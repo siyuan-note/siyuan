@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "Historia konfiguracji źródła fiszek",
 	"flashcardSourceHistoryTip": "Przywróć ustawienia źródła i odwołania do bloków, zachowując postęp powtórek; pytania i odpowiedzi przywróć z historii powiązanego dokumentu",
 	"flashcardSourceRestoreConfirm": "Przywrócić tę konfigurację źródła? Zmiana obejmie wszystkie fiszki z tego źródła; postęp powtórek pozostanie bez zmian",
+	"newTabItem": "Utwórz blok elementu karty",
+	"encryptedNotebookFollowSystemLock": "Blokuj wraz z ekranem systemu",
+	"encryptedNotebookFollowSystemLockDesc": "Blokuj wszystkie odblokowane zaszyfrowane notatniki przy blokowaniu systemu, niezależnie od czasu bezczynności; pozostają zablokowane po odblokowaniu systemu",
+	"customBlock": "Blok niestandardowy",
+	"embedHeadingLevel": "Poziom osadzonych nagłówków",
+	"embedHeadingLevelPreserve": "Zachowaj oryginalne poziomy",
+	"originalToRef": "Zamień oryginalny blok na odwołanie do bloku",
+	"originalToEmbed": "Zamień oryginalny blok na osadzony blok",
+	"mobileFileTreeMultiSelectTip": "Dotknij dokumentów lub notatników, aby je zaznaczyć lub odznaczyć",
 	"repoBatchDelete": "Usuń wybrane oznaczenia",
 	"repoBatchDone": "Gotowe",
 	"repoBatchClear": "Wyczyść zaznaczenie",
@@ -2923,6 +2932,7 @@
 		"393": "Zaszyfrowane notatniki nie obsługują tej operacji",
 		"394": "Zaszyfrowane notatniki nie obsługują publikowania, nie można skonfigurować uprawnień publikowania",
 		"395": "Eksport zbiorczy nie obsługuje zaszyfrowanych notatników, odblokuj je i wyeksportuj pojedynczo albo wyeksportuj zwykłe notatniki",
-		"396": "Zaszyfrowane notatniki nie obsługują przypinania dokumentów"
+		"396": "Zaszyfrowane notatniki nie obsługują przypinania dokumentów",
+		"397": "To urządzenie nie może utworzyć synchronizowanego pliku. Zmień jego nazwę w SiYuan na urządzeniu, na którym jest dostępny, a następnie zsynchronizuj ponownie: %s"
 	}
 }

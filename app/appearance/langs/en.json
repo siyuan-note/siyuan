@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "Card source configuration history",
 	"flashcardSourceHistoryTip": "Restore source settings and block references while keeping review progress; restore questions and answers from the linked document history",
 	"flashcardSourceRestoreConfirm": "Restore this source configuration? All cards from this source are affected; review progress stays unchanged",
+	"newTabItem": "New tab item block",
+	"encryptedNotebookFollowSystemLock": "Follow system screen lock",
+	"encryptedNotebookFollowSystemLockDesc": "Lock all unlocked encrypted notebooks when the system locks, independently of the idle timeout; notebooks remain locked after the system unlocks",
+	"customBlock": "Custom block",
+	"embedHeadingLevel": "Embedded heading level",
+	"embedHeadingLevelPreserve": "Keep original levels",
+	"originalToRef": "Convert original to block reference",
+	"originalToEmbed": "Convert original to embed block",
+	"mobileFileTreeMultiSelectTip": "Tap documents or notebooks to select or deselect them",
 	"repoBatchDelete": "Delete selected tags",
 	"repoBatchDone": "Done",
 	"repoBatchClear": "Clear selection",
@@ -2923,6 +2932,7 @@
 		"393": "Encrypted notebooks do not support this operation",
 		"394": "Encrypted notebooks do not support publishing, publish access cannot be configured",
 		"395": "Batch export does not support encrypted notebooks, please unlock and export them one by one, or export regular notebooks instead",
-		"396": "Encrypted notebooks do not support pinning documents"
+		"396": "Encrypted notebooks do not support pinning documents",
+		"397": "This device cannot create the synced file. Rename it in SiYuan on a device where it is accessible, then sync again: %s"
 	}
 }

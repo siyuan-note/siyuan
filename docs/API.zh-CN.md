@@ -105,7 +105,7 @@
 
 * 端点：`http://127.0.0.1:6806`
 * 除非接口中另有说明，否则 API 接口均使用 POST 方法
-* 使用 JSON 入参的接口，参数为 JSON 字符串，放置到 body 里，标头 Content-Type 为 `application/json`
+* 使用 JSON 入参的接口，参数为 JSON 字符串，写入 body 里，标头 Content-Type 为 `application/json`
 * 返回值
 
   ```json
@@ -140,7 +140,7 @@ if (response.code === 0 && response.data) {
 * 只有在本文档中设有独立接口说明的接口属于公开 API。其他内核路由和 `/api/transactions` 操作属于内部实现，除非另有说明，否则不承诺兼容性和行为稳定性
 * `code: 0` 表示接口处理请求时未报告错误，只保证该接口明确说明的结果，不表示相关索引、缓存、WebSocket 广播或同步状态均已更新
 * 省略字段、`null`、空对象和空数组的含义由各接口定义。对象或数组是替换、合并还是局部修改现有状态，以及顺序是否具有意义，也以各接口说明为准
-* 接口可能裁剪、忽略、补全或转换输入。接口说明会返回规范化结果时，调用方应将返回的 `data` 作为实际接受的结果
+* 接口可能裁剪、忽略、填充或转换输入。接口说明会返回规范化结果时，调用方应将返回的 `data` 作为实际接受的结果
 * 不要根据操作名称推断其为只读操作。存在持久化副作用时，各接口会说明其影响范围
 * 只有接口明确说明时，相同请求才保证幂等或可以安全重试。响应中断或结果无法确定时，应尽可能先读取当前状态再决定是否重试
 
@@ -784,11 +784,11 @@ if (response.code === 0 && response.data) {
 * `/api/asset/upload`
 * 参数为 HTTP Multipart 表单
 
-    * `assetsDirPath`：资源文件存放的文件夹路径，以 data 文件夹作为根路径，比如：
+    * `assetsDirPath`：资源文件保存的文件夹路径，以 data 文件夹作为根路径，比如：
         * `"/assets/"`：工作空间/data/assets/ 文件夹
         * `"/assets/sub/"`：工作空间/data/assets/sub/ 文件夹
 
-      常规情况下建议用第一种，统一存放到工作空间资源文件夹下，放在子目录有一些副作用，请参考用户指南资源文件章节。
+      常规情况下建议用第一种，统一保存在工作空间资源文件夹下，因为写入子目录有一些副作用，请参考用户指南资源文件章节。
     * `file[]`：上传的文件列表
 * 返回值
 
@@ -1291,7 +1291,7 @@ if (response.code === 0 && response.data) {
 
     * `stmt`：SQL 脚本
 
-未显式指定外层 `LIMIT` 时，默认最多返回 `search.limit` 行，即设置中的搜索结果条数。请使用显式的 `LIMIT` 和 `OFFSET` 分页，并采用稳定且唯一的排序，例如 `ORDER BY hpath, id`。显式外层 `LIMIT` 会覆盖默认限制，可以大于 `search.limit`。
+未显式指定外层 `LIMIT` 时，默认最多返回 `search.limit` 行，即设置中的搜索结果条数。因此，请使用显式的 `LIMIT` 和 `OFFSET` 分页，并采用稳定且唯一的排序，例如 `ORDER BY hpath, id`。显式外层 `LIMIT` 会覆盖默认限制，可以大于 `search.limit`。
 
 * 返回值
 
@@ -1644,9 +1644,9 @@ if (response.code === 0 && response.data) {
 
 * `/api/convert/pandoc`
 * 工作目录
-    * 执行调用 pandoc 命令时工作目录会被设置在 `工作空间/temp/convert/pandoc/${test}` 下
+    * 执行 pandoc 命令时工作目录会被设置在 `工作空间/temp/convert/pandoc/${test}` 下
     * 可先通过 API [`写入文件`](#写入文件) 将待转换文件写入该目录
-    * 然后再调用该 API 进行转换，转换后的文件也会被写入该目录
+    * 然后再调用该 API 转换，转换后的文件也会被写入该目录
     * 最后调用 API [`获取文件`](#获取文件) 获取转换后的文件内容
         * 或者调用 API [`通过 Markdown 创建文档`](#通过-markdown-创建文档)
         * 或者调用内部 API `importStdMd` 将转换后的文件夹直接导入
@@ -1782,7 +1782,7 @@ if (response.code === 0 && response.data) {
 
       `text` 保持现有行为，在适用时将字符集转换为 UTF-8。二进制编码作用于字符集转换前的响应正文数据；gzip 解压等现有 HTTP 内容解码行为不变。
 
-      HTTP 内容解码后的响应正文上限为 32 MiB，超限时返回错误码 `10` 且不返回部分正文。大文件或流式响应请使用 `/api/network/proxy`。
+      HTTP 内容解码后的响应正文上限为 32 MiB，超限时返回错误码 `10` 且不返回部分正文。因此，大文件或流式响应请使用 `/api/network/proxy`。
 * 返回值
 
   ```json
@@ -1823,11 +1823,11 @@ if (response.code === 0 && response.data) {
 * 请求方法：任意 HTTP 方法
 * 查询参数
 
-    * `u`：必填，目标 `http` 或 `https` URL 使用 Go `base64.RawURLEncoding` 编码后的字符串，也就是 URL 安全且不带 `=` 补位的 Base64
+    * `u`：必填，目标 `http` 或 `https` URL 使用 Go `base64.RawURLEncoding` 编码后的字符串，也就是 URL 安全且不带 `=` 填充的 Base64
     * `h`：可选，请求标头 JSON 使用同样方式编码后的字符串，JSON 类型为 `map[string][]string`，例如 `{"Authorization":["Bearer token"]}`
     * `t`：可选，连接超时时间，使用 Go `time.ParseDuration` 格式，例如 `30s`、`1500ms`
 * 请求体：原样转发当前请求体，当前请求的完整 `Content-Type` 标头会转发到目标请求
-* 返回值：直接返回目标服务的 HTTP 状态码和响应体，不包裹 `code`、`msg`、`data`；目标服务响应标头会添加 `Siyuan-Proxy-` 前缀后返回，例如 `Content-Type` 会返回为 `Siyuan-Proxy-Content-Type`
+* 返回值：直接返回目标服务的 HTTP 状态码和响应体，不封装 `code`、`msg`、`data`；目标服务响应标头会添加 `Siyuan-Proxy-` 前缀后返回，例如 `Content-Type` 会返回为 `Siyuan-Proxy-Content-Type`
 
 #### WebSocket 正向代理
 
@@ -1849,7 +1849,7 @@ if (response.code === 0 && response.data) {
     * `u`：必填，目标 `http` 或 `https` URL 使用 Go `base64.RawURLEncoding` 编码后的字符串
     * `h`：可选，请求标头 JSON 使用同样方式编码后的字符串，JSON 类型为 `map[string][]string`
     * `t`：可选，连接超时时间，使用 Go `time.ParseDuration` 格式，例如 `30s`、`1500ms`
-* 返回值：直接流式返回目标服务的 HTTP 状态码和响应体，不包裹 `code`、`msg`、`data`；如果请求标头中没有 `Accept`，会自动使用 `text/event-stream`；目标服务响应标头会添加 `Siyuan-Proxy-` 前缀后返回
+* 返回值：直接流式返回目标服务的 HTTP 状态码和响应体，不封装 `code`、`msg`、`data`；如果请求标头中没有 `Accept`，会自动使用 `text/event-stream`；目标服务响应标头会添加 `Siyuan-Proxy-` 前缀后返回
 
 ## 系统
 
@@ -2487,7 +2487,7 @@ if (response.code === 0 && response.data) {
     * `avID`: 数据库 ID
     * `blockID`: 拥有该视图的数据库块
     * `layoutType`: 目标布局——`table`、`gallery`、`kanban` 之一
-* 返回值：与 [渲染](#渲染) 返回结构相同。当切换到 `kanban` 且已配置分组时，`data.view` 携带 `groups[]` 数组；每个分组是视图实例，含 `groupKey`、`groupValue`，以及看板特有字段（`coverFrom`、`cardAspectRatio`、`cardSize`、`fitImage`、`displayFieldName`、`fillColBackgroundColor`、`fields`）
+* 返回值：与 [渲染](#渲染) 返回结构相同。当切换到 `kanban` 且已配置分组时，`data.view` 包含 `groups[]` 数组；每个分组是视图实例，含 `groupKey`、`groupValue`，以及看板特有字段（`coverFrom`、`cardAspectRatio`、`cardSize`、`fitImage`、`displayFieldName`、`fillColBackgroundColor`、`fields`）
 
 ### 设置分组
 
@@ -2549,7 +2549,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-  配置后（真实抓取的响应），过滤与排序形如：
+  配置后（真实获取的响应），过滤与排序形如：
 
   ```json
   {

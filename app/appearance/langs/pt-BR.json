@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "Histórico de configuração da fonte dos cartões",
 	"flashcardSourceHistoryTip": "Restaure as configurações e referências a blocos mantendo o progresso de revisão; recupere perguntas e respostas pelo histórico do documento vinculado",
 	"flashcardSourceRestoreConfirm": "Restaurar esta configuração? Todos os cartões desta fonte serão afetados; o progresso de revisão permanecerá inalterado",
+	"newTabItem": "Criar bloco de item de aba",
+	"encryptedNotebookFollowSystemLock": "Seguir o bloqueio de tela do sistema",
+	"encryptedNotebookFollowSystemLockDesc": "Bloquear todos os cadernos criptografados desbloqueados quando o sistema for bloqueado, independentemente do tempo de inatividade; eles permanecem bloqueados após desbloquear o sistema",
+	"customBlock": "Bloco personalizado",
+	"embedHeadingLevel": "Nível dos títulos incorporados",
+	"embedHeadingLevelPreserve": "Manter os níveis originais",
+	"originalToRef": "Converter o original em referência de bloco",
+	"originalToEmbed": "Converter o original em bloco incorporado",
+	"mobileFileTreeMultiSelectTip": "Toque nos documentos ou cadernos para selecioná-los ou desmarcá-los",
 	"repoBatchDelete": "Excluir marcações selecionadas",
 	"repoBatchDone": "Concluir",
 	"repoBatchClear": "Limpar seleção",
@@ -2923,6 +2932,7 @@
 		"393": "Notebooks criptografados não suportam esta operação",
 		"394": "Cadernos criptografados não são compatíveis com publicação, não é possível configurar permissões de publicação",
 		"395": "A exportação em lote não é compatível com cadernos criptografados; desbloqueie-os e exporte um por um, ou exporte cadernos comuns",
-		"396": "Cadernos criptografados não permitem fixar documentos"
+		"396": "Cadernos criptografados não permitem fixar documentos",
+		"397": "Este dispositivo não pode criar o arquivo sincronizado. Renomeie-o no SiYuan em um dispositivo onde ele esteja acessível e sincronize novamente: %s"
 	}
 }

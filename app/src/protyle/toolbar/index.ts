@@ -1,4 +1,5 @@
 import {Divider} from "./Divider";
+import {renderMultiSelectToolbar} from "../../mobile/util/multiSelectToolbar";
 import {ContractFormData} from "../../util/contractFormData";
 import {Font, hasSameTextStyle, setFontStyle} from "./Font";
 import {
@@ -2086,39 +2087,16 @@ export class Toolbar {
         blockElement.classList.add("protyle-wysiwyg--select");
         window.siyuan.menus.menu.remove();
         this.subElement.style.width = window.innerWidth - 16 + "px";
-        this.subElement.style.padding = "0";
-        this.subElement.innerHTML = `<div class="block__icons">
-    <div class="block__logo">
-        <svg class="block__logoicon"><use xlink:href="#iconCheck"></use></svg> 
-        <span class="multiSelectCount">${protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length}</span>
-    </div>
-    <span class="fn__flex-1"></span>
-    <button class="block__icon block__icon--show" data-type="menu" data-menu="true"><svg><use xlink:href="#iconMore"></use></svg></button>
-    <span class="fn__space"></span>
-    <button class="block__icon block__icon--show" data-type="exitMultiSelectMode"><svg><use xlink:href="#iconClose"></use></svg></button>
-</div>`;
+        renderMultiSelectToolbar(this.subElement, protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length, () => {
+            protyle.gutter.renderMenu(protyle, protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select"));
+            window.siyuan.menus.menu.fullscreen();
+        }, () => {
+            this.subElement.classList.add("fn__none");
+            this.subElement.innerHTML = "";
+            hideElements(["select"], protyle);
+        });
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
-        this.subElement.firstElementChild.addEventListener("click", (event) => {
-            let target = event.target as HTMLElement;
-            while (target && target !== this.subElement) {
-                if (target.dataset.type === "exitMultiSelectMode") {
-                    this.subElement.classList.add("fn__none");
-                    this.subElement.innerHTML = "";
-                    hideElements(["select"], protyle);
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (target.dataset.type === "menu") {
-                    protyle.gutter.renderMenu(protyle, protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select"));
-                    window.siyuan.menus.menu.fullscreen();
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                }
-                target = target.parentElement;
-            }
-        });
         setPosition(this.subElement, 8, 8);
         this.element.classList.add("fn__none");
         activeBlur();
@@ -2393,21 +2371,21 @@ export class Toolbar {
         const hasCopy = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("") !== "" ||
             (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji");
         if (hasCopy) {
-            html += '<button class="keyboard__action" data-action="copy"><svg><use xlink:href="#iconCopy"></use></svg></button>';
+            html += `<button class="keyboard__action" data-action="copy" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></button>`;
             if (!protyle.disabled) {
-                html += `<button class="keyboard__action" data-action="cut"><svg><use xlink:href="#iconCut"></use></svg></button>
-<button class="keyboard__action" data-action="delete"><svg><use xlink:href="#iconTrashcan"></use></svg></button>`;
+                html += `<button class="keyboard__action" data-action="cut" aria-label="${window.siyuan.languages.cut}"><svg><use xlink:href="#iconCut"></use></svg></button>
+<button class="keyboard__action" data-action="delete" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></button>`;
             }
         }
         if (!protyle.disabled) {
-            html += `<button class="keyboard__action" data-action="paste"><svg><use xlink:href="#iconPaste"></use></svg></button>
-<button class="keyboard__action" data-action="select"><svg><use xlink:href="#iconSelect"></use></svg></button>`;
+            html += `<button class="keyboard__action" data-action="paste" aria-label="${window.siyuan.languages.paste}"><svg><use xlink:href="#iconPaste"></use></svg></button>
+<button class="keyboard__action" data-action="select" aria-label="${window.siyuan.languages.select}"><svg><use xlink:href="#iconSelect"></use></svg></button>`;
         }
         if (pluginMenus.length > 0) {
             html += `<button class="keyboard__action" data-action="plugin" data-menu="true" aria-label="${window.siyuan.languages.plugin}"><svg><use xlink:href="#iconPlugin"></use></svg></button>`;
         }
         if (hasCopy || !protyle.disabled) {
-            html += '<button class="keyboard__action" data-action="more"><svg><use xlink:href="#iconMore"></use></svg></button>';
+            html += `<button class="keyboard__action" data-action="more" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>`;
         }
         this.subElement.innerHTML = `<div class="fn__flex">${html}</div>`;
         const setContentPosition = () => {
@@ -2493,7 +2471,7 @@ export class Toolbar {
 <div class="keyboard__split${protyle.disabled ? " fn__none" : ""}"></div>
 <button class="keyboard__action${protyle.disabled ? " fn__none" : ""}" data-action="pasteEscaped"><span>${window.siyuan.languages.pasteEscaped}</span></button>
 <div class="keyboard__split${protyle.disabled ? " fn__none" : ""}"></div>
-<button class="keyboard__action" data-action="back"><svg><use xlink:href="#iconBack"></use></svg></button>`;
+<button class="keyboard__action" data-action="back" aria-label="${window.siyuan.languages.back}"><svg><use xlink:href="#iconBack"></use></svg></button>`;
                 setContentPosition();
             }
         });

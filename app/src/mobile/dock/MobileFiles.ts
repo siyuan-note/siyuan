@@ -59,11 +59,15 @@ import {
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
 import {MobileOpenedFileSelection} from "./mobileOpenedFileSelection";
+import {insertMobileMultiSelectMenu, renderMultiSelectToolbar, updateMultiSelectToolbar} from "../util/multiSelectToolbar";
 import {PinnedDocs} from "../../layout/dock/PinnedDocs";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
     private actionsElement: HTMLElement;
+    private selectionElement: HTMLElement;
+    private selectionObserver: MutationObserver;
+    private multiSelect = false;
     private pinnedDocs: PinnedDocs;
     private closeElement: HTMLElement;
     private reloadNotebookInfoTimeout: number;
@@ -115,6 +119,45 @@ export class MobileFiles extends Model {
             openMobileFileById(app, id, [Constants.CB_GET_SCROLL], undefined, notebook);
         }, true);
         this.closeElement = this.element.nextElementSibling as HTMLElement;
+        this.selectionElement = document.createElement("div");
+        this.selectionElement.className = "protyle-util fn__none";
+        this.selectionElement.style.cssText = "position:relative;margin:8px;flex-shrink:0";
+        this.actionsElement.after(this.selectionElement);
+        this.selectionObserver = new MutationObserver(() => this.updateMultiSelect());
+        renderMultiSelectToolbar(this.selectionElement, 0, () => {
+            const item = this.element.querySelector<HTMLElement>("li.b3-list-item--focus");
+            if (item) {
+                if (item.dataset.type === "navigation-root") {
+                    initNavigationMenu(this.app, item);
+                } else {
+                    initFileMenu(this.app, item.closest("ul[data-url]").getAttribute("data-url"), item.dataset.path, item);
+                }
+                window.siyuan.menus.menu.fullscreen("bottom");
+            }
+        }, () => this.setMultiSelect(false));
+        filesElement.addEventListener("click", (event) => {
+            if (!this.multiSelect || this.selectionElement.contains(event.target as Node)) {
+                return;
+            }
+            const target = event.target as HTMLElement;
+            const item = target.closest<HTMLElement>('li[data-type="navigation-file"], li[data-type="navigation-root"]');
+            const toggle = target.closest(".b3-list-item__toggle:not(.fn__hidden)") ||
+                (target.closest(".b3-list-item__icon") ? item?.querySelector(":scope > .b3-list-item__toggle:not(.fn__hidden)") : null);
+            if (item && this.element.contains(item) && !this.pinnedDocs.element.contains(item)) {
+                if (toggle) {
+                    this.toggleTreeItem(item);
+                } else {
+                    item.classList.toggle("b3-list-item--focus");
+                }
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        }, true);
+        filesElement.addEventListener("touchstart", (event) => {
+            if (this.multiSelect && this.pinnedDocs.element.contains(event.target as Node)) {
+                event.stopPropagation();
+            }
+        }, {capture: true, passive: true});
         filesElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.actionsElement)) {
@@ -202,18 +245,7 @@ export class MobileFiles extends Model {
                     event.stopPropagation();
                     break;
                 } else if (target.classList.contains("b3-list-item__toggle") && !target.classList.contains("fn__hidden") && target.parentElement.getAttribute("data-type") !== "toggle") {
-                    const ulElement = hasTopClosestByTag(target, "UL");
-                    if (ulElement) {
-                        const notebookId = ulElement.getAttribute("data-url");
-                        const liElement = target.parentElement;
-                        if (liElement.querySelector(".b3-list-item__arrow--open")) {
-                            collapseFileTree(liElement, () => this.getOpenPaths());
-                        } else if (!isFileTreeCollapsing(liElement)) {
-                            this.getLeaf(liElement, notebookId);
-                        }
-                        this.setCurrent(liElement, false);
-                        window.siyuan.menus.menu.remove();
-                    }
+                    this.toggleTreeItem(target.parentElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -256,11 +288,13 @@ export class MobileFiles extends Model {
                                 newFileInTree(app, notebookId, pathString);
                             } else if (type === "more-root") {
                                 initNavigationMenu(app, target.parentElement);
+                                this.insertMultiSelectMenu(target.parentElement);
                                 window.siyuan.menus.menu.fullscreen("bottom");
                             }
                         }
                         if (type === "more-file") {
                             initFileMenu(app, notebookId, pathString, target.parentElement);
+                            this.insertMultiSelectMenu(target.parentElement);
                             window.siyuan.menus.menu.fullscreen("bottom");
                         }
                     }
@@ -288,6 +322,7 @@ export class MobileFiles extends Model {
             }
         });
         filesElement.addEventListener("touchstart", (event: TouchEvent) => {
+            if (this.multiSelect) return;
             if (window.siyuan.config.readonly) return;
             if (event.touches.length !== 1) return;
 
@@ -761,6 +796,7 @@ export class MobileFiles extends Model {
     };
 
     public destroy() {
+        this.selectionObserver.disconnect();
         this.pinnedDocs.destroy();
     }
 
@@ -1404,8 +1440,66 @@ export class MobileFiles extends Model {
         return newLiElement;
     }
 
+    private toggleTreeItem(item: HTMLElement) {
+        const notebookId = item.closest("ul[data-url]")?.getAttribute("data-url");
+        if (!notebookId) {
+            return;
+        }
+        if (item.querySelector(".b3-list-item__arrow--open")) {
+            collapseFileTree(item, () => this.getOpenPaths());
+        } else if (!isFileTreeCollapsing(item)) {
+            this.getLeaf(item, notebookId);
+        }
+        this.setCurrent(item, false);
+        window.siyuan.menus.menu.remove();
+    }
+
+    private insertMultiSelectMenu(item: HTMLElement) {
+        if (window.siyuan.config.readonly) {
+            return;
+        }
+        const menuItem = new MenuItem({
+            id: "multiSelect",
+            icon: "iconCheck",
+            label: window.siyuan.languages.multiSelect,
+            click: () => {
+                this.setCurrent(item, false);
+                this.setMultiSelect(true);
+            }
+        }).element;
+        insertMobileMultiSelectMenu(window.siyuan.menus.menu.element.lastElementChild, menuItem);
+    }
+
+    private setMultiSelect(enabled: boolean) {
+        this.multiSelect = enabled;
+        this.touchDragState = null;
+        this.openedFileSelection.cancel();
+        this.actionsElement.classList.toggle("fn__none", enabled);
+        this.selectionElement.classList.toggle("fn__none", !enabled);
+        if (enabled) {
+            showMessage(window.siyuan.languages.mobileFileTreeMultiSelectTip);
+            this.selectionObserver.observe(this.element, {childList: true, subtree: true, attributes: true, attributeFilter: ["class"]});
+        } else {
+            this.selectionObserver.disconnect();
+        }
+        this.updateMultiSelect();
+        if (!enabled) {
+            this.element.querySelectorAll(".b3-list-item--focus").forEach(item => {
+                item.classList.remove("b3-list-item--focus");
+            });
+        }
+    }
+
+    private updateMultiSelect() {
+        if (!this.multiSelect) {
+            return;
+        }
+        const count = this.element.querySelectorAll("li.b3-list-item--focus").length;
+        updateMultiSelectToolbar(this.selectionElement, count);
+    }
+
     public setCurrent(target: HTMLElement, isScroll = true) {
-        if (!target) {
+        if (!target || this.multiSelect) {
             return;
         }
         this.pinnedDocs.clearSelection();
@@ -1421,6 +1515,9 @@ export class MobileFiles extends Model {
     }
 
     public async selectOpenedFile(notebookId: string, filePath: string) {
+        if (this.multiSelect) {
+            return;
+        }
         const currentElement = this.element.querySelector(
             `ul[data-url="${notebookId}"] li[data-path="${filePath}"]`
         );
@@ -1461,7 +1558,9 @@ export class MobileFiles extends Model {
             app: Constants.SIYUAN_APPID,
         }, response => {
             if (response.data.path === "/" && response.data.files.length === 0) {
-                newFileInTree(this.app, notebookId, "/");
+                if (!this.multiSelect) {
+                    newFileInTree(this.app, notebookId, "/");
+                }
                 return;
             }
             this.onLsHTML(response.data);

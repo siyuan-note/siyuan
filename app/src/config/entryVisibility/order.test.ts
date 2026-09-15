@@ -14,12 +14,25 @@ test("entry order keeps custom order and inserts new entries by their default ne
     assert.deepEqual(mergeEntryOrder(["a", "new", "b", "c"], ["c", "a", "b"]), ["c", "a", "new", "b"]);
 });
 
+test("definition conversion submenus preserve custom order and plugin slots", () => {
+    for (const id of ["defBlock", "defBlockChildren"]) {
+        const entries = getEntryCatalogChildren(`inline.ref.turnInto.${id}`);
+        const defaults = entries.map(item => item.key);
+        assert.deepEqual(mergeEntryOrder(defaults, []), ["originalToRef", "originalToEmbed"]);
+        const saved = ["originalToEmbed", "plugin:example:item", "originalToRef"];
+        const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+        assert.deepEqual(merged, saved);
+        assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, new Set()), saved);
+    }
+});
+
 test("missing table and image actions merge into saved orders while preserving plugin slots", () => {
     [
         {path: "gutter.single.table", added: ["cancelMerged", "transposeTable"]},
         {path: "inline.text.more", added: ["cancelMerged"]},
         {path: "inline.image", added: ["openBy"]},
         {path: "gutter.single.copy", added: ["copyMirror"]},
+        {path: "gutter.single.blockEmbed", added: ["embedHeadingLevel"]},
     ].forEach(({path, added}) => {
         const entries = getEntryCatalogChildren(path);
         const defaults = entries.map(item => item.key);

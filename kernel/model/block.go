@@ -97,19 +97,20 @@ func (block *Block) IsDoc() bool {
 }
 
 type Path struct {
-	ID       string   `json:"id"`                 // 块 ID
-	Box      string   `json:"box"`                // 块 Box
-	Name     string   `json:"name"`               // 当前路径
-	Number   string   `json:"number,omitempty"`   // 标题编号
-	HPath    string   `json:"hPath"`              // 人类可读路径
-	Type     string   `json:"type"`               // "path"
-	NodeType string   `json:"nodeType"`           // 节点类型
-	SubType  string   `json:"subType"`            // 节点子类型
-	Blocks   []*Block `json:"blocks,omitempty"`   // 子块节点
-	Children []*Path  `json:"children,omitempty"` // 子路径节点
-	Depth    int      `json:"depth"`              // 层级深度
-	Count    int      `json:"count"`              // 子块计数
-	Folded   bool     `json:"folded"`             // 是否折叠
+	ID         string   `json:"id"`                   // 块 ID
+	Box        string   `json:"box"`                  // 块 Box
+	Name       string   `json:"name"`                 // 当前路径
+	NameIsHTML bool     `json:"nameIsHTML,omitempty"` // Name 是否为渲染后的 HTML，前端据此决定是否转义
+	Number     string   `json:"number,omitempty"`     // 标题编号
+	HPath      string   `json:"hPath"`                // 人类可读路径
+	Type       string   `json:"type"`                 // "path"
+	NodeType   string   `json:"nodeType"`             // 节点类型
+	SubType    string   `json:"subType"`              // 节点子类型
+	Blocks     []*Block `json:"blocks,omitempty"`     // 子块节点
+	Children   []*Path  `json:"children,omitempty"`   // 子路径节点
+	Depth      int      `json:"depth"`                // 层级深度
+	Count      int      `json:"count"`                // 子块计数
+	Folded     bool     `json:"folded"`               // 是否折叠
 
 	Updated string `json:"updated"` // 更新时间
 	Created string `json:"created"` // 创建时间
@@ -716,7 +717,7 @@ func TransferBlockRef(fromID, toID string, refIDs []string) (err error) {
 	return
 }
 
-func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
+func SwapBlockRef(refID, defID string, includeChildren, originalToEmbed bool) (err error) {
 	refTree, err := LoadTreeByBlockID(refID)
 	if err != nil {
 		return
@@ -724,9 +725,6 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	refNode := treenode.GetNodeInTree(refTree, refID)
 	if nil == refNode {
 		return
-	}
-	if ast.NodeListItem == refNode.Parent.Type {
-		refNode = refNode.Parent
 	}
 	defTree, err := LoadTreeByBlockID(defID)
 	if err != nil {
@@ -741,6 +739,27 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	}
 	if nil == defNode {
 		return
+	}
+	swapBlockRefNodes(refNode, defNode, defID, includeChildren, originalToEmbed)
+
+	if err = indexWriteTreeUpsertQueue(refTree); err != nil {
+		return
+	}
+	if !sameTree {
+		if err = indexWriteTreeUpsertQueue(defTree); err != nil {
+			return
+		}
+	}
+	FlushTxQueue()
+	util.ReloadUI()
+	return
+}
+
+func swapBlockRefNodes(refNode, defNode *ast.Node, defID string, includeChildren, originalToEmbed bool) {
+	originalRefNode := refNode
+	isHeading := ast.NodeHeading == defNode.Type
+	if ast.NodeListItem == refNode.Parent.Type {
+		refNode = refNode.Parent
 	}
 	var defNodeChildren []*ast.Node
 	if ast.NodeListItem == defNode.Parent.Type {
@@ -818,18 +837,19 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 		}
 	}
 	refPivot.Unlink()
-
-	if err = indexWriteTreeUpsertQueue(refTree); err != nil {
-		return
-	}
-	if !sameTree {
-		if err = indexWriteTreeUpsertQueue(defTree); err != nil {
-			return
+	if originalToEmbed {
+		embed := &ast.Node{ID: originalRefNode.ID, Type: ast.NodeBlockQueryEmbed, KramdownIAL: originalRefNode.KramdownIAL}
+		if isHeading {
+			headingMode := "1"
+			if includeChildren {
+				headingMode = "0"
+			}
+			embed.SetIALAttr("custom-heading-mode", headingMode)
 		}
+		embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + defID + "'")})
+		originalRefNode.InsertBefore(embed)
+		originalRefNode.Unlink()
 	}
-	FlushTxQueue()
-	util.ReloadUI()
-	return
 }
 
 func GetHeadingDeleteTransaction(id string) (transaction *Transaction, err error) {
@@ -1534,7 +1554,7 @@ func compareBlockKramdownIALAttrNames(a, b string) int {
 }
 
 func isSystemManagedBlockKramdownIALAttr(name string) bool {
-	return "custom-avs" == name || "custom-heading-mode" == name || "custom-reminder-wechat" == name ||
+	return "custom-avs" == name || "custom-heading-mode" == name || embedHeadingLevelAttr == name || "custom-reminder-wechat" == name ||
 		strings.HasPrefix(name, "custom-riff-") || strings.HasPrefix(name, "custom-sy-")
 }
 

@@ -38,6 +38,22 @@ import {
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
+test("embedded heading levels follow display modes and expose all levels in Simple", () => {
+    const path = "gutter.single.blockEmbed";
+    assert.deepEqual(getEntryCatalogChildren(path).map(entry => entry.key), [
+        "refresh", "update", "separator_breadcrumb", "embedBlockBreadcrumb", "headingEmbedMode", "embedHeadingLevel",
+    ]);
+    const levelPath = `${path}.embedHeadingLevel`;
+    assert.equal(getEntryCatalogNode(levelPath)?.simple, true);
+    assert.deepEqual(getEntryCatalogChildren(levelPath).map(entry => entry.key), [
+        "auto", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6",
+    ]);
+    getEntryCatalogChildren(levelPath).forEach(entry => {
+        assert.equal(entry.type, "entry");
+        assert.equal(entry.simple, true);
+    });
+});
+
 const slashMenuBuiltinOrder = [
     "template",
     "widget",
@@ -109,6 +125,19 @@ const slashMenuBuiltinOrder = [
     "errorStyle",
     "clearFontStyle",
 ];
+
+test("definition conversion retains parent paths and registers original block choices", () => {
+    for (const id of ["defBlock", "defBlockChildren"]) {
+        const path = `inline.ref.turnInto.${id}`;
+        assert.equal(getEntryCatalogNode(path).simple, false);
+        assert.deepEqual(getEntryCatalogChildren(path).map((item) => item.key), ["originalToRef", "originalToEmbed"]);
+        for (const child of getEntryCatalogChildren(path)) {
+            assert.equal(child.type, "entry");
+            assert.equal(child.simple, true);
+            assert.equal(getEntryParentPath(`${path}.${child.key}`), path);
+        }
+    }
+});
 
 test("entry catalog paths are unique and indexed", () => {
     const paths: string[] = [];

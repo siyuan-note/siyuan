@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "História nastavení zdroja kariet",
 	"flashcardSourceHistoryTip": "Obnovte nastavenia zdroja a odkazy na bloky so zachovaním pokroku opakovania; otázky a odpovede obnovte z histórie prepojeného dokumentu",
 	"flashcardSourceRestoreConfirm": "Obnoviť tieto nastavenia zdroja? Ovplyvní to všetky karty z tohto zdroja; pokrok opakovania zostane nezmenený",
+	"newTabItem": "Vytvoriť blok položky karty",
+	"encryptedNotebookFollowSystemLock": "Sledovať uzamknutie obrazovky systému",
+	"encryptedNotebookFollowSystemLockDesc": "Pri uzamknutí systému uzamknúť všetky odomknuté šifrované zápisníky bez ohľadu na čas nečinnosti; po odomknutí systému zostanú uzamknuté",
+	"customBlock": "Vlastný blok",
+	"embedHeadingLevel": "Úroveň vložených nadpisov",
+	"embedHeadingLevelPreserve": "Zachovať pôvodné úrovne",
+	"originalToRef": "Previesť pôvodný blok na odkaz na blok",
+	"originalToEmbed": "Previesť pôvodný blok na vložený blok",
+	"mobileFileTreeMultiSelectTip": "Ťuknutím na dokumenty alebo zápisníky ich vyberiete alebo zrušíte ich výber",
 	"repoBatchDelete": "Odstrániť vybrané značky",
 	"repoBatchDone": "Hotovo",
 	"repoBatchClear": "Zrušiť výber",
@@ -2923,6 +2932,7 @@
 		"393": "Šifrované zápisníky túto operáciu nepodporujú",
 		"394": "Šifrované zápisníky nepodporujú publikovanie, práva na publikovanie nie je možné nastaviť",
 		"395": "Hromadný export nepodporuje šifrované zápisníky, odomknite ich a exportujte po jednom alebo exportujte bežné zápisníky",
-		"396": "Šifrované zápisníky nepodporujú pripínanie dokumentov"
+		"396": "Šifrované zápisníky nepodporujú pripínanie dokumentov",
+		"397": "Toto zariadenie nemôže vytvoriť synchronizovaný súbor. Premenujte ho v SiYuan na zariadení, kde je dostupný, a potom zopakujte synchronizáciu: %s"
 	}
 }

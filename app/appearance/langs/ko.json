@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "카드 소스 설정 기록",
 	"flashcardSourceHistoryTip": "복습 진행 상황을 유지하면서 소스 설정과 블록 참조를 복원합니다. 질문과 답변은 연결된 문서 기록에서 복원하세요",
 	"flashcardSourceRestoreConfirm": "이 소스 설정을 복원하시겠습니까? 이 소스의 모든 카드에 영향을 주지만 복습 진행 상황은 유지됩니다",
+	"newTabItem": "새 탭 항목 블록 만들기",
+	"encryptedNotebookFollowSystemLock": "시스템 화면 잠금에 따라 잠금",
+	"encryptedNotebookFollowSystemLockDesc": "시스템이 잠기면 유휴 시간 설정과 관계없이 잠금 해제된 모든 암호화 노트북을 잠그며, 시스템 잠금을 해제해도 노트북은 잠금 상태를 유지합니다",
+	"customBlock": "사용자 정의 블록",
+	"embedHeadingLevel": "임베드된 제목 수준",
+	"embedHeadingLevelPreserve": "원래 제목 수준 유지",
+	"originalToRef": "원본 정의 블록을 블록 참조로 변환",
+	"originalToEmbed": "원본 정의 블록을 임베드 블록으로 변환",
+	"mobileFileTreeMultiSelectTip": "문서나 노트북을 탭하여 선택하거나 선택 해제하세요",
 	"repoBatchDelete": "선택한 태그 삭제",
 	"repoBatchDone": "관리 완료",
 	"repoBatchClear": "선택 해제",
@@ -2923,6 +2932,7 @@
 		"393": "암호화된 노트북에서는 지원되지 않습니다",
 		"394": "암호화된 노트북은 게시를 지원하지 않으므로 게시 권한을 설정할 수 없습니다",
 		"395": "일괄 내보내기는 암호화된 노트북을 지원하지 않습니다. 잠금을 해제한 뒤 하나씩 내보내거나 일반 노트북을 내보내세요",
-		"396": "암호화된 노트북은 문서 고정을 지원하지 않습니다"
+		"396": "암호화된 노트북은 문서 고정을 지원하지 않습니다",
+		"397": "이 기기에서는 동기화된 파일을 만들 수 없습니다. 파일에 접근할 수 있는 기기의 SiYuan에서 이름을 변경한 후 다시 동기화하세요: %s"
 	}
 }

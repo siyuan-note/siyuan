@@ -71,7 +71,7 @@ export const openWechatNotify = (nodeElement: Element) => {
         title: window.siyuan.languages.wechatReminder,
         content: `<div class="b3-dialog__content custom-attr">
     <div class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.notifyTime}</span>
+        <span class="ft__on-surface fn__flex-center" style="text-align: right;flex: 0 0 100px;overflow-wrap: anywhere">${window.siyuan.languages.notifyTime}</span>
         <div class="fn__space"></div>
         <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
     </div>
@@ -141,7 +141,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
             title: window.siyuan.languages.wechatReminder,
             content: `<div class="b3-dialog__content custom-attr">
     <div class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.notifyTime}</span>
+        <span class="ft__on-surface fn__flex-center" style="text-align: right;flex: 0 0 100px;overflow-wrap: anywhere">${window.siyuan.languages.notifyTime}</span>
         <div class="fn__space"></div>
         <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
     </div>
@@ -590,6 +590,7 @@ export const exportMd = (id: string) => {
 
                 const maxNameLen = 32;
                 const name = replaceFileName(info.name).substring(0, maxNameLen);
+                let directoriesReady = false;
                 const dialog = openInputDialog({
                     title: window.siyuan.languages.fileName,
                     value: name,
@@ -600,6 +601,9 @@ export const exportMd = (id: string) => {
 <button type="button" class="b3-button b3-button--outline" data-template-manager>${window.siyuan.languages.templateManager}</button>
 ${databaseOptions}`,
                     onConfirm: (value, dialog) => {
+                        if (!directoriesReady) {
+                            return;
+                        }
                         const inputElement = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
                         let templateName = value.trim() === "" ? window.siyuan.languages.untitled :
                             replaceFileName(value);
@@ -640,11 +644,28 @@ ${databaseOptions}`,
                 });
                 dialog.element.setAttribute("data-key", Constants.DIALOG_EXPORTTEMPLATE);
                 const directoryElement = dialog.element.querySelector<HTMLSelectElement>("[data-template-directory]");
-                directoryElement.value = info.directory || "";
-                void loadTemplateDirectories(directoryElement).catch(console.error);
-                dialog.element.querySelector("[data-template-manager]").addEventListener("click", () => {
+                const confirmElement = dialog.element.querySelector<HTMLButtonElement>("[data-input-confirm]");
+                const managerElement = dialog.element.querySelector<HTMLButtonElement>("[data-template-manager]");
+                let initialized = false;
+                const refreshDirectories = async () => {
+                    directoriesReady = false;
+                    confirmElement.disabled = true;
+                    directoryElement.disabled = true;
+                    managerElement.disabled = true;
+                    try {
+                        directoriesReady = await loadTemplateDirectories(directoryElement,
+                            initialized ? undefined : info.directory || "");
+                        initialized = initialized || directoriesReady;
+                    } finally {
+                        confirmElement.disabled = !directoriesReady;
+                        directoryElement.disabled = !directoriesReady;
+                        managerElement.disabled = false;
+                    }
+                };
+                void refreshDirectories().catch(console.error);
+                managerElement.addEventListener("click", () => {
                     openTemplateManager(id, () => {
-                        void loadTemplateDirectories(directoryElement).catch(console.error);
+                        void refreshDirectories().catch(console.error);
                     });
                 });
             }

@@ -52,6 +52,7 @@ func TestTransactionFiniteActionSchemas(t *testing.T) {
 		{"update", `"<div>content</div>"`},
 		{"append", `"<div>content</div>"`},
 		{"move", `"<div>content</div>"`},
+		{"swapBlockRef", `{"includeChildren":true,"originalToEmbed":false}`},
 		{"unfoldHeading", `"remove"`},
 		{"sortAttrViewView", `"unRefresh"`},
 		{"updateAttrViewCell", `{"text":null}`},

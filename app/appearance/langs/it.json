@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "Cronologia della configurazione della fonte delle schede",
 	"flashcardSourceHistoryTip": "Ripristina impostazioni e riferimenti ai blocchi mantenendo i progressi di ripasso; recupera domande e risposte dalla cronologia del documento collegato",
 	"flashcardSourceRestoreConfirm": "Ripristinare questa configurazione? Tutte le schede di questa fonte saranno interessate; i progressi di ripasso rimarranno invariati",
+	"newTabItem": "Crea blocco elemento di scheda",
+	"encryptedNotebookFollowSystemLock": "Segui il blocco schermo del sistema",
+	"encryptedNotebookFollowSystemLockDesc": "Blocca tutti i quaderni crittografati sbloccati quando il sistema si blocca, indipendentemente dal tempo di inattività; restano bloccati dopo lo sblocco del sistema",
+	"customBlock": "Blocco personalizzato",
+	"embedHeadingLevel": "Livello dei titoli incorporati",
+	"embedHeadingLevelPreserve": "Mantieni i livelli originali",
+	"originalToRef": "Converti il blocco originale in riferimento a blocco",
+	"originalToEmbed": "Converti il blocco originale in blocco incorporato",
+	"mobileFileTreeMultiSelectTip": "Tocca i documenti o i quaderni per selezionarli o deselezionarli",
 	"repoBatchDelete": "Elimina i contrassegni selezionati",
 	"repoBatchDone": "Fine",
 	"repoBatchClear": "Deseleziona",
@@ -2923,6 +2932,7 @@
 		"393": "I quaderni crittografati non supportano questa operazione",
 		"394": "I quaderni crittografati non supportano la pubblicazione, non è possibile configurare i permessi di pubblicazione",
 		"395": "L’esportazione in blocco non supporta i quaderni crittografati, sbloccali ed esportali uno alla volta, oppure esporta quaderni normali",
-		"396": "I quaderni crittografati non supportano il fissaggio dei documenti"
+		"396": "I quaderni crittografati non supportano il fissaggio dei documenti",
+		"397": "Questo dispositivo non può creare il file sincronizzato. Rinominalo in SiYuan su un dispositivo da cui è accessibile, quindi sincronizza di nuovo: %s"
 	}
 }

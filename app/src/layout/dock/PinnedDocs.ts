@@ -15,6 +15,7 @@ import {newFileInTree} from "../../util/newFile";
 import {isOnlyMeta} from "../../protyle/util/compatibility";
 import {FILE_TREE_CHILDREN_SORT_MODE, FILE_TREE_EFFECTIVE_SORT_MODE} from "../../util/fileTreeSort";
 import {setFileTreeVisibility} from "./fileTreeAnimation";
+import {setDragTipGhost} from "../../protyle/util/dragTip";
 
 interface IPinnedDoc {
     id: string;
@@ -107,6 +108,7 @@ export class PinnedDocs {
             event.dataTransfer.setData(Constants.SIYUAN_DROP_DOCUMENTS, JSON.stringify({ids: [row.dataset.nodeId]}));
             event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, row.dataset.nodeId);
             event.dataTransfer.effectAllowed = "copyMove";
+            this.setDragImage(row, event.dataTransfer);
         });
         this.element.addEventListener("dragover", event => {
             if (window.siyuan.config.readonly || ![Constants.SIYUAN_DROP_DOCUMENTS, Constants.SIYUAN_DROP_FILE,
@@ -447,6 +449,21 @@ export class PinnedDocs {
         if (this.mobile) { menu.fullscreen("bottom"); } else { menu.popup({x, y}); }
     }
 
+    private setDragImage(row: HTMLElement, dataTransfer: DataTransfer) {
+        const ghost = document.createElement("ul");
+        ghost.className = "b3-list b3-list--background";
+        ghost.style.cssText = "width:219px;position:fixed;top:-30px;pointer-events:none";
+        ghost.append(row.cloneNode(true));
+        document.body.append(ghost);
+        setDragTipGhost(ghost, 16, 16);
+        dataTransfer.setDragImage(ghost, 16, 16);
+        if (window.siyuan.touchDragActive) {
+            window.siyuan.touchDragGhost = ghost;
+        } else {
+            window.setTimeout(() => ghost.remove());
+        }
+    }
+
     public previewDrop(x: number, y: number, allowSource = false) {
         this.clearDrop();
         const target = document.elementFromPoint(x, y);
@@ -457,7 +474,7 @@ export class PinnedDocs {
         if (source && (!row || row.closest("[data-encrypted=true]"))) { return false; }
         if (!row) {
             this.dropTarget = {id: "", position: "pin-before"};
-            this.heading.classList.add(target.closest("[data-pin-heading]") ? "dragover" : "dragover__bottom");
+            this.heading.classList.add("dragover");
         } else {
             if (row.dataset.unavailable === "true") { return false; }
             const rect = row.getBoundingClientRect();

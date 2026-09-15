@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "Konfigurationsverlauf der Kartenquelle",
 	"flashcardSourceHistoryTip": "Quelleneinstellungen und Blockreferenzen wiederherstellen und den Lernfortschritt behalten; Fragen und Antworten über den Verlauf des verknüpften Dokuments wiederherstellen",
 	"flashcardSourceRestoreConfirm": "Diese Quellkonfiguration wiederherstellen? Alle Karten dieser Quelle sind betroffen; der Lernfortschritt bleibt unverändert",
+	"newTabItem": "Neuen Registerkartenblock erstellen",
+	"encryptedNotebookFollowSystemLock": "Der Systemsperre folgen",
+	"encryptedNotebookFollowSystemLockDesc": "Alle entsperrten verschlüsselten Notizbücher beim Sperren des Systems unabhängig vom Inaktivitätszeitlimit sperren; sie bleiben nach dem Entsperren des Systems gesperrt",
+	"customBlock": "Benutzerdefinierter Block",
+	"embedHeadingLevel": "Überschriftenebene des eingebetteten Blocks",
+	"embedHeadingLevelPreserve": "Ursprüngliche Ebene beibehalten",
+	"originalToRef": "Original in Blockreferenz umwandeln",
+	"originalToEmbed": "Original in eingebetteten Block umwandeln",
+	"mobileFileTreeMultiSelectTip": "Tippe auf Dokumente oder Notizbücher, um sie auszuwählen oder die Auswahl aufzuheben",
 	"repoBatchDelete": "Ausgewählte Markierungen löschen",
 	"repoBatchDone": "Fertig",
 	"repoBatchClear": "Auswahl aufheben",
@@ -2923,6 +2932,7 @@
 		"393": "Verschlüsselte Notizbücher unterstützen diesen Vorgang nicht",
 		"394": "Verschlüsselte Notizbücher unterstützen keine Veröffentlichung, Veröffentlichungsrechte können nicht konfiguriert werden",
 		"395": "Der Stapelentexport unterstützt keine verschlüsselten Notizbücher, bitte entsperren Sie sie und exportieren Sie sie einzeln oder exportieren Sie normale Notizbücher",
-		"396": "Verschlüsselte Notizbücher unterstützen das Anheften von Dokumenten nicht"
+		"396": "Verschlüsselte Notizbücher unterstützen das Anheften von Dokumenten nicht",
+		"397": "Dieses Gerät kann die synchronisierte Datei nicht erstellen. Benennen Sie sie in SiYuan auf einem Gerät um, auf dem sie zugänglich ist, und synchronisieren Sie erneut: %s"
 	}
 }

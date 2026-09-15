@@ -737,7 +737,7 @@ export class BacklinkContent extends Model {
 
     private openDocument(options: {app: App, id: string, action: TProtyleAction[], position?: "right" | "bottom"}) {
         /// #if MOBILE
-        openMobileFileById(options.app, options.id, options.action);
+        openMobileFileById(options.app, options.id, options.action, "start");
         /// #else
         openFileById(options);
         /// #endif

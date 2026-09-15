@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "Kart kaynağı yapılandırma geçmişi",
 	"flashcardSourceHistoryTip": "Tekrar ilerlemesini koruyarak kaynak ayarlarını ve blok başvurularını geri yükleyin; soruları ve yanıtları bağlantılı belgenin geçmişinden geri yükleyin",
 	"flashcardSourceRestoreConfirm": "Bu kaynak yapılandırması geri yüklensin mi? Bu kaynaktaki tüm kartlar etkilenir; tekrar ilerlemesi değişmez",
+	"newTabItem": "Yeni sekme öğesi bloğu oluştur",
+	"encryptedNotebookFollowSystemLock": "Sistem ekran kilidini takip et",
+	"encryptedNotebookFollowSystemLockDesc": "Sistem kilitlendiğinde boşta kalma süresinden bağımsız olarak kilidi açık tüm şifreli not defterlerini kilitle; sistemin kilidi açıldıktan sonra defterler kilitli kalır",
+	"customBlock": "Özel blok",
+	"embedHeadingLevel": "Gömülü başlık düzeyi",
+	"embedHeadingLevelPreserve": "Özgün düzeyleri koru",
+	"originalToRef": "Özgün bloğu blok referansına dönüştür",
+	"originalToEmbed": "Özgün bloğu gömülü bloğa dönüştür",
+	"mobileFileTreeMultiSelectTip": "Belgeleri veya not defterlerini seçmek ya da seçimlerini kaldırmak için dokunun",
 	"repoBatchDelete": "Seçilen etiketleri sil",
 	"repoBatchDone": "Tamamlandı",
 	"repoBatchClear": "Seçimi temizle",
@@ -2923,6 +2932,7 @@
 		"393": "Şifrelenmiş not defterleri bu işlemi desteklemez",
 		"394": "Şifrelenmiş not defterleri yayımlamayı desteklemez, yayımlama izinleri yapılandırılamaz",
 		"395": "Toplu dışa aktarma şifrelenmiş not defterlerini desteklemez; kilitlerini açıp tek tek dışa aktarın veya normal not defterlerini dışa aktarın",
-		"396": "Şifrelenmiş not defterleri belgeleri sabitlemeyi desteklemez"
+		"396": "Şifrelenmiş not defterleri belgeleri sabitlemeyi desteklemez",
+		"397": "Bu cihaz eşitlenen dosyayı oluşturamıyor. Dosyaya erişilebilen bir cihazda SiYuan üzerinden dosyayı yeniden adlandırıp tekrar eşitleyin: %s"
 	}
 }

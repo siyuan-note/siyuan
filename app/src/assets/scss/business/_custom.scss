@@ -393,8 +393,7 @@
   padding: 0;
   width: 1.625em;
 
-  &:hover,
-  &:focus-visible {
+  &:hover {
     background-color: var(--b3-theme-background);
     background-image: linear-gradient(var(--b3-list-hover), var(--b3-list-hover));
     color: var(--b3-theme-on-background);

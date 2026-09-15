@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "卡源配置历史",
 	"flashcardSourceHistoryTip": "恢复卡源配置和块引用并保留复习进度；题面和答案请从关联文档历史恢复",
 	"flashcardSourceRestoreConfirm": "恢复此版本的卡源配置？同一卡源生成的所有卡片都会受到影响，复习进度保持不变",
+	"newTabItem": "新建页签项块",
+	"encryptedNotebookFollowSystemLock": "跟随系统锁屏",
+	"encryptedNotebookFollowSystemLockDesc": "系统锁屏时锁定所有已解锁的加密笔记本，不受闲置自动锁定时间影响；系统解锁后仍需输入主密码",
+	"customBlock": "自定义块",
+	"embedHeadingLevel": "嵌入标题层级",
+	"embedHeadingLevelPreserve": "保持原层级",
+	"originalToRef": "定义块转为引用",
+	"originalToEmbed": "定义块转为嵌入块",
+	"mobileFileTreeMultiSelectTip": "轻点文档或笔记本以选中或取消选中",
 	"repoBatchDelete": "删除所选标记",
 	"repoBatchDone": "完成管理",
 	"repoBatchClear": "取消选择",
@@ -2923,6 +2932,7 @@
 		"393": "加密笔记本不支持该操作",
 		"394": "加密笔记本不支持发布，无法配置发布权限",
 		"395": "批量导出不支持加密笔记本，请先解锁后逐个导出，或改为导出普通笔记本",
-		"396": "加密笔记本不支持置顶文档"
+		"396": "加密笔记本不支持置顶文档",
+		"397": "当前设备无法创建同步文件，请在能够访问该文件的设备上通过思源重命名后重新同步：%s"
 	}
 }

@@ -149,8 +149,7 @@
         height: 20px;
       }
 
-      &:hover,
-      &:focus-visible {
+      &:hover {
         background-color: var(--b3-list-hover);
       }
     }

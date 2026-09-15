@@ -89,25 +89,23 @@ export class Menus {
                     }
                     this.unselect();
                     // navigation 根上：新建文档/文件夹/取消挂在/打开文件位置
-                    const menuButton = (event.target as Element).closest("[data-type='more-root']");
-                    const rect = menuButton?.getBoundingClientRect();
+                    const rect = target.getBoundingClientRect();
                     initNavigationMenu(app, target).popup({
-                        x: rect ? rect.left : event.clientX,
-                        y: rect ? rect.bottom : event.clientY,
-                        h: rect ? rect.height : 0,
+                        x: event.clientX,
+                        y: rect.bottom,
+                        h: rect.height,
                     });
                     setPanelFocus(hasClosestByClassName(target, "sy__file") as HTMLElement);
                     event.stopPropagation();
                     break;
                 } else if (dataType === "navigation-file") {
                     this.unselect();
-                    const menuButton = (event.target as Element).closest("[data-type='more-file']");
-                    const rect = menuButton?.getBoundingClientRect();
+                    const rect = target.getBoundingClientRect();
                     // navigation 文件上：删除/重命名/打开文件位置/导出
                     initFileMenu(app, this.getDir(target), target.getAttribute("data-path"), target).popup({
-                        x: rect ? rect.left : event.clientX,
-                        y: rect ? rect.bottom : event.clientY,
-                        h: rect ? rect.height : 0,
+                        x: event.clientX,
+                        y: rect.bottom,
+                        h: rect.height,
                     });
                     setPanelFocus(hasClosestByClassName(target, "sy__file") as HTMLElement);
                     event.stopPropagation();

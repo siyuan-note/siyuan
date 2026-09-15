@@ -1425,8 +1425,10 @@ export const openMenuPanel = (options: {
                     window.siyuan.menus.menu.remove();
                     const editMenuElement = hasClosestByClassName(target, "b3-menu");
                     if (editMenuElement) {
-                        editMenuElement.firstElementChild.classList.add("fn__none");
-                        editMenuElement.lastElementChild.classList.remove("fn__none");
+                        // 移动端菜单顶部会插入抓手标题，属性列表和类型列表按 items 容器定位
+                        const itemsElements = editMenuElement.querySelectorAll(":scope > .b3-menu__items");
+                        itemsElements[0]?.classList.add("fn__none");
+                        itemsElements[1]?.classList.remove("fn__none");
                     }
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
@@ -1567,8 +1569,10 @@ export const openMenuPanel = (options: {
                 } else if (type === "goEditCol") {
                     const editMenuElement = hasClosestByClassName(target, "b3-menu");
                     if (editMenuElement) {
-                        editMenuElement.firstElementChild.classList.remove("fn__none");
-                        editMenuElement.lastElementChild.classList.add("fn__none");
+                        // 移动端菜单顶部会插入抓手标题，属性列表和类型列表按 items 容器定位
+                        const itemsElements = editMenuElement.querySelectorAll(":scope > .b3-menu__items");
+                        itemsElements[0]?.classList.remove("fn__none");
+                        itemsElements[1]?.classList.add("fn__none");
                     }
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();

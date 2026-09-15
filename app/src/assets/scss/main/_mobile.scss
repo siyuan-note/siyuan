@@ -193,8 +193,7 @@ body.mobile-keyboard--open {
     }
 
     &--active,
-    &:not(.toolbar__icon-deactivate):active,
-    &:not(.toolbar__icon-deactivate):focus-visible {
+    &:not(.toolbar__icon-deactivate):active {
       background-color: var(--b3-list-hover);
     }
 
@@ -238,8 +237,7 @@ body.mobile-keyboard--open {
       height: 20px;
     }
 
-    &:active,
-    &:focus-visible {
+    &:active {
       background-color: var(--b3-list-hover);
     }
   }
@@ -310,8 +308,7 @@ body.mobile-keyboard--open {
       height: 18px;
     }
 
-    &:active,
-    &:focus-visible {
+    &:active {
       background-color: var(--b3-list-hover);
     }
 
@@ -493,10 +490,6 @@ body.mobile-keyboard--open {
       width: 20px;
       height: 20px;
       flex-shrink: 0;
-    }
-
-    &:focus-visible {
-      color: var(--b3-theme-on-surface);
     }
 
     &:active:not([disabled]) {
@@ -1534,18 +1527,6 @@ body.mobile-topbar--merged {
     transform: none;
     will-change: auto;
 
-    &::before {
-      content: "";
-      display: block;
-      flex-shrink: 0;
-      width: 32px;
-      height: 4px;
-      margin: 5px auto 7px;
-      border-radius: 2px;
-      background-color: var(--b3-theme-on-surface-light);
-      opacity: .45;
-    }
-
     > .b3-menu__items {
       max-height: none;
       min-height: 0;
@@ -1621,8 +1602,15 @@ body.mobile-topbar--merged {
       background-color: var(--b3-theme-surface);
       border: 0 !important;
 
-      &::before {
+      // 内容标题不绘制抓手，抓手统一由顶部的 --root 标题绘制
+      &:not(.b3-menu__title--root)::before {
         content: none;
+      }
+
+      &--root {
+        height: 16px;
+        min-height: 0;
+        padding: 0;
       }
 
       > .b3-menu__label {
@@ -1741,7 +1729,7 @@ body.mobile-topbar--merged {
     transition: transform .15s cubic-bezier(0, 0, .2, 1);
   }
 
-  .mobile-bottom-sheet__handle {
+  .mobile-bottom-sheet > .b3-menu__title--root {
     height: 16px;
     flex-shrink: 0;
     position: relative;

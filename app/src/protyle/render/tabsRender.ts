@@ -117,6 +117,14 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
         endTitleEditing();
         schedule();
     });
+    const onAncestorScroll = (event: Event) => {
+        // 吸顶标题随外层容器滚动时，同步正文内重命名输入层的位置。
+        if ((event.target === document || (event.target instanceof Element &&
+            event.target !== element && event.target.contains(element))) &&
+            element.querySelector(".tabs-title-editor")) {
+            schedule();
+        }
+    };
     const controller: ITabsRoot = {
         options,
         select(tabs, id, persist) {
@@ -176,6 +184,13 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                 const narrow = tabs.clientWidth < 420;
                 const vertical = tabs.getAttribute("tabs-position") === "left" && !narrow;
                 tabs.setAttribute("data-tabs-orientation", vertical ? "vertical" : "horizontal");
+                if (!tabs.querySelector(":scope > .tabs-divider")) {
+                    const divider = document.createElement("div");
+                    divider.className = "tabs-divider protyle-action";
+                    divider.setAttribute("contenteditable", "false");
+                    divider.setAttribute("aria-hidden", "true");
+                    tabs.prepend(divider);
+                }
                 let header = tabs.querySelector<HTMLElement>(":scope > .tabs-header");
                 if (!header) {
                     header = document.createElement("div");
@@ -213,6 +228,20 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         move: (source, target, after) => controller.options.move?.(source, target, after),
                         render: schedule,
                     });
+                    const selectTab = (id: string) => {
+                        // 切换前检查块顶部是否被滚动容器遮挡，顶部可见时保持当前位置。
+                        const top = tabs.getBoundingClientRect().top;
+                        let visibleTop = 0;
+                        for (let parent = tabs.parentElement; parent; parent = parent.parentElement) {
+                            if (/(auto|scroll|hidden|clip)/.test(getComputedStyle(parent).overflowY)) {
+                                visibleTop = Math.max(visibleTop, parent.getBoundingClientRect().top + parent.clientTop);
+                            }
+                        }
+                        controller.select(tabs, id, true);
+                        if (top < visibleTop) {
+                            tabs.scrollIntoView({block: "start", inline: "nearest"});
+                        }
+                    };
                     items.forEach((item, index) => {
                         const button = document.createElement("button");
                         button.type = "button";
@@ -286,7 +315,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         button.addEventListener("click", event => {
                             event.preventDefault();
                             event.stopPropagation();
-                            controller.select(tabs, itemID(item), true);
+                            selectTab(itemID(item));
                         });
                         button.addEventListener("dblclick", event => {
                             event.preventDefault();
@@ -308,7 +337,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             if (event.key === "Enter" || event.key === " ") {
                                 event.preventDefault();
                                 event.stopPropagation();
-                                controller.select(tabs, itemID(item), true);
+                                selectTab(itemID(item));
                                 return;
                             }
                             const target = tabKeyboardTarget(ids, itemID(item), event.key,
@@ -331,6 +360,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         add.className = "tabs-control ariaLabel";
                         add.innerHTML = '<svg><use xlink:href="#iconAdd"></use></svg>';
                         add.setAttribute("aria-label", escapeHtml(controller.options.addLabel || "+"));
+                        add.setAttribute("data-position", "north");
                         add.addEventListener("click", event => {
                             event.stopPropagation();
                             controller.options.add?.(tabs);
@@ -471,6 +501,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             controller.resize.disconnect();
             element.removeEventListener("focusout", onFocusOut);
             element.removeEventListener("scroll", schedule, true);
+            document.removeEventListener("scroll", onAncestorScroll, true);
             document.removeEventListener("selectionchange", endTitleEditing);
             roots.delete(element);
         },
@@ -478,6 +509,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
     roots.set(element, controller);
     element.addEventListener("focusout", onFocusOut);
     element.addEventListener("scroll", schedule, true);
+    document.addEventListener("scroll", onAncestorScroll, true);
     document.addEventListener("selectionchange", endTitleEditing);
     controller.render();
 };

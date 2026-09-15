@@ -143,3 +143,34 @@ func TestReadCustomEmojisRecursively(t *testing.T) {
 		t.Fatalf("unexpected custom emoji path [%v]", actual)
 	}
 }
+
+func TestReadCustomEmojisPreservesExistingNames(t *testing.T) {
+	model.ClearCustomEmojis()
+	t.Cleanup(model.ClearCustomEmojis)
+	root := t.TempDir()
+	files := map[string]string{"\ufffd.png": "replacement", "_.png": "underscore", "[icon].png": "invalid", "icon.png": "existing"}
+	for name, data := range files {
+		if err := os.WriteFile(filepath.Join(root, name), []byte(data), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for range 2 {
+		items := []*apicontract.SystemEmoji{}
+		readCustomEmojis(root, "", &items)
+		seen := map[string]bool{}
+		for _, item := range items {
+			seen[item.Unicode] = true
+		}
+		for _, name := range []string{"\ufffd.png", "_.png", "icon.png"} {
+			if !seen[name] {
+				t.Errorf("existing emoji disappeared from list: %q", name)
+			}
+		}
+		for name, want := range files {
+			got, err := os.ReadFile(filepath.Join(root, name))
+			if err != nil || string(got) != want {
+				t.Errorf("existing emoji %q changed: %q, %v", name, got, err)
+			}
+		}
+	}
+}

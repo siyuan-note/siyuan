@@ -955,6 +955,7 @@ interface IBlockTree {
     hPath?: string,
     subType?: string,
     name: string,
+    nameIsHTML?: boolean,
     type: string,
     depth: number,
     url?: string,

@@ -43,6 +43,7 @@
   - [Kurulum Paketi](#kurulum-paketi)
   - [Paket Yöneticisi](#paket-yöneticisi)
   - [Docker Barındırma](#docker-barındırma)
+  - [Kubernetes Barındırma](#kubernetes-barındırma)
   - [Unraid Barındırma](#unraid-barındırma)
   - [TrueNAS Barındırma](#truenas-barındırma)
   - [Test Kanalları](#test-kanalları)
@@ -290,6 +291,35 @@ Port 6806’yı gizlemek için NGINX ters proxy (reverse proxy) kullan. Dikkat e
 - Masaüstü ve mobil uygulama bağlantılarını desteklemez; yalnızca tarayıcı üzerinden kullanım mümkündür.  
 - PDF, HTML ve Word formatlarına dışa aktarma desteklenmez.  
 - Markdown dosyası içe aktarma desteklenmez.
+
+</details>
+
+### Kubernetes Barındırma
+
+<details>
+<summary>Kubernetes Dağıtımı</summary>
+
+[HelmForge SiYuan chart'ı](https://github.com/helmforgedev/charts/tree/main/charts/siyuan), HelmForge topluluğu tarafından sürdürülür ve resmi `b3log/siyuan` imajını kullanır; resmi bir SiYuan chart'ı değildir. Chart ile ilgili sorunları lütfen [HelmForge'a](https://github.com/helmforgedev/charts/issues) bildir.
+
+Helm, kubectl ve varsayılan StorageClass aracılığıyla 10Gi ReadWriteOnce birimi oluşturabilen bir Kubernetes kümesi hazır olduğunda şu komutları çalıştır:
+
+```bash
+helm repo add helmforge https://repo.helmforge.dev
+helm repo update
+helm install siyuan helmforge/siyuan --namespace siyuan --create-namespace --wait
+kubectl -n siyuan get secret siyuan-siyuan-auth -o go-template='{{index .data "access-code" | base64decode}}{{"\n"}}'
+kubectl -n siyuan port-forward service/siyuan-siyuan 6806:6806
+```
+
+<http://localhost:6806> adresini aç ve oluşturulan ekran kilidi şifresini gir. Bu şifreyi güvenle sakla; API token'ından farklıdır. Yukarıdaki kaynak adları, varsayılan chart ayarlarını ve `siyuan` sürüm adını temel alır.
+
+Uzaktan erişim için özel bir HTTPS alan adı ve `/ws` yolundaki WebSocket bağlantılarını iletebilen bir Ingress denetleyicisi kullan; URL yeniden yazımı yapma. `ingress` ayarlarını yapılandır ve `networkPolicy.ingressFrom` üzerinden denetleyicinin ad alanından gelen trafiğe izin ver. Varsayılan politika yalnızca aynı ad alanından gelen trafiğe ve DNS çıkışına izin verir. Bulut eşitleme gibi harici hizmetler için açık çıkış kuralları ekle. TLS, mevcut Secret kaynakları ve depolama ayarları için [chart kılavuzuna ve üretim örneğine](https://helmforge.dev/docs/charts/siyuan) bak.
+
+- **Her çalışma alanına yalnızca bir uygulama örneği yazmalı:** Kopya sayısını artırma veya aynı çalışma alanını çalışan başka bir örneğe bağlama; ReadWriteMany depolama da bunu güvenli hâle getirmez. Chart, `Recreate` stratejisiyle yeni örneği başlatmadan önce eskisini durdurur; bu nedenle yükseltmeler sırasında hizmet kesintisi olur.
+- **Kalıcı depolama:** Çalışma alanının tamamı `/siyuan/workspace` konumuna bağlanır. Chart kaldırıldığında oluşturduğu PVC varsayılan olarak korunur; ancak ad alanının veya PVC'nin silinmesi veri kaybına yol açabilir. Korunan veya geri yüklenen bir PVC'yi `persistence.existingClaim` ile yeniden kullan.
+- **Yedekleme ve yükseltmeler:** Çalışma alanının tamamını yedeklemeden önce yazan örneği düzgün şekilde durdur veya uygulama tutarlılığını sağlayan bir yedekleme yöntemi kullan. Kullanımdaki SQLite indeksini tek başına kopyalamak yeterli değildir. Kimlik doğrulama Secret kaynaklarını, şifreleme anahtarlarını ve şifreli not defteri kurtarma parolalarını güvenle sakla; ayrı bir PVC'ye geri yüklemeyi test et. Yükseltmeden önce yedek al ve depolama biçimi değişikliklerini incele: Helm geri alma işlemi veri geçişlerini geri döndürmez.
+
+Docker barındırma kısıtlamaları burada da geçerlidir: yalnızca tarayıcıdan kullanım desteklenir; masaüstü ve mobil uygulama bağlantıları, PDF/HTML/Word dışa aktarma ve Markdown dosyası içe aktarma desteklenmez.
 
 </details>
 

@@ -840,8 +840,6 @@ export const openEmojiPanel = (
     }) => {
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
-    } else {
-        window.siyuan.menus.menu.removeScrollEvent();
     }
 
     const popoverElement = options?.ownerElement?.closest<HTMLElement>(".block__popover");
@@ -940,7 +938,7 @@ export const openEmojiPanel = (
             </div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
-                <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.language}</span>
+                <span class="fn__flex-center ft__on-surface" style="flex: 0 0 89px;overflow-wrap: anywhere">${window.siyuan.languages.language}</span>
                 <span class="fn__space--small"></span>
                 <select class="b3-select fn__flex-1">
                     <option value="" ${dynamicCurrentObj.lang === "" ? " selected" : ""}>${window.siyuan.languages.themeOS}</option>
@@ -953,7 +951,7 @@ export const openEmojiPanel = (
             <div class="fn__hr"></div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
-                <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.date}</span>
+                <span class="fn__flex-center ft__on-surface" style="flex: 0 0 89px;overflow-wrap: anywhere">${window.siyuan.languages.date}</span>
                 <span class="fn__space--small"></span>
                 <input type="date" max="9999-12-31" class="b3-text-field fn__flex-1" value="${dynamicCurrentObj.date}"/>
                 <span class="fn__space--small"></span>
@@ -963,7 +961,7 @@ export const openEmojiPanel = (
             <div class="fn__hr"></div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
-                <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.format}</span>
+                <span class="fn__flex-center ft__on-surface" style="flex: 0 0 89px;overflow-wrap: anywhere">${window.siyuan.languages.format}</span>
                 <span class="fn__space--small"></span>
                 <select class="b3-select fn__flex-1">
                     ${genWeekdayOptions(dynamicCurrentObj.lang, dynamicCurrentObj.weekdayType)}
@@ -982,7 +980,7 @@ export const openEmojiPanel = (
             <div class="fn__hr"></div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
-                <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.custom}</span>
+                <span class="fn__flex-center ft__on-surface" style="flex: 0 0 89px;overflow-wrap: anywhere">${window.siyuan.languages.custom}</span>
                 <span class="fn__space--small"></span>
                 <input type="text" class="b3-text-field fn__flex-1" value="">
                 <span class="fn__space"></span>

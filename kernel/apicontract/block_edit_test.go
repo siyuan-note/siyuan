@@ -6,6 +6,20 @@ import (
 	"testing"
 )
 
+func TestSwapBlockRefContractCompatibility(t *testing.T) {
+	for _, field := range []string{"", `,"originalToEmbed":false`, `,"originalToEmbed":true`} {
+		request, err := SwapBlockRef.Decode(strings.NewReader(`{"refID":"ref","defID":"def","includeChildren":true` + field + `}`))
+		if err != nil || request.OriginalToEmbed != strings.Contains(field, "true") || !request.IncludeChildren {
+			t.Fatalf("unexpected swap request: %+v, %v", request, err)
+		}
+	}
+	for _, value := range []string{`null`, `1`, `"true"`} {
+		if _, err := SwapBlockRef.Decode(strings.NewReader(`{"refID":"ref","defID":"def","includeChildren":false,"originalToEmbed":` + value + `}`)); err == nil {
+			t.Fatalf("invalid embed option accepted: %s", value)
+		}
+	}
+}
+
 func TestTransferBlockRefCompatibility(t *testing.T) {
 	for _, body := range []string{`{"fromID":"from","toID":"to"}`, `{"fromID":"from","toID":"to","reloadUI":null,"refIDs":null}`} {
 		request, err := TransferBlockRef.Decode(strings.NewReader(body))

@@ -1,5 +1,6 @@
 import {getEventName, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
+import {isScrollAboveMenu} from "../util/zIndex";
 import {getAnchoredMenuPosition} from "./menuPosition";
 import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGroup";
 import {waitForSheetViewport} from "./sheetOpen";
@@ -310,16 +311,20 @@ export class Menu {
             window.setTimeout(() => this.remove(), Constants.TIMEOUT_DBLCLICK);
             return;
         }
+        const restoreKeyboard = this.restoreKeyboard;
+        if (restoreKeyboard) {
+            // 先隐藏菜单，避免软键盘改变视口时将退出中的菜单重新顶入可视区域。
+            this.removeImmediately();
+            // 在关闭手势中恢复焦点，使浏览器端也能响应用户操作弹出软键盘。
+            restoreKeyboard();
+            return;
+        }
         clearTimeout(fullscreenCloseTimeout);
         this.element.style.transition = "";
         void this.element.offsetHeight;
         this.element.style.transform = "translateY(100%)";
         this.hideFullscreenScrim();
         fullscreenCloseTimeout = window.setTimeout(() => this.removeImmediately(), Constants.TIMEOUT_DBLCLICK);
-        const restoreKeyboard = this.restoreKeyboard;
-        this.restoreKeyboard = undefined;
-        // 在关闭手势中恢复焦点，使浏览器端也能响应用户操作弹出软键盘。
-        restoreKeyboard?.();
     }
 
     private updateSheetTitle() {
@@ -345,7 +350,16 @@ export class Menu {
         const mobileSize = window.siyuan.mobile.size;
         const orientationSize = mobileSize.isLandscape ? mobileSize.landscape : mobileSize.portrait;
         // 使用当前方向记录的完整视口高度，避免软键盘收起期间菜单高度被压缩
-        this.element.style.height = Math.max(window.innerHeight, orientationSize?.height1 || 0) * .56 + "px";
+        const maxHeight = Math.max(window.innerHeight, orientationSize?.height1 || 0) * .56;
+        if (this.element.classList.contains("b3-menu--fit")) {
+            // 内容不足时收缩面板，避免列表下方留白；先清空高度，否则 scrollHeight 会被当前高度撑大
+            this.element.style.height = "";
+            const titleHeight = this.element.firstElementChild.getBoundingClientRect().height;
+            const contentHeight = this.element.lastElementChild.scrollHeight;
+            this.element.style.height = Math.min(maxHeight, Math.max(160, titleHeight + contentHeight)) + "px";
+            return;
+        }
+        this.element.style.height = maxHeight + "px";
     }
 
     public showSubMenu(subMenuElement: HTMLElement) {
@@ -420,11 +434,8 @@ export class Menu {
         itemsMenuElement.style.maxHeight = Math.max(window.innerHeight - menuElement.getBoundingClientRect().top - 18 + 1, 30) + "px";
     }
 
-    private preventDefault(event: KeyboardEvent) {
-        if (!hasClosestByClassName(event.target as Element, "b3-menu") &&
-            !hasClosestByClassName(event.target as Element, "tooltip") &&
-            // 移动端底部键盘菜单
-            !hasClosestByClassName(event.target as Element, "keyboard__bar")) {
+    private preventDefault(event: Event) {
+        if (!isScrollAboveMenu(event.target as Element, this.element)) {
             event.preventDefault();
         }
     }
@@ -437,7 +448,7 @@ export class Menu {
         }
     }
 
-    public removeScrollEvent() {
+    private removeScrollEvent() {
         window.removeEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, false);
     }
 
@@ -504,7 +515,7 @@ export class Menu {
         this.element.lastElementChild.classList.remove("b3-menu__items--menu");
         this.element.lastElementChild.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全
         this.element.classList.add("fn__none");
-        this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet");
+        this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet", "b3-menu--fit");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
         this.element.removeAttribute("data-from");    // 标识菜单入口

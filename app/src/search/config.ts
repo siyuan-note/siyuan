@@ -1,10 +1,11 @@
+import {normalizeSearchTypes} from "./getDefault";
 import type {FullTextSearchBlockRequestInput} from "../types/api";
 
 export const buildSearchRequest = (config: Config.IUILayoutTabSearchConfig): FullTextSearchBlockRequestInput => {
     return {
         query: config.query,
         method: config.method,
-        types: {...config.types},
+        types: normalizeSearchTypes(config.types),
         subTypes: config.subTypes,
         paths: config.idPath || [],
         groupBy: config.group,

@@ -111,28 +111,29 @@ type SystemOIDCClaimRule struct {
 }
 
 type SystemSystem struct {
-	ID                        string              `json:"id" api:"optional,nullable"`
-	Name                      string              `json:"name" api:"optional,nullable"`
-	KernelVersion             string              `json:"kernelVersion" api:"optional,nullable"`
-	OS                        string              `json:"os" api:"optional,nullable"`
-	OSPlatform                string              `json:"osPlatform" api:"optional,nullable"`
-	Container                 string              `json:"container" api:"optional,nullable"`
-	IsMicrosoftStore          bool                `json:"isMicrosoftStore" api:"optional,nullable"`
-	HomeDir                   string              `json:"homeDir" api:"optional,nullable"`
-	WorkspaceDir              string              `json:"workspaceDir" api:"optional,nullable"`
-	AppDir                    string              `json:"appDir" api:"optional,nullable"`
-	ConfDir                   string              `json:"confDir" api:"optional,nullable"`
-	DataDir                   string              `json:"dataDir" api:"optional,nullable"`
-	NetworkServe              bool                `json:"networkServe" api:"optional,nullable"`
-	NetworkServeTLS           bool                `json:"networkServeTLS" api:"optional,nullable"`
-	NetworkProxy              *SystemNetworkProxy `json:"networkProxy" api:"optional,nullable"`
-	DownloadInstallPkg        bool                `json:"downloadInstallPkg" api:"optional,nullable"`
-	UpdateChannel             string              `json:"updateChannel,omitempty" api:"optional,nullable"`
-	AutoLaunch2               int                 `json:"autoLaunch2" api:"optional,nullable"`
-	LockScreenMode            int                 `json:"lockScreenMode" api:"optional,nullable"`
-	DisabledFeatures          []string            `json:"disabledFeatures" api:"optional,nullable"`
-	MicrosoftDefenderExcluded bool                `json:"microsoftDefenderExcluded" api:"optional,nullable"`
-	SafeMode                  bool                `json:"safeMode" api:"optional,nullable"`
+	ID                                string              `json:"id" api:"optional,nullable"`
+	Name                              string              `json:"name" api:"optional,nullable"`
+	KernelVersion                     string              `json:"kernelVersion" api:"optional,nullable"`
+	OS                                string              `json:"os" api:"optional,nullable"`
+	OSPlatform                        string              `json:"osPlatform" api:"optional,nullable"`
+	Container                         string              `json:"container" api:"optional,nullable"`
+	IsMicrosoftStore                  bool                `json:"isMicrosoftStore" api:"optional,nullable"`
+	HomeDir                           string              `json:"homeDir" api:"optional,nullable"`
+	WorkspaceDir                      string              `json:"workspaceDir" api:"optional,nullable"`
+	AppDir                            string              `json:"appDir" api:"optional,nullable"`
+	ConfDir                           string              `json:"confDir" api:"optional,nullable"`
+	DataDir                           string              `json:"dataDir" api:"optional,nullable"`
+	NetworkServe                      bool                `json:"networkServe" api:"optional,nullable"`
+	NetworkServeTLS                   bool                `json:"networkServeTLS" api:"optional,nullable"`
+	NetworkProxy                      *SystemNetworkProxy `json:"networkProxy" api:"optional,nullable"`
+	DownloadInstallPkg                bool                `json:"downloadInstallPkg" api:"optional,nullable"`
+	UpdateChannel                     string              `json:"updateChannel,omitempty" api:"optional,nullable"`
+	AutoLaunch2                       int                 `json:"autoLaunch2" api:"optional,nullable"`
+	LockScreenMode                    int                 `json:"lockScreenMode" api:"optional,nullable"`
+	EncryptedNotebookFollowSystemLock bool                `json:"encryptedNotebookFollowSystemLock" api:"optional,nullable"`
+	DisabledFeatures                  []string            `json:"disabledFeatures" api:"optional,nullable"`
+	MicrosoftDefenderExcluded         bool                `json:"microsoftDefenderExcluded" api:"optional,nullable"`
+	SafeMode                          bool                `json:"safeMode" api:"optional,nullable"`
 }
 
 type SystemNetworkProxy struct {

@@ -3,12 +3,12 @@
 [中文](WORKSPACE.zh-CN.md)
 
 > This document describes how a SiYuan workspace is organized on disk.
-> It complements [`SY-FORMAT.md`](./SY-FORMAT.md): the latter covers the **internal** JSON structure of a `.sy` file, while this one covers the **overall** file-system layout of the workspace.
+> It complements [`SY-FORMAT.md`](./SY-FORMAT.md): the latter describes the **internal** JSON structure of a `.sy` file, while this one describes the **overall** file-system layout of the workspace.
 > All conclusions are verified against a real workspace and the kernel source.
 
 ## 0. Overview
 
-A SiYuan workspace is a **self-describing** directory tree: notebooks, documents, and assets live on disk as files and directories. **The filename is the ID; the directory structure is the document hierarchy.** The file system contains the authoritative source content, while SQLite databases under `temp/` are rebuildable indexes and caches. Normal-notebook content is readable directly; encrypted-notebook content is ciphertext and must be accessed through the unlocked kernel.
+A SiYuan workspace is a **self-describing** directory tree: notebooks, documents, and assets live on disk as files and directories. **The filename is the ID; the directory structure is the document hierarchy.** The file system contains the authoritative source content, while SQLite databases under `temp/` are rebuildable indexes and caches. Normal-notebook content is readable directly, whereas encrypted-notebook content is ciphertext and must be accessed through the unlocked kernel.
 
 ---
 
@@ -98,7 +98,7 @@ That is, the physical path segments `assets` / `templates` / `widgets` / `emojis
 
 ### Persistent data vs rebuildable indexes
 
-`data/storage/` contains persistent structured data such as attribute-view definitions and plugin state. The SQLite files in `temp/` are derived indexes and caches: normal notebooks use the global `siyuan.db` and `blocktree.db`, while each unlocked encrypted notebook uses independent SQLCipher databases. Deleting or rebuilding an index must not be confused with deleting the source `.sy`, asset, or database-definition files.
+`data/storage/` contains persistent structured data such as attribute-view definitions and plugin state. The SQLite files in `temp/` are derived indexes and caches: normal notebooks use the global `siyuan.db` and `blocktree.db`, while each unlocked encrypted notebook uses independent SQLCipher databases. Therefore, deleting or rebuilding an index must not be confused with deleting the source `.sy`, asset, or database-definition files.
 
 ### How a notebook is recognized
 
@@ -107,7 +107,7 @@ That is, the physical path segments `assets` / `templates` / `widgets` / `emojis
 1. Skip reserved names;
 2. Must be a directory (not a file);
 3. The directory name must match the NodeID format (`ast.IsNodeIDPattern`);
-4. If all the above hold → that directory name is the `box.ID` (notebook ID).
+4. If all the above are met → that directory name is the `box.ID` (notebook ID).
 
 ---
 
@@ -132,13 +132,13 @@ Code evidence:
 - Expanding children (`Ls`): given a `.sy` path, strip the `.sy` suffix, check whether the same-named directory exists, and list its entries if so.
 - Child depth (`GetChildDocDepth`): walks the same-named directory accordingly.
 
-> ⚠️ This means: **moving or renaming a document that has children must also move its same-named directory**, otherwise the children get orphaned.
+> ⚠️ This means: **moving or renaming a document that has children must also move its same-named directory**, otherwise the child documents can no longer be located.
 
 ### Top-level notebook document exception
 
 When the top-level notebook document feature is enabled, the kernel creates `<boxID>.sy` directly inside the notebook directory. Its document rootID is exactly the notebook ID, so the notebook and its top-level document share one ID.
 
-The switch is stored at `fileTree.boxDocEnabled` in `conf/conf.json`. It defaults to enabled for new workspaces; an existing configuration that does not contain the field is initialized as disabled.
+The switch is stored at `fileTree.boxDocEnabled` in `conf/conf.json`. It defaults to enabled for new workspaces; if an existing configuration does not contain the field, it is initialized as disabled.
 
 The top-level notebook document is a virtual parent for every ordinary document stored directly under `<boxID>/`. Unlike an ordinary parent document, its children remain in the notebook directory and are **not** moved into a `<boxID>/<boxID>/` directory. For example:
 
@@ -190,7 +190,7 @@ An encrypted notebook still stores its name, closed state, and key-recovery enve
 
 Read/write sites: `GetConf` / `SaveConf`. The path is hard-coded as `<DataDir>/<boxID>/.siyuan/conf.json`.
 
-`boxDoc.json` contains a metadata spec version and the top-level document ID. At runtime the kernel derives that document ID directly from `box.ID`; the metadata file is retained so `.sy.zip` import can identify the source notebook's top-level document and remap it to the destination notebook ID.
+`boxDoc.json` contains a metadata spec version and the top-level document ID. At runtime the kernel derives that document ID directly from `box.ID`, whereas the metadata file is retained so `.sy.zip` import can identify the source notebook's top-level document and remap it to the destination notebook ID.
 
 Encrypted notebooks retain recovery metadata in `conf.json` and `notebook-crypto-backup.json`, but their `.sy`, notebook-local assets, and attribute-view definitions are ciphertext. See [ENCRYPTED-NOTEBOOK.md](./ENCRYPTED-NOTEBOOK.md) for the encryption boundary, database isolation, and recovery design.
 
@@ -205,13 +205,13 @@ Be careful to distinguish the two `conf.json` files:
 | `conf/conf.json` | **Workspace root** | Workspace-level global config (appearance / langs / system / editor / sync / repo, etc.) |
 | `<boxID>/.siyuan/conf.json` | **Inside a notebook** | That notebook only (BoxConf) |
 
-`conf/conf.json` holds UI appearance, account, sync, AI, flashcard, and other workspace-level settings.
+`conf/conf.json` contains UI appearance, account, sync, AI, flashcard, and other workspace-level settings.
 
 ---
 
 ## 7. Workspace-level hidden config: `data/.siyuan/`
 
-`data/.siyuan/` is different from the per-notebook `.siyuan/` — the former holds **workspace-level** rules and state:
+`data/.siyuan/` is different from the per-notebook `.siyuan/` — the former contains **workspace-level** rules and state:
 
 | File | Purpose |
 |---|---|
@@ -235,7 +235,7 @@ Most entries are optional and are created only when the corresponding feature is
 
 Two coexisting locations:
 
-1. **Global `data/assets/`** — the main one. Naming convention looks like `<original-base>-<NodeID>.<ext>` (e.g. `640-20240927104411-0jh7x96.webp`). Referenced inside documents as the relative path `assets/xxx`.
+1. **Global `data/assets/`** — the main one. The naming convention has the form `<original-base>-<NodeID>.<ext>` (e.g. `640-20240927104411-0jh7x96.webp`). Referenced inside documents as the relative path `assets/xxx`.
 2. **Per-notebook `<notebook>/assets/`** — used by the built-in guide and required for encrypted notebooks; ordinary unencrypted user notebooks generally don't have one.
 
 Asset-link prefix recognition: only `assets/`, `emojis/`, `plugins/`, `public/`, and `widgets/` are accepted as legal asset-link prefixes.
@@ -264,7 +264,7 @@ These are physical identifiers. A notebook's display name comes from `BoxConf.na
 
 ### Document absolute path
 
-A document's absolute path on disk = `data/<boxID>/<relative-path>`, where `<relative-path>` looks like `/20221126104620-m06prws/20230928134805-z11t56h.sy` (POSIX style, leading `/`).
+A document's absolute path on disk = `data/<boxID>/<relative-path>`, where `<relative-path>` has the form `/20221126104620-m06prws/20230928134805-z11t56h.sy` (POSIX style, leading `/`).
 
 Extracting the doc ID from a path (`GetTreeID`): simply `filepath.Base(path)` with the `.sy` suffix removed.
 
@@ -274,9 +274,9 @@ Extracting the doc ID from a path (`GetTreeID`): simply `filepath.Base(path)` wi
 
 HPath is **not authoritative data stored in the `.sy` source file** — it is derived when loading a document (`LoadTreeByData`) and may be cached in rebuildable indexes such as `blocktree.db`:
 
-1. Split the document's own relative path by `/`, drop the leading empty segment and the trailing self segment, yielding the **ID segments of each ancestor document**.
+1. Split the document's own relative path by `/`, remove the leading empty segment and the trailing self segment, yielding the **ID segments of each ancestor document**.
 2. For each ancestor ID, build `<ancestorID>.sy` and read its `title` via `DocIAL()` (a **streaming read of `Properties` only**, without parsing the whole tree). Encrypted `.sy` files must first be read and decrypted in full before the properties can be parsed.
-3. Join the titles with `/` and append the current document's title → an HPath like `/Parent/Child/Current`.
+3. Concatenate the titles with `/` and concatenate the current document's title → an HPath like `/Parent/Child/Current`.
 4. If some ancestor `.sy` is missing, the kernel **auto-creates** an `Untitled` parent (issue #7376).
 
 > This is the fundamental reason "directory structure is data": **moving or renaming a file/directory directly changes the document's HPath and breadcrumbs** — because HPath is entirely derived from the directory chain.
@@ -307,7 +307,7 @@ When writing files directly:
 
 | Document | Layer | Question answered |
 |---|---|---|
-| **This one (WORKSPACE)** | File-system layer | "What does a workspace look like on disk? How are notebooks/documents/assets organized?" |
-| **SY-FORMAT** | AST layer | "What does the JSON tree inside a `.sy` file look like? What node types/fields exist?" |
+| **This one (WORKSPACE)** | File-system layer | "How is a workspace organized on disk? How are notebooks/documents/assets organized?" |
+| **SY-FORMAT** | AST layer | "What is the structure of the JSON tree inside a `.sy` file? What node types/fields exist?" |
 
-The two are complementary: this document tells you where a `.sy` file **lives, what it's named, and who shares its directory**; SY-FORMAT tells you **what's inside** it.
+The two are complementary: this document describes where a `.sy` file **lives, what it's named, and who shares its directory**; SY-FORMAT describes **what's inside** it.

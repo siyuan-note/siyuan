@@ -189,7 +189,7 @@ var transferBlockRef = contractHandler(apicontract.TransferBlockRef, func(c *gin
 })
 
 var swapBlockRef = contractHandler(apicontract.SwapBlockRef, func(c *gin.Context, request apicontract.SwapBlockRefRequest) apicontract.Response[apicontract.Null] {
-	if err := model.SwapBlockRef(request.RefID, request.DefID, request.IncludeChildren); err != nil {
+	if err := model.SwapBlockRef(request.RefID, request.DefID, request.IncludeChildren, request.OriginalToEmbed); err != nil {
 		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 7000)
 	}
 	return apicontract.Success(apicontract.Null{})

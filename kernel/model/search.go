@@ -2088,6 +2088,7 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		s.Callout = types["callout"]
 		s.Tabs = types["tabs"]
 		s.TabItem = types["tabItem"]
+		s.CustomBlock = new(types["customBlock"])
 	} else {
 		s.Document = Conf.Search.Document
 		s.Heading = Conf.Search.Heading
@@ -2134,6 +2135,7 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 	addSimple(s.Callout, treenode.TypeAbbr(ast.NodeCallout.String()))
 	addSimple(s.Tabs, "tabs")
 	addSimple(s.TabItem, "tab")
+	addSimple(s.CustomBlockEnabled(), "custom")
 
 	var clauses []string
 

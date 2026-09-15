@@ -18,7 +18,7 @@ function usage() {
   console.log("Options:");
   console.log("  --flavor=<flavor>      Flavor: cn / googleplay / huawei / official (default: official)");
   console.log("  --android-dir=<path>   Path to the siyuan-android project (default: next to the siyuan project)");
-  console.log("  --device=<serial>      Specify an adb device (required when multiple devices are connected)");
+  console.log("  --device=<serial>      Specify an adb connection (required for different or unidentified devices)");
   console.log("  --skip-ui              Skip pnpm build:mobile and use the existing stage/build/mobile output");
   console.log("  --skip-kernel          Skip the gomobile build and use the existing kernel/kernel.aar");
   console.log("  --skip-gradle          Skip the Gradle build and reinstall the most recently built APK");
@@ -148,6 +148,28 @@ function wait(milliseconds) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
 }
 
+function selectDuplicateDevice(adb, devices, execute = spawnSync) {
+  let identity = null;
+  for (const serial of devices) {
+    // 连接名称可能随无线服务重新发布而变化，使用手机报告的序列号核对身份。
+    const result = execute(adb, ["-s", serial, "shell", "getprop", "ro.serialno"], {
+      encoding: "utf8",
+      timeout: 3000,
+      windowsHide: true,
+    });
+    const value = result.stdout?.trim();
+    // 无法确认身份时保留手动选择，避免把未知连接合并到另一台手机。
+    if (result.error || result.status !== 0 || !value || /^(unknown|null|0+)$/i.test(value)) {
+      return null;
+    }
+    if (identity !== null && identity !== value) {
+      return null;
+    }
+    identity = value;
+  }
+  return devices[0] || null;
+}
+
 function deviceSerial(adb) {
   const maxAttempts = 11;
   let devices = [];
@@ -182,7 +204,12 @@ function deviceSerial(adb) {
   if (devices.length === 0) {
     fail("No connected devices detected. To connect using wireless debugging, enable Wireless debugging on the device, run adb pair <ip>:<port> <pairing-code>, and then run adb connect <ip>:<port>");
   }
-  fail(`Multiple devices detected: ${devices.join(", ")}. Specify one using --device=<serial>`);
+  const selected = selectDuplicateDevice(adb, devices);
+  if (selected) {
+    console.log(`Multiple connections to the same device detected; using ${selected}`);
+    return selected;
+  }
+  fail(`Multiple different or unidentified devices detected: ${devices.join(", ")}. Specify one using --device=<serial>`);
 }
 
 const sdkDir = findSdkDir();

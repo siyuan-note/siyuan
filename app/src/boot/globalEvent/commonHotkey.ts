@@ -162,7 +162,7 @@ export const correctHotkey = (app: App) => {
     }
 };
 
-let lastHotkeys: Record<string, string>;
+let lastAppMenuSync: string;
 
 export const syncAppMenuShortcuts = (suspended = false) => {
     /// #if !BROWSER
@@ -180,45 +180,19 @@ export const syncAppMenuShortcuts = (suspended = false) => {
         const item = appMenuHotkeyItems[id];
         hotkey[id] = suspended ? "" : item.custom ?? item.default ?? "";
     });
-    if (lastHotkeys && Object.keys(appMenuHotkeyItems).every(id => lastHotkeys[id] === hotkey[id])) {
-        return;
-    }
-    lastHotkeys = {...hotkey};
-    ipcRenderer.send(Constants.SIYUAN_SYNC_APP_MENU, {
+    const data = {
         workspaceDir: getHostCapabilities().workspaces ? window.siyuan.config.system.workspaceDir : "",
         lang: window.siyuan.config.lang,
         readonly: window.siyuan.config.readonly,
         hotkey,
-        i18n: {
-            config: window.siyuan.languages.config,
-            about: window.siyuan.languages.appMenuAbout,
-            services: window.siyuan.languages.appMenuServices,
-            toggleMainWindow: window.siyuan.languages.toggleWin,
-            hide: window.siyuan.languages.appMenuHide,
-            hideOthers: window.siyuan.languages.appMenuHideOthers,
-            showAll: window.siyuan.languages.showAll,
-            quit: window.siyuan.languages.appMenuQuit,
-            edit: window.siyuan.languages.edit,
-            undo: window.siyuan.languages.undo,
-            redo: window.siyuan.languages.redo,
-            cut: window.siyuan.languages.cut,
-            copy: window.siyuan.languages.copy,
-            paste: window.siyuan.languages.paste,
-            pasteAndMatchStyle: window.siyuan.languages.pasteAsPlainText,
-            selectAll: window.siyuan.languages.selectAll,
-            window: window.siyuan.languages.appMenuWindow,
-            minimize: window.siyuan.languages.appMenuMinimize,
-            zoom: window.siyuan.languages.zoom,
-            togglefullscreen: window.siyuan.languages.appMenuTogglefullscreen,
-            help: window.siyuan.languages.help,
-            userGuide: window.siyuan.languages.userGuide,
-            feedback: window.siyuan.languages.feedback,
-            debug: window.siyuan.languages.debug,
-            officialWebsite: window.siyuan.languages._trayMenu.officialWebsite,
-            openSource: window.siyuan.languages._trayMenu.openSource,
-            bringAllToFront: window.siyuan.languages.appMenuBringAllToFront,
-        },
-    });
+    };
+    // 语言、工作空间和只读状态同样影响菜单，不能只比较快捷键。
+    const signature = JSON.stringify(data);
+    if (lastAppMenuSync === signature) {
+        return;
+    }
+    ipcRenderer.send(Constants.SIYUAN_SYNC_APP_MENU, data);
+    lastAppMenuSync = signature;
     /// #endif
 };
 

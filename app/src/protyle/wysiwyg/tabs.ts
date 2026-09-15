@@ -150,6 +150,7 @@ export const unwrapTabs = (protyle: IProtyle, tabs: HTMLElement) => {
             item.replaceChildren(...blocks, genSBElement("row").lastElementChild);
         });
         tabs.querySelector(":scope > .tabs-header")?.remove();
+        tabs.querySelector(":scope > .tabs-divider")?.remove();
         tabs.className = "sb";
         tabs.dataset.type = "NodeSuperBlock";
         tabs.dataset.sbLayout = "row";
@@ -210,7 +211,7 @@ export const initEditorTabs = (protyle: IProtyle) => {
     tabsRender(root, {
         readonly: tabs => !canEdit(protyle, tabs || root),
         label: window.siyuan.languages.tabItem,
-        addLabel: window.siyuan.languages.tabItem,
+        addLabel: window.siyuan.languages.newTabItem,
         taskLabel: window.siyuan.languages.task,
         task: item => setTabTask(protyle, item, nextTaskListMarker(item.getAttribute("tabs-task"))),
         taskMenu: item => editTabTask(protyle, item),

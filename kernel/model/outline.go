@@ -362,16 +362,17 @@ func outline(tree *parse.Tree) (ret []*Path) {
 		for _, b := range children {
 			resetDepth(b, 0)
 			ret = append(ret, &Path{
-				ID:       b.ID,
-				Box:      b.Box,
-				Name:     b.Content,
-				NodeType: b.Type,
-				Type:     "outline",
-				SubType:  b.SubType,
-				Blocks:   b.Children,
-				Depth:    0,
-				Count:    b.Count,
-				Folded:   true,
+				ID:         b.ID,
+				Box:        b.Box,
+				Name:       b.Content,
+				NameIsHTML: true,
+				NodeType:   b.Type,
+				Type:       "outline",
+				SubType:    b.SubType,
+				Blocks:     b.Children,
+				Depth:      0,
+				Count:      b.Count,
+				Folded:     true,
 			})
 		}
 	}

@@ -415,7 +415,9 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
 					}
 					hChildren = cleanRenderNodes(hChildren, true)
-					if 0 == blockEmbedMode {
+					if level := explicitEmbedHeadingLevel(n, sqlBlock.ID); level != 0 {
+						adjustEmbedHeadingLevels(hChildren, level)
+					} else if 0 == blockEmbedMode && treenode.GetEmbedBlockRef(n) != sqlBlock.ID {
 						embedTopLevel := 0
 						for _, hChild := range hChildren {
 							if ast.NodeHeading == hChild.Type {

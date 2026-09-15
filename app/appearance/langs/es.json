@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "Historial de configuración de la fuente de tarjetas",
 	"flashcardSourceHistoryTip": "Restaura la configuración y las referencias a bloques conservando el progreso de repaso; recupera preguntas y respuestas desde el historial del documento vinculado",
 	"flashcardSourceRestoreConfirm": "¿Restaurar esta configuración? Afectará a todas las tarjetas de esta fuente; el progreso de repaso no cambiará",
+	"newTabItem": "Crear bloque de elemento de pestaña",
+	"encryptedNotebookFollowSystemLock": "Seguir el bloqueo de pantalla del sistema",
+	"encryptedNotebookFollowSystemLockDesc": "Bloquear todos los cuadernos cifrados desbloqueados al bloquear el sistema, independientemente del tiempo de inactividad; permanecen bloqueados al desbloquear el sistema",
+	"customBlock": "Bloque personalizado",
+	"embedHeadingLevel": "Nivel de los encabezados incrustados",
+	"embedHeadingLevelPreserve": "Mantener los niveles originales",
+	"originalToRef": "Convertir el original en referencia a bloque",
+	"originalToEmbed": "Convertir el original en bloque incrustado",
+	"mobileFileTreeMultiSelectTip": "Toca los documentos o cuadernos para seleccionarlos o deseleccionarlos",
 	"repoBatchDelete": "Eliminar etiquetas seleccionadas",
 	"repoBatchDone": "Finalizar",
 	"repoBatchClear": "Borrar selección",
@@ -2923,6 +2932,7 @@
 		"393": "Los cuadernos cifrados no admiten esta operación",
 		"394": "Los cuadernos cifrados no admiten publicación, no se pueden configurar permisos de publicación",
 		"395": "La exportación por lotes no admite cuadernos cifrados; desbloquéalos y expórtalos uno por uno, o exporta cuadernos normales",
-		"396": "Los cuadernos cifrados no permiten fijar documentos"
+		"396": "Los cuadernos cifrados no permiten fijar documentos",
+		"397": "Este dispositivo no puede crear el archivo sincronizado. Cámbiele el nombre en SiYuan desde un dispositivo donde sea accesible y vuelva a sincronizar: %s"
 	}
 }

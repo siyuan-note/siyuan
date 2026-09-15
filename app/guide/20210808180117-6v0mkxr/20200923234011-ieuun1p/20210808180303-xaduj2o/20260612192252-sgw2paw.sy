@@ -6,7 +6,7 @@
 		"id": "20260612192252-sgw2paw",
 		"title": "Command Line Interface",
 		"type": "doc",
-		"updated": "20260913020024"
+		"updated": "20260914195107"
 	},
 	"Children": [
 		{
@@ -1579,7 +1579,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618124055-5xyayt6",
-				"updated": "20260913020024"
+				"updated": "20260914195107"
 			},
 			"Children": [
 				{
@@ -12577,7 +12577,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260809180000-53b0536",
-				"updated": "20260809232000"
+				"updated": "20260914195107"
 			},
 			"Children": [
 				{
@@ -12591,7 +12591,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260809180000-86e65af",
-				"updated": "20260809232000"
+				"updated": "20260914195107"
 			},
 			"Children": [
 				{
@@ -12632,7 +12632,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " the access authentication code, "
+					"Data": " the lock screen password, "
 				},
 				{
 					"Type": "NodeTextMark",

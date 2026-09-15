@@ -10,6 +10,7 @@ import {disabledWYSIWYG} from "../util/disabledWYSIWYG";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {finishCustomEmbedRender, finishEmptyEmbedRender, IEmbedRenderLoadingState} from "./embedRenderState";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {isDirectHeadingEmbed} from "./embedHeading";
 
 /**
  * 渲染嵌入块
@@ -129,7 +130,9 @@ const renderEmbed = (blocks: {
         }
         const childOperationAttr = blocksItem.allowChildOperation ? " data-allow-child-operation=\"true\"" : "";
         const rootIDAttr = blocksItem.block.rootID ? ` data-root-id="${blocksItem.block.rootID}"` : "";
-        html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}"${rootIDAttr}${childOperationAttr}>
+        const headingAttr = blocks.length === 1 && isDirectHeadingEmbed(Lute.UnEscapeHTMLStr(item.getAttribute("data-content")),
+            blocksItem.block.id, blocksItem.block.type) ? " data-embed-heading=\"true\"" : "";
+        html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}"${rootIDAttr}${childOperationAttr}${headingAttr}>
 ${popover}${breadcrumbHTML}${blocksItem.block.content}
 </div>`;
     });

@@ -133,7 +133,7 @@ if (response.code === 0 && response.data) {
 }
 ```
 
-See the [generated route declarations](../app/src/types/api/index.d.ts) for exact coverage and the [contract maintenance guide](API-CONTRACTS.md) for generation and compatibility rules. Type declarations do not perform runtime JSON validation.
+See the [generated route declarations](../app/src/types/api/index.d.ts) for exact coverage and the [contract maintenance guide](API-CONTRACTS.md) for generation and compatibility rules. Type declarations do not validate JSON at runtime.
 
 ### Behavior semantics
 
@@ -790,7 +790,7 @@ Move documents by `id`:
         * `"/assets/sub/"`: workspace/data/assets/sub/ folder
 
       Under normal circumstances, it is recommended to use the first method, which is stored in the assets folder of the
-      workspace, putting in a subdirectory has some side effects, please refer to the assets chapter of the user guide.
+      workspace, since putting in a subdirectory has some side effects, please refer to the assets chapter of the user guide.
     * `file[]`: Uploaded file list
 * Return value
 
@@ -824,7 +824,7 @@ Move documents by `id`:
     * `errFiles`: List of filenames with errors in upload processing
     * `failedFiles`: Files explicitly reported as failed. `index` is the file's index in `file[]`, `name` is its upload filename, and `error` is the failure message. This field may omit files that were not attempted or not reported individually; use `succFiles` when each input item must be identified unambiguously
     * `succFiles`: Successfully processed files in input order. `index` is the file's index in `file[]`, `name` is its upload filename, and `path` is the uploaded asset path. Use this field when a batch can contain duplicate filenames
-    * `succMap`: Compatibility mapping for existing callers. The key is the upload filename and the value is assets/foo-id.png. When a batch contains duplicate filenames, only the last item with a given key remains in this map
+    * `succMap`: Compatibility mapping for existing callers. The key is the upload filename and the value is assets/foo-id.png. However, when a batch contains duplicate filenames, only the last item with a given key remains in this map
 
 ## Blocks
 
@@ -1295,7 +1295,7 @@ Move documents by `id`:
 
     * `stmt`: SQL statement
 
-Without an explicit outer `LIMIT`, results default to at most `search.limit` rows (the configured search result limit). Use explicit `LIMIT` and `OFFSET` clauses to paginate, with a stable, unique ordering such as `ORDER BY hpath, id`. An explicit outer `LIMIT` overrides the default, including values larger than `search.limit`.
+Without an explicit outer `LIMIT`, results default to at most `search.limit` rows (the configured search result limit). Use explicit `LIMIT` and `OFFSET` clauses to paginate, with a stable, unique ordering such as `ORDER BY hpath, id`. However, an explicit outer `LIMIT` overrides the default, including values larger than `search.limit`.
 
 * Return value
 
@@ -1311,7 +1311,7 @@ Without an explicit outer `LIMIT`, results default to at most `search.limit` row
   }
   ```
 
-On success, `data` remains an array. `limit` is the server default limit applied to this query, or `0` when the SQL supplies an explicit outer `LIMIT`; it is not the value of that explicit clause. `truncated` is `true` only when the server default limit omitted at least one result row. Exactly reaching the limit does not imply truncation. For the example above, `LIMIT 7` is explicit, so `limit` is `0` and `truncated` is `false`. These fields are omitted on errors.
+On success, `data` remains an array. `limit` is the server default limit applied to this query, or `0` when the SQL supplies an explicit outer `LIMIT`; it is not the value of that explicit clause. `truncated` is `true` only when the server default limit omitted at least one result row. Exactly meeting the limit does not imply truncation. For the example above, `LIMIT 7` is explicit, so `limit` is `0` and `truncated` is `false`. These fields are omitted on errors.
 
 Note: To ensure data security, access to this interface is prohibited in Publish Mode.
 
@@ -1787,7 +1787,7 @@ Note: To ensure data security, access to this interface is prohibited in Publish
 
       `text` preserves the existing behavior and converts the character set to UTF-8 when applicable. The binary encodings encode the response body before character-set conversion; existing HTTP content decoding behavior, such as gzip decompression, is unchanged.
 
-      The response body is limited to 32 MiB after HTTP content decoding. If the limit is exceeded, the API returns error code `10` without a partial body. Use `/api/network/proxy` for large files or streaming responses.
+      The response body is limited to 32 MiB after HTTP content decoding. If the limit is exceeded, the API returns error code `10` without a partial body. Therefore, use `/api/network/proxy` for large files or streaming responses.
 * Return value
 
   ```json
@@ -2051,8 +2051,8 @@ The field types (`keyType`) are:
   }
   ```
 
-    * `data.view`: The rendered view instance. Its shape depends on `viewType`: `table` returns `columns`/`rows`/`rowCount`, while `gallery` and `kanban` return `fields`/`cards`/`cardCount`. When grouping is enabled, `groups` contains a view instance for each group, including `groupKey`/`groupValue`. `view` also carries `filters`, `sorts`, `group`, `showIcon`, `wrapField`, `groupFolded`, and `groupHidden`. Note: active filters or grouping can make the item list empty even when the total item count is greater than 0
-    * `data.view.columns[]`: Each has `id`, `name`, `type`, `icon`, `wrap`, `hidden`, `desc`, `calc`, `numberFormat`, `template`, `renderTemplate`, `pin`, `width`; `select`/`mSelect` columns additionally carry `options`. Gallery and kanban fields expose the same field metadata under `data.view.fields[]`
+    * `data.view`: The rendered view instance. Its shape depends on `viewType`: `table` returns `columns`/`rows`/`rowCount`, while `gallery` and `kanban` return `fields`/`cards`/`cardCount`. When grouping is enabled, `groups` contains a view instance for each group, including `groupKey`/`groupValue`. `view` also includes `filters`, `sorts`, `group`, `showIcon`, `wrapField`, `groupFolded`, and `groupHidden`. Note: active filters or grouping can make the item list empty even when the total item count is greater than 0
+    * `data.view.columns[]`: Each has `id`, `name`, `type`, `icon`, `wrap`, `hidden`, `desc`, `calc`, `numberFormat`, `template`, `renderTemplate`, `pin`, `width`; `select`/`mSelect` columns additionally include `options`. Gallery and kanban fields expose the same field metadata under `data.view.fields[]`
     * `data.view.columns[].renderTemplate`: Optional display template for a normal field. It changes only the displayed content; the field's stored typed value remains unchanged
     * `data.view.rows[].id`: The table row's **item ID** (`itemID`). It also equals `value.blockID` in that row's primary-key cell. For a bound row, the bound block ID is stored in `value.block.id` in the primary-key cell; these are distinct concepts and must not be assumed equal
     * `data.view.cards[].id`: The **item ID** (`itemID`) of a gallery or kanban card. When grouping is enabled, table rows or cards are in the corresponding view instances under `groups[]`
@@ -2213,7 +2213,7 @@ The field types (`keyType`) are:
   }
   ```
 
-    * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), and all views with their raw layout config (`table`/`gallery`/`kanban`) and item ordering (`itemIds`). The compatibility `viewID` is computed as the first available view and is not persisted. Returns no rendered rows or pagination; use [Render](#Render) for computed rows
+    * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), and all views with their raw layout config (`table`/`gallery`/`kanban`) and item ordering (`itemIds`). The compatibility `viewID` is computed as the first available view and is not persisted. Returns no rendered rows or pagination; therefore, use [Render](#Render) for computed rows
 
 ### Get primary key values
 
@@ -2274,7 +2274,7 @@ The field types (`keyType`) are:
   }
   ```
 
-    * `data.rows`: A `KeyValues` object holding the primary-key (`block`) field and its paginated values
+    * `data.rows`: A `KeyValues` object containing the primary-key (`block`) field and its paginated values
     * `data.blockIDs`: IDs of all database blocks (mirrors) that reference this database
     * `data.total`: Number of primary-key values after filtering and before pagination
 
@@ -2406,7 +2406,7 @@ For rich text, `text.rich.content` is the authoritative Kramdown source. The ker
 
 ### Add items
 
-Adds one or more items (rows). Each source can either bind an existing block (`isDetached: false`) or create a detached row that only lives inside the view (`isDetached: true`).
+Adds one or more items (rows). Each source can either bind an existing block (`isDetached: false`) or create a detached row that exists only inside the view (`isDetached: true`).
 
 * `/api/av/addAttributeViewBlocks`
 * Parameters
@@ -2495,7 +2495,7 @@ Switches the layout type of the view selected by the database block between `tab
     * `avID`: Database ID
     * `blockID`: The database block that owns the view
     * `layoutType`: Target layout — one of `table`, `gallery`, `kanban`
-* Return value: same shape as [Render](#Render). When switching to `kanban` and a group is configured, `data.view` carries a `groups[]` array; each group is a view instance with `groupKey`, `groupValue`, plus kanban-specific fields (`coverFrom`, `cardAspectRatio`, `cardSize`, `fitImage`, `displayFieldName`, `fillColBackgroundColor`, `fields`)
+* Return value: same shape as [Render](#Render). When switching to `kanban` and a group is configured, `data.view` contains a `groups[]` array; each group is a view instance with `groupKey`, `groupValue`, plus kanban-specific fields (`coverFrom`, `cardAspectRatio`, `cardSize`, `fitImage`, `displayFieldName`, `fillColBackgroundColor`, `fields`)
 
 ### Set grouping
 
@@ -2586,7 +2586,7 @@ Returns the current filter and sort rules of the view bound to a database block.
   }
   ```
 
-    * `data.filters`: Array of `ViewFilter`. The top level holds a single root group node `{ "combination": "and"|"or", "filters": [...] }`; the array elements are either leaf filters or nested group nodes, enabling recursive AND/OR combinations.
+    * `data.filters`: Array of `ViewFilter`. The top level contains a single root group node `{ "combination": "and"|"or", "filters": [...] }`; the array elements are either leaf filters or nested group nodes, enabling recursive AND/OR combinations.
     * `data.filters[].column`: Field (column) ID the filter applies to (leaf node only)
     * `data.filters[].valueSource`: Optional value source for a leaf node — `stored` is the default when omitted, and `rendered` filters the field's display-template result
     * `data.filters[].operator`: Filter operator (see the operator table below; leaf node only)
@@ -2645,7 +2645,7 @@ Returns the current filter and sort rules of the view bound to a database block.
 
     * `avID`: Database ID
     * `blockID`: The database block that owns the view
-    * `data`: Full new array of `ViewFilter` objects that **replaces** the view's existing filters entirely (see [Get filter and sort](#Get-filter-and-sort)). Pass `[]` to clear all filters. The top level holds a single root group node `{ "combination": "and"|"or", "filters": [...] }`; the array elements are either leaf filters or nested group nodes, enabling recursive AND/OR combinations
+    * `data`: Full new array of `ViewFilter` objects that **replaces** the view's existing filters entirely (see [Get filter and sort](#Get-filter-and-sort)). Pass `[]` to clear all filters. The top level contains a single root group node `{ "combination": "and"|"or", "filters": [...] }`; the array elements are either leaf filters or nested group nodes, enabling recursive AND/OR combinations
 * Return value
 
   ```json

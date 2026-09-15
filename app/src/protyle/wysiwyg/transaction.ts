@@ -21,6 +21,7 @@ import {
 } from "./getBlock";
 import {Constants} from "../../constants";
 import {blockRender} from "../render/blockRender";
+import {renderEmbedHeadings} from "../render/embedHeading";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
@@ -583,6 +584,10 @@ const promiseTransaction = (options: {
             countBlockWord(ids, protyle, true);
             if (!options.skipSync) {
                 responseTransaction.doOperations.forEach((operation: IOperation) => {
+                    if (operation.action === "swapBlockRef" && operation.retData?.length) {
+                        reloadProtyle(protyle, false);
+                        return;
+                    }
                     if (handleViewFoldSourceOperation(protyle, operation)) {
                         return;
                     }
@@ -797,6 +802,17 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     const deferUndoFocus = !!undoFocusContext?.undoFocusEmbedId;
     const pendingUndoEmbedElements = new Set<Element>();
     operations.forEach(operation => {
+        if (operation.action === "swapBlockRef") {
+            if (operation.retData?.includes(protyle.block.rootID)) {
+                reloadProtyle(protyle, false);
+            } else if (operation.retData?.length) {
+                protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach(item => {
+                    item.removeAttribute("data-render");
+                    blockRender(protyle, item);
+                });
+            }
+            return;
+        }
         if (handleViewFoldSourceOperation(protyle, operation)) {
             return;
         }
@@ -1078,6 +1094,10 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     nodeAttrHTML += refElement.outerHTML;
                 }
                 attrElement.innerHTML = nodeAttrHTML + Constants.ZWSP;
+                if (data.new["custom-heading-level"] !== data.old["custom-heading-level"] &&
+                    item.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+                    renderEmbedHeadings(item);
+                }
                 if (mermaidLayoutChanged && item.getAttribute("data-subtype") === "mermaid") {
                     item.removeAttribute("data-render");
                     processRender(item);

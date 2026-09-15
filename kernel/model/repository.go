@@ -1167,7 +1167,7 @@ func PurgeCloud() (err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1378,7 +1378,18 @@ func checkoutRepo(id string) (err error) {
 		return
 	}
 
-	_, _, err = repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	err = checkoutRepoSnapshot(repo, id, func(checkoutErr error) {
+		release()
+		FullReindexDirect()
+		if checkoutErr != nil {
+			util.ReloadUI()
+			return
+		}
+		appendAgentRollbackEntries()
+		time.Sleep(time.Second)
+		FlushTxQueue()
+		task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
+	})
 	if err != nil {
 		logging.LogErrorf("checkout repository failed: %s", err)
 		util.PushClearProgress()
@@ -1386,13 +1397,14 @@ func checkoutRepo(id string) (err error) {
 		return
 	}
 
-	release()
-	FullReindexDirect()
-	appendAgentRollbackEntries()
-	time.Sleep(time.Second)
-	FlushTxQueue()
-	task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
 	return
+}
+
+// checkoutRepoSnapshot 恢复失败前可能已有文件落盘，返回结果前同步更新索引、缓存和界面。
+func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) error {
+	_, _, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	refresh(err)
+	return err
 }
 
 func appendAgentRollbackEntries() {
@@ -1461,7 +1473,7 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1507,7 +1519,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1553,7 +1565,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1589,7 +1601,7 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1629,7 +1641,7 @@ func GetCloudRepoSnapshots(page int) (ret []*dejavu.Log, pageCount, totalCount i
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -2962,6 +2974,16 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	return newRepositoryWithAssetSourceLocked()
 }
 
+// newCloudRepositoryWithAssetSourceLocked 在访问云端前校验配置，保留未配置云端时的本地快照功能。
+func newCloudRepositoryWithAssetSourceLocked() (*dejavu.Repo, error) {
+	if Conf.Sync.Provider == conf.ProviderS3 {
+		if err := validateSyncS3(Conf.Sync.S3); err != nil {
+			return nil, err
+		}
+	}
+	return newRepositoryWithAssetSourceLocked()
+}
+
 // newRepositoryWithAssetSourceLocked 由已持有来源锁的调用方创建仓库，避免读写锁递归等待。
 func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 	cloudConf, err := buildCloudConf()
@@ -3378,7 +3400,7 @@ func getCloudSpace() (stat *cloud.Stat, err error) {
 	defer assetDownloadSourceMu.RUnlock()
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}

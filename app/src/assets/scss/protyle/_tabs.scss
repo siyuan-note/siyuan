@@ -15,6 +15,10 @@
   }
 
   .tabs-header {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background-color: var(--b3-theme-background);
     display: none;
     align-items: center;
     min-width: 0;
@@ -38,6 +42,10 @@
     }
   }
 
+  .tabs-divider {
+    display: none;
+  }
+
   .tabs-tab, .tabs-control {
     color: var(--b3-theme-on-surface);
     background: transparent;
@@ -59,11 +67,6 @@
     &:hover {
       background: var(--b3-theme-surface);
       color: var(--b3-theme-on-background);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--b3-theme-primary);
-      outline-offset: -2px;
     }
 
     &[aria-selected="true"] {
@@ -136,6 +139,7 @@
 
   .tab-item-content {
     min-width: 0;
+    outline: none;
   }
 
   .tabs-tab--editing > .tabs-tab-label {
@@ -150,7 +154,7 @@
 
   .tabs-title-editor {
     position: absolute;
-    z-index: 1;
+    z-index: 5;
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -215,7 +219,21 @@
       // 正文左侧保留块标及折叠按钮的操作空间，避免与页签按钮重叠。
       column-gap: 48px;
 
+      // 分隔线占满网格行，标题栏按内容高度吸顶，加号紧跟页签列表。
+      > .tabs-divider {
+        display: block;
+        grid-area: 1 / 1;
+        border-right: 1px solid var(--b3-border-color);
+        pointer-events: none;
+      }
+
+      > .tab-item {
+        grid-area: 1 / 2;
+      }
+
       > .tabs-header {
+        grid-area: 1 / 1;
+        align-self: start;
         box-sizing: border-box;
         min-width: 80px;
         flex-wrap: wrap;
@@ -247,8 +265,8 @@
     .tabs[data-tabs-ready="true"] {
       display: block !important;
 
-      > .tabs-header {
-        display: none;
+      > .tabs-header, > .tabs-divider {
+        display: none !important;
       }
 
       > .tab-item[data-tabs-hidden], > .tab-item > .tab-item-info {

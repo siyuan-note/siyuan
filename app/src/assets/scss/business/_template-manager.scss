@@ -65,11 +65,6 @@
     color: inherit;
     font: inherit;
     cursor: pointer;
-
-    &:focus-visible {
-      outline: 1px solid var(--b3-theme-primary);
-      outline-offset: -1px;
-    }
   }
 
   &__file {

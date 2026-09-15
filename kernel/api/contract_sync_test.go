@@ -112,7 +112,8 @@ func TestAPIContractSyncHTTPResponses(t *testing.T) {
 		{"setSyncProviderS3", `{"s3":{"timeout":1.5}}`, -1, 5000},
 		{"setSyncProviderWebDAV", `{"webdav":{"username":false}}`, -1, 5000},
 		{"setSyncProviderLocal", `{"local":{"timeout":1.5}}`, -1, 5000},
-		{"setSyncProviderS3", `{"s3":{"bucket":"","endpoint":" example "}}`, 0, 0},
+		{"setSyncProviderS3", `{"s3":{"bucket":"","endpoint":" example "}}`, -1, 5000},
+		{"setSyncProviderS3", `{"s3":{"bucket":"notes","endpoint":" example ","accessKey":"key","secretKey":"secret","region":"auto"}}`, 0, 0},
 		{"setSyncProviderWebDAV", `{"webdav":{"endpoint":" example ","username":" user "}}`, 0, 0},
 	} {
 		recorder := httptest.NewRecorder()
@@ -237,7 +238,7 @@ func TestAPIContractSyncProviderMultipart(t *testing.T) {
 
 func TestAPIContractSyncProviderExportContents(t *testing.T) {
 	syncTestConfiguration(t)
-	model.Conf.Sync.S3 = &conf.S3{Endpoint: " endpoint ", SecretKey: " secret ", Bucket: "bucket", Timeout: 35}
+	model.Conf.Sync.S3 = &conf.S3{Endpoint: " endpoint ", AccessKey: "key", SecretKey: " secret ", Bucket: "bucket", Region: "auto", Timeout: 35}
 	model.Conf.Sync.WebDAV = &conf.WebDAV{Endpoint: " endpoint ", Password: " password ", Timeout: 36}
 	for _, entry := range []struct {
 		name     string

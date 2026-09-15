@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "卡源設定歷史",
 	"flashcardSourceHistoryTip": "還原卡源設定和區塊引用並保留複習進度；題目和答案請從關聯文件歷史還原",
 	"flashcardSourceRestoreConfirm": "還原此版本的卡源設定？同一卡源產生的所有卡片都會受到影響，複習進度保持不變",
+	"newTabItem": "新增頁籤項區塊",
+	"encryptedNotebookFollowSystemLock": "跟隨系統鎖定螢幕",
+	"encryptedNotebookFollowSystemLockDesc": "系統鎖定螢幕時鎖定所有已解鎖的加密筆記本，不受閒置自動鎖定時間影響；系統解鎖後仍需輸入主密碼",
+	"customBlock": "自訂區塊",
+	"embedHeadingLevel": "嵌入標題層級",
+	"embedHeadingLevelPreserve": "保持原層級",
+	"originalToRef": "原定義區塊轉為區塊引用",
+	"originalToEmbed": "原定義區塊轉為嵌入區塊",
+	"mobileFileTreeMultiSelectTip": "輕點文件或筆記本以選取或取消選取",
 	"repoBatchDelete": "刪除所選標記",
 	"repoBatchDone": "完成管理",
 	"repoBatchClear": "取消選取",
@@ -2923,6 +2932,7 @@
 		"393": "加密筆記本不支援該操作",
 		"394": "加密筆記本不支援發布，無法設定發布權限",
 		"395": "批次匯出不支援加密筆記本，請先解鎖後逐個匯出，或改為匯出一般筆記本",
-		"396": "加密筆記本不支援置頂文件"
+		"396": "加密筆記本不支援置頂文件",
+		"397": "目前裝置無法建立同步檔案，請在能夠存取該檔案的裝置上透過思源重新命名後再次同步：%s"
 	}
 }

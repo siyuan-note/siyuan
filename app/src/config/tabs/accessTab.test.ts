@@ -5,7 +5,53 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {ContractFormData} from "../../util/contractFormData";
 
-test("crypto backup import preserves password bytes and rejects only an empty input", async () => {
+test("encrypted notebook system lock is offered only for supported local desktop kernels", () => {
+    const compiled = transpileModule(readFileSync("src/config/tabs/accessTab.ts", "utf8") +
+        "\nexport {registerEncryptedNotebookGroup};", {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    for (const [os, browser, mobile, ownsKernel, expected] of [
+        ["windows", false, false, true, true],
+        ["darwin", false, false, true, true],
+        ["linux", false, false, true, false],
+        ["windows", true, false, true, false],
+        ["windows", false, false, false, false],
+        ["darwin", false, true, true, false],
+    ] as const) {
+        const switches: Array<{id: string, save: (value: unknown) => void}> = [];
+        const requests: Array<{url: string, enabled: boolean}> = [];
+        const dependencies = {
+            isBrowser: () => browser,
+            isMobile: () => mobile,
+            getHostCapabilities: () => ({ownsKernel, importExport: ownsKernel}),
+            fetchPost: (url: string, data: {enabled: boolean}) => requests.push({url, enabled: data.enabled}),
+        };
+        const exports = {} as {registerEncryptedNotebookGroup: (tab: unknown) => void};
+        runInNewContext(compiled, {
+            exports,
+            require: () => dependencies,
+            window: {siyuan: {config: {readonly: false, system: {os}}, languages: {}}},
+        });
+        exports.registerEncryptedNotebookGroup({group: () => ({
+            slot: () => {},
+            number: () => {},
+            switch: (id: string, spec: {save: (value: unknown) => void}) => switches.push({id, save: spec.save}),
+        })});
+        assert.equal(switches.length, expected ? 1 : 0);
+        if (expected) {
+            assert.equal(switches[0].id, "system.encryptedNotebookFollowSystemLock");
+            switches[0].save(true);
+            switches[0].save(false);
+            switches[0].save("true");
+            assert.deepEqual(requests, [
+                {url: "/api/notebook/setEncryptedNotebookFollowSystemLock", enabled: true},
+                {url: "/api/notebook/setEncryptedNotebookFollowSystemLock", enabled: false},
+            ]);
+        }
+    }
+});
+
+test("crypto backup import trims passwords and rejects whitespace-only input", async () => {
     const compiled = transpileModule(readFileSync("src/config/tabs/accessTab.ts", "utf8") +
         "\nexport {mountEncryptedNotebook};", {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -45,12 +91,14 @@ test("crypto backup import preserves password bytes and rejects only an empty in
     listeners.get("#importCryptoBackupBtn")();
     const dialog = {destroy: () => { destroyed++; }};
     confirm("", dialog);
+    confirm("   ", dialog);
+    confirm("\t\u00a0\u3000\n", dialog);
     assert.equal(requests.length, 0);
-    for (const password of [" password ", "   ", "\tpassword\n", "\u00a0password\u3000"]) {
+    for (const password of [" password ", "\tpassword\n", "\u00a0password\u3000"]) {
         confirm(password, dialog);
         await Promise.resolve();
-        assert.equal(requests[requests.length - 1].get("password"), password);
+        assert.equal(requests[requests.length - 1].get("password"), password.trim());
         assert.ok(requests[requests.length - 1].get("file") instanceof Blob);
     }
-    assert.equal(destroyed, 4);
+    assert.equal(destroyed, 3);
 });

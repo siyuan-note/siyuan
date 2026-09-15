@@ -4520,7 +4520,7 @@ export class WYSIWYG {
                 !event.target.closest("a, [data-type~='block-ref'], [data-type~='a'], img")) {
                 event.preventDefault();
                 void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, richCell,
-                    undefined, {x: event.clientX, y: event.clientY}));
+                    undefined, {x: event.clientX, y: event.clientY, target: event.target}));
                 return;
             }
             if (areProtylePluginExtensionsEnabled(protyle)) {
@@ -4725,7 +4725,7 @@ export class WYSIWYG {
                     checkFold(response.data.refDefs[0].refID, (zoomIn) => {
                         mobileBlur = true;
                         activeBlur();
-                        openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
                     });
                 });
                 return;
@@ -4834,7 +4834,7 @@ export class WYSIWYG {
                         /// #if MOBILE
                         mobileBlur = true;
                         activeBlur();
-                        openMobileFileById(protyle.app, embedId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        openMobileFileById(protyle.app, embedId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
                         /// #else
                         if (event.shiftKey) {
                             openFileById({
@@ -4891,7 +4891,7 @@ export class WYSIWYG {
             if (openFloatElement) {
                 const id = openFloatElement.getAttribute("data-id");
                 /// #if MOBILE
-                openMobileFileById(protyle.app, id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                openMobileFileById(protyle.app, id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
                 /// #else
                 window.siyuan.blockPanels.push(new BlockPanel({
                     app: protyle.app,

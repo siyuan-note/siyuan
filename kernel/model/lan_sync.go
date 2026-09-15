@@ -257,7 +257,7 @@ func newSyncRepository() (ret *dejavu.Repo, err error) {
 
 // newSyncRepositoryWithAssetSourceLocked 在来源锁保护下创建带局域网分块来源的仓库。
 func newSyncRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
-	ret, err = newRepositoryWithAssetSourceLocked()
+	ret, err = newCloudRepositoryWithAssetSourceLocked()
 	if nil != err {
 		return
 	}

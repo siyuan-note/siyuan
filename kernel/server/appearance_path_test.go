@@ -55,6 +55,7 @@ func TestAppearanceFileBoundaries(t *testing.T) {
 	write(filepath.Join(filepath.Dir(util.AppearancePath), "conf.json"), `{"secret":"credential"}`)
 	write(filepath.Join(outside, "theme.css"), "resource")
 	write(filepath.Join(outside, "icon.js"), "resource")
+	write(filepath.Join(util.AppearancePath, "boot/index.html"), "boot page")
 	engine := gin.New()
 	serveAppearance(engine)
 	check := func(path string, status int, body string) {
@@ -73,6 +74,17 @@ func TestAppearanceFileBoundaries(t *testing.T) {
 	check("themes/local/theme.js", 200, "")
 	check("themes/local/", 404, "")
 	check("../conf.json", 403, "")
+	check("boot/", 200, "boot page")
+	check("boot/?v=3.8.4-alpha.9&appearance=0", 200, "boot page")
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest("GET", "/appearance/boot/index.html?v=3.8.4-alpha.9&appearance=0", nil))
+	if recorder.Code != 301 || recorder.Header().Get("Location") != "./?v=3.8.4-alpha.9&appearance=0" {
+		t.Fatalf("boot redirect: status=%d location=%q", recorder.Code, recorder.Header().Get("Location"))
+	}
+	if err := os.Remove(filepath.Join(util.AppearancePath, "boot/index.html")); err != nil {
+		t.Fatal(err)
+	}
+	check("boot/", 404, "")
 	link := func(target, name string) {
 		t.Helper()
 		if err := os.Symlink(target, filepath.Join(util.AppearancePath, name)); err != nil {
@@ -80,6 +92,9 @@ func TestAppearanceFileBoundaries(t *testing.T) {
 		}
 	}
 	link(outside, "themes/linked")
+	link(filepath.Join(filepath.Dir(util.AppearancePath), "conf.json"), "boot/index.html")
+	check("boot/", 403, "")
+	check("boot/index.html", 403, "")
 	link(outside, "icons/linked")
 	check("themes/linked/theme.css", 200, "resource")
 	check("icons/linked/icon.js", 200, "resource")

@@ -73,6 +73,7 @@ const {
     unsafeRemoteChromiumSwitchNames,
 } = require("./remoteKernel");
 const {dispatchWindowMessage} = require("./windowMessaging");
+const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
@@ -100,6 +101,14 @@ let bootAppearanceFallback = false;
 let latestActiveWindow;
 let firstOpen = false;
 let workspaces = []; // workspaceDir, id, port, webContentsId, browserWindow, tray, hideShortcut
+const notebookSystemLock = createNotebookSystemLock({
+    getWorkspaces: () => workspaces,
+    fetch: (...args) => net.fetch(...args),
+    writeLog: (message) => writeLog(message),
+    prepare: (workspace) => prepareNotebookSystemLock(BrowserWindow.getAllWindows().filter(window =>
+        initializedWindowIds.has(window.webContents.id) &&
+        windowKernelTargets.get(window.webContents.id)?.origin === workspace.kernelTarget.origin), ipcMain),
+});
 const windowKernelTargets = new Map();
 const initializedWindowIds = new Set();
 const pendingRemoteOpenURLs = [];
@@ -922,83 +931,82 @@ const getAppWindow = () => {
     return BrowserWindow.getAllWindows().find(isInitializedAppWindow) || null;
 };
 
-const setNonDarwinApplicationMenu = () => {
-    const productName = "SiYuan";
-    const template = [{
-        label: productName, submenu: [{
-            label: `About ${productName}`, role: "about",
-        }, {type: "separator"}, {role: "services"}, {type: "separator"}, {
-            label: `Hide ${productName}`, role: "hide",
-        }, {role: "hideOthers"}, {role: "unhide"}, {type: "separator"}, {
-            label: `Quit ${productName}`, role: "quit",
-        },],
-    }, {
-        role: "editMenu", submenu: [{role: "cut"}, {role: "copy"}, {role: "paste"}, {role: "selectAll"}],
-    }, {
-        role: "windowMenu",
-        submenu: [{role: "minimize"}, {role: "zoom"}, {role: "togglefullscreen"}, {type: "separator"}, {role: "toggledevtools"}, {type: "separator"}, {role: "front"},],
-    },];
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+const appMenuLanguages = new Map();
+
+const loadAppMenuLanguages = (language) => {
+    language = resolveAppLanguage([language]);
+    if (appMenuLanguages.has(language)) {
+        return appMenuLanguages.get(language);
+    }
+    try {
+        const languages = JSON.parse(fs.readFileSync(path.join(appDir, "appearance", "langs", `${language}.json`), "utf8"));
+        appMenuLanguages.set(language, languages);
+        return languages;
+    } catch (error) {
+        writeLog("load application menu language failed: " + error.message);
+        return language === "en" ? {} : loadAppMenuLanguages("en");
+    }
 };
 
 const applyMacAppMenu = (sync) => {
-    if ("darwin" !== process.platform || !sync || !sync.i18n || typeof sync.i18n !== "object" ||
+    if ("darwin" !== process.platform || !sync || typeof sync.lang !== "string" ||
         !sync.hotkey || typeof sync.hotkey !== "object") {
         return;
     }
+    const languages = loadAppMenuLanguages(sync.lang);
     /** @type {import("electron").MenuItemConstructorOptions[]} */
     const template = [{
         role: "appMenu",
         label: app.name,
         submenu: [
-            {role: "about", label: sync.i18n.about || "About SiYuan"},
+            {role: "about", label: languages.appMenuAbout || "About SiYuan"},
             ...(sync.readonly ? [] : [{
-                label: sync.i18n.config || "Settings",
+                label: languages.config || "Settings",
                 click: () => {
                     getAppWindow()?.webContents.send("siyuan-open-setting");
                 },
                 ...withHotkey(sync.hotkey.config),
             }]),
             {type: "separator"},
-            {role: "services", label: sync.i18n.services || "Services"},
+            {role: "services", label: languages.appMenuServices || "Services"},
             {type: "separator"},
             {
-                label: sync.i18n.toggleMainWindow || "Hide/Show Window",
+                label: languages.toggleWin || "Hide/Show Window",
                 click: () => {
                     toggleMainWindow(getAppWindow());
                 },
                 ...withHotkey(sync.hotkey.toggleWin),
             },
-            {role: "hide", label: sync.i18n.hide || "Hide SiYuan"},
-            {role: "hideOthers", label: sync.i18n.hideOthers || "Hide Others"},
-            {role: "unhide", label: sync.i18n.showAll || "Show All"},
+            {role: "hide", label: languages.appMenuHide || "Hide SiYuan"},
+            {role: "hideOthers", label: languages.appMenuHideOthers || "Hide Others"},
+            {role: "unhide", label: languages.showAll || "Show All"},
             {type: "separator"},
-            {role: "quit", label: sync.i18n.quit || "Quit SiYuan"},
+            {role: "quit", label: languages.appMenuQuit || "Quit SiYuan"},
         ],
     }, {
         role: "editMenu",
-        label: sync.i18n.edit || "Edit",
+        label: languages.edit || "Edit",
         submenu: [
-            {role: "undo", label: sync.i18n.undo || "Undo", ...withHotkey(sync.hotkey.undo, true)},
-            {role: "redo", label: sync.i18n.redo || "Redo", ...withHotkey(sync.hotkey.redo, true)},
+            {role: "undo", label: languages.undo || "Undo", ...withHotkey(sync.hotkey.undo, true)},
+            {role: "redo", label: languages.redo || "Redo", ...withHotkey(sync.hotkey.redo, true)},
             {type: "separator"},
-            {role: "cut", label: sync.i18n.cut || "Cut"},
-            {role: "copy", label: sync.i18n.copy || "Copy"},
-            {role: "paste", label: sync.i18n.paste || "Paste"},
-            {role: "pasteAndMatchStyle", label: sync.i18n.pasteAndMatchStyle || "Paste and Match Style"},
+            {role: "cut", label: languages.cut || "Cut"},
+            {role: "copy", label: languages.copy || "Copy"},
+            {role: "paste", label: languages.paste || "Paste"},
+            {role: "pasteAndMatchStyle", label: languages.pasteAsPlainText || "Paste and Match Style"},
             {type: "separator"},
-            {role: "selectAll", label: sync.i18n.selectAll || "Select All"},
+            {role: "selectAll", label: languages.selectAll || "Select All"},
         ],
     }, {
         role: "windowMenu",
-        label: sync.i18n.window || "Window",
+        label: languages.appMenuWindow || "Window",
         submenu: [
-            {role: "minimize", label: sync.i18n.minimize || "Minimize"},
-            {role: "zoom", label: sync.i18n.zoom || "Zoom"},
-            {role: "togglefullscreen", label: sync.i18n.togglefullscreen || "Toggle Full Screen"},
+            {role: "minimize", label: languages.appMenuMinimize || "Minimize"},
+            {role: "zoom", label: languages.zoom || "Zoom"},
+            {role: "togglefullscreen", label: languages.appMenuTogglefullscreen || "Toggle Full Screen"},
             {type: "separator"},
             {
-                label: sync.i18n.bringAllToFront || "Bring All to Front",
+                label: languages.appMenuBringAllToFront || "Bring All to Front",
                 click: () => {
                     const windows = BrowserWindow.getAllWindows();
                     windows.forEach(showWindow);
@@ -1011,36 +1019,91 @@ const applyMacAppMenu = (sync) => {
         ],
     }, {
         role: "help",
-        label: sync.i18n.help || "Help",
+        label: languages.help || "Help",
         submenu: [
             ...(sync.readonly ? [] : [{
-                label: sync.i18n.userGuide || "User Guide",
+                label: languages.userGuide || "User Guide",
                 click: () => {
                     getAppWindow()?.webContents.send("siyuan-open-help");
                 },
             }]),
             {
-                label: sync.i18n.feedback || "Feedback",
+                label: languages.feedback || "Feedback",
                 click: () => {
                     shell.openExternal(getFeedbackUrl(sync.lang));
                 },
             },
             {
-                label: sync.i18n.officialWebsite || "Visit official website",
+                label: languages._trayMenu?.officialWebsite || "Visit official website",
                 click: () => {
                     shell.openExternal("https://b3log.org/siyuan");
                 },
             },
             {
-                label: sync.i18n.openSource || "Visit project on GitHub",
+                label: languages._trayMenu?.openSource || "Visit project on GitHub",
                 click: () => {
                     shell.openExternal("https://github.com/siyuan-note/siyuan");
                 },
             },
-            {role: "toggledevtools", label: sync.i18n.debug || "Developer Tools"},
+            {role: "toggledevtools", label: languages.debug || "Developer Tools"},
         ],
     }];
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+};
+
+const setStartupApplicationMenu = () => {
+    // 启动阶段使用现有语言资源，工作空间就绪后再同步用户配置的语言和快捷键。
+    let requestedLanguage = getArg("--lang");
+    const workspaceDir = getArg("--workspace") || lastWorkspacePath;
+    if (!requestedLanguage && !remoteKernelTarget && workspaceDir) {
+        try {
+            const config = JSON.parse(fs.readFileSync(path.join(workspaceDir, "conf", "conf.json"), "utf8"));
+            requestedLanguage = config.appearance?.lang || config.lang;
+        } catch (error) {
+            writeLog("load startup menu workspace language failed: " + error.message);
+        }
+    }
+    const language = resolveAppLanguage(typeof requestedLanguage === "string" && requestedLanguage
+        ? [requestedLanguage] : app.getPreferredSystemLanguages());
+    const languages = loadAppMenuLanguages(language);
+    Menu.setApplicationMenu(Menu.buildFromTemplate([{
+        role: "appMenu",
+        label: "SiYuan",
+        submenu: [
+            {role: "about", label: languages.appMenuAbout},
+            {type: "separator"},
+            {role: "services", label: languages.appMenuServices},
+            {type: "separator"},
+            {role: "hide", label: languages.appMenuHide},
+            {role: "hideOthers", label: languages.appMenuHideOthers},
+            {role: "unhide", label: languages.showAll},
+            {type: "separator"},
+            {role: "quit", label: languages.appMenuQuit},
+        ],
+    }, {
+        role: "editMenu",
+        label: languages.edit,
+        submenu: [
+            ...["undo", "redo"].map(role => ({role, label: languages[role]})),
+            {type: "separator"},
+            ...["cut", "copy", "paste"].map(role => ({role, label: languages[role]})),
+            {role: "pasteAndMatchStyle", label: languages.pasteAsPlainText},
+            {type: "separator"},
+            {role: "selectAll", label: languages.selectAll},
+        ],
+    }, {
+        role: "windowMenu",
+        label: languages.appMenuWindow,
+        submenu: [
+            {role: "minimize", label: languages.appMenuMinimize},
+            {role: "zoom", label: languages.zoom},
+            {role: "togglefullscreen", label: languages.appMenuTogglefullscreen},
+            {type: "separator"},
+            {role: "toggledevtools", label: languages.debug},
+            {type: "separator"},
+            {role: "front", label: languages.appMenuBringAllToFront},
+        ],
+    }]));
 };
 
 const applyMacAppMenuForWindow = (wnd) => {
@@ -2201,7 +2264,7 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
     });
 
     if ("darwin" !== process.platform) {
-        setNonDarwinApplicationMenu();
+        setStartupApplicationMenu();
     }
     // 当前页面链接使用浏览器打开
     windowNavigate(currentWindow, "app", kernelTarget.origin, kernelTarget.mode === "remote");
@@ -2822,11 +2885,8 @@ app.whenReady().then(() => {
             }
         }
     });
-    if ("darwin" === process.platform) {
-        Menu.setApplicationMenu(Menu.buildFromTemplate([{role: "appMenu"}]));
-    } else {
-        setNonDarwinApplicationMenu();
-    }
+    // 前端菜单同步完成前也保留原生编辑操作，避免复制、粘贴依赖界面初始化成功。
+    setStartupApplicationMenu();
     // 仅本进程启动的本地内核允许自签名证书，远程内核始终使用系统信任链。
     session.defaultSession.setCertificateVerifyProc((request, callback) => {
         const kernelMode = remoteKernelTarget ? "remote" : "local";
@@ -2950,12 +3010,12 @@ app.whenReady().then(() => {
 
         resetTrayMenu(tray, lang, mainWindow);
     };
-    // 由渲染进程同步 macOS 应用菜单的文案与快捷键
+    // 渲染进程只同步语言标识和菜单配置，文案由主进程读取。
     ipcMain.on("siyuan-sync-app-menu", (event, sync) => {
         if ("darwin" !== process.platform) {
             return;
         }
-        if (!sync || !sync.i18n || typeof sync.i18n !== "object" || !sync.hotkey || typeof sync.hotkey !== "object") {
+        if (!sync || typeof sync.lang !== "string" || !sync.hotkey || typeof sync.hotkey !== "object") {
             return;
         }
         const kernelTarget = getWindowKernelTarget(event.sender.id);
@@ -4097,6 +4157,7 @@ app.whenReady().then(() => {
     powerMonitor.on("resume", async () => {
         // 桌面端系统休眠唤醒后判断网络连通性后再执行数据同步 https://github.com/siyuan-note/siyuan/issues/6687
         writeLog("system resume");
+        void notebookSystemLock.retry();
 
         const isOnline = async () => {
             return net.isOnline();
@@ -4134,9 +4195,25 @@ app.whenReady().then(() => {
     });
     powerMonitor.on("lock-screen", () => {
         writeLog("system lock-screen");
-        BrowserWindow.getAllWindows().forEach(item => {
-            item.webContents.send("siyuan-send-windows", {cmd: "lockscreenByMode"});
+        let applicationLocked = false;
+        const lockApplication = () => {
+            if (applicationLocked) {
+                return;
+            }
+            applicationLocked = true;
+            BrowserWindow.getAllWindows().forEach(item => {
+                item.webContents.send("siyuan-send-windows", {cmd: "lockscreenByMode"});
+            });
+        };
+        // 编辑器提交完成前保留访问会话，但内核请求失败不能延迟应用锁屏。
+        const timeout = setTimeout(lockApplication, 1000);
+        void notebookSystemLock.lock().finally(() => {
+            clearTimeout(timeout);
+            lockApplication();
         });
+    });
+    powerMonitor.on("unlock-screen", () => {
+        void notebookSystemLock.retry();
     });
 });
 

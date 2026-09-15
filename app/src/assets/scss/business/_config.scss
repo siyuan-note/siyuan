@@ -543,10 +543,6 @@
       min-width: 17px;
       font-size: inherit;
       box-sizing: content-box;
-
-      &:focus-visible {
-        outline: 2px solid var(--b3-theme-primary);
-      }
     }
 
     &__record {
@@ -820,8 +816,7 @@
       padding: 6px 8px;
       width: 100%;
 
-      &:hover,
-      &:focus-visible {
+      &:hover {
         background-color: var(--b3-list-hover);
       }
     }
@@ -847,8 +842,7 @@
           font-size: 28px;
         }
 
-        &:hover,
-        &:focus-visible {
+        &:hover {
           color: var(--b3-theme-on-surface);
         }
 

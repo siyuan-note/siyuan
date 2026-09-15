@@ -2,7 +2,7 @@ import {getIconByType} from "../editor/getIcon";
 import {isMobile} from "./functions";
 import {mathRender} from "../protyle/render/mathRender";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
-import {escapeAriaLabel, escapeHtml} from "./escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml} from "./escape";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {headingNumberNeedsLeadingTrim, headingNumberNeedsSpacing} from "../protyle/util/headingNumberCore";
 import {getTreeItemTailHTML} from "./treeItemTail";
@@ -124,13 +124,13 @@ style="--file-toggle-width:${item.depth === 0 ? 22 : ((item.depth + 1) * 18)}px"
 data-treetype="${item.type}" 
 data-type="${item.nodeType || ""}" 
 data-subtype="${item.subType || ""}" 
-${item.label !== undefined && item.label !== null ? `data-label='${item.label}'` : ""}>
+${item.label !== undefined && item.label !== null ? `data-label='${escapeAttr(item.label)}'` : ""}>
     <span style="${style}" class="b3-list-item__toggle${showArrow ? " b3-list-item__toggle--hl" : ""}${showArrow ? "" : " fn__hidden"}">
         <svg data-id="${item.id || encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow${(item.type === "outline" ? !item.folded : hasChild) ? " b3-list-item__arrow--open" : ""}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
     ${numberHTML}
-    <span class="b3-list-item__text ariaLabel" data-position="${this.titleTooltipPosition}"${titleTip}>${item.name}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="${this.titleTooltipPosition}"${titleTip}>${item.nameIsHTML ? item.name : escapeHtml(item.name)}</span>
     ${getTreeItemTailHTML(countHTML, this.topExtHTML || "", isM)}
 </li>`;
             if (item.children && item.children.length > 0) {

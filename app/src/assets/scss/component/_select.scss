@@ -77,11 +77,6 @@
         &:hover {
           background-color: var(--b3-list-hover);
         }
-
-        &:focus-visible {
-          background-color: var(--b3-list-hover);
-          outline: none;
-        }
       }
     }
   }

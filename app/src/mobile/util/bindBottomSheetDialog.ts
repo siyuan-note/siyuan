@@ -6,7 +6,8 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void>
     const sheet = dialog.element.querySelector<HTMLElement>(".b3-dialog__container");
     sheet.classList.add("mobile-bottom-sheet");
     const handle = document.createElement("div");
-    handle.className = "mobile-bottom-sheet__handle";
+    // 抓手与菜单抽屉保持一致，由 b3-menu__title 的伪元素绘制
+    handle.className = "b3-menu__title b3-menu__title--root";
     handle.setAttribute("aria-hidden", "true");
     sheet.prepend(handle);
     const resize = () => {

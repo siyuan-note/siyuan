@@ -272,6 +272,12 @@
     }
   }
 
+  &__template-panels {
+    @media (max-width: 750px) {
+      flex-direction: column;
+    }
+  }
+
   &__template-list {
     --file-toggle-width: 0px;
     border-right: 1px solid var(--b3-border-color);
@@ -291,6 +297,14 @@
         padding: 0 6px 0 4px;
       }
     }
+
+    @media (max-width: 750px) {
+      border-bottom: 1px solid var(--b3-border-color);
+      border-right: 0;
+      flex-shrink: 1;
+      max-height: 30vh;
+      width: auto;
+    }
   }
 
   &__template-editor .custom-attr__avvalue.av__template-switch {
@@ -304,11 +318,67 @@
     }
   }
 
+  // 控件已为描边卡片，值容器不再叠加悬停底色
+  &__template-editor .custom-attr__avvalue:hover {
+    background-color: transparent;
+  }
+
+  &__template-editor .custom-attr .block__icons {
+    @media (max-width: 750px) {
+      flex-wrap: wrap;
+      // 编辑器已有内边距，移动端不再叠加行内边距，避免内容过度内缩
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
   &__template-editor .custom-attr .block__logo:not(.popover__block) {
     cursor: default;
 
+    @media (max-width: 750px) {
+      align-self: auto;
+      flex: 1 1 100%;
+      margin-left: 0;
+      padding-left: 0;
+      width: auto;
+    }
+
     &:hover {
       background-color: transparent;
+    }
+  }
+
+  &__template-editor .custom-attr .custom-attr__avvalue {
+    @media (max-width: 750px) {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  // 模板编辑器控件与筛选面板统一为描边卡片样式
+  &__template-editor .custom-attr {
+    .b3-text-field,
+    .b3-select {
+      border: 1px solid var(--b3-theme-surface-lighter);
+      border-radius: var(--b3-border-radius);
+      background-color: var(--b3-menu-background);
+      box-shadow: none;
+      outline: none;
+
+      &:hover {
+        background-color: var(--b3-menu-background);
+        box-shadow: none;
+      }
+
+      &:focus {
+        border-color: var(--b3-theme-primary-light);
+        box-shadow: 0 0 0 .6px var(--b3-theme-primary-lighter);
+      }
+    }
+
+    .b3-text-field {
+      min-height: 0;
+      padding: 4px 8px;
     }
   }
 
@@ -1835,8 +1905,7 @@
         box-sizing: border-box;
         overflow: hidden;
 
-        &:hover,
-        &:focus-visible {
+        &:hover {
           background-color: var(--b3-list-hover);
         }
 
@@ -1963,8 +2032,7 @@
         text-align: left;
         cursor: pointer;
 
-        &:hover,
-        &:focus-visible {
+        &:hover {
           background-color: var(--b3-list-hover);
         }
       }
@@ -2442,8 +2510,7 @@ img.av__cellassetimg {
     padding: 5px;
     width: 26px;
 
-    &:hover,
-    &:focus-visible {
+    &:hover {
       background-color: var(--b3-list-hover);
       opacity: 1;
     }

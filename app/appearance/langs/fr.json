@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "Historique de configuration de la source des cartes",
 	"flashcardSourceHistoryTip": "Restaurez les paramètres et les références de blocs en conservant la progression des révisions ; restaurez les questions et réponses depuis l’historique du document lié",
 	"flashcardSourceRestoreConfirm": "Restaurer cette configuration ? Toutes les cartes de cette source seront concernées ; la progression des révisions restera inchangée",
+	"newTabItem": "Créer un bloc d’onglet",
+	"encryptedNotebookFollowSystemLock": "Suivre le verrouillage de l’écran du système",
+	"encryptedNotebookFollowSystemLockDesc": "Verrouiller tous les carnets chiffrés déverrouillés lorsque le système se verrouille, indépendamment du délai d’inactivité ; ils restent verrouillés après le déverrouillage du système",
+	"customBlock": "Bloc personnalisé",
+	"embedHeadingLevel": "Niveau des titres intégrés",
+	"embedHeadingLevelPreserve": "Conserver les niveaux d’origine",
+	"originalToRef": "Convertir le bloc original en référence de bloc",
+	"originalToEmbed": "Convertir le bloc original en bloc intégré",
+	"mobileFileTreeMultiSelectTip": "Touchez les documents ou les carnets pour les sélectionner ou les désélectionner",
 	"repoBatchDelete": "Supprimer les étiquettes sélectionnées",
 	"repoBatchDone": "Terminé",
 	"repoBatchClear": "Désélectionner",
@@ -2923,6 +2932,7 @@
 		"393": "Les cahiers chiffrés ne prennent pas en charge cette opération",
 		"394": "Les carnets chiffrés ne prennent pas en charge la publication, les droits de publication ne peuvent pas être configurés",
 		"395": "L’exportation par lots ne prend pas en charge les carnets chiffrés ; déverrouillez-les et exportez-les un par un, ou exportez des carnets ordinaires",
-		"396": "Les carnets chiffrés ne permettent pas d’épingler des documents"
+		"396": "Les carnets chiffrés ne permettent pas d’épingler des documents",
+		"397": "Cet appareil ne peut pas créer le fichier synchronisé. Renommez-le dans SiYuan sur un appareil où il est accessible, puis relancez la synchronisation : %s"
 	}
 }

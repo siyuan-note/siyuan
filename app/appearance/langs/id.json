@@ -17,6 +17,15 @@
 	"flashcardSourceHistory": "Riwayat konfigurasi sumber kartu",
 	"flashcardSourceHistoryTip": "Pulihkan pengaturan sumber dan referensi blok dengan mempertahankan kemajuan ulasan; pulihkan pertanyaan dan jawaban dari riwayat dokumen terkait",
 	"flashcardSourceRestoreConfirm": "Pulihkan konfigurasi sumber ini? Semua kartu dari sumber ini akan terpengaruh; kemajuan ulasan tetap sama",
+	"newTabItem": "Buat blok item tab",
+	"encryptedNotebookFollowSystemLock": "Ikuti penguncian layar sistem",
+	"encryptedNotebookFollowSystemLockDesc": "Kunci semua buku catatan terenkripsi yang terbuka saat sistem terkunci, terlepas dari batas waktu tidak aktif; buku catatan tetap terkunci setelah sistem dibuka",
+	"customBlock": "Blok kustom",
+	"embedHeadingLevel": "Tingkat judul tersemat",
+	"embedHeadingLevelPreserve": "Pertahankan tingkat asli",
+	"originalToRef": "Ubah blok asli menjadi referensi blok",
+	"originalToEmbed": "Ubah blok asli menjadi blok sematan",
+	"mobileFileTreeMultiSelectTip": "Ketuk dokumen atau buku catatan untuk memilih atau membatalkan pilihan",
 	"repoBatchDelete": "Hapus tanda yang dipilih",
 	"repoBatchDone": "Selesai",
 	"repoBatchClear": "Batalkan pilihan",
@@ -2923,6 +2932,7 @@
 		"393": "Buku catatan terenkripsi tidak mendukung operasi ini",
 		"394": "Buku catatan terenkripsi tidak mendukung publikasi, izin publikasi tidak dapat dikonfigurasi",
 		"395": "Ekspor massal tidak mendukung buku catatan terenkripsi, buka kuncinya lalu ekspor satu per satu, atau ekspor buku catatan biasa",
-		"396": "Buku catatan terenkripsi tidak mendukung penyematan dokumen"
+		"396": "Buku catatan terenkripsi tidak mendukung penyematan dokumen",
+		"397": "Perangkat ini tidak dapat membuat berkas yang disinkronkan. Ubah namanya di SiYuan pada perangkat yang dapat mengaksesnya, lalu sinkronkan kembali: %s"
 	}
 }

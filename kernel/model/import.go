@@ -1058,12 +1058,12 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		if d == nil {
 			return nil
 		}
-		if !util.IsValidUploadFileName(d.Name()) {
+		if !util.IsValidExistingEmojiFileName(d.Name()) {
 			emojiFullName := path
 			fullPathFilteredName := filepath.Join(filepath.Dir(path), util.FilterUploadEmojiFileName(d.Name()))
 			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 			logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", d.Name(), fullPathFilteredName)
-			if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
+			if removeErr := util.RenameEmojiFile(emojiFullName, fullPathFilteredName); nil != removeErr {
 				logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
 			}
 		}
@@ -1431,12 +1431,12 @@ func ImportData(zipPath string) (err error) {
 		if d == nil {
 			return nil
 		}
-		if !util.IsValidUploadFileName(d.Name()) {
+		if !util.IsValidExistingEmojiFileName(d.Name()) {
 			emojiFullName := path
 			fullPathFilteredName := filepath.Join(filepath.Dir(path), util.FilterUploadEmojiFileName(d.Name()))
 			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 			logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", d.Name(), fullPathFilteredName)
-			if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
+			if removeErr := util.RenameEmojiFile(emojiFullName, fullPathFilteredName); nil != removeErr {
 				logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
 			}
 		}

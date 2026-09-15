@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"go/ast"
 	"go/parser"
@@ -8,10 +9,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -150,6 +153,17 @@ func TestTransactionContractHistoryHTTP(t *testing.T) {
 }
 
 func TestTransactionContractBootBeforeOperationBinding(t *testing.T) {
+	// 启动完成后的进度不可回退，使用独立进程验证启动期间的请求校验顺序。
+	if os.Getenv("SIYUAN_TEST_TRANSACTION_BOOT") != "1" {
+		ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+		defer cancel()
+		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestTransactionContractBootBeforeOperationBinding$", "-test.v")
+		command.Env = append(os.Environ(), "SIYUAN_TEST_TRANSACTION_BOOT=1")
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("boot subprocess failed: %v\n%s", err, output)
+		}
+		return
+	}
 	oldConf, oldLangs := model.Conf, util.Langs
 	progress := util.GetBootProgress()
 	util.IncBootProgress(-progress, "")

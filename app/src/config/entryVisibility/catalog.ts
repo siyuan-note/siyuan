@@ -442,6 +442,10 @@ const gutterSingle = () => [
             node("showHeadingOnlyBlocks", lang("showHeadingOnlyBlocks")),
             node("default", lang("default")),
         ]),
+        node("embedHeadingLevel", lang("embedHeadingLevel"), true, [
+            node("auto", lang("embedHeadingLevelPreserve")),
+            ...[1, 2, 3, 4, 5, 6].map(level => node(`heading${level}`, lang(`heading${level}`))),
+        ]),
     ]),
     separator("separator_1"),
     gutterHeadingTransform(),
@@ -974,8 +978,14 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("text*", () => `${window.siyuan.languages.text} *`),
                 node("link", lang("hyperlink")),
                 node("blockEmbed", lang("blockEmbed")),
-                node("defBlock", lang("defBlock"), false),
-                node("defBlockChildren", lang("defBlockChildren"), false),
+                node("defBlock", lang("defBlock"), false, [
+                    node("originalToRef", lang("originalToRef")),
+                    node("originalToEmbed", lang("originalToEmbed")),
+                ]),
+                node("defBlockChildren", lang("defBlockChildren"), false, [
+                    node("originalToRef", lang("originalToRef")),
+                    node("originalToEmbed", lang("originalToEmbed")),
+                ]),
             ]),
             node("copy", lang("copy")),
             node("cut", lang("cut")),

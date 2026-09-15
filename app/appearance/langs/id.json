@@ -1,4 +1,9 @@
 {
+	"taskStatus": "Status tugas",
+	"taskStatusTodo": "Belum dikerjakan",
+	"taskStatusInProgress": "Sedang dikerjakan",
+	"taskStatusDone": "Selesai",
+	"taskStatusCanceled": "Dibatalkan",
 	"pluginPublishDataTip": "Publikasikan data plugin",
 	"pluginPublishData": "Data plugin yang dipublikasikan",
 	"pluginPublishDataGrantTip": "Izinkan pengunjung layanan publikasi membaca kolom ini? Publikasikan hanya konten yang layak diungkapkan. Data publikasi yang ada akan dihapus",

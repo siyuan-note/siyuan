@@ -1,4 +1,9 @@
 {
+	"taskStatus": "Stan zadania",
+	"taskStatusTodo": "Do zrobienia",
+	"taskStatusInProgress": "W toku",
+	"taskStatusDone": "Ukończone",
+	"taskStatusCanceled": "Anulowane",
 	"pluginPublishDataTip": "Publikuj dane wtyczki",
 	"pluginPublishData": "Opublikowane dane wtyczki",
 	"pluginPublishDataGrantTip": "Zezwolić odwiedzającym usługę publikowania na odczyt tych pól? Publikuj tylko treści odpowiednie do ujawnienia. Dotychczas opublikowane dane zostaną usunięte",

@@ -1,4 +1,9 @@
 {
+	"taskStatus": "任務狀態",
+	"taskStatusTodo": "待辦",
+	"taskStatusInProgress": "進行中",
+	"taskStatusDone": "完成",
+	"taskStatusCanceled": "放棄",
 	"pluginPublishDataTip": "發佈外掛資料",
 	"pluginPublishData": "外掛程式發佈資料",
 	"pluginPublishDataGrantTip": "允許發佈服務訪客讀取下列欄位？請僅公開適合披露的內容，現有發佈資料將被清空",

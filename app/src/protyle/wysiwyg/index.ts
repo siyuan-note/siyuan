@@ -69,7 +69,7 @@ import {
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
-import {editTaskListItem, toggleTaskListItem} from "./list";
+import {openTaskListItemMenu, toggleTaskListItem} from "./list";
 import {preserveCopiedTabTask} from "../util/tabsCopy";
 import {hideElements} from "../ui/hideElements";
 /// #if !BROWSER
@@ -3579,7 +3579,7 @@ export class WYSIWYG {
                 return false;
             }
             if (hasClosestByClassName(target, "protyle-action--task")) {
-                editTaskListItem(protyle, nodeElement);
+                openTaskListItemMenu(protyle, nodeElement);
                 event.preventDefault();
                 return;
             }

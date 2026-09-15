@@ -14,7 +14,7 @@ import {remapTabsDOMIDs} from "../util/tabsCopy";
 import {copySubMenu} from "../../menus/commonMenuItem";
 import {isTaskListMarker, nextTaskListMarker} from "./taskListMarker";
 import {hideElements} from "../ui/hideElements";
-import {openTaskStatusDialog} from "./taskStatusDialog";
+import {getTaskStatusItems, openTaskStatusDialog, openTaskStatusMenu} from "./taskStatusDialog";
 
 export const toggleTabsTasks = (protyle: IProtyle, tabs: HTMLElement) => {
     const items = getTabItems(tabs);
@@ -164,6 +164,8 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
     menu.addItem({icon: "iconCopy", label: lang.copy, submenu: copySubMenu([item.dataset.nodeId], false)});
     if (canEdit(protyle, tabs)) {
         if (getTabTask(item) !== null) {
+            menu.addItem({icon: "iconCheck", label: lang.taskStatus,
+                submenu: getTaskStatusItems(getTabTask(item), marker => setTabTask(protyle, item, marker))});
             menu.addItem({icon: "iconCheck", label: lang.customTaskStatus, click: () => editTabTask(protyle, item)});
         }
         menu.addItem({icon: "iconEdit", label: lang.rename, click: () => renameTab(protyle, item)});
@@ -204,7 +206,13 @@ export const initEditorTabs = (protyle: IProtyle) => {
         addLabel: window.siyuan.languages.newTabItem,
         taskLabel: window.siyuan.languages.task,
         task: item => setTabTask(protyle, item, nextTaskListMarker(getTabTask(item))),
-        taskMenu: item => editTabTask(protyle, item),
+        taskMenu: item => {
+            if (canEdit(protyle, item)) {
+                const anchor = Array.from(item.parentElement.querySelectorAll<HTMLElement>(".tabs-task"))
+                    .find(task => task.dataset.tabId === item.dataset.nodeId);
+                openTaskStatusMenu(anchor || item, getTabTask(item), marker => setTabTask(protyle, item, marker));
+            }
+        },
         endEdit: () => hideElements(["toolbar"], protyle),
         select: (tabs, id) => {
             if (!canEdit(protyle, tabs) || tabs.getAttribute("tabs-active-id") === id) {

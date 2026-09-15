@@ -1,4 +1,9 @@
 {
+	"taskStatus": "Статус завдання",
+	"taskStatusTodo": "До виконання",
+	"taskStatusInProgress": "У процесі",
+	"taskStatusDone": "Завершено",
+	"taskStatusCanceled": "Скасовано",
 	"pluginPublishDataTip": "Опублікувати дані плагіна",
 	"pluginPublishData": "Опубліковані дані плагіна",
 	"pluginPublishDataGrantTip": "Дозволити відвідувачам сервісу публікації читати ці поля? Публікуйте лише відомості, придатні для розкриття. Раніше опубліковані дані буде видалено",

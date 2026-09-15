@@ -1,4 +1,9 @@
 {
+	"taskStatus": "حالة المهمة",
+	"taskStatusTodo": "للقيام بها",
+	"taskStatusInProgress": "قيد التنفيذ",
+	"taskStatusDone": "مكتملة",
+	"taskStatusCanceled": "ملغاة",
 	"pluginPublishDataTip": "نشر بيانات الإضافة",
 	"pluginPublishData": "بيانات الإضافة المنشورة",
 	"pluginPublishDataGrantTip": "هل تسمح لزوار خدمة النشر بقراءة هذه الحقول؟ انشر فقط المحتوى المناسب للإفصاح عنه. ستُحذف البيانات المنشورة الحالية",

@@ -1,4 +1,9 @@
 {
+	"taskStatus": "Görev durumu",
+	"taskStatusTodo": "Yapılacak",
+	"taskStatusInProgress": "Devam ediyor",
+	"taskStatusDone": "Tamamlandı",
+	"taskStatusCanceled": "İptal edildi",
 	"pluginPublishDataTip": "Eklenti verilerini yayımla",
 	"pluginPublishData": "Eklentinin yayımlanan verileri",
 	"pluginPublishDataGrantTip": "Yayın hizmeti ziyaretçilerinin bu alanları okumasına izin verilsin mi? Yalnızca açıklanmaya uygun içerikleri yayımlayın. Mevcut yayımlanmış veriler silinecek",

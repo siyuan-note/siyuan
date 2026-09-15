@@ -1,4 +1,9 @@
 {
+	"taskStatus": "タスクの状態",
+	"taskStatusTodo": "未着手",
+	"taskStatusInProgress": "進行中",
+	"taskStatusDone": "完了",
+	"taskStatusCanceled": "中止",
 	"pluginPublishDataTip": "プラグインデータを公開",
 	"pluginPublishData": "プラグインの公開データ",
 	"pluginPublishDataGrantTip": "公開サービスの閲覧者に以下のフィールドの読み取りを許可しますか？公開してよい内容のみを含めてください。既存の公開データは消去されます",

@@ -20,7 +20,8 @@ test("custom task status merges into saved list menus without moving existing en
     const saved = ["appendListItem", "plugin:example:item", "orderedListStart", "continueListNumbering",
         "separator_numbering", "prependListItem"];
     const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
-    assert.deepEqual(merged.filter(key => key !== "customTaskStatus"), saved);
+    assert.deepEqual(merged.filter(key => !["customTaskStatus", "taskStatus"].includes(key)), saved);
+    assert.equal(merged[merged.indexOf("customTaskStatus") - 1], "taskStatus");
     assert.equal(merged[merged.indexOf("orderedListStart") - 1], "customTaskStatus");
     assert.deepEqual(resolveEntryOrder(["customTaskStatus", "prependListItem", "appendListItem", "plugin:example:item"],
         merged, new Set(["separator_numbering"])), ["appendListItem", "plugin:example:item", "customTaskStatus", "prependListItem"]);

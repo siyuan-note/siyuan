@@ -1,4 +1,9 @@
 {
+	"taskStatus": "Stato dell'attività",
+	"taskStatusTodo": "Da fare",
+	"taskStatusInProgress": "In corso",
+	"taskStatusDone": "Completata",
+	"taskStatusCanceled": "Annullata",
 	"pluginPublishDataTip": "Pubblica i dati del plugin",
 	"pluginPublishData": "Dati pubblicati del componente aggiuntivo",
 	"pluginPublishDataGrantTip": "Consentire ai visitatori del servizio di pubblicazione di leggere questi campi? Pubblicare solo contenuti adatti alla divulgazione. I dati già pubblicati verranno cancellati",

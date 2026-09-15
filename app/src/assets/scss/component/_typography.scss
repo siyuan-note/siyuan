@@ -1,4 +1,5 @@
 @use "../util/function";
+@use "../protyle/task";
 
 :root {
   --b3-font-family-emoji-reset: "Emojis Additional", "Emojis Reset";
@@ -896,7 +897,7 @@
     word-break: break-word;
     position: relative;
 
-    &--done > div[data-node-id].p {
+    &--done:not([data-task="/"]) > div[data-node-id].p {
       color: var(--b3-theme-on-surface-light);
       text-decoration: line-through;
     }

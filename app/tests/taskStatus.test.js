@@ -27,7 +27,9 @@ const sources = () => {
             extract("protyle/util/editorCommonEvent.ts", ["moveTo"]),
         renderer: compile(renderSource.replace(/^import .*;\r?\n/gm, "")) +
             extract("protyle/render/tabsState.ts", ["resolveTabID", "tabKeyboardTarget"]),
-        css: require("sass").compile(path.join(__dirname, "../src/assets/scss/protyle/_tabs.scss")).css,
+        menu: extract("protyle/wysiwyg/taskStatusDialog.ts", ["getTaskStatusItems"]),
+        css: require("sass").compile(path.join(__dirname, "../src/assets/scss/protyle/_wysiwyg.scss")).css +
+            require("sass").compile(path.join(__dirname, "../src/assets/scss/component/_typography.scss")).css,
     };
 };
 
@@ -54,6 +56,23 @@ const cases = async source => {
     root.className = "protyle-wysiwyg";
     document.body.append(root);
     const protyle = {lute, disabled: false, options: {action: []}, block: {rootID: "doc"}, wysiwyg: {element: root}};
+    const taskStyle = document.createElement("style");
+    taskStyle.textContent = source.css;
+    document.head.append(taskStyle);
+    window.siyuan = {languages: {}};
+    let customMarker;
+    const getMenu = new Function("openTaskStatusDialog", source.menu + "; return getTaskStatusItems;")(
+        marker => { customMarker = marker; });
+    let chosenMarker;
+    const menuItems = getMenu("x", marker => { chosenMarker = marker; });
+    check.equal(menuItems.length, 5);
+    check.equal(menuItems[2].icon, "iconCheck");
+    for (let index = 0; index < 4; index++) {
+        menuItems[index].click();
+        check.equal(chosenMarker, [" ", "/", "X", "-"][index]);
+    }
+    menuItems[4].click();
+    check.equal(customMarker, "x");
     const markdown = "::: tabs\n@tab Keep\n\nA\n@tab Task\n\nB\n:::\n{: tabs-task=\"true\"}\n\n::: tabs\n@tab Target\n\nC\n:::\n";
     const reset = () => {
         root.innerHTML = lute.Md2BlockDOM(markdown);
@@ -165,6 +184,15 @@ const cases = async source => {
         const imported = document.createElement("div");
         imported.innerHTML = lute.SpinBlockDOM(root.innerHTML);
         check.equal(imported.querySelector(".li").getAttribute("data-task"), marker === "x" ? "X" : marker);
+        const action = taskItem.querySelector(".protyle-action--task");
+        if (![" ", "X", "x"].includes(marker)) {
+            check.equal(JSON.parse(getComputedStyle(action, "::before").content), marker);
+            check.equal(getComputedStyle(action.querySelector("svg")).visibility, "hidden");
+        }
+        if (marker === "/" || marker === "-") {
+            check.equal(getComputedStyle(taskItem.querySelector(".p")).textDecorationLine,
+                marker === "/" ? "none" : "line-through");
+        }
         api.toggleTaskListItem(protyle, taskItem);
         check.equal(taskItem.getAttribute("data-task"), marker === " " ? "X" : " ");
     }
@@ -181,6 +209,23 @@ const cases = async source => {
     api.setTaskListItemMarker(protyle, taskItem, "/");
     check.equal(taskItem.outerHTML, before);
     protyle.options.action = [];
+
+    // 重载、嵌套列表和导出结构使用各自标记，不能继承外层任务字符。
+    for (const exportDOM of [false, true]) {
+        root.innerHTML = lute.Md2BlockDOM("* [-] Canceled\n  * [/] Working\n  * [?] Custom\n");
+        if (exportDOM) {
+            root.querySelectorAll(".li").forEach(entry => {
+                entry.querySelector(":scope > .protyle-action--task").setAttribute("data-task", entry.getAttribute("data-task"));
+                entry.removeAttribute("data-task");
+            });
+        }
+        const entries = root.querySelectorAll(".li");
+        ["-", "/", "?"].forEach((marker, index) => {
+            const action = entries[index].querySelector(":scope > .protyle-action--task");
+            check.equal(JSON.parse(getComputedStyle(action, "::before").content), marker);
+        });
+        check.equal(getComputedStyle(entries[1].querySelector(".p")).textDecorationLine, "none");
+    }
 
     // 真实导航渲染验证三种状态共用图标轮廓，右键入口和只读行为保持一致。
     const renderer = new Function("bindTabsDrag", "cancelTabsDrag", "isDraggingTabs", "escapeHtml",

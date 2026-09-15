@@ -1,4 +1,9 @@
 {
+	"taskStatus": "Task status",
+	"taskStatusTodo": "To do",
+	"taskStatusInProgress": "In progress",
+	"taskStatusDone": "Completed",
+	"taskStatusCanceled": "Canceled",
 	"pluginPublishDataTip": "Publish plugin data",
 	"pluginPublishData": "Plugin published data",
 	"pluginPublishDataGrantTip": "Allow publishing-service visitors to read these fields? Only publish content suitable for disclosure. Existing published data will be cleared",

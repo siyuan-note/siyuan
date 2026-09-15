@@ -1,4 +1,9 @@
 {
+	"taskStatus": "Taakstatus",
+	"taskStatusTodo": "Te doen",
+	"taskStatusInProgress": "In uitvoering",
+	"taskStatusDone": "Voltooid",
+	"taskStatusCanceled": "Geannuleerd",
 	"pluginPublishDataTip": "Plugingegevens publiceren",
 	"pluginPublishData": "Gepubliceerde plug-ingegevens",
 	"pluginPublishDataGrantTip": "Bezoekers van de publicatiedienst toestaan deze velden te lezen? Publiceer alleen inhoud die openbaar mag worden. Bestaande gepubliceerde gegevens worden gewist",

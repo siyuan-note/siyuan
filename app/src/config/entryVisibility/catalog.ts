@@ -369,6 +369,13 @@ const gutterSingle = () => [
     ...gutterBase(false),
     separator("separator_listBlock"),
     node("listBlock", lang("listBlock"), true, [
+        node("taskStatus", lang("taskStatus"), true, [
+            node("taskStatusTodo", lang("taskStatusTodo")),
+            node("taskStatusInProgress", lang("taskStatusInProgress")),
+            node("taskStatusDone", lang("taskStatusDone")),
+            node("taskStatusCanceled", lang("taskStatusCanceled")),
+            node("customTaskStatus", lang("customTaskStatus")),
+        ]),
         node("customTaskStatus", lang("customTaskStatus")),
         node("orderedListStart", lang("orderedListStart")),
         node("continueListNumbering", lang("continueListNumbering")),

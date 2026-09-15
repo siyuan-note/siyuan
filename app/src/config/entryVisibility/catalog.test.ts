@@ -734,6 +734,7 @@ test("list block submenu follows the base block entries", () => {
     assert.equal(listBlock?.type, "entry");
     assert.equal(listBlock?.simple, true);
     assert.deepEqual(listBlock?.children?.map((item) => item.key), [
+        "taskStatus",
         "customTaskStatus",
         "orderedListStart",
         "continueListNumbering",
@@ -743,6 +744,10 @@ test("list block submenu follows the base block entries", () => {
     ]);
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.customTaskStatus")?.simple, true);
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.customTaskStatus")?.type, "entry");
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.listBlock.taskStatus").map(item => item.key), [
+        "taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus",
+    ]);
+    assert.equal(getEntryCatalogNode("gutter.single.listBlock.taskStatus")?.simple, true);
     const source = readFileSync(resolve(process.cwd(), "src/protyle/gutter/index.ts"), "utf8");
     const submenu = source.slice(source.indexOf("const genListBlockSubmenu"), source.indexOf("return submenu;", source.indexOf("const genListBlockSubmenu")));
     assert.deepEqual(Array.from(submenu.matchAll(/id: "([^"]+)"/g), match => match[1]),

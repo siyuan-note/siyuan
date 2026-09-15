@@ -1,4 +1,9 @@
 {
+	"taskStatus": "任务状态",
+	"taskStatusTodo": "待办",
+	"taskStatusInProgress": "进行中",
+	"taskStatusDone": "完成",
+	"taskStatusCanceled": "放弃",
 	"pluginPublishDataTip": "发布插件数据",
 	"pluginPublishData": "插件发布数据",
 	"pluginPublishDataGrantTip": "允许发布服务访问者读取以下字段？请仅公开适合披露的内容，现有发布数据将被清空",

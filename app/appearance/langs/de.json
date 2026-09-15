@@ -1,4 +1,9 @@
 {
+	"taskStatus": "Aufgabenstatus",
+	"taskStatusTodo": "Offen",
+	"taskStatusInProgress": "In Bearbeitung",
+	"taskStatusDone": "Erledigt",
+	"taskStatusCanceled": "Abgebrochen",
 	"pluginPublishDataTip": "Plugin-Daten veröffentlichen",
 	"pluginPublishData": "Veröffentlichte Plugin-Daten",
 	"pluginPublishDataGrantTip": "Besuchern des Veröffentlichungsdienstes Zugriff auf diese Felder erlauben? Veröffentlichen Sie nur dafür geeignete Inhalte. Bisher veröffentlichte Daten werden gelöscht",

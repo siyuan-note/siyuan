@@ -1,4 +1,9 @@
 {
+	"taskStatus": "Статус задатка",
+	"taskStatusTodo": "За урадити",
+	"taskStatusInProgress": "У току",
+	"taskStatusDone": "Завршено",
+	"taskStatusCanceled": "Отказано",
 	"pluginPublishDataTip": "Објави податке додатка",
 	"pluginPublishData": "Објављени подаци додатка",
 	"pluginPublishDataGrantTip": "Дозволити посетиоцима услуге објављивања да читају ова поља? Објављујте само садржај погодан за откривање. Постојећи објављени подаци биће обрисани",

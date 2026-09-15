@@ -1,4 +1,9 @@
 {
+	"taskStatus": "สถานะงาน",
+	"taskStatusTodo": "สิ่งที่ต้องทำ",
+	"taskStatusInProgress": "กำลังดำเนินการ",
+	"taskStatusDone": "เสร็จสิ้น",
+	"taskStatusCanceled": "ยกเลิก",
 	"pluginPublishDataTip": "เผยแพร่ข้อมูลปลั๊กอิน",
 	"pluginPublishData": "ข้อมูลที่เผยแพร่ของปลั๊กอิน",
 	"pluginPublishDataGrantTip": "อนุญาตให้ผู้เข้าชมบริการเผยแพร่อ่านฟิลด์เหล่านี้หรือไม่? เผยแพร่เฉพาะเนื้อหาที่เปิดเผยได้ ข้อมูลที่เผยแพร่อยู่จะถูกล้าง",

@@ -1,8 +1,15 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
-import {getTaskListMarker, isTaskListMarker} from "./taskListMarker";
+import {getTaskListMarker, isTaskListMarker, nextTaskListMarker} from "./taskListMarker";
 
 describe("getTaskListMarker", () => {
+    it("keeps the binary click cycle for preset and custom states", () => {
+        assert.equal(nextTaskListMarker(" "), "X");
+        assert.equal(nextTaskListMarker(null), "X");
+        for (const marker of ["X", "x", "/", "-", "?"]) {
+            assert.equal(nextTaskListMarker(marker), " ");
+        }
+    });
     it("validates a complete custom status instead of an empty shortcut prefix", () => {
         for (const marker of [" ", "X", "x", "/", "-", "?", "\"", "&", "<"]) {
             assert.equal(isTaskListMarker(marker), true, marker);

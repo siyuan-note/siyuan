@@ -1,4 +1,9 @@
 {
+	"taskStatus": "Stav úlohy",
+	"taskStatusTodo": "Na vykonanie",
+	"taskStatusInProgress": "Prebieha",
+	"taskStatusDone": "Dokončená",
+	"taskStatusCanceled": "Zrušená",
 	"pluginPublishDataTip": "Zverejniť údaje doplnku",
 	"pluginPublishData": "Zverejnené údaje doplnku",
 	"pluginPublishDataGrantTip": "Povoliť návštevníkom publikačnej služby čítať tieto polia? Zverejňujte iba obsah vhodný na sprístupnenie. Doteraz zverejnené údaje sa vymažú",

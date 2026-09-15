@@ -114,6 +114,7 @@ import {
     appendListItem,
     openOrderedListStartDialog,
     editTaskListItem,
+    setTaskListItemMarker,
     prependListItem,
     setOrderedListStart
 } from "../wysiwyg/list";
@@ -133,6 +134,7 @@ import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFold} from "../util/
 import {exportImage} from "../export/util";
 import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wysiwyg/callout";
 import {setTabsPosition, toggleTabsTasks, unwrapTabs} from "../wysiwyg/tabs";
+import {getTaskStatusItems} from "../wysiwyg/taskStatusDialog";
 import {hasTabsTasks} from "../render/tabsRender";
 
 const restoreGutterRange = (protyle: IProtyle) => {
@@ -2139,6 +2141,13 @@ export class Gutter {
             const genListBlockSubmenu = (continueListStart?: number) => {
                 const submenu: IMenu[] = [];
                 if (type === "NodeListItem" && nodeElement.getAttribute("data-subtype") === "t") {
+                    submenu.push({
+                        id: "taskStatus",
+                        icon: "iconCheck",
+                        label: window.siyuan.languages.taskStatus,
+                        submenu: getTaskStatusItems(nodeElement.getAttribute("data-task"),
+                            marker => setTaskListItemMarker(protyle, nodeElement, marker)),
+                    });
                     submenu.push({
                         id: "customTaskStatus",
                         icon: "iconCheck",

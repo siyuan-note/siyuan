@@ -25,7 +25,7 @@ import {showMessage} from "../../dialog/message";
 import {activateTrackedRangeInsertion, type ITrackedRangeInsertion} from "../util/trackedRange";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {isTaskListMarker, nextTaskListMarker} from "./taskListMarker";
-import {openTaskStatusDialog} from "./taskStatusDialog";
+import {openTaskStatusDialog, openTaskStatusMenu} from "./taskStatusDialog";
 
 const getLastChildBlock = (element: Element) => {
     if (!element || !element.lastElementChild) {
@@ -155,6 +155,13 @@ export const toggleTaskListItem = (protyle: IProtyle, taskItemElement: Element):
 export const editTaskListItem = (protyle: IProtyle, item: Element) => {
     if (!protyle.disabled && !protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
         openTaskStatusDialog(item.getAttribute("data-task"), marker => setTaskListItemMarker(protyle, item, marker));
+    }
+};
+
+export const openTaskListItemMenu = (protyle: IProtyle, item: Element) => {
+    if (!protyle.disabled && !protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+        openTaskStatusMenu(item.querySelector(":scope > .protyle-action"), item.getAttribute("data-task"),
+            marker => setTaskListItemMarker(protyle, item, marker));
     }
 };
 

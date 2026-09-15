@@ -6,6 +6,7 @@ test("mobile fragment toolbar follows its own selection and cleans up pending re
     const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
     const originalDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
     const events = new EventTarget();
+    const viewport = Object.assign(new EventTarget(), {offsetTop: 0, offsetLeft: 0, width: 390, height: 500});
     const frames = new Map<number, FrameRequestCallback>();
     let frameID = 0;
     const root = {};
@@ -18,7 +19,9 @@ test("mobile fragment toolbar follows its own selection and cleans up pending re
     const classes = new Set<string>();
     const element = Object.assign(new EventTarget(), {
         classList: classes,
-        style: {},
+        style: {top: "", left: "", width: ""},
+        offsetHeight: 48,
+        remove: () => {},
         setAttribute: () => {},
     });
     const protyle = {
@@ -34,15 +37,19 @@ test("mobile fragment toolbar follows its own selection and cleans up pending re
             },
         },
     } as unknown as IProtyle;
-    Object.defineProperty(globalThis, "document", {configurable: true, value: events});
-    Object.defineProperty(globalThis, "window", {configurable: true, value: {
+    Object.defineProperty(globalThis, "document", {configurable: true, value: Object.assign(events, {
+        body: {appendChild: () => {}},
+    })});
+    Object.defineProperty(globalThis, "window", {configurable: true, value: Object.assign(new EventTarget(), {
+        visualViewport: viewport,
+        siyuan: {zIndex: 10},
         requestAnimationFrame: (callback: FrameRequestCallback) => {
             frames.set(++frameID, callback);
             return frameID;
         },
         cancelAnimationFrame: (id: number) => frames.delete(id),
         getSelection: () => ({rangeCount: 1, isCollapsed: collapsed, getRangeAt: () => range}),
-    }});
+    })});
     const flush = () => {
         const callbacks = Array.from(frames.values());
         frames.clear();
@@ -56,6 +63,15 @@ test("mobile fragment toolbar follows its own selection and cleans up pending re
         assert.equal(frames.size, 1);
         flush();
         assert.equal(renders, 1);
+        assert.equal(element.style.top, "452px");
+        assert.equal(element.style.width, "390px");
+        viewport.height = 320;
+        viewport.offsetTop = 20;
+        viewport.dispatchEvent(new Event("resize"));
+        assert.equal(element.style.top, "292px");
+        viewport.offsetLeft = 12;
+        viewport.dispatchEvent(new Event("scroll"));
+        assert.equal(element.style.left, "12px");
 
         range = {startContainer: ownNode, endContainer: foreignNode};
         events.dispatchEvent(new Event("selectionchange"));
@@ -82,6 +98,9 @@ test("mobile fragment toolbar follows its own selection and cleans up pending re
         events.dispatchEvent(new Event("selectionchange"));
         cleanup();
         assert.equal(frames.size, 0);
+        viewport.height = 600;
+        viewport.dispatchEvent(new Event("resize"));
+        assert.equal(element.style.top, "292px");
         events.dispatchEvent(new Event("selectionchange"));
         assert.equal(frames.size, 0);
     } finally {

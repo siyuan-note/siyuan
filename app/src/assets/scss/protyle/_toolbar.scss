@@ -8,6 +8,23 @@
     border-radius: var(--b3-border-radius);
     display: flex;
 
+    &--mobile {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-radius: 0;
+      box-sizing: border-box;
+
+      > * {
+        flex-shrink: 0;
+      }
+
+      .protyle-toolbar__item {
+        height: 48px;
+        min-width: 40px;
+      }
+    }
+
     &__item {
       display: inline-flex;
       align-items: center;

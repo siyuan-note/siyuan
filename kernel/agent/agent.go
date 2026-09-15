@@ -24,6 +24,7 @@ import (
 	"html"
 	"io"
 	"math/rand/v2"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -1559,34 +1560,83 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 }
 
 func GenerateTitle(client *openai.Client, apiBaseURL, protocol, model, userMsg, language string) string {
+	const (
+		initialMaxCompletionTokens  = 50
+		fallbackMaxCompletionTokens = 512
+	)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	ctx = util.ContextWithOpenAIResponsesBaseURL(ctx, apiBaseURL)
-	resp, err := util.CreateOpenAICompletion(ctx, client, protocol, openai.ChatCompletionRequest{
+	request := openai.ChatCompletionRequest{
 		Model: model,
 		Messages: []openai.ChatCompletionMessage{
 			{Role: openai.ChatMessageRoleSystem, Content: "You are a title generator. Below is the first message of a conversation. Write a concise title (under 12 words) that summarizes the topic. Output ONLY the title, no other text. Reply in the same language as the user's message. If you cannot determine the language, reply in " + util.I18nTerm(language, "_label") + "."},
 			{Role: openai.ChatMessageRoleUser, Content: "Conversation starts with: " + userMsg},
 		},
-		MaxCompletionTokens: 50,
+		MaxCompletionTokens: initialMaxCompletionTokens,
 		Temperature:         1,
-	}, nil)
+		// 标题不需要模型推理，把有限的输出预算留给最终标题，避免思考模型耗尽预算后没有可见正文。
+		ReasoningEffort: "none",
+	}
+	resp, err := util.CreateOpenAICompletion(ctx, client, protocol, request, nil)
+	if isReasoningEffortUnsupportedError(err) || titleCompletionExhausted(resp, err) {
+		// 兼容不接受或忽略 reasoning_effort 的端点，并为无法关闭思考的模型预留推理预算。
+		request.ReasoningEffort = ""
+		request.MaxCompletionTokens = fallbackMaxCompletionTokens
+		resp, err = util.CreateOpenAICompletion(ctx, client, protocol, request, nil)
+	}
 	if err != nil || len(resp.Choices) == 0 {
-		runes := []rune(userMsg)
-		if len(runes) > 30 {
-			return string(runes[:30]) + "..."
-		}
-		return userMsg
+		return titleFallback(userMsg)
 	}
 	title := strings.TrimSpace(resp.Choices[0].Message.Content)
 	if title == "" {
-		runes := []rune(userMsg)
-		if len(runes) > 30 {
-			return string(runes[:30]) + "..."
-		}
-		return userMsg
+		return titleFallback(userMsg)
 	}
 	return title
+}
+
+func titleCompletionExhausted(resp openai.ChatCompletionResponse, err error) bool {
+	return err == nil && len(resp.Choices) > 0 && resp.Choices[0].FinishReason == openai.FinishReasonLength &&
+		strings.TrimSpace(resp.Choices[0].Message.Content) == ""
+}
+
+func isReasoningEffortUnsupportedError(err error) bool {
+	if err == nil {
+		return false
+	}
+	var apiErr *openai.APIError
+	if !errors.As(err, &apiErr) {
+		return false
+	}
+	if apiErr.HTTPStatusCode != 0 && apiErr.HTTPStatusCode != http.StatusBadRequest &&
+		apiErr.HTTPStatusCode != http.StatusUnprocessableEntity {
+		return false
+	}
+	param := ""
+	if apiErr.Param != nil {
+		param = strings.ToLower(strings.TrimSpace(*apiErr.Param))
+	}
+	if strings.Contains(param, "reasoning_effort") {
+		return true
+	}
+	message := strings.ToLower(apiErr.Message)
+	if !strings.Contains(message, "reasoning_effort") && !strings.Contains(message, "reasoning effort") {
+		return false
+	}
+	for _, marker := range []string{"unsupported", "not support", "unknown", "unrecognized", "not allowed", "invalid"} {
+		if strings.Contains(message, marker) {
+			return true
+		}
+	}
+	return false
+}
+
+func titleFallback(userMsg string) string {
+	runes := []rune(userMsg)
+	if len(runes) > 30 {
+		return string(runes[:30]) + "..."
+	}
+	return userMsg
 }
 
 // safeActions 按 action 字符串全局匹配，命中即免 UI 确认。

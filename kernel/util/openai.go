@@ -839,8 +839,15 @@ func NewOpenAIImageAdapter(apiKey, apiBaseURL, model string, timeout int) *OpenA
 	if timeout < 1 {
 		timeout = 30
 	}
+	client := NewOpenAIClientWithModel(apiKey, apiBaseURL, model)
+	if isMiniMaxImageEndpoint(apiBaseURL) {
+		config := openai.DefaultConfig(apiKey)
+		config.BaseURL = apiBaseURL
+		config.HTTPClient = &miniMaxImageTransport{base: httpclient.NewUserAgentClient(nil)}
+		client = openai.NewClientWithConfig(config)
+	}
 	return &OpenAIImageAdapter{
-		client:  NewOpenAIClientWithModel(apiKey, apiBaseURL, model),
+		client:  client,
 		model:   model,
 		timeout: time.Duration(timeout) * time.Second,
 	}

@@ -943,6 +943,7 @@ func renderTemplateSource(p, id string, mode TemplateRenderMode, content *string
 	var nodesNeedAppendChild, unlinks []*ast.Node
 	// 模板内部块旧 ID 到新 ID 的映射，用于成套改写模板内部的自引用
 	blockIDs := map[string]string{}
+	restoreTabsSelection := captureTemplateTabsSelection(tree.Root)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -1004,9 +1005,9 @@ func renderTemplateSource(p, id string, mode TemplateRenderMode, content *string
 		saveTemplateAttributeViewCopies(attributeViewCopies, templateAttributeViewBoxID(tree))
 	}
 
+	restoreTabsSelection()
 	// 用映射成套改写模板内部的自引用，并补全指向外部块的引用锚文本
 	// 仅命中 blockIDs 的引用（模板内部块）才会改写 ID；未命中的（外部块）保持不变
-	treenode.RemapTabsActiveIDs(tree.Root, blockIDs)
 	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue

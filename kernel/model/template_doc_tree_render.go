@@ -266,6 +266,7 @@ func renderTemplateDocTreeMarkdown(markdown []byte, boxID string) (*parse.Tree, 
 
 	var nodesNeedAppendChild, unlinks []*ast.Node
 	blockIDs := map[string]string{}
+	restoreTabsSelection := captureTemplateTabsSelection(tree.Root)
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -292,6 +293,7 @@ func renderTemplateDocTreeMarkdown(markdown []byte, boxID string) (*parse.Tree, 
 		return ast.WalkContinue
 	})
 
+	restoreTabsSelection()
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue

@@ -147,7 +147,7 @@ const rendererModules = () => {
     assert.ok(selectedBranch);
     modules["wysiwyg/blockSelection"] = readFileSync(path.join(root, "wysiwyg/blockSelection.ts"), "utf8");
     modules["wysiwyg/selectedNavigationKeydown"] = `import {getEditorRange, focusByRange, setLastNodeRange} from "../util/selection";
-        import {getAdjacentVerticalBlock} from "./verticalTarget";
+        import {getAdjacentVerticalBlock, getAdjacentVisibleBlock} from "./verticalTarget";
         import {focusVerticalBlockSelection} from "./verticalNavigation";
         import {isDocumentBoundaryLoaded} from "../util/documentRange";
         import {isInEmbedBlock} from "../util/hasClosest";

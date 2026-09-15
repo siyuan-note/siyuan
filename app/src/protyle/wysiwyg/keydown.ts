@@ -144,7 +144,7 @@ import {
     prepareVerticalNavigation,
 } from "./verticalNavigation";
 import {isAtomicVerticalNavigationTarget} from "./verticalNavigationState";
-import {getAdjacentVerticalBlock} from "./verticalTarget";
+import {getAdjacentVerticalBlock, getAdjacentVisibleBlock} from "./verticalTarget";
 import {focusVerticalBlockSelection} from "./verticalNavigation";
 import {isDocumentBoundaryLoaded} from "../util/documentRange";
 import {
@@ -514,7 +514,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (event.key === "ArrowDown") {
                     const currentSelectElement = blockSelectionModeElement ||
                         selectElements[selectElements.length - 1] as HTMLElement;
-                    const nextElement = getAdjacentVerticalBlock(currentSelectElement, "down") || currentSelectElement;
+                    const nextElement = (blockSelectionModeElement ?
+                        getAdjacentVisibleBlock(currentSelectElement, "down") as HTMLElement :
+                        getAdjacentVerticalBlock(currentSelectElement, "down")) || currentSelectElement;
 
                     if (blockSelectionModeElement) {
                         setBlockSelectionModeElement(protyle.wysiwyg.element, nextElement);
@@ -531,7 +533,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     focusVerticalBlockSelection(protyle.wysiwyg.element, nextElement, "down");
                 } else if (event.key === "ArrowUp") {
                     const currentSelectElement = blockSelectionModeElement || selectElements[0] as HTMLElement;
-                    let previousElement = getAdjacentVerticalBlock(currentSelectElement, "up");
+                    let previousElement = blockSelectionModeElement ?
+                        getAdjacentVisibleBlock(currentSelectElement, "up") as HTMLElement :
+                        getAdjacentVerticalBlock(currentSelectElement, "up");
                     if (!previousElement && protyle.title?.editElement &&
                         !isInEmbedBlock(currentSelectElement) &&
                         isDocumentBoundaryLoaded(protyle.wysiwyg.element, "before")) {

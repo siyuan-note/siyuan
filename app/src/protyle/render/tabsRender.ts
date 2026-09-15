@@ -294,6 +294,8 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             });
                             if (marker === " " || marker.toLowerCase() === "x") {
                                 task.innerHTML = `<svg><use xlink:href="#${marker === " " ? "iconUncheck" : "iconCheck"}"></use></svg>`;
+                            } else if (marker === "/" || marker === "-") {
+                                task.innerHTML = `<svg><use xlink:href="#${marker === "/" ? "iconTaskInProgress" : "iconIndeterminateCheck"}"></use></svg>`;
                             } else {
                                 task.innerHTML = '<svg><use xlink:href="#iconUncheck"></use></svg>';
                                 const character = document.createElement("span");

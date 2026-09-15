@@ -40,6 +40,10 @@ module.exports = (env, argv) => {
         module: {
             rules: [
                 {
+                    test: /task-(canceled|in-progress|unchecked)\.svg$/,
+                    type: "asset/inline",
+                },
+                {
                     test: /\.ts(x?)$/,
                     include: [path.resolve(__dirname, "src")],
                     use: [

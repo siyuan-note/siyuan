@@ -18,6 +18,8 @@ const sources = () => {
     };
     const renderSource = readFileSync(path.join(__dirname, "../src/protyle/render/tabsRender.ts"), "utf8");
     return {
+        icons: ["unchecked", "in-progress", "canceled"].map(name =>
+            readFileSync(path.join(__dirname, `../src/assets/icon/task-${name}.svg`), "utf8")),
         actions: extract("protyle/render/tabsRender.ts", ["getTabTask", "getTabItems", "hasTabsTasks"]) +
             extract("protyle/util/tabsCopy.ts", ["preserveTabTask", "preserveCopiedTabTask", "remapTabsDOMIDs", "wrapPastedTabItems"]) +
             extract("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]) +
@@ -35,6 +37,19 @@ const sources = () => {
 
 const cases = async source => {
     const check = require("node:assert/strict");
+    // 列表遮罩与页签引用的图标保持同一外框和图形，防止两处资源发生偏差。
+    const symbols = ["iconUncheck", "iconTaskInProgress", "iconIndeterminateCheck"];
+    source.icons.forEach((svg, index) => {
+        const icon = new DOMParser().parseFromString(svg, "image/svg+xml").documentElement;
+        const symbol = document.getElementById(symbols[index]);
+        for (const attribute of ["viewBox", "stroke-width", "stroke-linecap", "stroke-linejoin"]) {
+            check.equal(icon.getAttribute(attribute), symbol.getAttribute(attribute));
+        }
+        const shape = element => Array.from(element.children).map(child => [child.localName,
+            Array.from(child.attributes).map(attribute => [attribute.name, attribute.value])]);
+        check.deepEqual(shape(icon), shape(symbol));
+        check.equal(icon.querySelector("rect").getAttribute("width"), "18");
+    });
     const lute = window.Lute.New();
     lute.SetTabs(true);
     lute.SetKramdownIAL(true);
@@ -185,9 +200,14 @@ const cases = async source => {
         imported.innerHTML = lute.SpinBlockDOM(root.innerHTML);
         check.equal(imported.querySelector(".li").getAttribute("data-task"), marker === "x" ? "X" : marker);
         const action = taskItem.querySelector(".protyle-action--task");
-        if (![" ", "X", "x"].includes(marker)) {
+        if (![" ", "X", "x", "/", "-"].includes(marker)) {
             check.equal(JSON.parse(getComputedStyle(action, "::before").content), marker);
-            check.equal(getComputedStyle(action.querySelector("svg")).visibility, "hidden");
+            check.equal(getComputedStyle(action.querySelector("use")).visibility, "hidden");
+        }
+        if (marker === "/" || marker === "-") {
+            check.equal(getComputedStyle(action, "::before").content, "none");
+            check.ok(getComputedStyle(action.querySelector("svg")).maskImage.includes(
+                marker === "/" ? "task-in-progress.svg" : "task-canceled.svg"));
         }
         if (marker === "/" || marker === "-") {
             check.equal(getComputedStyle(taskItem.querySelector(".p")).textDecorationLine,
@@ -210,6 +230,19 @@ const cases = async source => {
     check.equal(taskItem.outerHTML, before);
     protyle.options.action = [];
 
+    // 各状态复用同一 SVG 画布尺寸，预设状态不再绘制字符或 CSS 边框。
+    for (const fontSize of [16, 20, 28]) {
+        root.style.fontSize = `${fontSize}px`;
+        api.setTaskListItemMarker(protyle, taskItem, "/");
+        const action = taskItem.querySelector(".protyle-action--task");
+        const iconSize = action.querySelector("svg").getBoundingClientRect().height;
+        for (const marker of [" ", "-", "X", "?"]) {
+            api.setTaskListItemMarker(protyle, taskItem, marker);
+            check.equal(action.querySelector("svg").getBoundingClientRect().height, iconSize);
+        }
+    }
+    root.style.fontSize = "";
+
     // 重载、嵌套列表和导出结构使用各自标记，不能继承外层任务字符。
     for (const exportDOM of [false, true]) {
         root.innerHTML = lute.Md2BlockDOM("* [-] Canceled\n  * [/] Working\n  * [?] Custom\n");
@@ -222,7 +255,7 @@ const cases = async source => {
         const entries = root.querySelectorAll(".li");
         ["-", "/", "?"].forEach((marker, index) => {
             const action = entries[index].querySelector(":scope > .protyle-action--task");
-            check.equal(JSON.parse(getComputedStyle(action, "::before").content), marker);
+            check.equal(getComputedStyle(action, "::before").content, marker === "?" ? '"?"' : "none");
         });
         check.equal(getComputedStyle(entries[1].querySelector(".p")).textDecorationLine, "none");
     }
@@ -235,7 +268,7 @@ const cases = async source => {
     document.head.append(style);
     ({from} = reset());
     const items = from.querySelectorAll(":scope > .tab-item");
-    items[1].setAttribute("tabs-task", "/");
+    items[1].setAttribute("tabs-task", "?");
     const completed = items[0].cloneNode(true);
     completed.dataset.nodeId = window.Lute.NewNodeID();
     completed.setAttribute("tabs-task", "X");
@@ -246,12 +279,19 @@ const cases = async source => {
     const custom = from.querySelector(".tabs-task--custom");
     const incomplete = from.querySelector(".tabs-task:not(.tabs-task--custom)");
     check.equal(custom.querySelector("use").getAttribute("xlink:href"), incomplete.querySelector("use").getAttribute("xlink:href"));
-    check.equal(custom.querySelector("span").textContent, "/");
+    check.equal(custom.querySelector("span").textContent, "?");
     check.equal(custom.getBoundingClientRect().width, incomplete.getBoundingClientRect().width);
     check.equal(custom.getBoundingClientRect().height, incomplete.getBoundingClientRect().height);
     const checked = from.querySelector('.tabs-task[data-task="X"]');
     check.equal(checked.querySelector("use").getAttribute("xlink:href"), "#iconCheck");
     check.equal(custom.getBoundingClientRect().width, checked.getBoundingClientRect().width);
+    for (const [marker, icon] of [["/", "iconTaskInProgress"], ["-", "iconIndeterminateCheck"]]) {
+        items[0].setAttribute("tabs-task", marker);
+        renderer.tabsRender(root, {readonly: () => false, taskMenu: entry => { edited = entry; }, task: entry => { toggled = entry; }});
+        const preset = from.querySelector(`.tabs-task[data-task="${marker}"]`);
+        check.equal(preset.querySelector("use").getAttribute("xlink:href"), `#${icon}`);
+        check.equal(preset.querySelector("span"), null);
+    }
     const active = from.getAttribute("tabs-active-id");
     custom.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
     check.equal(edited, items[1]);
@@ -279,6 +319,8 @@ const run = async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(readFileSync(path.join(__dirname,
             "../stage/protyle/js/lute/lute.min.js"), "utf8"));
+        await win.webContents.executeJavaScript(readFileSync(path.join(__dirname,
+            "../appearance/icons/litheness/icon.js"), "utf8"));
         const result = await win.webContents.executeJavaScript(`(${cases.toString()})(${JSON.stringify(sources())})`);
         assert.equal(result, "Task status cases passed");
         console.log(result);

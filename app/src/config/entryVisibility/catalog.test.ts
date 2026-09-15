@@ -734,8 +734,8 @@ test("list block submenu follows the base block entries", () => {
     assert.equal(listBlock?.type, "entry");
     assert.equal(listBlock?.simple, true);
     assert.deepEqual(listBlock?.children?.map((item) => item.key), [
-        "taskStatus",
-        "customTaskStatus",
+        "taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus",
+        "separator_taskStatus",
         "orderedListStart",
         "continueListNumbering",
         "separator_numbering",
@@ -744,13 +744,13 @@ test("list block submenu follows the base block entries", () => {
     ]);
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.customTaskStatus")?.simple, true);
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.customTaskStatus")?.type, "entry");
-    assert.deepEqual(getEntryCatalogChildren("gutter.single.listBlock.taskStatus").map(item => item.key), [
-        "taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus",
-    ]);
-    assert.equal(getEntryCatalogNode("gutter.single.listBlock.taskStatus")?.simple, true);
+    assert.equal(getEntryCatalogNode("gutter.single.listBlock.taskStatus"), undefined);
+    assert.equal(getEntryCatalogNode("gutter.single.listBlock.separator_taskStatus")?.type, "separator");
     const source = readFileSync(resolve(process.cwd(), "src/protyle/gutter/index.ts"), "utf8");
     const submenu = source.slice(source.indexOf("const genListBlockSubmenu"), source.indexOf("return submenu;", source.indexOf("const genListBlockSubmenu")));
-    assert.deepEqual(Array.from(submenu.matchAll(/id: "([^"]+)"/g), match => match[1]),
+    const taskSource = readFileSync(resolve(process.cwd(), "src/protyle/wysiwyg/taskStatusDialog.ts"), "utf8");
+    assert.deepEqual([...Array.from(taskSource.matchAll(/id: "([^"]+)"/g), match => match[1]),
+        ...Array.from(submenu.matchAll(/id: "([^"]+)"/g), match => match[1])],
         listBlock.children.map(item => item.key));
 });
 

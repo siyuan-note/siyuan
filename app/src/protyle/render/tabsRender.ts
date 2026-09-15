@@ -313,12 +313,15 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                                 }
                                 event.stopPropagation();
                                 event.preventDefault();
-                                if (!readonly) {
-                                    if (type === "contextmenu") {
+                                if (type === "contextmenu") {
+                                    if (controller.options.menu) {
+                                        controller.select(tabs, itemID(item), true);
+                                        controller.options.menu(tabs, item, button);
+                                    } else if (!readonly) {
                                         controller.options.taskMenu?.(item);
-                                    } else if (type !== "dblclick") {
-                                        controller.options.task?.(item);
                                     }
+                                } else if (!readonly && type !== "dblclick") {
+                                    controller.options.task?.(item);
                                 }
                             }));
                             button.prepend(task);

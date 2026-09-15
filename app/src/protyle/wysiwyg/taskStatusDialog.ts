@@ -1,7 +1,6 @@
 import {openInputDialog} from "../../dialog/inputDialog";
 import {showMessage} from "../../dialog/message";
 import {isTaskListMarker} from "./taskListMarker";
-import {Menu} from "../../plugin/Menu";
 
 export const getTaskStatusItems = (marker: string, setMarker: (marker: string) => void): IMenu[] => {
     const lang = window.siyuan.languages;
@@ -23,13 +22,6 @@ export const getTaskStatusItems = (marker: string, setMarker: (marker: string) =
         checked: ![" ", "/", "X", "-"].includes(marker?.toUpperCase()),
         click: () => openTaskStatusDialog(marker, setMarker),
     }]);
-};
-
-export const openTaskStatusMenu = (anchor: Element, marker: string, setMarker: (marker: string) => void) => {
-    const menu = new Menu();
-    getTaskStatusItems(marker, setMarker).forEach(item => menu.addItem(item));
-    const rect = anchor.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
 };
 
 export const openTaskStatusDialog = (marker: string, setMarker: (marker: string) => void) => {

@@ -69,7 +69,7 @@ import {
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
-import {openTaskListItemMenu, toggleTaskListItem} from "./list";
+import {toggleTaskListItem} from "./list";
 import {preserveCopiedTabTask} from "../util/tabsCopy";
 import {hideElements} from "../ui/hideElements";
 /// #if !BROWSER
@@ -3578,11 +3578,6 @@ export class WYSIWYG {
             if (!nodeElement) {
                 return false;
             }
-            if (hasClosestByClassName(target, "protyle-action--task")) {
-                openTaskListItemMenu(protyle, nodeElement);
-                event.preventDefault();
-                return;
-            }
             const widthDragElement = hasClosestByClassName(target, "av__widthdrag") as HTMLElement;
             if (widthDragElement) {
                 if (!protyle.disabled) {
@@ -3761,7 +3756,7 @@ export class WYSIWYG {
                         nodeElement.querySelector(".table__select").removeAttribute("style");
                     }
                 }
-            } else if (protyle.toolbar.range.toString() === "") {
+            } else if (protyle.toolbar.range.toString() === "" || hasClosestByClassName(target, "protyle-action--task")) {
                 if (!protyle.gutter) {
                     event.preventDefault();
                     window.siyuan.menus.menu.remove();

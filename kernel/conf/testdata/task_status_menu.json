@@ -1,0 +1,70 @@
+[
+  {
+    "name": "hidden parent and duplicate custom entries preserve effective visibility and plugin order",
+    "input": {
+      "entries": {
+        "gutter.single.listBlock.taskStatus": false,
+        "gutter.single.listBlock.taskStatus.taskStatusTodo": true,
+        "gutter.single.listBlock.taskStatus.customTaskStatus": true,
+        "gutter.single.listBlock.customTaskStatus": false,
+        "gutter.single.listBlock.taskStatus.pluginChild": true,
+        "future.entry": false
+      },
+      "orders": {
+        "gutter.single.listBlock": ["appendListItem", "pluginBefore", "taskStatus", "pluginMiddle", "customTaskStatus", "prependListItem"],
+        "gutter.single.listBlock.taskStatus": ["taskStatusCanceled", "pluginChild", "customTaskStatus", "taskStatusTodo", "taskStatusInProgress", "taskStatusDone"]
+      }
+    },
+    "expected": {
+      "entries": {
+        "gutter.single.listBlock.taskStatusTodo": false,
+        "gutter.single.listBlock.taskStatusInProgress": false,
+        "gutter.single.listBlock.taskStatusDone": false,
+        "gutter.single.listBlock.taskStatusCanceled": false,
+        "gutter.single.listBlock.customTaskStatus": false,
+        "gutter.single.listBlock.pluginChild": false,
+        "future.entry": false
+      },
+      "orders": {
+        "gutter.single.listBlock": ["appendListItem", "pluginBefore", "taskStatusCanceled", "pluginChild", "customTaskStatus", "taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "separator_taskStatus", "pluginMiddle", "prependListItem"]
+      }
+    }
+  },
+  {
+    "name": "visible duplicate remains accessible and unspecified child order uses defaults",
+    "input": {
+      "entries": {
+        "gutter.single.listBlock.taskStatus": true,
+        "gutter.single.listBlock.taskStatus.taskStatusCanceled": false,
+        "gutter.single.listBlock.taskStatus.customTaskStatus": false,
+        "gutter.single.listBlock.customTaskStatus": true
+      },
+      "orders": {
+        "gutter.single.listBlock": ["taskStatus", "customTaskStatus", "prependListItem", "pluginTail", "appendListItem"]
+      }
+    },
+    "expected": {
+      "entries": {
+        "gutter.single.listBlock.taskStatusTodo": true,
+        "gutter.single.listBlock.taskStatusInProgress": true,
+        "gutter.single.listBlock.taskStatusDone": true,
+        "gutter.single.listBlock.taskStatusCanceled": false,
+        "gutter.single.listBlock.customTaskStatus": true
+      },
+      "orders": {
+        "gutter.single.listBlock": ["taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus", "separator_taskStatus", "prependListItem", "pluginTail", "appendListItem"]
+      }
+    }
+  },
+  {
+    "name": "profiles without the task submenu retain their existing settings",
+    "input": {
+      "entries": {"gutter.single.listBlock.customTaskStatus": false},
+      "orders": {"gutter.single.listBlock": ["appendListItem", "customTaskStatus", "prependListItem"]}
+    },
+    "expected": {
+      "entries": {"gutter.single.listBlock.customTaskStatus": false},
+      "orders": {"gutter.single.listBlock": ["appendListItem", "customTaskStatus", "prependListItem"]}
+    }
+  }
+]

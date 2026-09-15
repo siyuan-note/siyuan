@@ -17,7 +17,20 @@ const sources = () => {
         return compile(statements.map(statement => statement.getText(source)).join("\n"));
     };
     const renderSource = readFileSync(path.join(__dirname, "../src/protyle/render/tabsRender.ts"), "utf8");
+    const wysiwygSource = ts.createSourceFile("index.ts", readFileSync(path.join(__dirname,
+        "../src/protyle/wysiwyg/index.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+    let contextMenu;
+    const visit = node => {
+        if (ts.isCallExpression(node) && node.expression.getText(wysiwygSource) === "this.element.addEventListener" &&
+            node.arguments[0]?.text === "contextmenu") {
+            contextMenu = compile(`const handleContextMenu = ${node.arguments[1].getText(wysiwygSource)};`);
+        }
+        ts.forEachChild(node, visit);
+    };
+    visit(wysiwygSource);
+    assert.ok(contextMenu);
     return {
+        contextMenu,
         icons: ["unchecked", "in-progress", "canceled"].map(name =>
             readFileSync(path.join(__dirname, `../src/assets/icon/task-${name}.svg`), "utf8")),
         actions: extract("protyle/render/tabsRender.ts", ["getTabTask", "getTabItems", "hasTabsTasks"]) +
@@ -30,6 +43,8 @@ const sources = () => {
         renderer: compile(renderSource.replace(/^import .*;\r?\n/gm, "")) +
             extract("protyle/render/tabsState.ts", ["resolveTabID", "tabKeyboardTarget"]),
         menu: extract("protyle/wysiwyg/taskStatusDialog.ts", ["getTaskStatusItems"]),
+        tabMenu: extract("protyle/wysiwyg/tabs.ts", ["canEdit", "openTabsMenu"]),
+        normalizeSeparators: extract("config/entryVisibility/runtime.ts", ["normalizeSeparators"]),
         css: require("sass").compile(path.join(__dirname, "../src/assets/scss/protyle/_wysiwyg.scss")).css +
             require("sass").compile(path.join(__dirname, "../src/assets/scss/component/_typography.scss")).css,
     };
@@ -96,6 +111,61 @@ const cases = async source => {
             target: groups[1].querySelector(".tab-item")};
     };
     const find = id => root.querySelector(`[data-node-id="${id}"]`);
+    // 完整页签菜单保留其他块操作，状态直接展开且自定义入口只有一个。
+    let openedMenu;
+    class TestMenu {
+        constructor() {
+            this.items = [];
+            openedMenu = {items: this.items};
+        }
+        addItem(item) { this.items.push(item); }
+        addSeparator(item) { this.items.push({...item, type: "separator"}); }
+        open() {}
+    }
+    const openTabMenu = new Function("Menu", "Constants", "getTabTask", "getTaskStatusItems", "setTabTask", "copySubMenu",
+        source.tabMenu + "; return openTabsMenu;")(
+        TestMenu, {CB_GET_HISTORY: "history"}, api.getTabTask, getMenu, api.setTabTask, () => []);
+    const menuFixture = reset();
+    openTabMenu(protyle, menuFixture.from, menuFixture.item, menuFixture.item);
+    const expectedStates = ["taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus"];
+    check.deepEqual(openedMenu.items.filter(item => expectedStates.includes(item.id)).map(item => item.id), expectedStates);
+    check.equal(openedMenu.items.filter(item => item.id === "customTaskStatus").length, 1);
+    check.equal(openedMenu.items.some(item => item.id === "taskStatus"), false);
+    const normalizeSeparators = new Function(source.normalizeSeparators + "; return normalizeSeparators;")();
+    for (const hidden of [[], expectedStates, ["prependListItem", "appendListItem", "pluginItem"]]) {
+        const container = document.createElement("div");
+        document.body.append(container);
+        for (const id of [...expectedStates, "separator_taskStatus", "separator_plugin", "pluginItem", "prependListItem", "appendListItem"]) {
+            if (hidden.includes(id)) {
+                continue;
+            }
+            const entry = document.createElement("button");
+            entry.dataset.id = id;
+            entry.className = id.startsWith("separator_") ? "b3-menu__separator" : "b3-menu__item";
+            container.append(entry);
+        }
+        normalizeSeparators(container);
+        const entries = Array.from(container.children);
+        check.equal(entries[0].classList.contains("b3-menu__separator"), false);
+        check.equal(entries[entries.length - 1].classList.contains("b3-menu__separator"), false);
+        entries.forEach((entry, index) => {
+            if (entry.classList.contains("b3-menu__separator")) {
+                check.equal(entries[index - 1].classList.contains("b3-menu__separator"), false);
+            }
+        });
+        if (!hidden.includes("pluginItem")) {
+            check.ok(container.querySelector('[data-id="pluginItem"]'));
+        }
+        container.remove();
+    }
+    check.ok(openedMenu.items.some(item => item.icon === "iconCopy"));
+    check.ok(openedMenu.items.some(item => item.icon === "iconTrashcan"));
+    openedMenu.items.find(item => item.id === "taskStatusInProgress").click();
+    check.equal(api.getTabTask(menuFixture.item), "/");
+    protyle.disabled = true;
+    openTabMenu(protyle, menuFixture.from, menuFixture.item, menuFixture.item);
+    check.deepEqual(openedMenu.items.map(item => item.icon), ["iconCopy"]);
+    protyle.disabled = false;
     const apply = operations => operations.forEach(operation => {
         const item = find(operation.id);
         if (operation.action === "setAttrs") {
@@ -191,6 +261,29 @@ const cases = async source => {
     // 列表自定义状态保留原始字符，并沿用点击切换、只读保护和撤销快照。
     root.innerHTML = lute.Md2BlockDOM("* [ ] Task\n");
     const taskItem = root.querySelector(".li");
+    // 图标右键必须进入完整块菜单，即使仍有文本选区或编辑器为只读，也不能被状态菜单截获。
+    let blockMenuTarget;
+    const selectionRange = document.createRange();
+    selectionRange.selectNodeContents(taskItem.querySelector(".p"));
+    const contextProtyle = {...protyle, toolbar: {range: selectionRange, element: document.createElement("div"),
+        isMultiSelectMode: () => false}, gutter: {renderMenu: (_protyle, block) => { blockMenuTarget = block; }}};
+    window.siyuan.menus = {menu: {popup() {}, fullscreen() {}, remove() {}}};
+    const contextMenu = new Function("protyle", "getBlockSelectionModeElement", "isInEmbedBlock", "hasClosestBlock",
+        "hasClosestByClassName", "getEditorRange", "isNotEditBlock", "hasClosestByAttribute", "hideElements",
+        source.contextMenu + "; return handleContextMenu;")(
+        contextProtyle, () => null, () => null, target => target.closest("[data-node-id]"),
+        (target, name) => target.closest(`.${name}`), () => selectionRange, () => false,
+        (target, name, value) => target.closest(`[${name}~="${value}"]`), () => {});
+    for (const readonly of [false, true]) {
+        contextProtyle.disabled = readonly;
+        for (const target of taskItem.querySelectorAll(".protyle-action, svg, use")) {
+            blockMenuTarget = undefined;
+            const html = taskItem.outerHTML;
+            await contextMenu({target, detail: {}, clientX: 1, clientY: 1, preventDefault() {}, stopPropagation() {}});
+            check.equal(blockMenuTarget, taskItem);
+            check.equal(taskItem.outerHTML, html);
+        }
+    }
     for (const marker of ["/", "-", "?", "X", "x", " ", "\"", "&", "<"]) {
         const before = taskItem.outerHTML;
         api.setTaskListItemMarker(protyle, taskItem, marker);
@@ -301,6 +394,17 @@ const cases = async source => {
     check.equal(from.getAttribute("tabs-active-id"), active);
     renderer.tabsRender(root, {readonly: () => true});
     check.equal(from.querySelector(".tabs-task--custom").getAttribute("aria-disabled"), "true");
+    // 任务图标右键与标题右键共用完整菜单，只读时仍允许复制，且不切换任务标记。
+    for (const readonly of [false, true]) {
+        let menuTarget;
+        renderer.tabsRender(root, {readonly: () => readonly, menu: (_tabs, entry) => { menuTarget = entry; },
+            taskMenu: () => check.fail("the task-only menu must not intercept the full item menu"),
+            task: () => check.fail("right-click must not toggle task status")});
+        const task = from.querySelector(".tabs-task--custom");
+        task.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
+        check.equal(menuTarget, items[1]);
+        check.equal(api.getTabTask(items[1]), "?");
+    }
     renderer.destroyTabsRender(root);
     root.remove();
     return "Task status cases passed";

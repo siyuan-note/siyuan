@@ -113,7 +113,6 @@ import {chartRender} from "../render/chartRender";
 import {
     appendListItem,
     openOrderedListStartDialog,
-    editTaskListItem,
     setTaskListItemMarker,
     prependListItem,
     setOrderedListStart
@@ -2141,19 +2140,9 @@ export class Gutter {
             const genListBlockSubmenu = (continueListStart?: number) => {
                 const submenu: IMenu[] = [];
                 if (type === "NodeListItem" && nodeElement.getAttribute("data-subtype") === "t") {
-                    submenu.push({
-                        id: "taskStatus",
-                        icon: "iconCheck",
-                        label: window.siyuan.languages.taskStatus,
-                        submenu: getTaskStatusItems(nodeElement.getAttribute("data-task"),
-                            marker => setTaskListItemMarker(protyle, nodeElement, marker)),
-                    });
-                    submenu.push({
-                        id: "customTaskStatus",
-                        icon: "iconCheck",
-                        label: window.siyuan.languages.customTaskStatus,
-                        click: () => editTaskListItem(protyle, nodeElement),
-                    });
+                    submenu.push(...getTaskStatusItems(nodeElement.getAttribute("data-task"),
+                        marker => setTaskListItemMarker(protyle, nodeElement, marker)));
+                    submenu.push({id: "separator_taskStatus", type: "separator"});
                 }
                 if (isOrderedList) {
                     submenu.push({

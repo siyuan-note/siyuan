@@ -14,7 +14,7 @@ import {remapTabsDOMIDs} from "../util/tabsCopy";
 import {copySubMenu} from "../../menus/commonMenuItem";
 import {isTaskListMarker, nextTaskListMarker} from "./taskListMarker";
 import {hideElements} from "../ui/hideElements";
-import {getTaskStatusItems, openTaskStatusDialog, openTaskStatusMenu} from "./taskStatusDialog";
+import {getTaskStatusItems} from "./taskStatusDialog";
 
 export const toggleTabsTasks = (protyle: IProtyle, tabs: HTMLElement) => {
     const items = getTabItems(tabs);
@@ -34,12 +34,6 @@ export const setTabTask = (protyle: IProtyle, item: HTMLElement, marker: string)
         return;
     }
     changeTabs(protyle, [item], () => item.setAttribute("tabs-task", marker));
-};
-
-const editTabTask = (protyle: IProtyle, item: HTMLElement) => {
-    if (canEdit(protyle, item)) {
-        openTaskStatusDialog(getTabTask(item), marker => setTabTask(protyle, item, marker));
-    }
 };
 
 const canEdit = (protyle: IProtyle, element: Element) => !protyle.disabled &&
@@ -164,9 +158,10 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
     menu.addItem({icon: "iconCopy", label: lang.copy, submenu: copySubMenu([item.dataset.nodeId], false)});
     if (canEdit(protyle, tabs)) {
         if (getTabTask(item) !== null) {
-            menu.addItem({icon: "iconCheck", label: lang.taskStatus,
-                submenu: getTaskStatusItems(getTabTask(item), marker => setTabTask(protyle, item, marker))});
-            menu.addItem({icon: "iconCheck", label: lang.customTaskStatus, click: () => editTabTask(protyle, item)});
+            menu.addSeparator({id: "separator_taskStatusBefore"});
+            getTaskStatusItems(getTabTask(item), marker => setTabTask(protyle, item, marker))
+                .forEach(option => menu.addItem(option));
+            menu.addSeparator({id: "separator_taskStatus"});
         }
         menu.addItem({icon: "iconEdit", label: lang.rename, click: () => renameTab(protyle, item)});
         menu.addItem({icon: "iconCopy", label: lang.duplicateCopy, click: () => {
@@ -206,13 +201,6 @@ export const initEditorTabs = (protyle: IProtyle) => {
         addLabel: window.siyuan.languages.newTabItem,
         taskLabel: window.siyuan.languages.task,
         task: item => setTabTask(protyle, item, nextTaskListMarker(getTabTask(item))),
-        taskMenu: item => {
-            if (canEdit(protyle, item)) {
-                const anchor = Array.from(item.parentElement.querySelectorAll<HTMLElement>(".tabs-task"))
-                    .find(task => task.dataset.tabId === item.dataset.nodeId);
-                openTaskStatusMenu(anchor || item, getTabTask(item), marker => setTabTask(protyle, item, marker));
-            }
-        },
         endEdit: () => hideElements(["toolbar"], protyle),
         select: (tabs, id) => {
             if (!canEdit(protyle, tabs) || tabs.getAttribute("tabs-active-id") === id) {

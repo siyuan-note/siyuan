@@ -145,6 +145,12 @@
     min-width: 0;
     padding: 4px;
     position: relative;
+
+    &.protyle-wysiwyg--select::after,
+    &.protyle-wysiwyg--select-mode::after,
+    &.protyle-wysiwyg--hl::after {
+      border-radius: inherit;
+    }
   }
 
   .tab-item-title {

@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "स्ट्रीमिंग Markdown पूर्वावलोकन",
+	"agentStreamingMarkdownTip": "एजेंट के उत्तर के दौरान Markdown का पूर्वावलोकन करें; प्रदर्शन प्रभावित हो सकता है",
 	"taskStatus": "कार्य की स्थिति",
 	"taskStatusTodo": "करना है",
 	"taskStatusInProgress": "प्रगति में",

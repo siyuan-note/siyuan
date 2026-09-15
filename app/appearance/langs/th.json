@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "แสดงตัวอย่าง Markdown ระหว่างสตรีม",
+	"agentStreamingMarkdownTip": "แสดงตัวอย่าง Markdown ขณะเอเจนต์ตอบกลับ อาจส่งผลต่อประสิทธิภาพ",
 	"taskStatus": "สถานะงาน",
 	"taskStatusTodo": "สิ่งที่ต้องทำ",
 	"taskStatusInProgress": "กำลังดำเนินการ",

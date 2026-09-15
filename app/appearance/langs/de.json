@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "Markdown-Vorschau beim Streaming",
+	"agentStreamingMarkdownTip": "Markdown während der Agentenantwort anzeigen; kann die Leistung beeinträchtigen",
 	"taskStatus": "Aufgabenstatus",
 	"taskStatusTodo": "Offen",
 	"taskStatusInProgress": "In Bearbeitung",

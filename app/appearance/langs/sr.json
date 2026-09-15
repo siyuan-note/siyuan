@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "Преглед Markdown-а током стримовања",
+	"agentStreamingMarkdownTip": "Преглед Markdown-а током одговора агента; може утицати на перформансе",
 	"taskStatus": "Статус задатка",
 	"taskStatusTodo": "За урадити",
 	"taskStatusInProgress": "У току",

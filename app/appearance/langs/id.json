@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "Pratinjau Markdown saat streaming",
+	"agentStreamingMarkdownTip": "Pratinjau Markdown saat agen merespons; dapat memengaruhi kinerja",
 	"taskStatus": "Status tugas",
 	"taskStatusTodo": "Belum dikerjakan",
 	"taskStatusInProgress": "Sedang dikerjakan",

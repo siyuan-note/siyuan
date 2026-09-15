@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "Akış sırasında Markdown önizlemesi",
+	"agentStreamingMarkdownTip": "Ajan yanıt verirken Markdown önizlemesi göster; performansı etkileyebilir",
 	"taskStatus": "Görev durumu",
 	"taskStatusTodo": "Yapılacak",
 	"taskStatusInProgress": "Devam ediyor",

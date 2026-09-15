@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "תצוגה מקדימה של Markdown בזמן הזרמה",
+	"agentStreamingMarkdownTip": "תצוגה מקדימה של Markdown בזמן תגובת הסוכן; עשויה להשפיע על הביצועים",
 	"taskStatus": "מצב משימה",
 	"taskStatusTodo": "לביצוע",
 	"taskStatusInProgress": "בתהליך",

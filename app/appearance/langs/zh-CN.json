@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "流式 Markdown 预览",
+	"agentStreamingMarkdownTip": "在回复过程中预览 Markdown，可能影响性能",
 	"taskStatus": "任务状态",
 	"taskStatusTodo": "待办",
 	"taskStatusInProgress": "进行中",

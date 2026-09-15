@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "Markdown-voorbeeld tijdens streaming",
+	"agentStreamingMarkdownTip": "Markdown tijdens het antwoord van de agent weergeven; kan de prestaties beïnvloeden",
 	"taskStatus": "Taakstatus",
 	"taskStatusTodo": "Te doen",
 	"taskStatusInProgress": "In uitvoering",

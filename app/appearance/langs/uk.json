@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "Попередній перегляд Markdown під час потокового виведення",
+	"agentStreamingMarkdownTip": "Попередній перегляд Markdown під час відповіді агента; може впливати на продуктивність",
 	"taskStatus": "Статус завдання",
 	"taskStatusTodo": "До виконання",
 	"taskStatusInProgress": "У процесі",

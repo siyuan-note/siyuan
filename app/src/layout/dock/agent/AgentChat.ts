@@ -31,6 +31,7 @@ import {
     isAgentRegenerateStateCurrent
 } from "./AgentHistory";
 import {
+    bindAgentMessageEvents,
     copyAgentText,
     createThinkingCardElement,
     postRender,
@@ -44,6 +45,12 @@ import {bindThinkingCardToggle} from "../../../ai/thinkingCard";
 import {getAgentReasoningEffortOptions} from "./AgentReasoning";
 import {mountGroupedModelPicker, type IGroupedModelPicker} from "../../../config/tabs/ai/aiProviderUi";
 import {AI_CONFIG_CHANGED_EVENT} from "../../../config/tabs/ai/aiRuntime";
+import {
+    AGENT_STREAMING_MARKDOWN_CHANGED_EVENT,
+    AGENT_STREAMING_MARKDOWN_KEY,
+    isAgentStreamingMarkdownEnabled
+} from "../../../config/tabs/ai/agentStreamingMarkdown";
+import {AgentStreamingMarkdown} from "./AgentStreamingMarkdown";
 import {isEncryptedBox} from "../../../util/pathName";
 import {Menu} from "../../../plugin/Menu";
 import {getAgentDefaultModelID, getUsableAgentModels} from "./agentModel";
@@ -211,6 +218,9 @@ export class AgentChat extends Model {
     private sessionErrors = new Map<string, {message: string; userEntryID?: string}>();
     private recoveryInFlightSessionIDs = new Set<string>();
     private lute: Lute;
+    private streamingMarkdownEnabled = isAgentStreamingMarkdownEnabled();
+    private streamingMarkdown: AgentStreamingMarkdown | undefined;
+    private streamingMarkdownBody: HTMLElement | undefined;
     private currentContent = "";
     private fullContent = "";
     private contextTokens = 0;
@@ -305,6 +315,12 @@ export class AgentChat extends Model {
         // AI 配置保存后主动刷新模型列表；window focus 和设置对话框关闭监听用于兜底其他配置更新入口。
         window.addEventListener(AI_CONFIG_CHANGED_EVENT, this.checkConfigChangedHandler);
         window.addEventListener("focus", this.checkConfigChangedHandler);
+        window.addEventListener(AGENT_STREAMING_MARKDOWN_CHANGED_EVENT, this.checkStreamingMarkdownChanged);
+        window.addEventListener("storage", (event) => {
+            if (event.key === AGENT_STREAMING_MARKDOWN_KEY || event.key === null) {
+                this.checkStreamingMarkdownChanged();
+            }
+        });
         // 设置对话框是 SiYuan 内部模态，关闭时 window 不失焦，focus 事件不触发。
         // 监听 body 子节点变化，当含 .config__panel 的设置 dialog 被移除时即时刷新。
         this.settingDialogObserver = new MutationObserver(() => {
@@ -323,6 +339,7 @@ export class AgentChat extends Model {
     // 仅当处于欢迎页（无会话内容）时重渲染，以便从无模型提示块切回示例或反之；
     // 有会话内容时不重绘（避免破坏对话），refreshModelOptions 内已刷新 trigger 显示。
     private checkConfigChanged() {
+        this.checkStreamingMarkdownChanged();
         const actualOptions = getUsableAgentModels(window.siyuan.config.ai);
         const actualDefaultModelID = getAgentDefaultModelID(window.siyuan.config.ai, actualOptions);
         const optionsChanged = actualOptions.length !== this.modelOptions.length || actualOptions.some((option, index) =>
@@ -336,6 +353,25 @@ export class AgentChat extends Model {
             this.showWelcome();
         }
     }
+
+    private checkStreamingMarkdownChanged = () => {
+        const enabled = isAgentStreamingMarkdownEnabled();
+        if (enabled === this.streamingMarkdownEnabled) {
+            return;
+        }
+        this.streamingMarkdownEnabled = enabled;
+        this.cancelTokenUpdate();
+        const body = this.currentAIElement?.querySelector<HTMLElement>(".agent-chat__body--streaming");
+        if (!body) {
+            return;
+        }
+        if (enabled) {
+            this.updateStreamingMarkdown(body);
+        } else {
+            body.classList.remove("agent-chat__body--streaming-markdown");
+            body.textContent = this.currentContent;
+        }
+    };
 
     private initUI() {
         const panel = this.panelElement;
@@ -492,12 +528,17 @@ export class AgentChat extends Model {
         this.layoutResizeObserver = new ResizeObserver(() => {
             const collapsed = this.messagesContainer.clientWidth === 0 || this.messagesContainer.clientHeight === 0;
             if (collapsed) {
+                this.streamingMarkdown?.cancel();
                 this.layoutVisible = false;
                 return;
             }
             // 仅在「刚从折叠恢复」时启动一次校正循环，避免干扰正常滚动 / 流式输出。
             if (!this.layoutVisible) {
                 this.layoutVisible = true;
+                const body = this.currentAIElement?.querySelector<HTMLElement>(".agent-chat__body--streaming");
+                if (this.streamingMarkdownEnabled && body) {
+                    this.updateStreamingMarkdown(body);
+                }
                 const saved = this.scrollBottomBySession.get(this.sessionId) ?? 0;
                 this.restoreScrollToBottom(saved);
                 return;
@@ -1161,6 +1202,7 @@ export class AgentChat extends Model {
         if (!run.viewState) {
             return;
         }
+        this.cancelTokenUpdate();
         const view = document.createDocumentFragment();
         this.observeStickTarget(null);
         while (this.messagesContainer.firstChild) {
@@ -1174,6 +1216,7 @@ export class AgentChat extends Model {
         if (!state) {
             return false;
         }
+        this.cancelTokenUpdate();
         this.observeStickTarget(null);
         if (state.view?.hasChildNodes()) {
             this.messagesContainer.innerHTML = "";
@@ -1207,6 +1250,15 @@ export class AgentChat extends Model {
         run.viewState = undefined;
         this.updateTokenDisplay();
         this.rebuildNavMarkers();
+        const body = this.currentAIElement?.querySelector<HTMLElement>(".agent-chat__body--streaming");
+        if (body) {
+            if (this.streamingMarkdownEnabled) {
+                this.updateStreamingMarkdown(body);
+            } else {
+                body.classList.remove("agent-chat__body--streaming-markdown");
+                body.textContent = this.currentContent;
+            }
+        }
         return true;
     }
 
@@ -1619,6 +1671,7 @@ export class AgentChat extends Model {
         const atBottom = this.isScrolledToBottom();
         const savedScroll = this.messagesContainer.scrollTop;
         if (forceRender) {
+            this.cancelTokenUpdate();
             this.currentAIElement = null;
             this.observeStickTarget(null);
             this.currentAssistantEntryId = "";
@@ -1769,6 +1822,7 @@ export class AgentChat extends Model {
 
     // 当前会话被其他实例删除时，清空到欢迎页。不调 saveSession（会话已不存在于磁盘）。
     private handleCurrentSessionDeleted() {
+        this.cancelTokenUpdate();
         this.destroyEditingComposer();
         this.pendingEditDraft = null;
         const deletedSessionID = this.sessionId;
@@ -2864,6 +2918,11 @@ export class AgentChat extends Model {
     }
 
     private async appendConfigurableError(message: string) {
+        if (this.streamingMarkdownEnabled && this.currentContent &&
+            this.currentAIElement?.querySelector(".agent-chat__body--streaming")) {
+            this.finalizeStreamingBody(this.currentContent, Date.now());
+        }
+        this.cancelTokenUpdate();
         this.finishActiveThinking();
         this.clearThinking();
         if (this.currentAIElement && !this.currentContent) {
@@ -3007,6 +3066,7 @@ export class AgentChat extends Model {
     }
 
     private createAIMessagePlaceholder(): HTMLElement {
+        this.cancelTokenUpdate();
         this.currentContent = "";
         this.currentAssistantEntryId = SessionStore.newSessionId();
         const el = document.createElement("div");
@@ -3032,6 +3092,14 @@ export class AgentChat extends Model {
         this.currentContent += token;
         this.fullContent += token;
 
+        if (this.streamingMarkdownEnabled) {
+            const body = this.currentAIElement.querySelector<HTMLElement>(".agent-chat__body");
+            if (body) {
+                this.updateStreamingMarkdown(body);
+            }
+            return;
+        }
+
         if (!this.pendingTokenUpdate) {
             this.pendingTokenUpdate = true;
             // 流式期间只用 textContent 写入纯文本，跳过 Lute 解析与 postRender 富渲染。
@@ -3048,6 +3116,7 @@ export class AgentChat extends Model {
     }
 
     private flushTokenUpdate() {
+        this.streamingMarkdown?.flush();
         if (this.pendingTokenUpdate) {
             this.pendingTokenUpdate = false;
             cancelAnimationFrame(this.rafId);
@@ -3055,6 +3124,30 @@ export class AgentChat extends Model {
             if (bodyEl) {
                 bodyEl.textContent = this.currentContent;
             }
+        }
+    }
+
+    private updateStreamingMarkdown(body: HTMLElement) {
+        if (!this.layoutVisible) {
+            // 面板折叠时保留最新内容，重新展开后再解析，避免不可见预览占用主线程。
+            return;
+        }
+        if (!this.streamingMarkdown || this.streamingMarkdownBody !== body) {
+            this.streamingMarkdown?.cancel();
+            this.streamingMarkdownBody = body;
+            bindAgentMessageEvents(body, this.app, this.host.onNavigate);
+            this.streamingMarkdown = new AgentStreamingMarkdown(body, () => this.scrollToBottom());
+        }
+        this.streamingMarkdown.update(this.currentContent);
+    }
+
+    private cancelTokenUpdate() {
+        this.streamingMarkdown?.cancel();
+        this.streamingMarkdown = undefined;
+        this.streamingMarkdownBody = undefined;
+        if (this.pendingTokenUpdate) {
+            cancelAnimationFrame(this.rafId);
+            this.pendingTokenUpdate = false;
         }
     }
 
@@ -3547,9 +3640,9 @@ export class AgentChat extends Model {
         }
     }
 
-    // 流式结束时把 currentAIElement 的 body 从纯文本一次性转为富渲染（Lute + postRender）。
-    // 由 finishResponse（正常结束）与 error 路径（中断）共用，保证流式期轻渲染后仍得到完整富文本。
+    // 结束、停止和错误路径统一使用完整原文渲染，并只在收尾时执行高亮、公式和图表等增强。
     private finalizeStreamingBody(content: string, ts: number, showActions = true) {
+        this.cancelTokenUpdate();
         if (!this.currentAIElement) {
             return;
         }
@@ -3557,7 +3650,7 @@ export class AgentChat extends Model {
         if (!bodyEl) {
             return;
         }
-        bodyEl.classList.remove("agent-chat__body--streaming");
+        bodyEl.classList.remove("agent-chat__body--streaming", "agent-chat__body--streaming-markdown");
         if (content) {
             // 富渲染只在此处执行一次，避免流式期间每帧 O(n²) 重建带来的卡顿。
             bodyEl.innerHTML = this.lute.ProtylePreviewStr("", content) || escapeHtml(content);
@@ -3565,7 +3658,7 @@ export class AgentChat extends Model {
             if (showActions) {
                 this.addCopyButton(this.currentAIElement, undefined, ts);
             }
-            this.scrollToBottom(true);
+            this.scrollToBottom(!this.streamingMarkdownEnabled);
         }
     }
 
@@ -3578,7 +3671,7 @@ export class AgentChat extends Model {
         const savedContent = this.currentContent;
         const savedFullContent = this.fullContent;
         const ts = Date.now();
-        // 流式结束：把 body 从流式期的纯文本转为一次性完整富渲染（Lute + postRender）。
+        // 流式结束：从原始 Markdown 完整渲染，确保待处理预览或未闭合语法不影响最终结果。
         // 场景一：内容在流式期间落到了思考卡片里（currentAIElement 仍为空），需新建普通 AI 消息承载。
         if (!this.currentAIElement && savedContent) {
             const thinkBody = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body");
@@ -3606,7 +3699,7 @@ export class AgentChat extends Model {
                 this.scrollToBottom(true);
             }
         } else if (this.currentAIElement) {
-            // 场景二：普通流式元素（createAIMessagePlaceholder 创建，body 仍是纯文本），一次性富渲染。
+            // 场景二：普通流式元素，一次性完整渲染并补齐增强功能。
             this.finalizeStreamingBody(savedContent, ts);
         }
         this.flushThinkingStep();
@@ -3762,6 +3855,11 @@ export class AgentChat extends Model {
     }
 
     private appendError(message: string) {
+        if (this.streamingMarkdownEnabled && this.currentContent &&
+            this.currentAIElement?.querySelector(".agent-chat__body--streaming")) {
+            this.finalizeStreamingBody(this.currentContent, Date.now());
+        }
+        this.cancelTokenUpdate();
         const lastUser = [...this.entries].reverse().find(entry => entry.type === "user");
         this.sessionErrors.set(this.sessionId, {message, userEntryID: lastUser?.id});
         this.finishActiveThinking();
@@ -3890,6 +3988,8 @@ export class AgentChat extends Model {
             this.fullContent = savedFullContent;
             this.addCopyButton(el, undefined, ts);
             this.scrollToBottom(true);
+        } else if (this.currentAIElement && this.streamingMarkdownEnabled) {
+            this.finalizeStreamingBody(savedContent, ts);
         }
         this.flushThinkingStep();
         if (this.currentContent) {
@@ -4652,6 +4752,10 @@ export class AgentChat extends Model {
     }
 
     private setStreaming(streaming: boolean) {
+        if (!streaming) {
+            this.flushTokenUpdate();
+            this.cancelTokenUpdate();
+        }
         this.isStreaming = streaming;
         this.updateRegenerateButtons();
         this.updateHostRunStatus();

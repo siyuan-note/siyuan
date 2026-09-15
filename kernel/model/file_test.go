@@ -996,6 +996,38 @@ func TestMoveDocsRejectsInvalidPathsBeforeMoving(t *testing.T) {
 	}
 }
 
+func TestMoveDocsRejectsSelfAndDescendantsBeforeMoving(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	childPath := strings.TrimSuffix(fixture.sourcePath, ".sy") + "/20260718000003-abcdefg.sy"
+	grandchildPath := strings.TrimSuffix(childPath, ".sy") + "/20260718000004-abcdefg.sy"
+	for _, docPath := range []string{childPath, grandchildPath} {
+		tree := treenode.NewTree(fixture.box.ID, docPath, "/Source/Descendant", "Descendant")
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
+		t.Cleanup(func() {
+			cache.RemoveTreeData(tree.ID)
+			cache.RemoveDocIAL(tree.Path)
+		})
+	}
+	for _, targetPath := range []string{fixture.sourcePath, childPath, grandchildPath} {
+		for _, sources := range [][]string{{fixture.sourcePath}, {fixture.targetPath, fixture.sourcePath}} {
+			if err := MoveDocs(sources, fixture.box.ID, targetPath, nil); err == nil || err.Error() != Conf.Language(87) {
+				t.Fatalf("expected invalid move target error for %v to %s, got %v", sources, targetPath, err)
+			}
+			for _, docPath := range []string{fixture.sourcePath, fixture.targetPath, childPath, grandchildPath} {
+				if !fixture.box.Exist(docPath) {
+					t.Fatalf("invalid move changed document %s", docPath)
+				}
+				if bt := treenode.GetBlockTree(util.GetTreeID(docPath)); bt == nil || bt.Path != docPath {
+					t.Fatalf("invalid move changed document index %s: %+v", docPath, bt)
+				}
+			}
+		}
+	}
+}
+
 func TestMoveDocsRefreshDeduplicatesParentsAndNotebooks(t *testing.T) {
 	refresh := newMoveDocsRefresh()
 	parent1 := &parse.Tree{Box: "20260718000000-abcdefg", ID: "20260718000001-abcdefg"}

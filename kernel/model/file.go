@@ -1708,6 +1708,13 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 		return
 	}
 
+	// 在移动任何文档前拒绝自身及后代目标，避免调用方将未执行的移动视为成功。
+	for _, fromPath := range fromPaths {
+		if fromBox := pathsBoxes[fromPath]; nil != fromBox && fromBox.ID == toBoxID &&
+			(toPath == fromPath || strings.HasPrefix(toPath, strings.TrimSuffix(fromPath, ".sy")+"/")) {
+			return errors.New(Conf.Language(87))
+		}
+	}
 	fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
 	if 1 > len(fromPaths) {
 		return

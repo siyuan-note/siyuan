@@ -353,10 +353,14 @@ export class Menu {
         // 使用当前方向记录的完整视口高度，避免软键盘收起期间菜单高度被压缩
         const maxHeight = Math.max(window.innerHeight, orientationSize?.height1 || 0) * .56;
         if (this.element.classList.contains("b3-menu--fit")) {
-            // 内容不足时收缩面板，避免列表下方留白；先清空高度，否则 scrollHeight 会被当前高度撑大
+            // 内容不足时收缩面板，避免列表下方留白；测量时取消弹性拉伸，否则 scrollHeight 会包含被撑大的空白
             this.element.style.height = "";
+            const itemsElement = this.element.lastElementChild as HTMLElement;
+            const itemsFlex = itemsElement.style.flex;
+            itemsElement.style.flex = "none";
             const titleHeight = this.element.firstElementChild.getBoundingClientRect().height;
-            const contentHeight = this.element.lastElementChild.scrollHeight;
+            const contentHeight = itemsElement.scrollHeight;
+            itemsElement.style.flex = itemsFlex;
             this.element.style.height = Math.min(maxHeight, Math.max(160, titleHeight + contentHeight)) + "px";
             return;
         }

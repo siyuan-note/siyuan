@@ -17,7 +17,14 @@ const setup = (options: {fit: boolean, contentHeight: number, viewportHeight: nu
         classes.add("b3-menu--fit");
     }
     const title = {getBoundingClientRect: () => ({height: 16})};
-    const items = {scrollHeight: options.contentHeight};
+    const itemsStyle = {flex: ""} as CSSStyleDeclaration;
+    const items = {
+        style: itemsStyle,
+        // 模拟真实底部菜单中 flex: 1 将内容区域撑满父容器的情况
+        get scrollHeight() {
+            return itemsStyle.flex === "none" ? options.contentHeight : options.viewportHeight * .9 - 16;
+        },
+    };
     const element = {
         style: {height: "100px"} as CSSStyleDeclaration,
         firstElementChild: title,
@@ -39,7 +46,7 @@ const setup = (options: {fit: boolean, contentHeight: number, viewportHeight: nu
         element,
         updateSheetTitle: () => {},
     });
-    return {menu, element};
+    return {menu, element, itemsStyle};
 };
 
 describe("mobile menu sheet content fit", () => {
@@ -50,9 +57,10 @@ describe("mobile menu sheet content fit", () => {
     });
 
     it("shrinks the sheet to short content", () => {
-        const {menu, element} = setup({fit: true, contentHeight: 272, viewportHeight: 2000});
+        const {menu, element, itemsStyle} = setup({fit: true, contentHeight: 272, viewportHeight: 2000});
         menu.resetPosition();
         assert.equal(element.style.height, "288px");
+        assert.equal(itemsStyle.flex, "");
     });
 
     it("caps fitted content at the standard sheet height", () => {

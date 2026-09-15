@@ -239,7 +239,18 @@ export class Wnd {
             this.headersElement.scrollLeft = this.headersElement.scrollLeft + event.deltaY;
         }, {passive: true});
 
+        let lastClickedTab: HTMLElement;
         this.headersElement.parentElement.addEventListener("click", (event) => {
+            const tabElement = (event.target as Element).closest<HTMLElement>('[data-type="tab-header"][data-id]');
+            const clickedTab = tabElement && this.headersElement.contains(tabElement) ? tabElement : undefined;
+            // 连续点击按页签配对，浏览器的点击次数可以超过两次。
+            if (event.button === 0 && event.detail > 1 && clickedTab && clickedTab === lastClickedTab &&
+                window.siyuan.config.fileTree.closeTabOnDoubleClick) {
+                lastClickedTab = undefined;
+                this.removeTab(clickedTab.getAttribute("data-id"));
+                return;
+            }
+            lastClickedTab = event.button === 0 ? clickedTab : undefined;
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.headersElement)) {
                 if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "new") {
@@ -266,9 +277,7 @@ export class Wnd {
             if (!tabElement || !this.headersElement.contains(tabElement)) {
                 return;
             }
-            if (window.siyuan.config.fileTree.closeTabOnDoubleClick) {
-                this.removeTab(tabElement.getAttribute("data-id"));
-            } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+            if (!window.siyuan.config.fileTree.closeTabOnDoubleClick && window.siyuan.config.fileTree.openFilesUseCurrentTab) {
                 tabElement.classList.remove("item--unupdate");
             }
         });

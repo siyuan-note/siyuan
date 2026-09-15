@@ -79,7 +79,7 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
 };
 
 export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElement,
-                                       navigation?: {key: string, goalX: number}, point?: {x: number, y: number},
+                                       navigation?: {key: string, goalX: number}, point?: {x: number, y: number, target?: Element},
                                        restoredSelection?: ReturnType<typeof captureRichCellSelection>) => {
     if (owner.disabled || !cell.isConnected || activeEditor?.cell === cell) {
         return;
@@ -103,6 +103,10 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         return;
     }
     hideElements(["gutter", "toolbar"], owner);
+    // 记录预览中被点击的公式位置，在重建单元格后打开对应公式的编辑面板。
+    const clickedMath = point?.target?.closest('[data-subtype="math"]');
+    const clickedMathIndex = clickedMath && cell.contains(clickedMath) ?
+        Array.from(cell.querySelectorAll('[data-subtype="math"]')).indexOf(clickedMath) : -1;
     const selection = getSelection();
     const initialRange = selection.rangeCount ? selection.getRangeAt(0) : undefined;
     const richSelection = cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE) ? captureRichCellSelection(cell, selection) : undefined;
@@ -244,7 +248,11 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         fragment.destroy();
         if (cell.isConnected && host.isConnected) {
             renderTableCellRich(cell);
-            renderTableCellRichElements(cell);
+            if (cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE)) {
+                renderTableCellRichElements(cell);
+            } else {
+                mathRender(cell);
+            }
         }
         if (activeEditor?.cell === cell) {
             activeEditor = undefined;
@@ -439,6 +447,13 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     fragment.focus(true);
     // 进入单元格编辑即按所属表格块同步大纲高亮
     updateOutlineCurrentBlock(owner, cell);
+    if (clickedMathIndex >= 0) {
+        const mathElement = fragment.wysiwyg.querySelectorAll('[data-subtype="math"]')[clickedMathIndex];
+        if (mathElement) {
+            fragment.protyle.toolbar.showRender(fragment.protyle, mathElement);
+            return;
+        }
+    }
     if (restoredSelection && restoreRichCellSelection(fragment.wysiwyg, restoredSelection)) {
         undoSelection = restoredSelection;
         return;

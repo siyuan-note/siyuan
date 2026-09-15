@@ -4520,7 +4520,7 @@ export class WYSIWYG {
                 !event.target.closest("a, [data-type~='block-ref'], [data-type~='a'], img")) {
                 event.preventDefault();
                 void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, richCell,
-                    undefined, {x: event.clientX, y: event.clientY}));
+                    undefined, {x: event.clientX, y: event.clientY, target: event.target}));
                 return;
             }
             if (areProtylePluginExtensionsEnabled(protyle)) {

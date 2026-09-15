@@ -208,8 +208,9 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
 
 const editKeydown = (app: App, event: KeyboardEvent) => {
     const eventTarget = event.target as HTMLElement;
-    // 页签标题的未处理按键进入全局快捷键，不使用正文中可能残留的选区执行编辑命令。
-    if (eventTarget.closest(".tabs-header")) {
+    // 页签标题允许切换当前文档只读状态，其它按键不使用正文中可能残留的选区执行编辑命令。
+    if (eventTarget.closest(".tabs-header") &&
+        !matchHotKey(window.siyuan.config.keymap.editor.general.switchReadonly, event)) {
         return false;
     }
     if (hasClosestByClassName(eventTarget, "sy__backlink--bottom", true) &&

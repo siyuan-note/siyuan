@@ -120,6 +120,18 @@ test("document readonly shortcut works without a body selection", () => {
     }
 });
 
+test("tab headers can toggle document readonly without using a body selection", () => {
+    for (const disabled of [false, true]) {
+        for (const [hasRange, foreignRange] of [[true, false], [false, false], [true, true]]) {
+            const fixture = globalFixture(disabled, hasRange, foreignRange);
+            const event = keyboardEvent("switchReadonly", true);
+            assert.equal(fixture.edit(event), true);
+            assert.equal(event.defaultPrevented, true);
+            assert.deepEqual(fixture.calls, ["switchReadonly"]);
+        }
+    }
+});
+
 test("body shortcuts follow the current document while preserving focused panel priority", () => {
     const calls: string[] = [];
     const element = (selector: string) => ({closest: (value: string) => value.split(", ").includes(selector)});

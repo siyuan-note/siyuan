@@ -881,7 +881,7 @@ export class Files extends Model {
                 }
             });
             if (invalidMoveTarget) {
-                showMessage(window.siyuan.languages._kernel[87]);
+                showMessage(window.siyuan.languages._kernel[87], 7000, "error");
                 newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
                 return;
             }

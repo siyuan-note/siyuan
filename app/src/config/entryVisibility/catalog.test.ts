@@ -689,6 +689,8 @@ test("conditional block resource menus have distinct configuration labels", () =
                     assets: "Assets",
                     audio: "Audio",
                     video: "Video",
+                    listBlock: "List block",
+                    listItem: "List item block",
                 },
             },
         },
@@ -697,6 +699,7 @@ test("conditional block resource menus have distinct configuration labels", () =
         assert.equal(getEntryCatalogNode("gutter.single.assetVideo")?.label(), "Video - Assets");
         assert.equal(getEntryCatalogNode("gutter.single.assetAudio")?.label(), "Audio - Assets");
         assert.equal(getEntryCatalogNode("gutter.single.assetIFrame")?.label(), "IFrame - Assets");
+        assert.equal(getEntryCatalogNode("gutter.single.listBlock")?.label(), "List block / List item block");
     } finally {
         if (windowDescriptor) {
             Object.defineProperty(globalThis, "window", windowDescriptor);

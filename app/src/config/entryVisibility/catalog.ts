@@ -368,7 +368,7 @@ const gutterMultiple = () => [
 const gutterSingle = () => [
     ...gutterBase(false),
     separator("separator_listBlock"),
-    node("listBlock", lang("listBlock"), true, [
+    node("listBlock", () => `${lang("listBlock")()} / ${lang("listItem")()}`, true, [
         node("taskStatusTodo", lang("taskStatusTodo")),
         node("taskStatusInProgress", lang("taskStatusInProgress")),
         node("taskStatusDone", lang("taskStatusDone")),

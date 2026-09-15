@@ -2195,7 +2195,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "listBlock",
                 icon: "iconList",
-                label: window.siyuan.languages.listBlock,
+                label: type === "NodeListItem" ? window.siyuan.languages.listItem : window.siyuan.languages.listBlock,
                 type: "submenu",
                 submenu: genListBlockSubmenu(),
                 loadSubmenu: continueListStartPromise ? async () => {

@@ -320,6 +320,7 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
     const openMenu = () => {
         const rect = target.getBoundingClientRect();
         menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target});
+        menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
     };
     target.setAttribute("aria-expanded", "true");
     openMenu();

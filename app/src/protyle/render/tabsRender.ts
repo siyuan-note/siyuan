@@ -228,6 +228,20 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         move: (source, target, after) => controller.options.move?.(source, target, after),
                         render: schedule,
                     });
+                    const selectTab = (id: string) => {
+                        // 切换前检查块顶部是否被滚动容器遮挡，顶部可见时保持当前位置。
+                        const top = tabs.getBoundingClientRect().top;
+                        let visibleTop = 0;
+                        for (let parent = tabs.parentElement; parent; parent = parent.parentElement) {
+                            if (/(auto|scroll|hidden|clip)/.test(getComputedStyle(parent).overflowY)) {
+                                visibleTop = Math.max(visibleTop, parent.getBoundingClientRect().top + parent.clientTop);
+                            }
+                        }
+                        controller.select(tabs, id, true);
+                        if (top < visibleTop) {
+                            tabs.scrollIntoView({block: "start", inline: "nearest"});
+                        }
+                    };
                     items.forEach((item, index) => {
                         const button = document.createElement("button");
                         button.type = "button";
@@ -301,8 +315,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         button.addEventListener("click", event => {
                             event.preventDefault();
                             event.stopPropagation();
-                            controller.select(tabs, itemID(item), true);
-                            tabs.scrollIntoView({block: "start", inline: "nearest"});
+                            selectTab(itemID(item));
                         });
                         button.addEventListener("dblclick", event => {
                             event.preventDefault();
@@ -324,8 +337,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             if (event.key === "Enter" || event.key === " ") {
                                 event.preventDefault();
                                 event.stopPropagation();
-                                controller.select(tabs, itemID(item), true);
-                                tabs.scrollIntoView({block: "start", inline: "nearest"});
+                                selectTab(itemID(item));
                                 return;
                             }
                             const target = tabKeyboardTarget(ids, itemID(item), event.key,

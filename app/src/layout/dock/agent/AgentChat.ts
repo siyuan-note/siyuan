@@ -403,7 +403,7 @@ export class AgentChat extends Model {
             "</div>" +
             '<div class="agent-chat fn__flex-column fn__flex-1">' +
             '<div class="agent-chat__messages-wrap">' +
-            '<div class="agent-chat__messages fn__flex-1" data-prevent-swipe></div>' +
+            '<div class="agent-chat__messages fn__flex-1"></div>' +
             '<span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span>' +
             "</div>" +
             '<div class="agent-chat__input-area">' +

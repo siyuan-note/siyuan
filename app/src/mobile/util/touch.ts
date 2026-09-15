@@ -527,6 +527,13 @@ export const handleTouchMove = (event: TouchEvent) => {
         if (hasClosestByAttribute(target, "id", "menu", true)) {
             return;
         }
+        if (hasClosestByClassName(target, "agent-chat__messages", true)) {
+            // 消息内容可沿手势方向横向滚动时，本次手势持续交给内容，抵达边缘后可再次滑动返回。
+            if (scrollBlock || isHorizontalScrollable(target, xDiff)) {
+                scrollBlock = true;
+                return;
+            }
+        }
         if (sideMaskElement.classList.contains("fn__none") || getTargetSidebar(target)) {
             let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock");
             if (event.touches.length > 1 || (scrollElement && !scrollElement.classList.contains("code-block"))) {

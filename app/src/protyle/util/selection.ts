@@ -28,7 +28,7 @@ import {
     getSemanticMarkerPrefixLengthForNode,
     stripSemanticMarkersFromRangeText
 } from "./inlineElementMarker";
-import {getSelectAllBlockAction} from "../wysiwyg/blockSelection";
+import {getSelectAllBlockAction, setBlockSelectionModeElement} from "../wysiwyg/blockSelection";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -175,6 +175,10 @@ export const selectBlocksByRange = (protyle: IProtyle, range: Range) => {
             item.classList.remove("protyle-wysiwyg--select");
         });
     });
+    // 将选区末端所属的已选块设为当前块，使转换后的选择支持块模式按键。
+    const currentElement = selectElements.find(item => item.contains(range.endContainer)) ||
+        selectElements[selectElements.length - 1];
+    setBlockSelectionModeElement(protyle.wysiwyg.element, currentElement);
     range.collapse(false);
     countBlockWord(selectElements.map(item => item.getAttribute("data-node-id")), protyle);
 };

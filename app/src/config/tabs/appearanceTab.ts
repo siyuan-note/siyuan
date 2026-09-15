@@ -34,7 +34,7 @@ import {setEditorFontSize} from "../../util/editorFontSize";
 import {
     ICustomFont,
     invalidateCustomFonts,
-    isNativeMobileContainer,
+    supportsCustomFonts,
     loadCustomFonts,
     registerCustomFont,
     unregisterCustomFont
@@ -83,13 +83,13 @@ const isCodeFont = (font: Pick<IFontItem, "spacing">) =>
     font.spacing === "monospace" || font.spacing === "dual" || font.spacing === "character-cell";
 
 const loadAvailableFonts = async () => {
-    const nativeMobile = isNativeMobileContainer();
+    const customFontSupported = supportsCustomFonts();
     const [systemFonts, customFonts] = await Promise.all([
         loadSystemFonts(),
-        nativeMobile ? loadCustomFonts() : Promise.resolve([] as ICustomFont[])
+        customFontSupported ? loadCustomFonts() : Promise.resolve([] as ICustomFont[])
     ]);
     return {
-        nativeMobile,
+        customFontSupported,
         customFonts,
         fontItems: [...customFonts, ...systemFonts],
     };
@@ -383,7 +383,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
             fontMenu.close();
             return;
         }
-        const {nativeMobile, customFonts, fontItems} = availableFonts;
+        const {customFontSupported, customFonts, fontItems} = availableFonts;
         selectedFonts = getConfiguredFonts(getFontConfig(), configKey).map((selectedFont) =>
             fontItems.find((font) => font.family === selectedFont.family && font.weight === selectedFont.weight) ||
             selectedFont);
@@ -392,7 +392,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
             genFontListItemHtml(item, selectedFonts.some((font) =>
                 font.family === item.family && font.weight === item.weight))
         ).join("");
-        const canManageCustomFonts = nativeMobile && !window.siyuan.config.readonly;
+        const canManageCustomFonts = customFontSupported && !window.siyuan.config.readonly;
         const canShowAllFonts = configKey === "codeFontFamilies" && fontItems.some((font) => !isCodeFont(font));
         const customFontsByID = new Map(customFonts.map((font) => [font.id, font]));
         fontMenu.addItem({
@@ -404,7 +404,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         ${canShowAllFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="show-all-fonts">${escapeHtml(window.siyuan.languages.showAll)}</button>` : ""}
         ${canManageCustomFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="import-font"><svg><use xlink:href="#iconDownload"></use></svg>${escapeHtml(window.siyuan.languages.importFont)}</button>` : ""}
     </div>
-    ${nativeMobile ? `<div class="b3-label__text ft__on-surface" style="margin-top: 8px">${escapeHtml(window.siyuan.languages.fontFileTip)}</div>` : ""}
+    ${customFontSupported ? `<div class="b3-label__text ft__on-surface" style="margin-top: 8px">${escapeHtml(window.siyuan.languages.fontFileTip)}</div>` : ""}
     ${canManageCustomFonts ? '<input class="fn__none" data-type="font-file" type="file" accept=".ttf,.otf,font/ttf,font/otf">' : ""}
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background" data-type="available-fonts">${fontItemHtml}</div>

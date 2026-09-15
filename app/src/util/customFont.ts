@@ -16,8 +16,8 @@ let customFontsPromise: Promise<ICustomFont[]> | undefined;
 const registeredFonts = new Map<string, ICustomFont>();
 const fontLoadPromises = new Map<string, Promise<FontFace[]>>();
 
-export const isNativeMobileContainer = () => {
-    return ["android", "ios", "harmony"].includes(window.siyuan.config.system.container);
+export const supportsCustomFonts = () => {
+    return ["docker", "android", "ios", "harmony"].includes(window.siyuan.config.system.container);
 };
 
 export const loadCustomFonts = () => {

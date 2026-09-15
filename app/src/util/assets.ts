@@ -391,7 +391,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
 }`;
     }
     style += getGlobalFontStyle(globalFonts);
-    if (!set && globalFonts.length > 0) {
+    if (!set) {
         style += "\n" + await getExportCustomFontStyle([...globalFonts, ...editorFonts, ...codeFonts]);
     }
     const editorFontFamilies = editorFonts.map((font) => CSS.escape(font.family)).join(", ");

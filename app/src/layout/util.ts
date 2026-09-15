@@ -1168,7 +1168,14 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                     window.siyuan.layout.rightDock.setSize();
                 }
                 if (range) {
-                    focusByRange(range);
+                    // 调整尺寸后仅恢复可见页签中的选区，避免旧光标重新展开已隐藏的页签。
+                    const inHiddenTab = [range.startContainer, range.endContainer].some(node => {
+                        const element = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement;
+                        return element?.closest('.tab-item[data-tabs-hidden="true"]');
+                    });
+                    if (!inHiddenTab) {
+                        focusByRange(range);
+                    }
                 }
                 nextElement.style.overflow = "";
                 previousElement.style.overflow = "";

@@ -6,25 +6,44 @@ import {escapeHtml} from "../../util/escape";
 import {getFileRenameTarget, getFileTree} from "../../util/fileTree";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isBrowser, isMobile} from "../../util/functions";
-import {bindBottomSheetDialog} from "../../mobile/util/bindBottomSheetDialog";
 import {canChangeSkillEntry, getSkillDirectory, SkillSourceState} from "./state";
+import {createSkillManagerPage} from "./page";
 import type {AISkillFileEntry, AISkillFileRequestInput} from "../../types/api";
 /// #if !MOBILE
 import {openBy} from "../../editor/util";
 /// #endif
 
+// 对话框保持居中，并跟随软键盘调整后的可见区域。
+const bindSkillDialogViewport = (dialog: Dialog) => {
+    const viewport = window.visualViewport;
+    if (!isMobile() || !viewport) {
+        return;
+    }
+    const container = dialog.element.querySelector<HTMLElement>(".b3-dialog");
+    const resize = () => {
+        container.style.top = `${viewport.offsetTop}px`;
+        container.style.height = `${viewport.height}px`;
+    };
+    viewport.addEventListener("resize", resize);
+    viewport.addEventListener("scroll", resize);
+    resize();
+    return () => {
+        viewport.removeEventListener("resize", resize);
+        viewport.removeEventListener("scroll", resize);
+    };
+};
+
 const confirmSkillAction = (title: string, text: string, remove = false): Promise<boolean> => new Promise(resolve => {
     let accepted = false;
-    let disposeSheet: () => void;
     const dialog = new Dialog({
         title,
-        width: isMobile() ? "100%" : "520px",
+        width: isMobile() ? "92vw" : "520px",
         content: `<div class="b3-dialog__content ft__breakword">${text}</div>
 <div class="b3-dialog__action">
 <button class="b3-button b3-button--cancel" id="cancelDialogConfirmBtn" data-action="cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
 <button class="b3-button b3-button--${remove ? "remove" : "text"}" id="confirmDialogConfirmBtn" data-action="confirm">${window.siyuan.languages.confirm}</button></div>`,
         destroyCallback: () => {
-            disposeSheet?.();
+            disposeViewport?.();
             resolve(accepted);
         },
     });
@@ -41,14 +60,21 @@ const confirmSkillAction = (title: string, text: string, remove = false): Promis
             dialog.destroy();
         }
     });
-    if (isMobile()) {
-        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
-    }
+    const disposeViewport = bindSkillDialogViewport(dialog);
     confirm.focus({preventScroll: true});
 });
 
-export const openSkillManager = () => {
+export const openSkillManager = (settingRoot?: HTMLElement) => {
     const lang = window.siyuan.languages;
+    const mobile = isMobile();
+    const settingHost = mobile ? (settingRoot?.closest<HTMLElement>(".config") || settingRoot ||
+        document.querySelector<HTMLElement>("#modelMain > .config")) : undefined;
+    if (mobile && !settingHost) {
+        return;
+    }
+    if (settingHost?.querySelector(".skill-manager-page")) {
+        return;
+    }
     const state = new SkillSourceState();
     const expandedPaths = new Set<string>();
     const localFiles = !isBrowser() && !isMobile() && getHostCapabilities().localFileSystem;
@@ -59,16 +85,14 @@ export const openSkillManager = () => {
     let closed = false;
     let confirming = false;
     let prompting = false;
+    let focusEditorAfterRun = false;
     let listScrollTop = 0;
-    let disposeSheet: () => void;
     const button = (action: string, label: string, extraClass = "") =>
         `<button type="button" class="b3-button b3-button--outline ${extraClass}" data-action="${action}">${label}</button>`;
-    const dialog = new Dialog({
-        title: lang.agentSkillManager,
-        width: isMobile() ? "100%" : "min(1100px, 96vw)",
-        height: "min(800px, 90vh)",
-        containerClassName: "skill-manager-dialog",
-        content: `<div class="skill-manager${isMobile() ? " skill-manager--mobile" : ""}">
+    const content = `<div class="skill-manager${mobile ? " skill-manager--mobile" : ""}">
+${mobile ? `<div class="skill-manager__page-header">
+<button type="button" class="block__icon skill-manager__page-back" data-action="back" aria-label="${lang.back}"><svg><use xlink:href="#iconLeft"></use></svg></button>
+<div class="skill-manager__title"></div>${button("save", lang.save, "skill-manager__page-save")}</div>` : ""}
 <div class="skill-manager__actions skill-manager__main-actions">
 ${button("newSkill", lang.agentSkillNew)}${button("newFile", lang.agentSkillNewFile)}${button("mkdir", lang.agentSkillNewFolder)}
 ${button("rename", lang.rename)}${button("remove", lang.remove)}${button("refresh", lang.refresh)}
@@ -78,17 +102,26 @@ ${localFiles ? button("open", lang.showInFolder) : ""}</div>
 <input class="b3-text-field skill-manager__search" type="search" placeholder="${lang.agentSkillSearch}" aria-label="${lang.agentSkillSearch}">
 <ul class="skill-manager__files b3-list b3-list--background" aria-label="${lang.agentWorkspaceSkills}"></ul></div>
 <div class="skill-manager__editor">
-<div class="skill-manager__editor-header">${button("back", lang.back, "skill-manager__back")}<div class="skill-manager__path ft__breakword"></div></div>
+<div class="skill-manager__editor-header">${mobile ? "" : button("back", lang.back, "skill-manager__back")}<div class="skill-manager__path ft__breakword"></div></div>
 <div class="skill-manager__hint ft__on-surface">${lang.emptyContent}</div>
 <textarea class="b3-text-field skill-manager__source fn__none" spellcheck="false" aria-label="${lang.agentSkillSource}" disabled></textarea>
-<div class="skill-manager__actions">${button("save", lang.save)}${localFiles ? button("open", lang.showInFolder, "skill-manager__editor-open") : ""}</div>
-</div></div></div>`,
-        destroyCallback: () => {
-            disposeSheet?.();
-            window.removeEventListener("beforeunload", beforeUnload);
-        },
+${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)}${localFiles ? button("open", lang.showInFolder, "skill-manager__editor-open") : ""}</div>`}
+</div></div></div>`;
+    const onDestroy = () => {
+        closed = true;
+        window.removeEventListener("beforeunload", beforeUnload);
+    };
+    const dialog = mobile ? undefined : new Dialog({
+        title: lang.agentSkillManager,
+        width: "min(1100px, 96vw)",
+        height: "min(800px, 90vh)",
+        containerClassName: "skill-manager-dialog",
+        content,
+        destroyCallback: onDestroy,
     });
-    const root = dialog.element.querySelector<HTMLElement>(".skill-manager");
+    const page = mobile ? createSkillManagerPage(settingHost, content, onDestroy) : undefined;
+    const element = page?.element || dialog.element;
+    const root = element.querySelector<HTMLElement>(".skill-manager");
     const list = root.querySelector<HTMLElement>(".skill-manager__files");
     const search = root.querySelector<HTMLInputElement>(".skill-manager__search");
     const source = root.querySelector<HTMLTextAreaElement>("textarea");
@@ -110,8 +143,14 @@ ${localFiles ? button("open", lang.showInFolder) : ""}</div>
         hint.classList.toggle("fn__none", editable);
         hint.textContent = selected && !selected.isDir ? lang.agentSkillResourceTip : lang.emptyContent;
         path.textContent = (state.path || selected?.path || "") + (state.dirty ? " *" : "");
+        if (mobile) {
+            const editing = root.classList.contains("skill-manager--editing");
+            root.querySelector<HTMLElement>(".skill-manager__title").textContent = editing ?
+                path.textContent : lang.agentSkillManager;
+            root.querySelector<HTMLElement>(".skill-manager__page-save").classList.toggle("fn__none", !editing);
+        }
         list.setAttribute("aria-busy", String(busy));
-        root.querySelectorAll<HTMLButtonElement>(".skill-manager__actions > [data-action]").forEach(element => {
+        root.querySelectorAll<HTMLButtonElement>("button[data-action]").forEach(element => {
             const action = element.dataset.action;
             element.disabled = busy || confirming || prompting ||
                 (action === "save" && (!editable || !state.dirty)) ||
@@ -135,16 +174,15 @@ ${localFiles ? button("open", lang.showInFolder) : ""}</div>
             update();
         }
     };
-    const destroy = dialog.destroy.bind(dialog);
+    const destroy = page ? page.destroy : dialog.destroy.bind(dialog);
     const close = async () => {
         if (await canDiscard()) {
             closed = true;
             destroy();
         }
     };
-    dialog.destroy = () => { void close(); };
-    if (isMobile()) {
-        disposeSheet = bindBottomSheetDialog(dialog, close);
+    if (dialog) {
+        dialog.destroy = () => { void close(); };
     }
     const run = async (action: () => Promise<void>) => {
         if (busy || closed || confirming || prompting) {
@@ -159,6 +197,14 @@ ${localFiles ? button("open", lang.showInFolder) : ""}</div>
         } finally {
             busy = false;
             update();
+            if (focusEditorAfterRun) {
+                focusEditorAfterRun = false;
+                const topDialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
+                if (!closed && root.isConnected && narrow() && root.classList.contains("skill-manager--editing") &&
+                    (!topDialog || topDialog === dialog)) {
+                    root.querySelector<HTMLButtonElement>("[data-action=back]").focus({preventScroll: true});
+                }
+            }
         }
     };
     const guardedRun = async (action: () => Promise<void>) => {
@@ -174,7 +220,11 @@ ${localFiles ? button("open", lang.showInFolder) : ""}</div>
         listScrollTop = list.scrollTop;
         root.classList.add("skill-manager--editing");
         if (narrow()) {
-            root.querySelector<HTMLButtonElement>("[data-action=back]").focus({preventScroll: true});
+            if (busy) {
+                focusEditorAfterRun = true;
+            } else {
+                root.querySelector<HTMLButtonElement>("[data-action=back]").focus({preventScroll: true});
+            }
         }
     };
     const select = async (entry?: AISkillFileEntry, reveal = true) => {
@@ -303,14 +353,13 @@ ${localFiles ? button("open", lang.showInFolder) : ""}</div>
         const directory = getSkillDirectory(entry);
         const title = action === "newSkill" ? lang.agentSkillNew : action === "newFile" ? lang.agentSkillNewFile :
             action === "mkdir" ? lang.agentSkillNewFolder : lang.rename;
-        let disposeInputSheet: () => void;
         const prompt = openInputDialog({
             title,
             label: lang.name,
             value: action === "rename" ? entry.path.split("/").pop() : "",
-            width: isMobile() ? "100%" : "520px",
+            width: isMobile() ? "92vw" : "520px",
             destroyCallback: () => {
-                disposeInputSheet?.();
+                disposeInputViewport?.();
                 prompting = false;
                 update();
             },
@@ -349,9 +398,7 @@ ${localFiles ? button("open", lang.showInFolder) : ""}</div>
         });
         prompt.element.querySelector("input").addEventListener("input", event =>
             (event.target as HTMLInputElement).setCustomValidity(""));
-        if (isMobile()) {
-            disposeInputSheet = bindBottomSheetDialog(prompt, async () => prompt.destroy());
-        }
+        const disposeInputViewport = bindSkillDialogViewport(prompt);
     };
     source.addEventListener("input", () => {
         state.text = source.value;
@@ -380,6 +427,10 @@ ${localFiles ? button("open", lang.showInFolder) : ""}</div>
                 }
             });
         } else if (action === "back") {
+            if (mobile && !root.classList.contains("skill-manager--editing")) {
+                void close();
+                return;
+            }
             void canDiscard().then(allowed => {
                 if (allowed) {
                     state.discard();
@@ -425,13 +476,20 @@ ${localFiles ? button("open", lang.showInFolder) : ""}</div>
             });
         }
     });
-    dialog.element.addEventListener("keydown", event => {
+    element.addEventListener("keydown", event => {
         event.stopPropagation();
         if (event.key === "Escape" && !event.isComposing) {
             event.preventDefault();
-            dialog.destroy();
+            if (mobile) {
+                root.querySelector<HTMLButtonElement>("[data-action=back]").click();
+            } else {
+                dialog.destroy();
+            }
         }
     });
     update();
+    if (mobile) {
+        root.querySelector<HTMLButtonElement>("[data-action=back]").focus({preventScroll: true});
+    }
     void run(() => reload());
 };

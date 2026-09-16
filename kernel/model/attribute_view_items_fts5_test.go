@@ -75,6 +75,63 @@ func TestAttributeViewItemsUndoRedo(t *testing.T) {
 	}
 }
 
+func TestAttributeViewItemsUndoRelationConfiguration(t *testing.T) {
+	fixture, source, op, undo := setupAttributeViewItemsTest(t, false)
+	peer := av.NewAttributeView(ast.NewNodeID())
+	for _, view := range []*av.AttributeView{source, peer} {
+		keyID := ast.NewNodeID()
+		view.KeyValues = append(view.KeyValues, &av.KeyValues{Key: &av.Key{ID: keyID, Type: av.KeyTypeRelation,
+			Relation: &av.Relation{AvID: source.ID}}})
+		value := &av.Value{Type: av.KeyTypeRelation, Relation: &av.ValueRelation{BlockIDs: append([]string(nil), op.SrcIDs...)}}
+		view.Views[0].Filters = fieldFilterRoot(&av.ViewFilter{Column: keyID,
+			Operator: av.FilterOperatorContainsAnyItem, Value: value.Clone()})
+		view.NewItemTemplates = []*av.NewItemTemplate{{ID: ast.NewNodeID(), Name: "Default", TargetType: av.NewItemTargetDetached,
+			FieldValues: map[string]*av.NewItemFieldValue{keyID: {Mode: av.NewItemFieldValueStatic, Value: value.Clone()}}}}
+		if err := av.SaveAttributeView(view); err != nil {
+			t.Fatal(err)
+		}
+		av.UpsertAvBackRel(view.ID, source.ID)
+	}
+	source, peer = readAttributeViewItemsTest(t, source.ID), readAttributeViewItemsTest(t, peer.ID)
+	tx := &Transaction{DoOperations: []*Operation{op}, UndoOperations: undo, fromAPI: true}
+	if err := PerformTxSync(tx); err != nil {
+		t.Fatal(err)
+	}
+	entry := GlobalUndoLog.Peek(fixture.sourceID)
+	for cycle := 0; cycle < 2; cycle++ {
+		for _, before := range []*av.AttributeView{source, peer} {
+			current := readAttributeViewItemsTest(t, before.ID)
+			if len(current.Views[0].Filters[0].Filters) != 0 || len(current.NewItemTemplates[0].FieldValues) != 0 {
+				t.Fatal("deletion did not remove relation configuration")
+			}
+			current.Name, before.Name = "Later name", "Later name"
+			if err := av.SaveAttributeView(current); err != nil {
+				t.Fatal(err)
+			}
+		}
+		replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
+		for _, before := range []*av.AttributeView{source, peer} {
+			current := readAttributeViewItemsTest(t, before.ID)
+			if !reflect.DeepEqual(before.NewItemTemplates, current.NewItemTemplates) ||
+				!reflect.DeepEqual(before.Views[0].Filters, current.Views[0].Filters) || current.Name != before.Name {
+				t.Fatal("item undo did not restore relation filters and template defaults")
+			}
+		}
+		replayAttributeViewFieldsTest(t, entry.DoOperationsForReplay())
+	}
+	deleted := readAttributeViewItemsTest(t, source.ID)
+	changed := readAttributeViewItemsTest(t, peer.ID)
+	changed.Views[0].Filters = fieldFilterRoot(fieldFilterLeaf(changed.GetBlockKeyValues().Key.ID))
+	if err := av.SaveAttributeView(changed); err != nil {
+		t.Fatal(err)
+	}
+	if err := PerformTxSync(&Transaction{DoOperations: entry.UndoOperationsForReplay(), isReplay: true}); err == nil {
+		t.Fatal("item undo overwrote a later relation filter edit")
+	}
+	assertAttributeViewFieldsTest(t, deleted, readAttributeViewItemsTest(t, source.ID))
+	assertAttributeViewFieldsTest(t, changed, readAttributeViewItemsTest(t, peer.ID))
+}
+
 func TestAttributeViewItemsUndoPreservesUnrelatedEdits(t *testing.T) {
 	fixture, expected, op, undo := setupAttributeViewItemsTest(t, false)
 	tx := &Transaction{DoOperations: []*Operation{op}, UndoOperations: undo, fromAPI: true}

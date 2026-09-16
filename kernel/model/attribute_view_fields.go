@@ -218,9 +218,16 @@ func removeAttributeViewFieldDefinition(view *av.AttributeView, keyID string) {
 			layout.Kanban.Fields = slices.DeleteFunc(layout.Kanban.Fields, func(field *av.ViewKanbanField) bool { return field.ID == keyID })
 		}
 		layout.Filters = av.RemoveFiltersByColumn(layout.Filters, keyID)
+		if len(layout.Filters) == 0 {
+			layout.Filters = []*av.ViewFilter{{Combination: av.FilterCombinationAnd}}
+		}
 		layout.Sorts = slices.DeleteFunc(layout.Sorts, func(sort *av.ViewSort) bool { return sort.Column == keyID })
 		if layout.Group != nil && layout.Group.Field == keyID {
 			removeAttributeViewGroup0(layout)
+			if layout.LayoutType == av.LayoutTypeKanban {
+				// 看板必须保留有效分组，将自动选择的替代分组一并纳入撤销快照。
+				setAttributeViewGroup(view, layout, &av.ViewGroup{Field: getKanbanPreferredGroupKey(view).ID})
+			}
 		}
 	}
 }

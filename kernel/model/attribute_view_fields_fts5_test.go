@@ -43,7 +43,8 @@ func TestAttributeViewFieldsUndoRedo(t *testing.T) {
 				t.Fatal("deleted field definition survived")
 			}
 			for _, view := range deleted.Views {
-				if attrViewFiltersContainColumn(view.Filters, op.ID) || view.Group != nil {
+				if attrViewFiltersContainColumn(view.Filters, op.ID) ||
+					view.Group != nil && (view.LayoutType != av.LayoutTypeKanban || view.Group.Field == op.ID) {
 					t.Fatal("deleted field left a filter or group behind")
 				}
 			}
@@ -77,6 +78,38 @@ func TestAttributeViewFieldsEmptyLayout(t *testing.T) {
 	for cycle := 0; cycle < 2; cycle++ {
 		replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 		assertAttributeViewFieldsTest(t, before, readAttributeViewItemsTest(t, before.ID))
+		replayAttributeViewFieldsTest(t, entry.DoOperationsForReplay())
+	}
+}
+
+func TestAttributeViewFieldsUndoAfterKanbanRender(t *testing.T) {
+	fixture, source, _ := setupAttributeViewGroupMoveTest(t, av.LayoutTypeKanban, "C")
+	var layout *av.View
+	for _, view := range source.Views {
+		if view.LayoutType == av.LayoutTypeKanban {
+			layout = view
+			break
+		}
+	}
+	if _, err := renderAttributeView(source, fixture.sourceID, layout.ID, "", "", 1, 50, nil, false, true, nil, ""); err != nil {
+		t.Fatal(err)
+	}
+	before := readAttributeViewItemsTest(t, source.ID)
+	keyID := layout.Group.Field
+	tx := &Transaction{fromAPI: true,
+		DoOperations:   []*Operation{{Action: "removeAttrViewCol", AvID: source.ID, ID: keyID, BlockID: fixture.sourceID}},
+		UndoOperations: []*Operation{{Action: "addAttrViewCol", AvID: source.ID, ID: keyID, BlockID: fixture.sourceID}}}
+	if err := PerformTxSync(tx); err != nil {
+		t.Fatal(err)
+	}
+	entry := GlobalUndoLog.Peek(fixture.sourceID)
+	for cycle := 0; cycle < 2; cycle++ {
+		current := readAttributeViewItemsTest(t, source.ID)
+		if _, err := renderAttributeView(current, fixture.sourceID, layout.ID, "", "", 1, 50, nil, false, true, nil, ""); err != nil {
+			t.Fatal(err)
+		}
+		replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
+		assertAttributeViewFieldsTest(t, before, readAttributeViewItemsTest(t, source.ID))
 		replayAttributeViewFieldsTest(t, entry.DoOperationsForReplay())
 	}
 }

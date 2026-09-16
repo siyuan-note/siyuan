@@ -36,6 +36,7 @@ type attributeViewItemsSnapshot struct {
 	Keys                 []*av.KeyValues
 	Orders               map[string][]string
 	Covers               map[string]map[string]*av.CardCoverPosition
+	relatedChanges       *attributeViewFieldsSnapshot
 }
 
 func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
@@ -62,7 +63,10 @@ func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
 				}
 			}
 		}
-		return tx.prepareAttributeViewItemMutation(current, op.attributeViewItems)
+		if err = tx.prepareAttributeViewItemMutation(current, op.attributeViewItems); err != nil {
+			return err
+		}
+		return tx.replayAttributeViewItemConfiguration(op.attributeViewItems, false)
 	}
 	if tx.isReplay || !tx.fromAPI || len(tx.UndoOperations) == 0 {
 		return nil
@@ -157,6 +161,9 @@ func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
 	if err = tx.prepareAttributeViewItemMutation(current, state); err != nil {
 		return err
 	}
+	if err = tx.captureAttributeViewItemConfiguration(state); err != nil {
+		return err
+	}
 	op.attributeViewItems, op.BlockID = state, state.BlockID
 	op.SrcIDs = append([]string(nil), state.ItemIDs...)
 	inverse.attributeViewItems, inverse.BlockID, inverse.Srcs = state, state.BlockID, srcs
@@ -168,6 +175,54 @@ func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
 	}
 	tx.UndoOperations = undoOperations
 	return nil
+}
+
+// 条目删除还会清理引用该条目的筛选与模板默认值，单独记录这些配置变化。
+func (tx *Transaction) captureAttributeViewItemConfiguration(state *attributeViewItemsSnapshot) error {
+	changes := &attributeViewFieldsSnapshot{avID: state.AvID, keyID: state.AvID, blockID: state.BlockID,
+		boxID: state.BoxID, changes: map[string]*attributeViewFieldChange{}}
+	seen := map[string]bool{}
+	for _, id := range append([]string{state.AvID}, av.GetSrcAvIDs(state.AvID)...) {
+		if seen[id] {
+			continue
+		}
+		seen[id] = true
+		before, err := tx.readAttributeViewForMutation(id, state.BlockID, state.BoxID)
+		if id != state.AvID && errors.Is(err, av.ErrViewNotFound) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		after, err := cloneAttributeViewForFieldMutation(before)
+		if err != nil {
+			return err
+		}
+		templateChanged := after.RemoveNewItemTemplateRelationItems(state.AvID, state.ItemIDs)
+		filterChanged := after.RemoveRelationFilterItems(state.AvID, state.ItemIDs)
+		if !templateChanged && !filterChanged {
+			continue
+		}
+		oldJSON, err := attributeViewFieldJSON(before)
+		if err != nil {
+			return err
+		}
+		newJSON, err := attributeViewFieldJSON(after)
+		if err != nil {
+			return err
+		}
+		changes.changes[id] = diffAttributeViewFields(oldJSON, newJSON, true, true)
+	}
+	state.relatedChanges = changes
+	return nil
+}
+
+func (tx *Transaction) replayAttributeViewItemConfiguration(state *attributeViewItemsSnapshot, undo bool) error {
+	if state.relatedChanges == nil || len(state.relatedChanges.changes) == 0 {
+		return nil
+	}
+	return tx.replayAttributeViewFields(&Operation{AvID: state.AvID, ID: state.AvID,
+		attributeViewFields: state.relatedChanges, attributeViewFieldUndo: undo})
 }
 
 func (tx *Transaction) readAttributeViewItems(state *attributeViewItemsSnapshot) (*av.AttributeView, error) {
@@ -351,6 +406,9 @@ func (tx *Transaction) restoreAttributeViewItems(op *Operation) error {
 		}
 	}
 	refreshRelatedSrcAvsInBlock(state.AvID, state.BlockID, tx)
+	if err = tx.replayAttributeViewItemConfiguration(state, true); err != nil {
+		return err
+	}
 	op.RetData = &insertAttrViewBlockResult{InsertedItemIDs: append([]string(nil), state.ItemIDs...)}
 	return nil
 }

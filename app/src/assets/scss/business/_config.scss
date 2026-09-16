@@ -718,6 +718,14 @@
       }
     }
 
+    &__cards {
+      grid-auto-rows: 160px;
+
+      > [data-bazaar-index] {
+        cursor: default;
+      }
+    }
+
     &__rating-star {
       --b3-icon-star-fill: currentColor;
       display: block;

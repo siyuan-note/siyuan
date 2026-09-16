@@ -29,6 +29,7 @@ import {
     mountUserSkillsBlock,
 } from "./aiSkillUi";
 import {isAgentStreamingMarkdownEnabled, setAgentStreamingMarkdownEnabled} from "./agentStreamingMarkdown";
+import {openSkillManager} from "../../../ai/skills/manager";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -169,6 +170,16 @@ const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
 const registerAiSkillsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("skills", window.siyuan.languages.tokenCatSkills);
 
+    group.button({
+        id: "aiWorkspaceSkills",
+        title: window.siyuan.languages.agentWorkspaceSkills,
+        desc: window.siyuan.languages.agentWorkspaceSkillsTip,
+        label: window.siyuan.languages.manage,
+        icon: "iconSettings",
+        afterMount: root => {
+            root.querySelector("#aiWorkspaceSkills")?.addEventListener("click", openSkillManager);
+        },
+    });
     group.button({
         id: "aiUserSkills",
         title: window.siyuan.languages.agentUserSkills,

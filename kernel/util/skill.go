@@ -419,6 +419,8 @@ func ReadSkill(name string, enabledUserSkills []string) (string, error) {
 }
 
 func SaveSkill(name, content string) error {
+	skillManagementLock.Lock()
+	defer skillManagementLock.Unlock()
 	if err := validateSkillName(name); err != nil {
 		return err
 	}
@@ -435,6 +437,8 @@ func SaveSkill(name, content string) error {
 }
 
 func RemoveSkill(name string) error {
+	skillManagementLock.Lock()
+	defer skillManagementLock.Unlock()
 	if err := validateSkillName(name); err != nil {
 		return err
 	}
@@ -450,6 +454,8 @@ func RemoveSkill(name string) error {
 }
 
 func RenameSkill(oldName, newName string) error {
+	skillManagementLock.Lock()
+	defer skillManagementLock.Unlock()
 	if err := validateSkillName(oldName); err != nil {
 		return err
 	}
@@ -788,6 +794,8 @@ func findSkillDirsRecursive(dir, root string) []string {
 
 // installSkillDirs 把若干相对 root 的 skill 目录落地到 SkillsDir()
 func installSkillDirs(relDirs []string, root string) (*InstallSkillResult, error) {
+	skillManagementLock.Lock()
+	defer skillManagementLock.Unlock()
 	result := &InstallSkillResult{}
 	for _, rel := range relDirs {
 		srcDir := filepath.Join(root, rel)

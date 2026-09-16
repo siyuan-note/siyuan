@@ -5,7 +5,8 @@ import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {showMessage} from "../dialog/message";
 import {clearTemplatePreview, previewTemplate} from "../protyle/toolbar/util";
-import {getTemplateRenameTarget, getTemplateTree, TemplateEntry} from "./fileTree";
+import type {TemplateEntry} from "./fileTree";
+import {getFileRenameTarget, getFileTree} from "../util/fileTree";
 import {getTemplateActionEntry, getTemplateActionState} from "./actionState";
 /// #if !MOBILE
 import {openBy} from "../editor/util";
@@ -156,7 +157,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
     const renderList = () => {
         const scrollTop = list.scrollTop;
         list.replaceChildren();
-        const rows = getTemplateTree(entries, fileSearch.value, expandedPaths);
+        const rows = getFileTree(entries, fileSearch.value, expandedPaths);
         if (rows.length === 0) {
             const empty = document.createElement("li");
             empty.className = "ft__on-surface template-manager__empty";
@@ -297,7 +298,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
                     input.focus();
                     return;
                 }
-                if (nameOnly && getTemplateRenameTarget(selected.path, input.value.trim()) === undefined) {
+                if (nameOnly && getFileRenameTarget(selected.path, input.value.trim()) === undefined) {
                     input.setCustomValidity(lang.templateNameTip);
                     input.reportValidity();
                     return;
@@ -444,7 +445,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
                         } else if (action === "mkdir") {
                             response = await api({action: "mkdir", path: value});
                         } else {
-                            value = getTemplateRenameTarget(selected.path, value);
+                            value = getFileRenameTarget(selected.path, value);
                             if (value === selected.path) {
                                 return;
                             }

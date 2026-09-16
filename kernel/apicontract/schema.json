@@ -5037,6 +5037,75 @@
       ],
       "additionalProperties": false
     },
+    "AISkillFileData": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "entries": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AISkillFileEntry"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AISkillFileEntry": {
+      "type": "object",
+      "properties": {
+        "editable": {
+          "type": "boolean"
+        },
+        "isDir": {
+          "type": "boolean"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "editable",
+        "isDir",
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "AISkillFileRequestInput": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "additionalProperties": false
+    },
     "AISkillInfo": {
       "type": "object",
       "properties": {
@@ -109456,6 +109525,81 @@
                     "type": "null"
                   }
                 ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/agent/manageSkills",
+      "handler": "manageSkills",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AISkillFileRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AISkillFileData"
               },
               "msg": {
                 "type": "string"

@@ -939,6 +939,10 @@
 .agent-session-more {
   position: relative;
 
+  &.b3-menu__item--show {
+    display: flex;
+  }
+
   .b3-menu__submenu {
     white-space: nowrap;
   }

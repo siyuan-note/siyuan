@@ -2,8 +2,8 @@
 @use "tabs";
 @use "task";
 
-// 编辑时恢复引用块，保留完整的选择范围和块结构；折叠的列表项和标题保留定位内容。
-.protyle-wysiwyg[data-backlink-hide-reference]:not(:focus-within) {
+// 任务点击保持隐藏布局，正文编辑时恢复引用块；折叠的列表项和标题保留定位内容。
+.protyle-wysiwyg[data-backlink-hide-reference]:is(:not(:focus-within), [data-backlink-task-focus]) {
   [data-backlink-reference]:not([fold="1"]):not(.li[fold="1"] *) {
     display: none !important;
   }

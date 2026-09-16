@@ -24,10 +24,30 @@ export const updateBacklinkReferenceVisibility = (protyle: IProtyle) => {
     element.toggleAttribute("data-backlink-hide-reference",
         Boolean(protyle.options.backlinkData) && protyle.element.getAttribute("data-ismention") !== "true" &&
         window.siyuan.config.editor.backlinkHideReference === true);
+    if (!element.hasAttribute("data-backlink-hide-reference")) {
+        element.removeAttribute("data-backlink-task-focus");
+    }
     if (protyle.options.backlinkData && !initialized.has(element)) {
         initialized.add(element);
+        // 任务点击保留隐藏布局，同时沿用编辑器的焦点、撤销和拖拽处理。
+        element.addEventListener("pointerdown", event => {
+            const action = event.target instanceof Element ? event.target.closest(".protyle-action--task") : null;
+            element.toggleAttribute("data-backlink-task-focus", Boolean(
+                event.button === 0 && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey &&
+                !protyle.disabled && element.hasAttribute("data-backlink-hide-reference") &&
+                action?.parentElement.classList.contains("li") && action.closest(".protyle-wysiwyg") === element &&
+                (!element.matches(":focus-within") || element.hasAttribute("data-backlink-task-focus"))
+            ));
+        }, true);
+        // 键盘操作和正文输入恢复完整结构，避免在隐藏引用块时编辑正文。
+        const restoreReferences = () => element.removeAttribute("data-backlink-task-focus");
+        element.addEventListener("keydown", restoreReferences, true);
+        element.addEventListener("beforeinput", restoreReferences, true);
         // 编辑后新增的正文立即保持可见，不等待反链请求刷新。
-        element.addEventListener("focusout", () => {
+        element.addEventListener("focusout", event => {
+            if (!(event.relatedTarget instanceof Node) || !element.contains(event.relatedTarget)) {
+                restoreReferences();
+            }
             element.querySelectorAll<HTMLElement>("[data-backlink-reference]").forEach(reference => {
                 if (!isPureReference(reference)) {
                     reference.removeAttribute("data-backlink-reference");

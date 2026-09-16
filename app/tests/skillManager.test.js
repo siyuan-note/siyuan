@@ -40,12 +40,23 @@ const runCases = async (appDirectory, mode, capture) => {
     let stored = original;
     let conflict = false;
     let id = 0;
+    const textFiles = new Map([
+        ["directory-id/.config.json", "\ufeff{\r\n  \"enabled\": true\r\n}\r\n"],
+        ["directory-id/run.py", "print('text only')\n"],
+        ["directory-id/README", "No extension\n"],
+    ]);
+    const readOnlyFiles = new Map([
+        ["directory-id/image.png", "binary"],
+        ["directory-id/legacy.txt", "encoding"],
+        ["directory-id/large.txt", "tooLarge"],
+    ]);
     const entries = [
         {path: "directory-id", isDir: true, editable: false},
         {path: "directory-id/SKILL.md", isDir: false, editable: true},
         {path: "directory-id/resources", isDir: true, editable: false},
         {path: "directory-id/resources/notes.md", isDir: false, editable: true},
-        {path: "directory-id/image.png", isDir: false, editable: false},
+        ...Array.from(textFiles.keys(), path => ({path, isDir: false, editable: false})),
+        ...Array.from(readOnlyFiles.keys(), path => ({path, isDir: false, editable: true})),
         ...Array.from({length: 40}, (_, index) => ({path: `extra-${index}`, isDir: true, editable: false})),
     ];
     window.siyuan = {
@@ -70,22 +81,45 @@ const runCases = async (appDirectory, mode, capture) => {
             requests.push({...request});
             await tick();
             if (request.action === "list") {
-                return {code: 0, data: {entries}};
+                return {code: 0, data: {entries: entries.map(entry => ({...entry}))}};
             }
             if (request.action === "read") {
                 const entry = entries.find(item => item.path === request.path);
                 assert.ok(entry, request.path);
+                if (readOnlyFiles.has(request.path)) {
+                    return {code: 0, data: {revision: "revision-1", readOnlyReason: readOnlyFiles.get(request.path)}};
+                }
                 return {code: 0, data: {
                     revision: "revision-1",
-                    ...(entry.editable ? {content: request.path.endsWith("SKILL.md") ? stored : "Resource text"} : {}),
+                    ...(textFiles.has(request.path) ? {content: textFiles.get(request.path)} :
+                        entry.editable ? {content: request.path.endsWith("SKILL.md") ? stored : "Resource text"} : {}),
                 }};
             }
             if (request.action === "write") {
                 if (conflict) {
                     return {code: -1, msg: "File changed", data: null};
                 }
-                stored = request.content;
+                if (request.path.endsWith("SKILL.md")) {
+                    stored = request.content;
+                } else {
+                    textFiles.set(request.path, request.content);
+                    if (!entries.some(entry => entry.path === request.path)) {
+                        entries.push({path: request.path, isDir: false, editable: true});
+                    }
+                }
                 return {code: 0, data: {revision: "revision-2"}};
+            }
+            if (request.action === "move") {
+                const entry = entries.find(entry => entry.path === request.path);
+                entry.path = request.target;
+                textFiles.set(request.target, textFiles.get(request.path));
+                textFiles.delete(request.path);
+                return {code: 0, data: {}};
+            }
+            if (request.action === "remove") {
+                entries.splice(entries.findIndex(entry => entry.path === request.path), 1);
+                textFiles.delete(request.path);
+                return {code: 0, data: {}};
             }
             throw new Error(`Unexpected action: ${request.action}`);
         }},
@@ -276,6 +310,7 @@ const runCases = async (appDirectory, mode, capture) => {
     assert.equal(host.isConnected, false);
     assert.equal(window.siyuan.dialogs.length, 0);
 
+    conflict = false;
     openManager();
     await tick();
     await tick();
@@ -291,6 +326,9 @@ const runCases = async (appDirectory, mode, capture) => {
     assert.equal(nextHost.querySelector('[data-action="save"]').disabled, true);
     assert.equal(nextManager.querySelector('[data-action="rename"]').disabled, true);
     assert.equal(nextManager.querySelector('[data-action="remove"]').disabled, true);
+    const lang = window.siyuan.languages;
+    assert.equal(nextManager.querySelector(".skill-manager__hint").textContent,
+        lang.agentSkillBinaryTip + (mode === "desktop" ? " " + lang.agentSkillOpenLocationTip : ""));
     if (mode === "desktop") {
         nextManager.querySelector('[data-action="open"]').click();
         assert.equal(opened[0][0], "D:/workspace/data/storage/ai/agent/skills/directory-id/image.png");
@@ -306,6 +344,70 @@ const runCases = async (appDirectory, mode, capture) => {
     assert.equal(prompt.element.classList.contains("mobile-bottom-sheet-dialog"), false);
     prompt.element.querySelector("[data-input-cancel]").click();
     await tick();
+    const nextButton = action => nextHost.querySelector(`[data-action="${action}"]`);
+    const returnToList = async () => {
+        if (mobile && nextManager.classList.contains("skill-manager--editing")) {
+            nextButton("back").click();
+            await tick();
+        }
+    };
+    const nextChoose = async file => {
+        await returnToList();
+        nextManager.querySelector(`[data-path="${file}"] .skill-manager__file`).click();
+        await tick();
+        await tick();
+    };
+    for (const [file, reason] of readOnlyFiles) {
+        await nextChoose(file);
+        const tip = {binary: lang.agentSkillBinaryTip, encoding: lang.agentSkillEncodingTip, tooLarge: lang.agentSkillTooLargeTip}[reason];
+        assert.ok(nextManager.querySelector(".skill-manager__hint").textContent.startsWith(tip));
+        assert.equal(nextButton("rename").disabled, true);
+        assert.equal(nextButton("remove").disabled, true);
+        assert.equal(nextManager.querySelector("textarea").disabled, true);
+    }
+    for (const [file, content] of textFiles) {
+        await nextChoose(file);
+        const editor = nextManager.querySelector("textarea");
+        assert.equal(editor.disabled, false, "read response supersedes stale list editability");
+        assert.equal(editor.value, content.replace(/\r\n/g, "\n"));
+        editor.value += "edited\n";
+        editor.dispatchEvent(new Event("input", {bubbles: true}));
+        nextButton("save").click();
+        await tick();
+        await tick();
+        const saved = requests.filter(request => request.action === "write").at(-1);
+        assert.equal(saved.path, file);
+        assert.equal(saved.content, content + (content.includes("\r\n") ? "edited\r\n" : "edited\n"));
+        assert.equal(nextButton("rename").disabled, false);
+        assert.equal(nextButton("remove").disabled, false);
+    }
+    const nameAction = async (action, name) => {
+        await returnToList();
+        nextButton(action).click();
+        await tick();
+        const inputDialog = window.siyuan.dialogs.at(-1);
+        inputDialog.element.querySelector("input").value = name;
+        inputDialog.element.querySelector("[data-input-confirm]").click();
+        for (let i = 0; i < 6; i++) {
+            await tick();
+        }
+    };
+    for (const name of ["settings.yaml", "LICENSE"]) {
+        await nameAction("newFile", name);
+        assert.ok(textFiles.has("directory-id/" + name), "new text files keep their chosen extension or lack of one");
+        assert.equal(nextManager.querySelector("textarea").disabled, false, "empty files are editable");
+    }
+    await nameAction("rename", ".env");
+    assert.ok(textFiles.has("directory-id/.env"));
+    assert.equal(textFiles.has("directory-id/LICENSE"), false);
+    await returnToList();
+    nextButton("remove").click();
+    await tick();
+    await acceptConfirm();
+    for (let i = 0; i < 4; i++) {
+        await tick();
+    }
+    assert.equal(textFiles.has("directory-id/.env"), false);
     if (mobile) {
         settingsRoot.remove();
     } else {

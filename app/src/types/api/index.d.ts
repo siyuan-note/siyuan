@@ -172,7 +172,7 @@ export type AISessionsRequestInput = { "keyword"?: string | null; "page"?: numbe
 
 export type AISkillData = { "content": string; "name": string; };
 
-export type AISkillFileData = { "content"?: string; "entries"?: Array<AISkillFileEntry> | null; "revision"?: string; };
+export type AISkillFileData = { "content"?: string; "entries"?: Array<AISkillFileEntry> | null; "readOnlyReason"?: "binary" | "encoding" | "tooLarge"; "revision"?: string; };
 
 export type AISkillFileEntry = { "editable": boolean; "isDir": boolean; "path": string; };
 

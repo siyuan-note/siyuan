@@ -26,6 +26,12 @@ const maxManagedSkillSourceSize = 8 * 1024 * 1024
 
 var skillManagementLock sync.Mutex
 
+var (
+	ErrSkillBinary   = errors.New("binary files cannot be edited as text")
+	ErrSkillEncoding = errors.New("only UTF-8 text files can be edited")
+	ErrSkillTooLarge = errors.New("text files must be at most 8 MiB")
+)
+
 type SkillFileRequest struct {
 	Action   string
 	Path     string
@@ -41,9 +47,10 @@ type SkillFileEntry struct {
 }
 
 type SkillFileData struct {
-	Entries  []SkillFileEntry
-	Content  *string
-	Revision string
+	Entries        []SkillFileEntry
+	Content        *string
+	Revision       string
+	ReadOnlyReason string
 }
 
 // 管理操作使用真实的相对路径，不使用技能正文中的名称作为文件标识。
@@ -52,7 +59,7 @@ func validateManagedSkillPath(p string) error {
 		return errors.New("invalid skill path")
 	}
 	for _, part := range strings.Split(p, "/") {
-		if strings.HasPrefix(part, ".") || strings.TrimSpace(part) != part || strings.HasSuffix(part, ".") ||
+		if strings.TrimSpace(part) != part || strings.HasSuffix(part, ".") ||
 			strings.ContainsAny(part, "<>\"|?*~") || strings.ContainsFunc(part, unicode.IsControl) {
 			return errors.New("invalid skill path component")
 		}
@@ -112,10 +119,6 @@ func checkManagedSkillPath(root *os.Root, p string) error {
 	return nil
 }
 
-func isManagedSkillMarkdown(p string) bool {
-	return strings.Contains(p, "/") && strings.EqualFold(path.Ext(p), ".md")
-}
-
 func isManagedSkillManifest(p string) bool {
 	return strings.Count(p, "/") == 1 && strings.EqualFold(path.Base(p), "SKILL.md")
 }
@@ -161,6 +164,41 @@ func managedSkillRevision(root *os.Root, p string) (string, error) {
 	return fmt.Sprintf("%x", h.Sum(nil)), err
 }
 
+// 编码标记不参与二进制判断；其余正文不允许文本空白以外的控制字符。
+func validateManagedSkillSource(content string) error {
+	if len(content) > maxManagedSkillSourceSize {
+		return ErrSkillTooLarge
+	}
+	if strings.HasPrefix(content, "\xff\xfe") || strings.HasPrefix(content, "\xfe\xff") ||
+		strings.HasPrefix(content, "\x00\x00\xfe\xff") {
+		return ErrSkillEncoding
+	}
+	if strings.ContainsRune(content, 0) {
+		return ErrSkillBinary
+	}
+	if !utf8.ValidString(content) {
+		return ErrSkillEncoding
+	}
+	for _, r := range content {
+		if unicode.IsControl(r) && r != '\t' && r != '\n' && r != '\r' && r != '\f' {
+			return ErrSkillBinary
+		}
+	}
+	return nil
+}
+
+func skillSourceReadOnlyReason(err error) string {
+	switch {
+	case errors.Is(err, ErrSkillBinary):
+		return "binary"
+	case errors.Is(err, ErrSkillEncoding):
+		return "encoding"
+	case errors.Is(err, ErrSkillTooLarge):
+		return "tooLarge"
+	}
+	return ""
+}
+
 func readManagedSkillSource(root *os.Root, p string) (string, error) {
 	file, err := root.Open(p)
 	if err != nil {
@@ -171,26 +209,36 @@ func readManagedSkillSource(root *os.Root, p string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if !info.Mode().IsRegular() || info.Size() > maxManagedSkillSourceSize {
-		return "", errors.New("invalid or oversized skill source")
+	if !info.Mode().IsRegular() {
+		return "", errors.New("skill source is not a regular file")
+	}
+	if info.Size() > maxManagedSkillSourceSize {
+		return "", ErrSkillTooLarge
 	}
 	content, err := io.ReadAll(io.LimitReader(file, maxManagedSkillSourceSize+1))
 	if err != nil {
 		return "", err
 	}
-	if len(content) > maxManagedSkillSourceSize || !utf8.Valid(content) {
-		return "", errors.New("skill source must be UTF-8 and at most 8 MiB")
+	// UTF-8 BOM 随正文保留；二进制内容不会返回给文本编辑器。
+	if err = validateManagedSkillSource(string(content)); err != nil {
+		return "", err
 	}
 	return string(content), nil
 }
 
 // 写入临时文件并同步后替换，发生写入错误时保留原文及其换行和元数据。
 func writeManagedSkillSource(root *os.Root, p, content string, create bool, revision string) error {
-	if len(content) > maxManagedSkillSourceSize || !utf8.ValidString(content) {
-		return errors.New("skill source must be UTF-8 and at most 8 MiB")
+	if err := validateManagedSkillSource(content); err != nil {
+		return err
 	}
 	target := p
+	mode := os.FileMode(0644)
 	if !create {
+		info, err := root.Stat(p)
+		if err != nil {
+			return err
+		}
+		mode = info.Mode().Perm()
 		target = path.Join(path.Dir(p), ".skill-"+ast.NewNodeID())
 	}
 	file, err := root.OpenFile(target, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
@@ -203,7 +251,13 @@ func writeManagedSkillSource(root *os.Root, p, content string, create bool, revi
 			root.Remove(target)
 		}
 	}()
-	_, err = file.WriteString(content)
+	// 替换脚本文件时保留执行权限，不受当前进程 umask 影响。
+	if !create {
+		err = file.Chmod(mode)
+	}
+	if err == nil {
+		_, err = file.WriteString(content)
+	}
 	if err == nil {
 		err = file.Sync()
 	}
@@ -255,7 +309,13 @@ func ManageSkillFiles(request SkillFileRequest) (SkillFileData, error) {
 				return walkErr
 			}
 			// 未解析或被同名技能遮蔽的目录也保留在列表中，链接只展示而不跟随。
-			editable := entry.Type().IsRegular() && isManagedSkillMarkdown(p) && validateManagedSkillPath(p) == nil
+			editable := false
+			if entry.Type().IsRegular() && strings.Contains(p, "/") && validateManagedSkillPath(p) == nil {
+				if err := checkManagedSkillPath(root, p); err == nil {
+					_, err = readManagedSkillSource(root, p)
+					editable = err == nil
+				}
+			}
 			ret.Entries = append(ret.Entries, SkillFileEntry{Path: p, IsDir: entry.IsDir(), Editable: editable})
 			return nil
 		})
@@ -301,20 +361,30 @@ func ManageSkillFiles(request SkillFileRequest) (SkillFileData, error) {
 		return ret, statErr
 	}
 	if request.Action == "read" {
-		if !info.IsDir() && isManagedSkillMarkdown(request.Path) {
+		if !info.IsDir() && strings.Contains(request.Path, "/") {
 			content, readErr := readManagedSkillSource(root, request.Path)
-			if readErr != nil {
+			if readErr == nil {
+				ret.Content = &content
+				ret.Revision = fmt.Sprintf("%x", sha256.Sum256([]byte(content)))
+				return ret, nil
+			}
+			ret.ReadOnlyReason = skillSourceReadOnlyReason(readErr)
+			if ret.ReadOnlyReason == "" {
 				return ret, readErr
 			}
-			ret.Content = &content
-			ret.Revision = fmt.Sprintf("%x", sha256.Sum256([]byte(content)))
-			return ret, nil
 		}
 		ret.Revision, err = managedSkillRevision(root, request.Path)
 		return ret, err
 	}
-	if (info == nil || !info.IsDir()) && !isManagedSkillMarkdown(request.Path) {
-		return ret, errors.New("only Markdown files inside a skill can be edited")
+	if info == nil || !info.IsDir() {
+		if !strings.Contains(request.Path, "/") {
+			return ret, errors.New("only text files inside a skill can be edited")
+		}
+		if info != nil {
+			if _, err = readManagedSkillSource(root, request.Path); err != nil {
+				return ret, err
+			}
+		}
 	}
 	if (request.Action == "move" || request.Action == "remove") && isManagedSkillManifest(request.Path) {
 		return ret, errors.New("rename or delete the skill directory instead of SKILL.md")
@@ -342,8 +412,8 @@ func ManageSkillFiles(request SkillFileRequest) (SkillFileData, error) {
 		if err = checkManagedSkillPath(root, request.Target); err != nil {
 			return ret, err
 		}
-		if path.Dir(request.Path) != path.Dir(request.Target) || (!info.IsDir() && !isManagedSkillMarkdown(request.Target)) {
-			return ret, errors.New("skills and Markdown files can only be renamed in the same directory")
+		if path.Dir(request.Path) != path.Dir(request.Target) {
+			return ret, errors.New("skills and text files can only be renamed in the same directory")
 		}
 		if _, err = root.Lstat(request.Target); !errors.Is(err, os.ErrNotExist) {
 			return ret, errors.New("skill destination already exists or is inaccessible")

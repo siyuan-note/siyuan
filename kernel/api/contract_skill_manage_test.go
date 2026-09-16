@@ -65,6 +65,25 @@ func TestAPIContractAISkillManagement(t *testing.T) {
 	}
 	call(`{"action":"mkdir","path":"directory/references"}`, 0)
 	call(`{"action":"write","path":"directory/references/reference.md","content":"reference"}`, 0)
+	call(`{"action":"mkdir","path":"directory/.claude"}`, 0)
+	call(`{"action":"write","path":"directory/.claude/.config.json","content":"{\r\n\"enabled\":true\r\n}\r\n"}`, 0)
+	text := call(`{"action":"read","path":"directory/.claude/.config.json"}`, 0)
+	if text.Content == nil || *text.Content != "{\r\n\"enabled\":true\r\n}\r\n" || text.ReadOnlyReason != "" {
+		t.Fatalf("hidden JSON file is not editable: %+v", text)
+	}
+	for _, fixture := range []struct{ name, content, reason string }{
+		{"binary.json", "\x00\x01", "binary"},
+		{"encoding.txt", "\xff\xfea\x00", "encoding"},
+		{"large.txt", strings.Repeat("a", 8*1024*1024+1), "tooLarge"},
+	} {
+		if err = os.WriteFile(filepath.Join(util.SkillsDir(), "directory", fixture.name), []byte(fixture.content), 0644); err != nil {
+			t.Fatal(err)
+		}
+		response := call(`{"action":"read","path":"directory/`+fixture.name+`"}`, 0)
+		if response.Content != nil || response.ReadOnlyReason != fixture.reason || response.Revision == "" {
+			t.Fatalf("read-only reason missing from HTTP response: %+v", response)
+		}
+	}
 	resource := filepath.Join(util.SkillsDir(), "directory", "asset.bin")
 	if err = os.WriteFile(resource, []byte{0, 255}, 0644); err != nil {
 		t.Fatal(err)

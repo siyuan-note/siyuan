@@ -5056,6 +5056,14 @@
             }
           ]
         },
+        "readOnlyReason": {
+          "type": "string",
+          "enum": [
+            "binary",
+            "encoding",
+            "tooLarge"
+          ]
+        },
         "revision": {
           "type": "string"
         }

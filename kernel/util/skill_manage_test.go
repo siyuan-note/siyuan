@@ -153,7 +153,7 @@ func TestSkillManagementRevisionConflicts(t *testing.T) {
 func TestSkillManagementPathBoundaries(t *testing.T) {
 	managedSkillTestWorkspace(t)
 	requireManagedSkill(t, SkillFileRequest{Action: "create", Path: "skill"})
-	for _, p := range []string{"", ".", "..", "../escape", "/absolute", "C:/escape", "skill\\SKILL.md", "skill/../escape.md", "skill//a.md", "skill/a:stream.md", "skill/CON.md", "skill/COM¹.md", "skill/CONIN$", "skill/a. ", "skill/a.", "skill/.hidden.md", "skill/SKILL~1.MD", "skill/\x00.md"} {
+	for _, p := range []string{"", ".", "..", "../escape", "/absolute", "C:/escape", "skill\\SKILL.md", "skill/../escape.md", "skill/./file.txt", "skill//a.md", "skill/a:stream.md", "skill/CON.md", "skill/COM¹.md", "skill/CONIN$", "skill/a. ", "skill/a.", "skill/SKILL~1.MD", "skill/\x00.md"} {
 		if _, err := ManageSkillFiles(SkillFileRequest{Action: "write", Path: p, Content: "outside"}); err == nil {
 			t.Fatalf("accepted invalid path %q", p)
 		}
@@ -171,7 +171,7 @@ func TestSkillManagementPathBoundaries(t *testing.T) {
 	requireManagedSkill(t, SkillFileRequest{Action: "mkdir", Path: "skill/sub"})
 	requireManagedSkill(t, SkillFileRequest{Action: "write", Path: "skill/extra.md", Content: "original"})
 	read := requireManagedSkill(t, SkillFileRequest{Action: "read", Path: "skill/extra.md"})
-	for _, target := range []string{"skill/sub/extra.md", "skill/file.txt", "../outside.md", "skill/SKILL.md"} {
+	for _, target := range []string{"skill/sub/extra.md", "../outside.md", "skill/SKILL.md"} {
 		if _, err := ManageSkillFiles(SkillFileRequest{Action: "move", Path: "skill/extra.md", Target: target, Revision: read.Revision}); err == nil {
 			t.Fatalf("accepted invalid move target %q", target)
 		}

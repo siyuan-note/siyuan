@@ -15,13 +15,14 @@ export class SkillSourceState {
     public text = "";
     private saved = "";
     private original = "";
-    private crlf = false;
+    private newline = "\n";
 
     public load(path: string, content: string, revision: string) {
         this.path = path;
         this.original = content;
         this.revision = revision;
-        this.crlf = content.includes("\r\n") && !content.replace(/\r\n/g, "").includes("\n");
+        const endings = content.match(/\r\n|\r|\n/g);
+        this.newline = endings?.length && endings.every(ending => ending === endings[0]) ? endings[0] : "\n";
         this.text = content.replace(/\r\n?/g, "\n");
         this.saved = this.text;
     }
@@ -34,7 +35,7 @@ export class SkillSourceState {
         if (!this.dirty) {
             return this.original;
         }
-        return this.crlf ? this.text.replace(/\n/g, "\r\n") : this.text;
+        return this.text.replace(/\n/g, this.newline);
     }
 
     public acceptSave(revision: string) {

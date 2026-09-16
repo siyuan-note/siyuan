@@ -8,7 +8,7 @@ import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isBrowser, isMobile} from "../../util/functions";
 import {canChangeSkillEntry, getSkillDirectory, SkillSourceState} from "./state";
 import {createSkillManagerPage} from "./page";
-import type {AISkillFileEntry, AISkillFileRequestInput} from "../../types/api";
+import type {AISkillFileData, AISkillFileEntry, AISkillFileRequestInput} from "../../types/api";
 /// #if !MOBILE
 import {openBy} from "../../editor/util";
 /// #endif
@@ -81,6 +81,7 @@ export const openSkillManager = (settingRoot?: HTMLElement) => {
     let entries: AISkillFileEntry[] = [];
     let selected: AISkillFileEntry;
     let selectedRevision = "";
+    let readOnlyReason: AISkillFileData["readOnlyReason"];
     let busy = false;
     let closed = false;
     let confirming = false;
@@ -141,7 +142,11 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
         source.readOnly = busy;
         source.classList.toggle("fn__none", !editable);
         hint.classList.toggle("fn__none", editable);
-        hint.textContent = selected && !selected.isDir ? lang.agentSkillResourceTip : lang.emptyContent;
+        const reasons = {binary: lang.agentSkillBinaryTip, encoding: lang.agentSkillEncodingTip,
+            tooLarge: lang.agentSkillTooLargeTip};
+        hint.textContent = selected && !selected.isDir ?
+            (reasons[readOnlyReason] || lang.agentSkillResourceTip) + (localFiles ? " " + lang.agentSkillOpenLocationTip : "") :
+            lang.emptyContent;
         path.textContent = (state.path || selected?.path || "") + (state.dirty ? " *" : "");
         if (mobile) {
             const editing = root.classList.contains("skill-manager--editing");
@@ -235,7 +240,12 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
         selected = entry;
         selectedRevision = data?.revision || "";
         if (!entry?.isDir) {
-            state.load(entry?.editable ? entry.path : "", data?.content || "", selectedRevision);
+            readOnlyReason = data?.readOnlyReason;
+            // 读取结果优先于列表快照，外部程序可能已改变文件内容或编码。
+            if (entry) {
+                entry.editable = typeof data?.content === "string";
+            }
+            state.load(entry?.editable ? entry.path : "", data?.content ?? "", selectedRevision);
             source.value = state.text;
             source.scrollTop = 0;
             if (entry && reveal) {
@@ -367,7 +377,7 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
                 const input = inputDialog.element.querySelector<HTMLInputElement>("input");
                 const name = value.trim();
                 const target = getFileRenameTarget(action === "rename" ? entry.path : "", name);
-                if (target === undefined || (action === "rename" && !entry.isDir && !/\.md$/i.test(name))) {
+                if (target === undefined) {
                     input.setCustomValidity(lang.agentSkillNameTip);
                     input.reportValidity();
                     return;
@@ -386,7 +396,7 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
                         }
                         data = await api({action: "move", path: entry.path, target, revision: selectedRevision});
                     } else {
-                        next = directory + "/" + (action === "newFile" && !/\.md$/i.test(name) ? name + ".md" : name);
+                        next = directory + "/" + name;
                         data = await api(action === "mkdir" ? {action: "mkdir", path: next} :
                             {action: "write", path: next, content: "", revision: ""});
                     }

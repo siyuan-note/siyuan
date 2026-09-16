@@ -11,6 +11,23 @@ const runCases = async (appDirectory, mode, capture) => {
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
     const mobile = mode === "mobile";
     const viewport = new EventTarget();
+    const viewportListeners = new Map();
+    const addViewportListener = viewport.addEventListener.bind(viewport);
+    const removeViewportListener = viewport.removeEventListener.bind(viewport);
+    viewport.addEventListener = (type, listener) => {
+        if (!viewportListeners.has(listener)) {
+            viewportListeners.set(listener, new Set());
+        }
+        viewportListeners.get(listener).add(type);
+        addViewportListener(type, listener);
+    };
+    viewport.removeEventListener = (type, listener) => {
+        viewportListeners.get(listener)?.delete(type);
+        if (viewportListeners.get(listener)?.size === 0) {
+            viewportListeners.delete(listener);
+        }
+        removeViewportListener(type, listener);
+    };
     viewport.height = window.innerHeight;
     viewport.offsetTop = 0;
     if (mobile) {
@@ -98,26 +115,49 @@ const runCases = async (appDirectory, mode, capture) => {
         new Function("require", "exports", output)(dependency => load(dependency, path.posix.dirname(moduleKey)), exports);
         return exports;
     };
-    load("ai/skills/manager").openSkillManager();
+    let settingsRoot;
+    if (mobile) {
+        document.body.innerHTML = `<div id="model" class="side-panel fn__flex-column" style="transform: translateX(0px)">
+            <div class="toolbar"><span class="toolbar__text">AI</span></div>
+            <div id="modelMain" class="fn__flex-1"><div class="config config--mobile config--mobile-items">
+                <div style="height: 1800px"><input id="setting-draft" value="Keep settings state"></div>
+            </div></div>
+        </div>`;
+        settingsRoot = document.querySelector(".config");
+        document.querySelector("#setting-draft").focus({preventScroll: true});
+        settingsRoot.scrollTop = 100;
+        assert.equal(settingsRoot.scrollTop, 100);
+    }
+    const openManager = () => load("ai/skills/manager").openSkillManager(settingsRoot);
+    const currentHost = () => mobile ? settingsRoot.querySelector(".skill-manager-page") : window.siyuan.dialogs[0].element;
+    openManager();
     await tick();
     await tick();
     const dialog = window.siyuan.dialogs[0];
-    const manager = dialog.element.querySelector(".skill-manager");
+    const host = currentHost();
+    const manager = host.matches(".skill-manager") ? host : host.querySelector(".skill-manager");
     assert.ok(manager);
     await new Promise(resolve => setTimeout(resolve, 180));
-    assert.equal(dialog.element.classList.contains("mobile-bottom-sheet-dialog"), mobile);
-    const container = dialog.element.querySelector(".b3-dialog__container");
+    assert.equal(host.classList.contains("mobile-bottom-sheet-dialog"), false);
+    assert.equal(host.querySelector(".b3-menu__title--root"), null);
+    const container = mobile ? host : host.querySelector(".b3-dialog__container");
     if (mobile) {
+        assert.equal(window.siyuan.dialogs.length, 0, "mobile management is a settings page");
+        assert.equal(host.querySelector('[role="dialog"]'), null);
+        assert.ok(document.querySelector("#setting-draft").closest("[inert]"), "parent settings cannot receive input");
+        assert.ok(document.querySelector("#model > .toolbar").hasAttribute("inert"));
         const bounds = container.getBoundingClientRect();
-        assert.ok(bounds.top > 0, "the mobile sheet leaves space above its handle");
-        assert.ok(bounds.bottom <= window.innerHeight + 1, "the mobile sheet fits in the viewport");
+        assert.ok(Math.abs(bounds.left) < 1 && Math.abs(bounds.right - window.innerWidth) < 1,
+            "the mobile page spans the viewport width");
+        assert.ok(Math.abs(bounds.top) < 1 && Math.abs(bounds.bottom - window.innerHeight) < 1,
+            "the mobile page covers the parent settings toolbar and content");
         assert.equal(getComputedStyle(manager.querySelector(".skill-manager__editor")).display, "none");
     }
     assert.equal(Boolean(manager.querySelector('[data-action="open"]')), mode === "desktop");
     if (capture) {
         await require("electron").ipcRenderer.invoke("skill-manager-capture", `${mode}-${window.innerWidth}-list`);
     }
-    const button = action => manager.querySelector(`[data-action="${action}"]`);
+    const button = action => host.querySelector(`[data-action="${action}"]`);
     assert.equal(getComputedStyle(button("back")).display === "none", !mobile);
     const choose = async file => {
         const row = Array.from(manager.querySelectorAll("li[data-path]")).find(item => item.dataset.path === file);
@@ -137,13 +177,23 @@ const runCases = async (appDirectory, mode, capture) => {
     assert.ok(source.getBoundingClientRect().height > 120, "the source editor has usable height");
     if (mobile) {
         assert.equal(getComputedStyle(manager.querySelector(".skill-manager__sidebar")).display, "none");
+        assert.equal(document.activeElement, button("back"), "opening a file focuses its page navigation");
         viewport.height = 360;
         viewport.dispatchEvent(new Event("resize"));
         await tick();
         const bounds = container.getBoundingClientRect();
-        assert.ok(bounds.bottom <= 361, "the drawer stays above the keyboard");
+        assert.ok(bounds.bottom <= 361, "the page stays above the keyboard");
         assert.ok(source.getBoundingClientRect().height > 60, "the keyboard leaves usable source space");
-        assert.ok(button("save").getBoundingClientRect().bottom <= bounds.bottom, "save stays within the drawer");
+        assert.ok(button("save").getBoundingClientRect().bottom <= source.getBoundingClientRect().top,
+            "save stays in the page header above the source editor");
+        assert.ok(button("save").getBoundingClientRect().bottom <= bounds.bottom, "save stays within the page");
+        viewport.offsetTop = 80;
+        viewport.dispatchEvent(new Event("scroll"));
+        await tick();
+        const shiftedBounds = container.getBoundingClientRect();
+        assert.ok(Math.abs(shiftedBounds.top - 80) < 1 && shiftedBounds.bottom <= 441,
+            "the page follows a keyboard-panned visual viewport");
+        viewport.offsetTop = 0;
         viewport.height = window.innerHeight;
         viewport.dispatchEvent(new Event("resize"));
         await tick();
@@ -179,7 +229,7 @@ const runCases = async (appDirectory, mode, capture) => {
     const cancelConfirm = async () => {
         const prompt = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
         assert.notEqual(prompt, dialog);
-        assert.equal(prompt.element.classList.contains("mobile-bottom-sheet-dialog"), mobile);
+        assert.equal(prompt.element.classList.contains("mobile-bottom-sheet-dialog"), false);
         prompt.element.querySelector('[data-action="cancel"]').click();
         await tick();
     };
@@ -204,43 +254,66 @@ const runCases = async (appDirectory, mode, capture) => {
         await choose("directory-id/SKILL.md");
         setSource(edited + "Unsaved");
     }
-    dialog.destroy();
+    const backOrClose = () => mobile ? button("back").click() : dialog.destroy();
+    backOrClose();
     await cancelConfirm();
-    assert.ok(dialog.element.isConnected);
+    assert.ok(host.isConnected);
     assert.equal(source.value, edited + "Unsaved");
-    dialog.destroy();
+    backOrClose();
     await acceptConfirm();
-    assert.equal(dialog.element.isConnected, false);
+    if (mobile) {
+        assert.ok(host.isConnected, "returning from the editor keeps the file list open");
+        backOrClose();
+        await tick();
+        assert.ok(settingsRoot.isConnected);
+        assert.equal(settingsRoot.scrollTop, 100, "returning to settings preserves its scroll position");
+        assert.equal(document.querySelector("#setting-draft").value, "Keep settings state");
+        assert.equal(document.querySelector("#setting-draft").closest("[inert]"), null);
+        assert.equal(document.querySelector("#model > .toolbar").hasAttribute("inert"), false);
+        assert.equal(document.activeElement.id, "setting-draft", "returning to settings restores focus");
+        assert.equal(viewportListeners.size, 0, "leaving the page removes viewport listeners");
+    }
+    assert.equal(host.isConnected, false);
     assert.equal(window.siyuan.dialogs.length, 0);
 
-    load("ai/skills/manager").openSkillManager();
+    openManager();
     await tick();
     await tick();
     const next = window.siyuan.dialogs[0];
-    const nextManager = next.element.querySelector(".skill-manager");
+    const nextHost = currentHost();
+    const nextManager = nextHost.matches(".skill-manager") ? nextHost : nextHost.querySelector(".skill-manager");
     nextManager.querySelector('[data-path="directory-id"] .skill-manager__file').click();
     await tick();
     await tick();
     nextManager.querySelector('[data-path="directory-id/image.png"] .skill-manager__file').click();
     await tick();
     await tick();
-    assert.equal(nextManager.querySelector('[data-action="save"]').disabled, true);
+    assert.equal(nextHost.querySelector('[data-action="save"]').disabled, true);
     assert.equal(nextManager.querySelector('[data-action="rename"]').disabled, true);
     assert.equal(nextManager.querySelector('[data-action="remove"]').disabled, true);
     if (mode === "desktop") {
         nextManager.querySelector('[data-action="open"]').click();
         assert.equal(opened[0][0], "D:/workspace/data/storage/ai/agent/skills/directory-id/image.png");
     }
+    if (mobile) {
+        nextHost.querySelector('[data-action="back"]').click();
+        await tick();
+    }
     nextManager.querySelector('[data-action="newSkill"]').click();
     await tick();
     const prompt = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
     assert.notEqual(prompt, next);
-    assert.equal(prompt.element.classList.contains("mobile-bottom-sheet-dialog"), mobile);
+    assert.equal(prompt.element.classList.contains("mobile-bottom-sheet-dialog"), false);
     prompt.element.querySelector("[data-input-cancel]").click();
     await tick();
-    next.destroy();
+    if (mobile) {
+        settingsRoot.remove();
+    } else {
+        next.destroy();
+    }
     await tick();
     assert.equal(window.siyuan.dialogs.length, 0);
+    assert.equal(viewportListeners.size, 0, "unmounting settings removes viewport listeners");
 };
 
 if (process.versions.electron && process.type === "browser") {

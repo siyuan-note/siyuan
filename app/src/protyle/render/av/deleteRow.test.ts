@@ -49,7 +49,8 @@ for (const binding of ["omitted", "bound", "detached"]) {
         assert.equal(restore.srcs[0].content, "Primary");
         assert.equal(restore.previousID, "previous");
         assert.equal(restore.groupID, "group");
-        assert.ok(operations[0].srcIDs.includes("original-item"));
-        assert.ok(operations[0].srcIDs.includes(restore.srcs[0].itemID));
+        assert.equal(restore.srcs[0].itemID, "original-item");
+        assert.deepEqual(operations[0].srcIDs, ["original-item"]);
+        assert.equal(operations[0].blockID, "database-block");
     });
 }

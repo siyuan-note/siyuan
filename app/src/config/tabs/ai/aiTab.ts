@@ -177,7 +177,7 @@ const registerAiSkillsGroup = (tab: SettingTabBuilder) => {
         label: window.siyuan.languages.manage,
         icon: "iconSettings",
         afterMount: root => {
-            root.querySelector("#aiWorkspaceSkills")?.addEventListener("click", openSkillManager);
+            root.querySelector("#aiWorkspaceSkills")?.addEventListener("click", () => openSkillManager(root));
         },
     });
     group.button({

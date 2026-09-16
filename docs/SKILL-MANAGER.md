@@ -12,7 +12,7 @@ Create a skill to add a directory containing `SKILL.md`. Inside a skill, create 
 
 Other resource files appear in the list but cannot be edited, renamed, or deleted individually in the manager. A local desktop client can open their file location for management with other applications. Deleting a folder also deletes every resource inside it, including files that the manager cannot edit, and cannot be undone through the manager.
 
-On mobile, the manager opens in a bottom drawer. Selecting a file opens its editor; returning to the list preserves the list's scroll position.
+On mobile, the manager opens as a full-screen settings subpage. Selecting a file opens an editor page with Back and Save at the top. Returning to the file list preserves its scroll position, and returning to settings preserves the existing settings page state. Unsaved-change confirmation and layout adaptation to the on-screen keyboard remain available; short confirmations and name entry use ordinary dialogs.
 
 ## File identity and concurrent changes
 

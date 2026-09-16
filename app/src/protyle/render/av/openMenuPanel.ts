@@ -83,6 +83,7 @@ import {openFieldVisibilityPanel} from "./fieldVisibility";
 import {clearSelect} from "../../util/clear";
 import {applyAVColorPalette, getAVCustomColors} from "./color";
 import {bindContextFilterEvent, getContextFilterHTML} from "./contextFilter";
+import {setAVCellPanelTarget} from "./panelTarget";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -229,6 +230,9 @@ export const openMenuPanel = (options: {
     <div class="b3-menu${options.type === "filters" ? " av__filter-panel" : ""}${options.type === "relation" ? " av__relation-panel" : ""}" ${options.keepMenuOpen ? "data-menu=\"true\"" : ""} ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${options.type === "relation" ? `width: 760px;max-width: ${isMobile() ? "90vw" : "calc(100vw - 32px)"};` : isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
+        if (options.cellElements?.length) {
+            setAVCellPanelTarget(avPanelElement, options.blockElement);
+        }
         applyAVColorPalette(avPanelElement as HTMLElement, getAVCustomColors());
         if (options.destroyCallback) {
             const renderedPanelElement = avPanelElement;

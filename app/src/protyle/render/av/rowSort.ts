@@ -12,12 +12,14 @@ export const sortAVRows = async (protyle: IProtyle, blockElement: HTMLElement, s
                            doOperations: IOperation[], undoOperations: IOperation[]) => {
     const request = {};
     rowSortRequests.set(blockElement, request);
+    const viewID = getAVViewID(blockElement);
     const hasSort = blockElement.querySelector('[data-type="av-sort"]')?.classList.contains("block__icon--active");
     if (!hasSort || selectedIDs.some(item => (item.split("@")[1] || "") !== (groupID || ""))) {
-        transaction(protyle, doOperations, undoOperations);
+        doOperations.forEach(operation => operation.viewID = viewID);
+        undoOperations.forEach(operation => operation.viewID = viewID);
+        transaction(protyle, doOperations, [...undoOperations].reverse());
         return;
     }
-    const viewID = getAVViewID(blockElement);
     const isCurrent = () => blockElement.isConnected && !protyle.disabled &&
         getAVViewID(blockElement) === viewID && rowSortRequests.get(blockElement) === request;
     await waitForPendingTransactions(protyle);

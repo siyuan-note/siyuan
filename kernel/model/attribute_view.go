@@ -7103,7 +7103,7 @@ func setAttributeViewColDesc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doSortAttrViewRow(operation *Operation) (ret *TxErr) {
-	err := sortAttributeViewRow(operation)
+	err := tx.sortAttributeViewItem(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}

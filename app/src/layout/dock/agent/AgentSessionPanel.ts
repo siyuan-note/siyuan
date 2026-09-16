@@ -124,6 +124,7 @@ export class AgentSessionPanel {
                 upDownHint(itemsContainer, event);
             });
             itemsContainer.addEventListener("scroll", () => {
+                this.closeAllSubmenus();
                 if (this.isLoadingMore) {
                     return;
                 }

@@ -1514,6 +1514,7 @@ const removeColByMenu = (options: {
         action: "removeAttrViewCol",
         id: options.colId,
         avID: options.avID,
+        blockID: options.blockID,
         removeDest: options.removeDest
     }, {
         action: "doUpdateUpdated",
@@ -1523,6 +1524,7 @@ const removeColByMenu = (options: {
         action: "addAttrViewCol",
         name: options.oldValue,
         avID: options.avID,
+        blockID: options.blockID,
         type: options.type,
         format: options.cellElement.dataset.dateFormat || "",
         id: options.colId,
@@ -1562,6 +1564,7 @@ export const removeCol = (options: {
         action: "removeAttrViewCol",
         id: colId,
         avID: options.avID,
+        blockID: options.blockID,
         removeDest: options.isTwoWay
     }, {
         action: "doUpdateUpdated",
@@ -1571,6 +1574,7 @@ export const removeCol = (options: {
         action: "addAttrViewCol",
         name: colData.name,
         avID: options.avID,
+        blockID: options.blockID,
         type: colData.type,
         format: colData.dateFormat || "",
         id: colId,

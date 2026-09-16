@@ -25,11 +25,8 @@ import (
 	"strings"
 
 	"github.com/88250/lute/parse"
-	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // 删除快照只保存在内核撤销日志中，保留字段值、条目身份和各视图顺序，不参与接口序列化。
@@ -39,13 +36,6 @@ type attributeViewItemsSnapshot struct {
 	Keys                 []*av.KeyValues
 	Orders               map[string][]string
 	Covers               map[string]map[string]*av.CardCoverPosition
-}
-
-// 事务失败时恢复本次写入涉及的数据库和文档，租约保持到提交或回滚结束。
-type attributeViewItemRollback struct {
-	views  map[string]*av.AttributeView
-	trees  map[string]*parse.Tree
-	leases map[string]bool
 }
 
 func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
@@ -181,28 +171,7 @@ func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
 }
 
 func (tx *Transaction) readAttributeViewItems(state *attributeViewItemsSnapshot) (*av.AttributeView, error) {
-	boxID, exact, err := resolveAttributeViewCarrierBoxID(state.BlockID)
-	if err != nil {
-		return nil, err
-	}
-	if exact && boxID != state.BoxID {
-		return nil, fmt.Errorf("database [%s] moved across notebook encryption boundaries", state.AvID)
-	}
-	if tx.attributeViewItemRollback == nil {
-		tx.attributeViewItemRollback = &attributeViewItemRollback{views: map[string]*av.AttributeView{},
-			trees: map[string]*parse.Tree{}, leases: map[string]bool{}}
-	}
-	if state.BoxID != "" && !tx.attributeViewItemRollback.leases[state.BoxID] {
-		if err = AcquireEncryptedBoxOperation(state.BoxID); err != nil {
-			return nil, err
-		}
-		tx.attributeViewItemRollback.leases[state.BoxID] = true
-	}
-	current, err := av.ParseAttributeViewForIndexInBox(state.AvID, state.BoxID)
-	if err == nil && current == nil {
-		err = av.ErrViewNotFound
-	}
-	return current, err
+	return tx.readAttributeViewForMutation(state.AvID, state.BlockID, state.BoxID)
 }
 
 func (tx *Transaction) prepareAttributeViewItemMutation(current *av.AttributeView, state *attributeViewItemsSnapshot) error {
@@ -222,7 +191,7 @@ func (tx *Transaction) prepareAttributeViewItemMutation(current *av.AttributeVie
 	}
 	for _, id := range ids {
 		key := state.BoxID + "/" + id
-		if id == "" || tx.attributeViewItemRollback.views[key] != nil {
+		if id == "" || tx.attributeViewRollback.views[key] != nil {
 			continue
 		}
 		original, err := av.ParseAttributeViewForIndexInBox(id, state.BoxID)
@@ -235,7 +204,7 @@ func (tx *Transaction) prepareAttributeViewItemMutation(current *av.AttributeVie
 		if original == nil {
 			return av.ErrViewNotFound
 		}
-		tx.attributeViewItemRollback.views[key] = original
+		tx.attributeViewRollback.views[key] = original
 	}
 	blockIDs := []string{state.BlockID}
 	for _, kv := range state.Keys {
@@ -248,21 +217,9 @@ func (tx *Transaction) prepareAttributeViewItemMutation(current *av.AttributeVie
 		}
 	}
 	for _, id := range blockIDs {
-		if id == "" {
-			continue
-		}
-		tree, err := tx.loadTree(id)
-		if err != nil {
+		if err := tx.rememberAttributeViewMutationTree(id); err != nil {
 			return err
 		}
-		if tx.attributeViewItemRollback.trees[tree.ID] != nil {
-			continue
-		}
-		original, err := filesys.LoadTree(tree.Box, tree.Path, util.NewLute())
-		if err != nil {
-			return err
-		}
-		tx.attributeViewItemRollback.trees[tree.ID] = original
 	}
 	return nil
 }
@@ -431,29 +388,4 @@ func restoreAttributeViewItemOrder(current, original, itemIDs []string) []string
 		}
 	}
 	return current
-}
-
-func (tx *Transaction) finishAttributeViewItemMutation(rollback bool) {
-	state := tx.attributeViewItemRollback
-	if state == nil {
-		return
-	}
-	if rollback {
-		for key, original := range state.views {
-			boxID, _, _ := strings.Cut(key, "/")
-			av.SetAVBoxID(original.ID, boxID)
-			if err := av.SaveAttributeView(original); err != nil {
-				logging.LogErrorf("restore database [%s] after transaction failure: %s", original.ID, err)
-			}
-		}
-		for _, tree := range state.trees {
-			if err := restoreCreatedDocTreeSnapshot(tree); err != nil {
-				logging.LogErrorf("restore database binding document [%s]: %s", tree.ID, err)
-			}
-		}
-	}
-	for boxID := range state.leases {
-		ReleaseEncryptedBoxOperation(boxID)
-	}
-	tx.attributeViewItemRollback = nil
 }

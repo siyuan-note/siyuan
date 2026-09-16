@@ -7411,6 +7411,12 @@ func refreshAttrViewKeyIDs(attrView *av.AttributeView, needSave bool) {
 }
 
 func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
+	if operation.attributeViewFields != nil {
+		if err := tx.replayAttributeViewFields(operation); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+		return
+	}
 	var icon string
 	if nil != operation.Data {
 		icon = operation.Data.(string)
@@ -7753,7 +7759,12 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := RemoveAttributeViewKey(operation.AvID, operation.ID, operation.RemoveDest)
+	var err error
+	if operation.attributeViewFields != nil {
+		err = tx.replayAttributeViewFields(operation)
+	} else {
+		err = tx.removeAttributeViewField(operation)
+	}
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
@@ -7761,184 +7772,9 @@ func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr)
 }
 
 func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if err != nil {
-		return
-	}
-
-	key, keyErr := attrView.GetKey(keyID)
-	if nil != keyErr {
-		err = keyErr
-		return
-	}
-	if av.KeyTypeBlock == key.Type {
-		err = errors.New("cannot remove primary key field")
-		return
-	}
-
-	var removedKey *av.Key
-	for i, keyValues := range attrView.KeyValues {
-		if keyValues.Key.ID == keyID {
-			attrView.KeyValues = append(attrView.KeyValues[:i], attrView.KeyValues[i+1:]...)
-			removedKey = keyValues.Key
-			attrView.RemoveNewItemTemplateFieldValue(keyID)
-			break
-		}
-	}
-	if nil != removedKey && av.KeyTypeRelation == removedKey.Type && nil != removedKey.Relation {
-		if removedKey.Relation.IsTwoWay {
-			var destAv *av.AttributeView
-			if avID == removedKey.Relation.AvID {
-				destAv = attrView
-			} else {
-				destAv, _ = av.ParseAttributeView(removedKey.Relation.AvID)
-			}
-
-			if nil != destAv {
-				oldDestKey, _ := destAv.GetKey(removedKey.Relation.BackKeyID)
-				if nil != oldDestKey && nil != oldDestKey.Relation && oldDestKey.Relation.AvID == attrView.ID && oldDestKey.Relation.IsTwoWay {
-					oldDestKey.Relation.IsTwoWay = false
-					oldDestKey.Relation.BackKeyID = ""
-				}
-
-				destAvRelSrcAv := false
-				for i, keyValues := range destAv.KeyValues {
-					if keyValues.Key.ID == removedKey.Relation.BackKeyID {
-						if removeRelationDest { // 删除双向关联的目标字段
-							destAv.KeyValues = append(destAv.KeyValues[:i], destAv.KeyValues[i+1:]...)
-							destAv.RemoveNewItemTemplateFieldValue(removedKey.Relation.BackKeyID)
-						}
-						continue
-					}
-
-					if av.KeyTypeRelation == keyValues.Key.Type && keyValues.Key.Relation.AvID == attrView.ID {
-						destAvRelSrcAv = true
-					}
-				}
-
-				if removeRelationDest {
-					for _, view := range destAv.Views {
-						switch view.LayoutType {
-						case av.LayoutTypeTable:
-							for i, column := range view.Table.Columns {
-								if column.ID == removedKey.Relation.BackKeyID {
-									view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
-									break
-								}
-							}
-						case av.LayoutTypeGallery:
-							for i, field := range view.Gallery.CardFields {
-								if field.ID == removedKey.Relation.BackKeyID {
-									view.Gallery.CardFields = append(view.Gallery.CardFields[:i], view.Gallery.CardFields[i+1:]...)
-									break
-								}
-							}
-						case av.LayoutTypeKanban:
-							for i, field := range view.Kanban.Fields {
-								if field.ID == removedKey.Relation.BackKeyID {
-									view.Kanban.Fields = append(view.Kanban.Fields[:i], view.Kanban.Fields[i+1:]...)
-									break
-								}
-							}
-						}
-					}
-				}
-
-				if destAv != attrView {
-					av.SaveAttributeView(destAv)
-					ReloadAttrView(destAv.ID)
-				}
-
-				if !destAvRelSrcAv {
-					av.RemoveAvRel(destAv.ID, attrView.ID)
-				}
-			}
-
-			srcAvRelDestAv := false
-			for _, keyValues := range attrView.KeyValues {
-				if av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation && keyValues.Key.Relation.AvID == removedKey.Relation.AvID {
-					srcAvRelDestAv = true
-				}
-			}
-			if !srcAvRelDestAv {
-				av.RemoveAvRel(attrView.ID, removedKey.Relation.AvID)
-			}
-		}
-	}
-	attrView.RemoveCardCoverPositionsBySource(av.CardCoverSource(av.CoverFromAssetField, keyID))
-
-	for _, view := range attrView.Views {
-		if nil != view.Table {
-			for i, column := range view.Table.Columns {
-				if column.ID == keyID {
-					view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
-					break
-				}
-			}
-		}
-
-		if nil != view.Gallery {
-			for i, field := range view.Gallery.CardFields {
-				if field.ID == keyID {
-					view.Gallery.CardFields = append(view.Gallery.CardFields[:i], view.Gallery.CardFields[i+1:]...)
-					break
-				}
-			}
-		}
-
-		if nil != view.Kanban {
-			for i, field := range view.Kanban.Fields {
-				if field.ID == keyID {
-					view.Kanban.Fields = append(view.Kanban.Fields[:i], view.Kanban.Fields[i+1:]...)
-					break
-				}
-			}
-		}
-	}
-
-	for _, view := range attrView.Views {
-		if nil != view.Group {
-			if groupKey := view.GetGroupKey(attrView); nil != groupKey && groupKey.ID == keyID {
-				removeAttributeViewGroup0(view)
-			}
-		}
-	}
-	removeAttrViewColumnFromFieldFilters(attrView, avID, keyID)
-
-	if err = av.SaveAttributeView(attrView); nil != err {
-		return
-	}
-	if nil != removedKey && av.KeyTypeRelation == removedKey.Type && nil != removedKey.Relation &&
-		"" != removedKey.Relation.AvID && removedKey.Relation.AvID != avID {
-		ReloadAttrView(removedKey.Relation.AvID)
-	}
-
-	relatedAvIDs := av.GetSrcAvIDs(avID)
-	for _, relatedAvID := range relatedAvIDs {
-		if relatedAvID == avID {
-			continue
-		}
-		destAv, _ := av.ParseAttributeView(relatedAvID)
-		if nil == destAv {
-			continue
-		}
-
-		for _, keyValues := range destAv.KeyValues {
-			if av.KeyTypeRollup == keyValues.Key.Type && nil != keyValues.Key.Rollup &&
-				keyValues.Key.Rollup.KeyID == keyID {
-				// 置空关联过来的汇总
-				for _, val := range keyValues.Values {
-					val.Rollup.Contents = nil
-				}
-			}
-		}
-		removeAttrViewColumnFromFieldFilters(destAv, avID, keyID)
-
-		regenAttrViewGroups(destAv)
-		av.SaveAttributeView(destAv)
-		ReloadAttrView(destAv.ID)
-	}
-	return
+	tx := &Transaction{}
+	defer func() { tx.finishAttributeViewMutation(err != nil) }()
+	return tx.removeAttributeViewField(&Operation{AvID: avID, ID: keyID, RemoveDest: removeRelationDest})
 }
 
 func (tx *Transaction) doReplaceAttrViewBlock(operation *Operation) (ret *TxErr) {

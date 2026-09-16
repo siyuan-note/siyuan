@@ -889,8 +889,8 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
             previousID: item.previousID,
             srcs: [{
                 itemID,
-                id: item.itemID,
-                isDetached: blockValue.isDetached,
+                id: blockValue.isDetached ? item.itemID : blockValue.block.id,
+                isDetached: blockValue.isDetached === true,
                 content: blockValue.block.content
             }],
             blockID: blockElement.dataset.nodeId,

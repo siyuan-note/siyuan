@@ -6051,11 +6051,24 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 
 	// 整批校验完成后再写入，避免后续条目越界时已修改前面的绑定。
 	boundTrees := map[string]*parse.Tree{}
-	for _, src := range srcs {
-		if src["isDetached"].(bool) {
+	detachedSources := make([]bool, len(srcs))
+	for index, src := range srcs {
+		if nil == src {
+			return result, fmt.Errorf("invalid attribute view source [%d]", index)
+		}
+		// 绑定条目的序列化数据可能省略值为 false 的字段，撤销重放时按绑定状态读取。
+		isDetached, ok := src["isDetached"].(bool)
+		if !ok && nil != src["isDetached"] {
+			return result, fmt.Errorf("invalid attribute view source [%d]: isDetached must be a boolean", index)
+		}
+		detachedSources[index] = isDetached
+		if isDetached {
 			continue
 		}
-		id := src["id"].(string)
+		id, ok := src["id"].(string)
+		if !ok {
+			return result, fmt.Errorf("invalid attribute view source [%d]: id must be a string", index)
+		}
 		if !ast.IsNodeIDPattern(id) {
 			continue
 		}
@@ -6075,14 +6088,14 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 	}
 
 	now := time.Now().UnixMilli()
-	for _, src := range srcs {
+	for index, src := range srcs {
 		boundBlockID := ""
 		srcItemID := ast.NewNodeID()
 		if nil != src["itemID"] {
 			srcItemID = src["itemID"].(string)
 		}
 
-		isDetached := src["isDetached"].(bool)
+		isDetached := detachedSources[index]
 		var tree *parse.Tree
 		if !isDetached {
 			boundBlockID = src["id"].(string)

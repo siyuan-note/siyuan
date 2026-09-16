@@ -865,6 +865,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             return;
         }
         if (operation.action === "foldHeading") {
+            const hadContent = protyle.wysiwyg.element.childElementCount > 0;
             protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
                 item.setAttribute("fold", "1");
                 if (!operation.retData) {
@@ -889,7 +890,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 });
                 // 折叠移除子块后，刷新折叠标题所在超级块的拖拽手柄（子块数变化）
                 refreshSbs(...Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)));
-                if (protyle.wysiwyg.element.childElementCount === 0) {
+                if (hadContent && protyle.block.rootID && protyle.wysiwyg.element.childElementCount === 0) {
                     zoomOut({
                         protyle,
                         id: protyle.block.rootID,

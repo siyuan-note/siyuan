@@ -295,8 +295,6 @@
     &[data-tabs-orientation="vertical"] {
       display: grid;
       grid-template-columns: fit-content(min(200px, 40%)) minmax(0, 1fr);
-      // 正文左侧保留块标及折叠按钮的操作空间，避免与页签按钮重叠。
-      column-gap: 48px;
 
       // 分隔线占满网格行，标题栏按内容高度吸顶，加号紧跟页签列表。
       > .tabs-divider {

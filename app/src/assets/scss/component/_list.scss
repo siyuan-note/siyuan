@@ -257,7 +257,7 @@
       height: 22px;
       padding: 0 2px;
       color: var(--b3-theme-on-surface-light);
-      transition: var(--b3-transition);
+      transition: color .2s cubic-bezier(0, 0, .2, 1), background-color .2s cubic-bezier(0, 0, .2, 1);
       border-radius: var(--b3-border-radius);
 
       &--hl {

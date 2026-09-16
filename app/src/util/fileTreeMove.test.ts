@@ -256,12 +256,15 @@ describe("updateMovedSubtree", () => {
         assert.equal(root.element.dataset.path, move.newPath);
         assert.equal(child.element.dataset.path, "/target/current/child.sy");
         assert.equal(grandchild.element.dataset.path, "/target/current/child/grandchild.sy");
-        assert.equal(root.properties.get("--file-toggle-width"), "60px");
-        assert.equal(child.properties.get("--file-toggle-width"), "80px");
-        assert.equal(grandchild.properties.get("--file-toggle-width"), "100px");
-        assert.equal(root.toggleElement.style.paddingLeft, "40px");
-        assert.equal(child.toggleElement.style.paddingLeft, "60px");
-        assert.equal(grandchild.toggleElement.style.paddingLeft, "80px");
+        assert.equal(root.properties.get("--file-toggle-width"), "54px");
+        assert.equal(child.properties.get("--file-toggle-width"), "72px");
+        assert.equal(grandchild.properties.get("--file-toggle-width"), "90px");
+        assert.equal(root.properties.get("--file-action-offset"), "56px");
+        assert.equal(child.properties.get("--file-action-offset"), "74px");
+        assert.equal(grandchild.properties.get("--file-action-offset"), "92px");
+        assert.equal(root.toggleElement.style.paddingLeft, "36px");
+        assert.equal(child.toggleElement.style.paddingLeft, "54px");
+        assert.equal(grandchild.toggleElement.style.paddingLeft, "72px");
     });
 
     it("is idempotent when the local move and WebSocket event both update the subtree", () => {
@@ -278,8 +281,19 @@ describe("updateMovedSubtree", () => {
 
         assert.equal(root.element.dataset.path, move.newPath);
         assert.equal(child.element.dataset.path, "/target/current/child.sy");
-        assert.equal(root.properties.get("--file-toggle-width"), "60px");
-        assert.equal(child.properties.get("--file-toggle-width"), "80px");
+        assert.equal(root.properties.get("--file-toggle-width"), "54px");
+        assert.equal(child.properties.get("--file-toggle-width"), "72px");
+    });
+
+    it("preserves mobile indentation when moving a subtree to the notebook root", () => {
+        const root = createFileTreeItem(move.fromPath);
+        const child = createFileTreeItem("/parent/current/child.sy");
+        updateMovedSubtree(root.element, createFileTreeList([child.element]), move.fromPath, "/current.sy", 20);
+        assert.equal(root.toggleElement.style.paddingLeft, "20px");
+        assert.equal(child.toggleElement.style.paddingLeft, "40px");
+        assert.equal(root.properties.get("--file-toggle-width"), "40px");
+        assert.equal(child.properties.get("--file-toggle-width"), "60px");
+        assert.equal(child.element.dataset.path, "/current/child.sy");
     });
 });
 

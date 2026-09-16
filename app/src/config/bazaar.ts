@@ -347,14 +347,19 @@ export const bazaar = {
         }
     },
     _genPackageIconHTML(iconURL: string, detail = false): string {
-        if (iconURL) {
-            const className = detail ? " class=\"item__img\"" : "";
-            return `<img${className} src="${escapeAttr(iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'">`;
+        // 图标缺失或加载失败时显示同尺寸的集市图标，避免切换时改变布局
+        const bazaarIconHTML = (hidden: boolean) => {
+            const placeholderStyle = hidden ? " style=\"display: none\"" : "";
+            return detail ?
+                `<svg class="item__img item__img--placeholder"${placeholderStyle}><use xlink:href="#iconBazaar"></use></svg>` :
+                `<span${placeholderStyle}><svg class="b3-card__icon"><use xlink:href="#iconBazaar"></use></svg></span>`;
+        };
+        if (!iconURL) {
+            return bazaarIconHTML(false);
         }
-        if (detail) {
-            return "<svg class=\"item__img item__img--placeholder\"><use xlink:href=\"#iconBazaar\"></use></svg>";
-        }
-        return "<span><svg class=\"b3-card__icon\"><use xlink:href=\"#iconBazaar\"></use></svg></span>";
+        const className = detail ? " class=\"item__img\"" : "";
+        const onIconError = "this.onerror=null;this.style.display='none';this.nextElementSibling.style.display=''";
+        return `<img${className} src="${escapeAttr(iconURL)}" loading="lazy" onerror="${onIconError}">${bazaarIconHTML(true)}`;
     },
     _genIncompatibleChipHTML(item: IBazaarItem, source: "installed" | "bazaar", bazaarType: TBazaarType) {
         const incompatible = bazaarType === "themes" ?
@@ -1063,7 +1068,7 @@ type="checkbox">
         ${bazaar._genReadmeUpdateButtonHTML(available, bazaarType, Boolean(installed))}
     </div>`;
         const previewHTML = displayData.previewURL ?
-            `<div class="item__preview" data-preview-url="${escapeAttr(displayData.previewURL)}"></div>` : "";
+            `<div class="item__preview" style="display: none" data-preview-url="${escapeAttr(displayData.previewURL)}"></div>` : "";
         readmeElement.innerHTML = `${isMobile() ? backHeaderHTML : ""}<div class="item__body"><div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
     ${isMobile() ? "" : backHeaderHTML}
     <div class="fn__flex-1">
@@ -1107,7 +1112,16 @@ type="checkbox">
 </div></div>${isMobile() ? readmeActionsHTML : ""}`;
         const previewElement = readmeElement.querySelector<HTMLElement>(".item__preview");
         if (previewElement) {
-            previewElement.style.backgroundImage = `url(${JSON.stringify(displayData.previewURL)})`;
+            // 预览图加载成功后才显示容器，避免失败时占据空间或打开无效预览
+            const previewImage = new Image();
+            previewImage.onload = () => {
+                previewElement.style.backgroundImage = `url(${JSON.stringify(displayData.previewURL)})`;
+                previewElement.style.display = "";
+            };
+            previewImage.onerror = () => {
+                previewElement.remove();
+            };
+            previewImage.src = displayData.previewURL;
         }
         const isInstalledReadme = from === "downloaded";
         if (isInstalledReadme) {

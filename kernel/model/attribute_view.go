@@ -6020,6 +6020,12 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
+	if nil != operation.attributeViewItems {
+		if err := tx.restoreAttributeViewItems(operation); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+		return
+	}
 	result, err := addAttributeViewBlocks(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -6427,9 +6433,12 @@ func getNearItem(attrView *av.AttributeView, view, groupView *av.View, previousI
 }
 
 func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) {
+	if err := tx.prepareAttributeViewItemRemoval(operation); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	err := removeAttributeViewBlock(operation.SrcIDs, operation.AvID, operation.BlockID, tx)
 	if err != nil {
-		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID}
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
@@ -6488,7 +6497,11 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 					if nil != bt {
 						tree := trees[bt.RootID]
 						if nil == tree {
-							tree, _ = LoadTreeByBlockID(val.Block.ID)
+							if nil != tx {
+								tree, _ = tx.loadTree(val.Block.ID)
+							} else {
+								tree, _ = LoadTreeByBlockID(val.Block.ID)
+							}
 						}
 
 						if nil != tree {

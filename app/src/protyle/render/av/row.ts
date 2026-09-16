@@ -880,15 +880,12 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     selectedItems.forEach(item => blockIds.push(item.itemID));
     selectedItems.forEach((item, index) => {
         const blockValue = primaryValues[index];
-        const itemID = Lute.NewNodeID();
-        // 撤销会使用新的条目 ID 恢复该行，重做时需要同时删除这个新条目。
-        blockIds.push(itemID);
         undoOperations.push({
             action: "insertAttrViewBlock",
             avID,
             previousID: item.previousID,
             srcs: [{
-                itemID,
+                itemID: item.itemID,
                 id: blockValue.isDetached ? item.itemID : blockValue.block.id,
                 isDetached: blockValue.isDetached === true,
                 content: blockValue.block.content
@@ -907,6 +904,7 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
         action: "removeAttrViewBlock",
         srcIDs: blockIds,
         avID,
+        blockID: blockElement.dataset.nodeId,
     }, {
         action: "doUpdateUpdated",
         id: blockElement.dataset.nodeId,

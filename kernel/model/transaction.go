@@ -2394,6 +2394,7 @@ type Operation struct {
 	templateDocTreeRootID string
 	blockSwapState        *blockSwapState
 	blockSwapUndo         bool
+	attributeViewItems    *attributeViewItemsSnapshot
 
 	LockType bool `json:"-"` // 外部块更新是否禁止改变主类型
 
@@ -2558,6 +2559,7 @@ type Transaction struct {
 	removeCreatedDoc             func(*Box, string, *lute.Lute) (*parse.Tree, error)
 	writeTransactionTree         func(*parse.Tree) error
 	blockSwapOriginalTrees       []*parse.Tree
+	attributeViewItemRollback    *attributeViewItemRollback
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
@@ -2829,6 +2831,7 @@ func (tx *Transaction) commit() (err error) {
 	committed = true
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
 	GlobalUndoLog.Record(tx)
+	tx.finishAttributeViewItemMutation(false)
 	tx.blockSwapOriginalTrees = nil
 	tx.templateDocTreeRootSnapshot = nil
 	tx.attemptedTemplateCreatedDocs = nil
@@ -2842,6 +2845,7 @@ func (tx *Transaction) commit() (err error) {
 }
 
 func (tx *Transaction) rollback() {
+	tx.finishAttributeViewItemMutation(true)
 	for _, tree := range tx.blockSwapOriginalTrees {
 		treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
 		treenode.UpsertBlockTree(tree)

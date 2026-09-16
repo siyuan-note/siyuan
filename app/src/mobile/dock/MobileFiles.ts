@@ -1252,6 +1252,7 @@ export class MobileFiles extends Model {
         if (!rootID) {
             return;
         }
+        this.pinnedDocs?.scheduleRefresh();
         const importedPath = data.parentPath === "/" ? `/${rootID}.sy` : `${data.parentPath}/${rootID}.sy`;
         this.updateItemArrow(data.notebook, importedPath);
     }

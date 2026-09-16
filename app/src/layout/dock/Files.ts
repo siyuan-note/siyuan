@@ -1657,6 +1657,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         if (!rootID) {
             return;
         }
+        this.pinnedDocs?.scheduleRefresh();
         const importedPath = data.parentPath === "/" ? `/${rootID}.sy` : `${data.parentPath}/${rootID}.sy`;
         this.updateItemArrow(data.notebook, importedPath);
     }

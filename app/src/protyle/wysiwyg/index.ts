@@ -5140,7 +5140,12 @@ export class WYSIWYG {
                 pushBackByClick(protyle, event.target, {x: event.clientX, y: event.clientY});
             }
             /// #endif
+            const clickActiveElement = document.activeElement;
             setTimeout(() => {
+                // 点击后的延迟处理不能覆盖随后打开的对话框或其他控件的焦点和选区。
+                if (document.activeElement !== clickActiveElement && !this.element.contains(document.activeElement)) {
+                    return;
+                }
                 // 选中后，在选中的文字上点击需等待 range 更新
                 let newRange = getEditorRange(this.element);
                 const calloutElement = ["callout", "callout-info", "callout-content"].some(className =>

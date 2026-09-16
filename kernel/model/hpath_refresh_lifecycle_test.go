@@ -59,10 +59,9 @@ func TestDocumentHPathRefreshLifecycle(t *testing.T) {
 		if len(hpathRefresh.tasks) != 0 {
 			t.Fatalf("pending tasks remain: %v", hpathRefresh.tasks)
 		}
-		for _, p := range []string{filepath.Join(util.ConfDir, "hpath-refresh.json"), filepath.Join(util.QueueDir, "hpath-refresh.queue")} {
-			if _, err := os.Stat(p); !os.IsNotExist(err) {
-				t.Fatalf("queue remains at %s: %v", p, err)
-			}
+		p := filepath.Join(util.QueueDir, "hpath-refresh.queue")
+		if _, err := os.Stat(p); !os.IsNotExist(err) {
+			t.Fatalf("queue remains at %s: %v", p, err)
 		}
 		RefreshHPathsJob()
 		resetMemory()
@@ -71,126 +70,20 @@ func TestDocumentHPathRefreshLifecycle(t *testing.T) {
 		}
 	}
 
-	t.Run("legacy migration and interrupted merge", func(t *testing.T) {
-		box, tree := newFixture(t)
-		legacy := filepath.Join(util.ConfDir, "hpath-refresh.json")
-		queue := filepath.Join(util.QueueDir, "hpath-refresh.queue")
-		original, err := os.ReadFile(queue)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err = os.WriteFile(legacy, original, 0600); err != nil {
-			t.Fatal(err)
-		}
-		if err = os.Remove(queue); err != nil {
-			t.Fatal(err)
-		}
-		resetMemory()
-		if err = loadHPathRefreshLocked(); err != nil {
-			t.Fatal(err)
-		}
-		migrated, err := os.ReadFile(queue)
-		if err != nil || !bytes.Equal(original, migrated) {
-			t.Fatalf("migration changed persisted entries: %v", err)
-		}
-		if _, err = os.Stat(legacy); !os.IsNotExist(err) {
-			t.Fatalf("legacy file remains: %v", err)
-		}
-		second := newHPathTestDoc(t, box.ID, "/", "Second", 1)
-		if err = RenameDoc(box.ID, second.Path, "SecondRenamed"); err != nil {
-			t.Fatal(err)
-		}
-		// 模拟目标文件已写入、来源文件尚未删除时进程中断，两个文件都必须合并。
-		if err = os.WriteFile(legacy, original, 0600); err != nil {
-			t.Fatal(err)
-		}
-		legacyTasks, _, err := readHPathRefreshTasks(legacy)
-		if err != nil {
-			t.Fatal(err)
-		}
-		stale := *hpathRefresh.tasks[box.ID+"/"+second.ID]
-		stale.Path = "/" + tree.ID + "/" + second.ID + ".sy"
-		legacyTasks[box.ID+"/"+second.ID] = &stale
-		if err = writeHPathRefreshTasks(legacy, legacyTasks); err != nil {
-			t.Fatal(err)
-		}
-		if err = writeHPathRefreshTasks(queue, map[string]*hpathRefreshTask{box.ID + "/" + second.ID: hpathRefresh.tasks[box.ID+"/"+second.ID]}); err != nil {
-			t.Fatal(err)
-		}
-		resetMemory()
-		if err = loadHPathRefreshLocked(); err != nil || len(hpathRefresh.tasks) != 2 {
-			t.Fatalf("migration lost pending tasks: %v", err)
-		}
-		if hpathRefresh.tasks[box.ID+"/"+second.ID].Path != second.Path {
-			t.Fatal("legacy duplicate replaced the destination entry")
-		}
-		drainHPathRefreshTest(t)
-		db, err := gosql.Open("sqlite3_extended", util.DBPath)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer db.Close()
-		assertHPathTestDoc(t, db, tree, "/Renamed")
-		assertHPathTestDoc(t, db, second, "/SecondRenamed")
-		assertCleared(t)
-	})
-
-	t.Run("failed migration preserves records", func(t *testing.T) {
-		newFixture(t)
-		legacy := filepath.Join(util.ConfDir, "hpath-refresh.json")
-		queue := filepath.Join(util.QueueDir, "hpath-refresh.queue")
-		original, err := os.ReadFile(queue)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err = os.WriteFile(legacy, original, 0600); err != nil {
-			t.Fatal(err)
-		}
-		if err = os.Remove(queue); err != nil {
-			t.Fatal(err)
-		}
-		if err = os.Mkdir(queue, 0755); err != nil {
-			t.Fatal(err)
-		}
-		resetMemory()
-		if err = loadHPathRefreshLocked(); err == nil {
-			t.Fatal("unwritable migration destination was accepted")
-		}
-		data, err := os.ReadFile(legacy)
-		if err != nil || !bytes.Equal(data, original) {
-			t.Fatalf("failed migration changed source: %v", err)
-		}
-		if err = os.Remove(queue); err != nil {
-			t.Fatal(err)
-		}
-		if err = loadHPathRefreshLocked(); err != nil || len(hpathRefresh.tasks) != 1 {
-			t.Fatalf("migration retry failed: %v", err)
-		}
-	})
-
 	t.Run("unknown or corrupt records remain intact", func(t *testing.T) {
 		newFixture(t)
-		legacy := filepath.Join(util.ConfDir, "hpath-refresh.json")
 		queue := filepath.Join(util.QueueDir, "hpath-refresh.queue")
-		valid, err := os.ReadFile(queue)
-		if err != nil {
-			t.Fatal(err)
-		}
 		for _, data := range [][]byte{[]byte(`{"version":99,"tasks":[]}`), []byte(`{"version":1,"tasks":`)} {
-			if err = os.WriteFile(legacy, data, 0600); err != nil {
+			if err := os.WriteFile(queue, data, 0600); err != nil {
 				t.Fatal(err)
 			}
 			resetMemory()
-			if err = loadHPathRefreshLocked(); err == nil {
+			if err := loadHPathRefreshLocked(); err == nil {
 				t.Fatal("invalid record accepted")
 			}
-			preserved, err := os.ReadFile(legacy)
+			preserved, err := os.ReadFile(queue)
 			if err != nil || !bytes.Equal(data, preserved) {
 				t.Fatalf("invalid source was changed: %v", err)
-			}
-			preserved, err = os.ReadFile(queue)
-			if err != nil || !bytes.Equal(valid, preserved) {
-				t.Fatalf("valid destination was changed: %v", err)
 			}
 		}
 	})

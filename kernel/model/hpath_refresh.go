@@ -65,61 +65,44 @@ func loadHPathRefreshLocked() error {
 	if hpathRefresh.file == p && hpathRefresh.tasks != nil {
 		return nil
 	}
-	legacy := filepath.Join(util.ConfDir, "hpath-refresh.json")
-	tasks, legacyExists, err := readHPathRefreshTasks(legacy)
+	tasks, err := readHPathRefreshTasks(p)
 	if err != nil {
 		return err
-	}
-	current, _, err := readHPathRefreshTasks(p)
-	if err != nil {
-		return err
-	}
-	for key, task := range current {
-		tasks[key] = task
-	}
-	if legacyExists {
-		// 合并后的记录先持久化，再移除迁移来源；中断后重复合并仍能恢复全部任务。
-		if err = writeHPathRefreshTasks(p, tasks); err != nil {
-			return err
-		}
-		if err = os.Remove(legacy); err != nil && !os.IsNotExist(err) {
-			return err
-		}
 	}
 	hpathRefresh.file, hpathRefresh.tasks, hpathRefresh.last = p, tasks, ""
 	hpathRefresh.nextPrune = time.Time{}
 	return nil
 }
 
-func readHPathRefreshTasks(p string) (map[string]*hpathRefreshTask, bool, error) {
+func readHPathRefreshTasks(p string) (map[string]*hpathRefreshTask, error) {
 	tasks := map[string]*hpathRefreshTask{}
 	data, err := os.ReadFile(p)
 	if os.IsNotExist(err) {
-		return tasks, false, nil
+		return tasks, nil
 	}
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 	var store struct {
 		Version int                 `json:"version"`
 		Tasks   []hpathRefreshEntry `json:"tasks"`
 	}
 	if err = json.Unmarshal(data, &store); err != nil {
-		return nil, true, err
+		return nil, err
 	}
 	if store.Version != 1 {
-		return nil, true, fmt.Errorf("unsupported hpath refresh version %d", store.Version)
+		return nil, fmt.Errorf("unsupported hpath refresh version %d", store.Version)
 	}
 	for _, entry := range store.Tasks {
 		if entry.ID == "" || entry.Box == "" {
-			return nil, true, errors.New("invalid hpath refresh entry")
+			return nil, errors.New("invalid hpath refresh entry")
 		}
 		if _, err = filesys.ValidateBoxRelativePath(entry.Box, entry.Path); err != nil {
-			return nil, true, err
+			return nil, err
 		}
 		tasks[entry.Box+"/"+entry.ID] = &hpathRefreshTask{hpathRefreshEntry: entry, recover: true, limit: 256}
 	}
-	return tasks, true, nil
+	return tasks, nil
 }
 
 func saveHPathRefreshLocked() error {

@@ -7,7 +7,7 @@
 		"id": "20230405172236-pg3l9eu",
 		"title": "Performance Optimization",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260916173158"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230405172238-x56gmi0",
-				"updated": "20260803171606"
+				"updated": "20260916173158"
 			},
 			"Children": [
 				{
@@ -379,7 +379,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230405172238-v4hbjbe",
-				"updated": "20250825114750"
+				"updated": "20260916173158"
 			},
 			"Children": [
 				{
@@ -531,7 +531,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405172238-udux4az",
-				"updated": "20240420104851"
+				"updated": "20260916173158"
 			},
 			"Children": [
 				{
@@ -631,6 +631,70 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260916172814-we94rkx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260916172814-we94rkx",
+						"updated": "20260916172814"
+					},
+					"Children": [
+						{
+							"ID": "20260916172814-pdghb8i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260916172814-pdghb8i",
+								"updated": "20260916172814"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Desktop accessibility support is disabled by default to reduce long-text editing or pasting freezes in some environments. If you use a screen reader or other assistive tools, enable it in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "App"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "General"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Accessibility support"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". This setting applies to all workspaces on this device and requires fully quitting and restarting SiYuan. If enabling it causes freezes, try disabling it and restarting to compare the behavior"
 								}
 							]
 						}

@@ -29,6 +29,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestCreateAssetsHistorySkipsRemovedSource(t *testing.T) {
+	originalDataDir, originalHistoryDir := util.DataDir, util.HistoryDir
+	util.DataDir, util.HistoryDir = t.TempDir(), t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir, util.HistoryDir = originalDataDir, originalHistoryDir
+	})
+
+	missing := filepath.Join(util.DataDir, "assets", "removed.png")
+	if err := createAssetsHistory([]string{missing}); err != nil {
+		t.Fatalf("generate history for removed asset failed: %v", err)
+	}
+	if err := CreateAssetHistory("assets/removed.png"); !os.IsNotExist(err) {
+		t.Fatalf("explicit history request should report missing source, got %v", err)
+	}
+}
+
 func TestGenerateDocHistorySkipsRemovedSource(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	sourceFile := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)

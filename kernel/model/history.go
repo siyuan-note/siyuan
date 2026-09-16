@@ -949,11 +949,11 @@ func createAssetsHistory(assets []string) (err error) {
 			return fmt.Errorf("create history directory [%s] failed: %w", filepath.Dir(historyPath), err)
 		}
 
-		if err = filelock.Copy(file, historyPath); err != nil {
-			if os.IsNotExist(err) {
+		if copyErr := filelock.Copy(file, historyPath); copyErr != nil {
+			if os.IsNotExist(copyErr) {
 				continue
 			}
-			return fmt.Errorf("copy asset [%s] to [%s] failed: %w", file, historyPath, err)
+			return fmt.Errorf("copy asset [%s] to [%s] failed: %w", file, historyPath, copyErr)
 		}
 	}
 

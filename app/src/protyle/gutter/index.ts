@@ -42,6 +42,7 @@ import {hideElements} from "../ui/hideElements";
 import {markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
+import {toggleListMindmap} from "../render/listMindmap";
 import {
     getContenteditableElement,
     getEmbedGutterOperationContext,
@@ -2189,6 +2190,18 @@ export class Gutter {
                         void appendListItem(protyle, nodeElement as HTMLElement, range);
                     }
                 });
+                if (type === "NodeList") {
+                    submenu.push({
+                        id: "listMindmap",
+                        icon: "iconGraph",
+                        label: nodeElement.getAttribute("custom-list-mindmap") === "1" ?
+                            window.siyuan.languages.listMindmapToList : window.siyuan.languages.listMindmapToMindmap,
+                        click() {
+                            hideElements(["select"], protyle);
+                            void toggleListMindmap(protyle, nodeElement as HTMLElement);
+                        },
+                    });
+                }
                 return submenu;
             };
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_listBlock", type: "separator"}).element);

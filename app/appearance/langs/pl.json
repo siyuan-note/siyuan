@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Wpisz tekst",
+	"listMindmapToMindmap": "Przełącz na widok mapy myśli",
+	"listMindmapToList": "Przełącz na widok listy",
+	"listMindmapRoot": "Bieżąca lista",
+	"listMindmapChild": "Dodaj węzeł podrzędny",
+	"listMindmapFit": "Dopasuj do płótna",
+	"listMindmapInvalid": "Nie można odczytać ustawień mapy myśli; oryginalne dane zostały zachowane",
+	"listMindmapUnsupported": "Przełącz na widok listy, aby edytować tę zawartość",
+	"listMindmapStale": "Zawartość uległa zmianie; edytuj ją ponownie",
 	"agentWorkspaceSkills": "Umiejętności przestrzeni roboczej",
 	"agentWorkspaceSkillsTip": "Zarządzaj umiejętnościami i plikami Markdown w bieżącej przestrzeni roboczej",
 	"agentSkillManager": "Menedżer umiejętności",

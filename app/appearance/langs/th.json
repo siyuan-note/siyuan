@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "ป้อนข้อความ",
+	"listMindmapToMindmap": "เปลี่ยนเป็นมุมมองแผนผังความคิด",
+	"listMindmapToList": "เปลี่ยนเป็นมุมมองรายการ",
+	"listMindmapRoot": "รายการปัจจุบัน",
+	"listMindmapChild": "เพิ่มโหนดลูก",
+	"listMindmapFit": "ปรับให้พอดีกับพื้นที่วาด",
+	"listMindmapInvalid": "ไม่สามารถอ่านการตั้งค่าแผนผังความคิดได้ โดยยังคงเก็บข้อมูลต้นฉบับไว้",
+	"listMindmapUnsupported": "เปลี่ยนเป็นมุมมองรายการเพื่อแก้ไขเนื้อหานี้",
+	"listMindmapStale": "เนื้อหามีการเปลี่ยนแปลง โปรดแก้ไขอีกครั้ง",
 	"agentWorkspaceSkills": "ทักษะของพื้นที่ทำงาน",
 	"agentWorkspaceSkillsTip": "จัดการทักษะและไฟล์ Markdown ในพื้นที่ทำงานปัจจุบัน",
 	"agentSkillManager": "ตัวจัดการทักษะ",

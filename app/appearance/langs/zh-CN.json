@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "输入文字",
+	"listMindmapToMindmap": "切换为脑图视图",
+	"listMindmapToList": "切换为列表视图",
+	"listMindmapRoot": "当前列表",
+	"listMindmapChild": "添加子节点",
+	"listMindmapFit": "适应画布",
+	"listMindmapInvalid": "脑图配置无法读取，原数据已保留",
+	"listMindmapUnsupported": "此内容请切回列表编辑",
+	"listMindmapStale": "内容已更新，请重新编辑",
 	"agentWorkspaceSkills": "工作空间技能",
 	"agentWorkspaceSkillsTip": "管理当前工作空间中的技能及 Markdown 文件",
 	"agentSkillManager": "技能管理",

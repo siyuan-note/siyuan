@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "أدخل نصًا",
+	"listMindmapToMindmap": "التبديل إلى عرض الخريطة الذهنية",
+	"listMindmapToList": "التبديل إلى عرض القائمة",
+	"listMindmapRoot": "القائمة الحالية",
+	"listMindmapChild": "إضافة عقدة فرعية",
+	"listMindmapFit": "ملاءمة لوحة الرسم",
+	"listMindmapInvalid": "تعذرت قراءة إعدادات الخريطة الذهنية؛ تم الاحتفاظ بالبيانات الأصلية",
+	"listMindmapUnsupported": "بدّل إلى عرض القائمة لتحرير هذا المحتوى",
+	"listMindmapStale": "تم تغيير المحتوى؛ يرجى تحريره مجددًا",
 	"agentWorkspaceSkills": "مهارات مساحة العمل",
 	"agentWorkspaceSkillsTip": "إدارة المهارات وملفات Markdown في مساحة العمل الحالية",
 	"agentSkillManager": "إدارة المهارات",

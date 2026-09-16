@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Введите текст",
+	"listMindmapToMindmap": "Переключить на интеллект-карту",
+	"listMindmapToList": "Переключить на список",
+	"listMindmapRoot": "Текущий список",
+	"listMindmapChild": "Добавить дочерний узел",
+	"listMindmapFit": "Вписать в холст",
+	"listMindmapInvalid": "Не удалось прочитать настройки интеллект-карты; исходные данные сохранены",
+	"listMindmapUnsupported": "Переключитесь на список, чтобы изменить это содержимое",
+	"listMindmapStale": "Содержимое изменилось; отредактируйте его повторно",
 	"agentWorkspaceSkills": "Навыки рабочего пространства",
 	"agentWorkspaceSkillsTip": "Управление навыками и файлами Markdown в текущем рабочем пространстве",
 	"agentSkillManager": "Управление навыками",

@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "輸入文字",
+	"listMindmapToMindmap": "切換為心智圖檢視",
+	"listMindmapToList": "切換為清單檢視",
+	"listMindmapRoot": "目前清單",
+	"listMindmapChild": "新增子節點",
+	"listMindmapFit": "符合畫布大小",
+	"listMindmapInvalid": "無法讀取心智圖設定，原始資料已保留",
+	"listMindmapUnsupported": "請切回清單檢視以編輯此內容",
+	"listMindmapStale": "內容已更新，請重新編輯",
 	"agentWorkspaceSkills": "工作空間技能",
 	"agentWorkspaceSkillsTip": "管理目前工作空間中的技能及 Markdown 檔案",
 	"agentSkillManager": "技能管理",

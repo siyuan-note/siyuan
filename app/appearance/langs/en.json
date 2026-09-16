@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Enter text",
+	"listMindmapToMindmap": "Switch to mind map view",
+	"listMindmapToList": "Switch to list view",
+	"listMindmapRoot": "Current list",
+	"listMindmapChild": "Add child node",
+	"listMindmapFit": "Fit to canvas",
+	"listMindmapInvalid": "Cannot read mind map settings; the original data has been preserved",
+	"listMindmapUnsupported": "Switch to list view to edit this content",
+	"listMindmapStale": "The content has changed; please edit it again",
 	"agentWorkspaceSkills": "Workspace skills",
 	"agentWorkspaceSkillsTip": "Manage skills and Markdown files in the current workspace",
 	"agentSkillManager": "Skill manager",

@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Introducir texto",
+	"listMindmapToMindmap": "Cambiar a vista de mapa mental",
+	"listMindmapToList": "Cambiar a vista de lista",
+	"listMindmapRoot": "Lista actual",
+	"listMindmapChild": "Añadir nodo hijo",
+	"listMindmapFit": "Ajustar al lienzo",
+	"listMindmapInvalid": "No se pueden leer los ajustes del mapa mental; se han conservado los datos originales",
+	"listMindmapUnsupported": "Cambia a la vista de lista para editar este contenido",
+	"listMindmapStale": "El contenido ha cambiado; vuelve a editarlo",
 	"agentWorkspaceSkills": "Habilidades del espacio de trabajo",
 	"agentWorkspaceSkillsTip": "Gestionar habilidades y archivos Markdown del espacio de trabajo actual",
 	"agentSkillManager": "Gestor de habilidades",

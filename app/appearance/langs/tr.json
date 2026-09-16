@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Metin girin",
+	"listMindmapToMindmap": "Zihin haritası görünümüne geç",
+	"listMindmapToList": "Liste görünümüne geç",
+	"listMindmapRoot": "Geçerli liste",
+	"listMindmapChild": "Alt düğüm ekle",
+	"listMindmapFit": "Tuvale sığdır",
+	"listMindmapInvalid": "Zihin haritası ayarları okunamadı; özgün veriler korundu",
+	"listMindmapUnsupported": "Bu içeriği düzenlemek için liste görünümüne geçin",
+	"listMindmapStale": "İçerik değişti; lütfen yeniden düzenleyin",
 	"agentWorkspaceSkills": "Çalışma alanı becerileri",
 	"agentWorkspaceSkillsTip": "Geçerli çalışma alanındaki becerileri ve Markdown dosyalarını yönetin",
 	"agentSkillManager": "Beceri yöneticisi",

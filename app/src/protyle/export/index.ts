@@ -18,6 +18,18 @@ import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getLastExportPath, setLastExportPath} from "./path";
 import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 
+const getExportLanguages = () => {
+    const keys = new Set([
+        "copy", "mindmap", "fontSize", "bold", "italic", "colorFont", "color", "undo", "redo", "fold", "collapse", "expand",
+        "fullscreen", "exitFullscreen", "zoomIn", "zoomOut", "delete", "close", "connect", "text",
+    ]);
+    const languages = Object.fromEntries(Object.entries(window.siyuan.languages)
+        .filter(([key]) => keys.has(key) || key.startsWith("listMindmap")));
+    // 转义脚本边界和行分隔符，保留各语言文案中的引号与换行。
+    return JSON.stringify(languages).replace(/</g, "\\u003c")
+        .replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+};
+
 const getPluginStyle = async () => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
     let css = "";
@@ -683,7 +695,7 @@ ${getIconScript(servePath)}
               katexMacros: decodeURI(\`${encodeURI(window.siyuan.config.editor.katexMacros)}\`),
             }
           },
-          languages: {copy:"${window.siyuan.languages.copy}"}
+          languages: ${getExportLanguages()}
         };
         previewElement.addEventListener("click", (event) => {
             let target = event.target;
@@ -1107,7 +1119,7 @@ ${getIconScript(servePath)}
           katexMacros: decodeURI(\`${encodeURI(window.siyuan.config.editor.katexMacros)}\`),
         }
       },
-      languages: {copy:"${window.siyuan.languages.copy}"}
+      languages: ${getExportLanguages()}
     };
     const previewElement = document.getElementById('preview');
     Protyle.highlightRender(previewElement, "stage/protyle");

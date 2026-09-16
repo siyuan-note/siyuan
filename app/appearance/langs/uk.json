@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Введіть текст",
+	"listMindmapToMindmap": "Перемкнути на мапу думок",
+	"listMindmapToList": "Перемкнути на список",
+	"listMindmapRoot": "Поточний список",
+	"listMindmapChild": "Додати дочірній вузол",
+	"listMindmapFit": "Вписати в полотно",
+	"listMindmapInvalid": "Не вдалося прочитати налаштування мапи думок; початкові дані збережено",
+	"listMindmapUnsupported": "Перемкніться на список, щоб редагувати цей вміст",
+	"listMindmapStale": "Вміст змінився; відредагуйте його знову",
 	"agentWorkspaceSkills": "Навички робочого простору",
 	"agentWorkspaceSkillsTip": "Керування навичками та файлами Markdown у поточному робочому просторі",
 	"agentSkillManager": "Керування навичками",

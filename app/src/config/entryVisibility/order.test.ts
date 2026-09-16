@@ -17,7 +17,7 @@ test("entry order keeps custom order and inserts new entries by their default ne
 test("custom task status merges into saved list menus without moving existing entries", () => {
     const entries = getEntryCatalogChildren("gutter.single.listBlock");
     const defaults = entries.map(item => item.key);
-    const saved = ["appendListItem", "plugin:example:item", "orderedListStart", "continueListNumbering",
+    const saved = ["appendListItem", "listMindmap", "plugin:example:item", "orderedListStart", "continueListNumbering",
         "separator_numbering", "prependListItem"];
     const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
     const added = ["taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus", "separator_taskStatus"];
@@ -25,6 +25,21 @@ test("custom task status merges into saved list menus without moving existing en
     assert.deepEqual(merged.slice(merged.indexOf("taskStatusTodo"), merged.indexOf("orderedListStart")), added);
     assert.deepEqual(resolveEntryOrder(["customTaskStatus", "prependListItem", "appendListItem", "plugin:example:item"],
         merged, new Set(["separator_numbering"])), ["appendListItem", "plugin:example:item", "customTaskStatus", "prependListItem"]);
+});
+
+test("list mind map view merges into saved list menus and preserves plugin slots", () => {
+    const entries = getEntryCatalogChildren("gutter.single.listBlock");
+    const defaults = entries.map(item => item.key);
+    const saved = defaults.filter(key => key !== "listMindmap");
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    assert.deepEqual(merged.filter(key => key !== "listMindmap"), saved);
+    assert.equal(merged[1], "plugin:example:item");
+    assert.equal(merged[merged.indexOf("appendListItem") + 1], "listMindmap");
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+    assert.deepEqual(resolveEntryOrder(["prependListItem", "appendListItem", "listMindmap"], merged, separators),
+        ["prependListItem", "appendListItem", "listMindmap"]);
 });
 
 test("definition conversion submenus preserve custom order and plugin slots", () => {

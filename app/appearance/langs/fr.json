@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Saisir du texte",
+	"listMindmapToMindmap": "Passer à la vue carte mentale",
+	"listMindmapToList": "Passer à la vue liste",
+	"listMindmapRoot": "Liste actuelle",
+	"listMindmapChild": "Ajouter un nœud enfant",
+	"listMindmapFit": "Ajuster au canevas",
+	"listMindmapInvalid": "Impossible de lire les paramètres de la carte mentale ; les données d’origine ont été conservées",
+	"listMindmapUnsupported": "Passez à la vue liste pour modifier ce contenu",
+	"listMindmapStale": "Le contenu a changé ; veuillez le modifier à nouveau",
 	"agentWorkspaceSkills": "Compétences de l’espace de travail",
 	"agentWorkspaceSkillsTip": "Gérer les compétences et les fichiers Markdown de l’espace de travail actuel",
 	"agentSkillManager": "Gestion des compétences",

@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "텍스트 입력",
+	"listMindmapToMindmap": "마인드맵 보기로 전환",
+	"listMindmapToList": "목록 보기로 전환",
+	"listMindmapRoot": "현재 목록",
+	"listMindmapChild": "하위 노드 추가",
+	"listMindmapFit": "캔버스에 맞추기",
+	"listMindmapInvalid": "마인드맵 설정을 읽을 수 없습니다. 원본 데이터는 보존되었습니다",
+	"listMindmapUnsupported": "이 내용을 편집하려면 목록 보기로 전환하세요",
+	"listMindmapStale": "내용이 변경되었습니다. 다시 편집하세요",
 	"agentWorkspaceSkills": "작업 공간 스킬",
 	"agentWorkspaceSkillsTip": "현재 작업 공간의 스킬과 Markdown 파일 관리",
 	"agentSkillManager": "스킬 관리",

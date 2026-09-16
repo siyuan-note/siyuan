@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Masukkan teks",
+	"listMindmapToMindmap": "Beralih ke tampilan peta pikiran",
+	"listMindmapToList": "Beralih ke tampilan daftar",
+	"listMindmapRoot": "Daftar saat ini",
+	"listMindmapChild": "Tambah simpul anak",
+	"listMindmapFit": "Sesuaikan dengan kanvas",
+	"listMindmapInvalid": "Pengaturan peta pikiran tidak dapat dibaca; data asli telah dipertahankan",
+	"listMindmapUnsupported": "Beralih ke tampilan daftar untuk mengedit konten ini",
+	"listMindmapStale": "Konten telah berubah; silakan edit kembali",
 	"agentWorkspaceSkills": "Keterampilan ruang kerja",
 	"agentWorkspaceSkillsTip": "Kelola keterampilan dan berkas Markdown di ruang kerja saat ini",
 	"agentSkillManager": "Pengelola keterampilan",

@@ -72,6 +72,7 @@ import {
     queueDatabaseRowRefreshForOperations
 } from "./render/av/databaseRowRefresh";
 import {initEditorTabs} from "./wysiwyg/tabs";
+import {initListMindmaps} from "./render/listMindmap";
 import {registerCustomBlockRoot} from "../plugin/customBlockRender";
 import {getTransactionOperations} from "../util/transactionOperations";
 import {
@@ -209,6 +210,7 @@ export class Protyle {
         this.protyle.undo = this.protyle.lite ? new LocalUndo() : new Undo();
         this.protyle.wysiwyg = new WYSIWYG(this.protyle);
         initEditorTabs(this.protyle);
+        initListMindmaps(this.protyle);
         if (isProtyleCustomBlockRenderEnabled(this.protyle)) {
             registerCustomBlockRoot(this.protyle.wysiwyg.element, {
                 disabled: () => this.protyle.disabled,

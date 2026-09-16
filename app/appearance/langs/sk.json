@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Zadajte text",
+	"listMindmapToMindmap": "Prepnúť na zobrazenie myšlienkovej mapy",
+	"listMindmapToList": "Prepnúť na zobrazenie zoznamu",
+	"listMindmapRoot": "Aktuálny zoznam",
+	"listMindmapChild": "Pridať podradený uzol",
+	"listMindmapFit": "Prispôsobiť plátnu",
+	"listMindmapInvalid": "Nastavenia myšlienkovej mapy sa nedajú načítať; pôvodné údaje boli zachované",
+	"listMindmapUnsupported": "Ak chcete upraviť tento obsah, prepnite na zobrazenie zoznamu",
+	"listMindmapStale": "Obsah sa zmenil; upravte ho znova",
 	"agentWorkspaceSkills": "Zručnosti pracovného priestoru",
 	"agentWorkspaceSkillsTip": "Správa zručností a súborov Markdown v aktuálnom pracovnom priestore",
 	"agentSkillManager": "Správca zručností",

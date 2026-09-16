@@ -1,3 +1,10 @@
+@mixin protyle-toolbar-surface {
+  background-color: var(--b3-theme-background);
+  box-shadow: var(--b3-dialog-shadow);
+  border-radius: var(--b3-border-radius);
+  display: flex;
+}
+
 @mixin text-clamp($line: 2) {
   word-break: break-all;
   -webkit-line-clamp: $line;

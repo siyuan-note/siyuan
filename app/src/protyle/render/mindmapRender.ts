@@ -4,8 +4,10 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
 import {escapeHtml} from "../../util/escape";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {listMindmapRender} from "./listMindmap/render";
 
 export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
+    listMindmapRender(element, cdn);
     let mindmapElements: Element[] | NodeListOf<Element> = [];
     if (element.getAttribute("data-subtype") === "mindmap" && element.getAttribute("data-render") !== "true") {
         mindmapElements = [element];

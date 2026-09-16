@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Унесите текст",
+	"listMindmapToMindmap": "Пређи на приказ мапе ума",
+	"listMindmapToList": "Пређи на приказ листе",
+	"listMindmapRoot": "Тренутна листа",
+	"listMindmapChild": "Додај подређени чвор",
+	"listMindmapFit": "Уклопи у платно",
+	"listMindmapInvalid": "Није могуће прочитати подешавања мапе ума; изворни подаци су сачувани",
+	"listMindmapUnsupported": "Пређите на приказ листе да бисте уредили овај садржај",
+	"listMindmapStale": "Садржај је промењен; уредите га поново",
 	"agentWorkspaceSkills": "Вештине радног простора",
 	"agentWorkspaceSkillsTip": "Управљајте вештинама и Markdown датотекама у тренутном радном простору",
 	"agentSkillManager": "Управљање вештинама",

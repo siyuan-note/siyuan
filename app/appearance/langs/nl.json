@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Voer tekst in",
+	"listMindmapToMindmap": "Naar mindmapweergave schakelen",
+	"listMindmapToList": "Naar lijstweergave schakelen",
+	"listMindmapRoot": "Huidige lijst",
+	"listMindmapChild": "Onderliggende knoop toevoegen",
+	"listMindmapFit": "Aan canvas aanpassen",
+	"listMindmapInvalid": "Mindmapinstellingen kunnen niet worden gelezen; de oorspronkelijke gegevens zijn behouden",
+	"listMindmapUnsupported": "Schakel naar de lijstweergave om deze inhoud te bewerken",
+	"listMindmapStale": "De inhoud is gewijzigd; bewerk deze opnieuw",
 	"agentWorkspaceSkills": "Werkruimtevaardigheden",
 	"agentWorkspaceSkillsTip": "Vaardigheden en Markdown-bestanden in de huidige werkruimte beheren",
 	"agentSkillManager": "Vaardighedenbeheer",

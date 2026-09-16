@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "הזן טקסט",
+	"listMindmapToMindmap": "מעבר לתצוגת מפת חשיבה",
+	"listMindmapToList": "מעבר לתצוגת רשימה",
+	"listMindmapRoot": "הרשימה הנוכחית",
+	"listMindmapChild": "הוספת צומת בן",
+	"listMindmapFit": "התאמה למשטח הציור",
+	"listMindmapInvalid": "לא ניתן לקרוא את הגדרות מפת החשיבה; הנתונים המקוריים נשמרו",
+	"listMindmapUnsupported": "יש לעבור לתצוגת רשימה כדי לערוך תוכן זה",
+	"listMindmapStale": "התוכן השתנה; יש לערוך אותו מחדש",
 	"agentWorkspaceSkills": "מיומנויות סביבת העבודה",
 	"agentWorkspaceSkillsTip": "ניהול מיומנויות וקובצי Markdown בסביבת העבודה הנוכחית",
 	"agentSkillManager": "מנהל המיומנויות",

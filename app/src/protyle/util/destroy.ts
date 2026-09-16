@@ -1,4 +1,5 @@
 import {destroyTabsRender} from "../render/tabsRender";
+import {destroyListMindmaps} from "../render/listMindmap";
 import {hideElements} from "../ui/hideElements";
 import {isSupportCSSHL} from "../render/searchMarkRender";
 import {destroyAIEditor} from "../../ai/editor";
@@ -14,6 +15,7 @@ export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
+    destroyListMindmaps(protyle);
     invalidateFocusFoldRequests(protyle);
     destroyTrackedRanges(protyle);
     cancelAssetUploads(protyle);

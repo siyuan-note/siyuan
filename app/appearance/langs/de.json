@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Text eingeben",
+	"listMindmapToMindmap": "Zur Mindmap-Ansicht wechseln",
+	"listMindmapToList": "Zur Listenansicht wechseln",
+	"listMindmapRoot": "Aktuelle Liste",
+	"listMindmapChild": "Untergeordneten Knoten hinzufügen",
+	"listMindmapFit": "An Zeichenfläche anpassen",
+	"listMindmapInvalid": "Mindmap-Einstellungen können nicht gelesen werden; die Originaldaten wurden beibehalten",
+	"listMindmapUnsupported": "Zum Bearbeiten dieses Inhalts zur Listenansicht wechseln",
+	"listMindmapStale": "Der Inhalt wurde geändert; bitte erneut bearbeiten",
 	"agentWorkspaceSkills": "Arbeitsbereich-Fähigkeiten",
 	"agentWorkspaceSkillsTip": "Fähigkeiten und Markdown-Dateien im aktuellen Arbeitsbereich verwalten",
 	"agentSkillManager": "Fähigkeitenverwaltung",

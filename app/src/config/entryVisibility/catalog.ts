@@ -380,6 +380,7 @@ const gutterSingle = () => [
         separator("separator_numbering"),
         node("prependListItem", lang("prependListItem")),
         node("appendListItem", lang("appendListItem")),
+        node("listMindmap", lang("listMindmapToMindmap")),
     ]),
     separator("separator_tabs"),
     node("tabs", lang("tabs"), true, [

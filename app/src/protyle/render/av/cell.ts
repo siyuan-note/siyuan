@@ -1211,7 +1211,7 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
 
 export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = true, type: TAVView = "table",
                            selectOptions?: IAVColumn["options"], dateFormat: TAVDateFormat = "",
-                           renderTemplate?: string) => {
+                           renderTemplate?: string, showCopy = true) => {
     let text = "";
     if (hasAVRenderTemplateResult(cellValue, renderTemplate)) {
         const storedValue = cloneAVCellValueSnapshot(cellValue);
@@ -1299,7 +1299,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     } else if (cellValue.type === "rollup") {
         let rollupType;
         cellValue?.rollup?.contents?.forEach((item) => {
-            const rollupText = ["template", "select", "mSelect", "mAsset", "relation"].includes(item.type) ? renderCell(item, rowIndex, showIcon, type) : renderRollup(item, showIcon);
+            const rollupText = ["template", "select", "mSelect", "mAsset", "relation"].includes(item.type) ? renderCell(item, rowIndex, showIcon, type, undefined, "", undefined, false) : renderRollup(item, showIcon);
             if (rollupText) {
                 text += rollupText + (item.type === "checkbox" ? "" : ", ");
             }
@@ -1329,10 +1329,12 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         }
     }
 
-    if ((["text", "template", "url", "email", "phone", "date", "created", "updated"].includes(cellValue.type) && cellValue[cellValue.type as "url"]?.content) ||
+    if (showCopy && cellValue.type === "rollup" && text) {
+        text += `<button class="av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.copy}" data-type="copy" data-rollup-value="${escapeAttr(encodeURIComponent(JSON.stringify(cellValue.rollup?.contents || [])))}"><svg><use xlink:href="#iconCopy"></use></svg></button>`;
+    } else if (showCopy && ((["text", "template", "url", "email", "phone", "date", "created", "updated"].includes(cellValue.type) && cellValue[cellValue.type as "url"]?.content) ||
         cellValue.type === "lineNumber" ||
         (cellValue.type === "number" && cellValue.number?.isNotEmpty) ||
-        (cellValue.type === "block" && cellValue.block?.content)) {
+        (cellValue.type === "block" && cellValue.block?.content))) {
         text += `<button class="av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.copy}" data-type="copy"><svg><use xlink:href="#iconCopy"></use></svg></button>`;
     }
     return text;

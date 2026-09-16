@@ -1,5 +1,6 @@
 {
-	"fileTreeMoveKeepSort": "Przenieś i zachowaj sortowanie",
+	"fileTreeMoveKeepSortTip": "Opcja „Tylko przenieś dokumenty” zachowuje bieżącą regułę sortowania, która określa pozycje dokumentów.",
+	"fileTreeMoveKeepSort": "Tylko przenieś dokumenty",
 	"accessibilitySupport": "Obsługa ułatwień dostępu",
 	"accessibilitySupportTip": "Obsługuje czytniki ekranu i inne narzędzia wspomagające; domyślnie wyłączona, dotyczy wszystkich obszarów roboczych na tym urządzeniu i wymaga całkowitego zamknięcia oraz ponownego uruchomienia SiYuan",
 	"accessibilitySupportError": "Nie można odczytać lub zapisać ustawień ułatwień dostępu",

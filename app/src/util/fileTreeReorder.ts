@@ -47,7 +47,9 @@ export const reorderSortedFileTree = async (sourceIDs: string[], targetID: strin
             return;
         }
         const action = await new Promise<"cancel" | "reorder" | "move">(resolve => {
-            confirmDialog(window.siyuan.languages.removeSorts, window.siyuan.languages.fileTreeDragRemoveSorts,
+            const text = window.siyuan.languages.fileTreeDragRemoveSorts + (moveTarget.fromPaths.length > 0 ?
+                `<br><br>${window.siyuan.languages.fileTreeMoveKeepSortTip}` : "");
+            confirmDialog(window.siyuan.languages.removeSorts, text,
                 () => resolve("reorder"), () => resolve("cancel"), false,
                 moveTarget.fromPaths.length > 0 ? {
                     label: window.siyuan.languages.fileTreeMoveKeepSort,

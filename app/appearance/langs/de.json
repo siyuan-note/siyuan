@@ -1,5 +1,6 @@
 {
-	"fileTreeMoveKeepSort": "Verschieben und Sortierung beibehalten",
+	"fileTreeMoveKeepSortTip": "„Dokumente nur verschieben“ behält die aktuelle Sortierregel bei, die die Positionen der Dokumente bestimmt.",
+	"fileTreeMoveKeepSort": "Dokumente nur verschieben",
 	"accessibilitySupport": "Unterstützung für Barrierefreiheit",
 	"accessibilitySupportTip": "Unterstützt Screenreader und andere Hilfsmittel; standardmäßig deaktiviert, gilt für alle Arbeitsbereiche auf diesem Gerät und wird nach vollständigem Beenden und Neustarten von SiYuan wirksam",
 	"accessibilitySupportError": "Einstellungen zur Barrierefreiheit konnten nicht gelesen oder gespeichert werden",

@@ -1,5 +1,6 @@
 {
-	"fileTreeMoveKeepSort": "Mover y conservar el orden",
+	"fileTreeMoveKeepSortTip": "«Solo mover documentos» conserva la regla de ordenación actual, que determina la posición de los documentos.",
+	"fileTreeMoveKeepSort": "Solo mover documentos",
 	"accessibilitySupport": "Compatibilidad con accesibilidad",
 	"accessibilitySupportTip": "Permite usar lectores de pantalla y otras herramientas de asistencia; desactivada por defecto, se aplica a todos los espacios de trabajo de este dispositivo y requiere cerrar por completo y reiniciar SiYuan",
 	"accessibilitySupportError": "No se pudo leer o guardar la configuración de accesibilidad",

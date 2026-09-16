@@ -1,5 +1,6 @@
 {
-	"fileTreeMoveKeepSort": "העברה תוך שמירה על המיון",
+	"fileTreeMoveKeepSortTip": "האפשרות „העברת מסמכים בלבד” שומרת על כלל המיון הנוכחי, הקובע את מיקומי המסמכים.",
+	"fileTreeMoveKeepSort": "העברת מסמכים בלבד",
 	"accessibilitySupport": "תמיכה בנגישות",
 	"accessibilitySupportTip": "תמיכה בקוראי מסך ובכלי עזר אחרים; כבויה כברירת מחדל, חלה על כל סביבות העבודה במכשיר זה ונכנסת לתוקף לאחר סגירה מלאה והפעלה מחדש של SiYuan",
 	"accessibilitySupportError": "לא ניתן לקרוא או לשמור את הגדרות הנגישות",

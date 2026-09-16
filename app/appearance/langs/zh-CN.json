@@ -1,5 +1,6 @@
 {
-	"fileTreeMoveKeepSort": "保留排序并移动",
+	"fileTreeMoveKeepSortTip": "「仅移动文档」将保留当前排序规则，文档位置由排序规则决定。",
+	"fileTreeMoveKeepSort": "仅移动文档",
 	"accessibilitySupport": "辅助功能支持",
 	"accessibilitySupportTip": "支持读屏和其他辅助工具，默认关闭；适用于本机所有工作空间，修改后需完全退出并重新启动思源",
 	"accessibilitySupportError": "无法读取或保存辅助功能设置",

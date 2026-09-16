@@ -1,5 +1,6 @@
 {
-	"fileTreeMoveKeepSort": "Премести и задржи сортирање",
+	"fileTreeMoveKeepSortTip": "Opcija „Samo premesti dokumente“ zadržava trenutno pravilo ređanja, koje određuje položaj dokumenata.",
+	"fileTreeMoveKeepSort": "Samo premesti dokumente",
 	"accessibilitySupport": "Подршка за приступачност",
 	"accessibilitySupportTip": "Подржава читаче екрана и друге помоћне алате; подразумевано је искључена, важи за све радне просторе на овом уређају и захтева потпуно затварање и поновно покретање SiYuan-а",
 	"accessibilitySupportError": "Није могуће прочитати или сачувати подешавања приступачности",

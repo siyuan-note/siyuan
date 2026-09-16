@@ -1,5 +1,6 @@
 {
-	"fileTreeMoveKeepSort": "정렬을 유지하며 이동",
+	"fileTreeMoveKeepSortTip": "‘문서만 이동’을 선택하면 현재 정렬 규칙이 유지되며, 문서의 위치는 해당 규칙에 따라 결정됩니다.",
+	"fileTreeMoveKeepSort": "문서만 이동",
 	"accessibilitySupport": "접근성 지원",
 	"accessibilitySupportTip": "화면 읽기 프로그램 및 기타 보조 도구를 지원합니다. 기본적으로 꺼져 있으며 이 기기의 모든 작업 공간에 적용됩니다. 변경 후 SiYuan을 완전히 종료하고 다시 시작해야 합니다",
 	"accessibilitySupportError": "접근성 설정을 읽거나 저장할 수 없습니다",

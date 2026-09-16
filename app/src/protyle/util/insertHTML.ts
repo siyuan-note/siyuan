@@ -30,7 +30,8 @@ import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 import {updateAttrViewCellAnimation, updateAVName} from "../render/av/action";
 import {getDefaultDateFormat} from "../render/av/dateFormat";
-import {genCellValue, updateCellsValue} from "../render/av/cell";
+import {genCellValue, genCellValueByElement, updateCellsValue} from "../render/av/cell";
+import {getAVBindingOperations} from "../render/av/binding";
 import {input} from "../wysiwyg/input";
 import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -738,19 +739,9 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             if (selectCellElement) {
                 const sourceId = contenteditableElement.firstElementChild.getAttribute("data-id");
                 const previousID = getFieldIdByCellElement(selectCellElement, blockElement.getAttribute("data-av-type") as TAVView);
-                transaction(protyle, [{
-                    action: "replaceAttrViewBlock",
-                    avID,
-                    previousID,
-                    nextID: sourceId,
-                    isDetached: false,
-                }], [{
-                    action: "replaceAttrViewBlock",
-                    avID,
-                    previousID: sourceId,
-                    nextID: previousID,
-                    isDetached: selectCellElement.dataset.detached === "true",
-                }]);
+                const operations = getAVBindingOperations(avID, previousID, sourceId, blockElement.dataset.nodeId,
+                    genCellValueByElement("block", selectCellElement), {protyleID: protyle.id});
+                transaction(protyle, operations.doOperations, operations.undoOperations);
                 updateAttrViewCellAnimation(selectCellElement, {
                     type: "block",
                     isDetached: false,

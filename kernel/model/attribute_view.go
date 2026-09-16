@@ -7778,11 +7778,9 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 }
 
 func (tx *Transaction) doReplaceAttrViewBlock(operation *Operation) (ret *TxErr) {
-	targetItemID, duplicate, err := replaceAttributeViewBlock(operation.AvID, operation.PreviousID, operation.NextID, operation.IsDetached, tx)
-	if err != nil {
-		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID}
+	if err := tx.replaceAttributeViewBinding(operation); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
-	operation.RetData = map[string]any{"targetItemID": targetItemID, "duplicate": duplicate}
 	return
 }
 

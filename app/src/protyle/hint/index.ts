@@ -59,6 +59,8 @@ import {isNotCtrl, isOnlyMeta} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
+import {getAVBindingOperations} from "../render/av/binding";
+import {genCellValueByElement} from "../render/av/cell";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
@@ -771,6 +773,7 @@ ${genHintItemHTML(item)}
             }
             const previousID = rowElement.dataset.id;
             const avID = nodeElement.getAttribute("data-av-id");
+            const previousValue = genCellValueByElement("block", cellElement);
             let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;
@@ -781,22 +784,9 @@ ${genHintItemHTML(item)}
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
                 const newID = Lute.NewNodeID();
                 const bindNewDoc = () => {
-                    transaction(protyle, [{
-                        action: "replaceAttrViewBlock",
-                        avID,
-                        previousID,
-                        nextID: newID,
-                        isDetached: false,
-                        blockID: nodeElement.dataset.nodeId,
-                        context: {protyleID: protyle.id},
-                    }], [{
-                        action: "replaceAttrViewBlock",
-                        avID,
-                        previousID,
-                        isDetached: true,
-                        blockID: nodeElement.dataset.nodeId,
-                        context: {protyleID: protyle.id},
-                    }]);
+                    const operations = getAVBindingOperations(avID, previousID, newID, nodeElement.dataset.nodeId,
+                        previousValue, {protyleID: protyle.id});
+                    transaction(protyle, operations.doOperations, operations.undoOperations);
                 };
                 if (isNewSubDoc) {
                     newSubDocByRefHint(protyle, realFileName, bindNewDoc, newID);
@@ -810,22 +800,9 @@ ${genHintItemHTML(item)}
                 });
             } else {
                 const sourceId = tempElement.getAttribute("data-id");
-                transaction(protyle, [{
-                    action: "replaceAttrViewBlock",
-                    avID,
-                    previousID,
-                    nextID: sourceId,
-                    isDetached: false,
-                    blockID: nodeElement.dataset.nodeId,
-                    context: {protyleID: protyle.id},
-                }], [{
-                    action: "replaceAttrViewBlock",
-                    avID,
-                    previousID,
-                    isDetached: true,
-                    blockID: nodeElement.dataset.nodeId,
-                    context: {protyleID: protyle.id},
-                }]);
+                const operations = getAVBindingOperations(avID, previousID, sourceId, nodeElement.dataset.nodeId,
+                    previousValue, {protyleID: protyle.id});
+                transaction(protyle, operations.doOperations, operations.undoOperations);
                 updateAttrViewCellAnimation(cellElement, {
                     type: "block",
                     isDetached: false,

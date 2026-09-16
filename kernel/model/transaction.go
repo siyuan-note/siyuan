@@ -2228,6 +2228,10 @@ func (tx *Transaction) doRestoreCreatedDoc(operation *Operation) (ret *TxErr) {
 		existing, loadErr = LoadTreeByBlockIDInExactBox(tree.Root.ID, tree.Box)
 	} else {
 		existing, loadErr = LoadTreeByBlockID(tree.Root.ID)
+		if errors.Is(loadErr, ErrIndexing) {
+			// 已知文档快照按原笔记本查找，后台索引任务不应阻止重做；下方仍检查目标文件是否存在。
+			existing, loadErr = LoadTreeByBlockIDInExactBox(tree.Root.ID, tree.Box)
+		}
 	}
 	if nil == loadErr && nil != existing {
 		if "" != operation.templateDocTreeRootID || tx.isReplay || existing.Box != tree.Box || existing.Path != tree.Path {
@@ -2389,14 +2393,16 @@ type Operation struct {
 	BlockIDs   []string `json:"blockIDs"` // move/append 时为随折叠标题移动的顶层块，闪卡操作时为目标块
 	BlockID    string   `json:"blockID"`
 
-	DeckID                 string      `json:"deckID"` // 用于添加/删除闪卡
-	Tree                   *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
-	templateDocTreeRootID  string
-	blockSwapState         *blockSwapState
-	blockSwapUndo          bool
-	attributeViewItems     *attributeViewItemsSnapshot
-	attributeViewFields    *attributeViewFieldsSnapshot
-	attributeViewFieldUndo bool
+	DeckID                   string      `json:"deckID"` // 用于添加/删除闪卡
+	Tree                     *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
+	templateDocTreeRootID    string
+	blockSwapState           *blockSwapState
+	blockSwapUndo            bool
+	attributeViewItems       *attributeViewItemsSnapshot
+	attributeViewFields      *attributeViewFieldsSnapshot
+	attributeViewFieldUndo   bool
+	attributeViewBinding     *attributeViewBindingSnapshot
+	attributeViewBindingUndo bool
 
 	LockType bool `json:"-"` // 外部块更新是否禁止改变主类型
 

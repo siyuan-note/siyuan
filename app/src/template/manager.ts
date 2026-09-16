@@ -15,6 +15,8 @@ import {replaceFileName} from "../editor/rename";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {isBrowser, isMobile} from "../util/functions";
 import type {TemplateFileRequestInput} from "../types/api";
+import {openModel} from "../mobile/menu/model";
+import {closeModel} from "../mobile/util/closePanel";
 
 export const loadTemplateDirectories = async (select: HTMLSelectElement, initialDirectory?: string) => {
     const response = await fetchSyncPost("/api/template/manage", {action: "list"});
@@ -32,6 +34,7 @@ export const loadTemplateDirectories = async (select: HTMLSelectElement, initial
 
 export const openTemplateManager = (contextID = "", onClose?: () => void, initialPath = "") => {
     const lang = window.siyuan.languages;
+    const mobile = isMobile();
     let selected: TemplateEntry;
     let editing: TemplateEntry;
     let editingRevision = "";
@@ -44,11 +47,7 @@ export const openTemplateManager = (contextID = "", onClose?: () => void, initia
     let closed = false;
     const expandedPaths = new Set<string>();
     const button = (action: string, label: string) => `<button type="button" class="b3-button b3-button--outline" data-action="${action}">${label}</button>`;
-    const dialog = new Dialog({
-        title: lang.templateManager,
-        width: "min(1100px, 96vw)",
-        height: "min(800px, 90vh)",
-        content: `<div class="template-manager">
+    const content = `<div class="template-manager${mobile ? " template-manager--mobile" : ""}">
 <div class="template-manager__actions">
 ${button("new", lang.newTemplate)}${button("mkdir", lang.templateNewFolder)}
 ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", lang.remove)}${button("refresh", lang.refresh)}
@@ -71,21 +70,47 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
 <select class="b3-select" aria-label="${lang.templateContext}"></select></div></div>
 <div class="template-manager__preview"></div>
 </div></div>
-</div>`,
-        destroyCallback: () => {
-            clearTemplatePreview(preview);
-            window.removeEventListener("beforeunload", beforeUnload);
-            onClose?.();
-        }
+</div>`;
+    const onDestroy = () => {
+        closed = true;
+        clearTemplatePreview(preview);
+        window.removeEventListener("beforeunload", beforeUnload);
+        onClose?.();
+    };
+    let element: HTMLElement;
+    const dialog = mobile ? undefined : new Dialog({
+        title: lang.templateManager,
+        width: "min(1100px, 96vw)",
+        height: "min(800px, 90vh)",
+        content,
+        destroyCallback: onDestroy,
     });
-    const source = dialog.element.querySelector<HTMLTextAreaElement>("textarea");
-    const list = dialog.element.querySelector<HTMLElement>(".template-manager__files");
-    const pathLabel = dialog.element.querySelector<HTMLElement>(".template-manager__path");
-    const preview = dialog.element.querySelector<HTMLElement>(".template-manager__preview");
-    const fileSearch = dialog.element.querySelector<HTMLInputElement>(".template-manager__search");
-    const search = dialog.element.querySelector<HTMLInputElement>(".template-manager__context input");
-    const context = dialog.element.querySelector<HTMLSelectElement>("select");
-    const contextName = dialog.element.querySelector<HTMLElement>(".template-manager__context-name");
+    if (mobile) {
+        openModel({
+            title: lang.templateManager,
+            icon: "iconLeft",
+            hideCloseIcon: true,
+            html: content,
+            bindEvent: root => { element = root; },
+            destroyCallback: onDestroy,
+            backCallback: () => {
+                back();
+                return false;
+            },
+            transition: "forward",
+        });
+    } else {
+        element = dialog.element;
+    }
+    const root = element.querySelector<HTMLElement>(".template-manager");
+    const source = element.querySelector<HTMLTextAreaElement>("textarea");
+    const list = element.querySelector<HTMLElement>(".template-manager__files");
+    const pathLabel = element.querySelector<HTMLElement>(".template-manager__path");
+    const preview = element.querySelector<HTMLElement>(".template-manager__preview");
+    const fileSearch = element.querySelector<HTMLInputElement>(".template-manager__search");
+    const search = element.querySelector<HTMLInputElement>(".template-manager__context input");
+    const context = element.querySelector<HTMLSelectElement>("select");
+    const contextName = element.querySelector<HTMLElement>(".template-manager__context-name");
     if (contextID) {
         context.add(new Option(contextID, contextID));
     }
@@ -113,19 +138,28 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             action();
         }
     };
-    const destroy = dialog.destroy.bind(dialog);
-    dialog.destroy = () => guard(() => {
-        closed = true;
-        clearTemplatePreview(preview);
-        destroy();
+    const destroy = mobile ? closeModel : dialog.destroy.bind(dialog);
+    const back = () => guard(() => {
+        if (mobile && root.classList.contains("template-manager--editing")) {
+            void run(async () => {
+                await select();
+                renderList();
+                element.closest("#model")?.querySelector<HTMLElement>(".toolbar__icon").focus({preventScroll: true});
+            });
+        } else {
+            destroy();
+        }
     });
+    if (dialog) {
+        dialog.destroy = back;
+    }
     const update = () => {
         pathLabel.textContent = (editing?.path || "") + (dirty() ? " *" : "");
         pathLabel.classList.toggle("fn__none", !editing);
         source.disabled = !editing;
         source.readOnly = busy;
         list.setAttribute("aria-busy", String(busy));
-        dialog.element.querySelectorAll<HTMLButtonElement>(".template-manager__actions > [data-action]").forEach(element => {
+        element.querySelectorAll<HTMLButtonElement>(".template-manager__actions > [data-action]").forEach(element => {
             const action = element.dataset.action;
             const state = getTemplateActionState(action, getTemplateActionEntry(action, selected, editing),
                 dirty(), busy, Boolean(context.value));
@@ -250,6 +284,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
         selected = entry;
         if (!preserveEditor) {
             editing = entry && !entry.isDir ? entry : undefined;
+            root.classList.toggle("template-manager--editing", !!editing);
             editingRevision = editing ? revision : "";
             useCRLF = content.includes("\r\n") && !content.replace(/\r\n/g, "").includes("\n");
             previewPath = absolutePath;
@@ -343,11 +378,11 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
         clearTemplatePreview(preview);
         update();
     });
-    dialog.element.addEventListener("keydown", event => {
+    element.addEventListener("keydown", event => {
         event.stopPropagation();
         if (event.key === "Escape" && !event.isComposing) {
             event.preventDefault();
-            dialog.destroy();
+            back();
         }
     });
     fileSearch.addEventListener("input", renderList);
@@ -390,7 +425,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             }
         }).catch(() => {});
     }
-    dialog.element.addEventListener("click", event => {
+    element.addEventListener("click", event => {
         const target = (event.target as Element).closest<HTMLElement>(".template-manager__actions > [data-action]");
         const action = preview.contains(target) ? undefined : target?.dataset.action;
         if (!action || busy || closed || (target as HTMLButtonElement).disabled) {

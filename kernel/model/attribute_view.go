@@ -6020,6 +6020,12 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
+	if operation.attributeViewFields != nil {
+		if err := tx.restoreDeletedAttributeViewBlocks(operation); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+		return
+	}
 	if nil != operation.attributeViewItems {
 		if err := tx.restoreAttributeViewItems(operation); err != nil {
 			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}

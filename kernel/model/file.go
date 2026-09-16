@@ -2075,7 +2075,6 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		return
 	}
 
-	generateAvHistoryInTree(ret, historyDir)
 	// 加密笔记本的 assets 不提升到全局
 	if !IsEncryptedBox(box.ID) {
 		if err = copyDocAssetsToDataAssets(box.ID, p); err != nil {
@@ -2102,11 +2101,19 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 			return
 		}
 	}
-	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
-
 	allRemoveRootIDs := []string{ret.ID}
 	allRemoveRootIDs = append(allRemoveRootIDs, removeIDs...)
 	allRemoveRootIDs = gulu.Str.RemoveDuplicatedElem(allRemoveRootIDs)
+	for _, rootID := range allRemoveRootIDs {
+		removeTree, loadErr := LoadTreeByBlockID(rootID)
+		if loadErr != nil {
+			return nil, loadErr
+		}
+		if err = backupBoundAttributeViewHistory(removeTree, historyDir); err != nil {
+			return
+		}
+	}
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	for _, rootID := range allRemoveRootIDs {
 		removeTree, _ := LoadTreeByBlockID(rootID)
 		if nil == removeTree {

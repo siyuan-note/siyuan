@@ -48,6 +48,10 @@ func attributeViewFieldJSON(value any) (any, error) {
 }
 
 func attributeViewFieldElementID(value any, container string) string {
+	if container == "itemIds" || container == "groupItemIds" {
+		id, _ := value.(string)
+		return id
+	}
 	object, ok := value.(map[string]any)
 	if !ok {
 		return ""

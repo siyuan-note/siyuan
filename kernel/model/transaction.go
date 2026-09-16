@@ -486,6 +486,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		tx.rollback()
 		return
 	}
+	tx.UndoOperations = append(tx.UndoOperations, tx.attributeViewDeletionUndo...)
 
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
@@ -542,6 +543,9 @@ func (tx *Transaction) processLargeInsert() bool {
 	var firstDeleteOp, lastDeleteOp *Operation
 	for i, op := range tx.DoOperations {
 		if "insert" != op.Action {
+			if "delete" != op.Action {
+				return false
+			}
 			if 0 != i && i != opSize-1 {
 				return false
 			}
@@ -1370,7 +1374,7 @@ func syncDelete2AvBlock(node *ast.Node, nodeTree *parse.Tree, delChildrenWhenDel
 		collectDeletedAttributeViewBlocks(node, delChildrenWhenDelParent, deletedAttrViewBlockIDs)
 		flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs)
 	} else {
-		tx.collectDeletedAttributeViewBlocks(node, delChildrenWhenDelParent)
+		tx.collectDeletedAttributeViewBlocks(node, nodeTree, delChildrenWhenDelParent)
 	}
 
 	for _, avID := range tx.syncDelete2Block(node, nodeTree) {
@@ -1430,10 +1434,6 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 	return
 }
 
-func (tx *Transaction) collectDeletedAttributeViewBlocks(node *ast.Node, delChildrenWhenDelParent bool) {
-	collectDeletedAttributeViewBlocks(node, delChildrenWhenDelParent, tx.deletedAttrViewBlockIDs)
-}
-
 func collectDeletedAttributeViewBlocks(node *ast.Node, delChildrenWhenDelParent bool, deletedAttrViewBlockIDs map[string]map[string]struct{}) {
 	collect := func(n *ast.Node) {
 		avs := n.IALAttr(av.NodeAttrNameAvs)
@@ -1485,7 +1485,9 @@ func groupDeletedAttributeViewBlocks(boundAVIDs map[string][]string) (ret map[st
 }
 
 func (tx *Transaction) flushDeletedAttributeViewBlocks() {
-	flushDeletedAttributeViewBlocks(tx.deletedAttrViewBlockIDs)
+	if tx.attributeViewDeletionErr == nil {
+		tx.attributeViewDeletionErr = tx.flushAttributeViewBlockDeletions()
+	}
 	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
 }
 
@@ -1502,6 +1504,10 @@ func flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs map[string]map[stri
 }
 
 func removeAttributeViewBoundBlocks(attrView *av.AttributeView, deletedBlockIDs map[string]struct{}) (changed bool) {
+	return removeAttributeViewBoundItems(attrView, deletedBlockIDs, false)
+}
+
+func removeAttributeViewBoundItems(attrView *av.AttributeView, deletedBlockIDs map[string]struct{}, removeValues bool) (changed bool) {
 	if nil == attrView {
 		return false
 	}
@@ -1511,10 +1517,14 @@ func removeAttributeViewBoundBlocks(attrView *av.AttributeView, deletedBlockIDs 
 		return false
 	}
 	values := make([]*av.Value, 0, len(blockValues.Values))
+	itemIDs := map[string]bool{}
 	for _, blockValue := range blockValues.Values {
 		if nil != blockValue && nil != blockValue.Block {
 			if _, deleted := deletedBlockIDs[blockValue.Block.ID]; deleted {
 				changed = true
+				if blockValue.BlockID != "" {
+					itemIDs[blockValue.BlockID] = true
+				}
 				continue
 			}
 		}
@@ -1522,6 +1532,23 @@ func removeAttributeViewBoundBlocks(attrView *av.AttributeView, deletedBlockIDs 
 	}
 	if changed {
 		blockValues.Values = values
+		if !removeValues {
+			return true
+		}
+		for _, kv := range attrView.KeyValues {
+			if kv != blockValues {
+				kv.Values = slices.DeleteFunc(kv.Values, func(value *av.Value) bool { return value != nil && itemIDs[value.BlockID] })
+			}
+		}
+		for _, view := range attrView.Views {
+			view.ItemIDs = slices.DeleteFunc(view.ItemIDs, func(id string) bool { return itemIDs[id] })
+			for _, group := range view.Groups {
+				group.GroupItemIDs = slices.DeleteFunc(group.GroupItemIDs, func(id string) bool { return itemIDs[id] })
+			}
+		}
+		for id := range itemIDs {
+			delete(attrView.CardCoverPositions, id)
+		}
 	}
 	return
 }
@@ -2575,6 +2602,9 @@ type Transaction struct {
 	listItemFoldCandidates    []listItemFoldCandidate
 	listItemFoldCandidateIDs  map[string]struct{}
 	deletedAttrViewBlockIDs   map[string]map[string]struct{}
+	deletedAttrViewCarriers   map[string]string
+	attributeViewDeletionUndo []*Operation
+	attributeViewDeletionErr  error
 	structureCheckNodes       map[*ast.Node]struct{}
 	crossTreeMoveRefRefreshes []crossTreeMoveRefRefresh
 
@@ -2679,6 +2709,8 @@ func (tx *Transaction) begin() (err error) {
 	tx.listItemFoldCandidates = nil
 	tx.listItemFoldCandidateIDs = map[string]struct{}{}
 	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
+	tx.deletedAttrViewCarriers = map[string]string{}
+	tx.attributeViewDeletionUndo, tx.attributeViewDeletionErr = nil, nil
 	tx.structureCheckNodes = map[*ast.Node]struct{}{}
 	tx.crossTreeMoveRefRefreshes = nil
 	tx.luteEngine = util.NewLute()
@@ -2688,6 +2720,9 @@ func (tx *Transaction) begin() (err error) {
 }
 
 func (tx *Transaction) commit() (err error) {
+	if tx.attributeViewDeletionErr != nil {
+		return tx.attributeViewDeletionErr
+	}
 	var attemptedRemovedDocs []*parse.Tree
 	compensationRequired := 0 < len(tx.restoredTemplateCreatedDocs) || 0 < len(tx.removedTemplateCreatedDocs) ||
 		nil != tx.templateDocTreeRootSnapshot

@@ -63,6 +63,10 @@ func (tx *Transaction) rememberAttributeViewMutationTree(blockID string) error {
 	if blockID == "" {
 		return nil
 	}
+	if tx.attributeViewRollback == nil {
+		tx.attributeViewRollback = &attributeViewRollback{views: map[string]*av.AttributeView{},
+			trees: map[string]*parse.Tree{}, leases: map[string]bool{}}
+	}
 	tree, err := tx.loadTree(blockID)
 	if err != nil {
 		return err

@@ -2,6 +2,15 @@
   min-height: 0;
 }
 
+.sy__agentChat:not(.sy__agentChat--mobile) > .block__icons {
+  > [data-type="session-menu"] svg,
+  > [data-type="fullscreen"] svg {
+    width: 14px;
+    height: 14px;
+    margin: 1px;
+  }
+}
+
 .agent-chat__title {
   font-size: 14px;
   color: var(--b3-theme-on-background);

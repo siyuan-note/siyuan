@@ -25,7 +25,7 @@ import (
 	"sort"
 )
 
-// 只记录字段删除实际改变的片段；带稳定 ID 的集合按元素合并，其他列表整体检查冲突。
+// 只记录字段操作实际改变的片段；带稳定标识的集合按元素合并，其他列表整体检查冲突。
 type attributeViewFieldChange struct {
 	before, after             any
 	beforeExists, afterExists bool
@@ -47,10 +47,14 @@ func attributeViewFieldJSON(value any) (any, error) {
 	return ret, err
 }
 
-func attributeViewFieldElementID(value any) string {
+func attributeViewFieldElementID(value any, container string) string {
 	object, ok := value.(map[string]any)
 	if !ok {
 		return ""
+	}
+	if container == "options" {
+		name, _ := object["name"].(string)
+		return name
 	}
 	if key, ok := object["key"].(map[string]any); ok {
 		object = key
@@ -59,11 +63,11 @@ func attributeViewFieldElementID(value any) string {
 	return id
 }
 
-func attributeViewFieldElements(values []any) (map[string]any, []string, bool) {
+func attributeViewFieldElements(values []any, container string) (map[string]any, []string, bool) {
 	ret := map[string]any{}
 	var order []string
 	for _, value := range values {
-		id := attributeViewFieldElementID(value)
+		id := attributeViewFieldElementID(value, container)
 		if id == "" || ret[id] != nil {
 			return nil, nil, false
 		}
@@ -160,8 +164,8 @@ func diffAttributeViewFieldData(before, after any, beforeExists, afterExists boo
 	if !beforeIsSlice || !afterIsSlice {
 		return change
 	}
-	oldElements, oldOrder, oldOK := attributeViewFieldElements(beforeSlice)
-	newElements, newOrder, newOK := attributeViewFieldElements(afterSlice)
+	oldElements, oldOrder, oldOK := attributeViewFieldElements(beforeSlice, container)
+	newElements, newOrder, newOK := attributeViewFieldElements(afterSlice, container)
 	if !oldOK || !newOK {
 		return change
 	}
@@ -221,7 +225,7 @@ func (change *attributeViewFieldChange) apply(current any, exists, undo bool) (a
 		if !exists || !ok {
 			return nil, false, conflict
 		}
-		elements, _, valid := attributeViewFieldElements(values)
+		elements, _, valid := attributeViewFieldElements(values, change.container)
 		if !valid {
 			return nil, false, conflict
 		}
@@ -239,7 +243,7 @@ func (change *attributeViewFieldChange) apply(current any, exists, undo bool) (a
 		}
 		result := make([]any, 0, len(values))
 		for _, value := range values {
-			if updated, keep := elements[attributeViewFieldElementID(value)]; keep {
+			if updated, keep := elements[attributeViewFieldElementID(value, change.container)]; keep {
 				result = append(result, updated)
 			}
 		}
@@ -248,12 +252,12 @@ func (change *attributeViewFieldChange) apply(current any, exists, undo bool) (a
 			order = change.beforeOrder
 		}
 		for index, id := range order {
-			if elements[id] == nil || slices.ContainsFunc(result, func(value any) bool { return attributeViewFieldElementID(value) == id }) {
+			if elements[id] == nil || slices.ContainsFunc(result, func(value any) bool { return attributeViewFieldElementID(value, change.container) == id }) {
 				continue
 			}
 			position := -1
 			for previous := index - 1; previous >= 0; previous-- {
-				if found := slices.IndexFunc(result, func(value any) bool { return attributeViewFieldElementID(value) == order[previous] }); found >= 0 {
+				if found := slices.IndexFunc(result, func(value any) bool { return attributeViewFieldElementID(value, change.container) == order[previous] }); found >= 0 {
 					position = found + 1
 					break
 				}

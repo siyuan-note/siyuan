@@ -8681,6 +8681,12 @@ func getNodeByBlockID(tx *Transaction, blockID string) (node *ast.Node, tree *pa
 }
 
 func (tx *Transaction) doUpdateAttrViewColOptions(operation *Operation) (ret *TxErr) {
+	if operation.attributeViewFields != nil {
+		if err := tx.replayAttributeViewFields(operation); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+		return nil
+	}
 	err := updateAttributeViewColumnOptions(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -8919,208 +8925,17 @@ func setAttrViewCustomColors(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doRemoveAttrViewColOption(operation *Operation) (ret *TxErr) {
-	err := removeAttributeViewColumnOption(operation)
+	err := tx.mutateAttributeViewOption(operation, true)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
-	}
-	return
-}
-
-func removeAttributeViewColumnOption(operation *Operation) (err error) {
-	attrView, err := av.ParseAttributeView(operation.AvID)
-	if err != nil {
-		return
-	}
-
-	optName := operation.Data.(string)
-
-	key, err := attrView.GetKey(operation.ID)
-	if err != nil {
-		return
-	}
-
-	for i, opt := range key.Options {
-		if optName == opt.Name {
-			key.Options = append(key.Options[:i], key.Options[i+1:]...)
-			break
-		}
-	}
-	attrView.RemoveNewItemTemplateSelectOption(operation.ID, optName)
-
-	for _, keyValues := range attrView.KeyValues {
-		if keyValues.Key.ID != operation.ID {
-			continue
-		}
-
-		for _, value := range keyValues.Values {
-			if nil == value || nil == value.MSelect {
-				continue
-			}
-
-			for i, opt := range value.MSelect {
-				if optName == opt.Content {
-					value.MSelect = append(value.MSelect[:i], value.MSelect[i+1:]...)
-					break
-				}
-			}
-		}
-		break
-	}
-
-	// 如果存在选项对应的过滤条件，则删除过滤条件中设置的选项值 https://github.com/siyuan-note/siyuan/issues/15536
-	for _, view := range attrView.Views {
-		view.Filters = av.RemoveSelectOptionFromFilters(view.Filters, operation.ID, optName)
-		if 0 == len(view.Filters) {
-			// 保持 spec 5 根组不变量
-			view.Filters = []*av.ViewFilter{{Combination: av.FilterCombinationAnd}}
-		}
-	}
-	removeAttrViewOptionFromFieldFilters(attrView, attrView.ID, operation.ID, optName)
-
-	regenAttrViewGroups(attrView)
-	if err = av.SaveAttributeView(attrView); nil != err {
-		return
-	}
-
-	for _, relatedAvID := range av.GetSrcAvIDs(attrView.ID) {
-		if relatedAvID == attrView.ID {
-			continue
-		}
-		relatedAv, parseErr := av.ParseAttributeView(relatedAvID)
-		if nil != parseErr || nil == relatedAv ||
-			!removeAttrViewOptionFromFieldFilters(relatedAv, attrView.ID, operation.ID, optName) {
-			continue
-		}
-		if err = av.SaveAttributeView(relatedAv); nil != err {
-			return
-		}
-		ReloadAttrView(relatedAvID)
 	}
 	return
 }
 
 func (tx *Transaction) doUpdateAttrViewColOption(operation *Operation) (ret *TxErr) {
-	err := updateAttributeViewColumnOption(operation)
+	err := tx.mutateAttributeViewOption(operation, false)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
-	}
-	return
-}
-
-func updateAttributeViewColumnOption(operation *Operation) (err error) {
-	attrView, err := av.ParseAttributeView(operation.AvID)
-	if err != nil {
-		return
-	}
-
-	key, err := attrView.GetKey(operation.ID)
-	if err != nil {
-		return
-	}
-
-	data := operation.Data.(map[string]any)
-
-	rename := false
-	oldName := strings.TrimSpace(data["oldName"].(string))
-	newName := strings.TrimSpace(data["newName"].(string))
-	newDesc := strings.TrimSpace(data["newDesc"].(string))
-	newColor := attrView.FilterColorValue(data["newColor"].(string))
-
-	found := false
-	if oldName != newName {
-		rename = true
-
-		for _, opt := range key.Options {
-			if newName == opt.Name { // 如果选项已经存在则直接使用
-				found = true
-				newColor = opt.Color
-				newDesc = opt.Desc
-				break
-			}
-		}
-	}
-	if rename {
-		attrView.RenameNewItemTemplateSelectOption(operation.ID, oldName, newName, newColor)
-	}
-
-	if !found {
-		for i, opt := range key.Options {
-			if oldName == opt.Name {
-				key.Options[i].Name = newName
-				key.Options[i].Color = newColor
-				key.Options[i].Desc = newDesc
-				break
-			}
-		}
-	}
-
-	// 如果存在选项对应的值，需要更新值中的选项
-	for _, keyValues := range attrView.KeyValues {
-		if keyValues.Key.ID != operation.ID {
-			continue
-		}
-
-		for _, value := range keyValues.Values {
-			if nil == value || nil == value.MSelect {
-				continue
-			}
-
-			found = false
-			for _, opt := range value.MSelect {
-				if newName == opt.Content {
-					found = true
-					break
-				}
-			}
-			if found && rename {
-				idx := -1
-				for i, opt := range value.MSelect {
-					if oldName == opt.Content {
-						idx = i
-						break
-					}
-				}
-				if 0 <= idx {
-					value.MSelect = util.RemoveElem(value.MSelect, idx)
-				}
-			} else {
-				for i, opt := range value.MSelect {
-					if oldName == opt.Content {
-						value.MSelect[i].Content = newName
-						value.MSelect[i].Color = newColor
-						break
-					}
-				}
-			}
-		}
-		break
-	}
-
-	// 如果存在选项对应的过滤条件，需要更新过滤条件中设置的选项值
-	// Database select field filters follow option editing changes https://github.com/siyuan-note/siyuan/issues/10881
-	for _, view := range attrView.Views {
-		av.RenameSelectOptionInFilters(view.Filters, key.ID, oldName, newName, newColor)
-	}
-	renameAttrViewOptionInFieldFilters(attrView, attrView.ID, key.ID, oldName, newName, newColor)
-
-	regenAttrViewGroups(attrView)
-	if err = av.SaveAttributeView(attrView); nil != err {
-		return
-	}
-
-	for _, relatedAvID := range av.GetSrcAvIDs(attrView.ID) {
-		if relatedAvID == attrView.ID {
-			continue
-		}
-		relatedAv, parseErr := av.ParseAttributeView(relatedAvID)
-		if nil != parseErr || nil == relatedAv ||
-			!renameAttrViewOptionInFieldFilters(relatedAv, attrView.ID, key.ID, oldName, newName, newColor) {
-			continue
-		}
-		if err = av.SaveAttributeView(relatedAv); nil != err {
-			return
-		}
-		ReloadAttrView(relatedAvID)
 	}
 	return
 }

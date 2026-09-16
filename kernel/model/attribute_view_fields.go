@@ -26,11 +26,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 )
 
-// 字段快照只包含本次删除的变化，不进入接口响应或数据库持久化格式。
+// 字段快照只包含本次操作的变化，不进入接口响应或数据库持久化格式。
 type attributeViewFieldsSnapshot struct {
 	avID, keyID, blockID, boxID string
 	changes                     map[string]*attributeViewFieldChange
 	relationValues              map[string]map[string]attributeViewRelationValues
+	fieldTypes                  map[string]map[string]av.KeyType
 }
 
 type attributeViewRelationValues map[string][]string
@@ -229,11 +230,20 @@ func (tx *Transaction) replayAttributeViewFields(op *Operation) error {
 	if !tx.isReplay || op.AvID != state.avID || op.ID != state.keyID {
 		return errors.New("invalid database field replay")
 	}
+	if len(state.changes) == 0 {
+		return nil
+	}
 	before, after := map[string]*av.AttributeView{}, map[string]*av.AttributeView{}
 	for _, id := range sortedAttributeViewFieldKeys(state.changes) {
 		current, err := tx.readAttributeViewForMutation(id, state.blockID, state.boxID)
 		if err != nil {
 			return err
+		}
+		for keyID, typ := range state.fieldTypes[id] {
+			key, keyErr := current.GetKey(keyID)
+			if keyErr != nil || key.Type != typ {
+				return fmt.Errorf("database field [%s] changed after the operation", keyID)
+			}
 		}
 		// 恢复双向定义时，另一端的单向值必须仍与删除时一致。
 		for keyID, expected := range state.relationValues[id] {

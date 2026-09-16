@@ -1068,7 +1068,7 @@ type="checkbox">
         ${bazaar._genReadmeUpdateButtonHTML(available, bazaarType, Boolean(installed))}
     </div>`;
         const previewHTML = displayData.previewURL ?
-            `<div class="item__preview" style="display: none" data-preview-url="${escapeAttr(displayData.previewURL)}"></div>` : "";
+            `<div class="item__preview" data-preview-url="${escapeAttr(displayData.previewURL)}"></div>` : "";
         readmeElement.innerHTML = `${isMobile() ? backHeaderHTML : ""}<div class="item__body"><div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
     ${isMobile() ? "" : backHeaderHTML}
     <div class="fn__flex-1">
@@ -1112,12 +1112,9 @@ type="checkbox">
 </div></div>${isMobile() ? readmeActionsHTML : ""}`;
         const previewElement = readmeElement.querySelector<HTMLElement>(".item__preview");
         if (previewElement) {
-            // 预览图加载成功后才显示容器，避免失败时占据空间或打开无效预览
+            // 加载期间保留预览区域，仅在加载失败后移除容器
+            previewElement.style.backgroundImage = `url(${JSON.stringify(displayData.previewURL)})`;
             const previewImage = new Image();
-            previewImage.onload = () => {
-                previewElement.style.backgroundImage = `url(${JSON.stringify(displayData.previewURL)})`;
-                previewElement.style.display = "";
-            };
             previewImage.onerror = () => {
                 previewElement.remove();
             };

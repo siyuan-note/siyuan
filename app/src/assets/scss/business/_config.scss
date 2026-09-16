@@ -719,7 +719,12 @@
     }
 
     &__cards {
-      grid-auto-rows: 160px;
+      grid-auto-rows: 116px;
+
+      .b3-card__desc {
+        max-height: 36px;
+        -webkit-line-clamp: 2;
+      }
 
       > [data-bazaar-index] {
         cursor: default;

@@ -202,6 +202,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                 if (!header) {
                     header = document.createElement("div");
                     header.className = "tabs-header protyle-action";
+                }
+                // 移动及撤销可能把页签项插到控件前面，导航栏始终位于正文之前。
+                if (tabs.firstElementChild !== header) {
                     tabs.prepend(header);
                 }
                 header.setAttribute("contenteditable", "false");

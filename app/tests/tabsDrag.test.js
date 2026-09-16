@@ -19,9 +19,18 @@ const sources = () => {
     return [
         extract("protyle/util/editorCommonEvent.ts", ["getDragSourceParentID", "moveTo"]),
         extract("protyle/wysiwyg/getBlock.ts", ["getParentBlock", "getPreviousBlockSibling", "getTopAloneElement"]),
-        extract("protyle/render/tabsRender.ts", ["getTabItems", "getTabTask"]),
+        (() => {
+            const file = ts.createSourceFile("tabsRender.ts", readFileSync(path.join(__dirname,
+                "../src/protyle/render/tabsRender.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+            return ts.transpileModule(file.statements.filter(statement => !ts.isImportDeclaration(statement))
+                .map(statement => statement.getText(file)).join("\n").replace(/^export /gm, ""), {
+                compilerOptions: {target: ts.ScriptTarget.ES2021},
+            }).outputText;
+        })(),
         extract("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]),
-        extract("protyle/render/tabsState.ts", ["adjacentTabID"]),
+        extract("protyle/render/tabsState.ts", ["adjacentTabID", "resolveTabID", "tabKeyboardTarget"]),
+        extract("util/escape.ts", ["escapeHtml"]),
+        extract("protyle/wysiwyg/transaction.ts", ["syncBlockAttrs"]),
         ts.transpileModule(readFileSync(path.join(__dirname, "../src/protyle/render/tabsDrag.ts"), "utf8")
             .replace(/export const /g, "const "), {compilerOptions: {target: ts.ScriptTarget.ES2021}}).outputText,
     ].join("\n");
@@ -50,8 +59,8 @@ const cases = async (source) => {
     const constants = {ZWSP: "\u200b", SIYUAN_DROP_BLOCK: "application/siyuan-block", SIYUAN_DROP_GUTTER: "application/siyuan-gutter"};
     const protyle = {lute, wysiwyg: {element: root}, notebookId: "notebook", block: {rootID: "doc"}};
     window.siyuan = {config: {system: {workspaceDir: "workspace"}}};
-    const {moveTo, bindTabsDrag, isDraggingTabs} = new Function("Constants", "genEmptyElement", "root", "protyle",
-        source + "; return {moveTo, bindTabsDrag, isDraggingTabs};")(
+    const {moveTo, bindTabsDrag, isDraggingTabs, syncBlockAttrs, tabsRender, destroyTabsRender} = new Function("Constants", "genEmptyElement", "root", "protyle",
+        source + "; return {moveTo, bindTabsDrag, isDraggingTabs, syncBlockAttrs, tabsRender, destroyTabsRender};")(
         constants, genEmptyElement, root, protyle);
     const list = document.createElement("div");
     const button = document.createElement("button");
@@ -100,7 +109,7 @@ const cases = async (source) => {
                 check.ok(Array.from(node.children).some(child => child.dataset.nodeId === attrs["tabs-active-id"]),
                     JSON.stringify(operation));
             }
-            Object.entries(attrs).forEach(([name, value]) => node.setAttribute(name, value));
+            syncBlockAttrs(stored, operation);
         } else if (operation.action === "delete") {
             node?.remove();
         } else if (operation.action === "update") {
@@ -121,10 +130,43 @@ const cases = async (source) => {
     });
     replay(result.doOperations);
     replay(result.undoOperations);
+    root.innerHTML = stored.innerHTML;
+    const secondItem = root.querySelector(`[data-node-id="${originalID}"]`);
+    const secondResult = await moveTo(protyle, [secondItem], root.lastElementChild, true, "afterend", false);
+    replay(secondResult.doOperations);
+    replay(secondResult.undoOperations);
+    check.equal(find(originalID).parentElement.getAttribute("tabs-active-id"), originalID);
     check.equal(find(originalID).parentElement.dataset.nodeId, tabs.dataset.nodeId);
     check.equal(find(tabs.dataset.nodeId).getAttribute("tabs-position"), "left");
-    replay(result.doOperations);
-    replay(result.undoOperations);
+    replay(secondResult.doOperations);
+    replay(secondResult.undoOperations);
+    check.equal(find(originalID).parentElement.getAttribute("tabs-active-id"), originalID);
+    const restoredTabs = find(tabs.dataset.nodeId);
+    const syncAttrs = attrs => syncBlockAttrs(stored, {
+        action: "setAttrs", id: tabs.dataset.nodeId, data: JSON.stringify(attrs),
+    });
+    syncAttrs({"tabs-position": "top", "tabs-task": "true", fold: "1", style: "color: red"});
+    check.equal(restoredTabs.getAttribute("tabs-position"), "top");
+    check.equal(restoredTabs.getAttribute("tabs-task"), "true");
+    check.equal(restoredTabs.getAttribute("fold"), "1");
+    check.equal(restoredTabs.style.color, "red");
+    check.equal(restoredTabs.getAttribute("tabs-active-id"), originalID);
+    syncAttrs({"tabs-position": "", "tabs-task": "", fold: "0", style: ""});
+    for (const name of ["tabs-position", "tabs-task", "fold", "style"]) {
+        check.equal(restoredTabs.hasAttribute(name), false);
+    }
+    check.equal(restoredTabs.getAttribute("tabs-active-id"), originalID);
+    root.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab First\n\nFirst body\n@tab Second\n\nSecond body\n:::\n");
+    tabsRender(root);
+    const layoutTabs = root.querySelector(".tabs");
+    const header = layoutTabs.querySelector(".tabs-header");
+    const firstPanel = layoutTabs.querySelector(".tab-item");
+    // 撤销将首个页签项插回容器前部，复用的导航栏必须恢复到正文之前。
+    layoutTabs.prepend(firstPanel);
+    tabsRender(root);
+    check.equal(layoutTabs.firstElementChild, header);
+    check.equal(layoutTabs.querySelectorAll(":scope > .tabs-header").length, 1);
+    destroyTabsRender(root);
     root.remove();
     return "Tabs drag cases passed";
 };
@@ -159,7 +201,7 @@ const run = async () => {
 if (process.versions.electron && process.type === "browser") {
     run().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
-    require("node:test").test("tab drag transactions preserve valid active IDs through undo and redo", {
+    require("node:test").test("repeated tab drags preserve active IDs through attribute replay, undo and redo", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,
     }, async () => {

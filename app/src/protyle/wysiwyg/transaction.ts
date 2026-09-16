@@ -142,11 +142,13 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     }
 };
 
-const syncFoldAndStyleAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>) => {
+const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>) => {
     const attrs = JSON.parse(operation.data);
     const hasFold = Object.prototype.hasOwnProperty.call(attrs, "fold");
     const hasStyle = Object.prototype.hasOwnProperty.call(attrs, "style");
-    if (!hasFold && !hasStyle) {
+    const tabsAttrs = ["tabs-active-id", "tabs-position", "tabs-task"]
+        .filter(name => Object.prototype.hasOwnProperty.call(attrs, name));
+    if (!hasFold && !hasStyle && tabsAttrs.length === 0) {
         return;
     }
     element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
@@ -164,6 +166,14 @@ const syncFoldAndStyleAttrs = (element: Element, operation: Extract<IOperation, 
                 item.removeAttribute("style");
             }
         }
+        // 撤销恢复的页签属性同步到 DOM，后续拖动据此捕获有效的选择和布局状态。
+        tabsAttrs.forEach(name => {
+            if (attrs[name]) {
+                item.setAttribute(name, attrs[name]);
+            } else {
+                item.removeAttribute(name);
+            }
+        });
     });
 };
 
@@ -506,7 +516,7 @@ const promiseTransaction = (options: {
                 return;
             }
             if (operation.action === "setAttrs") {
-                syncFoldAndStyleAttrs(protyle.wysiwyg.element, operation);
+                syncBlockAttrs(protyle.wysiwyg.element, operation);
                 const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
                 if (gutterFoldElement) {
                     gutterFoldElement.removeAttribute("disabled");
@@ -596,7 +606,7 @@ const promiseTransaction = (options: {
                         return;
                     }
                     if (operation.action === "setAttrs") {
-                        syncFoldAndStyleAttrs(protyle.wysiwyg.element, operation);
+                        syncBlockAttrs(protyle.wysiwyg.element, operation);
                     }
                     // 冻结范围依赖列的 DOM 分组，新增列事务落盘后使用完整数据重建分组。
                     if (operation.action === "addAttrViewCol" &&
@@ -821,7 +831,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             updateElements.push(item);
         });
         if (operation.action === "setAttrs") {
-            syncFoldAndStyleAttrs(protyle.wysiwyg.element, operation);
+            syncBlockAttrs(protyle.wysiwyg.element, operation);
             return;
         }
         if (operation.action === "unfoldHeading") {

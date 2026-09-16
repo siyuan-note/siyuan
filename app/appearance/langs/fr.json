@@ -1,4 +1,5 @@
 {
+	"fileTreeMoveKeepSort": "Déplacer en conservant le tri",
 	"accessibilitySupport": "Prise en charge de l’accessibilité",
 	"accessibilitySupportTip": "Permet l’utilisation de lecteurs d’écran et d’autres outils d’assistance ; désactivée par défaut, s’applique à tous les espaces de travail de cet appareil et nécessite de quitter complètement puis de redémarrer SiYuan",
 	"accessibilitySupportError": "Impossible de lire ou d’enregistrer les paramètres d’accessibilité",

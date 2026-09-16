@@ -1,4 +1,5 @@
 {
+	"fileTreeMoveKeepSort": "Sıralamayı koruyarak taşı",
 	"accessibilitySupport": "Erişilebilirlik desteği",
 	"accessibilitySupportTip": "Ekran okuyucuları ve diğer yardımcı araçları destekler; varsayılan olarak kapalıdır, bu cihazdaki tüm çalışma alanlarına uygulanır ve SiYuan tamamen kapatılıp yeniden başlatıldığında etkinleşir",
 	"accessibilitySupportError": "Erişilebilirlik ayarları okunamadı veya kaydedilemedi",

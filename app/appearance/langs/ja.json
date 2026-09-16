@@ -1,4 +1,5 @@
 {
+	"fileTreeMoveKeepSort": "並び順を維持して移動",
 	"accessibilitySupport": "アクセシビリティ対応",
 	"accessibilitySupportTip": "スクリーンリーダーなどの支援ツールに対応します。初期設定はオフで、この端末のすべてのワークスペースに適用されます。変更後は思源を完全に終了して再起動してください",
 	"accessibilitySupportError": "アクセシビリティ設定を読み取りまたは保存できません",

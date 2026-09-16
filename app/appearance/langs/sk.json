@@ -1,4 +1,5 @@
 {
+	"fileTreeMoveKeepSort": "Presunúť a zachovať zoradenie",
 	"accessibilitySupport": "Podpora prístupnosti",
 	"accessibilitySupportTip": "Podporuje čítačky obrazovky a ďalšie asistenčné nástroje; predvolene vypnutá, platí pre všetky pracovné priestory na tomto zariadení a vyžaduje úplné ukončenie a opätovné spustenie SiYuan",
 	"accessibilitySupportError": "Nastavenia prístupnosti sa nepodarilo načítať alebo uložiť",

@@ -1,4 +1,5 @@
 {
+	"fileTreeMoveKeepSort": "Move and keep sorting",
 	"accessibilitySupport": "Accessibility support",
 	"accessibilitySupportTip": "Support screen readers and other assistive tools; off by default, applies to all workspaces on this device, and takes effect after fully quitting and restarting SiYuan",
 	"accessibilitySupportError": "Unable to read or save accessibility settings",

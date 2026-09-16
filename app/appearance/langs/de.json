@@ -1,4 +1,5 @@
 {
+	"fileTreeMoveKeepSort": "Verschieben und Sortierung beibehalten",
 	"accessibilitySupport": "Unterstützung für Barrierefreiheit",
 	"accessibilitySupportTip": "Unterstützt Screenreader und andere Hilfsmittel; standardmäßig deaktiviert, gilt für alle Arbeitsbereiche auf diesem Gerät und wird nach vollständigem Beenden und Neustarten von SiYuan wirksam",
 	"accessibilitySupportError": "Einstellungen zur Barrierefreiheit konnten nicht gelesen oder gespeichert werden",

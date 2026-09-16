@@ -1,4 +1,5 @@
 {
+	"fileTreeMoveKeepSort": "Verplaatsen met behoud van sortering",
 	"accessibilitySupport": "Ondersteuning voor toegankelijkheid",
 	"accessibilitySupportTip": "Ondersteunt schermlezers en andere hulpmiddelen; standaard uitgeschakeld, geldt voor alle werkruimten op dit apparaat en wordt actief nadat SiYuan volledig is afgesloten en opnieuw is gestart",
 	"accessibilitySupportError": "Kan toegankelijkheidsinstellingen niet lezen of opslaan",

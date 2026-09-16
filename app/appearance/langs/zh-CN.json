@@ -1,4 +1,5 @@
 {
+	"fileTreeMoveKeepSort": "保留排序并移动",
 	"accessibilitySupport": "辅助功能支持",
 	"accessibilitySupportTip": "支持读屏和其他辅助工具，默认关闭；适用于本机所有工作空间，修改后需完全退出并重新启动思源",
 	"accessibilitySupportError": "无法读取或保存辅助功能设置",

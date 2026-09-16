@@ -5,7 +5,8 @@ import {Constants} from "../constants";
 export const confirmDialog = (title: string, text: string,
                               confirm?: (dialog?: Dialog) => void,
                               cancel?: (dialog: Dialog) => void,
-                              isDelete = false) => {
+                              isDelete = false,
+                              extraAction?: {label: string, callback: () => void}) => {
     if (!text && !title) {
         confirm();
         return;
@@ -49,6 +50,11 @@ export const confirmDialog = (title: string, text: string,
                 handleCancel();
                 dialog.destroy();
                 break;
+            } else if (target.id === "extraDialogConfirmBtn") {
+                handled = true;
+                extraAction?.callback();
+                dialog.destroy();
+                break;
             } else if (target.id === "confirmDialogConfirmBtn" || (isDispatch && event.detail=== "Enter")) {
                 handled = true;
                 confirm?.(dialog);
@@ -58,6 +64,15 @@ export const confirmDialog = (title: string, text: string,
             target = target.parentElement;
         }
     });
+    if (extraAction) {
+        const button = document.createElement("button");
+        button.className = "b3-button b3-button--text";
+        button.id = "extraDialogConfirmBtn";
+        button.textContent = extraAction.label;
+        const space = document.createElement("div");
+        space.className = "fn__space";
+        dialog.element.querySelector("#confirmDialogConfirmBtn").before(button, space);
+    }
     dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
     (dialog.element.querySelector("#confirmDialogConfirmBtn") as HTMLButtonElement).focus({preventScroll: true});
 };

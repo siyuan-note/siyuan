@@ -1,4 +1,5 @@
 {
+	"fileTreeMoveKeepSort": "העברה תוך שמירה על המיון",
 	"accessibilitySupport": "תמיכה בנגישות",
 	"accessibilitySupportTip": "תמיכה בקוראי מסך ובכלי עזר אחרים; כבויה כברירת מחדל, חלה על כל סביבות העבודה במכשיר זה ונכנסת לתוקף לאחר סגירה מלאה והפעלה מחדש של SiYuan",
 	"accessibilitySupportError": "לא ניתן לקרוא או לשמור את הגדרות הנגישות",

@@ -1,4 +1,5 @@
 {
+	"fileTreeMoveKeepSort": "Pindahkan dan pertahankan pengurutan",
 	"accessibilitySupport": "Dukungan aksesibilitas",
 	"accessibilitySupportTip": "Mendukung pembaca layar dan alat bantu lainnya; nonaktif secara bawaan, berlaku untuk semua ruang kerja di perangkat ini, dan memerlukan penutupan sepenuhnya serta mulai ulang SiYuan",
 	"accessibilitySupportError": "Tidak dapat membaca atau menyimpan pengaturan aksesibilitas",

@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "Ondersteuning voor toegankelijkheid",
+	"accessibilitySupportTip": "Ondersteunt schermlezers en andere hulpmiddelen; standaard uitgeschakeld, geldt voor alle werkruimten op dit apparaat en wordt actief nadat SiYuan volledig is afgesloten en opnieuw is gestart",
+	"accessibilitySupportError": "Kan toegankelijkheidsinstellingen niet lezen of opslaan",
+	"accessibilitySupportOverrideTip": "Bepaald door opstartparameters; verwijder de toegankelijkheidsparameters om deze instelling te gebruiken",
 	"agentWorkspaceSkills": "Werkruimtevaardigheden",
 	"agentWorkspaceSkillsTip": "Vaardigheden en Markdown-bestanden in de huidige werkruimte beheren",
 	"agentSkillManager": "Vaardighedenbeheer",

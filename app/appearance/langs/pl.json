@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "Obsługa ułatwień dostępu",
+	"accessibilitySupportTip": "Obsługuje czytniki ekranu i inne narzędzia wspomagające; domyślnie wyłączona, dotyczy wszystkich obszarów roboczych na tym urządzeniu i wymaga całkowitego zamknięcia oraz ponownego uruchomienia SiYuan",
+	"accessibilitySupportError": "Nie można odczytać lub zapisać ustawień ułatwień dostępu",
+	"accessibilitySupportOverrideTip": "Sterowanie za pomocą parametrów uruchamiania; usuń parametry ułatwień dostępu, aby użyć tego ustawienia",
 	"agentWorkspaceSkills": "Umiejętności przestrzeni roboczej",
 	"agentWorkspaceSkillsTip": "Zarządzaj umiejętnościami i plikami Markdown w bieżącej przestrzeni roboczej",
 	"agentSkillManager": "Menedżer umiejętności",

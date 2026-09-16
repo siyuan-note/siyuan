@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "Unterstützung für Barrierefreiheit",
+	"accessibilitySupportTip": "Unterstützt Screenreader und andere Hilfsmittel; standardmäßig deaktiviert, gilt für alle Arbeitsbereiche auf diesem Gerät und wird nach vollständigem Beenden und Neustarten von SiYuan wirksam",
+	"accessibilitySupportError": "Einstellungen zur Barrierefreiheit konnten nicht gelesen oder gespeichert werden",
+	"accessibilitySupportOverrideTip": "Wird durch Startparameter gesteuert; entferne die Parameter zur Barrierefreiheit, um diese Einstellung zu verwenden",
 	"agentWorkspaceSkills": "Arbeitsbereich-Fähigkeiten",
 	"agentWorkspaceSkillsTip": "Fähigkeiten und Markdown-Dateien im aktuellen Arbeitsbereich verwalten",
 	"agentSkillManager": "Fähigkeitenverwaltung",

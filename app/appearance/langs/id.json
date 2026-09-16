@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "Dukungan aksesibilitas",
+	"accessibilitySupportTip": "Mendukung pembaca layar dan alat bantu lainnya; nonaktif secara bawaan, berlaku untuk semua ruang kerja di perangkat ini, dan memerlukan penutupan sepenuhnya serta mulai ulang SiYuan",
+	"accessibilitySupportError": "Tidak dapat membaca atau menyimpan pengaturan aksesibilitas",
+	"accessibilitySupportOverrideTip": "Dikendalikan oleh parameter peluncuran; hapus parameter aksesibilitas untuk menggunakan pengaturan ini",
 	"agentWorkspaceSkills": "Keterampilan ruang kerja",
 	"agentWorkspaceSkillsTip": "Kelola keterampilan dan berkas Markdown di ruang kerja saat ini",
 	"agentSkillManager": "Pengelola keterampilan",

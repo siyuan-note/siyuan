@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "תמיכה בנגישות",
+	"accessibilitySupportTip": "תמיכה בקוראי מסך ובכלי עזר אחרים; כבויה כברירת מחדל, חלה על כל סביבות העבודה במכשיר זה ונכנסת לתוקף לאחר סגירה מלאה והפעלה מחדש של SiYuan",
+	"accessibilitySupportError": "לא ניתן לקרוא או לשמור את הגדרות הנגישות",
+	"accessibilitySupportOverrideTip": "נשלטת באמצעות פרמטרי ההפעלה; יש להסיר את פרמטרי הנגישות כדי להשתמש בהגדרה זו",
 	"agentWorkspaceSkills": "מיומנויות סביבת העבודה",
 	"agentWorkspaceSkillsTip": "ניהול מיומנויות וקובצי Markdown בסביבת העבודה הנוכחית",
 	"agentSkillManager": "מנהל המיומנויות",

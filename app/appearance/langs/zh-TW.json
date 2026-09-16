@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "輔助功能支援",
+	"accessibilitySupportTip": "支援螢幕閱讀器和其他輔助工具，預設關閉；適用於本機所有工作空間，修改後需完全結束並重新啟動思源",
+	"accessibilitySupportError": "無法讀取或儲存輔助功能設定",
+	"accessibilitySupportOverrideTip": "目前由啟動參數控制，移除輔助功能相關啟動參數後才能使用此設定",
 	"agentWorkspaceSkills": "工作空間技能",
 	"agentWorkspaceSkillsTip": "管理目前工作空間中的技能及 Markdown 檔案",
 	"agentSkillManager": "技能管理",

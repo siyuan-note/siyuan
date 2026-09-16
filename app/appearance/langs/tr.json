@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "Erişilebilirlik desteği",
+	"accessibilitySupportTip": "Ekran okuyucuları ve diğer yardımcı araçları destekler; varsayılan olarak kapalıdır, bu cihazdaki tüm çalışma alanlarına uygulanır ve SiYuan tamamen kapatılıp yeniden başlatıldığında etkinleşir",
+	"accessibilitySupportError": "Erişilebilirlik ayarları okunamadı veya kaydedilemedi",
+	"accessibilitySupportOverrideTip": "Başlangıç parametreleri tarafından kontrol ediliyor; bu ayarı kullanmak için erişilebilirlik parametrelerini kaldırın",
 	"agentWorkspaceSkills": "Çalışma alanı becerileri",
 	"agentWorkspaceSkillsTip": "Geçerli çalışma alanındaki becerileri ve Markdown dosyalarını yönetin",
 	"agentSkillManager": "Beceri yöneticisi",

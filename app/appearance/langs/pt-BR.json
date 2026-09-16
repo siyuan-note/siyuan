@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "Suporte à acessibilidade",
+	"accessibilitySupportTip": "Oferece suporte a leitores de tela e outras ferramentas assistivas; desativado por padrão, aplica-se a todos os espaços de trabalho deste dispositivo e exige encerrar completamente e reiniciar o SiYuan",
+	"accessibilitySupportError": "Não foi possível ler ou salvar as configurações de acessibilidade",
+	"accessibilitySupportOverrideTip": "Controlado pelos parâmetros de inicialização; remova os parâmetros de acessibilidade para usar esta configuração",
 	"agentWorkspaceSkills": "Habilidades do espaço de trabalho",
 	"agentWorkspaceSkillsTip": "Gerenciar habilidades e arquivos Markdown no espaço de trabalho atual",
 	"agentSkillManager": "Gerenciador de habilidades",

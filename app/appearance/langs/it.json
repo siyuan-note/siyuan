@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "Supporto per l’accessibilità",
+	"accessibilitySupportTip": "Supporta lettori di schermo e altri strumenti assistivi; disattivato per impostazione predefinita, si applica a tutti gli spazi di lavoro su questo dispositivo e richiede di chiudere completamente e riavviare SiYuan",
+	"accessibilitySupportError": "Impossibile leggere o salvare le impostazioni di accessibilità",
+	"accessibilitySupportOverrideTip": "Controllato dai parametri di avvio; rimuovi i parametri di accessibilità per usare questa impostazione",
 	"agentWorkspaceSkills": "Competenze dell'area di lavoro",
 	"agentWorkspaceSkillsTip": "Gestisci competenze e file Markdown nell'area di lavoro corrente",
 	"agentSkillManager": "Gestione competenze",

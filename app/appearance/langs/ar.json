@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "دعم إمكانية الوصول",
+	"accessibilitySupportTip": "يدعم قارئات الشاشة والأدوات المساعدة الأخرى؛ معطّل افتراضيًا، وينطبق على جميع مساحات العمل على هذا الجهاز، ويتطلب إغلاق SiYuan بالكامل وإعادة تشغيله",
+	"accessibilitySupportError": "تعذّرت قراءة إعدادات إمكانية الوصول أو حفظها",
+	"accessibilitySupportOverrideTip": "تتحكم به معاملات بدء التشغيل؛ أزل معاملات إمكانية الوصول لاستخدام هذا الإعداد",
 	"agentWorkspaceSkills": "مهارات مساحة العمل",
 	"agentWorkspaceSkillsTip": "إدارة المهارات وملفات Markdown في مساحة العمل الحالية",
 	"agentSkillManager": "إدارة المهارات",

@@ -1,4 +1,8 @@
 {
+	"accessibilitySupport": "접근성 지원",
+	"accessibilitySupportTip": "화면 읽기 프로그램 및 기타 보조 도구를 지원합니다. 기본적으로 꺼져 있으며 이 기기의 모든 작업 공간에 적용됩니다. 변경 후 SiYuan을 완전히 종료하고 다시 시작해야 합니다",
+	"accessibilitySupportError": "접근성 설정을 읽거나 저장할 수 없습니다",
+	"accessibilitySupportOverrideTip": "시작 인수로 제어되고 있습니다. 이 설정을 사용하려면 접근성 관련 시작 인수를 제거하세요",
 	"agentWorkspaceSkills": "작업 공간 스킬",
 	"agentWorkspaceSkillsTip": "현재 작업 공간의 스킬과 Markdown 파일 관리",
 	"agentSkillManager": "스킬 관리",

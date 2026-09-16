@@ -74,6 +74,9 @@ const {
 } = require("./remoteKernel");
 const {dispatchWindowMessage} = require("./windowMessaging");
 const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
+const {
+    readAccessibilitySetting, writeAccessibilitySetting, getAccessibilityOverride, configureAccessibility,
+} = require("./accessibility");
 
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
@@ -82,6 +85,7 @@ const simulateRosetta = process.argv.includes("--simulate-rosetta");
 const appVer = app.getVersion();
 const confDir = path.join(app.getPath("home"), ".config", "siyuan");
 const windowStatePath = path.join(confDir, "windowState.json");
+const accessibilitySettingPath = path.join(confDir, "accessibility.json");
 const appCrashLogPath = path.join(confDir, "app.crash.log");
 const appCrashMarkerPath = path.join(confDir, "app.crash.json");
 const systemShutdownNone = 0;
@@ -751,6 +755,17 @@ for (let i = argStart; i < process.argv.length; i++) {
     app.commandLine.appendSwitch(arg);
     writeLog("command line switch [" + arg + "]");
 }
+
+// 桌面端辅助功能配置在创建窗口前应用，对本机所有工作空间生效。
+const accessibilityOverride = getAccessibilityOverride(app.commandLine);
+let accessibilityEnabled = true;
+try {
+    accessibilityEnabled = readAccessibilitySetting(accessibilitySettingPath);
+} catch (error) {
+    // 配置读取失败时保留辅助功能支持，避免阻断已依赖读屏的用户。
+    writeLog("read accessibility setting failed: " + error.message);
+}
+configureAccessibility(app.commandLine, accessibilityEnabled);
 
 try {
     firstOpen = !remoteKernelTarget && !fs.existsSync(path.join(confDir, "workspace.json"));
@@ -3089,6 +3104,17 @@ app.whenReady().then(() => {
         app.exit();
     });
     ipcMain.handle("siyuan-get", async (event, data) => {
+        if (data.cmd === "getAccessibilitySetting" || data.cmd === "setAccessibilitySetting") {
+            if (!initializedWindowIds.has(event.sender.id) ||
+                !getWindowKernelTarget(event.sender.id) || event.senderFrame !== event.sender.mainFrame) {
+                throw new Error("Accessibility setting is unavailable");
+            }
+            if (data.cmd === "setAccessibilitySetting") {
+                writeAccessibilitySetting(accessibilitySettingPath, data.enabled);
+                accessibilityEnabled = data.enabled;
+            }
+            return {enabled: accessibilityEnabled, override: accessibilityOverride};
+        }
         if (data.cmd === "remoteConnections") {
             if (!getWindowKernelTarget(event.sender.id) || event.senderFrame !== event.sender.mainFrame) {
                 return [];

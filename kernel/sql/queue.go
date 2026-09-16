@@ -194,6 +194,12 @@ func WaitFlushTx() {
 }
 
 func ClearQueue() {
+	HPathRefreshLock.Lock()
+	defer HPathRefreshLock.Unlock()
+	clearQueue()
+}
+
+func clearQueue() {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 	operationQueue = nil

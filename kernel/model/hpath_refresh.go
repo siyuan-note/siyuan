@@ -42,56 +42,99 @@ type hpathRefreshTask struct {
 	scope       [32]byte
 	limit       int
 	covers      map[string]*hpathRefreshTask
+	coveredBy   *hpathRefreshTask
 	started     time.Time
 	active      time.Duration
 	batches     int
 }
 
 var hpathRefresh = struct {
-	sync.Mutex
-	file  string
-	tasks map[string]*hpathRefreshTask
-	last  string
-}{}
+	*sync.Mutex
+	file      string
+	tasks     map[string]*hpathRefreshTask
+	last      string
+	nextPrune time.Time
+}{Mutex: &sql.HPathRefreshLock}
+
+func init() {
+	sql.ResetHPathRefreshQueue = resetHPathRefreshQueueLocked
+}
 
 func loadHPathRefreshLocked() error {
-	p := filepath.Join(util.ConfDir, "hpath-refresh.json")
+	p := filepath.Join(util.QueueDir, "hpath-refresh.queue")
 	if hpathRefresh.file == p && hpathRefresh.tasks != nil {
 		return nil
 	}
-	tasks := map[string]*hpathRefreshTask{}
-	data, err := os.ReadFile(p)
-	if err != nil && !os.IsNotExist(err) {
+	legacy := filepath.Join(util.ConfDir, "hpath-refresh.json")
+	tasks, legacyExists, err := readHPathRefreshTasks(legacy)
+	if err != nil {
 		return err
 	}
-	if err == nil {
-		var store struct {
-			Version int                 `json:"version"`
-			Tasks   []hpathRefreshEntry `json:"tasks"`
-		}
-		if err = json.Unmarshal(data, &store); err != nil {
+	current, _, err := readHPathRefreshTasks(p)
+	if err != nil {
+		return err
+	}
+	for key, task := range current {
+		tasks[key] = task
+	}
+	if legacyExists {
+		// 合并后的记录先持久化，再移除迁移来源；中断后重复合并仍能恢复全部任务。
+		if err = writeHPathRefreshTasks(p, tasks); err != nil {
 			return err
 		}
-		if store.Version != 1 {
-			return fmt.Errorf("unsupported hpath refresh version %d", store.Version)
-		}
-		for _, entry := range store.Tasks {
-			if entry.ID == "" || entry.Box == "" {
-				return errors.New("invalid hpath refresh entry")
-			}
-			if _, err = filesys.ValidateBoxRelativePath(entry.Box, entry.Path); err != nil {
-				return err
-			}
-			tasks[entry.Box+"/"+entry.ID] = &hpathRefreshTask{hpathRefreshEntry: entry, recover: true, limit: 256}
+		if err = os.Remove(legacy); err != nil && !os.IsNotExist(err) {
+			return err
 		}
 	}
 	hpathRefresh.file, hpathRefresh.tasks, hpathRefresh.last = p, tasks, ""
+	hpathRefresh.nextPrune = time.Time{}
 	return nil
 }
 
+func readHPathRefreshTasks(p string) (map[string]*hpathRefreshTask, bool, error) {
+	tasks := map[string]*hpathRefreshTask{}
+	data, err := os.ReadFile(p)
+	if os.IsNotExist(err) {
+		return tasks, false, nil
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	var store struct {
+		Version int                 `json:"version"`
+		Tasks   []hpathRefreshEntry `json:"tasks"`
+	}
+	if err = json.Unmarshal(data, &store); err != nil {
+		return nil, true, err
+	}
+	if store.Version != 1 {
+		return nil, true, fmt.Errorf("unsupported hpath refresh version %d", store.Version)
+	}
+	for _, entry := range store.Tasks {
+		if entry.ID == "" || entry.Box == "" {
+			return nil, true, errors.New("invalid hpath refresh entry")
+		}
+		if _, err = filesys.ValidateBoxRelativePath(entry.Box, entry.Path); err != nil {
+			return nil, true, err
+		}
+		tasks[entry.Box+"/"+entry.ID] = &hpathRefreshTask{hpathRefreshEntry: entry, recover: true, limit: 256}
+	}
+	return tasks, true, nil
+}
+
 func saveHPathRefreshLocked() error {
-	entries := make([]hpathRefreshEntry, 0, len(hpathRefresh.tasks))
-	for _, task := range hpathRefresh.tasks {
+	return writeHPathRefreshTasks(hpathRefresh.file, hpathRefresh.tasks)
+}
+
+func writeHPathRefreshTasks(p string, tasks map[string]*hpathRefreshTask) error {
+	if len(tasks) == 0 {
+		if err := os.Remove(p); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+		return nil
+	}
+	entries := make([]hpathRefreshEntry, 0, len(tasks))
+	for _, task := range tasks {
 		entries = append(entries, task.hpathRefreshEntry)
 	}
 	sort.Slice(entries, func(i, j int) bool {
@@ -104,8 +147,83 @@ func saveHPathRefreshLocked() error {
 	if err != nil {
 		return err
 	}
+	if err = os.MkdirAll(filepath.Dir(p), 0755); err != nil {
+		return err
+	}
 	// WriteFile 使用临时文件、Sync 和替换，写入成功后才允许修改源文档。
-	return filelock.WriteFile(hpathRefresh.file, data)
+	return filelock.WriteFile(p, data)
+}
+
+func removeHPathRefreshTasksLocked(remove func(*hpathRefreshTask) bool) error {
+	remaining := make(map[string]*hpathRefreshTask, len(hpathRefresh.tasks))
+	for key, task := range hpathRefresh.tasks {
+		if !remove(task) {
+			remaining[key] = task
+		}
+	}
+	if len(remaining) == len(hpathRefresh.tasks) {
+		return nil
+	}
+	if err := writeHPathRefreshTasks(hpathRefresh.file, remaining); err != nil {
+		return err
+	}
+	hpathRefresh.tasks = remaining
+	for key, task := range remaining {
+		if parent := task.coveredBy; parent != nil && (remaining[parent.Box+"/"+parent.ID] != parent || parent.covers[key] != task) {
+			task.coveredBy = nil
+		}
+		for childKey, child := range task.covers {
+			if remaining[childKey] != child {
+				delete(task.covers, childKey)
+			}
+		}
+	}
+	return nil
+}
+
+func resetHPathRefreshQueueLocked() error {
+	if err := loadHPathRefreshLocked(); err != nil {
+		return err
+	}
+	// 普通数据库重建不涉及独立加密数据库，后者的恢复任务继续保留。
+	return removeHPathRefreshTasksLocked(func(task *hpathRefreshTask) bool {
+		if IsEncryptedBox(task.Box) {
+			return false
+		}
+		// 清理写盘失败时仍从源文档重新恢复，避免沿用重建前的行号。
+		task.docs, task.index, task.recover = nil, 0, true
+		task.covers, task.coveredBy = nil, nil
+		task.blockAfter, task.treeAfter = 0, 0
+		return true
+	})
+}
+
+func removeHPathRefreshBox(boxID string) {
+	hpathRefresh.Lock()
+	defer hpathRefresh.Unlock()
+	if err := loadHPathRefreshLocked(); err != nil {
+		logging.LogErrorf("load hpath tasks when removing notebook [%s] failed: %s", boxID, err)
+		return
+	}
+	if err := removeHPathRefreshTasksLocked(func(task *hpathRefreshTask) bool { return task.Box == boxID }); err != nil {
+		logging.LogErrorf("remove notebook hpath tasks [%s] failed: %s", boxID, err)
+	}
+}
+
+func pruneHPathRefreshTasksLocked() error {
+	if time.Now().Before(hpathRefresh.nextPrune) {
+		return nil
+	}
+	hpathRefresh.nextPrune = time.Now().Add(time.Minute)
+	missing := map[string]bool{}
+	for _, task := range hpathRefresh.tasks {
+		if _, checked := missing[task.Box]; !checked {
+			_, err := os.Stat(filepath.Join(util.DataDir, task.Box))
+			// 仅回收确认不存在的笔记本，关闭、锁定或读取失败均保留恢复记录。
+			missing[task.Box] = os.IsNotExist(err)
+		}
+	}
+	return removeHPathRefreshTasksLocked(func(task *hpathRefreshTask) bool { return missing[task.Box] })
 }
 
 func queueHPathRefreshLocked(tree *parse.Tree) (key string, err error) {
@@ -199,25 +317,24 @@ func RefreshHPathsJob() {
 	if len(hpathRefresh.tasks) == 0 {
 		return
 	}
+	if err := pruneHPathRefreshTasksLocked(); err != nil {
+		logging.LogWarnf("prune hpath refresh tasks failed: %s", err)
+	}
 	opened := map[string]bool{}
 	for _, box := range Conf.GetOpenedBoxes() {
 		opened[box.ID] = true
 	}
 	for key, task := range hpathRefresh.tasks {
-		covered := false
-		for _, parent := range hpathRefresh.tasks {
-			if parent.covers[key] == task {
-				covered = true
-				break
-			}
-		}
-		if covered {
+		if !opened[task.Box] {
 			continue
+		}
+		if parent := task.coveredBy; parent != nil {
+			if hpathRefresh.tasks[parent.Box+"/"+parent.ID] == parent && parent.covers[key] == task {
+				continue
+			}
+			task.coveredBy = nil
 		}
 		if time.Now().Before(task.due) && time.Since(task.first) < 2*time.Second {
-			continue
-		}
-		if !opened[task.Box] {
 			continue
 		}
 		keys = append(keys, key)
@@ -364,6 +481,7 @@ func refreshHPathsTask(task *hpathRefreshTask) (done bool, err error) {
 			bt := treenode.GetBlockTreeInBox(other.ID, other.Box)
 			if bt != nil && bt.BoxID == root.BoxID && strings.HasPrefix(bt.Path, strings.TrimSuffix(root.Path, ".sy")+"/") {
 				task.covers[key] = other
+				other.coveredBy = task
 			}
 		}
 	}

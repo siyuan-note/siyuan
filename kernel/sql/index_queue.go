@@ -38,6 +38,11 @@ var (
 	indexMu        sync.Mutex
 	indexQueueSize atomic.Int64
 	indexFlock     *flock.Flock
+
+	// HPathRefreshLock 在重建索引前阻止路径任务写回；锁顺序为路径任务锁、数据库初始化锁、索引队列锁。
+	HPathRefreshLock sync.Mutex
+	// ResetHPathRefreshQueue 由模型层注入，在持有 HPathRefreshLock 时同步清理普通索引的路径恢复记录。
+	ResetHPathRefreshQueue func() error
 )
 
 type indexEntry struct {
@@ -192,6 +197,12 @@ func readIndexEntriesFrom(indexQueuePath string, offset int64) (entries []indexE
 }
 
 func clearIndexQueueEntries() {
+	// 调用方持有 HPathRefreshLock；普通队列刷新只清理自身快照，不会进入这里。
+	if ResetHPathRefreshQueue != nil {
+		if err := ResetHPathRefreshQueue(); err != nil {
+			logging.LogErrorf("clear hpath refresh queue failed: %s", err)
+		}
+	}
 	indexMu.Lock()
 	defer indexMu.Unlock()
 

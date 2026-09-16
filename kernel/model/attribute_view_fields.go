@@ -309,6 +309,7 @@ func (tx *Transaction) saveAttributeViewFieldChanges(state *attributeViewFieldsS
 		if err := av.SaveAttributeView(after[id]); err != nil {
 			return err
 		}
+		tx.invalidateAttributeViewHistory(id)
 	}
 	for _, id := range ids {
 		syncAttributeViewRelationIndexes(before[id], after[id])

@@ -105,7 +105,28 @@ func syncAttributeViewRelationIndexes(before, after *av.AttributeView) {
 	}
 }
 
+// 非编辑器变更在提交成功后清理失效历史；无事务的写入在保存后立即清理。
+func (tx *Transaction) invalidateAttributeViewHistory(avID string) {
+	if tx == nil {
+		GlobalUndoLog.ClearAttributeView(avID)
+		return
+	}
+	if tx.isReplay || tx.fromAPI && len(tx.UndoOperations) > 0 {
+		return
+	}
+	if tx.invalidatedAvHistory == nil {
+		tx.invalidatedAvHistory = map[string]bool{}
+	}
+	tx.invalidatedAvHistory[avID] = true
+}
+
 func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
+	if !rollback {
+		for avID := range tx.invalidatedAvHistory {
+			GlobalUndoLog.ClearAttributeView(avID)
+		}
+	}
+	tx.invalidatedAvHistory = nil
 	state := tx.attributeViewRollback
 	if state == nil {
 		return
@@ -125,6 +146,9 @@ func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 			if err := restoreCreatedDocTreeSnapshot(tree); err != nil {
 				logging.LogErrorf("restore database document [%s]: %s", tree.ID, err)
 			}
+		}
+		for _, original := range state.views {
+			ReloadAttrView(original.ID)
 		}
 	}
 	for boxID := range state.leases {

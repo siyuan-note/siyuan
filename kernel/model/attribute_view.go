@@ -95,6 +95,7 @@ func RemoveUnusedAttributeView(id string) (err error) {
 		util.PushErrMsg(fmt.Sprintf("%s", err), 7000)
 		return
 	}
+	GlobalUndoLog.ClearAttributeView(id)
 
 	IncSync()
 
@@ -145,6 +146,7 @@ func RemoveUnusedAttributeViews() (ret []string) {
 				util.PushErrMsg(fmt.Sprintf("%s", removeErr), 7000)
 				return
 			}
+			GlobalUndoLog.ClearAttributeView(id)
 		}
 		ret = append(ret, absPath)
 	}
@@ -6473,12 +6475,14 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 	}
 
 	trees := map[string]*parse.Tree{}
+	removedValues := false
 	for _, keyValues := range attrView.KeyValues {
 		tmp := keyValues.Values[:0]
 		for i, val := range keyValues.Values {
 			if !gulu.Str.Contains(val.BlockID, srcIDs) {
 				tmp = append(tmp, keyValues.Values[i])
 			} else {
+				removedValues = true
 				if av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation &&
 					keyValues.Key.Relation.IsTwoWay && nil != val.Relation && 0 < len(val.Relation.BlockIDs) {
 					clearedValue := val.Clone()
@@ -6488,6 +6492,7 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 						oldRelationBlockIDs, blockID); nil != err {
 						return
 					}
+					tx.invalidateAttributeViewHistory(keyValues.Key.Relation.AvID)
 				}
 				// Remove av block also remove node attr https://github.com/siyuan-note/siyuan/issues/9091#issuecomment-1709824006
 				if !val.IsDetached && nil != val.Block {
@@ -6542,7 +6547,10 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 	if nil != err {
 		return
 	}
-	if err = removeRelatedRelationItems(avID, srcIDs, blockID); nil != err {
+	if removedValues {
+		tx.invalidateAttributeViewHistory(avID)
+	}
+	if err = removeRelatedRelationItems(avID, srcIDs, blockID, tx); nil != err {
 		return
 	}
 
@@ -6604,7 +6612,7 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 	return
 }
 
-func removeRelatedRelationItems(avID string, itemIDs []string, blockID string) (err error) {
+func removeRelatedRelationItems(avID string, itemIDs []string, blockID string, tx *Transaction) (err error) {
 	for _, relatedAvID := range av.GetSrcAvIDs(avID) {
 		if relatedAvID == avID {
 			continue
@@ -6621,6 +6629,7 @@ func removeRelatedRelationItems(avID string, itemIDs []string, blockID string) (
 		if err = avSaveView(relatedAv, blockID); nil != err {
 			return
 		}
+		tx.invalidateAttributeViewHistory(relatedAvID)
 		ReloadAttrView(relatedAvID)
 	}
 	return
@@ -7778,7 +7787,7 @@ func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr)
 }
 
 func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err error) {
-	tx := &Transaction{}
+	tx := &Transaction{trees: map[string]*parse.Tree{}}
 	defer func() { tx.finishAttributeViewMutation(err != nil) }()
 	return tx.removeAttributeViewField(&Operation{AvID: avID, ID: keyID, RemoveDest: removeRelationDest})
 }

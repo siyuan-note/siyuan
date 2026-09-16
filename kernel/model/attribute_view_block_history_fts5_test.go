@@ -14,6 +14,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -100,6 +101,33 @@ func TestAttributeViewBoundHistoryRelations(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAttributeViewDeleteDocumentUnreadableChildPreservesData(t *testing.T) {
+	fixture, before, _ := setupAttributeViewDeletedBlockTest(t, "block")
+	childID := ast.NewNodeID()
+	child := treenode.NewTree(fixture.box.ID, "/"+fixture.sourceID+"/"+childID+".sy", "/Source/Child", "Child")
+	if _, err := filesys.WriteTree(child); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(child)
+	childPath := filepath.Join(util.DataDir, child.Box, child.Path)
+	corrupted := []byte("unreadable child document")
+	if err := os.WriteFile(childPath, corrupted, 0600); err != nil {
+		t.Fatal(err)
+	}
+	cache.RemoveTreeData(child.ID)
+	t.Cleanup(func() { cache.RemoveTreeData(child.ID) })
+	if _, err := removeDoc(fixture.box, fixture.sourcePath, util.NewLute()); err == nil {
+		t.Fatal("document deletion skipped unreadable child history")
+	}
+	if _, err := os.Stat(filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)); err != nil {
+		t.Fatalf("failed deletion removed the parent document: %v", err)
+	}
+	if data, err := os.ReadFile(childPath); err != nil || !bytes.Equal(data, corrupted) {
+		t.Fatalf("failed deletion changed the unreadable child: %v", err)
+	}
+	assertAttributeViewFieldsTest(t, before, readAttributeViewItemsTest(t, before.ID))
 }
 
 func TestAttributeViewDeletedDocumentHistory(t *testing.T) {

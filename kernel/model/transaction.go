@@ -2599,6 +2599,7 @@ type Transaction struct {
 	writeTransactionTree         func(*parse.Tree) error
 	blockSwapOriginalTrees       []*parse.Tree
 	attributeViewRollback        *attributeViewRollback
+	invalidatedAvHistory         map[string]bool
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）

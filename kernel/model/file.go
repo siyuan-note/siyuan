@@ -2104,22 +2104,23 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	allRemoveRootIDs := []string{ret.ID}
 	allRemoveRootIDs = append(allRemoveRootIDs, removeIDs...)
 	allRemoveRootIDs = gulu.Str.RemoveDuplicatedElem(allRemoveRootIDs)
+	removeTrees := make([]*parse.Tree, 0, len(allRemoveRootIDs))
 	for _, rootID := range allRemoveRootIDs {
-		removeTree, loadErr := LoadTreeByBlockID(rootID)
-		if loadErr != nil {
-			return nil, loadErr
+		removeTree := ret
+		if rootID != ret.ID {
+			var loadErr error
+			removeTree, loadErr = LoadTreeByBlockID(rootID)
+			if loadErr != nil {
+				return nil, loadErr
+			}
 		}
 		if err = backupBoundAttributeViewHistory(removeTree, historyDir); err != nil {
 			return
 		}
+		removeTrees = append(removeTrees, removeTree)
 	}
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
-	for _, rootID := range allRemoveRootIDs {
-		removeTree, _ := LoadTreeByBlockID(rootID)
-		if nil == removeTree {
-			continue
-		}
-
+	for _, removeTree := range removeTrees {
 		removedRootPaths[removeTree.ID] = removeTree.Path
 		syncDelete2AvBlock(removeTree.Root, removeTree, true, nil)
 	}

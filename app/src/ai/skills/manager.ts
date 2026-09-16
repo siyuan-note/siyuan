@@ -91,7 +91,7 @@ export const openSkillManager = (settingRoot?: HTMLElement) => {
         `<button type="button" class="b3-button b3-button--outline ${extraClass}" data-action="${action}">${label}</button>`;
     const content = `<div class="skill-manager${mobile ? " skill-manager--mobile" : ""}">
 ${mobile ? `<div class="skill-manager__page-header">
-<button type="button" class="block__icon skill-manager__page-back" data-action="back" aria-label="${lang.back}"><svg><use xlink:href="#iconLeft"></use></svg></button>
+<button type="button" class="block__icon block__icon--show skill-manager__page-back" data-action="back" aria-label="${lang.back}"><svg><use xlink:href="#iconLeft"></use></svg></button>
 <div class="skill-manager__title"></div>${button("save", lang.save, "skill-manager__page-save")}</div>` : ""}
 <div class="skill-manager__actions skill-manager__main-actions">
 ${button("newSkill", lang.agentSkillNew)}${button("newFile", lang.agentSkillNewFile)}${button("mkdir", lang.agentSkillNewFolder)}

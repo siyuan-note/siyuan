@@ -19,6 +19,7 @@ package model
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -332,6 +333,38 @@ func (l *UndoLog) Clear(rootID string) {
 			other.redoStack = removeEntryByID(other.redoStack, id)
 		}
 		_ = otherID
+	}
+}
+
+// ClearAttributeView 从各文档栈清理涉及指定数据库的整笔撤销、重做记录，保留无关记录。
+// 非编辑器事务移除绑定条目后，旧记录不能再安全地重放单元格编辑或数据库快照。
+func (l *UndoLog) ClearAttributeView(avID string) {
+	if avID == "" {
+		return
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	affected := func(entry *UndoEntry) bool {
+		for _, operations := range [][]*Operation{entry.doOperations, entry.undoOperations} {
+			for _, operation := range operations {
+				if operation.AvID == avID {
+					return true
+				}
+				if snapshot := operation.attributeViewFields; snapshot != nil && snapshot.changes[avID] != nil {
+					return true
+				}
+				if items := operation.attributeViewItems; items != nil && items.relatedChanges != nil &&
+					items.relatedChanges.changes[avID] != nil {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	for _, stack := range l.stacks {
+		stack.undoStack = slices.DeleteFunc(stack.undoStack, affected)
+		stack.redoStack = slices.DeleteFunc(stack.redoStack, affected)
 	}
 }
 

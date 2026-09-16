@@ -17,10 +17,43 @@
 package model
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/88250/lute/ast"
 )
+
+func TestUndoLogClearAttributeView(t *testing.T) {
+	avID := "affected-database"
+	snapshot := &attributeViewFieldsSnapshot{changes: map[string]*attributeViewFieldChange{avID: {}}}
+	for _, operation := range []*Operation{
+		{Action: "updateAttrViewCell", AvID: avID},
+		{Action: "addAttrViewCol", AvID: "related-database", attributeViewFields: snapshot},
+		{Action: "insertAttrViewBlock", AvID: "related-database", attributeViewItems: &attributeViewItemsSnapshot{relatedChanges: snapshot}},
+	} {
+		t.Run(operation.Action, func(t *testing.T) {
+			log := newUndoLog(64)
+			affected := &UndoEntry{undoOperations: []*Operation{operation}}
+			kept := &UndoEntry{doOperations: []*Operation{{Action: "updateAttrViewCell", AvID: "unrelated-database"}}}
+			for _, rootID := range []string{"database-document", "bound-document"} {
+				log.stacks[rootID] = &undoStack{
+					undoStack: []*UndoEntry{kept, affected},
+					redoStack: []*UndoEntry{affected, kept},
+					hasUndo:   true,
+				}
+			}
+			log.ClearAttributeView(avID)
+			for _, stack := range log.stacks {
+				if !slices.Equal(stack.undoStack, []*UndoEntry{kept}) || !slices.Equal(stack.redoStack, []*UndoEntry{kept}) {
+					t.Fatal("database history was not removed consistently across document stacks")
+				}
+				if !stack.hasUndo {
+					t.Fatal("clearing history changed the redo invalidation state")
+				}
+			}
+		})
+	}
+}
 
 func TestReplaceReplayOperationID(t *testing.T) {
 	replacements := map[string]string{"old": "new"}

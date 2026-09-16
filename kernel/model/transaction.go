@@ -1498,7 +1498,11 @@ func flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs map[string]map[stri
 			continue
 		}
 		regenAttrViewGroups(attrView)
-		av.SaveAttributeView(attrView)
+		if err = av.SaveAttributeView(attrView); err != nil {
+			logging.LogErrorf("remove deleted database bindings [%s] failed: %s", avID, err)
+			continue
+		}
+		GlobalUndoLog.ClearAttributeView(avID)
 		ReloadAttrView(avID)
 	}
 }

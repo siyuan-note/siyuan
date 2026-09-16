@@ -160,6 +160,69 @@ func TestAttributeViewDeletedDocumentHistory(t *testing.T) {
 	}
 }
 
+func TestAttributeViewDeletedDocumentClearsDatabaseHistory(t *testing.T) {
+	for _, redo := range []bool{false, true} {
+		t.Run(map[bool]string{false: "undo", true: "redo"}[redo], func(t *testing.T) {
+			fixture, before, _, _ := setupAttributeViewItemsTest(t, true)
+			unrelated := &Transaction{fromAPI: true,
+				DoOperations:   []*Operation{{Action: "doUpdateUpdated", ID: fixture.sourceID, Data: "20260101000000"}},
+				UndoOperations: []*Operation{{Action: "doUpdateUpdated", ID: fixture.sourceID, Data: "20250101000000"}},
+			}
+			if err := PerformTxSync(unrelated); err != nil {
+				t.Fatal(err)
+			}
+			keptEntry := GlobalUndoLog.Peek(fixture.sourceID)
+			itemID := before.GetBlockKeyValues().Values[1].BlockID
+			var keyID string
+			for _, kv := range before.KeyValues {
+				if kv.Key.Type == av.KeyTypeText {
+					keyID = kv.Key.ID
+					break
+				}
+			}
+			edit := &Transaction{fromAPI: true,
+				DoOperations: []*Operation{
+					{Action: "updateAttrViewCell", AvID: before.ID, BlockID: fixture.sourceID, KeyID: keyID, RowID: itemID,
+						Data: map[string]any{"text": map[string]any{"content": "Edited before deleting document"}}},
+					{Action: "doUpdateUpdated", ID: fixture.sourceID, Data: "20260102000000"},
+				},
+				UndoOperations: []*Operation{{Action: "updateAttrViewCell", AvID: before.ID, BlockID: fixture.sourceID,
+					KeyID: keyID, RowID: itemID, Data: map[string]any{"text": map[string]any{"content": "private field contents"}}}},
+			}
+			if err := PerformTxSync(edit); err != nil {
+				t.Fatal(err)
+			}
+			if entry := GlobalUndoLog.Peek(fixture.sourceID); entry == nil || entry == keptEntry {
+				t.Fatal("cell edit did not enter the undo log")
+			}
+			if redo {
+				entry := GlobalUndoLog.Undo(fixture.sourceID)
+				replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
+				GlobalUndoLog.UndoCommit(entry, fixture.sourceID)
+			}
+			if _, err := removeDoc(fixture.box, fixture.targetPath, util.NewLute()); err != nil {
+				t.Fatal(err)
+			}
+			sql.FlushQueue()
+			if readAttributeViewItemsTest(t, before.ID).GetBlockValue(itemID) != nil {
+				t.Fatal("deleted document remains bound to the database item")
+			}
+			if entry := GlobalUndoLog.Redo(fixture.sourceID); entry != nil {
+				t.Fatal("deleted database item still has a redo entry")
+			}
+			entry := GlobalUndoLog.Undo(fixture.sourceID)
+			if entry == nil {
+				t.Fatal("unrelated document history was removed")
+			}
+			replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
+			if entry != keptEntry {
+				t.Fatal("deleted database item still has an undo entry")
+			}
+			GlobalUndoLog.UndoCommit(entry, fixture.sourceID)
+		})
+	}
+}
+
 func TestAttributeViewBoundHistoryRestore(t *testing.T) {
 	for _, encrypted := range []bool{false, true} {
 		t.Run(map[bool]string{false: "ordinary", true: "encrypted"}[encrypted], func(t *testing.T) {

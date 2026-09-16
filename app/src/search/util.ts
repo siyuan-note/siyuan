@@ -1554,8 +1554,6 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
     });
 };
 
-export {getAttr} from "./attrs";
-
 const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Config.IUILayoutTabSearchConfig,
                   focusId?: {
                       currentId?: string,

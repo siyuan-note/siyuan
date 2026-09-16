@@ -29,6 +29,8 @@ import {isMobileMenuSearchMatch} from "./searchFilter";
 import {unmountAssetsTab} from "../../config/assets";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {getMobilePluginDockEntries, MOBILE_PLUGIN_DOCKS_CHANGE_EVENT} from "../dock/pluginDockState";
+import {openTemplateManager} from "../../template/manager";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 let mobileMenuReturnCallback: (() => void) | undefined;
 
@@ -301,6 +303,9 @@ export const initRightMenu = (app: App) => {
             <div id="menuCommand" class="b3-menu__item">
                 <svg class="b3-menu__icon"><use xlink:href="#iconTerminal"></use></svg><span class="b3-menu__label">${window.siyuan.languages.commandPanel}</span>
             </div>
+            <div id="menuTemplateManager" class="b3-menu__item${window.siyuan.config.readonly || !getHostCapabilities().importExport ? " fn__none" : ""}">
+                <svg class="b3-menu__icon"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-menu__label">${window.siyuan.languages.templateManager}</span>
+            </div>
             <div id="menuCard" class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}">
                 <svg class="b3-menu__icon"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-menu__label">${window.siyuan.languages.spaceRepetition}</span>
             </div>
@@ -567,6 +572,13 @@ export const initRightMenu = (app: App) => {
             } else if (target.id === "menuNewDaily") {
                 newDailyNote(app);
                 closePanel();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuTemplateManager") {
+                const contextID = getCurrentEditor()?.protyle.block.rootID || "";
+                closePanel();
+                openTemplateManager(contextID);
                 event.preventDefault();
                 event.stopPropagation();
                 break;

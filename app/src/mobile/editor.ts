@@ -23,6 +23,7 @@ import {stickyRow} from "../protyle/render/av/row";
 import {invalidateTrackedRanges} from "../protyle/util/trackedRange";
 import {getActiveMobileSecondaryEditor} from "./util/secondaryEditors";
 import {closeMobileBacklinkSheets} from "./util/backlinkPanels";
+import {closeAVCellEditor} from "../protyle/render/av/cellEditor";
 
 export const getCurrentEditor = () => {
     return getActiveMobileSecondaryEditor() || window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -105,6 +106,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
         fail();
         return;
     }
+    closeAVCellEditor();
     const avPanelElement = document.querySelector(".av__panel");
     if (avPanelElement && !avPanelElement.classList.contains("fn__none")) {
         avPanelElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));

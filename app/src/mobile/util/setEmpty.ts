@@ -8,8 +8,10 @@ import {setTitle} from "../../util/processTitle";
 import {clearMobileBarsScroll} from "./mobileBars";
 import {updateMobileTopBarLayout} from "./mobileTopBar";
 import {invalidateTrackedRanges} from "../../protyle/util/trackedRange";
+import {closeAVCellEditor} from "../../protyle/render/av/cellEditor";
 
 export const setEmpty = (app: App) => {
+    closeAVCellEditor();
     if (window.siyuan.mobile.editor?.protyle) {
         invalidateTrackedRanges(window.siyuan.mobile.editor.protyle);
     }

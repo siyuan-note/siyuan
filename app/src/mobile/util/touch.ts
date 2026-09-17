@@ -21,6 +21,7 @@ import {stripSemanticMarkersFromRangeText} from "../../protyle/util/inlineElemen
 import {getTouchAxis, shouldStartLongPressMultiSelect} from "./touchGesture";
 import {getMobileBlockSelectionElement} from "./blockSelection";
 import {updateMultiSelectToolbar} from "./multiSelectToolbar";
+import {closeAVCellEditor} from "../../protyle/render/av/cellEditor";
 import {
     getOpeningSidebar,
     getOpenSidebarReleaseAction,
@@ -100,6 +101,7 @@ const popSidebar = (side: MobileSidebarSide, render = true) => {
             return;
         }
     }
+    closeAVCellEditor();
     const otherSidebar = side === "left" ? "right" : "left";
     getSidebarElement(otherSidebar)?.style.removeProperty("transform");
     sidebarElement.style.transform = "translateX(0px)";

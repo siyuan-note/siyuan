@@ -58,6 +58,7 @@ import {
 } from "./richText";
 import {openAVRichTextEditor} from "./richTextEditor";
 import {getAVData} from "./virtualScroll";
+import {AV_CELL_EDITOR_CLOSE_EVENT} from "./cellEditor";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -649,6 +650,10 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     ${html}
     </div>`);
     const avMaskElement = document.querySelector(".av__mask");
+    avMaskElement.addEventListener(AV_CELL_EDITOR_CLOSE_EVENT, () => {
+        updateCellValueByInput(protyle, type, blockElement, cellElements, false);
+        avMaskElement.remove();
+    }, {once: true});
     if (options?.destroyCallback) {
         const parentElement = avMaskElement.parentElement;
         const observer = new MutationObserver(() => {
@@ -778,7 +783,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     });
 };
 
-const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: HTMLElement, cellElements: HTMLElement[]) => {
+const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: HTMLElement, cellElements: HTMLElement[],
+                                restoreFocus = true) => {
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     if (viewType === "table" && !cellElements[0].dataset.avId) {
         const rowElement = hasClosestByClassName(cellElements[0], "av__row");
@@ -817,7 +823,9 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
             document.querySelectorAll(".av__mask").forEach((item) => {
                 item.remove();
             });
-            focusBlock(blockElement);
+            if (restoreFocus) {
+                focusBlock(blockElement);
+            }
             return;
         }
         updateCellsValue(protyle, blockElement, type === "checkbox" ? {
@@ -832,7 +840,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
         addDragFill(cellElements[0]);
     }
     //  单元格编辑中 ctrl+p 光标定位
-    if (!document.querySelector(".b3-dialog")) {
+    if (restoreFocus && !document.querySelector(".b3-dialog")) {
         focusBlock(blockElement);
     }
     document.querySelectorAll(".av__mask").forEach((item) => {

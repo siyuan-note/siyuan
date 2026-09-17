@@ -744,13 +744,19 @@ test("list block submenu follows the base block entries", () => {
         "separator_numbering",
         "prependListItem",
         "appendListItem",
+        "listMindmap",
     ]);
+    assert.equal(getEntryCatalogNode("gutter.single.listBlock.listMindmap")?.simple, true);
+    assert.equal(getEntryCatalogNode("gutter.single.listBlock.listMindmap")?.type, "entry");
+    assert.equal(getEntryParentPath("gutter.single.listBlock.listMindmap"), "gutter.single.listBlock");
+    assert.equal(getEntryCatalogNode("gutter.multi.listBlock.listMindmap"), undefined);
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.customTaskStatus")?.simple, true);
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.customTaskStatus")?.type, "entry");
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.taskStatus"), undefined);
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.separator_taskStatus")?.type, "separator");
     const source = readFileSync(resolve(process.cwd(), "src/protyle/gutter/index.ts"), "utf8");
     const submenu = source.slice(source.indexOf("const genListBlockSubmenu"), source.indexOf("return submenu;", source.indexOf("const genListBlockSubmenu")));
+    assert.match(submenu, /if \(type === "NodeList"\) \{\s+submenu\.push\(\{\s+id: "listMindmap"/);
     const taskSource = readFileSync(resolve(process.cwd(), "src/protyle/wysiwyg/taskStatusDialog.ts"), "utf8");
     assert.deepEqual([...Array.from(taskSource.matchAll(/id: "([^"]+)"/g), match => match[1]),
         ...Array.from(submenu.matchAll(/id: "([^"]+)"/g), match => match[1])],

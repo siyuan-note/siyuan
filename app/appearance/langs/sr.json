@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Унесите текст",
+	"listMindmapToMindmap": "Пређи на приказ мапе ума",
+	"listMindmapToList": "Пређи на приказ листе",
+	"listMindmapRoot": "Тренутна листа",
+	"listMindmapChild": "Додај подређени чвор",
+	"listMindmapFit": "Уклопи у платно",
+	"listMindmapInvalid": "Није могуће прочитати подешавања мапе ума; изворни подаци су сачувани",
+	"listMindmapUnsupported": "Пређите на приказ листе да бисте уредили овај садржај",
+	"listMindmapStale": "Садржај је промењен; уредите га поново",
 	"fileTreeMoveKeepSortTip": "Opcija „Samo premesti dokumente“ zadržava trenutno pravilo ređanja, koje određuje položaj dokumenata.",
 	"agentSkillBinaryTip": "Бинарне датотеке се не могу уређивати као текст",
 	"agentSkillEncodingTip": "Ова датотека није кодирана као UTF-8 и не може се уређивати",

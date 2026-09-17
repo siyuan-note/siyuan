@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "輸入文字",
+	"listMindmapToMindmap": "切換為心智圖檢視",
+	"listMindmapToList": "切換為清單檢視",
+	"listMindmapRoot": "目前清單",
+	"listMindmapChild": "新增子節點",
+	"listMindmapFit": "符合畫布大小",
+	"listMindmapInvalid": "無法讀取心智圖設定，原始資料已保留",
+	"listMindmapUnsupported": "請切回清單檢視以編輯此內容",
+	"listMindmapStale": "內容已更新，請重新編輯",
 	"fileTreeMoveKeepSortTip": "「僅移動文件」將保留目前排序規則，文件位置由排序規則決定。",
 	"agentSkillBinaryTip": "二進位檔案不支援以文字編輯",
 	"agentSkillEncodingTip": "此檔案不是 UTF-8 編碼，無法編輯",

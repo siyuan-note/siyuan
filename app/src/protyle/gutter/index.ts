@@ -42,6 +42,7 @@ import {hideElements} from "../ui/hideElements";
 import {markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
+import {toggleListMindmap} from "../render/listMindmap";
 import {
     getContenteditableElement,
     getEmbedGutterOperationContext,
@@ -2189,6 +2190,18 @@ export class Gutter {
                         void appendListItem(protyle, nodeElement as HTMLElement, range);
                     }
                 });
+                if (type === "NodeList") {
+                    submenu.push({
+                        id: "listMindmap",
+                        icon: nodeElement.getAttribute("custom-list-mindmap") === "1" ? "iconList" : "iconMindmap",
+                        label: nodeElement.getAttribute("custom-list-mindmap") === "1" ?
+                            window.siyuan.languages.listMindmapToList : window.siyuan.languages.listMindmapToMindmap,
+                        click() {
+                            hideElements(["select"], protyle);
+                            void toggleListMindmap(protyle, nodeElement as HTMLElement);
+                        },
+                    });
+                }
                 return submenu;
             };
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_listBlock", type: "separator"}).element);
@@ -3731,6 +3744,9 @@ export class Gutter {
         }
         let html = "";
         let nodeElement = selectedElement || element;
+        const mindmapElement = nodeElement.getAttribute("data-type") === "NodeList" &&
+            nodeElement.getAttribute("custom-list-mindmap") === "1" ?
+            nodeElement.querySelector(":scope > .list-mindmap") : null;
         const tabsHeader = !isMultiSelect && nodeElement.getAttribute("data-type") === "NodeTabs" ?
             nodeElement.querySelector(":scope > .tabs-header") : null;
         if (tabsHeader) {
@@ -3776,7 +3792,8 @@ export class Gutter {
                 }
                 if (index === 0) {
                     // 不单独显示，要不然在块的间隔中，gutter 会跳来跳去的
-                    if (!isMultiSelect && ["NodeBlockquote", "NodeList", "NodeCallout", "NodeSuperBlock"].includes(type)) {
+                    if (!isMultiSelect && !mindmapElement &&
+                        ["NodeBlockquote", "NodeList", "NodeCallout", "NodeSuperBlock"].includes(type)) {
                         if (target && type === "NodeCallout") {
                             // Callout 标题需显示
                             const calloutInfoElement = hasTopClosestByClassName(target, "callout-info");
@@ -3790,7 +3807,7 @@ export class Gutter {
                         }
                     }
 
-                    let topElement = selectedElement || (tabsHeader ? nodeElement : getTopAloneElement(nodeElement));
+                    let topElement = selectedElement || (tabsHeader || mindmapElement ? nodeElement : getTopAloneElement(nodeElement));
                     if (embedContext && !embedContext.boundaryElement.contains(topElement)) {
                         // 单独查询列表项时，渲染器生成的无 ID 列表包装节点不属于可操作边界。
                         topElement = embedContext.targetElement || nodeElement;
@@ -3965,10 +3982,13 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 titleElement?.getBoundingClientRect().bottom,
             );
         }
-        let rect = element.getBoundingClientRect();
+        // 脑图中的原始列表项已隐藏，使用可见面板定位列表块标。
+        let rect = (mindmapElement || element).getBoundingClientRect();
         let marginHeight = 0;
         const isRTL = window.siyuan.config.editor.rtl || getComputedStyle(element).direction === "rtl";
-        if (listItem && !isRTL) {
+        if (mindmapElement) {
+            space = 0;
+        } else if (listItem && !isRTL) {
             rect = listItem.firstElementChild.getBoundingClientRect();
             space = 0;
         } else if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {

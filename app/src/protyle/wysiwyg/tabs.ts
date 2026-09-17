@@ -11,6 +11,7 @@ import {avRender} from "../render/av/render";
 import {isHiddenTabContent} from "../render/tabsVisibility";
 import {queueTransaction} from "../util/transactionQueue";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
+import {remapListMindmapIDs} from "../render/listMindmap/model";
 import {copySubMenu} from "../../menus/commonMenuItem";
 import {isTaskListMarker, nextTaskListMarker} from "./taskListMarker";
 import {hideElements} from "../ui/hideElements";
@@ -174,6 +175,7 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
                 block.setAttribute("updated", id.substring(0, 14));
             });
             remapTabsDOMIDs(copy, ids);
+            remapListMindmapIDs(copy, ids);
             changeTabs(protyle, [tabs], () => {
                 item.after(copy);
                 tabs.setAttribute("tabs-active-id", copy.dataset.nodeId);

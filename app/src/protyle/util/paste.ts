@@ -28,6 +28,7 @@ import {captureAVAssetUploadHandler} from "../render/av/asset";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {remapTabsDOMIDs, wrapPastedTabItems} from "./tabsCopy";
+import {remapListMindmapIDs} from "../render/listMindmap/model";
 import {getTabItems, getTabTitle} from "../render/tabsRender";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
@@ -1114,6 +1115,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 clearBlockElement(e, isCutPaste); // 剪切粘贴保留引用角标
             });
             remapTabsDOMIDs(tempElement, pastedIDs);
+            remapListMindmapIDs(tempElement, pastedIDs);
             const updated = dayjs().format("YYYYMMDDHHmmss");
             pastedBlockElements.forEach((e) => {
                 e.setAttribute("updated", updated);

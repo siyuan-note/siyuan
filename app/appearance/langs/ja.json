@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "テキストを入力",
+	"listMindmapToMindmap": "マインドマップ表示に切り替え",
+	"listMindmapToList": "リスト表示に切り替え",
+	"listMindmapRoot": "現在のリスト",
+	"listMindmapChild": "子ノードを追加",
+	"listMindmapFit": "キャンバスに合わせる",
+	"listMindmapInvalid": "マインドマップの設定を読み込めません。元のデータは保持されています",
+	"listMindmapUnsupported": "この内容を編集するにはリスト表示に切り替えてください",
+	"listMindmapStale": "内容が更新されました。もう一度編集してください",
 	"fileTreeMoveKeepSortTip": "「ドキュメントの移動のみ」では現在の並び替えルールが維持され、ドキュメントの位置はそのルールによって決まります。",
 	"agentSkillBinaryTip": "バイナリファイルはテキストとして編集できません",
 	"agentSkillEncodingTip": "このファイルは UTF-8 形式ではないため編集できません",

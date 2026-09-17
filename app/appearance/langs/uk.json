@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Введіть текст",
+	"listMindmapToMindmap": "Перемкнути на мапу думок",
+	"listMindmapToList": "Перемкнути на список",
+	"listMindmapRoot": "Поточний список",
+	"listMindmapChild": "Додати дочірній вузол",
+	"listMindmapFit": "Вписати в полотно",
+	"listMindmapInvalid": "Не вдалося прочитати налаштування мапи думок; початкові дані збережено",
+	"listMindmapUnsupported": "Перемкніться на список, щоб редагувати цей вміст",
+	"listMindmapStale": "Вміст змінився; відредагуйте його знову",
 	"fileTreeMoveKeepSortTip": "«Лише перемістити документи» зберігає поточне правило сортування, яке визначає розташування документів.",
 	"agentSkillBinaryTip": "Двійкові файли не можна редагувати як текст",
 	"agentSkillEncodingTip": "Цей файл має кодування, відмінне від UTF-8, і його неможливо редагувати",

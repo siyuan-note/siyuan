@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Digite o texto",
+	"listMindmapToMindmap": "Alternar para a visualização de mapa mental",
+	"listMindmapToList": "Alternar para a visualização de lista",
+	"listMindmapRoot": "Lista atual",
+	"listMindmapChild": "Adicionar nó filho",
+	"listMindmapFit": "Ajustar à área de desenho",
+	"listMindmapInvalid": "Não foi possível ler as configurações do mapa mental; os dados originais foram preservados",
+	"listMindmapUnsupported": "Alterne para a visualização de lista para editar este conteúdo",
+	"listMindmapStale": "O conteúdo foi alterado; edite-o novamente",
 	"fileTreeMoveKeepSortTip": "“Apenas mover documentos” mantém a regra de ordenação atual, que determina a posição dos documentos.",
 	"agentSkillBinaryTip": "Arquivos binários não podem ser editados como texto",
 	"agentSkillEncodingTip": "Este arquivo não está codificado em UTF-8 e não pode ser editado",

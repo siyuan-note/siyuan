@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "텍스트 입력",
+	"listMindmapToMindmap": "마인드맵 보기로 전환",
+	"listMindmapToList": "목록 보기로 전환",
+	"listMindmapRoot": "현재 목록",
+	"listMindmapChild": "하위 노드 추가",
+	"listMindmapFit": "캔버스에 맞추기",
+	"listMindmapInvalid": "마인드맵 설정을 읽을 수 없습니다. 원본 데이터는 보존되었습니다",
+	"listMindmapUnsupported": "이 내용을 편집하려면 목록 보기로 전환하세요",
+	"listMindmapStale": "내용이 변경되었습니다. 다시 편집하세요",
 	"fileTreeMoveKeepSortTip": "‘문서만 이동’을 선택하면 현재 정렬 규칙이 유지되며, 문서의 위치는 해당 규칙에 따라 결정됩니다.",
 	"agentSkillBinaryTip": "바이너리 파일은 텍스트로 편집할 수 없습니다",
 	"agentSkillEncodingTip": "이 파일은 UTF-8 인코딩이 아니므로 편집할 수 없습니다",

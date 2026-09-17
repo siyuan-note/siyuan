@@ -183,6 +183,7 @@ import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard, prepareExternalClipboardHTML, prepareRichClipboardHTML} from "../util/richClipboard";
 import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
+import {cleanListMindmapHTML} from "../render/listMindmap/model";
 import {
     getSemanticInlineVisibleText,
     getTextWithoutSemanticMarkers,
@@ -1069,7 +1070,7 @@ export class WYSIWYG {
                 html = visibleTabsSelectionHTML(html);
                 textPlain = "";
             }
-            html = sanitizeViewFoldHTML(html);
+            html = cleanListMindmapHTML(sanitizeViewFoldHTML(html));
             if (protyle.disabled) {
                 html = getEnableHTML(html);
             }
@@ -3478,7 +3479,7 @@ export class WYSIWYG {
             }
 
             if (!isInCodeBlock) {
-                html = sanitizeViewFoldHTML(html);
+                html = cleanListMindmapHTML(sanitizeViewFoldHTML(html));
                 enableLuteMarkdownSyntax(protyle);
                 const clipboardBlockDOM = selectAVElement ? html :
                     transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy");

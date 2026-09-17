@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Enter text",
+	"listMindmapToMindmap": "Switch to mind map view",
+	"listMindmapToList": "Switch to list view",
+	"listMindmapRoot": "Current list",
+	"listMindmapChild": "Add child node",
+	"listMindmapFit": "Fit to canvas",
+	"listMindmapInvalid": "Cannot read mind map settings; the original data has been preserved",
+	"listMindmapUnsupported": "Switch to list view to edit this content",
+	"listMindmapStale": "The content has changed; please edit it again",
 	"fileTreeMoveKeepSortTip": "“Move documents only” keeps the current sort rule, which determines the documents’ positions.",
 	"agentSkillBinaryTip": "Binary files cannot be edited as text",
 	"agentSkillEncodingTip": "This file is not UTF-8 encoded and cannot be edited",

@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Metin girin",
+	"listMindmapToMindmap": "Zihin haritası görünümüne geç",
+	"listMindmapToList": "Liste görünümüne geç",
+	"listMindmapRoot": "Geçerli liste",
+	"listMindmapChild": "Alt düğüm ekle",
+	"listMindmapFit": "Tuvale sığdır",
+	"listMindmapInvalid": "Zihin haritası ayarları okunamadı; özgün veriler korundu",
+	"listMindmapUnsupported": "Bu içeriği düzenlemek için liste görünümüne geçin",
+	"listMindmapStale": "İçerik değişti; lütfen yeniden düzenleyin",
 	"fileTreeMoveKeepSortTip": "“Yalnızca belgeleri taşı” geçerli sıralama kuralını korur; belgelerin konumlarını bu kural belirler.",
 	"agentSkillBinaryTip": "İkili dosyalar metin olarak düzenlenemez",
 	"agentSkillEncodingTip": "Bu dosya UTF-8 kodlamasında değil ve düzenlenemez",

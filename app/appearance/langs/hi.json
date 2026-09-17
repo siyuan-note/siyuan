@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "पाठ दर्ज करें",
+	"listMindmapToMindmap": "माइंड मैप दृश्य पर जाएँ",
+	"listMindmapToList": "सूची दृश्य पर जाएँ",
+	"listMindmapRoot": "वर्तमान सूची",
+	"listMindmapChild": "उप-नोड जोड़ें",
+	"listMindmapFit": "कैनवास में समायोजित करें",
+	"listMindmapInvalid": "माइंड मैप सेटिंग पढ़ी नहीं जा सकीं; मूल डेटा सुरक्षित रखा गया है",
+	"listMindmapUnsupported": "इस सामग्री को संपादित करने के लिए सूची दृश्य पर जाएँ",
+	"listMindmapStale": "सामग्री बदल गई है; कृपया इसे फिर से संपादित करें",
 	"fileTreeMoveKeepSortTip": "“केवल दस्तावेज़ स्थानांतरित करें” वर्तमान क्रमबद्ध करने का नियम बनाए रखता है, जो दस्तावेज़ों की स्थिति निर्धारित करता है।",
 	"agentSkillBinaryTip": "बाइनरी फ़ाइलों को टेक्स्ट के रूप में संपादित नहीं किया जा सकता",
 	"agentSkillEncodingTip": "यह फ़ाइल UTF-8 में एन्कोड नहीं है और इसे संपादित नहीं किया जा सकता",

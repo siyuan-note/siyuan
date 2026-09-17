@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "输入文字",
+	"listMindmapToMindmap": "切换为脑图视图",
+	"listMindmapToList": "切换为列表视图",
+	"listMindmapRoot": "当前列表",
+	"listMindmapChild": "添加子节点",
+	"listMindmapFit": "适应画布",
+	"listMindmapInvalid": "脑图配置无法读取，原数据已保留",
+	"listMindmapUnsupported": "此内容请切回列表编辑",
+	"listMindmapStale": "内容已更新，请重新编辑",
 	"fileTreeMoveKeepSortTip": "「仅移动文档」将保留当前排序规则，文档位置由排序规则决定。",
 	"agentSkillBinaryTip": "二进制文件不支持作为文本编辑",
 	"agentSkillEncodingTip": "此文件不是 UTF-8 编码，无法编辑",

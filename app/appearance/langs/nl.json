@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Voer tekst in",
+	"listMindmapToMindmap": "Naar mindmapweergave schakelen",
+	"listMindmapToList": "Naar lijstweergave schakelen",
+	"listMindmapRoot": "Huidige lijst",
+	"listMindmapChild": "Onderliggende knoop toevoegen",
+	"listMindmapFit": "Aan canvas aanpassen",
+	"listMindmapInvalid": "Mindmapinstellingen kunnen niet worden gelezen; de oorspronkelijke gegevens zijn behouden",
+	"listMindmapUnsupported": "Schakel naar de lijstweergave om deze inhoud te bewerken",
+	"listMindmapStale": "De inhoud is gewijzigd; bewerk deze opnieuw",
 	"fileTreeMoveKeepSortTip": "‘Alleen documenten verplaatsen’ behoudt de huidige sorteerregel, die de posities van de documenten bepaalt.",
 	"agentSkillBinaryTip": "Binaire bestanden kunnen niet als tekst worden bewerkt",
 	"agentSkillEncodingTip": "Dit bestand is niet UTF-8-gecodeerd en kan niet worden bewerkt",

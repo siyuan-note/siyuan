@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "הזן טקסט",
+	"listMindmapToMindmap": "מעבר לתצוגת מפת חשיבה",
+	"listMindmapToList": "מעבר לתצוגת רשימה",
+	"listMindmapRoot": "הרשימה הנוכחית",
+	"listMindmapChild": "הוספת צומת בן",
+	"listMindmapFit": "התאמה למשטח הציור",
+	"listMindmapInvalid": "לא ניתן לקרוא את הגדרות מפת החשיבה; הנתונים המקוריים נשמרו",
+	"listMindmapUnsupported": "יש לעבור לתצוגת רשימה כדי לערוך תוכן זה",
+	"listMindmapStale": "התוכן השתנה; יש לערוך אותו מחדש",
 	"fileTreeMoveKeepSortTip": "האפשרות „העברת מסמכים בלבד” שומרת על כלל המיון הנוכחי, הקובע את מיקומי המסמכים.",
 	"agentSkillBinaryTip": "לא ניתן לערוך קבצים בינאריים כטקסט",
 	"agentSkillEncodingTip": "הקובץ אינו מקודד ב-UTF-8 ולא ניתן לערוך אותו",

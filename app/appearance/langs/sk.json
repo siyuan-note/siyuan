@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Zadajte text",
+	"listMindmapToMindmap": "Prepnúť na zobrazenie myšlienkovej mapy",
+	"listMindmapToList": "Prepnúť na zobrazenie zoznamu",
+	"listMindmapRoot": "Aktuálny zoznam",
+	"listMindmapChild": "Pridať podradený uzol",
+	"listMindmapFit": "Prispôsobiť plátnu",
+	"listMindmapInvalid": "Nastavenia myšlienkovej mapy sa nedajú načítať; pôvodné údaje boli zachované",
+	"listMindmapUnsupported": "Ak chcete upraviť tento obsah, prepnite na zobrazenie zoznamu",
+	"listMindmapStale": "Obsah sa zmenil; upravte ho znova",
 	"fileTreeMoveKeepSortTip": "Možnosť „Iba presunúť dokumenty“ zachová aktuálne pravidlo zoradenia, ktoré určuje pozície dokumentov.",
 	"agentSkillBinaryTip": "Binárne súbory nemožno upravovať ako text",
 	"agentSkillEncodingTip": "Tento súbor nemá kódovanie UTF-8 a nemožno ho upravovať",

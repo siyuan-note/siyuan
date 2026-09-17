@@ -1,4 +1,13 @@
 {
+	"listMindmapPlaceholder": "Inserisci testo",
+	"listMindmapToMindmap": "Passa alla vista mappa mentale",
+	"listMindmapToList": "Passa alla vista elenco",
+	"listMindmapRoot": "Elenco attuale",
+	"listMindmapChild": "Aggiungi nodo figlio",
+	"listMindmapFit": "Adatta all’area di disegno",
+	"listMindmapInvalid": "Impossibile leggere le impostazioni della mappa mentale; i dati originali sono stati conservati",
+	"listMindmapUnsupported": "Passa alla vista elenco per modificare questo contenuto",
+	"listMindmapStale": "Il contenuto è cambiato; modificalo di nuovo",
 	"fileTreeMoveKeepSortTip": "«Sposta solo i documenti» mantiene la regola di ordinamento attuale, che determina la posizione dei documenti.",
 	"agentSkillBinaryTip": "I file binari non possono essere modificati come testo",
 	"agentSkillEncodingTip": "Questo file non è codificato in UTF-8 e non può essere modificato",

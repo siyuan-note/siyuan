@@ -38,13 +38,14 @@ test("sticky views follow visible breadcrumbs and return to the viewport top whe
         getBoundingClientRect: () => ({bottom: 600}),
     };
     let hidden = false;
+    let breadcrumbBottom = 72;
     const scroll = {
         scrollTop: 200,
         getBoundingClientRect: () => ({top: 24, bottom: 800}),
         previousElementSibling: {
             classList: {contains: (name: string) => name === "protyle-breadcrumb"},
             getAttribute: () => hidden ? "true" : null,
-            getBoundingClientRect: () => ({bottom: 72}),
+            getBoundingClientRect: () => ({bottom: breadcrumbBottom}),
         },
     };
     exports.stickyRow(block, scroll, "top");
@@ -65,6 +66,20 @@ test("sticky views follow visible breadcrumbs and return to the viewport top whe
     hidden = false;
     exports.stickyRow(block, scroll, "top");
     assert.equal(views.style.top, "72px");
+    for (const topbarHeight of [48, 0]) {
+        let previousTop: number | undefined;
+        for (const offset of [46, 47, 48, 47, 46]) {
+            hidden = offset === 48;
+            breadcrumbBottom = 24 + (topbarHeight + 42) * (1 - offset / 48);
+            exports.stickyRow(block, scroll, "top");
+            const top = parseFloat(views.style.top);
+            assert.equal(top, Math.round(breadcrumbBottom));
+            if (previousTop !== undefined) {
+                assert.ok(Math.abs(top - previousTop) <= 2);
+            }
+            previousTop = top;
+        }
+    }
 });
 
 test("backlink scrolling clears fixed rows and their spacers without calculating window positions", () => {

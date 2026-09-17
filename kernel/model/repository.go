@@ -1553,6 +1553,15 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 			err = fmt.Errorf(Conf.Language(84), Conf.Language(154))
 			return
 		}
+		if conf.ProviderSiYuan == Conf.Sync.Provider && errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
+			u := Conf.GetUser()
+			msg := fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
+			if 2 == u.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
+			}
+			err = fmt.Errorf(Conf.Language(84), msg)
+			return
+		}
 		handleCloudError(err)
 		err = fmt.Errorf(Conf.Language(84), formatRepoErrorMsg(err))
 		return

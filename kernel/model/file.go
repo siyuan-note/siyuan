@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -1695,6 +1696,10 @@ func orderMoveDocPaths(fromPaths []string, pathsBoxes map[string]*Box) (ret []st
 }
 
 func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err error) {
+	return moveDocs(fromPaths, toBoxID, toPath, callback, true)
+}
+
+func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByConf bool) (err error) {
 	toBox := Conf.Box(toBoxID)
 	if nil == toBox {
 		err = errors.New(Conf.Language(0))
@@ -1774,6 +1779,20 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 	movedDocs := make([]moveDocResult, 0, len(fromPaths))
 	defer func() {
 		if 0 < len(movedDocs) {
+			// 部分移动失败时也保存已完成文档的整组顺序，再通知前端刷新。
+			if placeByConf {
+				ids := make([]string, 0, len(movedDocs))
+				for _, moved := range movedDocs {
+					ids = append(ids, util.GetTreeID(moved.NewPath))
+				}
+				position := "after"
+				if Conf.FileTree.CreateDocAtTop != nil && *Conf.FileTree.CreateDocAtTop {
+					position = "before"
+				}
+				if sortErr := toBox.placeDocsInSiblingOrder(strings.TrimSuffix(toPath, ".sy"), ids, "", position); sortErr != nil {
+					err = errors.Join(err, sortErr)
+				}
+			}
 			evt := util.NewCmdResult("moveDocs", 0, util.PushModeBroadcast)
 			evt.Data = map[string]any{"moves": movedDocs}
 			evt.Callback = callback
@@ -3081,6 +3100,10 @@ func (box *Box) addMinSort(parentPath, id string) {
 }
 
 func (box *Box) placeDocInSiblingOrder(parentPath, id, targetID, position string) error {
+	return box.placeDocsInSiblingOrder(parentPath, []string{id}, targetID, position)
+}
+
+func (box *Box) placeDocsInSiblingOrder(parentPath string, ids []string, targetID, position string) error {
 	fileTreeSortLock.Lock()
 	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
 	if err := os.MkdirAll(confDir, 0755); nil != err {
@@ -3098,9 +3121,13 @@ func (box *Box) placeDocInSiblingOrder(parentPath, id, targetID, position string
 		fileTreeSortLock.Unlock()
 		return err
 	}
-	orderedIDs := make([]string, 0, len(currentIDs)+1)
+	orderedIDs := make([]string, 0, len(currentIDs)+len(ids))
+	movedIDs := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		movedIDs[id] = true
+	}
 	for _, currentID := range currentIDs {
-		if currentID != id {
+		if !movedIDs[currentID] {
 			orderedIDs = append(orderedIDs, currentID)
 		}
 	}
@@ -3124,9 +3151,7 @@ func (box *Box) placeDocInSiblingOrder(parentPath, id, targetID, position string
 			return fmt.Errorf("sort target document [%s] not found", targetID)
 		}
 	}
-	orderedIDs = append(orderedIDs, "")
-	copy(orderedIDs[insertIndex+1:], orderedIDs[insertIndex:])
-	orderedIDs[insertIndex] = id
+	orderedIDs = slices.Insert(orderedIDs, insertIndex, ids...)
 	sortIDs := make(map[string]int, len(orderedIDs))
 	for i, orderedID := range orderedIDs {
 		sortIDs[orderedID] = i + 1

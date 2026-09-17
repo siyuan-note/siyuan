@@ -1266,7 +1266,11 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
     });
 };
 
-export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.parent) => {
+export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout?.parent) => {
+    // 启动期间的窗口尺寸变化可能早于中央布局初始化。
+    if (!layout) {
+        return;
+    }
     const sizeProperty = layout.direction === "lr" ? "width" : "height";
     if (layout.element.closest(".layout__center") &&
         layout.children.some((item) => item.element.style[sizeProperty].endsWith("px"))) {

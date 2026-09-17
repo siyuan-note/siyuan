@@ -125,6 +125,7 @@ export class Hint {
     private createTargetSession?: TCreateTargetSession;
     private emojiPanel?: EmojiPanelController;
     private emojiBrowseMode = false;
+    private loadingAnimation?: Animation;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -177,6 +178,7 @@ export class Hint {
     }
 
     public destroy() {
+        this.cancelLoadingAnimation();
         this.destroyEmojiPanel();
     }
 
@@ -344,7 +346,7 @@ export class Hint {
                 if (createTarget.result !== undefined) {
                     this.genHTML(hintSlash(key, protyle, createTarget.result), protyle, true, "hint");
                 } else {
-                    this.genLoading(protyle);
+                    this.genLoading(protyle, 200);
                     createTarget.promise.then((isCurrentSubDoc) => {
                         if (createTarget.isCurrent()) {
                             this.genHTML(hintSlash(key, protyle, isCurrentSubDoc), protyle, true, "hint");
@@ -436,8 +438,17 @@ export class Hint {
         this.element.style.top = `${position.top}px`;
     }
 
-    public genLoading(protyle: IProtyle) {
+    private cancelLoadingAnimation() {
+        this.loadingAnimation?.cancel();
+        this.loadingAnimation = undefined;
+    }
+
+    public genLoading(protyle: IProtyle, delay = 0) {
+        const delayPanel = this.loadingAnimation?.playState === "running" &&
+            (this.loadingAnimation.effect as KeyframeEffect)?.target === this.element;
+        this.cancelLoadingAnimation();
         this.destroyEmojiPanel();
+        const wasHidden = this.element.classList.contains("fn__none");
         if (this.element.classList.contains("fn__none")) {
             this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><img width="64px" src="/stage/loading-pure.svg"></div>';
             this.element.classList.remove("fn__none");
@@ -462,6 +473,14 @@ export class Hint {
             }
         } else if (!this.element.querySelector(".fn__loading")) {
             this.element.insertAdjacentHTML("beforeend", '<div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div>');
+        }
+        if (delay > 0) {
+            // 首次打开时延迟显示整个占位面板，更新候选项时只延迟显示加载遮罩
+            const loadingElement = wasHidden || delayPanel ? this.element : this.element.querySelector(".fn__loading");
+            this.loadingAnimation = loadingElement.animate([
+                {visibility: "hidden"},
+                {visibility: "hidden"},
+            ], {duration: delay});
         }
     }
 
@@ -531,6 +550,7 @@ export class Hint {
     }
 
     public genHTML(data: IHintData[], protyle: IProtyle, hide = false, source: THintSource) {
+        this.cancelLoadingAnimation();
         this.source = source;
         this.destroyEmojiPanel();
         if (data.length === 0) {
@@ -668,6 +688,7 @@ ${genHintItemHTML(item)}
     }
 
     private genEmojiHTML(protyle: IProtyle, value = "") {
+        this.cancelLoadingAnimation();
         if (value && !this.enableEmoji) {
             return;
         }

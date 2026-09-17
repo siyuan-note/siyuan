@@ -4,6 +4,47 @@
 
 需要 Python 3.11 或更新版本。安装包检查不需要更改打包流程，也不需要从其他机器带回基准文件。EXE、DMG、AppImage、DEB、RPM 等格式还需要 7-Zip，可用 `--sevenzip` 指定路径。
 
+## 常用命令
+
+以下命令均在官方 Windows 构建机器的仓库根目录 `D:\88250\siyuan` 执行。执行前完成各仓库版本号、更新日志等发布准备，停止前端开发构建，并将 WSL 仓库同步到与 Windows 相同的提交和构建输入。Windows 签名需插好 YubiKey，按系统提示输入 PIN。
+
+先查看打包计划，不会实际构建：
+
+```powershell
+python -X utf8 scripts/build-release.py
+```
+
+全部平台打包，包括 Windows、WSL Linux、Android 和鸿蒙：
+
+```powershell
+python -X utf8 scripts/build-release.py --execute
+```
+
+首次使用建议分平台执行，按需要选择下面的命令：
+
+```powershell
+python -X utf8 scripts/build-release.py --platforms windows --execute
+python -X utf8 scripts/build-release.py --platforms linux --execute
+python -X utf8 scripts/build-release.py --platforms android --execute
+python -X utf8 scripts/build-release.py --platforms harmony --execute
+```
+
+Windows 额外生成 Appx 包：
+
+```powershell
+python -X utf8 scripts/build-release.py --platforms windows --appx --execute
+```
+
+产物验证通过后收集到桌面 `siyuan` 文件夹，同时生成 `SHA256SUMS.txt`。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.4.apk`。已有同名安装包不会覆盖。
+
+单独验证桌面 `siyuan` 文件夹中的安装包，将 `3.8.4` 替换为本次发布版本：
+
+```powershell
+python -X utf8 scripts/verify-release.py check --version 3.8.4
+```
+
+WSL 默认用户为 `d`，仓库路径为 `/home/d/88250/siyuan`。完整构建流程尚未实际运行，首次使用请分平台确认工具链与签名环境；具体参数和检查范围见下文。
+
 ## 直接检查安装包
 
 把安装包放入桌面 `siyuan` 文件夹，在仓库根目录执行：

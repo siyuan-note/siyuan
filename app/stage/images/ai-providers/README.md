@@ -10,4 +10,6 @@ The `zhipu.svg` file is extracted from the 24-by-24 `pure-logo.svg` symbol bundl
 
 The `volcengine.svg` file comes from [theSVG](https://github.com/glincker/thesvg/blob/aa0605996b4ad4fdda98502f84021b3c3a64847d/public/icons/volcengine/default.svg), distributed under the MIT license. The depicted logo remains a trademark of Volcengine.
 
+The `api-route.svg` file comes from the official [API Route](https://www.api-route.com/) logo asset and normalizes its path geometry to the standard 24-by-24 view box.
+
 Groq uses a generated initial avatar because its [trademark policy](https://groq.com/trademark-policy) limits nominative fair use to its word marks and excludes logos. Custom providers also use generated initial avatars.

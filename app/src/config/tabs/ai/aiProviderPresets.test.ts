@@ -26,4 +26,14 @@ describe("AI provider presets", () => {
         assert.equal(getResponsesSupport("https://open.bigmodel.cn/api/paas/v4"), "unsupported");
         assert.equal(getResponsesSupport("https://example.com/v1"), "experimental");
     });
+
+    it("recognizes API Route aggregator preset", () => {
+        const preset = PROVIDER_PRESETS.find((item) => item.id === "api-route");
+        assert.equal(preset?.baseURL, "https://global.api-route.com/v1");
+        assert.equal(preset?.category, "aggregator");
+        assert.equal(preset?.responsesSupport, "supported");
+        assert.equal(findProviderPreset("https://global.api-route.com/v1/")?.id, "api-route");
+        assert.equal(getDefaultProviderProtocol("api-route"), "openai");
+        assert.equal(getResponsesSupport("https://global.api-route.com/v1"), "supported");
+    });
 });

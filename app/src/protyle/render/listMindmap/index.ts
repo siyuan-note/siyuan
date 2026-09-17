@@ -75,6 +75,15 @@ class ListMindmapController {
         this.host = document.createElement("div");
         this.host.className = "list-mindmap";
         this.host.contentEditable = "false";
+        this.host.addEventListener("pointermove", event => {
+            if (event.pointerType !== "mouse" || event.buttons || !owner.options.render.gutter ||
+                !owner.gutter || this.host.classList.contains("fullscreen") ||
+                (event.target as Element).closest(".list-mindmap__editor, .protyle-toolbar, .protyle-util")) {
+                return;
+            }
+            // 脑图内部的鼠标事件不冒泡到编辑器，块标仍定位到原列表块。
+            owner.gutter.render(owner, list, this.host);
+        });
         this.host.addEventListener("pointerdown", event => {
             const target = event.target as HTMLElement;
             // 脑图阻止事件冒泡，主动复用公共收起逻辑，并保留内嵌编辑器浮层的交互。

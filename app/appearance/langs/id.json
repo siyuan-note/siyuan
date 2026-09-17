@@ -1,4 +1,7 @@
 {
+	"mobileKernelReconnecting": "Menghubungkan kembali...",
+	"mobileKernelReconnectPrompt": "Koneksi ke kernel terputus sementara. SiYuan akan mencoba menghubungkan kembali secara otomatis. Saat kembali dari latar belakang, pemulihan koneksi mungkin memerlukan beberapa detik. Harap tunggu. Jendela ini akan tertutup secara otomatis setelah koneksi pulih. Jika koneksi belum pulih setelah menunggu lama, coba buka kembali SiYuan.",
+	"backlinkGlobalSort": "Urutan referensi global",
 	"backlinkDocumentSort": "Urutan dokumen",
 	"backlinkBlockSort": "Urutan referensi dalam dokumen",
 	"backlinkBodyOrder": "Urutan dalam dokumen (bawaan)",

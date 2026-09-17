@@ -1,0 +1,188 @@
+// SiYuan - From thought to insight, with agents
+// Copyright (c) 2020-present, b3log.org
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+package model
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+
+	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+func setupAppearancePackagesTest(t *testing.T) {
+	t.Helper()
+	oldAppearance, oldThemes, oldIcons, oldMode, oldConf := util.AppearancePath, util.ThemesPath, util.IconsPath, util.Mode, Conf
+	oldDataDir := util.DataDir
+	oldConfDir := util.ConfDir
+	oldRepoDir := util.RepoDir
+	t.Cleanup(func() {
+		util.AppearancePath, util.ThemesPath, util.IconsPath, util.Mode, Conf = oldAppearance, oldThemes, oldIcons, oldMode, oldConf
+		util.DataDir = oldDataDir
+		util.ConfDir = oldConfDir
+		util.RepoDir = oldRepoDir
+	})
+	root := t.TempDir()
+	util.AppearancePath = filepath.Join(root, "conf", "appearance")
+	util.ConfDir = filepath.Join(root, "conf")
+	util.RepoDir = filepath.Join(root, "repo")
+	util.DataDir = filepath.Join(root, "data")
+	util.ThemesPath, util.IconsPath = filepath.Join(root, "data", "themes"), filepath.Join(root, "data", "icons")
+	util.Mode = "prod"
+	Conf = NewAppConf()
+	Conf.Appearance = conf.NewAppearance()
+	for _, name := range []string{"daylight", "midnight", "custom"} {
+		writeAppearanceTestPackage(t, "themes", name, "1.0.0", "")
+	}
+	for _, name := range []string{"litheness", "custom"} {
+		writeAppearanceTestPackage(t, "icons", name, "1.0.0", "")
+	}
+}
+
+func writeAppearanceTestFile(t *testing.T, path, content string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func writeAppearanceTestPackage(t *testing.T, kind, name, version, minVersion string) {
+	t.Helper()
+	manifest, entry := "theme.json", "theme.css"
+	if kind == "icons" {
+		manifest, entry = "icon.json", "icon.js"
+	}
+	data, err := json.Marshal(map[string]any{
+		"name": name, "version": version, "minAppVersion": minVersion, "modes": []string{"light", "dark"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := util.AppearancePackagePath(kind, name)
+	writeAppearanceTestFile(t, filepath.Join(root, manifest), string(data))
+	writeAppearanceTestFile(t, filepath.Join(root, entry), "resource "+name)
+}
+
+func TestLoadAppearancePackagesPreservesBuiltInsAndChecksVersion(t *testing.T) {
+	setupAppearancePackagesTest(t)
+	writeAppearanceTestPackage(t, "themes", "future", "2.0.0", "999.0.0")
+	writeAppearanceTestPackage(t, "icons", "future", "2.0.0", "999.0.0")
+	writeAppearanceTestFile(t, filepath.Join(util.ThemesPath, "daylight", "theme.json"), `{"name":"daylight","version":"99.0.0"}`)
+	writeAppearanceTestFile(t, filepath.Join(util.IconsPath, "litheness", "icon.json"), `{"name":"litheness","version":"99.0.0"}`)
+	Conf.Appearance.ThemeLight, Conf.Appearance.Icon = "custom", "custom"
+	LoadThemes()
+	LoadIcons()
+	if !containTheme("daylight", Conf.Appearance.LightThemes) || !containTheme("midnight", Conf.Appearance.DarkThemes) ||
+		!containIcon("litheness", Conf.Appearance.Icons) {
+		t.Fatal("built-in packages were not retained")
+	}
+	if !containTheme("custom", Conf.Appearance.LightThemes) || !containIcon("custom", Conf.Appearance.Icons) {
+		t.Fatal("data packages were not loaded")
+	}
+	if containTheme("future", Conf.Appearance.LightThemes) || containIcon("future", Conf.Appearance.Icons) {
+		t.Fatal("packages requiring a newer application were loaded")
+	}
+	if Conf.Appearance.ThemeLight != "custom" || Conf.Appearance.Icon != "custom" ||
+		Conf.Appearance.ThemeVer != "1.0.0" || Conf.Appearance.IconVer != "1.0.0" {
+		t.Fatal("local selection or package version changed unexpectedly")
+	}
+	if err := os.Remove(filepath.Join(util.IconsPath, "custom", "icon.js")); err != nil {
+		t.Fatal(err)
+	}
+	LoadIcons()
+	if containIcon("custom", Conf.Appearance.Icons) {
+		t.Fatal("incomplete icon package was loaded")
+	}
+}
+
+func TestExportAppearancePackagesUsesDataAndCopiesResources(t *testing.T) {
+	setupAppearancePackagesTest(t)
+	writeAppearanceTestFile(t, filepath.Join(util.ThemesPath, "custom", "assets", "font.woff2"), "font")
+	writeAppearanceTestFile(t, filepath.Join(util.IconsPath, "custom", "assets", "image.png"), "image")
+	writeAppearanceTestFile(t, filepath.Join(util.AppearancePath, "themes", "custom", "theme.css"), "legacy")
+	destination := t.TempDir()
+	if err := copyExportAppearance(destination, "custom", "custom"); err != nil {
+		t.Fatal(err)
+	}
+	for name, expected := range map[string]string{
+		"themes/custom/theme.css":         "resource custom",
+		"themes/custom/assets/font.woff2": "font",
+		"themes/daylight/theme.css":       "resource daylight",
+		"themes/midnight/theme.css":       "resource midnight",
+		"icons/custom/assets/image.png":   "image",
+		"icons/litheness/icon.js":         "resource litheness",
+	} {
+		data, err := os.ReadFile(filepath.Join(destination, "appearance", name))
+		if err != nil || string(data) != expected {
+			t.Errorf("%s: got %q, error %v", name, data, err)
+		}
+	}
+}
+
+func TestRefreshAppearanceConfigFallsBackAfterRemoval(t *testing.T) {
+	setupAppearancePackagesTest(t)
+	writeAppearanceTestFile(t, filepath.Join(util.ThemesPath, "custom", "theme.js"), "script")
+	Conf.Appearance.ThemeLight, Conf.Appearance.Icon = "custom", "custom"
+	Conf.Appearance.ThemeDark = "missing"
+	refreshAppearanceConfig()
+	if !Conf.Appearance.ThemeJS || Conf.Appearance.ThemeLight != "custom" || Conf.Appearance.ThemeDark != "midnight" {
+		t.Fatal("fallback for an unused mode changed the current theme script")
+	}
+	if err := os.Remove(filepath.Join(util.ThemesPath, "custom", "theme.json")); err != nil {
+		t.Fatal(err)
+	}
+	writeAppearanceTestPackage(t, "icons", "custom", "2.0.0", "999.0.0")
+	refreshAppearanceConfig()
+	if Conf.Appearance.ThemeLight != "daylight" || Conf.Appearance.Icon != "litheness" || Conf.Appearance.ThemeJS ||
+		Conf.Appearance.ThemeVer != "1.0.0" || Conf.Appearance.IconVer != "1.0.0" {
+		t.Fatalf("appearance fallback retained stale package state: %+v", Conf.Appearance)
+	}
+}
+
+func TestAppearanceLoadWaitsForPackagePublication(t *testing.T) {
+	setupAppearancePackagesTest(t)
+	for name, load := range map[string]func(){"themes": LoadThemes, "icons": LoadIcons, "config": refreshAppearanceConfig} {
+		t.Run(name, func(t *testing.T) {
+			lockPath := filepath.Join(util.DataDir, ".siyuan-appearance")
+			filelock.Lock(lockPath)
+			released := false
+			defer func() {
+				if !released {
+					filelock.Unlock(lockPath)
+				}
+			}()
+			started, done := make(chan struct{}), make(chan struct{})
+			go func() {
+				close(started)
+				load()
+				close(done)
+			}()
+			<-started
+			select {
+			case <-done:
+				t.Fatal("appearance loaded during package publication")
+			case <-time.After(50 * time.Millisecond):
+			}
+			filelock.Unlock(lockPath)
+			released = true
+			select {
+			case <-done:
+			case <-time.After(3 * time.Second):
+				t.Fatal("appearance loading did not resume after package publication")
+			}
+		})
+	}
+}

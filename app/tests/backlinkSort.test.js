@@ -81,3 +81,23 @@ test("mention sorting does not offer anchor sorting", () => {
     state.panel.showSortMenu("mSort", "2");
     assert.equal(state.menuItems.some(item => item.label?.startsWith("backlink")), false);
 });
+
+test("global sorting selects a flat mode and document sorting restores grouping", () => {
+    const state = createPanel();
+    let searches = 0;
+    state.panel.searchBacklinks = () => searches++;
+    state.panel.tree.element.previousElementSibling = {querySelector: () => ({setAttribute() {}})};
+    state.panel.showSortMenu("sort", "3");
+    const header = state.menuItems.findIndex(item => item.label === "backlinkGlobalSort");
+    state.menuItems[header + 1].click();
+    assert.equal(state.editor.backlinkGlobalSort, 1);
+    assert.equal(state.requests[0].data.backlinkGlobalSort, 1);
+    state.panel.showSortMenu("sort", "3");
+    assert.equal(state.menuItems.filter(item => item.checked).length, 1);
+    assert.equal(state.menuItems[header + 1].checked, true);
+    state.menuItems[header + 2].click();
+    assert.equal(state.editor.backlinkGlobalSort, 2);
+    state.menuItems.find(item => item.label === "modifiedDESC").click();
+    assert.equal(state.editor.backlinkGlobalSort, 0);
+    assert.equal(searches, 3);
+});

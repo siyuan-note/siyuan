@@ -19,7 +19,7 @@ SiYuan 工作区是一棵**自描述**的目录树：笔记本、文档和资源
 ├── .lock                       # 运行时工作区锁
 ├── conf/
 │   ├── conf.json              # ★工作区总配置（appearance/system/sync/editor...）
-│   ├── appearance/             # 已安装的主题、图标和语言资源
+│   ├── appearance/             # 内置外观资源和本地迁移备份
 │   ├── ca.crt / ca.key / cert.pem / key.pem   # TLS 证书和密钥
 │   └── windowState.json        # 桌面端窗口状态
 ├── data/                       # DataDir — 所有笔记本数据的根
@@ -30,6 +30,8 @@ SiYuan 工作区是一棵**自描述**的目录树：笔记本、文档和资源
 │   ├── templates/              # 全局模板（.md）
 │   ├── widgets/                # 挂件
 │   ├── plugins/                # 插件
+│   ├── themes/                 # 从同步包还原的本机主题目录
+│   ├── icons/                  # 从同步包还原的本机图标目录
 │   ├── emojis/                 # 自定义 emoji
 │   ├── snippets/               # 代码片段（CSS/JS）
 │   ├── public/                 # 静态资源
@@ -80,7 +82,7 @@ SiYuan 工作区是一棵**自描述**的目录树：笔记本、文档和资源
 
 `data/` 第一层是两类东西混排：
 
-1. **固定数据目录**：`.siyuan/`、`assets/`、`templates/`、`widgets/`、`plugins/`、`emojis/`、`snippets/`、`public/`、`storage/`。
+1. **固定数据目录**：`.siyuan/`、`assets/`、`templates/`、`widgets/`、`plugins/`、`themes/`、`icons/`、`emojis/`、`snippets/`、`public/`、`storage/`。
 2. **笔记本目录**：每个是一个以笔记本 ID 命名的文件夹。
 
 ### 保留文件名清单
@@ -97,6 +99,8 @@ func IsReservedFilename(baseName string) bool {
 即物理路径段 `assets` / `templates` / `widgets` / `emojis` / `.siyuan` 以及任意以 `.` 开头的名称均为保留名称。该限制针对磁盘上的 ID 和路径段，不限制用户界面中显示的笔记本名称或文档标题。
 
 ### 持久化数据与可重建索引
+
+第三方主题位于 `data/themes/<name>/`，图标包位于 `data/icons/<name>/`。完整包内容、更新和卸载通过 `data/storage/appearance-v1/` 中不可变的内部归档参与数据同步及快照，本机主题和图标目录不直接进入普通文件同步。各设备在 `conf/conf.json` 中独立保存外观选择。内置主题和图标仍属于程序资源。即使资源文件设置为按需下载，外观包资源也会完整下载。旧客户端可以继续同步笔记，新客户端负责还原外观包及处理冲突。迁移会保留原有本地文件供恢复。迁移和冲突行为详见[外观同步](APPEARANCE-SYNC.zh-CN.md)。
 
 `data/storage/` 保存属性视图定义和插件状态等持久化结构化数据。`temp/` 中的 SQLite 文件是派生索引和缓存：普通笔记本使用全局 `siyuan.db` 和 `blocktree.db`，每个已解锁的加密笔记本则使用独立的 SQLCipher 数据库。因此删除或重建索引不能与删除源 `.sy`、资源文件或数据库定义文件混为一谈。
 

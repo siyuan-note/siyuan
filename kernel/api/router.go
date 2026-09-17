@@ -330,6 +330,8 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/ref/refreshBacklink", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, refreshBacklink)
 	ginServer.Handle("POST", "/api/ref/getBacklink2", model.CheckAuth, getBacklink2)
+	ginServer.Handle("POST", "/api/ref/getGlobalBacklinks", model.CheckAuth, getGlobalBacklinks)
+	ginServer.Handle("POST", "/api/ref/getGlobalBacklinkContexts", model.CheckAuth, getGlobalBacklinkContexts)
 	ginServer.Handle("POST", "/api/ref/getBacklinkDoc", model.CheckAuth, getBacklinkDoc)
 	ginServer.Handle("POST", "/api/ref/getBackmentionDoc", model.CheckAuth, getBackmentionDoc)
 

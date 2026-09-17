@@ -18,6 +18,11 @@ export const sendGlobalShortcut = (app: App) => {
     if (isWindow()) {
         return;
     }
+    const languages = window.siyuan.languages?.["_trayMenu"];
+    if (!languages) {
+        // 插件可能在语言包加载完成前注册命令，由 onGetConfig 在布局初始化后补发。
+        return;
+    }
     const toggleHotkeys = getKeymapBindings(window.siyuan.config.keymap.general.toggleWin)
         .map(clearDisallowedTextInputHotkey).filter(Boolean);
     const hotkeys = new Set(toggleHotkeys);
@@ -35,7 +40,7 @@ export const sendGlobalShortcut = (app: App) => {
         });
     });
     ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
-        languages: window.siyuan.languages["_trayMenu"],
+        languages,
         hotkeys: Array.from(hotkeys),
         toggleHotkeys,
     });

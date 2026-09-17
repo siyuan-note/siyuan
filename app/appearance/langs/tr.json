@@ -1,4 +1,7 @@
 {
+	"mobileKernelReconnecting": "Yeniden bağlanılıyor...",
+	"mobileKernelReconnectPrompt": "Çekirdekle bağlantı geçici olarak kesildi. SiYuan otomatik olarak yeniden bağlanmayı deneyecek. Arka plandan dönerken bağlantının yeniden kurulması birkaç saniye sürebilir. Lütfen bekleyin. Bağlantı yeniden kurulduğunda bu pencere otomatik olarak kapanacaktır. Uzun süre beklemenize rağmen bağlantı yeniden kurulmazsa SiYuan'ı yeniden açmayı deneyin.",
+	"backlinkGlobalSort": "Genel başvuru sıralaması",
 	"backlinkDocumentSort": "Belge sıralaması",
 	"backlinkBlockSort": "Belge içindeki başvurular",
 	"backlinkBodyOrder": "Belgedeki sıra (varsayılan)",

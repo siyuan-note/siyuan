@@ -1,4 +1,7 @@
 {
+	"mobileKernelReconnecting": "Riconnessione in corso...",
+	"mobileKernelReconnectPrompt": "La connessione al kernel è stata temporaneamente interrotta. SiYuan tenterà di riconnettersi automaticamente. Al ritorno dal background, il ripristino della connessione potrebbe richiedere alcuni secondi. Attendi. Questa finestra si chiuderà automaticamente una volta ripristinata la connessione. Se la connessione non viene ripristinata dopo una lunga attesa, prova a riaprire SiYuan.",
+	"backlinkGlobalSort": "Ordinamento globale dei riferimenti",
 	"backlinkDocumentSort": "Ordinamento dei documenti",
 	"backlinkBlockSort": "Riferimenti all’interno dei documenti",
 	"backlinkBodyOrder": "Ordine nel documento (predefinito)",

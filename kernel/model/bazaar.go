@@ -564,7 +564,7 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 			if !item.meta.update && nil != themeOptions {
 				// 新安装主题时才自动切换 https://github.com/siyuan-note/siyuan/issues/4966
 				applied := false
-				theme, err := bazaar.ParsePackageJSON(filepath.Join(util.ThemesPath, item.name, "theme.json"))
+				theme, err := bazaar.ParsePackageJSON(filepath.Join(util.AppearancePackagePath("themes", item.name), "theme.json"))
 				if nil == err && nil != theme && nil != theme.Modes {
 					for _, mode := range *theme.Modes {
 						switch mode {
@@ -586,13 +586,16 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 				}
 				Conf.Appearance.Mode = themeOptions.Mode
 				Conf.Appearance.ModeOS = themeOptions.ModeOS
-				Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, item.name, "theme.js"))
+				Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.AppearancePackagePath("themes", item.name), "theme.js"))
 				Conf.Save()
 			}
 		}
-		InitAppearance()
-		WatchThemes()
-		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
+		var names []string
+		for _, item := range items {
+			names = append(names, item.name)
+		}
+		refreshAppearancePackages(names, nil)
+		IncSync()
 	case "icons":
 		for _, item := range items {
 			if !item.meta.update && applyNewAppearance {
@@ -601,8 +604,12 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 				Conf.Save()
 			}
 		}
-		InitAppearance()
-		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
+		var names []string
+		for _, item := range items {
+			names = append(names, item.name)
+		}
+		refreshAppearancePackages(nil, names)
+		IncSync()
 	}
 }
 
@@ -733,12 +740,11 @@ func UninstallPackage(pkgType, packageName string) error {
 		uninstallPluginSet := hashset.New(packageName)
 		PushReloadPlugin(uninstallPluginSet, nil, nil, nil, "", "")
 	case "themes":
-		InitAppearance()
-		WatchThemes()
-		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
+		refreshAppearancePackages([]string{packageName}, nil)
+		IncSync()
 	case "icons":
-		InitAppearance()
-		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
+		refreshAppearancePackages(nil, []string{packageName})
+		IncSync()
 	}
 
 	return nil

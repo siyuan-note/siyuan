@@ -6,6 +6,16 @@ import (
 )
 
 func TestBacklinkListRequestCompatibility(t *testing.T) {
+	for _, raw := range []string{`true`, `false`, `null`, `"false"`} {
+		request, err := GetBacklink2.Decode(strings.NewReader(`{"id":"id","k":"","mk":"","includeBacklinks":` + raw + `}`))
+		if raw == "true" || raw == "false" {
+			if err != nil || request.IncludeBacklinks == nil || *request.IncludeBacklinks != (raw == "true") {
+				t.Fatalf("backlink flag: %+v %v", request, err)
+			}
+		} else if err == nil {
+			t.Fatalf("invalid backlink flag accepted: %s", raw)
+		}
+	}
 	for _, body := range []string{`{}`, `{"id":null,"k":false,"sort":false,"containChildren":null}`} {
 		request, err := decodeBacklinkListRequest(strings.NewReader(body))
 		if err != nil || request.ID != nil {

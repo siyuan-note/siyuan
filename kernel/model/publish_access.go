@@ -670,6 +670,21 @@ func FilterAttributeViewByPublishAccess(c *gin.Context, publishAccess PublishAcc
 	return viewable
 }
 
+// AVExportPublishFilter 为导出路径提供发布访问过滤，nil 表示调用方已确认无需过滤（管理员导出）。
+type AVExportPublishFilter func(view av.Viewable, avID, blockID string) av.Viewable
+
+// NewAVExportPublishFilter 为发布读者构造导出用的属性视图过滤器，非读者角色返回 nil。
+func NewAVExportPublishFilter(c *gin.Context) AVExportPublishFilter {
+	if !IsReadOnlyRoleContext(c) {
+		return nil
+	}
+
+	publishAccess := GetPublishAccess()
+	return func(view av.Viewable, avID, blockID string) av.Viewable {
+		return FilterAttributeViewByPublishAccess(c, publishAccess, avID, blockID, view)
+	}
+}
+
 func parseAttributeViewForPublishAccess(avID, blockID string) (attrView *av.AttributeView, boxID string) {
 	if "" != blockID {
 		blockTree := treenode.GetBlockTree(blockID)

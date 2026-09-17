@@ -752,6 +752,7 @@ var exportPreview = contractHandler(apicontract.ExportPreview, func(c *gin.Conte
 	}
 
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	avPublishFilter := model.NewAVExportPublishFilter(c)
 	var publishAccess model.PublishAccess
 	var accessChecker model.EmbedBlockAccessChecker
 	if isReadOnlyRole {
@@ -760,7 +761,7 @@ var exportPreview = contractHandler(apicontract.ExportPreview, func(c *gin.Conte
 			return model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockID)
 		}
 	}
-	stdHTML := model.ExportPreview(id, fillCSSVar, accessChecker)
+	stdHTML := model.ExportPreview(id, fillCSSVar, avPublishFilter, accessChecker)
 	if isReadOnlyRole {
 		bt := treenode.GetBlockTree(id)
 		if bt != nil {

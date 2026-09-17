@@ -78,7 +78,7 @@ func TestAssetDownloadFootnoteExport(t *testing.T) {
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true)
+		Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true, nil)
 	if prepareErr != nil {
 		t.Fatal(prepareErr)
 	}

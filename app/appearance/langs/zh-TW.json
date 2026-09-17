@@ -1,4 +1,7 @@
 {
+	"mobileKernelReconnecting": "正在重新連線...",
+	"mobileKernelReconnectPrompt": "與核心的連線暫時中斷，思源會自動嘗試重新連線。從背景返回時，恢復連線可能需要幾秒，請稍候。連線恢復後，本視窗會自動關閉。如果長時間未恢復，請嘗試重新開啟思源。",
+	"backlinkGlobalSort": "全域引用排序",
 	"backlinkDocumentSort": "文件排序",
 	"backlinkBlockSort": "文件內引用排序",
 	"backlinkBodyOrder": "內文順序（預設）",

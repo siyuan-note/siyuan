@@ -1356,9 +1356,9 @@ func checkoutRepo(id string) (err error) {
 	CloseWatchEmojis()
 	defer WatchEmojis()
 
-	// 若主题支持同步，需关闭监听器
-	// CloseWatchThemes()
-	// defer WatchThemes()
+	// 整包恢复期间暂停监听，完成后重新绑定实际目录。
+	CloseWatchThemes()
+	defer WatchThemes()
 
 	// 恢复快照时自动暂停同步，避免刚刚恢复后的数据又被同步覆盖
 	syncEnabled := Conf.Sync.Enabled
@@ -1370,6 +1370,12 @@ func checkoutRepo(id string) (err error) {
 
 	// 回滚快照时默认为当前数据创建一个快照
 	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
+	if err = processAssetDownloadRecovery(repo, true); err != nil {
+		return
+	}
+	if err = prepareAppearancePackages(); err != nil {
+		return
+	}
 	_, err = repo.Index("Backup before checkout", false, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if err != nil {
 		logging.LogErrorf("index repository failed: %s", err)
@@ -1402,7 +1408,9 @@ func checkoutRepo(id string) (err error) {
 
 // checkoutRepoSnapshot 恢复失败前可能已有文件落盘，返回结果前同步更新索引、缓存和界面。
 func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) error {
-	_, _, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	upserts, removes, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	themes, icons := appearanceChangedPackages(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
+	refreshAppearancePackages(themes, icons)
 	refresh(err)
 	return err
 }
@@ -1799,6 +1807,12 @@ func CreateRepoSnapshot(memo string) (id string, created bool, err error) {
 	defer util.PushClearProgress()
 
 	start := time.Now()
+	if err = processAssetDownloadRecovery(repo, true); err != nil {
+		return
+	}
+	if err = prepareAppearancePackages(); err != nil {
+		return
+	}
 	index, created, err := repo.IndexWithResult(memo, true, map[string]any{
 		eventbus.CtxPushMsg:             eventbus.CtxPushMsgToStatusBarAndProgress,
 		dejavu.CtxAssetDownloadsAllowed: checkAssetDownloadAccess() == nil,
@@ -2383,6 +2397,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		mergeResult.ConflictCount(), len(mergeResult.Upserts), len(mergeResult.Removes))
 
 	//logSyncMergeResult(mergeResult)
+	themes, icons := appearanceChangedPackages(mergeResult)
+	refreshAppearancePackages(themes, icons)
 
 	var needReloadFiletree bool
 	conflictCount := mergeResult.ConflictCount()
@@ -2917,6 +2933,9 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 	}
 
 	checkChunks := true
+	if err = prepareAppearancePackages(); err != nil {
+		return
+	}
 	if util.IsMobileContainer() {
 		// 因为移动端私有数据空间不会存在外部操作导致分块损坏的情况，所以不需要检查分块以提升性能 https://github.com/siyuan-note/siyuan/issues/13216
 		checkChunks = false
@@ -3019,12 +3038,18 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 	if err != nil {
 		return nil, err
 	}
+	appearanceIgnoreLines, err := loadAppearanceSyncIgnoreLines()
+	if err != nil {
+		return nil, err
+	}
 	dataDir := util.DataDir
 	ret, err = dejavu.NewRepoWithOptions(dejavu.Options{
 		DataPath: util.DataDir, RepoPath: util.RepoDir, HistoryPath: util.HistoryDir, TempPath: util.TempDir,
 		DeviceID: Conf.System.ID, DeviceName: Conf.System.Name, DeviceOS: Conf.System.OS,
 		AESKey: Conf.Repo.Key, IgnoreLines: ignoreLines, Cloud: cloudRepo,
-		IgnoreRulePath: syncIgnoreRulePath, HiddenDirectoryNames: []string{".siyuan"},
+		EnableAppearanceSync: true, AppearanceIgnoreLines: appearanceIgnoreLines,
+		BeforeAppearanceApply: util.EnsureAppearanceSyncIsolation,
+		IgnoreRulePath:        syncIgnoreRulePath, HiddenDirectoryNames: []string{".siyuan"},
 		PathFilter: func(info os.FileInfo, absPath string) (bool, error) {
 			return syncPathFilter(dataDir, info, absPath)
 		},

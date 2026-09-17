@@ -1,4 +1,7 @@
 {
+	"mobileKernelReconnecting": "正在重新连接...",
+	"mobileKernelReconnectPrompt": "与内核的连接暂时断开，思源会自动尝试重新连接。从后台返回时，恢复连接可能需要几秒，请稍等。连接恢复后，本窗口会自动关闭。如果长时间未恢复，请尝试重新打开思源。",
+	"backlinkGlobalSort": "全局引用排序",
 	"backlinkDocumentSort": "文档排序",
 	"backlinkBlockSort": "文档内引用排序",
 	"backlinkBodyOrder": "正文顺序（默认）",

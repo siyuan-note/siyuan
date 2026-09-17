@@ -331,6 +331,9 @@ func saveBazaarInfo() {
 // recordPackageOperationTime 记录集市包的首次安装时间或最近更新时间
 func recordPackageOperationTime(pkgType, pkgName string, operationTime, fallbackInstallTime time.Time, update bool,
 	repoURL, repoRef string) {
+	if isAppearanceKind(pkgType) {
+		return
+	}
 	getBazaarInfo()
 	repoURL, repoRef = normalizeGitHubPackageSource(repoURL, repoRef)
 
@@ -369,6 +372,14 @@ func recordPackageOperationTime(pkgType, pkgName string, operationTime, fallback
 }
 
 func getPackageSource(pkgType, pkgName string) (repoURL, repoRef string) {
+	if isAppearanceKind(pkgType) {
+		info, err := GetAppearancePackageInfo(pkgType, pkgName)
+		if err == nil {
+			return normalizeGitHubPackageSource(info.RepoURL, info.RepoRef)
+		}
+		logging.LogErrorf("read appearance metadata failed: %s", err)
+		return
+	}
 	getBazaarInfo()
 	bazaarInfoCacheLock.RLock()
 	defer bazaarInfoCacheLock.RUnlock()
@@ -388,6 +399,9 @@ func getPackageRepoRef(pkgType, pkgName string) string {
 
 // ensurePackageInstallTime 在没有首次安装时间时进行初始化
 func ensurePackageInstallTime(pkgType, pkgName string, fallbackInstallTime time.Time) (installTime, updateTime int64) {
+	if isAppearanceKind(pkgType) {
+		return fallbackInstallTime.UnixMilli(), 0
+	}
 	getBazaarInfo()
 
 	bazaarInfoCacheLock.Lock()
@@ -416,6 +430,20 @@ func ensurePackageInstallTime(pkgType, pkgName string, fallbackInstallTime time.
 
 // getPackageTimes 获取集市包的首次安装时间和最近更新时间
 func getPackageTimes(pkgType, pkgName, installPath string) (installTime, updateTime int64) {
+	if isAppearanceKind(pkgType) {
+		info, err := GetAppearancePackageInfo(pkgType, pkgName)
+		if err != nil {
+			logging.LogErrorf("read appearance metadata failed: %s", err)
+			return
+		}
+		if info.InstallTime > 0 {
+			return info.InstallTime, info.UpdateTime
+		}
+		if stat, statErr := os.Stat(installPath); statErr == nil {
+			return stat.ModTime().UnixMilli(), 0
+		}
+		return
+	}
 	getBazaarInfo()
 	bazaarInfoCacheLock.RLock()
 	if bazaarInfoCache != nil && bazaarInfoCache.Packages[pkgType] != nil {
@@ -441,6 +469,9 @@ func getPackageTimes(pkgType, pkgName, installPath string) (installTime, updateT
 
 // RemovePackageInfo 删除集市包的持久化信息
 func RemovePackageInfo(pkgType, pkgName string) {
+	if isAppearanceKind(pkgType) {
+		return
+	}
 	getBazaarInfo()
 
 	bazaarInfoCacheLock.Lock()

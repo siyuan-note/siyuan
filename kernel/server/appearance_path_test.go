@@ -31,11 +31,14 @@ import (
 func TestAppearanceFileBoundaries(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	originalPath, originalMode, originalConf := util.AppearancePath, util.Mode, model.Conf
+	originalThemesPath, originalIconsPath := util.ThemesPath, util.IconsPath
 	util.AppearancePath, util.Mode = filepath.Join(t.TempDir(), "conf", "appearance"), "prod"
+	util.ThemesPath, util.IconsPath = filepath.Join(t.TempDir(), "themes"), filepath.Join(t.TempDir(), "icons")
 	model.Conf = model.NewAppConf()
 	model.Conf.AccessAuthCode = "test-password"
 	t.Cleanup(func() {
 		util.AppearancePath, util.Mode, model.Conf = originalPath, originalMode, originalConf
+		util.ThemesPath, util.IconsPath = originalThemesPath, originalIconsPath
 	})
 	outside := t.TempDir()
 	write := func(name, content string) {
@@ -48,8 +51,13 @@ func TestAppearanceFileBoundaries(t *testing.T) {
 		}
 	}
 	for _, name := range []string{"themes/local/theme.css", "icons/local/icon.js", "fonts/font.woff"} {
-		write(filepath.Join(util.AppearancePath, name), "resource")
+		write(appearanceTestResourcePath(name), "resource")
 	}
+	write(filepath.Join(util.AppearancePath, "themes/local/old.css"), "legacy")
+	write(filepath.Join(util.AppearancePath, "themes/daylight/theme.css"), "built-in")
+	write(filepath.Join(util.ThemesPath, "daylight/theme.css"), "shadow")
+	write(filepath.Join(util.AppearancePath, "icons/litheness/icon.js"), "built-in")
+	write(filepath.Join(util.IconsPath, "litheness/icon.js"), "shadow")
 	write(filepath.Join(util.AppearancePath, "langs/en.json"), `{"fallback":"English"}`)
 	write(filepath.Join(util.AppearancePath, "langs/fr.json"), `{"label":"French"}`)
 	write(filepath.Join(filepath.Dir(util.AppearancePath), "conf.json"), `{"secret":"credential"}`)
@@ -67,6 +75,12 @@ func TestAppearanceFileBoundaries(t *testing.T) {
 		}
 	}
 	check("themes/local/theme.css", 200, "resource")
+	check("themes/local/old.css", 404, "")
+	check("Themes/local/old.css", 404, "")
+	check("Themes/local/theme.css", 200, "resource")
+	check("themes/daylight/theme.css", 200, "built-in")
+	check("icons/litheness/icon.js", 200, "built-in")
+	check("Icons/LITHENESS/icon.js", 200, "built-in")
 	check("icons/local/icon.js", 200, "resource")
 	check("fonts/font.woff", 200, "resource")
 	check("langs/fr.json", 200, `"fallback":"English"`)
@@ -87,7 +101,7 @@ func TestAppearanceFileBoundaries(t *testing.T) {
 	check("boot/", 404, "")
 	link := func(target, name string) {
 		t.Helper()
-		if err := os.Symlink(target, filepath.Join(util.AppearancePath, name)); err != nil {
+		if err := os.Symlink(target, appearanceTestResourcePath(name)); err != nil {
 			t.Skipf("symlinks unavailable: %s", err)
 		}
 	}
@@ -117,4 +131,16 @@ func TestAppearanceFileBoundaries(t *testing.T) {
 	link(filepath.Join(filepath.Dir(util.AppearancePath), "conf.json"), "langs/en.json")
 	check("langs/fr.json", 403, "")
 	check("langs/en.json", 403, "")
+}
+
+func appearanceTestResourcePath(name string) string {
+	parts := strings.SplitN(name, "/", 3)
+	if len(parts) >= 2 && (parts[0] == "themes" || parts[0] == "icons") {
+		root := util.AppearancePackagePath(parts[0], parts[1])
+		if len(parts) == 3 {
+			return filepath.Join(root, parts[2])
+		}
+		return root
+	}
+	return filepath.Join(util.AppearancePath, name)
 }

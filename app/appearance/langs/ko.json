@@ -1,4 +1,7 @@
 {
+	"mobileKernelReconnecting": "다시 연결하는 중...",
+	"mobileKernelReconnectPrompt": "커널과의 연결이 일시적으로 끊어졌습니다. SiYuan이 자동으로 다시 연결을 시도합니다. 백그라운드에서 돌아오면 연결을 복구하는 데 몇 초가 걸릴 수 있으니 잠시 기다려 주세요. 연결이 복구되면 이 창은 자동으로 닫힙니다. 오래 기다려도 연결이 복구되지 않으면 SiYuan을 다시 열어 보세요.",
+	"backlinkGlobalSort": "전체 참조 정렬",
 	"backlinkDocumentSort": "문서 정렬",
 	"backlinkBlockSort": "문서 내 참조 정렬",
 	"backlinkBodyOrder": "본문 순서 (기본값)",

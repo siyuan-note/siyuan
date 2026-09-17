@@ -1,4 +1,7 @@
 {
+	"mobileKernelReconnecting": "Verbindung wird wiederhergestellt...",
+	"mobileKernelReconnectPrompt": "Die Verbindung zum Kernel wurde vorübergehend unterbrochen. SiYuan versucht automatisch, die Verbindung wiederherzustellen. Wenn die App aus dem Hintergrund zurückkehrt, kann dies einige Sekunden dauern. Bitte warte. Dieses Fenster schließt sich automatisch, sobald die Verbindung wiederhergestellt ist. Falls die Verbindung auch nach längerer Wartezeit nicht wiederhergestellt ist, öffne SiYuan erneut.",
+	"backlinkGlobalSort": "Globale Referenzsortierung",
 	"backlinkDocumentSort": "Dokumentsortierung",
 	"backlinkBlockSort": "Referenzen innerhalb von Dokumenten",
 	"backlinkBodyOrder": "Reihenfolge im Dokument (Standard)",

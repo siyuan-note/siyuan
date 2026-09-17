@@ -1,4 +1,7 @@
 {
+	"mobileKernelReconnecting": "Reconnecting...",
+	"mobileKernelReconnectPrompt": "The connection to the kernel was temporarily lost. SiYuan will automatically try to reconnect. When returning from the background, restoring the connection may take a few seconds. Please wait. This window will close automatically once the connection is restored. If the connection is not restored after a long wait, try reopening SiYuan.",
+	"backlinkGlobalSort": "Global reference sorting",
 	"backlinkDocumentSort": "Document sorting",
 	"backlinkBlockSort": "References within documents",
 	"backlinkBodyOrder": "Document order (default)",

@@ -33,8 +33,42 @@ import {refreshChartTheme} from "../protyle/render/chartRender";
 import {getHostCapabilities} from "./hostCapabilities";
 
 let headingNumberMeasurementRefreshTimer: number;
+let appearanceUpdate = Promise.resolve();
+let appearanceReloadPending = false;
+const appearancePackageRevisions = new Map<string, string>();
 const DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE = "U+25fd-25fe, U+2614-2615, U+2648-2653, U+267f, U+2693, U+26a1, " +
     "U+26aa-26ab, U+1f0cf, U+1f311-1f318, U+1f42d-1f42e, U+1f431, U+1f435, U+1f600-1f64f";
+
+// 串行应用外观变更，等待脚本加载和卸载完成后再处理下一次推送。
+export const enqueueAppearanceUpdate = (apply: () => Promise<void>) => {
+    appearanceUpdate = appearanceUpdate.then(async () => {
+        if (!appearanceReloadPending) {
+            await apply();
+        }
+    }).catch(error => {
+        console.error("apply appearance error: " + error);
+    });
+    return appearanceUpdate;
+};
+
+export const markAppearanceReloadPending = () => {
+    appearanceReloadPending = true;
+};
+
+export const invalidateAppearancePackages = (themes: string[], icons: string[], revision: string) => {
+    const changed = {
+        themes: themes.filter(name => appearancePackageRevisions.get(`themes/${name}`) !== revision),
+        icons: icons.filter(name => appearancePackageRevisions.get(`icons/${name}`) !== revision),
+    };
+    themes.forEach(name => appearancePackageRevisions.set(`themes/${name}`, revision));
+    icons.forEach(name => appearancePackageRevisions.set(`icons/${name}`, revision));
+    return changed;
+};
+
+const appearancePackageVersion = (kind: "themes" | "icons", name: string, version: string) => {
+    const revision = appearancePackageRevisions.get(`${kind}/${name}`);
+    return encodeURIComponent(version) + (revision ? `&revision=${encodeURIComponent(revision)}` : "");
+};
 
 export const refreshHeadingNumberMeasurements = () => {
     invalidateHeadingNumberMeasurements();
@@ -99,7 +133,8 @@ export const refreshThemeStyle = (themeAddress: string) => {
     }
 };
 
-export const loadAssets = (appearance: Config.IAppearance) => {
+export const loadAssets = async (appearance: Config.IAppearance) => {
+    const scriptLoads: Promise<unknown>[] = [];
     setBodyHighlight(appearance.bodyGradient);
     const data = getHostCapabilities().customAppearance ? appearance : {
         ...appearance,
@@ -157,9 +192,10 @@ export const loadAssets = (appearance: Config.IAppearance) => {
     const themeSupported = isCurrentThemeSupported(data, getFrontend());
     if (themeSupported && ((data.mode === 1 && data.themeDark !== "midnight") ||
         (data.mode === 0 && data.themeLight !== "daylight"))) {
-        const themeAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.css?v=${data.themeVer}`;
+        const themeName = data.mode === 1 ? data.themeDark : data.themeLight;
+        const themeAddress = `/appearance/themes/${themeName}/theme.css?v=${appearancePackageVersion("themes", themeName, data.themeVer)}`;
         if (styleElement) {
-            if (!styleElement.getAttribute("href").startsWith(themeAddress)) {
+            if (styleElement.getAttribute("href") !== themeAddress) {
                 changedThemeStyleElements.push(styleElement as HTMLLinkElement);
                 themeStylesChanged = true;
                 styleElement.setAttribute("href", themeAddress);
@@ -206,26 +242,28 @@ export const loadAssets = (appearance: Config.IAppearance) => {
     /// #endif
     setCodeTheme();
 
-    const themeScriptAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.js?v=${data.themeVer}`;
+    const themeName = data.mode === 1 ? data.themeDark : data.themeLight;
+    const themeScriptAddress = `/appearance/themes/${themeName}/theme.js?v=${appearancePackageVersion("themes", themeName, data.themeVer)}`;
     const themeScriptURL = new URL(themeScriptAddress, window.location.href).href;
     const themeScriptElements = getThemeScriptElements();
     if (!data.themeJS || !themeSupported) {
         removeThemeScriptElements();
     } else if (!themeScriptElements.some((item) => item.src === themeScriptURL)) {
         removeThemeScriptElements();
-        addScript(themeScriptAddress, "themeScript");
+        scriptLoads.push(addScript(themeScriptAddress, "themeScript"));
     }
 
     // load icons
-    const isBuiltInIcon = data.icon === "litheness";
+    const iconName = data.icon === "litheness" || data.icons?.some(icon => icon.name === data.icon) ? data.icon : "litheness";
+    const isBuiltInIcon = iconName === "litheness";
     const iconScriptElement = document.getElementById("iconScript");
     const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
     const iconDefaultURL = `/appearance/icons/litheness/icon.js?v=${Constants.SIYUAN_VERSION}`;
-    const iconThirdURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
+    const iconThirdURL = `/appearance/icons/${iconName}/icon.js?v=${appearancePackageVersion("icons", iconName, data.iconVer)}`;
 
     if ((isBuiltInIcon && iconDefaultScriptElement && iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) ||
-        (!isBuiltInIcon && iconScriptElement && iconScriptElement.getAttribute("src").startsWith(iconThirdURL))) {
+        (!isBuiltInIcon && iconScriptElement && iconScriptElement.getAttribute("src") === iconThirdURL)) {
         // 第三方图标切换到默认 litheness
         if (isBuiltInIcon) {
             iconScriptElement?.remove();
@@ -235,21 +273,22 @@ export const loadAssets = (appearance: Config.IAppearance) => {
                 }
             });
         }
+        await Promise.all(scriptLoads);
         return;
     }
-    addScript(iconDefaultURL, "iconDefaultScript").then(() => {
+    scriptLoads.push(addScript(iconDefaultURL, "iconDefaultScript").then(async () => {
         iconScriptElement?.remove();
         if (!isBuiltInIcon) {
-            addScript(iconThirdURL, "iconScript").then(() => {
-                Array.from(document.body.children).forEach((item, index) => {
-                    if (item.tagName === "svg" &&
-                        index !== 0 && !item.getAttribute("data-name") && "iconsLitheness" !== item.id) {
-                        item.remove();
-                    }
-                });
+            await addScript(iconThirdURL, "iconScript");
+            Array.from(document.body.children).forEach((item, index) => {
+                if (item.tagName === "svg" &&
+                    index !== 0 && !item.getAttribute("data-name") && "iconsLitheness" !== item.id) {
+                    item.remove();
+                }
             });
         }
-    });
+    }));
+    await Promise.all(scriptLoads);
 };
 
 export const initAssets = () => {
@@ -272,24 +311,27 @@ export const initAssets = () => {
         }
         fetchPost("/api/system/setAppearanceMode", {
             mode: OSTheme === "light" ? 0 : 1
-        }, async response => {
-            const nextAppearance = response.data.appearance as Config.IAppearance;
-            if (shouldUnloadThemeScript(window.siyuan.config.appearance, nextAppearance, getFrontend()) &&
-                !await unloadThemeScript()) {
-                /// #if !MOBILE
-                exportLayout({
-                    cb() {
-                        window.location.reload();
-                    },
-                    errorExit: false,
-                });
-                /// #else
-                window.location.reload();
-                /// #endif
-                return;
-            }
-            window.siyuan.config.appearance = nextAppearance;
-            loadAssets(nextAppearance);
+        }, response => {
+            void enqueueAppearanceUpdate(async () => {
+                const nextAppearance = response.data.appearance as Config.IAppearance;
+                if (shouldUnloadThemeScript(window.siyuan.config.appearance, nextAppearance, getFrontend()) &&
+                    !await unloadThemeScript()) {
+                    markAppearanceReloadPending();
+                    /// #if !MOBILE
+                    exportLayout({
+                        cb() {
+                            window.location.reload();
+                        },
+                        errorExit: false,
+                    });
+                    /// #else
+                    window.location.reload();
+                    /// #endif
+                    return;
+                }
+                window.siyuan.config.appearance = nextAppearance;
+                await loadAssets(nextAppearance);
+            });
         });
     });
 };

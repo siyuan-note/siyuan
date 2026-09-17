@@ -481,7 +481,7 @@ func Export2Liandi(id string) (err error) {
 			".md", 3, 1, 1,
 			"#", "#",
 			"", "",
-			false, false, nil, true, false, nil)
+			false, false, nil, true, false, nil, nil)
 		result := gulu.Ret.NewResult()
 		request := httpclient.NewCloudRequest30s()
 		request = request.
@@ -1024,7 +1024,8 @@ func exportResourcesEncryptedBox(resourcePaths []string) (encryptedBoxID string,
 	return
 }
 
-func ExportPreview(id string, fillCSSVar bool, accessChecker ...EmbedBlockAccessChecker) (retStdHTML string) {
+func ExportPreview(id string, fillCSSVar bool, avPublishFilter AVExportPublishFilter,
+	accessChecker ...EmbedBlockAccessChecker) (retStdHTML string) {
 	if exportErr := withExportReadLockByBlockID(id, func() error {
 		blockRefMode := Conf.Export.BlockRefMode
 		bt := getExportBlockTree(id)
@@ -1040,7 +1041,7 @@ func ExportPreview(id string, fillCSSVar bool, accessChecker ...EmbedBlockAccess
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			"#", "#", // 这里固定使用 # 包裹标签，否则无法正确解析标签 https://github.com/siyuan-note/siyuan/issues/13857
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true, accessChecker...)
+			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true, avPublishFilter, accessChecker...)
 		if nil != exportTreeErr {
 			return exportTreeErr
 		}
@@ -1229,7 +1230,7 @@ func exportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptio
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true)
+			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true, nil)
 		if nil != exportTreeErr {
 			return exportTreeErr
 		}
@@ -1277,55 +1278,8 @@ func exportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptio
 		if 1 == Conf.Appearance.Mode {
 			theme = Conf.Appearance.ThemeDark
 		}
-		// 复制主题文件夹
-		srcs = []string{"themes/" + theme}
-		appearancePath := util.AppearancePath
-		if util.IsSymlinkPath(util.AppearancePath) {
-			// Support for symlinked theme folder when exporting HTML https://github.com/siyuan-note/siyuan/issues/9173
-			var readErr error
-			appearancePath, readErr = filepath.EvalSymlinks(util.AppearancePath)
-			if nil != readErr {
-				logging.LogErrorf("readlink [%s] failed: %s", util.AppearancePath, readErr)
-				return readErr
-			}
-		}
-
-		for _, src := range srcs {
-			from := filepath.Join(appearancePath, src)
-			to := filepath.Join(savePath, "appearance", src)
-			if err := filelock.Copy(from, to); err != nil {
-				logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
-				return err
-			}
-		}
-
-		// 只复制图标文件夹中的 icon.js 文件
-		iconName := Conf.Appearance.Icon
-		// 如果使用的不是内建图标（litheness），需要复制 litheness 作为后备
-		if iconName != "litheness" && iconName != "" {
-			srcIconFile := filepath.Join(appearancePath, "icons", "litheness", "icon.js")
-			toIconDir := filepath.Join(savePath, "appearance", "icons", "litheness")
-			if err := os.MkdirAll(toIconDir, 0755); err != nil {
-				logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
-				return err
-			}
-			toIconFile := filepath.Join(toIconDir, "icon.js")
-			if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
-				logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
-			}
-		}
-		// 复制当前使用的图标文件
-		if iconName != "" {
-			srcIconFile := filepath.Join(appearancePath, "icons", iconName, "icon.js")
-			toIconDir := filepath.Join(savePath, "appearance", "icons", iconName)
-			if err := os.MkdirAll(toIconDir, 0755); err != nil {
-				logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
-				return err
-			}
-			toIconFile := filepath.Join(toIconDir, "icon.js")
-			if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
-				logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
-			}
+		if err := copyExportAppearance(savePath, theme, Conf.Appearance.Icon); err != nil {
+			return err
 		}
 
 		// 复制自定义表情图片
@@ -1444,7 +1398,7 @@ func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			addTitle, customTitle, Conf.Export.InlineMemo, true, true)
+			addTitle, customTitle, Conf.Export.InlineMemo, true, true, nil)
 		if nil != exportTreeErr {
 			return exportTreeErr
 		}
@@ -1488,53 +1442,8 @@ func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 			if 1 == Conf.Appearance.Mode {
 				theme = Conf.Appearance.ThemeDark
 			}
-			// 复制主题文件夹
-			srcs = []string{"themes/" + theme}
-			appearancePath := util.AppearancePath
-			if util.IsSymlinkPath(util.AppearancePath) {
-				// Support for symlinked theme folder when exporting HTML https://github.com/siyuan-note/siyuan/issues/9173
-				var readErr error
-				appearancePath, readErr = filepath.EvalSymlinks(util.AppearancePath)
-				if nil != readErr {
-					logging.LogErrorf("readlink [%s] failed: %s", util.AppearancePath, readErr)
-					return readErr
-				}
-			}
-			for _, src := range srcs {
-				from := filepath.Join(appearancePath, src)
-				to := filepath.Join(savePath, "appearance", src)
-				if err := filelock.Copy(from, to); err != nil {
-					logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
-				}
-			}
-
-			// 只复制图标文件夹中的 icon.js 文件
-			iconName := Conf.Appearance.Icon
-			// 如果使用的不是内建图标（litheness），需要复制 litheness 作为后备
-			if iconName != "litheness" && iconName != "" {
-				srcIconFile := filepath.Join(appearancePath, "icons", "litheness", "icon.js")
-				toIconDir := filepath.Join(savePath, "appearance", "icons", "litheness")
-				if err := os.MkdirAll(toIconDir, 0755); err != nil {
-					logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
-					return err
-				}
-				toIconFile := filepath.Join(toIconDir, "icon.js")
-				if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
-					logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
-				}
-			}
-			// 复制当前使用的图标文件
-			if iconName != "" {
-				srcIconFile := filepath.Join(appearancePath, "icons", iconName, "icon.js")
-				toIconDir := filepath.Join(savePath, "appearance", "icons", iconName)
-				if err := os.MkdirAll(toIconDir, 0755); err != nil {
-					logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
-					return err
-				}
-				toIconFile := filepath.Join(toIconDir, "icon.js")
-				if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
-					logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
-				}
+			if err := copyExportAppearance(savePath, theme, Conf.Appearance.Icon); err != nil {
+				return err
 			}
 
 			// 复制自定义表情图片
@@ -2151,7 +2060,7 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 }
 
 func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag bool,
-	accessChecker ...EmbedBlockAccessChecker) string {
+	avPublishFilter AVExportPublishFilter, accessChecker ...EmbedBlockAccessChecker) string {
 	var ret string
 	if exportErr := withExportReadLockByBlockID(id, func() error {
 		bt := getExportBlockTree(id)
@@ -2196,7 +2105,7 @@ func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjust
 			".md", Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, fillCSSVar, nil, accessChecker...)
+			Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, fillCSSVar, nil, avPublishFilter, accessChecker...)
 		return nil
 	}); exportErr != nil {
 		logging.LogErrorf("export std markdown [%s] failed: %s", id, exportErr)
@@ -3119,7 +3028,7 @@ func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar
 			".md", refMode, embedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			addTitle, Conf.Export.InlineMemo, nil, true, fillCSSVar, nil)
+			addTitle, Conf.Export.InlineMemo, nil, true, fillCSSVar, nil, nil)
 		docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 		if addYfm {
 			exportedMd = yfm(docIAL) + exportedMd
@@ -3159,7 +3068,7 @@ func exportMarkdownContent(rootID, ext string, exportRefMode int, defBlockIDs []
 		ext, exportRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, singleFile, false, boxPaths)
+		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, singleFile, false, boxPaths, nil)
 	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 	if Conf.Export.MarkdownYFM {
 		// 导出 Markdown 时在文档头添加 YFM 开关 https://github.com/siyuan-note/siyuan/issues/7727
@@ -3172,12 +3081,12 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 	ext string, blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string, blockRefTextLeft, blockRefTextRight string,
 	addTitle, inlineMemo bool, defBlockIDs []string, singleFile, fillCSSVar bool, boxPaths map[string]string,
-	accessChecker ...EmbedBlockAccessChecker) (ret string) {
+	avPublishFilter AVExportPublishFilter, accessChecker ...EmbedBlockAccessChecker) (ret string) {
 	tree, exportTreeErr := exportTree(tree, false, false, false, false,
 		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
-		addTitle, "", inlineMemo, 0 < len(defBlockIDs), singleFile, accessChecker...)
+		addTitle, "", inlineMemo, 0 < len(defBlockIDs), singleFile, avPublishFilter, accessChecker...)
 	if nil != exportTreeErr {
 		logging.LogErrorf("prepare Markdown export failed: %s", exportTreeErr)
 		return ""
@@ -3334,7 +3243,7 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 	tagOpenMarker, tagCloseMarker string,
 	blockRefTextLeft, blockRefTextRight string,
 	addTitle bool, customTitle string, inlineMemo, addDocAnchorSpan, singleFile bool,
-	accessChecker ...EmbedBlockAccessChecker) (ret *parse.Tree, err error) {
+	avPublishFilter AVExportPublishFilter, accessChecker ...EmbedBlockAccessChecker) (ret *parse.Tree, err error) {
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID
@@ -3705,6 +3614,9 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 			av.FilterWithContext(table, attrView, rollupFurtherCollections, cachedAttrViews, filterContext)
 		}
 		av.Sort(table, attrView)
+
+		// 发布读者的导出结果不得包含绑定到不可访问文档的行和单元格，与渲染路径保持同一套过滤规则
+		table = filterExportAttributeViewTableRows(avPublishFilter, table, avID, n.ID)
 
 		aligns := getAttrViewTableAligns(table, avHiddenCol)
 		mdTable := &ast.Node{Type: ast.NodeTable, TableAligns: aligns}
@@ -4887,6 +4799,23 @@ func getAttrViewTableAligns(table *av.Table, hiddenCol bool) (ret []int) {
 		ret = append(ret, align)
 	}
 	return
+}
+
+// filterExportAttributeViewTableRows 按发布访问规则过滤导出用的表格，filter 为 nil 时原样返回。
+// 过滤在表格副本上进行，发布读者导出数据库时不会看到绑定到不可访问文档的行和单元格。
+func filterExportAttributeViewTableRows(filter AVExportPublishFilter, table *av.Table,
+	avID, blockID string) *av.Table {
+	if nil == filter || nil == table {
+		return table
+	}
+
+	cloned := *table
+	cloned.Groups = nil
+	viewable := filter(&cloned, avID, blockID)
+	if filtered, ok := viewable.(*av.Table); ok {
+		return filtered
+	}
+	return table
 }
 
 // adjustHeadingLevel 聚焦导出（即非文档块）的情况下，将第一个标题层级提升为一级（如果开启了添加文档标题的话提升为二级）。

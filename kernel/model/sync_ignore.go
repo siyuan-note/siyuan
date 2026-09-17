@@ -114,6 +114,31 @@ func syncPathFilter(dataDir string, info os.FileInfo, absPath string) (bool, err
 	if ignored, err := dejavu.IgnorePath(info, absPath, rel, syncIgnoreRulePath, ".siyuan"); ignored || err != nil {
 		return ignored, err
 	}
+	parts := strings.Split(strings.TrimPrefix(filepath.ToSlash(rel), "/"), "/")
+	if len(parts) >= 2 && (parts[0] == "themes" || parts[0] == "icons") {
+		if stat, err := os.Lstat(filepath.Join(dataDir, parts[0], parts[1])); err == nil && stat.Mode()&os.ModeSymlink != 0 {
+			return true, nil
+		}
+	}
+	if len(parts) >= 2 && ((parts[0] == "themes" && isBuiltInTheme(parts[1])) ||
+		(parts[0] == "icons" && isBuiltInIcon(parts[1]))) {
+		if info != nil && info.IsDir() {
+			return true, filepath.SkipDir
+		}
+		return true, nil
+	}
+	if payload := appearanceStatePayloadPath(rel); payload != "" {
+		if stat, err := os.Lstat(filepath.Join(dataDir, filepath.FromSlash(payload))); err == nil && stat.Mode()&os.ModeSymlink != 0 {
+			return true, nil
+		}
+		_, matcher, err := getSyncIgnoreRules()
+		if err != nil {
+			return false, err
+		}
+		if matcher.MatchesPath(payload) {
+			return true, nil
+		}
+	}
 	if info != nil && info.IsDir() {
 		if info.Name() == "filesys_status_check" {
 			return true, filepath.SkipDir

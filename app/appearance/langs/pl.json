@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Sortowanie dokumentów",
+	"backlinkBlockSort": "Odwołania wewnątrz dokumentów",
+	"backlinkBodyOrder": "Kolejność w dokumencie (domyślna)",
+	"backlinkAnchorASC": "Tekst kotwicy rosnąco",
+	"backlinkAnchorDESC": "Tekst kotwicy malejąco",
 	"mobileSidebarSwipe": "Otwieraj panele boczne przesunięciem",
 	"mobileSidebarButtons": "Pokaż przyciski paneli bocznych",
 	"mobileSidebarAccessTip": "Pozostaw włączony co najmniej jeden sposób otwierania paneli bocznych",

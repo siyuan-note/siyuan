@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "文档排序",
+	"backlinkBlockSort": "文档内引用排序",
+	"backlinkBodyOrder": "正文顺序（默认）",
+	"backlinkAnchorASC": "锚文本升序",
+	"backlinkAnchorDESC": "锚文本降序",
 	"mobileSidebarSwipe": "滑动打开侧栏",
 	"mobileSidebarButtons": "显示侧栏按钮",
 	"mobileSidebarAccessTip": "至少保留一种打开侧栏的方式",

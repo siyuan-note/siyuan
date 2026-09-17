@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "문서 정렬",
+	"backlinkBlockSort": "문서 내 참조 정렬",
+	"backlinkBodyOrder": "본문 순서 (기본값)",
+	"backlinkAnchorASC": "앵커 텍스트 오름차순",
+	"backlinkAnchorDESC": "앵커 텍스트 내림차순",
 	"mobileSidebarSwipe": "스와이프로 사이드바 열기",
 	"mobileSidebarButtons": "사이드바 버튼 표시",
 	"mobileSidebarAccessTip": "사이드바를 여는 방법을 하나 이상 활성화하세요",

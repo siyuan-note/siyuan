@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Сортирање докумената",
+	"backlinkBlockSort": "Референце унутар докумената",
+	"backlinkBodyOrder": "Редослед у документу (подразумевано)",
+	"backlinkAnchorASC": "Текст везе растуће",
+	"backlinkAnchorDESC": "Текст везе опадајуће",
 	"mobileSidebarSwipe": "Отварање бочних трака превлачењем",
 	"mobileSidebarButtons": "Прикажи дугмад бочних трака",
 	"mobileSidebarAccessTip": "Оставите укључен бар један начин отварања бочних трака",

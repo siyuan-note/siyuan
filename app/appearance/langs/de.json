@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Dokumentsortierung",
+	"backlinkBlockSort": "Referenzen innerhalb von Dokumenten",
+	"backlinkBodyOrder": "Reihenfolge im Dokument (Standard)",
+	"backlinkAnchorASC": "Ankertext aufsteigend",
+	"backlinkAnchorDESC": "Ankertext absteigend",
 	"mobileSidebarSwipe": "Seitenleisten durch Wischen öffnen",
 	"mobileSidebarButtons": "Schaltflächen für Seitenleisten anzeigen",
 	"mobileSidebarAccessTip": "Mindestens eine Möglichkeit zum Öffnen der Seitenleisten muss aktiviert bleiben",

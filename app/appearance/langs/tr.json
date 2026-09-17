@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Belge sıralaması",
+	"backlinkBlockSort": "Belge içindeki başvurular",
+	"backlinkBodyOrder": "Belgedeki sıra (varsayılan)",
+	"backlinkAnchorASC": "Bağlantı metni artan",
+	"backlinkAnchorDESC": "Bağlantı metni azalan",
 	"mobileSidebarSwipe": "Kenar çubuklarını kaydırarak aç",
 	"mobileSidebarButtons": "Kenar çubuğu düğmelerini göster",
 	"mobileSidebarAccessTip": "Kenar çubuklarını açmak için en az bir yöntemi etkin tutun",

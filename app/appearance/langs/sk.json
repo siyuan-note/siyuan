@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Zoradenie dokumentov",
+	"backlinkBlockSort": "Odkazy v dokumentoch",
+	"backlinkBodyOrder": "Poradie v dokumente (predvolené)",
+	"backlinkAnchorASC": "Text odkazu vzostupne",
+	"backlinkAnchorDESC": "Text odkazu zostupne",
 	"mobileSidebarSwipe": "Otvárať bočné panely potiahnutím",
 	"mobileSidebarButtons": "Zobraziť tlačidlá bočných panelov",
 	"mobileSidebarAccessTip": "Ponechajte zapnutý aspoň jeden spôsob otvárania bočných panelov",

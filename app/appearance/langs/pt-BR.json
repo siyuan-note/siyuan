@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Ordenação de documentos",
+	"backlinkBlockSort": "Referências dentro dos documentos",
+	"backlinkBodyOrder": "Ordem no documento (padrão)",
+	"backlinkAnchorASC": "Texto âncora crescente",
+	"backlinkAnchorDESC": "Texto âncora decrescente",
 	"mobileSidebarSwipe": "Deslizar para abrir as barras laterais",
 	"mobileSidebarButtons": "Mostrar botões das barras laterais",
 	"mobileSidebarAccessTip": "Mantenha pelo menos uma forma de abrir as barras laterais ativada",

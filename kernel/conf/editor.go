@@ -98,6 +98,7 @@ type Editor struct {
 	BacklinkHideReference           bool           `json:"backlinkHideReference"`           // 反链面板是否隐藏传递型纯引用块
 	BacklinkShowBottom              bool           `json:"backlinkShowBottom"`              // 是否在文档底部显示反向链接
 	BacklinkSort                    *int           `json:"backlinkSort"`                    // 反向链接排序方式
+	BacklinkBlockSort               int            `json:"backlinkBlockSort"`               // 文档内引用排序：0 正文顺序，1 锚文本升序，2 锚文本降序
 	BackmentionSort                 *int           `json:"backmentionSort"`                 // 反链提及排序方式
 	HeadingNumber                   bool           `json:"headingNumber"`                   // 是否显示标题编号
 	HeadingNumberFormat             string         `json:"headingNumberFormat"`             // 标题编号格式

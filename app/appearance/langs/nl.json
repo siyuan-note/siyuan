@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Documenten sorteren",
+	"backlinkBlockSort": "Verwijzingen binnen documenten",
+	"backlinkBodyOrder": "Volgorde in het document (standaard)",
+	"backlinkAnchorASC": "Ankertekst oplopend",
+	"backlinkAnchorDESC": "Ankertekst aflopend",
 	"mobileSidebarSwipe": "Vegen om zijbalken te openen",
 	"mobileSidebarButtons": "Zijbalkknoppen tonen",
 	"mobileSidebarAccessTip": "Houd minstens één manier om zijbalken te openen ingeschakeld",

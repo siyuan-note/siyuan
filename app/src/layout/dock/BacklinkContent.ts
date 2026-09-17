@@ -783,6 +783,13 @@ export class BacklinkContent extends Model {
             this.searchBacklinks();
         };
         window.siyuan.menus.menu.remove();
+        if (type === "sort") {
+            window.siyuan.menus.menu.append(new MenuItem({
+                type: "readonly",
+                iconHTML: "",
+                label: window.siyuan.languages.backlinkDocumentSort,
+            }).element);
+        }
         window.siyuan.menus.menu.append(new MenuItem({
             checked: sort === "0",
             iconHTML: "",
@@ -848,6 +855,30 @@ export class BacklinkContent extends Model {
                 clickEvent("3");
             }
         }).element);
+        if (type === "sort") {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                type: "readonly",
+                iconHTML: "",
+                label: window.siyuan.languages.backlinkBlockSort,
+            }).element);
+            [window.siyuan.languages.backlinkBodyOrder, window.siyuan.languages.backlinkAnchorASC,
+                window.siyuan.languages.backlinkAnchorDESC].forEach((label, mode) => {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label,
+                    iconHTML: "",
+                    checked: mode === (window.siyuan.config.editor.backlinkBlockSort || 0),
+                    click: () => {
+                        window.siyuan.config.editor.backlinkBlockSort = mode;
+                        fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
+                            window.siyuan.config.editor = {...response.data, assetOpen: normalizeAssetOpenConfig(response.data.assetOpen)};
+                        });
+                        this.cancelContextRequests(this.tree.element, false);
+                        this.refreshExpandedContexts(new Set<string>(), true, true);
+                    },
+                }).element);
+            });
+        }
     }
 
     private applySourceFilter(filter: IBacklinkSourceFilter) {
@@ -1121,6 +1152,7 @@ export class BacklinkContent extends Model {
         const notebookId = liElement.getAttribute("data-notebook-id");
         if (!isMention) {
             param.sourceFilter = getBacklinkSourceFilterParam(this.sourceFilter);
+            param.blockSort = window.siyuan.config.editor.backlinkBlockSort || 0;
         }
         if (isEncryptedBox(notebookId)) {
             param.notebook = notebookId;

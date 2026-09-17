@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Urutan dokumen",
+	"backlinkBlockSort": "Urutan referensi dalam dokumen",
+	"backlinkBodyOrder": "Urutan dalam dokumen (bawaan)",
+	"backlinkAnchorASC": "Teks jangkar menaik",
+	"backlinkAnchorDESC": "Teks jangkar menurun",
 	"mobileSidebarSwipe": "Geser untuk membuka bilah samping",
 	"mobileSidebarButtons": "Tampilkan tombol bilah samping",
 	"mobileSidebarAccessTip": "Aktifkan setidaknya satu cara untuk membuka bilah samping",

@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "מיון מסמכים",
+	"backlinkBlockSort": "מיון הפניות בתוך מסמכים",
+	"backlinkBodyOrder": "סדר ההופעה במסמך (ברירת מחדל)",
+	"backlinkAnchorASC": "טקסט עוגן בסדר עולה",
+	"backlinkAnchorDESC": "טקסט עוגן בסדר יורד",
 	"mobileSidebarSwipe": "החלקה לפתיחת סרגלי הצד",
 	"mobileSidebarButtons": "הצגת כפתורי סרגלי הצד",
 	"mobileSidebarAccessTip": "יש להשאיר לפחות דרך אחת לפתיחת סרגלי הצד פעילה",

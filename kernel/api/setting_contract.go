@@ -376,6 +376,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.BacklinkHideReference = value.BacklinkHideReference
 	result.BacklinkShowBottom = value.BacklinkShowBottom
 	result.BacklinkSort = value.BacklinkSort
+	result.BacklinkBlockSort = value.BacklinkBlockSort
 	result.BackmentionSort = value.BackmentionSort
 	result.HeadingNumber = value.HeadingNumber
 	result.HeadingNumberFormat = value.HeadingNumberFormat

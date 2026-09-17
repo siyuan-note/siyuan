@@ -3,6 +3,7 @@ package apicontract
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 )
 
@@ -32,6 +33,7 @@ type BacklinkAttributeViewMatch struct {
 type BacklinkDocumentRequest struct {
 	BackmentionDocumentRequest
 	SourceFilter *BacklinkSourceFilter `json:"sourceFilter" api:"optional"`
+	BlockSort    int                   `json:"blockSort" api:"optional"` // 0 正文顺序，1 锚文本自然升序，2 锚文本自然降序
 }
 
 type BacklinkSourceFilter struct {
@@ -80,6 +82,11 @@ func init() {
 			return request, err
 		}
 		request.SourceFilter = decodeBacklinkSourceFilter(fields["sourceFilter"])
+		if raw, exists := fields["blockSort"]; exists {
+			if err = json.Unmarshal(raw, &request.BlockSort); err != nil || bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+				return request, fmt.Errorf("invalid blockSort: expected integer")
+			}
+		}
 		return request, nil
 	}
 	GetBackmentionDoc.decodeRequest = func(reader io.Reader) (request BackmentionDocumentRequest, err error) {

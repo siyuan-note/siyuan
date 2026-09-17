@@ -13945,6 +13945,9 @@
     "BacklinkDocumentRequestInput": {
       "type": "object",
       "properties": {
+        "blockSort": {
+          "type": "integer"
+        },
         "containChildren": {
           "anyOf": [
             {
@@ -36552,6 +36555,16 @@
             }
           ]
         },
+        "backlinkBlockSort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "backlinkContainChildren": {
           "anyOf": [
             {
@@ -40011,6 +40024,9 @@
             }
           ]
         },
+        "backlinkBlockSort": {
+          "type": "integer"
+        },
         "backlinkContainChildren": {
           "type": "boolean"
         },
@@ -40300,6 +40316,7 @@
         "allowHTMLBLockScript",
         "allowSVGScript",
         "assetOpen",
+        "backlinkBlockSort",
         "backlinkContainChildren",
         "backlinkExpandCount",
         "backlinkHideReference",

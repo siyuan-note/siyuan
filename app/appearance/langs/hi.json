@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "दस्तावेज़ों का क्रम",
+	"backlinkBlockSort": "दस्तावेज़ों के भीतर संदर्भों का क्रम",
+	"backlinkBodyOrder": "दस्तावेज़ में क्रम (डिफ़ॉल्ट)",
+	"backlinkAnchorASC": "एंकर पाठ आरोही क्रम में",
+	"backlinkAnchorDESC": "एंकर पाठ अवरोही क्रम में",
 	"mobileSidebarSwipe": "साइडबार खोलने के लिए स्वाइप करें",
 	"mobileSidebarButtons": "साइडबार बटन दिखाएँ",
 	"mobileSidebarAccessTip": "साइडबार खोलने का कम से कम एक तरीका सक्षम रखें",

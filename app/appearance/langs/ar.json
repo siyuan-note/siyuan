@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "ترتيب المستندات",
+	"backlinkBlockSort": "ترتيب المراجع داخل المستندات",
+	"backlinkBodyOrder": "ترتيب الظهور في المستند (الافتراضي)",
+	"backlinkAnchorASC": "نص الرابط تصاعديًا",
+	"backlinkAnchorDESC": "نص الرابط تنازليًا",
 	"mobileSidebarSwipe": "السحب لفتح الأشرطة الجانبية",
 	"mobileSidebarButtons": "إظهار أزرار الأشرطة الجانبية",
 	"mobileSidebarAccessTip": "أبقِ طريقة واحدة على الأقل لفتح الأشرطة الجانبية مفعّلة",

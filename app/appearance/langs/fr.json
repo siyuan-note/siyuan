@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Tri des documents",
+	"backlinkBlockSort": "Références dans les documents",
+	"backlinkBodyOrder": "Ordre dans le document (par défaut)",
+	"backlinkAnchorASC": "Texte d’ancrage croissant",
+	"backlinkAnchorDESC": "Texte d’ancrage décroissant",
 	"mobileSidebarSwipe": "Balayer pour ouvrir les panneaux latéraux",
 	"mobileSidebarButtons": "Afficher les boutons des panneaux latéraux",
 	"mobileSidebarAccessTip": "Gardez au moins un moyen d’ouvrir les panneaux latéraux activé",

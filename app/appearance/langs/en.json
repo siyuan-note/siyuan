@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Document sorting",
+	"backlinkBlockSort": "References within documents",
+	"backlinkBodyOrder": "Document order (default)",
+	"backlinkAnchorASC": "Anchor text ascending",
+	"backlinkAnchorDESC": "Anchor text descending",
 	"mobileSidebarSwipe": "Swipe to open sidebars",
 	"mobileSidebarButtons": "Show sidebar buttons",
 	"mobileSidebarAccessTip": "Keep at least one way to open sidebars enabled",

@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "การเรียงเอกสาร",
+	"backlinkBlockSort": "การเรียงการอ้างอิงภายในเอกสาร",
+	"backlinkBodyOrder": "ลำดับในเนื้อหา (ค่าเริ่มต้น)",
+	"backlinkAnchorASC": "ข้อความลิงก์จากน้อยไปมาก",
+	"backlinkAnchorDESC": "ข้อความลิงก์จากมากไปน้อย",
 	"mobileSidebarSwipe": "ปัดเพื่อเปิดแถบด้านข้าง",
 	"mobileSidebarButtons": "แสดงปุ่มแถบด้านข้าง",
 	"mobileSidebarAccessTip": "เปิดใช้งานวิธีเปิดแถบด้านข้างไว้อย่างน้อยหนึ่งวิธี",

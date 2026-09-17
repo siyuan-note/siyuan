@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "ドキュメントの並び順",
+	"backlinkBlockSort": "ドキュメント内の参照の並び順",
+	"backlinkBodyOrder": "本文の順序（既定）",
+	"backlinkAnchorASC": "アンカーテキストの昇順",
+	"backlinkAnchorDESC": "アンカーテキストの降順",
 	"mobileSidebarSwipe": "スワイプでサイドバーを開く",
 	"mobileSidebarButtons": "サイドバーボタンを表示",
 	"mobileSidebarAccessTip": "サイドバーを開く方法を少なくとも1つ有効にしてください",

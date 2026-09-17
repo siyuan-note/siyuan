@@ -1,4 +1,9 @@
 {
+	"backlinkDocumentSort": "Сортування документів",
+	"backlinkBlockSort": "Посилання всередині документів",
+	"backlinkBodyOrder": "Порядок у документі (типово)",
+	"backlinkAnchorASC": "Текст посилання за зростанням",
+	"backlinkAnchorDESC": "Текст посилання за спаданням",
 	"mobileSidebarSwipe": "Відкривати бічні панелі свайпом",
 	"mobileSidebarButtons": "Показувати кнопки бічних панелей",
 	"mobileSidebarAccessTip": "Залиште ввімкненим принаймні один спосіб відкриття бічних панелей",

@@ -124,11 +124,7 @@ const ACTION_HANDLERS = {
         }
         const item = installedItem || pkgItem;
         /// #if !BROWSER
-        if (["icons", "themes"].includes(pkgType)) {
-            useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", pkgType, item.name));
-        } else {
-            useShell("openPath", path.join(window.siyuan.config.system.dataDir, pkgType, item.name));
-        }
+        useShell("openPath", path.join(window.siyuan.config.system.dataDir, pkgType, item.name));
         /// #endif
         return HANDLED;
     }) satisfies TBazaarActionHandler,

@@ -56,7 +56,7 @@ The state is an internal kernel format, separate from the manifest maintained by
 
 `files` maps relative POSIX paths within the package to the SHA-256 digests of plaintext files. The inventory follows existing synchronization filtering rules: ordinary hidden directories, dot-prefixed files, and `.tmp` files are excluded, while permitted `.siyuan` directories are retained. Unknown versions, invalid paths, case or Unicode normalization collisions, missing files, and digest mismatches return errors and preserve the source material.
 
-A deletion state retains installation source information, sets `deleted: true`, and contains an empty `files` object; the package directory is absent. Migration creates a state with `migration: true`. Explicit installation, updates, and local edits create ordinary states. A late migration must not remove an existing deletion record. An explicit reinstall creates a new non-deleted state.
+A deletion state retains installation source information, sets `deleted: true`, and contains an empty `files` object. Synchronized package files are removed; an empty directory or retained local ignored files do not count as a reinstall or block subsequent snapshots and synchronization. Migration creates a state with `migration: true`. Explicit installation, updates, and local edits create ordinary states. A late migration must not remove an existing deletion record. An explicit reinstall creates a new non-deleted state.
 
 ### Immutable package events
 

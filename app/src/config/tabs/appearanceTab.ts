@@ -810,7 +810,7 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             afterMount: (root) => {
                 /// #if !BROWSER
                 root.querySelector("#appearanceOpenTheme")?.addEventListener("click", () => {
-                    useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "themes"));
+                    useShell("openPath", path.join(window.siyuan.config.system.dataDir, "themes"));
                 });
                 /// #endif
             },
@@ -852,7 +852,7 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             afterMount: (root) => {
                 /// #if !BROWSER
                 root.querySelector("#appearanceOpenIcon")?.addEventListener("click", () => {
-                    useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "icons"));
+                    useShell("openPath", path.join(window.siyuan.config.system.dataDir, "icons"));
                 });
                 /// #endif
             },

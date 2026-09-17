@@ -251,7 +251,8 @@ func PrepareAppearancePackages(ignored ...func(kind, name string) bool) error {
 					return scanErr
 				}
 				if len(files) == 0 {
-					if state == nil {
+					// 删除后保留的空目录和本机忽略文件不构成重新安装。
+					if state == nil || state.Deleted {
 						continue
 					}
 					return fmt.Errorf("%w: %s/%s", ErrAppearancePackageEmpty, kind, name)

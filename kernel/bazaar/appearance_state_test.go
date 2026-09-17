@@ -109,6 +109,55 @@ func TestAppearanceStateRestoresIsolationBeforePackageChanges(t *testing.T) {
 	}
 }
 
+func TestAppearanceStateDeletedPreservesIgnoredDirectories(t *testing.T) {
+	for _, kind := range []string{"themes", "icons"} {
+		for _, contents := range []string{"empty", "ignored"} {
+			t.Run(kind+"/"+contents, func(t *testing.T) {
+				setupAppearanceStateTest(t)
+				if err := DeleteAppearancePackage(kind, "example"); err != nil {
+					t.Fatal(err)
+				}
+				payload, statePath, _ := appearancePackagePaths(kind, "example")
+				before, err := os.ReadFile(statePath)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err = os.MkdirAll(payload, 0755); err != nil {
+					t.Fatal(err)
+				}
+				ignored := map[string]string{}
+				if contents == "ignored" {
+					ignored = map[string]string{".git/config": "local repository", ".draft": "draft", "cache.tmp": "cache"}
+					for name, content := range ignored {
+						writeAppearanceTestFile(t, payload, name, content)
+					}
+				}
+				if err = PrepareAppearancePackages(); err != nil {
+					t.Fatalf("deleted package blocked snapshot preparation: %v", err)
+				}
+				after, err := os.ReadFile(statePath)
+				if err != nil || string(after) != string(before) {
+					t.Fatalf("deleted state changed: %s %v", after, err)
+				}
+				for name, content := range ignored {
+					data, readErr := os.ReadFile(filepath.Join(payload, filepath.FromSlash(name)))
+					if readErr != nil || string(data) != content {
+						t.Fatalf("ignored local file changed: %s: %s %v", name, data, readErr)
+					}
+				}
+				writeAppearanceTestFile(t, payload, ".siyuan/settings.json", "{}")
+				if err = PrepareAppearancePackages(); err == nil {
+					t.Fatal("synchronizable files resurrected a deleted package without explicit installation")
+				}
+				after, err = os.ReadFile(statePath)
+				if err != nil || string(after) != string(before) {
+					t.Fatalf("rejected reinstall changed deleted state: %s %v", after, err)
+				}
+			})
+		}
+	}
+}
+
 func TestAppearanceStateCloudIntegration(t *testing.T) {
 	for _, onDemand := range []bool{false, true} {
 		t.Run(map[bool]string{false: "full", true: "on-demand"}[onDemand], func(t *testing.T) {
@@ -163,9 +212,20 @@ func TestAppearanceStateCloudIntegration(t *testing.T) {
 				writeAppearanceTestFile(t, source, "theme.json", `{"name":"example","version":"1.0.0"}`)
 				writeAppearanceTestFile(t, source, "theme.css", css)
 				writeAppearanceTestFile(t, source, "assets/font.woff", asset)
+				writeAppearanceTestFile(t, source, ".siyuan/settings.json", css)
+				writeAppearanceTestFile(t, source, "assets/.siyuan/settings.json", asset)
+				writeAppearanceTestFile(t, source, "assets.tmp/font.woff", asset)
 				if err := PublishAppearancePackage(source, "themes", "example", PackageInfo{InstallTime: 1}, false, update); err != nil {
 					t.Fatal(err)
 				}
+			}
+			selectRepo(a)
+			if err := PrepareAppearancePackages(); err != nil {
+				t.Fatal(err)
+			}
+			empty, err := a.Index("before installation", true, nil)
+			if err != nil {
+				t.Fatal(err)
 			}
 			install(a, "base css", "base font", false)
 			syncRepo(a)
@@ -177,7 +237,11 @@ func TestAppearanceStateCloudIntegration(t *testing.T) {
 			if err := ValidateAppearancePackage("themes", "example"); err != nil {
 				t.Fatal(err)
 			}
-			for name, want := range map[string]string{"theme.css": "cloud complete css", "assets/font.woff": "cloud complete font"} {
+			for name, want := range map[string]string{
+				"theme.css": "cloud complete css", "assets/font.woff": "cloud complete font",
+				".siyuan/settings.json": "cloud complete css", "assets/.siyuan/settings.json": "cloud complete font",
+				"assets.tmp/font.woff": "cloud complete font",
+			} {
 				data, err := os.ReadFile(filepath.Join(util.ThemesPath, "example", filepath.FromSlash(name)))
 				if err != nil || string(data) != want {
 					t.Fatalf("mixed kernel/DejaVu package %s: %s %v", name, data, err)
@@ -187,6 +251,10 @@ func TestAppearanceStateCloudIntegration(t *testing.T) {
 			if err != nil || len(deferred) != 0 {
 				t.Fatalf("appearance asset deferred: %v %v", deferred, err)
 			}
+			if changed, checkErr := b.CheckSnapshot(); checkErr != nil || changed {
+				t.Fatalf("unchanged package kept changing snapshot: %t %v", changed, checkErr)
+			}
+			writeAppearanceTestFile(t, b.DataPath, "themes/example/.git/config", "local development state")
 			selectRepo(a)
 			if err = DeleteAppearancePackage("themes", "example"); err != nil {
 				t.Fatal(err)
@@ -198,6 +266,29 @@ func TestAppearanceStateCloudIntegration(t *testing.T) {
 			if err != nil || !state.Deleted {
 				t.Fatalf("kernel tombstone did not converge: %+v %v", state, err)
 			}
+			writeAppearanceTestFile(t, b.DataPath, "after-delete.txt", "note after package deletion")
+			syncRepo(b)
+			syncRepo(a)
+			data, err := os.ReadFile(filepath.Join(a.DataPath, "after-delete.txt"))
+			if err != nil || string(data) != "note after package deletion" {
+				t.Fatalf("package deletion blocked ordinary note sync: %s %v", data, err)
+			}
+			data, err = os.ReadFile(filepath.Join(b.DataPath, "themes", "example", ".git", "config"))
+			if err != nil || string(data) != "local development state" {
+				t.Fatalf("package deletion discarded ignored files: %s %v", data, err)
+			}
+			install(a, "reinstalled css", "reinstalled font", false)
+			syncRepo(a)
+			if _, _, err = a.Checkout(empty.ID, nil); err != nil {
+				t.Fatal(err)
+			}
+			_, statePath, _ = appearancePackagePaths("themes", "example")
+			state, err = readAppearanceState(statePath)
+			if err != nil || !state.Deleted {
+				t.Fatalf("snapshot did not restore deletion: %+v %v", state, err)
+			}
+			syncRepo(a)
+			syncRepo(b)
 		})
 	}
 }

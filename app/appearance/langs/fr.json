@@ -1,4 +1,6 @@
 {
+	"mobileKernelReconnecting": "Reconnexion en cours...",
+	"mobileKernelReconnectPrompt": "La connexion au noyau a été temporairement interrompue. SiYuan tentera de se reconnecter automatiquement. Au retour de l’arrière-plan, le rétablissement de la connexion peut prendre quelques secondes. Veuillez patienter. Cette fenêtre se fermera automatiquement une fois la connexion rétablie. Si la connexion n’est pas rétablie après une longue attente, essayez de rouvrir SiYuan.",
 	"backlinkGlobalSort": "Tri global des références",
 	"backlinkDocumentSort": "Tri des documents",
 	"backlinkBlockSort": "Références dans les documents",

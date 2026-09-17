@@ -1,4 +1,6 @@
 {
+	"mobileKernelReconnecting": "Reconectando...",
+	"mobileKernelReconnectPrompt": "La conexión con el núcleo se ha interrumpido temporalmente. SiYuan intentará reconectarse automáticamente. Al volver del segundo plano, restablecer la conexión puede tardar unos segundos. Espera, por favor. Esta ventana se cerrará automáticamente cuando se restablezca la conexión. Si no se restablece tras una espera prolongada, intenta volver a abrir SiYuan.",
 	"backlinkGlobalSort": "Orden global de referencias",
 	"backlinkDocumentSort": "Orden de documentos",
 	"backlinkBlockSort": "Referencias dentro de los documentos",

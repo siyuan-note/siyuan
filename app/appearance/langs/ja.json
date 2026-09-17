@@ -1,4 +1,6 @@
 {
+	"mobileKernelReconnecting": "再接続しています...",
+	"mobileKernelReconnectPrompt": "カーネルとの接続が一時的に切断されました。SiYuan は自動的に再接続を試みます。バックグラウンドから戻った際は、接続の復旧に数秒かかることがありますので、しばらくお待ちください。接続が復旧すると、このウィンドウは自動的に閉じます。長時間待っても復旧しない場合は、SiYuan を開き直してください。",
 	"backlinkGlobalSort": "参照全体の並び順",
 	"backlinkDocumentSort": "ドキュメントの並び順",
 	"backlinkBlockSort": "ドキュメント内の参照の並び順",

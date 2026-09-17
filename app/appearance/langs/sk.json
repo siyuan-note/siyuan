@@ -1,4 +1,6 @@
 {
+	"mobileKernelReconnecting": "Opätovné pripájanie...",
+	"mobileKernelReconnectPrompt": "Spojenie s jadrom bolo dočasne prerušené. SiYuan sa automaticky pokúsi znova pripojiť. Pri návrate z pozadia môže obnovenie spojenia trvať niekoľko sekúnd. Počkajte, prosím. Toto okno sa po obnovení spojenia automaticky zatvorí. Ak sa spojenie neobnoví ani po dlhšom čakaní, skúste znova otvoriť SiYuan.",
 	"backlinkGlobalSort": "Globálne zoradenie odkazov",
 	"backlinkDocumentSort": "Zoradenie dokumentov",
 	"backlinkBlockSort": "Odkazy v dokumentoch",

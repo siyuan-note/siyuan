@@ -1,4 +1,8 @@
 @media (max-width: 750px) {
+  #saveSyncConfig {
+    order: -1;
+  }
+
   #encryptedNotebookEnabledActions {
     flex: 1 1 100%;
     flex-wrap: wrap;

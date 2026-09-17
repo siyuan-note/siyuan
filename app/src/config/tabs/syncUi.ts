@@ -341,11 +341,11 @@ const genProviderActionButtons = (dataType: SyncProviderConfigKey) => {
         <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
     </button>` : "";
     return `<div class="b3-label b3-label--inner fn__flex fn__flex-wrap">
-    ${dataType === "s3" ? `<button class="b3-button fn__size200" id="saveSyncConfig">${window.siyuan.languages.save}</button><div class="fn__space"></div>` : ""}
     <div class="fn__flex-1"></div>
     <button class="b3-button b3-button--outline fn__size200" id="purgeCloudData">
         <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.cloudStoragePurge}
     </button>${importExportHtml}
+    ${dataType === "s3" ? `<div class="fn__space"></div><button class="b3-button fn__size200" id="saveSyncConfig">${window.siyuan.languages.save}</button>` : ""}
 </div>`;
 };
 

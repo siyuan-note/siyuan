@@ -1300,17 +1300,30 @@ func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess PublishAccess,
 	ret.IAL[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
 
 	bt := treenode.GetBlockTree(info.RootID)
-	if bt != nil {
-		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-		if (password != "" && !CheckPublishAuthCookie(c, passwordID, password)) || !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-			ret.IAL["name"] = ""
-			ret.IAL["alias"] = ""
-			ret.IAL["memo"] = ""
-			ret.IAL["bookmark"] = ""
-			ret.IAL["tags"] = ""
-			ret.RefCount = 0
-			ret.RefIDs = []string{}
+	if nil == bt {
+		// 无法定位文档路径时不给出下级文档数，避免泄漏发布排除文档的数量
+		ret.SubFileCount = 0
+		return
+	}
+
+	// 下级文档数只统计发布可见的文档，与读者可见的文档树口径一致
+	if 0 < ret.SubFileCount {
+		if IsBoxDoc(bt.BoxID, bt.ID) {
+			ret.SubFileCount = BoxDocSubFileCountForPublish(bt.BoxID, publishAccess)
+		} else {
+			ret.SubFileCount = BoxDocSubFileCountForPublishAt(bt.BoxID, bt.Path, publishAccess)
 		}
+	}
+
+	passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+	if (password != "" && !CheckPublishAuthCookie(c, passwordID, password)) || !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+		ret.IAL["name"] = ""
+		ret.IAL["alias"] = ""
+		ret.IAL["memo"] = ""
+		ret.IAL["bookmark"] = ""
+		ret.IAL["tags"] = ""
+		ret.RefCount = 0
+		ret.RefIDs = []string{}
 	}
 	return
 }

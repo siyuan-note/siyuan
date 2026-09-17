@@ -764,3 +764,112 @@ func TestFilterFileTreePublishAccess(t *testing.T) {
 		t.Fatalf("administrator IDs should remain unchanged: %v", filtered)
 	}
 }
+
+// TestListDocsByPathFiltersSubFileCountForPublishReader 验证发布读者看到的文档树
+// 下级文档数只统计发布可见的文档，避免据此推断被排除文档的数量。
+func TestListDocsByPathFiltersSubFileCountForPublishReader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	const (
+		boxID       = "20260726000000-boxid01"
+		parentID    = "20260726000001-parent1"
+		publicID    = "20260726000002-public1"
+		hiddenID    = "20260726000003-hidden1"
+		forbiddenID = "20260726000004-forbid1"
+	)
+	oldDataDir, oldConf := util.DataDir, model.Conf
+	oldPublishAccess := model.GetPublishAccess()
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.FileTree = conf.NewFileTree()
+	const testLang = "filetree-subfile-count-test"
+	installAPITestTimeLangs(t, testLang)
+	model.Conf.Lang = testLang
+	t.Cleanup(func() {
+		if err := model.SetPublishAccess(oldPublishAccess); err != nil {
+			t.Errorf("restore publish access failed: %v", err)
+		}
+		util.DataDir, model.Conf = oldDataDir, oldConf
+	})
+	if err := model.SetPublishAccess(model.PublishAccess{}); err != nil {
+		t.Fatal(err)
+	}
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Closed = false
+	if err := (&model.Box{ID: boxID}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	boxDir := filepath.Join(util.DataDir, boxID)
+	if err := os.MkdirAll(filepath.Join(boxDir, parentID), 0755); err != nil {
+		t.Fatal(err)
+	}
+	// 文档属性必须非空，否则会被当作损坏数据移出笔记本
+	writeDoc := func(dir, id string) {
+		t.Helper()
+		content := `{"Properties":{"id":"` + id + `","title":"` + id + `"}}`
+		if err := os.WriteFile(filepath.Join(boxDir, dir, id+".sy"), []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeDoc(".", parentID)
+	writeDoc(parentID, publicID)
+	writeDoc(parentID, hiddenID)
+	writeDoc(parentID, forbiddenID)
+
+	requestSubFileCount := func(role model.Role) int {
+		t.Helper()
+
+		engine := gin.New()
+		engine.Use(func(c *gin.Context) {
+			c.Set(model.RoleContextKey, role)
+			c.Next()
+		})
+		engine.POST("/api/filetree/listDocsByPath", listDocsByPath)
+
+		recorder := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(
+			http.MethodPost,
+			"/api/filetree/listDocsByPath",
+			strings.NewReader(`{"notebook":"`+boxID+`","path":"/"}`),
+		)
+		httpRequest.Header.Set("Content-Type", "application/json")
+		engine.ServeHTTP(recorder, httpRequest)
+		requireAPIContract(t, http.MethodPost, "/api/filetree/listDocsByPath", recorder)
+
+		response := &struct {
+			Code int    `json:"code"`
+			Msg  string `json:"msg"`
+			Data struct {
+				Files []*model.File `json:"files"`
+			} `json:"data"`
+		}{}
+		if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+			t.Fatalf("unmarshal list response failed: %v", err)
+		}
+		if 0 != response.Code {
+			t.Fatalf("list docs by path failed: %s", recorder.Body.String())
+		}
+		for _, file := range response.Data.Files {
+			if file.ID == parentID {
+				return file.SubFileCount
+			}
+		}
+		t.Fatalf("parent document not found: %s", recorder.Body.String())
+		return -1
+	}
+
+	if actual := requestSubFileCount(model.RoleAdministrator); 3 != actual {
+		t.Fatalf("administrator subfile count = %d, want 3", actual)
+	}
+
+	if err := model.SetPublishAccess(model.PublishAccess{
+		{ID: hiddenID, Visible: false},
+		{ID: forbiddenID, Visible: false, Disable: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if actual := requestSubFileCount(model.RoleReader); 1 != actual {
+		t.Fatalf("reader subfile count = %d, want only the published one", actual)
+	}
+}

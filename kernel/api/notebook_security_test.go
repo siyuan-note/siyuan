@@ -190,8 +190,8 @@ func TestGetNotebookInfoHidesInvisibleNotebookFromReader(t *testing.T) {
 	}
 }
 
-// installNotebookSecurityTimeLangs 为指定语言安装时间本地化标签，避免聚合信息渲染相对时间失败。
-func installNotebookSecurityTimeLangs(t *testing.T, lang string) {
+// installAPITestTimeLangs 为指定语言安装时间本地化标签，避免聚合信息渲染相对时间失败。
+func installAPITestTimeLangs(t *testing.T, lang string) {
 	t.Helper()
 
 	oldLang, hadLang := util.TimeLangs[lang]
@@ -219,7 +219,7 @@ func TestGetNotebookInfoExcludesPublishExcludedDocumentsForReader(t *testing.T) 
 	model.Conf = model.NewAppConf()
 	model.Conf.FileTree = conf.NewFileTree()
 	const testLang = "notebook-info-publish-test"
-	installNotebookSecurityTimeLangs(t, testLang)
+	installAPITestTimeLangs(t, testLang)
 	model.Conf.Lang = testLang
 	t.Cleanup(func() {
 		if err := model.SetPublishAccess(oldPublishAccess); err != nil {

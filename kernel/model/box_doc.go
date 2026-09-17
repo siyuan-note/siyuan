@@ -274,16 +274,21 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 
 // BoxDocSubFileCount 返回笔记本顶层文档的可见下级文档数。
 func BoxDocSubFileCount(boxID string) int {
-	return boxDocSubFileCount(boxID, nil)
+	return boxDocSubFileCount(boxID, "/", nil)
 }
 
 // BoxDocSubFileCountForPublish 返回发布访问控制下笔记本顶层文档的可见下级文档数。
 func BoxDocSubFileCountForPublish(boxID string, publishAccess PublishAccess) int {
-	return boxDocSubFileCount(boxID, PublishVisibleDocPathFilter(boxID, publishAccess))
+	return boxDocSubFileCount(boxID, "/", PublishVisibleDocPathFilter(boxID, publishAccess))
 }
 
-func boxDocSubFileCount(boxID string, include func(string) bool) int {
-	ret, _ := visibleDocCount(boxID, "/", func(p string) map[string]string {
+// BoxDocSubFileCountForPublishAt 返回发布访问控制下指定文档的可见直接子文档数，docPath 为该文档的 .sy 路径。
+func BoxDocSubFileCountForPublishAt(boxID, docPath string, publishAccess PublishAccess) int {
+	return boxDocSubFileCount(boxID, strings.TrimSuffix(docPath, ".sy"), PublishVisibleDocPathFilter(boxID, publishAccess))
+}
+
+func boxDocSubFileCount(boxID, parentPath string, include func(docPath string) bool) int {
+	ret, _ := visibleDocCount(boxID, parentPath, func(p string) map[string]string {
 		return filesys.DocIAL(filepath.Join(util.DataDir, boxID, p))
 	}, include)
 	return ret

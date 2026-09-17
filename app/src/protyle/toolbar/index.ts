@@ -1,5 +1,7 @@
 import {Divider} from "./Divider";
-import {renderMultiSelectToolbar} from "../../mobile/util/multiSelectToolbar";
+import {renderMultiSelectToolbar, updateMultiSelectToolbar} from "../../mobile/util/multiSelectToolbar";
+import {selectAllLoadedBlocks} from "../wysiwyg/blockSelection";
+import {showSelectAllIncompleteTip} from "../util/selectAllTip";
 import {ContractFormData} from "../../util/contractFormData";
 import {Font, hasSameTextStyle, setFontStyle} from "./Font";
 import {
@@ -2094,6 +2096,12 @@ export class Toolbar {
             this.subElement.classList.add("fn__none");
             this.subElement.innerHTML = "";
             hideElements(["select"], protyle);
+        }, () => {
+            window.getSelection()?.removeAllRanges();
+            activeBlur();
+            const elements = selectAllLoadedBlocks(protyle.wysiwyg.element);
+            updateMultiSelectToolbar(this.subElement, elements.length);
+            showSelectAllIncompleteTip(protyle);
         });
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");

@@ -862,6 +862,18 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 		dataVersion = cache.SetAVDataWithVersionInBox(avID, boxID, data)
 	}
 
+	ret, err = ParseAttributeViewData(avID, data)
+	if nil == err {
+		if resolveColors {
+			ret.ResolveDirectColors()
+			cache.SetAVSearchDataInBox(avID, boxID, dataVersion, newAttributeViewSearchInfo(ret))
+		}
+	}
+	return
+}
+
+// ParseAttributeViewData 解析已经完成解密认证的数据库数据，复用现有格式兼容与规范化处理。
+func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err error) {
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
 	if err = json.Unmarshal(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
@@ -924,12 +936,6 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 	}
 	if nil == err {
 		err = ret.NormalizeRichText()
-	}
-	if nil == err {
-		if resolveColors {
-			ret.ResolveDirectColors()
-			cache.SetAVSearchDataInBox(avID, boxID, dataVersion, newAttributeViewSearchInfo(ret))
-		}
 	}
 	return
 }

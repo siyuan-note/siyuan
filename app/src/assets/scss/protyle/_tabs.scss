@@ -7,12 +7,12 @@
     // 将嵌套页签的层级限制在当前块内，避免子页签吸顶栏覆盖父页签栏。
     isolation: isolate;
     border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius-b);
+    border-radius: var(--b3-border-radius);
 
     &[data-node-id] {
       padding: 0;
       margin: 4px 0;
-      border-radius: var(--b3-border-radius-b);
+      border-radius: var(--b3-border-radius);
     }
 
     &.protyle-wysiwyg--select::after,
@@ -47,6 +47,21 @@
 
     &::-webkit-scrollbar {
       display: none;
+    }
+
+    // 方向取自当前列表，避免外层页签的布局影响嵌套页签。
+    &[aria-orientation="vertical"] {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+      flex-basis: 100%;
+      max-height: 60vh;
+
+      > .tabs-tab {
+        justify-content: flex-start;
+        max-width: none;
+        margin: 0;
+      }
     }
   }
 
@@ -151,6 +166,14 @@
     &.protyle-wysiwyg--hl::after {
       border-radius: inherit;
     }
+
+    &[data-tabs-hidden="true"] {
+      display: none;
+    }
+
+    &[data-tabs-hidden]:not([data-tabs-editing="true"]) > .tab-item-info {
+      display: none;
+    }
   }
 
   .tab-item-title {
@@ -169,7 +192,7 @@
     visibility: hidden;
   }
 
-  .tabs[data-tabs-orientation="horizontal"] > .tabs-header > .tabs-list > .tabs-tab--editing {
+  .tabs-list[aria-orientation="horizontal"] > .tabs-tab--editing {
     width: 186px;
     max-width: 100%;
     justify-content: flex-start;
@@ -251,12 +274,12 @@
           border-style: inherit;
           border-color: var(--b3-border-color);
           border-bottom-width: 0;
-          border-radius: var(--tabs-border-top-left-radius, var(--b3-border-radius-b)) var(--tabs-border-top-right-radius, var(--b3-border-radius-b)) 0 0;
+          border-radius: var(--tabs-border-top-left-radius, var(--b3-border-radius)) var(--tabs-border-top-right-radius, var(--b3-border-radius)) 0 0;
           pointer-events: none;
         }
 
         &::after {
-          border-radius: max(0px, calc(var(--tabs-border-top-left-radius, var(--b3-border-radius-b)) - var(--tabs-border-top-width, 1px))) max(0px, calc(var(--tabs-border-top-right-radius, var(--b3-border-radius-b)) - var(--tabs-border-top-width, 1px))) 0 0;
+          border-radius: max(0px, calc(var(--tabs-border-top-left-radius, var(--b3-border-radius)) - var(--tabs-border-top-width, 1px))) max(0px, calc(var(--tabs-border-top-right-radius, var(--b3-border-radius)) - var(--tabs-border-top-width, 1px))) 0 0;
         }
       }
 
@@ -269,19 +292,9 @@
       }
     }
 
-    > .tab-item[data-tabs-hidden="true"] {
-      display: none;
-    }
-
-    > .tab-item:not([data-tabs-editing="true"]) > .tab-item-info {
-      display: none;
-    }
-
     &[data-tabs-orientation="vertical"] {
       display: grid;
       grid-template-columns: fit-content(min(200px, 40%)) minmax(0, 1fr);
-      // 正文左侧保留块标及折叠按钮的操作空间，避免与页签按钮重叠。
-      column-gap: 48px;
 
       // 分隔线占满网格行，标题栏按内容高度吸顶，加号紧跟页签列表。
       > .tabs-divider {
@@ -306,22 +319,8 @@
         padding-top: 6px;
         border-bottom: 0;
         border-right: 1px solid var(--b3-border-color);
-        border-top-left-radius: max(0px, calc(var(--b3-border-radius-b) - var(--tabs-border-left-width, 1px)));
-        border-bottom-left-radius: max(0px, calc(var(--b3-border-radius-b) - var(--tabs-border-left-width, 1px)));
-
-        > .tabs-list {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 4px;
-          flex-basis: 100%;
-          max-height: 60vh;
-
-          > .tabs-tab {
-            justify-content: flex-start;
-            max-width: none;
-            margin: 0;
-          }
-        }
+        border-top-left-radius: max(0px, calc(var(--b3-border-radius) - var(--tabs-border-left-width, 1px)));
+        border-bottom-left-radius: max(0px, calc(var(--b3-border-radius) - var(--tabs-border-left-width, 1px)));
       }
     }
   }
@@ -345,33 +344,33 @@
   .protyle-wysiwyg, .b3-typography {
     .tabs[data-tabs-ready="true"] {
       display: block !important;
+    }
 
-      > .tabs-header, > .tabs-divider {
-        display: none !important;
-      }
+    .tabs-header, .tabs-divider {
+      display: none !important;
+    }
 
-      > .tab-item[data-tabs-hidden], > .tab-item > .tab-item-info {
-        display: block !important;
-      }
+    .tab-item[data-tabs-hidden], .tab-item[data-tabs-hidden] > .tab-item-info {
+      display: block !important;
+    }
 
-      > .tab-item > .tabs-title-editor {
-        position: static;
-        width: auto !important;
-        height: auto !important;
-        clip-path: none !important;
-        padding: 0;
-        background: transparent;
-        box-shadow: none;
-        font-size: inherit;
+    .tabs-title-editor {
+      position: static;
+      width: auto !important;
+      height: auto !important;
+      clip-path: none !important;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+      font-size: inherit;
 
-        .tab-item-title[spellcheck] {
-          font-weight: bold;
-          white-space: normal;
-          overflow: visible;
+      .tab-item-title[spellcheck] {
+        font-weight: bold;
+        white-space: normal;
+        overflow: visible;
 
-          br {
-            display: initial;
-          }
+        br {
+          display: initial;
         }
       }
     }

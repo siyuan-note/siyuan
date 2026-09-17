@@ -943,6 +943,7 @@ var AIGetSkill = define[AISkillNameRequest, AISkillData]("getSkill", "/api/ai/ag
 var AISaveSkill = define[AISkillSaveRequest, Null]("saveSkill", "/api/ai/agent/saveSkill", StructJSONBody, ResponseOptions{}, "POST")
 var AIRemoveSkill = define[AISkillNameRequest, Null]("removeSkill", "/api/ai/agent/removeSkill", StructJSONBody, ResponseOptions{}, "POST")
 var AIRenameSkill = define[AISkillRenameRequest, Null]("renameSkill", "/api/ai/agent/renameSkill", StructJSONBody, ResponseOptions{}, "POST")
+var AIManageSkills = define[AISkillFileRequest, AISkillFileData]("manageSkills", "/api/ai/agent/manageSkills", JSONBody, ResponseOptions{}, "POST")
 
 var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/editor/chat", StructJSONBody, aiEditorSSEOptions(), "POST")
 var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", StructJSONBody, aiAgentSSEOptions(), "POST")

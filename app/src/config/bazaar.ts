@@ -347,14 +347,19 @@ export const bazaar = {
         }
     },
     _genPackageIconHTML(iconURL: string, detail = false): string {
-        if (iconURL) {
-            const className = detail ? " class=\"item__img\"" : "";
-            return `<img${className} src="${escapeAttr(iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'">`;
+        // 图标缺失或加载失败时显示同尺寸的集市图标，避免切换时改变布局
+        const bazaarIconHTML = (hidden: boolean) => {
+            const placeholderStyle = hidden ? " style=\"display: none\"" : "";
+            return detail ?
+                `<svg class="item__img item__img--placeholder"${placeholderStyle}><use xlink:href="#iconBazaar"></use></svg>` :
+                `<span${placeholderStyle}><svg class="b3-card__icon"><use xlink:href="#iconBazaar"></use></svg></span>`;
+        };
+        if (!iconURL) {
+            return bazaarIconHTML(false);
         }
-        if (detail) {
-            return "<svg class=\"item__img item__img--placeholder\"><use xlink:href=\"#iconBazaar\"></use></svg>";
-        }
-        return "<span><svg class=\"b3-card__icon\"><use xlink:href=\"#iconBazaar\"></use></svg></span>";
+        const className = detail ? " class=\"item__img\"" : "";
+        const onIconError = "this.onerror=null;this.style.display='none';this.nextElementSibling.style.display=''";
+        return `<img${className} src="${escapeAttr(iconURL)}" loading="lazy" onerror="${onIconError}">${bazaarIconHTML(true)}`;
     },
     _genIncompatibleChipHTML(item: IBazaarItem, source: "installed" | "bazaar", bazaarType: TBazaarType) {
         const incompatible = bazaarType === "themes" ?
@@ -1107,7 +1112,13 @@ type="checkbox">
 </div></div>${isMobile() ? readmeActionsHTML : ""}`;
         const previewElement = readmeElement.querySelector<HTMLElement>(".item__preview");
         if (previewElement) {
+            // 加载期间保留预览区域，仅在加载失败后移除容器
             previewElement.style.backgroundImage = `url(${JSON.stringify(displayData.previewURL)})`;
+            const previewImage = new Image();
+            previewImage.onerror = () => {
+                previewElement.remove();
+            };
+            previewImage.src = displayData.previewURL;
         }
         const isInstalledReadme = from === "downloaded";
         if (isInstalledReadme) {
@@ -1719,7 +1730,7 @@ type="checkbox">
         state.frameID = window.requestAnimationFrame(() => {
             state.frameID = undefined;
             if (state.active && this._isBazaarCardRenderCurrent(state)) {
-                this._appendBazaarCardBatch(state);
+                this._fillVisibleBazaarCards(state);
             }
         });
     },
@@ -1730,48 +1741,55 @@ type="checkbox">
         if (typeof window.IntersectionObserver === "function") {
             if (!state.observer) {
                 state.observer = new IntersectionObserver((entries) => {
-                    if (entries.some((entry) => entry.isIntersecting)) {
-                        state.observer?.disconnect();
-                        this._scheduleBazaarCardBatch(state);
+                    if (!state.active || !this._isBazaarCardRenderCurrent(state)) {
+                        return;
                     }
+                    entries.filter((entry) => entry.isIntersecting).forEach((entry) => {
+                        this._fillBazaarCard(state, entry.target as HTMLElement);
+                    });
                 }, {
                     root: state.panel,
                     rootMargin: "640px 0px",
                 });
             }
             state.observer.disconnect();
-            const lastCard = state.cardsElement.lastElementChild;
-            if (lastCard) {
-                state.observer.observe(lastCard);
-            }
+            state.cardsElement.querySelectorAll("[data-bazaar-index]").forEach((card) => state.observer.observe(card));
             return;
         }
         if (!state.scrollHandler) {
             state.scrollHandler = () => {
-                if (state.panel.scrollTop + state.panel.clientHeight + 640 >= state.panel.scrollHeight) {
-                    this._scheduleBazaarCardBatch(state);
-                }
+                this._scheduleBazaarCardBatch(state);
             };
             state.panel.addEventListener("scroll", state.scrollHandler, {passive: true});
         }
-        if (state.panel.clientHeight > 0 &&
-            state.panel.scrollTop + state.panel.clientHeight + 640 >= state.panel.scrollHeight) {
+        if (state.panel.clientHeight > 0) {
             this._scheduleBazaarCardBatch(state);
         }
     },
-    _appendBazaarCardBatch(state: IBazaarCardRenderState) {
+    _fillBazaarCard(state: IBazaarCardRenderState, card: HTMLElement) {
+        const index = card.getAttribute("data-bazaar-index");
+        if (index === null) {
+            return;
+        }
+        state.observer?.unobserve(card);
+        card.removeAttribute("data-bazaar-index");
+        card.outerHTML = this._genCardHTML(state.packages[Number(index)], state.bazaarType);
+        state.cursor++;
+        if (state.cursor >= state.packages.length) {
+            this._stopBazaarCardWatcher(state);
+        }
+    },
+    _fillVisibleBazaarCards(state: IBazaarCardRenderState) {
         if (!this._isBazaarCardRenderCurrent(state)) {
             return;
         }
-        const batch = getNextBazaarCardBatch(state.packages, state.cursor);
-        state.cursor = batch.nextCursor;
-        state.cardsElement.insertAdjacentHTML("beforeend", batch.packages.map((item) =>
-            this._genCardHTML(item, state.bazaarType)).join(""));
-        if (batch.complete) {
-            this._stopBazaarCardWatcher(state);
-        } else {
-            this._watchBazaarCardBatch(state);
-        }
+        const bounds = state.panel.getBoundingClientRect();
+        state.cardsElement.querySelectorAll<HTMLElement>("[data-bazaar-index]").forEach((card) => {
+            const cardBounds = card.getBoundingClientRect();
+            if (cardBounds.bottom >= bounds.top - 640 && cardBounds.top <= bounds.bottom + 640) {
+                this._fillBazaarCard(state, card);
+            }
+        });
     },
     _setBazaarPanelActive(panel: Element, active: boolean) {
         this._bazaarCardRenderStates.forEach((state: IBazaarCardRenderState) => {
@@ -1794,7 +1812,10 @@ type="checkbox">
             container.innerHTML = `<div class="b3-cards b3-cards--nowrap"><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul></div>`;
             return;
         }
-        container.innerHTML = '<div class="b3-cards"></div>';
+        const batch = getNextBazaarCardBatch(visiblePackages, 0);
+        container.innerHTML = `<div class="b3-cards config-bazaar__cards">${visiblePackages.map((item, index) =>
+            index < batch.nextCursor ? this._genCardHTML(item, bazaarType) :
+                `<div class="b3-card" data-bazaar-index="${index}" aria-hidden="true"></div>`).join("")}</div>`;
         const panel = container.closest(".config-bazaar__panel") as HTMLElement;
         const state: IBazaarCardRenderState = {
             container,
@@ -1802,12 +1823,12 @@ type="checkbox">
             cardsElement: container.firstElementChild as HTMLElement,
             packages: visiblePackages,
             bazaarType,
-            cursor: 0,
+            cursor: batch.nextCursor,
             active: !panel.classList.contains("fn__none"),
             mount: this._captureMount(),
         };
         this._bazaarCardRenderStates.set(container, state);
-        this._appendBazaarCardBatch(state);
+        this._watchBazaarCardBatch(state);
     },
     _onBazaar(response: IWebSocketData, bazaarType: TBazaarType, mount: IBazaarMountSnapshot) {
         if (!bazaar._isBazaarRequestCurrent(bazaarType, mount)) {

@@ -1,0 +1,246 @@
+.skill-manager-dialog > .b3-dialog__body {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.skill-manager-page.config__view {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: auto;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  padding: var(--mobile-top-safe-area, 0px) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow: hidden;
+  border-radius: 0;
+  background-color: var(--b3-theme-background);
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.skill-manager {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px;
+  box-sizing: border-box;
+  gap: 8px;
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__panels {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 12px;
+  }
+
+  &__sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    min-width: 0;
+    min-height: 0;
+    gap: 8px;
+    padding-inline-end: 8px;
+    border-right: 1px solid var(--b3-border-color);
+  }
+
+  &__search {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  &__files {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    .b3-list-item {
+      min-height: 36px;
+      height: auto;
+    }
+  }
+
+  &__file,
+  &__toggle {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  &__file {
+    flex: 1;
+    min-width: 0;
+    min-height: 36px;
+    text-align: start;
+
+    .b3-list-item__text {
+      text-align: start;
+    }
+  }
+
+  &__toggle {
+    flex: 0 0 24px;
+    height: 32px;
+    justify-content: center;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  &__empty {
+    padding: 8px;
+  }
+
+  &__editor {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    gap: 8px;
+  }
+
+  &__editor-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__path {
+    flex: 1;
+    min-width: 0;
+    max-height: 20vh;
+    overflow: auto;
+  }
+
+  .skill-manager__back,
+  .skill-manager__editor-open {
+    display: none;
+    flex-shrink: 0;
+  }
+
+  &__hint {
+    flex: 1;
+  }
+
+  &__source {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    resize: none;
+    font-family: var(--b3-font-family-code);
+    tab-size: 4;
+  }
+}
+
+@mixin skill-manager-pages {
+  .skill-manager__sidebar {
+    width: 100%;
+    padding-inline-end: 0;
+    border-right: 0;
+  }
+
+  .skill-manager__editor {
+    display: none;
+  }
+
+  .skill-manager__back,
+  .skill-manager__editor-open {
+    display: inline-flex;
+  }
+
+  &.skill-manager--editing {
+    .skill-manager__sidebar,
+    .skill-manager__main-actions {
+      display: none;
+    }
+
+    .skill-manager__editor {
+      display: flex;
+    }
+  }
+}
+
+.skill-manager--mobile {
+  @include skill-manager-pages;
+  padding: 0;
+  gap: 0;
+
+  .skill-manager__page-header {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    min-height: 48px;
+    padding: 4px 12px 4px 4px;
+    box-sizing: border-box;
+    gap: 8px;
+    border-bottom: 1px solid var(--b3-border-color);
+  }
+
+  .skill-manager__page-back {
+    display: flex;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .skill-manager__title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .skill-manager__page-save {
+    flex-shrink: 0;
+  }
+
+  .skill-manager__main-actions {
+    margin: 12px 12px 0;
+  }
+
+  .skill-manager__panels {
+    padding: 12px;
+  }
+
+  .skill-manager__editor-header {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .skill-manager {
+    @include skill-manager-pages;
+  }
+}

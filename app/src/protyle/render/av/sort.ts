@@ -72,7 +72,7 @@ export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data
     const fields = getFieldsByData(data);
     menuElement.querySelectorAll("select").forEach((item: HTMLSelectElement) => {
         item.addEventListener("change", () => {
-            const colId = item.parentElement.getAttribute("data-id");
+            const colId = item.closest("[data-id]").getAttribute("data-id");
             const oldSort = JSON.parse(JSON.stringify(data.view.sorts));
             const sort = data.view.sorts.find((sort: IAVSort) => sort.column === colId);
             if (!sort) {
@@ -138,27 +138,26 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
     sorts.forEach((item: IAVSort) => {
         const column = columns.find((column) => column.id === item.column);
         const valueSourceHTML = column?.type !== "template" && (column?.renderTemplate?.trim() || item.valueSource === "rendered") ? `
-    <span class="fn__space"></span>
-    <select class="b3-select" data-type="sortValueSource" style="margin: 4px 0">
+    <select class="b3-select" data-type="sortValueSource">
         <option value="stored" ${item.valueSource !== "rendered" ? "selected" : ""}>${window.siyuan.languages.originalValue}</option>
         <option value="rendered" ${item.valueSource === "rendered" ? "selected" : ""}>${window.siyuan.languages.templateRenderedValue}</option>
     </select>` : "";
         const dateEndpointHTML = column?.type === "date" && item.valueSource !== "rendered" ? `
-    <span class="fn__space"></span>
-    <select class="b3-select" data-type="sortDateEndpoint" style="margin: 4px 0">
+    <select class="b3-select" data-type="sortDateEndpoint">
         <option value="start" ${item.dateEndpoint !== "end" ? "selected" : ""}>${window.siyuan.languages.startDate}</option>
         <option value="end" ${item.dateEndpoint === "end" ? "selected" : ""}>${window.siyuan.languages.endDate}</option>
     </select>` : "";
-        html += `<button draggable="true" class="b3-menu__item" data-id="${item.column}">
+        html += `<button draggable="true" class="b3-menu__item av__sort-row" data-id="${item.column}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <select class="b3-select fn__flex-1" data-type="sortColumn" style="margin: 4px 0">
+    <span class="av__sort-controls">
+    <select class="b3-select" data-type="sortColumn">
         ${genSortItem(item.column)}
     </select>${valueSourceHTML}${dateEndpointHTML}
-    <span class="fn__space"></span>
-    <select class="b3-select" data-type="sortOrder" style="margin: 4px 0">
+    <select class="b3-select" data-type="sortOrder">
         <option value="ASC" ${item.order === "ASC" ? "selected" : ""}>${window.siyuan.languages.asc}</option>
         <option value="DESC" ${item.order === "DESC" ? "selected" : ""}>${window.siyuan.languages.desc}</option>
     </select>
+    </span>
     <svg class="b3-menu__action" data-type="removeSort"><use xlink:href="#iconTrashcan"></use></svg>
 </button>`;
     });

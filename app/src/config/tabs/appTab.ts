@@ -216,7 +216,67 @@ const registerAppGeneralGroup = (tab: SettingTabBuilder) => {
         html: genNetworkProxyHtml,
         afterMount: mountNetworkProxy,
     });
+    /// #if !BROWSER
+    group.slot({
+        key: "accessibilitySupport",
+        keywords: [window.siyuan.languages.accessibilitySupport, window.siyuan.languages.accessibilitySupportTip],
+        html: () => `<label class="fn__flex b3-label config-item">
+    <div class="fn__flex-1 config-item__main">
+        ${genConfigItemName(window.siyuan.languages.accessibilitySupport)}
+        <div class="b3-label__text">${window.siyuan.languages.accessibilitySupportTip}</div>
+        <div id="accessibilitySupportStatus" class="b3-label__text fn__none" role="status"></div>
+    </div>
+    <span class="fn__space"></span>
+    <input id="accessibilitySupport" class="b3-switch fn__flex-center" type="checkbox" disabled>
+</label>`,
+        afterMount: mountAccessibilitySetting,
+    });
+    /// #endif
 };
+
+/// #if !BROWSER
+const mountAccessibilitySetting = async (root: HTMLElement) => {
+    const input = root.querySelector<HTMLInputElement>("#accessibilitySupport");
+    const status = root.querySelector<HTMLElement>("#accessibilitySupportStatus");
+    let enabled = false;
+    const showStatus = (text: string) => {
+        status.textContent = text;
+        status.classList.toggle("fn__none", !text);
+    };
+    try {
+        const setting: {enabled: boolean; override: boolean | null} = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "getAccessibilitySetting",
+        });
+        enabled = setting.enabled;
+        input.checked = setting.override ?? enabled;
+        if (setting.override !== null) {
+            showStatus(window.siyuan.languages.accessibilitySupportOverrideTip);
+            return;
+        }
+        input.disabled = false;
+    } catch (error) {
+        console.warn("read accessibility setting failed", error);
+        showStatus(window.siyuan.languages.accessibilitySupportError);
+        return;
+    }
+    input.addEventListener("change", async () => {
+        input.disabled = true;
+        showStatus("");
+        try {
+            const setting: {enabled: boolean} = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "setAccessibilitySetting", enabled: input.checked,
+            });
+            enabled = setting.enabled;
+        } catch (error) {
+            console.warn("save accessibility setting failed", error);
+            showStatus(window.siyuan.languages.accessibilitySupportError);
+        } finally {
+            input.checked = enabled;
+            input.disabled = false;
+        }
+    });
+};
+/// #endif
 
 const genNetworkProxyHtml = (): string => {
     const proxy = window.siyuan.config.system.networkProxy;

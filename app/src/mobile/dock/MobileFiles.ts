@@ -570,7 +570,7 @@ export class MobileFiles extends Model {
                             selectFileElements.forEach(item => {
                                 const fromPath = item.getAttribute("data-path");
                                 const newPath = pathPosix().join(toDir, item.getAttribute("data-node-id") + ".sy");
-                                updateMovedSubtree(item, getFileTreeChildList(item), fromPath, newPath);
+                                updateMovedSubtree(item, getFileTreeChildList(item), fromPath, newPath, 20);
                             });
                             hasMove = true;
                         }
@@ -1051,7 +1051,7 @@ export class MobileFiles extends Model {
             if (sourceElement) {
                 childListElement = getFileTreeChildList(sourceElement);
                 collectExpandedDocIDs(sourceElement, childListElement, expandedDocIDs);
-                updateMovedSubtree(sourceElement, childListElement, move.fromPath, move.newPath);
+                updateMovedSubtree(sourceElement, childListElement, move.fromPath, move.newPath, 20);
             }
             if (sourceElement && !sourceAtTarget) {
                 const sourceListElement = sourceElement.parentElement;
@@ -1252,6 +1252,7 @@ export class MobileFiles extends Model {
         if (!rootID) {
             return;
         }
+        this.pinnedDocs?.scheduleRefresh();
         const importedPath = data.parentPath === "/" ? `/${rootID}.sy` : `${data.parentPath}/${rootID}.sy`;
         this.updateItemArrow(data.notebook, importedPath);
     }

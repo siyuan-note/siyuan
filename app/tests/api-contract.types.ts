@@ -6,6 +6,24 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/ai/agent/manageSkills", {action: "list"}, response => {
+    if (response.code === 0) {
+        const entries: {path: string, isDir: boolean, editable: boolean}[] | null | undefined = response.data.entries;
+        const content: string | undefined = response.data.content;
+        const revision: string | undefined = response.data.revision;
+        void [entries, content, revision];
+    }
+});
+fetchPost("/api/ai/agent/manageSkills", {action: "write", path: "example/SKILL.md", content: "", revision: "hash"});
+// @ts-expect-error 技能管理操作不能省略。
+fetchPost("/api/ai/agent/manageSkills", {});
+// @ts-expect-error 文件修订号必须是字符串。
+fetchPost("/api/ai/agent/manageSkills", {action: "write", path: "example/SKILL.md", revision: 1});
+// @ts-expect-error 技能文件定位使用相对路径，不接受显示名称。
+fetchPost("/api/ai/agent/manageSkills", {action: "read", name: "example"});
+// @ts-expect-error 技能文件管理只支持 POST。
+fetchGet("/api/ai/agent/manageSkills", () => undefined);
+
 fetchPost("/api/petal/savePluginPublishData", {packageName: "example", data: {theme: "dark", enabled: true, count: 1, empty: null}});
 fetchPost("/api/petal/setPluginPublishDataGrant", {packageName: "example", fields: ["theme"], enabled: true});
 // @ts-expect-error 公开字段不能包含未经独立授权的嵌套对象。

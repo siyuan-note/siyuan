@@ -718,6 +718,19 @@
       }
     }
 
+    &__cards {
+      grid-auto-rows: 116px;
+
+      .b3-card__desc {
+        max-height: 36px;
+        -webkit-line-clamp: 2;
+      }
+
+      > [data-bazaar-index] {
+        cursor: default;
+      }
+    }
+
     &__rating-star {
       --b3-icon-star-fill: currentColor;
       display: block;

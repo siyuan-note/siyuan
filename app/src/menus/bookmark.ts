@@ -9,7 +9,7 @@ import {MobileBookmarks} from "../mobile/dock/MobileBookmarks";
 import {Constants} from "../constants";
 
 export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookmarkObj: Bookmark | MobileBookmarks) => {
-    if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+    if (event.type !== "contextmenu" && !window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BOOKMARK) {
         window.siyuan.menus.menu.remove();
         return;
@@ -76,5 +76,7 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
         }).element);
     }
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BOOKMARK);
-    window.siyuan.menus.menu.popup({x: event.clientX - 11, y: event.clientY + 11, h: 22, w: 12});
+    const button = event.type === "contextmenu" ? null : (event.target as Element).closest(".b3-list-item__action");
+    const rect = (button || element).getBoundingClientRect();
+    window.siyuan.menus.menu.popup({x: button ? rect.left : event.clientX, y: rect.bottom, h: rect.height});
 };

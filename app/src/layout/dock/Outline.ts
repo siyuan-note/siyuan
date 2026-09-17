@@ -1402,9 +1402,11 @@ export class Outline extends Model {
             }
         }).element);
 
+        const rect = element.getBoundingClientRect();
         window.siyuan.menus.menu.popup({
             x: event.clientX,
-            y: event.clientY
+            y: rect.bottom,
+            h: rect.height,
         });
     }
 

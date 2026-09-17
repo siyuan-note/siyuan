@@ -223,9 +223,16 @@ export const initEditorTabs = (protyle: IProtyle) => {
             }
             tabs.setAttribute("tabs-active-id", id);
             if (!protyle.lite) {
-                queueTransaction(protyle, () => fetchPost("/api/attr/setBlockAttrs", {
-                    id: tabs.dataset.nodeId, attrs: {"tabs-active-id": id},
-                }));
+                queueTransaction(protyle, async () => {
+                    // 撤销及移动会替换容器或移除占位页签，排队保存时只提交仍有效的当前选择。
+                    if (!tabs.isConnected || tabs.getAttribute("tabs-active-id") !== id ||
+                        !getTabItems(tabs).some(item => item.dataset.nodeId === id)) {
+                        return;
+                    }
+                    await fetchPost("/api/attr/setBlockAttrs", {
+                        id: tabs.dataset.nodeId, attrs: {"tabs-active-id": id},
+                    });
+                });
             }
         },
         rename: item => renameTab(protyle, item),

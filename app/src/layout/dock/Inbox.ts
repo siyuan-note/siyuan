@@ -307,9 +307,9 @@ ${data.shorthandContent}
             separatorPosition: "top",
         });
         const button = (event.target as Element).closest("[data-type='more']");
-        const rect = !itemElement ? button?.getBoundingClientRect() : undefined;
+        const rect = (itemElement || button)?.getBoundingClientRect();
         window.siyuan.menus.menu.popup({
-            x: rect ? rect.left : event.clientX,
+            x: !itemElement && rect ? rect.left : event.clientX,
             y: rect ? rect.bottom : event.clientY + 16,
             h: rect ? rect.height : 0,
         });

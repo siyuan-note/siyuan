@@ -168,3 +168,26 @@
     }
   }
 }
+
+.template-manager--mobile {
+  .template-manager__sidebar {
+    width: 100%;
+    flex: 1;
+    padding-inline-end: 0;
+    border: 0;
+  }
+
+  .template-manager__editor {
+    display: none;
+  }
+
+  &.template-manager--editing {
+    .template-manager__sidebar {
+      display: none;
+    }
+
+    .template-manager__editor {
+      display: flex;
+    }
+  }
+}

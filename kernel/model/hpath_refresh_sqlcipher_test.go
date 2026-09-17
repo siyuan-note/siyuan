@@ -67,7 +67,7 @@ func TestEncryptedDocumentHPathRefresh(t *testing.T) {
 		}
 	}
 	assertChildCiphertext("rename")
-	journal, err := os.ReadFile(filepath.Join(util.ConfDir, "hpath-refresh.json"))
+	journal, err := os.ReadFile(filepath.Join(util.QueueDir, "hpath-refresh.queue"))
 	if err != nil || bytes.Contains(journal, []byte("Private")) {
 		t.Fatalf("task journal leaked titles: %s, %v", journal, err)
 	}
@@ -77,6 +77,8 @@ func TestEncryptedDocumentHPathRefresh(t *testing.T) {
 	}
 	LockBox(boxID)
 	assertChildCiphertext("lock")
+	// 重建普通索引不得丢弃独立加密笔记本在锁定前留下的恢复记录。
+	sql.InitDatabase(true)
 	RefreshHPathsJob()
 	if len(hpathRefresh.tasks) != 1 {
 		t.Fatal("locked notebook lost its pending task")

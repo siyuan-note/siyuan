@@ -372,6 +372,8 @@ func RollbackDocHistory(historyPath string) (err error) {
 	if encrypted && tree.Root.ID+".sy" != filepath.Base(historyPath) {
 		return errors.New("encrypted document history root ID does not match its filename")
 	}
+	boundRecovery := &Transaction{trees: map[string]*parse.Tree{}}
+	defer func() { boundRecovery.finishAttributeViewMutation(err != nil) }()
 	if nil != tree {
 		historyDir := filepath.Join(util.HistoryDir, parts[0])
 
@@ -390,10 +392,13 @@ func RollbackDocHistory(historyPath string) (err error) {
 				destAvPath = filepath.Join(util.DataDir, boxID, "storage", "av", avNode.AttributeViewID+".json")
 			}
 			if gulu.File.IsExist(destAvPath) {
-				if copyErr := filelock.CopyNewtimes(srcAvPath, destAvPath); nil != copyErr {
-					logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+				avBoxID := ""
+				if encrypted {
+					avBoxID = boxID
 				}
-				cache.RemoveAVData(avNode.AttributeViewID)
+				if err = boundRecovery.restoreEmbeddedAttributeViewHistory(srcAvPath, avBoxID, avNode.AttributeViewID); err != nil {
+					return
+				}
 			}
 
 			avIDs = append(avIDs, avNode.AttributeViewID)
@@ -449,6 +454,11 @@ func RollbackDocHistory(historyPath string) (err error) {
 	// 仅重新索引该文档，不进行全量索引
 	// Reindex only the current document after rolling back the document https://github.com/siyuan-note/siyuan/issues/12320
 	// 写回成功后再替换索引和清理旧路径，失败时保留当前文档并向调用方返回错误。
+	if !needResetTree {
+		if err = boundRecovery.restoreBoundAttributeViewHistory(tree, filepath.Join(util.HistoryDir, parts[0])); err != nil {
+			return
+		}
+	}
 	if _, err = filesys.WriteTree(tree); err != nil {
 		return
 	}
@@ -939,11 +949,11 @@ func createAssetsHistory(assets []string) (err error) {
 			return fmt.Errorf("create history directory [%s] failed: %w", filepath.Dir(historyPath), err)
 		}
 
-		if err = filelock.Copy(file, historyPath); err != nil {
-			if os.IsNotExist(err) {
+		if copyErr := filelock.Copy(file, historyPath); copyErr != nil {
+			if os.IsNotExist(copyErr) {
 				continue
 			}
-			return fmt.Errorf("copy asset [%s] to [%s] failed: %w", file, historyPath, err)
+			return fmt.Errorf("copy asset [%s] to [%s] failed: %w", file, historyPath, copyErr)
 		}
 	}
 

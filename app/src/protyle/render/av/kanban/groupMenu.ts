@@ -53,6 +53,7 @@ export const openKanbanGroupMenu = (options: {
                         action: "removeAttrViewColOption",
                         id: colID,
                         avID,
+                        blockID,
                         data: name,
                     }, {
                         action: "doUpdateUpdated",
@@ -62,6 +63,7 @@ export const openKanbanGroupMenu = (options: {
                         action: "updateAttrViewColOptions",
                         id: colID,
                         avID,
+                        blockID,
                         data: colOptions,
                     }]);
                 },
@@ -121,6 +123,7 @@ export const openKanbanGroupMenu = (options: {
                     action: "updateAttrViewColOption",
                     id: colID,
                     avID,
+                    blockID,
                     data: {
                         oldName: name,
                         newName: name,
@@ -136,6 +139,7 @@ export const openKanbanGroupMenu = (options: {
                     action: "updateAttrViewColOption",
                     id: colID,
                     avID,
+                    blockID,
                     data: {
                         oldName: name,
                         newName: name,

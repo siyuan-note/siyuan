@@ -8,6 +8,7 @@ import {
     cellValueIsEmpty,
     genCellValueByElement,
     getCellText,
+    getCellValueText,
     getTypeByCellElement,
     popTextCell,
     renderCell,
@@ -764,6 +765,25 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "copy") {
+            if (target.hasAttribute("data-rollup-value")) {
+                const values: IAVCellValue[] = JSON.parse(decodeURIComponent(target.dataset.rollupValue));
+                writeText(values.map(value => {
+                    if (value.type === "block") {
+                        return value.block?.content || window.siyuan.languages.untitled;
+                    }
+                    if (value.type === "checkbox") {
+                        return value.checkbox?.checked ? "true" : "false";
+                    }
+                    if (value.type === "mAsset") {
+                        return (value.mAsset || []).map(asset => asset.content).join(", ");
+                    }
+                    return getCellValueText(value);
+                }).join(", "));
+                showMessage(window.siyuan.languages.copied);
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
+            }
             const cellElement = hasClosestByClassName(target, "av__cell") as HTMLElement;
             const source = getAVTextSource(genCellValueByElement("text", cellElement));
             if (source.kind === "rich") {

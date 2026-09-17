@@ -17,7 +17,8 @@ const getAVElements = (element: Element) => {
 const clearViewState = (element: Element) => {
     const attributes = ["data-view-fold-source", "data-view-fold-hidden-source", "data-view-fold",
         "data-view-fold-default", "data-view-fold-hidden", "data-view-heading-owner", "data-view-heading-loaded",
-        "data-backlink-reference", "data-backlink-reference-list", "data-backlink-hide-reference"];
+        "data-backlink-reference", "data-backlink-reference-list", "data-backlink-hide-reference",
+        "data-backlink-task-focus"];
     const elements = [element, ...Array.from(element.querySelectorAll(attributes.map(attribute => {
         return `[${attribute}]`;
     }).join(", ")))];

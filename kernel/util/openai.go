@@ -863,8 +863,15 @@ func NewOpenAIImageAdapter(apiKey, apiBaseURL, model string, timeout int, header
 	if timeout < 1 {
 		timeout = 30
 	}
+	client := NewOpenAIClientWithModel(apiKey, apiBaseURL, model, headers...)
+	if isMiniMaxImageEndpoint(apiBaseURL) {
+		config := openai.DefaultConfig(apiKey)
+		config.BaseURL = apiBaseURL
+		config.HTTPClient = &miniMaxImageTransport{base: newAIProviderHTTPClient(apiBaseURL, headers...)}
+		client = openai.NewClientWithConfig(config)
+	}
 	return &OpenAIImageAdapter{
-		client:  NewOpenAIClientWithModel(apiKey, apiBaseURL, model, headers...),
+		client:  client,
 		model:   model,
 		timeout: time.Duration(timeout) * time.Second,
 	}

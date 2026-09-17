@@ -172,6 +172,12 @@ export type AISessionsRequestInput = { "keyword"?: string | null; "page"?: numbe
 
 export type AISkillData = { "content": string; "name": string; };
 
+export type AISkillFileData = { "content"?: string; "entries"?: Array<AISkillFileEntry> | null; "readOnlyReason"?: "binary" | "encoding" | "tooLarge"; "revision"?: string; };
+
+export type AISkillFileEntry = { "editable": boolean; "isDir": boolean; "path": string; };
+
+export type AISkillFileRequestInput = { "action": string; "content"?: string; "path"?: string; "revision"?: string; "target"?: string; };
+
 export type AISkillInfo = { "description": string; "name": string; };
 
 export type AISkillNameRequestInput = { "name"?: string | null; };
@@ -2502,6 +2508,11 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AIUserSkillInfo> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/ai/agent/manageSkills": {
+        request: AISkillFileRequestInput;
+        response: { "code": 0; "data": AISkillFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/ai/agent/question": {
         request: AIQuestionRequestInput;

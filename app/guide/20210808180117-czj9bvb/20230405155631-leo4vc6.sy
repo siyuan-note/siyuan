@@ -7,7 +7,7 @@
 		"id": "20230405155631-leo4vc6",
 		"title": "性能优化",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260916173158"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230405155631-0xw341e",
-				"updated": "20260803171606"
+				"updated": "20260916173158"
 			},
 			"Children": [
 				{
@@ -375,7 +375,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230405171407-ltaakx8",
-				"updated": "20250825114421"
+				"updated": "20260916173158"
 			},
 			"Children": [
 				{
@@ -527,7 +527,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405171539-llfg8mm",
-				"updated": "20240420104842"
+				"updated": "20260916173158"
 			},
 			"Children": [
 				{
@@ -627,6 +627,70 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ 减少元素从而提升编辑器性能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260916172814-5e0pyui",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260916172814-5e0pyui",
+						"updated": "20260916172814"
+					},
+					"Children": [
+						{
+							"ID": "20260916172814-s8fpf6v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260916172814-s8fpf6v",
+								"updated": "20260916172814"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端默认关闭辅助功能支持，以减少部分环境下长文本编辑或粘贴时的卡顿；如需使用读屏等辅助工具，可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "应用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "常规"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "辅助功能支持"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中开启。该设置适用于本机所有工作空间，修改后需完全退出并重新启动思源；若开启后出现卡顿，可尝试关闭后重启进行对照"
 								}
 							]
 						}

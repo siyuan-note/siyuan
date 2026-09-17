@@ -419,8 +419,10 @@ export class PinnedDocs {
             row.classList.toggle("b3-list-item--focus");
             return;
         }
-        if (target.closest("[data-pin-more]")) {
-            this.menu(row, event.clientX, event.clientY);
+        const moreButton = target.closest("[data-pin-more]");
+        if (moreButton) {
+            const rect = moreButton.getBoundingClientRect();
+            this.menu(row, {x: rect.left, y: rect.bottom, h: rect.height});
         } else if (target.closest("[data-pin-new]")) {
             newFileInTree(this.app, row.dataset.notebook, row.dataset.path);
         } else if (target.closest("[data-pin-toggle]")) {
@@ -445,7 +447,7 @@ export class PinnedDocs {
         }
     }
 
-    private menu(row: HTMLElement, x: number, y: number) {
+    private menu(row: HTMLElement, position: IPosition) {
         if (row.dataset.unavailable === "true") {
             const menu = window.siyuan.menus.menu;
             menu.remove();
@@ -458,12 +460,12 @@ export class PinnedDocs {
                     icon: "iconUnpin",
                     click: () => { updatePinnedDocs([row.dataset.nodeId], "unpin"); },
                 }).element);
-                if (this.mobile) { menu.fullscreen("bottom"); } else { menu.popup({x, y}); }
+                if (this.mobile) { menu.fullscreen("bottom"); } else { menu.popup(position); }
             }
             return;
         }
         const menu = initFileMenu(this.app, row.dataset.notebook, row.dataset.path, row);
-        if (this.mobile) { menu.fullscreen("bottom"); } else { menu.popup({x, y}); }
+        if (this.mobile) { menu.fullscreen("bottom"); } else { menu.popup(position); }
     }
 
     private setDragImage(row: HTMLElement, dataTransfer: DataTransfer) {
@@ -554,7 +556,8 @@ export class PinnedDocs {
             event.preventDefault();
             // 触摸长按由拖拽处理，避免弹出菜单中断手势。
             if (this.touch || this.suppressClick) { return; }
-            this.menu(row, event.clientX, event.clientY);
+            const rect = row.getBoundingClientRect();
+            this.menu(row, {x: event.clientX, y: rect.bottom, h: rect.height});
         }
     }
 

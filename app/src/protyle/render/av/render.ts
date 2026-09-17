@@ -58,6 +58,7 @@ import {
 import {getAVHeaderEditingState} from "./headerEditing";
 import {getAVColorStyle} from "./color";
 import {getContextFilterKeyID} from "./contextFilterState";
+import {isAVCellPanelForBlock} from "./panelTarget";
 
 interface IIds {
     groupId: string,
@@ -476,7 +477,7 @@ const afterRenderTable = (options: ITableOptions) => {
             if (blockElement && options.blockElement === blockElement) {
                 focusBlock(options.blockElement);
             }
-        } else if (avPanelElement && !newCellElement) {
+        } else if (avPanelElement && !newCellElement && isAVCellPanelForBlock(avPanelElement, options.blockElement)) {
             avPanelElement.remove();
         }
     }

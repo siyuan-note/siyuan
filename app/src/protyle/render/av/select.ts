@@ -189,6 +189,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             action: "updateAttrViewColOption",
             id: colId,
             avID: data.id,
+            blockID,
             data: {
                 newColor: color,
                 oldName: name,
@@ -203,6 +204,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             action: "updateAttrViewColOption",
             id: colId,
             avID: data.id,
+            blockID,
             data: {
                 newColor: color,
                 oldName: inputElement.value,
@@ -337,6 +339,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     action: "removeAttrViewColOption",
                     id: colId,
                     avID: data.id,
+                    blockID,
                     data: newName,
                 }, {
                     action: "doUpdateUpdated",
@@ -346,7 +349,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     action: "updateAttrViewColOptions",
                     id: colId,
                     avID: data.id,
-                    data: colOptions
+                    blockID,
+                    data: colOptions.map(option => ({...option}))
                 }]);
                 colOptions.find((item, index) => {
                     if (item.name === newName) {
@@ -424,6 +428,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         action: "updateAttrViewColOption",
                         id: colId,
                         avID: data.id,
+                        blockID,
                         data: {
                             oldName: name,
                             newName: inputElement.value,
@@ -439,6 +444,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         action: "updateAttrViewColOption",
                         id: colId,
                         avID: data.id,
+                        blockID,
                         data: {
                             oldName: inputElement.value,
                             newName: name,

@@ -171,10 +171,11 @@ export const remapMovedPath = (currentPath: string, fromPath: string, newPath: s
     return newPrefix + currentPath.slice(fromPrefix.length);
 };
 
-const updateMovedItemPath = (item: HTMLElement, newPath: string) => {
+const updateMovedItemPath = (item: HTMLElement, newPath: string, indent: number) => {
     item.dataset.path = newPath;
-    const paddingLeft = (newPath.split("/").length - 1) * 20;
-    item.style.setProperty("--file-toggle-width", `${paddingLeft + 20}px`);
+    const paddingLeft = (newPath.split("/").length - 1) * indent;
+    item.style.setProperty("--file-toggle-width", `${paddingLeft + indent}px`);
+    item.style.setProperty("--file-action-offset", `${paddingLeft + 20}px`);
     const toggleElement = item.querySelector<HTMLElement>(":scope > .b3-list-item__toggle");
     if (toggleElement) {
         toggleElement.style.paddingLeft = `${paddingLeft}px`;
@@ -185,10 +186,11 @@ export const updateMovedSubtree = (
     liElement: HTMLElement,
     childListElement: HTMLElement | undefined,
     fromPath: string,
-    newPath: string
+    newPath: string,
+    indent = 18
 ) => {
-    updateMovedItemPath(liElement, newPath);
+    updateMovedItemPath(liElement, newPath, indent);
     childListElement?.querySelectorAll<HTMLElement>("li[data-path]").forEach((item) => {
-        updateMovedItemPath(item, remapMovedPath(item.dataset.path, fromPath, newPath));
+        updateMovedItemPath(item, remapMovedPath(item.dataset.path, fromPath, newPath), indent);
     });
 };

@@ -23,7 +23,7 @@ interface IPanelHarness {
     loadChildren(row: unknown, children: unknown, generation: number): Promise<void>;
     drop(ids: string[], x: number, y: number, allowSource?: boolean): Promise<void>;
     click(event: unknown): void;
-    menu(row: unknown, x: number, y: number): void;
+    menu(row: unknown, position: {x: number, y: number, h: number}): void;
     toggle(row: unknown): void;
     open(id: string, notebook: string): void;
     mobile?: boolean;
@@ -130,15 +130,17 @@ test("collapse clears descendant expansion and persists the closed section", asy
 test("pinned document more actions open the source document menu", () => {
     const {panel, calls} = loadPanel();
     const row = {dataset: {nodeId: "document", notebook: "notebook", path: "/document.sy"}};
+    const button = {getBoundingClientRect: () => ({left: 180, bottom: 120, height: 24})};
     panel.click({
         stopPropagation: () => {}, clientX: 10, clientY: 20,
-        target: {closest: (selector: string) => selector === "[data-pin-row]" || selector === "[data-pin-more]" ? row : null},
+        target: {closest: (selector: string) => selector === "[data-pin-row]" ? row : selector === "[data-pin-more]" ? button : null},
     });
     assert.equal(calls[0].kind, "menu");
     assert.deepEqual(calls[0].args.slice(1), ["notebook", "/document.sy", row]);
     assert.equal(calls[1].kind, "popup");
+    assert.deepEqual({...calls[1].args[0] as object}, {x: 180, y: 120, h: 24});
     panel.mobile = true;
-    panel.menu(row, 10, 20);
+    panel.menu(row, {x: 180, y: 120, h: 24});
     assert.equal(calls[3].kind, "fullscreen");
 });
 
@@ -159,7 +161,8 @@ test("pinned roots share one list and retain each document notebook without wrap
 
 test("touch long press suppresses the context menu before and during dragging", () => {
     const {panel, calls} = loadPanel();
-    const row = {dataset: {nodeId: "document", notebook: "notebook", path: "/document.sy"}};
+    const row = {dataset: {nodeId: "document", notebook: "notebook", path: "/document.sy"},
+        getBoundingClientRect: () => ({left: 0, bottom: 120, height: 28})};
     let prevented = 0;
     const event = {stopPropagation: () => {}, preventDefault: () => prevented++,
         target: {closest: () => row}, clientX: 10, clientY: 20};
@@ -175,6 +178,9 @@ test("touch long press suppresses the context menu before and during dragging", 
     panel.suppressClick = false;
     panel.contextMenu(event);
     assert.equal(calls[0].kind, "menu");
+    assert.deepEqual({...calls[1].args[0] as object}, {x: 10, y: 120, h: 28});
+    panel.contextMenu({...event, clientX: 200, clientY: 115});
+    assert.deepEqual({...calls[3].args[0] as object}, {x: 200, y: 120, h: 28});
 });
 
 test("mobile pinned rows use touch dragging without native HTML dragging", async () => {

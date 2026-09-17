@@ -1,6 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getTemplateRenameTarget, getTemplateTree, TemplateEntry} from "./fileTree";
+import type {TemplateEntry} from "./fileTree";
+import {getFileRenameTarget, getFileTree} from "../util/fileTree";
 
 const entries: TemplateEntry[] = [
     {path: "note10.md", isDir: false},
@@ -14,31 +15,31 @@ const entries: TemplateEntry[] = [
 
 describe("template file tree", () => {
     it("keeps normalized slashes in the basename without changing the parent directory", () => {
-        assert.equal(getTemplateRenameTarget("模板.md", "22／1111.md"), "22／1111.md");
-        assert.equal(getTemplateRenameTarget("子文件夹/模板.md", "22／1111.md"), "子文件夹/22／1111.md");
-        assert.equal(getTemplateRenameTarget("Work/Weekly", "Daily／Review"), "Work/Daily／Review");
-        assert.equal(getTemplateRenameTarget("folder/note.md", "..／outside.md"), "folder/..／outside.md");
-        assert.equal(getTemplateRenameTarget("folder/note.md", "／／note.md"), "folder/／／note.md");
+        assert.equal(getFileRenameTarget("模板.md", "22／1111.md"), "22／1111.md");
+        assert.equal(getFileRenameTarget("子文件夹/模板.md", "22／1111.md"), "子文件夹/22／1111.md");
+        assert.equal(getFileRenameTarget("Work/Weekly", "Daily／Review"), "Work/Daily／Review");
+        assert.equal(getFileRenameTarget("folder/note.md", "..／outside.md"), "folder/..／outside.md");
+        assert.equal(getFileRenameTarget("folder/note.md", "／／note.md"), "folder/／／note.md");
     });
     it("renames only the basename while preserving nested and non-ASCII paths", () => {
-        assert.equal(getTemplateRenameTarget("子文件夹/模板.md", "新模板.md"), "子文件夹/新模板.md");
-        assert.equal(getTemplateRenameTarget("Work/Weekly", "Daily"), "Work/Daily");
-        assert.equal(getTemplateRenameTarget("模板.md", "O'Reilly.md"), "O'Reilly.md");
-        assert.equal(getTemplateRenameTarget("folder /template.md", "new.md"), "folder /new.md");
+        assert.equal(getFileRenameTarget("子文件夹/模板.md", "新模板.md"), "子文件夹/新模板.md");
+        assert.equal(getFileRenameTarget("Work/Weekly", "Daily"), "Work/Daily");
+        assert.equal(getFileRenameTarget("模板.md", "O'Reilly.md"), "O'Reilly.md");
+        assert.equal(getFileRenameTarget("folder /template.md", "new.md"), "folder /new.md");
         for (const name of ["", ".", "..", "../outside.md", "new/note.md", "new\\note.md", "C:note.md"]) {
-            assert.equal(getTemplateRenameTarget("folder/note.md", name), undefined, name);
+            assert.equal(getFileRenameTarget("folder/note.md", name), undefined, name);
         }
     });
     it("groups folders first and naturally sorts files without changing the input", () => {
         const original = entries.slice();
-        const rows = getTemplateTree(entries, "", new Set());
+        const rows = getFileTree(entries, "", new Set());
         assert.deepEqual(rows.map(item => item.path), ["Empty", "Work", "note2.md", "note10.md"]);
         assert.equal(rows[1].isPackage, true);
         assert.deepEqual(entries, original);
     });
 
     it("respects nested expansion and keeps empty directories", () => {
-        const rows = getTemplateTree(entries, "", new Set(["Work", "Work/Weekly", "Empty"]));
+        const rows = getFileTree(entries, "", new Set(["Work", "Work/Weekly", "Empty"]));
         assert.deepEqual(rows.map(item => [item.path, item.depth]), [
             ["Empty", 0], ["Work", 0], ["Work/Weekly", 1], ["Work/Weekly/Review.md", 2],
             ["Work/daily.md", 1], ["note2.md", 0], ["note10.md", 0],
@@ -48,19 +49,19 @@ describe("template file tree", () => {
 
     it("searches names case-insensitively and reveals ancestors without changing expansion", () => {
         const expanded = new Set(["Empty"]);
-        const rows = getTemplateTree(entries, " REVIEW ", expanded);
+        const rows = getFileTree(entries, " REVIEW ", expanded);
         assert.deepEqual(rows.map(item => item.path), ["Work", "Work/Weekly", "Work/Weekly/Review.md"]);
         assert.equal(rows[0].expanded, true);
         assert.equal(rows[1].expanded, true);
         assert.deepEqual([...expanded], ["Empty"]);
-        assert.deepEqual(getTemplateTree(entries, "", expanded).map(item => item.path),
+        assert.deepEqual(getFileTree(entries, "", expanded).map(item => item.path),
             ["Empty", "Work", "note2.md", "note10.md"]);
     });
 
     it("matches full paths and includes descendants of matching folders", () => {
-        assert.deepEqual(getTemplateTree(entries, "work/week", new Set()).map(item => item.path),
+        assert.deepEqual(getFileTree(entries, "work/week", new Set()).map(item => item.path),
             ["Work", "Work/Weekly", "Work/Weekly/Review.md"]);
-        assert.deepEqual(getTemplateTree(entries, "missing", new Set()), []);
-        assert.deepEqual(getTemplateTree([], "", new Set()), []);
+        assert.deepEqual(getFileTree(entries, "missing", new Set()), []);
+        assert.deepEqual(getFileTree([], "", new Set()), []);
     });
 });

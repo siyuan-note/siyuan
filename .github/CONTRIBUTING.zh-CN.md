@@ -21,10 +21,10 @@ Electron 44 要求 macOS 13 或更高版本，Windows 和 Linux 仅支持 64 位
 
 设置 Electron 镜像环境变量并安装 Electron：
 
-* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.3.0 -D`
+* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.4.1 -D`
 * Windows：
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@44.3.0 -D`
+  * `pnpm install electron@44.4.1 -D`
 
 NPM 镜像：
 
@@ -34,7 +34,7 @@ NPM 镜像：
 
 进入 app 文件夹执行：
 
-* `pnpm install electron@44.3.0 -D`
+* `pnpm install electron@44.4.1 -D`
 * `pnpm run install:electron`
 * `pnpm run dev`
 * `pnpm run start`

@@ -288,6 +288,7 @@ func RemoveBox(boxID string) (err error) {
 	isUserGuide := IsUserGuide(boxID)
 	localPath := filepath.Join(util.DataDir, boxID)
 	if !filelock.IsExist(localPath) {
+		removeHPathRefreshBox(boxID)
 		forgetRuntimeNormalBox(boxID)
 		removeMasterPasswordMigrationBox(boxID)
 		return
@@ -356,6 +357,7 @@ func RemoveBox(boxID string) (err error) {
 	if err = removeBoxDir(localPath); err != nil {
 		return
 	}
+	removeHPathRefreshBox(boxID)
 	maintainPinnedDocs(nil, boxID, "")
 	// 目录删除成功后再清理，避免删除失败时提前移除数据库条目。
 	flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs)

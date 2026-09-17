@@ -55,7 +55,7 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                 return `${name} [${imageData.naturalWidth} × ${imageData.naturalHeight}]`;
             }],
             button: false,
-            magnifier: true,
+            magnifier: false,
             navigation: true,
             transition: false,
             ready: () => {

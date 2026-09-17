@@ -32,7 +32,15 @@ import {
     isDefaultTableColumnWidth,
     TABLE_DEFAULT_COLUMN_WIDTH,
 } from "./tableColumnWidth";
-import {getVisibleBuiltinColorIndexes} from "../toolbar/inlineStyle";
+import {
+    getInlineStyleByID,
+    getInlineStyleIDFromValue,
+    getInlineStylePropertyValue,
+    getInlineStylesCache,
+    getVisibleOrderedStyleKeys,
+    isBuiltinOrderKey,
+} from "../toolbar/inlineStyle";
+import {escapeAttr} from "../../util/escape";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 
 type TableSelectionMode = "row" | "column" | "cell";
@@ -201,14 +209,23 @@ export const setTableCellStyle = (protyle: IProtyle, node: HTMLElement, cells: H
 export const getTableCellBackgroundMenus = (cells: HTMLTableCellElement[],
                                              onChange: (color: string) => void): IMenu[] => {
     const backgroundColor = getCommonTableCellStyle(cells, "background-color");
-    const colors = ["", ...getVisibleBuiltinColorIndexes("backgroundColor")
-        .map(index => `var(--b3-font-background${index})`)];
-    const colorHTML = colors.map(color => {
-        const currentClass = backgroundColor === color ? " color__square--current" : "";
-        const defaultClass = color ? "" : " ariaLabel";
-        const attributes = color ? ` style="background-color:${color}"` :
-            ` aria-label="${window.siyuan.languages.default}" data-position="3south"`;
-        return `<button type="button" data-color="${color}" class="color__square${currentClass}${defaultClass}"${attributes}></button>`;
+    const data = getInlineStylesCache();
+    const backgroundStyleID = getInlineStyleIDFromValue(backgroundColor);
+    const colors = [{color: "", name: window.siyuan.languages.default, id: ""},
+        ...getVisibleOrderedStyleKeys("backgroundColor", data).map(key => {
+            if (isBuiltinOrderKey("backgroundColor", key)) {
+                return {color: `var(--b3-font-background${key})`, name: "", id: ""};
+            }
+            const style = getInlineStyleByID(key, data);
+            return {color: getInlineStylePropertyValue(style, "backgroundColor"), name: style.name, id: style.id};
+        })];
+    const colorHTML = colors.map(({color, name, id}) => {
+        const currentClass = backgroundColor === color || (id && backgroundStyleID === id) ?
+            " color__square--current" : "";
+        const labelClass = name ? " ariaLabel" : "";
+        const attributes = (color ? ` style="background-color:${escapeAttr(color)}"` : "") +
+            (name ? ` aria-label="${escapeAttr(name)}" data-position="3south"` : "");
+        return `<button type="button" data-color="${escapeAttr(color)}" class="color__square${currentClass}${labelClass}"${attributes}></button>`;
     }).join("");
     return [{
         type: "empty",

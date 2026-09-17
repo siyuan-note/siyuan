@@ -994,6 +994,14 @@ func bootSyncRepoWithDNSRetry() (err error) {
 }
 
 func loadSyncIgnoreLines() (ret []string, err error) {
+	return readSyncIgnoreLines(false)
+}
+
+func loadAppearanceSyncIgnoreLines() ([]string, error) {
+	return readSyncIgnoreLines(true)
+}
+
+func readSyncIgnoreLines(forAppearance bool) (ret []string, err error) {
 	// 忽略旧版同步配置，读取用户规则失败时仍需保留此规则。
 	defer func() {
 		ret = append(ret, "/.siyuan/conf.json")
@@ -1020,6 +1028,12 @@ func loadSyncIgnoreLines() (ret []string, err error) {
 	dataStr := string(data)
 	dataStr = strings.ReplaceAll(dataStr, "\r\n", "\n")
 	ret = strings.Split(dataStr, "\n")
+	if forAppearance {
+		ret, err = util.AppearanceUserSyncIgnoreLines(ret)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	// 忽略用户指南
 	for _, id := range userGuideIDs {

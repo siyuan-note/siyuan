@@ -1277,55 +1277,8 @@ func exportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptio
 		if 1 == Conf.Appearance.Mode {
 			theme = Conf.Appearance.ThemeDark
 		}
-		// 复制主题文件夹
-		srcs = []string{"themes/" + theme}
-		appearancePath := util.AppearancePath
-		if util.IsSymlinkPath(util.AppearancePath) {
-			// Support for symlinked theme folder when exporting HTML https://github.com/siyuan-note/siyuan/issues/9173
-			var readErr error
-			appearancePath, readErr = filepath.EvalSymlinks(util.AppearancePath)
-			if nil != readErr {
-				logging.LogErrorf("readlink [%s] failed: %s", util.AppearancePath, readErr)
-				return readErr
-			}
-		}
-
-		for _, src := range srcs {
-			from := filepath.Join(appearancePath, src)
-			to := filepath.Join(savePath, "appearance", src)
-			if err := filelock.Copy(from, to); err != nil {
-				logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
-				return err
-			}
-		}
-
-		// 只复制图标文件夹中的 icon.js 文件
-		iconName := Conf.Appearance.Icon
-		// 如果使用的不是内建图标（litheness），需要复制 litheness 作为后备
-		if iconName != "litheness" && iconName != "" {
-			srcIconFile := filepath.Join(appearancePath, "icons", "litheness", "icon.js")
-			toIconDir := filepath.Join(savePath, "appearance", "icons", "litheness")
-			if err := os.MkdirAll(toIconDir, 0755); err != nil {
-				logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
-				return err
-			}
-			toIconFile := filepath.Join(toIconDir, "icon.js")
-			if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
-				logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
-			}
-		}
-		// 复制当前使用的图标文件
-		if iconName != "" {
-			srcIconFile := filepath.Join(appearancePath, "icons", iconName, "icon.js")
-			toIconDir := filepath.Join(savePath, "appearance", "icons", iconName)
-			if err := os.MkdirAll(toIconDir, 0755); err != nil {
-				logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
-				return err
-			}
-			toIconFile := filepath.Join(toIconDir, "icon.js")
-			if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
-				logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
-			}
+		if err := copyExportAppearance(savePath, theme, Conf.Appearance.Icon); err != nil {
+			return err
 		}
 
 		// 复制自定义表情图片
@@ -1488,53 +1441,8 @@ func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 			if 1 == Conf.Appearance.Mode {
 				theme = Conf.Appearance.ThemeDark
 			}
-			// 复制主题文件夹
-			srcs = []string{"themes/" + theme}
-			appearancePath := util.AppearancePath
-			if util.IsSymlinkPath(util.AppearancePath) {
-				// Support for symlinked theme folder when exporting HTML https://github.com/siyuan-note/siyuan/issues/9173
-				var readErr error
-				appearancePath, readErr = filepath.EvalSymlinks(util.AppearancePath)
-				if nil != readErr {
-					logging.LogErrorf("readlink [%s] failed: %s", util.AppearancePath, readErr)
-					return readErr
-				}
-			}
-			for _, src := range srcs {
-				from := filepath.Join(appearancePath, src)
-				to := filepath.Join(savePath, "appearance", src)
-				if err := filelock.Copy(from, to); err != nil {
-					logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
-				}
-			}
-
-			// 只复制图标文件夹中的 icon.js 文件
-			iconName := Conf.Appearance.Icon
-			// 如果使用的不是内建图标（litheness），需要复制 litheness 作为后备
-			if iconName != "litheness" && iconName != "" {
-				srcIconFile := filepath.Join(appearancePath, "icons", "litheness", "icon.js")
-				toIconDir := filepath.Join(savePath, "appearance", "icons", "litheness")
-				if err := os.MkdirAll(toIconDir, 0755); err != nil {
-					logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
-					return err
-				}
-				toIconFile := filepath.Join(toIconDir, "icon.js")
-				if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
-					logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
-				}
-			}
-			// 复制当前使用的图标文件
-			if iconName != "" {
-				srcIconFile := filepath.Join(appearancePath, "icons", iconName, "icon.js")
-				toIconDir := filepath.Join(savePath, "appearance", "icons", iconName)
-				if err := os.MkdirAll(toIconDir, 0755); err != nil {
-					logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
-					return err
-				}
-				toIconFile := filepath.Join(toIconDir, "icon.js")
-				if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
-					logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
-				}
+			if err := copyExportAppearance(savePath, theme, Conf.Appearance.Icon); err != nil {
+				return err
 			}
 
 			// 复制自定义表情图片

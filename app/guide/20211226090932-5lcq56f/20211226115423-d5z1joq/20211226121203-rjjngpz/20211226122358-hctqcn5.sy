@@ -6,7 +6,7 @@
 		"id": "20211226122358-hctqcn5",
 		"title": "Kernel 參數",
 		"type": "doc",
-		"updated": "20260914011526"
+		"updated": "20260917190844"
 	},
 	"Children": [
 		{
@@ -548,7 +548,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220601091152-z1gdkxi",
-				"updated": "20220601091152"
+				"updated": "20260917190844"
 			},
 			"Children": [
 				{
@@ -604,7 +604,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220601091152-7qrn8ca",
-				"updated": "20220601091152"
+				"updated": "20260917190844"
 			},
 			"Children": [
 				{
@@ -627,7 +627,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "。這裡的外觀資料夾儲存內建資源；第三方主題和圖示套件統一使用工作空間/data/themes/ 和工作空間/data/icons/，不隨執行模式改變。"
 				}
 			]
 		},

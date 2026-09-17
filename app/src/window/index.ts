@@ -28,7 +28,7 @@ import {loadPlugins} from "../plugin/loader";
 import {applyPluginReload, syncGlobalPluginConfig} from "../plugin/globalState";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
-import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
+import {appearanceConfigApi, refreshAppearance} from "../config/tabs/appearanceRuntime";
 import {renderSnippet} from "../config/util/snippets";
 import {refreshThemeStyle, reloadInlineStyles, setBodyHighlight} from "../util/assets";
 import {reloadSync} from "../util/reloadSync";
@@ -63,6 +63,9 @@ class App {
                                 break;
                             case "setAppearance":
                                 appearanceConfigApi.apply(data.data);
+                                break;
+                            case "refreshAppearance":
+                                void refreshAppearance(data.data);
                                 break;
                             case "reloadInlineStyles":
                                 void reloadInlineStyles();

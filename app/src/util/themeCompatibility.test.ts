@@ -38,9 +38,21 @@ describe("theme frontend compatibility", () => {
         assert.equal(getCurrentAppearanceTheme(appearance({mode: 1}))?.name, "dark-theme");
     });
 
-    it("falls back according to the current frontend when theme metadata is unavailable", () => {
-        assert.equal(isCurrentThemeSupported(appearance({lightThemes: []}), "mobile"), false);
-        assert.equal(isCurrentThemeSupported(appearance({lightThemes: []}), "desktop"), true);
+    it("does not load a missing custom theme while preserving its selection", () => {
+        for (const frontend of ["desktop", "desktop-window", "browser-desktop", "mobile", "browser-mobile"]) {
+            const missing = appearance({lightThemes: []});
+            assert.equal(isCurrentThemeSupported(missing, frontend), false);
+            assert.equal(isCurrentThemeSupported(appearance({lightThemes: undefined}), frontend), false);
+            assert.equal(isCurrentThemeSupported(appearance({mode: 1, darkThemes: []}), frontend), false);
+            assert.equal(missing.themeLight, "light-theme");
+        }
+    });
+
+    it("keeps built-in themes available without package metadata", () => {
+        for (const frontend of ["desktop", "browser-desktop", "mobile", "browser-mobile"]) {
+            assert.equal(isCurrentThemeSupported(appearance({themeLight: "daylight", lightThemes: []}), frontend), true);
+            assert.equal(isCurrentThemeSupported(appearance({mode: 1, themeDark: "midnight", darkThemes: []}), frontend), true);
+        }
     });
 
     it("uses each mode's frontend declaration", () => {
@@ -63,6 +75,7 @@ describe("theme script lifecycle", () => {
             lightThemes: [{name: "light-theme", label: "Light", frontends: ["mobile"]}],
         });
         assert.equal(shouldUnloadThemeScript(previous, appearance(), "mobile"), true);
+        assert.equal(shouldUnloadThemeScript(appearance(), appearance({lightThemes: []}), "desktop"), true);
     });
 
     it("keeps a compatible unchanged script", () => {

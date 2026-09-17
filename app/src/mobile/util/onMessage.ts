@@ -22,7 +22,7 @@ import {reloadInlineStyles} from "../../util/assets";
 import {renderMobileBottomBar} from "./mobileBottomBar";
 import {Constants} from "../../constants";
 import {MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT} from "./mobileSidePanelConfig";
-import {appearanceConfigApi} from "../../config/tabs/appearanceRuntime";
+import {appearanceConfigApi, refreshAppearance} from "../../config/tabs/appearanceRuntime";
 import {applyCloudUserState} from "../../config/tabs/accountUi";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {handleMobileKernelExit} from "./kernelExit";
@@ -64,6 +64,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setAppearance":
                 appearanceConfigApi.apply(data.data);
+                break;
+            case "refreshAppearance":
+                void refreshAppearance(data.data);
                 break;
             case "reloadInlineStyles":
                 void reloadInlineStyles();

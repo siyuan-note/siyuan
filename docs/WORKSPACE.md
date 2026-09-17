@@ -19,7 +19,7 @@ A SiYuan workspace is a **self-describing** directory tree: notebooks, documents
 ├── .lock                       # Runtime workspace lock
 ├── conf/
 │   ├── conf.json              # ★Workspace-level config (appearance/system/sync/editor...)
-│   ├── appearance/             # Installed themes, icons, and language resources
+│   ├── appearance/             # Built-in appearance resources and local migration backups
 │   ├── ca.crt / ca.key / cert.pem / key.pem   # TLS certificates and keys
 │   └── windowState.json        # Desktop window state
 ├── data/                       # DataDir — root of all notebook data
@@ -30,6 +30,8 @@ A SiYuan workspace is a **self-describing** directory tree: notebooks, documents
 │   ├── templates/              # Global templates (.md)
 │   ├── widgets/                # Widgets
 │   ├── plugins/                # Plugins
+│   ├── themes/                 # Local theme directories restored from synced packages
+│   ├── icons/                  # Local icon directories restored from synced packages
 │   ├── emojis/                 # Custom emoji
 │   ├── snippets/               # Code snippets (CSS/JS)
 │   ├── public/                 # Static resources
@@ -80,7 +82,7 @@ Workspace-root entries:
 
 The first level of `data/` mixes two kinds of entries:
 
-1. **Fixed data directories:** `.siyuan/`, `assets/`, `templates/`, `widgets/`, `plugins/`, `emojis/`, `snippets/`, `public/`, `storage/`.
+1. **Fixed data directories:** `.siyuan/`, `assets/`, `templates/`, `widgets/`, `plugins/`, `themes/`, `icons/`, `emojis/`, `snippets/`, `public/`, `storage/`.
 2. **Notebook directories:** each is a folder named with the notebook ID.
 
 ### Reserved-filename list
@@ -97,6 +99,8 @@ func IsReservedFilename(baseName string) bool {
 That is, the physical path segments `assets` / `templates` / `widgets` / `emojis` / `.siyuan`, as well as anything starting with `.`, are reserved. This restriction applies to on-disk IDs and path segments, not to the notebook names or document titles displayed to users.
 
 ### Persistent data vs rebuildable indexes
+
+Third-party themes live in `data/themes/<name>/` and icon packages in `data/icons/<name>/`. Immutable archives in `data/storage/appearance-v1/` carry their complete contents, updates, and uninstallations through data sync and snapshots; the local theme and icon directories are excluded from ordinary file sync. Each device keeps its selection in `conf/conf.json`. Built-in themes and icons remain application resources. Package resources are downloaded completely even when asset downloads are on demand. Older clients can continue syncing notes; new clients restore appearance packages and handle their conflicts. Migration retains the original local files for recovery. See [Appearance sync](APPEARANCE-SYNC.md) for migration and conflict behavior.
 
 `data/storage/` contains persistent structured data such as attribute-view definitions and plugin state. The SQLite files in `temp/` are derived indexes and caches: normal notebooks use the global `siyuan.db` and `blocktree.db`, while each unlocked encrypted notebook uses independent SQLCipher databases. Therefore, deleting or rebuilding an index must not be confused with deleting the source `.sy`, asset, or database-definition files.
 

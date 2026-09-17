@@ -42,6 +42,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
 	"github.com/olahol/melody"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/agent"
 	"github.com/siyuan-note/siyuan/kernel/api"
@@ -789,18 +790,22 @@ func serveAppearance(ginServer *gin.Engine) {
 		c.Redirect(302, location.String())
 	})
 
-	appearancePath := util.AppearancePath
-	if "dev" == util.Mode {
-		appearancePath = filepath.Join(util.WorkingDir, "appearance")
-	}
+	appearancePath := util.BuiltInAppearancePath()
 	siyuan.GET("/appearance/*filepath", func(c *gin.Context) {
-		filePath, status := resolveAppearanceFile(appearancePath, strings.TrimPrefix(c.Request.URL.Path, "/appearance/"))
+		requestPath := strings.TrimPrefix(c.Request.URL.Path, "/appearance/")
+		if isThirdPartyAppearanceRequest(requestPath) {
+			lockPath := filepath.Join(util.DataDir, ".siyuan-appearance")
+			filelock.Lock(lockPath)
+			defer filelock.Unlock(lockPath)
+		}
+		filePath, status := resolveAppearanceFile(appearancePath, requestPath)
 		if status != 0 {
 			c.Status(status)
 			return
 		}
 
-		if strings.HasPrefix(c.Request.URL.Path, "/appearance/themes/") {
+		resourceKind := strings.ToLower(strings.SplitN(requestPath, "/", 2)[0])
+		if resourceKind == "themes" || resourceKind == "icons" {
 			c.Header("Cache-Control", "private, no-store")
 		}
 		if strings.HasSuffix(c.Request.URL.Path, "/theme.js") {

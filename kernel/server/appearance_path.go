@@ -23,7 +23,18 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func isThirdPartyAppearanceRequest(requestPath string) bool {
+	parts := strings.SplitN(requestPath, "/", 3)
+	if len(parts) < 2 {
+		return false
+	}
+	parts[0] = strings.ToLower(parts[0])
+	return (parts[0] == "themes" && !strings.EqualFold(parts[1], "daylight") && !strings.EqualFold(parts[1], "midnight")) ||
+		(parts[0] == "icons" && !strings.EqualFold(parts[1], "litheness"))
+}
 
 // resolveAppearanceFile 在读取前限定真实路径，仅允许主题和图标包目录链接到外部目录。
 func resolveAppearanceFile(root, requestPath string) (string, int) {
@@ -35,6 +46,19 @@ func resolveAppearanceFile(root, requestPath string) (string, int) {
 	if relativePath == "boot" {
 		relativePath = filepath.Join(relativePath, "index.html")
 	}
+	segments := strings.Split(filepath.ToSlash(relativePath), "/")
+	packageRootIndex := -1
+	kind := strings.ToLower(segments[0])
+	if len(segments) >= 2 && (kind == "themes" || kind == "icons") {
+		packagePath := util.AppearancePackagePath(kind, segments[1])
+		if packagePath == "" {
+			return "", http.StatusForbidden
+		}
+		root = filepath.Dir(packagePath)
+		segments[1] = filepath.Base(packagePath)
+		segments = segments[1:]
+		packageRootIndex = 0
+	}
 	root, err := filepath.Abs(root)
 	if err != nil {
 		return "", http.StatusInternalServerError
@@ -44,7 +68,6 @@ func resolveAppearanceFile(root, requestPath string) (string, int) {
 		return "", http.StatusNotFound
 	}
 	allowedRoot, target := root, root
-	segments := strings.Split(filepath.ToSlash(relativePath), "/")
 	for i, segment := range segments {
 		target = filepath.Join(target, segment)
 		info, statErr := os.Lstat(target)
@@ -61,7 +84,7 @@ func resolveAppearanceFile(root, requestPath string) (string, int) {
 				return "", http.StatusForbidden
 			}
 		}
-		if i == 1 && (segments[0] == "themes" || segments[0] == "icons") {
+		if i == packageRootIndex {
 			info, err = os.Stat(target)
 			if err != nil || !info.IsDir() {
 				return "", http.StatusNotFound

@@ -200,17 +200,20 @@ func inlineStyleThemeTestTree(style string) (tree *parse.Tree, node *ast.Node) {
 func setupThemeTest(t *testing.T, theme, css string) {
 	t.Helper()
 	oldDataDir, oldThemesPath, oldConf := util.DataDir, util.ThemesPath, Conf
+	oldAppearancePath, oldMode := util.AppearancePath, util.Mode
 	tempDir := t.TempDir()
 	util.DataDir = filepath.Join(tempDir, "data")
 	util.ThemesPath = filepath.Join(tempDir, "themes")
+	util.AppearancePath, util.Mode = filepath.Join(tempDir, "appearance"), "prod"
 	Conf = NewAppConf()
 	Conf.Appearance = conf.NewAppearance()
 	Conf.Sync = conf.NewSync()
 	t.Cleanup(func() {
 		util.DataDir, util.ThemesPath, Conf = oldDataDir, oldThemesPath, oldConf
+		util.AppearancePath, util.Mode = oldAppearancePath, oldMode
 	})
 
-	themeDir := filepath.Join(util.ThemesPath, theme)
+	themeDir := util.AppearancePackagePath("themes", theme)
 	if err := os.MkdirAll(themeDir, 0755); err != nil {
 		t.Fatal(err)
 	}

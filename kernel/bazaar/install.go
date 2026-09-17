@@ -109,14 +109,16 @@ func InstallPackage(repoURL, repoHash, repoRef, installPath, systemID, pkgType, 
 	if err != nil {
 		return err
 	}
-	if err = installPackage(data, installPath, pkgType, packageName, update); err != nil {
+	if err = installPackageWithSource(data, installPath, pkgType, packageName, update, repoURL, repoRef); err != nil {
 		return err
 	}
 	RemoveInstalledPackageSizeCache(pkgType, packageName)
 
 	// 记录首次安装时间或最近更新时间
 	now := time.Now()
-	recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update, repoURL, repoRef)
+	if !isAppearanceKind(pkgType) {
+		recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update, repoURL, repoRef)
+	}
 
 	// 文件夹的修改时间设置为当前操作时间
 	if err = os.Chtimes(installPath, now, now); err != nil {
@@ -128,6 +130,10 @@ func InstallPackage(repoURL, repoHash, repoRef, installPath, systemID, pkgType, 
 }
 
 func installPackage(data []byte, installPath, pkgType, packageName string, update bool) (err error) {
+	return installPackageWithSource(data, installPath, pkgType, packageName, update, "", "")
+}
+
+func installPackageWithSource(data []byte, installPath, pkgType, packageName string, update bool, repoURL, repoRef string) (err error) {
 	// 非更新安装时目标目录已存在且非空则拒绝覆盖，防止把其他包的内容写入已有包目录
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
 	if !update {
@@ -182,10 +188,42 @@ func installPackage(data []byte, installPath, pkgType, packageName string, updat
 		return fmt.Errorf("marketplace package name mismatch: expected [%s], got [%s]", packageName, pkg.Name)
 	}
 
-	if err = replacePackageDirectory(srcPath, installPath, update); err != nil {
+	if err = publishInstalledPackage(srcPath, installPath, pkgType, packageName, update, repoURL, repoRef); err != nil {
 		return
 	}
 	return
+}
+
+// publishInstalledPackage 将外观包内容和安装元数据放入同一个可恢复事务。
+func publishInstalledPackage(sourcePath, installPath, pkgType, packageName string, update bool, repoURL, repoRef string) error {
+	if !isAppearanceKind(pkgType) {
+		return replacePackageDirectory(sourcePath, installPath, update)
+	}
+	expectedPath, _, err := appearancePackagePaths(pkgType, packageName)
+	if err != nil {
+		return err
+	}
+	if filepath.Clean(installPath) != filepath.Clean(expectedPath) {
+		return errors.New("invalid appearance package install path")
+	}
+	info, err := GetAppearancePackageInfo(pkgType, packageName)
+	if err != nil {
+		return err
+	}
+	now := time.Now()
+	if update {
+		if info.InstallTime < 1 {
+			info.InstallTime = now.UnixMilli()
+			if stat, statErr := os.Stat(installPath); statErr == nil {
+				info.InstallTime = stat.ModTime().UnixMilli()
+			}
+		}
+		info.UpdateTime = now.UnixMilli()
+	} else {
+		info.InstallTime, info.UpdateTime = now.UnixMilli(), 0
+	}
+	info.RepoURL, info.RepoRef = normalizeGitHubPackageSource(repoURL, repoRef)
+	return PublishAppearancePackage(sourcePath, pkgType, packageName, *info, false, update)
 }
 
 // replacePackageDirectory 将 sourcePath 整目录替换到 installPath。
@@ -252,13 +290,15 @@ func InstallLocalPackage(sourcePath, installPath, pkgType, packageName string, u
 	if info, statErr := os.Stat(installPath); statErr == nil {
 		fallbackInstallTime = info.ModTime()
 	}
-	if err = replacePackageDirectory(sourcePath, installPath, update); err != nil {
+	if err = publishInstalledPackage(sourcePath, installPath, pkgType, packageName, update, "", ""); err != nil {
 		return
 	}
 
 	RemoveInstalledPackageSizeCache(pkgType, packageName)
 	now := time.Now()
-	recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update, "", "")
+	if !isAppearanceKind(pkgType) {
+		recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update, "", "")
+	}
 	if chtimesErr := os.Chtimes(installPath, now, now); chtimesErr != nil {
 		logging.LogWarnf("set package [%s] folder mtime failed: %s", packageName, chtimesErr)
 	}
@@ -267,6 +307,12 @@ func InstallLocalPackage(sourcePath, installPath, pkgType, packageName string, u
 
 // UninstallPackage 卸载集市包
 func UninstallPackage(installPath string) (err error) {
+	if relativePath, relErr := filepath.Rel(util.DataDir, installPath); relErr == nil {
+		parts := strings.Split(filepath.ToSlash(relativePath), "/")
+		if len(parts) == 2 && isAppearanceKind(parts[0]) {
+			return DeleteAppearancePackage(parts[0], parts[1])
+		}
+	}
 	packageInstallLock.Lock()
 	defer packageInstallLock.Unlock()
 

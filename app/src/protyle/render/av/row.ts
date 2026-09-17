@@ -497,14 +497,28 @@ const applyFixedClip = (el: HTMLElement, scrollEl: HTMLElement) => {
     const scrollLeft = scrollEl.scrollLeft;
     const clientWidth = scrollEl.clientWidth;
     const scrollWidth = scrollEl.scrollWidth;
-    if (scrollWidth <= clientWidth) {
-        if (el.style.clipPath) {
-            el.style.clipPath = "";
-        }
-        return;
-    }
     const right = Math.max(0, scrollWidth - scrollLeft - clientWidth);
-    el.style.clipPath = `inset(0 ${right}px 0 ${scrollLeft}px)`;
+    applyFixedViewportClip(el, scrollWidth > clientWidth ? scrollLeft : 0, right);
+};
+
+const applyFixedViewportClip = (el: HTMLElement, left = 0, right = 0) => {
+    // 固定栏按编辑器与分屏的交集裁剪，避免分屏缩小时覆盖相邻文档。
+    const viewport = el.closest(".protyle-content");
+    const pane = el.closest(".layout-tab-container");
+    const rect = el.getBoundingClientRect();
+    let top = 0;
+    let bottom = 0;
+    [viewport, pane].forEach(element => {
+        if (!element) {
+            return;
+        }
+        const bounds = element.getBoundingClientRect();
+        top = Math.max(top, bounds.top - rect.top);
+        bottom = Math.max(bottom, rect.bottom - bounds.bottom);
+        left = Math.max(left, bounds.left - rect.left);
+        right = Math.max(right, rect.right - bounds.right);
+    });
+    el.style.clipPath = `inset(${top}px ${right}px ${bottom}px ${left}px)`;
 };
 
 const stickyScrollElMap = new WeakMap<HTMLElement, HTMLElement>();
@@ -592,7 +606,7 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
         bindHeaderScrollSync(blockElement, scrollEl);
     }
 
-    // 先批量读取所有几何信息，再统一写入 style，避免读-写交错触发强制重排
+    // 先批量读取吸顶判定所需的几何信息，再更新固定栏位置及裁剪范围。
     const elementRect = scrollElement.getBoundingClientRect();
     const breadcrumbElement = scrollElement.previousElementSibling as HTMLElement;
     // 移动端面包屑隐藏后仍保留布局尺寸，吸顶位置需回到滚动视口顶部。
@@ -692,7 +706,7 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
         });
     }
 
-    // 第二遍：纯写入，此时不再读取布局，仅触发一次重排
+    // 第二遍：应用固定栏位置，并按定位后的实际边界裁剪。
     const stickyBottom = Math.round(window.innerHeight - elementRect.bottom);
     if (viewsTask) {
         if (viewsTask.shouldFix) {
@@ -702,6 +716,7 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
             viewsTask.element.style.left = viewsTask.left + "px";
             viewsTask.element.style.top = viewsTask.top + "px";
             viewsTask.element.style.width = viewsTask.width + "px";
+            applyFixedViewportClip(viewsTask.element);
         } else {
             removeFixedRow(viewsTask.element, "av__views--fixed", "av__views-placeholder");
         }
@@ -712,10 +727,10 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
             if (!item.classList.contains("av__row--header--fixed")) {
                 addFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder", headerH, Math.round(bodyRect.width));
             }
-            syncFixedRowPos(item, bodyRect, task.scrollLeft, task.scrollEl);
             item.style.top = bodyRect.bottom < headerStickyTop + headerH
                 ? Math.round(bodyRect.bottom - headerH) + "px"
                 : headerStickyTop + "px";
+            syncFixedRowPos(item, bodyRect, task.scrollLeft, task.scrollEl);
         } else {
             removeFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder");
         }
@@ -726,8 +741,8 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
             if (!item.classList.contains("av__row--footer--fixed")) {
                 addFixedRow(item, "av__row--footer--fixed", "av__row--footer--placeholder", footerH, Math.round(bodyRect.width));
             }
-            syncFixedRowPos(item, bodyRect, task.scrollLeft, task.scrollEl);
             item.style.bottom = stickyBottom + "px";
+            syncFixedRowPos(item, bodyRect, task.scrollLeft, task.scrollEl);
         } else {
             removeFixedRow(item, "av__row--footer--fixed", "av__row--footer--placeholder");
         }

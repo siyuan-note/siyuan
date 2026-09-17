@@ -42,8 +42,9 @@ import {adjustDockPadding} from "./dock/util";
 import {setTitle} from "../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
 import {applyDockEntryVisibility} from "../config/entryVisibility/runtime";
-import {panePercentages, resizePanePercentages} from "./resizePane";
+import {MIN_VERTICAL_PANE_SIZE, panePercentages, resizePanePercentages} from "./resizePane";
 import {requestResponsiveDockLayout} from "./dock/responsive";
+import {stickyRow} from "../protyle/render/av/row";
 
 const isBuiltInCustomModel = (type: string) => {
     return type === "siyuan-card" || type === "siyuan-database-row";
@@ -1044,6 +1045,8 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             documentSelf.body.classList.add("fn__pointer-none");
             const nextElement = resizeElement.nextElementSibling as HTMLElement;
             const previousElement = resizeElement.previousElementSibling as HTMLElement;
+            const resizingProtyles = getAllEditor().map(editor => editor?.protyle).filter(protyle =>
+                protyle && (previousElement.contains(protyle.element) || nextElement.contains(protyle.element)));
             const isCenterResize = !!resizeElement.parentElement.closest(".layout__center");
             const responsiveDock = !isCenterResize && direction === "lr" ?
                 [window.siyuan.layout?.leftDock, window.siyuan.layout?.rightDock].find((dock) =>
@@ -1085,7 +1088,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 const delta = currentCoordinate - x;
                 const previousNowSize = previousSize + delta;
                 const nextNowSize = nextSize - delta;
-                if (previousNowSize < 8 || nextNowSize < 8) {
+                if (!isCenterResize && (previousNowSize < 8 || nextNowSize < 8)) {
                     return;
                 }
                 if (window.siyuan.layout.leftDock && window.siyuan.layout.leftDock.layout.element === previousElement &&
@@ -1116,6 +1119,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                         previousIndex,
                         nextIndex,
                         delta,
+                        direction === "tb" ? MIN_VERTICAL_PANE_SIZE : 8,
                     );
                     if (percentages) {
                         setPanePercentages(paneElements, percentages);
@@ -1130,6 +1134,16 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 }
             };
 
+            const updateFixedRows = () => {
+                // 分屏拖动不一定改变文档内容尺寸，需在绘制前同步数据库固定栏的坐标和裁剪。
+                resizingProtyles.forEach(protyle => {
+                    hideElements(["gutterOnly"], protyle);
+                    protyle.wysiwyg.element.querySelectorAll<HTMLElement>(".av").forEach(item => {
+                        stickyRow(item, protyle.contentElement, "all");
+                    });
+                });
+            };
+
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 moveEvent.preventDefault();
                 moveEvent.stopPropagation();
@@ -1139,6 +1153,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                         resizeFrame = 0;
                         if (pendingCoordinate !== undefined) {
                             applyResize(pendingCoordinate);
+                            updateFixedRows();
                         }
                         pendingCoordinate = undefined;
                     });
@@ -1152,6 +1167,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 }
                 if (pendingCoordinate !== undefined) {
                     applyResize(pendingCoordinate);
+                    updateFixedRows();
                 }
                 documentSelf.body.classList.remove("fn__pointer-none");
                 documentSelf.onmousemove = null;

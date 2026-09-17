@@ -15,10 +15,17 @@ test("sticky views follow visible breadcrumbs and return to the viewport top whe
         require: () => ({hasTopClosestByAttribute: () => false}),
         window: {innerHeight: 800},
     });
+    let paneBottom = 800;
     const views = {
         classList: {contains: (name: string) => name === "av__views--fixed"},
         offsetHeight: 40,
-        style: {top: "", left: "", width: ""},
+        style: {top: "", left: "", width: "", clipPath: ""},
+        closest: (selector: string) => ({
+            getBoundingClientRect: () => ({
+                top: 24, bottom: selector === ".layout-tab-container" ? paneBottom : 800, left: 0, right: 500,
+            }),
+        }),
+        getBoundingClientRect: () => ({top: parseFloat(views.style.top), bottom: parseFloat(views.style.top) + 40, left: 20, right: 420}),
         nextElementSibling: {
             classList: {contains: (name: string) => name === "av__views-placeholder"},
             getBoundingClientRect: () => ({top: -100, left: 20, width: 400}),
@@ -42,6 +49,16 @@ test("sticky views follow visible breadcrumbs and return to the viewport top whe
     };
     exports.stickyRow(block, scroll, "top");
     assert.equal(views.style.top, "72px");
+    assert.equal(views.style.clipPath, "inset(0px 0px 0px 0px)");
+    paneBottom = 90;
+    exports.stickyRow(block, scroll, "top");
+    assert.equal(views.style.clipPath, "inset(0px 0px 22px 0px)");
+    paneBottom = 60;
+    exports.stickyRow(block, scroll, "top");
+    assert.equal(views.style.clipPath, "inset(0px 0px 52px 0px)");
+    paneBottom = 800;
+    exports.stickyRow(block, scroll, "top");
+    assert.equal(views.style.clipPath, "inset(0px 0px 0px 0px)");
     hidden = true;
     exports.stickyRow(block, scroll, "top");
     assert.equal(views.style.top, "24px");

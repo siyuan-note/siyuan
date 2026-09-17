@@ -4070,6 +4070,14 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
         const left = compressed ? horizontalAnchorLeft - this.element.clientWidth - space / 2 + 3 - gutterGap :
             getNaturalLeft(this.element.clientWidth);
         this.element.style.left = `${getFixedGutterPosition(left, fixedContainerRect?.left)}px`;
+        // 块标及其插入按钮按滚动视口和分屏边界裁剪，保留视口内的外伸控件。
+        const viewportRect = protyle.contentElement.getBoundingClientRect();
+        const paneRect = protyle.element.closest(".layout-tab-container")?.getBoundingClientRect() || viewportRect;
+        const gutterRect = this.element.getBoundingClientRect();
+        this.element.style.clipPath = `inset(${Math.max(contentTop, paneRect.top) - gutterRect.top}px ${
+            gutterRect.right - Math.min(viewportRect.right, paneRect.right)}px ${
+            gutterRect.bottom - Math.min(viewportRect.bottom, paneRect.bottom)}px ${
+            Math.max(viewportRect.left, paneRect.left) - gutterRect.left}px)`;
     }
 }
 

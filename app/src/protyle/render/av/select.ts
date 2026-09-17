@@ -25,6 +25,7 @@ import {
     getNextAVOptionColor,
 } from "./color";
 import {openAVCustomColorDialog} from "./colorDialog";
+import {isMobile} from "../../../util/functions";
 
 let cellValues: IAVCellValue[];
 
@@ -48,8 +49,8 @@ const filterSelectHTML = (key: string, options: {
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
                 const airaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>` : "";
-                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${currentName === item.name ? " b3-menu__item--current" : ""}" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${escapeAttr(item.color)}">
-    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${currentName === item.name ? " b3-menu__item--current" : ""}" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" data-option-row="true" data-color="${escapeAttr(item.color)}">
+    <span draggable="true" class="b3-menu__icon b3-menu__icon--custom fn__grab"><svg><use xlink:href="#iconDrag"></use></svg></span>
     <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${airaLabel}">
         <span class="b3-chip" style="${getAVColorStyle(item)}">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
@@ -524,6 +525,10 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
 
 export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, cellElements: HTMLElement[], blockElement: Element) => {
     const inputElement = menuElement.querySelector("input");
+    // 在选项按钮获得焦点前记录搜索状态，重建多选面板时仅恢复用户主动进入的输入。
+    menuElement.onpointerdown = () => {
+        menuElement.dataset.restoreSearchFocus = String(document.activeElement === inputElement);
+    };
     const colId = getColId(cellElements[0], blockElement.getAttribute("data-av-type") as TAVView);
     let colData: IAVColumn;
     getFieldsByData(data).find((item: IAVColumn) => {
@@ -566,6 +571,9 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
 };
 
 export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], currentElement: HTMLElement, menuElement: HTMLElement, blockElement: Element) => {
+    const inputElement = menuElement.querySelector("input");
+    const restoreSearchFocus = !isMobile() || document.activeElement === inputElement ||
+        menuElement.dataset.restoreSearchFocus === "true";
     let hasSelected = false;
     Array.from(menuElement.querySelectorAll(".b3-chips .b3-chip")).find((item: HTMLElement) => {
         if (item.dataset.content === currentElement.dataset.name) {
@@ -574,7 +582,9 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         }
     });
     if (hasSelected) {
-        menuElement.querySelector("input").focus();
+        if (restoreSearchFocus) {
+            inputElement.focus();
+        }
         return;
     }
 
@@ -722,7 +732,9 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         const oldChipsHeight = menuElement.querySelector(".b3-chips").clientHeight;
         menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
         bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
-        menuElement.querySelector("input").focus();
+        if (restoreSearchFocus) {
+            menuElement.querySelector("input").focus();
+        }
         menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
         // chips 增减导致菜单高度变化后重新定位（锁底部，顶部自适应，避免底部溢出视口）
         const cellRect = cellElements[cellElements.length - 1].getBoundingClientRect();

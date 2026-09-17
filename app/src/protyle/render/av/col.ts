@@ -142,8 +142,8 @@ export const getEditHTML = (options: {
         }
         colData.options.forEach(item => {
             const airaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>` : "";
-            html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" data-color="${escapeAttr(item.color)}">
-    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
+            html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" data-option-row="true" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" data-color="${escapeAttr(item.color)}">
+    <span draggable="true" class="b3-menu__icon b3-menu__icon--custom fn__grab"><svg><use xlink:href="#iconDrag"></use></svg></span>
     <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${airaLabel}">
         <span class="b3-chip" style="${getAVColorStyle(item)}">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>

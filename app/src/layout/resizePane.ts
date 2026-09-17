@@ -1,4 +1,5 @@
 export const MIN_VERTICAL_PANE_SIZE = 200;
+export const MIN_HORIZONTAL_PANE_SIZE = 240;
 
 export const resizePanePercentages = (
     sizes: number[],

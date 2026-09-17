@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {MIN_VERTICAL_PANE_SIZE, resizePanePercentages, splitPanePercentages} from "./resizePane";
+import {MIN_HORIZONTAL_PANE_SIZE, MIN_VERTICAL_PANE_SIZE, resizePanePercentages, splitPanePercentages} from "./resizePane";
 
 describe("layout pane resizing", () => {
     it("keeps two panes proportional after resizing", () => {
@@ -29,6 +29,19 @@ describe("layout pane resizing", () => {
     it("allows an undersized pane to recover without shrinking it further", () => {
         assert.deepEqual(resizePanePercentages([100, 400], 0, 1, -50, MIN_VERTICAL_PANE_SIZE), [20, 80]);
         assert.deepEqual(resizePanePercentages([100, 400], 0, 1, 100, MIN_VERTICAL_PANE_SIZE), [40, 60]);
+    });
+
+    it("keeps horizontal panes usable without resizing other panes", () => {
+        const left = resizePanePercentages([400, 400, 200], 0, 1, -1000, MIN_HORIZONTAL_PANE_SIZE);
+        const right = resizePanePercentages([400, 400, 200], 0, 1, 1000, MIN_HORIZONTAL_PANE_SIZE);
+        [24, 56, 20].forEach((expected, index) => assert.ok(Math.abs(left[index] - expected) < 1e-10));
+        [56, 24, 20].forEach((expected, index) => assert.ok(Math.abs(right[index] - expected) < 1e-10));
+    });
+
+    it("allows a narrow horizontal pane to widen without forcing the layout to jump", () => {
+        assert.deepEqual(resizePanePercentages([100, 400], 0, 1, -50, MIN_HORIZONTAL_PANE_SIZE), [20, 80]);
+        assert.deepEqual(resizePanePercentages([100, 400], 0, 1, 100, MIN_HORIZONTAL_PANE_SIZE), [40, 60]);
+        assert.deepEqual(resizePanePercentages([100, 100], 0, 1, 50, MIN_HORIZONTAL_PANE_SIZE), [50, 50]);
     });
 
     it("normalizes pane sizes before splitting an existing pane", () => {

@@ -42,7 +42,7 @@ import {adjustDockPadding} from "./dock/util";
 import {setTitle} from "../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
 import {applyDockEntryVisibility} from "../config/entryVisibility/runtime";
-import {MIN_VERTICAL_PANE_SIZE, panePercentages, resizePanePercentages} from "./resizePane";
+import {MIN_HORIZONTAL_PANE_SIZE, MIN_VERTICAL_PANE_SIZE, panePercentages, resizePanePercentages} from "./resizePane";
 import {requestResponsiveDockLayout} from "./dock/responsive";
 import {stickyRow} from "../protyle/render/av/row";
 
@@ -1119,7 +1119,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                         previousIndex,
                         nextIndex,
                         delta,
-                        direction === "tb" ? MIN_VERTICAL_PANE_SIZE : 8,
+                        direction === "tb" ? MIN_VERTICAL_PANE_SIZE : MIN_HORIZONTAL_PANE_SIZE,
                     );
                     if (percentages) {
                         setPanePercentages(paneElements, percentages);

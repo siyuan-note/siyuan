@@ -54,7 +54,13 @@ var getNotebookInfo = contractHandler(apicontract.GetNotebookInfo, func(c *gin.C
 		return contractFailure[apicontract.NotebookInfoData](ret)
 	}
 
-	boxInfo := box.GetInfo()
+	var boxInfo *model.BoxInfo
+	if model.IsReadOnlyRoleContext(c) {
+		// 发布读者的统计口径与可见的发布视图一致，不包含隐藏和禁止发布的文档
+		boxInfo = box.GetInfoForPublish(model.GetPublishAccess())
+	} else {
+		boxInfo = box.GetInfo()
+	}
 	return apicontract.Success(apicontract.NotebookInfoData{BoxInfo: notebookInfoContract(boxInfo)})
 })
 

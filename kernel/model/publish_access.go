@@ -303,6 +303,17 @@ func CheckPathAccessableByPublishIgnore(box string, path string, publishIgnore P
 	return true
 }
 
+// PublishVisibleDocPathFilter 返回发布读者可见文档路径的判定函数，口径与读者可见的发布视图一致：
+// 隐藏、禁止发布以及加密笔记本中的文档都不计入读者统计。
+func PublishVisibleDocPathFilter(boxID string, publishAccess PublishAccess) func(docPath string) bool {
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
+	return func(docPath string) bool {
+		return CheckPathAccessableByPublishIgnore(boxID, docPath, publishInvisible) &&
+			CheckPathAccessableByPublishIgnore(boxID, docPath, publishDisable)
+	}
+}
+
 // IsEncryptedPublishRuntimeTarget 判断发布读取目标是否属于当前可解析的加密笔记本。
 func IsEncryptedPublishRuntimeTarget(id string) bool {
 	boxIDs, denyAll := encryptedBoxIDsForPublishAccess()

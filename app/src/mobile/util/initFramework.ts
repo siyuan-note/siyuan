@@ -26,6 +26,7 @@ import {setTitle} from "../../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../../protyle/render/av/locate";
 import {MobileTabs} from "../tabs/MobileTabs";
 import {initMobileBottomBar} from "./mobileBottomBar";
+import {initSidebarButtons, updateSidebarButtons} from "./sidebarButtons";
 import {initMobileBars} from "./mobileBars";
 import {openDock} from "../dock/util";
 import {
@@ -303,6 +304,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
     renderMobileSidePanelLayout(app);
     initSidePanelTabs(app, sidebarElement);
     initSidePanelTabs(app, sidebarRightElement);
+    initSidebarButtons();
     const sidebarRightExitElement = document.getElementById("sidebarRightExit");
     if (isInMobileApp() && sidebarRightExitElement) {
         sidebarRightExitElement.classList.remove("fn__none");
@@ -315,10 +317,12 @@ export const initFramework = async (app: App, isStart: boolean) => {
     window.addEventListener(MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT, () => {
         renderMobileSidePanelLayout(app);
         updateOpenSidePanelDocks(app, [sidebarElement, sidebarRightElement]);
+        updateSidebarButtons();
     });
     window.addEventListener(MOBILE_PLUGIN_DOCKS_CHANGE_EVENT, () => {
         renderMobileSidePanelLayout(app);
         updateOpenSidePanelDocks(app, [sidebarElement, sidebarRightElement]);
+        updateSidebarButtons();
     });
     await Promise.all([inlineStyleReady, snippetReady]);
     window.siyuan.mobile.docks.file = new MobileFiles(app, getDockContentElement("file"));

@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Otvárať bočné panely potiahnutím",
+	"mobileSidebarButtons": "Zobraziť tlačidlá bočných panelov",
+	"mobileSidebarAccessTip": "Ponechajte zapnutý aspoň jeden spôsob otvárania bočných panelov",
+	"openLeftSidebar": "Otvoriť ľavý bočný panel",
+	"openRightSidebar": "Otvoriť pravý bočný panel",
 	"listMindmapPlaceholder": "Zadajte text",
 	"listMindmapToMindmap": "Prepnúť na zobrazenie myšlienkovej mapy",
 	"listMindmapToList": "Prepnúť na zobrazenie zoznamu",

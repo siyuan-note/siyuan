@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "스와이프로 사이드바 열기",
+	"mobileSidebarButtons": "사이드바 버튼 표시",
+	"mobileSidebarAccessTip": "사이드바를 여는 방법을 하나 이상 활성화하세요",
+	"openLeftSidebar": "왼쪽 사이드바 열기",
+	"openRightSidebar": "오른쪽 사이드바 열기",
 	"listMindmapPlaceholder": "텍스트 입력",
 	"listMindmapToMindmap": "마인드맵 보기로 전환",
 	"listMindmapToList": "목록 보기로 전환",

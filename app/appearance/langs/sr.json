@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Отварање бочних трака превлачењем",
+	"mobileSidebarButtons": "Прикажи дугмад бочних трака",
+	"mobileSidebarAccessTip": "Оставите укључен бар један начин отварања бочних трака",
+	"openLeftSidebar": "Отвори леву бочну траку",
+	"openRightSidebar": "Отвори десну бочну траку",
 	"listMindmapPlaceholder": "Унесите текст",
 	"listMindmapToMindmap": "Пређи на приказ мапе ума",
 	"listMindmapToList": "Пређи на приказ листе",

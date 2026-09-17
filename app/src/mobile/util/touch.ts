@@ -1,3 +1,5 @@
+import {getSidebarDock, getSidebarElement, popSidebar} from "./sidebar";
+import {getMobileSidebarConfig} from "./mobileBarsConfig";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -21,7 +23,6 @@ import {stripSemanticMarkersFromRangeText} from "../../protyle/util/inlineElemen
 import {getTouchAxis, shouldStartLongPressMultiSelect} from "./touchGesture";
 import {getMobileBlockSelectionElement} from "./blockSelection";
 import {updateMultiSelectToolbar} from "./multiSelectToolbar";
-import {closeAVCellEditor} from "../../protyle/render/av/cellEditor";
 import {
     getOpeningSidebar,
     getOpenSidebarReleaseAction,
@@ -49,10 +50,6 @@ let longPressTimer: number;
 let longPressBlockElement: HTMLElement;
 let longPressTouchRange: Range;
 
-const getSidebarElement = (side: MobileSidebarSide) => {
-    return document.getElementById(side === "left" ? "sidebar" : "sidebarRight");
-};
-
 const sideMaskElement = document.querySelector(".side-mask") as HTMLElement;
 
 const updateSidebarSwipeState = (activeSide?: MobileSidebarSide) => {
@@ -68,45 +65,6 @@ const getTargetSidebar = (target: HTMLElement): MobileSidebarSide | undefined =>
     }
     if (hasClosestByAttribute(target, "id", "sidebarRight", true)) {
         return "right";
-    }
-};
-
-const getSidebarDock = (sidebarElement: HTMLElement | null) => {
-    if (!sidebarElement) {
-        return;
-    }
-    const toolbarElement = sidebarElement.querySelector(".toolbar--border");
-    const tabElements = Array.from(toolbarElement?.querySelectorAll<HTMLElement>("[data-type]") || []);
-    const activeElement = tabElements.find(item =>
-        item.classList.contains("toolbar__icon--active") && !item.classList.contains("fn__none")) ||
-        tabElements.find(item => !item.classList.contains("fn__none"));
-    const type = activeElement?.dataset.type?.replace(/^sidebar-/, "").replace(/-tab$/, "");
-    if (toolbarElement && type) {
-        return {toolbarElement, type};
-    }
-};
-
-const popSidebar = (side: MobileSidebarSide, render = true) => {
-    activeBlur();
-    const sidebarElement = getSidebarElement(side);
-    if (!sidebarElement) {
-        return;
-    }
-    let dock: ReturnType<typeof getSidebarDock>;
-    if (render) {
-        dock = getSidebarDock(sidebarElement);
-        if (!dock) {
-            sidebarElement.style.removeProperty("transform");
-            closePanel();
-            return;
-        }
-    }
-    closeAVCellEditor();
-    const otherSidebar = side === "left" ? "right" : "left";
-    getSidebarElement(otherSidebar)?.style.removeProperty("transform");
-    sidebarElement.style.transform = "translateX(0px)";
-    if (render) {
-        dock.toolbarElement.dispatchEvent(new CustomEvent("click", {detail: dock.type}));
     }
 };
 
@@ -323,6 +281,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
         }
         return;
     }
+    if (!getMobileSidebarConfig().sidebarSwipe) {
+        return;
+    }
     if (!scrollEnable || !isXScroll) {
         closePanel();
         return;
@@ -527,6 +488,9 @@ export const handleTouchMove = (event: TouchEvent) => {
             return;
         }
         if (hasClosestByAttribute(target, "id", "menu", true)) {
+            return;
+        }
+        if (!getTargetSidebar(target) && !getMobileSidebarConfig().sidebarSwipe) {
             return;
         }
         if (hasClosestByClassName(target, "agent-chat__messages", true)) {

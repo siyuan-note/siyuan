@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Otwieraj panele boczne przesunięciem",
+	"mobileSidebarButtons": "Pokaż przyciski paneli bocznych",
+	"mobileSidebarAccessTip": "Pozostaw włączony co najmniej jeden sposób otwierania paneli bocznych",
+	"openLeftSidebar": "Otwórz lewy panel boczny",
+	"openRightSidebar": "Otwórz prawy panel boczny",
 	"listMindmapPlaceholder": "Wpisz tekst",
 	"listMindmapToMindmap": "Przełącz na widok mapy myśli",
 	"listMindmapToList": "Przełącz na widok listy",

@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "साइडबार खोलने के लिए स्वाइप करें",
+	"mobileSidebarButtons": "साइडबार बटन दिखाएँ",
+	"mobileSidebarAccessTip": "साइडबार खोलने का कम से कम एक तरीका सक्षम रखें",
+	"openLeftSidebar": "बायाँ साइडबार खोलें",
+	"openRightSidebar": "दायाँ साइडबार खोलें",
 	"listMindmapPlaceholder": "पाठ दर्ज करें",
 	"listMindmapToMindmap": "माइंड मैप दृश्य पर जाएँ",
 	"listMindmapToList": "सूची दृश्य पर जाएँ",

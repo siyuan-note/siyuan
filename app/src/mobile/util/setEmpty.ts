@@ -20,7 +20,7 @@ export const setEmpty = (app: App) => {
     }
     setTitle("", true);
     clearMobileBarsScroll();
-    document.getElementById("mobileTopBar").classList.add("fn__none");
+    document.getElementById("mobileTopBar").classList.remove("fn__none");
     document.getElementById("toolbarName").classList.add("fn__hidden");
     document.getElementById("toolbarNameReadonly").classList.add("fn__hidden");
     document.getElementById("editor").classList.add("fn__none");

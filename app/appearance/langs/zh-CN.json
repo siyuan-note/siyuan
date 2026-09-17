@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "滑动打开侧栏",
+	"mobileSidebarButtons": "显示侧栏按钮",
+	"mobileSidebarAccessTip": "至少保留一种打开侧栏的方式",
+	"openLeftSidebar": "打开左侧栏",
+	"openRightSidebar": "打开右侧栏",
 	"listMindmapPlaceholder": "输入文字",
 	"listMindmapToMindmap": "切换为脑图视图",
 	"listMindmapToList": "切换为列表视图",

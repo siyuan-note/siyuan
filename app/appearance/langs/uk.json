@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Відкривати бічні панелі свайпом",
+	"mobileSidebarButtons": "Показувати кнопки бічних панелей",
+	"mobileSidebarAccessTip": "Залиште ввімкненим принаймні один спосіб відкриття бічних панелей",
+	"openLeftSidebar": "Відкрити ліву бічну панель",
+	"openRightSidebar": "Відкрити праву бічну панель",
 	"listMindmapPlaceholder": "Введіть текст",
 	"listMindmapToMindmap": "Перемкнути на мапу думок",
 	"listMindmapToList": "Перемкнути на список",

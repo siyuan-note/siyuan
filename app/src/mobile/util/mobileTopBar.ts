@@ -1,4 +1,4 @@
-const MOBILE_TOP_BAR_ELEMENT_IDS = ["toolbarName", "toolbarNameReadonly", "toolbarSync"] as const;
+const MOBILE_TOP_BAR_ELEMENT_IDS = ["toolbarSidebarLeft", "toolbarName", "toolbarNameReadonly", "toolbarSync", "toolbarSidebarRight"] as const;
 
 let topBarElements: HTMLElement[];
 let mergedBreadcrumbSpace: HTMLElement | undefined;

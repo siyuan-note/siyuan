@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Kenar çubuklarını kaydırarak aç",
+	"mobileSidebarButtons": "Kenar çubuğu düğmelerini göster",
+	"mobileSidebarAccessTip": "Kenar çubuklarını açmak için en az bir yöntemi etkin tutun",
+	"openLeftSidebar": "Sol kenar çubuğunu aç",
+	"openRightSidebar": "Sağ kenar çubuğunu aç",
 	"listMindmapPlaceholder": "Metin girin",
 	"listMindmapToMindmap": "Zihin haritası görünümüne geç",
 	"listMindmapToList": "Liste görünümüne geç",

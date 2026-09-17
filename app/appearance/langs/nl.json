@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Vegen om zijbalken te openen",
+	"mobileSidebarButtons": "Zijbalkknoppen tonen",
+	"mobileSidebarAccessTip": "Houd minstens één manier om zijbalken te openen ingeschakeld",
+	"openLeftSidebar": "Linkerzijbalk openen",
+	"openRightSidebar": "Rechterzijbalk openen",
 	"listMindmapPlaceholder": "Voer tekst in",
 	"listMindmapToMindmap": "Naar mindmapweergave schakelen",
 	"listMindmapToList": "Naar lijstweergave schakelen",

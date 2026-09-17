@@ -47,5 +47,6 @@ for (const mobile of [true, false]) {
         assert.equal(mounted, true);
         assert.equal(slots.some(item => item.key === "mobileBottomBar"), mobile);
         assert.equal(slots.some(item => item.key === "mobileBarsAutoHide"), mobile);
+        assert.equal(slots.some(item => item.key === "mobileSidebarAccess"), mobile);
     });
 }

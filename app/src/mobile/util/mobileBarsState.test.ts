@@ -96,17 +96,18 @@ describe("mobile bars state", () => {
         assert.equal(getVisibility(state).bottomBarVisible, true);
     });
 
-    it("keeps the hidden reading state while editing", () => {
+    it("restores hidden reading bars when editing so sidebar buttons remain accessible", () => {
         let state = createMobileBarsState(100);
         state = update(state, {type: "set-reading-bars", visible: false});
         state = update(state, {type: "set-editing", active: true, scrollTop: 100});
         state = update(state, {type: "scroll", scrollTop: 180});
-        assert.equal(state.readingBarsOffset, 30);
+        assert.equal(state.readingBarsOffset, 0);
+        assert.equal(getVisibility(state).topbarVisible, true);
 
         state = update(state, {type: "set-editing", active: false, scrollTop: 180});
         assert.deepEqual(getVisibility(state), {
-            topbarVisible: false,
-            bottomBarVisible: false,
+            topbarVisible: true,
+            bottomBarVisible: true,
             editingBarVisible: false,
             scrollPaused: false,
         });

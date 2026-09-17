@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Открывать боковые панели свайпом",
+	"mobileSidebarButtons": "Показывать кнопки боковых панелей",
+	"mobileSidebarAccessTip": "Оставьте включённым хотя бы один способ открытия боковых панелей",
+	"openLeftSidebar": "Открыть левую боковую панель",
+	"openRightSidebar": "Открыть правую боковую панель",
 	"listMindmapPlaceholder": "Введите текст",
 	"listMindmapToMindmap": "Переключить на интеллект-карту",
 	"listMindmapToList": "Переключить на список",

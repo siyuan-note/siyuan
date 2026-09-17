@@ -422,7 +422,7 @@ body.mobile-keyboard--open {
   box-sizing: border-box;
   height: var(--mobile-topbar-height);
   min-height: var(--mobile-topbar-height);
-  padding: 0 max(4px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  padding: 0 max(4px, env(safe-area-inset-right)) 0 max(4px, env(safe-area-inset-left));
   transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);
   will-change: transform;
 }

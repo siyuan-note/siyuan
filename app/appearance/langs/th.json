@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "ปัดเพื่อเปิดแถบด้านข้าง",
+	"mobileSidebarButtons": "แสดงปุ่มแถบด้านข้าง",
+	"mobileSidebarAccessTip": "เปิดใช้งานวิธีเปิดแถบด้านข้างไว้อย่างน้อยหนึ่งวิธี",
+	"openLeftSidebar": "เปิดแถบด้านซ้าย",
+	"openRightSidebar": "เปิดแถบด้านขวา",
 	"listMindmapPlaceholder": "ป้อนข้อความ",
 	"listMindmapToMindmap": "เปลี่ยนเป็นมุมมองแผนผังความคิด",
 	"listMindmapToList": "เปลี่ยนเป็นมุมมองรายการ",

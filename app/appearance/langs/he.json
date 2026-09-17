@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "החלקה לפתיחת סרגלי הצד",
+	"mobileSidebarButtons": "הצגת כפתורי סרגלי הצד",
+	"mobileSidebarAccessTip": "יש להשאיר לפחות דרך אחת לפתיחת סרגלי הצד פעילה",
+	"openLeftSidebar": "פתיחת סרגל הצד השמאלי",
+	"openRightSidebar": "פתיחת סרגל הצד הימני",
 	"listMindmapPlaceholder": "הזן טקסט",
 	"listMindmapToMindmap": "מעבר לתצוגת מפת חשיבה",
 	"listMindmapToList": "מעבר לתצוגת רשימה",

@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "滑動開啟側欄",
+	"mobileSidebarButtons": "顯示側欄按鈕",
+	"mobileSidebarAccessTip": "至少保留一種開啟側欄的方式",
+	"openLeftSidebar": "開啟左側欄",
+	"openRightSidebar": "開啟右側欄",
 	"listMindmapPlaceholder": "輸入文字",
 	"listMindmapToMindmap": "切換為心智圖檢視",
 	"listMindmapToList": "切換為清單檢視",

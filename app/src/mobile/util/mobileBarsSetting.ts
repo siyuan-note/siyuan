@@ -13,7 +13,7 @@ export const genMobileBarsSettingHTML = () => `<label class="b3-label fn__flex c
 
 export const mountMobileBarsSetting = (root: HTMLElement) => {
     root.querySelector<HTMLInputElement>("#mobileBarsAutoHide")?.addEventListener("change", (event) => {
-        const config = {autoHide: (event.target as HTMLInputElement).checked};
+        const config = {...window.siyuan.storage[MOBILE_BARS_CONFIG_KEY], autoHide: (event.target as HTMLInputElement).checked};
         window.siyuan.storage[MOBILE_BARS_CONFIG_KEY] = config;
         setStorageVal(MOBILE_BARS_CONFIG_KEY, config);
         showMobileBars();

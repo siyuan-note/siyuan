@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Geser untuk membuka bilah samping",
+	"mobileSidebarButtons": "Tampilkan tombol bilah samping",
+	"mobileSidebarAccessTip": "Aktifkan setidaknya satu cara untuk membuka bilah samping",
+	"openLeftSidebar": "Buka bilah samping kiri",
+	"openRightSidebar": "Buka bilah samping kanan",
 	"listMindmapPlaceholder": "Masukkan teks",
 	"listMindmapToMindmap": "Beralih ke tampilan peta pikiran",
 	"listMindmapToList": "Beralih ke tampilan daftar",

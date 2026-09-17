@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Seitenleisten durch Wischen öffnen",
+	"mobileSidebarButtons": "Schaltflächen für Seitenleisten anzeigen",
+	"mobileSidebarAccessTip": "Mindestens eine Möglichkeit zum Öffnen der Seitenleisten muss aktiviert bleiben",
+	"openLeftSidebar": "Linke Seitenleiste öffnen",
+	"openRightSidebar": "Rechte Seitenleiste öffnen",
 	"listMindmapPlaceholder": "Text eingeben",
 	"listMindmapToMindmap": "Zur Mindmap-Ansicht wechseln",
 	"listMindmapToList": "Zur Listenansicht wechseln",

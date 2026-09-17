@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Balayer pour ouvrir les panneaux latéraux",
+	"mobileSidebarButtons": "Afficher les boutons des panneaux latéraux",
+	"mobileSidebarAccessTip": "Gardez au moins un moyen d’ouvrir les panneaux latéraux activé",
+	"openLeftSidebar": "Ouvrir le panneau latéral gauche",
+	"openRightSidebar": "Ouvrir le panneau latéral droit",
 	"listMindmapPlaceholder": "Saisir du texte",
 	"listMindmapToMindmap": "Passer à la vue carte mentale",
 	"listMindmapToList": "Passer à la vue liste",

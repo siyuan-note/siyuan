@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "السحب لفتح الأشرطة الجانبية",
+	"mobileSidebarButtons": "إظهار أزرار الأشرطة الجانبية",
+	"mobileSidebarAccessTip": "أبقِ طريقة واحدة على الأقل لفتح الأشرطة الجانبية مفعّلة",
+	"openLeftSidebar": "فتح الشريط الجانبي الأيسر",
+	"openRightSidebar": "فتح الشريط الجانبي الأيمن",
 	"listMindmapPlaceholder": "أدخل نصًا",
 	"listMindmapToMindmap": "التبديل إلى عرض الخريطة الذهنية",
 	"listMindmapToList": "التبديل إلى عرض القائمة",

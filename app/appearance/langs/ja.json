@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "スワイプでサイドバーを開く",
+	"mobileSidebarButtons": "サイドバーボタンを表示",
+	"mobileSidebarAccessTip": "サイドバーを開く方法を少なくとも1つ有効にしてください",
+	"openLeftSidebar": "左サイドバーを開く",
+	"openRightSidebar": "右サイドバーを開く",
 	"listMindmapPlaceholder": "テキストを入力",
 	"listMindmapToMindmap": "マインドマップ表示に切り替え",
 	"listMindmapToList": "リスト表示に切り替え",

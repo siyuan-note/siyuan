@@ -1,4 +1,9 @@
 {
+	"mobileSidebarSwipe": "Deslizar para abrir as barras laterais",
+	"mobileSidebarButtons": "Mostrar botões das barras laterais",
+	"mobileSidebarAccessTip": "Mantenha pelo menos uma forma de abrir as barras laterais ativada",
+	"openLeftSidebar": "Abrir barra lateral esquerda",
+	"openRightSidebar": "Abrir barra lateral direita",
 	"listMindmapPlaceholder": "Digite o texto",
 	"listMindmapToMindmap": "Alternar para a visualização de mapa mental",
 	"listMindmapToList": "Alternar para a visualização de lista",

@@ -62,15 +62,16 @@ test("editor recycling waits for transactions and preserves the measured height"
     const {list, finishTransaction} = setup();
     let destroyed = 0;
     const editor = {protyle: {}, destroy: () => destroyed++};
-    const record = {editor, element: {contains: () => false}, body: {
+    const record = {editor, element: {contains: () => false, getBoundingClientRect: () => ({height: 280})}, body: {
         style: {}, getBoundingClientRect: () => ({height: 280}), replaceChildren() {},
-    }, source: {classList: {remove() {}}}, item: {anchor: "A1"}};
+    }, source: {classList: {remove() {}}, getBoundingClientRect: () => ({height: 28})}, item: {anchor: "A1"}};
     const pending = list.release(record);
     assert.equal(destroyed, 0);
     finishTransaction();
     await pending;
     assert.equal(destroyed, 1);
-    assert.equal(record.body.style.minHeight, "280px");
+    assert.equal(record.body.style.minHeight, "252px");
+    assert.equal(parseFloat(record.body.style.minHeight) + record.source.getBoundingClientRect().height, 280);
     assert.equal(record.editor, undefined);
 });
 
@@ -133,4 +134,5 @@ test("denied access clears content and invalidates other in-flight responses", a
     assert.equal(list.snapshot, "");
     assert.equal(list.loading, false);
     assert.deepEqual(applied, [0]);
+    assert.equal(list.hasError, true);
 });

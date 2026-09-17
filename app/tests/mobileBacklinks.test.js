@@ -214,6 +214,55 @@ const runCases = async (sources) => {
     assert.equal(globalElement.querySelector(".listCount").classList.contains("fn__none"), false);
     assert.equal(registry.getMobileSecondaryEditors().length, 2);
     const globalEditors = [...globalPanel.editors];
+    const globalList = globalPanel.globalList;
+    const firstRecord = globalList.records.get("first");
+    const originalHeight = firstRecord.element.getBoundingClientRect().height;
+    const originalScroll = globalList.onScroll;
+    globalList.onScroll = noop;
+    await globalList.release(firstRecord);
+    assert.ok(Math.abs(firstRecord.element.getBoundingClientRect().height - originalHeight) < 1,
+        "recycling must include the fallback path in the existing height");
+    const restoring = globalList.loadContexts([firstRecord]);
+    assert.equal(requests[0]?.url, "/api/ref/getGlobalBacklinkContexts");
+    requests.shift().reply({expired: false, items: [
+        {id: "first", revision: "first1", dom: "", blockPaths: [], expand: true},
+    ]});
+    await restoring;
+    assert.ok(Math.abs(firstRecord.element.getBoundingClientRect().height - originalHeight) < 1,
+        "restoring an editor must preserve the complete placeholder height");
+    globalEditors[0] = firstRecord.editor;
+    globalList.onScroll = originalScroll;
+    globalPanel.type = "bottom";
+    globalPanel.empty = true;
+    globalElement.classList.add("sy__backlink--backlinks-empty", "sy__backlink--mentions-empty");
+    globalList.clearUnavailable();
+    assert.equal(globalElement.classList.contains("sy__backlink--backlinks-empty"), false,
+        "a failed bottom list must keep its retry control visible");
+    assert.equal(globalPanel.empty, false);
+    assert.equal(globalList.message.textContent, "retry");
+    globalList.message.click();
+    await tick();
+    assert.equal(requests[0]?.url, "/api/ref/getGlobalBacklinks");
+    requests.shift().reply({snapshot: "empty", offset: 0, total: 0, items: []});
+    await tick();
+    assert.equal(globalList.hasError, false);
+    assert.equal(globalElement.classList.contains("sy__backlink--backlinks-empty"), true,
+        "a successful empty retry must restore normal empty handling");
+    globalPanel.type = "local";
+    globalList.search({...globalList.query, keyword: "restored"}, false);
+    await tick();
+    assert.equal(requests[0]?.url, "/api/ref/getGlobalBacklinks");
+    requests.shift().reply({snapshot: "restored", offset: 0, total: 1, items: [
+        {id: "first", rootID: "source1", box: "box", hPath: "/Source 1", anchor: "A1"},
+    ]});
+    for (let i = 0; i < 20 && requests.length === 0; i++) { await tick(); }
+    assert.equal(requests[0]?.url, "/api/ref/getGlobalBacklinkContexts");
+    requests.shift().reply({expired: false, items: [
+        {id: "first", revision: "first2", dom: "", blockPaths: [], expand: true},
+    ]});
+    await tick();
+    assert.equal(globalPanel.editors.length, 1);
+    globalEditors.splice(0, globalEditors.length, ...globalPanel.editors);
     panels.removeMobileBacklinkContent({notebookId: "box"});
     assert.equal(globalPanel.editors.length, 0);
     assert.equal(registry.getMobileSecondaryEditors().length, 0);

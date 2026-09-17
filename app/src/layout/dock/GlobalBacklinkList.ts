@@ -48,6 +48,7 @@ export class GlobalBacklinkList {
     private frame = 0;
     private destroyed = false;
     private dirty = false;
+    private failed = false;
     private composing = false;
     private dragging = false;
     private scrollVersion = 0;
@@ -139,6 +140,8 @@ export class GlobalBacklinkList {
 
     public get count() { return this.total; }
 
+    public get hasError() { return this.failed; }
+
     public setCollapsed(value: boolean) {
         this.collapsed = value;
         this.records.forEach(record => {
@@ -209,6 +212,7 @@ export class GlobalBacklinkList {
             if (data.expired) { this.snapshot = ""; this.dirty = true; this.onFocusout(); return; }
             this.snapshot = data.snapshot;
             this.total = data.total;
+            this.failed = false;
             this.options.count(this.total);
             const anchor = this.captureAnchor();
             this.addPage(data.offset, data.items);
@@ -221,6 +225,8 @@ export class GlobalBacklinkList {
             this.onScroll();
         } catch (error) {
             if (generation === this.generation && !this.destroyed) {
+                this.failed = true;
+                this.options.count(this.total);
                 this.message.classList.remove("fn__none");
                 this.message.textContent = window.siyuan.languages.retry;
                 console.error(error);
@@ -352,6 +358,9 @@ export class GlobalBacklinkList {
                 throw new Error(response.msg);
             }
             if (response.data.expired) { this.dirty = true; this.onFocusout(); return; }
+            this.failed = false;
+            this.options.count(this.total);
+            this.message.classList.add("fn__none");
             const anchor = this.captureAnchor();
             const scrollVersion = this.scrollVersion;
             for (const item of response.data.items || []) {
@@ -361,6 +370,7 @@ export class GlobalBacklinkList {
                 const rect = record.element.getBoundingClientRect();
                 if (rect.bottom <= viewport.top - 320 || rect.top >= viewport.bottom + 320 ||
                     Array.from(this.records.values()).filter(value => value.editor).length >= 16) { continue; }
+                record.body.style.minHeight = `${rect.height}px`;
                 record.body.replaceChildren();
                 record.body.setAttribute("data-defid", this.query.id);
                 record.body.setAttribute("data-ismention", "false");
@@ -396,6 +406,8 @@ export class GlobalBacklinkList {
             if (scrollVersion === this.scrollVersion) { this.restoreAnchor(anchor); }
         } catch (error) {
             if (generation !== this.generation || this.destroyed) { return; }
+            this.failed = true;
+            this.options.count(this.total);
             console.error(error);
             this.message.classList.remove("fn__none");
             this.message.textContent = window.siyuan.languages.retry;
@@ -413,15 +425,16 @@ export class GlobalBacklinkList {
         record.releasing = false;
         if (this.destroyed || this.composing || this.dragging || record.editor !== editor ||
             record.element.contains(document.activeElement) || hasAVEditorSession(record.element)) { return; }
-        const height = record.body.getBoundingClientRect().height;
+        const height = record.element.getBoundingClientRect().height;
         unregisterViewFoldContext(editor.protyle);
         this.options.editorRemoved(editor);
         editor.destroy();
         record.editor = undefined;
         record.body.replaceChildren();
-        record.body.style.minHeight = `${Math.max(height, 72)}px`;
         record.body.textContent = record.item.anchor;
         record.source.classList.remove("fn__none");
+        // 占位总高度包含重新显示的来源行，避免回收时重复增加面包屑的高度。
+        record.body.style.minHeight = `${Math.max(0, height - record.source.getBoundingClientRect().height)}px`;
         this.onScroll();
     }
 
@@ -448,6 +461,7 @@ export class GlobalBacklinkList {
         this.clearPages();
         this.snapshot = "";
         this.total = 0;
+        this.failed = true;
         this.top.style.height = this.bottom.style.height = "0px";
         this.options.count(0);
         this.message.classList.remove("fn__none");

@@ -957,8 +957,9 @@ export class BacklinkContent extends Model {
                     countElement.textContent = total.toString();
                     countElement.classList.toggle("fn__none", total === 0 && this.type !== "bottom");
                     if (this.type === "bottom") {
-                        this.element.classList.toggle("sy__backlink--backlinks-empty", total === 0 && !this.inputsElement[0].value);
-                        const empty = total === 0 && !this.inputsElement[0].value &&
+                        const hideBacklinks = total === 0 && !this.inputsElement[0].value && !this.globalList?.hasError;
+                        this.element.classList.toggle("sy__backlink--backlinks-empty", hideBacklinks);
+                        const empty = hideBacklinks &&
                             this.element.classList.contains("sy__backlink--mentions-empty");
                         if (empty !== this.empty) { this.empty = empty; this.emptyChange?.(empty); }
                     }
@@ -2214,6 +2215,10 @@ export class BacklinkContent extends Model {
         const bottomVisibility = this.type === "bottom" ?
             getBottomBacklinkVisibility(data.linkRefsCount, data.mentionsCount, data.k, data.mk) : undefined;
         if (bottomVisibility) {
+            if (this.globalList?.hasError) {
+                bottomVisibility.hideBacklinks = false;
+                bottomVisibility.hidePanel = false;
+            }
             this.element.classList.toggle("sy__backlink--backlinks-empty", bottomVisibility.hideBacklinks);
             this.element.classList.toggle("sy__backlink--mentions-empty", bottomVisibility.hideMentions);
         }

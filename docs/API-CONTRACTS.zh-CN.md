@@ -124,6 +124,8 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 `TestGlobalBacklink*`、`TestAPIContractGlobalBacklink`、`TestBacklinkAnchorSortContext` 和 `TestBacklink2OptionalMentions` 覆盖跨文档分页、首个引用取值、编辑后的快照稳定性、阅读定位、普通和加密读取、来源权限、过期、缓存上限、实际 HTTP 响应契约及提及兼容性。它们包含在下方内核全量 CI 命令中，可单独运行 `go test -tags "fts5 sqlcipher" ./model ./api ./apicontract/... -run 'Test(GlobalBacklink|Backlink|APIContractGlobalBacklink|APIContractBack|APIContractSetting|PublishReaderBack|PublishReaderSearchAndBacklink|RouteCoverage)' -count=1`。前端的 `globalBacklinkPaging.test.ts`、`globalBacklinkList.test.js` 和 `backlinkSort.test.js` 已由现有全量 CI 自动发现，覆盖页窗口上限、迟到响应、待提交编辑和模式切换。
 
+`TestGlobalBacklinkLargeDataset` 在隔离数据库中创建并索引 100 篇真实文档、共 10,000 条引用，逐一检查全部 200 页的自然顺序及条目无重复、无遗漏，再加载 16 个可编辑上下文。测试报告首次排序、缓存分页、正文加载的耗时及快照大小，不设置依赖机器性能的时间阈值。可运行 `go test -tags "fts5 sqlcipher" ./model -run TestGlobalBacklinkLargeDataset -count=1 -v`；现有 `TestGlobalBacklink*` 筛选和内核全量 CI 均包含该测试。前端回归还覆盖底部面板请求失败后的重试入口、重试成功后的空状态恢复，以及编辑器回收与重建时整行高度保持稳定。
+
 ## 文件与流式协议
 
 `RawSSEOptions` 和 `RawWebSocketOptions` 声明以字节为载荷的广播协议，通过 `ValidateRawSSEEvent` 和 `ValidateRawWebSocketFrame` 单独校验事件及帧元数据；JSON 事件与 RPC 消息保留各自既有校验。原始 WebSocket 的错误由升级器写出，不使用 `RejectWebSocket`。

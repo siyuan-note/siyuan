@@ -154,3 +154,73 @@ func TestGlobalBacklinkSnapshotBounds(t *testing.T) {
 		t.Fatal("notebook purge did not isolate affected source snapshots")
 	}
 }
+
+// 使用真实文档和引用索引验证万条反链，耗时只作观测，避免按机器速度设置脆弱阈值。
+func TestGlobalBacklinkLargeDataset(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	Conf.Search = conf.NewSearch()
+	t.Cleanup(func() { ClearGlobalBacklinkSnapshots("") })
+	const documents, perDocument = 100, 100
+	definition, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sql.IndexTreeQueue(definition)
+	for doc := 0; doc < documents; doc++ {
+		tree := addFileOperationTestDoc(t, fixture, ast.NewNodeID(), fmt.Sprintf("Source%d", doc), false)
+		for tree.Root.FirstChild != nil {
+			tree.Root.FirstChild.Unlink()
+		}
+		for index := perDocument - 1; index >= 0; index-- {
+			p := treenode.NewParagraph(ast.NewNodeID())
+			p.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: fixture.sourceID,
+				TextMarkBlockRefSubtype: "s", TextMarkTextContent: fmt.Sprintf("A%d", index*documents+doc+1)})
+			tree.Root.AppendChild(p)
+		}
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
+		sql.IndexTreeQueue(tree)
+		sql.UpdateRefsTreeQueue(tree)
+	}
+	sql.FlushQueue()
+	query := GlobalBacklinkQuery{ID: fixture.sourceID, Sort: 1}
+	allow := func(string) bool { return true }
+	started := time.Now()
+	token, first, total, _, expired, err := GetGlobalBacklinks(query, "", 0, "", allow)
+	initialDuration := time.Since(started)
+	if err != nil || expired || total != documents*perDocument || len(first) != GlobalBacklinkPageSize {
+		t.Fatalf("large first page: %d %d %v %v", total, len(first), expired, err)
+	}
+	seen := map[string]bool{}
+	started = time.Now()
+	for offset := 0; offset < total; offset += GlobalBacklinkPageSize {
+		_, items, count, page, expired, err := GetGlobalBacklinks(query, token, offset, "", allow)
+		if err != nil || expired || count != total || page != offset {
+			t.Fatalf("large page %d: %v %v", offset, expired, err)
+		}
+		for index, item := range items {
+			if seen[item.ID] || item.Anchor != fmt.Sprintf("A%d", offset+index+1) {
+				t.Fatalf("duplicate or unsorted large result: %+v", item)
+			}
+			seen[item.ID] = true
+		}
+	}
+	pagesDuration := time.Since(started)
+	if len(seen) != total {
+		t.Fatalf("missing large results: %d of %d", len(seen), total)
+	}
+	var ids []string
+	for _, item := range first[:16] {
+		ids = append(ids, item.ID)
+	}
+	started = time.Now()
+	contexts, expired, err := GetGlobalBacklinkContexts(query, token, ids, allow)
+	if err != nil || expired || len(contexts) != len(ids) {
+		t.Fatalf("large contexts: %d %v %v", len(contexts), expired, err)
+	}
+	t.Logf("%d references / %d documents: initial=%s, %d cached pages=%s, 16 contexts=%s, snapshot=%d bytes",
+		total, documents, initialDuration, total/GlobalBacklinkPageSize, pagesDuration, time.Since(started), globalBacklinkSnapshots.values[token].bytes)
+}

@@ -34,6 +34,8 @@ const sources = () => {
         icons: ["unchecked", "in-progress", "canceled"].map(name =>
             readFileSync(path.join(__dirname, `../src/assets/icon/task-${name}.svg`), "utf8")),
         actions: extract("protyle/render/tabsRender.ts", ["getTabTask", "getTabItems", "hasTabsTasks"]) +
+            extract("protyle/render/listMindmap/model.ts", ["LIST_MINDMAP_META_ATTRIBUTE", "isRecord", "invalidMetadata",
+                "parseListMindmapMetadata", "cleanListMindmapDOM", "remapListMindmapIDs"]) +
             extract("protyle/util/tabsCopy.ts", ["preserveTabTask", "preserveCopiedTabTask", "remapTabsDOMIDs", "wrapPastedTabItems"]) +
             extract("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]) +
             extract("protyle/wysiwyg/taskListMarker.ts", ["getTaskListMarker", "isTaskListMarker", "nextTaskListMarker"]) +

@@ -170,7 +170,7 @@ func TestFileAnnotationExportRejectsInvalidData(t *testing.T) {
 		root := &ast.Node{Type: ast.NodeDocument, ID: "20260912000000-root001"}
 		root.AppendChild(node.Parent)
 		tree := &parse.Tree{Root: root, ID: root.ID}
-		if _, err := exportTree(tree, false, false, false, false, 0, 0, 0, "#", "#", "", "", false, "", false, false, true); err == nil {
+		if _, err := exportTree(tree, false, false, false, false, 0, 0, 0, "#", "#", "", "", false, "", false, false, true, nil); err == nil {
 			t.Fatalf("invalid annotation data exported: %s", data)
 		}
 		if node.Parent == nil || node.Previous != nil {

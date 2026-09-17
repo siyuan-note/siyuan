@@ -96,7 +96,7 @@ func exportPreview(args map[string]any) (CallToolResult, error) {
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
-	html := model.ExportPreview(id, false)
+	html := model.ExportPreview(id, false, nil)
 	if html == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "export preview failed or empty"}}, IsError: true}, nil
 	}

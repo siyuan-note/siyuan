@@ -95,7 +95,7 @@ var exportPreviewCmd = &cobra.Command{
 			return nil
 		}
 
-		html := model.ExportPreview(id, false)
+		html := model.ExportPreview(id, false, nil)
 		return writeExportContent(html, output)
 	},
 }

@@ -65,8 +65,8 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             {key: "[[", hint: hintRef}, {key: "/", hint: slash}, {key: "、", hint: slash}],
     };
     const originalMinWidth = host.style.minWidth;
-    // 挂载前保留未缩放的内容宽度，避免轻量编辑器改变内在尺寸后挤压文字。
-    host.style.minWidth = `${host.offsetWidth}px`;
+    // 保留未缩放的亚像素宽度，避免取整后响应式容器挤压文字，导致换行和整棵树重排。
+    host.style.minWidth = getComputedStyle(host).width;
     host.replaceChildren();
     host.classList.add("list-mindmap__editor");
     host.dataset.protyleLiteRender = "safe";

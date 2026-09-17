@@ -800,13 +800,21 @@ const browserCases = async (sourceCode: string, css: string) => {
     clickLink();
     await new Promise(resolve => setTimeout(resolve, 220));
     check.deepEqual(opened, ["https://example.com"]);
+    const geometry = () => Array.from(richHost.querySelectorAll(".list-mindmap__node")).map(element => {
+        const rect = element.getBoundingClientRect();
+        return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};
+    });
+    const beforeEditing = geometry();
     clickLink();
     clickLink(2);
     link.dispatchEvent(new MouseEvent("dblclick", {bubbles: true, cancelable: true, detail: 2}));
     await new Promise(resolve => setTimeout(resolve, 220));
     check.equal(richEdits, 1);
     check.equal(opened.length, 1);
+    check.deepEqual(geometry(), beforeEditing, "entering edit mode does not reposition the canvas or other nodes");
     richView.setEditing();
+    await settle();
+    check.deepEqual(geometry(), beforeEditing, "leaving edit mode does not reposition the canvas or other nodes");
     const point = centerPoint(link);
     sendPointer(link, "pointerdown", point.x, point.y);
     sendPointer(richHost.querySelector(".list-mindmap__viewport"), "pointermove", point.x + 30, point.y);

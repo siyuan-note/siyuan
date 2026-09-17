@@ -140,6 +140,11 @@ func ensureReadableAssetLocal(absPath string) error {
 
 // prepareExportAssets 在导出持有笔记本读锁或生成产物之前补齐文档引用的资源。
 func prepareExportAssets(boxID string, docPaths []string, includeFootnotes ...bool) error {
+	return prepareExportAssetsInScope(boxID, docPaths, len(includeFootnotes) != 0 && includeFootnotes[0], "")
+}
+
+// prepareExportAssetsInScope 在单块导出时按块范围收集依赖，文档导出仍按文档路径收集。
+func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnotes bool, blockID string) error {
 	if boxID != "" && IsEncryptedBox(boxID) && !IsBoxUnlocked(boxID) {
 		return errors.New(Conf.Language(314))
 	}
@@ -175,36 +180,55 @@ func prepareExportAssets(boxID string, docPaths []string, includeFootnotes ...bo
 		if loadErr != nil {
 			return loadErr
 		}
-		exportRefTrees(tree, &[]string{}, trees)
+		if blockID != "" {
+			block := getExportBlockTreeInBox(blockID, targetBoxID)
+			if block == nil || treenode.GetNodeInTree(tree, blockID) == nil {
+				return ErrBlockNotFound
+			}
+			trees[blockID] = selectExportTree(tree, block)
+		} else {
+			exportRefTrees(tree, &[]string{}, trees)
+		}
 	}
 	// 查询嵌入的资源属于导出依赖，按笔记本边界展开并去重，避免循环嵌入反复读取。
-	var pending []*parse.Tree
+	type pendingTree struct {
+		key  string
+		tree *parse.Tree
+	}
+	var pending []pendingTree
 	queued := map[string]bool{}
 	appendPending := func() {
 		for id, tree := range trees {
 			if !queued[id] {
 				queued[id] = true
-				pending = append(pending, tree)
+				pending = append(pending, pendingTree{id, tree})
 			}
 		}
 	}
 	appendPending()
 	for i := 0; i < len(pending); i++ {
-		tree := pending[i]
-		if len(includeFootnotes) != 0 && includeFootnotes[0] && Conf.Export.BlockRefMode == 4 {
+		tree := pending[i].tree
+		if blockID != "" {
+			if err := treenode.MaterializeTableCellRichExport(tree.Root); err != nil {
+				return err
+			}
+			defer treenode.MaterializeTabTitles(tree.Root)()
+		}
+		if includeFootnotes && Conf.Export.BlockRefMode == 4 && tree.Root.Type == ast.NodeDocument {
 			// 按单文件导出的脚注展开规则收集资源，不受是否另行导出关联文档影响
 			order := []string{}
 			footnotes := map[string]*refAsFootnotes{}
 			depth := 0
-			collectFootnotesDefs(tree, tree.ID, &order, footnotes, &depth)
+			collectFootnotesDefs0(tree, tree.Root, &order, footnotes, &depth)
 			defs, defsErr := resolveFootnotesDefs(&order, footnotes, tree, map[string]bool{},
 				Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight, false)
 			if defsErr != nil {
 				return defsErr
 			}
 			if defs != nil {
+				pruneExportFootnotes(tree.Root, defs, footnotes)
 				footnoteTree := *tree
-				footnoteTree.ID, footnoteTree.Root = tree.ID+"-footnotes", defs
+				footnoteTree.ID, footnoteTree.Root = pending[i].key+"-footnotes", defs
 				trees[footnoteTree.ID] = &footnoteTree
 			}
 		}
@@ -221,7 +245,17 @@ func prepareExportAssets(boxID string, docPaths []string, includeFootnotes ...bo
 			}
 			for _, block := range blocks {
 				if embedded, loadErr := loadExportRelatedTree(block.ID, tree.Box); loadErr == nil {
-					exportRefTrees(embedded, &[]string{}, trees)
+					if blockID != "" {
+						if trees[block.ID] != nil {
+							continue
+						}
+						bt := getExportBlockTreeInBox(block.ID, embedded.Box)
+						if bt != nil && treenode.GetNodeInTree(embedded, block.ID) != nil {
+							trees[block.ID] = selectExportTree(embedded, bt)
+						}
+					} else {
+						exportRefTrees(embedded, &[]string{}, trees)
+					}
 				}
 			}
 			return ast.WalkContinue
@@ -281,6 +315,9 @@ func prepareExportBlockAssets(id string, includeSubDocs bool) error {
 		return nil
 	}
 	docPaths := []string{bt.Path}
+	if bt.Type != "d" && !includeSubDocs {
+		return prepareExportAssetsInScope(bt.BoxID, docPaths, true, id)
+	}
 	if includeSubDocs {
 		if box := Conf.Box(bt.BoxID); box != nil {
 			listPath := strings.TrimSuffix(bt.Path, ".sy")

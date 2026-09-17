@@ -95,7 +95,12 @@ func TestAssetDownloadFootnoteExport(t *testing.T) {
 	appearancePath := util.AppearancePath
 	t.Cleanup(func() { util.AppearancePath = appearancePath })
 	util.AppearancePath = t.TempDir()
-	if err := os.MkdirAll(filepath.Join(util.AppearancePath, "themes", Conf.Appearance.ThemeLight), 0755); err != nil {
+	for _, theme := range []string{Conf.Appearance.ThemeLight, Conf.Appearance.ThemeDark} {
+		if err := os.MkdirAll(filepath.Join(util.AppearancePath, "themes", theme), 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.MkdirAll(filepath.Join(util.AppearancePath, "icons", Conf.Appearance.Icon), 0755); err != nil {
 		t.Fatal(err)
 	}
 	_, _, exportErr := exportMarkdownHTML(source.ID, exportDir, false, false)

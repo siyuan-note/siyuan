@@ -2029,8 +2029,8 @@ export class WYSIWYG {
 
             // 内容区域使用浏览器原生选区，跨块选择时保留各行内元素自身的选中样式。
             if (!startsFromPadding && !tableBlockElement) {
-                documentSelf.onmouseup = (mouseUpEvent) => {
-                    documentSelf.onmouseup = null;
+                // 捕获节点编辑器外的松手事件，避免脑图等容器阻止冒泡后遗漏选区工具栏。
+                documentSelf.addEventListener("mouseup", (mouseUpEvent) => {
                     if (this.element.contains(mouseUpEvent.target as Node)) {
                         return;
                     }
@@ -2047,7 +2047,7 @@ export class WYSIWYG {
                             }
                         }
                     });
-                };
+                }, {capture: true, once: true});
                 return;
             }
             if (startsFromPadding) {

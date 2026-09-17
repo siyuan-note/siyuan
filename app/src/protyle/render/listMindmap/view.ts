@@ -10,6 +10,7 @@ import {routeMindmapRelation, MindmapRoutePoint} from "./routing";
 import {mathRender} from "../mathRender";
 import {getAVRichTextSafeURL} from "../av/richTextValue";
 import {Constants} from "../../../constants";
+import {findMindmapDrop} from "./drop";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -850,7 +851,7 @@ export class ListMindmapView {
         if (!this.ghost) {
             const source = this.nodeElements.get(pointer.id);
             this.ghost = source.cloneNode(true) as HTMLDivElement;
-            this.ghost.className = "list-mindmap__node list-mindmap__ghost";
+            this.ghost.className = "list-mindmap__node list-mindmap__node--selected list-mindmap__ghost";
             this.ghost.removeAttribute("data-mindmap-id");
             this.ghost.querySelectorAll(".list-mindmap__fold, .list-mindmap__add-child, .list-mindmap__add-bridge")
                 .forEach(button => button.remove());
@@ -861,15 +862,39 @@ export class ListMindmapView {
         this.ghost.style.left = `${source.x + dx / this.scale}px`;
         this.ghost.style.top = `${source.y + dy / this.scale}px`;
         this.clearDrop();
-        const target = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>(".list-mindmap__node");
-        const targetId = target?.dataset.mindmapId;
+        const hit = document.elementFromPoint(event.clientX, event.clientY);
+        let target = hit?.closest<HTMLElement>(".list-mindmap__node");
+        let blankPlacement: PointerState["placement"];
+        // 直接命中节点时保留原有操作，空白处再比较同级和子节点落点的二维距离。
+        if (!target && hit && this.viewport.contains(hit)) {
+            const bounds = this.viewport.getBoundingClientRect();
+            const x = (event.clientX - bounds.left - this.offsetX) / this.scale;
+            const y = (event.clientY - bounds.top - this.offsetY) / this.scale;
+            const drop = findMindmapDrop(this.positions.values(), x, y, id => this.canDrop(pointer.id, id));
+            if (drop) {
+                target = this.nodeElements.get(drop.id);
+                blankPlacement = drop.placement;
+            }
+        }
+        let targetId = target?.dataset.mindmapId;
         if (!targetId || !this.world.contains(target) || !this.canDrop(pointer.id, targetId)) {
             return;
         }
         const rect = target.getBoundingClientRect();
         const part = (event.clientY - rect.top) / rect.height;
         const node = this.model.nodes.get(targetId);
-        const placement = node.virtual ? "child" : part < .25 ? "before" : part > .75 ? "after" : "child";
+        let placement: PointerState["placement"] = blankPlacement || (node.virtual ? "child" :
+            part < .25 ? "before" : part > .75 ? "after" : "child");
+        // 同一个兄弟间隙统一显示在后一个节点之前，避免最近节点切换时插入线跳动。
+        if (placement === "after" && node.parentId) {
+            const siblings = this.model.nodes.get(node.parentId).children;
+            const next = siblings[siblings.indexOf(node) + 1];
+            if (next && this.positions.has(next.id) && this.canDrop(pointer.id, next.id)) {
+                targetId = next.id;
+                target = this.nodeElements.get(next.id);
+                placement = "before";
+            }
+        }
         pointer.targetId = targetId;
         pointer.placement = placement;
         target.dataset.mindmapDrop = placement;

@@ -225,9 +225,11 @@ export class Toolbar {
         if (!this.rangePosition || !this.range) {
             return;
         }
-        // 单元格内的浮动工具栏使用外层编辑器边界，避免被短单元格挤到选区上。
+        // 内嵌编辑器的浮动工具栏使用外层容器边界，避免被短单元格或脑图节点挤到选区上。
         const cellEditor = protyle.element.closest(".table__cell-editor");
-        const protyleRect = (cellEditor?.parentElement.closest(".protyle") || protyle.element).getBoundingClientRect();
+        const mindmap = protyle.element.closest(".list-mindmap");
+        const protyleRect = (mindmap || cellEditor?.parentElement.closest(".protyle") ||
+            protyle.element).getBoundingClientRect();
         const viewportBoundary = element.dataset.positionBoundary === "viewport";
         const topBoundary = viewportBoundary ? 8 : protyleRect.top + 30;
         const bottomBoundary = viewportBoundary ? window.innerHeight - 8 :

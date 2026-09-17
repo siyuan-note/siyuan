@@ -1,4 +1,5 @@
 {
+	"backlinkGlobalSort": "Глобальная сортировка ссылок",
 	"backlinkDocumentSort": "Сортировка документов",
 	"backlinkBlockSort": "Ссылки внутри документов",
 	"backlinkBodyOrder": "Порядок в документе (по умолчанию)",

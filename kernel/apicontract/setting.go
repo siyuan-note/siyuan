@@ -220,6 +220,7 @@ type SettingEditor struct {
 	BacklinkHideReference           bool                 `json:"backlinkHideReference" api:"optional,nullable"`
 	BacklinkShowBottom              bool                 `json:"backlinkShowBottom" api:"optional,nullable"`
 	BacklinkSort                    *int                 `json:"backlinkSort" api:"optional,nullable"`
+	BacklinkGlobalSort              int                  `json:"backlinkGlobalSort" api:"optional,nullable"`
 	BacklinkBlockSort               int                  `json:"backlinkBlockSort" api:"optional,nullable"`
 	BackmentionSort                 *int                 `json:"backmentionSort" api:"optional,nullable"`
 	HeadingNumber                   bool                 `json:"headingNumber" api:"optional,nullable"`

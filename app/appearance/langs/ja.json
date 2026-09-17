@@ -1,4 +1,5 @@
 {
+	"backlinkGlobalSort": "参照全体の並び順",
 	"backlinkDocumentSort": "ドキュメントの並び順",
 	"backlinkBlockSort": "ドキュメント内の参照の並び順",
 	"backlinkBodyOrder": "本文の順序（既定）",

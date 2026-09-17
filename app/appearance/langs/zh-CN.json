@@ -1,4 +1,5 @@
 {
+	"backlinkGlobalSort": "全局引用排序",
 	"backlinkDocumentSort": "文档排序",
 	"backlinkBlockSort": "文档内引用排序",
 	"backlinkBodyOrder": "正文顺序（默认）",

@@ -192,6 +192,7 @@ var getBacklink2 = contractHandler(apicontract.GetBacklink2, func(c *gin.Context
 	if request.IncludeMentions != nil {
 		includeMentions = *request.IncludeMentions
 	}
+	includeBacklinks := request.IncludeBacklinks == nil || *request.IncludeBacklinks
 	sort := util.SortModeUpdatedDESC
 	if request.Sort != nil {
 		sort, _ = strconv.Atoi(*request.Sort)
@@ -240,9 +241,9 @@ var getBacklink2 = contractHandler(apicontract.GetBacklink2, func(c *gin.Context
 			return apicontract.Failure[apicontract.BacklinkListData](1, err.Error())
 		}
 		if notebook != "" && model.IsEncryptedBox(notebook) {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook, sourceFilter, includeMentions)
+			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook, sourceFilter, includeMentions, includeBacklinks)
 		} else {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, "", sourceFilter, includeMentions)
+			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, "", sourceFilter, includeMentions, includeBacklinks)
 		}
 	}
 	if model.IsReadOnlyRoleContext(c) {

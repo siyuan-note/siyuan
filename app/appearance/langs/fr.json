@@ -1,4 +1,5 @@
 {
+	"backlinkGlobalSort": "Tri global des références",
 	"backlinkDocumentSort": "Tri des documents",
 	"backlinkBlockSort": "Références dans les documents",
 	"backlinkBodyOrder": "Ordre dans le document (par défaut)",

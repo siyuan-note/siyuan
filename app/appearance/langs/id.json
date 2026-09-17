@@ -1,4 +1,5 @@
 {
+	"backlinkGlobalSort": "Urutan referensi global",
 	"backlinkDocumentSort": "Urutan dokumen",
 	"backlinkBlockSort": "Urutan referensi dalam dokumen",
 	"backlinkBodyOrder": "Urutan dalam dokumen (bawaan)",

@@ -14109,6 +14109,16 @@
             }
           ]
         },
+        "includeBacklinks": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "includeMentions": {
           "anyOf": [
             {
@@ -25667,6 +25677,204 @@
       ],
       "additionalProperties": false
     },
+    "GlobalBacklinkContextData": {
+      "type": "object",
+      "properties": {
+        "expired": {
+          "type": "boolean"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BacklinkContext"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "expired",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalBacklinkContextRequestInput": {
+      "type": "object",
+      "properties": {
+        "containChildren": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "snapshot": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer"
+        },
+        "sourceFilter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BacklinkSourceFilterInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "containChildren",
+        "id",
+        "ids",
+        "snapshot",
+        "sort"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalBacklinkItem": {
+      "type": "object",
+      "properties": {
+        "anchor": {
+          "type": "string"
+        },
+        "box": {
+          "type": "string"
+        },
+        "hPath": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "rootID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "anchor",
+        "box",
+        "hPath",
+        "id",
+        "rootID"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalBacklinkListData": {
+      "type": "object",
+      "properties": {
+        "expired": {
+          "type": "boolean"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/GlobalBacklinkItem"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "snapshot": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "expired",
+        "items",
+        "offset",
+        "snapshot",
+        "total"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalBacklinkListRequestInput": {
+      "type": "object",
+      "properties": {
+        "anchorID": {
+          "type": "string"
+        },
+        "containChildren": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "snapshot": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer"
+        },
+        "sourceFilter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BacklinkSourceFilterInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "containChildren",
+        "id",
+        "sort"
+      ],
+      "additionalProperties": false
+    },
     "GlobalGraphConf": {
       "type": "object",
       "properties": {
@@ -36585,6 +36793,16 @@
             }
           ]
         },
+        "backlinkGlobalSort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "backlinkHideReference": {
           "anyOf": [
             {
@@ -40033,6 +40251,9 @@
         "backlinkExpandCount": {
           "type": "integer"
         },
+        "backlinkGlobalSort": {
+          "type": "integer"
+        },
         "backlinkHideReference": {
           "type": "boolean"
         },
@@ -40319,6 +40540,7 @@
         "backlinkBlockSort",
         "backlinkContainChildren",
         "backlinkExpandCount",
+        "backlinkGlobalSort",
         "backlinkHideReference",
         "backlinkMentionExclude",
         "backlinkShowBottom",
@@ -139863,6 +140085,158 @@
               },
               "data": {
                 "$ref": "#/$defs/BacklinkContextData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ref/getGlobalBacklinkContexts",
+      "handler": "getGlobalBacklinkContexts",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GlobalBacklinkContextRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/GlobalBacklinkContextData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ref/getGlobalBacklinks",
+      "handler": "getGlobalBacklinks",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GlobalBacklinkListRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/GlobalBacklinkListData"
               },
               "msg": {
                 "type": "string"

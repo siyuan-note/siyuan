@@ -1,4 +1,5 @@
 import {normalizeAssetOpenConfig} from "../../editor/assetOpen";
+import {GlobalBacklinkList} from "./GlobalBacklinkList";
 import {bindPanelSearch} from "./panelSearch";
 import type {Tab} from "../Tab";
 import {Model} from "../Model";
@@ -180,6 +181,7 @@ export class BacklinkContent extends Model {
     private ownerScrollListener?: () => void;
     private onlyBacklinks: boolean;
     private surface: string;
+    private globalList?: GlobalBacklinkList;
 
     constructor(options: {
         app: App,
@@ -416,6 +418,10 @@ export class BacklinkContent extends Model {
         }
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
+            if (this.globalList) {
+                this.globalList.setCollapsed(true);
+                return;
+            }
             const finishScroll = this.beginBottomScroll();
             this.cancelContextRequests(this.tree.element, false);
             this.hideEditorGutters(this.tree.element);
@@ -433,6 +439,10 @@ export class BacklinkContent extends Model {
             finishScroll?.();
         });
         this.element.querySelector('[data-type="expand"]').addEventListener("click", () => {
+            if (this.globalList) {
+                this.globalList.setCollapsed(false);
+                return;
+            }
             this.expandDocumentItems(this.tree, false);
         });
         this.element.addEventListener("click", (event) => {
@@ -768,12 +778,14 @@ export class BacklinkContent extends Model {
     }
 
     private showSortMenu(type: string, sort: string) {
+        const globalSort = window.siyuan.config.editor.backlinkGlobalSort || 0;
         const clickEvent = (currentSort: string) => {
             (type === "sort" ? this.tree : this.mTree).element.previousElementSibling.querySelector(`[data-type="${type}"]`).setAttribute("data-sort", currentSort);
             // 保存排序状态到配置
             const sortValue = parseInt(currentSort);
             if (type === "sort") {
                 window.siyuan.config.editor.backlinkSort = sortValue;
+                window.siyuan.config.editor.backlinkGlobalSort = 0;
             } else {
                 window.siyuan.config.editor.backmentionSort = sortValue;
             }
@@ -791,7 +803,7 @@ export class BacklinkContent extends Model {
             }).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({
-            checked: sort === "0",
+            checked: (type !== "sort" || !globalSort) && sort === "0",
             iconHTML: "",
             label: window.siyuan.languages.fileNameASC,
             click: () => {
@@ -799,7 +811,7 @@ export class BacklinkContent extends Model {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            checked: sort === "1",
+            checked: (type !== "sort" || !globalSort) && sort === "1",
             iconHTML: "",
             label: window.siyuan.languages.fileNameDESC,
             click: () => {
@@ -807,7 +819,7 @@ export class BacklinkContent extends Model {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            checked: sort === "4",
+            checked: (type !== "sort" || !globalSort) && sort === "4",
             iconHTML: "",
             label: window.siyuan.languages.fileNameNatASC,
             click: () => {
@@ -815,7 +827,7 @@ export class BacklinkContent extends Model {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            checked: sort === "5",
+            checked: (type !== "sort" || !globalSort) && sort === "5",
             iconHTML: "",
             label: window.siyuan.languages.fileNameNatDESC,
             click: () => {
@@ -824,7 +836,7 @@ export class BacklinkContent extends Model {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            checked: sort === "9",
+            checked: (type !== "sort" || !globalSort) && sort === "9",
             iconHTML: "",
             label: window.siyuan.languages.createdASC,
             click: () => {
@@ -832,7 +844,7 @@ export class BacklinkContent extends Model {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            checked: sort === "10",
+            checked: (type !== "sort" || !globalSort) && sort === "10",
             iconHTML: "",
             label: window.siyuan.languages.createdDESC,
             click: () => {
@@ -840,7 +852,7 @@ export class BacklinkContent extends Model {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            checked: sort === "2",
+            checked: (type !== "sort" || !globalSort) && sort === "2",
             iconHTML: "",
             label: window.siyuan.languages.modifiedASC,
             click: () => {
@@ -848,7 +860,7 @@ export class BacklinkContent extends Model {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            checked: sort === "3",
+            checked: (type !== "sort" || !globalSort) && sort === "3",
             iconHTML: "",
             label: window.siyuan.languages.modifiedDESC,
             click: () => {
@@ -867,14 +879,33 @@ export class BacklinkContent extends Model {
                 window.siyuan.menus.menu.append(new MenuItem({
                     label,
                     iconHTML: "",
-                    checked: mode === (window.siyuan.config.editor.backlinkBlockSort || 0),
+                    checked: !globalSort && mode === (window.siyuan.config.editor.backlinkBlockSort || 0),
                     click: () => {
                         window.siyuan.config.editor.backlinkBlockSort = mode;
+                        window.siyuan.config.editor.backlinkGlobalSort = 0;
                         fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
                             window.siyuan.config.editor = {...response.data, assetOpen: normalizeAssetOpenConfig(response.data.assetOpen)};
                         });
                         this.cancelContextRequests(this.tree.element, false);
+                        if (this.globalList) {
+                            this.searchBacklinks(true);
+                            return;
+                        }
                         this.refreshExpandedContexts(new Set<string>(), true, true);
+                    },
+                }).element);
+            });
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                type: "readonly", iconHTML: "", label: window.siyuan.languages.backlinkGlobalSort,
+            }).element);
+            [window.siyuan.languages.backlinkAnchorASC, window.siyuan.languages.backlinkAnchorDESC].forEach((label, index) => {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label, iconHTML: "", checked: globalSort === index + 1,
+                    click: () => {
+                        window.siyuan.config.editor.backlinkGlobalSort = index + 1;
+                        fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
+                        this.searchBacklinks();
                     },
                 }).element);
             });
@@ -885,6 +916,63 @@ export class BacklinkContent extends Model {
         this.sourceFilter = normalizeBacklinkSourceFilter(filter);
         this.updateSourceFilterButton();
         this.searchBacklinks();
+    }
+
+    private syncGlobalList(refresh: boolean) {
+        const mode = window.siyuan.config.editor.backlinkGlobalSort || 0;
+        if (mode !== 1 && mode !== 2) {
+            if (this.globalList) {
+                this.globalList.destroy();
+                this.globalList = undefined;
+                this.listQueryKey = "";
+                this.listRevision = "";
+                this.tree.element.scrollTop = this.status[this.blockId]?.scrollTop || 0;
+            }
+            return;
+        }
+        if (!this.globalList) {
+            if (this.status[this.blockId] && !this.showingLoading) { this.saveStatus(); }
+            this.cancelContextRequests(this.tree.element, false);
+            this.itemRecords[0].forEach(record => this.destroyItemRecord(record));
+            this.itemRecords[0].clear();
+            this.globalList = new GlobalBacklinkList({
+                app: this.app,
+                host: this.tree.element,
+                scroll: this.getScrollElement(this.tree),
+                state: () => this.viewState,
+                foldedTypes: () => normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes")),
+                open: id => this.openDocument({app: this.app, id, action: [Constants.CB_GET_CONTEXT]}),
+                editorAdded: editor => {
+                    this.editors.push(editor);
+                    if (this.type === "bottom") {
+                        editor.protyle.wysiwyg.element.addEventListener("focusin", () => this.setOwnerFocus());
+                    }
+                },
+                editorRemoved: editor => {
+                    const index = this.editors.indexOf(editor);
+                    if (index !== -1) { this.editors.splice(index, 1); }
+                },
+                count: total => {
+                    const countElement = this.element.querySelector(".listCount");
+                    countElement.textContent = total.toString();
+                    countElement.classList.toggle("fn__none", total === 0 && this.type !== "bottom");
+                    if (this.type === "bottom") {
+                        this.element.classList.toggle("sy__backlink--backlinks-empty", total === 0 && !this.inputsElement[0].value);
+                        const empty = total === 0 && !this.inputsElement[0].value &&
+                            this.element.classList.contains("sy__backlink--mentions-empty");
+                        if (empty !== this.empty) { this.empty = empty; this.emptyChange?.(empty); }
+                    }
+                },
+            });
+        }
+        this.globalList.search({
+            id: this.blockId,
+            notebook: isEncryptedBox(this.notebookId) ? this.notebookId : "",
+            keyword: this.inputsElement[0].value,
+            sort: mode,
+            containChildren: window.siyuan.config.editor.backlinkContainChildren,
+            sourceFilter: getBacklinkSourceFilterParam(this.sourceFilter),
+        }, refresh);
     }
 
     private updateSourceFilterButton() {
@@ -931,6 +1019,7 @@ export class BacklinkContent extends Model {
                     configureBacklinkTypeFold(record.editor.protyle, types, this.viewState);
                 }
             });
+            this.globalList?.updateFoldTypes();
         };
         const blockTypeFoldSubmenu: IMenu[] = [{
             label: window.siyuan.languages.reset,
@@ -1546,6 +1635,7 @@ export class BacklinkContent extends Model {
     }
 
     private captureReadingAnchor(isMention: boolean) {
+        if (!isMention && this.globalList) { return; }
         if (this.type !== "bottom") {
             return this.capturePaneReadingAnchor(isMention);
         }
@@ -1585,6 +1675,7 @@ export class BacklinkContent extends Model {
     }
 
     private restorePersistedReadingAnchor(isMention: boolean, loadedRootID?: string) {
+        if (!isMention && this.globalList) { return; }
         if (this.type === "bottom" && !this.isBottomReadingAnchorViewportActive()) {
             return;
         }
@@ -1732,6 +1823,8 @@ export class BacklinkContent extends Model {
     }
 
     private resetRenderedData(resetLists: boolean) {
+        this.globalList?.destroy();
+        this.globalList = undefined;
         cancelHeightAnimation(this.tree.element);
         cancelHeightAnimation(this.mTree.element);
         this.bottomLayoutScroll?.reset();
@@ -1923,6 +2016,7 @@ export class BacklinkContent extends Model {
             notebook?: string,
             knownRevision?: string,
             includeMentions?: boolean,
+            includeBacklinks?: boolean,
         } = {
             sort: parseInt(this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').getAttribute("data-sort")).toString(),
             mSort: parseInt(this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').getAttribute("data-sort")).toString(),
@@ -1930,6 +2024,9 @@ export class BacklinkContent extends Model {
             mk: this.inputsElement[1].value,
             id: this.blockId,
         };
+        if (notebookId) { this.notebookId = notebookId; }
+        this.syncGlobalList(init || refreshAllContexts || this.dirty);
+        if (this.globalList) { param.includeBacklinks = false; }
         if (this.onlyBacklinks) {
             param.includeMentions = false;
         }
@@ -2033,9 +2130,9 @@ export class BacklinkContent extends Model {
         this.status[this.blockId] = {
             sort: parseInt(this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').getAttribute("data-sort")),
             mSort: parseInt(this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').getAttribute("data-sort")),
-            scrollTop: this.tree.element.scrollTop,
+            scrollTop: this.globalList ? this.status[this.blockId]?.scrollTop || 0 : this.tree.element.scrollTop,
             mScrollTop: this.mTree.element.scrollTop,
-            backlinkOpenIds: [],
+            backlinkOpenIds: this.globalList ? this.status[this.blockId]?.backlinkOpenIds || [] : [],
             backlinkMOpenIds: [],
             backlinkMStatus: 3, // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
             backlinkFolded: this.tree.element.classList.contains("fn__none") ||
@@ -2082,6 +2179,7 @@ export class BacklinkContent extends Model {
             };
         }
         const wasLoading = this.showingLoading;
+        if (this.globalList) { data = {...data, linkRefsCount: this.globalList.count}; }
         this.showingLoading = false;
 
         this.setRequesting(false);
@@ -2096,7 +2194,7 @@ export class BacklinkContent extends Model {
         }));
         const runtimeAnchorBlockID = this.blockId;
         const runtimeAnchorQueryKey = this.renderedQueryKey;
-        const backlinkChanged = this.reconcileList(this.tree, data.backlinks, false);
+        const backlinkChanged = this.globalList ? false : this.reconcileList(this.tree, data.backlinks, false);
         const backmentionChanged = this.reconcileList(this.mTree, data.backmentions, true);
         this.renderedQueryKey = this.listQueryKey;
         if (backlinkChanged || backmentionChanged) {
@@ -2145,7 +2243,7 @@ export class BacklinkContent extends Model {
                 data.backmentions.map(item => item.id),
             );
             const backlinkFolded = backlinkState.folded ||
-                (this.type !== "bottom" && data.linkRefsCount === 0 && data.mentionsCount > 0);
+                (!this.globalList && this.type !== "bottom" && data.linkRefsCount === 0 && data.mentionsCount > 0);
             const backmentionFolded = backmentionState.folded ||
                 (this.type !== "bottom" && data.mentionsCount === 0);
             this.status[this.blockId] = {
@@ -2287,6 +2385,7 @@ export class BacklinkContent extends Model {
     }
 
     public markDirty() {
+        this.globalList?.markDirty();
         this.indexChangeVersion++;
         this.dirty = true;
         this.pendingFull = true;
@@ -2299,6 +2398,7 @@ export class BacklinkContent extends Model {
         if (!change?.backlinkChanged) {
             return;
         }
+        this.globalList?.markDirty();
         this.indexChangeVersion++;
         this.dirty = true;
         this.pendingFull = this.pendingFull || Boolean(change.backlinkFull);
@@ -2364,6 +2464,8 @@ export class BacklinkContent extends Model {
         if (this.blockId && !this.showingLoading) {
             this.saveStatus();
         }
+        this.globalList?.destroy();
+        this.globalList = undefined;
         this.destroyed = true;
         this.viewStateGeneration++;
         this.clearReadingAnchorTimers();

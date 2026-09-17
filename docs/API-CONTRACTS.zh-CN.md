@@ -118,6 +118,12 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 `DirectJSONOutput` 保留直接返回 JSON 对象或数组的独立协议，不添加内核信封，此类载荷使用 `SuccessDirectJSON` 返回。支持通知空响应的端点显式声明 `NoContent` 并返回 `SuccessNoContent`；HTTP 校验要求状态码为 204 且响应体为空。鉴权和只读错误仍保留内核错误信封。生成声明记录直接输出模式及可选的空响应支持。
 
+全局反链接口使用独立的平铺列表。`/api/ref/getGlobalBacklinks` 要求提供 `id`、`sort`（`1` 自然升序、`2` 自然降序）和 `containChildren`，支持可选的 `notebook`、`keyword` 和 `sourceFilter`。每个实际引用块只出现一次，取其首个匹配行内引用的锚文本并去除首尾空白；空锚文本在两个方向中均置后，相同锚文本按来源文档 ID、正文位置和块 ID 排列。首次请求返回不透明的快照令牌及最多 50 条元数据，后续请求复用 `snapshot` 和 `offset`，偏移量限制在已有页的边界。可选的 `anchorID` 用于定位原阅读位置所在页。正文变化期间快照顺序保持不变，不带令牌刷新时才纳入编辑结果。令牌过期、查询不匹配、来源文档消失或当前页条目删除、移动时返回 `expired: true`。缓存最多保留 16 份快照，期限为 5 分钟，总元数据预算为 64 MiB，不缓存正文；笔记本锁定时清除对应快照。
+
+`/api/ref/getGlobalBacklinkContexts` 使用相同查询、必需的 `snapshot` 和最多 20 个属于该快照的块 `ids`，返回可独立编辑的块正文，并保留面包屑和数据库引用信息。两个接口在返回元数据或正文前重新检查来源权限，保留加密笔记本请求租约；发布阅读者不能读取加密笔记本。前端每页加载 50 条，保留视口附近 5 页及正在编辑的页，最多按需创建 16 个编辑器。回收等待未完成事务，保留输入法组合、焦点、拖动和数据库编辑会话。自动刷新等待编辑结束并恢复可见块的位置。配置 `backlinkGlobalSort` 的 `0`（默认）表示文档分组，`1`、`2` 表示全局锚文本升降序。`/api/ref/getBacklink2` 新增可选的 `includeBacklinks`（默认 `true`）；设为 `false` 时返回空反链列表及零反链计数，保留提及行为，避免重复加载文档分组。已有调用方和文档内 `blockSort` 的默认行为保持不变。
+
+`TestGlobalBacklink*`、`TestAPIContractGlobalBacklink`、`TestBacklinkAnchorSortContext` 和 `TestBacklink2OptionalMentions` 覆盖跨文档分页、首个引用取值、编辑后的快照稳定性、阅读定位、普通和加密读取、来源权限、过期、缓存上限、实际 HTTP 响应契约及提及兼容性。它们包含在下方内核全量 CI 命令中，可单独运行 `go test -tags "fts5 sqlcipher" ./model ./api ./apicontract/... -run 'Test(GlobalBacklink|Backlink|APIContractGlobalBacklink|APIContractBack|APIContractSetting|PublishReaderBack|PublishReaderSearchAndBacklink|RouteCoverage)' -count=1`。前端的 `globalBacklinkPaging.test.ts`、`globalBacklinkList.test.js` 和 `backlinkSort.test.js` 已由现有全量 CI 自动发现，覆盖页窗口上限、迟到响应、待提交编辑和模式切换。
+
 ## 文件与流式协议
 
 `RawSSEOptions` 和 `RawWebSocketOptions` 声明以字节为载荷的广播协议，通过 `ValidateRawSSEEvent` 和 `ValidateRawWebSocketFrame` 单独校验事件及帧元数据；JSON 事件与 RPC 消息保留各自既有校验。原始 WebSocket 的错误由升级器写出，不使用 `RejectWebSocket`。

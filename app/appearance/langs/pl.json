@@ -1,4 +1,5 @@
 {
+	"backlinkGlobalSort": "Globalne sortowanie odwołań",
 	"backlinkDocumentSort": "Sortowanie dokumentów",
 	"backlinkBlockSort": "Odwołania wewnątrz dokumentów",
 	"backlinkBodyOrder": "Kolejność w dokumencie (domyślna)",

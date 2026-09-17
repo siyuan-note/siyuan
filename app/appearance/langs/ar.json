@@ -1,4 +1,5 @@
 {
+	"backlinkGlobalSort": "ترتيب المراجع على مستوى الكل",
 	"backlinkDocumentSort": "ترتيب المستندات",
 	"backlinkBlockSort": "ترتيب المراجع داخل المستندات",
 	"backlinkBodyOrder": "ترتيب الظهور في المستند (الافتراضي)",

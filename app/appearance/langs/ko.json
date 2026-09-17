@@ -1,4 +1,5 @@
 {
+	"backlinkGlobalSort": "전체 참조 정렬",
 	"backlinkDocumentSort": "문서 정렬",
 	"backlinkBlockSort": "문서 내 참조 정렬",
 	"backlinkBodyOrder": "본문 순서 (기본값)",

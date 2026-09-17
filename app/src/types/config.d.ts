@@ -565,6 +565,7 @@ declare namespace Config {
          * Backlink sort mode
          */
         backlinkSort: number;
+        backlinkGlobalSort: number;
         backlinkBlockSort: number;
         /**
          * Backmention sort mode

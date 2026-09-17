@@ -175,6 +175,20 @@ func TestBacklinkAnchorSortContext(t *testing.T) {
 					}
 				}
 			}
+			globalQuery := GlobalBacklinkQuery{ID: fixture.sourceID, Notebook: boxID, Sort: 1, ContainChildren: true}
+			allow := func(string) bool { return true }
+			token, globalItems, total, _, expired, err := GetGlobalBacklinks(globalQuery, "", 0, "", allow)
+			if err != nil || expired || total != 4 || globalItems[0].ID != ids[2] {
+				t.Fatalf("global sorting in %s notebook: %+v %v %v", name, globalItems, expired, err)
+			}
+			contexts, expired, err := GetGlobalBacklinkContexts(globalQuery, token, []string{ids[2], ids[0]}, allow)
+			if err != nil || expired || len(contexts) != 2 || contexts[0].ID != ids[2] {
+				t.Fatalf("global contexts in %s notebook: %+v %v %v", name, contexts, expired, err)
+			}
+			ClearGlobalBacklinkSnapshots(boxID)
+			if _, expired, _ = GetGlobalBacklinkContexts(globalQuery, token, []string{ids[0]}, allow); !expired {
+				t.Fatal("cleared notebook snapshot remained readable")
+			}
 		})
 	}
 }

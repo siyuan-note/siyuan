@@ -55,11 +55,19 @@ func TestBacklink2OptionalMentions(t *testing.T) {
 	if len(links) != 1 || linkCount != 1 || len(mentions) != 1 || mentionCount != 1 {
 		t.Fatalf("fixture should contain one backlink and one mention: %d/%d, %d/%d", len(links), linkCount, len(mentions), mentionCount)
 	}
-	gotBox, gotLinks, gotMentions, gotLinkCount, gotMentionCount := GetBacklink2InBoxWithOptions(fixture.sourceID, "", "", 0, 0, false, "", nil, false)
+	gotBox, gotLinks, gotMentions, gotLinkCount, gotMentionCount := GetBacklink2InBoxWithOptions(fixture.sourceID, "", "", 0, 0, false, "", nil, false, true)
 	if gotBox != box || !reflect.DeepEqual(gotLinks, links) || gotLinkCount != linkCount {
 		t.Fatal("omitting mentions changed the backlink results")
 	}
 	if gotMentions == nil || len(gotMentions) != 0 || gotMentionCount != 0 {
 		t.Fatalf("omitted mentions must remain an empty array with zero count: %+v, %d", gotMentions, gotMentionCount)
+	}
+	gotBox, gotLinks, gotMentions, gotLinkCount, gotMentionCount = GetBacklink2InBoxWithOptions(fixture.sourceID, "", "", 0, 0, false, "", nil, true, false)
+	if gotBox != box || !reflect.DeepEqual(gotMentions, mentions) || gotMentionCount != mentionCount || gotLinks == nil || len(gotLinks) != 0 || gotLinkCount != 0 {
+		t.Fatal("omitting document groups changed mentions or retained backlink groups")
+	}
+	_, gotLinks, gotMentions, gotLinkCount, gotMentionCount = GetBacklink2InBoxWithOptions(fixture.sourceID, "", "", 0, 0, false, "", nil, false, false)
+	if len(gotLinks) != 0 || len(gotMentions) != 0 || gotLinkCount != 0 || gotMentionCount != 0 {
+		t.Fatal("omitted lists returned results")
 	}
 }

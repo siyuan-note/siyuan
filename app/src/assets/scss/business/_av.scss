@@ -380,6 +380,46 @@
       min-height: 0;
       padding: 4px 8px;
     }
+
+    [data-role="field-mode"],
+    input[type="date"],
+    input[type="datetime-local"] {
+      height: 30px;
+      min-width: 0;
+    }
+  }
+
+  &__sort-row {
+    align-items: flex-start;
+
+    > .b3-menu__icon,
+    > .b3-menu__action {
+      align-self: flex-start;
+      flex-shrink: 0;
+      margin-top: 10px;
+    }
+
+    > .b3-menu__action {
+      margin-top: 7px;
+    }
+  }
+
+  &__sort-controls {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 4px 0;
+
+    .b3-select {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    [data-type="sortColumn"] {
+      flex: 1 1 120px;
+    }
   }
 
   &__title {

@@ -1179,7 +1179,7 @@ ${genHintItemHTML(item)}
                     let foldData;
                     if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
                         nodeElement.getAttribute("fold") === "1") {
-                        foldData = setFold(protyle, nodeElement, true, false, false, true);
+                        foldData = setFold(protyle, nodeElement, true, false, true);
                     }
                     nodeElement.insertAdjacentHTML("afterend", newHTML);
                     const newId = newHTML.substr(newHTML.indexOf('data-node-id="') + 14, 22);

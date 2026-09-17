@@ -52,7 +52,7 @@ const getEmptyFoldResult = () => ({
 });
 
 export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolean,
-                        isRemove?: boolean, addLoading = true, getOperations = false,
+                        isRemove?: boolean, getOperations = false,
                         persistViewState = !getOperations) => {
     if (nodeElement.getAttribute("data-type") === "NodeListItem" && nodeElement.childElementCount < 4 &&
         // 该情况需要强制展开 https://github.com/siyuan-note/siyuan/issues/12327
@@ -127,9 +127,6 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     const undoOperations: IOperation[] = [];
     if (nodeElement.getAttribute("data-type") === "NodeHeading") {
         if (hasFold) {
-            if (addLoading) {
-                nodeElement.insertAdjacentHTML("beforeend", '<div spin="1" style="text-align: center"><img width="24px" height="24px" src="/stage/loading-pure.svg"></div>');
-            }
             doOperations.push({
                 action: "unfoldHeading",
                 id,

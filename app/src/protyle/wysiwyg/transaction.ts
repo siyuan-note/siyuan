@@ -1664,7 +1664,7 @@ export const insertEmptyBlockquote = (protyle: IProtyle, previousElement: HTMLEl
 
     let foldData;
     if (previousElement.getAttribute("data-type") === "NodeHeading" && previousElement.getAttribute("fold") === "1") {
-        foldData = setFold(protyle, previousElement, true, false, false, true);
+        foldData = setFold(protyle, previousElement, true, false, true);
     }
 
     const id = blockquoteElement.getAttribute("data-node-id");
@@ -1899,7 +1899,7 @@ export const turnsIntoTransaction = (options: {
                 let foldData;
                 if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
                     tempElement.content.firstElementChild.getAttribute("data-subtype") !== item.dataset.subtype) {
-                    foldData = setFold(options.protyle, item, undefined, undefined, false, true);
+                    foldData = setFold(options.protyle, item, undefined, undefined, true);
                     newHTML = newHTML.replace(' fold="1"', "");
                 }
                 if (foldData && foldData.doOperations?.length > 0) {
@@ -2423,7 +2423,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
                     return;
                 }
                 item.removeAttribute("fold");
-                if (!item.lastElementChild.classList.contains("protyle-attr")) {
+                if (item.lastElementChild?.getAttribute("spin") === "1") {
                     item.lastElementChild.remove();
                 }
                 removeUnfoldRepeatBlock(visibleRetData, protyle);

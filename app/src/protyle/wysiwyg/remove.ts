@@ -1214,7 +1214,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         }
         tabsRemoval.normalize();
         Object.keys(unfoldData).forEach(item => {
-            const foldOperations = setFold(protyle, unfoldData[item].element, true, false, false, true);
+            const foldOperations = setFold(protyle, unfoldData[item].element, true, false, true);
             deletes.push(...foldOperations.doOperations);
             inserts.splice(0, 0, ...foldOperations.undoOperations);
         });
@@ -1551,11 +1551,11 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         const previousBlockElement = getPreviousBlockSibling(blockElement);
         if (previousBlockElement?.getAttribute("data-type") === "NodeHeading" &&
             previousBlockElement.getAttribute("fold") === "1") {
-            setFold(protyle, previousBlockElement, true, false, false, false, false);
+            setFold(protyle, previousBlockElement, true, false, false, false);
         }
         if (blockType === "NodeHeading" &&
             blockElement.getAttribute("fold") === "1") {
-            setFold(protyle, blockElement, true, false, false, false, false);
+            setFold(protyle, blockElement, true, false, false, false);
         }
         turnsIntoTransaction({
             protyle: protyle,
@@ -1788,7 +1788,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         // https://github.com/siyuan-note/siyuan/issues/12327
         if (removeParentElement.classList.contains("li") && removeParentElement.childElementCount === 4 &&
             removeParentElement.getAttribute("fold") === "1") {
-            const foldOperations = setFold(protyle, removeParentElement, true, false, false, true);
+            const foldOperations = setFold(protyle, removeParentElement, true, false, true);
             doOperations.push(...foldOperations.doOperations);
             undoOperations.splice(0, 0, ...foldOperations.undoOperations);
         }
@@ -2182,7 +2182,7 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
     }
 
     if (foldElement) {
-        const foldOperations = setFold(protyle, foldElement, true, false, false, true);
+        const foldOperations = setFold(protyle, foldElement, true, false, true);
         doOperations.push(...foldOperations.doOperations);
         undoOperations.push(...foldOperations.undoOperations);
         if (foldElement.parentElement.getAttribute("data-subtype") === "o") {

@@ -2772,7 +2772,7 @@ export const setFoldById = (data: {
 }, protyle: IProtyle) => {
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.id}"]`)).find((item: Element) => {
         if (!isInEmbedBlock(item)) {
-            const operations = setFold(protyle, item, true, false, true, true);
+            const operations = setFold(protyle, item, true, false, true);
             if (hasViewFoldContext(protyle)) {
                 const occurrenceID = getViewFoldOccurrenceID(protyle, item);
                 void setViewFoldTransient(protyle, item, false, undefined, true).then(() => {

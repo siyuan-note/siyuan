@@ -997,7 +997,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         });
     }
     unfoldHeadingElements.forEach(item => {
-        const foldData = setFold(protyle, item, true, false, false, true);
+        const foldData = setFold(protyle, item, true, false, true);
         if (!foldData.doOperations?.length) {
             return;
         }

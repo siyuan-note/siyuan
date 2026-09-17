@@ -251,7 +251,7 @@ const revealFlashcardAnswer = (protyle: IProtyle, callback: () => void) => {
         state: revealState,
         generation,
         unfold: cardElement ? (done) => {
-            const foldData = setFold(protyle, cardElement, true, false, true, true);
+            const foldData = setFold(protyle, cardElement, true, false, true);
             if (!foldData.doOperations?.length) {
                 done();
                 return;

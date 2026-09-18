@@ -459,25 +459,11 @@ FONT_COMPONENTS = [
         "app/appearance/fonts/LxgwWenKaiGB-Lite-1.521/LICENSE",
     ),
     (
-        "LXGW WenKai Lite (retained version)",
-        "1.501",
-        "OFL-1.1",
-        "https://github.com/lxgw/LxgwWenKai-Lite",
-        "app/appearance/fonts/LxgwWenKai-Lite-1.501/LICENSE",
-    ),
-    (
         "Noto COLRv1 Emoji",
         "2.051",
         "OFL-1.1",
         "https://github.com/googlefonts/noto-emoji",
         "app/appearance/fonts/Noto-COLRv1-2.051/LICENSE",
-    ),
-    (
-        "Noto COLRv1 Emoji (retained version)",
-        "2.047",
-        "OFL-1.1",
-        "https://github.com/googlefonts/noto-emoji",
-        "app/appearance/fonts/Noto-COLRv1-2.047/LICENSE",
     ),
 ]
 

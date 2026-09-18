@@ -19,4 +19,4 @@ python -m fontTools.ttLib.woff2 compress Noto-COLRv1.ttf -o Noto-COLRv1.woff2
 
 在 `app/` 目录运行 `node --import tsx --test src/util/emojiFont.test.ts tests/emojiFont.test.js`，检查新增列表、补充范围、实际字形组合和离线字体加载。浏览器测试使用 Electron，分别检查三种平台样式分支；这不替代实际 Apple WebKit 和移动端的兼容性验证。
 
-保留 `Noto-COLRv1-2.047` 目录以兼容历史引用；当前前端和离线 HTML 导出使用本目录。
+当前前端和离线 HTML 导出使用本目录。内核仅清理内容与原版一致的 `Noto-COLRv1-2.047` 历史副本；旧字体 URL 在文件缺失时映射到本目录，用户修改过的旧文件优先保留和使用。

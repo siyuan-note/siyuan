@@ -51,6 +51,10 @@ func InitAppearance() {
 		return
 	}
 
+	if err := util.CleanupLegacyFonts(util.AppearancePath); err != nil {
+		logging.LogWarnf("clean up legacy fonts failed: %s", err)
+	}
+
 	refreshAppearanceConfig()
 	util.InitEmojiChars()
 }

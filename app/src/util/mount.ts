@@ -12,7 +12,7 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
-import {getLastDailyNoteNotebookId} from "./dailyNote";
+import {genNotebookOptionsHTML, getLastDailyNoteNotebookId} from "./dailyNote";
 import {getHostCapabilities} from "./hostCapabilities";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -66,12 +66,7 @@ const openDailyNote = (app: App, useLastNotebook: boolean) => {
     if (lastNotebookId && useLastNotebook) {
         fetchNewDailyNote(app, lastNotebookId);
     } else {
-        let optionsHTML = "";
-        window.siyuan.notebooks.forEach(item => {
-            if (!item.closed) {
-                optionsHTML += `<option value="${item.id}">${item.name}</option>`;
-            }
-        });
+        const optionsHTML = genNotebookOptionsHTML(window.siyuan.notebooks);
         const dialog = new Dialog({
             positionId: Constants.DIALOG_DIALYNOTE,
             title: window.siyuan.languages.plsChoose,

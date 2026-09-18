@@ -162,6 +162,7 @@
   }
 
   &__views--mobile {
+    flex-wrap: wrap;
     gap: 4px;
     min-width: 0;
 
@@ -176,7 +177,7 @@
     > .av__mobile-view {
       flex: 0 1 auto;
       min-width: 64px;
-      max-width: 10em;
+      max-width: min(10em, 100%);
       overflow: hidden;
       gap: 4px;
 

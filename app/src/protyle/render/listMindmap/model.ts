@@ -1,7 +1,5 @@
+import {Constants} from "../../../constants";
 import {getOrderedListMarkerUpdates} from "../../wysiwyg/listContext";
-
-export const LIST_MINDMAP_VIEW_ATTRIBUTE = "custom-sy-list-mindmap";
-export const LIST_MINDMAP_META_ATTRIBUTE = "custom-sy-list-mindmap-data";
 
 export interface ListMindmapNodeStyle {
     textColor?: string;
@@ -121,21 +119,21 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
 };
 
 export const writeListMindmapMetadata = (list: HTMLElement, metadata: ListMindmapMetadata) => {
-    parseListMindmapMetadata(list.getAttribute(LIST_MINDMAP_META_ATTRIBUTE));
+    parseListMindmapMetadata(list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA));
     const value = JSON.stringify(metadata);
     parseListMindmapMetadata(value);
-    list.setAttribute(LIST_MINDMAP_META_ATTRIBUTE, value);
+    list.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA, value);
 };
 
 // 复制块树时同步替换节点样式和关系线端点，先校验全部配置再写入，避免出现部分改写。
 export const remapListMindmapIDs = (root: Element, ids: Map<string, string>) => {
-    const lists = Array.from(root.querySelectorAll<HTMLElement>(`[${LIST_MINDMAP_META_ATTRIBUTE}]`)).filter(list =>
+    const lists = Array.from(root.querySelectorAll<HTMLElement>(`[${Constants.CUSTOM_SY_LIST_MINDMAP_DATA}]`)).filter(list =>
         !list.closest(".list-mindmap"));
-    if (root.hasAttribute(LIST_MINDMAP_META_ATTRIBUTE)) {
+    if (root.hasAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA)) {
         lists.unshift(root as HTMLElement);
     }
     const updates = lists.map(list => {
-        const metadata = parseListMindmapMetadata(list.getAttribute(LIST_MINDMAP_META_ATTRIBUTE));
+        const metadata = parseListMindmapMetadata(list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA));
         const validIds = new Set(readListMindmap(list).nodes.keys());
         validIds.add(list.dataset.nodeId);
         const nodes: Record<string, ListMindmapNodeStyle> = Object.create(null);
@@ -155,7 +153,7 @@ export const remapListMindmapIDs = (root: Element, ids: Map<string, string>) => 
             to: ids.get(relation.to) || relation.to,
         })).filter(relation => validIds.has(relation.from) && validIds.has(relation.to))}};
     });
-    updates.forEach(({list, metadata}) => list.setAttribute(LIST_MINDMAP_META_ATTRIBUTE, JSON.stringify(metadata)));
+    updates.forEach(({list, metadata}) => list.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA, JSON.stringify(metadata)));
     cleanListMindmapDOM(root);
 };
 
@@ -172,7 +170,7 @@ export const readListMindmap = (list: HTMLElement): ListMindmapModel => {
     if (list.getAttribute("data-type") !== "NodeList" || !list.getAttribute("data-node-id")) {
         throw new Error("A list mindmap requires a list block");
     }
-    const metadata = parseListMindmapMetadata(list.getAttribute(LIST_MINDMAP_META_ATTRIBUTE));
+    const metadata = parseListMindmapMetadata(list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA));
     const nodes = new Map<string, ListMindmapNode>();
     const virtualRoot: ListMindmapNode = {
         id: list.getAttribute("data-node-id"),
@@ -488,7 +486,7 @@ export const deleteListMindmapNode = (list: HTMLElement, id: string): boolean =>
     removedIds.forEach(removedId => delete model.metadata.nodes[removedId]);
     model.metadata.relations = model.metadata.relations.filter(relation =>
         !removedIds.has(relation.from) && !removedIds.has(relation.to));
-    if (list.hasAttribute(LIST_MINDMAP_META_ATTRIBUTE)) {
+    if (list.hasAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA)) {
         writeListMindmapMetadata(list, model.metadata);
     }
     return true;

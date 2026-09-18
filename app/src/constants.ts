@@ -79,6 +79,8 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_HEADING_NUMBER: string = "custom-sy-heading-number";
     public static readonly CUSTOM_SY_AV_VIEW: string = "custom-sy-av-view";
     public static readonly CUSTOM_SY_AV_VISIBLE_VIEWS: string = "custom-sy-av-visible-views";
+    public static readonly CUSTOM_SY_LIST_MINDMAP: string = "custom-sy-list-mindmap";
+    public static readonly CUSTOM_SY_LIST_MINDMAP_DATA: string = "custom-sy-list-mindmap-data";
     public static readonly CUSTOM_SY_TITLE_EMPTY: string = "custom-sy-title-empty";
     public static readonly CUSTOM_SY_CODE_TAB_SPACES: string = "custom-sy-code-tab-spaces";
 

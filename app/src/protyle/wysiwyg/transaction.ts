@@ -74,7 +74,7 @@ import {
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
 import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
-import {cleanListMindmapHTML, LIST_MINDMAP_META_ATTRIBUTE, LIST_MINDMAP_VIEW_ATTRIBUTE} from "../render/listMindmap/model";
+import {cleanListMindmapHTML} from "../render/listMindmap/model";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
@@ -147,8 +147,8 @@ const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action
     const attrs = JSON.parse(operation.data);
     const hasFold = Object.prototype.hasOwnProperty.call(attrs, "fold");
     const hasStyle = Object.prototype.hasOwnProperty.call(attrs, "style");
-    const hasMindmapView = Object.prototype.hasOwnProperty.call(attrs, LIST_MINDMAP_VIEW_ATTRIBUTE);
-    const hasMindmapMetadata = Object.prototype.hasOwnProperty.call(attrs, LIST_MINDMAP_META_ATTRIBUTE);
+    const hasMindmapView = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_LIST_MINDMAP);
+    const hasMindmapMetadata = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_LIST_MINDMAP_DATA);
     const tabsAttrs = ["tabs-active-id", "tabs-position", "tabs-task"]
         .filter(name => Object.prototype.hasOwnProperty.call(attrs, name));
     if (!hasFold && !hasStyle && !hasMindmapView && !hasMindmapMetadata && tabsAttrs.length === 0) {
@@ -156,18 +156,18 @@ const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action
     }
     element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
         if (hasMindmapMetadata) {
-            if (attrs[LIST_MINDMAP_META_ATTRIBUTE]) {
-                item.setAttribute(LIST_MINDMAP_META_ATTRIBUTE, attrs[LIST_MINDMAP_META_ATTRIBUTE]);
+            if (attrs[Constants.CUSTOM_SY_LIST_MINDMAP_DATA]) {
+                item.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA, attrs[Constants.CUSTOM_SY_LIST_MINDMAP_DATA]);
             } else {
-                item.removeAttribute(LIST_MINDMAP_META_ATTRIBUTE);
+                item.removeAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA);
             }
         }
         // 同步脑图视图属性，由列表监听器刷新各分屏中的视图。
         if (hasMindmapView) {
-            if (attrs[LIST_MINDMAP_VIEW_ATTRIBUTE]) {
-                item.setAttribute(LIST_MINDMAP_VIEW_ATTRIBUTE, attrs[LIST_MINDMAP_VIEW_ATTRIBUTE]);
+            if (attrs[Constants.CUSTOM_SY_LIST_MINDMAP]) {
+                item.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP, attrs[Constants.CUSTOM_SY_LIST_MINDMAP]);
             } else {
-                item.removeAttribute(LIST_MINDMAP_VIEW_ATTRIBUTE);
+                item.removeAttribute(Constants.CUSTOM_SY_LIST_MINDMAP);
             }
         }
         if (hasFold) {

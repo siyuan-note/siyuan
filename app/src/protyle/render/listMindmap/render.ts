@@ -1,4 +1,5 @@
-import {LIST_MINDMAP_VIEW_ATTRIBUTE, readListMindmap} from "./model";
+import {Constants} from "../../../constants";
+import {readListMindmap} from "./model";
 import {ListMindmapView} from "./view";
 
 const editorRoots = new WeakMap<Element, () => void>();
@@ -10,7 +11,7 @@ export const registerListMindmapRoot = (root: Element, refresh: () => void) => {
 };
 
 export const getListMindmapElements = (root: Element) => {
-    const selector = `[data-type="NodeList"][${LIST_MINDMAP_VIEW_ATTRIBUTE}="1"]`;
+    const selector = `[data-type="NodeList"][${Constants.CUSTOM_SY_LIST_MINDMAP}="1"]`;
     const lists = Array.from(root.querySelectorAll<HTMLElement>(selector));
     if (root.matches(selector)) {
         lists.unshift(root as HTMLElement);

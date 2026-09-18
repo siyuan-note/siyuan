@@ -20,7 +20,7 @@ import {
 import {openInlineStyleDialog} from "../../toolbar/inlineStyleDialog";
 import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
-    LIST_MINDMAP_VIEW_ATTRIBUTE, moveListMindmapNode, readListMindmap, replaceListMindmapContent,
+    moveListMindmapNode, readListMindmap, replaceListMindmapContent,
     writeListMindmapMetadata,
 } from "./model";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
@@ -38,7 +38,7 @@ export const toggleListMindmap = (owner: IProtyle, list: HTMLElement) => {
     if (list.dataset.type !== "NodeList" || !canEdit(owner, list)) {
         return;
     }
-    const previous = list.getAttribute(LIST_MINDMAP_VIEW_ATTRIBUTE) || "";
+    const previous = list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) || "";
     const next = previous === "1" ? "" : "1";
     if (next) {
         try {
@@ -50,10 +50,10 @@ export const toggleListMindmap = (owner: IProtyle, list: HTMLElement) => {
         }
     }
     hideElements(["gutter", "toolbar", "hint"], owner);
-    list.setAttribute(LIST_MINDMAP_VIEW_ATTRIBUTE, next);
+    list.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP, next);
     transaction(owner, [{action: "setAttrs", id: list.dataset.nodeId,
-        data: JSON.stringify({[LIST_MINDMAP_VIEW_ATTRIBUTE]: next})}], [{action: "setAttrs", id: list.dataset.nodeId,
-        data: JSON.stringify({[LIST_MINDMAP_VIEW_ATTRIBUTE]: previous})}]);
+        data: JSON.stringify({[Constants.CUSTOM_SY_LIST_MINDMAP]: next})}], [{action: "setAttrs", id: list.dataset.nodeId,
+        data: JSON.stringify({[Constants.CUSTOM_SY_LIST_MINDMAP]: previous})}]);
     roots.get(owner)?.refresh();
 };
 
@@ -376,7 +376,7 @@ export const initListMindmaps = (owner: IProtyle) => {
                 return;
             }
             const mount = () => {
-                if (disposed || !root.contains(list) || list.getAttribute(LIST_MINDMAP_VIEW_ATTRIBUTE) !== "1") {
+                if (disposed || !root.contains(list) || list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1") {
                     return;
                 }
                 try {

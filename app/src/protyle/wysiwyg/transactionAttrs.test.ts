@@ -10,7 +10,8 @@ const declaration = source.statements.find(statement => isVariableStatement(stat
     statement.declarationList.declarations.some(item => item.name.getText(source) === "syncBlockAttrs"));
 const attribute = "custom-sy-list-mindmap";
 const metadataAttribute = "custom-sy-list-mindmap-data";
-const context = {LIST_MINDMAP_VIEW_ATTRIBUTE: attribute, LIST_MINDMAP_META_ATTRIBUTE: metadataAttribute, sync: undefined as any};
+const context = {Constants: {CUSTOM_SY_LIST_MINDMAP: attribute, CUSTOM_SY_LIST_MINDMAP_DATA: metadataAttribute},
+    sync: undefined as any};
 runInNewContext(transpileModule(declaration.getText(source) + "\nglobalThis.sync = syncBlockAttrs;", {
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText, context);

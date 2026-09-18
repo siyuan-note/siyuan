@@ -5,8 +5,20 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {execFile} from "node:child_process";
 import {promisify} from "node:util";
-import {layoutListMindmap, parseListMindmapMetadata} from "./model";
 import type {ListMindmapLayoutNode} from "./model";
+
+const buildGlobals = ["SIYUAN_VERSION", "NODE_ENV"].map(name => ({
+    name, descriptor: Object.getOwnPropertyDescriptor(globalThis, name),
+}));
+buildGlobals.forEach(({name}) => Object.defineProperty(globalThis, name, {configurable: true, value: "test"}));
+const {layoutListMindmap, parseListMindmapMetadata}: typeof import("./model") = require("./model");
+buildGlobals.forEach(({name, descriptor}) => {
+    if (descriptor) {
+        Object.defineProperty(globalThis, name, descriptor);
+    } else {
+        Reflect.deleteProperty(globalThis, name);
+    }
+});
 
 const measured = (id: string, width = 100, height = 40,
                   children: ListMindmapLayoutNode[] = []): ListMindmapLayoutNode => ({id, width, height, children});
@@ -93,7 +105,8 @@ const browserCases = async (sourceCode: string, css: string) => {
                 formula.innerHTML = '<span class="katex">rendered formula</span>';
                 formula.setAttribute("data-render", "true");
             });
-        }, {TIMEOUT_DBLCLICK: 190});
+        }, {TIMEOUT_DBLCLICK: 190, CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
+            CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"});
     const lute = Lute.New();
     lute.SetKramdownIAL(true);
     lute.SetProtyleWYSIWYG(true);

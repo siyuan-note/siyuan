@@ -11,6 +11,12 @@
 	},
 	"Children": [
 		{
+			"ID": "20260918120000-fcouten",
+			"Type": "NodeParagraph",
+			"Properties": {"id": "20260918120000-fcouten"},
+			"Children": [{"Type": "NodeText", "Data": "During review, toggle the outline with the toolbar button or your outline shortcut (Alt+2 on Windows and Control+2 on macOS by default). Click a visible heading to scroll within the card; other headings open the source document. Hidden or masked headings use numbered placeholders to avoid revealing answers. The outline follows the current card, and modified shortcuts do not submit ratings."}]
+		},
+		{
 			"ID": "20260614194307-9kjmef3",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

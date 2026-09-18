@@ -63,7 +63,11 @@ export const shouldLoadFlashcardV2HeadingChildren = (nodeType: string | null, fo
     return nodeType === "NodeHeading" && fold === "1";
 };
 
-export const getFlashcardV2ReviewShortcutAction = (shortcut: string) => {
+export const getFlashcardV2ReviewShortcutAction = (shortcut: string,
+    modifiers?: {altKey: boolean, ctrlKey: boolean, metaKey: boolean, shiftKey: boolean}) => {
+    if (modifiers && (modifiers.altKey || modifiers.ctrlKey || modifiers.metaKey || modifiers.shiftKey)) {
+        return undefined;
+    }
     return flashcardV2ReviewShortcutActions[shortcut.toLowerCase()];
 };
 

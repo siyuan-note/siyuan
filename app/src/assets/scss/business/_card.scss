@@ -158,6 +158,36 @@
     min-height: 0;
     padding: 0;
 
+    &-body {
+      min-height: 0;
+      min-width: 0;
+    }
+
+    &-outline {
+      flex: 0 0 28%;
+      max-width: 240px;
+      min-width: 0;
+      overflow: auto;
+      border-right: 1px solid var(--b3-border-color);
+      padding: 8px 0;
+
+      > button {
+        box-sizing: border-box;
+        width: 100%;
+        margin: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+
+        &:hover,
+        &.b3-list-item--focus {
+          background: var(--b3-list-hover);
+        }
+      }
+    }
+
     &-toolbar {
       flex: 0 0 auto;
       align-items: center;
@@ -167,6 +197,7 @@
     }
 
     &-content {
+      min-width: 0;
       min-height: 0;
       padding: 16px;
       overflow: auto;

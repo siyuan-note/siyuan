@@ -11,6 +11,12 @@
 	},
 	"Children": [
 		{
+			"ID": "20260918120000-fcouttw",
+			"Type": "NodeParagraph",
+			"Properties": {"id": "20260918120000-fcouttw"},
+			"Children": [{"Type": "NodeText", "Data": "複習時可點擊工具列的大綱按鈕，或使用大綱快捷鍵（Windows 預設 Alt+2，macOS 預設 Control+2）切換複習大綱。點擊目前卡片中可見的標題可捲動定位，其他標題會開啟原文；尚未顯示或仍有遮擋的標題以序號代替，避免提前揭露答案。大綱隨換卡更新，組合快捷鍵不會觸發評分。"}]
+		},
+		{
 			"ID": "20260614194439-k7n1m8a",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

@@ -10,6 +10,15 @@ import {
 } from "./flashcardV2State";
 
 describe("flashcardV2State", () => {
+    it("never rates or reveals cards through modified shortcuts", () => {
+        const plain = {altKey: false, ctrlKey: false, metaKey: false, shiftKey: false};
+        assert.equal(getFlashcardV2ReviewShortcutAction("2", plain), "hard");
+        for (const modifier of Object.keys(plain)) {
+            for (const key of ["2", "Enter", " ", "q", "x"]) {
+                assert.equal(getFlashcardV2ReviewShortcutAction(key, {...plain, [modifier]: true}), undefined);
+            }
+        }
+    });
     it("synchronizes only backend-confirmed terminal states after a failed rating", () => {
         const item = (id: string, status: string, generationStatus = "active") => ({
             card: {id, generationStatus}, sessionCard: {status},

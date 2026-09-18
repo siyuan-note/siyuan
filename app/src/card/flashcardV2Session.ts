@@ -45,6 +45,8 @@ import {
     shouldLoadFlashcardV2HeadingChildren,
 } from "./flashcardV2State";
 import {setFlashcardLocateBlockID} from "./flashcardLocate";
+import {createFlashcardOutline} from "./flashcardOutline";
+import {matchHotKey} from "../protyle/util/hotKey";
 import {flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
 import {openFlashcardReviewTab} from "./openFlashcardReviewTab";
@@ -516,15 +518,19 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
 <div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
     <span data-flashcard-count class="ft__on-surface"></span>
     <span class="fn__flex-1"></span>
+    <button data-type="toggle-outline" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.outline}" aria-expanded="false"><svg><use xlink:href="#iconOutline"></use></svg></button>
     <button data-type="read-aloud" class="block__icon ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
     <button data-type="edit-source" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
     <button data-type="more" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
     <button data-type="undo-review" class="block__icon ariaLabel fn__none" aria-label="${window.siyuan.languages.undo}"><svg><use xlink:href="#iconUndo"></use></svg></button>
 </div>
+<div class="fn__flex fn__flex-1 card__v2-session-body">
+<nav data-flashcard-outline class="card__v2-session-outline fn__none" aria-label="${window.siyuan.languages.outline}"></nav>
 <div class="card__block fn__flex-1 card__v2-session-content" aria-busy="true">
     <div data-flashcard-context class="card__v2-context ft__secondary fn__none"></div>
     <div class="protyle-wysiwyg" contenteditable="false" data-flashcard-front></div>
     <div class="fn__none" data-flashcard-answer><div class="fn__hr"></div><div class="protyle-wysiwyg" contenteditable="false"></div></div>
+</div>
 </div>
 <div data-flashcard-action="reveal" class="fn__flex card__action card__v2-session-actions">
     <button data-type="show" class="b3-button b3-button--text" disabled><div class="card__icon">👀</div>${window.siyuan.languages.cardShowAnswer}</button>
@@ -902,6 +908,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 height: isMobile() ? "100dvh" : "78vh",
                 content: sessionContent(),
                 destroyCallback: () => {
+                    outline?.destroy();
                     clearWaiting();
                     renderGeneration++;
                     playbackController?.cancel();
@@ -914,6 +921,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             }, mount);
             dialog.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
             dialog.element.setAttribute("data-flashcard-v2-review", "");
+            const outline = createFlashcardOutline(app, dialog.element);
             releaseOpening();
             const canUseReviewActions = () => canUseFlashcardV2ReviewActions({
                 renderPending,
@@ -931,6 +939,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 pluginAnswerController = rendered.pluginAnswerController;
                 sourceBlockID = rendered.sourceBlockID;
                 setFlashcardLocateBlockID(dialog.element, sourceBlockID);
+                outline.update(sourceBlockID);
                 playbackController = rendered.playbackController;
                 currentModel = rendered.model;
                 pluginEdit = rendered.pluginEdit;
@@ -951,6 +960,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 clearWaiting();
                 completedPending = false;
                 const generation = ++renderGeneration;
+                outline.update();
                 setFlashcardLocateBlockID(dialog.element);
                 renderPending = true;
                 revealController = undefined;
@@ -976,6 +986,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 }
             };
             const showCompletion = () => {
+                outline.update();
                 clearWaiting();
                 renderGeneration++;
                 setFlashcardLocateBlockID(dialog.element);
@@ -1111,6 +1122,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         face: "back",
                     });
                 }
+                outline.reveal(complete);
                 setActionsVisible(dialog, complete);
             };
             const updateManagedQueueCards = (data: {
@@ -1579,6 +1591,17 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 }
             });
             dialog.element.addEventListener("keydown", (event: KeyboardEvent) => {
+                if (matchHotKey(window.siyuan.config.keymap.general.outline, event)) {
+                    if (!event.repeat) {
+                        outline.toggle();
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+                if (!getFlashcardV2ReviewShortcutAction(event.key, event)) {
+                    return;
+                }
                 if (event.repeat || requestPending) {
                     return;
                 }

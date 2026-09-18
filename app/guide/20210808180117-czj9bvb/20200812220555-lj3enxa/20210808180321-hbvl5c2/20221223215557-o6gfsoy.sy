@@ -11,6 +11,12 @@
 	},
 	"Children": [
 		{
+			"ID": "20260918120000-fcoutcn",
+			"Type": "NodeParagraph",
+			"Properties": {"id": "20260918120000-fcoutcn"},
+			"Children": [{"Type": "NodeText", "Data": "复习时可点击工具栏的大纲按钮，或使用大纲快捷键（Windows 默认 Alt+2，macOS 默认 Control+2）切换复习大纲。点击当前卡片中可见的标题可滚动定位，其他标题会打开原文；尚未显示或仍有遮挡的标题以序号代替，避免提前暴露答案。大纲随换卡更新，组合快捷键不会触发评分。"}]
+		},
+		{
 			"ID": "20260614194151-5atwbsj",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

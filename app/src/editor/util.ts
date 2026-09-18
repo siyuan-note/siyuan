@@ -848,7 +848,7 @@ export const openBy = (url: string, type: "folder" | "app") => {
             });
         };
         if (isEncryptedBox(new URL(url, window.location.origin).searchParams.get("box"))) {
-            confirmDialog(window.siyuan.languages.openBy, window.siyuan.languages.encryptedAssetExternalOpenTip, open);
+            confirmDialog("⚠️ " + window.siyuan.languages.openBy, window.siyuan.languages.encryptedAssetExternalOpenTip, open);
         } else {
             open();
         }

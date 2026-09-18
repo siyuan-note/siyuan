@@ -425,6 +425,10 @@ body.mobile-keyboard--open {
   padding: 0 max(4px, env(safe-area-inset-right)) 0 max(4px, env(safe-area-inset-left));
   transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);
   will-change: transform;
+
+  .toolbar__title {
+    margin-left: 8px;
+  }
 }
 
 .mobile-bottom-bar {

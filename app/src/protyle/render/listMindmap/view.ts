@@ -96,6 +96,7 @@ export class ListMindmapView {
     private scale = 1;
     private offsetX = 0;
     private offsetY = 0;
+    private foldAnchor?: string;
     private frame = 0;
     private initialFit = true;
     private destroyed = false;
@@ -479,7 +480,8 @@ export class ListMindmapView {
                     children: node.children.map(child => makeLayoutNode(child.id)),
                 };
             };
-            const previous = this.editingId ? this.positions.get(this.editingId) : undefined;
+            const anchorId = this.editingId || this.foldAnchor;
+            const previous = anchorId ? this.positions.get(anchorId) : undefined;
             const result = layoutListMindmap(makeLayoutNode(this.model.root.id));
             this.positions = result.nodes;
             this.relationRoutes.clear();
@@ -521,12 +523,13 @@ export class ListMindmapView {
                     element.style.top = `${position.y - 1}px`;
                 }
             });
-            // 编辑导致尺寸变化时固定当前节点，避免输入光标随整棵树跳动。
-            const current = this.editingId ? this.positions.get(this.editingId) : undefined;
+            // 编辑或折叠改变布局时固定操作节点，避免光标和折叠按钮随整棵树跳动。
+            const current = anchorId ? this.positions.get(anchorId) : undefined;
             if (previous && current) {
                 this.offsetX += (previous.x - current.x) * this.scale;
                 this.offsetY += (previous.y - current.y) * this.scale;
             }
+            this.foldAnchor = undefined;
             if (this.initialFit) {
                 this.initialFit = false;
                 this.fit();
@@ -806,6 +809,7 @@ export class ListMindmapView {
         if (!node?.children.length) {
             return;
         }
+        this.foldAnchor = id;
         if (this.options.readOnly || node.virtual) {
             this.folded.set(id, !(this.folded.get(id) ?? node.collapsed));
             this.update(this.model);
@@ -1189,8 +1193,12 @@ export class ListMindmapView {
                 event.clientX - bounds.left, event.clientY - bounds.top);
             return;
         }
-        this.offsetX -= event.deltaX * unitX;
-        this.offsetY -= event.deltaY * unitY;
+        if (event.shiftKey) {
+            this.offsetX -= event.deltaX ? event.deltaX * unitX : event.deltaY * unitX;
+        } else {
+            this.offsetX -= event.deltaX * unitX;
+            this.offsetY -= event.deltaY * unitY;
+        }
         this.draw();
     };
 

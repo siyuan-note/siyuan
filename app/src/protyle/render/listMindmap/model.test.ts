@@ -527,11 +527,11 @@ const browserCases = async (sourceCode: string, css: string) => {
     ["listMindmapChild", "delete", "fold"].forEach(label =>
         check.equal(toolbar.querySelector(`[aria-label="${label}"]`), null));
     const relationButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="connect"]');
-    check.equal(relationButton.nextElementSibling.getAttribute("aria-label"), "zoomOut");
+    check.ok(relationButton.nextElementSibling.classList.contains("list-mindmap__zoom-control"));
     check.equal(relationButton.querySelector("use").getAttribute("xlink:href"), "#iconRoute");
     const inspector = host.querySelector<HTMLElement>(".list-mindmap__inspector");
     const fitButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="listMindmapFit"]');
-    check.equal(fitButton.querySelector("use").getAttribute("xlink:href"), "#iconRefresh");
+    check.equal(fitButton.querySelector("use").getAttribute("xlink:href"), "#iconFocus");
     fitButton.dispatchEvent(new PointerEvent("pointerover", {bubbles: true}));
     check.equal(host.querySelector<HTMLElement>('[role="tooltip"]').hidden, false);
     check.equal(host.querySelector('[role="tooltip"]').textContent, "listMindmapFit");

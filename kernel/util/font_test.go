@@ -118,8 +118,8 @@ func TestParseBundledFontLocalizedName(t *testing.T) {
 		Lang = oldLang
 	})
 
-	fontPath := filepath.Join("..", "..", "app", "appearance", "fonts", "LxgwWenKai-Lite-1.501",
-		"LXGWWenKaiLite-Regular.ttf")
+	fontPath := filepath.Join("..", "..", "app", "appearance", "fonts", "LxgwWenKaiGB-Lite-1.521",
+		"LXGWWenKaiGBLite-Regular.ttf")
 	fontFile, err := os.Open(fontPath)
 	if err != nil {
 		t.Fatal(err)

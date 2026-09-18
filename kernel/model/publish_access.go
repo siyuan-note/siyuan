@@ -303,6 +303,17 @@ func CheckPathAccessableByPublishIgnore(box string, path string, publishIgnore P
 	return true
 }
 
+// PublishVisibleDocPathFilter 返回发布读者可见文档路径的判定函数，口径与读者可见的发布视图一致：
+// 隐藏、禁止发布以及加密笔记本中的文档都不计入读者统计。
+func PublishVisibleDocPathFilter(boxID string, publishAccess PublishAccess) func(docPath string) bool {
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
+	return func(docPath string) bool {
+		return CheckPathAccessableByPublishIgnore(boxID, docPath, publishInvisible) &&
+			CheckPathAccessableByPublishIgnore(boxID, docPath, publishDisable)
+	}
+}
+
 // IsEncryptedPublishRuntimeTarget 判断发布读取目标是否属于当前可解析的加密笔记本。
 func IsEncryptedPublishRuntimeTarget(id string) bool {
 	boxIDs, denyAll := encryptedBoxIDsForPublishAccess()
@@ -1289,17 +1300,30 @@ func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess PublishAccess,
 	ret.IAL[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
 
 	bt := treenode.GetBlockTree(info.RootID)
-	if bt != nil {
-		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-		if (password != "" && !CheckPublishAuthCookie(c, passwordID, password)) || !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-			ret.IAL["name"] = ""
-			ret.IAL["alias"] = ""
-			ret.IAL["memo"] = ""
-			ret.IAL["bookmark"] = ""
-			ret.IAL["tags"] = ""
-			ret.RefCount = 0
-			ret.RefIDs = []string{}
+	if nil == bt {
+		// 无法定位文档路径时不给出下级文档数，避免泄漏发布排除文档的数量
+		ret.SubFileCount = 0
+		return
+	}
+
+	// 下级文档数只统计发布可见的文档，与读者可见的文档树口径一致
+	if 0 < ret.SubFileCount {
+		if IsBoxDoc(bt.BoxID, bt.ID) {
+			ret.SubFileCount = BoxDocSubFileCountForPublish(bt.BoxID, publishAccess)
+		} else {
+			ret.SubFileCount = BoxDocSubFileCountForPublishAt(bt.BoxID, bt.Path, publishAccess)
 		}
+	}
+
+	passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+	if (password != "" && !CheckPublishAuthCookie(c, passwordID, password)) || !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+		ret.IAL["name"] = ""
+		ret.IAL["alias"] = ""
+		ret.IAL["memo"] = ""
+		ret.IAL["bookmark"] = ""
+		ret.IAL["tags"] = ""
+		ret.RefCount = 0
+		ret.RefIDs = []string{}
 	}
 	return
 }

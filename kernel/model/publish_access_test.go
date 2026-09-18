@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -1866,5 +1867,69 @@ func TestCheckAbsPathAccessableByPublishAccessKeepsHiddenNotebookAccessible(t *t
 	})
 	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Password: password}}) {
 		t.Fatal("password protected notebook should be accessible after authorization")
+	}
+}
+
+// TestFilterBlockInfoByPublishAccessFiltersSubFileCount 验证读者拿到的下级文档数
+// 只统计发布可见的文档，避免据此推断被排除文档的数量。
+func TestFilterBlockInfoByPublishAccessFiltersSubFileCount(t *testing.T) {
+	const (
+		boxID       = "20260726000000-boxid01"
+		parentID    = "20260726000001-parent1"
+		publicID    = "20260726000002-public1"
+		hiddenID    = "20260726000003-hidden1"
+		forbiddenID = "20260726000004-forbid1"
+	)
+
+	previousDataDir, previousBlockTreeDBPath, previousConf := util.DataDir, util.BlockTreeDBPath, Conf
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	treenode.InitBlockTree(true)
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.DataDir, util.BlockTreeDBPath, Conf = previousDataDir, previousBlockTreeDBPath, previousConf
+	})
+
+	boxDir := filepath.Join(util.DataDir, boxID)
+	if err := os.MkdirAll(filepath.Join(boxDir, parentID), 0755); err != nil {
+		t.Fatal(err)
+	}
+	for _, target := range []struct{ dir, id string }{
+		{".", parentID}, {parentID, publicID}, {parentID, hiddenID}, {parentID, forbiddenID},
+	} {
+		if err := os.WriteFile(filepath.Join(boxDir, target.dir, target.id+".sy"), []byte(`{"Properties":{}}`), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	parentPath := "/" + parentID + ".sy"
+	treenode.IndexBlockTree(&parse.Tree{
+		ID:    parentID,
+		Box:   boxID,
+		Path:  parentPath,
+		HPath: "/" + parentID,
+		Root:  &ast.Node{ID: parentID, Type: ast.NodeDocument},
+	})
+
+	publishAccess := PublishAccess{
+		{ID: hiddenID, Visible: false},
+		{ID: forbiddenID, Visible: false, Disable: true},
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodPost, "/", nil)
+	c.Set(RoleContextKey, RoleReader)
+
+	// SubFileCount 模拟 blockinfo 已按未过滤口径统计出的下级文档数
+	filtered := FilterBlockInfoByPublishAccess(c, publishAccess, &BlockInfo{RootID: parentID, SubFileCount: 3, IAL: map[string]string{}})
+	if 1 != filtered.SubFileCount {
+		t.Fatalf("reader subfile count = %d, want only the published one", filtered.SubFileCount)
+	}
+
+	// 无法定位文档路径时不下发下级文档数
+	missing := FilterBlockInfoByPublishAccess(c, publishAccess, &BlockInfo{RootID: "20260726000005-missing", SubFileCount: 5, IAL: map[string]string{}})
+	if 0 != missing.SubFileCount {
+		t.Fatalf("missing document subfile count = %d, want 0", missing.SubFileCount)
 	}
 }

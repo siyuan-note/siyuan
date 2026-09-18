@@ -56,6 +56,8 @@ type Markdown struct {
 
 func NewLute() (ret *lute.Lute) {
 	ret = lute.New()
+	// 文本标记以 HTML 实体保存正文，解析时保留转义，避免渲染时将尖括号正文识别为标签。
+	ret.ParseOptions.KeepEscaped = true
 	ret.SetTextMark(true)
 	ret.SetProtyleWYSIWYG(true)
 	ret.SetBlockRef(true)

@@ -18,6 +18,7 @@ const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke
     const moduleExports: {registerAppTab?: (tab: unknown) => void} = {};
     runInNewContext(code, {
         exports: moduleExports,
+        process: {platform: "win32"},
         console: {warn: (): void => undefined},
         window: {siyuan: {
             languages: new Proxy({}, {get: (_, key) => String(key)}),

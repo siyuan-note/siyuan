@@ -246,7 +246,7 @@ func buildImportedSYSortValues(importedDocs []*importedSYSortDoc, sourceSortIDs 
 	sortValues := map[string]int{}
 	for _, docs := range groups {
 		for sortValue, doc := range docs {
-			sortValues[doc.newID] = sortValue
+			sortValues[doc.newID] = sortValue + 1
 		}
 	}
 
@@ -264,7 +264,7 @@ func buildImportedSYSortValues(importedDocs []*importedSYSortDoc, sourceSortIDs 
 		orderedRootIDs = append(orderedRootIDs, rootIDs...)
 	}
 	for sortValue, id := range orderedRootIDs {
-		sortValues[id] = sortValue
+		sortValues[id] = sortValue + 1
 	}
 	return sortValues
 }

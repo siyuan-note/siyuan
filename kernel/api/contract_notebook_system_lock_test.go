@@ -88,6 +88,7 @@ func TestAPIContractNotebookSystemLock(t *testing.T) {
 		t.Fatal(err)
 	}
 	gin.SetMode(gin.TestMode)
+	checkExternalAssetLocked := testResolveEncryptedAssetPath(t, boxIDs[0], key)
 	engine := gin.New()
 	engine.Use(boxLeaseMiddleware)
 	engine.POST("/api/notebook/setEncryptedNotebookFollowSystemLock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setEncryptedNotebookFollowSystemLock)
@@ -165,6 +166,7 @@ func TestAPIContractNotebookSystemLock(t *testing.T) {
 			t.Fatal("locked notebook admitted a read")
 		}
 	}
+	checkExternalAssetLocked()
 	boxConf = (&model.Box{ID: boxIDs[0]}).GetConf()
 	if err = model.UnlockBox(boxIDs[0], password, boxConf.BoxCrypt); err != nil {
 		t.Fatal(err)

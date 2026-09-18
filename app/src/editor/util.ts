@@ -41,6 +41,7 @@ import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {revealTabsForTarget} from "../protyle/render/tabsRender";
 import {isHiddenTabContent} from "../protyle/render/tabsVisibility";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {shouldCheckOtherWindows} from "./openFileWindow";
 
 const isSameCustomTab = (type: string, data: any, options: IOpenFileOptions) => {
@@ -837,13 +838,20 @@ export const openBy = (url: string, type: "folder" | "app") => {
     }
     /// #if !BROWSER
     if (url.startsWith("assets/")) {
-        fetchPost("/api/asset/resolveAssetPath", {path: url.replace(/\.pdf\?page=\d{1,}$/, ".pdf")}, (response) => {
-            if (type === "app") {
-                useShell("openPath", response.data);
-            } else if (type === "folder") {
-                useShell("showItemInFolder", response.data);
-            }
-        });
+        const open = () => {
+            fetchPost("/api/asset/resolveAssetPath", {path: url.replace(/\.pdf\?page=\d{1,}$/, ".pdf")}, (response) => {
+                if (type === "app") {
+                    useShell("openPath", response.data);
+                } else if (type === "folder") {
+                    useShell("showItemInFolder", response.data);
+                }
+            });
+        };
+        if (isEncryptedBox(new URL(url, window.location.origin).searchParams.get("box"))) {
+            confirmDialog(window.siyuan.languages.openBy, window.siyuan.languages.encryptedAssetExternalOpenTip, open);
+        } else {
+            open();
+        }
         return;
     }
     let address = "";

@@ -345,6 +345,7 @@ const genProviderActionButtons = (dataType: SyncProviderConfigKey) => {
     <button class="b3-button b3-button--outline fn__size200" id="purgeCloudData">
         <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.cloudStoragePurge}
     </button>${importExportHtml}
+    ${dataType === "s3" ? `<div class="fn__space"></div><button class="b3-button fn__size200" id="saveSyncConfig">${window.siyuan.languages.save}</button>` : ""}
 </div>`;
 };
 
@@ -399,6 +400,9 @@ const bindProviderConfigEvent = (configElement: Element, root: Element) => {
         return;
     }
     fillSyncProviderConfigValues(configElement);
+    configElement.querySelector("#saveSyncConfig")?.addEventListener("click", () => {
+        saveSyncProviderConfigValues(configElement);
+    });
     if (syncProviderConfigBoundElements.has(configElement)) {
         return;
     }
@@ -406,6 +410,9 @@ const bindProviderConfigEvent = (configElement: Element, root: Element) => {
     configElement.addEventListener("change", (event: Event) => {
         const target = event.target as HTMLElement;
         if (!target.matches(".b3-text-field, .b3-select")) {
+            return;
+        }
+        if (window.siyuan.config.sync.provider === 2) {
             return;
         }
         saveSyncProviderConfigValues(configElement);
@@ -420,15 +427,43 @@ const saveSyncProviderConfigValues = (configElement: Element) => {
     }
     const data = readProviderConfigFields(configElement, def.getConfig());
     const configKey = def.configKey;
-    // 使用 fetchSyncPost：内核返回 code < 0 时 fetchPost 不会调用回调，此处需始终回写界面与已保存配置一致
+    if (configKey === "s3") {
+        for (const key of ["endpoint", "accessKey", "secretKey", "bucket", "region"]) {
+            const input = configElement.querySelector<HTMLInputElement>(`#${key}`);
+            if (!input.value.trim()) {
+                showMessage(`${def.fields.find((field) => field.id === key).label}: ${window.siyuan.languages._kernel[142]}`);
+                input.focus();
+                return;
+            }
+        }
+    }
+    const saveButton = configElement.querySelector<HTMLButtonElement>("#saveSyncConfig");
+    if (saveButton?.disabled) {
+        return;
+    }
+    if (saveButton) {
+        saveButton.disabled = true;
+    }
+    // 记录提交时的控件和值，仅回填未被继续编辑的控件，失败时保留输入。
+    const fields = def.fields.map((field) => {
+        const element = configElement.querySelector<HTMLInputElement | HTMLSelectElement>(`#${field.id}`);
+        return {key: field.id, element, value: element.value};
+    });
     fetchSyncPost(def.api, {[configKey]: data})
         .then((response) => {
             if (response.code === 0 && response.data?.[configKey]) {
                 window.siyuan.config.sync[configKey] = response.data[configKey];
+                fields.forEach(({key, element, value}) => {
+                    if (element.value === value) {
+                        element.value = String(response.data[configKey][key]);
+                    }
+                });
             }
         })
         .finally(() => {
-            fillSyncProviderConfigValues(configElement);
+            if (saveButton) {
+                saveButton.disabled = false;
+            }
         })
         .catch(() => {});
 };

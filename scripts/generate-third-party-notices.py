@@ -421,6 +421,13 @@ BUNDLED_COMPONENTS = [
         "Localized names and search keywords in app/appearance/emojis/conf.json",
     ),
     (
+        "Unicode Emoji test data",
+        "17.0",
+        "Unicode-3.0",
+        "https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt",
+        "New fully-qualified sequences in app/tests/fixtures/unicode17-emoji.json",
+    ),
+    (
         "Pexels cover photos",
         "72 selected photographs",
         "Pexels License",
@@ -445,18 +452,18 @@ FONT_COMPONENTS = [
         "app/appearance/fonts/JetBrainsMono-2.304/LICENSE",
     ),
     (
-        "LXGW WenKai Lite",
-        "1.501",
+        "LXGW WenKai GB Lite",
+        "1.521",
         "OFL-1.1",
-        "https://github.com/lxgw/LxgwWenKai-Lite",
-        "app/appearance/fonts/LxgwWenKai-Lite-1.501/LICENSE",
+        "https://github.com/lxgw/LxgwWenkaiGB-Lite",
+        "app/appearance/fonts/LxgwWenKaiGB-Lite-1.521/LICENSE",
     ),
     (
         "Noto COLRv1 Emoji",
-        "2.047",
+        "2.051",
         "OFL-1.1",
         "https://github.com/googlefonts/noto-emoji",
-        "app/appearance/fonts/Noto-COLRv1-2.047/LICENSE",
+        "app/appearance/fonts/Noto-COLRv1-2.051/LICENSE",
     ),
 ]
 

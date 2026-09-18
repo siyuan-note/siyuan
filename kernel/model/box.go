@@ -587,6 +587,16 @@ type BoxInfo struct {
 }
 
 func (box *Box) GetInfo() (ret *BoxInfo) {
+	return box.getInfo(nil)
+}
+
+// GetInfoForPublish 返回发布访问控制下笔记本的聚合信息，只统计发布读者可见的文档。
+func (box *Box) GetInfoForPublish(publishAccess PublishAccess) (ret *BoxInfo) {
+	return box.getInfo(PublishVisibleDocPathFilter(box.ID, publishAccess))
+}
+
+// getInfo 统计笔记本的聚合信息，include 为文档路径可见性判定，nil 表示统计全部文档。
+func (box *Box) getInfo(include func(docPath string) bool) (ret *BoxInfo) {
 	ret = &BoxInfo{
 		ID:   box.ID,
 		Name: util.EscapeHTML(box.Name),
@@ -614,6 +624,10 @@ func (box *Box) GetInfo() (ret *BoxInfo) {
 
 		id := strings.TrimSuffix(fileInfo.name, ".sy")
 		if !ast.IsNodeIDPattern(id) {
+			continue
+		}
+
+		if nil != include && !include(fileInfo.path) {
 			continue
 		}
 

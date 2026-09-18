@@ -1553,6 +1553,15 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 			err = fmt.Errorf(Conf.Language(84), Conf.Language(154))
 			return
 		}
+		if conf.ProviderSiYuan == Conf.Sync.Provider && errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
+			u := Conf.GetUser()
+			msg := fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
+			if 2 == u.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
+			}
+			err = fmt.Errorf(Conf.Language(84), msg)
+			return
+		}
 		handleCloudError(err)
 		err = fmt.Errorf(Conf.Language(84), formatRepoErrorMsg(err))
 		return
@@ -1905,6 +1914,17 @@ func newSyncContext() map[string]any {
 	return map[string]any{eventbus.CtxPushMsg: pushTarget}
 }
 
+func formatSyncRepoErrorMsg(err error) string {
+	if conf.ProviderSiYuan == Conf.Sync.Provider && errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
+		u := Conf.GetUser()
+		if 2 == u.UserSiYuanSubscriptionPlan {
+			return fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
+		}
+		return fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
+	}
+	return fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+}
+
 func syncRepoDownload() (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		planSyncAfter(fixSyncInterval)
@@ -1958,14 +1978,7 @@ func syncRepoDownload() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo download failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			}
-		}
+		msg := formatSyncRepoErrorMsg(err)
 		Conf.Sync.Stat = msg
 		Conf.Save()
 		pushSyncStatusBar(msg)
@@ -2041,14 +2054,7 @@ func syncRepoUpload() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo upload failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			}
-		}
+		msg := formatSyncRepoErrorMsg(err)
 		Conf.Sync.Stat = msg
 		Conf.Save()
 		pushSyncStatusBar(msg)
@@ -2152,14 +2158,7 @@ func bootSyncRepo() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			}
-		}
+		msg := formatSyncRepoErrorMsg(err)
 		Conf.Sync.Stat = msg
 		Conf.Save()
 		pushSyncStatusBar(msg)
@@ -2298,14 +2297,7 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			}
-		}
+		msg := formatSyncRepoErrorMsg(err)
 		Conf.Sync.Stat = msg
 		Conf.Save()
 		pushSyncStatusBar(msg)

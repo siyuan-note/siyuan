@@ -1176,6 +1176,10 @@ func listDocsByPathContract(c *gin.Context, request apicontract.FileTreeListRequ
 		for _, file := range files {
 			if model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishInvisible) &&
 				model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishDisable) {
+				// 下级文档数同样只统计发布可见的文档，避免读者据此推断被排除文档的数量
+				if 0 < file.SubFileCount {
+					file.SubFileCount = model.BoxDocSubFileCountForPublishAt(notebook, file.Path, publishAccess)
+				}
 				tempFiles = append(tempFiles, file)
 			}
 		}

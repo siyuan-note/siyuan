@@ -1486,6 +1486,12 @@ func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	return selectExportTree(ret, bt)
+}
+
+// selectExportTree 保留文档身份，仅将正文限制为目标块及其所属的标题内容。
+func selectExportTree(tree *parse.Tree, bt *treenode.BlockTree) (ret *parse.Tree) {
+	ret = tree
 	if "d" != bt.Type {
 		node := treenode.GetNodeInTree(ret, bt.ID)
 		nodes := []*ast.Node{node}
@@ -1497,7 +1503,7 @@ func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
 		}
 
 		oldRoot := ret.Root
-		ret = parse.Parse("", []byte(""), luteEngine.ParseOptions)
+		ret = parse.Parse("", []byte(""), NewLute().ParseOptions)
 		first := ret.Root.FirstChild
 		for _, n := range nodes {
 			first.InsertBefore(n)
@@ -1697,8 +1703,8 @@ func processPDFWatermark(pdfCtx *model.Context, watermark bool) {
 			}
 		}
 		if useDefaultFont {
-			m["fontname"] = "LXGWWenKaiLite-Regular"
-			fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKai-Lite-1.501", "LXGWWenKaiLite-Regular.ttf")
+			m["fontname"] = "LXGWWenKaiGBLite-Regular"
+			fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKaiGB-Lite-1.521", "LXGWWenKaiGBLite-Regular.ttf")
 			err := api.InstallFonts([]string{fontPath})
 			if err != nil {
 				logging.LogErrorf("install font [%s] failed: %s", fontPath, err)
@@ -3267,7 +3273,7 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 	refFootnotesByID := make(map[string]*refAsFootnotes)
 	if 4 == blockRefMode && singleFile {
 		depth = 0
-		collectFootnotesDefs(ret, ret.ID, &refFootnoteOrder, refFootnotesByID, &depth)
+		collectFootnotesDefs0(ret, ret.Root, &refFootnoteOrder, refFootnotesByID, &depth)
 	}
 
 	currentTreeNodeIDs := map[string]bool{}
@@ -3380,38 +3386,15 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 		n.Unlink()
 	}
 
+	var footnotesDefBlock *ast.Node
 	if 4 == blockRefMode { // 脚注+锚点哈希
 		unlinks = nil
-		footnotesDefBlock, footnotesErr := resolveFootnotesDefs(&refFootnoteOrder, refFootnotesByID, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight, richTableCells)
+		var footnotesErr error
+		footnotesDefBlock, footnotesErr = resolveFootnotesDefs(&refFootnoteOrder, refFootnotesByID, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight, richTableCells)
 		if nil != footnotesErr {
 			return nil, footnotesErr
 		}
 		if nil != footnotesDefBlock {
-			// 如果是聚焦导出，可能存在没有使用的脚注定义块，在这里进行清理
-			// Improve focus export conversion of block refs to footnotes https://github.com/siyuan-note/siyuan/issues/10647
-			footnotesRefs := ret.Root.ChildrenByType(ast.NodeFootnotesRef)
-			for footnotesDef := footnotesDefBlock.FirstChild; nil != footnotesDef; footnotesDef = footnotesDef.Next {
-				fnRefsInDef := footnotesDef.ChildrenByType(ast.NodeFootnotesRef)
-				footnotesRefs = append(footnotesRefs, fnRefsInDef...)
-			}
-
-			for footnotesDef := footnotesDefBlock.FirstChild; nil != footnotesDef; footnotesDef = footnotesDef.Next {
-				exist := false
-				for _, ref := range footnotesRefs {
-					if ref.FootnotesRefId == footnotesDef.FootnotesRefId {
-						exist = true
-						break
-					}
-				}
-				if !exist {
-					unlinks = append(unlinks, footnotesDef)
-				}
-			}
-
-			for _, n := range unlinks {
-				n.Unlink()
-			}
-
 			ret.Root.AppendChild(footnotesDefBlock)
 		}
 	}
@@ -3948,6 +3931,7 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 	for _, n := range unlinks {
 		n.Unlink()
 	}
+	pruneExportFootnotes(ret.Root, footnotesDefBlock, nil)
 	return ret, nil
 }
 

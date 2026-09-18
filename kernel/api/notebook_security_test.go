@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -186,6 +187,156 @@ func TestGetNotebookInfoHidesInvisibleNotebookFromReader(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// installAPITestTimeLangs 为指定语言安装时间本地化标签，避免聚合信息渲染相对时间失败。
+func installAPITestTimeLangs(t *testing.T, lang string) {
+	t.Helper()
+
+	oldLang, hadLang := util.TimeLangs[lang]
+	util.TimeLangs[lang] = map[string]any{}
+	for _, key := range []string{"albl", "blbl", "now", "1s", "xs", "1m", "xm", "1h", "xh", "1d", "xd", "1w", "xw", "1M", "xM", "1y", "2y", "xy", "max"} {
+		util.TimeLangs[lang][key] = ""
+	}
+	t.Cleanup(func() {
+		if hadLang {
+			util.TimeLangs[lang] = oldLang
+		} else {
+			delete(util.TimeLangs, lang)
+		}
+	})
+}
+
+// TestGetNotebookInfoExcludesPublishExcludedDocumentsForReader 验证发布读者的笔记本聚合信息
+// 只统计发布可见的文档，隐藏和禁止发布的文档不计入文档数、体积和最后修改时间。
+func TestGetNotebookInfoExcludesPublishExcludedDocumentsForReader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldConf, oldDataDir := model.Conf, util.DataDir
+	oldPublishAccess := model.GetPublishAccess()
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.FileTree = conf.NewFileTree()
+	const testLang = "notebook-info-publish-test"
+	installAPITestTimeLangs(t, testLang)
+	model.Conf.Lang = testLang
+	t.Cleanup(func() {
+		if err := model.SetPublishAccess(oldPublishAccess); err != nil {
+			t.Errorf("restore publish access failed: %v", err)
+		}
+		model.Conf, util.DataDir = oldConf, oldDataDir
+	})
+
+	const (
+		boxID       = "20260726000000-abcdefg"
+		publicID    = "20260726000001-publica"
+		hiddenID    = "20260726000002-hiddend"
+		forbiddenID = "20260726000003-forbidd"
+	)
+	boxConf := conf.NewBoxConf()
+	boxConf.Name = "Mixed notebook"
+	boxConf.Closed = false
+	boxConfPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
+	if err := os.MkdirAll(filepath.Dir(boxConfPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	boxConfData, err := json.Marshal(boxConf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(boxConfPath, boxConfData, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// 隐藏和禁止发布的文档使用更晚的修改时间，用于验证读者看到的时间不包含它们
+	excludedModTime := time.Now().Add(time.Hour).Truncate(time.Second)
+	writeDoc := func(docID string, modTime time.Time) int64 {
+		t.Helper()
+		docPath := filepath.Join(util.DataDir, boxID, docID+".sy")
+		if writeErr := os.WriteFile(docPath, []byte(`{"Properties":{}}`), 0644); nil != writeErr {
+			t.Fatal(writeErr)
+		}
+		if writeErr := os.Chtimes(docPath, modTime, modTime); nil != writeErr {
+			t.Fatal(writeErr)
+		}
+		info, statErr := os.Stat(docPath)
+		if nil != statErr {
+			t.Fatal(statErr)
+		}
+		return info.Size()
+	}
+
+	rootSize := writeDoc(boxID, time.Now())
+	publicSize := writeDoc(publicID, time.Now())
+	hiddenSize := writeDoc(hiddenID, excludedModTime)
+	forbiddenSize := writeDoc(forbiddenID, excludedModTime)
+	wholeSize := uint64(rootSize + publicSize + hiddenSize + forbiddenSize)
+
+	if err = model.SetPublishAccess(model.PublishAccess{
+		{ID: hiddenID, Visible: false},
+		{ID: forbiddenID, Visible: false, Disable: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	request := func(role model.Role) *model.BoxInfo {
+		t.Helper()
+
+		engine := gin.New()
+		engine.Use(func(c *gin.Context) {
+			c.Set(model.RoleContextKey, role)
+			c.Next()
+		})
+		engine.POST("/api/notebook/getNotebookInfo", getNotebookInfo)
+
+		recorder := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(
+			http.MethodPost,
+			"/api/notebook/getNotebookInfo",
+			strings.NewReader(`{"notebook":"`+boxID+`"}`),
+		)
+		httpRequest.Header.Set("Content-Type", "application/json")
+		engine.ServeHTTP(recorder, httpRequest)
+		requireAPIContract(t, http.MethodPost, "/api/notebook/getNotebookInfo", recorder)
+
+		response := &struct {
+			Code int    `json:"code"`
+			Msg  string `json:"msg"`
+			Data struct {
+				BoxInfo *model.BoxInfo `json:"boxInfo"`
+			} `json:"data"`
+		}{}
+		if unmarshalErr := json.Unmarshal(recorder.Body.Bytes(), response); nil != unmarshalErr {
+			t.Fatalf("unmarshal response failed: %v", unmarshalErr)
+		}
+		if 0 != response.Code || nil == response.Data.BoxInfo {
+			t.Fatalf("unexpected response: %s", recorder.Body.String())
+		}
+		return response.Data.BoxInfo
+	}
+
+	reader := request(model.RoleReader)
+	if 1 != reader.DocCount {
+		t.Fatalf("reader saw %d documents, want only the published one", reader.DocCount)
+	}
+	// Size 按既有语义包含笔记本根文档，DocCount 不包含
+	if uint64(rootSize+publicSize) != reader.Size {
+		t.Fatalf("reader size = %d, want %d", reader.Size, rootSize+publicSize)
+	}
+	if reader.Mtime >= excludedModTime.Unix() {
+		t.Fatalf("reader modification time %d covers publish-excluded documents", reader.Mtime)
+	}
+
+	administrator := request(model.RoleAdministrator)
+	if 3 != administrator.DocCount {
+		t.Fatalf("administrator saw %d documents, want the whole notebook", administrator.DocCount)
+	}
+	if wholeSize != administrator.Size {
+		t.Fatalf("administrator size = %d, want %d", administrator.Size, wholeSize)
+	}
+	if administrator.Mtime != excludedModTime.Unix() {
+		t.Fatalf("administrator modification time = %d, want %d", administrator.Mtime, excludedModTime.Unix())
 	}
 }
 

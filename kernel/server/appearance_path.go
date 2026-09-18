@@ -38,6 +38,17 @@ func isThirdPartyAppearanceRequest(requestPath string) bool {
 
 // resolveAppearanceFile 在读取前限定真实路径，仅允许主题和图标包目录链接到外部目录。
 func resolveAppearanceFile(root, requestPath string) (string, int) {
+	filePath, status := resolveAppearanceFilePath(root, requestPath)
+	if replacement := util.LegacyFontReplacement(requestPath); status == 0 && replacement != "" {
+		if _, err := os.Lstat(filePath); os.IsNotExist(err) {
+			// 已存在的用户文件优先，仅为缺失的历史字体提供替代资源，并复用路径边界校验。
+			return resolveAppearanceFilePath(root, replacement)
+		}
+	}
+	return filePath, status
+}
+
+func resolveAppearanceFilePath(root, requestPath string) (string, int) {
 	relativePath, ok := cleanStaticRelativePath(requestPath)
 	if !ok {
 		return "", http.StatusForbidden

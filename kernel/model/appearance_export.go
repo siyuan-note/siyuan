@@ -61,5 +61,14 @@ func copyExportAppearance(savePath, theme, icon string) error {
 			copied[name] = true
 		}
 	}
+	// 离线 HTML 使用与前端声明一致的内置表情字体，不复制用户字体或历史版本。
+	fontDir := "Noto-COLRv1-2.051"
+	for _, name := range []string{"Noto-COLRv1.woff2", "LICENSE"} {
+		from := filepath.Join(util.BuiltInAppearancePath(), "fonts", fontDir, name)
+		to := filepath.Join(savePath, "appearance", "fonts", fontDir, name)
+		if err := filelock.Copy(from, to); err != nil {
+			return fmt.Errorf("copy emoji font [%s]: %w", name, err)
+		}
+	}
 	return nil
 }

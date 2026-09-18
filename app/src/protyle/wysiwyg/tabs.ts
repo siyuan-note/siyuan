@@ -12,7 +12,7 @@ import {isHiddenTabContent} from "../render/tabsVisibility";
 import {queueTransaction} from "../util/transactionQueue";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
 import {remapListMindmapIDs} from "../render/listMindmap/model";
-import {copySubMenu} from "../../menus/commonMenuItem";
+import {copySubMenu, openAttr} from "../../menus/commonMenuItem";
 import {isTaskListMarker, nextTaskListMarker} from "./taskListMarker";
 import {hideElements} from "../ui/hideElements";
 import {getTaskStatusItems} from "./taskStatusDialog";
@@ -202,6 +202,7 @@ export const initEditorTabs = (protyle: IProtyle) => {
         label: window.siyuan.languages.tabItem,
         addLabel: window.siyuan.languages.newTabItem,
         taskLabel: window.siyuan.languages.task,
+        attributes: {label: window.siyuan.languages.attr, open: (block, focus) => openAttr(block, focus, protyle)},
         task: item => setTabTask(protyle, item, nextTaskListMarker(getTabTask(item))),
         endEdit: () => hideElements(["toolbar"], protyle),
         activate: item => {

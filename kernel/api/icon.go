@@ -161,7 +161,16 @@ var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Con
 		// Type 8: 文字图标
 		content := c.Query("content")
 		id := c.Query("id")
-		svg = generateTypeEightSVG(color, content, id)
+		if strings.Contains(content, ".action{") {
+			// 模板内容会按 id 读取工作区数据，只读角色必须通过发布访问控制后才能执行 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-whcx-xxqh-c838
+			if !dynamicIconContentAccessable(c, id) {
+				// 空内容保持与 id 不存在时一致的响应结构，避免泄露文档的可访问状态
+				svg = generateTypeEightSVG(color, "")
+				break
+			}
+			content = model.RenderDynamicIconContentTemplate(c, content, id)
+		}
+		svg = generateTypeEightSVG(color, content)
 	default:
 		// 默认为Type 1
 		svg = generateTypeOneSVG(color, dateInfo)
@@ -178,10 +187,21 @@ var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Con
 	c.Header("Content-Type", "image/svg+xml")
 	c.Header("Content-Security-Policy", "script-src 'none'; object-src 'none'; base-uri 'none'")
 	c.Header("X-Content-Type-Options", "nosniff")
+	// 响应内容随角色与发布密码 Cookie 变化，避免中间缓存跨调用方回放
+	c.Header("Vary", "Cookie")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Pragma", "no-cache")
 	return apicontract.SuccessBinary("image/svg+xml", []byte(svg))
 })
+
+// dynamicIconContentAccessable 判断调用方是否可读取动态图标模板内容所引用的块。
+// 管理员与编辑者拥有工作区读权限，只读角色则需要通过发布访问控制（禁用、密码与加密笔记本门禁）。
+func dynamicIconContentAccessable(c *gin.Context, id string) bool {
+	if !model.IsReadOnlyRoleContext(c) {
+		return true
+	}
+	return model.CheckBlockIdMetadataAccessableByPublishAccess(c, model.GetPublishAccess(), id)
+}
 
 func getDateInfo(dateStr string, lang string, weekdayType string) map[string]any {
 	// 设置默认值
@@ -543,38 +563,44 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]any) st
 }
 
 // Type 8: 文字图标
-func generateTypeEightSVG(color, content, id string) string {
-	if strings.Contains(content, ".action{") {
-		content = model.RenderDynamicIconContentTemplate(content, id)
-	}
-
+func generateTypeEightSVG(color, content string) string {
 	colorScheme := getColorScheme(color)
+
+	contentLen := len([]rune(content))
+	if 0 == contentLen {
+		// 内容为空时不输出文本，避免字号按零长度计算得到无效值
+		return fmt.Sprintf(`
+    <svg id="dynamic_icon_type8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        <path d="M39,0h434c20.97,0,38,17.03,38,38v412c0,33.11-26.89,60-60,60H60c-32.56,0-59-26.44-59-59V38C1,17.03,18.03,0,39,0Z" style="fill: %s;"/>
+	</svg>
+    `, colorScheme.Primary)
+	}
 
 	// 动态变化字体大小
 	isChinese := regexp.MustCompile(`[\p{Han}]`).MatchString(content)
 	var fontSize float64
 	if isChinese {
 		switch {
-		case len([]rune(content)) == 1:
+		case contentLen == 1:
 			fontSize = 320
 		default:
-			fontSize = 480 / float64(len([]rune(content)))
+			fontSize = 480 / float64(contentLen)
 		}
 	} else {
 		switch {
-		case len([]rune(content)) == 1:
+		case contentLen == 1:
 			fontSize = 480
-		case len([]rune(content)) == 2:
+		case contentLen == 2:
 			fontSize = 300
-		case len([]rune(content)) == 3:
+		case contentLen == 3:
 			fontSize = 240
 		default:
-			fontSize = 750 / float64(len([]rune(content)))
+			fontSize = 750 / float64(contentLen)
 		}
 	}
 	// 当内容为单个字符时，一些小写字母需要调整文字位置(暂时没法批量解决)
 	dy := "0%"
-	if len([]rune(content)) == 1 {
+	if contentLen == 1 {
 		switch content {
 		case "g", "p", "y", "q":
 			dy = "-10%"

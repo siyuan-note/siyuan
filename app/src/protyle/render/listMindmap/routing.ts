@@ -90,7 +90,8 @@ export const routeMindmapRelation = (from: MindmapRouteBox, to: MindmapRouteBox,
         }
         const index = Math.floor(current.key / 2);
         const a = point(index);
-        if (targets.has(current.key)) {
+        // 相邻节点的避让端口可能重合，不能将尚未走过任何线段的起点作为完整路径。
+        if (targets.has(current.key) && previous.has(current.key)) {
             const route: MindmapRoutePoint[] = [];
             let key: number | undefined = current.key;
             while (key !== undefined) {

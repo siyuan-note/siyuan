@@ -19,6 +19,15 @@ const validate = (route: MindmapRoutePoint[], nodes: MindmapRouteBox[]) => {
     }
 };
 
+test("vertically adjacent nodes connect when their clearance ports coincide", () => {
+    const nodes = [
+        {x: 200, y: 0, width: 64, height: 38},
+        {x: 200, y: 62, width: 64, height: 38},
+    ];
+    validate(routeMindmapRelation(nodes[0], nodes[1], nodes), nodes);
+    validate(routeMindmapRelation(nodes[1], nodes[0], nodes), nodes);
+});
+
 test("connection preview routes to the exact pointer position around obstacles", () => {
     const from = {x: 0, y: 0, width: 100, height: 40};
     const obstacle = {x: 160, y: 0, width: 100, height: 80};

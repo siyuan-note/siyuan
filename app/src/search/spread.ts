@@ -25,6 +25,9 @@ export const openSearch = async (options: {
     notebookIds?: string[],
     searchPath?: string
 }) => {
+    if (window.siyuan.isPublish && options.hotkey === Constants.DIALOG_REPLACE) {
+        return;
+    }
     const version = ++openSearchVersion;
     const existingSearchDialog = window.siyuan.dialogs.find((item) => item.element.querySelector("#searchList"));
     const existingSearchElement = existingSearchDialog?.element.querySelector(".b3-dialog__body");

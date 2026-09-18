@@ -6,7 +6,7 @@
 		"id": "20240517031132-jmr5ihm",
 		"title": "Publish service",
 		"type": "doc",
-		"updated": "20260803163440"
+		"updated": "20260918190000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160303-vbqukj8",
-				"updated": "20260803163440"
+				"updated": "20260918190000"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160303-5spvi7o",
-				"updated": "20260803163440"
+				"updated": "20260918190000"
 			},
 			"Children": [
 				{
@@ -154,7 +154,7 @@
 					},
 					"Properties": {
 						"id": "20260315160303-27cpoh4",
-						"updated": "20260315160303"
+						"updated": "20260918190000"
 					},
 					"Children": [
 						{
@@ -162,7 +162,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260315160303-pber85t",
-								"updated": "20260315160328"
+								"updated": "20260918190000"
 							},
 							"Children": [
 								{
@@ -177,6 +177,19 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". When deploying with Docker and enabling the publish service, add "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-p 6808:6808"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to the container creation command in addition to the hosting port mapping. Docker uses host-port:container-port mappings; if you change the publish service port, update the container port accordingly and use the host port to access the service. Use a fixed publish service port rather than 0"
 								}
 							]
 						}

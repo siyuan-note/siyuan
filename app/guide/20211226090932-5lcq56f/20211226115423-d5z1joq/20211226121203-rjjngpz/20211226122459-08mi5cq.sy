@@ -6,7 +6,7 @@
 		"id": "20211226122459-08mi5cq",
 		"title": "Docker 伺服",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20260918190000"
 	},
 	"Children": [
 		{
@@ -277,7 +277,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122519-kdp3vo5",
-				"updated": "20211226011647"
+				"updated": "20260918190000"
 			},
 			"Children": [
 				{
@@ -374,7 +374,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226122519-ajimm1z",
-				"updated": "20231108220606"
+				"updated": "20260918190000"
 			},
 			"Children": [
 				{
@@ -400,6 +400,19 @@
 				{
 					"Type": "NodeText",
 					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。透過 Docker 部署並啟用發布服務時，除了伺服連接埠映射外，還需在建立容器的指令中加入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-p 6808:6808"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。Docker 連接埠映射格式為主機連接埠:容器連接埠；若修改發布服務連接埠，應同步調整容器連接埠，存取時使用主機連接埠。請使用固定的發布服務連接埠，不要設定為 0"
 				}
 			]
 		},

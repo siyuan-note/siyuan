@@ -129,6 +129,9 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
 
 // closeCB 不存在为页签搜索
 export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, element: HTMLElement, closeCB?: () => void) => {
+    if (window.siyuan.isPublish) {
+        config.hasReplace = false;
+    }
     let includeChild = true;
     let enableIncludeChild = false;
     config.idPath.forEach(item => {
@@ -194,7 +197,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
             <span class="fn__space"></span>
             ${genQueryHTML(config.method, "searchSyntaxCheck")}
             <span class="fn__space"></span>
-            <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon ariaLabel" data-position="9south">
+            <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon ariaLabel${window.siyuan.isPublish ? " fn__none" : ""}" data-position="9south">
                 <svg><use xlink:href="#iconReplace"></use></svg>
             </span>
             <span class="fn__space"></span>
@@ -585,6 +588,9 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 inputEvent(element, config, edit, true);
                 break;
             } else if (target.id === "searchReplace") {
+                if (window.siyuan.isPublish) {
+                    return;
+                }
                 // ctrl+P 不需要保存
                 config.hasReplace = !config.hasReplace;
                 element.querySelectorAll(".search__header")[1].classList.toggle("fn__none");
@@ -1132,6 +1138,9 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
         persistedConfig: options?.storageConfig,
     });
     const runtimeConfig = resolvedConfig.runtimeConfig;
+    if (window.siyuan.isPublish) {
+        runtimeConfig.hasReplace = false;
+    }
     if (config.hasReplace !== runtimeConfig.hasReplace) {
         const replaceHeaderElement = element.querySelectorAll(".search__header")[1];
         if (runtimeConfig.hasReplace) {
@@ -1363,6 +1372,9 @@ export const getArticle = (options: {
 };
 
 export const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle, isAll: boolean) => {
+    if (window.siyuan.isPublish) {
+        return;
+    }
     if (config.method === 2 || config.method === 4) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;

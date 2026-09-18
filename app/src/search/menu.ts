@@ -6,7 +6,7 @@ import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
-import {isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
+import {isDisabledFeature, isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
 import {bindSearchSubtypeFilters} from "./subTypes";
@@ -338,7 +338,7 @@ export const queryMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => voi
             cb();
         }
     }).element);
-    if (window.siyuan.config.ai.embedding.enabled) {
+    if (!isDisabledFeature("ai") && window.siyuan.config.ai.embedding.enabled) {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconSparkles",
             label: window.siyuan.languages.semanticSearch,
@@ -536,7 +536,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
             updateSearchResult(config, element, true);
         }
     }];
-    if (window.siyuan.config.ai.embedding.enabled) {
+    if (!isDisabledFeature("ai") && window.siyuan.config.ai.embedding.enabled) {
         searchMethodSubmenu.push({
             icon: "iconSparkles",
             label: window.siyuan.languages.semanticSearch,

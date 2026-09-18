@@ -1,5 +1,5 @@
 import {Constants} from "../../constants";
-import {setStorageVal} from "../../protyle/util/compatibility";
+import {isDisabledFeature, setStorageVal} from "../../protyle/util/compatibility";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {
     getMobilePluginDockEntries,
@@ -93,7 +93,8 @@ const getVisibleDockIds = (
     config: IMobileSidePanelConfig,
     side: MobileSidePanelSide,
     pluginEntriesById: ReadonlyMap<string, IMobilePluginDockEntry>,
-) => config[side].filter(id => isMobileSidePanelBuiltInDockId(id) || pluginEntriesById.has(id));
+) => config[side].filter(id => (id !== "agent" || !isDisabledFeature("ai")) &&
+    (isMobileSidePanelBuiltInDockId(id) || pluginEntriesById.has(id)));
 
 const genDockItemHtml = (
     dockId: MobileSidePanelDockId,
@@ -196,11 +197,14 @@ export const mountMobileSidePanelSetting = (root: HTMLElement) => {
                 side: side === "left" ? "right" : "left",
             }, pluginDockContext.layouts);
         } else if (actionElement.dataset.action === "up" || actionElement.dataset.action === "down") {
+            const availableDockIds = config[side].filter(id =>
+                isMobileSidePanelBuiltInDockId(id) || pluginDockContext.entriesById.has(id));
+            const targetId = visibleDockIds[index + (actionElement.dataset.action === "up" ? -1 : 1)];
             config = reduceMobileSidePanelConfig(config, {
                 type: "reorder",
                 side,
-                fromIndex: index,
-                toIndex: index + (actionElement.dataset.action === "up" ? -1 : 1),
+                fromIndex: availableDockIds.indexOf(dockId),
+                toIndex: availableDockIds.indexOf(targetId),
             }, pluginDockContext.layouts);
         } else {
             return;

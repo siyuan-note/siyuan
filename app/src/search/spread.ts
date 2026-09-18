@@ -13,6 +13,7 @@ import {
     setSearchConfigTemporaryPath,
 } from "./config";
 import {beginSearchPathRequest} from "./path";
+import {isDisabledFeature} from "../protyle/util/compatibility";
 
 let openSearchVersion = 0;
 
@@ -62,7 +63,7 @@ export const openSearch = async (options: {
         k: options.key || localData.k,
         r: localData.r,
         hasReplace: options.hotkey === Constants.DIALOG_REPLACE,
-        method: localData.method === 4 && !window.siyuan.config.ai.embedding.enabled ? 0 : localData.method,
+        method: localData.method === 4 && (isDisabledFeature("ai") || !window.siyuan.config.ai.embedding.enabled) ? 0 : localData.method,
         hPath,
         idPath,
         group: localData.group,

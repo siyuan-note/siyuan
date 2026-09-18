@@ -20,7 +20,7 @@ import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../protyle/util/hasClosest";
-import {isIPad, isNotCtrl, isPhablet, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isDisabledFeature, isIPad, isNotCtrl, isPhablet, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFile} from "../util/newFile";
 import {
     filterMenu,
@@ -112,7 +112,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
             k: text,
             r: "",
             hasReplace: false,
-            method: searchData ? searchData.method : (localData.method === 4 && !window.siyuan.config.ai.embedding.enabled ? 0 : localData.method),
+            method: searchData ? searchData.method : (localData.method === 4 && (isDisabledFeature("ai") || !window.siyuan.config.ai.embedding.enabled) ? 0 : localData.method),
             hPath: "",
             idPath: [],
             group: localData.group,

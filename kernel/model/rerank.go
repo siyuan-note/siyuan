@@ -23,7 +23,7 @@ const defaultRerankCandidateCount = 30
 
 // isRerankEnabled 判断重排是否可用：配置已开启且填了 APIKey。语义搜索在召回后会据此决定是否走重排。
 func isRerankEnabled() bool {
-	return nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && len(Conf.AI.Rerank.APIKey) > 0
+	return !util.IsDisabledFeature("ai") && nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && len(Conf.AI.Rerank.APIKey) > 0
 }
 
 func rerankKey() string {

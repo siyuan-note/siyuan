@@ -10,7 +10,7 @@ import {preventScroll} from "../../protyle/scroll/preventScroll";
 import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix} from "../../util/pathName";
 import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
-import {setStorageVal} from "../../protyle/util/compatibility";
+import {isDisabledFeature, setStorageVal} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
@@ -763,7 +763,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
     if (currentEditor && isEncryptedBox(currentEditor.protyle.notebookId)) {
         config.sensitive = true;
     }
-    if (config.method === 4 && !window.siyuan.config.ai.embedding.enabled) {
+    if (config.method === 4 && (isDisabledFeature("ai") || !window.siyuan.config.ai.embedding.enabled)) {
         config.method = 0;
     }
     const rangeText = (currentEditor?.protyle.toolbar.range ||

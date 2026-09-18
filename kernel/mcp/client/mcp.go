@@ -39,6 +39,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 const (
@@ -131,6 +132,9 @@ func setMCPRuntimeStateLocked(serverID, status string, toolsCount int, errMsg, a
 // 连接完成前发起的 Agent 请求本轮可能看不到 MCP 工具，下轮即可用。
 // 后续调用若已连接则直接返回；若后台连接仍在进行则也直接返回，等其完成。
 func EnsureMCPConnected(servers []conf.MCPServer) {
+	if util.IsDisabledFeature("ai") {
+		return
+	}
 	servers = append([]conf.MCPServer(nil), servers...)
 	mcpMu.Lock()
 	if mcpConnecting {
@@ -872,6 +876,9 @@ func reconnectMCPServer(serverID string) bool {
 // ReconnectMCPAsync 用最新的 server 配置异步重连，不阻塞调用方（如 setAI 配置保存）。
 // 适用于配置变更（开关切换、编辑、增删 server）后让连接立即跟上，而非等下次 Agent 请求。
 func ReconnectMCPAsync(servers []conf.MCPServer, forceServerIDs, interactiveServerIDs []string) {
+	if util.IsDisabledFeature("ai") {
+		return
+	}
 	servers = append([]conf.MCPServer(nil), servers...)
 	force := make(map[string]bool, len(forceServerIDs))
 	for _, serverID := range forceServerIDs {

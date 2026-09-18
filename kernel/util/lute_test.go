@@ -17,12 +17,45 @@
 package util
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 )
+
+func TestLuteTextMarkEscapedContentRoundTrip(t *testing.T) {
+	for _, blockType := range []string{"NodeHeading", "NodeParagraph"} {
+		for _, mark := range []string{"em", "strong", "s", "mark", "sup", "sub", "em strong", "code"} {
+			t.Run(blockType+"/"+mark, func(t *testing.T) {
+				engine := NewLute()
+				const content = "&lt;vitae&gt; &amp; &amp;lt;literal&amp;gt;"
+				dom := `<div data-node-id="20260918120000-abcdefg" data-type="` + blockType + `" data-subtype="h1"><div contenteditable="true">before <span data-type="` + mark + `">` + content + `</span> after</div></div>`
+				for i := 0; i < 3; i++ {
+					tree := engine.BlockDOM2Tree(dom)
+					found := false
+					ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+						if entering && n.Type == ast.NodeTextMark {
+							found = true
+							if n.TextMarkTextContent != content {
+								t.Fatalf("round %d: content = %q, want %q", i, n.TextMarkTextContent, content)
+							}
+							if rendered := engine.RenderNodeBlockDOM(n); !strings.Contains(rendered, content) {
+								t.Fatalf("outline text lost: %s", rendered)
+							}
+						}
+						return ast.WalkContinue
+					})
+					if !found {
+						t.Fatal("text mark lost")
+					}
+					dom = engine.Tree2BlockDOM(tree, engine.RenderOptions, engine.ParseOptions)
+				}
+			})
+		}
+	}
+}
 
 func TestLuteFactoriesEnableCustomBlock(t *testing.T) {
 	factories := []struct {

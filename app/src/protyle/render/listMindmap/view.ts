@@ -96,7 +96,7 @@ export class ListMindmapView {
     private scale = 1;
     private offsetX = 0;
     private offsetY = 0;
-    private foldAnchor?: string;
+    private foldAnchor?: {id: string, collapsed: boolean};
     private frame = 0;
     private initialFit = true;
     private destroyed = false;
@@ -469,6 +469,8 @@ export class ListMindmapView {
             if (!this.viewport.clientWidth || !this.viewport.clientHeight) {
                 return;
             }
+            // 同一帧内先恢复测量，布局完成后再隐藏折叠后代，避免展开时读取到零尺寸。
+            this.nodeElements.forEach(element => element.hidden = false);
             const makeLayoutNode = (id: string): ListMindmapLayoutNode => {
                 const node = this.model.nodes.get(id);
                 const element = this.nodeElements.get(id);
@@ -480,7 +482,7 @@ export class ListMindmapView {
                     children: node.children.map(child => makeLayoutNode(child.id)),
                 };
             };
-            const anchorId = this.editingId || this.foldAnchor;
+            const anchorId = this.editingId || this.foldAnchor?.id;
             const previous = anchorId ? this.positions.get(anchorId) : undefined;
             const result = layoutListMindmap(makeLayoutNode(this.model.root.id));
             this.positions = result.nodes;
@@ -529,7 +531,10 @@ export class ListMindmapView {
                 this.offsetX += (previous.x - current.x) * this.scale;
                 this.offsetY += (previous.y - current.y) * this.scale;
             }
-            this.foldAnchor = undefined;
+            if (this.foldAnchor && (this.folded.get(this.foldAnchor.id) ??
+                this.model.nodes.get(this.foldAnchor.id)?.collapsed) === this.foldAnchor.collapsed) {
+                this.foldAnchor = undefined;
+            }
             if (this.initialFit) {
                 this.initialFit = false;
                 this.fit();
@@ -809,7 +814,7 @@ export class ListMindmapView {
         if (!node?.children.length) {
             return;
         }
-        this.foldAnchor = id;
+        this.foldAnchor = {id, collapsed: !(this.folded.get(id) ?? node.collapsed)};
         if (this.options.readOnly || node.virtual) {
             this.folded.set(id, !(this.folded.get(id) ?? node.collapsed));
             this.update(this.model);

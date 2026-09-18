@@ -696,8 +696,11 @@ const browserCases = async (sourceCode: string, css: string) => {
     const persistedBeforeFold = list.outerHTML;
     pressDelete();
     check.deepEqual(deletions, [beta]);
+    const beforeCollapse = nodeElement(model.root.id).getBoundingClientRect();
     nodeElement(model.root.id).querySelector<HTMLButtonElement>(".list-mindmap__fold").click();
     await settle();
+    const afterCollapse = nodeElement(model.root.id).getBoundingClientRect();
+    check.ok(Math.abs(afterCollapse.y - beforeCollapse.y) < 1, "collapse keeps the root at its screen position");
     check.equal(nodeElement(alpha).hidden, true);
     const foldedButton = nodeElement(model.root.id).querySelector<HTMLButtonElement>(".list-mindmap__fold");
     check.equal(foldedButton.querySelector("span").textContent, String(model.nodes.size - 1));
@@ -705,6 +708,9 @@ const browserCases = async (sourceCode: string, css: string) => {
     foldedButton.click();
     await settle();
     check.equal(nodeElement(alpha).hidden, false);
+    const afterExpand = nodeElement(model.root.id).getBoundingClientRect();
+    check.ok(Math.abs(afterExpand.y - afterCollapse.y) < 1, "expansion keeps the root stable after size observers settle");
+    check.ok(Math.abs(afterExpand.x - afterCollapse.x) < 1, "expansion preserves horizontal position");
     check.equal(list.outerHTML, persistedBeforeFold);
     readonly.destroy();
 

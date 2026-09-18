@@ -163,6 +163,7 @@ const registerExportPandocGroup = (tab: SettingTabBuilder) => {
         });
     });
     group.textBlock("export.pandocParams", {
+        spellcheck: false,
         title: window.siyuan.languages.export25,
         desc: window.siyuan.languages.export26,
         mode: "textarea",

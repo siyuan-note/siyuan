@@ -929,7 +929,7 @@ export const openEmojiPanel = (
                 <span class="fn__space"></span>
                 <label class="b3-form__icon fn__flex-1" style="overflow:initial;">
                     <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                    <input class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
+                    <input spellcheck="false" class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
                 </label>
                 <span class="fn__space"></span>
                 <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="random" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconDices"></use></svg></span>
@@ -1026,7 +1026,7 @@ export const openEmojiPanel = (
             <div class="fn__none emojis__link-input">
                 <label class="emojis__link-value">
                     <span class="b3-label__text">URL / Base64</span>
-                    <textarea class="b3-text-field fn__block" data-type="network-icon-url"
+                    <textarea spellcheck="false" class="b3-text-field fn__block" data-type="network-icon-url"
                               placeholder="https://... / data:image/..."></textarea>
                 </label>
                 <div class="emojis__link-footer">
@@ -1043,7 +1043,7 @@ export const openEmojiPanel = (
                 </div>
                 <label class="emojis__link-name">
                     <span class="b3-label__text">${window.siyuan.languages.fileName}</span>
-                    <input class="b3-text-field fn__block" data-type="custom-icon-name" placeholder="path/to/icon">
+                    <input spellcheck="false" class="b3-text-field fn__block" data-type="custom-icon-name" placeholder="path/to/icon">
                 </label>
                 <div class="fn__none emojis__link-footer emojis__link-footer--choice">
                     <button class="b3-button b3-button--cancel emojis__link-choice-back" data-action="back-custom-icon">${window.siyuan.languages.returnLabel}</button>

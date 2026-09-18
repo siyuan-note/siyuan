@@ -310,14 +310,14 @@ const genProviderField = (field: SyncProviderFieldDef): string => {
 const genProviderFlexInput = (label: string, id: string, attrs = "") => `<div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">${label}</div>
     <div class="fn__space"></div>
-    <input id="${id}" class="b3-text-field fn__block"${attrs ? ` ${attrs}` : ""}>
+    <input spellcheck="false" id="${id}" class="b3-text-field fn__block"${attrs ? ` ${attrs}` : ""}>
 </div>`;
 
 const genProviderFlexPassword = (label: string, id: string) => `<div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">${label}</div>
     <div class="fn__space"></div>
     <div class="b3-form__icona fn__block">
-        <input id="${id}" type="password" class="b3-text-field b3-form__icona-input">
+        <input spellcheck="false" id="${id}" type="password" class="b3-text-field b3-form__icona-input">
         <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
     </div>
 </div>`;

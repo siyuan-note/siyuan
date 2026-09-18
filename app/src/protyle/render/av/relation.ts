@@ -120,7 +120,7 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
         iconHTML: "",
         type: "empty",
         label: `<div class="fn__flex-column b3-menu__filter"${isMobile() ? "" : ' style="width: 50vw"'} >
-    <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.searchPlaceholder}"/>
+    <input spellcheck="false" class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.searchPlaceholder}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
         ${SEARCH_AV_LOADING_HTML}
@@ -883,7 +883,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
         return `<div data-av-id="${colRelationData.avID}" data-source-av-id="${data.id}" data-key-id="${colId}" class="fn__flex-column av__relation">
 <div class="b3-menu__item" data-type="nobg">
     <div class="b3-form__icona fn__flex-1" style="overflow: visible">
-        <input class="b3-text-field fn__block" style="min-width: 190px"/>
+        <input spellcheck="false" class="b3-text-field fn__block" style="min-width: 190px"/>
         <svg class="b3-form__icona-icon ariaLabel fn__none" data-position="north" data-type="copyRelatedItems" aria-label="${window.siyuan.languages.copy} ${window.siyuan.languages.relatedItems}"><use xlink:href="#iconCopy"></use></svg>
     </div>
     <span class="fn__space"></span>

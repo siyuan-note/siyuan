@@ -75,6 +75,7 @@ type SelectSpec = ControlSpecBase & {
 };
 type TextSpec = ControlSpecBase & {
     desc: string;
+    spellcheck?: boolean;
 };
 type TextBlockSpec = TextSpec & {
     mode: "input-text" | "input-password" | "textarea";
@@ -134,6 +135,7 @@ type StackSwitchSpec = {
 };
 type StackTextBlockSpec = {
     mode: "input-text" | "input-password" | "textarea";
+    spellcheck?: boolean;
 };
 type ButtonSpec = {
     id: string;
@@ -215,7 +217,7 @@ class StackLineBuilder {
     }
 
     textBlock(id: string, spec: StackTextBlockSpec) {
-        const control = controlTextBlock(id, {mode: spec.mode});
+        const control = controlTextBlock(id, {mode: spec.mode, spellcheck: spec.spellcheck});
         this.lines.push({left: control});
         return this;
     }
@@ -295,12 +297,14 @@ class SettingGroupBuilder<TId extends string> {
 
     text(id: string, spec: TextSpec) {
         return this.registerFullItem(id, spec, controlString(id, {
+            spellcheck: spec.spellcheck,
             readConfig: spec.readConfig as (() => string) | undefined,
         }));
     }
 
     textBlock(id: string, spec: TextBlockSpec) {
         return this.registerFullItem(id, spec, controlTextBlock(id, {
+            spellcheck: spec.spellcheck,
             mode: spec.mode,
             readConfig: spec.readConfig as (() => string) | undefined,
         }));

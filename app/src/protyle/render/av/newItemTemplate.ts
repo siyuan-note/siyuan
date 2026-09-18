@@ -63,7 +63,7 @@ const getFieldSelectMenuHTML = (column: IAVColumn, selected: string[], keyword =
     </div>
     ${selected.includes(option.name) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
 </button>`).join("");
-    return `<div class="b3-chips">${selectedHTML}<input value="${escapeAttr(keyword)}"></div><div data-role="field-options" style="flex:1;overflow:auto">${optionsHTML}</div>`;
+    return `<div class="b3-chips">${selectedHTML}<input spellcheck="false" value="${escapeAttr(keyword)}"></div><div data-role="field-options" style="flex:1;overflow:auto">${optionsHTML}</div>`;
 };
 
 const getFieldText = (value: IAVCellValue) => {
@@ -417,7 +417,7 @@ const openContentTemplateMenu = (target: HTMLElement) => {
     menu.addItem({
         type: "empty",
         label: `<div data-menu="true" style="padding:4px;width:360px;max-width:100%;box-sizing:border-box">
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
+    <input spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
     <div class="b3-list b3-list--background" style="margin-top:4px;max-height:240px;overflow:auto"></div>
 </div>`,
         bind: menuElement => {
@@ -565,7 +565,7 @@ const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn |
             </div>
             <div class="block__icons av__row">
                 <div class="block__logo block__logo--icon ariaLabel" data-position="parentE" aria-label="${escapeAttr(`${window.siyuan.languages.fileTree14}<br>${window.siyuan.languages.fileTree13}`)}"><svg class="block__logoicon"><use xlink:href="#iconFolder"></use></svg><span>${window.siyuan.languages.savePath}</span></div>
-                <div class="fn__flex-1 custom-attr__avvalue"><div class="fn__flex" style="align-items:center"><select class="b3-select" data-role="box-id" style="width:${showPath ? "160px" : "100%"}">${notebookOptions}</select><span class="fn__space${showPath ? "" : " fn__none"}" data-role="path-space"></span><input class="b3-text-field fn__flex-1${showPath ? "" : " fn__none"}" data-role="path-template" value="${escapeAttr(itemTemplate.saveLocation?.pathTemplate || "")}"${showPath ? "" : " disabled"}></div><div class="b3-label__text${isDefault ? "" : " fn__none"}" data-role="default-tip" style="margin-top:4px">${window.siyuan.languages.newItemTemplateDefaultTip}</div><div class="b3-label__text${isSubDoc ? "" : " fn__none"}" data-role="subdoc-tip" style="margin-top:4px">${window.siyuan.languages.newItemTemplateSubDocTip}</div></div>
+                <div class="fn__flex-1 custom-attr__avvalue"><div class="fn__flex" style="align-items:center"><select class="b3-select" data-role="box-id" style="width:${showPath ? "160px" : "100%"}">${notebookOptions}</select><span class="fn__space${showPath ? "" : " fn__none"}" data-role="path-space"></span><input spellcheck="false" class="b3-text-field fn__flex-1${showPath ? "" : " fn__none"}" data-role="path-template" value="${escapeAttr(itemTemplate.saveLocation?.pathTemplate || "")}"${showPath ? "" : " disabled"}></div><div class="b3-label__text${isDefault ? "" : " fn__none"}" data-role="default-tip" style="margin-top:4px">${window.siyuan.languages.newItemTemplateDefaultTip}</div><div class="b3-label__text${isSubDoc ? "" : " fn__none"}" data-role="subdoc-tip" style="margin-top:4px">${window.siyuan.languages.newItemTemplateSubDocTip}</div></div>
             </div>
             <div class="block__icons av__row">
                 <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconEyeoff"></use></svg><span>${window.siyuan.languages.hideInFileTree}</span></div>

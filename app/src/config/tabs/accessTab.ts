@@ -86,6 +86,7 @@ const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
         });
     }
     group.text("api.token", {
+        spellcheck: false,
         title: window.siyuan.languages.about13,
         desc: window.siyuan.languages.about14.replace("${token}", window.siyuan.config.api.token),
         save: (value) => sendAccessSetting("api.token", value),
@@ -152,7 +153,7 @@ const mountOIDCButton = (root: HTMLElement) => {
         <div class="config-name">${window.siyuan.languages.oidcClaimRules}</div>
         <div class="b3-label__text">${window.siyuan.languages.oidcClaimRulesTip}</div>
         <div class="fn__hr"></div>
-        <textarea data-field="claimRules" class="b3-text-field fn__block" rows="5" style="resize: vertical;">${escape(JSON.stringify(config.claimRules, null, 2))}</textarea>
+        <textarea spellcheck="false" data-field="claimRules" class="b3-text-field fn__block" rows="5" style="resize: vertical;">${escape(JSON.stringify(config.claimRules, null, 2))}</textarea>
     </div>
     <div class="b3-label__text fn__none" data-section="validationStatus">${window.siyuan.languages.oidcVerificationTip}</div>
 </div>

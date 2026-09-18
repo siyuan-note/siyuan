@@ -389,10 +389,12 @@ const registerEditorMarkdownInlineGroup = (tab: SettingTabBuilder) => {
 const registerEditorAdvancedGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("advanced", window.siyuan.languages.configGroupAdvanced);
     group.text("editor.plantUMLServePath", {
+        spellcheck: false,
         title: window.siyuan.languages.md39,
         desc: window.siyuan.languages.md40,
     });
     group.textBlock("editor.katexMacros", {
+        spellcheck: false,
         title: window.siyuan.languages.katexMacros,
         desc: window.siyuan.languages.katexMacrosTip,
         mode: "textarea",

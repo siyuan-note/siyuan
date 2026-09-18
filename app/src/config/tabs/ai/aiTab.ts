@@ -210,16 +210,19 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.semanticSearchTip,
     });
     group.textBlock("ai.embedding.baseURL", {
+        spellcheck: false,
         title: window.siyuan.languages.apiBaseURL,
         desc: window.siyuan.languages.apiBaseURLEmbeddingTip,
         mode: "input-text",
     });
     group.textBlock("ai.embedding.apiKey", {
+        spellcheck: false,
         title: window.siyuan.languages.apiKey,
         desc: window.siyuan.languages.apiKeyTip,
         mode: "input-password",
     });
     group.textBlock("ai.embedding.name", {
+        spellcheck: false,
         title: window.siyuan.languages.apiModel,
         desc: window.siyuan.languages.apiModelTip,
         mode: "input-text",
@@ -281,16 +284,19 @@ const registerAiRerankGroup = (tab: SettingTabBuilder) => {
         ],
     });
     group.textBlock("ai.rerank.endpoint", {
+        spellcheck: false,
         title: window.siyuan.languages.apiEndpoint,
         desc: window.siyuan.languages.apiEndpointRerankTip,
         mode: "input-text",
     });
     group.textBlock("ai.rerank.apiKey", {
+        spellcheck: false,
         title: window.siyuan.languages.apiKey,
         desc: window.siyuan.languages.apiKeyTip,
         mode: "input-password",
     });
     group.textBlock("ai.rerank.name", {
+        spellcheck: false,
         title: window.siyuan.languages.apiModel,
         desc: window.siyuan.languages.apiModelTip,
         mode: "input-text",

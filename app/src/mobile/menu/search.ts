@@ -862,7 +862,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
                 <svg class="svg--mid"><use xlink:href="#iconSearch"></use></svg>
                 <svg class="svg--smaller"><use xlink:href="#iconDown"></use></svg>
             </span>
-            <input id="searchAssetInput" placeholder="${window.siyuan.languages.keyword}" class="toolbar__title fn__block">
+            <input spellcheck="false" id="searchAssetInput" placeholder="${window.siyuan.languages.keyword}" class="toolbar__title fn__block">
         </div>
         <div class="toolbar">
             <span class="fn__space"></span>

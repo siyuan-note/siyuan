@@ -94,7 +94,7 @@ export class AgentSessionPanel {
                 '<svg class="toolbar__icon" data-type="back"><use xlink:href="#iconLeft"></use></svg>' +
                 '<span class="toolbar__text">' + L.manageSessions + "</span>" +
                 '<svg class="toolbar__icon agent-session-popup__close" data-type="close"><use xlink:href="#iconCloseRound"></use></svg></div>' : "";
-            html += '<input class="b3-text-field agent-session-popup__search" placeholder="' + L.agentSessionSearch + '">';
+            html += '<input spellcheck="false" class="b3-text-field agent-session-popup__search" placeholder="' + L.agentSessionSearch + '">';
             html += '<div class="b3-list b3-list--background fn__flex-1"></div>';
 
             this.popup.innerHTML = html;

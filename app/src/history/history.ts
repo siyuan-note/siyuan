@@ -526,7 +526,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                     <div class="fn__flex-1"></div>
                     <div class="b3-form__icon">
                         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                        <input class="b3-text-field b3-form__icon-input ${isMobile() ? "fn__size96" : "fn__size200"}" placeholder="${window.siyuan.languages.searchPlaceholder}">
+                        <input spellcheck="false" class="b3-text-field b3-form__icon-input ${isMobile() ? "fn__size96" : "fn__size200"}" placeholder="${window.siyuan.languages.searchPlaceholder}">
                     </div>
                     <span class="fn__space"></span>
                     <select data-type="typeselect" class="b3-select ${isMobile() ? "fn__flex-shrink" : "fn__size200"}">
@@ -582,7 +582,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                     <div class="fn__flex-1"></div>
                     <div class="b3-form__icon fn__none">
                        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                       <input class="b3-text-field b3-form__icon-input fn__size200" style="padding-right: 44px;" placeholder="${window.siyuan.languages.searchFileName}">
+                       <input class="b3-text-field b3-form__icon-input fn__size200" style="padding-right: 44px;" spellcheck="false" placeholder="${window.siyuan.languages.searchFileName}">
                        <button class="b3-button b3-button--text" style="position: absolute;right: 0;top: 0;">${window.siyuan.languages.search}</button>
                     </div>
                     <span class="fn__space"></span>

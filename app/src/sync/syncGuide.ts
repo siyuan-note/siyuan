@@ -13,6 +13,7 @@ import type {App} from "../index";
 import {Constants} from "../constants";
 import {getCloudURL} from "../config/util/about";
 import {sanitizeKernelHTML} from "../util/hostCapabilities";
+import {escapeHtml} from "../util/escape";
 
 const openSyncSetting = (app?: App) => {
     if (!app) {
@@ -81,11 +82,21 @@ export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: (ready: b
 };
 
 export const renderSyncCloudList = (cloudListElement: Element, reload = false, cb?: (ready: boolean) => void) => {
+    const provider = window.siyuan.config.sync.provider;
+    if (provider === 2) {
+        // S3 使用配置的存储桶，不依赖列出所有存储桶的权限；实际访问错误由同步请求报告。
+        const s3 = window.siyuan.config.sync.s3;
+        const ready = !!s3 && [s3.endpoint, s3.accessKey, s3.secretKey, s3.bucket, s3.region]
+            .every(value => !!value?.trim());
+        cloudListElement.innerHTML = ready ? `<div class="fn__hr"></div><ul class="b3-list">
+    <li class="b3-list-item" style="cursor: default;"><span class="b3-list-item__text">${escapeHtml(s3.bucket)}</span></li>
+</ul>` : `<ul><li class="b3-list--empty">${window.siyuan.languages.cloudConfigTip}</li></ul>`;
+        cb?.(ready);
+        return;
+    }
     if (!reload && cloudListElement.firstElementChild && cloudListElement.firstElementChild.tagName !== "IMG") {
         return;
     }
-    const provider = window.siyuan.config.sync.provider;
-    const canSelect = provider !== 2;
     const canManage = provider === 0 || provider === 4;
     cb?.(false);
     cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
@@ -105,15 +116,15 @@ export const renderSyncCloudList = (cloudListElement: Element, reload = false, c
     </li>
 </ul>`;
         } else {
-            const syncListParts: string[] = [`<div class="fn__hr"></div><ul class="b3-list${canSelect ? " b3-list--background" : ""}" style="overflow: auto;">`];
+            const syncListParts: string[] = ["<div class=\"fn__hr\"></div><ul class=\"b3-list b3-list--background\" style=\"overflow: auto;\">"];
             if (response.data.syncDirs.length === 0) {
                 syncListParts.push(`<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`);
             }
             response.data.syncDirs.forEach((item: { hSize: string, cloudName: string, updated: string }) => {
                 const checked = item.cloudName === response.data.checkedSyncDir;
-                ready = ready || !canSelect || checked;
-                const rowAttributes = canSelect ? ` data-type="selectCloud" data-name="${item.cloudName}"` : " style=\"cursor: default;\"";
-                const radioHTML = canSelect ? `<input type="radio" name="cloudName"${checked ? " checked" : ""}/><span class="fn__space"></span>` : "";
+                ready = ready || checked;
+                const rowAttributes = ` data-type="selectCloud" data-name="${item.cloudName}"`;
+                const radioHTML = `<input type="radio" name="cloudName"${checked ? " checked" : ""}/><span class="fn__space"></span>`;
                 /// #if MOBILE
                 syncListParts.push(`<li${rowAttributes} class="b3-list-item b3-list-item--two">
     <div class="b3-list-item__first" data-name="${item.cloudName}">

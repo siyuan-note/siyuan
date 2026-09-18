@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260913160005"
+		"updated": "20260918213112"
 	},
 	"Children": [
 		{
@@ -17705,7 +17705,7 @@
 			"Properties": {
 				"ID": "20240530101000-84m3izj",
 				"id": "20240530101000-q5l68vs",
-				"updated": "20260811122156"
+				"updated": "20260918213112"
 			},
 			"Children": [
 				{
@@ -17975,6 +17975,38 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260918213112-5d15as4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260918213112-5d15as4",
+				"updated": "20260918213112"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リストのマインドマップで、ノードを選択し、編集中でないときに "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと子ノードを作成し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと同階層のノードを作成して編集できます。仮想ルートには同階層のノードを作成できません。編集中はエディター本来のキー操作が維持されます"
 				}
 			]
 		}

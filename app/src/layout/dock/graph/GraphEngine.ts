@@ -763,6 +763,11 @@ export class GraphEngine {
     }
 
     private updateHover(pointer: IPointerPosition) {
+        if (!this.data) {
+            this.setHovered(-1);
+            this.hideTooltip();
+            return;
+        }
         const hovered = this.hitTest(pointer.x, pointer.y);
         this.setHovered(hovered);
         const node = hovered < 0 ? undefined : this.data.nodes[hovered];

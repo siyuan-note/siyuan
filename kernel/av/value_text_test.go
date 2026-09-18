@@ -26,6 +26,37 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestValueTextRichEmptyParagraphs(t *testing.T) {
+	for _, paragraphs := range [][]string{{""}, {"", ""}, {"", "first", "", "", "last", ""}} {
+		var dom strings.Builder
+		for _, content := range paragraphs {
+			dom.WriteString(`<div data-node-id="` + ast.NewNodeID() + `" data-type="NodeParagraph"><div contenteditable="true">` + content + `</div></div>`)
+		}
+		rich := &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown,
+			Content: valueTextRichBlockDOM2Kramdown(newValueTextRichLute(), dom.String())}
+		for round := 0; round < 3; round++ {
+			before := rich.Content
+			tree, err := NormalizeValueTextRich(rich)
+			if nil != err {
+				t.Fatal(err)
+			}
+			var actual []string
+			ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+				if entering && ast.NodeParagraph == node.Type {
+					actual = append(actual, strings.TrimRight(node.Content(), "\n"))
+				}
+				return ast.WalkContinue
+			})
+			if len(actual) != len(paragraphs) || strings.Join(actual, "|") != strings.Join(paragraphs, "|") {
+				t.Fatalf("paragraphs changed: want %q, got %q", paragraphs, actual)
+			}
+			if before != rich.Content {
+				t.Fatalf("normalization changed source: %q != %q", before, rich.Content)
+			}
+		}
+	}
+}
+
 func TestValueTextPlainJSONCompatibility(t *testing.T) {
 	const content = "**literal** <tag> ((20240101000000-abcdefg))\nnext"
 	value := &ValueText{}

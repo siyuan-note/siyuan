@@ -1391,7 +1391,21 @@ func RenderValueTextRich(tree *parse.Tree) (content string, err error) {
 }
 
 func valueTextRichBlockDOM2Kramdown(luteEngine *lute.Lute, blockDOM string) string {
-	blockDOM = valueTextRichBlockDOMStructuralAttrs.ReplaceAllString(blockDOM, "")
+	// 空段落依靠块属性列表保留，相邻块的标识也必须保留以隔开属性列表。
+	preserveBlockIDs := false
+	ast.Walk(luteEngine.BlockDOM2Tree(blockDOM).Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && ast.NodeParagraph == node.Type && "" == strings.TrimSpace(strings.ReplaceAll(node.Content(), "\u200b", "")) {
+			preserveBlockIDs = true
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	blockDOM = valueTextRichBlockDOMStructuralAttrs.ReplaceAllStringFunc(blockDOM, func(attribute string) string {
+		if preserveBlockIDs && strings.HasPrefix(strings.TrimSpace(attribute), "data-node-id=") {
+			return attribute
+		}
+		return ""
+	})
 	blockDOM, backslashSentinel, backtickSentinel := protectValueTextRichBlockDOMStyleCharacters(blockDOM)
 	markdown := strings.TrimSpace(luteEngine.BlockDOM2Md(blockDOM))
 	if "" != backtickSentinel {

@@ -155,6 +155,7 @@ class ListMindmapController {
                 });
             },
             onManageNodeColors: () => openInlineStyleDialog("style1"),
+            onManageLineColors: () => openInlineStyleDialog("backgroundColor"),
             finishEdit: () => this.activeEditor?.finish(),
             onExit: async () => {
                 if (this.activeEditor && !await this.activeEditor.finish()) {

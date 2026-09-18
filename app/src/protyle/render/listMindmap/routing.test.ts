@@ -19,6 +19,15 @@ const validate = (route: MindmapRoutePoint[], nodes: MindmapRouteBox[]) => {
     }
 };
 
+test("connection preview routes to the exact pointer position around obstacles", () => {
+    const from = {x: 0, y: 0, width: 100, height: 40};
+    const obstacle = {x: 160, y: 0, width: 100, height: 80};
+    const pointer = {x: 340, y: 30, width: 0, height: 0};
+    const route = routeMindmapRelation(from, pointer, [from, obstacle]);
+    validate(route, [from, obstacle]);
+    assert.deepEqual(route[route.length - 1], {x: pointer.x, y: pointer.y});
+});
+
 test("relations route around intervening nodes in both directions", () => {
     const nodes = [
         {x: 300, y: 100, width: 165, height: 76},

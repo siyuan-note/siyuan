@@ -50,12 +50,7 @@
     opacity: 0;
     pointer-events: none;
     gap: 4px;
-    overflow-x: auto;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    overflow: visible;
   }
 
   &:hover &__toolbar,
@@ -80,6 +75,40 @@
     font-size: 11px;
     font-variant-numeric: tabular-nums;
     user-select: none;
+  }
+
+  &__zoom-control {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    pointer-events: auto;
+
+    &:hover .list-mindmap__zoom-actions,
+    &:focus-within .list-mindmap__zoom-actions {
+      display: flex;
+    }
+  }
+
+  &__zoom-actions {
+    @include protyle-toolbar-surface;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    width: max-content;
+
+    .block__icon {
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .b3-slider {
+      width: 100px;
+    }
   }
 
   &__viewport {
@@ -434,7 +463,7 @@
   &__inspector--line {
     align-items: center;
     flex-wrap: nowrap;
-    gap: 8px 16px;
+    gap: 0;
 
     .list-mindmap__palette {
       margin: 0;
@@ -472,16 +501,6 @@
   &__palette {
     display: flex;
     flex-wrap: nowrap;
-  }
-
-  &__color {
-    svg {
-      visibility: hidden;
-    }
-
-    &[aria-pressed="true"] svg {
-      visibility: visible;
-    }
   }
 
 }

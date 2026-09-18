@@ -17,7 +17,8 @@ export const routeMindmapRelation = (from: MindmapRouteBox, to: MindmapRouteBox,
         {x: node.x + node.width + clearance, y: node.y + Math.max(0, Math.min(node.height / 2, node.height - 22)), direction: 0},
     ];
     const starts = ports(from);
-    const goals = ports(to);
+    const goals = to.width === 0 && to.height === 0 ?
+        [{x: to.x, y: to.y, direction: 0}, {x: to.x, y: to.y, direction: 1}] : ports(to);
     const xs = [...new Set([...boxes.flatMap(box => [box.left, box.right]), ...starts.map(p => p.x), ...goals.map(p => p.x)])].sort((a, b) => a - b);
     const ys = [...new Set([...boxes.flatMap(box => [box.top, box.bottom]), ...starts.map(p => p.y), ...goals.map(p => p.y)])].sort((a, b) => a - b);
     const point = (index: number) => ({x: xs[index % xs.length], y: ys[Math.floor(index / xs.length)]});

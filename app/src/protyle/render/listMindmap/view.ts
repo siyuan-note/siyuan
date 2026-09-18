@@ -22,6 +22,7 @@ export interface ListMindmapViewOptions {
     colors?: () => {label: string, value: string}[];
     nodeColors?: () => {label: string, color: string, backgroundColor: string}[];
     onManageNodeColors?: () => void;
+    onManageLineColors?: () => void;
     onFullscreen?: (enter: boolean, button: HTMLButtonElement) => void;
     onEdit?: (id: string, contentHost: HTMLElement) => void;
     finishEdit?: () => boolean | void | Promise<boolean | void>;
@@ -65,6 +66,7 @@ export class ListMindmapView {
     private readonly toolbar: HTMLDivElement;
     private readonly inspector: HTMLDivElement;
     private readonly zoomLabel: HTMLSpanElement;
+    private readonly zoomSlider = createElement("input", "b3-slider");
     private readonly nodeElements = new Map<string, HTMLDivElement>();
     private readonly relationElements = new Map<string, HTMLButtonElement>();
     private readonly buttons = new Map<string, HTMLButtonElement>();
@@ -83,6 +85,7 @@ export class ListMindmapView {
     private linePaths: {id: string, relation: boolean, path: Path2D}[] = [];
     private relationRoutes = new Map<string, MindmapRoutePoint[]>();
     private relationFrom?: string;
+    private relationPreview?: {x: number, y: number, targetId?: string};
     private editingId?: string;
     private pointer?: PointerState;
     private pointerCapture?: HTMLElement;
@@ -197,7 +200,9 @@ export class ListMindmapView {
         button.type = "button";
         button.setAttribute("aria-label", this.label(key));
         // 图标引用现有图标集，避免复制或生成路径数据。
-        button.innerHTML = `<svg aria-hidden="true"><use xlink:href="#${icon}"></use></svg>`;
+        if (icon) {
+            button.innerHTML = `<svg aria-hidden="true"><use xlink:href="#${icon}"></use></svg>`;
+        }
         button.addEventListener("click", (event) => {
             event.stopPropagation();
             this.finishThen(action);
@@ -311,13 +316,25 @@ export class ListMindmapView {
             add("relation", "connect", "iconRoute", () => {
                 this.inspector.hidden = true;
                 this.relationFrom = this.relationFrom ? undefined : this.selectedId;
+                this.relationPreview = undefined;
                 this.updateSelection();
             });
         }
-        add("zoomOut", "zoomOut", "iconZoomOut", () => this.zoomAt(this.scale / 1.2));
-        this.toolbar.append(this.zoomLabel);
-        add("zoomIn", "zoomIn", "iconZoomIn", () => this.zoomAt(this.scale * 1.2));
-        add("fit", "listMindmapFit", "iconRefresh", () => this.fit());
+        const zoomControl = createElement("div", "list-mindmap__zoom-control");
+        const zoomActions = createElement("div", "list-mindmap__zoom-actions");
+        this.zoomLabel.tabIndex = 0;
+        this.zoomLabel.setAttribute("aria-label", this.label("zoom"));
+        this.zoomSlider.type = "range";
+        this.zoomSlider.min = "15";
+        this.zoomSlider.max = "250";
+        this.zoomSlider.step = "1";
+        this.zoomSlider.setAttribute("aria-label", this.label("zoom"));
+        this.zoomSlider.oninput = () => this.zoomAt(Number(this.zoomSlider.value) / 100);
+        const reset = this.makeButton("reset", "iconRefresh", () => this.zoomAt(1));
+        zoomActions.append(this.zoomSlider, reset);
+        zoomControl.append(this.zoomLabel, zoomActions);
+        this.toolbar.append(zoomControl);
+        add("fit", "listMindmapFit", "iconFocus", () => this.fit());
         add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
     }
 
@@ -561,11 +578,13 @@ export class ListMindmapView {
         }));
     }
 
-    private relationPath(id: string, from: ListMindmapPosition, to: ListMindmapPosition, label: HTMLElement) {
-        let points = this.relationRoutes.get(id);
+    private relationPath(id: string | undefined, from: ListMindmapPosition, to: ListMindmapPosition, label?: HTMLElement) {
+        let points = id ? this.relationRoutes.get(id) : undefined;
         if (!points) {
             points = routeMindmapRelation(from, to, this.routingObstacles());
-            this.relationRoutes.set(id, points);
+            if (id) {
+                this.relationRoutes.set(id, points);
+            }
         }
         if (points.length < 2) {
             return;
@@ -585,6 +604,9 @@ export class ListMindmapView {
         const end = points[points.length - 1];
         const previous = points[points.length - 2];
         path.lineTo(end.x, end.y);
+        if (!label) {
+            return {path, end, previous, labelPoint: undefined as MindmapRoutePoint | undefined};
+        }
         const width = label.offsetWidth;
         const height = label.offsetHeight;
         const segments = points.slice(1).map((p, i) => ({a: points[i], b: p,
@@ -612,6 +634,7 @@ export class ListMindmapView {
         }
         this.world.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
         this.zoomLabel.textContent = `${Math.round(this.scale * 100)}%`;
+        this.zoomSlider.value = String(Math.round(this.scale * 100));
         const width = this.viewport.clientWidth;
         const height = this.viewport.clientHeight;
         const ratio = window.devicePixelRatio || 1;
@@ -705,6 +728,37 @@ export class ListMindmapView {
                 element.style.top = `${labelPoint.y}px`;
             }
         });
+        this.drawRelationPreview(context, primary);
+    }
+
+    private drawRelationPreview(context: CanvasRenderingContext2D, color: string) {
+        const from = this.positions.get(this.relationFrom);
+        if (!from || !this.relationPreview) {
+            return;
+        }
+        const target = this.positions.get(this.relationPreview.targetId);
+        const route = this.relationPath(undefined, from, target || {
+            id: "", x: this.relationPreview.x, y: this.relationPreview.y, width: 0, height: 0,
+        });
+        if (!route) {
+            return;
+        }
+        const {path, end, previous} = route;
+        context.beginPath();
+        context.strokeStyle = color;
+        context.lineWidth = 1.5;
+        context.setLineDash([5, 4]);
+        context.stroke(path);
+        context.setLineDash([]);
+        context.beginPath();
+        const size = Math.max(10 / this.scale, 4.5);
+        const direction = Math.atan2(end.y - previous.y, end.x - previous.x);
+        context.fillStyle = color;
+        context.moveTo(end.x - size * Math.cos(direction - Math.PI / 6), end.y - size * Math.sin(direction - Math.PI / 6));
+        context.lineTo(end.x, end.y);
+        context.lineTo(end.x - size * Math.cos(direction + Math.PI / 6), end.y - size * Math.sin(direction + Math.PI / 6));
+        context.closePath();
+        context.fill();
     }
 
     private selectNode(id: string) {
@@ -722,9 +776,13 @@ export class ListMindmapView {
     }
 
     private updateSelection() {
+        if (!this.relationFrom) {
+            this.relationPreview = undefined;
+        }
         this.nodeElements.forEach((element, id) => {
             element.classList.toggle("list-mindmap__node--selected", this.selectedId === id);
-            element.classList.toggle("list-mindmap__node--relation", this.relationFrom === id);
+            element.classList.toggle("list-mindmap__node--relation", this.relationFrom === id ||
+                this.relationPreview?.targetId === id);
             element.setAttribute("aria-selected", String(this.selectedId === id));
         });
         this.relationElements.forEach((element, id) => element.classList.toggle("list-mindmap__relation--selected", this.selectedRelation === id));
@@ -821,6 +879,17 @@ export class ListMindmapView {
     }
 
     private pointerMove = (event: PointerEvent) => {
+        if (this.relationFrom) {
+            const bounds = this.viewport.getBoundingClientRect();
+            const id = (event.target as Element).closest<HTMLElement>(".list-mindmap__node")?.dataset.mindmapId;
+            this.relationPreview = {
+                x: (event.clientX - bounds.left - this.offsetX) / this.scale,
+                y: (event.clientY - bounds.top - this.offsetY) / this.scale,
+                targetId: id && id !== this.relationFrom && !this.model.nodes.get(id)?.virtual ? id : undefined,
+            };
+            this.updateSelection();
+            return;
+        }
         const pointer = this.pointer;
         if (!pointer) {
             const target = event.target as Element;
@@ -1112,6 +1181,14 @@ export class ListMindmapView {
             mode === WheelEvent.DOM_DELTA_PAGE ? this.viewport.clientWidth : 1;
         const unitY = mode === WheelEvent.DOM_DELTA_LINE ? 16 :
             mode === WheelEvent.DOM_DELTA_PAGE ? this.viewport.clientHeight : 1;
+        // 浏览器将触控板捏合转换为带 Ctrl 的滚轮事件，和鼠标组合滚轮共用光标锚点缩放。
+        if (event.ctrlKey) {
+            const bounds = this.viewport.getBoundingClientRect();
+            const delta = Math.max(-24, Math.min(24, event.deltaY * unitY));
+            this.zoomAt(this.scale * Math.exp(-delta * .01),
+                event.clientX - bounds.left, event.clientY - bounds.top);
+            return;
+        }
         this.offsetX -= event.deltaX * unitX;
         this.offsetY -= event.deltaY * unitY;
         this.draw();
@@ -1173,21 +1250,29 @@ export class ListMindmapView {
         this.inspector.classList.toggle("list-mindmap__inspector--line", lineSelected);
         this.inspector.style.left = "";
         this.inspector.style.top = "";
+        const squareButton = (key: string, icon: string, action: () => void) => {
+            const button = this.makeButton(key, icon, action);
+            button.className = "color__square";
+            button.querySelector("svg").classList.add("svg--mid");
+            return button;
+        };
         const color = (value: string, action: (value: string) => void, key = "color") => {
             const palette = createElement("div", "list-mindmap__palette");
             palette.setAttribute("role", "group");
             palette.setAttribute("aria-label", this.label(key));
             const colors = [{label: this.label("default"), value: ""}, ...(this.options.colors?.() || [])];
             colors.forEach(item => {
-                const button = this.makeButton("color", "iconCheck", () => action(item.value));
+                const button = this.makeButton("color", "", () => action(item.value));
                 const selected = (value || "") === item.value;
-                button.className = "color__square list-mindmap__color" + (selected ? " color__square--current" : "");
-                button.querySelector("svg").classList.add("svg--mid");
+                button.className = "color__square" + (selected ? " color__square--current" : "");
                 button.setAttribute("aria-label", item.label);
                 button.setAttribute("aria-pressed", String(selected));
                 button.style.backgroundColor = item.value || "var(--b3-theme-background)";
                 palette.append(button);
             });
+            if (this.options.onManageLineColors) {
+                palette.append(squareButton("manageColors", "iconSettings", this.options.onManageLineColors));
+            }
             this.inspector.append(palette);
         };
         if (this.selectedRelation) {
@@ -1197,7 +1282,7 @@ export class ListMindmapView {
             }
             const change = (patch: Partial<ListMindmapRelation>) => this.options.onRelationChange?.(relation.id, patch);
             color(relation.color, value => change({color: value}));
-            const remove = this.makeButton("delete", "iconTrashcan", () => this.options.onRelationDelete?.(relation.id));
+            const remove = squareButton("delete", "iconTrashcan", () => this.options.onRelationDelete?.(relation.id));
             this.inspector.append(remove);
             return;
         }
@@ -1231,15 +1316,13 @@ export class ListMindmapView {
             nodePalette.append(button);
         });
         if (this.options.onManageNodeColors) {
-            const manage = this.makeButton("manageColors", "iconSettings", this.options.onManageNodeColors);
-            manage.className = "color__square";
-            manage.querySelector("svg").classList.add("svg--mid");
+            const manage = squareButton("manageColors", "iconSettings", this.options.onManageNodeColors);
             nodePalette.append(manage);
         }
         this.inspector.append(nodePalette);
         const node = this.model.nodes.get(id);
         if (node && !node.virtual && node !== this.model.root) {
-            this.inspector.append(this.makeButton("delete", "iconTrashcan", () => this.deleteSelection()));
+            nodePalette.append(squareButton("delete", "iconTrashcan", () => this.deleteSelection()));
         }
     }
 

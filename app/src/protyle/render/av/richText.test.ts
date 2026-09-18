@@ -550,6 +550,32 @@ describe("attribute view text value creation", () => {
 });
 
 describe("attribute view rich text DOM policy", () => {
+    it("preserves leading, consecutive and trailing empty paragraphs across saves", {
+        skip: hasDOM && typeof Lute !== "undefined" ? false :
+            "The Node test environment does not provide DOM and Lute globals",
+    }, async () => {
+        Object.assign(globalThis, {NODE_ENV: "test", SIYUAN_VERSION: "test"});
+        const richText = await import("./richText");
+        for (const paragraphs of [[""], ["", ""], ["", "first", "", "", "last", ""]]) {
+            let dom = paragraphs.map(content => '<div data-type="NodeParagraph">' +
+                `<div contenteditable="true">${content}</div></div>`).join("");
+            let previous: string;
+            for (let round = 0; round < 3; round++) {
+                const serialized = richText.serializeAVRichTextBlockDOM(dom);
+                if (round > 0) {
+                    assert.equal(serialized.markdown, previous);
+                }
+                previous = serialized.markdown;
+                dom = richText.getAVRichTextBlockDOM(serialized.markdown);
+                const template = document.createElement("template");
+                template.innerHTML = dom;
+                assert.deepEqual(Array.from(template.content.querySelectorAll(
+                    '[data-type="NodeParagraph"] > [contenteditable="true"]'
+                )).map(element => element.textContent), paragraphs);
+            }
+        }
+    });
+
     it("preserves code content and prepares block and inline math for preview rendering", {
         skip: hasDOM && typeof Lute !== "undefined" ? false :
             "The Node test environment does not provide DOM and Lute globals",

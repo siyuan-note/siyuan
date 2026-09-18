@@ -45,6 +45,7 @@ func TestExportFootnotesAfterMerge(t *testing.T) {
 	oldAppearance := util.AppearancePath
 	util.AppearancePath = t.TempDir()
 	t.Cleanup(func() { util.AppearancePath = oldAppearance })
+	writeAppearanceTestEmojiFont(t)
 	for _, dir := range []string{"themes/daylight", "themes/midnight", "icons/litheness"} {
 		if err := os.MkdirAll(filepath.Join(util.AppearancePath, dir), 0755); err != nil {
 			t.Fatal(err)

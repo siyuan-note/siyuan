@@ -47,6 +47,13 @@ func setupAppearancePackagesTest(t *testing.T) {
 	for _, name := range []string{"litheness", "custom"} {
 		writeAppearanceTestPackage(t, "icons", name, "1.0.0", "")
 	}
+	writeAppearanceTestEmojiFont(t)
+}
+
+func writeAppearanceTestEmojiFont(t *testing.T) {
+	t.Helper()
+	writeAppearanceTestFile(t, filepath.Join(util.AppearancePath, "fonts", "Noto-COLRv1-2.051", "Noto-COLRv1.woff2"), "emoji font")
+	writeAppearanceTestFile(t, filepath.Join(util.AppearancePath, "fonts", "Noto-COLRv1-2.051", "LICENSE"), "emoji license")
 }
 
 func writeAppearanceTestFile(t *testing.T, path, content string) {
@@ -113,22 +120,44 @@ func TestExportAppearancePackagesUsesDataAndCopiesResources(t *testing.T) {
 	writeAppearanceTestFile(t, filepath.Join(util.ThemesPath, "custom", "assets", "font.woff2"), "font")
 	writeAppearanceTestFile(t, filepath.Join(util.IconsPath, "custom", "assets", "image.png"), "image")
 	writeAppearanceTestFile(t, filepath.Join(util.AppearancePath, "themes", "custom", "theme.css"), "legacy")
+	writeAppearanceTestFile(t, filepath.Join(util.AppearancePath, "fonts", "custom", "private.ttf"), "private font")
+	writeAppearanceTestFile(t, filepath.Join(util.AppearancePath, "fonts", "Noto-COLRv1-2.047", "Noto-COLRv1.woff2"), "old emoji font")
 	destination := t.TempDir()
 	if err := copyExportAppearance(destination, "custom", "custom"); err != nil {
 		t.Fatal(err)
 	}
 	for name, expected := range map[string]string{
-		"themes/custom/theme.css":         "resource custom",
-		"themes/custom/assets/font.woff2": "font",
-		"themes/daylight/theme.css":       "resource daylight",
-		"themes/midnight/theme.css":       "resource midnight",
-		"icons/custom/assets/image.png":   "image",
-		"icons/litheness/icon.js":         "resource litheness",
+		"themes/custom/theme.css":                   "resource custom",
+		"themes/custom/assets/font.woff2":           "font",
+		"themes/daylight/theme.css":                 "resource daylight",
+		"themes/midnight/theme.css":                 "resource midnight",
+		"icons/custom/assets/image.png":             "image",
+		"icons/litheness/icon.js":                   "resource litheness",
+		"fonts/Noto-COLRv1-2.051/Noto-COLRv1.woff2": "emoji font",
+		"fonts/Noto-COLRv1-2.051/LICENSE":           "emoji license",
 	} {
 		data, err := os.ReadFile(filepath.Join(destination, "appearance", name))
 		if err != nil || string(data) != expected {
 			t.Errorf("%s: got %q, error %v", name, data, err)
 		}
+	}
+	for _, name := range []string{"custom", "Noto-COLRv1-2.047"} {
+		if _, err := os.Stat(filepath.Join(destination, "appearance", "fonts", name)); !os.IsNotExist(err) {
+			t.Errorf("unexpected exported font directory %s: %v", name, err)
+		}
+		if _, err := os.Stat(filepath.Join(util.AppearancePath, "fonts", name)); err != nil {
+			t.Errorf("source font directory %s was not preserved: %v", name, err)
+		}
+	}
+}
+
+func TestExportAppearanceReportsMissingEmojiFont(t *testing.T) {
+	setupAppearancePackagesTest(t)
+	if err := os.Remove(filepath.Join(util.AppearancePath, "fonts", "Noto-COLRv1-2.051", "Noto-COLRv1.woff2")); err != nil {
+		t.Fatal(err)
+	}
+	if err := copyExportAppearance(t.TempDir(), "daylight", "litheness"); err == nil {
+		t.Fatal("missing bundled emoji font was silently ignored")
 	}
 }
 

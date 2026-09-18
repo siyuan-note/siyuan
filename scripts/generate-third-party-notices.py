@@ -421,6 +421,13 @@ BUNDLED_COMPONENTS = [
         "Localized names and search keywords in app/appearance/emojis/conf.json",
     ),
     (
+        "Unicode Emoji test data",
+        "17.0",
+        "Unicode-3.0",
+        "https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt",
+        "New fully-qualified sequences in app/tests/fixtures/unicode17-emoji.json",
+    ),
+    (
         "Pexels cover photos",
         "72 selected photographs",
         "Pexels License",
@@ -453,6 +460,13 @@ FONT_COMPONENTS = [
     ),
     (
         "Noto COLRv1 Emoji",
+        "2.051",
+        "OFL-1.1",
+        "https://github.com/googlefonts/noto-emoji",
+        "app/appearance/fonts/Noto-COLRv1-2.051/LICENSE",
+    ),
+    (
+        "Noto COLRv1 Emoji (retained version)",
         "2.047",
         "OFL-1.1",
         "https://github.com/googlefonts/noto-emoji",

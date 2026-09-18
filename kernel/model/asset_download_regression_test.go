@@ -95,6 +95,7 @@ func TestAssetDownloadFootnoteExport(t *testing.T) {
 	appearancePath := util.AppearancePath
 	t.Cleanup(func() { util.AppearancePath = appearancePath })
 	util.AppearancePath = t.TempDir()
+	writeAppearanceTestEmojiFont(t)
 	for _, theme := range []string{Conf.Appearance.ThemeLight, Conf.Appearance.ThemeDark} {
 		if err := os.MkdirAll(filepath.Join(util.AppearancePath, "themes", theme), 0755); err != nil {
 			t.Fatal(err)

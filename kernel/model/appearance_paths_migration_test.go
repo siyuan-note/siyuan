@@ -96,7 +96,7 @@ func createAppearanceMigrationDirectoryLink(t *testing.T, link, target string) {
 }
 
 func TestAppearanceMigrationRemovesExistingAliases(t *testing.T) {
-	for _, layout := range []string{"shared-development-directory", "destination-points-to-source", "source-points-to-destination"} {
+	for _, layout := range []string{"shared-development-directory", "destination-points-to-source", "source-points-to-destination", "chained-development-links", "indirect-development-links"} {
 		t.Run(layout, func(t *testing.T) {
 			setupAppearancePackagesTest(t)
 			external := t.TempDir()
@@ -114,6 +114,14 @@ func TestAppearanceMigrationRemovesExistingAliases(t *testing.T) {
 			case "source-points-to-destination":
 				writeAppearanceTestFile(t, filepath.Join(target, "theme.css"), "development theme")
 				createAppearanceMigrationDirectoryLink(t, source, target)
+			case "chained-development-links", "indirect-development-links":
+				createAppearanceMigrationDirectoryLink(t, source, external)
+				link := source
+				if layout == "indirect-development-links" {
+					link = filepath.Join(t.TempDir(), "intermediate")
+					createAppearanceMigrationDirectoryLink(t, link, source)
+				}
+				createAppearanceMigrationDirectoryLink(t, target, link)
 			}
 			if err := moveAppearancePackage(source, target); err != nil {
 				t.Fatal(err)
@@ -122,7 +130,7 @@ func TestAppearanceMigrationRemovesExistingAliases(t *testing.T) {
 				t.Fatalf("source alias remains: %v", err)
 			}
 			file, want := "theme.css", "development theme"
-			if layout == "shared-development-directory" {
+			if layout == "shared-development-directory" || layout == "chained-development-links" || layout == "indirect-development-links" {
 				file, want = "asset.txt", "development asset"
 			}
 			if data, err := os.ReadFile(filepath.Join(target, file)); err != nil || string(data) != want {
@@ -160,5 +168,30 @@ func TestAppearanceMigrationPreservesAliasedParent(t *testing.T) {
 	}
 	if data, err := os.ReadFile(filepath.Join(target, "theme.css")); err != nil || string(data) != "shared" {
 		t.Fatalf("shared directory was removed: %q, %v", data, err)
+	}
+}
+
+func TestAppearanceMigrationRelativeChainedLinks(t *testing.T) {
+	root := t.TempDir()
+	external := filepath.Join(root, "external")
+	writeAppearanceTestFile(t, filepath.Join(external, "theme.css"), "development")
+	source, target := filepath.Join(root, "source"), filepath.Join(root, "data", "target")
+	if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("external", source); err != nil {
+		t.Skipf("relative symlinks unavailable: %v", err)
+	}
+	if err := os.Symlink(filepath.Join("..", "source"), target); err != nil {
+		t.Fatal(err)
+	}
+	if err := moveAppearancePackage(source, target); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Lstat(source); !os.IsNotExist(err) {
+		t.Fatalf("source link remains: %v", err)
+	}
+	if data, err := os.ReadFile(filepath.Join(target, "theme.css")); err != nil || string(data) != "development" {
+		t.Fatalf("relative link broke during migration: %q, %v", data, err)
 	}
 }

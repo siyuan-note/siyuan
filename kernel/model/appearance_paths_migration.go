@@ -1,6 +1,8 @@
 package model
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -80,7 +82,12 @@ func moveAppearancePackage(source, target string) error {
 				if _, err = os.Readlink(source); err != nil {
 					return err
 				}
-				// 两个入口已指向同一份开发文件，只移除源链接。
+				if !targetEntry.IsDir() {
+					if err = flattenAppearanceDirectoryLink(target, targetEntry, targetInfo); err != nil {
+						return err
+					}
+				}
+				// 目标入口已独立指向开发目录，可以清理源链接。
 				return os.Remove(source)
 			}
 			// 目标链接依赖源目录时，先移除链接，再将实际目录迁入目标位置。
@@ -124,4 +131,43 @@ func moveAppearancePackage(source, target string) error {
 		return err
 	}
 	return os.RemoveAll(source)
+}
+
+// flattenAppearanceDirectoryLink 先验证指向最终目录的新链接，替换失败时保留原链接供重试。
+func flattenAppearanceDirectoryLink(target string, entry, directory os.FileInfo) error {
+	resolved, err := resolveAppearanceDirectoryLink(target)
+	if err != nil {
+		return err
+	}
+	staging, err := os.MkdirTemp(filepath.Dir(target), ".appearance-link-")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(staging)
+	link, backup := filepath.Join(staging, "link"), filepath.Join(staging, "previous")
+	defer os.Remove(link)
+	if err = createAppearanceDirectoryLink(resolved, link); err != nil {
+		return err
+	}
+	info, err := os.Stat(link)
+	if err != nil {
+		return err
+	}
+	if !os.SameFile(directory, info) {
+		return fmt.Errorf("appearance link destination changed: %s", target)
+	}
+	current, err := os.Lstat(target)
+	if err != nil {
+		return err
+	}
+	if !os.SameFile(entry, current) {
+		return fmt.Errorf("appearance link changed during migration: %s", target)
+	}
+	if err = os.Rename(target, backup); err != nil {
+		return err
+	}
+	if err = os.Rename(link, target); err != nil {
+		return errors.Join(err, os.Rename(backup, target))
+	}
+	return os.Remove(backup)
 }

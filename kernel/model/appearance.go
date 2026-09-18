@@ -61,36 +61,29 @@ func InitAppearance() {
 
 // refreshAppearanceConfig 按完整可用的包刷新本机外观选择，缺失或不兼容时使用内置资源。
 func refreshAppearanceConfig() {
-	lockPath := filepath.Join(util.DataDir, ".siyuan-appearance")
-	filelock.Lock(lockPath)
-	defer filelock.Unlock(lockPath)
-	runtimeState := newAppearanceRuntimeState()
-	loadThemes(runtimeState)
-	loadIcons(runtimeState)
+	LoadThemes()
+	LoadIcons()
 
 	var reloadThemes, reloadIcons bool
 	Conf.m.Lock()
-	if !containTheme(Conf.Appearance.ThemeDark, Conf.Appearance.DarkThemes) &&
-		!runtimeState.preserveSelection("themes", Conf.Appearance.ThemeDark) {
+	if !containTheme(Conf.Appearance.ThemeDark, Conf.Appearance.DarkThemes) {
 		Conf.Appearance.ThemeDark = "midnight"
 		reloadThemes = true
 	}
-	if !containTheme(Conf.Appearance.ThemeLight, Conf.Appearance.LightThemes) &&
-		!runtimeState.preserveSelection("themes", Conf.Appearance.ThemeLight) {
+	if !containTheme(Conf.Appearance.ThemeLight, Conf.Appearance.LightThemes) {
 		Conf.Appearance.ThemeLight = "daylight"
 		reloadThemes = true
 	}
-	if !containIcon(Conf.Appearance.Icon, Conf.Appearance.Icons) &&
-		!runtimeState.preserveSelection("icons", Conf.Appearance.Icon) {
+	if !containIcon(Conf.Appearance.Icon, Conf.Appearance.Icons) {
 		Conf.Appearance.Icon = "litheness"
 		reloadIcons = true
 	}
 	Conf.m.Unlock()
 	if reloadThemes {
-		loadThemes(runtimeState)
+		LoadThemes()
 	}
 	if reloadIcons {
-		loadIcons(runtimeState)
+		LoadIcons()
 	}
 	Conf.Save()
 }
@@ -187,13 +180,6 @@ func appearancePackageNames(kind string) ([]string, error) {
 }
 
 func LoadThemes() {
-	lockPath := filepath.Join(util.DataDir, ".siyuan-appearance")
-	filelock.Lock(lockPath)
-	defer filelock.Unlock(lockPath)
-	loadThemes(newAppearanceRuntimeState())
-}
-
-func loadThemes(runtimeState *appearanceRuntimeState) {
 	themeNames, err := appearancePackageNames("themes")
 	if err != nil {
 		logging.LogErrorf("read appearance themes folder failed: %s", err)
@@ -210,12 +196,6 @@ func loadThemes(runtimeState *appearanceRuntimeState) {
 	themeDark := Conf.Appearance.ThemeDark
 	for _, name := range themeNames {
 		themePath := util.AppearancePackagePath("themes", name)
-		if !isBuiltInTheme(name) {
-			if err := runtimeState.validate("themes", name); err != nil {
-				logging.LogWarnf("skip unavailable theme [%s]: %s", name, err)
-				continue
-			}
-		}
 		themeConf, parseErr := bazaar.ParsePackageJSON(filepath.Join(themePath, "theme.json"))
 		if nil != parseErr || !bazaar.IsValidInstalledPackage(themeConf, name) ||
 			bazaar.IsBelowRequiredAppVersion(themeConf) || !gulu.File.IsExist(filepath.Join(themePath, "theme.css")) {
@@ -287,13 +267,6 @@ func loadThemes(runtimeState *appearanceRuntimeState) {
 }
 
 func LoadIcons() {
-	lockPath := filepath.Join(util.DataDir, ".siyuan-appearance")
-	filelock.Lock(lockPath)
-	defer filelock.Unlock(lockPath)
-	loadIcons(newAppearanceRuntimeState())
-}
-
-func loadIcons(runtimeState *appearanceRuntimeState) {
 	iconNames, err := appearancePackageNames("icons")
 	if err != nil {
 		logging.LogErrorf("read appearance icons folder failed: %s", err)
@@ -306,12 +279,6 @@ func loadIcons(runtimeState *appearanceRuntimeState) {
 	currentIcon := Conf.Appearance.Icon
 	for _, name := range iconNames {
 		iconPath := util.AppearancePackagePath("icons", name)
-		if !isBuiltInIcon(name) {
-			if err := runtimeState.validate("icons", name); err != nil {
-				logging.LogWarnf("skip unavailable icon [%s]: %s", name, err)
-				continue
-			}
-		}
 		iconConf, err := bazaar.ParsePackageJSON(filepath.Join(iconPath, "icon.json"))
 		if err != nil || !bazaar.IsValidInstalledPackage(iconConf, name) ||
 			bazaar.IsBelowRequiredAppVersion(iconConf) || !gulu.File.IsExist(filepath.Join(iconPath, "icon.js")) {

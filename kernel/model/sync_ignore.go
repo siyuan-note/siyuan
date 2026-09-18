@@ -127,18 +127,6 @@ func syncPathFilter(dataDir string, info os.FileInfo, absPath string) (bool, err
 		}
 		return true, nil
 	}
-	if payload := appearanceStatePayloadPath(rel); payload != "" {
-		if stat, err := os.Lstat(filepath.Join(dataDir, filepath.FromSlash(payload))); err == nil && stat.Mode()&os.ModeSymlink != 0 {
-			return true, nil
-		}
-		_, matcher, err := getSyncIgnoreRules()
-		if err != nil {
-			return false, err
-		}
-		if matcher.MatchesPath(payload) {
-			return true, nil
-		}
-	}
 	if info != nil && info.IsDir() {
 		if info.Name() == "filesys_status_check" {
 			return true, filepath.SkipDir

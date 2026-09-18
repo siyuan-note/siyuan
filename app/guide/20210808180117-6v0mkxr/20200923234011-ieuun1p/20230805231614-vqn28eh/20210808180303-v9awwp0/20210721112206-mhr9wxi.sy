@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20260917202413"
+		"updated": "20260918195936"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721112403-8no39l4",
-				"updated": "20260917202413"
+				"updated": "20260918195936"
 			},
 			"Children": [
 				{
@@ -52,12 +52,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260917190844-p6hrspl",
-				"updated": "20260917202413"
+				"updated": "20260918195936"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Theme and icon package files, updates, and uninstallations sync between devices; each device chooses its own theme and icons. Images, fonts, and other package resources are always downloaded completely. Older clients can continue syncing notes; the new client handles shared appearance packages and their conflicts."
+					"Data": "Theme and icon package files, updates, and uninstallations sync between devices; each device chooses its own theme and icons. Images, fonts, and other package resources are always downloaded completely. Synchronization, deletion, and conflicts follow the same file-level rules as plugins, widgets, and templates. Restoring a snapshot without a package removes it."
 				}
 			]
 		},
@@ -719,7 +719,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230219121305-n0v0nlb",
-				"updated": "20260917202413"
+				"updated": "20260918195936"
 			},
 			"Children": [
 				{
@@ -748,7 +748,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220703232248-j1dq9w6",
-				"updated": "20260917202413"
+				"updated": "20260918195936"
 			},
 			"Children": [
 				{
@@ -788,7 +788,7 @@
 					},
 					"Properties": {
 						"id": "20220703232248-nuapm43",
-						"updated": "20260917202413"
+						"updated": "20260918195936"
 					},
 					"Children": [
 						{
@@ -811,7 +811,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20220703232248-kl3io11",
-								"updated": "20260917202413"
+								"updated": "20260918195936"
 							},
 							"Children": [
 								{
@@ -851,7 +851,7 @@
 									},
 									"Properties": {
 										"id": "20220703232248-jneoxfm",
-										"updated": "20260917202413"
+										"updated": "20260918195936"
 									},
 									"Children": [
 										{
@@ -859,12 +859,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220703232248-x7l12qz",
-												"updated": "20260917202413"
+												"updated": "20260918195936"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "For ordinary file conflicts, the local file overwrites the cloud file, and the conflicting cloud file is preserved in data history; theme and icon conflicts are handled as complete packages without mixing files from different versions"
+													"Data": "For file conflicts, including theme and icon files, the local file overwrites the cloud file, and the conflicting cloud file is preserved in data history"
 												}
 											]
 										}

@@ -26,10 +26,6 @@ import (
 
 // copyExportAppearance 将完整外观包复制到导出目录，并保留默认主题和图标作为后备。
 func copyExportAppearance(savePath, theme, icon string) error {
-	lockPath := filepath.Join(util.DataDir, ".siyuan-appearance")
-	filelock.Lock(lockPath)
-	defer filelock.Unlock(lockPath)
-	runtimeState := newAppearanceRuntimeState()
 	packages := map[string][]string{
 		"themes": {"daylight", "midnight", theme},
 		"icons":  {"litheness", icon},
@@ -43,11 +39,6 @@ func copyExportAppearance(savePath, theme, icon string) error {
 			from := util.AppearancePackagePath(kind, name)
 			if from == "" {
 				return fmt.Errorf("invalid appearance package [%s/%s]", kind, name)
-			}
-			if (kind == "themes" && !isBuiltInTheme(name)) || (kind == "icons" && !isBuiltInIcon(name)) {
-				if err := runtimeState.validate(kind, name); err != nil {
-					return err
-				}
 			}
 			// 解析包目录本身的符号链接，使导出保留完整资源而不携带本机路径。
 			from, err := filepath.EvalSymlinks(from)

@@ -26,16 +26,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func isThirdPartyAppearanceRequest(requestPath string) bool {
-	parts := strings.SplitN(requestPath, "/", 3)
-	if len(parts) < 2 {
-		return false
-	}
-	parts[0] = strings.ToLower(parts[0])
-	return (parts[0] == "themes" && !strings.EqualFold(parts[1], "daylight") && !strings.EqualFold(parts[1], "midnight")) ||
-		(parts[0] == "icons" && !strings.EqualFold(parts[1], "litheness"))
-}
-
 // resolveAppearanceFile 在读取前限定真实路径，仅允许主题和图标包目录链接到外部目录。
 func resolveAppearanceFile(root, requestPath string) (string, int) {
 	filePath, status := resolveAppearanceFilePath(root, requestPath)

@@ -437,24 +437,32 @@ export class EmojiPanelController {
         }
     }
 
+    private getPanelOffsetTop(element: HTMLElement) {
+        // 使用布局坐标，避免弹窗缩放影响分类定位和虚拟分块的可见范围。
+        let top = 0;
+        for (let current = element; current; current = current.offsetParent as HTMLElement) {
+            top += current.offsetTop;
+        }
+        for (let current = this.panelElement; current; current = current.offsetParent as HTMLElement) {
+            top -= current.offsetTop;
+        }
+        return top;
+    }
+
     private updateCategoryOffsets() {
-        const panelTop = this.panelElement.getBoundingClientRect().top;
         this.categoryOffsets = Array.from(this.panelElement.querySelectorAll<HTMLElement>(".emojis__section[data-category]"))
             .map((item) => ({
                 id: item.dataset.category || "",
-                top: item.getBoundingClientRect().top - panelTop + this.panelElement.scrollTop,
+                top: this.getPanelOffsetTop(item),
             }));
     }
 
     private updateBuiltInChunkOffsets() {
-        const panelTop = this.panelElement.getBoundingClientRect().top;
-        const scrollTop = this.panelElement.scrollTop;
         this.builtInChunkOffsets = Array.from(this.panelElement.querySelectorAll<HTMLElement>(".emojis__chunk"))
             .map((element) => {
-                const rect = element.getBoundingClientRect();
-                const top = rect.top - panelTop + scrollTop;
+                const top = this.getPanelOffsetTop(element);
                 const categoryID = element.closest<HTMLElement>(".emojis__section")?.dataset.category || "";
-                return {element, categoryID, top, bottom: top + rect.height};
+                return {element, categoryID, top, bottom: top + element.offsetHeight};
             });
     }
 
@@ -473,10 +481,10 @@ export class EmojiPanelController {
         const itemStyle = getComputedStyle(item);
         const contentStyle = getComputedStyle(content);
         const number = (value: string) => parseFloat(value) || 0;
-        const width = item.getBoundingClientRect().width + number(itemStyle.marginLeft) + number(itemStyle.marginRight);
+        const width = item.offsetWidth + number(itemStyle.marginLeft) + number(itemStyle.marginRight);
         const gap = number(contentStyle.columnGap);
         const availableWidth = content.clientWidth - number(contentStyle.paddingLeft) - number(contentStyle.paddingRight);
-        this.rowHeight = item.getBoundingClientRect().height + number(itemStyle.marginTop) + number(itemStyle.marginBottom);
+        this.rowHeight = item.offsetHeight + number(itemStyle.marginTop) + number(itemStyle.marginBottom);
         this.rowGap = number(contentStyle.rowGap);
         section.remove();
         return width > 0 ? Math.max(1, Math.floor((availableWidth + gap) / (width + gap))) : this.columnCount;

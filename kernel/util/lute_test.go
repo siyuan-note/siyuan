@@ -47,3 +47,31 @@ func TestLuteFactoriesEnableCustomBlock(t *testing.T) {
 		})
 	}
 }
+
+func TestLuteUnicode17Callout(t *testing.T) {
+	engine := NewLute()
+	for alias, emoji := range map[string]string{
+		"distorted_face": "🫪",
+		"fight_cloud":    "🫯",
+		"hairy_creature": "🫈",
+		"ballet_dancer":  "🧑‍🩰",
+		"orca":           "🫍",
+		"landslide":      "🛘",
+		"trombone":       "🪊",
+		"treasure_chest": "🪎",
+		"people_wrestling_light_skin_tone_dark_skin_tone": "🧑🏻‍🫯‍🧑🏿",
+	} {
+		t.Run(alias, func(t *testing.T) {
+			for _, icon := range []string{emoji, ":" + alias + ":"} {
+				tree := parse.Parse("", []byte("> [!NOTE] "+icon+" Title\n> Content\n"), engine.ParseOptions)
+				node := tree.Root.FirstChild
+				if node == nil || node.Type != ast.NodeCallout {
+					t.Fatalf("callout was not parsed for %q", icon)
+				}
+				if node.CalloutIcon != emoji || node.CalloutTitle != "Title" {
+					t.Fatalf("unexpected callout: icon=%q, title=%q", node.CalloutIcon, node.CalloutTitle)
+				}
+			}
+		})
+	}
+}

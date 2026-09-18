@@ -1703,8 +1703,8 @@ func processPDFWatermark(pdfCtx *model.Context, watermark bool) {
 			}
 		}
 		if useDefaultFont {
-			m["fontname"] = "LXGWWenKaiLite-Regular"
-			fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKai-Lite-1.501", "LXGWWenKaiLite-Regular.ttf")
+			m["fontname"] = "LXGWWenKaiGBLite-Regular"
+			fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKaiGB-Lite-1.521", "LXGWWenKaiGBLite-Regular.ttf")
 			err := api.InstallFonts([]string{fontPath})
 			if err != nil {
 				logging.LogErrorf("install font [%s] failed: %s", fontPath, err)

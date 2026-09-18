@@ -452,7 +452,14 @@ FONT_COMPONENTS = [
         "app/appearance/fonts/JetBrainsMono-2.304/LICENSE",
     ),
     (
-        "LXGW WenKai Lite",
+        "LXGW WenKai GB Lite",
+        "1.521",
+        "OFL-1.1",
+        "https://github.com/lxgw/LxgwWenkaiGB-Lite",
+        "app/appearance/fonts/LxgwWenKaiGB-Lite-1.521/LICENSE",
+    ),
+    (
+        "LXGW WenKai Lite (retained version)",
         "1.501",
         "OFL-1.1",
         "https://github.com/lxgw/LxgwWenKai-Lite",

@@ -37,6 +37,9 @@ import {
     type TRandomEmojiScope,
 } from "./panel";
 import {getFileTreeIconHTML, updateFileTreeItemIcon} from "./fileTreeIcon";
+import {bindBottomSheetDialog} from "../mobile/util/bindBottomSheetDialog";
+import {activeBlur} from "../mobile/util/keyboardToolbar";
+import {bindEmojiSheetSelection} from "../mobile/util/bindEmojiSheetSelection";
 
 export {unicode2Emoji};
 
@@ -845,6 +848,7 @@ export const openEmojiPanel = (
         custom?: boolean,
         ownerElement?: HTMLElement,
         targetID?: string,
+        insertRange?: Range,
     }) => {
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
@@ -892,13 +896,17 @@ export const openEmojiPanel = (
         }
     };
 
+    let disposeSheet: (() => void) | undefined;
+    let disposeSelection: (() => void) | undefined;
     const dialog = new Dialog({
-        disableAnimation: true,
-        transparent: true,
+        disableAnimation: !isMobile(),
+        transparent: !isMobile(),
         hideCloseIcon: true,
-        width: isMobile() ? "80vw" : "368px",
-        height: "50vh",
+        width: isMobile() ? "100vw" : "368px",
+        height: isMobile() ? "min(40vh, 360px)" : "50vh",
         destroyCallback: () => {
+            disposeSheet?.();
+            disposeSelection?.();
             clearPastedCustomIcon();
             emojiPanelState.controller?.destroy();
         },
@@ -1060,8 +1068,23 @@ export const openEmojiPanel = (
     }
     dialog.element.querySelector(".b3-dialog__container").setAttribute("data-menu", "true");
     const dialogElement = dialog.element.querySelector(".b3-dialog") as HTMLElement;
-    dialogElement.style.justifyContent = "inherit";
-    dialogElement.style.alignItems = "inherit";
+    if (isMobile()) {
+        const destroyDialog = dialog.destroy.bind(dialog);
+        dialog.destroy = (destroyOptions?: IObject) => {
+            if (dialog.element.contains(document.activeElement)) {
+                activeBlur(true);
+            }
+            destroyDialog(destroyOptions);
+        };
+        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
+        if (type === "insert" && options?.insertRange) {
+            disposeSelection = bindEmojiSheetSelection(
+                dialog.element.querySelector(".b3-dialog__container"), options.insertRange.cloneRange());
+        }
+    } else {
+        dialogElement.style.justifyContent = "inherit";
+        dialogElement.style.alignItems = "inherit";
+    }
     let currentTab = window.siyuan.storage[Constants.LOCAL_EMOJIS].currentTab;
     const currentTabElement = dialog.element.querySelector(`[data-type="tab-${currentTab}"]`);
     if (!currentTabElement || currentTabElement.classList.contains("fn__none")) {
@@ -1071,7 +1094,9 @@ export const openEmojiPanel = (
     const currentBodyTab = customEmojiPage ? "emoji" : currentTab;
     dialog.element.querySelector(`.emojis__tabheader [data-type="tab-${currentTab}"]`).classList.add("block__icon--active");
     dialog.element.querySelector(`.emojis__tabbody [data-type="tab-${currentBodyTab}"]`).classList.remove("fn__none");
-    setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
+    if (!isMobile()) {
+        setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
+    }
     const networkIconInputElement = dialog.element.querySelector('[data-type="network-icon-url"]') as HTMLTextAreaElement;
     const customIconFileElement = dialog.element.querySelector('[data-type="custom-icon-file"]') as HTMLInputElement;
     const customIconNameElement = dialog.element.querySelector('[data-type="custom-icon-name"]') as HTMLInputElement;

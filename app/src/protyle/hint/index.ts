@@ -743,7 +743,7 @@ ${genHintItemHTML(item)}
             focusByRange(protyle.toolbar.range);
             insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle, false, true,
                 false, undefined, undoContext);
-        }, undefined, {targetID});
+        }, undefined, {targetID, insertRange: range});
     }
 
     private destroyEmojiPanel() {

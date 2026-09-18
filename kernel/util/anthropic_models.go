@@ -16,12 +16,35 @@ func ListProviderModels(apiKey, baseURL, protocol string, timeout int, headers .
 	if !IsAnthropicMessagesProtocol(protocol) {
 		return ListAvailableModelsWithContext(apiKey, baseURL, timeout, headers...)
 	}
+	if modelsBaseURL := anthropicModelsBaseURL(baseURL); modelsBaseURL != "" {
+		return ListAvailableModelsWithContext(apiKey, modelsBaseURL, timeout, headers...)
+	}
 	if timeout < 1 {
 		timeout = 30
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
 	return listAnthropicModels(ctx, NewAIClientWithModel(apiKey, baseURL, "", headers...))
+}
+
+// 百炼的 Messages 入口不提供模型列表，使用同一源站的 OpenAI 兼容入口。
+func anthropicModelsBaseURL(baseURL string) string {
+	endpoint, err := url.Parse(strings.TrimSpace(baseURL))
+	if err != nil || endpoint.Scheme != "https" || endpoint.User != nil || endpoint.RawQuery != "" || endpoint.Fragment != "" {
+		return ""
+	}
+	switch strings.ToLower(endpoint.Host) {
+	case "dashscope.aliyuncs.com", "dashscope-intl.aliyuncs.com":
+	default:
+		return ""
+	}
+	path := strings.TrimRight(endpoint.Path, "/")
+	if path != "/apps/anthropic" && path != "/apps/anthropic/v1" {
+		return ""
+	}
+	endpoint.Path = "/compatible-mode/v1"
+	endpoint.RawPath = ""
+	return endpoint.String()
 }
 
 func listAnthropicModels(ctx context.Context, client *AIClient) ([]AvailableModel, error) {

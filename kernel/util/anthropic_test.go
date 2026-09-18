@@ -67,7 +67,7 @@ func TestAnthropicStreamAndNativeHistory(t *testing.T) {
 		writeAnthropicEvents(w, anthropicToolEvents...)
 	}))
 	defer server.Close()
-	client := NewAIClientWithModel("key", server.URL+"/gateway/v1", "test", map[string]string{
+	client := NewAIClientWithModel("key", server.URL+"/gateway", "test", map[string]string{
 		"X-Api-Key": "override-key", "X-Custom": "custom",
 	})
 	stream, err := CreateOpenAICompletionStream(context.Background(), client, AnthropicProtocolMessages,
@@ -259,7 +259,7 @@ func TestAnthropicModelsPagination(t *testing.T) {
 	calls := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		if r.URL.Path != "/v1/models" || r.Header.Get("x-api-key") != "key" || r.Header.Get("anthropic-version") == "" {
+		if r.URL.Path != "/anthropic/v1/models" || r.Header.Get("x-api-key") != "key" || r.Header.Get("anthropic-version") == "" {
 			t.Errorf("unexpected model request: %s %v", r.URL.Path, r.Header)
 		}
 		if r.URL.Query().Get("after_id") == "" {
@@ -272,9 +272,33 @@ func TestAnthropicModelsPagination(t *testing.T) {
 		}
 	}))
 	defer server.Close()
-	models, err := ListProviderModels("key", server.URL, AnthropicProtocolMessages, 5)
+	models, err := ListProviderModels("key", server.URL+"/anthropic", AnthropicProtocolMessages, 5)
 	if err != nil || calls != 2 || len(models) != 2 || models[0].ContextLength != 200000 || models[1].ContextLength != 0 {
 		t.Fatalf("unexpected model list: %+v %v", models, err)
+	}
+}
+
+func TestAnthropicEndpointPrefixes(t *testing.T) {
+	for _, tc := range []struct{ base, prefix string }{
+		{"https://api.anthropic.com", "https://api.anthropic.com/v1/"},
+		{"https://api.anthropic.com/v1/", "https://api.anthropic.com/v1/"},
+		{"https://api.deepseek.com/anthropic", "https://api.deepseek.com/anthropic/v1/"},
+		{"https://api.deepseek.com/anthropic/", "https://api.deepseek.com/anthropic/v1/"},
+		{"https://api.deepseek.com/anthropic/v1", "https://api.deepseek.com/anthropic/v1/"},
+		{"https://gateway.example.com/custom", "https://gateway.example.com/custom/v1/"},
+		{"https://gateway.example.com/custom/v1/", "https://gateway.example.com/custom/v1/"},
+		{"https://gateway.example.com/a%2Fb", "https://gateway.example.com/a%2Fb/v1/"},
+	} {
+		for _, resource := range []string{"messages", "models"} {
+			got, err := anthropicEndpoint(tc.base, resource)
+			if err != nil || got != tc.prefix+resource {
+				t.Errorf("endpoint for %s %s: %q, %v", tc.base, resource, got, err)
+			}
+		}
+	}
+	got, err := anthropicEndpoint("https://gateway.example.com/anthropic?route=custom", "messages")
+	if err != nil || got != "https://gateway.example.com/anthropic/v1/messages?route=custom" {
+		t.Fatalf("query parameters changed: %q %v", got, err)
 	}
 }
 

@@ -11,6 +11,7 @@ import {hasProviderHeaderAuth, parseProviderHeaders} from "./aiProviderHeaders";
 import {
     findProviderPreset,
     getDefaultProviderProtocol,
+    getProviderProtocolBaseURL,
     getResponsesSupport,
     IProviderPreset,
     PROVIDER_PRESETS,
@@ -777,6 +778,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         const target = event.target as HTMLInputElement;
         if (target.dataset.providerField === "protocol") {
             draft.protocol = target.value;
+            draft.baseURL = getProviderProtocolBaseURL(draft.baseURL, draft.protocol);
+            view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']").value = draft.baseURL;
+            updateModelActionButtons();
             updateResponsesCompatibility();
             return;
         }

@@ -5,6 +5,7 @@ export interface IProviderPreset {
     id: string;
     name: string;
     baseURL: string;
+    protocolBaseURLs?: Record<string, string>;
     category: AIProviderCategory;
     responsesSupport: AIResponsesSupport;
     region?: "china" | "international";
@@ -14,12 +15,35 @@ export interface IProviderPreset {
 export const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "openai", name: "OpenAI", baseURL: "https://api.openai.com/v1", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/openai.svg"},
     {id: "anthropic", name: "Anthropic", baseURL: "https://api.anthropic.com/v1", category: "official", responsesSupport: "unsupported"},
-    {id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/deepseek.svg"},
-    {id: "moonshot", name: "Moonshot AI", baseURL: "https://api.moonshot.cn/v1", category: "official", responsesSupport: "experimental", icon: "/stage/images/ai-providers/moonshot.svg"},
-    {id: "minimax", name: "MiniMax", baseURL: "https://api.minimax.io/v1", category: "official", responsesSupport: "experimental", region: "international", icon: "/stage/images/ai-providers/minimax.svg"},
-    {id: "minimax-cn", name: "MiniMax", baseURL: "https://api.minimax.cn/v1", category: "official", responsesSupport: "experimental", region: "china", icon: "/stage/images/ai-providers/minimax.svg"},
-    {id: "aliyun", name: "Alibaba Model Studio", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", category: "official", responsesSupport: "supported", region: "china", icon: "/stage/images/ai-providers/aliyun.svg"},
-    {id: "aliyun-intl", name: "Alibaba Model Studio", baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", category: "official", responsesSupport: "supported", region: "international", icon: "/stage/images/ai-providers/aliyun.svg"},
+    {
+        id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", responsesSupport: "supported",
+        icon: "/stage/images/ai-providers/deepseek.svg",
+        protocolBaseURLs: {
+            "openai": "https://api.deepseek.com",
+            "openai-responses": "https://api.deepseek.com",
+            "anthropic-messages": "https://api.deepseek.com/anthropic",
+        },
+    },
+    {
+        id: "moonshot", name: "Moonshot AI", baseURL: "https://api.moonshot.cn/v1", category: "official", responsesSupport: "experimental", icon: "/stage/images/ai-providers/moonshot.svg",
+        protocolBaseURLs: {"anthropic-messages": "https://api.moonshot.cn/anthropic"},
+    },
+    {
+        id: "minimax", name: "MiniMax", baseURL: "https://api.minimax.io/v1", category: "official", responsesSupport: "experimental", region: "international", icon: "/stage/images/ai-providers/minimax.svg",
+        protocolBaseURLs: {"anthropic-messages": "https://api.minimax.io/anthropic"},
+    },
+    {
+        id: "minimax-cn", name: "MiniMax", baseURL: "https://api.minimax.cn/v1", category: "official", responsesSupport: "experimental", region: "china", icon: "/stage/images/ai-providers/minimax.svg",
+        protocolBaseURLs: {"anthropic-messages": "https://api.minimax.cn/anthropic"},
+    },
+    {
+        id: "aliyun", name: "Alibaba Model Studio", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", category: "official", responsesSupport: "supported", region: "china", icon: "/stage/images/ai-providers/aliyun.svg",
+        protocolBaseURLs: {"anthropic-messages": "https://dashscope.aliyuncs.com/apps/anthropic"},
+    },
+    {
+        id: "aliyun-intl", name: "Alibaba Model Studio", baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", category: "official", responsesSupport: "supported", region: "international", icon: "/stage/images/ai-providers/aliyun.svg",
+        protocolBaseURLs: {"anthropic-messages": "https://dashscope-intl.aliyuncs.com/apps/anthropic"},
+    },
     {id: "volcengine", name: "Volcengine Ark", baseURL: "https://ark.cn-beijing.volces.com/api/v3", category: "official", responsesSupport: "experimental", icon: "/stage/images/ai-providers/volcengine.svg"},
     {id: "zhipu", name: "Zhipu AI", baseURL: "https://open.bigmodel.cn/api/paas/v4", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/zhipu.svg"},
     {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/gemini.svg"},
@@ -34,9 +58,22 @@ export const PROVIDER_PRESETS: IProviderPreset[] = [
 
 export const normalizeProviderBaseURL = (value: string) => value.trim().replace(/\/+$/, "").toLowerCase();
 
+const normalizePresetBaseURL = (value: string) => normalizeProviderBaseURL(value).replace(/\/v1$/, "");
+
 export const findProviderPreset = (baseURL: string) =>
     PROVIDER_PRESETS.find((preset) => preset.baseURL &&
-        normalizeProviderBaseURL(preset.baseURL) === normalizeProviderBaseURL(baseURL));
+        [preset.baseURL, ...Object.values(preset.protocolBaseURLs || {})].some((value) =>
+            normalizePresetBaseURL(value) === normalizePresetBaseURL(baseURL)));
+
+// 只切换预设的标准地址，保留用户自行配置的网关和查询参数。
+export const getProviderProtocolBaseURL = (baseURL: string, protocol: string): string => {
+    const preset = findProviderPreset(baseURL);
+    if (!preset?.protocolBaseURLs) {
+        return baseURL;
+    }
+    return preset.protocolBaseURLs[protocol] ||
+        (["openai", "openai-responses"].includes(protocol) ? preset.baseURL : baseURL);
+};
 
 export const getResponsesSupport = (baseURL: string): AIResponsesSupport =>
     findProviderPreset(baseURL)?.responsesSupport || "experimental";

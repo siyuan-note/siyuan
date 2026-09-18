@@ -64,7 +64,12 @@ func newAnthropicHTTPClient(apiKey, baseURL string, headers ...map[string]string
 	merged := http.Header{}
 	merged.Set("anthropic-version", "2023-06-01")
 	if apiKey != "" {
-		merged.Set("x-api-key", apiKey)
+		endpoint, _ := url.Parse(strings.TrimSpace(baseURL))
+		if endpoint != nil && strings.EqualFold(endpoint.Hostname(), "openrouter.ai") {
+			merged.Set("Authorization", "Bearer "+apiKey)
+		} else {
+			merged.Set("x-api-key", apiKey)
+		}
 	}
 	if len(headers) > 0 {
 		if ValidateAIProviderHeaders(headers[0]) != nil {
@@ -87,11 +92,12 @@ func anthropicEndpoint(baseURL, resource string) (string, error) {
 	if err != nil || endpoint.Host == "" || (endpoint.Scheme != "http" && endpoint.Scheme != "https") {
 		return "", errors.New("invalid Anthropic API base URL")
 	}
-	endpoint.Path = strings.TrimRight(endpoint.Path, "/")
-	if endpoint.Path == "" {
-		endpoint.Path = "/v1"
+	// 与 Anthropic SDK 一样在基础地址后追加版本路径，同时兼容已包含 /v1 的配置。
+	if strings.HasSuffix(strings.TrimRight(endpoint.Path, "/"), "/v1") {
+		endpoint = endpoint.JoinPath(resource)
+	} else {
+		endpoint = endpoint.JoinPath("v1", resource)
 	}
-	endpoint.Path += "/" + resource
 	return endpoint.String(), nil
 }
 

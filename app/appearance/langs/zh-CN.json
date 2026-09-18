@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Linux 输入法兼容模式",
+	"linuxInputMethodTip": "通过 X11/XWayland 改善输入法兼容性，可能影响显示缩放，作用于本机所有工作空间，完全退出并重新启动思源后生效",
+	"linuxInputMethodError": "无法读取或保存输入法兼容设置",
+	"linuxInputMethodOverrideTip": "当前由启动参数控制，移除 --ozone-platform 后可使用此设置",
 	"mobileKernelReconnecting": "正在重新连接...",
 	"mobileKernelReconnectPrompt": "与内核的连接暂时断开，思源会自动尝试重新连接。从后台返回时，恢复连接可能需要几秒，请稍等。连接恢复后，本窗口会自动关闭。如果长时间未恢复，请尝试重新打开思源。",
 	"backlinkGlobalSort": "全局引用排序",

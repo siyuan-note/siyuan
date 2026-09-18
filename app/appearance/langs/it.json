@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Modalità di compatibilità dei metodi di input Linux",
+	"linuxInputMethodTip": "Usa X11/XWayland per migliorare la compatibilità dei metodi di input; può influire sul ridimensionamento, si applica a tutti gli spazi di lavoro su questo dispositivo e richiede la chiusura completa e il riavvio di SiYuan",
+	"linuxInputMethodError": "Impossibile leggere o salvare le impostazioni di compatibilità dei metodi di input",
+	"linuxInputMethodOverrideTip": "Controllato dagli argomenti di avvio; rimuovi --ozone-platform per usare questa impostazione",
 	"mobileKernelReconnecting": "Riconnessione in corso...",
 	"mobileKernelReconnectPrompt": "La connessione al kernel è stata temporaneamente interrotta. SiYuan tenterà di riconnettersi automaticamente. Al ritorno dal background, il ripristino della connessione potrebbe richiedere alcuni secondi. Attendi. Questa finestra si chiuderà automaticamente una volta ripristinata la connessione. Se la connessione non viene ripristinata dopo una lunga attesa, prova a riaprire SiYuan.",
 	"backlinkGlobalSort": "Ordinamento globale dei riferimenti",

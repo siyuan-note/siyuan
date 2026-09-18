@@ -7,18 +7,18 @@ import {ModuleKind, transpileModule} from "typescript";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-type AccessibilitySetting = {enabled: boolean; override: boolean | null};
-type Invoke = (channel: string, data: {cmd: string; enabled?: boolean}) => Promise<AccessibilitySetting>;
+type LinuxInputMethodSetting = {enabled: boolean; override: boolean | null};
+type Invoke = (channel: string, data: {cmd: string; enabled?: boolean}) => Promise<LinuxInputMethodSetting>;
 type Slot = {key: string; html: () => string; afterMount: (root: unknown) => Promise<void>};
 
-const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke): Slot | undefined => {
+const getLinuxInputMethodSlot = (browser: boolean, mobile: boolean, invoke?: Invoke, platform = "linux"): Slot | undefined => {
     const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appTab.ts"), "utf8");
     const processed = parse(source, {BROWSER: browser, MOBILE: mobile}, false, true);
     const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
     const moduleExports: {registerAppTab?: (tab: unknown) => void} = {};
     runInNewContext(code, {
         exports: moduleExports,
-        process: {platform: "win32"},
+        process: {platform},
         console: {warn: (): void => undefined},
         window: {siyuan: {
             languages: new Proxy({}, {get: (_, key) => String(key)}),
@@ -47,7 +47,7 @@ const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke
         },
     });
     moduleExports.registerAppTab({group: () => group});
-    return slots.find(slot => slot.key === "accessibilitySupport");
+    return slots.find(slot => slot.key === "linuxInputMethod");
 };
 
 const controls = () => {
@@ -58,21 +58,21 @@ const controls = () => {
         addEventListener: (_: string, listener: () => Promise<void>) => { change = listener; },
     };
     const status = {textContent: "", classList: {toggle: (): void => undefined}};
-    const root = {querySelector: (selector: string) => selector === "#accessibilitySupport" ? input : status};
+    const root = {querySelector: (selector: string) => selector === "#linuxInputMethod" ? input : status};
     return {root, input, status, change: () => change()};
 };
 
-test("accessibility preference is available in Electron but excluded from browser and mobile", () => {
-    assert.ok(getAccessibilitySlot(false, false));
-    assert.equal(getAccessibilitySlot(true, false), undefined);
-    assert.equal(getAccessibilitySlot(true, true), undefined);
+test("Linux input method preference is available in Electron but excluded from browser and mobile", () => {
+    assert.ok(getLinuxInputMethodSlot(false, false));
+    assert.equal(getLinuxInputMethodSlot(true, false), undefined);
+    assert.equal(getLinuxInputMethodSlot(true, true), undefined);
 });
 
-test("accessibility preference loads and saves through the desktop process", async () => {
+test("Linux input method preference loads and saves through the desktop process", async () => {
     let saved = false;
-    const slot = getAccessibilitySlot(false, false, async (channel, data) => {
+    const slot = getLinuxInputMethodSlot(false, false, async (channel, data) => {
         assert.equal(channel, "siyuan-get");
-        if (data.cmd === "setAccessibilitySetting") {
+        if (data.cmd === "setLinuxInputMethodSetting") {
             saved = data.enabled;
         }
         return {enabled: saved, override: null};
@@ -91,26 +91,26 @@ test("accessibility preference loads and saves through the desktop process", asy
 
 test("startup overrides display their effective state and explain the locked control", async () => {
     for (const override of [false, true]) {
-        const slot = getAccessibilitySlot(false, false, async () => ({enabled: !override, override}));
+        const slot = getLinuxInputMethodSlot(false, false, async () => ({enabled: !override, override}));
         const view = controls();
         await slot.afterMount(view.root);
         assert.equal(view.input.checked, override);
         assert.equal(view.input.disabled, true);
-        assert.equal(view.status.textContent, "accessibilitySupportOverrideTip");
+        assert.equal(view.status.textContent, "linuxInputMethodOverrideTip");
     }
 });
 
 test("read failures keep the preference disabled and visible to the user", async () => {
-    const slot = getAccessibilitySlot(false, false, async () => { throw new Error("Unavailable"); });
+    const slot = getLinuxInputMethodSlot(false, false, async () => { throw new Error("Unavailable"); });
     const view = controls();
     await slot.afterMount(view.root);
     assert.equal(view.input.disabled, true);
-    assert.equal(view.status.textContent, "accessibilitySupportError");
+    assert.equal(view.status.textContent, "linuxInputMethodError");
 });
 
 test("save failures restore the previous choice and allow retry", async () => {
-    const slot = getAccessibilitySlot(false, false, async (_, data) => {
-        if (data.cmd === "setAccessibilitySetting") {
+    const slot = getLinuxInputMethodSlot(false, false, async (_, data) => {
+        if (data.cmd === "setLinuxInputMethodSetting") {
             throw new Error("Unable to save");
         }
         return {enabled: false, override: null};
@@ -121,5 +121,11 @@ test("save failures restore the previous choice and allow retry", async () => {
     await view.change();
     assert.equal(view.input.checked, false);
     assert.equal(view.input.disabled, false);
-    assert.equal(view.status.textContent, "accessibilitySupportError");
+    assert.equal(view.status.textContent, "linuxInputMethodError");
+});
+
+test("Linux input method preference is hidden on other desktop platforms", () => {
+    for (const platform of ["win32", "darwin"]) {
+        assert.equal(getLinuxInputMethodSlot(false, false, undefined, platform), undefined);
+    }
 });

@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Mode de compatibilité des méthodes de saisie Linux",
+	"linuxInputMethodTip": "Utiliser X11/XWayland pour améliorer la compatibilité des méthodes de saisie ; peut affecter la mise à l’échelle, s’applique à tous les espaces de travail de cet appareil et prend effet après avoir complètement quitté puis redémarré SiYuan",
+	"linuxInputMethodError": "Impossible de lire ou d’enregistrer les paramètres de compatibilité des méthodes de saisie",
+	"linuxInputMethodOverrideTip": "Contrôlé par les arguments de démarrage ; retirez --ozone-platform pour utiliser ce paramètre",
 	"mobileKernelReconnecting": "Reconnexion en cours...",
 	"mobileKernelReconnectPrompt": "La connexion au noyau a été temporairement interrompue. SiYuan tentera de se reconnecter automatiquement. Au retour de l’arrière-plan, le rétablissement de la connexion peut prendre quelques secondes. Veuillez patienter. Cette fenêtre se fermera automatiquement une fois la connexion rétablie. Si la connexion n’est pas rétablie après une longue attente, essayez de rouvrir SiYuan.",
 	"backlinkGlobalSort": "Tri global des références",

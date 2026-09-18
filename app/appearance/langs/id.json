@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Mode kompatibilitas metode masukan Linux",
+	"linuxInputMethodTip": "Gunakan X11/XWayland untuk meningkatkan kompatibilitas metode masukan; dapat memengaruhi skala tampilan, berlaku untuk semua ruang kerja di perangkat ini, dan aktif setelah SiYuan ditutup sepenuhnya lalu dimulai ulang",
+	"linuxInputMethodError": "Tidak dapat membaca atau menyimpan pengaturan kompatibilitas metode masukan",
+	"linuxInputMethodOverrideTip": "Dikendalikan oleh argumen awal; hapus --ozone-platform untuk menggunakan pengaturan ini",
 	"mobileKernelReconnecting": "Menghubungkan kembali...",
 	"mobileKernelReconnectPrompt": "Koneksi ke kernel terputus sementara. SiYuan akan mencoba menghubungkan kembali secara otomatis. Saat kembali dari latar belakang, pemulihan koneksi mungkin memerlukan beberapa detik. Harap tunggu. Jendela ini akan tertutup secara otomatis setelah koneksi pulih. Jika koneksi belum pulih setelah menunggu lama, coba buka kembali SiYuan.",
 	"backlinkGlobalSort": "Urutan referensi global",

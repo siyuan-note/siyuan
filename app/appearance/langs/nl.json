@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Compatibiliteitsmodus voor Linux-invoermethoden",
+	"linuxInputMethodTip": "Gebruik X11/XWayland om de compatibiliteit van invoermethoden te verbeteren; kan de beeldschermschaal beïnvloeden, geldt voor alle werkruimten op dit apparaat en wordt actief nadat SiYuan volledig is afgesloten en opnieuw gestart",
+	"linuxInputMethodError": "Kan de compatibiliteitsinstellingen voor invoermethoden niet lezen of opslaan",
+	"linuxInputMethodOverrideTip": "Bepaald door opstartargumenten; verwijder --ozone-platform om deze instelling te gebruiken",
 	"mobileKernelReconnecting": "Opnieuw verbinden...",
 	"mobileKernelReconnectPrompt": "De verbinding met de kernel is tijdelijk verbroken. SiYuan probeert automatisch opnieuw verbinding te maken. Bij terugkeer uit de achtergrond kan het herstellen van de verbinding enkele seconden duren. Even geduld. Dit venster sluit automatisch zodra de verbinding is hersteld. Als de verbinding na lang wachten niet is hersteld, probeer SiYuan dan opnieuw te openen.",
 	"backlinkGlobalSort": "Alle verwijzingen sorteren",

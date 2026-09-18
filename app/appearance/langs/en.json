@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Linux input method compatibility mode",
+	"linuxInputMethodTip": "Use X11/XWayland to address input method issues; may affect display scaling, applies to all workspaces on this device, and takes effect after fully quitting and restarting SiYuan",
+	"linuxInputMethodError": "Unable to read or save input method compatibility settings",
+	"linuxInputMethodOverrideTip": "Controlled by startup arguments; remove --ozone-platform to use this setting",
 	"mobileKernelReconnecting": "Reconnecting...",
 	"mobileKernelReconnectPrompt": "The connection to the kernel was temporarily lost. SiYuan will automatically try to reconnect. When returning from the background, restoring the connection may take a few seconds. Please wait. This window will close automatically once the connection is restored. If the connection is not restored after a long wait, try reopening SiYuan.",
 	"backlinkGlobalSort": "Global reference sorting",

@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Linux 入力メソッド互換モード",
+	"linuxInputMethodTip": "X11/XWayland を使用して入力メソッドの互換性を改善します。表示倍率に影響する場合があります。この端末のすべてのワークスペースに適用され、SiYuan を完全に終了して再起動すると有効になります",
+	"linuxInputMethodError": "入力メソッドの互換設定を読み取りまたは保存できません",
+	"linuxInputMethodOverrideTip": "起動引数で制御されています。この設定を使用するには --ozone-platform を削除してください",
 	"mobileKernelReconnecting": "再接続しています...",
 	"mobileKernelReconnectPrompt": "カーネルとの接続が一時的に切断されました。SiYuan は自動的に再接続を試みます。バックグラウンドから戻った際は、接続の復旧に数秒かかることがありますので、しばらくお待ちください。接続が復旧すると、このウィンドウは自動的に閉じます。長時間待っても復旧しない場合は、SiYuan を開き直してください。",
 	"backlinkGlobalSort": "参照全体の並び順",

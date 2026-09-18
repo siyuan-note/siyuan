@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Modo de compatibilidad de métodos de entrada de Linux",
+	"linuxInputMethodTip": "Usar X11/XWayland para mejorar la compatibilidad de los métodos de entrada; puede afectar al escalado, se aplica a todos los espacios de trabajo de este dispositivo y requiere cerrar completamente y reiniciar SiYuan",
+	"linuxInputMethodError": "No se pueden leer o guardar los ajustes de compatibilidad de métodos de entrada",
+	"linuxInputMethodOverrideTip": "Controlado por argumentos de inicio; elimina --ozone-platform para usar este ajuste",
 	"mobileKernelReconnecting": "Reconectando...",
 	"mobileKernelReconnectPrompt": "La conexión con el núcleo se ha interrumpido temporalmente. SiYuan intentará reconectarse automáticamente. Al volver del segundo plano, restablecer la conexión puede tardar unos segundos. Espera, por favor. Esta ventana se cerrará automáticamente cuando se restablezca la conexión. Si no se restablece tras una espera prolongada, intenta volver a abrir SiYuan.",
 	"backlinkGlobalSort": "Orden global de referencias",

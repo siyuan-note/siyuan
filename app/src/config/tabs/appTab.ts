@@ -231,6 +231,22 @@ const registerAppGeneralGroup = (tab: SettingTabBuilder) => {
 </label>`,
         afterMount: mountAccessibilitySetting,
     });
+    if (process.platform === "linux") {
+        group.slot({
+            key: "linuxInputMethod",
+            keywords: [window.siyuan.languages.linuxInputMethod, window.siyuan.languages.linuxInputMethodTip],
+            html: () => `<label class="fn__flex b3-label config-item">
+        <div class="fn__flex-1 config-item__main">
+            ${genConfigItemName(window.siyuan.languages.linuxInputMethod)}
+            <div class="b3-label__text">${window.siyuan.languages.linuxInputMethodTip}</div>
+            <div id="linuxInputMethodStatus" class="b3-label__text fn__none" role="status"></div>
+        </div>
+        <span class="fn__space"></span>
+        <input id="linuxInputMethod" class="b3-switch fn__flex-center" type="checkbox" disabled>
+    </label>`,
+            afterMount: mountLinuxInputMethodSetting,
+        });
+    }
     /// #endif
 };
 
@@ -270,6 +286,48 @@ const mountAccessibilitySetting = async (root: HTMLElement) => {
         } catch (error) {
             console.warn("save accessibility setting failed", error);
             showStatus(window.siyuan.languages.accessibilitySupportError);
+        } finally {
+            input.checked = enabled;
+            input.disabled = false;
+        }
+    });
+};
+
+const mountLinuxInputMethodSetting = async (root: HTMLElement) => {
+    const input = root.querySelector<HTMLInputElement>("#linuxInputMethod");
+    const status = root.querySelector<HTMLElement>("#linuxInputMethodStatus");
+    let enabled = false;
+    const showStatus = (text: string) => {
+        status.textContent = text;
+        status.classList.toggle("fn__none", !text);
+    };
+    try {
+        const setting: {enabled: boolean; override: boolean | null} = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "getLinuxInputMethodSetting",
+        });
+        enabled = setting.enabled;
+        input.checked = setting.override ?? enabled;
+        if (setting.override !== null) {
+            showStatus(window.siyuan.languages.linuxInputMethodOverrideTip);
+            return;
+        }
+        input.disabled = false;
+    } catch (error) {
+        console.warn("read Linux input method setting failed", error);
+        showStatus(window.siyuan.languages.linuxInputMethodError);
+        return;
+    }
+    input.addEventListener("change", async () => {
+        input.disabled = true;
+        showStatus("");
+        try {
+            const setting: {enabled: boolean} = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "setLinuxInputMethodSetting", enabled: input.checked,
+            });
+            enabled = setting.enabled;
+        } catch (error) {
+            console.warn("save Linux input method setting failed", error);
+            showStatus(window.siyuan.languages.linuxInputMethodError);
         } finally {
             input.checked = enabled;
             input.disabled = false;

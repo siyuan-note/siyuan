@@ -78,6 +78,10 @@ const {
     readAccessibilitySetting, writeAccessibilitySetting, getAccessibilityOverride, configureAccessibility,
 } = require("./accessibility");
 
+const {
+    readLinuxInputMethodSetting, writeLinuxInputMethodSetting, getLinuxInputMethodOverride, configureLinuxInputMethod,
+} = require("./linuxInputMethod");
+
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
 const isDevEnv = process.env.NODE_ENV === "development";
@@ -85,6 +89,7 @@ const simulateRosetta = process.argv.includes("--simulate-rosetta");
 const appVer = app.getVersion();
 const confDir = path.join(app.getPath("home"), ".config", "siyuan");
 const windowStatePath = path.join(confDir, "windowState.json");
+const linuxInputMethodSettingPath = path.join(confDir, "linux-input-method.json");
 const accessibilitySettingPath = path.join(confDir, "accessibility.json");
 const appCrashLogPath = path.join(confDir, "app.crash.log");
 const appCrashMarkerPath = path.join(confDir, "app.crash.json");
@@ -766,6 +771,18 @@ try {
     writeLog("read accessibility setting failed: " + error.message);
 }
 configureAccessibility(app.commandLine, accessibilityEnabled);
+
+// Linux 输入法兼容设置在窗口创建前应用，显式显示后端参数保持优先。
+const linuxInputMethodOverride = getLinuxInputMethodOverride(app.commandLine);
+let linuxInputMethodEnabled = false;
+if (process.platform === "linux") {
+    try {
+        linuxInputMethodEnabled = readLinuxInputMethodSetting(linuxInputMethodSettingPath);
+    } catch (error) {
+        writeLog("read Linux input method setting failed: " + error.message);
+    }
+    configureLinuxInputMethod(app.commandLine, linuxInputMethodEnabled, process.platform);
+}
 
 try {
     firstOpen = !remoteKernelTarget && !fs.existsSync(path.join(confDir, "workspace.json"));
@@ -3104,6 +3121,17 @@ app.whenReady().then(() => {
         app.exit();
     });
     ipcMain.handle("siyuan-get", async (event, data) => {
+        if (data.cmd === "getLinuxInputMethodSetting" || data.cmd === "setLinuxInputMethodSetting") {
+            if (process.platform !== "linux" || !initializedWindowIds.has(event.sender.id) ||
+                !getWindowKernelTarget(event.sender.id) || event.senderFrame !== event.sender.mainFrame) {
+                throw new Error("Linux input method setting is unavailable");
+            }
+            if (data.cmd === "setLinuxInputMethodSetting") {
+                writeLinuxInputMethodSetting(linuxInputMethodSettingPath, data.enabled);
+                linuxInputMethodEnabled = data.enabled;
+            }
+            return {enabled: linuxInputMethodEnabled, override: linuxInputMethodOverride};
+        }
         if (data.cmd === "getAccessibilitySetting" || data.cmd === "setAccessibilitySetting") {
             if (!initializedWindowIds.has(event.sender.id) ||
                 !getWindowKernelTarget(event.sender.id) || event.senderFrame !== event.sender.mainFrame) {

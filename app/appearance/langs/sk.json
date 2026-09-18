@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Režim kompatibility vstupných metód systému Linux",
+	"linuxInputMethodTip": "Použiť X11/XWayland na zlepšenie kompatibility vstupných metód; môže ovplyvniť mierku zobrazenia, platí pre všetky pracovné priestory na tomto zariadení a prejaví sa po úplnom ukončení a opätovnom spustení SiYuan",
+	"linuxInputMethodError": "Nastavenia kompatibility vstupných metód sa nepodarilo načítať alebo uložiť",
+	"linuxInputMethodOverrideTip": "Riadené argumentmi spustenia; odstráňte --ozone-platform, aby ste mohli použiť toto nastavenie",
 	"mobileKernelReconnecting": "Opätovné pripájanie...",
 	"mobileKernelReconnectPrompt": "Spojenie s jadrom bolo dočasne prerušené. SiYuan sa automaticky pokúsi znova pripojiť. Pri návrate z pozadia môže obnovenie spojenia trvať niekoľko sekúnd. Počkajte, prosím. Toto okno sa po obnovení spojenia automaticky zatvorí. Ak sa spojenie neobnoví ani po dlhšom čakaní, skúste znova otvoriť SiYuan.",
 	"backlinkGlobalSort": "Globálne zoradenie odkazov",

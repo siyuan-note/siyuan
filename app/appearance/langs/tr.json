@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Linux giriş yöntemi uyumluluk modu",
+	"linuxInputMethodTip": "Giriş yöntemi uyumluluğunu iyileştirmek için X11/XWayland kullanır; ekran ölçeklendirmesini etkileyebilir, bu cihazdaki tüm çalışma alanlarına uygulanır ve SiYuan tamamen kapatılıp yeniden başlatıldığında etkinleşir",
+	"linuxInputMethodError": "Giriş yöntemi uyumluluk ayarları okunamadı veya kaydedilemedi",
+	"linuxInputMethodOverrideTip": "Başlatma argümanları tarafından kontrol ediliyor; bu ayarı kullanmak için --ozone-platform argümanını kaldırın",
 	"mobileKernelReconnecting": "Yeniden bağlanılıyor...",
 	"mobileKernelReconnectPrompt": "Çekirdekle bağlantı geçici olarak kesildi. SiYuan otomatik olarak yeniden bağlanmayı deneyecek. Arka plandan dönerken bağlantının yeniden kurulması birkaç saniye sürebilir. Lütfen bekleyin. Bağlantı yeniden kurulduğunda bu pencere otomatik olarak kapanacaktır. Uzun süre beklemenize rağmen bağlantı yeniden kurulmazsa SiYuan'ı yeniden açmayı deneyin.",
 	"backlinkGlobalSort": "Genel başvuru sıralaması",

@@ -1,4 +1,8 @@
 {
+	"linuxInputMethod": "Tryb zgodności metod wprowadzania w systemie Linux",
+	"linuxInputMethodTip": "Używaj X11/XWayland, aby poprawić zgodność metod wprowadzania; może wpływać na skalowanie ekranu, dotyczy wszystkich przestrzeni roboczych na tym urządzeniu i wymaga całkowitego zamknięcia oraz ponownego uruchomienia SiYuan",
+	"linuxInputMethodError": "Nie można odczytać lub zapisać ustawień zgodności metod wprowadzania",
+	"linuxInputMethodOverrideTip": "Sterowane argumentami uruchamiania; usuń --ozone-platform, aby użyć tego ustawienia",
 	"mobileKernelReconnecting": "Ponowne łączenie...",
 	"mobileKernelReconnectPrompt": "Połączenie z jądrem zostało tymczasowo przerwane. SiYuan automatycznie spróbuje połączyć się ponownie. Po powrocie z tła przywrócenie połączenia może potrwać kilka sekund. Proszę poczekać. To okno zamknie się automatycznie po przywróceniu połączenia. Jeśli połączenie nie zostanie przywrócone po dłuższym oczekiwaniu, spróbuj ponownie otworzyć SiYuan.",
 	"backlinkGlobalSort": "Globalne sortowanie odwołań",

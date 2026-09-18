@@ -297,6 +297,9 @@
         "entryID": {
           "type": "string"
         },
+        "nativeContent": {
+          "$ref": "#/$defs/AINativeContent"
+        },
         "reasoningContent": {
           "type": "string"
         },
@@ -361,6 +364,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AINativeContentInput"
             },
             {
               "type": "null"
@@ -1398,6 +1411,59 @@
       ],
       "additionalProperties": false
     },
+    "AINativeContent": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "blocks",
+        "protocol",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "AINativeContentInput": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/JSONValue"
+          }
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "blocks",
+        "protocol",
+        "version"
+      ],
+      "additionalProperties": false
+    },
     "AIPermissionData": {
       "type": "object",
       "properties": {
@@ -1901,6 +1967,9 @@
         "name": {
           "type": "string"
         },
+        "nativeContent": {
+          "$ref": "#/$defs/AINativeContent"
+        },
         "promptTokens": {
           "type": "integer"
         },
@@ -2077,6 +2146,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AINativeContentInput"
             },
             {
               "type": "null"
@@ -2581,6 +2660,16 @@
             }
           ]
         },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AISessionExtensionAINativeContent"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "reasoningContent": {
           "anyOf": [
             {
@@ -2692,6 +2781,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AISessionExtensionAINativeContentInput"
             },
             {
               "type": "null"
@@ -3154,6 +3253,88 @@
         "$ref": "#/$defs/JSONValue"
       }
     },
+    "AISessionExtensionAINativeContent": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protocol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
+    },
+    "AISessionExtensionAINativeContentInput": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protocol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
+    },
     "AISessionExtensionAIReference": {
       "type": "object",
       "properties": {
@@ -3313,6 +3494,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AISessionExtensionAINativeContent"
             },
             {
               "type": "null"
@@ -3592,6 +3783,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AISessionExtensionAINativeContentInput"
             },
             {
               "type": "null"

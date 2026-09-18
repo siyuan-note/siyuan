@@ -130,7 +130,7 @@ func isGoogleGeminiOpenAICompatibleEndpoint(apiBaseURL, model string) bool {
 }
 
 // WrapGeminiThoughtSignatureTransport 为 Google OpenAI 兼容端点补充工具调用签名往返支持。
-// 该函数导出仅用于 Agent 集成测试构造本地上游，生产代码通过 NewOpenAIClientWithModel 使用。
+// 该函数导出仅用于 Agent 集成测试构造本地上游，生产代码通过 NewAIClientWithModel 使用。
 func WrapGeminiThoughtSignatureTransport(base openai.HTTPDoer) openai.HTTPDoer {
 	return &geminiThoughtSignatureTransport{base: base}
 }

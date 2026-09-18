@@ -1,4 +1,5 @@
 {
+	"apiTypeAnthropicMessages": "Anthropic Messages 接口",
 	"encryptedAssetExternalOpenTip": "将打开临时解密副本，修改不会保存到原附件。锁定笔记本后副本可能被清理，如需保留修改，请另存到其他位置。",
 	"linuxInputMethod": "Linux 输入法兼容模式",
 	"linuxInputMethodTip": "通过 X11/XWayland 改善输入法兼容性，可能影响显示缩放，作用于本机所有工作空间，完全退出并重新启动思源后生效",
@@ -1499,7 +1500,7 @@
 	"apiVersion": "API 版本",
 	"apiVersionTip": "仅在使用 Azure OpenAI 服务时需要设置",
 	"apiProvider": "API 提供商",
-	"apiProviderTip": "兼容 Chat Completions API 或 Responses API 接口的提供商（如 DeepSeek、Kimi、MiniMax）均可使用",
+	"apiProviderTip": "为每个提供商选择其支持的 API 类型",
 	"skip": "跳过",
 	"nextRound": "下一轮",
 	"save": "保存",

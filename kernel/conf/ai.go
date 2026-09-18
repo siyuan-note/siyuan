@@ -604,6 +604,9 @@ func (ai *AI) Normalize() {
 		p.BaseURL = strings.TrimSpace(p.BaseURL)
 		if "" == p.BaseURL {
 			p.BaseURL = "https://api.openai.com/v1"
+			if util.IsAnthropicMessagesProtocol(p.Protocol) {
+				p.BaseURL = "https://api.anthropic.com/v1"
+			}
 		}
 		p.DisplayName = strings.TrimSpace(p.DisplayName)
 		p.APIKey = strings.TrimSpace(p.APIKey)

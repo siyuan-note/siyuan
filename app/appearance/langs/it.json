@@ -1,4 +1,5 @@
 {
+	"apiTypeAnthropicMessages": "API Messaggi di Anthropic",
 	"encryptedAssetExternalOpenTip": "Verrà aperta una copia temporanea decrittografata. Le modifiche non verranno salvate nell’allegato originale. La copia potrebbe essere eliminata quando il quaderno viene bloccato. Per conservare le modifiche, salvare il file in un’altra posizione.",
 	"linuxInputMethod": "Modalità di compatibilità dei metodi di input Linux",
 	"linuxInputMethodTip": "Usa X11/XWayland per migliorare la compatibilità dei metodi di input; può influire sul ridimensionamento, si applica a tutti gli spazi di lavoro su questo dispositivo e richiede la chiusura completa e il riavvio di SiYuan",
@@ -1499,7 +1500,7 @@
 	"apiVersion": "Versione API",
 	"apiVersionTip": "Necessario solo quando si utilizza il servizio Azure OpenAI",
 	"apiProvider": "Provider API",
-	"apiProviderTip": "I provider compatibili con l'API Chat Completions o l'API Responses (es. DeepSeek, Kimi, MiniMax) possono essere utilizzati",
+	"apiProviderTip": "Seleziona il tipo di API supportato da ciascun fornitore",
 	"skip": "Salta",
 	"nextRound": "Prossimo turno",
 	"save": "Salva",

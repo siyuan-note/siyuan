@@ -21,6 +21,14 @@ describe("AI provider presets", () => {
         assert.equal(getDefaultProviderProtocol("custom"), "openai");
     });
 
+    it("selects Messages for the Anthropic preset without changing custom provider defaults", () => {
+        assert.equal(getDefaultProviderProtocol("anthropic"), "anthropic-messages");
+        assert.equal(findProviderPreset("https://api.anthropic.com/v1/")?.id, "anthropic");
+        assert.equal(getResponsesSupport("https://api.anthropic.com/v1"), "unsupported");
+        assert.equal(getDefaultProviderProtocol("custom"), "openai");
+        assert.equal(getDefaultProviderProtocol("openai"), "openai-responses");
+    });
+
     it("reports known and custom Responses compatibility", () => {
         assert.equal(getResponsesSupport("https://api.deepseek.com"), "supported");
         assert.equal(getResponsesSupport("https://open.bigmodel.cn/api/paas/v4"), "unsupported");

@@ -81,7 +81,7 @@ type OpenAIImageAdapter struct {
 	timeout time.Duration
 }
 
-func ChatGPT(msg string, contextMsgs []string, c *openai.Client, apiBaseURL, protocol, model string, maxTokens int,
+func ChatGPT(msg string, contextMsgs []string, c *AIClient, apiBaseURL, protocol, model string, maxTokens int,
 	temperature float64, timeout int) (ret string, stop bool, err error) {
 	var reqMsgs []openai.ChatCompletionMessage
 
@@ -216,9 +216,9 @@ func (t *extraBodyTransport) Do(req *http.Request) (*http.Response, error) {
 	return t.base.Do(req)
 }
 
-// NewOpenAIClientWithModel 创建 OpenAI client，并按模型与端点启用兼容适配。
+// NewAIClientWithModel 创建生成客户端，并按模型与端点启用协议适配。
 // 模型请求统一启用思考字段适配，命中清单的模型会注入额外参数，官方 Gemini 端点会保留工具调用签名。
-func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string, headers ...map[string]string) *openai.Client {
+func NewAIClientWithModel(apiKey, apiBaseURL, model string, headers ...map[string]string) *AIClient {
 	extra := ExtraBodyForModel(model)
 	geminiThoughtSignatures := isGoogleGeminiOpenAICompatibleEndpoint(apiBaseURL, model)
 	config := openai.DefaultConfig(apiKey)
@@ -232,7 +232,8 @@ func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string, headers ...map[s
 	}
 	transport = &reasoningResponseTransport{base: transport}
 	config.HTTPClient = transport
-	return openai.NewClientWithConfig(config)
+	return &AIClient{Client: openai.NewClientWithConfig(config), baseURL: apiBaseURL,
+		anthropicHTTP: newAnthropicHTTPClient(apiKey, apiBaseURL, headers...)}
 }
 
 // TestModel 测试模型可用性。先调用 ListModels（GET /v1/models）拉取可用模型清单，
@@ -243,19 +244,33 @@ func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int, headers 
 	if 1 > timeout {
 		timeout = 30
 	}
-	client := NewOpenAIClientWithModel(apiKey, apiBaseURL, model, headers...)
+	client := NewAIClientWithModel(apiKey, apiBaseURL, model, headers...)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
 	ctx = ContextWithOpenAIResponsesBaseURL(ctx, apiBaseURL)
 
 	// 优先校验模型是否在可用清单中
-	list, listErr := client.ListModels(ctx)
+	var availableIDs []string
+	var listErr error
+	if IsAnthropicMessagesProtocol(protocol) {
+		var models []AvailableModel
+		models, listErr = listAnthropicModels(ctx, client)
+		for _, m := range models {
+			availableIDs = append(availableIDs, m.ID)
+		}
+	} else {
+		list, err := client.ListModels(ctx)
+		listErr = err
+		for _, m := range list.Models {
+			availableIDs = append(availableIDs, m.ID)
+		}
+	}
 	if nil == listErr {
 		model = strings.TrimSpace(model)
 		target := strings.ToLower(model)
-		for _, m := range list.Models {
-			available = append(available, m.ID)
-			if strings.ToLower(m.ID) == target {
+		for _, id := range availableIDs {
+			available = append(available, id)
+			if strings.ToLower(id) == target {
 				matched = true
 			}
 		}
@@ -274,7 +289,7 @@ func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int, headers 
 		MaxCompletionTokens: 1,
 		Temperature:         1,
 	}
-	if IsOpenAIResponsesProtocol(protocol) {
+	if IsOpenAIResponsesProtocol(protocol) || IsAnthropicMessagesProtocol(protocol) {
 		request.Stream = true
 		var stream *OpenAICompletionStream
 		stream, err = CreateOpenAICompletionStream(ctx, client, protocol, request, nil)
@@ -863,7 +878,7 @@ func NewOpenAIImageAdapter(apiKey, apiBaseURL, model string, timeout int, header
 	if timeout < 1 {
 		timeout = 30
 	}
-	client := NewOpenAIClientWithModel(apiKey, apiBaseURL, model, headers...)
+	client := NewAIClientWithModel(apiKey, apiBaseURL, model, headers...).Client
 	if isMiniMaxImageEndpoint(apiBaseURL) {
 		config := openai.DefaultConfig(apiKey)
 		config.BaseURL = apiBaseURL

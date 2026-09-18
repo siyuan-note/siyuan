@@ -496,6 +496,9 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 		if message.ReasoningContent != "" {
 			entry["reasoningContent"] = message.ReasoningContent
 		}
+		if message.NativeContent != nil {
+			entry["nativeContent"] = message.NativeContent
+		}
 		if len(message.ResponseOutput) > 0 {
 			entry["responseOutput"] = message.ResponseOutput
 		}

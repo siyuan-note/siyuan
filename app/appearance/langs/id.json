@@ -1,4 +1,5 @@
 {
+	"apiTypeAnthropicMessages": "API Pesan Anthropic",
 	"encryptedAssetExternalOpenTip": "Salinan sementara yang telah didekripsi akan dibuka. Perubahan tidak akan disimpan ke lampiran asli. Salinan dapat dihapus saat buku catatan dikunci. Untuk mempertahankan perubahan, simpan berkas ke lokasi lain.",
 	"linuxInputMethod": "Mode kompatibilitas metode masukan Linux",
 	"linuxInputMethodTip": "Gunakan X11/XWayland untuk meningkatkan kompatibilitas metode masukan; dapat memengaruhi skala tampilan, berlaku untuk semua ruang kerja di perangkat ini, dan aktif setelah SiYuan ditutup sepenuhnya lalu dimulai ulang",
@@ -1499,7 +1500,7 @@
 	"apiVersion": "Versi API",
 	"apiVersionTip": "Hanya diperlukan saat menggunakan layanan Azure OpenAI",
 	"apiProvider": "Penyedia API",
-	"apiProviderTip": "Penyedia yang kompatibel dengan API Chat Completions atau API Responses (mis., DeepSeek, Kimi, MiniMax) dapat digunakan",
+	"apiProviderTip": "Pilih jenis API yang didukung oleh setiap penyedia",
 	"skip": "Lewati",
 	"nextRound": "Putaran berikutnya",
 	"save": "Simpan",

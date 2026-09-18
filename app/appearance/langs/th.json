@@ -1,4 +1,5 @@
 {
+	"apiTypeAnthropicMessages": "API ข้อความ Anthropic",
 	"encryptedAssetExternalOpenTip": "จะเปิดสำเนาชั่วคราวที่ถอดรหัสแล้ว การเปลี่ยนแปลงจะไม่ถูกบันทึกลงในไฟล์แนบต้นฉบับ สำเนาอาจถูกลบเมื่อล็อกสมุดบันทึก หากต้องการเก็บการเปลี่ยนแปลงไว้ โปรดบันทึกไฟล์ไปยังตำแหน่งอื่น",
 	"linuxInputMethod": "โหมดความเข้ากันได้ของวิธีป้อนข้อมูลบน Linux",
 	"linuxInputMethodTip": "ใช้ X11/XWayland เพื่อปรับปรุงความเข้ากันได้ของวิธีป้อนข้อมูล อาจส่งผลต่อการปรับขนาดหน้าจอ มีผลกับพื้นที่ทำงานทั้งหมดบนอุปกรณ์นี้ และมีผลหลังจากปิด SiYuan อย่างสมบูรณ์แล้วเปิดใหม่",
@@ -1499,7 +1500,7 @@
 	"apiVersion": "เวอร์ชัน API",
 	"apiVersionTip": "เฉพาะ Azure OpenAI",
 	"apiProvider": "ผู้ให้ API",
-	"apiProviderTip": "สามารถใช้ผู้ให้บริการที่รองรับ Chat Completions API หรือ Responses API (เช่น DeepSeek, Kimi, MiniMax) ได้",
+	"apiProviderTip": "เลือกประเภท API ที่ผู้ให้บริการแต่ละรายรองรับ",
 	"skip": "ข้าม",
 	"nextRound": "รอบถัดไป",
 	"save": "บันทึก",

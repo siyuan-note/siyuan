@@ -1,4 +1,5 @@
 {
+	"apiTypeAnthropicMessages": "Anthropic Mesajlar API’si",
 	"encryptedAssetExternalOpenTip": "Geçici olarak şifresi çözülmüş bir kopya açılacak. Değişiklikler özgün eke kaydedilmeyecek. Not defteri kilitlendiğinde kopya silinebilir. Değişikliklerinizi korumak için dosyayı başka bir konuma kaydedin.",
 	"linuxInputMethod": "Linux giriş yöntemi uyumluluk modu",
 	"linuxInputMethodTip": "Giriş yöntemi uyumluluğunu iyileştirmek için X11/XWayland kullanır; ekran ölçeklendirmesini etkileyebilir, bu cihazdaki tüm çalışma alanlarına uygulanır ve SiYuan tamamen kapatılıp yeniden başlatıldığında etkinleşir",
@@ -1499,7 +1500,7 @@
 	"apiVersion": "API sürümü",
 	"apiVersionTip": "Yalnızca Azure OpenAI hizmeti kullanıldığında gereklidir",
 	"apiProvider": "API Sağlayıcısı",
-	"apiProviderTip": "Chat Completions API veya Responses API ile uyumlu sağlayıcılar (örn. DeepSeek, Kimi, MiniMax) kullanılabilir",
+	"apiProviderTip": "Her sağlayıcının desteklediği API türünü seçin",
 	"skip": "Geç",
 	"nextRound": "Sonraki tur",
 	"save": "Kaydet",

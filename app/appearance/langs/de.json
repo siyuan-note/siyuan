@@ -1,4 +1,5 @@
 {
+	"apiTypeAnthropicMessages": "Anthropic Messages API",
 	"encryptedAssetExternalOpenTip": "Es wird eine temporäre entschlüsselte Kopie geöffnet. Änderungen werden nicht im ursprünglichen Anhang gespeichert. Die Kopie kann beim Sperren des Notizbuchs gelöscht werden. Speichern Sie die Datei an einem anderen Ort, um Ihre Änderungen zu behalten.",
 	"linuxInputMethod": "Linux-Eingabemethoden-Kompatibilitätsmodus",
 	"linuxInputMethodTip": "X11/XWayland zur Verbesserung der Eingabemethoden-Kompatibilität verwenden; kann die Anzeigeskalierung beeinflussen, gilt für alle Arbeitsbereiche auf diesem Gerät und wird nach vollständigem Beenden und Neustarten von SiYuan wirksam",
@@ -1499,7 +1500,7 @@
 	"apiVersion": "API-Version",
 	"apiVersionTip": "Nur erforderlich, wenn der Azure OpenAI-Dienst verwendet wird.",
 	"apiProvider": "API-Anbieter",
-	"apiProviderTip": "Anbieter, die mit der Chat Completions API oder der Responses API kompatibel sind (z. B. DeepSeek, Kimi, MiniMax), können verwendet werden",
+	"apiProviderTip": "Wählen Sie für jeden Anbieter den unterstützten API-Typ aus",
 	"skip": "Überspringen",
 	"nextRound": "Nächste Runde",
 	"save": "Speichern",

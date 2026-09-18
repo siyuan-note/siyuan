@@ -13,6 +13,7 @@ export interface IProviderPreset {
 
 export const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "openai", name: "OpenAI", baseURL: "https://api.openai.com/v1", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/openai.svg"},
+    {id: "anthropic", name: "Anthropic", baseURL: "https://api.anthropic.com/v1", category: "official", responsesSupport: "unsupported"},
     {id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/deepseek.svg"},
     {id: "moonshot", name: "Moonshot AI", baseURL: "https://api.moonshot.cn/v1", category: "official", responsesSupport: "experimental", icon: "/stage/images/ai-providers/moonshot.svg"},
     {id: "minimax", name: "MiniMax", baseURL: "https://api.minimax.io/v1", category: "official", responsesSupport: "experimental", region: "international", icon: "/stage/images/ai-providers/minimax.svg"},
@@ -41,4 +42,4 @@ export const getResponsesSupport = (baseURL: string): AIResponsesSupport =>
     findProviderPreset(baseURL)?.responsesSupport || "experimental";
 
 export const getDefaultProviderProtocol = (presetId: string) =>
-    presetId === "openai" ? "openai-responses" : "openai";
+    presetId === "anthropic" ? "anthropic-messages" : presetId === "openai" ? "openai-responses" : "openai";

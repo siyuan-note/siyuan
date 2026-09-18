@@ -272,6 +272,25 @@ func estimateChatRequestTokens(model string, messages []openai.ChatCompletionMes
 func estimateProtocolRequestTokens(model, protocol string, messages []openai.ChatCompletionMessage,
 	checkpointMessages []AgentMessage, compaction *runtimeCompaction, tools []openai.Tool) int {
 	total := estimateChatRequestTokens(model, messages, tools)
+	if util.IsAnthropicMessagesProtocol(protocol) {
+		counter, _ := getTokenCounter(model)
+		for _, message := range checkpointMessages {
+			if message.NativeContent != nil && util.IsAnthropicMessagesProtocol(message.NativeContent.Protocol) {
+				// 只补计原生签名及结构开销，避免重复计算可见文本和工具参数。
+				visible := counter.count(message.Content) + counter.count(message.ReasoningContent)
+				for _, call := range message.ToolCalls {
+					arguments := call.ArgumentsJSON
+					if arguments == "" {
+						data, _ := json.Marshal(call.Arguments)
+						arguments = string(data)
+					}
+					visible += counter.count(call.Name) + counter.count(arguments)
+				}
+				total += max(responseOutputTokenCost(model, message.NativeContent.Blocks, 0)-visible, 0)
+			}
+		}
+		return total
+	}
 	if !util.IsOpenAIResponsesProtocol(protocol) {
 		return total
 	}

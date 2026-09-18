@@ -1,4 +1,5 @@
 {
+	"apiTypeAnthropicMessages": "واجهة Anthropic Messages",
 	"encryptedAssetExternalOpenTip": "سيتم فتح نسخة مؤقتة مفكوك تشفيرها. لن تُحفظ التغييرات في المرفق الأصلي. قد تُحذف النسخة عند قفل دفتر الملاحظات. للاحتفاظ بالتغييرات، احفظ الملف في موقع آخر.",
 	"linuxInputMethod": "وضع توافق طرق الإدخال في Linux",
 	"linuxInputMethodTip": "استخدام X11/XWayland لتحسين توافق طرق الإدخال؛ قد يؤثر على تحجيم العرض، وينطبق على جميع مساحات العمل على هذا الجهاز، ويسري بعد إغلاق SiYuan بالكامل وإعادة تشغيله",
@@ -1499,7 +1500,7 @@
 	"apiVersion": "‫إصدار API‬",
 	"apiVersionTip": "‫مطلوب فقط عند استخدام خدمة Azure OpenAI‬",
 	"apiProvider": "‫موفر API‬",
-	"apiProviderTip": "يمكن استخدام الموفرين المتوافقين مع واجهة Chat Completions API أو Responses API (مثل DeepSeek وKimi وMiniMax)",
+	"apiProviderTip": "اختر نوع واجهة API الذي يدعمه كل مزود",
 	"skip": "تخطى",
 	"nextRound": "الجولة التالية",
 	"save": "حفظ",

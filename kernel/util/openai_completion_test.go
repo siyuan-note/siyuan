@@ -57,7 +57,7 @@ func TestOpenAIResponsesStreamPreservesOutput(t *testing.T) {
 
 	config := openai.DefaultConfig("test")
 	config.BaseURL = server.URL + "/v1"
-	client := openai.NewClientWithConfig(config)
+	client := &AIClient{Client: openai.NewClientWithConfig(config)}
 	request := openai.ChatCompletionRequest{
 		Model:               "gpt-test",
 		Messages:            []openai.ChatCompletionMessage{{Role: openai.ChatMessageRoleUser, Content: "hello"}},
@@ -190,7 +190,7 @@ func TestOpenAIResponsesStreamRequiresTerminalEvent(t *testing.T) {
 
 	config := openai.DefaultConfig("test")
 	config.BaseURL = server.URL + "/v1"
-	stream, err := CreateOpenAICompletionStream(context.Background(), openai.NewClientWithConfig(config),
+	stream, err := CreateOpenAICompletionStream(context.Background(), &AIClient{Client: openai.NewClientWithConfig(config)},
 		OpenAIProtocolResponses, openai.ChatCompletionRequest{Model: "gpt-test"}, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -216,7 +216,7 @@ func TestOpenAIResponsesStreamReturnsTypedError(t *testing.T) {
 
 	config := openai.DefaultConfig("test")
 	config.BaseURL = server.URL + "/v1"
-	stream, err := CreateOpenAICompletionStream(context.Background(), openai.NewClientWithConfig(config),
+	stream, err := CreateOpenAICompletionStream(context.Background(), &AIClient{Client: openai.NewClientWithConfig(config)},
 		OpenAIProtocolResponses, openai.ChatCompletionRequest{Model: "gpt-test"}, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -250,7 +250,7 @@ func TestOpenAIResponsesStreamRejectsIncompleteFunctionCall(t *testing.T) {
 
 	config := openai.DefaultConfig("test")
 	config.BaseURL = server.URL + "/v1"
-	stream, err := CreateOpenAICompletionStream(context.Background(), openai.NewClientWithConfig(config),
+	stream, err := CreateOpenAICompletionStream(context.Background(), &AIClient{Client: openai.NewClientWithConfig(config)},
 		OpenAIProtocolResponses, openai.ChatCompletionRequest{Model: "gpt-test"}, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -304,7 +304,7 @@ func TestOpenAIResponsesNonStreamFailure(t *testing.T) {
 
 	config := openai.DefaultConfig("test")
 	config.BaseURL = server.URL + "/v1"
-	_, err := CreateOpenAICompletion(context.Background(), openai.NewClientWithConfig(config),
+	_, err := CreateOpenAICompletion(context.Background(), &AIClient{Client: openai.NewClientWithConfig(config)},
 		OpenAIProtocolResponses, openai.ChatCompletionRequest{Model: "gpt-test"}, nil)
 	if err == nil || !strings.Contains(err.Error(), "generation failed") {
 		t.Fatalf("unexpected failed response error: %v", err)

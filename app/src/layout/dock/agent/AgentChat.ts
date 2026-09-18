@@ -107,6 +107,7 @@ type SessionEntry =
     type: "assistant";
     content?: string;
     reasoningContent?: string;
+    nativeContent?: {protocol: string; version: number; blocks: Array<Record<string, unknown>>};
     responseOutput?: Array<Record<string, unknown>>;
     responseOutputTokens?: number;
     roundID?: string;

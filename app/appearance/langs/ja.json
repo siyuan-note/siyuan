@@ -1,4 +1,5 @@
 {
+	"apiTypeAnthropicMessages": "Anthropic Messages API",
 	"encryptedAssetExternalOpenTip": "一時的に復号したコピーを開きます。変更は元の添付ファイルには保存されません。ノートブックをロックすると、コピーが削除される場合があります。変更を保持するには、別の場所に保存してください。",
 	"linuxInputMethod": "Linux 入力メソッド互換モード",
 	"linuxInputMethodTip": "X11/XWayland を使用して入力メソッドの互換性を改善します。表示倍率に影響する場合があります。この端末のすべてのワークスペースに適用され、SiYuan を完全に終了して再起動すると有効になります",
@@ -1499,7 +1500,7 @@
 	"apiVersion": "API バージョン",
 	"apiVersionTip": "Azure OpenAI サービスを使用する場合にのみ必要です",
 	"apiProvider": "API プロバイダー",
-	"apiProviderTip": "Chat Completions API または Responses API と互換性のあるプロバイダー（DeepSeek、Kimi、MiniMax など）を利用できます",
+	"apiProviderTip": "各プロバイダーがサポートする API タイプを選択してください",
 	"skip": "スキップ",
 	"nextRound": "次のラウンド",
 	"save": "保存",

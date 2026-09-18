@@ -129,7 +129,7 @@ const createProviderView = (root: HTMLElement, backLabel: string, stacked = fals
 
 export const genProviderCardsHtml = (): string => `<div class="b3-label config-item" id="aiProviderCardsBlock">
     <div class="fn__flex">
-        ${genConfigItemMainHtml(window.siyuan.languages.openAICompatibleProvider, window.siyuan.languages.apiProviderTip)}
+        ${genConfigItemMainHtml(window.siyuan.languages.apiProvider, window.siyuan.languages.apiProviderTip)}
         <span class="fn__space"></span>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-action="addProvider">
             <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
@@ -409,6 +409,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 <select class="b3-select fn__flex-center fn__size200" data-provider-field="protocol">
                     <option value="openai"${draft.protocol === "openai" ? " selected" : ""}>Chat Completions API</option>
                     <option value="openai-responses"${draft.protocol === "openai-responses" ? " selected" : ""}>Responses API</option>
+                    <option value="anthropic-messages"${draft.protocol === "anthropic-messages" ? " selected" : ""}>${window.siyuan.languages.apiTypeAnthropicMessages}</option>
                 </select>
             </label>
             <label class="fn__flex b3-label config-item">

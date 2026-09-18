@@ -1,4 +1,5 @@
 {
+	"apiTypeAnthropicMessages": "Anthropic Messages-API",
 	"encryptedAssetExternalOpenTip": "Er wordt een tijdelijke ontsleutelde kopie geopend. Wijzigingen worden niet opgeslagen in de oorspronkelijke bijlage. De kopie kan worden verwijderd wanneer het notitieboek wordt vergrendeld. Sla het bestand op een andere locatie op om uw wijzigingen te behouden.",
 	"linuxInputMethod": "Compatibiliteitsmodus voor Linux-invoermethoden",
 	"linuxInputMethodTip": "Gebruik X11/XWayland om de compatibiliteit van invoermethoden te verbeteren; kan de beeldschermschaal beïnvloeden, geldt voor alle werkruimten op dit apparaat en wordt actief nadat SiYuan volledig is afgesloten en opnieuw gestart",
@@ -1499,7 +1500,7 @@
 	"apiVersion": "API-versie",
 	"apiVersionTip": "Alleen nodig voor Azure OpenAI",
 	"apiProvider": "API-provider",
-	"apiProviderTip": "Providers die compatibel zijn met de Chat Completions API of de Responses API (bijv. DeepSeek, Kimi, MiniMax) kunnen worden gebruikt",
+	"apiProviderTip": "Selecteer het API-type dat door elke provider wordt ondersteund",
 	"skip": "Overslaan",
 	"nextRound": "Volgende ronde",
 	"save": "Opslaan",

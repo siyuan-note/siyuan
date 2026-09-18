@@ -232,11 +232,13 @@ func BuildBookmark() (ret *Bookmarks) {
 	for _, block := range blocks {
 		if "" != block.Name {
 			// Blocks in the bookmark panel display their name instead of content https://github.com/siyuan-note/siyuan/issues/8514
-			block.Content = block.Name
+			// 名称是 SQL 索引中的裸文本，书签面板按 HTML 渲染 Content，转义后再展示
+			block.Content = util.EscapeHTML(block.Name)
 		} else if "NodeAttributeView" == block.Type {
 			// Display database title in bookmark panel https://github.com/siyuan-note/siyuan/issues/11666
 			avID := gulu.Str.SubStringBetween(block.Markdown, "av-id=\"", "\"")
-			block.Content, _ = av.GetAttributeViewName(avID)
+			avName, _ := av.GetAttributeViewName(avID)
+			block.Content = util.EscapeHTML(avName)
 		} else {
 			// Improve bookmark panel rendering https://github.com/siyuan-note/siyuan/issues/9361
 			tree, err := LoadTreeByBlockID(block.ID)

@@ -784,13 +784,13 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         <div class="config-name">${window.siyuan.languages.args}</div>
         <div class="b3-label__text">${window.siyuan.languages.aiMcpArgsTip}</div>
         <div class="fn__hr"></div>
-        <textarea class="b3-text-field fn__block" id="aiMcpServerArgs" rows="4" style="resize: vertical;">${Lute.EscapeHTMLStr(argsText)}</textarea>
+        <textarea spellcheck="false" class="b3-text-field fn__block" id="aiMcpServerArgs" rows="4" style="resize: vertical;">${Lute.EscapeHTMLStr(argsText)}</textarea>
     </div>
     <div class="b3-label b3-label--inner${mcpTypeHidden("stdio")}" data-mcp-type="stdio">
         <div class="config-name">${window.siyuan.languages.aiMcpInheritEnv}</div>
         <div class="b3-label__text">${window.siyuan.languages.aiMcpInheritEnvTip}</div>
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" id="aiMcpServerEnvSearch" type="search" placeholder="${window.siyuan.languages.search}"/>
+        <input spellcheck="false" class="b3-text-field fn__block" id="aiMcpServerEnvSearch" type="search" placeholder="${window.siyuan.languages.search}"/>
         <div class="fn__hr--small"></div>
         <div class="b3-list b3-list--border b3-list--background" id="aiMcpServerInheritEnv" style="max-height: 180px; overflow: auto;">
             ${renderEnvironmentVariableOptions(environment.names, selectedEnvironmentNames)}
@@ -818,7 +818,7 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         <div class="config-name">${window.siyuan.languages.aiMcpHttpHeaders}</div>
         <div class="b3-label__text">${window.siyuan.languages.fillJsonObject}</div>
         <div class="fn__hr"></div>
-        <textarea class="b3-text-field fn__block" id="aiMcpServerHeaders" rows="3" style="resize: vertical;" placeholder='{"Authorization":"Bearer ..."}'>${Lute.EscapeHTMLStr(headersText)}</textarea>
+        <textarea spellcheck="false" class="b3-text-field fn__block" id="aiMcpServerHeaders" rows="3" style="resize: vertical;" placeholder='{"Authorization":"Bearer ..."}'>${Lute.EscapeHTMLStr(headersText)}</textarea>
     </div>
     <div class="b3-label b3-label--inner fn__flex${mcpTypeHidden("http")}" data-mcp-type="http">
         <div class="fn__flex-1">

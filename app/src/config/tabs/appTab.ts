@@ -352,7 +352,7 @@ const genNetworkProxyHtml = (): string => {
             <option value="http" ${proxy.scheme === "http" ? "selected" : ""}>HTTP</option>
         </select>
         <span class="fn__space"></span>
-        <input id="networkProxyHost" placeholder="user:pass@IP" class="b3-text-field fn__flex-1" value="${Lute.EscapeHTMLStr(proxy.host)}"/>
+        <input spellcheck="false" id="networkProxyHost" placeholder="user:pass@IP" class="b3-text-field fn__flex-1" value="${Lute.EscapeHTMLStr(proxy.host)}"/>
         <span class="fn__space"></span>
         <input id="networkProxyPort" placeholder="Port" class="b3-text-field fn__flex-1" value="${Lute.EscapeHTMLStr(proxy.port)}" type="number"/>
         <span class="fn__space"></span>

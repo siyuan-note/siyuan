@@ -34,9 +34,10 @@ type SelectControl = ControlBase & {
     kind: "select";
     options: SelectOption[];
 };
-export type StringControl = ControlBase & {kind: "text"};
+export type StringControl = ControlBase & {kind: "text"; spellcheck?: boolean};
 type TextBlockControl = ControlBase & {
     kind: "textBlock";
+    spellcheck?: boolean;
     mode: "input-text" | "input-password" | "textarea";
 };
 
@@ -171,11 +172,12 @@ export const controlSelect = (
 
 export const controlString = (
     id: string,
-    options?: {readConfig?: () => string; fallback?: string},
+    options?: {readConfig?: () => string; fallback?: string; spellcheck?: boolean},
 ): StringControl => {
     const fallback = options?.fallback ?? "";
     return {
         kind: "text",
+        spellcheck: options?.spellcheck,
         id,
         readConfig: () => options?.readConfig?.() ?? coerceString(readConfigAt(id), fallback),
         readValue: (el) => (el as HTMLInputElement | HTMLTextAreaElement).value,
@@ -186,6 +188,7 @@ export const controlTextBlock = (
     id: string,
     options: {
         mode: "input-text" | "input-password" | "textarea";
+        spellcheck?: boolean;
         readConfig?: () => string;
         fallback?: string;
     },
@@ -193,6 +196,7 @@ export const controlTextBlock = (
     const fallback = options.fallback ?? "";
     return {
         kind: "textBlock",
+        spellcheck: options.spellcheck,
         id,
         mode: options.mode,
         readConfig: () => options.readConfig?.() ?? coerceString(readConfigAt(id), fallback),

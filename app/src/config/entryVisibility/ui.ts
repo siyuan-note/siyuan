@@ -572,7 +572,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     <div class="config-group">
         ${builtin ? `<div class="config-title">${escapeHtml(draft.name)}</div>` : ""}
         <div class="fn__flex">
-            <input class="b3-text-field fn__flex-1" data-type="entry-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
+            <input spellcheck="false" class="b3-text-field fn__flex-1" data-type="entry-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
         </div>
     </div>
     <div class="config-entry-visibility__browser" data-type="entry-browser"></div>

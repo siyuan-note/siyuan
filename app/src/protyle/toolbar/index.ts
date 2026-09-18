@@ -1953,7 +1953,7 @@ export class Toolbar {
         window.siyuan.menus.menu.remove();
         this.range = getEditorRange(nodeElement);
         this.subElement.innerHTML = `<div data-id="codeLanguage" class="fn__flex-column" style="max-height:50vh">
-    <input placeholder="${window.siyuan.languages.searchPlaceholder}" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
+    <input spellcheck="false" placeholder="${window.siyuan.languages.searchPlaceholder}" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"></div>
 </div>`;
         const listElement = this.subElement.lastElementChild.lastElementChild as HTMLElement;
@@ -2294,7 +2294,7 @@ export class Toolbar {
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
         this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh">
-    <input style="margin: 0 8px 4px 8px" class="b3-text-field"/>
+    <input spellcheck="false" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height:64px" src="/stage/loading-pure.svg"></div>
 </div>`;
         const listElement = this.subElement.lastElementChild.lastElementChild as HTMLElement;

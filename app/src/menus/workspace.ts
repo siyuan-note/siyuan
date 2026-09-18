@@ -436,7 +436,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
             layoutSubMenu.push({
                 iconHTML: "",
                 type: "empty",
-                label: `<input class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.searchPlaceholder}">
+                label: `<input spellcheck="false" class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.searchPlaceholder}">
 <div class="b3-list b3-list--background" style="width: 220px"></div>`,
                 bind(menuElement) {
                     const genListHTML = (isInit = false) => {

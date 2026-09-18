@@ -534,7 +534,7 @@ export class Hint {
     private getHTMLByData(data: IHintData[]) {
         let hintsHTML = '<div style="flex: 1;overflow:auto;">';
         if (this.source !== "hint") {
-            hintsHTML = '<input style="margin:0 8px 4px 8px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';
+            hintsHTML = '<input spellcheck="false" style="margin:0 8px 4px 8px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';
         }
         const focusIndex = data.findIndex(item => item.focus);
         data.forEach((hintData, i) => {

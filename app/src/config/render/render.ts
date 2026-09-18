@@ -66,14 +66,14 @@ const genTextBlockFieldHtml = (
     id: string,
     mode: "input-text" | "input-password" | "textarea",
     value: string,
+    spellcheck = window.siyuan.config.editor.spellcheck,
 ): string => {
-    const spellcheck = window.siyuan.config.editor.spellcheck ? "true" : "false";
     if (mode === "textarea") {
         return `<textarea class="b3-text-field fn__block" id="${id}" spellcheck="${spellcheck}">${Lute.EscapeHTMLStr(value)}</textarea>`;
     }
     if (mode === "input-password") {
         return `<div class="b3-form__icona fn__block">
-    <input id="${id}" type="password" class="b3-text-field b3-form__icona-input" value="${Lute.EscapeHTMLStr(value)}">
+    <input id="${id}" type="password" spellcheck="false" class="b3-text-field b3-form__icona-input" value="${Lute.EscapeHTMLStr(value)}">
     <svg class="b3-form__icona-icon" data-action="togglePassword" style="user-select: none;"><use xlink:href="#iconEye"></use></svg>
 </div>`;
     }
@@ -153,7 +153,7 @@ const genStackRight = (r: StackRight): string => {
 
 const genStackLeft = (left: StackLeft, hasRight: boolean): string => {
     if (left.kind === "textBlock") {
-        return `<div class="${hasRight ? "fn__flex-1 " : ""}fn__block">${genTextBlockFieldHtml(left.id, left.mode, left.readConfig() as string)}</div>`;
+        return `<div class="${hasRight ? "fn__flex-1 " : ""}fn__block">${genTextBlockFieldHtml(left.id, left.mode, left.readConfig() as string, left.spellcheck)}</div>`;
     }
     if (!hasRight) {
         return left.kind === "title" ? genConfigItemName(left.text) : `<div class="b3-label__text">${left.text}</div>`;
@@ -230,7 +230,7 @@ const renderControlParts = (parts: RowPart[]): string => {
             return `<div class="fn__flex b3-label config-item">
     ${genConfigItemMainHtml(title, desc ?? "")}
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="${control.id}" value="${Lute.EscapeHTMLStr(control.readConfig() as string)}"/>
+    <input class="b3-text-field fn__flex-center fn__size200" id="${control.id}"${control.spellcheck === undefined ? "" : ` spellcheck="${control.spellcheck}"`} value="${Lute.EscapeHTMLStr(control.readConfig() as string)}"/>
 </div>`;
         case "textBlock": {
             return `<div class="b3-label config-item">
@@ -238,7 +238,7 @@ const renderControlParts = (parts: RowPart[]): string => {
         ${genConfigItemName(title)}
         <div class="b3-label__text">${desc ?? ""}</div>
         <div class="fn__hr--small"></div>
-        ${genTextBlockFieldHtml(control.id, control.mode, control.readConfig() as string)}
+        ${genTextBlockFieldHtml(control.id, control.mode, control.readConfig() as string, control.spellcheck)}
     </div>
 </div>`;
         }

@@ -1,6 +1,8 @@
 # AI provider logos
 
-The SVG files in this directory are bundled locally so the AI settings UI does not hotlink third-party assets.
+The image files in this directory are bundled locally so the AI settings UI does not hotlink third-party assets.
+
+The `anthropic.png` file is the unmodified [Apple touch icon](https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/67d31dd7aa394792257596c5_webclip.png) linked by the official [Anthropic website](https://www.anthropic.com/). The depicted logo remains a trademark of Anthropic.
 
 The `openai.svg` file is extracted without altering its path geometry from the official [OpenAI Blossom asset](https://images.ctfassets.net/kftzwdyauwt9/3hUGLn3ypllZ0oa01qOYVq/28e8188e6f11b84c3e876569d492734f/Blossom_Light.svg) and normalized to the same 24-by-24 view box as the other provider icons. Use of the logo is subject to the [OpenAI Design Guidelines](https://openai.com/brand/).
 

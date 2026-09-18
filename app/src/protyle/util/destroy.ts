@@ -10,6 +10,7 @@ import {unregisterCustomBlockRoot} from "../../plugin/customBlockRender";
 import {destroyTrackedRanges} from "./trackedRange";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {invalidateFocusFoldRequests} from "./focusFold";
+import {unregisterViewFoldContext} from "./viewFold";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
@@ -17,6 +18,7 @@ export const destroy = (protyle: IProtyle) => {
     }
     destroyListMindmaps(protyle);
     invalidateFocusFoldRequests(protyle);
+    unregisterViewFoldContext(protyle);
     destroyTrackedRanges(protyle);
     cancelAssetUploads(protyle);
     unmountBreadcrumbButtons(protyle);

@@ -271,14 +271,15 @@ test("pinned heading highlights the whole row while root reorder keeps insertion
     assert.deepEqual(highlights, ["dragover"]);
     assert.equal(panel.dropTarget.id, "");
     hitTest.target = {closest: (): Element | null => null};
-    panel.previewDrop(10, 20);
-    assert.deepEqual(highlights, ["dragover", "dragover"]);
+    assert.equal(panel.previewDrop(10, 20), false);
+    assert.equal(panel.dropTarget, undefined);
+    assert.deepEqual(highlights, ["dragover"]);
     const row = {dataset: {pinRoot: "true", nodeId: "document"},
         querySelector: () => ({textContent: "Document"}),
         getBoundingClientRect: () => ({top: 0, height: 30}), classList: {add: (name: string) => highlights.push(name)}};
     hitTest.target = {closest: () => row};
     panel.previewDrop(10, 1);
-    assert.equal(highlights[2], "dragover__top");
+    assert.equal(highlights[1], "dragover__top");
 });
 
 test("desktop pinned drags create an unclipped ghost and preserve synthetic touch ghosts", () => {

@@ -1,6 +1,7 @@
 import {resolveTabID, tabKeyboardTarget} from "./tabsState";
 import {bindTabsDrag, cancelTabsDrag, isDraggingTabs} from "./tabsDrag";
 import {escapeHtml} from "../../util/escape";
+import {clearTabsAttributes, renderTabsAttributes} from "./tabsAttributes";
 
 export interface ITabsRenderOptions {
     readonly?: (tabs?: Element) => boolean;
@@ -17,6 +18,7 @@ export interface ITabsRenderOptions {
     taskMenu?: (item: HTMLElement) => void;
     taskLabel?: string;
     endEdit?: () => void;
+    attributes?: {label: string, open: (block: HTMLElement, focus: string) => void};
 }
 
 interface ITabState {
@@ -159,6 +161,10 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             }
             controller.observer.disconnect();
             controller.resize.disconnect();
+            const focusedAttributes = document.activeElement?.closest<HTMLElement>(".tabs-attributes");
+            const focusedAttributesID = focusedAttributes && element.contains(focusedAttributes) ?
+                focusedAttributes.dataset.blockId : undefined;
+            clearTabsAttributes(element);
             const shown: HTMLElement[] = [];
             getTabs().forEach(tabs => {
                 const items = getTabItems(tabs);
@@ -441,6 +447,8 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     }
                 });
                 tabs.setAttribute("data-tabs-ready", "true");
+                renderTabsAttributes(tabs, items.find(item => itemID(item) === state.active), header,
+                    controller.options.attributes);
                 // 从容器读取主题设置的实际边框，吸顶标题沿用相同宽度及圆角。
                 const tabsStyle = getComputedStyle(tabs);
                 ["top-width", "right-width", "left-width", "top-left-radius", "top-right-radius"].forEach(property => {
@@ -497,6 +505,10 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     shown.push(items.find(item => itemID(item) === state.active));
                 }
             });
+            if (focusedAttributesID) {
+                Array.from(element.querySelectorAll<HTMLElement>(".tabs-attributes"))
+                    .find(button => button.dataset.blockId === focusedAttributesID)?.focus({preventScroll: true});
+            }
             controller.observer.observe(element, {
                 childList: true, subtree: true, characterData: true, attributes: true,
                 attributeFilter: ["tabs-active-id", "tabs-position", "tabs-task", "data-readonly", "data-tabs-editing", "contenteditable"],
@@ -523,6 +535,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             destroyed = true;
             controller.observer.disconnect();
             controller.resize.disconnect();
+            clearTabsAttributes(element);
             element.removeEventListener("focusout", onFocusOut);
             element.removeEventListener("scroll", schedule, true);
             document.removeEventListener("scroll", onAncestorScroll, true);

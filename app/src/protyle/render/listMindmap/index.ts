@@ -12,7 +12,8 @@ import {openLink} from "../../../editor/openLink";
 import {matchHotKey} from "../../util/hotKey";
 import {setFullscreen} from "../../breadcrumb/action";
 import {
-    getBuiltinColorPropertyValue, getBuiltinInlineStylePreview, getInlineStyleByID, getInlineStylePreview, getInlineStylePropertyValue,
+    getBuiltinColorPropertyValue, getBuiltinInlineStylePreview, getBuiltinInlineStylePropertyValue,
+    getInlineStyleByID, getInlineStylePreview, getInlineStylePropertyValue,
     getInlineStylesCache, getVisibleOrderedStyleKeys, isBuiltinOrderKey,
     TBuiltinInlineStyleID,
 } from "../../toolbar/inlineStyle";
@@ -148,7 +149,9 @@ class ListMindmapController {
                 return getVisibleOrderedStyleKeys("style1", data).map(key => {
                     if (isBuiltinOrderKey("style1", key)) {
                         return {label: window.siyuan.languages[`${key}Style`],
-                            ...getBuiltinInlineStylePreview(key as TBuiltinInlineStyleID)};
+                            color: getBuiltinInlineStylePropertyValue(key as TBuiltinInlineStyleID, "color"),
+                            backgroundColor: getBuiltinInlineStylePropertyValue(key as TBuiltinInlineStyleID, "backgroundColor"),
+                            preview: getBuiltinInlineStylePreview(key as TBuiltinInlineStyleID)};
                     }
                     const style = getInlineStyleByID(key, data);
                     return {label: style.name, ...getInlineStylePreview(style)};

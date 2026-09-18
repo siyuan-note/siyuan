@@ -306,8 +306,8 @@ export const initMobileBottomBar = (app: App) => {
 };
 
 const genBottomBarOptions = (pluginDockEntries: readonly IMobilePluginDockEntry[]) => [
-    ...MOBILE_BOTTOM_BAR_ACTIONS.map((action) =>
-        `<option value="${action}"${action === "agent" && isDisabledFeature("ai") ? " disabled" : ""}>${escapeHtml(getActionLabel(action))}</option>`),
+    ...MOBILE_BOTTOM_BAR_ACTIONS.filter(action => action !== "agent" || !isDisabledFeature("ai")).map((action) =>
+        `<option value="${action}">${escapeHtml(getActionLabel(action))}</option>`),
     ...pluginDockEntries.map((entry) =>
         `<option value="${escapeAttr(entry.key)}">${escapeHtml(getPluginDockLabel(entry))}</option>`),
 ].join("");

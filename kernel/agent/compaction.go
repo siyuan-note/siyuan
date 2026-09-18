@@ -99,6 +99,9 @@ func runtimeCompactionMatchesProtocol(compaction *runtimeCompaction, protocol st
 	if compaction == nil {
 		return false
 	}
+	if util.IsAnthropicMessagesProtocol(compaction.Protocol) || util.IsAnthropicMessagesProtocol(protocol) {
+		return util.IsAnthropicMessagesProtocol(compaction.Protocol) && util.IsAnthropicMessagesProtocol(protocol)
+	}
 	return util.IsOpenAIResponsesProtocol(compaction.Protocol) == util.IsOpenAIResponsesProtocol(protocol)
 }
 
@@ -157,6 +160,11 @@ func checkpointMessagesAfterCompaction(entries []SessionEntry, coveredEntryCount
 }
 
 func buildCompactionSource(previousSummary string, messages []AgentMessage) (string, error) {
+	messages = append([]AgentMessage(nil), messages...)
+	for i := range messages {
+		// 摘要只读取可见历史，原生签名随未压缩轮次保留，不进入摘要提示。
+		messages[i].NativeContent = nil
+	}
 	data, err := json.Marshal(messages)
 	if err != nil {
 		return "", err
@@ -181,13 +189,13 @@ func compactionSummaryMessages(source string) []openai.ChatCompletionMessage {
 	}
 }
 
-func createCompactionSummary(ctx context.Context, client *openai.Client, model, source string, maxTokens, maxRetries int,
+func createCompactionSummary(ctx context.Context, client *util.AIClient, model, source string, maxTokens, maxRetries int,
 	requestTimeout, streamIdleTimeout time.Duration, ch chan<- AgentEvent) (summary string, promptTokens, completionTokens int, err error) {
 	return createProtocolCompactionSummary(ctx, client, util.OpenAIProtocolChatCompletions, model, source, maxTokens,
 		maxRetries, requestTimeout, streamIdleTimeout, ch)
 }
 
-func createProtocolCompactionSummary(ctx context.Context, client *openai.Client, protocol, model, source string,
+func createProtocolCompactionSummary(ctx context.Context, client *util.AIClient, protocol, model, source string,
 	maxTokens, maxRetries int, requestTimeout, streamIdleTimeout time.Duration,
 	ch chan<- AgentEvent) (summary string, promptTokens, completionTokens int, err error) {
 	if maxTokens < compactionSummaryMinTokens {
@@ -242,7 +250,7 @@ func createProtocolCompactionSummary(ctx context.Context, client *openai.Client,
 	return summary, promptTokens, completionTokens, nil
 }
 
-func createResponseCompaction(ctx context.Context, client *openai.Client, request openai.ChatCompletionRequest,
+func createResponseCompaction(ctx context.Context, client *util.AIClient, request openai.ChatCompletionRequest,
 	responseInput []any, maxRetries int, requestTimeout time.Duration,
 	ch chan<- AgentEvent) (output []json.RawMessage, promptTokens, completionTokens int, err error) {
 	if maxRetries < 0 {

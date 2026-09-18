@@ -634,8 +634,18 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
             ? viewsElement.nextElementSibling as HTMLElement
             : viewsElement;
         const viewsRect = placeholderElement.getBoundingClientRect();
-        const blockRect = blockElement.getBoundingClientRect();
+        // 吸顶栏按当前可用宽度换行，并同步占位高度，保持表头位置与文档布局一致。
+        if (placeholderElement !== viewsElement) {
+            const width = Math.round(viewsRect.width) + "px";
+            if (viewsElement.style.width !== width) {
+                viewsElement.style.width = width;
+            }
+        }
         const height = viewsElement.offsetHeight;
+        if (placeholderElement !== viewsElement && placeholderElement.style.height !== height + "px") {
+            placeholderElement.style.height = height + "px";
+        }
+        const blockRect = blockElement.getBoundingClientRect();
         const shouldFix = height > 0 && viewsRect.top < stickyTop && blockRect.bottom > stickyTop;
         const top = blockRect.bottom < stickyTop + height ? Math.round(blockRect.bottom - height) : stickyTop;
         viewsTask = {

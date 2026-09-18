@@ -1499,7 +1499,7 @@
 	"apiVersion": "Verzia API",
 	"apiVersionTip": "Vyžadované len pre Azure OpenAI",
 	"apiProvider": "Poskytovateľ API",
-	"apiProviderTip": "Poskytovatelia kompatibilní s Chat Completions API alebo Responses API (napr. DeepSeek, Kimi, MiniMax) môžu byť použité",
+	"apiProviderTip": "Vyberte typ API podporovaný jednotlivými poskytovateľmi",
 	"skip": "Preskočiť",
 	"nextRound": "Ďalšie kolo",
 	"save": "Uložiť",

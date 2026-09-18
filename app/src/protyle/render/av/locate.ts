@@ -1,4 +1,5 @@
 import {Constants} from "../../../constants";
+import {applyPublishAVFolds, getPublishAVView, setPublishAVView} from "./publishState";
 import {getCardWidth} from "./gallery/style";
 import {showMessage} from "../../../dialog/message";
 import {transaction} from "../../wysiwyg/transaction";
@@ -235,12 +236,19 @@ export const getAVLocateParams = (blockElement: HTMLElement, enabled = true) => 
 };
 
 export const applyAVRenderContext = (blockElement: HTMLElement, data: IAV) => {
+    if (window.siyuan.isPublish) {
+        setPublishAVView(blockElement, data.viewID);
+        applyPublishAVFolds(blockElement, data);
+    }
     blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, data.viewID);
     blockElement.setAttribute("data-av-type", data.viewType);
     applyAVColorPalette(blockElement, getAVCustomColors());
 };
 
 export const persistAVLocateView = (blockElement: HTMLElement, protyle: IProtyle, data: IAV) => {
+    if (window.siyuan.isPublish) {
+        return false;
+    }
     const request = getAVLocateRequest(blockElement);
     if (!request || !data.target || data.target.itemID !== request.itemID || !blockElement.isConnected) {
         return false;
@@ -267,12 +275,19 @@ export const persistAVLocateView = (blockElement: HTMLElement, protyle: IProtyle
 };
 
 export const failAVRender = (blockElement: HTMLElement, response: IWebSocketData) => {
+    if (window.siyuan.isPublish && response.data?.error === "viewNotFound" &&
+        getPublishAVView(blockElement) && !getAVLocateRequest(blockElement)) {
+        setPublishAVView(blockElement, "");
+        blockElement.removeAttribute("data-render");
+        return true;
+    }
     const request = getAVLocateRequest(blockElement);
     if (request) {
         clearAVLocateRequest(blockElement, request);
     }
     const viewNotFound = request?.viewID && response.data?.error === "viewNotFound";
     showMessage(viewNotFound ? window.siyuan.languages.databaseViewNotFound : response.msg);
+    return false;
 };
 
 export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData: {

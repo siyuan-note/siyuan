@@ -400,6 +400,15 @@ func getAttributeViewPasteRowsFromTable(table *av.Table, startItemID string, cou
 }
 
 func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	return renderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, true)
+}
+
+// RenderAttributeViewWithTargetReadOnly 仅在内存中渲染发布视图，不创建或保存数据库。
+func RenderAttributeViewWithTargetReadOnly(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	return renderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, false, ignoreRows, targetItemID, targetGroupID, false)
+}
+
+func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, writable bool) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
 		return
@@ -477,7 +486,7 @@ func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 	} else {
 	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, true, target, targetGroupID)
+	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID)
 	return
 }
 
@@ -531,6 +540,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 
 	// 渲染视图
 	renderContext := sql.NewAttributeViewRenderContext()
+	renderContext.ReadOnly = !writable
 	defer renderContext.PushTemplateErrors()
 	deferTemplateValues := shouldDeferAttributeViewTemplateValues(attrView, view, query, ignoreRows)
 	if deferTemplateValues {

@@ -22,6 +22,11 @@ const getHotkey = (item: INativeCommandCatalogItem) => {
     return window.siyuan.config.keymap.editor[item.keymapPath[1]][item.keymapPath[2]]?.custom || "";
 };
 
+const publishUnavailableCommands = new Set([
+    "addToDatabase", "closeUnmodified", "editReadonly", "switchReadonly", "replace",
+    "move", "newFile", "dailyNote", "syncNow", "dataHistory",
+]);
+
 const matchesContext = (item: INativeCommandCatalogItem, context: ICommandContextSnapshot) => {
     // 命令面板和快捷键共用只读限制，文档树操作仍按文档树上下文处理。
     if (context.focus !== "fileTree" && context.protyle?.disabled &&
@@ -51,6 +56,7 @@ const createNativeCommand = (
     hotkey: () => getHotkey(item),
     order,
     platform: environment => isNativeCommandSupported(item, environment),
+    when: () => !window.siyuan.isPublish || !publishUnavailableCommands.has(item.legacyId),
     enabled: context => matchesContext(item, context),
     execute: context => execute(item.legacyId, context),
 });

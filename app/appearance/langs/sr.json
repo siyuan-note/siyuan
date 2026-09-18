@@ -1499,7 +1499,7 @@
 	"apiVersion": "Verzija API-ja",
 	"apiVersionTip": "Potrebno samo pri korišćenju Azure OpenAI usluge",
 	"apiProvider": "API provajder",
-	"apiProviderTip": "Podržani su provajderi kompatibilni sa Chat Completions API-jem ili Responses API-jem (na primer DeepSeek, Kimi, MiniMax)",
+	"apiProviderTip": "Изаберите тип API-ја који подржава сваки добављач",
 	"skip": "Preskoči",
 	"nextRound": "Sledeći krug",
 	"save": "Sačuvaj",

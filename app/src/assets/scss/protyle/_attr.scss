@@ -73,6 +73,18 @@
   }
 }
 
+// 为页签块、嵌入块及超级块后方的属性行留出空间，避免与前方容器的边界重叠。
+.protyle-wysiwyg--attr {
+  :is([data-type="NodeTabs"], [data-type="NodeBlockQueryEmbed"], [data-type="NodeSuperBlock"]) + [data-node-id],
+  :is([data-type="NodeTabs"], [data-type="NodeBlockQueryEmbed"], [data-type="NodeSuperBlock"]) +
+  .sb[data-sb-layout="row"] > [data-node-id]:first-child {
+    &:is([name]:not([name=""]), [alias]:not([alias=""]), [memo]:not([memo=""]),
+    [bookmark]:not([bookmark=""]), [av-names]:not([av-names=""])) {
+      margin-top: 16px;
+    }
+  }
+}
+
 // 三击时恢复属性容器可选，以保留浏览器的整段选择行为 https://github.com/siyuan-note/siyuan/issues/16829
 .protyle-wysiwyg--select-attr .protyle-attr {
   user-select: auto;

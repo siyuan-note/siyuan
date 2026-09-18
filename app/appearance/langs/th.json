@@ -1499,7 +1499,7 @@
 	"apiVersion": "เวอร์ชัน API",
 	"apiVersionTip": "เฉพาะ Azure OpenAI",
 	"apiProvider": "ผู้ให้ API",
-	"apiProviderTip": "สามารถใช้ผู้ให้บริการที่รองรับ Chat Completions API หรือ Responses API (เช่น DeepSeek, Kimi, MiniMax) ได้",
+	"apiProviderTip": "เลือกประเภท API ที่ผู้ให้บริการแต่ละรายรองรับ",
 	"skip": "ข้าม",
 	"nextRound": "รอบถัดไป",
 	"save": "บันทึก",

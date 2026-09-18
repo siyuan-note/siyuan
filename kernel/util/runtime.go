@@ -50,6 +50,16 @@ func DisableFeature(feature string) {
 	DisabledFeatures = gulu.Str.RemoveDuplicatedElem(DisabledFeatures)
 }
 
+// IsDisabledFeature 查询原生端启动时禁用的功能，不修改用户配置。
+func IsDisabledFeature(feature string) bool {
+	for _, disabled := range DisabledFeatures {
+		if disabled == feature {
+			return true
+		}
+	}
+	return false
+}
+
 var (
 	UseSingleLineSave    = true // UseSingleLineSave 是否使用单行保存 .sy 和数据库 .json 文件。
 	LargeFileWarningSize = 8    // LargeFileWarningSize 大文件警告大小，单位：MB

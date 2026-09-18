@@ -20,7 +20,10 @@ export interface ListMindmapViewOptions {
     cdn?: string;
     onOpenLink?: (href: string, event: MouseEvent) => void;
     colors?: () => {label: string, value: string}[];
-    nodeColors?: () => {label: string, color: string, backgroundColor: string}[];
+    nodeColors?: () => {
+        label: string, color: string, backgroundColor: string,
+        preview?: {color: string, backgroundColor: string},
+    }[];
     onManageNodeColors?: () => void;
     onManageLineColors?: () => void;
     onFullscreen?: (enter: boolean, button: HTMLButtonElement) => void;
@@ -1315,7 +1318,10 @@ export class ListMindmapView {
         const nodePalette = createElement("div", "fn__flex");
         nodePalette.setAttribute("role", "group");
         nodePalette.setAttribute("aria-label", this.label("color"));
-        [{label: this.label("default"), color: "", backgroundColor: ""}, ...(this.options.nodeColors?.() || [])].forEach(item => {
+        const nodeColors: ReturnType<NonNullable<ListMindmapViewOptions["nodeColors"]>> = [
+            {label: this.label("default"), color: "", backgroundColor: ""}, ...(this.options.nodeColors?.() || []),
+        ];
+        nodeColors.forEach(item => {
             const button = this.makeButton("color", "iconFont", () => change({
                 textColor: item.color, backgroundColor: item.backgroundColor,
             }));
@@ -1324,8 +1330,8 @@ export class ListMindmapView {
             button.textContent = "A";
             button.setAttribute("aria-label", item.label);
             button.setAttribute("aria-pressed", String(selected));
-            button.style.color = item.color;
-            button.style.backgroundColor = item.backgroundColor;
+            button.style.color = item.preview?.color ?? item.color;
+            button.style.backgroundColor = item.preview?.backgroundColor ?? item.backgroundColor;
             nodePalette.append(button);
         });
         if (this.options.onManageNodeColors) {

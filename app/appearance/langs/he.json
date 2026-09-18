@@ -1499,7 +1499,7 @@
 	"apiVersion": "גרסת API",
 	"apiVersionTip": "נדרש רק כשמשתמשים בשירות Azure OpenAI",
 	"apiProvider": "ספק API",
-	"apiProviderTip": "ניתן להשתמש בספקים התואמים ל-Chat Completions API או Responses API (למשל DeepSeek, Kimi, MiniMax)",
+	"apiProviderTip": "בחרו את סוג ה־API הנתמך על ידי כל ספק",
 	"skip": "דלג",
 	"nextRound": "סיבוב הבא",
 	"save": "שמור",

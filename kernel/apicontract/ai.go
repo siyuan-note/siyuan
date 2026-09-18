@@ -1,5 +1,12 @@
 package apicontract
 
+import "strings"
+
+// RequiresAI 标识受 AI 功能开关控制的接口，包含配置保存和 OAuth 回调。
+func RequiresAI(path string) bool {
+	return strings.HasPrefix(path, "/api/ai/") || path == "/api/setting/setAI"
+}
+
 type AIEditorChatRequest struct {
 	TaskID  string            `json:"taskID" api:"optional,nullable"`
 	IDs     []string          `json:"ids" api:"optional,nullable"`

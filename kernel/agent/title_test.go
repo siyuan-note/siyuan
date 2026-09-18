@@ -37,7 +37,7 @@ func TestGenerateTitleDisablesReasoningWithinOutputBudget(t *testing.T) {
 	}))
 	defer server.Close()
 
-	title := GenerateTitle(util.NewOpenAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
+	title := GenerateTitle(util.NewAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
 		util.OpenAIProtocolChatCompletions, "test-model", "Investigate reasoning output", "en")
 	if title != "Reasoning Compatibility" {
 		t.Fatalf("title = %q", title)
@@ -67,7 +67,7 @@ func TestGenerateTitleRetriesWithoutReasoningForLegacyEndpoint(t *testing.T) {
 	}))
 	defer server.Close()
 
-	title := GenerateTitle(util.NewOpenAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
+	title := GenerateTitle(util.NewAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
 		util.OpenAIProtocolChatCompletions, "test-model", "Investigate legacy endpoint", "en")
 	if title != "Legacy Endpoint" || len(requests) != 2 {
 		t.Fatalf("title = %q, requests = %d", title, len(requests))
@@ -101,7 +101,7 @@ func TestGenerateTitleRetriesWithoutReasoningForResponsesEndpoint(t *testing.T) 
 	}))
 	defer server.Close()
 
-	title := GenerateTitle(util.NewOpenAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
+	title := GenerateTitle(util.NewAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
 		util.OpenAIProtocolResponses, "test-model", "Investigate Responses endpoint", "en")
 	if title != "Responses Endpoint" || len(requests) != 2 {
 		t.Fatalf("title = %q, requests = %d", title, len(requests))
@@ -133,7 +133,7 @@ func TestGenerateTitleRetriesWhenReasoningExhaustsInitialBudget(t *testing.T) {
 	}))
 	defer server.Close()
 
-	title := GenerateTitle(util.NewOpenAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
+	title := GenerateTitle(util.NewAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
 		util.OpenAIProtocolChatCompletions, "test-model", "Investigate title token budget", "en")
 	if title != "Reasoning Budget" || len(requests) != 2 {
 		t.Fatalf("title = %q, requests = %d", title, len(requests))
@@ -153,7 +153,7 @@ func TestGenerateTitleDoesNotRetryUnrelatedProviderError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	title := GenerateTitle(util.NewOpenAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
+	title := GenerateTitle(util.NewAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
 		util.OpenAIProtocolChatCompletions, "test-model", "Investigate provider failure", "en")
 	if title != "Investigate provider failure" || requests != 1 {
 		t.Fatalf("title = %q, requests = %d", title, requests)
@@ -170,7 +170,7 @@ func TestGenerateTitleDoesNotRetryReasoningErrorFromUnavailableProvider(t *testi
 	}))
 	defer server.Close()
 
-	title := GenerateTitle(util.NewOpenAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
+	title := GenerateTitle(util.NewAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
 		util.OpenAIProtocolChatCompletions, "test-model", "Investigate provider failure", "en")
 	if title != "Investigate provider failure" || requests != 1 {
 		t.Fatalf("title = %q, requests = %d", title, requests)

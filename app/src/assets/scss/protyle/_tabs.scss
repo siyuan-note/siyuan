@@ -327,6 +327,93 @@
 }
 
 .protyle-wysiwyg {
+  .tabs-attributes {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    flex: 0 1 auto;
+    min-width: 24px;
+    max-width: 40%;
+    height: 24px;
+    padding: 2px 4px;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background: transparent;
+    color: var(--b3-theme-on-surface);
+    font: 12px/20px var(--b3-font-family);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--b3-theme-surface);
+    }
+
+    svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+
+    &__icon {
+      display: none;
+    }
+
+    &__summary {
+      display: flex;
+      min-width: 0;
+      gap: 6px;
+
+      > span {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+    }
+
+    &--compact {
+      flex-shrink: 0;
+
+      .tabs-attributes__icon {
+        display: block;
+      }
+
+      .tabs-attributes__summary {
+        display: none;
+      }
+    }
+  }
+
+  .tabs-header > .tabs-attributes {
+    margin-left: auto;
+  }
+
+  // 首个子块沿用普通属性样式，仅将属性移入内容区以避开吸顶栏。
+  .tabs[data-tabs-ready="true"][data-tabs-orientation="horizontal"] > .tab-item >
+  .tab-item-content > [data-node-id]:first-child > .protyle-attr {
+    top: 0;
+  }
+
+  @media screen {
+    &--attr {
+      .tabs-attributes {
+        display: flex;
+      }
+
+      // 原属性保留供事务读取，隐藏时不与通用属性的文本截断显示规则竞争。
+      [data-tabs-attributes] > .protyle-attr {
+        visibility: hidden;
+
+        > .protyle-attr--refcount {
+          visibility: visible;
+        }
+      }
+
+    }
+  }
+
   .protyle-wysiwyg--select > .tabs-header::after,
   .protyle-wysiwyg--select-mode > .tabs-header::after,
   .protyle-wysiwyg--hl > .tabs-header::after {

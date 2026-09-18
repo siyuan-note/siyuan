@@ -297,6 +297,9 @@ func TestValueTextRichTextMarkStyleIALWhitelist(t *testing.T) {
 		content string
 		style   string
 	}{
+		{`<span data-type="text strong" style="color: var(--b3-card-error-color); ` +
+			`background-color: var(--b3-card-warning-background);">builtin theme</span>`,
+			"color: var(--b3-card-error-color); background-color: var(--b3-card-warning-background);"},
 		{`<span data-type="text" style="color: var(--b3-font-color1);">foreground</span>`,
 			"color: var(--b3-font-color1);"},
 		{`<span data-type="text" style="color: var(--b3-font-color01);">normalized foreground</span>`,
@@ -410,6 +413,11 @@ func TestValueTextRichTextMarkStyleIALWhitelist(t *testing.T) {
 		`<span data-type="text" style="color: var(--b3-font-color8); background-image: url(javascript:alert(1));">URL</span>`,
 		`<span data-type="text" style="color: var(--b3-font-color8); color: var(--b3-font-color9);">duplicate</span>`,
 		`<span data-type="text" style="color: var(--b3-inline-builtin-danger-color, var(--b3-card-danger-color));">unknown builtin</span>`,
+		`<span data-type="text" style="color: var(--b3-card-danger-color);">unknown theme</span>`,
+		`<span data-type="text" style="color: var(--b3-card-info-background);">wrong theme property</span>`,
+		`<span data-type="text" style="background-color: var(--b3-card-info-color);">wrong theme background</span>`,
+		`<span data-type="text" style="color: var(--b3-card-info-color, red);">unexpected fallback</span>`,
+		`<span data-type="text" style="color: var(--b3-inline-builtin-info-color, var(--b3-card-error-color));">mismatched fallback</span>`,
 		`<span data-type="text" style="color: var(--b3-inline-style-invalid-color, #112233);">invalid ID</span>`,
 		`<span data-type="text" style="color: var(--b3-inline-style-20240101000000-abcdefg-color, url(javascript:alert(1)));">custom URL</span>`,
 		`<span data-type="text" custom-foo="bar" style="color: var(--b3-font-color8);">custom attribute</span>`,

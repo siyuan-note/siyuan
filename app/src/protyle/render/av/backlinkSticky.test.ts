@@ -8,7 +8,7 @@ const compiled = transpileModule(readFileSync("src/protyle/render/av/row.ts", "u
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-test("sticky views follow visible breadcrumbs and return to the viewport top when hidden", () => {
+test("sticky views follow breadcrumbs and keep wrapped height in sync when resized", () => {
     const exports: {stickyRow?: (block: unknown, scroll: unknown, status: string) => void} = {};
     runInNewContext(compiled, {
         exports,
@@ -16,19 +16,21 @@ test("sticky views follow visible breadcrumbs and return to the viewport top whe
         window: {innerHeight: 800},
     });
     let paneBottom = 800;
+    let viewsWidth = 400;
     const views = {
         classList: {contains: (name: string) => name === "av__views--fixed"},
-        offsetHeight: 40,
+        get offsetHeight() { return parseFloat(this.style.width) < 300 ? 80 : 40; },
         style: {top: "", left: "", width: "", clipPath: ""},
         closest: (selector: string) => ({
             getBoundingClientRect: () => ({
                 top: 24, bottom: selector === ".layout-tab-container" ? paneBottom : 800, left: 0, right: 500,
             }),
         }),
-        getBoundingClientRect: () => ({top: parseFloat(views.style.top), bottom: parseFloat(views.style.top) + 40, left: 20, right: 420}),
+        getBoundingClientRect: () => ({top: parseFloat(views.style.top), bottom: parseFloat(views.style.top) + views.offsetHeight, left: 20, right: 20 + viewsWidth}),
         nextElementSibling: {
             classList: {contains: (name: string) => name === "av__views-placeholder"},
-            getBoundingClientRect: () => ({top: -100, left: 20, width: 400}),
+            style: {height: "40px"},
+            getBoundingClientRect: () => ({top: -100, left: 20, width: viewsWidth}),
         },
     };
     const block = {
@@ -79,6 +81,16 @@ test("sticky views follow visible breadcrumbs and return to the viewport top whe
             }
             previousTop = top;
         }
+    }
+    hidden = false;
+    breadcrumbBottom = 72;
+    paneBottom = 120;
+    for (const width of [280, 400, 280]) {
+        viewsWidth = width;
+        exports.stickyRow(block, scroll, "top");
+        assert.equal(views.style.width, width + "px");
+        assert.equal(views.nextElementSibling.style.height, width < 300 ? "80px" : "40px");
+        assert.equal(views.style.clipPath, width < 300 ? "inset(0px 0px 32px 0px)" : "inset(0px 0px 0px 0px)");
     }
 });
 

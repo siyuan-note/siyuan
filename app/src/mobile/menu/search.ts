@@ -10,7 +10,7 @@ import {preventScroll} from "../../protyle/scroll/preventScroll";
 import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix} from "../../util/pathName";
 import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
-import {setStorageVal} from "../../protyle/util/compatibility";
+import {isDisabledFeature, setStorageVal} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
@@ -41,6 +41,9 @@ import {
 import {cancelSearchRequest, scheduleSearchRequest} from "../../search/request";
 
 const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAll: boolean) => {
+    if (window.siyuan.isPublish) {
+        return;
+    }
     if (config.method === 2) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;
@@ -107,6 +110,9 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
 
 const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig,
                       clear = false) => {
+    if (window.siyuan.isPublish) {
+        newConfig = {...newConfig, hasReplace: false};
+    }
     if (config.hasReplace !== newConfig.hasReplace) {
         if (newConfig.hasReplace) {
             element.querySelector('[data-type="toggle-replace"]').classList.add("toolbar__icon--active");
@@ -601,6 +607,9 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                 event.preventDefault();
                 break;
             } else if (type === "toggle-replace") {
+                if (window.siyuan.isPublish) {
+                    return;
+                }
                 config.hasReplace = !config.hasReplace;
                 replaceInputElement.parentElement.classList.toggle("fn__none");
                 target.classList.toggle("toolbar__icon--active");
@@ -763,7 +772,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
     if (currentEditor && isEncryptedBox(currentEditor.protyle.notebookId)) {
         config.sensitive = true;
     }
-    if (config.method === 4 && !window.siyuan.config.ai.embedding.enabled) {
+    if (config.method === 4 && (isDisabledFeature("ai") || !window.siyuan.config.ai.embedding.enabled)) {
         config.method = 0;
     }
     const rangeText = (currentEditor?.protyle.toolbar.range ||
@@ -781,6 +790,9 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
         });
     }
 
+    if (window.siyuan.isPublish) {
+        config.hasReplace = false;
+    }
     activeBlur();
     let includeChild = true;
     let enableIncludeChild = false;
@@ -834,7 +846,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
     </div>
     <div class="toolbar">
         <span class="fn__flex-1"></span>
-        <svg data-type="toggle-replace" class="toolbar__icon${config.hasReplace ? " toolbar__icon--active" : ""}"><use xlink:href="#iconReplace"></use></svg>
+        <svg data-type="toggle-replace" class="toolbar__icon${window.siyuan.isPublish ? " fn__none" : ""}${config.hasReplace ? " toolbar__icon--active" : ""}"><use xlink:href="#iconReplace"></use></svg>
         <svg ${enableIncludeChild ? "" : "disabled"} data-type="include" class="toolbar__icon${includeChild ? " toolbar__icon--active" : ""}"><use xlink:href="#iconInclude"></use></svg>
         <svg data-type="path" class="toolbar__icon"><use xlink:href="#iconFolder"></use></svg>
         <svg ${document.querySelector("#empty").classList.contains("fn__none") ? "" : "disabled"} data-type="currentPath" class="toolbar__icon"><use xlink:href="#iconFocus"></use></svg>

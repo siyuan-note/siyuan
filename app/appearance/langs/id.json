@@ -1499,7 +1499,7 @@
 	"apiVersion": "Versi API",
 	"apiVersionTip": "Hanya diperlukan saat menggunakan layanan Azure OpenAI",
 	"apiProvider": "Penyedia API",
-	"apiProviderTip": "Penyedia yang kompatibel dengan API Chat Completions atau API Responses (mis., DeepSeek, Kimi, MiniMax) dapat digunakan",
+	"apiProviderTip": "Pilih jenis API yang didukung oleh setiap penyedia",
 	"skip": "Lewati",
 	"nextRound": "Putaran berikutnya",
 	"save": "Simpan",

@@ -80,6 +80,7 @@ export interface AgentSession {
             toolCalls?: Array<{name: string; result?: string}>
         }>;
         reasoningContent?: string;
+        nativeContent?: {protocol: string; version: number; blocks: Array<Record<string, unknown>>};
         responseOutput?: Array<Record<string, unknown>>;
         responseOutputTokens?: number;
         roundID?: string;

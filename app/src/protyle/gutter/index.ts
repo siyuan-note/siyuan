@@ -2193,8 +2193,8 @@ export class Gutter {
                 if (type === "NodeList") {
                     submenu.push({
                         id: "listMindmap",
-                        icon: nodeElement.getAttribute("custom-list-mindmap") === "1" ? "iconList" : "iconMindmap",
-                        label: nodeElement.getAttribute("custom-list-mindmap") === "1" ?
+                        icon: nodeElement.getAttribute("custom-sy-list-mindmap") === "1" ? "iconList" : "iconMindmap",
+                        label: nodeElement.getAttribute("custom-sy-list-mindmap") === "1" ?
                             window.siyuan.languages.listMindmapToList : window.siyuan.languages.listMindmapToMindmap,
                         click() {
                             hideElements(["select"], protyle);
@@ -3745,7 +3745,7 @@ export class Gutter {
         let html = "";
         let nodeElement = selectedElement || element;
         const mindmapElement = nodeElement.getAttribute("data-type") === "NodeList" &&
-            nodeElement.getAttribute("custom-list-mindmap") === "1" ?
+            nodeElement.getAttribute("custom-sy-list-mindmap") === "1" ?
             nodeElement.querySelector(":scope > .list-mindmap") : null;
         const tabsHeader = !isMultiSelect && nodeElement.getAttribute("data-type") === "NodeTabs" ?
             nodeElement.querySelector(":scope > .tabs-header") : null;

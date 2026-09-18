@@ -1,7 +1,7 @@
 import {getOrderedListMarkerUpdates} from "../../wysiwyg/listContext";
 
-export const LIST_MINDMAP_VIEW_ATTRIBUTE = "custom-list-mindmap";
-export const LIST_MINDMAP_META_ATTRIBUTE = "custom-list-mindmap-data";
+export const LIST_MINDMAP_VIEW_ATTRIBUTE = "custom-sy-list-mindmap";
+export const LIST_MINDMAP_META_ATTRIBUTE = "custom-sy-list-mindmap-data";
 
 export interface ListMindmapNodeStyle {
     textColor?: string;

@@ -153,7 +153,7 @@ const browserCases = async (sourceCode: string, css: string) => {
         item.getAttribute("data-marker")), ["0.", "1."]);
 
     // 删除节点同步清理已删除子树的关系线和样式，其他关系及最后一个实际节点保留。
-    list.setAttribute("custom-list-mindmap-data", JSON.stringify({version: 1,
+    list.setAttribute("custom-sy-list-mindmap-data", JSON.stringify({version: 1,
         nodes: {[second.id]: {bold: true}, [third.id]: {textColor: "red"}, [first.id]: {italic: true}},
         relations: [{id: "r1", from: second.id, to: first.id, label: "remove"},
             {id: "r2", from: third.id, to: first.id, label: "remove child"},
@@ -172,7 +172,7 @@ const browserCases = async (sourceCode: string, css: string) => {
     check.equal(inserted.dataset.marker, "1.");
 
     // 未知版本或损坏配置在任何编辑之前报错，原内容保持不变。
-    list.setAttribute("custom-list-mindmap-data", '{"version":2,"nodes":{},"relations":[]}');
+    list.setAttribute("custom-sy-list-mindmap-data", '{"version":2,"nodes":{},"relations":[]}');
     const corrupt = list.outerHTML;
     check.throws(() => api.moveListMindmapNode(list, inserted.dataset.nodeId, first.id, "after"), /metadata/);
     check.throws(() => api.deleteListMindmapNode(list, inserted.dataset.nodeId), /metadata/);
@@ -232,7 +232,7 @@ const browserCases = async (sourceCode: string, css: string) => {
     check.equal(childList.outerHTML, childHTML);
 
     // 渲染和编辑标记不会进入持久化 DOM，列表视图属性及关系线配置仍然保留。
-    list.setAttribute("custom-list-mindmap", "1");
+    list.setAttribute("custom-sy-list-mindmap", "1");
     list.setAttribute("data-list-mindmap-rendered", "true");
     list.setAttribute("data-list-mindmap-editing", "true");
     const derived = document.createElement("div");
@@ -247,23 +247,23 @@ const browserCases = async (sourceCode: string, css: string) => {
     check.equal(cleaned.includes("data-list-mindmap-editing"), false);
     check.equal(cleaned.includes("<!--list-mindmap-->"), false);
     check.equal(cleaned.includes("<!--unrelated list-mindmap comment-->"), true);
-    check.equal(cleaned.includes('custom-list-mindmap="1"'), true);
+    check.equal(cleaned.includes('custom-sy-list-mindmap="1"'), true);
     check.ok(list.contains(derived));
     check.equal(api.cleanListMindmapHTML("<div>unrelated</div>"), "<div>unrelated</div>");
     check.ok(lute.BlockDOM2Md(cleaned).includes("New child"));
 
     // 复制后关系线与节点样式引用新块 ID，遇到任一损坏配置时不进行部分迁移。
-    list.setAttribute("custom-list-mindmap-data", JSON.stringify({version: 1, extension: "keep",
+    list.setAttribute("custom-sy-list-mindmap-data", JSON.stringify({version: 1, extension: "keep",
         nodes: {a: {bold: true}, b: {italic: true}},
         relations: [{id: "relation", from: "a", to: "b", label: "keep"}]}));
     const child = list.querySelector('[data-type="NodeList"]');
-    child.setAttribute("custom-list-mindmap-data", '{"version":2,"nodes":{},"relations":[]}');
+    child.setAttribute("custom-sy-list-mindmap-data", '{"version":2,"nodes":{},"relations":[]}');
     const beforeRemap = list.outerHTML;
     check.throws(() => api.remapListMindmapIDs(list, new Map([["a", "new-a"], ["b", "new-b"]])), /metadata/);
     check.equal(list.outerHTML, beforeRemap);
-    child.removeAttribute("custom-list-mindmap-data");
+    child.removeAttribute("custom-sy-list-mindmap-data");
     api.remapListMindmapIDs(list, new Map([["a", "new-a"], ["b", "new-b"]]));
-    const remapped = JSON.parse(list.getAttribute("custom-list-mindmap-data"));
+    const remapped = JSON.parse(list.getAttribute("custom-sy-list-mindmap-data"));
     check.deepEqual(remapped.nodes, {"new-a": {bold: true}, "new-b": {italic: true}});
     check.deepEqual(remapped.relations, [{id: "relation", from: "new-a", to: "new-b", label: "keep"}]);
     check.equal(remapped.extension, "keep");

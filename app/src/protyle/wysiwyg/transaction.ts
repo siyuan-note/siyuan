@@ -74,7 +74,7 @@ import {
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
 import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
-import {cleanListMindmapHTML} from "../render/listMindmap/model";
+import {cleanListMindmapHTML, LIST_MINDMAP_VIEW_ATTRIBUTE} from "../render/listMindmap/model";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
@@ -147,12 +147,21 @@ const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action
     const attrs = JSON.parse(operation.data);
     const hasFold = Object.prototype.hasOwnProperty.call(attrs, "fold");
     const hasStyle = Object.prototype.hasOwnProperty.call(attrs, "style");
+    const hasMindmapView = Object.prototype.hasOwnProperty.call(attrs, LIST_MINDMAP_VIEW_ATTRIBUTE);
     const tabsAttrs = ["tabs-active-id", "tabs-position", "tabs-task"]
         .filter(name => Object.prototype.hasOwnProperty.call(attrs, name));
-    if (!hasFold && !hasStyle && tabsAttrs.length === 0) {
+    if (!hasFold && !hasStyle && !hasMindmapView && tabsAttrs.length === 0) {
         return;
     }
     element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
+        // 同步脑图视图属性，由列表监听器刷新各分屏中的视图。
+        if (hasMindmapView) {
+            if (attrs[LIST_MINDMAP_VIEW_ATTRIBUTE]) {
+                item.setAttribute(LIST_MINDMAP_VIEW_ATTRIBUTE, attrs[LIST_MINDMAP_VIEW_ATTRIBUTE]);
+            } else {
+                item.removeAttribute(LIST_MINDMAP_VIEW_ATTRIBUTE);
+            }
+        }
         if (hasFold) {
             if (attrs.fold === "1") {
                 item.setAttribute("fold", "1");

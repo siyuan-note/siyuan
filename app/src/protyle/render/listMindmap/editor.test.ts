@@ -256,6 +256,16 @@ const browserCases = async (sourceCode: string, css: string) => {
     const fixture = document.createElement("div");
     fixture.className = "protyle-wysiwyg";
     document.body.append(fixture);
+    fixture.innerHTML = '<div class="list-mindmap"><div class="list-mindmap__node"><div class="list-mindmap__content">' +
+        '<div class="p list-mindmap__preview-block">Normal</div>' +
+        '<div class="bq list-mindmap__preview-block" data-type="NodeBlockquote"><div class="p list-mindmap__preview-block">Quote</div></div>' +
+        '<div class="h1 list-mindmap__preview-block" data-type="NodeHeading">Heading</div>' +
+        "</div></div></div>";
+    const quote = fixture.querySelector<HTMLElement>(".bq");
+    check.equal(getComputedStyle(quote).position, "relative", "quote decoration is anchored to the quote block");
+    check.ok(parseFloat(getComputedStyle(quote).paddingLeft) > 4, "quote keeps shared indentation");
+    check.ok(parseFloat(getComputedStyle(fixture.querySelector(".h1")).fontSize) >
+        parseFloat(getComputedStyle(fixture.querySelector(".p")).fontSize), "heading keeps shared font size");
     for (const text of ["Test text", '<span data-type="strong">11pppppp</span>', "First<br>Second", "First\nSecond",
         '<span data-type="strong">1水电费ppppp</span>', '<span data-type="strong">1水电费pppppp</span>']) {
         fixture.innerHTML = `<div data-node-id="list" data-type="NodeList"><div class="list-mindmap"><div class="list-mindmap__node"><div class="list-mindmap__content"><div class="p"><div class="list-mindmap__text">${text}</div></div></div></div></div></div>`;

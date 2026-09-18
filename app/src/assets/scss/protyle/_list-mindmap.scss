@@ -238,7 +238,6 @@
       }
     }
 
-    > div,
     > .p {
       margin: 0;
       padding: 0;
@@ -274,7 +273,7 @@
       line-height: inherit;
     }
 
-    .protyle-wysiwyg > [data-node-id] {
+    .protyle-wysiwyg > .p[data-node-id] {
       margin: 0;
       padding: 0;
       line-height: inherit;
@@ -292,6 +291,10 @@
 
   &__editor .protyle-content[data-padding-mode] {
     container-type: normal;
+  }
+
+  &__preview-block {
+    position: relative;
   }
 
   &__text {

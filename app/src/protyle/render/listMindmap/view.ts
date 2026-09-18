@@ -411,6 +411,9 @@ export class ListMindmapView {
                         const clone = block.cloneNode(true) as HTMLElement;
                         clone.querySelectorAll(".protyle-attr, .protyle-action, .protyle-icons, .list-mindmap").forEach(item => item.remove());
                         [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))].forEach((item) => {
+                            if (item.hasAttribute("data-node-id")) {
+                                item.classList.add("list-mindmap__preview-block");
+                            }
                             if (item.hasAttribute("spellcheck")) {
                                 item.classList.add("list-mindmap__text");
                                 item.classList.toggle("list-mindmap__text--trailing-newline", item.textContent.endsWith("\n"));
@@ -419,9 +422,6 @@ export class ListMindmapView {
                             item.removeAttribute("data-node-id");
                             item.removeAttribute("spellcheck");
                             item.removeAttribute("draggable");
-                            if (item.getAttribute("data-type")?.startsWith("Node")) {
-                                item.removeAttribute("data-type");
-                            }
                         });
                         content.append(clone);
                     });

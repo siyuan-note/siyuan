@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260918210804"
+		"updated": "20260918223821"
 	},
 	"Children": [
 		{
@@ -4047,7 +4047,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260910080119"
+				"updated": "20260918223821"
 			},
 			"Children": [
 				{
@@ -11956,7 +11956,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-ans1gna",
-				"updated": "20260815184617"
+				"updated": "20260918223821"
 			},
 			"Children": [
 				{
@@ -11980,7 +11980,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-4oe7doq",
-				"updated": "20260815184617"
+				"updated": "20260918223821"
 			},
 			"Children": [
 				{
@@ -12333,6 +12333,80 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create a child node"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Switch to mind map and select a node"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create a sibling node"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Switch to mind map and select a node"
+								}
+							]
 						}
 					]
 				}
@@ -17669,7 +17743,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220902200437-58why4v",
-				"updated": "20260811122156"
+				"updated": "20260918223821"
 			},
 			"Children": [
 				{
@@ -17920,38 +17994,6 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20260918210804-ba0cedp",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260918210804-ba0cedp",
-				"updated": "20260918210804"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "In a list mind map, when a node is selected but not being edited, press "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to create a child node or "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to create and edit a sibling node. Virtual roots cannot have siblings; editing retains the editor's key behavior"
 				}
 			]
 		}

@@ -1115,7 +1115,11 @@ func ResolveUnusedDataAssetPath(assetPath string) (relativePath, absPath string,
 		return
 	}
 
-	if unusedAssetsContainPath(relativePath, absPath, UnusedAssets(false)) {
+	unusedAssets, err := UnusedAssets(false)
+	if err != nil {
+		return
+	}
+	if unusedAssetsContainPath(relativePath, absPath, unusedAssets) {
 		return
 	}
 	err = fmt.Errorf("asset is not unused: %s", relativePath)
@@ -1515,20 +1519,26 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 	return
 }
 
-func RemoveUnusedAssets() (ret []string) {
+func RemoveUnusedAssets() (ret []string, err error) {
 	ret = []string{}
+	unusedAssets, err := UnusedAssets(false)
+	if err != nil {
+		return
+	}
 	var size int64
 
 	msgId := util.PushMsg(Conf.Language(100), 30*1000)
 	defer func() {
+		if err != nil {
+			util.PushUpdateMsg(msgId, err.Error(), 7000)
+			return
+		}
 		msg := fmt.Sprintf(Conf.Language(91), len(ret), humanize.BytesCustomCeil(uint64(size), 2))
 		util.PushUpdateMsg(msgId, msg, 7000)
 	}()
 
-	unusedAssets := UnusedAssets(false)
 	for _, unusedAsset := range unusedAssets {
-		if err := EnsureAssetPrefixLocal(filepath.Join(util.DataDir, unusedAsset.Item)); err != nil {
-			util.PushErrMsg(err.Error(), 7000)
+		if err = EnsureAssetPrefixLocal(filepath.Join(util.DataDir, unusedAsset.Item)); err != nil {
 			return
 		}
 	}
@@ -1580,7 +1590,7 @@ func RemoveUnusedAssets() (ret []string) {
 
 			if removeErr := filelock.RemoveWithoutFatal(absPath); removeErr != nil {
 				logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, removeErr)
-				util.PushErrMsg(fmt.Sprintf("%s", removeErr), 7000)
+				err = removeErr
 				return
 			}
 
@@ -1854,19 +1864,28 @@ func removeReferencedAssetPaths(assetsPathMap map[string]string, dests map[strin
 			continue
 		}
 
-		if idx := strings.Index(dest, "?"); 0 < idx {
+		if idx := strings.IndexAny(dest, "?#"); 0 <= idx {
 			// `pdf?page` 资源文件链接会被判定为未引用资源 https://github.com/siyuan-note/siyuan/issues/5649
 			dest = dest[:idx]
 		}
 
-		resolvedDest, _, found := lookupAssetPath(assetsPathMap, dest)
-		if !found {
-			continue
+		// 先移除 URL 后缀，再解码路径；同时保留历史数据中按字面量存储的百分号文件名。
+		candidates := []string{dest}
+		if decoded, decodeErr := url.PathUnescape(dest); decodeErr == nil {
+			if decoded != dest {
+				candidates = append(candidates, decoded)
+			}
 		}
-		if strings.HasSuffix(resolvedDest, "/") {
-			linkDestFolderPaths = append(linkDestFolderPaths, resolvedDest)
-		} else {
-			linkDestFilePaths = append(linkDestFilePaths, resolvedDest)
+		for _, candidate := range candidates {
+			resolvedDest, _, found := lookupAssetPath(assetsPathMap, candidate)
+			if !found {
+				continue
+			}
+			if strings.HasSuffix(resolvedDest, "/") {
+				linkDestFolderPaths = append(linkDestFolderPaths, resolvedDest)
+			} else {
+				linkDestFilePaths = append(linkDestFilePaths, resolvedDest)
+			}
 		}
 	}
 
@@ -1890,8 +1909,14 @@ func removeReferencedAssetPaths(assetsPathMap map[string]string, dests map[strin
 	return
 }
 
-func UnusedAssets(sorted bool) (ret []*UnusedItem) {
-	defer logging.Recover()
+func UnusedAssets(sorted bool) (ret []*UnusedItem, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			ret = nil
+			err = fmt.Errorf("scan asset references failed: %v", recovered)
+			logging.LogErrorf("%s", err)
+		}
+	}()
 	ret = []*UnusedItem{}
 
 	assetsPathMap, err := allAssetAbsPaths()
@@ -1918,13 +1943,16 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 		dests := map[string]bool{}
 
 		// 分页加载，优化清理未引用资源内存占用 https://github.com/siyuan-note/siyuan/issues/5200
-		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
+		pages, walkErr := pagedPathsWithError(filepath.Join(util.DataDir, notebook.ID), 32)
+		if walkErr != nil {
+			return nil, walkErr
+		}
 		for _, paths := range pages {
 			var trees []*parse.Tree
 			for _, localPath := range paths {
 				tree, loadTreeErr := loadTree(localPath, luteEngine)
 				if nil != loadTreeErr {
-					continue
+					return nil, fmt.Errorf("read asset references [%s] failed: %w", localPath, loadTreeErr)
 				}
 				trees = append(trees, tree)
 			}
@@ -1957,7 +1985,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	agentSessionDests, readAgentSessionsErr := agentSessionImageAssetDests(luteEngine)
 	if readAgentSessionsErr != nil {
 		logging.LogErrorf("read agent session image assets failed: %s", readAgentSessionsErr)
-		return
+		return nil, readAgentSessionsErr
 	}
 	removeReferencedAssetPaths(assetsPathMap, agentSessionDests)
 
@@ -2428,11 +2456,7 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 				}
 				ret = append(ret, dataAssets)
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
-				dest := treenode.GetNodeSrcTokens(n)
-				if !util.IsAssetLinkDest([]byte(dest), includeServePath) {
-					return ast.WalkContinue
-				}
-				ret = append(ret, dest)
+				ret = append(ret, htmlAssetLinkDests(n.Tokens, includeServePath)...)
 			}
 		}
 		return ast.WalkContinue
@@ -2445,6 +2469,24 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 		}
 	}
 	return
+}
+
+func htmlAssetLinkDests(tokens []byte, includeServePath bool) (ret []string) {
+	// 逐个读取标签属性，兼容内联标签片段并只解码一层 HTML 实体。
+	tokenizer := html.NewTokenizer(bytes.NewReader(tokens))
+	for {
+		switch tokenizer.Next() {
+		case html.ErrorToken:
+			return
+		case html.StartTagToken, html.SelfClosingTagToken:
+			for _, attr := range tokenizer.Token().Attr {
+				dest := strings.TrimSpace(attr.Val)
+				if util.IsAssetLinkDest([]byte(dest), includeServePath) {
+					ret = append(ret, dest)
+				}
+			}
+		}
+	}
 }
 
 func fileAnnotationAssetLinkDest(reference string, includeServePath bool) string {

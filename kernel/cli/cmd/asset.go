@@ -112,7 +112,10 @@ var assetUnusedCmd = &cobra.Command{
 	Use:   "unused",
 	Short: "List unused assets",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		items := model.UnusedAssets(true)
+		items, err := model.UnusedAssets(true)
+		if err != nil {
+			return err
+		}
 		switch outputFormat {
 		case "json":
 			data, _ := json.MarshalIndent(items, "", "  ")
@@ -164,7 +167,10 @@ var assetCleanCmd = &cobra.Command{
 			return nil
 		}
 
-		removed := model.RemoveUnusedAssets()
+		removed, err := model.RemoveUnusedAssets()
+		if err != nil {
+			return err
+		}
 		if len(removed) == 0 {
 			fmt.Println("No unused assets to clean.")
 			return nil

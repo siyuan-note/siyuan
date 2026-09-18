@@ -212,3 +212,56 @@ func TestAssetUploadResultContractNullability(t *testing.T) {
 		}
 	}
 }
+
+func TestAssetUnusedScanFailureContract(t *testing.T) {
+	assets := setupAssetContractWorkspace(t)
+	model.Conf.FileTree = conf.NewFileTree()
+	box := &model.Box{ID: "20260918000000-abcdefg"}
+	if err := box.SaveConf(conf.NewBoxConf()); err != nil {
+		t.Fatal(err)
+	}
+	docPath := filepath.Join(util.DataDir, box.ID, "20260918000001-abcdefg.sy")
+	assetPath := filepath.Join(assets, "protected.png")
+	if err := os.WriteFile(assetPath, []byte("original"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	engine.POST("/api/asset/getUnusedAssets", getUnusedAssets)
+	engine.POST("/api/asset/removeUnusedAssets", removeUnusedAssets)
+	engine.POST("/api/asset/removeUnusedAsset", removeUnusedAsset)
+	for _, data := range []string{`{"Type":"NodeDocument","Spec":"99"}`, `{"Type":`} {
+		if err := os.WriteFile(docPath, []byte(data), 0644); err != nil {
+			t.Fatal(err)
+		}
+		for _, endpoint := range []string{"getUnusedAssets", "removeUnusedAssets", "removeUnusedAsset"} {
+			url := "/api/asset/" + endpoint
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", url, strings.NewReader(`{"path":"assets/protected.png"}`)))
+			requireAPIContract(t, "POST", url, recorder)
+			var response struct {
+				Code int
+				Msg  string
+				Data json.RawMessage
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 || !strings.Contains(response.Msg, filepath.Base(docPath)) || string(response.Data) != "null" {
+				t.Fatalf("%s must report scan failure: %s, %v", endpoint, recorder.Body.String(), err)
+			}
+			if stored, err := os.ReadFile(assetPath); err != nil || string(stored) != "original" {
+				t.Fatalf("%s changed asset: %q, %v", endpoint, stored, err)
+			}
+		}
+	}
+	if err := os.Remove(docPath); err != nil {
+		t.Fatal(err)
+	}
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/getUnusedAssets", strings.NewReader(`{}`)))
+	requireAPIContract(t, "POST", "/api/asset/getUnusedAssets", recorder)
+	var response struct {
+		Code int
+		Data []apicontract.AssetUnusedItem
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || len(response.Data) != 1 || response.Data[0].Item != "assets/protected.png" {
+		t.Fatalf("successful scan changed response shape: %s, %v", recorder.Body.String(), err)
+	}
+}

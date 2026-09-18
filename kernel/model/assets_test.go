@@ -276,7 +276,10 @@ func TestUnusedAssetsExcludesAgentSessionImages(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	items := UnusedAssets(false)
+	items, err := UnusedAssets(false)
+	if err != nil {
+		t.Fatal(err)
+	}
 	unused := map[string]bool{}
 	for _, item := range items {
 		unused[item.Item] = true

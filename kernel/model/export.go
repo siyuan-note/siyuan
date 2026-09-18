@@ -4459,9 +4459,7 @@ func exportPandocConvertZip0(boxID, baseFolderName string, docPaths, defBlockIDs
 			}
 		}
 
-		for assetsOld, assetsNew := range assetsOldNew {
-			md = strings.ReplaceAll(md, assetsOld, assetsNew)
-		}
+		md = rewriteExportMarkdownAssets(md, assetsOldNew)
 
 		// 调用 Pandoc 进行格式转换
 		pandocErr := util.Pandoc(pandocFrom, pandocTo, writePath, md)
@@ -4541,6 +4539,53 @@ func resolveExportAssetPaths(asset string, assetsOldNew, assetsNewOld map[string
 	return
 }
 
+func rewriteExportHTMLAssets(tokens []byte, replacements map[string]string) []byte {
+	// 属性按解码后的值匹配，写回时由 HTML 序列化器转义；未修改的标签保留原始格式。
+	tokenizer := html.NewTokenizer(bytes.NewReader(tokens))
+	var result bytes.Buffer
+	for {
+		typ := tokenizer.Next()
+		raw := append([]byte(nil), tokenizer.Raw()...)
+		if typ == html.StartTagToken || typ == html.SelfClosingTagToken {
+			token := tokenizer.Token()
+			updated := false
+			for i, attr := range token.Attr {
+				if dest, ok := replacements[strings.TrimSpace(attr.Val)]; ok && dest != strings.TrimSpace(attr.Val) {
+					token.Attr[i].Val = dest
+					updated = true
+				}
+			}
+			if updated {
+				result.WriteString(token.String())
+			} else {
+				result.Write(raw)
+			}
+		} else {
+			result.Write(raw)
+		}
+		if typ == html.ErrorToken {
+			return result.Bytes()
+		}
+	}
+}
+
+func rewriteExportMarkdownAssets(markdown string, replacements map[string]string) string {
+	markdown = string(rewriteExportHTMLAssets([]byte(markdown), replacements))
+	for oldDest, dest := range replacements {
+		markdown = strings.ReplaceAll(markdown, oldDest, dest)
+	}
+	return markdown
+}
+
+func setExportAssetLinkDest(node *ast.Node, oldDest, dest string) {
+	switch node.Type {
+	case ast.NodeHTMLBlock, ast.NodeInlineHTML, ast.NodeIFrame, ast.NodeAudio, ast.NodeVideo:
+		node.Tokens = rewriteExportHTMLAssets(node.Tokens, map[string]string{oldDest: dest})
+	default:
+		setAssetsLinkDest(node, oldDest, dest)
+	}
+}
+
 func removeAssetsID(tree *parse.Tree, assetsOldNew, assetsNewOld map[string]string) {
 	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
 	defer finishTabTitles()
@@ -4559,7 +4604,7 @@ func removeAssetsID(tree *parse.Tree, assetsOldNew, assetsNewOld map[string]stri
 			}
 
 			if newDest := assetsOldNew[dest]; "" != newDest {
-				setAssetsLinkDest(node, dest, newDest)
+				setExportAssetLinkDest(node, dest, newDest)
 				continue
 			}
 
@@ -4573,7 +4618,7 @@ func removeAssetsID(tree *parse.Tree, assetsOldNew, assetsNewOld map[string]stri
 			newDest += fragment
 			if existOld := assetsNewOld[newDest]; "" != existOld {
 				if existOld == dest { // 已存在相同资源路径
-					setAssetsLinkDest(node, dest, newDest)
+					setExportAssetLinkDest(node, dest, newDest)
 				} else {
 					// 存在同名但内容不同的资源文件，保留 ID
 					assetsNewOld[dest] = dest
@@ -4582,7 +4627,7 @@ func removeAssetsID(tree *parse.Tree, assetsOldNew, assetsNewOld map[string]stri
 				continue
 			}
 
-			setAssetsLinkDest(node, dest, newDest)
+			setExportAssetLinkDest(node, dest, newDest)
 			assetsOldNew[dest] = newDest
 			assetsNewOld[newDest] = dest
 		}

@@ -1,4 +1,5 @@
 import {isAVRenderData} from "../renderData";
+import {getPublishAVView} from "../publishState";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
 import {getPageSize} from "../groups";
 import {fetchSyncPost} from "../../../../util/fetch";
@@ -153,7 +154,7 @@ export const renderKanban = async (options: {
         const common = {
             id: options.blockElement.getAttribute("data-av-id"),
             blockID: options.blockElement.getAttribute("data-node-id"),
-            viewID: locateParams?.viewID || "",
+            viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(options.blockElement) : ""),
         };
         const paging = {
             pageSize: avPageSize.unGroupPageSize,
@@ -168,6 +169,7 @@ export const renderKanban = async (options: {
         }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
             ...common, ...paging,
             initialLayout: options.blockElement.getAttribute("data-av-type"),
+            createIfNotExist: !window.siyuan.isPublish,
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
         }, undefined, false));
@@ -175,7 +177,9 @@ export const renderKanban = async (options: {
             return;
         }
         if (response.code !== 0 || !isAVRenderData(response.data)) {
-            failAVRender(options.blockElement, response);
+            if (failAVRender(options.blockElement, response)) {
+                await renderKanban(options);
+            }
             return;
         }
         data = response.data;

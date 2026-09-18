@@ -23,6 +23,7 @@ import {
 } from "../locate";
 import {getCardStyle} from "./style";
 import {setGroupFoldedStates} from "../groupFold";
+import {getPublishAVView} from "../publishState";
 import {renderAVRichTextElements} from "../richText";
 
 interface IIds {
@@ -273,7 +274,7 @@ export const renderGallery = async (options: {
         const common = {
             id: options.blockElement.getAttribute("data-av-id"),
             blockID: options.blockElement.getAttribute("data-node-id"),
-            viewID: locateParams?.viewID || "",
+            viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(options.blockElement) : ""),
         };
         const paging = {
             pageSize: avPageSize.unGroupPageSize,
@@ -288,6 +289,7 @@ export const renderGallery = async (options: {
         }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
             ...common, ...paging,
             initialLayout: options.blockElement.getAttribute("data-av-type"),
+            createIfNotExist: !window.siyuan.isPublish,
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
         }, undefined, false));
@@ -295,7 +297,9 @@ export const renderGallery = async (options: {
             return;
         }
         if (response.code !== 0 || !isAVRenderData(response.data)) {
-            failAVRender(options.blockElement, response);
+            if (failAVRender(options.blockElement, response)) {
+                await renderGallery(options);
+            }
             return;
         }
         data = response.data;

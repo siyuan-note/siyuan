@@ -55,6 +55,7 @@ import {createAttributeViewItem, createAttributeViewItemDocs, openNewItemTemplat
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {openKanbanGroupMenu} from "./kanban/groupMenu";
 import {getGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
+import {setPublishAVFolds, setPublishAVView} from "./publishState";
 import {
     finishCardCoverPosition,
     isCardCoverPositioning,
@@ -648,6 +649,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 initUnfoldedGroupTables(blockElement, protyle);
                 updateGroupFoldedStates(blockElement, doData);
                 clearTimeout(foldTimeout);
+                if (window.siyuan.isPublish) {
+                    setPublishAVFolds(blockElement, viewID, doData);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return true;
+                }
                 transaction(protyle, [{
                     action: "foldAttrViewGroups",
                     avID: blockElement.dataset.avId,
@@ -667,6 +674,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 initUnfoldedGroupTables(blockElement, protyle);
                 updateGroupFoldedStates(blockElement, {[target.dataset.id]: isOpen});
                 clearTimeout(foldTimeout);
+                if (window.siyuan.isPublish) {
+                    setPublishAVFolds(blockElement, viewID, {[target.dataset.id]: isOpen});
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return true;
+                }
                 foldTimeout = window.setTimeout(() => {
                     transaction(protyle, [{
                         action: "foldAttrViewGroup",
@@ -717,8 +730,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             /// #endif
             if (target.classList.contains("item--focus")) {
                 openViewMenu({protyle, blockElement, element: target});
-            } else if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+            } else if (window.siyuan.isPublish || protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
                 clearSelect(["row", "galleryItem"], blockElement);
+                if (window.siyuan.isPublish) {
+                    setPublishAVView(blockElement, target.dataset.id);
+                }
                 blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, target.dataset.id);
                 blockElement.removeAttribute("data-render");
                 if (target.dataset.page) {

@@ -35,7 +35,11 @@ func avArchiveRenderData(attrView *av.AttributeView, view av.Viewable) apicontra
 }
 
 func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, filter func(av.Viewable) av.Viewable, hideContext bool) apicontract.Response[apicontract.AVRenderResult] {
-	view, attrView, target, err := model.RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
+	render := model.RenderAttributeViewWithTarget
+	if filter != nil {
+		render = model.RenderAttributeViewWithTargetReadOnly
+	}
+	view, attrView, target, err := render(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
 	if err != nil {
 		message := err.Error()
 		if errors.Is(err, av.ErrSpecTooNew) {

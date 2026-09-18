@@ -34,6 +34,7 @@ import {
     setAVLocateRequest
 } from "./locate";
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
+import {getPublishAVView} from "./publishState";
 import {updateHotkeyTip} from "../../util/compatibility";
 import {inspectAVInsertedItem} from "./filteredTip";
 import {
@@ -675,7 +676,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             const common = {
                 id: e.getAttribute("data-av-id"),
                 blockID: e.getAttribute("data-node-id"),
-                viewID: locateParams?.viewID || "",
+                viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(e) : ""),
             };
             const paging = {
                 pageSize: avPageSize.unGroupPageSize,
@@ -690,7 +691,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
                 ...common, ...paging,
                 initialLayout: e.getAttribute("data-av-type"),
-                createIfNotExist: !protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE),
+                createIfNotExist: !window.siyuan.isPublish && !protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE),
                 targetItemID: locateParams?.targetItemID || "",
                 targetGroupID: locateParams?.targetGroupID || "",
             }, undefined, false));
@@ -698,7 +699,9 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 continue;
             }
             if (response.code !== 0 || !isAVRenderData(response.data)) {
-                failAVRender(e, response);
+                if (failAVRender(e, response)) {
+                    await avRender(e, protyle, cb, renderAll);
+                }
                 continue;
             }
             data = response.data;

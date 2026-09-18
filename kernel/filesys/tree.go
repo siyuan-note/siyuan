@@ -168,8 +168,28 @@ func ValidateBoxRelativePath(boxID, p string) (string, error) {
 	return p, nil
 }
 
+// validateTreePath 限制文档读写只访问以块 ID 命名的文档及其父目录，避免订正逻辑覆盖内部配置。
+func validateTreePath(boxID, p string) error {
+	if !ast.IsNodeIDPattern(boxID) {
+		return fmt.Errorf("invalid notebook ID [%s]", boxID)
+	}
+	rel, err := ValidateBoxRelativePath(boxID, p)
+	if err != nil {
+		return err
+	}
+	if !strings.HasSuffix(rel, ".sy") {
+		return fmt.Errorf("invalid document path [%s]", p)
+	}
+	for _, id := range strings.Split(strings.TrimSuffix(rel, ".sy"), "/") {
+		if !ast.IsNodeIDPattern(id) {
+			return fmt.Errorf("invalid document path [%s]", p)
+		}
+	}
+	return nil
+}
+
 func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, needFix bool, err error) {
-	if _, err = ValidateBoxRelativePath(boxID, p); err != nil {
+	if err = validateTreePath(boxID, p); err != nil {
 		logging.LogErrorf("invalid tree path [%s] for box [%s]: %s", p, boxID, err)
 		return
 	}
@@ -240,6 +260,9 @@ func NormalizeTreeForRead(tree *parse.Tree) (err error) {
 }
 
 func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	if err = validateTreePath(boxID, p); err != nil {
+		return
+	}
 	ret, err = parseJSON2Tree(boxID, p, data, luteEngine)
 	if nil != err {
 		logging.LogErrorf("parse tree [%s] failed: %s", p, err)
@@ -518,6 +541,9 @@ func writeTreeByWriteFile(filePath string, data []byte) (err error) {
 }
 
 func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error) {
+	if err = validateTreePath(tree.Box, tree.Path); err != nil {
+		return
+	}
 	if err = treenode.SyncTableCellRichInlineChanges(tree.Root); nil != err {
 		return
 	}
@@ -537,10 +563,6 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		treenode.UpsertBlockTree(tree)
 	}
 	treenode.UpgradeSpec(tree)
-
-	if _, err = ValidateBoxRelativePath(tree.Box, tree.Path); err != nil {
-		return
-	}
 
 	filePath = filepath.Join(util.DataDir, tree.Box, tree.Path)
 	tree.Root.SetIALAttr("type", "doc")
@@ -619,6 +641,9 @@ func afterWriteTree(tree *parse.Tree) {
 
 // fixTreeJSONData 订正树 JSON 数据。
 func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, dek []byte, encrypted bool) (data []byte, needFix bool, err error) {
+	if err = validateTreePath(boxID, p); err != nil {
+		return
+	}
 	if err = treenode.CheckSpecJSON(jsonData); nil != err {
 		return
 	}

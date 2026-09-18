@@ -247,7 +247,10 @@ func validateAssetUploadPaths(fileList []string) ([]string, error) {
 }
 
 func assetUnused(args map[string]any) (CallToolResult, error) {
-	items := model.UnusedAssets(true)
+	items, err := model.UnusedAssets(true)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
 	if len(items) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no unused assets found"}}}, nil
 	}
@@ -272,7 +275,10 @@ func assetClean(args map[string]any) (CallToolResult, error) {
 		}
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("removed: %v", ret)}}}, nil
 	}
-	removed := model.RemoveUnusedAssets()
+	removed, err := model.RemoveUnusedAssets()
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "clean failed: " + err.Error()}}, IsError: true}, nil
+	}
 	if len(removed) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no unused assets to clean"}}}, nil
 	}

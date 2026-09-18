@@ -128,6 +128,17 @@ func TestFindUnindexedTreePathIgnoresTextMatch(t *testing.T) {
 	if matchedPath := findUnindexedTreePathInAllBoxes(targetID); "" != matchedPath {
 		t.Fatalf("text content was recognized as a block ID [path=%s]", matchedPath)
 	}
+	sortPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
+	sortData := []byte(`{"` + targetID + `":1}`)
+	if err := os.WriteFile(sortPath, sortData, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if matchedPath := findUnindexedTreePathInAllBoxes(targetID); matchedPath != "" {
+		t.Fatalf("sort configuration was recognized as a document [path=%s]", matchedPath)
+	}
+	if got, err := os.ReadFile(sortPath); err != nil || string(got) != string(sortData) {
+		t.Fatalf("sort configuration changed during reindex fallback: %v", err)
+	}
 	paragraph.ID = targetID
 	if _, err := filesys.WriteTree(tree); nil != err {
 		t.Fatal(err)

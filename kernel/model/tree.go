@@ -139,10 +139,25 @@ func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 }
 
 func pagedPaths(localPath string, pageSize int) (ret map[int][]string) {
+	ret, _ = pagedPathsWithWalker(localPath, pageSize, false, filelock.Walk)
+	return
+}
+
+func pagedPathsWithError(localPath string, pageSize int) (ret map[int][]string, err error) {
+	return pagedPathsWithWalker(localPath, pageSize, true, filelock.Walk)
+}
+
+func pagedPathsWithWalker(localPath string, pageSize int, strict bool, walk func(string, fs.WalkDirFunc) error) (ret map[int][]string, err error) {
 	ret = map[int][]string{}
 	page := 1
-	filelock.Walk(localPath, func(path string, d fs.DirEntry, err error) error {
-		if nil != err || nil == d {
+	err = walk(localPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			if strict {
+				return err
+			}
+			return nil
+		}
+		if d == nil {
 			return nil
 		}
 

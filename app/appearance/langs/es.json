@@ -1,5 +1,4 @@
 {
-	"apiTypeAnthropicMessages": "API de mensajes de Anthropic",
 	"encryptedAssetExternalOpenTip": "Se abrirá una copia temporal descifrada. Los cambios no se guardarán en el archivo adjunto original. La copia puede eliminarse al bloquear el cuaderno. Para conservar los cambios, guarde el archivo en otra ubicación.",
 	"linuxInputMethod": "Modo de compatibilidad de métodos de entrada de Linux",
 	"linuxInputMethodTip": "Usar X11/XWayland para mejorar la compatibilidad de los métodos de entrada; puede afectar al escalado, se aplica a todos los espacios de trabajo de este dispositivo y requiere cerrar completamente y reiniciar SiYuan",

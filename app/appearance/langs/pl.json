@@ -1,5 +1,4 @@
 {
-	"apiTypeAnthropicMessages": "API wiadomości Anthropic",
 	"encryptedAssetExternalOpenTip": "Zostanie otwarta tymczasowa odszyfrowana kopia. Zmiany nie zostaną zapisane w oryginalnym załączniku. Kopia może zostać usunięta po zablokowaniu notatnika. Aby zachować zmiany, zapisz plik w innym miejscu.",
 	"linuxInputMethod": "Tryb zgodności metod wprowadzania w systemie Linux",
 	"linuxInputMethodTip": "Używaj X11/XWayland, aby poprawić zgodność metod wprowadzania; może wpływać na skalowanie ekranu, dotyczy wszystkich przestrzeni roboczych na tym urządzeniu i wymaga całkowitego zamknięcia oraz ponownego uruchomienia SiYuan",

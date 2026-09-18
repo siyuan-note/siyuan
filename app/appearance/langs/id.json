@@ -1,5 +1,4 @@
 {
-	"apiTypeAnthropicMessages": "API Pesan Anthropic",
 	"encryptedAssetExternalOpenTip": "Salinan sementara yang telah didekripsi akan dibuka. Perubahan tidak akan disimpan ke lampiran asli. Salinan dapat dihapus saat buku catatan dikunci. Untuk mempertahankan perubahan, simpan berkas ke lokasi lain.",
 	"linuxInputMethod": "Mode kompatibilitas metode masukan Linux",
 	"linuxInputMethodTip": "Gunakan X11/XWayland untuk meningkatkan kompatibilitas metode masukan; dapat memengaruhi skala tampilan, berlaku untuk semua ruang kerja di perangkat ini, dan aktif setelah SiYuan ditutup sepenuhnya lalu dimulai ulang",

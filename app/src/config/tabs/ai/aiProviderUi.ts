@@ -407,9 +407,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         '<span class="fn__none" data-type="responsesCompatibility"></span>')}
                 <span class="fn__space"></span>
                 <select class="b3-select fn__flex-center fn__size200" data-provider-field="protocol">
-                    <option value="openai"${draft.protocol === "openai" ? " selected" : ""}>Chat Completions API</option>
-                    <option value="openai-responses"${draft.protocol === "openai-responses" ? " selected" : ""}>Responses API</option>
-                    <option value="anthropic-messages"${draft.protocol === "anthropic-messages" ? " selected" : ""}>${window.siyuan.languages.apiTypeAnthropicMessages}</option>
+                    <option value="openai"${draft.protocol === "openai" ? " selected" : ""}>Chat Completions</option>
+                    <option value="openai-responses"${draft.protocol === "openai-responses" ? " selected" : ""}>Responses</option>
+                    <option value="anthropic-messages"${draft.protocol === "anthropic-messages" ? " selected" : ""}>Anthropic Messages</option>
                 </select>
             </label>
             <label class="fn__flex b3-label config-item">

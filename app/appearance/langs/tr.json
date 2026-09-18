@@ -1,5 +1,4 @@
 {
-	"apiTypeAnthropicMessages": "Anthropic Mesajlar API’si",
 	"encryptedAssetExternalOpenTip": "Geçici olarak şifresi çözülmüş bir kopya açılacak. Değişiklikler özgün eke kaydedilmeyecek. Not defteri kilitlendiğinde kopya silinebilir. Değişikliklerinizi korumak için dosyayı başka bir konuma kaydedin.",
 	"linuxInputMethod": "Linux giriş yöntemi uyumluluk modu",
 	"linuxInputMethodTip": "Giriş yöntemi uyumluluğunu iyileştirmek için X11/XWayland kullanır; ekran ölçeklendirmesini etkileyebilir, bu cihazdaki tüm çalışma alanlarına uygulanır ve SiYuan tamamen kapatılıp yeniden başlatıldığında etkinleşir",

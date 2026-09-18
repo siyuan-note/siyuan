@@ -1,5 +1,4 @@
 {
-	"apiTypeAnthropicMessages": "Anthropic Messages 接口",
 	"encryptedAssetExternalOpenTip": "将打开临时解密副本，修改不会保存到原附件。锁定笔记本后副本可能被清理，如需保留修改，请另存到其他位置。",
 	"linuxInputMethod": "Linux 输入法兼容模式",
 	"linuxInputMethodTip": "通过 X11/XWayland 改善输入法兼容性，可能影响显示缩放，作用于本机所有工作空间，完全退出并重新启动思源后生效",

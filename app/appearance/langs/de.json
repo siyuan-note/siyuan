@@ -1,5 +1,4 @@
 {
-	"apiTypeAnthropicMessages": "Anthropic Messages API",
 	"encryptedAssetExternalOpenTip": "Es wird eine temporäre entschlüsselte Kopie geöffnet. Änderungen werden nicht im ursprünglichen Anhang gespeichert. Die Kopie kann beim Sperren des Notizbuchs gelöscht werden. Speichern Sie die Datei an einem anderen Ort, um Ihre Änderungen zu behalten.",
 	"linuxInputMethod": "Linux-Eingabemethoden-Kompatibilitätsmodus",
 	"linuxInputMethodTip": "X11/XWayland zur Verbesserung der Eingabemethoden-Kompatibilität verwenden; kann die Anzeigeskalierung beeinflussen, gilt für alle Arbeitsbereiche auf diesem Gerät und wird nach vollständigem Beenden und Neustarten von SiYuan wirksam",

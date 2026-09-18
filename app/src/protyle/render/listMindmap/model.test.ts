@@ -254,8 +254,12 @@ const browserCases = async (sourceCode: string, css: string) => {
 
     // 复制后关系线与节点样式引用新块 ID，遇到任一损坏配置时不进行部分迁移。
     list.setAttribute("custom-sy-list-mindmap-data", JSON.stringify({version: 1, extension: "keep",
-        nodes: {a: {bold: true}, b: {italic: true}},
-        relations: [{id: "relation", from: "a", to: "b", label: "keep"}]}));
+        nodes: {a: {bold: true}, b: {italic: true}, deleted: {bold: true}},
+        relations: [{id: "relation", from: "a", to: "b", label: "keep"},
+            {id: "orphan", from: "a", to: "deleted", label: "remove"}]}));
+    const copiedItems = list.querySelectorAll('[data-type="NodeListItem"]');
+    copiedItems[0].setAttribute("data-node-id", "new-a");
+    copiedItems[1].setAttribute("data-node-id", "new-b");
     const child = list.querySelector('[data-type="NodeList"]');
     child.setAttribute("custom-sy-list-mindmap-data", '{"version":2,"nodes":{},"relations":[]}');
     const beforeRemap = list.outerHTML;
@@ -331,6 +335,24 @@ const browserCases = async (sourceCode: string, css: string) => {
     HTMLElement.prototype.hasPointerCapture = () => false;
     HTMLElement.prototype.releasePointerCapture = () => undefined;
     const nodeElement = (id: string) => host.querySelector<HTMLElement>(`[data-mindmap-id="${id}"]`);
+    const compactNode = nodeElement(alpha);
+    compactNode.style.minHeight = "0";
+    compactNode.style.height = "32px";
+    view.refreshLayout();
+    await settle();
+    check.equal(view.positions.get(alpha).height, compactNode.offsetHeight,
+        "connection geometry uses the actual compact node height");
+    const compactPositions = JSON.stringify([...view.positions]);
+    view.setEditing(alpha);
+    await settle();
+    check.equal(JSON.stringify([...view.positions]), compactPositions, "entering edit mode preserves connection geometry");
+    view.setEditing(undefined);
+    await settle();
+    check.equal(JSON.stringify([...view.positions]), compactPositions, "leaving edit mode preserves connection geometry");
+    compactNode.style.minHeight = "";
+    compactNode.style.height = "";
+    view.refreshLayout();
+    await settle();
     const sendPointer = (element: Element, type: string, x: number, y: number) => element.dispatchEvent(new PointerEvent(type, {
         bubbles: true, cancelable: true, pointerId: 1, pointerType: "mouse", button: 0, clientX: x, clientY: y,
     }));
@@ -338,7 +360,7 @@ const browserCases = async (sourceCode: string, css: string) => {
     const targetRect = nodeElement(beta).getBoundingClientRect();
     const sourcePoint = {x: sourceRect.left + sourceRect.width / 2, y: sourceRect.top + sourceRect.height / 2};
     const targetPoint = {x: targetRect.left + targetRect.width / 2, y: targetRect.top + targetRect.height / 2};
-    check.ok(sourceRect.width >= 64 && sourceRect.height >= 36);
+    check.ok(sourceRect.width >= 64 && sourceRect.height >= 32);
     check.equal(host.querySelector("[data-node-id]"), null);
     sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y);
     sendPointer(viewport, "pointerup", sourcePoint.x, sourcePoint.y);
@@ -670,6 +692,40 @@ const browserCases = async (sourceCode: string, css: string) => {
     blank();
     check.equal(inspector.hidden, true);
     check.equal(host.querySelector(".list-mindmap__relation--selected"), null);
+
+    const savedRelations = model.metadata.relations;
+    model.metadata.relations = [
+        {id: "forward", from: alpha, to: beta, label: ""},
+        {id: "reverse", from: beta, to: alpha, label: ""},
+    ];
+    view.update(model);
+    await settle();
+    for (const scale of [0.5, 1, 2]) {
+        view.scale = scale;
+        view.draw();
+        for (const id of ["forward", "reverse"]) {
+            const end = view.linePaths.find((line: any) => line.id === id).end;
+            const bounds = viewport.getBoundingClientRect();
+            const x = bounds.left + view.offsetX + end.x * scale;
+            const y = bounds.top + view.offsetY + end.y * scale;
+            sendPointer(viewport, "pointermove", x, y);
+            check.equal(view.hoveredLine, `relation:${id}`, "each arrow highlights its own direction");
+            sendPointer(viewport, "pointerdown", x, y);
+            sendPointer(viewport, "pointerup", x, y);
+            check.equal(view.selectedRelation, id, "overlapping reverse relations can be selected independently");
+            viewport.dispatchEvent(new MouseEvent("dblclick", {clientX: x, clientY: y, bubbles: true}));
+            const input = host.querySelector<HTMLInputElement>(".list-mindmap__relation-editor");
+            check.ok(input, "double-clicking either arrow edits that relation");
+            input.value = id;
+            input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+            check.deepEqual(relationChanges[relationChanges.length - 1], [id, {label: id}]);
+            pressDelete();
+            check.equal(relationDeletions[relationDeletions.length - 1], id);
+        }
+    }
+    view.scale = 1;
+    model.metadata.relations = savedRelations;
+    view.update(model);
 
     // 全屏使用编辑器同款窗口内布局，不调用浏览器全屏，并在退出和销毁时恢复原位置。
     Object.defineProperty(host, "requestFullscreen", {configurable: true, value: () => check.fail("Native fullscreen must not be requested")});

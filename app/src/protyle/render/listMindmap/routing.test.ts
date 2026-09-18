@@ -19,6 +19,92 @@ const validate = (route: MindmapRoutePoint[], nodes: MindmapRouteBox[]) => {
     }
 };
 
+const validateDirection = (route: MindmapRoutePoint[], from: MindmapRouteBox, to: MindmapRouteBox) => {
+    const outward = (port: MindmapRoutePoint, next: MindmapRoutePoint, node: MindmapRouteBox) => {
+        if (port.x < node.x) {
+            assert.ok(next.x < port.x && next.y === port.y);
+        } else if (port.x > node.x + node.width) {
+            assert.ok(next.x > port.x && next.y === port.y);
+        } else if (port.y < node.y) {
+            assert.ok(next.y < port.y && next.x === port.x);
+        } else {
+            assert.ok(next.y > port.y && next.x === port.x);
+        }
+    };
+    outward(route[0], route[1], from);
+    outward(route[route.length - 1], route[route.length - 2], to);
+};
+
+test("mixed widths keep arrows facing nodes", () => {
+    for (const width of [64, 130, 260]) {
+        const nodes = [
+            {x: 0, y: 56, width: 88, height: 32, controlY: 72},
+            {x: 128, y: 0, width: 64, height: 32},
+            {x: 128, y: 56, width, height: 32},
+            {x: 128, y: 112, width: 64, height: 32},
+            {x: 168 + width, y: 56, width: 64, height: 32},
+        ];
+        for (const [from, to] of [[1, 2], [1, 4], [2, 4], [2, 3]]) {
+            const route = routeMindmapRelation(nodes[from], nodes[to], nodes);
+            validate(route, nodes);
+            validateDirection(route, nodes[from], nodes[to]);
+            if (to === 3) {
+                assert.equal(route.length, 2, "wide sibling connects vertically to the narrower sibling");
+            }
+        }
+        for (const from of nodes) {
+            for (const to of nodes) {
+                if (from !== to) {
+                    const route = routeMindmapRelation(from, to, nodes);
+                    validate(route, nodes);
+                    validateDirection(route, from, to);
+                    assert.deepEqual(routeMindmapRelation(to, from, nodes), [...route].reverse(),
+                        "opposite connections share the same geometry");
+                }
+            }
+        }
+    }
+});
+
+test("routing is independent of other connections and reverse arrows retain their approach direction", () => {
+    const nodes = [
+        {x: 0, y: 0, width: 100, height: 40},
+        {x: 260, y: 0, width: 100, height: 40},
+        {x: 260, y: 100, width: 100, height: 40},
+    ];
+    const first = routeMindmapRelation(nodes[0], nodes[1], nodes);
+    const second = routeMindmapRelation(nodes[0], nodes[2], nodes);
+    const reverse = routeMindmapRelation(nodes[1], nodes[0], nodes);
+    validate(second, nodes);
+    validate(reverse, nodes);
+    validateDirection(second, nodes[0], nodes[2]);
+    validateDirection(reverse, nodes[1], nodes[0]);
+    assert.deepEqual(routeMindmapRelation(nodes[0], nodes[1], nodes), first,
+        "computing other connections does not change the existing route");
+    assert.deepEqual(routeMindmapRelation(nodes[0], nodes[2], nodes), second,
+        "routing remains independent of previously computed connections");
+});
+
+test("multiline parents connect directly to short children without tiny doglegs", () => {
+    for (const height of [80, 128, 200]) {
+        const nodes = [
+            {x: 128, y: 0, width: 64, height: 32},
+            {x: 128, y: 56, width: 160, height},
+            {x: 328, y: 56 + (height - 32) / 2, width: 64, height: 32},
+            {x: 128, y: 80 + height, width: 64, height: 32},
+        ];
+        for (const [from, to] of [[1, 2], [2, 1]]) {
+            const route = routeMindmapRelation(nodes[from], nodes[to], nodes);
+            validate(route, nodes);
+            validateDirection(route, nodes[from], nodes[to]);
+            assert.equal(route.length, 2, "different node heights share a horizontal port level");
+            assert.equal(route[0].y, route[1].y);
+            assert.equal(route[0].y, nodes[2].y + nodes[2].height / 2,
+                "horizontal connections meet the short node at its vertical center");
+        }
+    }
+});
+
 test("vertically adjacent nodes connect when their clearance ports coincide", () => {
     const nodes = [
         {x: 200, y: 0, width: 64, height: 38},
@@ -28,6 +114,23 @@ test("vertically adjacent nodes connect when their clearance ports coincide", ()
     validate(routeMindmapRelation(nodes[1], nodes[0], nodes), nodes);
 });
 
+test("adjacent siblings remain connectable between a parent and a child column", () => {
+    const nodes = [
+        {x: 0, y: 62, width: 88, height: 38, controlY: 81},
+        {x: 128, y: 0, width: 64, height: 38},
+        {x: 128, y: 62, width: 64, height: 38},
+        {x: 128, y: 124, width: 64, height: 38},
+        {x: 232, y: 62, width: 64, height: 38},
+    ];
+    for (const from of nodes) {
+        for (const to of nodes) {
+            if (from !== to) {
+                validate(routeMindmapRelation(from, to, nodes), nodes);
+            }
+        }
+    }
+});
+
 test("connection preview routes to the exact pointer position around obstacles", () => {
     const from = {x: 0, y: 0, width: 100, height: 40};
     const obstacle = {x: 160, y: 0, width: 100, height: 80};
@@ -35,6 +138,40 @@ test("connection preview routes to the exact pointer position around obstacles",
     const route = routeMindmapRelation(from, pointer, [from, obstacle]);
     validate(route, [from, obstacle]);
     assert.deepEqual(route[route.length - 1], {x: pointer.x, y: pointer.y});
+});
+
+test("compact sibling connections prefer the gap instead of an outer detour", () => {
+    for (const height of [32, 38, 46]) {
+        const nodes = [
+            {x: 0, y: height + 24, width: 88, height, controlY: height * 1.5 + 24},
+            {x: 128, y: 0, width: 64, height},
+            {x: 128, y: height + 24, width: 64, height},
+            {x: 128, y: 2 * (height + 24), width: 64, height},
+            {x: 232, y: height + 24, width: 64, height},
+        ];
+        for (const [from, to] of [[1, 2], [2, 1], [2, 3], [3, 2]]) {
+            const route = routeMindmapRelation(nodes[from], nodes[to], nodes);
+            validate(route, nodes);
+            assert.equal(route.length, 2, "siblings use the direct vertical gap");
+            assert.equal(route[0].x, nodes[from].x + nodes[from].width / 2);
+            assert.equal(Math.abs(route[1].y - route[0].y), 18,
+                "short connections leave enough space for two readable arrows and a gap");
+            assert.deepEqual(routeMindmapRelation(nodes[from], nodes[to], nodes), route);
+        }
+        for (const [from, to] of [[2, 4], [4, 2]]) {
+            const route = routeMindmapRelation(nodes[from], nodes[to], nodes);
+            validate(route, nodes);
+            assert.equal(route.length, 2, "aligned parent and child use the direct horizontal gap");
+            assert.equal(route[0].y, route[1].y);
+        }
+        const diagonal = routeMindmapRelation(nodes[1], nodes[4], nodes);
+        validate(diagonal, nodes);
+        assert.equal(diagonal.length, 3, "cross-column connection only needs one bend");
+        assert.equal(diagonal[0].y, nodes[1].y + nodes[1].height / 2,
+            "side endpoints are vertically centered");
+        assert.equal(diagonal[diagonal.length - 1].x, nodes[4].x + nodes[4].width / 2,
+            "top endpoints are horizontally centered");
+    }
 });
 
 test("relations route around intervening nodes in both directions", () => {
@@ -52,7 +189,7 @@ test("right-side endpoints remain close to node text while avoiding bottom contr
     const to = {x: 240, y: 0, width: 120, height: 40};
     const route = routeMindmapRelation(from, to, [from, to]);
     validate(route, [from, to]);
-    assert.equal(route[0].x - from.x - from.width, 12);
+    assert.equal(route[0].x - from.x - from.width, 3);
 });
 
 test("relations find side ports when vertical gaps are too narrow", () => {

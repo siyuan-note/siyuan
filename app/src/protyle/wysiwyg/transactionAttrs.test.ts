@@ -9,7 +9,8 @@ const source = createSourceFile("transaction.ts", readFileSync("src/protyle/wysi
 const declaration = source.statements.find(statement => isVariableStatement(statement) &&
     statement.declarationList.declarations.some(item => item.name.getText(source) === "syncBlockAttrs"));
 const attribute = "custom-sy-list-mindmap";
-const context = {LIST_MINDMAP_VIEW_ATTRIBUTE: attribute, sync: undefined as any};
+const metadataAttribute = "custom-sy-list-mindmap-data";
+const context = {LIST_MINDMAP_VIEW_ATTRIBUTE: attribute, LIST_MINDMAP_META_ATTRIBUTE: metadataAttribute, sync: undefined as any};
 runInNewContext(transpileModule(declaration.getText(source) + "\nglobalThis.sync = syncBlockAttrs;", {
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText, context);
@@ -41,4 +42,16 @@ test("unrelated attribute transactions preserve the mind map view", () => {
     assert.equal(attrs.get(attribute), "1");
     assert.equal(attrs.get("style"), "color: red");
     assert.equal(attrs.get("fold"), "1");
+});
+
+test("kernel metadata cleanup and undo synchronize across editor copies", () => {
+    const attrs = new Map<string, string>();
+    const root = {querySelectorAll: () => [{
+        setAttribute: (name: string, value: string) => attrs.set(name, value),
+        removeAttribute: (name: string) => attrs.delete(name),
+    }]};
+    for (const value of ['{"version":1,"nodes":{},"relations":[]}', '{"version":1,"nodes":{"a":{}},"relations":[]}']) {
+        context.sync(root, {action: "setAttrs", id: "list-id", data: JSON.stringify({[metadataAttribute]: value})});
+        assert.equal(attrs.get(metadataAttribute), value);
+    }
 });

@@ -136,9 +136,14 @@ export const remapListMindmapIDs = (root: Element, ids: Map<string, string>) => 
     }
     const updates = lists.map(list => {
         const metadata = parseListMindmapMetadata(list.getAttribute(LIST_MINDMAP_META_ATTRIBUTE));
+        const validIds = new Set(readListMindmap(list).nodes.keys());
+        validIds.add(list.dataset.nodeId);
         const nodes: Record<string, ListMindmapNodeStyle> = Object.create(null);
         Object.entries(metadata.nodes).forEach(([id, style]) => {
             const mappedId = ids.get(id) || id;
+            if (!validIds.has(mappedId)) {
+                return;
+            }
             if (Object.prototype.hasOwnProperty.call(nodes, mappedId)) {
                 throw new Error("Duplicate copied list mindmap identity");
             }
@@ -148,7 +153,7 @@ export const remapListMindmapIDs = (root: Element, ids: Map<string, string>) => 
             ...relation,
             from: ids.get(relation.from) || relation.from,
             to: ids.get(relation.to) || relation.to,
-        }))}};
+        })).filter(relation => validIds.has(relation.from) && validIds.has(relation.to))}};
     });
     updates.forEach(({list, metadata}) => list.setAttribute(LIST_MINDMAP_META_ATTRIBUTE, JSON.stringify(metadata)));
     cleanListMindmapDOM(root);

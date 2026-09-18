@@ -151,8 +151,8 @@
     min-width: 64px;
     max-width: 300px;
     width: max-content;
-    min-height: 36px;
-    padding: 7px 12px;
+    min-height: 32px;
+    padding: 4px 12px;
     box-sizing: border-box;
     border: 0;
     border-radius: var(--b3-border-radius);
@@ -238,7 +238,8 @@
       }
     }
 
-    > .p {
+    > .p,
+    > .p.list-mindmap__preview-block {
       margin: 0;
       padding: 0;
       font-size: inherit;

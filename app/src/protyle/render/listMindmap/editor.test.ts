@@ -268,10 +268,13 @@ const browserCases = async (sourceCode: string, css: string) => {
         parseFloat(getComputedStyle(fixture.querySelector(".p")).fontSize), "heading keeps shared font size");
     for (const text of ["Test text", '<span data-type="strong">11pppppp</span>', "First<br>Second", "First\nSecond",
         '<span data-type="strong">1水电费ppppp</span>', '<span data-type="strong">1水电费pppppp</span>']) {
-        fixture.innerHTML = `<div data-node-id="list" data-type="NodeList"><div class="list-mindmap"><div class="list-mindmap__node"><div class="list-mindmap__content"><div class="p"><div class="list-mindmap__text">${text}</div></div></div></div></div></div>`;
+        fixture.innerHTML = `<div data-node-id="list" data-type="NodeList"><div class="list-mindmap"><div class="list-mindmap__node"><div class="list-mindmap__content"><div class="p list-mindmap__preview-block" data-type="NodeParagraph"><div class="list-mindmap__text">${text}</div></div></div></div></div></div>`;
         const node = fixture.querySelector<HTMLElement>(".list-mindmap__node");
         const content = fixture.querySelector<HTMLElement>(".list-mindmap__content");
         const before = {width: node.offsetWidth, height: node.offsetHeight};
+        if (text === "Test text") {
+            check.equal(before.height, 32, "single-line previews do not inherit extra block spacing");
+        }
         const preview = content.innerHTML;
         for (const scale of [1, 0.65, 1.5]) {
             fixture.style.transform = `scale(${scale})`;

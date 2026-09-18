@@ -312,12 +312,14 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                 click: () => { updatePinnedDocs(blockIDs, "pin"); },
             }).element);
         }
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "unpinDoc",
-            icon: "iconUnpin",
-            label: window.siyuan.languages.unpinDoc,
-            click: () => { updatePinnedDocs(blockIDs, "unpin"); },
-        }).element);
+        if (blockIDs.some(id => pinnedDocIDs.has(id))) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "unpinDoc",
+                icon: "iconUnpin",
+                label: window.siyuan.languages.unpinDoc,
+                click: () => { updatePinnedDocs(blockIDs, "unpin"); },
+            }).element);
+        }
     }
     window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
     if (!window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {

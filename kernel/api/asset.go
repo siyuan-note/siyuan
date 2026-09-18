@@ -375,7 +375,14 @@ var resolveAssetPath = contractHandler(apicontract.ResolveAssetPath, func(c *gin
 		return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
 	}
 	if model.IsEncryptedAssetPath(p) {
-		return apicontract.FailureWithTimeout[string](-1, model.Conf.Language(314), 3000)
+		if err = holdEncryptedBoxRequest(c, model.ExtractBoxIDFromAssetsPath(p)); err != nil {
+			return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
+		}
+		p, err = model.PrepareEncryptedAssetForExternalOpen(path)
+		if err != nil {
+			return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
+		}
+		return apicontract.Success(p)
 	}
 	if err = model.EnsureAssetPrefixLocal(p); err != nil {
 		return apicontract.FailureWithTimeout[string](-1, err.Error(), 7000)

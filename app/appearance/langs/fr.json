@@ -1,4 +1,5 @@
 {
+	"encryptedAssetExternalOpenTip": "Une copie temporaire déchiffrée va être ouverte. Les modifications ne seront pas enregistrées dans la pièce jointe d’origine. La copie peut être supprimée lors du verrouillage du carnet. Pour conserver vos modifications, enregistrez le fichier à un autre emplacement.",
 	"linuxInputMethod": "Mode de compatibilité des méthodes de saisie Linux",
 	"linuxInputMethodTip": "Utiliser X11/XWayland pour améliorer la compatibilité des méthodes de saisie ; peut affecter la mise à l’échelle, s’applique à tous les espaces de travail de cet appareil et prend effet après avoir complètement quitté puis redémarré SiYuan",
 	"linuxInputMethodError": "Impossible de lire ou d’enregistrer les paramètres de compatibilité des méthodes de saisie",

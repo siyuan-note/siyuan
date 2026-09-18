@@ -1,4 +1,5 @@
 {
+	"encryptedAssetExternalOpenTip": "Otvorí sa dočasná dešifrovaná kópia. Zmeny sa neuložia do pôvodnej prílohy. Kópia môže byť odstránená pri uzamknutí zápisníka. Ak chcete zachovať zmeny, uložte súbor na iné miesto.",
 	"linuxInputMethod": "Režim kompatibility vstupných metód systému Linux",
 	"linuxInputMethodTip": "Použiť X11/XWayland na zlepšenie kompatibility vstupných metód; môže ovplyvniť mierku zobrazenia, platí pre všetky pracovné priestory na tomto zariadení a prejaví sa po úplnom ukončení a opätovnom spustení SiYuan",
 	"linuxInputMethodError": "Nastavenia kompatibility vstupných metód sa nepodarilo načítať alebo uložiť",

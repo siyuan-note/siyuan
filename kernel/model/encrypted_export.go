@@ -238,6 +238,27 @@ func AcquireExportArtifactLease(exportPath string) (lease *ExportArtifactLease, 
 		}
 		return registerMobileExportLease("", artifact, filepath.Base(artifact), "")
 	}
+	return prepareEncryptedAssetExport(relativePath, boxID, false)
+}
+
+// PrepareEncryptedAssetForExternalOpen 生成保留原始名称的受管明文副本，供外部程序打开或定位。
+// 副本随笔记本锁定清理，外部程序的修改不会写回加密资源。
+func PrepareEncryptedAssetForExternalOpen(assetPath string) (string, error) {
+	relativePath, boxID, err := assetPathAndBox(assetPath, "")
+	if err != nil {
+		return "", err
+	}
+	if boxID == "" || !IsEncryptedBox(boxID) {
+		return "", errors.New("source is not an encrypted asset")
+	}
+	artifact, err := prepareEncryptedAssetExport(relativePath, boxID, true)
+	if err != nil {
+		return "", err
+	}
+	return artifact.Path, nil
+}
+
+func prepareEncryptedAssetExport(relativePath, boxID string, external bool) (lease *ExportArtifactLease, err error) {
 	if !IsBoxUnlocked(boxID) {
 		return nil, errors.New(Conf.Language(314))
 	}
@@ -269,7 +290,11 @@ func AcquireExportArtifactLease(exportPath string) (lease *ExportArtifactLease, 
 	if idErr != nil {
 		return nil, idErr
 	}
-	cleanupDir := filepath.Join(util.TempDir, "export", boxID, "mobile", leaseID)
+	kind := "mobile"
+	if external {
+		kind = "external"
+	}
+	cleanupDir := filepath.Join(util.TempDir, "export", boxID, kind, leaseID)
 	if mkErr := os.MkdirAll(cleanupDir, 0700); mkErr != nil {
 		return nil, mkErr
 	}
@@ -310,6 +335,16 @@ func AcquireExportArtifactLease(exportPath string) (lease *ExportArtifactLease, 
 	originalName = util.FilterFileName(filepath.Base(originalName))
 	if originalName == "" || originalName == "." {
 		originalName = diskName
+	}
+	if external {
+		namedPath := filepath.Join(cleanupDir, originalName)
+		if plainPath != namedPath {
+			if err = os.Rename(plainPath, namedPath); err != nil {
+				return nil, err
+			}
+		}
+		cleanup = false
+		return &ExportArtifactLease{Path: namedPath, Name: originalName}, nil
 	}
 	lease, err = registerMobileExportLeaseWithID(leaseID, boxID, plainPath, originalName, cleanupDir)
 	if err != nil {

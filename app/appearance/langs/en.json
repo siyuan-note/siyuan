@@ -1,4 +1,5 @@
 {
+	"encryptedAssetExternalOpenTip": "This will open a temporary decrypted copy. Changes will not be saved to the original attachment. The copy may be cleaned up when the notebook is locked. To keep your changes, save the file to another location.",
 	"linuxInputMethod": "Linux input method compatibility mode",
 	"linuxInputMethodTip": "Use X11/XWayland to address input method issues; may affect display scaling, applies to all workspaces on this device, and takes effect after fully quitting and restarting SiYuan",
 	"linuxInputMethodError": "Unable to read or save input method compatibility settings",

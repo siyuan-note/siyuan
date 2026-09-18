@@ -1,4 +1,5 @@
 {
+	"encryptedAssetExternalOpenTip": "將開啟暫時解密的副本，修改不會儲存至原附件。鎖定筆記本後副本可能會被清除，如需保留修改，請另存至其他位置。",
 	"linuxInputMethod": "Linux 輸入法相容模式",
 	"linuxInputMethodTip": "透過 X11/XWayland 改善輸入法相容性，可能影響顯示縮放，套用至本機所有工作空間，完全結束並重新啟動思源後生效",
 	"linuxInputMethodError": "無法讀取或儲存輸入法相容設定",

@@ -1,4 +1,5 @@
 {
+	"encryptedAssetExternalOpenTip": "Será aberta uma cópia temporária descriptografada. As alterações não serão salvas no anexo original. A cópia poderá ser removida quando o caderno for bloqueado. Para manter as alterações, salve o arquivo em outro local.",
 	"linuxInputMethod": "Modo de compatibilidade dos métodos de entrada do Linux",
 	"linuxInputMethodTip": "Usar X11/XWayland para melhorar a compatibilidade dos métodos de entrada; pode afetar a escala da tela, aplica-se a todos os espaços de trabalho neste dispositivo e exige encerrar completamente e reiniciar o SiYuan",
 	"linuxInputMethodError": "Não foi possível ler ou salvar as configurações de compatibilidade dos métodos de entrada",

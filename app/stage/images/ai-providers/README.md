@@ -2,7 +2,7 @@
 
 The image files in this directory are bundled locally so the AI settings UI does not hotlink third-party assets.
 
-The `anthropic.png` file is the unmodified [Apple touch icon](https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/67d31dd7aa394792257596c5_webclip.png) linked by the official [Anthropic website](https://www.anthropic.com/). The depicted logo remains a trademark of Anthropic.
+The `anthropic.svg` file comes from [Simple Icons 16.27.0](https://github.com/simple-icons/simple-icons/blob/16.27.0/icons/anthropic.svg), preserving its original path geometry and transparent 24-by-24 view box. Simple Icons is distributed under CC0-1.0; the depicted logo remains a trademark of Anthropic.
 
 The `openai.svg` file is extracted without altering its path geometry from the official [OpenAI Blossom asset](https://images.ctfassets.net/kftzwdyauwt9/3hUGLn3ypllZ0oa01qOYVq/28e8188e6f11b84c3e876569d492734f/Blossom_Light.svg) and normalized to the same 24-by-24 view box as the other provider icons. Use of the logo is subject to the [OpenAI Design Guidelines](https://openai.com/brand/).
 
@@ -12,4 +12,6 @@ The `zhipu.svg` file is extracted from the 24-by-24 `pure-logo.svg` symbol bundl
 
 The `volcengine.svg` file comes from [theSVG](https://github.com/glincker/thesvg/blob/aa0605996b4ad4fdda98502f84021b3c3a64847d/public/icons/volcengine/default.svg), distributed under the MIT license. The depicted logo remains a trademark of Volcengine.
 
-Groq uses a generated initial avatar because its [trademark policy](https://groq.com/trademark-policy) limits nominative fair use to its word marks and excludes logos. Custom providers also use generated initial avatars.
+The `groq.svg` file is extracted from the navigation wordmark on the official [Groq website](https://groq.com/), preserving its original path geometry and transparent background. The depicted logo remains a trademark of Groq; see its [trademark policy](https://groq.com/trademark-policy).
+
+Custom providers use generated initial avatars.

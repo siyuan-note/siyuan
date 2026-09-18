@@ -1,5 +1,6 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {processSync} from "../../dialog/processSystem";
+import {processSync, progressLoading} from "../../dialog/processSystem";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {updateAccountPanelVisibility} from "./accountUi";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {
@@ -24,14 +25,24 @@ export const mountSyncProvider = (root: ParentNode) => {
 };
 
 const setSyncProvider = async (provider: Config.ISync["provider"]) => {
-    if (pendingSyncProvider !== undefined) {
+    if (pendingSyncProvider !== undefined || provider === window.siyuan.config.sync.provider) {
         mountSyncProvider(document);
         return;
     }
     pendingSyncProvider = provider;
     mountSyncProvider(document);
+    let started = false;
     try {
-        const response = await fetchSyncPost("/api/sync/setSyncProvider", {provider});
+        const confirmed = await new Promise<boolean>((resolve) => {
+            confirmDialog(window.siyuan.languages.syncProvider, window.siyuan.languages.syncProviderChangeConfirm,
+                () => resolve(true), () => resolve(false), false, undefined, window.siyuan.languages.syncProviderChangeContinue);
+        });
+        if (!confirmed) {
+            return;
+        }
+        started = true;
+        progressLoading({code: 1, msg: window.siyuan.languages._kernel[398]});
+        const response = await fetchSyncPost("/api/sync/setSyncProvider", {provider, completeAssets: true});
         if (response.code === 0) {
             window.siyuan.config.sync.provider = provider;
             if (syncTabElement) {
@@ -40,7 +51,11 @@ const setSyncProvider = async (provider: Config.ISync["provider"]) => {
         }
     } catch (error) {
         console.warn("[config] failed to update sync provider", error);
+        showMessage(window.siyuan.languages.syncProviderChangeFailed, 7000, "error");
     } finally {
+        if (started) {
+            progressLoading({code: 2, msg: ""});
+        }
         pendingSyncProvider = undefined;
         mountSyncProvider(document);
     }

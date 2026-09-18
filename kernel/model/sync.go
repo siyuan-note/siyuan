@@ -595,11 +595,22 @@ func SetSyncMode(mode int) {
 	Conf.Save()
 }
 
-func SetSyncProvider(provider int) (err error) {
+func SetSyncProvider(provider int, completeAssets bool) (err error) {
 	release := lockAssetSourceChange()
 	defer release()
 	if provider != Conf.Sync.Provider {
-		if err = requireCompleteAssetDownloads(); err != nil {
+		if completeAssets {
+			util.PushEndlessProgress(Conf.Language(398))
+			defer util.ClearPushProgress(100)
+			err = ensureCompleteSyncAssets(func() { util.PushEndlessProgress(Conf.Language(399)) })
+			if err != nil {
+				logging.LogWarnf("complete data before switching sync provider [%d -> %d] failed: %s", Conf.Sync.Provider, provider, err)
+				err = fmt.Errorf(Conf.Language(400), err)
+			}
+		} else {
+			err = requireCompleteAssetDownloads()
+		}
+		if err != nil {
 			return
 		}
 	}

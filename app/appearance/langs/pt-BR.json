@@ -1,4 +1,7 @@
 {
+	"syncProviderChangeConfirm": "Antes de trocar o provedor de sincronização, o SiYuan precisa verificar os recursos e os snapshots anteriores e pode baixar o conteúdo ausente do armazenamento em nuvem atual. Isso pode levar algum tempo. Continuar?",
+	"syncProviderChangeContinue": "Continuar",
+	"syncProviderChangeFailed": "Não foi possível confirmar a troca do provedor de sincronização. Verifique a conexão e recarregue a interface.",
 	"encryptedAssetExternalOpenTip": "Será aberta uma cópia temporária descriptografada. As alterações não serão salvas no anexo original. A cópia poderá ser removida quando o caderno for bloqueado. Para manter as alterações, salve o arquivo em outro local.",
 	"linuxInputMethod": "Modo de compatibilidade dos métodos de entrada do Linux",
 	"linuxInputMethodTip": "Usar X11/XWayland para melhorar a compatibilidade dos métodos de entrada; pode afetar a escala da tela, aplica-se a todos os espaços de trabalho neste dispositivo e exige encerrar completamente e reiniciar o SiYuan",
@@ -2882,6 +2885,9 @@
 		"394": "Cadernos criptografados não são compatíveis com publicação, não é possível configurar permissões de publicação",
 		"395": "A exportação em lote não é compatível com cadernos criptografados; desbloqueie-os e exporte um por um, ou exporte cadernos comuns",
 		"396": "Cadernos criptografados não permitem fixar documentos",
-		"397": "Este dispositivo não pode criar o arquivo sincronizado. Renomeie-o no SiYuan em um dispositivo onde ele esteja acessível e sincronize novamente: %s"
+		"397": "Este dispositivo não pode criar o arquivo sincronizado. Renomeie-o no SiYuan em um dispositivo onde ele esteja acessível e sincronize novamente: %s",
+		"398": "Verificando recursos e snapshots anteriores...",
+		"399": "Baixando recursos e conteúdo ausente de snapshots anteriores...",
+		"400": "Não foi possível verificar ou completar os recursos e os snapshots anteriores. O provedor de sincronização não foi alterado: %s"
 	}
 }

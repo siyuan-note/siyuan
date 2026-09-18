@@ -1,4 +1,7 @@
 {
+	"syncProviderChangeConfirm": "Prima di cambiare provider di sincronizzazione, SiYuan deve verificare le risorse e le istantanee precedenti e potrebbe scaricare i contenuti mancanti dall’archiviazione cloud attuale. L’operazione potrebbe richiedere del tempo. Continuare?",
+	"syncProviderChangeContinue": "Continua",
+	"syncProviderChangeFailed": "Impossibile confermare il cambio del provider di sincronizzazione. Verifica la connessione e ricarica l’interfaccia.",
 	"encryptedAssetExternalOpenTip": "Verrà aperta una copia temporanea decrittografata. Le modifiche non verranno salvate nell’allegato originale. La copia potrebbe essere eliminata quando il quaderno viene bloccato. Per conservare le modifiche, salvare il file in un’altra posizione.",
 	"linuxInputMethod": "Modalità di compatibilità dei metodi di input Linux",
 	"linuxInputMethodTip": "Usa X11/XWayland per migliorare la compatibilità dei metodi di input; può influire sul ridimensionamento, si applica a tutti gli spazi di lavoro su questo dispositivo e richiede la chiusura completa e il riavvio di SiYuan",
@@ -2882,6 +2885,9 @@
 		"394": "I quaderni crittografati non supportano la pubblicazione, non è possibile configurare i permessi di pubblicazione",
 		"395": "L’esportazione in blocco non supporta i quaderni crittografati, sbloccali ed esportali uno alla volta, oppure esporta quaderni normali",
 		"396": "I quaderni crittografati non supportano il fissaggio dei documenti",
-		"397": "Questo dispositivo non può creare il file sincronizzato. Rinominalo in SiYuan su un dispositivo da cui è accessibile, quindi sincronizza di nuovo: %s"
+		"397": "Questo dispositivo non può creare il file sincronizzato. Rinominalo in SiYuan su un dispositivo da cui è accessibile, quindi sincronizza di nuovo: %s",
+		"398": "Verifica delle risorse e delle istantanee precedenti...",
+		"399": "Download delle risorse e dei contenuti mancanti delle istantanee precedenti...",
+		"400": "Impossibile verificare o completare le risorse e le istantanee precedenti. Il provider di sincronizzazione non è stato modificato: %s"
 	}
 }

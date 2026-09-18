@@ -1,4 +1,7 @@
 {
+	"syncProviderChangeConfirm": "Before switching sync providers, SiYuan needs to check resources and historical snapshots and may download missing content from the current cloud storage. This may take some time. Continue?",
+	"syncProviderChangeContinue": "Continue",
+	"syncProviderChangeFailed": "Unable to confirm the sync provider change. Check the connection and reload the interface.",
 	"encryptedAssetExternalOpenTip": "This will open a temporary decrypted copy. Changes will not be saved to the original attachment. The copy may be cleaned up when the notebook is locked. To keep your changes, save the file to another location.",
 	"linuxInputMethod": "Linux input method compatibility mode",
 	"linuxInputMethodTip": "Use X11/XWayland to address input method issues; may affect display scaling, applies to all workspaces on this device, and takes effect after fully quitting and restarting SiYuan",
@@ -2882,6 +2885,9 @@
 		"394": "Encrypted notebooks do not support publishing, publish access cannot be configured",
 		"395": "Batch export does not support encrypted notebooks, please unlock and export them one by one, or export regular notebooks instead",
 		"396": "Encrypted notebooks do not support pinning documents",
-		"397": "This device cannot create the synced file. Rename it in SiYuan on a device where it is accessible, then sync again: %s"
+		"397": "This device cannot create the synced file. Rename it in SiYuan on a device where it is accessible, then sync again: %s",
+		"398": "Checking resources and historical snapshots...",
+		"399": "Downloading missing resources and historical snapshot content...",
+		"400": "Unable to check or complete resources and historical snapshots. The sync provider was not changed: %s"
 	}
 }

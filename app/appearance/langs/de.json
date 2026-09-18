@@ -1,4 +1,7 @@
 {
+	"syncProviderChangeConfirm": "Vor dem Wechsel des Synchronisierungsanbieters muss SiYuan Ressourcen und frühere Schnappschüsse prüfen und gegebenenfalls fehlende Inhalte aus dem aktuellen Cloud-Speicher herunterladen. Dies kann einige Zeit dauern. Fortfahren?",
+	"syncProviderChangeContinue": "Fortfahren",
+	"syncProviderChangeFailed": "Der Wechsel des Synchronisierungsanbieters konnte nicht bestätigt werden. Prüfen Sie die Verbindung und laden Sie die Oberfläche neu.",
 	"encryptedAssetExternalOpenTip": "Es wird eine temporäre entschlüsselte Kopie geöffnet. Änderungen werden nicht im ursprünglichen Anhang gespeichert. Die Kopie kann beim Sperren des Notizbuchs gelöscht werden. Speichern Sie die Datei an einem anderen Ort, um Ihre Änderungen zu behalten.",
 	"linuxInputMethod": "Linux-Eingabemethoden-Kompatibilitätsmodus",
 	"linuxInputMethodTip": "X11/XWayland zur Verbesserung der Eingabemethoden-Kompatibilität verwenden; kann die Anzeigeskalierung beeinflussen, gilt für alle Arbeitsbereiche auf diesem Gerät und wird nach vollständigem Beenden und Neustarten von SiYuan wirksam",
@@ -2882,6 +2885,9 @@
 		"394": "Verschlüsselte Notizbücher unterstützen keine Veröffentlichung, Veröffentlichungsrechte können nicht konfiguriert werden",
 		"395": "Der Stapelentexport unterstützt keine verschlüsselten Notizbücher, bitte entsperren Sie sie und exportieren Sie sie einzeln oder exportieren Sie normale Notizbücher",
 		"396": "Verschlüsselte Notizbücher unterstützen das Anheften von Dokumenten nicht",
-		"397": "Dieses Gerät kann die synchronisierte Datei nicht erstellen. Benennen Sie sie in SiYuan auf einem Gerät um, auf dem sie zugänglich ist, und synchronisieren Sie erneut: %s"
+		"397": "Dieses Gerät kann die synchronisierte Datei nicht erstellen. Benennen Sie sie in SiYuan auf einem Gerät um, auf dem sie zugänglich ist, und synchronisieren Sie erneut: %s",
+		"398": "Ressourcen und frühere Schnappschüsse werden geprüft...",
+		"399": "Fehlende Ressourcen und Inhalte früherer Schnappschüsse werden heruntergeladen...",
+		"400": "Ressourcen und frühere Schnappschüsse konnten nicht geprüft oder vervollständigt werden. Der Synchronisierungsanbieter wurde nicht geändert: %s"
 	}
 }

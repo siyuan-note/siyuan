@@ -1,4 +1,7 @@
 {
+	"syncProviderChangeConfirm": "Senkronizasyon sağlayıcısını değiştirmeden önce SiYuan, kaynakları ve geçmiş anlık görüntüleri kontrol etmeli ve gerekirse eksik içeriği mevcut bulut depolamasından indirmelidir. Bu işlem biraz zaman alabilir. Devam edilsin mi?",
+	"syncProviderChangeContinue": "Devam et",
+	"syncProviderChangeFailed": "Senkronizasyon sağlayıcısının değiştiği doğrulanamadı. Bağlantıyı kontrol edin ve arayüzü yeniden yükleyin.",
 	"encryptedAssetExternalOpenTip": "Geçici olarak şifresi çözülmüş bir kopya açılacak. Değişiklikler özgün eke kaydedilmeyecek. Not defteri kilitlendiğinde kopya silinebilir. Değişikliklerinizi korumak için dosyayı başka bir konuma kaydedin.",
 	"linuxInputMethod": "Linux giriş yöntemi uyumluluk modu",
 	"linuxInputMethodTip": "Giriş yöntemi uyumluluğunu iyileştirmek için X11/XWayland kullanır; ekran ölçeklendirmesini etkileyebilir, bu cihazdaki tüm çalışma alanlarına uygulanır ve SiYuan tamamen kapatılıp yeniden başlatıldığında etkinleşir",
@@ -2882,6 +2885,9 @@
 		"394": "Şifrelenmiş not defterleri yayımlamayı desteklemez, yayımlama izinleri yapılandırılamaz",
 		"395": "Toplu dışa aktarma şifrelenmiş not defterlerini desteklemez; kilitlerini açıp tek tek dışa aktarın veya normal not defterlerini dışa aktarın",
 		"396": "Şifrelenmiş not defterleri belgeleri sabitlemeyi desteklemez",
-		"397": "Bu cihaz eşitlenen dosyayı oluşturamıyor. Dosyaya erişilebilen bir cihazda SiYuan üzerinden dosyayı yeniden adlandırıp tekrar eşitleyin: %s"
+		"397": "Bu cihaz eşitlenen dosyayı oluşturamıyor. Dosyaya erişilebilen bir cihazda SiYuan üzerinden dosyayı yeniden adlandırıp tekrar eşitleyin: %s",
+		"398": "Kaynaklar ve geçmiş anlık görüntüler kontrol ediliyor...",
+		"399": "Eksik kaynaklar ve geçmiş anlık görüntü içerikleri indiriliyor...",
+		"400": "Kaynaklar ve geçmiş anlık görüntüler kontrol edilemedi veya tamamlanamadı. Senkronizasyon sağlayıcısı değiştirilmedi: %s"
 	}
 }

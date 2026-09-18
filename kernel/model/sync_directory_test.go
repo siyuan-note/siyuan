@@ -88,7 +88,7 @@ func TestS3DirectoryListingPreservesConfiguration(t *testing.T) {
 				}
 				if name == "work" && result == "matched" {
 					for _, provider := range []int{conf.ProviderSiYuan, conf.ProviderLocal, conf.ProviderWebDAV} {
-						if err = SetSyncProvider(provider); err != nil || Conf.Sync.CloudName != name {
+						if err = SetSyncProvider(provider, false); err != nil || Conf.Sync.CloudName != name {
 							t.Fatalf("provider %d did not retain the chosen directory: %v", provider, err)
 						}
 					}

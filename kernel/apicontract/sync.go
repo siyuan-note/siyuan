@@ -20,6 +20,8 @@ type SyncModeRequest struct {
 }
 type SyncProviderRequest struct {
 	Provider float64 `json:"provider"`
+	// 显式确认后补齐原来源的资源和历史快照，缺省时只检查完整性。
+	CompleteAssets bool `json:"completeAssets" api:"optional,nullable"`
 }
 type SyncNameRequest struct {
 	Name string `json:"name" api:"trim"`
@@ -189,6 +191,9 @@ func init() {
 		fields, err := syncRequestFields(reader, SetSyncProvider.definition.Path)
 		if err == nil {
 			r.Provider, err = legacyField[float64](fields, "provider", "Number", true)
+		}
+		if err == nil {
+			r.CompleteAssets, err = legacyField[bool](fields, "completeAssets", "Boolean", false)
 		}
 		return r, err
 	}

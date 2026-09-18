@@ -592,7 +592,7 @@ func setSyncProviderContract(c *gin.Context, request apicontract.SyncProviderReq
 	ret = apicontract.Success(apicontract.Null{})
 
 	provider := request.Provider
-	err := model.SetSyncProvider(int(provider))
+	err := model.SetSyncProvider(int(provider), request.CompleteAssets)
 	if err != nil {
 		ret = apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 5000)
 		return

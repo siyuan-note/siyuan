@@ -1,4 +1,7 @@
 {
+	"syncProviderChangeConfirm": "Przed zmianą dostawcy synchronizacji SiYuan musi sprawdzić zasoby i wcześniejsze migawki. Może być konieczne pobranie brakującej zawartości z obecnej chmury. Może to potrwać. Kontynuować?",
+	"syncProviderChangeContinue": "Kontynuuj",
+	"syncProviderChangeFailed": "Nie można potwierdzić zmiany dostawcy synchronizacji. Sprawdź połączenie i ponownie załaduj interfejs.",
 	"encryptedAssetExternalOpenTip": "Zostanie otwarta tymczasowa odszyfrowana kopia. Zmiany nie zostaną zapisane w oryginalnym załączniku. Kopia może zostać usunięta po zablokowaniu notatnika. Aby zachować zmiany, zapisz plik w innym miejscu.",
 	"linuxInputMethod": "Tryb zgodności metod wprowadzania w systemie Linux",
 	"linuxInputMethodTip": "Używaj X11/XWayland, aby poprawić zgodność metod wprowadzania; może wpływać na skalowanie ekranu, dotyczy wszystkich przestrzeni roboczych na tym urządzeniu i wymaga całkowitego zamknięcia oraz ponownego uruchomienia SiYuan",
@@ -2882,6 +2885,9 @@
 		"394": "Zaszyfrowane notatniki nie obsługują publikowania, nie można skonfigurować uprawnień publikowania",
 		"395": "Eksport zbiorczy nie obsługuje zaszyfrowanych notatników, odblokuj je i wyeksportuj pojedynczo albo wyeksportuj zwykłe notatniki",
 		"396": "Zaszyfrowane notatniki nie obsługują przypinania dokumentów",
-		"397": "To urządzenie nie może utworzyć synchronizowanego pliku. Zmień jego nazwę w SiYuan na urządzeniu, na którym jest dostępny, a następnie zsynchronizuj ponownie: %s"
+		"397": "To urządzenie nie może utworzyć synchronizowanego pliku. Zmień jego nazwę w SiYuan na urządzeniu, na którym jest dostępny, a następnie zsynchronizuj ponownie: %s",
+		"398": "Sprawdzanie zasobów i wcześniejszych migawek...",
+		"399": "Pobieranie brakujących zasobów i zawartości wcześniejszych migawek...",
+		"400": "Nie można sprawdzić ani uzupełnić zasobów i wcześniejszych migawek. Dostawca synchronizacji nie został zmieniony: %s"
 	}
 }

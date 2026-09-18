@@ -394,6 +394,16 @@ describe("attribute view text source compatibility", () => {
     });
 
     it("keeps only supported inline color declarations", () => {
+        for (const id of ["error", "warning", "info", "success"]) {
+            const style = `color: var(--b3-card-${id}-color); background-color: var(--b3-card-${id}-background);`;
+            assert.equal(sanitizeAVRichTextInlineStyle(style), style);
+            assert.equal(sanitizeAVRichTextInlineStyle(`color: var(--b3-card-${id}-background);`), "");
+            assert.equal(sanitizeAVRichTextInlineStyle(`background-color: var(--b3-card-${id}-color);`), "");
+        }
+        for (const value of ["var(--b3-card-danger-color)", "var(--b3-card-info-color, red)",
+            "var(--b3-inline-builtin-info-color, var(--b3-card-error-color))"]) {
+            assert.equal(sanitizeAVRichTextInlineStyle(`color: ${value};`), "");
+        }
         assert.equal(sanitizeAVRichTextInlineStyle(
             "background-color: var(--b3-font-background8); color:var(--b3-font-color2);"
         ), "color: var(--b3-font-color2); background-color: var(--b3-font-background8);");

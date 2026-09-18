@@ -302,7 +302,8 @@ const browserCases = async (sourceCode: string, css: string) => {
         host, model,
         labels: new Proxy({}, {get: (_target, key) => String(key)}),
         colors: () => [{label: "Appearance background", value: "var(--b3-font-background1)"}],
-        nodeColors: () => [{label: "Appearance combined", color: "var(--b3-font-color1)", backgroundColor: "var(--b3-font-background1)"}],
+        nodeColors: () => [{label: "Appearance combined", color: "var(--b3-font-color1)",
+            backgroundColor: "var(--b3-font-background1)", preview: {color: "#112233", backgroundColor: "#ddeeff"}}],
         onFullscreen: (enter: boolean) => fullscreenChanges.push(enter),
         onEdit: (id: string) => edits.push(id),
         finishEdit: () => finishAllowed,
@@ -552,6 +553,8 @@ const browserCases = async (sourceCode: string, css: string) => {
     const nodeColorButton = nodePalette.querySelector<HTMLButtonElement>('[aria-label="Appearance combined"]');
     check.equal(nodeColorButton.textContent, "A");
     check.equal(nodeColorButton.classList.contains("color__square"), true);
+    check.equal(getComputedStyle(nodeColorButton).color, "rgb(17, 34, 51)");
+    check.equal(getComputedStyle(nodeColorButton).backgroundColor, "rgb(221, 238, 255)");
     nodeColorButton.click();
     check.deepEqual(nodeStyles[nodeStyles.length - 1], [beta, {textColor: "var(--b3-font-color1)", backgroundColor: "var(--b3-font-background1)"}]);
     host.style.setProperty("--b3-font-color1", "#123456");

@@ -39,6 +39,7 @@ import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtim
 import {resolveSlashMenuItems, TSlashMenuItem} from "./slashMenu";
 import {
     getBuiltinInlineStylePropertyValue,
+    getBuiltinInlineStylePreview,
     isBuiltinInlineStyleVisible,
     TBuiltinInlineStyleID,
 } from "../toolbar/inlineStyle";
@@ -62,9 +63,13 @@ const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     errorStyle: "error",
 };
 
-const getBuiltinStyleCSS = (id: TBuiltinInlineStyleID) =>
-    `color: ${getBuiltinInlineStylePropertyValue(id, "color")};` +
-    `background-color: ${getBuiltinInlineStylePropertyValue(id, "backgroundColor")};`;
+const getBuiltinStyleCSS = (id: TBuiltinInlineStyleID, preview = false) => {
+    const colors = preview ? getBuiltinInlineStylePreview(id) : {
+        color: getBuiltinInlineStylePropertyValue(id, "color"),
+        backgroundColor: getBuiltinInlineStylePropertyValue(id, "backgroundColor"),
+    };
+    return `color: ${colors.color};background-color: ${colors.backgroundColor};`;
+};
 
 const getHotkeyOrMarker = (hotkey: string, marker: string) => {
     if (hotkey) {
@@ -397,22 +402,22 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         filter: [window.siyuan.languages.infoStyle, "info style", "信息样式", "xinxiyangshi", "xxys"],
         id: "infoStyle",
         value: `style${Constants.ZWSP}${getBuiltinStyleCSS("info")}`,
-        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("info")}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.infoStyle}</span></div>`,
+        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("info", true)}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.infoStyle}</span></div>`,
     }, {
         filter: [window.siyuan.languages.successStyle, "success style", "成功样式", "chenggongyangshi", "cgys"],
         id: "successStyle",
         value: `style${Constants.ZWSP}${getBuiltinStyleCSS("success")}`,
-        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("success")}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.successStyle}</span></div>`,
+        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("success", true)}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.successStyle}</span></div>`,
     }, {
         filter: [window.siyuan.languages.warningStyle, "warning style", "警告样式", "jinggaoyangshi", "jgys"],
         id: "warningStyle",
         value: `style${Constants.ZWSP}${getBuiltinStyleCSS("warning")}`,
-        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("warning")}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.warningStyle}</span></div>`,
+        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("warning", true)}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.warningStyle}</span></div>`,
     }, {
         filter: [window.siyuan.languages.errorStyle, "error style", "错误样式", "cuowuyangshi", "cwys"],
         id: "errorStyle",
         value: `style${Constants.ZWSP}${getBuiltinStyleCSS("error")}`,
-        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("error")}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.errorStyle}</span></div>`,
+        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("error", true)}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.errorStyle}</span></div>`,
     }, {
         filter: [window.siyuan.languages.clearFontStyle, "clear style", "清除样式", "qingchuyangshi", "qcys"],
         id: "clearFontStyle",

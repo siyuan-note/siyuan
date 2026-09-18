@@ -1270,6 +1270,9 @@ func normalizeValueTextRichBuiltinStyleValue(property, value string) (ret string
 	if "background-color" == property {
 		valueSuffix, legacySuffix = "background-color", "background"
 	}
+	if match := valueTextRichBuiltinThemeStylePattern.FindStringSubmatch(value); len(match) == 3 {
+		return value, match[2] == legacySuffix
+	}
 	match := valueTextRichBuiltinStylePattern.FindStringSubmatch(value)
 	if 5 != len(match) || match[1] != match[3] || match[2] != valueSuffix || match[4] != legacySuffix {
 		return "", false
@@ -1362,8 +1365,9 @@ var valueTextRichStylePropertyOrder = []string{
 }
 
 var (
-	valueTextRichBuiltinPalettePattern = regexp.MustCompile(`^var\(--b3-font-(color|background)(\d+)\)$`)
-	valueTextRichBuiltinStylePattern   = regexp.MustCompile(
+	valueTextRichBuiltinThemeStylePattern = regexp.MustCompile(`^var\(--b3-card-(error|warning|info|success)-(color|background)\)$`)
+	valueTextRichBuiltinPalettePattern    = regexp.MustCompile(`^var\(--b3-font-(color|background)(\d+)\)$`)
+	valueTextRichBuiltinStylePattern      = regexp.MustCompile(
 		`^var\(--b3-inline-builtin-(error|warning|info|success)-(color|background-color),\s*` +
 			`var\(--b3-card-(error|warning|info|success)-(color|background)\)\)$`,
 	)

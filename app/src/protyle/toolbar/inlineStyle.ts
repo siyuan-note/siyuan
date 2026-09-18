@@ -601,21 +601,20 @@ export const getBuiltinColorPropertyValue = (index: number, property: TInlineSty
     `var(${getBuiltinColorVariableName(index, property)})`;
 
 export const getBuiltinInlineStyleVariableName = (id: TBuiltinInlineStyleID, property: TInlineStyleProperty) =>
-    `--b3-inline-builtin-${id}-${property === "color" ? "color" : "background-color"}`;
-
-export const getBuiltinInlineStyleLegacyVariableName = (id: TBuiltinInlineStyleID,
-                                                        property: TInlineStyleProperty) =>
     `--b3-card-${id}-${property === "color" ? "color" : "background"}`;
 
 export const getBuiltinInlineStylePropertyValue = (id: TBuiltinInlineStyleID,
                                                    property: TInlineStyleProperty) =>
-    `var(${getBuiltinInlineStyleVariableName(id, property)}, ` +
-    `var(${getBuiltinInlineStyleLegacyVariableName(id, property)}))`;
+    `var(${getBuiltinInlineStyleVariableName(id, property)})`;
 
-export const getBuiltinInlineStylePreview = (id: TBuiltinInlineStyleID) => ({
-    color: getBuiltinInlineStylePropertyValue(id, "color"),
-    backgroundColor: getBuiltinInlineStylePropertyValue(id, "backgroundColor"),
-});
+export const getBuiltinInlineStylePreview = (id: TBuiltinInlineStyleID,
+                                             mode = getCurrentInlineStyleMode(), data = getInlineStylesCache()) => {
+    const colors = getBuiltinInlineStyle(id, data)?.[mode];
+    return {
+        color: colors?.color || getBuiltinInlineStylePropertyValue(id, "color"),
+        backgroundColor: colors?.backgroundColor || getBuiltinInlineStylePropertyValue(id, "backgroundColor"),
+    };
+};
 
 export const getBuiltinInlineStyleApplication = (id: TBuiltinInlineStyleID): IInlineStyleApplication => ({
     type: "style1",
@@ -692,6 +691,10 @@ export const filterHiddenRecentInlineStyles = (values: string[], data = getInlin
     values.filter(value => isRecentInlineStyleVisible(value, data));
 
 export const getRecentInlineStyleKey = (value: string) => {
+    const builtinID = value.startsWith("style1" + INLINE_STYLE_SEPARATOR) && getBuiltinInlineStyleIDFromValue(value);
+    if (builtinID) {
+        return "style1" + INLINE_STYLE_SEPARATOR + builtinID;
+    }
     const id = getInlineStyleIDFromValue(value);
     if (!id) {
         return value;
@@ -720,15 +723,11 @@ export const getInlineStylesCSS = (data: unknown = getInlineStylesCache()) => {
         });
         normalized.builtin.styles.forEach(style => {
             if (style[mode].color) {
-                declarations.push(`  ${getBuiltinInlineStyleVariableName(style.id, "color")}: ${style[mode].color};`);
-                contentDeclarations.push(`  ${getBuiltinInlineStyleLegacyVariableName(style.id, "color")}: ` +
-                    `var(${getBuiltinInlineStyleVariableName(style.id, "color")});`);
+                contentDeclarations.push(`  ${getBuiltinInlineStyleVariableName(style.id, "color")}: ${style[mode].color};`);
             }
             if (style[mode].backgroundColor) {
-                declarations.push(`  ${getBuiltinInlineStyleVariableName(style.id, "backgroundColor")}: ` +
+                contentDeclarations.push(`  ${getBuiltinInlineStyleVariableName(style.id, "backgroundColor")}: ` +
                     `${style[mode].backgroundColor};`);
-                contentDeclarations.push(`  ${getBuiltinInlineStyleLegacyVariableName(style.id, "backgroundColor")}: ` +
-                    `var(${getBuiltinInlineStyleVariableName(style.id, "backgroundColor")});`);
             }
         });
         normalized.styles.forEach(style => {

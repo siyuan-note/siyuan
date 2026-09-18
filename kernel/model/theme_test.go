@@ -145,6 +145,24 @@ func TestFillThemeStyleVarUsesBuiltinOverrides(t *testing.T) {
 		"border-color: #aabbcc; text-decoration-color: #ddeeff; outline-color: #112233;" {
 		t.Fatalf("unexpected builtin inline style export: %s", actual)
 	}
+	for _, mode := range []int{0, 1} {
+		Conf.Appearance.Mode = mode
+		for _, source := range []string{
+			"color: var(--b3-card-error-color); background-color: var(--b3-card-error-background);",
+			"color: var(--b3-inline-builtin-error-color, var(--b3-card-error-color)); " +
+				"background-color: var(--b3-inline-builtin-error-background-color, var(--b3-card-error-background));",
+		} {
+			tree, node = inlineStyleThemeTestTree(source)
+			fillThemeStyleVar(tree)
+			expected := "color: #aabbcc; background-color: #ddeeff;"
+			if mode == 1 {
+				expected = "color: #123456; background-color: #654321;"
+			}
+			if actual := node.KramdownIAL[0][1]; actual != expected {
+				t.Fatalf("mode %d export of %q: %s", mode, source, actual)
+			}
+		}
+	}
 }
 
 func TestFillThemeStyleVarUsesCurrentInlineStyleMode(t *testing.T) {

@@ -723,6 +723,10 @@ const normalizeAVRichTextInlineStyleValue = (property: AVRichTextStyleProperty, 
         return "";
     }
 
+    const themeStyle = value.match(/^var\(--b3-card-(error|warning|info|success)-(color|background)\)$/);
+    if (themeStyle) {
+        return themeStyle[2] === (property === "color" ? "color" : "background") ? value : "";
+    }
     const builtinStyle = value.match(
         /^var\(--b3-inline-builtin-(error|warning|info|success)-(color|background-color),\s*var\(--b3-card-(error|warning|info|success)-(color|background)\)\)$/
     );

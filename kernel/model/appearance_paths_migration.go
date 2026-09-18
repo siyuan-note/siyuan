@@ -50,7 +50,7 @@ func MigrateAppearancePackages() error {
 }
 
 func moveAppearancePackage(source, target string) error {
-	if _, err := os.Lstat(target); err == nil {
+	if targetEntry, err := os.Lstat(target); err == nil {
 		sourceInfo, sourceErr := os.Stat(source)
 		targetInfo, targetErr := os.Stat(target)
 		if sourceErr != nil {
@@ -60,9 +60,36 @@ func moveAppearancePackage(source, target string) error {
 			return targetErr
 		}
 		if os.SameFile(sourceInfo, targetInfo) {
-			return nil
+			sourceEntry, err := os.Lstat(source)
+			if err != nil {
+				return err
+			}
+			sourceParent, err := os.Stat(filepath.Dir(source))
+			if err != nil {
+				return err
+			}
+			targetParent, err := os.Stat(filepath.Dir(target))
+			if err != nil {
+				return err
+			}
+			if sourceEntry.Name() == targetEntry.Name() && os.SameFile(sourceParent, targetParent) {
+				// 父目录的不同路径指向同一个目录项时，没有需要清理的副本。
+				return nil
+			}
+			if !sourceEntry.IsDir() {
+				if _, err = os.Readlink(source); err != nil {
+					return err
+				}
+				// 两个入口已指向同一份开发文件，只移除源链接。
+				return os.Remove(source)
+			}
+			// 目标链接依赖源目录时，先移除链接，再将实际目录迁入目标位置。
+			if err = os.Remove(target); err != nil {
+				return err
+			}
+		} else {
+			return os.RemoveAll(source)
 		}
-		return os.RemoveAll(source)
 	} else if !os.IsNotExist(err) {
 		return err
 	}

@@ -2,7 +2,9 @@ package model
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -78,5 +80,85 @@ func TestAppearanceMigrationPreservesDevelopmentLink(t *testing.T) {
 	}
 	if _, err := os.Lstat(source); !os.IsNotExist(err) {
 		t.Fatalf("original link remains: %v", err)
+	}
+}
+
+func createAppearanceMigrationDirectoryLink(t *testing.T, link, target string) {
+	t.Helper()
+	if err := os.Symlink(target, link); err != nil {
+		if runtime.GOOS != "windows" {
+			t.Skipf("symlinks unavailable: %v", err)
+		}
+		if output, err := exec.Command("cmd", "/d", "/c", "mklink", "/J", link, target).CombinedOutput(); err != nil {
+			t.Skipf("directory links unavailable: %v %s", err, output)
+		}
+	}
+}
+
+func TestAppearanceMigrationRemovesExistingAliases(t *testing.T) {
+	for _, layout := range []string{"shared-development-directory", "destination-points-to-source", "source-points-to-destination"} {
+		t.Run(layout, func(t *testing.T) {
+			setupAppearancePackagesTest(t)
+			external := t.TempDir()
+			writeAppearanceTestFile(t, filepath.Join(external, "asset.txt"), "development asset")
+			source := filepath.Join(util.AppearancePath, "themes", "linked")
+			target := filepath.Join(util.ThemesPath, "linked")
+			switch layout {
+			case "shared-development-directory":
+				createAppearanceMigrationDirectoryLink(t, source, external)
+				createAppearanceMigrationDirectoryLink(t, target, external)
+			case "destination-points-to-source":
+				writeAppearanceTestFile(t, filepath.Join(source, "theme.css"), "development theme")
+				createAppearanceMigrationDirectoryLink(t, filepath.Join(source, "assets"), external)
+				createAppearanceMigrationDirectoryLink(t, target, source)
+			case "source-points-to-destination":
+				writeAppearanceTestFile(t, filepath.Join(target, "theme.css"), "development theme")
+				createAppearanceMigrationDirectoryLink(t, source, target)
+			}
+			if err := moveAppearancePackage(source, target); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := os.Lstat(source); !os.IsNotExist(err) {
+				t.Fatalf("source alias remains: %v", err)
+			}
+			file, want := "theme.css", "development theme"
+			if layout == "shared-development-directory" {
+				file, want = "asset.txt", "development asset"
+			}
+			if data, err := os.ReadFile(filepath.Join(target, file)); err != nil || string(data) != want {
+				t.Fatalf("migrated package is unreadable: %q, %v", data, err)
+			}
+			if layout == "destination-points-to-source" {
+				if data, err := os.ReadFile(filepath.Join(target, "assets", "asset.txt")); err != nil || string(data) != "development asset" {
+					t.Fatalf("nested development link changed: %q, %v", data, err)
+				}
+			}
+			if err := os.RemoveAll(target); err != nil {
+				t.Fatal(err)
+			}
+			if err := MigrateAppearancePackages(); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := os.Lstat(target); !os.IsNotExist(err) {
+				t.Fatalf("uninstalled package reappeared: %v", err)
+			}
+			if data, err := os.ReadFile(filepath.Join(external, "asset.txt")); err != nil || string(data) != "development asset" {
+				t.Fatalf("external development files changed: %q, %v", data, err)
+			}
+		})
+	}
+}
+
+func TestAppearanceMigrationPreservesAliasedParent(t *testing.T) {
+	root := t.TempDir()
+	writeAppearanceTestFile(t, filepath.Join(root, "themes", "shared", "theme.css"), "shared")
+	alias := filepath.Join(t.TempDir(), "themes")
+	createAppearanceMigrationDirectoryLink(t, alias, filepath.Join(root, "themes"))
+	target := filepath.Join(root, "themes", "shared")
+	if err := moveAppearancePackage(filepath.Join(alias, "shared"), target); err != nil {
+		t.Fatal(err)
+	}
+	if data, err := os.ReadFile(filepath.Join(target, "theme.css")); err != nil || string(data) != "shared" {
+		t.Fatalf("shared directory was removed: %q, %v", data, err)
 	}
 }

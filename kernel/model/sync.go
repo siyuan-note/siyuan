@@ -998,6 +998,10 @@ func loadSyncIgnoreLines() (ret []string, err error) {
 	defer func() {
 		ret = append(ret, "/.siyuan/conf.json")
 	}()
+	// 同步或快照可能重新带回隔离块，加载规则前完成清理。
+	if err = util.MigrateAppearanceSyncIgnore(); err != nil {
+		return
+	}
 	ignore := filepath.Join(util.DataDir, ".siyuan", "syncignore")
 	err = os.MkdirAll(filepath.Dir(ignore), 0755)
 	if err != nil {

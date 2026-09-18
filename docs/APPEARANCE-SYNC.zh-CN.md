@@ -24,7 +24,7 @@
 
 启动时将旧外观目录中的第三方包移入 `data/themes/` 和 `data/icons/`，已有目标目录优先。迁移成功后移除源目录，避免删除包或恢复旧快照后又从原目录复活。内置资源仍保留在程序外观目录中。
 
-升级时一次性移除 `.siyuan/syncignore` 中完整的 `siyuan-appearance-isolation:v1` 系统规则块，保留块外用户规则的内容和顺序。此后不再生成或维护隔离块。
+升级时移除 `.siyuan/syncignore` 中完整的 `siyuan-appearance-isolation:v1` 系统规则块；重新加载忽略规则时，也会清除同步或快照恢复带回的隔离块，保留块外用户规则的内容和顺序。此后不再生成或维护隔离块。
 
 正式实现不再生成逐包摘要及删除记录、不可变包归档、恢复标签，也不再使用外观专用事务协议。安装信息复用共享的 `storage/bazaar.json` 机制。Alpha 版本遗留的 `data/storage/appearance-v1/`、`data/storage/bazaar/themes/`、`data/storage/bazaar/icons/`、`conf/appearance-migration.json` 及已有的 `.siyuan-appearance-v1` 标签不做自动清理，也不用于恢复外观包。已有标签按普通标签处理。
 

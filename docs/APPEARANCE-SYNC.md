@@ -24,7 +24,7 @@ The ordinary `.siyuan/syncignore` rules apply to individual files and directorie
 
 Startup moves third-party packages from the previous appearance directory into `data/themes/` and `data/icons/`. An existing destination takes precedence. Successfully migrated source directories are removed, so deleting a package or restoring an older snapshot cannot recreate it from the original directory. Built-in resources remain in the application appearance directory.
 
-The upgrade removes complete generated `siyuan-appearance-isolation:v1` blocks from `.siyuan/syncignore` once they are encountered. User-written rules outside those blocks retain their contents and order. No isolation block is created or maintained afterward.
+The upgrade removes complete generated `siyuan-appearance-isolation:v1` blocks from `.siyuan/syncignore`. Loading changed ignore rules also removes blocks brought back by synchronization or snapshot restoration. User-written rules outside those blocks retain their contents and order. No isolation block is created or maintained afterward.
 
 The released implementation does not create per-package digest or deletion records, immutable package archives, recovery tags, or an appearance-specific transaction protocol. Installation metadata uses the shared `storage/bazaar.json` mechanism. Alpha leftovers in `data/storage/appearance-v1/`, `data/storage/bazaar/themes/`, `data/storage/bazaar/icons/`, and `conf/appearance-migration.json`, and existing `.siyuan-appearance-v1` tags are not automatically cleaned up or used to restore packages. Existing tags follow ordinary tag behavior.
 

@@ -486,6 +486,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		tx.rollback()
 		return
 	}
+	if ret = tx.normalizeListMindmapMetadata(); nil != ret {
+		tx.rollback()
+		return
+	}
 	tx.UndoOperations = append(tx.UndoOperations, tx.attributeViewDeletionUndo...)
 
 	if cr := tx.commit(); nil != cr {

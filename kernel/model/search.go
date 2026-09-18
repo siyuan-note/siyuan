@@ -652,7 +652,6 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	escapedKey := util.EscapeHTML(keyword)
 	escapedKey = strings.ReplaceAll(escapedKey, "&#34;", "&quot;")
 	escapedKey = strings.ReplaceAll(escapedKey, "&#39;", "'")
-	escapedR, _ := regexp.Compile(escapedKey)
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	var renameRoots []*ast.Node
 	renameRootTitles := map[string]string{}
@@ -825,15 +824,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 							return ast.WalkContinue
 						}
 
-						if 0 == method {
-							if strings.Contains(n.TextMarkTextContent, escapedKey) {
-								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, util.EscapeHTML(replacement))
-							}
-						} else if 3 == method {
-							if nil != escapedR && escapedR.MatchString(n.TextMarkTextContent) {
-								n.TextMarkTextContent = escapedR.ReplaceAllString(n.TextMarkTextContent, util.EscapeHTML(replacement))
-							}
-						}
+						n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
@@ -841,18 +832,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 						}
 					} else if n.IsTextMarkType("a") {
 						if replaceTypes["aText"] {
-							if 0 == method {
-								content := util.UnescapeHTML(n.TextMarkTextContent)
-								if strings.Contains(content, escapedKey) {
-									n.TextMarkTextContent = strings.ReplaceAll(content, escapedKey, replacement)
-								} else if strings.Contains(content, keyword) {
-									n.TextMarkTextContent = strings.ReplaceAll(content, keyword, replacement)
-								}
-							} else if 3 == method {
-								if nil != r && r.MatchString(n.TextMarkTextContent) {
-									n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
-								}
-							}
+							n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 							if "" == n.TextMarkTextContent {
 								unlinks = append(unlinks, n)
 								mergeSamePreNext(n)
@@ -1012,12 +992,12 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 						if 0 == method {
 							if strings.Contains(n.TextMarkInlineMemoContent, keyword) {
 								n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
-								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+								n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 							}
 						} else if 3 == method {
 							if nil != r && r.MatchString(n.TextMarkInlineMemoContent) {
 								n.TextMarkInlineMemoContent = r.ReplaceAllString(n.TextMarkInlineMemoContent, replacement)
-								n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
+								n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 							}
 						}
 
@@ -1040,16 +1020,9 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 							return ast.WalkContinue
 						}
 
-						if 0 == method {
-							if strings.Contains(n.TextMarkTextContent, keyword) {
-								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
-								n.TextMarkBlockRefSubtype = "s"
-							}
-						} else if 3 == method {
-							if nil != r && r.MatchString(n.TextMarkTextContent) {
-								n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
-								n.TextMarkBlockRefSubtype = "s"
-							}
+						if content, matched := replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r); matched {
+							n.TextMarkTextContent = content
+							n.TextMarkBlockRefSubtype = "s"
 						}
 
 						if "" == n.TextMarkTextContent {
@@ -1060,15 +1033,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 							return ast.WalkContinue
 						}
 
-						if 0 == method {
-							if strings.Contains(n.TextMarkTextContent, keyword) {
-								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
-							}
-						} else if 3 == method {
-							if nil != r && r.MatchString(n.TextMarkTextContent) {
-								n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
-							}
-						}
+						n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -1158,12 +1123,7 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 				n.TextMarkType = strings.TrimSpace(n.TextMarkType)
 			} else if strings.Contains(n.TextMarkTextContent, keyword) || strings.Contains(n.TextMarkTextContent, escapedKey) { // 标签包含了部分关键字的情况
 				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时保持标签类型不变，仅替换标签部分内容
-					content := n.TextMarkTextContent
-					if strings.Contains(content, escapedKey) {
-						content = strings.ReplaceAll(content, escapedKey, replacement)
-					} else if strings.Contains(content, keyword) {
-						content = strings.ReplaceAll(content, keyword, replacement)
-					}
+					content, _ := replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 					content = strings.ReplaceAll(content, editor.Zwsp, "")
 					n.TextMarkTextContent = content
 					return
@@ -1171,18 +1131,24 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 			}
 		}
 
-		if strings.Contains(n.TextMarkTextContent, escapedKey) {
-			n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, util.EscapeHTML(replacement))
-		} else if strings.Contains(n.TextMarkTextContent, keyword) {
-			n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
-		}
+		n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 		n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, editor.Zwsp, "")
 	} else if 3 == method {
-		if nil != r && r.MatchString(n.TextMarkTextContent) {
-			n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
-		}
+		n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 		n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, editor.Zwsp, "")
 	}
+}
+
+// replaceEscapedTextMarkContent 在正文上匹配和展开捕获组，写回时统一转义，避免替换结果变成 HTML 标签。
+func replaceEscapedTextMarkContent(content string, method int, keyword, replacement string, r *regexp.Regexp) (string, bool) {
+	text := util.UnescapeHTML(content)
+	if 0 == method && strings.Contains(text, keyword) {
+		return util.EscapeHTML(strings.ReplaceAll(text, keyword, replacement)), true
+	}
+	if 3 == method && nil != r && r.MatchString(text) {
+		return util.EscapeHTML(r.ReplaceAllString(text, replacement)), true
+	}
+	return content, false
 }
 
 type replaceTextFragment struct {

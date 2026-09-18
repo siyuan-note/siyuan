@@ -615,6 +615,7 @@ func validateValueTextRichTreeWithImages(tree *parse.Tree, images bool) (err err
 // newValueTextRichLute 固定启用存储格式支持的语法，避免编辑器开关变化后重解释既有数据。
 func newValueTextRichLute() *lute.Lute {
 	ret := lute.New()
+	ret.ParseOptions.KeepEscaped = true
 	ret.SetTextMark(true)
 	ret.SetEmoji(false)
 	ret.SetProtyleWYSIWYG(true)

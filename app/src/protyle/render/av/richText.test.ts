@@ -29,6 +29,32 @@ import {
 const hasDOM = typeof globalThis.document?.createElement === "function";
 
 describe("attribute view text source compatibility", () => {
+    it("preserves escaped inline text through bundled Lute storage and preview conversions", () => {
+        if (typeof Lute === "undefined") {
+            require("../../../../stage/protyle/js/lute/lute.min.js");
+        }
+        const lute = configureAVRichTextLute(Lute.New());
+        lute.SetTextMark(true);
+        lute.SetHTMLTag2TextMark(true);
+        lute.SetKramdownIAL(true);
+        lute.SetSpin(true);
+        lute.SetProtyleWYSIWYG(true);
+        for (const mark of ["em", "strong", "s", "mark", "sup", "sub", "u", "kbd", "code", "text", "a em"]) {
+            const text = '<vitae> & &lt; "quote"';
+            let dom = '<div data-node-id="20260918120000-abcdefg" data-type="NodeParagraph">' +
+                `<div contenteditable="true"><span data-type="${mark}" data-href="https://example.com">` +
+                '&lt;vitae&gt; &amp; &amp;lt; "quote"</span></div></div>';
+            for (let round = 0; round < 3; round++) {
+                const markdown = lute.BlockDOM2Md(dom);
+                dom = lute.Md2BlockDOM(markdown);
+                assert.equal(dom.includes("<vitae>"), false, `${mark}: raw HTML after round ${round}`);
+                assert.equal(lute.BlockDOM2Content(dom).replaceAll("\u200b", ""), text, mark);
+                dom = lute.SpinBlockDOM(dom);
+                assert.equal(lute.BlockDOM2Content(dom).replaceAll("\u200b", ""), text, mark);
+            }
+        }
+    });
+
     it("keeps legacy Markdown-looking content literal", () => {
         const literal = "**literal** ((20240101000000-abcdefg \"reference\")) $x$";
         const value: IAVCellValue = {type: "text", text: {content: literal}};

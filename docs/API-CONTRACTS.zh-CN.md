@@ -68,6 +68,8 @@ AI 契约保留供应商配置、模型发现与匹配、确认结果、会话�
 
 同步契约保留数值截断、手动模式下的条件方向校验、配置字段匹配与 JSON 数字归一化，以及消息显示时长。同步配置导入要求恰好一个文件，并保留加密包内容与恢复路径。鉴权及只读检查仍先于请求体解码，同步和笔记本加密继续由模型层处理。
 
+`/api/sync/setSyncProvider` 接受可选、可空的 `completeAssets`。只有 `true` 授权在切换来源前，从原提供商下载缺失的当前资源和历史快照内容；省略、`null` 和 `false` 保留只检查完整性的行为。补齐过程保留下载模式和恢复密钥，失败时保留原提供商。确认后的操作通过现有全局进度遮罩显示检查和补齐阶段，成功或失败均关闭遮罩。运行 `go test ./apicontract/...` 和 `go test -tags "fts5 sqlcipher" ./api ./model -run 'Test(APIContractSync|SyncProviderCompletion|AssetDownloadModePreservesHistoricalRecovery|AssetDownloadStateCorruption)' -count=1`；这些测试已包含在完整内核 CI 测试中。前端确认、取消和遮罩清理由现有前端测试范围内的 `src/config/tabs/syncRuntime.test.ts` 覆盖。
+
 集市契约保留必填字段的校验顺序、空白处理、主题模式联动、评分可用性和限流载荷，以及本地包上传错误。包和外观响应声明完整嵌套结构，包括固定五项的评分分布。上传请求保留首文件选择及覆盖参数解析。安装、卸载、鉴权和发布限制仍由既有业务处理函数及中间件执行。
 
 插件信息查询保留路径参数、查询参数和 JSON 请求体中名称的优先级，包括空白及业务错误码 1 至 4。命中 URL 参数时不解析请求体，列表查询忽略请求体。插件列表与 RPC 方法列表保留数组及数组元素的空值语义。HTTP JSON-RPC 使用独立契约描述单次与批量请求、成功与错误回复，以及纯通知请求的 HTTP 204 响应。插件准入先于请求体读取，批量错误保留原有顺序，任意 JSON 仅用于 RPC 参数、返回值和错误详情。RPC WebSocket 路由声明 HTTP 101 升级、HTTP 404 插件准入错误、HTTP 400 文本拒绝，以及独立的入站调用和出站回复或通知。Origin 授权与连接清理保留在既有升级生命周期中。

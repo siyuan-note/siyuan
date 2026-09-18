@@ -595,11 +595,22 @@ func SetSyncMode(mode int) {
 	Conf.Save()
 }
 
-func SetSyncProvider(provider int) (err error) {
+func SetSyncProvider(provider int, completeAssets bool) (err error) {
 	release := lockAssetSourceChange()
 	defer release()
 	if provider != Conf.Sync.Provider {
-		if err = requireCompleteAssetDownloads(); err != nil {
+		if completeAssets {
+			util.PushEndlessProgress(Conf.Language(398))
+			defer util.ClearPushProgress(100)
+			err = ensureCompleteSyncAssets(func() { util.PushEndlessProgress(Conf.Language(399)) })
+			if err != nil {
+				logging.LogWarnf("complete data before switching sync provider [%d -> %d] failed: %s", Conf.Sync.Provider, provider, err)
+				err = fmt.Errorf(Conf.Language(400), err)
+			}
+		} else {
+			err = requireCompleteAssetDownloads()
+		}
+		if err != nil {
 			return
 		}
 	}
@@ -994,18 +1005,14 @@ func bootSyncRepoWithDNSRetry() (err error) {
 }
 
 func loadSyncIgnoreLines() (ret []string, err error) {
-	return readSyncIgnoreLines(false)
-}
-
-func loadAppearanceSyncIgnoreLines() ([]string, error) {
-	return readSyncIgnoreLines(true)
-}
-
-func readSyncIgnoreLines(forAppearance bool) (ret []string, err error) {
 	// 忽略旧版同步配置，读取用户规则失败时仍需保留此规则。
 	defer func() {
 		ret = append(ret, "/.siyuan/conf.json")
 	}()
+	// 同步或快照可能重新带回隔离块，加载规则前完成清理。
+	if err = util.MigrateAppearanceSyncIgnore(); err != nil {
+		return
+	}
 	ignore := filepath.Join(util.DataDir, ".siyuan", "syncignore")
 	err = os.MkdirAll(filepath.Dir(ignore), 0755)
 	if err != nil {
@@ -1028,12 +1035,6 @@ func readSyncIgnoreLines(forAppearance bool) (ret []string, err error) {
 	dataStr := string(data)
 	dataStr = strings.ReplaceAll(dataStr, "\r\n", "\n")
 	ret = strings.Split(dataStr, "\n")
-	if forAppearance {
-		ret, err = util.AppearanceUserSyncIgnoreLines(ret)
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	// 忽略用户指南
 	for _, id := range userGuideIDs {

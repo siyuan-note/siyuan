@@ -1,5 +1,6 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {processSync} from "../../dialog/processSystem";
+import {processSync, progressLoading} from "../../dialog/processSystem";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {updateAccountPanelVisibility} from "./accountUi";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {
@@ -12,6 +13,53 @@ import {
 export let syncTabElement: HTMLElement | undefined;
 
 let syncAssetDownloadModePending = false;
+let pendingSyncProvider: Config.ISync["provider"] | undefined;
+
+/** 同步提供商控件显示已确认值或正在提交的值，请求期间禁止重复切换 */
+export const mountSyncProvider = (root: ParentNode) => {
+    root.querySelectorAll<HTMLSelectElement>('[id="sync.provider"]').forEach((element) => {
+        element.disabled = pendingSyncProvider !== undefined || window.siyuan.config.readonly;
+        element.setAttribute("aria-busy", String(pendingSyncProvider !== undefined));
+        element.value = String(pendingSyncProvider ?? window.siyuan.config.sync.provider);
+    });
+};
+
+const setSyncProvider = async (provider: Config.ISync["provider"]) => {
+    if (pendingSyncProvider !== undefined || provider === window.siyuan.config.sync.provider) {
+        mountSyncProvider(document);
+        return;
+    }
+    pendingSyncProvider = provider;
+    mountSyncProvider(document);
+    let started = false;
+    try {
+        const confirmed = await new Promise<boolean>((resolve) => {
+            confirmDialog(window.siyuan.languages.syncProvider, window.siyuan.languages.syncProviderChangeConfirm,
+                () => resolve(true), () => resolve(false), false, undefined, window.siyuan.languages.syncProviderChangeContinue);
+        });
+        if (!confirmed) {
+            return;
+        }
+        started = true;
+        progressLoading({code: 1, msg: window.siyuan.languages._kernel[398]});
+        const response = await fetchSyncPost("/api/sync/setSyncProvider", {provider, completeAssets: true});
+        if (response.code === 0) {
+            window.siyuan.config.sync.provider = provider;
+            if (syncTabElement) {
+                refreshSyncCloudSpaceGroup(syncTabElement);
+            }
+        }
+    } catch (error) {
+        console.warn("[config] failed to update sync provider", error);
+        showMessage(window.siyuan.languages.syncProviderChangeFailed, 7000, "error");
+    } finally {
+        if (started) {
+            progressLoading({code: 2, msg: ""});
+        }
+        pendingSyncProvider = undefined;
+        mountSyncProvider(document);
+    }
+};
 
 /** 切换资源下载模式时同步控件状态，并阻止重复提交 */
 export const mountSyncAssetDownloadMode = (root: ParentNode) => {
@@ -121,14 +169,7 @@ export const refreshSyncCloudSpaceGroup = (root: Element) => {
 export const patchSyncConfig = (controlId: string, value: unknown) => {
     switch (controlId) {
         case "sync.provider": {
-            const provider = value as Config.ISync["provider"];
-            fetchPost("/api/sync/setSyncProvider", {provider}, () => {
-                window.siyuan.config.sync.provider = provider;
-                if (syncTabElement) {
-                    refreshSyncCloudSpaceGroup(syncTabElement);
-                }
-            });
-            break;
+            return setSyncProvider(value as Config.ISync["provider"]);
         }
         case "sync.enabled": {
             const enabled = Boolean(value) as Config.ISync["enabled"];

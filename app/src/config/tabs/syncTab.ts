@@ -10,7 +10,7 @@ import {writeText} from "../../protyle/util/compatibility";
 import {bindSyncCloudListEvent, renderSyncCloudList, setKey} from "../../sync/syncGuide";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {getLANSyncSearchAvailability, getSyncProviderConfigKeywords} from "./syncUi";
-import {mountLANSyncStatus, mountSyncAssetDownloadMode} from "./syncRuntime";
+import {mountLANSyncStatus, mountSyncAssetDownloadMode, mountSyncProvider} from "./syncRuntime";
 import {openHistory} from "../../history/history";
 
 const registerSyncGroup = (tab: SettingTabBuilder) => {
@@ -19,6 +19,7 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
     group.select("sync.provider", {
         title: window.siyuan.languages.syncProvider,
         desc: window.siyuan.languages.syncProviderTip,
+        afterMount: mountSyncProvider,
         options: [
             {value: 0, label: "SiYuan"},
             {value: 2, label: "S3"},

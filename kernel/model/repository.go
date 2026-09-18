@@ -1356,7 +1356,7 @@ func checkoutRepo(id string) (err error) {
 	CloseWatchEmojis()
 	defer WatchEmojis()
 
-	// 整包恢复期间暂停监听，完成后重新绑定实际目录。
+	// 快照恢复期间暂停监听，完成后重新绑定实际目录。
 	CloseWatchThemes()
 	defer WatchThemes()
 
@@ -1371,9 +1371,6 @@ func checkoutRepo(id string) (err error) {
 	// 回滚快照时默认为当前数据创建一个快照
 	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
 	if err = processAssetDownloadRecovery(repo, true); err != nil {
-		return
-	}
-	if err = prepareAppearancePackages(); err != nil {
 		return
 	}
 	_, err = repo.Index("Backup before checkout", false, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
@@ -1817,9 +1814,6 @@ func CreateRepoSnapshot(memo string) (id string, created bool, err error) {
 
 	start := time.Now()
 	if err = processAssetDownloadRecovery(repo, true); err != nil {
-		return
-	}
-	if err = prepareAppearancePackages(); err != nil {
 		return
 	}
 	index, created, err := repo.IndexWithResult(memo, true, map[string]any{
@@ -2925,9 +2919,6 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 	}
 
 	checkChunks := true
-	if err = prepareAppearancePackages(); err != nil {
-		return
-	}
 	if util.IsMobileContainer() {
 		// 因为移动端私有数据空间不会存在外部操作导致分块损坏的情况，所以不需要检查分块以提升性能 https://github.com/siyuan-note/siyuan/issues/13216
 		checkChunks = false
@@ -3030,18 +3021,12 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 	if err != nil {
 		return nil, err
 	}
-	appearanceIgnoreLines, err := loadAppearanceSyncIgnoreLines()
-	if err != nil {
-		return nil, err
-	}
 	dataDir := util.DataDir
 	ret, err = dejavu.NewRepoWithOptions(dejavu.Options{
 		DataPath: util.DataDir, RepoPath: util.RepoDir, HistoryPath: util.HistoryDir, TempPath: util.TempDir,
 		DeviceID: Conf.System.ID, DeviceName: Conf.System.Name, DeviceOS: Conf.System.OS,
 		AESKey: Conf.Repo.Key, IgnoreLines: ignoreLines, Cloud: cloudRepo,
-		EnableAppearanceSync: true, AppearanceIgnoreLines: appearanceIgnoreLines,
-		BeforeAppearanceApply: util.EnsureAppearanceSyncIsolation,
-		IgnoreRulePath:        syncIgnoreRulePath, HiddenDirectoryNames: []string{".siyuan"},
+		IgnoreRulePath: syncIgnoreRulePath, HiddenDirectoryNames: []string{".siyuan"},
 		PathFilter: func(info os.FileInfo, absPath string) (bool, error) {
 			return syncPathFilter(dataDir, info, absPath)
 		},

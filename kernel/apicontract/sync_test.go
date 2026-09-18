@@ -79,3 +79,25 @@ func TestSyncNameAndNumericCompatibility(t *testing.T) {
 		t.Fatal("overflow in body was ignored")
 	}
 }
+
+func TestSyncProviderCompletionContract(t *testing.T) {
+	for _, entry := range []struct {
+		body     string
+		complete bool
+	}{
+		{`{"provider":2.9}`, false},
+		{`{"provider":2.9,"completeAssets":null}`, false},
+		{`{"provider":2.9,"completeAssets":false}`, false},
+		{`{"provider":2.9,"completeAssets":true}`, true},
+	} {
+		request, err := SetSyncProvider.Decode(strings.NewReader(entry.body))
+		if err != nil || request.Provider != 2.9 || request.CompleteAssets != entry.complete {
+			t.Fatalf("unexpected provider request: %+v %v", request, err)
+		}
+	}
+	for _, body := range []string{`{"completeAssets":true}`, `{"provider":2,"completeAssets":1}`, `{"provider":2,"completeAssets":"true"}`} {
+		if _, err := SetSyncProvider.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid completion request accepted: %s", body)
+		}
+	}
+}

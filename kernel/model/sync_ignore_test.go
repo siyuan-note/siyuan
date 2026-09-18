@@ -5,7 +5,9 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
+	"time"
 
 	ignore "github.com/sabhiram/go-gitignore"
 	"github.com/siyuan-note/dejavu"
@@ -25,6 +27,95 @@ func mustSyncIgnoreLines(t testing.TB) []string {
 	t.Helper()
 	lines, _ := mustSyncIgnoreRules(t)
 	return lines
+}
+
+func TestSyncIgnoreRemovesRestoredAppearanceIsolation(t *testing.T) {
+	setupAppearancePackagesTest(t)
+	oldWorking := util.WorkingDir
+	util.WorkingDir = t.TempDir()
+	t.Cleanup(func() { util.WorkingDir = oldWorking })
+	block := "# siyuan-appearance-isolation:v1:begin\n/themes/\n/icons/\n/storage/bazaar/themes/\n/storage/bazaar/icons/\n# siyuan-appearance-isolation:v1:end\n"
+	userRules := "# local packages\n/themes/local/\n/icons/local/\n"
+	rule := filepath.Join(util.DataDir, syncIgnoreRulePath)
+	writeAppearanceTestFile(t, rule, userRules+block)
+	oldTime := time.Unix(1700000000, 0)
+	if err := os.Chtimes(rule, oldTime, oldTime); err != nil {
+		t.Fatal(err)
+	}
+	base := t.TempDir()
+	options := dejavu.Options{
+		DataPath: util.DataDir, RepoPath: filepath.Join(base, "repo"), HistoryPath: filepath.Join(base, "history"), TempPath: filepath.Join(base, "temp"),
+		DeviceID: "device", DeviceName: "device", DeviceOS: "windows", AESKey: []byte("0123456789abcdef0123456789abcdef"),
+		IgnoreLines: strings.Split(userRules+block, "\n"), IgnoreRulePath: syncIgnoreRulePath, HiddenDirectoryNames: []string{".siyuan"},
+		PathFilter: func(info os.FileInfo, path string) (bool, error) {
+			return syncPathFilter(util.DataDir, info, path)
+		},
+	}
+	repo, err := dejavu.NewRepoWithOptions(options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	before, err := repo.Index("before migration", true, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = MigrateAppearancePackages(); err != nil {
+		t.Fatal(err)
+	}
+	options.IgnoreLines = mustSyncIgnoreLines(t)
+	repo, err = dejavu.NewRepoWithOptions(options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = repo.Index("after migration", true, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err = checkoutRepoSnapshot(repo, before.ID, func(error) {}); err != nil {
+		t.Fatal(err)
+	}
+	if data, err := os.ReadFile(rule); err != nil || string(data) != userRules+block {
+		t.Fatalf("snapshot did not restore the isolation block: %q, %v", data, err)
+	}
+	_, matcher := mustSyncIgnoreRules(t)
+	for _, path := range []string{"/themes/custom/theme.css", "/icons/custom/icon.js"} {
+		if matcher.MatchesPath(path) {
+			t.Fatalf("restored isolation block excludes package: %s", path)
+		}
+	}
+	for _, path := range []string{"/themes/local/theme.css", "/icons/local/icon.js"} {
+		if !matcher.MatchesPath(path) {
+			t.Fatalf("user rule was removed: %s", path)
+		}
+	}
+	if data, err := os.ReadFile(rule); err != nil || string(data) != userRules {
+		t.Fatalf("restored isolation block not removed cleanly: %q, %v", data, err)
+	}
+	_, cached := mustSyncIgnoreRules(t)
+	_, reused := mustSyncIgnoreRules(t)
+	if cached != reused {
+		t.Fatal("cleaned rules were not cached")
+	}
+}
+
+func TestSyncIgnoreRejectsModifiedAppearanceIsolation(t *testing.T) {
+	oldData, oldWorking := util.DataDir, util.WorkingDir
+	util.DataDir, util.WorkingDir = t.TempDir(), t.TempDir()
+	t.Cleanup(func() { util.DataDir, util.WorkingDir = oldData, oldWorking })
+	mustSyncIgnoreRules(t)
+	rule := filepath.Join(util.DataDir, syncIgnoreRulePath)
+	original := "# siyuan-appearance-isolation:v1:begin\n/custom/\n"
+	writeAppearanceTestFile(t, rule, original)
+	if _, matcher, err := getSyncIgnoreRules(); err == nil || matcher != nil {
+		t.Fatal("modified isolation block produced usable rules")
+	}
+	if data, err := os.ReadFile(rule); err != nil || string(data) != original {
+		t.Fatalf("modified rules were not preserved: %q, %v", data, err)
+	}
+	writeAppearanceTestFile(t, rule, "/custom/\n")
+	_, matcher := mustSyncIgnoreRules(t)
+	if !matcher.MatchesPath("/custom/file") {
+		t.Fatal("rule loading did not recover after correction")
+	}
 }
 
 func TestSyncIgnoreGuideReadFailureRecovers(t *testing.T) {

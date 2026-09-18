@@ -1,4 +1,7 @@
 {
+	"syncProviderChangeConfirm": "Sebelum mengganti penyedia sinkronisasi, SiYuan perlu memeriksa sumber daya dan snapshot lama, serta mungkin mengunduh konten yang hilang dari penyimpanan cloud saat ini. Proses ini dapat memakan waktu. Lanjutkan?",
+	"syncProviderChangeContinue": "Lanjutkan",
+	"syncProviderChangeFailed": "Perubahan penyedia sinkronisasi tidak dapat dikonfirmasi. Periksa koneksi dan muat ulang antarmuka.",
 	"encryptedAssetExternalOpenTip": "Salinan sementara yang telah didekripsi akan dibuka. Perubahan tidak akan disimpan ke lampiran asli. Salinan dapat dihapus saat buku catatan dikunci. Untuk mempertahankan perubahan, simpan berkas ke lokasi lain.",
 	"linuxInputMethod": "Mode kompatibilitas metode masukan Linux",
 	"linuxInputMethodTip": "Gunakan X11/XWayland untuk meningkatkan kompatibilitas metode masukan; dapat memengaruhi skala tampilan, berlaku untuk semua ruang kerja di perangkat ini, dan aktif setelah SiYuan ditutup sepenuhnya lalu dimulai ulang",
@@ -2882,6 +2885,9 @@
 		"394": "Buku catatan terenkripsi tidak mendukung publikasi, izin publikasi tidak dapat dikonfigurasi",
 		"395": "Ekspor massal tidak mendukung buku catatan terenkripsi, buka kuncinya lalu ekspor satu per satu, atau ekspor buku catatan biasa",
 		"396": "Buku catatan terenkripsi tidak mendukung penyematan dokumen",
-		"397": "Perangkat ini tidak dapat membuat berkas yang disinkronkan. Ubah namanya di SiYuan pada perangkat yang dapat mengaksesnya, lalu sinkronkan kembali: %s"
+		"397": "Perangkat ini tidak dapat membuat berkas yang disinkronkan. Ubah namanya di SiYuan pada perangkat yang dapat mengaksesnya, lalu sinkronkan kembali: %s",
+		"398": "Memeriksa sumber daya dan snapshot lama...",
+		"399": "Mengunduh sumber daya dan konten snapshot lama yang hilang...",
+		"400": "Tidak dapat memeriksa atau melengkapi sumber daya dan snapshot lama. Penyedia sinkronisasi tidak diubah: %s"
 	}
 }

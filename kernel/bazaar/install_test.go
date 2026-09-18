@@ -22,7 +22,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -279,79 +278,4 @@ func buildInstallPackageArchive(t *testing.T, files map[string]string) []byte {
 		t.Fatal(err)
 	}
 	return data
-}
-
-func TestAppearanceInstallUpdateAndDeletePublishPackageState(t *testing.T) {
-	useTestBazaarInfo(t)
-	oldTemp, oldThemes, oldIcons := util.TempDir, util.ThemesPath, util.IconsPath
-	util.TempDir = t.TempDir()
-	util.ThemesPath, util.IconsPath = filepath.Join(util.DataDir, "themes"), filepath.Join(util.DataDir, "icons")
-	t.Cleanup(func() { util.TempDir, util.ThemesPath, util.IconsPath = oldTemp, oldThemes, oldIcons })
-	for _, kind := range []string{"themes", "icons"} {
-		t.Run(kind, func(t *testing.T) {
-			manifest, entry := "theme.json", "theme.css"
-			if kind == "icons" {
-				manifest, entry = "icon.json", "icon.js"
-			}
-			installPath := util.AppearancePackagePath(kind, "sample")
-			data := buildInstallPackageArchive(t, map[string]string{
-				manifest: `{"name":"sample","version":"1.0.0"}`, entry: "version one", "stale.txt": "stale",
-			})
-			if err := installPackageWithSource(data, installPath, kind, "sample", false, "https://github.com/owner/repo", "v1"); err != nil {
-				t.Fatal(err)
-			}
-			if err := ValidateAppearancePackage(kind, "sample"); err != nil {
-				t.Fatal(err)
-			}
-			initial, err := GetAppearancePackageInfo(kind, "sample")
-			if err != nil || initial.InstallTime == 0 || initial.UpdateTime != 0 || initial.RepoRef != "v1" {
-				t.Fatalf("invalid install state: %+v, %v", initial, err)
-			}
-			source := t.TempDir()
-			for name, content := range map[string]string{manifest: `{"name":"sample","version":"2.0.0"}`, entry: "version two"} {
-				if err = os.WriteFile(filepath.Join(source, name), []byte(content), 0644); err != nil {
-					t.Fatal(err)
-				}
-			}
-			if err = InstallLocalPackage(source, installPath, kind, "sample", true); err != nil {
-				t.Fatal(err)
-			}
-			updated, err := GetAppearancePackageInfo(kind, "sample")
-			if err != nil || updated.InstallTime != initial.InstallTime || updated.UpdateTime == 0 || updated.RepoURL != "" {
-				t.Fatalf("invalid update state: %+v, %v", updated, err)
-			}
-			if _, err = os.Stat(filepath.Join(installPath, "stale.txt")); !os.IsNotExist(err) {
-				t.Fatalf("stale file survived update: %v", err)
-			}
-			if err = ValidateAppearancePackage(kind, "sample"); err != nil {
-				t.Fatal(err)
-			}
-			if err = UninstallPackage(installPath); err != nil {
-				t.Fatal(err)
-			}
-			_, statePath, err := appearancePackagePaths(kind, "sample")
-			if err != nil {
-				t.Fatal(err)
-			}
-			state, err := readAppearanceState(statePath)
-			if err != nil || !state.Deleted || len(state.Files) != 0 {
-				t.Fatalf("invalid deletion state: %+v, %v", state, err)
-			}
-			if _, err = os.Stat(installPath); !os.IsNotExist(err) {
-				t.Fatalf("package survived deletion: %v", err)
-			}
-			if err = InstallLocalPackage(source, installPath, kind, "sample", false); err != nil {
-				t.Fatal(err)
-			}
-			if err = ValidateAppearancePackage(kind, "sample"); err != nil {
-				t.Fatalf("explicit reinstall did not clear deletion: %v", err)
-			}
-			if info, err := GetAppearancePackageInfo(kind, "sample"); err != nil || reflect.DeepEqual(info, updated) || info.UpdateTime != 0 {
-				t.Fatalf("reinstall did not reset operation state: %+v, %v", info, err)
-			}
-		})
-	}
-	if _, err := os.Stat(filepath.Join(util.DataDir, "storage", "bazaar.json")); !os.IsNotExist(err) {
-		t.Fatalf("appearance installation unexpectedly rewrote shared bazaar metadata: %v", err)
-	}
 }

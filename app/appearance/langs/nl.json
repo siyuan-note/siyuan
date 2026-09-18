@@ -1,4 +1,7 @@
 {
+	"syncProviderChangeConfirm": "Voordat u van synchronisatieprovider wisselt, moet SiYuan bronnen en eerdere momentopnamen controleren en mogelijk ontbrekende inhoud uit de huidige cloudopslag downloaden. Dit kan enige tijd duren. Doorgaan?",
+	"syncProviderChangeContinue": "Doorgaan",
+	"syncProviderChangeFailed": "De wijziging van de synchronisatieprovider kon niet worden bevestigd. Controleer de verbinding en laad de interface opnieuw.",
 	"encryptedAssetExternalOpenTip": "Er wordt een tijdelijke ontsleutelde kopie geopend. Wijzigingen worden niet opgeslagen in de oorspronkelijke bijlage. De kopie kan worden verwijderd wanneer het notitieboek wordt vergrendeld. Sla het bestand op een andere locatie op om uw wijzigingen te behouden.",
 	"linuxInputMethod": "Compatibiliteitsmodus voor Linux-invoermethoden",
 	"linuxInputMethodTip": "Gebruik X11/XWayland om de compatibiliteit van invoermethoden te verbeteren; kan de beeldschermschaal beïnvloeden, geldt voor alle werkruimten op dit apparaat en wordt actief nadat SiYuan volledig is afgesloten en opnieuw gestart",
@@ -2882,6 +2885,9 @@
 		"394": "Versleutelde notitieboeken ondersteunen geen publicatie, publicatierechten kunnen niet worden ingesteld",
 		"395": "Batch-export ondersteunt geen versleutelde notitieboeken, ontgrendel ze en exporteer ze een voor een, of exporteer gewone notitieboeken",
 		"396": "Versleutelde notitieboeken ondersteunen het vastzetten van documenten niet",
-		"397": "Dit apparaat kan het gesynchroniseerde bestand niet aanmaken. Hernoem het in SiYuan op een apparaat waarop het toegankelijk is en synchroniseer opnieuw: %s"
+		"397": "Dit apparaat kan het gesynchroniseerde bestand niet aanmaken. Hernoem het in SiYuan op een apparaat waarop het toegankelijk is en synchroniseer opnieuw: %s",
+		"398": "Bronnen en eerdere momentopnamen controleren...",
+		"399": "Ontbrekende bronnen en inhoud van eerdere momentopnamen downloaden...",
+		"400": "Bronnen en eerdere momentopnamen konden niet worden gecontroleerd of aangevuld. De synchronisatieprovider is niet gewijzigd: %s"
 	}
 }

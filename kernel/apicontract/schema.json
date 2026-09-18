@@ -44067,6 +44067,16 @@
     "SyncProviderRequestInput": {
       "type": "object",
       "properties": {
+        "completeAssets": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "provider": {
           "type": "number"
         }

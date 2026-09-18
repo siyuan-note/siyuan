@@ -13,9 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -178,40 +176,5 @@ func TestRefreshAppearanceConfigFallsBackAfterRemoval(t *testing.T) {
 	if Conf.Appearance.ThemeLight != "daylight" || Conf.Appearance.Icon != "litheness" || Conf.Appearance.ThemeJS ||
 		Conf.Appearance.ThemeVer != "1.0.0" || Conf.Appearance.IconVer != "1.0.0" {
 		t.Fatalf("appearance fallback retained stale package state: %+v", Conf.Appearance)
-	}
-}
-
-func TestAppearanceLoadWaitsForPackagePublication(t *testing.T) {
-	setupAppearancePackagesTest(t)
-	for name, load := range map[string]func(){"themes": LoadThemes, "icons": LoadIcons, "config": refreshAppearanceConfig} {
-		t.Run(name, func(t *testing.T) {
-			lockPath := filepath.Join(util.DataDir, ".siyuan-appearance")
-			filelock.Lock(lockPath)
-			released := false
-			defer func() {
-				if !released {
-					filelock.Unlock(lockPath)
-				}
-			}()
-			started, done := make(chan struct{}), make(chan struct{})
-			go func() {
-				close(started)
-				load()
-				close(done)
-			}()
-			<-started
-			select {
-			case <-done:
-				t.Fatal("appearance loaded during package publication")
-			case <-time.After(50 * time.Millisecond):
-			}
-			filelock.Unlock(lockPath)
-			released = true
-			select {
-			case <-done:
-			case <-time.After(3 * time.Second):
-				t.Fatal("appearance loading did not resume after package publication")
-			}
-		})
 	}
 }

@@ -1984,7 +1984,7 @@ export type SyncProviderExportData = { "name": string; "zip": string; };
 
 export type SyncProviderImportRequestInput = { "file"?: Blob; };
 
-export type SyncProviderRequestInput = { "provider": number; };
+export type SyncProviderRequestInput = { "completeAssets"?: boolean | null; "provider": number; };
 
 export type SyncS3 = { "accessKey": string; "bucket": string; "concurrentReqs": number; "endpoint": string; "pathStyle": boolean; "region": string; "secretKey": string; "skipTlsVerify": boolean; "timeout": number; };
 

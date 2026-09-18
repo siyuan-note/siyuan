@@ -42,7 +42,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
 	"github.com/olahol/melody"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/agent"
 	"github.com/siyuan-note/siyuan/kernel/api"
@@ -793,11 +792,6 @@ func serveAppearance(ginServer *gin.Engine) {
 	appearancePath := util.BuiltInAppearancePath()
 	siyuan.GET("/appearance/*filepath", func(c *gin.Context) {
 		requestPath := strings.TrimPrefix(c.Request.URL.Path, "/appearance/")
-		if isThirdPartyAppearanceRequest(requestPath) {
-			lockPath := filepath.Join(util.DataDir, ".siyuan-appearance")
-			filelock.Lock(lockPath)
-			defer filelock.Unlock(lockPath)
-		}
 		filePath, status := resolveAppearanceFile(appearancePath, requestPath)
 		if status != 0 {
 			c.Status(status)

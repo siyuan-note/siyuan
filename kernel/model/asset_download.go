@@ -21,6 +21,7 @@ import (
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -295,6 +296,80 @@ func clearAssetDownloadState() error {
 	return repo.ClearAssetDownloadState()
 }
 
+// ensureCompleteSyncAssets 在调用方持有来源锁时补齐当前资源和历史快照，不改变下载模式或来源。
+func ensureCompleteSyncAssets(onIncomplete func()) error {
+	files, err := deferredSyncAssets()
+	if err != nil {
+		return err
+	}
+	if len(files) != 0 {
+		if onIncomplete != nil {
+			logging.LogInfof("complete deferred sync assets before changing provider [count=%d]", len(files))
+			onIncomplete()
+		}
+		if err = ensureAllSyncAssets(); err != nil {
+			return err
+		}
+	}
+	exists, err := assetDownloadStateExists()
+	if err != nil || !exists {
+		return err
+	}
+	repo, err := newRepositoryWithAssetSourceLocked()
+	if err != nil {
+		return err
+	}
+	incomplete, err := repo.HasIncompleteSnapshots()
+	if err != nil || !incomplete {
+		return err
+	}
+	if onIncomplete != nil {
+		onIncomplete()
+	}
+	if err = checkAssetDownloadAccess(); err != nil {
+		return err
+	}
+	handleCloudError := cloudRepoErrorHandler()
+	if err = repo.EnsureAllSnapshotChunks(newSyncContext()); err != nil {
+		handleCloudError(err)
+		if onIncomplete != nil {
+			logIncompleteSyncSnapshot(repo)
+		}
+		return fmt.Errorf("%s: %w", Conf.Language(376), err)
+	}
+	return nil
+}
+
+// logIncompleteSyncSnapshot 在补齐失败后记录首个缺失的历史文件，便于定位恢复来源，不读取云端。
+func logIncompleteSyncSnapshot(repo *dejavu.Repo) {
+	entries, err := os.ReadDir(filepath.Join(util.RepoDir, "indexes"))
+	if err != nil {
+		logging.LogWarnf("list incomplete sync snapshots failed: %s", err)
+		return
+	}
+	for _, entry := range entries {
+		if entry.IsDir() || len(entry.Name()) != 40 {
+			continue
+		}
+		index, err := repo.GetIndex(entry.Name())
+		if err != nil {
+			logging.LogWarnf("read sync snapshot [%s] failed: %s", entry.Name(), err)
+			return
+		}
+		files, err := repo.GetFiles(index)
+		if err != nil {
+			logging.LogWarnf("read sync snapshot files [%s] failed: %s", index.ID, err)
+			return
+		}
+		for _, file := range files {
+			if repoFileNeedsDownload(file) {
+				logging.LogWarnf("incomplete sync snapshot [index=%s, file=%s, path=%s]", index.ID, file.ID, file.Path)
+				return
+			}
+		}
+	}
+}
+
 func SetSyncAssetDownloadMode(mode int) error {
 	if mode != 0 && mode != 1 {
 		return errors.New("invalid asset download mode")
@@ -304,32 +379,8 @@ func SetSyncAssetDownloadMode(mode int) error {
 	assetDownloadSourceMu.Lock()
 	defer assetDownloadSourceMu.Unlock()
 	if mode == 0 {
-		if err := ensureAllSyncAssets(); err != nil {
+		if err := ensureCompleteSyncAssets(nil); err != nil {
 			return err
-		}
-		exists, err := assetDownloadStateExists()
-		if err != nil {
-			return err
-		}
-		if exists {
-			repo, repoErr := newRepositoryWithAssetSourceLocked()
-			if repoErr != nil {
-				return repoErr
-			}
-			incomplete, checkErr := repo.HasIncompleteSnapshots()
-			if checkErr != nil {
-				return checkErr
-			}
-			if incomplete {
-				if err = checkAssetDownloadAccess(); err != nil {
-					return err
-				}
-				handleCloudError := cloudRepoErrorHandler()
-				if err = repo.EnsureAllSnapshotChunks(newSyncContext()); err != nil {
-					handleCloudError(err)
-					return fmt.Errorf("%s: %w", Conf.Language(376), err)
-				}
-			}
 		}
 	}
 	Conf.Sync.AssetDownloadMode = mode

@@ -88,6 +88,19 @@ export const duplicateCol = (options: {
     options.blockElement.setAttribute("updated", newUpdated);
 };
 
+const getColOptionHTML = (item: IAVColumn["options"][number]) => {
+    const ariaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc)}</div>` : "";
+    return `<button class="b3-menu__item" data-option-row="true" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" data-color="${escapeAttr(item.color)}">
+    <span draggable="true" class="b3-menu__icon b3-menu__icon--custom fn__grab"><svg><use xlink:href="#iconDrag"></use></svg></span>
+    <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${ariaLabel}">
+        <span class="b3-chip" style="${getAVColorStyle(item)}">
+            <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
+        </span>
+    </div>
+    <svg class="b3-menu__action" data-type="setColOption"><use xlink:href="#iconEdit"></use></svg>
+</button>`;
+};
+
 export const getEditHTML = (options: {
     protyle: IProtyle,
     colId: string,
@@ -141,16 +154,7 @@ export const getEditHTML = (options: {
             colData.options = [];
         }
         colData.options.forEach(item => {
-            const airaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>` : "";
-            html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" data-option-row="true" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" data-color="${escapeAttr(item.color)}">
-    <span draggable="true" class="b3-menu__icon b3-menu__icon--custom fn__grab"><svg><use xlink:href="#iconDrag"></use></svg></span>
-    <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${airaLabel}">
-        <span class="b3-chip" style="${getAVColorStyle(item)}">
-            <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
-        </span>
-    </div>
-    <svg class="b3-menu__action" data-type="setColOption"><use xlink:href="#iconEdit"></use></svg>
-</button>`;
+            html += getColOptionHTML(item);
         });
     } else if (colData.type === "number") {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
@@ -501,6 +505,7 @@ export const bindEditEvent = (options: {
                 options.menuElement.parentElement.remove();
             }
             if (event.key === "Enter") {
+                event.preventDefault();
                 let hasSelected = false;
                 colData.options.find((item) => {
                     if (addOptionElement.value === item.name) {
@@ -526,20 +531,12 @@ export const bindEditEvent = (options: {
                     avID,
                     data: addOptionElement.value
                 }]);
-                options.menuElement.innerHTML = getEditHTML({
-                    protyle: options.protyle,
-                    colId,
-                    data: options.data,
-                    isCustomAttr: options.isCustomAttr
-                });
-                bindEditEvent({
-                    protyle: options.protyle,
-                    menuElement: options.menuElement,
-                    data: options.data,
-                    isCustomAttr: options.isCustomAttr,
-                    blockID: options.blockID
-                });
-                (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
+                // 保留输入框及其焦点，避免移动端软键盘因菜单重建而收起和弹出。
+                const optionElements = options.menuElement.querySelectorAll('[data-option-row="true"]');
+                const lastOptionElement = optionElements.length > 0 ?
+                    optionElements[optionElements.length - 1] : addOptionElement.parentElement;
+                lastOptionElement.insertAdjacentHTML("afterend", getColOptionHTML(colData.options[colData.options.length - 1]));
+                addOptionElement.value = "";
                 // 添加选项后面板增高，需按首次锚点重新定位（sticky 锁底部，顶部上移避免溢出视口）
                 const prevTop = parseFloat(options.menuElement.dataset.positionTop);
                 if (!isNaN(prevTop)) {

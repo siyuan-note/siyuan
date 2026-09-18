@@ -288,7 +288,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     <div class="fn__hr"></div>
     <textarea rows="1" placeholder="${window.siyuan.languages.addDesc}" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(desc)}">${escapeHtml(desc)}</textarea>
 </div>
-<div class="fn__hr--small"></div>`,
+${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
         bind(element) {
             const inputElement = element.querySelector("input");
             element.classList.add("b3-menu__custom");
@@ -322,6 +322,9 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             });
         }
     });
+    if (isMobile()) {
+        menu.addSeparator();
+    }
     menu.addItem({
         id: "delete",
         label: window.siyuan.languages.delete,

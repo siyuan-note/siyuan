@@ -28,6 +28,7 @@ export interface ListMindmapViewOptions {
     onManageLineColors?: () => void;
     onFullscreen?: (enter: boolean, button: HTMLButtonElement) => void;
     onEdit?: (id: string, contentHost: HTMLElement) => void;
+    onRootTitleChange?: (title: string) => void;
     finishEdit?: () => boolean | void | Promise<boolean | void>;
     onMove?: (id: string, targetId: string, placement: "before" | "child" | "after") => void;
     onAdd?: (id: string, kind: "child" | "sibling") => void;
@@ -373,7 +374,7 @@ export class ListMindmapView {
                 addBridge.hidden = !!this.options.readOnly;
                 addBridge.setAttribute("aria-hidden", "true");
                 element.append(addBridge);
-                const fold = this.makeButton("collapse", "iconDown", () => this.toggleFold(id), "list-mindmap__fold");
+                const fold = this.makeButton("collapse", "iconLeft", () => this.toggleFold(id), "list-mindmap__fold");
                 fold.append(createElement("span", "list-mindmap__fold-count"));
                 element.append(fold);
                 const addChild = this.makeButton("listMindmapChild", "iconAdd", () => {
@@ -404,12 +405,16 @@ export class ListMindmapView {
                 const content = this.getContentHost(id);
                 content.replaceChildren();
                 if (node.virtual) {
-                    content.textContent = this.label("listMindmapRoot");
+                    content.textContent = this.model.metadata.rootTitle || this.label("listMindmapRoot");
                 } else {
                     node.contentBlocks.forEach((block) => {
                         const clone = block.cloneNode(true) as HTMLElement;
                         clone.querySelectorAll(".protyle-attr, .protyle-action, .protyle-icons, .list-mindmap").forEach(item => item.remove());
                         [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))].forEach((item) => {
+                            if (item.hasAttribute("spellcheck")) {
+                                item.classList.add("list-mindmap__text");
+                                item.classList.toggle("list-mindmap__text--trailing-newline", item.textContent.endsWith("\n"));
+                            }
                             item.removeAttribute("contenteditable");
                             item.removeAttribute("data-node-id");
                             item.removeAttribute("spellcheck");
@@ -421,7 +426,9 @@ export class ListMindmapView {
                         content.append(clone);
                     });
                 }
-                const empty = !content.textContent.replace(/[\u200b\ufeff]/g, "").trim() &&
+                const hasBlankLines = node.contentBlocks.length > 1 || content.textContent.includes("\n") ||
+                    content.querySelectorAll("br").length > 1;
+                const empty = !hasBlankLines && !content.textContent.replace(/[\u200b\ufeff]/g, "").trim() &&
                     !content.querySelector("img, svg, video, audio, iframe, canvas, hr, [data-content]");
                 content.classList.toggle("list-mindmap__content--empty", empty);
                 content.dataset.placeholder = this.label("listMindmapPlaceholder");
@@ -1123,17 +1130,65 @@ export class ListMindmapView {
             }
             return;
         }
-        if (!id || this.model.nodes.get(id)?.virtual) {
+        if (!id) {
             return;
         }
         event.preventDefault();
         event.stopPropagation();
         this.cancelPointer();
         this.finishThen(() => {
+            if (this.model.nodes.get(id)?.virtual) {
+                this.editRootTitle(id);
+                return;
+            }
             this.setEditing(id);
             this.options.onEdit?.(id, this.getContentHost(id));
         });
     };
+
+    private editRootTitle(id: string) {
+        this.finishRelationEdit?.(true);
+        const content = this.getContentHost(id);
+        const input = createElement("textarea", "list-mindmap__root-title");
+        const measure = createElement("span", "list-mindmap__root-title-measure");
+        input.rows = 1;
+        input.value = this.model.metadata.rootTitle || this.label("listMindmapRoot");
+        measure.textContent = input.value;
+        input.setAttribute("aria-label", this.label("text"));
+        content.classList.add("list-mindmap__root-title-host");
+        this.setEditing(id);
+        content.replaceChildren(measure, input);
+        input.addEventListener("input", () => {
+            measure.textContent = input.value || "\u200b";
+            this.refreshLayout();
+        });
+        let finished = false;
+        const finish = (save: boolean) => {
+            if (finished) {
+                return;
+            }
+            finished = true;
+            this.finishRelationEdit = undefined;
+            const title = input.value.trim();
+            content.classList.remove("list-mindmap__root-title-host");
+            this.setEditing(undefined);
+            if (save && title !== (this.model.metadata.rootTitle || "")) {
+                this.options.onRootTitleChange?.(title);
+            }
+            this.update(this.model);
+        };
+        this.finishRelationEdit = finish;
+        input.addEventListener("blur", () => finish(true));
+        input.addEventListener("keydown", event => {
+            event.stopPropagation();
+            if (!event.isComposing && (event.key === "Enter" || event.key === "Escape")) {
+                event.preventDefault();
+                finish(event.key === "Enter");
+            }
+        });
+        input.focus();
+        input.select();
+    }
 
     private editRelationLabel(event: MouseEvent) {
         const relation = this.model.metadata.relations.find(item => item.id === this.selectedRelation);
@@ -1232,7 +1287,22 @@ export class ListMindmapView {
         if (event.isComposing || target.closest("input, textarea, select, .list-mindmap__node--editing")) {
             return;
         }
-        if ((event.key === "Delete" || event.key === "Backspace") &&
+        if ((event.key === "Tab" || event.key === "Enter") && !this.options.readOnly &&
+            !this.editingId && !this.relationFrom && this.selectedId && !event.repeat &&
+            !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+            !target.isContentEditable && !target.closest("button, a")) {
+            const id = this.selectedId;
+            const node = this.model.nodes.get(id);
+            if (!node || (event.key === "Enter" && node.virtual)) {
+                return;
+            }
+            const kind = event.key === "Tab" ? "child" : "sibling";
+            this.finishThen(() => {
+                if (this.selectedId === id) {
+                    this.options.onAdd?.(id, kind);
+                }
+            });
+        } else if ((event.key === "Delete" || event.key === "Backspace") &&
             !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
             const selectedId = this.selectedId;
             const selectedRelation = this.selectedRelation;

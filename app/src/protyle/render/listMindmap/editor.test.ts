@@ -256,9 +256,9 @@ const browserCases = async (sourceCode: string, css: string) => {
     const fixture = document.createElement("div");
     fixture.className = "protyle-wysiwyg";
     document.body.append(fixture);
-    for (const text of ["Test text", '<span data-type="strong">11pppppp</span>', "First<br>Second",
+    for (const text of ["Test text", '<span data-type="strong">11pppppp</span>', "First<br>Second", "First\nSecond",
         '<span data-type="strong">1水电费ppppp</span>', '<span data-type="strong">1水电费pppppp</span>']) {
-        fixture.innerHTML = `<div data-node-id="list" data-type="NodeList"><div class="list-mindmap"><div class="list-mindmap__node"><div class="list-mindmap__content"><div class="p"><div>${text}</div></div></div></div></div></div>`;
+        fixture.innerHTML = `<div data-node-id="list" data-type="NodeList"><div class="list-mindmap"><div class="list-mindmap__node"><div class="list-mindmap__content"><div class="p"><div class="list-mindmap__text">${text}</div></div></div></div></div></div>`;
         const node = fixture.querySelector<HTMLElement>(".list-mindmap__node");
         const content = fixture.querySelector<HTMLElement>(".list-mindmap__content");
         const before = {width: node.offsetWidth, height: node.offsetHeight};
@@ -270,6 +270,14 @@ const browserCases = async (sourceCode: string, css: string) => {
             content.innerHTML = `<div class="protyle-content" data-padding-mode="responsive" data-device="desktop"><div class="protyle-wysiwyg" spellcheck="false" contenteditable="true"><div class="p" data-node-id="text" data-type="NodeParagraph"><div contenteditable="true" spellcheck="false">${text}</div></div></div></div>`;
             check.deepEqual({width: node.offsetWidth, height: node.offsetHeight}, before,
                 "entering edit mode preserves node dimensions with responsive padding and canvas zoom");
+            content.style.minWidth = "";
+            const editable = content.querySelector<HTMLElement>('[data-type="NodeParagraph"] > div');
+            editable.textContent = "A longer sentence that expands the node while editing";
+            const expandedWidth = node.offsetWidth;
+            check.ok(expandedWidth > before.width, "typing expands the editor before blur");
+            check.ok(expandedWidth <= 300, "editing respects the existing maximum width");
+            editable.textContent = "A";
+            check.ok(node.offsetWidth < expandedWidth, "deleting text shrinks the editor before blur");
             content.classList.remove("list-mindmap__editor", "protyle");
             content.style.minWidth = "";
             content.innerHTML = preview;

@@ -93,6 +93,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
                 return;
             }
             changed = true;
+            host.style.minWidth = originalMinWidth;
             options.onResize();
             if (saving) {
                 return;

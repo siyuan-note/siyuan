@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260913160005"
+		"updated": "20260918210804"
 	},
 	"Children": [
 		{
@@ -17862,6 +17862,38 @@
 			"Properties": {
 				"id": "20220902201142-hyb8kfm"
 			}
+		},
+		{
+			"ID": "20260918210804-v5fqgbn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260918210804-v5fqgbn",
+				"updated": "20260918210804"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "列表脑图中，节点选中且未编辑时，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 创建子节点，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 创建同级节点并编辑；虚拟根节点不创建同级节点，编辑状态保留编辑器的按键行为"
+				}
+			]
 		}
 	]
 }

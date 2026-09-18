@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260913160005"
+		"updated": "20260918210804"
 	},
 	"Children": [
 		{
@@ -17920,6 +17920,38 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260918210804-ba0cedp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260918210804-ba0cedp",
+				"updated": "20260918210804"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In a list mind map, when a node is selected but not being edited, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to create a child node or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to create and edit a sibling node. Virtual roots cannot have siblings; editing retains the editor's key behavior"
 				}
 			]
 		}

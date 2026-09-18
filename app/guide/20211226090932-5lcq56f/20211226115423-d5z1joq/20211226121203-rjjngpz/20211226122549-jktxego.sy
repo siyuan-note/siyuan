@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260913160005"
+		"updated": "20260918210804"
 	},
 	"Children": [
 		{
@@ -17925,6 +17925,38 @@
 			"Properties": {
 				"id": "20220902195830-i3ncplk"
 			}
+		},
+		{
+			"ID": "20260918210804-t0jvlna",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260918210804-t0jvlna",
+				"updated": "20260918210804"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "列表腦圖中，節點選中且未編輯時，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 建立子節點，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 建立同級節點並編輯；虛擬根節點不建立同級節點，編輯狀態保留編輯器的按鍵行為"
+				}
+			]
 		}
 	]
 }

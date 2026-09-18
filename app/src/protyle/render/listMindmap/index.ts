@@ -171,6 +171,9 @@ class ListMindmapController {
                 }
             },
             onEdit: (id, contentHost) => this.edit(id, contentHost),
+            onRootTitleChange: title => this.metadata(metadata => {
+                metadata.rootTitle = title;
+            }),
             onMove: (id, target, placement) => this.change(() => moveListMindmapNode(list, id, target, placement)),
             onAdd: async (id, kind) => {
                 const target = this.model.nodes.get(id);

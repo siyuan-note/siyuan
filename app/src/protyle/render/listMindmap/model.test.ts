@@ -85,7 +85,7 @@ test("layout rejects cyclic or invalid trees and supports deep nesting without r
 const browserCases = async (sourceCode: string, css: string) => {
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
-        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, remapListMindmapIDs, ListMindmapView};")(
+        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, remapListMindmapIDs, writeListMindmapMetadata, ListMindmapView};")(
         async (element: Element) => {
             const formulas = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
             await Promise.resolve();
@@ -490,6 +490,23 @@ const browserCases = async (sourceCode: string, css: string) => {
         sendPointer(nodeElement(id), "pointerdown", point.x, point.y);
         sendPointer(viewport, "pointerup", point.x, point.y);
     };
+    select(beta);
+    const beforeShortcuts = additions.length;
+    const originalEditable = host.parentElement.contentEditable;
+    host.parentElement.contentEditable = "true";
+    for (const key of ["Tab", "Enter"]) {
+        const event = new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true});
+        host.dispatchEvent(event);
+        check.equal(event.defaultPrevented, true, "nested mindmap handles keys instead of moving toolbar focus");
+    }
+    check.deepEqual(additions.slice(beforeShortcuts), [[beta, "child"], [beta, "sibling"]]);
+    view.setEditing(beta);
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Tab", bubbles: true}));
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    check.equal(additions.length, beforeShortcuts + 2, "editing does not create nodes via selection shortcuts");
+    view.setEditing();
+    additions.length = beforeShortcuts;
+    host.parentElement.contentEditable = originalEditable;
     const blank = () => {
         const rect = viewport.getBoundingClientRect();
         sendPointer(viewport, "pointerdown", rect.left + 5, rect.top + 5);
@@ -717,6 +734,40 @@ const browserCases = async (sourceCode: string, css: string) => {
     check.equal(list.outerHTML, persistedBeforeFold);
     readonly.destroy();
 
+    const titleView = new api.ListMindmapView({...options, onRootTitleChange: (title: string) => {
+        model.metadata.rootTitle = title;
+        api.writeListMindmapMetadata(list, model.metadata);
+        titleView.update(model);
+    }});
+    await settle();
+    const renameRoot = async (title: string, key: string) => {
+        const node = nodeElement(model.root.id);
+        const before = {width: node.offsetWidth, height: node.offsetHeight};
+        titleView.getContentHost(model.root.id).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+        const input = host.querySelector<HTMLTextAreaElement>(".list-mindmap__root-title");
+        check.ok(input, "virtual root supports inline title editing");
+        check.deepEqual({width: node.offsetWidth, height: node.offsetHeight}, before,
+            "entering root title editing preserves dimensions");
+        input.value = "A long root title that grows while typing";
+        input.dispatchEvent(new Event("input", {bubbles: true}));
+        await settle();
+        const expanded = node.offsetWidth;
+        input.value = "A";
+        input.dispatchEvent(new Event("input", {bubbles: true}));
+        await settle();
+        check.ok(node.offsetWidth < expanded, "root title resizes before leaving the editor");
+        input.value = title;
+        input.dispatchEvent(new KeyboardEvent("keydown", {key, bubbles: true}));
+    };
+    await renameRoot("Custom root", "Enter");
+    check.equal(api.readListMindmap(list).metadata.rootTitle, "Custom root");
+    check.equal(titleView.getContentHost(model.root.id).textContent, "Custom root");
+    await renameRoot("Canceled title", "Escape");
+    check.equal(titleView.getContentHost(model.root.id).textContent, "Custom root");
+    await renameRoot("", "Enter");
+    check.equal(titleView.getContentHost(model.root.id).textContent, "listMindmapRoot");
+    titleView.destroy();
+
     const singleList = reset("* Single\n");
     const single = new api.ListMindmapView({...options, model: api.readListMindmap(singleList)});
     const emptyModel = api.readListMindmap(singleList);
@@ -728,6 +779,23 @@ const browserCases = async (sourceCode: string, css: string) => {
     check.equal(emptyContent.classList.contains("list-mindmap__content--empty"), true);
     check.equal(emptyContent.dataset.placeholder, "listMindmapPlaceholder");
     check.equal(emptyContent.textContent, "", "placeholder is not node content");
+    emptyBlock.innerHTML = '<div spellcheck="false">First\n\n\nLast</div>';
+    single.update(emptyModel);
+    await settle();
+    const textPreview = emptyContent.querySelector<HTMLElement>(".list-mindmap__text");
+    const lineHeight = parseFloat(getComputedStyle(textPreview).lineHeight);
+    check.ok(textPreview.offsetHeight >= lineHeight * 4, "consecutive soft breaks retain blank lines");
+    emptyBlock.innerHTML = '<div spellcheck="false">\n\n</div>';
+    single.update(emptyModel);
+    await settle();
+    check.equal(emptyContent.classList.contains("list-mindmap__content--empty"), false);
+    check.ok(emptyContent.offsetHeight >= lineHeight * 3, "blank-only and trailing lines remain visible");
+    emptyBlock.innerHTML = '<div spellcheck="false"></div>';
+    emptyModel.root.contentBlocks = [emptyBlock, emptyBlock.cloneNode(true), emptyBlock.cloneNode(true)];
+    single.update(emptyModel);
+    await settle();
+    check.ok(emptyContent.offsetHeight >= lineHeight * 3, "empty paragraphs retain individual line height");
+    emptyModel.root.contentBlocks = [emptyBlock];
     emptyBlock.innerHTML = '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">';
     single.update(emptyModel);
     check.equal(emptyContent.classList.contains("list-mindmap__content--empty"), false);

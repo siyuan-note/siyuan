@@ -13,18 +13,13 @@ const setup = () => {
     const s3 = {endpoint: "", accessKey: "", secretKey: "", bucket: "", region: "", timeout: 30,
         pathStyle: true, skipTlsVerify: false, concurrentReqs: 4};
     const sync = {provider: 2, s3};
-    let focused = "";
     const inputs = Object.fromEntries(Object.keys(s3).map((key) => [key, {
-        value: "", focus: () => { focused = key; },
+        value: "",
     }]));
     const messages: string[] = [];
-    const clicks: Record<string, () => void> = {};
-    const button = {disabled: false, addEventListener: (name: string, callback: () => void) => {
-        clicks[name] = callback;
-    }};
     const events: Record<string, (event: unknown) => void> = {};
     const element = {
-        querySelector: (selector: string) => selector === "#saveSyncConfig" ? button : inputs[selector.slice(1)] || null,
+        querySelector: (selector: string) => inputs[selector.slice(1)] || null,
         addEventListener: (name: string, callback: (event: unknown) => void) => { events[name] = callback; },
     };
     const requests: {data: {s3: typeof s3}, resolve: (response: unknown) => void, reject: (error: Error) => void}[] = [];
@@ -54,52 +49,55 @@ const setup = () => {
             events.change({target: {matches: () => true}});
         }
     };
-    return {sync, inputs, button, requests, messages, fill, save: () => clicks.click(), focused: () => focused};
+    return {sync, inputs, requests, messages, fill, change: () => events.change({target: {matches: () => true}})};
 };
 
 const settle = () => new Promise<void>((resolve) => setImmediate(resolve));
 
-test("S3 fields remain editable until explicit save and missing fields are identified", () => {
+test("S3 configuration saves automatically once required fields are complete", async () => {
     const ui = setup();
-    ui.save();
-    assert.equal(ui.focused(), "endpoint");
-    assert.match(ui.messages[0], /Endpoint: Input can not be empty/);
+    ui.change();
+    await settle();
+    assert.equal(ui.messages.length, 0);
     assert.equal(ui.requests.length, 0);
     ui.fill();
-    assert.equal(ui.requests.length, 0);
-    ui.save();
-    ui.save();
+    await settle();
     assert.equal(ui.requests.length, 1);
     assert.equal(ui.requests[0].data.s3.region, "region");
-    assert.equal(ui.button.disabled, true);
 });
 
 test("failed S3 saves retain all inputs and allow retry", async () => {
     const ui = setup();
     ui.fill();
-    ui.save();
+    await settle();
     ui.requests[0].resolve({code: -1});
     await settle();
     assert.equal(ui.inputs.endpoint.value, " storage.example.com ");
     assert.equal(ui.inputs.secretKey.value, "secretKey");
     assert.equal(ui.sync.s3.endpoint, "");
-    assert.equal(ui.button.disabled, false);
-    ui.save();
+    ui.change();
+    await settle();
     ui.requests[1].reject(new Error("network"));
     await settle();
     assert.equal(ui.inputs.endpoint.value, " storage.example.com ");
-    assert.equal(ui.button.disabled, false);
 });
 
 test("successful S3 saves normalize unchanged fields and preserve edits made while saving", async () => {
     const ui = setup();
     ui.fill();
-    ui.save();
+    await settle();
     ui.inputs.bucket.value = "another-bucket";
+    ui.change();
+    await settle();
+    assert.equal(ui.requests.length, 1);
     ui.requests[0].resolve({code: 0, data: {s3: {...ui.requests[0].data.s3, endpoint: "https://storage.example.com"}}});
     await settle();
     assert.equal(ui.inputs.endpoint.value, "https://storage.example.com");
     assert.equal(ui.inputs.bucket.value, "another-bucket");
     assert.equal(ui.sync.s3.bucket, "bucket");
-    assert.equal(ui.button.disabled, false);
+    assert.equal(ui.requests.length, 2);
+    assert.equal(ui.requests[1].data.s3.bucket, "another-bucket");
+    ui.requests[1].resolve({code: 0, data: {s3: ui.requests[1].data.s3}});
+    await settle();
+    assert.equal(ui.sync.s3.bucket, "another-bucket");
 });

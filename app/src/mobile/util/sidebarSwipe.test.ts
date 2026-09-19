@@ -181,4 +181,18 @@ for (const side of ["left", "right"] as const) {
         harness.end(nextX);
         assert.deepEqual(harness.actions, ["restore", "restore", `next:${side}`]);
     });
+
+    test(`${side} sidebar closes only on a fresh gesture after content reaches its horizontal edge`, () => {
+        const harness = createTouchHarness(side, {scrollable: true});
+        harness.start();
+        harness.move(closeX);
+        harness.target.scrollLeft = side === "left" ? 300 : 0;
+        harness.move(closeX);
+        harness.end(closeX);
+        assert.deepEqual(harness.actions, ["restore"]);
+        harness.start();
+        harness.move(closeX);
+        harness.end(closeX);
+        assert.deepEqual(harness.actions, ["restore", "close"]);
+    });
 }

@@ -1,6 +1,7 @@
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
+import {captureCompositionText} from "./compositionCaret";
 import {
     beforePaste,
     convertPastedListItemSubtype,
@@ -105,6 +106,7 @@ import {
     getTextSiyuanFromTextHTML,
     isInAndroid,
     isInIOS,
+    isIOSDevice,
     isAndroid,
     isIPhone,
     isMac,
@@ -4018,7 +4020,9 @@ export class WYSIWYG {
             }
         });
         // 记录组合开始时的光标位置，用于取消组合后恢复光标（输入法删空候选词会导致浏览器移动光标）
-        let compositionRange: { range: Range } | { cell: HTMLElement; offset: number };
+        let compositionRange: ({ range: Range } | { cell: HTMLElement; offset: number }) & {
+            hasRetainedText?: (range: Range) => boolean;
+        };
         let crossBlockComposition: ICrossBlockComposition;
         const isAfterInlineMath = (range: Range) => {
             let previousNode: Node;
@@ -4051,13 +4055,16 @@ export class WYSIWYG {
             }
             if (nodeElement) {
                 const startCell = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
+                const hasRetainedText = isIOSDevice() ? captureCompositionText(
+                    startCell || getContenteditableElement(nodeElement, range.startContainer), range) : undefined;
                 if (startCell && !isAfterInlineMath(range)) {
                     compositionRange = {
                         cell: startCell as HTMLElement,
                         offset: getSelectionOffset(startCell, nodeElement, range).start,
+                        hasRetainedText,
                     };
                 } else {
-                    compositionRange = {range: range.cloneRange()};
+                    compositionRange = {range: range.cloneRange(), hasRetainedText};
                 }
             } else {
                 compositionRange = undefined;
@@ -4113,6 +4120,7 @@ export class WYSIWYG {
                 return;
             }
             if ("" !== event.data) {
+                compositionRange = undefined;
                 this.escapeInline(protyle, range, event);
                 // 小鹤音形 ;k 不能使用 setTimeout;
                 // wysiwyg.element contenteditable 为 false 时，连拼 needRender 必须为 false
@@ -4125,7 +4133,8 @@ export class WYSIWYG {
                     updateTransaction(protyle, blockElement, protyle.wysiwyg.lastHTMLs[id]);
                 }
                 // https://github.com/siyuan-note/siyuan/issues/17584
-                if (compositionRange) {
+                // iOS 的空结束事件若保留了输入文字及其末尾光标，不再恢复到输入前的位置。
+                if (compositionRange && !compositionRange.hasRetainedText?.(range)) {
                     if ("range" in compositionRange) {
                         // https://github.com/siyuan-note/siyuan/issues/14667
                         if (this.element.contains(compositionRange.range.startContainer)) {

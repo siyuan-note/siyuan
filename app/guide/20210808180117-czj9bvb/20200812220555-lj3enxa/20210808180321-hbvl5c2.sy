@@ -7,7 +7,7 @@
 		"id": "20210808180321-hbvl5c2",
 		"title": "通用操作",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20260919112418"
 	},
 	"Children": [
 		{
@@ -483,6 +483,81 @@
 					"TextMarkBlockRefID": "20260614104254-4ifhixg",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "网络代理"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-ml7zduv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260919112418-ml7zduv",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "复制文档树"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-snrcycl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260919112418-snrcycl",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在文档树中单选一个含有子文档的文档，选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "复制"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "带子文档复制为副本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可在原父目录下创建当前文档及全部后代的副本，保留层级、子文档名称和自定义顺序。仅副本根文档添加副本后缀，自动排序仍遵循所选排序方式。"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-gpzx1f7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260919112418-gpzx1f7",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "副本正文中的块引用、块超链接和查询嵌入中的显式块 ID，若目标位于本次复制范围内，则指向对应副本；范围外的目标保持不变。资源文件继续共享，复制出的块不继承数据库行绑定和闪卡归属。"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-8epsvu2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260919112418-8epsvu2",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数据库块仍是原数据库的镜像，共享数据和既有行绑定。在副本中编辑绑定行，可能修改原文档。本操作不会创建独立的数据库归档。"
 				}
 			]
 		}

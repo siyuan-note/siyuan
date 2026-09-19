@@ -801,6 +801,14 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                         id
                     });
                 }
+            }, {
+                id: "duplicateTree",
+                iconHTML: "",
+                label: window.siyuan.languages.duplicateDocTree,
+                ignore: !(Number(liElement.getAttribute("data-count")) > 0),
+                click() {
+                    fetchPost("/api/filetree/duplicateDocTree", {id});
+                }
             }])
         }).element);
         const selectedItems = Array.from(fileElement.querySelectorAll(".b3-list-item--focus"));

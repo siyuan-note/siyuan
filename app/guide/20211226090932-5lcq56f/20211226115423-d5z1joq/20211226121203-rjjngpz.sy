@@ -7,7 +7,7 @@
 		"id": "20211226121203-rjjngpz",
 		"title": "通用作業",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20260919112418"
 	},
 	"Children": [
 		{
@@ -483,6 +483,81 @@
 					"TextMarkBlockRefID": "20260614104322-shrqj15",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "網路代理"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-2bkxzxt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260919112418-2bkxzxt",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "複製文件樹"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-l42op2n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260919112418-l42op2n",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在文件樹中單選一個含有子文件的文件，選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "複製"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "連同子文件複製為副本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可在原父目錄下建立目前文件及所有後代的副本，保留層級、子文件名稱和自訂順序。僅副本根文件加上副本後綴，自動排序仍遵循所選排序方式。"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-qb8chp0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260919112418-qb8chp0",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "副本內文中的區塊引用、區塊超連結和查詢嵌入中的明確區塊 ID，若目標位於本次複製範圍內，則指向對應副本；範圍外的目標保持不變。資源檔案繼續共用，複製出的區塊不繼承資料庫列綁定和閃卡歸屬。"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-a1e6jpm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260919112418-a1e6jpm",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "資料庫區塊仍是原資料庫的鏡像，共用資料和既有列綁定。在副本中編輯綁定列，可能修改原文件。本操作不會建立獨立的資料庫封存副本。"
 				}
 			]
 		}

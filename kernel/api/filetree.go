@@ -708,6 +708,19 @@ func renameDocByIDContract(c *gin.Context, request apicontract.FileTreeRenameIDR
 
 var duplicateDoc = contractHandler(apicontract.DuplicateDoc, duplicateDocContract)
 
+var duplicateDocTree = contractHandler(apicontract.DuplicateDocTree, duplicateDocTreeContract)
+
+func duplicateDocTreeContract(c *gin.Context, request apicontract.FileTreeIDRequest) apicontract.Response[apicontract.FileTreeDuplicateData] {
+	if err := holdEncryptedBlockRequests(c, "", []string{request.ID}, false); err != nil {
+		return apicontract.FailureWithTimeout[apicontract.FileTreeDuplicateData](-1, err.Error(), 7000)
+	}
+	tree, err := model.DuplicateDocTree(request.ID)
+	if err != nil {
+		return apicontract.FailureWithTimeout[apicontract.FileTreeDuplicateData](-1, err.Error(), 7000)
+	}
+	return apicontract.Success(apicontract.FileTreeDuplicateData{ID: tree.ID, Notebook: tree.Box, Path: tree.Path, HPath: tree.HPath})
+}
+
 func duplicateDocContract(c *gin.Context, request apicontract.FileTreeIDRequest) apicontract.Response[apicontract.FileTreeDuplicateData] {
 	ret := gulu.Ret.NewResult()
 

@@ -38,6 +38,16 @@ import {
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
+test("document tree duplication follows single-document duplication in the configurable menu", () => {
+    const children = getEntryCatalogChildren("docTree.document.copy");
+    assert.deepEqual(children.slice(-2).map(item => item.key), ["duplicate", "duplicateTree"]);
+    const entry = getEntryCatalogNode("docTree.document.copy.duplicateTree");
+    assert.equal(entry.type, "entry");
+    assert.equal(entry.simple, true);
+    assert.equal(getEntryParentPath("docTree.document.copy.duplicateTree"), "docTree.document.copy");
+    assert.equal(getEntryCatalogNode("docTree.multi.copy.duplicateTree"), undefined);
+});
+
 test("embedded heading levels follow display modes and expose all levels in Simple", () => {
     const path = "gutter.single.blockEmbed";
     assert.deepEqual(getEntryCatalogChildren(path).map(entry => entry.key), [

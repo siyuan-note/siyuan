@@ -764,6 +764,7 @@ var RemoveDocs = define[FileTreePathsRequest, Null]("removeDocs", "/api/filetree
 var RenameDoc = define[FileTreeRenameRequest, Null]("renameDoc", "/api/filetree/renameDoc", JSONBody, ResponseOptions{}, "POST")
 var RenameDocByID = define[FileTreeRenameIDRequest, Null]("renameDocByID", "/api/filetree/renameDocByID", JSONBody, ResponseOptions{}, "POST")
 var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDoc", "/api/filetree/duplicateDoc", JSONBody, ResponseOptions{}, "POST")
+var DuplicateDocTree = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDocTree", "/api/filetree/duplicateDocTree", JSONBody, ResponseOptions{}, "POST")
 var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", JSONBody, ResponseOptions{}, "POST")
 var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var CreateDocWithMd = define[FileTreeCreateMarkdownRequest, string]("createDocWithMd", "/api/filetree/createDocWithMd", JSONBody, ResponseOptions{}, "POST")

@@ -156,6 +156,8 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 
 ## 生成与验证
 
+`POST /api/filetree/duplicateDocTree` 将单篇文档及全部子文档复制到同一笔记本的原父目录。请求为文档 `id`，返回副本根文档的 `id`、`notebook`、`path` 和 `hPath`；原有单文档复制接口保持不变。副本中的内部块引用、块链接和查询嵌入的显式块 ID 统一重映射，数据库定义与行绑定保持为共享镜像。源快照经过认证读取，不执行修复写回；运行期间检测到失败时清理新建文档并恢复排序。这是运行时补偿，不保证进程崩溃时的事务原子性。`TestDuplicateDocTree*` 覆盖层级、排序、引用、富文本单元格、镜像、无效源及回滚；`TestAPIContractDuplicateDocTree*` 覆盖实际响应、授权、加密源数据保留、认证失败、锁定与解锁及响应租约。测试已纳入内核全量持续集成命令，可使用 `go test -tags "fts5 sqlcipher" ./model ./api -run 'Test(DuplicateDocTree|APIContractDuplicateDocTree)' -count=1` 和 `go test ./apicontract/...` 单独验证。
+
 HTML 剪贴板转换保留字面反斜杠和标记字符，并在关闭 Markdown 语法时保留 HTML 格式。`TestHTML2BlockDOMContractEscapedText` 覆盖两种源格式模式、实际响应模式校验、编辑往返、HTML 实体以及样式和链接边界。可使用 `go test -tags "fts5 sqlcipher" ./api ./model -run 'Test(.*HTML.*|.*Clipboard.*|.*IFrame.*|SpinBlockDOM.*|WPSPresentation.*|NormalizeMSWord.*|NormalizeWPS.*)' -count=1` 运行相关转换回归。下方内核全量命令已包含这些测试，`app/tests/luteHtmlEscapes.test.js` 通过前端全量测试检查生成的 Lute JavaScript。修改 Lute 源码后，还需在 Lute 仓库运行 `go test ./...` 并重新生成内置 JavaScript。
 
 自定义块搜索使用可选的 `customBlock` 类型筛选字段。API 显式传入类型映射时仅搜索其中启用的类型；省略类型映射时使用搜索设置，默认启用自定义块。保存的搜索条件区分字段缺失与 `false`，使旧版前端搜索配置能够继承设置。`TestCustomBlockSearch` 回归覆盖配置兼容、搜索条件保存、类型筛选和全文索引更新；`TestAPIContractSettingConfigCompatibility` 与 `TestAPIContractSettingCompletePayloads` 覆盖设置契约，均包含在下方完整内核测试命令中。

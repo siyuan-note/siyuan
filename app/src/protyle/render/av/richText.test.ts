@@ -550,13 +550,17 @@ describe("attribute view text value creation", () => {
 });
 
 describe("attribute view rich text DOM policy", () => {
-    it("preserves leading, consecutive and trailing empty paragraphs across saves", {
+    it("canonicalizes a single empty paragraph and preserves structural empty paragraphs", {
         skip: hasDOM && typeof Lute !== "undefined" ? false :
             "The Node test environment does not provide DOM and Lute globals",
     }, async () => {
         Object.assign(globalThis, {NODE_ENV: "test", SIYUAN_VERSION: "test"});
         const richText = await import("./richText");
-        for (const paragraphs of [[""], ["", ""], ["", "first", "", "", "last", ""]]) {
+        const empty = richText.serializeAVRichTextBlockDOM(
+            '<div data-type="NodeParagraph"><div contenteditable="true"></div></div>'
+        );
+        assert.deepEqual(empty, {blockDOM: "", markdown: "", plainText: ""});
+        for (const paragraphs of [["", ""], ["", "first", "", "", "last", ""]]) {
             let dom = paragraphs.map(content => '<div data-type="NodeParagraph">' +
                 `<div contenteditable="true">${content}</div></div>`).join("");
             let previous: string;

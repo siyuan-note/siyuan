@@ -30,6 +30,7 @@ import (
 func TestWatchThemesCurrentThemeOnly(t *testing.T) {
 	originalConf, originalThemesPath := Conf, util.ThemesPath
 	originalAppearancePath, originalMode := util.AppearancePath, util.Mode
+	CloseWatchThemes()
 	t.Cleanup(func() {
 		CloseWatchThemes()
 		Conf = originalConf

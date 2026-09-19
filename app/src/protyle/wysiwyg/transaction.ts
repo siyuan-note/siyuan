@@ -142,6 +142,17 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     }
 };
 
+const canSyncListFoldInPlace = (embedElement: Element, operation: Extract<IOperation, {action: "setAttrs"}>) => {
+    const attrs = JSON.parse(operation.data);
+    if (Object.keys(attrs).length !== 1 || !Object.prototype.hasOwnProperty.call(attrs, "fold")) {
+        return false;
+    }
+    const items = Array.from(embedElement.querySelectorAll(`[data-node-id="${operation.id}"]`));
+    // 列表子块已在 DOM 中时只同步折叠属性，展开缺少子块的片段仍需重新查询。
+    return items.length > 0 && items.every(item => item.getAttribute("data-type") === "NodeListItem" &&
+        (attrs.fold === "1" || item.childElementCount > 3));
+};
+
 const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>) => {
     const attrs = JSON.parse(operation.data);
     const hasFold = Object.prototype.hasOwnProperty.call(attrs, "fold");
@@ -531,9 +542,9 @@ const promiseTransaction = (options: {
                 if (gutterFoldElement) {
                     gutterFoldElement.removeAttribute("disabled");
                 }
-                // 仅在 alt+click 箭头折叠时才会触发
+                // 就地同步列表折叠，保留嵌入内容中的光标节点和布局。
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-                    if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
+                    if (item.querySelector(`[data-node-id="${operation.id}"]`) && !canSyncListFoldInPlace(item, operation)) {
                         pendingEmbedElements.add(item);
                     }
                 });

@@ -30,6 +30,16 @@ const rendererSource = () => {
         assert.equal(matches.length, 1, file);
         return matches[0];
     };
+    const editorSource = readFileSync(path.join(__dirname, "../src/protyle/wysiwyg/index.ts"), "utf8");
+    const foldStart = editorSource.indexOf('            const actionElement = hasClosestByClassName(event.target, "protyle-action");');
+    const foldEnd = editorSource.indexOf("            const range = getEditorRange(this.element);", foldStart);
+    assert.ok(foldStart >= 0 && foldEnd > foldStart);
+    const foldClick = editorSource.slice(foldStart, foldEnd);
+    const embedStart = editorSource.indexOf('            const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");');
+    const embedEnd = editorSource.indexOf("            if (commonClick(event, protyle))", embedStart);
+    assert.ok(embedStart >= 0 && embedEnd > embedStart);
+    const embedClick = editorSource.slice(embedStart, embedEnd)
+        .replace(/\/\/\/ #if MOBILE[\s\S]*?\/\/\/ #else/g, "");
     // 使用实际删除、折叠和选区代码，只替代网络提交及无关的渲染副作用。
     const source = `
         const Constants = {ZWSP: "\\u200b", ATTRIBUTE_EDITING: "data-editing"};
@@ -59,12 +69,35 @@ const rendererSource = () => {
         extract("wysiwyg/verticalVisibility", ["getFoldedNavigationOwner"]) +
         extract("wysiwyg/remove", ["getOperationParentID", "removeBlock"]) +
         extract("util/blockFold", ["applyFoldState", "toggleListFold"]) + `
+        ${extract("wysiwyg/transaction", ["canSyncListFoldInPlace", "syncBlockAttrs"])}
+        export const syncEmbeddedAttrs = (protyle, operation) => {
+            const pendingEmbedElements = new Set();
+            ${extractClick("wysiwyg/transaction", condition => condition === 'operation.action === "setAttrs"', "pendingEmbedElements.add(item)")}
+            return pendingEmbedElements;
+        };
+        ${extract("wysiwyg/listContext", ["isListItemActionElement", "shouldFoldEmbeddedListByAlt"])}
+        export const embeddedMouseDown = (protyle, event) => {
+            const target = event.target;
+            if (shouldFoldEmbeddedListByAlt(event, protyle.disabled, hasClosestByClassName(target, "protyle-action")))
+                ${extractClick("wysiwyg/index", condition => condition.includes("shouldFoldEmbeddedListByAlt") && condition.includes("hasClosestByClassName(target"), "event.preventDefault()")}
+        };
         export const clickGutter = (protyle, foldElement, buttonElement) => ${extractClick("gutter/index",
         condition => condition.includes('buttonElement.getAttribute("data-type") === "NodeListItem"'))};
         export const clickArrow = (protyle, foldElement, buttonElement) => ${extractClick("gutter/index",
         condition => condition === "event.altKey", 'toggleListFold(protyle, foldElement, "children")')};
         export const clickDot = (protyle, actionElement) => ${extractClick("wysiwyg/index",
         condition => condition === "event.altKey && !protyle.disabled")};
+        export const clickEmbed = (protyle, event) => {
+            const ctrlIsPressed = event.ctrlKey || event.metaKey;
+            const checkFold = (id, callback) => callback(false, []);
+            const openFileById = options => protyle.opened.push(options);
+            ${foldClick}
+            protyle.rangeReads = (protyle.rangeReads || 0) + 1;
+            ${embedClick}
+            if (event.altKey && !protyle.disabled && actionElement && actionElement.parentElement.classList.contains("li")) {
+                clickDot(protyle, actionElement);
+            }
+        };
     `;
     return ts.transpileModule(source, {compilerOptions: {
         target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS,
@@ -73,7 +106,7 @@ const rendererSource = () => {
 
 const runCases = async () => {
     const assert = require("node:assert/strict");
-    const {removeBlock, toggleListFold, clickGutter, clickArrow, clickDot,
+    const {removeBlock, toggleListFold, clickGutter, clickArrow, clickDot, clickEmbed, embeddedMouseDown, syncEmbeddedAttrs,
         focusByRange, getContenteditableElement} = window.listFoldRemoval;
     const ids = new Map();
     const nodeID = name => {
@@ -204,6 +237,85 @@ const runCases = async () => {
             cases++;
         }
     }
+    for (const marker of ["bullet", "number", "task"]) {
+        const embeddedList = list("embedded-list", item("embedded-leaf", "leaf") +
+            item("embedded-parent", "parent", list("embedded-children", item("embedded-child", "child"))));
+        const {protyle} = setup(list("source-list", item("source-parent", "source", paragraph("source-child", "child"))) +
+            `<div data-type="NodeBlockQueryEmbed" data-node-id="${nodeID("embed")}">
+                <div class="protyle-wysiwyg__embed" data-id="${nodeID("embedded-list")}">${embeddedList}${paragraph("embedded-after", "after")}</div>
+                <div class="protyle-wysiwyg__embed" data-id="${nodeID("other-result")}">
+                    ${list("other-result", item("other-parent", "other", paragraph("other-child", "child")))}
+                </div>
+            </div>`);
+        protyle.opened = [];
+        protyle.gutter = {element: document.createElement("div")};
+        const action = byID("embedded-leaf").firstElementChild;
+        action.innerHTML = "<span>marker</span>";
+        if (marker === "task") {
+            action.classList.add("protyle-action--task");
+        }
+        byID("embedded-list").setAttribute("data-subtype", marker === "number" ? "o" : marker === "task" ? "t" : "u");
+        const click = (target, modifiers = {}) => clickEmbed(protyle, {
+            target, button: 0, altKey: true, shiftKey: false, ctrlKey: false, metaKey: false,
+            stopPropagation() {}, preventDefault() {}, ...modifiers,
+        });
+        const caret = byID("embedded-after").querySelector('[contenteditable="true"]').firstChild;
+        getSelection().collapse(caret, 2);
+        const mouseDown = new MouseEvent("mousedown", {button: 0, altKey: true, bubbles: true, cancelable: true});
+        action.addEventListener("mousedown", event => embeddedMouseDown(protyle, event), {once: true});
+        action.firstElementChild.dispatchEvent(mouseDown);
+        assert.equal(mouseDown.defaultPrevented, true, "folding must suppress native caret placement");
+        click(action.firstElementChild);
+        assert.equal(getSelection().anchorNode, caret);
+        assert.equal(getSelection().anchorOffset, 2);
+        assert.equal(protyle.rangeReads || 0, 0, "folding must run before editor range fallback");
+        assert.equal(protyle.opened.length, 0, "Alt-clicking embedded markers must not open a split");
+        assert.equal(byID("embedded-parent").getAttribute("fold"), "1");
+        assert.equal(byID("embedded-leaf").hasAttribute("fold"), false);
+        assert.equal(byID("source-parent").hasAttribute("fold"), false);
+        assert.equal(byID("other-parent").hasAttribute("fold"), false);
+        assert.deepEqual(protyle.transactions[0].doOperations.map(operation => operation.id), [nodeID("embedded-parent")]);
+        const listBeforeSync = byID("embedded-list");
+        for (const operations of [protyle.transactions[0].doOperations,
+            protyle.transactions[0].undoOperations, protyle.transactions[0].doOperations]) {
+            operations.forEach(operation => {
+                assert.equal(syncEmbeddedAttrs(protyle, operation).size, 0,
+                    "list folding must not schedule a full embed reload after the transaction");
+            });
+            assert.equal(byID("embedded-list"), listBeforeSync);
+            assert.equal(getSelection().anchorNode, caret);
+            assert.equal(getSelection().anchorOffset, 2);
+        }
+        assert.equal(syncEmbeddedAttrs(protyle, {
+            action: "setAttrs", id: nodeID("embedded-parent"), data: JSON.stringify({fold: "1", name: "named"}),
+        }).size, 1, "other attributes must retain embed refresh behavior");
+        assert.equal(syncEmbeddedAttrs(protyle, {
+            action: "setAttrs", id: nodeID("embedded-leaf"), data: JSON.stringify({fold: ""}),
+        }).size, 1, "expanding fragments without loaded children must still query their content");
+        applyOperations(protyle.transactions[0].undoOperations);
+        assert.equal(byID("embedded-parent").hasAttribute("fold"), false);
+        applyOperations(protyle.transactions[0].doOperations);
+        click(action);
+        assert.equal(byID("embedded-parent").hasAttribute("fold"), false);
+        getSelection().removeAllRanges();
+        click(action);
+        assert.equal(getSelection().rangeCount, 0, "folding without a caret must not focus the document start");
+        assert.equal(protyle.rangeReads || 0, 0);
+        const count = protyle.transactions.length;
+        const embedResult = action.closest(".protyle-wysiwyg__embed");
+        click(embedResult);
+        click(byID("embedded-leaf-text"));
+        click(action, {altKey: false, shiftKey: true});
+        click(action, {shiftKey: true});
+        click(action, {altKey: false, ctrlKey: true});
+        click(action, {altKey: false, metaKey: true});
+        protyle.disabled = true;
+        click(action);
+        assert.deepEqual(protyle.opened.map(options => options.position),
+            ["right", "right", "bottom", "bottom", undefined, undefined, "right"]);
+        assert.equal(protyle.transactions.length, count, "navigation and read-only clicks must not fold source blocks");
+        cases++;
+    }
     return cases;
 };
 
@@ -263,7 +375,7 @@ if (process.versions.electron && process.type === "browser") {
             const {stdout} = await promisify(execFile)(require("electron"), [__filename, profile], {
                 env, windowsHide: true, timeout: 40000,
             });
-            assert.match(stdout, /10 Electron cases passed/);
+            assert.match(stdout, /13 Electron cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-list-fold-"));

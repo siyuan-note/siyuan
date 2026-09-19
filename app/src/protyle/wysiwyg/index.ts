@@ -219,7 +219,7 @@ import {
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
 import {bindTouchBlockDragSelect} from "./touchBlockDragSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
-import {shouldOpenListItemAttr} from "./listContext";
+import {shouldFoldEmbeddedListByAlt, shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
 import {LargeListVirtualizer} from "./listVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
@@ -1167,6 +1167,11 @@ export class WYSIWYG {
             const documentSelf = document;
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
+            if (shouldFoldEmbeddedListByAlt(event, protyle.disabled, hasClosestByClassName(target, "protyle-action"))) {
+                // 折叠控件不改变选区，避免浏览器把光标放到嵌入块前方。
+                event.preventDefault();
+                return;
+            }
             if (event.button === 0 && !event.shiftKey && !event.ctrlKey && !event.metaKey &&
                 !event.altKey && !protyle.disabled) {
                 repairHiddenTabSelection(this.element, target);
@@ -4616,6 +4621,15 @@ export class WYSIWYG {
             if (hasClosestByClassName(event.target, "av__views") && avClick(protyle, event)) {
                 return;
             }
+            const actionElement = hasClosestByClassName(event.target, "protyle-action");
+            if (actionElement && shouldFoldEmbeddedListByAlt(event, protyle.disabled, actionElement)) {
+                // 在读取编辑器选区前处理折叠，避免无选区时兜底聚焦文档顶部。
+                toggleListFold(protyle, actionElement.parentElement.parentElement);
+                hideElements(["gutter"], protyle);
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             const range = getEditorRange(this.element);
             const resumeBlockHint = !protyle.hint.element.classList.contains("fn__none") &&
                 Constants.BLOCK_HINT_KEYS.includes(protyle.hint.splitChar);
@@ -4987,7 +5001,6 @@ export class WYSIWYG {
                 return;
             }
 
-            const actionElement = hasClosestByClassName(event.target, "protyle-action");
             if (actionElement) {
                 const type = actionElement.parentElement.parentElement.getAttribute("data-type");
                 if (type === "img" && !protyle.disabled) {

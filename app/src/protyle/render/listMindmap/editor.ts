@@ -251,7 +251,14 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
             event.preventDefault();
             event.stopImmediatePropagation();
-            finish();
+            const mindmap = host.closest<HTMLElement>(".list-mindmap");
+            void finish().then(finished => {
+                // 退出节点编辑后将键盘焦点交回脑图，保留已选节点的快捷键操作。
+                if (finished && mindmap?.isConnected &&
+                    (document.activeElement === document.body || mindmap.contains(document.activeElement))) {
+                    mindmap.focus({preventScroll: true});
+                }
+            });
         }
     }, {capture: true, signal});
     host.addEventListener("compositionstart", () => {

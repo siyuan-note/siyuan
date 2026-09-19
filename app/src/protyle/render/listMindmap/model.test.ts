@@ -255,6 +255,33 @@ const browserCases = async (sourceCode: string, css: string) => {
     list.appendChild(document.createComment("list-mindmap"));
     list.appendChild(document.createComment("unrelated list-mindmap comment"));
     const cleaned = api.cleanListMindmapHTML(list.outerHTML);
+    // 列表转换只接收源块，脑图工具栏、画布和节点预览不能传给 Lute。
+    for (const [markdown, conversions] of [
+        ["* Alpha\n* Beta\n", [["UL2OL", "o"], ["UL2TL", "t"]]],
+        ["1. Alpha\n2. Beta\n", [["OL2UL", "u"], ["OL2TL", "t"]]],
+        ["* [ ] Alpha\n* [x] Beta\n", [["TL2UL", "u"], ["TL2OL", "o"]]],
+    ] as [string, [string, string][]][]) {
+        const source = document.createElement("div");
+        source.innerHTML = lute.Md2BlockDOM(markdown);
+        const sourceList = source.firstElementChild;
+        sourceList.setAttribute("custom-sy-list-mindmap", "1");
+        sourceList.setAttribute("data-list-mindmap-rendered", "true");
+        const metadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: "Example"});
+        sourceList.setAttribute("custom-sy-list-mindmap-data", metadata);
+        sourceList.prepend(derived.cloneNode(true));
+        for (const [conversion, subtype] of conversions) {
+            const converted = document.createElement("div");
+            converted.innerHTML = (lute as any)[conversion](api.cleanListMindmapHTML(sourceList.outerHTML));
+            const result = converted.firstElementChild;
+            check.equal(result.getAttribute("data-subtype"), subtype);
+            check.equal(result.getAttribute("data-node-id"), sourceList.getAttribute("data-node-id"));
+            check.equal(result.getAttribute("custom-sy-list-mindmap"), "1");
+            check.equal(result.getAttribute("custom-sy-list-mindmap-data"), metadata);
+            check.equal(result.querySelector(".list-mindmap"), null);
+            check.equal(result.hasAttribute("data-list-mindmap-rendered"), false);
+            check.ok(result.textContent.includes("Alpha") && result.textContent.includes("Beta"));
+        }
+    }
     check.equal(cleaned.includes("Derived editor"), false);
     check.equal(cleaned.includes("data-list-mindmap-rendered"), false);
     check.equal(cleaned.includes("data-list-mindmap-editing"), false);

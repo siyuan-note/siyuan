@@ -249,6 +249,22 @@ const browserCases = async (sourceCode: string, css: string) => {
     check.equal(current.state.destroyed, 1);
     await current.remove();
 
+    // Esc 成功保存后恢复脑图焦点；保存失败时仍留在节点编辑器。
+    for (const accept of [false, true]) {
+        current = create();
+        current.container.className = "list-mindmap";
+        current.container.tabIndex = -1;
+        current.host.tabIndex = -1;
+        current.host.focus();
+        current.state.accept = accept;
+        await current.type("Escape content");
+        current.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+        await until(() => accept ? current.state.finished === 1 : current.state.saves.length === 1);
+        await settle();
+        check.equal(document.activeElement, accept ? current.container : current.host);
+        await current.remove();
+    }
+
     // 使用完整样式和外层文档结构，覆盖嵌套编辑器的最小高度及行高继承。
     const style = document.createElement("style");
     style.textContent = css;

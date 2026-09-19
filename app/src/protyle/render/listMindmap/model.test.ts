@@ -807,6 +807,27 @@ const browserCases = async (sourceCode: string, css: string) => {
     model.metadata.relations = savedRelations;
     view.update(model);
 
+    // 打印收紧画布高度，结束打印后恢复屏幕上的缩放和平移。
+    await settle();
+    const screenTransform = [view.scale, view.offsetX, view.offsetY];
+    const screenHeight = host.offsetHeight;
+    await require("electron").ipcRenderer.invoke("list-mindmap-print-media", "print");
+    window.dispatchEvent(new Event("beforeprint"));
+    await settle();
+    check.ok(host.offsetHeight < screenHeight, "PDF does not retain the fixed editor canvas height");
+    const printBounds = viewport.getBoundingClientRect();
+    for (const node of view.positions.values()) {
+        check.ok(node.x * view.scale + view.offsetX >= 0);
+        check.ok((node.x + node.width) * view.scale + view.offsetX <= printBounds.width + 1);
+        check.ok(node.y * view.scale + view.offsetY >= 0);
+        check.ok((node.y + node.height) * view.scale + view.offsetY <= printBounds.height + 1);
+    }
+    await require("electron").ipcRenderer.invoke("list-mindmap-print-media", "screen");
+    window.dispatchEvent(new Event("afterprint"));
+    await settle();
+    check.equal(host.offsetHeight, screenHeight);
+    check.deepEqual([view.scale, view.offsetX, view.offsetY], screenTransform);
+
     // 全屏使用编辑器同款窗口内布局，不调用浏览器全屏，并在退出和销毁时恢复原位置。
     Object.defineProperty(host, "requestFullscreen", {configurable: true, value: () => check.fail("Native fullscreen must not be requested")});
     hostParent.style.transform = "translateX(5px)";
@@ -1087,6 +1108,10 @@ app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+    win.webContents.debugger.attach("1.3");
+    ipcMain.handle("list-mindmap-print-media", async (_event, media) => {
+        await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {media});
+    });
     ipcMain.handle("list-mindmap-native-input", async (_event, events) => {
         for (const event of events) {
             win.webContents.sendInputEvent(event);

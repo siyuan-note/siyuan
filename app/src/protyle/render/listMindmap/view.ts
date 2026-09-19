@@ -176,13 +176,14 @@ export class ListMindmapView {
                 event.stopPropagation();
             }));
         this.listen(window, "beforeprint", () => {
-            this.printTransform = {scale: this.scale, offsetX: this.offsetX, offsetY: this.offsetY};
-            this.fit();
+            this.printTransform ||= {scale: this.scale, offsetX: this.offsetX, offsetY: this.offsetY};
+            this.fitPrint();
         });
         this.listen(window, "afterprint", () => {
             if (this.printTransform) {
                 Object.assign(this, this.printTransform);
                 this.printTransform = undefined;
+                this.options.host.style.removeProperty("--list-mindmap-print-height");
                 this.draw();
             }
         });
@@ -546,7 +547,9 @@ export class ListMindmapView {
                 this.model.nodes.get(this.foldAnchor.id)?.collapsed) === this.foldAnchor.collapsed) {
                 this.foldAnchor = undefined;
             }
-            if (this.initialFit) {
+            if (this.printTransform) {
+                this.fitPrint();
+            } else if (this.initialFit) {
                 this.initialFit = false;
                 this.fit();
             } else {
@@ -1301,6 +1304,41 @@ export class ListMindmapView {
         this.offsetX = x - (x - this.offsetX) * next / this.scale;
         this.offsetY = y - (y - this.offsetY) * next / this.scale;
         this.scale = next;
+        this.draw();
+    }
+
+    private fitPrint() {
+        if (!this.positions.size || !this.viewport.clientWidth) {
+            return;
+        }
+        // 打印按实际可见内容裁定高度，不计入编辑画布为操作按钮预留的空间。
+        let left = Infinity;
+        let top = Infinity;
+        let right = -Infinity;
+        let bottom = -Infinity;
+        const include = (x: number, y: number, width = 0, height = 0) => {
+            left = Math.min(left, x);
+            top = Math.min(top, y);
+            right = Math.max(right, x + width);
+            bottom = Math.max(bottom, y + height);
+        };
+        this.positions.forEach(node => include(node.x, node.y - 1, node.width, node.height + 1));
+        this.relationRoutes.forEach(points => points.forEach(point => include(point.x, point.y)));
+        this.relationElements.forEach(element => {
+            if (!element.hidden && element.style.visibility !== "hidden") {
+                const x = parseFloat(element.style.left);
+                const y = parseFloat(element.style.top);
+                if (Number.isFinite(x) && Number.isFinite(y)) {
+                    include(x - element.offsetWidth / 2, y - element.offsetHeight / 2,
+                        element.offsetWidth, element.offsetHeight);
+                }
+            }
+        });
+        const width = this.viewport.clientWidth;
+        this.scale = Math.min(1, Math.max(1, width - 24) / Math.max(1, right - left));
+        this.options.host.style.setProperty("--list-mindmap-print-height", `${Math.ceil((bottom - top) * this.scale + 26)}px`);
+        this.offsetX = (width - (right - left) * this.scale) / 2 - left * this.scale;
+        this.offsetY = 12 - top * this.scale;
         this.draw();
     }
 

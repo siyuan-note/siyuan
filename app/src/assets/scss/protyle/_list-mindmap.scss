@@ -564,7 +564,8 @@
 @media print {
   .list-mindmap {
     break-inside: avoid;
-    height: 420px;
+    height: var(--list-mindmap-print-height, 420px);
+    min-height: 0;
 
     &__toolbar,
     &__inspector,

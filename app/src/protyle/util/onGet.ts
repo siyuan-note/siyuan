@@ -504,6 +504,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
     window.siyuan.menus.menu.remove();
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
     protyle.disabled = true;
+    protyle.databaseAttributePanel?.updateReadonly();
     if (protyle.title && protyle.title.editElement) {
         protyle.title.editElement.setAttribute("contenteditable", "false");
         protyle.title.editElement.style.userSelect = "text";
@@ -537,6 +538,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         return;
     }
     protyle.disabled = false;
+    protyle.databaseAttributePanel?.updateReadonly();
     if (isMobile()) {
         /// #if MOBILE
         updateMobileTitleReadonly(protyle);

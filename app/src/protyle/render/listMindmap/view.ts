@@ -1172,7 +1172,7 @@ export class ListMindmapView {
         });
     };
 
-    private editRootTitle(id: string) {
+    private editRootTitle(id: string, toEnd = false) {
         this.finishRelationEdit?.(true);
         const content = this.getContentHost(id);
         const input = createElement("textarea", "list-mindmap__root-title");
@@ -1210,10 +1210,15 @@ export class ListMindmapView {
             if (!event.isComposing && (event.key === "Enter" || event.key === "Escape")) {
                 event.preventDefault();
                 finish(event.key === "Enter");
+                this.options.host.focus({preventScroll: true});
             }
         });
         input.focus();
-        input.select();
+        if (toEnd) {
+            input.setSelectionRange(input.value.length, input.value.length);
+        } else {
+            input.select();
+        }
     }
 
     private editRelationLabel(event: MouseEvent) {
@@ -1313,7 +1318,47 @@ export class ListMindmapView {
         if (event.isComposing || target.closest("input, textarea, select, .list-mindmap__node--editing")) {
             return;
         }
-        if ((event.key === "Tab" || event.key === "Enter") && !this.options.readOnly &&
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(event.key) &&
+            !this.editingId && !this.relationFrom && this.selectedId &&
+            !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+            !target.isContentEditable && !target.closest("button, a")) {
+            const node = this.model.nodes.get(this.selectedId);
+            if (!node) {
+                return;
+            }
+            if (event.key === " ") {
+                if (this.options.readOnly || event.repeat) {
+                    return;
+                }
+                this.finishThen(() => {
+                    if (this.selectedId !== node.id) {
+                        return;
+                    }
+                    if (node.virtual) {
+                        this.editRootTitle(node.id, true);
+                    } else {
+                        this.setEditing(node.id);
+                        this.options.onEdit?.(node.id, this.getContentHost(node.id));
+                    }
+                });
+            } else {
+                const parent = this.model.nodes.get(node.parentId);
+                let next: string;
+                if (event.key === "ArrowLeft") {
+                    next = parent?.id;
+                } else if (event.key === "ArrowRight") {
+                    if (!(this.folded.get(node.id) ?? node.collapsed)) {
+                        next = node.children[0]?.id;
+                    }
+                } else if (parent) {
+                    const index = parent.children.findIndex(child => child.id === node.id);
+                    next = parent.children[index + (event.key === "ArrowUp" ? -1 : 1)]?.id;
+                }
+                if (next) {
+                    this.selectNode(next);
+                }
+            }
+        } else if ((event.key === "Tab" || event.key === "Enter") && !this.options.readOnly &&
             !this.editingId && !this.relationFrom && this.selectedId && !event.repeat &&
             !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
             !target.isContentEditable && !target.closest("button, a")) {

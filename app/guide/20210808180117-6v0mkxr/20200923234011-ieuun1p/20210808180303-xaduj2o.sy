@@ -7,7 +7,7 @@
 		"id": "20210808180303-xaduj2o",
 		"title": "General Operations",
 		"type": "doc",
-		"updated": "20260919112418"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -483,81 +483,6 @@
 					"TextMarkBlockRefID": "20260614104204-staofnm",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "Network Proxy"
-				}
-			]
-		},
-		{
-			"ID": "20260919112418-y2jxj08",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20260919112418-y2jxj08",
-				"updated": "20260919112418"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Duplicate a document tree"
-				}
-			]
-		},
-		{
-			"ID": "20260919112418-3axs9gq",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260919112418-3axs9gq",
-				"updated": "20260919112418"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "In the document tree, select one document that has sub-documents and choose "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Copy"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Duplicate with sub-documents"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ". A copy of the document and all its descendants is created under the same parent, preserving the hierarchy, child titles and custom order. Only the copied root document receives a copy suffix. Automatic sorting still follows the selected sort mode."
-				}
-			]
-		},
-		{
-			"ID": "20260919112418-rtrl8ns",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260919112418-rtrl8ns",
-				"updated": "20260919112418"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Block references, block hyperlinks and explicit block IDs in query embeds within the copied content point to the corresponding copies when their targets belong to the copied tree. Targets outside the tree stay unchanged. Assets remain shared, and copied blocks do not inherit database row bindings or flashcard membership."
-				}
-			]
-		},
-		{
-			"ID": "20260919112418-73rn983",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260919112418-73rn983",
-				"updated": "20260919112418"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Database blocks remain mirrors of the original databases, sharing their data and existing row bindings. Editing a bound row in the copy may modify the original document. This operation does not create an independent database archive."
 				}
 			]
 		}

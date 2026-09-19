@@ -365,7 +365,7 @@ var setNotebookConf = contractHandler(apicontract.SetNotebookConf, func(c *gin.C
 
 	boxConf.DailyNoteTemplatePath = util.NormalizeTemplatePath(boxConf.DailyNoteTemplatePath)
 
-	if err := box.SaveConf(boxConf); err != nil {
+	if err := box.SaveConfAndSync(boxConf); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return contractFailure[*apicontract.NotebookConf](ret)

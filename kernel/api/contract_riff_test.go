@@ -92,6 +92,7 @@ func TestAPIContractRiffDeckLifecycle(t *testing.T) {
 	previousConf, previousDecks, previousData := model.Conf, model.Decks, util.DataDir
 	model.Conf, model.Decks, util.DataDir = model.NewAppConf(), map[string]*riff.Deck{}, t.TempDir()
 	model.Conf.Flashcard = conf.NewFlashcard()
+	model.Conf.Sync = conf.NewSync()
 	t.Cleanup(func() { model.Conf, model.Decks, util.DataDir = previousConf, previousDecks, previousData })
 	if err := os.MkdirAll(filepath.Join(util.DataDir, "storage", "riff"), 0755); err != nil {
 		t.Fatal(err)

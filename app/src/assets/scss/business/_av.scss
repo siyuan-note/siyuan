@@ -1348,6 +1348,10 @@
       .av__cell[data-wrap="true"] & {
         white-space: normal;
 
+        p:empty::after {
+          content: "\200b";
+        }
+
         p,
         h1,
         h2,

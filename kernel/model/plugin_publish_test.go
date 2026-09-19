@@ -18,6 +18,7 @@ func setupPluginPublishTest(t *testing.T) func(string) {
 	root := t.TempDir()
 	util.DataDir, util.ConfDir = filepath.Join(root, "data"), filepath.Join(root, "conf")
 	Conf = NewAppConf()
+	Conf.Sync = conf.NewSync()
 	Conf.Bazaar = &conf.Bazaar{Trust: true}
 	Conf.Lang = "en"
 	t.Cleanup(func() { util.DataDir, util.ConfDir, Conf = originalData, originalConfDir, originalConf })

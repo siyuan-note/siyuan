@@ -1271,5 +1271,8 @@ func CreateTemplate(name, content string, overwrite bool) (code int, err error) 
 	}
 
 	err = filelock.WriteFile(savePath, []byte(content))
+	if err == nil {
+		IncSyncIfNeeded(savePath)
+	}
 	return
 }

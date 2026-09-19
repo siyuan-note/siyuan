@@ -522,7 +522,10 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
         h: rect.height,
     });
     const inputElement = menu.element.querySelector("input");
-    inputElement.select();
+    // 移动端由用户点击输入框进入编辑，避免与菜单打开时的键盘收起流程冲突。
+    if (!isMobile()) {
+        inputElement.select();
+    }
     const descElement = menu.element.querySelector("textarea");
 };
 

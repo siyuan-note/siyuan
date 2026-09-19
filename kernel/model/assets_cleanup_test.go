@@ -12,10 +12,88 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestUnusedAssetsPathPrefixes(t *testing.T) {
+	for _, prefix := range []string{"/", "./", "../", "../../", "%2e%2e/", "assets/../../"} {
+		t.Run(prefix, func(t *testing.T) {
+			boxID, docPath := setupUnusedAssetWorkspace(t)
+			boxConf := conf.NewBoxConf()
+			boxConf.Closed = false
+			if err := (&Box{ID: boxID}).SaveConf(boxConf); err != nil {
+				t.Fatal(err)
+			}
+			root := &ast.Node{Type: ast.NodeDocument, ID: "20260918000001-abcdefg", Spec: treenode.CurrentSpec}
+			root.SetIALAttr("title-img", "background-image: url("+prefix+"assets/title.png)")
+			root.AppendChild(&ast.Node{Type: ast.NodeHTMLBlock, ID: "20260918000002-abcdefg", Tokens: []byte(`<iframe src="` + prefix + `assets/frame.html?v=3&amp;iframe=true"></iframe><img src="` + prefix + `assets/sub/image.png#preview">`)})
+			root.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(prefix + "assets/link.png")})
+			root.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkAHref: prefix + "assets/space%20name.png"})
+			widget := &ast.Node{Type: ast.NodeWidget}
+			widget.SetIALAttr("custom-data-assets", prefix+"assets/widget/")
+			root.AppendChild(widget)
+			engine := util.NewLute()
+			data := render.NewJSONRenderer(&parse.Tree{Root: root}, engine.RenderOptions, engine.ParseOptions).Render()
+			if err := os.WriteFile(docPath, data, 0644); err != nil {
+				t.Fatal(err)
+			}
+			for _, name := range []string{"title.png", "frame.html", "sub/image.png", "link.png", "space name.png", "widget/index.html", "unused.png"} {
+				filename := filepath.Join(util.DataDir, "assets", name)
+				if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filename, []byte(name), 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			items, err := UnusedAssets(false)
+			if err != nil || len(items) != 1 || items[0].Item != "assets/unused.png" {
+				t.Fatalf("unused: %+v, %v", items, err)
+			}
+			if missing := MissingAssets(); len(missing) != 0 {
+				t.Fatalf("existing assets reported missing: %+v", missing)
+			}
+			if err := os.Remove(filepath.Join(util.DataDir, "assets", "sub", "image.png")); err != nil {
+				t.Fatal(err)
+			}
+			missing := MissingAssets()
+			if len(missing) != 1 || missing[0].Item != "assets/sub/image.png" || !reflect.DeepEqual(missing[0].BlockIDs, []string{"20260918000002-abcdefg"}) {
+				t.Fatalf("missing: %+v", missing)
+			}
+		})
+	}
+}
+
+func TestNormalizeAssetScanLinkDest(t *testing.T) {
+	for _, test := range []struct{ input, want string }{
+		{"/assets/a.png?x=1#part", "assets/a.png?x=1#part"},
+		{"../assets/sub/../a.png", "assets/a.png"},
+		{"%2e%2e/assets/a.png", "assets/a.png"},
+		{"assets/%2e%2e/a.png", ""},
+		{"assets/../a.png", ""},
+		{"//assets/a.png", ""},
+		{"https://example.com/assets/a.png", ""},
+		{"data:assets/a.png", ""},
+		{`..\assets/a.png`, ""},
+		{"./assets/folder/", "assets/folder/"},
+		{"./assets/a%23b.png#part", "assets/a%23b.png#part"},
+		{"../assets/100%.png", "assets/100%.png"},
+	} {
+		if got := normalizeAssetScanLinkDest(test.input); got != test.want {
+			t.Errorf("%q: got %q, want %q", test.input, got, test.want)
+		}
+	}
+	value := &av.Value{URL: &av.ValueURL{Content: "../assets/url.png"}, MAsset: []*av.ValueAsset{{Content: "/assets/cell.png"}}}
+	if got := getAttributeViewValueAssetsLinkDests(value, false, normalizeAssetScanLinkDest); !reflect.DeepEqual(got, []string{"assets/url.png", "assets/cell.png"}) {
+		t.Fatalf("database references: %v", got)
+	}
+	if got := getAttributeViewValueAssetsLinkDests(value, false); len(got) != 0 {
+		t.Fatalf("changed non-scan behavior: %v", got)
+	}
+}
 
 func setupUnusedAssetWorkspace(t *testing.T) (boxID, docPath string) {
 	t.Helper()

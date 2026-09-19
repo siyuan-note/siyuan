@@ -671,7 +671,7 @@ const browserCases = async (sourceCode: string, css: string) => {
     select(beta);
     check.equal(inspector.hidden, false);
     check.equal(inspector.classList.contains("list-mindmap__inspector--node"), true);
-    check.equal(getComputedStyle(inspector).bottom, "8px");
+    check.equal(getComputedStyle(inspector).bottom, "0px");
     check.equal(host.querySelector(".list-mindmap__status"), null);
     const nodeMenuBounds = inspector.getBoundingClientRect();
     const panelBounds = host.getBoundingClientRect();
@@ -754,7 +754,7 @@ const browserCases = async (sourceCode: string, css: string) => {
     check.equal(relationElement.classList.contains("list-mindmap__relation--hover"), false);
     check.equal(inspector.hidden, false);
     check.equal(inspector.classList.contains("list-mindmap__inspector--line"), true);
-    check.equal(getComputedStyle(inspector).bottom, "8px");
+    check.equal(getComputedStyle(inspector).bottom, "0px");
     const lineMenuBounds = inspector.getBoundingClientRect();
     check.ok(Math.abs(lineMenuBounds.left + lineMenuBounds.width / 2 - panelBounds.left - panelBounds.width / 2) < 2);
     check.ok(lineMenuBounds.width < panelBounds.width / 2);
@@ -981,6 +981,21 @@ const browserCases = async (sourceCode: string, css: string) => {
 
     const singleList = reset("* Single\n");
     const single = new api.ListMindmapView({...options, model: api.readListMindmap(singleList)});
+    await settle();
+    single.fit();
+    check.ok(single.scale > 1 && single.scale <= 2.5, "fit enlarges small maps within the zoom limit");
+    const fitViewport = host.querySelector<HTMLElement>(".list-mindmap__viewport").getBoundingClientRect();
+    const fitNode = host.querySelector<HTMLElement>(".list-mindmap__node").getBoundingClientRect();
+    check.ok(Math.abs((fitNode.left + fitNode.right) / 2 - (fitViewport.left + fitViewport.right) / 2) < 1,
+        "fit centers visible content instead of layout padding");
+    const fitInspector = host.querySelector<HTMLElement>(".list-mindmap__inspector");
+    fitInspector.hidden = false;
+    single.fit();
+    check.deepEqual(host.querySelector<HTMLElement>(".list-mindmap__node").getBoundingClientRect().toJSON(),
+        fitNode.toJSON(), "opening the inspector preserves fit position and scale");
+    check.ok(host.querySelector<HTMLElement>(".list-mindmap__node").getBoundingClientRect().bottom <=
+        fitInspector.getBoundingClientRect().top, "fit keeps content above the visible inspector");
+    fitInspector.hidden = true;
     const emptyModel = api.readListMindmap(singleList);
     const emptyBlock = document.createElement("div");
     emptyBlock.innerHTML = "<div><br></div>";

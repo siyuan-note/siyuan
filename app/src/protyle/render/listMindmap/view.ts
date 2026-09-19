@@ -1362,11 +1362,8 @@ export class ListMindmapView {
         this.draw();
     }
 
-    private fitPrint() {
-        if (!this.positions.size || !this.viewport.clientWidth) {
-            return;
-        }
-        // 打印按实际可见内容裁定高度，不计入编辑画布为操作按钮预留的空间。
+    private contentBounds() {
+        // 按实际可见节点、关系线和文字计算边界，不包含布局预留的空白。
         let left = Infinity;
         let top = Infinity;
         let right = -Infinity;
@@ -1389,6 +1386,14 @@ export class ListMindmapView {
                 }
             }
         });
+        return {left, top, right, bottom};
+    }
+
+    private fitPrint() {
+        if (!this.positions.size || !this.viewport.clientWidth) {
+            return;
+        }
+        const {left, top, right, bottom} = this.contentBounds();
         const width = this.viewport.clientWidth;
         this.scale = Math.min(1, Math.max(1, width - 24) / Math.max(1, right - left));
         this.options.host.style.setProperty("--list-mindmap-print-height", `${Math.ceil((bottom - top) * this.scale + 26)}px`);
@@ -1400,9 +1405,21 @@ export class ListMindmapView {
     public fit() {
         const width = this.viewport.clientWidth;
         const height = this.viewport.clientHeight;
-        this.scale = Math.min(1, Math.max(.15, Math.min((width - 64) / this.bounds.width, (height - 64) / this.bounds.height)));
-        this.offsetX = (width - this.bounds.width * this.scale) / 2;
-        this.offsetY = (height - this.bounds.height * this.scale) / 2;
+        if (!this.positions.size || !width || !height) {
+            return;
+        }
+        // 先更新关系文字的位置，再按画布上下留白缩放并居中。
+        this.draw();
+        const {left, top, right, bottom} = this.contentBounds();
+        const insetTop = 16;
+        // 菜单打开前后保持相同的底部留白，避免选中节点时画布跳动。
+        const insetBottom = 42;
+        const availableWidth = Math.max(1, width - 48);
+        const availableHeight = Math.max(1, height - insetTop - insetBottom);
+        this.scale = Math.min(2.5, Math.max(.15, Math.min(availableWidth / Math.max(1, right - left),
+            availableHeight / Math.max(1, bottom - top))));
+        this.offsetX = width / 2 - (left + right) * this.scale / 2;
+        this.offsetY = insetTop + availableHeight / 2 - (top + bottom) * this.scale / 2;
         this.draw();
     }
 

@@ -1081,6 +1081,15 @@ export const zoomOut = (options: {
         getDocParam.notebook = options.protyle.notebookId;
     }
     fetchPost("/api/filetree/getDoc", getDocParam, async (getResponse) => {
+        // 退出聚焦时先确定可见的折叠祖先，使滚动和延迟恢复光标使用同一目标。
+        if (options.focusId && options.id === options.protyle.block.rootID) {
+            const unfoldResponse = await fetchSyncPost("/api/block/getUnfoldedParentID", {id: options.focusId});
+            if (unfoldResponse.code === 0 && unfoldResponse.data.parentID &&
+                unfoldResponse.data.parentID !== options.focusId) {
+                options.focusId = unfoldResponse.data.parentID;
+                options.focusPosition = undefined;
+            }
+        }
         const action: TProtyleAction[] = [Constants.CB_GET_HTML];
         if (!options.isPushBack) {
             action.push(Constants.CB_GET_UNUNDO);

@@ -3,7 +3,7 @@ import {focusByOffset, getSelectionOffset, getUndoFocusContext, setLastNodeRange
 import {updateTransaction} from "./transaction";
 import {Constants} from "../../constants";
 import {
-    getCodeBlockDeleteStart,
+    getCodeBlockOutdentRange,
     getCodeBlockLineRange,
     getCodeTabSpace,
     resolveCodeTabSpaces,
@@ -27,16 +27,16 @@ export const tabCodeBlock = (protyle: IProtyle, nodeElement: HTMLElement,
     if (range.collapsed) {
         if (outdent) {
             const caret = getSelectionOffset(editableElement, undefined, range).start;
-            const deleteStart = getCodeBlockDeleteStart(editableElement.textContent, caret, tabSpace);
-            if (deleteStart === caret) {
+            const outdentRange = getCodeBlockOutdentRange(editableElement.textContent, caret, tabSpace);
+            if (outdentRange.start === outdentRange.end) {
                 return;
             }
-            const deleteRange = focusByOffset(editableElement, deleteStart, caret, false) as Range;
+            const deleteRange = focusByOffset(editableElement, outdentRange.start, outdentRange.end, false) as Range;
             if (!deleteRange) {
                 return;
             }
             deleteRange.deleteContents();
-            const caretRange = focusByOffset(editableElement, deleteStart, deleteStart, false) as Range;
+            const caretRange = focusByOffset(editableElement, outdentRange.caret, outdentRange.caret, false) as Range;
             if (!caretRange) {
                 return;
             }

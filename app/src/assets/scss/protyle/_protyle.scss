@@ -977,6 +977,8 @@
   .protyle-wysiwyg {
     padding: 0 !important;
     min-height: 1.6em;
+    // 继承单元格字号，保持预览与编辑时的文字大小一致。
+    font-size: inherit;
   }
 }
 

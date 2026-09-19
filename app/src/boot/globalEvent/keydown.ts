@@ -82,6 +82,7 @@ import {cancelDrag} from "./dragover";
 import {bindAVPanelKeydown} from "../../protyle/render/av/keydown";
 import {formatPainter} from "../../protyle/toolbar/FormatPainter";
 import {adjustEditorFontSize, type TEditorFontSizeAction} from "../../util/editorFontSize";
+import {areProtylePluginExtensionsEnabled} from "../../protyle/runtimeCapabilities";
 
 const EDITOR_FONT_SIZE_COMMANDS: Array<{
     command: "increaseEditorFontSize" | "decreaseEditorFontSize" | "resetEditorFontSize",
@@ -629,6 +630,22 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 copyTextByType([nodeElement.getAttribute("data-node-id")], "ref");
             }
         }
+        return true;
+    }
+    // 只读正文的快捷键使用所属编辑器上下文，插件命令仍遵循自身的可用性判断。
+    if (protyle.disabled && !isFileFocus && !event.isComposing &&
+        (target === document.body || protyle.wysiwyg.element.contains(target)) &&
+        areProtylePluginExtensionsEnabled(protyle) &&
+        dispatchPluginShortcut(app, event, "editorShortcut", () => {
+            const context = captureCommandContext({app, source: "editorShortcut", protyle, range});
+            // 无有效正文选区时，不携带上下文采集回退得到的历史选区。
+            if (!range) {
+                context.range = undefined;
+                context.block = undefined;
+                context.tableCell = undefined;
+            }
+            return context;
+        })) {
         return true;
     }
     if (hasClosestByClassName(target, "protyle-title__input")) {

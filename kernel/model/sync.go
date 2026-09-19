@@ -83,6 +83,7 @@ func SyncDataDownload() (err error) {
 }
 
 func syncDataDownloadLocked() (err error) {
+	revision := pendingSync.begin()
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
@@ -94,6 +95,7 @@ func syncDataDownloadLocked() (err error) {
 		code = 2
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+	pendingSync.finish(revision, err == nil, notifySyncPending)
 	if 1 == code {
 		consumeShorthands()
 	}
@@ -151,6 +153,7 @@ func SyncDataUpload() (err error) {
 		return
 	}
 	defer unlock()
+	revision := pendingSync.begin()
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
@@ -162,10 +165,12 @@ func SyncDataUpload() (err error) {
 		code = 2
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+	pendingSync.finish(revision, err == nil, notifySyncPending)
 	return
 }
 
 var (
+	pendingSync      syncPendingState
 	syncSameCount    = atomic.Int32{}
 	autoSyncErrCount = 0
 	fixSyncInterval  = 5 * time.Minute
@@ -209,6 +214,7 @@ func BootSyncData() {
 
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
+	revision := pendingSync.begin()
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	err := bootSyncRepoWithDNSRetry()
 	code := 1
@@ -216,6 +222,7 @@ func BootSyncData() {
 		code = 2
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+	pendingSync.finish(revision, err == nil, notifySyncPending)
 	if 1 == code {
 		// 启动同步成功后消费本地速记临时文件，避免移动端开启云同步时需手动触发同步才能刷新闪念速记
 		consumeShorthands()
@@ -305,6 +312,7 @@ func syncData(exit, byHand bool) {
 }
 
 func syncDataLocked(exit, byHand bool) error {
+	revision := pendingSync.begin()
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	if exit {
 		ExitSyncSucc = 0
@@ -324,6 +332,7 @@ func syncDataLocked(exit, byHand bool) error {
 		code = 2
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+	pendingSync.finish(revision, err == nil, notifySyncPending)
 
 	if !exit && 1 == code {
 		consumeShorthands()
@@ -1059,6 +1068,11 @@ func loadSyncIgnoreLines() (ret []string, err error) {
 func IncSync() {
 	syncSameCount.Store(0)
 	planSyncAfter(time.Duration(Conf.Sync.Interval) * time.Second)
+	pendingSync.change(notifySyncPending)
+}
+
+func notifySyncPending(pending bool) {
+	util.BroadcastByType("main", "syncPending", 0, "", pending)
 }
 
 func planSyncAfter(d time.Duration) {

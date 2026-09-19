@@ -20,6 +20,11 @@
   font-size: var(--b3-font-size-editor);
   font-family: var(--b3-font-family-protyle);
 
+  &.table__cell-rich {
+    // 单元格富文本预览沿用表格设置的字号。
+    font-size: inherit;
+  }
+
   img {
     max-width: 100%;
     margin: 0 auto;

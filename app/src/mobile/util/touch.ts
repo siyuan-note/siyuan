@@ -1,4 +1,4 @@
-import {getSidebarDock, getSidebarElement, popSidebar} from "./sidebar";
+import {getSidebarDock, getSidebarElement, popSidebar, switchToNextSidebarTab} from "./sidebar";
 import {getMobileSidebarConfig} from "./mobileBarsConfig";
 import {
     hasClosestBlock,
@@ -271,7 +271,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
         return;
     }
 
-    const commitSidebarSwipe = Math.abs(finalXDiff) > Math.abs(finalYDiff) && shouldCommitSidebarSwipe(
+    const commitSidebarSwipe = firstXY === "x" && Math.abs(finalXDiff) > Math.abs(finalYDiff) && shouldCommitSidebarSwipe(
         firstDirection,
         finalXDiff,
         currentTime - time,
@@ -279,10 +279,13 @@ export const handleTouchEnd = (event: TouchEvent) => {
     );
 
     if (targetSidebar) {
-        if (commitSidebarSwipe) {
+        if (commitSidebarSwipe && shouldDragOpenSidebar(targetSidebar, firstDirection)) {
             closePanel();
         } else {
             popSidebar(targetSidebar, false);
+            if (commitSidebarSwipe) {
+                switchToNextSidebarTab(targetSidebar);
+            }
         }
         return;
     }
@@ -467,8 +470,10 @@ export const handleTouchMove = (event: TouchEvent) => {
         // 选中后扩选的情况
         const range = getSelection().getRangeAt(0);
         const currentEditor = getCurrentEditor();
+        const targetSidebar = getTargetSidebar(target);
         if (hasVisibleSelectionText(stripSemanticMarkersFromRangeText(range)) &&
-            currentEditor?.protyle.wysiwyg.element.contains(range.startContainer)) {
+            (currentEditor?.protyle.wysiwyg.element.contains(range.startContainer) ||
+                (targetSidebar && getSidebarElement(targetSidebar)?.contains(range.startContainer)))) {
             return;
         }
     }
@@ -486,14 +491,15 @@ export const handleTouchMove = (event: TouchEvent) => {
         }
         firstDirection = xDiff > 0 ? "toLeft" : "toRight";
         if (firstXY === "x") {
-            const targetSidebar = getTargetSidebar(target);
             const menuElement = hasClosestByAttribute(target, "id", "menu", true);
-            if ((menuElement && !shouldCloseGlobalMenu(firstDirection, false)) ||
-                (targetSidebar && !shouldDragOpenSidebar(targetSidebar, firstDirection))) {
+            if (menuElement && !shouldCloseGlobalMenu(firstDirection, false)) {
                 firstXY = "y";
                 yDiff = undefined;
             }
         }
+    }
+    if (firstXY === "y") {
+        return;
     }
     if (typeof previousClientX !== "undefined") {
         if (firstDirection === "toRight") {
@@ -525,8 +531,8 @@ export const handleTouchMove = (event: TouchEvent) => {
         if (!getTargetSidebar(target) && !getMobileSidebarConfig().sidebarSwipe) {
             return;
         }
-        if (hasClosestByClassName(target, "agent-chat__messages", true)) {
-            // 消息内容可沿手势方向横向滚动时，本次手势持续交给内容，抵达边缘后可再次滑动返回。
+        if (getTargetSidebar(target) || hasClosestByClassName(target, "agent-chat__messages", true)) {
+            // 内容可沿手势方向横向滚动时，本次手势持续交给内容，抵达边缘后可再次滑动操作侧栏。
             if (scrollBlock || isHorizontalScrollable(target, xDiff)) {
                 scrollBlock = true;
                 return;
@@ -573,6 +579,11 @@ export const handleTouchMove = (event: TouchEvent) => {
             }
         }
 
+        // 切换页签时保持侧栏展开，松手后按距离和速度判断是否切换。
+        const sidebar = getTargetSidebar(target);
+        if (sidebar && !shouldDragOpenSidebar(sidebar, firstDirection)) {
+            return;
+        }
         if (isFirstMove) {
             const openingSidebar = getOpeningSidebar(firstDirection);
             if (!getTargetSidebar(target) && !getSidebarDock(getSidebarElement(openingSidebar))) {

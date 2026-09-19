@@ -300,11 +300,20 @@ export const addPluginDock = (plugin: Plugin) => {
         if (!window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name]) {
             window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] = {};
         }
-        if (window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] &&
-            window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key]) {
-            plugin.docks[key].config = window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key];
-        }
         const dock = plugin.docks[key];
+        const savedConfig = window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key];
+        if (savedConfig) {
+            // 仅恢复用户布局，图标、标题和默认快捷键使用插件本次注册的配置。
+            dock.config = {
+                ...dock.config,
+                position: savedConfig.position ?? dock.config.position,
+                index: savedConfig.index ?? dock.config.index,
+                show: savedConfig.show ?? dock.config.show,
+                size: {...dock.config.size, ...savedConfig.size},
+            };
+        }
+        window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key] = dock.config;
+        setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);
         const entryId = getPluginDockEntryKey(plugin.name, dock.id);
         const show = dock.config.show && isEntryVisible(`dock.${entryId}`);
         const dockTab: Config.IUILayoutDockTab & {entryId: string} = {

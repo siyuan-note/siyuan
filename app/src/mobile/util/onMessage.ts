@@ -29,6 +29,7 @@ import {handleMobileKernelExit} from "./kernelExit";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {applyEntryVisibility} from "../../config/entryVisibility/runtime";
 import {removeMobileBacklinkContent} from "./backlinkPanels";
+import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;
@@ -40,6 +41,12 @@ const dispatchMobileSidePanelConfigChange = () => {
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
+            case "syncPending":
+                document.getElementById("toolbarSync").classList.toggle("fn__none", !(data.data === true &&
+                    ((0 !== window.siyuan.config.sync.provider && isPaidUser()) ||
+                        (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
+                    window.siyuan.config.repo.key && window.siyuan.config.sync.enabled));
+                break;
             case "databaseIndexCommit":
                 processBacklinkIndexCommit(data.data);
                 break;
@@ -187,9 +194,6 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case"syncing":
                 processSync(data);
-                if (data.code === 1) {
-                    document.getElementById("toolbarSync").classList.add("fn__none");
-                }
                 break;
             case "openFileById":
                 openMobileFileById(app, data.data.id);

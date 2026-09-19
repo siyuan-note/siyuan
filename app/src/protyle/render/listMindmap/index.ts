@@ -133,7 +133,7 @@ class ListMindmapController {
                 }
             },
             colors: () => {
-                const type = "backgroundColor";
+                const type = "color";
                 const data = getInlineStylesCache();
                 return getVisibleOrderedStyleKeys(type, data).map(key => {
                     if (isBuiltinOrderKey(type, key)) {
@@ -158,7 +158,7 @@ class ListMindmapController {
                 });
             },
             onManageNodeColors: () => openInlineStyleDialog("style1"),
-            onManageLineColors: () => openInlineStyleDialog("backgroundColor"),
+            onManageLineColors: () => openInlineStyleDialog("color"),
             finishEdit: () => this.activeEditor?.finish(),
             onExit: async () => {
                 if (this.activeEditor && !await this.activeEditor.finish()) {

@@ -30,12 +30,15 @@ import {openListMindmapEditor} from "./editor";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, destroy: () => void}>();
 
-const canEdit = (owner: IProtyle, list: HTMLElement) => !owner.disabled && !owner.lite &&
+const canToggleView = (owner: IProtyle, list: HTMLElement) => !owner.disabled && !owner.lite &&
     !owner.options.action.includes(Constants.CB_GET_HISTORY) &&
-    !list.closest(".protyle-wysiwyg__embed") && list.closest(".protyle-wysiwyg") === owner.wysiwyg.element;
+    list.closest(".protyle-wysiwyg") === owner.wysiwyg.element;
+
+const canEdit = (owner: IProtyle, list: HTMLElement) => canToggleView(owner, list) &&
+    !list.closest(".protyle-wysiwyg__embed");
 
 export const toggleListMindmap = (owner: IProtyle, list: HTMLElement) => {
-    if (list.dataset.type !== "NodeList" || !canEdit(owner, list)) {
+    if (list.dataset.type !== "NodeList" || !canToggleView(owner, list)) {
         return;
     }
     const previous = list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) || "";
@@ -164,7 +167,7 @@ class ListMindmapController {
                 if (this.activeEditor && !await this.activeEditor.finish()) {
                     return;
                 }
-                if (canEdit(owner, list)) {
+                if (canToggleView(owner, list)) {
                     toggleListMindmap(owner, list);
                 } else {
                     this.destroy();

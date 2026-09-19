@@ -2279,7 +2279,7 @@ export const turnsOneInto = async (options: {
         newHTML = converted.outerHTML;
     } else {
         // @ts-ignore
-        newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+        newHTML = options.protyle.lute[options.type](cleanListMindmapHTML(options.nodeElement.outerHTML), options.level);
     }
     disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);

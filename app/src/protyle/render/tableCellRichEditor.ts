@@ -194,6 +194,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         },
     });
     fragment.protyle.block.rootID = owner.block.rootID;
+    fragment.protyle.block.parentID = table.dataset.nodeId;
+    fragment.protyle.path = owner.path;
     const commit = () => {
         if (!cell.isConnected || !table.isConnected || !host.isConnected || owner.disabled || composing) {
             return;

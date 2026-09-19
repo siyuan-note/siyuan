@@ -558,6 +558,12 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
     let refParam: import("../../types/api").SearchRefBlockRequestInput;
     if (protyle.lite) {
         refParam = {k: key, id: "", rootID: "", beforeLen: 48, isDatabase: false, isSquareBrackets: true};
+        // 单元格内的临时块不在块树中，使用所属表格提供搜索和新建文档的上下文
+        if (protyle.path && protyle.block.parentID) {
+            refParam.id = protyle.block.parentID;
+            refParam.rootID = protyle.block.rootID;
+            refParam.isSquareBrackets = ["[[", "【【"].includes(protyle.hint.splitChar);
+        }
     } else {
         refParam = {
             k: key,

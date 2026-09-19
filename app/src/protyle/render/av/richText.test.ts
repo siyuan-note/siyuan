@@ -576,6 +576,10 @@ describe("attribute view rich text DOM policy", () => {
                 assert.deepEqual(Array.from(template.content.querySelectorAll(
                     '[data-type="NodeParagraph"] > [contenteditable="true"]'
                 )).map(element => element.textContent), paragraphs);
+                template.innerHTML = richText.getAVRichTextPreviewHTML(serialized.markdown);
+                assert.deepEqual(Array.from(template.content.querySelectorAll("p"))
+                    .map(element => element.textContent), paragraphs);
+                assert.equal(template.content.querySelector("[id], [data-node-id]"), null);
             }
         }
     });

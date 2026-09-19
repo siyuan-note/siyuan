@@ -352,7 +352,8 @@ export const getAVRichTextBlockDOM = (markdown: string, images = false) => markd
 
 const getAVRichTextPreviewBlockDOM = (blockDOM: string) => {
     const template = document.createElement("template");
-    template.innerHTML = cleanAVRichTextBlockDOMStructure(blockDOM);
+    // 转换为 HTML 前保留块标识，以保留空段落，预览净化时再移除标识。
+    template.innerHTML = cleanAVRichTextBlockDOMStructure(blockDOM, true);
     // 代码块操作节点和待办操作节点参与内容解析，需要保留到 HTML 转换完成。
     return (template.innerHTML || "").trim();
 };

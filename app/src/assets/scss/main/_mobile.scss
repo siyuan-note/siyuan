@@ -1722,6 +1722,8 @@ body.mobile-topbar--merged {
   }
 
   .mobile-bottom-sheet {
+    // 退出时保持可见，由位移动画将面板移出可视区域。
+    opacity: 1;
     max-height: min(60vh, 100%);
     border: 0;
     border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;

@@ -54,6 +54,9 @@ export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement, cl
         }
     };
     const onEnd = (event: TouchEvent) => {
+        if (closing) {
+            return;
+        }
         if (!dragging || !start || !event.changedTouches.length) {
             reset();
             return;
@@ -62,6 +65,8 @@ export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement, cl
         const duration = Math.max(performance.now() - start.time, 1);
         const shouldClose = offset > Math.min(120, element.clientHeight * .25) || (offset > 20 && offset / duration > .6);
         suppressClickUntil = performance.now() + 300;
+        // 提交最后一次拖动位置，使关闭或回弹过渡从当前位移开始。
+        void element.offsetHeight;
         element.style.transition = "";
         start = undefined;
         dragging = false;

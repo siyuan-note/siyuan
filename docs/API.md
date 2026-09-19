@@ -23,7 +23,6 @@ Plugin resource declarations, data authorization, and publishing APIs are docume
     * [Rename a document](#Rename-a-document)
     * [Remove a document](#Remove-a-document)
     * [Move documents](#Move-documents)
-    * [Duplicate a document with descendants](#duplicate-a-document-with-descendants)
     * [Set notebook and document sort values](#Set-notebook-and-document-sort-values)
     * [Set a document's child document sort mode](#Set-a-documents-child-document-sort-mode)
     * [Get human-readable path based on path](#Get-human-readable-path-based-on-path)
@@ -551,35 +550,6 @@ Move documents by `id`:
     "data": null
   }
   ```
-
-### Duplicate a document with descendants
-
-`POST /api/filetree/duplicateDocTree` requires administrator authorization and a writable kernel.
-
-```json
-{"id":"20260919010000-source1"}
-```
-
-The ID must identify a document, excluding the notebook document. The endpoint copies the document and every descendant to the same parent and notebook. All blocks receive new IDs; only the root title gains a duplicate suffix. Child titles, hierarchy, document sort modes, and custom child order are preserved. In custom order, the new root follows the original.
-
-References and block links inside the copied subtree, including tab titles and rich table cells, point to copied blocks. Explicit block IDs in query embeds are also remapped; other references and assets retain their existing targets. Database blocks remain mirrors sharing the original database and row bindings, so editing a bound row can modify an original block. Copied blocks do not inherit database membership or flashcard membership.
-
-The successful response identifies the copied root:
-
-```json
-{
-  "code": 0,
-  "msg": "",
-  "data": {
-    "id": "20260919010001-copied1",
-    "notebook": "20260919010002-notebk1",
-    "path": "/20260919010001-copied1.sy",
-    "hPath": "/Source (Duplicated 2026-09-19 01:00:01)"
-  }
-}
-```
-
-Encrypted notebooks must be unlocked; the request holds a notebook lease through response serialization. Unreadable, corrupt, or unsupported source documents fail without modifying them. Detected write failures clean up the new documents and restore sorting; cleanup errors are reported. Process crashes are not covered by this compensation. `/api/filetree/duplicateDoc` continues to copy only one document.
 
 ### Reorder documents relative to a sibling
 

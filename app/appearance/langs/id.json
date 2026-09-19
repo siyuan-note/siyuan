@@ -1,4 +1,5 @@
 {
+	"duplicateDocTree": "Duplikasikan beserta subdokumen",
 	"syncProviderChangeConfirm": "Sebelum mengganti penyedia sinkronisasi, SiYuan perlu memeriksa sumber daya dan snapshot lama, serta mungkin mengunduh konten yang hilang dari penyimpanan cloud saat ini. Proses ini dapat memakan waktu. Lanjutkan?",
 	"syncProviderChangeContinue": "Lanjutkan",
 	"syncProviderChangeFailed": "Perubahan penyedia sinkronisasi tidak dapat dikonfirmasi. Periksa koneksi dan muat ulang antarmuka.",

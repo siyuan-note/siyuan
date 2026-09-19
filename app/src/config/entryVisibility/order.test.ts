@@ -10,6 +10,20 @@ import {
     resolveEntryOrderWithBoundaryDefaults,
 } from "./order";
 
+test("document tree duplication merges into saved orders and retains plugin slots", () => {
+    const entries = getEntryCatalogChildren("docTree.document.copy");
+    const defaults = entries.map(item => item.key);
+    const saved = defaults.filter(key => key !== "duplicateTree");
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    assert.deepEqual(merged.filter(key => key !== "duplicateTree"), saved);
+    assert.equal(merged[merged.indexOf("duplicate") + 1], "duplicateTree");
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+    assert.deepEqual(resolveEntryOrder(["duplicate", "duplicateTree"], merged, separators),
+        ["duplicate", "duplicateTree"]);
+});
+
 test("entry order keeps custom order and inserts new entries by their default neighbors", () => {
     assert.deepEqual(mergeEntryOrder(["a", "new", "b", "c"], ["c", "a", "b"]), ["c", "a", "new", "b"]);
 });

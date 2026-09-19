@@ -1,4 +1,5 @@
 {
+	"duplicateDocTree": "Dupliquer avec les sous-documents",
 	"syncProviderChangeConfirm": "Avant de changer de fournisseur de synchronisation, SiYuan doit vérifier les ressources et les anciens instantanés, et peut télécharger le contenu manquant depuis le stockage cloud actuel. Cela peut prendre un certain temps. Continuer ?",
 	"syncProviderChangeContinue": "Continuer",
 	"syncProviderChangeFailed": "Impossible de confirmer le changement de fournisseur de synchronisation. Vérifiez la connexion et rechargez l’interface.",

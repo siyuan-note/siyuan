@@ -8,7 +8,7 @@
 		"id": "20240530101000-g3ugxml",
 		"title": "基本操作",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20260919112418"
 	},
 	"Children": [
 		{
@@ -506,6 +506,81 @@
 					"TextMarkBlockRefID": "20260614104715-xe51jlk",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "ネットワークプロキシ"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-pf45gei",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260919112418-pf45gei",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントツリーの複製"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-2w0h66i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260919112418-2w0h66i",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントツリーで子ドキュメントを持つドキュメントを一つ選択し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "コピー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "子ドキュメントを含めて複製"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選びます。同じ親の下に、そのドキュメントとすべての子孫の複製が作成されます。階層、子ドキュメント名、手動の並び順を維持し、複製を示す接尾辞は最上位のドキュメントにのみ追加します。自動ソートでは選択中の並べ替え方法に従います。"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-xigfluq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260919112418-xigfluq",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "複製した本文のブロック参照、ブロックリンク、およびクエリ埋め込み内の明示的なブロック ID は、参照先が複製範囲内にある場合、対応する複製を指します。範囲外の参照先は変更しません。アセットは共有を継続し、複製したブロックはデータベース行のバインド状態やフラッシュカードの所属を引き継ぎません。"
+				}
+			]
+		},
+		{
+			"ID": "20260919112418-f74aaqn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260919112418-f74aaqn",
+				"updated": "20260919112418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースブロックは元のデータベースのミラーとなり、データと既存の行のバインドを共有します。複製側でバインドされた行を編集すると、元のドキュメントが変更される場合があります。この操作では独立したデータベースのアーカイブは作成されません。"
 				}
 			]
 		}

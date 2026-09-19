@@ -3807,6 +3807,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/filetree/duplicateDocTree": {
+        request: FileTreeIDRequestInput;
+        response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/filetree/getDoc": {
         request: FileTreeGetDocRequestInput;
         response: { "code": 0; "data": FileTreeGetDocData; "msg": string; } | { "code": -1 | 1 | 3; "data": { "closeTimeout": number; } | null; "msg": string; };

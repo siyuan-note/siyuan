@@ -19,6 +19,7 @@ package model
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	ginSessions "github.com/gin-contrib/sessions"
@@ -300,8 +301,8 @@ func TestCheckAuthRemoteSessionOrigin(t *testing.T) {
 	}
 }
 
-// TestCheckAuthLockScreenLocalHostPassThrough 验证设置锁屏密码时本机放行分支拒绝
-// 浏览器标记的跨站请求与非本机 Origin/Host 请求，无浏览器头的本机客户端及同源请求放行
+// TestCheckAuthLockScreenLocalHostPassThrough 验证设置锁屏密码时跨站请求及无凭据的非本机来源无法访问，
+// 无浏览器头的本机客户端及同源请求可通过本机免认证放行。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-9gpj-3rm3-x42m
 func TestCheckAuthLockScreenLocalHostPassThrough(t *testing.T) {
 	originalConf := Conf
@@ -315,6 +316,7 @@ func TestCheckAuthLockScreenLocalHostPassThrough(t *testing.T) {
 	})
 
 	engine := gin.New()
+	engine.Use(ginSessions.Sessions("siyuan", cookie.NewStore([]byte("test-session-cookie-key"))))
 	engine.GET("/assets/icon.png", CheckAuth, func(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 	})
@@ -382,4 +384,82 @@ func TestCheckAuthLockScreenLocalHostPassThrough(t *testing.T) {
 			t.Fatalf("assets status = %d, want %d", recorder.Code, http.StatusUnauthorized)
 		}
 	})
+}
+
+// TestCheckAuthLoopbackProxy 验证经环回地址转发的远程访问使用正常认证，且不能借此获取本机免认证权限。
+func TestCheckAuthLoopbackProxy(t *testing.T) {
+	originalConf := Conf
+	originalWorkspaceDir := util.WorkspaceDir
+	Conf = NewAppConf()
+	Conf.AccessAuthCode = "test-access-auth-code"
+	util.WorkspaceDir = "test-workspace"
+	t.Cleanup(func() {
+		Conf = originalConf
+		util.WorkspaceDir = originalWorkspaceDir
+	})
+
+	engine := gin.New()
+	engine.Use(ginSessions.Sessions("siyuan", cookie.NewStore([]byte("test-session-cookie-key"))))
+	engine.GET("/login", func(c *gin.Context) {
+		session := util.GetSession(c)
+		util.GetWorkspaceSession(session).AccessAuthCode = Conf.AccessAuthCode
+		if err := session.Save(c); err != nil {
+			t.Fatal(err)
+		}
+		c.Status(http.StatusNoContent)
+	})
+	for _, path := range []string{"/stage/build/desktop/", "/check-auth", "/assets/icon.png", "/api/system/exit", "/api/test"} {
+		engine.Any(path, CheckAuth, func(c *gin.Context) {
+			if c.Request.URL.Path != "/check-auth" && !IsAdminRoleContext(c) {
+				t.Error("authenticated request has no administrator role")
+			}
+			c.Status(http.StatusNoContent)
+		})
+	}
+	loginRecorder := httptest.NewRecorder()
+	engine.ServeHTTP(loginRecorder, httptest.NewRequest(http.MethodGet, "/login", nil))
+	if loginRecorder.Code != http.StatusNoContent {
+		t.Fatalf("login status = %d", loginRecorder.Code)
+	}
+
+	for _, test := range []struct {
+		name, method, path, origin, site string
+		authenticated                    bool
+		want                             int
+	}{
+		{name: "page redirects to login", method: http.MethodGet, path: "/stage/build/desktop/", site: "none", want: http.StatusFound},
+		{name: "login page accessible", method: http.MethodGet, path: "/check-auth", site: "same-origin", want: http.StatusNoContent},
+		{name: "assets require login", method: http.MethodGet, path: "/assets/icon.png", want: http.StatusFound},
+		{name: "local API requires credentials", method: http.MethodPost, path: "/api/system/exit", want: http.StatusUnauthorized},
+		{name: "DNS rebinding cannot bypass authentication", method: http.MethodPost, path: "/api/system/exit", origin: "http://evil.example:6806", site: "same-origin", want: http.StatusUnauthorized},
+		{name: "authenticated page", method: http.MethodGet, path: "/stage/build/desktop/", authenticated: true, want: http.StatusNoContent},
+		{name: "authenticated assets", method: http.MethodGet, path: "/assets/icon.png", authenticated: true, want: http.StatusNoContent},
+		{name: "authenticated same-origin API", method: http.MethodPost, path: "/api/test", origin: "http://192.0.2.1:6806", site: "same-origin", authenticated: true, want: http.StatusNoContent},
+		{name: "authenticated cross-origin API denied", method: http.MethodPost, path: "/api/test", origin: "https://evil.example", authenticated: true, want: http.StatusUnauthorized},
+		{name: "authenticated cross-site navigation denied", method: http.MethodGet, path: "/assets/icon.png", site: "cross-site", authenticated: true, want: http.StatusUnauthorized},
+		{name: "authenticated same-site request denied", method: http.MethodPost, path: "/api/system/exit", site: "same-site", authenticated: true, want: http.StatusUnauthorized},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			request := httptest.NewRequest(test.method, test.path, nil)
+			request.Host = "192.0.2.1:6806"
+			request.RemoteAddr = "127.0.0.1:1234"
+			request.Header.Set("User-Agent", "Mozilla/5.0")
+			request.Header.Set("X-Forwarded-Host", request.Host)
+			request.Header.Set("Origin", test.origin)
+			request.Header.Set("Sec-Fetch-Site", test.site)
+			if test.authenticated {
+				for _, responseCookie := range loginRecorder.Result().Cookies() {
+					request.AddCookie(responseCookie)
+				}
+			}
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, request)
+			if recorder.Code != test.want {
+				t.Fatalf("status = %d, want %d, body = %s", recorder.Code, test.want, recorder.Body.String())
+			}
+			if test.want == http.StatusFound && recorder.Header().Get("Location") != "/check-auth?to="+url.QueryEscape(test.path) {
+				t.Fatalf("unexpected login redirect: %s", recorder.Header().Get("Location"))
+			}
+		})
+	}
 }

@@ -140,6 +140,7 @@ func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
 		err = errors.New(msg)
 		return
 	}
+	IncSyncIfNeeded(publishAccessPath)
 	return
 }
 

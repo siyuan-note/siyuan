@@ -243,6 +243,8 @@ func SetFlashcardsDueTime(cardDues []*SetFlashcardDueTime) (err error) {
 
 	if err = deck.Save(); err != nil {
 		logging.LogErrorf("save deck [%s] failed: %s", builtinDeckID, err)
+	} else {
+		IncSyncIfNeeded(filepath.Join(getRiffDir(), builtinDeckID+".deck"), filepath.Join(getRiffDir(), builtinDeckID+".cards"))
 	}
 	return
 }
@@ -673,10 +675,13 @@ func ReviewFlashcard(deckID, cardID string, rating riff.Rating, reviewedCardIDs 
 		return
 	}
 
+	defer IncSyncIfNeeded(filepath.Join(getRiffDir(), deckID+".deck"), filepath.Join(getRiffDir(), deckID+".cards"))
+
 	if err = deck.SaveLog(log); err != nil {
 		logging.LogErrorf("save review log [%s] failed: %s", deckID, err)
 		return
 	}
+	IncSyncIfNeeded(filepath.Join(getRiffDir(), "logs", time.Now().Format("200601")+".msgpack"))
 
 	_, unreviewedCount, _, _ := getDueFlashcards(deckID, reviewedCardIDs)
 	if 1 > unreviewedCount {
@@ -1209,6 +1214,7 @@ func RenameDeck(deckID, name string) (err error) {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}
+	IncSyncIfNeeded(filepath.Join(getRiffDir(), deckID+".deck"), filepath.Join(getRiffDir(), deckID+".cards"))
 	return
 }
 
@@ -1229,6 +1235,7 @@ func RemoveDeck(deckID string) (err error) {
 		if err = filelock.Remove(deckPath); err != nil {
 			return
 		}
+		IncSyncIfNeeded(deckPath)
 	}
 
 	cardsPath := filepath.Join(riffSavePath, deckID+".cards")
@@ -1236,6 +1243,7 @@ func RemoveDeck(deckID string) (err error) {
 		if err = filelock.Remove(cardsPath); err != nil {
 			return
 		}
+		IncSyncIfNeeded(cardsPath)
 	}
 
 	LoadFlashcards()
@@ -1245,7 +1253,11 @@ func RemoveDeck(deckID string) (err error) {
 func CreateDeck(name string) (deck *riff.Deck, err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
-	return createDeck(name)
+	deck, err = createDeck(name)
+	if err == nil {
+		IncSyncIfNeeded(filepath.Join(getRiffDir(), deck.ID+".deck"), filepath.Join(getRiffDir(), deck.ID+".cards"))
+	}
+	return
 }
 
 func createDeck(name string) (deck *riff.Deck, err error) {

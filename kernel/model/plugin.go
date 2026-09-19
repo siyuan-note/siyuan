@@ -140,7 +140,10 @@ func updatePetal(name string, update func(petal *Petal) error) (ret *Petal, err 
 	if err = update(ret); err != nil {
 		return
 	}
-	savePetals0(petals)
+	err = savePetals0(petals)
+	if err == nil {
+		IncSyncIfNeeded(filepath.Join(util.DataDir, "storage", "petal", "petals.json"))
+	}
 	return
 }
 
@@ -366,10 +369,12 @@ var petalsStoreLock = sync.Mutex{}
 func savePetals(petals []*Petal) {
 	petalsStoreLock.Lock()
 	defer petalsStoreLock.Unlock()
-	savePetals0(petals)
+	if err := savePetals0(petals); err == nil {
+		IncSyncIfNeeded(filepath.Join(util.DataDir, "storage", "petal", "petals.json"))
+	}
 }
 
-func savePetals0(petals []*Petal) {
+func savePetals0(petals []*Petal) (err error) {
 	if 1 > len(petals) {
 		petals = []*Petal{}
 	}
@@ -385,6 +390,7 @@ func savePetals0(petals []*Petal) {
 		logging.LogErrorf("write petals [%s] failed: %s", confPath, err)
 		return
 	}
+	return
 }
 
 func getPetals() (ret []*Petal) {

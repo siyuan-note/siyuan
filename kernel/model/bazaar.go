@@ -525,6 +525,8 @@ func installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName strin
 	err = bazaar.InstallPackage(repoURL, repoHash, repoRef, installPath, Conf.System.ID, pkgType, packageName, meta.update)
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(46), packageName, err)
+	} else {
+		IncSyncIfNeeded(installPath)
 	}
 	return
 }
@@ -595,7 +597,6 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 			names = append(names, item.name)
 		}
 		refreshAppearancePackages(names, nil)
-		IncSync()
 	case "icons":
 		for _, item := range items {
 			if !item.meta.update && applyNewAppearance {
@@ -609,7 +610,6 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 			names = append(names, item.name)
 		}
 		refreshAppearancePackages(nil, names)
-		IncSync()
 	}
 }
 
@@ -664,6 +664,7 @@ func InstallLocalBazaarPackage(archivePath, frontend string, overwrite bool) (re
 	if err = bazaar.InstallLocalPackage(sourcePath, installPath, pkgType, pkg.Name, result.Updated); err != nil {
 		return result, fmt.Errorf(Conf.Language(46), pkg.Name, err)
 	}
+	IncSyncIfNeeded(installPath)
 	finishInstall(pkgType, []batchInstallItem{{name: pkg.Name, meta: installMeta{update: result.Updated}}}, nil, false)
 	return result, nil
 }
@@ -716,6 +717,13 @@ func UninstallPackage(pkgType, packageName string) error {
 			return err
 		}
 	}
+	// 删除可能部分成功，提前记录目录内是否存在参与同步的文件。
+	affectsSync := PathsAffectSync(installPath)
+	defer func() {
+		if affectsSync {
+			IncSync()
+		}
+	}()
 	err = bazaar.UninstallPackage(installPath)
 	if err != nil {
 		return fmt.Errorf(Conf.Language(47), err.Error())
@@ -741,10 +749,8 @@ func UninstallPackage(pkgType, packageName string) error {
 		PushReloadPlugin(uninstallPluginSet, nil, nil, nil, "", "")
 	case "themes":
 		refreshAppearancePackages([]string{packageName}, nil)
-		IncSync()
 	case "icons":
 		refreshAppearancePackages(nil, []string{packageName})
-		IncSync()
 	}
 
 	return nil

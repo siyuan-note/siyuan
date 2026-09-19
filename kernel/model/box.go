@@ -332,6 +332,15 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 }
 
 func (box *Box) SaveConf(conf *conf.BoxConf) error {
+	return box.saveConf(conf, false)
+}
+
+// SaveConfAndSync 保存用户修改的笔记本配置，并为已落盘的变更重新计划同步。
+func (box *Box) SaveConfAndSync(conf *conf.BoxConf) error {
+	return box.saveConf(conf, true)
+}
+
+func (box *Box) saveConf(conf *conf.BoxConf, syncChange bool) error {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	persisted, err := prepareBoxConfForSave(box.ID, conf)
 	if err != nil {
@@ -347,6 +356,9 @@ func (box *Box) SaveConf(conf *conf.BoxConf) error {
 		if err = box.saveConf0(newData); err != nil {
 			return err
 		}
+		if syncChange {
+			IncSyncIfNeeded(confPath)
+		}
 		return syncBoxConfCryptoBackup(box.ID, persisted)
 	}
 
@@ -356,6 +368,9 @@ func (box *Box) SaveConf(conf *conf.BoxConf) error {
 
 	if err = box.saveConf0(newData); err != nil {
 		return err
+	}
+	if syncChange {
+		IncSyncIfNeeded(confPath)
 	}
 	return syncBoxConfCryptoBackup(box.ID, persisted)
 }

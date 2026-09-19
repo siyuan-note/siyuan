@@ -48,6 +48,9 @@ func RemoveSnippet(id string) (ret *conf.Snippet, err error) {
 		}
 	}
 	err = writeSnippetsConf(snippets)
+	if err == nil {
+		IncSyncIfNeeded(filepath.Join(util.SnippetsPath, "conf.json"))
+	}
 	return
 }
 
@@ -56,6 +59,9 @@ func SetSnippet(snippets []*conf.Snippet) (err error) {
 	defer snippetsLock.Unlock()
 
 	err = writeSnippetsConf(snippets)
+	if err == nil {
+		IncSyncIfNeeded(filepath.Join(util.SnippetsPath, "conf.json"))
+	}
 	return
 }
 

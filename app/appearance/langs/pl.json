@@ -1,4 +1,5 @@
 {
+	"copyVersion": "Kopiuj numer wersji",
 	"duplicateDocTree": "Duplikuj wraz z dokumentami podrzędnymi",
 	"syncProviderChangeConfirm": "Przed zmianą dostawcy synchronizacji SiYuan musi sprawdzić zasoby i wcześniejsze migawki. Może być konieczne pobranie brakującej zawartości z obecnej chmury. Może to potrwać. Kontynuować?",
 	"syncProviderChangeContinue": "Kontynuuj",

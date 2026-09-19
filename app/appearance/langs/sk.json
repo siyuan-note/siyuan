@@ -1,4 +1,5 @@
 {
+	"copyVersion": "Kopírovať číslo verzie",
 	"duplicateDocTree": "Duplikovať s poddokumentmi",
 	"syncProviderChangeConfirm": "Pred zmenou poskytovateľa synchronizácie musí SiYuan skontrolovať zdroje a staršie snímky a prípadne stiahnuť chýbajúci obsah z aktuálneho cloudového úložiska. Môže to chvíľu trvať. Pokračovať?",
 	"syncProviderChangeContinue": "Pokračovať",

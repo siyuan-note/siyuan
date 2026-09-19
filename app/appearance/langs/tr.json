@@ -1,4 +1,5 @@
 {
+	"copyVersion": "Sürüm numarasını kopyala",
 	"duplicateDocTree": "Alt belgelerle birlikte çoğalt",
 	"syncProviderChangeConfirm": "Senkronizasyon sağlayıcısını değiştirmeden önce SiYuan, kaynakları ve geçmiş anlık görüntüleri kontrol etmeli ve gerekirse eksik içeriği mevcut bulut depolamasından indirmelidir. Bu işlem biraz zaman alabilir. Devam edilsin mi?",
 	"syncProviderChangeContinue": "Devam et",

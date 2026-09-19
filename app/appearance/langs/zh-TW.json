@@ -1,4 +1,5 @@
 {
+	"copyVersion": "複製版本號",
 	"duplicateDocTree": "連同子文件複製為副本",
 	"syncProviderChangeConfirm": "切換同步服務提供者前，需要檢查資源和歷史快照的完整性，必要時會從目前的雲端下載缺失內容，可能需要較長時間。是否繼續？",
 	"syncProviderChangeContinue": "繼續",

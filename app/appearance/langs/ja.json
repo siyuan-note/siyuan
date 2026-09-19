@@ -1,4 +1,5 @@
 {
+	"copyVersion": "バージョン番号をコピー",
 	"duplicateDocTree": "子ドキュメントを含めて複製",
 	"syncProviderChangeConfirm": "同期プロバイダーを切り替える前に、リソースと過去のスナップショットの完全性を確認し、必要に応じて現在のクラウドストレージから不足している内容をダウンロードします。時間がかかる場合があります。続行しますか？",
 	"syncProviderChangeContinue": "続行",

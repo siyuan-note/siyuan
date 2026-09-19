@@ -1,4 +1,5 @@
 {
+	"copyVersion": "Copy version number",
 	"duplicateDocTree": "Duplicate with sub-documents",
 	"syncProviderChangeConfirm": "Before switching sync providers, SiYuan needs to check resources and historical snapshots and may download missing content from the current cloud storage. This may take some time. Continue?",
 	"syncProviderChangeContinue": "Continue",

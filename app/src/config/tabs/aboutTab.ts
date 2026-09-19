@@ -6,6 +6,8 @@ import {openLink} from "../../editor/openLink";
 import {sendAppSetting} from "./appRuntime";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {openChangelog} from "../../boot/openChangelog";
+import {writeText} from "../../protyle/util/compatibility";
+import {showMessage} from "../../dialog/message";
 
 const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("version", "");
@@ -80,7 +82,13 @@ const genAboutVersionHtml = (): string => {
 </div>`;
 };
 
-const genAboutVersionName = () => `<div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>`;
+const genAboutVersionName = () => `<div class="config-name fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</span>
+    <span class="fn__space"></span>
+    <button type="button" id="copyVersionBtn" class="block__icon block__icon--show fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.copyVersion}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </button>
+</div>`;
 
 const genAllChangelogsLink = () => `<a href="https://github.com/siyuan-note/siyuan/releases" target="_blank">${window.siyuan.languages.allChangelogs}</a>`;
 
@@ -95,6 +103,10 @@ const genAboutVersionActions = (showCheckUpdate: boolean) => `<div class="fn__fl
 </div>`;
 
 const mountAboutVersionSlot = (root: HTMLElement) => {
+    root.querySelector("#copyVersionBtn")?.addEventListener("click", () => {
+        writeText(`v${Constants.SIYUAN_VERSION}`);
+        showMessage(window.siyuan.languages.copied);
+    });
     root.querySelector("#viewChangelogBtn")?.addEventListener("click", () => {
         openChangelog(true);
     });

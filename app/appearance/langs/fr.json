@@ -1,4 +1,5 @@
 {
+	"copyVersion": "Copier le numéro de version",
 	"duplicateDocTree": "Dupliquer avec les sous-documents",
 	"syncProviderChangeConfirm": "Avant de changer de fournisseur de synchronisation, SiYuan doit vérifier les ressources et les anciens instantanés, et peut télécharger le contenu manquant depuis le stockage cloud actuel. Cela peut prendre un certain temps. Continuer ?",
 	"syncProviderChangeContinue": "Continuer",

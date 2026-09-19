@@ -27,14 +27,14 @@ export const openTopBarMenu = (app: App, target?: Element) => {
         const hasSetting = hasPluginSetting(plugin);
         for (let i = 0; i < plugin.topBarIcons.length; i++) {
             const item = plugin.topBarIcons[i];
-            if (!document.contains(item)) {
+            const hasUnpin = isMobile() && window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
+            if (!document.contains(item) && !hasUnpin) {
                 plugin.topBarIcons.splice(i, 1);
                 i--;
                 continue;
             }
             const submenu: IMenu[] = [];
             if (isMobile()) {
-                const hasUnpin = window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
                 submenu.push({
                     id: hasUnpin ? "pin" : "unpin",
                     icon: hasUnpin ? "iconPin" : "iconUnpin",
@@ -44,6 +44,9 @@ export const openTopBarMenu = (app: App, target?: Element) => {
                             window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].splice(
                                 window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].indexOf(item.id), 1);
                             item.classList.remove("fn__none");
+                            if (!document.contains(item)) {
+                                document.getElementById("menuPluginTopBar")?.after(item);
+                            }
                         } else {
                             window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].push(item.id);
                             window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN] = Array.from(new Set(

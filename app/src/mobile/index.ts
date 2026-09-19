@@ -16,6 +16,7 @@ import {Menus} from "../menus";
 import {addBaseURL, parseSiYuanUriInfo, setNoteBook} from "../util/pathName";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
 import {
+    handleTouchCancel,
     handleTouchEnd,
     handleTouchMove,
     handleTouchSelectionChange,
@@ -240,7 +241,7 @@ class App {
             document.addEventListener("touchstart", handleTouchStart, false);
             document.addEventListener("touchmove", handleTouchMove, false);
             document.addEventListener("touchend", handleTouchEnd, false);
-            document.addEventListener("touchcancel", handleTouchEnd, false);
+            document.addEventListener("touchcancel", handleTouchCancel, false);
             document.addEventListener("selectionchange", handleTouchSelectionChange, true);
             window.addEventListener("nativePhysicalTouchUp", handleTouchUp, false);
             window.addEventListener("keyup", () => {

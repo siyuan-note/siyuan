@@ -1,15 +1,17 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
+import {getTouchAxis} from "./touchGesture";
 import {
     getOpeningSidebar,
-    getOpenSidebarReleaseAction,
     getSidebarClosingDirection,
     getSidebarClosingOffset,
     getSidebarOpeningOffset,
+    MOBILE_SIDEBAR_SWIPE_ACTIVATION_DISTANCE,
     MOBILE_SIDEBAR_MASK_SWIPING_CLASS,
     MOBILE_SIDEBAR_SWIPING_CLASS,
     setSidebarSwipeState,
     shouldCloseGlobalMenu,
+    shouldCommitSidebarSwipe,
     shouldDragOpenSidebar,
 } from "./touchPanelGesture";
 
@@ -45,13 +47,6 @@ describe("mobile sidebar touch gesture", () => {
         assert.equal(shouldDragOpenSidebar("right", "toLeft"), false);
     });
 
-    it("reopens a sidebar when a closing drag is pulled back", () => {
-        assert.equal(getOpenSidebarReleaseAction("left", "toLeft", false), "close");
-        assert.equal(getOpenSidebarReleaseAction("left", "toLeft", true), "open");
-        assert.equal(getOpenSidebarReleaseAction("right", "toRight", false), "close");
-        assert.equal(getOpenSidebarReleaseAction("right", "toRight", true), "open");
-    });
-
     it("closes the global menu only for an unreversed swipe to the right", () => {
         assert.equal(shouldCloseGlobalMenu("toRight", false), true);
         assert.equal(shouldCloseGlobalMenu("toRight", true), false);
@@ -74,6 +69,30 @@ describe("mobile sidebar touch gesture", () => {
         assert.equal(getSidebarOpeningOffset("right", 120, 300), 180);
         assert.equal(getSidebarOpeningOffset("right", -20, 300), 300);
         assert.equal(getSidebarOpeningOffset("right", 400, 300), 0);
+    });
+
+    it("uses a sidebar-specific activation dead zone", () => {
+        assert.equal(getTouchAxis(11, 0, MOBILE_SIDEBAR_SWIPE_ACTIVATION_DISTANCE), undefined);
+        assert.equal(getTouchAxis(12, 0, MOBILE_SIDEBAR_SWIPE_ACTIVATION_DISTANCE), "x");
+    });
+
+    it("ignores short or slow sidebar swipes", () => {
+        assert.equal(shouldCommitSidebarSwipe("toRight", -31, 50, 360), false);
+        assert.equal(shouldCommitSidebarSwipe("toLeft", 31, 50, 360), false);
+        assert.equal(shouldCommitSidebarSwipe("toRight", -32, 200, 360), false);
+        assert.equal(shouldCommitSidebarSwipe("toLeft", 32, 200, 360), false);
+    });
+
+    it("commits fast sidebar flicks in either direction", () => {
+        assert.equal(shouldCommitSidebarSwipe("toRight", -32, 100, 360), true);
+        assert.equal(shouldCommitSidebarSwipe("toLeft", 32, 100, 360), true);
+    });
+
+    it("commits long drags and rejects movement opposite to the locked direction", () => {
+        assert.equal(shouldCommitSidebarSwipe("toRight", -120, 1000, 360), true);
+        assert.equal(shouldCommitSidebarSwipe("toLeft", 120, 1000, 360), true);
+        assert.equal(shouldCommitSidebarSwipe("toRight", 120, 100, 360), false);
+        assert.equal(shouldCommitSidebarSwipe("toLeft", -120, 100, 360), false);
     });
 
     it("keeps only the active sidebar in the swiping state", () => {

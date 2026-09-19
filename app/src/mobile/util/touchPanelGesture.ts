@@ -1,6 +1,10 @@
 export type MobileSidebarSide = "left" | "right";
 export type MobileSwipeDirection = "toLeft" | "toRight";
-export type MobileSidebarReleaseAction = "close" | "open";
+
+export const MOBILE_SIDEBAR_SWIPE_ACTIVATION_DISTANCE = 12;
+export const MOBILE_SIDEBAR_SWIPE_MIN_FLING_DISTANCE = 32;
+export const MOBILE_SIDEBAR_SWIPE_MIN_FLING_VELOCITY = 0.3;
+export const MOBILE_SIDEBAR_SWIPE_SETTLE_RATIO = 1 / 3;
 
 export const MOBILE_SIDEBAR_SWIPING_CLASS = "side-panel--swiping";
 export const MOBILE_SIDEBAR_MASK_SWIPING_CLASS = "side-mask--swiping";
@@ -43,15 +47,6 @@ export const shouldCloseGlobalMenu = (direction: MobileSwipeDirection, reversing
     return direction === "toRight" && !reversing;
 };
 
-export const getOpenSidebarReleaseAction = (
-    side: MobileSidebarSide,
-    firstDirection: MobileSwipeDirection,
-    reversing: boolean,
-): MobileSidebarReleaseAction => {
-    const closing = shouldDragOpenSidebar(side, firstDirection);
-    return closing !== reversing ? "close" : "open";
-};
-
 export const getSidebarClosingOffset = (side: MobileSidebarSide, xDiff: number, width: number) => {
     if (side === "left") {
         return Math.max(Math.min(-xDiff, 0), -width);
@@ -64,4 +59,22 @@ export const getSidebarOpeningOffset = (side: MobileSidebarSide, xDiff: number, 
         return Math.min(Math.max(-xDiff - width, -width), 0);
     }
     return Math.max(Math.min(width - xDiff, width), 0);
+};
+
+export const shouldCommitSidebarSwipe = (
+    direction: MobileSwipeDirection,
+    xDiff: number,
+    duration: number,
+    width: number,
+) => {
+    const distance = direction === "toRight" ? -xDiff : xDiff;
+    if (distance <= 0) {
+        return false;
+    }
+    if (distance >= width * MOBILE_SIDEBAR_SWIPE_SETTLE_RATIO) {
+        return true;
+    }
+    const velocity = duration > 0 ? distance / duration : Number.POSITIVE_INFINITY;
+    return distance >= MOBILE_SIDEBAR_SWIPE_MIN_FLING_DISTANCE &&
+        velocity >= MOBILE_SIDEBAR_SWIPE_MIN_FLING_VELOCITY;
 };

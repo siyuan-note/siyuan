@@ -7,7 +7,7 @@
 		"id": "20210808180321-hbvl5c2",
 		"title": "通用操作",
 		"type": "doc",
-		"updated": "20260919112418"
+		"updated": "20260919115608"
 	},
 	"Children": [
 		{
@@ -492,7 +492,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260919112418-ml7zduv",
-				"updated": "20260919112418"
+				"updated": "20260919115608"
 			},
 			"Children": [
 				{
@@ -506,7 +506,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260919112418-snrcycl",
-				"updated": "20260919112418"
+				"updated": "20260919115608"
 			},
 			"Children": [
 				{
@@ -525,7 +525,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "带子文档复制为副本"
+					"TextMarkTextContent": "带子文档创建副本"
 				},
 				{
 					"Type": "NodeText",

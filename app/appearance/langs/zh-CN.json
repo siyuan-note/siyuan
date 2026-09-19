@@ -1,5 +1,5 @@
 {
-	"duplicateDocTree": "带子文档复制为副本",
+	"duplicateDocTree": "带子文档创建副本",
 	"syncProviderChangeConfirm": "切换同步提供商前，需要检查资源和历史快照的完整性，必要时会从当前云端下载缺失内容，可能需要较长时间。是否继续？",
 	"syncProviderChangeContinue": "继续",
 	"syncProviderChangeFailed": "无法确认同步提供商是否已切换，请检查连接并刷新界面。",

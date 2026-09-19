@@ -43,6 +43,7 @@ import {revealTabsForTarget} from "../protyle/render/tabsRender";
 import {isHiddenTabContent} from "../protyle/render/tabsVisibility";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {shouldCheckOtherWindows} from "./openFileWindow";
+import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 
 const isSameCustomTab = (type: string, data: any, options: IOpenFileOptions) => {
     if (!options.custom || (options.custom.id && options.custom.id !== type)) {
@@ -686,6 +687,23 @@ export const updatePanelByEditor = (options: {
                     pushBack(options.protyle, undefined, options.protyle.wysiwyg.element.firstElementChild);
                 }
                 countBlockWord([], options.protyle);
+            }
+        }
+        if (!options.focus && options.pushBackStack && options.protyle.preview.element.classList.contains("fn__none")) {
+            // 浏览页签时记录位置，不聚焦编辑器，避免唤起软键盘。
+            const protyle = options.protyle;
+            const range = protyle.toolbar.range;
+            if (range && protyle.element.contains(range.startContainer) && protyle.element.contains(range.endContainer)) {
+                pushBack(protyle, range);
+            } else {
+                const block = protyle.wysiwyg.element.firstElementChild;
+                const editable = block && getContenteditableElement(block);
+                if (editable) {
+                    const initialRange = document.createRange();
+                    initialRange.selectNodeContents(editable);
+                    initialRange.collapse(true);
+                    pushBack(protyle, initialRange, block);
+                }
             }
         }
         if (window.siyuan.config.fileTree.alwaysSelectOpenedFile && options.protyle) {

@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260919231210"
+		"updated": "20260919232200"
 	},
 	"Children": [
 		{
@@ -11944,7 +11944,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-x02vhoh",
-				"updated": "20260919231210"
+				"updated": "20260919232200"
 			},
 			"Children": [
 				{
@@ -11964,7 +11964,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-yv5msrs",
-				"updated": "20260919231210"
+				"updated": "20260919232200"
 			},
 			"Children": [
 				{
@@ -12427,7 +12427,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "焦点位于脑图内且已选中节点"
+									"Data": "切换脑图并选中节点"
 								}
 							]
 						}
@@ -12464,7 +12464,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "焦点位于脑图内且已选中节点"
+									"Data": "切换脑图并选中节点"
 								}
 							]
 						}
@@ -12501,7 +12501,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "焦点位于脑图内且已选中节点"
+									"Data": "切换脑图并选中节点"
 								}
 							]
 						}
@@ -12538,7 +12538,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "焦点位于脑图内且已选中节点"
+									"Data": "切换脑图并选中节点"
 								}
 							]
 						}
@@ -12575,7 +12575,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "焦点位于脑图内且已选中节点"
+									"Data": "切换脑图并选中节点"
 								}
 							]
 						}

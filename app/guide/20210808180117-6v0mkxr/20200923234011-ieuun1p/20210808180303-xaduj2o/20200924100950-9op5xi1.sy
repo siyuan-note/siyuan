@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260919231210"
+		"updated": "20260919232200"
 	},
 	"Children": [
 		{
@@ -11956,7 +11956,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-ans1gna",
-				"updated": "20260919231210"
+				"updated": "20260919232200"
 			},
 			"Children": [
 				{
@@ -11980,7 +11980,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-4oe7doq",
-				"updated": "20260919231210"
+				"updated": "20260919232200"
 			},
 			"Children": [
 				{
@@ -12441,7 +12441,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Focus the mind map and select a node"
+									"Data": "Switch to mind map and select a node"
 								}
 							]
 						}
@@ -12478,7 +12478,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Focus the mind map and select a node"
+									"Data": "Switch to mind map and select a node"
 								}
 							]
 						}
@@ -12515,7 +12515,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Focus the mind map and select a node"
+									"Data": "Switch to mind map and select a node"
 								}
 							]
 						}
@@ -12552,7 +12552,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Focus the mind map and select a node"
+									"Data": "Switch to mind map and select a node"
 								}
 							]
 						}
@@ -12589,7 +12589,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Focus the mind map and select a node"
+									"Data": "Switch to mind map and select a node"
 								}
 							]
 						}

@@ -396,6 +396,10 @@ export class ListMindmapView {
                 this.resizeObserver.observe(element);
             }
             element.classList.toggle("list-mindmap__node--virtual", node.virtual);
+            element.classList.toggle("list-mindmap__node--untitled", node.virtual && !model.metadata.rootTitle);
+            if (node.virtual) {
+                element.setAttribute("aria-label", model.metadata.rootTitle || this.label("listMindmapRoot"));
+            }
             element.classList.toggle("list-mindmap__node--root", id === model.root.id);
             element.classList.toggle("list-mindmap__node--branch", node.children.length > 0);
             element.style.backgroundColor = model.metadata.nodes[id]?.backgroundColor || "";
@@ -411,7 +415,7 @@ export class ListMindmapView {
                 const content = this.getContentHost(id);
                 content.replaceChildren();
                 if (node.virtual) {
-                    content.textContent = this.model.metadata.rootTitle || this.label("listMindmapRoot");
+                    content.textContent = this.model.metadata.rootTitle || "";
                 } else {
                     node.contentBlocks.forEach((block) => {
                         const clone = block.cloneNode(true) as HTMLElement;
@@ -434,7 +438,7 @@ export class ListMindmapView {
                 }
                 const hasBlankLines = node.contentBlocks.length > 1 || content.textContent.includes("\n") ||
                     content.querySelectorAll("br").length > 1;
-                const empty = !hasBlankLines && !content.textContent.replace(/[\u200b\ufeff]/g, "").trim() &&
+                const empty = !node.virtual && !hasBlankLines && !content.textContent.replace(/[\u200b\ufeff]/g, "").trim() &&
                     !content.querySelector("img, svg, video, audio, iframe, canvas, hr, [data-content]");
                 content.classList.toggle("list-mindmap__content--empty", empty);
                 content.dataset.placeholder = this.label("listMindmapPlaceholder");
@@ -492,7 +496,7 @@ export class ListMindmapView {
                 const element = this.nodeElements.get(id);
                 return {
                     id,
-                    width: Math.max(64, element.offsetWidth),
+                    width: Math.max(1, element.offsetWidth),
                     height: Math.max(1, element.offsetHeight),
                     collapsed: this.folded.get(id) ?? node.collapsed,
                     children: node.children.map(child => makeLayoutNode(child.id)),
@@ -1231,7 +1235,8 @@ export class ListMindmapView {
         const input = createElement("textarea", "list-mindmap__root-title");
         const measure = createElement("span", "list-mindmap__root-title-measure");
         input.rows = 1;
-        input.value = this.model.metadata.rootTitle || this.label("listMindmapRoot");
+        input.value = this.model.metadata.rootTitle || "";
+        input.placeholder = this.label("listMindmapPlaceholder");
         measure.textContent = input.value;
         input.setAttribute("aria-label", this.label("text"));
         content.classList.add("list-mindmap__root-title-host");

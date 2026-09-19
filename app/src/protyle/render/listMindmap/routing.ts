@@ -57,7 +57,7 @@ const findRelationRoute = (from: MindmapRouteBox, to: MindmapRouteBox,
     const boxes = nodes.flatMap(node => [
         {left: node.x - clearance, right: node.x + node.width + clearance,
             top: node.y - clearance, bottom: node.y + node.height + clearance},
-        {left: node.x + node.width - 19, right: node.x + node.width + 46,
+        {left: node.x + node.width - 19, right: node.x + node.width + 61,
             top: (node.controlY ?? node.y + node.height) - 15, bottom: (node.controlY ?? node.y + node.height) + 15},
     ]);
     const ports = (node: MindmapRouteBox, other: MindmapRouteBox) => {

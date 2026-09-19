@@ -950,8 +950,13 @@ const browserCases = async (sourceCode: string, css: string) => {
         titleView.getContentHost(model.root.id).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
         const input = host.querySelector<HTMLTextAreaElement>(".list-mindmap__root-title");
         check.ok(input, "virtual root supports inline title editing");
-        check.deepEqual({width: node.offsetWidth, height: node.offsetHeight}, before,
-            "entering root title editing preserves dimensions");
+        if (model.metadata.rootTitle) {
+            check.deepEqual({width: node.offsetWidth, height: node.offsetHeight}, before,
+                "entering named root title editing preserves dimensions");
+        } else {
+            check.equal(before.width, before.height, "the unnamed root is a compact square");
+            check.equal(input.value, "", "editing an unnamed root starts with empty text");
+        }
         input.value = "A long root title that grows while typing";
         input.dispatchEvent(new Event("input", {bubbles: true}));
         await settle();
@@ -969,7 +974,9 @@ const browserCases = async (sourceCode: string, css: string) => {
     await renameRoot("Canceled title", "Escape");
     check.equal(titleView.getContentHost(model.root.id).textContent, "Custom root");
     await renameRoot("", "Enter");
-    check.equal(titleView.getContentHost(model.root.id).textContent, "listMindmapRoot");
+    check.equal(titleView.getContentHost(model.root.id).textContent, "");
+    check.ok(nodeElement(model.root.id).classList.contains("list-mindmap__node--untitled"));
+    check.equal(nodeElement(model.root.id).offsetWidth, nodeElement(model.root.id).offsetHeight);
     titleView.destroy();
 
     const singleList = reset("* Single\n");

@@ -168,6 +168,40 @@
 
     &--virtual {
       font-weight: 600;
+      background: var(--b3-theme-surface);
+      box-shadow: inset 0 0 0 1px var(--b3-border-color);
+      transition: background-color 120ms ease, box-shadow 120ms ease;
+
+      &:hover:not(.list-mindmap__node--dragging):not(.list-mindmap__node--editing):not(.list-mindmap__node--selected):not(.list-mindmap__node--relation) {
+        background: var(--b3-list-hover);
+        box-shadow: inset 0 0 0 1px var(--b3-border-color);
+      }
+    }
+
+    &--untitled:not(.list-mindmap__node--editing) {
+      width: 28px;
+      min-width: 28px;
+      height: 28px;
+      min-height: 28px;
+      padding: 0;
+
+      > .list-mindmap__content {
+        display: grid;
+        place-items: center;
+        min-width: 0;
+        min-height: 0;
+        width: 100%;
+        height: 100%;
+
+        &::before {
+          content: "";
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: currentColor;
+          opacity: .45;
+        }
+      }
     }
 
     &--selected:not([data-mindmap-drop])::after {
@@ -342,7 +376,7 @@
   &__fold {
     position: absolute;
     z-index: 1;
-    right: -11px;
+    right: -26px;
     top: calc(50% - 11px);
     min-width: 22px;
     width: 22px;
@@ -408,11 +442,11 @@
   }
 
   &__node--branch > &__add-child {
-    right: -38px;
+    right: -53px;
   }
 
   &__node--branch > &__add-bridge {
-    width: 38px;
+    width: 53px;
   }
 
   &__node:not(.list-mindmap__node--root) {

@@ -12,7 +12,8 @@ import {Editor} from "../editor";
 import {scrollCenter} from "./highlightById";
 import {zoomOut} from "../menus/protyle";
 import {showMessage} from "../dialog/message";
-import {saveScroll} from "../protyle/scroll/saveScroll";
+import {getDocByScroll, saveScroll} from "../protyle/scroll/saveScroll";
+import {isPhablet} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
 import type {App} from "../index";
 import {onGet} from "../protyle/util/onGet";
@@ -20,6 +21,23 @@ import {isEncryptedBox} from "./pathName";
 
 let forwardStack: IBackStack[] = [];
 let previousIsBack = false;
+const readingPositions = new WeakMap<IBackStack, IScrollAttr>();
+
+export const saveBackScroll = (protyle?: IProtyle) => {
+    if (!isPhablet()) {
+        return;
+    }
+    const stack = previousIsBack ? forwardStack[forwardStack.length - 1] :
+        window.siyuan.backStack[window.siyuan.backStack.length - 1];
+    if (!stack || (protyle && stack.protyle !== protyle) ||
+        stack.protyle.element.getBoundingClientRect().height === 0) {
+        return;
+    }
+    const position = saveScroll(stack.protyle, true) as IScrollAttr;
+    if (position) {
+        readingPositions.set(stack, position);
+    }
+};
 
 const focusStack = async (app: App, stack: IBackStack) => {
     hideElements(["gutter", "toolbar", "hint", "util", "dialog"], stack.protyle);
@@ -124,6 +142,26 @@ const focusStack = async (app: App, stack: IBackStack) => {
     }
 
     const currentZoomId = stack.protyle.block.showAll ? stack.protyle.block.id : undefined;
+    const readingPosition = readingPositions.get(stack);
+    if (isPhablet() && readingPosition && currentZoomId === stack.zoomId) {
+        // 阅读位置独立于旧光标，显示页签后按离开时的加载范围和滚动值恢复。
+        stack.protyle.model.parent.parent.switchTab(stack.protyle.model.parent.headElement);
+        const first = stack.protyle.wysiwyg.element.firstElementChild?.getAttribute("data-node-id");
+        const last = stack.protyle.wysiwyg.element.lastElementChild?.getAttribute("data-node-id");
+        if (first === readingPosition.startId && last === readingPosition.endId) {
+            stack.protyle.contentElement.scrollTop = readingPosition.scrollTop;
+            return true;
+        }
+        return new Promise<boolean>(resolve => {
+            getDocByScroll({
+                protyle: stack.protyle,
+                scrollAttr: readingPosition,
+                focus: false,
+                cb: () => resolve(true),
+                fail: () => resolve(false),
+            });
+        });
+    }
     const focusTitle = () => {
         if (stack.protyle.title.editElement.getBoundingClientRect().height === 0) {
             // 切换 tab
@@ -245,6 +283,12 @@ const focusStack = async (app: App, stack: IBackStack) => {
 };
 
 export const goBack = async (app: App) => {
+    const current = previousIsBack ? forwardStack[forwardStack.length - 1] :
+        window.siyuan.backStack[window.siyuan.backStack.length - 1];
+    const target = window.siyuan.backStack[window.siyuan.backStack.length - (previousIsBack ? 1 : 2)];
+    if (target && current?.protyle !== target.protyle) {
+        saveBackScroll();
+    }
     if (window.siyuan.backStack.length === 0) {
         if (forwardStack.length > 0) {
             await focusStack(app, forwardStack[forwardStack.length - 1]);
@@ -274,6 +318,12 @@ export const goBack = async (app: App) => {
 };
 
 export const goForward = async (app: App) => {
+    const current = previousIsBack ? forwardStack[forwardStack.length - 1] :
+        window.siyuan.backStack[window.siyuan.backStack.length - 1];
+    const target = forwardStack[forwardStack.length - (previousIsBack ? 2 : 1)];
+    if (target && current?.protyle !== target.protyle) {
+        saveBackScroll();
+    }
     if (forwardStack.length === 0) {
         if (window.siyuan.backStack.length > 0) {
             await focusStack(app, window.siyuan.backStack[window.siyuan.backStack.length - 1]);
@@ -351,6 +401,7 @@ export const pushBack = (protyle: IProtyle, range?: Range, blockElement?: Elemen
             (protyle.block.showAll && lastStack.zoomId === protyle.block.id) || (!lastStack.zoomId && !protyle.block.showAll)
         )) {
             lastStack.position = position;
+            readingPositions.delete(lastStack);
         } else {
             if (forwardStack.length > 0) {
                 if (previousIsBack) {

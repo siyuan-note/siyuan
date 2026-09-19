@@ -80,6 +80,8 @@ test("tablet tab switches navigate A B C backward and forward without touching t
     context.document.contains = () => true;
     context.document.querySelector = (): undefined => undefined;
     context.Constants = {SIZE_UNDO: 128};
+    context.readingPositions = new WeakMap();
+    context.saveBackScroll = () => {};
     context.hasClosestBlock = (node: unknown) => node;
     context.getSelectionOffset = () => ({start: 0, end: 0});
     const switchTab = (protyle: unknown, pushBackStack: boolean) => context.update({

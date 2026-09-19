@@ -1391,11 +1391,23 @@ func RenderValueTextRich(tree *parse.Tree) (content string, err error) {
 }
 
 func valueTextRichBlockDOM2Kramdown(luteEngine *lute.Lute, blockDOM string) string {
-	// 空段落依靠块属性列表保留，相邻块的标识也必须保留以隔开属性列表。
+	tree := luteEngine.BlockDOM2Tree(blockDOM)
+	first := tree.Root.FirstChild
+	singleEmptyParagraph := nil != first && ast.NodeParagraph == first.Type &&
+		"" == strings.TrimSpace(strings.ReplaceAll(first.Content(), "\u200b", ""))
+	if singleEmptyParagraph {
+		for next := first.Next; nil != next; next = next.Next {
+			singleEmptyParagraph = ast.NodeKramdownBlockIAL == next.Type
+			if !singleEmptyParagraph {
+				break
+			}
+		}
+	}
+	// 多块内容中的空段落依靠块属性列表保留，相邻块的标识也必须保留以隔开属性列表。
 	preserveBlockIDs := false
-	ast.Walk(luteEngine.BlockDOM2Tree(blockDOM).Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if entering && ast.NodeParagraph == node.Type && "" == strings.TrimSpace(strings.ReplaceAll(node.Content(), "\u200b", "")) {
-			preserveBlockIDs = true
+			preserveBlockIDs = !singleEmptyParagraph
 			return ast.WalkStop
 		}
 		return ast.WalkContinue

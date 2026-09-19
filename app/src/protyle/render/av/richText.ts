@@ -327,9 +327,12 @@ export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTe
     let cleanBlockDOM = cleanAVRichTextBlockDOMStructure(sanitizedBlockDOM);
     const template = document.createElement("template");
     template.innerHTML = cleanBlockDOM;
-    // 空段落依靠块属性列表保留，同时保留相邻块的标识，避免属性被合并到前一段。
-    if (Array.from(template.content.querySelectorAll('[data-type="NodeParagraph"]'))
-        .some(element => lute.BlockDOM2Md(element.outerHTML).trim() === "")) {
+    const paragraphs = Array.from(template.content.querySelectorAll<HTMLElement>('[data-type="NodeParagraph"]'));
+    const hasEmptyParagraph = paragraphs.some(element => lute.BlockDOM2Md(element.outerHTML).trim() === "");
+    const singleEmptyParagraph = template.content.children.length === 1 &&
+        template.content.firstElementChild === paragraphs[0] && hasEmptyParagraph;
+    // 多块内容中的空段落依靠块属性列表保留，同时保留相邻块的标识，避免属性被合并到前一段。
+    if (hasEmptyParagraph && !singleEmptyParagraph) {
         cleanBlockDOM = cleanAVRichTextBlockDOMStructure(sanitizedBlockDOM, true);
     }
     const styleBackslashEncoding = createAVRichTextStyleBackslashEncoding(cleanBlockDOM);

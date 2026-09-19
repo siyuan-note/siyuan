@@ -34,7 +34,7 @@ const sources = () => {
         icons: ["unchecked", "in-progress", "canceled"].map(name =>
             readFileSync(path.join(__dirname, `../src/assets/icon/task-${name}.svg`), "utf8")),
         actions: extract("protyle/render/tabsRender.ts", ["getTabTask", "getTabItems", "hasTabsTasks"]) +
-            extract("protyle/render/listMindmap/model.ts", ["LIST_MINDMAP_META_ATTRIBUTE", "isRecord", "invalidMetadata",
+            extract("protyle/render/listMindmap/model.ts", ["isRecord", "invalidMetadata",
                 "parseListMindmapMetadata", "cleanListMindmapDOM", "remapListMindmapIDs"]) +
             extract("protyle/util/tabsCopy.ts", ["preserveTabTask", "preserveCopiedTabTask", "remapTabsDOMIDs", "wrapPastedTabItems"]) +
             extract("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]) +
@@ -43,7 +43,8 @@ const sources = () => {
             extract("protyle/wysiwyg/list.ts", ["setTaskListItemMarker", "toggleTaskListItem"]) +
             extract("protyle/util/editorCommonEvent.ts", ["moveTo"]),
         renderer: compile(renderSource.replace(/^import .*;\r?\n/gm, "")) +
-            extract("protyle/render/tabsState.ts", ["resolveTabID", "tabKeyboardTarget"]),
+            extract("protyle/render/tabsState.ts", ["resolveTabID", "tabKeyboardTarget"]) +
+            extract("protyle/render/tabsAttributes.ts", ["clearTabsAttributes", "renderTabsAttributes"]),
         menu: extract("protyle/wysiwyg/taskStatusDialog.ts", ["getTaskStatusItems"]),
         tabMenu: extract("protyle/wysiwyg/tabs.ts", ["canEdit", "openTabsMenu"]),
         normalizeSeparators: extract("config/entryVisibility/runtime.ts", ["normalizeSeparators"]),
@@ -79,7 +80,9 @@ const cases = async source => {
     const api = new Function("Constants", "transaction", "updateTransaction", "dayjs", "getParentBlock",
         "getPreviousBlockSibling", "getTopAloneElement", source.actions +
         "; return {getTabTask, hasTabsTasks, preserveCopiedTabTask, wrapPastedTabItems, moveTo, moveTab, toggleTabsTasks, setTabTask, setTaskListItemMarker, toggleTaskListItem};")(
-        {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing", ZWSP: "\u200b"},
+        {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing", ZWSP: "\u200b",
+            CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
+            CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
         (_protyle, forward, backward) => { lastTransaction = {forward, backward}; },
         (_protyle, item, html) => { lastTransaction = {forward: item.outerHTML, backward: html}; },
         () => ({format: () => "20260915120000"}), item => item.parentElement,

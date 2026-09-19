@@ -67,6 +67,7 @@ const setupOptionMenu = (kanban = false) => {
         transaction: (_protyle: any, operations: any[], inverse: any[]) => transactions.push({operations, inverse}),
         getEditHTML: () => "",
         bindEditEvent: () => {},
+        isMobile: () => false,
     });
     if (kanban) {
         exports.openKanbanGroupMenu({protyle: {}, blockElement, target});

@@ -23,7 +23,7 @@ import (
 	"github.com/88250/lute/parse"
 )
 
-func TestNodeStaticContentUnescapesBlockRefText(t *testing.T) {
+func TestNodeStaticContentDecodesTextMarkContent(t *testing.T) {
 	paragraph := &ast.Node{Type: ast.NodeParagraph}
 	paragraph.AppendChild(&ast.Node{
 		Type:                    ast.NodeTextMark,
@@ -39,7 +39,7 @@ func TestNodeStaticContentUnescapesBlockRefText(t *testing.T) {
 	}
 
 	content = NodeStaticContent(paragraph, nil, true, false, true)
-	if "123foo&amp;bar" != content {
+	if "123foo&bar" != content {
 		t.Fatalf("unexpected generic static content: %q", content)
 	}
 }

@@ -25,13 +25,14 @@ import {getMobileBlockSelectionElement} from "./blockSelection";
 import {updateMultiSelectToolbar} from "./multiSelectToolbar";
 import {
     getOpeningSidebar,
-    getOpenSidebarReleaseAction,
     getSidebarClosingOffset,
     getSidebarOpeningOffset,
+    MOBILE_SIDEBAR_SWIPE_ACTIVATION_DISTANCE,
     type MobileSidebarSide,
     type MobileSwipeDirection,
     setSidebarSwipeState,
     shouldCloseGlobalMenu,
+    shouldCommitSidebarSwipe,
     shouldDragOpenSidebar,
 } from "./touchPanelGesture";
 
@@ -45,6 +46,7 @@ let firstXY: "x" | "y";
 let lastClientX: number;    // 和起始方向不一致时，记录最后一次的 clientX
 let scrollBlock: boolean;
 let isFirstMove = true;
+let swipeStartSidebar: MobileSidebarSide;
 // 长按进入多选的定时器
 let longPressTimer: number;
 let longPressBlockElement: HTMLElement;
@@ -225,6 +227,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
         window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "";
     }
 
+    const finalXDiff = Math.floor(clientX - event.changedTouches[0].clientX);
+    const finalYDiff = Math.floor(clientY - event.changedTouches[0].clientY);
+
     // 有些事件不经过 touchstart 和 touchmove，因此需设置为 null 不再继续执行
     clientX = null;
     // 有些事件不经过 touchmove
@@ -266,15 +271,15 @@ export const handleTouchEnd = (event: TouchEvent) => {
         return;
     }
 
-    let scrollEnable = false;
-    if (Date.now() - time < 1000) {
-        scrollEnable = true;
-    } else if (Math.abs(xDiff) > window.innerWidth / 3) {
-        scrollEnable = true;
-    }
+    const commitSidebarSwipe = Math.abs(finalXDiff) > Math.abs(finalYDiff) && shouldCommitSidebarSwipe(
+        firstDirection,
+        finalXDiff,
+        currentTime - time,
+        window.innerWidth,
+    );
 
     if (targetSidebar) {
-        if (isXScroll && getOpenSidebarReleaseAction(targetSidebar, firstDirection, reversing) === "close") {
+        if (commitSidebarSwipe) {
             closePanel();
         } else {
             popSidebar(targetSidebar, false);
@@ -284,16 +289,39 @@ export const handleTouchEnd = (event: TouchEvent) => {
     if (!getMobileSidebarConfig().sidebarSwipe) {
         return;
     }
-    if (!scrollEnable || !isXScroll) {
+    if (!commitSidebarSwipe) {
         closePanel();
         return;
     }
 
-    if (reversing) {
-        closePanel();
-    } else {
-        popSidebar(getOpeningSidebar(firstDirection));
+    popSidebar(getOpeningSidebar(firstDirection));
+};
+
+export const handleTouchCancel = () => {
+    updateSidebarSwipeState();
+    if (!isFirstMove) {
+        if (swipeStartSidebar) {
+            popSidebar(swipeStartSidebar, false);
+        } else {
+            closePanel();
+        }
     }
+    if (window.siyuan.mobile.editor) {
+        window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "";
+    }
+    isFirstMove = true;
+    clientX = null;
+    clientY = null;
+    xDiff = undefined;
+    yDiff = undefined;
+    firstDirection = undefined;
+    firstXY = undefined;
+    lastClientX = undefined;
+    previousClientX = undefined;
+    swipeStartSidebar = undefined;
+    scrollBlock = false;
+    clearLongPress();
+    handleTouchUp();
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
@@ -302,6 +330,7 @@ export const handleTouchStart = (event: TouchEvent) => {
     longPressBlockElement = undefined;
     longPressTouchRange = undefined;
     const target = event.touches[0].target as HTMLElement;
+    swipeStartSidebar = getTargetSidebar(target);
     if (0 < event.touches.length && (target.tagName === "VIDEO" || target.tagName === "AUDIO")) {
         // https://github.com/siyuan-note/siyuan/issues/14569
         activeBlur();
@@ -448,7 +477,10 @@ export const handleTouchMove = (event: TouchEvent) => {
     yDiff = Math.floor(clientY - event.touches[0].clientY);
     // 上下滚动防止左右滑动
     if (!firstXY) {
-        firstXY = getTouchAxis(xDiff, yDiff, Constants.SIZE_DRAG_THRESHOLD);
+        const sidebarGesture = !hasClosestByAttribute(target, "id", "model", true) &&
+            !hasClosestByAttribute(target, "id", "menu", true);
+        firstXY = getTouchAxis(xDiff, yDiff, sidebarGesture ?
+            MOBILE_SIDEBAR_SWIPE_ACTIVATION_DISTANCE : Constants.SIZE_DRAG_THRESHOLD);
         if (!firstXY) {
             return;
         }

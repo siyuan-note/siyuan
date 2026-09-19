@@ -381,6 +381,16 @@ export class Gutter {
             });
         });
         this.element.addEventListener("dragend", restoreGutter);
+        this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            if (event.button !== 0 || !protyle.options.backlinkData) {
+                return;
+            }
+            const buttonElement = hasClosestByTag(event.target as HTMLElement, "BUTTON");
+            if (buttonElement && buttonElement.getAttribute("data-type") === "fold") {
+                // 保持反链编辑区的焦点，避免引用块隐藏后布局变化导致折叠点击失效。
+                event.preventDefault();
+            }
+        });
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLInputElement }) => {
             const buttonElement = hasClosestByTag(event.target, "BUTTON");
             if (!buttonElement) {

@@ -1,5 +1,5 @@
 {
-	"copyVersion": "העתקת מספר הגרסה",
+	"copyRuntimeInfo": "העתקת מידע על סביבת הריצה",
 	"duplicateDocTree": "שכפול עם מסמכי משנה",
 	"syncProviderChangeConfirm": "לפני החלפת ספק הסנכרון, SiYuan צריך לבדוק משאבים ותמונות מצב קודמות, וייתכן שיוריד תוכן חסר מאחסון הענן הנוכחי. הפעולה עשויה להימשך זמן מה. להמשיך?",
 	"syncProviderChangeContinue": "המשך",

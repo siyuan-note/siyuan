@@ -251,6 +251,7 @@ var (
 	AddMicrosoftDefenderExclusion       = define[EmptyRequest, Null]("addMicrosoftDefenderExclusion", "/api/system/addMicrosoftDefenderExclusion", NoBody, ResponseOptions{}, "POST")
 	GetWorkspaceInfo                    = define[EmptyRequest, WorkspaceInfoData]("getWorkspaceInfo", "/api/system/getWorkspaceInfo", NoBody, ResponseOptions{}, "POST")
 	GetNetwork                          = define[EmptyRequest, NetworkData]("getNetwork", "/api/system/getNetwork", NoBody, ResponseOptions{}, "POST")
+	GetRuntimeInfo                      = define[EmptyRequest, SystemRuntimeInfoData]("getRuntimeInfo", "/api/system/getRuntimeInfo", NoBody, ResponseOptions{}, "POST")
 	CurrentTime                         = define[EmptyRequest, int64]("currentTime", "/api/system/currentTime", NoBody, ResponseOptions{}, "POST")
 	BootProgress                        = define[EmptyRequest, BootProgressData]("bootProgress", "/api/system/bootProgress", NoBody, ResponseOptions{}, "GET", "POST")
 	SetFollowSystemLockScreen           = define[LockScreenRequest, Null]("setFollowSystemLockScreen", "/api/system/setFollowSystemLockScreen", JSONBody, ResponseOptions{}, "POST")

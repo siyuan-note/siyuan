@@ -2108,6 +2108,8 @@ export type SystemRemoveCustomFontRequestInput = { "id"?: string | null; };
 
 export type SystemRepo = { "indexRetentionDays": number; "key": string | null; "retentionIndexesDaily": number; "syncIndexTiming": number; };
 
+export type SystemRuntimeInfoData = { "text": string; };
+
 export type SystemS3 = { "accessKey": string; "bucket": string; "concurrentReqs": number; "endpoint": string; "pathStyle": boolean; "region": string; "secretKey": string; "skipTlsVerify": boolean; "timeout": number; };
 
 export type SystemStat = { "assetsSize": number; "blockCount": number; "cAssetsSize": number; "cBlockCount": number; "cDataSize": number; "cTreeCount": number; "dataSize": number; "treeCount": number; };
@@ -5263,6 +5265,11 @@ export interface APIPOSTRoutes {
     "/api/system/getNetwork": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": NetworkData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/getRuntimeInfo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SystemRuntimeInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
     "/api/system/getSysFonts": {

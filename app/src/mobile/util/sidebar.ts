@@ -22,6 +22,20 @@ export const getSidebarDock = (sidebarElement: HTMLElement | null) => {
     }
 };
 
+export const switchToNextSidebarTab = (side: MobileSidebarSide) => {
+    const toolbarElement = getSidebarElement(side)?.querySelector(".toolbar--border");
+    const tabs = Array.from(toolbarElement?.querySelectorAll<HTMLElement>("[data-type$='-tab']") || [])
+        .filter(item => !item.classList.contains("fn__none"));
+    if (tabs.length < 2) {
+        return;
+    }
+    const activeIndex = tabs.findIndex(item => item.classList.contains("toolbar__icon--active"));
+    const nextTab = tabs[(activeIndex + 1) % tabs.length];
+    const type = nextTab.dataset.mobilePluginDockTab || nextTab.dataset.type.replace(/^sidebar-/, "").replace(/-tab$/, "");
+    toolbarElement.dispatchEvent(new CustomEvent("click", {detail: type}));
+    nextTab.scrollIntoView({block: "nearest", inline: "nearest"});
+};
+
 export const popSidebar = (side: MobileSidebarSide, render = true) => {
     activeBlur();
     const sidebarElement = getSidebarElement(side);

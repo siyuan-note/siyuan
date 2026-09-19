@@ -2592,11 +2592,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 countBlockWord([], protyle);
             }
             if (tabNodeElement.getAttribute("data-type") === "NodeCodeBlock") {
-                if (selectText !== "" || !event.shiftKey) {
-                    tabCodeBlock(protyle, tabNodeElement, tabRange, event.shiftKey);
-                    return true;
-                }
-                return;
+                tabCodeBlock(protyle, tabNodeElement, tabRange, event.shiftKey);
+                return true;
             }
             if (!event.shiftKey) {
                 document.execCommand("insertHTML", false, window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " "));

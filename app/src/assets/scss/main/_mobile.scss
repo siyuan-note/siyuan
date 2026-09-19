@@ -1145,7 +1145,7 @@ body.mobile-topbar--merged {
             height: auto;
             margin: 0;
             min-height: 44px;
-            padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));
+            padding: max(8px, var(--mobile-top-safe-area)) max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));
             position: sticky;
             top: 0;
             width: 100%;

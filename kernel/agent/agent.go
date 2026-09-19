@@ -1904,7 +1904,7 @@ func resolveBrowserCapabilityTimeout(confirmTimeout time.Duration) time.Duration
 // resolveQuestionTimeout 解析 question 工具等待用户作答的时长：确认超时时间为 0 时一直等待，
 // 其余情况沿用确认超时时间（调用方已把负数兜底为默认值），因此默认配置下为 600 秒。
 func resolveQuestionTimeout(confirmTimeout time.Duration) time.Duration {
-	if confirmTimeout <= 0 {
+	if confirmTimeout < 0 {
 		return fallbackQuestionTimeout
 	}
 	return confirmTimeout

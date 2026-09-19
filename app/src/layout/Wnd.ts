@@ -33,6 +33,8 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {getAllModels} from "./getAll";
 import {clearCounter} from "./status";
 import {saveScroll} from "../protyle/scroll/saveScroll";
+import {restoreTabPosition, saveTabPosition} from "../protyle/scroll/tabPosition";
+import {saveBackScroll} from "../util/backForward";
 import {Asset} from "../asset";
 import {newFile} from "../util/newFile";
 import {MenuItem} from "../menus/Menu";
@@ -686,11 +688,18 @@ export class Wnd {
                         }
                     }
                     item.panelElement.classList.remove("fn__none");
+                    if (isPhablet() && item.model instanceof Editor) {
+                        restoreTabPosition(item.model.editor.protyle);
+                    }
                 }
                 currentTab = item;
             } else {
                 item.headElement?.classList.remove("item--focus");
                 if (!item.panelElement.classList.contains("fn__none")) {
+                    if (isPhablet() && item.model instanceof Editor) {
+                        saveTabPosition(item.model.editor.protyle);
+                        saveBackScroll(item.model.editor.protyle);
+                    }
                     // 必须现判断，否则会触发 observer.observe(this.element, {attributeFilter: ["class"]}); 导致 https://ld246.com/article/1641198819303
                     item.panelElement.classList.add("fn__none");
                 }
@@ -786,6 +795,10 @@ export class Wnd {
                 }
             }
             if (!keepCursor) {
+                if (isPhablet() && item.model instanceof Editor && !item.panelElement.classList.contains("fn__none")) {
+                    saveTabPosition(item.model.editor.protyle);
+                    saveBackScroll(item.model.editor.protyle);
+                }
                 item.headElement?.classList.remove("item--focus");
                 item.panelElement.classList.add("fn__none");
             }

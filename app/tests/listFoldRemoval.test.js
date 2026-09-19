@@ -14,6 +14,22 @@ const rendererSource = () => {
         assert.equal(statements.length, names.length, file);
         return statements.map(statement => statement.getText(source)).join("\n");
     };
+    const extractClick = (file, condition, call = "toggleListFold(") => {
+        const source = ts.createSourceFile(file,
+            readFileSync(path.join(__dirname, "../src/protyle", `${file}.ts`), "utf8"),
+            ts.ScriptTarget.Latest, true);
+        const matches = [];
+        const visit = node => {
+            if (ts.isIfStatement(node) && condition(node.expression.getText(source)) &&
+                node.thenStatement.getText(source).includes(call)) {
+                matches.push(node.thenStatement.getText(source));
+            }
+            ts.forEachChild(node, visit);
+        };
+        visit(source);
+        assert.equal(matches.length, 1, file);
+        return matches[0];
+    };
     // 使用实际删除、折叠和选区代码，只替代网络提交及无关的渲染副作用。
     const source = `
         const Constants = {ZWSP: "\\u200b", ATTRIBUTE_EDITING: "data-editing"};
@@ -22,6 +38,7 @@ const rendererSource = () => {
         const getEmbedChildOperationParentID = () => undefined;
         const confirmRefRemoval = async () => true;
         const preventScroll = () => {}, mathRender = () => {}, scrollCenter = () => {};
+        const hideElements = () => {};
         const lineNumberRender = () => {}, clearSelect = () => {}, revealTabsForTarget = () => {};
         const getTextWithoutSemanticMarkers = element => element.textContent;
         const getSemanticMarkerPrefixLengthForNode = () => 0;
@@ -41,7 +58,14 @@ const rendererSource = () => {
         extract("util/selection", ["focusByRange", "focusByWbr"]) +
         extract("wysiwyg/verticalVisibility", ["getFoldedNavigationOwner"]) +
         extract("wysiwyg/remove", ["getOperationParentID", "removeBlock"]) +
-        extract("util/blockFold", ["applyFoldState", "toggleListFold"]);
+        extract("util/blockFold", ["applyFoldState", "toggleListFold"]) + `
+        export const clickGutter = (protyle, foldElement, buttonElement) => ${extractClick("gutter/index",
+        condition => condition.includes('buttonElement.getAttribute("data-type") === "NodeListItem"'))};
+        export const clickArrow = (protyle, foldElement, buttonElement) => ${extractClick("gutter/index",
+        condition => condition === "event.altKey", 'toggleListFold(protyle, foldElement, "children")')};
+        export const clickDot = (protyle, actionElement) => ${extractClick("wysiwyg/index",
+        condition => condition === "event.altKey && !protyle.disabled")};
+    `;
     return ts.transpileModule(source, {compilerOptions: {
         target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS,
     }}).outputText;
@@ -49,7 +73,8 @@ const rendererSource = () => {
 
 const runCases = async () => {
     const assert = require("node:assert/strict");
-    const {removeBlock, toggleListFold, focusByRange, getContenteditableElement} = window.listFoldRemoval;
+    const {removeBlock, toggleListFold, clickGutter, clickArrow, clickDot,
+        focusByRange, getContenteditableElement} = window.listFoldRemoval;
     const ids = new Map();
     const nodeID = name => {
         if (!ids.has(name)) {
@@ -125,36 +150,59 @@ const runCases = async () => {
             cases++;
         }
     }
-    for (const viewFold of [false, true]) {
-        const {protyle} = setup(list("mixed",
-            item("leaf", "leaf") + item("expanded", "expanded", paragraph("expanded-child", "child")) +
-            item("folded", "folded", paragraph("folded-child", "child"), true) +
-            item("missing", "missing children", "", true)), viewFold);
-        toggleListFold(protyle, byID("mixed"));
-        assert.equal(byID("leaf").hasAttribute("fold"), false);
-        assert.equal(byID("expanded").getAttribute("fold"), "1");
-        assert.equal(byID("folded").getAttribute("fold"), "1");
-        if (!viewFold) {
-            assert.equal(protyle.transactions.length, 1, "batch folding must be one undo step");
-            assert.deepEqual(protyle.transactions[0].doOperations.map(operation => operation.id), [nodeID("expanded")]);
-            applyOperations(protyle.transactions[0].undoOperations);
-            assert.equal(byID("expanded").hasAttribute("fold"), false);
-            assert.equal(byID("folded").getAttribute("fold"), "1", "undo must restore mixed fold states");
-            applyOperations(protyle.transactions[0].doOperations);
+    for (const entry of ["gutter", "dot", "arrow"]) {
+        for (const viewFold of [false, true]) {
+            const mixed = list("mixed",
+                item("leaf", "leaf") + item("expanded", "expanded", paragraph("expanded-child", "child")) +
+                item("folded", "folded", paragraph("folded-child", "child"), true) +
+                item("missing", "missing children", "", true));
+            const {protyle} = setup(entry === "arrow" ? list("outer", item("parent", "parent", mixed +
+                list("extra", item("extra-folded", "extra", paragraph("extra-child", "child"), true)))) : mixed, viewFold);
+            const gutter = document.createElement("div");
+            gutter.innerHTML = '<button></button><button data-type="fold"><svg></svg></button>';
+            const button = gutter.firstElementChild;
+            const toggle = () => {
+                if (entry === "gutter") {
+                    clickGutter(protyle, byID("expanded"), button);
+                    assert.equal(gutter.querySelector("svg").style.transform,
+                        byID("expanded").getAttribute("fold") === "1" ? "" : "rotate(90deg)");
+                } else if (entry === "dot") {
+                    clickDot(protyle, byID("expanded").firstElementChild);
+                } else {
+                    clickArrow(protyle, byID("parent"), button);
+                    assert.equal(byID("parent").hasAttribute("fold"), false);
+                }
+            };
+            toggle();
+            assert.equal(byID("leaf").hasAttribute("fold"), false);
+            assert.equal(byID("expanded").getAttribute("fold"), "1");
+            assert.equal(byID("folded").getAttribute("fold"), "1");
+            if (!viewFold) {
+                assert.equal(protyle.transactions.length, 1, "batch folding must be one undo step");
+                assert.deepEqual(protyle.transactions[0].doOperations.map(operation => operation.id), [nodeID("expanded")]);
+                applyOperations(protyle.transactions[0].undoOperations);
+                assert.equal(byID("expanded").hasAttribute("fold"), false);
+                assert.equal(byID("folded").getAttribute("fold"), "1", "undo must restore mixed fold states");
+                applyOperations(protyle.transactions[0].doOperations);
+            }
+            toggle();
+            assert.equal(byID("mixed").querySelectorAll('[fold="1"]').length, 0);
+            if (viewFold) {
+                assert.equal(protyle.transactions.length, 0, "view folding must not write document data");
+                assert.deepEqual(protyle.viewChanges.map(change => change.id),
+                    ["expanded", "folded", ...(entry === "arrow" ? ["extra-folded"] : []),
+                        "leaf", "expanded", "folded", "missing", ...(entry === "arrow" ? ["extra-folded"] : [])].map(nodeID));
+            } else {
+                const unfolded = protyle.transactions[1];
+                assert.deepEqual(unfolded.doOperations.map(operation => operation.id),
+                    ["expanded", "folded", "missing", ...(entry === "arrow" ? ["extra-folded"] : [])].map(nodeID));
+                applyOperations(unfolded.undoOperations);
+                assert.equal(byID("missing").getAttribute("fold"), "1");
+                applyOperations(unfolded.doOperations);
+                assert.equal(byID("missing").hasAttribute("fold"), false);
+            }
+            cases++;
         }
-        toggleListFold(protyle, byID("mixed"));
-        assert.equal(byID("mixed").querySelectorAll('[fold="1"]').length, 0);
-        if (viewFold) {
-            assert.equal(protyle.transactions.length, 0, "view folding must not write document data");
-            assert.deepEqual(protyle.viewChanges.map(change => change.id),
-                ["expanded", "folded", "leaf", "expanded", "folded", "missing"].map(nodeID));
-        } else {
-            const unfolded = protyle.transactions[1];
-            assert.deepEqual(unfolded.doOperations.map(operation => operation.id), ["expanded", "folded", "missing"].map(nodeID));
-            applyOperations(unfolded.undoOperations);
-            applyOperations(unfolded.doOperations);
-        }
-        cases++;
     }
     return cases;
 };
@@ -215,7 +263,7 @@ if (process.versions.electron && process.type === "browser") {
             const {stdout} = await promisify(execFile)(require("electron"), [__filename, profile], {
                 env, windowsHide: true, timeout: 40000,
             });
-            assert.match(stdout, /6 Electron cases passed/);
+            assert.match(stdout, /10 Electron cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-list-fold-"));

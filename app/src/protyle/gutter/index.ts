@@ -10,7 +10,7 @@ import {
 } from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
 import {enterBack, iframeMenu, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
-import {foldBlocksRecursively, foldHeadingGroup, setFold} from "../util/blockFold";
+import {foldBlocksRecursively, foldHeadingGroup, setFold, toggleListFold} from "../util/blockFold";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openFileAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {
@@ -130,7 +130,7 @@ import {
 } from "./layout";
 import {closeSubElement} from "../toolbar/subElementLifecycle";
 import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
-import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFold} from "../util/viewFold";
+import {getViewFoldOccurrenceID, hasViewFoldContext} from "../util/viewFold";
 import {exportImage} from "../export/util";
 import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wysiwyg/callout";
 import {setTabsPosition, toggleTabsTasks, unwrapTabs} from "../wysiwyg/tabs";
@@ -434,62 +434,7 @@ export class Gutter {
                     });
                 } else if (event.altKey) {
                     // 折叠所有子集
-                    let hasFold = true;
-                    Array.from(foldElement.children).find((ulElement) => {
-                        if (ulElement.classList.contains("list")) {
-                            const foldElement = Array.from(ulElement.children).find((listItemElement) => {
-                                if (listItemElement.classList.contains("li")) {
-                                    if (listItemElement.getAttribute("fold") !== "1" && listItemElement.childElementCount > 3) {
-                                        hasFold = false;
-                                        return true;
-                                    }
-                                }
-                            });
-                            if (foldElement) {
-                                return true;
-                            }
-                        }
-                    });
-                    if (hasViewFoldContext(protyle)) {
-                        Array.from(foldElement.children).forEach(ulElement => {
-                            if (ulElement.classList.contains("list")) {
-                                Array.from(ulElement.children).forEach(listItemElement => {
-                                    if (listItemElement.classList.contains("li") &&
-                                        (hasFold || listItemElement.childElementCount > 3)) {
-                                        setViewFold(protyle, listItemElement, !hasFold);
-                                    }
-                                });
-                            }
-                        });
-                    } else {
-                        const doOperations: IOperation[] = [];
-                        const undoOperations: IOperation[] = [];
-                        Array.from(foldElement.children).forEach((ulElement) => {
-                            if (ulElement.classList.contains("list")) {
-                                Array.from(ulElement.children).forEach((listItemElement) => {
-                                    if (listItemElement.classList.contains("li")) {
-                                        if (hasFold) {
-                                            listItemElement.removeAttribute("fold");
-                                        } else if (listItemElement.childElementCount > 3) {
-                                            listItemElement.setAttribute("fold", "1");
-                                        }
-                                        const listId = listItemElement.getAttribute("data-node-id");
-                                        doOperations.push({
-                                            action: "setAttrs",
-                                            id: listId,
-                                            data: JSON.stringify({fold: hasFold ? "" : "1"})
-                                        });
-                                        undoOperations.push({
-                                            action: "setAttrs",
-                                            id: listId,
-                                            data: JSON.stringify({fold: hasFold ? "1" : ""})
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                        transaction(protyle, doOperations, undoOperations);
-                    }
+                    toggleListFold(protyle, foldElement, "children");
                     buttonElement.removeAttribute("disabled");
                 } else {
                     foldStatus = setFold(protyle, foldElement).fold;
@@ -620,50 +565,10 @@ export class Gutter {
                     foldHeadingGroup(protyle, foldElement, "siblings");
                 } else if (buttonElement.getAttribute("data-type") === "NodeListItem" && foldElement.parentElement.getAttribute("data-node-id")) {
                     // 折叠同级
-                    let hasFold = true;
-                    Array.from(foldElement.parentElement.children).find((listItemElement) => {
-                        if (listItemElement.classList.contains("li")) {
-                            if (listItemElement.getAttribute("fold") !== "1" && listItemElement.childElementCount > 3) {
-                                hasFold = false;
-                                return true;
-                            }
-                        }
-                    });
+                    toggleListFold(protyle, foldElement.parentElement);
                     const arrowElement = buttonElement.parentElement.querySelector("[data-type='fold'] > svg") as HTMLElement;
                     if (arrowElement) {
-                        arrowElement.style.transform = hasFold ? "rotate(90deg)" : "";
-                    }
-                    if (hasViewFoldContext(protyle)) {
-                        Array.from(foldElement.parentElement.children).forEach(listItemElement => {
-                            if (listItemElement.classList.contains("li") &&
-                                (hasFold || listItemElement.childElementCount > 3)) {
-                                setViewFold(protyle, listItemElement, !hasFold);
-                            }
-                        });
-                    } else {
-                        const doOperations: IOperation[] = [];
-                        const undoOperations: IOperation[] = [];
-                        Array.from(foldElement.parentElement.children).find((listItemElement) => {
-                            if (listItemElement.classList.contains("li")) {
-                                if (hasFold) {
-                                    listItemElement.removeAttribute("fold");
-                                } else if (listItemElement.childElementCount > 3) {
-                                    listItemElement.setAttribute("fold", "1");
-                                }
-                                const listId = listItemElement.getAttribute("data-node-id");
-                                doOperations.push({
-                                    action: "setAttrs",
-                                    id: listId,
-                                    data: JSON.stringify({fold: hasFold ? "" : "1"})
-                                });
-                                undoOperations.push({
-                                    action: "setAttrs",
-                                    id: listId,
-                                    data: JSON.stringify({fold: hasFold ? "1" : ""})
-                                });
-                            }
-                        });
-                        transaction(protyle, doOperations, undoOperations);
+                        arrowElement.style.transform = foldElement.getAttribute("fold") === "1" ? "" : "rotate(90deg)";
                     }
                 } else {
                     const hasFold = setFold(protyle, foldElement).fold;

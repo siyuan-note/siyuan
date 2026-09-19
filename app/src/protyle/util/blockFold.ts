@@ -166,8 +166,10 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     return {fold: !hasFold ? 1 : 0, undoOperations, doOperations, ready: Promise.resolve()};
 };
 
-export const toggleListFold = (protyle: IProtyle, listElement: Element) => {
-    const items = Array.from(listElement.children).filter(item => item.classList.contains("li"));
+export const toggleListFold = (protyle: IProtyle, listElement: Element, scope: "siblings" | "children" = "siblings") => {
+    const lists = scope === "children" ?
+        Array.from(listElement.children).filter(item => item.classList.contains("list")) : [listElement];
+    const items = lists.flatMap(list => Array.from(list.children).filter(item => item.classList.contains("li")));
     const folded = items.some(item => item.getAttribute("fold") !== "1" && item.childElementCount > 3);
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];

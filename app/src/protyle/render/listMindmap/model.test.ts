@@ -23,6 +23,19 @@ buildGlobals.forEach(({name, descriptor}) => {
 const measured = (id: string, width = 100, height = 40,
                   children: ListMindmapLayoutNode[] = []): ListMindmapLayoutNode => ({id, width, height, children});
 
+test("relation label spacing only expands the requested branch boundary", () => {
+    const root = measured("root", 100, 40, [measured("a"), measured("b"), measured("c")]);
+    const expanded = layoutListMindmap(root, {verticalGaps: new Map([["b", 64]])}).nodes;
+    assert.equal(expanded.get("b").y - expanded.get("a").y - 40, 64);
+    assert.equal(expanded.get("c").y - expanded.get("b").y - 40, 24);
+    const normal = layoutListMindmap(root).nodes;
+    assert.equal(normal.get("b").y - normal.get("a").y - 40, 24);
+    const horizontal = layoutListMindmap(root, {horizontalGaps: new Map([["b", 150]])}).nodes;
+    assert.equal(horizontal.get("b").x - horizontal.get("root").x - 100, 150);
+    assert.equal(horizontal.get("a").x - horizontal.get("root").x - 100, 40);
+    assert.equal(horizontal.get("c").x - horizontal.get("root").x - 100, 40);
+});
+
 test("mindmap metadata rejects unknown formats and invalid values without replacing original data", () => {
     const value = '{"version":1,"nodes":{"a":{"bold":true,"fontSize":18,"extension":"retained"}},' +
         '"relations":[{"id":"r","from":"a","to":"b","label":"label","dash":true}],"extension":42}';
@@ -774,6 +787,40 @@ const browserCases = async (sourceCode: string, css: string) => {
     check.equal(host.querySelector(".list-mindmap__relation--selected"), null);
 
     const savedRelations = model.metadata.relations;
+    // 短连线文字撑开节点间距，文字仍位于所属连线上。
+    model.metadata.relations = [];
+    view.update(model);
+    await settle();
+    const siblingGap = () => view.positions.get(beta).y - view.positions.get(alpha).y - view.positions.get(alpha).height;
+    const originalGap = siblingGap();
+    model.metadata.relations = [{id: "short-label", from: alpha, to: beta, label: "Connection label"}];
+    view.update(model);
+    await settle();
+    const shortLabel = view.relationElements.get("short-label");
+    const fromBox = view.positions.get(alpha);
+    const toBox = view.positions.get(beta);
+    check.ok(siblingGap() >= shortLabel.offsetHeight + 32);
+    const labelRoute = view.relationPath("short-label", fromBox, toBox, shortLabel);
+    check.ok(labelRoute.labelPoint, "short relations always retain their text");
+    check.notEqual(shortLabel.style.visibility, "hidden");
+    for (const box of [fromBox, toBox]) {
+        const p = labelRoute.labelPoint;
+        check.equal(p.x + shortLabel.offsetWidth / 2 > box.x && p.x - shortLabel.offsetWidth / 2 < box.x + box.width &&
+            p.y + shortLabel.offsetHeight / 2 > box.y && p.y - shortLabel.offsetHeight / 2 < box.y + box.height, false);
+    }
+    const routePoints = view.relationRoutes.get("short-label");
+    check.ok(routePoints.slice(1).some((point: any, index: number) => {
+        const previous = routePoints[index];
+        const p = labelRoute.labelPoint;
+        return (point.x === previous.x && p.x === point.x && p.y >= Math.min(point.y, previous.y) &&
+            p.y <= Math.max(point.y, previous.y)) ||
+            (point.y === previous.y && p.y === point.y && p.x >= Math.min(point.x, previous.x) &&
+                p.x <= Math.max(point.x, previous.x));
+    }), "the label stays on its own connection");
+    model.metadata.relations[0].label = "";
+    view.update(model);
+    await settle();
+    check.equal(siblingGap(), originalGap, "removing the label restores the default spacing");
     model.metadata.relations = [
         {id: "forward", from: alpha, to: beta, label: ""},
         {id: "reverse", from: beta, to: alpha, label: ""},

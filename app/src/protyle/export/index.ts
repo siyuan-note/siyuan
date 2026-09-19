@@ -325,6 +325,15 @@ const renderPDF = async (id: string) => {
             max-width: 100%;
         }
 
+        #preview .list-mindmap__toolbar {
+            display: none !important;
+        }
+
+        #preview .list-mindmap {
+            height: var(--list-mindmap-print-height, 420px);
+            min-height: 0;
+        }
+
         #preview a.pdf-embedded-asset {
             position: relative;
             padding-right: 1em !important;
@@ -348,7 +357,7 @@ const renderPDF = async (id: string) => {
     </style>
     ${getSnippetCSS()}
 </head>
-<body style="-webkit-print-color-adjust: exact;">
+<body data-export-pdf="true" style="-webkit-print-color-adjust: exact;">
 <div id="action">
     <div style="flex: 1;overflow-y:auto;overflow-x:hidden">
         <div class="b3-label">

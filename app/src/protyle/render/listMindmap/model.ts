@@ -249,10 +249,13 @@ export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
     horizontalGap?: number;
     verticalGap?: number;
     padding?: number;
+    horizontalGaps?: Map<string, number>;
+    verticalGaps?: Map<string, number>;
 } = {}) => {
     const horizontalGap = options.horizontalGap ?? 40;
     const verticalGap = options.verticalGap ?? 24;
     const padding = options.padding ?? 32;
+    const gapBefore = (id: string) => Math.max(verticalGap, options.verticalGaps?.get(id) || 0);
     if ([horizontalGap, verticalGap, padding].some(value => !Number.isFinite(value) || value < 0)) {
         throw new Error("Invalid list mindmap layout spacing");
     }
@@ -277,8 +280,8 @@ export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
     const heights = new Map<string, number>();
     [...ordered].reverse().forEach(({node}) => {
         const children = node.collapsed ? [] : node.children;
-        const childHeight = children.reduce((sum, child) => sum + heights.get(child.id), 0) +
-            Math.max(0, children.length - 1) * verticalGap;
+        const childHeight = children.reduce((sum, child, index) => sum + heights.get(child.id) +
+            (index ? gapBefore(child.id) : 0), 0);
         heights.set(node.id, Math.max(node.height, childHeight));
     });
     const tops = new Map([[root.id, padding]]);
@@ -292,7 +295,7 @@ export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
         const position = {
             id: node.id,
             parentId,
-            x: parent ? parent.x + parent.width + horizontalGap : padding,
+            x: parent ? parent.x + parent.width + Math.max(horizontalGap, options.horizontalGaps?.get(node.id) || 0) : padding,
             y: top + (height - node.height) / 2,
             width: node.width,
             height: node.height,
@@ -303,12 +306,15 @@ export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
             edges.push({from: parentId, to: node.id});
         }
         const children = node.collapsed ? [] : node.children;
-        const childHeight = children.reduce((sum, child) => sum + heights.get(child.id), 0) +
-            Math.max(0, children.length - 1) * verticalGap;
+        const childHeight = children.reduce((sum, child, index) => sum + heights.get(child.id) +
+            (index ? gapBefore(child.id) : 0), 0);
         let childTop = top + (height - childHeight) / 2;
-        children.forEach(child => {
+        children.forEach((child, index) => {
+            if (index) {
+                childTop += gapBefore(child.id);
+            }
             tops.set(child.id, childTop);
-            childTop += heights.get(child.id) + verticalGap;
+            childTop += heights.get(child.id);
         });
     });
     return {nodes, edges, width: width + padding, height: heights.get(root.id) + padding * 2};

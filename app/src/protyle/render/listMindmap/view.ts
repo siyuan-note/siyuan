@@ -16,6 +16,7 @@ export interface ListMindmapViewOptions {
     host: HTMLElement;
     model: ListMindmapModel;
     readOnly?: boolean;
+    printLayout?: boolean;
     labels?: Record<string, string>;
     cdn?: string;
     onOpenLink?: (href: string, event: MouseEvent) => void;
@@ -183,8 +184,12 @@ export class ListMindmapView {
             if (this.printTransform) {
                 Object.assign(this, this.printTransform);
                 this.printTransform = undefined;
-                this.options.host.style.removeProperty("--list-mindmap-print-height");
-                this.draw();
+                if (this.options.printLayout) {
+                    this.fitPrint();
+                } else {
+                    this.options.host.style.removeProperty("--list-mindmap-print-height");
+                    this.draw();
+                }
             }
         });
         this.resizeObserver = new ResizeObserver(() => this.refreshLayout());
@@ -495,7 +500,50 @@ export class ListMindmapView {
             };
             const anchorId = this.editingId || this.foldAnchor?.id;
             const previous = anchorId ? this.positions.get(anchorId) : undefined;
-            const result = layoutListMindmap(makeLayoutNode(this.model.root.id));
+            const layoutRoot = makeLayoutNode(this.model.root.id);
+            let result = layoutListMindmap(layoutRoot);
+            const horizontalGaps = new Map<string, number>();
+            const verticalGaps = new Map<string, number>();
+            const reserve = (gaps: Map<string, number>, id: string, size: number) => {
+                gaps.set(id, Math.max(gaps.get(id) || 0, size));
+            };
+            const ancestors = (id: string) => {
+                const path: string[] = [];
+                while (id) {
+                    path.unshift(id);
+                    id = result.nodes.get(id)?.parentId;
+                }
+                return path;
+            };
+            // 只撑开关系线两端之间的分支边界，其他节点保留默认间距。
+            this.model.metadata.relations.forEach(relation => {
+                if (!relation.label?.trim() || !result.nodes.has(relation.from) || !result.nodes.has(relation.to)) {
+                    return;
+                }
+                const label = this.relationElements.get(relation.id);
+                if (label) {
+                    label.hidden = false;
+                    const from = result.nodes.get(relation.from);
+                    const to = result.nodes.get(relation.to);
+                    const fromPath = ancestors(from.id);
+                    const toPath = ancestors(to.id);
+                    let common = 0;
+                    while (common < Math.min(fromPath.length, toPath.length) && fromPath[common] === toPath[common]) {
+                        common++;
+                    }
+                    if (common < fromPath.length && common < toPath.length) {
+                        const lower = from.y < to.y ? toPath[common] : fromPath[common];
+                        reserve(verticalGaps, lower, label.offsetHeight + 32);
+                    }
+                    if (from.x + from.width <= to.x || to.x + to.width <= from.x) {
+                        const right = from.x < to.x ? to : from;
+                        reserve(horizontalGaps, right.id, label.offsetWidth + 32);
+                    }
+                }
+            });
+            if (horizontalGaps.size || verticalGaps.size) {
+                result = layoutListMindmap(layoutRoot, {horizontalGaps, verticalGaps});
+            }
             this.positions = result.nodes;
             this.relationRoutes.clear();
             this.edges = result.edges;
@@ -547,7 +595,7 @@ export class ListMindmapView {
                 this.model.nodes.get(this.foldAnchor.id)?.collapsed) === this.foldAnchor.collapsed) {
                 this.foldAnchor = undefined;
             }
-            if (this.printTransform) {
+            if (this.printTransform || this.options.printLayout) {
                 this.fitPrint();
             } else if (this.initialFit) {
                 this.initialFit = false;
@@ -636,15 +684,17 @@ export class ListMindmapView {
         const height = label.offsetHeight;
         const segments = points.slice(1).map((p, i) => ({a: points[i], b: p,
             length: Math.hypot(p.x - points[i].x, p.y - points[i].y)})).sort((a, b) => b.length - a.length);
+        const nodes = [...this.positions.values()];
+        const available = (p: MindmapRoutePoint) => !nodes.some(node =>
+            p.x + width / 2 > node.x - 4 && p.x - width / 2 < node.x + node.width + 4 &&
+            p.y + height / 2 > node.y - 4 && p.y - height / 2 < node.y + node.height + 4);
         let labelPoint: MindmapRoutePoint;
         for (const segment of segments) {
-            const center = {x: (segment.a.x + segment.b.x) / 2, y: (segment.a.y + segment.b.y) / 2};
-            const candidates = [center, {x: center.x + width / 2 + 6, y: center.y},
-                {x: center.x - width / 2 - 6, y: center.y},
-                {x: center.x, y: center.y - height / 2 - 6}, {x: center.x, y: center.y + height / 2 + 6}];
-            labelPoint = candidates.find(p => ![...this.positions.values()].some(node =>
-                p.x + width / 2 > node.x - 4 && p.x - width / 2 < node.x + node.width + 40 &&
-                p.y + height / 2 > node.y - 4 && p.y - height / 2 < node.y + node.height + 4));
+            const candidates = [0.5, 0.25, 0.75].map(ratio => ({
+                x: segment.a.x + (segment.b.x - segment.a.x) * ratio,
+                y: segment.a.y + (segment.b.y - segment.a.y) * ratio,
+            }));
+            labelPoint = candidates.find(available);
             if (labelPoint) {
                 break;
             }

@@ -43,6 +43,7 @@ export const listMindmapRender = (root: Element, cdn?: string) => {
             list.appendChild(host);
             const view = new ListMindmapView({
                 host, model, readOnly: true, labels: window.siyuan?.languages || {}, cdn,
+                printLayout: !!list.closest("[data-export-pdf]"),
                 onExit: () => {
                     view.destroy();
                     host.remove();

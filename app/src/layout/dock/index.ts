@@ -1100,7 +1100,8 @@ export class Dock {
     }
 
     public remove(key: TDock | string) {
-        this.toggleModel(key, false, true, true);
+        // 移除插件停靠栏时保留用户的打开状态，供重新启用时恢复。
+        this.toggleModel(key, false, true, true, false);
         this.elements[0].parentElement.querySelector(`[data-type="${key}"]`).remove();
         const custom = this.data[key] as Custom;
         if (custom.parent) {

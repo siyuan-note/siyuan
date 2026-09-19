@@ -1,5 +1,5 @@
 {
-	"copyVersion": "Versienummer kopiëren",
+	"copyRuntimeInfo": "Runtime-informatie kopiëren",
 	"duplicateDocTree": "Dupliceren met subdocumenten",
 	"syncProviderChangeConfirm": "Voordat u van synchronisatieprovider wisselt, moet SiYuan bronnen en eerdere momentopnamen controleren en mogelijk ontbrekende inhoud uit de huidige cloudopslag downloaden. Dit kan enige tijd duren. Doorgaan?",
 	"syncProviderChangeContinue": "Doorgaan",

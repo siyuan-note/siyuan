@@ -1,5 +1,5 @@
 {
-	"copyVersion": "Copia numero di versione",
+	"copyRuntimeInfo": "Copia informazioni di esecuzione",
 	"duplicateDocTree": "Duplica con i sottodocumenti",
 	"syncProviderChangeConfirm": "Prima di cambiare provider di sincronizzazione, SiYuan deve verificare le risorse e le istantanee precedenti e potrebbe scaricare i contenuti mancanti dall’archiviazione cloud attuale. L’operazione potrebbe richiedere del tempo. Continuare?",
 	"syncProviderChangeContinue": "Continua",

@@ -80,6 +80,10 @@ var getWorkspaceInfo = contractHandler(apicontract.GetWorkspaceInfo, func(c *gin
 	return apicontract.Success(apicontract.WorkspaceInfoData{WorkspaceDir: util.WorkspaceDir, SiyuanVer: util.Ver})
 })
 
+var getRuntimeInfo = contractHandler(apicontract.GetRuntimeInfo, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.SystemRuntimeInfoData] {
+	return apicontract.Success(apicontract.SystemRuntimeInfoData{Text: util.RuntimeInfo(c.Request.Context())})
+})
+
 var getNetwork = contractHandler(apicontract.GetNetwork, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.NetworkData] {
 	maskedConf, err := model.GetMaskedConf()
 	if err != nil {

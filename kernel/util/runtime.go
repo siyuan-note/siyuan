@@ -149,7 +149,11 @@ func getWorkspaceDriveType() string {
 	if IsMobileContainer() {
 		return ghw.DriveTypeSSD.String()
 	}
+	return detectWorkspaceDriveType()
+}
 
+// detectWorkspaceDriveType 仅返回实际检测到的磁盘类型，不根据平台推断。
+func detectWorkspaceDriveType() string {
 	block, err := ghw.Block()
 	if err != nil {
 		logging.LogWarnf("get block storage info failed: %s", err)
@@ -159,7 +163,7 @@ func getWorkspaceDriveType() string {
 	var maxMountPathLen int
 	var matchedDriveType string
 	parentRelPrefix := ".." + string(filepath.Separator)
-	workspacePath := filepath.Clean(WorkspaceDir)
+	workspacePath := ResolveLongestExistingParent(WorkspaceDir)
 
 	if gulu.OS.IsWindows() {
 		vol := strings.ToLower(filepath.VolumeName(workspacePath))
@@ -170,7 +174,7 @@ func getWorkspaceDriveType() string {
 				}
 			}
 		}
-	} else if gulu.OS.IsLinux() {
+	} else {
 		for _, disk := range block.Disks {
 			for _, partition := range disk.Partitions {
 				if partition.MountPoint == "" {

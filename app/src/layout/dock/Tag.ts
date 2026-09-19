@@ -4,7 +4,6 @@ import {Model} from "../Model";
 import {Tree} from "../../util/Tree";
 import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
-import {getTransactionOperations} from "../../util/transactionOperations";
 import {fetchPost} from "../../util/fetch";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
@@ -176,19 +175,6 @@ export class Tag extends Model {
     private handleMsgCallback(data: IWebSocketData) {
         if (data) {
             switch (data.cmd) {
-                case "transactions":
-                    getTransactionOperations(data.data).forEach((item: IOperation) => {
-                        let needReload = false;
-                        if ((item.action === "update" || item.action === "insert") && item.data.indexOf('data-type="tag"') > -1) {
-                            needReload = true;
-                        } else if (item.action === "delete") {
-                            needReload = true;
-                        }
-                        if (needReload) {
-                            this.update();
-                        }
-                    });
-                    break;
                 case "closeBox":
                 case "removeBox":
                 case "removeDoc":

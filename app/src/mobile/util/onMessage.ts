@@ -49,6 +49,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "databaseIndexCommit":
                 processBacklinkIndexCommit(data.data);
+                window.siyuan.mobile.docks.tag?.update();
                 break;
             case "setEntryVisibility":
                 applyEntryVisibility(data.data);

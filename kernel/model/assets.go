@@ -1957,12 +1957,13 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem, err error) {
 				trees = append(trees, tree)
 			}
 			for _, tree := range trees {
-				for _, d := range getAssetsLinkDests(tree.Root, false) {
+				for _, d := range getAssetsLinkDests(tree.Root, false, normalizeAssetScanLinkDest) {
 					dests[d] = true
 				}
 
 				if titleImgPath := treenode.GetDocTitleImgPath(tree.Root); "" != titleImgPath {
 					// 题头图计入
+					titleImgPath = normalizeAssetScanLinkDest(titleImgPath)
 					if !util.IsAssetLinkDest([]byte(titleImgPath), false) {
 						continue
 					}
@@ -2184,7 +2185,7 @@ func MissingAssets() (ret []*UnusedItem) {
 					}
 
 					blockID := assetLinkDestBlockID(n)
-					for _, dest := range getAssetLinkDestsByNode(n, false) {
+					for _, dest := range getAssetLinkDestsByNode(n, false, normalizeAssetScanLinkDest) {
 						addAssetLinkDestBlockID(referenceBlockIDs, notebook.ID, encrypted, dest, blockID)
 					}
 					return ast.WalkContinue
@@ -2192,6 +2193,7 @@ func MissingAssets() (ret []*UnusedItem) {
 
 				if titleImgPath := treenode.GetDocTitleImgPath(tree.Root); "" != titleImgPath {
 					// 题头图计入
+					titleImgPath = normalizeAssetScanLinkDest(titleImgPath)
 					if !util.IsAssetLinkDest([]byte(titleImgPath), false) {
 						continue
 					}
@@ -2247,6 +2249,13 @@ func assetReferenceExists(reference missingAssetReference, assetsPathMap map[str
 	if _, _, found := lookupAssetPath(assetsPathMap, reference.dest); found {
 		return true
 	}
+	literalDest := normalizeAssetScanLinkDest(reference.rawDest)
+	if idx := strings.IndexAny(literalDest, "?#"); idx >= 0 {
+		literalDest = literalDest[:idx]
+	}
+	if _, _, found := lookupAssetPath(assetsPathMap, literalDest); found {
+		return true
+	}
 	if strings.HasPrefix(reference.dest, "assets/.") {
 		// Assets starting with `.` should not be considered missing assets https://github.com/siyuan-note/siyuan/issues/8821
 		return filelock.IsExist(filepath.Join(util.DataDir, reference.dest))
@@ -2272,13 +2281,57 @@ func addAssetLinkDestBlockID(referenceBlockIDs map[missingAssetReference]map[str
 	}
 }
 
-func normalizeMissingAssetLinkDest(dest string) string {
+func normalizeScannedAsset(dest string, normalize []func(string) string) string {
+	if len(normalize) != 0 {
+		return normalize[0](dest)
+	}
+	return dest
+}
+
+// normalizeAssetScanLinkDest 按编辑器的根路径解析本地引用，保留 URL 后缀和文件名编码。
+func normalizeAssetScanLinkDest(dest string) string {
 	dest = strings.TrimSpace(dest)
+	if dest == "" || strings.HasPrefix(dest, "//") || strings.Contains(dest, "\\") {
+		return ""
+	}
+	// 保留历史数据中按字面量存储的百分号文件名，解析仅用于排除协议和主机。
+	parsed, err := url.Parse(strings.ReplaceAll(dest, "%", "%25"))
+	if err != nil || parsed.IsAbs() || parsed.Host != "" {
+		return ""
+	}
+	suffix := ""
+	if idx := strings.IndexAny(dest, "?#"); idx >= 0 {
+		suffix, dest = dest[idx:], dest[:idx]
+	}
+	parts := strings.Split(dest, "/")
+	for i, part := range parts {
+		// 浏览器将编码的点路径段视为导航，其他编码留给资源查找处理。
+		if decoded, err := url.PathUnescape(part); err == nil && (decoded == "." || decoded == "..") {
+			parts[i] = decoded
+		}
+	}
+	dest = strings.Join(parts, "/")
+	directory := strings.HasSuffix(dest, "/") || strings.HasSuffix(dest, "/.") || strings.HasSuffix(dest, "/..")
+	dest = strings.TrimPrefix(path.Clean("/"+dest), "/")
+	if directory {
+		dest += "/"
+	}
 	if !strings.HasPrefix(dest, "assets/") {
 		return ""
 	}
-	if idx := strings.Index(dest, "?"); 0 < idx {
+	return dest + suffix
+}
+
+func normalizeMissingAssetLinkDest(dest string) string {
+	dest = normalizeAssetScanLinkDest(dest)
+	if !strings.HasPrefix(dest, "assets/") {
+		return ""
+	}
+	if idx := strings.IndexAny(dest, "?#"); 0 < idx {
 		dest = dest[:idx]
+	}
+	if decoded, err := url.PathUnescape(dest); err == nil {
+		dest = decoded
 	}
 	if strings.HasSuffix(dest, "/") || strings.HasSuffix(dest, ".rtfd") {
 		return ""
@@ -2302,7 +2355,7 @@ func assetLinkDestBlockID(node *ast.Node) string {
 	return ""
 }
 
-func getAssetLinkDestsByNode(node *ast.Node, includeServePath bool) []string {
+func getAssetLinkDestsByNode(node *ast.Node, includeServePath bool, normalize ...func(string) string) []string {
 	if !node.IsBlock() && ast.NodeLinkDest != node.Type && ast.NodeHTMLBlock != node.Type && ast.NodeInlineHTML != node.Type &&
 		ast.NodeIFrame != node.Type && ast.NodeWidget != node.Type && ast.NodeAudio != node.Type && ast.NodeVideo != node.Type &&
 		ast.NodeAttributeView != node.Type && ast.NodeFileAnnotationRefID != node.Type && !node.IsTextMarkType("a") &&
@@ -2317,7 +2370,7 @@ func getAssetLinkDestsByNode(node *ast.Node, includeServePath bool) []string {
 	nodeCopy.Next = nil
 	nodeCopy.FirstChild = nil
 	nodeCopy.LastChild = nil
-	return getAssetsLinkDests(&nodeCopy, includeServePath)
+	return getAssetsLinkDests(&nodeCopy, includeServePath, normalize...)
 }
 
 func emojisInTree(tree *parse.Tree) (ret []string) {
@@ -2381,14 +2434,15 @@ func getQueryEmbedNodesAssetsLinkDests(node *ast.Node) (ret []string) {
 	return
 }
 
-func getAssetsLinkDests(node *ast.Node, includeServePath bool) (ret []string) {
-	return getAssetsLinkDestsWithAttributeViewItemFilter(node, includeServePath, nil)
+func getAssetsLinkDests(node *ast.Node, includeServePath bool, normalize ...func(string) string) (ret []string) {
+	return getAssetsLinkDestsWithAttributeViewItemFilter(node, includeServePath, nil, normalize...)
 }
 
 func getAssetsLinkDestsWithAttributeViewItemFilter(
 	node *ast.Node,
 	includeServePath bool,
 	itemFilter attributeViewItemFilter,
+	normalize ...func(string) string,
 ) (ret []string) {
 	ret = []string{}
 	treenode.WalkWithTabTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -2398,7 +2452,7 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 			for _, kv := range n.KramdownIAL {
 				k := kv[0]
 				if strings.HasPrefix(k, "custom-data-assets") {
-					dest := kv[1]
+					dest := normalizeScannedAsset(kv[1], normalize)
 					if "" == dest || !util.IsAssetLinkDest([]byte(dest), includeServePath) {
 						continue
 					}
@@ -2416,25 +2470,27 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 		}
 
 		if ast.NodeLinkDest == n.Type {
-			if !util.IsAssetLinkDest(n.Tokens, includeServePath) {
+			dest := normalizeScannedAsset(string(n.Tokens), normalize)
+			if !util.IsAssetLinkDest([]byte(dest), includeServePath) {
 				return ast.WalkContinue
 			}
 
-			dest := strings.TrimSpace(string(n.Tokens))
+			dest = strings.TrimSpace(dest)
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("a") {
-			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkAHref), includeServePath) {
+			dest := normalizeScannedAsset(n.TextMarkAHref, normalize)
+			if !util.IsAssetLinkDest([]byte(dest), includeServePath) {
 				return ast.WalkContinue
 			}
 
-			dest := strings.TrimSpace(n.TextMarkAHref)
+			dest = strings.TrimSpace(dest)
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("file-annotation-ref") {
-			if dest := fileAnnotationAssetLinkDest(n.TextMarkFileAnnotationRefID, includeServePath); "" != dest {
+			if dest := fileAnnotationAssetLinkDest(n.TextMarkFileAnnotationRefID, includeServePath, normalize...); "" != dest {
 				ret = append(ret, dest)
 			}
 		} else if ast.NodeFileAnnotationRefID == n.Type {
-			if dest := fileAnnotationAssetLinkDest(n.TokensStr(), includeServePath); "" != dest {
+			if dest := fileAnnotationAssetLinkDest(n.TokensStr(), includeServePath, normalize...); "" != dest {
 				ret = append(ret, dest)
 			}
 		} else if ast.NodeAttributeView == n.Type {
@@ -2443,7 +2499,7 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 				return ast.WalkContinue
 			}
 
-			ret = append(ret, getAttributeViewAssetsLinkDests(attrView, includeServePath, itemFilter)...)
+			ret = append(ret, getAttributeViewAssetsLinkDests(attrView, includeServePath, itemFilter, normalize...)...)
 		} else {
 			if ast.NodeWidget == n.Type {
 				dataAssets := n.IALAttr("custom-data-assets")
@@ -2451,12 +2507,13 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 					// 兼容两种属性名 custom-data-assets 和 data-assets https://github.com/siyuan-note/siyuan/issues/4122#issuecomment-1154796568
 					dataAssets = n.IALAttr("data-assets")
 				}
+				dataAssets = normalizeScannedAsset(dataAssets, normalize)
 				if !util.IsAssetLinkDest([]byte(dataAssets), includeServePath) {
 					return ast.WalkContinue
 				}
 				ret = append(ret, dataAssets)
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
-				ret = append(ret, htmlAssetLinkDests(n.Tokens, includeServePath)...)
+				ret = append(ret, htmlAssetLinkDests(n.Tokens, includeServePath, normalize...)...)
 			}
 		}
 		return ast.WalkContinue
@@ -2471,7 +2528,7 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 	return
 }
 
-func htmlAssetLinkDests(tokens []byte, includeServePath bool) (ret []string) {
+func htmlAssetLinkDests(tokens []byte, includeServePath bool, normalize ...func(string) string) (ret []string) {
 	// 逐个读取标签属性，兼容内联标签片段并只解码一层 HTML 实体。
 	tokenizer := html.NewTokenizer(bytes.NewReader(tokens))
 	for {
@@ -2480,7 +2537,7 @@ func htmlAssetLinkDests(tokens []byte, includeServePath bool) (ret []string) {
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
 			for _, attr := range tokenizer.Token().Attr {
-				dest := strings.TrimSpace(attr.Val)
+				dest := normalizeScannedAsset(strings.TrimSpace(attr.Val), normalize)
 				if util.IsAssetLinkDest([]byte(dest), includeServePath) {
 					ret = append(ret, dest)
 				}
@@ -2489,7 +2546,8 @@ func htmlAssetLinkDests(tokens []byte, includeServePath bool) (ret []string) {
 	}
 }
 
-func fileAnnotationAssetLinkDest(reference string, includeServePath bool) string {
+func fileAnnotationAssetLinkDest(reference string, includeServePath bool, normalize ...func(string) string) string {
+	reference = normalizeScannedAsset(reference, normalize)
 	if !util.IsAssetLinkDest(gulu.Str.ToBytes(reference), includeServePath) {
 		return ""
 	}
@@ -2501,12 +2559,13 @@ func getAttributeViewAssetsLinkDests(
 	attrView *av.AttributeView,
 	includeServePath bool,
 	itemFilter attributeViewItemFilter,
+	normalize ...func(string) string,
 ) (ret []string) {
 	if nil == attrView {
 		return
 	}
 	collectValue := func(value *av.Value) {
-		ret = append(ret, getAttributeViewValueAssetsLinkDests(value, includeServePath)...)
+		ret = append(ret, getAttributeViewValueAssetsLinkDests(value, includeServePath, normalize...)...)
 	}
 	if nil == itemFilter {
 		attrView.VisitPersistedValues(collectValue)
@@ -2552,21 +2611,21 @@ func visitAttributeViewValue0(value *av.Value, visit func(*av.Value), visited ma
 	}
 }
 
-func getAttributeViewValueAssetsLinkDests(value *av.Value, includeServePath bool) (ret []string) {
+func getAttributeViewValueAssetsLinkDests(value *av.Value, includeServePath bool, normalize ...func(string) string) (ret []string) {
 	if nil == value {
 		return
 	}
-	if nil != value.URL && util.IsAssetLinkDest([]byte(value.URL.Content), includeServePath) {
-		ret = append(ret, strings.TrimSpace(value.URL.Content))
+	if nil != value.URL && util.IsAssetLinkDest([]byte(normalizeScannedAsset(value.URL.Content, normalize)), includeServePath) {
+		ret = append(ret, strings.TrimSpace(normalizeScannedAsset(value.URL.Content, normalize)))
 	}
 	for _, asset := range value.MAsset {
-		if nil != asset && util.IsAssetLinkDest([]byte(asset.Content), includeServePath) {
-			ret = append(ret, strings.TrimSpace(asset.Content))
+		if nil != asset && util.IsAssetLinkDest([]byte(normalizeScannedAsset(asset.Content, normalize)), includeServePath) {
+			ret = append(ret, strings.TrimSpace(normalizeScannedAsset(asset.Content, normalize)))
 		}
 	}
 	if nil != value.Text && nil != value.Text.Rich {
 		if tree, err := av.ParseValueTextRich(value.Text.Rich); nil == err && nil != tree {
-			ret = append(ret, getAssetsLinkDests(tree.Root, includeServePath)...)
+			ret = append(ret, getAssetsLinkDests(tree.Root, includeServePath, normalize...)...)
 		}
 	}
 	return

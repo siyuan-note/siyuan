@@ -208,7 +208,7 @@ func replacePackageDirectory(sourcePath, installPath string, update bool) (err e
 			_ = os.RemoveAll(operationPath)
 		}
 	}()
-	if err = filelock.Copy(sourcePath, stagingPath); err != nil {
+	if err = filelock.CopyNewtimes(sourcePath, stagingPath); err != nil {
 		return
 	}
 

@@ -35,7 +35,7 @@ const fixture = (tablet: boolean, alreadyZoomed = false, missingTarget = false) 
         fetchPost: (_url: string, _data: any, callback: (data: any) => Promise<void>) => {
             pending.push(Promise.resolve(callback({data: {}})));
         },
-        fetchSyncPost: async () => ({data: {parentID: "target"}}),
+        fetchSyncPost: async () => ({code: 0, data: {parentID: "target"}}),
         onGet: (options: any) => loads.push(options),
         focusBlock: () => focused++,
         focusByOffset: () => focused++,
@@ -79,9 +79,11 @@ test("clicking the current breadcrumb scrolls without focusing on tablets", () =
     assert.equal(f.focused(), 0);
 });
 
-test("tablet exit-focus navigation scrolls to its saved target without restoring a selection", () => {
+test("tablet exit-focus navigation scrolls to its saved target without restoring a selection", async () => {
     const f = fixture(true);
     f.zoom({id: "root", focusId: "target", focusPosition: {start: 2, end: 5}, suppressFocus: true});
+    await f.settle();
+    assert.equal(f.loads.length, 1);
     assert.equal(f.loads[0].suppressFocus, true);
     assert.equal(f.scrolled(), 1);
     assert.equal(f.focused(), 0);
@@ -97,9 +99,11 @@ test("a dynamically loaded exit-focus target retains focus suppression", async (
     assert.equal(f.focused(), 0);
 });
 
-test("tablet editing recovery still restores explicit cursor offsets", () => {
+test("tablet editing recovery still restores explicit cursor offsets", async () => {
     const f = fixture(true);
     f.zoom({id: "root", focusId: "target", focusPosition: {start: 2, end: 5}, isPushBack: false});
+    await f.settle();
+    assert.equal(f.loads.length, 1);
     assert.equal(f.loads[0].suppressFocus, false);
     assert.equal(f.focused(), 1);
 });

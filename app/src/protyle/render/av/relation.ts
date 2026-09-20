@@ -23,6 +23,7 @@ import {getSearchAVFocus} from "./searchAVFocus";
 import {getAVTemplateHTML} from "./attributeValue";
 import {hasAVRenderTemplateResult} from "./cellValue";
 import {renderAVRichTextElements} from "./richText";
+import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 
 interface IAVItem {
     avID: string;
@@ -446,8 +447,10 @@ style="grid-template-columns:${gridTemplate}">
 data-value-id="${escapeAttr(primaryCell.id || "")}"
 style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}${primaryCell.color ? `color:${primaryCell.color};` : ""}">
     ${selected ? '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>' : ""}
+    ${isDetached ? "" : `<span class="av__relation-row-icon">${getFileTreeIconHTML(primaryValue.block?.icon, "file")}</span>`}
     <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}${useRenderedContent ? " av__celltext--template" : ""}"
         ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'}
+        data-icon="${escapeAttr(primaryValue.block?.icon || "")}"
         data-id="${escapeAttr(primaryValue.block?.id || "")}" data-content="${escapeAttr(primaryValue.block?.content || "")}">${content}</span>
     ${primaryCell.id ? `<button type="button" class="av__relation-row-open ariaLabel" data-type="openRelationRow" draggable="false"
         data-position="north" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></button>` : ""}
@@ -614,6 +617,7 @@ export const bindRelationEvent = (options: {
                 return {
                     id: item.dataset.rowId,
                     blockID: blockElement.dataset.id,
+                    icon: blockElement.dataset.icon || "",
                     content: blockElement.dataset.content ?? blockElement.textContent,
                     isDetached: !blockElement.classList.contains("popover__block"),
                 };
@@ -625,6 +629,7 @@ export const bindRelationEvent = (options: {
             return {
                 id,
                 blockID: value?.block?.id,
+                icon: value?.block?.icon || "",
                 content: value?.block?.content || "",
                 isDetached: value?.isDetached === true || !value?.block?.id,
             };
@@ -734,6 +739,7 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
                             isDetached: item.isDetached,
                             block: {
                                 id: item.blockID,
+                                icon: item.icon,
                                 content: item.content,
                             }
                         }
@@ -907,6 +913,7 @@ const getRelationValue = (menuElement: HTMLElement) => {
             type: "block",
             block: {
                 id: blockElement.dataset.id,
+                icon: blockElement.dataset.icon || "",
                 content: blockElement.dataset.content ?? blockElement.textContent
             },
             isDetached: !blockElement.classList.contains("popover__block")

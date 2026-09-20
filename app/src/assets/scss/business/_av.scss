@@ -2629,6 +2629,24 @@ img.av__cellassetimg {
     }
   }
 
+  .av__relation-row-icon {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: center;
+    height: 20px;
+    width: 20px;
+    margin-right: 6px;
+    font-size: 16px;
+
+    svg,
+    img {
+      height: 16px;
+      width: 16px;
+      object-fit: contain;
+    }
+  }
+
   .av__relation-row-open {
     align-items: center;
     background-color: transparent;

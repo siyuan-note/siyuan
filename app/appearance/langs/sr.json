@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "Превуците да промените почетни чвор",
+	"listMindmapRouteEnd": "Превуците да промените одредишни чвор",
+	"listMindmapRouteHandle": "Превуците да подесите путању; двапут кликните на ручицу за превлачење да вратите аутоматско израчунавање",
+	"listMindmapRouteFallback": "Подешена путања није доступна у овом распореду; приказује се аутоматска путања",
 	"listView": "Lista",
 	"databaseListView": "Prikaz baze - lista",
 	"copyRuntimeInfo": "Копирај информације о извршавању",

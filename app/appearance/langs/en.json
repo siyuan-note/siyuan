@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "Drag to change the start node",
+	"listMindmapRouteEnd": "Drag to change the end node",
+	"listMindmapRouteHandle": "Drag to adjust the path; double-click the handle to reset",
+	"listMindmapRouteFallback": "The adjusted path is unavailable in this layout; showing the automatic path",
 	"listView": "List",
 	"databaseListView": "Database list view",
 	"copyRuntimeInfo": "Copy runtime information",

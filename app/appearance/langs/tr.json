@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "Başlangıç düğümünü değiştirmek için sürükleyin",
+	"listMindmapRouteEnd": "Hedef düğümü değiştirmek için sürükleyin",
+	"listMindmapRouteHandle": "Yolu ayarlamak için sürükleyin; otomatik hesaplamayı geri yüklemek için sürükleme tutamacına çift tıklayın",
+	"listMindmapRouteFallback": "Ayarlanan yol bu düzende kullanılamıyor; otomatik yol gösteriliyor",
 	"listView": "Liste",
 	"databaseListView": "Veritabanı liste görünümü",
 	"copyRuntimeInfo": "Çalışma zamanı bilgilerini kopyala",

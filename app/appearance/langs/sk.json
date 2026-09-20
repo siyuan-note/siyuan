@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "Potiahnutím zmeníte počiatočný uzol",
+	"listMindmapRouteEnd": "Potiahnutím zmeníte cieľový uzol",
+	"listMindmapRouteHandle": "Potiahnutím upravíte trasu; dvojitým kliknutím na úchyt obnovíte automatický výpočet",
+	"listMindmapRouteFallback": "Upravená trasa nie je v tomto rozložení dostupná; zobrazuje sa automatická trasa",
 	"listView": "Zoznam",
 	"databaseListView": "Zoznamové zobrazenie databázy",
 	"copyRuntimeInfo": "Kopírovať informácie o prostredí behu",

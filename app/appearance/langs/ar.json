@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "اسحب لتغيير عقدة البداية",
+	"listMindmapRouteEnd": "اسحب لتغيير عقدة النهاية",
+	"listMindmapRouteHandle": "اسحب لضبط المسار؛ انقر نقرًا مزدوجًا على مقبض السحب لاستعادة الحساب التلقائي",
+	"listMindmapRouteFallback": "المسار المعدّل غير متاح في هذا التخطيط؛ يتم عرض المسار التلقائي",
 	"listView": "قائمة",
 	"databaseListView": "عرض قائمة قاعدة البيانات",
 	"copyRuntimeInfo": "نسخ معلومات التشغيل",

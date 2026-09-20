@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "ドラッグして始点ノードを変更",
+	"listMindmapRouteEnd": "ドラッグして終点ノードを変更",
+	"listMindmapRouteHandle": "ドラッグして経路を調整、ハンドルをダブルクリックして自動計算に戻す",
+	"listMindmapRouteFallback": "現在のレイアウトでは手動の経路を使用できないため、自動の経路を表示しています",
 	"listView": "リスト",
 	"databaseListView": "データベース リストビュー",
 	"copyRuntimeInfo": "実行環境情報をコピー",

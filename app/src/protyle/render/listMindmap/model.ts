@@ -1,5 +1,6 @@
 import {Constants} from "../../../constants";
 import {getOrderedListMarkerUpdates} from "../../wysiwyg/listContext";
+import type {MindmapManualRoute} from "./routing";
 
 export interface ListMindmapNodeStyle {
     textColor?: string;
@@ -23,6 +24,7 @@ export interface ListMindmapRelation {
     color?: string;
     width?: number;
     dash?: boolean;
+    route?: MindmapManualRoute;
 }
 
 export interface ListMindmapMetadata {
@@ -113,6 +115,16 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
                 !Number.isFinite(relation.width) || relation.width < 0)) ||
             ("dash" in relation && typeof relation.dash !== "boolean")) {
             throw invalidMetadata();
+        }
+        if ("route" in relation) {
+            const route = relation.route;
+            if (!isRecord(route) || route.version !== 1 || !Array.isArray(route.points) ||
+                !route.points.length || route.points.length > 64 || route.points.some(point =>
+                    !isRecord(point) || ["x", "y", "t"].some(key => typeof point[key] !== "number" ||
+                        !Number.isFinite(point[key]) || Math.abs(Number(point[key])) > 1000000) ||
+                    Number(point.t) < 0 || Number(point.t) > 1)) {
+                throw invalidMetadata();
+            }
         }
         relationIds.add(relation.id);
     }

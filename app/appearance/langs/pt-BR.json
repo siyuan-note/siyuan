@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "Arraste para alterar o nó inicial",
+	"listMindmapRouteEnd": "Arraste para alterar o nó de destino",
+	"listMindmapRouteHandle": "Arraste para ajustar o trajeto; clique duas vezes na alça para restaurar o cálculo automático",
+	"listMindmapRouteFallback": "O trajeto ajustado não está disponível neste leiaute; exibindo o trajeto automático",
 	"listView": "Lista",
 	"databaseListView": "Visualização de lista do banco de dados",
 	"copyRuntimeInfo": "Copiar informações de execução",

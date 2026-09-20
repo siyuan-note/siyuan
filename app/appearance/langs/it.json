@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "Trascina per cambiare il nodo iniziale",
+	"listMindmapRouteEnd": "Trascina per cambiare il nodo di destinazione",
+	"listMindmapRouteHandle": "Trascina per regolare il percorso; fai doppio clic sulla maniglia per ripristinare il calcolo automatico",
+	"listMindmapRouteFallback": "Il percorso modificato non è disponibile in questa disposizione; viene mostrato il percorso automatico",
 	"listView": "Elenco",
 	"databaseListView": "Vista elenco del database",
 	"copyRuntimeInfo": "Copia informazioni di esecuzione",

@@ -23,11 +23,13 @@ func TestPruneListMindmapMetadata(t *testing.T) {
 	_, list, child := mindmapTestTree()
 	original := `{"version":1,"rootTitle":"A & B","extension":9007199254740993,"nodes":{"` + list.ID +
 		`":{"backgroundColor":"red"},"child":{"bold":true,"extension":9007199254740993},"deleted":{}},` +
-		`"relations":[{"id":"keep","from":"` + list.ID + `","to":"child","label":"A & B"},` +
+		`"relations":[{"id":"keep","from":"` + list.ID + `","to":"child","label":"A & B",` +
+		`"route":{"version":1,"points":[{"x":-35,"y":20.5,"t":0.5}],"extension":9007199254740993}},` +
 		`{"id":"remove","from":"child","to":"deleted","label":""}]}`
 	list.SetIALAttr(listMindmapMetadataAttr, original)
 	next, changed := pruneListMindmapMetadata(list)
-	if !changed || strings.Contains(next, "deleted") || strings.Count(next, "9007199254740993") != 2 {
+	if !changed || strings.Contains(next, "deleted") || strings.Count(next, "9007199254740993") != 3 ||
+		!strings.Contains(next, `"points":[{"x":-35,"y":20.5,"t":0.5}]`) {
 		t.Fatalf("unexpected metadata: %s", next)
 	}
 	var result map[string]json.RawMessage
@@ -44,6 +46,24 @@ func TestPruneListMindmapMetadata(t *testing.T) {
 	child.Unlink()
 	if next, changed = pruneListMindmapMetadata(list); !changed || strings.Contains(next, `"child"`) {
 		t.Fatalf("deleted child retained: %s", next)
+	}
+}
+
+func TestPruneListMindmapPreservesInvalidRoutes(t *testing.T) {
+	for _, route := range []string{
+		`null`, `{}`, `{"version":2,"points":[{"x":0,"y":0,"t":0.5}]}`,
+		`{"version":1,"points":[]}`, `{"version":1,"points":[{"x":"0","y":0,"t":0.5}]}`,
+		`{"version":1,"points":[{"x":0,"y":0,"t":-0.1}]}`, `{"version":1,"points":[{"x":0,"y":0,"t":1.1}]}`,
+		`{"version":1,"points":[{"x":1000001,"y":0,"t":0.5}]}`, `{"version":1,"points":[{"x":0,"y":null,"t":0.5}]}`,
+		`{"version":1,"points":[{"x":0,"y":0}]}`,
+		`{"version":1,"points":[` + strings.Repeat(`{"x":0,"y":0,"t":0.5},`, 64) + `{"x":0,"y":0,"t":0.5}]}`,
+	} {
+		_, list, _ := mindmapTestTree()
+		original := `{"version":1,"nodes":{"deleted":{}},"relations":[{"id":"r","from":"a","to":"b","label":"","route":` + route + `}]}`
+		list.SetIALAttr(listMindmapMetadataAttr, original)
+		if next, changed := pruneListMindmapMetadata(list); changed || next != original {
+			t.Fatalf("unsupported or corrupt route was changed: %s", next)
+		}
 	}
 }
 
@@ -79,7 +99,8 @@ func TestPruneListMindmapPreservesInvalidMetadata(t *testing.T) {
 func TestNormalizeListMindmapTransactions(t *testing.T) {
 	for _, withUndo := range []bool{false, true} {
 		tree, list, child := mindmapTestTree()
-		original := `{"version":1,"nodes":{"child":{"bold":true}},"relations":[{"id":"r","from":"` + list.ID + `","to":"child","label":""}]}`
+		original := `{"version":1,"nodes":{"child":{"bold":true}},"relations":[{"id":"r","from":"` + list.ID + `","to":"child","label":"",` +
+			`"route":{"version":1,"points":[{"x":-35,"y":20.5,"t":0.5}]}}]}`
 		list.SetIALAttr(listMindmapMetadataAttr, original)
 		parent := child.Parent
 		child.Unlink()

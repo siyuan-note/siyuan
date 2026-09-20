@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "גררו כדי לשנות את צומת ההתחלה",
+	"listMindmapRouteEnd": "גררו כדי לשנות את צומת הסיום",
+	"listMindmapRouteHandle": "גררו כדי להתאים את הנתיב; לחצו פעמיים על ידית הגרירה כדי לשחזר חישוב אוטומטי",
+	"listMindmapRouteFallback": "הנתיב המותאם אינו זמין בפריסה זו; מוצג הנתיב האוטומטי",
 	"listView": "רשימה",
 	"databaseListView": "תצוגת רשימה של מסד נתונים",
 	"copyRuntimeInfo": "העתקת מידע על סביבת הריצה",

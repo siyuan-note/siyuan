@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "Faites glisser pour changer le nœud de départ",
+	"listMindmapRouteEnd": "Faites glisser pour changer le nœud d’arrivée",
+	"listMindmapRouteHandle": "Faites glisser pour ajuster le tracé ; double-cliquez sur la poignée pour rétablir le calcul automatique",
+	"listMindmapRouteFallback": "Le tracé ajusté est indisponible dans cette disposition ; le tracé automatique est affiché",
 	"listView": "Liste",
 	"databaseListView": "Vue liste de base de données",
 	"copyRuntimeInfo": "Copier les informations d’exécution",

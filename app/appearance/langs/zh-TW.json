@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "拖曳以變更起始節點",
+	"listMindmapRouteEnd": "拖曳以變更目標節點",
+	"listMindmapRouteHandle": "拖曳調整路徑，按兩下拖曳控制點恢復自動計算",
+	"listMindmapRouteFallback": "目前配置無法使用手動路徑，暫時顯示自動路徑",
 	"listView": "列表",
 	"databaseListView": "資料庫列表檢視",
 	"copyRuntimeInfo": "複製執行資訊",

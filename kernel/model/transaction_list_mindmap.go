@@ -77,7 +77,35 @@ func validListMindmapMetadata(data map[string]any) bool {
 		if _, ok := relation["label"].(string); !ok || seen[relation["id"].(string)] {
 			return false
 		}
+		if route, exists := relation["route"]; exists && !validListMindmapRoute(route) {
+			return false
+		}
 		seen[relation["id"].(string)] = true
+	}
+	return true
+}
+
+func validListMindmapRoute(value any) bool {
+	route, ok := value.(map[string]any)
+	if !ok || route["version"] != float64(1) {
+		return false
+	}
+	points, ok := route["points"].([]any)
+	if !ok || len(points) == 0 || len(points) > 64 {
+		return false
+	}
+	for _, value := range points {
+		point, ok := value.(map[string]any)
+		if !ok {
+			return false
+		}
+		for _, key := range []string{"x", "y", "t"} {
+			number, ok := point[key].(float64)
+			if !ok || math.IsNaN(number) || math.IsInf(number, 0) || math.Abs(number) > 1e6 ||
+				(key == "t" && (number < 0 || number > 1)) {
+				return false
+			}
+		}
 	}
 	return true
 }

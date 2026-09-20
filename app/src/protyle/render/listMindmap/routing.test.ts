@@ -1,6 +1,7 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
-import {routeMindmapRelation, MindmapRouteBox, MindmapRoutePoint} from "./routing";
+import {routeMindmapRelation, routeManualMindmapRelation, encodeMindmapRoute, moveMindmapRouteSegment, adjustMindmapRoute,
+    MindmapRouteBox, MindmapRoutePoint} from "./routing";
 
 const validate = (route: MindmapRoutePoint[], nodes: MindmapRouteBox[]) => {
     assert.ok(route.length >= 2, "a route must exist");
@@ -34,6 +35,88 @@ const validateDirection = (route: MindmapRoutePoint[], from: MindmapRouteBox, to
     outward(route[0], route[1], from);
     outward(route[route.length - 1], route[route.length - 2], to);
 };
+
+test("dragging a straight relation preserves arrow direction and follows endpoint translation", () => {
+    for (const vertical of [false, true]) {
+        const nodes = [{x: 0, y: 0, width: 100, height: 40},
+            {x: vertical ? 0 : 300, y: vertical ? 200 : 0, width: 100, height: 40}];
+        const automatic = routeMindmapRelation(nodes[0], nodes[1], nodes);
+        assert.equal(automatic.length, 2);
+        const moved = moveMindmapRouteSegment(automatic, 0, -60);
+        const saved = encodeMindmapRoute(moved, nodes[0], nodes[1]);
+        const routed = routeManualMindmapRelation(nodes[0], nodes[1], nodes, saved);
+        validate(routed, nodes);
+        validateDirection(routed, nodes[0], nodes[1]);
+        assert.notDeepEqual(routed, automatic);
+        assert.ok(routed.some(point => vertical ? point.x === automatic[0].x - 60 : point.y === automatic[0].y - 60));
+        const axis = vertical ? "x" : "y";
+        const segment = routed.findIndex((point, index) => point[axis] === automatic[0][axis] - 60 &&
+            routed[index + 1]?.[axis] === point[axis]);
+        const returned = adjustMindmapRoute(routed, segment, 60, nodes[0], nodes[1], saved);
+        assert.deepEqual(routeManualMindmapRelation(nodes[0], nodes[1], nodes, returned), automatic,
+            "dragging either orientation back restores the straight path");
+        const translated = nodes.map(node => ({...node, x: node.x + 57, y: node.y + 83}));
+        const next = routeManualMindmapRelation(translated[0], translated[1], translated, saved);
+        validate(next, translated);
+        assert.equal(next.length, routed.length);
+        next.forEach((point, index) => {
+            assert.ok(Math.abs(point.x - routed[index].x - 57) < .001);
+            assert.ok(Math.abs(point.y - routed[index].y - 83) < .001);
+        });
+        const resized = [nodes[0], {...nodes[1], x: nodes[1].x + 150, y: nodes[1].y + 120, width: 160}];
+        const afterResize = routeManualMindmapRelation(resized[0], resized[1], resized, saved);
+        validate(afterResize, resized);
+        validateDirection(afterResize, resized[0], resized[1]);
+        assert.deepEqual(routeMindmapRelation(nodes[0], nodes[1], nodes), automatic,
+            "removing the manual route restores the automatic route");
+    }
+});
+
+test("manual paths avoid obstacles and retain their configuration when a control is blocked", () => {
+    const nodes = [{x: 0, y: 0, width: 100, height: 40}, {x: 600, y: 0, width: 100, height: 40}];
+    const automatic = routeMindmapRelation(nodes[0], nodes[1], nodes);
+    const moved = moveMindmapRouteSegment(automatic, 0, -80);
+    const saved = encodeMindmapRoute(moved, nodes[0], nodes[1]);
+    const snapshot = JSON.stringify(saved);
+    const obstacle = {x: 335, y: -100, width: 30, height: 40};
+    validate(routeManualMindmapRelation(nodes[0], nodes[1], [...nodes, obstacle], saved), [...nodes, obstacle]);
+    const blocked = {...obstacle, x: moved[1].x - 10, y: moved[1].y - 10};
+    assert.deepEqual(routeManualMindmapRelation(nodes[0], nodes[1], [...nodes, blocked], saved), []);
+    assert.equal(JSON.stringify(saved), snapshot, "fallback does not delete manual configuration");
+    validate(routeManualMindmapRelation(nodes[0], nodes[1], nodes, saved), nodes);
+});
+
+test("an outward drag can return through the generated endpoint bends", () => {
+    const nodes = [
+        {x: 300, y: 40, width: 110, height: 40},
+        {x: 300, y: 220, width: 110, height: 40},
+        {x: 470, y: 0, width: 120, height: 40},
+        {x: 470, y: 100, width: 220, height: 40},
+    ];
+    const automatic = routeMindmapRelation(nodes[0], nodes[1], nodes);
+    assert.equal(automatic.length, 2);
+    for (const savedBends of [false, true]) {
+        let route = encodeMindmapRoute(moveMindmapRouteSegment(automatic, 0, 500), nodes[0], nodes[1]);
+        let points = routeManualMindmapRelation(nodes[0], nodes[1], nodes, route);
+        validate(points, nodes);
+        if (savedBends) {
+            route = encodeMindmapRoute(points, nodes[0], nodes[1]);
+        }
+        let column = automatic[0].x + 500;
+        for (const x of [800, 440, 400, automatic[0].x]) {
+            const segment = points.slice(1).map((point, index) => ({point, index, previous: points[index]}))
+                .find(item => item.point.x === column && item.previous.x === column);
+            assert.ok(segment);
+            route = adjustMindmapRoute(points, segment.index, x - segment.point.x, nodes[0], nodes[1], route);
+            points = routeManualMindmapRelation(nodes[0], nodes[1], nodes, route);
+            column = x;
+            assert.ok(points.length, JSON.stringify({savedBends, x, route}));
+            validate(points, nodes);
+            validateDirection(points, nodes[0], nodes[1]);
+        }
+        assert.deepEqual(points, automatic);
+    }
+});
 
 test("mixed widths keep arrows facing nodes", () => {
     for (const width of [64, 130, 260]) {

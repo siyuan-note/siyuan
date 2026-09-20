@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "आरंभिक नोड बदलने के लिए खींचें",
+	"listMindmapRouteEnd": "लक्ष्य नोड बदलने के लिए खींचें",
+	"listMindmapRouteHandle": "पथ समायोजित करने के लिए खींचें; स्वचालित गणना बहाल करने के लिए ड्रैग हैंडल पर दो बार क्लिक करें",
+	"listMindmapRouteFallback": "इस लेआउट में समायोजित पथ उपलब्ध नहीं है; स्वचालित पथ दिखाया जा रहा है",
 	"listView": "सूची",
 	"databaseListView": "डेटाबेस सूची दृश्य",
 	"copyRuntimeInfo": "रनटाइम की जानकारी कॉपी करें",

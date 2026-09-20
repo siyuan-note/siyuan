@@ -1,5 +1,9 @@
 export interface MindmapRoutePoint {x: number; y: number;}
 export interface MindmapRouteBox extends MindmapRoutePoint {width: number; height: number; controlY?: number;}
+export interface MindmapManualRoute {
+    version: 1;
+    points: (MindmapRoutePoint & {t: number})[];
+}
 
 const bendCost = 24;
 
@@ -61,6 +65,9 @@ const findRelationRoute = (from: MindmapRouteBox, to: MindmapRouteBox,
             top: (node.controlY ?? node.y + node.height) - 15, bottom: (node.controlY ?? node.y + node.height) + 15},
     ]);
     const ports = (node: MindmapRouteBox, other: MindmapRouteBox) => {
+        if (!node.width && !node.height) {
+            return [0, 1, 2, 3].map(direction => ({x: node.x, y: node.y, direction}));
+        }
         const centerX = node.x + node.width / 2;
         const otherCenterX = other.x + other.width / 2;
         const xs = [...new Set([centerX, ...(otherCenterX >= node.x + 12 &&
@@ -188,4 +195,141 @@ const findRelationRoute = (from: MindmapRouteBox, to: MindmapRouteBox,
         });
     }
     return [];
+};
+
+const routeAnchor = (from: MindmapRouteBox, to: MindmapRouteBox, t: number): MindmapRoutePoint => ({
+    x: (from.x + from.width / 2) * (1 - t) + (to.x + to.width / 2) * t,
+    y: (from.y + from.height / 2) * (1 - t) + (to.y + to.height / 2) * t,
+});
+
+// 控制点相对两个端点保存；整体平移不改变配置，单端移动按路径比例带动控制点。
+export const encodeMindmapRoute = (points: MindmapRoutePoint[], from: MindmapRouteBox,
+                                  to: MindmapRouteBox): MindmapManualRoute => {
+    const lengths = [0];
+    points.slice(1).forEach((point, index) => lengths.push(lengths[index] +
+        Math.hypot(point.x - points[index].x, point.y - points[index].y)));
+    const total = lengths[lengths.length - 1] || 1;
+    return {version: 1, points: points.slice(1, -1).map((point, index) => {
+        const t = lengths[index + 1] / total;
+        const anchor = routeAnchor(from, to, t);
+        return {t, x: point.x - anchor.x, y: point.y - anchor.y};
+    })};
+};
+
+const decodeMindmapRoute = (route: MindmapManualRoute, from: MindmapRouteBox, to: MindmapRouteBox) =>
+    route.points.map(point => {
+        const anchor = routeAnchor(from, to, point.t);
+        return {x: Math.round((anchor.x + point.x) * 1e6) / 1e6,
+            y: Math.round((anchor.y + point.y) * 1e6) / 1e6, width: 0, height: 0};
+    });
+
+export const routeManualMindmapRelation = (from: MindmapRouteBox, to: MindmapRouteBox,
+                                          nodes: MindmapRouteBox[], route: MindmapManualRoute): MindmapRoutePoint[] => {
+    const controls = decodeMindmapRoute(route, from, to);
+    const stops = [from, ...controls, to];
+    const result: MindmapRoutePoint[] = [];
+    for (let i = 1; i < stops.length; i++) {
+        const a = stops[i - 1];
+        const b = stops[i];
+        if (!a.width && !b.width && a.x === b.x && a.y === b.y) {
+            continue;
+        }
+        const segment = routeMindmapRelation(a, b, nodes);
+        if (segment.length < 2) {
+            return [];
+        }
+        result.push(...(result.length ? segment.slice(1) : segment));
+    }
+    // 合并共线点和避障后重叠的折返段，避免接缝产生无效圆角。
+    const simplified: MindmapRoutePoint[] = [];
+    for (const point of result) {
+        let b = simplified[simplified.length - 1];
+        if (b && point.x === b.x && point.y === b.y) {
+            continue;
+        }
+        let a = simplified[simplified.length - 2];
+        while (a && ((a.x === b.x && b.x === point.x) || (a.y === b.y && b.y === point.y))) {
+            simplified.pop();
+            b = a;
+            a = simplified[simplified.length - 2];
+        }
+        if (!b || b.x !== point.x || b.y !== point.y) {
+            simplified.push(point);
+        }
+    }
+    return simplified;
+};
+
+export const moveMindmapRouteSegment = (points: MindmapRoutePoint[], index: number, offset: number): MindmapRoutePoint[] => {
+    if (index < 0 || index >= points.length - 1) {
+        return [];
+    }
+    const result = points.map(point => ({...point}));
+    const a = result[index];
+    const b = result[index + 1];
+    const axis = a.y === b.y ? "y" : "x";
+    const length = Math.hypot(b.x - a.x, b.y - a.y);
+    if (length < 12) {
+        return [];
+    }
+    // 首尾线段只保存移动部分，连接端重新选择垂直于节点边缘的引出段。
+    const start = index === 0 ? {x: a.x + (b.x - a.x) / 3, y: a.y + (b.y - a.y) / 3} : a;
+    const end = index === points.length - 2 ? {x: b.x - (b.x - a.x) / 3, y: b.y - (b.y - a.y) / 3} : b;
+    const movedStart = {...start, [axis]: start[axis] + offset};
+    const movedEnd = {...end, [axis]: end[axis] + offset};
+    return [...result.slice(0, index), ...(index === 0 ? [a] : []), movedStart, movedEnd,
+        ...(index === points.length - 2 ? [b] : []), ...result.slice(index + 2)];
+};
+
+export const adjustMindmapRoute = (points: MindmapRoutePoint[], index: number, offset: number,
+                                  from: MindmapRouteBox, to: MindmapRouteBox, route?: MindmapManualRoute): MindmapManualRoute | undefined => {
+    const candidate = moveMindmapRouteSegment(points, index, offset);
+    if (candidate.length < 3) {
+        return;
+    }
+    const a = points[index];
+    const b = points[index + 1];
+    const axis = a.y === b.y ? "y" : "x";
+    const along = axis === "x" ? "y" : "x";
+    const controls = route ? decodeMindmapRoute(route, from, to) : [];
+    const selected = controls.map((point, i) => Math.abs(point[axis] - a[axis]) < .001 ? i : -1).filter(i => i >= 0);
+    if (!selected.length) {
+        return candidate.length <= 66 ? encodeMindmapRoute(candidate, from, to) : undefined;
+    }
+    // 再次拖动沿用已保存的控制点，自动避障产生的拐点不转成固定约束。
+    const removed = new Set<number>();
+    const crosses = (point: MindmapRoutePoint) => point[axis] > Math.min(a[axis], a[axis] + offset) &&
+        point[axis] < Math.max(a[axis], a[axis] + offset);
+    // 越过相邻折线时收起被跨过的控制点，允许已保存的绕行逐段缩回。
+    for (let i = selected[0] - 1; i >= 0 && crosses(controls[i]); i--) {
+        removed.add(i);
+    }
+    for (let i = selected[selected.length - 1] + 1; i < controls.length && crosses(controls[i]); i++) {
+        removed.add(i);
+    }
+    const size = along === "y" ? "height" : "width";
+    const first = from[along] < to[along] ? from : to;
+    const last = first === from ? to : from;
+    return {...route, points: route.points.flatMap((point, i) => {
+        if (removed.has(i)) {
+            return [];
+        }
+        if (!selected.includes(i)) {
+            return [point];
+        }
+        const moved = {...controls[i], [axis]: controls[i][axis] + offset};
+        // 回到端点之间时，连接处的控制点退到节点外侧，由路由重新选择连接端口。
+        const overlapsEndpoint = [from, to].some(node =>
+            (moved.x > node.x - 6 && moved.x < node.x + node.width + 6 &&
+                moved.y > node.y - 6 && moved.y < node.y + node.height + 6) ||
+            (moved.x > node.x + node.width - 19 && moved.x < node.x + node.width + 61 &&
+                moved.y > (node.controlY ?? node.y + node.height) - 15 &&
+                moved.y < (node.controlY ?? node.y + node.height) + 15));
+        const inset = along === "y" && moved.x > first.x + first.width - 19 &&
+            moved.x < first.x + first.width + 61 ? 16 : 8;
+        if (overlapsEndpoint && first[along] + first[size] + inset <= last[along] - 8) {
+            moved[along] = Math.max(first[along] + first[size] + inset, Math.min(last[along] - 8, moved[along]));
+        }
+        return [{...point, x: point.x + moved.x - controls[i].x, y: point.y + moved.y - controls[i].y}];
+    })};
 };

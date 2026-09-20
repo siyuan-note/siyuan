@@ -50,6 +50,21 @@ test("mindmap metadata rejects unknown formats and invalid values without replac
     }
 });
 
+test("manual relation routes are optional, versioned and validated without dropping extension fields", () => {
+    const route = {version: 1, points: [{x: -40, y: 25.5, t: .4, extension: "keep"}], extension: "keep"};
+    const metadata = {version: 1, nodes: {}, relations: [{id: "r", from: "a", to: "b", label: "", route}]};
+    const value = JSON.stringify(metadata);
+    assert.equal(JSON.stringify(parseListMindmapMetadata(value)), value);
+    for (const invalid of [null, {}, {...route, version: 2}, {...route, points: []},
+        {...route, points: Array(65).fill(route.points[0])}, ...[
+            {x: "0", y: 0, t: 0}, {x: 0, y: 0, t: -1}, {x: 0, y: 0, t: 1.1},
+            {x: 1e7, y: 0, t: .5}, {x: 0, y: null, t: .5}, {x: 0, y: 0},
+        ].map(point => ({version: 1, points: [point]}))]) {
+        const data = JSON.stringify({...metadata, relations: [{...metadata.relations[0], route: invalid}]});
+        assert.throws(() => parseListMindmapMetadata(data), /Invalid list mindmap metadata/);
+    }
+});
+
 test("variable-size mindmap branches keep their order and never overlap", () => {
     const root = measured("root", 90, 55, [
         measured("a", 220, 200, [measured("a1", 150, 36), measured("a2", 90, 92)]),
@@ -306,9 +321,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(lute.BlockDOM2Md(cleaned).includes("New child"));
 
     // 复制后关系线与节点样式引用新块 ID，遇到任一损坏配置时不进行部分迁移。
+    const copiedRoute = {version: 1, points: [{x: -35, y: 20, t: .5}], extension: "keep"};
     list.setAttribute("custom-sy-list-mindmap-data", JSON.stringify({version: 1, extension: "keep",
         nodes: {a: {bold: true}, b: {italic: true}, deleted: {bold: true}},
-        relations: [{id: "relation", from: "a", to: "b", label: "keep"},
+        relations: [{id: "relation", from: "a", to: "b", label: "keep", route: copiedRoute},
             {id: "orphan", from: "a", to: "deleted", label: "remove"}]}));
     const copiedItems = list.querySelectorAll('[data-type="NodeListItem"]');
     copiedItems[0].setAttribute("data-node-id", "new-a");
@@ -322,7 +338,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     api.remapListMindmapIDs(list, new Map([["a", "new-a"], ["b", "new-b"]]));
     const remapped = JSON.parse(list.getAttribute("custom-sy-list-mindmap-data"));
     check.deepEqual(remapped.nodes, {"new-a": {bold: true}, "new-b": {italic: true}});
-    check.deepEqual(remapped.relations, [{id: "relation", from: "new-a", to: "new-b", label: "keep"}]);
+    check.deepEqual(remapped.relations, [{id: "relation", from: "new-a", to: "new-b", label: "keep", route: copiedRoute}]);
     check.equal(remapped.extension, "keep");
     check.equal(list.querySelector(".list-mindmap"), null);
     check.equal(list.hasAttribute("data-list-mindmap-rendered"), false);
@@ -797,6 +813,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     relationLabel.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
     check.deepEqual(relationChanges.pop(), ["relation-test", {label: "Renamed"}]);
     check.equal(host.querySelector(".list-mindmap__relation-editor"), null);
+    check.equal(getComputedStyle(relationElement).visibility, "hidden", "finishing text editing returns to handle mode");
     host.querySelector<HTMLButtonElement>(".list-mindmap__relation").click();
     host.querySelector(".list-mindmap__relation").dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     const cancelledLabel = host.querySelector<HTMLInputElement>(".list-mindmap__relation-editor");
@@ -815,6 +832,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     blank();
     check.equal(inspector.hidden, true);
     check.equal(host.querySelector(".list-mindmap__relation--selected"), null);
+    await settle();
+    check.equal(getComputedStyle(relationElement).visibility, "visible", "deselecting restores relation text");
 
     const savedRelations = model.metadata.relations;
     // 短连线文字撑开节点间距，文字仍位于所属连线上。
@@ -847,6 +866,28 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             (point.y === previous.y && p.y === point.y && p.x >= Math.min(point.x, previous.x) &&
                 p.x <= Math.max(point.x, previous.x));
     }), "the label stays on its own connection");
+    const beforeHandleGap = siblingGap();
+    const beforeHandleLabel = shortLabel.getBoundingClientRect();
+    shortLabel.click();
+    check.equal(getComputedStyle(shortLabel).visibility, "hidden", "selecting a relation hides its label before dragging");
+    const midpointHandle = host.querySelector<HTMLElement>(".list-mindmap__route-handle:not(.list-mindmap__route-endpoint)");
+    check.ok(midpointHandle, "text no longer suppresses the segment handle");
+    const midpoint = centerPoint(midpointHandle);
+    check.equal(document.elementFromPoint(midpoint.x, midpoint.y), midpointHandle, "the drag handle receives the pointer");
+    view.refreshLayout();
+    await settle();
+    check.equal(siblingGap(), beforeHandleGap, "hidden text keeps its layout measurements");
+    check.equal(shortLabel.getBoundingClientRect().width, beforeHandleLabel.width);
+    view.setReadOnly(true);
+    check.equal(getComputedStyle(shortLabel).visibility, "visible", "read-only rendering retains relation text");
+    view.setReadOnly(false);
+    check.equal(getComputedStyle(shortLabel).visibility, "hidden");
+    window.dispatchEvent(new Event("beforeprint"));
+    check.equal(getComputedStyle(shortLabel).visibility, "visible", "printing retains selected relation text");
+    window.dispatchEvent(new Event("afterprint"));
+    check.equal(getComputedStyle(shortLabel).visibility, "hidden");
+    blank();
+    check.equal(getComputedStyle(shortLabel).visibility, "visible");
     model.metadata.relations[0].label = "";
     view.update(model);
     await settle();
@@ -872,15 +913,283 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.equal(view.selectedRelation, id, "overlapping reverse relations can be selected independently");
             viewport.dispatchEvent(new MouseEvent("dblclick", {clientX: x, clientY: y, bubbles: true}));
             const input = host.querySelector<HTMLInputElement>(".list-mindmap__relation-editor");
-            check.ok(input, "double-clicking either arrow edits that relation");
-            input.value = id;
-            input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
-            check.deepEqual(relationChanges[relationChanges.length - 1], [id, {label: id}]);
+            check.ok(input, "double-clicking either arrow edits its relation label");
+            input.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
             pressDelete();
             check.equal(relationDeletions[relationDeletions.length - 1], id);
         }
     }
+    // 短尾段仍绘制清晰的箭头，整体很短的双向直连则保留箭头间距。
+    const arrowContext = host.querySelector("canvas").getContext("2d");
+    const originalMoveTo = arrowContext.moveTo;
+    const originalLineTo = arrowContext.lineTo;
+    const originalFill = arrowContext.fill;
+    let polygon: {x: number, y: number}[] = [];
+    let arrows: {x: number, y: number}[][] = [];
+    arrowContext.moveTo = (x, y) => { polygon = [{x, y}]; originalMoveTo.call(arrowContext, x, y); };
+    arrowContext.lineTo = (x, y) => { polygon.push({x, y}); originalLineTo.call(arrowContext, x, y); };
+    arrowContext.fill = () => { arrows.push(polygon); originalFill.call(arrowContext); };
+    try {
+        const straight = view.relationRoutes.get("forward");
+        const start = straight[0];
+        const end = straight[straight.length - 1];
+        view.relationRoutes.set("forward", [start, {x: end.x + 100, y: start.y},
+            {x: end.x + 100, y: end.y - 3}, {x: end.x, y: end.y - 3}, end]);
+        view.selectedRelation = undefined;
+        view.hoveredLine = undefined;
+        for (const scale of [.5, 1, 2]) {
+            view.scale = scale;
+            arrows = [];
+            view.draw();
+            const width = (arrow: {x: number, y: number}[]) => Math.hypot(arrow[2].x - arrow[0].x, arrow[2].y - arrow[0].y) * scale;
+            check.ok(width(arrows[0]) >= 6.9, "a three-unit tail retains a readable arrow at every zoom level");
+            check.ok(width(arrows[1]) <= Math.hypot(end.x - start.x, end.y - start.y) * scale / 3 + .001,
+                "short reverse connections retain space between arrowheads");
+        }
+    } finally {
+        arrowContext.moveTo = originalMoveTo;
+        arrowContext.lineTo = originalLineTo;
+        arrowContext.fill = originalFill;
+    }
     view.scale = 1;
+    // 拖动短关系线只在松手时保存一次；取消、外部刷新和只读切换丢弃预览。
+    model.metadata.relations = [{id: "drag-route", from: alpha, to: beta, label: ""}];
+    view.update(model);
+    await settle();
+    view.selectedRelation = "drag-route";
+    view.updateSelection();
+    relationChanges.length = 0;
+    const automaticRoute = JSON.stringify(view.relationRoutes.get("drag-route"));
+    const screenNodes = () => [alpha, beta].map(id => {
+        const bounds = nodeElement(id).getBoundingClientRect();
+        return {x: bounds.x, y: bounds.y};
+    });
+    const dragHandle = async (offset: number) => {
+        const handle = host.querySelector<HTMLElement>(".list-mindmap__route-handle:not(.list-mindmap__route-endpoint)");
+        check.ok(handle, "short relations expose a drag handle");
+        const point = centerPoint(handle);
+        const horizontal = handle.style.cursor === "ns-resize";
+        sendPointer(handle, "pointerdown", point.x, point.y);
+        check.ok(view.pointer?.relation);
+        sendPointer(viewport, "pointermove", point.x + (horizontal ? 0 : offset), point.y + (horizontal ? offset : 0));
+        await settle();
+        return {x: point.x + (horizontal ? 0 : offset), y: point.y + (horizontal ? offset : 0)};
+    };
+    const beforeDragNodes = screenNodes();
+    const beforeDragScale = view.scale;
+    const blockedEnd = await dragHandle(-35);
+    check.equal(view.pointer.relation.valid, false, "a control inside another node's buttons is rejected");
+    sendPointer(viewport, "pointerup", blockedEnd.x, blockedEnd.y);
+    check.equal(relationChanges.length, 0, "an invalid preview never saves");
+    let dragEnd = await dragHandle(110);
+    check.equal(view.pointer.relation.valid, true, "dragging a short relation creates a valid path");
+    check.notEqual(JSON.stringify(view.relationRoutes.get("drag-route")), automaticRoute);
+    check.deepEqual(screenNodes(), beforeDragNodes);
+    check.equal(relationChanges.length, 0, "previews do not create transactions");
+    viewport.dispatchEvent(new WheelEvent("wheel", {deltaY: 100, ctrlKey: true, bubbles: true, cancelable: true}));
+    check.equal(view.scale, beforeDragScale, "zoom stays fixed while dragging");
+    sendPointer(viewport, "pointerup", dragEnd.x, dragEnd.y);
+    check.equal(relationChanges.length, 1, "release saves exactly once");
+    const savedRoute = (relationChanges[0] as any[])[1].route;
+    check.equal((relationChanges[0] as any[])[2], JSON.stringify(model.metadata.relations[0]), "save guards against stale relations");
+    check.ok(savedRoute.points.length);
+    model.metadata.relations[0].route = savedRoute;
+    view.update(model);
+    await settle();
+    check.deepEqual(screenNodes(), beforeDragNodes, "saving the path preserves the camera anchor");
+    const savedGeometry = JSON.stringify(view.relationRoutes.get("drag-route"));
+    const outwardPoints = view.relationRoutes.get("drag-route");
+    const outwardColumn = JSON.parse(automaticRoute)[0].x + 110;
+    const returningSegment = outwardPoints.findIndex((point: any, index: number) =>
+        point.x === outwardColumn && outwardPoints[index + 1]?.x === outwardColumn);
+    const returningHandle = view.routeHandles.get(`drag-route:${returningSegment}`);
+    check.ok(returningHandle);
+    const returningPoint = centerPoint(returningHandle);
+    sendPointer(returningHandle, "pointerdown", returningPoint.x, returningPoint.y);
+    sendPointer(viewport, "pointermove", returningPoint.x - 110 * view.scale, returningPoint.y);
+    await settle();
+    check.equal(view.pointer.relation.valid, true, "a saved outward path can be dragged back between its endpoints");
+    check.equal(JSON.stringify(view.relationRoutes.get("drag-route")), automaticRoute);
+    sendPointer(viewport, "pointerup", returningPoint.x - 110 * view.scale, returningPoint.y);
+    check.equal(relationChanges.length, 2);
+    model.metadata.relations[0].route = (relationChanges[1] as any[])[1].route;
+    view.update(model);
+    await settle();
+    check.equal(JSON.stringify(view.relationRoutes.get("drag-route")), automaticRoute, "the returned route persists across refresh");
+    model.metadata.relations[0].route = savedRoute;
+    view.update(model);
+    await settle();
+    model.metadata.relations[0].route = {version: 1, points: [{x: 0, y: 0, t: 0}]};
+    view.update(model);
+    await settle();
+    check.equal(view.fallbackRoutes.has("drag-route"), true);
+    check.equal(host.querySelector<HTMLElement>(".list-mindmap__route-status").hidden, false);
+    check.equal(model.metadata.relations[0].route.points.length, 1, "unavailable routes retain their saved controls");
+    model.metadata.relations[0].route = savedRoute;
+    view.update(model);
+    await settle();
+    check.equal(view.fallbackRoutes.has("drag-route"), false);
+    check.equal(JSON.stringify(view.relationRoutes.get("drag-route")), savedGeometry);
+    relationChanges.length = 0;
+    await dragHandle(-15);
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    check.equal(view.pointer, undefined);
+    check.equal(JSON.stringify(view.relationRoutes.get("drag-route")), savedGeometry);
+    check.equal(relationChanges.length, 0);
+    dragEnd = await dragHandle(-15);
+    viewport.dispatchEvent(new PointerEvent("pointercancel", {pointerId: 1, bubbles: true}));
+    sendPointer(viewport, "pointerup", dragEnd.x, dragEnd.y);
+    check.equal(relationChanges.length, 0, "pointer cancellation discards the preview");
+    dragEnd = await dragHandle(-15);
+    view.update(model);
+    sendPointer(viewport, "pointerup", dragEnd.x, dragEnd.y);
+    await settle();
+    check.equal(relationChanges.length, 0, "remote refresh cancels a stale drag");
+    dragEnd = await dragHandle(-15);
+    view.setReadOnly(true);
+    sendPointer(viewport, "pointerup", dragEnd.x, dragEnd.y);
+    check.equal(relationChanges.length, 0);
+    check.equal(host.querySelector(".list-mindmap__route-handle:not(.list-mindmap__route-endpoint)"), null, "read-only render has no drag handles");
+    await settle();
+    check.equal(JSON.stringify(view.relationRoutes.get("drag-route")), savedGeometry, "read-only rendering uses the saved path");
+    view.setReadOnly(false);
+    view.selectedRelation = "drag-route";
+    view.updateSelection();
+    await settle();
+    const resetEnd = view.linePaths.find((line: any) => line.id === "drag-route").end;
+    const resetBounds = viewport.getBoundingClientRect();
+    viewport.dispatchEvent(new MouseEvent("dblclick", {clientX: resetBounds.left + view.offsetX + resetEnd.x * view.scale,
+        clientY: resetBounds.top + view.offsetY + resetEnd.y * view.scale, bubbles: true}));
+    const lineEditor = host.querySelector<HTMLInputElement>(".list-mindmap__relation-editor");
+    check.ok(lineEditor, "double-clicking a manual path edits its text");
+    check.equal(relationChanges.length, 0, "double-clicking a line does not reset its route");
+    lineEditor.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    host.querySelector(".list-mindmap__route-handle:not(.list-mindmap__route-endpoint)").dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    check.deepEqual(relationChanges.map((change: any[]) => change.slice(0, 2)), [["drag-route", {route: undefined}]],
+        "double-clicking the drag handle clears only its manual route");
+    delete model.metadata.relations[0].route;
+    view.update(model);
+    await settle();
+    check.equal(JSON.stringify(view.relationRoutes.get("drag-route")), automaticRoute);
+    check.equal(host.querySelector(".list-mindmap__relation-editor"), null);
+    // 线条本身也可拖动，手柄在不同缩放下保持相同的点击尺寸。
+    relationChanges.length = 0;
+    const directPoints = view.relationRoutes.get("drag-route");
+    const directX = resetBounds.left + view.offsetX + (directPoints[0].x + directPoints[1].x) / 2 * view.scale;
+    const directY = resetBounds.top + view.offsetY + (directPoints[0].y + directPoints[1].y) / 2 * view.scale;
+    sendPointer(viewport, "pointerdown", directX, directY);
+    sendPointer(viewport, "pointermove", directX + 110, directY);
+    sendPointer(viewport, "pointerup", directX + 110, directY);
+    check.equal(relationChanges.length, 1);
+    for (const scale of [.5, 2]) {
+        view.scale = scale;
+        view.draw();
+        const handle = host.querySelector<HTMLElement>(".list-mindmap__route-handle:not(.list-mindmap__route-endpoint)").getBoundingClientRect();
+        check.equal(handle.width, 20);
+        check.equal(handle.height, 20);
+    }
+    view.scale = 1;
+    view.draw();
+    HTMLElement.prototype.setPointerCapture = originalCapture;
+    HTMLElement.prototype.hasPointerCapture = originalHasCapture;
+    HTMLElement.prototype.releasePointerCapture = originalReleaseCapture;
+    relationChanges.length = 0;
+    const nativeHandle = centerPoint(host.querySelector<HTMLElement>(".list-mindmap__route-handle:not(.list-mindmap__route-endpoint)"));
+    await nativeInput([
+        {type: "mouseMove", ...nativeHandle},
+        {type: "mouseDown", ...nativeHandle, button: "left", clickCount: 1},
+        {type: "mouseMove", x: nativeHandle.x + 110, y: nativeHandle.y, button: "left"},
+        {type: "mouseUp", x: nativeHandle.x + 110, y: nativeHandle.y, button: "left", clickCount: 1},
+    ]);
+    check.equal(relationChanges.length, 1, "native pointer capture saves a drag exactly once");
+    model.metadata.relations[0].route = (relationChanges[0] as any[])[1].route;
+    view.update(model);
+    await settle();
+    const nativeReset = centerPoint(host.querySelector<HTMLElement>(".list-mindmap__route-handle:not(.list-mindmap__route-endpoint)"));
+    await nativeInput([
+        {type: "mouseMove", ...nativeReset},
+        {type: "mouseDown", ...nativeReset, button: "left", clickCount: 1},
+        {type: "mouseUp", ...nativeReset, button: "left", clickCount: 1},
+        {type: "mouseDown", ...nativeReset, button: "left", clickCount: 2},
+        {type: "mouseUp", ...nativeReset, button: "left", clickCount: 2},
+    ]);
+    check.equal(relationChanges.length, 2, "native double click restores automatic routing despite pointer capture");
+    check.deepEqual((relationChanges[1] as any[]).slice(0, 2), ["drag-route", {route: undefined}]);
+    HTMLElement.prototype.setPointerCapture = () => undefined;
+    HTMLElement.prototype.hasPointerCapture = () => false;
+    HTMLElement.prototype.releasePointerCapture = () => undefined;
+    // 首尾标识分别更换起点和终点，空白、自身、重复连接及取消操作均保留原数据。
+    const endpointModel = api.readListMindmap(reset("* Start\n* End\n* Alternate\n"));
+    const [startNode, endNode, alternateNode] = endpointModel.root.children;
+    endpointModel.metadata.relations = [{id: "endpoint-test", from: startNode.id, to: endNode.id,
+        label: "Keep label", color: "red", route: savedRoute}];
+    view.update(endpointModel);
+    await settle();
+    view.selectedRelation = "endpoint-test";
+    view.updateSelection();
+    check.equal(host.querySelectorAll(".list-mindmap__route-endpoint").length, 2);
+    const dragEndpoint = async (endpoint: string, targetId?: string) => {
+        const handle = host.querySelector<HTMLElement>(`.list-mindmap__route-endpoint[data-endpoint="${endpoint}"]`);
+        const point = centerPoint(handle);
+        const target = targetId ? centerPoint(nodeElement(targetId)) : {x: point.x + 100, y: panelBounds.top + 10};
+        sendPointer(handle, "pointerdown", point.x, point.y);
+        sendPointer(viewport, "pointermove", target.x, target.y);
+        await settle();
+        check.equal(host.querySelectorAll(".list-mindmap__route-endpoint").length, 2, "both endpoints remain marked during a drag");
+        return target;
+    };
+    for (const endpoint of ["from", "to"]) {
+        relationChanges.length = 0;
+        const target = await dragEndpoint(endpoint, alternateNode.id);
+        check.equal(view.pointer.relation.valid, true);
+        check.ok(nodeElement(alternateNode.id).classList.contains("list-mindmap__node--relation"));
+        check.equal(relationChanges.length, 0);
+        sendPointer(viewport, "pointerup", target.x, target.y);
+        check.deepEqual((relationChanges[0] as any[]).slice(0, 2), ["endpoint-test", {[endpoint]: alternateNode.id, route: undefined}]);
+        check.equal(relationChanges.length, 1);
+        check.equal((relationChanges[0] as any[])[2], JSON.stringify(endpointModel.metadata.relations[0]));
+        await settle();
+    }
+    relationChanges.length = 0;
+    for (const targetId of [undefined, startNode.id, endpointModel.root.id]) {
+        const target = await dragEndpoint("to", targetId);
+        check.equal(view.pointer.relation.valid, false);
+        sendPointer(viewport, "pointerup", target.x, target.y);
+        check.equal(relationChanges.length, 0);
+        await settle();
+    }
+    const cancelTarget = await dragEndpoint("to", alternateNode.id);
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    sendPointer(viewport, "pointerup", cancelTarget.x, cancelTarget.y);
+    check.equal(relationChanges.length, 0);
+    await settle();
+    HTMLElement.prototype.setPointerCapture = originalCapture;
+    HTMLElement.prototype.hasPointerCapture = originalHasCapture;
+    HTMLElement.prototype.releasePointerCapture = originalReleaseCapture;
+    const nativeStart = centerPoint(host.querySelector<HTMLElement>('.list-mindmap__route-endpoint[data-endpoint="from"]'));
+    const nativeTarget = centerPoint(nodeElement(alternateNode.id));
+    await nativeInput([
+        {type: "mouseMove", ...nativeStart},
+        {type: "mouseDown", ...nativeStart, button: "left", clickCount: 1},
+        {type: "mouseMove", ...nativeTarget, button: "left"},
+        {type: "mouseUp", ...nativeTarget, button: "left", clickCount: 1},
+    ]);
+    check.equal(relationChanges.length, 1, "native endpoint capture reconnects the start node once");
+    check.deepEqual((relationChanges[0] as any[]).slice(0, 2), ["endpoint-test", {from: alternateNode.id, route: undefined}]);
+    relationChanges.length = 0;
+    HTMLElement.prototype.setPointerCapture = () => undefined;
+    HTMLElement.prototype.hasPointerCapture = () => false;
+    HTMLElement.prototype.releasePointerCapture = () => undefined;
+    endpointModel.metadata.relations.push({id: "existing", from: startNode.id, to: alternateNode.id, label: ""});
+    view.update(endpointModel);
+    await settle();
+    const duplicateTarget = await dragEndpoint("to", alternateNode.id);
+    check.equal(view.pointer.relation.valid, false);
+    sendPointer(viewport, "pointerup", duplicateTarget.x, duplicateTarget.y);
+    check.equal(relationChanges.length, 0);
+    view.setReadOnly(true);
+    check.equal(host.querySelectorAll(".list-mindmap__route-endpoint").length, 0);
+    view.setReadOnly(false);
     model.metadata.relations = savedRelations;
     view.update(model);
 

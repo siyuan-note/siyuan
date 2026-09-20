@@ -594,6 +594,70 @@
     }
   }
 
+  &__route-handle {
+    position: absolute;
+    z-index: 4;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    transform: translate(-50%, -50%);
+    background: transparent;
+    touch-action: none;
+
+    &::before {
+      content: "";
+      display: block;
+      width: 8px;
+      height: 8px;
+      margin: auto;
+      border: 1px solid var(--b3-theme-primary);
+      border-radius: 2px;
+      background: var(--b3-theme-background);
+      box-sizing: border-box;
+    }
+
+    &:hover::before,
+    &:focus-visible::before {
+      background: var(--b3-theme-primary);
+    }
+  }
+
+  &__viewport--route-invalid &__route-handle::before {
+    border-color: var(--b3-theme-error);
+  }
+
+  &__route-endpoint {
+    width: 12px;
+    height: 12px;
+    cursor: crosshair;
+
+    &::before {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    &[data-endpoint="to"]::before {
+      background: var(--b3-theme-primary);
+    }
+  }
+
+  &__route-status {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    z-index: 6;
+    transform: translateX(-50%);
+    max-width: calc(100% - 32px);
+    padding: 4px 8px;
+    border-radius: var(--b3-border-radius);
+    background: var(--b3-theme-background);
+    color: var(--b3-theme-on-surface);
+    font-size: 12px;
+    pointer-events: none;
+  }
+
   &__inspector {
     @include protyle-toolbar-surface;
     position: absolute;
@@ -679,6 +743,8 @@
     &__toolbar,
     &__inspector,
     &__tooltip,
+    &__route-handle,
+    &__route-status,
     &__add-bridge,
     &__fold,
     &__add-child {

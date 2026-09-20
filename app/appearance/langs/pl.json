@@ -1,4 +1,8 @@
 {
+	"listMindmapRouteStart": "Przeciągnij, aby zmienić węzeł początkowy",
+	"listMindmapRouteEnd": "Przeciągnij, aby zmienić węzeł docelowy",
+	"listMindmapRouteHandle": "Przeciągnij, aby dostosować przebieg; kliknij dwukrotnie uchwyt, aby przywrócić automatyczne wyznaczanie",
+	"listMindmapRouteFallback": "Dostosowany przebieg jest niedostępny w tym układzie; wyświetlany jest przebieg automatyczny",
 	"listView": "Lista",
 	"databaseListView": "Widok listy bazy danych",
 	"copyRuntimeInfo": "Kopiuj informacje o środowisku uruchomieniowym",

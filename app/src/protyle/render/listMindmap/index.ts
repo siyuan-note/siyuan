@@ -228,10 +228,24 @@ class ListMindmapController {
                     metadata.relations.push({id: Lute.NewNodeID(), from, to, label: ""});
                 }
             }),
-            onRelationChange: (id, patch) => this.metadata(metadata => {
+            onRelationChange: (id, patch, expected) => this.metadata(metadata => {
                 const relation = metadata.relations.find(item => item.id === id);
-                if (relation) {
-                    Object.assign(relation, patch);
+                if (!relation || (expected !== undefined && JSON.stringify(relation) !== expected)) {
+                    showMessage(window.siyuan.languages.listMindmapStale);
+                    return false;
+                }
+                if (patch.from !== undefined || patch.to !== undefined) {
+                    const from = patch.from ?? relation.from;
+                    const to = patch.to ?? relation.to;
+                    const nodes = readListMindmap(this.list).nodes;
+                    if (!nodes.has(from) || !nodes.has(to) || from === to || metadata.relations.some(item =>
+                        item.id !== id && item.from === from && item.to === to)) {
+                        return false;
+                    }
+                }
+                Object.assign(relation, patch);
+                if ("route" in patch && patch.route === undefined) {
+                    delete relation.route;
                 }
             }),
             onRelationDelete: id => this.metadata(metadata => {
@@ -242,10 +256,12 @@ class ListMindmapController {
         this.snapshot = cleanListMindmapHTML(list.outerHTML);
     }
 
-    private metadata(change: (metadata: ListMindmapMetadata) => void) {
+    private metadata(change: (metadata: ListMindmapMetadata) => void | false) {
         this.change(() => {
             const metadata = readListMindmap(this.list).metadata;
-            change(metadata);
+            if (change(metadata) === false) {
+                return false;
+            }
             writeListMindmapMetadata(this.list, metadata);
         });
     }

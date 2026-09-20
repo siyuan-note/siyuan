@@ -7,6 +7,7 @@ import * as ts from "typescript";
 
 const setup = () => {
     const transactions: Array<{do: IOperation[], undo: IOperation[]}> = [];
+    const menus: Array<Array<{label: string; checked: boolean; click: () => void}>> = [];
     const exports = {};
     const window = {siyuan: {isPublish: false, languages: {}, config: {lang: "en"}}};
     runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "settings.ts"), "utf8"), {
@@ -18,9 +19,15 @@ const setup = () => {
                 transactions.push({do: perform, undo})},
             "../../../../util/escape": {escapeAttr: (value: string) => value, escapeHtml: (value: string) => value},
             "../col": {getColNameByType: (type: string) => type},
+            "../../../../plugin/Menu": {Menu: class {
+                items: Array<{label: string; checked: boolean; click: () => void}> = [];
+                constructor() { menus.push(this.items); }
+                addItem(item: {label: string; checked: boolean; click: () => void}) { this.items.push(item); }
+                open() { return; }
+            }},
         })[id],
     });
-    return {methods: exports as typeof import("./settings"), transactions, window};
+    return {methods: exports as typeof import("./settings"), transactions, window, menus};
 };
 
 const data = () => ({id: "database", viewID: "calendar-view", view: {
@@ -49,6 +56,37 @@ test("calendar setup creates and binds a field only on request in one undoable t
         assert.equal(settingsOf(current.do[1]).dateKeyID, "new-field");
         assert.equal(settingsOf(current.undo[0]).dateKeyID, "missing-field");
         assert.equal(current.do.some(item => item.action === "updateAttrViewCell"), false);
+    }
+});
+
+test("calendar layout submenus filter choices, mark selection and preserve undo", () => {
+    for (const key of ["dateKeyID", "colorKeyID", "weekStart"] as const) {
+        const {methods, transactions, menus} = setup();
+        const current = data();
+        const view = current.view as IAVTable;
+        view.calendar = {dateKeyID: "date", colorKeyID: "color", weekStart: 1};
+        view.columns = [{id: "date", type: "date", name: "Date"}, {id: "created", type: "created", name: "Created"},
+            {id: "updated", type: "updated", name: "Updated"}, {id: "color", type: "select", name: "Color"},
+            {id: "text", type: "text", name: "Text"}] as IAVColumn[];
+        assert.doesNotMatch(methods.getCalendarSettingsHTML(view, true), /<select/);
+        let click: (event: {preventDefault: () => void; stopPropagation: () => void}) => void;
+        let refreshed = 0;
+        const button = {tagName: "BUTTON", dataset: {calendarSetting: key},
+            getBoundingClientRect: () => ({left: 0, bottom: 28, height: 28}),
+            addEventListener: (_name: string, handler: typeof click) => { click = handler; }};
+        methods.bindCalendarSettings({protyle: {options: {}} as IProtyle, blockElement: block, data: current,
+            menuElement: {querySelectorAll: () => [button]} as unknown as Element, onChange: () => { refreshed++; }});
+        click({preventDefault() { return; }, stopPropagation() { return; }});
+        const items = menus[0];
+        assert.equal(items.length, key === "weekStart" ? 7 : key === "dateKeyID" ? 4 : 2);
+        assert.equal(items.filter(item => item.checked).length, 1);
+        items.find(item => item.checked).click();
+        assert.equal(transactions.length, 0);
+        items[0].click();
+        assert.equal(transactions.length, 1);
+        assert.equal(settingsOf(transactions[0].do[0])[key], key === "weekStart" ? 0 : "");
+        assert.equal(settingsOf(transactions[0].undo[0])[key], key === "weekStart" ? 1 : key === "dateKeyID" ? "date" : "color");
+        assert.equal(refreshed, 1);
     }
 });
 

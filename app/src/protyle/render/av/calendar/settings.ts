@@ -1,46 +1,70 @@
 import {transaction} from "../../../wysiwyg/transaction";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getColNameByType} from "../col";
+import {Menu} from "../../../../plugin/Menu";
 
 export const isCalendarDateColumn = (column: IAVColumn) => ["date", "created", "updated"].includes(column?.type);
 
-export const getCalendarSettingsHTML = (view: IAVTable) => {
-    const settings = view.calendar;
-    const select = (key: "dateKeyID" | "colorKeyID", label: string, fields: IAVColumn[]) => `<label class="b3-menu__item">
-    <span class="b3-menu__label">${label}</span>
-    <select class="b3-select" data-calendar-setting="${key}" aria-label="${label}">
-        <option value="">${key === "dateKeyID" ? window.siyuan.languages.calendarSelectDateField : window.siyuan.languages.calcOperatorNone}</option>
-        ${fields.map(field => `<option value="${escapeAttr(field.id)}"${settings[key] === field.id ? " selected" : ""}>${escapeHtml(field.name)}</option>`).join("")}
-    </select>
-</label>`;
-    const weekDays = Array.from({length: 7}, (_, day) => new Date(2024, 0, 7 + day).toLocaleDateString(window.siyuan.config.lang, {weekday: "long"}));
-    return select("dateKeyID", window.siyuan.languages.calendarDateField, view.columns.filter(isCalendarDateColumn)) +
-        select("colorKeyID", window.siyuan.languages.calendarColorField, view.columns.filter(field => field.type === "select")) +
-        `<label class="b3-menu__item"><span class="b3-menu__label">${window.siyuan.languages.calendarWeekStart}</span>
-    <select class="b3-select" data-calendar-setting="weekStart" aria-label="${window.siyuan.languages.calendarWeekStart}">
-        ${weekDays.map((name, index) => `<option value="${index}"${settings.weekStart === index ? " selected" : ""}>${name}</option>`).join("")}
-    </select>
-</label>`;
+const getCalendarSettingItems = (view: IAVTable): Array<{
+    key: keyof IAVCalendarSettings;
+    label: string;
+    choices: Array<{value: string; label: string}>;
+}> => {
+    const fields = (columns: IAVColumn[]) => [{value: "", label: window.siyuan.languages.calcOperatorNone},
+        ...columns.map(column => ({value: column.id, label: column.name}))];
+    return [{
+        key: "dateKeyID", label: window.siyuan.languages.calendarDateField,
+        choices: fields(view.columns.filter(isCalendarDateColumn)),
+    }, {
+        key: "colorKeyID", label: window.siyuan.languages.calendarColorField,
+        choices: fields(view.columns.filter(field => field.type === "select")),
+    }, {
+        key: "weekStart", label: window.siyuan.languages.calendarWeekStart,
+        choices: Array.from({length: 7}, (_, day) => ({value: day.toString(),
+            label: new Date(2024, 0, 7 + day).toLocaleDateString(window.siyuan.config.lang, {weekday: "long"})})),
+    }];
 };
+
+export const getCalendarSettingsHTML = (view: IAVTable, asMenu = false) => getCalendarSettingItems(view).map(item => {
+    const value = view.calendar[item.key].toString();
+    if (asMenu) {
+        const selected = item.choices.find(choice => choice.value === value);
+        return `<button class="b3-menu__item" data-calendar-setting="${item.key}">
+    <span class="fn__flex-center">${item.label}</span><span class="fn__flex-1"></span>
+    <span class="b3-menu__accelerator">${escapeHtml(selected?.label || window.siyuan.languages.calcOperatorNone)}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>`;
+    }
+    return `<label class="b3-menu__item"><span class="b3-menu__label">${item.label}</span>
+    <select class="b3-select" data-calendar-setting="${item.key}" aria-label="${item.label}">
+        ${item.choices.map(choice => `<option value="${escapeAttr(choice.value)}"${choice.value === value ? " selected" : ""}>${escapeHtml(item.key === "dateKeyID" && choice.value === "" ? window.siyuan.languages.calendarSelectDateField : choice.label)}</option>`).join("")}
+    </select>
+</label>`;
+}).join("");
 
 export const bindCalendarSettings = (options: {
     protyle: IProtyle;
     blockElement: Element;
     data: IAV;
     menuElement: Element;
+    onChange?: () => void;
 }) => {
     if (options.protyle.disabled || window.siyuan.isPublish || options.protyle.options.history?.created || options.protyle.options.history?.snapshot) {
-        options.menuElement.querySelectorAll<HTMLSelectElement>("[data-calendar-setting]").forEach(select => {
+        options.menuElement.querySelectorAll<HTMLSelectElement | HTMLButtonElement>("[data-calendar-setting]").forEach(select => {
             select.disabled = true;
         });
         return;
     }
-    options.menuElement.querySelectorAll<HTMLSelectElement>("[data-calendar-setting]").forEach(select => {
-        select.addEventListener("change", () => {
+    options.menuElement.querySelectorAll<HTMLSelectElement | HTMLButtonElement>("[data-calendar-setting]").forEach(select => {
+        const item = getCalendarSettingItems(options.data.view as IAVTable).find(item => item.key === select.dataset.calendarSetting);
+        const update = (value: string) => {
             const view = options.data.view as IAVTable;
             const previous = {...view.calendar};
-            const setting = select.dataset.calendarSetting;
-            const next = {...previous, [setting]: setting === "weekStart" ? Number(select.value) : select.value};
+            const setting = item.key;
+            if (previous[setting].toString() === value) {
+                return;
+            }
+            const next = {...previous, [setting]: setting === "weekStart" ? Number(value) : value};
             const operation = {
                 action: "setAttrViewCalendar" as const,
                 avID: options.data.id,
@@ -49,7 +73,25 @@ export const bindCalendarSettings = (options: {
             };
             transaction(options.protyle, [{...operation, data: next}], [{...operation, data: previous}]);
             view.calendar = next;
-        });
+            options.onChange?.();
+        };
+        if (select.tagName === "BUTTON") {
+            select.addEventListener("click", (event) => {
+                const menu = new Menu();
+                const view = options.data.view as IAVTable;
+                item.choices.forEach(choice => menu.addItem({
+                    iconHTML: "", label: escapeHtml(choice.label),
+                    checked: view.calendar[item.key].toString() === choice.value,
+                    click: () => update(choice.value),
+                }));
+                const rect = select.getBoundingClientRect();
+                menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+                event.preventDefault();
+                event.stopPropagation();
+            });
+        } else {
+            select.addEventListener("change", () => update(select.value));
+        }
     });
 };
 

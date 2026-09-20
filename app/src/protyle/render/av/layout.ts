@@ -167,7 +167,7 @@ export const getLayoutHTML = (data: IAV) => {
 </label>`;
     }
     if (data.viewType === "calendar") {
-        return html + getCalendarSettingsHTML(data.view as IAVTable) + "</div>";
+        return html + getCalendarSettingsHTML(data.view as IAVTable, true) + "</div>";
     }
     return html + `<button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
         <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>
@@ -282,7 +282,7 @@ export const bindLayoutEvent = (options: {
         options.data.view.wrapField = checked;
     });
     if (options.data.viewType === "calendar") {
-        bindCalendarSettings(options);
+        bindCalendarSettings({...options, onChange: rerender});
         return;
     }
     if (isTableLikeView(options.data.viewType)) {

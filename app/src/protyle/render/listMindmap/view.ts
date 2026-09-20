@@ -1635,7 +1635,6 @@ export class ListMindmapView {
         const measure = createElement("span", "list-mindmap__root-title-measure");
         input.rows = 1;
         input.value = this.model.metadata.rootTitle || "";
-        input.placeholder = this.label("listMindmapPlaceholder");
         measure.textContent = input.value;
         input.setAttribute("aria-label", this.label("text"));
         content.classList.add("list-mindmap__root-title-host");

@@ -74,7 +74,6 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     const fragment = mountProtyleLiteFragment(host, {
         app: owner.app,
         initialBlockHTML,
-        placeholder: window.siyuan.languages.listMindmapPlaceholder,
         protyleOptions: {notebookId: owner.notebookId, toolbar, hint},
         runtimeCapabilities: {
             upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,

@@ -2220,11 +2220,11 @@ export class WYSIWYG {
                 return firstTopBlock ? getDragSelectBlock(getFirstBlock(firstTopBlock)) : false;
             };
             let lastMoveEvent: MouseEvent;
-            const selectScrollEvent = () => lastMoveEvent && documentSelf.onmousemove?.(lastMoveEvent);
+            const selectScrollEvent = () => lastMoveEvent && moveDragSelect(lastMoveEvent);
             if (startsFromPadding) {
                 protyle.contentElement.addEventListener("scroll", selectScrollEvent);
             }
-            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+            const moveDragSelect = (moveEvent: MouseEvent) => {
                 lastMoveEvent = moveEvent;
                 let moveTarget: boolean | HTMLElement = moveEvent.target as HTMLElement;
                 // table cell select
@@ -2592,6 +2592,7 @@ export class WYSIWYG {
                     return;
                 }
                 dragSelectFinished = true;
+                documentSelf.removeEventListener("mousemove", moveDragSelect, true);
                 documentSelf.removeEventListener("mouseup", finishDragSelect, true);
                 if (documentSelf.onmouseup === finishDragSelect) {
                     documentSelf.onmouseup = null;
@@ -3009,6 +3010,12 @@ export class WYSIWYG {
                     }
                 }
             };
+            // 侧边划选在捕获阶段更新，避免脑图等容器拦截移动事件后选区停止更新。
+            if (startsFromPadding) {
+                documentSelf.addEventListener("mousemove", moveDragSelect, true);
+            } else {
+                documentSelf.onmousemove = moveDragSelect;
+            }
             // 底部反链包含嵌套编辑器，捕获阶段结束框选，避免内部事件阻断后选区无法清理
             documentSelf.onmouseup = finishDragSelect;
             documentSelf.addEventListener("mouseup", finishDragSelect, {capture: true, once: true});

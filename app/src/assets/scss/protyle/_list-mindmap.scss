@@ -184,10 +184,10 @@
     }
 
     &--untitled:not(.list-mindmap__node--editing) {
-      width: 28px;
-      min-width: 28px;
-      height: 28px;
-      min-height: 28px;
+      width: 32px;
+      min-width: 32px;
+      height: 32px;
+      min-height: 32px;
       padding: 0;
 
       > .list-mindmap__content {
@@ -266,7 +266,7 @@
     min-height: 24px;
     overflow-wrap: anywhere;
 
-    &--empty:not(.list-mindmap__editor) {
+    .list-mindmap__node:not(.list-mindmap__node--editing) > &--empty:not(.list-mindmap__editor) {
       > * {
         display: none;
       }

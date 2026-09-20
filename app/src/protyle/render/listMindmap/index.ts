@@ -13,6 +13,7 @@ import {completeTabsListSource} from "../../wysiwyg/tabsList";
 import {waitForPendingTransactions} from "../../util/transactionQueue";
 import {hideAllElements, hideElements} from "../../ui/hideElements";
 import {globalClickHideMenu} from "../../../boot/globalEvent/click";
+import {countBlockWord} from "../../../layout/status";
 import {openLink} from "../../../editor/openLink";
 import {matchHotKey} from "../../util/hotKey";
 import {setFullscreen} from "../../breadcrumb/action";
@@ -103,6 +104,12 @@ class ListMindmapController {
             if (!target.closest(".protyle-toolbar, .protyle-util, [data-sub-element-source]")) {
                 hideAllElements(["toolbar", "util", "gutter"]);
                 hideElements(["hint"], this.owner);
+                // 进入脑图交互时清除外层块选区，同时保留多选工具栏的操作上下文。
+                if (event.button === 0 && !this.owner.toolbar.isMultiSelectMode() &&
+                    this.owner.wysiwyg.element.querySelector(".protyle-wysiwyg--select, .protyle-wysiwyg--select-mode")) {
+                    hideElements(["select"], this.owner);
+                    countBlockWord([], this.owner);
+                }
             }
         }, {capture: true});
         this.host.addEventListener("keydown", event => {

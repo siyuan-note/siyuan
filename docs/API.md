@@ -93,8 +93,6 @@ Plugin resource declarations, data authorization, and publishing APIs are docume
         * [HTTP forward proxy](#HTTP-forward-proxy)
         * [WebSocket forward proxy](#WebSocket-forward-proxy)
         * [EventSource forward proxy](#EventSource-forward-proxy)
-* [AI](#AI)
-    * [Test decision model](#Test-decision-model)
 * [System](#System)
     * [Get boot progress](#Get-boot-progress)
     * [Get system version](#Get-system-version)
@@ -1860,14 +1858,6 @@ Note: To ensure data security, access to this interface is prohibited in Publish
     * `h`: Optional, request header JSON encoded in the same way; the JSON type is `map[string][]string`
     * `t`: Optional, connection timeout in Go `time.ParseDuration` format, for example `30s` or `1500ms`
 * Return value: Directly streams the target service HTTP status code and response body without wrapping them in `code`, `msg`, or `data`; if the request headers do not include `Accept`, `text/event-stream` is used automatically; target response headers are returned with the `Siyuan-Proxy-` prefix
-
-## AI
-
-### Test decision model
-
-`POST /api/ai/testDecisionModel` requires authentication and administrator access. No request body is needed. It tests the saved `ai.decision` configuration using a fixed sample with the TypeSafe System One API, without reading notes. The decision model can be disabled while testing; globally disabling AI rejects the request. A test may incur provider charges.
-
-The standard success envelope contains `data: {"matched": true}` when the provider returns a valid answer. An incomplete configuration, network failure or invalid provider response returns `data: {"matched": false, "msg": "..."}` with `code: 0`. This tests connectivity and response format, not model accuracy. The configured timeout applies, and the request is not retried automatically.
 
 ## System
 

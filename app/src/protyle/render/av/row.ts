@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByAttribute} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
@@ -200,12 +201,14 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     }
     const tableRow = options.row as IAVRow;
     const tableData = options.data as IAVTable;
+    const isList = options.type === "list";
+    const pinIndex = isList ? -1 : options.pinIndex;
 
     html = `<div class="av__row" data-index="${options.rowIndex}" data-id="${tableRow.id}">`;
-    if (options.pinIndex > -1) {
+    if (pinIndex > -1) {
         html += `<div class="av__colsticky av__colsticky--freeze"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg>${getFreezeDragHTML()}</div>`;
     } else {
-        html += `<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg>${getFreezeDragHTML()}</div></div>`;
+        html += `<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg>${isList ? "" : getFreezeDragHTML()}</div></div>`;
     }
 
     tableRow.cells.forEach((cell, index) => {
@@ -218,18 +221,18 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
         if (cell.valueType === "checkbox") {
             checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
         }
-        html += `<div class="av__cell${checkClass}" data-id="${cell.id}" data-col-id="${column.id}" 
+        html += `<div class="av__cell${checkClass}${isList ? " ariaLabel" : ""}" data-id="${cell.id}" data-col-id="${column.id}" ${isList ? `aria-label="${escapeAriaLabel(column.name)}" data-position="north"` : ""}
 data-wrap="${column.wrap}" 
 data-dtype="${column.type}" 
 data-date-format="${column.dateFormat || ""}"
 ${column.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 data-align="${column.align || ""}"
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
-style="width: ${escapeAttr(column.width) || "200px"};
+style="${isList ? "" : `width: ${escapeAttr(column.width) || "200px"};`}
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
 ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat, column.renderTemplate)}</div>`;
 
-        if (options.pinIndex === index) {
+        if (pinIndex === index) {
             html += "</div>";
         }
     });
@@ -242,7 +245,7 @@ export const getFieldIdByCellElement = (cellElement: Element, viewType: TAVView)
     if (isCustomAttr(cellElement)) {
         return cellElement.getAttribute("data-row-id");
     }
-    return (hasClosestByClassName(cellElement, viewType === "table" ? "av__row" : "av__gallery-item") as HTMLElement).dataset.id;
+    return (hasClosestByClassName(cellElement, isTableLikeView(viewType) ? "av__row" : "av__gallery-item") as HTMLElement).dataset.id;
 };
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
@@ -327,7 +330,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
 export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
     let selectCount = 0;
-    if (avType === "table") {
+    if (isTableLikeView(avType)) {
         blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
             if (hasClosestByClassName(bodyElement, "av") !== blockElement) {
                 return;
@@ -386,7 +389,7 @@ export const setPage = (blockElement: Element) => {
     blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
         const pageSize = item.dataset.pageSize;
         if (pageSize) {
-            const currentCount = item.querySelectorAll(avType === "table" ? ".av__row:not(.av__row--header)" : ".av__gallery-item").length;
+            const currentCount = item.querySelectorAll(isTableLikeView(avType) ? ".av__row:not(.av__row--header)" : ".av__gallery-item").length;
             if (parseInt(pageSize) < currentCount) {
                 item.dataset.pageSize = currentCount.toString();
             }
@@ -417,6 +420,7 @@ export const insertAttrViewBlockAnimation = (options: {
         return previousElement;
     };
     options.blockElement.querySelector('[data-type="av-search"]').textContent = "";
+    const isList = options.blockElement.getAttribute("data-av-type") === "list";
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
     let previousElement = options.blockElement.querySelector(groupQuery + `.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
     // 有排序需要加入最后一行
@@ -452,8 +456,7 @@ data-wrap="${item.dataset.wrap}"
 data-dtype="${item.dataset.dtype}" 
 data-date-format="${item.dataset.dateFormat || ""}"
 data-align="${item.dataset.align || ""}"
-style="width: ${item.style.width};"
-${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(colType, null), lineNumber,
+style="${isList ? "" : `width: ${item.style.width};`}"${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(colType, null), lineNumber,
     true, "table", undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
         if (pinIndex === index) {
             cellsHTML += "</div>";

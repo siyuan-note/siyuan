@@ -163,11 +163,14 @@ func visitViewValues(view *View, visitValue func(*Value)) {
 	if nil != view.GroupCalc && nil != view.GroupCalc.FieldCalc {
 		visitValue(view.GroupCalc.FieldCalc.Result)
 	}
-	if nil != view.Table {
-		if nil != view.Table.BaseLayout {
-			visitFilterValues(view.Table.Filters, visitValue)
+	for _, layout := range []*LayoutTable{view.Table, view.List} {
+		if nil == layout {
+			continue
 		}
-		for _, column := range view.Table.Columns {
+		if nil != layout.BaseLayout {
+			visitFilterValues(layout.Filters, visitValue)
+		}
+		for _, column := range layout.Columns {
 			if nil == column {
 				continue
 			}

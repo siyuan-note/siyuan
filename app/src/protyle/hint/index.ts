@@ -1,3 +1,4 @@
+import {isTableLikeView} from "../render/av/viewType";
 import {Constants} from "../../constants";
 import {isBuiltinSlashHint} from "./builtinSlash";
 import {
@@ -788,7 +789,7 @@ ${genHintItemHTML(item)}
             if (!cellElement) {
                 return;
             }
-            const rowElement = hasClosestByClassName(cellElement, nodeElement.getAttribute("data-av-type") === "table" ? "av__row" : "av__gallery-item");
+            const rowElement = hasClosestByClassName(cellElement, isTableLikeView(nodeElement.getAttribute("data-av-type")) ? "av__row" : "av__gallery-item");
             if (!rowElement) {
                 return;
             }

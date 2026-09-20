@@ -1,4 +1,6 @@
 {
+	"listView": "Lijst",
+	"databaseListView": "Lijstweergave van database",
 	"copyRuntimeInfo": "Runtime-informatie kopiëren",
 	"duplicateDocTree": "Dupliceren met subdocumenten",
 	"syncProviderChangeConfirm": "Voordat u van synchronisatieprovider wisselt, moet SiYuan bronnen en eerdere momentopnamen controleren en mogelijk ontbrekende inhoud uit de huidige cloudopslag downloaden. Dit kan enige tijd duren. Doorgaan?",
@@ -2479,6 +2481,7 @@
 		"quit": "Applicatie afsluiten"
 	},
 	"_attrView": {
+		"list": "Lijst",
 		"dateFormat": "Datumnotatie",
 		"fullDate": "Gelokaliseerde datum",
 		"dateMonths": "januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december",

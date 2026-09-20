@@ -470,11 +470,14 @@ func visitViewColorHolders(view *View, visitOption func(*SelectOption), visitSel
 	if nil != view.GroupCalc && nil != view.GroupCalc.FieldCalc {
 		walkValueSelects(view.GroupCalc.FieldCalc.Result, visitSelection)
 	}
-	if nil != view.Table {
-		if nil != view.Table.BaseLayout {
-			visitFilterColorHolders(view.Table.Filters, visitSelection)
+	for _, layout := range []*LayoutTable{view.Table, view.List} {
+		if nil == layout {
+			continue
 		}
-		for _, column := range view.Table.Columns {
+		if nil != layout.BaseLayout {
+			visitFilterColorHolders(layout.Filters, visitSelection)
+		}
+		for _, column := range layout.Columns {
 			if nil == column {
 				continue
 			}
@@ -667,9 +670,12 @@ func collectViewCustomColorIndexes(view *View, attrView *AttributeView, addColor
 	collectKeyCustomColorIndexes(view.GroupKey, addColor)
 	collectFilterCustomColorIndexes(view.Filters, attrView, addColor)
 	collectValueCustomColorIndexes(view.GroupVal, addColor)
-	if nil != view.Table {
-		if nil != view.Table.BaseLayout {
-			collectFilterCustomColorIndexes(view.Table.Filters, attrView, addColor)
+	for _, layout := range []*LayoutTable{view.Table, view.List} {
+		if nil == layout {
+			continue
+		}
+		if nil != layout.BaseLayout {
+			collectFilterCustomColorIndexes(layout.Filters, attrView, addColor)
 		}
 	}
 	if nil != view.Gallery {

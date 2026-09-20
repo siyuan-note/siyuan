@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-// AVViewInstance 表示表格、画廊或看板及其递归分组实例。
+// AVViewInstance 表示表格、列表、画廊或看板及其递归分组实例，列表复用表格的行列结构。
 type AVViewInstance struct {
 	table   *AVTable
 	gallery *AVGallery

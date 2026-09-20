@@ -1,3 +1,4 @@
+import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
 import {hasClosestBlock, hasClosestByClassName} from "../../../util/hasClosest";
 import {Constants} from "../../../../constants";
@@ -312,7 +313,7 @@ export const renderGallery = async (options: {
     }
     applyAVRenderContext(options.blockElement, data);
     prepareAVLocate(options.blockElement, data, resetData);
-    if (data.viewType === "table") {
+    if (isTableLikeView(data.viewType)) {
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
         return;
     }

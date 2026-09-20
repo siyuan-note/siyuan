@@ -164,7 +164,7 @@ const insertAVPastePlaceholder = (bodyElement: HTMLElement, view: IAVTable, row:
         row,
         rowIndex,
         pinIndex: getAVPastePinIndex(bodyElement),
-        type: "table",
+        type: bodyElement.closest<HTMLElement>(".av")?.dataset.avType === "list" ? "list" : "table",
     }));
     const rowElement = bottomElement.previousElementSibling as HTMLElement;
     rowElement.classList.add(PLACEHOLDER_ROW_CLASS);
@@ -209,7 +209,7 @@ const syncAVPasteRowCells = (options: {
         row: options.row,
         rowIndex: options.rowIndex,
         pinIndex: getAVPastePinIndex(options.bodyElement),
-        type: "table",
+        type: options.bodyElement.closest<HTMLElement>(".av")?.dataset.avType === "list" ? "list" : "table",
     });
     options.columnIDs.forEach(columnID => {
         const nextCell = template.content.querySelector(`.av__cell[data-col-id="${columnID}"]`) as HTMLElement;
@@ -469,6 +469,8 @@ const pasteAVMatrix = async (options: {
             action: "addAttrViewCol",
             name,
             avID: options.blockElement.dataset.avId,
+            blockID: options.blockElement.dataset.nodeId,
+            viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
             type,
             format: getDefaultDateFormat(type),
             id,

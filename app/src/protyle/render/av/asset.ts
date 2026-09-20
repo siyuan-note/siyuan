@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {updateAttrViewCellAnimation} from "./action";
@@ -145,7 +146,7 @@ export const updateAssetCell = (options: {
             return;
         }
         if (!options.blockElement.contains(item)) {
-            if (viewType === "table") {
+            if (isTableLikeView(viewType)) {
                 item = (options.blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     options.blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
             } else {

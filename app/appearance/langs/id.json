@@ -1,4 +1,6 @@
 {
+	"listView": "Daftar",
+	"databaseListView": "Tampilan daftar database",
 	"copyRuntimeInfo": "Salin informasi runtime",
 	"duplicateDocTree": "Duplikasikan beserta subdokumen",
 	"syncProviderChangeConfirm": "Sebelum mengganti penyedia sinkronisasi, SiYuan perlu memeriksa sumber daya dan snapshot lama, serta mungkin mengunduh konten yang hilang dari penyimpanan cloud saat ini. Proses ini dapat memakan waktu. Lanjutkan?",
@@ -2479,6 +2481,7 @@
 		"quit": "Keluar aplikasi"
 	},
 	"_attrView": {
+		"list": "Daftar",
 		"dateFormat": "Format tanggal",
 		"fullDate": "Tanggal lokal",
 		"dateMonths": "Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember",

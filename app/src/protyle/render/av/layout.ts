@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
@@ -118,6 +119,11 @@ export const getLayoutHTML = (data: IAV) => {
                 <svg><use xlink:href="#iconTable"></use></svg>
                 <div class="fn__hr"></div>
                 <div>${window.siyuan.languages.table}</div>
+            </div>
+            <div data-type="set-layout" data-view-type="list" class="av__layout-item${data.viewType === "list" ? " av__layout-item--select" : ""}">
+                <svg><use xlink:href="#iconList"></use></svg>
+                <div class="fn__hr"></div>
+                <div>${window.siyuan.languages.listView}</div>
             </div>
             <div data-type="set-layout" data-view-type="kanban" class="av__layout-item${data.viewType === "kanban" ? " av__layout-item--select" : ""}">
                 <svg><use xlink:href="#iconBoard"></use></svg>
@@ -266,7 +272,7 @@ export const bindLayoutEvent = (options: {
         });
         options.data.view.wrapField = checked;
     });
-    if (options.data.viewType === "table") {
+    if (isTableLikeView(options.data.viewType)) {
         return;
     }
     const cardLayoutElement = options.menuElement.querySelector('[data-type="set-card-layout"]') as HTMLButtonElement;

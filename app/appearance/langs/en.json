@@ -1,4 +1,6 @@
 {
+	"listView": "List",
+	"databaseListView": "Database list view",
 	"copyRuntimeInfo": "Copy runtime information",
 	"duplicateDocTree": "Duplicate with sub-documents",
 	"syncProviderChangeConfirm": "Before switching sync providers, SiYuan needs to check resources and historical snapshots and may download missing content from the current cloud storage. This may take some time. Continue?",
@@ -2479,6 +2481,7 @@
 		"quit": "Quit application"
 	},
 	"_attrView": {
+		"list": "List",
 		"dateFormat": "Date format",
 		"fullDate": "Localized date",
 		"dateMonths": "January|February|March|April|May|June|July|August|September|October|November|December",

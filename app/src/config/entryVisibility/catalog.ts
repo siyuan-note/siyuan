@@ -540,6 +540,7 @@ const slashMenuBuiltinChildren = [
     node("math", lang("math")),
     node("html", literal("HTML")),
     node("databaseTableView", lang("databaseTableView")),
+    node("databaseListView", lang("databaseListView")),
     node("databaseKanbanView", lang("databaseKanbanView")),
     node("databaseGalleryView", lang("databaseGalleryView")),
     separator("separator_2"),

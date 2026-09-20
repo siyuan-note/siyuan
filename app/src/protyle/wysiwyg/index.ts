@@ -1,4 +1,5 @@
 import {recordReplacementUndo} from "./replacementInput";
+import {isTableLikeView} from "../render/av/viewType";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
 import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
@@ -776,7 +777,7 @@ export class WYSIWYG {
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select") ||
                 (getAVSelectedCells(nodeElement).length > 0 ||
-                (nodeElement.dataset.avType === "table" && getAVSelectedItemIDs(nodeElement).length > 0) ?
+                (isTableLikeView(nodeElement.dataset.avType) && getAVSelectedItemIDs(nodeElement).length > 0) ?
                     nodeElement : null);
             const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
             // 表格内跨多单元格的文本选区：range.cloneContents() 会产出残缺的 td/tr 片段，需要重建合法 table
@@ -1255,7 +1256,7 @@ export class WYSIWYG {
             const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
                 hasClosestByClassName(target, "protyle-action"));
             if (event.shiftKey && !openListItemAttrByShift) {
-                if (!isMobile() && !protyle.disabled && avElement?.dataset.avType === "table" &&
+                if (!isMobile() && !protyle.disabled && isTableLikeView(avElement?.dataset.avType) &&
                     avCellElement && avCellElement.dataset.id &&
                     selectAVCellRange(avElement, avCellElement)) {
                     if (nodeElement) {
@@ -1820,7 +1821,7 @@ export class WYSIWYG {
             }
             // av cell select
             if (!protyle.disabled && avCellElement && avCellElement.dataset.id && !isInEmbedBlock(avCellElement)) {
-                if (!nodeElement || nodeElement.dataset.avType !== "table") {
+                if (!nodeElement || !isTableLikeView(nodeElement.dataset.avType)) {
                     return;
                 }
                 if (!setAVCellAnchor(nodeElement, avCellElement)) {
@@ -3073,7 +3074,7 @@ export class WYSIWYG {
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select") ||
                 (getAVSelectedCells(nodeElement).length > 0 ||
-                (nodeElement.dataset.avType === "table" && getAVSelectedItemIDs(nodeElement).length > 0) ?
+                (isTableLikeView(nodeElement.dataset.avType) && getAVSelectedItemIDs(nodeElement).length > 0) ?
                     nodeElement : null);
             const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
             // 表格内跨多单元格的文本选区：range.cloneContents() 会产出残缺的 td/tr 片段，需要重建合法 table

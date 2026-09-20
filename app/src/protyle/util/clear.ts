@@ -1,3 +1,4 @@
+import {isTableLikeView} from "../render/av/viewType";
 import {updateAVSelectionStatus, updateHeader} from "../render/av/row";
 import {resetAVRowSelect} from "../render/av/virtualScroll";
 import {hasClosestByClassName} from "./hasClosest";
@@ -124,7 +125,7 @@ const resetAVBodySelect = (element: Element, type: "table" | "gallery" | "all") 
     const avElements = element.classList.contains("av") ? [element] : Array.from(element.querySelectorAll(".av"));
     avElements.forEach((avElement: HTMLElement) => {
         const avType = avElement.dataset.avType;
-        if ((type === "table" && avType !== "table") || (type === "gallery" && avType === "table")) {
+        if ((type === "table" && !isTableLikeView(avType)) || (type === "gallery" && isTableLikeView(avType))) {
             return;
         }
         avElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {

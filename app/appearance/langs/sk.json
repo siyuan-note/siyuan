@@ -1,4 +1,6 @@
 {
+	"listView": "Zoznam",
+	"databaseListView": "Zoznamové zobrazenie databázy",
 	"copyRuntimeInfo": "Kopírovať informácie o prostredí behu",
 	"duplicateDocTree": "Duplikovať s poddokumentmi",
 	"syncProviderChangeConfirm": "Pred zmenou poskytovateľa synchronizácie musí SiYuan skontrolovať zdroje a staršie snímky a prípadne stiahnuť chýbajúci obsah z aktuálneho cloudového úložiska. Môže to chvíľu trvať. Pokračovať?",
@@ -2479,6 +2481,7 @@
 		"quit": "Ukončiť aplikáciu"
 	},
 	"_attrView": {
+		"list": "Zoznam",
 		"dateFormat": "Formát dátumu",
 		"fullDate": "Lokalizovaný dátum",
 		"dateMonths": "januára|februára|marca|apríla|mája|júna|júla|augusta|septembra|októbra|novembra|decembra",

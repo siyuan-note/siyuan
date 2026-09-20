@@ -75,6 +75,21 @@ func TestRenderGroupViewWithSourceReusesCardLayouts(t *testing.T) {
 		newTestItem func(id string) av.Item
 	}{
 		{
+			name: "list",
+			newView: func(id string) *av.View {
+				view := &av.View{ID: id, LayoutType: av.LayoutTypeList, List: av.NewLayoutList()}
+				view.List.Columns = []*av.ViewTableColumn{{BaseField: &av.BaseField{ID: key.ID, Hidden: true}}}
+				return view
+			},
+			newParent: func(view *av.View, items []av.Item) av.Viewable {
+				list := &av.List{Table: &av.Table{BaseInstance: av.NewViewBaseInstance(view)}}
+				list.SetItems(items)
+				return list
+			},
+			getItems:    func(viewable av.Viewable) []av.Item { return viewable.(*av.List).GetItems() },
+			newTestItem: func(id string) av.Item { return &av.TableRow{ID: id} },
+		},
+		{
 			name: "gallery",
 			newView: func(id string) *av.View {
 				view := &av.View{ID: id, LayoutType: av.LayoutTypeGallery, Gallery: av.NewLayoutGallery()}

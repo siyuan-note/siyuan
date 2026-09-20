@@ -241,6 +241,11 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconTable"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.databaseTableView}</span></div>`,
     }, {
+        filter: [window.siyuan.languages.databaseListView, "database list view", "数据库列表视图", "shujukuliebiaoshitu", "sjklbs"],
+        id: "databaseListView",
+        value: '<div data-type="NodeAttributeView" data-av-type="list"></div>',
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.databaseListView}</span></div>`,
+    }, {
         filter: [window.siyuan.languages.databaseKanbanView, "database kanban view", "数据库看板视图", "shujukukanbanshitu", "sjkkbs"],
         id: "databaseKanbanView",
         value: '<div data-type="NodeAttributeView" data-av-type="kanban"></div>',

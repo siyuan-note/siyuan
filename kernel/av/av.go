@@ -313,6 +313,7 @@ type View struct {
 	PageSize         int            `json:"pageSize"`          // 每页条目数
 	LayoutType       LayoutType     `json:"type"`              // 当前布局类型
 	Table            *LayoutTable   `json:"table,omitempty"`   // 表格布局
+	List             *LayoutList    `json:"list,omitempty"`    // 列表布局
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
 	Kanban           *LayoutKanban  `json:"kanban,omitempty"`  // 看板布局
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
@@ -417,6 +418,7 @@ type LayoutType string
 
 const (
 	LayoutTypeTable   LayoutType = "table"   // 属性视图类型 - 表格
+	LayoutTypeList    LayoutType = "list"    // 属性视图类型 - 列表
 	LayoutTypeGallery LayoutType = "gallery" // 属性视图类型 - 卡片
 	LayoutTypeKanban  LayoutType = "kanban"  // 属性视图类型 - 看板
 )
@@ -935,6 +937,9 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 		err = CheckSpec(ret)
 	}
 	if nil == err {
+		err = ret.ValidateListLayouts()
+	}
+	if nil == err {
 		err = ret.NormalizeRichText()
 	}
 	return
@@ -964,6 +969,9 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		}
 	}()
 
+	if err = av.ValidateListLayouts(); nil != err {
+		return
+	}
 	if err = av.NormalizeRichText(); nil != err {
 		logging.LogErrorf("normalize attribute view [%s] rich text failed: %s", av.ID, err)
 		return
@@ -1330,18 +1338,22 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 			view.Group.Field = keyIDMap[view.Group.Field]
 		}
 
-		switch view.LayoutType {
-		case LayoutTypeTable:
-			view.Table.ID = ast.NewNodeID()
-			for _, column := range view.Table.Columns {
+		for _, layout := range []*LayoutTable{view.Table, view.List} {
+			if nil == layout {
+				continue
+			}
+			layout.ID = ast.NewNodeID()
+			for _, column := range layout.Columns {
 				column.ID = keyIDMap[column.ID]
 			}
-		case LayoutTypeGallery:
+		}
+		if nil != view.Gallery {
 			view.Gallery.ID = ast.NewNodeID()
 			for _, cardField := range view.Gallery.CardFields {
 				cardField.ID = keyIDMap[cardField.ID]
 			}
-		case LayoutTypeKanban:
+		}
+		if nil != view.Kanban {
 			view.Kanban.ID = ast.NewNodeID()
 			for _, field := range view.Kanban.Fields {
 				field.ID = keyIDMap[field.ID]

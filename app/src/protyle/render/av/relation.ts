@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint, upDownHint} from "../../../util/upDownHint";
@@ -944,7 +945,7 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
     if (!nodeElement.contains(cellElements[0])) {
         const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
         const rowID = getFieldIdByCellElement(cellElements[0], viewType);
-        if (viewType === "table") {
+        if (isTableLikeView(viewType)) {
             cellElements[0] = (nodeElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) ||
                 nodeElement.querySelector(`.fn__flex-1[data-col-id="${cellElements[0].dataset.colId}"]`)) as HTMLElement;
         } else {

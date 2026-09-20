@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260904121106"
+		"updated": "20260920084445"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-fnv59m7",
-				"updated": "20251224101813"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20251224101749-zd1sdj7",
-				"updated": "20251224101813"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Databases consist of content blocks or non-content block data, and are presented in different views, such as table view, kanban view, and card view."
+					"Data": "Databases consist of content blocks or non-content block data, and are presented in different views, such as table view, list view, kanban view, and card view."
 				}
 			]
 		},
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20260904121106"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -495,6 +495,185 @@
 								{
 									"Type": "NodeText",
 									"Data": ": Data entry, batch editing, scenarios with diverse field types, general data management similar to spreadsheets"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260920084445-xgbteah",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260920084445-xgbteah",
+				"updated": "20260920084445"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "List View"
+				}
+			]
+		},
+		{
+			"ID": "20260920084445-92ydsjz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920084445-92ydsjz",
+				"updated": "20260920084445"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Displays each entry on one line, without column headers or a table grid. A newly created list view shows only the primary key field; all other fields are hidden by default."
+				}
+			]
+		},
+		{
+			"ID": "20260920084445-56ro8a2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260920084445-56ro8a2",
+				"updated": "20260920084445"
+			},
+			"Children": [
+				{
+					"ID": "20260920084445-bjzjg8s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-bjzjg8s",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-25ekao7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-25ekao7",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Switching: Open the view settings and select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Layout"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "List"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", or insert a database list view from the slash menu"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920084445-39ih6ur",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-39ih6ur",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-i33u60f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-i33u60f",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Fields: Open "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Fields"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to show the fields you need. Visible fields appear alongside the primary key on the same line, and their values can be edited"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920084445-4dpfqq3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-4dpfqq3",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-38pz053",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-38pz053",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "View settings: Duplicating a list view or switching back to its list layout preserves the field visibility you configured"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920084445-q8nlr4p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-q8nlr4p",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-6lh2jh4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-6lh2jh4",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Filtering, sorting, and grouping: Shares data with other views of the same database and supports independent filter, sort, and group settings"
 								}
 							]
 						}
@@ -984,7 +1163,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171129-edm1pru",
-				"updated": "20260904121106"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -1951,7 +2130,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-y8inb0t",
-				"updated": "20260613171129"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -1980,7 +2159,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171129-y221wzt",
-				"updated": "20260613171129"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -2153,7 +2332,7 @@
 					},
 					"Properties": {
 						"id": "20260613171129-ravjist",
-						"updated": "20260613171129"
+						"updated": "20260920084445"
 					},
 					"Children": [
 						{
@@ -2181,7 +2360,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260613171129-qfcbary",
-								"updated": "20260613171129"
+								"updated": "20260920084445"
 							},
 							"Children": [
 								{
@@ -2193,7 +2372,7 @@
 									},
 									"Properties": {
 										"id": "20260613171129-e2s3vqd",
-										"updated": "20260613171129"
+										"updated": "20260920084445"
 									},
 									"Children": [
 										{
@@ -2201,12 +2380,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260613171129-wrv369s",
-												"updated": "20260613171129"
+												"updated": "20260920084445"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Table View: Rows are categorized by group, each group can be collapsed/expanded"
+													"Data": "Table and List Views: Rows are categorized by group, each group can be collapsed/expanded"
 												}
 											]
 										}
@@ -2281,7 +2460,7 @@
 					},
 					"Properties": {
 						"id": "20260613171129-ksd0v5v",
-						"updated": "20260613171129"
+						"updated": "20260920084445"
 					},
 					"Children": [
 						{
@@ -2289,7 +2468,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613171129-l092i7g",
-								"updated": "20260613171129"
+								"updated": "20260920084445"
 							},
 							"Children": [
 								{
@@ -2299,7 +2478,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": In table and gallery views, select \"None\" to remove grouping; kanban view cannot remove grouping"
+									"Data": ": In table, list, and gallery views, select \"None\" to remove grouping; kanban view cannot remove grouping"
 								}
 							]
 						}

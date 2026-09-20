@@ -472,6 +472,12 @@ fetchPost("/api/av/setAttributeViewBlockAttr", {avID: "av", keyID: "key", itemID
 fetchPost("/api/av/setAttrViewGroup", {avID: "av", blockID: "block", group: {field: "key", method: 0}});
 fetchPost("/api/av/batchSetAttributeViewBlockAttrs", {avID: "av", values: [{keyID: "key", itemID: "item", value: {checkbox: {checked: false}}}]});
 fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {id: "av", page: 2.5, pageSize: -1, blockIDs: ["block"]});
+fetchPost("/api/av/changeAttrViewLayout", {avID: "av", blockID: "block", layoutType: "list"}, response => {
+    if (response.code === 0 && "viewType" in response.data && response.data.viewType === "list" && "columns" in response.data.view) {
+        const columns = response.data.view.columns;
+        void columns;
+    }
+});
 // @ts-expect-error 单元格文本内容不能是数字。
 fetchPost("/api/av/setAttributeViewBlockAttr", {avID: "av", keyID: "key", value: {text: {content: 1}}});
 // @ts-expect-error 批量修改必须包含字段 ID。

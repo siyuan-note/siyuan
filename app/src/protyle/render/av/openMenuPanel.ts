@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
 import {
@@ -270,7 +271,7 @@ export const openMenuPanel = (options: {
             if (!options.blockElement.contains(lastElement)) {
                 // https://github.com/siyuan-note/siyuan/issues/15839
                 const rowID = getFieldIdByCellElement(lastElement, data.viewType);
-                if (data.viewType === "table") {
+                if (isTableLikeView(data.viewType)) {
                     lastElement = options.blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${lastElement.dataset.colId}"]`);
                 } else {
                     lastElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${lastElement.dataset.fieldId}"]`);

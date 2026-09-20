@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
@@ -30,7 +31,7 @@ import {activeBlur} from "../../../mobile/util/keyboardToolbar";
 /// #endif
 
 export const getColId = (element: Element, viewType: TAVView) => {
-    if (viewType === "table" || hasClosestByClassName(element, "custom-attr")) {
+    if (isTableLikeView(viewType) || hasClosestByClassName(element, "custom-attr")) {
         return element.getAttribute("data-col-id");
     } else if (["gallery", "kanban"].includes(viewType)) {
         return element.getAttribute("data-field-id");
@@ -1611,7 +1612,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
     /// #endif
     const menu = new Menu(Constants.MENU_AV_HEADER_ADD);
     const avID = blockElement.getAttribute("data-av-id");
-    if (typeof previousID === "undefined" && blockElement.getAttribute("data-av-type") === "table") {
+    if (typeof previousID === "undefined" && isTableLikeView(blockElement.getAttribute("data-av-type"))) {
         previousID = Array.from(blockElement.querySelectorAll(".av__row--header .av__cell")).pop().getAttribute("data-col-id");
     }
     const blockId = blockElement.getAttribute("data-node-id");
@@ -1624,6 +1625,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.text,
                 avID,
                 type: "text",
@@ -1662,6 +1665,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.number,
                 avID,
                 type: "number",
@@ -1700,6 +1705,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.select,
                 avID,
                 type: "select",
@@ -1738,6 +1745,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.multiSelect,
                 avID,
                 type: "mSelect",
@@ -1776,6 +1785,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.date,
                 avID,
                 type: "date",
@@ -1815,6 +1826,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.assets,
                 avID,
                 type: "mAsset",
@@ -1853,6 +1866,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.checkbox,
                 avID,
                 type: "checkbox",
@@ -1891,6 +1906,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.link,
                 avID,
                 type: "url",
@@ -1929,6 +1946,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.email,
                 avID,
                 type: "email",
@@ -1967,6 +1986,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.phone,
                 avID,
                 type: "phone",
@@ -2005,6 +2026,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.template,
                 avID,
                 type: "template",
@@ -2043,6 +2066,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.relation,
                 avID,
                 type: "relation",
@@ -2081,6 +2106,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.rollup,
                 avID,
                 type: "rollup",
@@ -2120,6 +2147,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.lineNumber,
                 avID,
                 type: "lineNumber",
@@ -2158,6 +2187,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.createdTime,
                 avID,
                 type: "created",
@@ -2197,6 +2228,8 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
             transaction(protyle, [{
                 action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 name: window.siyuan.languages.updatedTime,
                 avID,
                 type: "updated",

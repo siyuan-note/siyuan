@@ -176,11 +176,11 @@ func RenderGroupViewWithSourceContext(attrView *av.AttributeView, view, groupVie
 	source *GroupViewRenderSource, ignoreRows bool, context *AttributeViewRenderContext) (ret av.Viewable) {
 	var err error
 	switch groupView.LayoutType {
-	case av.LayoutTypeTable:
+	case av.LayoutTypeTable, av.LayoutTypeList:
 		// 这里需要使用深拷贝，因为字段上可能会带有计算（FieldCalc），每个分组视图的计算结果都需要分别存储在不同的字段实例上
-		err = copier.CopyWithOption(&groupView.Table.Columns, &view.Table.Columns, copier.Option{DeepCopy: true})
-		groupView.Table.ShowIcon = view.Table.ShowIcon
-		groupView.Table.WrapField = view.Table.WrapField
+		err = copier.CopyWithOption(&groupView.GetTableLayout().Columns, &view.GetTableLayout().Columns, copier.Option{DeepCopy: true})
+		groupView.GetTableLayout().ShowIcon = view.GetTableLayout().ShowIcon
+		groupView.GetTableLayout().WrapField = view.GetTableLayout().WrapField
 	case av.LayoutTypeGallery:
 		err = copier.CopyWithOption(&groupView.Gallery.CardFields, &view.Gallery.CardFields, copier.Option{DeepCopy: true})
 		groupView.Gallery.ShowIcon = view.Gallery.ShowIcon
@@ -216,8 +216,8 @@ func RenderGroupViewWithSourceContext(attrView *av.AttributeView, view, groupVie
 	if nil != err {
 		logging.LogErrorf("copy view fields [%s] to group [%s] failed: %s", view.ID, groupView.ID, err)
 		switch groupView.LayoutType {
-		case av.LayoutTypeTable:
-			groupView.Table.Columns = view.Table.Columns
+		case av.LayoutTypeTable, av.LayoutTypeList:
+			groupView.GetTableLayout().Columns = view.GetTableLayout().Columns
 		case av.LayoutTypeGallery:
 			groupView.Gallery.CardFields = view.Gallery.CardFields
 		case av.LayoutTypeKanban:
@@ -307,6 +307,8 @@ func renderView(attrView *av.AttributeView, view *av.View, query string, depth *
 	case av.LayoutTypeTable:
 		ret = renderAttributeViewTable(attrView, view, query, depth, cachedAttrViews, ignoreRows, deferTemplateValues,
 			renderContext)
+	case av.LayoutTypeList:
+		ret = &av.List{Table: renderAttributeViewTable(attrView, view, query, depth, cachedAttrViews, ignoreRows, deferTemplateValues, renderContext)}
 	case av.LayoutTypeGallery:
 		ret = renderAttributeViewGallery(attrView, view, query, depth, cachedAttrViews, ignoreRows, deferTemplateValues,
 			renderContext)
@@ -1185,10 +1187,13 @@ func removeMissingField(attrView *av.AttributeView, view *av.View, missingKeyID 
 	logging.LogWarnf("key [%s] is missing", missingKeyID)
 
 	changed := false
-	if nil != view.Table {
-		for i, column := range view.Table.Columns {
+	for _, layout := range []*av.LayoutTable{view.Table, view.List} {
+		if nil == layout {
+			continue
+		}
+		for i, column := range layout.Columns {
 			if column.ID == missingKeyID {
-				view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
+				layout.Columns = append(layout.Columns[:i], layout.Columns[i+1:]...)
 				changed = true
 				break
 			}

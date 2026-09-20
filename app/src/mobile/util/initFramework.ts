@@ -134,8 +134,6 @@ export const renderMobileSidePanelLayout = (
     const pluginDockLayouts = getMobilePluginDockLayouts(pluginDockEntries);
     const resolvedConfig = normalizeMobileSidePanelConfig(
         config || getMobileSidePanelConfig(pluginDockLayouts), pluginDockLayouts);
-    getDockTabElement("agent").classList.toggle("fn__none",
-        window.siyuan.config.readonly || window.siyuan.isPublish || isDisabledFeature("ai"));
     const sidePanelElements = {
         left: document.getElementById("sidebar"),
         right: document.getElementById("sidebarRight"),
@@ -165,6 +163,8 @@ export const renderMobileSidePanelLayout = (
             if (!tabElement || !dockContentElement) {
                 return;
             }
+            tabElement.classList.toggle("fn__none", resolvedConfig.hidden.includes(type) ||
+                (type === "agent" && (window.siyuan.config.readonly || window.siyuan.isPublish || isDisabledFeature("ai"))));
             toolbarScrollElement.append(tabElement);
             contentElement.append(dockContentElement);
             sideDockIds[side].push(type);
@@ -182,6 +182,9 @@ export const renderMobileSidePanelLayout = (
             getDockContentElement(type).classList.toggle("fn__none", type !== activeDockId);
         });
         if (!activeDockId) {
+            if (sidePanelElement.style.transform === "translateX(0px)") {
+                closePanel();
+            }
             sidePanelElement.style.transform = "";
         }
     });
@@ -262,7 +265,7 @@ const initSidePanelTabs = (app: App, sidePanelElement: HTMLElement) => {
         } else {
             svgElement = hasTopClosestByTag(target, "svg") as HTMLElement;
         }
-        if (!svgElement) {
+        if (!svgElement || svgElement.classList.contains("fn__none")) {
             return;
         }
         const tabType = svgElement.getAttribute("data-type");

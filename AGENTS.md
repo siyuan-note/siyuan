@@ -113,6 +113,10 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 8. **Built-in custom attributes:** Use the `custom-sy-` prefix for custom attributes owned by built-in features
    - Define custom attribute name constants in `app/src/constants.ts`, alongside similar constants in `Constants`, rather than in individual feature modules
 
+9. **Frontend preference storage:** Do not use browser `localStorage` directly, including `window.localStorage` and `globalThis.localStorage`
+   - Read preferences from `window.siyuan.storage`; when changing a preference, update its in-memory value and persist it with `setStorageVal` from `app/src/protyle/util/compatibility.ts`
+   - SiYuan persists these values in the workspace's `data/storage/local.json`; do not use browser `storage` events to observe changes to this store
+
 ---
 
 ## 4. Required toolchain

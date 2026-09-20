@@ -78,6 +78,7 @@ func TestGetNotebookInfoHidesInvisibleNotebookFromReader(t *testing.T) {
 	oldConf, oldDataDir := model.Conf, util.DataDir
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
 	model.Conf.FileTree = conf.NewFileTree()
 	const testLang = "notebook-security-test"
 	oldTimeLang, hadTimeLang := util.TimeLangs[testLang]
@@ -217,6 +218,7 @@ func TestGetNotebookInfoExcludesPublishExcludedDocumentsForReader(t *testing.T) 
 	oldPublishAccess := model.GetPublishAccess()
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
 	model.Conf.FileTree = conf.NewFileTree()
 	const testLang = "notebook-info-publish-test"
 	installAPITestTimeLangs(t, testLang)

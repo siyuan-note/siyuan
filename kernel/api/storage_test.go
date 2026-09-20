@@ -25,12 +25,17 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestCriteriaCRUD(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	oldConf := model.Conf
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
+	t.Cleanup(func() { model.Conf = oldConf })
 
 	oldDataDir := util.DataDir
 	util.DataDir = t.TempDir()

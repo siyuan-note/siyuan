@@ -21,6 +21,7 @@ func TestAPIContractPluginPublish(t *testing.T) {
 	util.WorkspaceDir = t.TempDir()
 	util.DataDir, util.ConfDir = filepath.Join(util.WorkspaceDir, "data"), filepath.Join(util.WorkspaceDir, "conf")
 	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
 	model.Conf.Bazaar = &conf.Bazaar{Trust: true}
 	t.Cleanup(func() {
 		util.WorkspaceDir, util.DataDir, util.ConfDir, model.Conf = oldWorkspace, oldData, oldConfDir, oldConf

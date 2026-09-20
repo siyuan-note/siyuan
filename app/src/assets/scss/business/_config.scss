@@ -1202,6 +1202,10 @@
 
   &-entry-visibility {
     &__view--mobile {
+      .config-entry-visibility__search {
+        margin: 0 8px;
+      }
+
       .config-entry-visibility__column {
         flex: 1 0 100%;
       }

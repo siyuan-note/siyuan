@@ -1,4 +1,4 @@
-export const MOBILE_SIDE_PANEL_CONFIG_VERSION = 3 as const;
+export const MOBILE_SIDE_PANEL_CONFIG_VERSION = 4 as const;
 export const MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT = "siyuan-mobile-side-panel-config-change";
 
 export const MOBILE_SIDE_PANEL_DOCK_IDS = [
@@ -26,9 +26,14 @@ export interface IMobileSidePanelConfig {
     left: MobileSidePanelDockId[],
     right: MobileSidePanelDockId[],
     pluginDockIds: string[],
+    hidden: MobileSidePanelDockId[],
 }
 
 export type MobileSidePanelConfigEvent = {
+    type: "visibility",
+    id: MobileSidePanelDockId,
+    visible: boolean,
+} | {
     type: "move",
     id: MobileSidePanelDockId,
     side: MobileSidePanelSide,
@@ -60,6 +65,7 @@ export const DEFAULT_MOBILE_SIDE_PANEL_CONFIG: Readonly<IMobileSidePanelConfig> 
     left: [...DEFAULT_MOBILE_SIDE_PANEL_LEFT],
     right: [...DEFAULT_MOBILE_SIDE_PANEL_RIGHT],
     pluginDockIds: [],
+    hidden: [],
 };
 
 const mobileSidePanelDockIdSet = new Set<string>(MOBILE_SIDE_PANEL_DOCK_IDS);
@@ -91,6 +97,7 @@ export const createDefaultMobileSidePanelConfig = (
         left: [...DEFAULT_MOBILE_SIDE_PANEL_LEFT],
         right: [...DEFAULT_MOBILE_SIDE_PANEL_RIGHT],
         pluginDockIds: [],
+        hidden: [],
     };
     normalizePluginDocks(pluginDocks).forEach((dock) => {
         config[dock.side].push(dock.id);
@@ -145,16 +152,16 @@ export const normalizeMobileSidePanelConfig = (
     }
 
     const record = value as Record<string, unknown>;
-    if ((record.version !== 1 && record.version !== 2 && record.version !== MOBILE_SIDE_PANEL_CONFIG_VERSION) ||
+    if ((record.version !== 1 && record.version !== 2 && record.version !== 3 && record.version !== MOBILE_SIDE_PANEL_CONFIG_VERSION) ||
         !Array.isArray(record.left) || !Array.isArray(record.right) ||
-        (record.version === MOBILE_SIDE_PANEL_CONFIG_VERSION && !Array.isArray(record.pluginDockIds))) {
+        ((record.version === 3 || record.version === MOBILE_SIDE_PANEL_CONFIG_VERSION) && !Array.isArray(record.pluginDockIds))) {
         return createDefaultMobileSidePanelConfig(pluginDocks);
     }
 
     const activePluginDocks = normalizePluginDocks(pluginDocks);
     const activePluginDockIds = new Set(activePluginDocks.map(item => item.id));
     const rememberedPluginDockIds = new Set<string>();
-    if (record.version === MOBILE_SIDE_PANEL_CONFIG_VERSION) {
+    if (record.version === 3 || record.version === MOBILE_SIDE_PANEL_CONFIG_VERSION) {
         (record.pluginDockIds as unknown[]).forEach((value) => {
             if (typeof value === "string" && value && !isMobileSidePanelBuiltInDockId(value)) {
                 rememberedPluginDockIds.add(value);
@@ -167,6 +174,7 @@ export const normalizeMobileSidePanelConfig = (
         left: [],
         right: [],
         pluginDockIds: [],
+        hidden: [],
     };
     const used = new Set<MobileSidePanelDockId>();
     addValidDockIds(config.left, record.left, validPluginDockIds, used);
@@ -201,6 +209,9 @@ export const normalizeMobileSidePanelConfig = (
         }
     });
     config.pluginDockIds = [...config.left, ...config.right].filter((id) => validPluginDockIds.has(id));
+    if (record.version === MOBILE_SIDE_PANEL_CONFIG_VERSION && Array.isArray(record.hidden)) {
+        config.hidden = [...new Set(record.hidden.filter((id): id is string => typeof id === "string" && used.has(id)))];
+    }
     moveDefaultDockToEmptySide(config, "left");
     moveDefaultDockToEmptySide(config, "right");
     return config;
@@ -235,8 +246,19 @@ export const reduceMobileSidePanelConfig = (
         left: [...currentState.left],
         right: [...currentState.right],
         pluginDockIds: [...currentState.pluginDockIds],
+        hidden: [...currentState.hidden],
     };
     const availableDockIds = getAvailableDockIds(pluginDocks);
+    if (event.type === "visibility") {
+        if (!availableDockIds.has(event.id)) {
+            return currentState;
+        }
+        config.hidden = config.hidden.filter(id => id !== event.id);
+        if (!event.visible) {
+            config.hidden.push(event.id);
+        }
+        return config;
+    }
     if (event.type === "reorder") {
         const docks = config[event.side];
         const visibleDocks = docks.filter(id => availableDockIds.has(id));

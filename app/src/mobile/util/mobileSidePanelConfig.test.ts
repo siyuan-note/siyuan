@@ -30,13 +30,62 @@ const assertCompleteConfig = (config: ReturnType<typeof normalizeMobileSidePanel
 };
 
 describe("mobile side panel config", () => {
+    it("migrates version 3 without changing positions or hiding docks", () => {
+        const stored = {
+            version: 3,
+            left: ["inbox", "pluginRight", "file", "bookmark", "tag"],
+            right: ["outline", "backlink", "agent"],
+            pluginDockIds: ["pluginRight"],
+        };
+        const config = normalizeMobileSidePanelConfig(stored);
+        assert.deepEqual(config.left, stored.left);
+        assert.deepEqual(config.right, stored.right);
+        assert.deepEqual(config.pluginDockIds, stored.pluginDockIds);
+        assert.deepEqual(config.hidden, []);
+    });
+
+    it("hides every dock without losing layout and restores visibility and reset defaults", () => {
+        const initial = createDefaultMobileSidePanelConfig(pluginDocks);
+        let config = initial;
+        [...initial.left, ...initial.right].forEach(id => {
+            config = reduceMobileSidePanelConfig(config, {type: "visibility", id, visible: false}, pluginDocks);
+        });
+        assert.deepEqual(config.left, initial.left);
+        assert.deepEqual(config.right, initial.right);
+        assert.deepEqual(config.hidden, [...initial.left, ...initial.right]);
+        assert.deepEqual(initial.hidden, []);
+        config = normalizeMobileSidePanelConfig(JSON.stringify(config), pluginDocks);
+        config = reduceMobileSidePanelConfig(config, {type: "visibility", id: "inbox", visible: true}, pluginDocks);
+        assert.equal(config.hidden.includes("inbox"), false);
+        assert.deepEqual(config.left, initial.left);
+        assert.deepEqual(reduceMobileSidePanelConfig(config, {type: "reset"}, pluginDocks), initial);
+    });
+
+    it("retains hidden plugin preferences while unavailable and across moves", () => {
+        let config = reduceMobileSidePanelConfig(createDefaultMobileSidePanelConfig(pluginDocks), {
+            type: "visibility", id: "pluginLeft", visible: false,
+        }, pluginDocks);
+        const missing = normalizeMobileSidePanelConfig(config);
+        assert.deepEqual(missing.hidden, ["pluginLeft"]);
+        config = reduceMobileSidePanelConfig(missing, {
+            type: "move", id: "pluginLeft", side: "right", index: 0,
+        }, pluginDocks);
+        assert.deepEqual(config.hidden, ["pluginLeft"]);
+        assert.equal(config.right[0], "pluginLeft");
+        const normalized = normalizeMobileSidePanelConfig({...config, hidden: ["pluginLeft", "pluginLeft", "unknown", null]});
+        assert.deepEqual(normalized.hidden, ["pluginLeft"]);
+        assert.deepEqual(reduceMobileSidePanelConfig(config, {
+            type: "visibility", id: "unknown", visible: false,
+        }, pluginDocks), config);
+    });
+
     it("falls back to a fresh default for malformed storage values", () => {
         [
             null,
             false,
             "not json",
             [],
-            {version: 4, left: ["file"], right: ["outline"], pluginDockIds: []},
+            {version: 5, left: ["file"], right: ["outline"], pluginDockIds: []},
             {version: MOBILE_SIDE_PANEL_CONFIG_VERSION, left: "file", right: ["outline"], pluginDockIds: []},
             {version: MOBILE_SIDE_PANEL_CONFIG_VERSION, left: ["file"], right: null, pluginDockIds: []},
             {version: MOBILE_SIDE_PANEL_CONFIG_VERSION, left: ["file"], right: ["outline"]},

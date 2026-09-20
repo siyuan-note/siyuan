@@ -129,7 +129,7 @@
 	"backlinkHideReference": "Ukryj bloki odwołań w propagowanych linkach zwrotnych",
 	"backlinkHideReferenceTip": "Ukrywaj bloki zawierające wyłącznie odwołania do bloków w propagowanych linkach zwrotnych, gdy pozostaje inna widoczna treść, i pokazuj je ponownie podczas edycji",
 	"uploadInsertTargetUnavailable": "Pierwotny cel przesyłania nie jest już dostępny. Wynik nie został wstawiony; przesłane pliki zostały zachowane.",
-	"mobileToolbarEntryTip": "Skonfiguruj widoczność i kolejność mobilnego paska narzędzi przy użyciu tych samych profili co na komputerze",
+	"mobileToolbarEntryTip": "Skonfiguruj widoczność i kolejność elementów mobilnego paska narzędzi; profile są zapisywane na tym urządzeniu i nie są synchronizowane między urządzeniami",
 	"keymapAssigned": "Przypisane",
 	"keymapCustomized": "Dostosowane przeze mnie",
 	"keymapUnassigned": "Nieprzypisane",

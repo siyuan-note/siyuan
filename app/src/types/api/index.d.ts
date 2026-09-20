@@ -2364,7 +2364,7 @@ export interface APIGETRoutes {
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
         output: "binary";
-        contentVariants: [{"status":200,"contentType":"text/html"},{"status":302,"contentType":"text/html"}];
+        contentVariants: [{"status":200,"contentType":"text/html"}];
     };
     "/api/system/version": {
         request: EmptyRequestInput;

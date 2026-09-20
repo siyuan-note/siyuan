@@ -180,6 +180,10 @@ func TestCheckBlockRefRejectsDeletedIDsOutsideIDs(t *testing.T) {
 }
 
 func TestFilterBlockAndRefIDsByPublishAccess(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
+	t.Cleanup(func() { model.Conf = previousConf })
 	const (
 		boxID             = "20260724000000-boxid01"
 		publicID          = "20260724000001-public1"
@@ -249,6 +253,10 @@ func TestFilterBlockAndRefIDsByPublishAccess(t *testing.T) {
 }
 
 func TestGetBlockInfoPublishAccess(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
+	t.Cleanup(func() { model.Conf = previousConf })
 	const (
 		boxID             = "20260806000020-box0020"
 		protectedID       = "20260806000021-protect"
@@ -362,6 +370,10 @@ type docBlocksOrdersResponse struct {
 }
 
 func TestBlockPublishAccessGuards(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
+	t.Cleanup(func() { model.Conf = previousConf })
 	const (
 		boxID             = "20260724000000-boxid03"
 		publicID          = "20260724000020-public3"

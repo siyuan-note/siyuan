@@ -21,6 +21,7 @@ import (
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -452,6 +453,64 @@ func TestWriteOIDCCallbackPageUsesSharedOAuthStyle(t *testing.T) {
 	if !strings.Contains(recorder.Header().Get("Content-Security-Policy"), "frame-ancestors 'none'") {
 		t.Fatalf("OIDC callback page has an incomplete content security policy: %s",
 			recorder.Header().Get("Content-Security-Policy"))
+	}
+}
+
+func TestOIDCWebCallbackContract(t *testing.T) {
+	setupOIDCTest(t)
+	for _, target := range []string{"/stage/build/desktop/?a=1&b=2", "https://foreign.example/", "//foreign.example/"} {
+		recorder := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(recorder)
+		response := writeOIDCWebCallbackPage(c, target)
+		if apicontract.SystemOIDCCallback.Status(response) != http.StatusOK || response.Binary() == nil {
+			t.Fatal("web callback must commit a document instead of an HTTP redirect")
+		}
+		page := string(response.Binary().Bytes)
+		if !strings.Contains(page, `<meta http-equiv="refresh" content="0;url=/`) || strings.Contains(page, "foreign.example") {
+			t.Fatalf("unexpected web callback navigation: %s", page)
+		}
+		if recorder.Header().Get("Cache-Control") != "no-store" || recorder.Header().Get("Referrer-Policy") != "no-referrer" ||
+			!strings.Contains(recorder.Header().Get("Content-Security-Policy"), "default-src 'none'") {
+			t.Fatalf("missing callback security headers: %v", recorder.Header())
+		}
+	}
+}
+
+func TestOIDCRepeatedWebCallbackContractSession(t *testing.T) {
+	setupOIDCTest(t)
+	engine := gin.New()
+	engine.Use(ginSessions.Sessions("siyuan", cookie.NewStore([]byte("oidc-web-callback-test-key"))))
+	engine.GET("/callback", func(c *gin.Context) {
+		response := respondRepeatedOIDCCallback(c, &oidcTransaction{Flow: oidcFlowWeb, Success: true, To: "/workspace"})
+		if apicontract.SystemOIDCCallback.Status(response) != http.StatusOK || response.Binary() == nil {
+			t.Fatal("repeated callback must return a navigation page")
+		}
+		c.Data(http.StatusOK, response.Binary().ContentType, response.Binary().Bytes)
+	})
+	engine.GET("/workspace", CheckAuth, func(c *gin.Context) { c.Status(http.StatusNoContent) })
+	callback := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "https://notes.example/callback", nil)
+	request.Header.Set("Sec-Fetch-Site", "cross-site")
+	engine.ServeHTTP(callback, request)
+	if callback.Code != http.StatusOK || callback.Header().Get("Location") != "" ||
+		!strings.Contains(callback.Body.String(), `content="0;url=/workspace"`) {
+		t.Fatalf("unexpected repeated callback: %d %s", callback.Code, callback.Body.String())
+	}
+	for _, site := range []string{"same-origin", "cross-site", "same-site"} {
+		request = httptest.NewRequest(http.MethodGet, "https://notes.example/workspace", nil)
+		request.Header.Set("Sec-Fetch-Site", site)
+		for _, cookie := range callback.Result().Cookies() {
+			request.AddCookie(cookie)
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, request)
+		want := http.StatusUnauthorized
+		if site == "same-origin" {
+			want = http.StatusNoContent
+		}
+		if recorder.Code != want {
+			t.Fatalf("workspace request with %s returned %d, want %d: %s", site, recorder.Code, want, recorder.Body.String())
+		}
 	}
 }
 

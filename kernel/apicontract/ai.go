@@ -193,6 +193,11 @@ type AIRerankTestData struct {
 	Matched bool    `json:"matched"`
 	Msg     *string `json:"msg,omitempty"`
 }
+
+type AIDecisionTestData struct {
+	Matched bool    `json:"matched"`
+	Msg     *string `json:"msg,omitempty"`
+}
 type AIModelsData struct {
 	Models         []string       `json:"models"`
 	ContextLengths map[string]int `json:"contextLengths"`

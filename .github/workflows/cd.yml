@@ -157,6 +157,10 @@ jobs:
       - name: Check application and strict contract types
         run: pnpm run typecheck
         working-directory: app
+      - name: Install filesystem fault injection dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y strace
       - name: Test all kernel packages
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true

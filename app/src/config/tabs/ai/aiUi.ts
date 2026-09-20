@@ -170,7 +170,8 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
     window.requestAnimationFrame(cleanup);
 };
 
-const mountModelTestButton = (root: HTMLElement, inputId: string, buttonId: string) => {
+const mountModelTestButton = (root: HTMLElement, inputId: string, buttonId: string,
+                              position: "description" | "input" = "description") => {
     const inputElement = root.querySelector<HTMLInputElement>(`[id="${inputId}"]`);
     const itemElement = inputElement?.closest<HTMLElement>(".config-item");
     const wrapperElement = itemElement?.querySelector<HTMLElement>(":scope > .fn__block");
@@ -181,17 +182,27 @@ const mountModelTestButton = (root: HTMLElement, inputId: string, buttonId: stri
         return;
     }
 
+    const spaceElement = document.createElement("div");
+    spaceElement.className = "fn__space";
+    const buttonElement = document.createElement("div");
+    buttonElement.innerHTML = `<button class="b3-button b3-button--outline" id="${buttonId}"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${window.siyuan.languages.testConnection}</span></button>`;
+    if (position === "input") {
+        const inputRow = document.createElement("div");
+        inputRow.className = "fn__flex";
+        inputElement.classList.replace("fn__block", "fn__flex-1");
+        buttonElement.className = "fn__flex-shrink";
+        inputElement.replaceWith(inputRow);
+        inputRow.append(inputElement, spaceElement, buttonElement);
+        return buttonElement.querySelector<HTMLButtonElement>(`#${buttonId}`);
+    }
+
     const headerElement = document.createElement("div");
     headerElement.className = "fn__flex";
     const textElement = document.createElement("div");
     textElement.className = "fn__flex-1";
     textElement.append(nameElement, descriptionElement);
-    const spaceElement = document.createElement("div");
-    spaceElement.className = "fn__space";
-    const buttonElement = document.createElement("div");
     buttonElement.style.textAlign = "right";
     buttonElement.style.marginTop = "8px";
-    buttonElement.innerHTML = `<button class="b3-button b3-button--outline" id="${buttonId}"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${window.siyuan.languages.testConnection}</span></button>`;
     headerElement.append(textElement, spaceElement, buttonElement);
     separatorElement.className = "fn__hr";
     itemElement.replaceChildren(headerElement, separatorElement, inputElement);
@@ -289,6 +300,38 @@ export const mountRerankTestBtn = (root: HTMLElement) => {
                 undefined, "error",
             );
         });
+    });
+};
+
+// mountDecisionTestBtn 将测试按钮放在模型名称输入框右侧，并在网络或内核错误后恢复按钮。
+export const mountDecisionTestBtn = (root: HTMLElement) => {
+    const button = mountModelTestButton(root, "ai.decision.name", "aiDecisionTestBtn", "input");
+    if (!button) {
+        return;
+    }
+    const label = button.querySelector("span");
+    button.addEventListener("click", async () => {
+        button.disabled = true;
+        label.textContent = window.siyuan.languages.testConnectionTesting;
+        try {
+            if (!await aiConfigApi.waitForSave()) {
+                showMessage(window.siyuan.languages.testConnectionFail, undefined, "error");
+                return;
+            }
+            await fetchPost("/api/ai/testDecisionModel", {}, response => {
+                const data = response.data;
+                if (data.matched) {
+                    showMessage(window.siyuan.languages.testConnectionSuccess, undefined, "info");
+                    return;
+                }
+                showMessage(data.msg
+                    ? window.siyuan.languages.testConnectionFailMsg.replace("${msg}", escapeHtml(data.msg))
+                    : window.siyuan.languages.testConnectionFail, undefined, "error");
+            }, undefined, () => showMessage(window.siyuan.languages.testConnectionFail, undefined, "error"));
+        } finally {
+            button.disabled = false;
+            label.textContent = window.siyuan.languages.testConnection;
+        }
     });
 };
 

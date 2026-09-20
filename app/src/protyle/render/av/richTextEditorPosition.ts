@@ -10,5 +10,7 @@ export const positionAVRichTextEditor = (panelElement: HTMLElement, anchorElemen
         window.innerWidth - width - AV_RICH_TEXT_EDITOR_MARGIN);
     panelElement.style.width = `${width}px`;
     panelElement.style.maxHeight = `${maxHeight}px`;
-    setPosition(panelElement, left, anchorRect.bottom, anchorRect.height, AV_RICH_TEXT_EDITOR_MARGIN);
+    // 浮层覆盖单元格，底部空间不足时仅上移到窗口内。
+    const top = Math.min(anchorRect.top, window.innerHeight - panelElement.getBoundingClientRect().height);
+    setPosition(panelElement, left, top, 0, AV_RICH_TEXT_EDITOR_MARGIN);
 };

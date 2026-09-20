@@ -91,6 +91,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - The menu `ignore` option controls conditional rendering and must not be used to opt an entry out of visibility or order configuration
 10. **API contracts:**
     - Follow [docs/API-CONTRACTS.md](docs/API-CONTRACTS.md) when adding or changing kernel HTTP APIs. Define new endpoints in `kernel/apicontract/` and bind their handlers through `contractHandler`; keep contracts synchronized when changing existing endpoints
+    - Do not automatically add newly implemented endpoints to `docs/API.md` or its localized versions (`docs/API.zh-CN.md`, `docs/API.ja.md`); add such documentation only when explicitly requested by the user. Continue maintaining API contracts, generated declarations, and required regression tests
     - Preserve existing input compatibility, response variants, authorization, and encrypted notebook lease behavior; cover affected behavior with regression tests
     - Remove migrated or deleted routes from `kernel/apicontract/legacy_routes.json`; never add new routes to this legacy list or bypass contract checks with `any` or type assertions
     - After contract changes, run `pnpm run api:generate --petal ../../petal` and `pnpm run api:check --petal ../../petal` from `app/`; synchronize related public declarations in `petal` and do not hand-edit generated declarations or schemas

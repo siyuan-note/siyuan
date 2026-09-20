@@ -786,6 +786,21 @@
       },
       "additionalProperties": false
     },
+    "AIDecisionTestData": {
+      "type": "object",
+      "properties": {
+        "matched": {
+          "type": "boolean"
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "matched"
+      ],
+      "additionalProperties": false
+    },
     "AIEditorAction": {
       "type": "object",
       "properties": {
@@ -36276,6 +36291,16 @@
             }
           ]
         },
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingDecisionInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "editing": {
           "anyOf": [
             {
@@ -39054,6 +39079,16 @@
             }
           ]
         },
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingDecision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "editing": {
           "anyOf": [
             {
@@ -39127,6 +39162,7 @@
       },
       "required": [
         "agent",
+        "decision",
         "editing",
         "embedding",
         "imageGeneration",
@@ -40354,6 +40390,90 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingDecision": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "enabled",
+        "endpoint",
+        "name",
+        "timeout"
+      ],
+      "additionalProperties": false
+    },
+    "SettingDecisionInput": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
             },
             {
               "type": "null"
@@ -111873,6 +111993,81 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/testDecisionModel",
+      "handler": "testDecisionModel",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIDecisionTestData"
               },
               "msg": {
                 "type": "string"

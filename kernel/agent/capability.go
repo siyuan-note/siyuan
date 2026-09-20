@@ -202,7 +202,7 @@ func buildCapabilitySet(frontendCapabilities []FrontendCapability, accessContext
 		if source == "" {
 			source = "native"
 		}
-		if id == "" || !capabilityOwnerAvailable(source, runtime, tool.OwnerID) ||
+		if id == "" || !tool.IsAvailable() || !capabilityOwnerAvailable(source, runtime, tool.OwnerID) ||
 			!capabilityAllowed(id, accessContext) {
 			continue
 		}
@@ -366,5 +366,5 @@ func capabilityStillExecutable(registration *capabilityRegistration, args map[st
 		return true
 	}
 	current, validator := tools.LookupToolWithValidator(registration.ModelName)
-	return current != nil && current == registration.Tool && validator == registration.Validator
+	return current.IsAvailable() && current == registration.Tool && validator == registration.Validator
 }

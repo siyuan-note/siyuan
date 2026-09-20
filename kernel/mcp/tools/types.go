@@ -57,6 +57,8 @@ type Tool struct {
 	Runtime string `json:"runtime,omitempty"`
 	// AgentOnly 标记能力仅供应用内 Agent 使用，不得投影到外部 MCP 服务。
 	AgentOnly bool `json:"agentOnly,omitempty"`
+	// Available 在列出和执行能力时检查其配置是否可用，空值表示始终可用。
+	Available func() bool `json:"-"`
 	// ReadOnlyHint 仅在外部工具明确声明只读时为 true；未声明时按可能写入处理并要求确认。
 	ReadOnlyHint bool `json:"readOnlyHint,omitempty"`
 	// EffectScope 描述写操作影响范围，用于判断本地数据仓库快照是否具有回滚价值。
@@ -74,6 +76,10 @@ type ToolEffects struct {
 	LocalWrite   bool `json:"localWrite,omitempty"`
 	DataEgress   bool `json:"dataEgress,omitempty"`
 	ExternalCost bool `json:"externalCost,omitempty"`
+}
+
+func (t *Tool) IsAvailable() bool {
+	return t != nil && (t.Available == nil || t.Available())
 }
 
 func (t *Tool) EffectsFor(action string) (ToolEffects, bool) {

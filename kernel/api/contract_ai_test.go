@@ -125,6 +125,7 @@ func TestAPIContractAIResponses(t *testing.T) {
 	engine := gin.New()
 	engine.POST("/api/ai/testEmbeddingModel", testEmbeddingModel)
 	engine.POST("/api/ai/testRerankModel", testRerankModel)
+	engine.POST("/api/ai/testDecisionModel", testDecisionModel)
 	engine.POST("/api/ai/agent/confirm", agentChatConfirm)
 	engine.POST("/api/ai/agent/question", agentChatQuestion)
 	engine.POST("/api/ai/agent/browserCapabilityResult", agentChatBrowserCapabilityResult)
@@ -136,6 +137,7 @@ func TestAPIContractAIResponses(t *testing.T) {
 	}{
 		{"/api/ai/testEmbeddingModel", "ignored", 200, "embedding model not configured"},
 		{"/api/ai/testRerankModel", "ignored", 200, "rerank model not configured"},
+		{"/api/ai/testDecisionModel", "ignored", 200, "decision model not configured"},
 		{"/api/ai/agent/confirm", `{"confirmID":"expired"}`, 409, "agent confirmation expired"},
 		{"/api/ai/agent/question", `{"questionID":"expired"}`, 409, "agent question expired"},
 		{"/api/ai/agent/browserCapabilityResult", `{"callID":"expired","structuredContent":{"nested":[1,true,null]}}`, 409, "agent browser capability call expired"},

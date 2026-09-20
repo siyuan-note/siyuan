@@ -1,5 +1,6 @@
 import type {BlockQueryRequestInput} from "../../types/api";
 import {isAbove} from "../../util/zIndex";
+import {stripSemanticMarkersFromRangeText} from "../../protyle/util/inlineElementMarker";
 import {
     copyPlainText,
     isMac,
@@ -585,7 +586,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             });
             copyPlainText(html.trimEnd());
         } else {
-            copyPlainText(range.toString());
+            copyPlainText(stripSemanticMarkersFromRangeText(range));
         }
         event.preventDefault();
         return true;

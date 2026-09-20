@@ -1,3 +1,4 @@
+import {prepareInlineElementBoundaryMutation} from "./inlineElementBoundary";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -912,6 +913,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         isBlock = true;
     }
     const range = useProtyleRange ? protyle.toolbar.range : getEditorRange(protyle.wysiwyg.element);
+    prepareInlineElementBoundaryMutation(range);
     const rangeStartBlockElement = hasClosestBlock(range.startContainer);
     const rangeEndBlockElement = hasClosestBlock(range.endContainer);
     if (!range.collapsed && rangeStartBlockElement && rangeEndBlockElement &&

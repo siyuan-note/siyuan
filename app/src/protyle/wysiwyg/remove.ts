@@ -1,4 +1,5 @@
 import {isHiddenTabContent} from "../render/tabsVisibility";
+import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {captureTabsRemoval} from "./tabsRemoval";
 import {
     focusBlock,
@@ -394,6 +395,7 @@ const deleteCrossBlockRangeContents = (rangesByBlock: ReturnType<typeof getCross
                 .filter(refElement => refElement.getAttribute("data-type")?.split(" ").includes("block-ref") &&
                     refElement.getAttribute("data-subtype") === "d")
                 .map(refElement => [refElement, refElement.textContent] as const));
+            prepareInlineElementBoundaryMutation(item.range);
             item.range.deleteContents();
             dynamicRefTexts.forEach((text, refElement) => {
                 if (refElement.isConnected && refElement.textContent !== text) {

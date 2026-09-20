@@ -78,11 +78,13 @@ import {
     TABLE_DEFAULT_COLUMN_WIDTH,
 } from "../protyle/util/tableColumnWidth";
 import {getParentDocumentID} from "../protyle/util/parentDocument";
+import {prepareInlineElementBoundaryMutation} from "../protyle/util/inlineElementBoundary";
 import {getZoomFocusScrollAttr, shouldFocusAfterZoom} from "../protyle/util/focusRestore";
 import {scrollCenter} from "../util/highlightById";
 import {
     getSemanticInlineVisibleText,
-    normalizeSemanticInlineElement
+    normalizeSemanticInlineElement,
+    stripSemanticMarkersFromRangeText,
 } from "../protyle/util/inlineElementMarker";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
@@ -775,7 +777,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
             click() {
                 focusByRange(getEditorRange(nodeElement));
-                copyPlainText(getSelection().getRangeAt(0).toString());
+                copyPlainText(stripSemanticMarkersFromRangeText(getSelection().getRangeAt(0)));
             }
         }).element);
         if (protyle.disabled || captionElement) {
@@ -798,6 +800,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             label: window.siyuan.languages.delete,
             click() {
                 const currentRange = getEditorRange(nodeElement);
+                prepareInlineElementBoundaryMutation(currentRange);
                 currentRange.insertNode(document.createElement("wbr"));
                 currentRange.extractContents();
                 focusByWbr(nodeElement, currentRange);
@@ -823,7 +826,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                     id: "copyPlainText",
                     label: window.siyuan.languages.copyPlainText,
                     click() {
-                        copyPlainText(inlineElement.textContent);
+                        copyPlainText(getSemanticInlineVisibleText(inlineElement));
                     }
                 }).element);
                 if (!protyle.disabled) {

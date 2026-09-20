@@ -1,4 +1,5 @@
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
+import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
@@ -3312,6 +3313,7 @@ export class WYSIWYG {
                 updateTransaction(protyle, nodeElement, oldHTML);
             } else {
                 const id = nodeElement.getAttribute("data-node-id");
+                prepareInlineElementBoundaryMutation(range);
                 setInsertWbrHTML(nodeElement, range, protyle);
                 const oldHTML = protyle.wysiwyg.lastHTMLs[id] || nodeElement.outerHTML;
                 const tempElement = document.createElement("div");
@@ -3958,6 +3960,9 @@ export class WYSIWYG {
             }
         });
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
+            if ((event.key === "Backspace" || event.key === "Delete") && getSelection().rangeCount > 0) {
+                prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0));
+            }
             if (isInAndroid()) {
                 if (event.key === "Unidentified") {
                     mobileUnidentifiedInputRange = undefined;
@@ -4164,6 +4169,10 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
+            if ((event.inputType.startsWith("insert") || event.inputType.startsWith("delete")) &&
+                getSelection().rangeCount > 0) {
+                prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0));
+            }
             if (!event.isComposing && ["deleteContentBackward", "deleteContentForward"].includes(event.inputType) &&
                 !getBlockSelectionModeElement(this.element) && !this.element.querySelector(".protyle-wysiwyg--select") &&
                 isTabTextBoundary(getEditorRange(this.element), event.inputType === "deleteContentBackward")) {

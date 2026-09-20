@@ -4,6 +4,7 @@ import * as dayjs from "dayjs";
 import {transaction, turnsOneInto, updateTransaction, wrapBlockInBlockquote} from "./transaction";
 import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
+import {restoreInlineElementBoundaryHTML} from "../util/inlineElementBoundary";
 import {
     fixAdjacentTags,
     getContenteditableElement,
@@ -402,6 +403,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         // 相邻标签之间插入空格区隔，避免 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
         // 使用迭代替换处理多个连续相邻标签（全局正则无法匹配重叠情况）
         // 若中间含有 <wbr>（光标标记），替换后需保留 <wbr>，否则 focusByWbr 无法定位光标
+        html = restoreInlineElementBoundaryHTML(html);
         let prevHTML: string;
         do {
             prevHTML = html;

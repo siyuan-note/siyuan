@@ -292,7 +292,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
 ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
         bind(element) {
             const inputElement = element.querySelector("input");
-            element.classList.add("b3-menu__custom");
+            element.classList.add("b3-menu__custom", "av__option-custom");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;
@@ -405,14 +405,14 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
         }
     });
     menu.addSeparator();
-    const html = `<div class="fn__flex fn__flex-wrap" style="width:238px;max-height:238px;overflow:auto">${getAVColorGridHTML(
+    const html = `<div class="fn__flex fn__flex-wrap av__option-colors">${getAVColorGridHTML(
         getAVCustomColors(), color, window.siyuan.languages.manageColors, getAVColorOrder())}</div>`;
     menu.addItem({
         type: "empty",
         iconHTML: "",
         label: html,
         bind(element) {
-            element.classList.add("b3-menu__custom");
+            element.classList.add("b3-menu__custom", "av__option-custom");
             element.addEventListener("click", (event) => {
                 const colorTarget = (event.target as HTMLElement).closest<HTMLElement>("button");
                 if (colorTarget?.dataset.type === AV_MANAGE_CUSTOM_COLORS_TYPE) {

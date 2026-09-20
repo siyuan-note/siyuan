@@ -2713,6 +2713,23 @@ img.av__cellassetimg {
   }
 }
 
+.av__option-colors {
+  width: 238px;
+  max-width: 100%;
+  max-height: 238px;
+  overflow: auto;
+}
+
+.b3-menu--fullscreen {
+  .b3-menu__custom.av__option-custom {
+    padding: 0;
+  }
+
+  .av__option-colors {
+    width: 100%;
+  }
+}
+
 .av__relation-drag-ghost {
   align-items: center;
   background-color: var(--b3-menu-background);

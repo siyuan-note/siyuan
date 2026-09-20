@@ -16,7 +16,9 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
-    padding: 8px 0;
+    padding: 4px 0;
+    font-size: 12px;
+    line-height: 20px;
   }
 
   .av__calendar-label {
@@ -27,12 +29,19 @@
   .av__calendar-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     margin-left: auto;
+
+    .b3-select {
+      height: 24px;
+      padding-top: 2px;
+      padding-bottom: 2px;
+      font-size: 12px;
+    }
   }
 
   .av__calendar-today {
-    padding: 4px 8px;
+    padding: 2px 6px;
     border: 0;
     border-radius: var(--b3-border-radius);
     background: transparent;

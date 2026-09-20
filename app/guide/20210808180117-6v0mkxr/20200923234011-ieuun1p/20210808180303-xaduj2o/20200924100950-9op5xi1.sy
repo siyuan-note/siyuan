@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260920104521"
+		"updated": "20260919234652"
 	},
 	"Children": [
 		{
@@ -11956,7 +11956,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-ans1gna",
-				"updated": "20260920104521"
+				"updated": "20260919232200"
 			},
 			"Children": [
 				{
@@ -11966,20 +11966,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "List"
-				}
-			]
-		},
-		{
-			"ID": "20260920104521-uqot5qy",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260920104521-uqot5qy",
-				"updated": "20260920104521"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The list mind map displays task checkboxes, including built-in and custom states. Icons, text colors, and strikethrough follow the original task list. Click a checkbox to toggle its state; right-click it or use the task status button in the selected node toolbar to choose a state or enter a custom marker. The task status shortcut below also works on a selected task node. Changes update the original list and support undo and redo; read-only views and exports only display states."
 				}
 			]
 		},
@@ -11994,7 +11980,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-4oe7doq",
-				"updated": "20260920104521"
+				"updated": "20260919232200"
 			},
 			"Children": [
 				{
@@ -12246,7 +12232,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Task list, or a selected task node in the list mind map"
+									"Data": "Task list"
 								}
 							]
 						}

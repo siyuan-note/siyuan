@@ -101,6 +101,7 @@ const genDockItemHtml = (
     side: MobileSidePanelSide,
     index: number,
     length: number,
+    visible: boolean,
     pluginEntriesById: ReadonlyMap<string, IMobilePluginDockEntry>,
 ) => {
     const pluginEntry = pluginEntriesById.get(dockId);
@@ -115,6 +116,8 @@ const genDockItemHtml = (
     return `<div class="b3-list-item" data-dock-id="${escapeAttr(dockId)}">
     <svg class="b3-list-item__graphic"><use xlink:href="#${escapeAttr(icon)}"></use></svg>
     <span class="b3-list-item__text">${escapeHtml(label)}</span>
+    <input class="b3-switch" type="checkbox" data-action="visibility" aria-label="${escapeAttr(label)}"${visible ? " checked" : ""}${disabled ? " disabled" : ""}>
+    <span class="fn__space"></span>
     <button class="block__icon block__icon--show ariaLabel" data-action="up" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.up)}" type="button"${disabled || index === 0 ? " disabled" : ""}><svg><use xlink:href="#iconUp"></use></svg></button>
     <button class="block__icon block__icon--show ariaLabel" data-action="down" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.down)}" type="button"${disabled || index === length - 1 ? " disabled" : ""}><svg><use xlink:href="#iconDown"></use></svg></button>
     <button class="block__icon block__icon--show ariaLabel" data-action="move" data-position="north" aria-label="${escapeAttr(moveLabel)}" type="button"${disabled || length === 1 ? " disabled" : ""}><svg><use xlink:href="#${moveIcon}"></use></svg></button>
@@ -130,7 +133,7 @@ const genSideHtml = (
     const dockIds = getVisibleDockIds(config, side, pluginEntriesById);
     return `<div class="b3-label__text">${escapeHtml(label)}</div>
 <div class="b3-list b3-list--background" data-side="${side}">${dockIds.map((dockId, index) =>
-        genDockItemHtml(dockId, side, index, dockIds.length, pluginEntriesById)).join("")}</div>`;
+        genDockItemHtml(dockId, side, index, dockIds.length, !config.hidden.includes(dockId), pluginEntriesById)).join("")}</div>`;
 };
 
 const genMobileSidePanelListsHtml = (
@@ -170,7 +173,7 @@ export const mountMobileSidePanelSetting = (root: HTMLElement) => {
     };
     render();
     settingElement.addEventListener("click", (event) => {
-        const actionElement = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-action]");
+        const actionElement = (event.target as HTMLElement).closest<HTMLButtonElement | HTMLInputElement>("[data-action]");
         if (!actionElement || actionElement.disabled) {
             return;
         }
@@ -190,7 +193,13 @@ export const mountMobileSidePanelSetting = (root: HTMLElement) => {
         if (!dockId || index < 0) {
             return;
         }
-        if (actionElement.dataset.action === "move") {
+        if (actionElement.dataset.action === "visibility") {
+            config = reduceMobileSidePanelConfig(config, {
+                type: "visibility",
+                id: dockId,
+                visible: (actionElement as HTMLInputElement).checked,
+            }, pluginDockContext.layouts);
+        } else if (actionElement.dataset.action === "move") {
             config = reduceMobileSidePanelConfig(config, {
                 type: "move",
                 id: dockId,

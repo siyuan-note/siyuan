@@ -36,3 +36,22 @@ func TestRenderOAuthCallbackPage(t *testing.T) {
 		t.Fatalf("OAuth failure callback page does not use the error state: %s", failurePage)
 	}
 }
+
+func TestRenderOAuthRedirectPage(t *testing.T) {
+	page := string(RenderOAuthRedirectPage("en", "OIDC login completed", `/stage/build/desktop/?a=1&b="<script>`))
+	for _, expected := range []string{
+		`<meta http-equiv="refresh" content="0;url=/stage/build/desktop/?a=1&amp;b=&#34;&lt;script&gt;">`,
+		`<a href="/stage/build/desktop/?a=1&amp;b=&#34;&lt;script&gt;">SiYuan</a>`,
+		`class="mark"`,
+	} {
+		if !strings.Contains(page, expected) {
+			t.Fatalf("redirect page does not contain %q: %s", expected, page)
+		}
+	}
+	if strings.Contains(page, "<script>") {
+		t.Fatal("redirect target introduced executable markup")
+	}
+	if page := string(RenderOAuthCallbackPage("en", "Done", "Close this window", true)); strings.Contains(page, `http-equiv="refresh"`) {
+		t.Fatal("ordinary callback page unexpectedly navigates")
+	}
+}

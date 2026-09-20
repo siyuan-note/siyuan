@@ -130,7 +130,7 @@
 	"backlinkHideReference": "Masquer les blocs de référence dans les liens retour propagés",
 	"backlinkHideReferenceTip": "Masquer les blocs contenant uniquement des références de bloc dans les liens retour propagés si un autre contenu reste visible, et les réafficher pendant la modification",
 	"uploadInsertTargetUnavailable": "La cible initiale du téléversement n’est plus disponible. Le résultat n’a pas été inséré ; les fichiers téléversés sont conservés.",
-	"mobileToolbarEntryTip": "Configurer la visibilité et l’ordre de la barre d’outils mobile avec les mêmes profils que sur ordinateur",
+	"mobileToolbarEntryTip": "Configurer la visibilité et l’ordre des éléments de la barre d’outils mobile ; les profils sont enregistrés sur cet appareil et ne sont pas synchronisés entre les appareils",
 	"keymapAssigned": "Attribués",
 	"keymapCustomized": "Personnalisés par moi",
 	"keymapUnassigned": "Non attribués",

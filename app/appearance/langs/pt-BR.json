@@ -130,7 +130,7 @@
 	"backlinkHideReference": "Ocultar blocos de referência em backlinks propagados",
 	"backlinkHideReferenceTip": "Ocultar blocos que contêm apenas referências a blocos em backlinks propagados quando houver outro conteúdo visível e exibi-los novamente durante a edição",
 	"uploadInsertTargetUnavailable": "O destino original do envio não está mais disponível. O resultado não foi inserido; os arquivos enviados foram mantidos.",
-	"mobileToolbarEntryTip": "Configure a visibilidade e a ordem da barra de ferramentas móvel usando os mesmos perfis da versão para computador",
+	"mobileToolbarEntryTip": "Configure a visibilidade e a ordem dos itens da barra de ferramentas móvel; os perfis são salvos neste dispositivo e não são sincronizados entre dispositivos",
 	"keymapAssigned": "Atribuídos",
 	"keymapCustomized": "Personalizados por mim",
 	"keymapUnassigned": "Não atribuídos",

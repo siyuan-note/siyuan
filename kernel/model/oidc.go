@@ -279,7 +279,7 @@ func OIDCCallback(c *gin.Context, request apicontract.SystemOIDCCallbackRequest)
 		return writeOIDCCallbackPage(c, false, oidcUserMessage())
 	}
 	completeOIDCTransaction(transaction.State, true, "")
-	return apicontract.RedirectHTTPContent(http.StatusFound, safeOIDCRedirectTarget(transaction.To))
+	return writeOIDCWebCallbackPage(c, transaction.To)
 }
 
 func OIDCMobileCallback(c *gin.Context, request apicontract.SystemOIDCMobileRequest) (ret apicontract.Response[apicontract.SystemOIDCMobileData]) {
@@ -826,7 +826,7 @@ func respondRepeatedOIDCCallback(c *gin.Context, transaction *oidcTransaction) a
 	if err := authenticateOIDCSession(c, transaction.RememberMe); err != nil {
 		return writeOIDCCallbackPage(c, false, oidcUserMessage())
 	}
-	return apicontract.RedirectHTTPContent(http.StatusFound, safeOIDCRedirectTarget(transaction.To))
+	return writeOIDCWebCallbackPage(c, transaction.To)
 }
 
 func cleanupOIDCTransactionsLocked() {
@@ -973,6 +973,18 @@ func writeOIDCCallbackPage(c *gin.Context, success bool, message string) apicont
 	if success {
 		title = oidcLanguage(366, "OIDC login completed")
 	}
+	lang := setOIDCCallbackPageHeaders(c)
+	return apicontract.SuccessHTTPContent(http.StatusOK, "text/html; charset=utf-8", util.RenderOAuthCallbackPage(lang, title, message, success))
+}
+
+func writeOIDCWebCallbackPage(c *gin.Context, target string) apicontract.Response[apicontract.BinaryContent] {
+	lang := setOIDCCallbackPageHeaders(c)
+	title := oidcLanguage(366, "OIDC login completed")
+	return apicontract.SuccessHTTPContent(http.StatusOK, "text/html; charset=utf-8",
+		util.RenderOAuthRedirectPage(lang, title, safeOIDCRedirectTarget(target)))
+}
+
+func setOIDCCallbackPageHeaders(c *gin.Context) string {
 	c.Header("Cache-Control", "no-store")
 	c.Header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'")
 	c.Header("Referrer-Policy", "no-referrer")
@@ -981,7 +993,7 @@ func writeOIDCCallbackPage(c *gin.Context, success bool, message string) apicont
 	if Conf != nil {
 		lang = util.LangToBCP47(Conf.Lang)
 	}
-	return apicontract.SuccessHTTPContent(http.StatusOK, "text/html; charset=utf-8", util.RenderOAuthCallbackPage(lang, title, message, success))
+	return lang
 }
 
 func OIDCStartPreflight(c *gin.Context) *apicontract.Response[apicontract.SystemOIDCStartData] {

@@ -106840,10 +106840,6 @@
         {
           "status": 200,
           "contentType": "text/html"
-        },
-        {
-          "status": 302,
-          "contentType": "text/html"
         }
       ]
     },

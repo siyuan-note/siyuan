@@ -130,7 +130,7 @@
 	"backlinkHideReference": "전파된 백링크의 참조 블록 숨기기",
 	"backlinkHideReferenceTip": "전파된 백링크에서 다른 표시할 내용이 있으면 블록 참조만 포함된 블록을 숨기고 편집 중에는 다시 표시",
 	"uploadInsertTargetUnavailable": "원래 업로드 대상이 더 이상 유효하지 않습니다. 결과를 삽입하지 않았으며 업로드된 파일은 유지됩니다.",
-	"mobileToolbarEntryTip": "데스크톱과 동일한 프로필로 모바일 도구 모음 항목의 표시 여부와 순서 설정",
+	"mobileToolbarEntryTip": "모바일 도구 모음 항목의 표시 여부와 순서를 설정합니다. 프로필은 이 기기에 저장되며 기기 간에 동기화되지 않습니다",
 	"keymapAssigned": "할당됨",
 	"keymapCustomized": "내가 사용자 지정함",
 	"keymapUnassigned": "할당되지 않음",

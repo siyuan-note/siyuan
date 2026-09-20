@@ -1,3 +1,4 @@
+import {recordReplacementUndo} from "./replacementInput";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
 import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
@@ -4172,6 +4173,7 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
+            recordReplacementUndo(event, this.element, this.lastHTMLs);
             if ((event.inputType.startsWith("insert") || event.inputType.startsWith("delete")) &&
                 getSelection().rangeCount > 0) {
                 prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0));

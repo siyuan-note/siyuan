@@ -3,7 +3,10 @@ import {showMessage} from "../../../dialog/message";
 import {fetchSyncPost} from "../../../util/fetch";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../../asset/html";
 import {updateTransaction, transaction} from "../../wysiwyg/transaction";
-import {genListItemElement} from "../../wysiwyg/list";
+import {genListItemElement, setTaskListItemMarker} from "../../wysiwyg/list";
+import {nextTaskListMarker, nextTaskListStatus} from "../../wysiwyg/taskListMarker";
+import {getTaskStatusItems} from "../../wysiwyg/taskStatusDialog";
+import {Menu} from "../../../plugin/Menu";
 import {completeTabsListSource} from "../../wysiwyg/tabsList";
 import {waitForPendingTransactions} from "../../util/transactionQueue";
 import {hideAllElements, hideElements} from "../../ui/hideElements";
@@ -70,6 +73,7 @@ class ListMindmapController {
     private activeEditor?: {finish: () => Promise<boolean>, destroy: () => void};
     private editRequest = 0;
     private disposed = false;
+    private taskChanges: Promise<void> = Promise.resolve();
 
     constructor(owner: IProtyle, list: HTMLElement) {
         this.owner = owner;
@@ -174,6 +178,21 @@ class ListMindmapController {
                 }
             },
             onEdit: (id, contentHost) => this.edit(id, contentHost),
+            onTaskToggle: (id, cycle) => this.setTask(id, cycle ? nextTaskListStatus : nextTaskListMarker),
+            onTaskMenu: (id, anchor) => {
+                if (!canEdit(owner, list)) {
+                    return;
+                }
+                const marker = readListMindmap(list).nodes.get(id)?.taskMarker;
+                if (marker === undefined) {
+                    return;
+                }
+                const menu = new Menu();
+                getTaskStatusItems(marker, next => this.setTask(id, () => next)).forEach(item => menu.addItem(item));
+                const rect = anchor.getBoundingClientRect();
+                menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+            },
+            isTaskCycle: event => matchHotKey(window.siyuan.config.keymap.editor.list.checkToggle, event),
             onRootTitleChange: title => this.metadata(metadata => {
                 metadata.rootTitle = title;
             }),
@@ -229,6 +248,32 @@ class ListMindmapController {
             change(metadata);
             writeListMindmapMetadata(this.list, metadata);
         });
+    }
+
+    private setTask(id: string, next: (marker: string) => string) {
+        // 连续操作串行提交，正文保存后重新查找源节点，避免使用过期状态覆盖任务。
+        this.taskChanges = this.taskChanges.then(async () => {
+            if (this.disposed || !this.list.isConnected || !canEdit(this.owner, this.list) ||
+                (this.activeEditor && !await this.activeEditor.finish())) {
+                return;
+            }
+            if (this.disposed || !this.list.isConnected || !canEdit(this.owner, this.list)) {
+                return;
+            }
+            const node = readListMindmap(this.list).nodes.get(id);
+            if (node?.taskMarker === undefined) {
+                return;
+            }
+            const marker = next(node.taskMarker);
+            if (marker !== node.taskMarker) {
+                setTaskListItemMarker(this.owner, node.element, marker);
+                this.refresh();
+            }
+        }).catch(error => {
+            console.error(error);
+            showMessage(window.siyuan.languages.listMindmapInvalid);
+        });
+        return this.taskChanges;
     }
 
     private async change(change: () => unknown, editing = false) {

@@ -40,6 +40,7 @@ export interface ListMindmapNode {
     children: ListMindmapNode[];
     collapsed: boolean;
     virtual: boolean;
+    taskMarker?: string;
 }
 
 export interface ListMindmapModel {
@@ -196,6 +197,9 @@ export const readListMindmap = (list: HTMLElement): ListMindmapModel => {
                 children: [],
                 collapsed: item.getAttribute("fold") === "1",
                 virtual: false,
+                taskMarker: item.getAttribute("data-subtype") === "t" ?
+                    item.getAttribute("data-task") ?? item.querySelector(":scope > .protyle-action--task")?.getAttribute("data-task") ??
+                    (item.classList.contains("protyle-task--done") ? "X" : " ") : undefined,
             };
             current.parent.children.push(node);
             nodes.set(id, node);

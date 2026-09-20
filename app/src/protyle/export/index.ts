@@ -22,6 +22,7 @@ const getExportLanguages = () => {
     const keys = new Set([
         "copy", "mindmap", "fontSize", "bold", "italic", "colorFont", "color", "undo", "redo", "fold", "collapse", "expand",
         "fullscreen", "exitFullscreen", "zoomIn", "zoomOut", "delete", "close", "connect", "text",
+        "task", "taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus",
     ]);
     const languages = Object.fromEntries(Object.entries(window.siyuan.languages)
         .filter(([key]) => keys.has(key) || key.startsWith("listMindmap")));

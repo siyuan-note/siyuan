@@ -1,4 +1,5 @@
 @use "../util/mixin" as *;
+@use "task";
 
 .protyle-wysiwyg,
 .b3-typography {
@@ -148,11 +149,11 @@
 
   &__node {
     position: absolute;
-    min-width: 64px;
+    min-width: 32px;
     max-width: 300px;
     width: max-content;
     min-height: 32px;
-    padding: 4px 12px;
+    padding: 4px 6px;
     box-sizing: border-box;
     border: 0;
     border-radius: var(--b3-border-radius);
@@ -257,7 +258,7 @@
   }
 
   &__content {
-    min-width: 36px;
+    min-width: 0;
     min-height: 24px;
     overflow-wrap: anywhere;
 
@@ -321,6 +322,73 @@
     .protyle-attr,
     .protyle-gutters {
       display: none;
+    }
+  }
+
+  &__node[data-task] {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 6px;
+    align-items: start;
+
+    > .list-mindmap__content {
+      grid-column: 2;
+      grid-row: 1;
+    }
+  }
+
+  &__task {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    margin-top: calc((1.5em - max(14px, 1em - 4px)) / 2);
+    padding: 0;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background: transparent;
+    color: var(--b3-theme-on-surface);
+    font: inherit;
+    cursor: pointer;
+    transition: var(--b3-transition);
+
+    &::after {
+      @include protyle-list-action-background(var(--b3-border-radius));
+    }
+
+    &:hover:not(:disabled) {
+      @include protyle-list-action-hover;
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+
+    &:focus-visible {
+      outline: 1px solid var(--b3-theme-primary);
+    }
+
+    svg {
+      width: max(14px, 1em - 4px);
+      height: max(14px, 1em - 4px);
+      display: block;
+      position: relative;
+      z-index: 1;
+      fill: currentColor;
+      pointer-events: none;
+    }
+  }
+
+  &__node.protyle-task--done:not([data-task="/"]) > .list-mindmap__content {
+    > .p {
+      @include task.completed-text;
+    }
+
+    &.list-mindmap__editor .protyle-wysiwyg > .p {
+      @include task.completed-text;
     }
   }
 
@@ -459,10 +527,26 @@
     }
 
     > .list-mindmap__add-bridge {
-      bottom: -11px;
+      bottom: -12px;
+
+      // 补齐右下角斜向移出的路径，避免鼠标先落到连线上而收起操作按钮。
+      &::before {
+        content: "";
+        position: absolute;
+        right: 100%;
+        bottom: 0;
+        width: 12px;
+        height: 12px;
+      }
     }
   }
 
+  &__node--selected > &__add-child,
+  &__node--selected > &__fold,
+  &__node--selected > &__add-bridge,
+  &__node--line-hover > &__add-child,
+  &__node--line-hover > &__fold,
+  &__node--line-hover > &__add-bridge,
   &__node:hover > &__add-child,
   &__node:hover > &__fold,
   &__node:focus-within > &__fold,
@@ -471,15 +555,6 @@
   &__node:focus-within > &__add-bridge {
     visibility: visible;
     opacity: 1;
-  }
-
-  @media (hover: none) {
-    &__node--selected > &__fold,
-    &__node--selected > &__add-child,
-    &__node--selected > &__add-bridge {
-      visibility: visible;
-      opacity: 1;
-    }
   }
 
   &__viewport--dragging &__add-child,

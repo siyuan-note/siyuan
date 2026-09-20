@@ -25,6 +25,7 @@ import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
 import {getTableCellEditorLute} from "../util/tableCellRichLute";
 import {setTableCellRichContext} from "../util/tableCellRichContext";
 import {updateOutlineCurrentBlock} from "../util/outlineBlock";
+import {canEnterCodeBlock} from "../wysiwyg/codeBlockEnter";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
@@ -419,8 +420,15 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             }
             const target = range?.startContainer instanceof Element ? range.startContainer : range?.startContainer.parentElement;
             const inListOrCode = target?.closest('[data-type="NodeList"], [data-type="NodeCodeBlock"]');
+            const editable = target?.closest<HTMLElement>('[contenteditable="true"]');
+            const enterCode = event.key === "Enter" && !event.shiftKey &&
+                editable?.parentElement.getAttribute("data-type") === "NodeParagraph" &&
+                canEnterCodeBlock(editable,
+                    getSelectionOffset(editable, fragment.wysiwyg, range).start,
+                    window.siyuan.config.editor.markdown.codeBlockMiddleDot !== false);
             const navigate = !inListOrCode && (event.key === "Tab" ||
-                (event.key === "Enter" && !event.shiftKey && getTableCellInlineHTML(fragment.getBlockHTML()) !== null));
+                (event.key === "Enter" && !event.shiftKey && !enterCode &&
+                    getTableCellInlineHTML(fragment.getBlockHTML()) !== null));
             if (navigate) {
                 event.preventDefault();
                 event.stopImmediatePropagation();

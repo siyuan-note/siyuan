@@ -1,5 +1,27 @@
 import {getTaskListMarker} from "../wysiwyg/taskListMarker";
 
+// 新建代码块的光标位于开围栏中，闭围栏由插入操作补齐；只放开这一段的结构换行。
+const getCodeFenceStart = (marker: Element, editable: Element): Text | undefined => {
+    if (!editable || marker.parentElement !== editable ||
+        editable.parentElement?.getAttribute("data-type") !== "NodeParagraph" ||
+        marker.previousSibling?.nodeType !== Node.TEXT_NODE) {
+        return;
+    }
+    const range = document.createRange();
+    range.selectNodeContents(editable);
+    range.setEndBefore(marker);
+    const before = document.createElement("div");
+    before.appendChild(range.cloneContents());
+    const opening = before.innerHTML.trimStart().match(/(?:^|\n)(`{3,})[^`\n<]*$/);
+    range.selectNodeContents(editable);
+    range.setStartAfter(marker);
+    const after = document.createElement("div");
+    after.appendChild(range.cloneContents());
+    if (opening && new RegExp("\\n`{" + opening[1].length + ",}[ \\t]*$").test(after.innerHTML.trimEnd())) {
+        return marker.previousSibling as Text;
+    }
+};
+
 // 保留单元格内的软换行，并允许光标所在的新行触发块级语法。
 export const getTableCellEditorLute = (lute: Lute, enableFullWidthTaskList = false): Lute => new Proxy(lute, {
     get(target, property) {
@@ -13,8 +35,25 @@ export const getTableCellEditorLute = (lute: Lute, enableFullWidthTaskList = fal
             while (html.includes(token)) {
                 token += "X";
             }
-            const marker = template.content.querySelector("wbr");
+            let marker = template.content.querySelector("wbr");
+            if (!marker && html.includes(Lute.Caret) && html.includes("```")) {
+                // 斜杠菜单使用文本光标，统一为 DOM 光标后再识别围栏和软换行边界。
+                const carets = document.createTreeWalker(template.content, NodeFilter.SHOW_TEXT);
+                while (carets.nextNode()) {
+                    const text = carets.currentNode as Text;
+                    const offset = text.data.indexOf(Lute.Caret);
+                    if (offset >= 0) {
+                        const tail = text.splitText(offset);
+                        tail.deleteData(0, Lute.Caret.length);
+                        marker = document.createElement("wbr");
+                        tail.before(marker);
+                        break;
+                    }
+                }
+            }
             const editable = marker?.closest('[contenteditable="true"]');
+            const codeStart = getCodeFenceStart(marker, editable);
+            let inCodeFence = false;
             const getBlockPath = (element: Element) => {
                 const types: string[] = [];
                 while (element) {
@@ -34,7 +73,17 @@ export const getTableCellEditorLute = (lute: Lute, enableFullWidthTaskList = fal
                 const element = node.parentElement;
                 if (element?.closest('[contenteditable="true"]') &&
                     !element.closest('[data-type="NodeCodeBlock"], [data-type="NodeMathBlock"], .img')) {
-                    if (editable?.contains(node) && node.textContent.includes("\n") &&
+                    if (node === codeStart) {
+                        const offset = Math.max(0, node.textContent.lastIndexOf("\n"));
+                        node.textContent = node.textContent.substring(0, offset).replace(/\n/g, token) +
+                            node.textContent.substring(offset);
+                        inCodeFence = true;
+                        continue;
+                    }
+                    if (inCodeFence && editable.contains(node)) {
+                        continue;
+                    }
+                    if (!codeStart && editable?.contains(node) && node.textContent.includes("\n") &&
                         (node.compareDocumentPosition(marker) & Node.DOCUMENT_POSITION_FOLLOWING)) {
                         boundary = node;
                     }

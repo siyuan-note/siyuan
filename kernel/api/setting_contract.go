@@ -35,6 +35,7 @@ func settingAIPayload(value *conf.AI) *apicontract.SettingAI {
 	result.MCP = settingMCPPayload(value.MCP)
 	result.Embedding = settingEmbeddingPayload(value.Embedding)
 	result.Rerank = settingRerankPayload(value.Rerank)
+	result.Decision = settingDecisionPayload(value.Decision)
 	result.Agent = settingAgentPayload(value.Agent)
 	result.Editing = settingEditingPayload(value.Editing)
 	result.ImageGeneration = settingImageGenerationPayload(value.ImageGeneration)
@@ -122,6 +123,14 @@ func settingRerankPayload(value *conf.Rerank) *apicontract.SettingRerank {
 	result.Timeout = value.Timeout
 	result.CandidateCount = value.CandidateCount
 	return result
+}
+
+func settingDecisionPayload(value *conf.Decision) *apicontract.SettingDecision {
+	if value == nil {
+		return nil
+	}
+	return &apicontract.SettingDecision{Enabled: value.Enabled, Endpoint: value.Endpoint,
+		APIKey: value.APIKey, Name: value.Name, Timeout: value.Timeout}
 }
 
 func settingAgentPayload(value *conf.Agent) *apicontract.SettingAgent {

@@ -1,4 +1,7 @@
 {
+	"decisionModel": "Model decyzyjny",
+	"decisionModelTip": "Preferuj TypeSafe System One (Jev) do klasyfikowania, filtrowania i oceniania; odpowiednia treść jest wysyłana do usługi decyzyjnej, co może wiązać się z opłatami",
+	"decisionEndpointTip": "Pełny adres API TypeSafe System One, domyślnie: https://api.typesafe.ai/v1/systemone",
 	"listView": "Lista",
 	"databaseListView": "Widok listy bazy danych",
 	"copyRuntimeInfo": "Kopiuj informacje o środowisku uruchomieniowym",

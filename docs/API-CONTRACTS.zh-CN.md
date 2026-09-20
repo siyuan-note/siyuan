@@ -34,6 +34,8 @@
 
 ## 兼容要求
 
+`POST /api/ai/testDecisionModel` 使用固定的 TypeSafe System One 样例测试已保存的可选 `ai.decision` 配置。接口要求管理员权限，遵循全局人工智能禁用标记和请求取消，返回具有类型声明的 `{matched, msg?}` 数据；配置错误和供应商错误不会被转换为判断结果。省略决策配置时补齐默认关闭的配置，关闭后保留密钥，并沿用现有配置加密存储机制。`TestAPIContractAI*`、`TestAPIContractSetting*`、`TestAIDecisionConfiguration` 和 `TestDecision*` 覆盖契约、配置、顺序批量调用的部分结果、区块读取、锁定笔记本拒绝访问、能力可用性、确认、取消及供应商响应校验，均纳入完整内核持续集成测试。可运行 `go test -tags "fts5 sqlcipher" ./api ./conf ./util ./mcp/tools ./agent -run 'Test(APIContractAI|APIContractSetting|AIDecision|Decision)' -count=1` 和 `go test ./apicontract/...` 进行针对性验证。
+
 加密笔记本系统锁屏接口保留管理员鉴权和只读检查。布尔开关保存在系统配置中，不进入密钥备份的认证数据。`TestAPIContractNotebookSystemLock` 覆盖配置持久化、关闭开关、独立于闲置时间、多笔记本（包括仅解锁未挂载的笔记本）、重复锁定、锁定后拒绝读取，以及重新解锁后认证读取未改变的密文。该测试已包含在下文的内核全量命令中，也可单独运行 `go test -tags "fts5 sqlcipher" ./api -run 'TestAPIContractNotebook(SystemLock|CryptoAuthorization)$' -count=1`。`TestNotebookSystemLockContract` 覆盖严格布尔输入，`TestRouteCoverage` 检查路由注册和处理器绑定。
 
 2026 年 9 月 14 日迁移完成时，`kernel/api/router.go` 中的 629 条方法和路径注册均已纳入契约，旧路由清单为空。该基线中的 4 条 `ANY` 注册在生成声明中展开为 661 条具体方法和路径。后续新增接口时，以生成器和路由覆盖检查的统计为准。由 `kernel/server/serve.go` 注册的静态资源、应用主 WebSocket 和其他传输服务不属于这份 API 路由清单。

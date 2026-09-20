@@ -1,4 +1,7 @@
 {
+	"decisionModel": "Decision model",
+	"decisionModelTip": "Prefer TypeSafe System One (Jev) for classification, filtering and scoring; relevant content is sent to the decision service and charges may apply",
+	"decisionEndpointTip": "Full TypeSafe System One API endpoint, default: https://api.typesafe.ai/v1/systemone",
 	"listView": "List",
 	"databaseListView": "Database list view",
 	"copyRuntimeInfo": "Copy runtime information",

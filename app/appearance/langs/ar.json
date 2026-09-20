@@ -1,4 +1,7 @@
 {
+	"decisionModel": "نموذج اتخاذ القرار",
+	"decisionModelTip": "تفضيل TypeSafe System One (Jev) للتصنيف والتصفية والتقييم؛ يُرسل المحتوى ذي الصلة إلى خدمة اتخاذ القرار وقد تُفرض رسوم",
+	"decisionEndpointTip": "عنوان API الكامل لخدمة TypeSafe System One، الافتراضي: https://api.typesafe.ai/v1/systemone",
 	"listView": "قائمة",
 	"databaseListView": "عرض قائمة قاعدة البيانات",
 	"copyRuntimeInfo": "نسخ معلومات التشغيل",

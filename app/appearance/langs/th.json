@@ -1,4 +1,7 @@
 {
+	"decisionModel": "โมเดลการตัดสินใจ",
+	"decisionModelTip": "ให้ความสำคัญกับ TypeSafe System One (Jev) สำหรับการจัดประเภท การกรอง และการให้คะแนน โดยส่งเนื้อหาที่เกี่ยวข้องไปยังบริการตัดสินใจและอาจมีค่าใช้จ่าย",
+	"decisionEndpointTip": "ที่อยู่ API แบบเต็มของ TypeSafe System One ค่าเริ่มต้น: https://api.typesafe.ai/v1/systemone",
 	"listView": "รายการ",
 	"databaseListView": "มุมมองรายการฐานข้อมูล",
 	"copyRuntimeInfo": "คัดลอกข้อมูลสภาพแวดล้อมการทำงาน",

@@ -1,4 +1,7 @@
 {
+	"decisionModel": "Rozhodovací model",
+	"decisionModelTip": "Uprednostniť TypeSafe System One (Jev) pri klasifikácii, filtrovaní a hodnotení; príslušný obsah sa odosiela rozhodovacej službe a môžu vzniknúť poplatky",
+	"decisionEndpointTip": "Úplná adresa API TypeSafe System One, predvolená: https://api.typesafe.ai/v1/systemone",
 	"listView": "Zoznam",
 	"databaseListView": "Zoznamové zobrazenie databázy",
 	"copyRuntimeInfo": "Kopírovať informácie o prostredí behu",

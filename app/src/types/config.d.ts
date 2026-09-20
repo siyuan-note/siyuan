@@ -143,6 +143,7 @@ declare namespace Config {
         mcp: IMCP;
         embedding: IEmbedding;
         rerank: IRerank;
+        decision: IDecision;
     }
 
     /**
@@ -191,6 +192,17 @@ declare namespace Config {
         size: string;
         quality: string;
         outputFormat: string;
+    }
+
+    /**
+     * 智能体决策模型配置，使用 TypeSafe System One 协议。
+     */
+    export interface IDecision {
+        enabled: boolean;
+        endpoint: string;
+        apiKey: string;
+        name: string;
+        timeout: number;
     }
 
     /**

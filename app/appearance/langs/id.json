@@ -1,4 +1,7 @@
 {
+	"decisionModel": "Model keputusan",
+	"decisionModelTip": "Utamakan TypeSafe System One (Jev) untuk klasifikasi, penyaringan, dan penilaian; konten terkait dikirim ke layanan keputusan dan dapat dikenai biaya",
+	"decisionEndpointTip": "Alamat lengkap API TypeSafe System One, bawaan: https://api.typesafe.ai/v1/systemone",
 	"listView": "Daftar",
 	"databaseListView": "Tampilan daftar database",
 	"copyRuntimeInfo": "Salin informasi runtime",

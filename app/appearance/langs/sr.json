@@ -1,4 +1,7 @@
 {
+	"decisionModel": "Модел за одлучивање",
+	"decisionModelTip": "Дајте предност моделу TypeSafe System One (Jev) за класификацију, филтрирање и оцењивање; одговарајући садржај се шаље сервису за одлучивање и може бити наплаћен",
+	"decisionEndpointTip": "Пуна адреса API-ја TypeSafe System One, подразумевано: https://api.typesafe.ai/v1/systemone",
 	"listView": "Lista",
 	"databaseListView": "Prikaz baze - lista",
 	"copyRuntimeInfo": "Копирај информације о извршавању",

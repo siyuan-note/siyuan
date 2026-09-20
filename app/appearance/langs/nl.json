@@ -1,4 +1,7 @@
 {
+	"decisionModel": "Beslismodel",
+	"decisionModelTip": "Geef TypeSafe System One (Jev) voorrang bij classificeren, filteren en beoordelen; relevante inhoud wordt naar de beslisservice verzonden en er kunnen kosten ontstaan",
+	"decisionEndpointTip": "Volledig API-eindpunt van TypeSafe System One, standaard: https://api.typesafe.ai/v1/systemone",
 	"listView": "Lijst",
 	"databaseListView": "Lijstweergave van database",
 	"copyRuntimeInfo": "Runtime-informatie kopiëren",

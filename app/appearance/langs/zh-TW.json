@@ -1,4 +1,7 @@
 {
+	"decisionModel": "決策模型",
+	"decisionModelTip": "優先使用 TypeSafe System One（Jev）處理分類、篩選和評分；相關內容會傳送至決策服務，可能產生費用",
+	"decisionEndpointTip": "TypeSafe System One 完整介面位址，預設為 https://api.typesafe.ai/v1/systemone",
 	"listView": "列表",
 	"databaseListView": "資料庫列表檢視",
 	"copyRuntimeInfo": "複製執行資訊",

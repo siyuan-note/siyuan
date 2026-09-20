@@ -1,4 +1,7 @@
 {
+	"decisionModel": "Entscheidungsmodell",
+	"decisionModelTip": "TypeSafe System One (Jev) bevorzugt zum Klassifizieren, Filtern und Bewerten verwenden; relevante Inhalte werden an den Entscheidungsdienst gesendet, dabei können Kosten entstehen",
+	"decisionEndpointTip": "Vollständiger API-Endpunkt von TypeSafe System One, Standard: https://api.typesafe.ai/v1/systemone",
 	"listView": "Liste",
 	"databaseListView": "Datenbank-Listenansicht",
 	"copyRuntimeInfo": "Laufzeitinformationen kopieren",

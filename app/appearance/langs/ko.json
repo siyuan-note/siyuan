@@ -1,4 +1,7 @@
 {
+	"decisionModel": "판단 모델",
+	"decisionModelTip": "분류, 필터링 및 평가에 TypeSafe System One(Jev)을 우선 사용합니다. 관련 내용은 판단 서비스로 전송되며 요금이 발생할 수 있습니다",
+	"decisionEndpointTip": "TypeSafe System One API의 전체 주소, 기본값: https://api.typesafe.ai/v1/systemone",
 	"listView": "목록",
 	"databaseListView": "데이터베이스 목록 보기",
 	"copyRuntimeInfo": "실행 환경 정보 복사",

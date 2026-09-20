@@ -292,6 +292,38 @@ export const mountRerankTestBtn = (root: HTMLElement) => {
     });
 };
 
+// mountDecisionTestBtn 测试已保存的决策配置，并在网络或内核错误后恢复按钮。
+export const mountDecisionTestBtn = (root: HTMLElement) => {
+    const button = mountModelTestButton(root, "ai.decision.name", "aiDecisionTestBtn");
+    if (!button) {
+        return;
+    }
+    const label = button.querySelector("span");
+    button.addEventListener("click", async () => {
+        button.disabled = true;
+        label.textContent = window.siyuan.languages.testConnectionTesting;
+        try {
+            if (!await aiConfigApi.waitForSave()) {
+                showMessage(window.siyuan.languages.testConnectionFail, undefined, "error");
+                return;
+            }
+            await fetchPost("/api/ai/testDecisionModel", {}, response => {
+                const data = response.data;
+                if (data.matched) {
+                    showMessage(window.siyuan.languages.testConnectionSuccess, undefined, "info");
+                    return;
+                }
+                showMessage(data.msg
+                    ? window.siyuan.languages.testConnectionFailMsg.replace("${msg}", escapeHtml(data.msg))
+                    : window.siyuan.languages.testConnectionFail, undefined, "error");
+            }, undefined, () => showMessage(window.siyuan.languages.testConnectionFail, undefined, "error"));
+        } finally {
+            button.disabled = false;
+            label.textContent = window.siyuan.languages.testConnection;
+        }
+    });
+};
+
 export const getModelPickerKeywords = (group: ModelPickerGroup): string[] => {
     const keywords = [
         window.siyuan.languages.defaultModel,

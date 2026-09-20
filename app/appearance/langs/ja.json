@@ -1,4 +1,7 @@
 {
+	"decisionModel": "判定モデル",
+	"decisionModelTip": "分類、絞り込み、評価に TypeSafe System One（Jev）を優先して使用します。関連する内容は判定サービスに送信され、料金が発生する場合があります",
+	"decisionEndpointTip": "TypeSafe System One API の完全なエンドポイント。既定値：https://api.typesafe.ai/v1/systemone",
 	"listView": "リスト",
 	"databaseListView": "データベース リストビュー",
 	"copyRuntimeInfo": "実行環境情報をコピー",

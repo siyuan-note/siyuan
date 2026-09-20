@@ -2038,6 +2038,10 @@ func buildSystemPrompt(language string, capabilities *capabilitySet) string {
 	sb.WriteString(util.Container)
 	sb.WriteString("\n</env>")
 
+	if capabilities.hasModelName("decision") {
+		sb.WriteString(decisionModelPrompt)
+	}
+
 	skills := util.DiscoverSkills(kernelModel.EnabledUserSkills())
 	if capabilities.hasModelName("skill") && len(skills) > 0 {
 		sb.WriteString(availableSkillsSegment(skills))

@@ -1,4 +1,7 @@
 {
+	"decisionModel": "מודל החלטות",
+	"decisionModelTip": "העדפת TypeSafe System One (Jev) לסיווג, סינון וניקוד; תוכן רלוונטי נשלח לשירות ההחלטות וייתכנו חיובים",
+	"decisionEndpointTip": "כתובת API מלאה של TypeSafe System One, ברירת מחדל: https://api.typesafe.ai/v1/systemone",
 	"listView": "רשימה",
 	"databaseListView": "תצוגת רשימה של מסד נתונים",
 	"copyRuntimeInfo": "העתקת מידע על סביבת הריצה",

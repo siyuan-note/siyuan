@@ -93,6 +93,8 @@
         * [HTTP 正向代理](#HTTP-正向代理)
         * [WebSocket 正向代理](#WebSocket-正向代理)
         * [EventSource 正向代理](#EventSource-正向代理)
+* [人工智能](#人工智能)
+    * [测试决策模型](#测试决策模型)
 * [系统](#系统)
     * [获取启动进度](#获取启动进度)
     * [获取系统版本](#获取系统版本)
@@ -1854,6 +1856,14 @@ if (response.code === 0 && response.data) {
     * `h`：可选，请求标头 JSON 使用同样方式编码后的字符串，JSON 类型为 `map[string][]string`
     * `t`：可选，连接超时时间，使用 Go `time.ParseDuration` 格式，例如 `30s`、`1500ms`
 * 返回值：直接流式返回目标服务的 HTTP 状态码和响应体，不封装 `code`、`msg`、`data`；如果请求标头中没有 `Accept`，会自动使用 `text/event-stream`；目标服务响应标头会添加 `Siyuan-Proxy-` 前缀后返回
+
+## 人工智能
+
+### 测试决策模型
+
+`POST /api/ai/testDecisionModel` 需要鉴权和管理员权限，无需请求体。使用已保存的 `ai.decision` 配置，以固定样例调用 TypeSafe System One 接口，不读取笔记内容。决策模型未启用时也可以测试；全局禁用人工智能时会拒绝请求。测试可能产生供应商费用。
+
+供应商返回有效答案时，标准成功响应中的数据为 `data: {"matched": true}`。配置不完整、网络失败或供应商响应无效时，返回 `data: {"matched": false, "msg": "..."}`，`code` 为 `0`。该接口验证连接和响应格式，不验证模型准确性。请求遵循配置的超时，不会自动重试。
 
 ## 系统
 

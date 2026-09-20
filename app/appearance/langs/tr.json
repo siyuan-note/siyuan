@@ -1,4 +1,7 @@
 {
+	"decisionModel": "Karar modeli",
+	"decisionModelTip": "Sınıflandırma, filtreleme ve puanlama için TypeSafe System One (Jev) tercih edilir; ilgili içerik karar hizmetine gönderilir ve ücret uygulanabilir",
+	"decisionEndpointTip": "TypeSafe System One API tam adresi, varsayılan: https://api.typesafe.ai/v1/systemone",
 	"listView": "Liste",
 	"databaseListView": "Veritabanı liste görünümü",
 	"copyRuntimeInfo": "Çalışma zamanı bilgilerini kopyala",

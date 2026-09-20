@@ -1,4 +1,7 @@
 {
+	"decisionModel": "निर्णय मॉडल",
+	"decisionModelTip": "वर्गीकरण, छँटाई और अंक देने के लिए TypeSafe System One (Jev) को प्राथमिकता दें; संबंधित सामग्री निर्णय सेवा को भेजी जाती है और शुल्क लग सकता है",
+	"decisionEndpointTip": "TypeSafe System One API का पूरा पता, डिफ़ॉल्ट: https://api.typesafe.ai/v1/systemone",
 	"listView": "सूची",
 	"databaseListView": "डेटाबेस सूची दृश्य",
 	"copyRuntimeInfo": "रनटाइम की जानकारी कॉपी करें",

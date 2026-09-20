@@ -33,6 +33,7 @@ func TestAPIContractAIDisabled(t *testing.T) {
 		"/api/ai/testModel":          testModel,
 		"/api/ai/testEmbeddingModel": testEmbeddingModel,
 		"/api/ai/testRerankModel":    testRerankModel,
+		"/api/ai/testDecisionModel":  testDecisionModel,
 		"/api/ai/listModels":         listModels,
 		"/api/ai/mcpOAuthAuthorize":  mcpOAuthAuthorize,
 		"/api/ai/reindexEmbedding":   reindexEmbedding,

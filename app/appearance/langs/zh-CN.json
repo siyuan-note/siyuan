@@ -1,4 +1,7 @@
 {
+	"decisionModel": "决策模型",
+	"decisionModelTip": "优先使用 TypeSafe System One（Jev）处理分类、筛选和评分；相关内容会发送到决策服务，可能产生费用",
+	"decisionEndpointTip": "TypeSafe System One 完整接口地址，默认 https://api.typesafe.ai/v1/systemone",
 	"listView": "列表",
 	"databaseListView": "数据库列表视图",
 	"copyRuntimeInfo": "复制运行信息",

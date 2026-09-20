@@ -1,4 +1,7 @@
 {
+	"decisionModel": "Modelo de decisión",
+	"decisionModelTip": "Priorizar TypeSafe System One (Jev) para clasificar, filtrar y puntuar; el contenido pertinente se envía al servicio de decisión y puede generar cargos",
+	"decisionEndpointTip": "Dirección completa de la API de TypeSafe System One, predeterminada: https://api.typesafe.ai/v1/systemone",
 	"listView": "Lista",
 	"databaseListView": "Vista de lista de base de datos",
 	"copyRuntimeInfo": "Copiar información de ejecución",

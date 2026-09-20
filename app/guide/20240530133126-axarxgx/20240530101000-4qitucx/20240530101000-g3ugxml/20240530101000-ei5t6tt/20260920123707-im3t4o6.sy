@@ -1,0 +1,182 @@
+{
+	"ID": "20260920123707-im3t4o6",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260920123707-im3t4o6",
+		"title": "判定モデル",
+		"type": "doc",
+		"updated": "20260920123707"
+	},
+	"Children": [
+		{
+			"ID": "20260920122941-2jaz8xt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260920122941-2jaz8xt",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20260920122941-q3bk39x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-q3bk39x",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エージェントは、基準が明確な分類、絞り込み、評価を繰り返す作業に TypeSafe System One（Jev）を優先して使用します。例えば、指定した基準に従い、選択した文書と研究課題との関連度を評価できます。ブロック ID を渡すとカーネルが全文を読み取るため、メインモデルが本文を繰り返し出力する負担を減らせます。埋め込みモデルやリランキングモデルの有効化は不要です。"
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-4696u20",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-4696u20",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定方法"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920122941-wp7a1fq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-wp7a1fq",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "判定モデル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で API エンドポイント、API キー、モデル名、リクエストのタイムアウトを設定し、接続をテストしてから有効にします。既定では無効です。エンドポイントは https://api.typesafe.ai/v1/systemone、モデルは jev-latest、タイムアウトは30秒です。無効にしても設定は保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-3kw55cx",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-3kw55cx",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "結果の見方"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920122941-eu59o60",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-eu59o60",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "要求の理解、複雑な推論、ツールの選択、最終回答はメインモデルが担当します。評価値は基準の段階の間になることがあり、確率や信頼度は正しさを保証しません。失敗した項目と未処理の項目は区別され、完了した結果は保持されます。リクエストは自動で再試行されません。"
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-z2he5ii",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-z2he5ii",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "内容と権限"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920122941-f8kxvml",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-f8kxvml",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "関連する内容は設定した判定サービスに送信され、料金が発生する場合があります。ツールの呼び出しには既存の機能確認ポリシーが適用されます。暗号化されたノートブックはロックを解除し、ブロックと共にノートブック ID を指定する必要があります。接続テストは固定サンプルを使用し、ノートの内容を読み取りません。"
+				}
+			]
+		},
+		{
+			"ID": "20260920122941-7ymos0b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-7ymos0b",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サービスと API ドキュメント："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://typesafe.ai/",
+					"TextMarkTextContent": "TypeSafe"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://docs.typesafe.ai/",
+					"TextMarkTextContent": "System One API"
+				}
+			]
+		}
+	]
+}

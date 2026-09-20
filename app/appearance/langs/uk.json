@@ -1,4 +1,7 @@
 {
+	"decisionModel": "Модель ухвалення рішень",
+	"decisionModelTip": "Надавати перевагу TypeSafe System One (Jev) для класифікації, фільтрування й оцінювання; відповідний вміст надсилається сервісу ухвалення рішень, можлива оплата",
+	"decisionEndpointTip": "Повна адреса API TypeSafe System One, типово: https://api.typesafe.ai/v1/systemone",
 	"listView": "Список",
 	"databaseListView": "Подання бази даних у вигляді списку",
 	"copyRuntimeInfo": "Копіювати інформацію про середовище виконання",

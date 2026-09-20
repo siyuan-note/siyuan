@@ -247,7 +247,10 @@ func TestValueTextRichEmojiAliasRemainsLiteral(t *testing.T) {
 }
 
 func TestValueTextRichRejectsExecutableCodeFences(t *testing.T) {
-	languages := []string{"abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "mindmap", "plantuml"}
+	if isValueTextRichExecutableCodeFence([]byte("mindmap")) {
+		t.Fatal("mindmap is an ordinary code language")
+	}
+	languages := []string{"abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "plantuml"}
 	for _, language := range languages {
 		rich := &ValueTextRich{
 			Spec:    ValueTextRichSpec,

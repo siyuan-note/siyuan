@@ -124,9 +124,9 @@ test("layout rejects cyclic or invalid trees and supports deep nesting without r
 
 const browserCases = async (sourceCode: string, css: string, taskSource: string, taskCSS: string) => {
     const check = require("node:assert/strict");
-    const api = new Function("mathRender", "Constants", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
+    const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, remapListMindmapIDs, writeListMindmapMetadata, " +
-        "parseLegacyMindmap, renderLegacyMindmaps, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
+        "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
         "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, ListMindmapView};")(
         async (element: Element) => {
             const formulas = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
@@ -136,7 +136,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 formula.setAttribute("data-render", "true");
             });
         }, {TIMEOUT_DBLCLICK: 190, CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
-            CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"});
+            CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data", CUSTOM_SY_MINDMAP_CODE: "custom-sy-mindmap-code"}, () => {});
     const lute = Lute.New();
     lute.SetKramdownIAL(true);
     lute.SetProtyleWYSIWYG(true);
@@ -148,40 +148,59 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const ids = (list: HTMLElement) => Array.from(list.querySelectorAll("[data-node-id]")).map(element =>
         element.getAttribute("data-node-id"));
 
-    // 旧格式预览只生成派生视图，复制和保存仍保留完整代码原文。
+    // mindmap 与其他语言一样生成可直接编辑的代码块，编辑重排时不会恢复图表节点。
     const legacySource = "- **Root**\n  - [X] Done\n  - [/] Progress\n";
     const legacyBlock = reset("```mindmap\n" + legacySource + "```\n");
-    const legacyContent = legacyBlock.getAttribute("data-content");
     const legacyID = legacyBlock.dataset.nodeId;
     document.body.append(holder);
-    api.renderLegacyMindmaps(holder);
-    check.ok(legacyBlock.querySelector(".list-mindmap__node"));
-    check.equal(legacyBlock.getAttribute("data-content"), legacyContent);
+    check.ok(legacyBlock.classList.contains("code-block"));
+    check.equal(legacyBlock.querySelector(".list-mindmap__node"), null);
     check.equal(legacyBlock.dataset.nodeId, legacyID);
     check.equal(legacyBlock.dataset.type, "NodeCodeBlock");
-    check.ok(!legacyBlock.querySelector(".list-mindmap__route-handle"));
     const legacySaved = api.cleanListMindmapHTML(legacyBlock.outerHTML);
     check.ok(!legacySaved.includes("list-mindmap__node"));
     check.ok(lute.BlockDOM2StdMd(legacySaved).includes(legacySource.trim()));
-    const legacyHost = legacyBlock.querySelector(".list-mindmap");
-    legacyBlock.removeAttribute("data-render");
-    api.renderLegacyMindmaps(legacyBlock);
-    check.equal(legacyBlock.querySelector(".list-mindmap"), legacyHost);
-    holder.remove();
-    await new Promise(resolve => setTimeout(resolve, 0));
-    check.equal(legacyBlock.hasAttribute("data-render"), false);
-    document.body.append(holder);
-    api.renderLegacyMindmaps(holder);
-    check.ok(legacyBlock.querySelector(".list-mindmap__node"));
-    const multiRoot = api.parseLegacyMindmap("- First\n- Second\n", lute);
-    check.equal(api.readListMindmap(multiRoot).metadata.rootTitle, undefined);
-    for (const invalidSource of ["", "Plain text", "- List\n\nOutside text", "- First\n\n1. Second"]) {
-        check.equal(api.parseLegacyMindmap(invalidSource, lute), undefined);
-    }
     const invalidBlock = reset("```mindmap\n- List\n\nOutside text\n```\n");
-    api.renderLegacyMindmaps(invalidBlock);
-    check.equal(invalidBlock.querySelector("pre").textContent, Lute.UnEscapeHTMLStr(invalidBlock.getAttribute("data-content")));
+    const invalidSource = "- List\n\nOutside text\n";
+    const invalidID = invalidBlock.dataset.nodeId;
+    invalidBlock.setAttribute("custom-test", "preserved");
+    check.equal(invalidBlock.querySelector(".hljs > [contenteditable=true]").textContent, invalidSource);
     check.equal(invalidBlock.dataset.type, "NodeCodeBlock");
+    check.equal(invalidBlock.dataset.nodeId, invalidID);
+    check.equal(invalidBlock.getAttribute("custom-test"), "preserved");
+    check.equal(invalidBlock.classList.contains("render-node"), false);
+    check.equal(invalidBlock.classList.contains("code-block"), true);
+    check.equal(invalidBlock.hasAttribute("data-subtype"), false);
+    check.equal(invalidBlock.hasAttribute("data-content"), false);
+    check.equal(invalidBlock.querySelector(".protyle-action__language").textContent, "mindmap");
+    check.equal(invalidBlock.querySelectorAll("[data-node-id]").length, 0);
+    check.ok(invalidBlock.querySelector(".protyle-action__copy"));
+    check.ok(invalidBlock.querySelector(".protyle-action__menu"));
+    check.ok(lute.BlockDOM2StdMd(invalidBlock.outerHTML).includes("```mindmap"));
+    invalidBlock.querySelector(".hljs > [contenteditable=true]").textContent = "- Now a valid list";
+    holder.innerHTML = lute.SpinBlockDOM(invalidBlock.outerHTML);
+    // 断言原始 SpinBlockDOM 的返回值，不能由渲染后的修补掩盖解析错误。
+    check.ok(holder.firstElementChild.classList.contains("code-block"));
+    check.equal(holder.querySelector(".list-mindmap"), null);
+    check.equal(holder.querySelector(".hljs > [contenteditable=true]").textContent, "- Now a valid list\n");
+    const rawCode = holder.firstElementChild as HTMLElement;
+    const edit = rawCode.querySelector(".hljs > [contenteditable=true]");
+    edit.innerHTML = "1<wbr>2\n  &amp;lt;script&amp;gt;\n";
+    holder.innerHTML = lute.SpinBlockDOM(rawCode.outerHTML);
+    check.ok(holder.firstElementChild.classList.contains("code-block"));
+    check.equal(holder.querySelector(".render-node"), null);
+    check.ok(holder.querySelector(".hljs wbr"));
+    const oldDOM = document.createElement("div");
+    oldDOM.className = "render-node";
+    oldDOM.dataset.type = "NodeCodeBlock";
+    oldDOM.dataset.nodeId = legacyID;
+    oldDOM.dataset.subtype = "mindmap";
+    oldDOM.dataset.content = Lute.EscapeHTMLStr(invalidSource);
+    oldDOM.innerHTML = '<div spin="1"></div><div class="protyle-attr" contenteditable="false"></div>';
+    api.normalizeLegacyMindmapCodes(oldDOM);
+    check.ok(oldDOM.classList.contains("code-block"));
+    check.equal(oldDOM.hasAttribute("data-subtype"), false);
+    check.equal(oldDOM.querySelector(".protyle-action__language").textContent, "mindmap");
     const newMindmap = reset(`- ${Lute.Caret}\n{: custom-sy-list-mindmap="1"}`);
     check.equal(newMindmap.dataset.type, "NodeList");
     check.equal(newMindmap.getAttribute("custom-sy-list-mindmap"), "1");
@@ -241,7 +260,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const embedded = `<div data-type="NodeBlockQueryEmbed">${legacySaved}</div>`;
     holder.innerHTML = api.replaceLegacyMindmapHTML(legacySaved + embedded, canonical);
     check.equal(holder.firstElementChild.getAttribute("data-type"), "NodeList");
-    check.ok(holder.querySelector('[data-type="NodeBlockQueryEmbed"] [data-subtype="mindmap"]'));
+    check.ok(holder.querySelector('[data-type="NodeBlockQueryEmbed"] .code-block'));
     holder.remove();
 
     // 直属子列表形成分支，其他正文中的嵌套列表属于正文，读取不会重建或移动任何原始块。

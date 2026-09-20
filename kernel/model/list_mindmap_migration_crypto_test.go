@@ -78,7 +78,8 @@ func TestMigrateLegacyMindmapsEncrypted(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, _, content, _, err := GetDocHistoryContent(relative, "", false)
-	if err != nil || !strings.Contains(content, `data-subtype="mindmap"`) {
+	if err != nil || !strings.Contains(content, `data-type="NodeCodeBlock"`) || !strings.Contains(content, "mindmap") ||
+		!strings.Contains(content, "Confidential root") {
 		t.Fatalf("encrypted history cannot recover the source: %v", err)
 	}
 	for _, operations := range [][]*Operation{tx.UndoOperations, tx.DoOperations} {

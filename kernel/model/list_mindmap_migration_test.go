@@ -69,5 +69,26 @@ func TestLegacyMindmapListRejectsPartialConversion(t *testing.T) {
 		if legacyMindmapList(node, engine) != nil || before != engine.RenderNodeBlockDOM(node) {
 			t.Fatalf("unsupported source was partially converted: %q", source)
 		}
+		node.SetIALAttr("custom-test", "preserved")
+		before = engine.RenderNodeBlockDOM(node)
+		dom := legacyMindmapCodeDOM(node, engine)
+		if before != engine.RenderNodeBlockDOM(node) || !isLegacyMindmap(node) {
+			t.Fatal("fallback mutated the source needed for undo")
+		}
+		if !strings.Contains(dom, `class="code-block"`) || !strings.Contains(dom, `custom-test="preserved"`) ||
+			!strings.Contains(dom, `data-node-id="`+node.ID+`"`) {
+			t.Fatalf("fallback lost code block identity or attributes: %s", dom)
+		}
+		restored := engine.BlockDOM2Tree(dom)
+		code := firstContentBlock(restored.Root)
+		if code.Type != ast.NodeCodeBlock || !isLegacyMindmap(code) || code.IALAttr(legacyMindmapCodeAttr) != "1" ||
+			string(code.ChildByType(ast.NodeCodeBlockFenceInfoMarker).CodeBlockInfo) != "mindmap" ||
+			string(code.ChildByType(ast.NodeCodeBlockCode).Tokens) != string(node.ChildByType(ast.NodeCodeBlockCode).Tokens) {
+			t.Fatalf("fallback changed source text: %q", source)
+		}
+		code.ChildByType(ast.NodeCodeBlockCode).Tokens = []byte("- Now a valid list\n")
+		if legacyMindmapList(code, engine) != nil {
+			t.Fatal("a converted code block must remain code after editing")
+		}
 	}
 }

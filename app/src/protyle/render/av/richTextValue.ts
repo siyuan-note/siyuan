@@ -47,7 +47,6 @@ const EXECUTABLE_CODE_LANGUAGES = new Set([
     "graphviz",
     "infographic",
     "mermaid",
-    "mindmap",
     "plantuml",
 ]);
 

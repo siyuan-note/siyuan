@@ -190,8 +190,6 @@ declare class Lute {
 
     public static New(): Lute;
 
-    public static EChartsMindmapStr(text: string): string;
-
     public static NewNodeID(): string;
 
     public static Sanitize(html: string): string;

@@ -103,12 +103,13 @@ describe("attribute view text source compatibility", () => {
 
     it("identifies only executable code fence languages", () => {
         for (const language of [
-            "abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "mindmap", "plantuml",
+            "abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "plantuml",
         ]) {
             assert.equal(isAVRichTextExecutableCodeLanguage(language), true);
         }
         assert.equal(isAVRichTextExecutableCodeLanguage("GraphViz options"), true);
         assert.equal(isAVRichTextExecutableCodeLanguage("javascript"), false);
+        assert.equal(isAVRichTextExecutableCodeLanguage("mindmap"), false);
         assert.equal(isAVRichTextExecutableCodeLanguage("go options"), false);
     });
 

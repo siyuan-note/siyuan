@@ -52,7 +52,7 @@ test("the public mind map renderer also renders documents containing only list m
     const dependencies: Record<string, unknown> = {
         "../../constants": {Constants: {PROTYLE_CDN: "stage/protyle"}},
         "./listMindmap/render": {listMindmapRender: () => calls.push("list")},
-        "./listMindmap/legacy": {renderLegacyMindmaps: () => calls.push("legacy")},
+        "./listMindmap/legacy": {normalizeLegacyMindmapCodes: () => calls.push("legacy")},
     };
     runInNewContext(compiled, {
         exports: exported,

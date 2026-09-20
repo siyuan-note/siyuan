@@ -57,7 +57,6 @@ const RENDER_MAP: Record<string, (previewPanel: Element) => void> = {
     mermaid: mermaidRender,
     flowchart: flowchartRender,
     echarts: chartRender,
-    mindmap: mindmapRender,
     graphviz: graphvizRender,
     math: mathRender,
 };
@@ -72,6 +71,7 @@ export const processRender = (previewPanel: Element) => {
         return;
     }
     customBlockRender(previewPanel);
+    mindmapRender(previewPanel);
     const language = previewPanel.getAttribute("data-subtype");
     if (RENDER_MAP[language]) {
         RENDER_MAP[language](previewPanel);

@@ -16,10 +16,11 @@ import (
 )
 
 const listMindmapViewAttr = "custom-sy-list-mindmap"
+const legacyMindmapCodeAttr = "custom-sy-mindmap-code"
 
 // legacyMindmapList 从完整 Markdown 原文生成列表，不能仅提取渲染树中的节点文字。
 func legacyMindmapList(node *ast.Node, engine *lute.Lute) *ast.Node {
-	if !isLegacyMindmap(node) {
+	if !isLegacyMindmap(node) || node.IALAttr(legacyMindmapCodeAttr) == "1" {
 		return nil
 	}
 	code := node.ChildByType(ast.NodeCodeBlockCode)
@@ -64,6 +65,20 @@ func isLegacyMindmap(node *ast.Node) bool {
 	return info != nil && string(info.CodeBlockInfo) == "mindmap"
 }
 
+// 以普通代码块结构输出原文，保留 mindmap 语言；原节点不变以便生成撤销操作。
+func legacyMindmapCodeDOM(node *ast.Node, engine *lute.Lute) string {
+	info := node.ChildByType(ast.NodeCodeBlockFenceInfoMarker)
+	original := info.CodeBlockInfo
+	info.CodeBlockInfo = []byte("text")
+	defer func() { info.CodeBlockInfo = original }()
+	dom := engine.RenderNodeBlockDOM(node)
+	dom = strings.Replace(dom, `contenteditable="false">text</span>`, `contenteditable="false">mindmap</span>`, 1)
+	if node.IALAttr(legacyMindmapCodeAttr) != "1" {
+		dom = strings.Replace(dom, "<div ", `<div `+legacyMindmapCodeAttr+`="1" `, 1)
+	}
+	return dom
+}
+
 // MigrateLegacyMindmaps 在事务串行区内读取完整文档，迁移后返回调用方当前显示块的权威内容。
 func MigrateLegacyMindmaps(id string) (tx *Transaction, visible map[string]string, err error) {
 	flushLock.Lock()
@@ -91,8 +106,14 @@ func MigrateLegacyMindmaps(id string) (tx *Transaction, visible map[string]strin
 		if n.IALAttr("custom-sy-readonly") == "true" {
 			return ast.WalkSkipChildren
 		}
-		if list := legacyMindmapList(n, engine); list != nil {
-			tx.DoOperations = append(tx.DoOperations, &Operation{Action: "update", ID: n.ID, Data: engine.RenderNodeBlockDOM(list)})
+		if isLegacyMindmap(n) && n.IALAttr(legacyMindmapCodeAttr) != "1" {
+			var dom string
+			if list := legacyMindmapList(n, engine); list != nil {
+				dom = engine.RenderNodeBlockDOM(list)
+			} else {
+				dom = legacyMindmapCodeDOM(n, engine)
+			}
+			tx.DoOperations = append(tx.DoOperations, &Operation{Action: "update", ID: n.ID, Data: dom})
 			tx.UndoOperations = append(tx.UndoOperations, &Operation{Action: "update", ID: n.ID, Data: engine.RenderNodeBlockDOM(n)})
 		}
 		return ast.WalkContinue
@@ -114,6 +135,9 @@ func MigrateLegacyMindmaps(id string) (tx *Transaction, visible map[string]strin
 		if entering && (node.Type == ast.NodeList && node.IALAttr(listMindmapViewAttr) == "1" ||
 			isLegacyMindmap(node)) {
 			visible[node.ID] = engine.RenderNodeBlockDOM(node)
+			if isLegacyMindmap(node) && node.IALAttr(legacyMindmapCodeAttr) == "1" {
+				visible[node.ID] = legacyMindmapCodeDOM(node, engine)
+			}
 		}
 		return ast.WalkContinue
 	})

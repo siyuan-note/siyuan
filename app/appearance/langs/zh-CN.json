@@ -1,5 +1,4 @@
 {
-	"listMindmapMigrationInvalid": "此脑图无法完整转换为列表，已保留原始源码",
 	"runtimeInfo": "运行信息",
 	"listMindmapRouteStart": "拖动更换起始节点",
 	"listMindmapRouteEnd": "拖动更换目标节点",

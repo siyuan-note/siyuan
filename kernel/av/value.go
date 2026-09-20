@@ -716,7 +716,7 @@ func isValueTextRichExecutableCodeFence(info []byte) bool {
 		return false
 	}
 	switch fields[0] {
-	case "abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "mindmap", "plantuml":
+	case "abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "plantuml":
 		return true
 	}
 	return false

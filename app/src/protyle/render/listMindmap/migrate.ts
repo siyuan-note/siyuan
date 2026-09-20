@@ -18,7 +18,7 @@ export const replaceLegacyMindmapHTML = (html: string, blocks: {id: string, dom:
     const template = document.createElement("template");
     template.innerHTML = html;
     const replacements = new Map(blocks.map(block => [block.id, block.dom]));
-    template.content.querySelectorAll<HTMLElement>('[data-type="NodeCodeBlock"][data-subtype="mindmap"]')
+    template.content.querySelectorAll<HTMLElement>('[data-type="NodeCodeBlock"]')
         .forEach(block => {
             if (block.closest('[data-type="NodeBlockQueryEmbed"]')) {
                 return;

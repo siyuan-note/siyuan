@@ -7,7 +7,7 @@
 		"id": "20210808180303-h361q1i",
 		"title": "Editor",
 		"type": "doc",
-		"updated": "20260830213256"
+		"updated": "20260920102915"
 	},
 	"Children": [
 		{
@@ -245,6 +245,122 @@
 					"TextMarkBlockRefID": "20221016204105-qx2aq0g",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "Heading and list layout"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-4hhz1ko",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260920102915-4hhz1ko",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Spell Check"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-3kq9ofr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-3kq9ofr",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable this feature in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Spell Check"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Misspelled words are marked with wavy underlines."
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-8dfar3l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-8dfar3l",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Desktop app: right-click an underlined word and choose a spelling suggestion from SiYuan's menu. You can also add a correctly spelled word to the dictionary. Use a normal right-click without holding "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-kl8nygu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-kl8nygu",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Browser: enable spell checking and select the languages to check in your browser settings. In Chrome, hold "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and right-click an underlined word to open the browser's native spelling menu."
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-7eun9ey",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-7eun9ey",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When spell checking starts depends on the environment. After opening a document, even if the caret has been restored, you may need to click the document body and wait briefly for underlines to appear."
 				}
 			]
 		}

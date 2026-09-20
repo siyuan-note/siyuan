@@ -1,4 +1,5 @@
 import {recordReplacementUndo} from "./replacementInput";
+import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
 import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
@@ -392,6 +393,7 @@ export class WYSIWYG {
     private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
     public tableControl: TableControl;
     private largeListVirtualizer?: LargeListVirtualizer;
+    private disposeSpellcheckFocus?: () => void;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -497,7 +499,7 @@ export class WYSIWYG {
         this.protyle = protyle;
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
-        this.element.setAttribute("spellcheck", "false");
+        this.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
         // Android 和 iPhone 的原生编辑限于正文节点，避免输入法修改列表等结构容器。
         this.element.setAttribute("contenteditable", (isIPhone() || isAndroid()) ? "false" : "true");
         if (window.siyuan.config.editor.displayBookmarkIcon) {
@@ -508,6 +510,13 @@ export class WYSIWYG {
         }
         this.bindCommonEvent(protyle);
         this.bindEvent(protyle);
+        /// #if BROWSER
+        if (!isMobile() && !isPhablet() && navigator.userAgent.includes("Chrome/")) {
+            this.disposeSpellcheckFocus = bindSpellcheckFocus(this.element, () =>
+                window.siyuan.config.editor.spellcheck && !protyle.disabled &&
+                !protyle.toolbar.isMultiSelectMode() && !getBlockSelectionModeElement(this.element));
+        }
+        /// #endif
         if (!isMobile()) {
             bindTouchBlockDragSelect(this.element, () => !protyle.toolbar.isMultiSelectMode());
         }
@@ -529,6 +538,7 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.disposeSpellcheckFocus?.();
         this.largeListVirtualizer?.destroy();
     }
 

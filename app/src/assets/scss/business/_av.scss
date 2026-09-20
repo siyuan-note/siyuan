@@ -102,14 +102,12 @@
   }
 
   &:hover {
-    .av__views .block__icon,
     .av__group-icon--hover {
       opacity: 1;
     }
   }
 
   &--touch {
-    .av__views .block__icon,
     .av__group-icon--hover,
     .av__row--footer .av__calc {
       opacity: 1;
@@ -227,8 +225,12 @@
       z-index: 3;
     }
 
-    &--show .block__icon {
+    .block__icon {
       opacity: 1;
+    }
+
+    > .fn__flex-1 {
+      min-width: 8px;
     }
 
     .block__icon svg {

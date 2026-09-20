@@ -241,7 +241,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
                 </div>
             </div>
             ${dateColumn && dateColumn.type !== "date" ? `<div class="av__calendar-source ft__on-surface">${window.siyuan.languages.calendarReadOnlyDate}</div>` : ""}
-            <div class="av__calendar-scroll">
+            <div class="av__calendar-scroll" data-prevent-swipe="true">
                 ${dateColumn ? `<div class="av__calendar-weekdays">${days.map(day => `<div>${day}</div>`).join("")}</div>` : ""}
                 <div class="av__body av__calendar-grid${dateColumn ? "" : " av__calendar-grid--empty"}" data-group-id="" style="--av-calendar-saturday:${(6 - weekStartDay + 7) % 7};--av-calendar-sunday:${(7 - weekStartDay) % 7};">${body}</div>
             </div>

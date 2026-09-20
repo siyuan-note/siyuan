@@ -1254,6 +1254,15 @@ export const getTableRangeCells = (tableElement: HTMLElement, startCell?: HTMLEl
     return ret;
 };
 
+export const getTableClipboardBlockDOM = (html: string) => {
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    const table = container.querySelector("table");
+    table.setAttribute("contenteditable", "true");
+    table.setAttribute("spellcheck", "false");
+    return `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeTable" class="table"><div contenteditable="false">${table.outerHTML}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+};
+
 // getTableRangeHTML 根据起始单元格到结束单元格的矩形区域，重建一个合法的 <table> HTML。
 // 用于表格内跨多单元格的文本选区复制/剪切：原 range.cloneContents()/extractContents() 会产出残缺片段。
 // 算法：建立原表格的二维网格映射，确定选区的网格范围，枚举其中的物理单元格，

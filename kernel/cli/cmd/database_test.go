@@ -74,11 +74,16 @@ func TestWriteGroupedDatabaseView(t *testing.T) {
 		ID: "20260806000000-view001", Name: "Table", Groups: []av.Viewable{group},
 	}}
 
-	var output bytes.Buffer
-	if count := writeRenderedView(&output, attrView, root, false); count != 1 {
-		t.Fatalf("unexpected grouped item count: %d", count)
-	}
-	if result := output.String(); !strings.Contains(result, "[Todo]") || !strings.Contains(result, "Task") {
-		t.Fatalf("unexpected grouped database output: %q", result)
+	list := &av.List{Table: &av.Table{BaseInstance: &av.BaseInstance{
+		ID: "20260806000000-view002", Name: "List", Groups: []av.Viewable{&av.List{Table: group}},
+	}}}
+	for _, view := range []av.Viewable{root, list} {
+		var output bytes.Buffer
+		if count := writeRenderedView(&output, attrView, view, false); count != 1 {
+			t.Fatalf("unexpected grouped item count for %s: %d", view.GetType(), count)
+		}
+		if result := output.String(); !strings.Contains(result, "[Todo]") || !strings.Contains(result, "Task") {
+			t.Fatalf("unexpected grouped database output for %s: %q", view.GetType(), result)
+		}
 	}
 }

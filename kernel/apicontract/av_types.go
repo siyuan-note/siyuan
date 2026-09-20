@@ -397,7 +397,7 @@ type AVViewData struct {
 	Name             string `json:"name" api:"optional,nullable"`
 	Desc             string `json:"desc" api:"optional,nullable"`
 	HideAttrViewName bool   `json:"hideAttrViewName" api:"optional,nullable"`
-	Type             string `json:"type" api:"optional,nullable,enum=table|gallery|kanban"`
+	Type             string `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban"`
 	PageSize         int    `json:"pageSize" api:"optional,nullable"`
 }
 
@@ -464,8 +464,9 @@ type AVView struct {
 	Filters          []*AVViewFilter  `json:"filters,omitempty" api:"optional,nullable"`
 	Sorts            []*AVViewSort    `json:"sorts,omitempty" api:"optional,nullable"`
 	PageSize         int              `json:"pageSize" api:"optional,nullable"`
-	LayoutType       string           `json:"type" api:"optional,nullable,enum=table|gallery|kanban"`
+	LayoutType       string           `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban"`
 	Table            *AVLayoutTable   `json:"table,omitempty" api:"optional,nullable"`
+	List             *AVLayoutTable   `json:"list,omitempty" api:"optional,nullable"`
 	Gallery          *AVLayoutGallery `json:"gallery,omitempty" api:"optional,nullable"`
 	Kanban           *AVLayoutKanban  `json:"kanban,omitempty" api:"optional,nullable"`
 	ItemIDs          []string         `json:"itemIds,omitempty" api:"optional,nullable"`
@@ -559,7 +560,7 @@ type AVAttributeViewFieldView struct {
 	ID     string `json:"id" api:"optional,nullable"`
 	Icon   string `json:"icon" api:"optional,nullable"`
 	Name   string `json:"name" api:"optional,nullable"`
-	Type   string `json:"type" api:"optional,nullable,enum=table|gallery|kanban"`
+	Type   string `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban"`
 	Hidden bool   `json:"hidden" api:"optional,nullable"`
 }
 
@@ -568,7 +569,7 @@ type AVAvSearchResult struct {
 	AvName     string              `json:"avName" api:"optional,nullable"`
 	ViewName   string              `json:"viewName" api:"optional,nullable"`
 	ViewID     string              `json:"viewID" api:"optional,nullable"`
-	ViewLayout string              `json:"viewLayout" api:"optional,nullable,enum=|table|gallery|kanban"`
+	ViewLayout string              `json:"viewLayout" api:"optional,nullable,enum=|table|list|gallery|kanban"`
 	BlockID    string              `json:"blockID" api:"optional,nullable"`
 	HPath      string              `json:"hPath" api:"optional,nullable"`
 	Matched    bool                `json:"matched,omitempty" api:"optional,nullable"`

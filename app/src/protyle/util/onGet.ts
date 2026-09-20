@@ -39,6 +39,7 @@ import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
 import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
+import {recordRestoredSpellcheckFocus} from "./spellcheckFocus";
 import {applyPublishFoldStates} from "./viewFold";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
@@ -623,6 +624,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     }
     if (!suppressFocus && (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST))) {
         setTimeout(() => {
+            const previousActiveElement = protyle.wysiwyg.element.ownerDocument.activeElement;
             let range: Range;
             if (savedFocusElement === focusElement && hasFocusOffsets(scrollAttr)) {
                 range = focusByOffset(focusElement, scrollAttr.focusStart, scrollAttr.focusEnd) as Range;
@@ -630,6 +632,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
                 range = focusBlock(focusElement, undefined, !action.includes(Constants.CB_GET_OUTLINE),
                     focusAfterZoom) as Range;
             }
+            recordRestoredSpellcheckFocus(protyle.wysiwyg.element, previousActiveElement);
             /// #if !MOBILE
             if (!action.includes(Constants.CB_GET_UNUNDO)) {
                 pushBack(protyle, range, focusElement);

@@ -1,4 +1,6 @@
 {
+	"listView": "列表",
+	"databaseListView": "数据库列表视图",
 	"copyRuntimeInfo": "复制运行信息",
 	"duplicateDocTree": "带子文档创建副本",
 	"syncProviderChangeConfirm": "切换同步提供商前，需要检查资源和历史快照的完整性，必要时会从当前云端下载缺失内容，可能需要较长时间。是否继续？",
@@ -2479,6 +2481,7 @@
 		"quit": "退出程序"
 	},
 	"_attrView": {
+		"list": "列表",
 		"dateFormat": "日期格式",
 		"fullDate": "本地化日期",
 		"dateMonths": "1月|2月|3月|4月|5月|6月|7月|8月|9月|10月|11月|12月",

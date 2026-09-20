@@ -578,8 +578,8 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 	ret = viewable
 
 	switch ret.GetType() {
-	case av.LayoutTypeTable:
-		table := ret.(*av.Table)
+	case av.LayoutTypeTable, av.LayoutTypeList:
+		table := av.TableFromViewable(ret)
 		filteredRows := []*av.TableRow{}
 		for _, row := range table.Rows {
 			if checkAttributeViewItemAccessableByPublishAccess(c, publishAccess, row) {
@@ -735,8 +735,8 @@ func (filter *attributeViewPublishAccessFilter) filterViewable(attrView *av.Attr
 	}
 
 	switch viewable.GetType() {
-	case av.LayoutTypeTable:
-		table := viewable.(*av.Table)
+	case av.LayoutTypeTable, av.LayoutTypeList:
+		table := av.TableFromViewable(viewable)
 		filter.filterGroupValue(attrView, table.BaseInstance)
 		for _, row := range table.Rows {
 			if nil == row {

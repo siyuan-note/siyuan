@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {Constants} from "../../../constants";
 import {applyPublishAVFolds, getPublishAVView, setPublishAVView} from "./publishState";
 import {getCardWidth} from "./gallery/style";
@@ -42,7 +43,7 @@ const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, view
     const token = Symbol();
     highlightTokens.set(blockElement, token);
     const className = "protyle-wysiwyg--hl";
-    const targetQuery = viewType === "table" ? `.av__row[data-id="${itemID}"]` : `.av__gallery-item[data-id="${itemID}"]`;
+    const targetQuery = isTableLikeView(viewType) ? `.av__row[data-id="${itemID}"]` : `.av__gallery-item[data-id="${itemID}"]`;
     requestAnimationFrame(() => {
         if (!blockElement.isConnected || highlightTokens.get(blockElement) !== token) {
             return;
@@ -53,7 +54,7 @@ const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, view
             return;
         }
         blockElement.querySelectorAll(`.${className}`).forEach(item => item.classList.remove(className));
-        if (viewType === "table") {
+        if (isTableLikeView(viewType)) {
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl").forEach(item => {
                 item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
             });
@@ -87,7 +88,7 @@ const getLocalAVLocateData = (data: IAV | undefined, request: IAVLocateRequest) 
         return;
     }
     const findTarget = (view: IAVTable | IAVGallery | IAVKanban, groupID = "") => {
-        const items = data.viewType === "table" ? (view as IAVTable).rows : (view as IAVGallery | IAVKanban).cards;
+        const items = isTableLikeView(data.viewType) ? (view as IAVTable).rows : (view as IAVGallery | IAVKanban).cards;
         const localIndex = items?.findIndex(item => item.id === request.itemID) ?? -1;
         if (localIndex < 0) {
             return;
@@ -314,7 +315,7 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
     }
     const key = data.target.groupID || "all";
     const view = (data.target.groupID ? data.view.groups?.find(item => item.id === data.target.groupID) : data.view) as IAVTable | IAVGallery | IAVKanban;
-    const itemLength = data.viewType === "table" ? (view as IAVTable).rows.length : (view as IAVGallery | IAVKanban).cards.length;
+    const itemLength = isTableLikeView(data.viewType) ? (view as IAVTable).rows.length : (view as IAVGallery | IAVKanban).cards.length;
     const offset = data.target.offset || 0;
     const localIndex = Math.max(0, data.target.index - offset);
     let renderedStart = Math.max(0, localIndex - locateRenderSize / 2);
@@ -323,7 +324,7 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
     let topSpacerHeight: number;
     const bodyQuery = data.target.groupID ? `.av__body[data-group-id="${data.target.groupID}"]` : ".av__body";
     const currentBody = blockElement.querySelector(bodyQuery);
-    if (data.viewType === "table") {
+    if (isTableLikeView(data.viewType)) {
         const rowHeight = (currentBody?.querySelector(".av__row[data-id]") as HTMLElement)?.offsetHeight || 36;
         topSpacerHeight = renderedStart * rowHeight;
     } else {
@@ -376,7 +377,7 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         return;
     }
     let targetElement: HTMLElement;
-    if (data.viewType === "table") {
+    if (isTableLikeView(data.viewType)) {
         const rowElement = bodyElement?.querySelector(`.av__row[data-id="${request.itemID}"]`) as HTMLElement;
         targetElement = rowElement?.querySelector(".av__cell[data-dtype=\"block\"]") as HTMLElement;
         if (targetElement && request.select !== false) {
@@ -414,7 +415,7 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         }
     }
     if (request.scroll !== false && !scrollBacklinkTarget(blockElement, targetElement)) {
-        if (!request.keyID && data.viewType === "table" && data.target.index === 0 && !data.target.groupID) {
+        if (!request.keyID && isTableLikeView(data.viewType) && data.target.index === 0 && !data.target.groupID) {
             const contentRect = protyle.contentElement.getBoundingClientRect();
             protyle.contentElement.scrollTop += blockElement.getBoundingClientRect().top - contentRect.top;
         } else {
@@ -429,7 +430,7 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
             kanbanElement.scrollLeft += targetRect.left + targetRect.width / 2 - (kanbanRect.left + kanbanRect.width / 2);
         }
     }
-    if (data.viewType === "table" && request.keyID) {
+    if (isTableLikeView(data.viewType) && request.keyID) {
         const scroller = blockElement.querySelector<HTMLElement>(".av__scroll");
         const rect = scroller?.getBoundingClientRect();
         const targetRect = targetElement.getBoundingClientRect();

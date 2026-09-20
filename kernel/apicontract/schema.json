@@ -5618,6 +5618,7 @@
           "type": "string",
           "enum": [
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -6158,6 +6159,7 @@
           "type": "string",
           "enum": [
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -6369,6 +6371,7 @@
           "enum": [
             "",
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -9506,6 +9509,7 @@
           "type": "string",
           "enum": [
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -12160,6 +12164,9 @@
         "kanban": {
           "$ref": "#/$defs/AVLayoutKanban"
         },
+        "list": {
+          "$ref": "#/$defs/AVLayoutTable"
+        },
         "name": {
           "type": "string"
         },
@@ -12186,6 +12193,7 @@
           "type": "string",
           "enum": [
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -12232,6 +12240,7 @@
           "type": "string",
           "enum": [
             "table",
+            "list",
             "gallery",
             "kanban"
           ]

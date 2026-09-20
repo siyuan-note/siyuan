@@ -1,4 +1,6 @@
 {
+	"listView": "Liste",
+	"databaseListView": "Vue liste de base de données",
 	"copyRuntimeInfo": "Copier les informations d’exécution",
 	"duplicateDocTree": "Dupliquer avec les sous-documents",
 	"syncProviderChangeConfirm": "Avant de changer de fournisseur de synchronisation, SiYuan doit vérifier les ressources et les anciens instantanés, et peut télécharger le contenu manquant depuis le stockage cloud actuel. Cela peut prendre un certain temps. Continuer ?",
@@ -2479,6 +2481,7 @@
 		"quit": "Quitter le programme"
 	},
 	"_attrView": {
+		"list": "Liste",
 		"dateFormat": "Format de date",
 		"fullDate": "Date localisée",
 		"dateMonths": "janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre",

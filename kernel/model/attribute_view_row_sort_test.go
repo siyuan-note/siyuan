@@ -19,6 +19,9 @@ func newAttributeViewRowSortTestData(layout av.LayoutType) (*av.AttributeView, *
 	number.Key.Type = av.KeyTypeNumber
 	number.Key.NumberFormat = av.NumberFormatNone
 	view.LayoutType = layout
+	if av.LayoutTypeList == layout {
+		view.List = newAttributeViewListLayout(attrView, nil)
+	}
 	view.Gallery = av.NewLayoutGallery()
 	view.Gallery.CoverFrom = av.CoverFromNone
 	view.Kanban = av.NewLayoutKanban()
@@ -47,7 +50,7 @@ func newAttributeViewRowSortTestData(layout av.LayoutType) (*av.AttributeView, *
 
 func TestAttributeViewRowSortPreviewPersistenceAndUndo(t *testing.T) {
 	setupAttributeViewValidationTest(t)
-	for _, layout := range []av.LayoutType{av.LayoutTypeTable, av.LayoutTypeGallery, av.LayoutTypeKanban} {
+	for _, layout := range []av.LayoutType{av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeGallery, av.LayoutTypeKanban} {
 		t.Run(string(layout), func(t *testing.T) {
 			attrView, view, ids := newAttributeViewRowSortTestData(layout)
 			// 用单页和过滤规则验证预览仍然保存完整条目顺序。
@@ -194,7 +197,7 @@ func TestAttributeViewRowSortMultiSelectionAndAnchors(t *testing.T) {
 
 func TestAttributeViewRowSortPreviewDoesNotSaveFieldRepairs(t *testing.T) {
 	setupAttributeViewValidationTest(t)
-	for _, layout := range []av.LayoutType{av.LayoutTypeTable, av.LayoutTypeGallery, av.LayoutTypeKanban} {
+	for _, layout := range []av.LayoutType{av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeGallery, av.LayoutTypeKanban} {
 		t.Run(string(layout), func(t *testing.T) {
 			attrView, view, ids := newAttributeViewRowSortTestData(layout)
 			missing := &av.BaseField{ID: ast.NewNodeID()}

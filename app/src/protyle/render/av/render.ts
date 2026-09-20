@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {fetchSyncPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
@@ -196,12 +197,12 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
 
 const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualData,
                        reserveVirtualHeight = false) => {
-    const freezeDragHTML = `<div class="av__freeze-drag ariaLabel" data-position="east" aria-label="${escapeAttr(window.siyuan.languages.freezeDrag)}"></div>`;
+    const viewType = e.dataset.avType === "list" ? "list" : "table";
     let calcHTML = "";
-    let contentHTML = `<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>${freezeDragHTML}</div>`;
+    let contentHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     let freezeIndex = -1;
     data.columns.forEach((item, index) => {
-        if (!item.hidden && item.pin) {
+        if (viewType === "table" && !item.hidden && item.pin) {
             freezeIndex = index;
         }
     });
@@ -226,7 +227,7 @@ style="width: ${escapeAttr(column.width) || "200px"};">
     <div class="av__widthdrag"></div>
 </div>`;
         if (pinIndex === index) {
-            contentHTML += `${freezeDragHTML}</div>`;
+            contentHTML += "</div>";
         }
         if (column.type === "lineNumber") {
             // lineNumber type 不参与计算操作
@@ -268,7 +269,7 @@ style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || 
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }
-        contentHTML += getRowHTML({data, row, rowIndex: rowIndex + (virtualData?.rowOffset || 0), pinIndex, type: "table"});
+        contentHTML += getRowHTML({data, row, rowIndex: rowIndex + (virtualData?.rowOffset || 0), pinIndex, type: viewType});
     });
     let bottomSpacerHTML = "";
     if (reserveVirtualHeight && virtualData && virtualData.renderedEnd < data.rows.length - 1) {
@@ -359,7 +360,7 @@ export const setAVGroupFolded = (foldElement: HTMLElement, folded: boolean) => {
     foldElement.setAttribute("aria-label", getGroupFoldTip(folded));
 
     const blockElement = foldElement.closest<HTMLElement>(".av");
-    if (blockElement?.dataset.avType !== "table") {
+    if (!isTableLikeView(blockElement?.dataset.avType)) {
         return;
     }
     const groupID = bodyElement.dataset.groupId;
@@ -375,7 +376,7 @@ export const setAVGroupFolded = (foldElement: HTMLElement, folded: boolean) => {
 };
 
 export const initUnfoldedGroupTables = (blockElement: HTMLElement, protyle: IProtyle) => {
-    if (blockElement.dataset.avType !== "table") {
+    if (!isTableLikeView(blockElement.dataset.avType)) {
         return;
     }
     const data = getAVData(blockElement);
@@ -1171,7 +1172,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                             if (popCellElement && popCellElement.getAttribute("data-detached") === "true" &&
                                 !genCellValueByElement("block", popCellElement).block?.content &&
                                 popCellElement.getBoundingClientRect().height !== 0 && hasGhost) {
-                                if (item.getAttribute("data-av-type") !== "table") {
+                                if (!isTableLikeView(item.getAttribute("data-av-type"))) {
                                     if (addingFocusTokens.get(addingFocusKey) === addingFocusToken) {
                                         addingFocusTokens.delete(addingFocusKey);
                                         popTextCell(protyle, [popCellElement], "block");

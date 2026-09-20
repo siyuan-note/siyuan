@@ -1906,7 +1906,7 @@ if (response.code === 0 && response.data) {
 
 ## 数据库
 
-数据库（内核中为“属性视图”）以字段（列）和条目（行）的形式存储结构化数据。每个数据库由 `avID` 标识，可通过一个或多个数据库块（`blockID`）嵌入到文档中。一个数据库可包含多个不同布局类型的视图（`viewID`）：`table`（表格）、`gallery`（卡片）和 `kanban`（看板）。
+数据库（内核中为“属性视图”）以字段（列）和条目（行）的形式存储结构化数据。每个数据库由 `avID` 标识，可通过一个或多个数据库块（`blockID`）嵌入到文档中。一个数据库可包含多个不同布局类型的视图（`viewID`）：`table`（表格）、`list`（列表）、`gallery`（卡片）和 `kanban`（看板）。
 
 字段类型（`keyType`）如下：
 
@@ -2050,7 +2050,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-    * `data.view`: 渲染后的视图实例。结构随 `viewType` 而变：`table` 返回 `columns`/`rows`/`rowCount`，`gallery` 和 `kanban` 返回 `fields`/`cards`/`cardCount`。启用分组时，`groups` 包含各分组的视图实例，每个实例含 `groupKey`/`groupValue`。`view` 还包含 `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden`。注意：启用的过滤或分组可能使条目列表为空，即使条目总数大于 0
+    * `data.view`: 渲染后的视图实例。结构随 `viewType` 而变：`table` 和 `list` 返回 `columns`/`rows`/`rowCount`，`gallery` 和 `kanban` 返回 `fields`/`cards`/`cardCount`。启用分组时，`groups` 包含各分组的视图实例，每个实例含 `groupKey`/`groupValue`。`view` 还包含 `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden`。注意：启用的过滤或分组可能使条目列表为空，即使条目总数大于 0
     * `data.view.columns[]`: 每列含 `id`/`name`/`type`/`icon`/`wrap`/`hidden`/`desc`/`calc`/`numberFormat`/`template`/`renderTemplate`/`pin`/`width`；`select`/`mSelect` 列还额外包含 `options`。画廊和看板字段在 `data.view.fields[]` 中返回相同的字段元数据
     * `data.view.columns[].renderTemplate`: 普通字段可选的显示模板，仅改变显示内容，字段原有类型的存储值保持不变
     * `data.view.rows[].id`: 表格行的**条目 ID**（`itemID`），也等于该行主键单元格的 `value.blockID`。对于绑定行，绑定块 ID 位于主键单元格的 `value.block.id`；二者是不同概念，不能假设相等
@@ -2212,7 +2212,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-    * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`），以及所有视图的原始布局配置（`table`/`gallery`/`kanban`）和条目顺序（`itemIds`）。兼容字段 `viewID` 动态取第一个可用视图，不会持久化。返回值不含渲染后的行或分页；需要计算后的行数据请使用 [渲染](#渲染)
+    * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`），以及所有视图的原始布局配置（`table`/`list`/`gallery`/`kanban`）和条目顺序（`itemIds`）。兼容字段 `viewID` 动态取第一个可用视图，不会持久化。返回值不含渲染后的行或分页；需要计算后的行数据请使用 [渲染](#渲染)
 
 ### 获取主键值
 
@@ -2347,7 +2347,7 @@ if (response.code === 0 && response.data) {
 | `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
 
-> ⚠️ `itemID` 是**条目 ID**，即[渲染](#渲染)返回的条目 `id`：表格为 `rows[].id`，卡片和看板为 `cards[].id`，启用分组时位于 `groups[]` 的对应视图实例中。它也等于主键值的 `value.blockID`。对于绑定条目，绑定块 ID 位于主键值的 `value.block.id`；二者是不同概念，不能假设相等。传入错误的 ID 会把值存为孤儿数据，不会出现在渲染后的单元格中。
+> ⚠️ `itemID` 是**条目 ID**，即[渲染](#渲染)返回的条目 `id`：表格和列表为 `rows[].id`，卡片和看板为 `cards[].id`，启用分组时位于 `groups[]` 的对应视图实例中。它也等于主键值的 `value.blockID`。对于绑定条目，绑定块 ID 位于主键值的 `value.block.id`；二者是不同概念，不能假设相等。传入错误的 ID 会把值存为孤儿数据，不会出现在渲染后的单元格中。
 
 对于富文本，`text.rich.content` 是权威的 Kramdown 源。内核会校验其受支持的结构并派生 `text.content` 纯文本投影；调用方提供的纯文本投影会被忽略。为兼容现有 API 客户端，省略 `text.rich` 时，如果 `text.content` 未改变则保留已存储的富文本载荷，如果 `text.content` 改变则以纯文本替换。即使纯文本投影未改变，也可以发送 `"rich": null` 明确移除富文本格式。包含富文本的数据库使用存储规范 9，无法由仅支持更早数据库规范的内核打开。
 
@@ -2475,7 +2475,9 @@ if (response.code === 0 && response.data) {
 
 ### 切换布局
 
-在 `table`（表格）、`gallery`（卡片）和 `kanban`（看板）之间切换数据库块所选视图的布局类型。成功时服务端会重新渲染并返回视图（结构与 [渲染](#渲染) 相同）。
+在 `table`（表格）、`list`（列表）、`gallery`（卡片）和 `kanban`（看板）之间切换数据库块所选视图的布局类型。成功时服务端会重新渲染并返回视图（结构与 [渲染](#渲染) 相同）。
+
+首次切换到 `list` 时，会初始化独立布局，默认仅显示主键字段。之后切换回该布局会保留字段显隐和顺序。隐藏字段的值保持不变，仍可用于过滤和排序；其他布局保留各自的显示设置。
 
 * `/api/av/changeAttrViewLayout`
 * 参数
@@ -2490,7 +2492,7 @@ if (response.code === 0 && response.data) {
 
     * `avID`: 数据库 ID
     * `blockID`: 拥有该视图的数据库块
-    * `layoutType`: 目标布局——`table`、`gallery`、`kanban` 之一
+    * `layoutType`: 目标布局——`table`、`list`、`gallery`、`kanban` 之一
 * 返回值：与 [渲染](#渲染) 返回结构相同。当切换到 `kanban` 且已配置分组时，`data.view` 包含 `groups[]` 数组；每个分组是视图实例，含 `groupKey`、`groupValue`，以及看板特有字段（`coverFrom`、`cardAspectRatio`、`cardSize`、`fitImage`、`displayFieldName`、`fillColBackgroundColor`、`fields`）
 
 ### 设置分组
@@ -2685,7 +2687,7 @@ if (response.code === 0 && response.data) {
 
 ### 添加字段
 
-添加新字段（列）。该字段会被添加到每个视图（表格/卡片/看板）中 `previousKeyID` 之后的位置（为空时使用默认位置）。
+添加新字段（列）。该字段会被添加到每个视图（表格/列表/卡片/看板）中 `previousKeyID` 之后的位置（为空时使用默认位置）。
 
 * `/api/av/addAttributeViewKey`
 * 参数
@@ -2706,7 +2708,7 @@ if (response.code === 0 && response.data) {
     * `keyName`: 字段显示名
     * `keyType`: 字段类型——`text`、`number`、`date`、`select`、`mSelect`、`url`、`email`、`phone`、`mAsset`、`template`、`created`、`updated`、`checkbox`、`relation`、`rollup`、`lineNumber` 之一。`block`（主键）不能通过该接口添加
     * `keyIcon`: 可选字段图标（emoji 或空字符串）
-    * `previousKeyID`: 在此字段 ID 之后插入新列。为空字符串时使用布局默认位置（表格插入到首位，卡片/看板插入到末尾）
+    * `previousKeyID`: 在此字段 ID 之后插入新列。为空字符串时使用布局默认位置（表格插入到首位，列表/卡片/看板插入到末尾）
 * 返回值
 
   ```json

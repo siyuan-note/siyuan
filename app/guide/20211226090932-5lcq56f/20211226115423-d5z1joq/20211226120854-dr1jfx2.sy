@@ -7,7 +7,7 @@
 		"id": "20211226120854-dr1jfx2",
 		"title": "編輯器",
 		"type": "doc",
-		"updated": "20260830213256"
+		"updated": "20260920102915"
 	},
 	"Children": [
 		{
@@ -220,6 +220,122 @@
 					"TextMarkBlockRefID": "20221016213639-1nag9jj",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "標題與列表混合排版"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-zr83okq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260920102915-zr83okq",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "拼寫檢查"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-kqmazhq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-kqmazhq",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "拼寫檢查"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中啟用此功能。拼寫錯誤會以波浪線標記。"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-2zycdok",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-2zycdok",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端：在帶有波浪線的單字上按右鍵，於思源選單中選擇更正建議，也可將正確的單字加入詞典。桌面端請使用一般右鍵，無需按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-yi3fmra",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-yi3fmra",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "瀏覽器端：請在瀏覽器設定中啟用拼寫檢查並選擇檢查語言。在 Chrome 中，按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 並在帶有波浪線的單字上按右鍵，即可使用瀏覽器原生的更正選單。"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-3dmr3wm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-3dmr3wm",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "拼寫檢查的觸發時機取決於執行環境。開啟文件後即使游標已恢復，也可能需要點選正文並稍候才會顯示波浪線。"
 				}
 			]
 		}

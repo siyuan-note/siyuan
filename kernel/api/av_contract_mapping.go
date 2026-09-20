@@ -30,6 +30,8 @@ func avContractView(value av.Viewable) apicontract.AVViewInstance {
 	switch view := value.(type) {
 	case *av.Table:
 		return apicontract.NewAVTableInstance(toContractAVTable(view))
+	case *av.List:
+		return apicontract.NewAVTableInstance(toContractAVTable(view.Table))
 	case *av.Gallery:
 		return apicontract.NewAVGalleryInstance(toContractAVGallery(view))
 	case *av.Kanban:
@@ -1025,6 +1027,7 @@ func toContractAVView(value *av.View) *apicontract.AVView {
 		PageSize:         value.PageSize,
 		LayoutType:       string(value.LayoutType),
 		Table:            toContractAVLayoutTable(value.Table),
+		List:             toContractAVLayoutTable(value.List),
 		Gallery:          toContractAVLayoutGallery(value.Gallery),
 		Kanban:           toContractAVLayoutKanban(value.Kanban),
 		ItemIDs:          value.ItemIDs,

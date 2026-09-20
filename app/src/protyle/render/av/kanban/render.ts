@@ -1,3 +1,4 @@
+import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
 import {getPublishAVView} from "../publishState";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
@@ -192,7 +193,7 @@ export const renderKanban = async (options: {
     }
     applyAVRenderContext(options.blockElement, data);
     prepareAVLocate(options.blockElement, data, resetData);
-    if (data.viewType === "table") {
+    if (isTableLikeView(data.viewType)) {
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
         return;
     }

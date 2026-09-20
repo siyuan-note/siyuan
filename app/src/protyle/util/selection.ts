@@ -1,4 +1,5 @@
 import {revealTabsForTarget} from "../render/tabsRender";
+import {getTextWithLegacyInlineBoundary} from "./inlineElementBoundary";
 import {isHiddenTabContent} from "../render/tabsVisibility";
 import {
     getContenteditableElement,
@@ -882,7 +883,7 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
 };
 
 const getDOMOffset = (textNode: Text, offset: number, skipZWSP: boolean) => {
-    const text = textNode.data;
+    const text = getTextWithLegacyInlineBoundary(textNode);
     const semanticPrefixLength = getSemanticMarkerPrefixLengthForNode(textNode);
     let domOffset = 0;
     let textOffset = 0;

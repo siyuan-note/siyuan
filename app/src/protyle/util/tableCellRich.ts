@@ -1,5 +1,7 @@
 import {getAVRichTextBlockDOM, getAVRichTextLute, sanitizeAVRichTextBlockDOM, serializeAVRichTextBlockDOM} from "../render/av/richText";
 import {decodeTableCellRich, encodeTableCellRich, TABLE_CELL_RICH_ATTRIBUTE, TABLE_RICH_ATTRIBUTE} from "./tableCellRichValue";
+import {restoreInlineElementBoundaries} from "./inlineElementBoundary";
+import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 
 export const TABLE_CELL_INLINE_ATTRIBUTE = "data-sy-table-cell-inline";
 
@@ -8,7 +10,7 @@ export const updateTableCellContentLayout = (element: HTMLElement, blockDOM: str
     element.classList.toggle("table__cell--inline", inline !== null);
     const template = document.createElement("template");
     template.innerHTML = inline || "";
-    const empty = inline !== null && (template.content.textContent || "").replace(/\u200b/g, "") === "" &&
+    const empty = inline !== null && getTextWithoutSemanticMarkers(template.content).replace(/\u200b/g, "") === "" &&
         !template.content.querySelector("br, img, [data-type~='inline-math']");
     element.classList.toggle("table__cell--empty", empty);
 };
@@ -16,6 +18,7 @@ export const updateTableCellContentLayout = (element: HTMLElement, blockDOM: str
 export const getTableCellInlineHTML = (blockDOM: string): string | null => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
+    restoreInlineElementBoundaries(template.content);
     const blocks = Array.from(template.content.children);
     if (blocks.length === 0) {
         return "";
@@ -150,7 +153,16 @@ export const getTableCellRichPlainText = (cell: Element) => {
     const template = document.createElement("template");
     template.innerHTML = getTableCellRichInline(cell);
     template.content.querySelectorAll("br").forEach(br => br.replaceWith("\n"));
-    return (template.content.textContent || "").replace(/\u200b/g, "").trim();
+    return getTextWithoutSemanticMarkers(template.content).replace(/\u200b/g, "").trim();
+};
+
+export const getTableCellPlainText = (cell: Element) => {
+    if (cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE)) {
+        return getTableCellRichPlainText(cell);
+    }
+    const clone = cell.cloneNode(true) as Element;
+    clone.querySelectorAll("br").forEach(br => br.replaceWith("\n"));
+    return getTextWithoutSemanticMarkers(clone).replace(/\u200b/g, "").replace(/\n+$/g, "");
 };
 
 export const renderTableCellRich = (cell: Element) => {

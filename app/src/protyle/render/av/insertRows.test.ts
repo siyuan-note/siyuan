@@ -10,7 +10,7 @@ const compiled = transpileModule(source.slice(source.indexOf("export const inser
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-for (const viewType of ["table", "gallery", "kanban"]) {
+for (const viewType of ["table", "list", "gallery", "kanban"]) {
     for (const count of [1, 3]) {
         test(`${viewType}: undo and redo ${count} added entries using their item IDs`, () => {
             let nextID = 0;

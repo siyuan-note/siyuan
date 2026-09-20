@@ -1,4 +1,6 @@
 {
+	"listView": "Lista",
+	"databaseListView": "Prikaz baze - lista",
 	"copyRuntimeInfo": "Копирај информације о извршавању",
 	"duplicateDocTree": "Дуплирај са поддокументима",
 	"syncProviderChangeConfirm": "Пре промене провајдера синхронизације, SiYuan мора да провери ресурсе и претходне снимке и по потреби преузме недостајући садржај из тренутног складишта у облаку. Ово може потрајати. Наставити?",
@@ -2479,6 +2481,7 @@
 		"quit": "Ugasi aplikaciju"
 	},
 	"_attrView": {
+		"list": "Lista",
 		"dateFormat": "Format datuma",
 		"fullDate": "Lokalizovani datum",
 		"dateMonths": "januara|februara|marta|aprila|maja|juna|jula|avgusta|septembra|oktobra|novembra|decembra",

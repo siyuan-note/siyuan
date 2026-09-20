@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {transaction} from "../../wysiwyg/transaction";
@@ -551,7 +552,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     return;
                 }
                 const cellType = getTypeByCellElement(target);
-                if (viewType === "table") {
+                if (isTableLikeView(viewType)) {
                     const scrollElement = hasClosestByClassName(target, "av__scroll");
                     if (!scrollElement) {
                         return;
@@ -868,7 +869,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
         return false;
     }
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
-    if (rowElement && avType === "table") {
+    if (rowElement && isTableLikeView(avType)) {
         if (!rowElement.classList.contains("av__row--select")) {
             clearSelect(["row"], blockElement);
         }
@@ -1233,10 +1234,10 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                 menu.addSeparator({id: "separator_1"});
             }
             menu.addItem({
-                id: avType === "table" ? "insertRowBefore" : "insertItemBefore",
+                id: isTableLikeView(avType) ? "insertRowBefore" : "insertItemBefore",
                 icon: "iconBefore",
                 label: `<div class="fn__flex" style="align-items: center;">
-${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBefore"].replace("${x}", `<span class="fn__space"></span><input type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size"><span class="fn__space"></span>`)}
+${window.siyuan.languages[isTableLikeView(avType) ? "insertRowBefore" : "insertItemBefore"].replace("${x}", `<span class="fn__space"></span><input type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size"><span class="fn__space"></span>`)}
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
@@ -1268,10 +1269,10 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                 }
             });
             menu.addItem({
-                id: avType === "table" ? "insertRowAfter" : "insertItemAfter",
+                id: isTableLikeView(avType) ? "insertRowAfter" : "insertItemAfter",
                 icon: "iconAfter",
                 label: `<div class="fn__flex" style="align-items: center;">
-${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAfter"].replace("${x}", `<span class="fn__space"></span><input type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size" value="1"><span class="fn__space"></span>`)}
+${window.siyuan.languages[isTableLikeView(avType) ? "insertRowAfter" : "insertItemAfter"].replace("${x}", `<span class="fn__space"></span><input type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size" value="1"><span class="fn__space"></span>`)}
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");

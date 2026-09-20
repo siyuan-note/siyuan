@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {describe, it} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {isTableLikeView} from "./viewType";
 
 const source = readFileSync("src/protyle/render/av/cell.ts", "utf8");
 const compiled = transpileModule(source.slice(source.indexOf("const updateCellValueByInput ="),
@@ -10,7 +11,7 @@ const compiled = transpileModule(source.slice(source.indexOf("const updateCellVa
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
 }).outputText;
 
-const createEditor = (changed: boolean) => {
+const createEditor = (changed: boolean, viewType = "table") => {
     const saved: unknown[][] = [];
     let focusCount = 0;
     let removed = false;
@@ -23,10 +24,11 @@ const createEditor = (changed: boolean) => {
     };
     const protyle = {};
     const block = {
-        getAttribute: (name: string) => name === "data-av-type" ? "table" : "database-id",
+        getAttribute: (name: string) => name === "data-av-type" ? viewType : "database-id",
     };
     const cells = [{dataset: {}, classList: {add: () => {}}}];
     const context = {
+        isTableLikeView,
         document: {
             querySelector: (selector: string) => selector === ".av__mask" ? mask : null,
             querySelectorAll: () => [mask],
@@ -50,6 +52,13 @@ const createEditor = (changed: boolean) => {
 };
 
 describe("database cell editor navigation", () => {
+    it("submits list property edits using the row identity and restores focus", () => {
+        const editor = createEditor(true, "list");
+        editor.close(true);
+        assert.deepEqual(editor.saved[0], [editor.protyle, editor.block, "updated value", editor.cells]);
+        assert.equal(editor.focusCount(), 1);
+        assert.equal(editor.isRemoved(), true);
+    });
     it("submits edited content to the original cell without focusing the departing document", () => {
         const editor = createEditor(true);
         editor.close();

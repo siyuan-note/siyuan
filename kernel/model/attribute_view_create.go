@@ -63,7 +63,7 @@ func CreateAttributeViewDatabase(parentID, previousID, nextID, name, primaryKeyN
 		layout = av.LayoutTypeTable
 	}
 	switch layout {
-	case av.LayoutTypeTable, av.LayoutTypeGallery, av.LayoutTypeKanban:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeGallery, av.LayoutTypeKanban:
 	default:
 		return nil, av.ErrWrongLayoutType
 	}
@@ -174,7 +174,7 @@ func configureCreatedAttributeView(attrView *av.AttributeView, name, primaryKeyN
 		previousKeyID = retainedKeyValues[len(retainedKeyValues)-1].Key.ID
 	}
 	for _, key := range preparedKeys {
-		addAttributeViewKey(attrView, currentView, key, previousKeyID)
+		addAttributeViewKey(attrView, nil, key, previousKeyID)
 		previousKeyID = key.ID
 	}
 
@@ -195,6 +195,15 @@ func retainCreatedAttributeViewFields(attrView *av.AttributeView, retainedKeyIDs
 	for _, view := range attrView.Views {
 		if nil == view {
 			continue
+		}
+		if nil != view.List {
+			columns := view.List.Columns[:0]
+			for _, column := range view.List.Columns {
+				if nil != column && retainedKeyIDs[column.ID] {
+					columns = append(columns, column)
+				}
+			}
+			view.List.Columns = columns
 		}
 		if nil != view.Table {
 			columns := view.Table.Columns[:0]

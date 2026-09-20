@@ -1,10 +1,19 @@
+import {
+    getInlineElementBoundaryOffset,
+    getTextWithLegacyInlineBoundary,
+    hasInlineElementBoundary,
+    normalizeInlineElementBoundary,
+    restoreInlineElementBoundary,
+    restoreInlineElementBoundaries,
+    SEMANTIC_INLINE_HTML_REGEXP,
+} from "./inlineElementBoundary";
+
 export type TSemanticInlineMarkerMode = "canonical" | "legacy" | "remove";
 
 const ZERO_WIDTH_SPACE = "\u200b";
 const WORD_JOINER = "\u2060";
 const SEMANTIC_INLINE_TYPES = new Set(["code", "kbd", "tag"]);
 const INTERNAL_MARKERS = new Set([ZERO_WIDTH_SPACE, WORD_JOINER, "\ufeff"]);
-const SEMANTIC_INLINE_HTML_REGEXP = /<span\b[^>]*\bdata-type=(?:"(?:[^"]* )?(?:code|kbd|tag)(?: [^"]*)?"|'(?:[^']* )?(?:code|kbd|tag)(?: [^']*)?')/iu;
 
 export const hasSemanticInlineType = (type: string | null | undefined) =>
     (type || "").split(" ").some(item => SEMANTIC_INLINE_TYPES.has(item));
@@ -98,10 +107,14 @@ export const setSemanticInlineElementMarker = (element: HTMLElement, mode: TSema
 };
 
 const ensureLeftExternalBoundary = (element: HTMLElement) => {
-    const previousSibling = element.previousSibling;
+    let previousSibling = element.previousSibling;
+    while (previousSibling?.nodeName === "WBR") {
+        previousSibling = previousSibling.previousSibling;
+    }
     if (previousSibling?.nodeType === Node.TEXT_NODE) {
         const textNode = previousSibling as Text;
-        const normalizedText = textNode.data.replace(/\u200b+$/u, "") + ZERO_WIDTH_SPACE;
+        const normalizedText = getTextWithLegacyInlineBoundary(textNode).replace(/\u200b+$/u, "") +
+            (hasInlineElementBoundary(element) ? WORD_JOINER : ZERO_WIDTH_SPACE);
         if (textNode.data !== normalizedText) {
             textNode.data = normalizedText;
         }
@@ -121,7 +134,10 @@ const ensureRightExternalBoundary = (element: HTMLElement) => {
     const nextSibling = element.nextSibling;
     if (nextSibling?.nodeType === Node.TEXT_NODE) {
         const textNode = nextSibling as Text;
-        const normalizedText = ZERO_WIDTH_SPACE + textNode.data.replace(/^\u200b+/u, "");
+        let normalizedText = ZERO_WIDTH_SPACE + getTextWithLegacyInlineBoundary(textNode).replace(/^\u200b+/u, "");
+        if (getInlineElementBoundaryOffset(textNode) >= 0) {
+            normalizedText = normalizedText.substring(0, normalizedText.length - 1) + WORD_JOINER;
+        }
         if (textNode.data !== normalizedText) {
             textNode.data = normalizedText;
         }
@@ -145,10 +161,12 @@ export const normalizeSemanticInlineElement = (element: HTMLElement, ensureExter
     if (ensureExternalBoundaries) {
         ensureLeftExternalBoundary(element);
         ensureRightExternalBoundary(element);
+        normalizeInlineElementBoundary(element);
     }
 };
 
 export const removeSemanticInlineExternalBoundaries = (element: HTMLElement) => {
+    restoreInlineElementBoundary(element);
     const previousSibling = element.previousSibling;
     if (previousSibling?.nodeType === Node.TEXT_NODE && previousSibling.textContent?.endsWith(ZERO_WIDTH_SPACE)) {
         const textNode = previousSibling as Text;
@@ -190,6 +208,9 @@ export const normalizeSemanticInlineElements = (root: ParentNode) => {
 };
 
 export const transformSemanticInlineMarkers = (root: ParentNode, mode: TSemanticInlineMarkerMode) => {
+    if (mode !== "canonical") {
+        restoreInlineElementBoundaries(root);
+    }
     getSemanticInlineElements(root).forEach(element => setSemanticInlineElementMarker(element, mode));
 };
 
@@ -235,7 +256,7 @@ export const getTextWithoutSemanticMarkers = (root: ParentNode) => {
     const visit = (node: Node) => {
         if (node.nodeType === Node.TEXT_NODE) {
             text += isSemanticInlineMarkerTextNode(node) ?
-                stripSemanticInternalMarkerPrefix(node.textContent || "") : node.textContent || "";
+                stripSemanticInternalMarkerPrefix(node.textContent || "") : getTextWithLegacyInlineBoundary(node);
             return;
         }
         Array.from(node.childNodes).forEach(visit);
@@ -256,7 +277,12 @@ export const stripSemanticMarkersFromRangeText = (range: Range) => {
         elements.unshift(ancestorElement);
     }
     const offsets: number[] = [];
+    const externalMarkers: {node: Text, offset: number}[] = [];
     elements.forEach(element => {
+        const previous = element.previousSibling;
+        if (previous && getInlineElementBoundaryOffset(previous) >= 0) {
+            externalMarkers.push({node: previous as Text, offset: getInlineElementBoundaryOffset(previous)});
+        }
         const textNode = getFirstTextNode(element);
         const prefixLength = textNode ? getSemanticInternalMarkerPrefixLength(textNode.data) : 0;
         for (let index = 0; textNode && index < prefixLength; index++) {
@@ -274,6 +300,18 @@ export const stripSemanticMarkersFromRangeText = (range: Range) => {
             offsets.push(prefixRange.toString().length);
         }
     });
+    externalMarkers.forEach(({node, offset}) => {
+        const markerRange = node.ownerDocument.createRange();
+        markerRange.setStart(node, offset);
+        markerRange.setEnd(node, offset + 1);
+        if (range.compareBoundaryPoints(Range.START_TO_END, markerRange) <= 0 ||
+            range.compareBoundaryPoints(Range.END_TO_START, markerRange) >= 0) {
+            return;
+        }
+        const prefixRange = range.cloneRange();
+        prefixRange.setEnd(node, offset);
+        offsets.push(prefixRange.toString().length);
+    });
     return removeTextOffsets(range.toString(), offsets);
 };
 
@@ -281,7 +319,7 @@ export const getMarkerAwareTextLength = (root: Node, ignoreZWSP: boolean) => {
     let length = 0;
     const visit = (node: Node) => {
         if (node.nodeType === Node.TEXT_NODE) {
-            let text = node.textContent || "";
+            let text = getTextWithLegacyInlineBoundary(node);
             if (isSemanticInlineMarkerTextNode(node)) {
                 text = stripSemanticInternalMarkerPrefix(text);
             }
@@ -299,7 +337,7 @@ export const getMarkerAwareTextLength = (root: Node, ignoreZWSP: boolean) => {
 
 const getAdjacentSemanticInline = (node: Node, previous: boolean) => {
     let sibling = previous ? node.previousSibling : node.nextSibling;
-    while (sibling?.nodeType === Node.TEXT_NODE && (sibling.textContent || "").split(ZERO_WIDTH_SPACE).join("") === "") {
+    while (sibling?.nodeType === Node.TEXT_NODE && getTextWithLegacyInlineBoundary(sibling).split(ZERO_WIDTH_SPACE).join("") === "") {
         sibling = previous ? sibling.previousSibling : sibling.nextSibling;
     }
     return sibling?.nodeType === Node.ELEMENT_NODE && isSemanticInlineElement(sibling as Element) ?
@@ -329,7 +367,7 @@ const setRangeAtSemanticEnd = (range: Range, element: HTMLElement) => {
 const setRangeBeforeLeftBoundary = (range: Range, element: HTMLElement) => {
     const previousSibling = element.previousSibling;
     if (previousSibling?.nodeType === Node.TEXT_NODE) {
-        const text = previousSibling.textContent || "";
+        const text = getTextWithLegacyInlineBoundary(previousSibling);
         range.setStart(previousSibling, text.length - (text.match(/\u200b+$/u)?.[0].length || 0));
     } else {
         range.setStartBefore(element);
@@ -341,7 +379,7 @@ const setRangeBeforeLeftBoundary = (range: Range, element: HTMLElement) => {
 const setRangeAfterRightBoundary = (range: Range, element: HTMLElement) => {
     const nextSibling = element.nextSibling;
     if (nextSibling?.nodeType === Node.TEXT_NODE) {
-        const text = nextSibling.textContent || "";
+        const text = getTextWithLegacyInlineBoundary(nextSibling);
         range.setStart(nextSibling, text.match(/^\u200b+/u)?.[0].length || 0);
     } else {
         range.setStartAfter(element);
@@ -385,8 +423,8 @@ export const getEmptySemanticInlineForDelete = (range: Range, forward: boolean) 
     }
     const adjacentSemantic = getAdjacentSemanticInline(textNode, !forward);
     const atAdjacentBoundary = forward ?
-        range.startOffset >= textNode.data.length - (textNode.data.match(/\u200b+$/u)?.[0].length || 0) :
-        range.startOffset <= (textNode.data.match(/^\u200b+/u)?.[0].length || 0);
+        range.startOffset >= textNode.data.length - (getTextWithLegacyInlineBoundary(textNode).match(/\u200b+$/u)?.[0].length || 0) :
+        range.startOffset <= (getTextWithLegacyInlineBoundary(textNode).match(/^\u200b+/u)?.[0].length || 0);
     if (atAdjacentBoundary && adjacentSemantic &&
         stripSemanticInternalMarkerPrefix(adjacentSemantic.textContent || "") === "") {
         return adjacentSemantic;
@@ -415,13 +453,13 @@ export const moveCaretAcrossSemanticMarker = (range: Range, direction: "left" | 
         return false;
     }
     if (direction === "right") {
-        const trailingBoundaryLength = textNode.data.match(/\u200b+$/u)?.[0].length || 0;
+        const trailingBoundaryLength = getTextWithLegacyInlineBoundary(textNode).match(/\u200b+$/u)?.[0].length || 0;
         const nextSemantic = getAdjacentSemanticInline(textNode, false);
         if (nextSemantic && range.startOffset >= textNode.data.length - trailingBoundaryLength) {
             return setRangeAtSemanticStart(range, nextSemantic);
         }
     } else {
-        const leadingBoundaryLength = textNode.data.match(/^\u200b+/u)?.[0].length || 0;
+        const leadingBoundaryLength = getTextWithLegacyInlineBoundary(textNode).match(/^\u200b+/u)?.[0].length || 0;
         const previousSemantic = getAdjacentSemanticInline(textNode, true);
         if (previousSemantic && range.startOffset <= leadingBoundaryLength) {
             return setRangeAtSemanticEnd(range, previousSemantic);
@@ -456,12 +494,12 @@ export const moveCaretForSemanticDelete = (range: Range, forward: boolean) => {
     }
     if (forward) {
         const nextSemantic = getAdjacentSemanticInline(textNode, false);
-        const boundaryLength = textNode.data.match(/\u200b+$/u)?.[0].length || 0;
+        const boundaryLength = getTextWithLegacyInlineBoundary(textNode).match(/\u200b+$/u)?.[0].length || 0;
         if (nextSemantic && range.startOffset >= textNode.data.length - boundaryLength) {
             return setRangeAtSemanticStart(range, nextSemantic);
         }
         const previousSemantic = getAdjacentSemanticInline(textNode, true);
-        const leadingBoundaryLength = textNode.data.match(/^\u200b+/u)?.[0].length || 0;
+        const leadingBoundaryLength = getTextWithLegacyInlineBoundary(textNode).match(/^\u200b+/u)?.[0].length || 0;
         if (previousSemantic && leadingBoundaryLength > 0 && range.startOffset < leadingBoundaryLength) {
             range.setStart(textNode, leadingBoundaryLength);
             range.collapse(true);
@@ -469,12 +507,12 @@ export const moveCaretForSemanticDelete = (range: Range, forward: boolean) => {
         }
     } else {
         const previousSemantic = getAdjacentSemanticInline(textNode, true);
-        const boundaryLength = textNode.data.match(/^\u200b+/u)?.[0].length || 0;
+        const boundaryLength = getTextWithLegacyInlineBoundary(textNode).match(/^\u200b+/u)?.[0].length || 0;
         if (previousSemantic && range.startOffset <= boundaryLength) {
             return setRangeAtSemanticEnd(range, previousSemantic);
         }
         const nextSemantic = getAdjacentSemanticInline(textNode, false);
-        const trailingBoundaryLength = textNode.data.match(/\u200b+$/u)?.[0].length || 0;
+        const trailingBoundaryLength = getTextWithLegacyInlineBoundary(textNode).match(/\u200b+$/u)?.[0].length || 0;
         if (nextSemantic && trailingBoundaryLength > 0 &&
             range.startOffset > textNode.data.length - trailingBoundaryLength) {
             range.setStart(textNode, textNode.data.length - trailingBoundaryLength);

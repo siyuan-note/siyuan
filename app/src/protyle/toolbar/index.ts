@@ -1,4 +1,5 @@
 import {Divider} from "./Divider";
+import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {renderMultiSelectToolbar, updateMultiSelectToolbar} from "../../mobile/util/multiSelectToolbar";
 import {selectAllLoadedBlocks} from "../wysiwyg/blockSelection";
 import {showSelectAllIncompleteTip} from "../util/selectAllTip";
@@ -923,6 +924,7 @@ export class Toolbar {
                 for (let i = 0; i < attributes.length; i++) {
                     afterElement.setAttribute(attributes[i].name, attributes[i].value);
                 }
+                prepareInlineElementBoundaryMutation(this.range);
                 this.range.insertNode(document.createElement("wbr"));
                 html = nodeElement.outerHTML;
                 contents = this.range.extractContents();
@@ -947,6 +949,7 @@ export class Toolbar {
             this.range.setStartBefore(this.range.startContainer.parentElement);
         }
         if (!html) {
+            prepareInlineElementBoundaryMutation(this.range);
             this.range.insertNode(document.createElement("wbr"));
             html = nodeElement.outerHTML;
             contents = this.range.extractContents();
@@ -2425,6 +2428,7 @@ export class Toolbar {
                 this.subElement.classList.add("fn__none");
             } else if (action === "delete") {
                 const currentRange = getEditorRange(nodeElement);
+                prepareInlineElementBoundaryMutation(currentRange);
                 currentRange.insertNode(document.createElement("wbr"));
                 const oldHTML = nodeElement.outerHTML;
                 currentRange.extractContents();
@@ -2450,7 +2454,7 @@ export class Toolbar {
                 this.subElement.classList.add("fn__none");
             } else if (action === "copyPlainText") {
                 focusByRange(getEditorRange(nodeElement));
-                copyPlainText(getSelection().getRangeAt(0).toString());
+                copyPlainText(stripSemanticMarkersFromRangeText(getSelection().getRangeAt(0)));
                 this.subElement.classList.add("fn__none");
             } else if (action === "pasteAsPlainText") {
                 focusByRange(getEditorRange(nodeElement));

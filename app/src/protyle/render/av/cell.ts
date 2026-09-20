@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
@@ -419,14 +420,16 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
     if (!bodyElement) {
         return;
     }
-    const avHeaderRect = bodyElement.querySelector(".av__row--header").getBoundingClientRect();
+    const isList = blockElement.getAttribute("data-av-type") === "list";
+    const avHeaderRect = (isList ? blockElement.querySelector(".av__views") :
+        bodyElement.querySelector(".av__row--header")).getBoundingClientRect();
     if (avHeaderRect.bottom > cellRect.top) {
         const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
         if (contentElement) {
             contentElement.scrollTop = contentElement.scrollTop + cellRect.top - avHeaderRect.bottom;
         }
     } else {
-        const footerElement = bodyElement.querySelector(".av__row--footer");
+        const footerElement = isList ? null : bodyElement.querySelector(".av__row--footer");
         if (footerElement?.querySelector(".av__calc--ashow")) {
             const avFooterRect = footerElement.getBoundingClientRect();
             if (avFooterRect.top < cellRect.bottom) {
@@ -467,7 +470,7 @@ const getStableTextCells = (cellElements: HTMLElement[], blockElement: HTMLEleme
         const colID = getColId(cellElement, viewType);
         const value = getStoredCellValueByElement(cellElement) || genCellValueByElement("text", cellElement);
         const rowElement = hasClosestByClassName(cellElement,
-            viewType === "table" ? "av__row" : "av__gallery-item");
+            isTableLikeView(viewType) ? "av__row" : "av__gallery-item");
         const groupElement = hasClosestByClassName(cellElement, "av__body");
         const rowIndex = parseInt(rowElement ? rowElement.getAttribute("data-index") || "0" : "0") || 0;
         const stableCell = createAVStableTextCell({
@@ -514,7 +517,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     let cellRect = cellElements[0].getBoundingClientRect();
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
-    if (viewType === "table" && options?.scrollIntoView !== false) {
+    if (isTableLikeView(viewType) && options?.scrollIntoView !== false) {
         cellScrollIntoView(blockElement, cellElements[0], false);
     }
     cellRect = cellElements[0].getBoundingClientRect();
@@ -637,7 +640,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         } else {
             options?.destroyCallback?.();
         }
-        if (viewType === "table" && !hasClosestByClassName(cellElements[0], "custom-attr")) {
+        if (isTableLikeView(viewType) && !hasClosestByClassName(cellElements[0], "custom-attr")) {
             cellElements[0].classList.add("av__cell--select");
             addDragFill(cellElements[0]);
         }
@@ -706,7 +709,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                     protyle.toolbar.range = document.createRange();
                     if (cellElements[0] && !blockElement.contains(cellElements[0])) {
                         const rowID = getFieldIdByCellElement(cellElements[0], viewType);
-                        if (viewType === "table") {
+                        if (isTableLikeView(viewType)) {
                             cellElements[0] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`)) as HTMLElement;
                         } else {
                             cellElements[0] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElements[0].dataset.fieldId}"]`)) as HTMLElement;
@@ -714,7 +717,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                     }
                     protyle.toolbar.range.selectNodeContents(cellElements[0].lastChild);
                     focusByRange(protyle.toolbar.range);
-                    if (viewType === "table") {
+                    if (isTableLikeView(viewType)) {
                         cellElements[0].classList.add("av__cell--select");
                         addDragFill(cellElements[0]);
                     }
@@ -786,7 +789,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
 const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: HTMLElement, cellElements: HTMLElement[],
                                 restoreFocus = true) => {
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
-    if (viewType === "table" && !cellElements[0].dataset.avId) {
+    if (isTableLikeView(viewType) && !cellElements[0].dataset.avId) {
         const rowElement = hasClosestByClassName(cellElements[0], "av__row");
         if (!rowElement) {
             return;
@@ -832,7 +835,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
             checked: !genCellValueByElement(type, cellElements[0]).checkbox?.checked
         } : inputElement.value, cellElements);
     }
-    if (viewType === "table" &&
+    if (isTableLikeView(viewType) &&
         // 兼容新增行后台隐藏
         cellElements[0] &&
         !hasClosestByClassName(cellElements[0], "custom-attr")) {
@@ -895,7 +898,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             continue;
         }
         if (item && !nodeElement.contains(item)) {
-            if (viewType === "table") {
+            if (isTableLikeView(viewType)) {
                 item = source.element = (nodeElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     nodeElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
             } else {

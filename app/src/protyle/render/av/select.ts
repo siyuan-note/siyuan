@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
@@ -100,7 +101,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
             return;
         }
         if (!blockElement.contains(item)) {
-            if (viewType === "table") {
+            if (isTableLikeView(viewType)) {
                 item = cellElements[elementIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
             } else {
@@ -243,7 +244,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             cellElements.forEach((cellElement: HTMLElement, index) => {
                 const rowID = getFieldIdByCellElement(cellElement, viewType);
                 if (!blockElement.contains(cellElement)) {
-                    if (viewType === "table" || isCustomAttr) {
+                    if (isTableLikeView(viewType) || isCustomAttr) {
                         cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
                             blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
                     } else {
@@ -372,7 +373,7 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
                     cellElements.forEach((cellElement: HTMLElement, index) => {
                         const rowID = getFieldIdByCellElement(cellElement, viewType);
                         if (!blockElement.contains(cellElement)) {
-                            if (viewType === "table" || isCustomAttr) {
+                            if (isTableLikeView(viewType) || isCustomAttr) {
                                 cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
                                     blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
                             } else {
@@ -479,7 +480,7 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
                         cellElements.forEach((cellElement: HTMLElement, cellIndex) => {
                             const rowID = getFieldIdByCellElement(cellElement, viewType);
                             if (!blockElement.contains(cellElement)) {
-                                if (viewType === "table" || isCustomAttr) {
+                                if (isTableLikeView(viewType) || isCustomAttr) {
                                     cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
                                         blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
                                 } else {
@@ -598,7 +599,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     if (!nodeElement) {
         cellElements.forEach((item, index) => {
             const rowID = getFieldIdByCellElement(item, data.viewType);
-            if (data.viewType === "table" || isCustomAttr(item)) {
+            if (isTableLikeView(data.viewType) || isCustomAttr(item)) {
                 cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
             } else {

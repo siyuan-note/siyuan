@@ -1,4 +1,6 @@
 {
+	"listView": "Lista",
+	"databaseListView": "Widok listy bazy danych",
 	"copyRuntimeInfo": "Kopiuj informacje o środowisku uruchomieniowym",
 	"duplicateDocTree": "Duplikuj wraz z dokumentami podrzędnymi",
 	"syncProviderChangeConfirm": "Przed zmianą dostawcy synchronizacji SiYuan musi sprawdzić zasoby i wcześniejsze migawki. Może być konieczne pobranie brakującej zawartości z obecnej chmury. Może to potrwać. Kontynuować?",
@@ -2479,6 +2481,7 @@
 		"quit": "Zamknij aplikację"
 	},
 	"_attrView": {
+		"list": "Lista",
 		"dateFormat": "Format daty",
 		"fullDate": "Data w formacie lokalnym",
 		"dateMonths": "stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia",

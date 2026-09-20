@@ -202,7 +202,7 @@ export type AIToolEffectsInput = { "dataEgress"?: boolean | null; "externalCost"
 
 export type AIUserSkillInfo = { "description": string; "enabled": boolean; "id": string; "name": string; "shadowed": boolean; };
 
-export type AVArchiveRenderData = { "colorOrder": Array<string> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "gallery" | "kanban"; "views": Array<AVViewData | null> | null; };
+export type AVArchiveRenderData = { "colorOrder": Array<string> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "list" | "gallery" | "kanban"; "views": Array<AVViewData | null> | null; };
 
 export type AVAttributeViewBacklink = { "avID": string; "avName": string; "blockIDs": Array<string> | null; "boundBlockID": string; "boxID": string; "databaseBlockID": string; "databasePath": string; "icon": string; "isDetached": boolean; "itemID": string; "relations": Array<AVAttributeViewBacklinkRelation | null> | null; "title": string; "valueID": string; };
 
@@ -228,7 +228,7 @@ export type AVAttributeViewCustomColorInput = { "dark"?: AVAttributeViewColorThe
 
 export type AVAttributeViewData = { "cardCoverPositions"?: Record<string, Record<string, AVCardCoverPosition | null> | null>; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID"?: string; "id": string; "keyIDs": Array<string> | null; "keyValues": Array<AVKeyValues | null> | null; "name": string; "newItemTemplates"?: Array<AVNewItemTemplate | null>; "spec": number; "viewID": string; "views": Array<AVView | null> | null; };
 
-export type AVAttributeViewFieldView = { "hidden": boolean; "icon": string; "id": string; "name": string; "type": "table" | "gallery" | "kanban"; };
+export type AVAttributeViewFieldView = { "hidden": boolean; "icon": string; "id": string; "name": string; "type": "table" | "list" | "gallery" | "kanban"; };
 
 export type AVAttributeViewGroupItemPosition = { "groupID": string; "previousID": string; };
 
@@ -238,7 +238,7 @@ export type AVAttributeViewRenderTarget = { "groupID"?: string; "index": number;
 
 export type AVAttributeViewSearchTarget = { "avID": string; "boundBlockID": string; "databaseBlockID": string; "groupID"?: string; "isDetached": boolean; "itemID": string; "keywords": Array<string> | null; "matchedKeyID": string; "matchedValueID": string; "notebookID": string; "title": string; "valueID": string; "viewID"?: string; };
 
-export type AVAvSearchResult = { "avID": string; "avName": string; "blockID": string; "children"?: Array<AVAvSearchResult | null>; "hPath": string; "matched"?: boolean; "viewID": string; "viewLayout": "" | "table" | "gallery" | "kanban"; "viewName": string; };
+export type AVAvSearchResult = { "avID": string; "avName": string; "blockID": string; "children"?: Array<AVAvSearchResult | null>; "hPath": string; "matched"?: boolean; "viewID": string; "viewLayout": "" | "table" | "list" | "gallery" | "kanban"; "viewName": string; };
 
 export type AVBlockAttributeViewKeys = { "avID": string; "avName": string; "blockIDs": Array<string> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "itemPositions": Array<AVAttributeViewItemPosition | null> | null; "keyValues": Array<AVKeyValues | null> | null; };
 
@@ -340,7 +340,7 @@ export type AVRelativeDate = { "count": number; "direction": number; "unit": num
 
 export type AVRelativeDateInput = { "count"?: number | null; "direction"?: number | null; "unit"?: number | null; };
 
-export type AVRenderData = { "colorOrder": Array<string> | null; "contextFilter": AVAttributeViewContextFilter | null; "contextFilterFields": Array<AVAttributeViewContextFilterField | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "target"?: AVAttributeViewRenderTarget; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "gallery" | "kanban"; "views": Array<AVViewData | null> | null; };
+export type AVRenderData = { "colorOrder": Array<string> | null; "contextFilter": AVAttributeViewContextFilter | null; "contextFilterFields": Array<AVAttributeViewContextFilterField | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "target"?: AVAttributeViewRenderTarget; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "list" | "gallery" | "kanban"; "views": Array<AVViewData | null> | null; };
 
 export type AVRenderResult = (AVRenderData & { "error"?: never; }) | (AVViewNotFound & { "colorOrder"?: never; "contextFilter"?: never; "contextFilterFields"?: never; "customColors"?: never; "defaultTemplateID"?: never; "id"?: never; "isMirror"?: never; "name"?: never; "newItemTemplates"?: never; "target"?: never; "usedCustomColorIndexes"?: never; "view"?: never; "viewID"?: never; "viewType"?: never; "views"?: never; });
 
@@ -452,9 +452,9 @@ export type AVValueUpdatedInput = { "content"?: number | null; "content2"?: numb
 
 export type AVValuesData = { "values": Record<string, AVValue | null> | null; };
 
-export type AVView = { "desc": string; "filters"?: Array<AVViewFilter | null>; "gallery"?: AVLayoutGallery; "group"?: AVViewGroup; "groupCalc"?: AVGroupCalc; "groupCreated": number; "groupFolded": boolean; "groupHidden": number; "groupItemIds": Array<string> | null; "groupKey"?: AVKey; "groupSort": number; "groupVal"?: AVValue; "groups"?: Array<AVView | null>; "hideAttrViewName": boolean; "icon": string; "id": string; "itemIds"?: Array<string>; "kanban"?: AVLayoutKanban; "name": string; "pageSize": number; "sorts"?: Array<AVViewSort | null>; "table"?: AVLayoutTable; "type": "table" | "gallery" | "kanban"; };
+export type AVView = { "desc": string; "filters"?: Array<AVViewFilter | null>; "gallery"?: AVLayoutGallery; "group"?: AVViewGroup; "groupCalc"?: AVGroupCalc; "groupCreated": number; "groupFolded": boolean; "groupHidden": number; "groupItemIds": Array<string> | null; "groupKey"?: AVKey; "groupSort": number; "groupVal"?: AVValue; "groups"?: Array<AVView | null>; "hideAttrViewName": boolean; "icon": string; "id": string; "itemIds"?: Array<string>; "kanban"?: AVLayoutKanban; "list"?: AVLayoutTable; "name": string; "pageSize": number; "sorts"?: Array<AVViewSort | null>; "table"?: AVLayoutTable; "type": "table" | "list" | "gallery" | "kanban"; };
 
-export type AVViewData = { "desc": string; "hideAttrViewName": boolean; "icon": string; "id": string; "name": string; "pageSize": number; "type": "table" | "gallery" | "kanban"; };
+export type AVViewData = { "desc": string; "hideAttrViewName": boolean; "icon": string; "id": string; "name": string; "pageSize": number; "type": "table" | "list" | "gallery" | "kanban"; };
 
 export type AVViewFilter = { "column": string; "combination"?: "and" | "or"; "dateEndpoint"?: "start" | "end"; "filters"?: Array<AVViewFilter | null>; "operator": "" | "=" | "!=" | "\u003e" | "\u003e=" | "\u003c" | "\u003c=" | "Contains" | "Does not contains" | "Contains any item" | "Does not contain any item" | "Is empty" | "Is not empty" | "Starts with" | "Ends with" | "Is between" | "Is true" | "Is false"; "quantifier"?: string; "relativeDate"?: AVRelativeDate; "relativeDate2"?: AVRelativeDate; "value": AVValue | null; "valueSource"?: "stored" | "rendered"; };
 

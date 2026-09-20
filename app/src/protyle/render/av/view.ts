@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
@@ -484,6 +485,26 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
         }
     });
     addMenu.addItem({
+        icon: "iconList",
+        label: window.siyuan.languages.listView,
+        click() {
+            addVisibleView();
+            transaction(protyle, [{
+                action: "addAttrViewView",
+                avID,
+                layout: "list",
+                id,
+                blockID: blockElement.getAttribute("data-node-id")
+            }], [{
+                action: "removeAttrViewView",
+                layout: "list",
+                avID,
+                id,
+                blockID: blockElement.getAttribute("data-node-id")
+            }]);
+        }
+    });
+    addMenu.addItem({
         icon: "iconBoard",
         label: window.siyuan.languages.kanban,
         click() {
@@ -536,6 +557,8 @@ export const getViewIcon = (type: string) => {
     switch (type) {
         case "table":
             return "iconTable";
+        case "list":
+            return "iconList";
         case "gallery":
             return "iconGallery";
         case "kanban":
@@ -547,6 +570,8 @@ export const getViewName = (type: string) => {
     switch (type) {
         case "table":
             return window.siyuan.languages.table;
+        case "list":
+            return window.siyuan.languages.listView;
         case "gallery":
             return window.siyuan.languages.gallery;
         case "kanban":
@@ -555,7 +580,7 @@ export const getViewName = (type: string) => {
 };
 
 export const getFieldsByData = (data: IAV) => {
-    return data.viewType === "table" ? (data.view as IAVTable).columns : (data.view as IAVGallery).fields;
+    return isTableLikeView(data.viewType) ? (data.view as IAVTable).columns : (data.view as IAVGallery).fields;
 };
 
 export const dragoverTab = (event: DragEvent) => {

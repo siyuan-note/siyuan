@@ -163,6 +163,12 @@ func TestDatabasePreviousKeyIDDefaultsToViewEnd(t *testing.T) {
 func TestDatabaseViewFieldIDsSupportsLayouts(t *testing.T) {
 	tests := []*av.View{
 		{
+			LayoutType: av.LayoutTypeList,
+			List: &av.LayoutList{Columns: []*av.ViewTableColumn{
+				{BaseField: &av.BaseField{ID: "list-1"}}, {BaseField: &av.BaseField{ID: "list-2", Hidden: true}},
+			}},
+		},
+		{
 			LayoutType: av.LayoutTypeTable,
 			Table: &av.LayoutTable{Columns: []*av.ViewTableColumn{
 				{BaseField: &av.BaseField{ID: "table-1"}}, {BaseField: &av.BaseField{ID: "table-2"}},

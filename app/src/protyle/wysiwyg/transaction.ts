@@ -1,4 +1,5 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {restoreInlineElementBoundaryHTML} from "../util/inlineElementBoundary";
 import {getEditorTransaction} from "../util/transactionContract";
 import {
     focusBlock,
@@ -2361,6 +2362,11 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     }
     cleanBlockSelectionModeOperations(doOperations);
     cleanBlockSelectionModeOperations(undoOperations);
+    [doOperations, undoOperations].forEach(operations => operations?.forEach(operation => {
+        if ((operation.action === "update" || operation.action === "insert") && typeof operation.data === "string") {
+            operation.data = restoreInlineElementBoundaryHTML(operation.data);
+        }
+    }));
     doOperations.forEach(operation => {
         if (operation.action === "update" && typeof operation.data === "string") {
             undoOperations?.filter((undo): undo is Extract<IOperation, {action: "update"}> =>

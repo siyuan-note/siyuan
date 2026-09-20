@@ -1,5 +1,5 @@
 import {MenuItem} from "../../menus/Menu";
-import {clearTableCellContent, getTableCellRichPlainText, mergeTableCellContents} from "./tableCellRich";
+import {clearTableCellContent, getTableCellPlainText, mergeTableCellContents} from "./tableCellRich";
 import {renderTableCellRichElements} from "../render/tableCellRich";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {copyPlainText, encodeBase64, isMac, readClipboard} from "./compatibility";
@@ -178,9 +178,6 @@ const replaceCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
     cell.replaceWith(newCell);
     return newCell;
 };
-
-const getCellText = (cell: HTMLTableCellElement) => cell.hasAttribute("data-sy-table-cell-rich") ?
-    getTableCellRichPlainText(cell) : cell.innerText.replace(/\n+$/g, "");
 
 export const getCommonTableCellStyle = (cells: HTMLTableCellElement[], property: string) => {
     if (cells.length === 0) {
@@ -2706,7 +2703,7 @@ export class TableControl {
         container.innerHTML = html;
         const rows = Array.from(container.querySelectorAll("tr"));
         const text = rows.map(row => Array.from(row.querySelectorAll("th, td")).filter(cell =>
-            !cell.classList.contains("fn__none")).map(cell => getCellText(cell as HTMLTableCellElement)).join("\t")).join("\n");
+            !cell.classList.contains("fn__none")).map(cell => getTableCellPlainText(cell)).join("\t")).join("\n");
         const textSiyuan = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
         const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${removeZWJ(textSiyuan)}`;
         return {text, textSiyuan, textHTML};

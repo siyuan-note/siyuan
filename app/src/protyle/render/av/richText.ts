@@ -1,6 +1,7 @@
 import {escapeHtml} from "../../../util/escape";
 import {highlightRender} from "../highlightRender";
 import {getAgentLute} from "../setLute";
+import {restoreInlineElementBoundaries} from "../../util/inlineElementBoundary";
 import {mathRender} from "../mathRender";
 import {
     createAVRichTextStyleBackslashEncoding,
@@ -142,6 +143,8 @@ export const getAVRichTextUnsupportedPasteBlocks = (blockDOM: string, images = f
 export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false) => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
+    // 在过滤临时属性前恢复边界，避免把显示占位符当成富文本内容保存。
+    restoreInlineElementBoundaries(template.content);
     template.content.querySelectorAll<HTMLElement>('[data-type^="Node"]').forEach((element) => {
         const type = element.dataset.type;
         if (!isSupportedAVRichTextBlock(element)) {

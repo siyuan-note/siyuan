@@ -1,4 +1,8 @@
+import {recordReplacementUndo} from "./replacementInput";
+import {bindSpellcheckFocus} from "../util/spellcheckFocus";
+import {isTableLikeView} from "../render/av/viewType";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
+import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
@@ -389,6 +393,7 @@ export class WYSIWYG {
     private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
     public tableControl: TableControl;
     private largeListVirtualizer?: LargeListVirtualizer;
+    private disposeSpellcheckFocus?: () => void;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -494,7 +499,7 @@ export class WYSIWYG {
         this.protyle = protyle;
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
-        this.element.setAttribute("spellcheck", "false");
+        this.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
         // Android 和 iPhone 的原生编辑限于正文节点，避免输入法修改列表等结构容器。
         this.element.setAttribute("contenteditable", (isIPhone() || isAndroid()) ? "false" : "true");
         if (window.siyuan.config.editor.displayBookmarkIcon) {
@@ -505,6 +510,13 @@ export class WYSIWYG {
         }
         this.bindCommonEvent(protyle);
         this.bindEvent(protyle);
+        /// #if BROWSER
+        if (!isMobile() && !isPhablet() && navigator.userAgent.includes("Chrome/")) {
+            this.disposeSpellcheckFocus = bindSpellcheckFocus(this.element, () =>
+                window.siyuan.config.editor.spellcheck && !protyle.disabled &&
+                !protyle.toolbar.isMultiSelectMode() && !getBlockSelectionModeElement(this.element));
+        }
+        /// #endif
         if (!isMobile()) {
             bindTouchBlockDragSelect(this.element, () => !protyle.toolbar.isMultiSelectMode());
         }
@@ -526,6 +538,7 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.disposeSpellcheckFocus?.();
         this.largeListVirtualizer?.destroy();
     }
 
@@ -774,7 +787,7 @@ export class WYSIWYG {
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select") ||
                 (getAVSelectedCells(nodeElement).length > 0 ||
-                (nodeElement.dataset.avType === "table" && getAVSelectedItemIDs(nodeElement).length > 0) ?
+                (isTableLikeView(nodeElement.dataset.avType) && getAVSelectedItemIDs(nodeElement).length > 0) ?
                     nodeElement : null);
             const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
             // 表格内跨多单元格的文本选区：range.cloneContents() 会产出残缺的 td/tr 片段，需要重建合法 table
@@ -1253,7 +1266,7 @@ export class WYSIWYG {
             const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
                 hasClosestByClassName(target, "protyle-action"));
             if (event.shiftKey && !openListItemAttrByShift) {
-                if (!isMobile() && !protyle.disabled && avElement?.dataset.avType === "table" &&
+                if (!isMobile() && !protyle.disabled && isTableLikeView(avElement?.dataset.avType) &&
                     avCellElement && avCellElement.dataset.id &&
                     selectAVCellRange(avElement, avCellElement)) {
                     if (nodeElement) {
@@ -1517,7 +1530,7 @@ export class WYSIWYG {
                     return;
                 }
                 const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
-                const headerElement = hasClosestByClassName(target, "av__row--header") as HTMLElement;
+                const headerElement = bodyElement?.querySelector<HTMLElement>(".av__row--header");
                 if (!bodyElement || !headerElement) {
                     return;
                 }
@@ -1539,6 +1552,9 @@ export class WYSIWYG {
                 };
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     const moveTarget = moveEvent.target as HTMLElement;
+                    if (moveTarget.classList.contains("av__freeze-drag")) {
+                        return;
+                    }
                     const firstColElement = hasClosestByClassName(moveTarget, "av__firstcol");
                     const cellElement = hasClosestByClassName(moveTarget, "av__cell") as HTMLElement;
                     if (firstColElement && bodyElement.contains(firstColElement)) {
@@ -1815,7 +1831,7 @@ export class WYSIWYG {
             }
             // av cell select
             if (!protyle.disabled && avCellElement && avCellElement.dataset.id && !isInEmbedBlock(avCellElement)) {
-                if (!nodeElement || nodeElement.dataset.avType !== "table") {
+                if (!nodeElement || !isTableLikeView(nodeElement.dataset.avType)) {
                     return;
                 }
                 if (!setAVCellAnchor(nodeElement, avCellElement)) {
@@ -3068,7 +3084,7 @@ export class WYSIWYG {
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select") ||
                 (getAVSelectedCells(nodeElement).length > 0 ||
-                (nodeElement.dataset.avType === "table" && getAVSelectedItemIDs(nodeElement).length > 0) ?
+                (isTableLikeView(nodeElement.dataset.avType) && getAVSelectedItemIDs(nodeElement).length > 0) ?
                     nodeElement : null);
             const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
             // 表格内跨多单元格的文本选区：range.cloneContents() 会产出残缺的 td/tr 片段，需要重建合法 table
@@ -3312,6 +3328,7 @@ export class WYSIWYG {
                 updateTransaction(protyle, nodeElement, oldHTML);
             } else {
                 const id = nodeElement.getAttribute("data-node-id");
+                prepareInlineElementBoundaryMutation(range);
                 setInsertWbrHTML(nodeElement, range, protyle);
                 const oldHTML = protyle.wysiwyg.lastHTMLs[id] || nodeElement.outerHTML;
                 const tempElement = document.createElement("div");
@@ -3958,6 +3975,9 @@ export class WYSIWYG {
             }
         });
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
+            if ((event.key === "Backspace" || event.key === "Delete") && getSelection().rangeCount > 0) {
+                prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0));
+            }
             if (isInAndroid()) {
                 if (event.key === "Unidentified") {
                     mobileUnidentifiedInputRange = undefined;
@@ -4164,6 +4184,11 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
+            recordReplacementUndo(event, this.element, this.lastHTMLs);
+            if ((event.inputType.startsWith("insert") || event.inputType.startsWith("delete")) &&
+                getSelection().rangeCount > 0) {
+                prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0));
+            }
             if (!event.isComposing && ["deleteContentBackward", "deleteContentForward"].includes(event.inputType) &&
                 !getBlockSelectionModeElement(this.element) && !this.element.querySelector(".protyle-wysiwyg--select") &&
                 isTabTextBoundary(getEditorRange(this.element), event.inputType === "deleteContentBackward")) {

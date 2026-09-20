@@ -1327,6 +1327,15 @@ body.mobile-topbar--merged {
     flex: 1;
     overflow: auto;
     background-color: var(--b3-theme-surface);
+
+    > .protyle-hint {
+      position: static;
+      width: auto !important;
+      min-width: 0;
+      max-width: none;
+      max-height: none !important;
+      box-shadow: none;
+    }
   }
 
   &__split {

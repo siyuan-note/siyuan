@@ -134,6 +134,9 @@ export class Hint {
         this.element.setAttribute("data-close", "false");
         this.element.className = "protyle-hint b3-list b3-list--background fn__none";
         this.element.addEventListener("click", (event) => {
+            if (this.element.closest("#keyboardToolbar")) {
+                return;
+            }
             const eventTarget = event.target as HTMLElement;
             if (eventTarget.tagName === "INPUT") {
                 event.stopPropagation();

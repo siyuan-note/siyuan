@@ -81,11 +81,13 @@ import {applyMobileToolbarEntries} from "./toolbarEntries";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
+import {mountLiteSlashMenu} from "./liteSlashMenu";
 
 const getCurrentEditor = () => getMobileToolbarProtyle()?.getInstance() || getDocumentEditor();
 const getKeyboardPaddingElement = (protyle: IProtyle) =>
     protyle.lite ? protyle.contentElement : protyle.element.parentElement;
 let toolbarProtyle: IProtyle;
+let unmountLiteSlashMenu: (() => void) | undefined;
 
 const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string | IMenuItem>) => {
     applyMobileToolbarEntries(element, toolbar, {
@@ -694,19 +696,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     protyle.hint.lastIndex = -1;
     if (protyle.lite) {
         // 轻量编辑器沿用自己的插入候选，保留单元格内容限制和智能体技能入口。
-        const items = protyle.options.hint.extend.find(item => item.key === "/")?.hint?.("", protyle, "hint") || [];
-        protyle.hint.genHTML(items, protyle, true, "hint");
-        const utilElement = toolbarElement.querySelector(".keyboard__util");
-        utilElement.replaceChildren();
-        if (items.length > 0) {
-            Array.from(protyle.hint.element.children).forEach((element: HTMLElement, index) => {
-                element.classList.add("keyboard__slash-item");
-                element.setAttribute("data-focus", items[index]?.focus === false ? "false" : "true");
-                utilElement.appendChild(element);
-            });
-        }
-        protyle.hint.element.classList.add("fn__none");
-        protyle.hint.bindUploadEvent(protyle, utilElement as HTMLElement);
+        unmountLiteSlashMenu = mountLiteSlashMenu(protyle, toolbarElement.querySelector(".keyboard__util"));
         return;
     }
     let pluginHTML = "";
@@ -832,6 +822,8 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
 };
 
 const resetKeyboardToolbarUtilButtons = () => {
+    unmountLiteSlashMenu?.();
+    unmountLiteSlashMenu = undefined;
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.querySelectorAll('[data-type="add"], [data-type="text"], [data-type="font-family"], [data-type="font-size"]')
         .forEach(item => item.classList.remove("protyle-toolbar__item--current"));
@@ -1525,7 +1517,8 @@ export const initKeyboardToolbar = () => {
         }
         const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
-        const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
+        const liteSlashBtnElement = target.closest<HTMLElement>(".keyboard__util .protyle-hint .b3-list-item[data-value]");
+        const slashBtnElement = liteSlashBtnElement || hasClosestByClassName(target, "keyboard__slash-item");
         if (slashBtnElement && slashBtnElement.dataset.action === "fontFamilyMenu") {
             const range = protyle.toolbar.range.cloneRange();
             const nodeElements = getFontNodeElements(protyle);
@@ -1575,6 +1568,14 @@ export const initKeyboardToolbar = () => {
             if (dataValue === Constants.ZWSP + 3) {
                 return;
             }
+            if (liteSlashBtnElement) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!dataValue) {
+                    return;
+                }
+                hideKeyboardToolbarUtil();
+            }
             protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
             event.preventDefault();
             event.stopPropagation();
@@ -1586,7 +1587,8 @@ export const initKeyboardToolbar = () => {
                 if (isInHarmony() || isInAndroid()) {
                     setTimeout(() => focusByRange(protyle.toolbar.range), Constants.TIMEOUT_TRANSITION);
                 }
-            } else if (slashBtnElement.getAttribute("data-focus") === "true") {
+            } else if (slashBtnElement.getAttribute("data-focus") === "true" ||
+                liteSlashBtnElement && slashBtnElement.getAttribute("data-focus") !== "false") {
                 focusByRange(protyle.toolbar.range);
             }
             return;

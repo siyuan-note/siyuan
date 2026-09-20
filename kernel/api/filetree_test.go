@@ -172,14 +172,15 @@ func TestAuthFilePublishAccessReturnsUniformFailure(t *testing.T) {
 	oldLangs := util.Langs
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
 	model.Conf.Lang = "test"
 	util.Langs = map[string]map[int]string{
 		"test": {285: passwordIncorrect},
 		"en":   {285: passwordIncorrect},
 	}
 	t.Cleanup(func() {
+		defer func() { model.Conf = oldConf }()
 		util.DataDir = oldDataDir
-		model.Conf = oldConf
 		util.Langs = oldLangs
 		if oldDataDir != "" {
 			if err := model.SetPublishAccess(oldPublishAccess); err != nil {
@@ -306,14 +307,15 @@ func TestAuthFilePublishAccessThrottlesBruteForce(t *testing.T) {
 	oldLangs := util.Langs
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
 	model.Conf.Lang = "test"
 	util.Langs = map[string]map[int]string{
 		"test": {285: "Password is incorrect", 354: passwordLocked},
 		"en":   {285: "Password is incorrect", 354: passwordLocked},
 	}
 	t.Cleanup(func() {
+		defer func() { model.Conf = oldConf }()
 		util.DataDir = oldDataDir
-		model.Conf = oldConf
 		util.Langs = oldLangs
 		if oldDataDir != "" {
 			if err := model.SetPublishAccess(oldPublishAccess); err != nil {
@@ -431,6 +433,7 @@ func TestPublishAccessConfigurationRejectsEncryptedNotebook(t *testing.T) {
 	oldLangs := util.Langs
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
 	model.Conf.Lang = "test"
 	util.Langs = map[string]map[int]string{
 		"test": {313: "Encrypted notebooks do not support this operation"},
@@ -440,8 +443,8 @@ func TestPublishAccessConfigurationRejectsEncryptedNotebook(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
+		defer func() { model.Conf = oldConf }()
 		util.DataDir = oldDataDir
-		model.Conf = oldConf
 		util.Langs = oldLangs
 		if oldDataDir != "" {
 			if err := model.SetPublishAccess(oldPublishAccess); err != nil {
@@ -678,6 +681,10 @@ func TestGetDocOptionallyReturnsEmbeddedDocInfo(t *testing.T) {
 }
 
 func TestFilterFileTreePublishAccess(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
+	t.Cleanup(func() { model.Conf = previousConf })
 	const (
 		boxID             = "20260725000000-boxid01"
 		publicID          = "20260725000001-public1"
@@ -781,6 +788,7 @@ func TestListDocsByPathFiltersSubFileCountForPublishReader(t *testing.T) {
 	oldPublishAccess := model.GetPublishAccess()
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
 	model.Conf.FileTree = conf.NewFileTree()
 	const testLang = "filetree-subfile-count-test"
 	installAPITestTimeLangs(t, testLang)

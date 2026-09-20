@@ -75,6 +75,7 @@ func TestGetDynamicIconEnforcesPublishAccess(t *testing.T) {
 	}
 
 	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
 	model.Conf.Lang = "en"
 	model.Conf.Editor = conf.NewEditor()
 

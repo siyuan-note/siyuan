@@ -40,6 +40,7 @@ func TestListNotebooksSortsBySubDocCount(t *testing.T) {
 	oldPublishAccess := model.GetPublishAccess()
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
 	model.Conf.FileTree = conf.NewFileTree()
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	*model.Conf.FileTree.BoxDocEnabled = true

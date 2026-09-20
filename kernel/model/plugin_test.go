@@ -29,6 +29,7 @@ func TestSetPetalPublishEnabled(t *testing.T) {
 	originalConf := Conf
 	originalDataDir := util.DataDir
 	Conf = NewAppConf()
+	Conf.Sync = conf.NewSync()
 	Conf.Bazaar = &conf.Bazaar{Trust: true}
 	util.DataDir = t.TempDir()
 	t.Cleanup(func() {

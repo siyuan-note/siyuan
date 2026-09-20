@@ -406,7 +406,7 @@ export const editAssetItem = (options: {
             }
         });
     }
-    const openSubMenu = openMenu(options.protyle ? options.protyle.app : window.siyuan.ws.app, linkAddress, true, false);
+    const openSubMenu = openMenu(options.protyle ? options.protyle.app : window.siyuan.ws.app, decodeURI(linkAddress), true, false);
     if (type !== "file" || openSubMenu.length > 0) {
         menu.addSeparator({id: "separator_2"});
     }

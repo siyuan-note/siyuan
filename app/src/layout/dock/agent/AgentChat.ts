@@ -42,7 +42,7 @@ import {
     renderWelcomeHTML
 } from "./AgentMessageRenderer";
 import {bindThinkingCardToggle} from "../../../ai/thinkingCard";
-import {getAgentReasoningEffortOptions} from "./AgentReasoning";
+import {getAgentReasoningEffort, getAgentReasoningEffortOptions, setAgentReasoningEffort} from "./AgentReasoning";
 import {mountGroupedModelPicker, type IGroupedModelPicker} from "../../../config/tabs/ai/aiProviderUi";
 import {AI_CONFIG_CHANGED_EVENT} from "../../../config/tabs/ai/aiRuntime";
 import {
@@ -261,9 +261,9 @@ export class AgentChat extends Model {
     private selectedModel: string;
     private defaultModelID = "";
     private modelOptions: Array<{ id: string; name: string }> = [];
-    // 推理努力度（iconBrain + 菜单），仅实例记忆，刷新后回到默认。
+    // 思考等级菜单使用本地保存的偏好初始化。
     private reasoningEffortButton: HTMLButtonElement;
-    private selectedReasoningEffort = "";
+    private selectedReasoningEffort = getAgentReasoningEffort();
     private permissionButton: HTMLButtonElement;
     private permissionMode: AgentPermissionMode = "confirm";
     private buttonOptions: HTMLElement;
@@ -754,7 +754,7 @@ export class AgentChat extends Model {
         });
     }
 
-    // 初始化思考强度菜单：提供各供应商使用的标准档位，选择结果仅在当前实例中生效。
+    // 初始化思考强度菜单：提供各供应商使用的标准档位，并在本地保存选择结果。
     private initReasoningEffortMenu() {
         const options = getAgentReasoningEffortOptions(window.siyuan.languages);
         const updateLabel = () => {
@@ -775,6 +775,7 @@ export class AgentChat extends Model {
                     current: option.value === this.selectedReasoningEffort,
                     click: () => {
                         this.selectedReasoningEffort = option.value;
+                        setAgentReasoningEffort(option.value);
                         updateLabel();
                     },
                 });

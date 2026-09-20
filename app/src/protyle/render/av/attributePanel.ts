@@ -58,9 +58,6 @@ export class AVAttributePanel {
         this.element.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             if (target.closest('[data-type="toggle-empty"]')) {
-                if (this.protyle.disabled) {
-                    return;
-                }
                 this.showEmptyFields = !this.showEmptyFields;
                 this.updateEmptyState();
                 event.preventDefault();
@@ -475,12 +472,12 @@ export class AVAttributePanel {
     private updateEmptyState() {
         this.element.dataset.readonly = String(Boolean(this.protyle.disabled));
         const hideEmpty = window.siyuan.config.editor.databaseAttrHideEmpty;
-        if (!hideEmpty || this.protyle.disabled) {
+        if (!hideEmpty) {
             this.showEmptyFields = false;
         }
         updateEmptyState(this.element, hideEmpty && !this.showEmptyFields);
         const editElement = this.element.querySelector<HTMLElement>('[data-type="toggle-empty"]');
-        editElement?.classList.toggle("fn__none", !hideEmpty || this.collapsed || this.protyle.disabled);
+        editElement?.classList.toggle("fn__none", !hideEmpty || this.collapsed);
         editElement?.setAttribute("aria-label", window.siyuan.languages[
             this.showEmptyFields ? "hideEmptyFields" : "displayEmptyFields"
         ]);

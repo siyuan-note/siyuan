@@ -1,5 +1,6 @@
 {
 	"listMindmapMigrationInvalid": "Este mapa mental no se pudo convertir por completo en una lista; se conserva el texto original",
+	"runtimeInfo": "Información de ejecución",
 	"listMindmapRouteStart": "Arrastra para cambiar el nodo inicial",
 	"listMindmapRouteEnd": "Arrastra para cambiar el nodo final",
 	"listMindmapRouteHandle": "Arrastra para ajustar el trazado; haz doble clic en el controlador para restablecerlo",

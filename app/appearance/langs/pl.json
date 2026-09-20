@@ -1,5 +1,6 @@
 {
 	"listMindmapMigrationInvalid": "Nie udało się w pełni przekształcić tej mapy myśli w listę; zachowano tekst źródłowy",
+	"runtimeInfo": "Informacje o środowisku uruchomieniowym",
 	"listMindmapRouteStart": "Przeciągnij, aby zmienić węzeł początkowy",
 	"listMindmapRouteEnd": "Przeciągnij, aby zmienić węzeł docelowy",
 	"listMindmapRouteHandle": "Przeciągnij, aby dostosować przebieg; kliknij dwukrotnie uchwyt, aby przywrócić automatyczne wyznaczanie",

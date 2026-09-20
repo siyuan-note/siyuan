@@ -12,6 +12,7 @@ import {
     deleteTableColumns,
     deleteTableRows,
     getTableCellSelectionIndexes,
+    getTableClipboardBlockDOM,
     getTableRangeHTML,
     isTableHeaderEnabled,
     ITableCellInfo,
@@ -2705,7 +2706,7 @@ export class TableControl {
         const rows = Array.from(container.querySelectorAll("tr"));
         const text = rows.map(row => Array.from(row.querySelectorAll("th, td")).filter(cell =>
             !cell.classList.contains("fn__none")).map(cell => getTableCellPlainText(cell)).join("\t")).join("\n");
-        const textSiyuan = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+        const textSiyuan = getTableClipboardBlockDOM(html);
         const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${removeZWJ(textSiyuan)}`;
         return {text, textSiyuan, textHTML};
     }

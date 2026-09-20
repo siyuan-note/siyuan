@@ -1,5 +1,6 @@
 {
 	"listMindmapMigrationInvalid": "Questa mappa mentale non può essere convertita interamente in un elenco; il testo originale viene conservato",
+	"runtimeInfo": "Informazioni di esecuzione",
 	"listMindmapRouteStart": "Trascina per cambiare il nodo iniziale",
 	"listMindmapRouteEnd": "Trascina per cambiare il nodo di destinazione",
 	"listMindmapRouteHandle": "Trascina per regolare il percorso; fai doppio clic sulla maniglia per ripristinare il calcolo automatico",

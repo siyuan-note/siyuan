@@ -1114,7 +1114,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                         }, 450);
                     }
                 });
-                if (data["data-av-type"]) {
+                // 已渲染数据库的布局类型随新内容一起更新，避免旧内容提前套用新布局样式。
+                if (data["data-av-type"] && !item.querySelector(".av__container")) {
                     item.setAttribute("data-av-type", data["data-av-type"]);
                 }
                 const attrElements = item.querySelectorAll(".protyle-attr");

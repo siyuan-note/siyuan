@@ -21,6 +21,20 @@
       display: none;
     }
 
+    .av__row--util > .av__colsticky {
+      width: 100%;
+      flex-direction: column;
+
+      > .fn__space {
+        display: none;
+      }
+
+      > .av__button {
+        margin: 5px 0;
+        justify-content: flex-start;
+      }
+    }
+
     .av__row {
       border-bottom: 0;
       border-radius: var(--b3-border-radius);

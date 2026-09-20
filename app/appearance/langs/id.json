@@ -1,5 +1,6 @@
 {
 	"listMindmapMigrationInvalid": "Peta pikiran ini tidak dapat sepenuhnya dikonversi menjadi daftar; teks sumber asli tetap disimpan",
+	"runtimeInfo": "Informasi runtime",
 	"listMindmapRouteStart": "Seret untuk mengganti simpul awal",
 	"listMindmapRouteEnd": "Seret untuk mengganti simpul tujuan",
 	"listMindmapRouteHandle": "Seret untuk menyesuaikan jalur; klik dua kali pada pegangan seret untuk mengembalikan perhitungan otomatis",

@@ -8,56 +8,53 @@ const compiled = transpileModule(readFileSync("src/config/tabs/ai/agentStreaming
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const createPreference = (values = new Map<string, string>(), unavailable = false) => {
+const createPreference = (values: Record<string, unknown> = {}, readonly = false) => {
     const events: {type: string}[] = [];
+    const storage = {...values};
     const exports = {} as typeof import("./agentStreamingMarkdown");
     runInNewContext(compiled, {
         exports,
+        require: (id: string) => {
+            assert.equal(id, "../../../protyle/util/compatibility");
+            return {setStorageVal: (key: string, value: unknown) => {
+                if (!readonly) {
+                    values[key] = value;
+                }
+            }};
+        },
         CustomEvent: class {
             constructor(public type: string) {}
         },
         window: {
-            localStorage: {
-                getItem: (key: string) => {
-                    if (unavailable) {
-                        throw new Error("Storage unavailable");
-                    }
-                    return values.get(key) ?? null;
-                },
-                setItem: (key: string, value: string) => {
-                    if (unavailable) {
-                        throw new Error("Storage unavailable");
-                    }
-                    values.set(key, value);
-                },
-            },
+            siyuan: {storage},
             dispatchEvent: (event: {type: string}) => events.push(event),
         },
     });
-    return {...exports, events, values};
+    return {...exports, events, values, storage};
 };
 
-test("streaming Markdown requires an explicit device-local opt-in", () => {
+test("streaming Markdown persists an explicit opt-in through SiYuan storage", () => {
     const preference = createPreference();
     assert.equal(preference.isAgentStreamingMarkdownEnabled(), false);
-    for (const value of ["", "false", "1", "invalid", "TRUE"]) {
-        preference.values.set(preference.AGENT_STREAMING_MARKDOWN_KEY, value);
+    for (const value of ["", "false", "true", "1", "invalid", "TRUE", false, 1]) {
+        preference.storage[preference.AGENT_STREAMING_MARKDOWN_KEY] = value;
         assert.equal(preference.isAgentStreamingMarkdownEnabled(), false);
     }
     preference.setAgentStreamingMarkdownEnabled(true);
     assert.equal(preference.isAgentStreamingMarkdownEnabled(), true);
-    assert.equal(preference.values.size, 1);
+    assert.equal(Object.keys(preference.values).length, 1);
     assert.equal(createPreference(preference.values).isAgentStreamingMarkdownEnabled(), true);
     assert.equal(preference.events[0].type, preference.AGENT_STREAMING_MARKDOWN_CHANGED_EVENT);
     preference.setAgentStreamingMarkdownEnabled(false);
     assert.equal(createPreference(preference.values).isAgentStreamingMarkdownEnabled(), false);
 });
 
-test("unavailable storage defaults to off and allows a session-only preference", () => {
-    const preference = createPreference(new Map(), true);
+test("readonly mode allows a session-only preference", () => {
+    const preference = createPreference({}, true);
     assert.equal(preference.isAgentStreamingMarkdownEnabled(), false);
     preference.setAgentStreamingMarkdownEnabled(true);
     assert.equal(preference.isAgentStreamingMarkdownEnabled(), true);
+    assert.equal(createPreference(preference.values).isAgentStreamingMarkdownEnabled(), false);
     preference.setAgentStreamingMarkdownEnabled(false);
     assert.equal(preference.isAgentStreamingMarkdownEnabled(), false);
 });
@@ -65,6 +62,6 @@ test("unavailable storage defaults to off and allows a session-only preference",
 test("reads updates made by other windows instead of caching persisted values", () => {
     const preference = createPreference();
     preference.setAgentStreamingMarkdownEnabled(true);
-    preference.values.delete(preference.AGENT_STREAMING_MARKDOWN_KEY);
+    delete preference.storage[preference.AGENT_STREAMING_MARKDOWN_KEY];
     assert.equal(preference.isAgentStreamingMarkdownEnabled(), false);
 });

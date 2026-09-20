@@ -47,7 +47,6 @@ import {mountGroupedModelPicker, type IGroupedModelPicker} from "../../../config
 import {AI_CONFIG_CHANGED_EVENT} from "../../../config/tabs/ai/aiRuntime";
 import {
     AGENT_STREAMING_MARKDOWN_CHANGED_EVENT,
-    AGENT_STREAMING_MARKDOWN_KEY,
     isAgentStreamingMarkdownEnabled
 } from "../../../config/tabs/ai/agentStreamingMarkdown";
 import {AgentStreamingMarkdown} from "./AgentStreamingMarkdown";
@@ -317,11 +316,6 @@ export class AgentChat extends Model {
         window.addEventListener(AI_CONFIG_CHANGED_EVENT, this.checkConfigChangedHandler);
         window.addEventListener("focus", this.checkConfigChangedHandler);
         window.addEventListener(AGENT_STREAMING_MARKDOWN_CHANGED_EVENT, this.checkStreamingMarkdownChanged);
-        window.addEventListener("storage", (event) => {
-            if (event.key === AGENT_STREAMING_MARKDOWN_KEY || event.key === null) {
-                this.checkStreamingMarkdownChanged();
-            }
-        });
         // 设置对话框是 SiYuan 内部模态，关闭时 window 不失焦，focus 事件不触发。
         // 监听 body 子节点变化，当含 .config__panel 的设置 dialog 被移除时即时刷新。
         this.settingDialogObserver = new MutationObserver(() => {

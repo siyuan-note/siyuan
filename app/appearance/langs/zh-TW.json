@@ -1,5 +1,6 @@
 {
 	"listMindmapMigrationInvalid": "此心智圖無法完整轉換為清單，已保留原始碼",
+	"runtimeInfo": "執行資訊",
 	"listMindmapRouteStart": "拖曳以變更起始節點",
 	"listMindmapRouteEnd": "拖曳以變更目標節點",
 	"listMindmapRouteHandle": "拖曳調整路徑，按兩下拖曳控制點恢復自動計算",

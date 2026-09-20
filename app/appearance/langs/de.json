@@ -1,5 +1,6 @@
 {
 	"listMindmapMigrationInvalid": "Die Mindmap konnte nicht vollständig in eine Liste umgewandelt werden; der Quelltext bleibt erhalten",
+	"runtimeInfo": "Laufzeitinformationen",
 	"listMindmapRouteStart": "Ziehen, um den Startknoten zu ändern",
 	"listMindmapRouteEnd": "Ziehen, um den Zielknoten zu ändern",
 	"listMindmapRouteHandle": "Ziehen, um den Verlauf anzupassen; Doppelklick auf den Ziehpunkt stellt die automatische Berechnung wieder her",

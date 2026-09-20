@@ -1,5 +1,6 @@
 {
 	"listMindmapMigrationInvalid": "לא ניתן להמיר את מפת החשיבה במלואה לרשימה; טקסט המקור נשמר",
+	"runtimeInfo": "מידע על סביבת הריצה",
 	"listMindmapRouteStart": "גררו כדי לשנות את צומת ההתחלה",
 	"listMindmapRouteEnd": "גררו כדי לשנות את צומת הסיום",
 	"listMindmapRouteHandle": "גררו כדי להתאים את הנתיב; לחצו פעמיים על ידית הגרירה כדי לשחזר חישוב אוטומטי",

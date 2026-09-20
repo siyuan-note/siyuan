@@ -127,6 +127,7 @@ import {
     deleteTableColumns,
     deleteTableRows,
     getTableCellSelectionIndexes,
+    getTableClipboardBlockDOM,
     getTableRangeHTML,
     isIncludeCell,
     updateTableTitle,
@@ -1108,8 +1109,7 @@ export class WYSIWYG {
                 if (!textSiyuan && (selectTableElement || selectTableRange)) {
                     // 表格选区：html 已是合法 <table>...</table>（含 thead/tbody/fn__none 占位），
                     // 构建最小化 NodeTable BlockDOM，不经过 markdown 往返（GFM 表格只有单行表头，往返会丢失多行 thead）
-                    const newId = Lute.NewNodeID();
-                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${clipboardBlockDOM}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+                    textSiyuan = getTableClipboardBlockDOM(clipboardBlockDOM);
                     html = textSiyuan;
                 } else if (!textSiyuan) {
                     textSiyuan = clipboardBlockDOM;
@@ -3513,8 +3513,7 @@ export class WYSIWYG {
                 let textSiyuan = blockDOMClipboardRichData?.textSiyuan;
                 if (!textSiyuan && (selectTableElement || selectTableRange)) {
                     // 表格选区：html 已是合法 <table>...</table>，构建最小化 NodeTable BlockDOM，不走 markdown 往返
-                    const newId = Lute.NewNodeID();
-                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${clipboardBlockDOM}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+                    textSiyuan = getTableClipboardBlockDOM(clipboardBlockDOM);
                     html = textSiyuan;
                 } else if (!textSiyuan) {
                     textSiyuan = clipboardBlockDOM;

@@ -71,28 +71,30 @@ describe("attribute view rich-text editor positioning", () => {
         }
     });
 
-    it("places the measured panel directly above a low cell", () => {
+    it("overlays a low cell while keeping the measured panel inside the window", () => {
         const panel = createPanel(240);
         const anchor = createAnchor({left: 551, top: 412, width: 199, height: 32});
 
         positionAVRichTextEditor(panel as unknown as HTMLElement, anchor);
 
         assert.equal(panel.style.left, "551px");
-        assert.equal(panel.style.top, "172px");
+        assert.equal(panel.style.top, "300px");
         assert.equal(panel.style.width, "420px");
         assert.equal(panel.style.maxHeight, "480px");
-        assert.equal(panel.getBoundingClientRect().bottom, anchor.getBoundingClientRect().top);
+        assert.equal(panel.getBoundingClientRect().bottom, window.innerHeight);
+        assert.ok(panel.getBoundingClientRect().top <= anchor.getBoundingClientRect().top);
+        assert.ok(panel.getBoundingClientRect().bottom >= anchor.getBoundingClientRect().bottom);
     });
 
-    it("places the panel directly below a cell when it fits", () => {
+    it("aligns the panel with the top of a cell when it fits", () => {
         Object.assign(window, {innerWidth: 1000, innerHeight: 800});
         const panel = createPanel(240);
         const anchor = createAnchor({left: 100, top: 100, width: 150, height: 32});
 
         positionAVRichTextEditor(panel as unknown as HTMLElement, anchor);
 
-        assert.equal(panel.style.top, "132px");
-        assert.equal(panel.getBoundingClientRect().top, anchor.getBoundingClientRect().bottom);
+        assert.equal(panel.style.top, "100px");
+        assert.equal(panel.getBoundingClientRect().top, anchor.getBoundingClientRect().top);
     });
 
     it("keeps horizontal margins and follows changes to the measured panel height", () => {
@@ -102,11 +104,13 @@ describe("attribute view rich-text editor positioning", () => {
 
         positionAVRichTextEditor(panel as unknown as HTMLElement, anchor);
         assert.equal(panel.style.left, "172px");
-        assert.equal(panel.style.top, "172px");
+        assert.equal(panel.style.top, "300px");
 
         panel.height = 300;
         positionAVRichTextEditor(panel as unknown as HTMLElement, anchor);
-        assert.equal(panel.style.top, "112px");
-        assert.equal(panel.getBoundingClientRect().bottom, anchor.getBoundingClientRect().top);
+        assert.equal(panel.style.top, "240px");
+        assert.equal(panel.getBoundingClientRect().bottom, window.innerHeight);
+        assert.ok(panel.getBoundingClientRect().top <= anchor.getBoundingClientRect().top);
+        assert.ok(panel.getBoundingClientRect().bottom >= anchor.getBoundingClientRect().bottom);
     });
 });

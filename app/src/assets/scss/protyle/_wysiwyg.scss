@@ -481,6 +481,12 @@
       }
     }
 
+    span[data-inline-wrap][data-type~="code"],
+    span[data-inline-wrap][data-type~="tag"],
+    span[data-inline-wrap][data-type~="kbd"] {
+      word-break: break-all;
+    }
+
     span[data-type~="tag"] {
       // https://github.com/siyuan-note/siyuan/issues/12305
       padding-left: 1px;

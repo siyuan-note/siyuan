@@ -5,7 +5,7 @@ import {updateTransaction} from "../wysiwyg/transaction";
 import {copyPlainText, encodeBase64, isMac, readClipboard} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
 import {paste} from "./paste";
-import {focusByRange, getEditorRange} from "./selection";
+import {focusByRange, getEditorRange, getUndoFocusContext} from "./selection";
 import {matchHotKey} from "./hotKey";
 import {
     buildTableGrid,
@@ -1983,8 +1983,23 @@ export class TableControl {
             return;
         }
         const oldHTML = this.selection.node.outerHTML;
+        // 框选没有浏览器文本选区，使用活动单元格记录撤销和重做的光标位置。
+        const getFocusContext = () => {
+            const range = document.createRange();
+            range.selectNodeContents(this.selection.activeCell);
+            range.collapse(false);
+            return getUndoFocusContext(this.wysiwygElement, range, true);
+        };
+        const undoContext = getFocusContext();
         this.getSelectedCells().forEach(clearTableCellContent);
-        updateTransaction(this.protyle, this.selection.node, oldHTML);
+        if (oldHTML === this.selection.node.outerHTML) {
+            return;
+        }
+        updateTransaction(this.protyle, this.selection.node, oldHTML, undoContext, {
+            doOperations: [],
+            undoOperations: [],
+            context: getFocusContext(),
+        });
         this.scheduleRender();
     }
 

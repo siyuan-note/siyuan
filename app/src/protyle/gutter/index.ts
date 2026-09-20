@@ -3911,7 +3911,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
             space = 0;
         }
         // 页签栏只用于垂直定位；水平方向和其他块一样以整个块的外边界为基准。
-        let horizontalAnchorLeft = tabsHeader ? tabsHeader.parentElement.getBoundingClientRect().left : rect.left;
+        let horizontalAnchorLeft = tabsHeader && !listItem ? tabsHeader.parentElement.getBoundingClientRect().left : rect.left;
         if (listItem && element.classList.contains("protyle-action") &&
             element.parentElement.getAttribute("data-type") === "NodeListItem") {
             const listItemElement = element.parentElement;

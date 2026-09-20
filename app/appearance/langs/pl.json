@@ -1,4 +1,18 @@
 {
+	"calendarView": "Kalendarz",
+	"calendarToday": "Dzisiaj",
+	"calendarDateField": "Pole daty",
+	"calendarColorField": "Kolor według",
+	"calendarSelectDateField": "Wybierz pole daty, aby wyświetlić kalendarz",
+	"calendarReadOnlyDate": "Dat systemowych nie można zmieniać przez przeciąganie",
+	"calendarInvalidRange": "Data zakończenia jest wcześniejsza niż data rozpoczęcia",
+	"calendarWeekStart": "Pierwszy dzień tygodnia",
+	"calendarMore": "Jeszcze ${x}",
+	"calendarJumpDate": "Przejdź do daty",
+	"calendarResizeStart": "Przeciągnij, aby zmienić datę rozpoczęcia",
+	"calendarResizeEnd": "Przeciągnij, aby zmienić datę zakończenia",
+	"databaseCalendarView": "Widok kalendarza bazy danych",
+	"calendarClearDate": "Wyczyść datę",
 	"runtimeInfo": "Informacje o środowisku uruchomieniowym",
 	"listMindmapRouteStart": "Przeciągnij, aby zmienić węzeł początkowy",
 	"listMindmapRouteEnd": "Przeciągnij, aby zmienić węzeł docelowy",
@@ -2489,6 +2503,7 @@
 		"quit": "Zamknij aplikację"
 	},
 	"_attrView": {
+		"calendar": "Kalendarz",
 		"list": "Lista",
 		"dateFormat": "Format daty",
 		"fullDate": "Data w formacie lokalnym",

@@ -1,4 +1,18 @@
 {
+	"calendarView": "달력",
+	"calendarToday": "오늘",
+	"calendarDateField": "날짜 필드",
+	"calendarColorField": "색상 기준",
+	"calendarSelectDateField": "달력을 표시할 날짜 필드를 선택하세요",
+	"calendarReadOnlyDate": "시스템 시간은 드래그하여 변경할 수 없습니다",
+	"calendarInvalidRange": "종료일이 시작일보다 빠릅니다",
+	"calendarWeekStart": "한 주의 시작 요일",
+	"calendarMore": "${x}개 더 보기",
+	"calendarJumpDate": "날짜로 이동",
+	"calendarResizeStart": "드래그하여 시작일 변경",
+	"calendarResizeEnd": "드래그하여 종료일 변경",
+	"databaseCalendarView": "데이터베이스 달력 보기",
+	"calendarClearDate": "날짜 지우기",
 	"runtimeInfo": "실행 환경 정보",
 	"listMindmapRouteStart": "드래그하여 시작 노드 변경",
 	"listMindmapRouteEnd": "드래그하여 대상 노드 변경",
@@ -2489,6 +2503,7 @@
 		"quit": "애플리케이션 종료"
 	},
 	"_attrView": {
+		"calendar": "달력",
 		"list": "목록",
 		"dateFormat": "날짜 형식",
 		"fullDate": "현지화된 날짜",

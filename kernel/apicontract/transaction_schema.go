@@ -85,6 +85,7 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"setAttrViewCardCoverPosition", reflect.TypeFor[TransactionCardCoverPosition](), reflect.TypeFor[Null]()},
 	{"setAttrViewCardSize", reflect.TypeFor[float64](), reflect.TypeFor[Null]()},
 	{"setAttrViewCardWidth", reflect.TypeFor[float64](), reflect.TypeFor[Null]()},
+	{"setAttrViewCalendar", reflect.TypeFor[AVCalendarSettings](), reflect.TypeFor[Null]()},
 	{"setAttrViewCardLayout", reflect.TypeFor[float64](), reflect.TypeFor[Null]()},
 	{"setAttrViewColFullRow", reflect.TypeFor[bool](), reflect.TypeFor[Null]()},
 	{"setAttrViewFitImage", reflect.TypeFor[bool](), reflect.TypeFor[Null]()},

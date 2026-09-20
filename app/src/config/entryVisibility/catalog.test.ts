@@ -98,6 +98,7 @@ const slashMenuBuiltinOrder = [
     "html",
     "databaseTableView",
     "databaseListView",
+    "databaseCalendarView",
     "databaseKanbanView",
     "databaseGalleryView",
     "separator_2",
@@ -497,7 +498,7 @@ test("slash menu catalog follows the built-in hint order", () => {
     assert.deepEqual(section?.children.map((item) => item.key), ["menu"]);
     const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
     assert.deepEqual(children.map((item) => item.key), slashMenuBuiltinOrder);
-    assert.equal(children.filter((item) => item.type === "entry").length, 65);
+    assert.equal(children.filter((item) => item.type === "entry").length, 66);
     assert.equal(children.filter((item) => item.type === "separator").length, 5);
     assert.equal(children.every((item) => item.simple), true);
 });

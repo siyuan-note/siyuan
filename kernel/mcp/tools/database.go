@@ -76,7 +76,7 @@ var DatabaseTool = &Tool{
 			"pageSize":       {Type: "integer", Description: "Results per page (default 50)"},
 			"name":           {Type: "string", Description: "Database name (for create) or key name (for key_add)"},
 			"primaryKeyName": {Type: "string", Description: "Primary key field name (for create, optional)"},
-			"layout":         {Type: "string", Description: "Initial database layout (for create, default table)", Enum: []string{"table", "list", "gallery", "kanban"}},
+			"layout":         {Type: "string", Description: "Initial database layout (for create, default table)", Enum: []string{"table", "list", "calendar", "gallery", "kanban"}},
 			"keys": {
 				Type: "array", Description: "Ordered fields to create after the primary key (for create, optional)",
 				Items: &Property{
@@ -380,7 +380,7 @@ func databaseViewFieldIDs(view *av.View) (ret []string) {
 		return
 	}
 	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
 		if layout := view.GetTableLayout(); nil != layout {
 			for _, column := range layout.Columns {
 				if nil != column && "" != column.ID {

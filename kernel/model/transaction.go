@@ -423,6 +423,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewCardSize(op)
 			case "setAttrViewCardWidth":
 				ret = tx.doSetAttrViewCardWidth(op)
+			case "setAttrViewCalendar":
+				ret = tx.doSetAttrViewCalendar(op)
 			case "setAttrViewCardLayout":
 				ret = tx.doSetAttrViewCardLayout(op)
 			case "setAttrViewColFullRow":

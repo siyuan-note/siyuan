@@ -265,6 +265,8 @@ func getAttributeViewBaseInstance(viewable av.Viewable) (ret *av.BaseInstance) {
 	switch instance := viewable.(type) {
 	case *av.Table:
 		ret = instance.BaseInstance
+	case *av.Calendar:
+		ret = instance.BaseInstance
 	case *av.List:
 		ret = instance.BaseInstance
 	case *av.Gallery:
@@ -401,19 +403,24 @@ func getAttributeViewPasteRowsFromTable(table *av.Table, startItemID string, cou
 	return table.Rows[start:end], nil
 }
 
-func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
-	return renderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, true)
+func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	return renderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, true, calendarRanges...)
 }
 
 // RenderAttributeViewWithTargetReadOnly 仅在内存中渲染发布视图，不创建或保存数据库。
-func RenderAttributeViewWithTargetReadOnly(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
-	return renderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, false, ignoreRows, targetItemID, targetGroupID, false)
+func RenderAttributeViewWithTargetReadOnly(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	return renderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, false, ignoreRows, targetItemID, targetGroupID, false, calendarRanges...)
 }
 
-func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, writable bool) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, writable bool, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
 		return
+	}
+	if len(calendarRanges) > 0 {
+		if _, err = calendarRanges[0].Location(); nil != err {
+			return
+		}
 	}
 
 	waitForSyncingStorages()
@@ -488,14 +495,14 @@ func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 	} else {
 	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID)
+	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, calendarRanges...)
 	return
 }
 
 func newAttributeViewWithLayout(avID string, initialLayout av.LayoutType) (ret *av.AttributeView) {
 	ret = av.NewAttributeView(avID)
 	switch initialLayout {
-	case av.LayoutTypeList, av.LayoutTypeGallery, av.LayoutTypeKanban:
+	case av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeGallery, av.LayoutTypeKanban:
 	default:
 		return
 	}
@@ -515,7 +522,7 @@ const (
 	groupValueNext7Days, groupValueNext30Days                = "_@next7Days@_", "_@next30Days@_"
 )
 
-func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, err error) {
 	if err = attrView.ValidateListLayouts(); nil != err {
 		return
 	}
@@ -553,6 +560,9 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	} else {
 		viewable = sql.RenderViewWithContext(attrView, view, query, ignoreRows, renderContext)
 	}
+	if calendar, ok := viewable.(*av.Calendar); ok && len(calendarRanges) > 0 {
+		calendar.CalendarRange = calendarRanges[0]
+	}
 	var groupRenderSource *sql.GroupViewRenderSource
 	if !ignoreRows && view.IsGroupView() {
 		// 在父视图分页前保存完整条目索引，各分组复用已经生成的字段值。
@@ -576,7 +586,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	}
 
 	// 渲染分组视图。当 ignoreRows 时若有已生成的分组则渲染元数据供面板使用，无分组则跳过（生成分组需要行数据）
-	if !ignoreRows || len(view.Groups) > 0 {
+	if view.LayoutType != av.LayoutTypeCalendar && (!ignoreRows || len(view.Groups) > 0) {
 		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, groupRenderSource,
 			ignoreRows, writable, target, targetGroupID, renderContext, filterContext)
 	}
@@ -730,7 +740,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 
 		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
 		switch groupView.LayoutType {
-		case av.LayoutTypeTable, av.LayoutTypeList:
+		case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
 			groupView.GetTableLayout().Columns = nil
 		case av.LayoutTypeGallery:
 			groupView.Gallery.CardFields = nil
@@ -777,7 +787,7 @@ func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
 
 	itemCount := 0
 	switch viewable.GetType() {
-	case av.LayoutTypeTable, av.LayoutTypeList:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
 		itemCount = av.TableFromViewable(viewable).RowCount
 	case av.LayoutTypeGallery:
 		itemCount = viewable.(*av.Gallery).CardCount
@@ -1012,7 +1022,7 @@ func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av
 		return templateKeyIDs[fieldID] && nil != calc && av.CalcOperatorNone != calc.Operator
 	}
 	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
 		for _, column := range view.GetTableLayout().Columns {
 			if nil != column && nil != column.BaseField && checkField(column.ID, column.Calc) {
 				return false
@@ -1071,8 +1081,14 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 	av.Sort(viewable, attrView)
 	av.Calc(viewable, attrView)
 
-	// 分页
+	// 日历按可见范围读取，不使用普通条目分页。
 	switch viewable.GetType() {
+	case av.LayoutTypeCalendar:
+		calendar := viewable.(*av.Calendar)
+		if err = av.FilterCalendarRows(calendar, calendar.CalendarRange, targetItemID); nil != err {
+			return
+		}
+		targetIndex = findAttributeViewTargetIndex(targetItemID, len(calendar.Rows), func(index int) string { return calendar.Rows[index].ID })
 	case av.LayoutTypeTable, av.LayoutTypeList:
 		table := av.TableFromViewable(viewable)
 		targetIndex = findAttributeViewTargetIndex(targetItemID, len(table.Rows), func(index int) string { return table.Rows[index].ID })
@@ -1330,7 +1346,7 @@ func newHistoryAttributeViewCustomColorRenderContext(historyDir string) *av.Cust
 	return newAttributeViewCustomColorRenderContext(colors, order, found)
 }
 
-func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
 		return
@@ -1409,11 +1425,11 @@ func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string
 		snapshotColors, snapshotOrder, snapshotPaletteFound)
 	attrView.ResolveDirectColors()
 
-	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, "", 1, -1, nil, false, false, nil, "")
+	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, "", 1, -1, nil, false, false, nil, "", calendarRanges...)
 	return
 }
 
-func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, created string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
 		return
@@ -1496,7 +1512,7 @@ func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page,
 	attrView.CustomColorRenderContext = newHistoryAttributeViewCustomColorRenderContext(source.historyDir)
 	attrView.ResolveDirectColors()
 
-	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, query, page, pageSize, groupPaging, false, false, nil, "")
+	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, query, page, pageSize, groupPaging, false, false, nil, "", calendarRanges...)
 	return
 }
 

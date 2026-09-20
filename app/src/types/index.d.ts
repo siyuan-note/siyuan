@@ -25,7 +25,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "kernel-plugin-state-change" |
     "before-show-tooltip" | "before-hide-tooltip" |
     "common-menu-open" | "common-menu-closed"
-type TAVView = "table" | "list" | "gallery" | "kanban";
+type TAVView = "table" | "list" | "gallery" | "kanban" | "calendar";
 type TAVAlign = "" | "left" | "center" | "right"
 type TAVDateFormat = "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"
 type TAVCol =
@@ -1221,8 +1221,56 @@ interface IAVFieldView {
     hidden: boolean;
 }
 
-// 表格和列表视图共用行列结构，布局由 viewType 区分。
+/**
+ * 日历的持久化设置，也是 setAttrViewCalendar 事务的完整 data。
+ * 月周模式和当前浏览日期由各编辑器独立维护，不写入共享设置。
+ * 切换布局保留其他布局及分组设置；日历渲染不应用分组。
+ */
+interface IAVCalendarSettings {
+    /**
+     * 绑定一个 date、created 或 updated 字段；系统时间不支持通过日历拖动修改。
+     * 空字符串表示未绑定；字段缺失或类型变化时保留绑定，日历返回空行，不自动改绑或回填日期。
+     * createAttributeViewItem 的可选 calendarDate 是毫秒时间戳，仅支持绑定普通 date 字段的日历。
+     * 指定时按全天日期覆盖模板中该字段的值，与模板其他字段及条目创建共用一个可撤销事务。
+     * 系统时间源拒绝指定 calendarDate；省略或传 null 时沿用常规创建流程。
+     */
+    dateKeyID: string;
+    /** 可选单选字段，使用已有选项颜色；空字符串表示不使用字段颜色。 */
+    colorKeyID: string;
+    /** 一周起始日，0 为星期日，1 为星期一，依次至 6 为星期六。 */
+    weekStart: number;
+}
+
+/**
+ * renderAttributeView、renderHistoryAttributeView 和 renderSnapshotAttributeView 的可选 calendarRange。
+ * 范围为毫秒时间戳的半开区间 [start, end)，必须满足 start < end，跨度不超过 63 * 24 小时。
+ * 仅作用于本次日历渲染，不写入共享视图、历史或快照；无效区间返回错误。
+ * 省略或传 null 时不限制日期范围，保留完整渲染及导出的调用兼容性。
+ * 日历在筛选和排序后按区间交集取行，不应用行分页；定位目标可额外包含区间外的匹配条目。
+ * 全天结束日期包含当天，带时间的结束端点不包含在区间内；缺少一个端点时按单点处理。
+ * 反向区间按开始端点显示，原值保持不变；无日期条目不显示。
+ * 发布读取继续过滤不可访问条目，日期范围和定位参数不扩大访问权限。
+ */
+interface IAVCalendarRange {
+    /** 范围起点，单位为毫秒，包含该时刻。 */
+    start: number;
+    /** 范围终点，单位为毫秒，不包含该时刻。 */
+    end: number;
+    /** 有效的客户端 IANA 时区，用于解释本地日期及夏令时。 */
+    timeZone: string;
+}
+
+// 表格、列表和日历共用行列结构，布局由 viewType 区分。
 interface IAVTable extends IAVView {
+    /** 仅日历布局返回的持久化字段设置。 */
+    calendar?: IAVCalendarSettings;
+    /** 回显本次请求的日期范围，省略范围的请求不返回此字段。 */
+    calendarRange?: IAVCalendarRange;
+    /**
+     * 可访问且通过筛选的定位条目的开始时间，单位为毫秒；无有效定位日期时省略。
+     * 发布读取先过滤不可访问条目，再重新计算此日期、定位行索引及 rowCount。
+     */
+    calendarTargetDate?: number;
     columns: IAVColumn[],
     rows: IAVRow[],
     rowCount: number,

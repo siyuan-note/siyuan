@@ -481,6 +481,8 @@ func databaseViewBase(viewable av.Viewable) (ret *av.BaseInstance) {
 	switch view := viewable.(type) {
 	case *av.Table:
 		ret = view.BaseInstance
+	case *av.Calendar:
+		ret = view.BaseInstance
 	case *av.List:
 		ret = view.BaseInstance
 	case *av.Gallery:

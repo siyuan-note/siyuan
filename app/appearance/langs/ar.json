@@ -1,4 +1,18 @@
 {
+	"calendarView": "التقويم",
+	"calendarToday": "اليوم",
+	"calendarDateField": "حقل التاريخ",
+	"calendarColorField": "اللون حسب",
+	"calendarSelectDateField": "اختر حقل تاريخ لعرض التقويم",
+	"calendarReadOnlyDate": "لا يمكن تغيير أوقات النظام بالسحب",
+	"calendarInvalidRange": "تاريخ الانتهاء يسبق تاريخ البدء",
+	"calendarWeekStart": "أول يوم في الأسبوع",
+	"calendarMore": "${x} إضافية",
+	"calendarJumpDate": "الانتقال إلى تاريخ",
+	"calendarResizeStart": "اسحب لتغيير تاريخ البدء",
+	"calendarResizeEnd": "اسحب لتغيير تاريخ الانتهاء",
+	"databaseCalendarView": "عرض التقويم لقاعدة البيانات",
+	"calendarClearDate": "مسح التاريخ",
 	"runtimeInfo": "معلومات التشغيل",
 	"listMindmapRouteStart": "اسحب لتغيير عقدة البداية",
 	"listMindmapRouteEnd": "اسحب لتغيير عقدة النهاية",
@@ -2489,6 +2503,7 @@
 		"quit": "خروج من التطبيق"
 	},
 	"_attrView": {
+		"calendar": "التقويم",
 		"list": "قائمة",
 		"dateFormat": "تنسيق التاريخ",
 		"fullDate": "تاريخ محلي",

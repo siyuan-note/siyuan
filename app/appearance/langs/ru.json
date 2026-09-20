@@ -1,4 +1,18 @@
 {
+	"calendarView": "Календарь",
+	"calendarToday": "Сегодня",
+	"calendarDateField": "Поле даты",
+	"calendarColorField": "Цвет по полю",
+	"calendarSelectDateField": "Выберите поле даты для отображения календаря",
+	"calendarReadOnlyDate": "Системные даты нельзя изменить перетаскиванием",
+	"calendarInvalidRange": "Дата окончания раньше даты начала",
+	"calendarWeekStart": "Первый день недели",
+	"calendarMore": "Ещё ${x}",
+	"calendarJumpDate": "Перейти к дате",
+	"calendarResizeStart": "Перетащите, чтобы изменить дату начала",
+	"calendarResizeEnd": "Перетащите, чтобы изменить дату окончания",
+	"databaseCalendarView": "Календарное представление базы данных",
+	"calendarClearDate": "Очистить дату",
 	"runtimeInfo": "Информация о среде выполнения",
 	"listMindmapRouteStart": "Перетащите, чтобы изменить начальный узел",
 	"listMindmapRouteEnd": "Перетащите, чтобы изменить конечный узел",
@@ -2489,6 +2503,7 @@
 		"quit": "Выйти из приложения"
 	},
 	"_attrView": {
+		"calendar": "Календарь",
 		"list": "Список",
 		"dateFormat": "Формат даты",
 		"fullDate": "Локализованная дата",

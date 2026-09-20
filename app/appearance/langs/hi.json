@@ -1,4 +1,18 @@
 {
+	"calendarView": "कैलेंडर",
+	"calendarToday": "आज",
+	"calendarDateField": "तारीख फ़ील्ड",
+	"calendarColorField": "रंग का आधार",
+	"calendarSelectDateField": "कैलेंडर दिखाने के लिए तारीख फ़ील्ड चुनें",
+	"calendarReadOnlyDate": "सिस्टम का समय खींचकर नहीं बदला जा सकता",
+	"calendarInvalidRange": "समाप्ति की तारीख आरंभ की तारीख से पहले है",
+	"calendarWeekStart": "सप्ताह का पहला दिन",
+	"calendarMore": "${x} और",
+	"calendarJumpDate": "तारीख पर जाएँ",
+	"calendarResizeStart": "आरंभ की तारीख बदलने के लिए खींचें",
+	"calendarResizeEnd": "समाप्ति की तारीख बदलने के लिए खींचें",
+	"databaseCalendarView": "डेटाबेस कैलेंडर दृश्य",
+	"calendarClearDate": "तारीख साफ़ करें",
 	"runtimeInfo": "रनटाइम की जानकारी",
 	"listMindmapRouteStart": "आरंभिक नोड बदलने के लिए खींचें",
 	"listMindmapRouteEnd": "लक्ष्य नोड बदलने के लिए खींचें",
@@ -2489,6 +2503,7 @@
 		"quit": "एप्लिकेशन से बाहर निकलें"
 	},
 	"_attrView": {
+		"calendar": "कैलेंडर",
 		"list": "सूची",
 		"dateFormat": "दिनांक प्रारूप",
 		"fullDate": "स्थानीयकृत दिनांक",

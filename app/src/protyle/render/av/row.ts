@@ -24,6 +24,7 @@ import {
     getAVSelectStat,
     getAVSelectedItemInfos,
     getAvBodyData,
+    IAVItemInfo,
     resetAVRowSelect,
     updateAVRowSelect
 } from "./virtualScroll";
@@ -895,8 +896,8 @@ export const setPageSize = (options: {
     });
 };
 
-export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
-    const selectedItems = getAVSelectedItemInfos(blockElement);
+export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle,
+                          selectedItems: IAVItemInfo[] = getAVSelectedItemInfos(blockElement)) => {
     if (selectedItems.length === 0) {
         return;
     }
@@ -941,14 +942,16 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
         data: newUpdated,
     }], undoOperations);
     const selectedIDs = new Set(selectedItems.map(item => item.itemID));
-    blockElement.querySelectorAll<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id]").forEach(item => {
+    blockElement.querySelectorAll<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id], .av__calendar-item[data-id]").forEach(item => {
         if (selectedIDs.has(item.dataset.id)) {
             item.remove();
         }
     });
     clearSelect(["row", "galleryItem"], blockElement);
-    stickyRow(blockElement, protyle.contentElement, "all");
-    updateHeader(blockElement.querySelector(".av__row"));
+    if (blockElement.dataset.avType !== "calendar") {
+        stickyRow(blockElement, protyle.contentElement, "all");
+        updateHeader(blockElement.querySelector(".av__row"));
+    }
     blockElement.setAttribute("updated", newUpdated);
 };
 

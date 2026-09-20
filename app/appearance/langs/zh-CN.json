@@ -1,4 +1,18 @@
 {
+	"calendarView": "日历",
+	"calendarToday": "今天",
+	"calendarDateField": "日期字段",
+	"calendarColorField": "颜色依据",
+	"calendarSelectDateField": "选择日期字段以显示日历",
+	"calendarReadOnlyDate": "系统时间不支持拖动修改",
+	"calendarInvalidRange": "结束日期早于开始日期",
+	"calendarWeekStart": "每周起始日",
+	"calendarMore": "还有 ${x} 项",
+	"calendarJumpDate": "跳转到日期",
+	"calendarResizeStart": "拖动调整开始日期",
+	"calendarResizeEnd": "拖动调整结束日期",
+	"databaseCalendarView": "数据库日历视图",
+	"calendarClearDate": "清空日期",
 	"runtimeInfo": "运行信息",
 	"listMindmapRouteStart": "拖动更换起始节点",
 	"listMindmapRouteEnd": "拖动更换目标节点",
@@ -2489,6 +2503,7 @@
 		"quit": "退出程序"
 	},
 	"_attrView": {
+		"calendar": "日历",
 		"list": "列表",
 		"dateFormat": "日期格式",
 		"fullDate": "本地化日期",

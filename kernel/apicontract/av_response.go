@@ -61,7 +61,7 @@ type AVArchiveRenderData struct {
 	CustomColors           []*AVAttributeViewCustomColor `json:"customColors"`
 	ColorOrder             []string                      `json:"colorOrder"`
 	UsedCustomColorIndexes []int                         `json:"usedCustomColorIndexes"`
-	ViewType               string                        `json:"viewType" api:"enum=table|list|gallery|kanban"`
+	ViewType               string                        `json:"viewType" api:"enum=table|list|gallery|kanban|calendar"`
 	ViewID                 string                        `json:"viewID"`
 	Views                  []*AVViewData                 `json:"views"`
 	View                   AVViewInstance                `json:"view"`

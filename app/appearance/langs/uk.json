@@ -1,4 +1,18 @@
 {
+	"calendarView": "Календар",
+	"calendarToday": "Сьогодні",
+	"calendarDateField": "Поле дати",
+	"calendarColorField": "Колір за полем",
+	"calendarSelectDateField": "Виберіть поле дати для відображення календаря",
+	"calendarReadOnlyDate": "Системні дати не можна змінювати перетягуванням",
+	"calendarInvalidRange": "Дата завершення передує даті початку",
+	"calendarWeekStart": "Перший день тижня",
+	"calendarMore": "Ще ${x}",
+	"calendarJumpDate": "Перейти до дати",
+	"calendarResizeStart": "Перетягніть, щоб змінити дату початку",
+	"calendarResizeEnd": "Перетягніть, щоб змінити дату завершення",
+	"databaseCalendarView": "Календарне подання бази даних",
+	"calendarClearDate": "Очистити дату",
 	"runtimeInfo": "Інформація про середовище виконання",
 	"listMindmapRouteStart": "Перетягніть, щоб змінити початковий вузол",
 	"listMindmapRouteEnd": "Перетягніть, щоб змінити кінцевий вузол",
@@ -2489,6 +2503,7 @@
 		"quit": "Вийти із застосунку"
 	},
 	"_attrView": {
+		"calendar": "Календар",
 		"list": "Список",
 		"dateFormat": "Формат дати",
 		"fullDate": "Локалізована дата",

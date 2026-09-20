@@ -1,4 +1,18 @@
 {
+	"calendarView": "Kalendár",
+	"calendarToday": "Dnes",
+	"calendarDateField": "Pole dátumu",
+	"calendarColorField": "Farba podľa",
+	"calendarSelectDateField": "Vyberte pole dátumu na zobrazenie kalendára",
+	"calendarReadOnlyDate": "Systémové dátumy nemožno meniť potiahnutím",
+	"calendarInvalidRange": "Dátum ukončenia je pred dátumom začiatku",
+	"calendarWeekStart": "Prvý deň týždňa",
+	"calendarMore": "Ďalších ${x}",
+	"calendarJumpDate": "Prejsť na dátum",
+	"calendarResizeStart": "Potiahnutím zmeníte dátum začiatku",
+	"calendarResizeEnd": "Potiahnutím zmeníte dátum ukončenia",
+	"databaseCalendarView": "Kalendárové zobrazenie databázy",
+	"calendarClearDate": "Vymazať dátum",
 	"runtimeInfo": "Informácie o prostredí behu",
 	"listMindmapRouteStart": "Potiahnutím zmeníte počiatočný uzol",
 	"listMindmapRouteEnd": "Potiahnutím zmeníte cieľový uzol",
@@ -2489,6 +2503,7 @@
 		"quit": "Ukončiť aplikáciu"
 	},
 	"_attrView": {
+		"calendar": "Kalendár",
 		"list": "Zoznam",
 		"dateFormat": "Formát dátumu",
 		"fullDate": "Lokalizovaný dátum",

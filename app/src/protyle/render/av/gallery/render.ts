@@ -313,7 +313,7 @@ export const renderGallery = async (options: {
     }
     applyAVRenderContext(options.blockElement, data);
     prepareAVLocate(options.blockElement, data, resetData);
-    if (isTableLikeView(data.viewType)) {
+    if (isTableLikeView(data.viewType) || data.viewType === "calendar") {
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
         return;
     }

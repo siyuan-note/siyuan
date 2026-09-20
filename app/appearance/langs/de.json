@@ -1,4 +1,18 @@
 {
+	"calendarView": "Kalender",
+	"calendarToday": "Heute",
+	"calendarDateField": "Datumsfeld",
+	"calendarColorField": "Farbe nach",
+	"calendarSelectDateField": "Datumsfeld für den Kalender auswählen",
+	"calendarReadOnlyDate": "Systemzeitstempel können nicht verschoben werden",
+	"calendarInvalidRange": "Das Enddatum liegt vor dem Startdatum",
+	"calendarWeekStart": "Wochenbeginn",
+	"calendarMore": "${x} weitere",
+	"calendarJumpDate": "Zum Datum wechseln",
+	"calendarResizeStart": "Ziehen, um das Startdatum zu ändern",
+	"calendarResizeEnd": "Ziehen, um das Enddatum zu ändern",
+	"databaseCalendarView": "Datenbank-Kalenderansicht",
+	"calendarClearDate": "Datum löschen",
 	"runtimeInfo": "Laufzeitinformationen",
 	"listMindmapRouteStart": "Ziehen, um den Startknoten zu ändern",
 	"listMindmapRouteEnd": "Ziehen, um den Zielknoten zu ändern",
@@ -2489,6 +2503,7 @@
 		"quit": "Anwendung beenden"
 	},
 	"_attrView": {
+		"calendar": "Kalender",
 		"list": "Liste",
 		"dateFormat": "Datumsformat",
 		"fullDate": "Lokalisiertes Datum",

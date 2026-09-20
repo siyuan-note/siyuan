@@ -42,7 +42,7 @@ func avPayloadSchema(b *schemaBuilder, t reflect.Type, input bool) (*Schema, err
 	case reflect.TypeFor[AVTable](), reflect.TypeFor[AVTableColumn](), reflect.TypeFor[AVTableCell](),
 		reflect.TypeFor[AVGallery](), reflect.TypeFor[AVGalleryField](), reflect.TypeFor[AVGalleryFieldValue](),
 		reflect.TypeFor[AVKanban](), reflect.TypeFor[AVKanbanField](), reflect.TypeFor[AVKanbanFieldValue](),
-		reflect.TypeFor[AVLayoutTable](), reflect.TypeFor[AVViewTableColumn](), reflect.TypeFor[AVLayoutGallery](),
+		reflect.TypeFor[AVLayoutCalendar](), reflect.TypeFor[AVLayoutTable](), reflect.TypeFor[AVViewTableColumn](), reflect.TypeFor[AVLayoutGallery](),
 		reflect.TypeFor[AVViewGalleryCardField](), reflect.TypeFor[AVLayoutKanban](), reflect.TypeFor[AVViewKanbanField]():
 		return avEmbeddedPayloadSchema(b, t, input)
 	}

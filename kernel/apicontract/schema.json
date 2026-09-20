@@ -5635,7 +5635,8 @@
             "table",
             "list",
             "gallery",
-            "kanban"
+            "kanban",
+            "calendar"
           ]
         },
         "views": {
@@ -6176,7 +6177,8 @@
             "table",
             "list",
             "gallery",
-            "kanban"
+            "kanban",
+            "calendar"
           ]
         }
       },
@@ -6388,7 +6390,8 @@
             "table",
             "list",
             "gallery",
-            "kanban"
+            "kanban",
+            "calendar"
           ]
         },
         "viewName": {
@@ -6538,6 +6541,86 @@
       },
       "required": [
         "isDetached"
+      ],
+      "additionalProperties": false
+    },
+    "AVCalendarRange": {
+      "type": "object",
+      "properties": {
+        "end": {
+          "type": "integer"
+        },
+        "start": {
+          "type": "integer"
+        },
+        "timeZone": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "end",
+        "start",
+        "timeZone"
+      ],
+      "additionalProperties": false
+    },
+    "AVCalendarRangeInput": {
+      "type": "object",
+      "properties": {
+        "end": {
+          "type": "integer"
+        },
+        "start": {
+          "type": "integer"
+        },
+        "timeZone": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "end",
+        "start",
+        "timeZone"
+      ],
+      "additionalProperties": false
+    },
+    "AVCalendarSettings": {
+      "type": "object",
+      "properties": {
+        "colorKeyID": {
+          "type": "string"
+        },
+        "dateKeyID": {
+          "type": "string"
+        },
+        "weekStart": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "colorKeyID",
+        "dateKeyID",
+        "weekStart"
+      ],
+      "additionalProperties": false
+    },
+    "AVCalendarSettingsInput": {
+      "type": "object",
+      "properties": {
+        "colorKeyID": {
+          "type": "string"
+        },
+        "dateKeyID": {
+          "type": "string"
+        },
+        "weekStart": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "colorKeyID",
+        "dateKeyID",
+        "weekStart"
       ],
       "additionalProperties": false
     },
@@ -8304,6 +8387,149 @@
       ],
       "additionalProperties": false
     },
+    "AVLayoutCalendar": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "columns": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/AVViewTableColumn"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "filters": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVViewFilter"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "id": {
+              "type": "string"
+            },
+            "pageSize": {
+              "type": "integer"
+            },
+            "rowIds": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "settings": {
+              "$ref": "#/$defs/AVCalendarSettings"
+            },
+            "showIcon": {
+              "type": "boolean"
+            },
+            "sorts": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVViewSort"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "spec": {
+              "type": "integer"
+            },
+            "wrapField": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "columns",
+            "rowIds",
+            "settings",
+            "spec",
+            "id",
+            "showIcon",
+            "wrapField"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "columns": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/AVViewTableColumn"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rowIds": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "settings": {
+              "$ref": "#/$defs/AVCalendarSettings"
+            }
+          },
+          "required": [
+            "columns",
+            "rowIds",
+            "settings"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
     "AVLayoutGallery": {
       "anyOf": [
         {
@@ -9526,7 +9752,8 @@
             "table",
             "list",
             "gallery",
-            "kanban"
+            "kanban",
+            "calendar"
           ]
         },
         "views": {
@@ -10184,6 +10411,15 @@
         {
           "type": "object",
           "properties": {
+            "calendar": {
+              "$ref": "#/$defs/AVCalendarSettings"
+            },
+            "calendarRange": {
+              "$ref": "#/$defs/AVCalendarRange"
+            },
+            "calendarTargetDate": {
+              "type": "integer"
+            },
             "columns": {
               "anyOf": [
                 {
@@ -10346,6 +10582,15 @@
         {
           "type": "object",
           "properties": {
+            "calendar": {
+              "$ref": "#/$defs/AVCalendarSettings"
+            },
+            "calendarRange": {
+              "$ref": "#/$defs/AVCalendarRange"
+            },
+            "calendarTargetDate": {
+              "type": "integer"
+            },
             "columns": {
               "anyOf": [
                 {
@@ -12092,6 +12337,9 @@
     "AVView": {
       "type": "object",
       "properties": {
+        "calendar": {
+          "$ref": "#/$defs/AVLayoutCalendar"
+        },
         "desc": {
           "type": "string"
         },
@@ -12210,7 +12458,8 @@
             "table",
             "list",
             "gallery",
-            "kanban"
+            "kanban",
+            "calendar"
           ]
         }
       },
@@ -12257,7 +12506,8 @@
             "table",
             "list",
             "gallery",
-            "kanban"
+            "kanban",
+            "calendar"
           ]
         }
       },
@@ -19449,6 +19699,16 @@
         },
         "blockID": {
           "type": "string"
+        },
+        "calendarDate": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "groupID": {
           "anyOf": [
@@ -33244,6 +33504,16 @@
             }
           ]
         },
+        "calendarRange": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVCalendarRangeInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "createIfNotExist": {
           "anyOf": [
             {
@@ -33376,6 +33646,16 @@
             }
           ]
         },
+        "calendarRange": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVCalendarRangeInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "carrierViewID": {
           "anyOf": [
             {
@@ -33466,6 +33746,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "calendarRange": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVCalendarRangeInput"
             },
             {
               "type": "null"
@@ -63749,6 +64039,216 @@
               "anyOf": [
                 {
                   "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string"
+            },
+            "groupID": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "ignoreDefaultFill": {
+              "type": "boolean"
+            },
+            "isDetached": {
+              "type": "boolean"
+            },
+            "isTwoWay": {
+              "type": "boolean"
+            },
+            "keyID": {
+              "type": "string"
+            },
+            "layout": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nextID": {
+              "type": "string"
+            },
+            "parentID": {
+              "type": "string"
+            },
+            "previousID": {
+              "type": "string"
+            },
+            "removeDest": {
+              "type": "boolean"
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "type": "string"
+            },
+            "rowID": {
+              "type": "string"
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ]
+            },
+            "viewID": {
+              "type": "string"
+            },
+            "viewIDs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "action",
+            "id",
+            "rootID",
+            "parentID",
+            "previousID",
+            "nextID",
+            "blockIDs",
+            "blockID",
+            "deckID",
+            "avID",
+            "srcIDs",
+            "srcs",
+            "isDetached",
+            "name",
+            "type",
+            "format",
+            "keyID",
+            "rowID",
+            "isTwoWay",
+            "backRelationKeyID",
+            "removeDest",
+            "layout",
+            "groupID",
+            "targetGroupID",
+            "viewID",
+            "ignoreDefaultFill",
+            "context",
+            "data",
+            "retData"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "setAttrViewCalendar"
+              ]
+            },
+            "avID": {
+              "type": "string"
+            },
+            "backRelationKeyID": {
+              "type": "string"
+            },
+            "blockID": {
+              "type": "string"
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TransactionCellUpdate"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "context": {
+              "$ref": "#/$defs/TransactionContext"
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVCalendarSettingsInput"
                 },
                 {
                   "type": "null"
@@ -96021,6 +96521,363 @@
             "action": {
               "type": "string",
               "enum": [
+                "setAttrViewCalendar"
+              ]
+            },
+            "avID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "backRelationKeyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionCellUpdateInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TransactionContext"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVCalendarSettingsInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "format": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "groupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ignoreDefaultFill": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isDetached": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isTwoWay": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "keyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "layout": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "nextID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "parentID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "previousID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "removeDest": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rowID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": {
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ],
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
                 "setAttrViewCardLayout"
               ]
             },
@@ -104423,6 +105280,7 @@
           "setAttrViewCardCoverPosition",
           "setAttrViewCardSize",
           "setAttrViewCardWidth",
+          "setAttrViewCalendar",
           "setAttrViewCardLayout",
           "setAttrViewColFullRow",
           "setAttrViewFitImage",

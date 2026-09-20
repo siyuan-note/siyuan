@@ -470,7 +470,7 @@ func visitViewColorHolders(view *View, visitOption func(*SelectOption), visitSel
 	if nil != view.GroupCalc && nil != view.GroupCalc.FieldCalc {
 		walkValueSelects(view.GroupCalc.FieldCalc.Result, visitSelection)
 	}
-	for _, layout := range []*LayoutTable{view.Table, view.List} {
+	for _, layout := range view.TableLayouts() {
 		if nil == layout {
 			continue
 		}
@@ -670,7 +670,7 @@ func collectViewCustomColorIndexes(view *View, attrView *AttributeView, addColor
 	collectKeyCustomColorIndexes(view.GroupKey, addColor)
 	collectFilterCustomColorIndexes(view.Filters, attrView, addColor)
 	collectValueCustomColorIndexes(view.GroupVal, addColor)
-	for _, layout := range []*LayoutTable{view.Table, view.List} {
+	for _, layout := range view.TableLayouts() {
 		if nil == layout {
 			continue
 		}

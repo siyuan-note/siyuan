@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -64,10 +65,12 @@ func resolveAppearanceFilePath(root, requestPath string) (string, int) {
 	if err != nil {
 		return "", http.StatusInternalServerError
 	}
-	root, err = filepath.EvalSymlinks(root)
+	resolvedRoot, err := evalAppearanceSymlinks(root)
 	if err != nil {
+		logging.LogWarnf("resolve appearance root [%s] failed: %s", root, err)
 		return "", http.StatusNotFound
 	}
+	root = resolvedRoot
 	allowedRoot, target := root, root
 	for i, segment := range segments {
 		target = filepath.Join(target, segment)
@@ -77,13 +80,16 @@ func resolveAppearanceFilePath(root, requestPath string) (string, int) {
 			return filepath.Join(append([]string{target}, segments[i+1:]...)...), 0
 		}
 		if statErr != nil {
+			logging.LogWarnf("stat appearance resource [%s] failed: %s", target, statErr)
 			return "", http.StatusForbidden
 		}
 		if info.Mode()&os.ModeSymlink != 0 {
-			target, err = filepath.EvalSymlinks(target)
-			if err != nil {
+			resolvedTarget, resolveErr := evalAppearanceSymlinks(target)
+			if resolveErr != nil {
+				logging.LogWarnf("resolve appearance link [%s] failed: %s", target, resolveErr)
 				return "", http.StatusForbidden
 			}
+			target = resolvedTarget
 		}
 		if i == packageRootIndex {
 			info, err = os.Stat(target)

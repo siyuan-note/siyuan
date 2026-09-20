@@ -19,6 +19,7 @@ const setup = () => {
                 transactions.push({do: perform, undo})},
             "../../../../util/escape": {escapeAttr: (value: string) => value, escapeHtml: (value: string) => value},
             "../col": {getColNameByType: (type: string) => type},
+            "../viewSettingMenu": {openViewSettingMenu: (menu: {open: () => void}) => menu.open()},
             "../../../../plugin/Menu": {Menu: class {
                 items: Array<{label: string; checked: boolean; click: () => void}> = [];
                 constructor() { menus.push(this.items); }

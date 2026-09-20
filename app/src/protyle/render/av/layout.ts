@@ -12,6 +12,7 @@ import {getColIconByType} from "./col";
 import {escapeHtml} from "../../../util/escape";
 import {CARD_LAYOUT_COMPACT, CARD_LAYOUT_LIST} from "./gallery/cardLayout";
 import {Menu} from "../../../plugin/Menu";
+import {openViewSettingMenu} from "./viewSettingMenu";
 
 const getCardLayoutHTML = (view: IAVGallery | IAVKanban) => {
     return `<button class="b3-menu__item" data-type="set-card-layout">
@@ -326,8 +327,7 @@ export const bindLayoutEvent = (options: {
                 }
             });
         });
-        const rect = cardLayoutElement.getBoundingClientRect();
-        menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+        openViewSettingMenu(menu, cardLayoutElement);
         event.preventDefault();
         event.stopPropagation();
     });

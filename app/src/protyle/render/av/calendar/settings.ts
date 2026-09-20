@@ -2,6 +2,7 @@ import {transaction} from "../../../wysiwyg/transaction";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getColNameByType} from "../col";
 import {Menu} from "../../../../plugin/Menu";
+import {openViewSettingMenu} from "../viewSettingMenu";
 
 export const isCalendarDateColumn = (column: IAVColumn) => ["date", "created", "updated"].includes(column?.type);
 
@@ -84,8 +85,7 @@ export const bindCalendarSettings = (options: {
                     checked: view.calendar[item.key].toString() === choice.value,
                     click: () => update(choice.value),
                 }));
-                const rect = select.getBoundingClientRect();
-                menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+                openViewSettingMenu(menu, select);
                 event.preventDefault();
                 event.stopPropagation();
             });

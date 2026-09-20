@@ -2,6 +2,7 @@ import {isTableLikeView} from "./viewType";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByAttribute} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
+import {openViewSettingMenu} from "./viewSettingMenu";
 import {transaction} from "../../wysiwyg/transaction";
 import {
     cellValueIsEmpty,
@@ -888,12 +889,7 @@ export const setPageSize = (options: {
             });
         }
     });
-    const rect = options.target.getBoundingClientRect();
-    menu.open({
-        x: rect.left,
-        y: rect.bottom,
-        h: rect.height
-    });
+    openViewSettingMenu(menu, options.target);
 };
 
 export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle,

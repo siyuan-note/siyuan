@@ -746,6 +746,9 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, i
 
 const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: Extract<IOperation, {action: "update"}>, isUndo: boolean) => {
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
+    // 撤销按快照中的光标返回操作块；同 ID 副本优先使用当前选区所在的实例，其次使用源块。
+    const focusElement = isUndo ? updateElements.find(item => range && item.contains(range.startContainer)) ||
+        updateElements.find(item => !isInEmbedBlock(item, false)) || updateElements[0] : undefined;
     updateElements.forEach(item => {
         // 前序局部回放可能已替换包含该块的祖先，跳过失效引用。
         if (!item.parentElement) {
@@ -755,6 +758,7 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: Ex
         if (range && item.contains(range.startContainer)) {
             isRangeBlock = true;
         }
+        const isFocusBlock = item === focusElement;
         // 表格的横向、纵向滚动均发生在首个子节点（contenteditable 容器，overflow:auto）上，
         // 更新块后需一并还原，否则固定表头长表格撤销/重做会跳回开头
         // https://github.com/siyuan-note/siyuan/issues/3650 https://github.com/siyuan-note/siyuan/issues/18035
@@ -782,17 +786,18 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: Ex
 
         const wbrElement = item.querySelector("wbr");
         const codeElement = item.getAttribute("data-type") === "NodeCodeBlock" ? item.querySelector(".hljs") : undefined;
+        const restoreCaret = isFocusBlock && !!wbrElement;
         // 未高亮的代码块由 highlightRender 使用 wbr 记录偏移，并在重建 DOM 后恢复光标。
         const deferCodeBlockCaretRestore = shouldDeferCodeBlockCaretRestore({
-            isRangeBlock,
+            isRangeBlock: restoreCaret,
             isReplay: isUndo,
             hasCaret: !!wbrElement,
             isCodeBlock: !!codeElement,
             isRendered: codeElement?.getAttribute("data-render") === "true",
         });
-        if (isRangeBlock && isUndo) {
+        if (isUndo && (restoreCaret || isRangeBlock)) {
             if (wbrElement) {
-                focusByWbr(item, range, deferCodeBlockCaretRestore);
+                focusByWbr(item, range || document.createRange(), deferCodeBlockCaretRestore);
             } else {
                 focusBlock(item);
             }

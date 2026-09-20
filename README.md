@@ -284,6 +284,7 @@ If you use custom `PUID` and `PGID` values, the entrypoint script will ensure th
 Use an NGINX reverse proxy to hide port 6806. Please note:
 
 - Configure the WebSocket reverse proxy for `/ws`
+- Preserve the original `Host` header, including the port, for both regular requests and `/ws`. In NGINX, configure `proxy_set_header Host $http_host;` in both proxy locations. Using `$host` drops non-standard ports (such as `8443`), which can cause Origin validation to fail, leaving the page stuck on the logo with repeated reloads, API responses of `401`, or failed WebSocket connections
 
 #### Note
 

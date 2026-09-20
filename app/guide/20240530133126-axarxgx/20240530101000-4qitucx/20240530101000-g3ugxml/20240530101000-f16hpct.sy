@@ -7,7 +7,7 @@
 		"id": "20240530101000-f16hpct",
 		"title": "Docker サーバー",
 		"type": "doc",
-		"updated": "20260918190000"
+		"updated": "20260921003419"
 	},
 	"Children": [
 		{
@@ -740,7 +740,7 @@
 			"Properties": {
 				"ID": "20240530101000-8reh0fr",
 				"id": "20240530101000-8viay1g",
-				"updated": "20240530101000"
+				"updated": "20260921003419"
 			},
 			"Children": [
 				{
@@ -771,7 +771,7 @@
 			"Properties": {
 				"ID": "20240530101000-vxly6p7",
 				"id": "20240530101000-tzkk9tn",
-				"updated": "20240530101000"
+				"updated": "20260921003419"
 			},
 			"Children": [
 				{
@@ -812,6 +812,88 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260921003419-g3s2ee9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20260921003419-rwf16da",
+							"Type": "NodeParagraph",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通常のリクエストと "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/ws"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " の両方で、ポートを含む元の "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " ヘッダーを保持してください。NGINX の両方のプロキシ設定に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "proxy_set_header Host $http_host;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を指定します。"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "$host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を使用すると標準以外のポート（例："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "8443"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "）が失われ、Origin の検証に失敗する場合があります。その結果、ログイン後にロゴ画面で再読み込みを繰り返す、API が "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "401"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を返す、WebSocket 接続に失敗するなどの問題が発生します"
+								}
+							],
+							"Properties": {
+								"id": "20260921003419-rwf16da",
+								"updated": "20260921003419"
+							}
+						}
+					],
+					"Properties": {
+						"id": "20260921003419-g3s2ee9",
+						"updated": "20260921003419"
+					}
 				}
 			]
 		},

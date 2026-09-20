@@ -6,7 +6,7 @@
 		"id": "20201227201128-m1wrouw",
 		"title": "Docker hosting",
 		"type": "doc",
-		"updated": "20260918190000"
+		"updated": "20260921003419"
 	},
 	"Children": [
 		{
@@ -644,7 +644,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210930092059-ifrr6wz",
-				"updated": "20210930092059"
+				"updated": "20260921003419"
 			},
 			"Children": [
 				{
@@ -673,7 +673,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210930092059-34ljyge",
-				"updated": "20211112103356"
+				"updated": "20260921003419"
 			},
 			"Children": [
 				{
@@ -708,6 +708,88 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260921003419-ozfsnu8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20260921003419-hvawzrd",
+							"Type": "NodeParagraph",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Preserve the original "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " header, including the port, for both regular requests and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/ws"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". In NGINX, configure "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "proxy_set_header Host $http_host;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in both proxy locations. Using "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "$host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " drops non-standard ports (such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "8443"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "), which can cause Origin validation to fail, leaving the page stuck on the logo with repeated reloads, API responses of "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "401"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", or failed WebSocket connections"
+								}
+							],
+							"Properties": {
+								"id": "20260921003419-hvawzrd",
+								"updated": "20260921003419"
+							}
+						}
+					],
+					"Properties": {
+						"id": "20260921003419-ozfsnu8",
+						"updated": "20260921003419"
+					}
 				}
 			]
 		},

@@ -279,6 +279,7 @@ Eğer özel `PUID` ve `PGID` değerleri kullanıyorsan, `entrypoint` betiği kon
 Port 6806’yı gizlemek için NGINX ters proxy (reverse proxy) kullan. Dikkat edilmesi gerekenler:
 
 - WebSocket ters proxy’sini `/ws` yoluna göre yapılandır.
+- Hem normal isteklerde hem de `/ws` için port dahil özgün `Host` başlığını koruyun. NGINX yapılandırmasında her iki proxy konumuna da `proxy_set_header Host $http_host;` ekleyin. `$host` kullanımı standart dışı portları (örneğin `8443`) kaldırır; bu da Origin doğrulamasının başarısız olmasına, girişten sonra logoda takılıp sayfanın sürekli yenilenmesine, API isteklerinin `401` yanıtı vermesine veya WebSocket bağlantılarının başarısız olmasına neden olabilir
 
 #### Notlar
 

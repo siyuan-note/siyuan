@@ -6,7 +6,7 @@
 		"id": "20211226122459-08mi5cq",
 		"title": "Docker 伺服",
 		"type": "doc",
-		"updated": "20260918190000"
+		"updated": "20260921003419"
 	},
 	"Children": [
 		{
@@ -610,7 +610,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122519-wwlpn5g",
-				"updated": "20211226011647"
+				"updated": "20260921003419"
 			},
 			"Children": [
 				{
@@ -639,7 +639,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226122519-kh6qira",
-				"updated": "20211228132828"
+				"updated": "20260921003419"
 			},
 			"Children": [
 				{
@@ -678,6 +678,88 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260921003419-sn7b4ld",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20260921003419-w31hwdt",
+							"Type": "NodeParagraph",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "一般請求和 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/ws"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 的反向代理都需要保留原始 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 請求標頭及連接埠，在 NGINX 的兩處代理設定中均設定 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "proxy_set_header Host $http_host;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "$host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 會遺失非標準連接埠（如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "8443"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "），可能導致來源驗證失敗，表現為登入後停留在 LOGO 並反覆重新整理、介面回傳 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "401"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 WebSocket 連線失敗"
+								}
+							],
+							"Properties": {
+								"id": "20260921003419-w31hwdt",
+								"updated": "20260921003419"
+							}
+						}
+					],
+					"Properties": {
+						"id": "20260921003419-sn7b4ld",
+						"updated": "20260921003419"
+					}
 				}
 			]
 		},

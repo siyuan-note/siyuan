@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "실행 환경 정보",
 	"listMindmapRouteStart": "드래그하여 시작 노드 변경",
 	"listMindmapRouteEnd": "드래그하여 대상 노드 변경",
 	"listMindmapRouteHandle": "드래그하여 경로 조정, 드래그 핸들을 두 번 클릭하여 자동 계산으로 복원",

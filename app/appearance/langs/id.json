@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "Informasi runtime",
 	"listMindmapRouteStart": "Seret untuk mengganti simpul awal",
 	"listMindmapRouteEnd": "Seret untuk mengganti simpul tujuan",
 	"listMindmapRouteHandle": "Seret untuk menyesuaikan jalur; klik dua kali pada pegangan seret untuk mengembalikan perhitungan otomatis",

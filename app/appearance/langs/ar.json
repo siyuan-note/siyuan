@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "معلومات التشغيل",
 	"listMindmapRouteStart": "اسحب لتغيير عقدة البداية",
 	"listMindmapRouteEnd": "اسحب لتغيير عقدة النهاية",
 	"listMindmapRouteHandle": "اسحب لضبط المسار؛ انقر نقرًا مزدوجًا على مقبض السحب لاستعادة الحساب التلقائي",

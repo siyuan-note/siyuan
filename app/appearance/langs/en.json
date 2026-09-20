@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "Runtime information",
 	"listMindmapRouteStart": "Drag to change the start node",
 	"listMindmapRouteEnd": "Drag to change the end node",
 	"listMindmapRouteHandle": "Drag to adjust the path; double-click the handle to reset",

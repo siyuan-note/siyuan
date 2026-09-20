@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "Informácie o prostredí behu",
 	"listMindmapRouteStart": "Potiahnutím zmeníte počiatočný uzol",
 	"listMindmapRouteEnd": "Potiahnutím zmeníte cieľový uzol",
 	"listMindmapRouteHandle": "Potiahnutím upravíte trasu; dvojitým kliknutím na úchyt obnovíte automatický výpočet",

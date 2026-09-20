@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "Çalışma zamanı bilgileri",
 	"listMindmapRouteStart": "Başlangıç düğümünü değiştirmek için sürükleyin",
 	"listMindmapRouteEnd": "Hedef düğümü değiştirmek için sürükleyin",
 	"listMindmapRouteHandle": "Yolu ayarlamak için sürükleyin; otomatik hesaplamayı geri yüklemek için sürükleme tutamacına çift tıklayın",

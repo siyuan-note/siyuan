@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "Runtime-informatie",
 	"listMindmapRouteStart": "Sleep om het beginknooppunt te wijzigen",
 	"listMindmapRouteEnd": "Sleep om het doelknooppunt te wijzigen",
 	"listMindmapRouteHandle": "Sleep om het pad aan te passen; dubbelklik op de sleepgreep om de automatische berekening te herstellen",

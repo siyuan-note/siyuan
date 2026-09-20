@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "Informazioni di esecuzione",
 	"listMindmapRouteStart": "Trascina per cambiare il nodo iniziale",
 	"listMindmapRouteEnd": "Trascina per cambiare il nodo di destinazione",
 	"listMindmapRouteHandle": "Trascina per regolare il percorso; fai doppio clic sulla maniglia per ripristinare il calcolo automatico",

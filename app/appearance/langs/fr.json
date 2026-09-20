@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "Informations d’exécution",
 	"listMindmapRouteStart": "Faites glisser pour changer le nœud de départ",
 	"listMindmapRouteEnd": "Faites glisser pour changer le nœud d’arrivée",
 	"listMindmapRouteHandle": "Faites glisser pour ajuster le tracé ; double-cliquez sur la poignée pour rétablir le calcul automatique",

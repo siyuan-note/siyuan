@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "Información de ejecución",
 	"listMindmapRouteStart": "Arrastra para cambiar el nodo inicial",
 	"listMindmapRouteEnd": "Arrastra para cambiar el nodo final",
 	"listMindmapRouteHandle": "Arrastra para ajustar el trazado; haz doble clic en el controlador para restablecerlo",

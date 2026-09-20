@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "Laufzeitinformationen",
 	"listMindmapRouteStart": "Ziehen, um den Startknoten zu ändern",
 	"listMindmapRouteEnd": "Ziehen, um den Zielknoten zu ändern",
 	"listMindmapRouteHandle": "Ziehen, um den Verlauf anzupassen; Doppelklick auf den Ziehpunkt stellt die automatische Berechnung wieder her",

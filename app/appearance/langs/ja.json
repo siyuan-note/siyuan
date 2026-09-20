@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "実行環境情報",
 	"listMindmapRouteStart": "ドラッグして始点ノードを変更",
 	"listMindmapRouteEnd": "ドラッグして終点ノードを変更",
 	"listMindmapRouteHandle": "ドラッグして経路を調整、ハンドルをダブルクリックして自動計算に戻す",

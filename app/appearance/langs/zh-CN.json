@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "运行信息",
 	"listMindmapRouteStart": "拖动更换起始节点",
 	"listMindmapRouteEnd": "拖动更换目标节点",
 	"listMindmapRouteHandle": "拖动调整路径，双击拖拽手柄恢复自动计算",

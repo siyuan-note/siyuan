@@ -1,4 +1,5 @@
 {
+	"runtimeInfo": "Informações de execução",
 	"listMindmapRouteStart": "Arraste para alterar o nó inicial",
 	"listMindmapRouteEnd": "Arraste para alterar o nó de destino",
 	"listMindmapRouteHandle": "Arraste para ajustar o trajeto; clique duas vezes na alça para restaurar o cálculo automático",

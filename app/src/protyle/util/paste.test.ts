@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
+import {getAVRichTextSafeURL} from "../render/av/richTextValue";
 
 // 执行粘贴入口，替换剪贴板和上传接口，检查图片不会在受限片段中被丢弃。
 const source = ts.transpileModule(readFileSync(join(process.cwd(), "src/protyle/util/paste.ts"), "utf8"), {
@@ -111,5 +112,110 @@ describe("strip pasted IAL data attributes", () => {
     it("leaves ordinary markdown and non-IAL lines untouched", () => {
         const markdown = "paragraph\n\n{: not an ial line\n\n# heading\n{: id=\"20240101000000-abc123\"}";
         assert.equal(harness.api.stripPastedIALDataAttributes(markdown), markdown);
+    });
+});
+
+describe("restricted cell selected text paste", () => {
+    const runPaste = async (text: string, options: {selected?: string, code?: boolean, inlineCode?: boolean,
+        unsupported?: boolean} = {}) => {
+        const selected = options.selected ?? "Selected & text";
+        const marks: Array<{type: string, value: ITextOption}> = [];
+        const inserted: string[] = [];
+        const messages: string[] = [];
+        const range = {startContainer: {parentElement: {tagName: "DIV"}}, toString: () => selected,
+            selectNodeContents: () => {}};
+        const block = {classList: {contains: () => false},
+            getAttribute: () => options.code ? "NodeCodeBlock" : "NodeParagraph"};
+        const mocks: Record<string, unknown> = {
+            "../../constants": {Constants: {ZWSP: "\u200b"}},
+            "../runtimeCapabilities": {
+                getProtyleBlockDOMSanitizer: () => (html: string) => html,
+                getProtyleUnsupportedPasteBlocks: () => () => options.unsupported ? ["Table"] : [],
+                getProtyleRestrictedPlainTextHTML: (text: string) => "plain:" + text,
+                isProtyleUploadDisabled: () => true,
+                areProtylePluginExtensionsEnabled: () => false,
+            },
+            "../upload/insertPosition": {
+                createUploadInsertPosition: () => ({range}),
+                captureUploadDocument: () => ({}),
+                getAvailableUploadInsertRange: () => range,
+                isUploadInsertPositionAvailable: () => true,
+            },
+            "./selection": {getEditorRange: () => range},
+            "./hasClosest": {hasClosestBlock: () => block},
+            "./compatibility": {isInHarmony: () => false},
+            "./officeMath": {extractOfficeMathHTML: () => ""},
+            "../upload/htmlLocalAssets": {resolveHTMLAssetURLs: () => {}, getHTMLAssetSourceURL: () => ""},
+            "./pasteSource": {extractCrossBlockPasteContext: (html: string) => ({html})},
+            "../ui/hideElements": {hideElements: () => {}},
+            "./inlineElementMarker": {stripSemanticMarkersFromRangeText: () => selected},
+            "../../editor/pdfAssetLink": {getPdfAnnotationReference: (): undefined => undefined},
+            "../../util/functions": {isDynamicRef: (value: string) => /^\(\(\d{14}-\w{7} '.*'\)\)$/.test(value)},
+            "../toolbar/util": {resolveLinkDest: (value: string) => /^(https?:|file:|assets\/)/.test(value) ? value : ""},
+            "../render/av/richTextValue": {getAVRichTextSafeURL},
+            "./normalizeText": {removeZWJ: (value: string) => value},
+            "./insertHTML": {insertHTML: (value: string) => inserted.push(value)},
+            "../../dialog/message": {showMessage: (value: string) => messages.push(value)},
+            "../../util/escape": {escapeHtml: (value: string) => value},
+        };
+        const module = {exports: {}};
+        runInNewContext(source, {module, exports: module.exports, require: (id: string) => mocks[id] || {},
+            DOMParser: class {parseFromString() {return {querySelector: (): null => null, body: {innerHTML: ""}};}},
+            Lute: {Sanitize: (value: string) => value},
+            window: {siyuan: {languages: {cellPasteUnsupported: "Unsupported: ${x}"}}},
+        });
+        const protyle = {
+            lite: true,
+            lute: {Md2BlockDOM: (value: string) => value},
+            hint: {enableExtend: false},
+            wysiwyg: {element: {querySelectorAll: (): Element[] => []}},
+            toolbar: {range, getCurrentType: () => options.inlineCode ? ["code"] : [],
+                setInlineMark: (_protyle: unknown, type: string, _action: string, value: ITextOption) => {
+                    marks.push({type, value});
+                    return [{}];
+                }},
+        } as unknown as IProtyle;
+        await (module.exports as typeof import("./paste")).paste(protyle, {
+            textPlain: text, textHTML: "", siyuanHTML: "", target: block as unknown as HTMLElement,
+        });
+        return {marks, inserted, messages};
+    };
+
+    it("applies a static reference with the selected anchor text", async () => {
+        const result = await runPaste("((20260921000000-abcdefg 'Document title'))");
+        assert.equal(result.marks.length, 1);
+        assert.equal(result.marks[0].type, "block-ref");
+        assert.equal(result.marks[0].value.color, "20260921000000-abcdefg\u200bs\u200bSelected & text");
+        assert.deepEqual(result.inserted, []);
+    });
+
+    for (const url of ["https://example.com", "assets/document.pdf"]) {
+        it(`attaches ${url} without replacing the selected text`, async () => {
+            const result = await runPaste(url);
+            assert.equal(result.marks[0].type, "a");
+            assert.equal(result.marks[0].value.color, url);
+            assert.deepEqual(result.inserted, []);
+        });
+    }
+
+    for (const [text, options] of [
+        ["ordinary text", {}],
+        ["https://example.com", {selected: ""}],
+        ["https://example.com", {code: true}],
+        ["https://example.com", {inlineCode: true}],
+        ["file:///private/document", {}],
+    ] as const) {
+        it(`retains plain text fallback for ${text} ${JSON.stringify(options)}`, async () => {
+            const result = await runPaste(text, options);
+            assert.deepEqual(result.marks, []);
+            assert.deepEqual(result.inserted, ["plain:" + text]);
+        });
+    }
+
+    it("rejects unsupported content before changing the selection", async () => {
+        const result = await runPaste("https://example.com", {unsupported: true});
+        assert.deepEqual(result.marks, []);
+        assert.deepEqual(result.inserted, []);
+        assert.equal(result.messages.length, 1);
     });
 });

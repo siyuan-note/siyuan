@@ -51,7 +51,7 @@ test("readonly body and tab header preserve keyboard defaults and bubbling", asy
 const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false) => {
     const calls: string[] = [];
     const contexts: Array<{protyle: unknown, previousRange?: unknown}> = [];
-    const body = {};
+    const body = {localName: "div", closest: (): null => null};
     const range = {commonAncestorContainer: foreignRange ? {} : body};
     const protyle = {
         disabled,
@@ -60,6 +60,7 @@ const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false)
         preview: {element: {classList: {contains: () => true}}},
         getInstance: () => ({isFullscreen: () => false, setFullscreen: () => calls.push("fullscreen")}),
         element: {contains: (node: unknown) => node === body || (node as any)?.localName === "div"},
+        wysiwyg: {element: {contains: (node: unknown) => node === body || (node as any)?.localName === "div"}},
         undo: {undo: () => calls.push("undo"), redo: () => calls.push("redo")},
     };
     const bindings = new Proxy({}, {get: (_target, key) => key});
@@ -67,7 +68,21 @@ const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false)
         getAllEditor: () => [{protyle}],
         getSelection: () => ({rangeCount: hasRange ? 1 : 0, getRangeAt: () => range}),
         getActiveTab: (): null => null,
-        document: {querySelector: (): null => null},
+        document: {body, querySelector: (): null => null},
+        areProtylePluginExtensionsEnabled: () => true,
+        captureCommandContext: (context: {range?: unknown}) => ({...context, range: context.range || range}),
+        dispatchPluginShortcut: (_app: unknown, event: {key: string, preventDefault: () => void},
+                                 source: string, capture: () => {protyle: unknown, range?: unknown}) => {
+            if (event.key !== "pluginShortcut") {
+                return false;
+            }
+            assert.equal(source, "editorShortcut");
+            const context = capture();
+            contexts.push({protyle: context.protyle, previousRange: context.range});
+            calls.push("plugin");
+            event.preventDefault();
+            return true;
+        },
         window: {siyuan: {languages: {untitled: "Untitled"}, config: {keymap: {general: bindings, editor: {general: bindings}}}}},
         hasClosestByClassName: () => false,
         isOnlyMeta: () => false,
@@ -97,8 +112,48 @@ const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false)
     };
     const documentKeydown = loadFunction("src/boot/globalEvent/keydown.ts", "documentKeydown", globals);
     const edit = loadFunction("src/boot/globalEvent/keydown.ts", "editKeydown", {...globals, documentKeydown});
-    return {edit: (event: any) => edit({}, event), calls, contexts, protyle, range};
+    return {edit: (event: any) => edit({}, event), calls, contexts, protyle, range, body, globals};
 };
+
+test("readonly plugin shortcuts receive the editor with a valid selection or no selection", () => {
+    for (const bodyTarget of [false, true]) {
+        for (const [hasRange, foreignRange] of [[true, false], [false, false], [true, true]]) {
+            const fixture = globalFixture(true, hasRange, foreignRange);
+            const event = keyboardEvent("pluginShortcut");
+            if (bodyTarget) {
+                event.target = fixture.body;
+            }
+            assert.equal(fixture.edit(event), true);
+            assert.deepEqual(fixture.calls, ["plugin"]);
+            assert.equal(event.defaultPrevented, true);
+            assert.equal(fixture.contexts[0].protyle, fixture.protyle);
+            assert.equal(fixture.contexts[0].previousRange, hasRange && !foreignRange ? fixture.range : undefined);
+        }
+    }
+});
+
+test("readonly plugin fallback excludes controls, composition, editable and restricted editors", () => {
+    for (const control of [true, "button", '[role="tab"]', '[role="checkbox"]', "input", "textarea"]) {
+        const fixture = globalFixture(true);
+        const event = keyboardEvent("pluginShortcut", control);
+        if (control === "input" || control === "textarea") {
+            Object.assign(event.target, {tagName: control.toUpperCase()});
+        }
+        assert.equal(fixture.edit(event), false);
+        assert.deepEqual(fixture.calls, []);
+    }
+    const editable = globalFixture(false);
+    assert.equal(editable.edit(keyboardEvent("pluginShortcut")), false);
+    const composing = globalFixture(true);
+    assert.equal(composing.edit({...keyboardEvent("pluginShortcut"), isComposing: true}), false);
+    const restricted = globalFixture(true);
+    restricted.globals.areProtylePluginExtensionsEnabled = () => false;
+    const edit = loadFunction("src/boot/globalEvent/keydown.ts", "editKeydown", {
+        ...restricted.globals, documentKeydown: () => false,
+    });
+    assert.equal(edit({}, keyboardEvent("pluginShortcut")), false);
+    assert.deepEqual(restricted.calls, []);
+});
 
 test("readonly content mutations are consumed before command execution, even without a valid selection", () => {
     for (const [hasRange, foreignRange] of [[true, false], [false, false], [true, true]]) {

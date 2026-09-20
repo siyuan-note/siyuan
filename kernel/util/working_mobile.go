@@ -136,8 +136,8 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 	ShortcutsPath = filepath.Join(userHomeConfDir, "shortcuts")
 
 	AppearancePath = filepath.Join(ConfDir, "appearance")
-	ThemesPath = filepath.Join(AppearancePath, "themes")
-	IconsPath = filepath.Join(AppearancePath, "icons")
+	ThemesPath = filepath.Join(DataDir, "themes")
+	IconsPath = filepath.Join(DataDir, "icons")
 
 	LogPath = filepath.Join(TempDir, "siyuan.log")
 	logging.SetLogPath(LogPath)

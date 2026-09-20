@@ -8,9 +8,10 @@ import * as selectionState from "./selectionState";
 import * as assetUploadTarget from "./assetUploadTarget";
 import {updateAVCachedCellValue} from "./cellValue";
 import * as uploadResult from "../../upload/uploadResult";
+import * as viewType from "./viewType";
 
 // 使用完整资源消费者，控制上传完成与虚拟行移除的顺序，记录实际生成的事务。
-const createHarness = () => {
+const createHarness = (layout = "table") => {
     const column = {id: "assets", type: "mAsset"} as IAVColumn;
     const cell = {id: "value", value: {id: "value", type: "mAsset", mAsset: [
         {content: "original.png", name: "original", type: "image"},
@@ -26,7 +27,7 @@ const createHarness = () => {
         closest: () => ({dataset: {}}),
     };
     const block = {
-        getAttribute: (key: string) => ({"data-av-type": "table", "data-av-id": "av", "data-node-id": "block"})[key],
+        getAttribute: (key: string) => ({"data-av-type": layout, "data-av-id": "av", "data-node-id": "block"})[key],
         contains: () => rendered,
         querySelector: () => rendered ? element : null,
         querySelectorAll: () => rendered ? [element] : [],
@@ -34,6 +35,7 @@ const createHarness = () => {
     const operations: IOperation[] = [];
     const pending: Array<(_response: string, result: unknown) => void> = [];
     const mocks: Record<string, unknown> = {
+        "./viewType": viewType,
         "./selectionState": selectionState,
         "./assetUploadTarget": assetUploadTarget,
         "../../upload/uploadResult": uploadResult,
@@ -95,6 +97,14 @@ const createHarness = () => {
 };
 
 describe("database resource upload consumers", () => {
+    it("keeps list uploads bound to the original row after virtualization removes it", () => {
+        const harness = createHarness("list");
+        harness.start("picker");
+        harness.hide();
+        harness.complete("list.png");
+        assert.deepEqual(harness.cell.value.mAsset.map(value => value.content), ["original.png", "list.png"]);
+        assert.equal(harness.operations.filter(op => op.action === "updateAttrViewCell").length, 1);
+    });
     for (const kind of ["picker", "drop", "panel"] as const) {
         it(`${kind}: appends to a visible target`, () => {
             const harness = createHarness();

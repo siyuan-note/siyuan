@@ -27,6 +27,8 @@ const fixture = () => {
             ({doOperations, undoOperations}),
         cleanBlockSelectionModeHTML: (html: string) => html,
         cleanTableCellRichHTML: (html: string) => html,
+        cleanListMindmapHTML: (html: string) => html,
+        restoreInlineElementBoundaryHTML: (html: string) => html,
         normalizeHTMLAssetIFrameBlockDOM: (html: string) => html,
         cleanHeadingNumberOperations: (): void => undefined,
         needSubscribe: () => true,

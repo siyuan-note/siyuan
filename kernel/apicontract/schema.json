@@ -297,6 +297,9 @@
         "entryID": {
           "type": "string"
         },
+        "nativeContent": {
+          "$ref": "#/$defs/AINativeContent"
+        },
         "reasoningContent": {
           "type": "string"
         },
@@ -361,6 +364,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AINativeContentInput"
             },
             {
               "type": "null"
@@ -771,6 +784,21 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "AIDecisionTestData": {
+      "type": "object",
+      "properties": {
+        "matched": {
+          "type": "boolean"
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "matched"
+      ],
       "additionalProperties": false
     },
     "AIEditorAction": {
@@ -1398,6 +1426,59 @@
       ],
       "additionalProperties": false
     },
+    "AINativeContent": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "blocks",
+        "protocol",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "AINativeContentInput": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/JSONValue"
+          }
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "blocks",
+        "protocol",
+        "version"
+      ],
+      "additionalProperties": false
+    },
     "AIPermissionData": {
       "type": "object",
       "properties": {
@@ -1901,6 +1982,9 @@
         "name": {
           "type": "string"
         },
+        "nativeContent": {
+          "$ref": "#/$defs/AINativeContent"
+        },
         "promptTokens": {
           "type": "integer"
         },
@@ -2077,6 +2161,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AINativeContentInput"
             },
             {
               "type": "null"
@@ -2581,6 +2675,16 @@
             }
           ]
         },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AISessionExtensionAINativeContent"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "reasoningContent": {
           "anyOf": [
             {
@@ -2692,6 +2796,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AISessionExtensionAINativeContentInput"
             },
             {
               "type": "null"
@@ -3154,6 +3268,88 @@
         "$ref": "#/$defs/JSONValue"
       }
     },
+    "AISessionExtensionAINativeContent": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protocol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
+    },
+    "AISessionExtensionAINativeContentInput": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protocol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
+    },
     "AISessionExtensionAIReference": {
       "type": "object",
       "properties": {
@@ -3313,6 +3509,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AISessionExtensionAINativeContent"
             },
             {
               "type": "null"
@@ -3592,6 +3798,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeContent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AISessionExtensionAINativeContentInput"
             },
             {
               "type": "null"
@@ -5417,6 +5633,7 @@
           "type": "string",
           "enum": [
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -5957,6 +6174,7 @@
           "type": "string",
           "enum": [
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -6168,6 +6386,7 @@
           "enum": [
             "",
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -9305,6 +9524,7 @@
           "type": "string",
           "enum": [
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -11959,6 +12179,9 @@
         "kanban": {
           "$ref": "#/$defs/AVLayoutKanban"
         },
+        "list": {
+          "$ref": "#/$defs/AVLayoutTable"
+        },
         "name": {
           "type": "string"
         },
@@ -11985,6 +12208,7 @@
           "type": "string",
           "enum": [
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -12031,6 +12255,7 @@
           "type": "string",
           "enum": [
             "table",
+            "list",
             "gallery",
             "kanban"
           ]
@@ -13945,6 +14170,9 @@
     "BacklinkDocumentRequestInput": {
       "type": "object",
       "properties": {
+        "blockSort": {
+          "type": "integer"
+        },
         "containChildren": {
           "anyOf": [
             {
@@ -14100,6 +14328,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includeBacklinks": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -25707,6 +25945,204 @@
       ],
       "additionalProperties": false
     },
+    "GlobalBacklinkContextData": {
+      "type": "object",
+      "properties": {
+        "expired": {
+          "type": "boolean"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BacklinkContext"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "expired",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalBacklinkContextRequestInput": {
+      "type": "object",
+      "properties": {
+        "containChildren": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "snapshot": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer"
+        },
+        "sourceFilter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BacklinkSourceFilterInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "containChildren",
+        "id",
+        "ids",
+        "snapshot",
+        "sort"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalBacklinkItem": {
+      "type": "object",
+      "properties": {
+        "anchor": {
+          "type": "string"
+        },
+        "box": {
+          "type": "string"
+        },
+        "hPath": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "rootID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "anchor",
+        "box",
+        "hPath",
+        "id",
+        "rootID"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalBacklinkListData": {
+      "type": "object",
+      "properties": {
+        "expired": {
+          "type": "boolean"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/GlobalBacklinkItem"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "snapshot": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "expired",
+        "items",
+        "offset",
+        "snapshot",
+        "total"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalBacklinkListRequestInput": {
+      "type": "object",
+      "properties": {
+        "anchorID": {
+          "type": "string"
+        },
+        "containChildren": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "snapshot": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer"
+        },
+        "sourceFilter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BacklinkSourceFilterInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "containChildren",
+        "id",
+        "sort"
+      ],
+      "additionalProperties": false
+    },
     "GlobalGraphConf": {
       "type": "object",
       "properties": {
@@ -28465,6 +28901,48 @@
       },
       "required": [
         "markdown"
+      ],
+      "additionalProperties": false
+    },
+    "MigrateLegacyMindmapsData": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/BlockDOMData"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "converted": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "blocks",
+        "converted"
+      ],
+      "additionalProperties": false
+    },
+    "MigrateLegacyMindmapsRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "notebook"
       ],
       "additionalProperties": false
     },
@@ -35938,6 +36416,16 @@
             }
           ]
         },
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingDecisionInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "editing": {
           "anyOf": [
             {
@@ -36635,6 +37123,16 @@
             }
           ]
         },
+        "backlinkBlockSort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "backlinkContainChildren": {
           "anyOf": [
             {
@@ -36646,6 +37144,16 @@
           ]
         },
         "backlinkExpandCount": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkGlobalSort": {
           "anyOf": [
             {
               "type": "integer"
@@ -38706,6 +39214,16 @@
             }
           ]
         },
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingDecision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "editing": {
           "anyOf": [
             {
@@ -38779,6 +39297,7 @@
       },
       "required": [
         "agent",
+        "decision",
         "editing",
         "embedding",
         "imageGeneration",
@@ -40015,6 +40534,90 @@
       },
       "additionalProperties": false
     },
+    "SettingDecision": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "enabled",
+        "endpoint",
+        "name",
+        "timeout"
+      ],
+      "additionalProperties": false
+    },
+    "SettingDecisionInput": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SettingEditing": {
       "type": "object",
       "properties": {
@@ -40104,10 +40707,16 @@
             }
           ]
         },
+        "backlinkBlockSort": {
+          "type": "integer"
+        },
         "backlinkContainChildren": {
           "type": "boolean"
         },
         "backlinkExpandCount": {
+          "type": "integer"
+        },
+        "backlinkGlobalSort": {
           "type": "integer"
         },
         "backlinkHideReference": {
@@ -40393,8 +41002,10 @@
         "allowHTMLBLockScript",
         "allowSVGScript",
         "assetOpen",
+        "backlinkBlockSort",
         "backlinkContainChildren",
         "backlinkExpandCount",
+        "backlinkGlobalSort",
         "backlinkHideReference",
         "backlinkMentionExclude",
         "backlinkShowBottom",
@@ -43724,6 +44335,16 @@
     "SyncProviderRequestInput": {
       "type": "object",
       "properties": {
+        "completeAssets": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "provider": {
           "type": "number"
         }
@@ -45749,6 +46370,18 @@
         "key",
         "retentionIndexesDaily",
         "syncIndexTiming"
+      ],
+      "additionalProperties": false
+    },
+    "SystemRuntimeInfoData": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
       ],
       "additionalProperties": false
     },
@@ -106304,10 +106937,6 @@
         {
           "status": 200,
           "contentType": "text/html"
-        },
-        {
-          "status": 302,
-          "contentType": "text/html"
         }
       ]
     },
@@ -111499,6 +112128,81 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/testDecisionModel",
+      "handler": "testDecisionModel",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIDecisionTestData"
               },
               "msg": {
                 "type": "string"
@@ -124500,6 +125204,81 @@
     },
     {
       "method": "POST",
+      "path": "/api/block/migrateLegacyMindmaps",
+      "handler": "migrateLegacyMindmaps",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/MigrateLegacyMindmapsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/MigrateLegacyMindmapsData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/block/moveBlock",
       "handler": "moveBlock",
       "body": "json",
@@ -130279,6 +131058,81 @@
       "method": "POST",
       "path": "/api/filetree/duplicateDoc",
       "handler": "duplicateDoc",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/FileTreeIDRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/FileTreeDuplicateData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/filetree/duplicateDocTree",
+      "handler": "duplicateDocTree",
       "body": "json",
       "request": {
         "$ref": "#/$defs/FileTreeIDRequestInput"
@@ -140018,6 +140872,158 @@
               },
               "data": {
                 "$ref": "#/$defs/BacklinkContextData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ref/getGlobalBacklinkContexts",
+      "handler": "getGlobalBacklinkContexts",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GlobalBacklinkContextRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/GlobalBacklinkContextData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ref/getGlobalBacklinks",
+      "handler": "getGlobalBacklinks",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GlobalBacklinkListRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/GlobalBacklinkListData"
               },
               "msg": {
                 "type": "string"
@@ -152727,6 +153733,81 @@
               },
               "data": {
                 "$ref": "#/$defs/NetworkData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getRuntimeInfo",
+      "handler": "getRuntimeInfo",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemRuntimeInfoData"
               },
               "msg": {
                 "type": "string"

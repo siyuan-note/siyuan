@@ -8,6 +8,7 @@ const sources = () => {
     const preprocess = require("ifdef-loader/preprocessor").parse;
     const modules = {};
     for (const name of ["layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
+        "layout/dock/GlobalBacklinkList", "layout/dock/globalBacklinkPaging",
         "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
         "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "protyle/util/transactionQueue",
         "util/escape", "util/zIndex", "dialog/index", "layout/dock/panelSearch", "protyle/wysiwyg/backlinkTypeFold",
@@ -49,6 +50,8 @@ const runCases = async (sources) => {
         "mobile/editor": {openMobileFileById: noop},
         "util/fetch": {fetchPost: (url, data, callback) => new Promise(resolve => {
             requests.push({url, data, reply: response => {callback?.({code: 0, data: response}); resolve();}});
+        }), fetchSyncPost: (url, data) => new Promise(resolve => {
+            requests.push({url, data, reply: response => resolve({code: 0, data: response})});
         })},
         "constants": {Constants: {TIMEOUT_LOAD: 0, TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
         "protyle/util/compatibility": {updateHotkeyAfterTip: () => "", isNotCtrl: () => true},
@@ -178,6 +181,96 @@ const runCases = async (sources) => {
     assert.equal(panel.editors.length, 0);
     unregister();
     panel.destroy();
+
+    window.siyuan.config.editor.backlinkGlobalSort = 1;
+    const globalElement = document.createElement("div");
+    globalElement.className = "panel";
+    document.body.appendChild(globalElement);
+    const globalPanel = new BacklinkContent({app: {}, element: globalElement, blockId: "host", rootId: "host",
+        notebookId: "box", type: "local", surface: "mobile-sheet", onlyBacklinks: true});
+    const unregisterGlobal = panels.registerMobileBacklinkPanel(globalPanel);
+    await tick();
+    for (const request of requests.splice(0)) {
+        if (request.url === "/api/ref/getBacklink2") {
+            assert.equal(request.data.includeBacklinks, false);
+            request.reply({...list, backlinks: [], linkRefsCount: 0});
+        } else {
+            assert.equal(request.url, "/api/ref/getGlobalBacklinks");
+            request.reply({snapshot: "global", offset: 0, total: 2, items: [
+                {id: "first", rootID: "source1", box: "box", hPath: "/Source 1", anchor: "A1"},
+                {id: "second", rootID: "source2", box: "box", hPath: "/Source 2", anchor: "A2"},
+            ]});
+        }
+    }
+    for (let i = 0; i < 20 && requests.length === 0; i++) { await tick(); }
+    assert.equal(requests[0]?.url, "/api/ref/getGlobalBacklinkContexts");
+    requests.shift().reply({expired: false, items: [
+        {id: "first", revision: "first1", dom: "", blockPaths: [], expand: true},
+        {id: "second", revision: "second1", dom: "", blockPaths: [], expand: true},
+    ]});
+    await tick();
+    assert.equal(globalPanel.editors.length, 2, "global entries from separate documents must mount independently");
+    assert.equal(globalElement.querySelector(".listCount").textContent, "2");
+    assert.equal(globalElement.querySelector(".listCount").classList.contains("fn__none"), false);
+    assert.equal(registry.getMobileSecondaryEditors().length, 2);
+    const globalEditors = [...globalPanel.editors];
+    const globalList = globalPanel.globalList;
+    const firstRecord = globalList.records.get("first");
+    const originalHeight = firstRecord.element.getBoundingClientRect().height;
+    const originalScroll = globalList.onScroll;
+    globalList.onScroll = noop;
+    await globalList.release(firstRecord);
+    assert.ok(Math.abs(firstRecord.element.getBoundingClientRect().height - originalHeight) < 1,
+        "recycling must include the fallback path in the existing height");
+    const restoring = globalList.loadContexts([firstRecord]);
+    assert.equal(requests[0]?.url, "/api/ref/getGlobalBacklinkContexts");
+    requests.shift().reply({expired: false, items: [
+        {id: "first", revision: "first1", dom: "", blockPaths: [], expand: true},
+    ]});
+    await restoring;
+    assert.ok(Math.abs(firstRecord.element.getBoundingClientRect().height - originalHeight) < 1,
+        "restoring an editor must preserve the complete placeholder height");
+    globalEditors[0] = firstRecord.editor;
+    globalList.onScroll = originalScroll;
+    globalPanel.type = "bottom";
+    globalPanel.empty = true;
+    globalElement.classList.add("sy__backlink--backlinks-empty", "sy__backlink--mentions-empty");
+    globalList.clearUnavailable();
+    assert.equal(globalElement.classList.contains("sy__backlink--backlinks-empty"), false,
+        "a failed bottom list must keep its retry control visible");
+    assert.equal(globalPanel.empty, false);
+    assert.equal(globalList.message.textContent, "retry");
+    globalList.message.click();
+    await tick();
+    assert.equal(requests[0]?.url, "/api/ref/getGlobalBacklinks");
+    requests.shift().reply({snapshot: "empty", offset: 0, total: 0, items: []});
+    await tick();
+    assert.equal(globalList.hasError, false);
+    assert.equal(globalElement.classList.contains("sy__backlink--backlinks-empty"), true,
+        "a successful empty retry must restore normal empty handling");
+    globalPanel.type = "local";
+    globalList.search({...globalList.query, keyword: "restored"}, false);
+    await tick();
+    assert.equal(requests[0]?.url, "/api/ref/getGlobalBacklinks");
+    requests.shift().reply({snapshot: "restored", offset: 0, total: 1, items: [
+        {id: "first", rootID: "source1", box: "box", hPath: "/Source 1", anchor: "A1"},
+    ]});
+    for (let i = 0; i < 20 && requests.length === 0; i++) { await tick(); }
+    assert.equal(requests[0]?.url, "/api/ref/getGlobalBacklinkContexts");
+    requests.shift().reply({expired: false, items: [
+        {id: "first", revision: "first2", dom: "", blockPaths: [], expand: true},
+    ]});
+    await tick();
+    assert.equal(globalPanel.editors.length, 1);
+    globalEditors.splice(0, globalEditors.length, ...globalPanel.editors);
+    panels.removeMobileBacklinkContent({notebookId: "box"});
+    assert.equal(globalPanel.editors.length, 0);
+    assert.equal(registry.getMobileSecondaryEditors().length, 0);
+    assert.ok(globalEditors.every(editor => editor.destroyed));
+    assert.equal(globalElement.querySelector("[data-global-backlink-id]"), null);
+    unregisterGlobal();
+    globalPanel.destroy();
+    window.siyuan.config.editor.backlinkGlobalSort = 0;
 
     const ownerElement = document.createElement("div");
     document.body.appendChild(ownerElement);

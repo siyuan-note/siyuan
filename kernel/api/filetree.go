@@ -708,6 +708,19 @@ func renameDocByIDContract(c *gin.Context, request apicontract.FileTreeRenameIDR
 
 var duplicateDoc = contractHandler(apicontract.DuplicateDoc, duplicateDocContract)
 
+var duplicateDocTree = contractHandler(apicontract.DuplicateDocTree, duplicateDocTreeContract)
+
+func duplicateDocTreeContract(c *gin.Context, request apicontract.FileTreeIDRequest) apicontract.Response[apicontract.FileTreeDuplicateData] {
+	if err := holdEncryptedBlockRequests(c, "", []string{request.ID}, false); err != nil {
+		return apicontract.FailureWithTimeout[apicontract.FileTreeDuplicateData](-1, err.Error(), 7000)
+	}
+	tree, err := model.DuplicateDocTree(request.ID)
+	if err != nil {
+		return apicontract.FailureWithTimeout[apicontract.FileTreeDuplicateData](-1, err.Error(), 7000)
+	}
+	return apicontract.Success(apicontract.FileTreeDuplicateData{ID: tree.ID, Notebook: tree.Box, Path: tree.Path, HPath: tree.HPath})
+}
+
 func duplicateDocContract(c *gin.Context, request apicontract.FileTreeIDRequest) apicontract.Response[apicontract.FileTreeDuplicateData] {
 	ret := gulu.Ret.NewResult()
 
@@ -1176,6 +1189,10 @@ func listDocsByPathContract(c *gin.Context, request apicontract.FileTreeListRequ
 		for _, file := range files {
 			if model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishInvisible) &&
 				model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishDisable) {
+				// 下级文档数同样只统计发布可见的文档，避免读者据此推断被排除文档的数量
+				if 0 < file.SubFileCount {
+					file.SubFileCount = model.BoxDocSubFileCountForPublishAt(notebook, file.Path, publishAccess)
+				}
 				tempFiles = append(tempFiles, file)
 			}
 		}

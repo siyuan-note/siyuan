@@ -324,6 +324,24 @@
 
 }
 
+.protyle-db-attr[data-readonly="true"],
+.custom-attr[data-readonly="true"] {
+  [data-type="remove"],
+  [data-type="addColumn"],
+  .av__row > .block__icon[draggable] {
+    display: none;
+  }
+
+  [data-type="editCol"],
+  .custom-attr__avvalue {
+    cursor: default;
+  }
+
+  .custom-attr__avvalue:hover {
+    background-color: transparent;
+  }
+}
+
 .protyle-db-attr__body,
 .protyle-db-row__body {
   container-type: inline-size;

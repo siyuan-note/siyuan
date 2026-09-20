@@ -13,10 +13,16 @@
 </div>
 <div class="mobile-safe-area"></div>
 <div id="mobileTopBar" class="toolbar toolbar--border mobile-topbar">
-    <input class="toolbar__title fn__hidden" id="toolbarName" autocomplete="off" enterkeyhint="next">
-    <span class="toolbar__title toolbar__title--readonly fn__hidden fn__none" id="toolbarNameReadonly"></span>
+    <button id="toolbarSidebarLeft" class="toolbar__button fn__none" type="button">
+        <svg><use xlink:href="#iconPanelLeft"></use></svg>
+    </button>
+    <input class="toolbar__title fn__hidden" id="toolbarName" autocomplete="off" enterkeyhint="next" data-prevent-swipe>
+    <span class="toolbar__title toolbar__title--readonly fn__hidden fn__none" id="toolbarNameReadonly" data-prevent-swipe></span>
     <button id="toolbarSync" class="toolbar__button toolbar__icon-deactivate fn__none" type="button">
         <svg><use xlink:href="#iconCloudSucc"></use></svg>
+    </button>
+    <button id="toolbarSidebarRight" class="toolbar__button fn__none" type="button">
+        <svg><use xlink:href="#iconPanelRight"></use></svg>
     </button>
 </div>
 <div id="editor" class="fn__none fn__flex-1"></div>

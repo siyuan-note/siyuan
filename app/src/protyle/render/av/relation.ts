@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint, upDownHint} from "../../../util/upDownHint";
@@ -120,7 +121,7 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
         iconHTML: "",
         type: "empty",
         label: `<div class="fn__flex-column b3-menu__filter"${isMobile() ? "" : ' style="width: 50vw"'} >
-    <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.searchPlaceholder}"/>
+    <input spellcheck="false" class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.searchPlaceholder}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
         ${SEARCH_AV_LOADING_HTML}
@@ -883,7 +884,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
         return `<div data-av-id="${colRelationData.avID}" data-source-av-id="${data.id}" data-key-id="${colId}" class="fn__flex-column av__relation">
 <div class="b3-menu__item" data-type="nobg">
     <div class="b3-form__icona fn__flex-1" style="overflow: visible">
-        <input class="b3-text-field fn__block" style="min-width: 190px"/>
+        <input spellcheck="false" class="b3-text-field fn__block" style="min-width: 190px"/>
         <svg class="b3-form__icona-icon ariaLabel fn__none" data-position="north" data-type="copyRelatedItems" aria-label="${window.siyuan.languages.copy} ${window.siyuan.languages.relatedItems}"><use xlink:href="#iconCopy"></use></svg>
     </div>
     <span class="fn__space"></span>
@@ -944,7 +945,7 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
     if (!nodeElement.contains(cellElements[0])) {
         const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
         const rowID = getFieldIdByCellElement(cellElements[0], viewType);
-        if (viewType === "table") {
+        if (isTableLikeView(viewType)) {
             cellElements[0] = (nodeElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) ||
                 nodeElement.querySelector(`.fn__flex-1[data-col-id="${cellElements[0].dataset.colId}"]`)) as HTMLElement;
         } else {

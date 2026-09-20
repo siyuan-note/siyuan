@@ -128,6 +128,17 @@ func TestFindUnindexedTreePathIgnoresTextMatch(t *testing.T) {
 	if matchedPath := findUnindexedTreePathInAllBoxes(targetID); "" != matchedPath {
 		t.Fatalf("text content was recognized as a block ID [path=%s]", matchedPath)
 	}
+	sortPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
+	sortData := []byte(`{"` + targetID + `":1}`)
+	if err := os.WriteFile(sortPath, sortData, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if matchedPath := findUnindexedTreePathInAllBoxes(targetID); matchedPath != "" {
+		t.Fatalf("sort configuration was recognized as a document [path=%s]", matchedPath)
+	}
+	if got, err := os.ReadFile(sortPath); err != nil || string(got) != string(sortData) {
+		t.Fatalf("sort configuration changed during reindex fallback: %v", err)
+	}
 	paragraph.ID = targetID
 	if _, err := filesys.WriteTree(tree); nil != err {
 		t.Fatal(err)
@@ -175,5 +186,49 @@ func TestBoxDocSubFileCount(t *testing.T) {
 	publishAccess[0].Visible = true
 	if actual := BoxDocSubFileCountForPublish(boxID, publishAccess); actual != 1 {
 		t.Fatalf("unexpected visible published box document subfile count [%d]", actual)
+	}
+}
+
+// TestBoxDocSubFileCountForPublishAt 验证发布访问控制下指定文档的可见直接子文档数。
+func TestBoxDocSubFileCountForPublishAt(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	const (
+		boxID       = "20260716130000-abcdefg"
+		parentID    = "20260716130001-abcdefg"
+		publicID    = "20260716130002-abcdefg"
+		hiddenID    = "20260716130003-abcdefg"
+		forbiddenID = "20260716130004-abcdefg"
+	)
+	boxDir := filepath.Join(util.DataDir, boxID)
+	if err := os.MkdirAll(filepath.Join(boxDir, parentID), 0755); err != nil {
+		t.Fatal(err)
+	}
+	writeDoc := func(dir, id string) {
+		t.Helper()
+		if err := os.WriteFile(filepath.Join(boxDir, dir, id+".sy"), []byte(`{"Properties":{}}`), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeDoc(".", parentID)
+	writeDoc(parentID, publicID)
+	writeDoc(parentID, hiddenID)
+	writeDoc(parentID, forbiddenID)
+
+	parentPath := "/" + parentID + ".sy"
+	if actual := BoxDocSubFileCountForPublishAt(boxID, parentPath, PublishAccess{}); actual != 3 {
+		t.Fatalf("unexpected subfile count [%d]", actual)
+	}
+
+	publishAccess := PublishAccess{
+		{ID: hiddenID, Visible: false},
+		{ID: forbiddenID, Visible: false, Disable: true},
+	}
+	if actual := BoxDocSubFileCountForPublishAt(boxID, parentPath, publishAccess); actual != 1 {
+		t.Fatalf("unexpected published subfile count [%d]", actual)
 	}
 }

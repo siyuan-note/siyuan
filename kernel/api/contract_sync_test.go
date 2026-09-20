@@ -94,6 +94,7 @@ func TestAPIContractSyncHTTPResponses(t *testing.T) {
 		"performSync": performSync, "setSyncMode": setSyncMode, "setSyncInterval": setSyncInterval,
 		"setSyncAssetDownloadMode": setSyncAssetDownloadMode, "setSyncProviderS3": setSyncProviderS3,
 		"setSyncProviderWebDAV": setSyncProviderWebDAV, "setSyncProviderLocal": setSyncProviderLocal,
+		"setSyncProvider": setSyncProvider,
 	} {
 		engine.POST("/api/sync/"+path, handler)
 	}
@@ -108,6 +109,9 @@ func TestAPIContractSyncHTTPResponses(t *testing.T) {
 		{"performSync", `{}`, -1, 0}, {"performSync", `{"upload":null}`, -1, 0},
 		{"setSyncMode", `{"mode":3.9}`, 0, 0}, {"setSyncInterval", `{"interval":31.9}`, 0, 0},
 		{"setSyncAssetDownloadMode", `{"mode":0.9}`, -1, 0},
+		{"setSyncProvider", `{"provider":0.9}`, 0, 0},
+		{"setSyncProvider", `{"provider":0,"completeAssets":true}`, 0, 0},
+		{"setSyncProvider", `{"provider":2,"completeAssets":"true"}`, -1, 0},
 		{"setSyncProviderS3", `{"s3":null}`, -1, 0},
 		{"setSyncProviderS3", `{"s3":{"timeout":1.5}}`, -1, 5000},
 		{"setSyncProviderWebDAV", `{"webdav":{"username":false}}`, -1, 5000},
@@ -166,28 +170,33 @@ func TestAPIContractSyncBootRole(t *testing.T) {
 
 func TestAPIContractSyncPermissionBeforeBody(t *testing.T) {
 	syncTestConfiguration(t)
-	for _, role := range []model.Role{model.RoleAdministrator, model.RoleReader} {
-		engine := gin.New()
-		engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, role) })
-		engine.POST("/api/sync/setSyncProviderS3", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setSyncProviderS3)
-		recorder := httptest.NewRecorder()
-		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/sync/setSyncProviderS3", strings.NewReader("malformed body")))
-		if role == model.RoleReader {
-			if recorder.Code != 403 || recorder.Body.Len() != 0 {
-				t.Fatalf("administrator gate changed: %d %s", recorder.Code, recorder.Body.String())
+	for path, handler := range map[string]gin.HandlerFunc{
+		"/api/sync/setSyncProviderS3": setSyncProviderS3,
+		"/api/sync/setSyncProvider":   setSyncProvider,
+	} {
+		for _, role := range []model.Role{model.RoleAdministrator, model.RoleReader} {
+			engine := gin.New()
+			engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, role) })
+			engine.POST(path, model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, handler)
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", path, strings.NewReader("malformed body")))
+			if role == model.RoleReader {
+				if recorder.Code != 403 || recorder.Body.Len() != 0 {
+					t.Fatalf("administrator gate changed: %d %s", recorder.Code, recorder.Body.String())
+				}
+				continue
 			}
-			continue
-		}
-		requireAPIContract(t, "POST", "/api/sync/setSyncProviderS3", recorder)
-		var response struct {
-			Code int    `json:"code"`
-			Msg  string `json:"msg"`
-			Data struct {
-				CloseTimeout int `json:"closeTimeout"`
-			} `json:"data"`
-		}
-		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 || response.Msg != model.Conf.Language(34) || response.Data.CloseTimeout != 5000 {
-			t.Fatalf("readonly gate changed: %s (%v)", recorder.Body.String(), err)
+			requireAPIContract(t, "POST", path, recorder)
+			var response struct {
+				Code int    `json:"code"`
+				Msg  string `json:"msg"`
+				Data struct {
+					CloseTimeout int `json:"closeTimeout"`
+				} `json:"data"`
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 || response.Msg != model.Conf.Language(34) || response.Data.CloseTimeout != 5000 {
+				t.Fatalf("readonly gate changed: %s (%v)", recorder.Body.String(), err)
+			}
 		}
 	}
 }

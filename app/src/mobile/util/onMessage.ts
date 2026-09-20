@@ -22,13 +22,14 @@ import {reloadInlineStyles} from "../../util/assets";
 import {renderMobileBottomBar} from "./mobileBottomBar";
 import {Constants} from "../../constants";
 import {MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT} from "./mobileSidePanelConfig";
-import {appearanceConfigApi} from "../../config/tabs/appearanceRuntime";
+import {appearanceConfigApi, refreshAppearance} from "../../config/tabs/appearanceRuntime";
 import {applyCloudUserState} from "../../config/tabs/accountUi";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {handleMobileKernelExit} from "./kernelExit";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {applyEntryVisibility} from "../../config/entryVisibility/runtime";
 import {removeMobileBacklinkContent} from "./backlinkPanels";
+import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;
@@ -40,8 +41,15 @@ const dispatchMobileSidePanelConfigChange = () => {
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
+            case "syncPending":
+                document.getElementById("toolbarSync").classList.toggle("fn__none", !(data.data === true &&
+                    ((0 !== window.siyuan.config.sync.provider && isPaidUser()) ||
+                        (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
+                    window.siyuan.config.repo.key && window.siyuan.config.sync.enabled));
+                break;
             case "databaseIndexCommit":
                 processBacklinkIndexCommit(data.data);
+                window.siyuan.mobile.docks.tag?.update();
                 break;
             case "setEntryVisibility":
                 applyEntryVisibility(data.data);
@@ -64,6 +72,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setAppearance":
                 appearanceConfigApi.apply(data.data);
+                break;
+            case "refreshAppearance":
+                void refreshAppearance(data.data);
                 break;
             case "reloadInlineStyles":
                 void reloadInlineStyles();
@@ -184,9 +195,6 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case"syncing":
                 processSync(data);
-                if (data.code === 1) {
-                    document.getElementById("toolbarSync").classList.add("fn__none");
-                }
                 break;
             case "openFileById":
                 openMobileFileById(app, data.data.id);

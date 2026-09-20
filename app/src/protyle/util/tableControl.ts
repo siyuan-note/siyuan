@@ -1,17 +1,18 @@
 import {MenuItem} from "../../menus/Menu";
-import {clearTableCellContent, getTableCellRichPlainText, mergeTableCellContents} from "./tableCellRich";
+import {clearTableCellContent, getTableCellPlainText, mergeTableCellContents} from "./tableCellRich";
 import {renderTableCellRichElements} from "../render/tableCellRich";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {copyPlainText, encodeBase64, isMac, readClipboard} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
 import {paste} from "./paste";
-import {focusByRange, getEditorRange} from "./selection";
+import {focusByRange, getEditorRange, getUndoFocusContext} from "./selection";
 import {matchHotKey} from "./hotKey";
 import {
     buildTableGrid,
     deleteTableColumns,
     deleteTableRows,
     getTableCellSelectionIndexes,
+    getTableClipboardBlockDOM,
     getTableRangeHTML,
     isTableHeaderEnabled,
     ITableCellInfo,
@@ -32,7 +33,15 @@ import {
     isDefaultTableColumnWidth,
     TABLE_DEFAULT_COLUMN_WIDTH,
 } from "./tableColumnWidth";
-import {getVisibleBuiltinColorIndexes} from "../toolbar/inlineStyle";
+import {
+    getInlineStyleByID,
+    getInlineStyleIDFromValue,
+    getInlineStylePropertyValue,
+    getInlineStylesCache,
+    getVisibleOrderedStyleKeys,
+    isBuiltinOrderKey,
+} from "../toolbar/inlineStyle";
+import {escapeAttr} from "../../util/escape";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 
 type TableSelectionMode = "row" | "column" | "cell";
@@ -106,12 +115,13 @@ const getCell = (target: EventTarget | Node) => {
     const element = target instanceof Element ? target : (target as Node)?.parentElement;
     const cell = element?.closest?.("th, td") as HTMLTableCellElement;
     const editor = element?.closest?.(".table__cell-editor");
-    return cell && (element.closest(".protyle-wysiwyg") === cell.closest(".protyle-wysiwyg") ||
+    return cell && !cell.closest(".list-mindmap__preview-block") &&
+        (element.closest(".protyle-wysiwyg") === cell.closest(".protyle-wysiwyg") ||
         editor?.parentElement === cell) ? cell : undefined;
 };
 
 const getTableNode = (cell: HTMLTableCellElement) => {
-    if (cell?.closest(".protyle-custom")) {
+    if (cell?.closest(".protyle-custom, .list-mindmap__preview-block")) {
         return;
     }
     return cell?.closest<HTMLElement>('[data-type="NodeTable"]');
@@ -171,9 +181,6 @@ const replaceCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
     return newCell;
 };
 
-const getCellText = (cell: HTMLTableCellElement) => cell.hasAttribute("data-sy-table-cell-rich") ?
-    getTableCellRichPlainText(cell) : cell.innerText.replace(/\n+$/g, "");
-
 export const getCommonTableCellStyle = (cells: HTMLTableCellElement[], property: string) => {
     if (cells.length === 0) {
         return undefined;
@@ -201,14 +208,23 @@ export const setTableCellStyle = (protyle: IProtyle, node: HTMLElement, cells: H
 export const getTableCellBackgroundMenus = (cells: HTMLTableCellElement[],
                                              onChange: (color: string) => void): IMenu[] => {
     const backgroundColor = getCommonTableCellStyle(cells, "background-color");
-    const colors = ["", ...getVisibleBuiltinColorIndexes("backgroundColor")
-        .map(index => `var(--b3-font-background${index})`)];
-    const colorHTML = colors.map(color => {
-        const currentClass = backgroundColor === color ? " color__square--current" : "";
-        const defaultClass = color ? "" : " ariaLabel";
-        const attributes = color ? ` style="background-color:${color}"` :
-            ` aria-label="${window.siyuan.languages.default}" data-position="3south"`;
-        return `<button type="button" data-color="${color}" class="color__square${currentClass}${defaultClass}"${attributes}></button>`;
+    const data = getInlineStylesCache();
+    const backgroundStyleID = getInlineStyleIDFromValue(backgroundColor);
+    const colors = [{color: "", name: window.siyuan.languages.default, id: ""},
+        ...getVisibleOrderedStyleKeys("backgroundColor", data).map(key => {
+            if (isBuiltinOrderKey("backgroundColor", key)) {
+                return {color: `var(--b3-font-background${key})`, name: "", id: ""};
+            }
+            const style = getInlineStyleByID(key, data);
+            return {color: getInlineStylePropertyValue(style, "backgroundColor"), name: style.name, id: style.id};
+        })];
+    const colorHTML = colors.map(({color, name, id}) => {
+        const currentClass = backgroundColor === color || (id && backgroundStyleID === id) ?
+            " color__square--current" : "";
+        const labelClass = name ? " ariaLabel" : "";
+        const attributes = (color ? ` style="background-color:${escapeAttr(color)}"` : "") +
+            (name ? ` aria-label="${escapeAttr(name)}" data-position="3south"` : "");
+        return `<button type="button" data-color="${escapeAttr(color)}" class="color__square${currentClass}${labelClass}"${attributes}></button>`;
     }).join("");
     return [{
         type: "empty",
@@ -1119,7 +1135,7 @@ export class TableControl {
     private getEdgeHover(clientX: number, clientY: number) {
         const candidates: ITableEdgeHover[] = [];
         this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
-            if (table.closest(".protyle-custom")) {
+            if (table.closest(".protyle-custom, .list-mindmap__preview-block")) {
                 return;
             }
             const gridRect = this.getTableGridRect(table);
@@ -1282,7 +1298,7 @@ export class TableControl {
         const actions = new Map<HTMLTableElement, HTMLElement>();
         this.wysiwygElement.querySelectorAll<HTMLTableElement>(
             '[data-type="NodeTable"][custom-pinthead="true"] table').forEach(table => {
-            if (table.closest(".protyle-custom")) {
+            if (table.closest(".protyle-custom, .list-mindmap__preview-block")) {
                 return;
             }
             const action = table.nextElementSibling as HTMLElement;
@@ -1967,8 +1983,23 @@ export class TableControl {
             return;
         }
         const oldHTML = this.selection.node.outerHTML;
+        // 框选没有浏览器文本选区，使用活动单元格记录撤销和重做的光标位置。
+        const getFocusContext = () => {
+            const range = document.createRange();
+            range.selectNodeContents(this.selection.activeCell);
+            range.collapse(false);
+            return getUndoFocusContext(this.wysiwygElement, range, true);
+        };
+        const undoContext = getFocusContext();
         this.getSelectedCells().forEach(clearTableCellContent);
-        updateTransaction(this.protyle, this.selection.node, oldHTML);
+        if (oldHTML === this.selection.node.outerHTML) {
+            return;
+        }
+        updateTransaction(this.protyle, this.selection.node, oldHTML, undoContext, {
+            doOperations: [],
+            undoOperations: [],
+            context: getFocusContext(),
+        });
         this.scheduleRender();
     }
 
@@ -2689,8 +2720,8 @@ export class TableControl {
         container.innerHTML = html;
         const rows = Array.from(container.querySelectorAll("tr"));
         const text = rows.map(row => Array.from(row.querySelectorAll("th, td")).filter(cell =>
-            !cell.classList.contains("fn__none")).map(cell => getCellText(cell as HTMLTableCellElement)).join("\t")).join("\n");
-        const textSiyuan = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+            !cell.classList.contains("fn__none")).map(cell => getTableCellPlainText(cell)).join("\t")).join("\n");
+        const textSiyuan = getTableClipboardBlockDOM(html);
         const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${removeZWJ(textSiyuan)}`;
         return {text, textSiyuan, textHTML};
     }

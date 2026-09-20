@@ -55,7 +55,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
 </div>
 <div class="template-manager__panels">
 <div class="template-manager__sidebar">
-<input class="b3-text-field template-manager__search" type="search" placeholder="${lang.templateSearch}" aria-label="${lang.templateSearch}">
+<input spellcheck="false" class="b3-text-field template-manager__search" type="search" placeholder="${lang.templateSearch}" aria-label="${lang.templateSearch}">
 <ul class="template-manager__files b3-list b3-list--background" aria-label="${lang.template}"></ul>
 </div>
 <div class="template-manager__editor">
@@ -66,7 +66,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
 <div>${lang.templateContext}<span class="template-manager__context-name"></span></div>
 <div class="ft__on-surface">${lang.templateContextTip}</div>
 <div class="template-manager__context-fields">
-<input class="b3-text-field" type="search" placeholder="${lang.templateContextSearch}" aria-label="${lang.templateContextSearch}">
+<input spellcheck="false" class="b3-text-field" type="search" placeholder="${lang.templateContextSearch}" aria-label="${lang.templateContextSearch}">
 <select class="b3-select" aria-label="${lang.templateContext}"></select></div></div>
 <div class="template-manager__preview"></div>
 </div></div>

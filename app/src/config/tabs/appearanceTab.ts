@@ -50,6 +50,7 @@ import {
 /// #if MOBILE
 import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../mobile/util/mobileBottomBar";
 import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../mobile/util/mobileSidePanelSetting";
+import {genSidebarSettingHTML, mountSidebarSetting} from "../../mobile/util/sidebarSetting";
 import {genMobileBarsSettingHTML, mountMobileBarsSetting} from "../../mobile/util/mobileBarsSetting";
 /// #endif
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
@@ -400,7 +401,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
             type: "empty",
             label: `<div class="fn__flex-column b3-menu__filter">
     <div class="fn__flex">
-        <input class="b3-text-field fn__flex-1" data-type="font-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
+        <input spellcheck="false" class="b3-text-field fn__flex-1" data-type="font-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
         ${canShowAllFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="show-all-fonts">${escapeHtml(window.siyuan.languages.showAll)}</button>` : ""}
         ${canManageCustomFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="import-font"><svg><use xlink:href="#iconDownload"></use></svg>${escapeHtml(window.siyuan.languages.importFont)}</button>` : ""}
     </div>
@@ -809,7 +810,7 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             afterMount: (root) => {
                 /// #if !BROWSER
                 root.querySelector("#appearanceOpenTheme")?.addEventListener("click", () => {
-                    useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "themes"));
+                    useShell("openPath", path.join(window.siyuan.config.system.dataDir, "themes"));
                 });
                 /// #endif
             },
@@ -851,7 +852,7 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             afterMount: (root) => {
                 /// #if !BROWSER
                 root.querySelector("#appearanceOpenIcon")?.addEventListener("click", () => {
-                    useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "icons"));
+                    useShell("openPath", path.join(window.siyuan.config.system.dataDir, "icons"));
                 });
                 /// #endif
             },
@@ -905,6 +906,12 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("controls", window.siyuan.languages.configGroupControls);
 
     /// #if MOBILE
+    group.slot({
+        key: "mobileSidebarAccess",
+        keywords: [window.siyuan.languages.mobileSidebarSwipe, window.siyuan.languages.mobileSidebarButtons],
+        html: genSidebarSettingHTML,
+        afterMount: mountSidebarSetting,
+    });
     group.slot({
         key: "mobileBarsAutoHide",
         keywords: [window.siyuan.languages.mobileBarsAutoHide, window.siyuan.languages.mobileBarsAutoHideTip],

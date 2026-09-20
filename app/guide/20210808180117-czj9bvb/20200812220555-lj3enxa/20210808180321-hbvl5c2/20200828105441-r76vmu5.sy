@@ -6,7 +6,7 @@
 		"id": "20200828105441-r76vmu5",
 		"title": "内核参数",
 		"type": "doc",
-		"updated": "20260914011526"
+		"updated": "20260917190844"
 	},
 	"Children": [
 		{
@@ -548,7 +548,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220601085956-e4x7vfb",
-				"updated": "20220601085956"
+				"updated": "20260917190844"
 			},
 			"Children": [
 				{
@@ -604,7 +604,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220601090153-w4lmqvd",
-				"updated": "20220601091012"
+				"updated": "20260917190844"
 			},
 			"Children": [
 				{
@@ -627,7 +627,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "。这里的外观文件夹保存内置资源；第三方主题和图标包统一使用工作空间/data/themes/ 和工作空间/data/icons/，不随运行模式改变。"
 				}
 			]
 		},

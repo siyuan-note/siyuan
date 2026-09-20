@@ -9,7 +9,8 @@ import {
     getSelectAllBlockAction,
     isContinuousBlockSelection,
     restoreBlockSelectionModeState,
-    runBlockSelectionDelete
+    runBlockSelectionDelete,
+    selectAllLoadedBlocks
 } from "./blockSelection";
 
 class TestElement {
@@ -124,6 +125,36 @@ describe("getBlockSelectionToggle", () => {
             [asElement(sibling), asElement(child)]);
         assert.deepEqual(getBlockSelectionToggle([asElement(child), asElement(sibling)], asElement(parent)),
             [asElement(sibling), asElement(parent)]);
+    });
+});
+
+describe("selectAllLoadedBlocks", () => {
+    it("replaces nested and partial selections with top-level blocks only", () => {
+        const editor = new TestElement("editor", false);
+        const child = new TestElement("child");
+        const container = new TestElement("container").append(child);
+        const sibling = new TestElement("sibling");
+        const decoration = new TestElement("decoration", false);
+        editor.append(container, decoration, sibling);
+        child.classList.add(BLOCK_SELECTION_CLASS, BLOCK_SELECTION_MODE_CLASS);
+        child.setAttribute("select-start", "1");
+        child.setAttribute("select-end", "2");
+
+        assert.deepEqual(selectAllLoadedBlocks(asElement(editor)), [container, sibling]);
+        assert.deepEqual(editor.querySelectorAll(`.${BLOCK_SELECTION_CLASS}`), [container, sibling]);
+        assert.equal(child.getAttribute("select-start"), null);
+        assert.equal(child.getAttribute("select-end"), null);
+        assert.equal(child.classList.contains(BLOCK_SELECTION_MODE_CLASS), false);
+        assert.deepEqual(selectAllLoadedBlocks(asElement(editor)), [container, sibling]);
+    });
+
+    it("selects from zero marks and supports an empty editor", () => {
+        const editor = new TestElement("editor", false);
+        assert.deepEqual(selectAllLoadedBlocks(asElement(editor)), []);
+        const block = new TestElement("block");
+        editor.append(block);
+        assert.deepEqual(selectAllLoadedBlocks(asElement(editor)), [block]);
+        assert.equal(block.classList.contains(BLOCK_SELECTION_CLASS), true);
     });
 });
 

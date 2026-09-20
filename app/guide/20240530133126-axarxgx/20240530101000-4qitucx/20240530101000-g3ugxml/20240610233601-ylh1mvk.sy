@@ -6,7 +6,7 @@
 		"id": "20240610233601-ylh1mvk",
 		"title": "サービスを公開",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260918190000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160203-l0m0q2g",
-				"updated": "20260803163402"
+				"updated": "20260918190000"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160203-kmbr9ic",
-				"updated": "20260803163402"
+				"updated": "20260918190000"
 			},
 			"Children": [
 				{
@@ -154,7 +154,7 @@
 					},
 					"Properties": {
 						"id": "20260315160203-ws1iee3",
-						"updated": "20260315160459"
+						"updated": "20260918190000"
 					},
 					"Children": [
 						{
@@ -162,7 +162,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260315160203-aarfptq",
-								"updated": "20260315160459"
+								"updated": "20260918190000"
 							},
 							"Children": [
 								{
@@ -177,6 +177,19 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ です"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。Docker で公開サービスを有効にする場合は、通常のサーバーポートのマッピングに加えて、コンテナ作成コマンドに "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-p 6808:6808"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を追加してください。Docker のポートマッピングはホスト側ポート:コンテナ側ポートの形式です。公開サービスのポートを変更した場合はコンテナ側ポートも変更し、アクセス時にはホスト側ポートを使用してください。公開サービスには固定ポートを指定し、0 に設定しないでください"
 								}
 							]
 						}

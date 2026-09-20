@@ -12,9 +12,9 @@ export type AIAgentGoogleToolCallProviderData = { "thoughtSignature"?: string; }
 
 export type AIAgentGoogleToolCallProviderDataInput = { "thoughtSignature"?: string | null; };
 
-export type AIAgentMessage = { "content": string; "editorContext"?: AIEditorContext; "entryID"?: string; "reasoningContent"?: string; "references"?: Array<AIReference>; "responseOutput"?: Array<JSONValue>; "responseOutputTokens"?: number; "role": string; "roundID"?: string; "toolCalls"?: Array<AIAgentToolCall>; };
+export type AIAgentMessage = { "content": string; "editorContext"?: AIEditorContext; "entryID"?: string; "nativeContent"?: AINativeContent; "reasoningContent"?: string; "references"?: Array<AIReference>; "responseOutput"?: Array<JSONValue>; "responseOutputTokens"?: number; "role": string; "roundID"?: string; "toolCalls"?: Array<AIAgentToolCall>; };
 
-export type AIAgentMessageInput = { "content"?: string | null; "editorContext"?: AIEditorContextInput | null; "entryID"?: string | null; "reasoningContent"?: string | null; "references"?: Array<AIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "role"?: string | null; "roundID"?: string | null; "toolCalls"?: Array<AIAgentToolCallInput> | null; };
+export type AIAgentMessageInput = { "content"?: string | null; "editorContext"?: AIEditorContextInput | null; "entryID"?: string | null; "nativeContent"?: AINativeContentInput | null; "reasoningContent"?: string | null; "references"?: Array<AIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "role"?: string | null; "roundID"?: string | null; "toolCalls"?: Array<AIAgentToolCallInput> | null; };
 
 export type AIAgentToolCall = { "arguments": { [key: string]: JSONValue } | null; "argumentsJSON"?: string; "attachments"?: Array<AIAgentAttachment>; "id"?: string; "name": string; "providerData"?: AIAgentToolCallProviderData; "result"?: string; "state"?: string; };
 
@@ -31,6 +31,8 @@ export type AICapabilityAction = { "effects"?: AIToolEffects; "name": string; };
 export type AICapabilityManifest = { "actions"?: Array<AICapabilityAction>; "agentOnly"?: boolean; "available": boolean; "description": string; "effects"?: AIToolEffects; "id": string; "name": string; "ownerId"?: string; "ownerName"?: string; "runtime": string; "source": string; "title"?: string; };
 
 export type AIConfirmRequestInput = { "always"?: boolean | null; "approved"?: boolean | null; "confirmID"?: string | null; };
+
+export type AIDecisionTestData = { "matched": boolean; "msg"?: string; };
 
 export type AIEditorAction = { "action": string; "id": string; "name": string; };
 
@@ -65,6 +67,10 @@ export type AIModelRequestInput = { "model": string; "provider"?: string | null;
 export type AIModelTestData = { "available": Array<string> | null; "matched": boolean; "msg"?: string; };
 
 export type AIModelsData = { "contextLengths": Record<string, number> | null; "models": Array<string> | null; "msg"?: string; };
+
+export type AINativeContent = { "blocks": Array<JSONValue> | null; "protocol": string; "version": number; };
+
+export type AINativeContentInput = { "blocks": Array<JSONValue>; "protocol": string; "version": number; };
 
 export type AIPermissionData = { "permissionMode": string; };
 
@@ -108,9 +114,9 @@ export type AISSETurn = { "turnID": string; };
 
 export type AISSEUsage = { "cachedTokens": number; "completionTokens": number; "contextLimit": number; "lastPromptTokens": number; "promptTokens": number; "tokenBreakdown": Record<string, number> | null; };
 
-export type AISessionEntry = { "answers"?: Array<string>; "args"?: { [key: string]: JSONValue }; "blockHTML"?: string; "completionTokens"?: number; "confirmID"?: string; "content"?: string; "duration"?: number; "editorContext"?: AIEditorContext; "id"?: string; "name"?: string; "promptTokens"?: number; "questionID"?: string; "questions"?: Array<{ [key: string]: JSONValue } | null>; "reasoningContent"?: string; "references"?: Array<AIReference>; "responseOutput"?: Array<JSONValue>; "responseOutputTokens"?: number; "roundID"?: string; "snapshotID"?: string; "status"?: string; "steps"?: Array<AISessionEntryStep>; "timestamp"?: number; "toolCalls"?: Array<AIAgentToolCall>; "type": string; };
+export type AISessionEntry = { "answers"?: Array<string>; "args"?: { [key: string]: JSONValue }; "blockHTML"?: string; "completionTokens"?: number; "confirmID"?: string; "content"?: string; "duration"?: number; "editorContext"?: AIEditorContext; "id"?: string; "name"?: string; "nativeContent"?: AINativeContent; "promptTokens"?: number; "questionID"?: string; "questions"?: Array<{ [key: string]: JSONValue } | null>; "reasoningContent"?: string; "references"?: Array<AIReference>; "responseOutput"?: Array<JSONValue>; "responseOutputTokens"?: number; "roundID"?: string; "snapshotID"?: string; "status"?: string; "steps"?: Array<AISessionEntryStep>; "timestamp"?: number; "toolCalls"?: Array<AIAgentToolCall>; "type": string; };
 
-export type AISessionEntryInput = { "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AIEditorContextInput | null; "id"?: string | null; "name"?: string | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionEntryStepInput> | null; "timestamp"?: number | null; "toolCalls"?: Array<AIAgentToolCallInput> | null; "type"?: string | null; };
+export type AISessionEntryInput = { "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AIEditorContextInput | null; "id"?: string | null; "name"?: string | null; "nativeContent"?: AINativeContentInput | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionEntryStepInput> | null; "timestamp"?: number | null; "toolCalls"?: Array<AIAgentToolCallInput> | null; "type"?: string | null; };
 
 export type AISessionEntryStep = { "content"?: string; "reasoning": string; "reasoningContent"?: string; "roundID"?: string; "toolCallIDs"?: Array<string>; "toolNames"?: Array<string>; };
 
@@ -124,9 +130,9 @@ export type AISessionExtensionAIAgentGoogleToolCallProviderData = ({ "thoughtSig
 
 export type AISessionExtensionAIAgentGoogleToolCallProviderDataInput = ({ "thoughtSignature"?: string | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAIAgentMessage = ({ "content"?: string | null; "editorContext"?: AISessionExtensionAIEditorContext | null; "entryID"?: string | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReference> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "role"?: string | null; "roundID"?: string | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCall> | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAIAgentMessage = ({ "content"?: string | null; "editorContext"?: AISessionExtensionAIEditorContext | null; "entryID"?: string | null; "nativeContent"?: AISessionExtensionAINativeContent | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReference> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "role"?: string | null; "roundID"?: string | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCall> | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAIAgentMessageInput = ({ "content"?: string | null; "editorContext"?: AISessionExtensionAIEditorContextInput | null; "entryID"?: string | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "role"?: string | null; "roundID"?: string | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCallInput> | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAIAgentMessageInput = ({ "content"?: string | null; "editorContext"?: AISessionExtensionAIEditorContextInput | null; "entryID"?: string | null; "nativeContent"?: AISessionExtensionAINativeContentInput | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "role"?: string | null; "roundID"?: string | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCallInput> | null; } & { [key: string]: JSONValue });
 
 export type AISessionExtensionAIAgentToolCall = ({ "arguments"?: { [key: string]: JSONValue } | null; "argumentsJSON"?: string | null; "attachments"?: Array<AISessionExtensionAIAgentAttachment> | null; "id"?: string | null; "name"?: string | null; "providerData"?: AISessionExtensionAIAgentToolCallProviderData | null; "result"?: string | null; "state"?: string | null; } & { [key: string]: JSONValue });
 
@@ -140,13 +146,17 @@ export type AISessionExtensionAIEditorContext = ({ "activeDocID"?: string | null
 
 export type AISessionExtensionAIEditorContextInput = ({ "activeDocID"?: string | null; "activeDocTitle"?: string | null; "focusedBlockID"?: string | null; "notebookID"?: string | null; "selectedBlockIDs"?: Array<string> | null; "visibleBlockIDs"?: Array<string> | null; } & { [key: string]: JSONValue });
 
+export type AISessionExtensionAINativeContent = ({ "blocks"?: Array<JSONValue> | null; "protocol"?: string | null; "version"?: number | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAINativeContentInput = ({ "blocks"?: Array<JSONValue> | null; "protocol"?: string | null; "version"?: number | null; } & { [key: string]: JSONValue });
+
 export type AISessionExtensionAIReference = ({ "id"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
 
 export type AISessionExtensionAIReferenceInput = ({ "id"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAISessionEntry = ({ "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AISessionExtensionAIEditorContext | null; "id"?: string | null; "name"?: string | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReference> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionExtensionAISessionEntryStep> | null; "timestamp"?: number | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCall> | null; "type"?: string | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAISessionEntry = ({ "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AISessionExtensionAIEditorContext | null; "id"?: string | null; "name"?: string | null; "nativeContent"?: AISessionExtensionAINativeContent | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReference> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionExtensionAISessionEntryStep> | null; "timestamp"?: number | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCall> | null; "type"?: string | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAISessionEntryInput = ({ "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AISessionExtensionAIEditorContextInput | null; "id"?: string | null; "name"?: string | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionExtensionAISessionEntryStepInput> | null; "timestamp"?: number | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCallInput> | null; "type"?: string | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAISessionEntryInput = ({ "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AISessionExtensionAIEditorContextInput | null; "id"?: string | null; "name"?: string | null; "nativeContent"?: AISessionExtensionAINativeContentInput | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionExtensionAISessionEntryStepInput> | null; "timestamp"?: number | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCallInput> | null; "type"?: string | null; } & { [key: string]: JSONValue });
 
 export type AISessionExtensionAISessionEntryStep = ({ "content"?: string | null; "reasoning"?: string | null; "reasoningContent"?: string | null; "roundID"?: string | null; "toolCallIDs"?: Array<string> | null; "toolNames"?: Array<string> | null; } & { [key: string]: JSONValue });
 
@@ -194,7 +204,7 @@ export type AIToolEffectsInput = { "dataEgress"?: boolean | null; "externalCost"
 
 export type AIUserSkillInfo = { "description": string; "enabled": boolean; "id": string; "name": string; "shadowed": boolean; };
 
-export type AVArchiveRenderData = { "colorOrder": Array<string> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "gallery" | "kanban"; "views": Array<AVViewData | null> | null; };
+export type AVArchiveRenderData = { "colorOrder": Array<string> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "list" | "gallery" | "kanban"; "views": Array<AVViewData | null> | null; };
 
 export type AVAttributeViewBacklink = { "avID": string; "avName": string; "blockIDs": Array<string> | null; "boundBlockID": string; "boxID": string; "databaseBlockID": string; "databasePath": string; "icon": string; "isDetached": boolean; "itemID": string; "relations": Array<AVAttributeViewBacklinkRelation | null> | null; "title": string; "valueID": string; };
 
@@ -220,7 +230,7 @@ export type AVAttributeViewCustomColorInput = { "dark"?: AVAttributeViewColorThe
 
 export type AVAttributeViewData = { "cardCoverPositions"?: Record<string, Record<string, AVCardCoverPosition | null> | null>; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID"?: string; "id": string; "keyIDs": Array<string> | null; "keyValues": Array<AVKeyValues | null> | null; "name": string; "newItemTemplates"?: Array<AVNewItemTemplate | null>; "spec": number; "viewID": string; "views": Array<AVView | null> | null; };
 
-export type AVAttributeViewFieldView = { "hidden": boolean; "icon": string; "id": string; "name": string; "type": "table" | "gallery" | "kanban"; };
+export type AVAttributeViewFieldView = { "hidden": boolean; "icon": string; "id": string; "name": string; "type": "table" | "list" | "gallery" | "kanban"; };
 
 export type AVAttributeViewGroupItemPosition = { "groupID": string; "previousID": string; };
 
@@ -230,7 +240,7 @@ export type AVAttributeViewRenderTarget = { "groupID"?: string; "index": number;
 
 export type AVAttributeViewSearchTarget = { "avID": string; "boundBlockID": string; "databaseBlockID": string; "groupID"?: string; "isDetached": boolean; "itemID": string; "keywords": Array<string> | null; "matchedKeyID": string; "matchedValueID": string; "notebookID": string; "title": string; "valueID": string; "viewID"?: string; };
 
-export type AVAvSearchResult = { "avID": string; "avName": string; "blockID": string; "children"?: Array<AVAvSearchResult | null>; "hPath": string; "matched"?: boolean; "viewID": string; "viewLayout": "" | "table" | "gallery" | "kanban"; "viewName": string; };
+export type AVAvSearchResult = { "avID": string; "avName": string; "blockID": string; "children"?: Array<AVAvSearchResult | null>; "hPath": string; "matched"?: boolean; "viewID": string; "viewLayout": "" | "table" | "list" | "gallery" | "kanban"; "viewName": string; };
 
 export type AVBlockAttributeViewKeys = { "avID": string; "avName": string; "blockIDs": Array<string> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "itemPositions": Array<AVAttributeViewItemPosition | null> | null; "keyValues": Array<AVKeyValues | null> | null; };
 
@@ -332,7 +342,7 @@ export type AVRelativeDate = { "count": number; "direction": number; "unit": num
 
 export type AVRelativeDateInput = { "count"?: number | null; "direction"?: number | null; "unit"?: number | null; };
 
-export type AVRenderData = { "colorOrder": Array<string> | null; "contextFilter": AVAttributeViewContextFilter | null; "contextFilterFields": Array<AVAttributeViewContextFilterField | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "target"?: AVAttributeViewRenderTarget; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "gallery" | "kanban"; "views": Array<AVViewData | null> | null; };
+export type AVRenderData = { "colorOrder": Array<string> | null; "contextFilter": AVAttributeViewContextFilter | null; "contextFilterFields": Array<AVAttributeViewContextFilterField | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "target"?: AVAttributeViewRenderTarget; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "list" | "gallery" | "kanban"; "views": Array<AVViewData | null> | null; };
 
 export type AVRenderResult = (AVRenderData & { "error"?: never; }) | (AVViewNotFound & { "colorOrder"?: never; "contextFilter"?: never; "contextFilterFields"?: never; "customColors"?: never; "defaultTemplateID"?: never; "id"?: never; "isMirror"?: never; "name"?: never; "newItemTemplates"?: never; "target"?: never; "usedCustomColorIndexes"?: never; "view"?: never; "viewID"?: never; "viewType"?: never; "views"?: never; });
 
@@ -444,9 +454,9 @@ export type AVValueUpdatedInput = { "content"?: number | null; "content2"?: numb
 
 export type AVValuesData = { "values": Record<string, AVValue | null> | null; };
 
-export type AVView = { "desc": string; "filters"?: Array<AVViewFilter | null>; "gallery"?: AVLayoutGallery; "group"?: AVViewGroup; "groupCalc"?: AVGroupCalc; "groupCreated": number; "groupFolded": boolean; "groupHidden": number; "groupItemIds": Array<string> | null; "groupKey"?: AVKey; "groupSort": number; "groupVal"?: AVValue; "groups"?: Array<AVView | null>; "hideAttrViewName": boolean; "icon": string; "id": string; "itemIds"?: Array<string>; "kanban"?: AVLayoutKanban; "name": string; "pageSize": number; "sorts"?: Array<AVViewSort | null>; "table"?: AVLayoutTable; "type": "table" | "gallery" | "kanban"; };
+export type AVView = { "desc": string; "filters"?: Array<AVViewFilter | null>; "gallery"?: AVLayoutGallery; "group"?: AVViewGroup; "groupCalc"?: AVGroupCalc; "groupCreated": number; "groupFolded": boolean; "groupHidden": number; "groupItemIds": Array<string> | null; "groupKey"?: AVKey; "groupSort": number; "groupVal"?: AVValue; "groups"?: Array<AVView | null>; "hideAttrViewName": boolean; "icon": string; "id": string; "itemIds"?: Array<string>; "kanban"?: AVLayoutKanban; "list"?: AVLayoutTable; "name": string; "pageSize": number; "sorts"?: Array<AVViewSort | null>; "table"?: AVLayoutTable; "type": "table" | "list" | "gallery" | "kanban"; };
 
-export type AVViewData = { "desc": string; "hideAttrViewName": boolean; "icon": string; "id": string; "name": string; "pageSize": number; "type": "table" | "gallery" | "kanban"; };
+export type AVViewData = { "desc": string; "hideAttrViewName": boolean; "icon": string; "id": string; "name": string; "pageSize": number; "type": "table" | "list" | "gallery" | "kanban"; };
 
 export type AVViewFilter = { "column": string; "combination"?: "and" | "or"; "dateEndpoint"?: "start" | "end"; "filters"?: Array<AVViewFilter | null>; "operator": "" | "=" | "!=" | "\u003e" | "\u003e=" | "\u003c" | "\u003c=" | "Contains" | "Does not contains" | "Contains any item" | "Does not contain any item" | "Is empty" | "Is not empty" | "Starts with" | "Ends with" | "Is between" | "Is true" | "Is false"; "quantifier"?: string; "relativeDate"?: AVRelativeDate; "relativeDate2"?: AVRelativeDate; "value": AVValue | null; "valueSource"?: "stored" | "rendered"; };
 
@@ -554,11 +564,11 @@ export type BacklinkContext = { "attributeViewTargets"?: Array<BacklinkAttribute
 
 export type BacklinkContextData = { "backlinks": Array<BacklinkContext | null> | null; "backmentions": Array<BacklinkContext | null> | null; "keywords": Array<string> | null; "revision": string; "unchanged": boolean; };
 
-export type BacklinkDocumentRequestInput = { "containChildren"?: boolean | null; "defID": string; "highlight"?: boolean | null; "keyword": string; "knownRevision"?: string | null; "notebook"?: string; "refTreeID": string; "sourceFilter"?: BacklinkSourceFilterInput | null; };
+export type BacklinkDocumentRequestInput = { "blockSort"?: number; "containChildren"?: boolean | null; "defID": string; "highlight"?: boolean | null; "keyword": string; "knownRevision"?: string | null; "notebook"?: string; "refTreeID": string; "sourceFilter"?: BacklinkSourceFilterInput | null; };
 
 export type BacklinkList = { "backlinks": Array<BacklinkPath | null> | null; "backmentions": Array<BacklinkPath | null> | null; "box": string; "k": string; "linkRefsCount": number; "mentionsCount": number; "mk": string; "revision": string; "unchanged": boolean; };
 
-export type BacklinkListRequestInput = { "containChildren"?: boolean | null; "id"?: string | null; "includeMentions"?: boolean | null; "k"?: string; "knownRevision"?: string | null; "mSort"?: string | null; "mk"?: string; "notebook"?: string | null; "refDefCandidates"?: boolean | null; "sort"?: string | null; "sourceFilter"?: BacklinkSourceFilterInput | null; };
+export type BacklinkListRequestInput = { "containChildren"?: boolean | null; "id"?: string | null; "includeBacklinks"?: boolean | null; "includeMentions"?: boolean | null; "k"?: string; "knownRevision"?: string | null; "mSort"?: string | null; "mk"?: string; "notebook"?: string | null; "refDefCandidates"?: boolean | null; "sort"?: string | null; "sourceFilter"?: BacklinkSourceFilterInput | null; };
 
 export type BacklinkPath = { "blocks"?: Array<SearchBlock | null>; "box": string; "children"?: Array<SearchPath | null>; "count": number; "created": string; "depth": number; "folded": boolean; "hPath": string; "id": string; "name": string; "nameIsHTML"?: boolean; "nodeType": string; "number"?: string; "revision": string; "subType": string; "type": string; "updated": string; };
 
@@ -1114,6 +1124,16 @@ export type GetTagRequestInput = { "app"?: string | null; "ignoreMaxListHint"?: 
 
 export type GetUpdatedPackageRequestInput = { "frontend": string; };
 
+export type GlobalBacklinkContextData = { "expired": boolean; "items": Array<BacklinkContext | null> | null; };
+
+export type GlobalBacklinkContextRequestInput = { "containChildren": boolean; "id": string; "ids": Array<string>; "keyword"?: string; "notebook"?: string; "snapshot": string; "sort": number; "sourceFilter"?: BacklinkSourceFilterInput | null; };
+
+export type GlobalBacklinkItem = { "anchor": string; "box": string; "hPath": string; "id": string; "rootID": string; };
+
+export type GlobalBacklinkListData = { "expired": boolean; "items": Array<GlobalBacklinkItem | null> | null; "offset": number; "snapshot": string; "total": number; };
+
+export type GlobalBacklinkListRequestInput = { "anchorID"?: string; "containChildren": boolean; "id": string; "keyword"?: string; "notebook"?: string; "offset"?: number; "snapshot"?: string; "sort": number; "sourceFilter"?: BacklinkSourceFilterInput | null; };
+
 export type GlobalGraphConf = { "d3": GraphD3 | null; "dailyNote": boolean; "minRefs": number; "type": GraphTypeFilter | null; };
 
 export type GlobalGraphRequestInput = { "conf": GraphConfigurationFieldsInput; "k"?: string | null; "reqId"?: JSONValue | null; };
@@ -1269,6 +1289,10 @@ export type LockScreenRequestInput = { "lockScreenMode": number; };
 export type Login2faEnvelope = { "code": number; "data": ({ "code": number; "msg": string; } & { [key: string]: JSONValue }) | null; "msg": string; };
 
 export type MarkdownHTMLRequestInput = { "markdown": string; "mode"?: string | null; };
+
+export type MigrateLegacyMindmapsData = { "blocks": Array<BlockDOMData> | null; "converted": number; };
+
+export type MigrateLegacyMindmapsRequestInput = { "id": string; "notebook": string; };
 
 export type MoveBlockRequestInput = { "id": string; "parentID"?: string | null; "previousID"?: string | null; };
 
@@ -1658,7 +1682,7 @@ export type SearchWidgetData = { "k": string; "widgets": Array<SearchWidgetResul
 
 export type SearchWidgetResult = { "content": string; "name": string; };
 
-export type SetAIRequestInput = { "agent"?: SettingAgentInput | null; "editing"?: SettingEditingInput | null; "embedding"?: SettingEmbeddingInput | null; "imageGeneration"?: SettingImageGenerationInput | null; "mcp"?: SettingMCPInput | null; "providers"?: Array<SettingProviderInput | null> | null; "rerank"?: SettingRerankInput | null; };
+export type SetAIRequestInput = { "agent"?: SettingAgentInput | null; "decision"?: SettingDecisionInput | null; "editing"?: SettingEditingInput | null; "embedding"?: SettingEmbeddingInput | null; "imageGeneration"?: SettingImageGenerationInput | null; "mcp"?: SettingMCPInput | null; "providers"?: Array<SettingProviderInput | null> | null; "rerank"?: SettingRerankInput | null; };
 
 export type SetAppearanceRequestInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
 
@@ -1688,7 +1712,7 @@ export type SetCriterionRequestInput = { "criterion": CriterionInput | null; };
 
 export type SetDatabaseBlockViewRequestInput = { "avID": string; "id": string; "viewID": string; };
 
-export type SetEditorRequestInput = { "allowHTMLBLockScript"?: boolean | null; "allowSVGScript"?: boolean | null; "assetOpen"?: SettingAssetOpenInput | null; "backlinkContainChildren"?: boolean | null; "backlinkExpandCount"?: number | null; "backlinkHideReference"?: boolean | null; "backlinkMentionExclude"?: string | null; "backlinkShowBottom"?: boolean | null; "backlinkSort"?: number | null; "backmentionExpandCount"?: number | null; "backmentionSort"?: number | null; "blockRefDynamicAnchorTextMaxLen"?: number | null; "checkBlockRef"?: boolean | null; "codeFontFamilies"?: Array<SettingEditorFontInput | null> | null; "codeLigatures"?: boolean | null; "codeLineWrap"?: boolean | null; "codeSyntaxHighlightLineNum"?: boolean | null; "codeTabSpaces"?: number | null; "cursorSurroundingLines"?: number | null; "databaseAttrClickMode"?: number | null; "databaseAttrHideEmpty"?: boolean | null; "databaseAttrShow"?: boolean | null; "databaseAttrUseTabs"?: boolean | null; "databaseAttrViewMode"?: number | null; "displayBookmarkIcon"?: boolean | null; "displayNetImgMark"?: boolean | null; "dragHTMLFileToIframe"?: boolean | null; "dynamicLoadBlocks"?: number | null; "embedBlockBreadcrumb"?: boolean | null; "emoji"?: Array<string> | null; "floatWindowDelay"?: number | null; "floatWindowMode"?: number | null; "fontFamilies"?: Array<SettingEditorFontInput | null> | null; "fontFamily"?: string | null; "fontFamilyDisplay"?: string | null; "fontSize"?: number | null; "fontSizeScrollZoom"?: boolean | null; "fontWeight"?: number | null; "fullWidth"?: boolean | null; "generateHistoryInterval"?: number | null; "hashTagSearch"?: boolean | null; "headingEmbedMode"?: number | null; "headingNumber"?: boolean | null; "headingNumberFormat"?: string | null; "historyRetentionDays"?: number | null; "justify"?: boolean | null; "katexMacros"?: string | null; "keepLoadedContent"?: boolean | null; "listItemDotNumberClickFocus"?: boolean | null; "listLogicalOutdent"?: boolean | null; "markdown"?: SettingMarkdownInput | null; "onlySearchForDoc"?: boolean | null; "pasteURLAutoConvert"?: boolean | null; "plantUMLServePath"?: string | null; "readOnly"?: boolean | null; "rtl"?: boolean | null; "spellcheck"?: boolean | null; "spellcheckLanguages"?: Array<string> | null; "virtualBlockRef"?: boolean | null; "virtualBlockRefExclude"?: string | null; "virtualBlockRefInclude"?: string | null; };
+export type SetEditorRequestInput = { "allowHTMLBLockScript"?: boolean | null; "allowSVGScript"?: boolean | null; "assetOpen"?: SettingAssetOpenInput | null; "backlinkBlockSort"?: number | null; "backlinkContainChildren"?: boolean | null; "backlinkExpandCount"?: number | null; "backlinkGlobalSort"?: number | null; "backlinkHideReference"?: boolean | null; "backlinkMentionExclude"?: string | null; "backlinkShowBottom"?: boolean | null; "backlinkSort"?: number | null; "backmentionExpandCount"?: number | null; "backmentionSort"?: number | null; "blockRefDynamicAnchorTextMaxLen"?: number | null; "checkBlockRef"?: boolean | null; "codeFontFamilies"?: Array<SettingEditorFontInput | null> | null; "codeLigatures"?: boolean | null; "codeLineWrap"?: boolean | null; "codeSyntaxHighlightLineNum"?: boolean | null; "codeTabSpaces"?: number | null; "cursorSurroundingLines"?: number | null; "databaseAttrClickMode"?: number | null; "databaseAttrHideEmpty"?: boolean | null; "databaseAttrShow"?: boolean | null; "databaseAttrUseTabs"?: boolean | null; "databaseAttrViewMode"?: number | null; "displayBookmarkIcon"?: boolean | null; "displayNetImgMark"?: boolean | null; "dragHTMLFileToIframe"?: boolean | null; "dynamicLoadBlocks"?: number | null; "embedBlockBreadcrumb"?: boolean | null; "emoji"?: Array<string> | null; "floatWindowDelay"?: number | null; "floatWindowMode"?: number | null; "fontFamilies"?: Array<SettingEditorFontInput | null> | null; "fontFamily"?: string | null; "fontFamilyDisplay"?: string | null; "fontSize"?: number | null; "fontSizeScrollZoom"?: boolean | null; "fontWeight"?: number | null; "fullWidth"?: boolean | null; "generateHistoryInterval"?: number | null; "hashTagSearch"?: boolean | null; "headingEmbedMode"?: number | null; "headingNumber"?: boolean | null; "headingNumberFormat"?: string | null; "historyRetentionDays"?: number | null; "justify"?: boolean | null; "katexMacros"?: string | null; "keepLoadedContent"?: boolean | null; "listItemDotNumberClickFocus"?: boolean | null; "listLogicalOutdent"?: boolean | null; "markdown"?: SettingMarkdownInput | null; "onlySearchForDoc"?: boolean | null; "pasteURLAutoConvert"?: boolean | null; "plantUMLServePath"?: string | null; "readOnly"?: boolean | null; "rtl"?: boolean | null; "spellcheck"?: boolean | null; "spellcheckLanguages"?: Array<string> | null; "virtualBlockRef"?: boolean | null; "virtualBlockRefExclude"?: string | null; "virtualBlockRefInclude"?: string | null; };
 
 export type SetEntryVisibilityRequestInput = { "active"?: string | null; "profiles"?: Array<SettingEntryVisibilityProfileInput | null> | null; "version"?: number | null; };
 
@@ -1736,7 +1760,7 @@ export type SetSyncWebDAVRequestInput = { "webdav": SyncWebDAVInput; };
 
 export type SetVariablesRequestInput = { "items"?: Array<SettingVariableInput | null> | null; };
 
-export type SettingAI = { "agent": SettingAgent | null; "editing": SettingEditing | null; "embedding": SettingEmbedding | null; "imageGeneration": SettingImageGeneration | null; "mcp": SettingMCP | null; "providers": Array<SettingProvider | null> | null; "rerank": SettingRerank | null; };
+export type SettingAI = { "agent": SettingAgent | null; "decision": SettingDecision | null; "editing": SettingEditing | null; "embedding": SettingEmbedding | null; "imageGeneration": SettingImageGeneration | null; "mcp": SettingMCP | null; "providers": Array<SettingProvider | null> | null; "rerank": SettingRerank | null; };
 
 export type SettingAgent = { "approvalPolicy": SettingApprovalPolicy | null; "capabilityPolicy": SettingCapabilityPolicy | null; "confirmTimeout": number; "maxCompletionTokens": number; "maxRetries": number; "maxToolCallRounds": number; "modelId": string; "sessionTimeout": number; "skills": SettingAgentSkills | null; "streamIdleTimeout": number; "temperature": number; };
 
@@ -1806,11 +1830,15 @@ export type SettingCapabilityPolicyInput = { "default"?: string | null; "overrid
 
 export type SettingCloudUserRequestInput = { "token"?: string | null; };
 
+export type SettingDecision = { "apiKey": string; "enabled": boolean; "endpoint": string; "name": string; "timeout": number; };
+
+export type SettingDecisionInput = { "apiKey"?: string | null; "enabled"?: boolean | null; "endpoint"?: string | null; "name"?: string | null; "timeout"?: number | null; };
+
 export type SettingEditing = { "maxCompletionTokens": number; "maxHistoryMessages": number; "modelId": string; "temperature": number; };
 
 export type SettingEditingInput = { "maxCompletionTokens"?: number | null; "maxHistoryMessages"?: number | null; "modelId"?: string | null; "temperature"?: number | null; };
 
-export type SettingEditor = { "allowHTMLBLockScript": boolean; "allowSVGScript": boolean; "assetOpen": SettingAssetOpen | null; "backlinkContainChildren": boolean; "backlinkExpandCount": number; "backlinkHideReference": boolean; "backlinkMentionExclude": string; "backlinkShowBottom": boolean; "backlinkSort": number | null; "backmentionExpandCount": number; "backmentionSort": number | null; "blockRefDynamicAnchorTextMaxLen": number; "checkBlockRef": boolean | null; "codeFontFamilies": Array<SettingEditorFont | null> | null; "codeLigatures": boolean; "codeLineWrap": boolean; "codeSyntaxHighlightLineNum": boolean; "codeTabSpaces": number; "cursorSurroundingLines": number; "databaseAttrClickMode": number; "databaseAttrHideEmpty": boolean; "databaseAttrShow": boolean | null; "databaseAttrUseTabs": boolean | null; "databaseAttrViewMode": number; "displayBookmarkIcon": boolean; "displayNetImgMark": boolean; "dragHTMLFileToIframe": boolean; "dynamicLoadBlocks": number; "embedBlockBreadcrumb": boolean; "emoji": Array<string> | null; "floatWindowDelay": number | null; "floatWindowMode": number; "fontFamilies": Array<SettingEditorFont | null> | null; "fontFamily": string; "fontFamilyDisplay": string; "fontSize": number; "fontSizeScrollZoom": boolean; "fontWeight": number; "fullWidth": boolean; "generateHistoryInterval": number; "hashTagSearch": boolean | null; "headingEmbedMode": number; "headingNumber": boolean; "headingNumberFormat": string; "historyRetentionDays": number; "justify": boolean; "katexMacros": string; "keepLoadedContent": boolean; "listItemDotNumberClickFocus": boolean; "listLogicalOutdent": boolean; "markdown": SettingMarkdown | null; "onlySearchForDoc": boolean; "pasteURLAutoConvert": boolean; "plantUMLServePath": string; "readOnly": boolean; "rtl": boolean; "spellcheck": boolean; "spellcheckLanguages": Array<string> | null; "virtualBlockRef": boolean; "virtualBlockRefExclude": string; "virtualBlockRefInclude": string; };
+export type SettingEditor = { "allowHTMLBLockScript": boolean; "allowSVGScript": boolean; "assetOpen": SettingAssetOpen | null; "backlinkBlockSort": number; "backlinkContainChildren": boolean; "backlinkExpandCount": number; "backlinkGlobalSort": number; "backlinkHideReference": boolean; "backlinkMentionExclude": string; "backlinkShowBottom": boolean; "backlinkSort": number | null; "backmentionExpandCount": number; "backmentionSort": number | null; "blockRefDynamicAnchorTextMaxLen": number; "checkBlockRef": boolean | null; "codeFontFamilies": Array<SettingEditorFont | null> | null; "codeLigatures": boolean; "codeLineWrap": boolean; "codeSyntaxHighlightLineNum": boolean; "codeTabSpaces": number; "cursorSurroundingLines": number; "databaseAttrClickMode": number; "databaseAttrHideEmpty": boolean; "databaseAttrShow": boolean | null; "databaseAttrUseTabs": boolean | null; "databaseAttrViewMode": number; "displayBookmarkIcon": boolean; "displayNetImgMark": boolean; "dragHTMLFileToIframe": boolean; "dynamicLoadBlocks": number; "embedBlockBreadcrumb": boolean; "emoji": Array<string> | null; "floatWindowDelay": number | null; "floatWindowMode": number; "fontFamilies": Array<SettingEditorFont | null> | null; "fontFamily": string; "fontFamilyDisplay": string; "fontSize": number; "fontSizeScrollZoom": boolean; "fontWeight": number; "fullWidth": boolean; "generateHistoryInterval": number; "hashTagSearch": boolean | null; "headingEmbedMode": number; "headingNumber": boolean; "headingNumberFormat": string; "historyRetentionDays": number; "justify": boolean; "katexMacros": string; "keepLoadedContent": boolean; "listItemDotNumberClickFocus": boolean; "listLogicalOutdent": boolean; "markdown": SettingMarkdown | null; "onlySearchForDoc": boolean; "pasteURLAutoConvert": boolean; "plantUMLServePath": string; "readOnly": boolean; "rtl": boolean; "spellcheck": boolean; "spellcheckLanguages": Array<string> | null; "virtualBlockRef": boolean; "virtualBlockRefExclude": string; "virtualBlockRefInclude": string; };
 
 export type SettingEditorFont = { "displayName": string; "family": string; "weight": number; };
 
@@ -1970,7 +1998,7 @@ export type SyncProviderExportData = { "name": string; "zip": string; };
 
 export type SyncProviderImportRequestInput = { "file"?: Blob; };
 
-export type SyncProviderRequestInput = { "provider": number; };
+export type SyncProviderRequestInput = { "completeAssets"?: boolean | null; "provider": number; };
 
 export type SyncS3 = { "accessKey": string; "bucket": string; "concurrentReqs": number; "endpoint": string; "pathStyle": boolean; "region": string; "secretKey": string; "skipTlsVerify": boolean; "timeout": number; };
 
@@ -2093,6 +2121,8 @@ export type SystemRemoveCustomFontData = { "appearance": SettingAppearance | nul
 export type SystemRemoveCustomFontRequestInput = { "id"?: string | null; };
 
 export type SystemRepo = { "indexRetentionDays": number; "key": string | null; "retentionIndexesDaily": number; "syncIndexTiming": number; };
+
+export type SystemRuntimeInfoData = { "text": string; };
 
 export type SystemS3 = { "accessKey": string; "bucket": string; "concurrentReqs": number; "endpoint": string; "pathStyle": boolean; "region": string; "secretKey": string; "skipTlsVerify": boolean; "timeout": number; };
 
@@ -2338,7 +2368,7 @@ export interface APIGETRoutes {
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
         output: "binary";
-        contentVariants: [{"status":200,"contentType":"text/html"},{"status":302,"contentType":"text/html"}];
+        contentVariants: [{"status":200,"contentType":"text/html"}];
     };
     "/api/system/version": {
         request: EmptyRequestInput;
@@ -2632,6 +2662,11 @@ export interface APIPOSTRoutes {
     "/api/ai/retryFailedEmbedding": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/testDecisionModel": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AIDecisionTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
     "/api/ai/testEmbeddingModel": {
@@ -3454,6 +3489,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/block/migrateLegacyMindmaps": {
+        request: MigrateLegacyMindmapsRequestInput;
+        response: { "code": 0; "data": MigrateLegacyMindmapsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/block/moveBlock": {
         request: MoveBlockRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3827,6 +3867,11 @@ export interface APIPOSTRoutes {
         body: "json";
     };
     "/api/filetree/duplicateDoc": {
+        request: FileTreeIDRequestInput;
+        response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/duplicateDocTree": {
         request: FileTreeIDRequestInput;
         response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
@@ -4450,6 +4495,16 @@ export interface APIPOSTRoutes {
     "/api/ref/getBackmentionDoc": {
         request: BackmentionDocumentRequestInput;
         response: { "code": 0; "data": BacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ref/getGlobalBacklinkContexts": {
+        request: GlobalBacklinkContextRequestInput;
+        response: { "code": 0; "data": GlobalBacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ref/getGlobalBacklinks": {
+        request: GlobalBacklinkListRequestInput;
+        response: { "code": 0; "data": GlobalBacklinkListData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/ref/refreshBacklink": {
@@ -5277,6 +5332,11 @@ export interface APIPOSTRoutes {
     "/api/system/getNetwork": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": NetworkData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/getRuntimeInfo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SystemRuntimeInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
     "/api/system/getSysFonts": {

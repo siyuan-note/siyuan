@@ -6,6 +6,23 @@ import (
 	"testing"
 )
 
+func TestDuplicateDocTreeContract(t *testing.T) {
+	const id = "20260919020000-source1"
+	request, err := DuplicateDocTree.Decode(strings.NewReader(`{"id":"` + id + `"}`))
+	if err != nil || request.ID != id {
+		t.Fatalf("valid document ID rejected: %+v %v", request, err)
+	}
+	for _, body := range []string{`{}`, `{"id":null}`, `{"id":false}`, `{"id":["` + id + `"]}`} {
+		if _, err := DuplicateDocTree.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid input accepted: %s", body)
+		}
+	}
+	legacy, err := DuplicateDoc.Decode(strings.NewReader(`{"id":"` + id + `"}`))
+	if err != nil || legacy.ID != id {
+		t.Fatalf("single-document copy contract changed: %+v %v", legacy, err)
+	}
+}
+
 func TestFileTreeLegacyJSONNumbers(t *testing.T) {
 	request, err := GetDoc.Decode(strings.NewReader(`{"id":"20260913000000-abcdefg","index":9007199254740993}`))
 	if err != nil {

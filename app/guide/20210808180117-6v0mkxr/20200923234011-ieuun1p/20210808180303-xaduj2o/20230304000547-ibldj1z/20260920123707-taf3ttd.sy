@@ -1,0 +1,186 @@
+{
+	"ID": "20260920123707-taf3ttd",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260920123707-taf3ttd",
+		"title": "Decision model",
+		"type": "doc",
+		"updated": "20260920123707"
+	},
+	"Children": [
+		{
+			"ID": "20260920122941-wpyglnt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260920122941-wpyglnt",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20260920122941-y6ady6p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-y6ady6p",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The agent prefers TypeSafe System One (Jev) for repetitive classification, filtering and scoring with explicit criteria. For example, ask it to rate selected documents against a research question using a defined rubric. It can pass block IDs for the kernel to read the full content, reducing repeated text generation by the main model. Embedding and reranking models are not required."
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-gv610zn",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-gv610zn",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Configuration"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920122941-omz7px3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-omz7px3",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Decision model"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", configure the API endpoint, API key, model name and request timeout, test the connection, then enable the model. It is disabled by default; the default endpoint is https://api.typesafe.ai/v1/systemone, model jev-latest, and timeout 30 seconds. Disabling it keeps the configuration."
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-nuj8zg2",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-nuj8zg2",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Understanding results"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920122941-falzyb0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-falzyb0",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The main model still understands the request, handles complex reasoning and tool selection, and prepares the final answer. Scores may fall between rubric levels, and probabilities or confidence do not guarantee correctness. Failed and unprocessed items are reported separately; completed items are retained and requests are not automatically retried."
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-5yw9ara",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-5yw9ara",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Content and permissions"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920122941-fvzl2j1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-fvzl2j1",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Relevant content is sent to the configured decision service and charges may apply. Tool calls follow the existing capability confirmation policy. Encrypted notebooks must be unlocked; encrypted sources also require their notebook ID. The connection test uses a fixed sample and does not read your notes."
+				}
+			]
+		},
+		{
+			"ID": "20260920122941-p6korqp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-p6korqp",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Service and API documentation: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://typesafe.ai/",
+					"TextMarkTextContent": "TypeSafe"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://docs.typesafe.ai/",
+					"TextMarkTextContent": "System One API"
+				}
+			]
+		}
+	]
+}

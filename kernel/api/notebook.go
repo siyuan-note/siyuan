@@ -54,7 +54,13 @@ var getNotebookInfo = contractHandler(apicontract.GetNotebookInfo, func(c *gin.C
 		return contractFailure[apicontract.NotebookInfoData](ret)
 	}
 
-	boxInfo := box.GetInfo()
+	var boxInfo *model.BoxInfo
+	if model.IsReadOnlyRoleContext(c) {
+		// 发布读者的统计口径与可见的发布视图一致，不包含隐藏和禁止发布的文档
+		boxInfo = box.GetInfoForPublish(model.GetPublishAccess())
+	} else {
+		boxInfo = box.GetInfo()
+	}
 	return apicontract.Success(apicontract.NotebookInfoData{BoxInfo: notebookInfoContract(boxInfo)})
 })
 
@@ -359,7 +365,7 @@ var setNotebookConf = contractHandler(apicontract.SetNotebookConf, func(c *gin.C
 
 	boxConf.DailyNoteTemplatePath = util.NormalizeTemplatePath(boxConf.DailyNoteTemplatePath)
 
-	if err := box.SaveConf(boxConf); err != nil {
+	if err := box.SaveConfAndSync(boxConf); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return contractFailure[*apicontract.NotebookConf](ret)

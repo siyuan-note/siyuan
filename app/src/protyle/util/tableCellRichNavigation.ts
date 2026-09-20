@@ -1,5 +1,6 @@
 import {buildTableGrid, getVerticalTableCell} from "./table";
 import {isCaretAtVerticalBoundary} from "../wysiwyg/verticalCaret";
+import {stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
 
 export const isTableCellCaretAtBoundary = (element: HTMLElement, range: Range, key: string) => {
     if (!range.collapsed || !element.contains(range.startContainer)) {
@@ -21,7 +22,7 @@ export const isTableCellCaretAtBoundary = (element: HTMLElement, range: Range, k
     } else {
         remaining.setStart(range.startContainer, range.startOffset);
     }
-    return remaining.toString().replace(/\u200b/g, "") === "" &&
+    return stripSemanticMarkersFromRangeText(remaining).replace(/\u200b/g, "") === "" &&
         !remaining.cloneContents().querySelector("br, img, [data-type='inline-math']");
 };
 

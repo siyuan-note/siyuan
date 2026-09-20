@@ -29,7 +29,7 @@ import {
     moveCaretForSemanticDelete,
     removeEmptySemanticInlineElement
 } from "../util/inlineElementMarker";
-import {hasUnloadedDocumentBlocks} from "../util/documentRange";
+import {showSelectAllIncompleteTip} from "../util/selectAllTip";
 import {endTrackedRangeInsertion, prepareTrackedRangeInsertion} from "../util/trackedRange";
 import {
     hasClosestBlock,
@@ -224,13 +224,6 @@ const preserveAVSelectionOnKeyup = (protyle: IProtyle, event: KeyboardEvent) => 
         !!focusedElement && focusedElement.classList.contains("av"))) {
         protyle.wysiwyg.preventKeyup = true;
     }
-};
-
-const showSelectAllIncompleteTip = () => {
-    if (window.siyuan.config.appearance.notifications?.selectAllIncompleteTip === false) {
-        return;
-    }
-    showMessage(window.siyuan.languages.selectAllIncompleteTip, 6000, "info", "selectAllIncompleteTip");
 };
 
 const getAdjacentInlineMath = (range: Range, editableElement: Element, previous: boolean): HTMLElement | undefined => {
@@ -1693,11 +1686,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectedCurrentContent && !protyle.lite &&
                 !nodeElement.classList.contains("code-block") && !isMobile()) {
                 showSelectAllTip();
-            } else if (!selectedCurrentContent && hasUnloadedDocumentBlocks(
-                protyle.wysiwyg.element,
-                !protyle.lite && !protyle.block.showAll && protyle.block.scroll && !protyle.options.backlinkData
-            )) {
-                showSelectAllIncompleteTip();
+            } else if (!selectedCurrentContent) {
+                showSelectAllIncompleteTip(protyle);
             }
             return true;
         }
@@ -2602,11 +2592,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 countBlockWord([], protyle);
             }
             if (tabNodeElement.getAttribute("data-type") === "NodeCodeBlock") {
-                if (selectText !== "" || !event.shiftKey) {
-                    tabCodeBlock(protyle, tabNodeElement, tabRange, event.shiftKey);
-                    return true;
-                }
-                return;
+                tabCodeBlock(protyle, tabNodeElement, tabRange, event.shiftKey);
+                return true;
             }
             if (!event.shiftKey) {
                 document.execCommand("insertHTML", false, window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " "));

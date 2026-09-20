@@ -20,6 +20,11 @@
   font-size: var(--b3-font-size-editor);
   font-family: var(--b3-font-family-protyle);
 
+  &.table__cell-rich {
+    // 单元格富文本预览沿用表格设置的字号。
+    font-size: inherit;
+  }
+
   img {
     max-width: 100%;
     margin: 0 auto;
@@ -30,6 +35,7 @@
   & > p,
   blockquote > p,
   [data-node-id],
+  .list-mindmap__preview-block,
   [data-table-cell-node] {
     line-height: 1.625;
     padding: 4px;
@@ -535,8 +541,7 @@
     position: relative;
   }
 
-  [data-subtype="echarts"],
-  [data-subtype="mindmap"] {
+  [data-subtype="echarts"] {
     z-index: 1;
     height: 420px;
 
@@ -898,8 +903,7 @@
     position: relative;
 
     &--done:not([data-task="/"]) > div[data-node-id].p {
-      color: var(--b3-theme-on-surface-light);
-      text-decoration: line-through;
+      @include task.completed-text;
     }
 
     input {

@@ -35,6 +35,10 @@ type backlinkParentMapping struct {
 }
 
 func buildBacklinkParentMappings(refBlocks []*Block, boxID string) (ret []*backlinkParentMapping) {
+	return buildBacklinkParentMappingsWithDocumentGrouping(refBlocks, boxID, true)
+}
+
+func buildBacklinkParentMappingsWithDocumentGrouping(refBlocks []*Block, boxID string, groupDocuments bool) (ret []*backlinkParentMapping) {
 	parentRefParagraphs := map[string][]*Block{}
 	var paragraphParentIDs []string
 	for _, refBlock := range refBlocks {
@@ -53,7 +57,7 @@ func buildBacklinkParentMappings(refBlocks []*Block, boxID string) (ret []*backl
 	treeCache := map[string]*parse.Tree{}
 	var mappings []*backlinkParentMapping
 	for _, parent := range paragraphParents {
-		if nil == parent {
+		if nil == parent || !groupDocuments && "NodeDocument" == parent.Type {
 			continue
 		}
 

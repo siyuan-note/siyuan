@@ -29,7 +29,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "kernel-plugin-state-change" |
     "before-show-tooltip" | "before-hide-tooltip" |
     "common-menu-open" | "common-menu-closed"
-type TAVView = "table" | "gallery" | "kanban"
+type TAVView = "table" | "list" | "gallery" | "kanban";
 type TAVAlign = "" | "left" | "center" | "right"
 type TAVDateFormat = "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"
 type TAVCol =
@@ -1225,6 +1225,7 @@ interface IAVFieldView {
     hidden: boolean;
 }
 
+// 表格和列表视图共用行列结构，布局由 viewType 区分。
 interface IAVTable extends IAVView {
     columns: IAVColumn[],
     rows: IAVRow[],

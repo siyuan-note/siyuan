@@ -67,18 +67,23 @@ body:
       required: false
   - type: textarea
     attributes:
-      label: Version environment
-      value: |
-        - Version: 
-        - Operating System: 
-        - Browser (if used): 
+      label: Runtime information
+      description: |
+        Open "Settings - About - Runtime information", click "Copy" in the dialog, and paste the result here. If you are using an older version without this button or cannot start SiYuan, manually enter the version, operating system, and browser (if used).
+      placeholder: |
+        Paste runtime information here, or manually enter:
+        - Version:
+        - Operating system:
+        - Browser (if used):
     validations:
       required: true
   - type: textarea
     attributes:
       label: Log file
       description: |
-        The program log file is located at `workspace/temp/siyuan.log`. Please attach relevant logs after removing private information, or leave this field blank if no relevant log is available.
+        Export the system logs from "Settings - App - Maintenance - System log" and attach the exported ZIP file here. If SiYuan cannot start or the export option is unavailable, you can retrieve `workspace/temp/siyuan.log` manually. Check the logs and remove private information before uploading. Leave this field blank if no relevant log is available.
+      placeholder: |
+        Attach the log file here, or paste the relevant log content.
     validations:
       required: false
   - type: textarea

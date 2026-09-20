@@ -73,12 +73,14 @@ describe("mobile bars", () => {
             },
         });
         const breadcrumbElement = new TestBreadcrumbElement();
+        const topbarElement = new TestBreadcrumbElement();
         const scrollElement = new TestScrollElement();
         Object.defineProperty(globalThis, "document", {
             configurable: true,
             value: {
                 body: {classList: new TestClassList()},
-                getElementById: (): undefined => undefined,
+                getElementById: (id: string): TestBreadcrumbElement | undefined =>
+                    id === "mobileTopBar" ? topbarElement : undefined,
                 querySelector: (): TestBreadcrumbElement => breadcrumbElement,
             },
         });
@@ -97,8 +99,13 @@ describe("mobile bars", () => {
                 notified++;
             });
             assert.equal(notified, 1);
-            assert.equal(breadcrumbElement.style.getPropertyValue("--mobile-bar-translate-y"), "0px");
-            assert.equal(breadcrumbElement.style.getPropertyValue("--mobile-bar-opacity"), "1");
+            const assertPosition = (progress: number) => {
+                const translation = `calc(${0 - progress} * (var(--mobile-topbar-height) + var(--mobile-breadcrumb-height)))`;
+                assert.equal(breadcrumbElement.style.getPropertyValue("--mobile-bar-translate-y"), translation);
+                assert.equal(topbarElement.style.getPropertyValue("--mobile-bar-translate-y"), translation);
+                assert.equal(breadcrumbElement.style.getPropertyValue("--mobile-bar-opacity"), "");
+            };
+            assertPosition(0);
             assert.equal(breadcrumbElement.attributes.has("inert"), false);
             assert.equal(breadcrumbElement.attributes.get("aria-hidden"), "false");
             const scrollTo = (top: number) => {
@@ -107,21 +114,26 @@ describe("mobile bars", () => {
                 frame(0);
             };
             scrollTo(24);
-            assert.equal(breadcrumbElement.style.getPropertyValue("--mobile-bar-opacity"), "0.5");
+            assertPosition(0.5);
+            scrollTo(47);
+            assertPosition(47 / 48);
             scrollTo(48);
-            assert.equal(breadcrumbElement.style.getPropertyValue("--mobile-bar-opacity"), "0");
+            assertPosition(1);
             assert.equal(breadcrumbElement.attributes.has("inert"), true);
             assert.equal(breadcrumbElement.attributes.get("aria-hidden"), "true");
+            scrollTo(47);
+            assertPosition(47 / 48);
+            assert.equal(breadcrumbElement.attributes.get("aria-hidden"), "false");
             scrollTo(0);
-            assert.equal(breadcrumbElement.style.getPropertyValue("--mobile-bar-opacity"), "1");
+            assertPosition(0);
             assert.equal(breadcrumbElement.attributes.has("inert"), false);
             storage[MOBILE_BARS_CONFIG_KEY].autoHide = false;
             scrollTo(100);
-            assert.equal(breadcrumbElement.style.getPropertyValue("--mobile-bar-opacity"), "1");
+            assertPosition(0);
             assert.equal(breadcrumbElement.attributes.get("aria-hidden"), "false");
             storage[MOBILE_BARS_CONFIG_KEY].autoHide = true;
             scrollTo(148);
-            assert.equal(breadcrumbElement.style.getPropertyValue("--mobile-bar-opacity"), "0");
+            assertPosition(1);
         } finally {
             clearMobileBarsScroll();
             Object.defineProperty(globalThis, "document", {configurable: true, value: originalDocument});

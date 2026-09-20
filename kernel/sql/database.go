@@ -955,9 +955,10 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 	boxID := tree.Box
 	p := tree.Path
 	rootID := tree.Root.ID
-	name := html.UnescapeString(n.IALAttr("name"))
-	alias := html.UnescapeString(n.IALAttr("alias"))
-	memo := html.UnescapeString(n.IALAttr("memo"))
+	// IALAttr 已解码过一次属性值转义，此处不再解码，否则落盘时正确转义的值会被还原成原始 HTML 进入索引
+	name := n.IALAttr("name")
+	alias := n.IALAttr("alias")
+	memo := n.IALAttr("memo")
 	tag := tagFromNode(n)
 
 	var content, fcontent, markdown, parentID string
@@ -1059,7 +1060,8 @@ func tagFromNode(node *ast.Node) (ret string) {
 	tagBuilder := bytes.Buffer{}
 
 	if ast.NodeDocument == node.Type {
-		tagIAL := html.UnescapeString(node.IALAttr("tags"))
+		// 与 buildBlockFromNode 一致，IALAttr 已解码过一次属性值转义
+		tagIAL := node.IALAttr("tags")
 		tags := strings.SplitSeq(tagIAL, ",")
 		for t := range tags {
 			t = strings.TrimSpace(t)

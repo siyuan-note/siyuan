@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260910080119"
+		"updated": "20260920131944"
 	},
 	"Children": [
 		{
@@ -3116,7 +3116,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20240530101000"
+				"updated": "20260920131944"
 			},
 			"Children": [
 				{
@@ -3127,41 +3127,1163 @@
 		},
 		{
 			"ID": "20240530101000-lrwpxpq",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"CodeBlockFenceChar": 96,
-			"CodeBlockFenceLen": 3,
-			"CodeBlockOpenFence": "YGBg",
-			"CodeBlockInfo": "bWluZG1hcA==",
-			"CodeBlockCloseFence": "YGBg",
+			"Type": "NodeList",
 			"Properties": {
 				"ID": "20240530101000-xheni2b",
 				"id": "20240530101000-lrwpxpq",
-				"updated": "20240530101000"
+				"updated": "20260920131944",
+				"custom-sy-list-mindmap": "1",
+				"custom-sy-list-mindmap-data": "{\"version\":1,\"nodes\":{},\"relations\":[]}"
+			},
+			"ListData": {
+				"Typ": 0,
+				"Tight": true,
+				"BulletChar": 45,
+				"Marker": "LQ=="
 			},
 			"Children": [
 				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "bWluZG1hcA=="
-				},
-				{
-					"ID": "20240530101000-gr0btu9",
-					"Type": "NodeCodeBlockCode",
-					"Data": "- Tutorial\n- Grammar guidance\n  - General content\n  - Mention users\n  - Emoji\n    - Some emoji examples\n  - Heading-Heading 3\n    - Heading 4\n      - Heading 5\n        - Heading 6\n  - Picture\n  - Code block\n    - Normal\n    - Syntax highlighting support\n      - Demonstrate Go code highlighting\n      - Demo Java highlighting\n  - Ordered, disordered, task list\n    - Unordered list\n    - Ordered list\n    - task list\n  - Form\n  - Hide details\n  - Paragraph\n  - Link reference\n  - Mathematical formula\n  - Mind Map\n  - Flow chart\n  - Timing diagram\n  - Gantt chart\n  - Chart\n  - Staff\n  - Graphviz\n  - Multimedia\n  - Footnote\n  - Shortcuts\n",
+					"ID": "20260920131944-fxnbecl",
+					"Type": "NodeListItem",
 					"Properties": {
-						"ID": "20240530101000-syxic32",
-						"id": "20240530101000-gr0btu9"
-					}
+						"id": "20260920131944-fxnbecl",
+						"updated": "20260920131944"
+					},
+					"ListData": {
+						"Typ": 0,
+						"BulletChar": 45,
+						"Marker": "LQ=="
+					},
+					"Children": [
+						{
+							"ID": "20260920131944-c2x53p3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920131944-c2x53p3",
+								"updated": "20260920131944"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Tutorial"
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
+					"ID": "20260920131944-tivsbcd",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20260920131944-tivsbcd",
+						"updated": "20260920131944"
+					},
+					"ListData": {
+						"Typ": 0,
+						"BulletChar": 45,
+						"Marker": "LQ=="
+					},
+					"Children": [
+						{
+							"ID": "20260920131944-2cfagn6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920131944-2cfagn6",
+								"updated": "20260920131944"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Grammar guidance"
+								}
+							]
+						},
+						{
+							"ID": "20260920131944-8lzxm29",
+							"Type": "NodeList",
+							"Properties": {
+								"id": "20260920131944-8lzxm29",
+								"updated": "20260920131944"
+							},
+							"ListData": {
+								"Typ": 0,
+								"Tight": true,
+								"BulletChar": 45,
+								"Marker": "LQ=="
+							},
+							"Children": [
+								{
+									"ID": "20260920131944-k7z53iz",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-k7z53iz",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-u942ce7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-u942ce7",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "General content"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-24y9af6",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-24y9af6",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-7vcaxzb",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-7vcaxzb",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Mention users"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-0d4drz3",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-0d4drz3",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-sb9orb2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-sb9orb2",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Emoji"
+												}
+											]
+										},
+										{
+											"ID": "20260920131944-xz2el6g",
+											"Type": "NodeList",
+											"Properties": {
+												"id": "20260920131944-xz2el6g",
+												"updated": "20260920131944"
+											},
+											"ListData": {
+												"Typ": 0,
+												"Tight": true,
+												"BulletChar": 45,
+												"Marker": "LQ=="
+											},
+											"Children": [
+												{
+													"ID": "20260920131944-zp3k4g1",
+													"Type": "NodeListItem",
+													"Properties": {
+														"id": "20260920131944-zp3k4g1",
+														"updated": "20260920131944"
+													},
+													"ListData": {
+														"Typ": 0,
+														"BulletChar": 45,
+														"Marker": "LQ=="
+													},
+													"Children": [
+														{
+															"ID": "20260920131944-ld40zmf",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20260920131944-ld40zmf",
+																"updated": "20260920131944"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "Some emoji examples"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-btnkm0h",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-btnkm0h",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-372ny2n",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-372ny2n",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Heading-Heading 3"
+												}
+											]
+										},
+										{
+											"ID": "20260920131944-fx4s3uk",
+											"Type": "NodeList",
+											"Properties": {
+												"id": "20260920131944-fx4s3uk",
+												"updated": "20260920131944"
+											},
+											"ListData": {
+												"Typ": 0,
+												"Tight": true,
+												"BulletChar": 45,
+												"Marker": "LQ=="
+											},
+											"Children": [
+												{
+													"ID": "20260920131944-cerwn1v",
+													"Type": "NodeListItem",
+													"Properties": {
+														"id": "20260920131944-cerwn1v",
+														"updated": "20260920131944"
+													},
+													"ListData": {
+														"Typ": 0,
+														"BulletChar": 45,
+														"Marker": "LQ=="
+													},
+													"Children": [
+														{
+															"ID": "20260920131944-7f6n3gi",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20260920131944-7f6n3gi",
+																"updated": "20260920131944"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "Heading 4"
+																}
+															]
+														},
+														{
+															"ID": "20260920131944-f1269cs",
+															"Type": "NodeList",
+															"Properties": {
+																"id": "20260920131944-f1269cs",
+																"updated": "20260920131944"
+															},
+															"ListData": {
+																"Typ": 0,
+																"Tight": true,
+																"BulletChar": 45,
+																"Marker": "LQ=="
+															},
+															"Children": [
+																{
+																	"ID": "20260920131944-72s0v80",
+																	"Type": "NodeListItem",
+																	"Properties": {
+																		"id": "20260920131944-72s0v80",
+																		"updated": "20260920131944"
+																	},
+																	"ListData": {
+																		"Typ": 0,
+																		"BulletChar": 45,
+																		"Marker": "LQ=="
+																	},
+																	"Children": [
+																		{
+																			"ID": "20260920131944-kg87f5c",
+																			"Type": "NodeParagraph",
+																			"Properties": {
+																				"id": "20260920131944-kg87f5c",
+																				"updated": "20260920131944"
+																			},
+																			"Children": [
+																				{
+																					"Type": "NodeText",
+																					"Data": "Heading 5"
+																				}
+																			]
+																		},
+																		{
+																			"ID": "20260920131944-92l9ke8",
+																			"Type": "NodeList",
+																			"Properties": {
+																				"id": "20260920131944-92l9ke8",
+																				"updated": "20260920131944"
+																			},
+																			"ListData": {
+																				"Typ": 0,
+																				"Tight": true,
+																				"BulletChar": 45,
+																				"Marker": "LQ=="
+																			},
+																			"Children": [
+																				{
+																					"ID": "20260920131944-8x0hgje",
+																					"Type": "NodeListItem",
+																					"Properties": {
+																						"id": "20260920131944-8x0hgje",
+																						"updated": "20260920131944"
+																					},
+																					"ListData": {
+																						"Typ": 0,
+																						"BulletChar": 45,
+																						"Marker": "LQ=="
+																					},
+																					"Children": [
+																						{
+																							"ID": "20260920131944-h75vath",
+																							"Type": "NodeParagraph",
+																							"Properties": {
+																								"id": "20260920131944-h75vath",
+																								"updated": "20260920131944"
+																							},
+																							"Children": [
+																								{
+																									"Type": "NodeText",
+																									"Data": "Heading 6"
+																								}
+																							]
+																						}
+																					]
+																				}
+																			]
+																		}
+																	]
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-zyq95qw",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-zyq95qw",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-d5ywuo5",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-d5ywuo5",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Picture"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-w2vou8e",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-w2vou8e",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-81fv6kk",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-81fv6kk",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Code block"
+												}
+											]
+										},
+										{
+											"ID": "20260920131944-i0kv322",
+											"Type": "NodeList",
+											"Properties": {
+												"id": "20260920131944-i0kv322",
+												"updated": "20260920131944"
+											},
+											"ListData": {
+												"Typ": 0,
+												"Tight": true,
+												"BulletChar": 45,
+												"Marker": "LQ=="
+											},
+											"Children": [
+												{
+													"ID": "20260920131944-87428op",
+													"Type": "NodeListItem",
+													"Properties": {
+														"id": "20260920131944-87428op",
+														"updated": "20260920131944"
+													},
+													"ListData": {
+														"Typ": 0,
+														"BulletChar": 45,
+														"Marker": "LQ=="
+													},
+													"Children": [
+														{
+															"ID": "20260920131944-amp1011",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20260920131944-amp1011",
+																"updated": "20260920131944"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "Normal"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20260920131944-pnwvlsz",
+													"Type": "NodeListItem",
+													"Properties": {
+														"id": "20260920131944-pnwvlsz",
+														"updated": "20260920131944"
+													},
+													"ListData": {
+														"Typ": 0,
+														"BulletChar": 45,
+														"Marker": "LQ=="
+													},
+													"Children": [
+														{
+															"ID": "20260920131944-60dw3sc",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20260920131944-60dw3sc",
+																"updated": "20260920131944"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "Syntax highlighting support"
+																}
+															]
+														},
+														{
+															"ID": "20260920131944-27sp95n",
+															"Type": "NodeList",
+															"Properties": {
+																"id": "20260920131944-27sp95n",
+																"updated": "20260920131944"
+															},
+															"ListData": {
+																"Typ": 0,
+																"Tight": true,
+																"BulletChar": 45,
+																"Marker": "LQ=="
+															},
+															"Children": [
+																{
+																	"ID": "20260920131944-trno8o3",
+																	"Type": "NodeListItem",
+																	"Properties": {
+																		"id": "20260920131944-trno8o3",
+																		"updated": "20260920131944"
+																	},
+																	"ListData": {
+																		"Typ": 0,
+																		"BulletChar": 45,
+																		"Marker": "LQ=="
+																	},
+																	"Children": [
+																		{
+																			"ID": "20260920131944-3x3xns7",
+																			"Type": "NodeParagraph",
+																			"Properties": {
+																				"id": "20260920131944-3x3xns7",
+																				"updated": "20260920131944"
+																			},
+																			"Children": [
+																				{
+																					"Type": "NodeText",
+																					"Data": "Demonstrate Go code highlighting"
+																				}
+																			]
+																		}
+																	]
+																},
+																{
+																	"ID": "20260920131944-gkne8ce",
+																	"Type": "NodeListItem",
+																	"Properties": {
+																		"id": "20260920131944-gkne8ce",
+																		"updated": "20260920131944"
+																	},
+																	"ListData": {
+																		"Typ": 0,
+																		"BulletChar": 45,
+																		"Marker": "LQ=="
+																	},
+																	"Children": [
+																		{
+																			"ID": "20260920131944-x9j86ie",
+																			"Type": "NodeParagraph",
+																			"Properties": {
+																				"id": "20260920131944-x9j86ie",
+																				"updated": "20260920131944"
+																			},
+																			"Children": [
+																				{
+																					"Type": "NodeText",
+																					"Data": "Demo Java highlighting"
+																				}
+																			]
+																		}
+																	]
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-qr3jo02",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-qr3jo02",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-dmlzypf",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-dmlzypf",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Ordered, disordered, task list"
+												}
+											]
+										},
+										{
+											"ID": "20260920131944-ssi9lhg",
+											"Type": "NodeList",
+											"Properties": {
+												"id": "20260920131944-ssi9lhg",
+												"updated": "20260920131944"
+											},
+											"ListData": {
+												"Typ": 0,
+												"Tight": true,
+												"BulletChar": 45,
+												"Marker": "LQ=="
+											},
+											"Children": [
+												{
+													"ID": "20260920131944-zdigrkk",
+													"Type": "NodeListItem",
+													"Properties": {
+														"id": "20260920131944-zdigrkk",
+														"updated": "20260920131944"
+													},
+													"ListData": {
+														"Typ": 0,
+														"BulletChar": 45,
+														"Marker": "LQ=="
+													},
+													"Children": [
+														{
+															"ID": "20260920131944-kpuu2cy",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20260920131944-kpuu2cy",
+																"updated": "20260920131944"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "Unordered list"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20260920131944-z6trqgt",
+													"Type": "NodeListItem",
+													"Properties": {
+														"id": "20260920131944-z6trqgt",
+														"updated": "20260920131944"
+													},
+													"ListData": {
+														"Typ": 0,
+														"BulletChar": 45,
+														"Marker": "LQ=="
+													},
+													"Children": [
+														{
+															"ID": "20260920131944-kcbcjgp",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20260920131944-kcbcjgp",
+																"updated": "20260920131944"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "Ordered list"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20260920131944-9r2zkhb",
+													"Type": "NodeListItem",
+													"Properties": {
+														"id": "20260920131944-9r2zkhb",
+														"updated": "20260920131944"
+													},
+													"ListData": {
+														"Typ": 0,
+														"BulletChar": 45,
+														"Marker": "LQ=="
+													},
+													"Children": [
+														{
+															"ID": "20260920131944-awp1igd",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20260920131944-awp1igd",
+																"updated": "20260920131944"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "task list"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-wsm0xtj",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-wsm0xtj",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-a0y5ri0",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-a0y5ri0",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Form"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-vagbu7q",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-vagbu7q",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-sxwdd1k",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-sxwdd1k",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Hide details"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-jttg9rl",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-jttg9rl",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-sbm8zuh",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-sbm8zuh",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Paragraph"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-bf6bdo8",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-bf6bdo8",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-42k3k8t",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-42k3k8t",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Link reference"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-kxf2ljj",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-kxf2ljj",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-bt2y3mo",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-bt2y3mo",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Mathematical formula"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-xsqawxu",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-xsqawxu",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-z3axxv2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-z3axxv2",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Mind Map"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-cgykgo9",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-cgykgo9",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-29fhe24",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-29fhe24",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Flow chart"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-xcnae2c",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-xcnae2c",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-z6y3dcr",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-z6y3dcr",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Timing diagram"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-90uz9yk",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-90uz9yk",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-0vxva96",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-0vxva96",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Gantt chart"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-iojxjbo",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-iojxjbo",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-1slrx3s",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-1slrx3s",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Chart"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-llpzjlo",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-llpzjlo",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-v666ddx",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-v666ddx",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Staff"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-fsc4970",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-fsc4970",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-ba9r8fe",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-ba9r8fe",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Graphviz"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-pm0ry2p",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-pm0ry2p",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-5letf02",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-5letf02",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Multimedia"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-eugd55s",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-eugd55s",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-jo5bsue",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-jo5bsue",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Footnote"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260920131944-aulmuns",
+									"Type": "NodeListItem",
+									"Properties": {
+										"id": "20260920131944-aulmuns",
+										"updated": "20260920131944"
+									},
+									"ListData": {
+										"Typ": 0,
+										"BulletChar": 45,
+										"Marker": "LQ=="
+									},
+									"Children": [
+										{
+											"ID": "20260920131944-upi30ju",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260920131944-upi30ju",
+												"updated": "20260920131944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Shortcuts"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -3171,12 +4293,12 @@
 			"Properties": {
 				"ID": "20240530101000-ibiw8ul",
 				"id": "20240530101000-qvuwb7d",
-				"updated": "20240530101000"
+				"updated": "20260920131944"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "マインドマップをレンダリングするには、Markdown のリスト構文を使用します。"
+					"Data": "スラッシュメニューからマインドマップを作成するか、リストブロックをマインドマップビューに切り替えます。編集可能なドキュメントを開くと、従来のマインドマップがリストのマインドマップに自動変換され、ブロック ID と内容が保持されます。変換は元に戻す操作とドキュメント履歴からの復元に対応しています。完全に変換できない内容はソースのまま保持して表示します。読み取り専用ビューとエクスポートでは、元のドキュメントを変更せずに表示だけを変換します。"
 				}
 			]
 		},

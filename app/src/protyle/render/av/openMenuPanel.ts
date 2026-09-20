@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
 import {
@@ -270,7 +271,7 @@ export const openMenuPanel = (options: {
             if (!options.blockElement.contains(lastElement)) {
                 // https://github.com/siyuan-note/siyuan/issues/15839
                 const rowID = getFieldIdByCellElement(lastElement, data.viewType);
-                if (data.viewType === "table") {
+                if (isTableLikeView(data.viewType)) {
                     lastElement = options.blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${lastElement.dataset.colId}"]`);
                 } else {
                     lastElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${lastElement.dataset.fieldId}"]`);
@@ -311,7 +312,7 @@ export const openMenuPanel = (options: {
             }
             if (["select", "date", "relation", "rollup"].includes(options.type)) {
                 const inputElement = menuElement.querySelector("input");
-                if (inputElement) {
+                if (inputElement && (options.type !== "select" || !isMobile())) {
                     inputElement.select();
                     inputElement.focus();
                 }
@@ -339,7 +340,8 @@ export const openMenuPanel = (options: {
         }
         let counter = 0;
         avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
-            window.siyuan.dragElement = event.target as HTMLElement;
+            const sourceElement = event.target as HTMLElement;
+            window.siyuan.dragElement = sourceElement.closest<HTMLElement>('[data-option-row="true"]') || sourceElement;
             if (window.siyuan.dragElement.dataset.relationType === "selected") {
                 const primaryElement = window.siyuan.dragElement.querySelector(".av__relation-table-primary");
                 if (primaryElement) {
@@ -652,9 +654,12 @@ export const openMenuPanel = (options: {
                 return;
             }
             const target = event.target as HTMLElement;
-            let targetElement = hasClosestByAttribute(target, "draggable", "true");
+            let targetElement = target.closest<HTMLElement>('[data-option-row="true"]') ||
+                hasClosestByAttribute(target, "draggable", "true");
             if (!targetElement) {
-                targetElement = hasClosestByAttribute(document.elementFromPoint(event.clientX, event.clientY - 1), "draggable", "true");
+                const nearbyElement = document.elementFromPoint(event.clientX, event.clientY - 1);
+                targetElement = nearbyElement?.closest<HTMLElement>('[data-option-row="true"]') ||
+                    hasClosestByAttribute(nearbyElement, "draggable", "true");
             }
             if (!targetElement || targetElement === window.siyuan.dragElement) {
                 return;

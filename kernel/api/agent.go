@@ -81,7 +81,7 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 		ret.Msg = model.Conf.Language(193)
 		return contractFailure[apicontract.Null](ret)
 	}
-	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name, model.ResolveAIProviderHeaders(selectedProvider))
+	client := util.NewAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name, model.ResolveAIProviderHeaders(selectedProvider))
 
 	confirmTimeout := resolveAgentConfirmTimeout(model.Conf.AI.Agent.ConfirmTimeout)
 	maxRetries := model.Conf.AI.Agent.MaxRetries
@@ -328,7 +328,7 @@ func agentChatTitleContract(c *gin.Context, req apicontract.AITitleRequest) apic
 		ret.Msg = "no AI provider configured"
 		return contractFailure[string](ret)
 	}
-	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name, model.ResolveAIProviderHeaders(selectedProvider))
+	client := util.NewAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name, model.ResolveAIProviderHeaders(selectedProvider))
 
 	title := agent.GenerateTitle(client, selectedProvider.BaseURL, selectedProvider.Protocol, selectedModel.Name,
 		req.Message, req.Language)

@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -48,6 +49,7 @@ func TestBlockAttrsRespectPublishAccess(t *testing.T) {
 	previousDataDir := util.DataDir
 	previousLangs := util.Langs
 	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
 	util.DataDir = t.TempDir()
 	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
 	util.Langs = map[string]map[int]string{

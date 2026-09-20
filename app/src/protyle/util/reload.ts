@@ -18,6 +18,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
         return;
     }
     updateBacklinkReferenceVisibility(protyle);
+    protyle.wysiwyg.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
     invalidateTrackedRanges(protyle);
     /// #if MOBILE
     hideKeyboardToolbar();

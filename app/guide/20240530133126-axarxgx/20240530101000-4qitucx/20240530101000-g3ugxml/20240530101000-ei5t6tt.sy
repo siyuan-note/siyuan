@@ -6,7 +6,7 @@
 		"id": "20240530101000-ei5t6tt",
 		"title": "人工知能",
 		"type": "doc",
-		"updated": "20260813120000"
+		"updated": "20260920123707"
 	},
 	"Children": [
 		{
@@ -311,6 +311,46 @@
 					"TextMarkType": "block-ref",
 					"TextMarkTextContent": "意味検索",
 					"TextMarkBlockRefID": "20260804171007-semnt04",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-ejudvzu",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-ejudvzu",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "判定モデル"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920123707-x2ixv5y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920123707-x2ixv5y",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エージェントは TypeSafe System One（Jev）を使って分類、絞り込み、評価を行えます。設定と使い方は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "判定モデル",
+					"TextMarkBlockRefID": "20260920123707-im3t4o6",
 					"TextMarkBlockRefSubtype": "s"
 				},
 				{

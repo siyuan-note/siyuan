@@ -38,6 +38,16 @@ import {
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
+test("document tree duplication follows single-document duplication in the configurable menu", () => {
+    const children = getEntryCatalogChildren("docTree.document.copy");
+    assert.deepEqual(children.slice(-2).map(item => item.key), ["duplicate", "duplicateTree"]);
+    const entry = getEntryCatalogNode("docTree.document.copy.duplicateTree");
+    assert.equal(entry.type, "entry");
+    assert.equal(entry.simple, true);
+    assert.equal(getEntryParentPath("docTree.document.copy.duplicateTree"), "docTree.document.copy");
+    assert.equal(getEntryCatalogNode("docTree.multi.copy.duplicateTree"), undefined);
+});
+
 test("embedded heading levels follow display modes and expose all levels in Simple", () => {
     const path = "gutter.single.blockEmbed";
     assert.deepEqual(getEntryCatalogChildren(path).map(entry => entry.key), [
@@ -87,6 +97,7 @@ const slashMenuBuiltinOrder = [
     "math",
     "html",
     "databaseTableView",
+    "databaseListView",
     "databaseKanbanView",
     "databaseGalleryView",
     "separator_2",
@@ -486,7 +497,7 @@ test("slash menu catalog follows the built-in hint order", () => {
     assert.deepEqual(section?.children.map((item) => item.key), ["menu"]);
     const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
     assert.deepEqual(children.map((item) => item.key), slashMenuBuiltinOrder);
-    assert.equal(children.filter((item) => item.type === "entry").length, 64);
+    assert.equal(children.filter((item) => item.type === "entry").length, 65);
     assert.equal(children.filter((item) => item.type === "separator").length, 5);
     assert.equal(children.every((item) => item.simple), true);
 });
@@ -744,13 +755,19 @@ test("list block submenu follows the base block entries", () => {
         "separator_numbering",
         "prependListItem",
         "appendListItem",
+        "listMindmap",
     ]);
+    assert.equal(getEntryCatalogNode("gutter.single.listBlock.listMindmap")?.simple, true);
+    assert.equal(getEntryCatalogNode("gutter.single.listBlock.listMindmap")?.type, "entry");
+    assert.equal(getEntryParentPath("gutter.single.listBlock.listMindmap"), "gutter.single.listBlock");
+    assert.equal(getEntryCatalogNode("gutter.multi.listBlock.listMindmap"), undefined);
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.customTaskStatus")?.simple, true);
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.customTaskStatus")?.type, "entry");
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.taskStatus"), undefined);
     assert.equal(getEntryCatalogNode("gutter.single.listBlock.separator_taskStatus")?.type, "separator");
     const source = readFileSync(resolve(process.cwd(), "src/protyle/gutter/index.ts"), "utf8");
     const submenu = source.slice(source.indexOf("const genListBlockSubmenu"), source.indexOf("return submenu;", source.indexOf("const genListBlockSubmenu")));
+    assert.match(submenu, /if \(type === "NodeList"\) \{\s+submenu\.push\(\{\s+id: "listMindmap"/);
     const taskSource = readFileSync(resolve(process.cwd(), "src/protyle/wysiwyg/taskStatusDialog.ts"), "utf8");
     assert.deepEqual([...Array.from(taskSource.matchAll(/id: "([^"]+)"/g), match => match[1]),
         ...Array.from(submenu.matchAll(/id: "([^"]+)"/g), match => match[1])],

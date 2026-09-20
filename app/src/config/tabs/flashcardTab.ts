@@ -81,6 +81,7 @@ const registerFlashcardReviewGroup = (tab: SettingTabBuilder) => {
         max: 36500,
     });
     group.textBlock("flashcard.weights", {
+        spellcheck: false,
         title: window.siyuan.languages.flashcardFSRSParamWeights,
         desc: window.siyuan.languages.flashcardFSRSParamWeightsTip,
         mode: "input-text",

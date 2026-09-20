@@ -145,6 +145,24 @@ func TestFillThemeStyleVarUsesBuiltinOverrides(t *testing.T) {
 		"border-color: #aabbcc; text-decoration-color: #ddeeff; outline-color: #112233;" {
 		t.Fatalf("unexpected builtin inline style export: %s", actual)
 	}
+	for _, mode := range []int{0, 1} {
+		Conf.Appearance.Mode = mode
+		for _, source := range []string{
+			"color: var(--b3-card-error-color); background-color: var(--b3-card-error-background);",
+			"color: var(--b3-inline-builtin-error-color, var(--b3-card-error-color)); " +
+				"background-color: var(--b3-inline-builtin-error-background-color, var(--b3-card-error-background));",
+		} {
+			tree, node = inlineStyleThemeTestTree(source)
+			fillThemeStyleVar(tree)
+			expected := "color: #aabbcc; background-color: #ddeeff;"
+			if mode == 1 {
+				expected = "color: #123456; background-color: #654321;"
+			}
+			if actual := node.KramdownIAL[0][1]; actual != expected {
+				t.Fatalf("mode %d export of %q: %s", mode, source, actual)
+			}
+		}
+	}
 }
 
 func TestFillThemeStyleVarUsesCurrentInlineStyleMode(t *testing.T) {
@@ -200,17 +218,20 @@ func inlineStyleThemeTestTree(style string) (tree *parse.Tree, node *ast.Node) {
 func setupThemeTest(t *testing.T, theme, css string) {
 	t.Helper()
 	oldDataDir, oldThemesPath, oldConf := util.DataDir, util.ThemesPath, Conf
+	oldAppearancePath, oldMode := util.AppearancePath, util.Mode
 	tempDir := t.TempDir()
 	util.DataDir = filepath.Join(tempDir, "data")
 	util.ThemesPath = filepath.Join(tempDir, "themes")
+	util.AppearancePath, util.Mode = filepath.Join(tempDir, "appearance"), "prod"
 	Conf = NewAppConf()
 	Conf.Appearance = conf.NewAppearance()
 	Conf.Sync = conf.NewSync()
 	t.Cleanup(func() {
 		util.DataDir, util.ThemesPath, Conf = oldDataDir, oldThemesPath, oldConf
+		util.AppearancePath, util.Mode = oldAppearancePath, oldMode
 	})
 
-	themeDir := filepath.Join(util.ThemesPath, theme)
+	themeDir := util.AppearancePackagePath("themes", theme)
 	if err := os.MkdirAll(themeDir, 0755); err != nil {
 		t.Fatal(err)
 	}

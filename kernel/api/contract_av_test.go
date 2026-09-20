@@ -83,6 +83,7 @@ func TestAVContractTransportMapping(t *testing.T) {
 		&av.Gallery{BaseInstance: base},
 		&av.Kanban{BaseInstance: base},
 		&av.Table{},
+		&av.List{Table: &av.Table{BaseInstance: base, Columns: []*av.TableColumn{{BaseInstanceField: &av.BaseInstanceField{ID: "key", Type: av.KeyTypeText, Hidden: true}}}}},
 	} {
 		assertAVContractJSONEqual(t, view, avContractView(view))
 	}
@@ -90,6 +91,49 @@ func TestAVContractTransportMapping(t *testing.T) {
 	assertAVContractJSONEqual(t, &av.ViewTableColumn{BaseField: &av.BaseField{ID: "key", Calc: &av.FieldCalc{}}, Calc: nil}, toContractAVViewTableColumn(&av.ViewTableColumn{BaseField: &av.BaseField{ID: "key", Calc: &av.FieldCalc{}}, Calc: nil}))
 	fixture := setupAttributeViewContextFilterAPITest(t)
 	assertAVContractJSONEqual(t, model.NewAttributeViewData(fixture.attrView), toContractAVAttributeViewData(model.NewAttributeViewData(fixture.attrView)))
+}
+
+func TestAVContractListLayout(t *testing.T) {
+	fixture := setupAttributeViewContextFilterAPITest(t)
+	util.AttrViewLangs["en"]["list"] = "List"
+	path := "/api/av/changeAttrViewLayout"
+	response := callAttributeViewContextFilterAPI(t, path, map[string]any{
+		"avID": fixture.attrView.ID, "blockID": fixture.databaseID, "layoutType": "list",
+	}, changeAttrViewLayout)
+	requireAPIContract(t, http.MethodPost, path, response)
+	var result struct {
+		Code int `json:"code"`
+		Data struct {
+			ViewType string    `json:"viewType"`
+			View     *av.Table `json:"view"`
+		} `json:"data"`
+	}
+	decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+	if result.Code != 0 || result.Data.ViewType != "list" || result.Data.View == nil {
+		t.Fatalf("list layout response: %s", response.Body.String())
+	}
+	if len(result.Data.View.Columns) != len(fixture.attrView.KeyValues) {
+		t.Fatalf("list fields missing: %s", response.Body.String())
+	}
+	for _, field := range result.Data.View.Columns {
+		if field.Hidden != (field.Type != av.KeyTypeBlock) {
+			t.Fatalf("unexpected list field visibility: %+v", field)
+		}
+	}
+	path = "/api/av/renderAttributeView"
+	response = callAttributeViewContextFilterAPI(t, path, map[string]any{
+		"id": fixture.attrView.ID, "blockID": fixture.databaseID, "ignoreRows": true,
+	}, renderAttributeView)
+	requireAPIContract(t, http.MethodPost, path, response)
+	decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+	if result.Code != 0 || result.Data.ViewType != "list" {
+		t.Fatalf("list render response: %s", response.Body.String())
+	}
+	stored, err := av.ParseAttributeView(fixture.attrView.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertAVContractJSONEqual(t, model.NewAttributeViewData(stored), toContractAVAttributeViewData(model.NewAttributeViewData(stored)))
 }
 
 func TestAVContractRenderWire(t *testing.T) {

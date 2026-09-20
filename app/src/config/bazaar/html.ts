@@ -26,7 +26,7 @@ export const genBazaarPackagePanelHTML = (bazaarType: TBazaarType, sortValue: st
         ${bazaarType === "themes" ? genThemeModeSelectHTML() : ""}
         <div class="fn__space"></div>
         <div class="fn__flex config-bazaar__filter-row">
-            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
+            <input spellcheck="false" class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
     </div>

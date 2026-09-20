@@ -67,8 +67,11 @@ body:
       required: false
   - type: textarea
     attributes:
-      label: 版本环境
-      value: |
+      label: 运行信息
+      description: |
+        请打开“设置 - 关于 - 运行信息”，在弹窗中点击“复制”，将内容粘贴到此处。如果使用的旧版本没有该按钮，或无法启动思源，请手动填写版本、操作系统和浏览器（如使用）。
+      placeholder: |
+        请粘贴运行信息，或手动填写：
         - 版本：
         - 操作系统：
         - 浏览器（如果使用了）：
@@ -78,7 +81,9 @@ body:
     attributes:
       label: 日志文件
       description: |
-        程序日志文件位于 `工作空间/temp/siyuan.log`。请在移除隐私信息后附上相关日志；如果没有相关日志，可以留空。
+        请在“设置 - 应用 - 维护 - 系统日志”中导出日志，将导出的 ZIP 文件附加到此处。如果思源无法启动或没有导出入口，也可以手动获取 `工作空间/temp/siyuan.log`。上传前请检查日志并移除隐私信息；如果没有相关日志，可以留空。
+      placeholder: |
+        请在此处附加日志文件，或粘贴相关日志内容。
     validations:
       required: false
   - type: textarea

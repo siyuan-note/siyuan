@@ -18,6 +18,19 @@ import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getLastExportPath, setLastExportPath} from "./path";
 import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 
+const getExportLanguages = () => {
+    const keys = new Set([
+        "copy", "mindmap", "fontSize", "bold", "italic", "colorFont", "color", "undo", "redo", "fold", "collapse", "expand",
+        "fullscreen", "exitFullscreen", "zoomIn", "zoomOut", "delete", "close", "connect", "text",
+        "task", "taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus",
+    ]);
+    const languages = Object.fromEntries(Object.entries(window.siyuan.languages)
+        .filter(([key]) => keys.has(key) || key.startsWith("listMindmap")));
+    // 转义脚本边界和行分隔符，保留各语言文案中的引号与换行。
+    return JSON.stringify(languages).replace(/</g, "\\u003c")
+        .replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+};
+
 const getPluginStyle = async () => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
     let css = "";
@@ -313,6 +326,15 @@ const renderPDF = async (id: string) => {
             max-width: 100%;
         }
 
+        #preview .list-mindmap__toolbar {
+            display: none !important;
+        }
+
+        #preview .list-mindmap {
+            height: var(--list-mindmap-print-height, 420px);
+            min-height: 0;
+        }
+
         #preview a.pdf-embedded-asset {
             position: relative;
             padding-right: 1em !important;
@@ -336,7 +358,7 @@ const renderPDF = async (id: string) => {
     </style>
     ${getSnippetCSS()}
 </head>
-<body style="-webkit-print-color-adjust: exact;">
+<body data-export-pdf="true" style="-webkit-print-color-adjust: exact;">
 <div id="action">
     <div style="flex: 1;overflow-y:auto;overflow-x:hidden">
         <div class="b3-label">
@@ -683,7 +705,7 @@ ${getIconScript(servePath)}
               katexMacros: decodeURI(\`${encodeURI(window.siyuan.config.editor.katexMacros)}\`),
             }
           },
-          languages: {copy:"${window.siyuan.languages.copy}"}
+          languages: ${getExportLanguages()}
         };
         previewElement.addEventListener("click", (event) => {
             let target = event.target;
@@ -1107,7 +1129,7 @@ ${getIconScript(servePath)}
           katexMacros: decodeURI(\`${encodeURI(window.siyuan.config.editor.katexMacros)}\`),
         }
       },
-      languages: {copy:"${window.siyuan.languages.copy}"}
+      languages: ${getExportLanguages()}
     };
     const previewElement = document.getElementById('preview');
     Protyle.highlightRender(previewElement, "stage/protyle");

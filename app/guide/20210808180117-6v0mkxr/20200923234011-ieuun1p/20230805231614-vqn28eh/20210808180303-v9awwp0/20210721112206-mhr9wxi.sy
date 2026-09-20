@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20260905191024"
+		"updated": "20260918195936"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721112403-8no39l4",
-				"updated": "20260905184908"
+				"updated": "20260918195936"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721112403-0ft3r91",
-				"updated": "20260905184908"
+				"updated": "20260917202413"
 			},
 			"Children": [
 				{
@@ -43,7 +43,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ folder logically consistent across devices, including assets, custom icons, plugins, code snippets, templates, widgets, and document data. With on-demand downloads, some asset content may not yet be stored on this device."
+					"Data": "​ folder logically consistent across devices, including assets, custom icons, third-party theme and icon packages, plugins, code snippets, templates, widgets, and document data. With on-demand downloads, some asset content may not yet be stored on this device."
+				}
+			]
+		},
+		{
+			"ID": "20260917190844-p6hrspl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260917190844-p6hrspl",
+				"updated": "20260918195936"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Theme and icon package files, updates, and uninstallations sync between devices; each device chooses its own theme and icons. Images, fonts, and other package resources are always downloaded completely. Synchronization, deletion, and conflicts follow the same file-level rules as plugins, widgets, and templates. Restoring a snapshot without a package removes it."
 				}
 			]
 		},
@@ -705,7 +719,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230219121305-n0v0nlb",
-				"updated": "20230219121539"
+				"updated": "20260918195936"
 			},
 			"Children": [
 				{
@@ -734,7 +748,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220703232248-j1dq9w6",
-				"updated": "20220703232358"
+				"updated": "20260918195936"
 			},
 			"Children": [
 				{
@@ -774,7 +788,7 @@
 					},
 					"Properties": {
 						"id": "20220703232248-nuapm43",
-						"updated": "20220703232358"
+						"updated": "20260918195936"
 					},
 					"Children": [
 						{
@@ -797,7 +811,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20220703232248-kl3io11",
-								"updated": "20220703232358"
+								"updated": "20260918195936"
 							},
 							"Children": [
 								{
@@ -837,7 +851,7 @@
 									},
 									"Properties": {
 										"id": "20220703232248-jneoxfm",
-										"updated": "20220703232358"
+										"updated": "20260918195936"
 									},
 									"Children": [
 										{
@@ -845,12 +859,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220703232248-x7l12qz",
-												"updated": "20220703232358"
+												"updated": "20260918195936"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "If there is a file conflict, the local will overwrite the cloud, and the conflicting files from the cloud will be generated in the data history."
+													"Data": "For file conflicts, including theme and icon files, the local file overwrites the cloud file, and the conflicting cloud file is preserved in data history"
 												}
 											]
 										}

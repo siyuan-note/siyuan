@@ -1,4 +1,5 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {restoreInlineElementBoundaryHTML} from "../util/inlineElementBoundary";
 import {getEditorTransaction} from "../util/transactionContract";
 import {
     focusBlock,
@@ -36,7 +37,6 @@ import {cancelSB, genEmptyElement, genSBElement, refreshSbResize} from "../../bl
 import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
-import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {resize} from "../util/resize";
 import {scrollCenter} from "../../util/highlightById";
 import {consumeGutterFoldRestore} from "../ui/gutterVisibility";
@@ -74,6 +74,7 @@ import {
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
 import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
+import {cleanListMindmapHTML} from "../render/listMindmap/model";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
@@ -86,7 +87,7 @@ const cleanBlockSelectionModeOperations = (operations?: IOperation[]) => {
     operations?.forEach(operation => {
         if (["appendInsert", "insert", "prependInsert", "update"].includes(operation.action) &&
             typeof operation.data === "string") {
-            operation.data = cleanTableCellRichHTML(cleanBlockSelectionModeHTML(operation.data));
+            operation.data = cleanListMindmapHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(operation.data)));
         }
         if (operation.action === "unfoldHeading" && typeof operation.retData === "string") {
             operation.retData = cleanBlockSelectionModeHTML(operation.retData);
@@ -142,16 +143,44 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     }
 };
 
+const canSyncListFoldInPlace = (embedElement: Element, operation: Extract<IOperation, {action: "setAttrs"}>) => {
+    const attrs = JSON.parse(operation.data);
+    if (Object.keys(attrs).length !== 1 || !Object.prototype.hasOwnProperty.call(attrs, "fold")) {
+        return false;
+    }
+    const items = Array.from(embedElement.querySelectorAll(`[data-node-id="${operation.id}"]`));
+    // 列表子块已在 DOM 中时只同步折叠属性，展开缺少子块的片段仍需重新查询。
+    return items.length > 0 && items.every(item => item.getAttribute("data-type") === "NodeListItem" &&
+        (attrs.fold === "1" || item.childElementCount > 3));
+};
+
 const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>) => {
     const attrs = JSON.parse(operation.data);
     const hasFold = Object.prototype.hasOwnProperty.call(attrs, "fold");
     const hasStyle = Object.prototype.hasOwnProperty.call(attrs, "style");
+    const hasMindmapView = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_LIST_MINDMAP);
+    const hasMindmapMetadata = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_LIST_MINDMAP_DATA);
     const tabsAttrs = ["tabs-active-id", "tabs-position", "tabs-task"]
         .filter(name => Object.prototype.hasOwnProperty.call(attrs, name));
-    if (!hasFold && !hasStyle && tabsAttrs.length === 0) {
+    if (!hasFold && !hasStyle && !hasMindmapView && !hasMindmapMetadata && tabsAttrs.length === 0) {
         return;
     }
     element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
+        if (hasMindmapMetadata) {
+            if (attrs[Constants.CUSTOM_SY_LIST_MINDMAP_DATA]) {
+                item.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA, attrs[Constants.CUSTOM_SY_LIST_MINDMAP_DATA]);
+            } else {
+                item.removeAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA);
+            }
+        }
+        // 同步脑图视图属性，由列表监听器刷新各分屏中的视图。
+        if (hasMindmapView) {
+            if (attrs[Constants.CUSTOM_SY_LIST_MINDMAP]) {
+                item.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP, attrs[Constants.CUSTOM_SY_LIST_MINDMAP]);
+            } else {
+                item.removeAttribute(Constants.CUSTOM_SY_LIST_MINDMAP);
+            }
+        }
         if (hasFold) {
             if (attrs.fold === "1") {
                 item.setAttribute("fold", "1");
@@ -205,13 +234,6 @@ const promiseTransaction = (options: {
     // 受影响的嵌入块需推迟到事务提交后再渲染，否则其查询请求会早于写入到达内核而拿到旧数据
     const pendingEmbedElements = new Set<Element>();
     const pendingAVElements = new Set<Element>();
-    /// #if MOBILE
-    if (((0 !== window.siyuan.config.sync.provider && isPaidUser()) ||
-            (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
-        window.siyuan.config.repo.key && window.siyuan.config.sync.enabled) {
-        document.getElementById("toolbarSync").classList.remove("fn__none");
-    }
-    /// #endif
     let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
@@ -521,9 +543,9 @@ const promiseTransaction = (options: {
                 if (gutterFoldElement) {
                     gutterFoldElement.removeAttribute("disabled");
                 }
-                // 仅在 alt+click 箭头折叠时才会触发
+                // 就地同步列表折叠，保留嵌入内容中的光标节点和布局。
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-                    if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
+                    if (item.querySelector(`[data-node-id="${operation.id}"]`) && !canSyncListFoldInPlace(item, operation)) {
                         pendingEmbedElements.add(item);
                     }
                 });
@@ -724,6 +746,9 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, i
 
 const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: Extract<IOperation, {action: "update"}>, isUndo: boolean) => {
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
+    // 撤销按快照中的光标返回操作块；同 ID 副本优先使用当前选区所在的实例，其次使用源块。
+    const focusElement = isUndo ? updateElements.find(item => range && item.contains(range.startContainer)) ||
+        updateElements.find(item => !isInEmbedBlock(item, false)) || updateElements[0] : undefined;
     updateElements.forEach(item => {
         // 前序局部回放可能已替换包含该块的祖先，跳过失效引用。
         if (!item.parentElement) {
@@ -733,6 +758,7 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: Ex
         if (range && item.contains(range.startContainer)) {
             isRangeBlock = true;
         }
+        const isFocusBlock = item === focusElement;
         // 表格的横向、纵向滚动均发生在首个子节点（contenteditable 容器，overflow:auto）上，
         // 更新块后需一并还原，否则固定表头长表格撤销/重做会跳回开头
         // https://github.com/siyuan-note/siyuan/issues/3650 https://github.com/siyuan-note/siyuan/issues/18035
@@ -760,17 +786,18 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: Ex
 
         const wbrElement = item.querySelector("wbr");
         const codeElement = item.getAttribute("data-type") === "NodeCodeBlock" ? item.querySelector(".hljs") : undefined;
+        const restoreCaret = isFocusBlock && !!wbrElement;
         // 未高亮的代码块由 highlightRender 使用 wbr 记录偏移，并在重建 DOM 后恢复光标。
         const deferCodeBlockCaretRestore = shouldDeferCodeBlockCaretRestore({
-            isRangeBlock,
+            isRangeBlock: restoreCaret,
             isReplay: isUndo,
             hasCaret: !!wbrElement,
             isCodeBlock: !!codeElement,
             isRendered: codeElement?.getAttribute("data-render") === "true",
         });
-        if (isRangeBlock && isUndo) {
+        if (isUndo && (restoreCaret || isRangeBlock)) {
             if (wbrElement) {
-                focusByWbr(item, range, deferCodeBlockCaretRestore);
+                focusByWbr(item, range || document.createRange(), deferCodeBlockCaretRestore);
             } else {
                 focusBlock(item);
             }
@@ -1092,7 +1119,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                         }, 450);
                     }
                 });
-                if (data["data-av-type"]) {
+                // 已渲染数据库的布局类型随新内容一起更新，避免旧内容提前套用新布局样式。
+                if (data["data-av-type"] && !item.querySelector(".av__container")) {
                     item.setAttribute("data-av-type", data["data-av-type"]);
                 }
                 const attrElements = item.querySelectorAll(".protyle-attr");
@@ -1663,7 +1691,7 @@ export const insertEmptyBlockquote = (protyle: IProtyle, previousElement: HTMLEl
 
     let foldData;
     if (previousElement.getAttribute("data-type") === "NodeHeading" && previousElement.getAttribute("fold") === "1") {
-        foldData = setFold(protyle, previousElement, true, false, false, true);
+        foldData = setFold(protyle, previousElement, true, false, true);
     }
 
     const id = blockquoteElement.getAttribute("data-node-id");
@@ -1898,7 +1926,7 @@ export const turnsIntoTransaction = (options: {
                 let foldData;
                 if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
                     tempElement.content.firstElementChild.getAttribute("data-subtype") !== item.dataset.subtype) {
-                    foldData = setFold(options.protyle, item, undefined, undefined, false, true);
+                    foldData = setFold(options.protyle, item, undefined, undefined, true);
                     newHTML = newHTML.replace(' fold="1"', "");
                 }
                 if (foldData && foldData.doOperations?.length > 0) {
@@ -2261,7 +2289,7 @@ export const turnsOneInto = async (options: {
         newHTML = converted.outerHTML;
     } else {
         // @ts-ignore
-        newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+        newHTML = options.protyle.lute[options.type](cleanListMindmapHTML(options.nodeElement.outerHTML), options.level);
     }
     disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);
@@ -2340,6 +2368,11 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     }
     cleanBlockSelectionModeOperations(doOperations);
     cleanBlockSelectionModeOperations(undoOperations);
+    [doOperations, undoOperations].forEach(operations => operations?.forEach(operation => {
+        if ((operation.action === "update" || operation.action === "insert") && typeof operation.data === "string") {
+            operation.data = restoreInlineElementBoundaryHTML(operation.data);
+        }
+    }));
     doOperations.forEach(operation => {
         if (operation.action === "update" && typeof operation.data === "string") {
             undoOperations?.filter((undo): undo is Extract<IOperation, {action: "update"}> =>
@@ -2422,7 +2455,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
                     return;
                 }
                 item.removeAttribute("fold");
-                if (!item.lastElementChild.classList.contains("protyle-attr")) {
+                if (item.lastElementChild?.getAttribute("spin") === "1") {
                     item.lastElementChild.remove();
                 }
                 removeUnfoldRepeatBlock(visibleRetData, protyle);
@@ -2492,8 +2525,8 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         refreshSbResize(element);
     }
     const id = element.getAttribute("data-node-id");
-    const newHTML = cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(element.outerHTML)));
-    const cleanOldHTML = cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(oldHTML)));
+    const newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(element.outerHTML))));
+    const cleanOldHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(oldHTML))));
     if (newHTML === cleanOldHTML.replace("<wbr>", "") && !additionalOperations) {
         return;
     }

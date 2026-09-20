@@ -422,9 +422,13 @@ body.mobile-keyboard--open {
   box-sizing: border-box;
   height: var(--mobile-topbar-height);
   min-height: var(--mobile-topbar-height);
-  padding: 0 max(4px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  padding: 0 max(4px, env(safe-area-inset-right)) 0 max(4px, env(safe-area-inset-left));
   transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);
   will-change: transform;
+
+  .toolbar__title {
+    margin-left: 8px;
+  }
 }
 
 .mobile-bottom-bar {
@@ -612,9 +616,8 @@ body.mobile-topbar--merged {
     z-index: 5;
     height: var(--mobile-breadcrumb-height);
     border-radius: 0;
-    opacity: var(--mobile-bar-opacity, 1);
     transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);
-    will-change: opacity, transform;
+    will-change: transform;
   }
 
   > .protyle-content {
@@ -1142,7 +1145,7 @@ body.mobile-topbar--merged {
             height: auto;
             margin: 0;
             min-height: 44px;
-            padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));
+            padding: max(8px, var(--mobile-top-safe-area)) max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));
             position: sticky;
             top: 0;
             width: 100%;
@@ -1719,6 +1722,8 @@ body.mobile-topbar--merged {
   }
 
   .mobile-bottom-sheet {
+    // 退出时保持可见，由位移动画将面板移出可视区域。
+    opacity: 1;
     max-height: min(60vh, 100%);
     border: 0;
     border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;

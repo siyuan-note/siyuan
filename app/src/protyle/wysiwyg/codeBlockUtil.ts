@@ -37,21 +37,15 @@ export const updateCodeBlockLines = (text: string, tabSpace: string, outdent = f
     return line.substring(spaceCount);
 }).join("\n");
 
-export const getCodeBlockDeleteStart = (text: string, caret: number, tabSpace: string) => {
-    const rangeEnd = Math.min(Math.max(caret, 0), text.length);
-    const lineStart = rangeEnd === 0 ? 0 : text.lastIndexOf("\n", rangeEnd - 1) + 1;
-    if (rangeEnd <= lineStart) {
-        return rangeEnd;
-    }
-    if (text[rangeEnd - 1] === "\t") {
-        return rangeEnd - 1;
-    }
-    if (tabSpace === "\t") {
-        return rangeEnd;
-    }
-    let rangeStart = rangeEnd;
-    while (rangeStart > lineStart && rangeEnd - rangeStart < tabSpace.length && text[rangeStart - 1] === " ") {
-        rangeStart--;
-    }
-    return rangeStart;
+export const getCodeBlockOutdentRange = (text: string, caret: number, tabSpace: string) => {
+    const position = Math.min(Math.max(caret, 0), text.length);
+    const lineStart = getCodeBlockLineRange(text, position, position).start;
+    const lineEnd = text.indexOf("\n", lineStart);
+    const line = text.substring(lineStart, lineEnd < 0 ? text.length : lineEnd);
+    const removed = line.length - updateCodeBlockLines(line, tabSpace, true).length;
+    return {
+        start: lineStart,
+        end: lineStart + removed,
+        caret: Math.max(lineStart, position - removed),
+    };
 };

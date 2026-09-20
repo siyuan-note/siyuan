@@ -49,6 +49,7 @@ var copyStdMarkdown = contractHandler(apicontract.CopyStdMarkdown, func(c *gin.C
 	id := request.ID
 	assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag := request.AssetsDestSpace2Underscore, request.FillCSSVar, request.AdjustHeadingLevel, request.ImgTag
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	avPublishFilter := model.NewAVExportPublishFilter(c)
 	var publishAccess model.PublishAccess
 	var accessChecker model.EmbedBlockAccessChecker
 	if isReadOnlyRole {
@@ -57,7 +58,7 @@ var copyStdMarkdown = contractHandler(apicontract.CopyStdMarkdown, func(c *gin.C
 			return model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockID)
 		}
 	}
-	markdownContent := model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag, accessChecker)
+	markdownContent := model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag, avPublishFilter, accessChecker)
 	if isReadOnlyRole {
 		bt := treenode.GetBlockTree(id)
 		if bt != nil {

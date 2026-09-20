@@ -21,6 +21,7 @@ func TestAPIContractNotebookConfPatchPersistence(t *testing.T) {
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
 	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.Sync = conf.NewSync()
 	t.Cleanup(func() { model.Conf, util.DataDir = oldConf, oldDataDir })
 	const id = "20260101000000-abcdefg"
 	path := filepath.Join(util.DataDir, id, ".siyuan", "conf.json")

@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
@@ -439,7 +440,7 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string, blockElement: 
 </div>${hiddenHTML}` : "";
     return `<div class="b3-menu__items fn__flex-column">
 <div class="b3-menu__item fn__flex-shrink" data-type="nobg">
-    <input class="b3-text-field fn__block" type="text" style="margin: 4px 0" placeholder="${window.siyuan.languages.searchPlaceholder}">
+    <input spellcheck="false" class="b3-text-field fn__block" type="text" style="margin: 4px 0" placeholder="${window.siyuan.languages.searchPlaceholder}">
 </div>
 <div class="fn__flex-1" style="overflow: auto">
     ${visibleSectionHTML}
@@ -477,6 +478,26 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
                 blockID: blockElement.getAttribute("data-node-id")
             }], [{
                 action: "removeAttrViewView",
+                avID,
+                id,
+                blockID: blockElement.getAttribute("data-node-id")
+            }]);
+        }
+    });
+    addMenu.addItem({
+        icon: "iconList",
+        label: window.siyuan.languages.listView,
+        click() {
+            addVisibleView();
+            transaction(protyle, [{
+                action: "addAttrViewView",
+                avID,
+                layout: "list",
+                id,
+                blockID: blockElement.getAttribute("data-node-id")
+            }], [{
+                action: "removeAttrViewView",
+                layout: "list",
                 avID,
                 id,
                 blockID: blockElement.getAttribute("data-node-id")
@@ -536,6 +557,8 @@ export const getViewIcon = (type: string) => {
     switch (type) {
         case "table":
             return "iconTable";
+        case "list":
+            return "iconList";
         case "gallery":
             return "iconGallery";
         case "kanban":
@@ -547,6 +570,8 @@ export const getViewName = (type: string) => {
     switch (type) {
         case "table":
             return window.siyuan.languages.table;
+        case "list":
+            return window.siyuan.languages.listView;
         case "gallery":
             return window.siyuan.languages.gallery;
         case "kanban":
@@ -555,7 +580,7 @@ export const getViewName = (type: string) => {
 };
 
 export const getFieldsByData = (data: IAV) => {
-    return data.viewType === "table" ? (data.view as IAVTable).columns : (data.view as IAVGallery).fields;
+    return isTableLikeView(data.viewType) ? (data.view as IAVTable).columns : (data.view as IAVGallery).fields;
 };
 
 export const dragoverTab = (event: DragEvent) => {

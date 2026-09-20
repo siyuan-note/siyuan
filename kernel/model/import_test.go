@@ -83,15 +83,15 @@ func TestBuildImportedSYSortValues(t *testing.T) {
 			name:           "prepend batch",
 			createDocAtTop: true,
 			want: map[string]int{
-				second.newID: 0, first.newID: 1, "existing-first": 2, "existing-second": 3,
-				childNew.newID: 0, childOld.newID: 1,
+				second.newID: 1, first.newID: 2, "existing-first": 3, "existing-second": 4,
+				childNew.newID: 1, childOld.newID: 2,
 			},
 		},
 		{
 			name: "append batch",
 			want: map[string]int{
-				"existing-first": 0, "existing-second": 1, second.newID: 2, first.newID: 3,
-				childNew.newID: 0, childOld.newID: 1,
+				"existing-first": 1, "existing-second": 2, second.newID: 3, first.newID: 4,
+				childNew.newID: 1, childOld.newID: 2,
 			},
 		},
 	}
@@ -113,7 +113,7 @@ func TestBuildImportedSYSortValuesWithoutSourceSort(t *testing.T) {
 		oldID: "20260801000002-bbbbbbb", newID: "20260801000002-newbbbb", sourcePath: "/20260801000002-bbbbbbb.sy"}
 
 	got := buildImportedSYSortValues([]*importedSYSortDoc{older, newer}, nil, []string{"existing"}, true)
-	assertImportedSYSortValues(t, got, map[string]int{newer.newID: 0, older.newID: 1, "existing": 2})
+	assertImportedSYSortValues(t, got, map[string]int{newer.newID: 1, older.newID: 2, "existing": 3})
 }
 
 func TestImportedSYRootIDs(t *testing.T) {

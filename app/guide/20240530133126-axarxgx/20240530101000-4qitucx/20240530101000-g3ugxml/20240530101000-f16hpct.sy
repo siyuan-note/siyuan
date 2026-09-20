@@ -7,7 +7,7 @@
 		"id": "20240530101000-f16hpct",
 		"title": "Docker サーバー",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20260918190000"
 	},
 	"Children": [
 		{
@@ -361,7 +361,7 @@
 			"Properties": {
 				"ID": "20240530101000-hmjllir",
 				"id": "20240530101000-e245wms",
-				"updated": "20240530101000"
+				"updated": "20260918190000"
 			},
 			"Children": [
 				{
@@ -386,7 +386,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "ENTRYPOINT [ \u0026quot;/opt/siyuan/kernel\u0026quot; ]"
+					"TextMarkTextContent": "ENTRYPOINT [ &quot;/opt/siyuan/kernel&quot; ]"
 				},
 				{
 					"Type": "NodeText",
@@ -469,7 +469,7 @@
 			"Properties": {
 				"ID": "20240530101000-cld3snp",
 				"id": "20240530101000-tusg4ak",
-				"updated": "20240530101000"
+				"updated": "20260918190000"
 			},
 			"Children": [
 				{
@@ -495,6 +495,19 @@
 				{
 					"Type": "NodeText",
 					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。Docker で公開サービスを有効にする場合は、通常のサーバーポートのマッピングに加えて、コンテナ作成コマンドに "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-p 6808:6808"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を追加してください。Docker のポートマッピングはホスト側ポート:コンテナ側ポートの形式です。公開サービスのポートを変更した場合はコンテナ側ポートも変更し、アクセス時にはホスト側ポートを使用してください。公開サービスには固定ポートを指定し、0 に設定しないでください"
 				}
 			]
 		},

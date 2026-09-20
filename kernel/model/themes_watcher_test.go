@@ -29,30 +29,40 @@ import (
 
 func TestWatchThemesCurrentThemeOnly(t *testing.T) {
 	originalConf, originalThemesPath := Conf, util.ThemesPath
+	originalAppearancePath, originalMode := util.AppearancePath, util.Mode
+	CloseWatchThemes()
 	t.Cleanup(func() {
 		CloseWatchThemes()
 		Conf = originalConf
 		util.ThemesPath = originalThemesPath
+		util.AppearancePath, util.Mode = originalAppearancePath, originalMode
 	})
 
 	themesDir := t.TempDir()
+	util.ThemesPath = themesDir
+	util.AppearancePath, util.Mode = t.TempDir(), "prod"
 	for _, name := range []string{"daylight", "midnight", "unused"} {
-		if err := os.Mkdir(filepath.Join(themesDir, name), 0755); err != nil {
+		if err := os.MkdirAll(util.AppearancePackagePath("themes", name), 0755); err != nil {
 			t.Fatal(err)
 		}
 	}
 	Conf = NewAppConf()
 	Conf.Appearance = conf.NewAppearance()
-	util.ThemesPath = themesDir
 
 	WatchThemes()
-	assertThemesWatchList(t, themesDir, filepath.Join(themesDir, "daylight"))
+	assertThemesWatchList(t, themesDir, util.AppearancePackagePath("themes", "daylight"))
 
 	Conf.m.Lock()
 	Conf.Appearance.Mode = 1
 	Conf.m.Unlock()
 	WatchThemes()
-	assertThemesWatchList(t, themesDir, filepath.Join(themesDir, "midnight"))
+	assertThemesWatchList(t, themesDir, util.AppearancePackagePath("themes", "midnight"))
+
+	Conf.m.Lock()
+	Conf.Appearance.ThemeDark = "unused"
+	Conf.m.Unlock()
+	WatchThemes()
+	assertThemesWatchList(t, themesDir, filepath.Join(themesDir, "unused"))
 
 	Conf.m.Lock()
 	Conf.Appearance.Mode = -1

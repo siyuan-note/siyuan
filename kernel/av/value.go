@@ -615,6 +615,7 @@ func validateValueTextRichTreeWithImages(tree *parse.Tree, images bool) (err err
 // newValueTextRichLute 固定启用存储格式支持的语法，避免编辑器开关变化后重解释既有数据。
 func newValueTextRichLute() *lute.Lute {
 	ret := lute.New()
+	ret.ParseOptions.KeepEscaped = true
 	ret.SetTextMark(true)
 	ret.SetEmoji(false)
 	ret.SetProtyleWYSIWYG(true)
@@ -715,7 +716,7 @@ func isValueTextRichExecutableCodeFence(info []byte) bool {
 		return false
 	}
 	switch fields[0] {
-	case "abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "mindmap", "plantuml":
+	case "abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "plantuml":
 		return true
 	}
 	return false
@@ -1269,6 +1270,9 @@ func normalizeValueTextRichBuiltinStyleValue(property, value string) (ret string
 	if "background-color" == property {
 		valueSuffix, legacySuffix = "background-color", "background"
 	}
+	if match := valueTextRichBuiltinThemeStylePattern.FindStringSubmatch(value); len(match) == 3 {
+		return value, match[2] == legacySuffix
+	}
 	match := valueTextRichBuiltinStylePattern.FindStringSubmatch(value)
 	if 5 != len(match) || match[1] != match[3] || match[2] != valueSuffix || match[4] != legacySuffix {
 		return "", false
@@ -1361,8 +1365,9 @@ var valueTextRichStylePropertyOrder = []string{
 }
 
 var (
-	valueTextRichBuiltinPalettePattern = regexp.MustCompile(`^var\(--b3-font-(color|background)(\d+)\)$`)
-	valueTextRichBuiltinStylePattern   = regexp.MustCompile(
+	valueTextRichBuiltinThemeStylePattern = regexp.MustCompile(`^var\(--b3-card-(error|warning|info|success)-(color|background)\)$`)
+	valueTextRichBuiltinPalettePattern    = regexp.MustCompile(`^var\(--b3-font-(color|background)(\d+)\)$`)
+	valueTextRichBuiltinStylePattern      = regexp.MustCompile(
 		`^var\(--b3-inline-builtin-(error|warning|info|success)-(color|background-color),\s*` +
 			`var\(--b3-card-(error|warning|info|success)-(color|background)\)\)$`,
 	)
@@ -1386,7 +1391,33 @@ func RenderValueTextRich(tree *parse.Tree) (content string, err error) {
 }
 
 func valueTextRichBlockDOM2Kramdown(luteEngine *lute.Lute, blockDOM string) string {
-	blockDOM = valueTextRichBlockDOMStructuralAttrs.ReplaceAllString(blockDOM, "")
+	tree := luteEngine.BlockDOM2Tree(blockDOM)
+	first := tree.Root.FirstChild
+	singleEmptyParagraph := nil != first && ast.NodeParagraph == first.Type &&
+		"" == strings.TrimSpace(strings.ReplaceAll(first.Content(), "\u200b", ""))
+	if singleEmptyParagraph {
+		for next := first.Next; nil != next; next = next.Next {
+			singleEmptyParagraph = ast.NodeKramdownBlockIAL == next.Type
+			if !singleEmptyParagraph {
+				break
+			}
+		}
+	}
+	// 多块内容中的空段落依靠块属性列表保留，相邻块的标识也必须保留以隔开属性列表。
+	preserveBlockIDs := false
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && ast.NodeParagraph == node.Type && "" == strings.TrimSpace(strings.ReplaceAll(node.Content(), "\u200b", "")) {
+			preserveBlockIDs = !singleEmptyParagraph
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	blockDOM = valueTextRichBlockDOMStructuralAttrs.ReplaceAllStringFunc(blockDOM, func(attribute string) string {
+		if preserveBlockIDs && strings.HasPrefix(strings.TrimSpace(attribute), "data-node-id=") {
+			return attribute
+		}
+		return ""
+	})
 	blockDOM, backslashSentinel, backtickSentinel := protectValueTextRichBlockDOMStyleCharacters(blockDOM)
 	markdown := strings.TrimSpace(luteEngine.BlockDOM2Md(blockDOM))
 	if "" != backtickSentinel {

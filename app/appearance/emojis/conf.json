@@ -601,6 +601,13 @@
         "keywords": "amazed,awk,awkward,blame,dazed,dead,disbelief,embarrassed,exercise,face,flushed,geez,heat,hot,impressed,jeez,that’s crazy,what,wow,えーっ,とまどい,赤くなる,顔,驚き,困惑,天呀,害羞,羞涩,脸,茫然,迷茫,难以置信"
       },
       {
+        "unicode": "1faea",
+        "description": "Distorted Face",
+        "description_ja_jp": "ゆがんだ顔",
+        "description_zh_cn": "变形的脸",
+        "keywords": "anxiety,bloated,panic,shocked,surprised,vulnerable,あぜん,ぼう然,ショック,不安,惊喜,惊恐,惊慌,焦虑,脆弱,膨れた,膨胀,震惊,驚いた"
+      },
+      {
         "unicode": "1f97a",
         "description": "Pleading Face",
         "description_ja_jp": "訴えるような顔",
@@ -1110,6 +1117,13 @@
         "description_ja_jp": "むかっ",
         "description_zh_cn": "怒",
         "keywords": "angry,comic,mad,upset,マンガ,怒った,怒り,怒りマーク,火大,生气,青筋"
+      },
+      {
+        "unicode": "1faef",
+        "description": "Fight Cloud",
+        "description_ja_jp": "ボカスカ",
+        "description_zh_cn": "打斗云团",
+        "keywords": "argument,brawl,debate,disagreement,fight,ruckus,wrestle,ケンカ,バトル,ボカスカ,争い,争论,取っ組み合い,吵架,喧嘩,土煙,战斗,打斗,打架,摔跤,斗殴,骚动"
       },
       {
         "unicode": "1f4a5",
@@ -2820,6 +2834,13 @@
         "keywords": "fairy tale,fantasy,monster,trolling,おとぎ話,ファンタジー,モンスター,幻想,怪兽,怪物,神话故事"
       },
       {
+        "unicode": "1fac8",
+        "description": "Hairy Creature",
+        "description_ja_jp": "毛むくじゃらの生物",
+        "description_zh_cn": "毛怪",
+        "keywords": "bigfoot,cryptid,forest,giant,hairy,sasquatch,woodwose,yeti,イエティ,サスカッチ,ビッグフット,多毛,大型,大脚怪,大脚野人,巨人,未確認動物,森,森林,欧洲野人,毛むくじゃら,神秘生物,雪怪"
+      },
+      {
         "unicode": "1f486",
         "description": "Person Getting Massage",
         "description_ja_jp": "フェイスマッサージ中の人",
@@ -3133,6 +3154,13 @@
         "description_ja_jp": "右を向いて走る女",
         "description_zh_cn": "朝右跑步的女人",
         "keywords": "coming,facing right,fast,hurry,marathon,quick,racing,runner,running,rush,speed,woman,ジョギング,スピード,ダッシュ,マラソン,ランナー,ランニング,レース,右向き,大急ぎ,急ぐ,移動,速い,冲刺,女,比赛,跑,跑步,面向右,马拉松"
+      },
+      {
+        "unicode": "1f9d1-200d-1fa70",
+        "description": "Ballet Dancer",
+        "description_ja_jp": "バレエダンサー",
+        "description_zh_cn": "芭蕾舞者",
+        "keywords": "ballet,dancer,ダンサー,バレエ,舞者,芭蕾,芭蕾舞"
       },
       {
         "unicode": "1f57a",
@@ -4653,6 +4681,13 @@
         "description_ja_jp": "イルカ",
         "description_zh_cn": "海豚",
         "keywords": "animal,beach,flipper,ocean,ドルフィン,動物,哺乳類,鸭脚板"
+      },
+      {
+        "unicode": "1facd",
+        "description": "Orca",
+        "description_ja_jp": "シャチ",
+        "description_zh_cn": "虎鲸",
+        "keywords": "marine,ocean,whale,クジラ,大海,海,海洋,鲸,鲸鱼"
       },
       {
         "unicode": "1f9ad",
@@ -6667,6 +6702,13 @@
         "keywords": "山岳,峰"
       },
       {
+        "unicode": "1f6d8",
+        "description": "Landslide",
+        "description_ja_jp": "地滑り",
+        "description_zh_cn": "山体滑坡",
+        "keywords": "avalanche,danger,disaster,earthquake,mountain,mudslide,rocks,危险,土砂災害,地震,塌方,山,山崩,山崩れ,山石,岩石,崩落,泥石流,災害,灾害,灾难,落石"
+      },
+      {
         "unicode": "1f30b",
         "description": "Volcano",
         "description_ja_jp": "火山",
@@ -8628,6 +8670,13 @@
         "keywords": "instrument,jazz,music,ジャズ,ラッパ,吹奏楽,楽器,金管楽器,音楽,乐器,吹奏,喇叭,音乐"
       },
       {
+        "unicode": "1fa8a",
+        "description": "Trombone",
+        "description_ja_jp": "トロンボーン",
+        "description_zh_cn": "长号",
+        "keywords": "brass,instrument,jazz,music,sad,slide,ジャズ,スライド,乐器,吹奏楽,悲伤,楽器,滑动,爵士,管楽器,铜管乐,音乐,音楽"
+      },
+      {
         "unicode": "1f3bb",
         "description": "Violin",
         "description_ja_jp": "バイオリン",
@@ -9053,6 +9102,13 @@
         "description_ja_jp": "ドル袋",
         "description_zh_cn": "钱袋",
         "keywords": "$,bag,bank,bet,billion,cash,cash out,cost,dollar,million,money,moneybag,paid,paying,pot of gold,rich,win,お金,キャッシュ,ドル,現金,賞金,賭け金,金持ち,金袋,銀行,付钱,十亿,变现,守财奴,富有,有钱,现金,百万,美元,赌钱,赢钱,钱,钱包,银行"
+      },
+      {
+        "unicode": "1fa8e",
+        "description": "Treasure Chest",
+        "description_ja_jp": "宝箱",
+        "description_zh_cn": "宝箱",
+        "keywords": "gem,gold,jewels,loot,money,prize,silver,valuables,wealth,お宝,お金,ジュエリー,劫掠,奖赏,宝物,宝石,富,抢劫,珍宝,珠宝,藏宝箱,財宝,貴金属,财富,金子,金貨,钱,银,黄金"
       },
       {
         "unicode": "1fa99",

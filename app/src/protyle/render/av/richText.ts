@@ -1,6 +1,7 @@
 import {escapeHtml} from "../../../util/escape";
 import {highlightRender} from "../highlightRender";
 import {getAgentLute} from "../setLute";
+import {restoreInlineElementBoundaries} from "../../util/inlineElementBoundary";
 import {mathRender} from "../mathRender";
 import {
     createAVRichTextStyleBackslashEncoding,
@@ -142,6 +143,8 @@ export const getAVRichTextUnsupportedPasteBlocks = (blockDOM: string, images = f
 export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false) => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
+    // 在过滤临时属性前恢复边界，避免把显示占位符当成富文本内容保存。
+    restoreInlineElementBoundaries(template.content);
     template.content.querySelectorAll<HTMLElement>('[data-type^="Node"]').forEach((element) => {
         const type = element.dataset.type;
         if (!isSupportedAVRichTextBlock(element)) {
@@ -239,14 +242,17 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false) => 
     return (template.innerHTML || "").trim();
 };
 
-const cleanAVRichTextBlockDOMStructure = (blockDOM: string) => {
+const cleanAVRichTextBlockDOMStructure = (blockDOM: string, preserveBlockIDs = false) => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
     template.content.querySelectorAll(".protyle-attr, .protyle-icons").forEach((element) => element.remove());
     template.content.querySelectorAll<HTMLElement>("*").forEach((element) => {
-        ["data-node-id", "data-node-index", "updated"].forEach((attribute) => {
+        (preserveBlockIDs ? ["data-node-index", "updated"] : ["data-node-id", "data-node-index", "updated"]).forEach((attribute) => {
             element.removeAttribute(attribute);
         });
+        if (preserveBlockIDs && ALLOWED_BLOCK_TYPES.has(element.dataset.type) && !element.dataset.nodeId) {
+            element.dataset.nodeId = Lute.NewNodeID();
+        }
     });
     return (template.innerHTML || "").trim();
 };
@@ -321,7 +327,17 @@ const getAVRichTextPlainContent = (blockDOM: string, lute: Lute) => {
 
 export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTextLute(), images = false) => {
     const sanitizedBlockDOM = sanitizeAVRichTextBlockDOM(blockDOM, images);
-    const cleanBlockDOM = cleanAVRichTextBlockDOMStructure(sanitizedBlockDOM);
+    let cleanBlockDOM = cleanAVRichTextBlockDOMStructure(sanitizedBlockDOM);
+    const template = document.createElement("template");
+    template.innerHTML = cleanBlockDOM;
+    const paragraphs = Array.from(template.content.querySelectorAll<HTMLElement>('[data-type="NodeParagraph"]'));
+    const hasEmptyParagraph = paragraphs.some(element => lute.BlockDOM2Md(element.outerHTML).trim() === "");
+    const singleEmptyParagraph = template.content.children.length === 1 &&
+        template.content.firstElementChild === paragraphs[0] && hasEmptyParagraph;
+    // 多块内容中的空段落依靠块属性列表保留，同时保留相邻块的标识，避免属性被合并到前一段。
+    if (hasEmptyParagraph && !singleEmptyParagraph) {
+        cleanBlockDOM = cleanAVRichTextBlockDOMStructure(sanitizedBlockDOM, true);
+    }
     const styleBackslashEncoding = createAVRichTextStyleBackslashEncoding(cleanBlockDOM);
     const protectedBlockDOM = protectAVRichTextStyleBackslashes(cleanBlockDOM, styleBackslashEncoding);
     const markdown = protectedBlockDOM ?
@@ -339,7 +355,8 @@ export const getAVRichTextBlockDOM = (markdown: string, images = false) => markd
 
 const getAVRichTextPreviewBlockDOM = (blockDOM: string) => {
     const template = document.createElement("template");
-    template.innerHTML = cleanAVRichTextBlockDOMStructure(blockDOM);
+    // 转换为 HTML 前保留块标识，以保留空段落，预览净化时再移除标识。
+    template.innerHTML = cleanAVRichTextBlockDOMStructure(blockDOM, true);
     // 代码块操作节点和待办操作节点参与内容解析，需要保留到 HTML 转换完成。
     return (template.innerHTML || "").trim();
 };

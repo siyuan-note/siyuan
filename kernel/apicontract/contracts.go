@@ -254,6 +254,7 @@ var (
 	AddMicrosoftDefenderExclusion       = define[EmptyRequest, Null]("addMicrosoftDefenderExclusion", "/api/system/addMicrosoftDefenderExclusion", NoBody, ResponseOptions{}, "POST")
 	GetWorkspaceInfo                    = define[EmptyRequest, WorkspaceInfoData]("getWorkspaceInfo", "/api/system/getWorkspaceInfo", NoBody, ResponseOptions{}, "POST")
 	GetNetwork                          = define[EmptyRequest, NetworkData]("getNetwork", "/api/system/getNetwork", NoBody, ResponseOptions{}, "POST")
+	GetRuntimeInfo                      = define[EmptyRequest, SystemRuntimeInfoData]("getRuntimeInfo", "/api/system/getRuntimeInfo", NoBody, ResponseOptions{}, "POST")
 	CurrentTime                         = define[EmptyRequest, int64]("currentTime", "/api/system/currentTime", NoBody, ResponseOptions{}, "POST")
 	BootProgress                        = define[EmptyRequest, BootProgressData]("bootProgress", "/api/system/bootProgress", NoBody, ResponseOptions{}, "GET", "POST")
 	SetFollowSystemLockScreen           = define[LockScreenRequest, Null]("setFollowSystemLockScreen", "/api/system/setFollowSystemLockScreen", JSONBody, ResponseOptions{}, "POST")
@@ -382,6 +383,8 @@ var InsertBlock = define[InsertBlockRequest, []*BlockTransaction]("insertBlock",
 var BatchInsertBlock = define[BatchInsertBlockRequest, []*BlockTransaction]("batchInsertBlock", "/api/block/batchInsertBlock", JSONBody, ResponseOptions{}, "POST")
 
 var UpdateBlock = define[UpdateBlockRequest, []*BlockTransaction]("updateBlock", "/api/block/updateBlock", JSONBody, ResponseOptions{}, "POST")
+
+var MigrateLegacyMindmaps = define[MigrateLegacyMindmapsRequest, MigrateLegacyMindmapsData]("migrateLegacyMindmaps", "/api/block/migrateLegacyMindmaps", JSONBody, ResponseOptions{}, "POST")
 
 var BatchUpdateBlock = define[BatchUpdateBlockRequest, []*BlockTransaction]("batchUpdateBlock", "/api/block/batchUpdateBlock", JSONBody, ResponseOptions{}, "POST")
 
@@ -550,6 +553,8 @@ var GetBackmentionDoc = define[BackmentionDocumentRequest, BacklinkContextData](
 var GetBacklinkDoc = define[BacklinkDocumentRequest, BacklinkContextData]("getBacklinkDoc", "/api/ref/getBacklinkDoc", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 var GetBacklink2 = define[BacklinkListRequest, BacklinkListData]("getBacklink2", "/api/ref/getBacklink2", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+var GetGlobalBacklinks = define[GlobalBacklinkListRequest, GlobalBacklinkListData]("getGlobalBacklinks", "/api/ref/getGlobalBacklinks", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetGlobalBacklinkContexts = define[GlobalBacklinkContextRequest, GlobalBacklinkContextData]("getGlobalBacklinkContexts", "/api/ref/getGlobalBacklinkContexts", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 var ContinueImportSY = define[ContinueImportSYRequest, ImportDocumentData]("continueImportSY", "/api/import/continueImportSY", JSONBody, ResponseOptions{}, "POST")
 
@@ -765,6 +770,7 @@ var RemoveDocs = define[FileTreePathsRequest, Null]("removeDocs", "/api/filetree
 var RenameDoc = define[FileTreeRenameRequest, Null]("renameDoc", "/api/filetree/renameDoc", JSONBody, ResponseOptions{}, "POST")
 var RenameDocByID = define[FileTreeRenameIDRequest, Null]("renameDocByID", "/api/filetree/renameDocByID", JSONBody, ResponseOptions{}, "POST")
 var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDoc", "/api/filetree/duplicateDoc", JSONBody, ResponseOptions{}, "POST")
+var DuplicateDocTree = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDocTree", "/api/filetree/duplicateDocTree", JSONBody, ResponseOptions{}, "POST")
 var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", JSONBody, ResponseOptions{}, "POST")
 var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var CreateDocWithMd = define[FileTreeCreateMarkdownRequest, string]("createDocWithMd", "/api/filetree/createDocWithMd", JSONBody, ResponseOptions{}, "POST")
@@ -830,9 +836,15 @@ var GetDocAssets = define[AssetDocumentAssetsRequest, []string]("getDocAssets", 
 var SetFileAnnotation = define[SetAssetAnnotationRequest, Null]("setFileAnnotation", "/api/asset/setFileAnnotation", JSONBody, ResponseOptions{}, "POST")
 var GetFileAnnotation = define[AssetPathRequest, AssetAnnotationData]("getFileAnnotation", "/api/asset/getFileAnnotation", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 403}}, "POST")
 var RemoveUnusedAsset = define[AssetPathRequest, AssetPathData]("removeUnusedAsset", "/api/asset/removeUnusedAsset", JSONBody, ResponseOptions{}, "POST")
+
+// 未引用资源扫描失败时返回标准错误，禁止使用不完整的引用集合清理资源。
 var RemoveUnusedAssets = define[EmptyRequest, AssetPathsData]("removeUnusedAssets", "/api/asset/removeUnusedAssets", NoBody, ResponseOptions{}, "POST")
+
+// 扫描失败返回标准错误，不将失败表示为成功的空列表。
 var GetUnusedAssets = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAssets", "/api/asset/getUnusedAssets", NoBody, ResponseOptions{}, "POST")
 var GetMissingAssets = define[EmptyRequest, []*AssetUnusedItem]("getMissingAssets", "/api/asset/getMissingAssets", NoBody, ResponseOptions{}, "POST")
+
+// ResolveAssetPath 返回普通资源路径；已解锁的加密资源返回保留原始名称的受管临时明文副本路径。
 var ResolveAssetPath = define[AssetPathRequest, string]("resolveAssetPath", "/api/asset/resolveAssetPath", JSONBody, ResponseOptions{}, "POST")
 var AssetUploadCloud = define[AssetCloudUploadRequest, Null]("uploadCloud", "/api/asset/uploadCloud", JSONBody, ResponseOptions{}, "POST")
 var AssetUploadCloudByAssetsPaths = define[AssetPathsCloudUploadRequest, Null]("uploadCloudByAssetsPaths", "/api/asset/uploadCloudByAssetsPaths", JSONBody, ResponseOptions{}, "POST")
@@ -921,6 +933,7 @@ var AIRemoveEditorAction = define[AIEditorActionIDRequest, Null]("removeAIEditor
 var AITestModel = define[AIModelRequest, AIModelTestData]("testModel", "/api/ai/testModel", JSONBody, ResponseOptions{}, "POST")
 var AITestEmbeddingModel = define[EmptyRequest, AIEmbeddingTestData]("testEmbeddingModel", "/api/ai/testEmbeddingModel", NoBody, ResponseOptions{}, "POST")
 var AITestRerankModel = define[EmptyRequest, AIRerankTestData]("testRerankModel", "/api/ai/testRerankModel", NoBody, ResponseOptions{}, "POST")
+var AITestDecisionModel = define[EmptyRequest, AIDecisionTestData]("testDecisionModel", "/api/ai/testDecisionModel", NoBody, ResponseOptions{}, "POST")
 var AIListModels = define[AIProviderRequest, AIModelsData]("listModels", "/api/ai/listModels", JSONBody, ResponseOptions{}, "POST")
 var AIGetEmbeddingStat = define[EmptyRequest, *AIEmbeddingStat]("embeddingStat", "/api/ai/embeddingStat", NoBody, ResponseOptions{}, "POST")
 var AIGetMCPStatus = define[EmptyRequest, []AIMCPStatus]("mcpStatus", "/api/ai/mcpStatus", NoBody, ResponseOptions{}, "POST")
@@ -967,7 +980,7 @@ var ExtensionCopy = define[ExtensionCopyRequest, *ExtensionCopyData]("extensionC
 var SystemBootProgressSSE = define[EmptyRequest, Null]("bootProgressSSE", "/api/system/bootProgressSSE", NoBody, SSEOptions(SSEEvent[BootProgressData]("")), "GET")
 var SystemGetBootAppearance = define[EmptyRequest, *SettingBootAppearance]("getBootAppearance", "/api/system/getBootAppearance", NoBody, ResponseOptions{EmptyResponseStatuses: []int{403}}, "GET")
 var SystemGetCaptcha = define[EmptyRequest, BinaryContent]("getCaptcha", "/api/system/getCaptcha", NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200, ContentVariants: []HTTPContentVariant{{Status: 200, ContentType: "image/png"}}, EmptyResponseStatuses: []int{500}}, "GET")
-var SystemOIDCCallback = define[SystemOIDCCallbackRequest, BinaryContent]("oidcCallback", "/api/system/oidc/callback", NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 302, ContentType: "text/html"}), "GET")
+var SystemOIDCCallback = define[SystemOIDCCallbackRequest, BinaryContent]("oidcCallback", "/api/system/oidc/callback", NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}), "GET")
 var SystemAddCustomEmoji = define[SystemCustomEmojiRequest, SystemPathData]("addCustomEmoji", "/api/system/addCustomEmoji", FormBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
 var SystemCheckUpdate = define[SystemCheckUpdateRequest, Null]("checkUpdate", "/api/system/checkUpdate", JSONBody, ResponseOptions{}, "POST")
 var SystemCheckWorkspaceDir = define[SystemPathRequest, SystemWorkspaceCheckData]("checkWorkspaceDir", "/api/system/checkWorkspaceDir", JSONBody, ResponseOptions{}, "POST")

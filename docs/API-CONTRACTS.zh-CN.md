@@ -34,6 +34,8 @@
 
 ## 兼容要求
 
+`POST /api/ai/testDecisionModel` 使用固定的 TypeSafe System One 样例测试已保存的可选 `ai.decision` 配置。接口要求管理员权限，遵循全局人工智能禁用标记和请求取消，返回具有类型声明的 `{matched, msg?}` 数据；配置错误和供应商错误不会被转换为判断结果。省略决策配置时补齐默认关闭的配置，关闭后保留密钥，并沿用现有配置加密存储机制。`TestAPIContractAI*`、`TestAPIContractSetting*`、`TestAIDecisionConfiguration` 和 `TestDecision*` 覆盖契约、配置、顺序批量调用的部分结果、区块读取、锁定笔记本拒绝访问、能力可用性、确认、取消及供应商响应校验，均纳入完整内核持续集成测试。可运行 `go test -tags "fts5 sqlcipher" ./api ./conf ./util ./mcp/tools ./agent -run 'Test(APIContractAI|APIContractSetting|AIDecision|Decision)' -count=1` 和 `go test ./apicontract/...` 进行针对性验证。
+
 加密笔记本系统锁屏接口保留管理员鉴权和只读检查。布尔开关保存在系统配置中，不进入密钥备份的认证数据。`TestAPIContractNotebookSystemLock` 覆盖配置持久化、关闭开关、独立于闲置时间、多笔记本（包括仅解锁未挂载的笔记本）、重复锁定、锁定后拒绝读取，以及重新解锁后认证读取未改变的密文。该测试已包含在下文的内核全量命令中，也可单独运行 `go test -tags "fts5 sqlcipher" ./api -run 'TestAPIContractNotebook(SystemLock|CryptoAuthorization)$' -count=1`。`TestNotebookSystemLockContract` 覆盖严格布尔输入，`TestRouteCoverage` 检查路由注册和处理器绑定。
 
 路由清单覆盖 `kernel/api/router.go` 中的方法和路径注册，其中 `ANY` 注册在生成声明中展开为具体 HTTP 方法。当前数量和闪卡存量记录以生成器及路由覆盖检查为准。由 `kernel/server/serve.go` 注册的静态资源、应用主 WebSocket 和其他传输服务不属于这份 API 路由清单。
@@ -42,13 +44,17 @@
 
 事务契约按动作区分全部 98 个已知操作，并在显式未知操作兼容分支中排除这些名称。前端使用同一组有限操作联合。私有原始输入保留历史字段、被忽略的值、模型异步错误和回传载荷，类型声明不把模型校验提前到 HTTP 准入阶段。撤销、重做、标题操作、响应租约及事务持久化格式保持原有行为。
 
+编辑器通过独立的 `swapBlockRef` 事务转换块引用：`id` 指定引用块，`blockID` 指定定义块，`data` 包含布尔选项 `includeChildren` 和 `originalToEmbed`。内核在 `retData` 中返回受影响的文档 ID，并以受影响顶层块的私有内存快照生成逆向操作。快照不传给客户端，也不接受客户端提交。重放保留块 ID 和数据库绑定；内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。`TestBlockSwapTransaction` 覆盖落盘后的撤销和重做、跨文档历史、冲突拒绝及写入失败恢复，包含在下方完整内核测试命令中，也可在 `kernel/` 下运行 `go test -tags "fts5 sqlcipher" ./model -run 'Test(SwapBlockRefNodes|BlockSwapTransaction)' -count=1` 单独验证
+
+块交换的撤销和重做为所有受影响文档持有笔记本租约，直到响应序列化完成。`TestContractBlockSwapReplayNotebookResponseLease` 验证锁定操作会等待响应结束，包含在完整内核测试命令中。
+
 扩展剪藏保留多段表单首值处理、动态名称上传文件、部分结果、原有消息及加密笔记本准入。动态图标保留 SVG 字节、安全和缓存响应头以及空错误响应。广播流声明原始 SSE 字节、动态事件名、ID 和重试值，以及原始 WebSocket 帧和升级错误；载荷不转换为 JSON 或 Base64，频道清理保持原有作用范围。
 
 插件私有服务声明现有序列化模式、原始文件、重定向、代理响应、SSE 事件和 WebSocket 帧。插件自行定义的载荷保留为协议扩展数据，并按实际分支分别校验序列化格式与任意字节。请求体、显式响应头、准入错误和取消处理保持插件服务原有生命周期。
 
 网络契约保留请求字节、表单字段、请求头、URL 和 TLS 诊断信息，包括完整证书公钥结构与大整数。转发代理选项保留校验顺序、数字截断、响应编码及协议定义的 JSON 载荷。HTTP、EventSource 和 WebSocket 代理保留上游状态与字节、重复请求头行为、安全响应头、流取消和连接清理。回显通配路径绑定独立适配器，并共用相同业务处理。
 
-数据库契约分别声明表格、画廊和看板结果，保留基础字段缺失、单元格局部修改及 null 值。已知修改字段保留传入状态，不以零值填充未提供的字段。当前、历史和快照渲染使用对应请求类型，调用端先处理错误载荷再更新视图。行排序、发布准入、加密笔记本租约和快速 JSON 渲染保留既有行为。前端和插件的共享声明按视图及单元格实际提供的字段同步。
+数据库契约分别声明表格、画廊和看板的结果结构，保留基础字段缺失、单元格局部修改及 null 值。独立的 `list` 布局复用表格的 `columns`/`rows`/`rowCount` 载荷，布局配置保存在 `list` 下，`viewType` 标识为 `list`。已知修改字段保留传入状态，不以零值填充未提供的字段。当前、历史和快照渲染使用对应请求类型，调用端先处理错误载荷再更新视图。行排序、发布准入、加密笔记本租约和快速 JSON 渲染保留既有行为。前端和插件的共享声明按视图及单元格实际提供的字段同步。`TestAVContractListLayout` 覆盖布局切换、默认字段显隐、后续渲染和持久化布局映射；运行 `go test -tags "fts5 sqlcipher" ./api -run 'TestAVContract' -count=1` 和 `go test ./apicontract/...`。这些测试已包含在内核完整 CI 测试中。
 
 AI 契约保留供应商配置、模型发现与匹配、确认结果、会话扩展字段，以及数值和省略语义。编辑器和智能体流声明实际 SSE 事件，断开连接时关闭上游请求，流生命周期仍位于请求内部。OAuth 页面保留媒体类型、HTTP 状态和安全响应头。会话权限通知使用 `WithAfterWrite`，保留先响应再广播的顺序。任意 JSON 仅用于协议扩展字段和工具结果。
 
@@ -58,7 +64,15 @@ AI 契约保留供应商配置、模型发现与匹配、确认结果、会话�
 
 文档树契约保留条件参数校验、路径与排序语义、回调省略规则、分页默认值及文档响应变体。发布认证通过显式声明的额外错误状态保留 HTTP 429 和 `Retry-After`。发布及加密笔记本准入仍先于延迟字段校验，文档租约覆盖响应序列化阶段。
 
+`POST /api/filetree/duplicateDocTree` 将单篇文档及全部子文档复制到同一笔记本的原父目录。请求为文档 `id`，返回副本根文档的 `id`、`notebook`、`path` 和 `hPath`；原有单文档复制接口保持不变。副本中的内部块引用、块链接和查询嵌入的显式块 ID 统一重映射，数据库定义与行绑定保持为共享镜像。源快照经过认证读取，不执行修复写回；运行期间检测到失败时清理新建文档并恢复排序。这是运行时补偿，不保证进程崩溃时的事务原子性。`TestDuplicateDocTree*` 覆盖层级、排序、引用、富文本单元格、镜像、无效源及回滚；`TestAPIContractDuplicateDocTree*` 覆盖实际响应、授权、加密源数据保留、认证失败、锁定与解锁及响应租约。测试已纳入内核全量持续集成命令，可使用 `go test -tags "fts5 sqlcipher" ./model ./api -run 'Test(DuplicateDocTree|APIContractDuplicateDocTree)' -count=1` 和 `go test ./apicontract/...` 单独验证。
+
+`TestAPIContractFileTreeMissingDocuments` 通过实际 HTTP 响应覆盖查询路径、删除、重命名、复制和移动不存在的文档，按响应契约检查业务错误及保留的 `closeTimeout`，已包含在下方的内核全量测试命令中。可在 `kernel/` 中执行 `go test -tags "fts5 sqlcipher" ./api -run TestAPIContractFileTreeMissingDocuments -count=1` 单独验证。
+
 附件契约保留结果列表的空值、逐文件上传顺序与重名文件、部分上传成功时的提示及本地插入失败载荷。OCR 列保持字符串值。标注校验、发布文件准入、加密读写、延迟下载和上传目标选择保持既有行为。非 API 上传入口复用同一个有类型的模型操作。
+
+资源引用扫描将定义文件缺失或定义 ID 无效的数据库记录到可选的 `unavailableAttributeViews` 列表，不阻断查询、预演或替换。每项包含笔记本 ID 与名称、文档 ID 与路径及人类可读路径、块 ID、数据库 ID 和原因。已存在但无法读取或内容损坏的定义仍返回错误。保存前重新校验缺失文件快照，避免遗漏扫描期间恢复的定义。当前按需下载规则不包含数据库定义，回归测试会检查这一前提。缺失定义回归覆盖模型和实际 HTTP 契约，包括关闭的笔记本和共享定义。
+
+资源引用查询和替换契约保留单资源请求，同时支持批量参数。批量结果按输入顺序返回每项状态、原因、引用和改动文件数；顶层计数对共享文件去重。空批次、重复源路径、链式和循环映射会被拒绝。独立映射可以在其他项失败时完成，共享文件写入失败归属所有受影响映射。扫描期间允许编辑，保存前校验工作区快照；取消和无变化重试保留源数据。`TestAssetRelink` 回归覆盖单资源兼容、批量校验、共享文档、数据库及 OCR 保存、历史和并发编辑，已包含在下方完整内核测试命令中。
 
 导出契约保留 Markdown 选项默认值与数字截断、笔记本列表过滤、标题选项类型忽略规则、可省略的 HTML 目录字段及上传字段选择规则。错误响应保留消息显示时长与资源错误中的空字符串载荷。发布过滤、加密笔记本准入、覆盖响应阶段的租约及临时导出清理保持既有生命周期。
 
@@ -68,17 +82,25 @@ AI 契约保留供应商配置、模型发现与匹配、确认结果、会话�
 
 同步契约保留数值截断、手动模式下的条件方向校验、配置字段匹配与 JSON 数字归一化，以及消息显示时长。同步配置导入要求恰好一个文件，并保留加密包内容与恢复路径。鉴权及只读检查仍先于请求体解码，同步和笔记本加密继续由模型层处理。
 
+`/api/sync/setSyncProvider` 接受可选、可空的 `completeAssets`。只有 `true` 授权在切换来源前，从原提供商下载缺失的当前资源和历史快照内容；省略、`null` 和 `false` 保留只检查完整性的行为。补齐过程保留下载模式和恢复密钥，失败时保留原提供商。确认后的操作通过现有全局进度遮罩显示检查和补齐阶段，成功或失败均关闭遮罩。运行 `go test ./apicontract/...` 和 `go test -tags "fts5 sqlcipher" ./api ./model -run 'Test(APIContractSync|SyncProviderCompletion|AssetDownloadModePreservesHistoricalRecovery|AssetDownloadStateCorruption)' -count=1`；这些测试已包含在完整内核 CI 测试中。前端确认、取消和遮罩清理由现有前端测试范围内的 `src/config/tabs/syncRuntime.test.ts` 覆盖。
+
 集市契约保留必填字段的校验顺序、空白处理、主题模式联动、评分可用性和限流载荷，以及本地包上传错误。包和外观响应声明完整嵌套结构，包括固定五项的评分分布。上传请求保留首文件选择及覆盖参数解析。安装、卸载、鉴权和发布限制仍由既有业务处理函数及中间件执行。
 
 插件信息查询保留路径参数、查询参数和 JSON 请求体中名称的优先级，包括空白及业务错误码 1 至 4。命中 URL 参数时不解析请求体，列表查询忽略请求体。插件列表与 RPC 方法列表保留数组及数组元素的空值语义。HTTP JSON-RPC 使用独立契约描述单次与批量请求、成功与错误回复，以及纯通知请求的 HTTP 204 响应。插件准入先于请求体读取，批量错误保留原有顺序，任意 JSON 仅用于 RPC 参数、返回值和错误详情。RPC WebSocket 路由声明 HTTP 101 升级、HTTP 404 插件准入错误、HTTP 400 文本拒绝，以及独立的入站调用和出站回复或通知。Origin 授权与连接清理保留在既有升级生命周期中。
 
+插件发布契约将仅管理员可用的授权、快照写入与已认证访问者的公开读取分离。公开数据仅包含声明的标量字段，授权和快照使用独立于同步插件私有存储的本地版本化文件。静态路由与文件接口共用插件状态和安全文件打开规则，发布加载响应排除内核代码。`TestAPIContractPluginPublish`、`TestPluginPublishContracts`、`TestPluginPublish*` 和 `TestPublishFile*` 覆盖实际响应、准入、范围变化、撤销、重装、损坏及路径边界，均包含在完整内核测试中。可运行 `go test -tags "fts5 sqlcipher" ./api ./model ./server ./util ./apicontract -run 'Test(APIContractPluginPublish|PluginPublish|PublishFile|RouteCoverage)' -count=1` 单独验证。路径测试的 CI 筛选也包含模型、静态路由与文件边界回归。接口说明和迁移示例见[插件发布](PLUGIN-PUBLISH.zh-CN.md)。
+
 搜索契约保留分页默认值与小数截断、路径校验与去重、历史子类型筛选的忽略规则，以及空值与空数组的区别。引用搜索区分仅回传请求标识和完整块结果，保留笔记本准入先于延迟参数校验的顺序。SQL 搜索权限、发布过滤、加密笔记本租约、取消请求的响应和只读嵌入块更新的空操作保持原有顺序。桌面端与移动端调用使用生成的请求类型。
+
+自定义块搜索使用可选的 `customBlock` 类型筛选字段。API 显式传入类型映射时仅搜索其中启用的类型；省略类型映射时使用搜索设置，默认启用自定义块。保存的搜索条件区分字段缺失与 `false`，使旧版前端搜索配置能够继承设置。`TestCustomBlockSearch` 回归覆盖配置兼容、搜索条件保存、类型筛选和全文索引更新；`TestAPIContractSettingConfigCompatibility` 与 `TestAPIContractSettingCompletePayloads` 覆盖设置契约，均包含在下方完整内核测试命令中。
 
 历史契约保留路径去空白、可选高亮默认值、历史类型的小数截断，以及空值与空数组的区别。版本对比先检查两个引用对象，再检查对象字段，并按排序后的笔记本 ID 获取租约。内容读取及文档、资源和数据库回滚保留历史路径租约检查，笔记本回滚沿用模型层的恢复行为。
 
 导入契约保留压缩包清理、首个上传文件选择、Markdown 路径空白，以及暂存令牌去空白和有效期。思源自动导入声明文档、令牌、笔记本和笔记本集合结果，挂载失败时保留文档载荷。Obsidian 任务取消失败时保留任务快照。笔记本挂载、加密导入处理和创建通知仍由既有业务操作负责。
 
 反链契约保留查询字段的空白、可选开关默认值、来源过滤归一化和版本哈希。列表查询缺少 ID 时仍返回空值；版本未变化时保留既有字段和空值数组。候选定义查询失败时保留空的 `refDefs` 数组。发布过滤、加密笔记本准入和请求期间的租约仍由处理器维护，上下文载荷保留递归块路径和数据库引用位置。
+
+`/api/ref/getBacklinkDoc` 接受可选整数 `blockSort`：`0`（默认）保持正文顺序，`1` 按匹配引用的锚文本自然升序排列，`2` 按自然降序排列，未知整数值保持正文顺序。每个展示条目取正文中首个匹配引用的锚文本并去除首尾空白，合并到父块的条目也遵循此规则。排序键相同时保持正文顺序，无锚文本的条目在两个方向中均置后。排序保留来源文档分组、过滤和提及顺序。在来源文档内部，由首段引用传递形成的整篇文档条目会展开为可独立排序的引用，并保留列表项和标题等局部上下文；恢复正文顺序时重新使用整篇文档条目。排序模式参与上下文版本哈希。编辑器设置 `backlinkBlockSort` 保存面板偏好，接口未提供 `blockSort` 时仍使用正文顺序。`TestBacklinkAnchorSort*`、`TestBacklinkDocumentBlockSort` 及已有设置和发布加密上下文契约测试覆盖排序、兼容性、版本变化以及普通和加密笔记本读取。这些回归包含在下方完整内核 CI 测试中，可单独运行 `go test -tags "fts5 sqlcipher" ./model ./api ./apicontract/... -run 'Test(Backlink|APIContractBack|APIContractSetting|PublishReaderBack|PublishReaderSearchAndBacklink|RouteCoverage)' -count=1`。
 
 图谱契约保留局部配置的默认值、配置字段不区分大小写和数值归一化行为。查询响应区分完整图数据和仅含请求标识的结果，后者包括错误及未提供 ID 的局部查询；节点和连线数组保留原有的空值语义。配置持久化仍要求管理员权限且不处于只读模式。发布过滤、加密笔记本拒绝访问与配置解码之间的执行顺序保持不变。
 
@@ -112,9 +134,19 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 全部 `/api/block/` 路由已使用契约。标题级别查询保留批量 ID 优先、去重、小数级别截断、文档结构体绑定和消息展示时长。文档转换结果包含六级标题计数和有类型的事务。引用检查仅校验所选范围使用的字段，保留忽略字段及笔记本参数去空白规则，并保留布尔错误载荷、发布过滤和持续到响应序列化完成的笔记本租约。这些特殊输入规则使用私有的入口专用类型解码函数，而普通接口继续通过字段声明解码。最近更新结果使用递归的 `SearchBlock` 载荷，包含可为空的引用、子块和卡片元数据。
 
+HTML 剪贴板转换保留字面反斜杠和标记字符，并在关闭 Markdown 语法时保留 HTML 格式。`TestHTML2BlockDOMContractEscapedText` 覆盖两种源格式模式、实际响应模式校验、编辑往返、HTML 实体以及样式和链接边界。可使用 `go test -tags "fts5 sqlcipher" ./api ./model -run 'Test(.*HTML.*|.*Clipboard.*|.*IFrame.*|SpinBlockDOM.*|WPSPresentation.*|NormalizeMSWord.*|NormalizeWPS.*)' -count=1` 运行相关转换回归。下方内核全量命令已包含这些测试，`app/tests/luteHtmlEscapes.test.js` 通过前端全量测试检查生成的 Lute JavaScript。修改 Lute 源码后，还需在 Lute 仓库运行 `go test ./...` 并重新生成内置 JavaScript。
+
 存储契约仅在存储值中允许任意 JSON，键、最近文档、搜索条件、行内样式和属性视图调色板均使用结构化类型。最近文档写入接口保留只读角色在解析请求体前直接返回成功的行为。`contractHandler` 可选的类型化 `beforeDecode` 回调用于保留这一执行顺序，允许在解码前返回响应；路由检查仍要求显式绑定端点。行内样式版本 1 的更新保留已有内置配置，版本 2 和调色板请求保留结构体解码的兼容行为。
 
 `DirectJSONOutput` 保留直接返回 JSON 对象或数组的独立协议，不添加内核信封，此类载荷使用 `SuccessDirectJSON` 返回。支持通知空响应的端点显式声明 `NoContent` 并返回 `SuccessNoContent`；HTTP 校验要求状态码为 204 且响应体为空。鉴权和只读错误仍保留内核错误信封。生成声明记录直接输出模式及可选的空响应支持。
+
+全局反链接口使用独立的平铺列表。`/api/ref/getGlobalBacklinks` 要求提供 `id`、`sort`（`1` 自然升序、`2` 自然降序）和 `containChildren`，支持可选的 `notebook`、`keyword` 和 `sourceFilter`。每个实际引用块只出现一次，取其首个匹配行内引用的锚文本并去除首尾空白；空锚文本在两个方向中均置后，相同锚文本按来源文档 ID、正文位置和块 ID 排列。首次请求返回不透明的快照令牌及最多 50 条元数据，后续请求复用 `snapshot` 和 `offset`，偏移量限制在已有页的边界。可选的 `anchorID` 用于定位原阅读位置所在页。正文变化期间快照顺序保持不变，不带令牌刷新时才纳入编辑结果。令牌过期、查询不匹配、来源文档消失或当前页条目删除、移动时返回 `expired: true`。缓存最多保留 16 份快照，期限为 5 分钟，总元数据预算为 64 MiB，不缓存正文；笔记本锁定时清除对应快照。
+
+`/api/ref/getGlobalBacklinkContexts` 使用相同查询、必需的 `snapshot` 和最多 20 个属于该快照的块 `ids`，返回可独立编辑的块正文，并保留面包屑和数据库引用信息。两个接口在返回元数据或正文前重新检查来源权限，保留加密笔记本请求租约；发布阅读者不能读取加密笔记本。前端每页加载 50 条，保留视口附近 5 页及正在编辑的页，最多按需创建 16 个编辑器。回收等待未完成事务，保留输入法组合、焦点、拖动和数据库编辑会话。自动刷新等待编辑结束并恢复可见块的位置。配置 `backlinkGlobalSort` 的 `0`（默认）表示文档分组，`1`、`2` 表示全局锚文本升降序。`/api/ref/getBacklink2` 新增可选的 `includeBacklinks`（默认 `true`）；设为 `false` 时返回空反链列表及零反链计数，保留提及行为，避免重复加载文档分组。已有调用方和文档内 `blockSort` 的默认行为保持不变。
+
+`TestGlobalBacklink*`、`TestAPIContractGlobalBacklink`、`TestBacklinkAnchorSortContext` 和 `TestBacklink2OptionalMentions` 覆盖跨文档分页、首个引用取值、编辑后的快照稳定性、阅读定位、普通和加密读取、来源权限、过期、缓存上限、实际 HTTP 响应契约及提及兼容性。它们包含在下方内核全量 CI 命令中，可单独运行 `go test -tags "fts5 sqlcipher" ./model ./api ./apicontract/... -run 'Test(GlobalBacklink|Backlink|APIContractGlobalBacklink|APIContractBack|APIContractSetting|PublishReaderBack|PublishReaderSearchAndBacklink|RouteCoverage)' -count=1`。前端的 `globalBacklinkPaging.test.ts`、`globalBacklinkList.test.js` 和 `backlinkSort.test.js` 已由现有全量 CI 自动发现，覆盖页窗口上限、迟到响应、待提交编辑和模式切换。
+
+`TestGlobalBacklinkLargeDataset` 在隔离数据库中创建并索引 100 篇真实文档、共 10,000 条引用，逐一检查全部 200 页的自然顺序及条目无重复、无遗漏，再加载 16 个可编辑上下文。测试报告首次排序、缓存分页、正文加载的耗时及快照大小，不设置依赖机器性能的时间阈值。可运行 `go test -tags "fts5 sqlcipher" ./model -run TestGlobalBacklinkLargeDataset -count=1 -v`；现有 `TestGlobalBacklink*` 筛选和内核全量 CI 均包含该测试。前端回归还覆盖底部面板请求失败后的重试入口、重试成功后的空状态恢复，以及编辑器回收与重建时整行高度保持稳定。
 
 ## 文件与流式协议
 
@@ -144,21 +176,7 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 
 ## 生成与验证
 
-HTML 剪贴板转换保留字面反斜杠和标记字符，并在关闭 Markdown 语法时保留 HTML 格式。`TestHTML2BlockDOMContractEscapedText` 覆盖两种源格式模式、实际响应模式校验、编辑往返、HTML 实体以及样式和链接边界。可使用 `go test -tags "fts5 sqlcipher" ./api ./model -run 'Test(.*HTML.*|.*Clipboard.*|.*IFrame.*|SpinBlockDOM.*|WPSPresentation.*|NormalizeMSWord.*|NormalizeWPS.*)' -count=1` 运行相关转换回归。下方内核全量命令已包含这些测试，`app/tests/luteHtmlEscapes.test.js` 通过前端全量测试检查生成的 Lute JavaScript。修改 Lute 源码后，还需在 Lute 仓库运行 `go test ./...` 并重新生成内置 JavaScript。
-
-自定义块搜索使用可选的 `customBlock` 类型筛选字段。API 显式传入类型映射时仅搜索其中启用的类型；省略类型映射时使用搜索设置，默认启用自定义块。保存的搜索条件区分字段缺失与 `false`，使旧版前端搜索配置能够继承设置。`TestCustomBlockSearch` 回归覆盖配置兼容、搜索条件保存、类型筛选和全文索引更新；`TestAPIContractSettingConfigCompatibility` 与 `TestAPIContractSettingCompletePayloads` 覆盖设置契约，均包含在下方完整内核测试命令中。
-
-编辑器通过独立的 `swapBlockRef` 事务转换块引用：`id` 指定引用块，`blockID` 指定定义块，`data` 包含布尔选项 `includeChildren` 和 `originalToEmbed`。内核在 `retData` 中返回受影响的文档 ID，并以受影响顶层块的私有内存快照生成逆向操作。快照不传给客户端，也不接受客户端提交。重放保留块 ID 和数据库绑定；内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。`TestBlockSwapTransaction` 覆盖落盘后的撤销和重做、跨文档历史、冲突拒绝及写入失败恢复，包含在下方完整内核测试命令中，也可在 `kernel/` 下运行 `go test -tags "fts5 sqlcipher" ./model -run 'Test(SwapBlockRefNodes|BlockSwapTransaction)' -count=1` 单独验证
-
-块交换的撤销和重做为所有受影响文档持有笔记本租约，直到响应序列化完成。`TestContractBlockSwapReplayNotebookResponseLease` 验证锁定操作会等待响应结束，包含在完整内核测试命令中。
-
-`TestAPIContractFileTreeMissingDocuments` 通过实际 HTTP 响应覆盖查询路径、删除、重命名、复制和移动不存在的文档，按响应契约检查业务错误及保留的 `closeTimeout`，已包含在下方的内核全量测试命令中。可在 `kernel/` 中执行 `go test -tags "fts5 sqlcipher" ./api -run TestAPIContractFileTreeMissingDocuments -count=1` 单独验证。
-
-资源引用扫描将定义文件缺失或定义 ID 无效的数据库记录到可选的 `unavailableAttributeViews` 列表，不阻断查询、预演或替换。每项包含笔记本 ID 与名称、文档 ID 与路径及人类可读路径、块 ID、数据库 ID 和原因。已存在但无法读取或内容损坏的定义仍返回错误。保存前重新校验缺失文件快照，避免遗漏扫描期间恢复的定义。当前按需下载规则不包含数据库定义，回归测试会检查这一前提。缺失定义回归覆盖模型和实际 HTTP 契约，包括关闭的笔记本和共享定义。
-
-资源引用查询和替换契约保留单资源请求，同时支持批量参数。批量结果按输入顺序返回每项状态、原因、引用和改动文件数；顶层计数对共享文件去重。空批次、重复源路径、链式和循环映射会被拒绝。独立映射可以在其他项失败时完成，共享文件写入失败归属所有受影响映射。扫描期间允许编辑，保存前校验工作区快照；取消和无变化重试保留源数据。`TestAssetRelink` 回归覆盖单资源兼容、批量校验、共享文档、数据库及 OCR 保存、历史和并发编辑，已包含在下方完整内核测试命令中。
-
-插件发布契约将仅管理员可用的授权、快照写入与已认证访问者的公开读取分离。公开数据仅包含声明的标量字段，授权和快照使用独立于同步插件私有存储的本地版本化文件。静态路由与文件接口共用插件状态和安全文件打开规则，发布加载响应排除内核代码。`TestAPIContractPluginPublish`、`TestPluginPublishContracts`、`TestPluginPublish*` 和 `TestPublishFile*` 覆盖实际响应、准入、范围变化、撤销、重装、损坏及路径边界，均包含在完整内核测试中。可运行 `go test -tags "fts5 sqlcipher" ./api ./model ./server ./util ./apicontract -run 'Test(APIContractPluginPublish|PluginPublish|PublishFile|RouteCoverage)' -count=1` 单独验证。路径测试的 CI 筛选也包含模型、静态路由与文件边界回归。接口说明和迁移示例见[插件发布](PLUGIN-PUBLISH.zh-CN.md)。
+`/api/block/migrateLegacyMindmaps` 是要求管理员身份的写入端点，保留只读保护及加密笔记本请求租约。请求必须提供文档 `id` 和 `notebook`；保存历史后，在一次可撤销事务中转换能够完整解析的旧 `mindmap` 列表，返回 `converted` 数量和文档脑图的权威 `blocks`（`id`、`dom`）。重复请求返回当前块内容，不重复转换；不完整的原文保持不变。回归命令为 `go test -tags "fts5 sqlcipher" ./model ./api ./apicontract/... -run 'Test(LegacyMindmap|MigrateLegacyMindmaps|APIContractHeadingTransactions|APIContractRouterCoverage|RouteCoverage)' -count=1`，前端覆盖位于 `listMindmap/migrate.test.ts` 和 `listMindmap/model.test.ts`，均由现有持续集成规则发现。
 
 在 `app/` 下运行：
 

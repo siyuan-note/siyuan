@@ -22,6 +22,7 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 	kernelConf "github.com/siyuan-note/siyuan/kernel/conf"
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestStreamIdleTimeoutResetsAfterEachChunk(t *testing.T) {
@@ -386,10 +387,10 @@ func TestCreateStreamAcceptsEmptySuccessfulResponse(t *testing.T) {
 	}
 }
 
-func newTestOpenAIClient(serverURL string) *openai.Client {
+func newTestOpenAIClient(serverURL string) *util.AIClient {
 	config := openai.DefaultConfig("test-key")
 	config.BaseURL = serverURL + "/v1"
-	return openai.NewClientWithConfig(config)
+	return &util.AIClient{Client: openai.NewClientWithConfig(config)}
 }
 
 func testChatRequest() openai.ChatCompletionRequest {

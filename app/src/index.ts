@@ -54,7 +54,7 @@ import {ipcRenderer} from "electron";
 import {getDockByType} from "./layout/tabUtil";
 import {Files} from "./layout/dock/Files";
 import {Tag} from "./layout/dock/Tag";
-import {appearanceConfigApi} from "./config/tabs/appearanceRuntime";
+import {appearanceConfigApi, refreshAppearance} from "./config/tabs/appearanceRuntime";
 import {renderSnippet} from "./config/util/snippets";
 import {refreshThemeStyle, reloadInlineStyles, setBodyHighlight} from "./util/assets";
 import {reloadSync} from "./util/reloadSync";
@@ -92,6 +92,9 @@ export class App {
                         case "setAppearance":
                             appearanceConfigApi.apply(data.data);
                             break;
+                        case "refreshAppearance":
+                            void refreshAppearance(data.data);
+                            break;
                         case "reloadInlineStyles":
                             void reloadInlineStyles();
                             break;
@@ -107,6 +110,9 @@ export class App {
                             break;
                         case "databaseIndexCommit":
                             processBacklinkIndexCommit(data.data);
+                            if (getDockByType("tag")?.data.tag instanceof Tag) {
+                                (getDockByType("tag").data.tag as Tag).update();
+                            }
                             break;
                         case "reloadTag":
                             if (getDockByType("tag")?.data.tag instanceof Tag) {

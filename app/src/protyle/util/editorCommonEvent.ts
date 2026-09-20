@@ -86,6 +86,7 @@ import {getCaretRect} from "./caretRect";
 import {isBlockRefDropTargetDisabled} from "./blockRefDrop";
 import {appendCancelSuperBlockOperations} from "../../block/cancelSuperBlock";
 import {preserveTabTask, remapTabsDOMIDs} from "./tabsCopy";
+import {remapListMindmapIDs} from "../render/listMindmap/model";
 import {getTabItems, getTabTask} from "../render/tabsRender";
 import {repairActiveTab} from "../wysiwyg/tabsRemoval";
 import {sortAVRows} from "../render/av/rowSort";
@@ -408,6 +409,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 e.setAttribute("updated", newId.split("-")[0]);
             });
             remapTabsDOMIDs(copyElement, copiedIDs);
+            remapListMindmapIDs(copyElement, copiedIDs);
             const targetSubtype = targetElement.getAttribute("data-subtype");
             if (copyElement.getAttribute("data-type") === "NodeListItem" &&
                 targetElement.getAttribute("data-type") === "NodeListItem" && targetSubtype &&
@@ -995,7 +997,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         });
     }
     unfoldHeadingElements.forEach(item => {
-        const foldData = setFold(protyle, item, true, false, false, true);
+        const foldData = setFold(protyle, item, true, false, true);
         if (!foldData.doOperations?.length) {
             return;
         }

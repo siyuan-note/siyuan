@@ -430,8 +430,11 @@ func TestAgentConfirmationDeadlineZeroHasNoLimit(t *testing.T) {
 }
 
 func TestQuestionTimeoutReusesConfirmTimeout(t *testing.T) {
-	if timeout := resolveQuestionTimeout(0); timeout != fallbackQuestionTimeout {
-		t.Fatalf("zero confirmation timeout did not use the fallback question timeout: %v", timeout)
+	if timeout := resolveQuestionTimeout(0); timeout != 0 {
+		t.Fatalf("zero confirmation timeout created a question timeout: %v", timeout)
+	}
+	if timeout := resolveQuestionTimeout(-time.Second); timeout != fallbackQuestionTimeout {
+		t.Fatalf("negative confirmation timeout did not use the fallback question timeout: %v", timeout)
 	}
 	if timeout := resolveQuestionTimeout(90 * time.Second); timeout != 90*time.Second {
 		t.Fatalf("positive confirmation timeout was not reused by question: %v", timeout)
@@ -442,7 +445,7 @@ func TestQuestionWithoutDeadlineWaitsForAnswer(t *testing.T) {
 	events := make(chan AgentEvent, 1)
 	resultCh := make(chan string, 1)
 	go func() {
-		resultCh <- handleQuestion(context.Background(), map[string]any{"questions": []any{}}, "test-round", events, 0)
+		resultCh <- handleQuestion(context.Background(), map[string]any{"questions": []any{}}, "test-round", events, resolveQuestionTimeout(0))
 	}()
 
 	event := <-events

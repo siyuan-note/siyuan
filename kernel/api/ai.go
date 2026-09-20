@@ -325,7 +325,7 @@ func listModelsContract(c *gin.Context, req apicontract.AIProviderRequest) apico
 		return contractFailure[apicontract.AIModelsData](ret)
 	}
 
-	metadata, err := util.ListAvailableModelsWithContext(provider.APIKey, provider.BaseURL, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
+	metadata, err := util.ListProviderModels(provider.APIKey, provider.BaseURL, provider.Protocol, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
 	models := make([]string, 0, len(metadata))
 	contextLengths := map[string]int{}
 	for _, item := range metadata {

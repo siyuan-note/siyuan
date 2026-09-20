@@ -14,6 +14,7 @@ type SettingAI struct {
 	MCP             *SettingMCP             `json:"mcp" api:"optional,nullable"`
 	Embedding       *SettingEmbedding       `json:"embedding" api:"optional,nullable"`
 	Rerank          *SettingRerank          `json:"rerank" api:"optional,nullable"`
+	Decision        *SettingDecision        `json:"decision" api:"optional,nullable"`
 	Agent           *SettingAgent           `json:"agent" api:"optional,nullable"`
 	Editing         *SettingEditing         `json:"editing" api:"optional,nullable"`
 	ImageGeneration *SettingImageGeneration `json:"imageGeneration" api:"optional,nullable"`
@@ -65,6 +66,14 @@ type SettingRerank struct {
 	RequestFormat  string `json:"requestFormat" api:"optional,nullable"`
 	Timeout        int    `json:"timeout" api:"optional,nullable"`
 	CandidateCount int    `json:"candidateCount" api:"optional,nullable"`
+}
+
+type SettingDecision struct {
+	Enabled  bool   `json:"enabled" api:"optional,nullable"`
+	Endpoint string `json:"endpoint" api:"optional,nullable"`
+	APIKey   string `json:"apiKey" api:"optional,nullable"`
+	Name     string `json:"name" api:"optional,nullable"`
+	Timeout  int    `json:"timeout" api:"optional,nullable"`
 }
 
 type SettingAgent struct {
@@ -221,6 +230,8 @@ type SettingEditor struct {
 	BacklinkHideReference           bool                 `json:"backlinkHideReference" api:"optional,nullable"`
 	BacklinkShowBottom              bool                 `json:"backlinkShowBottom" api:"optional,nullable"`
 	BacklinkSort                    *int                 `json:"backlinkSort" api:"optional,nullable"`
+	BacklinkGlobalSort              int                  `json:"backlinkGlobalSort" api:"optional,nullable"`
+	BacklinkBlockSort               int                  `json:"backlinkBlockSort" api:"optional,nullable"`
 	BackmentionSort                 *int                 `json:"backmentionSort" api:"optional,nullable"`
 	HeadingNumber                   bool                 `json:"headingNumber" api:"optional,nullable"`
 	HeadingNumberFormat             string               `json:"headingNumberFormat" api:"optional,nullable"`

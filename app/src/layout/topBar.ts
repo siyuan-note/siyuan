@@ -303,6 +303,7 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.reset,
+                    icon: "iconRefresh",
                     accelerator: "⌘0",
                     click: () => {
                         setZoom("restore");

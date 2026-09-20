@@ -622,7 +622,7 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 }
 
 func isEmbeddingEnabled() bool {
-	return nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && len(Conf.AI.Embedding.APIKey) > 0
+	return !util.IsDisabledFeature("ai") && nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && len(Conf.AI.Embedding.APIKey) > 0
 }
 
 // rerankSqlBlocks 用重排模型对候选块按 query 逐对精排。未启用或调用失败时原样返回（降级为向量相似度排序）。

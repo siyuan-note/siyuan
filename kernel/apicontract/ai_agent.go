@@ -67,6 +67,7 @@ type AISessionEntry struct {
 	CompletionTok        int                    `json:"completionTokens,omitempty" api:"optional,nullable"`
 	Timestamp            int64                  `json:"timestamp,omitempty" api:"optional,nullable"`
 	ReasoningCont        string                 `json:"reasoningContent,omitempty" api:"optional,nullable"`
+	NativeContent        *AINativeContent       `json:"nativeContent,omitempty" api:"optional,nullable"`
 	ResponseOutput       []JSONValue            `json:"responseOutput,omitempty" api:"optional,nullable"`
 	ResponseOutputTokens int                    `json:"responseOutputTokens,omitempty" api:"optional,nullable"`
 	RoundID              string                 `json:"roundID,omitempty" api:"optional,nullable"`
@@ -84,6 +85,7 @@ type AIAgentMessage struct {
 	Role                 string            `json:"role" api:"optional,nullable"`
 	Content              string            `json:"content" api:"optional,nullable"`
 	ReasoningContent     string            `json:"reasoningContent,omitempty" api:"optional,nullable"`
+	NativeContent        *AINativeContent  `json:"nativeContent,omitempty" api:"optional,nullable"`
 	ResponseOutput       []JSONValue       `json:"responseOutput,omitempty" api:"optional,nullable"`
 	ResponseOutputTokens int               `json:"responseOutputTokens,omitempty" api:"optional,nullable"`
 	RoundID              string            `json:"roundID,omitempty" api:"optional,nullable"`
@@ -230,4 +232,11 @@ func aiAgentSSEOptions() ResponseOptions {
 	options := SSEOptions(SSEEvent[AISSETurn]("turn"), SSEEvent[AISSEToken]("content"), SSEEvent[AISSEThinking]("thinking"), SSEEvent[AISSEToken]("reasoning"), SSEEvent[AISSEConfirm]("confirm"), SSEEvent[AIPermissionData]("permission"), SSEEvent[AISSEToolCall]("tool_call"), SSEEvent[AISSEToolResult]("tool_result"), SSEEvent[AISSEMessage]("error"), SSEEvent[AISSEMessage]("interrupted"), SSEEvent[AISSEUsage]("usage"), SSEEvent[AISSETurn]("done"), SSEEvent[AISSERetry]("retry"), SSEEvent[AISSEQuestion]("question"), SSEEvent[AISSEBrowserCapabilityCall]("browser_capability_call"), SSEEvent[AISSESnapshot]("snapshot"))
 	options.AdditionalErrorStatuses = []int{409}
 	return options
+}
+
+// AINativeContent 保留供应商定义的原生内容块，协议和版本用于选择兼容的上下文读取方式。
+type AINativeContent struct {
+	Protocol string      `json:"protocol"`
+	Version  int         `json:"version"`
+	Blocks   []JSONValue `json:"blocks"`
 }

@@ -33,6 +33,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -482,7 +483,9 @@ func markTemplateAttributeViewModes(root *ast.Node, databaseMode TemplateDatabas
 	})
 }
 
-func RenderDynamicIconContentTemplate(content, id string) (ret string) {
+// RenderDynamicIconContentTemplate 渲染动态图标中的模板内容。
+// 调用方必须自行完成授权：只读角色会失去按块 ID 读取工作区数据的模板函数，避免绕过发布访问控制。
+func RenderDynamicIconContentTemplate(c *gin.Context, content, id string) (ret string) {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return
@@ -508,7 +511,7 @@ func RenderDynamicIconContentTemplate(content, id string) (ret string) {
 	dataModel["alias"] = block.Alias
 
 	goTpl := template.New("").Delims(".action{", "}")
-	tplFuncMap := dynamicIconTemplateFuncs()
+	tplFuncMap := dynamicIconTemplateFuncs(c)
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(content)
 	if err != nil {
@@ -526,8 +529,17 @@ func RenderDynamicIconContentTemplate(content, id string) (ret string) {
 	return
 }
 
-func dynamicIconTemplateFuncs() template.FuncMap {
-	return filesys.BuiltInTemplateFuncs()
+// dynamicIconTemplateFuncs 返回动态图标模板可用的函数表。
+// 通用模板函数会按块 ID 直接读取工作区数据，与动态图标模板自身的授权无关，
+// 因此只读角色（发布读者与匿名访问者）必须剔除这些函数，防止其绕过发布访问控制读取被禁用、
+// 受密码保护或加密笔记本中的文档元数据与块统计。
+func dynamicIconTemplateFuncs(c *gin.Context) (ret template.FuncMap) {
+	ret = filesys.BuiltInTemplateFuncs()
+	if IsReadOnlyRoleContext(c) {
+		delete(ret, "getHPathByID")
+		delete(ret, "statBlock")
+	}
+	return
 }
 
 func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, err error) {
@@ -773,6 +785,11 @@ func applyTemplateAttributeViewPlan(node *ast.Node, plan *templateAttributeViewP
 
 func templateAttributeViewPreviewTable(node *ast.Node, plan *templateAttributeViewPlan) *ast.Node {
 	view := *plan.selectedView
+	if nil != plan.selectedView.List {
+		list := *plan.selectedView.List
+		list.Columns = append([]*av.ViewTableColumn(nil), plan.selectedView.List.Columns...)
+		view.List = &list
+	}
 	if nil != plan.selectedView.Table {
 		table := *plan.selectedView.Table
 		table.Columns = append([]*av.ViewTableColumn(nil), plan.selectedView.Table.Columns...)
@@ -1259,5 +1276,8 @@ func CreateTemplate(name, content string, overwrite bool) (code int, err error) 
 	}
 
 	err = filelock.WriteFile(savePath, []byte(content))
+	if err == nil {
+		IncSyncIfNeeded(savePath)
+	}
 	return
 }

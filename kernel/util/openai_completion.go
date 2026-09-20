@@ -88,9 +88,10 @@ func IsOpenAIResponsesProtocol(protocol string) bool {
 	return strings.EqualFold(strings.TrimSpace(protocol), OpenAIProtocolResponses)
 }
 
-// OpenAICompletionStream 将 Chat Completions 与 Responses 的流式输出统一为 Chat 增量，
+// OpenAICompletionStream 将各生成协议的流式输出统一为 Chat 增量，
 // 让现有上层渲染、重试和工具执行逻辑保持一致。
 type OpenAICompletionStream struct {
+	anthropic         *anthropicStream
 	chat              *openai.ChatCompletionStream
 	responses         *openai.ResponseStream
 	pending           []openai.ChatCompletionStreamResponse
@@ -100,8 +101,11 @@ type OpenAICompletionStream struct {
 	responsesDone     bool
 }
 
-func CreateOpenAICompletionStream(ctx context.Context, client *openai.Client, protocol string,
+func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protocol string,
 	request openai.ChatCompletionRequest, responseInput []any) (*OpenAICompletionStream, error) {
+	if IsAnthropicMessagesProtocol(protocol) {
+		return createAnthropicStream(ctx, client, request)
+	}
 	if !IsOpenAIResponsesProtocol(protocol) {
 		stream, err := client.CreateChatCompletionStream(ctx, request)
 		if err != nil {
@@ -120,8 +124,11 @@ func CreateOpenAICompletionStream(ctx context.Context, client *openai.Client, pr
 	}, nil
 }
 
-func CreateOpenAICompletion(ctx context.Context, client *openai.Client, protocol string,
+func CreateOpenAICompletion(ctx context.Context, client *AIClient, protocol string,
 	request openai.ChatCompletionRequest, responseInput []any) (openai.ChatCompletionResponse, error) {
+	if IsAnthropicMessagesProtocol(protocol) {
+		return createAnthropicCompletion(ctx, client, request)
+	}
 	if !IsOpenAIResponsesProtocol(protocol) {
 		return client.CreateChatCompletion(ctx, request)
 	}
@@ -135,7 +142,7 @@ func CreateOpenAICompletion(ctx context.Context, client *openai.Client, protocol
 	return responseToChatCompletion(response), nil
 }
 
-func CompactOpenAIResponse(ctx context.Context, client *openai.Client, request openai.ChatCompletionRequest,
+func CompactOpenAIResponse(ctx context.Context, client *AIClient, request openai.ChatCompletionRequest,
 	responseInput []any) ([]json.RawMessage, *openai.ResponseUsage, error) {
 	responseRequest := openai.CompactResponseRequest{
 		Model:        request.Model,
@@ -439,6 +446,9 @@ func responseUsageToChat(usage *openai.ResponseUsage) openai.Usage {
 }
 
 func (stream *OpenAICompletionStream) Recv() (openai.ChatCompletionStreamResponse, error) {
+	if stream.anthropic != nil {
+		return stream.anthropic.recv()
+	}
 	if stream.chat != nil {
 		return stream.chat.Recv()
 	}
@@ -712,10 +722,20 @@ func (stream *OpenAICompletionStream) ResponseOutput() []json.RawMessage {
 }
 
 func (stream *OpenAICompletionStream) Close() {
+	if stream.anthropic != nil {
+		stream.anthropic.body.Close()
+	}
 	if stream.chat != nil {
 		stream.chat.Close()
 	}
 	if stream.responses != nil {
 		stream.responses.Close()
 	}
+}
+
+func (stream *OpenAICompletionStream) NativeContent() *AIMessageContent {
+	if stream.anthropic == nil {
+		return nil
+	}
+	return CloneAIMessageContent(stream.anthropic.content)
 }

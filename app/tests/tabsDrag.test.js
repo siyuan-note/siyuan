@@ -29,6 +29,7 @@ const sources = () => {
         })(),
         extract("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]),
         extract("protyle/render/tabsState.ts", ["adjacentTabID", "resolveTabID", "tabKeyboardTarget"]),
+        extract("protyle/render/tabsAttributes.ts", ["clearTabsAttributes", "renderTabsAttributes"]),
         extract("util/escape.ts", ["escapeHtml"]),
         extract("protyle/wysiwyg/transaction.ts", ["syncBlockAttrs"]),
         ts.transpileModule(readFileSync(path.join(__dirname, "../src/protyle/render/tabsDrag.ts"), "utf8")

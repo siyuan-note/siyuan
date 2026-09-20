@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -1866,5 +1867,190 @@ func TestCheckAbsPathAccessableByPublishAccessKeepsHiddenNotebookAccessible(t *t
 	})
 	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Password: password}}) {
 		t.Fatal("password protected notebook should be accessible after authorization")
+	}
+}
+
+// TestFilterBlockInfoByPublishAccessFiltersSubFileCount 验证读者拿到的下级文档数
+// 只统计发布可见的文档，避免据此推断被排除文档的数量。
+func TestFilterBlockInfoByPublishAccessFiltersSubFileCount(t *testing.T) {
+	const (
+		boxID       = "20260726000000-boxid01"
+		parentID    = "20260726000001-parent1"
+		publicID    = "20260726000002-public1"
+		hiddenID    = "20260726000003-hidden1"
+		forbiddenID = "20260726000004-forbid1"
+	)
+
+	previousDataDir, previousBlockTreeDBPath, previousConf := util.DataDir, util.BlockTreeDBPath, Conf
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	treenode.InitBlockTree(true)
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.DataDir, util.BlockTreeDBPath, Conf = previousDataDir, previousBlockTreeDBPath, previousConf
+	})
+
+	boxDir := filepath.Join(util.DataDir, boxID)
+	if err := os.MkdirAll(filepath.Join(boxDir, parentID), 0755); err != nil {
+		t.Fatal(err)
+	}
+	for _, target := range []struct{ dir, id string }{
+		{".", parentID}, {parentID, publicID}, {parentID, hiddenID}, {parentID, forbiddenID},
+	} {
+		if err := os.WriteFile(filepath.Join(boxDir, target.dir, target.id+".sy"), []byte(`{"Properties":{}}`), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	parentPath := "/" + parentID + ".sy"
+	treenode.IndexBlockTree(&parse.Tree{
+		ID:    parentID,
+		Box:   boxID,
+		Path:  parentPath,
+		HPath: "/" + parentID,
+		Root:  &ast.Node{ID: parentID, Type: ast.NodeDocument},
+	})
+
+	publishAccess := PublishAccess{
+		{ID: hiddenID, Visible: false},
+		{ID: forbiddenID, Visible: false, Disable: true},
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodPost, "/", nil)
+	c.Set(RoleContextKey, RoleReader)
+
+	// SubFileCount 模拟 blockinfo 已按未过滤口径统计出的下级文档数
+	filtered := FilterBlockInfoByPublishAccess(c, publishAccess, &BlockInfo{RootID: parentID, SubFileCount: 3, IAL: map[string]string{}})
+	if 1 != filtered.SubFileCount {
+		t.Fatalf("reader subfile count = %d, want only the published one", filtered.SubFileCount)
+	}
+
+	// 无法定位文档路径时不下发下级文档数
+	missing := FilterBlockInfoByPublishAccess(c, publishAccess, &BlockInfo{RootID: "20260726000005-missing", SubFileCount: 5, IAL: map[string]string{}})
+	if 0 != missing.SubFileCount {
+		t.Fatalf("missing document subfile count = %d, want 0", missing.SubFileCount)
+	}
+}
+
+// TestFilterBlockInfoByPublishAccessFiltersRefIDs 验证读者拿到的反链块 ID 与引用数
+// 不包含禁止发布、密码保护文档中的引用块，同时保留发布可见的反链。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-v758-8w88-pfr2
+func TestFilterBlockInfoByPublishAccessFiltersRefIDs(t *testing.T) {
+	const (
+		boxID             = "20260919000000-boxid01"
+		publicID          = "20260919000001-public1"
+		visibleRefID      = "20260919000002-visref1"
+		hiddenRefID       = "20260919000003-hidref1"
+		disabledRefID     = "20260919000004-disref1"
+		protectedRefID    = "20260919000005-protref1"
+		disabledDocID     = "20260919000006-disable"
+		protectedDocID    = "20260919000007-protect"
+		protectedPassword = "protected-password"
+	)
+
+	previousDataDir, previousBlockTreeDBPath, previousConf := util.DataDir, util.BlockTreeDBPath, Conf
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	treenode.InitBlockTree(true)
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.DataDir, util.BlockTreeDBPath, Conf = previousDataDir, previousBlockTreeDBPath, previousConf
+	})
+
+	boxDir := filepath.Join(util.DataDir, boxID)
+	if err := os.MkdirAll(boxDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	for _, id := range []string{publicID, visibleRefID, hiddenRefID, disabledRefID, protectedRefID, disabledDocID, protectedDocID} {
+		if err := os.WriteFile(filepath.Join(boxDir, id+".sy"), []byte(`{"Properties":{}}`), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// 禁止发布、密码保护文档中的引用块位于这两个文档路径下
+	for _, target := range []struct{ id, path string }{
+		{publicID, "/" + publicID + ".sy"},
+		{visibleRefID, "/" + visibleRefID + ".sy"},
+		{hiddenRefID, "/" + hiddenRefID + ".sy"},
+		{disabledRefID, "/" + disabledDocID + "/" + disabledRefID + ".sy"},
+		{protectedRefID, "/" + protectedDocID + "/" + protectedRefID + ".sy"},
+		{disabledDocID, "/" + disabledDocID + ".sy"},
+		{protectedDocID, "/" + protectedDocID + ".sy"},
+	} {
+		treenode.IndexBlockTree(&parse.Tree{
+			ID:    target.id,
+			Box:   boxID,
+			Path:  target.path,
+			HPath: "/" + target.id,
+			Root:  &ast.Node{ID: target.id, Type: ast.NodeDocument},
+		})
+	}
+
+	publishAccess := PublishAccess{
+		{ID: disabledDocID, Visible: true, Disable: true},
+		{ID: protectedDocID, Visible: true, Password: protectedPassword},
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodPost, "/", nil)
+	c.Set(RoleContextKey, RoleReader)
+
+	// RefIDs 模拟 blockinfo 已按未过滤口径查出的反链块 ID
+	info := &BlockInfo{
+		ID:       publicID,
+		RootID:   publicID,
+		RefIDs:   []string{visibleRefID, hiddenRefID, disabledRefID, protectedRefID},
+		RefCount: 4,
+		IAL:      map[string]string{},
+	}
+	filtered := FilterBlockInfoByPublishAccess(c, publishAccess, info)
+	if 2 != len(filtered.RefIDs) || visibleRefID != filtered.RefIDs[0] || hiddenRefID != filtered.RefIDs[1] {
+		t.Fatalf("reader reference IDs = %v, want the published and invisible backlinks", filtered.RefIDs)
+	}
+	if 2 != filtered.RefCount {
+		t.Fatalf("reader reference count = %d, want the filtered count", filtered.RefCount)
+	}
+
+	// 授权后密码保护文档的反链可见，禁止发布文档的反链仍不可见
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedDocID,
+		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+	})
+	filtered = FilterBlockInfoByPublishAccess(c, publishAccess, &BlockInfo{
+		ID:       publicID,
+		RootID:   publicID,
+		RefIDs:   []string{visibleRefID, hiddenRefID, disabledRefID, protectedRefID},
+		RefCount: 4,
+		IAL:      map[string]string{},
+	})
+	if 3 != len(filtered.RefIDs) || 3 != filtered.RefCount {
+		t.Fatalf("authorized reader reference IDs = %v, count = %d, want the password protected backlink added",
+			filtered.RefIDs, filtered.RefCount)
+	}
+
+	// 文档路径无法定位时不下发下级文档数，反链块 ID 仍按逐元素过滤结果给出
+	missing := FilterBlockInfoByPublishAccess(c, publishAccess, &BlockInfo{
+		ID:           "20260919000008-missing",
+		RootID:       "20260919000008-missing",
+		SubFileCount: 5,
+		RefIDs:       []string{visibleRefID, disabledRefID},
+		RefCount:     2,
+		IAL:          map[string]string{},
+	})
+	if 0 != missing.SubFileCount {
+		t.Fatalf("missing document subfile count = %d, want 0", missing.SubFileCount)
+	}
+	if 1 != len(missing.RefIDs) || visibleRefID != missing.RefIDs[0] || 1 != missing.RefCount {
+		t.Fatalf("missing document reference IDs = %v, count = %d, want only the published backlink",
+			missing.RefIDs, missing.RefCount)
+	}
+
+	// 原始未过滤反链在 API 层无 RefIDs 时仍给出空数组而不是 null
+	empty := FilterBlockInfoByPublishAccess(c, publishAccess, &BlockInfo{ID: publicID, RootID: publicID, IAL: map[string]string{}})
+	if nil == empty.RefIDs || 0 != len(empty.RefIDs) || 0 != empty.RefCount {
+		t.Fatalf("document without references reference IDs = %v, count = %d, want empty slice", empty.RefIDs, empty.RefCount)
 	}
 }

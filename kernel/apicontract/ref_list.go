@@ -13,6 +13,7 @@ type BacklinkListRequest struct {
 	KnownRevision    string                `json:"knownRevision" api:"optional,nullable,ignoretype"`
 	Notebook         string                `json:"notebook" api:"optional,nullable,ignoretype"`
 	IncludeMentions  *bool                 `json:"includeMentions" api:"optional"`
+	IncludeBacklinks *bool                 `json:"includeBacklinks" api:"optional"`
 	Sort             *string               `json:"sort" api:"optional"`
 	MentionSort      *string               `json:"mSort" api:"optional"`
 	ContainChildren  *bool                 `json:"containChildren" api:"optional"`
@@ -48,6 +49,13 @@ func decodeBacklinkListRequest(reader io.Reader) (request BacklinkListRequest, e
 	var includeMentions bool
 	if raw := fields["includeMentions"]; !bytes.Equal(raw, []byte("null")) && json.Unmarshal(raw, &includeMentions) == nil {
 		request.IncludeMentions = &includeMentions
+	}
+	if _, exists := fields["includeBacklinks"]; exists {
+		value, decodeErr := legacyField[bool](fields, "includeBacklinks", "Bool", true)
+		if decodeErr != nil {
+			return request, decodeErr
+		}
+		request.IncludeBacklinks = &value
 	}
 	for _, field := range []struct {
 		name   string

@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -250,6 +251,46 @@ func TestReplacePackageDirectoryRechecksNonEmptyTarget(t *testing.T) {
 	}
 	if _, err = os.Stat(filepath.Join(installPath, "new.js")); !os.IsNotExist(err) {
 		t.Fatalf("new package file was written unexpectedly: %v", err)
+	}
+}
+
+func TestReplacePackageDirectoryRefreshesFileTimes(t *testing.T) {
+	root := t.TempDir()
+	sourcePath := filepath.Join(root, "source")
+	installPath := filepath.Join(root, "plugins", "sample")
+	relativePath := filepath.Join("nested", "index.js")
+	sourceFile := filepath.Join(sourcePath, relativePath)
+	if err := os.MkdirAll(filepath.Dir(sourceFile), 0755); err != nil {
+		t.Fatal(err)
+	}
+	archiveTime := time.Date(1980, 1, 1, 0, 0, 0, 0, time.UTC)
+	for _, content := range []string{"first version", "updated version"} {
+		if err := os.WriteFile(sourceFile, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Chtimes(sourceFile, archiveTime, archiveTime); err != nil {
+			t.Fatal(err)
+		}
+		before := time.Now().Add(-time.Second)
+		if err := replacePackageDirectory(sourcePath, installPath, content == "updated version"); err != nil {
+			t.Fatal(err)
+		}
+		installedFile := filepath.Join(installPath, relativePath)
+		info, err := os.Stat(installedFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if info.ModTime().Before(before) || info.ModTime().After(time.Now()) {
+			t.Fatalf("installed file retained archive time: %s", info.ModTime())
+		}
+		data, err := os.ReadFile(installedFile)
+		if err != nil || string(data) != content {
+			t.Fatalf("unexpected installed content: %q, %v", data, err)
+		}
+		info, err = os.Stat(sourceFile)
+		if err != nil || !info.ModTime().Equal(archiveTime) {
+			t.Fatalf("source file timestamp changed: %v, %v", info, err)
+		}
 	}
 }
 

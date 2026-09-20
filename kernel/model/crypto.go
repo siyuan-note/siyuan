@@ -1548,6 +1548,7 @@ func lockBoxHeld(boxID string) {
 	heif.ClearMemoryCache(boxID)
 	RevokeManagedEncryptedExportsForBox(boxID)
 	ClearRichClipboardBox(boxID)
+	ClearGlobalBacklinkSnapshots(boxID)
 
 	cachedDEKsLock.Lock()
 	if dek, ok := cachedDEKs[boxID]; ok {

@@ -23,10 +23,23 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // resolveAppearanceFile 在读取前限定真实路径，仅允许主题和图标包目录链接到外部目录。
 func resolveAppearanceFile(root, requestPath string) (string, int) {
+	filePath, status := resolveAppearanceFilePath(root, requestPath)
+	if replacement := util.LegacyFontReplacement(requestPath); status == 0 && replacement != "" {
+		if _, err := os.Lstat(filePath); os.IsNotExist(err) {
+			// 已存在的用户文件优先，仅为缺失的历史字体提供替代资源，并复用路径边界校验。
+			return resolveAppearanceFilePath(root, replacement)
+		}
+	}
+	return filePath, status
+}
+
+func resolveAppearanceFilePath(root, requestPath string) (string, int) {
 	relativePath, ok := cleanStaticRelativePath(requestPath)
 	if !ok {
 		return "", http.StatusForbidden
@@ -35,16 +48,30 @@ func resolveAppearanceFile(root, requestPath string) (string, int) {
 	if relativePath == "boot" {
 		relativePath = filepath.Join(relativePath, "index.html")
 	}
+	segments := strings.Split(filepath.ToSlash(relativePath), "/")
+	packageRootIndex := -1
+	kind := strings.ToLower(segments[0])
+	if len(segments) >= 2 && (kind == "themes" || kind == "icons") {
+		packagePath := util.AppearancePackagePath(kind, segments[1])
+		if packagePath == "" {
+			return "", http.StatusForbidden
+		}
+		root = filepath.Dir(packagePath)
+		segments[1] = filepath.Base(packagePath)
+		segments = segments[1:]
+		packageRootIndex = 0
+	}
 	root, err := filepath.Abs(root)
 	if err != nil {
 		return "", http.StatusInternalServerError
 	}
-	root, err = filepath.EvalSymlinks(root)
+	resolvedRoot, err := evalAppearanceSymlinks(root)
 	if err != nil {
+		logging.LogWarnf("resolve appearance root [%s] failed: %s", root, err)
 		return "", http.StatusNotFound
 	}
+	root = resolvedRoot
 	allowedRoot, target := root, root
-	segments := strings.Split(filepath.ToSlash(relativePath), "/")
 	for i, segment := range segments {
 		target = filepath.Join(target, segment)
 		info, statErr := os.Lstat(target)
@@ -53,15 +80,18 @@ func resolveAppearanceFile(root, requestPath string) (string, int) {
 			return filepath.Join(append([]string{target}, segments[i+1:]...)...), 0
 		}
 		if statErr != nil {
+			logging.LogWarnf("stat appearance resource [%s] failed: %s", target, statErr)
 			return "", http.StatusForbidden
 		}
 		if info.Mode()&os.ModeSymlink != 0 {
-			target, err = filepath.EvalSymlinks(target)
-			if err != nil {
+			resolvedTarget, resolveErr := evalAppearanceSymlinks(target)
+			if resolveErr != nil {
+				logging.LogWarnf("resolve appearance link [%s] failed: %s", target, resolveErr)
 				return "", http.StatusForbidden
 			}
+			target = resolvedTarget
 		}
-		if i == 1 && (segments[0] == "themes" || segments[0] == "icons") {
+		if i == packageRootIndex {
 			info, err = os.Stat(target)
 			if err != nil || !info.IsDir() {
 				return "", http.StatusNotFound

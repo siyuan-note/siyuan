@@ -76,6 +76,7 @@ The component list is informational and does not replace the license terms. Copy
 | theSVG | Snapshot aa0605996b4ad4fdda98502f84021b3c3a64847d | MIT | [upstream](https://github.com/glincker/thesvg) | Volcengine logo in app/stage/images/ai-providers/ |
 | AI provider brand assets | Bundled snapshots | Upstream brand and trademark terms | [upstream](https://github.com/siyuan-note/siyuan/blob/master/app/stage/images/ai-providers/README.md) | OpenAI, Zhipu AI, SiliconFlow, and other provider marks; exact sources and terms are recorded below |
 | Unicode CLDR emoji annotations | Bundled snapshot | Unicode-3.0 | [upstream](https://github.com/unicode-org/cldr) | Localized names and search keywords in app/appearance/emojis/conf.json |
+| Unicode Emoji test data | 17.0 | Unicode-3.0 | [upstream](https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt) | New fully-qualified sequences in app/tests/fixtures/unicode17-emoji.json |
 | Pexels cover photos | 72 selected photographs | Pexels License | [upstream](https://www.pexels.com/license/) | app/appearance/covers/; photographer and source attribution is recorded below |
 | Microsoft Edge Demos PWA service worker example | Bundled adaptation | MIT | [upstream](https://github.com/MicrosoftEdge/Demos/tree/main/pwamp) | app/stage/service-worker.js |
 
@@ -86,8 +87,8 @@ Minified files that contain their own bundled-license blocks retain those blocks
 | Component | Version | License | Source | Distribution |
 |---|---|---|---|---|
 | JetBrains Mono | 2.304 | OFL-1.1 | [upstream](https://github.com/JetBrains/JetBrainsMono) | app/appearance/fonts/JetBrainsMono-2.304/LICENSE |
-| LXGW WenKai Lite | 1.501 | OFL-1.1 | [upstream](https://github.com/lxgw/LxgwWenKai-Lite) | app/appearance/fonts/LxgwWenKai-Lite-1.501/LICENSE |
-| Noto COLRv1 Emoji | 2.047 | OFL-1.1 | [upstream](https://github.com/googlefonts/noto-emoji) | app/appearance/fonts/Noto-COLRv1-2.047/LICENSE |
+| LXGW WenKai GB Lite | 1.521 | OFL-1.1 | [upstream](https://github.com/lxgw/LxgwWenkaiGB-Lite) | app/appearance/fonts/LxgwWenKaiGB-Lite-1.521/LICENSE |
+| Noto COLRv1 Emoji | 2.051 | OFL-1.1 | [upstream](https://github.com/googlefonts/noto-emoji) | app/appearance/fonts/Noto-COLRv1-2.051/LICENSE |
 
 ## Go standard library and runtime
 
@@ -1695,10 +1696,10 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 ```
 
-### app/appearance/fonts/LxgwWenKai-Lite-1.501/LICENSE
+### app/appearance/fonts/LxgwWenKaiGB-Lite-1.521/LICENSE
 
 ```text
-Copyright 2021-2024 LXGW (https://github.com/lxgw/LxgwWenKai)
+Copyright 2024-2025 LXGW (https://github.com/lxgw/LxgwWenkaiGB-Lite)
 Copyright 2020 The Klee Project Authors (https://github.com/fontworks-fonts/Klee)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
@@ -1794,7 +1795,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 ```
 
-### app/appearance/fonts/Noto-COLRv1-2.047/LICENSE
+### app/appearance/fonts/Noto-COLRv1-2.051/LICENSE
 
 ```text
 This Font Software is licensed under the SIL Open Font License,

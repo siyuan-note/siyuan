@@ -342,13 +342,19 @@ var removeUnusedAsset = contractHandler(apicontract.RemoveUnusedAsset, func(c *g
 
 var removeUnusedAssets = contractHandler(apicontract.RemoveUnusedAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.AssetPathsData] {
 
-	paths := model.RemoveUnusedAssets()
+	paths, err := model.RemoveUnusedAssets()
+	if err != nil {
+		return apicontract.Failure[apicontract.AssetPathsData](-1, err.Error())
+	}
 	return apicontract.Success(apicontract.AssetPathsData{Paths: paths})
 })
 
 var getUnusedAssets = contractHandler(apicontract.GetUnusedAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
 
-	unusedAssets := model.UnusedAssets(true)
+	unusedAssets, err := model.UnusedAssets(true)
+	if err != nil {
+		return apicontract.Failure[[]*apicontract.AssetUnusedItem](-1, err.Error())
+	}
 	total := len(unusedAssets)
 
 	// 最多返回 512 个未引用资源。
@@ -375,7 +381,14 @@ var resolveAssetPath = contractHandler(apicontract.ResolveAssetPath, func(c *gin
 		return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
 	}
 	if model.IsEncryptedAssetPath(p) {
-		return apicontract.FailureWithTimeout[string](-1, model.Conf.Language(314), 3000)
+		if err = holdEncryptedBoxRequest(c, model.ExtractBoxIDFromAssetsPath(p)); err != nil {
+			return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
+		}
+		p, err = model.PrepareEncryptedAssetForExternalOpen(path)
+		if err != nil {
+			return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
+		}
+		return apicontract.Success(p)
 	}
 	if err = model.EnsureAssetPrefixLocal(p); err != nil {
 		return apicontract.FailureWithTimeout[string](-1, err.Error(), 7000)

@@ -7,11 +7,13 @@ import * as ts from "typescript";
 import {setTopBarContextMenu, fillTopBarContextMenu} from "./topBarContextMenu";
 import {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "./topBarKey";
 
-const buildPluginMenu = (counts: number[], settings: boolean[], mobile = false, readonly = false) => {
+const buildPluginMenu = (counts: number[], settings: boolean[], mobile = false, readonly = false,
+                        initiallyUnpinned: string[] = []) => {
     const items: IMenu[] = [];
     const opened: number[] = [];
     const clicked: string[] = [];
-    const unpinned: string[] = [];
+    const unpinned = [...initiallyUnpinned];
+    const mounted: string[] = [];
     const plugins = counts.map((count, index) => ({
         name: `plugin${index}`,
         displayName: `Plugin ${index}`,
@@ -55,12 +57,15 @@ const buildPluginMenu = (counts: number[], settings: boolean[], mobile = false, 
         exports,
         require: () => dependencies,
         CustomEvent: class {},
-        document: {contains: () => true},
+        document: {
+            contains: (item: {id: string}) => !initiallyUnpinned.includes(item.id) || mounted.includes(item.id),
+            getElementById: () => ({after: (item: {id: string}) => mounted.push(item.id)}),
+        },
         window: {siyuan: {languages: {}, config: {readonly}, storage: {unpinned}}},
     });
     const target = {getBoundingClientRect: () => ({width: 10, right: 10, bottom: 10, height: 10})};
     exports.openTopBarMenu({plugins} as never, mobile ? undefined : target as never);
-    return {items, opened, clicked, unpinned};
+    return {items, opened, clicked, unpinned, mounted, plugins};
 };
 
 test("plugin settings appear once after all top bar buttons", () => {
@@ -99,6 +104,18 @@ test("mobile plugin buttons retain pinning and execution separately from setting
     assert.deepEqual(unpinned, ["button0_0"]);
     assert.deepEqual(clicked, ["button0_0"]);
     assert.deepEqual(opened, [0]);
+});
+
+test("unpinned mobile buttons remain registered and can be mounted again", () => {
+    const {items, unpinned, mounted, plugins, clicked} = buildPluginMenu([1], [false], true, false, ["button0_0"]);
+    const button = items.find(item => item.id === "button0_0");
+    assert.equal(plugins[0].topBarIcons.length, 1);
+    assert.deepEqual(Array.from(button.submenu, item => item.id), ["pin", "play"]);
+    button.submenu[1].click(undefined, undefined);
+    assert.deepEqual(clicked, ["button0_0"]);
+    button.submenu[0].click(undefined, undefined);
+    assert.deepEqual(unpinned, []);
+    assert.deepEqual(mounted, ["button0_0"]);
 });
 
 class TestElement {

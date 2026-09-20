@@ -93,6 +93,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/exportConf", model.CheckAuth, model.CheckAdminRole, exportConf)
 	ginServer.Handle("POST", "/api/system/importConf", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importConf)
 	ginServer.Handle("POST", "/api/system/getWorkspaceInfo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getWorkspaceInfo)
+	ginServer.Handle("POST", "/api/system/getRuntimeInfo", model.CheckAuth, model.CheckAdminRole, getRuntimeInfo)
 	ginServer.Handle("POST", "/api/system/reloadUI", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, deprecatedReloadUI) // TODO 请使用 /api/ui/reloadUI，该端点将于 2026 年 12 月 1 日后删除
 	ginServer.Handle("POST", "/api/system/addMicrosoftDefenderExclusion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addMicrosoftDefenderExclusion)
 	ginServer.Handle("POST", "/api/system/ignoreAddMicrosoftDefenderExclusion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, ignoreAddMicrosoftDefenderExclusion)
@@ -183,6 +184,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/moveDocs", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, moveDocs)
 	ginServer.Handle("POST", "/api/filetree/moveDocsByID", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, moveDocsByID)
 	ginServer.Handle("POST", "/api/filetree/duplicateDoc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, duplicateDoc)
+	ginServer.Handle("POST", "/api/filetree/duplicateDocTree", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, duplicateDocTree)
 	ginServer.Handle("POST", "/api/filetree/getHPathByPath", model.CheckAuth, getHPathByPath)
 	ginServer.Handle("POST", "/api/filetree/getHPathsByPaths", model.CheckAuth, getHPathsByPaths)
 	ginServer.Handle("POST", "/api/filetree/getHPathByID", model.CheckAuth, getHPathByID)
@@ -294,6 +296,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/appendDailyNoteBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, appendDailyNoteBlock)
 	ginServer.Handle("POST", "/api/block/prependDailyNoteBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, prependDailyNoteBlock)
 	ginServer.Handle("POST", "/api/block/updateBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updateBlock)
+	ginServer.Handle("POST", "/api/block/migrateLegacyMindmaps", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, migrateLegacyMindmaps)
 	ginServer.Handle("POST", "/api/block/batchUpdateBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, batchUpdateBlock)
 	ginServer.Handle("POST", "/api/block/deleteBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, deleteBlock)
 	ginServer.Handle("POST", "/api/block/moveBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, moveBlock)
@@ -330,6 +333,8 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/ref/refreshBacklink", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, refreshBacklink)
 	ginServer.Handle("POST", "/api/ref/getBacklink2", model.CheckAuth, getBacklink2)
+	ginServer.Handle("POST", "/api/ref/getGlobalBacklinks", model.CheckAuth, getGlobalBacklinks)
+	ginServer.Handle("POST", "/api/ref/getGlobalBacklinkContexts", model.CheckAuth, getGlobalBacklinkContexts)
 	ginServer.Handle("POST", "/api/ref/getBacklinkDoc", model.CheckAuth, getBacklinkDoc)
 	ginServer.Handle("POST", "/api/ref/getBackmentionDoc", model.CheckAuth, getBackmentionDoc)
 
@@ -685,6 +690,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/testModel", model.CheckAuth, model.CheckAdminRole, testModel)
 	ginServer.Handle("POST", "/api/ai/testEmbeddingModel", model.CheckAuth, model.CheckAdminRole, testEmbeddingModel)
 	ginServer.Handle("POST", "/api/ai/testRerankModel", model.CheckAuth, model.CheckAdminRole, testRerankModel)
+	ginServer.Handle("POST", "/api/ai/testDecisionModel", model.CheckAuth, model.CheckAdminRole, testDecisionModel)
 	ginServer.Handle("POST", "/api/ai/listModels", model.CheckAuth, model.CheckAdminRole, listModels)
 	ginServer.Handle("POST", "/api/ai/embeddingStat", model.CheckAuth, model.CheckAdminRole, embeddingStat)
 	ginServer.Handle("POST", "/api/ai/mcpStatus", model.CheckAuth, model.CheckAdminRole, mcpStatus)

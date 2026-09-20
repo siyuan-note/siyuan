@@ -8,7 +8,6 @@ import {Constants} from "../constants";
 import {onGet} from "../protyle/util/onGet";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
-import {isPaidUser, needSubscribe} from "../util/needSubscribe";
 import {fullscreen} from "../protyle/breadcrumb/action";
 import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
@@ -255,7 +254,7 @@ const revealFlashcardAnswer = (protyle: IProtyle, callback: () => void) => {
         state: revealState,
         generation,
         unfold: cardElement ? (done) => {
-            const foldData = setFold(protyle, cardElement, true, false, true, true);
+            const foldData = setFold(protyle, cardElement, true, false, true);
             if (!foldData.doOperations?.length) {
                 done();
                 return;
@@ -746,14 +745,6 @@ export const bindCardEvent = async (options: {
                 durationMS: type === "-3" ? 0 : Math.max(0, Math.round(performance.now() - cardShownAt)),
                 reviewedCards: options.cardsData.cards
             }, () => {
-                /// #if MOBILE
-                if (type !== "-3" &&
-                    ((0 !== window.siyuan.config.sync.provider && isPaidUser()) ||
-                        (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
-                    window.siyuan.config.repo.key && window.siyuan.config.sync.enabled) {
-                    document.getElementById("toolbarSync").classList.remove("fn__none");
-                }
-                /// #endif
                 index++;
                 if (index > options.cardsData.cards.length - 1) {
                     const currentCardType = filterElement.getAttribute("data-cardtype");

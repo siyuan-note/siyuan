@@ -17,6 +17,7 @@ import {hasClosestByTag, hasTopClosestByClassName} from "../util/hasClosest";
 import {removeEmbed} from "./removeEmbed";
 import {clearBlockElement} from "../util/clear";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
+import {remapListMindmapIDs} from "../render/listMindmap/model";
 import {isEncryptedBox} from "../../util/pathName";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {captureCommandContext} from "../../command/context";
@@ -339,6 +340,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             clearBlockElement(childItem);
         });
         remapTabsDOMIDs(tempElement, copiedIDs);
+        remapListMindmapIDs(tempElement, copiedIDs);
         if (typeof starIndex === "number") {
             const orderIndex = starIndex + index + 1;
             tempElement.setAttribute("data-marker", (orderIndex) + ".");
@@ -381,6 +383,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
                 childItem.setAttribute("data-node-id", newChildId);
                 clearBlockElement(childItem);
                 remapTabsDOMIDs(childItem, foldedIDs);
+                remapListMindmapIDs(childItem, foldedIDs);
                 doOperations.push({
                     context: {
                         ignoreProcess: "true"

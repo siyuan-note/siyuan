@@ -75,7 +75,7 @@ export const commandPanel = (app: App) => {
     const content = `<div class="fn__flex-column${isMobile() ? " mobile-command-panel" : ""}">
     <div class="b3-form__icon search__header" style="border-top: 0;border-bottom: 1px solid var(--b3-theme-surface-lighter);">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <input class="b3-text-field b3-text-field--text" style="padding-left: 32px !important;">
+        <input spellcheck="false" class="b3-text-field b3-text-field--text" style="padding-left: 32px !important;">
     </div>
     <ul class="b3-list b3-list--background search__list" id="commands"></ul>
     <div class="search__tip${isMobile() ? " fn__none" : ""}">

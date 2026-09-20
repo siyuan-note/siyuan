@@ -1,6 +1,6 @@
 import {Constants} from "../../constants";
 import {escapeHtml} from "../../util/escape";
-import {getTableCellRichPlainText} from "./tableCellRich";
+import {getTableCellPlainText} from "./tableCellRich";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import type {IUploadInsertOptions} from "../upload";
 import {
@@ -28,6 +28,7 @@ import {captureAVAssetUploadHandler} from "../render/av/asset";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {remapTabsDOMIDs, wrapPastedTabItems} from "./tabsCopy";
+import {remapListMindmapIDs} from "../render/listMindmap/model";
 import {getTabItems, getTabTitle} from "../render/tabsRender";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
@@ -64,7 +65,7 @@ import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
-import {normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
+import {getTextWithoutSemanticMarkers, normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
 import {
     areProtylePluginExtensionsEnabled,
     getProtyleBlockDOMSanitizer,
@@ -193,12 +194,12 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
         // 需在嵌入块后，代码块前
         text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
     } else if (["NodeHeading", "NodeParagraph"].includes(dataType)) {
-        text += blockElement.querySelector("[spellcheck]").textContent;
+        text += getTextWithoutSemanticMarkers(blockElement.querySelector("[spellcheck]"));
     } else if ("NodeCodeBlock" === dataType) {
         text += removeZWJ(blockElement.querySelector("[spellcheck]").textContent);
     } else if (dataType === "NodeTable") {
         blockElement.querySelectorAll("th, td").forEach((item) => {
-            text += (item.hasAttribute("data-sy-table-cell-rich") ? getTableCellRichPlainText(item) : item.textContent.trim()) + "\t";
+            text += getTableCellPlainText(item).trim() + "\t";
             if (!item.nextElementSibling) {
                 text = text.slice(0, -1) + "\n";
             }
@@ -1114,6 +1115,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 clearBlockElement(e, isCutPaste); // 剪切粘贴保留引用角标
             });
             remapTabsDOMIDs(tempElement, pastedIDs);
+            remapListMindmapIDs(tempElement, pastedIDs);
             const updated = dayjs().format("YYYYMMDDHHmmss");
             pastedBlockElements.forEach((e) => {
                 e.setAttribute("updated", updated);

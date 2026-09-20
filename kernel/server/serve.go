@@ -789,18 +789,17 @@ func serveAppearance(ginServer *gin.Engine) {
 		c.Redirect(302, location.String())
 	})
 
-	appearancePath := util.AppearancePath
-	if "dev" == util.Mode {
-		appearancePath = filepath.Join(util.WorkingDir, "appearance")
-	}
+	appearancePath := util.BuiltInAppearancePath()
 	siyuan.GET("/appearance/*filepath", func(c *gin.Context) {
-		filePath, status := resolveAppearanceFile(appearancePath, strings.TrimPrefix(c.Request.URL.Path, "/appearance/"))
+		requestPath := strings.TrimPrefix(c.Request.URL.Path, "/appearance/")
+		filePath, status := resolveAppearanceFile(appearancePath, requestPath)
 		if status != 0 {
 			c.Status(status)
 			return
 		}
 
-		if strings.HasPrefix(c.Request.URL.Path, "/appearance/themes/") {
+		resourceKind := strings.ToLower(strings.SplitN(requestPath, "/", 2)[0])
+		if resourceKind == "themes" || resourceKind == "icons" {
 			c.Header("Cache-Control", "private, no-store")
 		}
 		if strings.HasSuffix(c.Request.URL.Path, "/theme.js") {

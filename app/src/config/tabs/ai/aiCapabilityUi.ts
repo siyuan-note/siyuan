@@ -240,7 +240,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
                 <div class="fn__hr--small"></div>
                 <div class="b3-form__icon">
                     <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                    <input class="b3-text-field b3-form__icon-input fn__block" data-type="searchAgentCapabilities" placeholder="${escapeAttribute(window.siyuan.languages.agentCapabilitiesSearch)}">
+                    <input spellcheck="false" class="b3-text-field b3-form__icon-input fn__block" data-type="searchAgentCapabilities" placeholder="${escapeAttribute(window.siyuan.languages.agentCapabilitiesSearch)}">
                 </div>
             </div>
             <label class="fn__flex b3-label config-item">

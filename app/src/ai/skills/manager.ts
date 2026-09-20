@@ -100,7 +100,7 @@ ${button("rename", lang.rename)}${button("remove", lang.remove)}${button("refres
 ${localFiles ? button("open", lang.showInFolder) : ""}</div>
 <div class="skill-manager__panels">
 <div class="skill-manager__sidebar">
-<input class="b3-text-field skill-manager__search" type="search" placeholder="${lang.agentSkillSearch}" aria-label="${lang.agentSkillSearch}">
+<input spellcheck="false" class="b3-text-field skill-manager__search" type="search" placeholder="${lang.agentSkillSearch}" aria-label="${lang.agentSkillSearch}">
 <ul class="skill-manager__files b3-list b3-list--background" aria-label="${lang.agentWorkspaceSkills}"></ul></div>
 <div class="skill-manager__editor">
 <div class="skill-manager__editor-header">${mobile ? "" : button("back", lang.back, "skill-manager__back")}<div class="skill-manager__path ft__breakword"></div></div>

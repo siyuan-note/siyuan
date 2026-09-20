@@ -4,6 +4,7 @@ import {resolve} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
+import {escapeHtml} from "../util/escape";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
@@ -20,7 +21,11 @@ const loadSyncGuide = (mobile: boolean, provider: number) => {
     const source = readFileSync(resolve(process.cwd(), "src/sync/syncGuide.ts"), "utf8");
     const processed = parse(source, {MOBILE: mobile, BROWSER: true}, false, true);
     const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
-    const sync = {provider, cloudName: "work"};
+    const sync = {
+        provider, cloudName: "work",
+        s3: {endpoint: "https://s3.example.com", accessKey: "test-key", secretKey: "test-secret",
+            bucket: "notes.backup", region: "us-east-1"},
+    };
     const requests: {url: string, data: {name?: string}, reply: (response: ListResponse) => void}[] = [];
     const moduleExports = {} as {
         renderSyncCloudList: (element: Element, reload: boolean, cb: (ready: boolean) => void) => void;
@@ -37,6 +42,9 @@ const loadSyncGuide = (mobile: boolean, provider: number) => {
             }
             if (name === "../util/hostCapabilities") {
                 return {sanitizeKernelHTML: (html: string) => html};
+            }
+            if (name === "../util/escape") {
+                return {escapeHtml};
             }
             return {};
         },
@@ -73,17 +81,29 @@ const listResponse = (cloudName: string, checkedSyncDir: string): ListResponse =
 });
 
 for (const mobile of [false, true]) {
-    test(`S3 displays the bucket read-only and allows the guide to continue (mobile=${mobile})`, () => {
+    test(`S3 displays its configured bucket without requiring bucket listing (mobile=${mobile})`, () => {
         const guide = loadSyncGuide(mobile, 2);
         guide.render();
-        assert.deepEqual(guide.readiness, [false]);
-        guide.requests[0].reply(listResponse("notes.backup", ""));
+        assert.equal(guide.requests.length, 0);
         assert.match(guide.list.innerHTML, /notes\.backup/);
         assert.doesNotMatch(guide.list.innerHTML, /type="radio"|data-type="(?:selectCloud|addCloud|removeCloud)"/);
-        assert.deepEqual(guide.readiness, [false, true]);
+        assert.deepEqual(guide.readiness, [true]);
         assert.equal(guide.sync.cloudName, "work");
         guide.select();
-        assert.equal(guide.requests.length, 1);
+        assert.equal(guide.requests.length, 0);
+        assert.doesNotMatch(guide.list.innerHTML, /test-key|test-secret/);
+    });
+
+    test(`S3 refreshes the configured bucket and escapes its name (mobile=${mobile})`, () => {
+        const guide = loadSyncGuide(mobile, 2);
+        guide.render();
+        Object.defineProperty(guide.list, "firstElementChild", {value: {tagName: "DIV"}});
+        guide.sync.s3.bucket = "<img src=x onerror=alert(1)>&";
+        guide.renderSyncCloudList(guide.list, false, ready => guide.readiness.push(ready));
+        assert.match(guide.list.innerHTML, /&lt;img src=x onerror=alert\(1\)>&amp;/);
+        assert.doesNotMatch(guide.list.innerHTML, /<img|notes\.backup/);
+        assert.equal(guide.requests.length, 0);
+        assert.deepEqual(guide.readiness, [true, true]);
     });
 
     for (const provider of [0, 3, 4]) {
@@ -112,27 +132,28 @@ for (const mobile of [false, true]) {
         });
     }
 
-    for (const failure of ["empty", "error"]) {
-        test(`S3 ${failure} listings do not enable the guide (mobile=${mobile})`, () => {
+    for (const field of ["endpoint", "accessKey", "secretKey", "bucket", "region"] as const) {
+        test(`S3 requires ${field} before enabling the guide (mobile=${mobile})`, () => {
             const guide = loadSyncGuide(mobile, 2);
+            guide.sync.s3[field] = "   ";
             guide.render();
-            guide.requests[0].reply(failure === "empty" ? {
-                code: 0, data: {syncDirs: [], checkedSyncDir: "work"},
-            } : {code: 1, msg: "Denied"});
-            assert.deepEqual(guide.readiness, [false, false]);
-            assert.match(guide.list.innerHTML, failure === "empty" ? /Empty/ : /Denied/);
+            assert.deepEqual(guide.readiness, [false]);
+            assert.match(guide.list.innerHTML, /Configure storage/);
             assert.doesNotMatch(guide.list.innerHTML, /type="radio"|data-type="selectCloud"/);
             assert.equal(guide.sync.cloudName, "work");
+            assert.equal(guide.requests.length, 0);
         });
     }
 
     test(`a pending listing cannot overwrite the UI after switching provider (mobile=${mobile})`, () => {
-        const guide = loadSyncGuide(mobile, 2);
+        const guide = loadSyncGuide(mobile, 0);
         guide.render();
-        guide.sync.provider = 0;
-        guide.list.innerHTML = "new provider";
-        guide.requests[0].reply(listResponse("notes.backup", ""));
-        assert.equal(guide.list.innerHTML, "new provider");
-        assert.deepEqual(guide.readiness, [false]);
+        guide.sync.provider = 2;
+        guide.render();
+        const bucketHTML = guide.list.innerHTML;
+        guide.requests[0].reply(listResponse("work", "work"));
+        assert.equal(guide.list.innerHTML, bucketHTML);
+        assert.match(guide.list.innerHTML, /notes\.backup/);
+        assert.deepEqual(guide.readiness, [false, true]);
     });
 }

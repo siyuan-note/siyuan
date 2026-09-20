@@ -32,8 +32,9 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	if !ignoreRows && !deferTemplateValues {
 		viewable := attrView.RenderedViewables[view.ID]
 		if nil != viewable {
-			ret = viewable.(*av.Table)
-			return
+			if ret = av.TableFromViewable(viewable); nil != ret {
+				return
+			}
 		}
 	}
 
@@ -44,7 +45,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	}
 
 	// 组装列
-	for _, col := range view.Table.Columns {
+	for _, col := range view.GetTableLayout().Columns {
 		key, getErr := attrView.GetKey(col.ID)
 		if nil != getErr {
 			// 找不到字段则在视图中删除（元数据查询场景不写盘）
@@ -61,7 +62,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				Type:           key.Type,
 				Icon:           key.Icon,
 				Wrap:           col.Wrap,
-				Hidden:         col.Hidden,
+				Hidden:         col.Hidden && !(av.LayoutTypeList == view.LayoutType && av.KeyTypeBlock == key.Type),
 				Desc:           key.Desc,
 				Calc:           col.Calc,
 				Options:        key.Options,

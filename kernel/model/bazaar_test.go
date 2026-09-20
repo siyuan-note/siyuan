@@ -294,6 +294,7 @@ func TestGetPackageUninstallPathUsesInvalidPackageDirectory(t *testing.T) {
 }
 
 func TestInstallLocalBazaarPackageReplacesEmptyDirectoryTree(t *testing.T) {
+	setupSyncMutationTest(t)
 	oldDataDir, oldTempDir := util.DataDir, util.TempDir
 	root := t.TempDir()
 	util.DataDir = filepath.Join(root, "data")

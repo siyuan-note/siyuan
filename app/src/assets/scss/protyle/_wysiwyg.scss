@@ -287,15 +287,7 @@
         }
 
         &::after {
-          content: "";
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          height: max(18px, 1em);
-          width: max(18px, 1em);
-          margin: min(-9px, -0.5em) 0 0 min(-9px, -0.5em);
-          border-radius: 50%;
-          transition: var(--b3-transition);
+          @include mixin.protyle-list-action-background;
         }
 
         svg {
@@ -955,11 +947,7 @@
     cursor: pointer;
 
     &:hover {
-      &::after {
-        background-color: var(--b3-list-icon-hover);
-      }
-
-      color: var(--b3-theme-on-background);
+      @include mixin.protyle-list-action-hover;
     }
   }
 

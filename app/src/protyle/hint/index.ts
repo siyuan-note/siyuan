@@ -1,3 +1,4 @@
+import {isTableLikeView} from "../render/av/viewType";
 import {Constants} from "../../constants";
 import {isBuiltinSlashHint} from "./builtinSlash";
 import {
@@ -32,6 +33,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
+import {spinListMindmapDOM} from "../render/listMindmap/create";
 import {assetMenu, imgMenu} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
@@ -125,6 +127,7 @@ export class Hint {
     private createTargetSession?: TCreateTargetSession;
     private emojiPanel?: EmojiPanelController;
     private emojiBrowseMode = false;
+    private loadingAnimation?: Animation;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -177,6 +180,7 @@ export class Hint {
     }
 
     public destroy() {
+        this.cancelLoadingAnimation();
         this.destroyEmojiPanel();
     }
 
@@ -344,7 +348,7 @@ export class Hint {
                 if (createTarget.result !== undefined) {
                     this.genHTML(hintSlash(key, protyle, createTarget.result), protyle, true, "hint");
                 } else {
-                    this.genLoading(protyle);
+                    this.genLoading(protyle, 200);
                     createTarget.promise.then((isCurrentSubDoc) => {
                         if (createTarget.isCurrent()) {
                             this.genHTML(hintSlash(key, protyle, isCurrentSubDoc), protyle, true, "hint");
@@ -436,8 +440,17 @@ export class Hint {
         this.element.style.top = `${position.top}px`;
     }
 
-    public genLoading(protyle: IProtyle) {
+    private cancelLoadingAnimation() {
+        this.loadingAnimation?.cancel();
+        this.loadingAnimation = undefined;
+    }
+
+    public genLoading(protyle: IProtyle, delay = 0) {
+        const delayPanel = this.loadingAnimation?.playState === "running" &&
+            (this.loadingAnimation.effect as KeyframeEffect)?.target === this.element;
+        this.cancelLoadingAnimation();
         this.destroyEmojiPanel();
+        const wasHidden = this.element.classList.contains("fn__none");
         if (this.element.classList.contains("fn__none")) {
             this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><img width="64px" src="/stage/loading-pure.svg"></div>';
             this.element.classList.remove("fn__none");
@@ -462,6 +475,14 @@ export class Hint {
             }
         } else if (!this.element.querySelector(".fn__loading")) {
             this.element.insertAdjacentHTML("beforeend", '<div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div>');
+        }
+        if (delay > 0) {
+            // 首次打开时延迟显示整个占位面板，更新候选项时只延迟显示加载遮罩
+            const loadingElement = wasHidden || delayPanel ? this.element : this.element.querySelector(".fn__loading");
+            this.loadingAnimation = loadingElement.animate([
+                {visibility: "hidden"},
+                {visibility: "hidden"},
+            ], {duration: delay});
         }
     }
 
@@ -515,7 +536,7 @@ export class Hint {
     private getHTMLByData(data: IHintData[]) {
         let hintsHTML = '<div style="flex: 1;overflow:auto;">';
         if (this.source !== "hint") {
-            hintsHTML = '<input style="margin:0 8px 4px 8px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';
+            hintsHTML = '<input spellcheck="false" style="margin:0 8px 4px 8px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';
         }
         const focusIndex = data.findIndex(item => item.focus);
         data.forEach((hintData, i) => {
@@ -531,6 +552,7 @@ export class Hint {
     }
 
     public genHTML(data: IHintData[], protyle: IProtyle, hide = false, source: THintSource) {
+        this.cancelLoadingAnimation();
         this.source = source;
         this.destroyEmojiPanel();
         if (data.length === 0) {
@@ -668,6 +690,7 @@ ${genHintItemHTML(item)}
     }
 
     private genEmojiHTML(protyle: IProtyle, value = "") {
+        this.cancelLoadingAnimation();
         if (value && !this.enableEmoji) {
             return;
         }
@@ -722,7 +745,7 @@ ${genHintItemHTML(item)}
             focusByRange(protyle.toolbar.range);
             insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle, false, true,
                 false, undefined, undoContext);
-        }, undefined, {targetID});
+        }, undefined, {targetID, insertRange: range});
     }
 
     private destroyEmojiPanel() {
@@ -767,7 +790,7 @@ ${genHintItemHTML(item)}
             if (!cellElement) {
                 return;
             }
-            const rowElement = hasClosestByClassName(cellElement, nodeElement.getAttribute("data-av-type") === "table" ? "av__row" : "av__gallery-item");
+            const rowElement = hasClosestByClassName(cellElement, isTableLikeView(nodeElement.getAttribute("data-av-type")) ? "av__row" : "av__gallery-item");
             if (!rowElement) {
                 return;
             }
@@ -1030,7 +1053,8 @@ ${genHintItemHTML(item)}
                 if (value !== "![]()") {
                     this.fixImageCursor(range);
                 }
-                let textContent = value;
+                const isMindmap = value === `- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`;
+                let textContent = isMindmap ? `- ${Lute.Caret}` : value;
                 if (value === "```") {
                     textContent = value + (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(window.siyuan.storage[Constants.LOCAL_CODELANG]) ? "" : window.siyuan.storage[Constants.LOCAL_CODELANG]) + Lute.Caret + "\n```";
                 }
@@ -1069,7 +1093,8 @@ ${genHintItemHTML(item)}
                         newHTML = `<div data-node-id="${id}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     } else {
                         editableElement.textContent = textContent;
-                        newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
+                        newHTML = isMindmap ? spinListMindmapDOM(protyle.lute, nodeElement.outerHTML) :
+                            protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
                     }
                     // 列表项内创建列表时保留空段落，避免形成 li>list 非法结构 https://github.com/siyuan-note/siyuan/issues/17890
                     const tempCheck = document.createElement("div");
@@ -1115,7 +1140,8 @@ ${genHintItemHTML(item)}
                         }]);
                     }
                 } else {
-                    let newHTML = protyle.lute.SpinBlockDOM(textContent);
+                    let newHTML = isMindmap ? spinListMindmapDOM(protyle.lute, textContent) :
+                        protyle.lute.SpinBlockDOM(textContent);
                     if (value === "<div>") {
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     }
@@ -1158,7 +1184,7 @@ ${genHintItemHTML(item)}
                     let foldData;
                     if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
                         nodeElement.getAttribute("fold") === "1") {
-                        foldData = setFold(protyle, nodeElement, true, false, false, true);
+                        foldData = setFold(protyle, nodeElement, true, false, true);
                     }
                     nodeElement.insertAdjacentHTML("afterend", newHTML);
                     const newId = newHTML.substr(newHTML.indexOf('data-node-id="') + 14, 22);

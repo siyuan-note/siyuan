@@ -123,7 +123,7 @@ export class AVAttributePanel {
             }
             this.element.dataset.rendered = "true";
             this.updateTabs();
-            this.updateEmptyState();
+            this.updateReadonly();
             this.element.classList.toggle("fn__none", !renderedElement.querySelector("[data-av-id], .custom-attr__avbacklinks"));
             const callbacks = this.renderCallbacks.splice(0);
             callbacks.forEach(callback => callback(this.bodyElement));
@@ -162,6 +162,18 @@ export class AVAttributePanel {
         } else {
             this.render();
         }
+    }
+
+    public updateReadonly() {
+        this.element.dataset.readonly = String(Boolean(this.protyle.disabled));
+        this.bodyElement.dataset.readonly = this.element.dataset.readonly;
+        this.bodyElement.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea").forEach(item => {
+            item.readOnly = Boolean(this.protyle.disabled);
+        });
+        this.element.querySelectorAll<HTMLElement>('[data-type="av-tab"]').forEach(item => {
+            item.draggable = !this.protyle.disabled;
+        });
+        this.updateEmptyState();
     }
 
     public hasDatabase(avID: string) {
@@ -389,6 +401,11 @@ export class AVAttributePanel {
             }
             event.preventDefault();
             event.stopPropagation();
+            if (this.protyle.disabled) {
+                clearDragState();
+                this.updateTabs();
+                return;
+            }
             const tabElements = Array.from(tabsElement.querySelectorAll<HTMLElement>('[data-type="av-tab"]'));
             const avIDs = tabElements.map(item => item.dataset.id || "");
             const index = avIDs.indexOf(draggedAvID);
@@ -453,6 +470,7 @@ export class AVAttributePanel {
     }
 
     private updateEmptyState() {
+        this.element.dataset.readonly = String(Boolean(this.protyle.disabled));
         const hideEmpty = window.siyuan.config.editor.databaseAttrHideEmpty;
         if (!hideEmpty) {
             this.showEmptyFields = false;

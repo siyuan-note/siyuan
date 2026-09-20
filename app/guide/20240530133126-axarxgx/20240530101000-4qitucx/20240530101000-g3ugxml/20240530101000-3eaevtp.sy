@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20260904121106"
+		"updated": "20260920084445"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101829-7bloks9",
-				"updated": "20251224101829"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -31,12 +31,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20251224101829-j0vtpnz",
-				"updated": "20251224101829"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "データベースは、コンテンツブロックまたは非コンテンツブロックデータで構成され、テーブルビュー、カンバンビュー、カードビューなど、さまざまなビューで表示されます。"
+					"Data": "データベースは、コンテンツブロックまたは非コンテンツブロックデータで構成され、テーブルビュー、リストビュー、カンバンビュー、カードビューなど、さまざまなビューで表示されます。"
 				}
 			]
 		},
@@ -46,7 +46,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101829-lva3op2",
-				"updated": "20260904121106"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -496,6 +496,185 @@
 								{
 									"Type": "NodeText",
 									"Data": "：データ入力、一括編集、多様なフィールドタイプを含む表管理、スプレッドシートに似た一般的なデータ管理"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260920084445-49cpwr3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260920084445-49cpwr3",
+				"updated": "20260920084445"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リストビュー"
+				}
+			]
+		},
+		{
+			"ID": "20260920084445-8jydb2r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920084445-8jydb2r",
+				"updated": "20260920084445"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各エントリを1行で表示し、列ヘッダーや表の罫線は表示しません。新しく作成したリストビューでは主キーフィールドのみが表示され、ほかのフィールドはすべて非表示になります。"
+				}
+			]
+		},
+		{
+			"ID": "20260920084445-ksbezy4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260920084445-ksbezy4",
+				"updated": "20260920084445"
+			},
+			"Children": [
+				{
+					"ID": "20260920084445-uvsrid1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-uvsrid1",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-jieo1xv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-jieo1xv",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切り替え：ビュー設定で "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "レイアウト"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "リスト"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を選択します。スラッシュメニューからデータベースのリストビューを挿入することもできます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920084445-ux0p6c6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-ux0p6c6",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-qg8vpt6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-qg8vpt6",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "フィールドの表示："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "属性"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " パネルで表示するフィールドを有効にします。表示するフィールドは主キーと同じ行に並び、値を編集できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920084445-lthew83",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-lthew83",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-49wkcie",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-49wkcie",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ビュー設定：リストビューを複製した場合や、そのビューをリストレイアウトに戻した場合も、設定したフィールドの表示・非表示は保持されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920084445-5evfzws",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-5evfzws",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-6ki99qy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-6ki99qy",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "フィルター、ソート、グループ化：同じデータベースのほかのビューとデータを共有し、フィルター、ソート、グループ化を個別に設定できます"
 								}
 							]
 						}
@@ -985,7 +1164,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171234-4oam4x1",
-				"updated": "20260904121106"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -1952,7 +2131,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171234-567esec",
-				"updated": "20260613171234"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -1981,7 +2160,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171234-5xm22ao",
-				"updated": "20260613171234"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -2154,7 +2333,7 @@
 					},
 					"Properties": {
 						"id": "20260613171234-kyk19y3",
-						"updated": "20260613171234"
+						"updated": "20260920084445"
 					},
 					"Children": [
 						{
@@ -2182,7 +2361,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260613171234-dmaihcf",
-								"updated": "20260613171234"
+								"updated": "20260920084445"
 							},
 							"Children": [
 								{
@@ -2194,7 +2373,7 @@
 									},
 									"Properties": {
 										"id": "20260613171234-kd8txk4",
-										"updated": "20260613171234"
+										"updated": "20260920084445"
 									},
 									"Children": [
 										{
@@ -2202,12 +2381,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260613171234-5ul4iy6",
-												"updated": "20260613171234"
+												"updated": "20260920084445"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "テーブルビュー：行がグループごとに分類され、各グループは折りたたみ/展開可能"
+													"Data": "テーブルビューとリストビュー：行がグループごとに分類され、各グループは折りたたみ/展開可能"
 												}
 											]
 										}
@@ -2282,7 +2461,7 @@
 					},
 					"Properties": {
 						"id": "20260613171234-fn0tmi6",
-						"updated": "20260613171234"
+						"updated": "20260920084445"
 					},
 					"Children": [
 						{
@@ -2290,7 +2469,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613171234-195iexs",
-								"updated": "20260613171234"
+								"updated": "20260920084445"
 							},
 							"Children": [
 								{
@@ -2300,7 +2479,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：テーブルビューとギャラリービューでは「なし」を選択して解除可能。カンバンビューでは解除不可"
+									"Data": "：テーブルビュー、リストビュー、ギャラリービューでは「なし」を選択して解除可能。カンバンビューでは解除不可"
 								}
 							]
 						}

@@ -140,7 +140,8 @@ const importChildren = () => [
 ];
 
 const docTreeCommon = (multi = false) => [
-    node("copy", lang("copy"), true, [...copyChildren(), node("duplicate", lang("duplicateCopy"))]),
+    node("copy", lang("copy"), true, [...copyChildren(), node("duplicate", lang("duplicateCopy")),
+        ...(!multi ? [node("duplicateTree", lang("duplicateDocTree"))] : [])]),
     node("move", lang("move")),
     node("addToDatabase", lang("addToDatabase"), false),
     node("delete", lang("delete")),
@@ -380,6 +381,7 @@ const gutterSingle = () => [
         separator("separator_numbering"),
         node("prependListItem", lang("prependListItem")),
         node("appendListItem", lang("appendListItem")),
+        node("listMindmap", lang("listMindmapToMindmap")),
     ]),
     separator("separator_tabs"),
     node("tabs", lang("tabs"), true, [
@@ -538,6 +540,7 @@ const slashMenuBuiltinChildren = [
     node("math", lang("math")),
     node("html", literal("HTML")),
     node("databaseTableView", lang("databaseTableView")),
+    node("databaseListView", lang("databaseListView")),
     node("databaseKanbanView", lang("databaseKanbanView")),
     node("databaseGalleryView", lang("databaseGalleryView")),
     separator("separator_2"),
@@ -567,7 +570,7 @@ const slashMenuBuiltinChildren = [
     node("flowChart", literal("FlowChart")),
     node("graph", literal("Graphviz")),
     node("mermaid", literal("Mermaid")),
-    node("mindmap", literal("Mind map")),
+    node("mindmap", lang("mindmap")),
     node("UML", literal("PlantUML")),
     separator("separator_5"),
     node("infoStyle", lang("infoStyle")),

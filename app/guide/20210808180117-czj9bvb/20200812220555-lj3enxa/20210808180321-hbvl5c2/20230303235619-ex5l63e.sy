@@ -6,7 +6,7 @@
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20260813120000"
+		"updated": "20260920123707"
 	},
 	"Children": [
 		{
@@ -323,6 +323,46 @@
 					"TextMarkType": "block-ref",
 					"TextMarkTextContent": "语义搜索",
 					"TextMarkBlockRefID": "20260804171001-semnt01",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-u8b0czt",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-u8b0czt",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "决策模型"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920123707-h982ktj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920123707-h982ktj",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "智能体可以使用 TypeSafe System One（Jev）完成分类、筛选和评分。配置和使用方式请参阅 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "决策模型",
+					"TextMarkBlockRefID": "20260920123707-1cgsb12",
 					"TextMarkBlockRefSubtype": "s"
 				},
 				{

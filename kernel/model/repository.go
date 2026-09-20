@@ -1356,9 +1356,9 @@ func checkoutRepo(id string) (err error) {
 	CloseWatchEmojis()
 	defer WatchEmojis()
 
-	// 若主题支持同步，需关闭监听器
-	// CloseWatchThemes()
-	// defer WatchThemes()
+	// 快照恢复期间暂停监听，完成后重新绑定实际目录。
+	CloseWatchThemes()
+	defer WatchThemes()
 
 	// 恢复快照时自动暂停同步，避免刚刚恢复后的数据又被同步覆盖
 	syncEnabled := Conf.Sync.Enabled
@@ -1370,6 +1370,9 @@ func checkoutRepo(id string) (err error) {
 
 	// 回滚快照时默认为当前数据创建一个快照
 	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
+	if err = processAssetDownloadRecovery(repo, true); err != nil {
+		return
+	}
 	_, err = repo.Index("Backup before checkout", false, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if err != nil {
 		logging.LogErrorf("index repository failed: %s", err)
@@ -1402,7 +1405,9 @@ func checkoutRepo(id string) (err error) {
 
 // checkoutRepoSnapshot 恢复失败前可能已有文件落盘，返回结果前同步更新索引、缓存和界面。
 func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) error {
-	_, _, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	upserts, removes, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	themes, icons := appearanceChangedPackages(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
+	refreshAppearancePackages(themes, icons)
 	refresh(err)
 	return err
 }
@@ -1543,6 +1548,15 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 	if err != nil {
 		if errors.Is(err, dejavu.ErrCloudBackupCountExceeded) {
 			err = fmt.Errorf(Conf.Language(84), Conf.Language(154))
+			return
+		}
+		if conf.ProviderSiYuan == Conf.Sync.Provider && errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
+			u := Conf.GetUser()
+			msg := fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
+			if 2 == u.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
+			}
+			err = fmt.Errorf(Conf.Language(84), msg)
 			return
 		}
 		handleCloudError(err)
@@ -1799,6 +1813,9 @@ func CreateRepoSnapshot(memo string) (id string, created bool, err error) {
 	defer util.PushClearProgress()
 
 	start := time.Now()
+	if err = processAssetDownloadRecovery(repo, true); err != nil {
+		return
+	}
 	index, created, err := repo.IndexWithResult(memo, true, map[string]any{
 		eventbus.CtxPushMsg:             eventbus.CtxPushMsgToStatusBarAndProgress,
 		dejavu.CtxAssetDownloadsAllowed: checkAssetDownloadAccess() == nil,
@@ -1891,6 +1908,17 @@ func newSyncContext() map[string]any {
 	return map[string]any{eventbus.CtxPushMsg: pushTarget}
 }
 
+func formatSyncRepoErrorMsg(err error) string {
+	if conf.ProviderSiYuan == Conf.Sync.Provider && errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
+		u := Conf.GetUser()
+		if 2 == u.UserSiYuanSubscriptionPlan {
+			return fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
+		}
+		return fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
+	}
+	return fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+}
+
 func syncRepoDownload() (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		planSyncAfter(fixSyncInterval)
@@ -1944,14 +1972,7 @@ func syncRepoDownload() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo download failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			}
-		}
+		msg := formatSyncRepoErrorMsg(err)
 		Conf.Sync.Stat = msg
 		Conf.Save()
 		pushSyncStatusBar(msg)
@@ -2027,14 +2048,7 @@ func syncRepoUpload() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo upload failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			}
-		}
+		msg := formatSyncRepoErrorMsg(err)
 		Conf.Sync.Stat = msg
 		Conf.Save()
 		pushSyncStatusBar(msg)
@@ -2138,14 +2152,7 @@ func bootSyncRepo() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			}
-		}
+		msg := formatSyncRepoErrorMsg(err)
 		Conf.Sync.Stat = msg
 		Conf.Save()
 		pushSyncStatusBar(msg)
@@ -2284,14 +2291,7 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
-			}
-		}
+		msg := formatSyncRepoErrorMsg(err)
 		Conf.Sync.Stat = msg
 		Conf.Save()
 		pushSyncStatusBar(msg)
@@ -2383,6 +2383,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		mergeResult.ConflictCount(), len(mergeResult.Upserts), len(mergeResult.Removes))
 
 	//logSyncMergeResult(mergeResult)
+	themes, icons := appearanceChangedPackages(mergeResult)
+	refreshAppearancePackages(themes, icons)
 
 	var needReloadFiletree bool
 	conflictCount := mergeResult.ConflictCount()

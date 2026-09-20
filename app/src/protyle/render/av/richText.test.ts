@@ -29,6 +29,32 @@ import {
 const hasDOM = typeof globalThis.document?.createElement === "function";
 
 describe("attribute view text source compatibility", () => {
+    it("preserves escaped inline text through bundled Lute storage and preview conversions", () => {
+        if (typeof Lute === "undefined") {
+            require("../../../../stage/protyle/js/lute/lute.min.js");
+        }
+        const lute = configureAVRichTextLute(Lute.New());
+        lute.SetTextMark(true);
+        lute.SetHTMLTag2TextMark(true);
+        lute.SetKramdownIAL(true);
+        lute.SetSpin(true);
+        lute.SetProtyleWYSIWYG(true);
+        for (const mark of ["em", "strong", "s", "mark", "sup", "sub", "u", "kbd", "code", "text", "a em"]) {
+            const text = '<vitae> & &lt; "quote"';
+            let dom = '<div data-node-id="20260918120000-abcdefg" data-type="NodeParagraph">' +
+                `<div contenteditable="true"><span data-type="${mark}" data-href="https://example.com">` +
+                '&lt;vitae&gt; &amp; &amp;lt; "quote"</span></div></div>';
+            for (let round = 0; round < 3; round++) {
+                const markdown = lute.BlockDOM2Md(dom);
+                dom = lute.Md2BlockDOM(markdown);
+                assert.equal(dom.includes("<vitae>"), false, `${mark}: raw HTML after round ${round}`);
+                assert.equal(lute.BlockDOM2Content(dom).replaceAll("\u200b", ""), text, mark);
+                dom = lute.SpinBlockDOM(dom);
+                assert.equal(lute.BlockDOM2Content(dom).replaceAll("\u200b", ""), text, mark);
+            }
+        }
+    });
+
     it("keeps legacy Markdown-looking content literal", () => {
         const literal = "**literal** ((20240101000000-abcdefg \"reference\")) $x$";
         const value: IAVCellValue = {type: "text", text: {content: literal}};
@@ -77,12 +103,13 @@ describe("attribute view text source compatibility", () => {
 
     it("identifies only executable code fence languages", () => {
         for (const language of [
-            "abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "mindmap", "plantuml",
+            "abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "plantuml",
         ]) {
             assert.equal(isAVRichTextExecutableCodeLanguage(language), true);
         }
         assert.equal(isAVRichTextExecutableCodeLanguage("GraphViz options"), true);
         assert.equal(isAVRichTextExecutableCodeLanguage("javascript"), false);
+        assert.equal(isAVRichTextExecutableCodeLanguage("mindmap"), false);
         assert.equal(isAVRichTextExecutableCodeLanguage("go options"), false);
     });
 
@@ -368,6 +395,16 @@ describe("attribute view text source compatibility", () => {
     });
 
     it("keeps only supported inline color declarations", () => {
+        for (const id of ["error", "warning", "info", "success"]) {
+            const style = `color: var(--b3-card-${id}-color); background-color: var(--b3-card-${id}-background);`;
+            assert.equal(sanitizeAVRichTextInlineStyle(style), style);
+            assert.equal(sanitizeAVRichTextInlineStyle(`color: var(--b3-card-${id}-background);`), "");
+            assert.equal(sanitizeAVRichTextInlineStyle(`background-color: var(--b3-card-${id}-color);`), "");
+        }
+        for (const value of ["var(--b3-card-danger-color)", "var(--b3-card-info-color, red)",
+            "var(--b3-inline-builtin-info-color, var(--b3-card-error-color))"]) {
+            assert.equal(sanitizeAVRichTextInlineStyle(`color: ${value};`), "");
+        }
         assert.equal(sanitizeAVRichTextInlineStyle(
             "background-color: var(--b3-font-background8); color:var(--b3-font-color2);"
         ), "color: var(--b3-font-color2); background-color: var(--b3-font-background8);");
@@ -514,6 +551,40 @@ describe("attribute view text value creation", () => {
 });
 
 describe("attribute view rich text DOM policy", () => {
+    it("canonicalizes a single empty paragraph and preserves structural empty paragraphs", {
+        skip: hasDOM && typeof Lute !== "undefined" ? false :
+            "The Node test environment does not provide DOM and Lute globals",
+    }, async () => {
+        Object.assign(globalThis, {NODE_ENV: "test", SIYUAN_VERSION: "test"});
+        const richText = await import("./richText");
+        const empty = richText.serializeAVRichTextBlockDOM(
+            '<div data-type="NodeParagraph"><div contenteditable="true"></div></div>'
+        );
+        assert.deepEqual(empty, {blockDOM: "", markdown: "", plainText: ""});
+        for (const paragraphs of [["", ""], ["", "first", "", "", "last", ""]]) {
+            let dom = paragraphs.map(content => '<div data-type="NodeParagraph">' +
+                `<div contenteditable="true">${content}</div></div>`).join("");
+            let previous: string;
+            for (let round = 0; round < 3; round++) {
+                const serialized = richText.serializeAVRichTextBlockDOM(dom);
+                if (round > 0) {
+                    assert.equal(serialized.markdown, previous);
+                }
+                previous = serialized.markdown;
+                dom = richText.getAVRichTextBlockDOM(serialized.markdown);
+                const template = document.createElement("template");
+                template.innerHTML = dom;
+                assert.deepEqual(Array.from(template.content.querySelectorAll(
+                    '[data-type="NodeParagraph"] > [contenteditable="true"]'
+                )).map(element => element.textContent), paragraphs);
+                template.innerHTML = richText.getAVRichTextPreviewHTML(serialized.markdown);
+                assert.deepEqual(Array.from(template.content.querySelectorAll("p"))
+                    .map(element => element.textContent), paragraphs);
+                assert.equal(template.content.querySelector("[id], [data-node-id]"), null);
+            }
+        }
+    });
+
     it("preserves code content and prepares block and inline math for preview rendering", {
         skip: hasDOM && typeof Lute !== "undefined" ? false :
             "The Node test environment does not provide DOM and Lute globals",

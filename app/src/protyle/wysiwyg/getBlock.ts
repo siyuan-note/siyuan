@@ -2,6 +2,7 @@ import {isHiddenTabContent} from "../render/tabsVisibility";
 import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
 import {getTextWithoutSemanticMarkers} from "../util/inlineElementMarker";
+import {getTextWithLegacyInlineBoundary} from "../util/inlineElementBoundary";
 
 export interface IEmbedOperationContext {
     resultElement: HTMLElement;
@@ -460,9 +461,9 @@ export const fixAdjacentTags = (editableElement: Element) => {
             const tagSpan = node as HTMLElement;
             if (tagSpan.tagName === "SPAN" &&
                 (tagSpan.getAttribute("data-type") || "").split(" ").includes("tag")) {
-                // 向后查找跳过 ZWSP 文本节点和 <wbr> 后的下一个节点
+                // 向后查找，跳过光标边界文本节点和 <wbr>。
                 let after = next;
-                while (after && ((after.nodeType === 3 && after.textContent === Constants.ZWSP) ||
+                while (after && ((after.nodeType === 3 && getTextWithLegacyInlineBoundary(after) === Constants.ZWSP) ||
                     (after.nodeType === 1 && (after as HTMLElement).tagName === "WBR"))) {
                     after = after.nextSibling;
                 }

@@ -40,6 +40,33 @@ export interface IViewFoldContext {
 }
 
 const viewFoldContexts = new WeakMap<IProtyle, IViewFoldContext>();
+const publishFoldStores = new WeakMap<IProtyle, Map<string, unknown>>();
+
+export const applyPublishFoldStates = (protyle: IProtyle) => {
+    const context = viewFoldContexts.get(protyle);
+    if (!window.siyuan.isPublish || (context && context.pane !== "publish")) {
+        return applyFocusFold(protyle);
+    }
+    if (!context || context.rootID !== protyle.block.rootID) {
+        let values = publishFoldStores.get(protyle);
+        if (!values) {
+            values = new Map<string, unknown>();
+            publishFoldStores.set(protyle, values);
+        }
+        return registerViewFoldContext(protyle, {
+            pane: "publish",
+            rootID: protyle.block.rootID,
+            store: {
+                get: <T>(key: string) => values.get(key) as T | undefined,
+                set: (key, value) => { values.set(key, value); },
+                remove: key => { values.delete(key); },
+            },
+            getOccurrenceID: element => element.closest('[data-type="NodeBlockQueryEmbed"]')?.getAttribute("data-node-id") || "",
+        });
+    }
+    invalidateViewFoldRequests(protyle);
+    return applyViewFoldStates(protyle);
+};
 const headingRequestVersions = new WeakMap<Element, number>();
 interface IHeadingChildrenRequest {
     context: IViewFoldContext,

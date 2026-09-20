@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {
     getAVData,
@@ -199,7 +200,7 @@ const getItemElement = (blockElement: HTMLElement, item: Pick<IAVItemInfo, "item
 const getItemKey = (groupID: string, itemID: string) => `${groupID}:${itemID}`;
 
 const syncItemSelectionDOM = (blockElement: HTMLElement, selectedKeys: Set<string>) => {
-    const isTable = blockElement.dataset.avType === "table";
+    const isTable = isTableLikeView(blockElement.dataset.avType);
     blockElement.querySelectorAll<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id]").forEach(item => {
         if (item.closest(".av") !== blockElement) {
             return;

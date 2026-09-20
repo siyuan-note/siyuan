@@ -58,17 +58,23 @@ describe("mobile top bar layout", () => {
         const toolbarName = new TestElement();
         const toolbarNameReadonly = new TestElement();
         const toolbarSync = new TestElement();
+        const toolbarSidebarLeft = new TestElement();
+        const toolbarSidebarRight = new TestElement();
         const elements = new Map<string, TestElement>([
             ["mobileTopBar", topBarElement],
             ["editor", editorElement],
             ["toolbarName", toolbarName],
             ["toolbarNameReadonly", toolbarNameReadonly],
             ["toolbarSync", toolbarSync],
+            ["toolbarSidebarLeft", toolbarSidebarLeft],
+            ["toolbarSidebarRight", toolbarSidebarRight],
         ]);
         editorElement.breadcrumbSpace = breadcrumbSpace;
+        topBarElement.appendChild(toolbarSidebarLeft);
         topBarElement.appendChild(toolbarName);
         topBarElement.appendChild(toolbarNameReadonly);
         topBarElement.appendChild(toolbarSync);
+        topBarElement.appendChild(toolbarSidebarRight);
         let landscape = true;
 
         Object.defineProperty(globalThis, "document", {
@@ -89,31 +95,31 @@ describe("mobile top bar layout", () => {
             updateMobileTopBarLayout();
             assert.equal(bodyElement.classList.contains("mobile-topbar--merged"), true);
             assert.equal(breadcrumbSpace.classList.contains("protyle-breadcrumb__space--mobile-title"), true);
-            assert.deepEqual(breadcrumbSpace.children, [toolbarName, toolbarNameReadonly, toolbarSync]);
+            assert.deepEqual(breadcrumbSpace.children, [toolbarSidebarLeft, toolbarName, toolbarNameReadonly, toolbarSync, toolbarSidebarRight]);
 
             restoreMobileTopBarLayout();
             assert.equal(bodyElement.classList.contains("mobile-topbar--merged"), false);
             assert.equal(breadcrumbSpace.classList.contains("protyle-breadcrumb__space--mobile-title"), false);
-            assert.deepEqual(topBarElement.children, [toolbarName, toolbarNameReadonly, toolbarSync]);
+            assert.deepEqual(topBarElement.children, [toolbarSidebarLeft, toolbarName, toolbarNameReadonly, toolbarSync, toolbarSidebarRight]);
 
             const replacementBreadcrumbSpace = new TestElement();
             editorElement.breadcrumbSpace = replacementBreadcrumbSpace;
             updateMobileTopBarLayout();
             assert.equal(bodyElement.classList.contains("mobile-topbar--merged"), true);
             assert.equal(replacementBreadcrumbSpace.classList.contains("protyle-breadcrumb__space--mobile-title"), true);
-            assert.deepEqual(replacementBreadcrumbSpace.children, [toolbarName, toolbarNameReadonly, toolbarSync]);
+            assert.deepEqual(replacementBreadcrumbSpace.children, [toolbarSidebarLeft, toolbarName, toolbarNameReadonly, toolbarSync, toolbarSidebarRight]);
 
             landscape = false;
             updateMobileTopBarLayout();
             assert.equal(bodyElement.classList.contains("mobile-topbar--merged"), false);
             assert.equal(replacementBreadcrumbSpace.classList.contains("protyle-breadcrumb__space--mobile-title"), false);
-            assert.deepEqual(topBarElement.children, [toolbarName, toolbarNameReadonly, toolbarSync]);
+            assert.deepEqual(topBarElement.children, [toolbarSidebarLeft, toolbarName, toolbarNameReadonly, toolbarSync, toolbarSidebarRight]);
 
             landscape = true;
             editorElement.classList.add("fn__none");
             updateMobileTopBarLayout();
             assert.equal(bodyElement.classList.contains("mobile-topbar--merged"), false);
-            assert.deepEqual(topBarElement.children, [toolbarName, toolbarNameReadonly, toolbarSync]);
+            assert.deepEqual(topBarElement.children, [toolbarSidebarLeft, toolbarName, toolbarNameReadonly, toolbarSync, toolbarSidebarRight]);
         } finally {
             Object.defineProperty(globalThis, "document", {configurable: true, value: originalDocument});
             Object.defineProperty(globalThis, "window", {configurable: true, value: originalWindow});

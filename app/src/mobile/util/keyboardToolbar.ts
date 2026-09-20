@@ -33,6 +33,7 @@ import {
     filterHiddenRecentInlineStyles,
     getBuiltinInlineStyleIDFromValue,
     getBuiltinInlineStylePreview,
+    getBuiltinInlineStyleApplication,
     getBuiltinInlineStylePropertyValue,
     getInlineStyleByID,
     getInlineStyleByValue,
@@ -471,7 +472,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </button>`;
                 }
                 const preview = getBuiltinInlineStylePreview(key as TBuiltinInlineStyleID);
-                return `<button class="keyboard__slash-item" data-type="style1">
+                return `<button class="keyboard__slash-item" data-type="style1" data-builtin-style-id="${key}">
     <span class="keyboard__slash-icon" style="color:${preview.color};background-color:${preview.backgroundColor};">A</span>
     <span class="keyboard__slash-text">${getBuiltinStyleLabel(key as TBuiltinInlineStyleID)}</span>
 </button>`;
@@ -562,7 +563,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
                             backgroundColor: lastFontStatus[1],
                             color: lastFontStatus[2],
                         };
-                        lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
+                        lastColorHTML += `<button class="keyboard__slash-item" data-builtin-style-id="${builtInStyle || ""}" data-type="${lastFontStatus[0]}">
     <span class="keyboard__slash-icon" style="background-color:${preview.backgroundColor};color:${preview.color}">A</span>
     <span class="keyboard__slash-text">${customLabel || (builtInStyle ? getBuiltinStyleLabel(builtInStyle) : window.siyuan.languages.color)}</span>
 </button>`;
@@ -724,8 +725,10 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
             return;
         }
         const style = getBuiltinStyleCSS(id);
+        const preview = getBuiltinInlineStylePreview(id);
         builtinStyleHTML += getSlashItem(`style${Constants.ZWSP}${style}`,
-            `<div style="${style}" class="keyboard__slash-icon">A</div>`, getBuiltinStyleLabel(id), "true");
+            `<div style="color:${preview.color};background-color:${preview.backgroundColor};" class="keyboard__slash-icon">A</div>`,
+            getBuiltinStyleLabel(id), "true");
     });
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `<div class="keyboard__slash-title"></div>
@@ -781,7 +784,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("```flowchart\n```", "", "Flow Chart", "true")}
     ${getSlashItem("```graphviz\n```", "", "Graph", "true")}
     ${getSlashItem("```mermaid\n```", "", "Mermaid", "true")}
-    ${getSlashItem("```mindmap\n```", "", window.siyuan.languages.mindmap, "true")}
+    ${getSlashItem(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
     ${getSlashItem("```plantuml\n```", "", "UML", "true")}
 </div>
 <div class="keyboard__slash-title"></div>
@@ -1600,8 +1603,10 @@ export const initKeyboardToolbar = () => {
             const itemElement = buttonElement.firstElementChild as HTMLElement;
             const focusRange = !buttonElement.classList.contains("keyboard__slash-item");
             if (type === "style1") {
+                const builtinID = buttonElement.dataset.builtinStyleId as TBuiltinInlineStyleID;
                 fontEvent(protyle, nodeElements, type,
-                    encodeStyle1(itemElement.style.backgroundColor, itemElement.style.color), focusRange);
+                    builtinID ? getBuiltinInlineStyleApplication(builtinID).color :
+                        encodeStyle1(itemElement.style.backgroundColor, itemElement.style.color), focusRange);
             } else if (type === "fontSize") {
                 fontEvent(protyle, nodeElements, type, itemElement.textContent.trim(), focusRange);
             } else if (type === "backgroundColor") {

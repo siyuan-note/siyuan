@@ -179,6 +179,12 @@ export const shouldOpenListItemAttr = (shiftKey: boolean, disabled: boolean,
     return shiftKey && !disabled && isListItemActionElement(actionElement);
 };
 
+export const shouldFoldEmbeddedListByAlt = (event: Pick<MouseEvent, "altKey" | "shiftKey" | "ctrlKey" | "metaKey" | "button">,
+                                          disabled: boolean, actionElement: Element | false) => {
+    return event.button === 0 && event.altKey && !event.shiftKey && !event.ctrlKey && !event.metaKey &&
+        !disabled && !!actionElement && isListItemActionElement(actionElement) && !!actionElement.closest(".protyle-wysiwyg__embed");
+};
+
 export const getListConversionType = (sourceSubtype: TListSubtype, targetSubtype: TListSubtype) => {
     if (sourceSubtype === targetSubtype) {
         return;

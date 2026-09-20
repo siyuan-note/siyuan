@@ -11,7 +11,8 @@ import {avRender} from "../render/av/render";
 import {isHiddenTabContent} from "../render/tabsVisibility";
 import {queueTransaction} from "../util/transactionQueue";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
-import {copySubMenu} from "../../menus/commonMenuItem";
+import {remapListMindmapIDs} from "../render/listMindmap/model";
+import {copySubMenu, openAttr} from "../../menus/commonMenuItem";
 import {isTaskListMarker, nextTaskListMarker} from "./taskListMarker";
 import {hideElements} from "../ui/hideElements";
 import {getTaskStatusItems} from "./taskStatusDialog";
@@ -37,11 +38,13 @@ export const setTabTask = (protyle: IProtyle, item: HTMLElement, marker: string)
 };
 
 const canEdit = (protyle: IProtyle, element: Element) => !protyle.disabled &&
-    !protyle.options.action.includes(Constants.CB_GET_HISTORY) && !element.closest(".protyle-wysiwyg__embed");
+    !protyle.options.action.includes(Constants.CB_GET_HISTORY) &&
+    !element.closest(".protyle-wysiwyg__embed, .list-mindmap__preview-block") &&
+    element.closest(".protyle-wysiwyg") === protyle.wysiwyg.element;
 
 // 同一事务提交受影响的最外层容器，嵌套移动时避免父子更新相互覆盖。
 const changeTabs = (protyle: IProtyle, elements: HTMLElement[], change: () => void) => {
-    if (elements.some(element => !canEdit(protyle, element))) {
+    if (elements.some(element => !element.dataset.nodeId || !canEdit(protyle, element))) {
         return;
     }
     const roots = Array.from(new Set(elements)).filter(element =>
@@ -174,6 +177,7 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
                 block.setAttribute("updated", id.substring(0, 14));
             });
             remapTabsDOMIDs(copy, ids);
+            remapListMindmapIDs(copy, ids);
             changeTabs(protyle, [tabs], () => {
                 item.after(copy);
                 tabs.setAttribute("tabs-active-id", copy.dataset.nodeId);
@@ -200,6 +204,7 @@ export const initEditorTabs = (protyle: IProtyle) => {
         label: window.siyuan.languages.tabItem,
         addLabel: window.siyuan.languages.newTabItem,
         taskLabel: window.siyuan.languages.task,
+        attributes: {label: window.siyuan.languages.attr, open: (block, focus) => openAttr(block, focus, protyle)},
         task: item => setTabTask(protyle, item, nextTaskListMarker(getTabTask(item))),
         endEdit: () => hideElements(["toolbar"], protyle),
         activate: item => {

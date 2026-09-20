@@ -52,7 +52,7 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
             <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
             <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
         </span>
-        <input id="searchAssetInput" value="${localSearch.k}" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.keyword}">
+        <input spellcheck="false" id="searchAssetInput" value="${localSearch.k}" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.keyword}">
     </div>
     <div class="block__icons">
         <span data-type="assetRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon ariaLabel" data-position="9south">

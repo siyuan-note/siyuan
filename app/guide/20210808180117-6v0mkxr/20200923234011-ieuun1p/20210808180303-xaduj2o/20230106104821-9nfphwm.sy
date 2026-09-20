@@ -6,7 +6,7 @@
 		"id": "20230106104821-9nfphwm",
 		"title": "Workspace",
 		"type": "doc",
-		"updated": "20260829104731"
+		"updated": "20260918195936"
 	},
 	"Children": [
 		{
@@ -170,7 +170,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=\u0026quot;Absolute-path-of-the-workspace\u0026quot;"
+									"TextMarkTextContent": "--workspace=&quot;Absolute-path-of-the-workspace&quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -179,7 +179,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026quot;"
+									"TextMarkTextContent": "&quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -188,7 +188,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=\u0026quot;F:\\SiYuan\u0026quot;"
+									"TextMarkTextContent": "--workspace=&quot;F:\\SiYuan&quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -270,7 +270,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230106105213-0cv5aqm",
-				"updated": "20230106105213"
+				"updated": "20260918195936"
 			},
 			"Children": [
 				{
@@ -571,6 +571,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260917190844-1yo0d58",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260917190844-1yo0d58",
+				"updated": "20260918195936"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Third-party themes are stored in data/themes/ and icon packages in data/icons/; both participate in data sync and snapshots. Each device keeps its appearance selection in its local conf/conf.json. Built-in appearance resources are not synced. Upgrade migration moves the original directories into data and removes the source copies."
 				}
 			]
 		}

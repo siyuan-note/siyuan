@@ -11,6 +11,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func notebookConfContract(value *conf.BoxConf) *apicontract.NotebookConf {
@@ -74,6 +75,16 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 				}
 			}
 			c.JSON(status, response)
+		}
+		// 渠道禁用在读取请求体前生效，路由上的身份和权限中间件仍先执行。
+		if apicontract.RequiresAI(endpoint.Definition().Path) && util.IsDisabledFeature("ai") {
+			message := util.I18nTerm(model.Conf.Lang, "agentCapabilitiesUnavailable")
+			if endpoint.Definition().Path == apicontract.AIMCPOAuthCallback.Definition().Path {
+				c.Data(403, "text/plain; charset=utf-8", []byte(message))
+			} else {
+				writeResponse(apicontract.Failure[Data](-1, message))
+			}
+			return
 		}
 		// 保留在读取请求体前完成的角色判断或大小限制，提前响应也使用相同的载荷类型。
 		for _, before := range beforeDecode {

@@ -6,7 +6,7 @@
 		"id": "20201227173504-847cs1q",
 		"title": "Docker 伺服",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20260918190000"
 	},
 	"Children": [
 		{
@@ -293,7 +293,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201227174908-s19h988"
+				"id": "20201227174908-s19h988",
+				"updated": "20260918190000"
 			},
 			"Children": [
 				{
@@ -396,7 +397,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210301201353-sffb1m7",
-				"updated": "20231108220447"
+				"updated": "20260918190000"
 			},
 			"Children": [
 				{
@@ -422,6 +423,19 @@
 				{
 					"Type": "NodeText",
 					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。通过 Docker 部署并启用发布服务时，除伺服端口映射外，还需在创建容器的命令中添加 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-p 6808:6808"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。Docker 端口映射格式为宿主机端口:容器端口；若修改发布服务端口，应同步调整容器端口，访问时使用宿主机端口。请使用固定的发布服务端口，不要设置为 0"
 				}
 			]
 		},

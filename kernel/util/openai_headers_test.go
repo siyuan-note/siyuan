@@ -67,7 +67,7 @@ func TestAIProviderHeadersStreamingAndImages(t *testing.T) {
 			}))
 			defer server.Close()
 			headers := map[string]string{"X-Route": "original"}
-			client := NewOpenAIClientWithModel("key", server.URL+"/v1", "MiniMax-M3", headers)
+			client := NewAIClientWithModel("key", server.URL+"/v1", "MiniMax-M3", headers)
 			headers["X-Route"] = "changed"
 			stream, err := CreateOpenAICompletionStream(context.Background(), client, protocol, openai.ChatCompletionRequest{
 				Model: "MiniMax-M3", Messages: []openai.ChatCompletionMessage{{Role: "user", Content: "hi"}},

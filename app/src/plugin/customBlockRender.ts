@@ -120,14 +120,14 @@ const collectCustomBlocks = (element: Element) => {
 
 const renderCustomBlock = (element: HTMLElement, force = false) => {
     const rootElement = element.closest<HTMLElement>(".protyle-wysiwyg");
-    const context = rootElement && rootContexts.get(rootElement);
+    const context = !element.closest(".list-mindmap__preview-block") && rootElement && rootContexts.get(rootElement);
     const info = element.getAttribute("data-info") || "";
     const content = element.getAttribute("data-content") || "";
     const decoded = decodeCustomBlockInfo(info);
     const plugin = decoded && activePlugins.has(decoded.pluginName)
         ? window.siyuan.ws?.app?.plugins.find(item => item.name === decoded.pluginName)
         : undefined;
-    const render = decoded ? plugin?.customBlockRenders[decoded.blockType]?.render : undefined;
+    const render = context && decoded ? plugin?.customBlockRenders[decoded.blockType]?.render : undefined;
     const state = renderStates.get(element);
     if (!force && state?.info === info && state.content === content && state.render === render &&
         state.root === rootElement) {
@@ -150,7 +150,7 @@ const renderCustomBlock = (element: HTMLElement, force = false) => {
     let contentUpdateQueued = false;
     let rendering = true;
     const isCurrentRoot = () => element.closest<HTMLElement>(".protyle-wysiwyg") === rootElement &&
-        rootContexts.get(rootElement) === context;
+        rootContexts.get(rootElement) === context && !element.closest(".list-mindmap__preview-block");
     const setContent = (newContent: string) => {
         if (typeof newContent !== "string" || !isCustomBlockContentValid(newContent) || rendering ||
             !context.ready || context.disabled() || !element.isConnected || !isCurrentRoot() ||

@@ -40,7 +40,7 @@ describe("shared mobile multi-select toolbar", () => {
     before(() => {
         Object.defineProperty(globalThis, "window", {
             configurable: true,
-            value: {siyuan: {languages: {more: "More", close: "Close"}}},
+            value: {siyuan: {languages: {more: "More", close: "Close", selectAll: "Select all"}}},
         });
     });
     after(() => {
@@ -51,7 +51,7 @@ describe("shared mobile multi-select toolbar", () => {
         }
     });
 
-    const createToolbar = () => {
+    const createToolbar = (onSelectAll?: () => void) => {
         const count = {textContent: ""};
         const menu = {dataset: {type: "menu"}, disabled: false};
         const close = {dataset: {type: "exitMultiSelectMode"}, disabled: false};
@@ -64,7 +64,7 @@ describe("shared mobile multi-select toolbar", () => {
             querySelector: (selector: string) => selector === ".multiSelectCount" ? count : menu,
             firstElementChild: {addEventListener: (_type: string, callback: typeof listener) => { listener = callback; }},
         } as unknown as HTMLElement;
-        renderMultiSelectToolbar(element, 1, () => { menuCalls++; }, () => { exitCalls++; });
+        renderMultiSelectToolbar(element, 1, () => { menuCalls++; }, () => { exitCalls++; }, onSelectAll);
         const click = (button: typeof menu | null) => {
             let prevented = false;
             let stopped = false;
@@ -78,6 +78,17 @@ describe("shared mobile multi-select toolbar", () => {
         };
         return {element, count, menu, close, click, calls: () => [menuCalls, exitCalls]};
     };
+
+    it("offers select all only when requested and allows it with zero selected blocks", () => {
+        assert.equal(createToolbar().element.innerHTML.includes('data-type="selectAll"'), false);
+        let calls = 0;
+        const toolbar = createToolbar(() => { calls++; });
+        assert.equal(toolbar.element.innerHTML.includes('data-type="selectAll"'), true);
+        updateMultiSelectToolbar(toolbar.element, 0);
+        toolbar.click({dataset: {type: "selectAll"}, disabled: false});
+        assert.equal(calls, 1);
+        assert.deepEqual(toolbar.calls(), [0, 0]);
+    });
 
     it("disables the menu for an empty selection and enables it when selection resumes", () => {
         const toolbar = createToolbar();

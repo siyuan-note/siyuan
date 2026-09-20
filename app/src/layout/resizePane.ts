@@ -1,3 +1,6 @@
+export const MIN_VERTICAL_PANE_SIZE = 200;
+export const MIN_HORIZONTAL_PANE_SIZE = 240;
+
 export const resizePanePercentages = (
     sizes: number[],
     previousIndex: number,
@@ -9,11 +12,13 @@ export const resizePanePercentages = (
         return;
     }
     const resizedSizes = sizes.slice();
-    resizedSizes[previousIndex] += delta;
-    resizedSizes[nextIndex] -= delta;
-    if (resizedSizes[previousIndex] < minSize || resizedSizes[nextIndex] < minSize) {
-        return;
-    }
+    // 已小于最小尺寸的分屏允许恢复，但不能继续缩小；越界拖动停在边界。
+    const previousMinimum = Math.min(minSize, sizes[previousIndex]);
+    const nextMinimum = Math.min(minSize, sizes[nextIndex]);
+    const boundedDelta = Math.max(previousMinimum - sizes[previousIndex],
+        Math.min(delta, sizes[nextIndex] - nextMinimum));
+    resizedSizes[previousIndex] += boundedDelta;
+    resizedSizes[nextIndex] -= boundedDelta;
     return panePercentages(resizedSizes);
 };
 

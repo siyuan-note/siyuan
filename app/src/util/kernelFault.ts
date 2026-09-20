@@ -18,6 +18,14 @@ export const kernelError = () => {
 <div class="b3-dialog__action">
     <button class="b3-button">${window.siyuan.languages.retry}</button>
 </div>`;
+    } else if (isInMobileApp()) {
+        title = `🍵 ${window.siyuan.languages.mobileKernelReconnecting} <small>v${Constants.SIYUAN_VERSION}</small>`;
+        content = `<div class="b3-dialog__content">
+    <div>${window.siyuan.languages.mobileKernelReconnectPrompt}</div>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button">${window.siyuan.languages.safeQuit}</button>
+</div>`;
     } else {
         title = `💔 ${window.siyuan.languages.kernelFault0} <small>v${Constants.SIYUAN_VERSION}</small>`;
         content = `<div class="b3-dialog__content">

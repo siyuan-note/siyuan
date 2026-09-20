@@ -63,7 +63,7 @@ export const loadBacklinkRefFilterMenu = async (options: {
     };
     return [{
         type: "empty",
-        label: `<input ${Constants.ATTRIBUTE_MENU_KEYMAP}="true" class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${escapeAttr(escapeHtml(languages.search))}">`,
+        label: `<input spellcheck="false" ${Constants.ATTRIBUTE_MENU_KEYMAP}="true" class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${escapeAttr(escapeHtml(languages.search))}">`,
         bind: element => {
             input = element.querySelector("input");
             input.setAttribute("aria-label", languages.search);

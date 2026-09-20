@@ -41,6 +41,8 @@ test("tablet paragraph clicks navigate back and forward despite a stale title se
         window: {siyuan: {backStack: stacks}},
         document: documentSelf,
         Constants: {SIZE_UNDO: 128},
+        readingPositions: new WeakMap(),
+        saveBackScroll: () => {},
         hasClosestBlock: (target: unknown) => target,
         isInEmbedBlock: () => false,
         getContenteditableElement: (element: unknown) => element,

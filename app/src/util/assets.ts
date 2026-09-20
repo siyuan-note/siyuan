@@ -24,6 +24,7 @@ import {getBackend, getFrontend} from "./functions";
 import {getWorkspaceName} from "./processTitle";
 import {ensureSelectedCustomFonts, getExportCustomFontStyle} from "./customFont";
 import {getGlobalFontStyle} from "./globalFont";
+import {getEmojiFontStyle} from "./emojiFont";
 import {isCurrentThemeSupported, shouldUnloadThemeScript} from "./themeCompatibility";
 import {
     getInlineStylesCSS,
@@ -33,8 +34,40 @@ import {refreshChartTheme} from "../protyle/render/chartRender";
 import {getHostCapabilities} from "./hostCapabilities";
 
 let headingNumberMeasurementRefreshTimer: number;
-const DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE = "U+25fd-25fe, U+2614-2615, U+2648-2653, U+267f, U+2693, U+26a1, " +
-    "U+26aa-26ab, U+1f0cf, U+1f311-1f318, U+1f42d-1f42e, U+1f431, U+1f435, U+1f600-1f64f";
+let appearanceUpdate = Promise.resolve();
+let appearanceReloadPending = false;
+const appearancePackageRevisions = new Map<string, string>();
+
+// 串行应用外观变更，等待脚本加载和卸载完成后再处理下一次推送。
+export const enqueueAppearanceUpdate = (apply: () => Promise<void>) => {
+    appearanceUpdate = appearanceUpdate.then(async () => {
+        if (!appearanceReloadPending) {
+            await apply();
+        }
+    }).catch(error => {
+        console.error("apply appearance error: " + error);
+    });
+    return appearanceUpdate;
+};
+
+export const markAppearanceReloadPending = () => {
+    appearanceReloadPending = true;
+};
+
+export const invalidateAppearancePackages = (themes: string[], icons: string[], revision: string) => {
+    const changed = {
+        themes: themes.filter(name => appearancePackageRevisions.get(`themes/${name}`) !== revision),
+        icons: icons.filter(name => appearancePackageRevisions.get(`icons/${name}`) !== revision),
+    };
+    themes.forEach(name => appearancePackageRevisions.set(`themes/${name}`, revision));
+    icons.forEach(name => appearancePackageRevisions.set(`icons/${name}`, revision));
+    return changed;
+};
+
+const appearancePackageVersion = (kind: "themes" | "icons", name: string, version: string) => {
+    const revision = appearancePackageRevisions.get(`${kind}/${name}`);
+    return encodeURIComponent(version) + (revision ? `&revision=${encodeURIComponent(revision)}` : "");
+};
 
 export const refreshHeadingNumberMeasurements = () => {
     invalidateHeadingNumberMeasurements();
@@ -99,7 +132,8 @@ export const refreshThemeStyle = (themeAddress: string) => {
     }
 };
 
-export const loadAssets = (appearance: Config.IAppearance) => {
+export const loadAssets = async (appearance: Config.IAppearance) => {
+    const scriptLoads: Promise<unknown>[] = [];
     setBodyHighlight(appearance.bodyGradient);
     const data = getHostCapabilities().customAppearance ? appearance : {
         ...appearance,
@@ -157,9 +191,10 @@ export const loadAssets = (appearance: Config.IAppearance) => {
     const themeSupported = isCurrentThemeSupported(data, getFrontend());
     if (themeSupported && ((data.mode === 1 && data.themeDark !== "midnight") ||
         (data.mode === 0 && data.themeLight !== "daylight"))) {
-        const themeAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.css?v=${data.themeVer}`;
+        const themeName = data.mode === 1 ? data.themeDark : data.themeLight;
+        const themeAddress = `/appearance/themes/${themeName}/theme.css?v=${appearancePackageVersion("themes", themeName, data.themeVer)}`;
         if (styleElement) {
-            if (!styleElement.getAttribute("href").startsWith(themeAddress)) {
+            if (styleElement.getAttribute("href") !== themeAddress) {
                 changedThemeStyleElements.push(styleElement as HTMLLinkElement);
                 themeStylesChanged = true;
                 styleElement.setAttribute("href", themeAddress);
@@ -206,26 +241,28 @@ export const loadAssets = (appearance: Config.IAppearance) => {
     /// #endif
     setCodeTheme();
 
-    const themeScriptAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.js?v=${data.themeVer}`;
+    const themeName = data.mode === 1 ? data.themeDark : data.themeLight;
+    const themeScriptAddress = `/appearance/themes/${themeName}/theme.js?v=${appearancePackageVersion("themes", themeName, data.themeVer)}`;
     const themeScriptURL = new URL(themeScriptAddress, window.location.href).href;
     const themeScriptElements = getThemeScriptElements();
     if (!data.themeJS || !themeSupported) {
         removeThemeScriptElements();
     } else if (!themeScriptElements.some((item) => item.src === themeScriptURL)) {
         removeThemeScriptElements();
-        addScript(themeScriptAddress, "themeScript");
+        scriptLoads.push(addScript(themeScriptAddress, "themeScript"));
     }
 
     // load icons
-    const isBuiltInIcon = data.icon === "litheness";
+    const iconName = data.icon === "litheness" || data.icons?.some(icon => icon.name === data.icon) ? data.icon : "litheness";
+    const isBuiltInIcon = iconName === "litheness";
     const iconScriptElement = document.getElementById("iconScript");
     const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
     const iconDefaultURL = `/appearance/icons/litheness/icon.js?v=${Constants.SIYUAN_VERSION}`;
-    const iconThirdURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
+    const iconThirdURL = `/appearance/icons/${iconName}/icon.js?v=${appearancePackageVersion("icons", iconName, data.iconVer)}`;
 
     if ((isBuiltInIcon && iconDefaultScriptElement && iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) ||
-        (!isBuiltInIcon && iconScriptElement && iconScriptElement.getAttribute("src").startsWith(iconThirdURL))) {
+        (!isBuiltInIcon && iconScriptElement && iconScriptElement.getAttribute("src") === iconThirdURL)) {
         // 第三方图标切换到默认 litheness
         if (isBuiltInIcon) {
             iconScriptElement?.remove();
@@ -235,21 +272,22 @@ export const loadAssets = (appearance: Config.IAppearance) => {
                 }
             });
         }
+        await Promise.all(scriptLoads);
         return;
     }
-    addScript(iconDefaultURL, "iconDefaultScript").then(() => {
+    scriptLoads.push(addScript(iconDefaultURL, "iconDefaultScript").then(async () => {
         iconScriptElement?.remove();
         if (!isBuiltInIcon) {
-            addScript(iconThirdURL, "iconScript").then(() => {
-                Array.from(document.body.children).forEach((item, index) => {
-                    if (item.tagName === "svg" &&
-                        index !== 0 && !item.getAttribute("data-name") && "iconsLitheness" !== item.id) {
-                        item.remove();
-                    }
-                });
+            await addScript(iconThirdURL, "iconScript");
+            Array.from(document.body.children).forEach((item, index) => {
+                if (item.tagName === "svg" &&
+                    index !== 0 && !item.getAttribute("data-name") && "iconsLitheness" !== item.id) {
+                    item.remove();
+                }
             });
         }
-    });
+    }));
+    await Promise.all(scriptLoads);
 };
 
 export const initAssets = () => {
@@ -272,24 +310,27 @@ export const initAssets = () => {
         }
         fetchPost("/api/system/setAppearanceMode", {
             mode: OSTheme === "light" ? 0 : 1
-        }, async response => {
-            const nextAppearance = response.data.appearance as Config.IAppearance;
-            if (shouldUnloadThemeScript(window.siyuan.config.appearance, nextAppearance, getFrontend()) &&
-                !await unloadThemeScript()) {
-                /// #if !MOBILE
-                exportLayout({
-                    cb() {
-                        window.location.reload();
-                    },
-                    errorExit: false,
-                });
-                /// #else
-                window.location.reload();
-                /// #endif
-                return;
-            }
-            window.siyuan.config.appearance = nextAppearance;
-            loadAssets(nextAppearance);
+        }, response => {
+            void enqueueAppearanceUpdate(async () => {
+                const nextAppearance = response.data.appearance as Config.IAppearance;
+                if (shouldUnloadThemeScript(window.siyuan.config.appearance, nextAppearance, getFrontend()) &&
+                    !await unloadThemeScript()) {
+                    markAppearanceReloadPending();
+                    /// #if !MOBILE
+                    exportLayout({
+                        cb() {
+                            window.location.reload();
+                        },
+                        errorExit: false,
+                    });
+                    /// #else
+                    window.location.reload();
+                    /// #endif
+                    return;
+                }
+                window.siyuan.config.appearance = nextAppearance;
+                await loadAssets(nextAppearance);
+            });
         });
     });
 };
@@ -312,84 +353,8 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
     if (set && allowCustomAppearance) {
         await ensureSelectedCustomFonts([...globalFonts, ...editorFonts, ...codeFonts]);
     }
-    let style;
-    // Emojis Reset: 字体中包含了 emoji，需重置
-    // Emojis Additional： 苹果/win11 字体中没有的 emoji
-    if (isMac() || isIPad() || isIPhone()) {
-        style = `@font-face {
-  font-family: "Emojis Additional";
-  src: url(${servePath}appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
-  unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1fa8f;
-}
-@font-face {
-  font-family: "Emojis Reset";
-  src: local("Apple Color Emoji"),
-  local("Segoe UI Emoji"),
-  local("Segoe UI Symbol");
-  unicode-range: U+21a9, U+21aa, U+2122, U+2194-2199, U+23cf, U+25b6, U+25c0, U+25fb, U+25fc, U+25aa, U+25ab, U+2600-2603,
-  U+260e, U+2611, U+261d, U+2639, U+263a, U+2640, U+2642, U+2660, U+2663, U+2665, U+2666, U+2668, U+267b, U+26aa, U+26ab, 
-  U+2702, U+2708, U+2934, U+2935, U+1f170, U+1f171, U+1f17e, U+1f17f, U+1f202, U+1f21a, U+1f22f, U+1f232-1f23a, U+1f250, 
-  U+1f251, U+1fae4, U+2049, U+203c, U+3030, U+303d, U+24c2, U+26a0, U+26a1, U+26be, U+27a1, U+2b05-2b07, U+3297, U+3299, U+a9, U+ae,
-  ${DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE};
-  size-adjust: 115%;
-}
-@font-face {
-  font-family: "Emojis";
-  src: local("Apple Color Emoji"),
-  local("Segoe UI Emoji"),
-  local("Segoe UI Symbol");
-  size-adjust: 115%;
-}`;
-    } else if (await isWin11()) {
-        // Win11 Browser
-        style = `@font-face {
-  font-family: "Emojis Additional";
-  src: url(${servePath}appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
-  unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1f3f4, U+e0067, U+e0062,
-  U+e0065, U+e006e, U+e007f, U+e0073, U+e0063, U+e0074, U+e0077, U+e006c;
-  size-adjust: 85%;
-}
-@font-face {
-  font-family: "Emojis Reset";
-  src: local("Segoe UI Emoji"),
-  local("Segoe UI Symbol");
-  unicode-range: U+263a, U+21a9, U+2642, U+303d, U+2197, U+2198, U+2199, U+2196, U+2195, U+2194, U+2660, U+2665, U+2666,
-  U+2663, U+3030, U+21aa, U+25b6, U+25c0, U+2640, U+203c, U+a9, U+ae, U+2122, ${DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE};
-  size-adjust: 85%;
-}
-@font-face {
-  font-family: "Emojis";
-  src: local("Segoe UI Emoji"),
-  local("Segoe UI Symbol");
-  size-adjust: 85%;
-}`;
-    } else {
-        style = `@font-face {
-  font-family: "Emojis Reset";
-  src: url(${servePath}appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
-  unicode-range: U+1f170-1f171, U+1f17e, U+1f17f, U+1f21a, U+1f22f, U+1f232-1f23a, U+1f250, U+1f251, U+1f32b, U+1f3bc,
-  U+1f411, U+1f42d, U+1f42e, U+1f431, U+1f435, U+1f441, U+1f4a8, U+1f4ab, U+1f525, ${DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE},
-  U+1f79, U+1f8f, U+1fa79, U+1fae4, U+1fae9, U+1fac6, U+1fabe, U+1fadf,
-  U+200d, U+203c, U+2049, U+2122, U+2139, U+2194-2199, U+21a9, U+21aa, U+23cf, U+25aa, U+25ab, U+25b6, U+25c0, U+25fb-25fe,
-  U+2611, U+2615, U+2618, U+261d, U+2620, U+2622, U+2623, U+2626, U+262a, U+262e, U+2638-263a, U+2640, U+2642, U+2648-2653,
-  U+265f, U+2660, U+2663, U+2665, U+2666, U+267b, U+267e, U+267f, U+2692-2697, U+2699, U+269b, U+269c, U+26a0, U+26a1,
-  U+26a7, U+26aa, U+26ab, U+26b0, U+26b1, U+2702, U+2708, U+2709, U+270c, U+270d, U+2712, U+2714, U+2716, U+271d, U+2733,
-  U+2734, U+2744, U+2747, U+2763, U+2764, U+2934-2935, U+3030, U+303d, U+3297, U+3299, U+fe0f, U+e50a, U+a9, U+ae;
-  size-adjust: 92%;
-}
-@font-face {
-  font-family: "Emojis";
-  src: url(${servePath}appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2"),
-  local("Segoe UI Emoji"),
-  local("Segoe UI Symbol"),
-  local("Apple Color Emoji"),
-  local("Twemoji Mozilla"),
-  local("Noto Color Emoji"),
-  local("Android Emoji"),
-  local("EmojiSymbols");
-  size-adjust: 92%;
-}`;
-    }
+    const emojiPlatform = isMac() || isIPad() || isIPhone() ? "apple" : await isWin11() ? "windows11" : "other";
+    let style = getEmojiFontStyle(emojiPlatform, servePath);
     style += getGlobalFontStyle(globalFonts);
     if (!set) {
         style += "\n" + await getExportCustomFontStyle([...globalFonts, ...editorFonts, ...codeFonts]);

@@ -3,6 +3,7 @@ import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "./processCode";
+import {migrateLegacyMindmapsBeforeRender} from "../render/listMindmap/migrate";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {revealTabsForTarget} from "../render/tabsRender";
@@ -39,7 +40,8 @@ import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
 import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
-import {applyFocusFold} from "./viewFold";
+import {recordRestoredSpellcheckFocus} from "./spellcheckFocus";
+import {applyPublishFoldStates} from "./viewFold";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -152,6 +154,7 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
             suppressFocus: options.suppressFocus,
@@ -171,6 +174,7 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
             suppressFocus: options.suppressFocus,
@@ -203,6 +207,7 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
             suppressFocus: options.suppressFocus,
@@ -237,7 +242,16 @@ const setHTML = (options: {
     afterCB?: () => void,
     focusAfterZoom?: boolean,
     suppressFocus?: boolean,
+    isValid?: () => boolean,
 }, protyle: IProtyle) => {
+    if (options.isValid && !options.isValid()) {
+        return;
+    }
+    if (!options.isSyncing && migrateLegacyMindmapsBeforeRender(protyle, options.content, options.action || [], content => {
+        setHTML({...options, content}, protyle);
+    })) {
+        return;
+    }
     if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
         return;
     }
@@ -333,7 +347,7 @@ const setHTML = (options: {
         }
     }
 
-    applyFocusFold(protyle);
+    void applyPublishFoldStates(protyle);
     if (options.eof) {
         const eofElement = options.action.includes(Constants.CB_GET_BEFORE) ?
             protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
@@ -504,6 +518,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
     window.siyuan.menus.menu.remove();
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
     protyle.disabled = true;
+    protyle.databaseAttributePanel?.updateReadonly();
     if (protyle.title && protyle.title.editElement) {
         protyle.title.editElement.setAttribute("contenteditable", "false");
         protyle.title.editElement.style.userSelect = "text";
@@ -537,6 +552,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         return;
     }
     protyle.disabled = false;
+    protyle.databaseAttributePanel?.updateReadonly();
     if (isMobile()) {
         /// #if MOBILE
         updateMobileTitleReadonly(protyle);
@@ -621,6 +637,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     }
     if (!suppressFocus && (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST))) {
         setTimeout(() => {
+            const previousActiveElement = protyle.wysiwyg.element.ownerDocument.activeElement;
             let range: Range;
             if (savedFocusElement === focusElement && hasFocusOffsets(scrollAttr)) {
                 range = focusByOffset(focusElement, scrollAttr.focusStart, scrollAttr.focusEnd) as Range;
@@ -628,6 +645,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
                 range = focusBlock(focusElement, undefined, !action.includes(Constants.CB_GET_OUTLINE),
                     focusAfterZoom) as Range;
             }
+            recordRestoredSpellcheckFocus(protyle.wysiwyg.element, previousActiveElement);
             /// #if !MOBILE
             if (!action.includes(Constants.CB_GET_UNUNDO)) {
                 pushBack(protyle, range, focusElement);

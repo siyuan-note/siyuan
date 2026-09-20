@@ -11,6 +11,7 @@ import {hasProviderHeaderAuth, parseProviderHeaders} from "./aiProviderHeaders";
 import {
     findProviderPreset,
     getDefaultProviderProtocol,
+    getProviderProtocolBaseURL,
     getResponsesSupport,
     IProviderPreset,
     PROVIDER_PRESETS,
@@ -129,7 +130,7 @@ const createProviderView = (root: HTMLElement, backLabel: string, stacked = fals
 
 export const genProviderCardsHtml = (): string => `<div class="b3-label config-item" id="aiProviderCardsBlock">
     <div class="fn__flex">
-        ${genConfigItemMainHtml(window.siyuan.languages.openAICompatibleProvider, window.siyuan.languages.apiProviderTip)}
+        ${genConfigItemMainHtml(window.siyuan.languages.apiProvider, window.siyuan.languages.apiProviderTip)}
         <span class="fn__space"></span>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-action="addProvider">
             <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
@@ -270,7 +271,7 @@ const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[]) 
         iconHTML: "",
         type: "empty",
         label: `<div class="fn__flex-column b3-menu__filter">
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
+    <input spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
         ${models.map((model) => `<div class="b3-list-item b3-list-item--narrow" data-model="${escapeHTML(model)}">
@@ -407,8 +408,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         '<span class="fn__none" data-type="responsesCompatibility"></span>')}
                 <span class="fn__space"></span>
                 <select class="b3-select fn__flex-center fn__size200" data-provider-field="protocol">
-                    <option value="openai"${draft.protocol === "openai" ? " selected" : ""}>Chat Completions API</option>
-                    <option value="openai-responses"${draft.protocol === "openai-responses" ? " selected" : ""}>Responses API</option>
+                    <option value="openai"${draft.protocol === "openai" ? " selected" : ""}>Chat Completions</option>
+                    <option value="openai-responses"${draft.protocol === "openai-responses" ? " selected" : ""}>Responses</option>
+                    <option value="anthropic-messages"${draft.protocol === "anthropic-messages" ? " selected" : ""}>Anthropic Messages</option>
                 </select>
             </label>
             <label class="fn__flex b3-label config-item">
@@ -776,6 +778,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         const target = event.target as HTMLInputElement;
         if (target.dataset.providerField === "protocol") {
             draft.protocol = target.value;
+            draft.baseURL = getProviderProtocolBaseURL(draft.baseURL, draft.protocol);
+            view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']").value = draft.baseURL;
+            updateModelActionButtons();
             updateResponsesCompatibility();
             return;
         }

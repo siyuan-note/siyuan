@@ -6,6 +6,94 @@
   margin-top: 4px !important;
   margin-bottom: 4px !important;
 
+  &[data-av-type="list"] {
+    width: 100%;
+
+    > .av__container,
+    .av__body {
+      width: 100%;
+    }
+
+    .av__row--header,
+    .av__row--footer,
+    .av__freeze-drag,
+    .av__drag-fill {
+      display: none;
+    }
+
+    .av__row--util > .av__colsticky {
+      width: 100%;
+      flex-direction: column;
+
+      > .fn__space {
+        display: none;
+      }
+
+      > .av__button {
+        margin: 5px 0;
+        justify-content: flex-start;
+      }
+    }
+
+    .av__row {
+      border-bottom: 0;
+      border-radius: var(--b3-border-radius);
+
+      &[data-id] {
+        border-top: 2px solid transparent;
+        border-bottom: 2px solid transparent;
+        background-clip: padding-box;
+      }
+
+      &:hover {
+        background-color: var(--b3-list-hover);
+      }
+
+      &.av__row--select,
+      &.av__row--hl {
+        background-color: var(--b3-theme-primary-lightest);
+
+        &::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: var(--b3-border-radius);
+          box-shadow: 0 1px 2px var(--b3-border-color);
+          pointer-events: none;
+        }
+
+        > .av__cell {
+          background-color: transparent;
+        }
+      }
+
+      > .av__colsticky {
+        background-color: transparent;
+        flex-shrink: 0;
+
+        > .av__firstcol {
+          display: none;
+        }
+      }
+
+      > .av__cell {
+        border-right: 0;
+        border-radius: inherit;
+        flex: 0 1 auto;
+        min-width: 2em;
+        min-height: calc(1.625em + 10px);
+        max-width: 30%;
+        width: auto;
+
+        &[data-dtype="block"] {
+          flex: 1 1 12em;
+          min-width: 8em;
+          max-width: none;
+        }
+      }
+    }
+  }
+
   &--backlink {
     max-height: min(400px, 60vh);
     overflow: auto;
@@ -162,6 +250,7 @@
   }
 
   &__views--mobile {
+    flex-wrap: wrap;
     gap: 4px;
     min-width: 0;
 
@@ -176,7 +265,7 @@
     > .av__mobile-view {
       flex: 0 1 auto;
       min-width: 64px;
-      max-width: 10em;
+      max-width: min(10em, 100%);
       overflow: hidden;
       gap: 4px;
 
@@ -1346,6 +1435,10 @@
 
       .av__cell[data-wrap="true"] & {
         white-space: normal;
+
+        p:empty::after {
+          content: "\200b";
+        }
 
         p,
         h1,
@@ -2617,6 +2710,23 @@ img.av__cellassetimg {
 
   .av__relation-table-row.dragover__bottom::after {
     bottom: -2px;
+  }
+}
+
+.av__option-colors {
+  width: 238px;
+  max-width: 100%;
+  max-height: 238px;
+  overflow: auto;
+}
+
+.b3-menu--fullscreen {
+  .b3-menu__custom.av__option-custom {
+    padding: 0;
+  }
+
+  .av__option-colors {
+    width: 100%;
   }
 }
 

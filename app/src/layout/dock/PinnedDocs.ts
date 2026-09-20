@@ -493,6 +493,7 @@ export class PinnedDocs {
         const row = target.closest<HTMLElement>(source ? "li[data-type]" : "[data-pin-row]");
         if (source && (!row || row.closest("[data-encrypted=true]"))) { return rejectDrop(); }
         if (!row) {
+            if (!target.closest("[data-pin-heading]")) { return rejectDrop(); }
             this.dropTarget = {id: "", position: "pin-before"};
             this.heading.classList.add("dragover");
         } else {

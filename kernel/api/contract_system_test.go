@@ -64,6 +64,34 @@ func TestAPIContractSystemCompleteConfiguration(t *testing.T) {
 	compareSettingPayload(t, "", systemCustomFontPayload)
 }
 
+func TestAPIContractSystemRuntimeInfo(t *testing.T) {
+	previousWorkspace, previousContainer := util.WorkspaceDir, util.Container
+	util.WorkspaceDir = "/private/runtime-info-workspace"
+	util.Container = "android"
+	t.Cleanup(func() { util.WorkspaceDir, util.Container = previousWorkspace, previousContainer })
+	for _, body := range []string{"", "{}"} {
+		recorder := systemContractRequest(t, "POST", "getRuntimeInfo", getRuntimeInfo, strings.NewReader(body))
+		var result struct {
+			Code int                               `json:"code"`
+			Data apicontract.SystemRuntimeInfoData `json:"data"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		if result.Code != 0 {
+			t.Fatalf("runtime info failed: %s", recorder.Body.String())
+		}
+		for _, field := range []string{"SiYuan " + util.Ver, "Kernel:", "Kernel OS:", "CPU logical cores:", "System memory:", "Kernel memory (RSS):", "Kernel Go heap:", "Workspace storage: unknown"} {
+			if !strings.Contains(result.Data.Text, field) {
+				t.Errorf("missing diagnostic field %q: %s", field, result.Data.Text)
+			}
+		}
+		if strings.Contains(result.Data.Text, util.WorkspaceDir) {
+			t.Fatal("runtime info exposes workspace path")
+		}
+	}
+}
+
 func TestAPIContractSystemOIDCStructCompatibility(t *testing.T) {
 	for _, body := range []string{`null`, `{}`, `{"Scopes":null,"claimRules":[null,{"values":[null]}]}`, `{"provider":"google","unknown":1e1000}`, `{"clientID":17}`, `{"claimRules":{}}`, `{} {}`, ``} {
 		before := conf.NewOIDC()

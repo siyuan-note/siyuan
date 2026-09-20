@@ -367,7 +367,7 @@ func getThemeStyleVar(theme string, isDarkMode bool) (ret map[string]string) {
 	// 第三方主题可能缺少基础变量，先加载默认主题作为基础
 	defaultTheme := map[bool]string{false: "daylight", true: "midnight"}[isDarkMode]
 	if theme != defaultTheme {
-		defaultData, err := os.ReadFile(filepath.Join(util.ThemesPath, defaultTheme, "theme.css"))
+		defaultData, err := os.ReadFile(filepath.Join(util.AppearancePackagePath("themes", defaultTheme), "theme.css"))
 		if err != nil {
 			logging.LogErrorf("read default theme [%s] css file failed: %s", defaultTheme, err)
 		} else {
@@ -376,7 +376,11 @@ func getThemeStyleVar(theme string, isDarkMode bool) (ret map[string]string) {
 	}
 
 	// 拼接主题 CSS，后面的规则覆盖前面的规则
-	userData, err := os.ReadFile(filepath.Join(util.ThemesPath, theme, "theme.css"))
+	themePath := util.AppearancePackagePath("themes", theme)
+	if themePath == "" {
+		return ret
+	}
+	userData, err := os.ReadFile(filepath.Join(themePath, "theme.css"))
 	if err != nil {
 		logging.LogErrorf("read theme [%s] css file failed: %s", theme, err)
 		return ret

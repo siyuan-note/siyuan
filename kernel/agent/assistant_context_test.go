@@ -476,11 +476,11 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 	}
 }
 
-func newTestGeminiOpenAIClient(serverURL string) *openai.Client {
+func newTestGeminiOpenAIClient(serverURL string) *util.AIClient {
 	config := openai.DefaultConfig("test-key")
 	config.BaseURL = serverURL + "/v1"
 	config.HTTPClient = util.WrapGeminiThoughtSignatureTransport(http.DefaultClient)
-	return openai.NewClientWithConfig(config)
+	return &util.AIClient{Client: openai.NewClientWithConfig(config)}
 }
 
 func assertGeminiThoughtSignatureInRequest(t *testing.T, body []byte, callID, want string) {

@@ -6,7 +6,7 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20260813120000"
+		"updated": "20260920123707"
 	},
 	"Children": [
 		{
@@ -320,6 +320,46 @@
 				{
 					"Type": "NodeText",
 					"Data": " for configuration and usage."
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-bayhe2r",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-bayhe2r",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Decision model"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920123707-dn6uk2y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920123707-dn6uk2y",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The agent can use TypeSafe System One (Jev) for classification, filtering and scoring. See "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Decision model",
+					"TextMarkBlockRefID": "20260920123707-taf3ttd",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

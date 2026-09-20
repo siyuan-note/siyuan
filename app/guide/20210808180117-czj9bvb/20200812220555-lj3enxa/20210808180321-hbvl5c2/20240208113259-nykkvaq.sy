@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20260904121106"
+		"updated": "20260920084445"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208113259-sp3g7zb",
-				"updated": "20251224100843"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240208114024-40auf5m",
-				"updated": "20251224100843"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "数据库由内容块或者非内容块数据组成，并以不同视图呈现，比如表格视图、看板视图和卡片视图。"
+					"Data": "数据库由内容块或者非内容块数据组成，并以不同视图呈现，比如表格视图、列表视图、看板视图和卡片视图。"
 				}
 			]
 		},
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208115136-9g2b46l",
-				"updated": "20260904121106"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -495,6 +495,185 @@
 								{
 									"Type": "NodeText",
 									"Data": "：数据录入、批量编辑、字段类型丰富的表格场景、与 Excel 类似的常规数据管理"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260920084445-ujj7y47",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260920084445-ujj7y47",
+				"updated": "20260920084445"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "列表视图"
+				}
+			]
+		},
+		{
+			"ID": "20260920084445-iglvf09",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920084445-iglvf09",
+				"updated": "20260920084445"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每个条目显示为一行，不显示表头和表格网格。新建列表视图默认只显示主键字段，其他字段均隐藏。"
+				}
+			]
+		},
+		{
+			"ID": "20260920084445-hq4xiri",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260920084445-hq4xiri",
+				"updated": "20260920084445"
+			},
+			"Children": [
+				{
+					"ID": "20260920084445-brs3h3s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-brs3h3s",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-yahw7bf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-yahw7bf",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切换方式：在视图设置中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "布局"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "列表"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，也可通过斜杠菜单插入数据库列表视图"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920084445-3oqs6eb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-3oqs6eb",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-vy20kr8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-vy20kr8",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "字段显示：打开 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "字段"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 面板启用需要显示的字段。可见字段与主键同行显示，并支持编辑字段值"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920084445-8rdt2le",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-8rdt2le",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-fj2rtkf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-fj2rtkf",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "视图设置：复制列表视图或切回该视图的列表布局时，会保留已配置的字段显隐设置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920084445-zgww1e6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920084445-zgww1e6",
+						"updated": "20260920084445"
+					},
+					"Children": [
+						{
+							"ID": "20260920084445-akby47e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920084445-akby47e",
+								"updated": "20260920084445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "过滤、排序和分组：与同一数据库的其他视图共享数据，支持独立设置过滤、排序和分组"
 								}
 							]
 						}
@@ -984,7 +1163,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613170258-y3mj135",
-				"updated": "20260904121106"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -1951,7 +2130,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613170258-j738gis",
-				"updated": "20260613170258"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -1980,7 +2159,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613170258-jcdhbkf",
-				"updated": "20260613170258"
+				"updated": "20260920084445"
 			},
 			"Children": [
 				{
@@ -2153,7 +2332,7 @@
 					},
 					"Properties": {
 						"id": "20260613170258-5q65i2h",
-						"updated": "20260613170258"
+						"updated": "20260920084445"
 					},
 					"Children": [
 						{
@@ -2181,7 +2360,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260613170258-57c2uxa",
-								"updated": "20260613170258"
+								"updated": "20260920084445"
 							},
 							"Children": [
 								{
@@ -2193,7 +2372,7 @@
 									},
 									"Properties": {
 										"id": "20260613170258-8levr5l",
-										"updated": "20260613170258"
+										"updated": "20260920084445"
 									},
 									"Children": [
 										{
@@ -2201,12 +2380,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260613170258-wnuyau1",
-												"updated": "20260613170258"
+												"updated": "20260920084445"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "表格视图：分组后行按分组归类，每个分组可折叠展开"
+													"Data": "表格和列表视图：分组后行按分组归类，每个分组可折叠展开"
 												}
 											]
 										}
@@ -2281,7 +2460,7 @@
 					},
 					"Properties": {
 						"id": "20260613170258-r43mzwx",
-						"updated": "20260613170258"
+						"updated": "20260920084445"
 					},
 					"Children": [
 						{
@@ -2289,7 +2468,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613170258-vy3k2oa",
-								"updated": "20260613170258"
+								"updated": "20260920084445"
 							},
 							"Children": [
 								{
@@ -2299,7 +2478,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：表格和卡片视图中可选择「无」取消分组；看板视图不可取消"
+									"Data": "：表格、列表和卡片视图中可选择「无」取消分组；看板视图不可取消"
 								}
 							]
 						}

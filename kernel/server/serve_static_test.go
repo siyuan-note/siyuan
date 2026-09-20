@@ -355,12 +355,15 @@ func TestLanguageResponseDisablesCache(t *testing.T) {
 func TestThemeResponseDisablesCache(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	originalAppearancePath, originalMode := util.AppearancePath, util.Mode
+	originalThemesPath := util.ThemesPath
 	util.AppearancePath, util.Mode = t.TempDir(), "prod"
+	util.ThemesPath = filepath.Join(t.TempDir(), "themes")
 	t.Cleanup(func() {
 		util.AppearancePath, util.Mode = originalAppearancePath, originalMode
+		util.ThemesPath = originalThemesPath
 	})
 
-	themeDir := filepath.Join(util.AppearancePath, "themes", "example", "style", "module")
+	themeDir := filepath.Join(util.ThemesPath, "example", "style", "module")
 	if err := os.MkdirAll(themeDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -486,6 +489,7 @@ func TestPluginPublishAccess(t *testing.T) {
 	util.DataDir = testutil.PublicDataDir(t)
 	model.Conf = model.NewAppConf()
 	model.Conf.Bazaar = &conf.Bazaar{Trust: true}
+	model.Conf.Sync = conf.NewSync()
 	t.Cleanup(func() {
 		util.DataDir = originalDataDir
 		model.Conf = originalConf

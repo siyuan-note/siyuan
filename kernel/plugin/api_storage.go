@@ -26,6 +26,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -282,6 +283,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 					err = fmt.Errorf("failed to write file: %w", writeErr)
 					return
 				}
+				model.IncSyncIfNeeded(abs)
 				return
 			}()
 
@@ -355,6 +357,14 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 					}, nil)
 				}()
 
+				_, statErr := os.Lstat(abs)
+				affectsSync := !os.IsNotExist(statErr) && model.PathsAffectSync(abs)
+				// 删除可能部分成功，提前记录目录内是否存在参与同步的文件。
+				defer func() {
+					if affectsSync {
+						model.IncSync()
+					}
+				}()
 				if removeErr := os.RemoveAll(abs); removeErr != nil {
 					err = fmt.Errorf("failed to remove: %w", removeErr)
 					return

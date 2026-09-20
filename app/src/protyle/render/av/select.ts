@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
@@ -25,6 +26,7 @@ import {
     getNextAVOptionColor,
 } from "./color";
 import {openAVCustomColorDialog} from "./colorDialog";
+import {isMobile} from "../../../util/functions";
 
 let cellValues: IAVCellValue[];
 
@@ -48,8 +50,8 @@ const filterSelectHTML = (key: string, options: {
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
                 const airaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>` : "";
-                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${currentName === item.name ? " b3-menu__item--current" : ""}" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${escapeAttr(item.color)}">
-    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${currentName === item.name ? " b3-menu__item--current" : ""}" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" data-option-row="true" data-color="${escapeAttr(item.color)}">
+    <span draggable="true" class="b3-menu__icon b3-menu__icon--custom fn__grab"><svg><use xlink:href="#iconDrag"></use></svg></span>
     <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${airaLabel}">
         <span class="b3-chip" style="${getAVColorStyle(item)}">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
@@ -99,7 +101,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
             return;
         }
         if (!blockElement.contains(item)) {
-            if (viewType === "table") {
+            if (isTableLikeView(viewType)) {
                 item = cellElements[elementIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
             } else {
@@ -242,7 +244,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             cellElements.forEach((cellElement: HTMLElement, index) => {
                 const rowID = getFieldIdByCellElement(cellElement, viewType);
                 if (!blockElement.contains(cellElement)) {
-                    if (viewType === "table" || isCustomAttr) {
+                    if (isTableLikeView(viewType) || isCustomAttr) {
                         cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
                             blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
                     } else {
@@ -287,10 +289,10 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     <div class="fn__hr"></div>
     <textarea rows="1" placeholder="${window.siyuan.languages.addDesc}" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(desc)}">${escapeHtml(desc)}</textarea>
 </div>
-<div class="fn__hr--small"></div>`,
+${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
         bind(element) {
             const inputElement = element.querySelector("input");
-            element.classList.add("b3-menu__custom");
+            element.classList.add("b3-menu__custom", "av__option-custom");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;
@@ -321,6 +323,9 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             });
         }
     });
+    if (isMobile()) {
+        menu.addSeparator();
+    }
     menu.addItem({
         id: "delete",
         label: window.siyuan.languages.delete,
@@ -368,7 +373,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     cellElements.forEach((cellElement: HTMLElement, index) => {
                         const rowID = getFieldIdByCellElement(cellElement, viewType);
                         if (!blockElement.contains(cellElement)) {
-                            if (viewType === "table" || isCustomAttr) {
+                            if (isTableLikeView(viewType) || isCustomAttr) {
                                 cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
                                     blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
                             } else {
@@ -400,14 +405,14 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         }
     });
     menu.addSeparator();
-    const html = `<div class="fn__flex fn__flex-wrap" style="width:238px;max-height:238px;overflow:auto">${getAVColorGridHTML(
+    const html = `<div class="fn__flex fn__flex-wrap av__option-colors">${getAVColorGridHTML(
         getAVCustomColors(), color, window.siyuan.languages.manageColors, getAVColorOrder())}</div>`;
     menu.addItem({
         type: "empty",
         iconHTML: "",
         label: html,
         bind(element) {
-            element.classList.add("b3-menu__custom");
+            element.classList.add("b3-menu__custom", "av__option-custom");
             element.addEventListener("click", (event) => {
                 const colorTarget = (event.target as HTMLElement).closest<HTMLElement>("button");
                 if (colorTarget?.dataset.type === AV_MANAGE_CUSTOM_COLORS_TYPE) {
@@ -475,7 +480,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         cellElements.forEach((cellElement: HTMLElement, cellIndex) => {
                             const rowID = getFieldIdByCellElement(cellElement, viewType);
                             if (!blockElement.contains(cellElement)) {
-                                if (viewType === "table" || isCustomAttr) {
+                                if (isTableLikeView(viewType) || isCustomAttr) {
                                     cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
                                         blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
                                 } else {
@@ -518,12 +523,19 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         h: rect.height,
     });
     const inputElement = menu.element.querySelector("input");
-    inputElement.select();
+    // 移动端由用户点击输入框进入编辑，避免与菜单打开时的键盘收起流程冲突。
+    if (!isMobile()) {
+        inputElement.select();
+    }
     const descElement = menu.element.querySelector("textarea");
 };
 
 export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, cellElements: HTMLElement[], blockElement: Element) => {
     const inputElement = menuElement.querySelector("input");
+    // 在选项按钮获得焦点前记录搜索状态，重建多选面板时仅恢复用户主动进入的输入。
+    menuElement.onpointerdown = () => {
+        menuElement.dataset.restoreSearchFocus = String(document.activeElement === inputElement);
+    };
     const colId = getColId(cellElements[0], blockElement.getAttribute("data-av-type") as TAVView);
     let colData: IAVColumn;
     getFieldsByData(data).find((item: IAVColumn) => {
@@ -566,6 +578,9 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
 };
 
 export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], currentElement: HTMLElement, menuElement: HTMLElement, blockElement: Element) => {
+    const inputElement = menuElement.querySelector("input");
+    const restoreSearchFocus = !isMobile() || document.activeElement === inputElement ||
+        menuElement.dataset.restoreSearchFocus === "true";
     let hasSelected = false;
     Array.from(menuElement.querySelectorAll(".b3-chips .b3-chip")).find((item: HTMLElement) => {
         if (item.dataset.content === currentElement.dataset.name) {
@@ -574,7 +589,9 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         }
     });
     if (hasSelected) {
-        menuElement.querySelector("input").focus();
+        if (restoreSearchFocus) {
+            inputElement.focus();
+        }
         return;
     }
 
@@ -582,7 +599,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     if (!nodeElement) {
         cellElements.forEach((item, index) => {
             const rowID = getFieldIdByCellElement(item, data.viewType);
-            if (data.viewType === "table" || isCustomAttr(item)) {
+            if (isTableLikeView(data.viewType) || isCustomAttr(item)) {
                 cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
             } else {
@@ -722,7 +739,9 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         const oldChipsHeight = menuElement.querySelector(".b3-chips").clientHeight;
         menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
         bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
-        menuElement.querySelector("input").focus();
+        if (restoreSearchFocus) {
+            menuElement.querySelector("input").focus();
+        }
         menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
         // chips 增减导致菜单高度变化后重新定位（锁底部，顶部自适应，避免底部溢出视口）
         const cellRect = cellElements[cellElements.length - 1].getBoundingClientRect();
@@ -767,7 +786,7 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
     return `<div class="b3-menu__items" style="display: flex;flex-direction: column;flex: 1;">
 <div class="b3-chips" style="max-width: 50vw">
     ${selectedHTML}
-    <input>
+    <input spellcheck="false">
 </div>
 <div class="av__select-list" style="flex: 1;overflow: auto;">${filterSelectHTML("", colData.options, selected)}</div>
 </div>`;

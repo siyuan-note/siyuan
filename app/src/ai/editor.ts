@@ -12,7 +12,7 @@ import {insertHTML} from "../protyle/util/insertHTML";
 import {blockRender} from "../protyle/render/blockRender";
 import {processRender} from "../protyle/util/processCode";
 import {highlightRender} from "../protyle/render/highlightRender";
-import {copyPlainText} from "../protyle/util/compatibility";
+import {copyPlainText, isDisabledFeature} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeAriaLabel, escapeHtml} from "../util/escape";
@@ -714,6 +714,9 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
 };
 
 const beginTask = (protyle: IProtyle, source: IAIEditorSource) => {
+    if (isDisabledFeature("ai")) {
+        return;
+    }
     const state = getState(protyle);
     const start = () => {
         if (state.task) {

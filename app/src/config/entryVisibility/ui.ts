@@ -42,6 +42,7 @@ import {
 } from "./profile";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isMobile} from "../../util/functions";
+import {isInMobileApp} from "../../protyle/util/compatibility";
 import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {
     DOCK_ORDER_SCOPES,
@@ -58,7 +59,9 @@ import {
 const getVisibleEntryCatalog = () => isMobile() ? entryCatalog.filter(item =>
     item.key === TOOLBAR_ENTRY_ROOT_PATH)
     .map(item => ({...item, children: item.children.filter(child => child.type === "separator" ||
-        MOBILE_TOOLBAR_NAMES.includes(child.key) || child.key.startsWith("plugin:"))})) : entryCatalog;
+        MOBILE_TOOLBAR_NAMES.includes(child.key) || child.key.startsWith("plugin:"))})) : entryCatalog.map(item =>
+    item.key === TOP_BAR_ROOT_PATH && !isInMobileApp() ?
+        {...item, children: item.children.filter(child => child.key !== "barExit")} : item);
 
 const renderTouchOrderButtons = (enabled: boolean) => isMobile() && enabled ? ["up", "down"].map(direction =>
     `<button type="button" class="block__icon block__icon--show" data-entry-move="${direction}"
@@ -247,8 +250,8 @@ const orderEntryNodes = (profile: Config.IEntryVisibilityProfile, parentPath: st
 };
 
 const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string, item: IEntryCatalogNode,
-                           parentEnabled: boolean, readOnly: boolean) => {
-    const label = item.type === "separator" ? window.siyuan.languages.entrySeparator : item.label();
+                           parentEnabled: boolean, readOnly: boolean,
+                           label = item.type === "separator" ? window.siyuan.languages.entrySeparator : item.label()) => {
     return `<input class="b3-switch" type="checkbox"
     aria-label="${escapeAttr(label)}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
     ${!parentEnabled && !readOnly ? " disabled" : ""}${getProfileEntryVisibility(profile, path,
@@ -263,12 +266,16 @@ const renderEntryRows = (profile: Config.IEntryVisibilityProfile, prefix: string
         const configurable = isEntryCatalogNodeConfigurable(item);
         const draggable = sortable && parentEnabled && configurable;
         if (item.type === "separator") {
+            const separatorIndex = (getEntryCatalogChildren(prefix) || nodes)
+                .filter(node => node.type === "separator").findIndex(node => node.key === item.key) + 1;
+            const label = window.siyuan.languages.entrySeparator +
+                (prefix === TOOLBAR_ENTRY_ROOT_PATH ? ` ${separatorIndex}` : "");
             return `<div class="config-entry-visibility__row config-entry-visibility__row--separator${parentEnabled ? "" : " config-entry-visibility__row--disabled"}${readOnly ? " config-entry-visibility__row--readonly" : ""}"
                 data-entry-row data-entry-key="${escapeAttr(item.key)}" data-entry-parent="${escapeAttr(prefix)}">
                 ${draggable ? '<span class="config-entry-visibility__drag" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></span>' : ""}
-                <span class="config-entry-visibility__label">${window.siyuan.languages.entrySeparator}</span>
+                <span class="config-entry-visibility__label">${escapeHtml(label)}</span>
+                ${renderEntrySwitch(profile, path, item, parentEnabled, readOnly, label)}
                 ${renderTouchOrderButtons(draggable && !readOnly)}
-                ${renderEntrySwitch(profile, path, item, parentEnabled, readOnly)}
                 <span class="config-entry-visibility__arrow-space"></span>
             </div>`;
         }
@@ -571,8 +578,8 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     </div>`}
     <div class="config-group">
         ${builtin ? `<div class="config-title">${escapeHtml(draft.name)}</div>` : ""}
-        <div class="fn__flex">
-            <input class="b3-text-field fn__flex-1" data-type="entry-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
+        <div class="fn__flex config-entry-visibility__search">
+            <input spellcheck="false" class="b3-text-field fn__flex-1" data-type="entry-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
         </div>
     </div>
     <div class="config-entry-visibility__browser" data-type="entry-browser"></div>

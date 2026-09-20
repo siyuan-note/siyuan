@@ -1,0 +1,186 @@
+{
+	"ID": "20260920123707-1cgsb12",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260920123707-1cgsb12",
+		"title": "决策模型",
+		"type": "doc",
+		"updated": "20260920123707"
+	},
+	"Children": [
+		{
+			"ID": "20260920122941-6z1dygp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260920122941-6z1dygp",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260920122941-iwjp5y3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-iwjp5y3",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "智能体会优先将标准明确、重复的分类、筛选和评分任务交给 TypeSafe System One（Jev）。例如，要求智能体按给定标准评价选中文档与研究问题的相关程度。智能体可以直接传递区块 ID，由内核读取完整正文，减少主模型重复输出正文的负担。无需启用嵌入或重排模型。"
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-dk1tbi0",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-dk1tbi0",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "配置方式"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920122941-e5xvhrd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-e5xvhrd",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "决策模型"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中填写接口地址、API 密钥、模型名称和请求超时，测试连接后启用。默认关闭，接口地址为 https://api.typesafe.ai/v1/systemone，模型为 jev-latest，超时为 30 秒。关闭后保留配置。"
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-b3dug8y",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-b3dug8y",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "结果说明"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920122941-qpkgek0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-qpkgek0",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主模型仍负责理解需求、复杂推理、工具选择和最终回答。评分可能介于两个等级之间，概率和置信度不代表结果一定正确。失败和未处理的项目会单独标记，已完成的结果会保留，请求不会自动重试。"
+				}
+			]
+		},
+		{
+			"ID": "20260920123707-te89kkt",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260920123707-te89kkt",
+				"updated": "20260920123707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "内容与权限"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260920122941-au1tcls",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-au1tcls",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "相关内容会发送到配置的决策服务，可能产生费用。工具调用沿用现有的能力确认策略。加密笔记本必须先解锁，引用其中的区块还需要提供笔记本 ID。连接测试使用固定样例，不读取笔记内容。"
+				}
+			]
+		},
+		{
+			"ID": "20260920122941-yh1yy94",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920122941-yh1yy94",
+				"updated": "20260920122941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "服务与接口文档："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://typesafe.ai/",
+					"TextMarkTextContent": "TypeSafe"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://docs.typesafe.ai/",
+					"TextMarkTextContent": "System One API"
+				}
+			]
+		}
+	]
+}

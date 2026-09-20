@@ -6,6 +6,9 @@ import {openLink} from "../../editor/openLink";
 import {sendAppSetting} from "./appRuntime";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {openChangelog} from "../../boot/openChangelog";
+import {writeClipboardData} from "../../protyle/util/compatibility";
+import {showMessage} from "../../dialog/message";
+import {Dialog} from "../../dialog";
 
 const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("version", "");
@@ -21,6 +24,7 @@ const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.updateChannelTip,
             window.siyuan.languages.changelog,
             window.siyuan.languages.allChangelogs,
+            window.siyuan.languages.runtimeInfo,
         ],
         html: genAboutVersionHtml,
         afterMount: mountAboutVersionSlot,
@@ -73,7 +77,8 @@ const genAboutVersionHtml = (): string => {
     return `<div class="fn__flex b3-label config-item">
     <div class="fn__flex-1">
         ${genAboutVersionName()}
-        <div class="b3-label__text">${window.siyuan.languages.downloadLatestVer}<span class="fn__space"></span>${genAllChangelogsLink()}</div>
+        <div class="b3-label__text">${window.siyuan.languages.downloadLatestVer}</div>
+        <div class="b3-label__text">${genAllChangelogsLink()}</div>
     </div>
     <div class="fn__space"></div>
     ${genAboutVersionActions(true)}
@@ -92,9 +97,44 @@ const genAboutVersionActions = (showCheckUpdate: boolean) => `<div class="fn__fl
     <button id="viewChangelogBtn" class="b3-button b3-button--outline fn__block">
         <svg><use xlink:href="#iconFileText"></use></svg>${window.siyuan.languages.changelog}
     </button>
+    <div class="fn__hr--small"></div>
+    <button type="button" id="viewRuntimeInfoBtn" class="b3-button b3-button--outline fn__block">
+        <svg><use xlink:href="#iconInfo"></use></svg>${window.siyuan.languages.runtimeInfo}
+    </button>
 </div>`;
 
 const mountAboutVersionSlot = (root: HTMLElement) => {
+    root.querySelector("#viewRuntimeInfoBtn")?.addEventListener("click", () => {
+        fetchPost("/api/system/getRuntimeInfo", {}, (response) => {
+            const lines = [response.data.text, `Frontend: ${Constants.SIYUAN_VERSION}`, `User agent: ${navigator.userAgent}`];
+            /// #if !BROWSER
+            if (typeof process !== "undefined" && process.versions?.electron) {
+                lines.push(`Electron: ${process.versions.electron}`, `Chromium: ${process.versions.chrome}`, `Node.js: ${process.versions.node}`);
+            }
+            /// #endif
+            const text = lines.join("\n");
+            const dialog = new Dialog({
+                title: window.siyuan.languages.runtimeInfo,
+                width: "min(720px, 92vw)",
+                content: `<div class="b3-dialog__content">
+    <pre tabindex="0" style="margin: 0; max-height: 55vh; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text;"></pre>
+</div>
+<div class="b3-dialog__action">
+    <button type="button" data-action="copy" class="b3-button b3-button--text">${window.siyuan.languages.copy}</button>
+</div>`,
+            });
+            dialog.element.querySelector("pre").textContent = text;
+            dialog.element.querySelector('[data-action="copy"]').addEventListener("click", async () => {
+                const result = await writeClipboardData({textPlain: text});
+                if (result.status === "failed") {
+                    showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+                    return;
+                }
+                showMessage(window.siyuan.languages.copied);
+                dialog.destroy();
+            });
+        });
+    });
     root.querySelector("#viewChangelogBtn")?.addEventListener("click", () => {
         openChangelog(true);
     });

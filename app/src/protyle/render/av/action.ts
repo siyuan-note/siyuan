@@ -1,3 +1,4 @@
+import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {transaction} from "../../wysiwyg/transaction";
@@ -55,6 +56,7 @@ import {createAttributeViewItem, createAttributeViewItemDocs, openNewItemTemplat
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {openKanbanGroupMenu} from "./kanban/groupMenu";
 import {getGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
+import {setPublishAVFolds, setPublishAVView} from "./publishState";
 import {
     finishCardCoverPosition,
     isCardCoverPositioning,
@@ -550,7 +552,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     return;
                 }
                 const cellType = getTypeByCellElement(target);
-                if (viewType === "table") {
+                if (isTableLikeView(viewType)) {
                     const scrollElement = hasClosestByClassName(target, "av__scroll");
                     if (!scrollElement) {
                         return;
@@ -648,6 +650,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 initUnfoldedGroupTables(blockElement, protyle);
                 updateGroupFoldedStates(blockElement, doData);
                 clearTimeout(foldTimeout);
+                if (window.siyuan.isPublish) {
+                    setPublishAVFolds(blockElement, viewID, doData);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return true;
+                }
                 transaction(protyle, [{
                     action: "foldAttrViewGroups",
                     avID: blockElement.dataset.avId,
@@ -667,6 +675,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 initUnfoldedGroupTables(blockElement, protyle);
                 updateGroupFoldedStates(blockElement, {[target.dataset.id]: isOpen});
                 clearTimeout(foldTimeout);
+                if (window.siyuan.isPublish) {
+                    setPublishAVFolds(blockElement, viewID, {[target.dataset.id]: isOpen});
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return true;
+                }
                 foldTimeout = window.setTimeout(() => {
                     transaction(protyle, [{
                         action: "foldAttrViewGroup",
@@ -717,8 +731,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             /// #endif
             if (target.classList.contains("item--focus")) {
                 openViewMenu({protyle, blockElement, element: target});
-            } else if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+            } else if (window.siyuan.isPublish || protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
                 clearSelect(["row", "galleryItem"], blockElement);
+                if (window.siyuan.isPublish) {
+                    setPublishAVView(blockElement, target.dataset.id);
+                }
                 blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, target.dataset.id);
                 blockElement.removeAttribute("data-render");
                 if (target.dataset.page) {
@@ -852,7 +869,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
         return false;
     }
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
-    if (rowElement && avType === "table") {
+    if (rowElement && isTableLikeView(avType)) {
         if (!rowElement.classList.contains("av__row--select")) {
             clearSelect(["row"], blockElement);
         }
@@ -1217,10 +1234,10 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                 menu.addSeparator({id: "separator_1"});
             }
             menu.addItem({
-                id: avType === "table" ? "insertRowBefore" : "insertItemBefore",
+                id: isTableLikeView(avType) ? "insertRowBefore" : "insertItemBefore",
                 icon: "iconBefore",
                 label: `<div class="fn__flex" style="align-items: center;">
-${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBefore"].replace("${x}", `<span class="fn__space"></span><input type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size"><span class="fn__space"></span>`)}
+${window.siyuan.languages[isTableLikeView(avType) ? "insertRowBefore" : "insertItemBefore"].replace("${x}", `<span class="fn__space"></span><input type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size"><span class="fn__space"></span>`)}
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
@@ -1252,10 +1269,10 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                 }
             });
             menu.addItem({
-                id: avType === "table" ? "insertRowAfter" : "insertItemAfter",
+                id: isTableLikeView(avType) ? "insertRowAfter" : "insertItemAfter",
                 icon: "iconAfter",
                 label: `<div class="fn__flex" style="align-items: center;">
-${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAfter"].replace("${x}", `<span class="fn__space"></span><input type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size" value="1"><span class="fn__space"></span>`)}
+${window.siyuan.languages[isTableLikeView(avType) ? "insertRowAfter" : "insertItemAfter"].replace("${x}", `<span class="fn__space"></span><input type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size" value="1"><span class="fn__space"></span>`)}
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");

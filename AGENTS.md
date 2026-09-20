@@ -56,6 +56,8 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - If no existing icon is suitable, source one from the official [Lucide icon library](https://lucide.dev/icons/) and adapt only attributes such as stroke width to match the established icon style; preserve the upstream path data
    - When adding an icon to `app/appearance/icons/litheness/icon.js`, add its preview entry to `app/appearance/icons/index.html` in the same change and keep the order aligned
 4. **User guide:** When editing the user guide, follow `docs/SY-FORMAT.md`
+   - User-guide changes must be synchronized across all four bundled languages: English (`app/guide/20210808180117-6v0mkxr`), Simplified Chinese (`app/guide/20210808180117-czj9bvb`), Traditional Chinese (`app/guide/20211226090932-5lcq56f`), and Japanese (`app/guide/20240530133126-axarxgx`). Do not omit Japanese or discover corresponding pages only by Chinese/English title matching
+   - Before finishing a guide change, enumerate the language directories under `app/guide/` and verify the corresponding section in each language. Translate the content, preserve existing document/block IDs, generate fresh IDs for new blocks, and validate the changed `.sy` JSON. `docs/` developer documentation does not replace the bundled user guide
    - When a feature adds or changes shortcuts, update the shortcut documentation in the user guide in the same change; if the appropriate section is unclear, ask the user where it should be placed
    - List item text must not end with a period or equivalent sentence-ending mark (for example `.`, `。`, or `।`)
    - Represent in-app UI navigation paths as segmented `kbd` text marks: use one `NodeTextMark` with `TextMarkType: "kbd"` per navigation level, and place a plain `NodeText` containing ` - ` between adjacent levels
@@ -89,6 +91,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - The menu `ignore` option controls conditional rendering and must not be used to opt an entry out of visibility or order configuration
 10. **API contracts:**
     - Follow [docs/API-CONTRACTS.md](docs/API-CONTRACTS.md) when adding or changing kernel HTTP APIs. Define new endpoints in `kernel/apicontract/` and bind their handlers through `contractHandler`; keep contracts synchronized when changing existing endpoints
+    - Do not automatically add newly implemented endpoints to `docs/API.md` or its localized versions (`docs/API.zh-CN.md`, `docs/API.ja.md`); add such documentation only when explicitly requested by the user. Continue maintaining API contracts, generated declarations, and required regression tests
     - Preserve existing input compatibility, response variants, authorization, and encrypted notebook lease behavior; cover affected behavior with regression tests
     - Remove migrated or deleted routes from `kernel/apicontract/legacy_routes.json`; never add new routes to this legacy list or bypass contract checks with `any` or type assertions
     - After contract changes, run `pnpm run api:generate --petal ../../petal` and `pnpm run api:check --petal ../../petal` from `app/`; synchronize related public declarations in `petal` and do not hand-edit generated declarations or schemas
@@ -106,6 +109,13 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - When moving or extracting a symbol into another module, update all affected imports to reference its defining module directly. Do not leave forwarding re-exports in the original module merely to avoid updating callers
 6. **CSS:** Do not use the `:has()` selector because of its performance impact
 7. **CSS positioning and scrolling:** When changing `position`, `transform`, `contain`, or `overflow` on a shared container, check the effects on descendant positioning reference frames, overlay coverage, and clipping. Prefer a dedicated container when a local control needs a positioning reference. For settings dialog changes, verify detail overlays, the top drag area, and scrollbar placement at different window widths
+
+8. **Built-in custom attributes:** Use the `custom-sy-` prefix for custom attributes owned by built-in features
+   - Define custom attribute name constants in `app/src/constants.ts`, alongside similar constants in `Constants`, rather than in individual feature modules
+
+9. **Frontend preference storage:** Do not use browser `localStorage` directly, including `window.localStorage` and `globalThis.localStorage`
+   - Read preferences from `window.siyuan.storage`; when changing a preference, update its in-memory value and persist it with `setStorageVal` from `app/src/protyle/util/compatibility.ts`
+   - SiYuan persists these values in the workspace's `data/storage/local.json`; do not use browser `storage` events to observe changes to this store
 
 ---
 

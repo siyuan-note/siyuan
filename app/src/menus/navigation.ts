@@ -311,12 +311,14 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                 click: () => { updatePinnedDocs(blockIDs, "pin"); },
             }).element);
         }
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "unpinDoc",
-            icon: "iconUnpin",
-            label: window.siyuan.languages.unpinDoc,
-            click: () => { updatePinnedDocs(blockIDs, "unpin"); },
-        }).element);
+        if (blockIDs.some(id => pinnedDocIDs.has(id))) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "unpinDoc",
+                icon: "iconUnpin",
+                label: window.siyuan.languages.unpinDoc,
+                click: () => { updatePinnedDocs(blockIDs, "unpin"); },
+            }).element);
+        }
     }
     window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
     if (!window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
@@ -785,6 +787,14 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     fetchPost("/api/filetree/duplicateDoc", {
                         id
                     });
+                }
+            }, {
+                id: "duplicateTree",
+                iconHTML: "",
+                label: window.siyuan.languages.duplicateDocTree,
+                ignore: !(Number(liElement.getAttribute("data-count")) > 0),
+                click() {
+                    fetchPost("/api/filetree/duplicateDocTree", {id});
                 }
             }])
         }).element);

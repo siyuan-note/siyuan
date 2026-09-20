@@ -7,7 +7,7 @@
 		"id": "20240530101000-4p096e8",
 		"title": "ワークスペース",
 		"type": "doc",
-		"updated": "20260829104731"
+		"updated": "20260918195936"
 	},
 	"Children": [
 		{
@@ -182,7 +182,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=\u0026quot;ワークスペースの絶対パス\u0026quot;"
+									"TextMarkTextContent": "--workspace=&quot;ワークスペースの絶対パス&quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -191,7 +191,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026quot;"
+									"TextMarkTextContent": "&quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -200,7 +200,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=\u0026quot;F:\\SiYuan\u0026quot;"
+									"TextMarkTextContent": "--workspace=&quot;F:\\SiYuan&quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -285,7 +285,7 @@
 			"Properties": {
 				"ID": "20240530101000-j4ly8y7",
 				"id": "20240530101000-1mozynr",
-				"updated": "20240530101000"
+				"updated": "20260918195936"
 			},
 			"Children": [
 				{
@@ -602,6 +602,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260917190844-5om4pnd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260917190844-5om4pnd",
+				"updated": "20260918195936"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サードパーティのテーマは data/themes/、アイコンパッケージは data/icons/ に保存され、データ同期とスナップショットの対象になります。各端末の外観の選択は引き続きローカルの conf/conf.json に保存されます。内蔵の外観リソースは同期されません。アップグレード時に元のディレクトリをデータディレクトリへ移行し、移行後に元のディレクトリを削除します。"
 				}
 			]
 		}

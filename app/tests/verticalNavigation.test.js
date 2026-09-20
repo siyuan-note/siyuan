@@ -33,6 +33,7 @@ const rendererModules = () => {
     modules["render/tabsRender"] = "export const setTabTitleNavigationEditing = () => false;";
     modules["../util/highlightById"] = "export const scrollCenter = () => {};";
     modules["render/av/focus"] = 'import {focusEditableAtGoalX} from "../../wysiwyg/verticalCaret";\n' +
+        'import {isTableLikeView} from "./viewType";\n' +
         'import {ensureAVTableBoundaryRow, getAVData} from "./virtualScroll";\n' +
         "const clearSelect = () => {};\n" +
         extract("render/av/focus", ["getVisibleAVTitle", "focusAVTitleByVerticalArrow", "focusAVVerticalRegion",
@@ -92,7 +93,7 @@ const rendererModules = () => {
         import {isInEmbedBlock} from "./hasClosest";
         const focusByOffset = element => { window.restoredFocusElement = element; return true; };\n` +
         extract("util/selection", ["restoreFocusContext"]);
-    for (const name of ["virtualScroll", "selectionState", "rangeSelect", "groupTableVirtual", "backlinkScroll"]) {
+    for (const name of ["virtualScroll", "selectionState", "rangeSelect", "groupTableVirtual", "backlinkScroll", "viewType"]) {
         modules[`render/av/${name}`] = readFileSync(path.join(root, "render/av", `${name}.ts`), "utf8");
     }
     modules["../constants"] = "const SIYUAN_VERSION = 'test', NODE_ENV = 'test';\n" +
@@ -590,6 +591,11 @@ const runElectron = async () => {
         });
     });
     let exitCode = 0;
+    win.webContents.on("console-message", (details) => {
+        if (details.level === "error") {
+            console.error(details.message);
+        }
+    });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         win.webContents.debugger.attach("1.3");

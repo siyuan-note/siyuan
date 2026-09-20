@@ -8,7 +8,7 @@
 		"id": "20240530101000-hnu6o79",
 		"title": "エディタ",
 		"type": "doc",
-		"updated": "20260830213256"
+		"updated": "20260920102915"
 	},
 	"Children": [
 		{
@@ -251,6 +251,122 @@
 				"ID": "20240530101000-1wyq56l",
 				"id": "20240530101000-48icsc4"
 			}
+		},
+		{
+			"ID": "20260920102915-j2vppoi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260920102915-j2vppoi",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スペルチェック"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-bqpxzto",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-bqpxzto",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "この機能は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スペルチェック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で有効にできます。スペルミスのある単語には波線が表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-bwh61nt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-bwh61nt",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版：波線のある単語を右クリックし、思源のメニューから修正候補を選択します。正しい単語を辞書に追加することもできます。通常の右クリックを使用し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " キーを押す必要はありません。"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-jffww3e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-jffww3e",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブラウザ版：ブラウザの設定でスペルチェックを有効にし、チェックする言語を選択してください。Chrome では、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " キーを押しながら波線のある単語を右クリックすると、ブラウザ標準のスペル修正メニューが開きます。"
+				}
+			]
+		},
+		{
+			"ID": "20260920102915-5z2g0ww",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920102915-5z2g0ww",
+				"updated": "20260920102915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スペルチェックが始まるタイミングは実行環境によって異なります。ドキュメントを開いてカーソル位置が復元されても、波線が表示されるまで本文をクリックして少し待つ必要がある場合があります。"
+				}
+			]
 		}
 	]
 }

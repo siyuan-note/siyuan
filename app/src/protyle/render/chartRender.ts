@@ -68,7 +68,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                 width = wysiswgElement.firstElementChild.clientWidth;
             }
             echartsElements.forEach(async (e: HTMLDivElement) => {
-                if (e.closest('[data-protyle-lite-render="safe"]')) {
+                if (e.closest('[data-protyle-lite-render="safe"], .list-mindmap__preview-block')) {
                     return;
                 }
                 e.setAttribute("data-render", "true");
@@ -117,7 +117,7 @@ export const refreshChartTheme = (element: Element) => {
     }
     const refreshElements: HTMLElement[] = [];
     echartsElements.forEach((item) => {
-        if (item.closest('[data-protyle-lite-render="safe"]')) {
+        if (item.closest('[data-protyle-lite-render="safe"], .list-mindmap__preview-block')) {
             return;
         }
         const chartElement = item.querySelector<HTMLElement>("[_echarts_instance_]");

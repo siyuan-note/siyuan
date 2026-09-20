@@ -265,6 +265,8 @@ func getAttributeViewBaseInstance(viewable av.Viewable) (ret *av.BaseInstance) {
 	switch instance := viewable.(type) {
 	case *av.Table:
 		ret = instance.BaseInstance
+	case *av.List:
+		ret = instance.BaseInstance
 	case *av.Gallery:
 		ret = instance.BaseInstance
 	case *av.Kanban:
@@ -287,15 +289,15 @@ func GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemI
 		return nil, nil, err
 	}
 
-	table, ok := viewable.(*av.Table)
-	if !ok {
+	table = av.TableFromViewable(viewable)
+	if nil == table {
 		return nil, nil, fmt.Errorf("attribute view [%s] is not a table", avID)
 	}
 	if "" != groupID {
 		var groupTable *av.Table
 		for _, group := range table.Groups {
 			if group.GetID() == groupID {
-				groupTable, _ = group.(*av.Table)
+				groupTable = av.TableFromViewable(group)
 				break
 			}
 		}
@@ -400,6 +402,15 @@ func getAttributeViewPasteRowsFromTable(table *av.Table, startItemID string, cou
 }
 
 func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	return renderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, true)
+}
+
+// RenderAttributeViewWithTargetReadOnly 仅在内存中渲染发布视图，不创建或保存数据库。
+func RenderAttributeViewWithTargetReadOnly(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	return renderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, false, ignoreRows, targetItemID, targetGroupID, false)
+}
+
+func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, writable bool) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
 		return
@@ -477,14 +488,14 @@ func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 	} else {
 	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, true, target, targetGroupID)
+	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID)
 	return
 }
 
 func newAttributeViewWithLayout(avID string, initialLayout av.LayoutType) (ret *av.AttributeView) {
 	ret = av.NewAttributeView(avID)
 	switch initialLayout {
-	case av.LayoutTypeGallery, av.LayoutTypeKanban:
+	case av.LayoutTypeList, av.LayoutTypeGallery, av.LayoutTypeKanban:
 	default:
 		return
 	}
@@ -505,6 +516,9 @@ const (
 )
 
 func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string) (viewable av.Viewable, err error) {
+	if err = attrView.ValidateListLayouts(); nil != err {
+		return
+	}
 	// 获取待渲染的视图
 	view, err := getRenderAttributeViewView(attrView, viewID, carrierViewID, nodeID, writable)
 	if nil != err {
@@ -531,6 +545,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 
 	// 渲染视图
 	renderContext := sql.NewAttributeViewRenderContext()
+	renderContext.ReadOnly = !writable
 	defer renderContext.PushTemplateErrors()
 	deferTemplateValues := shouldDeferAttributeViewTemplateValues(attrView, view, query, ignoreRows)
 	if deferTemplateValues {
@@ -715,8 +730,8 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 
 		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
 		switch groupView.LayoutType {
-		case av.LayoutTypeTable:
-			groupView.Table.Columns = nil
+		case av.LayoutTypeTable, av.LayoutTypeList:
+			groupView.GetTableLayout().Columns = nil
 		case av.LayoutTypeGallery:
 			groupView.Gallery.CardFields = nil
 		case av.LayoutTypeKanban:
@@ -762,8 +777,8 @@ func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
 
 	itemCount := 0
 	switch viewable.GetType() {
-	case av.LayoutTypeTable:
-		itemCount = viewable.(*av.Table).RowCount
+	case av.LayoutTypeTable, av.LayoutTypeList:
+		itemCount = av.TableFromViewable(viewable).RowCount
 	case av.LayoutTypeGallery:
 		itemCount = viewable.(*av.Gallery).CardCount
 	case av.LayoutTypeKanban:
@@ -997,8 +1012,8 @@ func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av
 		return templateKeyIDs[fieldID] && nil != calc && av.CalcOperatorNone != calc.Operator
 	}
 	switch view.LayoutType {
-	case av.LayoutTypeTable:
-		for _, column := range view.Table.Columns {
+	case av.LayoutTypeTable, av.LayoutTypeList:
+		for _, column := range view.GetTableLayout().Columns {
 			if nil != column && nil != column.BaseField && checkField(column.ID, column.Calc) {
 				return false
 			}
@@ -1058,8 +1073,8 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 
 	// 分页
 	switch viewable.GetType() {
-	case av.LayoutTypeTable:
-		table := viewable.(*av.Table)
+	case av.LayoutTypeTable, av.LayoutTypeList:
+		table := av.TableFromViewable(viewable)
 		targetIndex = findAttributeViewTargetIndex(targetItemID, len(table.Rows), func(index int) string { return table.Rows[index].ID })
 		table.RowCount = len(table.Rows)
 		table.PageSize = view.PageSize

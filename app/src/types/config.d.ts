@@ -143,6 +143,7 @@ declare namespace Config {
         mcp: IMCP;
         embedding: IEmbedding;
         rerank: IRerank;
+        decision: IDecision;
     }
 
     /**
@@ -194,6 +195,17 @@ declare namespace Config {
     }
 
     /**
+     * 智能体决策模型配置，使用 TypeSafe System One 协议。
+     */
+    export interface IDecision {
+        enabled: boolean;
+        endpoint: string;
+        apiKey: string;
+        name: string;
+        timeout: number;
+    }
+
+    /**
      * Embedding model configuration
      */
     export interface IEmbedding {
@@ -229,6 +241,7 @@ declare namespace Config {
         enabled: boolean;
         displayName?: string;
         baseURL: string;
+        /** 生成协议：openai、openai-responses 或 anthropic-messages；省略时使用 openai */
         protocol?: string;
         apiKey: string;
         requestTimeout: number;
@@ -565,6 +578,8 @@ declare namespace Config {
          * Backlink sort mode
          */
         backlinkSort: number;
+        backlinkGlobalSort: number;
+        backlinkBlockSort: number;
         /**
          * Backmention sort mode
          */

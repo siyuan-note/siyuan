@@ -255,6 +255,10 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highli
 }
 
 func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight bool, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
+	return GetBacklinkDocWithSort(defID, refTreeID, keyword, containChildren, highlight, 0, filters...)
+}
+
+func GetBacklinkDocWithSort(defID, refTreeID, keyword string, containChildren, highlight bool, blockSort int, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
 	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
 		keywords = strings.Split(keyword, " ")
@@ -308,6 +312,8 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 		return
 	}
 
+	linkRefs = expandBacklinkDocumentEntries(linkRefs, tmpRefs, rootID, keywords, encBoxIDUsed, originalRefBlockIDs, blockSort)
+	anchorKeys := backlinkAnchorSortKeys(linkRefs, refTree, tmpRefs, originalRefBlockIDs, blockSort)
 	avTargets := backlinkAttributeViewTargets(refTree, tmpRefs)
 	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
@@ -318,11 +324,16 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 	}
 
 	sortBacklinks(ret, refTree)
+	sortBacklinksByAnchor(ret, anchorKeys, blockSort)
 	filterBlockPaths(ret)
 	return
 }
 
 func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
+	return GetBacklinkDocInBoxWithSort(defID, refTreeID, keyword, containChildren, highlight, boxID, 0, filters...)
+}
+
+func GetBacklinkDocInBoxWithSort(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string, blockSort int, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
 	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
 		keywords = strings.Split(keyword, " ")
@@ -358,6 +369,8 @@ func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, high
 		return
 	}
 
+	linkRefs = expandBacklinkDocumentEntries(linkRefs, tmpRefs, rootID, keywords, boxID, originalRefBlockIDs, blockSort)
+	anchorKeys := backlinkAnchorSortKeys(linkRefs, refTree, tmpRefs, originalRefBlockIDs, blockSort)
 	avTargets := backlinkAttributeViewTargets(refTree, tmpRefs)
 	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
@@ -368,6 +381,7 @@ func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, high
 	}
 
 	sortBacklinks(ret, refTree)
+	sortBacklinksByAnchor(ret, anchorKeys, blockSort)
 	filterBlockPaths(ret)
 	return
 }
@@ -588,11 +602,11 @@ func GetBacklink2InBox(id, keyword, mentionKeyword string, sortMode, mentionSort
 }
 
 func GetBacklink2InBoxWithFilter(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool, boxID string, sourceFilter *BacklinkSourceFilter) (boxIDOut string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
-	return GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sortMode, mentionSortMode, containChildren, boxID, sourceFilter, true)
+	return GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sortMode, mentionSortMode, containChildren, boxID, sourceFilter, true, true)
 }
 
-// GetBacklink2InBoxWithOptions 查询反链文档列表，并按需搜索提及。
-func GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool, boxID string, sourceFilter *BacklinkSourceFilter, includeMentions bool) (boxIDOut string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
+// GetBacklink2InBoxWithOptions 按需查询反链文档分组与提及列表。
+func GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool, boxID string, sourceFilter *BacklinkSourceFilter, includeMentions, includeBacklinks bool) (boxIDOut string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
 	keyword = strings.TrimSpace(keyword)
 	var keywords []string
 	if "" != keyword {
@@ -607,19 +621,26 @@ func GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword string, sortMode, 
 	}
 	rootID := sqlBlock.RootID
 	boxIDOut = sqlBlock.Box
+	if !includeMentions && !includeBacklinks {
+		return
+	}
 
 	refs := sql.QueryRefsByDefIDInBox(id, containChildren, boxID)
 	refs = removeDuplicatedRefs(refs)
 
 	linkRefs, linkRefsCount, excludeBacklinkIDs, _ := buildLinkRefsInBox(rootID, refs, keywords, boxID)
-	filteredLinkRefs := filterBacklinkSourcesInBox(linkRefs, rootID, boxID, sourceFilter)
-	if nil != NormalizeBacklinkSourceFilter(sourceFilter) {
-		linkRefsCount = len(filteredLinkRefs)
-	}
-	tmpBacklinks := toFlatTree(filteredLinkRefs, 0, "backlink", nil)
-	for _, l := range tmpBacklinks {
-		l.Blocks = nil
-		backlinks = append(backlinks, l)
+	if includeBacklinks {
+		filteredLinkRefs := filterBacklinkSourcesInBox(linkRefs, rootID, boxID, sourceFilter)
+		if nil != NormalizeBacklinkSourceFilter(sourceFilter) {
+			linkRefsCount = len(filteredLinkRefs)
+		}
+		tmpBacklinks := toFlatTree(filteredLinkRefs, 0, "backlink", nil)
+		for _, l := range tmpBacklinks {
+			l.Blocks = nil
+			backlinks = append(backlinks, l)
+		}
+	} else {
+		linkRefsCount = 0
 	}
 
 	sort.Slice(backlinks, func(i, j int) bool {
@@ -706,6 +727,10 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 
 // buildLinkRefsInBox 与 buildLinkRefs 一致，但按 boxID 路由到加密 db 或全局 db。
 func buildLinkRefsInBox(defRootID string, refs []*sql.Ref, keywords []string, boxID string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set, originalRefBlockIDs map[string]string) {
+	return buildLinkRefsInBoxWithDocumentGrouping(defRootID, refs, keywords, boxID, true)
+}
+
+func buildLinkRefsInBoxWithDocumentGrouping(defRootID string, refs []*sql.Ref, keywords []string, boxID string, groupDocuments bool) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set, originalRefBlockIDs map[string]string) {
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
 	var queryBlockIDs []string
@@ -774,7 +799,7 @@ func buildLinkRefsInBox(defRootID string, refs []*sql.Ref, keywords []string, bo
 		refBlocksByID[refBlock.ID] = refBlock
 	}
 	coveredRefIDs := map[string]bool{}
-	for _, mapping := range buildBacklinkParentMappings(backlinkRefBlocks, boxID) {
+	for _, mapping := range buildBacklinkParentMappingsWithDocumentGrouping(backlinkRefBlocks, boxID, groupDocuments) {
 		originalRefBlockIDs[mapping.parent.ID] = mapping.refBlock.ID
 		for refID := range mapping.coveredRefIDs {
 			coveredRefIDs[refID] = true

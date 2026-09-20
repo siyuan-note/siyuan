@@ -102,6 +102,7 @@ func TestCheckPluginAccessableInPublish(t *testing.T) {
 	originalConf := Conf
 	util.DataDir = t.TempDir()
 	Conf = NewAppConf()
+	Conf.Sync = conf.NewSync()
 	Conf.Bazaar = &conf.Bazaar{Trust: true}
 	t.Cleanup(func() {
 		util.DataDir = originalDataDir

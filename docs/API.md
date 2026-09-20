@@ -1911,7 +1911,7 @@ Note: To ensure data security, access to this interface is prohibited in Publish
 
 ## Database
 
-A database (internally an "attribute view") stores structured data as fields (columns) and items (rows). Each database is identified by an `avID` and can be embedded into a document through one or more database blocks (`blockID`). A single database may contain multiple views (`viewID`) of different layout types: `table`, `gallery`, and `kanban`.
+A database (internally an "attribute view") stores structured data as fields (columns) and items (rows). Each database is identified by an `avID` and can be embedded into a document through one or more database blocks (`blockID`). A single database may contain multiple views (`viewID`) of different layout types: `table`, `list`, `gallery`, and `kanban`.
 
 The field types (`keyType`) are:
 
@@ -2055,7 +2055,7 @@ The field types (`keyType`) are:
   }
   ```
 
-    * `data.view`: The rendered view instance. Its shape depends on `viewType`: `table` returns `columns`/`rows`/`rowCount`, while `gallery` and `kanban` return `fields`/`cards`/`cardCount`. When grouping is enabled, `groups` contains a view instance for each group, including `groupKey`/`groupValue`. `view` also includes `filters`, `sorts`, `group`, `showIcon`, `wrapField`, `groupFolded`, and `groupHidden`. Note: active filters or grouping can make the item list empty even when the total item count is greater than 0
+    * `data.view`: The rendered view instance. Its shape depends on `viewType`: `table` and `list` return `columns`/`rows`/`rowCount`, while `gallery` and `kanban` return `fields`/`cards`/`cardCount`. When grouping is enabled, `groups` contains a view instance for each group, including `groupKey`/`groupValue`. `view` also includes `filters`, `sorts`, `group`, `showIcon`, `wrapField`, `groupFolded`, and `groupHidden`. Note: active filters or grouping can make the item list empty even when the total item count is greater than 0
     * `data.view.columns[]`: Each has `id`, `name`, `type`, `icon`, `wrap`, `hidden`, `desc`, `calc`, `numberFormat`, `template`, `renderTemplate`, `pin`, `width`; `select`/`mSelect` columns additionally include `options`. Gallery and kanban fields expose the same field metadata under `data.view.fields[]`
     * `data.view.columns[].renderTemplate`: Optional display template for a normal field. It changes only the displayed content; the field's stored typed value remains unchanged
     * `data.view.rows[].id`: The table row's **item ID** (`itemID`). It also equals `value.blockID` in that row's primary-key cell. For a bound row, the bound block ID is stored in `value.block.id` in the primary-key cell; these are distinct concepts and must not be assumed equal
@@ -2217,7 +2217,7 @@ The field types (`keyType`) are:
   }
   ```
 
-    * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), and all views with their raw layout config (`table`/`gallery`/`kanban`) and item ordering (`itemIds`). The compatibility `viewID` is computed as the first available view and is not persisted. Returns no rendered rows or pagination; therefore, use [Render](#Render) for computed rows
+    * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), and all views with their raw layout config (`table`/`list`/`gallery`/`kanban`) and item ordering (`itemIds`). The compatibility `viewID` is computed as the first available view and is not persisted. Returns no rendered rows or pagination; therefore, use [Render](#Render) for computed rows
 
 ### Get primary key values
 
@@ -2353,7 +2353,7 @@ Updates a single cell (one field of one row). This is the primary write endpoint
 | `mAsset`   | `{"mAsset": [{"type": "image", "name": "", "content": "https://example.com/image"}]}`                               |
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
 
-> ⚠️ `itemID` is the **item ID**, which is the rendered item's `id` from [Render](#Render): `rows[].id` for a table and `cards[].id` for a gallery or kanban, inside the corresponding view instance under `groups[]` when grouping is enabled. It also equals the primary-key value's `value.blockID`. For a bound item, the bound block ID is stored in the primary-key value's `value.block.id`; these are distinct concepts and must not be assumed equal. Passing the wrong ID stores the value as an orphan that does not appear in the rendered cell.
+> ⚠️ `itemID` is the **item ID**, which is the rendered item's `id` from [Render](#Render): `rows[].id` for a table or list and `cards[].id` for a gallery or kanban, inside the corresponding view instance under `groups[]` when grouping is enabled. It also equals the primary-key value's `value.blockID`. For a bound item, the bound block ID is stored in the primary-key value's `value.block.id`; these are distinct concepts and must not be assumed equal. Passing the wrong ID stores the value as an orphan that does not appear in the rendered cell.
 
 For `mAsset`, each item uses `type: "image"` to render an image or `type: "file"` to render a file link. Updating the value replaces the entire `mAsset` array, so append operations must include the existing items.
 
@@ -2436,7 +2436,7 @@ Adds one or more items (rows). Each source can either bind an existing block (`i
     * `avID`: Database ID
     * `blockID`: The database block that owns this database (resolves target view/group)
     * `viewID`: Explicit target view. When omitted, the view selected by `blockID` is used, then the first available view
-    * `groupID`: Target group ID for kanban views. Omit for table/gallery
+    * `groupID`: Target group ID for kanban views. Omit for table/list/gallery
     * `previousID`: Insert after this item ID. Empty means append to the end
     * `srcs[].id`: For bound blocks (`isDetached: false`), the block ID to bind. Must match the node ID pattern
     * `srcs[].isDetached`: `true` to create a detached row; `false` to bind an existing block
@@ -2483,7 +2483,9 @@ Removes one or more items (rows). Detached rows are deleted; bound blocks are un
 
 ### Change layout
 
-Switches the layout type of the view selected by the database block between `table`, `gallery`, and `kanban`. On success the server re-renders the view and returns it (same shape as [Render](#Render)).
+Switches the layout type of the view selected by the database block between `table`, `list`, `gallery`, and `kanban`. On success the server re-renders the view and returns it (same shape as [Render](#Render)).
+
+The first switch to `list` initializes an independent layout with only the primary-key field visible. Subsequent switches back to this layout preserve its field visibility and ordering. Hidden fields retain their values and remain available for filtering and sorting; other layouts keep their own display settings.
 
 * `/api/av/changeAttrViewLayout`
 * Parameters
@@ -2498,7 +2500,7 @@ Switches the layout type of the view selected by the database block between `tab
 
     * `avID`: Database ID
     * `blockID`: The database block that owns the view
-    * `layoutType`: Target layout — one of `table`, `gallery`, `kanban`
+    * `layoutType`: Target layout — one of `table`, `list`, `gallery`, `kanban`
 * Return value: same shape as [Render](#Render). When switching to `kanban` and a group is configured, `data.view` contains a `groups[]` array; each group is a view instance with `groupKey`, `groupValue`, plus kanban-specific fields (`coverFrom`, `cardAspectRatio`, `cardSize`, `fitImage`, `displayFieldName`, `fillColBackgroundColor`, `fields`)
 
 ### Set grouping
@@ -2695,7 +2697,7 @@ Returns the current filter and sort rules of the view bound to a database block.
 
 ### Add a field
 
-Adds a new field (column). The field is appended to every view (table/gallery/kanban) at the position after `previousKeyID` (or at the default position when empty).
+Adds a new field (column). The field is appended to every view (table/list/gallery/kanban) at the position after `previousKeyID` (or at the default position when empty).
 
 * `/api/av/addAttributeViewKey`
 * Parameters
@@ -2716,7 +2718,7 @@ Adds a new field (column). The field is appended to every view (table/gallery/ka
     * `keyName`: Field display name
     * `keyType`: Field type — one of `text`, `number`, `date`, `select`, `mSelect`, `url`, `email`, `phone`, `mAsset`, `template`, `created`, `updated`, `checkbox`, `relation`, `rollup`, `lineNumber`. `block` (primary key) cannot be added through this endpoint
     * `keyIcon`: Optional field icon (emoji or empty string)
-    * `previousKeyID`: Insert the new column after this field ID. Empty string uses the layout default (first column for table, last for gallery/kanban)
+    * `previousKeyID`: Insert the new column after this field ID. Empty string uses the layout default (first column for table, last for list/gallery/kanban)
 * Return value
 
   ```json

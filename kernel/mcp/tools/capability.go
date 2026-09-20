@@ -81,7 +81,7 @@ func ListCapabilityManifests() []CapabilityManifest {
 			Runtime:     runtime,
 			AgentOnly:   tool.AgentOnly,
 			Effects:     effects,
-			Available:   true,
+			Available:   tool.IsAvailable(),
 			Actions:     capabilityActionsForTool(tool),
 		})
 	}

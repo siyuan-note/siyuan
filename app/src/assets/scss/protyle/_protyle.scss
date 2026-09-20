@@ -2,6 +2,7 @@
 @use "toolbar" as *;
 @use "wysiwyg" as *;
 @use "attr" as *;
+@use "list-mindmap" as *;
 
 .protyle-lite-fragment .protyle-action__menu {
   display: none;
@@ -529,6 +530,38 @@
 }
 
 .sy__backlink {
+  .backlinkList__source {
+    appearance: none;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 4px 28px;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background-color: transparent;
+    color: var(--b3-theme-on-surface-light);
+    font: inherit;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: start;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--b3-list-hover);
+      color: var(--b3-theme-on-background);
+    }
+
+    &:focus-visible {
+      outline: 1px solid var(--b3-theme-primary);
+      outline-offset: -1px;
+    }
+  }
+
   // 仅为上下文首块已有的属性栏留出空间，普通块保持紧凑。
   .protyle-wysiwyg > .protyle-breadcrumb__bar + [data-node-id]:is(
     [name]:not([name=""]),
@@ -944,6 +977,8 @@
   .protyle-wysiwyg {
     padding: 0 !important;
     min-height: 1.6em;
+    // 继承单元格字号，保持预览与编辑时的文字大小一致。
+    font-size: inherit;
   }
 }
 

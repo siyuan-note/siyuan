@@ -55,6 +55,17 @@ export const clearBlockSelectionMode = (editorElement: Element, clearMarks = fal
     }
 };
 
+export const selectAllLoadedBlocks = (editorElement: Element) => {
+    clearBlockSelectionMode(editorElement, true);
+    const elements = Array.from(editorElement.children).filter(item => item.getAttribute("data-node-id"));
+    elements.forEach(item => {
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
+        item.classList.add(BLOCK_SELECTION_CLASS);
+    });
+    return elements;
+};
+
 export const getSelectAllBlockAction = (editorElement: Element): "none" | "select-all" | "keep" => {
     const selectedElements = editorElement.querySelectorAll(`.${BLOCK_SELECTION_CLASS}`);
     if (selectedElements.length === 0) {

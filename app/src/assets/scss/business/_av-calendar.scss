@@ -17,11 +17,6 @@
     align-items: center;
     gap: 6px;
     padding: 8px 0;
-
-    input {
-      width: 138px;
-      min-width: 0;
-    }
   }
 
   .av__calendar-label {
@@ -36,6 +31,22 @@
     margin-left: auto;
   }
 
+  .av__calendar-today {
+    padding: 4px 8px;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 20px;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--b3-list-hover);
+    }
+  }
+
   .av__calendar-source {
     display: flex;
     flex-wrap: wrap;
@@ -46,12 +57,13 @@
 
   .av__calendar-scroll {
     overflow-x: auto;
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius);
   }
 
   .av__calendar-grid {
     min-width: 560px;
+    box-sizing: border-box;
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
     direction: ltr;
 
     &--empty {
@@ -67,18 +79,26 @@
   }
 
   .av__calendar-weekdays {
+    min-width: 560px;
+    direction: ltr;
     padding: 8px 0;
     text-align: center;
     color: var(--b3-theme-on-surface);
     font-size: 12px;
-    background: var(--b3-theme-surface);
   }
 
   .av__calendar-week {
+    &:first-child {
+      border-top: 0;
+    }
+
     min-height: 130px;
     border-top: 1px solid var(--b3-border-color);
     padding-bottom: 6px;
-    background-image: repeating-linear-gradient(to right, transparent, transparent calc(100% / 7 - 1px), var(--b3-border-color) calc(100% / 7 - 1px), var(--b3-border-color) calc(100% / 7));
+    background-image:
+      repeating-linear-gradient(to right, transparent, transparent calc(100% / 7 - 1px), var(--b3-border-color) calc(100% / 7 - 1px), var(--b3-border-color) calc(100% / 7)),
+      linear-gradient(to right, transparent calc(var(--av-calendar-saturday) * 100% / 7), var(--b3-theme-surface) 0, var(--b3-theme-surface) calc((var(--av-calendar-saturday) + 1) * 100% / 7), transparent 0),
+      linear-gradient(to right, transparent calc(var(--av-calendar-sunday) * 100% / 7), var(--b3-theme-surface) 0, var(--b3-theme-surface) calc((var(--av-calendar-sunday) + 1) * 100% / 7), transparent 0);
   }
 
   .av__calendar-day {
@@ -91,7 +111,15 @@
     font-size: 12px;
 
     > span {
-      padding: 1px 3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 4px;
+      line-height: 24px;
+      text-align: center;
       border-radius: var(--b3-border-radius);
       overflow: hidden;
       text-overflow: ellipsis;

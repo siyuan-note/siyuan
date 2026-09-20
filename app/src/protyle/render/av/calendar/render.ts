@@ -19,11 +19,6 @@ import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarInterval, 
 import {addCalendarDateField, bindCalendarSettings, getCalendarSettingsHTML, isCalendarDateColumn} from "./settings";
 import {getCalendarRequestRange, getCalendarState} from "./state";
 
-const dateInputValue = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return `${date.getFullYear().toString().padStart(4, "0")}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
-};
-
 const iconButton = (action: string, icon: string, label: string) => `<button type="button" class="block__icon block__icon--show" data-calendar-action="${action}" aria-label="${escapeAttr(label)}"><svg><use xlink:href="#${icon}"></use></svg></button>`;
 
 const canEditCalendar = (protyle: IProtyle) => !protyle.disabled && !window.siyuan.isPublish &&
@@ -201,12 +196,12 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     const label = state.mode === "month" ? anchor.toLocaleDateString(locale, {year: "numeric", month: "long"}) :
         `${new Date(range.start).toLocaleDateString(locale)} - ${new Date(addCalendarDays(range.end, -1)).toLocaleDateString(locale)}`;
     const days = Array.from({length: 7}, (_, day) => new Date(addCalendarDays(range.start, day)).toLocaleDateString(locale, {weekday: "short"}));
+    const weekStartDay = new Date(range.start).getDay();
     let body = "";
     if (!dateColumn) {
         body = `<div class="av__calendar-empty"><svg><use xlink:href="#iconCalendar"></use></svg><p>${window.siyuan.languages.calendarSelectDateField}</p>
             ${editable ? `<div class="av__calendar-setup">${getCalendarSettingsHTML(view)}</div><div class="av__calendar-create-fields">${(["date", "created", "updated"] as const).map(type => `<button class="b3-button b3-button--outline" data-calendar-create-field="${type}">${window.siyuan.languages.newCol} ${getColNameByType(type)}</button>`).join("")}</div>` : ""}</div>`;
     } else {
-        body = `<div class="av__calendar-weekdays">${days.map(day => `<div>${day}</div>`).join("")}</div>`;
         for (let start = range.start; start < range.end; start = addCalendarDays(start, 7)) {
             const segments = packCalendarWeek(events, start);
             if (data.target?.status === "visible" && segments.some(segment => segment.event.row.id === data.target.itemID)) {
@@ -238,16 +233,18 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         <div class="av__calendar" contenteditable="false">
             <div class="av__calendar-toolbar">
                 <span class="av__calendar-label">${escapeHtml(label)}</span>
-                <input type="date" min="0001-01-01" max="9999-12-31" class="b3-text-field" data-calendar-jump value="${dateInputValue(state.anchor)}" aria-label="${window.siyuan.languages.calendarJumpDate}">
                 <div class="av__calendar-controls">
                 ${iconButton("previous", "iconLeft", window.siyuan.languages.previous)}
-                <button type="button" class="b3-button b3-button--outline" data-calendar-action="today">${window.siyuan.languages.calendarToday}</button>
+                <button type="button" class="av__calendar-today" data-calendar-action="today">${window.siyuan.languages.calendarToday}</button>
                 ${iconButton("next", "iconRight", window.siyuan.languages.next)}
                 <select class="b3-select" data-calendar-mode aria-label="${window.siyuan.languages.calendarView}"><option value="month"${state.mode === "month" ? " selected" : ""}>${window.siyuan.languages.month}</option><option value="week"${state.mode === "week" ? " selected" : ""}>${window.siyuan.languages.week}</option></select>
                 </div>
             </div>
-            ${dateColumn ? `<div class="av__calendar-source"><span>${escapeHtml(dateColumn.name)}</span>${dateColumn.type !== "date" ? `<span class="ft__on-surface">${window.siyuan.languages.calendarReadOnlyDate}</span>` : ""}</div>` : ""}
-            <div class="av__calendar-scroll"><div class="av__body av__calendar-grid${dateColumn ? "" : " av__calendar-grid--empty"}" data-group-id="">${body}</div></div>
+            ${dateColumn && dateColumn.type !== "date" ? `<div class="av__calendar-source ft__on-surface">${window.siyuan.languages.calendarReadOnlyDate}</div>` : ""}
+            <div class="av__calendar-scroll">
+                ${dateColumn ? `<div class="av__calendar-weekdays">${days.map(day => `<div>${day}</div>`).join("")}</div>` : ""}
+                <div class="av__body av__calendar-grid${dateColumn ? "" : " av__calendar-grid--empty"}" data-group-id="" style="--av-calendar-saturday:${(6 - weekStartDay + 7) % 7};--av-calendar-sunday:${(7 - weekStartDay) % 7};">${body}</div>
+            </div>
         </div>
         <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
     </div>`;
@@ -338,15 +335,6 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         state.mode = (event.target as HTMLSelectElement).value as "month" | "week";
         state.expandedWeeks.clear();
         refresh();
-    });
-    root.querySelector<HTMLInputElement>("[data-calendar-jump]").addEventListener("change", event => {
-        const value = (event.target as HTMLInputElement).value;
-        const date = new Date(`${value}T00:00:00`).getTime();
-        if (Number.isFinite(date) && (event.target as HTMLInputElement).checkValidity()) {
-            state.anchor = date;
-            state.expandedWeeks.clear();
-            refresh();
-        }
     });
     if (!dateColumn && editable) {
         bindCalendarSettings({protyle, blockElement, data, menuElement: root});

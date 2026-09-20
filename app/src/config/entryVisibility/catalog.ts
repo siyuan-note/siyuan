@@ -570,7 +570,7 @@ const slashMenuBuiltinChildren = [
     node("flowChart", literal("FlowChart")),
     node("graph", literal("Graphviz")),
     node("mermaid", literal("Mermaid")),
-    node("mindmap", literal("Mind map")),
+    node("mindmap", lang("mindmap")),
     node("UML", literal("PlantUML")),
     separator("separator_5"),
     node("infoStyle", lang("infoStyle")),

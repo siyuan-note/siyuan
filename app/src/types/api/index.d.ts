@@ -1288,6 +1288,10 @@ export type Login2faEnvelope = { "code": number; "data": ({ "code": number; "msg
 
 export type MarkdownHTMLRequestInput = { "markdown": string; "mode"?: string | null; };
 
+export type MigrateLegacyMindmapsData = { "blocks": Array<BlockDOMData> | null; "converted": number; };
+
+export type MigrateLegacyMindmapsRequestInput = { "id": string; "notebook": string; };
+
 export type MoveBlockRequestInput = { "id": string; "parentID"?: string | null; "previousID"?: string | null; };
 
 export type NetImageAssetsRequestInput = { "id": string; "url"?: string | null; };
@@ -3441,6 +3445,11 @@ export interface APIPOSTRoutes {
     "/api/block/insertBlock": {
         request: InsertBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/migrateLegacyMindmaps": {
+        request: MigrateLegacyMindmapsRequestInput;
+        response: { "code": 0; "data": MigrateLegacyMindmapsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/block/moveBlock": {

@@ -52,7 +52,7 @@ test("the public mind map renderer also renders documents containing only list m
     const dependencies: Record<string, unknown> = {
         "../../constants": {Constants: {PROTYLE_CDN: "stage/protyle"}},
         "./listMindmap/render": {listMindmapRender: () => calls.push("list")},
-        "../util/addScript": {addScript: () => calls.push("echarts")},
+        "./listMindmap/legacy": {renderLegacyMindmaps: () => calls.push("legacy")},
     };
     runInNewContext(compiled, {
         exports: exported,
@@ -63,5 +63,5 @@ test("the public mind map renderer also renders documents containing only list m
         getAttribute: (): string | null => null,
         querySelectorAll: (): Element[] => [],
     });
-    assert.deepEqual(calls, ["list"]);
+    assert.deepEqual(calls, ["list", "legacy"]);
 });

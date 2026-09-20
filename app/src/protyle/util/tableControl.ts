@@ -114,12 +114,13 @@ const getCell = (target: EventTarget | Node) => {
     const element = target instanceof Element ? target : (target as Node)?.parentElement;
     const cell = element?.closest?.("th, td") as HTMLTableCellElement;
     const editor = element?.closest?.(".table__cell-editor");
-    return cell && (element.closest(".protyle-wysiwyg") === cell.closest(".protyle-wysiwyg") ||
+    return cell && !cell.closest(".list-mindmap__preview-block") &&
+        (element.closest(".protyle-wysiwyg") === cell.closest(".protyle-wysiwyg") ||
         editor?.parentElement === cell) ? cell : undefined;
 };
 
 const getTableNode = (cell: HTMLTableCellElement) => {
-    if (cell?.closest(".protyle-custom")) {
+    if (cell?.closest(".protyle-custom, .list-mindmap__preview-block")) {
         return;
     }
     return cell?.closest<HTMLElement>('[data-type="NodeTable"]');
@@ -1133,7 +1134,7 @@ export class TableControl {
     private getEdgeHover(clientX: number, clientY: number) {
         const candidates: ITableEdgeHover[] = [];
         this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
-            if (table.closest(".protyle-custom")) {
+            if (table.closest(".protyle-custom, .list-mindmap__preview-block")) {
                 return;
             }
             const gridRect = this.getTableGridRect(table);
@@ -1296,7 +1297,7 @@ export class TableControl {
         const actions = new Map<HTMLTableElement, HTMLElement>();
         this.wysiwygElement.querySelectorAll<HTMLTableElement>(
             '[data-type="NodeTable"][custom-pinthead="true"] table').forEach(table => {
-            if (table.closest(".protyle-custom")) {
+            if (table.closest(".protyle-custom, .list-mindmap__preview-block")) {
                 return;
             }
             const action = table.nextElementSibling as HTMLElement;

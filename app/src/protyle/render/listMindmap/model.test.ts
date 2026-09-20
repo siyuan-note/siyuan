@@ -125,7 +125,9 @@ test("layout rejects cyclic or invalid trees and supports deep nesting without r
 const browserCases = async (sourceCode: string, css: string, taskSource: string, taskCSS: string) => {
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
-        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, remapListMindmapIDs, writeListMindmapMetadata, ListMindmapView};")(
+        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, remapListMindmapIDs, writeListMindmapMetadata, " +
+        "parseLegacyMindmap, renderLegacyMindmaps, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
+        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, ListMindmapView};")(
         async (element: Element) => {
             const formulas = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
             await Promise.resolve();
@@ -145,6 +147,102 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     };
     const ids = (list: HTMLElement) => Array.from(list.querySelectorAll("[data-node-id]")).map(element =>
         element.getAttribute("data-node-id"));
+
+    // 旧格式预览只生成派生视图，复制和保存仍保留完整代码原文。
+    const legacySource = "- **Root**\n  - [X] Done\n  - [/] Progress\n";
+    const legacyBlock = reset("```mindmap\n" + legacySource + "```\n");
+    const legacyContent = legacyBlock.getAttribute("data-content");
+    const legacyID = legacyBlock.dataset.nodeId;
+    document.body.append(holder);
+    api.renderLegacyMindmaps(holder);
+    check.ok(legacyBlock.querySelector(".list-mindmap__node"));
+    check.equal(legacyBlock.getAttribute("data-content"), legacyContent);
+    check.equal(legacyBlock.dataset.nodeId, legacyID);
+    check.equal(legacyBlock.dataset.type, "NodeCodeBlock");
+    check.ok(!legacyBlock.querySelector(".list-mindmap__route-handle"));
+    const legacySaved = api.cleanListMindmapHTML(legacyBlock.outerHTML);
+    check.ok(!legacySaved.includes("list-mindmap__node"));
+    check.ok(lute.BlockDOM2StdMd(legacySaved).includes(legacySource.trim()));
+    const legacyHost = legacyBlock.querySelector(".list-mindmap");
+    legacyBlock.removeAttribute("data-render");
+    api.renderLegacyMindmaps(legacyBlock);
+    check.equal(legacyBlock.querySelector(".list-mindmap"), legacyHost);
+    holder.remove();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    check.equal(legacyBlock.hasAttribute("data-render"), false);
+    document.body.append(holder);
+    api.renderLegacyMindmaps(holder);
+    check.ok(legacyBlock.querySelector(".list-mindmap__node"));
+    const multiRoot = api.parseLegacyMindmap("- First\n- Second\n", lute);
+    check.equal(api.readListMindmap(multiRoot).metadata.rootTitle, undefined);
+    for (const invalidSource of ["", "Plain text", "- List\n\nOutside text", "- First\n\n1. Second"]) {
+        check.equal(api.parseLegacyMindmap(invalidSource, lute), undefined);
+    }
+    const invalidBlock = reset("```mindmap\n- List\n\nOutside text\n```\n");
+    api.renderLegacyMindmaps(invalidBlock);
+    check.equal(invalidBlock.querySelector("pre").textContent, Lute.UnEscapeHTMLStr(invalidBlock.getAttribute("data-content")));
+    check.equal(invalidBlock.dataset.type, "NodeCodeBlock");
+    const newMindmap = reset(`- ${Lute.Caret}\n{: custom-sy-list-mindmap="1"}`);
+    check.equal(newMindmap.dataset.type, "NodeList");
+    check.equal(newMindmap.getAttribute("custom-sy-list-mindmap"), "1");
+    const creationSource = `- ${Lute.Caret}`;
+    const paragraph = reset("Empty\n");
+    const paragraphID = paragraph.dataset.nodeId;
+    paragraph.querySelector('[contenteditable="true"]').textContent = creationSource;
+    for (const input of [creationSource, paragraph.outerHTML]) {
+        holder.innerHTML = api.spinListMindmapDOM(lute, input);
+        check.equal(holder.childElementCount, 1);
+        check.equal(holder.firstElementChild.getAttribute("data-type"), "NodeList");
+        check.equal(holder.firstElementChild.getAttribute("custom-sy-list-mindmap"), "1");
+        if (input === paragraph.outerHTML) {
+            check.equal(holder.firstElementChild.getAttribute("data-node-id"), paragraphID);
+        }
+        const createdModel = api.readListMindmap(holder.firstElementChild);
+        check.equal(createdModel.nodes.size, 1);
+        const saved = lute.SpinBlockDOM(holder.innerHTML);
+        holder.innerHTML = saved;
+        check.equal(holder.childElementCount, 1);
+        check.equal(holder.firstElementChild.getAttribute("custom-sy-list-mindmap"), "1");
+    }
+    const focusRoot = document.createElement("div");
+    focusRoot.className = "protyle-wysiwyg";
+    focusRoot.contentEditable = "true";
+    focusRoot.innerHTML = api.spinListMindmapDOM(lute, creationSource);
+    document.body.append(focusRoot);
+    const focusList = focusRoot.firstElementChild as HTMLElement;
+    const focusHost = document.createElement("div");
+    focusList.append(focusHost);
+    let mindmapKeys = 0;
+    let documentKeys = 0;
+    focusRoot.addEventListener("keydown", () => documentKeys++);
+    const focusView = new api.ListMindmapView({host: focusHost, model: api.readListMindmap(focusList),
+        onExit: () => {}, onAdd: () => mindmapKeys++});
+    const sourceRange = document.createRange();
+    sourceRange.selectNodeContents(focusList.querySelector('[contenteditable="true"]'));
+    sourceRange.collapse(true);
+    focusRoot.focus();
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(sourceRange);
+    check.ok(api.focusListMindmap(focusList, focusHost));
+    check.equal(document.activeElement, focusHost);
+    check.ok(focusHost.contains(window.getSelection().anchorNode));
+    focusHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
+    check.equal(mindmapKeys, 1);
+    check.equal(documentKeys, 0, "new mindmap keys never reach the hidden source list");
+    const elsewhere = document.createElement("input");
+    document.body.append(elsewhere);
+    elsewhere.focus();
+    check.equal(api.focusListMindmap(focusList, focusHost), undefined);
+    check.equal(document.activeElement, elsewhere, "mounting does not steal focus from another input");
+    focusView.destroy();
+    focusRoot.remove();
+    elsewhere.remove();
+    const canonical = [{id: legacyID, dom: newMindmap.outerHTML}];
+    const embedded = `<div data-type="NodeBlockQueryEmbed">${legacySaved}</div>`;
+    holder.innerHTML = api.replaceLegacyMindmapHTML(legacySaved + embedded, canonical);
+    check.equal(holder.firstElementChild.getAttribute("data-type"), "NodeList");
+    check.ok(holder.querySelector('[data-type="NodeBlockQueryEmbed"] [data-subtype="mindmap"]'));
+    holder.remove();
 
     // 直属子列表形成分支，其他正文中的嵌套列表属于正文，读取不会重建或移动任何原始块。
     let list = reset("* Parent\n\n  Second paragraph\n\n  * Child\n    * Grandchild\n\n* Sibling\n");
@@ -260,6 +358,21 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(edited.contentBlocks[2].dataset.nodeId, added.dataset.nodeId);
     check.equal(editable.element.querySelector(':scope > [data-type="NodeList"]'), childList);
     check.equal(childList.outerHTML, childHTML);
+    const nestedTaskHolder = document.createElement("div");
+    lute.SetDataTask(true);
+    nestedTaskHolder.innerHTML = lute.Md2BlockDOM("- Node\n\n  > - [ ] Nested task\n");
+    const nestedTaskList = nestedTaskHolder.firstElementChild as HTMLElement;
+    const nestedTaskModel = api.readListMindmap(nestedTaskList);
+    const nestedContent: HTMLElement[] = nestedTaskModel.root.contentBlocks.map((block: HTMLElement) => block.cloneNode(true) as HTMLElement);
+    const nestedTask = nestedContent.find((block: HTMLElement) => block.dataset.type === "NodeBlockquote")
+        .querySelector<HTMLElement>('.li[data-subtype="t"]');
+    nestedTask.setAttribute("data-task", "X");
+    nestedTask.classList.add("protyle-task--done");
+    nestedTask.querySelector(".protyle-action--task").setAttribute("data-task", "X");
+    check.equal(api.replaceListMindmapContent(nestedTaskList, nestedTaskModel.root.id,
+        nestedContent.map((block: HTMLElement) => block.outerHTML).join("")), true);
+    check.equal(nestedTaskList.querySelector('.li[data-subtype="t"]').getAttribute("data-task"), "X",
+        "saving rich content retains its edited nested task marker");
     check.equal(list.querySelector("wbr"), null);
     const beforeRejectedEdit = list.outerHTML;
     check.equal(api.replaceListMindmapContent(list, editable.id, childHTML), false);
@@ -1321,6 +1434,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const singleList = reset("* Single\n");
     const single = new api.ListMindmapView({...options, model: api.readListMindmap(singleList)});
     await settle();
+    check.equal(single.scale, 1, "initial layout keeps a single node at its normal size");
     single.fit();
     check.ok(single.scale > 1 && single.scale <= 2.5, "fit enlarges small maps within the zoom limit");
     const fitViewport = host.querySelector<HTMLElement>(".list-mindmap__viewport").getBoundingClientRect();
@@ -1335,6 +1449,22 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(host.querySelector<HTMLElement>(".list-mindmap__node").getBoundingClientRect().bottom <=
         fitInspector.getBoundingClientRect().top, "fit keeps content above the visible inspector");
     fitInspector.hidden = true;
+    lute.SetTabs(true);
+    const tabsContainer = document.createElement("div");
+    tabsContainer.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab First\n\nOne\n@tab Second\n\nTwo\n:::\n");
+    const sourceTabs = tabsContainer.firstElementChild as HTMLElement;
+    const sourceItems = sourceTabs.querySelectorAll<HTMLElement>(":scope > .tab-item");
+    sourceTabs.setAttribute("tabs-active-id", sourceItems[1].dataset.nodeId);
+    const sourceTabsHTML = sourceTabs.outerHTML;
+    const tabsModel = api.readListMindmap(singleList);
+    tabsModel.root.contentBlocks = [sourceTabs];
+    single.update(tabsModel);
+    const previewTabs = host.querySelector<HTMLElement>(".tabs");
+    const previewItems = previewTabs.querySelectorAll<HTMLElement>(":scope > .tab-item");
+    check.ok(previewItems[0].id && previewItems[1].id && previewItems[0].id !== previewItems[1].id);
+    check.equal(previewTabs.getAttribute("tabs-active-id"), previewItems[1].id);
+    check.equal(previewTabs.querySelector("[data-node-id]"), null);
+    check.equal(sourceTabs.outerHTML, sourceTabsHTML);
     const emptyModel = api.readListMindmap(singleList);
     const emptyBlock = document.createElement("div");
     emptyBlock.innerHTML = "<div><br></div>";
@@ -1490,6 +1620,70 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(exportClick, true, "export anchor clicks reach the existing navigation handler");
     exportView.destroy();
 
+    // 复杂块保留在源列表中；预览不携带块身份，媒体控件也不触发节点拖拽或编辑。
+    const specialList = reset("- Root\n  - First\n  - Second\n");
+    const specialRoot = specialList.querySelector<HTMLElement>(".li");
+    const specials = document.createElement("div");
+    ["NodeTable", "NodeAttributeView", "NodeBlockQueryEmbed", "NodeCustomBlock", "NodeHTMLBlock", "NodeCallout",
+        "NodeSuperBlock", "NodeVideo", "NodeAudio", "NodeIFrame", "NodeWidget"].forEach(type => {
+        const element = document.createElement("div");
+        element.dataset.nodeId = Lute.NewNodeID();
+        element.dataset.type = type;
+        element.dataset.content = "Source content";
+        element.setAttribute("custom-preserved", "value");
+        if (type === "NodeTable") {
+            element.innerHTML = '<table><tbody><tr><td>Cell</td></tr></tbody></table><div class="protyle-action__table"></div>';
+        } else {
+            element.textContent = type;
+        }
+        const tag = ({NodeVideo: "video", NodeAudio: "audio", NodeIFrame: "iframe"} as Record<string, string>)[type];
+        if (tag) {
+            const media = document.createElement(tag);
+            media.setAttribute("controls", "");
+            element.append(media);
+        }
+        specials.append(element);
+    });
+    specialRoot.querySelector(".p").after(...Array.from(specials.children));
+    const sourceChart = document.createElement("div");
+    sourceChart.dataset.type = "NodeCodeBlock";
+    sourceChart.dataset.nodeId = Lute.NewNodeID();
+    sourceChart.setAttribute("_echarts_instance_", "source-instance");
+    const sourceCanvas = document.createElement("canvas");
+    sourceCanvas.width = 4;
+    sourceCanvas.height = 4;
+    sourceCanvas.getContext("2d").fillStyle = "#123456";
+    sourceCanvas.getContext("2d").fillRect(0, 0, 4, 4);
+    sourceChart.append(sourceCanvas);
+    specialRoot.querySelector(".p").after(sourceChart);
+    const sourceContent = api.readListMindmap(specialList).root.contentBlocks.map((block: HTMLElement) => block.outerHTML);
+    let specialEdits = 0;
+    const specialView = new api.ListMindmapView({host: richHost, model: api.readListMindmap(specialList),
+        onExit: () => {}, onEdit: () => specialEdits++, onMove: () => check.fail("Media started a node move")});
+    check.equal(richHost.querySelector("[data-node-id]"), null);
+    check.equal(richHost.querySelector(".protyle-action__table"), null);
+    check.equal(richHost.querySelector("[_echarts_instance_]"), null);
+    check.deepEqual(Array.from(richHost.querySelector<HTMLCanvasElement>(".list-mindmap__content canvas")
+        .getContext("2d").getImageData(0, 0, 1, 1).data), [18, 52, 86, 255]);
+    for (const tag of ["audio", "video", "iframe"]) {
+        const media = richHost.querySelector(tag);
+        const pointer = new PointerEvent("pointerdown", {bubbles: true, cancelable: true, pointerId: 9, button: 0});
+        media.dispatchEvent(pointer);
+        check.equal(pointer.defaultPrevented, false, tag);
+        check.equal(specialView.pointer, undefined, tag);
+        const keyboard = new KeyboardEvent("keydown", {key: " ", bubbles: true, cancelable: true});
+        media.dispatchEvent(keyboard);
+        check.equal(keyboard.defaultPrevented, false, tag);
+        media.dispatchEvent(new MouseEvent("dblclick", {bubbles: true, cancelable: true}));
+        check.equal(specialEdits, 0, tag);
+    }
+    const specialChildren = api.readListMindmap(specialList).root.children;
+    check.equal(api.moveListMindmapNode(specialList, specialChildren[1].id, specialChildren[0].id, "before"), true);
+    specialView.update(api.readListMindmap(specialList));
+    check.deepEqual(api.readListMindmap(specialList).root.contentBlocks.map((block: HTMLElement) => block.outerHTML), sourceContent);
+    specialView.destroy();
+    check.deepEqual(api.readListMindmap(specialList).root.contentBlocks.map((block: HTMLElement) => block.outerHTML), sourceContent);
+
     // 真实列表与脑图逐项比较图标、删除线和颜色，覆盖导出及脱离编辑器容器的全屏布局。
     const taskStyle = document.createElement("style");
     taskStyle.textContent = taskCSS;
@@ -1512,12 +1706,14 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     taskParent.append(taskHost);
     const operations: {id: string, before: string, after: string}[] = [];
     const taskAPI = new Function("readListMindmap", "canEdit", "Constants", "dayjs", "updateTransaction", "showMessage",
+        "getListMindmapTabItem", "getTabTask", "cleanListMindmapHTML",
         taskSource + "; return {setTaskListItemMarker, nextTaskListMarker, nextTaskListStatus, TaskController};")(
         api.readListMindmap, (owner: any) => !owner.disabled && !owner.history && !owner.embedded,
         {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing"},
         () => ({format: () => "20260920000000"}),
         (_owner: unknown, element: HTMLElement, before: string) => operations.push({id: element.dataset.nodeId,
-            before, after: element.outerHTML}), () => check.fail("Task update failed"));
+            before, after: api.cleanListMindmapHTML(element.outerHTML)}), () => check.fail("Task update failed"),
+        api.getListMindmapTabItem, api.getTabTask, api.cleanListMindmapHTML);
     const owner = {disabled: false, history: false, embedded: false, options: {action: [] as string[]}};
     let finishTask: boolean | Promise<boolean> = true;
     let menus = 0;
@@ -1642,6 +1838,88 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     taskView.update(rootModel);
     check.ok(taskButton());
     taskView.destroy();
+    // 页签预览将任务操作交给所属脑图保存，外层页签渲染器不能接管派生控件。
+    taskParent.innerHTML = lute.Md2BlockDOM("- Container\n");
+    const tabList = taskParent.firstElementChild as HTMLElement;
+    const tabNode = tabList.querySelector<HTMLElement>(".li");
+    const tabNodeID = tabNode.dataset.nodeId;
+    const tabContent = document.createElement("div");
+    tabContent.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab First\n\nOne\n@tab Second\n\nTwo\n:::\n{: tabs-task=\"true\"}\n");
+    tabNode.querySelector(".p").replaceWith(tabContent.firstElementChild);
+    const tabSource = tabNode.querySelector<HTMLElement>(".tabs");
+    const sourceActiveTab = tabSource.getAttribute("tabs-active-id");
+    const tabItemIDs = Array.from(tabSource.querySelectorAll<HTMLElement>(":scope > .tab-item"))
+        .map(item => item.dataset.nodeId);
+    const tabHost = document.createElement("div");
+    tabList.append(tabHost);
+    const tabController = Object.assign(new taskAPI.TaskController(), {owner, list: tabList, disposed: false,
+        taskChanges: Promise.resolve(), refresh: () => tabView.update(api.readListMindmap(tabList))});
+    let tabMenus = 0;
+    const tabView = new api.ListMindmapView({host: tabHost, model: api.readListMindmap(tabList), onExit: () => {},
+        onTabTaskToggle: (id: string, itemID: string) => tabController.setTabTask(id, itemID, taskAPI.nextTaskListMarker),
+        onTabTaskMenu: (id: string, itemID: string, anchor: HTMLElement) => {
+            check.equal(id, tabNodeID);
+            check.equal(itemID, tabItemIDs[1]);
+            check.ok(anchor.classList.contains("tabs-task"));
+            tabMenus++;
+        }});
+    const outerOptions = {readonly: () => false, task: () => check.fail("Outer editor claimed a preview task")};
+    api.tabsRender(taskParent, outerOptions);
+    const previewTask = (index = 1) => tabHost.querySelectorAll<HTMLElement>(".tabs-task")[index];
+    const previewTab = (index = 1) => tabHost.querySelectorAll<HTMLElement>(".tabs-tab")[index];
+    previewTab().click();
+    operations.length = 0;
+    previewTask().click();
+    await tabController.taskChanges;
+    check.equal(operations.length, 1);
+    check.equal(operations[0].id, tabList.dataset.nodeId);
+    check.equal(api.getTabTask(api.getListMindmapTabItem(tabList, tabNodeID, tabItemIDs[1])), "X");
+    check.equal(previewTask().getAttribute("data-task"), "X");
+    check.equal(previewTab().getAttribute("aria-selected"), "true", "saving a task preserves the visible preview tab");
+    check.equal(tabHost.querySelector(".tabs-control"), null, "preview only exposes supported writes");
+    check.equal(tabHost.querySelector("[data-node-id]"), null);
+    check.equal(tabSource.getAttribute("tabs-active-id"), sourceActiveTab, "preview navigation does not change source navigation");
+    for (const [html, marker] of [[operations[0].after, "X"], [operations[0].before, " "]] as const) {
+        replay.innerHTML = lute.SpinBlockDOM(html);
+        check.equal(api.getTabTask(replay.querySelectorAll(".tab-item")[1]), marker);
+        check.ok(!html.includes("list-mindmap__"));
+    }
+    api.tabsRender(taskParent, outerOptions);
+    previewTask().dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
+    check.equal(tabMenus, 1);
+    previewTask().click();
+    previewTask().click();
+    await tabController.taskChanges;
+    check.equal(previewTask().getAttribute("data-task"), "X", "queued clicks read the latest source state");
+    previewTask().dispatchEvent(new KeyboardEvent("keydown", {key: " ", bubbles: true, cancelable: true}));
+    await tabController.taskChanges;
+    check.equal(previewTask().getAttribute("data-task"), " ");
+    const savedCount = operations.length;
+    tabView.setReadOnly(true);
+    check.equal(previewTask().getAttribute("aria-disabled"), "true");
+    previewTask().click();
+    await tabController.taskChanges;
+    check.equal(operations.length, savedCount);
+    previewTab(0).click();
+    check.equal(previewTab(0).getAttribute("aria-selected"), "true", "readonly previews still navigate");
+    tabView.setReadOnly(false);
+    for (const mode of ["disabled", "history", "embedded"] as const) {
+        owner[mode] = true;
+        await tabController.setTabTask(tabNodeID, tabItemIDs[1], () => "X");
+        check.equal(operations.length, savedCount);
+        owner[mode] = false;
+    }
+    tabController.activeEditor = {finish: async () => false};
+    previewTask().click();
+    await tabController.taskChanges;
+    check.equal(operations.length, savedCount, "failed content saves prevent tab task changes");
+    tabController.activeEditor = undefined;
+    const removedTab = api.getListMindmapTabItem(tabList, tabNodeID, tabItemIDs[1]);
+    removedTab.remove();
+    await tabController.setTabTask(tabNodeID, tabItemIDs[1], () => "X");
+    check.equal(operations.length, savedCount, "removed tab IDs never produce an update");
+    tabView.destroy();
+    api.destroyTabsRender(taskParent);
     taskParent.remove();
     taskStyle.remove();
     hostParent.remove();
@@ -1660,8 +1938,14 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         readFileSync(file, "utf8").replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
             compilerOptions: {target: typescript.ScriptTarget.ES2021},
         }).outputText;
-    const source = compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
-        compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "view.ts"));
+    const tabsSource = "const {tabsRender, destroyTabsRender, getTabTask} = (() => {" +
+        ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsRender.ts"]
+            .map(file => compile(path.join(__dirname, file))).join("\n") +
+        "return {tabsRender, destroyTabsRender, getTabTask};})();\n";
+    const source = tabsSource + compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
+        compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "view.ts")) +
+        compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +
+        compile(path.join(__dirname, "create.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_color.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/protyle/_list-mindmap.scss")).css;
@@ -1670,14 +1954,15 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     const indexSource = typescript.createSourceFile("index.ts", readFileSync(path.join(__dirname, "index.ts"), "utf8"),
         typescript.ScriptTarget.Latest, true);
     const controller = indexSource.statements.find(typescript.isClassDeclaration);
-    const setTask = controller.members.find(member => member.name?.getText(indexSource) === "setTask");
+    const taskMethods = controller.members.filter(member => ["setTask", "setTabTask", "queueTask", "change"]
+        .includes(member.name?.getText(indexSource)));
     const listSource = typescript.createSourceFile("list.ts", readFileSync(path.join(__dirname, "../../wysiwyg/list.ts"), "utf8"),
         typescript.ScriptTarget.Latest, true);
     const setter = listSource.statements.filter(typescript.isVariableStatement).find(statement =>
         statement.declarationList.declarations.some(item => item.name.getText(listSource) === "setTaskListItemMarker"));
     const taskSource = compile(path.join(__dirname, "../../wysiwyg/taskListMarker.ts")) +
         typescript.transpileModule(setter.getText(listSource).replace(/^export /, "") +
-            `\nclass TaskController {${setTask.getText(indexSource)}}`, {
+            `\nclass TaskController {${taskMethods.map(member => member.getText(indexSource)).join("\n")}}`, {
                 compilerOptions: {target: typescript.ScriptTarget.ES2021},
             }).outputText;
     const lutePath = path.resolve(__dirname, "../../../../stage/protyle/js/lute/lute.min.js");

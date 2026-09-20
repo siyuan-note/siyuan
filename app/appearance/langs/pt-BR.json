@@ -1,4 +1,5 @@
 {
+	"listMindmapMigrationInvalid": "Não foi possível converter completamente este mapa mental em uma lista; o texto original foi preservado",
 	"listMindmapRouteStart": "Arraste para alterar o nó inicial",
 	"listMindmapRouteEnd": "Arraste para alterar o nó de destino",
 	"listMindmapRouteHandle": "Arraste para ajustar o trajeto; clique duas vezes na alça para restaurar o cálculo automático",

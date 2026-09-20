@@ -176,6 +176,8 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 
 ## 生成与验证
 
+`/api/block/migrateLegacyMindmaps` 是要求管理员身份的写入端点，保留只读保护及加密笔记本请求租约。请求必须提供文档 `id` 和 `notebook`；保存历史后，在一次可撤销事务中转换能够完整解析的旧 `mindmap` 列表，返回 `converted` 数量和文档脑图的权威 `blocks`（`id`、`dom`）。重复请求返回当前块内容，不重复转换；不完整的原文保持不变。回归命令为 `go test -tags "fts5 sqlcipher" ./model ./api ./apicontract/... -run 'Test(LegacyMindmap|MigrateLegacyMindmaps|APIContractHeadingTransactions|APIContractRouterCoverage|RouteCoverage)' -count=1`，前端覆盖位于 `listMindmap/migrate.test.ts` 和 `listMindmap/model.test.ts`，均由现有持续集成规则发现。
+
 在 `app/` 下运行：
 
 ```text

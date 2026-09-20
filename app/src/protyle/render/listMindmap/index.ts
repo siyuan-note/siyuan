@@ -6,6 +6,8 @@ import {updateTransaction, transaction} from "../../wysiwyg/transaction";
 import {genListItemElement, setTaskListItemMarker} from "../../wysiwyg/list";
 import {nextTaskListMarker, nextTaskListStatus} from "../../wysiwyg/taskListMarker";
 import {getTaskStatusItems} from "../../wysiwyg/taskStatusDialog";
+import {getTabTask} from "../tabsRender";
+import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {completeTabsListSource} from "../../wysiwyg/tabsList";
 import {waitForPendingTransactions} from "../../util/transactionQueue";
@@ -24,16 +26,18 @@ import {openInlineStyleDialog} from "../../toolbar/inlineStyleDialog";
 import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
     moveListMindmapNode, readListMindmap, replaceListMindmapContent,
-    writeListMindmapMetadata,
+    writeListMindmapMetadata, getListMindmapTabItem,
 } from "./model";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
 import {getListMindmapElements, registerListMindmapRoot} from "./render";
 import {ListMindmapView} from "./view";
 import {openListMindmapEditor} from "./editor";
+import {focusListMindmap} from "./create";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, destroy: () => void}>();
 
 const canToggleView = (owner: IProtyle, list: HTMLElement) => !owner.disabled && !owner.lite &&
+    list.isConnected && !!list.dataset.nodeId &&
     !owner.options.action.includes(Constants.CB_GET_HISTORY) &&
     list.closest(".protyle-wysiwyg") === owner.wysiwyg.element;
 
@@ -179,6 +183,18 @@ class ListMindmapController {
             },
             onEdit: (id, contentHost) => this.edit(id, contentHost),
             onTaskToggle: (id, cycle) => this.setTask(id, cycle ? nextTaskListStatus : nextTaskListMarker),
+            onTabTaskToggle: (id, itemId) => this.setTabTask(id, itemId, nextTaskListMarker),
+            onTabTaskMenu: (id, itemId, anchor) => {
+                const item = getListMindmapTabItem(list, id, itemId);
+                const marker = item && getTabTask(item);
+                if (!canEdit(owner, list) || marker == null) {
+                    return;
+                }
+                const menu = new Menu();
+                getTaskStatusItems(marker, next => this.setTabTask(id, itemId, () => next)).forEach(entry => menu.addItem(entry));
+                const rect = anchor.getBoundingClientRect();
+                menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+            },
             onTaskMenu: (id, anchor) => {
                 if (!canEdit(owner, list)) {
                     return;
@@ -254,6 +270,12 @@ class ListMindmapController {
         });
         list.dataset.listMindmapRendered = "true";
         this.snapshot = cleanListMindmapHTML(list.outerHTML);
+        if (canEdit(owner, list)) {
+            const range = focusListMindmap(list, this.host);
+            if (range) {
+                owner.toolbar.range = range;
+            }
+        }
     }
 
     private metadata(change: (metadata: ListMindmapMetadata) => void | false) {
@@ -267,15 +289,7 @@ class ListMindmapController {
     }
 
     private setTask(id: string, next: (marker: string) => string) {
-        // 连续操作串行提交，正文保存后重新查找源节点，避免使用过期状态覆盖任务。
-        this.taskChanges = this.taskChanges.then(async () => {
-            if (this.disposed || !this.list.isConnected || !canEdit(this.owner, this.list) ||
-                (this.activeEditor && !await this.activeEditor.finish())) {
-                return;
-            }
-            if (this.disposed || !this.list.isConnected || !canEdit(this.owner, this.list)) {
-                return;
-            }
+        return this.queueTask(() => {
             const node = readListMindmap(this.list).nodes.get(id);
             if (node?.taskMarker === undefined) {
                 return;
@@ -285,6 +299,37 @@ class ListMindmapController {
                 setTaskListItemMarker(this.owner, node.element, marker);
                 this.refresh();
             }
+        });
+    }
+
+    private setTabTask(id: string, itemId: string, next: (marker: string) => string) {
+        return this.queueTask(async () => {
+            await this.change(() => {
+                const item = getListMindmapTabItem(this.list, id, itemId);
+                const marker = item && getTabTask(item);
+                if (marker == null) {
+                    return false;
+                }
+                const value = next(marker);
+                if (value === marker) {
+                    return false;
+                }
+                item.setAttribute("tabs-task", value);
+            }, true);
+        });
+    }
+
+    private queueTask(change: () => void | Promise<void>) {
+        // 连续操作串行提交，正文保存后重新查找源节点，避免使用过期状态覆盖任务。
+        this.taskChanges = this.taskChanges.then(async () => {
+            if (this.disposed || !this.list.isConnected || !canEdit(this.owner, this.list) ||
+                (this.activeEditor && !await this.activeEditor.finish())) {
+                return;
+            }
+            if (this.disposed || !this.list.isConnected || !canEdit(this.owner, this.list)) {
+                return;
+            }
+            await change();
         }).catch(error => {
             console.error(error);
             showMessage(window.siyuan.languages.listMindmapInvalid);
@@ -375,15 +420,21 @@ class ListMindmapController {
             return;
         }
         this.disposed = true;
+        const restoreFocus = this.host.contains(document.activeElement) && this.list.isConnected &&
+            this.list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1";
         this.activeEditor?.destroy();
         this.view.destroy();
         this.host.remove();
         this.list.removeAttribute("data-list-mindmap-rendered");
+        if (restoreFocus) {
+            focusBlock(this.list);
+        }
     }
 }
 
 // 补齐折叠隐藏的正文后才允许改动列表，避免以局部视图覆盖完整块树。
 const completeList = async (owner: IProtyle, list: HTMLElement) => {
+    await owner.wysiwyg.flushPendingInput();
     await waitForPendingTransactions(owner);
     if (!list.isConnected) {
         return "failed";

@@ -28861,6 +28861,48 @@
       ],
       "additionalProperties": false
     },
+    "MigrateLegacyMindmapsData": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/BlockDOMData"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "converted": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "blocks",
+        "converted"
+      ],
+      "additionalProperties": false
+    },
+    "MigrateLegacyMindmapsRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "notebook"
+      ],
+      "additionalProperties": false
+    },
     "MoveBlockRequestInput": {
       "type": "object",
       "properties": {
@@ -125013,6 +125055,81 @@
                     "type": "null"
                   }
                 ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/migrateLegacyMindmaps",
+      "handler": "migrateLegacyMindmaps",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/MigrateLegacyMindmapsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/MigrateLegacyMindmapsData"
               },
               "msg": {
                 "type": "string"

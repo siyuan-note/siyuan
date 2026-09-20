@@ -1,5 +1,6 @@
 import {destroyTabsRender} from "../render/tabsRender";
 import {destroyListMindmaps} from "../render/listMindmap";
+import {cancelLegacyMindmapMigration} from "../render/listMindmap/migrate";
 import {hideElements} from "../ui/hideElements";
 import {isSupportCSSHL} from "../render/searchMarkRender";
 import {destroyAIEditor} from "../../ai/editor";
@@ -17,6 +18,7 @@ export const destroy = (protyle: IProtyle) => {
         return;
     }
     destroyListMindmaps(protyle);
+    cancelLegacyMindmapMigration(protyle);
     invalidateFocusFoldRequests(protyle);
     unregisterViewFoldContext(protyle);
     destroyTrackedRanges(protyle);

@@ -5,6 +5,7 @@ import {clearTabsAttributes, renderTabsAttributes} from "./tabsAttributes";
 
 export interface ITabsRenderOptions {
     readonly?: (tabs?: Element) => boolean;
+    taskReadonly?: (tabs?: Element) => boolean;
     label?: string;
     addLabel?: string;
     select?: (tabs: HTMLElement, id: string) => void;
@@ -82,10 +83,21 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
         existing.render();
         return;
     }
+    const owns = (target: Element) => {
+        if (target.closest(".protyle-wysiwyg") !== element.closest(".protyle-wysiwyg")) {
+            return false;
+        }
+        for (let parent = target; parent && parent !== element; parent = parent.parentElement) {
+            if (roots.has(parent)) {
+                return false;
+            }
+        }
+        return element.contains(target);
+    };
     const getTabs = () => [
         ...(element.matches('.tabs[data-type="NodeTabs"]') ? [element as HTMLElement] : []),
         ...Array.from(element.querySelectorAll<HTMLElement>('.tabs[data-type="NodeTabs"]')),
-    ];
+    ].filter(owns);
     let scheduled = false;
     let destroyed = false;
     const sizes = new WeakMap<Element, string>();
@@ -110,6 +122,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
         }
         let changed = false;
         element.querySelectorAll<HTMLElement>('.tab-item[data-tabs-editing="true"]').forEach(item => {
+            if (!owns(item)) {
+                return;
+            }
             const title = getTabTitle(item);
             const selectionInTitle = title?.contains(selection?.anchorNode) &&
                 (active === element || element.contains(active));
@@ -142,7 +157,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                 controller.render();
             }
             const state = states.get(tabs);
-            if (!state || !getTabItems(tabs).some(item => itemID(item) === id)) {
+            if (!state || state.owner !== controller || !getTabItems(tabs).some(item => itemID(item) === id)) {
                 return;
             }
             if (state.active !== id) {
@@ -164,7 +179,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             const focusedAttributes = document.activeElement?.closest<HTMLElement>(".tabs-attributes");
             const focusedAttributesID = focusedAttributes && element.contains(focusedAttributes) ?
                 focusedAttributes.dataset.blockId : undefined;
-            clearTabsAttributes(element);
+            clearTabsAttributes(element, owns);
             const shown: HTMLElement[] = [];
             getTabs().forEach(tabs => {
                 const items = getTabItems(tabs);
@@ -194,6 +209,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                 }
                 state.active = resolveTabID(ids, state.active);
                 const readonly = controller.options.readonly?.(tabs) ?? true;
+                const taskReadonly = controller.options.taskReadonly?.(tabs) ?? readonly;
                 const narrow = tabs.clientWidth < 420;
                 const vertical = tabs.getAttribute("tabs-position") === "left" && !narrow;
                 tabs.setAttribute("data-tabs-orientation", vertical ? "vertical" : "horizontal");
@@ -221,7 +237,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     });
                     header.addEventListener("selectstart", event => event.preventDefault());
                 }
-                const signature = JSON.stringify([readonly, ...items.map(item => [itemID(item),
+                const signature = JSON.stringify([readonly, taskReadonly, ...items.map(item => [itemID(item),
                     getTabTask(item), item.dataset.tabsEditing === "true" ? null : getTabTitle(item)?.innerHTML])]);
                 let previousScroll: {left: number, top: number};
                 if (state.signature !== signature || !header.firstElementChild) {
@@ -295,9 +311,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             task.setAttribute("role", "checkbox");
                             task.setAttribute("aria-label", controller.options.taskLabel || "Task");
                             task.setAttribute("aria-checked", String(marker !== " "));
-                            task.setAttribute("aria-disabled", String(readonly));
+                            task.setAttribute("aria-disabled", String(taskReadonly));
                             task.setAttribute("data-task", marker);
-                            task.tabIndex = readonly ? -1 : 0;
+                            task.tabIndex = taskReadonly ? -1 : 0;
                             task.addEventListener("pointerdown", event => event.stopPropagation());
                             task.addEventListener("mousedown", event => {
                                 event.preventDefault();
@@ -328,10 +344,10 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                                     if (controller.options.menu) {
                                         controller.select(tabs, itemID(item), true);
                                         controller.options.menu(tabs, item, button);
-                                    } else if (!readonly) {
+                                    } else if (!taskReadonly) {
                                         controller.options.taskMenu?.(item);
                                     }
-                                } else if (!readonly && type !== "dblclick") {
+                                } else if (!taskReadonly && type !== "dblclick") {
                                     controller.options.task?.(item);
                                 }
                             }));
@@ -535,7 +551,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             destroyed = true;
             controller.observer.disconnect();
             controller.resize.disconnect();
-            clearTabsAttributes(element);
+            clearTabsAttributes(element, owns);
             element.removeEventListener("focusout", onFocusOut);
             element.removeEventListener("scroll", schedule, true);
             document.removeEventListener("scroll", onAncestorScroll, true);

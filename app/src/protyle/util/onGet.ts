@@ -3,6 +3,7 @@ import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "./processCode";
+import {migrateLegacyMindmapsBeforeRender} from "../render/listMindmap/migrate";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {revealTabsForTarget} from "../render/tabsRender";
@@ -153,6 +154,7 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
             suppressFocus: options.suppressFocus,
@@ -172,6 +174,7 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
             suppressFocus: options.suppressFocus,
@@ -204,6 +207,7 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
             suppressFocus: options.suppressFocus,
@@ -238,7 +242,16 @@ const setHTML = (options: {
     afterCB?: () => void,
     focusAfterZoom?: boolean,
     suppressFocus?: boolean,
+    isValid?: () => boolean,
 }, protyle: IProtyle) => {
+    if (options.isValid && !options.isValid()) {
+        return;
+    }
+    if (!options.isSyncing && migrateLegacyMindmapsBeforeRender(protyle, options.content, options.action || [], content => {
+        setHTML({...options, content}, protyle);
+    })) {
+        return;
+    }
     if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
         return;
     }

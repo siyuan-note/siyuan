@@ -541,8 +541,7 @@
     position: relative;
   }
 
-  [data-subtype="echarts"],
-  [data-subtype="mindmap"] {
+  [data-subtype="echarts"] {
     z-index: 1;
     height: 420px;
 

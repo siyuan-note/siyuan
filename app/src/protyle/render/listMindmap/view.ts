@@ -12,6 +12,7 @@ import {mathRender} from "../mathRender";
 import {getAVRichTextSafeURL} from "../av/richTextValue";
 import {Constants} from "../../../constants";
 import {findMindmapDrop} from "./drop";
+import {destroyTabsRender, tabsRender} from "../tabsRender";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -38,6 +39,8 @@ export interface ListMindmapViewOptions {
     onFold?: (id: string) => void;
     onTaskToggle?: (id: string, cycle?: boolean) => void;
     onTaskMenu?: (id: string, anchor: HTMLElement) => void;
+    onTabTaskToggle?: (id: string, itemId: string) => void;
+    onTabTaskMenu?: (id: string, itemId: string, anchor: HTMLElement) => void;
     isTaskCycle?: (event: KeyboardEvent) => boolean;
     onUndo?: () => void;
     onRedo?: () => void;
@@ -89,6 +92,7 @@ export class ListMindmapView {
     private readonly zoomLabel: HTMLSpanElement;
     private readonly zoomSlider = createElement("input", "b3-slider");
     private readonly nodeElements = new Map<string, HTMLDivElement>();
+    private readonly previewID = `list-mindmap-${Lute.NewNodeID()}-`;
     private readonly relationElements = new Map<string, HTMLButtonElement>();
     private readonly buttons = new Map<string, HTMLButtonElement>();
     private readonly folded = new Map<string, boolean>();
@@ -341,7 +345,7 @@ export class ListMindmapView {
                 task.disabled = value;
             }
         });
-        this.updateSelection();
+        this.update(this.model);
     }
 
     private createToolbar() {
@@ -396,6 +400,7 @@ export class ListMindmapView {
         }
         this.nodeElements.forEach((element, id) => {
             if (!model.nodes.has(id)) {
+                destroyTabsRender(this.getContentHost(id));
                 this.resizeObserver.unobserve(element);
                 element.remove();
                 this.nodeElements.delete(id);
@@ -446,14 +451,35 @@ export class ListMindmapView {
             fold.querySelector("span").textContent = String(descendants.get(id));
             if (id !== this.editingId) {
                 const content = this.getContentHost(id);
+                const activeTabs = new Map<string, string>();
+                content.querySelectorAll<HTMLElement>('.tab-item[data-tabs-hidden="false"]').forEach(item => {
+                    activeTabs.set(item.parentElement.id, item.id);
+                });
+                destroyTabsRender(content);
                 content.replaceChildren();
+                const sourceTabIDs = new Map<string, string>();
                 if (node.virtual) {
                     content.textContent = this.model.metadata.rootTitle || "";
                 } else {
                     node.contentBlocks.forEach((block) => {
                         const clone = block.cloneNode(true) as HTMLElement;
-                        clone.querySelectorAll(".protyle-attr, .protyle-action, .protyle-icons, .list-mindmap").forEach(item => item.remove());
+                        const sourceCanvases = block.querySelectorAll("canvas");
+                        clone.querySelectorAll("canvas").forEach((canvas, index) => {
+                            const source = sourceCanvases[index];
+                            if (source.width && source.height) {
+                                canvas.getContext("2d")?.drawImage(source, 0, 0);
+                            }
+                        });
+                        const previewTabIDs = new Map<string, string>();
+                        clone.querySelectorAll(".protyle-attr, .protyle-action, .protyle-action__table, .protyle-icons, .list-mindmap")
+                            .forEach(item => item.remove());
                         [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))].forEach((item) => {
+                            // 页签预览使用独立 DOM 标识切换正文，不携带可提交事务的块身份。
+                            if (["NodeTabs", "NodeTabItem"].includes(item.getAttribute("data-type"))) {
+                                item.id = this.previewID + item.getAttribute("data-node-id");
+                                previewTabIDs.set(item.getAttribute("data-node-id"), item.id);
+                                sourceTabIDs.set(item.id, item.getAttribute("data-node-id"));
+                            }
                             if (item.hasAttribute("data-node-id")) {
                                 item.classList.add("list-mindmap__preview-block");
                             }
@@ -465,7 +491,16 @@ export class ListMindmapView {
                             item.removeAttribute("data-node-id");
                             item.removeAttribute("spellcheck");
                             item.removeAttribute("draggable");
+                            // 画布保留显示快照，实例标识不能使预览刷新或销毁源图表。
+                            item.removeAttribute("_echarts_instance_");
                         });
+                        [clone, ...Array.from(clone.querySelectorAll<HTMLElement>('[data-type="NodeTabs"]'))]
+                            .forEach(tabs => {
+                                const active = activeTabs.get(tabs.id) || previewTabIDs.get(tabs.getAttribute("tabs-active-id"));
+                                if (active) {
+                                    tabs.setAttribute("tabs-active-id", active);
+                                }
+                            });
                         content.append(clone);
                     });
                 }
@@ -475,6 +510,27 @@ export class ListMindmapView {
                     !content.querySelector("img, svg, video, audio, iframe, canvas, hr, [data-content]");
                 content.classList.toggle("list-mindmap__content--empty", empty);
                 content.dataset.placeholder = this.label("listMindmapPlaceholder");
+                if (content.querySelector('.tabs[data-type="NodeTabs"]')) {
+                    tabsRender(content, {
+                        readonly: () => true,
+                        taskReadonly: () => !!this.options.readOnly || !this.options.onTabTaskToggle,
+                        taskLabel: this.label("taskList"),
+                        task: item => {
+                            const itemId = sourceTabIDs.get(item.id);
+                            if (!this.options.readOnly && itemId) {
+                                this.options.onTabTaskToggle?.(id, itemId);
+                            }
+                        },
+                        taskMenu: item => {
+                            const itemId = sourceTabIDs.get(item.id);
+                            const anchor = content.querySelector<HTMLElement>(`.tabs-task[data-tab-id="${item.id}"]`);
+                            if (!this.options.readOnly && itemId && anchor) {
+                                this.options.onTabTaskMenu?.(id, itemId, anchor);
+                            }
+                        },
+                        shown: () => this.refreshLayout(),
+                    });
+                }
                 // 副本独立渲染公式，避免源节点的异步渲染完成后脑图仍保留未渲染内容。
                 void mathRender(content, this.options.cdn)?.then(() => this.refreshLayout()).catch(error => console.error(error));
             }
@@ -507,6 +563,7 @@ export class ListMindmapView {
         }
         this.editingId = id;
         if (id) {
+            destroyTabsRender(this.getContentHost(id));
             this.selectNode(id);
             this.nodeElements.get(id)?.classList.add("list-mindmap__node--editing");
         }
@@ -641,7 +698,7 @@ export class ListMindmapView {
                 this.fitPrint();
             } else if (this.initialFit) {
                 this.initialFit = false;
-                this.fit();
+                this.fit(1);
             } else {
                 this.draw();
             }
@@ -1192,7 +1249,7 @@ export class ListMindmapView {
         clearTimeout(this.linkTimer);
         this.suppressLinkClick = false;
         const target = event.target as HTMLElement;
-        if (event.button !== 0 || target.closest("button, input, select, textarea, .list-mindmap__node--editing")) {
+        if (event.button !== 0 || target.closest("button, input, select, textarea, audio, video, iframe, .list-mindmap__node--editing")) {
             return;
         }
         const element = target.closest<HTMLElement>(".list-mindmap__node");
@@ -1544,7 +1601,7 @@ export class ListMindmapView {
             this.editRelationLabel(event);
             return;
         }
-        if (target.closest("button, input, select, .list-mindmap__node--editing")) {
+        if (target.closest("button, input, select, audio, video, iframe, .list-mindmap__node--editing")) {
             return;
         }
         const id = target.closest<HTMLElement>(".list-mindmap__node")?.dataset.mindmapId;
@@ -1749,7 +1806,7 @@ export class ListMindmapView {
         this.draw();
     }
 
-    public fit() {
+    public fit(maxScale = 2.5) {
         const width = this.viewport.clientWidth;
         const height = this.viewport.clientHeight;
         if (!this.positions.size || !width || !height) {
@@ -1763,7 +1820,7 @@ export class ListMindmapView {
         const insetBottom = 42;
         const availableWidth = Math.max(1, width - 48);
         const availableHeight = Math.max(1, height - insetTop - insetBottom);
-        this.scale = Math.min(2.5, Math.max(.15, Math.min(availableWidth / Math.max(1, right - left),
+        this.scale = Math.min(maxScale, Math.max(.15, Math.min(availableWidth / Math.max(1, right - left),
             availableHeight / Math.max(1, bottom - top))));
         this.offsetX = width / 2 - (left + right) * this.scale / 2;
         this.offsetY = insetTop + availableHeight / 2 - (top + bottom) * this.scale / 2;
@@ -1772,7 +1829,7 @@ export class ListMindmapView {
 
     private keyDown = (event: KeyboardEvent) => {
         const target = event.target as HTMLElement;
-        if (event.isComposing || target.closest("input, textarea, select, .list-mindmap__node--editing")) {
+        if (event.isComposing || target.closest("input, textarea, select, audio, video, iframe, .list-mindmap__node--editing")) {
             return;
         }
         if (this.pointer?.relation && event.key !== "Escape") {
@@ -2032,6 +2089,7 @@ export class ListMindmapView {
         this.resizeObserver.disconnect();
         this.disposers.forEach(dispose => dispose());
         this.exitFullscreen();
+        this.nodeElements.forEach((_element, id) => destroyTabsRender(this.getContentHost(id)));
         this.nodeElements.clear();
         this.relationElements.clear();
         this.options.host.replaceChildren();

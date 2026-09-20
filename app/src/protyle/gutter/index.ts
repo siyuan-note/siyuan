@@ -2334,7 +2334,7 @@ export class Gutter {
                     }
                 }] : [])]
             }).element);
-        } else if (type === "NodeCodeBlock" && !protyle.disabled && ["echarts", "mindmap"].includes(nodeElement.getAttribute("data-subtype"))) {
+        } else if (type === "NodeCodeBlock" && !protyle.disabled && nodeElement.getAttribute("data-subtype") === "echarts") {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_chart", type: "separator"}).element);
             const height = (nodeElement as HTMLElement).style.height;
             let html = nodeElement.outerHTML;

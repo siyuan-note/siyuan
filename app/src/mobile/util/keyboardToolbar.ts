@@ -784,7 +784,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("```flowchart\n```", "", "Flow Chart", "true")}
     ${getSlashItem("```graphviz\n```", "", "Graph", "true")}
     ${getSlashItem("```mermaid\n```", "", "Mermaid", "true")}
-    ${getSlashItem("```mindmap\n```", "", window.siyuan.languages.mindmap, "true")}
+    ${getSlashItem(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
     ${getSlashItem("```plantuml\n```", "", "UML", "true")}
 </div>
 <div class="keyboard__slash-title"></div>

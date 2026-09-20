@@ -3,9 +3,10 @@ interface ITabsAttributesOptions {
     open: (block: HTMLElement, focus: string) => void;
 }
 
-export const clearTabsAttributes = (root: Element) => {
-    root.querySelectorAll(".tabs-attributes").forEach(button => button.remove());
-    root.querySelectorAll("[data-tabs-attributes]").forEach(block => block.removeAttribute("data-tabs-attributes"));
+export const clearTabsAttributes = (root: Element, owns: (element: Element) => boolean = () => true) => {
+    Array.from(root.querySelectorAll(".tabs-attributes")).filter(owns).forEach(button => button.remove());
+    Array.from(root.querySelectorAll("[data-tabs-attributes]")).filter(owns)
+        .forEach(block => block.removeAttribute("data-tabs-attributes"));
 };
 
 // 属性控件仅投影原始属性，保留块内属性节点供事务、复制及导出读取。

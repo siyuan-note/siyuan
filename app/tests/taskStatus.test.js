@@ -79,7 +79,7 @@ const cases = async source => {
     let lastTransaction;
     const api = new Function("Constants", "transaction", "updateTransaction", "dayjs", "getParentBlock",
         "getPreviousBlockSibling", "getTopAloneElement", source.actions +
-        "; return {getTabTask, hasTabsTasks, preserveCopiedTabTask, wrapPastedTabItems, moveTo, moveTab, toggleTabsTasks, setTabTask, setTaskListItemMarker, toggleTaskListItem};")(
+        "; return {canEdit, getTabTask, hasTabsTasks, preserveCopiedTabTask, wrapPastedTabItems, moveTo, moveTab, toggleTabsTasks, setTabTask, setTaskListItemMarker, toggleTaskListItem};")(
         {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing", ZWSP: "\u200b",
             CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
             CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
@@ -251,6 +251,7 @@ const cases = async source => {
     api.setTabTask(protyle, item, "/");
     check.equal(item.getAttribute("tabs-task"), "/");
     apply(lastTransaction.backward);
+    from = find(from.dataset.nodeId);
     item = from.querySelectorAll(":scope > .tab-item")[1];
     check.equal(item.hasAttribute("tabs-task"), false);
     api.toggleTabsTasks(protyle, from);
@@ -410,6 +411,39 @@ const cases = async source => {
         check.equal(menuTarget, items[1]);
         check.equal(api.getTabTask(items[1]), "?");
     }
+    // 展示副本可以切换页签，但任务操作不能提交空块 ID；内嵌编辑器由自身接管。
+    const preview = from.cloneNode(true);
+    preview.classList.add("list-mindmap__preview-block");
+    preview.querySelectorAll(".tabs-header, .tabs-divider").forEach(element => element.remove());
+    [preview, ...preview.querySelectorAll("[data-node-id]")].forEach(element => element.removeAttribute("data-node-id"));
+    const previewItems = Array.from(preview.querySelectorAll(":scope > .tab-item"));
+    previewItems.forEach((item, index) => { item.id = `preview-tab-${index}`; });
+    root.append(preview);
+    const options = {readonly: tabs => !api.canEdit(protyle, tabs),
+        task: entry => api.setTabTask(protyle, entry, "X")};
+    renderer.tabsRender(root, options);
+    const previewBefore = previewItems[0].getAttribute("tabs-task");
+    lastTransaction = undefined;
+    preview.querySelector(".tabs-task").click();
+    api.setTabTask(protyle, previewItems[0], "X");
+    check.equal(lastTransaction, undefined);
+    check.equal(previewItems[0].getAttribute("tabs-task"), previewBefore);
+    preview.querySelectorAll(".tabs-tab")[1].click();
+    check.equal(previewItems[1].getAttribute("data-tabs-hidden"), "false");
+    check.equal(previewItems[0].getAttribute("data-tabs-hidden"), "true");
+    const inner = document.createElement("div");
+    inner.className = "protyle-wysiwyg";
+    inner.innerHTML = lute.Md2BlockDOM(markdown);
+    root.append(inner);
+    const innerBefore = inner.innerHTML;
+    renderer.tabsRender(root, options);
+    check.equal(inner.innerHTML, innerBefore);
+    const innerOwner = {...protyle, wysiwyg: {element: inner}};
+    renderer.tabsRender(inner, {readonly: tabs => !api.canEdit(innerOwner, tabs),
+        task: entry => api.setTabTask(innerOwner, entry, "X")});
+    inner.querySelector(".tabs-task").click();
+    check.ok(lastTransaction.forward[0].id);
+    renderer.destroyTabsRender(inner);
     renderer.destroyTabsRender(root);
     root.remove();
     return "Task status cases passed";

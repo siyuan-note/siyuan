@@ -190,6 +190,8 @@ Dynamic multipart endpoints use `MultipartFields` to retain every text value and
 
 ## Generation and verification
 
+`/api/block/migrateLegacyMindmaps` is an authenticated administrator write endpoint with read-only protection and an encrypted-notebook request lease. It requires a document `id` and `notebook`, converts complete legacy `mindmap` lists in one undoable transaction after saving history, and returns `converted` and canonical `blocks` (`id`, `dom`) for the document's mind maps. Repeated requests return the current block content without reconverting lists; incomplete sources remain unchanged. Regression coverage runs with `go test -tags "fts5 sqlcipher" ./model ./api ./apicontract/... -run 'Test(LegacyMindmap|MigrateLegacyMindmaps|APIContractHeadingTransactions|APIContractRouterCoverage|RouteCoverage)' -count=1` and the frontend `listMindmap/migrate.test.ts` and `listMindmap/model.test.ts` suites. These tests use the existing CI discovery paths.
+
 Run from `app/`:
 
 ```text

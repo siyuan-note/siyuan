@@ -3,6 +3,11 @@
 
 .protyle-wysiwyg,
 .b3-typography {
+  [data-subtype="mindmap"],
+  [data-type="NodeList"][data-list-mindmap-rendered="true"] {
+    height: auto !important;
+  }
+
   [data-type="NodeList"][data-list-mindmap-rendered="true"] > [data-type="NodeListItem"] {
     display: none;
   }
@@ -25,6 +30,16 @@
   font-size: 14px;
   line-height: 1.5;
   outline: none;
+
+  &--source {
+    height: auto;
+    min-height: 0;
+
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  }
 
   [hidden] {
     display: none !important;

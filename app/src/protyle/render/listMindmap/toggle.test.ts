@@ -18,6 +18,7 @@ const setup = () => {
     const attribute = "custom-sy-list-mindmap";
     const attrs = new Map([[attribute, "1"]]);
     const list = {
+        isConnected: true,
         dataset: {type: "NodeList", nodeId: "source-list"},
         closest: (selector: string) => selector === ".protyle-wysiwyg" ? root : embed,
         getAttribute: (name: string) => attrs.get(name),
@@ -59,6 +60,19 @@ test("read-only, history and lightweight editors cannot persist embedded view ch
             owner.options.action.push("history");
         } else {
             owner[mode as "disabled" | "lite"] = true;
+        }
+        api.toggleListMindmap(owner, list);
+        assert.equal(operations.length, 0);
+    }
+});
+
+test("removed lists and blocks without IDs cannot submit view changes", () => {
+    for (const removed of [false, true]) {
+        const {list, owner, api, operations} = setup();
+        if (removed) {
+            list.isConnected = false;
+        } else {
+            list.dataset.nodeId = "";
         }
         api.toggleListMindmap(owner, list);
         assert.equal(operations.length, 0);

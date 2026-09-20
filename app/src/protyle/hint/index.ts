@@ -33,6 +33,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
+import {spinListMindmapDOM} from "../render/listMindmap/create";
 import {assetMenu, imgMenu} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
@@ -1052,7 +1053,8 @@ ${genHintItemHTML(item)}
                 if (value !== "![]()") {
                     this.fixImageCursor(range);
                 }
-                let textContent = value;
+                const isMindmap = value === `- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`;
+                let textContent = isMindmap ? `- ${Lute.Caret}` : value;
                 if (value === "```") {
                     textContent = value + (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(window.siyuan.storage[Constants.LOCAL_CODELANG]) ? "" : window.siyuan.storage[Constants.LOCAL_CODELANG]) + Lute.Caret + "\n```";
                 }
@@ -1091,7 +1093,8 @@ ${genHintItemHTML(item)}
                         newHTML = `<div data-node-id="${id}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     } else {
                         editableElement.textContent = textContent;
-                        newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
+                        newHTML = isMindmap ? spinListMindmapDOM(protyle.lute, nodeElement.outerHTML) :
+                            protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
                     }
                     // 列表项内创建列表时保留空段落，避免形成 li>list 非法结构 https://github.com/siyuan-note/siyuan/issues/17890
                     const tempCheck = document.createElement("div");
@@ -1137,7 +1140,8 @@ ${genHintItemHTML(item)}
                         }]);
                     }
                 } else {
-                    let newHTML = protyle.lute.SpinBlockDOM(textContent);
+                    let newHTML = isMindmap ? spinListMindmapDOM(protyle.lute, textContent) :
+                        protyle.lute.SpinBlockDOM(textContent);
                     if (value === "<div>") {
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     }

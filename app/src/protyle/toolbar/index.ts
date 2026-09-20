@@ -1501,8 +1501,8 @@ export class Toolbar {
                 }
             });
         }
-        let title = "HTML";
-        let placeholder = "";
+        let title = types.includes("NodeCodeBlock") ? window.siyuan.languages.code : "HTML";
+        const placeholder = "";
         const isInlineMemo = types.includes("inline-memo");
         switch (renderElement.getAttribute("data-subtype")) {
             case "abc":
@@ -1519,12 +1519,6 @@ export class Toolbar {
                 break;
             case "mermaid":
                 title = "Mermaid";
-                break;
-            case "mindmap":
-                placeholder = `- foo
-  - bar
-- baz`;
-                title = window.siyuan.languages.mindmap;
                 break;
             case "plantuml":
                 title = "UML";

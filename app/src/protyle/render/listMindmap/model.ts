@@ -561,7 +561,9 @@ export const replaceListMindmapContent = (list: HTMLElement, nodeId: string, blo
         const original = originals.get(id);
         if (original) {
             Array.from(original.attributes).forEach(attribute => {
-                if (!["data-type", "data-subtype", "class", "updated", "contenteditable"].includes(attribute.name) &&
+                if (!block.hasAttribute(attribute.name) &&
+                    !["data-type", "data-subtype", "class", "updated", "contenteditable", "data-task", "data-marker", "fold"]
+                        .includes(attribute.name) &&
                     !attribute.name.startsWith("data-list-mindmap-")) {
                     block.setAttribute(attribute.name, attribute.value);
                 }
@@ -587,4 +589,11 @@ export const replaceListMindmapContent = (list: HTMLElement, nodeId: string, blo
         lastInserted = block;
     });
     return true;
+};
+
+// 仅返回该节点正文中的源页签，预览副本和其他分支不参与保存。
+export const getListMindmapTabItem = (list: HTMLElement, nodeId: string, itemId: string): HTMLElement | undefined => {
+    const node = readListMindmap(list).nodes.get(nodeId);
+    return node?.contentBlocks.flatMap(block => Array.from(block.querySelectorAll<HTMLElement>('[data-type="NodeTabItem"]')))
+        .find(item => item.dataset.nodeId === itemId);
 };

@@ -32,10 +32,10 @@ const loadHandler = (element: "button" | "task", globals: Record<string, unknown
     return exports.handler;
 };
 
-const fixture = (readonly: boolean, vertical = false) => {
+const fixture = (readonly: boolean, vertical = false, taskReadonly = readonly) => {
     const calls: string[] = [];
     const globals = {
-        ids: ["a", "b"], items: [{}], item: {}, itemID: () => "a", type: "keydown", readonly,
+        ids: ["a", "b"], items: [{}], item: {}, itemID: () => "a", type: "keydown", readonly, taskReadonly,
         tabs: {
             getBoundingClientRect: () => ({top: -1}),
             getAttribute: () => vertical ? "vertical" : "horizontal",
@@ -113,4 +113,7 @@ test("readonly task activation cannot toggle the task or select the parent tab",
     const tab = fixture(true);
     assert.equal(tab.dispatch("Enter").propagationStopped, true);
     assert.deepEqual(tab.calls, ["select", "activate", "panel-start"]);
+    const delegatedTask = fixture(true, false, false);
+    assert.equal(delegatedTask.dispatch("Enter", true).propagationStopped, true);
+    assert.deepEqual(delegatedTask.calls, ["task"]);
 });

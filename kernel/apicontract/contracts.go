@@ -381,6 +381,8 @@ var BatchInsertBlock = define[BatchInsertBlockRequest, []*BlockTransaction]("bat
 
 var UpdateBlock = define[UpdateBlockRequest, []*BlockTransaction]("updateBlock", "/api/block/updateBlock", JSONBody, ResponseOptions{}, "POST")
 
+var MigrateLegacyMindmaps = define[MigrateLegacyMindmapsRequest, MigrateLegacyMindmapsData]("migrateLegacyMindmaps", "/api/block/migrateLegacyMindmaps", JSONBody, ResponseOptions{}, "POST")
+
 var BatchUpdateBlock = define[BatchUpdateBlockRequest, []*BlockTransaction]("batchUpdateBlock", "/api/block/batchUpdateBlock", JSONBody, ResponseOptions{}, "POST")
 
 var DeleteBlock = define[DeleteBlockRequest, []*BlockTransaction]("deleteBlock", "/api/block/deleteBlock", JSONBody, ResponseOptions{}, "POST")

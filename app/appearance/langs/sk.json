@@ -1,4 +1,5 @@
 {
+	"listMindmapMigrationInvalid": "Túto myšlienkovú mapu sa nepodarilo úplne previesť na zoznam; pôvodný zdrojový text sa zachoval",
 	"listMindmapRouteStart": "Potiahnutím zmeníte počiatočný uzol",
 	"listMindmapRouteEnd": "Potiahnutím zmeníte cieľový uzol",
 	"listMindmapRouteHandle": "Potiahnutím upravíte trasu; dvojitým kliknutím na úchyt obnovíte automatický výpočet",

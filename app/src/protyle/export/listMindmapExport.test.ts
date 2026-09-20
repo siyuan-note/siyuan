@@ -21,6 +21,12 @@ test("mind map export labels preserve localized text without closing the generat
         listMindmapToList: "List view",
         fullscreen: "Fullscreen",
         exitFullscreen: "Exit fullscreen",
+        task: "Task",
+        taskStatusTodo: "To do",
+        taskStatusInProgress: "In progress",
+        taskStatusDone: "Done",
+        taskStatusCanceled: "Canceled",
+        customTaskStatus: "Custom status",
         unrelated: "Not exported",
     };
     const compiled = transpileModule(`(${declaration.initializer.getText(source)})()`, {

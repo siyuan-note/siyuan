@@ -904,8 +904,7 @@
     position: relative;
 
     &--done:not([data-task="/"]) > div[data-node-id].p {
-      color: var(--b3-theme-on-surface-light);
-      text-decoration: line-through;
+      @include task.completed-text;
     }
 
     input {

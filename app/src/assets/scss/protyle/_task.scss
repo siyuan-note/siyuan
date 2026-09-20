@@ -1,6 +1,11 @@
 @use "sass:string";
 
-.protyle-wysiwyg, .b3-typography {
+@mixin completed-text {
+  color: var(--b3-theme-on-surface-light);
+  text-decoration: line-through;
+}
+
+.protyle-wysiwyg, .b3-typography, .list-mindmap {
   .protyle-action--task[data-task] {
     --task-marker: attr(data-task);
   }
@@ -85,7 +90,6 @@
   .li[data-task="-"] > div.p,
   .li > .protyle-action--task[data-task="-"] ~ div.p,
   .tabs-task[data-task="-"] ~ .tabs-tab-label {
-    color: var(--b3-theme-on-surface-light);
-    text-decoration: line-through;
+    @include completed-text;
   }
 }

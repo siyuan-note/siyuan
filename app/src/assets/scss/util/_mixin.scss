@@ -1,3 +1,23 @@
+@mixin protyle-list-action-background($radius: 50%) {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: max(18px, 1em);
+  width: max(18px, 1em);
+  margin: min(-9px, -0.5em) 0 0 min(-9px, -0.5em);
+  border-radius: $radius;
+  transition: var(--b3-transition);
+}
+
+@mixin protyle-list-action-hover {
+  &::after {
+    background-color: var(--b3-list-icon-hover);
+  }
+
+  color: var(--b3-theme-on-background);
+}
+
 @mixin protyle-toolbar-surface {
   background-color: var(--b3-theme-background);
   box-shadow: var(--b3-dialog-shadow);

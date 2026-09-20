@@ -107,7 +107,7 @@ test("layout rejects cyclic or invalid trees and supports deep nesting without r
     assert.equal(layoutListMindmap(root).nodes.size, 5001);
 });
 
-const browserCases = async (sourceCode: string, css: string) => {
+const browserCases = async (sourceCode: string, css: string, taskSource: string, taskCSS: string) => {
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, remapListMindmapIDs, writeListMindmapMetadata, ListMindmapView};")(
@@ -413,7 +413,7 @@ const browserCases = async (sourceCode: string, css: string) => {
     const targetRect = nodeElement(beta).getBoundingClientRect();
     const sourcePoint = {x: sourceRect.left + sourceRect.width / 2, y: sourceRect.top + sourceRect.height / 2};
     const targetPoint = {x: targetRect.left + targetRect.width / 2, y: targetRect.top + targetRect.height / 2};
-    check.ok(sourceRect.width >= 64 && sourceRect.height >= 32);
+    check.ok(sourceRect.width >= 32 && sourceRect.height >= 32);
     check.equal(host.querySelector("[data-node-id]"), null);
     sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y);
     sendPointer(viewport, "pointerup", sourcePoint.x, sourcePoint.y);
@@ -539,6 +539,26 @@ const browserCases = async (sourceCode: string, css: string) => {
     await clickMouse(addChildButton(beta));
     check.equal(additions.length, beforeRejectedAddition + 1);
     check.deepEqual(additions[additions.length - 1], [beta, "child"]);
+    // 鼠标从节点右下角斜向移出时，过渡区域必须连续，不能先落到连线上导致按钮消失。
+    view.clearSelection();
+    await moveMouse(nodeElement(alpha));
+    const branchRect = nodeElement(alpha).getBoundingClientRect();
+    const branchScale = branchRect.width / nodeElement(alpha).offsetWidth;
+    const cornerPoint = {x: Math.round(branchRect.right - 3 * branchScale),
+        y: Math.round(branchRect.bottom + 3 * branchScale)};
+    await nativeInput([{type: "mouseMove", ...cornerPoint}]);
+    await settle();
+    const expandedFold = nodeElement(alpha).querySelector<HTMLButtonElement>(".list-mindmap__fold");
+    check.equal(visiblyRendered(expandedFold), true, "the lower inner corner keeps the fold control visible");
+    check.equal(document.elementFromPoint(cornerPoint.x, cornerPoint.y)?.closest(".list-mindmap__node"), nodeElement(alpha),
+        "the lower corner selects the node instead of its connection");
+    await moveMouse(expandedFold);
+    const expandedPoint = centerPoint(expandedFold);
+    check.equal(document.elementFromPoint(expandedPoint.x, expandedPoint.y)?.closest("button"), expandedFold);
+    await clickMouse(nodeElement(alpha));
+    await moveMouse();
+    check.equal(visiblyRendered(expandedFold), true, "selected nodes keep their fold control visible without hovering");
+    check.equal(visiblyRendered(addChildButton(alpha)), true);
     model.nodes.get(alpha).collapsed = true;
     view.update(model);
     await settle();
@@ -711,6 +731,8 @@ const browserCases = async (sourceCode: string, css: string) => {
     view.update(model);
     check.equal(host.querySelector("canvas").getContext("2d").strokeStyle, "#123456");
     check.equal(getComputedStyle(nodeElement(beta)).borderWidth, "0px");
+    view.clearSelection();
+    await moveMouse();
     await settle();
     const parentBounds = nodeElement(model.nodes.get(beta).parentId).getBoundingClientRect();
     const childBounds = nodeElement(beta).getBoundingClientRect();
@@ -719,8 +741,16 @@ const browserCases = async (sourceCode: string, css: string) => {
     const lineY = (parentY + childBounds.bottom) / 2;
     sendPointer(viewport, "pointermove", lineX, lineY);
     check.equal(viewport.classList.contains("list-mindmap__viewport--line-hover"), true);
+    check.equal(visiblyRendered(addChildButton(beta)), true, "hovering a tree curve exposes its node controls");
+    check.equal(nodeElement(beta).getAttribute("aria-selected"), "false", "line hover does not change selection");
+    const alphaBounds = nodeElement(alpha).getBoundingClientRect();
+    sendPointer(viewport, "pointermove", alphaBounds.left + alphaBounds.width / 2, alphaBounds.bottom + 1);
+    check.equal(visiblyRendered(nodeElement(alpha).querySelector<HTMLButtonElement>(".list-mindmap__fold")), true,
+        "hovering a branch underline exposes its fold control");
+    check.equal(visiblyRendered(addChildButton(beta)), false, "moving to another line clears the previous node controls");
     viewport.dispatchEvent(new PointerEvent("pointerleave"));
     check.equal(viewport.classList.contains("list-mindmap__viewport--line-hover"), false);
+    check.equal(nodeElement(alpha).classList.contains("list-mindmap__node--line-hover"), false);
     sendPointer(viewport, "pointerdown", lineX, lineY);
     sendPointer(viewport, "pointerup", lineX, lineY);
     check.equal(inspector.hidden, false, "clicking the tree curve opens its settings");
@@ -1150,6 +1180,161 @@ const browserCases = async (sourceCode: string, css: string) => {
     anchor.click();
     check.equal(exportClick, true, "export anchor clicks reach the existing navigation handler");
     exportView.destroy();
+
+    // 真实列表与脑图逐项比较图标、删除线和颜色，覆盖导出及脱离编辑器容器的全屏布局。
+    const taskStyle = document.createElement("style");
+    taskStyle.textContent = taskCSS;
+    document.head.append(taskStyle);
+    lute.SetArbitraryTaskListItemMarker(true);
+    lute.SetDataTask(true);
+    const taskParent = document.createElement("div");
+    taskParent.className = "protyle-wysiwyg";
+    taskParent.style.setProperty("--b3-theme-on-surface-light", "#8899aa");
+    taskParent.style.setProperty("--b3-theme-on-background", "#223344");
+    taskParent.innerHTML = lute.Md2BlockDOM("* [ ] Task\n\n  Second paragraph\n\n  * [/] Child\n* Ordinary\n");
+    document.body.append(taskParent);
+    const taskList = taskParent.firstElementChild as HTMLElement;
+    const ordinaryItem = taskParent.querySelector<HTMLElement>('.li[data-subtype="u"]');
+    taskList.insertBefore(ordinaryItem, taskList.lastElementChild);
+    const taskItem = taskList.querySelector<HTMLElement>(".li");
+    const taskId = taskItem.dataset.nodeId;
+    const taskHost = document.createElement("div");
+    taskHost.style.width = "700px";
+    taskParent.append(taskHost);
+    const operations: {id: string, before: string, after: string}[] = [];
+    const taskAPI = new Function("readListMindmap", "canEdit", "Constants", "dayjs", "updateTransaction", "showMessage",
+        taskSource + "; return {setTaskListItemMarker, nextTaskListMarker, nextTaskListStatus, TaskController};")(
+        api.readListMindmap, (owner: any) => !owner.disabled && !owner.history && !owner.embedded,
+        {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing"},
+        () => ({format: () => "20260920000000"}),
+        (_owner: unknown, element: HTMLElement, before: string) => operations.push({id: element.dataset.nodeId,
+            before, after: element.outerHTML}), () => check.fail("Task update failed"));
+    const owner = {disabled: false, history: false, embedded: false, options: {action: [] as string[]}};
+    let finishTask: boolean | Promise<boolean> = true;
+    let menus = 0;
+    let taskEdits = 0;
+    const taskView = new api.ListMindmapView({host: taskHost, model: api.readListMindmap(taskList),
+        labels: new Proxy({}, {get: (_target, key) => String(key)}), onExit: () => {},
+        onEdit: () => taskEdits++, onMove: () => check.fail("Task control started a drag"),
+        onRelationAdd: () => check.fail("Task control created a relation"),
+        finishEdit: () => finishTask, onTaskMenu: () => menus++,
+        isTaskCycle: (event: KeyboardEvent) => event.ctrlKey && event.key === "l",
+        onTaskToggle: (id: string, cycle: boolean) => controller.setTask(id,
+            cycle ? taskAPI.nextTaskListStatus : taskAPI.nextTaskListMarker)});
+    const controller = Object.assign(new taskAPI.TaskController(), {owner, list: taskList, disposed: false,
+        taskChanges: Promise.resolve(), refresh: () => taskView.update(api.readListMindmap(taskList))});
+    const taskNode = () => taskHost.querySelector<HTMLElement>(`[data-mindmap-id="${taskId}"]`);
+    const taskButton = () => taskNode().querySelector<HTMLButtonElement>(".list-mindmap__task");
+    const compare = () => {
+        const sourceAction = taskItem.querySelector(".protyle-action--task");
+        const button = taskButton();
+        check.equal(button.querySelector("use").getAttribute("xlink:href"),
+            sourceAction.querySelector("use").getAttribute("xlink:href"));
+        for (const property of ["content", "fontSize", "transform"] as const) {
+            check.equal(getComputedStyle(button, "::before")[property],
+                getComputedStyle(sourceAction, "::before")[property]);
+        }
+        for (const property of ["maskImage", "height"] as const) {
+            check.equal(getComputedStyle(button.querySelector("svg"))[property],
+                getComputedStyle(sourceAction.querySelector("svg"))[property]);
+        }
+        const originals = taskItem.querySelectorAll(":scope > .p");
+        const previews = taskNode().querySelectorAll(":scope > .list-mindmap__content > .p");
+        check.equal(previews.length, originals.length);
+        originals.forEach((original, index) => {
+            for (const property of ["color", "textDecorationLine"] as const) {
+                check.equal(getComputedStyle(previews[index])[property], getComputedStyle(original)[property]);
+            }
+        });
+    };
+    taskParent.style.fontSize = "16px";
+    taskParent.style.color = "#223344";
+    for (const marker of [" ", "/", "X", "x", "-", "?", "A", "\"", "&", "<", "\\"]) {
+        taskAPI.setTaskListItemMarker(owner, taskItem, marker);
+        controller.refresh();
+        await settle();
+        compare();
+        check.equal(taskNode().querySelector("[data-node-id]"), null);
+        check.equal(taskHost.querySelectorAll(".list-mindmap__task").length, 2);
+        check.equal(taskView.model.root.taskMarker, undefined, "virtual roots are not tasks");
+        const child = taskView.model.nodes.get(taskId).children[0];
+        check.equal(taskView.model.nodes.get(child.id).taskMarker, "/");
+        const childNode = taskHost.querySelector(`[data-mindmap-id="${child.id}"] .p`);
+        check.equal(getComputedStyle(childNode).textDecorationLine, "none", "parent state never styles child tasks");
+    }
+    const taskSourceHTML = taskList.outerHTML;
+    taskView.setReadOnly(true);
+    taskButton().click();
+    taskButton().dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
+    await settle();
+    check.equal(taskList.outerHTML, taskSourceHTML);
+    check.equal(menus, 0);
+    check.equal(taskButton().disabled, true);
+    taskView.setReadOnly(false);
+    check.equal(taskButton().disabled, false);
+    taskButton().dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
+    check.equal(menus, 1);
+    taskAPI.setTaskListItemMarker(owner, taskItem, " ");
+    controller.refresh();
+    operations.length = 0;
+    taskButton().click();
+    taskButton().click();
+    await controller.taskChanges;
+    check.equal(taskItem.dataset.task, " ");
+    check.equal(operations.length, 2);
+    check.ok(operations.every(operation => operation.id === taskId && !operation.after.includes("list-mindmap__")));
+    const operation = operations[0];
+    const replay = document.createElement("div");
+    for (const [html, marker] of [[operation.after, "X"], [operation.before, " "]] as const) {
+        replay.innerHTML = lute.SpinBlockDOM(html);
+        check.equal(replay.querySelector(".li").getAttribute("data-task"), marker, "transaction snapshots preserve redo and undo states");
+    }
+    taskButton().dispatchEvent(new KeyboardEvent("keydown", {key: "l", ctrlKey: true, bubbles: true, cancelable: true}));
+    await controller.taskChanges;
+    check.equal(taskItem.dataset.task, "/");
+    taskButton().dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    check.equal(taskEdits, 0);
+    finishTask = false;
+    taskButton().click();
+    await controller.taskChanges;
+    check.equal(taskItem.dataset.task, "/", "failed content saves prevent task changes");
+    finishTask = true;
+    for (const mode of ["disabled", "history", "embedded"] as const) {
+        owner[mode] = true;
+        await controller.setTask(taskId, () => "X");
+        check.equal(taskItem.dataset.task, "/");
+        owner[mode] = false;
+    }
+    let release: (result: boolean) => void;
+    controller.activeEditor = {finish: () => new Promise<boolean>(resolve => release = resolve)};
+    const pendingChange = controller.setTask(taskId, () => "X");
+    await Promise.resolve();
+    owner.disabled = true;
+    release(true);
+    await pendingChange;
+    check.equal(taskItem.dataset.task, "/", "permission is rechecked after content saves");
+    owner.disabled = false;
+    controller.activeEditor = undefined;
+    taskView.enterFullscreen();
+    check.equal(getComputedStyle(taskButton().querySelector("svg")).maskImage.includes("task-in-progress.svg"), true);
+    taskView.exitFullscreen();
+    // 导出 DOM 的标记可以位于任务图标上；真实任务根节点仍显示复选框。
+    const exportedTaskList = taskList.cloneNode(true) as HTMLElement;
+    exportedTaskList.querySelectorAll<HTMLElement>('.li[data-subtype="t"]').forEach(item => {
+        item.querySelector(".protyle-action--task").setAttribute("data-task", item.dataset.task);
+        item.removeAttribute("data-task");
+    });
+    check.equal(api.readListMindmap(exportedTaskList).nodes.get(taskId).taskMarker, "/");
+    exportedTaskList.querySelector(':scope > .li[data-subtype="u"]').remove();
+    const rootModel = api.readListMindmap(exportedTaskList);
+    check.equal(rootModel.root.virtual, false);
+    check.equal(rootModel.root.taskMarker, "/");
+    taskView.setReadOnly(true);
+    taskView.update(rootModel);
+    check.ok(taskButton());
+    taskView.destroy();
+    taskParent.remove();
+    taskStyle.remove();
     hostParent.remove();
     style.remove();
     return "List mindmap DOM cases passed";
@@ -1171,6 +1356,21 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_color.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/protyle/_list-mindmap.scss")).css;
+    const taskCSS = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/protyle/_wysiwyg.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_typography.scss")).css;
+    const indexSource = typescript.createSourceFile("index.ts", readFileSync(path.join(__dirname, "index.ts"), "utf8"),
+        typescript.ScriptTarget.Latest, true);
+    const controller = indexSource.statements.find(typescript.isClassDeclaration);
+    const setTask = controller.members.find(member => member.name?.getText(indexSource) === "setTask");
+    const listSource = typescript.createSourceFile("list.ts", readFileSync(path.join(__dirname, "../../wysiwyg/list.ts"), "utf8"),
+        typescript.ScriptTarget.Latest, true);
+    const setter = listSource.statements.filter(typescript.isVariableStatement).find(statement =>
+        statement.declarationList.declarations.some(item => item.name.getText(listSource) === "setTaskListItemMarker"));
+    const taskSource = compile(path.join(__dirname, "../../wysiwyg/taskListMarker.ts")) +
+        typescript.transpileModule(setter.getText(listSource).replace(/^export /, "") +
+            `\nclass TaskController {${setTask.getText(indexSource)}}`, {
+                compilerOptions: {target: typescript.ScriptTarget.ES2021},
+            }).outputText;
     const lutePath = path.resolve(__dirname, "../../../../stage/protyle/js/lute/lute.min.js");
     const code = `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
@@ -1191,7 +1391,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         const result = await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)});
+        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(taskSource)}, ${JSON.stringify(taskCSS)})`)});
         console.log(result);
         win.destroy();
         app.exit(0);

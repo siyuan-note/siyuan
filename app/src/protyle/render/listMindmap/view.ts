@@ -35,6 +35,9 @@ export interface ListMindmapViewOptions {
     onAdd?: (id: string, kind: "child" | "sibling") => void;
     onDelete?: (id: string) => void;
     onFold?: (id: string) => void;
+    onTaskToggle?: (id: string, cycle?: boolean) => void;
+    onTaskMenu?: (id: string, anchor: HTMLElement) => void;
+    isTaskCycle?: (event: KeyboardEvent) => boolean;
     onUndo?: () => void;
     onRedo?: () => void;
     onNodeStyle?: (id: string, patch: Partial<ListMindmapNodeStyle>) => void;
@@ -311,6 +314,10 @@ export class ListMindmapView {
             addChild.hidden = value;
             addChild.disabled = value;
             element.querySelector<HTMLElement>(".list-mindmap__add-bridge").hidden = value;
+            const task = element.querySelector<HTMLButtonElement>(".list-mindmap__task");
+            if (task) {
+                task.disabled = value;
+            }
         });
         this.updateSelection();
     }
@@ -401,6 +408,7 @@ export class ListMindmapView {
                 element.setAttribute("aria-label", model.metadata.rootTitle || this.label("listMindmapRoot"));
             }
             element.classList.toggle("list-mindmap__node--root", id === model.root.id);
+            this.renderTask(element, id);
             element.classList.toggle("list-mindmap__node--branch", node.children.length > 0);
             element.style.backgroundColor = model.metadata.nodes[id]?.backgroundColor || "";
             element.style.color = model.metadata.nodes[id]?.textColor || "";
@@ -846,6 +854,44 @@ export class ListMindmapView {
         context.fill();
     }
 
+    private renderTask(element: HTMLElement, id: string) {
+        const marker = this.model.nodes.get(id)?.taskMarker;
+        let task = element.querySelector<HTMLButtonElement>(".list-mindmap__task");
+        if (marker === undefined) {
+            task?.remove();
+            element.removeAttribute("data-task");
+            element.classList.remove("protyle-task--done");
+            return;
+        }
+        element.dataset.task = marker;
+        element.classList.toggle("protyle-task--done", marker !== " ");
+        if (!task) {
+            task = this.makeButton("task", "iconUncheck", () => {
+                if (!this.options.readOnly && this.model.nodes.get(id)?.taskMarker !== undefined) {
+                    this.options.onTaskToggle?.(id);
+                }
+            });
+            task.className = "protyle-action protyle-action--task list-mindmap__task";
+            task.addEventListener("contextmenu", event => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.finishThen(() => this.openTaskMenu(id, task));
+            });
+            element.prepend(task);
+        }
+        task.dataset.task = marker;
+        task.disabled = !!this.options.readOnly;
+        const key = {" ": "taskStatusTodo", "/": "taskStatusInProgress", X: "taskStatusDone", "-": "taskStatusCanceled"}[marker.toUpperCase()];
+        task.setAttribute("aria-label", key ? this.label(key) : `${this.label("customTaskStatus")} ${marker}`);
+        task.querySelector("use").setAttribute("xlink:href", marker === " " ? "#iconUncheck" : "#iconCheck");
+    }
+
+    private openTaskMenu(id: string, anchor: HTMLElement) {
+        if (!this.options.readOnly && this.model.nodes.get(id)?.taskMarker !== undefined) {
+            this.options.onTaskMenu?.(id, anchor);
+        }
+    }
+
     private selectNode(id: string) {
         const changed = this.selectedId !== id || !!this.selectedRelation;
         this.selectedId = id;
@@ -1086,7 +1132,13 @@ export class ListMindmapView {
         if (key === this.hoveredLine) {
             return;
         }
+        if (this.hoveredLine?.startsWith("edge:")) {
+            this.nodeElements.get(this.hoveredLine.slice(5))?.classList.remove("list-mindmap__node--line-hover");
+        }
         this.hoveredLine = key;
+        if (key?.startsWith("edge:")) {
+            this.nodeElements.get(key.slice(5))?.classList.add("list-mindmap__node--line-hover");
+        }
         this.viewport.classList.toggle("list-mindmap__viewport--line-hover", !!key);
         this.draw();
     }
@@ -1428,6 +1480,21 @@ export class ListMindmapView {
         if (event.isComposing || target.closest("input, textarea, select, .list-mindmap__node--editing")) {
             return;
         }
+        if (!this.options.readOnly && this.options.isTaskCycle?.(event)) {
+            const id = target.closest<HTMLElement>(".list-mindmap__node")?.dataset.mindmapId || this.selectedId;
+            if (this.model.nodes.get(id)?.taskMarker !== undefined) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!event.repeat) {
+                    this.finishThen(() => {
+                        if (!this.options.readOnly) {
+                            this.options.onTaskToggle?.(id, true);
+                        }
+                    });
+                }
+            }
+            return;
+        }
         if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(event.key) &&
             !this.editingId && !this.relationFrom && this.selectedId &&
             !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
@@ -1591,6 +1658,10 @@ export class ListMindmapView {
         }
         this.inspector.append(nodePalette);
         const node = this.model.nodes.get(id);
+        if (node?.taskMarker !== undefined && this.options.onTaskMenu) {
+            const task = squareButton("checkToggle", "iconCheck", () => this.openTaskMenu(id, task));
+            nodePalette.append(task);
+        }
         if (node && !node.virtual && node !== this.model.root) {
             nodePalette.append(squareButton("delete", "iconTrashcan", () => this.deleteSelection()));
         }

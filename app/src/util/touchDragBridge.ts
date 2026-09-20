@@ -207,7 +207,7 @@ const handleTouchStart = (e: TouchEvent) => {
     if (!target.classList.contains("av__widthdrag") && !target.classList.contains("av__freeze-drag")) {
         const draggable = getDraggableAncestor(target);
         if (draggable) {
-            dragState = createDragState(draggable, touch, "touch", isMouseInput(touch));
+            dragState = createDragState(draggable, target, touch, "touch", isMouseInput(touch));
             // WebKit 会接管 draggable 元素的长按并取消触摸序列，临时关闭原生拖拽以保留 touchend。
             suspendNativeDrag(dragState);
             return;
@@ -361,8 +361,11 @@ const getDraggableAncestor = (el: Element): HTMLElement | null => {
     return null;
 };
 
-const createDragState = (draggableElement: HTMLElement, point: DragPoint, inputType: "touch" | "pointer",
+const createDragState = (draggableElement: HTMLElement, target: Element, point: DragPoint, inputType: "touch" | "pointer",
                          isMouse: boolean, pointerId?: number): DragState & LongPressGate => {
+    // 菜单和列表正文优先滚动，抓手仍可直接拖拽。
+    const isListContent = (draggableElement.classList.contains("b3-menu__item") ||
+        draggableElement.classList.contains("b3-list-item")) && !target.closest(".fn__grab");
     return {
         dataTransfer: null,
         ghostElement: null,
@@ -374,7 +377,7 @@ const createDragState = (draggableElement: HTMLElement, point: DragPoint, inputT
         startY: point.clientY,
         touchStartTime: Date.now(),
         // 触摸操作和 Android 外接鼠标在文件树、画廊、页签和列表操作中需长按，以避免与滚动冲突。
-        requireLongPress: shouldRequireLongPress(draggableElement.closest(".sy__file") !== null ||
+        requireLongPress: shouldRequireLongPress(isListContent || draggableElement.closest(".sy__file") !== null ||
             draggableElement.closest(".sy__outline") !== null ||
             draggableElement.closest(".av__gallery-item") !== null ||
             draggableElement.closest(".av__group-title") !== null ||
@@ -445,7 +448,7 @@ const handlePointerDown = (event: PointerEvent) => {
         return;
     }
 
-    dragState = createDragState(draggable, event, "pointer", true, event.pointerId);
+    dragState = createDragState(draggable, event.target as Element, event, "pointer", true, event.pointerId);
     // 原生 dragstart 会取消 Pointer 流，临时关闭 draggable 以保留 pointermove 和 pointerup。
     suspendNativeDrag(dragState);
 };

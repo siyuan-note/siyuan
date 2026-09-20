@@ -9,7 +9,7 @@ import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusBlock, focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {getCurrentEditor as getDocumentEditor} from "../editor";
-import {getMobileToolbarProtyle, getMobileToolbarUndo} from "../../protyle/lite/mobileToolbar";
+import {getMobileToolbarPaddingElement, getMobileToolbarProtyle, getMobileToolbarUndo} from "../../protyle/lite/mobileToolbar";
 import {LocalUndo} from "../../protyle/undo";
 import {convertFontSize, fontEvent, getFontNodeElements, getFontSizeInfo} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
@@ -84,8 +84,6 @@ import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
 import {mountLiteSlashMenu} from "./liteSlashMenu";
 
 const getCurrentEditor = () => getMobileToolbarProtyle()?.getInstance() || getDocumentEditor();
-const getKeyboardPaddingElement = (protyle: IProtyle) =>
-    protyle.lite ? protyle.contentElement : protyle.element.parentElement;
 let toolbarProtyle: IProtyle;
 let unmountLiteSlashMenu: (() => void) | undefined;
 
@@ -426,7 +424,7 @@ const updateKeyboardPanelHeight = () => {
     toolbarElement.style.height = panelHeight;
     const editor = getCurrentEditor();
     if (editor) {
-        getKeyboardPaddingElement(editor.protyle).style.paddingBottom = panelHeight;
+        getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = panelHeight;
     }
 };
 
@@ -860,7 +858,7 @@ const hideKeyboardToolbarUtil = (restoreKeyboard = false) => {
     updateKeyboardToolbarPosition();
     const editor = getCurrentEditor();
     if (editor) {
-        getKeyboardPaddingElement(editor.protyle).style.paddingBottom = "48px";
+        getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = "48px";
     }
     resetKeyboardToolbarUtilButtons();
 };
@@ -1075,7 +1073,7 @@ const showKeyboardToolbarElement = () => {
         keyboardPanelClosing = false;
         hideKeyboardToolbarUtil();
         if (toolbarProtyle) {
-            getKeyboardPaddingElement(toolbarProtyle).style.paddingBottom = "";
+            getMobileToolbarPaddingElement(toolbarProtyle).style.paddingBottom = "";
         }
         toolbarProtyle = protyle;
         updateMobilePluginToolbar(protyle);
@@ -1098,7 +1096,7 @@ const showKeyboardToolbarElement = () => {
     const editor = getCurrentEditor();
     if (editor) {
         if (editor.protyle.wysiwyg.element.contains(range.startContainer)) {
-            getKeyboardPaddingElement(editor.protyle).style.paddingBottom = "48px";
+            getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = "48px";
         }
         forEachPluginSubscriber("mobile-keyboard-show", eventBus => {
             eventBus.emit("mobile-keyboard-show");
@@ -1216,7 +1214,7 @@ export const hideKeyboardToolbar = () => {
     toolbarElement.style.height = "";
     const editor = getCurrentEditor();
     if (editor) {
-        getKeyboardPaddingElement(editor.protyle).style.paddingBottom = "";
+        getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = "";
         if (!toolbarHidden) {
             forEachPluginSubscriber("mobile-keyboard-hide", eventBus => {
                 eventBus.emit("mobile-keyboard-hide");
@@ -1286,7 +1284,7 @@ export const activeBlur = (force = false) => {
 export const initKeyboardToolbar = () => {
     window.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => {
         if (event.detail) {
-            getKeyboardPaddingElement(event.detail).style.paddingBottom = "";
+            getMobileToolbarPaddingElement(event.detail).style.paddingBottom = "";
             if (toolbarProtyle === event.detail) {
                 toolbarProtyle = undefined;
             }

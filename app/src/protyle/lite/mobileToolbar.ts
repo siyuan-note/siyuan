@@ -8,6 +8,12 @@ export const setMobileToolbarUndo = (protyle: IProtyle, owner: IProtyle, run: (r
 
 export const getMobileToolbarUndo = (protyle: IProtyle) => undoContexts.get(protyle);
 
+export const getMobileToolbarPaddingElement = (protyle: IProtyle) => {
+    // 单元格的键盘占位放在所属编辑器上，避免撑高表格行。
+    const owner = undoContexts.get(protyle)?.owner || protyle;
+    return owner.lite ? owner.contentElement : owner.element.parentElement;
+};
+
 export const getMobileToolbarProtyle = () => {
     const root = document.activeElement?.closest(".protyle-wysiwyg");
     if (root) {

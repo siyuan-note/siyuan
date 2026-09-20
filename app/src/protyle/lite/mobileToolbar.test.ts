@@ -1,6 +1,29 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {bindMobileToolbar, getMobileToolbarProtyle, getMobileToolbarUndo, setMobileToolbarUndo} from "./mobileToolbar";
+import {bindMobileToolbar, getMobileToolbarPaddingElement, getMobileToolbarProtyle, getMobileToolbarUndo, setMobileToolbarUndo} from "./mobileToolbar";
+
+test("table cell keyboard padding belongs to its outer editor", () => {
+    const createEditor = (lite = false) => ({
+        lite,
+        element: {parentElement: {style: {paddingBottom: ""}}},
+        contentElement: {style: {paddingBottom: ""}},
+    }) as unknown as IProtyle;
+    for (const lite of [false, true]) {
+        const owner = createEditor(lite);
+        const cell = createEditor(true);
+        setMobileToolbarUndo(cell, owner, () => {});
+        const target = lite ? owner.contentElement : owner.element.parentElement;
+        assert.equal(getMobileToolbarPaddingElement(owner), target);
+        assert.equal(getMobileToolbarPaddingElement(cell), target);
+        for (const padding of ["48px", "320px", ""]) {
+            getMobileToolbarPaddingElement(cell).style.paddingBottom = padding;
+            assert.equal(target.style.paddingBottom, padding);
+            assert.equal(cell.contentElement.style.paddingBottom, "");
+        }
+    }
+    const composer = createEditor(true);
+    assert.equal(getMobileToolbarPaddingElement(composer), composer.contentElement);
+});
 
 test("shared mobile toolbar follows fragment focus, retains panel ownership and releases destroyed editors", () => {
     const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");

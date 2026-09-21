@@ -462,7 +462,6 @@ export class WYSIWYG {
                 !selectElements[0].classList.contains("sb")) {
                 // 单个 p 不选中
             } else {
-                const ids: string[] = [];
                 const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
                 if (!hasSelectClassElement && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") &&
                     !protyle.scroll.keepLoadedContent &&
@@ -473,14 +472,13 @@ export class WYSIWYG {
                 selectElements.forEach(item => {
                     if (!hasClosestByClassName(item, "protyle-wysiwyg--select")) {
                         item.classList.add("protyle-wysiwyg--select");
-                        ids.push(item.getAttribute("data-node-id"));
                         // 清除选中的子块 https://ld246.com/article/1667826582251
                         item.querySelectorAll(".protyle-wysiwyg--select").forEach(subItem => {
                             subItem.classList.remove("protyle-wysiwyg--select");
                         });
                     }
                 });
-                countBlockWord(ids, protyle);
+                countBlockWord(getBlockSelectionStatusIDs(this.element), protyle);
                 if (toDown) {
                     focusBlock(selectElements[selectElements.length - 1], protyle.wysiwyg.element, false);
                 } else {

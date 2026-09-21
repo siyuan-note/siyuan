@@ -8,12 +8,69 @@ const day = (date: string) => new Date(`${date}T00:00:00`).getTime();
 test("calendar range covers leap months and seven local days", () => {
     const month = getCalendarRange(day("2024-02-29"), "month", 1);
     assert.equal(new Date(month.start).getDay(), 1);
-    assert.equal(calendarDayDistance(month.start, month.end), 42);
+    assert.equal(calendarDayDistance(month.start, month.end), 35);
     assert.ok(month.start <= day("2024-02-01") && month.end > day("2024-02-29"));
     const week = getCalendarRange(day("2026-09-20"), "week", 0);
     assert.equal(week.start, day("2026-09-20"));
     assert.equal(calendarDayDistance(week.start, week.end), 7);
     assert.equal(calendarDayDistance(day("0099-12-31"), day("0100-01-01")), 1);
+});
+
+test("calendar month uses only the four, five or six weeks needed", () => {
+    const cases = [
+        {anchor: "2021-02-15", weekStart: 1, start: "2021-02-01", end: "2021-03-01", days: 28},
+        {anchor: "2026-09-21", weekStart: 1, start: "2026-08-31", end: "2026-10-05", days: 35},
+        {anchor: "2026-03-15", weekStart: 1, start: "2026-02-23", end: "2026-04-06", days: 42},
+        {anchor: "2026-03-15", weekStart: 0, start: "2026-03-01", end: "2026-04-05", days: 35},
+        {anchor: "2024-12-15", weekStart: 1, start: "2024-11-25", end: "2025-01-06", days: 42},
+    ];
+    for (const item of cases) {
+        const range = getCalendarRange(day(item.anchor), "month", item.weekStart);
+        assert.equal(range.start, day(item.start));
+        assert.equal(range.end, day(item.end));
+        assert.equal(calendarDayDistance(range.start, range.end), item.days);
+    }
+});
+
+test("calendar month covers every day without extra weeks for every week start", () => {
+    for (const year of [1, 99, 2024, 2025, 2026, 9999]) {
+        for (let month = 0; month < 12; month++) {
+            const first = new Date(0);
+            first.setFullYear(year, month, 1);
+            first.setHours(0, 0, 0, 0);
+            const next = new Date(first);
+            next.setMonth(month + 1);
+            for (let weekStart = 0; weekStart < 7; weekStart++) {
+                const range = getCalendarRange(first.getTime(), "month", weekStart);
+                assert.equal(new Date(range.start).getDay(), weekStart);
+                assert.equal(new Date(range.end).getDay(), weekStart);
+                assert.ok(range.start <= first.getTime() && range.end >= next.getTime());
+                assert.ok(addCalendarDays(range.start, 7) > first.getTime());
+                assert.ok(addCalendarDays(range.end, -7) < next.getTime());
+                assert.ok([28, 35, 42].includes(calendarDayDistance(range.start, range.end)));
+            }
+        }
+    }
+});
+
+test("calendar month boundaries stay at local midnight across daylight saving changes", () => {
+    const previous = process.env.TZ;
+    process.env.TZ = "America/New_York";
+    try {
+        for (const anchor of ["2026-03-15", "2026-11-15"]) {
+            const range = getCalendarRange(day(anchor), "month", 1);
+            assert.equal(new Date(range.start).getHours(), 0);
+            assert.equal(new Date(range.end).getHours(), 0);
+            assert.notEqual(new Date(range.start).getTimezoneOffset(), new Date(range.end).getTimezoneOffset());
+            assert.equal(calendarDayDistance(range.start, range.end), 42);
+        }
+    } finally {
+        if (previous === undefined) {
+            delete process.env.TZ;
+        } else {
+            process.env.TZ = previous;
+        }
+    }
 });
 
 test("calendar all-day end is inclusive and timed midnight is exclusive", () => {

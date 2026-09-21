@@ -592,7 +592,7 @@ export class Gutter {
             } else if (event.shiftKey && !protyle.disabled && !isEncryptedBox(protyle.notebookId)) {
                 // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
                 openAttr(this.getNodeElement(protyle, buttonElement), "bookmark", protyle);
-            } else if (!window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed && !window.siyuan.shiftIsPressed) {
+            } else if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
                 this.renderMenu(protyle, buttonElement);
                 // https://ld246.com/article/1648433751993
                 if (!protyle.toolbar.range &&
@@ -615,7 +615,7 @@ export class Gutter {
             if (!buttonElement || buttonElement.getAttribute("data-type") === "fold") {
                 return;
             }
-            if (!window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed && !window.siyuan.shiftIsPressed) {
+            if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
                 hideTooltip();
                 clearSelect(["cell", "img"], protyle.wysiwyg.element);
                 const gutterRect = buttonElement.getBoundingClientRect();

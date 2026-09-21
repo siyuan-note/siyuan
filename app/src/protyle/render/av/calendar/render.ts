@@ -10,6 +10,7 @@ import {finishAVLocate} from "../locate";
 import {createAttributeViewItem} from "../newItemTemplate";
 import {openDatabaseRowByData} from "../openDatabaseRow";
 import {avRender, genTabHeaderHTML, updateSearch} from "../render";
+import {replaceAVContainer} from "../container";
 import {renderAVRichTextElements} from "../richText";
 import {deleteRow} from "../row";
 import {bindAvSearch} from "../search";
@@ -228,7 +229,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         }
     }
     blockElement.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);
-    blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
+    replaceAVContainer(blockElement, `<div class="av__container fn__block">
         ${genTabHeaderHTML(data, !!query || isSearching, editable, blockElement, editable && !!dateColumn)}
         <div class="av__calendar" contenteditable="false">
             <div class="av__calendar-toolbar">
@@ -247,7 +248,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             </div>
         </div>
         <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
-    </div>`;
+    </div>`);
     blockElement.dataset.render = "true";
     setAVData(blockElement, data);
     const root = blockElement.querySelector<HTMLElement>(".av__calendar");

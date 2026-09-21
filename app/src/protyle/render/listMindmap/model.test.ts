@@ -828,7 +828,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     ["listMindmapChild", "delete", "fold"].forEach(label =>
         check.equal(toolbar.querySelector(`[aria-label="${label}"]`), null));
     const relationButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="connect"]');
-    check.ok(relationButton.nextElementSibling.classList.contains("list-mindmap__zoom-control"));
+    const toolbarPanButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
+    check.equal(relationButton.nextElementSibling, toolbarPanButton);
+    check.ok(toolbarPanButton.nextElementSibling.classList.contains("list-mindmap__zoom-control"));
     check.equal(relationButton.querySelector("use").getAttribute("xlink:href"), "#iconRoute");
     const inspector = host.querySelector<HTMLElement>(".list-mindmap__inspector");
     const fitButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="listMindmapFit"]');
@@ -2149,6 +2151,10 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
             compilerOptions: {target: typescript.ScriptTarget.ES2021},
         }).outputText;
     const lutePath = path.resolve(__dirname, "../../../../stage/protyle/js/lute/lute.min.js");
+    // 展开测试函数，避免断言失败时 Node 从压缩后的源码提取表达式而掩盖实际错误。
+    const browserSource = typescript.transpileModule(`(${browserCases.toString()})`, {
+        compilerOptions: {target: typescript.ScriptTarget.ES2021},
+    }).outputText.trim().replace(/;$/, "");
     const code = `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
@@ -2168,7 +2174,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         const result = await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(taskSource)}, ${JSON.stringify(taskCSS)}, ${JSON.stringify(dragSource)})`)});
+        `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(taskSource)}, ${JSON.stringify(taskCSS)}, ${JSON.stringify(dragSource)})`)});
         console.log(result);
         win.destroy();
         app.exit(0);

@@ -12,7 +12,7 @@ export const isLongUnbrokenInlineText = (text: string) =>
     /^[^\s\u200b\u2060\ufeff]{32,}$/u.test(text.replace(/^[\u200b\u2060\ufeff]+/u, ""));
 
 export const hasInlineElementBoundary = (element: Element | null | undefined) =>
-    element?.getAttribute(INLINE_BOUNDARY_ATTRIBUTE) === "true";
+    element?.hasAttribute(INLINE_BOUNDARY_ATTRIBUTE) ?? false;
 
 export const getInlineElementBoundaryOffset = (node: Node) => {
     if (node.nodeType !== Node.TEXT_NODE || !node.textContent?.endsWith(WORD_JOINER)) {
@@ -59,7 +59,7 @@ export const normalizeInlineElementBoundary = (element: HTMLElement) => {
     if (previous.textContent?.endsWith(ZERO_WIDTH_SPACE)) {
         // 行首光标占位符不提供断行机会，避免连续文本整体移到空白首行之后。
         (previous as Text).replaceData(text.length - 1, 1, WORD_JOINER);
-        element.setAttribute(INLINE_BOUNDARY_ATTRIBUTE, "true");
+        element.toggleAttribute(INLINE_BOUNDARY_ATTRIBUTE, true);
     }
 };
 

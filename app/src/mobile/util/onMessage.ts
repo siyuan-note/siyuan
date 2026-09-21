@@ -67,7 +67,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 } else {
                     clearTimeout(statusTimeout);
                     statusElement.innerHTML = `<div class="fn__flex">${sanitizeKernelHTML(data.data.tasks[0].action)}<div class="fn__progress"><div></div></div>`;
-                    statusElement.style.bottom = "calc(var(--mobile-bottom-bar-offset) + var(--mobile-bottom-bar-gap))";
+                    statusElement.style.bottom = "0";
                 }
                 break;
             case "setAppearance":
@@ -230,7 +230,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 }
                 clearTimeout(statusTimeout);
                 statusElement.innerHTML = sanitizeKernelHTML(data.msg);
-                statusElement.style.bottom = "calc(var(--mobile-bottom-bar-offset) + var(--mobile-bottom-bar-gap))";
+                statusElement.style.bottom = "0";
                 statusTimeout = window.setTimeout(() => {
                     statusElement.style.bottom = "";
                 }, 12000);

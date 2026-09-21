@@ -364,12 +364,21 @@ def resolve_resource(source, url):
     return result
 
 
+def check_frontend_entries(paths, mobile):
+    entries = ["stage/build/mobile/index.html"]
+    if not mobile:
+        # 桌面安装包同时提供主窗口、独立窗口及桌面和移动浏览器入口。
+        entries.extend(("stage/build/app/index.html", "stage/build/app/window.html",
+                        "stage/build/desktop/index.html"))
+    errors = [f"缺少前端入口：{entry}" for entry in entries if entry not in paths]
+    if "stage/build/export/protyle-method.js" not in paths:
+        errors.append("缺少导出前端：stage/build/export/protyle-method.js")
+    return errors
+
+
 def check_frontend(paths, expected_version, mobile):
-    errors = []
+    errors = check_frontend_entries(paths, mobile)
     versions = {}
-    entry = "stage/build/mobile/index.html" if mobile else "stage/build/app/index.html"
-    if entry not in paths:
-        errors.append(f"缺少前端入口：{entry}")
     html_files = [name for name in paths if name.startswith("stage/build/") and name.endswith(".html")]
     for name in html_files:
         parser = ResourceReferences()
@@ -393,8 +402,6 @@ def check_frontend(paths, expected_version, mobile):
         if found != {expected_version}:
             errors.append(f"导出前端版本不匹配或无法识别：{sorted(found)}")
         versions[export] = sorted(found)
-    else:
-        errors.append(f"缺少导出前端：{export}")
     for name, path in paths.items():
         if name.startswith("stage/build/") and name.endswith(".css"):
             for match in re.finditer(r"url\(\s*['\"]?([^)'\"]+)['\"]?\s*\)", path.read_text(encoding="utf-8")):
@@ -440,6 +447,7 @@ def verify_package(package, baselines=None, sevenzip=None, version=None):
             raise VerificationError(f"应找到一个完整前端资源目录，实际找到 {len(roots)} 个")
         kernel_hashes = sorted({digest(path) for path in kernels})
         actual = package_resources(layers, roots[0])
+        mobile = package.suffix.lower() in {".apk", ".aab", ".hap", ".app", ".ipa"}
         if not baselines:
             expected = version
             if not expected:
@@ -453,7 +461,6 @@ def verify_package(package, baselines=None, sevenzip=None, version=None):
             package_version = PACKAGE_VERSION.match(package.name)
             if package_version and package_version[1] != expected:
                 errors.append(f"包名版本不匹配：{package_version[1]}，预期 {expected}")
-            mobile = package.suffix.lower() in {".apk", ".aab", ".hap", ".app", ".ipa"}
             for info in infos:
                 if "-arm64" in package.name.lower() and info["architecture"] != "arm64":
                     errors.append(f"内核架构与包名不匹配：{info['architecture']}")
@@ -477,6 +484,10 @@ def verify_package(package, baselines=None, sevenzip=None, version=None):
                     "version": expected, "kernels": infos, "frontend_versions": frontend,
                     "kernel_sha256": kernel_hashes, "resource_count": len(actual),
                     "scope": "包内版本及可解析资源引用检查；不证明同版本产物为最新构建"}
+        # 基准摘要一致也必须满足入口完整性，避免不完整基准掩盖整套前端缺失。
+        errors = check_frontend_entries(actual, mobile)
+        if errors:
+            raise VerificationError("\n".join(errors))
         metadata = roots[0] / "app/package.json"
         if metadata.is_file():
             actual_version = json.loads(metadata.read_text(encoding="utf-8"))["version"]

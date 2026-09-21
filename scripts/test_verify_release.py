@@ -24,6 +24,7 @@ class ReleaseTests(unittest.TestCase):
         self.resources = {
             "stage/build/mobile/index.html": b"<html></html>",
             "stage/build/mobile/main.js": b"current frontend",
+            "stage/build/export/protyle-method.js": b"current export frontend",
             "appearance/langs/en.json": b"{}",
             "guide/document.sy": b"guide",
             "changelogs/v3.8.4/en.md": b"release notes",
@@ -175,6 +176,56 @@ class DirectReleaseTests(unittest.TestCase):
         result = release.verify_package(self.package(), version="3.8.4")
         self.assertEqual(result["kernels"][0]["version"], "3.8.4")
         self.assertEqual(result["frontend_versions"]["stage/build/mobile/index.html"], ["3.8.4"])
+
+    def desktop_resources(self):
+        resources = dict(self.resources)
+        for frontend in ("app", "desktop"):
+            for name, data in self.resources.items():
+                if name.startswith("stage/build/mobile/"):
+                    resources[name.replace("stage/build/mobile/", f"stage/build/{frontend}/")] = data
+        resources["stage/build/app/window.html"] = resources["stage/build/app/index.html"]
+        return resources
+
+    def desktop_package(self, resources):
+        path = self.root / "siyuan-3.8.4-linux-arm64.zip"
+        with zipfile.ZipFile(path, "w") as archive:
+            archive.writestr("resources/kernel/SiYuan-Kernel", self.kernel)
+            for name, data in resources.items():
+                archive.writestr("resources/" + name, data)
+        return path
+
+    def test_complete_desktop_frontends_pass(self):
+        result = release.verify_package(self.desktop_package(self.desktop_resources()), version="3.8.4")
+        self.assertEqual(len(result["frontend_versions"]), 5)
+
+    def test_desktop_missing_entire_frontend_fails(self):
+        for frontend in ("app", "desktop", "mobile", "export"):
+            with self.subTest(frontend=frontend):
+                resources = {name: data for name, data in self.desktop_resources().items()
+                             if not name.startswith(f"stage/build/{frontend}/")}
+                with self.assertRaisesRegex(release.VerificationError, f"stage/build/{frontend}/"):
+                    release.verify_package(self.desktop_package(resources), version="3.8.4")
+
+    def test_desktop_missing_window_entry_fails(self):
+        resources = self.desktop_resources()
+        del resources["stage/build/app/window.html"]
+        with self.assertRaisesRegex(release.VerificationError, "stage/build/app/window.html"):
+            release.verify_package(self.desktop_package(resources), version="3.8.4")
+
+    def test_matching_baseline_cannot_hide_missing_desktop_frontend(self):
+        resources = {name: data for name, data in self.desktop_resources().items()
+                     if not name.startswith("stage/build/desktop/")}
+        baseline = dict(self.baseline, kernels=[release.hashlib.sha256(self.kernel).hexdigest()],
+                        resources={name: release.hashlib.sha256(data).hexdigest()
+                                   for name, data in resources.items()})
+        with self.assertRaisesRegex(release.VerificationError, "stage/build/desktop/index.html"):
+            release.verify_package(self.desktop_package(resources), [baseline])
+
+    def test_mobile_missing_entire_frontend_fails(self):
+        resources = {name: data for name, data in self.resources.items()
+                     if not name.startswith("stage/build/mobile/")}
+        with self.assertRaisesRegex(release.VerificationError, "stage/build/mobile/index.html"):
+            release.verify_package(self.package(resources=resources), version="3.8.4")
 
     def test_beta_kernel_in_stable_apk(self):
         with self.assertRaisesRegex(release.VerificationError, "3.8.4-beta.2"):

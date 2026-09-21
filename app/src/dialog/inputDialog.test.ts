@@ -26,6 +26,12 @@ class Control {
 
 class Input extends Control {
     type = "text";
+    min = "";
+    max = "";
+    valid = true;
+    reportValidity() {
+        return this.valid;
+    }
 }
 
 const loadDialog = () => {
@@ -148,6 +154,55 @@ it("supports multiline values and lets autocomplete own keyboard events", () => 
     assert.equal(dialog.input.value, "one\ntwo");
     const autocomplete = open({title: "Tag", value: "tag", bindInput: false, onConfirm: () => {}});
     assert.equal(autocomplete.enter, undefined);
+});
+
+it("calendar date jump waits for confirmation and uses local midnight without changing the view mode", () => {
+    const file = "src/protyle/render/av/calendar/render.ts";
+    const source = createSourceFile(file, readFileSync(file, "utf8"), ScriptTarget.Latest, true);
+    let call = "";
+    const visit = (node: import("typescript").Node) => {
+        if (isCallExpression(node) && node.expression.getText(source) === "openInputDialog") {
+            call = node.getText(source);
+        }
+        forEachChild(node, visit);
+    };
+    visit(source);
+    assert.ok(call);
+    for (const mode of ["month", "week"]) {
+        const open = loadDialog();
+        let dialog: ReturnType<typeof open>;
+        const initial = new Date("2026-09-21T00:00:00").getTime();
+        const state = {anchor: initial, mode, expandedWeeks: new Set([initial])};
+        let refreshed = 0;
+        runInNewContext(transpileModule(call, {compilerOptions: {target: ScriptTarget.ES2020}}).outputText, {
+            openInputDialog: (options: Parameters<typeof open>[0]) => { dialog = open(options); },
+            window: {siyuan: {languages: {calendarJumpDate: "Go to date"}}},
+            state, dayjs: require("dayjs"), Date,
+            refresh: () => refreshed++,
+        });
+        const input = dialog.input as Input;
+        assert.equal(input.type, "date");
+        assert.equal(input.value, "2026-09-21");
+        assert.equal(input.min, "0001-01-01");
+        assert.equal(input.max, "9999-12-31");
+        for (const [value, valid] of [["", true], ["10000-01-01", false]] as const) {
+            input.value = value;
+            input.valid = valid;
+            dialog.enter();
+            assert.equal(dialog.closed, false);
+            assert.equal(state.anchor, initial);
+            assert.equal(refreshed, 0);
+        }
+        input.value = "2024-02-29";
+        input.valid = true;
+        assert.equal(state.anchor, initial);
+        dialog.enter();
+        assert.equal(state.anchor, new Date("2024-02-29T00:00:00").getTime());
+        assert.equal(state.mode, mode);
+        assert.equal(state.expandedWeeks.size, 0);
+        assert.equal(dialog.closed, true);
+        assert.equal(refreshed, 1);
+    }
 });
 
 for (const file of ["src/history/doc.ts", "src/history/history.ts"]) {

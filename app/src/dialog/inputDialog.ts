@@ -9,7 +9,7 @@ export const openInputDialog = (options: {
     width?: string,
     positionId?: string,
     maxLength?: number,
-    type?: "text" | "number" | "password",
+    type?: "text" | "number" | "password" | "date",
     multiline?: boolean,
     resize?: "none" | "vertical",
     min?: string,

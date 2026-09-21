@@ -1,4 +1,5 @@
 import {Constants} from "../../../../constants";
+import {openInputDialog} from "../../../../dialog/inputDialog";
 import * as dayjs from "dayjs";
 import {Menu} from "../../../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
@@ -238,6 +239,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
                 ${iconButton("previous", "iconLeft", window.siyuan.languages.previous)}
                 <button type="button" class="av__calendar-today" data-calendar-action="today">${window.siyuan.languages.calendarToday}</button>
                 ${iconButton("next", "iconRight", window.siyuan.languages.next)}
+                ${iconButton("jump", "iconCalendar", window.siyuan.languages.calendarJumpDate)}
                 <select class="b3-select" data-calendar-mode aria-label="${window.siyuan.languages.calendarView}"><option value="month"${state.mode === "month" ? " selected" : ""}>${window.siyuan.languages.month}</option><option value="week"${state.mode === "week" ? " selected" : ""}>${window.siyuan.languages.week}</option></select>
                 </div>
             </div>
@@ -272,6 +274,26 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         }
         const action = target.closest<HTMLElement>("[data-calendar-action]")?.dataset.calendarAction;
         if (action) {
+            if (action === "jump") {
+                openInputDialog({
+                    title: window.siyuan.languages.calendarJumpDate,
+                    type: "date",
+                    value: dayjs(state.anchor).format("YYYY-MM-DD"),
+                    min: "0001-01-01",
+                    max: "9999-12-31",
+                    onConfirm: (value, dialog) => {
+                        const input = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
+                        if (!value || !input.reportValidity()) {
+                            return;
+                        }
+                        state.anchor = new Date(`${value}T00:00:00`).getTime();
+                        state.expandedWeeks.clear();
+                        dialog.destroy();
+                        refresh();
+                    },
+                });
+                return;
+            }
             if (action === "today") {
                 state.anchor = calendarDay(Date.now());
             } else if (state.mode === "week") {

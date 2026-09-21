@@ -287,6 +287,17 @@ func TestRPCMethodResults(t *testing.T) {
 		{"throw", `() => { throw new Error("RPC failure"); }`, true},
 		{"reject", `() => Promise.reject(new Error("RPC failure"))`, true},
 		{"reject_string", `() => Promise.reject("RPC failure")`, true},
+		{"resolve_getter_throw", `() => Promise.resolve({
+			get value() { throw new Error("RPC failure"); }
+		})`, true},
+		{"reject_getter_throw", `() => Promise.reject({
+			get value() { throw new Error("RPC failure"); }
+		})`, true},
+		{"reject_to_string_throw", `() => {
+			const error = new Error("rejected");
+			error.toString = () => { throw new Error("RPC failure"); };
+			return Promise.reject(error);
+		}`, true},
 		{"then_throw", `() => {
 			const promise = Promise.resolve(42);
 			promise.then = () => { throw new Error("RPC failure"); };
@@ -312,6 +323,9 @@ func TestRPCMethodResults(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 			defer cancel()
 			result, rpcError := p.callRpcMethod(ctx, "result", nil)
+			if ctx.Err() != nil {
+				t.Fatalf("RPC waited for context expiration instead of returning its result: %v", ctx.Err())
+			}
 			if entry.wantError {
 				if rpcError == nil || rpcError.Code != JsonRpcErrorCodeInternalError || !strings.Contains(rpcError.Data.(string), "RPC failure") {
 					t.Fatalf("unexpected script error: %#v", rpcError)

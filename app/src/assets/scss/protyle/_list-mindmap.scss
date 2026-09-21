@@ -142,6 +142,18 @@
     pointer-events: none;
   }
 
+  &__viewport--pan {
+    cursor: grab;
+
+    .list-mindmap__world {
+      pointer-events: none;
+    }
+
+    &.list-mindmap__viewport--dragging {
+      cursor: grabbing;
+    }
+  }
+
   &__world {
     position: absolute;
     left: 0;

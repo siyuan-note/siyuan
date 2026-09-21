@@ -603,7 +603,11 @@ func validateValueTextRichTreeWithImages(tree *parse.Tree, images bool) (err err
 		if !entering {
 			return ast.WalkContinue
 		}
-		if !isAllowedValueTextRichNode(node) && !(images && isAllowedTableCellRichImageNode(node)) {
+		allowed := isAllowedValueTextRichNode(node)
+		if images && ast.NodeKramdownBlockIAL == node.Type {
+			allowed = isAllowedValueTextRichBlockIAL(node, true)
+		}
+		if !allowed && !(images && isAllowedTableCellRichImageNode(node)) {
 			err = fmt.Errorf("unsupported attribute view rich text node [%s]", node.Type.String())
 			return ast.WalkStop
 		}
@@ -701,7 +705,7 @@ func isAllowedValueTextRichNode(node *ast.Node) bool {
 	case ast.NodeCodeBlock, ast.NodeCodeBlockFenceInfoMarker:
 		return !isValueTextRichExecutableCodeFence(node.CodeBlockInfo)
 	case ast.NodeKramdownBlockIAL:
-		return isAllowedValueTextRichBlockIAL(node)
+		return isAllowedValueTextRichBlockIAL(node, false)
 	case ast.NodeKramdownSpanIAL:
 		return isAllowedValueTextRichSpanIAL(node)
 	case ast.NodeTextMark:
@@ -1300,7 +1304,7 @@ func normalizeValueTextRichTreeStyles(tree *parse.Tree) (err error) {
 	return
 }
 
-func isAllowedValueTextRichBlockIAL(node *ast.Node) bool {
+func isAllowedValueTextRichBlockIAL(node *ast.Node, codeSettings bool) bool {
 	ial := parse.Tokens2IAL(node.Tokens)
 	if 1 > len(ial) {
 		return false
@@ -1322,6 +1326,12 @@ func isAllowedValueTextRichBlockIAL(node *ast.Node) bool {
 			}
 		case "type":
 			if "doc" != attr[1] {
+				return false
+			}
+		case "linewrap", "ligatures", "linenumber":
+			// 普通表格的代码设置仅允许布尔值，且必须属于紧邻的代码块。
+			if !codeSettings || nil == node.Previous || ast.NodeCodeBlock != node.Previous.Type ||
+				("true" != attr[1] && "false" != attr[1]) || node.Previous.IALAttr(attr[0]) != attr[1] {
 				return false
 			}
 		default:
@@ -1403,11 +1413,15 @@ func valueTextRichBlockDOM2Kramdown(luteEngine *lute.Lute, blockDOM string) stri
 			}
 		}
 	}
-	// 多块内容中的空段落依靠块属性列表保留，相邻块的标识也必须保留以隔开属性列表。
+	// 空段落和代码设置依靠块属性列表保留，相邻块的标识也必须保留以隔开属性列表。
 	preserveBlockIDs := false
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
-		if entering && ast.NodeParagraph == node.Type && "" == strings.TrimSpace(strings.ReplaceAll(node.Content(), "\u200b", "")) {
-			preserveBlockIDs = !singleEmptyParagraph
+		if !entering {
+			return ast.WalkContinue
+		}
+		if ast.NodeParagraph == node.Type && !singleEmptyParagraph && "" == strings.TrimSpace(strings.ReplaceAll(node.Content(), "\u200b", "")) ||
+			ast.NodeCodeBlock == node.Type && ("" != node.IALAttr("linewrap") || "" != node.IALAttr("ligatures") || "" != node.IALAttr("linenumber")) {
+			preserveBlockIDs = true
 			return ast.WalkStop
 		}
 		return ast.WalkContinue

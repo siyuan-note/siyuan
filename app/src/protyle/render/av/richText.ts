@@ -192,7 +192,9 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false) => 
             const name = attribute.name.toLowerCase();
             const imageAttribute = images && ["src", "data-src", "alt", "title", "loading"].includes(name) &&
                 (element.tagName === "IMG" || element.classList.contains("img"));
-            if ((!AV_RICH_TEXT_EDITOR_ALLOWED_ATTRIBUTES.includes(name) && !imageAttribute) ||
+            const codeAttribute = images && element.dataset.type === "NodeCodeBlock" &&
+                ["linewrap", "ligatures", "linenumber"].includes(name) && ["true", "false"].includes(attribute.value);
+            if ((!AV_RICH_TEXT_EDITOR_ALLOWED_ATTRIBUTES.includes(name) && !imageAttribute && !codeAttribute) ||
                 name === "xlink:href" && !attribute.value.startsWith("#icon")) {
                 element.removeAttribute(attribute.name);
             }
@@ -334,8 +336,10 @@ export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTe
     const hasEmptyParagraph = paragraphs.some(element => lute.BlockDOM2Md(element.outerHTML).trim() === "");
     const singleEmptyParagraph = template.content.children.length === 1 &&
         template.content.firstElementChild === paragraphs[0] && hasEmptyParagraph;
-    // 多块内容中的空段落依靠块属性列表保留，同时保留相邻块的标识，避免属性被合并到前一段。
-    if (hasEmptyParagraph && !singleEmptyParagraph) {
+    const hasCodeSettings = images && !!template.content.querySelector(
+        '[data-type="NodeCodeBlock"]:is([linewrap], [ligatures], [linenumber])');
+    // 空段落和代码设置依靠块属性列表保留，同时保留相邻块的标识，避免属性被合并到前一段。
+    if ((hasEmptyParagraph && !singleEmptyParagraph) || hasCodeSettings) {
         cleanBlockDOM = cleanAVRichTextBlockDOMStructure(sanitizedBlockDOM, true);
     }
     const styleBackslashEncoding = createAVRichTextStyleBackslashEncoding(cleanBlockDOM);

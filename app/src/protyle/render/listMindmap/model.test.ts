@@ -377,6 +377,32 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(edited.contentBlocks[2].dataset.nodeId, added.dataset.nodeId);
     check.equal(editable.element.querySelector(':scope > [data-type="NodeList"]'), childList);
     check.equal(childList.outerHTML, childHTML);
+    const codeSettingHolder = document.createElement("div");
+    codeSettingHolder.innerHTML = lute.Md2BlockDOM("- Parent\n\n  ```js\n  x\n  ```\n");
+    const codeSettingList = codeSettingHolder.firstElementChild as HTMLElement;
+    const codeSettingNode = api.readListMindmap(codeSettingList).root;
+    const codeSettingBlocks: HTMLElement[] = codeSettingNode.contentBlocks.map((block: HTMLElement) =>
+        block.cloneNode(true) as HTMLElement);
+    const settingCode = codeSettingBlocks.find(block => block.dataset.type === "NodeCodeBlock");
+    check.ok(settingCode);
+    const codeSettingID = settingCode.dataset.nodeId;
+    const oldCodeSettings = codeSettingList.outerHTML;
+    for (const [name, value] of [["linewrap", "false"], ["ligatures", "true"], ["linenumber", "false"]]) {
+        settingCode.setAttribute(name, value);
+    }
+    check.equal(api.replaceListMindmapContent(codeSettingList, codeSettingNode.id,
+        codeSettingBlocks.map(block => block.outerHTML).join("")), true);
+    const newCodeSettings = codeSettingList.outerHTML;
+    for (const html of [newCodeSettings, oldCodeSettings, newCodeSettings]) {
+        const roundTrip = document.createElement("div");
+        roundTrip.innerHTML = lute.Md2BlockDOM(lute.BlockDOM2Md(html));
+        const restoredCode = roundTrip.querySelector(`[data-node-id="${codeSettingID}"]`);
+        check.ok(restoredCode, "code settings keep the source block identity");
+        for (const [name, value] of [["linewrap", "false"], ["ligatures", "true"], ["linenumber", "false"]]) {
+            check.equal(restoredCode.getAttribute(name), html === oldCodeSettings ? null : value,
+                "source snapshots restore code settings through undo and redo");
+        }
+    }
     const nestedTaskHolder = document.createElement("div");
     lute.SetDataTask(true);
     nestedTaskHolder.innerHTML = lute.Md2BlockDOM("- Node\n\n  > - [ ] Nested task\n");

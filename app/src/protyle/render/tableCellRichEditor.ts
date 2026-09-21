@@ -26,8 +26,7 @@ import {getTableCellEditorLute} from "../util/tableCellRichLute";
 import {setTableCellRichContext} from "../util/tableCellRichContext";
 import {updateOutlineCurrentBlock} from "../util/outlineBlock";
 import {canEnterCodeBlock} from "../wysiwyg/codeBlockEnter";
-import {writeText} from "../util/compatibility";
-import {nbsp2space, removeZWJ} from "../util/normalizeText";
+import {bindLiteCodeActions} from "../lite/codeActions";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
@@ -287,18 +286,6 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     setMobileToolbarUndo(fragment.protyle, owner, undoCell);
     setTableCellRichContext(fragment.protyle, {owner, cell, finish});
     const signal = controller.signal;
-    host.addEventListener("click", event => {
-        const button = event.target instanceof Element ? event.target.closest(".protyle-action__copy") : null;
-        if (!button || !fragment.wysiwyg.contains(button)) {
-            return;
-        }
-        // 单元格隔离外层点击事件，代码复制需在编辑器内部完成。
-        const text = button.parentElement.nextElementSibling.textContent.replace(/\n$/, "");
-        writeText(removeZWJ(nbsp2space(text)));
-        showMessage(window.siyuan.languages.copied, 2000);
-        event.preventDefault();
-        event.stopImmediatePropagation();
-    }, {capture: true, signal});
     bindTableCellRichDrag(owner, cell, fragment.wysiwyg, finish, signal,
         target => openTableCellRichEditor(owner, target));
     const captureBeforeChange = () => {
@@ -307,6 +294,12 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         }
     };
     host.addEventListener("beforeinput", captureBeforeChange, {capture: true, signal});
+    bindLiteCodeActions(host, fragment.protyle, {
+        signal,
+        canEdit: () => !finished && !owner.disabled,
+        beforeChange: captureBeforeChange,
+        onChange: commit,
+    });
     host.addEventListener("pointerdown", event => {
         captureBeforeChange();
         if (fragment.wysiwyg.contains(event.target as Node)) {

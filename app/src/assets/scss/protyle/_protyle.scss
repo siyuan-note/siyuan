@@ -8,6 +8,22 @@
   display: none;
 }
 
+.protyle-lite-fragment .protyle-action__copy {
+  border-radius: var(--b3-border-radius);
+}
+
+.table__cell-editor,
+.list-mindmap__editor {
+  .code-block .protyle-action__menu {
+    display: block;
+  }
+
+  .code-block .protyle-action__copy {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
 .protyle-scroll {
   --b3-dynamicscroll-width: 200px;
   position: absolute;
@@ -932,16 +948,18 @@
   // 跟随单元格的可用宽度，保证预览与编辑使用相同的折行边界。
   width: auto;
   max-width: 100%;
+}
 
-  .code-block {
-    // 预览与编辑共用最小宽度，为代码内容和顶部操作区保留空间。
-    min-width: 200px;
+.table__cell-rich .code-block,
+.table__cell-editor .code-block,
+.list-mindmap__content .code-block {
+  // 预览与编辑共用最小宽度，为代码内容和顶部操作区保留空间。
+  min-width: 200px;
 
-    .protyle-action__language {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+  .protyle-action__language {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 

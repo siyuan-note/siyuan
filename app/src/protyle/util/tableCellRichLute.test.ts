@@ -256,8 +256,32 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     let bubbled = 0;
     Object.assign(window.siyuan, {languages: {copied: "Copied"}});
     const copyController = new AbortController();
+    let canEditCode = true;
+    let menuItems: IMenu[] = [];
+    let menuShown = 0;
+    let mobileMenuShown = 0;
+    let mobileCodeMenu = false;
+    let updates = 0;
+    let oldCode: ReturnType<typeof api.serializeTableCellRich>;
+    const settingCell = document.createElement("td");
+    Object.assign(window.siyuan, {menus: {menu: {
+        remove: () => { menuItems = []; }, append: () => {}, popup: () => { menuShown++; },
+        fullscreen: () => { mobileMenuShown++; },
+    }}});
     const copyDependencies = {
         host, fragment, signal: copyController.signal,
+        canEdit: () => canEditCode,
+        beforeChange: () => { oldCode = api.serializeTableCellRich(wysiwyg.innerHTML); },
+        commit: () => {
+            updates++;
+            api.updateTableCellEditingValue(settingCell, api.serializeTableCellRich(wysiwyg.innerHTML));
+        },
+        isMobile: () => mobileCodeMenu,
+        highlightRender: () => {},
+        MenuItem: class {
+            element = document.createElement("button");
+            constructor(item: IMenu) { menuItems.push(item); }
+        },
         writeText: (text: string) => copied.push(text),
         showMessage: (text: string) => {
             check.equal(text, "Copied");
@@ -280,9 +304,50 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     check.equal(copied.length, 6);
     check.equal(messages, 6);
     check.equal(bubbled, 0, "copy stays inside the cell editor");
+    Object.assign(window.siyuan.config.editor, {codeLineWrap: true, codeLigatures: false, codeSyntaxHighlightLineNum: true});
+    const settingsBody = "a | b\n\n<test> & c\n";
+    wysiwyg.innerHTML = base.Md2BlockDOM("```js\n" + settingsBody + "```");
+    const defaults = [true, false, true];
+    for (const [index, attribute] of ["linewrap", "ligatures", "linenumber"].entries()) {
+        wysiwyg.querySelector(".protyle-action__menu use").dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        check.equal(menuItems.length, 3);
+        check.equal(menuItems[index].checked, defaults[index]);
+        menuItems[index].click(document.createElement("button"), new MouseEvent("click"));
+        wysiwyg.innerHTML = api.getTableCellRichBlockDOM(settingCell);
+        check.equal(wysiwyg.firstElementChild.getAttribute(attribute), String(!defaults[index]));
+        check.equal(wysiwyg.querySelector('.hljs [contenteditable="true"]').textContent, settingsBody);
+        check.equal(api.serializeTableCellRich(wysiwyg.innerHTML).markdown,
+            api.serializeTableCellRich(api.getTableCellRichBlockDOM(settingCell)).markdown);
+        const redo = settingCell.getAttribute("data-sy-table-cell-rich");
+        api.updateTableCellEditingValue(settingCell, oldCode);
+        const undoHolder = document.createElement("div");
+        undoHolder.innerHTML = api.getTableCellRichBlockDOM(settingCell);
+        check.equal(undoHolder.firstElementChild.hasAttribute(attribute), false);
+        settingCell.setAttribute("data-sy-table-cell-rich", redo);
+        check.equal(api.getTableCellRichBlockDOM(settingCell), wysiwyg.innerHTML);
+    }
+    check.equal(updates, 3, "each setting explicitly commits through the host");
+    canEditCode = false;
+    wysiwyg.querySelector(".protyle-action__menu").dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    check.equal(menuShown, 3, "read-only editors cannot open the settings menu");
+    menuItems[0].click(document.createElement("button"), new MouseEvent("click"));
+    check.equal(updates, 3, "stale menu callbacks cannot change a read-only editor");
+    canEditCode = true;
+    mobileCodeMenu = true;
+    wysiwyg.querySelector(".protyle-action__menu").dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    check.equal(mobileMenuShown, 1, "mobile opens the fullscreen menu");
+    check.equal(menuShown, 3);
+    wysiwyg.firstElementChild.setAttribute("linewrap", "invalid");
+    const cleanCode = document.createElement("div");
+    cleanCode.innerHTML = api.sanitizeAVRichTextBlockDOM(wysiwyg.innerHTML, true);
+    check.equal(cleanCode.firstElementChild.hasAttribute("linewrap"), false);
+    cleanCode.innerHTML = api.sanitizeAVRichTextBlockDOM(wysiwyg.innerHTML);
+    check.equal(cleanCode.firstElementChild.hasAttribute("ligatures"), false);
     copyController.abort();
     wysiwyg.querySelector(".protyle-action__copy").dispatchEvent(new MouseEvent("click", {bubbles: true}));
     check.equal(copied.length, 6, "closing the editor removes the copy handler");
+    menuItems[0].click(document.createElement("button"), new MouseEvent("click"));
+    check.equal(updates, 3, "closing the editor invalidates menu callbacks");
     const selectionDependencies = {getContenteditableElement, isNotEditBlock: () => false, revealTabsForTarget: () => {}};
     const selectionAPI = new Function(...Object.keys(selectionDependencies), selectionSource +
         "\nreturn {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, focusByOffset, getSelectionOffset};")(
@@ -390,9 +455,8 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const start = editor.indexOf('host.addEventListener("keydown", event => {');
     const end = editor.indexOf("}, {capture: true, signal});", start) + "}, {capture: true, signal});".length;
     const keydownSource = compile(editor.substring(start, end));
-    const copyStart = editor.indexOf('host.addEventListener("click", event => {');
-    const copyEnd = editor.indexOf("}, {capture: true, signal});", copyStart) + "}, {capture: true, signal});".length;
-    const copySource = compile(read("normalizeText.ts") + "\n" + editor.substring(copyStart, copyEnd));
+    const copySource = compile(read("normalizeText.ts")) + "\n" + compile(read("../lite/codeActions.ts")) +
+        "\nbindLiteCodeActions(host, fragment.protyle, {signal, canEdit, beforeChange, onChange: commit});";
     const selectionSource = compile(read("selection.ts")) + "\n" + compile(read("tableCellRichSelection.ts"));
     const highlightSource = compile(read("../render/highlightRender.ts"));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cell-code-test-"));

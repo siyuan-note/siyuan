@@ -446,6 +446,7 @@
     overflow: auto;
 
     > .b3-label,
+    &--grid > .b3-label,
     &-section > .b3-label {
       display: flex;
       flex-direction: column;
@@ -942,6 +943,144 @@
     }
   }
 
+  &__v2-managed-title {
+    padding: 2px 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    text-align: start;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--b3-theme-primary);
+    }
+  }
+
+  &__v2-managed-card,
+  &__v2-managed-source {
+    > button.b3-list-item__action {
+      padding: 0;
+      border: 0;
+      color: inherit;
+      background: transparent;
+      cursor: pointer;
+    }
+  }
+
+  &__v2-details {
+    flex-shrink: 0;
+    min-width: 0;
+    border-top: 1px solid var(--b3-border-color);
+
+    > summary {
+      padding: 12px 0;
+      color: var(--b3-theme-on-surface);
+      cursor: pointer;
+    }
+  }
+
+  &__v2-checklist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    max-height: 180px;
+    overflow: auto;
+    padding: 8px;
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+
+    > label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      padding: 4px;
+      cursor: pointer;
+
+      > span {
+        overflow-wrap: anywhere;
+      }
+    }
+  }
+
+  &__v2-picker-row {
+    display: flex;
+    align-items: center;
+    border-radius: var(--b3-border-radius);
+
+    > input {
+      margin-inline-start: 8px;
+    }
+
+    > button {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__v2-picker-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--b3-border-color);
+
+    > label {
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  &__v2-picker-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  &__v2-preview-toolbar,
+  &__v2-preview-navigation,
+  &__v2-preview-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__v2-preview-toolbar {
+    justify-content: space-between;
+  }
+
+  &__v2-preview-actions {
+    justify-content: center;
+    padding: 12px;
+    border-top: 1px solid var(--b3-border-color);
+  }
+
+  &__v2-statistics-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--b3-border-color);
+      border-radius: var(--b3-border-radius);
+
+      > strong {
+        font-size: 22px;
+      }
+    }
+  }
+
   &__v2-managed-details {
     display: flex;
     align-items: center;
@@ -979,6 +1118,10 @@
       display: flex;
     }
   }
+}
+
+[aria-busy="true"] .card__v2-image-editor {
+  pointer-events: none;
 }
 
 @media screen and (max-width: 750px) {

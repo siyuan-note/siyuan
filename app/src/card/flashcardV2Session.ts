@@ -573,22 +573,22 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
 </div>
 </div>`;
 
-const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2SessionQueueCard[], index: number,
+const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
+    current: Pick<IFlashcardV2SessionQueueCard["sessionCard"], "cardID" | "optionOrder" | "dynamicOptions">,
     isCurrent: () => boolean, callback: (rendered: IFlashcardV2RenderedCard) => void,
-    unavailable: () => void) => {
-    const current = queue[index];
+    unavailable: () => void, preview = false) => {
     const contentElement = dialog.element.querySelector(".card__block") as HTMLElement;
     const contextElement = dialog.element.querySelector("[data-flashcard-context]") as HTMLElement;
     const frontElement = dialog.element.querySelector("[data-flashcard-front]") as HTMLElement;
     const answerElement = dialog.element.querySelector("[data-flashcard-answer]") as HTMLElement;
     setReviewActionsEnabled(dialog, false);
     let modelLoaded = false;
-    void fetchPost("/api/flashcard/getRenderModel", {cardID: current.card.id}, (modelResponse) => {
+    void fetchPost("/api/flashcard/getRenderModel", {cardID: current.cardID}, (modelResponse) => {
         if (!isCurrent()) {
             return;
         }
         const model = modelResponse.data as IFlashcardV2RenderModel;
-        const dynamicReferences: IFlashcardV2SourceReference[] = (current.sessionCard.dynamicOptions || [])
+        const dynamicReferences: IFlashcardV2SourceReference[] = (current.dynamicOptions || [])
             .filter((option) => option.entityType === "block")
             .map((option, optionIndex) => ({
                 entityType: "block",
@@ -618,7 +618,6 @@ const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2
             answerElement.classList.add("fn__none");
             (answerElement.querySelector(".protyle-wysiwyg") as HTMLElement).innerHTML = "";
             contentElement.className = "card__block fn__flex-1 card__v2-session-content";
-            dialog.element.querySelector("[data-flashcard-count]").textContent = flashcardV2QueueProgress(queue);
             setActionsVisible(dialog, false);
             let frontReferences = selectReferences(references, model.template.frontSpec);
             if (frontReferences.length === 0) {
@@ -633,7 +632,7 @@ const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2
             const ankiFront = renderFlashcardV2AnkiTemplate(model, "front", doms);
             const ankiBack = ankiFront === undefined ? undefined :
                 renderFlashcardV2AnkiTemplate(model, "back", doms, ankiFront);
-            const specialFront = renderFlashcardV2Choice(model, doms, current.sessionCard.optionOrder || []) ??
+            const specialFront = renderFlashcardV2Choice(model, doms, current.optionOrder || []) ??
                 renderFlashcardV2MultiLine(model, doms);
             let hasRenderedAnswer = specialFront !== undefined ||
                 (ankiBack !== undefined ? ankiBack.trim() !== "" : answerReferences.length > 0);
@@ -728,7 +727,9 @@ const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2
                 })) : undefined,
             });
             blocksLoaded = true;
-            playbackController.activate("front");
+            if (!preview) {
+                playbackController.activate("front");
+            }
             (frontElement.querySelector("[data-anki-type-answer], [data-flashcard-type-answer]") as
                 HTMLInputElement)?.focus();
         }).then(() => {
@@ -741,6 +742,99 @@ const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2
             unavailable();
         }
     });
+};
+
+const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2SessionQueueCard[], index: number,
+    isCurrent: () => boolean, callback: (rendered: IFlashcardV2RenderedCard) => void,
+    unavailable: () => void) => {
+    dialog.element.querySelector("[data-flashcard-count]").textContent = flashcardV2QueueProgress(queue);
+    renderFlashcardV2Card(dialog, queue[index].sessionCard, isCurrent, callback, unavailable);
+};
+
+// 预览仅加载渲染模型和块内容，不打开复习会话，也不发送评分或会话事件。
+export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0) => {
+    if (cardIDs.length === 0) {
+        return;
+    }
+    let index = Math.min(cardIDs.length - 1, Math.max(0, initialIndex));
+    let generation = 0;
+    let rendered: IFlashcardV2RenderedCard | undefined;
+    const dialog = createSessionSurface({
+        title: window.siyuan.languages.flashcardPreview,
+        width: "min(880px, 96vw)",
+        height: "min(760px, 86vh)",
+        destroyCallback: () => {
+            generation++;
+            rendered?.playbackController.cancel();
+        },
+        content: `<div class="b3-dialog__content fn__flex-column card__v2-session card__v2-preview">
+<div data-flashcard-toolbar class="card__v2-session-toolbar card__v2-preview-toolbar">
+<span class="ft__on-surface">${window.siyuan.languages.flashcardPreviewTip}</span>
+<div class="card__v2-preview-navigation">
+<button data-type="previous" class="b3-button b3-button--outline">${window.siyuan.languages.previous}</button>
+<span data-flashcard-count aria-live="polite"></span>
+<button data-type="next" class="b3-button b3-button--outline">${window.siyuan.languages.next}</button>
+</div></div>
+<div class="card__block fn__flex-1 card__v2-session-content" aria-busy="true">
+<div data-flashcard-context class="card__v2-context ft__secondary fn__none"></div>
+<div class="protyle-wysiwyg" contenteditable="false" data-flashcard-front></div>
+<div class="fn__none" data-flashcard-answer><div class="fn__hr"></div><div class="protyle-wysiwyg" contenteditable="false"></div></div>
+</div>
+<div data-flashcard-action="reveal" class="card__v2-preview-actions">
+<button data-type="reset" class="b3-button b3-button--outline">${window.siyuan.languages.refresh}</button>
+<button data-type="show" class="b3-button b3-button--text" disabled>${window.siyuan.languages.cardShowAnswer}</button>
+<button data-type="retry" class="b3-button b3-button--text fn__none">${window.siyuan.languages.retry}</button>
+</div>
+<div data-flashcard-action="ratings" class="fn__none"></div>
+<div data-flashcard-action="finish" class="fn__none"></div></div>`,
+    });
+    const show = dialog.element.querySelector<HTMLButtonElement>('[data-type="show"]');
+    const retry = dialog.element.querySelector<HTMLButtonElement>('[data-type="retry"]');
+    const load = () => {
+        const request = ++generation;
+        const isCurrent = () => request === generation && dialog.element.isConnected;
+        rendered?.playbackController.cancel();
+        rendered = undefined;
+        show.disabled = true;
+        show.classList.remove("fn__none");
+        retry.classList.add("fn__none");
+        dialog.element.querySelector('[data-flashcard-action="reveal"]').classList.remove("fn__none");
+        dialog.element.querySelector("[data-flashcard-count]").textContent = `${index + 1} / ${cardIDs.length}`;
+        dialog.element.querySelector<HTMLButtonElement>('[data-type="previous"]').disabled = index === 0;
+        dialog.element.querySelector<HTMLButtonElement>('[data-type="next"]').disabled = index === cardIDs.length - 1;
+        dialog.element.querySelector("[data-flashcard-front]").textContent = "";
+        dialog.element.querySelector("[data-flashcard-answer]").classList.add("fn__none");
+        dialog.element.querySelector("[data-flashcard-context]").classList.add("fn__none");
+        renderFlashcardV2Card(dialog, {cardID: cardIDs[index]}, isCurrent, (result) => {
+            rendered = result;
+            setReviewActionsEnabled(dialog, true);
+            dialog.element.querySelector('[data-flashcard-action="reveal"]').classList.remove("fn__none");
+        }, () => {
+            dialog.element.querySelector(".card__block").setAttribute("aria-busy", "false");
+            dialog.element.querySelector("[data-flashcard-front]").textContent = window.siyuan.languages.flashcardLoadFailed;
+            show.classList.add("fn__none");
+            retry.classList.remove("fn__none");
+        }, true);
+    };
+    dialog.element.addEventListener("click", (event) => {
+        const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-type]");
+        if (!button || button.disabled) {
+            return;
+        }
+        if (button.dataset.type === "show" && rendered) {
+            if (rendered.revealController?.revealNext() ?? true) {
+                void (rendered.pluginAnswerController?.check() ?? rendered.choiceController?.check() ??
+                    rendered.typedAnswerController?.check());
+                showFlashcardAnswer(dialog.element.querySelector(".card__block"));
+                dialog.element.querySelector("[data-flashcard-answer]").classList.remove("fn__none");
+                show.disabled = true;
+            }
+        } else if (["previous", "next", "reset", "retry"].includes(button.dataset.type)) {
+            index += button.dataset.type === "previous" ? -1 : button.dataset.type === "next" ? 1 : 0;
+            load();
+        }
+    });
+    load();
 };
 
 const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => void) => {

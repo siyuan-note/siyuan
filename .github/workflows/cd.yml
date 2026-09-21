@@ -14,7 +14,7 @@ env:
 jobs:
   prepare:
     name: Prepare
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       release_title: ${{ steps.release_info.outputs.release_title }}
       version: ${{ steps.version.outputs.value }}
@@ -108,7 +108,7 @@ jobs:
   languages:
     name: Language validation
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -545,7 +545,7 @@ jobs:
             ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.rpm
 
   build_android:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: ubuntu build android.apk
     # 测试通过后并行执行 Android 和桌面构建，全部成功后汇总产物并创建发布。
     needs: [prepare, languages, contracts, frontend-tests]
@@ -704,7 +704,7 @@ jobs:
 
   create_release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [prepare, build, build_android]
     steps:
       - name: Download all artifacts

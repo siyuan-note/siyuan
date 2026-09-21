@@ -15,7 +15,7 @@ on:
 jobs:
   build:
     if: ${{ github.repository_owner == 'siyuan-note' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check tag aka check release type
         id: checktag

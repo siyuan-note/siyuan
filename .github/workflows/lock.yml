@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   lock:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: dessant/lock-threads@v6
         with:

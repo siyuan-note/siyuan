@@ -77,6 +77,7 @@ const rendererModules = () => {
     visitKeyup(wysiwyg);
     assert.ok(keyupStatements);
     modules["wysiwyg/navigationKeyup"] = `import {getEditorRange} from "../util/selection";
+        import {getBlockSelectionModeElement} from "./blockSelection";
         import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
         import {shouldRunAVKeyupFallback} from "../render/av/verticalNavigation";
         const getAVTemplateInteractiveElement = () => false;

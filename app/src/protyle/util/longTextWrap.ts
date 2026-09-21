@@ -41,16 +41,48 @@ export const unwrapLongTextRuns = (root: ParentNode) => {
     parents.forEach(parent => parent.normalize());
 };
 
+const isDisplayWrapper = (node: Node) => node?.nodeType === Node.ELEMENT_NODE &&
+    (node as Element).matches(LONG_TEXT_SELECTOR) &&
+    !(node as Element).hasAttribute("data-type") && !(node as Element).hasAttribute("style");
+
 const preserveSelection = (root: Element, update: () => void, retainedRange?: Range) => {
     const selection = root.ownerDocument.getSelection();
     const capture = (node: Node, offset: number) => {
         if (!node || !root.contains(node)) {
             return {node, offset};
         }
+        let parent = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement;
+        let container = parent;
+        while (isDisplayWrapper(container)) {
+            container = container.parentElement;
+        }
+        // 以不会被替换的父元素和前一个结构节点定位，保留空块、软换行及行内格式边界。
+        let previous = node.nodeType === Node.ELEMENT_NODE ? node.childNodes[offset - 1] : node.previousSibling;
+        while (parent) {
+            while (previous) {
+                if (isDisplayWrapper(previous)) {
+                    parent = previous as Element;
+                    previous = previous.lastChild;
+                } else if (previous.nodeType === Node.TEXT_NODE) {
+                    previous = previous.previousSibling;
+                } else {
+                    break;
+                }
+            }
+            if (previous || parent === container) {
+                break;
+            }
+            previous = parent.previousSibling;
+            parent = parent.parentElement;
+        }
         const range = root.ownerDocument.createRange();
-        range.selectNodeContents(root);
+        if (previous) {
+            range.setStartAfter(previous);
+        } else {
+            range.setStart(container, 0);
+        }
         range.setEnd(node, offset);
-        return {node, offset, textOffset: range.toString().length};
+        return {node, offset, container, previous, textOffset: range.toString().length};
     };
     const anchor = selection?.rangeCount ? capture(selection.anchorNode, selection.anchorOffset) : undefined;
     const focus = selection?.rangeCount ? capture(selection.focusNode, selection.focusOffset) : undefined;
@@ -72,15 +104,28 @@ const preserveSelection = (root: Element, update: () => void, retainedRange?: Ra
             return position;
         }
         let offset = position.textOffset;
-        const walker = root.ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-        let node: Node;
-        while ((node = walker.nextNode())) {
-            if (offset <= node.textContent.length) {
-                return {node, offset};
+        const {container, previous} = position;
+        const walker = root.ownerDocument.createTreeWalker(container, NodeFilter.SHOW_ALL);
+        walker.currentNode = previous || container;
+        let node = previous ? walker.nextSibling() : walker.firstChild();
+        while (node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                if (offset <= node.textContent.length) {
+                    return {node, offset};
+                }
+                offset -= node.textContent.length;
+            } else if (!isDisplayWrapper(node)) {
+                break;
             }
-            offset -= node.textContent.length;
+            node = walker.nextNode();
         }
-        return {node: root, offset: root.childNodes.length};
+        const range = root.ownerDocument.createRange();
+        if (previous) {
+            range.setStartAfter(previous);
+        } else {
+            range.setStart(container, 0);
+        }
+        return {node: range.startContainer, offset: range.startOffset};
     };
     // 延迟输入处理持有原 Range 对象，更新显示节点时同步恢复其边界。
     positions.forEach(({range, start, end}) => {

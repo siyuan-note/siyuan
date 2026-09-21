@@ -39,7 +39,8 @@ func TestTableCellRichDocumentReaders(t *testing.T) {
 	}
 	source := "- **first**\n- second\n\n```go\na | b\nc\n```"
 	for _, source := range []string{source, source + "\n" +
-		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}`} {
+		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}`,
+		source + "\n" + `{: id="20260921000000-code001" custom-sy-code-tab-spaces="2"}`} {
 		for name, read := range readers {
 			t.Run(name, func(t *testing.T) {
 				tree, err := read(legacy)
@@ -81,7 +82,7 @@ func TestTableCellRichDocumentReaders(t *testing.T) {
 func TestTableCellRichHTMLAndMarkdownExports(t *testing.T) {
 	luteEngine := util.NewLute()
 	source := "- **first**\n- second\n\n```go\na | b\nc\n```\n" +
-		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}` +
+		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false" custom-sy-code-tab-spaces="2"}` +
 		"\n\n![image](assets/original.png)"
 	tree := parse.Parse("", []byte("| Header |\n| --- |\n| value |"), luteEngine.ParseOptions)
 	cell := tree.Root.FirstChild.LastChild.FirstChild
@@ -102,7 +103,8 @@ func TestTableCellRichHTMLAndMarkdownExports(t *testing.T) {
 		t.Fatal(err)
 	}
 	codes := cell.ChildrenByType(ast.NodeCodeBlock)
-	if len(codes) != 1 || codes[0].IALAttr("linewrap") != "false" || codes[0].IALAttr("linenumber") != "true" || codes[0].IALAttr("ligatures") != "false" {
+	if len(codes) != 1 || codes[0].IALAttr("linewrap") != "false" || codes[0].IALAttr("linenumber") != "true" ||
+		codes[0].IALAttr("ligatures") != "false" || codes[0].IALAttr("custom-sy-code-tab-spaces") != "2" {
 		t.Fatal("export materialization lost code settings")
 	}
 	ast.Walk(cell, func(node *ast.Node, entering bool) ast.WalkStatus {

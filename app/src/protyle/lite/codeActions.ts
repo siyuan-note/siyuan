@@ -1,13 +1,35 @@
 import {MenuItem} from "../../menus/Menu";
+import {Constants} from "../../constants";
 import {showMessage} from "../../dialog/message";
 import {isMobile} from "../../util/functions";
 import {highlightRender} from "../render/highlightRender";
 import {writeText} from "../util/compatibility";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
+import {CODE_TAB_SPACE_VALUES} from "../wysiwyg/codeBlockUtil";
 
 export const getLiteCodeMenuItems = (node: Element, update: (attribute: string, value: string) => void): IMenu[] => {
     const editor = window.siyuan.config.editor;
-    return [
+    const codeTabSpaces = node.getAttribute(Constants.CUSTOM_SY_CODE_TAB_SPACES);
+    const tabSpaces: IMenu = {
+        id: "md29",
+        iconHTML: "",
+        label: window.siyuan.languages.md29,
+        type: "submenu",
+        submenu: [{
+            id: "default",
+            iconHTML: "",
+            label: `${window.siyuan.languages.default} (${editor.codeTabSpaces})`,
+            checked: codeTabSpaces === null,
+            click: () => update(Constants.CUSTOM_SY_CODE_TAB_SPACES, ""),
+        }, ...CODE_TAB_SPACE_VALUES.map(value => ({
+            id: `tabSpaces${value}`,
+            iconHTML: "",
+            label: value.toString(),
+            checked: codeTabSpaces === value.toString(),
+            click: () => update(Constants.CUSTOM_SY_CODE_TAB_SPACES, value.toString()),
+        }))],
+    };
+    return [tabSpaces, ...[
         {attribute: "linewrap", label: "md31", fallback: editor.codeLineWrap},
         {attribute: "ligatures", label: "md2", fallback: editor.codeLigatures},
         {attribute: "linenumber", label: "md27", fallback: editor.codeSyntaxHighlightLineNum},
@@ -16,11 +38,12 @@ export const getLiteCodeMenuItems = (node: Element, update: (attribute: string, 
         const checked = value === "true" || (value !== "false" && fallback);
         return {
             id: label,
+            iconHTML: "",
             label: window.siyuan.languages[label],
             checked,
             click: () => update(attribute, String(!checked)),
         };
-    });
+    })];
 };
 
 export const bindLiteCodeActions = (host: HTMLElement, protyle: IProtyle, options: {
@@ -55,7 +78,11 @@ export const bindLiteCodeActions = (host: HTMLElement, protyle: IProtyle, option
                 return;
             }
             options.beforeChange?.();
-            code.setAttribute(attribute, value);
+            if (value === "") {
+                code.removeAttribute(attribute);
+            } else {
+                code.setAttribute(attribute, value);
+            }
             // 属性变化不会触发片段的正文观察器，需显式交由宿主事务保存。
             options.onChange();
             content.removeAttribute("data-render");

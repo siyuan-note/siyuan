@@ -10,9 +10,12 @@ import {createSourceFile, isClassDeclaration, isMethodDeclaration, ScriptTarget,
 const browserCases = async (source: string, enterSource: string, hintSource: string, keydownSource: string,
                             copySource: string, selectionSource: string, highlightSource: string) => {
     const check: typeof assert = require("node:assert/strict");
-    const api = new Function(source + "\nreturn {getAgentLute, configureAVRichTextLute, getTableCellEditorLute, " +
+    const codeTabAttribute = "custom-sy-code-tab-spaces";
+    const api = new Function("Constants", source + "\nreturn {getAgentLute, configureAVRichTextLute, getTableCellEditorLute, " +
         "canEnterCodeBlock, hasCodeBlockFence, getTableCellInlineHTML, serializeTableCellRich, " +
-        "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM};")() as
+        "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM};")({
+        CUSTOM_SY_CODE_TAB_SPACES: codeTabAttribute,
+    }) as
         typeof import("../render/setLute") & typeof import("../render/av/richTextValue") &
         typeof import("./tableCellRichLute") & typeof import("../wysiwyg/codeBlockEnter") &
         typeof import("./tableCellRich") & typeof import("../render/av/richText");
@@ -254,7 +257,7 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const copied: string[] = [];
     let messages = 0;
     let bubbled = 0;
-    Object.assign(window.siyuan, {languages: {copied: "Copied"}});
+    Object.assign(window.siyuan, {languages: {copied: "Copied", default: "Default"}});
     const copyController = new AbortController();
     let canEditCode = true;
     let menuItems: IMenu[] = [];
@@ -270,6 +273,8 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     }}});
     const copyDependencies = {
         host, fragment, signal: copyController.signal,
+        Constants: {...constants, CUSTOM_SY_CODE_TAB_SPACES: codeTabAttribute},
+        getContenteditableElement, getUndoFocusContext: () => ({}), updateTransaction,
         canEdit: () => canEditCode,
         beforeChange: () => { oldCode = api.serializeTableCellRich(wysiwyg.innerHTML); },
         commit: () => {
@@ -288,7 +293,9 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
             messages++;
         },
     };
-    new Function(...Object.keys(copyDependencies), copySource)(...Object.values(copyDependencies));
+    const codeActions = new Function(...Object.keys(copyDependencies), copySource +
+        "\nreturn {getCodeBlockTabSpace, tabCodeBlock};")(...Object.values(copyDependencies)) as
+        typeof import("../wysiwyg/codeBlock");
     fixture.addEventListener("click", () => bubbled++);
     for (const text of ["", "a\u00a0b\n  <tag> & value\n\n", "\u200D```\n"]) {
         wysiwyg.innerHTML = base.Md2BlockDOM("```js\nplaceholder\n```");
@@ -304,15 +311,16 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     check.equal(copied.length, 6);
     check.equal(messages, 6);
     check.equal(bubbled, 0, "copy stays inside the cell editor");
-    Object.assign(window.siyuan.config.editor, {codeLineWrap: true, codeLigatures: false, codeSyntaxHighlightLineNum: true});
+    Object.assign(window.siyuan.config.editor,
+        {codeLineWrap: true, codeLigatures: false, codeSyntaxHighlightLineNum: true, codeTabSpaces: 4});
     const settingsBody = "a | b\n\n<test> & c\n";
     wysiwyg.innerHTML = base.Md2BlockDOM("```js\n" + settingsBody + "```");
     const defaults = [true, false, true];
     for (const [index, attribute] of ["linewrap", "ligatures", "linenumber"].entries()) {
         wysiwyg.querySelector(".protyle-action__menu use").dispatchEvent(new MouseEvent("click", {bubbles: true}));
-        check.equal(menuItems.length, 3);
-        check.equal(menuItems[index].checked, defaults[index]);
-        menuItems[index].click(document.createElement("button"), new MouseEvent("click"));
+        check.equal(menuItems.length, 4);
+        check.equal(menuItems[index + 1].checked, defaults[index]);
+        menuItems[index + 1].click(document.createElement("button"), new MouseEvent("click"));
         wysiwyg.innerHTML = api.getTableCellRichBlockDOM(settingCell);
         check.equal(wysiwyg.firstElementChild.getAttribute(attribute), String(!defaults[index]));
         check.equal(wysiwyg.querySelector('.hljs [contenteditable="true"]').textContent, settingsBody);
@@ -327,27 +335,67 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
         check.equal(api.getTableCellRichBlockDOM(settingCell), wysiwyg.innerHTML);
     }
     check.equal(updates, 3, "each setting explicitly commits through the host");
+    wysiwyg.innerHTML = base.Md2BlockDOM("```js\n" + settingsBody + "```");
+    for (const value of [0, 2, 4, 6, 8, null]) {
+        const previousValue = wysiwyg.firstElementChild.getAttribute(codeTabAttribute);
+        wysiwyg.querySelector(".protyle-action__menu").dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        const tabItems = menuItems.find(item => item.id === "md29").submenu;
+        check.deepEqual(tabItems.map(item => item.label), ["Default (4)", "0", "2", "4", "6", "8"]);
+        check.equal(tabItems.filter(item => item.checked).length, 1);
+        const option = tabItems.find(item => item.id === (value === null ? "default" : `tabSpaces${value}`));
+        option.click(document.createElement("button"), new MouseEvent("click"));
+        wysiwyg.innerHTML = api.getTableCellRichBlockDOM(settingCell);
+        const code = wysiwyg.firstElementChild as HTMLElement;
+        check.equal(code.getAttribute(codeTabAttribute), value === null ? null : value.toString());
+        check.equal(code.querySelector('.hljs [contenteditable="true"]').textContent, settingsBody);
+        const expectedIndent = value === 0 ? "\t" : " ".repeat(value ?? 4);
+        check.equal(codeActions.getCodeBlockTabSpace(code), expectedIndent);
+        const redo = settingCell.getAttribute("data-sy-table-cell-rich");
+        api.updateTableCellEditingValue(settingCell, oldCode);
+        const undoHolder = document.createElement("div");
+        undoHolder.innerHTML = api.getTableCellRichBlockDOM(settingCell);
+        check.equal(undoHolder.firstElementChild.getAttribute(codeTabAttribute), previousValue);
+        settingCell.setAttribute("data-sy-table-cell-rich", redo);
+        const range = document.createRange();
+        range.setStart(code.querySelector('.hljs [contenteditable="true"]').firstChild, 0);
+        range.collapse(true);
+        codeActions.tabCodeBlock(protyle as unknown as IProtyle, code, range);
+        check.equal(code.querySelector('.hljs [contenteditable="true"]').textContent, expectedIndent + settingsBody);
+        wysiwyg.innerHTML = api.getTableCellRichBlockDOM(settingCell);
+    }
+    const editableUpdates = updates;
+    const editableMenus = menuShown;
     canEditCode = false;
     wysiwyg.querySelector(".protyle-action__menu").dispatchEvent(new MouseEvent("click", {bubbles: true}));
-    check.equal(menuShown, 3, "read-only editors cannot open the settings menu");
-    menuItems[0].click(document.createElement("button"), new MouseEvent("click"));
-    check.equal(updates, 3, "stale menu callbacks cannot change a read-only editor");
+    check.equal(menuShown, editableMenus, "read-only editors cannot open the settings menu");
+    menuItems[1].click(document.createElement("button"), new MouseEvent("click"));
+    menuItems[0].submenu[1].click(document.createElement("button"), new MouseEvent("click"));
+    check.equal(updates, editableUpdates, "stale menu callbacks cannot change a read-only editor");
     canEditCode = true;
     mobileCodeMenu = true;
     wysiwyg.querySelector(".protyle-action__menu").dispatchEvent(new MouseEvent("click", {bubbles: true}));
     check.equal(mobileMenuShown, 1, "mobile opens the fullscreen menu");
-    check.equal(menuShown, 3);
+    check.equal(menuShown, editableMenus);
     wysiwyg.firstElementChild.setAttribute("linewrap", "invalid");
     const cleanCode = document.createElement("div");
     cleanCode.innerHTML = api.sanitizeAVRichTextBlockDOM(wysiwyg.innerHTML, true);
     check.equal(cleanCode.firstElementChild.hasAttribute("linewrap"), false);
     cleanCode.innerHTML = api.sanitizeAVRichTextBlockDOM(wysiwyg.innerHTML);
     check.equal(cleanCode.firstElementChild.hasAttribute("ligatures"), false);
+    for (const value of ["", "3", "-2", "10", "02", "2.0", "true"]) {
+        wysiwyg.firstElementChild.setAttribute(codeTabAttribute, value);
+        cleanCode.innerHTML = api.sanitizeAVRichTextBlockDOM(wysiwyg.innerHTML, true);
+        check.equal(cleanCode.firstElementChild.hasAttribute(codeTabAttribute), false);
+    }
+    wysiwyg.firstElementChild.setAttribute(codeTabAttribute, "2");
+    cleanCode.innerHTML = api.sanitizeAVRichTextBlockDOM(wysiwyg.innerHTML);
+    check.equal(cleanCode.firstElementChild.hasAttribute(codeTabAttribute), false);
     copyController.abort();
     wysiwyg.querySelector(".protyle-action__copy").dispatchEvent(new MouseEvent("click", {bubbles: true}));
     check.equal(copied.length, 6, "closing the editor removes the copy handler");
-    menuItems[0].click(document.createElement("button"), new MouseEvent("click"));
-    check.equal(updates, 3, "closing the editor invalidates menu callbacks");
+    menuItems[1].click(document.createElement("button"), new MouseEvent("click"));
+    menuItems[0].submenu[1].click(document.createElement("button"), new MouseEvent("click"));
+    check.equal(updates, editableUpdates, "closing the editor invalidates menu callbacks");
     const selectionDependencies = {getContenteditableElement, isNotEditBlock: () => false, revealTabsForTarget: () => {}};
     const selectionAPI = new Function(...Object.keys(selectionDependencies), selectionSource +
         "\nreturn {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, focusByOffset, getSelectionOffset};")(
@@ -444,7 +492,7 @@ test("table cells insert code through slash and Enter without losing soft breaks
         .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const read = (file: string) => readFileSync(path.join(__dirname, file), "utf8");
     const source = ["longTextWrap.ts", "inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts", "../../util/escape.ts",
-        "../render/setLute.ts", "../render/av/richTextValue.ts", "../render/av/richText.ts",
+        "../render/setLute.ts", "../wysiwyg/codeBlockUtil.ts", "../render/av/richTextValue.ts", "../render/av/richText.ts",
         "../wysiwyg/taskListMarker.ts", "../wysiwyg/codeBlockEnter.ts", "tableCellRichLute.ts", "tableCellRichValue.ts",
         "tableCellRich.ts"].map(file => compile(read(file))).join("\n");
     const hint = createSourceFile("hint.ts", read("../hint/index.ts"), ScriptTarget.Latest, true);
@@ -455,7 +503,8 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const start = editor.indexOf('host.addEventListener("keydown", event => {');
     const end = editor.indexOf("}, {capture: true, signal});", start) + "}, {capture: true, signal});".length;
     const keydownSource = compile(editor.substring(start, end));
-    const copySource = compile(read("normalizeText.ts")) + "\n" + compile(read("../lite/codeActions.ts")) +
+    const copySource = ["normalizeText.ts", "../wysiwyg/codeBlockUtil.ts", "../wysiwyg/codeBlock.ts", "../lite/codeActions.ts"]
+        .map(file => compile(read(file))).join("\n") +
         "\nbindLiteCodeActions(host, fragment.protyle, {signal, canEdit, beforeChange, onChange: commit});";
     const selectionSource = compile(read("selection.ts")) + "\n" + compile(read("tableCellRichSelection.ts"));
     const highlightSource = compile(read("../render/highlightRender.ts"));

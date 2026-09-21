@@ -1,4 +1,6 @@
 import {escapeHtml} from "../../../util/escape";
+import {Constants} from "../../../constants";
+import {CODE_TAB_SPACE_VALUES} from "../../wysiwyg/codeBlockUtil";
 import {highlightRender} from "../highlightRender";
 import {getAgentLute} from "../setLute";
 import {restoreInlineElementBoundaries} from "../../util/inlineElementBoundary";
@@ -99,8 +101,12 @@ const replaceWithText = (element: Element) => {
     element.replaceWith(document.createTextNode(element.textContent || ""));
 };
 
-const removeUnsupportedBlockAttributes = (element: HTMLElement) => {
+const removeUnsupportedBlockAttributes = (element: HTMLElement, codeSettings: boolean) => {
     Array.from(element.attributes).forEach((attribute) => {
+        if (codeSettings && element.dataset.type === "NodeCodeBlock" &&
+            attribute.name === Constants.CUSTOM_SY_CODE_TAB_SPACES) {
+            return;
+        }
         if (attribute.name.startsWith("custom-") || attribute.name === "bookmark" ||
             attribute.name === "memo" || attribute.name === "name" || attribute.name === "style") {
             element.removeAttribute(attribute.name);
@@ -154,7 +160,7 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false) => 
         if (type === "NodeHeading") {
             element.className = element.dataset.subtype;
         }
-        removeUnsupportedBlockAttributes(element);
+        removeUnsupportedBlockAttributes(element, images);
     });
     template.content.querySelectorAll(
         (images ? "" : ".img, img, ") +
@@ -193,7 +199,9 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false) => 
             const imageAttribute = images && ["src", "data-src", "alt", "title", "loading"].includes(name) &&
                 (element.tagName === "IMG" || element.classList.contains("img"));
             const codeAttribute = images && element.dataset.type === "NodeCodeBlock" &&
-                ["linewrap", "ligatures", "linenumber"].includes(name) && ["true", "false"].includes(attribute.value);
+                (["linewrap", "ligatures", "linenumber"].includes(name) && ["true", "false"].includes(attribute.value) ||
+                    name === Constants.CUSTOM_SY_CODE_TAB_SPACES &&
+                    CODE_TAB_SPACE_VALUES.some(value => value.toString() === attribute.value));
             if ((!AV_RICH_TEXT_EDITOR_ALLOWED_ATTRIBUTES.includes(name) && !imageAttribute && !codeAttribute) ||
                 name === "xlink:href" && !attribute.value.startsWith("#icon")) {
                 element.removeAttribute(attribute.name);
@@ -337,7 +345,7 @@ export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTe
     const singleEmptyParagraph = template.content.children.length === 1 &&
         template.content.firstElementChild === paragraphs[0] && hasEmptyParagraph;
     const hasCodeSettings = images && !!template.content.querySelector(
-        '[data-type="NodeCodeBlock"]:is([linewrap], [ligatures], [linenumber])');
+        `[data-type="NodeCodeBlock"]:is([linewrap], [ligatures], [linenumber], [${Constants.CUSTOM_SY_CODE_TAB_SPACES}])`);
     // 空段落和代码设置依靠块属性列表保留，同时保留相邻块的标识，避免属性被合并到前一段。
     if ((hasEmptyParagraph && !singleEmptyParagraph) || hasCodeSettings) {
         cleanBlockDOM = cleanAVRichTextBlockDOMStructure(sanitizedBlockDOM, true);

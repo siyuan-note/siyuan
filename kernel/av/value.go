@@ -1334,6 +1334,16 @@ func isAllowedValueTextRichBlockIAL(node *ast.Node, codeSettings bool) bool {
 				("true" != attr[1] && "false" != attr[1]) || node.Previous.IALAttr(attr[0]) != attr[1] {
 				return false
 			}
+		case "custom-sy-code-tab-spaces":
+			if !codeSettings || nil == node.Previous || ast.NodeCodeBlock != node.Previous.Type ||
+				node.Previous.IALAttr(attr[0]) != attr[1] {
+				return false
+			}
+			switch attr[1] {
+			case "0", "2", "4", "6", "8":
+			default:
+				return false
+			}
 		default:
 			return false
 		}
@@ -1420,7 +1430,8 @@ func valueTextRichBlockDOM2Kramdown(luteEngine *lute.Lute, blockDOM string) stri
 			return ast.WalkContinue
 		}
 		if ast.NodeParagraph == node.Type && !singleEmptyParagraph && "" == strings.TrimSpace(strings.ReplaceAll(node.Content(), "\u200b", "")) ||
-			ast.NodeCodeBlock == node.Type && ("" != node.IALAttr("linewrap") || "" != node.IALAttr("ligatures") || "" != node.IALAttr("linenumber")) {
+			ast.NodeCodeBlock == node.Type && ("" != node.IALAttr("linewrap") || "" != node.IALAttr("ligatures") ||
+				"" != node.IALAttr("linenumber") || "" != node.IALAttr("custom-sy-code-tab-spaces")) {
 			preserveBlockIDs = true
 			return ast.WalkStop
 		}

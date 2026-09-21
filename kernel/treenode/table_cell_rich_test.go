@@ -65,7 +65,7 @@ func TestTableCellRichSourceProjectionAndSpec(t *testing.T) {
 
 func TestTableCellRichSynchronizesAssetReferenceAndText(t *testing.T) {
 	tree, cell := richTableTree(t, "![image](assets/old.png) ((20240101000000-abcdefg 'reference')) text\n\n```go\nold\n```\n"+
-		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}`)
+		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false" custom-sy-code-tab-spaces="2"}`)
 	ast.Walk(cell, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -85,7 +85,7 @@ func TestTableCellRichSynchronizesAssetReferenceAndText(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, expected := range []string{"assets/new.png", "20240102000000-abcdefg", "<new> & value",
-		`linewrap="false"`, `linenumber="true"`, `ligatures="false"`} {
+		`linewrap="false"`, `linenumber="true"`, `ligatures="false"`, `custom-sy-code-tab-spaces="2"`} {
 		if !strings.Contains(cell.TableCellRich.Content, expected) {
 			t.Fatalf("source does not contain %q: %s", expected, cell.TableCellRich.Content)
 		}

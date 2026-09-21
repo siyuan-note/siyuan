@@ -136,7 +136,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 formula.setAttribute("data-render", "true");
             });
         }, {TIMEOUT_DBLCLICK: 190, CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
-            CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data", CUSTOM_SY_MINDMAP_CODE: "custom-sy-mindmap-code"}, () => {});
+            CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data", CUSTOM_SY_MINDMAP_CODE: "custom-sy-mindmap-code",
+            CUSTOM_SY_CODE_TAB_SPACES: "custom-sy-code-tab-spaces"}, () => {});
     const lute = Lute.New();
     lute.SetKramdownIAL(true);
     lute.SetProtyleWYSIWYG(true);
@@ -387,7 +388,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(settingCode);
     const codeSettingID = settingCode.dataset.nodeId;
     const oldCodeSettings = codeSettingList.outerHTML;
-    for (const [name, value] of [["linewrap", "false"], ["ligatures", "true"], ["linenumber", "false"]]) {
+    const codeSettings = [["linewrap", "false"], ["ligatures", "true"], ["linenumber", "false"],
+        ["custom-sy-code-tab-spaces", "2"]];
+    for (const [name, value] of codeSettings) {
         settingCode.setAttribute(name, value);
     }
     check.equal(api.replaceListMindmapContent(codeSettingList, codeSettingNode.id,
@@ -398,10 +401,23 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         roundTrip.innerHTML = lute.Md2BlockDOM(lute.BlockDOM2Md(html));
         const restoredCode = roundTrip.querySelector(`[data-node-id="${codeSettingID}"]`);
         check.ok(restoredCode, "code settings keep the source block identity");
-        for (const [name, value] of [["linewrap", "false"], ["ligatures", "true"], ["linenumber", "false"]]) {
+        for (const [name, value] of codeSettings) {
             check.equal(restoredCode.getAttribute(name), html === oldCodeSettings ? null : value,
                 "source snapshots restore code settings through undo and redo");
         }
+    }
+    settingCode.removeAttribute("custom-sy-code-tab-spaces");
+    check.equal(api.replaceListMindmapContent(codeSettingList, codeSettingNode.id,
+        codeSettingBlocks.map(block => block.outerHTML).join("")), true);
+    const resetCodeSettings = codeSettingList.outerHTML;
+    const resetCodeHolder = document.createElement("div");
+    resetCodeHolder.innerHTML = lute.Md2BlockDOM(lute.BlockDOM2Md(resetCodeSettings));
+    check.equal(resetCodeHolder.querySelector(`[data-node-id="${codeSettingID}"]`)
+        .hasAttribute("custom-sy-code-tab-spaces"), false, "default Tab spacing removes the saved override");
+    for (const html of [newCodeSettings, resetCodeSettings]) {
+        resetCodeHolder.innerHTML = lute.Md2BlockDOM(lute.BlockDOM2Md(html));
+        check.equal(resetCodeHolder.querySelector(`[data-node-id="${codeSettingID}"]`)
+            .getAttribute("custom-sy-code-tab-spaces"), html === newCodeSettings ? "2" : null);
     }
     const nestedTaskHolder = document.createElement("div");
     lute.SetDataTask(true);

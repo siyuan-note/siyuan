@@ -8,8 +8,12 @@ import (
 )
 
 func TestTableCellRichCodeSettings(t *testing.T) {
-	for _, attribute := range []string{"linewrap", "linenumber", "ligatures"} {
-		for _, value := range []string{"true", "false"} {
+	for _, attribute := range []string{"linewrap", "linenumber", "ligatures", "custom-sy-code-tab-spaces"} {
+		values := []string{"true", "false"}
+		if attribute == "custom-sy-code-tab-spaces" {
+			values = []string{"0", "2", "4", "6", "8"}
+		}
+		for _, value := range values {
 			t.Run(attribute+"/"+value, func(t *testing.T) {
 				source := "before\n\n```go\na | b\n```\n{: id=\"20260921000000-code001\" " + attribute + "=\"" + value + "\"}\n\nafter"
 				rich := &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
@@ -40,7 +44,7 @@ func TestTableCellRichCodeSettings(t *testing.T) {
 }
 
 func TestTableCellRichRejectsInvalidCodeSettings(t *testing.T) {
-	for _, source := range []string{
+	sources := []string{
 		"```go\ncode\n```\n{: id=\"20260921000000-code001\" linewrap=\"invalid\"}",
 		"```go\ncode\n```\n{: id=\"20260921000000-code001\" ligatures=\"TRUE\"}",
 		"```go\ncode\n```\n{: id=\"20260921000000-code001\" linenumber=\"1\"}",
@@ -48,7 +52,12 @@ func TestTableCellRichRejectsInvalidCodeSettings(t *testing.T) {
 		"paragraph\n{: id=\"20260921000000-code001\" linewrap=\"true\"}",
 		"# heading\n{: id=\"20260921000000-code001\" linenumber=\"false\"}",
 		"```mermaid\ngraph TD\n```\n{: id=\"20260921000000-code001\" linewrap=\"true\"}",
-	} {
+		"paragraph\n{: id=\"20260921000000-code001\" custom-sy-code-tab-spaces=\"2\"}",
+	}
+	for _, value := range []string{"", "3", "-2", "10", "02", "2.0", "true"} {
+		sources = append(sources, "```go\ncode\n```\n{: id=\"20260921000000-code001\" custom-sy-code-tab-spaces=\""+value+"\"}")
+	}
+	for _, source := range sources {
 		rich := &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
 		if _, err := ParseTableCellRich(rich); err == nil {
 			t.Fatalf("accepted unsupported code attributes: %s", source)

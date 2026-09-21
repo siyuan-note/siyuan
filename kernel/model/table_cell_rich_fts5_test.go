@@ -34,7 +34,7 @@ func TestTableCellRichCodeSettingsTransactions(t *testing.T) {
 		t.Fatal(err)
 	}
 	treenode.UpsertBlockTree(tree)
-	const settings = plain + "\n" + `{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}`
+	const settings = plain + "\n" + `{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false" custom-sy-code-tab-spaces="2"}`
 	for index, source := range []string{settings, plain, settings} {
 		updated := parse.Parse("", []byte("| Header |\n| --- |\n| code |"), luteEngine.ParseOptions)
 		updatedTable := updated.Root.FirstChild

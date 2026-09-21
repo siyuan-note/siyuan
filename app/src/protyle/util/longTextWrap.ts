@@ -41,7 +41,7 @@ export const unwrapLongTextRuns = (root: ParentNode) => {
     parents.forEach(parent => parent.normalize());
 };
 
-const preserveSelection = (root: Element, update: () => void) => {
+const preserveSelection = (root: Element, update: () => void, retainedRange?: Range) => {
     const selection = root.ownerDocument.getSelection();
     const capture = (node: Node, offset: number) => {
         if (!node || !root.contains(node)) {
@@ -54,10 +54,19 @@ const preserveSelection = (root: Element, update: () => void) => {
     };
     const anchor = selection?.rangeCount ? capture(selection.anchorNode, selection.anchorOffset) : undefined;
     const focus = selection?.rangeCount ? capture(selection.focusNode, selection.focusOffset) : undefined;
-    update();
-    if (!anchor || !focus || (anchor.textOffset === undefined && focus.textOffset === undefined)) {
-        return;
+    const ranges = new Set<Range>();
+    if (selection?.rangeCount) {
+        ranges.add(selection.getRangeAt(0));
     }
+    if (retainedRange) {
+        ranges.add(retainedRange);
+    }
+    const positions = Array.from(ranges, range => ({
+        range,
+        start: capture(range.startContainer, range.startOffset),
+        end: capture(range.endContainer, range.endOffset),
+    }));
+    update();
     const resolve = (position: ReturnType<typeof capture>) => {
         if (position.textOffset === undefined) {
             return position;
@@ -73,6 +82,19 @@ const preserveSelection = (root: Element, update: () => void) => {
         }
         return {node: root, offset: root.childNodes.length};
     };
+    // 延迟输入处理持有原 Range 对象，更新显示节点时同步恢复其边界。
+    positions.forEach(({range, start, end}) => {
+        if (start.textOffset === undefined && end.textOffset === undefined) {
+            return;
+        }
+        const from = resolve(start);
+        const to = resolve(end);
+        range.setStart(from.node, from.offset);
+        range.setEnd(to.node, to.offset);
+    });
+    if (!anchor || !focus || (anchor.textOffset === undefined && focus.textOffset === undefined)) {
+        return;
+    }
     const start = resolve(anchor);
     const end = resolve(focus);
     selection.setBaseAndExtent(start.node, start.offset, end.node, end.offset);
@@ -171,8 +193,11 @@ const configuredEditors = new WeakSet<Element>();
 const composingEditors = new WeakSet<Element>();
 const inputDepth = new WeakMap<Element, number>();
 
-export const suspendLongTextRuns = (editor: Element) => {
+export const suspendLongTextRuns = (editor: Element, block: Element, range: Range) => {
     inputDepth.set(editor, (inputDepth.get(editor) || 0) + 1);
+    if (block.querySelector(LONG_TEXT_SELECTOR)) {
+        preserveSelection(block, () => unwrapLongTextRuns(block), range);
+    }
     return () => {
         inputDepth.set(editor, inputDepth.get(editor) - 1);
         renderLongTextRuns(editor);

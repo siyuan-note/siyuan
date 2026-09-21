@@ -354,7 +354,6 @@ export class ListMindmapView {
             this.buttons.set(id, button);
             this.toolbar.append(button);
         };
-        add("exit", "listMindmapToList", "iconList", () => this.options.onExit());
         this.toolbar.append(createElement("span", "list-mindmap__spacer fn__flex-1"));
         if (!this.options.readOnly) {
             add("relation", "connect", "iconRoute", () => {

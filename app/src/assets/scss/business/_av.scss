@@ -1243,6 +1243,22 @@
 
     &[data-wrap="true"] {
       white-space: pre-wrap;
+
+      .av__cell--relation {
+        display: inline-flex;
+        max-width: 100%;
+        vertical-align: top;
+
+        > :first-child {
+          flex-shrink: 0;
+          align-self: flex-start;
+        }
+
+        > .av__celltext {
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+      }
     }
 
     &[data-wrap="false"] {

@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Échéances les plus proches d’abord",
+	"flashcardStudy": "Commencer à étudier",
+	"flashcardStudyScope": "Périmètre d’étude",
+	"flashcardStudySelection": "Cartes sélectionnées (${count})",
+	"flashcardStudyFiltered": "Résultats du filtre actuel",
+	"flashcardReviewNormalTip": "Réviser les cartes arrivées à échéance et les nouvelles cartes dans les limites quotidiennes",
+	"flashcardStudyDifficultFirst": "Les plus difficiles d’abord",
+	"flashcardStudyLapsesFirst": "Les plus oubliées d’abord",
+	"flashcardRetryWeak": "Retravailler les cartes mal maîtrisées (${count})",
 	"calendarRowLimit": "Lignes d’éléments visibles",
 	"calendarNewOnDate": "Nouvel élément à cette date",
 	"leftRightSidebarLayout": "Disposition des barres latérales gauche et droite",

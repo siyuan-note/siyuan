@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "期日が早い順",
+	"flashcardStudy": "学習を開始",
+	"flashcardStudyScope": "学習範囲",
+	"flashcardStudySelection": "選択したカード（${count} 枚）",
+	"flashcardStudyFiltered": "現在の絞り込み範囲",
+	"flashcardReviewNormalTip": "1 日の上限に従って、復習期限のカードと新しいカードを学習します",
+	"flashcardStudyDifficultFirst": "難しい順",
+	"flashcardStudyLapsesFirst": "忘れた回数が多い順",
+	"flashcardRetryWeak": "苦手なカードをもう一度練習（${count} 枚）",
 	"calendarRowLimit": "項目の表示行数",
 	"calendarNewOnDate": "この日付に項目を作成",
 	"leftRightSidebarLayout": "左右のサイドバーのレイアウト",

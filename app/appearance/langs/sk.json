@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Najbližší termín najprv",
+	"flashcardStudy": "Začať učenie",
+	"flashcardStudyScope": "Rozsah učenia",
+	"flashcardStudySelection": "Vybrané kartičky (${count})",
+	"flashcardStudyFiltered": "Výsledky aktuálneho filtra",
+	"flashcardReviewNormalTip": "Opakovať splatné a nové kartičky v rámci denných limitov",
+	"flashcardStudyDifficultFirst": "Najťažšie ako prvé",
+	"flashcardStudyLapsesFirst": "Najčastejšie zabudnuté ako prvé",
+	"flashcardRetryWeak": "Znovu precvičiť slabšie kartičky (${count})",
 	"calendarRowLimit": "Počet zobrazených riadkov položiek",
 	"calendarNewOnDate": "Nová položka v tento deň",
 	"leftRightSidebarLayout": "Rozloženie ľavého a pravého bočného panela",

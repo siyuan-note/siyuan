@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Vadesi yakın olanlar önce",
+	"flashcardStudy": "Çalışmaya başla",
+	"flashcardStudyScope": "Çalışma kapsamı",
+	"flashcardStudySelection": "Seçili kartlar (${count})",
+	"flashcardStudyFiltered": "Geçerli filtre sonuçları",
+	"flashcardReviewNormalTip": "Zamanı gelen ve yeni kartları günlük sınırlar içinde tekrar et",
+	"flashcardStudyDifficultFirst": "Önce en zorlar",
+	"flashcardStudyLapsesFirst": "Önce en çok unutulanlar",
+	"flashcardRetryWeak": "Zayıf kartları yeniden çalış (${count})",
 	"calendarRowLimit": "Görünür öğe satırları",
 	"calendarNewOnDate": "Bu tarihte yeni öğe",
 	"leftRightSidebarLayout": "Sol ve sağ kenar çubuğu düzeni",

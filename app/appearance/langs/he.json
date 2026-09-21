@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "מועד החזרה הקרוב ביותר תחילה",
+	"flashcardStudy": "התחלת לימוד",
+	"flashcardStudyScope": "היקף הלימוד",
+	"flashcardStudySelection": "הכרטיסיות שנבחרו (${count})",
+	"flashcardStudyFiltered": "תוצאות הסינון הנוכחי",
+	"flashcardReviewNormalTip": "חזרה על כרטיסיות שמועדן הגיע ועל כרטיסיות חדשות במסגרת המגבלות היומיות",
+	"flashcardStudyDifficultFirst": "הקשות ביותר תחילה",
+	"flashcardStudyLapsesFirst": "הנשכחות ביותר תחילה",
+	"flashcardRetryWeak": "תרגול נוסף של כרטיסיות חלשות (${count})",
 	"calendarRowLimit": "שורות פריטים מוצגות",
 	"calendarNewOnDate": "פריט חדש בתאריך זה",
 	"leftRightSidebarLayout": "פריסת סרגלי הצד השמאלי והימני",

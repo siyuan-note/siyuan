@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "先到期的優先",
+	"flashcardStudy": "開始學習",
+	"flashcardStudyScope": "學習範圍",
+	"flashcardStudySelection": "選取的卡片（${count} 張）",
+	"flashcardStudyFiltered": "目前篩選範圍",
+	"flashcardReviewNormalTip": "複習已到期卡片和新卡，遵循每日限額",
+	"flashcardStudyDifficultFirst": "難度高的優先",
+	"flashcardStudyLapsesFirst": "遺忘次數多的優先",
+	"flashcardRetryWeak": "再練習薄弱卡片（${count} 張）",
 	"calendarRowLimit": "項目顯示行數",
 	"calendarNewOnDate": "在此日期新增項目",
 	"leftRightSidebarLayout": "左右欄佈局",

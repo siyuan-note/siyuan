@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Сначала с ближайшим сроком",
+	"flashcardStudy": "Начать обучение",
+	"flashcardStudyScope": "Область обучения",
+	"flashcardStudySelection": "Выбранные карточки (${count})",
+	"flashcardStudyFiltered": "Результаты текущего фильтра",
+	"flashcardReviewNormalTip": "Повторять карточки с наступившим сроком и новые карточки в пределах дневных лимитов",
+	"flashcardStudyDifficultFirst": "Сначала самые сложные",
+	"flashcardStudyLapsesFirst": "Сначала чаще забываемые",
+	"flashcardRetryWeak": "Снова потренировать трудные карточки (${count})",
 	"calendarRowLimit": "Число видимых строк записей",
 	"calendarNewOnDate": "Создать запись на эту дату",
 	"leftRightSidebarLayout": "Расположение левой и правой боковых панелей",

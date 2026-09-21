@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Спочатку з найближчим терміном",
+	"flashcardStudy": "Почати навчання",
+	"flashcardStudyScope": "Обсяг навчання",
+	"flashcardStudySelection": "Вибрані картки (${count})",
+	"flashcardStudyFiltered": "Результати поточного фільтра",
+	"flashcardReviewNormalTip": "Повторювати картки, термін яких настав, і нові картки в межах денних лімітів",
+	"flashcardStudyDifficultFirst": "Спочатку найскладніші",
+	"flashcardStudyLapsesFirst": "Спочатку найчастіше забуті",
+	"flashcardRetryWeak": "Знову потренувати складні картки (${count})",
 	"calendarRowLimit": "Кількість видимих рядків записів",
 	"calendarNewOnDate": "Створити запис на цю дату",
 	"leftRightSidebarLayout": "Розташування лівої та правої бічних панелей",

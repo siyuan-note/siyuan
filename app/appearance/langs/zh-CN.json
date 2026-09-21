@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "先到期的优先",
+	"flashcardStudy": "开始学习",
+	"flashcardStudyScope": "学习范围",
+	"flashcardStudySelection": "选中卡片（${count} 张）",
+	"flashcardStudyFiltered": "当前筛选范围",
+	"flashcardReviewNormalTip": "复习已到期卡片和新卡，遵循每日限额",
+	"flashcardStudyDifficultFirst": "难度高的优先",
+	"flashcardStudyLapsesFirst": "遗忘次数多的优先",
+	"flashcardRetryWeak": "再练薄弱卡片（${count} 张）",
 	"calendarRowLimit": "条目显示行数",
 	"calendarNewOnDate": "在此日期新建条目",
 	"leftRightSidebarLayout": "左右栏布局",

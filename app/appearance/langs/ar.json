@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "المستحقة أولًا",
+	"flashcardStudy": "بدء الدراسة",
+	"flashcardStudyScope": "نطاق الدراسة",
+	"flashcardStudySelection": "البطاقات المحددة (${count})",
+	"flashcardStudyFiltered": "نتائج التصفية الحالية",
+	"flashcardReviewNormalTip": "مراجعة البطاقات المستحقة والجديدة ضمن الحدود اليومية",
+	"flashcardStudyDifficultFirst": "الأصعب أولاً",
+	"flashcardStudyLapsesFirst": "الأكثر نسياناً أولاً",
+	"flashcardRetryWeak": "التدرب مجدداً على البطاقات الضعيفة (${count})",
 	"calendarRowLimit": "عدد صفوف العناصر المعروضة",
 	"calendarNewOnDate": "إضافة عنصر في هذا التاريخ",
 	"leftRightSidebarLayout": "تخطيط الشريطين الجانبيين الأيسر والأيمن",

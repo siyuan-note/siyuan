@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Jatuh tempo terdekat dahulu",
+	"flashcardStudy": "Mulai belajar",
+	"flashcardStudyScope": "Cakupan belajar",
+	"flashcardStudySelection": "Kartu terpilih (${count})",
+	"flashcardStudyFiltered": "Hasil filter saat ini",
+	"flashcardReviewNormalTip": "Ulangi kartu jatuh tempo dan kartu baru sesuai batas harian",
+	"flashcardStudyDifficultFirst": "Paling sulit dahulu",
+	"flashcardStudyLapsesFirst": "Paling sering terlupa dahulu",
+	"flashcardRetryWeak": "Latih kembali kartu yang belum dikuasai (${count})",
 	"calendarRowLimit": "Baris item yang ditampilkan",
 	"calendarNewOnDate": "Item baru pada tanggal ini",
 	"leftRightSidebarLayout": "Tata letak bilah sisi kiri dan kanan",

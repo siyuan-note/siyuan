@@ -51,6 +51,7 @@ import {flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
 import {openFlashcardReviewTab} from "./openFlashcardReviewTab";
 import {flashcardV2QueueProgress, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
+import {FlashcardV2WeakCards, flashcardV2SubsetOptions} from "./flashcardV2Study";
 
 interface IFlashcardV2SessionQueueCard {
     repeatDue?: number;
@@ -94,6 +95,7 @@ interface IFlashcardV2LastReview {
     eventID: string;
     index: number;
     skippedSessionCardIDs: string[];
+    previousRating?: string;
 }
 
 interface IFlashcardV2PlaybackController {
@@ -122,11 +124,14 @@ export interface IFlashcardV2ReviewSessionOptions {
     includeSuspended?: boolean;
     includeBuried?: boolean;
     includePaused?: boolean;
+    // 显式选择的强化练习使用本次额度，不更改每日设置或正常复习额度。
+    practiceLimit?: number;
 }
 
 interface IFlashcardSessionSurface {
     element: HTMLElement;
     destroy: () => void;
+    dispose: (callback?: () => void) => void;
 }
 
 export interface IFlashcardSessionMount {
@@ -138,18 +143,34 @@ export interface IFlashcardSessionMount {
 const createSessionSurface = (options: ConstructorParameters<typeof Dialog>[0],
     mount?: IFlashcardSessionMount): IFlashcardSessionSurface => {
     if (!mount) {
-        return new Dialog(options);
+        let disposed: (() => void) | undefined;
+        const dialog = new Dialog({...options, destroyCallback: (value) => {
+            options.destroyCallback?.(value);
+            // 等待对话框从全局列表移除，再打开下一轮练习。
+            if (disposed) {
+                queueMicrotask(disposed);
+            }
+        }});
+        return {element: dialog.element, destroy: () => dialog.destroy(), dispose: (callback) => {
+            disposed = callback;
+            dialog.destroy();
+        }};
     }
     const element = document.createElement("div");
     element.className = "fn__flex-column fn__flex-1";
     element.style.minHeight = "0";
     element.innerHTML = options.content;
     mount.element.replaceChildren(element);
-    mount.signal.addEventListener("abort", () => {
+    const dispose = () => {
+        mount.signal.removeEventListener("abort", dispose);
         options.destroyCallback?.();
         element.remove();
-    }, {once: true});
-    return {element, destroy: mount.close};
+    };
+    mount.signal.addEventListener("abort", dispose, {once: true});
+    return {element, destroy: mount.close, dispose: (callback) => {
+        dispose();
+        callback?.();
+    }};
 };
 
 let flashcardV2ReviewOpening = false;
@@ -510,9 +531,10 @@ const openFlashcardV2SessionDue = (cardID: string, due: number, callback: () => 
     input.focus();
 };
 
-const sessionCompletionContent = (canUndo: boolean) => `<div class="card__empty-icon">🔮</div>
+const sessionCompletionContent = (canUndo: boolean, weakCount = 0) => `<div class="card__empty-icon">🔮</div>
 <span>${window.siyuan.languages.noDueCard}</span>
-${canUndo ? `<span class="card__v2-completion-actions"><button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button></span>` : ""}`;
+${weakCount ? `<div class="fn__hr"></div><span class="ft__on-surface">${window.siyuan.languages.flashcardReviewReinforcementTip}</span>` : ""}
+<span class="card__v2-completion-actions">${weakCount ? `<button data-type="practice-weak" class="b3-button b3-button--outline">${escapeHtml(window.siyuan.languages.flashcardRetryWeak.replace("${count}", weakCount.toString()))}</button>` : ""}${canUndo ? `<button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button>` : ""}<button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.flashcardFinishSession}</button></span>`;
 
 const sessionContent = () => `<div class="b3-dialog__content fn__flex-column card__v2-session">
 <div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
@@ -784,6 +806,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
     };
     const sessionID = genUUID();
     const now = Date.now();
+    const practiceLimit = options.reviewMode === "reinforcement" ? options.practiceLimit : undefined;
     let sessionStarted = false;
     void fetchPost("/api/flashcard/startSession", {
         operationID: genUUID(),
@@ -796,8 +819,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
         seed: sessionID,
         now,
         ...flashcardV2ReviewDay(now),
-        newLimit: window.siyuan.config.flashcard.newCardLimit,
-        reviewLimit: window.siyuan.config.flashcard.reviewCardLimit,
+        newLimit: practiceLimit ?? window.siyuan.config.flashcard.newCardLimit,
+        reviewLimit: practiceLimit ?? window.siyuan.config.flashcard.reviewCardLimit,
         includeSuspended: options.reviewMode === "reinforcement" && Boolean(options.includeSuspended),
         includeBuried: options.reviewMode === "reinforcement" && Boolean(options.includeBuried),
         includePaused: options.reviewMode === "reinforcement" && Boolean(options.includePaused),
@@ -849,6 +872,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         content: `<div class="b3-dialog__content card__empty card__empty--space card__v2-completion">${sessionCompletionContent(false)}</div>`,
                     }, mount);
                     completionDialog.element.setAttribute("data-flashcard-v2-review", "");
+                    completionDialog.element.querySelector('[data-type="finish"]').addEventListener("click", () =>
+                        completionDialog.destroy());
                     releaseOpening();
                 }).then(() => {
                     if (!completionShown) {
@@ -878,6 +903,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 waitingTimer = undefined;
             };
             let lastReview: IFlashcardV2LastReview | undefined;
+            const weakCards = new FlashcardV2WeakCards();
             let renderGeneration = 0;
             let sessionEndEmitted = false;
             const flagDefinitions = new Map<number, string>();
@@ -999,7 +1025,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 dialog.element.querySelector("[data-flashcard-toolbar]").classList.add("fn__none");
                 contentElement.querySelector("[data-flashcard-context]").classList.add("fn__none");
                 frontElement.className = "card__empty card__empty--space card__v2-completion";
-                frontElement.innerHTML = sessionCompletionContent(Boolean(lastReview));
+                frontElement.innerHTML = sessionCompletionContent(Boolean(lastReview), weakCards.cards(queue).length);
                 contentElement.querySelector("[data-flashcard-answer]").classList.add("fn__none");
                 dialog.element.querySelector('[data-flashcard-action="reveal"]').classList.add("fn__none");
                 dialog.element.querySelector('[data-flashcard-action="ratings"]').classList.add("fn__none");
@@ -1433,6 +1459,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                             eventID: result.event.eventID,
                             index: reviewedIndex,
                             skippedSessionCardIDs: result.skippedSessionCardIDs || [],
+                            previousRating: weakCards.record(queue[reviewedIndex].card.id, ratingElement.dataset.rating),
                         };
                         setUndoVisible(dialog, true);
                         requestPending = false;
@@ -1492,6 +1519,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                             }
                         });
                         index = undoing.index;
+                        weakCards.restore(undoing.cardID, undoing.previousRating);
                         completedPending = false;
                         lastReview = undefined;
                         setUndoVisible(dialog, false);
@@ -1518,7 +1546,12 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     });
                     return;
                 }
-                if (target.closest('[data-type="finish"]') && !requestPending) {
+                const practiceWeak = Boolean(target.closest('[data-type="practice-weak"]'));
+                if ((target.closest('[data-type="finish"]') || practiceWeak && completedPending) && !requestPending) {
+                    const practiceIDs = practiceWeak ? weakCards.cards(queue) : [];
+                    if (practiceWeak && practiceIDs.length === 0) {
+                        return;
+                    }
                     requestPending = true;
                     let finished = false;
                     void finishSession(sessionID, "completed", () => {
@@ -1526,7 +1559,16 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         if (!sessionFinished) {
                             sessionFinished = true;
                             emitSessionEnded("completed");
-                            dialog.destroy();
+                            if (practiceWeak) {
+                                dialog.dispose(() => openFlashcardV2ReviewSession(app, "", name, {
+                                    ...flashcardV2SubsetOptions("", undefined, practiceIDs, "reinforcement"),
+                                    includeSuspended: options.includeSuspended,
+                                    includeBuried: options.includeBuried,
+                                    includePaused: options.includePaused,
+                                }, mount));
+                            } else {
+                                dialog.destroy();
+                            }
                         }
                     }).then(() => {
                         if (!finished && !sessionFinished) {

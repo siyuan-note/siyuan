@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Früher fällige zuerst",
+	"flashcardStudy": "Lernen starten",
+	"flashcardStudyScope": "Lernumfang",
+	"flashcardStudySelection": "Ausgewählte Karten (${count})",
+	"flashcardStudyFiltered": "Aktuelle Filterergebnisse",
+	"flashcardReviewNormalTip": "Fällige und neue Karten innerhalb der täglichen Grenzen wiederholen",
+	"flashcardStudyDifficultFirst": "Schwierigste zuerst",
+	"flashcardStudyLapsesFirst": "Häufig vergessene zuerst",
+	"flashcardRetryWeak": "Schwache Karten erneut üben (${count})",
 	"calendarRowLimit": "Angezeigte Eintragszeilen",
 	"calendarNewOnDate": "Eintrag an diesem Datum erstellen",
 	"leftRightSidebarLayout": "Layout der linken und rechten Seitenleiste",

@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Due sooner first",
+	"flashcardStudy": "Start studying",
+	"flashcardStudyScope": "Study scope",
+	"flashcardStudySelection": "Selected cards (${count})",
+	"flashcardStudyFiltered": "Current filtered results",
+	"flashcardReviewNormalTip": "Review due cards and new cards within the daily limits",
+	"flashcardStudyDifficultFirst": "Hardest first",
+	"flashcardStudyLapsesFirst": "Most lapses first",
+	"flashcardRetryWeak": "Practice weak cards again (${count})",
 	"calendarRowLimit": "Visible item rows",
 	"calendarNewOnDate": "New item on this date",
 	"leftRightSidebarLayout": "Left and right sidebar layout",

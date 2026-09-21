@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "ครบกำหนดเร็วที่สุดก่อน",
+	"flashcardStudy": "เริ่มเรียน",
+	"flashcardStudyScope": "ขอบเขตการเรียน",
+	"flashcardStudySelection": "บัตรที่เลือก (${count} ใบ)",
+	"flashcardStudyFiltered": "ผลลัพธ์ของตัวกรองปัจจุบัน",
+	"flashcardReviewNormalTip": "ทบทวนบัตรที่ถึงกำหนดและบัตรใหม่ภายในขีดจำกัดรายวัน",
+	"flashcardStudyDifficultFirst": "ยากที่สุดก่อน",
+	"flashcardStudyLapsesFirst": "ลืมบ่อยที่สุดก่อน",
+	"flashcardRetryWeak": "ฝึกบัตรที่ยังไม่คล่องอีกครั้ง (${count} ใบ)",
 	"calendarRowLimit": "จำนวนแถวรายการที่แสดง",
 	"calendarNewOnDate": "สร้างรายการในวันที่นี้",
 	"leftRightSidebarLayout": "เค้าโครงแถบด้านข้างซ้ายและขวา",

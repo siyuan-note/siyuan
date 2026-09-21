@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "복습 예정일이 빠른 순",
+	"flashcardStudy": "학습 시작",
+	"flashcardStudyScope": "학습 범위",
+	"flashcardStudySelection": "선택한 카드 (${count}개)",
+	"flashcardStudyFiltered": "현재 필터 결과",
+	"flashcardReviewNormalTip": "일일 한도 내에서 복습할 카드와 새 카드를 학습합니다",
+	"flashcardStudyDifficultFirst": "어려운 카드 먼저",
+	"flashcardStudyLapsesFirst": "많이 잊은 카드 먼저",
+	"flashcardRetryWeak": "취약한 카드 다시 연습 (${count}개)",
 	"calendarRowLimit": "표시할 항목 행 수",
 	"calendarNewOnDate": "이 날짜에 새 항목 만들기",
 	"leftRightSidebarLayout": "왼쪽 및 오른쪽 사이드바 레이아웃",

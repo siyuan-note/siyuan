@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "जल्दी देय होने वाले पहले",
+	"flashcardStudy": "पढ़ाई शुरू करें",
+	"flashcardStudyScope": "अध्ययन का दायरा",
+	"flashcardStudySelection": "चुने गए कार्ड (${count})",
+	"flashcardStudyFiltered": "मौजूदा फ़िल्टर के परिणाम",
+	"flashcardReviewNormalTip": "दैनिक सीमा के भीतर नियत और नए कार्डों की समीक्षा करें",
+	"flashcardStudyDifficultFirst": "सबसे कठिन पहले",
+	"flashcardStudyLapsesFirst": "सबसे ज़्यादा भूले गए पहले",
+	"flashcardRetryWeak": "कमज़ोर कार्डों का फिर अभ्यास करें (${count})",
 	"calendarRowLimit": "दिखाई देने वाली आइटम पंक्तियाँ",
 	"calendarNewOnDate": "इस तारीख पर नया आइटम",
 	"leftRightSidebarLayout": "बाएं और दाएं साइडबार का लेआउट",

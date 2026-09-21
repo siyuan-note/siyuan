@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Eerstvolgende herhalingen eerst",
+	"flashcardStudy": "Begin met leren",
+	"flashcardStudyScope": "Leerbereik",
+	"flashcardStudySelection": "Geselecteerde kaarten (${count})",
+	"flashcardStudyFiltered": "Huidige filterresultaten",
+	"flashcardReviewNormalTip": "Herhaal vervallen en nieuwe kaarten binnen de dagelijkse limieten",
+	"flashcardStudyDifficultFirst": "Moeilijkste eerst",
+	"flashcardStudyLapsesFirst": "Vaakst vergeten eerst",
+	"flashcardRetryWeak": "Zwakke kaarten opnieuw oefenen (${count})",
 	"calendarRowLimit": "Zichtbare itemrijen",
 	"calendarNewOnDate": "Nieuw item op deze datum",
 	"leftRightSidebarLayout": "Indeling van linker- en rechterzijbalk",

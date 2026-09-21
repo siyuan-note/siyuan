@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Prazo mais próximo primeiro",
+	"flashcardStudy": "Começar a estudar",
+	"flashcardStudyScope": "Escopo do estudo",
+	"flashcardStudySelection": "Cartões selecionados (${count})",
+	"flashcardStudyFiltered": "Resultados do filtro atual",
+	"flashcardReviewNormalTip": "Revisar os cartões vencidos e novos dentro dos limites diários",
+	"flashcardStudyDifficultFirst": "Mais difíceis primeiro",
+	"flashcardStudyLapsesFirst": "Mais esquecidos primeiro",
+	"flashcardRetryWeak": "Praticar novamente os cartões difíceis (${count})",
 	"calendarRowLimit": "Linhas de itens visíveis",
 	"calendarNewOnDate": "Novo item nesta data",
 	"leftRightSidebarLayout": "Layout das barras laterais esquerda e direita",

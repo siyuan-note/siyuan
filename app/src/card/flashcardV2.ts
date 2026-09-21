@@ -9,6 +9,7 @@ import {genUUID} from "../util/genID";
 import {openFlashcardV2DocumentHistory, openFlashcardV2SourceHistory} from "./flashcardV2SourceHistory";
 import {openFlashcardV2Cleanup} from "./flashcardV2Cleanup";
 import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
+import {openFlashcardV2SubsetSession} from "./flashcardV2Subset";
 import type {App} from "../index";
 import {listFlashcardV2PluginTypes} from "./flashcardV2Plugin";
 import type {IFlashcardQueryAST, IFlashcardQueryExpression} from "./flashcardV2Query";
@@ -143,6 +144,7 @@ interface IFlashcardSearchResult {
         due: number;
         reps: number;
         lapses: number;
+        difficulty?: number;
         suspended: boolean;
         buriedUntil?: number;
     };
@@ -1713,6 +1715,7 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
 <button data-type="pageNext" class="b3-button b3-button--outline"${hasNext ? "" : " disabled"}>${window.siyuan.languages.next}</button>
 </div>
 <div class="card__v2-management-tools">
+<button data-type="study" class="b3-button b3-button--text">${window.siyuan.languages.flashcardStudy}</button>
 <button data-type="filter" class="b3-button b3-button--outline">${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button>
 <button data-type="conflicts" class="b3-button b3-button--outline">${window.siyuan.languages.conflict}</button>
 <button data-type="cleanup" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardCleanup}</button>
@@ -1767,6 +1770,11 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                     return;
                 }
                 const type = target.dataset.type;
+                if (type === "study") {
+                    openFlashcardV2SubsetSession(window.siyuan.ws.app, name, reviewSetID, managementQuery,
+                        cards.filter((card) => selectedCardIDs.has(card.card.id)));
+                    return;
+                }
                 if (type === "pagePrevious" || type === "pageNext") {
                     const nextOffset = type === "pagePrevious" ? Math.max(0, offset - flashcardV2ManagementPageSize) :
                         offset + flashcardV2ManagementPageSize;

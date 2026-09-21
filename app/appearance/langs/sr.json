@@ -1,4 +1,13 @@
 {
+	"flashcardStudyDueFirst": "Прво најближи рок",
+	"flashcardStudy": "Започни учење",
+	"flashcardStudyScope": "Обим учења",
+	"flashcardStudySelection": "Изабране картице (${count})",
+	"flashcardStudyFiltered": "Резултати тренутног филтера",
+	"flashcardReviewNormalTip": "Понављај доспеле и нове картице у оквиру дневних ограничења",
+	"flashcardStudyDifficultFirst": "Прво најтеже",
+	"flashcardStudyLapsesFirst": "Прво најчешће заборављене",
+	"flashcardRetryWeak": "Поново вежбај слабије научене картице (${count})",
 	"calendarRowLimit": "Број видљивих редова ставки",
 	"calendarNewOnDate": "Нова ставка на овај датум",
 	"leftRightSidebarLayout": "Raspored leve i desne bočne trake",

@@ -63,6 +63,7 @@ import {getAVHeaderEditingState} from "./headerEditing";
 import {getAVColorStyle} from "./color";
 import {getContextFilterKeyID} from "./contextFilterState";
 import {isAVCellPanelForBlock} from "./panelTarget";
+import {replaceAVContainer} from "./container";
 
 interface IIds {
     groupId: string,
@@ -342,13 +343,13 @@ const renderGroupTable = (options: ITableOptions) => {
         }
     });
     if (options.renderAll) {
-        options.blockElement.firstElementChild.outerHTML = `<div class="av__container">
+        replaceAVContainer(options.blockElement, `<div class="av__container">
     ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled, options.blockElement)}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
-</div>`;
+</div>`);
     } else {
         options.blockElement.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
     }
@@ -528,10 +529,6 @@ const afterRenderTable = (options: ITableOptions) => {
                 focusBlock(options.blockElement);
             }
         }
-    }
-    const focusViewElement = options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement;
-    if (focusViewElement) {
-        options.blockElement.querySelector(".layout-tab-bar").scrollLeft = focusViewElement.offsetLeft - 30;
     }
     if (options.cb) {
         options.cb(options.data);
@@ -747,13 +744,13 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
     ${getTableHTMLs(view, e, resetData.virtualData.all)}
 </div>`;
         if (renderAll) {
-            e.firstElementChild.outerHTML = `<div class="av__container">
+            replaceAVContainer(e, `<div class="av__container">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !protyle.disabled, e)}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
-</div>`;
+</div>`);
         } else {
             e.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
         }

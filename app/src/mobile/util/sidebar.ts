@@ -7,16 +7,17 @@ export const getSidebarElement = (side: MobileSidebarSide) => {
     return document.getElementById(side === "left" ? "sidebar" : "sidebarRight");
 };
 
-export const getSidebarDock = (sidebarElement: HTMLElement | null) => {
+export const getSidebarDock = (sidebarElement: HTMLElement | null, preferFirst = false) => {
     if (!sidebarElement) {
         return;
     }
     const toolbarElement = sidebarElement.querySelector(".toolbar--border");
     const tabElements = Array.from(toolbarElement?.querySelectorAll<HTMLElement>("[data-type]") || []);
-    const activeElement = tabElements.find(item =>
-        item.classList.contains("toolbar__icon--active") && !item.classList.contains("fn__none")) ||
+    const activeElement = (!preferFirst && tabElements.find(item =>
+        item.classList.contains("toolbar__icon--active") && !item.classList.contains("fn__none"))) ||
         tabElements.find(item => !item.classList.contains("fn__none"));
-    const type = activeElement?.dataset.type?.replace(/^sidebar-/, "").replace(/-tab$/, "");
+    const type = activeElement?.dataset.mobilePluginDockTab ||
+        activeElement?.dataset.type?.replace(/^sidebar-/, "").replace(/-tab$/, "");
     if (toolbarElement && type) {
         return {toolbarElement, type};
     }
@@ -36,7 +37,7 @@ export const switchToNextSidebarTab = (side: MobileSidebarSide) => {
     nextTab.scrollIntoView({block: "nearest", inline: "nearest"});
 };
 
-export const popSidebar = (side: MobileSidebarSide, render = true) => {
+export const popSidebar = (side: MobileSidebarSide, render = true, preferFirst = false) => {
     activeBlur();
     const sidebarElement = getSidebarElement(side);
     if (!sidebarElement) {
@@ -44,7 +45,7 @@ export const popSidebar = (side: MobileSidebarSide, render = true) => {
     }
     let dock: ReturnType<typeof getSidebarDock>;
     if (render) {
-        dock = getSidebarDock(sidebarElement);
+        dock = getSidebarDock(sidebarElement, preferFirst);
         if (!dock) {
             sidebarElement.style.removeProperty("transform");
             closePanel();

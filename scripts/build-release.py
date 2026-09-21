@@ -374,11 +374,6 @@ class Builder:
             VERIFY.verify_package(path, sevenzip=VERIFY.find_7z(self.args.sevenzip), version=self.version)
         for artifact in self.artifacts:
             copy_verified(artifact, output / artifact.name, output)
-        checksums = "".join(f"{VERIFY.digest(artifact)}  {artifact.name}\n" for artifact in sorted(existing + self.artifacts))
-        sums = self.work / "SHA256SUMS.txt"
-        with sums.open("w", encoding="utf-8", newline="\n") as stream:
-            stream.write(checksums)
-        copy_verified(sums, output / "SHA256SUMS.txt", output)
         print(f"完成：{len(self.artifacts)} 个安装包已校验并收集到 {output}")
 
 
@@ -425,7 +420,7 @@ def main():
     print("本地前端仅构建一次；Linux 前端在 WSL 中构建")
     for platform in args.platforms:
         print(f"  {platform}: {descriptions[platform]}")
-    print("最后逐个验证安装包，全部通过后复制产物并生成 SHA256SUMS.txt")
+    print("最后逐个验证安装包，全部通过后复制产物")
     if not args.execute:
         print("当前仅显示计划，没有执行构建或修改文件；添加 --execute 开始")
         return 0

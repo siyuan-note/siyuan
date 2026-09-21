@@ -184,19 +184,25 @@ class BuildTests(unittest.TestCase):
                 self.builder.finish()
         self.assertFalse(self.args.output.exists())
 
-    def test_add_platform_updates_checksums_without_overwriting_packages(self):
+    def test_add_platform_preserves_existing_packages_and_checksums(self):
         existing = self.write(self.args.output / "siyuan-3.8.4-win.exe", b"signed windows")
         artifact = self.write(self.builder.work / "siyuan-3.8.4.apk", b"android")
         self.write(self.args.output / "SHA256SUMS.txt", b"old sums")
         self.builder.artifacts = [artifact]
         with patch.object(build.VERIFY, "verify_package"), contextlib.redirect_stdout(io.StringIO()):
             self.builder.finish()
-        sums = (self.args.output / "SHA256SUMS.txt").read_text(encoding="utf-8")
-        self.assertIn(build.VERIFY.digest(existing), sums)
-        self.assertIn(build.VERIFY.digest(artifact), sums)
-        self.assertIn("  siyuan-3.8.4.apk\n", sums)
+        self.assertEqual((self.args.output / "SHA256SUMS.txt").read_bytes(), b"old sums")
         self.assertTrue((self.args.output / "siyuan-3.8.4.apk").is_file())
         self.assertEqual(existing.read_bytes(), b"signed windows")
+
+    def test_finish_does_not_generate_checksums(self):
+        artifact = self.write(self.builder.work / "siyuan-3.8.4.apk", b"android")
+        self.builder.artifacts = [artifact]
+        with patch.object(build.VERIFY, "verify_package"), contextlib.redirect_stdout(io.StringIO()):
+            self.builder.finish()
+        self.assertEqual((self.args.output / artifact.name).read_bytes(), b"android")
+        self.assertFalse((self.args.output / "SHA256SUMS.txt").exists())
+        self.assertFalse((self.builder.work / "SHA256SUMS.txt").exists())
 
     def test_default_plan_does_not_run_commands(self):
         with patch.object(build.sys, "argv", ["build-release.py"]), patch.object(build, "run") as command, \

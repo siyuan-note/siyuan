@@ -28,6 +28,7 @@ export const newDatabaseRowModel = (options: {
     let resizeObserver: ResizeObserver;
     let unregisterRefresh: () => void;
     let destroyed = false;
+    let renderVersion = 0;
     const updateTitle = (custom: Custom, bodyElement: HTMLElement) => {
         const primaryElement = bodyElement.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');
         if (!primaryElement?.dataset.cellValue) {
@@ -58,11 +59,16 @@ export const newDatabaseRowModel = (options: {
             return;
         }
         const data = custom.data as typeof options.data;
+        const currentRenderVersion = ++renderVersion;
         const bodyElement = document.createElement("div");
         bodyElement.className = "custom-attr protyle-db-row__body";
-        previousBodyElement.replaceWith(bodyElement);
-        updateLayout(custom);
         renderAVAttribute(bodyElement, data.itemID, contextProtyle, (element) => {
+            if (destroyed || currentRenderVersion !== renderVersion || !previousBodyElement.isConnected) {
+                return;
+            }
+            // 保留当前内容，待属性和反链加载完成后一次替换，避免刷新期间出现空白。
+            previousBodyElement.replaceWith(element);
+            updateLayout(custom);
             updateTitle(custom, element);
             if (!data.keywords?.length) {
                 return;

@@ -44,3 +44,62 @@ test("only a calendar with an ordinary date source supplies the date of a new en
     getCalendarState(table).dateType = "date";
     assert.equal(getCalendarCreationDate(table), undefined);
 });
+
+test("calendar header creation supplies the browsing date with and without a template", () => {
+    const action = ts.createSourceFile("action.ts", readFileSync(join(__dirname, "../action.ts"), "utf8"),
+        ts.ScriptTarget.Latest, true);
+    let branch = "";
+    const visit = (node: ts.Node) => {
+        if (ts.isIfStatement(node) && node.expression.getText(action) === 'type === "av-add-more" && !protyle.disabled') {
+            branch = node.thenStatement.getText(action);
+        }
+        ts.forEachChild(node, visit);
+    };
+    visit(action);
+    assert.ok(branch);
+    const template = ts.createSourceFile("newItemTemplate.ts",
+        readFileSync(join(__dirname, "../newItemTemplate.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+    const create = template.statements.find(statement => ts.isVariableStatement(statement) &&
+        statement.declarationList.declarations.some(declaration => declaration.name.getText(template) === "createAttributeViewItem"));
+    assert.ok(create);
+    const compiled = ts.transpileModule(create.getText(template).replace(/^export /, "") + `\n(() => ${branch})();`, {
+        compilerOptions: {target: ts.ScriptTarget.ES2022},
+    }).outputText;
+    for (const layout of ["calendar", "table"]) {
+        for (const templateID of ["", "template-id"]) {
+            for (const dateType of ["date", "created", "updated"] as const) {
+                const blockElement = {
+                    dataset: {avId: "database", nodeId: "carrier"},
+                    getAttribute: (key: string) => key === "data-av-type" ? layout : "view-id",
+                    querySelector: () => ({dataset: {defaultTemplateId: templateID}}),
+                } as unknown as HTMLElement;
+                const state = getCalendarState(blockElement);
+                state.anchor = new Date("2019-01-15T00:00:00").getTime();
+                state.dateType = dateType;
+                const requests: {calendarDate?: number, templateID: string, viewID: string}[] = [];
+                let inserted = 0;
+                runInNewContext(compiled, {
+                    blockElement, getCalendarCreationDate,
+                    Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view"},
+                    protyle: {app: {appId: "app"}, id: "editor"},
+                    event: {preventDefault() {}, stopPropagation() {}},
+                    fetchPost: (url: string, payload: typeof requests[number]) => {
+                        assert.equal(url, "/api/av/createAttributeViewItem");
+                        requests.push(payload);
+                    },
+                    insertRows: () => inserted++,
+                });
+                if (layout === "table" && !templateID) {
+                    assert.equal(inserted, 1);
+                    assert.equal(requests.length, 0);
+                } else {
+                    assert.equal(inserted, 0);
+                    assert.equal(requests.length, 1);
+                    assert.equal(requests[0].templateID, templateID);
+                    assert.equal(requests[0].viewID, "view-id");
+                    assert.equal(requests[0].calendarDate, layout === "calendar" && dateType === "date" ? state.anchor : undefined);
+                }
+            }
+        }
+    }
+});

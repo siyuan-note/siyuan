@@ -285,7 +285,7 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     check.equal(copied.length, 6, "closing the editor removes the copy handler");
     const selectionDependencies = {getContenteditableElement, isNotEditBlock: () => false, revealTabsForTarget: () => {}};
     const selectionAPI = new Function(...Object.keys(selectionDependencies), selectionSource +
-        "\nreturn {captureRichCellSelection, restoreRichCellSelection, focusByOffset, getSelectionOffset};")(
+        "\nreturn {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, focusByOffset, getSelectionOffset};")(
         ...Object.values(selectionDependencies)) as typeof import("./tableCellRichSelection") & typeof import("./selection");
     const renderDependencies = {
         ...selectionAPI, Constants: {PROTYLE_CDN: ""}, setCodeTheme: () => {}, addScript: () => Promise.resolve(),
@@ -341,6 +341,30 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
         await new Promise(resolve => setTimeout(resolve, 0));
         check.equal(selectionAPI.captureRichCellSelection(wysiwyg, getSelection()).start, 7,
             "first-click caret survives the initial asynchronous code highlight");
+    }
+    for (const offset of [2, 6, body.indexOf("123555555") + 4]) {
+        wysiwyg.innerHTML = api.getTableCellRichBlockDOM(savedCell);
+        render(wysiwyg);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        const previewCode = wysiwyg.querySelector<HTMLElement>('.hljs > [contenteditable="true"]');
+        previewCode.style.cssText = "white-space: pre; font: 16px monospace; padding-left: 40px;";
+        wysiwyg.querySelectorAll<HTMLElement>("[contenteditable]").forEach(element => element.contentEditable = "false");
+        const previewRange = selectionAPI.focusByOffset(previewCode, offset, offset, false);
+        check.ok(previewRange);
+        const rect = previewRange.getBoundingClientRect();
+        const point = {x: rect.left + 0.1, y: rect.top + rect.height / 2};
+        const clicked = selectionAPI.captureRichCellSelectionAtPoint(wysiwyg, point);
+        check.equal(clicked?.start, offset, "hit-test uses the visible preview text");
+        check.equal(clicked.startIndex, 1);
+        wysiwyg.innerHTML = api.getTableCellRichBlockDOM(savedCell);
+        const editingCode = wysiwyg.querySelector<HTMLElement>('.hljs > [contenteditable="true"]');
+        editingCode.style.cssText = "white-space: pre; font: 16px monospace; padding-left: 0;";
+        check.notEqual(selectionAPI.captureRichCellSelectionAtPoint(wysiwyg, point)?.start, offset,
+            "the same screen coordinate points elsewhere before the line number gutter is rendered");
+        render(wysiwyg);
+        check.equal(selectionAPI.restoreRichCellSelection(wysiwyg, clicked), true);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.deepEqual(selectionAPI.captureRichCellSelection(wysiwyg, getSelection()), clicked);
     }
     fixture.remove();
     return "Table cell code insertion cases passed";

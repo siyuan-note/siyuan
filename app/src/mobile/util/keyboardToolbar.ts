@@ -1515,7 +1515,7 @@ export const initKeyboardToolbar = () => {
         }
         const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
-        const liteSlashBtnElement = target.closest<HTMLElement>(".keyboard__util .protyle-hint .b3-list-item[data-value]");
+        const liteSlashBtnElement = target.closest<HTMLElement>(".keyboard__util .protyle-hint .keyboard__slash-item[data-value]");
         const slashBtnElement = liteSlashBtnElement || hasClosestByClassName(target, "keyboard__slash-item");
         if (slashBtnElement && slashBtnElement.dataset.action === "fontFamilyMenu") {
             const range = protyle.toolbar.range.cloneRange();

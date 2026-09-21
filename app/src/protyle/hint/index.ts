@@ -75,6 +75,7 @@ import {
     shouldIgnoreHintTrigger,
 } from "./blockHintRange";
 import {getMobileHintPosition} from "./mobileHintPosition";
+import {getLiteSlashMenuHTML} from "../../mobile/util/liteSlashMenu";
 import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
 import {getSemanticInlineVisibleText, stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
@@ -537,6 +538,9 @@ export class Hint {
     }
 
     private getHTMLByData(data: IHintData[]) {
+        if (this.source === "hint" && this.element.closest("#keyboardToolbar")) {
+            return getLiteSlashMenuHTML(data);
+        }
         let hintsHTML = '<div style="flex: 1;overflow:auto;">';
         if (this.source !== "hint") {
             hintsHTML = '<input spellcheck="false" style="margin:0 8px 4px 8px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';

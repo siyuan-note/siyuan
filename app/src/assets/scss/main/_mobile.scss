@@ -1335,6 +1335,14 @@ body.mobile-topbar--merged {
       max-width: none;
       max-height: none !important;
       box-shadow: none;
+      border: 0;
+      padding: 0;
+      background-color: transparent;
+
+      .keyboard__slash-text {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
     }
   }
 
@@ -1438,6 +1446,12 @@ body.mobile-topbar--merged {
 
     &-text {
       margin-left: 6px;
+    }
+
+    &-description {
+      display: block;
+      color: var(--b3-theme-on-surface);
+      font-size: .75rem;
     }
   }
 

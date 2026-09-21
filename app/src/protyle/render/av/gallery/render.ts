@@ -26,6 +26,7 @@ import {getCardStyle} from "./style";
 import {setGroupFoldedStates} from "../groupFold";
 import {getPublishAVView} from "../publishState";
 import {renderAVRichTextElements} from "../richText";
+import {replaceAVContainer} from "../container";
 
 interface IIds {
     groupId: string,
@@ -99,13 +100,13 @@ const renderGroupGallery = (options: ITableOptions) => {
         }
     });
     if (options.renderAll) {
-        options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
+        replaceAVContainer(options.blockElement, `<div class="av__container fn__block">
     ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled, options.blockElement)}
     <div>
         ${avBodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
-</div>`;
+</div>`);
     } else {
         options.blockElement.querySelector(".av__header").nextElementSibling.innerHTML = avBodyHTML;
     }
@@ -176,10 +177,6 @@ export const afterRenderGallery = (options: ITableOptions) => {
                 focusBlock(options.blockElement);
             }
         }
-    }
-    const focusViewElement = options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement;
-    if (focusViewElement) {
-        options.blockElement.querySelector(".layout-tab-bar").scrollLeft = focusViewElement.offsetLeft - 30;
     }
     if (options.cb) {
         options.cb(options.data);
@@ -313,7 +310,7 @@ export const renderGallery = async (options: {
     }
     applyAVRenderContext(options.blockElement, data);
     prepareAVLocate(options.blockElement, data, resetData);
-    if (isTableLikeView(data.viewType)) {
+    if (isTableLikeView(data.viewType) || data.viewType === "calendar") {
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
         return;
     }
@@ -341,7 +338,7 @@ export const renderGallery = async (options: {
     }
     const bodyHTML = getGalleryHTML(view, options.blockElement, virtualData.all);
     if (options.renderAll) {
-        options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
+        replaceAVContainer(options.blockElement, `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled, options.blockElement)}
     <div>
         <div class="av__body" data-group-id="" data-page-size="${view.pageSize}"${virtualData.all?.locate ? ' data-av-locate-window="true"' : ""}>
@@ -349,7 +346,7 @@ export const renderGallery = async (options: {
         </div>
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
-</div>`;
+</div>`);
     } else {
         const bodyElement = options.blockElement.querySelector(".av__body") as HTMLElement;
         bodyElement.innerHTML = bodyHTML;

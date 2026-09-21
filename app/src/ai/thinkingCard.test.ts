@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
-import {describe, it} from "node:test";
-import {bindThinkingCardToggle} from "./thinkingCard";
+import {describe, it, test} from "node:test";
+import {bindThinkingCardToggle, updateThinkingBody} from "./thinkingCard";
 
 class FakeClassList {
     private readonly values = new Set<string>();
@@ -115,4 +115,28 @@ describe("thinking card toggle", () => {
         assert.equal(card.body.classList.contains("agent-chat__thinking-body--expanded"), false);
         assert.equal(card.latest.classList.contains("fn__none"), true);
     });
+});
+
+test("streaming reasoning follows the bottom and preserves a user's reading position", () => {
+    const body = {clientHeight: 200, scrollHeight: 600, scrollTop: 400} as HTMLElement;
+    const append = () => Object.assign(body, {scrollHeight: body.scrollHeight + 100});
+    updateThinkingBody(body, append);
+    assert.equal(body.scrollTop, 700);
+
+    body.scrollTop = 100;
+    updateThinkingBody(body, append);
+    updateThinkingBody(body, append);
+    assert.equal(body.scrollTop, 100);
+
+    body.scrollTop = body.scrollHeight - body.clientHeight;
+    updateThinkingBody(body, append);
+    assert.equal(body.scrollTop, body.scrollHeight);
+});
+
+test("short and collapsed reasoning can continue following new content", () => {
+    for (const clientHeight of [0, 200]) {
+        const body = {clientHeight, scrollHeight: 100, scrollTop: 0} as HTMLElement;
+        updateThinkingBody(body, () => Object.assign(body, {scrollHeight: 300}));
+        assert.equal(body.scrollTop, 300);
+    }
 });

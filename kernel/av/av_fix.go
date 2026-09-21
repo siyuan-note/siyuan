@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	CurrentSpec   = 9
+	CurrentSpec   = 10
 	PlainTextSpec = 8
 	RichTextSpec  = 9
 )
@@ -47,6 +47,35 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec7(av)
 	upgradeSpec8(av)
 	upgradeSpec9(av)
+	upgradeSpec10(av)
+}
+
+// upgradeSpec10 仅为包含列表或日历配置的数据库升级，保留其他数据库的旧版兼容性。
+func upgradeSpec10(av *AttributeView) {
+	if 10 <= av.Spec {
+		return
+	}
+	var needsUpgrade func(*View) bool
+	needsUpgrade = func(view *View) bool {
+		if nil == view {
+			return false
+		}
+		if nil != view.List || nil != view.Calendar {
+			return true
+		}
+		for _, group := range view.Groups {
+			if needsUpgrade(group) {
+				return true
+			}
+		}
+		return false
+	}
+	for _, view := range av.Views {
+		if needsUpgrade(view) {
+			av.Spec = 10
+			return
+		}
+	}
 }
 
 func CheckSpec(av *AttributeView) (err error) {

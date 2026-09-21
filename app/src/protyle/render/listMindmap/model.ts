@@ -562,7 +562,8 @@ export const replaceListMindmapContent = (list: HTMLElement, nodeId: string, blo
         if (original) {
             Array.from(original.attributes).forEach(attribute => {
                 if (!block.hasAttribute(attribute.name) &&
-                    !["data-type", "data-subtype", "class", "updated", "contenteditable", "data-task", "data-marker", "fold"]
+                    !["data-type", "data-subtype", "class", "updated", "contenteditable", "data-task", "data-marker", "fold",
+                        Constants.CUSTOM_SY_CODE_TAB_SPACES]
                         .includes(attribute.name) &&
                     !attribute.name.startsWith("data-list-mindmap-")) {
                     block.setAttribute(attribute.name, attribute.value);

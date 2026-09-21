@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20260920084445"
+		"updated": "20260921201901"
 	},
 	"Children": [
 		{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20251224101729-3lny7un",
-				"updated": "20260920084445"
+				"updated": "20260920225154"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "資料庫由內容區塊或非內容區塊資料組成，並以不同視圖呈現，例如表格視圖、列表視圖、看板視圖和卡片視圖。"
+					"Data": "資料庫由內容區塊或非內容區塊資料組成，並以不同視圖呈現，例如表格視圖、列表視圖、日曆視圖、看板視圖和卡片視圖。"
 				}
 			]
 		},
@@ -674,6 +674,260 @@
 								{
 									"Type": "NodeText",
 									"Data": "篩選、排序和分組：與同一資料庫的其他視圖共享資料，支援獨立設定篩選、排序和分組"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260920225154-xknvq29",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260920225154-xknvq29",
+				"updated": "20260921201901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "日曆視圖"
+				}
+			]
+		},
+		{
+			"ID": "20260920225154-z9ga0hb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260920225154-z9ga0hb",
+				"updated": "20260920225154"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按月或週顯示有日期的項目。週視圖包含七個日期欄，跨日項目會連續顯示在對應日期上。各編輯器獨立記錄目前瀏覽日期和月、週模式。"
+				}
+			]
+		},
+		{
+			"ID": "20260920225154-mpwyzfe",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260920225154-mpwyzfe",
+				"updated": "20260921201901"
+			},
+			"Children": [
+				{
+					"ID": "20260920225154-6a8qyqe",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920225154-6a8qyqe",
+						"updated": "20260920225154"
+					},
+					"Children": [
+						{
+							"ID": "20260920225154-r1vw5b7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920225154-r1vw5b7",
+								"updated": "20260920225154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切換方式：在視圖設定中選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "佈局"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "日曆"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，也可透過斜線選單插入資料庫日曆檢視"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920225154-nvf2ccc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920225154-nvf2ccc",
+						"updated": "20260920225154"
+					},
+					"Children": [
+						{
+							"ID": "20260920225154-6aj594a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920225154-6aj594a",
+								"updated": "20260920225154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日期欄位：在佈局設定中選擇一個日期、建立時間或更新時間欄位。沒有適用欄位時，日曆會提示選擇或建立欄位，不會為既有項目自動填入一般日期；沒有日期的項目不顯示"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920225154-aibikc5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920225154-aibikc5",
+						"updated": "20260921201901"
+					},
+					"Children": [
+						{
+							"ID": "20260920225154-t9xok0u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920225154-t9xok0u",
+								"updated": "20260921201901"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "瀏覽日期：使用上一頁、下一頁、今天或日期選擇器切換日期。月視圖會摺疊項目較多的日期，點擊更多按鈕可展開所在週。日期依目前裝置的本地時區顯示。月視圖依當月實際需要顯示四、五或六週"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920225154-8jo2ad8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920225154-8jo2ad8",
+						"updated": "20260921201901"
+					},
+					"Children": [
+						{
+							"ID": "20260920225154-wxzch42",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920225154-wxzch42",
+								"updated": "20260921201901"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "編輯項目：點擊項目使用既有資料庫項目編輯介面。使用一般日期欄位時，可透過日期格內的加號建立項目，拖曳項目調整日期，或拖曳兩端調整日期範圍。日期修改支援復原，觸控裝置可拖曳項目上的移動把手。新增後自動聚焦主鍵欄位；拖曳時預覽調整後的日期範圍並醒目提示對應日期格，放開後儲存。右鍵選單也支援複製、新建文件並綁定、新增至其他資料庫、編輯欄位及在所選日期新增項目"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920225154-xpzcvxc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920225154-xpzcvxc",
+						"updated": "20260920225154"
+					},
+					"Children": [
+						{
+							"ID": "20260920225154-z6bn57l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920225154-z6bn57l",
+								"updated": "20260920225154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "系統時間：建立時間和更新時間沿用項目或綁定區塊的實際時間，不支援拖曳修改，也不提供日期格內的新增按鈕"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920225154-csqj5ki",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920225154-csqj5ki",
+						"updated": "20260920225154"
+					},
+					"Children": [
+						{
+							"ID": "20260920225154-embq9da",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920225154-embq9da",
+								"updated": "20260920225154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日期範圍：全天範圍包含結束當天；帶時間的範圍若在午夜結束，則顯示到前一天。僅有一個端點時顯示在該日期，結束早於開始時標記異常並保留原值"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260920225154-0na3b4b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260920225154-0na3b4b",
+						"updated": "20260921201901"
+					},
+					"Children": [
+						{
+							"ID": "20260920225154-dp0msus",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260920225154-dp0msus",
+								"updated": "20260921201901"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "視圖設定：沿用資料庫的篩選、排序、欄位顯示與隱藏及新項目範本，可選擇單選欄位作為項目顏色來源。日曆佈局暫不套用分組，切換回其他佈局時保留原有分組設定。佈局設定中的項目顯示行數可選 3、5、10 或全部，預設為 3，儲存在目前日曆視圖中。此設定僅控制月視圖摺疊，週視圖顯示全部項目，日期範圍內的資料仍完整載入"
 								}
 							]
 						}

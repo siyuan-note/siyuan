@@ -241,6 +241,15 @@
     font-size: 15px;
   }
 
+  &-side-panel {
+    [data-action="drag"],
+    &--dragging {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+  }
+
   &__panel {
     background-color: var(--b3-theme-background);
     border-radius: var(--b3-border-radius-b);

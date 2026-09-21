@@ -30,6 +30,8 @@ func avContractView(value av.Viewable) apicontract.AVViewInstance {
 	switch view := value.(type) {
 	case *av.Table:
 		return apicontract.NewAVTableInstance(toContractAVTable(view))
+	case *av.Calendar:
+		return apicontract.NewAVTableInstance(toContractAVTable(view.Table))
 	case *av.List:
 		return apicontract.NewAVTableInstance(toContractAVTable(view.Table))
 	case *av.Gallery:
@@ -45,10 +47,13 @@ func toContractAVTable(value *av.Table) *apicontract.AVTable {
 		return nil
 	}
 	return &apicontract.AVTable{
-		AVBaseInstance: toContractAVBaseInstance(value.BaseInstance),
-		Columns:        avContractSlice(value.Columns, func(value *av.TableColumn) *apicontract.AVTableColumn { return toContractAVTableColumn(value) }),
-		Rows:           avContractSlice(value.Rows, func(value *av.TableRow) *apicontract.AVTableRow { return toContractAVTableRow(value) }),
-		RowCount:       value.RowCount,
+		AVBaseInstance:     toContractAVBaseInstance(value.BaseInstance),
+		Calendar:           toContractAVCalendarSettings(value.Calendar),
+		CalendarRange:      toContractAVCalendarRange(value.CalendarRange),
+		CalendarTargetDate: value.CalendarTargetDate,
+		Columns:            avContractSlice(value.Columns, func(value *av.TableColumn) *apicontract.AVTableColumn { return toContractAVTableColumn(value) }),
+		Rows:               avContractSlice(value.Rows, func(value *av.TableRow) *apicontract.AVTableRow { return toContractAVTableRow(value) }),
+		RowCount:           value.RowCount,
 	}
 }
 func toContractAVBaseInstance(value *av.BaseInstance) *apicontract.AVBaseInstance {
@@ -1028,6 +1033,7 @@ func toContractAVView(value *av.View) *apicontract.AVView {
 		LayoutType:       string(value.LayoutType),
 		Table:            toContractAVLayoutTable(value.Table),
 		List:             toContractAVLayoutTable(value.List),
+		Calendar:         toContractAVLayoutCalendar(value.Calendar),
 		Gallery:          toContractAVLayoutGallery(value.Gallery),
 		Kanban:           toContractAVLayoutKanban(value.Kanban),
 		ItemIDs:          value.ItemIDs,

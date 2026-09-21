@@ -194,14 +194,18 @@ type GetAttributeViewFieldViewsRequest struct {
 }
 
 type CreateAttributeViewItemRequest struct {
-	AvID       string `json:"avID"`
-	BlockID    string `json:"blockID"`
-	ViewID     string `json:"viewID" api:"optional,nullable"`
-	TemplateID string `json:"templateID" api:"optional,nullable"`
-	PreviousID string `json:"previousID" api:"optional,nullable"`
-	GroupID    string `json:"groupID" api:"optional,nullable"`
-	App        string `json:"app" api:"optional,nullable"`
-	Session    string `json:"session" api:"optional,nullable"`
+	// 日历新条目的全天日期，单位为毫秒；仅支持绑定普通 date 字段的日历视图。
+	// 覆盖模板中该字段的值，与模板其他字段及条目创建共用一个可撤销事务。
+	// 绑定 created 或 updated 时拒绝指定日期；省略或传 null 时沿用常规创建流程。
+	CalendarDate *int64 `json:"calendarDate" api:"optional,nullable"`
+	AvID         string `json:"avID"`
+	BlockID      string `json:"blockID"`
+	ViewID       string `json:"viewID" api:"optional,nullable"`
+	TemplateID   string `json:"templateID" api:"optional,nullable"`
+	PreviousID   string `json:"previousID" api:"optional,nullable"`
+	GroupID      string `json:"groupID" api:"optional,nullable"`
+	App          string `json:"app" api:"optional,nullable"`
+	Session      string `json:"session" api:"optional,nullable"`
 }
 
 type CreateAttributeViewItemWithMarkdownRequest struct {
@@ -239,14 +243,18 @@ type SearchAttributeViewRequest struct {
 }
 
 type RenderSnapshotAttributeViewRequest struct {
-	Snapshot      string `json:"snapshot"`
-	ID            string `json:"id"`
-	BlockID       string `json:"blockID" api:"optional,nullable,ignoretype"`
-	ViewID        string `json:"viewID" api:"optional,nullable,ignoretype"`
-	CarrierViewID string `json:"carrierViewID" api:"optional,nullable,ignoretype"`
+	// 仅限制本次快照中的日历渲染范围，语义见 AVCalendarRange；不修改快照及共享视图。
+	CalendarRange *AVCalendarRange `json:"calendarRange" api:"optional,nullable"`
+	Snapshot      string           `json:"snapshot"`
+	ID            string           `json:"id"`
+	BlockID       string           `json:"blockID" api:"optional,nullable,ignoretype"`
+	ViewID        string           `json:"viewID" api:"optional,nullable,ignoretype"`
+	CarrierViewID string           `json:"carrierViewID" api:"optional,nullable,ignoretype"`
 }
 
 type RenderHistoryAttributeViewRequest struct {
+	// 仅限制本次历史版本中的日历渲染范围，语义见 AVCalendarRange；不修改历史及共享视图。
+	CalendarRange *AVCalendarRange          `json:"calendarRange" api:"optional,nullable"`
 	ID            string                    `json:"id"`
 	Created       string                    `json:"created"`
 	BlockID       string                    `json:"blockID" api:"optional,nullable"`
@@ -259,6 +267,9 @@ type RenderHistoryAttributeViewRequest struct {
 }
 
 type RenderAttributeViewRequest struct {
+	// 仅限制本次日历渲染范围，语义见 AVCalendarRange；无效区间返回错误，不修改已存数据。
+	// 发布读取保留权限过滤；日期范围和定位参数不扩大条目访问权限。
+	CalendarRange    *AVCalendarRange          `json:"calendarRange" api:"optional,nullable"`
 	ID               string                    `json:"id"`
 	BlockID          string                    `json:"blockID" api:"optional,nullable"`
 	ViewID           string                    `json:"viewID" api:"optional,nullable"`

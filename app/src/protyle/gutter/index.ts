@@ -3793,7 +3793,8 @@ export class Gutter {
                     type,
                     subtype: nodeElement.getAttribute("data-subtype"),
                     nodeID: dataNodeId,
-                    icon: getIconByType(type, nodeElement.getAttribute("data-subtype")),
+                    icon: type === "NodeList" && nodeElement.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1" ?
+                        "iconMindmap" : getIconByType(type, nodeElement.getAttribute("data-subtype")),
                     embedID,
                     viewOccurrenceID,
                     popoverHTML,

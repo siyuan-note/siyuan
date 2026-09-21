@@ -219,9 +219,10 @@ test("undo replay restores recorded carets across paragraphs, table cells and em
     const source = compile(`class TableCutControl {${methods.map(method => method.getText(tableSource)).join("\n")}}`) +
         extract("tableCellRich.ts", ["clearTableCellContent"]) +
         compile(readFileSync(path.join(__dirname, "hasClosest.ts"), "utf8")) +
+        moduleSource("longTextWrap.ts", ["unwrapLongTextRuns"]) +
         moduleSource("inlineElementBoundary.ts", ["getInlineElementBoundaryOffset", "getTextWithLegacyInlineBoundary",
             "hasInlineElementBoundary", "normalizeInlineElementBoundary", "restoreInlineElementBoundary",
-            "restoreInlineElementBoundaries", "SEMANTIC_INLINE_HTML_REGEXP"]) +
+            "restoreInlineElementBoundaries", "restoreInlineElementBoundaryHTML", "SEMANTIC_INLINE_HTML_REGEXP"]) +
         moduleSource("inlineElementMarker.ts", ["stripSemanticMarkersFromRangeText", "getMarkerAwareTextLength",
             "getSemanticMarkerPrefixLengthForNode"]) +
         extract("tableCellRichValue.ts", ["TABLE_CELL_RICH_ATTRIBUTE"]) +

@@ -20,7 +20,10 @@ test("sidebar opening restores the active dock, falls back to visible docks and 
     let closed = 0;
     let blurred = 0;
     let cellEditorsClosed = 0;
-    const moduleExports: {openSidebar?: (side: string) => void} = {};
+    const moduleExports: {
+        openSidebar?: (side: string) => void;
+        popSidebar?: (side: string) => void;
+    } = {};
     const source = readFileSync(resolve(process.cwd(), "src/mobile/util/sidebar.ts"), "utf8");
     const code = transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
     runInNewContext(code, {
@@ -57,4 +60,20 @@ test("sidebar opening restores the active dock, falls back to visible docks and 
     assert.equal(blurred, 2);
     assert.equal(cellEditorsClosed, 2);
     assert.equal(rendered.length, 2);
+
+    tabs = [tab("tag", false, true), tab("bookmark", false), tab("file", true)];
+    moduleExports.popSidebar("left");
+    assert.equal(rendered.at(-1), "file");
+    const plugin = tab("plugin-custom", true);
+    Object.assign(plugin.dataset, {mobilePluginDockTab: "custom-plugin-tab"});
+    tabs = [tab("file", false), plugin];
+    moduleExports.popSidebar("left");
+    assert.equal(rendered.at(-1), "custom-plugin-tab");
+    tabs = [tab("file", false), tab("bookmark", false)];
+    moduleExports.popSidebar("left");
+    assert.equal(rendered.at(-1), "file");
+    tabs = [];
+    moduleExports.popSidebar("left");
+    assert.equal(rendered.length, 5);
+    assert.equal(left.style.transform, "");
 });

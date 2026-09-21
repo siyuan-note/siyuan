@@ -6,6 +6,7 @@ import {getPageSize} from "../groups";
 import {fetchSyncPost} from "../../../../util/fetch";
 import {Constants} from "../../../../constants";
 import {avRender, genTabHeaderHTML} from "../render";
+import {replaceAVContainer} from "../container";
 import {afterRenderGallery, renderGallery} from "../gallery/render";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getRowHTML} from "../row";
@@ -193,7 +194,7 @@ export const renderKanban = async (options: {
     }
     applyAVRenderContext(options.blockElement, data);
     prepareAVLocate(options.blockElement, data, resetData);
-    if (isTableLikeView(data.viewType)) {
+    if (isTableLikeView(data.viewType) || data.viewType === "calendar") {
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
         return;
     }
@@ -238,14 +239,14 @@ export const renderKanban = async (options: {
         }
     });
     if (options.renderAll) {
-        options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
+        replaceAVContainer(options.blockElement, `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query,
         !options.protyle.disabled && !queryEmbedElement, options.blockElement, !queryEmbedElement)}
     <div class="av__kanban${isSelectGroup ? " av__kanban--bg" : ""}" data-group-options="${escapeAttr(JSON.stringify(groupOptions))}" style="${getCardStyle(view)}">
         ${bodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
-</div>`;
+</div>`);
     } else {
         const kanbanElement = options.blockElement.querySelector(".av__kanban");
         kanbanElement.innerHTML = bodyHTML;

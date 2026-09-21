@@ -38,46 +38,52 @@ func TestTableCellRichDocumentReaders(t *testing.T) {
 		},
 	}
 	source := "- **first**\n- second\n\n```go\na | b\nc\n```"
-	for name, read := range readers {
-		t.Run(name, func(t *testing.T) {
-			tree, err := read(legacy)
-			if nil != err {
-				t.Fatal(err)
-			}
-			cell := tree.Root.FirstChild.LastChild.FirstChild
-			if tree.Root.Spec != "2" || cell.TableCellRich != nil || cell.FirstChild.TokensStr() != "**literal** - list" || cell.IALAttr("colspan") != "2" {
-				t.Fatal("legacy cell must retain its content, format, and document version")
-			}
-			cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
-			treenode.UpgradeSpec(tree)
-			luteEngine := util.NewLute()
-			data := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()
-			restored, err := read(data)
-			if nil != err {
-				t.Fatal(err)
-			}
-			restoredCell := restored.Root.FirstChild.LastChild.FirstChild
-			if restoredCell.TableCellRich.Content != source || !strings.Contains(restoredCell.Text(), "first") || strings.Contains(restoredCell.Text(), "literal") {
-				t.Fatal("reader must preserve rich source and rebuild its inline projection")
-			}
-			unknown := bytes.Replace(data, []byte(`"spec": 1`), []byte(`"spec": 99`), 1)
-			if bytes.Equal(unknown, data) {
-				unknown = bytes.Replace(data, []byte(`"spec":1`), []byte(`"spec":99`), 1)
-			}
-			original := bytes.Clone(unknown)
-			if _, err = read(unknown); nil == err {
-				t.Fatal("unsupported rich format must fail before normalization")
-			}
-			if !bytes.Equal(original, unknown) {
-				t.Fatal("reader changed unsupported input")
-			}
-		})
+	for _, source := range []string{source, source + "\n" +
+		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}`,
+		source + "\n" + `{: id="20260921000000-code001" custom-sy-code-tab-spaces="2"}`} {
+		for name, read := range readers {
+			t.Run(name, func(t *testing.T) {
+				tree, err := read(legacy)
+				if nil != err {
+					t.Fatal(err)
+				}
+				cell := tree.Root.FirstChild.LastChild.FirstChild
+				if tree.Root.Spec != "2" || cell.TableCellRich != nil || cell.FirstChild.TokensStr() != "**literal** - list" || cell.IALAttr("colspan") != "2" {
+					t.Fatal("legacy cell must retain its content, format, and document version")
+				}
+				cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
+				treenode.UpgradeSpec(tree)
+				luteEngine := util.NewLute()
+				data := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()
+				restored, err := read(data)
+				if nil != err {
+					t.Fatal(err)
+				}
+				restoredCell := restored.Root.FirstChild.LastChild.FirstChild
+				if restoredCell.TableCellRich.Content != source || !strings.Contains(restoredCell.Text(), "first") || strings.Contains(restoredCell.Text(), "literal") {
+					t.Fatal("reader must preserve rich source and rebuild its inline projection")
+				}
+				unknown := bytes.Replace(data, []byte(`"spec": 1`), []byte(`"spec": 99`), 1)
+				if bytes.Equal(unknown, data) {
+					unknown = bytes.Replace(data, []byte(`"spec":1`), []byte(`"spec":99`), 1)
+				}
+				original := bytes.Clone(unknown)
+				if _, err = read(unknown); nil == err {
+					t.Fatal("unsupported rich format must fail before normalization")
+				}
+				if !bytes.Equal(original, unknown) {
+					t.Fatal("reader changed unsupported input")
+				}
+			})
+		}
 	}
 }
 
 func TestTableCellRichHTMLAndMarkdownExports(t *testing.T) {
 	luteEngine := util.NewLute()
-	source := "- **first**\n- second\n\n```go\na | b\nc\n```\n\n![image](assets/original.png)"
+	source := "- **first**\n- second\n\n```go\na | b\nc\n```\n" +
+		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false" custom-sy-code-tab-spaces="2"}` +
+		"\n\n![image](assets/original.png)"
 	tree := parse.Parse("", []byte("| Header |\n| --- |\n| value |"), luteEngine.ParseOptions)
 	cell := tree.Root.FirstChild.LastChild.FirstChild
 	cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
@@ -95,6 +101,11 @@ func TestTableCellRichHTMLAndMarkdownExports(t *testing.T) {
 	}
 	if err := treenode.MaterializeTableCellRichExport(tree.Root); nil != err {
 		t.Fatal(err)
+	}
+	codes := cell.ChildrenByType(ast.NodeCodeBlock)
+	if len(codes) != 1 || codes[0].IALAttr("linewrap") != "false" || codes[0].IALAttr("linenumber") != "true" ||
+		codes[0].IALAttr("ligatures") != "false" || codes[0].IALAttr("custom-sy-code-tab-spaces") != "2" {
+		t.Fatal("export materialization lost code settings")
 	}
 	ast.Walk(cell, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if entering && node.Type == ast.NodeLinkDest {

@@ -43,7 +43,7 @@ const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, view
     const token = Symbol();
     highlightTokens.set(blockElement, token);
     const className = "protyle-wysiwyg--hl";
-    const targetQuery = isTableLikeView(viewType) ? `.av__row[data-id="${itemID}"]` : `.av__gallery-item[data-id="${itemID}"]`;
+    const targetQuery = viewType === "calendar" ? `.av__calendar-item[data-id="${itemID}"]` : isTableLikeView(viewType) ? `.av__row[data-id="${itemID}"]` : `.av__gallery-item[data-id="${itemID}"]`;
     requestAnimationFrame(() => {
         if (!blockElement.isConnected || highlightTokens.get(blockElement) !== token) {
             return;
@@ -88,7 +88,7 @@ const getLocalAVLocateData = (data: IAV | undefined, request: IAVLocateRequest) 
         return;
     }
     const findTarget = (view: IAVTable | IAVGallery | IAVKanban, groupID = "") => {
-        const items = isTableLikeView(data.viewType) ? (view as IAVTable).rows : (view as IAVGallery | IAVKanban).cards;
+        const items = isTableLikeView(data.viewType) || data.viewType === "calendar" ? (view as IAVTable).rows : (view as IAVGallery | IAVKanban).cards;
         const localIndex = items?.findIndex(item => item.id === request.itemID) ?? -1;
         if (localIndex < 0) {
             return;
@@ -313,6 +313,9 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
     if (request.viewID && request.previousViewID !== undefined && request.viewID !== request.previousViewID) {
         clearSelect(["row", "galleryItem"], blockElement);
     }
+    if (data.viewType === "calendar") {
+        return;
+    }
     const key = data.target.groupID || "all";
     const view = (data.target.groupID ? data.view.groups?.find(item => item.id === data.target.groupID) : data.view) as IAVTable | IAVGallery | IAVKanban;
     const itemLength = isTableLikeView(data.viewType) ? (view as IAVTable).rows.length : (view as IAVGallery | IAVKanban).cards.length;
@@ -377,7 +380,9 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         return;
     }
     let targetElement: HTMLElement;
-    if (isTableLikeView(data.viewType)) {
+    if (data.viewType === "calendar") {
+        targetElement = bodyElement?.querySelector(`.av__calendar-item[data-id="${request.itemID}"]`);
+    } else if (isTableLikeView(data.viewType)) {
         const rowElement = bodyElement?.querySelector(`.av__row[data-id="${request.itemID}"]`) as HTMLElement;
         targetElement = rowElement?.querySelector(".av__cell[data-dtype=\"block\"]") as HTMLElement;
         if (targetElement && request.select !== false) {
@@ -401,7 +406,7 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         return;
     }
     if (request.keyID) {
-        const item = bodyElement?.querySelector<HTMLElement>(`.av__row[data-id="${request.itemID}"], .av__gallery-item[data-id="${request.itemID}"]`);
+        const item = bodyElement?.querySelector<HTMLElement>(`.av__row[data-id="${request.itemID}"], .av__gallery-item[data-id="${request.itemID}"], .av__calendar-item[data-id="${request.itemID}"]`);
         const cell = item?.querySelector<HTMLElement>(`[data-col-id="${request.keyID}"], [data-field-id="${request.keyID}"]`);
         if (cell) {
             targetElement = cell;
@@ -428,6 +433,14 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         const targetRect = targetElement.getBoundingClientRect();
         if (kanbanElement && (targetRect.left < kanbanRect.left || targetRect.right > kanbanRect.right)) {
             kanbanElement.scrollLeft += targetRect.left + targetRect.width / 2 - (kanbanRect.left + kanbanRect.width / 2);
+        }
+    }
+    if (data.viewType === "calendar") {
+        const scroller = blockElement.querySelector<HTMLElement>(".av__calendar-scroll");
+        const rect = scroller?.getBoundingClientRect();
+        const targetRect = targetElement.getBoundingClientRect();
+        if (scroller && (targetRect.left < rect.left || targetRect.right > rect.right)) {
+            scroller.scrollLeft += targetRect.left - rect.left;
         }
     }
     if (isTableLikeView(data.viewType) && request.keyID) {

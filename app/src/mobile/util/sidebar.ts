@@ -16,7 +16,8 @@ export const getSidebarDock = (sidebarElement: HTMLElement | null) => {
     const activeElement = tabElements.find(item =>
         item.classList.contains("toolbar__icon--active") && !item.classList.contains("fn__none")) ||
         tabElements.find(item => !item.classList.contains("fn__none"));
-    const type = activeElement?.dataset.type?.replace(/^sidebar-/, "").replace(/-tab$/, "");
+    const type = activeElement?.dataset.mobilePluginDockTab ||
+        activeElement?.dataset.type?.replace(/^sidebar-/, "").replace(/-tab$/, "");
     if (toolbarElement && type) {
         return {toolbarElement, type};
     }

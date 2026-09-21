@@ -75,7 +75,7 @@ type BaseInstance struct {
 func NewViewBaseInstance(view *View) *BaseInstance {
 	showIcon, wrapField := true, false
 	switch view.LayoutType {
-	case LayoutTypeTable, LayoutTypeList:
+	case LayoutTypeTable, LayoutTypeList, LayoutTypeCalendar:
 		showIcon = view.GetTableLayout().ShowIcon
 		wrapField = view.GetTableLayout().WrapField
 	case LayoutTypeGallery:

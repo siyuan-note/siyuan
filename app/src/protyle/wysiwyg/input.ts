@@ -5,6 +5,7 @@ import {transaction, turnsOneInto, updateTransaction, wrapBlockInBlockquote} fro
 import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
 import {restoreInlineElementBoundaryHTML} from "../util/inlineElementBoundary";
+import {suspendLongTextRuns} from "../util/longTextWrap";
 import {
     fixAdjacentTags,
     getContenteditableElement,
@@ -112,7 +113,7 @@ export const beforeBlockquoteInput = (protyle: IProtyle, event: InputEvent) => {
     return true;
 };
 
-export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true,
+const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true,
                             event?: InputEvent, inputOperations?: IInputOperations) => {
     if (!blockElement.parentElement) {
         // 不同 windows 版本下输入法会多次触发 input，导致 outerhtml 赋值的块丢失
@@ -563,6 +564,15 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     hideElements(["gutter"], protyle);
     updateInput(html, protyle, id, inputOperations);
+};
+
+export const input = async (...args: Parameters<typeof inputBlock>) => {
+    const resume = suspendLongTextRuns(args[0].wysiwyg.element, args[1], args[2]);
+    try {
+        await inputBlock(...args);
+    } finally {
+        resume();
+    }
 };
 
 const updateInput = (html: string, protyle: IProtyle, id: string, inputOperations?: IInputOperations) => {

@@ -98,9 +98,6 @@ const getVisibleDockIds = (
 
 const genDockItemHtml = (
     dockId: MobileSidePanelDockId,
-    side: MobileSidePanelSide,
-    index: number,
-    length: number,
     visible: boolean,
     pluginEntriesById: ReadonlyMap<string, IMobilePluginDockEntry>,
 ) => {
@@ -110,17 +107,12 @@ const genDockItemHtml = (
     if (!label || !icon) {
         return "";
     }
-    const moveLabel = side === "left" ? window.siyuan.languages.moveToRight : window.siyuan.languages.moveToLeft;
-    const moveIcon = side === "left" ? "iconRight" : "iconLeft";
     const disabled = window.siyuan.config.readonly || window.siyuan.isPublish;
     return `<div class="b3-list-item" data-dock-id="${escapeAttr(dockId)}">
+    <span class="block__icon block__icon--show" data-action="drag" style="touch-action: none; cursor: grab; margin-right: 8px;${disabled ? " visibility: hidden;" : ""}"><svg><use xlink:href="#iconDrag"></use></svg></span>
     <svg class="b3-list-item__graphic"><use xlink:href="#${escapeAttr(icon)}"></use></svg>
     <span class="b3-list-item__text">${escapeHtml(label)}</span>
     <input class="b3-switch" type="checkbox" data-action="visibility" aria-label="${escapeAttr(label)}"${visible ? " checked" : ""}${disabled ? " disabled" : ""}>
-    <span class="fn__space"></span>
-    <button class="block__icon block__icon--show ariaLabel" data-action="up" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.up)}" type="button"${disabled || index === 0 ? " disabled" : ""}><svg><use xlink:href="#iconUp"></use></svg></button>
-    <button class="block__icon block__icon--show ariaLabel" data-action="down" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.down)}" type="button"${disabled || index === length - 1 ? " disabled" : ""}><svg><use xlink:href="#iconDown"></use></svg></button>
-    <button class="block__icon block__icon--show ariaLabel" data-action="move" data-position="north" aria-label="${escapeAttr(moveLabel)}" type="button"${disabled || length === 1 ? " disabled" : ""}><svg><use xlink:href="#${moveIcon}"></use></svg></button>
 </div>`;
 };
 
@@ -132,8 +124,8 @@ const genSideHtml = (
     const label = side === "left" ? window.siyuan.languages.marginLeft : window.siyuan.languages.marginRight;
     const dockIds = getVisibleDockIds(config, side, pluginEntriesById);
     return `<div class="b3-label__text">${escapeHtml(label)}</div>
-<div class="b3-list b3-list--background" data-side="${side}">${dockIds.map((dockId, index) =>
-        genDockItemHtml(dockId, side, index, dockIds.length, !config.hidden.includes(dockId), pluginEntriesById)).join("")}</div>`;
+<div class="b3-list b3-list--background" data-side="${side}">${dockIds.map(dockId =>
+        genDockItemHtml(dockId, !config.hidden.includes(dockId), pluginEntriesById)).join("")}</div>`;
 };
 
 const genMobileSidePanelListsHtml = (
@@ -150,13 +142,13 @@ export const genMobileSidePanelSettingHTML = () => {
     const config = getMobileSidePanelConfig(pluginDockContext.layouts);
     return `<div id="mobileSidePanelSetting" class="b3-label config-item">
     <div class="fn__flex">
-        <div class="fn__flex-1 config-item__main"><div class="config-name">${escapeHtml(window.siyuan.languages.leftRightLayout)}</div></div>
+        <div class="fn__flex-1 config-item__main"><div class="config-name">${escapeHtml(window.siyuan.languages.leftRightSidebarLayout)}</div></div>
         <button class="b3-button b3-button--outline" data-action="reset" type="button"${disabled}>
             <svg><use xlink:href="#iconUndo"></use></svg>${escapeHtml(window.siyuan.languages.reset)}
         </button>
     </div>
     <div class="fn__hr"></div>
-    <div data-type="side-panel-lists">${genMobileSidePanelListsHtml(config, pluginDockContext.entriesById)}</div>
+    <div class="config-side-panel" data-type="side-panel-lists">${genMobileSidePanelListsHtml(config, pluginDockContext.entriesById)}</div>
 </div>`;
 };
 
@@ -168,10 +160,91 @@ export const mountMobileSidePanelSetting = (root: HTMLElement) => {
     }
     let pluginDockContext = getPluginDockContext();
     let config = getMobileSidePanelConfig(pluginDockContext.layouts);
+    let dragging: {id: string, pointerId: number, x: number, y: number} | undefined;
+    let dropTarget: {side: MobileSidePanelSide, index: number} | undefined;
+    const clearDropTarget = () => {
+        listsElement.querySelectorAll<HTMLElement>("[data-dock-id]").forEach(item => {
+            item.classList.remove("dragover__top", "dragover__bottom");
+            item.style.opacity = "";
+        });
+        dropTarget = undefined;
+    };
+    const clearDrag = () => {
+        dragging = undefined;
+        listsElement.classList.remove("config-side-panel--dragging");
+        clearDropTarget();
+    };
     const render = () => {
+        clearDrag();
         listsElement.innerHTML = genMobileSidePanelListsHtml(config, pluginDockContext.entriesById);
     };
     render();
+    listsElement.addEventListener("pointerdown", (event: PointerEvent) => {
+        const handle = (event.target as Element).closest('[data-action="drag"]');
+        if (!handle || event.button !== 0 || !event.isPrimary ||
+            window.siyuan.config.readonly || window.siyuan.isPublish) {
+            return;
+        }
+        const item = handle.closest<HTMLElement>("[data-dock-id]");
+        dragging = {id: item.dataset.dockId, pointerId: event.pointerId, x: event.clientX, y: event.clientY};
+        listsElement.setPointerCapture(event.pointerId);
+        listsElement.classList.add("config-side-panel--dragging");
+        event.preventDefault();
+    });
+    listsElement.addEventListener("pointermove", (event: PointerEvent) => {
+        if (!dragging || dragging.pointerId !== event.pointerId) {
+            return;
+        }
+        clearDropTarget();
+        if (Math.hypot(event.clientX - dragging.x, event.clientY - dragging.y) < 5) {
+            return;
+        }
+        const target = document.elementFromPoint(event.clientX, event.clientY);
+        const sideElement = target?.closest<HTMLElement>("[data-side]");
+        if (!sideElement || !listsElement.contains(sideElement)) {
+            return;
+        }
+        const side = sideElement.dataset.side as MobileSidePanelSide;
+        const sourceSide = config.left.includes(dragging.id) ? "left" : "right";
+        const available = (ids: string[]) => ids.filter(id =>
+            isMobileSidePanelBuiltInDockId(id) || pluginDockContext.entriesById.has(id));
+        if (side !== sourceSide && available(config[sourceSide]).length === 1) {
+            return;
+        }
+        const rows = Array.from(sideElement.querySelectorAll<HTMLElement>("[data-dock-id]"))
+            .filter(item => item.dataset.dockId !== dragging.id);
+        const next = rows.find(item => event.clientY < item.getBoundingClientRect().top + item.offsetHeight / 2);
+        const ids = available(config[side]).filter(id => id !== dragging.id);
+        dropTarget = {side, index: next ? ids.indexOf(next.dataset.dockId) : ids.length};
+        const marker = next || rows[rows.length - 1];
+        if (marker) {
+            marker.classList.add(next ? "dragover__top" : "dragover__bottom");
+        }
+        listsElement.querySelectorAll<HTMLElement>("[data-dock-id]").forEach(item => {
+            if (item.dataset.dockId === dragging.id) {
+                item.style.opacity = "0.5";
+            }
+        });
+    });
+    listsElement.addEventListener("pointerup", (event: PointerEvent) => {
+        if (!dragging || dragging.pointerId !== event.pointerId) {
+            return;
+        }
+        if (dropTarget && !window.siyuan.config.readonly && !window.siyuan.isPublish) {
+            config = saveMobileSidePanelConfig(reduceMobileSidePanelConfig(config, {
+                type: "move", id: dragging.id, ...dropTarget,
+            }, pluginDockContext.layouts), pluginDockContext.layouts);
+        }
+        listsElement.releasePointerCapture(event.pointerId);
+        render();
+    });
+    const cancelDrag = (event: PointerEvent) => {
+        if (event.pointerId === dragging?.pointerId) {
+            clearDrag();
+        }
+    };
+    listsElement.addEventListener("pointercancel", cancelDrag);
+    listsElement.addEventListener("lostpointercapture", cancelDrag);
     settingElement.addEventListener("click", (event) => {
         const actionElement = (event.target as HTMLElement).closest<HTMLButtonElement | HTMLInputElement>("[data-action]");
         if (!actionElement || actionElement.disabled) {
@@ -198,22 +271,6 @@ export const mountMobileSidePanelSetting = (root: HTMLElement) => {
                 type: "visibility",
                 id: dockId,
                 visible: (actionElement as HTMLInputElement).checked,
-            }, pluginDockContext.layouts);
-        } else if (actionElement.dataset.action === "move") {
-            config = reduceMobileSidePanelConfig(config, {
-                type: "move",
-                id: dockId,
-                side: side === "left" ? "right" : "left",
-            }, pluginDockContext.layouts);
-        } else if (actionElement.dataset.action === "up" || actionElement.dataset.action === "down") {
-            const availableDockIds = config[side].filter(id =>
-                isMobileSidePanelBuiltInDockId(id) || pluginDockContext.entriesById.has(id));
-            const targetId = visibleDockIds[index + (actionElement.dataset.action === "up" ? -1 : 1)];
-            config = reduceMobileSidePanelConfig(config, {
-                type: "reorder",
-                side,
-                fromIndex: availableDockIds.indexOf(dockId),
-                toIndex: availableDockIds.indexOf(targetId),
             }, pluginDockContext.layouts);
         } else {
             return;

@@ -258,7 +258,7 @@ func HandleRpcHttp(c *gin.Context) {
 		return
 	}
 
-	responses := p.dispatchRpcRequests(results.Requests)
+	responses := p.dispatchRpcRequests(c.Request.Context(), results.Requests)
 
 	if !results.Batch {
 		// Single request - return single response (or empty for notification)
@@ -322,7 +322,8 @@ func (p *KernelPlugin) serveRPCWebSocket(writer http.ResponseWriter, request *ht
 			logging.LogErrorf("[plugin:%s] RPC WebSocket request read failed: %s", name, err)
 			return
 		}
-		response, err := p.dispatchRPCContract(request)
+		// WebSocket 调用随插件停止退出，不使用 HTTP 握手请求的上下文。
+		response, err := p.dispatchRPCContract(p.context, request)
 		if err != nil {
 			logging.LogErrorf("[plugin:%s] RPC response marshal failed: %s", name, err)
 			return

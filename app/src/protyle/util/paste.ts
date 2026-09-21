@@ -25,6 +25,7 @@ import {showMessage} from "../../dialog/message";
 import {avRender} from "../render/av/render";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {captureAVAssetUploadHandler} from "../render/av/asset";
+import {getAVRichTextSafeURL} from "../render/av/richTextValue";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {remapTabsDOMIDs, wrapPastedTabItems} from "./tabsCopy";
@@ -80,6 +81,42 @@ import {ipcRenderer} from "electron";
 
 const PASTE_PLUGIN_TIMEOUT = 120_000;
 const PASTE_PLUGIN_TIMED_OUT = Symbol("paste-plugin-timed-out");
+
+const pastePlainTextLink = (protyle: IProtyle, range: Range, text: string) => {
+    const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
+    if (!selectedText) {
+        return false;
+    }
+    const annotationReference = getPdfAnnotationReference(text.split("\n")[0]);
+    const restricted = !!getProtyleBlockDOMSanitizer(protyle);
+    if (isDynamicRef(text)) {
+        protyle.toolbar.range = range;
+        const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+            type: "id",
+            // 选区文本由行内标记处理，保留原始锚文本。
+            color: `${text.substring(2, 24)}${Constants.ZWSP}s${Constants.ZWSP}${selectedText}`
+        });
+        if (refElement[0]) {
+            protyle.toolbar.range.selectNodeContents(refElement[0]);
+        }
+        return true;
+    }
+    if (annotationReference && (!restricted || getAVRichTextSafeURL(annotationReference))) {
+        protyle.toolbar.range = range;
+        protyle.toolbar.setInlineMark(protyle, "file-annotation-ref", "range", {
+            type: "file-annotation-ref",
+            color: annotationReference
+        });
+        return true;
+    }
+    const linkDest = resolveLinkDest(text, protyle.lute);
+    if (linkDest && (!restricted || getAVRichTextSafeURL(linkDest))) {
+        protyle.toolbar.range = range;
+        protyle.toolbar.setInlineMark(protyle, "a", "range", {type: "a", color: linkDest});
+        return true;
+    }
+    return false;
+};
 
 export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement, validatedRange?: Range) => {
     // 受限单元格须先验证载荷，拒绝粘贴时保持行内元素边界处的光标不变。
@@ -976,6 +1013,11 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         item.classList.remove("protyle-wysiwyg--hl");
     });
     if (blockDOMSanitizer && !siyuanHTML) {
+        // 受限片段保留选中文字附加引用或链接的行为，代码内容仍按纯文本粘贴。
+        if (nodeElement.getAttribute("data-type") !== "NodeCodeBlock" &&
+            !protyle.toolbar.getCurrentType(range).includes("code") && pastePlainTextLink(protyle, range, textPlain)) {
+            return;
+        }
         const plainHTML = getProtyleRestrictedPlainTextHTML(removeZWJ(textPlain));
         if (plainHTML) {
             insertAtPasteRange(plainHTML, range);
@@ -1453,40 +1495,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             uploadFiles(protyle, files, undefined, avAssetUploadSuccess, undefined, directAssetUploadOptions);
             return;
         } else if (textPlain.trim() !== "" && (files && files.length === 0 || !files)) {
-            const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
-            if (selectedText !== "") {
-                const firstLine = textPlain.split("\n")[0];
-                const annotationReference = getPdfAnnotationReference(firstLine);
-                if (isDynamicRef(textPlain)) {
-                    protyle.toolbar.range = range;
-                    const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
-                        type: "id",
-                        // range 不能 escape，否则 https://github.com/siyuan-note/siyuan/issues/8359
-                        color: `${textPlain.substring(2, 22 + 2)}${Constants.ZWSP}s${Constants.ZWSP}${selectedText}`
-                    });
-                    if (refElement[0]) {
-                        protyle.toolbar.range.selectNodeContents(refElement[0]);
-                    }
-                    return;
-                } else if (annotationReference) {
-                    protyle.toolbar.range = range;
-                    protyle.toolbar.setInlineMark(protyle, "file-annotation-ref", "range", {
-                        type: "file-annotation-ref",
-                        color: annotationReference
-                    });
-                    return;
-                } else {
-                    // https://github.com/siyuan-note/siyuan/issues/8475
-                    const linkDest = resolveLinkDest(textPlain, protyle.lute);
-                    if (linkDest) {
-                        protyle.toolbar.range = range;
-                        protyle.toolbar.setInlineMark(protyle, "a", "range", {
-                            type: "a",
-                            color: linkDest
-                        });
-                        return;
-                    }
-                }
+            if (pastePlainTextLink(protyle, range, textPlain)) {
+                return;
             }
             let textPlainDom: string;
             textPlain = stripPastedIALDataAttributes(textPlain);

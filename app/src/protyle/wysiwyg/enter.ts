@@ -31,7 +31,7 @@ import {isMobile} from "../../util/functions";
 import {processRender} from "../util/processCode";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
-import {isCodeBlockFenceBeforeCaret} from "./codeBlockEnter";
+import {canEnterCodeBlock, hasCodeBlockFence} from "./codeBlockEnter";
 import {isEmptyListItemBlock, shouldCreateListItemChildOnEnter} from "./listContext";
 import {
     BLOCK_SELECTION_CLASS,
@@ -97,66 +97,65 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
     }
 
     const position = getSelectionOffset(editableElement, protyle.wysiwyg.element, range);
-    const trimStartHTML = editableElement.innerHTML.trimStart();
-    const trimStartText = editableElement.textContent.trimStart();
     const enableCodeBlockMiddleDot = window.siyuan.config.editor.markdown.codeBlockMiddleDot !== false;
     const codeBlockMarkerRegExp = enableCodeBlockMiddleDot ? /·|~/g : /~/g;
     const codeBlockFenceStartRegExp = enableCodeBlockMiddleDot ? /^(~|·|`){3,}/g : /^(~|`){3,}/g;
     const codeBlockFenceLineRegExp = enableCodeBlockMiddleDot ? /\n(~|·|`){3,}/g : /\n(~|`){3,}/g;
-    const hasCodeBlockFence = (html: string, text: string) => html.startsWith("```") || html.startsWith("~~~") ||
-        (html.indexOf("\n```") > -1 && text.indexOf("\n```") > -1) ||
-        (html.indexOf("\n~~~") > -1 && text.indexOf("\n~~~") > -1) ||
-        (enableCodeBlockMiddleDot && (html.startsWith("···") ||
-            (html.indexOf("\n···") > -1 && text.indexOf("\n···") > -1)));
     // 光标位于代码块围栏之前或内部时按普通换行处理 https://github.com/siyuan-note/siyuan/issues/18873
-    if (hasCodeBlockFence(trimStartHTML, trimStartText) &&
-        isCodeBlockFenceBeforeCaret(editableElement.textContent, position.start, enableCodeBlockMiddleDot)) {
-        if (trimStartHTML.indexOf("\n") === -1 &&
-            trimStartHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
-            // ```test` 不处理，正常渲染为段落块
-        } else if (blockElement.classList.contains("p")) { // https://github.com/siyuan-note/siyuan/issues/6953
-            activateTrackedRangeInsertion(trackedRangeInsertion);
-            range.insertNode(document.createElement("wbr"));
-            const oldHTML = blockElement.outerHTML;
-            // https://github.com/siyuan-note/siyuan/issues/16744
-            range.extractContents();
-            const wbrElement = document.createElement("wbr");
-            range.insertNode(wbrElement);
-            wbrElement.after(document.createTextNode("\n"));
-            let replaceInnerHTML = editableElement.innerHTML
-                .replace(codeBlockFenceLineRegExp, "\n```").trim()
-                .replace(codeBlockFenceStartRegExp, "```");
-            if (!replaceInnerHTML.endsWith("\n```")) {
-                replaceInnerHTML += "\n```";
+    if (blockElement.classList.contains("p") && canEnterCodeBlock(editableElement, position.start, enableCodeBlockMiddleDot)) {
+        activateTrackedRangeInsertion(trackedRangeInsertion);
+        range.insertNode(document.createElement("wbr"));
+        const oldHTML = blockElement.outerHTML;
+        // https://github.com/siyuan-note/siyuan/issues/16744
+        range.extractContents();
+        const wbrElement = document.createElement("wbr");
+        range.insertNode(wbrElement);
+        wbrElement.after(document.createTextNode("\n"));
+        let replaceInnerHTML = editableElement.innerHTML
+            .replace(codeBlockFenceLineRegExp, "\n```").trim()
+            .replace(codeBlockFenceStartRegExp, "```");
+        if (!replaceInnerHTML.endsWith("\n```")) {
+            replaceInnerHTML += "\n```";
+        }
+        editableElement.innerHTML = replaceInnerHTML;
+        const template = document.createElement("template");
+        template.innerHTML = protyle.lute.SpinBlockDOM(blockElement.outerHTML);
+        const replacements = Array.from(template.content.children) as HTMLElement[];
+        // 软换行前的正文保留为段落，渲染和光标定位使用实际生成的代码块。
+        const codeElement = template.content.querySelector("wbr")?.closest<HTMLElement>('[data-type="NodeCodeBlock"]');
+        blockElement.replaceWith(template.content);
+        blockElement = codeElement || replacements[0];
+        const languageElement = blockElement.querySelector(".protyle-action__language");
+        if (languageElement) {
+            if (window.siyuan.storage[Constants.LOCAL_CODELANG] && languageElement.textContent === "") {
+                languageElement.textContent = window.siyuan.storage[Constants.LOCAL_CODELANG];
+            } else if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
+                window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
+                setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
             }
-            editableElement.innerHTML = replaceInnerHTML;
-            blockElement.outerHTML = protyle.lute.SpinBlockDOM(blockElement.outerHTML);
-            blockElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${blockElement.getAttribute("data-node-id")}"]`);
-            const languageElement = blockElement.querySelector(".protyle-action__language");
-            if (languageElement) {
-                if (window.siyuan.storage[Constants.LOCAL_CODELANG] && languageElement.textContent === "") {
-                    languageElement.textContent = window.siyuan.storage[Constants.LOCAL_CODELANG];
-                } else if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
-                    window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
-                    setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
-                }
-                if (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
-                    blockElement.dataset.content = "";
-                    blockElement.dataset.subtype = languageElement.textContent;
-                    blockElement.className = "render-node";
-                    blockElement.innerHTML = `<div spin="1"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
-                    protyle.toolbar.showRender(protyle, blockElement);
-                    processRender(blockElement);
-                } else {
-                    highlightRender(blockElement);
-                }
-            } else {
+            if (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
+                blockElement.dataset.content = "";
+                blockElement.dataset.subtype = languageElement.textContent;
+                blockElement.className = "render-node";
+                blockElement.innerHTML = `<div spin="1"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
                 protyle.toolbar.showRender(protyle, blockElement);
                 processRender(blockElement);
+            } else {
+                highlightRender(blockElement);
             }
-            updateTransaction(protyle, blockElement, oldHTML, undefined, undefined, {trackedRangeInsertion});
-            return true;
+        } else {
+            protyle.toolbar.showRender(protyle, blockElement);
+            processRender(blockElement);
         }
+        // 转换产生多个块时，将新增块一起记入事务，撤销可完整恢复原段落。
+        updateTransaction(protyle, replacements[0], oldHTML, undefined, replacements.length > 1 ? {
+            doOperations: replacements.slice(1).map((element, index) => ({
+                action: "insert", id: element.dataset.nodeId, data: element.outerHTML,
+                previousID: replacements[index].dataset.nodeId,
+            })),
+            undoOperations: replacements.slice(1).map(element => ({action: "delete", id: element.dataset.nodeId})),
+        } : undefined, {trackedRangeInsertion});
+        return true;
     }
     // 代码块
     if (blockElement.getAttribute("data-type") === "NodeCodeBlock") {
@@ -345,7 +344,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
     const newHTML = newEditableElement.innerHTML.trimStart();
     const newText = newEditableElement.textContent.trimStart();
     // https://github.com/siyuan-note/siyuan/issues/10759
-    if (hasCodeBlockFence(newHTML, newText)) {
+    if (hasCodeBlockFence(newHTML, newText, enableCodeBlockMiddleDot)) {
         if (newHTML.indexOf("\n") === -1 &&
             newHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块

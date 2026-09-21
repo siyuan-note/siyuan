@@ -1,3 +1,4 @@
+import {bindCalendarSettings, getCalendarSettingsHTML} from "./calendar/settings";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
@@ -11,6 +12,7 @@ import {getColIconByType} from "./col";
 import {escapeHtml} from "../../../util/escape";
 import {CARD_LAYOUT_COMPACT, CARD_LAYOUT_LIST} from "./gallery/cardLayout";
 import {Menu} from "../../../plugin/Menu";
+import {openViewSettingMenu} from "./viewSettingMenu";
 
 const getCardLayoutHTML = (view: IAVGallery | IAVKanban) => {
     return `<button class="b3-menu__item" data-type="set-card-layout">
@@ -120,6 +122,11 @@ export const getLayoutHTML = (data: IAV) => {
                 <div class="fn__hr"></div>
                 <div>${window.siyuan.languages.table}</div>
             </div>
+            <div data-type="set-layout" data-view-type="calendar" class="av__layout-item${data.viewType === "calendar" ? " av__layout-item--select" : ""}">
+                <svg><use xlink:href="#iconCalendar"></use></svg>
+                <div class="fn__hr"></div>
+                <div>${window.siyuan.languages.calendarView}</div>
+            </div>
             <div data-type="set-layout" data-view-type="list" class="av__layout-item${data.viewType === "list" ? " av__layout-item--select" : ""}">
                 <svg><use xlink:href="#iconList"></use></svg>
                 <div class="fn__hr"></div>
@@ -159,6 +166,9 @@ export const getLayoutHTML = (data: IAV) => {
     <span class="fn__space fn__flex-1"></span>
     <input data-type="toggle-kanban-bg" type="checkbox" class="b3-switch b3-switch--menu" ${view.fillColBackgroundColor ? "checked" : ""}>
 </label>`;
+    }
+    if (data.viewType === "calendar") {
+        return html + getCalendarSettingsHTML(data.view as IAVTable, true) + "</div>";
     }
     return html + `<button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
         <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>
@@ -272,6 +282,10 @@ export const bindLayoutEvent = (options: {
         });
         options.data.view.wrapField = checked;
     });
+    if (options.data.viewType === "calendar") {
+        bindCalendarSettings({...options, onChange: rerender});
+        return;
+    }
     if (isTableLikeView(options.data.viewType)) {
         return;
     }
@@ -313,8 +327,7 @@ export const bindLayoutEvent = (options: {
                 }
             });
         });
-        const rect = cardLayoutElement.getBoundingClientRect();
-        menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+        openViewSettingMenu(menu, cardLayoutElement);
         event.preventDefault();
         event.stopPropagation();
     });

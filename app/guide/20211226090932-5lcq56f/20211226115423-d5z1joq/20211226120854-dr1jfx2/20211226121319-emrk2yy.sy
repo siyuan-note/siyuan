@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260920131944"
+		"updated": "20260921112518"
 	},
 	"Children": [
 		{
@@ -1907,1038 +1907,12 @@
 			]
 		},
 		{
-			"ID": "20211226122008-81ngeqd",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226122008-81ngeqd",
-				"updated": "20260730184353"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "引述區塊"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-gdx4vn9",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20211226122008-gdx4vn9",
-				"updated": "20251209211653"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": ">"
-				},
-				{
-					"ID": "20211226122008-f15cb8m",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20211226122008-f15cb8m",
-						"updated": "20260730184353"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "注意不是内容區塊引用，而是引述區塊（Blockquote）。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251209211701-hu8m4pm",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20251209211701-hu8m4pm",
-				"updated": "20260730184353"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "提示區塊"
-				}
-			]
-		},
-		{
-			"ID": "20251211094143-aymafj0",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211094143-aymafj0",
-				"updated": "20251211094150"
-			},
-			"CalloutType": "NOTE",
-			"CalloutTitle": "Note",
-			"CalloutIcon": "✏️",
-			"Children": [
-				{
-					"ID": "20251211094143-df00ss1",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211094143-df00ss1",
-						"updated": "20251211094150"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "反白顯示即使快速瀏覽也應注意的資訊。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211094143-tfdwvoe",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211094143-tfdwvoe",
-				"updated": "20251211094152"
-			},
-			"CalloutType": "TIP",
-			"CalloutTitle": "Tip",
-			"CalloutIcon": "💡",
-			"Children": [
-				{
-					"ID": "20251211094143-jgbn677",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211094143-jgbn677",
-						"updated": "20251211094152"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "幫助取得更大成功的選用資訊。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211094143-zst3xpn",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211094143-zst3xpn",
-				"updated": "20251211094157"
-			},
-			"CalloutType": "IMPORTANT",
-			"CalloutTitle": "Important",
-			"CalloutIcon": "❗",
-			"Children": [
-				{
-					"ID": "20251211094143-91vr3mm",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211094143-91vr3mm",
-						"updated": "20251211094157"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "成功所必需的關鍵資訊。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211094143-vij9zby",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211094143-vij9zby",
-				"updated": "20251211094201"
-			},
-			"CalloutType": "WARNING",
-			"CalloutTitle": "Warning",
-			"CalloutIcon": "⚠️",
-			"Children": [
-				{
-					"ID": "20251211094143-xt5f7c4",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211094143-xt5f7c4",
-						"updated": "20251211094201"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "由於潛在風險，需要立即關注的關鍵內容。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211094143-1kho5im",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211094143-1kho5im",
-				"updated": "20251211094143"
-			},
-			"CalloutType": "CAUTION",
-			"CalloutTitle": "Caution",
-			"CalloutIcon": "🚨",
-			"Children": [
-				{
-					"ID": "20251211094143-s8sta3t",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211094143-s8sta3t",
-						"updated": "20251211094143"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "操作可能帶來的負面後果。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-9j816g5",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20260905124213-9j816g5",
-				"updated": "20260905124213"
-			},
-			"HeadingLevel": 2,
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "頁籤區塊"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-kjrn1lr",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905124213-kjrn1lr",
-				"updated": "20260905124213"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "輸入 / 並選擇頁籤區塊，可建立包含兩個頁籤的容器。按一下標題切換頁籤，按兩下或使用頁籤選單編輯標題。標題支援與提示區塊相同的行級格式，內文支援巢狀頁籤區塊。"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-ecbf51t",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905124213-ecbf51t",
-				"updated": "20260905124213"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "使用頁籤右側的選單新增、複製、刪除或排序頁籤，切換頂部或左側版面配置。選取的頁籤與版面配置會隨文件儲存、同步；唯讀頁面的切換僅於本次檢視生效。取消頁籤版面配置會依序保留所有標題與內文。"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-egek3ii",
-			"Type": "NodeTabs",
-			"Properties": {
-				"id": "20260905124213-egek3ii",
-				"updated": "20260905124213",
-				"tabs-active-id": "20260905124213-pdsl9dr",
-				"tabs-position": "top"
-			},
-			"Children": [
-				{
-					"ID": "20260905124213-pdsl9dr",
-					"Type": "NodeTabItem",
-					"Properties": {
-						"id": "20260905124213-pdsl9dr",
-						"updated": "20260905124213"
-					},
-					"TabItemTitle": "方案一",
-					"Children": [
-						{
-							"ID": "20260905124213-gma7b89",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260905124213-gma7b89",
-								"updated": "20260905124213"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "這是第一個頁籤的內文。"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260905124213-yacxp0w",
-					"Type": "NodeTabItem",
-					"Properties": {
-						"id": "20260905124213-yacxp0w",
-						"updated": "20260905124213"
-					},
-					"TabItemTitle": "方案二",
-					"Children": [
-						{
-							"ID": "20260905124213-7yuhz0z",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260905124213-7yuhz0z",
-								"updated": "20260905124213"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "這是第二個頁籤的內文。"
-								}
-							]
-						},
-						{
-							"ID": "20260905124213-s1ubmxu",
-							"Type": "NodeTabs",
-							"Properties": {
-								"id": "20260905124213-s1ubmxu",
-								"updated": "20260905124213",
-								"tabs-active-id": "20260905124213-qnxuyb1",
-								"tabs-position": "left"
-							},
-							"Children": [
-								{
-									"ID": "20260905124213-qnxuyb1",
-									"Type": "NodeTabItem",
-									"Properties": {
-										"id": "20260905124213-qnxuyb1",
-										"updated": "20260905124213"
-									},
-									"TabItemTitle": "巢狀頁籤",
-									"Children": [
-										{
-											"ID": "20260905124213-it7f8gm",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20260905124213-it7f8gm",
-												"updated": "20260905124213"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "這是第一個頁籤的內文。"
-												}
-											]
-										}
-									]
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-yn6yro1",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226122008-yn6yro1",
-				"updated": "20260730184353"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "代碼區塊"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-kd7tbb0",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226122008-kd7tbb0",
-				"updated": "20211228135912"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果在 ``` 後面跟隨語言名稱，可以有語法突顯的效果哦，比如："
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-ckdtx9j",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20211226122008-ckdtx9j",
-				"updated": "20211228135834"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "展示 Go 代码突顯"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-9fkxkyi",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"Properties": {
-				"id": "20211226122008-9fkxkyi",
-				"updated": "20210104091228"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "Z28="
-				},
-				{
-					"ID": "20220307092237-tnyitpk",
-					"Type": "NodeCodeBlockCode",
-					"Data": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, 世界\")\n}\n",
-					"Properties": {
-						"id": "20220307092237-tnyitpk"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-fcs48nq",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20211226122008-fcs48nq",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "展示 Java 突顯"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-v7ecm6r",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"Properties": {
-				"id": "20211226122008-v7ecm6r",
-				"updated": "20210104091228"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "amF2YQ=="
-				},
-				{
-					"ID": "20220307092237-2a4frka",
-					"Type": "NodeCodeBlockCode",
-					"Data": "public class HelloWorld {\n\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n\n}\n",
-					"Properties": {
-						"id": "20220307092237-2a4frka"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-ukzwvpl",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20211226122008-ukzwvpl",
-				"updated": "20260616221535"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": ">"
-				},
-				{
-					"ID": "20211226122008-fsflp4n",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20211226122008-fsflp4n",
-						"updated": "20211228134904"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "Tip: 語言名稱支援下面這些： "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "ruby"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "python"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "js"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "html"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "erb"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "css"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "coffee"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "bash"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "json"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "yml"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "xml"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​ ..."
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20260616221535-0iq3rxe",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260616221535-0iq3rxe",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "另外，程式碼區塊語言還支援 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan-template"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 和 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "template"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​，兩者等價。使用後會啟用"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20211226123004-dplpw0o",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "思源範本"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "語法的高亮顯示；匯出為範本時，該程式碼區塊不會以程式碼區塊形式匯出，而是轉為普通段落文字。"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-8glkpvq",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226122008-8glkpvq",
-				"updated": "20260910080119"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "表格"
-				}
-			]
-		},
-		{
-			"ID": "20260908091355-rch0001",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908091355-rch0001",
-				"updated": "20260908091355"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "儲存格預設支援編輯段落、標題、列表、引述、程式碼和公式，無需手動轉換。既有文字中的 Markdown 標記保持原樣，原有粗體、連結等格式也會保留。"
-				}
-			]
-		},
-		{
-			"ID": "20260908091355-rch0002",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908091355-rch0002",
-				"updated": "20260910080119"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "點擊儲存格即可編輯；新增表格後可直接輸入，無需再次點擊。儲存格僅含一個普通段落時，"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 移到下一列的同欄；表格末列則在表格後插入段落。"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 切換儲存格，"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 在儲存格內換行。包含標題、多個段落等內容時，Enter 依目前內容類型在儲存格內編輯；列表和程式碼區塊使用對應的換行與縮排操作。關閉提示後按 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Escape"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 或點擊儲存格外結束編輯，內容自動儲存。"
-				}
-			]
-		},
-		{
-			"ID": "20260908091355-rch0003",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908091355-rch0003",
-				"updated": "20260909090723"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "內部段落和列表項目沒有獨立區塊 ID，支援引用既有區塊。圖片及原有行級格式可以保留。不支援巢狀表格、資料庫、超級區塊、頁籤、提示區塊、查詢嵌入、分隔線、可執行圖表、音訊、影片、掛件、HTML 和自訂區塊。貼上內容包含不支援的區塊時，會拒絕整次貼上並提示不支援的類型，原有內容不變。標準 Markdown 匯出為可讀的行級內容，HTML、PDF 和 Word 匯出保留富文字排版。"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-adah6ak",
-			"Type": "NodeTable",
-			"TableAligns": [
-				0,
-				0
-			],
-			"Properties": {
-				"id": "20211226122008-adah6ak",
-				"updated": "20210104091228"
-			},
-			"Children": [
-				{
-					"Type": "NodeTableHead",
-					"Data": "thead",
-					"Children": [
-						{
-							"Type": "NodeTableRow",
-							"Data": "tr",
-							"Children": [
-								{
-									"Type": "NodeTableCell",
-									"Data": "th",
-									"Children": [
-										{
-											"Type": "NodeText",
-											"Data": "header 1"
-										}
-									]
-								},
-								{
-									"Type": "NodeTableCell",
-									"Data": "th",
-									"Children": [
-										{
-											"Type": "NodeText",
-											"Data": "header 2"
-										}
-									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 1"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 2"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 3"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 4"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 5"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 6"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220312004712-5dfiars",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20220312004712-5dfiars",
-				"updated": "20260730184353"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "HTML 區塊"
-				}
-			]
-		},
-		{
-			"ID": "20220312004730-udc38az",
-			"Type": "NodeHTMLBlock",
-			"Data": "<div>\n<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World\n</div>",
-			"Properties": {
-				"id": "20220312004730-udc38az",
-				"updated": "20220828102621"
-			}
-		},
-		{
-			"ID": "20220312122707-8258e11",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220312122707-8258e11",
-				"updated": "20260730184353"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "更多細節請參考 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20240427230732-snprakd",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "HTML 區塊注意"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-rhsy8hl",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226122008-rhsy8hl",
-				"updated": "20211226122008"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "分隔線"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-k6bqhae",
-			"Type": "NodeThematicBreak",
-			"Properties": {
-				"id": "20211226122008-k6bqhae",
-				"updated": "20210604222430"
-			}
-		},
-		{
-			"ID": "20211226122008-hkcptuh",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226122008-hkcptuh",
-				"updated": "20211226122008"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "數學公式"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-20jkuaq",
-			"Type": "NodeMathBlock",
-			"Properties": {
-				"id": "20211226122008-20jkuaq",
-				"updated": "20211226122008"
-			},
-			"Children": [
-				{
-					"Type": "NodeMathBlockOpenMarker"
-				},
-				{
-					"ID": "20220307092237-a68zazs",
-					"Type": "NodeMathBlockContent",
-					"Data": "\\frac{1}{\n  \\Bigl(\\sqrt{\\phi \\sqrt{5}}-\\phi\\Bigr) e^{\n  \\frac25 \\pi}} = 1+\\frac{e^{-2\\pi}} {1+\\frac{e^{-4\\pi}} {\n    1+\\frac{e^{-6\\pi}}\n    {1+\\frac{e^{-8\\pi}}{1+\\cdots}}\n  }\n}",
-					"Properties": {
-						"id": "20220307092237-a68zazs"
-					}
-				},
-				{
-					"Type": "NodeMathBlockCloseMarker"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-zl8npgo",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226122008-zl8npgo",
-				"updated": "20211226122008"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "IFrame"
-				}
-			]
-		},
-		{
-			"ID": "20220909095422-c32trma",
-			"Type": "NodeIFrame",
-			"Data": "<iframe src=\"https://player.bilibili.com/player.html?bvid=BV1ov41187qM&amp;page=1&amp;high_quality=1&amp;as_wide=1&amp;allowfullscreen=true&amp;aid=247401039&amp;cid=319662466&amp;autoplay=0\" data-src=\"//player.bilibili.com/player.html?aid=247401039&amp;bvid=BV1ov41187qM&amp;cid=319662466&amp;page=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\" style=\"width: 981px; height: 440px;\" sandbox=\"allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts allow-popups\"></iframe>",
-			"Properties": {
-				"id": "20220909095422-c32trma",
-				"updated": "20220909095422"
-			}
-		},
-		{
-			"ID": "20211226122008-je7yc30",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226122008-je7yc30",
-				"updated": "20211226165048"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "影片"
-				}
-			]
-		},
-		{
-			"ID": "20220909095406-zjh29cs",
-			"Type": "NodeVideo",
-			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
-			"Properties": {
-				"id": "20220909095406-zjh29cs",
-				"updated": "20220909095406"
-			}
-		},
-		{
-			"ID": "20211226122008-ln4xfsf",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226122008-ln4xfsf",
-				"updated": "20211226122008"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "音訊"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-ed2gzq4",
-			"Type": "NodeAudio",
-			"Data": "<audio controls=\"controls\" src=\"assets/record1623120470117-20210608104750-2thv5m5.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608113713-4eddn56.wav\"></audio>",
-			"Properties": {
-				"id": "20211226122008-ed2gzq4",
-				"updated": "20210608113713"
-			}
-		},
-		{
 			"ID": "20211226122008-731sqd6",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20260920131944"
+				"updated": "20260921112518"
 			},
 			"Children": [
 				{
@@ -4109,18 +3083,1030 @@
 			]
 		},
 		{
-			"ID": "20211226122008-fd4y9qu",
-			"Type": "NodeParagraph",
+			"ID": "20211226122008-81ngeqd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20211226122008-fd4y9qu",
-				"updated": "20260920131944"
+				"id": "20211226122008-81ngeqd",
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "透過斜線選單建立心智圖，或將清單區塊切換為心智圖視圖。開啟可編輯文件時，舊心智圖會自動轉換為清單心智圖，保留區塊 ID 和內容，支援復原及文件歷史還原。無法完整轉換的內容會保留並顯示原始碼。唯讀視圖和匯出僅轉換顯示，不修改原始文件。"
+					"Data": "引述區塊"
 				}
 			]
+		},
+		{
+			"ID": "20211226122008-gdx4vn9",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20211226122008-gdx4vn9",
+				"updated": "20251209211653"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": ">"
+				},
+				{
+					"ID": "20211226122008-f15cb8m",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20211226122008-f15cb8m",
+						"updated": "20260730184353"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "注意不是内容區塊引用，而是引述區塊（Blockquote）。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251209211701-hu8m4pm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251209211701-hu8m4pm",
+				"updated": "20260730184353"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提示區塊"
+				}
+			]
+		},
+		{
+			"ID": "20251211094143-aymafj0",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094143-aymafj0",
+				"updated": "20251211094150"
+			},
+			"CalloutType": "NOTE",
+			"CalloutTitle": "Note",
+			"CalloutIcon": "✏️",
+			"Children": [
+				{
+					"ID": "20251211094143-df00ss1",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094143-df00ss1",
+						"updated": "20251211094150"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "反白顯示即使快速瀏覽也應注意的資訊。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094143-tfdwvoe",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094143-tfdwvoe",
+				"updated": "20251211094152"
+			},
+			"CalloutType": "TIP",
+			"CalloutTitle": "Tip",
+			"CalloutIcon": "💡",
+			"Children": [
+				{
+					"ID": "20251211094143-jgbn677",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094143-jgbn677",
+						"updated": "20251211094152"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "幫助取得更大成功的選用資訊。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094143-zst3xpn",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094143-zst3xpn",
+				"updated": "20251211094157"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251211094143-91vr3mm",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094143-91vr3mm",
+						"updated": "20251211094157"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "成功所必需的關鍵資訊。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094143-vij9zby",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094143-vij9zby",
+				"updated": "20251211094201"
+			},
+			"CalloutType": "WARNING",
+			"CalloutTitle": "Warning",
+			"CalloutIcon": "⚠️",
+			"Children": [
+				{
+					"ID": "20251211094143-xt5f7c4",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094143-xt5f7c4",
+						"updated": "20251211094201"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "由於潛在風險，需要立即關注的關鍵內容。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094143-1kho5im",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094143-1kho5im",
+				"updated": "20251211094143"
+			},
+			"CalloutType": "CAUTION",
+			"CalloutTitle": "Caution",
+			"CalloutIcon": "🚨",
+			"Children": [
+				{
+					"ID": "20251211094143-s8sta3t",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094143-s8sta3t",
+						"updated": "20251211094143"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "操作可能帶來的負面後果。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-9j816g5",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-9j816g5",
+				"updated": "20260905124213"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "頁籤區塊"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-kjrn1lr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-kjrn1lr",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "輸入 / 並選擇頁籤區塊，可建立包含兩個頁籤的容器。按一下標題切換頁籤，按兩下或使用頁籤選單編輯標題。標題支援與提示區塊相同的行級格式，內文支援巢狀頁籤區塊。"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-ecbf51t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-ecbf51t",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用頁籤右側的選單新增、複製、刪除或排序頁籤，切換頂部或左側版面配置。選取的頁籤與版面配置會隨文件儲存、同步；唯讀頁面的切換僅於本次檢視生效。取消頁籤版面配置會依序保留所有標題與內文。"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-egek3ii",
+			"Type": "NodeTabs",
+			"Properties": {
+				"id": "20260905124213-egek3ii",
+				"updated": "20260905124213",
+				"tabs-active-id": "20260905124213-pdsl9dr",
+				"tabs-position": "top"
+			},
+			"Children": [
+				{
+					"ID": "20260905124213-pdsl9dr",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260905124213-pdsl9dr",
+						"updated": "20260905124213"
+					},
+					"TabItemTitle": "方案一",
+					"Children": [
+						{
+							"ID": "20260905124213-gma7b89",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260905124213-gma7b89",
+								"updated": "20260905124213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "這是第一個頁籤的內文。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260905124213-yacxp0w",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260905124213-yacxp0w",
+						"updated": "20260905124213"
+					},
+					"TabItemTitle": "方案二",
+					"Children": [
+						{
+							"ID": "20260905124213-7yuhz0z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260905124213-7yuhz0z",
+								"updated": "20260905124213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "這是第二個頁籤的內文。"
+								}
+							]
+						},
+						{
+							"ID": "20260905124213-s1ubmxu",
+							"Type": "NodeTabs",
+							"Properties": {
+								"id": "20260905124213-s1ubmxu",
+								"updated": "20260905124213",
+								"tabs-active-id": "20260905124213-qnxuyb1",
+								"tabs-position": "left"
+							},
+							"Children": [
+								{
+									"ID": "20260905124213-qnxuyb1",
+									"Type": "NodeTabItem",
+									"Properties": {
+										"id": "20260905124213-qnxuyb1",
+										"updated": "20260905124213"
+									},
+									"TabItemTitle": "巢狀頁籤",
+									"Children": [
+										{
+											"ID": "20260905124213-it7f8gm",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260905124213-it7f8gm",
+												"updated": "20260905124213"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "這是第一個頁籤的內文。"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-yn6yro1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122008-yn6yro1",
+				"updated": "20260730184353"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "代碼區塊"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-kd7tbb0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122008-kd7tbb0",
+				"updated": "20211228135912"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果在 ``` 後面跟隨語言名稱，可以有語法突顯的效果哦，比如："
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-ckdtx9j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226122008-ckdtx9j",
+				"updated": "20211228135834"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "展示 Go 代码突顯"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-9fkxkyi",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20211226122008-9fkxkyi",
+				"updated": "20210104091228"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "Z28="
+				},
+				{
+					"ID": "20220307092237-tnyitpk",
+					"Type": "NodeCodeBlockCode",
+					"Data": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, 世界\")\n}\n",
+					"Properties": {
+						"id": "20220307092237-tnyitpk"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-fcs48nq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226122008-fcs48nq",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "展示 Java 突顯"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-v7ecm6r",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20211226122008-v7ecm6r",
+				"updated": "20210104091228"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "amF2YQ=="
+				},
+				{
+					"ID": "20220307092237-2a4frka",
+					"Type": "NodeCodeBlockCode",
+					"Data": "public class HelloWorld {\n\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n\n}\n",
+					"Properties": {
+						"id": "20220307092237-2a4frka"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-ukzwvpl",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20211226122008-ukzwvpl",
+				"updated": "20260616221535"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": ">"
+				},
+				{
+					"ID": "20211226122008-fsflp4n",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20211226122008-fsflp4n",
+						"updated": "20211228134904"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Tip: 語言名稱支援下面這些： "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "ruby"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "python"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "js"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "html"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "erb"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "css"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "coffee"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "bash"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "json"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "yml"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "xml"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​ ..."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260616221535-0iq3rxe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260616221535-0iq3rxe",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "另外，程式碼區塊語言還支援 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan-template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，兩者等價。使用後會啟用"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226123004-dplpw0o",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "思源範本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "語法的高亮顯示；匯出為範本時，該程式碼區塊不會以程式碼區塊形式匯出，而是轉為普通段落文字。"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-8glkpvq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122008-8glkpvq",
+				"updated": "20260910080119"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表格"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0001",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0001",
+				"updated": "20260908091355"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存格預設支援編輯段落、標題、列表、引述、程式碼和公式，無需手動轉換。既有文字中的 Markdown 標記保持原樣，原有粗體、連結等格式也會保留。"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0002",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0002",
+				"updated": "20260910080119"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊儲存格即可編輯；新增表格後可直接輸入，無需再次點擊。儲存格僅含一個普通段落時，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 移到下一列的同欄；表格末列則在表格後插入段落。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切換儲存格，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 在儲存格內換行。包含標題、多個段落等內容時，Enter 依目前內容類型在儲存格內編輯；列表和程式碼區塊使用對應的換行與縮排操作。關閉提示後按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Escape"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或點擊儲存格外結束編輯，內容自動儲存。"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0003",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0003",
+				"updated": "20260909090723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "內部段落和列表項目沒有獨立區塊 ID，支援引用既有區塊。圖片及原有行級格式可以保留。不支援巢狀表格、資料庫、超級區塊、頁籤、提示區塊、查詢嵌入、分隔線、可執行圖表、音訊、影片、掛件、HTML 和自訂區塊。貼上內容包含不支援的區塊時，會拒絕整次貼上並提示不支援的類型，原有內容不變。標準 Markdown 匯出為可讀的行級內容，HTML、PDF 和 Word 匯出保留富文字排版。"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-adah6ak",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20211226122008-adah6ak",
+				"updated": "20210104091228"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "header 1"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "header 2"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 1"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 2"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 3"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 4"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 5"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 6"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220312004712-5dfiars",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220312004712-5dfiars",
+				"updated": "20260730184353"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HTML 區塊"
+				}
+			]
+		},
+		{
+			"ID": "20220312004730-udc38az",
+			"Type": "NodeHTMLBlock",
+			"Data": "<div>\n<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World\n</div>",
+			"Properties": {
+				"id": "20220312004730-udc38az",
+				"updated": "20220828102621"
+			}
+		},
+		{
+			"ID": "20220312122707-8258e11",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220312122707-8258e11",
+				"updated": "20260730184353"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更多細節請參考 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240427230732-snprakd",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "HTML 區塊注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-rhsy8hl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122008-rhsy8hl",
+				"updated": "20211226122008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "分隔線"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-k6bqhae",
+			"Type": "NodeThematicBreak",
+			"Properties": {
+				"id": "20211226122008-k6bqhae",
+				"updated": "20210604222430"
+			}
+		},
+		{
+			"ID": "20211226122008-hkcptuh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122008-hkcptuh",
+				"updated": "20211226122008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "數學公式"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-20jkuaq",
+			"Type": "NodeMathBlock",
+			"Properties": {
+				"id": "20211226122008-20jkuaq",
+				"updated": "20211226122008"
+			},
+			"Children": [
+				{
+					"Type": "NodeMathBlockOpenMarker"
+				},
+				{
+					"ID": "20220307092237-a68zazs",
+					"Type": "NodeMathBlockContent",
+					"Data": "\\frac{1}{\n  \\Bigl(\\sqrt{\\phi \\sqrt{5}}-\\phi\\Bigr) e^{\n  \\frac25 \\pi}} = 1+\\frac{e^{-2\\pi}} {1+\\frac{e^{-4\\pi}} {\n    1+\\frac{e^{-6\\pi}}\n    {1+\\frac{e^{-8\\pi}}{1+\\cdots}}\n  }\n}",
+					"Properties": {
+						"id": "20220307092237-a68zazs"
+					}
+				},
+				{
+					"Type": "NodeMathBlockCloseMarker"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-zl8npgo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122008-zl8npgo",
+				"updated": "20211226122008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "IFrame"
+				}
+			]
+		},
+		{
+			"ID": "20220909095422-c32trma",
+			"Type": "NodeIFrame",
+			"Data": "<iframe src=\"https://player.bilibili.com/player.html?bvid=BV1ov41187qM&amp;page=1&amp;high_quality=1&amp;as_wide=1&amp;allowfullscreen=true&amp;aid=247401039&amp;cid=319662466&amp;autoplay=0\" data-src=\"//player.bilibili.com/player.html?aid=247401039&amp;bvid=BV1ov41187qM&amp;cid=319662466&amp;page=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\" style=\"width: 981px; height: 440px;\" sandbox=\"allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts allow-popups\"></iframe>",
+			"Properties": {
+				"id": "20220909095422-c32trma",
+				"updated": "20220909095422"
+			}
+		},
+		{
+			"ID": "20211226122008-je7yc30",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122008-je7yc30",
+				"updated": "20211226165048"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "影片"
+				}
+			]
+		},
+		{
+			"ID": "20220909095406-zjh29cs",
+			"Type": "NodeVideo",
+			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
+			"Properties": {
+				"id": "20220909095406-zjh29cs",
+				"updated": "20220909095406"
+			}
+		},
+		{
+			"ID": "20211226122008-ln4xfsf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122008-ln4xfsf",
+				"updated": "20211226122008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "音訊"
+				}
+			]
+		},
+		{
+			"ID": "20211226122008-ed2gzq4",
+			"Type": "NodeAudio",
+			"Data": "<audio controls=\"controls\" src=\"assets/record1623120470117-20210608104750-2thv5m5.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608113713-4eddn56.wav\"></audio>",
+			"Properties": {
+				"id": "20211226122008-ed2gzq4",
+				"updated": "20210608113713"
+			}
 		},
 		{
 			"ID": "20211226122008-l775ci5",

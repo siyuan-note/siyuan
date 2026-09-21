@@ -34,12 +34,12 @@ func avArchiveRenderData(attrView *av.AttributeView, view av.Viewable) apicontra
 	return apicontract.AVArchiveRenderData{Name: attrView.Name, ID: attrView.ID, CustomColors: avContractSlice(attrView.Palette(), toContractAVAttributeViewCustomColor), ColorOrder: attrView.PaletteOrder(), UsedCustomColorIndexes: attrView.UsedCustomColorIndexes(), ViewType: string(view.GetType()), ViewID: view.GetID(), Views: views, View: avContractView(view), IsMirror: av.IsMirror(attrView.ID), NewItemTemplates: avContractSlice(attrView.NewItemTemplates, toContractAVNewItemTemplate), DefaultTemplateID: attrView.DefaultTemplateID}
 }
 
-func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, filter func(av.Viewable) av.Viewable, hideContext bool) apicontract.Response[apicontract.AVRenderResult] {
+func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, filter func(av.Viewable) av.Viewable, hideContext bool, calendarRanges ...*av.CalendarRange) apicontract.Response[apicontract.AVRenderResult] {
 	render := model.RenderAttributeViewWithTarget
 	if filter != nil {
 		render = model.RenderAttributeViewWithTargetReadOnly
 	}
-	view, attrView, target, err := render(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
+	view, attrView, target, err := render(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, calendarRanges...)
 	if err != nil {
 		message := err.Error()
 		if errors.Is(err, av.ErrSpecTooNew) {
@@ -56,7 +56,27 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 	}
 	data := apicontract.AVRenderData{AVArchiveRenderData: avArchiveRenderData(attrView, view), ContextFilter: toContractAVAttributeViewContextFilter(contextFilter), ContextFilterFields: avContractSlice(attrView.ContextFilterFields(), toContractAVAttributeViewContextFilterField), Target: toContractAVAttributeViewRenderTarget(target)}
 	if filter != nil {
-		data.View = avContractView(filter(view))
+		view = filter(view)
+		if calendar, ok := view.(*av.Calendar); ok {
+			// 发布过滤后重新计算定位，避免返回不可访问条目的日期和行位置。
+			visibleTargetID := ""
+			if target != nil {
+				for index, row := range calendar.Rows {
+					if row.ID == target.ItemID {
+						visibleTargetID = row.ID
+						target.Index = index
+						target.Offset = 0
+						break
+					}
+				}
+				if visibleTargetID == "" {
+					target = &model.AttributeViewRenderTarget{Status: "itemNotFound", ItemID: target.ItemID}
+				}
+			}
+			av.FilterCalendarRows(calendar, calendar.CalendarRange, visibleTargetID)
+			data.Target = toContractAVAttributeViewRenderTarget(target)
+		}
+		data.View = avContractView(view)
 	}
 	if hideContext {
 		data.ContextFilter = nil

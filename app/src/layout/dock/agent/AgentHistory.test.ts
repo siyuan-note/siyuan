@@ -6,6 +6,7 @@ import {
     findAgentUserEntryIndex,
     getAgentThinkingDisplaySeconds,
     getAgentThinkingToolGroups,
+    getAgentTurnContent,
     hasAgentExecutedToolsAfter,
     hasAgentModelSpecificContext,
     hasAgentThinkingStepDetails,
@@ -52,6 +53,31 @@ describe("AgentHistory", () => {
         assert.equal(getAgentThinkingDisplaySeconds(0.499), 1);
         assert.equal(getAgentThinkingDisplaySeconds(1.499), 1);
         assert.equal(getAgentThinkingDisplaySeconds(1.5), 2);
+    });
+
+    it("copies all assistant rounds within the selected user turn", () => {
+        const turnEntries = [
+            {id: "user-1", type: "user", content: "First question"},
+            {type: "assistant", content: "**First part**", toolCalls: [{name: "document"}]},
+            {type: "thinking", steps: [{reasoningContent: "Reasoning"}]},
+            {type: "assistant", toolCalls: [{result: "Tool output"}]},
+            {type: "assistant", content: "Last part"},
+            {id: "user-2", type: "user", content: "Second question"},
+            {type: "assistant", content: "Second answer"},
+        ];
+        assert.equal(getAgentTurnContent(turnEntries, "user-1"), "**First part**\n\nLast part");
+        assert.equal(getAgentTurnContent(turnEntries, "user-2"), "Second answer");
+        assert.equal(getAgentTurnContent(turnEntries, "missing"), "");
+    });
+
+    it("copies legacy thinking content once after presentation normalization", () => {
+        const turnEntries = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "Question"},
+            {type: "thinking", steps: [{content: "Intermediate answer", toolNames: ["document"]}]},
+            {type: "assistant", content: "Intermediate answer", toolCalls: [{name: "document"}]},
+            {type: "assistant", content: "Final answer"},
+        ]);
+        assert.equal(getAgentTurnContent(turnEntries, "user-1"), "Intermediate answer\n\nFinal answer");
     });
 
     it("recognizes only thinking steps with visible details", () => {

@@ -1,3 +1,5 @@
+import {getCalendarCreationDate} from "./calendar/state";
+import {Constants} from "../../../constants";
 import {Dialog} from "../../../dialog";
 import {showMessage} from "../../../dialog/message";
 import {Menu} from "../../../plugin/Menu";
@@ -17,12 +19,14 @@ import {getAVBlockRefSubtype} from "./cellValue";
 import {getAVColorStyle} from "./color";
 import {createAVPlainTextEditValue} from "./richTextValue";
 import {isMobile} from "../../../util/functions";
+import {openDatabaseRowByData} from "./openDatabaseRow";
 /// #if MOBILE
 import {activeBlur} from "../../../mobile/util/keyboardToolbar";
 import {bindBottomSheetDialog} from "../../../mobile/util/bindBottomSheetDialog";
 /// #endif
 
 interface ICreatePosition {
+    calendarDate?: number;
     previousID?: string;
     groupID?: string;
 }
@@ -920,6 +924,8 @@ export const createAttributeViewItem = (options: {
     position?: ICreatePosition;
 }) => {
     fetchPost("/api/av/createAttributeViewItem", {
+        calendarDate: options.position?.calendarDate ?? getCalendarCreationDate(options.blockElement),
+        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
         avID: options.blockElement.dataset.avId,
         blockID: options.blockElement.dataset.nodeId,
         templateID: options.templateID || "",
@@ -938,6 +944,16 @@ export const createAttributeViewItem = (options: {
         }
         options.blockElement.removeAttribute("data-render");
         avRender(options.blockElement, options.protyle);
+        if (options.blockElement.dataset.avType === "calendar" && response.code === 0 &&
+            response.data && "itemID" in response.data) {
+            void openDatabaseRowByData(options.protyle, {
+                avID: options.blockElement.dataset.avId, databaseBlockID: options.blockElement.dataset.nodeId,
+                notebookID: options.protyle.notebookId, itemID: response.data.itemID, valueID: "",
+                title: response.data.content || window.siyuan.languages.untitled,
+                boundBlockID: response.data.blockID, isDetached: response.data.isDetached,
+                focusPrimary: true,
+            });
+        }
     });
 };
 

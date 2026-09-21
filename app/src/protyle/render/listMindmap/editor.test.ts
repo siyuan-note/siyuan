@@ -105,6 +105,7 @@ const browserCases = async (sourceCode: string, css: string) => {
                     },
                 };
             },
+            bindLiteCodeActions: noop,
             setMobileToolbarUndo: noop,
             getDefaultToolbar: (): unknown[] => [],
             hideElements: noop,

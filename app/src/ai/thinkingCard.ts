@@ -1,3 +1,11 @@
+export const updateThinkingBody = (body: HTMLElement, update: () => void): void => {
+    const followBottom = body.clientHeight === 0 || body.scrollHeight - body.scrollTop - body.clientHeight <= 10;
+    update();
+    if (followBottom) {
+        body.scrollTop = body.scrollHeight;
+    }
+};
+
 export const bindThinkingCardToggle = (el: HTMLElement, onLayoutChange?: () => void): void => {
     const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
     const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;

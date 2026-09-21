@@ -78,8 +78,8 @@ type CreateAttributeViewItemDocsResult struct {
 }
 
 // CreateAttributeViewItem 按指定模板创建一个数据库条目。templateID 为空时创建空白游离条目。
-func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID string) (*CreateAttributeViewItemResult, error) {
-	return createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID, nil)
+func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID string, calendarDates ...*int64) (*CreateAttributeViewItemResult, error) {
+	return createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID, nil, calendarDates...)
 }
 
 // CreateAttributeViewItemWithMarkdown 按指定的文档类型模板创建数据库条目，并使用传入的 Markdown 创建绑定文档。
@@ -92,7 +92,7 @@ func CreateAttributeViewItemWithMarkdown(avID, blockID, viewID, templateID, prev
 }
 
 func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID string,
-	document *CreateAttributeViewItemMarkdown) (*CreateAttributeViewItemResult, error) {
+	document *CreateAttributeViewItemMarkdown, calendarDates ...*int64) (*CreateAttributeViewItemResult, error) {
 	attrView, err := avParseView(avID, blockID)
 	if nil != err {
 		return nil, err
@@ -144,6 +144,11 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	fieldValues, err := resolveNewItemFieldValues(attrView, itemTemplate, createdAt, dbTree.Box)
 	if nil != err {
 		return nil, err
+	}
+	if len(calendarDates) > 0 && nil != calendarDates[0] {
+		if err = setNewCalendarItemDate(attrView, blockID, viewID, *calendarDates[0], fieldValues); nil != err {
+			return nil, err
+		}
 	}
 	filterContext, err := resolveAttributeViewFilterContext(attrView, nil, blockID)
 	if nil != err {

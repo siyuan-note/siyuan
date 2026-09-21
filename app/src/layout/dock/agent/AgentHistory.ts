@@ -91,6 +91,21 @@ export const isAgentAssistantContentFinalInTurn = (
     return true;
 };
 
+export const getAgentTurnContent = (entries: AgentHistoryEntry[], userEntryID: string): string => {
+    const userIndex = entries.findIndex(entry => entry.type === "user" && entry.id === userEntryID);
+    if (userIndex < 0) {
+        return "";
+    }
+    const contents: string[] = [];
+    for (let i = userIndex + 1; i < entries.length && entries[i].type !== "user"; i++) {
+        const entry = entries[i];
+        if (entry.type === "assistant" && entry.content?.trim()) {
+            contents.push(entry.content);
+        }
+    }
+    return contents.join("\n\n");
+};
+
 export const hasAgentExecutedToolsAfter = (entries: AgentHistoryEntry[], entryIndex: number): boolean => {
     return entries.slice(entryIndex + 1).some((entry) => {
         if (entry.type === "snapshot") {

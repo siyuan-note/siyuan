@@ -4,6 +4,7 @@ import {isMobile} from "../../../util/functions";
 import {hintRef, hintSlash} from "../../hint/extend";
 import {registerBuiltinSlashHint} from "../../hint/builtinSlash";
 import {mountProtyleLiteFragment} from "../../lite/fragmentEditor";
+import {bindLiteCodeActions} from "../../lite/codeActions";
 import {setMobileToolbarUndo} from "../../lite/mobileToolbar";
 import {getDefaultToolbar} from "../../toolbar/defaults";
 import {hideElements} from "../../ui/hideElements";
@@ -74,7 +75,6 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     const fragment = mountProtyleLiteFragment(host, {
         app: owner.app,
         initialBlockHTML,
-        placeholder: window.siyuan.languages.listMindmapPlaceholder,
         protyleOptions: {notebookId: owner.notebookId, toolbar, hint},
         runtimeCapabilities: {
             upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,
@@ -232,6 +232,14 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     };
     setMobileToolbarUndo(fragment.protyle, owner, undo);
     const signal = events.signal;
+    bindLiteCodeActions(host, fragment.protyle, {
+        signal,
+        canEdit: () => !finished && !closing && options.canEdit(),
+        onChange: () => {
+            changed = true;
+            void commit();
+        },
+    });
     ["beforeinput", "input", "compositionstart", "compositionupdate", "compositionend", "copy", "cut", "paste",
         "pointerdown", "pointerup", "pointermove", "mousedown", "mouseup", "mousemove", "click", "dblclick",
         "contextmenu", "dragstart", "dragover", "drop", "focusin", "focusout", "keyup"]

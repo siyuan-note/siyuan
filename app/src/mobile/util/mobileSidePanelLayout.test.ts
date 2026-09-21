@@ -5,7 +5,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import {createDefaultMobileSidePanelConfig, MOBILE_SIDE_PANEL_DOCK_IDS, normalizeMobileSidePanelConfig} from "./mobileSidePanelConfig";
 
-test("side panel rendering hides docks, selects a visible fallback and closes an empty panel", () => {
+test("side panel layout selects initial defaults, remembers activated tabs and falls back when hidden", () => {
     const element = (type: string) => {
         const classes = new Set<string>();
         return {
@@ -22,9 +22,12 @@ test("side panel rendering hides docks, selects a visible fallback and closes an
     type DockElement = ReturnType<typeof element>;
     const panel = () => {
         const children: DockElement[] = [];
+        let onClick: (event: {detail: string}) => void;
         return {
             style: {transform: ""},
             firstElementChild: {
+                addEventListener: (_type: string, callback: typeof onClick) => onClick = callback,
+                dispatchEvent: (event: {detail: string}) => onClick(event),
                 firstElementChild: {append: (item: DockElement) => {
                     const index = children.indexOf(item);
                     if (index >= 0) {
@@ -33,6 +36,7 @@ test("side panel rendering hides docks, selects a visible fallback and closes an
                     children.push(item);
                 }},
                 querySelector: () => children.find(item => item.classList.contains("toolbar__icon--active")),
+                querySelectorAll: () => children,
             },
             lastElementChild: {append: (): void => undefined},
         };
@@ -41,14 +45,19 @@ test("side panel rendering hides docks, selects a visible fallback and closes an
     const right = panel();
     let closed = 0;
     let aiDisabled = false;
-    const moduleExports = {} as {renderMobileSidePanelLayout: (app: unknown, config: unknown) => void};
+    const moduleExports = {} as {
+        renderMobileSidePanelLayout: (app: unknown, config: unknown) => void;
+        initSidePanelTabs: (app: unknown, element: unknown) => void;
+    };
     const compiled = transpileModule(readFileSync("src/mobile/util/initFramework.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
     }).outputText;
-    runInNewContext(compiled, {
+    runInNewContext(compiled + "\nexports.initSidePanelTabs = initSidePanelTabs;", {
         exports: moduleExports,
         CSS: {escape: (value: string) => value},
-        window: {siyuan: {config: {readonly: false}, isPublish: false}},
+        window: {siyuan: {config: {readonly: false}, isPublish: false, mobile: {docks: {
+            bookmark: {update: () => {}}, backlink: {update: () => {}},
+        }}}},
         document: {
             getElementById: (id: string) => id === "sidebar" ? left : right,
             querySelectorAll: (): DockElement[] => [],
@@ -89,4 +98,28 @@ test("side panel rendering hides docks, selects a visible fallback and closes an
     aiDisabled = false;
     render([]);
     assert.equal(tabs.get("agent").classList.contains("fn__none"), false);
+
+    moduleExports.initSidePanelTabs({}, left);
+    moduleExports.initSidePanelTabs({}, right);
+    const config = {...createDefaultMobileSidePanelConfig(),
+        left: ["tag", "bookmark", "file", "inbox"], right: ["agent", "outline", "backlink"], hidden: ["agent"],
+    };
+    moduleExports.renderMobileSidePanelLayout({}, config);
+    assert.equal(tabs.get("tag").classList.contains("toolbar__icon--active"), true);
+    assert.equal(tabs.get("outline").classList.contains("toolbar__icon--active"), true);
+
+    // 首次打开前变更布局时，仍按最新顺序选择首个可见功能。
+    config.left = ["file", "tag", "bookmark", "inbox"];
+    moduleExports.renderMobileSidePanelLayout({}, config);
+    assert.equal(tabs.get("file").classList.contains("toolbar__icon--active"), true);
+    left.firstElementChild.dispatchEvent({detail: "bookmark"});
+    right.firstElementChild.dispatchEvent({detail: "backlink"});
+    moduleExports.renderMobileSidePanelLayout({}, config);
+    assert.equal(tabs.get("bookmark").classList.contains("toolbar__icon--active"), true);
+    assert.equal(tabs.get("backlink").classList.contains("toolbar__icon--active"), true);
+
+    config.hidden = ["agent", "bookmark", "backlink"];
+    moduleExports.renderMobileSidePanelLayout({}, config);
+    assert.equal(tabs.get("file").classList.contains("toolbar__icon--active"), true);
+    assert.equal(tabs.get("outline").classList.contains("toolbar__icon--active"), true);
 });

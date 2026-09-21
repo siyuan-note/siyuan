@@ -283,6 +283,7 @@ chown -R 1001:1002 /siyuan/workspace
 使用 NGINX 反向代理可以隐藏 6806 端口，请注意：
 
 - 配置 WebSocket 反代 `/ws`
+- 普通请求和 `/ws` 的反向代理都需要保留原始 `Host` 请求头及端口，在 NGINX 的两处代理配置中均设置 `proxy_set_header Host $http_host;`。使用 `$host` 会丢失非标准端口（如 `8443`），可能导致来源校验失败，表现为登录后停留在 LOGO 并反复刷新、接口返回 `401` 或 WebSocket 连接失败
 
 #### 注意
 

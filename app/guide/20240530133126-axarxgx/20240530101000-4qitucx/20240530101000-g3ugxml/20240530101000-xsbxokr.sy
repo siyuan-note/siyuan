@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260919234652"
+		"updated": "20260921111101"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908134131-m3ys4ns",
-				"updated": "20260908202835"
+				"updated": "20260921111101"
 			},
 			"Children": [
 				{
@@ -36,49 +36,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " では、同じ操作に複数のショートカットを割り当てられます。同じ行のプラスボタンをクリックし、キーの組み合わせを入力すると保存されます。既存のショートカットは閉じるボタンをクリックすると削除できます。変更する場合は、削除してから新しいショートカットを追加してください。リセットボタンをクリックすると、その操作のすべてのショートカットが初期設定に戻ります。Esc キーを押すか入力欄の外をクリックすると、入力を取り消せます。先頭のショートカットがメニューのヒントに表示されます。別のショートカットを右クリックすると、メインのショートカットに設定できます。同じ操作に割り当て済みのショートカットを入力しても保存されず、入力状態が続くため、別のキーの組み合わせを入力できます。"
-				}
-			]
-		},
-		{
-			"ID": "20260908134131-eojg73f",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908134131-eojg73f",
-				"updated": "20260908180419"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "異なる操作に同じショートカットを設定できます。重複する割り当ては競合として強調表示されます。実行時は現在フォーカスしている局所的な範囲が優先され、次に全般的な範囲が判定されます。同じ範囲内では固定順序で判定され、実行優先順位は変更できません。組み込み操作は固定の判定順序、プラグイン操作はプラグイン名とコマンド識別子の順序に従います。一度のキー入力で実行されるのは最初の利用可能な操作だけです。実行開始後にキャンセルや失敗が発生しても、他の操作は実行されません。"
-				}
-			]
-		},
-		{
-			"ID": "20260908172944-0h53s6j",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908172944-0h53s6j",
-				"updated": "20260908180419"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "検索欄の下で「すべて」「割り当て済み」「自分でカスタマイズ」「未割り当て」を選び、名前やキーの検索と組み合わせて絞り込めます。「割り当て済み」は少なくとも一つのショートカットが設定されている操作、「自分でカスタマイズ」は追加・変更・削除した割り当てが初期設定と異なる操作、「未割り当て」はショートカットが設定されていない操作を表示します。未解決の競合がある場合のみ「競合」フィルターが表示され、競合するショートカットが個別に強調表示されます。変更後は結果が自動更新されます。「競合」を選択中にすべての競合が解消されると、自動的に「すべて」に切り替わります。"
-				}
-			]
-		},
-		{
-			"ID": "20260813143409-t5y8q2m",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260813143409-t5y8q2m",
-				"updated": "20260813143409"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "通常のテキスト入力への影響を避けるため、単一文字、または "
+					"Data": " では、同じ操作に複数のショートカットを割り当てられます。先頭以外のショートカットを右クリックすると、メインのショートカットに設定できます。同じショートカットが設定されている場合、現在の局所的な範囲が優先され、次に全般的な範囲が判定されます。通常のテキスト入力への影響を避けるため、単一文字、または "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -4005,7 +3963,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20260918223821"
+				"updated": "20260921105011"
 			},
 			"Children": [
 				{
@@ -11900,7 +11858,7 @@
 			"Properties": {
 				"ID": "20240530101000-uaq4ub6",
 				"id": "20240530101000-yl0e0sq",
-				"updated": "20260919232200"
+				"updated": "20260921105011"
 			},
 			"Children": [
 				{
@@ -11930,7 +11888,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-wqr5cs1",
-				"updated": "20260919232200"
+				"updated": "20260921105011"
 			},
 			"Children": [
 				{
@@ -12285,6 +12243,95 @@
 							"Data": "td"
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260921105011-icqlkb6",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260921105011-icqlkb6",
+				"updated": "20260921111101"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マインドマップ"
+				}
+			]
+		},
+		{
+			"ID": "20260921105011-01k7syf",
+			"Type": "NodeTable",
+			"Properties": {
+				"id": "20260921105011-01k7syf",
+				"updated": "20260921111101",
+				"colgroup": "|"
+			},
+			"TableAligns": [
+				0,
+				0
+			],
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "名前"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "ショートカット"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択したノードを編集"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Space"
+								}
+							]
+						}
+					]
 				},
 				{
 					"Type": "NodeTableRow",
@@ -12308,16 +12355,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Tab"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "マインドマップに切り替えてノードを選択"
 								}
 							]
 						}
@@ -12347,14 +12384,40 @@
 									"TextMarkTextContent": "Enter"
 								}
 							]
-						},
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "マインドマップに切り替えてノードを選択"
+									"Data": "ノードまたは接続を削除"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Delete"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Backspace"
 								}
 							]
 						}
@@ -12384,16 +12447,6 @@
 									"TextMarkTextContent": "←"
 								}
 							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "マインドマップに切り替えてノードを選択"
-								}
-							]
 						}
 					]
 				},
@@ -12419,16 +12472,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "→"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "マインドマップに切り替えてノードを選択"
 								}
 							]
 						}
@@ -12458,16 +12501,6 @@
 									"TextMarkTextContent": "↑"
 								}
 							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "マインドマップに切り替えてノードを選択"
-								}
-							]
 						}
 					]
 				},
@@ -12495,14 +12528,31 @@
 									"TextMarkTextContent": "↓"
 								}
 							]
-						},
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "マインドマップに切り替えてノードを選択"
+									"Data": "ノードの編集を終了"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Esc"
 								}
 							]
 						}
@@ -12518,7 +12568,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選択したノードを編集し、末尾にカーソルを移動"
+									"Data": "キャンバスを横方向に移動"
 								}
 							]
 						},
@@ -12529,7 +12579,32 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Space"
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " + "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ホイール"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "キャンバスを拡大・縮小"
 								}
 							]
 						},
@@ -12538,8 +12613,18 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "マインドマップに切り替えてノードを選択"
+									"Data": " + "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ホイール"
 								}
 							]
 						}

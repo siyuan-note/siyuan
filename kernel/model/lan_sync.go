@@ -311,18 +311,7 @@ func syncDataFromLAN(latestID string) {
 		return
 	}
 	scope := lanSyncScope()
-	_, _ = syncRemoteRequests.do(scope, latestID, func() error {
-		lockSync()
-		defer unlockSync()
-		if syncRemoteRequests.isCompleted(scope, latestID) {
-			return nil
-		}
-		err := syncDataLocked(false, false)
-		if nil == err {
-			completeCurrentSyncRemoteRequest(scope)
-		}
-		return err
-	})
+	syncDataFromRemote(scope, latestID)
 }
 
 func SetSyncLAN(enabled bool, maxConcurrentReqs int) {

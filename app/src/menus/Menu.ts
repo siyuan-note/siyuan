@@ -199,6 +199,10 @@ export class Menu {
         if (target.closest("input:not([type=\"file\"]), textarea, select, [contenteditable=\"true\"]")) {
             return false;
         }
+        // 可排序条目由触摸拖拽桥接处理，避免排序时同时下拉关闭菜单。
+        if (target.closest('[draggable="true"]')) {
+            return false;
+        }
         if (target.closest(".b3-menu__title")) {
             return true;
         }

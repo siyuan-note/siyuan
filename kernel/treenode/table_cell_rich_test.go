@@ -27,6 +27,7 @@ func richTableTree(t *testing.T, source string) (*parse.Tree, *ast.Node) {
 func TestTableCellRichSourceProjectionAndSpec(t *testing.T) {
 	sources := []string{
 		"- **first**\n- second\n\n> quotation\n\n```go\na | b\nc\n```\n\n$$\nx^2\n$$",
+		"```go\na | b\n```\n" + `{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}`,
 		"- [ ] open\n- [x] done\n\n![image](assets/image.png) ((20240101000000-abcdefg 'reference'))",
 		"<span data-type=\"text\" style=\"color: var(--b3-font-color1);\">styled</span>",
 		"",
@@ -63,7 +64,8 @@ func TestTableCellRichSourceProjectionAndSpec(t *testing.T) {
 }
 
 func TestTableCellRichSynchronizesAssetReferenceAndText(t *testing.T) {
-	tree, cell := richTableTree(t, "![image](assets/old.png) ((20240101000000-abcdefg 'reference')) text\n\n```go\nold\n```")
+	tree, cell := richTableTree(t, "![image](assets/old.png) ((20240101000000-abcdefg 'reference')) text\n\n```go\nold\n```\n"+
+		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false" custom-sy-code-tab-spaces="2"}`)
 	ast.Walk(cell, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -82,7 +84,8 @@ func TestTableCellRichSynchronizesAssetReferenceAndText(t *testing.T) {
 	if err := SyncTableCellRichInlineChanges(tree.Root); nil != err {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"assets/new.png", "20240102000000-abcdefg", "<new> & value"} {
+	for _, expected := range []string{"assets/new.png", "20240102000000-abcdefg", "<new> & value",
+		`linewrap="false"`, `linenumber="true"`, `ligatures="false"`, `custom-sy-code-tab-spaces="2"`} {
 		if !strings.Contains(cell.TableCellRich.Content, expected) {
 			t.Fatalf("source does not contain %q: %s", expected, cell.TableCellRich.Content)
 		}
@@ -110,6 +113,7 @@ func TestTableCellRichFrontendProjectionParity(t *testing.T) {
 		`var(--b3-font-family-editor), var(--b3-font-family);"}`
 	for _, source := range []string{
 		"- **first**\n- second\n\n```go\na < b && c\nd\n```\n\n$$\nx < y\n$$",
+		"```go\na < b && c\n```\n" + `{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}`,
 		"![image](assets/image.png) ((20240101000000-abcdefg 'reference')) `a & b`",
 		styled,
 		`<span data-type="text">styled</span>{: style='font-family: ` +

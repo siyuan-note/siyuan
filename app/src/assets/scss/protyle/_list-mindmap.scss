@@ -54,15 +54,17 @@
     z-index: 5;
     opacity: 0;
     pointer-events: none;
-    gap: 4px;
+    gap: 8px;
     overflow: visible;
   }
 
+  &.fullscreen &__toolbar,
   &:hover &__toolbar,
   &__toolbar:focus-within {
     opacity: 1;
   }
 
+  &.fullscreen &__toolbar .block__icon,
   &:hover &__toolbar .block__icon,
   &__toolbar:focus-within .block__icon {
     pointer-events: auto;
@@ -142,6 +144,18 @@
     pointer-events: none;
   }
 
+  &__viewport--pan {
+    cursor: grab;
+
+    .list-mindmap__world {
+      pointer-events: none;
+    }
+
+    &.list-mindmap__viewport--dragging {
+      cursor: grabbing;
+    }
+  }
+
   &__world {
     position: absolute;
     left: 0;
@@ -184,10 +198,10 @@
     }
 
     &--untitled:not(.list-mindmap__node--editing) {
-      width: 28px;
-      min-width: 28px;
-      height: 28px;
-      min-height: 28px;
+      width: 32px;
+      min-width: 32px;
+      height: 32px;
+      min-height: 32px;
       padding: 0;
 
       > .list-mindmap__content {
@@ -266,7 +280,7 @@
     min-height: 24px;
     overflow-wrap: anywhere;
 
-    &--empty:not(.list-mindmap__editor) {
+    .list-mindmap__node:not(.list-mindmap__node--editing) > &--empty:not(.list-mindmap__editor) {
       > * {
         display: none;
       }
@@ -448,12 +462,12 @@
   &__fold {
     position: absolute;
     z-index: 1;
-    right: -26px;
-    top: calc(50% - 11px);
-    min-width: 22px;
-    width: 22px;
-    height: 22px;
-    padding: 4px;
+    right: -19px;
+    top: calc(50% - 9px);
+    min-width: 18px;
+    width: 18px;
+    height: 18px;
+    padding: 2px;
     border: 1px solid var(--b3-border-color);
     border-radius: 50%;
     background: var(--b3-theme-background);
@@ -482,12 +496,12 @@
 
   &__add-child {
     position: absolute;
-    right: -26px;
-    top: calc(50% - 11px);
-    min-width: 22px;
-    width: 22px;
-    height: 22px;
-    padding: 4px;
+    right: -19px;
+    top: calc(50% - 9px);
+    min-width: 18px;
+    width: 18px;
+    height: 18px;
+    padding: 2px;
     border: 1px solid var(--b3-border-color);
     border-radius: 50%;
     background: var(--b3-theme-surface);
@@ -509,25 +523,25 @@
     left: 100%;
     top: 0;
     bottom: 0;
-    width: 26px;
+    width: 19px;
     visibility: hidden;
   }
 
   &__node--branch > &__add-child {
-    right: -53px;
+    right: -39px;
   }
 
   &__node--branch > &__add-bridge {
-    width: 53px;
+    width: 39px;
   }
 
   &__node:not(.list-mindmap__node--root) {
     > .list-mindmap__fold {
-      top: calc(100% - 10px);
+      top: calc(100% - 8px);
     }
 
     > .list-mindmap__add-child {
-      top: calc(100% - 10px);
+      top: calc(100% - 8px);
     }
 
     > .list-mindmap__add-bridge {

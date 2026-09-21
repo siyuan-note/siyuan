@@ -9,7 +9,7 @@ import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusBlock, focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {getCurrentEditor as getDocumentEditor} from "../editor";
-import {getMobileToolbarProtyle, getMobileToolbarUndo} from "../../protyle/lite/mobileToolbar";
+import {getMobileToolbarPaddingElement, getMobileToolbarProtyle, getMobileToolbarUndo} from "../../protyle/lite/mobileToolbar";
 import {LocalUndo} from "../../protyle/undo";
 import {convertFontSize, fontEvent, getFontNodeElements, getFontSizeInfo} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
@@ -81,11 +81,11 @@ import {applyMobileToolbarEntries} from "./toolbarEntries";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
+import {mountLiteSlashMenu} from "./liteSlashMenu";
 
 const getCurrentEditor = () => getMobileToolbarProtyle()?.getInstance() || getDocumentEditor();
-const getKeyboardPaddingElement = (protyle: IProtyle) =>
-    protyle.lite ? protyle.contentElement : protyle.element.parentElement;
 let toolbarProtyle: IProtyle;
+let unmountLiteSlashMenu: (() => void) | undefined;
 
 const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string | IMenuItem>) => {
     applyMobileToolbarEntries(element, toolbar, {
@@ -424,7 +424,7 @@ const updateKeyboardPanelHeight = () => {
     toolbarElement.style.height = panelHeight;
     const editor = getCurrentEditor();
     if (editor) {
-        getKeyboardPaddingElement(editor.protyle).style.paddingBottom = panelHeight;
+        getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = panelHeight;
     }
 };
 
@@ -694,19 +694,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     protyle.hint.lastIndex = -1;
     if (protyle.lite) {
         // 轻量编辑器沿用自己的插入候选，保留单元格内容限制和智能体技能入口。
-        const items = protyle.options.hint.extend.find(item => item.key === "/")?.hint?.("", protyle, "hint") || [];
-        protyle.hint.genHTML(items, protyle, true, "hint");
-        const utilElement = toolbarElement.querySelector(".keyboard__util");
-        utilElement.replaceChildren();
-        if (items.length > 0) {
-            Array.from(protyle.hint.element.children).forEach((element: HTMLElement, index) => {
-                element.classList.add("keyboard__slash-item");
-                element.setAttribute("data-focus", items[index]?.focus === false ? "false" : "true");
-                utilElement.appendChild(element);
-            });
-        }
-        protyle.hint.element.classList.add("fn__none");
-        protyle.hint.bindUploadEvent(protyle, utilElement as HTMLElement);
+        unmountLiteSlashMenu = mountLiteSlashMenu(protyle, toolbarElement.querySelector(".keyboard__util"));
         return;
     }
     let pluginHTML = "";
@@ -764,6 +752,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("- " + Lute.Caret, "iconList", window.siyuan.languages.list, "true")}
     ${getSlashItem("1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
     ${getSlashItem("- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
+    ${getSlashItem(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
     ${getSlashItem("> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
     ${getSlashItem(`::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`, "iconTabs", window.siyuan.languages.tabs, "true")}
     ${getSlashItem(`> [!NOTE]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">✏️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span>`, "true")}
@@ -784,7 +773,6 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("```flowchart\n```", "", "Flow Chart", "true")}
     ${getSlashItem("```graphviz\n```", "", "Graph", "true")}
     ${getSlashItem("```mermaid\n```", "", "Mermaid", "true")}
-    ${getSlashItem(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
     ${getSlashItem("```plantuml\n```", "", "UML", "true")}
 </div>
 <div class="keyboard__slash-title"></div>
@@ -832,6 +820,8 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
 };
 
 const resetKeyboardToolbarUtilButtons = () => {
+    unmountLiteSlashMenu?.();
+    unmountLiteSlashMenu = undefined;
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.querySelectorAll('[data-type="add"], [data-type="text"], [data-type="font-family"], [data-type="font-size"]')
         .forEach(item => item.classList.remove("protyle-toolbar__item--current"));
@@ -868,7 +858,7 @@ const hideKeyboardToolbarUtil = (restoreKeyboard = false) => {
     updateKeyboardToolbarPosition();
     const editor = getCurrentEditor();
     if (editor) {
-        getKeyboardPaddingElement(editor.protyle).style.paddingBottom = "48px";
+        getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = "48px";
     }
     resetKeyboardToolbarUtilButtons();
 };
@@ -1083,7 +1073,7 @@ const showKeyboardToolbarElement = () => {
         keyboardPanelClosing = false;
         hideKeyboardToolbarUtil();
         if (toolbarProtyle) {
-            getKeyboardPaddingElement(toolbarProtyle).style.paddingBottom = "";
+            getMobileToolbarPaddingElement(toolbarProtyle).style.paddingBottom = "";
         }
         toolbarProtyle = protyle;
         updateMobilePluginToolbar(protyle);
@@ -1106,7 +1096,7 @@ const showKeyboardToolbarElement = () => {
     const editor = getCurrentEditor();
     if (editor) {
         if (editor.protyle.wysiwyg.element.contains(range.startContainer)) {
-            getKeyboardPaddingElement(editor.protyle).style.paddingBottom = "48px";
+            getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = "48px";
         }
         forEachPluginSubscriber("mobile-keyboard-show", eventBus => {
             eventBus.emit("mobile-keyboard-show");
@@ -1224,7 +1214,7 @@ export const hideKeyboardToolbar = () => {
     toolbarElement.style.height = "";
     const editor = getCurrentEditor();
     if (editor) {
-        getKeyboardPaddingElement(editor.protyle).style.paddingBottom = "";
+        getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = "";
         if (!toolbarHidden) {
             forEachPluginSubscriber("mobile-keyboard-hide", eventBus => {
                 eventBus.emit("mobile-keyboard-hide");
@@ -1294,7 +1284,7 @@ export const activeBlur = (force = false) => {
 export const initKeyboardToolbar = () => {
     window.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => {
         if (event.detail) {
-            getKeyboardPaddingElement(event.detail).style.paddingBottom = "";
+            getMobileToolbarPaddingElement(event.detail).style.paddingBottom = "";
             if (toolbarProtyle === event.detail) {
                 toolbarProtyle = undefined;
             }
@@ -1525,7 +1515,8 @@ export const initKeyboardToolbar = () => {
         }
         const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
-        const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
+        const liteSlashBtnElement = target.closest<HTMLElement>(".keyboard__util .protyle-hint .keyboard__slash-item[data-value]");
+        const slashBtnElement = liteSlashBtnElement || hasClosestByClassName(target, "keyboard__slash-item");
         if (slashBtnElement && slashBtnElement.dataset.action === "fontFamilyMenu") {
             const range = protyle.toolbar.range.cloneRange();
             const nodeElements = getFontNodeElements(protyle);
@@ -1575,6 +1566,14 @@ export const initKeyboardToolbar = () => {
             if (dataValue === Constants.ZWSP + 3) {
                 return;
             }
+            if (liteSlashBtnElement) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!dataValue) {
+                    return;
+                }
+                hideKeyboardToolbarUtil();
+            }
             protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
             event.preventDefault();
             event.stopPropagation();
@@ -1586,7 +1585,8 @@ export const initKeyboardToolbar = () => {
                 if (isInHarmony() || isInAndroid()) {
                     setTimeout(() => focusByRange(protyle.toolbar.range), Constants.TIMEOUT_TRANSITION);
                 }
-            } else if (slashBtnElement.getAttribute("data-focus") === "true") {
+            } else if (slashBtnElement.getAttribute("data-focus") === "true" ||
+                liteSlashBtnElement && slashBtnElement.getAttribute("data-focus") !== "false") {
                 focusByRange(protyle.toolbar.range);
             }
             return;

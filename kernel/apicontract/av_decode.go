@@ -135,6 +135,16 @@ func avDecodeParsedRequest[Request any](reader io.Reader, path string) (request 
 		options := "," + field.Tag.Get("api") + ","
 		required := !strings.Contains(options, ",optional,")
 		switch field.Type.Kind() {
+		case reflect.Pointer:
+			// 可选指针保留省略、null 和零值的区别，具体值继续使用契约类型校验。
+			if raw, present := fields[name]; present {
+				err = decodeRequestValue(raw, value.Field(i))
+				if err != nil {
+					err = fmt.Errorf("Field [%s]: %w", name, err)
+				}
+			} else if required {
+				err = fmt.Errorf("Field [%s] is required", name)
+			}
 		case reflect.String:
 			var decoded string
 			decoded, err = legacyField[string](fields, name, "String", required)

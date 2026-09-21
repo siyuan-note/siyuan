@@ -1,6 +1,13 @@
 package apicontract
 
 type AVTable struct {
+	// 仅日历布局返回字段绑定及一周起始日；创建、更新系统时间作为只读日期源。
+	Calendar *AVCalendarSettings `json:"calendar,omitempty" api:"optional"`
+	// 回显本次请求的日期范围，省略范围的请求不返回此字段。
+	CalendarRange *AVCalendarRange `json:"calendarRange,omitempty" api:"optional"`
+	// 可访问且通过筛选的定位条目的开始时间，单位为毫秒；无有效定位日期时省略。
+	// 发布读取先过滤不可访问条目，再重新计算此日期、定位行索引及 rowCount。
+	CalendarTargetDate *int64 `json:"calendarTargetDate,omitempty" api:"optional"`
 	*AVBaseInstance
 	Columns  []*AVTableColumn `json:"columns" api:"optional,nullable"`
 	Rows     []*AVTableRow    `json:"rows" api:"optional,nullable"`
@@ -397,7 +404,7 @@ type AVViewData struct {
 	Name             string `json:"name" api:"optional,nullable"`
 	Desc             string `json:"desc" api:"optional,nullable"`
 	HideAttrViewName bool   `json:"hideAttrViewName" api:"optional,nullable"`
-	Type             string `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban"`
+	Type             string `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban|calendar"`
 	PageSize         int    `json:"pageSize" api:"optional,nullable"`
 }
 
@@ -456,30 +463,31 @@ type AVAttributeViewCustomColor struct {
 }
 
 type AVView struct {
-	ID               string           `json:"id" api:"optional,nullable"`
-	Icon             string           `json:"icon" api:"optional,nullable"`
-	Name             string           `json:"name" api:"optional,nullable"`
-	HideAttrViewName bool             `json:"hideAttrViewName" api:"optional,nullable"`
-	Desc             string           `json:"desc" api:"optional,nullable"`
-	Filters          []*AVViewFilter  `json:"filters,omitempty" api:"optional,nullable"`
-	Sorts            []*AVViewSort    `json:"sorts,omitempty" api:"optional,nullable"`
-	PageSize         int              `json:"pageSize" api:"optional,nullable"`
-	LayoutType       string           `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban"`
-	Table            *AVLayoutTable   `json:"table,omitempty" api:"optional,nullable"`
-	List             *AVLayoutTable   `json:"list,omitempty" api:"optional,nullable"`
-	Gallery          *AVLayoutGallery `json:"gallery,omitempty" api:"optional,nullable"`
-	Kanban           *AVLayoutKanban  `json:"kanban,omitempty" api:"optional,nullable"`
-	ItemIDs          []string         `json:"itemIds,omitempty" api:"optional,nullable"`
-	Group            *AVViewGroup     `json:"group,omitempty" api:"optional,nullable"`
-	GroupCreated     int64            `json:"groupCreated" api:"optional,nullable"`
-	Groups           []*AVView        `json:"groups,omitempty" api:"optional,nullable"`
-	GroupItemIDs     []string         `json:"groupItemIds" api:"optional,nullable"`
-	GroupCalc        *AVGroupCalc     `json:"groupCalc,omitempty" api:"optional,nullable"`
-	GroupKey         *AVKey           `json:"groupKey,omitempty" api:"optional,nullable"`
-	GroupVal         *AVValue         `json:"groupVal,omitempty" api:"optional,nullable"`
-	GroupFolded      bool             `json:"groupFolded" api:"optional,nullable"`
-	GroupHidden      int              `json:"groupHidden" api:"optional,nullable"`
-	GroupSort        int              `json:"groupSort" api:"optional,nullable"`
+	ID               string            `json:"id" api:"optional,nullable"`
+	Icon             string            `json:"icon" api:"optional,nullable"`
+	Name             string            `json:"name" api:"optional,nullable"`
+	HideAttrViewName bool              `json:"hideAttrViewName" api:"optional,nullable"`
+	Desc             string            `json:"desc" api:"optional,nullable"`
+	Filters          []*AVViewFilter   `json:"filters,omitempty" api:"optional,nullable"`
+	Sorts            []*AVViewSort     `json:"sorts,omitempty" api:"optional,nullable"`
+	PageSize         int               `json:"pageSize" api:"optional,nullable"`
+	LayoutType       string            `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban|calendar"`
+	Table            *AVLayoutTable    `json:"table,omitempty" api:"optional,nullable"`
+	Calendar         *AVLayoutCalendar `json:"calendar,omitempty" api:"optional,nullable"`
+	List             *AVLayoutTable    `json:"list,omitempty" api:"optional,nullable"`
+	Gallery          *AVLayoutGallery  `json:"gallery,omitempty" api:"optional,nullable"`
+	Kanban           *AVLayoutKanban   `json:"kanban,omitempty" api:"optional,nullable"`
+	ItemIDs          []string          `json:"itemIds,omitempty" api:"optional,nullable"`
+	Group            *AVViewGroup      `json:"group,omitempty" api:"optional,nullable"`
+	GroupCreated     int64             `json:"groupCreated" api:"optional,nullable"`
+	Groups           []*AVView         `json:"groups,omitempty" api:"optional,nullable"`
+	GroupItemIDs     []string          `json:"groupItemIds" api:"optional,nullable"`
+	GroupCalc        *AVGroupCalc      `json:"groupCalc,omitempty" api:"optional,nullable"`
+	GroupKey         *AVKey            `json:"groupKey,omitempty" api:"optional,nullable"`
+	GroupVal         *AVValue          `json:"groupVal,omitempty" api:"optional,nullable"`
+	GroupFolded      bool              `json:"groupFolded" api:"optional,nullable"`
+	GroupHidden      int               `json:"groupHidden" api:"optional,nullable"`
+	GroupSort        int               `json:"groupSort" api:"optional,nullable"`
 }
 
 type AVLayoutTable struct {
@@ -560,7 +568,7 @@ type AVAttributeViewFieldView struct {
 	ID     string `json:"id" api:"optional,nullable"`
 	Icon   string `json:"icon" api:"optional,nullable"`
 	Name   string `json:"name" api:"optional,nullable"`
-	Type   string `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban"`
+	Type   string `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban|calendar"`
 	Hidden bool   `json:"hidden" api:"optional,nullable"`
 }
 
@@ -569,7 +577,7 @@ type AVAvSearchResult struct {
 	AvName     string              `json:"avName" api:"optional,nullable"`
 	ViewName   string              `json:"viewName" api:"optional,nullable"`
 	ViewID     string              `json:"viewID" api:"optional,nullable"`
-	ViewLayout string              `json:"viewLayout" api:"optional,nullable,enum=|table|list|gallery|kanban"`
+	ViewLayout string              `json:"viewLayout" api:"optional,nullable,enum=|table|list|gallery|kanban|calendar"`
 	BlockID    string              `json:"blockID" api:"optional,nullable"`
 	HPath      string              `json:"hPath" api:"optional,nullable"`
 	Matched    bool                `json:"matched,omitempty" api:"optional,nullable"`

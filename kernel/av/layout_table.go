@@ -71,9 +71,12 @@ type ViewTableColumn struct {
 type Table struct {
 	*BaseInstance
 
-	Columns  []*TableColumn `json:"columns"`  // 表格列
-	Rows     []*TableRow    `json:"rows"`     // 表格行
-	RowCount int            `json:"rowCount"` // 表格总行数
+	Calendar           *CalendarSettings `json:"calendar,omitempty"`
+	CalendarRange      *CalendarRange    `json:"calendarRange,omitempty"`
+	CalendarTargetDate *int64            `json:"calendarTargetDate,omitempty"`
+	Columns            []*TableColumn    `json:"columns"`  // 表格列
+	Rows               []*TableRow       `json:"rows"`     // 表格行
+	RowCount           int               `json:"rowCount"` // 表格总行数
 }
 
 // TableColumn 描述了表格实例列的结构。

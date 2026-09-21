@@ -1,3 +1,5 @@
+import {renderCalendar} from "./calendar/render";
+import {getCalendarRequestRange} from "./calendar/state";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {fetchSyncPost} from "../../../util/fetch";
@@ -61,6 +63,7 @@ import {getAVHeaderEditingState} from "./headerEditing";
 import {getAVColorStyle} from "./color";
 import {getContextFilterKeyID} from "./contextFilterState";
 import {isAVCellPanelForBlock} from "./panelTarget";
+import {replaceAVContainer} from "./container";
 
 interface IIds {
     groupId: string,
@@ -340,13 +343,13 @@ const renderGroupTable = (options: ITableOptions) => {
         }
     });
     if (options.renderAll) {
-        options.blockElement.firstElementChild.outerHTML = `<div class="av__container">
+        replaceAVContainer(options.blockElement, `<div class="av__container">
     ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled, options.blockElement)}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
-</div>`;
+</div>`);
     } else {
         options.blockElement.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
     }
@@ -527,10 +530,6 @@ const afterRenderTable = (options: ITableOptions) => {
             }
         }
     }
-    const focusViewElement = options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement;
-    if (focusViewElement) {
-        options.blockElement.querySelector(".layout-tab-bar").scrollLeft = focusViewElement.offsetLeft - 30;
-    }
     if (options.cb) {
         options.cb(options.data);
     }
@@ -678,6 +677,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         let data: IAV;
         if (!avData) {
             const common = {
+                calendarRange: getCalendarRequestRange(e, locateParams?.viewID || undefined),
                 id: e.getAttribute("data-av-id"),
                 blockID: e.getAttribute("data-node-id"),
                 viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(e) : ""),
@@ -723,6 +723,10 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             setAVVisibleViewIDs(e, getAVVisibleViewIDs(e, data.views));
         }
         prepareAVLocate(e, data, resetData);
+        if (data.viewType === "calendar") {
+            await renderCalendar(e, protyle, data, cb);
+            continue;
+        }
         if (data.viewType === "gallery") {
             await renderGallery({blockElement: e, protyle, cb, renderAll, data});
             continue;
@@ -740,13 +744,13 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
     ${getTableHTMLs(view, e, resetData.virtualData.all)}
 </div>`;
         if (renderAll) {
-            e.firstElementChild.outerHTML = `<div class="av__container">
+            replaceAVContainer(e, `<div class="av__container">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !protyle.disabled, e)}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
-</div>`;
+</div>`);
         } else {
             e.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
         }
@@ -947,7 +951,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewColAlign") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"]`).forEach((cellElement: HTMLElement) => {
+            item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"], .av__calendar-field[data-col-id="${operation.id}"]`).forEach((cellElement: HTMLElement) => {
                 cellElement.dataset.align = operation.data;
             });
         });
@@ -978,7 +982,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewWrapField") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            item.querySelectorAll(".av__cell").forEach(fieldItem => {
+            item.querySelectorAll(".av__cell, .av__calendar-field").forEach(fieldItem => {
                 fieldItem.setAttribute("data-wrap", operation.data.toString());
             });
         });
@@ -1034,10 +1038,10 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewShowIcon") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji').forEach(cellItem => {
+            item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__calendar-field[data-dtype="block"] .b3-menu__avemoji').forEach(cellItem => {
                 cellItem.classList.toggle("fn__none", !operation.data);
             });
-            item.querySelectorAll('.av__cell[data-dtype="relation"] .av__cell--relation').forEach(cellItem => {
+            item.querySelectorAll('.av__cell[data-dtype="relation"] .av__cell--relation, .av__calendar-field[data-dtype="relation"] .av__cell--relation').forEach(cellItem => {
                 cellItem.firstElementChild.classList.toggle("fn__none", !operation.data);
             });
         });
@@ -1045,7 +1049,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewColWrap") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"]`).forEach(cellItem => {
+            item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"],.av__calendar-field[data-field-id="${operation.id}"]`).forEach(cellItem => {
                 cellItem.setAttribute("data-wrap", operation.data.toString());
             });
         });
@@ -1098,7 +1102,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");
             if (["setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
-                "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow",
+                "setAttrViewCalendar", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow",
                 "setAttrViewDisplayFieldName"].includes(operation.action) &&
                 (!operation.viewID || getViewIDByAVElement(item) === operation.viewID)) {
                 // 卡片尺寸或字段布局变化后原虚拟滚动占位高度已失效，重渲时从首项重新初始化。

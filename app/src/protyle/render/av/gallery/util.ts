@@ -1,5 +1,6 @@
 import {transaction} from "../../../wysiwyg/transaction";
 import {Menu} from "../../../../plugin/Menu";
+import {openViewSettingMenu} from "../viewSettingMenu";
 import {hasClosestByClassName} from "../../../util/hasClosest";
 import {unicode2Emoji} from "../../../../emoji";
 import {getColIconByType} from "../col";
@@ -142,8 +143,7 @@ export const setGalleryCover = (options: {
             });
         }
     });
-    const rect = options.target.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+    openViewSettingMenu(menu, options.target);
 };
 
 export const setGallerySize = (options: {
@@ -219,8 +219,7 @@ export const setGallerySize = (options: {
             });
         }
     });
-    const rect = options.target.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+    openViewSettingMenu(menu, options.target);
 };
 
 export const setGalleryRatio = (options: {
@@ -297,8 +296,7 @@ export const setGalleryRatio = (options: {
             });
         }
     });
-    const rect = options.target.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+    openViewSettingMenu(menu, options.target);
 };
 
 export const openGalleryItemMenu = (options: {

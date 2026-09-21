@@ -1,6 +1,7 @@
 import type {Transaction, TransactionOperation, UnknownTransactionAction} from "../../types/api";
 
 const transactionActions: Record<IOperation["action"], true> = {
+    "setAttrViewCalendar": true,
     "updateAttrs": true,
     "create": true,
     "restoreCreatedDoc": true,

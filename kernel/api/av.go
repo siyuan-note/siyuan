@@ -346,7 +346,7 @@ var getAttributeViewFieldViews = contractHandler(apicontract.GetAttributeViewFie
 })
 
 var createAttributeViewItem = contractHandler(apicontract.CreateAttributeViewItem, func(c *gin.Context, request apicontract.CreateAttributeViewItemRequest) apicontract.Response[apicontract.AVCreateItemResult] {
-	value, err := model.CreateAttributeViewItem(request.AvID, request.BlockID, request.ViewID, request.TemplateID, request.PreviousID, request.GroupID)
+	value, err := model.CreateAttributeViewItem(request.AvID, request.BlockID, request.ViewID, request.TemplateID, request.PreviousID, request.GroupID, request.CalendarDate)
 	return createAVItemResponse(value, err, request.App, request.Session)
 })
 
@@ -385,7 +385,7 @@ var renderSnapshotAttributeView = contractHandler(apicontract.RenderSnapshotAttr
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 		return apicontract.Failure[apicontract.AVArchiveRenderData](-1, model.Conf.Language(314))
 	}
-	view, attrView, err := model.RenderRepoSnapshotAttributeView(request.Snapshot, request.ID, request.ViewID, request.CarrierViewID)
+	view, attrView, err := model.RenderRepoSnapshotAttributeView(request.Snapshot, request.ID, request.ViewID, request.CarrierViewID, fromContractAVCalendarRange(request.CalendarRange))
 	if err != nil {
 		return apicontract.Failure[apicontract.AVArchiveRenderData](-1, err.Error())
 	}
@@ -403,7 +403,7 @@ var renderHistoryAttributeView = contractHandler(apicontract.RenderHistoryAttrib
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 		return apicontract.Failure[apicontract.AVArchiveRenderData](-1, model.Conf.Language(314))
 	}
-	view, attrView, err := model.RenderHistoryAttributeView(request.ID, request.ViewID, request.CarrierViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), request.Created)
+	view, attrView, err := model.RenderHistoryAttributeView(request.ID, request.ViewID, request.CarrierViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), request.Created, fromContractAVCalendarRange(request.CalendarRange))
 	if err != nil {
 		return apicontract.Failure[apicontract.AVArchiveRenderData](-1, err.Error())
 	}
@@ -429,7 +429,7 @@ var renderAttributeView = contractHandler(apicontract.RenderAttributeView, func(
 	if request.CreateIfNotExist != nil {
 		create = *request.CreateIfNotExist
 	}
-	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly)
+	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, fromContractAVCalendarRange(request.CalendarRange))
 })
 
 func holdAttributeViewRequest(c *gin.Context, blockID, avID string) error {

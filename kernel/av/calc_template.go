@@ -41,11 +41,11 @@ func buildRollupTemplateContext(values []float64, strs []string, raw []*Value) m
 	}
 
 	var nonEmptyCount int
-	var sum float64
+	var sum decimalSum
 	minVal := math.MaxFloat64
 	maxVal := -math.MaxFloat64
 	for _, v := range values {
-		sum += v
+		sum.add(v)
 		if v < minVal {
 			minVal = v
 		}
@@ -54,10 +54,10 @@ func buildRollupTemplateContext(values []float64, strs []string, raw []*Value) m
 		}
 		nonEmptyCount++
 	}
-	ctx["sum"] = sum
+	ctx["sum"] = sum.float64()
 	ctx["nonEmptyCount"] = nonEmptyCount
 	if 0 < nonEmptyCount {
-		ctx["avg"] = sum / float64(nonEmptyCount)
+		ctx["avg"] = sum.average(nonEmptyCount)
 		ctx["min"] = minVal
 		ctx["max"] = maxVal
 
@@ -65,7 +65,7 @@ func buildRollupTemplateContext(values []float64, strs []string, raw []*Value) m
 		copy(sorted, values)
 		sort.Float64s(sorted)
 		if 0 == nonEmptyCount%2 {
-			ctx["median"] = (sorted[nonEmptyCount/2-1] + sorted[nonEmptyCount/2]) / 2
+			ctx["median"] = numberMean(sorted[nonEmptyCount/2-1], sorted[nonEmptyCount/2])
 		} else {
 			ctx["median"] = sorted[nonEmptyCount/2]
 		}
@@ -143,7 +143,7 @@ func collectFieldValues(collection Collection, fieldIndex int) (nums []float64, 
 				raw = append(raw, &Value{Type: KeyTypeMAsset, MAsset: []*ValueAsset{ast}})
 			}
 		default:
-			val, _ := util.Convert2Float(v.String(false))
+			val := calculationNumber(v)
 			nums = append(nums, val)
 			strs = append(strs, v.String(false))
 			raw = append(raw, v)

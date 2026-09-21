@@ -68,12 +68,18 @@ test("sidebar cycling follows visible tab order and dispatches plugin activation
     assert.equal(activated.length, 4);
 });
 
-const createTouchHarness = (side: "left" | "right", options: {scrollable?: boolean, disabled?: boolean} = {}) => {
+const createTouchHarness = (side: "left" | "right", options: {
+    scrollable?: boolean, disabled?: boolean, closed?: boolean,
+} = {}) => {
     const actions: string[] = [];
-    const panel = {classList: classList(), style: {transform: "translateX(0px)"}, contains: () => false};
-    const mask = {classList: classList(), style: {}};
+    const panel = {
+        classList: classList(),
+        style: {transform: "translateX(0px)", removeProperty() { this.transform = ""; }},
+        contains: () => false,
+    };
+    const mask = {classList: classList(...(options.closed ? ["fn__none"] : [])), style: {}};
     const target = {
-        id: side === "left" ? "sidebar" : "sidebarRight",
+        id: options.closed ? "editor" : side === "left" ? "sidebar" : "sidebarRight",
         tagName: "DIV", dataset: {}, parentElement: null as HTMLElement | null,
         closest: (): null => null,
         scrollWidth: options.scrollable ? 600 : 300, clientWidth: 300, scrollLeft: 100,
@@ -82,7 +88,11 @@ const createTouchHarness = (side: "left" | "right", options: {scrollable?: boole
     const modules: Record<string, unknown> = {
         "./sidebar": {
             getSidebarElement: () => panel,
-            popSidebar: () => { panel.style.transform = "translateX(0px)"; actions.push("restore"); },
+            getSidebarDock: () => ({}),
+            popSidebar: (value: string, render = true) => {
+                panel.style.transform = "translateX(0px)";
+                actions.push(render ? `open:${value}` : "restore");
+            },
             switchToNextSidebarTab: (value: string) => actions.push(`next:${value}`),
         },
         "./touchPanelGesture": gestures,
@@ -128,6 +138,20 @@ const createTouchHarness = (side: "left" | "right", options: {scrollable?: boole
 for (const side of ["left", "right"] as const) {
     const nextX = side === "left" ? 240 : 120;
     const closeX = side === "left" ? 120 : 240;
+    test(`${side} sidebar restores its selected tab only after a committed swipe`, () => {
+        const harness = createTouchHarness(side, {closed: true});
+        harness.start();
+        harness.move(nextX);
+        assert.deepEqual(harness.actions, []);
+        harness.end(nextX);
+        assert.deepEqual(harness.actions, [`open:${side}`]);
+        const disabled = createTouchHarness(side, {closed: true, disabled: true});
+        disabled.start();
+        disabled.move(nextX);
+        disabled.end(nextX);
+        assert.deepEqual(disabled.actions, []);
+    });
+
     test(`${side} sidebar switches once on release and retains closing gestures`, () => {
         const next = createTouchHarness(side, {disabled: true});
         next.start();

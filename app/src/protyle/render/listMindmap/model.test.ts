@@ -122,7 +122,7 @@ test("layout rejects cyclic or invalid trees and supports deep nesting without r
     assert.equal(layoutListMindmap(root).nodes.size, 5001);
 });
 
-const browserCases = async (sourceCode: string, css: string, taskSource: string, taskCSS: string) => {
+const browserCases = async (sourceCode: string, css: string, taskSource: string, taskCSS: string, dragSource: string) => {
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, remapListMindmapIDs, writeListMindmapMetadata, " +
@@ -136,7 +136,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 formula.setAttribute("data-render", "true");
             });
         }, {TIMEOUT_DBLCLICK: 190, CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
-            CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data", CUSTOM_SY_MINDMAP_CODE: "custom-sy-mindmap-code"}, () => {});
+            CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data", CUSTOM_SY_MINDMAP_CODE: "custom-sy-mindmap-code",
+            CUSTOM_SY_CODE_TAB_SPACES: "custom-sy-code-tab-spaces"}, () => {});
     const lute = Lute.New();
     lute.SetKramdownIAL(true);
     lute.SetProtyleWYSIWYG(true);
@@ -377,6 +378,47 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(edited.contentBlocks[2].dataset.nodeId, added.dataset.nodeId);
     check.equal(editable.element.querySelector(':scope > [data-type="NodeList"]'), childList);
     check.equal(childList.outerHTML, childHTML);
+    const codeSettingHolder = document.createElement("div");
+    codeSettingHolder.innerHTML = lute.Md2BlockDOM("- Parent\n\n  ```js\n  x\n  ```\n");
+    const codeSettingList = codeSettingHolder.firstElementChild as HTMLElement;
+    const codeSettingNode = api.readListMindmap(codeSettingList).root;
+    const codeSettingBlocks: HTMLElement[] = codeSettingNode.contentBlocks.map((block: HTMLElement) =>
+        block.cloneNode(true) as HTMLElement);
+    const settingCode = codeSettingBlocks.find(block => block.dataset.type === "NodeCodeBlock");
+    check.ok(settingCode);
+    const codeSettingID = settingCode.dataset.nodeId;
+    const oldCodeSettings = codeSettingList.outerHTML;
+    const codeSettings = [["linewrap", "false"], ["ligatures", "true"], ["linenumber", "false"],
+        ["custom-sy-code-tab-spaces", "2"]];
+    for (const [name, value] of codeSettings) {
+        settingCode.setAttribute(name, value);
+    }
+    check.equal(api.replaceListMindmapContent(codeSettingList, codeSettingNode.id,
+        codeSettingBlocks.map(block => block.outerHTML).join("")), true);
+    const newCodeSettings = codeSettingList.outerHTML;
+    for (const html of [newCodeSettings, oldCodeSettings, newCodeSettings]) {
+        const roundTrip = document.createElement("div");
+        roundTrip.innerHTML = lute.Md2BlockDOM(lute.BlockDOM2Md(html));
+        const restoredCode = roundTrip.querySelector(`[data-node-id="${codeSettingID}"]`);
+        check.ok(restoredCode, "code settings keep the source block identity");
+        for (const [name, value] of codeSettings) {
+            check.equal(restoredCode.getAttribute(name), html === oldCodeSettings ? null : value,
+                "source snapshots restore code settings through undo and redo");
+        }
+    }
+    settingCode.removeAttribute("custom-sy-code-tab-spaces");
+    check.equal(api.replaceListMindmapContent(codeSettingList, codeSettingNode.id,
+        codeSettingBlocks.map(block => block.outerHTML).join("")), true);
+    const resetCodeSettings = codeSettingList.outerHTML;
+    const resetCodeHolder = document.createElement("div");
+    resetCodeHolder.innerHTML = lute.Md2BlockDOM(lute.BlockDOM2Md(resetCodeSettings));
+    check.equal(resetCodeHolder.querySelector(`[data-node-id="${codeSettingID}"]`)
+        .hasAttribute("custom-sy-code-tab-spaces"), false, "default Tab spacing removes the saved override");
+    for (const html of [newCodeSettings, resetCodeSettings]) {
+        resetCodeHolder.innerHTML = lute.Md2BlockDOM(lute.BlockDOM2Md(html));
+        check.equal(resetCodeHolder.querySelector(`[data-node-id="${codeSettingID}"]`)
+            .getAttribute("custom-sy-code-tab-spaces"), html === newCodeSettings ? "2" : null);
+    }
     const nestedTaskHolder = document.createElement("div");
     lute.SetDataTask(true);
     nestedTaskHolder.innerHTML = lute.Md2BlockDOM("- Node\n\n  > - [ ] Nested task\n");
@@ -828,7 +870,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     ["listMindmapChild", "delete", "fold"].forEach(label =>
         check.equal(toolbar.querySelector(`[aria-label="${label}"]`), null));
     const relationButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="connect"]');
-    check.ok(relationButton.nextElementSibling.classList.contains("list-mindmap__zoom-control"));
+    const toolbarPanButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
+    check.equal(relationButton.nextElementSibling, toolbarPanButton);
+    check.ok(toolbarPanButton.nextElementSibling.classList.contains("list-mindmap__zoom-control"));
     check.equal(relationButton.querySelector("use").getAttribute("xlink:href"), "#iconRoute");
     const inspector = host.querySelector<HTMLElement>(".list-mindmap__inspector");
     const fitButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="listMindmapFit"]');
@@ -1454,6 +1498,21 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const single = new api.ListMindmapView({...options, model: api.readListMindmap(singleList)});
     await settle();
     check.equal(single.scale, 1, "initial layout keeps a single node at its normal size");
+    const panButton = host.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
+    panButton.click();
+    check.equal(panButton.getAttribute("aria-pressed"), "true");
+    const panNode = host.querySelector<HTMLElement>(".list-mindmap__node");
+    check.equal(getComputedStyle(panNode).pointerEvents, "none");
+    const panBefore = {x: single.offsetX, y: single.offsetY};
+    panNode.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerId: 81, clientX: 100, clientY: 100}));
+    panNode.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerId: 81, clientX: 140, clientY: 125}));
+    panNode.dispatchEvent(new PointerEvent("pointerup", {bubbles: true, pointerId: 81, clientX: 140, clientY: 125}));
+    check.equal(single.offsetX, panBefore.x + 40, "hand tool pans from a node instead of moving it");
+    check.equal(single.offsetY, panBefore.y + 25);
+    check.equal(host.querySelector(".list-mindmap__ghost"), null);
+    panButton.click();
+    check.equal(panButton.getAttribute("aria-pressed"), "false");
+    check.ok(getComputedStyle(panNode).pointerEvents !== "none");
     single.fit();
     check.ok(single.scale > 1 && single.scale <= 2.5, "fit enlarges small maps within the zoom limit");
     const fitViewport = host.querySelector<HTMLElement>(".list-mindmap__viewport").getBoundingClientRect();
@@ -1940,6 +1999,126 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     tabView.destroy();
     api.destroyTabsRender(taskParent);
     taskParent.remove();
+
+    // 使用编辑器的实际划选监听器，验证从两侧进入脑图、跨块移动及松手清理。
+    const dragParent = document.createElement("div");
+    dragParent.style.cssText = "position:fixed;inset:0;background:white;z-index:9999;overflow:auto";
+    const dragEditor = document.createElement("div");
+    dragEditor.className = "protyle-wysiwyg";
+    dragEditor.style.cssText = "padding:20px 64px;box-sizing:border-box";
+    dragEditor.innerHTML = lute.Md2BlockDOM("Before\n\n- Alpha\n- Beta\n\nAfter\n");
+    const dragList = dragEditor.querySelector<HTMLElement>(".list");
+    dragList.setAttribute("custom-sy-list-mindmap", "1");
+    dragList.dataset.listMindmapRendered = "true";
+    const dragHost = document.createElement("div");
+    dragHost.className = "list-mindmap";
+    dragHost.style.height = "260px";
+    dragList.append(dragHost);
+    const dragView = new api.ListMindmapView({host: dragHost, model: api.readListMindmap(dragList)});
+    const dragOverlay = document.createElement("div");
+    dragOverlay.className = "fn__none";
+    dragOverlay.style.position = "absolute";
+    const dragStyle = document.createElement("style");
+    dragStyle.textContent = ".fn__none {display:none} .drag-selection {position:absolute;pointer-events:none}";
+    dragOverlay.classList.add("drag-selection");
+    dragParent.append(dragEditor, dragOverlay, dragStyle);
+    document.body.append(dragParent);
+    const noop = () => {};
+    const absent = () => false;
+    const selectedCounts: string[][] = [];
+    const services = {
+        Constants: {ZWSP: "\u200b"},
+        getAVTemplateInteractiveElement: absent, getAVSelectionRoot: absent, isAVDragSelectSupported: absent,
+        isTableLikeView: absent, isMobile: absent, shouldFoldEmbeddedListByAlt: absent,
+        shouldOpenListItemAttr: absent, isHiddenTabContent: absent,
+        isOnlyMeta: (event: MouseEvent) => (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey,
+        repairHiddenTabSelection: noop, clearSelect: noop, hideAllElements: noop, globalClickHideMenu: noop,
+        dragOverScroll: noop, stopScrollAnimation: noop, countBlockWord: (ids: string[]) => selectedCounts.push(ids),
+    };
+    const dragOwner = {
+        element: dragParent, contentElement: dragParent, selectElement: dragOverlay,
+        wysiwyg: {element: dragEditor}, options: {render: {breadcrumb: false}},
+        toolbar: {isMultiSelectMode: absent},
+        hint: {deactivateEmojiPanel: noop, element: document.createElement("div")},
+    };
+    new Function("protyle", "services", `const {${Object.keys(services).join(",")}} = services;\n` + dragSource)
+        .call(Object.assign(dragOwner.wysiwyg, {host: dragHost, owner: dragOwner}), dragOwner, services);
+    const dragErrors: string[] = [];
+    const collectDragError = (event: ErrorEvent) => dragErrors.push(event.message);
+    window.addEventListener("error", collectDragError);
+    await settle();
+    const selectedIDs = () => Array.from(dragEditor.querySelectorAll<HTMLElement>(".protyle-wysiwyg--select"))
+        .map(item => item.dataset.nodeId);
+    for (const side of ["left", "right"]) {
+        for (const direction of [1, -1]) {
+            dragEditor.querySelectorAll(".protyle-wysiwyg--select").forEach(item =>
+                item.classList.remove("protyle-wysiwyg--select"));
+            const rect = dragHost.getBoundingClientRect();
+            const start = {x: Math.round(side === "left" ? rect.left - 32 : rect.right + 32),
+                y: Math.round(rect.top + rect.height / 2)};
+            const inside = {x: Math.round(side === "left" ? rect.left + 24 : rect.right - 24),
+                y: start.y + 30 * direction};
+            check.ok(dragHost.contains(document.elementFromPoint(inside.x, inside.y)));
+            await nativeInput([
+                {type: "mouseMove", ...start},
+                {type: "mouseDown", ...start, button: "left", clickCount: 1},
+                {type: "mouseMove", ...inside, button: "left"},
+            ]);
+            check.deepEqual(dragErrors, []);
+            check.deepEqual(selectedIDs(), [dragList.dataset.nodeId], `${side} ${direction}: selects the whole mind map`);
+            const adjacent = direction === 1 ? dragList.nextElementSibling : dragList.previousElementSibling;
+            const outside = {x: inside.x, y: Math.round(adjacent.getBoundingClientRect().top + 10)};
+            await nativeInput([{type: "mouseMove", ...outside, button: "left"}]);
+            check.deepEqual(new Set(selectedIDs()), new Set([dragList.dataset.nodeId, adjacent.getAttribute("data-node-id")]));
+            await nativeInput([{type: "mouseMove", ...inside, button: "left"}]);
+            check.deepEqual(selectedIDs(), [dragList.dataset.nodeId], "returning into the mind map shrinks the selection");
+            await nativeInput([{type: "mouseUp", ...inside, button: "left", clickCount: 1}]);
+            check.deepEqual(dragErrors, []);
+            check.equal(dragEditor.classList.contains("fn__pointer-none"), false);
+            check.ok(dragOverlay.classList.contains("fn__none"));
+            await nativeInput([{type: "mouseMove", ...outside}]);
+            check.deepEqual(selectedIDs(), [dragList.dataset.nodeId], "moving after release does not extend the selection");
+            check.ok(dragOverlay.classList.contains("fn__none"));
+
+            // 点击空白画布或节点均退出块选中状态，并清理多块选区、端点标记和状态栏计数。
+            adjacent.classList.add("protyle-wysiwyg--select");
+            dragList.classList.add("protyle-wysiwyg--select-mode");
+            dragList.setAttribute("select-start", "true");
+            dragList.setAttribute("select-end", "true");
+            selectedCounts.length = 0;
+            const clickPoint = side === "left" ? inside : centerPoint(dragHost.querySelector(".list-mindmap__node"));
+            await nativeInput([
+                {type: "mouseMove", ...clickPoint},
+                {type: "mouseDown", ...clickPoint, button: "left", clickCount: 1},
+                {type: "mouseUp", ...clickPoint, button: "left", clickCount: 1},
+            ]);
+            check.deepEqual(dragErrors, []);
+            check.deepEqual(selectedIDs(), [], "clicking the mind map clears the outer block selection");
+            check.equal(dragList.classList.contains("protyle-wysiwyg--select-mode"), false);
+            check.equal(dragList.hasAttribute("select-start"), false);
+            check.equal(dragList.hasAttribute("select-end"), false);
+            check.deepEqual(selectedCounts, [[]]);
+        }
+    }
+    // 右键和多选工具栏操作保留选区，内嵌编辑器的工具栏同样不能取消其操作对象。
+    dragList.classList.add("protyle-wysiwyg--select");
+    const selectionPointerDown = (element: Element, button = 0) =>
+        element.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, button}));
+    selectionPointerDown(dragHost, 2);
+    check.deepEqual(selectedIDs(), [dragList.dataset.nodeId]);
+    dragOwner.toolbar.isMultiSelectMode = () => true;
+    selectionPointerDown(dragHost);
+    check.deepEqual(selectedIDs(), [dragList.dataset.nodeId]);
+    dragOwner.toolbar.isMultiSelectMode = absent;
+    const selectionToolbar = document.createElement("div");
+    selectionToolbar.className = "protyle-toolbar";
+    dragHost.append(selectionToolbar);
+    selectionPointerDown(selectionToolbar);
+    check.deepEqual(selectedIDs(), [dragList.dataset.nodeId]);
+    check.deepEqual(dragErrors, []);
+    window.removeEventListener("error", collectDragError);
+    dragView.destroy();
+    dragParent.remove();
     taskStyle.remove();
     hostParent.remove();
     style.remove();
@@ -1984,7 +2163,40 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
             `\nclass TaskController {${taskMethods.map(member => member.getText(indexSource)).join("\n")}}`, {
                 compilerOptions: {target: typescript.ScriptTarget.ES2021},
             }).outputText;
+    const wysiwygSource = typescript.createSourceFile("index.ts",
+        readFileSync(path.join(__dirname, "../../wysiwyg/index.ts"), "utf8"), typescript.ScriptTarget.Latest, true);
+    let mouseDownBinding: import("typescript").CallExpression;
+    const findMouseDown = (node: import("typescript").Node) => {
+        if (typescript.isCallExpression(node) && node.expression.getText(wysiwygSource) === "this.element.addEventListener" &&
+            node.arguments[0]?.getText(wysiwygSource) === '"mousedown"') {
+            mouseDownBinding = node;
+        }
+        typescript.forEachChild(node, findMouseDown);
+    };
+    findMouseDown(wysiwygSource);
+    assert.ok(mouseDownBinding);
+    const constructor = controller.members.find(typescript.isConstructorDeclaration);
+    const pointerDownBinding = constructor.body.statements.find(statement =>
+        typescript.isExpressionStatement(statement) && typescript.isCallExpression(statement.expression) &&
+        statement.expression.expression.getText(indexSource) === "this.host.addEventListener" &&
+        statement.expression.arguments[0]?.getText(indexSource) === '"pointerdown"');
+    assert.ok(pointerDownBinding);
+    const dragSource = compile(path.join(__dirname, "../../util/hasClosest.ts")) +
+        compile(path.join(__dirname, "../../wysiwyg/getBlock.ts")) +
+        compile(path.join(__dirname, "../../wysiwyg/blockDragSelect.ts")) +
+        "const {getBlockSelectionModeElement, clearBlockSelectionMode} = (() => {" +
+        compile(path.join(__dirname, "../../wysiwyg/blockSelection.ts")) +
+        "return {getBlockSelectionModeElement, clearBlockSelectionMode};})();\n" +
+        "const {hideElements} = (() => {" + compile(path.join(__dirname, "../../ui/hideElements.ts")) +
+        "return {hideElements};})();\n" +
+        typescript.transpileModule(mouseDownBinding.getText(wysiwygSource) + ";\n" + pointerDownBinding.getText(indexSource), {
+            compilerOptions: {target: typescript.ScriptTarget.ES2021},
+        }).outputText;
     const lutePath = path.resolve(__dirname, "../../../../stage/protyle/js/lute/lute.min.js");
+    // 展开测试函数，避免断言失败时 Node 从压缩后的源码提取表达式而掩盖实际错误。
+    const browserSource = typescript.transpileModule(`(${browserCases.toString()})`, {
+        compilerOptions: {target: typescript.ScriptTarget.ES2021},
+    }).outputText.trim().replace(/;$/, "");
     const code = `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
@@ -2004,7 +2216,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         const result = await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(taskSource)}, ${JSON.stringify(taskCSS)})`)});
+        `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(taskSource)}, ${JSON.stringify(taskCSS)}, ${JSON.stringify(dragSource)})`)});
         console.log(result);
         win.destroy();
         app.exit(0);

@@ -2,7 +2,8 @@ import {recordReplacementUndo} from "./replacementInput";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
-import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
+import {normalizeInlineElementBoundaries, prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
+import {renderLongTextRuns} from "../util/longTextWrap";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
@@ -461,7 +462,6 @@ export class WYSIWYG {
                 !selectElements[0].classList.contains("sb")) {
                 // 单个 p 不选中
             } else {
-                const ids: string[] = [];
                 const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
                 if (!hasSelectClassElement && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") &&
                     !protyle.scroll.keepLoadedContent &&
@@ -472,14 +472,13 @@ export class WYSIWYG {
                 selectElements.forEach(item => {
                     if (!hasClosestByClassName(item, "protyle-wysiwyg--select")) {
                         item.classList.add("protyle-wysiwyg--select");
-                        ids.push(item.getAttribute("data-node-id"));
                         // 清除选中的子块 https://ld246.com/article/1667826582251
                         item.querySelectorAll(".protyle-wysiwyg--select").forEach(subItem => {
                             subItem.classList.remove("protyle-wysiwyg--select");
                         });
                     }
                 });
-                countBlockWord(ids, protyle);
+                countBlockWord(getBlockSelectionStatusIDs(this.element), protyle);
                 if (toDown) {
                     focusBlock(selectElements[selectElements.length - 1], protyle.wysiwyg.element, false);
                 } else {
@@ -960,13 +959,13 @@ export class WYSIWYG {
                 } else {
                     html = "<table></table>";
                 }
-                textPlain = protyle.lute.HTML2Md(html);
+                textPlain = protyle.lute.HTML2Md(transformSemanticInlineHTML(html, "remove"));
             } else if (selectTableRange) {
                 // 表格内跨多单元格的文本选区：按网格映射重建合法 table，重新计算 colspan/rowspan。
                 // 后续统一构建 NodeTable BlockDOM，不经过 markdown 往返（GFM 表格只有单行表头）
                 const tableElement = tableRangeElement.querySelector("table");
                 html = getTableRangeHTML(tableElement, tableRangeStartCell, tableRangeEndCell);
-                textPlain = protyle.lute.HTML2Md(html);
+                textPlain = protyle.lute.HTML2Md(transformSemanticInlineHTML(html, "remove"));
             } else {
                 const tempElement = document.createElement("div");
                 // https://github.com/siyuan-note/siyuan/issues/5540
@@ -2220,11 +2219,11 @@ export class WYSIWYG {
                 return firstTopBlock ? getDragSelectBlock(getFirstBlock(firstTopBlock)) : false;
             };
             let lastMoveEvent: MouseEvent;
-            const selectScrollEvent = () => lastMoveEvent && documentSelf.onmousemove?.(lastMoveEvent);
+            const selectScrollEvent = () => lastMoveEvent && moveDragSelect(lastMoveEvent);
             if (startsFromPadding) {
                 protyle.contentElement.addEventListener("scroll", selectScrollEvent);
             }
-            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+            const moveDragSelect = (moveEvent: MouseEvent) => {
                 lastMoveEvent = moveEvent;
                 let moveTarget: boolean | HTMLElement = moveEvent.target as HTMLElement;
                 // table cell select
@@ -2592,6 +2591,7 @@ export class WYSIWYG {
                     return;
                 }
                 dragSelectFinished = true;
+                documentSelf.removeEventListener("mousemove", moveDragSelect, true);
                 documentSelf.removeEventListener("mouseup", finishDragSelect, true);
                 if (documentSelf.onmouseup === finishDragSelect) {
                     documentSelf.onmouseup = null;
@@ -3009,6 +3009,12 @@ export class WYSIWYG {
                     }
                 }
             };
+            // 侧边划选在捕获阶段更新，避免脑图等容器拦截移动事件后选区停止更新。
+            if (startsFromPadding) {
+                documentSelf.addEventListener("mousemove", moveDragSelect, true);
+            } else {
+                documentSelf.onmousemove = moveDragSelect;
+            }
             // 底部反链包含嵌套编辑器，捕获阶段结束框选，避免内部事件阻断后选区无法清理
             documentSelf.onmouseup = finishDragSelect;
             documentSelf.addEventListener("mouseup", finishDragSelect, {capture: true, once: true});
@@ -4353,6 +4359,9 @@ export class WYSIWYG {
             }
             this.escapeInline(protyle, range, event);
 
+            // 原生输入结束后立即恢复各段折行，避免延迟解析前绘制出临时的整段换行。
+            normalizeInlineElementBoundaries(this.element);
+            renderLongTextRuns(this.element);
             if ((/^\d{1}$/.test(event.data) || event.data === "‘" || event.data === "“" ||
                 // 百度输入法中文反双引号 https://github.com/siyuan-note/siyuan/issues/9686
                 event.data === "”" ||
@@ -4381,6 +4390,13 @@ export class WYSIWYG {
             const isArrowFromOutsideAV = arrowStartElement && !arrowStartElement.classList.contains("av");
             if (event.key.startsWith("Arrow")) {
                 arrowStartElement = undefined;
+            }
+
+            if (getBlockSelectionModeElement(this.element)) {
+                // 块选择模式使用块统计，避免松开按键后被光标所在的文本选区统计覆盖。
+                this.preventKeyup = false;
+                event.stopPropagation();
+                return;
             }
 
             if (!event.altKey && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.isComposing &&

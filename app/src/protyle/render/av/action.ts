@@ -405,7 +405,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (type === "av-add-more" && !protyle.disabled) {
             const templateID = blockElement.querySelector<HTMLElement>(".av__header")?.dataset.defaultTemplateId;
-            if (templateID) {
+            if (templateID || blockElement.getAttribute("data-av-type") === "calendar") {
                 createAttributeViewItem({blockElement, protyle, templateID});
             } else {
                 insertRows({
@@ -859,6 +859,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undefined, position: IPosition, options?: {
     blockElement?: HTMLElement;
     anchorElement?: HTMLElement;
+    customize?: (menu: Menu) => void;
 }) => {
     hideElements(["hint"], protyle);
     if (rowElement?.classList.contains("av__row--header")) {
@@ -869,6 +870,8 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
         return false;
     }
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
+    const editable = !protyle.disabled && !window.siyuan.isPublish &&
+        !protyle.options.history?.created && !protyle.options.history?.snapshot;
     if (rowElement && isTableLikeView(avType)) {
         if (!rowElement.classList.contains("av__row--select")) {
             clearSelect(["row"], blockElement);
@@ -1134,14 +1137,16 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
         });
     }
 
-    copyMenu.push({
-        id: "duplicate",
-        iconHTML: "",
-        label: window.siyuan.languages.duplicateCopy,
-        click: () => {
-            duplicateRows(blockElement, protyle, selectedItemInfos.map(item => item.itemID));
-        }
-    });
+    if (editable) {
+        copyMenu.push({
+            id: "duplicate",
+            iconHTML: "",
+            label: window.siyuan.languages.duplicateCopy,
+            click: () => {
+                duplicateRows(blockElement, protyle, selectedItemInfos.map(item => item.itemID));
+            }
+        });
+    }
 
     menu.addItem({
         id: "copy",
@@ -1150,7 +1155,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
         type: "submenu",
         submenu: copyMenu
     });
-    if (!protyle.disabled) {
+    if (editable) {
         const detachedItemIDs = selectedItems.filter(item => item.isDetached).map(item => item.itemID);
         if (detachedItemIDs.length > 0) {
             menu.addItem({
@@ -1229,7 +1234,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                 });
             }
         });
-        if (selectedItemInfos.length === 1) {
+        if (selectedItemInfos.length === 1 && avType !== "calendar") {
             if (!primaryRows[0].isDetached) {
                 menu.addSeparator({id: "separator_1"});
             }
@@ -1338,6 +1343,7 @@ ${window.siyuan.languages[isTableLikeView(avType) ? "insertRowAfter" : "insertIt
             submenu: getAVEditFieldMenuItems(protyle, blockElement)
         });
     }
+    options?.customize?.(menu);
     if (protyle) {
         emitOpenMenu({
             type: "open-menu-av",

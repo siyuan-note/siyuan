@@ -110,3 +110,35 @@ func TestAVParsedRequestErrors(t *testing.T) {
 		t.Fatalf("key ID validation was not deferred: %+v %v", keys, err)
 	}
 }
+
+func TestAVContractCalendarCreateRequest(t *testing.T) {
+	for _, test := range []struct {
+		name, field string
+		want        int64
+		present     bool
+	}{
+		{"omitted", "", 0, false},
+		{"null", `,"calendarDate":null`, 0, false},
+		{"epoch", `,"calendarDate":0`, 0, true},
+		{"beforeEpoch", `,"calendarDate":-86400000`, -86400000, true},
+		{"selectedDay", `,"calendarDate":1790006400000`, 1790006400000, true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			request, err := CreateAttributeViewItem.Decode(strings.NewReader(`{"avID":" av ","blockID":"block","viewID":"calendar","templateID":"template"` + test.field + `}`))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if (request.CalendarDate != nil) != test.present || test.present && *request.CalendarDate != test.want {
+				t.Fatalf("unexpected calendar date: %+v", request.CalendarDate)
+			}
+			if request.AvID != " av " || request.BlockID != "block" || request.ViewID != "calendar" || request.TemplateID != "template" {
+				t.Fatalf("creation fields changed: %+v", request)
+			}
+		})
+	}
+	for _, value := range []string{`"1790006400000"`, `true`, `{}`, `[]`, `1.5`, `9223372036854775808`} {
+		if _, err := CreateAttributeViewItem.Decode(strings.NewReader(`{"avID":"av","blockID":"block","calendarDate":` + value + `}`)); err == nil {
+			t.Fatalf("invalid calendar date accepted: %s", value)
+		}
+	}
+}

@@ -208,11 +208,10 @@ func removeAttributeViewFieldDefinition(view *av.AttributeView, keyID string) {
 	view.RemoveNewItemTemplateFieldValue(keyID)
 	view.RemoveCardCoverPositionsBySource(av.CardCoverSource(av.CoverFromAssetField, keyID))
 	for _, layout := range view.Views {
-		if layout.List != nil {
-			layout.List.Columns = slices.DeleteFunc(layout.List.Columns, func(column *av.ViewTableColumn) bool { return column.ID == keyID })
-		}
-		if layout.Table != nil {
-			layout.Table.Columns = slices.DeleteFunc(layout.Table.Columns, func(column *av.ViewTableColumn) bool { return column.ID == keyID })
+		for _, table := range layout.TableLayouts() {
+			if table != nil {
+				table.Columns = slices.DeleteFunc(table.Columns, func(column *av.ViewTableColumn) bool { return column.ID == keyID })
+			}
 		}
 		if layout.Gallery != nil {
 			layout.Gallery.CardFields = slices.DeleteFunc(layout.Gallery.CardFields, func(field *av.ViewGalleryCardField) bool { return field.ID == keyID })

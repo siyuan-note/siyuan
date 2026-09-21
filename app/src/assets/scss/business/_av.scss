@@ -102,14 +102,12 @@
   }
 
   &:hover {
-    .av__views .block__icon,
     .av__group-icon--hover {
       opacity: 1;
     }
   }
 
   &--touch {
-    .av__views .block__icon,
     .av__group-icon--hover,
     .av__row--footer .av__calc {
       opacity: 1;
@@ -227,8 +225,12 @@
       z-index: 3;
     }
 
-    &--show .block__icon {
+    .block__icon {
       opacity: 1;
+    }
+
+    > .fn__flex-1 {
+      min-width: 8px;
     }
 
     .block__icon svg {
@@ -1241,6 +1243,22 @@
 
     &[data-wrap="true"] {
       white-space: pre-wrap;
+
+      .av__cell--relation {
+        display: inline-flex;
+        max-width: 100%;
+        vertical-align: top;
+
+        > :first-child {
+          flex-shrink: 0;
+          align-self: flex-start;
+        }
+
+        > .av__celltext {
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+      }
     }
 
     &[data-wrap="false"] {
@@ -1383,13 +1401,14 @@
     &:focus-within > .av__cell-action[data-type="copy"] {
       opacity: 1;
     }
+  }
 
-    .b3-chip {
-      margin: 1px 2px;
-      padding: 2px 6px;
-      line-height: calc(1.625em - 6px);
-      font-size: inherit;
-    }
+  &__cell .b3-chip,
+  &__calendar-field .b3-chip {
+    margin: 1px 2px;
+    padding: 2px 6px;
+    line-height: calc(1.625em - 6px);
+    font-size: inherit;
   }
 
   &__drag-fill {
@@ -1433,7 +1452,8 @@
         }
       }
 
-      .av__cell[data-wrap="true"] & {
+      .av__cell[data-wrap="true"] &,
+      .av__calendar-field[data-wrap="true"] & {
         white-space: normal;
 
         p:empty::after {
@@ -1473,7 +1493,8 @@
         }
       }
 
-      .av__cell:not([data-wrap="true"]) & {
+      .av__cell:not([data-wrap="true"]) &,
+      .av__calendar-field:not([data-wrap="true"]) & {
         max-height: 1.625em;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -2624,6 +2645,24 @@ img.av__cellassetimg {
     .b3-menu__label {
       flex: 1;
       min-width: 0;
+    }
+  }
+
+  .av__relation-row-icon {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: center;
+    height: 20px;
+    width: 20px;
+    margin-right: 6px;
+    font-size: 16px;
+
+    svg,
+    img {
+      height: 16px;
+      width: 16px;
+      object-fit: contain;
     }
   }
 

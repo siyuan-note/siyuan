@@ -1,11 +1,18 @@
+import {unwrapLongTextRuns} from "./longTextWrap";
+
 const INLINE_BOUNDARY_ATTRIBUTE = "data-inline-boundary";
+const INLINE_WRAP_ATTRIBUTE = "data-inline-wrap";
 const SEMANTIC_INLINE_SELECTOR = 'span[data-type~="code"],span[data-type~="tag"],span[data-type~="kbd"]';
 export const SEMANTIC_INLINE_HTML_REGEXP = /<span\b[^>]*\bdata-type=(?:"(?:[^"]* )?(?:code|kbd|tag)(?: [^"]*)?"|'(?:[^']* )?(?:code|kbd|tag)(?: [^']*)?')/iu;
 const WORD_JOINER = "\u2060";
 const ZERO_WIDTH_SPACE = "\u200b";
 
+// 至少 32 个连续字符按字符折行，短词、空白和用户显式设置的断行边界保持原有语义。
+export const isLongUnbrokenInlineText = (text: string) =>
+    /^[^\s\u200b\u2060\ufeff]{32,}$/u.test(text.replace(/^[\u200b\u2060\ufeff]+/u, ""));
+
 export const hasInlineElementBoundary = (element: Element | null | undefined) =>
-    element?.getAttribute(INLINE_BOUNDARY_ATTRIBUTE) === "true";
+    element?.hasAttribute(INLINE_BOUNDARY_ATTRIBUTE) ?? false;
 
 export const getInlineElementBoundaryOffset = (node: Node) => {
     if (node.nodeType !== Node.TEXT_NODE || !node.textContent?.endsWith(WORD_JOINER)) {
@@ -29,6 +36,7 @@ export const normalizeInlineElementBoundary = (element: HTMLElement) => {
     if (!element.matches(SEMANTIC_INLINE_SELECTOR)) {
         return;
     }
+    element.toggleAttribute(INLINE_WRAP_ATTRIBUTE, isLongUnbrokenInlineText(element.textContent || ""));
     let previous = element.previousSibling;
     while (previous?.nodeName === "WBR") {
         previous = previous.previousSibling;
@@ -51,7 +59,7 @@ export const normalizeInlineElementBoundary = (element: HTMLElement) => {
     if (previous.textContent?.endsWith(ZERO_WIDTH_SPACE)) {
         // 行首光标占位符不提供断行机会，避免连续文本整体移到空白首行之后。
         (previous as Text).replaceData(text.length - 1, 1, WORD_JOINER);
-        element.setAttribute(INLINE_BOUNDARY_ATTRIBUTE, "true");
+        element.toggleAttribute(INLINE_BOUNDARY_ATTRIBUTE, true);
     }
 };
 
@@ -77,6 +85,12 @@ export const restoreInlineElementBoundary = (element: HTMLElement) => {
 };
 
 export const restoreInlineElementBoundaries = (root: ParentNode) => {
+    unwrapLongTextRuns(root);
+    root.querySelectorAll(`[${INLINE_WRAP_ATTRIBUTE}]`).forEach(element =>
+        element.removeAttribute(INLINE_WRAP_ATTRIBUTE));
+    if (root instanceof HTMLElement) {
+        root.removeAttribute(INLINE_WRAP_ATTRIBUTE);
+    }
     const elements = Array.from(root.querySelectorAll<HTMLElement>(`[${INLINE_BOUNDARY_ATTRIBUTE}]`));
     if (root instanceof HTMLElement && hasInlineElementBoundary(root)) {
         elements.unshift(root);
@@ -109,7 +123,7 @@ export const prepareInlineElementBoundaryMutation = (range: Range) => {
 };
 
 export const restoreInlineElementBoundaryHTML = (html: string) => {
-    if (!html.includes(INLINE_BOUNDARY_ATTRIBUTE)) {
+    if (!html.includes(INLINE_BOUNDARY_ATTRIBUTE) && !html.includes(INLINE_WRAP_ATTRIBUTE)) {
         return html;
     }
     const template = document.createElement("template");

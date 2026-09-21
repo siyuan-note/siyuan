@@ -19,12 +19,14 @@ import {focusEditableAtGoalX, getCaretGoalX} from "../wysiwyg/verticalCaret";
 import {fixTable} from "../util/table";
 import {updateTableCellContentLayout} from "../util/tableCellRich";
 import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
-import {captureRichCellSelection, restoreRichCellSelection} from "../util/tableCellRichSelection";
+import {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection} from "../util/tableCellRichSelection";
 import {matchHotKey} from "../util/hotKey";
 import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
 import {getTableCellEditorLute} from "../util/tableCellRichLute";
 import {setTableCellRichContext} from "../util/tableCellRichContext";
 import {updateOutlineCurrentBlock} from "../util/outlineBlock";
+import {canEnterCodeBlock} from "../wysiwyg/codeBlockEnter";
+import {bindLiteCodeActions} from "../lite/codeActions";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
@@ -113,6 +115,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     const richSelection = cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE) ? captureRichCellSelection(cell, selection) : undefined;
     const preserveSelection = initialRange && !initialRange.collapsed &&
         cell.contains(initialRange.startContainer) && cell.contains(initialRange.endContainer);
+    // 在预览布局中记录点击位置，避免编辑器重建及行号留白变化影响坐标定位。
+    const clickedSelection = point && !preserveSelection ? captureRichCellSelectionAtPoint(cell, point) : undefined;
     const initialOffset = !cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE) && initialRange &&
         cell.contains(initialRange.startContainer) && cell.contains(initialRange.endContainer) ?
         getSelectionOffset(cell, owner.wysiwyg.element, initialRange) : undefined;
@@ -207,7 +211,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
                 return;
             }
             const oldHTML = cleanTableCellRichHTML(table.outerHTML);
-            const redoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection()) || undoSelection;
+            const redoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection(), true) || undoSelection;
             const tableRange = document.createRange();
             tableRange.selectNodeContents(cell);
             tableRange.collapse(true);
@@ -290,6 +294,12 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         }
     };
     host.addEventListener("beforeinput", captureBeforeChange, {capture: true, signal});
+    bindLiteCodeActions(host, fragment.protyle, {
+        signal,
+        canEdit: () => !finished && !owner.disabled,
+        beforeChange: captureBeforeChange,
+        onChange: commit,
+    });
     host.addEventListener("pointerdown", event => {
         captureBeforeChange();
         if (fragment.wysiwyg.contains(event.target as Node)) {
@@ -419,8 +429,15 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             }
             const target = range?.startContainer instanceof Element ? range.startContainer : range?.startContainer.parentElement;
             const inListOrCode = target?.closest('[data-type="NodeList"], [data-type="NodeCodeBlock"]');
+            const editable = target?.closest<HTMLElement>('[contenteditable="true"]');
+            const enterCode = event.key === "Enter" && !event.shiftKey &&
+                editable?.parentElement.getAttribute("data-type") === "NodeParagraph" &&
+                canEnterCodeBlock(editable,
+                    getSelectionOffset(editable, fragment.wysiwyg, range).start,
+                    window.siyuan.config.editor.markdown.codeBlockMiddleDot !== false);
             const navigate = !inListOrCode && (event.key === "Tab" ||
-                (event.key === "Enter" && !event.shiftKey && getTableCellInlineHTML(fragment.getBlockHTML()) !== null));
+                (event.key === "Enter" && !event.shiftKey && !enterCode &&
+                    getTableCellInlineHTML(fragment.getBlockHTML()) !== null));
             if (navigate) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
@@ -484,6 +501,9 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             range.collapse(!backward);
             focusByRange(range);
         }
+        return;
+    }
+    if (clickedSelection && restoreRichCellSelection(fragment.wysiwyg, clickedSelection)) {
         return;
     }
     if (richSelection && (preserveSelection || !point) && restoreRichCellSelection(fragment.wysiwyg, richSelection)) {

@@ -5,6 +5,7 @@ import {
     normalizeInlineElementBoundary,
     restoreInlineElementBoundary,
     restoreInlineElementBoundaries,
+    restoreInlineElementBoundaryHTML,
     SEMANTIC_INLINE_HTML_REGEXP,
 } from "./inlineElementBoundary";
 
@@ -216,7 +217,7 @@ export const transformSemanticInlineMarkers = (root: ParentNode, mode: TSemantic
 
 export const transformSemanticInlineHTML = (html: string, mode: TSemanticInlineMarkerMode) => {
     if (!SEMANTIC_INLINE_HTML_REGEXP.test(html)) {
-        return html;
+        return mode === "canonical" ? html : restoreInlineElementBoundaryHTML(html);
     }
     const template = document.createElement("template");
     template.innerHTML = html;

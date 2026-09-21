@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260919234652"
+		"updated": "20260921191955"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908092714-514td5y",
-				"updated": "20260908202901"
+				"updated": "20260921111101"
 			},
 			"Children": [
 				{
@@ -38,49 +38,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中为同一个操作配置多个快捷键。点击该行的加号后按下组合键即可保存；点击快捷键的关闭按钮可删除；如需更换，请先删除再添加。点击恢复按钮可恢复该操作的全部默认快捷键。按 Esc 或点击外部可取消录入。第一项用于菜单提示，右击其他快捷键可将其设为主快捷键。同一操作内输入重复快捷键时，不会保存或退出录入，可以继续输入其他组合键。"
-				}
-			]
-		},
-		{
-			"ID": "20260908092714-88wn8r6",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908092714-88wn8r6",
-				"updated": "20260908180419"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "不同操作可以设置相同的快捷键，重复绑定会以冲突配色提示。执行时，当前局部范围优先，通用范围其次；同一范围按固定顺序匹配，用户不能调整执行优先级。内置操作使用固定判断顺序，插件操作按插件名称和命令标识排序。每次按键只执行首个可用操作；开始执行后，即使取消或失败，也不会继续执行其他操作。"
-				}
-			]
-		},
-		{
-			"ID": "20260908172944-s7w2qn9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908172944-s7w2qn9",
-				"updated": "20260908180419"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "搜索栏下方可按「全部」「已分配」「由我分配」「未分配」筛选，并与名称搜索或按键搜索组合使用。「已分配」表示至少有一个快捷键；「由我分配」表示绑定与默认配置不同，包括新增、修改或删除绑定；「未分配」表示没有快捷键。仅在存在未解决的冲突时显示「冲突」筛选项，并突出显示具体冲突的快捷键。修改后筛选结果会自动更新；冲突全部消除后，若当前选中「冲突」，则自动切回「全部」。"
-				}
-			]
-		},
-		{
-			"ID": "20260813143407-p4v8n2c",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260813143407-p4v8n2c",
-				"updated": "20260813143407"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "为避免影响正常文本输入，不能将单个字符或与 "
+					"Data": " 中为同一个操作配置多个快捷键，右击非第一个快捷键可将其设为主快捷键。快捷键相同时，当前局部范围优先，通用范围其次。为避免影响正常文本输入，不能将单个字符或与 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -4045,7 +4003,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260918223821"
+				"updated": "20260921191955"
 			},
 			"Children": [
 				{
@@ -11944,7 +11902,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-x02vhoh",
-				"updated": "20260919232200"
+				"updated": "20260921105011"
 			},
 			"Children": [
 				{
@@ -11964,7 +11922,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-yv5msrs",
-				"updated": "20260919232200"
+				"updated": "20260921105011"
 			},
 			"Children": [
 				{
@@ -12321,6 +12279,103 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260921105011-hmrchvc",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260921105011-hmrchvc",
+				"updated": "20260921191955"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思维导图"
+				}
+			]
+		},
+		{
+			"ID": "20260921105011-fr0uxw6",
+			"Type": "NodeTable",
+			"Properties": {
+				"id": "20260921105011-fr0uxw6",
+				"updated": "20260921111101",
+				"colgroup": "|"
+			},
+			"TableAligns": [
+				0,
+				0
+			],
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "名称"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "操作"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "编辑选中节点"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Space"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
 				},
 				{
 					"Type": "NodeTableRow",
@@ -12341,19 +12396,17 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Tab"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
+								},
 								{
 									"Type": "NodeText",
-									"Data": "切换脑图并选中节点"
+									"Data": "​"
 								}
 							]
 						}
@@ -12378,9 +12431,33 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "删除节点或连接"
 								}
 							]
 						},
@@ -12390,7 +12467,25 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "切换脑图并选中节点"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Delete"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / ​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Backspace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -12415,19 +12510,17 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "←"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
+								},
 								{
 									"Type": "NodeText",
-									"Data": "切换脑图并选中节点"
+									"Data": "​"
 								}
 							]
 						}
@@ -12452,19 +12545,17 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "→"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
+								},
 								{
 									"Type": "NodeText",
-									"Data": "切换脑图并选中节点"
+									"Data": "​"
 								}
 							]
 						}
@@ -12489,19 +12580,17 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "↑"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
+								},
 								{
 									"Type": "NodeText",
-									"Data": "切换脑图并选中节点"
+									"Data": "​"
 								}
 							]
 						}
@@ -12526,19 +12615,17 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "↓"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
+								},
 								{
 									"Type": "NodeText",
-									"Data": "切换脑图并选中节点"
+									"Data": "​"
 								}
 							]
 						}
@@ -12554,18 +12641,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "编辑选中节点，光标定位末尾"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Space"
+									"Data": "结束节点编辑"
 								}
 							]
 						},
@@ -12575,7 +12651,104 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "切换脑图并选中节点"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Esc"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "横向移动画布"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ + ​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "滚轮"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "缩放画布"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ + ​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "滚轮"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

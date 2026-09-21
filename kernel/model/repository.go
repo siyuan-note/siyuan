@@ -2200,10 +2200,10 @@ func bootSyncRepo() (err error) {
 			logging.LogInfof("syncing prepared boot data repo [device=%s, kernel=%s, provider=%d]", Conf.System.ID, KernelID, Conf.Sync.Provider)
 			syncStart := time.Now()
 			indexStart := time.Now()
-			beforeIndex, afterIndex, syncErr := indexRepoBeforeCloudSync(repo)
+			_, _, syncErr := indexRepoBeforeCloudSync(repo)
 			indexElapsed := time.Since(indexStart)
 			if nil == syncErr {
-				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, beforeIndex, afterIndex, syncStart, indexElapsed, prefetchTraffic)
+				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, syncStart, indexElapsed, prefetchTraffic)
 			}
 			if syncErr != nil {
 				logging.LogErrorf("boot background sync repo failed: %s", syncErr)
@@ -2216,7 +2216,7 @@ func bootSyncRepo() (err error) {
 	return
 }
 
-func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
+func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -2245,7 +2245,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	logging.LogInfof("syncing data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "a", byHand)
 	start := time.Now()
 	indexStart := time.Now()
-	beforeIndex, afterIndex, err := indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync(repo)
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		autoSyncErrCount++
@@ -2265,11 +2265,11 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
-	dataChanged, err = syncIndexedRepo(repo, exit, byHand, beforeIndex, afterIndex, start, indexElapsed, false, nil)
+	cloudPublished, err = syncIndexedRepo(repo, exit, byHand, start, indexElapsed, false, nil)
 	return
 }
 
-func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterIndex *entity.Index, start time.Time, indexElapsed time.Duration, skipCloudPreflight bool, prefetchTraffic *dejavu.DownloadTrafficStat) (dataChanged bool, err error) {
+func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, indexElapsed time.Duration, skipCloudPreflight bool, prefetchTraffic *dejavu.DownloadTrafficStat) (cloudPublished bool, err error) {
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
 	if !exit {
@@ -2283,7 +2283,7 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 		syncContext["skipCloudPreflight"] = true
 	}
 	cloudStart := time.Now()
-	mergeResult, trafficStat, err := repo.Sync(syncContext)
+	mergeResult, trafficStat, cloudPublished, err := syncRepoWithPublication(repo, syncContext)
 	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
 	if err != nil {
@@ -2311,8 +2311,6 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 		trafficStat.PeerFallbackCount += prefetchTraffic.PeerFallbackCount
 	}
 
-	dataChanged = nil == beforeIndex || beforeIndex.ID != afterIndex.ID || mergeResult.DataChanged()
-
 	pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
@@ -2324,7 +2322,7 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 	calcPetalDiff(beforeSyncPetals, mergeResult)
 	postProcessStart := time.Now()
 	err = processAssetSyncMergeResult(repo, exit, byHand, mergeResult, trafficStat, "a", elapsed)
-	if dataChanged {
+	if nil == err && cloudPublished {
 		notifyLANSyncCommit(repo)
 	}
 	postProcessElapsed := time.Since(postProcessStart)
@@ -2342,8 +2340,8 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 	return
 }
 
-func syncIndexedRepoAfterBootWithDNSRetry(repo *dejavu.Repo, beforeIndex, afterIndex *entity.Index, start time.Time, indexElapsed time.Duration, prefetchTraffic *dejavu.DownloadTrafficStat) (err error) {
-	_, err = syncIndexedRepo(repo, false, false, beforeIndex, afterIndex, start, indexElapsed, true, prefetchTraffic)
+func syncIndexedRepoAfterBootWithDNSRetry(repo *dejavu.Repo, start time.Time, indexElapsed time.Duration, prefetchTraffic *dejavu.DownloadTrafficStat) (err error) {
+	_, err = syncIndexedRepo(repo, false, false, start, indexElapsed, true, prefetchTraffic)
 	if nil != err && flushAndRetryOnDNSError(err) {
 		_, err = syncRepo(false, false)
 	}
@@ -3209,6 +3207,9 @@ func subscribeRepoEvents() {
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadRef, func(context map[string]any, ref string) {
+		if uploadingRef, ok := context[syncCloudRefContextKey].(*atomic.Bool); ok && "refs/latest" == ref {
+			uploadingRef.Store(true)
+		}
 		msg := fmt.Sprintf(Conf.Language(171), ref)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)

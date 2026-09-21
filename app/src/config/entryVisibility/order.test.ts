@@ -28,6 +28,21 @@ test("entry order keeps custom order and inserts new entries by their default ne
     assert.deepEqual(mergeEntryOrder(["a", "new", "b", "c"], ["c", "a", "b"]), ["c", "a", "new", "b"]);
 });
 
+test("database calendar view merges into saved slash orders and preserves plugin slots", () => {
+    const entries = getEntryCatalogChildren("editor.slash.menu");
+    const defaults = entries.map(item => item.key);
+    const saved = defaults.filter(key => key !== "databaseCalendarView");
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    assert.deepEqual(merged.filter(key => key !== "databaseCalendarView"), saved);
+    assert.equal(merged[merged.indexOf("databaseListView") + 1], "databaseCalendarView");
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+    assert.deepEqual(resolveEntryOrder(["databaseCalendarView", "databaseListView"], merged, separators),
+        ["databaseListView", "databaseCalendarView"]);
+    assert.equal(entries.find(item => item.key === "databaseCalendarView").simple, true);
+});
+
 test("database list view merges into saved slash orders and preserves plugin slots", () => {
     const entries = getEntryCatalogChildren("editor.slash.menu");
     const defaults = entries.map(item => item.key);

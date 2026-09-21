@@ -112,7 +112,9 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     </div>` : ""}
 </div>`;
     document.body.appendChild(maskElement);
-    const endEditorSession = beginAVEditorSession(options.protyle.element);
+    // 独立记录详情使用未挂载的编辑器上下文，浮层生命周期跟随实际可见的详情面板。
+    const ownerElement = options.nodeElement.closest<HTMLElement>(".protyle-db-row") || options.protyle.element;
+    const endEditorSession = beginAVEditorSession(ownerElement);
     const panelElement = maskElement.firstElementChild as HTMLElement;
     const hostElement = panelElement.querySelector<HTMLElement>(".av__richtext-host");
     hostElement.dataset.protyleLiteRender = "safe";
@@ -158,7 +160,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     let finished = false;
     let cancelled = false;
     const isOwnerConnected = () => {
-        if (!options.protyle.element.isConnected || !options.nodeElement.isConnected) {
+        if (!ownerElement.isConnected || !options.nodeElement.isConnected) {
             return false;
         }
         if (options.anchorElement.isConnected) {

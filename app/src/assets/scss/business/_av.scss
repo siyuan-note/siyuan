@@ -1401,13 +1401,14 @@
     &:focus-within > .av__cell-action[data-type="copy"] {
       opacity: 1;
     }
+  }
 
-    .b3-chip {
-      margin: 1px 2px;
-      padding: 2px 6px;
-      line-height: calc(1.625em - 6px);
-      font-size: inherit;
-    }
+  &__cell .b3-chip,
+  &__calendar-field .b3-chip {
+    margin: 1px 2px;
+    padding: 2px 6px;
+    line-height: calc(1.625em - 6px);
+    font-size: inherit;
   }
 
   &__drag-fill {
@@ -1451,7 +1452,8 @@
         }
       }
 
-      .av__cell[data-wrap="true"] & {
+      .av__cell[data-wrap="true"] &,
+      .av__calendar-field[data-wrap="true"] & {
         white-space: normal;
 
         p:empty::after {
@@ -1491,7 +1493,8 @@
         }
       }
 
-      .av__cell:not([data-wrap="true"]) & {
+      .av__cell:not([data-wrap="true"]) &,
+      .av__calendar-field:not([data-wrap="true"]) & {
         max-height: 1.625em;
         white-space: nowrap;
         text-overflow: ellipsis;

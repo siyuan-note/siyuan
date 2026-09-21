@@ -1,49 +1,155 @@
-# 发布构建与安装包校验
+# 发布流程、构建与安装包校验
 
 > **使用范围：`scripts/build-release.py` 是思源官方打包脚本，仅供官方发布环境使用，其他环境请勿使用。脚本依赖官方构建机器的目录结构、工具链、WSL 配置和签名环境，不是通用打包工具。**
 
 需要 Python 3.11 或更新版本。安装包检查不需要更改打包流程，也不需要从其他机器带回基准文件。EXE、DMG、AppImage、DEB、RPM 等格式还需要 7-Zip，可用 `--sevenzip` 指定路径。
 
-## 常用命令
+## 发布分工
 
-以下命令均在官方 Windows 构建机器的仓库根目录 `D:\88250\siyuan` 执行。执行前完成各仓库版本号、更新日志等发布准备，停止前端开发构建，并将 WSL 仓库同步到与 Windows 相同的提交和构建输入。Windows 签名需插好 YubiKey，按系统提示输入 PIN。
+- 正式版按下文完成本地构建、产物汇总、检查和手动发布
+- alpha、beta、rc 由 GitHub Actions 自动发布：准备并同步主仓库和 Android 仓库的版本后，推送对应预发布标签，不同时手动上传同名发布产物
 
-先查看打包计划，不会实际构建：
+## 开发版发布步骤
+
+alpha、beta、rc 使用语义化预发布版本号，例如 `3.8.5-alpha.1`、`3.8.5-beta.1`、`3.8.5-rc.1`。以下以 `3.8.5-beta.1` 为例，执行时替换为本次版本。自动发布由 [CD 工作流](../.github/workflows/cd.yml) 执行，无需运行本地四平台构建脚本。
+
+### 1. 准备版本并同步代码
+
+- 将 `kernel/util/working.go` 的 `Mode` 设置为 `prod`，将 `Ver` 和 `app/package.json` 的版本更新为同一个预发布版本号
+- 更新 Android 仓库 `build.gradle` 的 `siyuanVersionName` 和 `siyuanVersionCode`，其中版本名称须与主仓库一致
+- 先将 Android 发布准备提交同步到远端 `main`；工作流从该分支检查版本，并锁定本次构建使用的 Android 提交，不按主仓库标签检出 Android 仓库
+- 提交并推送主仓库待发布代码，确认当前检出的是本次发布提交
+- 确认仓库 Actions 所需的 Android 签名配置和凭据可用，凭据仅通过仓库 Secrets 管理，不写入文档或源代码
+
+### 2. 打标签并触发构建
+
+在主仓库根目录执行，仅推送本次标签：
+
+```powershell
+git tag v3.8.5-beta.1
+git push origin v3.8.5-beta.1
+```
+
+推送包含 `-alpha`、`-beta` 或 `-rc` 的标签会触发 `CD For SiYuan`。标签去掉开头的 `v` 后必须与 `app/package.json` 版本完全一致，Android 版本也必须匹配，否则准备阶段会失败。
+
+### 3. 等待自动构建与发布
+
+在 GitHub Actions 中查看本次标签对应的 `CD For SiYuan` 运行记录。工作流生成发布说明、运行检查并构建以下八个安装包：
+
+| 平台 | 自动发布产物 |
+| --- | --- |
+| Windows | AMD64 NSIS 安装包 |
+| Linux | AMD64 AppImage、tar.gz、deb、rpm，共四个包 |
+| macOS | Intel、Apple Silicon 两个 DMG |
+| Android | 官方版 ARM64 APK |
+
+开发版当前不自动发布 Windows ARM64、Linux ARM64、Appx、鸿蒙、iOS 或其他 Android 渠道包，不使用正式版的全平台齐全清单。
+
+工作流会自动生成并校验 `SHA256SUMS.txt`，创建预发布草稿，上传安装包与摘要文件，再核对远端资产摘要，全部匹配后自动公开为预发布版本。这里的摘要由 GitHub Actions 生成；正式版本地构建脚本仍不生成摘要，由发布者最后手动执行自己的工具。
+
+### 4. 检查结果与处理失败
+
+- 确认本次工作流完成，检查测试日志；部分测试允许失败后继续，发布成功不代表所有测试都通过
+- 确认对应标签的 GitHub Release 已公开且标记为预发布，版本正确，八个安装包及 `SHA256SUMS.txt` 均已上传
+- 若构建或上传失败，先检查失败步骤和已有 Release 状态；修复环境问题后可重跑失败任务，涉及源代码或版本调整时使用新的预发布版本和标签
+- 工作流上传时会覆盖同名资产，不同时手动上传，也不提前公开草稿；已有 Release 被公开时，草稿检查会阻止后续自动上传
+
+## 正式版发布步骤
+
+除明确注明的步骤外，以下命令均在官方 Windows 构建机器的仓库根目录 `D:\88250\siyuan` 执行。示例版本 `3.8.4` 须替换为本次发布版本。首次使用应分平台确认工具链与签名环境；完整流水线尚未实际运行验证。
+
+### 1. 完成发布准备
+
+- 生成 changelogs
+- 修改 `kernel/util/working.go` 的 `Mode`、`Ver` 和 `app/package.json` 的版本
+- 更新 `app/appx/AppxManifest.xml` 和 `app/appx/AppxManifest-arm64.xml` 的版本
+- 更新 Android 的 `siyuanVersionName`、`siyuanVersionCode`
+- 更新鸿蒙的 `versionName`、`versionCode`
+- 更新 iOS 版本号
+- 按需更新文档、图标、第三方资源版本及 `DatabaseVer`
+- 将各仓库需要发布的代码提交并同步到远端
+
+### 2. 同步 WSL 仓库
+
+在 WSL 中以用户 `d` 进入 `/home/d/88250/siyuan`，切到对应发布分支并拉取代码，确保与 Windows 是同一提交，受检查的构建输入一致。脚本不会自动拉取。
+
+### 3. 准备构建环境
+
+- 准备 Python 3.11 或更新版本、Go、Node、pnpm、Windows 双架构编译器、gomobile、Android SDK/NDK、DevEco Studio 和 7-Zip；Appx 还需 `electron-windows-store`
+- 停止正在运行的前端开发构建
+- 插好 YubiKey，签名时按系统提示输入 PIN
+- 确认 Android、鸿蒙签名配置可用
+- 桌面 `siyuan` 文件夹不要留有旧版本或同名安装包；分批构建时保留本次版本已验证的其他平台产物
+
+### 4. 查看计划
 
 ```powershell
 python -X utf8 scripts/build-release.py
 ```
 
-全部平台打包，包括 Windows、WSL Linux、Android 和鸿蒙：
+此命令只显示计划，不构建、不修改文件，也不检查构建工具或签名环境。
+
+### 5. 执行构建
+
+首次使用建议依次分平台执行，确认每个平台成功后再继续：
 
 ```powershell
-python -X utf8 scripts/build-release.py --execute
-```
-
-首次使用建议分平台执行，按需要选择下面的命令：
-
-```powershell
-python -X utf8 scripts/build-release.py --platforms windows --execute
+python -X utf8 scripts/build-release.py --platforms windows --appx --execute
 python -X utf8 scripts/build-release.py --platforms linux --execute
 python -X utf8 scripts/build-release.py --platforms android --execute
 python -X utf8 scripts/build-release.py --platforms harmony --execute
 ```
 
-Windows 额外生成 Appx 包：
+正式版需要两个 Appx 包，保留 `--appx`。确认各平台运行正常后，后续发布可一条命令构建 Windows、WSL Linux、Android 和鸿蒙：
 
 ```powershell
-python -X utf8 scripts/build-release.py --platforms windows --appx --execute
+python -X utf8 scripts/build-release.py --appx --execute
 ```
 
-产物验证通过后收集到桌面 `siyuan` 文件夹，同时生成 `SHA256SUMS.txt`。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.4.apk`。已有同名安装包不会覆盖。
+脚本自动构建、复制移动端内核和资源、验证安装包，并将通过验证的产物收集到桌面 `siyuan` 文件夹。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.4.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。
 
-单独验证桌面 `siyuan` 文件夹中的安装包，将 `3.8.4` 替换为本次发布版本：
+### 6. 汇总其他平台产物
+
+macOS、iOS 在对应构建机器上完成构建和签名。macOS 完成公证并收集双架构 DMG；iOS 同步内核、资源及 changelogs，确认版本号后完成上架构建。Windows 编排脚本不执行这两个平台的构建。
+
+将其他机器上需要分发的安装包收集到桌面 `siyuan` 后，再进行最终检查。iOS 上架产物在对应平台完成验收；若提供 IPA 供此脚本检查，其校验限制见下文。
+
+### 7. 发布前再次检查
+
+人工确认以下安装包齐全，分平台构建时可以暂时缺包，最终发布前必须收齐：
+
+| 平台 | 必需产物 |
+| --- | --- |
+| Windows | AMD64、ARM64 两个 NSIS 安装包 |
+| Linux | AMD64、ARM64 各包含 AppImage、tar.gz、deb、rpm，共八个包 |
+| macOS | Intel、Apple Silicon 两个 DMG |
+| Microsoft Store | 两个架构的 Appx |
+| Android | 官方版、国内渠道 APK，以及 Google Play、华为渠道 AAB，共四个包 |
+| 鸿蒙 | APP、已签名 HAP |
+
+核对版本、平台和架构后，在仓库根目录执行：
 
 ```powershell
 python -X utf8 scripts/verify-release.py check --version 3.8.4
 ```
 
-WSL 默认用户为 `d`，仓库路径为 `/home/d/88250/siyuan`。完整构建流程尚未实际运行，首次使用请分平台确认工具链与签名环境；具体参数和检查范围见下文。
+校验器已检查必需前端入口，整套前端漏打包会报错。当前架构检查并不完整，也不检查此次应发布的平台是否齐全，因此不能代替上面的人工核对；校验器不验证 `SHA256SUMS.txt`。
+
+### 8. 手动生成校验和
+
+全部产物收齐并校验通过后，在桌面 `siyuan` 目录中手动执行自己的 `checksum.exe`，生成 `SHA256SUMS.txt`。后续添加或替换安装包后，需重新检查并再次手动生成。上传时使用这份最终清单。
+
+### 9. 手动发布与上架
+
+- 合并 master，触发 Docker 镜像构建
+- 打正式版标签
+- 发布 GitHub Releases，并附上 `SHA256SUMS.txt`
+- 同步 Gitee
+- 上传 R2 和网盘
+- 发布公告
+- 部署 Rhy，粘贴最终的 `SHA256SUMS.txt`
+- 部署 Index 和用户指南
+- 完成小米、华为、荣耀、OPPO、vivo、App Store、Microsoft Store、腾讯应用宝、Google Play、360 和腾讯电脑管家等应用市场上架
 
 ## 直接检查安装包
 
@@ -66,6 +172,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 
 - 从 PE、ELF 或 Mach-O 内核中的完整 `SiYuan v… (pdfcpu ` 标识读取版本，该标识由 `kernel/model/export.go` 的 `util.Ver` 编译生成；同时交叉检查可识别的桌面 CLI 完整版本标识，不把任意版本子串当成通过依据
 - 检查内核版本与发布版本一致，并识别可判定的内核架构和格式错误
+- 检查必需前端入口：桌面包必须包含 `app/index.html`、`app/window.html`、`desktop/index.html`、`mobile/index.html` 和 `export/protyle-method.js`，移动包必须包含 `mobile/index.html` 和 `export/protyle-method.js`，以上路径均相对于 `stage/build/`；整套前端目录缺失也会失败
 - 从 HTML 实际引用的 JavaScript 读取 `Constants.SIYUAN_VERSION`，检查前端与内核一致，不使用未被入口引用的新文件掩盖旧入口
 - 检查 HTML、CSS 的可解析本地资源引用，以及当前 webpack 的数字分块哈希映射，发现缺失脚本、样式、字体或动态分块
 - 检查导出前端版本、语言 JSON、用户指南和正式版当前更新日志；桌面包额外检查 `resources/app/package.json` 版本
@@ -81,30 +188,14 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 
 未知文件或目录、空目录、解包失败和无法识别版本均不算通过。`checksum.exe`、`SHA256SUMS.txt`、`.blockmap`、YAML 更新元数据及可选基准 JSON 不作为安装包处理。独立检查脚本目前不验证校验和清单、签名、证书或原生外壳功能，也不推断此次应发布哪些平台。
 
-## 自动构建
+## 自动构建参数与行为
 
-在 Windows 上先查看四个平台的计划，再执行：
+### 参数与预检
 
-```text
-python -X utf8 scripts/build-release.py
-python -X utf8 scripts/build-release.py --execute
-```
-
-可分批选择平台，Windows Store 包通过 `--appx` 额外启用：
-
-```text
-python -X utf8 scripts/build-release.py --platforms windows --appx --execute
-python -X utf8 scripts/build-release.py --platforms linux,android,harmony --execute
-```
-
-不传 `--execute` 只显示计划，不构建、不修改文件。完整流水线尚未实际运行，回归测试使用模拟构建产物；首次使用应按平台分批执行，确认本机工具链和签名环境。
-
-### 执行前准备
-
-- 按原流程完成版本号、更新日志和数据库版本准备；脚本检查内核 `Ver`、`Mode`、Android、鸿蒙版本，以及启用 Appx 时的清单版本，不自动修改版本号或 `versionCode`
-- 停止前端开发构建再执行正式构建，脚本会调用生产构建命令
-- 准备 Go、Node、pnpm、Windows 双架构编译器、gomobile、Android SDK/NDK、DevEco Studio 和 7-Zip；Appx 还需 `electron-windows-store`
-- 插好 YubiKey，保留现有 Android 与鸿蒙签名配置；脚本不读取或输出这些配置里的密码
+- 脚本检查内核 `Ver`、`Mode`、Android、鸿蒙版本，以及启用 Appx 时的清单版本，不自动修改版本号或 `versionCode`
+- `--platforms` 接受逗号分隔的平台名称，可选 `windows`、`linux`、`android`、`harmony`；默认构建四个平台，Appx 需额外指定 `--appx`
+- `--output` 可指定产物收集目录，默认桌面 `siyuan`；脚本不覆盖已有同名安装包
+- 脚本保留现有 Android 与鸿蒙签名配置，不读取或输出这些配置里的密码
 - WSL 默认用户 `d`、仓库 `/home/d/88250/siyuan`，可通过 `--wsl-user`、`--wsl-repo`、`--wsl-distro` 调整；Windows 与 WSL 必须处于同一提交，受检查的构建输入须一致
 - Android、鸿蒙仓库默认在思源仓库同级，可用 `--android-dir`、`--harmony-dir` 调整；工具路径可用 `--arm64-cc`、`--deveco`、`--sevenzip` 调整
 
@@ -116,7 +207,7 @@ python -X utf8 scripts/build-release.py --platforms linux,android,harmony --exec
 - Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.4.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
 - 鸿蒙先构建并复制 ARM64 内核，再构建并复制 x86_64 内核，避免同名 `libkernel.so` 被覆盖后拷错；使用同一份新 `app.zip`，通过 Hvigor release 模式生成 APP 和已签名 HAP
 - 每条命令失败立即停止，产物必须是本次生成，复制时再次核对摘要
-- 新安装包全部验证通过后才收集到桌面 `siyuan`，不覆盖同名包；分批构建会检查目录中已有的其他包，并更新覆盖所有包的 `SHA256SUMS.txt`
+- 新安装包全部验证通过后才收集到桌面 `siyuan`，不覆盖同名包；分批构建会检查目录中已有的其他包，保留已有的 `SHA256SUMS.txt`，校验和清单由发布者最终手动生成
 - 构建目录保留在系统临时目录，控制台打印实际路径，失败后可检查并取回产物；不会自动提交、推送、打标签、上传或发布公告
 
 ### YubiKey PIN
@@ -134,7 +225,7 @@ python -X utf8 scripts/verify-release.py baseline --version 3.8.4 --target andro
 python -X utf8 scripts/verify-release.py check --version 3.8.4 --baseline android-arm64.release-baseline.json
 ```
 
-资源目录必须对应实际打包的集合。桌面包筛选外观文件并裁剪更新日志，不能直接比较未筛选的 `app/`；macOS 签名也可能改变内核摘要。
+资源目录必须对应实际打包的集合。桌面包筛选外观文件并裁剪更新日志，不能直接比较未筛选的 `app/`；macOS 签名也可能改变内核摘要。启用基准比较时仍检查必需前端入口，即使安装包与基准摘要一致，也不能放过前端入口缺失。
 
 ## 回归测试
 

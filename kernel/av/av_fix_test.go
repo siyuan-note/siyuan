@@ -19,6 +19,8 @@ package av
 import (
 	"encoding/json"
 	"math"
+	"os"
+	"reflect"
 	"testing"
 )
 
@@ -83,6 +85,61 @@ func TestUpgradeSpec8(t *testing.T) {
 	UpgradeSpec(attrView)
 	if PlainTextSpec != attrView.Spec {
 		t.Fatalf("expected spec %d, got %d", PlainTextSpec, attrView.Spec)
+	}
+}
+
+func TestUpgradeSpec10PreservesLegacyLayouts(t *testing.T) {
+	data, err := os.ReadFile("testdata/spec9-layouts.json")
+	if nil != err {
+		t.Fatal(err)
+	}
+	attrView, err := ParseAttributeViewData("20260921000000-layouts", data)
+	if nil != err || 9 != attrView.Spec {
+		t.Fatalf("legacy layout read failed: %v", err)
+	}
+	before, _ := json.Marshal(attrView)
+	UpgradeSpec(attrView)
+	if 10 != attrView.Spec || nil != CheckSpec(attrView) {
+		t.Fatalf("layouts require spec 10: %d", attrView.Spec)
+	}
+	upgraded, _ := json.Marshal(attrView)
+	readBack, err := ParseAttributeViewData(attrView.ID, upgraded)
+	if nil != err || !reflect.DeepEqual(attrView, readBack) {
+		t.Fatalf("upgraded layout read failed: %v", err)
+	}
+	attrView.Spec = 9
+	after, _ := json.Marshal(attrView)
+	if string(before) != string(after) {
+		t.Fatal("upgrade changed layout or item data")
+	}
+
+	for _, layout := range attrView.Views[1:] {
+		for _, grouped := range []bool{false, true} {
+			view := &View{LayoutType: LayoutTypeTable, List: layout.List, Calendar: layout.Calendar}
+			if grouped {
+				view = &View{LayoutType: LayoutTypeTable, Groups: []*View{view}}
+			}
+			candidate := &AttributeView{Spec: PlainTextSpec, Views: []*View{nil, view}}
+			UpgradeSpec(candidate)
+			if 10 != candidate.Spec {
+				t.Fatal("inactive or grouped layout was not protected")
+			}
+			candidate.Views = nil
+			UpgradeSpec(candidate)
+			if 10 != candidate.Spec {
+				t.Fatal("removing layouts downgraded the database")
+			}
+		}
+	}
+	for _, spec := range []int{PlainTextSpec, RichTextSpec, CurrentSpec + 1} {
+		candidate := &AttributeView{Spec: spec, Views: attrView.Views[:1]}
+		UpgradeSpec(candidate)
+		if spec != candidate.Spec {
+			t.Fatalf("unrelated database spec changed from %d to %d", spec, candidate.Spec)
+		}
+		if spec > CurrentSpec && CheckSpec(candidate) != ErrSpecTooNew {
+			t.Fatal("unknown format was accepted")
+		}
 	}
 }
 

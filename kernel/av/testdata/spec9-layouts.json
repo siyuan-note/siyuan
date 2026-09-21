@@ -1,0 +1,32 @@
+{
+  "spec": 9,
+  "id": "20260921000000-layouts",
+  "name": "Layout compatibility",
+  "keyValues": [
+    {
+      "key": {"id": "20260921000001-primary", "name": "Title", "type": "block"},
+      "values": [{"id": "20260921000004-value01", "keyID": "20260921000001-primary", "blockID": "20260921000003-example", "type": "block", "isDetached": true, "block": {"content": "Example", "created": 1789948800000, "updated": 1789948800000}}]
+    },
+    {
+      "key": {"id": "20260921000002-datekey", "name": "Date", "type": "date"},
+      "values": [{"id": "20260921000005-value02", "keyID": "20260921000002-datekey", "blockID": "20260921000003-example", "type": "date", "date": {"content": 1789948800000, "isNotEmpty": true, "isNotTime": true}}]
+    }
+  ],
+  "views": [
+    {
+      "id": "20260921000010-table00", "name": "Table", "type": "table", "pageSize": 50,
+      "itemIds": ["20260921000003-example"],
+      "table": {"spec": 0, "id": "20260921000011-table01", "showIcon": true, "columns": [{"id": "20260921000001-primary"}, {"id": "20260921000002-datekey"}]}
+    },
+    {
+      "id": "20260921000020-list000", "name": "List", "type": "list", "pageSize": 50,
+      "itemIds": ["20260921000003-example"],
+      "list": {"spec": 0, "id": "20260921000021-list001", "showIcon": true, "columns": [{"id": "20260921000001-primary"}, {"id": "20260921000002-datekey", "hidden": true}]}
+    },
+    {
+      "id": "20260921000030-calendr", "name": "Calendar", "type": "calendar", "pageSize": 50,
+      "itemIds": ["20260921000003-example"],
+      "calendar": {"spec": 0, "id": "20260921000031-calendr", "showIcon": true, "columns": [{"id": "20260921000001-primary"}, {"id": "20260921000002-datekey"}], "settings": {"dateKeyID": "20260921000002-datekey", "weekStart": 1}}
+    }
+  ]
+}

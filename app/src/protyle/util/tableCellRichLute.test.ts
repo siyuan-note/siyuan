@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {createSourceFile, isClassDeclaration, isMethodDeclaration, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string, enterSource: string, hintSource: string, keydownSource: string) => {
+const browserCases = async (source: string, enterSource: string, hintSource: string, keydownSource: string, copySource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const api = new Function(source + "\nreturn {getAgentLute, configureAVRichTextLute, getTableCellEditorLute, " +
         "canEnterCodeBlock, hasCodeBlockFence, getTableCellInlineHTML, serializeTableCellRich, " +
@@ -250,6 +250,38 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
         check.equal(calls.rendered, code);
         check.ok(code.contains(getSelection().anchorNode));
     }
+    const copied: string[] = [];
+    let messages = 0;
+    let bubbled = 0;
+    Object.assign(window.siyuan, {languages: {copied: "Copied"}});
+    const copyController = new AbortController();
+    const copyDependencies = {
+        host, fragment, signal: copyController.signal,
+        writeText: (text: string) => copied.push(text),
+        showMessage: (text: string) => {
+            check.equal(text, "Copied");
+            messages++;
+        },
+    };
+    new Function(...Object.keys(copyDependencies), copySource)(...Object.values(copyDependencies));
+    fixture.addEventListener("click", () => bubbled++);
+    for (const text of ["", "a\u00a0b\n  <tag> & value\n\n", "\u200D```\n"]) {
+        wysiwyg.innerHTML = base.Md2BlockDOM("```js\nplaceholder\n```");
+        wysiwyg.querySelector('.hljs [contenteditable="true"]').textContent = text + "\n";
+        const button = wysiwyg.querySelector(".protyle-action__copy");
+        for (const target of [button, button.querySelector("use")]) {
+            const event = new MouseEvent("click", {bubbles: true, cancelable: true});
+            target.dispatchEvent(event);
+            check.equal(event.defaultPrevented, true);
+            check.equal(copied[copied.length - 1], text.replace(/\u00a0/g, " ").replace(/\u200D```/g, "```"));
+        }
+    }
+    check.equal(copied.length, 6);
+    check.equal(messages, 6);
+    check.equal(bubbled, 0, "copy stays inside the cell editor");
+    copyController.abort();
+    wysiwyg.querySelector(".protyle-action__copy").dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    check.equal(copied.length, 6, "closing the editor removes the copy handler");
     fixture.remove();
     return "Table cell code insertion cases passed";
 };
@@ -274,6 +306,9 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const start = editor.indexOf('host.addEventListener("keydown", event => {');
     const end = editor.indexOf("}, {capture: true, signal});", start) + "}, {capture: true, signal});".length;
     const keydownSource = compile(editor.substring(start, end));
+    const copyStart = editor.indexOf('host.addEventListener("click", event => {');
+    const copyEnd = editor.indexOf("}, {capture: true, signal});", copyStart) + "}, {capture: true, signal});".length;
+    const copySource = compile(read("normalizeText.ts") + "\n" + editor.substring(copyStart, copyEnd));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cell-code-test-"));
     const script = path.join(temporary, "run.cjs");
     const lutePath = path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js");
@@ -286,7 +321,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         const result = await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, compile(read("../wysiwyg/enter.ts")), hintSource, keydownSource]
+        browserCases.toString() + ")(" + [source, compile(read("../wysiwyg/enter.ts")), hintSource, keydownSource, copySource]
             .map(value => JSON.stringify(value)).join(",") + ")")});
         console.log(result);
         win.destroy();

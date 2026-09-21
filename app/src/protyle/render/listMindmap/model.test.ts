@@ -596,8 +596,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     compactNode.style.height = "";
     view.refreshLayout();
     await settle();
-    const sendPointer = (element: Element, type: string, x: number, y: number) => element.dispatchEvent(new PointerEvent(type, {
-        bubbles: true, cancelable: true, pointerId: 1, pointerType: "mouse", button: 0, clientX: x, clientY: y,
+    const sendPointer = (element: Element, type: string, x: number, y: number, button = 0) => element.dispatchEvent(new PointerEvent(type, {
+        bubbles: true, cancelable: true, pointerId: 1, pointerType: "mouse", button, clientX: x, clientY: y,
     }));
     const sourceRect = nodeElement(alpha).getBoundingClientRect();
     const targetRect = nodeElement(beta).getBoundingClientRect();
@@ -609,6 +609,20 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     sendPointer(viewport, "pointerup", sourcePoint.x, sourcePoint.y);
     check.equal(edits.length, 0);
     check.equal(moves.length, 0);
+    const panOrigin = {x: view.offsetX, y: view.offsetY};
+    sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y, 2);
+    sendPointer(viewport, "pointermove", sourcePoint.x + 30, sourcePoint.y + 20, 2);
+    check.equal(view.offsetX, panOrigin.x + 30, "right drag pans over nodes");
+    check.equal(view.offsetY, panOrigin.y + 20, "right drag pans vertically");
+    check.equal(host.querySelector(".list-mindmap__ghost"), null);
+    sendPointer(viewport, "pointerup", sourcePoint.x + 30, sourcePoint.y + 20, 2);
+    const contextMenu = new MouseEvent("contextmenu", {bubbles: true, cancelable: true});
+    viewport.dispatchEvent(contextMenu);
+    check.equal(contextMenu.defaultPrevented, true, "right pan suppresses the native menu");
+    check.equal(moves.length, 0, "right pan does not move nodes");
+    view.offsetX = panOrigin.x;
+    view.offsetY = panOrigin.y;
+    view.draw();
     sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y);
     sendPointer(viewport, "pointermove", targetPoint.x, targetPoint.y);
     check.ok(host.querySelector(".list-mindmap__ghost"));

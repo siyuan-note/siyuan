@@ -53,6 +53,7 @@ export interface ListMindmapViewOptions {
 
 interface PointerState {
     pointerId: number;
+    rightButton?: boolean;
     id?: string;
     startX: number;
     startY: number;
@@ -82,6 +83,7 @@ const createElement = <T extends keyof HTMLElementTagNameMap>(tag: T, className:
 };
 
 export class ListMindmapView {
+    private suppressPanContextMenu = false;
     private readonly options: ListMindmapViewOptions;
     private model: ListMindmapModel;
     private readonly viewport: HTMLDivElement;
@@ -175,6 +177,11 @@ export class ListMindmapView {
         this.listen(this.viewport, "pointermove", this.pointerMove);
         this.listen(this.viewport, "pointerleave", () => this.setHoveredLine());
         this.listen(this.viewport, "pointerup", this.pointerUp);
+        this.listen(this.viewport, "contextmenu", (event: MouseEvent) => {
+            if (this.suppressPanContextMenu) {
+                event.preventDefault();
+            }
+        });
         this.listen(this.viewport, "pointercancel", this.cancelPointer);
         this.listen(this.viewport, "lostpointercapture", this.cancelPointer);
         this.listen(window, "pointerup", (event: PointerEvent) => {
@@ -1269,10 +1276,12 @@ export class ListMindmapView {
     private pointerDown = (event: PointerEvent) => {
         clearTimeout(this.linkTimer);
         this.suppressLinkClick = false;
+        this.suppressPanContextMenu = false;
         const target = event.target as HTMLElement;
-        if (event.button !== 0 || target.closest("button, input, select, textarea, audio, video, iframe, .list-mindmap__node--editing")) {
+        if (![0, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe, .list-mindmap__node--editing")) {
             return;
         }
+        this.suppressPanContextMenu = event.button === 2;
         const element = target.closest<HTMLElement>(".list-mindmap__node");
         const id = element?.dataset.mindmapId;
         this.pendingPointerId = event.pointerId;
@@ -1284,11 +1293,11 @@ export class ListMindmapView {
     };
 
     private beginPointer(event: PointerEvent, id?: string) {
-        if (this.panning) {
+        if (this.panning || event.button === 2) {
             id = undefined;
             event.preventDefault();
         }
-        if (!this.panning && !id && !this.options.readOnly && !this.relationFrom) {
+        if (event.button !== 2 && !this.panning && !id && !this.options.readOnly && !this.relationFrom) {
             const line = this.findLine(event);
             const points = line?.relation && this.relationRoutes.get(line.id);
             if (points) {
@@ -1324,6 +1333,7 @@ export class ListMindmapView {
         this.options.host.focus({preventScroll: true});
         this.pointer = {
             pointerId: event.pointerId,
+            rightButton: event.button === 2,
             id: !this.options.readOnly && id && !this.model.nodes.get(id)?.virtual ? id : undefined,
             startX: event.clientX,
             startY: event.clientY,
@@ -1341,7 +1351,7 @@ export class ListMindmapView {
     }
 
     private pointerMove = (event: PointerEvent) => {
-        if (this.relationFrom) {
+        if (this.relationFrom && !this.pointer?.rightButton) {
             const bounds = this.viewport.getBoundingClientRect();
             const id = (event.target as Element).closest<HTMLElement>(".list-mindmap__node")?.dataset.mindmapId;
             this.relationPreview = {
@@ -1489,7 +1499,7 @@ export class ListMindmapView {
         this.cancelPointer();
         if (moved && id && targetId && placement) {
             this.options.onMove?.(id, targetId, placement);
-        } else if (!moved && !id && !this.options.readOnly && !this.panning) {
+        } else if (!moved && !id && !pointer.rightButton && !this.options.readOnly && !this.panning) {
             this.selectLine(event);
         }
     };

@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260921111101"
+		"updated": "20260921221035"
 	},
 	"Children": [
 		{
@@ -12251,7 +12251,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-icqlkb6",
-				"updated": "20260921111101"
+				"updated": "20260921221035"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12266,7 +12266,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-01k7syf",
-				"updated": "20260921111101",
+				"updated": "20260921221035",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -12625,6 +12625,32 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "ホイール"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "キャンバスを移動"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "マウスの右ボタンを押しながらドラッグ"
 								}
 							]
 						}

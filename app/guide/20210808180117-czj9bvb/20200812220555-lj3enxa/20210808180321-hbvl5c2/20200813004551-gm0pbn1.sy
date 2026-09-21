@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260921191955"
+		"updated": "20260921221035"
 	},
 	"Children": [
 		{
@@ -12287,7 +12287,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20260921191955"
+				"updated": "20260921221035"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12302,7 +12302,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-fr0uxw6",
-				"updated": "20260921111101",
+				"updated": "20260921221035",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -12749,6 +12749,32 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "移动画布"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "按住鼠标右键拖动"
 								}
 							]
 						}

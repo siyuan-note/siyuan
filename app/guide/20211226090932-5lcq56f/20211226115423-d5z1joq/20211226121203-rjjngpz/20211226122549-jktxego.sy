@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260921111101"
+		"updated": "20260921221035"
 	},
 	"Children": [
 		{
@@ -12293,7 +12293,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20260921111101"
+				"updated": "20260921221035"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12308,7 +12308,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-f8y6pxv",
-				"updated": "20260921111101",
+				"updated": "20260921221035",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -12667,6 +12667,32 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "滾輪"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "移動畫布"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "按住滑鼠右鍵拖曳"
 								}
 							]
 						}

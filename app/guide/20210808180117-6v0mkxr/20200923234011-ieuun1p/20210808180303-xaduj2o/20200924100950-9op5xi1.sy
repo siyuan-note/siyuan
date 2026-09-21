@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260921111101"
+		"updated": "20260921221035"
 	},
 	"Children": [
 		{
@@ -12301,7 +12301,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20260921111101"
+				"updated": "20260921221035"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12316,7 +12316,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-3srqnh0",
-				"updated": "20260921111101",
+				"updated": "20260921221035",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -12675,6 +12675,32 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Wheel"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Pan the canvas"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Hold the right mouse button and drag"
 								}
 							]
 						}

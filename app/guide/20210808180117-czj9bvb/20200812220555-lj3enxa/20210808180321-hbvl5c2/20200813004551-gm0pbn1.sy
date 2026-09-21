@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260921111101"
+		"updated": "20260921191955"
 	},
 	"Children": [
 		{
@@ -4003,7 +4003,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260921105011"
+				"updated": "20260921191955"
 			},
 			"Children": [
 				{
@@ -12287,13 +12287,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20260921111101"
+				"updated": "20260921191955"
 			},
 			"HeadingLevel": 3,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "脑图"
+					"Data": "思维导图"
 				}
 			]
 		},

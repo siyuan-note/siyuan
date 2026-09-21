@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20260906220233"
+		"updated": "20260921215916"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-4b3n4al",
-				"updated": "20260906003609"
+				"updated": "20260921215916"
 			},
 			"Children": [
 				{
@@ -64,7 +64,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210104091538-le8t1ci",
-				"updated": "20260906003609"
+				"updated": "20260921215916"
 			},
 			"Children": [
 				{
@@ -895,6 +895,75 @@
 										},
 										{
 											"Type": "NodeLinkText",
+											"Data": "mindmap-list"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/mindmap-list-20260921215248-e039c4.svg"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mind map"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
 											"Data": "list-item"
 										},
 										{
@@ -1336,7 +1405,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20260906220233"
+				"updated": "20260921215916"
 			},
 			"Children": [
 				{
@@ -2455,6 +2524,35 @@
 				{
 					"Type": "NodeText",
 					"Data": "The task list block can only contain list item blocks, and neighboring task list blocks are widely spaced."
+				}
+			]
+		},
+		{
+			"ID": "20260921215916-r1kfene",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260921215916-r1kfene",
+				"updated": "20260921215916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mind map"
+				}
+			]
+		},
+		{
+			"ID": "20260921215248-t2cedml",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921215248-t2cedml",
+				"updated": "20260921215916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A mind map is a display mode for list blocks. Unordered lists, ordered lists, and task lists can be switched to mind map view. The block icon then changes to a mind map icon, while the content remains a list block."
 				}
 			]
 		},

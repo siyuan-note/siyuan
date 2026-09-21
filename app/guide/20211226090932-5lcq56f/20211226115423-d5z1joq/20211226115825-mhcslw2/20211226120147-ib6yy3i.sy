@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20260906220233"
+		"updated": "20260921215916"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-2s70boj",
-				"updated": "20260906003609"
+				"updated": "20260921215916"
 			},
 			"Children": [
 				{
@@ -49,7 +49,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226120227-nx8tlf5",
-				"updated": "20260906003609"
+				"updated": "20260921215916"
 			},
 			"Children": [
 				{
@@ -908,6 +908,75 @@
 										},
 										{
 											"Type": "NodeLinkText",
+											"Data": "mindmap-list"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/mindmap-list-20260921215248-e039c4.svg"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "心智圖"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "容器區塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
 											"Data": "list-item"
 										},
 										{
@@ -1365,7 +1434,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-esm6f20",
-				"updated": "20260906220233"
+				"updated": "20260921215916"
 			},
 			"Children": [
 				{
@@ -2470,6 +2539,35 @@
 				{
 					"Type": "NodeText",
 					"Data": "任務列表區塊只能包含列表項區塊，相鄰的任務列表區塊間距較大。"
+				}
+			]
+		},
+		{
+			"ID": "20260921215916-cfx2ewc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260921215916-cfx2ewc",
+				"updated": "20260921215916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "心智圖"
+				}
+			]
+		},
+		{
+			"ID": "20260921215248-a468zqd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921215248-a468zqd",
+				"updated": "20260921215916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "心智圖是列表區塊的一種顯示方式，支援將無序列表、有序列表和任務列表切換為心智圖檢視。切換後，區塊圖示會顯示為心智圖圖示，內容仍屬於列表區塊。"
 				}
 			]
 		},

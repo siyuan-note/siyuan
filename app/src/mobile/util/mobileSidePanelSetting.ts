@@ -148,7 +148,7 @@ export const genMobileSidePanelSettingHTML = () => {
         </button>
     </div>
     <div class="fn__hr"></div>
-    <div data-type="side-panel-lists">${genMobileSidePanelListsHtml(config, pluginDockContext.entriesById)}</div>
+    <div class="config-side-panel" data-type="side-panel-lists">${genMobileSidePanelListsHtml(config, pluginDockContext.entriesById)}</div>
 </div>`;
 };
 

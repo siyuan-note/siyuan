@@ -242,9 +242,12 @@
   }
 
   &-side-panel {
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
+    [data-action="drag"],
+    &--dragging {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
   }
 
   &__panel {

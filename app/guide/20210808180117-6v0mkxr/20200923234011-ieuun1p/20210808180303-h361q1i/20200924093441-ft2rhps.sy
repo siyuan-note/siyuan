@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260921211836"
+		"updated": "20260921213529"
 	},
 	"Children": [
 		{
@@ -1911,58 +1911,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20260921211836"
+				"updated": "20260921213529"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Mind map"
-				}
-			]
-		},
-		{
-			"ID": "20260921204726-7g2nfph",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260921204726-7g2nfph",
-				"updated": "20260921211836"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "On desktop and mobile, use the expansion-level button after Connect in the mind map toolbar. The menu offers levels 1 through 6 and expands the nodes at the selected level too. The center node is level 1, including the generated center node for a list with multiple top-level items. Choose "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Expand Level"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Expand to level 1"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to show the center node and its direct children. Deeper branches retain their previous folding states, and individual branches can still be expanded."
-				}
-			]
-		},
-		{
-			"ID": "20260921204726-jxta1cb",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260921204726-jxta1cb",
-				"updated": "20260921211836"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The same menu also offers Expand all and Collapse all. Collapse all shows only the center node. In editable documents, folding is saved with the list and a batch change can be undone in one step. Read-only views and exported HTML only change the current view. Folding the generated center node is temporary."
 				}
 			]
 		},

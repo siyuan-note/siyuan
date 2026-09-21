@@ -276,7 +276,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             }).join("");
             const overflow = Array.from({length: 7}, (_, day) => {
                 const hidden = segments.filter(segment => segment.lane >= rowLimit && segment.column <= day && segment.column + segment.span > day).length;
-                return hidden && !expanded ? `<button class="av__calendar-more" data-calendar-expand="${start}" style="grid-column:${day + 1}">${escapeHtml(window.siyuan.languages.calendarMore.replace("${x}", hidden.toString()))}</button>` : "";
+                return hidden && !expanded ? `<button class="b3-button b3-button--cancel b3-button--small av__calendar-more" data-calendar-expand="${start}" style="grid-column:${day + 1}">${escapeHtml(window.siyuan.languages.calendarMore.replace("${x}", hidden.toString()))}</button>` : "";
             }).join("");
             body += `<div class="av__calendar-week" data-calendar-week="${start}"><div class="av__calendar-days">${dayHeaders}</div>
                 <div class="av__calendar-events" style="grid-template-rows:repeat(${Math.max(1, maxLane)},auto)">${visible.map(segment => getEventHTML(segment, view, editable)).join("")}</div>
@@ -291,7 +291,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
                 <span class="av__calendar-label">${escapeHtml(label)}</span>
                 <div class="av__calendar-controls">
                 ${iconButton("previous", "iconLeft", window.siyuan.languages.previous)}
-                <button type="button" class="av__calendar-today" data-calendar-action="today">${window.siyuan.languages.calendarToday}</button>
+                <button type="button" class="b3-button b3-button--cancel av__calendar-today" data-calendar-action="today">${window.siyuan.languages.calendarToday}</button>
                 ${iconButton("next", "iconRight", window.siyuan.languages.next)}
                 ${iconButton("jump", "iconCalendar", window.siyuan.languages.calendarJumpDate)}
                 <select class="b3-select" data-calendar-mode aria-label="${window.siyuan.languages.calendarView}"><option value="month"${state.mode === "month" ? " selected" : ""}>${window.siyuan.languages.month}</option><option value="week"${state.mode === "week" ? " selected" : ""}>${window.siyuan.languages.week}</option></select>

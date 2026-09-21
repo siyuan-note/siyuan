@@ -723,17 +723,11 @@
   }
 
   &__tooltip {
+    // 本地提示保留脑图内的定位和边界约束，供编辑器及导出页面共同使用。
     position: absolute;
     z-index: 7;
     max-width: calc(100% - 16px);
-    padding: 4px 8px;
-    border-radius: var(--b3-border-radius);
-    background: var(--b3-tooltips-background);
-    color: var(--b3-tooltips-color);
-    box-sizing: border-box;
-    font-size: 12px;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
+    max-height: calc(100% - 8px);
     pointer-events: none;
   }
 

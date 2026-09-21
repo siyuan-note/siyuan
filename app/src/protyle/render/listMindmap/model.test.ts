@@ -2161,6 +2161,7 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         compile(path.join(__dirname, "create.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_color.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_tooltips.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/protyle/_list-mindmap.scss")).css;
     const taskCSS = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/protyle/_wysiwyg.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_typography.scss")).css;

@@ -517,6 +517,7 @@
 
 .agent-chat__thinking-body--expanded {
   max-height: 2000px;
+  overflow-y: auto;
   padding: 8px 0;
   border-top-color: var(--b3-border-color);
 }

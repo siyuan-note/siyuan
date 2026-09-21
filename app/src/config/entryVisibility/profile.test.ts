@@ -5,28 +5,11 @@ import {resolve} from "node:path";
 import {getEntryCatalogCustomDefaultVisibility, getEntryCatalogDefaultVisibility, getEntryCatalogNode} from "./catalog";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {
-    migrateMindmapMenu,
     getBuiltinProfileEntryVisibility,
     getProfileEntryVisibility,
     isEntryVisibilityImportVersionSupported,
     normalizeEntryVisibilityImportProfile,
 } from "./profile";
-
-test("mind map menu migration preserves visibility and plugin order", () => {
-    const profile = {
-        entries: {"gutter.single.listBlock.listMindmap": false},
-        orders: {"gutter.single.listBlock": ["prependListItem", "listMindmap", "plugin:test", "appendListItem"],
-            "gutter.single.turnInto": ["check", "plugin:convert", "list"]},
-    };
-    migrateMindmapMenu(profile);
-    const expected = {entries: {"gutter.single.turnInto.listMindmap": false}, orders: {
-        "gutter.single.listBlock": ["prependListItem", "plugin:test", "appendListItem"],
-        "gutter.single.turnInto": ["check", "plugin:convert", "list"],
-    }};
-    assert.deepEqual(profile, expected);
-    migrateMindmapMenu(profile);
-    assert.deepEqual(profile, expected);
-});
 
 test("task state imports match kernel migrations and remain stable on reimport", () => {
     const fixtures = JSON.parse(readFileSync(resolve(process.cwd(), "../kernel/conf/testdata/task_status_menu.json"), "utf8"));
@@ -128,11 +111,11 @@ test("custom entry visibility uses a caller-provided default only when the entry
     assert.equal(getProfileEntryVisibility(profile, "hidden", true), false);
 });
 
-test("entry visibility import supports versions 1 through 7", () => {
-    for (const version of [1, 2, 3, 4, 5, 6, 7]) {
-        assert.equal(isEntryVisibilityImportVersionSupported(version, 7), true);
+test("entry visibility import supports versions 1 through 6", () => {
+    for (const version of [1, 2, 3, 4, 5, 6]) {
+        assert.equal(isEntryVisibilityImportVersionSupported(version, 6), true);
     }
-    assert.equal(isEntryVisibilityImportVersionSupported(8, 7), false);
+    assert.equal(isEntryVisibilityImportVersionSupported(7, 6), false);
 });
 
 test("legacy entry visibility imports require base without persisting it", () => {

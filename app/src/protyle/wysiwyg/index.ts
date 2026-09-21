@@ -4392,6 +4392,13 @@ export class WYSIWYG {
                 arrowStartElement = undefined;
             }
 
+            if (getBlockSelectionModeElement(this.element)) {
+                // 块选择模式使用块统计，避免松开按键后被光标所在的文本选区统计覆盖。
+                this.preventKeyup = false;
+                event.stopPropagation();
+                return;
+            }
+
             if (!event.altKey && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.isComposing &&
                 event.key.startsWith("Arrow") && shouldRunAVKeyupFallback(this.preventKeyup,
                     !!isArrowFromOutsideAV) &&

@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260920131944"
+		"updated": "20260921112518"
 	},
 	"Children": [
 		{
@@ -1906,1045 +1906,12 @@
 			]
 		},
 		{
-			"ID": "20210604230145-zsjeri5",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210604230145-zsjeri5",
-				"updated": "20251209212851"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Blockquote"
-				}
-			]
-		},
-		{
-			"ID": "20210604230152-vpxtzjj",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20210604230152-vpxtzjj",
-				"updated": "20251209212850"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": ">"
-				},
-				{
-					"ID": "20210604230153-s8x7oko",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20210604230153-s8x7oko",
-						"updated": "20210604230216"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "Note that it is not a content block ref, but a block quote (Blockquote)."
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251209212851-yo274kb",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20251209212851-yo274kb",
-				"updated": "20251211094305"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Callout block"
-				}
-			]
-		},
-		{
-			"ID": "20251211094305-py67twd",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211094305-py67twd",
-				"updated": "20251211094305"
-			},
-			"CalloutType": "NOTE",
-			"CalloutTitle": "Note",
-			"CalloutIcon": "✏️",
-			"Children": [
-				{
-					"ID": "20251211094305-ow2t21o",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211094305-ow2t21o",
-						"updated": "20251211094305"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "Highlights information that users should take into account, even when skimming."
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211094305-7j529td",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211094305-7j529td",
-				"updated": "20251211094305"
-			},
-			"CalloutType": "TIP",
-			"CalloutTitle": "Tip",
-			"CalloutIcon": "💡",
-			"Children": [
-				{
-					"ID": "20251211094305-49y1j3r",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211094305-49y1j3r",
-						"updated": "20251211094305"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "Optional information to help a user be more successful."
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211094305-6tapwrt",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211094305-6tapwrt",
-				"updated": "20251211094305"
-			},
-			"CalloutType": "IMPORTANT",
-			"CalloutTitle": "Important",
-			"CalloutIcon": "❗",
-			"Children": [
-				{
-					"ID": "20251211094305-pmwapsh",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211094305-pmwapsh",
-						"updated": "20251211094305"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "Crucial information necessary for users to succeed."
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211094305-kq893ph",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211094305-kq893ph",
-				"updated": "20251211094305"
-			},
-			"CalloutType": "WARNING",
-			"CalloutTitle": "Warning",
-			"CalloutIcon": "⚠️",
-			"Children": [
-				{
-					"ID": "20251211094305-2622twh",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211094305-2622twh",
-						"updated": "20251211094305"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "Critical content demanding immediate user attention due to potential risks."
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211094305-bmbbwkp",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211094305-bmbbwkp",
-				"updated": "20251211094305"
-			},
-			"CalloutType": "CAUTION",
-			"CalloutTitle": "Caution",
-			"CalloutIcon": "🚨",
-			"Children": [
-				{
-					"ID": "20251211094305-tmokbr0",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211094305-tmokbr0",
-						"updated": "20251211094305"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "Negative potential consequences of an action."
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-top2oxl",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20260905124213-top2oxl",
-				"updated": "20260905124213"
-			},
-			"HeadingLevel": 2,
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Tabbed container"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-swdj34k",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905124213-swdj34k",
-				"updated": "20260905124213"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Type / and choose Tabbed container to create two tabs. Click a title to switch tabs; double-click it or use the tab menu to edit it. Titles support the same inline formatting as callouts, and tab content can contain nested tabbed containers."
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-zh5dvu9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905124213-zh5dvu9",
-				"updated": "20260905124213"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Use the menu beside the tabs to add, duplicate, delete or reorder tabs and choose a top or left layout. The active tab and layout are saved and synced with the document. Switching in a read-only view is temporary. Removing the tab layout preserves every title and its content in order."
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-kvygzam",
-			"Type": "NodeTabs",
-			"Properties": {
-				"id": "20260905124213-kvygzam",
-				"updated": "20260905124213",
-				"tabs-active-id": "20260905124213-i84zxk7",
-				"tabs-position": "top"
-			},
-			"Children": [
-				{
-					"ID": "20260905124213-i84zxk7",
-					"Type": "NodeTabItem",
-					"Properties": {
-						"id": "20260905124213-i84zxk7",
-						"updated": "20260905124213"
-					},
-					"TabItemTitle": "Option one",
-					"Children": [
-						{
-							"ID": "20260905124213-zp9buah",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260905124213-zp9buah",
-								"updated": "20260905124213"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "This is the first tab content."
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260905124213-jjarsdb",
-					"Type": "NodeTabItem",
-					"Properties": {
-						"id": "20260905124213-jjarsdb",
-						"updated": "20260905124213"
-					},
-					"TabItemTitle": "Option two",
-					"Children": [
-						{
-							"ID": "20260905124213-d4ogy30",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260905124213-d4ogy30",
-								"updated": "20260905124213"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "This is the second tab content."
-								}
-							]
-						},
-						{
-							"ID": "20260905124213-h42tupr",
-							"Type": "NodeTabs",
-							"Properties": {
-								"id": "20260905124213-h42tupr",
-								"updated": "20260905124213",
-								"tabs-active-id": "20260905124213-458mbf6",
-								"tabs-position": "left"
-							},
-							"Children": [
-								{
-									"ID": "20260905124213-458mbf6",
-									"Type": "NodeTabItem",
-									"Properties": {
-										"id": "20260905124213-458mbf6",
-										"updated": "20260905124213"
-									},
-									"TabItemTitle": "Nested tabs",
-									"Children": [
-										{
-											"ID": "20260905124213-exqp25u",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20260905124213-exqp25u",
-												"updated": "20260905124213"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "This is the first tab content."
-												}
-											]
-										}
-									]
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-606oli4",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091509-606oli4",
-				"updated": "20210415200916"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Code block"
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-wae7knn",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091509-wae7knn"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "If the language name is followed by ```, it can have the effect of syntax highlighting, for example:"
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-v2agp4t",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210104091509-v2agp4t",
-				"updated": "20210415200922"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Demonstrate Go code highlighting"
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-7jdx2zj",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"CodeBlockFenceChar": 96,
-			"CodeBlockFenceLen": 3,
-			"CodeBlockOpenFence": "YGBg",
-			"CodeBlockInfo": "Z28=",
-			"CodeBlockCloseFence": "YGBg",
-			"Properties": {
-				"id": "20210104091509-7jdx2zj"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "Z28="
-				},
-				{
-					"ID": "20220307092214-ame28qb",
-					"Type": "NodeCodeBlockCode",
-					"Data": "package main\n\nimport \"fmt\"\n\nfunc main() {\nfmt.Println(\"Hello, World\")\n}\n",
-					"Properties": {
-						"id": "20220307092214-ame28qb"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-yzs0dlz",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210104091509-yzs0dlz",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Demo Java highlighting"
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-686b9xi",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"CodeBlockFenceChar": 96,
-			"CodeBlockFenceLen": 3,
-			"CodeBlockOpenFence": "YGBg",
-			"CodeBlockInfo": "amF2YQ==",
-			"CodeBlockCloseFence": "YGBg",
-			"Properties": {
-				"id": "20210104091509-686b9xi"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "amF2YQ=="
-				},
-				{
-					"ID": "20220307092214-m4qj7wx",
-					"Type": "NodeCodeBlockCode",
-					"Data": "public class HelloWorld {\n\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n\n}\n",
-					"Properties": {
-						"id": "20220307092214-m4qj7wx"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-3a5p9xt",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20210104091509-3a5p9xt",
-				"updated": "20260616221442"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": "> "
-				},
-				{
-					"ID": "20210104091509-ozjt2fc",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20210104091509-ozjt2fc",
-						"updated": "20210104091509"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "Tip: Language names support the following: "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "ruby"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "python"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "js"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "html"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "erb"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "css"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "coffee"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "bash"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "json"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "yml"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": " xml"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​ ..."
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20260616221442-2iocv82",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260616221442-2iocv82",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Additionally, code block language supports "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan-template"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ and "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "template"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​, both equivalent. Using them enables syntax highlighting for "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20201204184532-3qm9l8n",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "SiYuan template"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " syntax. When exporting as a template, the code block is not exported as a code block, but converted to plain paragraph text instead."
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-qr9enpx",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091509-qr9enpx",
-				"updated": "20260910080119"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Table"
-				}
-			]
-		},
-		{
-			"ID": "20260908091355-rch0007",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908091355-rch0007",
-				"updated": "20260908091355"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Table cells support paragraphs, headings, lists, blockquotes, code, and math without manual conversion. Existing Markdown-looking text stays literal, and existing bold text, links, and other inline formatting are preserved."
-				}
-			]
-		},
-		{
-			"ID": "20260908091355-rch0008",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908091355-rch0008",
-				"updated": "20260910080119"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Click a cell to edit it. After creating a table, type directly without clicking again. When the cell contains only one ordinary paragraph, "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " moves to the same column in the next row, or inserts a paragraph after the table when on the last row. "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " switches cells, and "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " inserts a line break within the cell. With headings, multiple paragraphs, or other block content, Enter edits within the cell according to the current content type. Lists and code blocks use their own line-break and indentation behavior. Close suggestions, then press "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Escape"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " or click outside the cell to finish editing and save automatically."
-				}
-			]
-		},
-		{
-			"ID": "20260908091355-rch0009",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908091355-rch0009",
-				"updated": "20260909090723"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Internal paragraphs and list items have no independent block IDs. References to existing blocks, images, and existing inline formatting are supported. Nested tables, databases, super blocks, tabs, callouts, query embeds, thematic breaks, executable diagrams, audio, video, widgets, HTML, and custom blocks are not supported. If pasted content contains an unsupported block, the entire paste is rejected with a message listing the unsupported types; existing content stays unchanged. Standard Markdown exports readable inline content, while HTML, PDF, and Word preserve rich text layout."
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-kjhoeyo",
-			"Type": "NodeTable",
-			"TableAligns": [
-				0,
-				0
-			],
-			"Properties": {
-				"id": "20210104091509-kjhoeyo",
-				"updated": "20210104091509"
-			},
-			"Children": [
-				{
-					"Type": "NodeTableHead",
-					"Data": "thead",
-					"Children": [
-						{
-							"Type": "NodeTableRow",
-							"Data": "tr",
-							"Children": [
-								{
-									"Type": "NodeTableCell",
-									"Data": "th",
-									"Children": [
-										{
-											"Type": "NodeText",
-											"Data": "header 1"
-										}
-									]
-								},
-								{
-									"Type": "NodeTableCell",
-									"Data": "th",
-									"Children": [
-										{
-											"Type": "NodeText",
-											"Data": "header 2"
-										}
-									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 1"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 2"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 3"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 4"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 5"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 6"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220312004745-onue5ab",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20220312004745-onue5ab",
-				"updated": "20220312122833"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "HTML block"
-				}
-			]
-		},
-		{
-			"ID": "20220312004751-frosojs",
-			"Type": "NodeHTMLBlock",
-			"Data": "<div>\n<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World\n</div>",
-			"Properties": {
-				"id": "20220312004751-frosojs",
-				"updated": "20220828102624"
-			}
-		},
-		{
-			"ID": "20220312122714-jgaetrv",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220312122714-jgaetrv",
-				"updated": "20240427231204"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Please refer to "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20240427231112-lcwev4m",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "HTML Block Notes"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " for more details."
-				}
-			]
-		},
-		{
-			"ID": "20210604230313-t41l7jd",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210604230313-t41l7jd",
-				"updated": "20220312004843"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Thematic break"
-				}
-			]
-		},
-		{
-			"ID": "20210604230332-t9wwcol",
-			"Type": "NodeThematicBreak",
-			"Properties": {
-				"id": "20210604230332-t9wwcol",
-				"updated": "20210604230332"
-			}
-		},
-		{
-			"ID": "20210104091509-5te4mca",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091509-5te4mca",
-				"updated": "20210415200947"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Mathematical formula"
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-oizpd0y",
-			"Type": "NodeMathBlock",
-			"Properties": {
-				"id": "20210104091509-oizpd0y",
-				"updated": "20230328091244"
-			},
-			"Children": [
-				{
-					"Type": "NodeMathBlockOpenMarker"
-				},
-				{
-					"Type": "NodeMathBlockContent",
-					"Data": "\\frac{1}{\n  \\Bigl(\\sqrt{\\phi \\sqrt{5}}-\\phi\\Bigr) e^{\n  \\frac25 \\pi}} = 1+\\frac{e^{-2\\pi}} {1+\\frac{e^{-4\\pi}} {\n    1+\\frac{e^{-6\\pi}}\n    {1+\\frac{e^{-8\\pi}}{1+\\cdots}}\n  }\n}"
-				},
-				{
-					"Type": "NodeMathBlockCloseMarker"
-				}
-			]
-		},
-		{
-			"ID": "20210604230350-ql890l0",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210604230350-ql890l0",
-				"updated": "20210608004924"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "IFrame"
-				}
-			]
-		},
-		{
-			"ID": "20220909095329-0tocxte",
-			"Type": "NodeIFrame",
-			"Data": "<iframe src=\"https://player.bilibili.com/player.html?bvid=BV1ov41187qM&amp;page=1&amp;high_quality=1&amp;as_wide=1&amp;allowfullscreen=true&amp;aid=247401039&amp;cid=319662466&amp;autoplay=0\" data-src=\"//player.bilibili.com/player.html?aid=247401039&amp;bvid=BV1ov41187qM&amp;cid=319662466&amp;page=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\" style=\"width: 981px; height: 440px;\" sandbox=\"allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts allow-popups\"></iframe>",
-			"Properties": {
-				"id": "20220909095329-0tocxte",
-				"updated": "20220909095329"
-			}
-		},
-		{
-			"ID": "20210608121322-k9l5wuv",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210608121322-k9l5wuv",
-				"updated": "20210608121326"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Video"
-				}
-			]
-		},
-		{
-			"ID": "20220909095340-rr23xv7",
-			"Type": "NodeVideo",
-			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
-			"Properties": {
-				"id": "20220909095340-rr23xv7",
-				"updated": "20220909095340"
-			}
-		},
-		{
-			"ID": "20210608121327-5vbk32w",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210608121327-5vbk32w",
-				"updated": "20210608121331"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Audio"
-				}
-			]
-		},
-		{
-			"ID": "20210608121458-7rrz8f2",
-			"Type": "NodeAudio",
-			"Data": "<audio controls=\"controls\" src=\"assets/record1623077643753-20210607225403-7cg1jkq.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608121458-mc4mcvz.wav\"></audio>",
-			"Properties": {
-				"id": "20210608121458-7rrz8f2",
-				"updated": "20210608121458"
-			}
-		},
-		{
 			"ID": "20210104091509-v1x69oc",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20260920131944"
+				"updated": "20260921112518"
 			},
 			"Children": [
 				{
@@ -4115,18 +3082,1037 @@
 			]
 		},
 		{
-			"ID": "20211213122548-xg047h3",
-			"Type": "NodeParagraph",
+			"ID": "20210604230145-zsjeri5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20211213122548-xg047h3",
-				"updated": "20260920131944"
+				"id": "20210604230145-zsjeri5",
+				"updated": "20251209212851"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Create a mind map from the slash menu, or switch a list block to mind map view. Opening an editable document automatically converts old mind maps to list mind maps while preserving block IDs and content. Conversion supports undo and document history recovery. Content that cannot be fully converted is preserved and displayed as source. Read-only views and exports display a temporary conversion without changing the original document."
+					"Data": "Blockquote"
 				}
 			]
+		},
+		{
+			"ID": "20210604230152-vpxtzjj",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20210604230152-vpxtzjj",
+				"updated": "20251209212850"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": ">"
+				},
+				{
+					"ID": "20210604230153-s8x7oko",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20210604230153-s8x7oko",
+						"updated": "20210604230216"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Note that it is not a content block ref, but a block quote (Blockquote)."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251209212851-yo274kb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251209212851-yo274kb",
+				"updated": "20251211094305"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Callout block"
+				}
+			]
+		},
+		{
+			"ID": "20251211094305-py67twd",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094305-py67twd",
+				"updated": "20251211094305"
+			},
+			"CalloutType": "NOTE",
+			"CalloutTitle": "Note",
+			"CalloutIcon": "✏️",
+			"Children": [
+				{
+					"ID": "20251211094305-ow2t21o",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094305-ow2t21o",
+						"updated": "20251211094305"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Highlights information that users should take into account, even when skimming."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094305-7j529td",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094305-7j529td",
+				"updated": "20251211094305"
+			},
+			"CalloutType": "TIP",
+			"CalloutTitle": "Tip",
+			"CalloutIcon": "💡",
+			"Children": [
+				{
+					"ID": "20251211094305-49y1j3r",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094305-49y1j3r",
+						"updated": "20251211094305"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Optional information to help a user be more successful."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094305-6tapwrt",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094305-6tapwrt",
+				"updated": "20251211094305"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251211094305-pmwapsh",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094305-pmwapsh",
+						"updated": "20251211094305"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Crucial information necessary for users to succeed."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094305-kq893ph",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094305-kq893ph",
+				"updated": "20251211094305"
+			},
+			"CalloutType": "WARNING",
+			"CalloutTitle": "Warning",
+			"CalloutIcon": "⚠️",
+			"Children": [
+				{
+					"ID": "20251211094305-2622twh",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094305-2622twh",
+						"updated": "20251211094305"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Critical content demanding immediate user attention due to potential risks."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094305-bmbbwkp",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094305-bmbbwkp",
+				"updated": "20251211094305"
+			},
+			"CalloutType": "CAUTION",
+			"CalloutTitle": "Caution",
+			"CalloutIcon": "🚨",
+			"Children": [
+				{
+					"ID": "20251211094305-tmokbr0",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094305-tmokbr0",
+						"updated": "20251211094305"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Negative potential consequences of an action."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-top2oxl",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-top2oxl",
+				"updated": "20260905124213"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tabbed container"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-swdj34k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-swdj34k",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Type / and choose Tabbed container to create two tabs. Click a title to switch tabs; double-click it or use the tab menu to edit it. Titles support the same inline formatting as callouts, and tab content can contain nested tabbed containers."
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-zh5dvu9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-zh5dvu9",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use the menu beside the tabs to add, duplicate, delete or reorder tabs and choose a top or left layout. The active tab and layout are saved and synced with the document. Switching in a read-only view is temporary. Removing the tab layout preserves every title and its content in order."
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-kvygzam",
+			"Type": "NodeTabs",
+			"Properties": {
+				"id": "20260905124213-kvygzam",
+				"updated": "20260905124213",
+				"tabs-active-id": "20260905124213-i84zxk7",
+				"tabs-position": "top"
+			},
+			"Children": [
+				{
+					"ID": "20260905124213-i84zxk7",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260905124213-i84zxk7",
+						"updated": "20260905124213"
+					},
+					"TabItemTitle": "Option one",
+					"Children": [
+						{
+							"ID": "20260905124213-zp9buah",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260905124213-zp9buah",
+								"updated": "20260905124213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "This is the first tab content."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260905124213-jjarsdb",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260905124213-jjarsdb",
+						"updated": "20260905124213"
+					},
+					"TabItemTitle": "Option two",
+					"Children": [
+						{
+							"ID": "20260905124213-d4ogy30",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260905124213-d4ogy30",
+								"updated": "20260905124213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "This is the second tab content."
+								}
+							]
+						},
+						{
+							"ID": "20260905124213-h42tupr",
+							"Type": "NodeTabs",
+							"Properties": {
+								"id": "20260905124213-h42tupr",
+								"updated": "20260905124213",
+								"tabs-active-id": "20260905124213-458mbf6",
+								"tabs-position": "left"
+							},
+							"Children": [
+								{
+									"ID": "20260905124213-458mbf6",
+									"Type": "NodeTabItem",
+									"Properties": {
+										"id": "20260905124213-458mbf6",
+										"updated": "20260905124213"
+									},
+									"TabItemTitle": "Nested tabs",
+									"Children": [
+										{
+											"ID": "20260905124213-exqp25u",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260905124213-exqp25u",
+												"updated": "20260905124213"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "This is the first tab content."
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091509-606oli4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091509-606oli4",
+				"updated": "20210415200916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Code block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091509-wae7knn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091509-wae7knn"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the language name is followed by ```, it can have the effect of syntax highlighting, for example:"
+				}
+			]
+		},
+		{
+			"ID": "20210104091509-v2agp4t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091509-v2agp4t",
+				"updated": "20210415200922"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Demonstrate Go code highlighting"
+				}
+			]
+		},
+		{
+			"ID": "20210104091509-7jdx2zj",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "Z28=",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20210104091509-7jdx2zj"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "Z28="
+				},
+				{
+					"ID": "20220307092214-ame28qb",
+					"Type": "NodeCodeBlockCode",
+					"Data": "package main\n\nimport \"fmt\"\n\nfunc main() {\nfmt.Println(\"Hello, World\")\n}\n",
+					"Properties": {
+						"id": "20220307092214-ame28qb"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20210104091509-yzs0dlz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091509-yzs0dlz",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Demo Java highlighting"
+				}
+			]
+		},
+		{
+			"ID": "20210104091509-686b9xi",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "amF2YQ==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20210104091509-686b9xi"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "amF2YQ=="
+				},
+				{
+					"ID": "20220307092214-m4qj7wx",
+					"Type": "NodeCodeBlockCode",
+					"Data": "public class HelloWorld {\n\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n\n}\n",
+					"Properties": {
+						"id": "20220307092214-m4qj7wx"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20210104091509-3a5p9xt",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20210104091509-3a5p9xt",
+				"updated": "20260616221442"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "> "
+				},
+				{
+					"ID": "20210104091509-ozjt2fc",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20210104091509-ozjt2fc",
+						"updated": "20210104091509"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Tip: Language names support the following: "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "ruby"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "python"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "js"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "html"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "erb"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "css"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "coffee"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "bash"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "json"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "yml"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": " xml"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​ ..."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260616221442-2iocv82",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260616221442-2iocv82",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Additionally, code block language supports "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan-template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, both equivalent. Using them enables syntax highlighting for "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201204184532-3qm9l8n",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "SiYuan template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " syntax. When exporting as a template, the code block is not exported as a code block, but converted to plain paragraph text instead."
+				}
+			]
+		},
+		{
+			"ID": "20210104091509-qr9enpx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091509-qr9enpx",
+				"updated": "20260910080119"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Table"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0007",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0007",
+				"updated": "20260908091355"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Table cells support paragraphs, headings, lists, blockquotes, code, and math without manual conversion. Existing Markdown-looking text stays literal, and existing bold text, links, and other inline formatting are preserved."
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0008",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0008",
+				"updated": "20260910080119"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click a cell to edit it. After creating a table, type directly without clicking again. When the cell contains only one ordinary paragraph, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " moves to the same column in the next row, or inserts a paragraph after the table when on the last row. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " switches cells, and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " inserts a line break within the cell. With headings, multiple paragraphs, or other block content, Enter edits within the cell according to the current content type. Lists and code blocks use their own line-break and indentation behavior. Close suggestions, then press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Escape"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or click outside the cell to finish editing and save automatically."
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0009",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0009",
+				"updated": "20260909090723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Internal paragraphs and list items have no independent block IDs. References to existing blocks, images, and existing inline formatting are supported. Nested tables, databases, super blocks, tabs, callouts, query embeds, thematic breaks, executable diagrams, audio, video, widgets, HTML, and custom blocks are not supported. If pasted content contains an unsupported block, the entire paste is rejected with a message listing the unsupported types; existing content stays unchanged. Standard Markdown exports readable inline content, while HTML, PDF, and Word preserve rich text layout."
+				}
+			]
+		},
+		{
+			"ID": "20210104091509-kjhoeyo",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20210104091509-kjhoeyo",
+				"updated": "20210104091509"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "header 1"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "header 2"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 1"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 2"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 3"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 4"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 5"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 6"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220312004745-onue5ab",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220312004745-onue5ab",
+				"updated": "20220312122833"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HTML block"
+				}
+			]
+		},
+		{
+			"ID": "20220312004751-frosojs",
+			"Type": "NodeHTMLBlock",
+			"Data": "<div>\n<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World\n</div>",
+			"Properties": {
+				"id": "20220312004751-frosojs",
+				"updated": "20220828102624"
+			}
+		},
+		{
+			"ID": "20220312122714-jgaetrv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220312122714-jgaetrv",
+				"updated": "20240427231204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please refer to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240427231112-lcwev4m",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "HTML Block Notes"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for more details."
+				}
+			]
+		},
+		{
+			"ID": "20210604230313-t41l7jd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210604230313-t41l7jd",
+				"updated": "20220312004843"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Thematic break"
+				}
+			]
+		},
+		{
+			"ID": "20210604230332-t9wwcol",
+			"Type": "NodeThematicBreak",
+			"Properties": {
+				"id": "20210604230332-t9wwcol",
+				"updated": "20210604230332"
+			}
+		},
+		{
+			"ID": "20210104091509-5te4mca",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091509-5te4mca",
+				"updated": "20210415200947"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mathematical formula"
+				}
+			]
+		},
+		{
+			"ID": "20210104091509-oizpd0y",
+			"Type": "NodeMathBlock",
+			"Properties": {
+				"id": "20210104091509-oizpd0y",
+				"updated": "20230328091244"
+			},
+			"Children": [
+				{
+					"Type": "NodeMathBlockOpenMarker"
+				},
+				{
+					"Type": "NodeMathBlockContent",
+					"Data": "\\frac{1}{\n  \\Bigl(\\sqrt{\\phi \\sqrt{5}}-\\phi\\Bigr) e^{\n  \\frac25 \\pi}} = 1+\\frac{e^{-2\\pi}} {1+\\frac{e^{-4\\pi}} {\n    1+\\frac{e^{-6\\pi}}\n    {1+\\frac{e^{-8\\pi}}{1+\\cdots}}\n  }\n}"
+				},
+				{
+					"Type": "NodeMathBlockCloseMarker"
+				}
+			]
+		},
+		{
+			"ID": "20210604230350-ql890l0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210604230350-ql890l0",
+				"updated": "20210608004924"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "IFrame"
+				}
+			]
+		},
+		{
+			"ID": "20220909095329-0tocxte",
+			"Type": "NodeIFrame",
+			"Data": "<iframe src=\"https://player.bilibili.com/player.html?bvid=BV1ov41187qM&amp;page=1&amp;high_quality=1&amp;as_wide=1&amp;allowfullscreen=true&amp;aid=247401039&amp;cid=319662466&amp;autoplay=0\" data-src=\"//player.bilibili.com/player.html?aid=247401039&amp;bvid=BV1ov41187qM&amp;cid=319662466&amp;page=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\" style=\"width: 981px; height: 440px;\" sandbox=\"allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts allow-popups\"></iframe>",
+			"Properties": {
+				"id": "20220909095329-0tocxte",
+				"updated": "20220909095329"
+			}
+		},
+		{
+			"ID": "20210608121322-k9l5wuv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210608121322-k9l5wuv",
+				"updated": "20210608121326"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Video"
+				}
+			]
+		},
+		{
+			"ID": "20220909095340-rr23xv7",
+			"Type": "NodeVideo",
+			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
+			"Properties": {
+				"id": "20220909095340-rr23xv7",
+				"updated": "20220909095340"
+			}
+		},
+		{
+			"ID": "20210608121327-5vbk32w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210608121327-5vbk32w",
+				"updated": "20210608121331"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Audio"
+				}
+			]
+		},
+		{
+			"ID": "20210608121458-7rrz8f2",
+			"Type": "NodeAudio",
+			"Data": "<audio controls=\"controls\" src=\"assets/record1623077643753-20210607225403-7cg1jkq.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608121458-mc4mcvz.wav\"></audio>",
+			"Properties": {
+				"id": "20210608121458-7rrz8f2",
+				"updated": "20210608121458"
+			}
 		},
 		{
 			"ID": "20210104091509-oihpzcz",

@@ -752,6 +752,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("- " + Lute.Caret, "iconList", window.siyuan.languages.list, "true")}
     ${getSlashItem("1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
     ${getSlashItem("- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
+    ${getSlashItem(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
     ${getSlashItem("> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
     ${getSlashItem(`::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`, "iconTabs", window.siyuan.languages.tabs, "true")}
     ${getSlashItem(`> [!NOTE]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">✏️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span>`, "true")}
@@ -772,7 +773,6 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("```flowchart\n```", "", "Flow Chart", "true")}
     ${getSlashItem("```graphviz\n```", "", "Graph", "true")}
     ${getSlashItem("```mermaid\n```", "", "Mermaid", "true")}
-    ${getSlashItem(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
     ${getSlashItem("```plantuml\n```", "", "UML", "true")}
 </div>
 <div class="keyboard__slash-title"></div>

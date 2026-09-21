@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260920131944"
+		"updated": "20260921112518"
 	},
 	"Children": [
 		{
@@ -1909,1037 +1909,12 @@
 			]
 		},
 		{
-			"ID": "20210604182634-xswb2hw",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210604182634-xswb2hw",
-				"updated": "20251209210844"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "引述块"
-				}
-			]
-		},
-		{
-			"ID": "20210604223030-6gapuyv",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20210604223030-6gapuyv",
-				"updated": "20251209210836"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": ">"
-				},
-				{
-					"ID": "20210604223031-yogw7qh",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20210604223031-yogw7qh",
-						"updated": "20210604223045"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "注意不是内容块引用，而是引述块（Blockquote）。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251209210844-rap5wy6",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20251209210844-rap5wy6",
-				"updated": "20251211094029"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "提示块"
-				}
-			]
-		},
-		{
-			"ID": "20251211093951-xtkv05z",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211093951-xtkv05z",
-				"updated": "20251211094016"
-			},
-			"CalloutType": "NOTE",
-			"CalloutTitle": "Note",
-			"CalloutIcon": "✏️",
-			"Children": [
-				{
-					"ID": "20251211093951-ywyj5yp",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211093951-ywyj5yp",
-						"updated": "20251211094016"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "突出显示即使快速浏览也应注意的信息。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211093951-olg8lvt",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211093951-olg8lvt",
-				"updated": "20251211094019"
-			},
-			"CalloutType": "TIP",
-			"CalloutTitle": "Tip",
-			"CalloutIcon": "💡",
-			"Children": [
-				{
-					"ID": "20251211093951-nny14nk",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211093951-nny14nk",
-						"updated": "20251211094019"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "可选信息，有助于更顺利地完成任务。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211093951-k74y9ge",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211093951-k74y9ge",
-				"updated": "20251211094024"
-			},
-			"CalloutType": "IMPORTANT",
-			"CalloutTitle": "Important",
-			"CalloutIcon": "❗",
-			"Children": [
-				{
-					"ID": "20251211093951-8rjh25b",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211093951-8rjh25b",
-						"updated": "20251211094024"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "成功完成任务所必需的关键信息。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211093951-580y2vk",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211093951-580y2vk",
-				"updated": "20251211094029"
-			},
-			"CalloutType": "WARNING",
-			"CalloutTitle": "Warning",
-			"CalloutIcon": "⚠️",
-			"Children": [
-				{
-					"ID": "20251211093951-l5o9hoe",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211093951-l5o9hoe",
-						"updated": "20251211094029"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "由于存在潜在风险，此重要内容需要立即关注。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20251211093951-fe1g5ac",
-			"Type": "NodeCallout",
-			"Properties": {
-				"id": "20251211093951-fe1g5ac",
-				"updated": "20251211093951"
-			},
-			"CalloutType": "CAUTION",
-			"CalloutTitle": "Caution",
-			"CalloutIcon": "🚨",
-			"Children": [
-				{
-					"ID": "20251211093951-ppbnywx",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20251211093951-ppbnywx",
-						"updated": "20251211093951"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "某项操作可能带来的负面后果。"
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-nhaajjp",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20260905124213-nhaajjp",
-				"updated": "20260905124213"
-			},
-			"HeadingLevel": 2,
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "页签块"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-ovvyyj9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905124213-ovvyyj9",
-				"updated": "20260905124213"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "输入 / 并选择页签块，可以创建包含两个页签的容器。单击标题切换页签，双击或使用页签菜单编辑标题。标题支持与提示块相同的行级格式，正文支持嵌套页签块。"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-tobqr1m",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905124213-tobqr1m",
-				"updated": "20260905124213"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "使用页签右侧的菜单新增、复制、删除或排序页签，切换顶部或左侧布局。选中的页签和布局随文档保存、同步；只读页面中的切换仅在本次查看时生效。取消页签布局会按顺序保留所有标题与正文。"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-wgaiosf",
-			"Type": "NodeTabs",
-			"Properties": {
-				"id": "20260905124213-wgaiosf",
-				"updated": "20260905124213",
-				"tabs-active-id": "20260905124213-7tik16n",
-				"tabs-position": "top"
-			},
-			"Children": [
-				{
-					"ID": "20260905124213-7tik16n",
-					"Type": "NodeTabItem",
-					"Properties": {
-						"id": "20260905124213-7tik16n",
-						"updated": "20260905124213"
-					},
-					"TabItemTitle": "方案一",
-					"Children": [
-						{
-							"ID": "20260905124213-6b4cs8h",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260905124213-6b4cs8h",
-								"updated": "20260905124213"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "这是第一个页签的正文。"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260905124213-920yhc9",
-					"Type": "NodeTabItem",
-					"Properties": {
-						"id": "20260905124213-920yhc9",
-						"updated": "20260905124213"
-					},
-					"TabItemTitle": "方案二",
-					"Children": [
-						{
-							"ID": "20260905124213-pwnu7na",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260905124213-pwnu7na",
-								"updated": "20260905124213"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "这是第二个页签的正文。"
-								}
-							]
-						},
-						{
-							"ID": "20260905124213-pb5hwmu",
-							"Type": "NodeTabs",
-							"Properties": {
-								"id": "20260905124213-pb5hwmu",
-								"updated": "20260905124213",
-								"tabs-active-id": "20260905124213-niwfnt8",
-								"tabs-position": "left"
-							},
-							"Children": [
-								{
-									"ID": "20260905124213-niwfnt8",
-									"Type": "NodeTabItem",
-									"Properties": {
-										"id": "20260905124213-niwfnt8",
-										"updated": "20260905124213"
-									},
-									"TabItemTitle": "嵌套页签",
-									"Children": [
-										{
-											"ID": "20260905124213-gjvv9b7",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20260905124213-gjvv9b7",
-												"updated": "20260905124213"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "这是第一个页签的正文。"
-												}
-											]
-										}
-									]
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-r7b56f9",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091228-r7b56f9",
-				"updated": "20210415200520"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "代码块"
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-zbx0a7k",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091228-zbx0a7k",
-				"updated": "20210104091228"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果在 ``` 后面跟随语言名称，可以有语法高亮的效果哦，比如："
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-qagtclt",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210104091228-qagtclt",
-				"updated": "20210415200529"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "演示 Go 代码高亮"
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-mwb2x54",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"Properties": {
-				"id": "20210104091228-mwb2x54",
-				"updated": "20210104091228"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "Z28="
-				},
-				{
-					"ID": "20220307091943-kkk3y91",
-					"Type": "NodeCodeBlockCode",
-					"Data": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, 世界\")\n}\n",
-					"Properties": {
-						"id": "20220307091943-kkk3y91"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-cwrynj4",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210104091228-cwrynj4",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "演示 Java 高亮"
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-68vvd95",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"Properties": {
-				"id": "20210104091228-68vvd95",
-				"updated": "20210104091228"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "amF2YQ=="
-				},
-				{
-					"ID": "20220307091943-urze16n",
-					"Type": "NodeCodeBlockCode",
-					"Data": "public class HelloWorld {\n\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n\n}\n",
-					"Properties": {
-						"id": "20220307091943-urze16n"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-zphf09i",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20210104091228-zphf09i",
-				"updated": "20260616221353"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": ">"
-				},
-				{
-					"ID": "20210104091228-rdwfiml",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20210104091228-rdwfiml",
-						"updated": "20210104091228"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "Tip: 语言名称支持下面这些： "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "ruby"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "python"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "js"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "html"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "erb"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "css"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "coffee"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "bash"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "json"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "yml"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​, "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "code",
-							"TextMarkTextContent": "xml"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "​ ..."
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20260616221353-d3vta43",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260616221353-d3vta43",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "另外，代码块语言还支持 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan-template"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 和 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "template"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​，两者等价。使用后会启用"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20201204181006-7bkppue",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "思源模板"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "语法的高亮显示；导出为模板时，该代码块不会以代码块形式导出，而是转为普通段落文本。"
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-1bq55o9",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091228-1bq55o9",
-				"updated": "20260910080119"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "表格"
-				}
-			]
-		},
-		{
-			"ID": "20260908091355-rch0004",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908091355-rch0004",
-				"updated": "20260908091355"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "单元格默认支持编辑段落、标题、列表、引述、代码和公式，无需手动转换。已有文字中的 Markdown 标记保持原样，原有加粗、链接等格式也会保留。"
-				}
-			]
-		},
-		{
-			"ID": "20260908091355-rch0005",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908091355-rch0005",
-				"updated": "20260910080119"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "点击单元格即可编辑；新建表格后可直接输入，无需再次点击。单元格仅含一个普通段落时，"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 移到下一行同列；表格末行则在表格后插入段落。"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 切换单元格，"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 在单元格内换行。包含标题、多个段落等内容时，Enter 按当前内容类型在单元格内编辑；列表和代码块使用对应的换行和缩进操作。关闭提示后按 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Escape"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 或点击单元格外结束编辑，内容自动保存。"
-				}
-			]
-		},
-		{
-			"ID": "20260908091355-rch0006",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908091355-rch0006",
-				"updated": "20260909090723"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "内部段落和列表项没有独立块 ID，支持引用已有块。图片及原有行级格式可以保留。不支持嵌套表格、数据库、超级块、页签、提示块、查询嵌入、分隔线、可执行图表、音视频、挂件、HTML 和自定义块。粘贴内容包含不支持的块时，会拒绝整次粘贴并提示不支持的类型，原有内容不变。标准 Markdown 导出为可读的行级内容，HTML、PDF 和 Word 导出保留富文本排版。"
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-eem86ni",
-			"Type": "NodeTable",
-			"TableAligns": [
-				0,
-				0
-			],
-			"Properties": {
-				"id": "20210104091228-eem86ni",
-				"updated": "20210104091228"
-			},
-			"Children": [
-				{
-					"Type": "NodeTableHead",
-					"Data": "thead",
-					"Children": [
-						{
-							"Type": "NodeTableRow",
-							"Data": "tr",
-							"Children": [
-								{
-									"Type": "NodeTableCell",
-									"Data": "th",
-									"Children": [
-										{
-											"Type": "NodeText",
-											"Data": "header 1"
-										}
-									]
-								},
-								{
-									"Type": "NodeTableCell",
-									"Data": "th",
-									"Children": [
-										{
-											"Type": "NodeText",
-											"Data": "header 2"
-										}
-									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 1"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 2"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 3"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 4"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 5"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "cell 6"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220312004459-gdhy5je",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20220312004459-gdhy5je",
-				"updated": "20220312004516"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "HTML 块"
-				}
-			]
-		},
-		{
-			"ID": "20220312004517-f6i1k8m",
-			"Type": "NodeHTMLBlock",
-			"Data": "<div>\n<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World\n</div>",
-			"Properties": {
-				"id": "20220312004517-f6i1k8m",
-				"updated": "20240427230559"
-			}
-		},
-		{
-			"ID": "20220312122055-qsltja9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220312122055-qsltja9",
-				"updated": "20240427230913"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "更多细节请参考 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20240427230507-yeaxqbs",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "HTML 块注意"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
-				}
-			]
-		},
-		{
-			"ID": "20210604183516-4v5xvue",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210604183516-4v5xvue",
-				"updated": "20210604183745"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "分隔线"
-				}
-			]
-		},
-		{
-			"ID": "20210604222430-tctcbzh",
-			"Type": "NodeThematicBreak",
-			"Properties": {
-				"id": "20210604222430-tctcbzh",
-				"updated": "20210604222430"
-			}
-		},
-		{
-			"ID": "20210104091228-l7g1s3j",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091228-l7g1s3j",
-				"updated": "20210415200550"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "数学公式"
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-9ok9gv4",
-			"Type": "NodeMathBlock",
-			"Properties": {
-				"id": "20210104091228-9ok9gv4"
-			},
-			"Children": [
-				{
-					"Type": "NodeMathBlockOpenMarker"
-				},
-				{
-					"ID": "20220307091943-xh5wtqf",
-					"Type": "NodeMathBlockContent",
-					"Data": "\\frac{1}{\n  \\Bigl(\\sqrt{\\phi \\sqrt{5}}-\\phi\\Bigr) e^{\n  \\frac25 \\pi}} = 1+\\frac{e^{-2\\pi}} {1+\\frac{e^{-4\\pi}} {\n    1+\\frac{e^{-6\\pi}}\n    {1+\\frac{e^{-8\\pi}}{1+\\cdots}}\n  }\n}",
-					"Properties": {
-						"id": "20220307091943-xh5wtqf"
-					}
-				},
-				{
-					"Type": "NodeMathBlockCloseMarker"
-				}
-			]
-		},
-		{
-			"ID": "20210604183551-ob6f6wk",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210604183551-ob6f6wk",
-				"updated": "20210608004838"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "IFrame"
-				}
-			]
-		},
-		{
-			"ID": "20220908200902-6rqv2wt",
-			"Type": "NodeIFrame",
-			"Data": "<iframe src=\"https://player.bilibili.com/player.html?bvid=BV1ov41187qM&amp;page=1&amp;high_quality=1&amp;as_wide=1&amp;allowfullscreen=true&amp;aid=247401039&amp;cid=319662466&amp;autoplay=0\" data-src=\"//player.bilibili.com/player.html?aid=247401039&amp;bvid=BV1ov41187qM&amp;cid=319662466&amp;page=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\" style=\"width: 981px; height: 440px;\" sandbox=\"allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts allow-popups\"></iframe>",
-			"Properties": {
-				"id": "20220908200902-6rqv2wt",
-				"updated": "20220908200902"
-			}
-		},
-		{
-			"ID": "20210608113637-i04ffr2",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210608113637-i04ffr2",
-				"updated": "20210608120716"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "视频"
-				}
-			]
-		},
-		{
-			"ID": "20210608113914-zvtw5kj",
-			"Type": "NodeVideo",
-			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
-			"Properties": {
-				"id": "20210608113914-zvtw5kj",
-				"updated": "20210608113914"
-			}
-		},
-		{
-			"ID": "20210608113645-k19wsmr",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210608113645-k19wsmr",
-				"updated": "20210608113650"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "音频"
-				}
-			]
-		},
-		{
-			"ID": "20210608113713-wm8271x",
-			"Type": "NodeAudio",
-			"Data": "<audio controls=\"controls\" src=\"assets/record1623120470117-20210608104750-2thv5m5.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608113713-4eddn56.wav\"></audio>",
-			"Properties": {
-				"id": "20210608113713-wm8271x",
-				"updated": "20210608113713"
-			}
-		},
-		{
 			"ID": "20210104091228-wdpx6ev",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20260920131944"
+				"updated": "20260921112518"
 			},
 			"Children": [
 				{
@@ -4110,18 +3085,1029 @@
 			]
 		},
 		{
-			"ID": "20211213122456-r9r9njg",
-			"Type": "NodeParagraph",
+			"ID": "20210604182634-xswb2hw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20211213122456-r9r9njg",
-				"updated": "20260920131944"
+				"id": "20210604182634-xswb2hw",
+				"updated": "20251209210844"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通过斜杠菜单新建脑图，或将列表块切换为脑图视图。打开可编辑文档时，旧脑图会自动转换为列表脑图，保留块 ID 和内容，支持撤销及文档历史恢复。无法完整转换的内容保留并显示源码。只读视图和导出仅转换显示，不修改原文档。"
+					"Data": "引述块"
 				}
 			]
+		},
+		{
+			"ID": "20210604223030-6gapuyv",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20210604223030-6gapuyv",
+				"updated": "20251209210836"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": ">"
+				},
+				{
+					"ID": "20210604223031-yogw7qh",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20210604223031-yogw7qh",
+						"updated": "20210604223045"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "注意不是内容块引用，而是引述块（Blockquote）。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251209210844-rap5wy6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251209210844-rap5wy6",
+				"updated": "20251211094029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提示块"
+				}
+			]
+		},
+		{
+			"ID": "20251211093951-xtkv05z",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211093951-xtkv05z",
+				"updated": "20251211094016"
+			},
+			"CalloutType": "NOTE",
+			"CalloutTitle": "Note",
+			"CalloutIcon": "✏️",
+			"Children": [
+				{
+					"ID": "20251211093951-ywyj5yp",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211093951-ywyj5yp",
+						"updated": "20251211094016"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "突出显示即使快速浏览也应注意的信息。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211093951-olg8lvt",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211093951-olg8lvt",
+				"updated": "20251211094019"
+			},
+			"CalloutType": "TIP",
+			"CalloutTitle": "Tip",
+			"CalloutIcon": "💡",
+			"Children": [
+				{
+					"ID": "20251211093951-nny14nk",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211093951-nny14nk",
+						"updated": "20251211094019"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "可选信息，有助于更顺利地完成任务。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211093951-k74y9ge",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211093951-k74y9ge",
+				"updated": "20251211094024"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251211093951-8rjh25b",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211093951-8rjh25b",
+						"updated": "20251211094024"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "成功完成任务所必需的关键信息。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211093951-580y2vk",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211093951-580y2vk",
+				"updated": "20251211094029"
+			},
+			"CalloutType": "WARNING",
+			"CalloutTitle": "Warning",
+			"CalloutIcon": "⚠️",
+			"Children": [
+				{
+					"ID": "20251211093951-l5o9hoe",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211093951-l5o9hoe",
+						"updated": "20251211094029"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "由于存在潜在风险，此重要内容需要立即关注。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211093951-fe1g5ac",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211093951-fe1g5ac",
+				"updated": "20251211093951"
+			},
+			"CalloutType": "CAUTION",
+			"CalloutTitle": "Caution",
+			"CalloutIcon": "🚨",
+			"Children": [
+				{
+					"ID": "20251211093951-ppbnywx",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211093951-ppbnywx",
+						"updated": "20251211093951"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "某项操作可能带来的负面后果。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-nhaajjp",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-nhaajjp",
+				"updated": "20260905124213"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签块"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-ovvyyj9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-ovvyyj9",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "输入 / 并选择页签块，可以创建包含两个页签的容器。单击标题切换页签，双击或使用页签菜单编辑标题。标题支持与提示块相同的行级格式，正文支持嵌套页签块。"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-tobqr1m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-tobqr1m",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用页签右侧的菜单新增、复制、删除或排序页签，切换顶部或左侧布局。选中的页签和布局随文档保存、同步；只读页面中的切换仅在本次查看时生效。取消页签布局会按顺序保留所有标题与正文。"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-wgaiosf",
+			"Type": "NodeTabs",
+			"Properties": {
+				"id": "20260905124213-wgaiosf",
+				"updated": "20260905124213",
+				"tabs-active-id": "20260905124213-7tik16n",
+				"tabs-position": "top"
+			},
+			"Children": [
+				{
+					"ID": "20260905124213-7tik16n",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260905124213-7tik16n",
+						"updated": "20260905124213"
+					},
+					"TabItemTitle": "方案一",
+					"Children": [
+						{
+							"ID": "20260905124213-6b4cs8h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260905124213-6b4cs8h",
+								"updated": "20260905124213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "这是第一个页签的正文。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260905124213-920yhc9",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260905124213-920yhc9",
+						"updated": "20260905124213"
+					},
+					"TabItemTitle": "方案二",
+					"Children": [
+						{
+							"ID": "20260905124213-pwnu7na",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260905124213-pwnu7na",
+								"updated": "20260905124213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "这是第二个页签的正文。"
+								}
+							]
+						},
+						{
+							"ID": "20260905124213-pb5hwmu",
+							"Type": "NodeTabs",
+							"Properties": {
+								"id": "20260905124213-pb5hwmu",
+								"updated": "20260905124213",
+								"tabs-active-id": "20260905124213-niwfnt8",
+								"tabs-position": "left"
+							},
+							"Children": [
+								{
+									"ID": "20260905124213-niwfnt8",
+									"Type": "NodeTabItem",
+									"Properties": {
+										"id": "20260905124213-niwfnt8",
+										"updated": "20260905124213"
+									},
+									"TabItemTitle": "嵌套页签",
+									"Children": [
+										{
+											"ID": "20260905124213-gjvv9b7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260905124213-gjvv9b7",
+												"updated": "20260905124213"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "这是第一个页签的正文。"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091228-r7b56f9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091228-r7b56f9",
+				"updated": "20210415200520"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "代码块"
+				}
+			]
+		},
+		{
+			"ID": "20210104091228-zbx0a7k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091228-zbx0a7k",
+				"updated": "20210104091228"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果在 ``` 后面跟随语言名称，可以有语法高亮的效果哦，比如："
+				}
+			]
+		},
+		{
+			"ID": "20210104091228-qagtclt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091228-qagtclt",
+				"updated": "20210415200529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "演示 Go 代码高亮"
+				}
+			]
+		},
+		{
+			"ID": "20210104091228-mwb2x54",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20210104091228-mwb2x54",
+				"updated": "20210104091228"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "Z28="
+				},
+				{
+					"ID": "20220307091943-kkk3y91",
+					"Type": "NodeCodeBlockCode",
+					"Data": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, 世界\")\n}\n",
+					"Properties": {
+						"id": "20220307091943-kkk3y91"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20210104091228-cwrynj4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091228-cwrynj4",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "演示 Java 高亮"
+				}
+			]
+		},
+		{
+			"ID": "20210104091228-68vvd95",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20210104091228-68vvd95",
+				"updated": "20210104091228"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "amF2YQ=="
+				},
+				{
+					"ID": "20220307091943-urze16n",
+					"Type": "NodeCodeBlockCode",
+					"Data": "public class HelloWorld {\n\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n\n}\n",
+					"Properties": {
+						"id": "20220307091943-urze16n"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20210104091228-zphf09i",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20210104091228-zphf09i",
+				"updated": "20260616221353"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": ">"
+				},
+				{
+					"ID": "20210104091228-rdwfiml",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20210104091228-rdwfiml",
+						"updated": "20210104091228"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Tip: 语言名称支持下面这些： "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "ruby"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "python"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "js"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "html"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "erb"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "css"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "coffee"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "bash"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "json"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "yml"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​, "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "xml"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​ ..."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260616221353-d3vta43",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260616221353-d3vta43",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "另外，代码块语言还支持 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan-template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，两者等价。使用后会启用"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201204181006-7bkppue",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "思源模板"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "语法的高亮显示；导出为模板时，该代码块不会以代码块形式导出，而是转为普通段落文本。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091228-1bq55o9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091228-1bq55o9",
+				"updated": "20260910080119"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表格"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0004",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0004",
+				"updated": "20260908091355"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "单元格默认支持编辑段落、标题、列表、引述、代码和公式，无需手动转换。已有文字中的 Markdown 标记保持原样，原有加粗、链接等格式也会保留。"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0005",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0005",
+				"updated": "20260910080119"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击单元格即可编辑；新建表格后可直接输入，无需再次点击。单元格仅含一个普通段落时，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 移到下一行同列；表格末行则在表格后插入段落。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切换单元格，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 在单元格内换行。包含标题、多个段落等内容时，Enter 按当前内容类型在单元格内编辑；列表和代码块使用对应的换行和缩进操作。关闭提示后按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Escape"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或点击单元格外结束编辑，内容自动保存。"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0006",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0006",
+				"updated": "20260909090723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "内部段落和列表项没有独立块 ID，支持引用已有块。图片及原有行级格式可以保留。不支持嵌套表格、数据库、超级块、页签、提示块、查询嵌入、分隔线、可执行图表、音视频、挂件、HTML 和自定义块。粘贴内容包含不支持的块时，会拒绝整次粘贴并提示不支持的类型，原有内容不变。标准 Markdown 导出为可读的行级内容，HTML、PDF 和 Word 导出保留富文本排版。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091228-eem86ni",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20210104091228-eem86ni",
+				"updated": "20210104091228"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "header 1"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "header 2"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 1"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 2"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 3"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 4"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 5"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "cell 6"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220312004459-gdhy5je",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220312004459-gdhy5je",
+				"updated": "20220312004516"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HTML 块"
+				}
+			]
+		},
+		{
+			"ID": "20220312004517-f6i1k8m",
+			"Type": "NodeHTMLBlock",
+			"Data": "<div>\n<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World\n</div>",
+			"Properties": {
+				"id": "20220312004517-f6i1k8m",
+				"updated": "20240427230559"
+			}
+		},
+		{
+			"ID": "20220312122055-qsltja9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220312122055-qsltja9",
+				"updated": "20240427230913"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更多细节请参考 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240427230507-yeaxqbs",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "HTML 块注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20210604183516-4v5xvue",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210604183516-4v5xvue",
+				"updated": "20210604183745"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "分隔线"
+				}
+			]
+		},
+		{
+			"ID": "20210604222430-tctcbzh",
+			"Type": "NodeThematicBreak",
+			"Properties": {
+				"id": "20210604222430-tctcbzh",
+				"updated": "20210604222430"
+			}
+		},
+		{
+			"ID": "20210104091228-l7g1s3j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091228-l7g1s3j",
+				"updated": "20210415200550"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数学公式"
+				}
+			]
+		},
+		{
+			"ID": "20210104091228-9ok9gv4",
+			"Type": "NodeMathBlock",
+			"Properties": {
+				"id": "20210104091228-9ok9gv4"
+			},
+			"Children": [
+				{
+					"Type": "NodeMathBlockOpenMarker"
+				},
+				{
+					"ID": "20220307091943-xh5wtqf",
+					"Type": "NodeMathBlockContent",
+					"Data": "\\frac{1}{\n  \\Bigl(\\sqrt{\\phi \\sqrt{5}}-\\phi\\Bigr) e^{\n  \\frac25 \\pi}} = 1+\\frac{e^{-2\\pi}} {1+\\frac{e^{-4\\pi}} {\n    1+\\frac{e^{-6\\pi}}\n    {1+\\frac{e^{-8\\pi}}{1+\\cdots}}\n  }\n}",
+					"Properties": {
+						"id": "20220307091943-xh5wtqf"
+					}
+				},
+				{
+					"Type": "NodeMathBlockCloseMarker"
+				}
+			]
+		},
+		{
+			"ID": "20210604183551-ob6f6wk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210604183551-ob6f6wk",
+				"updated": "20210608004838"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "IFrame"
+				}
+			]
+		},
+		{
+			"ID": "20220908200902-6rqv2wt",
+			"Type": "NodeIFrame",
+			"Data": "<iframe src=\"https://player.bilibili.com/player.html?bvid=BV1ov41187qM&amp;page=1&amp;high_quality=1&amp;as_wide=1&amp;allowfullscreen=true&amp;aid=247401039&amp;cid=319662466&amp;autoplay=0\" data-src=\"//player.bilibili.com/player.html?aid=247401039&amp;bvid=BV1ov41187qM&amp;cid=319662466&amp;page=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\" style=\"width: 981px; height: 440px;\" sandbox=\"allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts allow-popups\"></iframe>",
+			"Properties": {
+				"id": "20220908200902-6rqv2wt",
+				"updated": "20220908200902"
+			}
+		},
+		{
+			"ID": "20210608113637-i04ffr2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210608113637-i04ffr2",
+				"updated": "20210608120716"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "视频"
+				}
+			]
+		},
+		{
+			"ID": "20210608113914-zvtw5kj",
+			"Type": "NodeVideo",
+			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
+			"Properties": {
+				"id": "20210608113914-zvtw5kj",
+				"updated": "20210608113914"
+			}
+		},
+		{
+			"ID": "20210608113645-k19wsmr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210608113645-k19wsmr",
+				"updated": "20210608113650"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "音频"
+				}
+			]
+		},
+		{
+			"ID": "20210608113713-wm8271x",
+			"Type": "NodeAudio",
+			"Data": "<audio controls=\"controls\" src=\"assets/record1623120470117-20210608104750-2thv5m5.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608113713-4eddn56.wav\"></audio>",
+			"Properties": {
+				"id": "20210608113713-wm8271x",
+				"updated": "20210608113713"
+			}
 		},
 		{
 			"ID": "20210104091228-2nz4ows",

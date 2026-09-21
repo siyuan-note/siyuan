@@ -60,7 +60,7 @@ func TestRPCWebSocketContractMessages(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		expected, err := p.dispatchRPCContract(request)
+		expected, err := p.dispatchRPCContract(ctx, request)
 		if err != nil {
 			t.Fatal(err)
 		}

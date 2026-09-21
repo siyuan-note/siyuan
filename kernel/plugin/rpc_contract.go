@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -47,7 +48,7 @@ func DispatchRPCContract(c *gin.Context, request apicontract.PluginRPCBatchReque
 	if !ok {
 		panic("RPC plugin was not prepared")
 	}
-	response, err := p.dispatchRPCContract(request)
+	response, err := p.dispatchRPCContract(c.Request.Context(), request)
 	if err != nil {
 		return rpcContractInternalError(err)
 	}
@@ -58,7 +59,7 @@ func DispatchRPCContract(c *gin.Context, request apicontract.PluginRPCBatchReque
 }
 
 // dispatchRPCContract 共用单次与批量调用的类型化响应，空值表示不发送通知回复。
-func (p *KernelPlugin) dispatchRPCContract(request apicontract.PluginRPCBatchRequest) (*apicontract.PluginRPCResponse, error) {
+func (p *KernelPlugin) dispatchRPCContract(ctx context.Context, request apicontract.PluginRPCBatchRequest) (*apicontract.PluginRPCResponse, error) {
 	if request.Error != nil {
 		response := apicontract.RPCSingleResponse(apicontract.RPCFailureReply(*request.Error))
 		return &response, nil
@@ -67,7 +68,7 @@ func (p *KernelPlugin) dispatchRPCContract(request apicontract.PluginRPCBatchReq
 	if err != nil {
 		return nil, err
 	}
-	responses := p.dispatchRpcRequests(requests)
+	responses := p.dispatchRpcRequests(ctx, requests)
 	var replies []apicontract.PluginRPCReply
 	for _, response := range responses {
 		if response == nil || response.Response == nil && response.Error == nil {

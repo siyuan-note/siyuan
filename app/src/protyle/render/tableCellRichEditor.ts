@@ -210,7 +210,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
                 return;
             }
             const oldHTML = cleanTableCellRichHTML(table.outerHTML);
-            const redoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection()) || undoSelection;
+            const redoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection(), true) || undoSelection;
             const tableRange = document.createRange();
             tableRange.selectNodeContents(cell);
             tableRange.collapse(true);

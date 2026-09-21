@@ -7,7 +7,8 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {createSourceFile, isClassDeclaration, isMethodDeclaration, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string, enterSource: string, hintSource: string, keydownSource: string, copySource: string) => {
+const browserCases = async (source: string, enterSource: string, hintSource: string, keydownSource: string,
+                            copySource: string, selectionSource: string, highlightSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const api = new Function(source + "\nreturn {getAgentLute, configureAVRichTextLute, getTableCellEditorLute, " +
         "canEnterCodeBlock, hasCodeBlockFence, getTableCellInlineHTML, serializeTableCellRich, " +
@@ -282,6 +283,65 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     copyController.abort();
     wysiwyg.querySelector(".protyle-action__copy").dispatchEvent(new MouseEvent("click", {bubbles: true}));
     check.equal(copied.length, 6, "closing the editor removes the copy handler");
+    const selectionDependencies = {getContenteditableElement, isNotEditBlock: () => false, revealTabsForTarget: () => {}};
+    const selectionAPI = new Function(...Object.keys(selectionDependencies), selectionSource +
+        "\nreturn {captureRichCellSelection, restoreRichCellSelection, focusByOffset, getSelectionOffset};")(
+        ...Object.values(selectionDependencies)) as typeof import("./tableCellRichSelection") & typeof import("./selection");
+    const renderDependencies = {
+        ...selectionAPI, Constants: {PROTYLE_CDN: ""}, setCodeTheme: () => {}, addScript: () => Promise.resolve(),
+    };
+    const render = new Function(...Object.keys(renderDependencies), highlightSource + "\nreturn highlightRender;")(
+        ...Object.values(renderDependencies)) as typeof import("../render/highlightRender").highlightRender;
+    Object.assign(window, {hljs: {
+        getLanguage: () => true,
+        highlight: (text: string) => {
+            const span = document.createElement("span");
+            span.textContent = text;
+            return {value: span.outerHTML};
+        },
+    }});
+    const body = "4441231234444\n\n\n123555555\n22\n\n123\n";
+    wysiwyg.innerHTML = base.Md2BlockDOM("sdf\n\n```java\n" + body + "```");
+    const codeEdit = wysiwyg.querySelector<HTMLElement>('.hljs [contenteditable="true"]');
+    selectionAPI.focusByOffset(codeEdit, 23, 23);
+    const beforeEdit = selectionAPI.captureRichCellSelection(wysiwyg, getSelection());
+    check.equal(beforeEdit.startIndex, 1, "the line number gutter is not an editable block");
+    const marker = document.createElement("wbr");
+    const markerRange = selectionAPI.focusByOffset(codeEdit, 24, 24, false);
+    check.ok(markerRange);
+    markerRange.insertNode(marker);
+    selectionAPI.focusByOffset(codeEdit, 0, 0);
+    const pending = selectionAPI.captureRichCellSelection(wysiwyg, getSelection(), true);
+    check.equal(pending.start, 24, "pending highlight uses the caret marker instead of the stale DOM selection");
+    const serialized = api.serializeTableCellRich(wysiwyg.innerHTML);
+    check.ok(!serialized.markdown.includes(Lute.Caret), "temporary caret must not enter stored cell content");
+    check.ok(wysiwyg.contains(marker), "serialization leaves the live caret intact");
+    const savedCell = document.createElement("td");
+    api.updateTableCellEditingValue(savedCell, serialized);
+    for (const lineNumbers of [false, true]) {
+        window.siyuan.config.editor.codeSyntaxHighlightLineNum = lineNumbers;
+        window.siyuan.config.editor.fontSize = 16;
+        for (const saved of [beforeEdit, pending, {...beforeEdit, end: 28, backward: true}]) {
+            wysiwyg.innerHTML = api.getTableCellRichBlockDOM(savedCell);
+            render(wysiwyg);
+            check.equal(selectionAPI.restoreRichCellSelection(wysiwyg, saved), true);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            check.deepEqual(selectionAPI.captureRichCellSelection(wysiwyg, getSelection()), saved,
+                "asynchronous highlighting preserves the restored undo or redo selection");
+            check.equal(wysiwyg.querySelector('.hljs [contenteditable="true"]').textContent, body);
+        }
+        wysiwyg.innerHTML = api.getTableCellRichBlockDOM(savedCell);
+        render(wysiwyg);
+        const clickedCode = wysiwyg.querySelector<HTMLElement>('.hljs [contenteditable="true"]');
+        const clickRange = document.createRange();
+        clickRange.setStart(clickedCode.firstChild, 7);
+        clickRange.collapse(true);
+        getSelection().removeAllRanges();
+        getSelection().addRange(clickRange);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.equal(selectionAPI.captureRichCellSelection(wysiwyg, getSelection()).start, 7,
+            "first-click caret survives the initial asynchronous code highlight");
+    }
     fixture.remove();
     return "Table cell code insertion cases passed";
 };
@@ -309,6 +369,8 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const copyStart = editor.indexOf('host.addEventListener("click", event => {');
     const copyEnd = editor.indexOf("}, {capture: true, signal});", copyStart) + "}, {capture: true, signal});".length;
     const copySource = compile(read("normalizeText.ts") + "\n" + editor.substring(copyStart, copyEnd));
+    const selectionSource = compile(read("selection.ts")) + "\n" + compile(read("tableCellRichSelection.ts"));
+    const highlightSource = compile(read("../render/highlightRender.ts"));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cell-code-test-"));
     const script = path.join(temporary, "run.cjs");
     const lutePath = path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js");
@@ -321,7 +383,8 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         const result = await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, compile(read("../wysiwyg/enter.ts")), hintSource, keydownSource, copySource]
+        browserCases.toString() + ")(" + [source, compile(read("../wysiwyg/enter.ts")), hintSource, keydownSource, copySource,
+            selectionSource, highlightSource]
             .map(value => JSON.stringify(value)).join(",") + ")")});
         console.log(result);
         win.destroy();

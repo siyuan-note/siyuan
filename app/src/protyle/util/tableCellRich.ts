@@ -82,6 +82,8 @@ export const getTableCellRichBlockDOM = (cell: Element) => {
 export const serializeTableCellRich = (blockDOM: string) => {
     const template = document.createElement("template");
     template.innerHTML = sanitizeAVRichTextBlockDOM(blockDOM, true);
+    // 光标由事务选区单独记录，不能将临时定位节点序列化为正文。
+    template.content.querySelectorAll("wbr").forEach(marker => marker.remove());
     let prefix = "SYTABLECELLWHITESPACE";
     while (template.innerHTML.includes(prefix)) {
         prefix += "X";

@@ -460,12 +460,12 @@
   &__fold {
     position: absolute;
     z-index: 1;
-    right: -26px;
-    top: calc(50% - 11px);
-    min-width: 22px;
-    width: 22px;
-    height: 22px;
-    padding: 4px;
+    right: -19px;
+    top: calc(50% - 9px);
+    min-width: 18px;
+    width: 18px;
+    height: 18px;
+    padding: 2px;
     border: 1px solid var(--b3-border-color);
     border-radius: 50%;
     background: var(--b3-theme-background);
@@ -494,12 +494,12 @@
 
   &__add-child {
     position: absolute;
-    right: -26px;
-    top: calc(50% - 11px);
-    min-width: 22px;
-    width: 22px;
-    height: 22px;
-    padding: 4px;
+    right: -19px;
+    top: calc(50% - 9px);
+    min-width: 18px;
+    width: 18px;
+    height: 18px;
+    padding: 2px;
     border: 1px solid var(--b3-border-color);
     border-radius: 50%;
     background: var(--b3-theme-surface);
@@ -521,25 +521,25 @@
     left: 100%;
     top: 0;
     bottom: 0;
-    width: 26px;
+    width: 19px;
     visibility: hidden;
   }
 
   &__node--branch > &__add-child {
-    right: -53px;
+    right: -39px;
   }
 
   &__node--branch > &__add-bridge {
-    width: 53px;
+    width: 39px;
   }
 
   &__node:not(.list-mindmap__node--root) {
     > .list-mindmap__fold {
-      top: calc(100% - 10px);
+      top: calc(100% - 8px);
     }
 
     > .list-mindmap__add-child {
-      top: calc(100% - 10px);
+      top: calc(100% - 8px);
     }
 
     > .list-mindmap__add-bridge {

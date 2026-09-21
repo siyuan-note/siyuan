@@ -3,6 +3,30 @@
   border: 1px solid var(--b3-border-color);
   border-radius: var(--b3-border-radius-b);
 
+  // 图片导出只保留脑图内容，不包含悬停控件和选中状态。
+  .list-mindmap {
+    &__toolbar,
+    &__inspector,
+    &__tooltip,
+    &__route-handle,
+    &__route-status,
+    &__add-bridge,
+    &__fold,
+    &__add-child {
+      display: none !important;
+    }
+
+    &__node--selected::after {
+      display: none !important;
+    }
+
+    &__node,
+    &__relation {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+  }
+
   .protyle-wysiwyg {
     position: relative;
     z-index: 1;

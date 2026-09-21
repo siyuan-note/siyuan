@@ -529,6 +529,12 @@ func ControlConcurrency(c *gin.Context) {
 
 	reqPath := c.Request.URL.Path
 
+	// 插件 RPC 独立处理各次调用，避免单个调用阻塞其他插件或信息查询。
+	if reqPath == "/api/plugin/rpc" {
+		c.Next()
+		return
+	}
+
 	// Improve the concurrency of the kernel data reading interfaces https://github.com/siyuan-note/siyuan/issues/10149
 	if strings.HasPrefix(reqPath, "/stage/") ||
 		strings.HasPrefix(reqPath, "/assets/") ||

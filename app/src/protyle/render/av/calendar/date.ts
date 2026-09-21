@@ -26,7 +26,13 @@ export const getCalendarRange = (anchor: number, mode: "month" | "week", weekSta
         date.setDate(1);
     }
     const start = addCalendarDays(date.getTime(), -((date.getDay() - weekStart + 7) % 7));
-    return {start, end: addCalendarDays(start, mode === "month" ? 42 : 7),
+    let end = addCalendarDays(start, 7);
+    if (mode === "month") {
+        // 月范围只包含与当月相交的完整周，结束端点为最后一周之后的起始日。
+        date.setMonth(date.getMonth() + 1, 1);
+        end = addCalendarDays(date.getTime(), (weekStart - date.getDay() + 7) % 7);
+    }
+    return {start, end,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"};
 };
 

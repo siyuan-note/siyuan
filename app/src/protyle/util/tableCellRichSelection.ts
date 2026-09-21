@@ -1,15 +1,22 @@
 import {focusByOffset, focusByRange, getSelectionOffset} from "./selection";
 
 const getCellEditables = (root: Element) => Array.from(root.querySelectorAll<HTMLElement>(
-    '[data-type="NodeParagraph"] > [contenteditable], [data-type="NodeHeading"] > [contenteditable], ' +
-    '[data-type="NodeCodeBlock"] .hljs > [contenteditable]'));
+    '[data-type="NodeParagraph"] > [contenteditable]:not(.protyle-attr), ' +
+    '[data-type="NodeHeading"] > [contenteditable]:not(.protyle-attr), ' +
+    '[data-type="NodeCodeBlock"] .hljs > [contenteditable]:last-child'));
 
-export const captureRichCellSelection = (cell: Element, selection: Selection) => {
-    if (!selection.rangeCount) {
+export const captureRichCellSelection = (cell: Element, selection: Selection, useCaret = false) => {
+    const editables = getCellEditables(cell);
+    // 代码高亮异步恢复选区时，临时定位节点才是编辑完成后的光标位置。
+    const marker = useCaret ? editables.map(edit => edit.querySelector("wbr")).find(item => !!item) : undefined;
+    if (!marker && !selection.rangeCount) {
         return;
     }
-    const range = selection.getRangeAt(0);
-    const editables = getCellEditables(cell);
+    const range = marker ? document.createRange() : selection.getRangeAt(0);
+    if (marker) {
+        range.setStartBefore(marker);
+        range.collapse(true);
+    }
     const startIndex = editables.findIndex(edit => edit.contains(range.startContainer));
     const endIndex = editables.findIndex(edit => edit.contains(range.endContainer));
     if (startIndex < 0 || endIndex < 0) {

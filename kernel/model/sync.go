@@ -53,32 +53,12 @@ func SyncDataDownload() (err error) {
 		return
 	}
 
-	scope := lanSyncScope()
-	latestID := getSyncCloudLatestID()
-	if "" != latestID {
-		_, err = syncRemoteRequests.do(scope, latestID, func() error {
-			lockSync()
-			defer unlockSync()
-			if syncRemoteRequests.isCompleted(scope, latestID) {
-				return nil
-			}
-			err := syncDataDownloadLocked()
-			if nil == err {
-				completeCurrentSyncRemoteRequest(scope)
-			}
-			return err
-		})
-		return
-	}
-
 	unlock, ok := lockSyncRequest(&syncDownloadRequests)
 	if !ok {
 		return
 	}
 	defer unlock()
-	if err = syncDataDownloadLocked(); nil == err {
-		completeCurrentSyncRemoteRequest(scope)
-	}
+	err = syncDataDownloadLocked()
 	return
 }
 
@@ -326,7 +306,7 @@ func syncDataLocked(exit, byHand bool) error {
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
 
-	dataChanged, err := syncRepoWithDNSRetry(exit, byHand)
+	cloudPublished, err := syncRepoWithDNSRetry(exit, byHand)
 	code := 1
 	if err != nil {
 		code = 2
@@ -343,8 +323,8 @@ func syncDataLocked(exit, byHand bool) error {
 		connectSyncWebSocket()
 	}
 
-	if 1 == Conf.Sync.Mode && nil != webSocketConn && Conf.Sync.Perception && dataChanged {
-		// 如果处于自动同步模式且不是由 WS 触发的同步，则通知其他设备上的内核进行同步
+	if nil == err && cloudPublished && 1 == Conf.Sync.Mode && nil != webSocketConn && Conf.Sync.Perception {
+		// 自动同步成功发布新云端版本后通知其他设备，纯下载不发送同步信号。
 		request := map[string]any{
 			"cmd":    "synced",
 			"synced": Conf.Sync.Synced,
@@ -979,10 +959,10 @@ func flushAndRetryOnDNSError(err error) bool {
 
 // syncRepoWithDNSRetry 执行一次同步，若失败且判定为 DNS 类错误，则刷新系统 DNS 缓存后重试一次。
 // 统一封装 DNS 重试逻辑，供主同步流程（syncData）与启动后台同步复用。
-func syncRepoWithDNSRetry(exit, byHand bool) (dataChanged bool, err error) {
-	dataChanged, err = syncRepo(exit, byHand)
+func syncRepoWithDNSRetry(exit, byHand bool) (cloudPublished bool, err error) {
+	cloudPublished, err = syncRepo(exit, byHand)
 	if nil != err && flushAndRetryOnDNSError(err) {
-		dataChanged, err = syncRepo(exit, byHand)
+		cloudPublished, err = syncRepo(exit, byHand)
 	}
 	return
 }
@@ -1204,8 +1184,7 @@ func connectSyncWebSocket() {
 			data := result.Data.(map[string]any)
 			switch data["cmd"].(string) {
 			case "synced":
-				// Improve data synchronization perception https://github.com/siyuan-note/siyuan/issues/13000
-				SyncDataDownload()
+				syncDataFromCloud()
 			case "kernels":
 				onlineKernelsLock.Lock()
 

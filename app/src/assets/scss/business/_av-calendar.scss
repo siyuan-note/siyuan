@@ -170,7 +170,7 @@
     cursor: pointer;
     font-size: 12px;
     line-height: 20px;
-    background: var(--b3-theme-primary-lightest);
+    background: color-mix(in srgb, var(--b3-av-calendar-background, var(--b3-theme-primary-lightest)) 50%, var(--b3-theme-background));
     color: var(--b3-theme-on-background);
     border: 1px solid transparent;
     outline-offset: -1px;
@@ -208,6 +208,10 @@
     min-width: 0;
     max-height: 64px;
     overflow: hidden;
+
+    &:not(:empty) {
+      min-height: 20px;
+    }
 
     .av__celltext {
       min-width: 0;

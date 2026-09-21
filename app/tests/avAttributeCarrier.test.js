@@ -92,6 +92,110 @@ const runCases = async () => {
     assert.equal(element.firstElementChild.dataset.attributeId, "document-block");
     assert.deepEqual(requests.filter(request => request.url.endsWith("getAttributeViewKeys")).at(-1).data,
         {id: "document-block"});
+
+    // 使用实际详情刷新函数，延迟接口完成并交错返回，检查内容连续性和过期响应。
+    let lifecycle;
+    let initialize;
+    let refresh;
+    const pendingRenders = [];
+    Object.assign(window, {
+        Custom: class {
+            constructor(options) {
+                lifecycle = options;
+                this.data = options.data;
+                this.element = document.createElement("div");
+                this.tab = {updateTitle: () => {}};
+                document.body.append(this.element);
+                options.init(this);
+            }
+        },
+        Dialog: class {
+            constructor(options) {
+                lifecycle = options;
+                this.element = document.createElement("div");
+                this.element.innerHTML = options.content;
+                document.body.append(this.element);
+                this.destroy = () => {
+                    options.destroyCallback();
+                    this.element.remove();
+                };
+                window.siyuan.dialogs.push(this);
+            }
+        },
+        Protyle: class {
+            constructor(_app, _element, options) {
+                initialize = () => options.after({protyle: {
+                    id: "row-editor", highlight: {styleElement: document.createElement("style")},
+                }});
+            }
+            destroy() {}
+        },
+        getEditorHorizontalPadding: () => ({left: 8, right: 8}),
+        registerDatabaseRowRefresh: (_id, options) => {
+            refresh = options.refresh;
+            return () => {};
+        },
+        highlightDatabaseRow: () => {},
+        renderAVAttribute: (body, _id, _protyle, callback) => {
+            pendingRenders.push(text => {
+                const value = encodeURIComponent(JSON.stringify({block: {content: text}}));
+                body.innerHTML = `<div data-primary="true"><span data-cell-value="${value}">${text}</span></div>`;
+                callback(body);
+            });
+        },
+    });
+    window.siyuan.config = {editor: {fullWidth: true}};
+    window.siyuan.dialogs = [];
+    for (const mobile of [false, true]) {
+        const data = {avID: "database", blockID: "carrier", databaseBlockID: "carrier",
+            itemID: "item", valueID: "primary", title: "Initial"};
+        document.body.replaceChildren();
+        if (mobile) {
+            window.openMobileDatabaseRow({app: {}}, data, data.title);
+        } else {
+            window.newDatabaseRowModel({app: {}, tab: {}, data});
+        }
+        initialize();
+        pendingRenders.shift()("Original");
+        const currentBody = () => document.querySelector(".protyle-db-row__body");
+        const original = currentBody();
+        for (const value of ["Updated text", "Updated label"]) {
+            const previous = currentBody();
+            refresh();
+            assert.equal(currentBody(), previous, "keep the visible body while fetching");
+            assert.ok(currentBody().textContent);
+            pendingRenders.shift()(value);
+            assert.equal(currentBody().textContent, value);
+            assert.equal(document.querySelector(".protyle-db-row__title span").textContent, value);
+        }
+        assert.notEqual(currentBody(), original);
+        for (const newestFirst of [false, true]) {
+            const previous = currentBody();
+            refresh();
+            refresh();
+            const older = pendingRenders.shift();
+            const newer = pendingRenders.shift();
+            if (newestFirst) {
+                newer("Latest");
+                older("Outdated");
+            } else {
+                older("Outdated");
+                assert.equal(currentBody(), previous);
+                newer("Latest");
+            }
+            assert.equal(currentBody().textContent, "Latest");
+            assert.equal(document.querySelector(".protyle-db-row__title span").textContent, "Latest");
+        }
+        refresh();
+        const previous = currentBody();
+        if (mobile) {
+            lifecycle.destroyCallback();
+        } else {
+            lifecycle.destroy();
+        }
+        pendingRenders.shift()("After close");
+        assert.equal(currentBody(), previous, "ignore responses after disposal");
+    }
 };
 
 const runElectron = async () => {
@@ -118,7 +222,9 @@ const runElectron = async () => {
         // 执行实际渲染、菜单请求和事务组装函数，仅隔离网络、富文本显示与编辑器外壳。
         const sources = [extract("cellValue"), extract("dragFillValue", ["rebindAVCellValue"]),
             extract("blockAttr", ["renderAVAttribute", "renderAttributeViewBacklinks"]),
-            extract("openMenuPanel", ["openMenuPanel"]), extract("cell", ["updateCellsValue"])].map(source =>
+            extract("openMenuPanel", ["openMenuPanel"]), extract("cell", ["updateCellsValue"]),
+            extract("../../../editor/databaseRow", ["newDatabaseRowModel"]),
+            extract("openDatabaseRow", ["closeMobileDatabaseRow", "openMobileDatabaseRow"])].map(source =>
             ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText);
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(`(() => {

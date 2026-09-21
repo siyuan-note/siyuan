@@ -4,7 +4,6 @@
 
 Plugin resource declarations, data authorization, and publishing APIs are documented in [Plugin publishing](PLUGIN-PUBLISH.md).
 
-* [Flashcard source history](FLASHCARD-HISTORY-API.md)
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)
     * [TypeScript contracts](#TypeScript-contracts)

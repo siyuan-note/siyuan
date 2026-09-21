@@ -10,12 +10,17 @@ import (
 
 // SourceHistoryVersion 保存卡源修订及其因果链中对应的内容引用，不包含块正文快照。
 type SourceHistoryVersion struct {
-	Revision   EntityRevision  `json:"revision"`
+	// 属于目标卡源的非墓碑实体修订，payload 为当时的卡源配置。
+	Revision EntityRevision `json:"revision"`
+	// 沿卡源父修订与操作批次还原，按 Sort、ID 依次升序排列的有效引用。
 	References []CardSourceRef `json:"references"`
-	Modes      []string        `json:"modes"`
+	// 从该修订的模式及启用模板派生的展示模式，不代表历史卡面渲染结果。
+	Modes []string `json:"modes"`
 }
 
-// SourceHistory 返回按时间分页排列的卡源修订。
+// SourceHistory 返回按 UpdatedAt、RevisionID 依次降序排列的卡源修订，包含保留的墓碑。
+// sourceID 不能为空白，limit 范围为 1 至 100，offset 不能为负数；没有匹配记录时返回空切片。
+// 分页顺序用于浏览，不用于判断引用归属或恢复因果关系；历史记录可随权威批次重建投影。
 func (projection *Projection) SourceHistory(ctx context.Context, sourceID string, limit, offset int) ([]EntityRevision, error) {
 	if strings.TrimSpace(sourceID) == "" || limit < 1 || limit > 100 || offset < 0 {
 		return nil, errors.New("invalid flashcard source history query")
@@ -55,6 +60,9 @@ func (projection *Projection) SourceHistory(ctx context.Context, sourceID string
 }
 
 // SourceHistoryVersion 沿卡源父修订读取引用，避免使用设备时间拼接并发版本。
+// 修订必须属于指定卡源且不是墓碑；有效引用必须能唯一还原，并包含该修订声明的主引用。
+// 引用若曾绕过卡源操作独立修改，缺少配置版本的因果边界时返回错误，不推断历史引用。
+// 此处还原引用元数据，不要求正文当前存在；正文可访问性和恢复前校验由调用层处理。
 func (projection *Projection) SourceHistoryVersion(ctx context.Context, sourceID, revisionID string) (SourceHistoryVersion, error) {
 	result := SourceHistoryVersion{References: make([]CardSourceRef, 0)}
 	revision, found, err := projection.entityRevisionByID(ctx, revisionID)
@@ -211,15 +219,26 @@ func sourceHistoryModes(source CardSource) []string {
 
 // RestoreSourceHistoryRequest 将历史配置作为新修订写入，保留当前排期及卡源管理状态。
 type RestoreSourceHistoryRequest struct {
-	OperationID        string                           `json:"operationID"`
-	SourceID           string                           `json:"sourceID"`
-	RevisionID         string                           `json:"revisionID"`
-	ExpectedRevisionID string                           `json:"expectedRevisionID"`
-	UpdatedAt          int64                            `json:"updatedAt"`
-	ValidateVersion    func(SourceHistoryVersion) error `json:"-"`
+	// 必填且不能全为空白；不确定操作结果时连同其他原始字段一起重用，变更请求须使用新的操作 ID。
+	OperationID string `json:"operationID"`
+	// 必填目标卡源 ID，历史修订与预期当前修订都必须属于该卡源。
+	SourceID string `json:"sourceID"`
+	// 必填的待恢复历史修订 ID，不能指向墓碑。
+	RevisionID string `json:"revisionID"`
+	// 必填的当前卡源修订 ID，作为新修订的父修订；过期值返回修订冲突。
+	ExpectedRevisionID string `json:"expectedRevisionID"`
+	// 必填且大于零的 Unix 毫秒时间；重试时保持首次请求值，不重新生成。
+	UpdatedAt int64 `json:"updatedAt"`
+	// 仅由内核调用层注入的校验函数，不接受 HTTP 请求传入；校验失败时不应用恢复更改。
+	ValidateVersion func(SourceHistoryVersion) error `json:"-"`
 }
 
 // RestoreSourceHistory 原子恢复卡源配置、引用及稳定变体，已有复习状态不参与恢复。
+// 新修订保留预期当前修订中的 DefaultPresetID、Priority 和 Status，不改写旧修订或复习事件。
+// 正文、资源、共享模板、标签与卡包成员不参与回退；恢复配置不改变卡源的软删除或失效状态。
+// 相同请求重试返回原恢复修订，复用操作 ID 却改变请求返回操作冲突；不回滚后来产生的状态。
+// 过期预期修订、相关实体冲突、插件卡源、不同模式或无法还原的引用均拒绝恢复。
+// 校验与协调通过后，配置、引用及卡片更改写入同一权威批次；历史保持可从权威记录重建。
 func (store *Store) RestoreSourceHistory(ctx context.Context, request RestoreSourceHistoryRequest) (EntityRevision, error) {
 	store.mu.Lock()
 	defer store.mu.Unlock()

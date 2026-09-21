@@ -1242,16 +1242,20 @@ func GetFlashcardV2SourceHistory(ctx context.Context, sourceID string, limit, of
 // FlashcardV2SourceHistoryVersion 为历史引用补充当前可访问的文档位置，缺失正文不伪装成历史正文。
 type FlashcardV2SourceHistoryVersion struct {
 	flashcardv2.SourceHistoryVersion
+	// 以当前存在且可访问的块 ID 为键；缺失块不产生条目，位置不表示历史文档快照。
 	Documents map[string]FlashcardV2HistoryDocument `json:"documents"`
 }
 
+// FlashcardV2HistoryDocument 描述当前文档的位置，不包含历史正文或图片。
 type FlashcardV2HistoryDocument struct {
 	RootID     string `json:"rootID"`
 	NotebookID string `json:"notebookID"`
-	Title      string `json:"title"`
+	// 当前文档的可读路径，用于从配置历史定位文档历史。
+	Title string `json:"title"`
 }
 
 // GetFlashcardV2SourceHistoryVersion 读取历史配置及其引用，允许查看已缺失块的引用。
+// 对仍存在的块补充当前文档位置，遇到加密笔记本目标返回错误，不暴露其位置元数据。
 func GetFlashcardV2SourceHistoryVersion(ctx context.Context, sourceID, revisionID string) (FlashcardV2SourceHistoryVersion, error) {
 	store, err := requireFlashcardV2Store(ctx, false)
 	if err != nil {
@@ -1276,6 +1280,8 @@ func GetFlashcardV2SourceHistoryVersion(ctx context.Context, sourceID, revisionI
 }
 
 // RestoreFlashcardV2SourceHistory 校验历史内容引用后原子恢复配置，不回退文档或复习进度。
+// 恢复前要求引用块当前存在且不属于加密笔记本，并确认历史挖空标记和遮挡图片仍属于对应块。
+// 正文、标记或图片关系缺失时先恢复关联文档；校验失败不应用配置恢复，也不修改保留的历史。
 func RestoreFlashcardV2SourceHistory(ctx context.Context, request flashcardv2.RestoreSourceHistoryRequest) (flashcardv2.EntityRevision, error) {
 	store, err := requireFlashcardV2Store(ctx, true)
 	if err != nil {

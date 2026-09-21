@@ -631,14 +631,26 @@ func getFlashcardHistory(c *gin.Context) {
 	ret.Data = map[string]any{"events": history}
 }
 
+// getFlashcardSourceHistory 处理 POST /api/flashcard/getSourceHistory，要求已认证的管理员及已激活的 v2 存储。
+// 响应使用 {code, msg, data}；历史仅包含卡源配置与引用，正文和复习事件由各自的历史入口管理。
+// 未指定 revisionID 时，data.versions 返回按 updatedAt、revisionID 依次降序排列的卡源实体修订。
+// 每项保留 revisionID、parentRevisionIDs、updatedAt、deleted、payload 等实体修订字段。
+// 指定 revisionID 时，data 包含 revision、references、modes、documents，不使用分页参数。
+// documents 以仍可访问的块 ID 为键，返回当前 rootID、notebookID 和可读 title 路径；缺失块不产生条目。
+// 列表时间排序只用于浏览，版本引用沿父修订与操作批次还原；详情不提供历史正文或完整历史卡面。
+// 跨卡源修订、墓碑、无法唯一还原或缺少必需引用的版本返回错误；独立修改引用的历史不按时间猜测版本。
 func getFlashcardSourceHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 	request := &struct {
-		SourceID   string `json:"sourceID"`
+		// 卡源 ID；列表模式拒绝空白值。
+		SourceID string `json:"sourceID"`
+		// 可选历史修订 ID；省略或为空时查询列表，非空时查询详情。
 		RevisionID string `json:"revisionID"`
-		Limit      int    `json:"limit"`
-		Offset     int    `json:"offset"`
+		// 列表页大小，省略时为 50，有效范围为 1 至 100。
+		Limit int `json:"limit"`
+		// 列表偏移，省略时为 0，不能为负数。
+		Offset int `json:"offset"`
 	}{Limit: 50}
 	if !bindFlashcardRequest(c, ret, request) {
 		return
@@ -660,6 +672,12 @@ func getFlashcardSourceHistory(c *gin.Context) {
 	ret.Data = map[string]any{"versions": versions}
 }
 
+// restoreFlashcardSourceHistory 处理 POST /api/flashcard/restoreSourceHistory。
+// 要求已认证的管理员、已激活的 v2 存储及可写模式，请求字段约束见 RestoreSourceHistoryRequest。
+// 响应使用 {code, msg, data}，成功时 data 为本次创建的卡源实体修订，配置、引用和生成卡片原子恢复。
+// 稳定卡片保留身份与复习状态，当前卡源预设、优先级及生命周期不回退，也不会自动恢复已软删除卡源。
+// 正文、图片、共享模板、标签和卡包成员不参与恢复；引用或挖空标记缺失时应先恢复文档，存在冲突时先解决冲突。
+// 超时或结果不确定时使用相同 operationID 及全部原始请求字段重试，修改请求则使用新的 operationID。
 func restoreFlashcardSourceHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

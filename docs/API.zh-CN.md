@@ -4,7 +4,6 @@
 
 插件资源声明、数据授权与相关接口详见[插件发布](PLUGIN-PUBLISH.zh-CN.md)。
 
-* [卡源配置历史](FLASHCARD-HISTORY-API.md)
 * [规范](#规范)
     * [参数和返回值](#参数和返回值)
     * [TypeScript 类型契约](#typescript-类型契约)

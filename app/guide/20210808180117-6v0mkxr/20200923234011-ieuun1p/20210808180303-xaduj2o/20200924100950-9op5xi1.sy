@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260919234652"
+		"updated": "20260921111101"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908092714-3tm4lvq",
-				"updated": "20260908202901"
+				"updated": "20260921111101"
 			},
 			"Children": [
 				{
@@ -38,49 +38,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", you can assign multiple shortcuts to the same action. Click the plus button in a row and press a key combination to save it. Click a shortcut’s close button to remove it, or the reset button to restore all defaults for that action. To replace a shortcut, remove it and add another. Press Esc or click outside to cancel recording. The first shortcut appears in menu hints; right-click another shortcut to make it the primary shortcut. If you enter a shortcut already assigned to the same action, it is not saved and recording stays active so you can enter another key combination."
-				}
-			]
-		},
-		{
-			"ID": "20260908092714-jbgcc13",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908092714-jbgcc13",
-				"updated": "20260908180419"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Different actions can use the same shortcut. Duplicate bindings are highlighted as conflicts. The currently focused local scope takes precedence over the general scope. Actions within a scope follow a fixed order, and execution priority cannot be customized. Built-in actions use their fixed handler order; plugin actions are sorted by plugin name and command identifier. Each keypress runs only the first available action. Once it starts, cancellation or failure does not trigger another action."
-				}
-			]
-		},
-		{
-			"ID": "20260908172944-uu4n5dl",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260908172944-uu4n5dl",
-				"updated": "20260908180419"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Below the search fields, filter by “All”, “Assigned”, “Customized by me”, or “Unassigned”, together with a name or key search. “Assigned” means at least one shortcut is set. “Customized by me” means bindings differ from the defaults, including added, changed, or removed bindings. “Unassigned” means no shortcut is set. The “Conflict” filter appears only when unresolved conflicts exist, and the affected shortcuts are highlighted individually. Results update after edits. If the active “Conflict” filter has no conflicts left, it automatically switches to “All”."
-				}
-			]
-		},
-		{
-			"ID": "20260813143406-k7m2x9q",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260813143406-k7m2x9q",
-				"updated": "20260813143406"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "To avoid interfering with normal text input, a single character alone or a single character combined with "
+					"Data": ", you can assign multiple shortcuts to the same action. Right-click any shortcut except the first to make it the primary shortcut. When shortcuts are the same, the current local scope takes precedence over the general scope. To avoid interfering with normal text input, a single character alone or a single character combined with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -4047,7 +4005,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260918223821"
+				"updated": "20260921105011"
 			},
 			"Children": [
 				{
@@ -11956,7 +11914,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-ans1gna",
-				"updated": "20260919232200"
+				"updated": "20260921105011"
 			},
 			"Children": [
 				{
@@ -11980,7 +11938,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-4oe7doq",
-				"updated": "20260919232200"
+				"updated": "20260921105011"
 			},
 			"Children": [
 				{
@@ -12335,6 +12293,95 @@
 							"Data": "td"
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260921105011-4zeuyl4",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260921105011-4zeuyl4",
+				"updated": "20260921111101"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mind map"
+				}
+			]
+		},
+		{
+			"ID": "20260921105011-3srqnh0",
+			"Type": "NodeTable",
+			"Properties": {
+				"id": "20260921105011-3srqnh0",
+				"updated": "20260921111101",
+				"colgroup": "|"
+			},
+			"TableAligns": [
+				0,
+				0
+			],
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Name"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Shortcuts"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Edit the selected node"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Space"
+								}
+							]
+						}
+					]
 				},
 				{
 					"Type": "NodeTableRow",
@@ -12358,16 +12405,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Tab"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Switch to mind map and select a node"
 								}
 							]
 						}
@@ -12397,14 +12434,40 @@
 									"TextMarkTextContent": "Enter"
 								}
 							]
-						},
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Switch to mind map and select a node"
+									"Data": "Delete a node or connection"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Delete"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Backspace"
 								}
 							]
 						}
@@ -12434,16 +12497,6 @@
 									"TextMarkTextContent": "←"
 								}
 							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Switch to mind map and select a node"
-								}
-							]
 						}
 					]
 				},
@@ -12469,16 +12522,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "→"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Switch to mind map and select a node"
 								}
 							]
 						}
@@ -12508,16 +12551,6 @@
 									"TextMarkTextContent": "↑"
 								}
 							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Switch to mind map and select a node"
-								}
-							]
 						}
 					]
 				},
@@ -12545,14 +12578,31 @@
 									"TextMarkTextContent": "↓"
 								}
 							]
-						},
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Switch to mind map and select a node"
+									"Data": "Finish editing the node"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Esc"
 								}
 							]
 						}
@@ -12568,7 +12618,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Edit the selected node with the caret at the end"
+									"Data": "Pan the canvas horizontally"
 								}
 							]
 						},
@@ -12579,7 +12629,32 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Space"
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " + "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Wheel"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Zoom the canvas"
 								}
 							]
 						},
@@ -12588,8 +12663,18 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "Switch to mind map and select a node"
+									"Data": " + "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Wheel"
 								}
 							]
 						}

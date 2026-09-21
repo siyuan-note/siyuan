@@ -362,7 +362,7 @@ const bindKeymapList = (root: HTMLElement) => {
         searchKeymapElement.dataset.keymap = "";
         resetKeymapList(keymapListElement);
     });
-    let recording: {row: HTMLElement; element: HTMLElement} | undefined;
+    let recording: { row: HTMLElement; element: HTMLElement } | undefined;
     const outsideRecording = (event: PointerEvent) => {
         if (recording && event.target !== recording.element &&
             !(event.target as HTMLElement).closest(".config-keymap__controls")) {
@@ -421,11 +421,15 @@ const bindKeymapList = (root: HTMLElement) => {
         event.stopPropagation();
         const row = chip.closest<HTMLElement>(".config-keymap__row");
         const menu = new Menu();
-        menu.addItem({label: window.siyuan.languages.keymapPrimary, click: () => {
-            const keys = getRowBindings(row);
-            keys.unshift(keys.splice(index, 1)[0]);
-            saveRow(row, keys);
-        }});
+        menu.addItem({
+            iconHTML: "",
+            label: window.siyuan.languages.keymapPrimary,
+            click: () => {
+                const keys = getRowBindings(row);
+                keys.unshift(keys.splice(index, 1)[0]);
+                saveRow(row, keys);
+            }
+        });
         menu.open({x: event.clientX, y: event.clientY});
     });
     keymapListElement.addEventListener("click", (event) => {

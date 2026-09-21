@@ -1239,6 +1239,8 @@ interface IAVCalendarSettings {
     colorKeyID: string;
     /** 一周起始日，0 为星期日，1 为星期一，依次至 6 为星期六。 */
     weekStart: number;
+    /** 月视图折叠前的条目行数：3、5、10 或 -1（全部）；省略或 0 使用 3，周视图显示全部，不影响查询范围。 */
+    rowLimit?: number;
 }
 
 /**

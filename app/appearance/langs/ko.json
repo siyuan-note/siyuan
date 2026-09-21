@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "표시할 항목 행 수",
+	"calendarNewOnDate": "이 날짜에 새 항목 만들기",
 	"leftRightSidebarLayout": "왼쪽 및 오른쪽 사이드바 레이아웃",
 	"calendarView": "달력",
 	"calendarToday": "오늘",

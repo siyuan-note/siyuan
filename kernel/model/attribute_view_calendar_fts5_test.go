@@ -56,6 +56,11 @@ func TestAttributeViewCalendarDateUndoAndEncryptedReplay(t *testing.T) {
 				}
 			}
 			settings := original.Views[0].Calendar.Settings
+			nextSettings := settings
+			nextSettings.RowLimit = 5
+			setRows := func(value av.CalendarSettings) *Operation {
+				return &Operation{Action: "setAttrViewCalendar", AvID: original.ID, ViewID: original.Views[0].ID, Data: value}
+			}
 			key, _ := original.GetKeyValues(settings.DateKeyID)
 			value := key.Values[0]
 			before := *value.Date
@@ -66,14 +71,16 @@ func TestAttributeViewCalendarDateUndoAndEncryptedReplay(t *testing.T) {
 				return &Operation{Action: "updateAttrViewCell", AvID: original.ID, KeyID: key.Key.ID,
 					RowID: value.BlockID, ID: value.ID, Data: map[string]any{"type": "date", "date": date}}
 			}
-			tx := &Transaction{DoOperations: []*Operation{operation(after)}, UndoOperations: []*Operation{operation(before)}, fromAPI: true}
+			tx := &Transaction{DoOperations: []*Operation{operation(after), setRows(nextSettings)},
+				UndoOperations: []*Operation{operation(before), setRows(settings)}, fromAPI: true}
 			if err := PerformTxSync(tx); err != nil {
 				t.Fatal(err)
 			}
 			for _, replay := range []struct {
 				operations []*Operation
 				expected   av.ValueDate
-			}{{tx.DoOperations, after}, {tx.UndoOperations, before}, {tx.DoOperations, after}} {
+				settings   av.CalendarSettings
+			}{{tx.DoOperations, after, nextSettings}, {tx.UndoOperations, before, settings}, {tx.DoOperations, after, nextSettings}} {
 				if err := PerformTxSync(&Transaction{DoOperations: cloneOperations(replay.operations), isReplay: true}); err != nil {
 					t.Fatal(err)
 				}
@@ -85,7 +92,7 @@ func TestAttributeViewCalendarDateUndoAndEncryptedReplay(t *testing.T) {
 				storedKey, _ := stored.GetKeyValues(key.Key.ID)
 				actual := *storedKey.Values[0].Date
 				actual.FormattedContent = ""
-				if !reflect.DeepEqual(actual, replay.expected) || stored.Views[0].Calendar.Settings != settings {
+				if !reflect.DeepEqual(actual, replay.expected) || stored.Views[0].Calendar.Settings != replay.settings {
 					t.Fatalf("date replay: actual=%+v expected=%+v settings=%+v", actual, replay.expected, stored.Views[0].Calendar.Settings)
 				}
 			}
@@ -174,6 +181,7 @@ func TestAttributeViewCalendarSetupUndo(t *testing.T) {
 	next := previous
 	next.DateKeyID = keyID
 	next.WeekStart = 0
+	next.RowLimit = 10
 	setting := func(value av.CalendarSettings) *Operation {
 		return &Operation{Action: "setAttrViewCalendar", AvID: database.ID, ViewID: view.ID, Data: value}
 	}

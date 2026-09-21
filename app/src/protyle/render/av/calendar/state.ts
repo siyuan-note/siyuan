@@ -6,6 +6,7 @@ interface ICalendarState {
     mode: "month" | "week";
     weekStart: number;
     dateType?: TAVCol;
+    rowLimit?: number;
     expandedWeeks: Set<number>;
 }
 

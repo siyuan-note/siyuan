@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "Visible item rows",
+	"calendarNewOnDate": "New item on this date",
 	"leftRightSidebarLayout": "Left and right sidebar layout",
 	"calendarView": "Calendar",
 	"calendarToday": "Today",

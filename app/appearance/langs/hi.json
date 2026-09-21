@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "दिखाई देने वाली आइटम पंक्तियाँ",
+	"calendarNewOnDate": "इस तारीख पर नया आइटम",
 	"leftRightSidebarLayout": "बाएं और दाएं साइडबार का लेआउट",
 	"calendarView": "कैलेंडर",
 	"calendarToday": "आज",

@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "Počet zobrazených riadkov položiek",
+	"calendarNewOnDate": "Nová položka v tento deň",
 	"leftRightSidebarLayout": "Rozloženie ľavého a pravého bočného panela",
 	"calendarView": "Kalendár",
 	"calendarToday": "Dnes",

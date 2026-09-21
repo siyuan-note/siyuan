@@ -951,6 +951,7 @@ export const createAttributeViewItem = (options: {
                 notebookID: options.protyle.notebookId, itemID: response.data.itemID, valueID: "",
                 title: response.data.content || window.siyuan.languages.untitled,
                 boundBlockID: response.data.blockID, isDetached: response.data.isDetached,
+                focusPrimary: true,
             });
         }
     });

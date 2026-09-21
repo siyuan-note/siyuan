@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "จำนวนแถวรายการที่แสดง",
+	"calendarNewOnDate": "สร้างรายการในวันที่นี้",
 	"leftRightSidebarLayout": "เค้าโครงแถบด้านข้างซ้ายและขวา",
 	"calendarView": "ปฏิทิน",
 	"calendarToday": "วันนี้",

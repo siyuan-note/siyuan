@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260920225154"
+		"updated": "20260921201901"
 	},
 	"Children": [
 		{
@@ -687,7 +687,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260920225154-tz8a00o",
-				"updated": "20260920225154"
+				"updated": "20260921201901"
 			},
 			"Children": [
 				{
@@ -716,7 +716,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260920225154-qqxdh7e",
-				"updated": "20260920225154"
+				"updated": "20260921201901"
 			},
 			"Children": [
 				{
@@ -802,7 +802,7 @@
 					},
 					"Properties": {
 						"id": "20260920225154-vblms0p",
-						"updated": "20260920225154"
+						"updated": "20260921201901"
 					},
 					"Children": [
 						{
@@ -810,12 +810,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260920225154-4wsrq3z",
-								"updated": "20260920225154"
+								"updated": "20260921201901"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Browsing: Use the previous/next buttons, Today, or the date picker. Month view collapses crowded dates; use the more button to expand that week. Dates follow your local time zone"
+									"Data": "Browsing: Use the previous/next buttons, Today, or the date picker. Month view collapses crowded dates; use the more button to expand that week. Dates follow your local time zone. Month view shows four, five, or six weeks as needed"
 								}
 							]
 						}
@@ -830,7 +830,7 @@
 					},
 					"Properties": {
 						"id": "20260920225154-ronkl9y",
-						"updated": "20260920225154"
+						"updated": "20260921201901"
 					},
 					"Children": [
 						{
@@ -838,12 +838,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260920225154-3lkyx9g",
-								"updated": "20260920225154"
+								"updated": "20260921201901"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Editing: Click an entry to open its existing database entry editor. With an ordinary date field, use the plus button on a day to create an entry, drag an entry to move its dates, or drag its end handles to adjust its range. Date changes support undo. On touch screens, use the move handle on the entry to drag it"
+									"Data": "Editing: Click an entry to open its existing database entry editor. With an ordinary date field, use the plus button on a day to create an entry, drag an entry to move its dates, or drag its end handles to adjust its range. Date changes support undo. On touch screens, use the move handle on the entry to drag it. New entries focus the primary field automatically. Dragging previews the resulting dates and highlights their cells; changes are saved on release. The context menu also offers copying, creating and binding documents, adding to another database, editing fields, and creating an entry on the selected date"
 								}
 							]
 						}
@@ -914,7 +914,7 @@
 					},
 					"Properties": {
 						"id": "20260920225154-3w6c98i",
-						"updated": "20260920225154"
+						"updated": "20260921201901"
 					},
 					"Children": [
 						{
@@ -922,12 +922,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260920225154-8p9e3ov",
-								"updated": "20260920225154"
+								"updated": "20260921201901"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "View settings: Filtering, sorting, field visibility, and new-entry templates use the existing database settings. A single-select field can supply entry colors. Grouping is suspended in calendar layout, and its settings are retained when switching back"
+									"Data": "View settings: Filtering, sorting, field visibility, and new-entry templates use the existing database settings. A single-select field can supply entry colors. Grouping is suspended in calendar layout, and its settings are retained when switching back. Visible item rows can be set to 3, 5, 10, or all in the layout settings, with 3 as the default. This setting is saved per calendar view and only controls folding in month view; week view displays all entries, and the complete date range is still loaded"
 								}
 							]
 						}

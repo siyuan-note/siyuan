@@ -23,7 +23,8 @@ func toContractAVCalendarSettings(value *av.CalendarSettings) *apicontract.AVCal
 	if nil == value {
 		return nil
 	}
-	return &apicontract.AVCalendarSettings{DateKeyID: value.DateKeyID, ColorKeyID: value.ColorKeyID, WeekStart: value.WeekStart}
+	return &apicontract.AVCalendarSettings{DateKeyID: value.DateKeyID, ColorKeyID: value.ColorKeyID,
+		WeekStart: value.WeekStart, RowLimit: value.RowLimit}
 }
 
 func toContractAVLayoutCalendar(value *av.LayoutCalendar) *apicontract.AVLayoutCalendar {

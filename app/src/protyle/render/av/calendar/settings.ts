@@ -20,6 +20,10 @@ const getCalendarSettingItems = (view: IAVTable): Array<{
         key: "colorKeyID", label: window.siyuan.languages.calendarColorField,
         choices: fields(view.columns.filter(field => field.type === "select")),
     }, {
+        key: "rowLimit", label: window.siyuan.languages.calendarRowLimit,
+        choices: [3, 5, 10, -1].map(value => ({value: value.toString(),
+            label: value === -1 ? window.siyuan.languages.all : value.toString()})),
+    }, {
         key: "weekStart", label: window.siyuan.languages.calendarWeekStart,
         choices: Array.from({length: 7}, (_, day) => ({value: day.toString(),
             label: new Date(2024, 0, 7 + day).toLocaleDateString(window.siyuan.config.lang, {weekday: "long"})})),
@@ -27,7 +31,7 @@ const getCalendarSettingItems = (view: IAVTable): Array<{
 };
 
 export const getCalendarSettingsHTML = (view: IAVTable, asMenu = false) => getCalendarSettingItems(view).map(item => {
-    const value = view.calendar[item.key].toString();
+    const value = (item.key === "rowLimit" ? view.calendar.rowLimit || 3 : view.calendar[item.key]).toString();
     if (asMenu) {
         const selected = item.choices.find(choice => choice.value === value);
         return `<button class="b3-menu__item" data-calendar-setting="${item.key}">
@@ -62,10 +66,10 @@ export const bindCalendarSettings = (options: {
             const view = options.data.view as IAVTable;
             const previous = {...view.calendar};
             const setting = item.key;
-            if (previous[setting].toString() === value) {
+            if ((setting === "rowLimit" ? previous.rowLimit || 3 : previous[setting]).toString() === value) {
                 return;
             }
-            const next = {...previous, [setting]: setting === "weekStart" ? Number(value) : value};
+            const next = {...previous, [setting]: setting === "weekStart" || setting === "rowLimit" ? Number(value) : value};
             const operation = {
                 action: "setAttrViewCalendar" as const,
                 avID: options.data.id,
@@ -82,7 +86,7 @@ export const bindCalendarSettings = (options: {
                 const view = options.data.view as IAVTable;
                 item.choices.forEach(choice => menu.addItem({
                     iconHTML: "", label: escapeHtml(choice.label),
-                    checked: view.calendar[item.key].toString() === choice.value,
+                    checked: (item.key === "rowLimit" ? view.calendar.rowLimit || 3 : view.calendar[item.key]).toString() === choice.value,
                     click: () => update(choice.value),
                 }));
                 openViewSettingMenu(menu, select);

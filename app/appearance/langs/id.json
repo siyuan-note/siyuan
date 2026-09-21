@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "Baris item yang ditampilkan",
+	"calendarNewOnDate": "Item baru pada tanggal ini",
 	"leftRightSidebarLayout": "Tata letak bilah sisi kiri dan kanan",
 	"calendarView": "Kalender",
 	"calendarToday": "Hari ini",

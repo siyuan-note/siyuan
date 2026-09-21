@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "Angezeigte Eintragszeilen",
+	"calendarNewOnDate": "Eintrag an diesem Datum erstellen",
 	"leftRightSidebarLayout": "Layout der linken und rechten Seitenleiste",
 	"calendarView": "Kalender",
 	"calendarToday": "Heute",

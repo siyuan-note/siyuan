@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "Zichtbare itemrijen",
+	"calendarNewOnDate": "Nieuw item op deze datum",
 	"leftRightSidebarLayout": "Indeling van linker- en rechterzijbalk",
 	"calendarView": "Kalender",
 	"calendarToday": "Vandaag",

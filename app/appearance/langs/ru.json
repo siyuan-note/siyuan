@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "Число видимых строк записей",
+	"calendarNewOnDate": "Создать запись на эту дату",
 	"leftRightSidebarLayout": "Расположение левой и правой боковых панелей",
 	"calendarView": "Календарь",
 	"calendarToday": "Сегодня",

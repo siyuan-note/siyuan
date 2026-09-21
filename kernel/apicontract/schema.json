@@ -6593,6 +6593,9 @@
         "dateKeyID": {
           "type": "string"
         },
+        "rowLimit": {
+          "type": "integer"
+        },
         "weekStart": {
           "type": "integer"
         }
@@ -6612,6 +6615,9 @@
         },
         "dateKeyID": {
           "type": "string"
+        },
+        "rowLimit": {
+          "type": "integer"
         },
         "weekStart": {
           "type": "integer"

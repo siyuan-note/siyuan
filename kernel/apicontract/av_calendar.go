@@ -11,6 +11,9 @@ type AVCalendarSettings struct {
 	ColorKeyID string `json:"colorKeyID"`
 	// 一周起始日，0 为星期日，1 为星期一，依次至 6 为星期六。
 	WeekStart int `json:"weekStart"`
+	// 月视图折叠前显示的条目行数，可选 3、5、10；-1 表示全部，省略或 0 按 3 行显示。
+	// 仅控制客户端折叠，不限制查询结果；周视图始终显示全部条目。
+	RowLimit int `json:"rowLimit,omitempty" api:"optional"`
 }
 
 // AVCalendarRange 是本次渲染的毫秒时间戳半开区间 [start, end)，不持久化。

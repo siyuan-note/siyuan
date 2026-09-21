@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "שורות פריטים מוצגות",
+	"calendarNewOnDate": "פריט חדש בתאריך זה",
 	"leftRightSidebarLayout": "פריסת סרגלי הצד השמאלי והימני",
 	"calendarView": "לוח שנה",
 	"calendarToday": "היום",

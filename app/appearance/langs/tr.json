@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "Görünür öğe satırları",
+	"calendarNewOnDate": "Bu tarihte yeni öğe",
 	"leftRightSidebarLayout": "Sol ve sağ kenar çubuğu düzeni",
 	"calendarView": "Takvim",
 	"calendarToday": "Bugün",

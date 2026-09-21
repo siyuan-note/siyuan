@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "Број видљивих редова ставки",
+	"calendarNewOnDate": "Нова ставка на овај датум",
 	"leftRightSidebarLayout": "Raspored leve i desne bočne trake",
 	"calendarView": "Календар",
 	"calendarToday": "Данас",

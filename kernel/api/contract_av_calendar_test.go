@@ -38,7 +38,16 @@ func TestAVContractCalendarLayoutAndRange(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertAVContractJSONEqual(t, current.Views[0], toContractAVView(current.Views[0]))
+	for _, limit := range []int{0, 3, 5, 10, -1} {
+		settings := current.Views[0].Calendar.Settings
+		settings.RowLimit = limit
+		assertAVContractJSONEqual(t, settings, toContractAVCalendarSettings(&settings))
+	}
 	assertAVContractJSONEqual(t, &av.Calendar{Table: result.Data.View}, avContractView(&av.Calendar{Table: result.Data.View}))
+	current.Views[0].Calendar.Settings.RowLimit = 5
+	if err = av.SaveAttributeView(current); err != nil {
+		t.Fatal(err)
+	}
 	path = "/api/av/renderAttributeView"
 	dateRange := &av.CalendarRange{Start: 1788220800000, End: 1791849600000, TimeZone: "Asia/Shanghai"}
 	response = callAttributeViewContextFilterAPI(t, path, map[string]any{
@@ -46,7 +55,8 @@ func TestAVContractCalendarLayoutAndRange(t *testing.T) {
 	}, renderAttributeView)
 	requireAPIContract(t, http.MethodPost, path, response)
 	decodeAttributeViewContextFilterAPIResponse(t, response, &result)
-	if result.Code != 0 || result.Data.View.CalendarRange == nil || *result.Data.View.CalendarRange != *dateRange || len(result.Data.View.Rows) != 0 {
+	if result.Code != 0 || result.Data.View.CalendarRange == nil || *result.Data.View.CalendarRange != *dateRange ||
+		result.Data.View.Calendar.RowLimit != 5 || len(result.Data.View.Rows) != 0 {
 		t.Fatalf("calendar range or empty binding response: %s", response.Body.String())
 	}
 	file := av.GetAttributeViewDataPath(fixture.attrView.ID)

@@ -117,3 +117,26 @@ test("calendar binding changes preserve the previous invalid binding for undo", 
     assert.equal(settingsOf(transactions[0].undo[0]).dateKeyID, "missing-field");
     assert.equal(settingsOf(transactions[0].do[0]).colorKeyID, "color");
 });
+
+test("calendar row limits preserve old defaults, persist numeric choices and support undo", () => {
+    const {methods, transactions, menus} = setup();
+    const current = data();
+    let click: (event: {preventDefault: () => void; stopPropagation: () => void}) => void;
+    const button = {tagName: "BUTTON", dataset: {calendarSetting: "rowLimit"},
+        addEventListener: (_name: string, handler: typeof click) => { click = handler; }};
+    methods.bindCalendarSettings({protyle: {options: {}} as IProtyle, blockElement: block, data: current,
+        menuElement: {querySelectorAll: () => [button]} as unknown as Element});
+    click({preventDefault() { return; }, stopPropagation() { return; }});
+    assert.deepEqual(Array.from(menus[0], item => item.checked), [true, false, false, false]);
+    menus[0][0].click();
+    assert.equal(transactions.length, 0);
+    for (const [index, limit] of [3, 5, 10, -1].entries()) {
+        if (index === 0) {
+            continue;
+        }
+        menus[0][index].click();
+        assert.equal(settingsOf(transactions.at(-1).do[0]).rowLimit, limit);
+        assert.equal(settingsOf(transactions.at(-1).undo[0]).rowLimit, index === 1 ? undefined : [3, 5, 10, -1][index - 1]);
+        assert.equal(settingsOf(transactions.at(-1).do[0]).dateKeyID, "missing-field");
+    }
+});

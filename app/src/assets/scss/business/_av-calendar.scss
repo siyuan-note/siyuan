@@ -97,6 +97,7 @@
   }
 
   .av__calendar-week {
+    position: relative;
     &:first-child {
       border-top: 0;
     }
@@ -280,16 +281,58 @@
   }
 
   .av__calendar-drop {
-    background: var(--b3-theme-primary-light);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: color-mix(in srgb, var(--b3-theme-primary) 12%, transparent);
     outline: 1px solid var(--b3-theme-primary);
     outline-offset: -1px;
   }
 
+  .av__calendar-preview-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .av__calendar-preview {
+    position: absolute;
+    box-sizing: border-box;
+    border-color: var(--b3-theme-primary);
+    box-shadow: var(--b3-point-shadow);
+  }
+
+  .av__calendar-item--dragging {
+    opacity: .35;
+  }
+
+  .av__calendar-item.av__gallery-item--select {
+    border-color: var(--b3-theme-primary);
+  }
+
   .av__calendar--dragging {
     cursor: grabbing;
+
+    .av__calendar-item {
+      cursor: grabbing;
+    }
+  }
+
+  .av__calendar--invalid,
+  .av__calendar--invalid .av__calendar-item {
+    cursor: not-allowed;
   }
 
   .av__calendar-more {
+    min-width: 0;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     margin: 3px;
     padding: 2px 6px;
     border: 0;

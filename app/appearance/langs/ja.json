@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "項目の表示行数",
+	"calendarNewOnDate": "この日付に項目を作成",
 	"leftRightSidebarLayout": "左右のサイドバーのレイアウト",
 	"calendarView": "カレンダー",
 	"calendarToday": "今日",

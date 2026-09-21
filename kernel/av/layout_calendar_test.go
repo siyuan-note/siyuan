@@ -1,10 +1,35 @@
 package av
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
 )
+
+func TestCalendarRowLimitCompatibility(t *testing.T) {
+	var settings CalendarSettings
+	if err := json.Unmarshal([]byte(`{"dateKeyID":"date","colorKeyID":"","weekStart":1}`), &settings); err != nil {
+		t.Fatal(err)
+	}
+	if settings.RowLimit != 0 || !settings.ValidRowLimit() {
+		t.Fatal("existing calendar settings must retain the default row limit")
+	}
+	for _, limit := range []int{0, 3, 5, 10, -1} {
+		settings.RowLimit = limit
+		data, err := json.Marshal(settings)
+		var actual CalendarSettings
+		if err != nil || json.Unmarshal(data, &actual) != nil || actual != settings || !actual.ValidRowLimit() {
+			t.Fatalf("row limit round trip: %d", limit)
+		}
+	}
+	for _, limit := range []int{-2, 1, 4, 100} {
+		settings.RowLimit = limit
+		if settings.ValidRowLimit() {
+			t.Fatalf("invalid row limit accepted: %d", limit)
+		}
+	}
+}
 
 func TestCalendarInterval(t *testing.T) {
 	location, err := time.LoadLocation("America/New_York")

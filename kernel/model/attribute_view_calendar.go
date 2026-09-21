@@ -50,6 +50,9 @@ func setAttrViewCalendar(operation *Operation) error {
 	if settings.WeekStart < 0 || settings.WeekStart > 6 {
 		return fmt.Errorf("invalid calendar week start")
 	}
+	if !settings.ValidRowLimit() {
+		return fmt.Errorf("invalid calendar row limit")
+	}
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return err

@@ -15,6 +15,12 @@ type CalendarSettings struct {
 	DateKeyID  string `json:"dateKeyID"`
 	ColorKeyID string `json:"colorKeyID"`
 	WeekStart  int    `json:"weekStart"`
+	RowLimit   int    `json:"rowLimit,omitempty"`
+}
+
+// ValidRowLimit 保留旧设置的零值默认值，负一表示展开全部条目行。
+func (s CalendarSettings) ValidRowLimit() bool {
+	return s.RowLimit == 0 || s.RowLimit == -1 || s.RowLimit == 3 || s.RowLimit == 5 || s.RowLimit == 10
 }
 
 type LayoutCalendar struct {
@@ -151,7 +157,7 @@ func (attrView *AttributeView) ValidateCalendarLayouts() error {
 		}
 		if layout := view.Calendar; nil != layout {
 			if nil == layout.LayoutTable || nil == layout.BaseLayout || layout.Settings.WeekStart < 0 ||
-				layout.Settings.WeekStart > 6 || layout.Spec != 0 {
+				layout.Settings.WeekStart > 6 || !layout.Settings.ValidRowLimit() || layout.Spec != 0 {
 				return fmt.Errorf("invalid calendar layout in view [%s]", view.ID)
 			}
 			for _, column := range layout.Columns {

@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "項目顯示行數",
+	"calendarNewOnDate": "在此日期新增項目",
 	"leftRightSidebarLayout": "左右欄佈局",
 	"calendarView": "日曆",
 	"calendarToday": "今天",

@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "عدد صفوف العناصر المعروضة",
+	"calendarNewOnDate": "إضافة عنصر في هذا التاريخ",
 	"leftRightSidebarLayout": "تخطيط الشريطين الجانبيين الأيسر والأيمن",
 	"calendarView": "التقويم",
 	"calendarToday": "اليوم",

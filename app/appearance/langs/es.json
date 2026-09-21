@@ -1,4 +1,6 @@
 {
+	"calendarRowLimit": "Filas de elementos visibles",
+	"calendarNewOnDate": "Nuevo elemento en esta fecha",
 	"leftRightSidebarLayout": "Disposición de las barras laterales izquierda y derecha",
 	"calendarView": "Calendario",
 	"calendarToday": "Hoy",

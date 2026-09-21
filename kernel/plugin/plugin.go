@@ -546,7 +546,7 @@ func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional
 
 // dispatchRpcRequests dispatches multiple JSON-RPC requests concurrently.
 // Returns responses in the same order as requests. Nil responses indicate notifications.
-func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcProcessingRequest) []*JsonRpcProcessingResponse {
+func (p *KernelPlugin) dispatchRpcRequests(ctx context.Context, requests []*JsonRpcProcessingRequest) []*JsonRpcProcessingResponse {
 	responses := make([]*JsonRpcProcessingResponse, len(requests))
 	var wg sync.WaitGroup
 
@@ -560,7 +560,7 @@ func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcProcessingRequest)
 		// For notifications, dispatch without waiting for a response.
 		if request.Request.IsNotification() {
 			go func(request *JsonRpcRequest) {
-				p.dispatchRpcRequest(request)
+				p.dispatchRpcRequest(p.context, request)
 			}(request.Request)
 			responses[i] = nil
 			continue
@@ -575,7 +575,7 @@ func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcProcessingRequest)
 		wg.Add(1)
 		go func(index int, request *JsonRpcRequest) {
 			defer wg.Done()
-			responses[index] = p.dispatchRpcRequest(request)
+			responses[index] = p.dispatchRpcRequest(ctx, request)
 		}(i, request.Request)
 	}
 
@@ -585,7 +585,7 @@ func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcProcessingRequest)
 
 // dispatchRpcRequest routes a single JSON-RPC request to the plugin's registered JS method.
 // Returns nil for notifications (no ID field).
-func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcRequest) *JsonRpcProcessingResponse {
+func (p *KernelPlugin) dispatchRpcRequest(ctx context.Context, request *JsonRpcRequest) *JsonRpcProcessingResponse {
 	// Validate request structure
 	if rpcError := request.Validate(); rpcError != nil {
 		// For notifications, return nil (no response).
@@ -605,12 +605,13 @@ func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcRequest) *JsonRpcProce
 
 	// For notifications, call the method without waiting for a response and return nil.
 	if request.IsNotification() {
-		go p.callRpcMethod(request.Method, request.Params.Value)
+		// 通知由插件生命周期管理，HTTP 返回后仍可继续执行。
+		go p.callRpcMethod(p.context, request.Method, request.Params.Value)
 		return nil
 	}
 
 	// For normal requests, call the method and return response or error.
-	rpcResult, rpcError := p.callRpcMethod(request.Method, request.Params.Value)
+	rpcResult, rpcError := p.callRpcMethod(ctx, request.Method, request.Params.Value)
 	if rpcError == nil {
 		return &JsonRpcProcessingResponse{
 			Response: &JsonRpcRequestResponse{
@@ -630,8 +631,8 @@ func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcRequest) *JsonRpcProce
 	}
 }
 
-// callRpcMethod invokes a registered JS RPC method via the event bus and awaits the response.
-func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, rpcError *JsonRpcError) {
+// callRpcMethod 在事件循环中调用 RPC 方法，等待结果、请求取消或插件停止。
+func (p *KernelPlugin) callRpcMethod(ctx context.Context, method string, params any) (rpcResult any, rpcError *JsonRpcError) {
 	defer func() {
 		if r := recover(); r != nil {
 			logging.LogDebugf("[plugin:%s] panic in RPC method [%s]: %v", p.Name, method, r)
@@ -673,8 +674,22 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 	}
 
 	done := make(chan *TaskResult, 1)
+	var completeOnce sync.Once
+	complete := func(result *TaskResult) {
+		// 仅接收首次结果，等待者退出后的回调也不会阻塞事件循环。
+		completeOnce.Do(func() { done <- result })
+	}
 
-	p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+	runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+		// 排队期间取消的调用不再进入脚本，已执行的脚本不会被强制中断。
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-p.context.Done():
+			return nil, p.context.Err()
+		default:
+		}
+
 		rpcParams := []goja.Value{}
 		jsParams := rt.ToValue(params)
 		if isJsArray(rt, jsParams) {
@@ -691,12 +706,26 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		}
 
 		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
-			done <- result.TaskResult()
+			complete(result.TaskResult())
 		}, rt, true, rpcMethod.Method, rt.GlobalObject(), rpcParams...)
 		return
-	}, nil)
+	}, func(_ *goja.Runtime, _ any, err error) {
+		if err != nil {
+			complete(&TaskResult{err: err})
+		}
+	})
+	if runErr != nil {
+		complete(&TaskResult{err: runErr})
+	}
 
-	result := <-done
+	var result *TaskResult
+	select {
+	case result = <-done:
+	case <-ctx.Done():
+		result = &TaskResult{err: ctx.Err()}
+	case <-p.context.Done():
+		result = &TaskResult{err: p.context.Err()}
+	}
 	if result.err != nil {
 		rpcError = &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,

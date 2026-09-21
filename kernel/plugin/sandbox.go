@@ -395,17 +395,22 @@ func invokeFunction(callback func(rt *goja.Runtime, result *CallResult), rt *goj
 			return
 		}
 
-		then(resultObj, rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) {
-			// ⚠️ call.Arguments always is an empty array.
-			promise, ok := result.(*goja.Promise)
-			if ok {
-				callback(rt, &CallResult{Value: promise.Result()})
-			} else {
-				callback(rt, &CallResult{Value: resultJs})
+		// 使用 Goja 原生函数签名接收 Promise 的完成值和拒绝原因。
+		_, thenErr := then(resultObj, rt.ToValue(func(call goja.FunctionCall) goja.Value {
+			callback(rt, &CallResult{Value: call.Argument(0)})
+			return goja.Undefined()
+		}), rt.ToValue(func(call goja.FunctionCall) goja.Value {
+			reason := call.Argument(0).Export()
+			// Error 的 message 通常不可枚举，导出对象时需保留其错误文本。
+			if object, ok := call.Argument(0).(*goja.Object); ok && object.ClassName() == "Error" {
+				reason = object.String()
 			}
-		}), rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) {
-			callback(rt, &CallResult{Error: fmt.Errorf("promise rejected: %v", call.Argument(0).Export())})
+			callback(rt, &CallResult{Error: fmt.Errorf("promise rejected: %v", reason)})
+			return goja.Undefined()
 		}))
+		if thenErr != nil {
+			callback(rt, &CallResult{Error: thenErr})
+		}
 	} else {
 		callback(rt, &CallResult{Value: resultJs})
 	}

@@ -148,7 +148,7 @@ export const genMobileSidePanelSettingHTML = () => {
         </button>
     </div>
     <div class="fn__hr"></div>
-    <div data-type="side-panel-lists">${genMobileSidePanelListsHtml(config, pluginDockContext.entriesById)}</div>
+    <div class="config-side-panel" data-type="side-panel-lists">${genMobileSidePanelListsHtml(config, pluginDockContext.entriesById)}</div>
 </div>`;
 };
 
@@ -169,9 +169,13 @@ export const mountMobileSidePanelSetting = (root: HTMLElement) => {
         });
         dropTarget = undefined;
     };
-    const render = () => {
+    const clearDrag = () => {
         dragging = undefined;
-        dropTarget = undefined;
+        listsElement.classList.remove("config-side-panel--dragging");
+        clearDropTarget();
+    };
+    const render = () => {
+        clearDrag();
         listsElement.innerHTML = genMobileSidePanelListsHtml(config, pluginDockContext.entriesById);
     };
     render();
@@ -184,6 +188,7 @@ export const mountMobileSidePanelSetting = (root: HTMLElement) => {
         const item = handle.closest<HTMLElement>("[data-dock-id]");
         dragging = {id: item.dataset.dockId, pointerId: event.pointerId, x: event.clientX, y: event.clientY};
         listsElement.setPointerCapture(event.pointerId);
+        listsElement.classList.add("config-side-panel--dragging");
         event.preventDefault();
     });
     listsElement.addEventListener("pointermove", (event: PointerEvent) => {
@@ -233,10 +238,13 @@ export const mountMobileSidePanelSetting = (root: HTMLElement) => {
         listsElement.releasePointerCapture(event.pointerId);
         render();
     });
-    listsElement.addEventListener("lostpointercapture", () => {
-        dragging = undefined;
-        clearDropTarget();
-    });
+    const cancelDrag = (event: PointerEvent) => {
+        if (event.pointerId === dragging?.pointerId) {
+            clearDrag();
+        }
+    };
+    listsElement.addEventListener("pointercancel", cancelDrag);
+    listsElement.addEventListener("lostpointercapture", cancelDrag);
     settingElement.addEventListener("click", (event) => {
         const actionElement = (event.target as HTMLElement).closest<HTMLButtonElement | HTMLInputElement>("[data-action]");
         if (!actionElement || actionElement.disabled) {

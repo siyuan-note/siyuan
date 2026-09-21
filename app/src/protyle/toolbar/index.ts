@@ -2444,8 +2444,16 @@ export class Toolbar {
                 }
                 this.subElement.classList.add("fn__none");
             } else if (action === "select") {
-                selectAll(protyle, nodeElement, range);
-                this.subElement.classList.add("fn__none");
+                if (selectAll(protyle, nodeElement, range, !!protyle.gutter)) {
+                    this.showContent(protyle, range, nodeElement, pluginMenus);
+                } else {
+                    const selectedElement = protyle.wysiwyg.element.querySelector<HTMLElement>(".protyle-wysiwyg--select");
+                    if (selectedElement && protyle.gutter) {
+                        this.showMultiSelectMode(protyle, selectedElement);
+                    } else {
+                        this.subElement.classList.add("fn__none");
+                    }
+                }
             } else if (action === "copyPlainText") {
                 focusByRange(getEditorRange(nodeElement));
                 copyPlainText(stripSemanticMarkersFromRangeText(getSelection().getRangeAt(0)));

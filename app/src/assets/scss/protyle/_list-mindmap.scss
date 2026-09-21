@@ -54,15 +54,17 @@
     z-index: 5;
     opacity: 0;
     pointer-events: none;
-    gap: 4px;
+    gap: 8px;
     overflow: visible;
   }
 
+  &.fullscreen &__toolbar,
   &:hover &__toolbar,
   &__toolbar:focus-within {
     opacity: 1;
   }
 
+  &.fullscreen &__toolbar .block__icon,
   &:hover &__toolbar .block__icon,
   &__toolbar:focus-within .block__icon {
     pointer-events: auto;

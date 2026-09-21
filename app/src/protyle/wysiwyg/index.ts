@@ -2,7 +2,8 @@ import {recordReplacementUndo} from "./replacementInput";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
-import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
+import {normalizeInlineElementBoundaries, prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
+import {renderLongTextRuns} from "../util/longTextWrap";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
@@ -4360,6 +4361,9 @@ export class WYSIWYG {
             }
             this.escapeInline(protyle, range, event);
 
+            // 原生输入结束后立即恢复各段折行，避免延迟解析前绘制出临时的整段换行。
+            normalizeInlineElementBoundaries(this.element);
+            renderLongTextRuns(this.element);
             if ((/^\d{1}$/.test(event.data) || event.data === "‘" || event.data === "“" ||
                 // 百度输入法中文反双引号 https://github.com/siyuan-note/siyuan/issues/9686
                 event.data === "”" ||

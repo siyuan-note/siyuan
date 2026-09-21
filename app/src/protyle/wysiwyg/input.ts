@@ -567,7 +567,7 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
 };
 
 export const input = async (...args: Parameters<typeof inputBlock>) => {
-    const resume = suspendLongTextRuns(args[0].wysiwyg.element);
+    const resume = suspendLongTextRuns(args[0].wysiwyg.element, args[1], args[2]);
     try {
         await inputBlock(...args);
     } finally {

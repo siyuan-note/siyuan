@@ -959,13 +959,13 @@ export class WYSIWYG {
                 } else {
                     html = "<table></table>";
                 }
-                textPlain = protyle.lute.HTML2Md(html);
+                textPlain = protyle.lute.HTML2Md(transformSemanticInlineHTML(html, "remove"));
             } else if (selectTableRange) {
                 // 表格内跨多单元格的文本选区：按网格映射重建合法 table，重新计算 colspan/rowspan。
                 // 后续统一构建 NodeTable BlockDOM，不经过 markdown 往返（GFM 表格只有单行表头）
                 const tableElement = tableRangeElement.querySelector("table");
                 html = getTableRangeHTML(tableElement, tableRangeStartCell, tableRangeEndCell);
-                textPlain = protyle.lute.HTML2Md(html);
+                textPlain = protyle.lute.HTML2Md(transformSemanticInlineHTML(html, "remove"));
             } else {
                 const tempElement = document.createElement("div");
                 // https://github.com/siyuan-note/siyuan/issues/5540

@@ -1348,19 +1348,18 @@ export class Files extends Model {
         let currentPath = filePath;
         let liElement;
         while (!liElement) {
-            liElement = treeElement.querySelector(`[data-path="${currentPath}"]`);
-            if (!liElement) {
-                const dirname = pathPosix().dirname(currentPath);
-                if (dirname === "/") {
-                    const rootElement = treeElement.firstElementChild as HTMLElement;
-                    if (rootElement.querySelector(".b3-list-item__arrow--open")) {
-                        this.getLeaf(rootElement, notebookId, true);
-                    }
-                    break;
-                } else {
-                    currentPath = dirname + ".sy";
+            // 新文档只影响父级的子文档状态，从父路径开始查找。
+            const dirname = pathPosix().dirname(currentPath);
+            if (dirname === "/") {
+                const rootElement = treeElement.firstElementChild as HTMLElement;
+                if (rootElement.querySelector(".b3-list-item__arrow--open")) {
+                    this.getLeaf(rootElement, notebookId, true);
                 }
-            } else {
+                break;
+            }
+            currentPath = dirname + ".sy";
+            liElement = treeElement.querySelector(`[data-path="${currentPath}"]`);
+            if (liElement) {
                 const hiddenElement = liElement.querySelector(".fn__hidden");
                 if (hiddenElement) {
                     // 原先无子文档：显示展开箭头

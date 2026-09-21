@@ -233,7 +233,7 @@ export const getPdfViewerHTML = () => `<div class="pdf__outer" id="outerContaine
           </div>
         </div>
 
-        <div id="viewerContainer">
+        <div id="viewerContainer" tabindex="-1">
           <div id="viewer" class="pdfViewer"></div>
           <div class="pdf__resize fn__none"></div>
         </div>

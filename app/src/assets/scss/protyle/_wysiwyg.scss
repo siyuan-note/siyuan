@@ -481,6 +481,7 @@
       }
     }
 
+    span[data-inline-wrap="token"],
     span[data-inline-wrap][data-type~="code"],
     span[data-inline-wrap][data-type~="tag"],
     span[data-inline-wrap][data-type~="kbd"] {

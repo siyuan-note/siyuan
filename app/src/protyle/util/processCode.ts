@@ -13,6 +13,7 @@ import {buildSemanticInlineHTML} from "./inlineElementMarker";
 import {renderTableCellRichElements} from "../render/tableCellRich";
 import {renderEmbedHeadings} from "../render/embedHeading";
 import {normalizeInlineElementBoundaries} from "./inlineElementBoundary";
+import {renderLongTextRuns} from "./longTextWrap";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
@@ -63,6 +64,7 @@ const RENDER_MAP: Record<string, (previewPanel: Element) => void> = {
 
 export const processRender = (previewPanel: Element) => {
     normalizeInlineElementBoundaries(previewPanel);
+    renderLongTextRuns(previewPanel);
     renderEmbedHeadings(previewPanel);
     renderTableCellRichElements(previewPanel);
     // 受限 Lite 编辑器只渲染公式，代码围栏始终作为源码编辑，不能执行图表或 HTML。

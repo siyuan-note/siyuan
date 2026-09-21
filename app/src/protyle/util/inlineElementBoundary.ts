@@ -1,3 +1,5 @@
+import {unwrapLongTextRuns} from "./longTextWrap";
+
 const INLINE_BOUNDARY_ATTRIBUTE = "data-inline-boundary";
 const INLINE_WRAP_ATTRIBUTE = "data-inline-wrap";
 const SEMANTIC_INLINE_SELECTOR = 'span[data-type~="code"],span[data-type~="tag"],span[data-type~="kbd"]';
@@ -83,6 +85,7 @@ export const restoreInlineElementBoundary = (element: HTMLElement) => {
 };
 
 export const restoreInlineElementBoundaries = (root: ParentNode) => {
+    unwrapLongTextRuns(root);
     root.querySelectorAll(`[${INLINE_WRAP_ATTRIBUTE}]`).forEach(element =>
         element.removeAttribute(INLINE_WRAP_ATTRIBUTE));
     if (root instanceof HTMLElement) {

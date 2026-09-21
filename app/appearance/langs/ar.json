@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "توسيع حتى المستوى ${level}",
 	"leftRightSidebarLayout": "تخطيط الشريطين الجانبيين الأيسر والأيمن",
 	"calendarView": "التقويم",
 	"calendarToday": "اليوم",

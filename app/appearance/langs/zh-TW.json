@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "展開到第 ${level} 級",
 	"leftRightSidebarLayout": "左右欄佈局",
 	"calendarView": "日曆",
 	"calendarToday": "今天",

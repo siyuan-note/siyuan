@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "Expand to level ${level}",
 	"leftRightSidebarLayout": "Left and right sidebar layout",
 	"calendarView": "Calendar",
 	"calendarToday": "Today",

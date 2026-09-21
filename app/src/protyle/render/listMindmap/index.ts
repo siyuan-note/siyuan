@@ -34,6 +34,8 @@ import {getListMindmapElements, registerListMindmapRoot} from "./render";
 import {ListMindmapView} from "./view";
 import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
+import {getListMindmapFoldStates} from "./fold";
+import {isMobile} from "../../../util/functions";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, destroy: () => void}>();
 
@@ -130,6 +132,37 @@ class ListMindmapController {
             host: this.host, model: this.model, labels: window.siyuan.languages,
             onOpenLink: (href, event) => openLink(owner.app, href, event, event.ctrlKey || event.metaKey),
             readOnly: !canEdit(owner, list),
+            onExpandLevelMenu: (anchor, select) => {
+                const menu = new Menu();
+                for (let level = 1; level <= 6; level++) {
+                    menu.addItem({
+                        id: `level${level}`,
+                        iconHTML: "",
+                        label: window.siyuan.languages.listMindmapExpandToLevel.replace("${level}", String(level)),
+                        click: () => select(level),
+                    });
+                }
+                menu.addSeparator({id: "separator_all"});
+                menu.addItem({id: "expandAll", icon: "iconExpand", label: window.siyuan.languages.expandAll,
+                    click: () => select("expandAll")});
+                menu.addItem({id: "foldAll", icon: "iconContract", label: window.siyuan.languages.foldAll,
+                    click: () => select("foldAll")});
+                if (isMobile()) {
+                    menu.fullscreen("bottom");
+                } else {
+                    const rect = anchor.getBoundingClientRect();
+                    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+                }
+            },
+            onFoldLevel: level => this.change(() => {
+                const model = readListMindmap(list);
+                getListMindmapFoldStates(model.root, level).forEach((collapsed, id) => {
+                    const node = model.nodes.get(id);
+                    if (node.element && node.collapsed !== collapsed) {
+                        node.element.setAttribute("fold", collapsed ? "1" : "0");
+                    }
+                });
+            }),
             onFullscreen: (enter, button) => {
                 if (enter) {
                     const drag = document.getElementById("drag");

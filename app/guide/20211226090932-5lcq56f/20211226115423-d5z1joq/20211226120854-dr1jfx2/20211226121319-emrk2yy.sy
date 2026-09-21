@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260921112518"
+		"updated": "20260921211836"
 	},
 	"Children": [
 		{
@@ -1912,12 +1912,58 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20260921112518"
+				"updated": "20260921211836"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "心智圖"
+				}
+			]
+		},
+		{
+			"ID": "20260921204726-7o3d4h3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921204726-7o3d4h3",
+				"updated": "20260921211836"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端和行動端均可透過心智圖工具列中「連線」後的展開層級按鈕操作。選單提供第一級至第六級，所選級別的節點也會展開。中心節點算第一級，多項列表自動產生的中心節點也算第一級。選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "展開層級"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "展開到第 1 級"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可顯示中心節點及其直接子節點，深層分支保留原有摺疊狀態，之後仍可單獨展開分支。"
+				}
+			]
+		},
+		{
+			"ID": "20260921204726-t1036m0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921204726-t1036m0",
+				"updated": "20260921211836"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同一選單還提供「全部展開」和「全部摺疊」，其中「全部摺疊」只顯示中心節點。可編輯文件中的摺疊狀態隨列表儲存，批次調整可一次復原；唯讀視圖和匯出的 HTML 僅暫時調整目前視圖。自動產生的中心節點的摺疊狀態也僅暫時保留。"
 				}
 			]
 		},

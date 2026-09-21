@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260921191955"
+		"updated": "20260921211836"
 	},
 	"Children": [
 		{
@@ -1914,12 +1914,58 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20260921191955"
+				"updated": "20260921211836"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "思维导图"
+				}
+			]
+		},
+		{
+			"ID": "20260921204726-hs69adt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921204726-hs69adt",
+				"updated": "20260921211836"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端和移动端均可通过脑图工具栏中「连接」后的展开层级按钮操作。菜单提供第一级至第六级，所选级别的节点也会展开。中心节点算第一级，多项列表自动生成的中心节点也算第一级。选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "展开层级"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "展开到第 1 级"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可显示中心节点及其直接子节点，深层分支保留原有折叠状态，之后仍可单独展开分支。"
+				}
+			]
+		},
+		{
+			"ID": "20260921204726-vm1ldyi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921204726-vm1ldyi",
+				"updated": "20260921211836"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同一菜单还提供「全部展开」和「全部折叠」，其中「全部折叠」只显示中心节点。可编辑文档中的折叠状态随列表保存，批量调整可一次撤销；只读视图和导出的 HTML 仅临时调整当前视图。自动生成的中心节点的折叠状态也仅临时保留。"
 				}
 			]
 		},

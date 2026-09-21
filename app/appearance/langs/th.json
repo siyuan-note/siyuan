@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "ขยายถึงระดับ ${level}",
 	"leftRightSidebarLayout": "เค้าโครงแถบด้านข้างซ้ายและขวา",
 	"calendarView": "ปฏิทิน",
 	"calendarToday": "วันนี้",

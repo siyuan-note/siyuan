@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "Прошири до нивоа ${level}",
 	"leftRightSidebarLayout": "Raspored leve i desne bočne trake",
 	"calendarView": "Календар",
 	"calendarToday": "Данас",

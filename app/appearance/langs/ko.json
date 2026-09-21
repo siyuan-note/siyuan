@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "${level}단계까지 펼치기",
 	"leftRightSidebarLayout": "왼쪽 및 오른쪽 사이드바 레이아웃",
 	"calendarView": "달력",
 	"calendarToday": "오늘",

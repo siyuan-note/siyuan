@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "第 ${level} 階層まで展開",
 	"leftRightSidebarLayout": "左右のサイドバーのレイアウト",
 	"calendarView": "カレンダー",
 	"calendarToday": "今日",

@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "Uitvouwen tot niveau ${level}",
 	"leftRightSidebarLayout": "Indeling van linker- en rechterzijbalk",
 	"calendarView": "Kalender",
 	"calendarToday": "Vandaag",

@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "Développer jusqu’au niveau ${level}",
 	"leftRightSidebarLayout": "Disposition des barres latérales gauche et droite",
 	"calendarView": "Calendrier",
 	"calendarToday": "Aujourd’hui",

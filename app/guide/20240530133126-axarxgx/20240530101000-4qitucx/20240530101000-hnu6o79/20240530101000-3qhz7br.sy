@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260921112518"
+		"updated": "20260921211836"
 	},
 	"Children": [
 		{
@@ -2044,12 +2044,58 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20260921112518"
+				"updated": "20260921211836"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "マインドマップ"
+				}
+			]
+		},
+		{
+			"ID": "20260921204726-5aejvfq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921204726-5aejvfq",
+				"updated": "20260921211836"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版とモバイル版では、マインドマップのツールバーで「接続」の後にある展開階層ボタンを使用できます。メニューには第 1 階層から第 6 階層までが表示され、選択した階層のノード自体も展開されます。中心ノードを第 1 階層と数え、複数の最上位項目を持つリストから自動生成された中心ノードも含みます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "展開レベル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "第 1 階層まで展開"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、中心ノードとその直接の子ノードが表示されます。さらに深い階層の折りたたみ状態は保持され、後から個別に枝を展開できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260921204726-1kl7742",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921204726-1kl7742",
+				"updated": "20260921211836"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同じメニューからすべて展開、すべて折りたたむ操作も行えます。すべて折りたたむと中心ノードだけが表示されます。編集可能な文書では折りたたみ状態がリストに保存され、一括操作を一度で元に戻せます。読み取り専用ビューとエクスポートした HTML では現在の表示だけが一時的に変わります。自動生成された中心ノードの折りたたみ状態も一時的です。"
 				}
 			]
 		},

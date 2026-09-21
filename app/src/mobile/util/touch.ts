@@ -297,7 +297,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
         return;
     }
 
-    popSidebar(getOpeningSidebar(firstDirection), true, true);
+    popSidebar(getOpeningSidebar(firstDirection));
 };
 
 export const handleTouchCancel = () => {

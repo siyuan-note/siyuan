@@ -89,9 +89,9 @@ const createTouchHarness = (side: "left" | "right", options: {
         "./sidebar": {
             getSidebarElement: () => panel,
             getSidebarDock: () => ({}),
-            popSidebar: (value: string, _render: boolean, preferFirst: boolean) => {
+            popSidebar: (value: string, render = true) => {
                 panel.style.transform = "translateX(0px)";
-                actions.push(preferFirst ? `first:${value}` : "restore");
+                actions.push(render ? `open:${value}` : "restore");
             },
             switchToNextSidebarTab: (value: string) => actions.push(`next:${value}`),
         },
@@ -138,13 +138,13 @@ const createTouchHarness = (side: "left" | "right", options: {
 for (const side of ["left", "right"] as const) {
     const nextX = side === "left" ? 240 : 120;
     const closeX = side === "left" ? 120 : 240;
-    test(`${side} sidebar opens its first visible tab only after a committed swipe`, () => {
+    test(`${side} sidebar restores its selected tab only after a committed swipe`, () => {
         const harness = createTouchHarness(side, {closed: true});
         harness.start();
         harness.move(nextX);
         assert.deepEqual(harness.actions, []);
         harness.end(nextX);
-        assert.deepEqual(harness.actions, [`first:${side}`]);
+        assert.deepEqual(harness.actions, [`open:${side}`]);
         const disabled = createTouchHarness(side, {closed: true, disabled: true});
         disabled.start();
         disabled.move(nextX);

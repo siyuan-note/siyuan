@@ -7,7 +7,7 @@
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
 		"type": "doc",
-		"updated": "20260921090531"
+		"updated": "20260921210136"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110114-xav9o1n",
-				"updated": "20260921090531"
+				"updated": "20260921210136"
 			},
 			"Children": [
 				{
@@ -62,12 +62,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260921090531-lx0v0bv",
-				"updated": "20260921090531"
+				"updated": "20260921210136"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Swipe right in the editor to open the left sidebar, or swipe left to open the right sidebar. Each gesture opens the first visible feature on that side. Change the feature order in "
+					"Data": "Swipe right in the editor to open the left sidebar, or swipe left to open the right sidebar. After starting the app, each sidebar initially opens its first visible feature. Subsequent openings restore the last used feature on that side. Change the feature order in "
 				},
 				{
 					"Type": "NodeTextMark",

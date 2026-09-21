@@ -49,6 +49,9 @@ import {
 import {exitSiYuan} from "../../dialog/processSystem";
 import {enterDocumentFromTitle} from "../../protyle/header/titleEnter";
 
+// 侧栏首次使用前随布局选择默认功能，使用后保留当前页签。
+const activatedSidePanels = new WeakSet<HTMLElement>();
+
 const getDockTabElement = (type: string) => {
     return document.querySelector(`[data-type="${CSS.escape(`sidebar-${type}-tab`)}"]`) as HTMLElement;
 };
@@ -63,6 +66,9 @@ const getDockIdFromTabElement = (element: HTMLElement) => {
 };
 
 const getActiveDockId = (sidePanelElement: HTMLElement) => {
+    if (!activatedSidePanels.has(sidePanelElement)) {
+        return;
+    }
     const activeElement = sidePanelElement.firstElementChild.querySelector<HTMLElement>(
         "[data-type$='-tab'].toolbar__icon--active");
     return activeElement ? getDockIdFromTabElement(activeElement) : undefined;
@@ -277,6 +283,7 @@ const initSidePanelTabs = (app: App, sidePanelElement: HTMLElement) => {
         if (!type) {
             return;
         }
+        activatedSidePanels.add(sidePanelElement);
         if (svgElement.classList.contains("toolbar__icon--active")) {
             if (isProgrammatic) {
                 updateDock(app, type, getDockContentElement(type));

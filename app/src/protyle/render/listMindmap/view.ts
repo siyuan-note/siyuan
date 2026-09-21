@@ -98,7 +98,7 @@ export class ListMindmapView {
     private readonly relationElements = new Map<string, HTMLButtonElement>();
     private readonly buttons = new Map<string, HTMLButtonElement>();
     private readonly folded = new Map<string, boolean>();
-    private readonly tooltip = createElement("div", "list-mindmap__tooltip");
+    private readonly tooltip = createElement("div", "tooltip list-mindmap__tooltip");
     private tooltipButton?: HTMLButtonElement;
     private readonly colorProbe = createElement("span", "list-mindmap__color-probe");
     private positions = new Map<string, ListMindmapPosition>();

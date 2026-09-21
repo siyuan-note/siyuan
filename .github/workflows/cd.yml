@@ -126,7 +126,7 @@ jobs:
   contracts:
     name: API contracts and kernel tests
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:

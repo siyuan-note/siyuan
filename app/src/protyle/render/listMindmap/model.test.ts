@@ -125,7 +125,7 @@ test("layout rejects cyclic or invalid trees and supports deep nesting without r
 const browserCases = async (sourceCode: string, css: string, taskSource: string, taskCSS: string, dragSource: string) => {
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
-        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, remapListMindmapIDs, writeListMindmapMetadata, " +
+        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, remapListMindmapIDs, writeListMindmapMetadata, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
         "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, ListMindmapView};")(
         async (element: Element) => {
@@ -459,9 +459,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const cleaned = api.cleanListMindmapHTML(list.outerHTML);
     // 列表转换只接收源块，脑图工具栏、画布和节点预览不能传给 Lute。
     for (const [markdown, conversions] of [
-        ["* Alpha\n* Beta\n", [["UL2OL", "o"], ["UL2TL", "t"]]],
-        ["1. Alpha\n2. Beta\n", [["OL2UL", "u"], ["OL2TL", "t"]]],
-        ["* [ ] Alpha\n* [x] Beta\n", [["TL2UL", "u"], ["TL2OL", "o"]]],
+        ["* Alpha\n* Beta\n", [["OL2UL", "u"], ["UL2OL", "o"], ["UL2TL", "t"]]],
+        ["1. Alpha\n2. Beta\n", [["OL2UL", "u"], ["UL2OL", "o"], ["UL2TL", "t"]]],
+        ["* [ ] Alpha\n* [x] Beta\n", [["OL2UL", "u"], ["UL2OL", "o"], ["UL2TL", "t"]]],
     ] as [string, [string, string][]][]) {
         const source = document.createElement("div");
         source.innerHTML = lute.Md2BlockDOM(markdown);
@@ -473,11 +473,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         sourceList.prepend(derived.cloneNode(true));
         for (const [conversion, subtype] of conversions) {
             const converted = document.createElement("div");
-            converted.innerHTML = (lute as any)[conversion](api.cleanListMindmapHTML(sourceList.outerHTML));
+            converted.innerHTML = api.convertListMindmapToList(sourceList, conversion, lute);
             const result = converted.firstElementChild;
             check.equal(result.getAttribute("data-subtype"), subtype);
             check.equal(result.getAttribute("data-node-id"), sourceList.getAttribute("data-node-id"));
-            check.equal(result.getAttribute("custom-sy-list-mindmap"), "1");
+            check.equal(result.getAttribute("custom-sy-list-mindmap"), null);
+            check.equal(sourceList.getAttribute("custom-sy-list-mindmap"), "1", "undo source retains mind map view");
             check.equal(result.getAttribute("custom-sy-list-mindmap-data"), metadata);
             check.equal(result.querySelector(".list-mindmap"), null);
             check.equal(result.hasAttribute("data-list-mindmap-rendered"), false);

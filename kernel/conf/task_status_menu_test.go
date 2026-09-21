@@ -25,7 +25,7 @@ func TestTaskStatusMenuMigration(t *testing.T) {
 			config := &EntryVisibility{Version: 5, Active: "custom", Profiles: []*EntryVisibilityProfile{&fixture.Input}}
 			for i := 0; i < 2; i++ {
 				NormalizeEntryVisibility(config, EntryVisibilityProfileFull)
-				if config.Version != 6 || !reflect.DeepEqual(fixture.Input.Entries, fixture.Expected.Entries) ||
+				if config.Version != EntryVisibilityVersion || !reflect.DeepEqual(fixture.Input.Entries, fixture.Expected.Entries) ||
 					!reflect.DeepEqual(fixture.Input.Orders, fixture.Expected.Orders) {
 					t.Fatalf("unexpected migration: %+v", fixture.Input)
 				}

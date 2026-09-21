@@ -50,8 +50,6 @@
 	"openLeftSidebar": "왼쪽 사이드바 열기",
 	"openRightSidebar": "오른쪽 사이드바 열기",
 	"listMindmapPlaceholder": "텍스트 입력",
-	"listMindmapToMindmap": "마인드맵 보기로 전환",
-	"listMindmapToList": "목록 보기로 전환",
 	"listMindmapRoot": "현재 목록",
 	"listMindmapChild": "하위 노드 추가",
 	"listMindmapFit": "캔버스에 맞추기",

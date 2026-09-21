@@ -80,7 +80,7 @@ func (appearance *Appearance) NormalizeGlobalFontFamilies() {
 }
 
 const (
-	EntryVisibilityVersion       = 6
+	EntryVisibilityVersion       = 7
 	EntryVisibilityProfileSimple = "simple"
 	EntryVisibilityProfileFull   = "full"
 )
@@ -167,6 +167,9 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 		}
 		if version < 6 {
 			migrateTaskStatusMenu(profile)
+		}
+		if version < 7 {
+			migrateMindmapMenu(profile)
 		}
 		profileIDs[profile.ID] = true
 		profiles = append(profiles, profile)

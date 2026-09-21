@@ -74,7 +74,7 @@ import {
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
 import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
-import {cleanListMindmapHTML} from "../render/listMindmap/model";
+import {cleanListMindmapHTML, convertListMindmapToList} from "../render/listMindmap/model";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
@@ -2288,8 +2288,9 @@ export const turnsOneInto = async (options: {
         }
         newHTML = converted.outerHTML;
     } else {
+        const listHTML = convertListMindmapToList(options.nodeElement, options.type, options.protyle.lute);
         // @ts-ignore
-        newHTML = options.protyle.lute[options.type](cleanListMindmapHTML(options.nodeElement.outerHTML), options.level);
+        newHTML = listHTML ?? options.protyle.lute[options.type](cleanListMindmapHTML(options.nodeElement.outerHTML), options.level);
     }
     disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);

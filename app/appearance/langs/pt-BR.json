@@ -50,8 +50,6 @@
 	"openLeftSidebar": "Abrir barra lateral esquerda",
 	"openRightSidebar": "Abrir barra lateral direita",
 	"listMindmapPlaceholder": "Digite o texto",
-	"listMindmapToMindmap": "Alternar para a visualização de mapa mental",
-	"listMindmapToList": "Alternar para a visualização de lista",
 	"listMindmapRoot": "Lista atual",
 	"listMindmapChild": "Adicionar nó filho",
 	"listMindmapFit": "Ajustar à área de desenho",

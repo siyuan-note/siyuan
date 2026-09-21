@@ -225,6 +225,7 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("list", lang("list")),
         node("orderedList", lang("ordered-list")),
         node("check", lang("check")),
+        ...(!multi ? [node("listMindmap", lang("mindmap"))] : []),
         node("heading1", lang("heading1")),
         node("heading2", lang("heading2")),
         node("heading3", lang("heading3")),
@@ -381,7 +382,6 @@ const gutterSingle = () => [
         separator("separator_numbering"),
         node("prependListItem", lang("prependListItem")),
         node("appendListItem", lang("appendListItem")),
-        node("listMindmap", lang("listMindmapToMindmap")),
     ]),
     separator("separator_tabs"),
     node("tabs", lang("tabs"), true, [

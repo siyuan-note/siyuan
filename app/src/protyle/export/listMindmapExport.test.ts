@@ -18,7 +18,6 @@ test("mind map export labels preserve localized text without closing the generat
         listMindmapRoot: "Current\u2028list\u2029root",
         connect: "Connect",
         text: "Text",
-        listMindmapToList: "List view",
         fullscreen: "Fullscreen",
         exitFullscreen: "Exit fullscreen",
         task: "Task",

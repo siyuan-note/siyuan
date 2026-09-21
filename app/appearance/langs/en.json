@@ -50,8 +50,6 @@
 	"openLeftSidebar": "Open left sidebar",
 	"openRightSidebar": "Open right sidebar",
 	"listMindmapPlaceholder": "Enter text",
-	"listMindmapToMindmap": "Switch to mind map view",
-	"listMindmapToList": "Switch to list view",
 	"listMindmapRoot": "Current list",
 	"listMindmapChild": "Add child node",
 	"listMindmapFit": "Fit to canvas",

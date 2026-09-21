@@ -50,8 +50,6 @@
 	"openLeftSidebar": "Ouvrir le panneau latéral gauche",
 	"openRightSidebar": "Ouvrir le panneau latéral droit",
 	"listMindmapPlaceholder": "Saisir du texte",
-	"listMindmapToMindmap": "Passer à la vue carte mentale",
-	"listMindmapToList": "Passer à la vue liste",
 	"listMindmapRoot": "Liste actuelle",
 	"listMindmapChild": "Ajouter un nœud enfant",
 	"listMindmapFit": "Ajuster au canevas",

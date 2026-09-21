@@ -21,6 +21,26 @@ export type TEntryVisibilityImportProfile = {
 export const isEntryVisibilityImportVersionSupported = (version: number, currentVersion: number) =>
     Number.isInteger(version) && version >= 1 && version <= currentVersion;
 
+// 脑图入口迁移到转换菜单，保留显式可见性和其余菜单项顺序。
+export const migrateMindmapMenu = (profile: Pick<Config.IEntryVisibilityProfile, "entries" | "orders">) => {
+    const oldParent = "gutter.single.listBlock";
+    const newParent = "gutter.single.turnInto";
+    const key = "listMindmap";
+    const oldPath = `${oldParent}.${key}`;
+    const newPath = `${newParent}.${key}`;
+    if (oldPath in profile.entries) {
+        if (!(newPath in profile.entries)) {
+            profile.entries[newPath] = profile.entries[oldParent] !== false && profile.entries[oldPath];
+        }
+        delete profile.entries[oldPath];
+    } else if (profile.entries[oldParent] === false && !(newPath in profile.entries)) {
+        profile.entries[newPath] = false;
+    }
+    if (profile.orders[oldParent]) {
+        profile.orders[oldParent] = profile.orders[oldParent].filter(item => item !== key);
+    }
+};
+
 // 展开任务状态子菜单，合并重复入口的可见性，并在原菜单位置保留子项顺序及插件位置。
 export const migrateTaskStatusMenu = (profile: Pick<Config.IEntryVisibilityProfile, "entries" | "orders">) => {
     const parent = "gutter.single.listBlock";
@@ -127,6 +147,9 @@ export const normalizeEntryVisibilityImportProfile = (
     }
     if (version < 6) {
         migrateTaskStatusMenu({entries, orders});
+    }
+    if (version < 7) {
+        migrateMindmapMenu({entries, orders});
     }
     return {name: profile.name, entries, orders};
 };

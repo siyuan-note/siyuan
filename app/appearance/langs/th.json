@@ -50,8 +50,6 @@
 	"openLeftSidebar": "เปิดแถบด้านซ้าย",
 	"openRightSidebar": "เปิดแถบด้านขวา",
 	"listMindmapPlaceholder": "ป้อนข้อความ",
-	"listMindmapToMindmap": "เปลี่ยนเป็นมุมมองแผนผังความคิด",
-	"listMindmapToList": "เปลี่ยนเป็นมุมมองรายการ",
 	"listMindmapRoot": "รายการปัจจุบัน",
 	"listMindmapChild": "เพิ่มโหนดลูก",
 	"listMindmapFit": "ปรับให้พอดีกับพื้นที่วาด",

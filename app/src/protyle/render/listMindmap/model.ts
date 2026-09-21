@@ -260,6 +260,25 @@ export const cleanListMindmapHTML = (html: string): string => {
     return template.innerHTML;
 };
 
+// 转换列表类型时退出脑图显示，保留节点、连接元数据及原 DOM 供撤销使用。
+export const convertListMindmapToList = (element: Element, type: string, lute: Lute): string | undefined => {
+    if (element.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1" ||
+        !["OL2UL", "UL2OL", "UL2TL", "OL2TL", "TL2UL", "TL2OL"].includes(type)) {
+        return;
+    }
+    const template = document.createElement("template");
+    template.innerHTML = cleanListMindmapHTML(element.outerHTML);
+    const source = template.content.firstElementChild;
+    source.removeAttribute(Constants.CUSTOM_SY_LIST_MINDMAP);
+    const from = {o: "OL", t: "TL", u: "UL"}[source.getAttribute("data-subtype")] || "UL";
+    const to = type.split("2")[1];
+    if (from === to) {
+        return source.outerHTML;
+    }
+    // @ts-expect-error Lute 的类型声明未包含列表转换方法。
+    return lute[`${from}2${to}`](source.outerHTML);
+};
+
 // 按每层最大宽度对齐节点，并为每个分支保留完整的垂直空间，避免富文本节点相互遮挡。
 export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
     horizontalGap?: number;

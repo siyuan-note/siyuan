@@ -1833,7 +1833,16 @@ export class Gutter {
                 type: "List2Tabs"
             }));
             const listSubtype = nodeElement.getAttribute("data-subtype");
-            if (listSubtype === "o") {
+            const isMindmap = nodeElement.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1";
+            if (isMindmap) {
+                [
+                    {menuId: "list", icon: "iconList", label: "list", type: "OL2UL"},
+                    {menuId: "orderedList", icon: "iconOrderedList", label: "ordered-list", type: "UL2OL"},
+                    {menuId: "check", icon: "iconCheck", label: "check", type: "UL2TL"},
+                ].forEach(target => turnIntoSubmenu.push(this.turnsOneInto({
+                    ...target, id, protyle, nodeElement, label: window.siyuan.languages[target.label],
+                })));
+            } else if (listSubtype === "o") {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "list",
                     id,
@@ -1897,7 +1906,18 @@ export class Gutter {
                     type: "OL2TL"
                 }));
             }
-            if (this.hasSublist([nodeElement])) {
+            if (!isMindmap) {
+                turnIntoSubmenu.push({
+                    id: "listMindmap",
+                    icon: "iconMindmap",
+                    label: window.siyuan.languages.mindmap,
+                    click() {
+                        hideElements(["select"], protyle);
+                        void toggleListMindmap(protyle, nodeElement as HTMLElement);
+                    },
+                });
+            }
+            if (!isMindmap && this.hasSublist([nodeElement])) {
                 turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
             }
         } else if (type === "NodeTabs" && allowStructuralMutation) {
@@ -2041,7 +2061,8 @@ export class Gutter {
                 }
             }).element);
         }
-        if ((type === "NodeList" || type === "NodeListItem") && allowStructuralMutation) {
+        if ((type === "NodeList" || type === "NodeListItem") && allowStructuralMutation &&
+            nodeElement.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1") {
             const isOrderedList = type === "NodeList" && nodeElement.getAttribute("data-subtype") === "o";
             const continueListStartPromise = isOrderedList ? fetchSyncPost("/api/block/getOrderedListContinueStart", {
                 id,
@@ -2105,18 +2126,6 @@ export class Gutter {
                         void appendListItem(protyle, nodeElement as HTMLElement, range);
                     }
                 });
-                if (type === "NodeList") {
-                    submenu.push({
-                        id: "listMindmap",
-                        icon: nodeElement.getAttribute("custom-sy-list-mindmap") === "1" ? "iconList" : "iconMindmap",
-                        label: nodeElement.getAttribute("custom-sy-list-mindmap") === "1" ?
-                            window.siyuan.languages.listMindmapToList : window.siyuan.languages.listMindmapToMindmap,
-                        click() {
-                            hideElements(["select"], protyle);
-                            void toggleListMindmap(protyle, nodeElement as HTMLElement);
-                        },
-                    });
-                }
                 return submenu;
             };
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_listBlock", type: "separator"}).element);

@@ -50,8 +50,6 @@
 	"openLeftSidebar": "開啟左側欄",
 	"openRightSidebar": "開啟右側欄",
 	"listMindmapPlaceholder": "輸入文字",
-	"listMindmapToMindmap": "切換為心智圖檢視",
-	"listMindmapToList": "切換為清單檢視",
 	"listMindmapRoot": "目前清單",
 	"listMindmapChild": "新增子節點",
 	"listMindmapFit": "符合畫布大小",

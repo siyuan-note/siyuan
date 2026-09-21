@@ -50,8 +50,6 @@
 	"openLeftSidebar": "打开左侧栏",
 	"openRightSidebar": "打开右侧栏",
 	"listMindmapPlaceholder": "输入文字",
-	"listMindmapToMindmap": "切换为思维导图视图",
-	"listMindmapToList": "切换为列表视图",
 	"listMindmapRoot": "当前列表",
 	"listMindmapChild": "添加子节点",
 	"listMindmapFit": "适应画布",

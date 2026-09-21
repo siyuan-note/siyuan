@@ -50,8 +50,6 @@
 	"openLeftSidebar": "左サイドバーを開く",
 	"openRightSidebar": "右サイドバーを開く",
 	"listMindmapPlaceholder": "テキストを入力",
-	"listMindmapToMindmap": "マインドマップ表示に切り替え",
-	"listMindmapToList": "リスト表示に切り替え",
 	"listMindmapRoot": "現在のリスト",
 	"listMindmapChild": "子ノードを追加",
 	"listMindmapFit": "キャンバスに合わせる",

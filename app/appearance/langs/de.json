@@ -50,8 +50,6 @@
 	"openLeftSidebar": "Linke Seitenleiste öffnen",
 	"openRightSidebar": "Rechte Seitenleiste öffnen",
 	"listMindmapPlaceholder": "Text eingeben",
-	"listMindmapToMindmap": "Zur Mindmap-Ansicht wechseln",
-	"listMindmapToList": "Zur Listenansicht wechseln",
 	"listMindmapRoot": "Aktuelle Liste",
 	"listMindmapChild": "Untergeordneten Knoten hinzufügen",
 	"listMindmapFit": "An Zeichenfläche anpassen",

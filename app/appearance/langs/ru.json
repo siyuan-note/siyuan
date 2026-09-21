@@ -50,8 +50,6 @@
 	"openLeftSidebar": "Открыть левую боковую панель",
 	"openRightSidebar": "Открыть правую боковую панель",
 	"listMindmapPlaceholder": "Введите текст",
-	"listMindmapToMindmap": "Переключить на интеллект-карту",
-	"listMindmapToList": "Переключить на список",
 	"listMindmapRoot": "Текущий список",
 	"listMindmapChild": "Добавить дочерний узел",
 	"listMindmapFit": "Вписать в холст",

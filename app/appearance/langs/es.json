@@ -50,8 +50,6 @@
 	"openLeftSidebar": "Abrir panel lateral izquierdo",
 	"openRightSidebar": "Abrir panel lateral derecho",
 	"listMindmapPlaceholder": "Introducir texto",
-	"listMindmapToMindmap": "Cambiar a vista de mapa mental",
-	"listMindmapToList": "Cambiar a vista de lista",
 	"listMindmapRoot": "Lista actual",
 	"listMindmapChild": "Añadir nodo hijo",
 	"listMindmapFit": "Ajustar al lienzo",

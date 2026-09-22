@@ -151,6 +151,43 @@ python -X utf8 scripts/verify-release.py check --version 3.8.4
 - 部署 Index 和用户指南
 - 完成小米、华为、荣耀、OPPO、vivo、App Store、Microsoft Store、腾讯应用宝、Google Play、360 和腾讯电脑管家等应用市场上架
 
+上架应用市场：
+
+- [小米](https://dev.mi.com/distribute)
+- [华为](https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/myApp)
+- [荣耀](https://developer.honor.com/)
+- [OPPO](https://open.oppomobile.com/)
+- [vivo](https://dev.vivo.com.cn/appLists)
+- [iOS](https://appstoreconnect.apple.com/apps/1583226508/appstore)
+- [微软](https://partner.microsoft.com/en-us/dashboard/windows/overview)
+- [腾讯应用宝](https://app.open.qq.com/p/app/detail?appId=1112307632)
+- [Google Play](https://play.google.com/console/developers)
+- [360软件开放平台](https://open.soft.360.cn/softlist.php)
+- [腾讯电脑管家软件开放平台](https://guanjia.qq.com/software-platform/softwarelibrary)
+
+上传发布包：
+
+```
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4.apk -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4.apk --content-type application/vnd.android.package-archive --remote
+
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux.AppImage --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux.tar.gz --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux.deb --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux.rpm --remote
+
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux-arm64.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux-arm64.AppImage --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux-arm64.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux-arm64.tar.gz --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux-arm64.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux-arm64.deb --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux-arm64.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux-arm64.rpm --remote
+
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-mac.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-mac.dmg --content-type application/octet-stream --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-mac-arm64.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-mac-arm64.dmg --content-type application/octet-stream --remote
+
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-win.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-win.exe --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-win-arm64.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-win-arm64.exe --remote
+echo 'complete'
+```
+
 ## 直接检查安装包
 
 把安装包放入桌面 `siyuan` 文件夹，在仓库根目录执行：

@@ -448,51 +448,47 @@ def verify_package(package, baselines=None, sevenzip=None, version=None):
         kernel_hashes = sorted({digest(path) for path in kernels})
         actual = package_resources(layers, roots[0])
         mobile = package.suffix.lower() in {".apk", ".aab", ".hap", ".app", ".ipa"}
+        expected = version or (baselines[0]["version"] if baselines else None)
+        if not expected:
+            match = PACKAGE_VERSION.match(package.name)
+            if not match:
+                raise VerificationError("无法从包名确定发布版本，请指定 --version")
+            expected = match[1]
+        infos = [kernel_info(path) for path in kernels]
+        errors = [f"内核版本不匹配：{info['name']} 为 {info['version']}，预期 {expected}"
+                  for info in infos if info["version"] != expected]
+        package_version = PACKAGE_VERSION.match(package.name)
+        if package_version and package_version[1] != expected:
+            errors.append(f"包名版本不匹配：{package_version[1]}，预期 {expected}")
+        for info in infos:
+            if "-arm64" in package.name.lower() and info["architecture"] != "arm64":
+                errors.append(f"内核架构与包名不匹配：{info['architecture']}")
+            if package.suffix.lower() in {".apk", ".aab", ".hap", ".app"} and info["format"] != "ELF":
+                errors.append(f"移动端内核格式不匹配：{info['format']}")
+        for path, info in zip(kernels, infos):
+            for abi, architecture in (("arm64-v8a", "arm64"), ("armeabi-v7a", "arm"), ("x86_64", "amd64"), ("x86", "386")):
+                if abi in path.parts and info["architecture"] != architecture:
+                    errors.append(f"内核架构与 ABI 目录 {abi} 不匹配：{info['architecture']}")
+        paths = resource_paths(layers, roots[0])
+        frontend, frontend_errors = check_frontend(paths, expected, mobile)
+        errors.extend(frontend_errors)
+        metadata = roots[0] / "app/package.json"
+        if not mobile and not metadata.is_file():
+            errors.append("缺少桌面外壳元数据：app/package.json")
+        if metadata.is_file():
+            metadata_value = json.loads(metadata.read_text(encoding="utf-8"))
+            actual_version = metadata_value.get("version") if isinstance(metadata_value, dict) else None
+            if actual_version != expected:
+                errors.append(f"桌面外壳版本不匹配：{actual_version}，预期 {expected}")
+        if errors:
+            raise VerificationError("\n".join(errors[:40]))
+        if baselines and any(b["version"] != expected for b in baselines):
+            raise VerificationError("基准版本与预期发布版本不匹配")
         if not baselines:
-            expected = version
-            if not expected:
-                match = PACKAGE_VERSION.match(package.name)
-                if not match:
-                    raise VerificationError("无法从包名确定发布版本，请指定 --version")
-                expected = match[1]
-            infos = [kernel_info(path) for path in kernels]
-            errors = [f"内核版本不匹配：{info['name']} 为 {info['version']}，预期 {expected}"
-                      for info in infos if info["version"] != expected]
-            package_version = PACKAGE_VERSION.match(package.name)
-            if package_version and package_version[1] != expected:
-                errors.append(f"包名版本不匹配：{package_version[1]}，预期 {expected}")
-            for info in infos:
-                if "-arm64" in package.name.lower() and info["architecture"] != "arm64":
-                    errors.append(f"内核架构与包名不匹配：{info['architecture']}")
-                if package.suffix.lower() in {".apk", ".aab", ".hap", ".app"} and info["format"] != "ELF":
-                    errors.append(f"移动端内核格式不匹配：{info['format']}")
-            for path, info in zip(kernels, infos):
-                for abi, architecture in (("arm64-v8a", "arm64"), ("armeabi-v7a", "arm"), ("x86_64", "amd64"), ("x86", "386")):
-                    if abi in path.parts and info["architecture"] != architecture:
-                        errors.append(f"内核架构与 ABI 目录 {abi} 不匹配：{info['architecture']}")
-            paths = resource_paths(layers, roots[0])
-            frontend, frontend_errors = check_frontend(paths, expected, mobile)
-            errors.extend(frontend_errors)
-            metadata = roots[0] / "app/package.json"
-            if metadata.is_file():
-                actual_version = json.loads(metadata.read_text(encoding="utf-8")).get("version")
-                if actual_version != expected:
-                    errors.append(f"桌面外壳版本不匹配：{actual_version}，预期 {expected}")
-            if errors:
-                raise VerificationError("\n".join(errors[:40]))
             return {"target": ", ".join(f"{info['format']}/{info['architecture']}" for info in infos),
                     "version": expected, "kernels": infos, "frontend_versions": frontend,
                     "kernel_sha256": kernel_hashes, "resource_count": len(actual),
                     "scope": "包内版本及可解析资源引用检查；不证明同版本产物为最新构建"}
-        # 基准摘要一致也必须满足入口完整性，避免不完整基准掩盖整套前端缺失。
-        errors = check_frontend_entries(actual, mobile)
-        if errors:
-            raise VerificationError("\n".join(errors))
-        metadata = roots[0] / "app/package.json"
-        if metadata.is_file():
-            actual_version = json.loads(metadata.read_text(encoding="utf-8"))["version"]
-            if actual_version != baselines[0]["version"]:
-                raise VerificationError(f"桌面应用版本不匹配：{actual_version}")
         candidates = [b for b in baselines if b["kernels"] == kernel_hashes]
         if not candidates:
             raise VerificationError("内核与所有基准均不匹配：可能漏拷贝内核、选错架构，或缺少该平台基准；"

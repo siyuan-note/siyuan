@@ -153,7 +153,7 @@ macOS、iOS 在对应构建机器上完成构建和签名。macOS 完成公证�
 | macOS | Intel、Apple Silicon 两个 DMG |
 | Microsoft Store | 两个架构的 Appx |
 | Android | 官方版、国内渠道 APK，以及 Google Play、华为渠道 AAB，共四个包 |
-| 鸿蒙 | APP、已签名 HAP |
+| 鸿蒙 | APP |
 
 核对版本、平台和架构后，在仓库根目录执行：
 
@@ -240,12 +240,12 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - 检查必需前端入口：桌面包必须包含 `app/index.html`、`app/window.html`、`desktop/index.html`、`mobile/index.html` 和 `export/protyle-method.js`，移动包必须包含 `mobile/index.html` 和 `export/protyle-method.js`，以上路径均相对于 `stage/build/`；整套前端目录缺失也会失败
 - 从 HTML 实际引用的 JavaScript 读取 `Constants.SIYUAN_VERSION`，检查前端与内核一致，不使用未被入口引用的新文件掩盖旧入口
 - 检查 HTML、CSS 的可解析本地资源引用，以及当前 webpack 的数字分块哈希映射，发现缺失脚本、样式、字体或动态分块
-- 检查导出前端版本、语言 JSON、用户指南和正式版当前更新日志；桌面包额外检查 `resources/app/package.json` 版本
+- 检查导出前端版本、语言 JSON、用户指南和正式版当前更新日志；桌面包必须包含资源根目录下的 `app/package.json`，其版本必须与发布版本一致
 - 展开 NSIS 内层压缩包、移动端 `app.zip`、AAB、HAP、APP 和 Linux 安装包载荷
 - macOS 不依赖本机存在对应构建产物；7-Zip 无法完整提取时明确失败
 - IPA 尝试从主程序识别静态链接内核；加密、缺少标识或无法唯一确定版本时明确失败
 
-已用真实 Windows、Android 和鸿蒙包验证解包及版本检查。Linux、macOS 和 iOS 尚未完成真实安装包验证。
+当前回归测试主要使用模拟安装包，配置加载测试使用本机已安装的 Electron Builder。尚无随文档维护、可核验的真实安装包验收记录，不据此宣称任一平台的当前版本已经通过真实包验证。正式使用前应分平台验收，并保留包版本、SHA256、工具版本及检查报告；测试通过不等于实际构建、签名或安装成功。
 
 ### 检查边界
 
@@ -270,7 +270,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - Windows 在全新目录构建两个架构内核，生成临时 Electron Builder 配置启用证书签名，不修改仓库 YAML，不复用开发内核目录；默认生成两个 NSIS 包并检查 Authenticode 签名
 - Linux 调用现有 `scripts/linux-build.sh --target=all`，收集双架构 TAR、AppImage、DEB、RPM 共八个包
 - Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.5.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
-- 鸿蒙先构建并复制 ARM64 内核，再构建并复制 x86_64 内核，避免同名 `libkernel.so` 被覆盖后拷错；使用同一份新 `app.zip`，通过 Hvigor release 模式生成 APP 和已签名 HAP
+- 鸿蒙先构建并复制 ARM64 内核，再构建并复制 x86_64 内核，避免同名 `libkernel.so` 被覆盖后拷错；使用同一份新 `app.zip`，通过 Hvigor release 模式执行 `assembleApp`，对应 DevEco Studio 的“构建 - 编译 Hap(s)/APP(s) - 编译 APP(s)”，只收集 APP，不要求单独的 HAP 产物
 - 每条命令失败立即停止，产物必须是本次生成，复制时再次核对摘要
 - 新安装包全部验证通过后才收集到桌面 `siyuan`，不覆盖同名包；分批构建会检查目录中已有的其他包，保留已有的 `SHA256SUMS.txt`，校验和清单由发布者最终手动生成
 - 构建目录保留在系统临时目录，控制台打印实际路径，失败后可检查并取回产物；不会自动提交、推送、打标签、上传或发布公告
@@ -283,14 +283,22 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 
 ## 可选的完整摘要基准
 
-通常无需使用。如果将来要比较同版本号的字节差异，可以从可信构建产物生成基准，使用 `check --baseline` 显式启用。不能从待验包反向生成基准。
+通常无需使用。如果将来要比较同版本号的字节差异，可以从可信构建产物生成基准，使用 `check --baseline` 显式启用。基准比对在普通检查通过后执行，不跳过包名、内核版本和架构、前端版本、资源引用或桌面外壳元数据检查。不能从待验包反向生成基准。
 
-```text
-python -X utf8 scripts/verify-release.py baseline --version 3.8.5 --target android-arm64 --kernel kernel/kernel.aar --resources app --output android-arm64.release-baseline.json
-python -X utf8 scripts/verify-release.py check --version 3.8.5 --baseline android-arm64.release-baseline.json
+以 Android 为例，先从本次构建日志取得“本次构建目录”，替换下面的 `$releaseWork`。新构建的 AAR 位于该目录的 `android/kernel.aar`，用于打包的资源归档位于 `mobile/app.zip`。不要使用主仓库的 `kernel/kernel.aar` 或未筛选的 `app/`，它们可能是旧产物或包含未打包的历史更新日志。
+
+```powershell
+$releaseWork = "C:\Users\DL882\AppData\Local\Temp\siyuan-release-3.8.5-实际目录后缀"
+$resources = Join-Path $releaseWork "baseline-resources"
+$baseline = Join-Path $releaseWork "android-arm64.release-baseline.json"
+Expand-Archive -LiteralPath (Join-Path $releaseWork "mobile/app.zip") -DestinationPath $resources
+python -X utf8 scripts/verify-release.py baseline --version 3.8.5 --target android-arm64 --kernel (Join-Path $releaseWork "android/kernel.aar") --resources $resources --output $baseline
+python -X utf8 scripts/verify-release.py check ../siyuan-android/app/build-release/siyuan-3.8.5-all --version 3.8.5 --baseline $baseline
 ```
 
-资源目录必须对应实际打包的集合。桌面包筛选外观文件并裁剪更新日志，不能直接比较未筛选的 `app/`；macOS 签名也可能改变内核摘要。启用基准比较时仍检查必需前端入口，即使安装包与基准摘要一致，也不能放过前端入口缺失。
+上述资源解压目录和基准文件应使用尚不存在的路径，Android 检查目录须与本次工程路径和版本一致。此示例只检查 Android 四渠道包；检查混合平台目录时，须重复传入 `--baseline` 提供各平台所需基准。
+
+资源目录必须对应实际打包的集合。桌面包筛选外观文件并裁剪更新日志，不能直接比较未筛选的 `app/`；签名或原生库处理也可能改变内核摘要。出现摘要差异时应核对可信构建过程，选取对应处理阶段的可信产物，不能从待验安装包反向生成基准以消除差异。
 
 ## 回归测试
 

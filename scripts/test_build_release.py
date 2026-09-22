@@ -138,7 +138,6 @@ class BuildTests(unittest.TestCase):
             if command[-1] == "assembleApp":
                 self.assertIn("buildMode=release", command)
                 self.write(self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-unsigned.app")
-                self.write(self.args.harmony_dir / "entry/build/default/outputs/default/entry-default-signed.hap")
             return ""
 
         with patch.object(self.builder, "wsl", side_effect=fake_wsl), patch.object(build, "run", side_effect=fake_run):
@@ -147,7 +146,7 @@ class BuildTests(unittest.TestCase):
         amd = self.args.harmony_dir / "entry/libs/x86_64/libkernel.so"
         self.assertEqual(arm.read_bytes(), kernel(architecture="arm64"))
         self.assertEqual(amd.read_bytes(), kernel(architecture="amd64"))
-        self.assertEqual(len(self.builder.artifacts), 2)
+        self.assertEqual([path.name for path in self.builder.artifacts], ["siyuan-harmony-default-unsigned.app"])
 
     def test_android_new_aar_is_copied_before_gradle(self):
         sdk = self.root / "sdk"

@@ -170,10 +170,9 @@ python -X utf8 scripts/verify-release.py check --version 3.8.5
 ### 9. 手动发布与上架
 
 - 合并 master，触发 Docker 镜像构建
-- 打正式版标签
-- 发布 GitHub Releases，并附上 `SHA256SUMS.txt`
+- GitHub Releases 上传安装包和 `SHA256SUMS.txt` 
 - 同步 Gitee
-- 上传 R2 和网盘
+- 上传 R2 和百度网盘
 - 发布公告
 - 部署 Rhy，粘贴最终的 `SHA256SUMS.txt`
 - 更新并推送 Index（命令见下方），部署 Index

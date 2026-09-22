@@ -64,6 +64,7 @@ import {
 } from "./wpsPresentation";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
+import {expandQueryEmbedsForClipboard} from "./queryEmbedClipboard";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
 import {getTextWithoutSemanticMarkers, normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
@@ -204,9 +205,16 @@ export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     return refText + ` <span data-type="block-ref" data-subtype="s" data-id="${blockElement.getAttribute("data-node-id")}">*</span>`;
 };
 
-export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
-    let text = "";
+export const getPlainText = (blockElement: HTMLElement, isNested = false): string => {
     const dataType = blockElement.dataset.type;
+    if (dataType === "NodeBlockQueryEmbed" || blockElement.classList.contains("protyle-wysiwyg__embed") ||
+        (!isNested && blockElement.querySelector('[data-type="NodeBlockQueryEmbed"], .protyle-wysiwyg__embed'))) {
+        const template = document.createElement("template");
+        template.innerHTML = expandQueryEmbedsForClipboard(blockElement.outerHTML);
+        return Array.from(template.content.children).map(item => getPlainText(item as HTMLElement, isNested))
+            .filter(Boolean).join("\n");
+    }
+    let text = "";
     if ("NodeHTMLBlock" === dataType) {
         text += blockElement.querySelector("protyle-html").getAttribute("data-content");
     } else if ("NodeAttributeView" === dataType) {

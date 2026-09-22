@@ -64,7 +64,7 @@ git push origin v3.8.5-beta.1
 - 将当前文档中的版本号 `3.8.5` 替换为待发布的最新版本号
 - 修改 `kernel/util/working.go` 的 `Mode`、`Ver` 和 `app/package.json` 的版本
 - 更新 `app/appx/AppxManifest.xml` 和 `app/appx/AppxManifest-arm64.xml` 的版本
-- 更新 Android 的 `siyuanVersionName`、`siyuanVersionCode`
+- 更新 Android 的 `siyuanVersionName`、`siyuanVersionCode`，打 tag `v3.8.5`
 - 更新鸿蒙的 `versionName`、`versionCode`
 - 更新 iOS 版本号
 - 将各仓库需要发布的代码提交并同步到远端

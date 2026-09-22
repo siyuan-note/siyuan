@@ -12298,6 +12298,38 @@
 			]
 		},
 		{
+			"ID": "20260922005114-vwg7ltx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922005114-vwg7ltx",
+				"updated": "20260922005114"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编辑思维导图节点时，列表转换快捷键（包括 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+L"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘L"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）不生效，斜杠菜单不提供列表转换。首段开头输入列表标记时会移除标记，保留正文和光标，不会生成列表或子节点。"
+				}
+			]
+		},
+		{
 			"ID": "20260921105011-fr0uxw6",
 			"Type": "NodeTable",
 			"Properties": {

@@ -79,7 +79,7 @@ import {getLiteSlashMenuHTML} from "../../mobile/util/liteSlashMenu";
 import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
 import {getSemanticInlineVisibleText, stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
-import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
+import {areProtylePluginExtensionsEnabled, isProtyleListItemFragment} from "../runtimeCapabilities";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -769,6 +769,11 @@ ${genHintItemHTML(item)}
         const range = protyle.toolbar.range;
         let nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer) as HTMLElement;
         if (!nodeElement) {
+            return;
+        }
+        if (["/", "、"].includes(this.splitChar) && isProtyleListItemFragment(protyle) &&
+            ["- " + Lute.Caret, "1. " + Lute.Caret, "- [ ] " + Lute.Caret].includes(value)) {
+            this.enableExtend = false;
             return;
         }
         // 新建标签的搜索状态：用选中的标签替换原空标签

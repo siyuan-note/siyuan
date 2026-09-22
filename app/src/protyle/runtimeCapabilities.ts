@@ -7,6 +7,8 @@ export interface ProtyleRuntimeCapabilities {
     lockedOptions?: Partial<Pick<IProtyleOptions, "hint" | "toolbar">>;
     pluginExtensions?: boolean;
     customBlockRender?: boolean;
+    // 片段内容作为列表项正文编辑，首段沿用列表输入规则。
+    listItemFragment?: boolean;
     sanitizeBlockDOM?: (blockDOM: string) => string;
     getUnsupportedPasteBlocks?: (blockDOM: string) => string[];
     restoreLuteMarkdownSyntax?: (lute: Lute) => void;
@@ -35,6 +37,13 @@ export const areProtylePluginExtensionsEnabled = (protyle: IProtyle) =>
 
 export const isProtyleCustomBlockRenderEnabled = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.customBlockRender !== false;
+
+export const isProtyleListItemFragment = (protyle: IProtyle) =>
+    protyleRuntimeCapabilities.get(protyle)?.listItemFragment === true;
+
+export const isProtyleListItemFirstParagraph = (protyle: IProtyle, blockElement: HTMLElement) =>
+    isProtyleListItemFragment(protyle) && blockElement === protyle.wysiwyg.element.firstElementChild &&
+    blockElement.dataset.type === "NodeParagraph";
 
 export const getProtyleLockedToolbar = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.lockedOptions?.toolbar;

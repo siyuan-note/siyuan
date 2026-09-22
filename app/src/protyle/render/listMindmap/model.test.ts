@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {execFile} from "node:child_process";
 import {promisify} from "node:util";
-import type {ListMindmapLayoutNode} from "./model";
+import type {ListMindmapLayoutNode, ListMindmapNode} from "./model";
 
 const buildGlobals = ["SIYUAN_VERSION", "NODE_ENV"].map(name => ({
     name, descriptor: Object.getOwnPropertyDescriptor(globalThis, name),
@@ -122,7 +122,8 @@ test("layout rejects cyclic or invalid trees and supports deep nesting without r
     assert.equal(layoutListMindmap(root).nodes.size, 5001);
 });
 
-const browserCases = async (sourceCode: string, css: string, taskSource: string, taskCSS: string, dragSource: string) => {
+const browserCases = async (sourceCode: string, css: string, taskSource: string, taskCSS: string, dragSource: string,
+                            inputSource: string) => {
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, remapListMindmapIDs, writeListMindmapMetadata, " +
@@ -148,6 +149,168 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     };
     const ids = (list: HTMLElement) => Array.from(list.querySelectorAll("[data-node-id]")).map(element =>
         element.getAttribute("data-node-id"));
+
+    // 虚拟根直属节点的首段复用列表输入链路，输入和保存均保留正文、块身份及光标。
+    const inputTransactions: {forward: IOperation[], backward: IOperation[]}[] = [];
+    const inputAPI = new Function("Constants", "dayjs", "transaction", "hideElements", "mathRender", "highlightRender",
+        "normalizeInlineFontFamilyStyle", "getBlockquoteContext", "revealTabsForTarget",
+        "updateTransaction", "isMac", "isOnlyMeta", "isNotCtrl", inputSource +
+        "; return {input, configureListItemInput, listShortcut, ListHint};")(
+        {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing", KEYCODELIST: {76: "L", 74: "J"}}, () => ({format: () => "20260922120000"}),
+        (_protyle: IProtyle, forward: IOperation[], backward: IOperation[]) => inputTransactions.push({forward, backward}),
+        () => {}, () => {}, () => {}, (value: string) => value, (): undefined => undefined, () => {},
+        (_protyle: IProtyle, block: HTMLElement, before: string) => {
+            inputTransactions.push({forward: [{action: "update", id: block.dataset.nodeId, data: block.outerHTML}],
+                backward: [{action: "update", id: block.dataset.nodeId, data: before}]});
+        }, () => false, (event: KeyboardEvent) => event.ctrlKey && !event.metaKey,
+        (event: KeyboardEvent) => !event.ctrlKey && !event.metaKey);
+    window.siyuan = {config: {editor: {markdown: {}}, keymap: {editor: {insert: {
+        list: {custom: "⌘J"}, "ordered-list": {custom: "⇧⌘J"}, check: {custom: "⌘L"}, quote: {custom: ""},
+    }}}}, storage: {}} as unknown as typeof window.siyuan;
+    document.body.append(holder);
+    const inputHost = document.createElement("div");
+    inputHost.className = "protyle-wysiwyg";
+    inputHost.contentEditable = "true";
+    document.body.append(inputHost);
+    const inputProtyle = {lute, wysiwyg: {element: inputHost, lastHTMLs: {}},
+        hint: {render: () => {}}, toolbar: {}, block: {parentID: "document"}} as unknown as IProtyle;
+    const caretOffset = (element: Element) => {
+        const selection = getSelection();
+        check.ok(selection.isCollapsed);
+        check.ok(element.contains(selection.anchorNode));
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        range.setEnd(selection.anchorNode, selection.anchorOffset);
+        return range.toString().length;
+    };
+    const typeAtCaret = async (value: string) => {
+        const range = getSelection().getRangeAt(0);
+        const block = (range.startContainer.nodeType === Node.ELEMENT_NODE ? range.startContainer as Element :
+            range.startContainer.parentElement).closest<HTMLElement>('[data-type="NodeParagraph"]');
+        inputProtyle.wysiwyg.lastHTMLs[block.dataset.nodeId] = block.outerHTML;
+        const text = document.createTextNode(value);
+        range.insertNode(text);
+        range.setStartAfter(text);
+        range.collapse(true);
+        await inputAPI.input(inputProtyle, block, range, true,
+            new InputEvent("input", {inputType: "insertText", data: value}));
+    };
+    for (const body of ["", "Text **bold** and *italic*"]) {
+        const list = reset("- " + (body || "Empty") + "\n- Sibling\n");
+        const model = api.readListMindmap(list);
+        const node = model.root.children[0];
+        inputHost.innerHTML = node.contentBlocks.map((block: HTMLElement) => block.outerHTML).join("");
+        inputAPI.configureListItemInput(inputProtyle);
+        const blockID = node.contentBlocks[0].dataset.nodeId;
+        const content = inputHost.firstElementChild.firstElementChild;
+        if (!body) {
+            content.textContent = "";
+        }
+        const before = content.innerHTML;
+        const sourceIDs = ids(list);
+        inputHost.focus();
+        getSelection().setBaseAndExtent(content, 0, content, 0);
+        inputTransactions.length = 0;
+        await typeAtCaret("*");
+        check.equal(inputHost.firstElementChild.getAttribute("data-type"), "NodeParagraph");
+        check.equal(caretOffset(inputHost.firstElementChild.firstElementChild), 1);
+        await typeAtCaret(" ");
+        const paragraph = inputHost.firstElementChild;
+        check.equal(paragraph.getAttribute("data-node-id"), blockID);
+        check.equal(paragraph.firstElementChild.innerHTML, before);
+        check.equal(caretOffset(paragraph.firstElementChild), 0);
+        check.equal(inputHost.querySelector('[data-type="NodeList"]'), null);
+        check.ok(inputTransactions.every(item => item.forward.every(operation => operation.action === "update")));
+        const undoData = inputTransactions.at(-1).backward[0].data;
+        check.ok(typeof undoData === "string" && undoData.includes("*"), "undo retains the typed marker");
+        api.replaceListMindmapContent(list, node.id, inputHost.innerHTML);
+        check.deepEqual(ids(list), sourceIDs);
+        check.equal(api.readListMindmap(list).nodes.size, model.nodes.size);
+        await typeAtCaret("x");
+        check.equal(caretOffset(paragraph.firstElementChild), 1);
+        check.ok(paragraph.firstElementChild.textContent.startsWith("x"));
+    }
+    // 真实根节点和下级节点的首段使用相同规则，后续段落仍可生成子列表。
+    for (const [markdown, nodeIndex, paragraphIndex] of [
+        ["- Single root\n", 0, 0],
+        ["- Parent\n  - Nested\n- Sibling\n", 2, 0],
+        ["- First\n\n  Second\n- Sibling\n", 0, 1],
+    ] as const) {
+        const model = api.readListMindmap(reset(markdown));
+        const node = [...model.nodes.values()].filter((item: ListMindmapNode) => !item.virtual)[nodeIndex];
+        inputHost.innerHTML = node.contentBlocks.map((block: HTMLElement) => block.outerHTML).join("");
+        inputAPI.configureListItemInput(inputProtyle);
+        const content = inputHost.children[paragraphIndex].firstElementChild;
+        inputHost.focus();
+        getSelection().setBaseAndExtent(content, 0, content, 0);
+        await typeAtCaret("* ");
+        if (paragraphIndex === 0) {
+            check.equal(inputHost.querySelector(".list"), null);
+        } else {
+            check.ok(inputHost.children[paragraphIndex].classList.contains("list"), markdown);
+        }
+    }
+    const checkListStructure = (list: HTMLElement) => {
+        list.querySelectorAll<HTMLElement>('[data-type="NodeListItem"]').forEach(item => {
+            check.equal(item.querySelector(":scope > [data-node-id]")?.getAttribute("data-type"), "NodeParagraph");
+        });
+    };
+    // 每层节点都移除首段的列表标记，保存后仍以段落开头，正文、子树及块身份保持不变。
+    for (const markdown of [
+        "- Text &lt;tag&gt; &amp; **bold**\n\n  Second\n",
+        "- Text **bold**\n\n  Second\n- Other\n",
+        "- Parent\n  - Text **bold**\n\n    Second\n    - Descendant\n- Other\n",
+    ]) {
+        const list = reset(markdown);
+        const model = api.readListMindmap(list);
+        const node = [...model.nodes.values()].find((item: ListMindmapNode) =>
+            item.contentBlocks[0]?.textContent.startsWith("Text"));
+        const sourceIDs = ids(list);
+        inputAPI.configureListItemInput(inputProtyle);
+        for (const marker of ["* ", "- ", "+ ", "1. ", "2) ", "[]", "[x]"]) {
+            inputHost.innerHTML = node.contentBlocks.map((block: HTMLElement) => block.outerHTML).join("");
+            const content = inputHost.firstElementChild.firstElementChild;
+            const before = content.innerHTML;
+            inputHost.focus();
+            getSelection().setBaseAndExtent(content, 0, content, 0);
+            await typeAtCaret(marker);
+            check.equal(content.innerHTML, before, marker);
+            check.equal(caretOffset(content), 0);
+            check.equal(inputHost.querySelector('[data-type="NodeList"]'), null);
+            check.equal(api.replaceListMindmapContent(list, node.id, inputHost.innerHTML), true);
+            check.deepEqual(ids(list), sourceIDs);
+            check.equal(node.element.dataset.subtype, "u");
+            checkListStructure(list);
+            const saved = document.createElement("div");
+            saved.innerHTML = lute.SpinBlockDOM(list.outerHTML);
+            check.equal(saved.childElementCount, 1);
+            check.deepEqual(ids(saved.firstElementChild as HTMLElement), sourceIDs);
+            checkListStructure(saved);
+        }
+        // 列表快捷键和残留的斜杠菜单命令在所有段落都保持文本及选区。
+        inputHost.innerHTML = node.contentBlocks.map((block: HTMLElement) => block.outerHTML).join("");
+        const before = inputHost.innerHTML;
+        for (const block of Array.from(inputHost.children)) {
+            const content = block.firstElementChild;
+            inputHost.focus();
+            getSelection().setBaseAndExtent(content.firstChild, 0, content.firstChild, 2);
+            const selected = getSelection().toString();
+            for (const subtype of ["u", "o", "t"]) {
+                const event = new KeyboardEvent("keydown", {key: subtype === "t" ? "l" : "j",
+                    keyCode: subtype === "t" ? 76 : 74, ctrlKey: true, shiftKey: subtype === "o", cancelable: true});
+                inputAPI.listShortcut(inputProtyle, block, event);
+                check.ok(event.defaultPrevented);
+                const hint = new inputAPI.ListHint();
+                hint.splitChar = "/";
+                hint.lastIndex = 0;
+                inputProtyle.toolbar.range = getSelection().getRangeAt(0);
+                hint.fill((subtype === "o" ? "1. " : subtype === "t" ? "- [ ] " : "- ") + Lute.Caret, inputProtyle, false);
+                check.equal(getSelection().toString(), selected);
+                check.equal(inputHost.innerHTML, before);
+            }
+        }
+    }
+    inputHost.remove();
 
     // mindmap 与其他语言一样生成可直接编辑的代码块，编辑重排时不会恢复图表节点。
     const legacySource = "- **Root**\n  - [X] Done\n  - [/] Progress\n";
@@ -1860,6 +2023,22 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const childNode = taskHost.querySelector(`[data-mindmap-id="${child.id}"] .p`);
         check.equal(getComputedStyle(childNode).textDecorationLine, "none", "parent state never styles child tasks");
     }
+    taskHost.scrollIntoView({block: "center"});
+    await settle();
+    const taskTextBounds = taskView.getContentHost(taskId).firstElementChild.getBoundingClientRect();
+    const taskTextPoint = {x: Math.round(taskTextBounds.left + taskTextBounds.width / 2),
+        y: Math.round(taskTextBounds.top + taskTextBounds.height / 2)};
+    await require("electron").ipcRenderer.invoke("list-mindmap-native-input", [
+        {type: "mouseMove", ...taskTextPoint},
+        {type: "mouseDown", ...taskTextPoint, button: "left", clickCount: 1},
+        {type: "mouseUp", ...taskTextPoint, button: "left", clickCount: 1},
+        {type: "mouseDown", ...taskTextPoint, button: "left", clickCount: 2},
+        {type: "mouseUp", ...taskTextPoint, button: "left", clickCount: 2},
+    ]);
+    await settle();
+    check.equal(taskEdits, 1, "native double click opens the task node editor");
+    taskEdits = 0;
+    taskView.setEditing(undefined);
     const taskSourceHTML = taskList.outerHTML;
     taskView.setReadOnly(true);
     taskButton().click();
@@ -2151,6 +2330,54 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         readFileSync(file, "utf8").replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
             compilerOptions: {target: typescript.ScriptTarget.ES2021},
         }).outputText;
+    const inputModules = ["../../../util/escape.ts", "../../util/normalizeText.ts", "../../runtimeCapabilities.ts",
+        "../../../util/keymapBindings.ts", "../../util/hotKey.ts",
+        "../../util/longTextWrap.ts", "../../util/inlineElementBoundary.ts", "../../util/inlineElementMarker.ts",
+        "../../util/hasClosest.ts", "../../wysiwyg/getBlock.ts", "../../util/selection.ts",
+        "../../wysiwyg/taskListMarker.ts", "../../wysiwyg/turnIntoList.ts", "../../wysiwyg/input.ts"];
+    let inputSource = inputModules.map(file => {
+        const filename = path.join(__dirname, file);
+        const module = typescript.createSourceFile(file, readFileSync(filename, "utf8"), typescript.ScriptTarget.ES2021, true);
+        const names = module.statements.filter(typescript.isVariableStatement).filter(statement =>
+            statement.modifiers?.some(modifier => modifier.kind === typescript.SyntaxKind.ExportKeyword))
+            .flatMap(statement => statement.declarationList.declarations.map(declaration => declaration.name.getText(module)));
+        return `const {${names.join(", ")}} = (() => {${compile(filename)}\nreturn {${names.join(", ")}};})();\n`;
+    }).join("\n");
+    const editorSource = typescript.createSourceFile("editor.ts", readFileSync(path.join(__dirname, "editor.ts"), "utf8"),
+        typescript.ScriptTarget.ES2021, true);
+    const listItemCapabilities: import("typescript").PropertyAssignment[] = [];
+    const findListItemCapability = (node: import("typescript").Node) => {
+        if (typescript.isPropertyAssignment(node) && node.name.getText(editorSource) === "listItemFragment") {
+            listItemCapabilities.push(node);
+        }
+        typescript.forEachChild(node, findListItemCapability);
+    };
+    findListItemCapability(editorSource);
+    assert.equal(listItemCapabilities.length, 1);
+    inputSource += `\nconst configureListItemInput = (protyle) => {
+        registerProtyleRuntimeCapabilities(protyle, {${listItemCapabilities.map(item => item.getText(editorSource)).join(",\n")}});
+    };`;
+    const keydownSource = typescript.createSourceFile("keydown.ts", readFileSync(path.join(__dirname, "../../wysiwyg/keydown.ts"), "utf8"),
+        typescript.ScriptTarget.ES2021, true);
+    const shortcutStatements: import("typescript").Node[] = [];
+    const findShortcut = (node: import("typescript").Node) => {
+        if ((typescript.isVariableStatement(node) && node.declarationList.declarations.some(item =>
+            ["isMatchList", "isMatchOList", "isMatchCheck", "isMatchQuote"].includes(item.name.getText(keydownSource)))) ||
+            (typescript.isIfStatement(node) && node.expression.getText(keydownSource).includes("isProtyleListItemFragment("))) {
+            shortcutStatements.push(node);
+        }
+        typescript.forEachChild(node, findShortcut);
+    };
+    findShortcut(keydownSource);
+    assert.equal(shortcutStatements.length, 5);
+    const hintSource = typescript.createSourceFile("hint.ts", readFileSync(path.join(__dirname, "../../hint/index.ts"), "utf8"),
+        typescript.ScriptTarget.ES2021, true);
+    const hint = hintSource.statements.filter(typescript.isClassDeclaration).find(item => item.name?.text === "Hint");
+    const fill = hint.members.find(item => item.name?.getText(hintSource) === "fill");
+    inputSource += typescript.transpileModule(`\nconst listShortcut = (protyle, nodeElement, event) => {
+        ${shortcutStatements.map(item => item.getText(keydownSource)).join("\n")}
+    };
+    class ListHint {${fill.getText(hintSource)}}`, {compilerOptions: {target: typescript.ScriptTarget.ES2021}}).outputText;
     const tabsSource = "const {tabsRender, destroyTabsRender, getTabTask} = (() => {" +
         ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsRender.ts"]
             .map(file => compile(path.join(__dirname, file))).join("\n") +
@@ -2232,7 +2459,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         const result = await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(taskSource)}, ${JSON.stringify(taskCSS)}, ${JSON.stringify(dragSource)})`)});
+        `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(taskSource)}, ${JSON.stringify(taskCSS)}, ${JSON.stringify(dragSource)}, ${JSON.stringify(inputSource)})`)});
         console.log(result);
         win.destroy();
         app.exit(0);

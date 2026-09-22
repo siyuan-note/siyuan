@@ -33,6 +33,7 @@ import {
 } from "../util/inlineElementMarker";
 import {normalizeInlineFontFamilyStyle} from "../toolbar/fontFamilyCore";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
+import {isProtyleListItemFirstParagraph} from "../runtimeCapabilities";
 
 interface IInputOperations {
     doOperations: IOperation[];
@@ -423,8 +424,9 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
     tempElement.innerHTML = html;
     // 列表项内紧挨标记的首个段落块不生成子列表，仅移除触发标记并保留现有内容
     // https://github.com/siyuan-note/siyuan/issues/17890 https://github.com/siyuan-note/siyuan/issues/18355
-    if (blockElement.closest('[data-type="NodeListItem"]') &&
-        blockElement.previousElementSibling?.classList.contains("protyle-action")) {
+    if ((blockElement.closest('[data-type="NodeListItem"]') &&
+        blockElement.previousElementSibling?.classList.contains("protyle-action")) ||
+        isProtyleListItemFirstParagraph(protyle, blockElement)) {
         if (tempElement.content.firstElementChild.classList.contains("list")) {
             if (editElement.contains(wbrElement)) {
                 const markerRange = document.createRange();

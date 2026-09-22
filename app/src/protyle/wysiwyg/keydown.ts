@@ -1,4 +1,5 @@
 import type {BlockQueryRequestInput} from "../../types/api";
+import {isProtyleListItemFragment} from "../runtimeCapabilities";
 import {hideElements} from "../ui/hideElements";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
@@ -2198,6 +2199,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         const isMatchCheck = matchHotKey(window.siyuan.config.keymap.editor.insert.check, event);
         const isMatchOList = matchHotKey(window.siyuan.config.keymap.editor.insert["ordered-list"], event);
         const isMatchQuote = matchHotKey(window.siyuan.config.keymap.editor.insert.quote, event);
+        if ((isMatchList || isMatchOList || isMatchCheck) && isProtyleListItemFragment(protyle)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if ((isMatchList || isMatchOList || isMatchCheck || isMatchQuote) && !isInEmbedBlock(nodeElement)) {
             const rangeElements = isCrossBlock && selectText !== "" ? getBlockElementsByRange(range) : [];
             if (rangeElements.length > 1 && !rangeElements.some(item => item.classList.contains("li"))) {

@@ -283,10 +283,18 @@ const browserCases = async (sourceCode: string, css: string) => {
     check.ok(parseFloat(getComputedStyle(quote).paddingLeft) > 4, "quote keeps shared indentation");
     check.ok(parseFloat(getComputedStyle(fixture.querySelector(".h1")).fontSize) >
         parseFloat(getComputedStyle(fixture.querySelector(".p")).fontSize), "heading keeps shared font size");
-    for (const text of ["Test text", '<span data-type="strong">11pppppp</span>', "First<br>Second", "First\nSecond",
-        '<span data-type="strong">1水电费ppppp</span>', '<span data-type="strong">1水电费pppppp</span>']) {
+    for (const [text, task] of ["", "Test text", '<span data-type="strong">11pppppp</span>', "First<br>Second", "First\nSecond",
+        '<span data-type="strong">1水电费ppppp</span>', '<span data-type="strong">1水电费pppppp</span>']
+        .flatMap(text => [[text, false], [text, true]] as const)) {
         fixture.innerHTML = `<div data-node-id="list" data-type="NodeList"><div class="list-mindmap"><div class="list-mindmap__node"><div class="list-mindmap__content"><div class="p list-mindmap__preview-block" data-type="NodeParagraph"><div class="list-mindmap__text">${text}</div></div></div></div></div></div>`;
         const node = fixture.querySelector<HTMLElement>(".list-mindmap__node");
+        if (task) {
+            node.dataset.task = " ";
+            const button = document.createElement("button");
+            button.className = "protyle-action protyle-action--task list-mindmap__task";
+            button.innerHTML = '<svg><use xlink:href="#iconUncheck"></use></svg>';
+            node.prepend(button);
+        }
         const content = fixture.querySelector<HTMLElement>(".list-mindmap__content");
         const before = {width: node.offsetWidth, height: node.offsetHeight};
         if (text === "Test text") {
@@ -302,6 +310,19 @@ const browserCases = async (sourceCode: string, css: string) => {
                 "entering edit mode preserves node dimensions with responsive padding and canvas zoom");
             content.style.minWidth = "";
             const editable = content.querySelector<HTMLElement>('[data-type="NodeParagraph"] > div');
+            check.ok(editable.getBoundingClientRect().width > 0, JSON.stringify({text, task, scale,
+                nodeWidth: node.offsetWidth, contentWidth: content.offsetWidth,
+                contentMinWidth: getComputedStyle(content).minWidth,
+                columns: getComputedStyle(node).gridTemplateColumns}));
+            const beforeInput = editable.textContent;
+            editable.focus();
+            const range = document.createRange();
+            range.selectNodeContents(editable);
+            range.collapse(false);
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+            await require("electron").ipcRenderer.invoke("list-mindmap-editor-type", "a");
+            check.equal(editable.textContent, beforeInput + "a", "focused node content accepts native text input");
             editable.textContent = "A longer sentence that expands the node while editing";
             const expandedWidth = node.offsetWidth;
             check.ok(expandedWidth > before.width, "typing expands the editor before blur");
@@ -333,11 +354,14 @@ test("list mindmap editor flushes pending input and preserves text across finish
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/base.scss"), {
         logger: require("sass").Logger.silent,
     }).css;
-    const code = `const {app, BrowserWindow} = require("electron");
+    const code = `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+    ipcMain.handle("list-mindmap-editor-type", async (_event, text) => {
+        await win.webContents.insertText(text);
+    });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         const result = await win.webContents.executeJavaScript(${JSON.stringify(

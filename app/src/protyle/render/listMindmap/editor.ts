@@ -60,7 +60,8 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     const toolbar = getDefaultToolbar(isMobile()).filter(item =>
         typeof item === "string" ? item !== "ai" : item.name !== "ai");
     const slash = registerBuiltinSlashHint((key: string, protyle: IProtyle, hintSource: THintSource) =>
-        hintSlash(key, protyle, hintSource).filter(item => TABLE_CELL_SLASH_IDS.has(item.id)));
+        hintSlash(key, protyle, hintSource).filter(item => TABLE_CELL_SLASH_IDS.has(item.id) &&
+            !["list", "orderedList", "check"].includes(item.id)));
     const hint: IProtyleOptions["hint"] = {
         extend: [{key: "((", hint: hintRef}, {key: "【【", hint: hintRef}, {key: "（（", hint: hintRef},
             {key: "[[", hint: hintRef}, {key: "/", hint: slash}, {key: "、", hint: slash}],
@@ -78,6 +79,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         protyleOptions: {notebookId: owner.notebookId, toolbar, hint},
         runtimeCapabilities: {
             upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,
+            listItemFragment: true,
             lute: getAVRichTextLute(), lockedOptions: {toolbar, hint},
             sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),

@@ -345,7 +345,8 @@
 
   &__node[data-task] {
     display: grid;
-    grid-template-columns: max-content minmax(0, 1fr);
+    // 空任务正文也保留输入宽度，确保光标能落入编辑器。
+    grid-template-columns: max-content minmax(1em, 1fr);
     column-gap: 6px;
     align-items: start;
 

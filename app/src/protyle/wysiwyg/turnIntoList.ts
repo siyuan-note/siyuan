@@ -1,9 +1,10 @@
 import {transaction, updateTransaction} from "./transaction";
-import {focusByWbr} from "../util/selection";
+import {focusByOffset, focusByWbr} from "../util/selection";
 import * as dayjs from "dayjs";
 import {decodeHTML, escapeAttr} from "../../util/escape";
 import {Constants} from "../../constants";
 import {getTaskListMarker} from "./taskListMarker";
+import {isProtyleListItemFirstParagraph} from "../runtimeCapabilities";
 
 interface IAdditionalOperations {
     doOperations: IOperation[];
@@ -29,6 +30,16 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
         !blockElement.previousElementSibling?.classList.contains("protyle-action--task") &&
         taskListMarker
     ) {
+        if (isProtyleListItemFirstParagraph(protyle, blockElement)) {
+            const oldHTML = blockElement.outerHTML;
+            const markerRange = focusByOffset(editElement, 0, taskListMarker.contentStartIndex, false);
+            if (markerRange) {
+                markerRange.deleteContents();
+            }
+            updateTransaction(protyle, blockElement, oldHTML, undefined, additionalOperations);
+            focusByWbr(protyle.wysiwyg.element, range);
+            return true;
+        }
         editElement.removeAttribute("placeholder");
         const isDone = taskListMarker.marker !== " ";
         if (blockElement.parentElement.classList.contains("li") &&

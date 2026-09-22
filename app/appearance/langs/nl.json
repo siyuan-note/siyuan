@@ -1,4 +1,5 @@
 {
+	"addAlias": "Alias toevoegen",
 	"listMindmapExpandToLevel": "Uitvouwen tot niveau ${level}",
 	"checkBlockRefProgress": "Blokverwijzingen en databasekoppelingen controleren...",
 	"calendarRowLimit": "Zichtbare itemrijen",

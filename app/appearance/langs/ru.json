@@ -1,4 +1,5 @@
 {
+	"addAlias": "Добавить псевдоним",
 	"listMindmapExpandToLevel": "Развернуть до уровня ${level}",
 	"checkBlockRefProgress": "Проверка ссылок на блоки и привязок к базам данных...",
 	"calendarRowLimit": "Число видимых строк записей",

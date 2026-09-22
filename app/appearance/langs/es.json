@@ -1,4 +1,5 @@
 {
+	"addAlias": "Añadir alias",
 	"listMindmapExpandToLevel": "Expandir hasta el nivel ${level}",
 	"checkBlockRefProgress": "Comprobando referencias de bloques y vínculos con bases de datos...",
 	"calendarRowLimit": "Filas de elementos visibles",

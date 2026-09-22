@@ -1,4 +1,5 @@
 {
+	"addAlias": "Takma ad ekle",
 	"listMindmapExpandToLevel": "${level}. düzeye kadar genişlet",
 	"checkBlockRefProgress": "Blok referansları ve veritabanı bağlantıları kontrol ediliyor...",
 	"calendarRowLimit": "Görünür öğe satırları",

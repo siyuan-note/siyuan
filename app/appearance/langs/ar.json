@@ -1,4 +1,5 @@
 {
+	"addAlias": "إضافة اسم مستعار",
 	"listMindmapExpandToLevel": "توسيع حتى المستوى ${level}",
 	"checkBlockRefProgress": "جارٍ التحقق من مراجع الكتل وارتباطات قواعد البيانات...",
 	"calendarRowLimit": "عدد صفوف العناصر المعروضة",

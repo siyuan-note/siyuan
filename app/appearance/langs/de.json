@@ -1,4 +1,5 @@
 {
+	"addAlias": "Alias hinzufügen",
 	"listMindmapExpandToLevel": "Bis Ebene ${level} aufklappen",
 	"checkBlockRefProgress": "Blockreferenzen und Datenbankverknüpfungen werden geprüft...",
 	"calendarRowLimit": "Angezeigte Eintragszeilen",

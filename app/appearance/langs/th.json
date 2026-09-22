@@ -1,4 +1,5 @@
 {
+	"addAlias": "เพิ่มชื่อเรียกอื่น",
 	"listMindmapExpandToLevel": "ขยายถึงระดับ ${level}",
 	"checkBlockRefProgress": "กำลังตรวจสอบการอ้างอิงบล็อกและการเชื่อมโยงฐานข้อมูล...",
 	"calendarRowLimit": "จำนวนแถวรายการที่แสดง",

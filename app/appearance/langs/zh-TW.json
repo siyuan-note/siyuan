@@ -1,4 +1,5 @@
 {
+	"addAlias": "新增別名",
 	"listMindmapExpandToLevel": "展開到第 ${level} 級",
 	"checkBlockRefProgress": "正在檢查區塊引用與資料庫綁定...",
 	"calendarRowLimit": "項目顯示行數",

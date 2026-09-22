@@ -276,19 +276,14 @@ def main():
     parser.add_argument("--android-code", type=int, help="显式指定 Android 版本代码，默认版本变化时加一")
     parser.add_argument("--harmony-code", type=int, help="显式指定鸿蒙版本代码，默认版本变化时加一")
     parser.add_argument("--tag-android", action="store_true", help="仅为已提交的 Android 发布版本创建本地标签")
-    parser.add_argument("--publish", action="store_true", help="准备版本后提交各仓库已跟踪改动并推送 origin，创建并推送 Android 标签")
-    parser.add_argument("--publish-index", action="store_true", help="仅更新 b3log-index 思源版本、构建官网并提交推送；安装包上传后执行")
+    parser.add_argument("--publish", action="store_true", help="准备并推送主仓库、Android、鸿蒙和 Android 标签，同时更新、构建并推送 b3log-index")
     parser.add_argument("--execute", action="store_true", help="执行修改；默认只显示计划")
     args = parser.parse_args()
     if not re.fullmatch(VERSION, args.version):
         raise PreparationError("必须指定正式版版本号，例如 3.8.5，不接受预发布版本或 v 前缀")
     if any(int(part) > 65535 for part in args.version.split(".")):
         raise PreparationError("版本号各段不得超过 Appx 支持的 65535")
-    if args.publish_index:
-        if args.tag_android or args.publish or args.android_code is not None or args.harmony_code is not None:
-            raise PreparationError("--publish-index 必须单独使用，不能组合发布准备或 Android 标签参数")
-        publish_index(args)
-    elif args.tag_android:
+    if args.tag_android:
         if args.publish:
             raise PreparationError("--tag-android 与 --publish 不能同时使用")
         if args.android_code is not None or args.harmony_code is not None:
@@ -297,6 +292,12 @@ def main():
     else:
         changes = plan(args)
         repositories = publish_preflight(args, changes) if args.publish else []
+        if args.publish:
+            if args.index_dir.resolve() in {args.repo.resolve(), args.android_dir.resolve(), args.harmony_dir.resolve()}:
+                raise PreparationError("b3log-index 必须是独立仓库")
+            # 官网也在写入任何版本文件前预检，避免路径或版本错误造成部分发布。
+            index_plan(args)
+            index_preflight(args)
         for path, original, updated in changes:
             print(f"更新：{path}")
             # 仅显示发生变化的版本字段，不输出文件中的其他配置。
@@ -312,6 +313,8 @@ def main():
             for repo, branch in repositories:
                 print(f"将提交全部已跟踪改动并推送 origin/{branch}：{repo}")
             print(f"将创建并推送 Android 标签 v{args.version}")
+        if args.publish:
+            publish_index(args)
     if not args.execute:
         print("仅显示计划，未修改文件或创建标签；添加 --execute 执行")
     return 0

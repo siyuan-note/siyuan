@@ -78,14 +78,16 @@ python -X utf8 scripts/prepare-release.py 3.8.5
 python -X utf8 scripts/prepare-release.py 3.8.5 --execute
 ```
 
-确认三个仓库已跟踪的改动均需发布后，查看提交推送计划，再执行：
+确认主仓库、Android、鸿蒙已跟踪的改动均需发布，并准备好 `b3log-index` 后，查看提交推送计划，再执行：
 
 ```powershell
 python -X utf8 scripts/prepare-release.py 3.8.5 --publish
 python -X utf8 scripts/prepare-release.py 3.8.5 --publish --execute
 ```
 
-`--publish` 准备版本后提交主仓库、Android、鸿蒙仓库的全部已跟踪改动，推送各自当前分支到 `origin`，最后创建并推送 Android 标签 `v3.8.5`，不会自动切换分支。未跟踪文件须先人工确认并纳入版本管理；远端分支必须是本地 HEAD 的祖先，否则先同步仓库。不会强推或覆盖已有标签。跨仓库发布不是原子操作，失败后检查已完成步骤并重跑；已发布版本需要修改内容时应使用新的版本号。
+`--publish` 准备版本后提交主仓库、Android、鸿蒙仓库的全部已跟踪改动，推送各自当前分支到 `origin`，创建并推送 Android 标签 `v3.8.5`，随后自动更新 `b3log-index` 的思源版本、编译官网、检查页面并提交推送。不会自动切换分支。未跟踪文件须先人工确认并纳入版本管理，官网允许本次编译新增的页面；远端分支必须是本地 HEAD 的祖先，否则先同步仓库。不会强推或覆盖已有标签。跨仓库发布不是原子操作，失败后检查已完成步骤并重跑同一命令；已发布版本需要修改内容时应使用新的版本号。官网代码在此阶段推送，服务器部署仍在安装包上传完成后进行。
+
+官网步骤更新 `src/siyuan/src/version.pug`，在 `b3log-index/src/siyuan` 执行 `pnpm install --frozen-lockfile` 和 `pnpm run build`，检查中英文页面的下载版本后，提交版本文件和编译页面。官网工程的 `package.json` 版本不是思源版本，不修改。存在其他未提交改动或远端领先时预检停止；官网构建或校验失败不会提交推送官网，保留文件供排查。重复执行且内容不变时不会创建空提交。
 
 如果各仓库已手动提交并推送，可仅在 Android 当前提交版本匹配且工作区干净时创建本地标签，然后自行推送：
 
@@ -93,7 +95,7 @@ python -X utf8 scripts/prepare-release.py 3.8.5 --publish --execute
 python -X utf8 scripts/prepare-release.py 3.8.5 --tag-android --execute
 ```
 
-准备脚本默认使用主仓库同级的 `siyuan-android`、`siyuan-harmony`，可用 `--android-dir`、`--harmony-dir` 指定路径。主仓库正式版标签仍在最终发布步骤中创建，iOS 仓库仍需手动准备和同步。
+准备脚本默认使用主仓库同级的 `siyuan-android`、`siyuan-harmony`、`b3log-index`，可用 `--android-dir`、`--harmony-dir`、`--index-dir` 指定路径。主仓库正式版标签仍在最终发布步骤中创建，iOS 仓库仍需手动准备和同步。
 
 ### 2. 同步 WSL 仓库
 
@@ -175,20 +177,8 @@ python -X utf8 scripts/verify-release.py check --version 3.8.5
 - 上传 R2 和百度网盘
 - 发布公告
 - 部署 Rhy，粘贴最终的 `SHA256SUMS.txt`
-- 更新并推送 Index（命令见下方），部署 Index
+- 部署 Index（版本更新、构建和推送已由发布准备的 `--publish --execute` 完成）
 - 完成小米、华为、荣耀、OPPO、vivo、App Store、Microsoft Store、腾讯应用宝、Google Play、360 和腾讯电脑管家等应用市场上架
-
-安装包已上传后，更新 `b3log-index` 中的思源官网版本、编译页面并提交推送：
-
-```powershell
-# 预览，不修改、构建或推送
-python -X utf8 scripts/prepare-release.py 3.8.5 --publish-index
-
-# 更新官网版本、构建、提交并推送
-python -X utf8 scripts/prepare-release.py 3.8.5 --publish-index --execute
-```
-
-此模式仅处理 `b3log-index`，不修改主仓库、Android、鸿蒙或标签，不能与 `--publish`、`--tag-android` 组合。默认使用主仓库同级的 `b3log-index`，可通过 `--index-dir` 指定。脚本更新 `src/siyuan/src/version.pug`，在 `src/siyuan` 执行 `pnpm install --frozen-lockfile` 和 `pnpm run build`，检查中英文页面的下载版本后，提交版本文件和编译页面，推送当前分支到 `origin`。官网工程的 `package.json` 版本不是思源版本，不修改。存在其他未提交改动或远端领先时停止；构建或校验失败不提交推送，保留文件供排查。重复执行且内容不变时不会创建空提交。此命令不执行服务器部署。
 
 上架应用市场：
 

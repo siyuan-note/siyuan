@@ -135,6 +135,40 @@ class PrepareTests(unittest.TestCase):
         self.assertIn('"3.8.5"', prepare.read(self.args.repo / "app/package.json"))
 
 
+class PublishCommandTests(unittest.TestCase):
+    def test_publish_includes_index_in_preview_and_execution(self):
+        for execute in (False, True):
+            with self.subTest(execute=execute):
+                argv = ["prepare-release.py", "3.8.6", "--publish"] + (["--execute"] if execute else [])
+                with patch.object(prepare.sys, "argv", argv), \
+                        patch.object(prepare, "plan", return_value=[]), \
+                        patch.object(prepare, "publish_preflight", return_value=[]), \
+                        patch.object(prepare, "index_plan", return_value=[]) as index_plan, \
+                        patch.object(prepare, "index_preflight") as preflight, \
+                        patch.object(prepare, "apply") as apply, \
+                        patch.object(prepare, "publish") as publish, \
+                        patch.object(prepare, "publish_index") as index, contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(prepare.main(), 0)
+                index_plan.assert_called_once()
+                preflight.assert_called_once()
+                index.assert_called_once()
+                self.assertEqual(index.call_args.args[0].execute, execute)
+                self.assertEqual(apply.call_count, int(execute))
+                self.assertEqual(publish.call_count, int(execute))
+
+    def test_index_preflight_failure_prevents_release_writes(self):
+        with patch.object(prepare.sys, "argv", ["prepare-release.py", "3.8.6", "--publish", "--execute"]), \
+                patch.object(prepare, "plan", return_value=[]), \
+                patch.object(prepare, "publish_preflight", return_value=[]), \
+                patch.object(prepare, "index_plan", return_value=[]), \
+                patch.object(prepare, "index_preflight", side_effect=prepare.PreparationError("invalid index")), \
+                patch.object(prepare, "apply") as apply, patch.object(prepare, "publish") as publish:
+            with self.assertRaises(prepare.PreparationError):
+                prepare.main()
+        apply.assert_not_called()
+        publish.assert_not_called()
+
+
 class IndexPublishTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

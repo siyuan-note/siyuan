@@ -1,5 +1,7 @@
 # 发布流程、构建与安装包校验
 
+<!-- release-version: 3.8.5 -->
+
 > **使用范围：`scripts/build-release.py` 是思源官方打包脚本，仅供官方发布环境使用，其他环境请勿使用。脚本依赖官方构建机器的目录结构、工具链、WSL 配置和签名环境，不是通用打包工具。**
 
 需要 Python 3.11 或更新版本。安装包检查不需要更改打包流程，也不需要从其他机器带回基准文件。EXE、DMG、AppImage、DEB、RPM 等格式还需要 7-Zip，可用 `--sevenzip` 指定路径。
@@ -61,13 +63,37 @@ git push origin v3.8.5-beta.1
 ### 1. 完成发布准备
 
 - 生成 changelogs
-- 将当前文档中的版本号 `3.8.5` 替换为待发布的最新版本号
-- 修改 `kernel/util/working.go` 的 `Mode`、`Ver` 和 `app/package.json` 的版本
-- 更新 `app/appx/AppxManifest.xml` 和 `app/appx/AppxManifest-arm64.xml` 的版本
-- 更新 Android 的 `siyuanVersionName`、`siyuanVersionCode`，打 tag `v3.8.5`
-- 更新鸿蒙的 `versionName`、`versionCode`
-- 更新 iOS 版本号
-- 将各仓库需要发布的代码提交并同步到远端
+
+在主仓库根目录指定本次正式版版本，先查看准备计划：
+
+```powershell
+python -X utf8 scripts/prepare-release.py 3.8.5
+```
+
+脚本更新本文版本示例（包括上传命令）、内核 `Mode=prod` 和 `Ver`、`app/package.json`、两个 Appx 清单、Android 和鸿蒙版本。文档顶部的 `release-version` 标记用于识别待替换版本，请保留。Android、鸿蒙版本名称变化时版本代码各加一；同版本重复执行不再递增，可用 `--android-code`、`--harmony-code` 显式指定版本代码。必须传入目标正式版版本号，脚本不自动查询最新版本。
+
+仅修改文件，留待人工检查和提交：
+
+```powershell
+python -X utf8 scripts/prepare-release.py 3.8.5 --execute
+```
+
+确认三个仓库已跟踪的改动均需发布后，查看提交推送计划，再执行：
+
+```powershell
+python -X utf8 scripts/prepare-release.py 3.8.5 --publish
+python -X utf8 scripts/prepare-release.py 3.8.5 --publish --execute
+```
+
+`--publish` 准备版本后提交主仓库、Android、鸿蒙仓库的全部已跟踪改动，推送各自当前分支到 `origin`，最后创建并推送 Android 标签 `v3.8.5`，不会自动切换分支。未跟踪文件须先人工确认并纳入版本管理；远端分支必须是本地 HEAD 的祖先，否则先同步仓库。不会强推或覆盖已有标签。跨仓库发布不是原子操作，失败后检查已完成步骤并重跑；已发布版本需要修改内容时应使用新的版本号。
+
+如果各仓库已手动提交并推送，可仅在 Android 当前提交版本匹配且工作区干净时创建本地标签，然后自行推送：
+
+```powershell
+python -X utf8 scripts/prepare-release.py 3.8.5 --tag-android --execute
+```
+
+准备脚本默认使用主仓库同级的 `siyuan-android`、`siyuan-harmony`，可用 `--android-dir`、`--harmony-dir` 指定路径。主仓库正式版标签仍在最终发布步骤中创建，iOS 仓库仍需手动准备和同步。
 
 ### 2. 同步 WSL 仓库
 

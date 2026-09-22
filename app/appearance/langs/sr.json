@@ -686,7 +686,7 @@
 	"docIconClickExpand": "Klik na ikonicu dokumenta ili beležnice razvija ili sklapa poddokumente",
 	"docIconClickExpandTip": "Kada je uključeno, klik na ikonicu dokumenta ili beležnice razvija ili sklapa poddokumente; ako poddokumenata nema, otvara se dostupan dokument, a u suprotnom se ikonica može promeniti; kada je isključeno, klik na bilo koju ikonicu je menja",
 	"parentDocClickExpand": "Klik na naslov nadređenog dokumenta širi ili sažima poddokumente",
-	"parentDocClickExpandTip": "Kada je omogućeno, klik na naslov nadređenog dokumenta širi ili sažima poddokumente, a nadređeni dokument se može otvoriti preko opcije Otvori dokument u kontekstnom meniju; kada nema poddokumenata, klik i dalje direktno otvara dokument",
+	"parentDocClickExpandTip": "Kada je omogućeno, klik na naslov nadređenog dokumenta širi ili sažima poddokumente, a nadređeni dokument se može otvoriti preko opcije Otvori dokument u kontekstnom meniju; kada nema poddokumenata, klik i dalje direktno otvara dokument; dvostruki klik na naslov otvara nadređeni dokument bez promene stanja proširenja",
 	"mcpStatusAuthorizing": "Autorizacija u toku",
 	"mcpStatusAuthorizationRequired": "Potrebna autorizacija",
 	"mcpAuthorize": "Autorizuj",

@@ -686,7 +686,7 @@
 	"docIconClickExpand": "Clique no ícone do documento ou do caderno para expandir ou recolher documentos filhos",
 	"docIconClickExpandTip": "Quando ativado, clicar no ícone de um documento ou caderno expande ou recolhe os documentos filhos; quando não há documentos filhos, um documento disponível é aberto, caso contrário, o ícone pode ser alterado; quando desativado, clicar em qualquer um dos ícones o altera",
 	"parentDocClickExpand": "Clique no título do documento pai para expandir ou recolher documentos filhos",
-	"parentDocClickExpandTip": "Quando ativado, clicar no título de um documento pai expande ou recolhe os documentos filhos, e o documento pai pode ser aberto usando “Abrir documento” no menu de contexto; quando não há documentos filhos, clicar ainda abre o documento diretamente",
+	"parentDocClickExpandTip": "Quando ativado, clicar no título de um documento pai expande ou recolhe os documentos filhos, e o documento pai pode ser aberto usando “Abrir documento” no menu de contexto; quando não há documentos filhos, clicar ainda abre o documento diretamente; clicar duas vezes no título abre o documento pai sem alterar o estado de expansão",
 	"mcpStatusAuthorizing": "Autorizando",
 	"mcpStatusAuthorizationRequired": "Autorização necessária",
 	"mcpAuthorize": "Autorizar",

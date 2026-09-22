@@ -686,7 +686,7 @@
 	"docIconClickExpand": "Kliknij ikonę dokumentu lub notatnika, aby rozwinąć lub zwinąć dokumenty podrzędne",
 	"docIconClickExpandTip": "Po włączeniu kliknięcie ikony dokumentu lub notatnika rozwija albo zwija dokumenty podrzędne; gdy nie ma dokumentów podrzędnych, dostępny dokument zostaje otwarty, w przeciwnym razie ikonę można zmienić; po wyłączeniu kliknięcie dowolnej z tych ikon zmienia ją",
 	"parentDocClickExpand": "Kliknij tytuł dokumentu nadrzędnego, aby rozwinąć lub zwinąć dokumenty podrzędne",
-	"parentDocClickExpandTip": "Po włączeniu kliknięcie tytułu dokumentu nadrzędnego rozwija lub zwija dokumenty podrzędne, a dokument nadrzędny można otworzyć za pomocą opcji „Otwórz dokument” w menu kontekstowym; gdy nie ma dokumentów podrzędnych, kliknięcie nadal otwiera dokument bezpośrednio",
+	"parentDocClickExpandTip": "Po włączeniu kliknięcie tytułu dokumentu nadrzędnego rozwija lub zwija dokumenty podrzędne, a dokument nadrzędny można otworzyć za pomocą opcji „Otwórz dokument” w menu kontekstowym; gdy nie ma dokumentów podrzędnych, kliknięcie nadal otwiera dokument bezpośrednio; dwukrotne kliknięcie tytułu otwiera dokument nadrzędny bez zmiany stanu rozwinięcia",
 	"mcpStatusAuthorizing": "Autoryzowanie",
 	"mcpStatusAuthorizationRequired": "Wymagana autoryzacja",
 	"mcpAuthorize": "Autoryzuj",

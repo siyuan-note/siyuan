@@ -686,7 +686,7 @@
 	"docIconClickExpand": "Kliknutím na ikonu dokumentu alebo zápisníka rozbaliť alebo zbaliť podradené dokumenty",
 	"docIconClickExpandTip": "Ak je možnosť zapnutá, kliknutie na ikonu dokumentu alebo zápisníka rozbalí alebo zbalí podradené dokumenty; ak neexistujú podradené dokumenty, otvorí sa dostupný dokument, inak možno ikonu zmeniť; ak je vypnutá, kliknutie na ktorúkoľvek z ikon ju zmení",
 	"parentDocClickExpand": "Kliknutím na nadpis nadradeného dokumentu rozbaliť alebo zbaliť podradené dokumenty",
-	"parentDocClickExpandTip": "Ak je možnosť zapnutá, kliknutie na nadpis nadradeného dokumentu rozbalí alebo zbalí podradené dokumenty a nadradený dokument možno otvoriť pomocou položky „Otvoriť dokument“ v kontextovej ponuke; ak neexistujú podradené dokumenty, kliknutie dokument naďalej otvorí priamo",
+	"parentDocClickExpandTip": "Ak je možnosť zapnutá, kliknutie na nadpis nadradeného dokumentu rozbalí alebo zbalí podradené dokumenty a nadradený dokument možno otvoriť pomocou položky „Otvoriť dokument“ v kontextovej ponuke; ak neexistujú podradené dokumenty, kliknutie dokument naďalej otvorí priamo; dvojité kliknutie na nadpis otvorí nadradený dokument bez zmeny stavu rozbalenia",
 	"mcpStatusAuthorizing": "Prebieha autorizácia",
 	"mcpStatusAuthorizationRequired": "Vyžaduje sa autorizácia",
 	"mcpAuthorize": "Autorizovať",

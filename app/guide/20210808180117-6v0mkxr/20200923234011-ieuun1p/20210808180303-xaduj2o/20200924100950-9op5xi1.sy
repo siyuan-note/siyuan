@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260921221035"
+		"updated": "20260922150640"
 	},
 	"Children": [
 		{
@@ -16676,12 +16676,26 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002135-5dfw1yo",
-				"updated": "20260913160005"
+				"updated": "20260922150640"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Document panel"
+				}
+			]
+		},
+		{
+			"ID": "20260922150640-l6dnc3c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922150640-l6dnc3c",
+				"updated": "20260922150640"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When “Click parent document title to expand or collapse child documents” is enabled, single-click a parent document title in the desktop document tree or pinned documents to expand or collapse its children after a short delay. Double-click the title to open the parent document without changing its expansion state. Documents without children still open with a single click"
 				}
 			]
 		},

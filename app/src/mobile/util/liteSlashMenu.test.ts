@@ -9,10 +9,11 @@ import {createSourceFile, isClassDeclaration, isMethodDeclaration, ScriptTarget,
 
 const browserCases = async (source: string, hintSource: string) => {
     const check: typeof assert = require("node:assert/strict");
-    const {mount, render} = new Function(source + hintSource +
-        "\nreturn {mount: mountLiteSlashMenu, render: Hint.prototype.getHTMLByData};")() as {
+    const {mount, render, paddingElement} = new Function(source + hintSource +
+        "\nreturn {mount: mountLiteSlashMenu, render: Hint.prototype.getHTMLByData, paddingElement: getMobileToolbarPaddingElement};")() as {
         mount: typeof import("./liteSlashMenu").mountLiteSlashMenu,
         render: (data: IHintData[]) => string,
+        paddingElement: typeof import("../../protyle/lite/mobileToolbar").getMobileToolbarPaddingElement,
     };
     window.siyuan = {languages: {emptyContent: "Empty"}} as unknown as typeof window.siyuan;
     const element = document.createElement("div");
@@ -106,6 +107,35 @@ const browserCases = async (source: string, hintSource: string) => {
     provider.hint = () => items;
     mount(protyle, panel);
     toolbar.style.width = "390px";
+
+    const agent = document.createElement("div");
+    agent.className = "sy__agentChat sy__agentChat--mobile fn__flex-column";
+    agent.style.position = "fixed";
+    agent.style.top = "0";
+    agent.innerHTML = '<div class="block__icons">Agent</div><div class="agent-chat fn__flex-column fn__flex-1">' +
+        '<div class="agent-chat__messages-wrap"><div class="agent-chat__messages fn__flex-1">Messages</div></div>' +
+        '<div class="agent-chat__input-area"><div class="agent-chat__composer-host">' +
+        '<div class="protyle-content"><div contenteditable="true">Input</div></div></div>' +
+        '<div class="agent-chat__buttons"><button class="b3-button">Send</button></div></div></div>';
+    document.body.appendChild(agent);
+    const contentElement = agent.querySelector<HTMLElement>(".protyle-content");
+    const composer = {lite: true, element: contentElement.parentElement, contentElement} as IProtyle;
+    for (const width of [320, 390, 768]) {
+        agent.style.width = `${width}px`;
+        for (const fontSize of [16, 32]) {
+            agent.style.fontSize = `${fontSize}px`;
+            for (const [height, padding] of [[700, 350], [420, 48], [700, 0]]) {
+                agent.style.height = `${height}px`;
+                paddingElement(composer).style.paddingBottom = padding ? `${padding}px` : "";
+                const input = agent.querySelector(".agent-chat__input-area").getBoundingClientRect();
+                check.ok(input.bottom <= height - padding, "composer stays above the keyboard panel");
+                check.ok(input.top >= agent.querySelector(".block__icons").getBoundingClientRect().bottom);
+                check.equal(contentElement.style.paddingBottom, "");
+                check.equal(agent.getBoundingClientRect().height, height, "padding does not enlarge the page");
+            }
+        }
+    }
+    agent.remove();
     return "Mobile slash cases passed";
 };
 
@@ -113,7 +143,8 @@ test("mobile slash panel retains synchronous and asynchronous candidates and rel
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const source = transpileModule(readFileSync(path.join(__dirname, "liteSlashMenu.ts"), "utf8")
+    const source = transpileModule((readFileSync(path.join(__dirname, "liteSlashMenu.ts"), "utf8") + "\n" +
+        readFileSync(path.join(__dirname, "../../protyle/lite/mobileToolbar.ts"), "utf8"))
         .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const hintFile = createSourceFile("hint.ts", readFileSync(path.join(__dirname, "../../protyle/hint/index.ts"), "utf8"),
         ScriptTarget.Latest, true);

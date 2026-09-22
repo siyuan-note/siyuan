@@ -5,7 +5,7 @@ import {bindMobileToolbar, getMobileToolbarPaddingElement, getMobileToolbarProty
 test("table cell keyboard padding belongs to its outer editor", () => {
     const createEditor = (lite = false) => ({
         lite,
-        element: {parentElement: {style: {paddingBottom: ""}}},
+        element: {parentElement: {style: {paddingBottom: ""}}, closest: (): unknown => null},
         contentElement: {style: {paddingBottom: ""}},
     }) as unknown as IProtyle;
     for (const lite of [false, true]) {
@@ -23,6 +23,19 @@ test("table cell keyboard padding belongs to its outer editor", () => {
     }
     const composer = createEditor(true);
     assert.equal(getMobileToolbarPaddingElement(composer), composer.contentElement);
+    const agentPanel = {style: {paddingBottom: ""}};
+    composer.element.closest = (() => agentPanel) as typeof composer.element.closest;
+    const cell = createEditor(true);
+    setMobileToolbarUndo(cell, composer, () => {});
+    for (const editor of [composer, cell]) {
+        assert.equal(getMobileToolbarPaddingElement(editor), agentPanel);
+        for (const padding of ["48px", "320px", ""]) {
+            getMobileToolbarPaddingElement(editor).style.paddingBottom = padding;
+            assert.equal(agentPanel.style.paddingBottom, padding);
+            assert.equal(composer.contentElement.style.paddingBottom, "");
+            assert.equal(cell.contentElement.style.paddingBottom, "");
+        }
+    }
 });
 
 test("shared mobile toolbar follows fragment focus, retains panel ownership and releases destroyed editors", () => {

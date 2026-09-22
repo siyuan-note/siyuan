@@ -11,6 +11,11 @@ export const getMobileToolbarUndo = (protyle: IProtyle) => undoContexts.get(prot
 export const getMobileToolbarPaddingElement = (protyle: IProtyle) => {
     // 单元格的键盘占位放在所属编辑器上，避免撑高表格行。
     const owner = undoContexts.get(protyle)?.owner || protyle;
+    // 智能体输入框有高度上限，键盘占位由整个页面承担，保持输入区位于面板上方。
+    const agentPanel = owner.element.closest<HTMLElement>(".sy__agentChat--mobile");
+    if (agentPanel) {
+        return agentPanel;
+    }
     return owner.lite ? owner.contentElement : owner.element.parentElement;
 };
 

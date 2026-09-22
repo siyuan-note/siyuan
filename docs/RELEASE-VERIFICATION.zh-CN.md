@@ -56,17 +56,17 @@ git push origin v3.8.5-beta.1
 
 ## 正式版发布步骤
 
-除明确注明的步骤外，以下命令均在官方 Windows 构建机器的仓库根目录 `D:\88250\siyuan` 执行。示例版本 `3.8.4` 须替换为本次发布版本。首次使用应分平台确认工具链与签名环境；完整流水线尚未实际运行验证。
+除明确注明的步骤外，以下命令均在官方 Windows 构建机器的仓库根目录 `D:\88250\siyuan` 执行。
 
 ### 1. 完成发布准备
 
 - 生成 changelogs
+- 将当前文档中的版本号 `3.8.5` 替换为待发布的最新版本号
 - 修改 `kernel/util/working.go` 的 `Mode`、`Ver` 和 `app/package.json` 的版本
 - 更新 `app/appx/AppxManifest.xml` 和 `app/appx/AppxManifest-arm64.xml` 的版本
 - 更新 Android 的 `siyuanVersionName`、`siyuanVersionCode`
 - 更新鸿蒙的 `versionName`、`versionCode`
 - 更新 iOS 版本号
-- 按需更新文档、图标、第三方资源版本及 `DatabaseVer`
 - 将各仓库需要发布的代码提交并同步到远端
 
 ### 2. 同步 WSL 仓库
@@ -106,7 +106,7 @@ python -X utf8 scripts/build-release.py --platforms harmony --execute
 python -X utf8 scripts/build-release.py --appx --execute
 ```
 
-脚本自动构建、复制移动端内核和资源、验证安装包，并将通过验证的产物收集到桌面 `siyuan` 文件夹。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.4.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。
+脚本自动构建、复制移动端内核和资源、验证安装包，并将通过验证的产物收集到桌面 `siyuan` 文件夹。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.5.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。
 
 ### 6. 汇总其他平台产物
 
@@ -130,7 +130,7 @@ macOS、iOS 在对应构建机器上完成构建和签名。macOS 完成公证�
 核对版本、平台和架构后，在仓库根目录执行：
 
 ```powershell
-python -X utf8 scripts/verify-release.py check --version 3.8.4
+python -X utf8 scripts/verify-release.py check --version 3.8.5
 ```
 
 校验器已检查必需前端入口，整套前端漏打包会报错。当前架构检查并不完整，也不检查此次应发布的平台是否齐全，因此不能代替上面的人工核对；校验器不验证 `SHA256SUMS.txt`。
@@ -168,23 +168,23 @@ python -X utf8 scripts/verify-release.py check --version 3.8.4
 上传发布包：
 
 ```
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4.apk -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4.apk --content-type application/vnd.android.package-archive --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5.apk -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5.apk --content-type application/vnd.android.package-archive --remote
 
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux.AppImage --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux.tar.gz --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux.deb --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux.rpm --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.AppImage --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.tar.gz --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.deb --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.rpm --remote
 
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux-arm64.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux-arm64.AppImage --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux-arm64.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux-arm64.tar.gz --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux-arm64.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux-arm64.deb --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-linux-arm64.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-linux-arm64.rpm --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.AppImage --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.tar.gz --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.deb --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.rpm --remote
 
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-mac.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-mac.dmg --content-type application/octet-stream --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-mac-arm64.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-mac-arm64.dmg --content-type application/octet-stream --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-mac.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-mac.dmg --content-type application/octet-stream --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-mac-arm64.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-mac-arm64.dmg --content-type application/octet-stream --remote
 
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-win.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-win.exe --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.4-win-arm64.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.4-win-arm64.exe --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-win.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-win.exe --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-win-arm64.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-win-arm64.exe --remote
 echo 'complete'
 ```
 
@@ -199,8 +199,8 @@ python -X utf8 scripts/verify-release.py check
 默认从包名推断发布版本。版本混杂、包名不含版本，或希望明确检查目标时指定版本：
 
 ```text
-python -X utf8 scripts/verify-release.py check --version 3.8.4
-python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.4 --report D:/releases/verification.json
+python -X utf8 scripts/verify-release.py check --version 3.8.5
+python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.5 --report D:/releases/verification.json
 ```
 
 报告路径必须是尚不存在的 `.json` 文件。退出码 `0` 表示所有包通过当前检查，`1` 表示失败或无法验证。检查不会运行安装器、内核或包内 JavaScript，不修改安装包；每个包使用独立临时目录，检查后清理。
@@ -241,7 +241,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - 本地前端生产构建一次，Linux 前端在 WSL 中构建
 - Windows 在全新目录构建两个架构内核，生成临时 Electron Builder 配置启用证书签名，不修改仓库 YAML，不复用开发内核目录；默认生成两个 NSIS 包并检查 Authenticode 签名
 - Linux 调用现有 `scripts/linux-build.sh --target=all`，收集双架构 TAR、AppImage、DEB、RPM 共八个包
-- Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.4.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
+- Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.5.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
 - 鸿蒙先构建并复制 ARM64 内核，再构建并复制 x86_64 内核，避免同名 `libkernel.so` 被覆盖后拷错；使用同一份新 `app.zip`，通过 Hvigor release 模式生成 APP 和已签名 HAP
 - 每条命令失败立即停止，产物必须是本次生成，复制时再次核对摘要
 - 新安装包全部验证通过后才收集到桌面 `siyuan`，不覆盖同名包；分批构建会检查目录中已有的其他包，保留已有的 `SHA256SUMS.txt`，校验和清单由发布者最终手动生成
@@ -258,8 +258,8 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 通常无需使用。如果将来要比较同版本号的字节差异，可以从可信构建产物生成基准，使用 `check --baseline` 显式启用。不能从待验包反向生成基准。
 
 ```text
-python -X utf8 scripts/verify-release.py baseline --version 3.8.4 --target android-arm64 --kernel kernel/kernel.aar --resources app --output android-arm64.release-baseline.json
-python -X utf8 scripts/verify-release.py check --version 3.8.4 --baseline android-arm64.release-baseline.json
+python -X utf8 scripts/verify-release.py baseline --version 3.8.5 --target android-arm64 --kernel kernel/kernel.aar --resources app --output android-arm64.release-baseline.json
+python -X utf8 scripts/verify-release.py check --version 3.8.5 --baseline android-arm64.release-baseline.json
 ```
 
 资源目录必须对应实际打包的集合。桌面包筛选外观文件并裁剪更新日志，不能直接比较未筛选的 `app/`；macOS 签名也可能改变内核摘要。启用基准比较时仍检查必需前端入口，即使安装包与基准摘要一致，也不能放过前端入口缺失。

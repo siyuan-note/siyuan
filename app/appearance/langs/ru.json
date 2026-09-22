@@ -1,5 +1,4 @@
 {
-	"listMindmapExpandToLevel": "Развернуть до уровня ${level}",
 	"checkBlockRefProgress": "Проверка ссылок на блоки и привязок к базам данных...",
 	"calendarRowLimit": "Число видимых строк записей",
 	"calendarNewOnDate": "Создать запись на эту дату",

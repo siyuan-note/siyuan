@@ -88,6 +88,14 @@ export class Outline extends Model {
     <span data-type="expandLevel" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.expandLevel}">
         <svg><use xlink:href="#iconExpandLevel"></use></svg>
     </span>
+    <span class="fn__space"></span>
+    <span data-type="expand" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.expandAll}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
+        <svg><use xlink:href="#iconExpand"></use></svg>
+    </span>
+    <span class="fn__space"></span>
+    <span data-type="collapse" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.foldAll}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
+        <svg><use xlink:href="#iconContract"></use></svg>
+    </span>
     <span class="${this.type === "local" ? "fn__none " : ""}fn__space"></span>
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}">
         <svg><use xlink:href='#iconMin'></use></svg>
@@ -190,6 +198,18 @@ export class Outline extends Model {
             blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
             topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
         });
+        // 为了快捷键的 dispatch
+        options.tab.panelElement.querySelector('[data-type="collapse"]').addEventListener("click", () => {
+            this.tree.collapseAll();
+            this.saveExpendIds();
+        });
+
+        // 普通的全部展开按钮
+        options.tab.panelElement.querySelector('[data-type="expand"]').addEventListener("click", () => {
+            this.tree.expandAll();
+            this.saveExpendIds();
+        });
+
         // 保持当前标题展开功能
         options.tab.panelElement.querySelector('[data-type="keepCurrentExpand"]').addEventListener("click", (event: MouseEvent & {
             target: Element
@@ -885,15 +905,6 @@ export class Outline extends Model {
         setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
     }
 
-    public setAllExpanded(expanded: boolean) {
-        if (expanded) {
-            this.tree.expandAll();
-        } else {
-            this.tree.collapseAll();
-        }
-        this.saveExpendIds();
-    }
-
     /**
      * 显示展开层级菜单
      */
@@ -909,21 +920,6 @@ export class Outline extends Model {
                 click: () => this.expandToLevel(i)
             }).element);
         }
-        window.siyuan.menus.menu.append(new MenuItem({id: "separator_all", type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "expandAll",
-            icon: "iconExpand",
-            label: window.siyuan.languages.expandAll,
-            accelerator: window.siyuan.config.keymap.editor.general.expand.custom,
-            click: () => this.setAllExpanded(true)
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "foldAll",
-            icon: "iconContract",
-            label: window.siyuan.languages.foldAll,
-            accelerator: window.siyuan.config.keymap.editor.general.collapse.custom,
-            click: () => this.setAllExpanded(false)
-        }).element);
         const rect = target.getBoundingClientRect();
         window.siyuan.menus.menu.popup({
             x: rect.left,
@@ -1389,7 +1385,10 @@ export class Outline extends Model {
             id: "expandAll",
             icon: "iconExpand",
             label: window.siyuan.languages.expandAll,
-            click: () => this.setAllExpanded(true)
+            click: () => {
+                this.tree.expandAll();
+                this.saveExpendIds();
+            }
         }).element);
 
         // 全部折叠
@@ -1397,7 +1396,10 @@ export class Outline extends Model {
             id: "foldAll",
             icon: "iconContract",
             label: window.siyuan.languages.foldAll,
-            click: () => this.setAllExpanded(false)
+            click: () => {
+                this.tree.collapseAll();
+                this.saveExpendIds();
+            }
         }).element);
 
         const rect = element.getBoundingClientRect();

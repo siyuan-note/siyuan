@@ -1,5 +1,7 @@
 # 发布流程、构建与安装包校验
 
+<!-- release-version: 3.8.5 -->
+
 > **使用范围：`scripts/build-release.py` 是思源官方打包脚本，仅供官方发布环境使用，其他环境请勿使用。脚本依赖官方构建机器的目录结构、工具链、WSL 配置和签名环境，不是通用打包工具。**
 
 需要 Python 3.11 或更新版本。安装包检查不需要更改打包流程，也不需要从其他机器带回基准文件。EXE、DMG、AppImage、DEB、RPM 等格式还需要 7-Zip，可用 `--sevenzip` 指定路径。
@@ -56,18 +58,42 @@ git push origin v3.8.5-beta.1
 
 ## 正式版发布步骤
 
-除明确注明的步骤外，以下命令均在官方 Windows 构建机器的仓库根目录 `D:\88250\siyuan` 执行。示例版本 `3.8.4` 须替换为本次发布版本。首次使用应分平台确认工具链与签名环境；完整流水线尚未实际运行验证。
+除明确注明的步骤外，以下命令均在官方 Windows 构建机器的仓库根目录 `D:\88250\siyuan` 执行。
 
 ### 1. 完成发布准备
 
 - 生成 changelogs
-- 修改 `kernel/util/working.go` 的 `Mode`、`Ver` 和 `app/package.json` 的版本
-- 更新 `app/appx/AppxManifest.xml` 和 `app/appx/AppxManifest-arm64.xml` 的版本
-- 更新 Android 的 `siyuanVersionName`、`siyuanVersionCode`
-- 更新鸿蒙的 `versionName`、`versionCode`
-- 更新 iOS 版本号
-- 按需更新文档、图标、第三方资源版本及 `DatabaseVer`
-- 将各仓库需要发布的代码提交并同步到远端
+
+在主仓库根目录指定本次正式版版本，先查看准备计划：
+
+```powershell
+python -X utf8 scripts/prepare-release.py 3.8.5
+```
+
+脚本更新本文版本示例（包括上传命令）、内核 `Mode=prod` 和 `Ver`、`app/package.json`、两个 Appx 清单、Android 和鸿蒙版本。文档顶部的 `release-version` 标记用于识别待替换版本，请保留。Android、鸿蒙版本名称变化时版本代码各加一；同版本重复执行不再递增，可用 `--android-code`、`--harmony-code` 显式指定版本代码。必须传入目标正式版版本号，脚本不自动查询最新版本。
+
+仅修改文件，留待人工检查和提交：
+
+```powershell
+python -X utf8 scripts/prepare-release.py 3.8.5 --execute
+```
+
+确认三个仓库已跟踪的改动均需发布后，查看提交推送计划，再执行：
+
+```powershell
+python -X utf8 scripts/prepare-release.py 3.8.5 --publish
+python -X utf8 scripts/prepare-release.py 3.8.5 --publish --execute
+```
+
+`--publish` 准备版本后提交主仓库、Android、鸿蒙仓库的全部已跟踪改动，推送各自当前分支到 `origin`，最后创建并推送 Android 标签 `v3.8.5`，不会自动切换分支。未跟踪文件须先人工确认并纳入版本管理；远端分支必须是本地 HEAD 的祖先，否则先同步仓库。不会强推或覆盖已有标签。跨仓库发布不是原子操作，失败后检查已完成步骤并重跑；已发布版本需要修改内容时应使用新的版本号。
+
+如果各仓库已手动提交并推送，可仅在 Android 当前提交版本匹配且工作区干净时创建本地标签，然后自行推送：
+
+```powershell
+python -X utf8 scripts/prepare-release.py 3.8.5 --tag-android --execute
+```
+
+准备脚本默认使用主仓库同级的 `siyuan-android`、`siyuan-harmony`，可用 `--android-dir`、`--harmony-dir` 指定路径。主仓库正式版标签仍在最终发布步骤中创建，iOS 仓库仍需手动准备和同步。
 
 ### 2. 同步 WSL 仓库
 
@@ -75,7 +101,7 @@ git push origin v3.8.5-beta.1
 
 ### 3. 准备构建环境
 
-- 准备 Python 3.11 或更新版本、Go、Node、pnpm、Windows 双架构编译器、gomobile、Android SDK/NDK、DevEco Studio 和 7-Zip；Appx 还需 `electron-windows-store`
+- 准备 Go、Node、pnpm、Windows 双架构编译器、gomobile、Android SDK/NDK、DevEco Studio 和 7-Zip；Appx 还需 `electron-windows-store`
 - 停止正在运行的前端开发构建
 - 插好 YubiKey，签名时按系统提示输入 PIN
 - 确认 Android、鸿蒙签名配置可用
@@ -91,7 +117,15 @@ python -X utf8 scripts/build-release.py
 
 ### 5. 执行构建
 
-首次使用建议依次分平台执行，确认每个平台成功后再继续：
+一次性构建 Windows、WSL Linux、Android 和鸿蒙。正式版需要两个 Appx 包，保留 `--appx`：
+
+```powershell
+python -X utf8 scripts/build-release.py --appx --execute
+```
+
+各平台按 Windows、Linux、Android、鸿蒙的顺序串行构建，中途失败会停止后续步骤。
+
+补充：需要单独构建某个平台或排查构建问题时，可选择对应命令：
 
 ```powershell
 python -X utf8 scripts/build-release.py --platforms windows --appx --execute
@@ -100,13 +134,7 @@ python -X utf8 scripts/build-release.py --platforms android --execute
 python -X utf8 scripts/build-release.py --platforms harmony --execute
 ```
 
-正式版需要两个 Appx 包，保留 `--appx`。确认各平台运行正常后，后续发布可一条命令构建 Windows、WSL Linux、Android 和鸿蒙：
-
-```powershell
-python -X utf8 scripts/build-release.py --appx --execute
-```
-
-脚本自动构建、复制移动端内核和资源、验证安装包，并将通过验证的产物收集到桌面 `siyuan` 文件夹。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.4.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。
+脚本自动构建、复制移动端内核和资源、验证安装包，并将通过验证的产物收集到桌面 `siyuan` 文件夹。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.5.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。
 
 ### 6. 汇总其他平台产物
 
@@ -130,7 +158,7 @@ macOS、iOS 在对应构建机器上完成构建和签名。macOS 完成公证�
 核对版本、平台和架构后，在仓库根目录执行：
 
 ```powershell
-python -X utf8 scripts/verify-release.py check --version 3.8.4
+python -X utf8 scripts/verify-release.py check --version 3.8.5
 ```
 
 校验器已检查必需前端入口，整套前端漏打包会报错。当前架构检查并不完整，也不检查此次应发布的平台是否齐全，因此不能代替上面的人工核对；校验器不验证 `SHA256SUMS.txt`。
@@ -151,6 +179,43 @@ python -X utf8 scripts/verify-release.py check --version 3.8.4
 - 部署 Index 和用户指南
 - 完成小米、华为、荣耀、OPPO、vivo、App Store、Microsoft Store、腾讯应用宝、Google Play、360 和腾讯电脑管家等应用市场上架
 
+上架应用市场：
+
+- [小米](https://dev.mi.com/distribute)
+- [华为](https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/myApp)
+- [荣耀](https://developer.honor.com/)
+- [OPPO](https://open.oppomobile.com/)
+- [vivo](https://dev.vivo.com.cn/appLists)
+- [iOS](https://appstoreconnect.apple.com/apps/1583226508/appstore)
+- [微软](https://partner.microsoft.com/en-us/dashboard/windows/overview)
+- [腾讯应用宝](https://app.open.qq.com/p/app/detail?appId=1112307632)
+- [Google Play](https://play.google.com/console/developers)
+- [360软件开放平台](https://open.soft.360.cn/softlist.php)
+- [腾讯电脑管家软件开放平台](https://guanjia.qq.com/software-platform/softwarelibrary)
+
+上传发布包：
+
+```
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5.apk -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5.apk --content-type application/vnd.android.package-archive --remote
+
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.AppImage --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.tar.gz --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.deb --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.rpm --remote
+
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.AppImage --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.tar.gz --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.deb --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.rpm --remote
+
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-mac.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-mac.dmg --content-type application/octet-stream --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-mac-arm64.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-mac-arm64.dmg --content-type application/octet-stream --remote
+
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-win.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-win.exe --remote
+wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-win-arm64.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-win-arm64.exe --remote
+echo 'complete'
+```
+
 ## 直接检查安装包
 
 把安装包放入桌面 `siyuan` 文件夹，在仓库根目录执行：
@@ -162,8 +227,8 @@ python -X utf8 scripts/verify-release.py check
 默认从包名推断发布版本。版本混杂、包名不含版本，或希望明确检查目标时指定版本：
 
 ```text
-python -X utf8 scripts/verify-release.py check --version 3.8.4
-python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.4 --report D:/releases/verification.json
+python -X utf8 scripts/verify-release.py check --version 3.8.5
+python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.5 --report D:/releases/verification.json
 ```
 
 报告路径必须是尚不存在的 `.json` 文件。退出码 `0` 表示所有包通过当前检查，`1` 表示失败或无法验证。检查不会运行安装器、内核或包内 JavaScript，不修改安装包；每个包使用独立临时目录，检查后清理。
@@ -204,7 +269,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - 本地前端生产构建一次，Linux 前端在 WSL 中构建
 - Windows 在全新目录构建两个架构内核，生成临时 Electron Builder 配置启用证书签名，不修改仓库 YAML，不复用开发内核目录；默认生成两个 NSIS 包并检查 Authenticode 签名
 - Linux 调用现有 `scripts/linux-build.sh --target=all`，收集双架构 TAR、AppImage、DEB、RPM 共八个包
-- Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.4.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
+- Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.5.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
 - 鸿蒙先构建并复制 ARM64 内核，再构建并复制 x86_64 内核，避免同名 `libkernel.so` 被覆盖后拷错；使用同一份新 `app.zip`，通过 Hvigor release 模式生成 APP 和已签名 HAP
 - 每条命令失败立即停止，产物必须是本次生成，复制时再次核对摘要
 - 新安装包全部验证通过后才收集到桌面 `siyuan`，不覆盖同名包；分批构建会检查目录中已有的其他包，保留已有的 `SHA256SUMS.txt`，校验和清单由发布者最终手动生成
@@ -221,8 +286,8 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 通常无需使用。如果将来要比较同版本号的字节差异，可以从可信构建产物生成基准，使用 `check --baseline` 显式启用。不能从待验包反向生成基准。
 
 ```text
-python -X utf8 scripts/verify-release.py baseline --version 3.8.4 --target android-arm64 --kernel kernel/kernel.aar --resources app --output android-arm64.release-baseline.json
-python -X utf8 scripts/verify-release.py check --version 3.8.4 --baseline android-arm64.release-baseline.json
+python -X utf8 scripts/verify-release.py baseline --version 3.8.5 --target android-arm64 --kernel kernel/kernel.aar --resources app --output android-arm64.release-baseline.json
+python -X utf8 scripts/verify-release.py check --version 3.8.5 --baseline android-arm64.release-baseline.json
 ```
 
 资源目录必须对应实际打包的集合。桌面包筛选外观文件并裁剪更新日志，不能直接比较未筛选的 `app/`；macOS 签名也可能改变内核摘要。启用基准比较时仍检查必需前端入口，即使安装包与基准摘要一致，也不能放过前端入口缺失。

@@ -1,4 +1,5 @@
 {
+	"addAlias": "新增別名",
 	"checkBlockRefProgress": "正在檢查區塊引用與資料庫綁定...",
 	"calendarRowLimit": "項目顯示行數",
 	"calendarNewOnDate": "在此日期新增項目",

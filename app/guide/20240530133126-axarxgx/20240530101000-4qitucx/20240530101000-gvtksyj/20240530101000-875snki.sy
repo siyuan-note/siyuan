@@ -7,7 +7,7 @@
 		"id": "20240530101000-875snki",
 		"title": "コンテンツブロックの属性",
 		"type": "doc",
-		"updated": "20251201102644"
+		"updated": "20260922145800"
 	},
 	"Children": [
 		{
@@ -48,7 +48,7 @@
 			"Properties": {
 				"ID": "20240530101000-9eowlvm",
 				"id": "20240530101000-enq56zt",
-				"updated": "20240530101000"
+				"updated": "20260922145800"
 			},
 			"Children": [
 				{
@@ -68,7 +68,7 @@
 				"ID": "20240530101000-ue0r5sh",
 				"colgroup": "|",
 				"id": "20240530101000-essns4c",
-				"updated": "20240530101000"
+				"updated": "20260922145800"
 			},
 			"Children": [
 				{
@@ -152,7 +152,25 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "コンテンツブロックのエイリアス"
+									"Data": "コンテンツブロックのエイリアス。属性パネルでは、エイリアスが個別のチップとして表示されます。「エイリアスを追加」で追加し、既存のエイリアスをクリックして編集し、閉じるアイコンで削除できます。半角カンマで区切ると、複数のエイリアスをまとめて追加できます。"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " キーを押すか入力欄からフォーカスを移すと保存され、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Esc"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " キーで今回の入力を取り消せます。新しい入力では、前後の空白、空の項目、完全に一致する重複項目が除去されます。"
 								}
 							]
 						}

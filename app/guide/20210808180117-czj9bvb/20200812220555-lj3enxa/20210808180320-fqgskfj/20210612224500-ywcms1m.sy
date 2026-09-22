@@ -6,7 +6,7 @@
 		"id": "20210612224500-ywcms1m",
 		"title": "内容块属性",
 		"type": "doc",
-		"updated": "20251201102135"
+		"updated": "20260922145800"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613004126-79loyta",
-				"updated": "20210613004130"
+				"updated": "20260922145800"
 			},
 			"Children": [
 				{
@@ -62,7 +62,7 @@
 			],
 			"Properties": {
 				"id": "20210613004249-56e0c6r",
-				"updated": "20210613120805"
+				"updated": "20260922145800"
 			},
 			"Children": [
 				{
@@ -146,7 +146,25 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "内容块的别名"
+									"Data": "内容块的别名。在属性面板中，多个别名分别显示为标签。点击「新增别名」添加，点击已有别名编辑，点击其关闭图标删除。输入时可用英文逗号分隔，批量添加多个别名。按 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或移开输入焦点保存，按 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Esc"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 取消本次输入。新输入会去除首尾空白、过滤空项和完全相同的重复项。"
 								}
 							]
 						}

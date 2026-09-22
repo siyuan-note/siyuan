@@ -7,6 +7,7 @@
 *.aar
 *.jar
 *.syso
+/kernel/harmony/libkernel.h
 .DS_Store
 .eslintcache
 app/node_modules

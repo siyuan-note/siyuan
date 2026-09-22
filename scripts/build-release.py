@@ -356,8 +356,7 @@ class Builder:
         started = time.time()
         run(command + ["assembleApp"], self.args.harmony_dir, env)
         app = self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-unsigned.app"
-        hap = self.args.harmony_dir / "entry/build/default/outputs/default/entry-default-signed.hap"
-        self.collect([app, hap], "鸿蒙", started)
+        self.collect([app], "鸿蒙", started)
 
     def finish(self):
         for artifact in self.artifacts:
@@ -415,7 +414,7 @@ def main():
         "windows": "构建 AMD64/ARM64 内核 - YubiKey 签名 - 生成两个 NSIS 安装包 - 检查签名",
         "linux": f"WSL 用户 {args.wsl_user}、目录 {args.wsl_repo} - 检查源代码一致 - 双架构构建 TAR/AppImage/DEB/RPM",
         "android": "生成新 kernel.aar - 核对版本和架构 - 自动复制内核及 app.zip - Gradle 四渠道 release 构建",
-        "harmony": "WSL 构建两种架构内核并分别复制 - 更新 app.zip - Hvigor release 构建 APP/HAP",
+        "harmony": "WSL 构建两种架构内核并分别复制 - 更新 app.zip - Hvigor release 构建 APP",
     }
     print("本地前端仅构建一次；Linux 前端在 WSL 中构建")
     for platform in args.platforms:

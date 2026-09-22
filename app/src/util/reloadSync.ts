@@ -121,7 +121,7 @@ export const reloadSync = (
     allModels.outline.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.blockId)) {
             item.parent.parent.removeTab(item.parent.id, false, false);
-        } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)) {
+        } else if (item.blockId && (item.type !== "local" || data.upsertRootIDs.includes(item.blockId))) {
             const outlineParam: IObject = {
                 id: item.blockId,
                 preview: item.isPreview

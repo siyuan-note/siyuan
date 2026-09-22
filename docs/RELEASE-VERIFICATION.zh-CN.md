@@ -216,6 +216,22 @@ wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-win-arm64.exe -f C:\U
 echo 'complete'
 ```
 
+### 10. 清理发布产物
+
+发布完成、确认桌面 `siyuan` 中的安装包已收齐并校验通过后，停止所有构建任务，在 Windows 主仓库执行：
+
+```powershell
+# 预览清理路径
+python -X utf8 scripts/clean-release.py
+
+# 实际清理
+python -X utf8 scripts/clean-release.py --execute
+```
+
+脚本清理发布脚本留下的系统临时构建目录、本地及 WSL 的 `app/build`、Linux 内核目录、鸿蒙生成的内核及头文件，以及 Android、鸿蒙工程中的构建输出和复制进去的内核、资源包。桌面 `siyuan` 始终保留；受 Git 管理的文件（包括鸿蒙公共头文件）、源码、签名配置、依赖和工具缓存、开发前端 `app/stage/build` 均保留。清理后再次打包需要重新生成内核和移动端资源包。
+
+自定义过构建参数时，清理时传入相同的 `--android-dir`、`--harmony-dir`、`--wsl-distro`、`--wsl-user`、`--wsl-repo`；使用自定义收集目录时，必须同时传入 `--output` 保护该目录。`--skip-wsl` 可只清理 Windows 本地。脚本拒绝越界路径、与保留目录重叠的目标以及自身或上级为链接的清理入口；构建目录内部的符号链接和目录联接只删除链接本身，不清理其指向的目录。不会清理其他电脑上的 macOS 或 iOS 构建产物。
+
 ## 直接检查安装包
 
 把安装包放入桌面 `siyuan` 文件夹，在仓库根目录执行：

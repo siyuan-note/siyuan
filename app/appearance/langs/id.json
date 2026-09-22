@@ -150,7 +150,7 @@
 	"keymapUnassigned": "Belum ditetapkan",
 	"keymapAdd": "Tambah pintasan keyboard",
 	"aiProviderHeadersTip": "Masukkan objek JSON dengan nilai string; header khusus menggantikan header bawaan dengan nama yang sama, termasuk header autentikasi; Mendukung {{secrets.NAME}} dan {{vars.NAME}}; rahasia harus mengizinkan host penyedia, dan nilai langsung disimpan sebagai teks biasa",
-	"cellPasteUnsupported": "Penempelan dibatalkan: sel ini tidak mendukung ${x}",
+	"cellPasteUnsupported": "Penempelan dibatalkan: ${x} tidak didukung di sini",
 	"templateNameTip": "Masukkan nama tanpa pemisah jalur",
 	"keymapUnset": "Belum diatur",
 	"keymapPrimary": "Jadikan pintasan utama",

@@ -150,7 +150,7 @@
 	"keymapUnassigned": "Nepriradené",
 	"keymapAdd": "Pridať klávesovú skratku",
 	"aiProviderHeadersTip": "Zadajte objekt JSON s textovými hodnotami; vlastné hlavičky prepíšu predvolené hlavičky s rovnakým názvom vrátane autentifikačných hlavičiek; Podporuje {{secrets.NAME}} a {{vars.NAME}}; tajomstvá musia povoľovať hostiteľa poskytovateľa a priamo zadané hodnoty sa ukladajú ako obyčajný text",
-	"cellPasteUnsupported": "Prilepenie zrušené: táto bunka nepodporuje ${x}",
+	"cellPasteUnsupported": "Prilepenie zrušené: ${x} tu nie je podporované",
 	"templateNameTip": "Zadajte názov bez oddeľovačov cesty",
 	"keymapUnset": "Nenastavené",
 	"keymapPrimary": "Nastaviť ako hlavnú skratku",

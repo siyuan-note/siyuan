@@ -150,7 +150,7 @@
 	"keymapUnassigned": "未割り当て",
 	"keymapAdd": "ショートカットを追加",
 	"aiProviderHeadersTip": "文字列値を持つ JSON オブジェクトを入力してください。カスタムヘッダーは、認証ヘッダーを含む同名の既定ヘッダーを上書きします。{{secrets.NAME}} と {{vars.NAME}} に対応しています。シークレットではプロバイダーのホストを許可する必要があり、直接入力した値は平文で保存されます",
-	"cellPasteUnsupported": "貼り付けをキャンセルしました：このセルでは ${x} はサポートされていません",
+	"cellPasteUnsupported": "貼り付けをキャンセルしました：ここでは ${x} はサポートされていません",
 	"templateNameTip": "パス区切り文字を含まない名前を入力してください",
 	"keymapUnset": "未設定",
 	"keymapPrimary": "メインのショートカットに設定",

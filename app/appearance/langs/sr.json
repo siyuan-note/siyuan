@@ -150,7 +150,7 @@
 	"keymapUnassigned": "Nedodeljeno",
 	"keymapAdd": "Dodaj prečicu",
 	"aiProviderHeadersTip": "Unesite JSON objekat sa vrednostima tipa string; prilagođena zaglavlja imaju prednost nad podrazumevanim zaglavljima istog imena, uključujući zaglavlja za prijavu; podržani su {{secrets.NAME}} i {{vars.NAME}}; tajne moraju da dozvole host provajdera, a direktno unete vrednosti čuvaju se kao običan tekst",
-	"cellPasteUnsupported": "Lepljenje je otkazano: ova ćelija ne podržava ${x}",
+	"cellPasteUnsupported": "Lepljenje je otkazano: ${x} ovde nije podržano",
 	"templateNameTip": "Unesite naziv bez znakova za razdvajanje putanje",
 	"keymapUnset": "Nije postavljeno",
 	"keymapPrimary": "Postavi kao glavnu prečicu",

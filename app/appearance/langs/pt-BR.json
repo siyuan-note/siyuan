@@ -150,7 +150,7 @@
 	"keymapUnassigned": "Não atribuídos",
 	"keymapAdd": "Adicionar atalho de teclado",
 	"aiProviderHeadersTip": "Insira um objeto JSON com valores de texto; cabeçalhos personalizados substituem os cabeçalhos padrão com o mesmo nome, incluindo os de autenticação; Suporta {{secrets.NAME}} e {{vars.NAME}}; os segredos devem permitir o host do provedor, e valores diretos são armazenados em texto simples",
-	"cellPasteUnsupported": "Colagem cancelada: esta célula não oferece suporte a ${x}",
+	"cellPasteUnsupported": "Colagem cancelada: não há suporte para ${x} aqui",
 	"templateNameTip": "Digite um nome sem separadores de caminho",
 	"keymapUnset": "Não definido",
 	"keymapPrimary": "Definir como atalho principal",

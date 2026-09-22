@@ -101,7 +101,7 @@ python -X utf8 scripts/prepare-release.py 3.8.5 --tag-android --execute
 
 ### 3. 准备构建环境
 
-- 准备 Python 3.11 或更新版本、Go、Node、pnpm、Windows 双架构编译器、gomobile、Android SDK/NDK、DevEco Studio 和 7-Zip；Appx 还需 `electron-windows-store`
+- 准备 Go、Node、pnpm、Windows 双架构编译器、gomobile、Android SDK/NDK、DevEco Studio 和 7-Zip；Appx 还需 `electron-windows-store`
 - 停止正在运行的前端开发构建
 - 插好 YubiKey，签名时按系统提示输入 PIN
 - 确认 Android、鸿蒙签名配置可用

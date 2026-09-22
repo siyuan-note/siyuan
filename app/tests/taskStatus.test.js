@@ -29,8 +29,26 @@ const sources = () => {
     };
     visit(wysiwygSource);
     assert.ok(contextMenu);
+    const keydownSource = ts.createSourceFile("keydown.ts", readFileSync(path.join(__dirname,
+        "../src/protyle/wysiwyg/keydown.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+    const shortcutStatements = [];
+    const visitShortcut = node => {
+        if ((ts.isVariableStatement(node) && node.declarationList.declarations.some(declaration =>
+            declaration.name.getText(keydownSource) === "isTaskCompletionToggle")) ||
+            (ts.isIfStatement(node) && node.expression.getText(keydownSource).startsWith("isTaskCompletionToggle ||"))) {
+            shortcutStatements.push(node.getText(keydownSource));
+            return;
+        }
+        ts.forEachChild(node, visitShortcut);
+    };
+    visitShortcut(keydownSource);
+    assert.equal(shortcutStatements.length, 2);
     return {
         contextMenu,
+        taskShortcut: extract("util/keymapBindings.ts", ["getKeymapBindings", "normalizeShortcutKey"]) +
+            extract("protyle/util/hotKey.ts", ["matchHotKey"]) +
+            extract("protyle/util/hasClosest.ts", ["hasClosestByAttribute"]) +
+            compile(`const handleTaskShortcut = (protyle, range, event) => {${shortcutStatements.join("\n")}};`),
         icons: ["unchecked", "in-progress", "canceled"].map(name =>
             readFileSync(path.join(__dirname, `../src/assets/icon/task-${name}.svg`), "utf8")),
         actions: extract("protyle/render/tabsRender.ts", ["getTabTask", "getTabItems", "hasTabsTasks"]) +
@@ -38,9 +56,9 @@ const sources = () => {
                 "parseListMindmapMetadata", "cleanListMindmapDOM", "remapListMindmapIDs"]) +
             extract("protyle/util/tabsCopy.ts", ["preserveTabTask", "preserveCopiedTabTask", "remapTabsDOMIDs", "wrapPastedTabItems"]) +
             extract("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]) +
-            extract("protyle/wysiwyg/taskListMarker.ts", ["getTaskListMarker", "isTaskListMarker", "nextTaskListMarker"]) +
+            extract("protyle/wysiwyg/taskListMarker.ts", ["getTaskListMarker", "isTaskListMarker", "nextTaskListMarker", "nextTaskListStatus"]) +
             extract("protyle/wysiwyg/tabs.ts", ["canEdit", "changeTabs", "toggleTabsTasks", "setTabTask", "moveTab"]) +
-            extract("protyle/wysiwyg/list.ts", ["setTaskListItemMarker", "toggleTaskListItem"]) +
+            extract("protyle/wysiwyg/list.ts", ["setTaskListItemMarker", "toggleTaskListItem", "cycleTaskListItemStatus"]) +
             extract("protyle/util/editorCommonEvent.ts", ["moveTo"]),
         renderer: compile(renderSource.replace(/^import .*;\r?\n/gm, "")) +
             extract("protyle/render/tabsState.ts", ["resolveTabID", "tabKeyboardTarget"]) +
@@ -79,7 +97,7 @@ const cases = async source => {
     let lastTransaction;
     const api = new Function("Constants", "transaction", "updateTransaction", "dayjs", "getParentBlock",
         "getPreviousBlockSibling", "getTopAloneElement", source.actions +
-        "; return {canEdit, getTabTask, hasTabsTasks, preserveCopiedTabTask, wrapPastedTabItems, moveTo, moveTab, toggleTabsTasks, setTabTask, setTaskListItemMarker, toggleTaskListItem};")(
+        "; return {canEdit, getTabTask, hasTabsTasks, preserveCopiedTabTask, wrapPastedTabItems, moveTo, moveTab, toggleTabsTasks, setTabTask, setTaskListItemMarker, toggleTaskListItem, cycleTaskListItemStatus};")(
         {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing", ZWSP: "\u200b",
             CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
             CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
@@ -327,6 +345,54 @@ const cases = async source => {
     protyle.options.action = ["history"];
     api.setTaskListItemMarker(protyle, taskItem, "/");
     check.equal(taskItem.outerHTML, before);
+    protyle.options.action = [];
+
+    // 快捷键复用真实任务事务，验证双态、四态、自定义绑定及只读状态。
+    const listKeys = {checkToggle: {custom: "⇧⌘L"}, taskCompletionToggle: {custom: "⇧⌘K"}};
+    const handleTaskShortcut = new Function("window", "Constants", "isMac", "isNotCtrl", "isOnlyMeta",
+        "toggleTaskListItem", "cycleTaskListItemStatus", source.taskShortcut + "; return handleTaskShortcut;")(
+        {siyuan: {config: {keymap: {editor: {list: listKeys}}}}}, {KEYCODELIST: {75: "K", 76: "L"}},
+        () => false, event => !event.ctrlKey && !event.metaKey, event => event.ctrlKey && !event.metaKey,
+        api.toggleTaskListItem, api.cycleTaskListItemStatus);
+    const pressTaskKey = (keyCode = 75, startContainer = taskItem.querySelector("[contenteditable]").firstChild) => {
+        const event = new KeyboardEvent("keydown", {keyCode, ctrlKey: true, shiftKey: true, cancelable: true});
+        handleTaskShortcut(protyle, {startContainer}, event);
+        return event;
+    };
+    for (const [marker, expected] of [[" ", "X"], ["/", "X"], ["X", " "], ["x", " "], ["-", " "], ["?", " "]]) {
+        api.setTaskListItemMarker(protyle, taskItem, marker);
+        check.equal(pressTaskKey().defaultPrevented, true);
+        check.equal(taskItem.dataset.task, expected);
+        const transaction = lastTransaction;
+        const restored = document.createElement("div");
+        restored.innerHTML = lute.SpinBlockDOM(transaction.backward);
+        check.equal(restored.querySelector(".li").dataset.task, marker === "x" ? "X" : marker);
+        restored.innerHTML = lute.SpinBlockDOM(transaction.forward);
+        check.equal(restored.querySelector(".li").dataset.task, expected);
+    }
+    for (const expected of ["/", "X", "-", " "]) {
+        pressTaskKey(76);
+        check.equal(taskItem.dataset.task, expected);
+    }
+    for (const custom of ["", undefined]) {
+        listKeys.taskCompletionToggle = custom === undefined ? undefined : {custom};
+        check.equal(pressTaskKey().defaultPrevented, false);
+        check.equal(taskItem.dataset.task, " ");
+    }
+    listKeys.checkToggle.custom = "";
+    listKeys.taskCompletionToggle = {custom: "", bindings: {version: 1, keys: ["⇧⌘L"]}};
+    pressTaskKey(76);
+    check.equal(taskItem.dataset.task, "X", "the original shortcut can be reassigned to completion");
+    check.equal(pressTaskKey(76, root).defaultPrevented, false);
+    for (const mode of ["disabled", "history"]) {
+        protyle.disabled = mode === "disabled";
+        protyle.options.action = mode === "history" ? ["history"] : [];
+        lastTransaction = undefined;
+        pressTaskKey(76);
+        check.equal(taskItem.dataset.task, "X");
+        check.equal(lastTransaction, undefined);
+    }
+    protyle.disabled = false;
     protyle.options.action = [];
 
     // 各状态复用同一 SVG 画布尺寸，预设状态不再绘制字符或 CSS 边框。

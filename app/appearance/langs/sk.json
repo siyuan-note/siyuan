@@ -1,5 +1,7 @@
 {
+	"taskCompletionToggle": "Prepnúť stav dokončenia úlohy",
 	"addAlias": "Pridať alias",
+	"listMindmapExpandToLevel": "Rozbaliť po úroveň ${level}",
 	"checkBlockRefProgress": "Kontrolujú sa odkazy na bloky a prepojenia s databázami...",
 	"calendarRowLimit": "Počet zobrazených riadkov položiek",
 	"calendarNewOnDate": "Nová položka v tento deň",

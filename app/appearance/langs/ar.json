@@ -1,5 +1,7 @@
 {
+	"taskCompletionToggle": "تبديل حالة إكمال المهمة",
 	"addAlias": "إضافة اسم مستعار",
+	"listMindmapExpandToLevel": "توسيع حتى المستوى ${level}",
 	"checkBlockRefProgress": "جارٍ التحقق من مراجع الكتل وارتباطات قواعد البيانات...",
 	"calendarRowLimit": "عدد صفوف العناصر المعروضة",
 	"calendarNewOnDate": "إضافة عنصر في هذا التاريخ",

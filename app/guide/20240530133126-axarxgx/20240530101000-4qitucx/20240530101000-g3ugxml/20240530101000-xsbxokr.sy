@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260922150640"
+		"updated": "20260922151635"
 	},
 	"Children": [
 		{
@@ -3963,7 +3963,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20260921105011"
+				"updated": "20260922151635"
 			},
 			"Children": [
 				{
@@ -11858,7 +11858,7 @@
 			"Properties": {
 				"ID": "20240530101000-uaq4ub6",
 				"id": "20240530101000-yl0e0sq",
-				"updated": "20260921105011"
+				"updated": "20260922151635"
 			},
 			"Children": [
 				{
@@ -11888,7 +11888,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-wqr5cs1",
-				"updated": "20260921105011"
+				"updated": "20260922151635"
 			},
 			"Children": [
 				{
@@ -12141,6 +12141,78 @@
 								{
 									"Type": "NodeText",
 									"Data": "タスクリスト"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "タスクの完了状態を切り替え"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "未割り当て"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "未着手と進行中は完了に、その他の状態は未着手に切り替えます。エディターとリストのマインドマップで使用できます。"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ショートカット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エディタ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "リストブロック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で設定できます"
 								}
 							]
 						}

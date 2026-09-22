@@ -1,5 +1,7 @@
 {
+	"taskCompletionToggle": "Alihkan status penyelesaian tugas",
 	"addAlias": "Tambah alias",
+	"listMindmapExpandToLevel": "Perluas hingga tingkat ${level}",
 	"checkBlockRefProgress": "Memeriksa referensi blok dan pengikatan basis data...",
 	"calendarRowLimit": "Baris item yang ditampilkan",
 	"calendarNewOnDate": "Item baru pada tanggal ini",

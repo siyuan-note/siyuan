@@ -1,5 +1,7 @@
 {
+	"taskCompletionToggle": "Промени стање завршености задатка",
 	"addAlias": "Додај псеудоним",
+	"listMindmapExpandToLevel": "Прошири до нивоа ${level}",
 	"checkBlockRefProgress": "Провера референци на блокове и веза са базама података...",
 	"calendarRowLimit": "Број видљивих редова ставки",
 	"calendarNewOnDate": "Нова ставка на овај датум",

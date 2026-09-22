@@ -1,5 +1,7 @@
 {
+	"taskCompletionToggle": "작업 완료 상태 전환",
 	"addAlias": "별칭 추가",
+	"listMindmapExpandToLevel": "${level}단계까지 펼치기",
 	"checkBlockRefProgress": "블록 참조 및 데이터베이스 바인딩 확인 중...",
 	"calendarRowLimit": "표시할 항목 행 수",
 	"calendarNewOnDate": "이 날짜에 새 항목 만들기",

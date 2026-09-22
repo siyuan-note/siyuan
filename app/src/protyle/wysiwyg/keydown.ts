@@ -90,7 +90,8 @@ import {
     listIndent,
     listOutdent,
     prependListItem,
-    cycleTaskListItemStatus
+    cycleTaskListItemStatus,
+    toggleTaskListItem
 } from "./list";
 import {
     getAppendListContext,
@@ -2401,12 +2402,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.list.checkToggle, event)) {
+        const isTaskCompletionToggle = matchHotKey(window.siyuan.config.keymap.editor.list.taskCompletionToggle, event);
+        if (isTaskCompletionToggle || matchHotKey(window.siyuan.config.keymap.editor.list.checkToggle, event)) {
             const taskItemElement = hasClosestByAttribute(range.startContainer, "data-subtype", "t");
             if (!taskItemElement) {
                 return;
             }
-            cycleTaskListItemStatus(protyle, taskItemElement);
+            if (isTaskCompletionToggle) {
+                toggleTaskListItem(protyle, taskItemElement);
+            } else {
+                cycleTaskListItemStatus(protyle, taskItemElement);
+            }
             event.preventDefault();
             event.stopPropagation();
             return;

@@ -13,6 +13,8 @@ import {getAVRichTextSafeURL} from "../av/richTextValue";
 import {Constants} from "../../../constants";
 import {findMindmapDrop} from "./drop";
 import {destroyTabsRender, tabsRender} from "../tabsRender";
+import {getListMindmapFoldStates} from "./fold";
+import type {ListMindmapFoldTarget} from "./fold";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -38,11 +40,14 @@ export interface ListMindmapViewOptions {
     onAdd?: (id: string, kind: "child" | "sibling") => void;
     onDelete?: (id: string) => void;
     onFold?: (id: string) => void;
+    onFoldLevel?: (level: ListMindmapFoldTarget) => Promise<boolean>;
+    onExpandLevelMenu?: (anchor: HTMLElement, select: (level: ListMindmapFoldTarget) => void) => void;
     onTaskToggle?: (id: string, cycle?: boolean) => void;
     onTaskMenu?: (id: string, anchor: HTMLElement) => void;
     onTabTaskToggle?: (id: string, itemId: string) => void;
     onTabTaskMenu?: (id: string, itemId: string, anchor: HTMLElement) => void;
     isTaskCycle?: (event: KeyboardEvent) => boolean;
+    isTaskCompletionToggle?: (event: KeyboardEvent) => boolean;
     onUndo?: () => void;
     onRedo?: () => void;
     onNodeStyle?: (id: string, patch: Partial<ListMindmapNodeStyle>) => void;
@@ -99,6 +104,7 @@ export class ListMindmapView {
     private readonly relationElements = new Map<string, HTMLButtonElement>();
     private readonly buttons = new Map<string, HTMLButtonElement>();
     private readonly folded = new Map<string, boolean>();
+    private levelSelect?: HTMLSelectElement;
     private readonly tooltip = createElement("div", "tooltip list-mindmap__tooltip");
     private tooltipButton?: HTMLButtonElement;
     private readonly colorProbe = createElement("span", "list-mindmap__color-probe");
@@ -310,7 +316,8 @@ export class ListMindmapView {
             return;
         }
         if (this.inspector.contains(target) || this.buttons.get("style")?.contains(target) ||
-            this.buttons.get("relation")?.contains(target)) {
+            this.buttons.get("relation")?.contains(target) || this.buttons.get("expandLevel")?.contains(target) ||
+            this.levelSelect?.contains(target)) {
             return;
         }
         this.inspector.hidden = true;
@@ -376,6 +383,31 @@ export class ListMindmapView {
                 this.updateSelection();
             });
         }
+        add("expandLevel", "expandLevel", "iconExpandLevel", () => {
+            const selectedId = this.selectedId;
+            this.options.onExpandLevelMenu?.(this.buttons.get("expandLevel"),
+                level => this.finishThen(() => {
+                    void this.expandToLevel(level, selectedId).catch(error => console.error(error));
+                }));
+        });
+        this.buttons.get("expandLevel").setAttribute("aria-haspopup", "menu");
+        if (!this.options.onExpandLevelMenu) {
+            // 独立导出页面使用原生选择菜单，不依赖应用菜单或移动端框架。
+            const control = createElement("div", "list-mindmap__level-control");
+            this.levelSelect = createElement("select", "list-mindmap__level-select");
+            this.levelSelect.setAttribute("aria-label", this.label("expandLevel"));
+            this.levelSelect.addEventListener("change", () => {
+                const value = this.levelSelect.value;
+                const level = value === "expandAll" || value === "foldAll" ? value : Number(value);
+                this.levelSelect.value = "";
+                this.finishThen(() => void this.expandToLevel(level).catch(error => console.error(error)));
+            });
+            const button = this.buttons.get("expandLevel");
+            button.tabIndex = -1;
+            button.setAttribute("aria-hidden", "true");
+            button.before(control);
+            control.append(button, this.levelSelect);
+        }
         add("pan", "cursorHand", "iconHand", () => {
             this.finishThen(() => {
                 this.finishRelationEdit?.(true);
@@ -422,6 +454,18 @@ export class ListMindmapView {
             return;
         }
         this.model = model;
+        if (this.levelSelect) {
+            const placeholder = new Option(this.label("expandLevel"), "");
+            placeholder.disabled = true;
+            this.levelSelect.replaceChildren(placeholder);
+            for (let level = 1; level <= 6; level++) {
+                this.levelSelect.add(new Option(this.label("listMindmapExpandToLevel").replace("${level}", String(level)),
+                    String(level)));
+            }
+            this.levelSelect.add(new Option(this.label("expandAll"), "expandAll"));
+            this.levelSelect.add(new Option(this.label("foldAll"), "foldAll"));
+            this.levelSelect.value = "";
+        }
         const descendants = new Map<string, number>();
         const ordered = [model.root];
         for (let i = 0; i < ordered.length; i++) {
@@ -1263,6 +1307,40 @@ export class ListMindmapView {
         }
     }
 
+    private async expandToLevel(level: ListMindmapFoldTarget, selectedId = this.selectedId) {
+        this.finishRelationEdit?.(true);
+        this.cancelPointer();
+        if (!this.options.readOnly && !await this.options.onFoldLevel?.(level)) {
+            return;
+        }
+        if (this.destroyed) {
+            return;
+        }
+        getListMindmapFoldStates(this.model.root, level).forEach((collapsed, id) => {
+            if (this.options.readOnly || this.model.nodes.get(id)?.virtual) {
+                this.folded.set(id, collapsed);
+            } else {
+                this.folded.delete(id);
+            }
+        });
+        let selected = this.model.nodes.get(selectedId) || this.model.root;
+        let ancestor = selected;
+        while (ancestor.parentId) {
+            ancestor = this.model.nodes.get(ancestor.parentId);
+            if (this.folded.get(ancestor.id) ?? ancestor.collapsed) {
+                selected = ancestor;
+            }
+        }
+        this.selectedId = selected.id;
+        this.selectedRelation = undefined;
+        this.selectedEdge = undefined;
+        this.relationFrom = undefined;
+        this.relationPreview = undefined;
+        this.inspector.hidden = true;
+        this.foldAnchor = {id: selected.id, collapsed: this.folded.get(selected.id) ?? selected.collapsed};
+        this.update(this.model);
+    }
+
     private deleteSelection() {
         if (this.options.readOnly) {
             return;
@@ -1885,7 +1963,8 @@ export class ListMindmapView {
         if (this.pointer?.relation && event.key !== "Escape") {
             return;
         }
-        if (!this.options.readOnly && this.options.isTaskCycle?.(event)) {
+        const isTaskCompletionToggle = this.options.isTaskCompletionToggle?.(event);
+        if (!this.options.readOnly && (isTaskCompletionToggle || this.options.isTaskCycle?.(event))) {
             const id = target.closest<HTMLElement>(".list-mindmap__node")?.dataset.mindmapId || this.selectedId;
             if (this.model.nodes.get(id)?.taskMarker !== undefined) {
                 event.preventDefault();
@@ -1893,7 +1972,7 @@ export class ListMindmapView {
                 if (!event.repeat) {
                     this.finishThen(() => {
                         if (!this.options.readOnly) {
-                            this.options.onTaskToggle?.(id, true);
+                            this.options.onTaskToggle?.(id, !isTaskCompletionToggle);
                         }
                     });
                 }

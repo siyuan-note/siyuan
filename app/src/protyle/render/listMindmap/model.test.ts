@@ -6,6 +6,7 @@ import * as path from "node:path";
 import {execFile} from "node:child_process";
 import {promisify} from "node:util";
 import type {ListMindmapLayoutNode, ListMindmapNode} from "./model";
+import type {ListMindmapFoldTarget} from "./fold";
 
 const buildGlobals = ["SIYUAN_VERSION", "NODE_ENV"].map(name => ({
     name, descriptor: Object.getOwnPropertyDescriptor(globalThis, name),
@@ -1089,7 +1090,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(toolbar.querySelector(`[aria-label="${label}"]`), null));
     const relationButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="connect"]');
     const toolbarPanButton = toolbar.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
-    check.equal(relationButton.nextElementSibling, toolbarPanButton);
+    check.ok(relationButton.nextElementSibling.classList.contains("list-mindmap__level-control"));
+    check.equal(relationButton.nextElementSibling.nextElementSibling, toolbarPanButton);
     check.ok(toolbarPanButton.nextElementSibling.classList.contains("list-mindmap__zoom-control"));
     check.equal(relationButton.querySelector("use").getAttribute("xlink:href"), "#iconRoute");
     const inspector = host.querySelector<HTMLElement>(".list-mindmap__inspector");
@@ -1669,7 +1671,101 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(Math.abs(afterExpand.y - afterCollapse.y) < 1, "expansion keeps the root stable after size observers settle");
     check.ok(Math.abs(afterExpand.x - afterCollapse.x) < 1, "expansion preserves horizontal position");
     check.equal(list.outerHTML, persistedBeforeFold);
+    const levelSelect = host.querySelector<HTMLSelectElement>(".list-mindmap__level-select");
+    check.deepEqual(Array.from(levelSelect.options).map(option => option.value),
+        ["", "1", "2", "3", "4", "5", "6", "expandAll", "foldAll"]);
+    const levelChild = model.nodes.get(alpha).children[0].id;
+    readonly.selectNode(levelChild);
+    const scaleBeforeLevel = readonly.scale;
+    const beforeLevel = nodeElement(alpha).getBoundingClientRect();
+    levelSelect.value = "1";
+    levelSelect.dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
+    check.equal(nodeElement(levelChild).hidden, true);
+    check.equal(nodeElement(alpha).hidden, false);
+    check.equal(readonly.selectedId, alpha, "a hidden selection moves to its visible ancestor");
+    check.equal(readonly.scale, scaleBeforeLevel);
+    check.ok(Math.abs(nodeElement(alpha).getBoundingClientRect().y - beforeLevel.y) < 1);
+    check.equal(list.outerHTML, persistedBeforeFold, "exported and read-only level changes never write the list");
+    levelSelect.value = "foldAll";
+    levelSelect.dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
+    check.equal(nodeElement(alpha).hidden, true);
+    check.equal(readonly.selectedId, model.root.id);
+    levelSelect.value = "expandAll";
+    levelSelect.dispatchEvent(new Event("change", {bubbles: true}));
+    await settle();
+    check.equal(nodeElement(levelChild).hidden, false);
+    check.equal(list.outerHTML, persistedBeforeFold);
     readonly.destroy();
+
+    let chooseLevel: (level: ListMindmapFoldTarget) => void;
+    let levelSaveAllowed = true;
+    let levelSaves = 0;
+    const levelView = new api.ListMindmapView({...options,
+        onExpandLevelMenu: (anchor: HTMLElement, choose: (level: ListMindmapFoldTarget) => void) => {
+            check.equal(anchor.getAttribute("aria-label"), "expandLevel");
+            chooseLevel = choose;
+        },
+        onFoldLevel: async (level: ListMindmapFoldTarget) => {
+            if (!levelSaveAllowed) {
+                return false;
+            }
+            levelSaves++;
+            const next = api.readListMindmap(list);
+            const pending = [{node: next.root, depth: 1}];
+            while (pending.length) {
+                const current = pending.pop();
+                if (current.node.children.length) {
+                    const collapsed = level === "foldAll" || (typeof level === "number" && current.depth > level);
+                    current.node.element?.setAttribute("fold", collapsed ? "1" : "0");
+                    if (!collapsed) {
+                        current.node.children.forEach((node: unknown) => pending.push({node, depth: current.depth + 1}));
+                    }
+                }
+            }
+            model = api.readListMindmap(list);
+            levelView.update(model);
+            return true;
+        },
+    });
+    await settle();
+    const levelButton = host.querySelector<HTMLButtonElement>('.list-mindmap__toolbar button[aria-label="expandLevel"]');
+    check.equal(levelButton.previousElementSibling.getAttribute("aria-label"), "connect");
+    check.equal(levelButton.nextElementSibling.getAttribute("aria-label"), "cursorHand");
+    check.equal(host.querySelector(".list-mindmap__level-select"), null);
+    levelView.selectNode(levelChild);
+    await clickMouse(levelButton);
+    levelView.clearSelection();
+    chooseLevel(1);
+    await settle();
+    check.equal(levelSaves, 1);
+    check.equal(levelView.selectedId, alpha, "menu clicks retain the selection anchor despite outside-pointer dismissal");
+    check.equal(nodeElement(levelChild).hidden, true);
+    check.equal(model.nodes.get(alpha).element.getAttribute("fold"), "1");
+    levelSaveAllowed = false;
+    levelButton.click();
+    chooseLevel("expandAll");
+    await settle();
+    check.equal(nodeElement(levelChild).hidden, true, "failed saves do not apply optimistic folding overrides");
+    levelSaveAllowed = true;
+    levelButton.click();
+    chooseLevel("expandAll");
+    await settle();
+    check.equal(nodeElement(levelChild).hidden, false);
+    levelButton.click();
+    chooseLevel("foldAll");
+    await settle();
+    check.equal(nodeElement(alpha).hidden, true, "the virtual center participates in batch folding");
+    levelButton.click();
+    chooseLevel(1);
+    await settle();
+    check.equal(nodeElement(alpha).hidden, false, "level selection expands a previously folded virtual center");
+    levelView.destroy();
+    list.outerHTML = persistedBeforeFold;
+    list = holder.querySelector<HTMLElement>('[data-type="NodeList"]');
+    model = api.readListMindmap(list);
+    options.model = model;
 
     const titleView = new api.ListMindmapView({...options, onRootTitleChange: (title: string) => {
         model.metadata.rootTitle = title;
@@ -2074,6 +2170,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         onRelationAdd: () => check.fail("Task control created a relation"),
         finishEdit: () => finishTask, onTaskMenu: () => menus++,
         isTaskCycle: (event: KeyboardEvent) => event.ctrlKey && event.key === "l",
+        isTaskCompletionToggle: (event: KeyboardEvent) => event.ctrlKey && event.key === "k",
         onTaskToggle: (id: string, cycle: boolean) => controller.setTask(id,
             cycle ? taskAPI.nextTaskListStatus : taskAPI.nextTaskListMarker)});
     const controller = Object.assign(new taskAPI.TaskController(), {owner, list: taskList, disposed: false,
@@ -2163,6 +2260,27 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     taskButton().dispatchEvent(new KeyboardEvent("keydown", {key: "l", ctrlKey: true, bubbles: true, cancelable: true}));
     await controller.taskChanges;
     check.equal(taskItem.dataset.task, "/");
+    for (const [marker, expected] of [[" ", "X"], ["/", "X"], ["X", " "], ["-", " "], ["?", " "]]) {
+        taskAPI.setTaskListItemMarker(owner, taskItem, marker);
+        controller.refresh();
+        const event = new KeyboardEvent("keydown", {key: "k", ctrlKey: true, bubbles: true, cancelable: true});
+        taskButton().dispatchEvent(event);
+        await controller.taskChanges;
+        check.equal(event.defaultPrevented, true);
+        check.equal(taskItem.dataset.task, expected);
+    }
+    const completedOperations = operations.length;
+    for (const readonly of [false, true]) {
+        taskView.setReadOnly(readonly);
+        taskButton().dispatchEvent(new KeyboardEvent("keydown", {
+            key: "k", ctrlKey: true, repeat: !readonly, bubbles: true, cancelable: true,
+        }));
+        await controller.taskChanges;
+        check.equal(operations.length, completedOperations);
+    }
+    taskView.setReadOnly(false);
+    taskAPI.setTaskListItemMarker(owner, taskItem, "/");
+    controller.refresh();
     taskButton().dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     check.equal(taskEdits, 0);
     finishTask = false;
@@ -2477,7 +2595,8 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
             .map(file => compile(path.join(__dirname, file))).join("\n") +
         "return {tabsRender, destroyTabsRender, getTabTask};})();\n";
     const source = tabsSource + compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
-        compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "view.ts")) +
+        compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "fold.ts")) +
+        compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "view.ts")) +
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +
         compile(path.join(__dirname, "create.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +

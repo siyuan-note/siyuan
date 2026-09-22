@@ -1,5 +1,7 @@
 {
+	"taskCompletionToggle": "切換任務完成狀態",
 	"addAlias": "新增別名",
+	"listMindmapExpandToLevel": "展開到第 ${level} 級",
 	"checkBlockRefProgress": "正在檢查區塊引用與資料庫綁定...",
 	"calendarRowLimit": "項目顯示行數",
 	"calendarNewOnDate": "在此日期新增項目",

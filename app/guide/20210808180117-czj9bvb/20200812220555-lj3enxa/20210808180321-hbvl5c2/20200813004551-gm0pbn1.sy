@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260922150640"
+		"updated": "20260922151635"
 	},
 	"Children": [
 		{
@@ -4003,7 +4003,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260921191955"
+				"updated": "20260922151635"
 			},
 			"Children": [
 				{
@@ -11902,7 +11902,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-x02vhoh",
-				"updated": "20260921105011"
+				"updated": "20260922151635"
 			},
 			"Children": [
 				{
@@ -11922,7 +11922,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-yv5msrs",
-				"updated": "20260921105011"
+				"updated": "20260922151635"
 			},
 			"Children": [
 				{
@@ -12171,6 +12171,78 @@
 								{
 									"Type": "NodeText",
 									"Data": "任务列表"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切换任务完成状态"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "未绑定"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "待办和进行中切换为完成，其他状态切换为待办；适用于编辑器和列表脑图；可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快捷键"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "编辑器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "列表块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中配置"
 								}
 							]
 						}

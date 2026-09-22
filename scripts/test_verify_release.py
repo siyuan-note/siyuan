@@ -7,13 +7,74 @@ import io
 import json
 from pathlib import Path
 import tempfile
+import subprocess
+import tarfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 
 SPEC = importlib.util.spec_from_file_location("verify_release", Path(__file__).with_name("verify-release.py"))
 release = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(release)
+
+
+class SevenZipTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.dest = self.root / "output"
+        self.dest.mkdir()
+        self.unpacker = release.Unpacker(self.root, release.find_7z() or "7z")
+
+    @unittest.skipUnless(release.find_7z(), "需要已安装的 7-Zip")
+    def test_real_sevenzip_skips_links_and_keeps_regular_files(self):
+        source = self.root / "links.tar"
+        with tarfile.open(source, "w") as archive:
+            for name in ("icon.png", "resources/kernel/SiYuan-Kernel"):
+                item = tarfile.TarInfo(name)
+                item.size = 4
+                archive.addfile(item, io.BytesIO(b"data"))
+            for name in (".DirIcon", "siyuan.png", "图标链接"):
+                item = tarfile.TarInfo(name)
+                item.type = tarfile.SYMTYPE
+                item.linkname = "icon.png"
+                archive.addfile(item)
+        self.unpacker.extract_sevenzip(source, self.dest)
+        self.assertEqual((self.dest / "icon.png").read_bytes(), b"data")
+        self.assertEqual((self.dest / "resources/kernel/SiYuan-Kernel").read_bytes(), b"data")
+        for name in (".DirIcon", "siyuan.png", "图标链接"):
+            self.assertFalse((self.dest / name).exists())
+
+    def test_squashfs_mode_links_are_excluded_literally(self):
+        listing = "----------\nPath = .DirIcon\nMode = lrwxrwxrwx\n\nPath = icon[1]*\nMode = lrwxrwxrwx\n\nPath = file\nMode = -rw-r--r--\n"
+
+        def run(command, **kwargs):
+            self.assertEqual(kwargs["encoding"], "utf-8")
+            self.assertIn("-sccUTF-8", command)
+            if command[1] == "l":
+                return subprocess.CompletedProcess(command, 0, listing, "")
+            self.assertIn("-spd", command)
+            exclusions = next(item[3:] for item in command if item.startswith("-x@"))
+            self.assertEqual(Path(exclusions).read_text(encoding="utf-8"), ".DirIcon\nicon[1]*\n")
+            return subprocess.CompletedProcess(command, 0, "", "")
+
+        with patch.object(release.subprocess, "run", side_effect=run):
+            self.unpacker.extract_sevenzip(self.root / "test.AppImage", self.dest)
+
+    def test_extraction_error_is_not_ignored(self):
+        results = [subprocess.CompletedProcess([], 0, "----------\nPath = file\nMode = -rw-r--r--\n", ""),
+                   subprocess.CompletedProcess([], 2, "", "CRC failed")]
+        with patch.object(release.subprocess, "run", side_effect=results):
+            with self.assertRaisesRegex(release.VerificationError, "CRC failed"):
+                self.unpacker.extract_sevenzip(self.root / "test.AppImage", self.dest)
+
+    def test_listing_error_stops_extraction(self):
+        with patch.object(release.subprocess, "run", return_value=subprocess.CompletedProcess([], 2, "", "bad archive")) as run:
+            with self.assertRaisesRegex(release.VerificationError, "bad archive"):
+                self.unpacker.extract_sevenzip(self.root / "test.AppImage", self.dest)
+            self.assertEqual(run.call_count, 1)
 
 
 class ReleaseTests(unittest.TestCase):

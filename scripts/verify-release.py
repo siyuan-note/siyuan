@@ -69,6 +69,38 @@ class Unpacker:
         self.sevenzip = sevenzip
         self.count = 0
 
+    def extract_sevenzip(self, source, dest):
+        if not self.sevenzip:
+            raise VerificationError(f"解包 {source.name} 需要 7-Zip，请指定 --sevenzip")
+        result = subprocess.run([self.sevenzip, "l", "-slt", "-sccUTF-8", str(source)],
+                                capture_output=True, encoding="utf-8", errors="replace", timeout=600)
+        if result.returncode:
+            raise VerificationError(f"7-Zip 无法读取 {source.name}：{result.stderr.strip()}")
+        listing = result.stdout.replace("\r\n", "\n").partition("----------\n")
+        if not listing[1]:
+            raise VerificationError(f"无法识别 7-Zip 文件清单：{source.name}")
+        links = []
+        for block in listing[2].split("\n\n"):
+            properties = dict(line.split(" = ", 1) for line in block.splitlines() if " = " in line)
+            name = properties.get("Path")
+            if name is None:
+                continue
+            safe_name(name)
+            if properties.get("Symbolic Link") or properties.get("Mode", "").startswith("l"):
+                links.append(name)
+        command = [self.sevenzip, "x", "-y", "-bd", "-bso0", "-bsp0", "-sccUTF-8", f"-o{dest}"]
+        # 与 ZIP/TAR 解包保持一致，跳过符号链接；必要资源仍由后续完整性检查确认。
+        # 使用精确路径排除，避免通配符扩大范围；列表放在载荷目录之外。
+        with tempfile.TemporaryDirectory(prefix="siyuan-7z-links-", dir=self.root) as temporary:
+            if links:
+                exclusions = Path(temporary) / "links.txt"
+                exclusions.write_text("\n".join(links) + "\n", encoding="utf-8")
+                command.extend(("-spd", "-scsUTF-8", f"-x@{exclusions}"))
+            result = subprocess.run(command + [str(source)], capture_output=True,
+                                    encoding="utf-8", errors="replace", timeout=600)
+            if result.returncode:
+                raise VerificationError(f"7-Zip 无法完整解包 {source.name}：{result.stderr.strip()}")
+
     def extract(self, source):
         self.count += 1
         if self.count > 64:
@@ -112,12 +144,7 @@ class Unpacker:
                     with archive.extractfile(entry) as src, target.open("wb") as out:
                         shutil.copyfileobj(src, out)
         else:
-            if not self.sevenzip:
-                raise VerificationError(f"解包 {source.name} 需要 7-Zip，请指定 --sevenzip")
-            command = [self.sevenzip, "x", "-y", "-bd", "-bso0", "-bsp0", f"-o{dest}", str(source)]
-            result = subprocess.run(command, capture_output=True, text=True, errors="replace", timeout=600)
-            if result.returncode:
-                raise VerificationError(f"7-Zip 无法完整解包 {source.name}：{result.stderr.strip()}")
+            self.extract_sevenzip(source, dest)
         return dest
 
     def layers(self, package):

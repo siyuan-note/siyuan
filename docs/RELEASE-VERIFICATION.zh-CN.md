@@ -140,7 +140,7 @@ python -X utf8 scripts/build-release.py --platforms harmony --execute
 
 macOS、iOS 在对应构建机器上完成构建和签名。macOS 完成公证并收集双架构 DMG；iOS 同步内核、资源及 changelogs，确认版本号后完成上架构建。Windows 编排脚本不执行这两个平台的构建。
 
-将其他机器上需要分发的安装包收集到桌面 `siyuan` 后，再进行最终检查。iOS 上架产物在对应平台完成验收；若提供 IPA 供此脚本检查，其校验限制见下文。
+将其他机器上需要分发的安装包收集到桌面 `siyuan` 后，再进行最终检查。iOS 在对应平台完成验收后直接上传 App Store，不收集 IPA 到桌面目录，也不使用本脚本校验。
 
 ### 7. 发布前再次检查
 
@@ -241,9 +241,8 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - 从 HTML 实际引用的 JavaScript 读取 `Constants.SIYUAN_VERSION`，检查前端与内核一致，不使用未被入口引用的新文件掩盖旧入口
 - 检查 HTML、CSS 的可解析本地资源引用，以及当前 webpack 的数字分块哈希映射，发现缺失脚本、样式、字体或动态分块
 - 检查导出前端版本、语言 JSON、用户指南和正式版当前更新日志；桌面包必须包含资源根目录下的 `app/package.json`，其版本必须与发布版本一致
-- 展开 NSIS 内层压缩包、移动端 `app.zip`、AAB、HAP、APP 和 Linux 安装包载荷
+- 展开 NSIS 内层压缩包、移动端 `app.zip`、AAB、APP 和 Linux 安装包载荷；鸿蒙仅支持 APP，解包其内部 HAP 以检查内核与资源，不支持单独校验 HAP 文件
 - macOS 不依赖本机存在对应构建产物；7-Zip 无法完整提取时明确失败
-- IPA 尝试从主程序识别静态链接内核；加密、缺少标识或无法唯一确定版本时明确失败
 
 当前回归测试主要使用模拟安装包，配置加载测试使用本机已安装的 Electron Builder。尚无随文档维护、可核验的真实安装包验收记录，不据此宣称任一平台的当前版本已经通过真实包验证。正式使用前应分平台验收，并保留包版本、SHA256、工具版本及检查报告；测试通过不等于实际构建、签名或安装成功。
 

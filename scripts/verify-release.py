@@ -7,7 +7,6 @@ from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path, PurePosixPath
-import plistlib
 import posixpath
 import re
 import shutil
@@ -24,7 +23,7 @@ from urllib.parse import unquote, urlsplit
 REPO = Path(__file__).resolve().parents[1]
 GROUPS = ("stage", "appearance", "guide", "changelogs")
 PACKAGES = (".exe", ".zip", ".7z", ".tar.gz", ".tgz", ".deb", ".rpm",
-            ".appimage", ".dmg", ".apk", ".aab", ".hap", ".app", ".ipa", ".appx", ".msix")
+            ".appimage", ".dmg", ".apk", ".aab", ".app", ".appx", ".msix")
 SIDECARS = (".blockmap", ".yml", ".yaml", ".release-baseline.json")
 KERNEL_NAMES = {"siyuan-kernel", "siyuan-kernel.exe", "libgojni.so", "libkernel.so"}
 VERSION = r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z.-]+)?"
@@ -131,7 +130,7 @@ class Unpacker:
                 if not path.is_file() or path.is_symlink():
                     continue
                 name = path.name.lower()
-                # 只展开安装器的载荷，不展开前端资源中的第三方归档。
+                # 只展开安装器的载荷，包括鸿蒙 APP 内部的 HAP，不展开前端资源中的第三方归档。
                 if (name == "app.zip" or name.endswith((".hap", ".appx", ".msix", ".cpio", ".hfs", ".img"))
                         or (name.startswith("app-") and name.endswith(".7z"))
                         or name.startswith("data.tar") or ".cpio." in name):
@@ -430,24 +429,19 @@ def check_frontend(paths, expected_version, mobile):
 
 
 def verify_package(package, baselines=None, sevenzip=None, version=None):
+    if not package.name.lower().endswith(PACKAGES):
+        raise VerificationError(f"不支持的安装包格式：{package.name}")
     with tempfile.TemporaryDirectory(prefix="siyuan-release-") as temp:
         layers = Unpacker(Path(temp), sevenzip).layers(package)
         kernels = kernel_files(layers)
         roots = resource_roots(layers)
-        if not kernels and package.suffix.lower() == ".ipa":
-            for layer in layers:
-                for info in layer.glob("Payload/*.app/Info.plist"):
-                    metadata = plistlib.loads(info.read_bytes())
-                    executable = metadata.get("CFBundleExecutable", "")
-                    if executable and Path(executable).name == executable and (info.parent / executable).is_file():
-                        kernels.append(info.parent / executable)
         if not kernels:
-            raise VerificationError("未找到可独立校验的内核；iOS 静态链接或加密内核需要另行验证")
+            raise VerificationError("未找到可独立校验的内核")
         if len(roots) != 1:
             raise VerificationError(f"应找到一个完整前端资源目录，实际找到 {len(roots)} 个")
         kernel_hashes = sorted({digest(path) for path in kernels})
         actual = package_resources(layers, roots[0])
-        mobile = package.suffix.lower() in {".apk", ".aab", ".hap", ".app", ".ipa"}
+        mobile = package.suffix.lower() in {".apk", ".aab", ".app"}
         expected = version or (baselines[0]["version"] if baselines else None)
         if not expected:
             match = PACKAGE_VERSION.match(package.name)
@@ -463,7 +457,7 @@ def verify_package(package, baselines=None, sevenzip=None, version=None):
         for info in infos:
             if "-arm64" in package.name.lower() and info["architecture"] != "arm64":
                 errors.append(f"内核架构与包名不匹配：{info['architecture']}")
-            if package.suffix.lower() in {".apk", ".aab", ".hap", ".app"} and info["format"] != "ELF":
+            if package.suffix.lower() in {".apk", ".aab", ".app"} and info["format"] != "ELF":
                 errors.append(f"移动端内核格式不匹配：{info['format']}")
         for path, info in zip(kernels, infos):
             for abi, architecture in (("arm64-v8a", "arm64"), ("armeabi-v7a", "arm"), ("x86_64", "amd64"), ("x86", "386")):

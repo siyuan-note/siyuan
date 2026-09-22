@@ -180,6 +180,40 @@ class DirectReleaseTests(unittest.TestCase):
         self.assertEqual(result["kernels"][0]["version"], "3.8.4")
         self.assertEqual(result["frontend_versions"]["stage/build/mobile/index.html"], ["3.8.4"])
 
+    def test_standalone_hap_is_not_supported(self):
+        hap = self.package().rename(self.root / "entry.hap")
+        with self.assertRaisesRegex(release.VerificationError, "不支持的安装包格式"):
+            release.verify_package(hap, version="3.8.4")
+        self.package()
+        args = argparse.Namespace(directory=self.root, version="3.8.4", baseline=None,
+                                  report=self.root / "report.json", sevenzip=None)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(release.verify(args), 1)
+        report = json.loads(args.report.read_text(encoding="utf-8"))
+        self.assertEqual(report["unknown"], ["entry.hap"])
+        self.assertEqual([entry["name"] for entry in report["packages"]], ["test.apk"])
+
+    def test_harmony_app_unpacks_embedded_hap(self):
+        payload = self.package().read_bytes()
+        app = self.root / "siyuan-harmony-default-unsigned.app"
+        with zipfile.ZipFile(app, "w") as archive:
+            archive.writestr("entry.hap", payload)
+        result = release.verify_package(app, version="3.8.4")
+        self.assertEqual(result["kernels"][0]["version"], "3.8.4")
+
+    def test_ipa_is_not_supported(self):
+        ipa = self.package().rename(self.root / "siyuan.ipa")
+        with self.assertRaisesRegex(release.VerificationError, "不支持的安装包格式"):
+            release.verify_package(ipa, version="3.8.4")
+        self.package()
+        args = argparse.Namespace(directory=self.root, version="3.8.4", baseline=None,
+                                  report=self.root / "report.json", sevenzip=None)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(release.verify(args), 1)
+        report = json.loads(args.report.read_text(encoding="utf-8"))
+        self.assertEqual(report["unknown"], ["siyuan.ipa"])
+        self.assertEqual([entry["name"] for entry in report["packages"]], ["test.apk"])
+
     def desktop_resources(self):
         resources = dict(self.resources)
         for frontend in ("app", "desktop"):

@@ -156,7 +156,7 @@ func TestClearWorkspaceTempRemovesImageOperations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clearWorkspaceTemp(false)
+	clearWorkspaceTemp("")
 	if _, err := os.Stat(operationDir); !os.IsNotExist(err) {
 		t.Fatalf("image operation directory was not removed: %v", err)
 	}
@@ -171,7 +171,7 @@ func TestClearWorkspaceTempPreservesInstallPackages(t *testing.T) {
 	util.DataDir = filepath.Join(root, "data")
 	util.TempDir = filepath.Join(root, "temp")
 	util.WorkspaceDir = root
-	installPkgPath := filepath.Join(util.TempDir, "install", "siyuan-test-win.exe")
+	installPkgPath := filepath.Join(util.TempDir, "install", "siyuan-0.0.1-win.exe")
 	if err := os.MkdirAll(filepath.Dir(installPkgPath), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -183,11 +183,11 @@ func TestClearWorkspaceTempPreservesInstallPackages(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clearWorkspaceTemp(true)
+	clearWorkspaceTemp(installPkgPath)
 	if _, err := os.Stat(installPkgPath); err != nil {
 		t.Fatalf("install package should be preserved during update: %v", err)
 	}
-	clearWorkspaceTemp(false)
+	clearWorkspaceTemp("")
 	if _, err := os.Stat(installPkgPath); !os.IsNotExist(err) {
 		t.Fatalf("old install package should be removed during normal exit: %v", err)
 	}

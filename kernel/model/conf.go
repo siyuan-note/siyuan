@@ -241,6 +241,7 @@ func InitConf() {
 
 	Conf = NewAppConf()
 	clearEncryptedExportTempOnBoot()
+	clearOldInstallPackages("")
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	confFileExists := gulu.File.IsExist(confPath)
 	entryVisibilityConfigured := false
@@ -1086,7 +1087,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	sql.CloseDatabase()
 	closePushQueue()
 	util.SaveAssetsTexts()
-	clearWorkspaceTemp("" != installPkgPath)
+	clearWorkspaceTemp(installPkgPath)
 	clearCorruptedNotebooks()
 	clearPortJSON()
 
@@ -1504,7 +1505,7 @@ func clearCorruptedNotebooks() {
 	}
 }
 
-func clearWorkspaceTemp(preserveInstallPkgs bool) {
+func clearWorkspaceTemp(preserveInstallPkgPath string) {
 	heif.ClearMemoryCache("")
 	os.RemoveAll(filepath.Join(util.TempDir, "assets-cache"))
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
@@ -1518,25 +1519,7 @@ func clearWorkspaceTemp(preserveInstallPkgs bool) {
 	os.RemoveAll(filepath.Join(util.TempDir, "base64"))
 	os.RemoveAll(filepath.Join(util.TempDir, "ai"))
 
-	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
-	install := filepath.Join(util.TempDir, "install")
-	if !preserveInstallPkgs && gulu.File.IsDir(install) {
-		monthAgo := time.Now().Add(-time.Hour * 24 * 7)
-		entries, err := os.ReadDir(install)
-		if err != nil {
-			logging.LogErrorf("read dir [%s] failed: %s", install, err)
-		} else {
-			for _, entry := range entries {
-				info, _ := entry.Info()
-				if nil != info && !info.IsDir() && info.ModTime().Before(monthAgo) {
-					installPkgPath := filepath.Join(install, entry.Name())
-					if err = os.RemoveAll(installPkgPath); err != nil {
-						logging.LogErrorf("remove old install pkg [%s] failed: %s", installPkgPath, err)
-					}
-				}
-			}
-		}
-	}
+	clearOldInstallPackages(preserveInstallPkgPath)
 
 	tmps, err := filepath.Glob(filepath.Join(util.TempDir, "*.tmp"))
 	if err != nil {

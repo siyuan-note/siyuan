@@ -150,7 +150,7 @@
 	"keymapUnassigned": "Niet toegewezen",
 	"keymapAdd": "Sneltoets toevoegen",
 	"aiProviderHeadersTip": "Voer een JSON-object met tekenreekswaarden in; aangepaste headers overschrijven standaardheaders met dezelfde naam, inclusief authenticatieheaders; Ondersteunt {{secrets.NAME}} en {{vars.NAME}}; geheimen moeten de providerhost toestaan en directe waarden worden als platte tekst opgeslagen",
-	"cellPasteUnsupported": "Plakken geannuleerd: blokken van het type ${x} worden niet ondersteund in deze cel",
+	"cellPasteUnsupported": "Plakken geannuleerd: deze cel ondersteunt ${x} niet",
 	"templateNameTip": "Voer een naam in zonder padscheidingstekens",
 	"keymapUnset": "Niet ingesteld",
 	"keymapPrimary": "Instellen als primaire sneltoets",

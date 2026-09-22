@@ -150,7 +150,7 @@
 	"keymapUnassigned": "Atanmamış",
 	"keymapAdd": "Klavye kısayolu ekle",
 	"aiProviderHeadersTip": "Dize değerleri içeren bir JSON nesnesi girin; özel başlıklar, kimlik doğrulama başlıkları dahil aynı adlı varsayılan başlıkların üzerine yazılır; {{secrets.NAME}} ve {{vars.NAME}} desteklenir; sırlar sağlayıcının ana makinesine izin vermelidir ve doğrudan girilen değerler düz metin olarak saklanır",
-	"cellPasteUnsupported": "Yapıştırma iptal edildi: bu hücrede ${x} blokları desteklenmiyor",
+	"cellPasteUnsupported": "Yapıştırma iptal edildi: bu hücre ${x} desteklemiyor",
 	"templateNameTip": "Yol ayırıcıları içermeyen bir ad girin",
 	"keymapUnset": "Ayarlanmadı",
 	"keymapPrimary": "Birincil kısayol olarak ayarla",

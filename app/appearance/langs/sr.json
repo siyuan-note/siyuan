@@ -1,4 +1,5 @@
 {
+	"taskCompletionToggle": "Промени стање завршености задатка",
 	"addAlias": "Додај псеудоним",
 	"listMindmapExpandToLevel": "Прошири до нивоа ${level}",
 	"checkBlockRefProgress": "Провера референци на блокове и веза са базама података...",

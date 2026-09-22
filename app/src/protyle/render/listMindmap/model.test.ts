@@ -2170,6 +2170,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         onRelationAdd: () => check.fail("Task control created a relation"),
         finishEdit: () => finishTask, onTaskMenu: () => menus++,
         isTaskCycle: (event: KeyboardEvent) => event.ctrlKey && event.key === "l",
+        isTaskCompletionToggle: (event: KeyboardEvent) => event.ctrlKey && event.key === "k",
         onTaskToggle: (id: string, cycle: boolean) => controller.setTask(id,
             cycle ? taskAPI.nextTaskListStatus : taskAPI.nextTaskListMarker)});
     const controller = Object.assign(new taskAPI.TaskController(), {owner, list: taskList, disposed: false,
@@ -2259,6 +2260,27 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     taskButton().dispatchEvent(new KeyboardEvent("keydown", {key: "l", ctrlKey: true, bubbles: true, cancelable: true}));
     await controller.taskChanges;
     check.equal(taskItem.dataset.task, "/");
+    for (const [marker, expected] of [[" ", "X"], ["/", "X"], ["X", " "], ["-", " "], ["?", " "]]) {
+        taskAPI.setTaskListItemMarker(owner, taskItem, marker);
+        controller.refresh();
+        const event = new KeyboardEvent("keydown", {key: "k", ctrlKey: true, bubbles: true, cancelable: true});
+        taskButton().dispatchEvent(event);
+        await controller.taskChanges;
+        check.equal(event.defaultPrevented, true);
+        check.equal(taskItem.dataset.task, expected);
+    }
+    const completedOperations = operations.length;
+    for (const readonly of [false, true]) {
+        taskView.setReadOnly(readonly);
+        taskButton().dispatchEvent(new KeyboardEvent("keydown", {
+            key: "k", ctrlKey: true, repeat: !readonly, bubbles: true, cancelable: true,
+        }));
+        await controller.taskChanges;
+        check.equal(operations.length, completedOperations);
+    }
+    taskView.setReadOnly(false);
+    taskAPI.setTaskListItemMarker(owner, taskItem, "/");
+    controller.refresh();
     taskButton().dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     check.equal(taskEdits, 0);
     finishTask = false;

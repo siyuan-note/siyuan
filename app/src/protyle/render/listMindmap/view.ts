@@ -47,6 +47,7 @@ export interface ListMindmapViewOptions {
     onTabTaskToggle?: (id: string, itemId: string) => void;
     onTabTaskMenu?: (id: string, itemId: string, anchor: HTMLElement) => void;
     isTaskCycle?: (event: KeyboardEvent) => boolean;
+    isTaskCompletionToggle?: (event: KeyboardEvent) => boolean;
     onUndo?: () => void;
     onRedo?: () => void;
     onNodeStyle?: (id: string, patch: Partial<ListMindmapNodeStyle>) => void;
@@ -1962,7 +1963,8 @@ export class ListMindmapView {
         if (this.pointer?.relation && event.key !== "Escape") {
             return;
         }
-        if (!this.options.readOnly && this.options.isTaskCycle?.(event)) {
+        const isTaskCompletionToggle = this.options.isTaskCompletionToggle?.(event);
+        if (!this.options.readOnly && (isTaskCompletionToggle || this.options.isTaskCycle?.(event))) {
             const id = target.closest<HTMLElement>(".list-mindmap__node")?.dataset.mindmapId || this.selectedId;
             if (this.model.nodes.get(id)?.taskMarker !== undefined) {
                 event.preventDefault();
@@ -1970,7 +1972,7 @@ export class ListMindmapView {
                 if (!event.repeat) {
                     this.finishThen(() => {
                         if (!this.options.readOnly) {
-                            this.options.onTaskToggle?.(id, true);
+                            this.options.onTaskToggle?.(id, !isTaskCompletionToggle);
                         }
                     });
                 }

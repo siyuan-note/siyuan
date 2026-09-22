@@ -1,4 +1,5 @@
 {
+	"taskCompletionToggle": "タスクの完了状態を切り替え",
 	"addAlias": "エイリアスを追加",
 	"listMindmapExpandToLevel": "第 ${level} 階層まで展開",
 	"checkBlockRefProgress": "ブロック参照とデータベースの紐付けを確認しています...",

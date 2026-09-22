@@ -1,4 +1,5 @@
 {
+	"taskCompletionToggle": "החלפת מצב השלמת המשימה",
 	"addAlias": "הוספת כינוי",
 	"listMindmapExpandToLevel": "הרחבה עד לרמה ${level}",
 	"checkBlockRefProgress": "בודק הפניות לבלוקים וקישורים למסדי נתונים...",

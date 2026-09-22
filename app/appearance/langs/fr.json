@@ -1,4 +1,5 @@
 {
+	"taskCompletionToggle": "Basculer l’état d’achèvement de la tâche",
 	"addAlias": "Ajouter un alias",
 	"listMindmapExpandToLevel": "Développer jusqu’au niveau ${level}",
 	"checkBlockRefProgress": "Vérification des références de blocs et des liaisons aux bases de données...",

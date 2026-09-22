@@ -1,4 +1,5 @@
 {
+	"taskCompletionToggle": "Перемкнути стан виконання завдання",
 	"addAlias": "Додати псевдонім",
 	"listMindmapExpandToLevel": "Розгорнути до рівня ${level}",
 	"checkBlockRefProgress": "Перевірка посилань на блоки та прив’язок до баз даних...",

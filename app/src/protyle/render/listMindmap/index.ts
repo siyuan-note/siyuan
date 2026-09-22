@@ -251,6 +251,7 @@ class ListMindmapController {
                 menu.open({x: rect.left, y: rect.bottom, h: rect.height});
             },
             isTaskCycle: event => matchHotKey(window.siyuan.config.keymap.editor.list.checkToggle, event),
+            isTaskCompletionToggle: event => matchHotKey(window.siyuan.config.keymap.editor.list.taskCompletionToggle, event),
             onRootTitleChange: title => this.metadata(metadata => {
                 metadata.rootTitle = title;
             }),

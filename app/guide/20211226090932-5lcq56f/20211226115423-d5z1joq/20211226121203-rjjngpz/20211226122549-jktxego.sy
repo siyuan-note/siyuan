@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260922150640"
+		"updated": "20260922151635"
 	},
 	"Children": [
 		{
@@ -3997,7 +3997,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260921105011"
+				"updated": "20260922151635"
 			},
 			"Children": [
 				{
@@ -11914,7 +11914,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-td76oes",
-				"updated": "20260921105011"
+				"updated": "20260922151635"
 			},
 			"Children": [
 				{
@@ -11934,7 +11934,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-qj1o02k",
-				"updated": "20260921105011"
+				"updated": "20260922151635"
 			},
 			"Children": [
 				{
@@ -12183,6 +12183,78 @@
 								{
 									"Type": "NodeText",
 									"Data": "任務列表"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切換任務完成狀態"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "未綁定"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "待辦和進行中切換為完成，其他狀態切換為待辦；適用於編輯器和列表心智圖；可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快速鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "編輯器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "列表區塊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中設定"
 								}
 							]
 						}

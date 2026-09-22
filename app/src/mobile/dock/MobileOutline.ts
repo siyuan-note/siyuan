@@ -73,9 +73,7 @@ export class MobileOutline extends Model {
     <input spellcheck="false" class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.searchPlaceholder}" />
     <svg data-type="search" class="toolbar__icon"><use xlink:href='#iconSearch'></use></svg>
     <svg data-type="keepCurrentExpand" class="toolbar__icon${window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand ? " toolbar__icon--active" : ""}"><use xlink:href="#iconFocus"></use></svg>
-    <svg data-type="expandLevel" class="toolbar__icon"><use xlink:href="#iconList"></use></svg>
-    <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
-    <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
+    <svg data-type="expandLevel" class="toolbar__icon"><use xlink:href="#iconExpandLevel"></use></svg>
 </div>
 <div class="b3-list-item fn__none" data-type="doc-title"></div>
 <div class="fn__flex-1" style="padding: 3px 0 calc(8px + env(safe-area-inset-bottom))"></div>`;
@@ -134,18 +132,6 @@ export class MobileOutline extends Model {
             blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
             topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
         });
-        // 为了快捷键的 dispatch
-        this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
-            this.tree.collapseAll();
-            this.saveExpendIds();
-        });
-
-        // 普通的全部展开按钮
-        this.element.querySelector('[data-type="expand"]').addEventListener("click", () => {
-            this.tree.expandAll();
-            this.saveExpendIds();
-        });
-
         // 保持当前标题展开功能
         this.element.querySelector('[data-type="keepCurrentExpand"]').addEventListener("click", (event: MouseEvent & {
             target: Element
@@ -772,6 +758,15 @@ export class MobileOutline extends Model {
         setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
     }
 
+    private setAllExpanded(expanded: boolean) {
+        if (expanded) {
+            this.tree.expandAll();
+        } else {
+            this.tree.collapseAll();
+        }
+        this.saveExpendIds();
+    }
+
     /**
      * 显示展开层级菜单
      */
@@ -787,6 +782,19 @@ export class MobileOutline extends Model {
                 click: () => this.expandToLevel(i)
             }).element);
         }
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_all", type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "expandAll",
+            icon: "iconExpand",
+            label: window.siyuan.languages.expandAll,
+            click: () => this.setAllExpanded(true)
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "foldAll",
+            icon: "iconContract",
+            label: window.siyuan.languages.foldAll,
+            click: () => this.setAllExpanded(false)
+        }).element);
         window.siyuan.menus.menu.fullscreen("bottom");
         return window.siyuan.menus.menu;
     }
@@ -1267,10 +1275,7 @@ export class MobileOutline extends Model {
             id: "expandAll",
             icon: "iconExpand",
             label: window.siyuan.languages.expandAll,
-            click: () => {
-                this.tree.expandAll();
-                this.saveExpendIds();
-            }
+            click: () => this.setAllExpanded(true)
         }).element);
 
         // 全部折叠
@@ -1278,10 +1283,7 @@ export class MobileOutline extends Model {
             id: "foldAll",
             icon: "iconContract",
             label: window.siyuan.languages.foldAll,
-            click: () => {
-                this.tree.collapseAll();
-                this.saveExpendIds();
-            }
+            click: () => this.setAllExpanded(false)
         }).element);
 
         window.siyuan.menus.menu.fullscreen("bottom");

@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "Expand to level ${level}",
 	"checkBlockRefProgress": "Checking block references and database bindings...",
 	"calendarRowLimit": "Visible item rows",
 	"calendarNewOnDate": "New item on this date",

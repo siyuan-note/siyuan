@@ -1107,6 +1107,14 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
         !event.key.startsWith("Arrow") && event.key !== "Enter") {
         return false;
     }
+    if (!event.repeat && (matchCollapse || matchExpand) && activePanelElement.classList.contains("sy__outline")) {
+        const outline = getAllModels().outline.find(item => item.element.parentElement === activePanelElement);
+        if (outline) {
+            outline.setAllExpanded(!matchCollapse);
+            event.preventDefault();
+            return true;
+        }
+    }
     if (!event.repeat && matchCollapse) {
         const collapseElement = activePanelElement.querySelector('.block__icon[data-type="collapse"]');
         if (collapseElement) {

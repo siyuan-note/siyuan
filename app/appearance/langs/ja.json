@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "第 ${level} 階層まで展開",
 	"checkBlockRefProgress": "ブロック参照とデータベースの紐付けを確認しています...",
 	"calendarRowLimit": "項目の表示行数",
 	"calendarNewOnDate": "この日付に項目を作成",

@@ -75,6 +75,26 @@
     flex: 1;
   }
 
+  &__level-control {
+    position: relative;
+    flex-shrink: 0;
+
+    &:focus-within {
+      outline: 1px solid var(--b3-theme-primary);
+      border-radius: var(--b3-border-radius);
+    }
+  }
+
+  &__level-select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
   &__zoom {
     flex-shrink: 0;
     min-width: 34px;

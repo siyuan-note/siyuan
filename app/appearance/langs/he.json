@@ -1,4 +1,5 @@
 {
+	"listMindmapExpandToLevel": "הרחבה עד לרמה ${level}",
 	"checkBlockRefProgress": "בודק הפניות לבלוקים וקישורים למסדי נתונים...",
 	"calendarRowLimit": "שורות פריטים מוצגות",
 	"calendarNewOnDate": "פריט חדש בתאריך זה",

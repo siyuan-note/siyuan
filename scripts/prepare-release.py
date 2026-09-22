@@ -2,6 +2,7 @@
 """准备正式版版本字段，或在 Android 版本提交后创建本地标签。默认只显示计划。"""
 
 import argparse
+import importlib.util
 import json
 from pathlib import Path
 import re
@@ -180,6 +181,88 @@ def publish(args, repositories):
     print("Android 标签已推送")
 
 
+INDEX_VERSION_FILE = "src/siyuan/src/version.pug"
+INDEX_VERSION = r'^- const siyuanVersion = "([^"]+)"'
+INDEX_PAGES = tuple(f"{prefix}{name}.html" for prefix in ("", "en/")
+                    for name in ("index", "eula", "community", "sponsor", "pricing", "privacy", "download")) \
+    + ("distributors/lizhi.html",)
+
+
+def index_plan(args):
+    path = args.index_dir / INDEX_VERSION_FILE
+    original = read(path)
+    current = field(original, INDEX_VERSION, "官网思源版本")[1]
+    if version_key(args.version) < version_key(current):
+        raise PreparationError(f"官网不允许降级：{current} -> {args.version}")
+    updated = replace(original, INDEX_VERSION, args.version, "官网思源版本")
+    return [(path, original, updated)] if updated != original else []
+
+
+def index_preflight(args):
+    repo = args.index_dir
+    if Path(git(repo, "rev-parse", "--show-toplevel")).resolve() != repo.resolve():
+        raise PreparationError(f"必须指定 b3log-index 仓库根目录：{repo}")
+    branch = git(repo, "symbolic-ref", "--quiet", "--short", "HEAD")
+    if git(repo, "ls-files", "--unmerged"):
+        raise PreparationError("b3log-index 存在未解决冲突")
+    allowed = {INDEX_VERSION_FILE} | {"src/siyuan/dist/" + page for page in INDEX_PAGES}
+    changed = git(repo, "diff", "--name-only", "HEAD").splitlines()
+    changed += git(repo, "diff", "--cached", "--name-only").splitlines()
+    untracked = git(repo, "ls-files", "--others", "--exclude-standard").splitlines()
+    if (set(changed) | set(untracked)) - allowed:
+        raise PreparationError("b3log-index 有官网版本和编译页面以外的改动，请先处理")
+    remote = git(repo, "ls-remote", "origin", "refs/heads/" + branch)
+    if remote:
+        git(repo, "merge-base", "--is-ancestor", remote.split()[0], "HEAD")
+    return branch
+
+
+def build_index(repo):
+    # 复用构建脚本对 Windows pnpm.cmd 的调用方式，只构建官网工程。
+    spec = importlib.util.spec_from_file_location("build_release", Path(__file__).with_name("build-release.py"))
+    build = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(build)
+    try:
+        build.run(["pnpm", "install", "--frozen-lockfile"], repo / "src/siyuan")
+        build.run(["pnpm", "run", "build"], repo / "src/siyuan")
+    except build.BuildError as error:
+        raise PreparationError(str(error)) from error
+
+
+def verify_index(repo, version):
+    for page in INDEX_PAGES:
+        path = repo / "src/siyuan/dist" / page
+        if not path.is_file() or path.stat().st_size == 0:
+            raise PreparationError(f"官网编译页面缺失或为空：{path}")
+        text = read(path)
+        versions = re.findall(r'https://release\.liuyun\.io/siyuan/siyuan-(' + VERSION + r')(?=[.-])', text)
+        if any(value != version for value in versions):
+            raise PreparationError(f"官网页面仍包含其他版本下载链接：{path}")
+        if page in {"download.html", "en/download.html", "index.html", "en/index.html"} and not versions:
+            raise PreparationError(f"官网页面缺少版本下载链接：{path}")
+
+
+def publish_index(args):
+    changes = index_plan(args)
+    branch = index_preflight(args)
+    print(f"官网思源版本：{args.version}；仓库：{args.index_dir}")
+    print(f"将更新 version.pug，执行 pnpm install --frozen-lockfile 和 pnpm run build，提交并推送 origin/{branch}")
+    if not args.execute:
+        return
+    apply(changes)
+    build_index(args.index_dir)
+    verify_index(args.index_dir, args.version)
+    # 构建后再次检查，禁止顺带提交锁文件或其他目录的改动。
+    if index_preflight(args) != branch:
+        raise PreparationError("官网构建期间分支发生变化，停止提交推送")
+    paths = [INDEX_VERSION_FILE] + ["src/siyuan/dist/" + page for page in INDEX_PAGES]
+    git(args.index_dir, "add", "--", *paths)
+    if git(args.index_dir, "diff", "--cached", "--name-only"):
+        git(args.index_dir, "commit", "-m", f":bookmark: Update SiYuan website to v{args.version}")
+    git(args.index_dir, "push", "origin", f"HEAD:refs/heads/{branch}")
+    print(f"官网已提交并推送：{args.index_dir}，分支：{branch}")
+
+
 def main():
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -189,17 +272,23 @@ def main():
     parser.add_argument("--repo", type=Path, default=ROOT)
     parser.add_argument("--android-dir", type=Path, default=ROOT.parent / "siyuan-android")
     parser.add_argument("--harmony-dir", type=Path, default=ROOT.parent / "siyuan-harmony")
+    parser.add_argument("--index-dir", type=Path, default=ROOT.parent / "b3log-index")
     parser.add_argument("--android-code", type=int, help="显式指定 Android 版本代码，默认版本变化时加一")
     parser.add_argument("--harmony-code", type=int, help="显式指定鸿蒙版本代码，默认版本变化时加一")
     parser.add_argument("--tag-android", action="store_true", help="仅为已提交的 Android 发布版本创建本地标签")
     parser.add_argument("--publish", action="store_true", help="准备版本后提交各仓库已跟踪改动并推送 origin，创建并推送 Android 标签")
+    parser.add_argument("--publish-index", action="store_true", help="仅更新 b3log-index 思源版本、构建官网并提交推送；安装包上传后执行")
     parser.add_argument("--execute", action="store_true", help="执行修改；默认只显示计划")
     args = parser.parse_args()
     if not re.fullmatch(VERSION, args.version):
         raise PreparationError("必须指定正式版版本号，例如 3.8.5，不接受预发布版本或 v 前缀")
     if any(int(part) > 65535 for part in args.version.split(".")):
         raise PreparationError("版本号各段不得超过 Appx 支持的 65535")
-    if args.tag_android:
+    if args.publish_index:
+        if args.tag_android or args.publish or args.android_code is not None or args.harmony_code is not None:
+            raise PreparationError("--publish-index 必须单独使用，不能组合发布准备或 Android 标签参数")
+        publish_index(args)
+    elif args.tag_android:
         if args.publish:
             raise PreparationError("--tag-android 与 --publish 不能同时使用")
         if args.android_code is not None or args.harmony_code is not None:

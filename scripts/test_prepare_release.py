@@ -135,5 +135,79 @@ class PrepareTests(unittest.TestCase):
         self.assertIn('"3.8.5"', prepare.read(self.args.repo / "app/package.json"))
 
 
+class IndexPublishTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.repo = self.root / "index"
+        path = self.repo / prepare.INDEX_VERSION_FILE
+        path.parent.mkdir(parents=True)
+        path.write_text('- const siyuanVersion = "3.8.4"\n', encoding="utf-8")
+        prepare.git(self.repo, "init", "-b", "main")
+        for key, value in (("user.name", "Release Test"), ("user.email", "test@example.invalid"),
+                           ("commit.gpgsign", "false"), ("core.autocrlf", "false")):
+            prepare.git(self.repo, "config", key, value)
+        prepare.git(self.repo, "add", ".")
+        prepare.git(self.repo, "commit", "-m", "fixture")
+        self.remote = self.root / "remote.git"
+        subprocess.run(["git", "init", "--bare", str(self.remote)], check=True, capture_output=True)
+        prepare.git(self.repo, "remote", "add", "origin", str(self.remote))
+        prepare.git(self.repo, "push", "origin", "main")
+        self.args = argparse.Namespace(index_dir=self.repo, version="3.8.5", execute=True)
+
+    def build(self, repo, version="3.8.5"):
+        for page in prepare.INDEX_PAGES:
+            path = repo / "src/siyuan/dist" / page
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(f'<a href="https://release.liuyun.io/siyuan/siyuan-{version}-win.exe">Download</a>',
+                            encoding="utf-8")
+
+    def test_publish_and_retry(self):
+        with patch.object(prepare, "build_index", side_effect=self.build), contextlib.redirect_stdout(io.StringIO()):
+            prepare.publish_index(self.args)
+            head = prepare.git(self.repo, "rev-parse", "HEAD")
+            prepare.publish_index(self.args)
+        self.assertEqual(head, prepare.git(self.repo, "rev-parse", "HEAD"))
+        self.assertIn(head, prepare.git(self.repo, "ls-remote", "origin", "refs/heads/main"))
+        self.assertIn("3.8.5", prepare.git(self.repo, "show", "HEAD:" + prepare.INDEX_VERSION_FILE))
+        self.assertEqual(prepare.git(self.repo, "status", "--porcelain"), "")
+
+    def test_dry_run_does_not_build_or_modify(self):
+        self.args.execute = False
+        with patch.object(prepare, "build_index") as build, contextlib.redirect_stdout(io.StringIO()):
+            prepare.publish_index(self.args)
+        build.assert_not_called()
+        self.assertIn("3.8.4", prepare.read(self.repo / prepare.INDEX_VERSION_FILE))
+
+    def test_build_failure_does_not_commit_or_push(self):
+        head = prepare.git(self.repo, "rev-parse", "HEAD")
+        with patch.object(prepare, "build_index", side_effect=prepare.PreparationError("build failed")), \
+                contextlib.redirect_stdout(io.StringIO()), self.assertRaises(prepare.PreparationError):
+            prepare.publish_index(self.args)
+        self.assertEqual(head, prepare.git(self.repo, "rev-parse", "HEAD"))
+        self.assertIn(head, prepare.git(self.repo, "ls-remote", "origin", "refs/heads/main"))
+
+    def test_wrong_version_and_missing_page_rejected(self):
+        self.build(self.repo, "3.8.4")
+        with self.assertRaises(prepare.PreparationError):
+            prepare.verify_index(self.repo, "3.8.5")
+        self.build(self.repo)
+        (self.repo / "src/siyuan/dist/en/download.html").unlink()
+        with self.assertRaises(prepare.PreparationError):
+            prepare.verify_index(self.repo, "3.8.5")
+
+    def test_unrelated_staged_change_rejected(self):
+        other = self.repo / "README.md"
+        other.write_text("original")
+        prepare.git(self.repo, "add", "README.md")
+        prepare.git(self.repo, "commit", "-m", "readme")
+        other.write_text("staged change")
+        prepare.git(self.repo, "add", "README.md")
+        other.write_text("original")
+        with self.assertRaises(prepare.PreparationError):
+            prepare.index_preflight(self.args)
+
+
 if __name__ == "__main__":
     unittest.main()

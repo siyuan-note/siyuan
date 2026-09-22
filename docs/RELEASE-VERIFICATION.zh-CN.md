@@ -176,8 +176,20 @@ python -X utf8 scripts/verify-release.py check --version 3.8.5
 - 上传 R2 和网盘
 - 发布公告
 - 部署 Rhy，粘贴最终的 `SHA256SUMS.txt`
-- 部署 Index 和用户指南
+- 更新并推送 Index（命令见下方），部署 Index
 - 完成小米、华为、荣耀、OPPO、vivo、App Store、Microsoft Store、腾讯应用宝、Google Play、360 和腾讯电脑管家等应用市场上架
+
+安装包已上传后，更新 `b3log-index` 中的思源官网版本、编译页面并提交推送：
+
+```powershell
+# 预览，不修改、构建或推送
+python -X utf8 scripts/prepare-release.py 3.8.5 --publish-index
+
+# 更新官网版本、构建、提交并推送
+python -X utf8 scripts/prepare-release.py 3.8.5 --publish-index --execute
+```
+
+此模式仅处理 `b3log-index`，不修改主仓库、Android、鸿蒙或标签，不能与 `--publish`、`--tag-android` 组合。默认使用主仓库同级的 `b3log-index`，可通过 `--index-dir` 指定。脚本更新 `src/siyuan/src/version.pug`，在 `src/siyuan` 执行 `pnpm install --frozen-lockfile` 和 `pnpm run build`，检查中英文页面的下载版本后，提交版本文件和编译页面，推送当前分支到 `origin`。官网工程的 `package.json` 版本不是思源版本，不修改。存在其他未提交改动或远端领先时停止；构建或校验失败不提交推送，保留文件供排查。重复执行且内容不变时不会创建空提交。此命令不执行服务器部署。
 
 上架应用市场：
 
@@ -231,6 +243,10 @@ python -X utf8 scripts/clean-release.py --execute
 脚本清理发布脚本留下的系统临时构建目录、本地及 WSL 的 `app/build`、Linux 内核目录、鸿蒙生成的内核及头文件，以及 Android、鸿蒙工程中的构建输出和复制进去的内核、资源包。桌面 `siyuan` 始终保留；受 Git 管理的文件（包括鸿蒙公共头文件）、源码、签名配置、依赖和工具缓存、开发前端 `app/stage/build` 均保留。清理后再次打包需要重新生成内核和移动端资源包。
 
 自定义过构建参数时，清理时传入相同的 `--android-dir`、`--harmony-dir`、`--wsl-distro`、`--wsl-user`、`--wsl-repo`；使用自定义收集目录时，必须同时传入 `--output` 保护该目录。`--skip-wsl` 可只清理 Windows 本地。脚本拒绝越界路径、与保留目录重叠的目标以及自身或上级为链接的清理入口；构建目录内部的符号链接和目录联接只删除链接本身，不清理其指向的目录。不会清理其他电脑上的 macOS 或 iOS 构建产物。
+
+### 11. 等待 GitHub Actions 完成并部署用户指南
+
+最后等待本次发布相关的 GitHub Actions 执行完成，确认用于用户指南部署的构建成功、版本与本次发布一致，再部署用户指南。工作流失败时先处理失败原因，成功后再部署。
 
 ## 直接检查安装包
 

@@ -1,4 +1,5 @@
 {
+	"checkBlockRefProgress": "正在檢查區塊引用與資料庫綁定...",
 	"calendarRowLimit": "項目顯示行數",
 	"calendarNewOnDate": "在此日期新增項目",
 	"leftRightSidebarLayout": "左右欄佈局",

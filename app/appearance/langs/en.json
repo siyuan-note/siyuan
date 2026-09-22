@@ -1,4 +1,5 @@
 {
+	"checkBlockRefProgress": "Checking block references and database bindings...",
 	"calendarRowLimit": "Visible item rows",
 	"calendarNewOnDate": "New item on this date",
 	"leftRightSidebarLayout": "Left and right sidebar layout",

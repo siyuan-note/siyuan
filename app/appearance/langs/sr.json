@@ -1,4 +1,5 @@
 {
+	"checkBlockRefProgress": "Провера референци на блокове и веза са базама података...",
 	"calendarRowLimit": "Број видљивих редова ставки",
 	"calendarNewOnDate": "Нова ставка на овај датум",
 	"leftRightSidebarLayout": "Raspored leve i desne bočne trake",

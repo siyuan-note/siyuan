@@ -1,4 +1,5 @@
 {
+	"checkBlockRefProgress": "Kontrolujú sa odkazy na bloky a prepojenia s databázami...",
 	"calendarRowLimit": "Počet zobrazených riadkov položiek",
 	"calendarNewOnDate": "Nová položka v tento deň",
 	"leftRightSidebarLayout": "Rozloženie ľavého a pravého bočného panela",

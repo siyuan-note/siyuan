@@ -1,4 +1,5 @@
 {
+	"checkBlockRefProgress": "Blok referansları ve veritabanı bağlantıları kontrol ediliyor...",
 	"calendarRowLimit": "Görünür öğe satırları",
 	"calendarNewOnDate": "Bu tarihte yeni öğe",
 	"leftRightSidebarLayout": "Sol ve sağ kenar çubuğu düzeni",

@@ -313,17 +313,20 @@ export const progressStatus = (data: IWebSocketData) => {
     }
 };
 
-export const progressLoading = (data: IWebSocketData) => {
-    let progressElement = document.getElementById("progress");
-    if (!progressElement) {
-        document.body.insertAdjacentHTML("beforeend", `<div id="progress" style="z-index: ${++window.siyuan.zIndex}"></div>`);
-        progressElement = document.getElementById("progress");
-    }
-    // code 0: 有进度；1: 无进度；2: 关闭
+export const progressLoading = (data: IWebSocketData, id = "progress") => {
+    let progressElement = document.getElementById(id);
+    // 关闭时只移除对应任务的遮罩。
     if (data.code === 2) {
-        progressElement.remove();
+        progressElement?.remove();
         return;
     }
+    if (!progressElement) {
+        progressElement = document.createElement("div");
+        progressElement.id = id;
+        progressElement.style.zIndex = String(++window.siyuan.zIndex);
+        document.body.appendChild(progressElement);
+    }
+    // code 0: 有进度；1: 无进度；2: 关闭
     if (data.code === 0) {
         const current = Number(data.data.current);
         const total = Number(data.data.total);

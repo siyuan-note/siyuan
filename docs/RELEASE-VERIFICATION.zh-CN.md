@@ -134,7 +134,7 @@ python -X utf8 scripts/build-release.py --platforms android --execute
 python -X utf8 scripts/build-release.py --platforms harmony --execute
 ```
 
-脚本自动构建、复制移动端内核和资源、验证安装包，并将通过验证的产物收集到桌面 `siyuan` 文件夹。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.5.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。
+脚本自动构建、复制移动端内核和资源，各平台产物生成后立即收集到桌面 `siyuan` 文件夹，不等待全部平台完成；所有选定平台构建结束后，在桌面目录统一校验，包含目录中已有的安装包。后续平台构建或最终校验失败时，已收集的包仍保留，但不能视为校验通过。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.5.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。
 
 ### 6. 汇总其他平台产物
 
@@ -153,7 +153,7 @@ macOS、iOS 在对应构建机器上完成构建和签名。macOS 完成公证�
 | macOS | Intel、Apple Silicon 两个 DMG |
 | Microsoft Store | 两个架构的 Appx |
 | Android | 官方版、国内渠道 APK，以及 Google Play、华为渠道 AAB，共四个包 |
-| 鸿蒙 | APP |
+| 鸿蒙 | 已签名 APP（`siyuan-harmony-default-signed.app`） |
 
 核对版本、平台和架构后，在仓库根目录执行：
 
@@ -270,9 +270,10 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - Windows 在全新目录构建两个架构内核，生成临时 Electron Builder 配置启用证书签名，不修改仓库 YAML，不复用开发内核目录；默认生成两个 NSIS 包并检查 Authenticode 签名
 - Linux 调用现有 `scripts/linux-build.sh --target=all`，收集双架构 TAR、AppImage、DEB、RPM 共八个包
 - Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.5.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
-- 鸿蒙先构建并复制 ARM64 内核，再构建并复制 x86_64 内核，避免同名 `libkernel.so` 被覆盖后拷错；使用同一份新 `app.zip`，通过 Hvigor release 模式执行 `assembleApp`，对应 DevEco Studio 的“构建 - 编译 Hap(s)/APP(s) - 编译 APP(s)”，只收集 APP，不要求单独的 HAP 产物
+- 鸿蒙先构建并复制 ARM64 内核，再构建并复制 x86_64 内核，避免同名 `libkernel.so` 被覆盖后拷错；使用同一份新 `app.zip`，通过 Hvigor release 模式执行 `assembleApp`，对应 DevEco Studio 的“构建 - 编译 Hap(s)/APP(s) - 编译 APP(s)”，只收集 `build/outputs/default/siyuan-harmony-default-signed.app`，缺少签名产物时失败，不收集 `unsigned.app` 或单独的 HAP
 - 每条命令失败立即停止，产物必须是本次生成，复制时再次核对摘要
-- 新安装包全部验证通过后才收集到桌面 `siyuan`，不覆盖同名包；分批构建会检查目录中已有的其他包，保留已有的 `SHA256SUMS.txt`，校验和清单由发布者最终手动生成
+- 鸿蒙各架构内核构建后同时复制构建目录中的 `.h` 文件到对应 `entry/libs/<ABI>/`，并将 ARM64 的头文件同步到 `entry/src/main/cpp/include/`；`libkernel.h` 必须为本次生成，`lan_sync_bridge.h` 若由构建目录提供则同步，否则保留工程中维护的版本，缺少必需头文件时停止构建
+- 各平台产物生成后立即复制到桌面 `siyuan`，不覆盖同名包；最后统一检查桌面目录，失败时保留已复制的包。需要重新构建同名包时，先人工移走旧包；校验失败修复后可直接对桌面目录重跑 `verify-release.py check`。保留已有的 `SHA256SUMS.txt`，校验和清单由发布者最终手动生成
 - 构建目录保留在系统临时目录，控制台打印实际路径，失败后可检查并取回产物；不会自动提交、推送、打标签、上传或发布公告
 
 ### YubiKey PIN

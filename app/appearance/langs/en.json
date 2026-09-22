@@ -1,4 +1,5 @@
 {
+	"checkBlockRefProgress": "Checking block references and database bindings...",
 	"calendarRowLimit": "Visible item rows",
 	"calendarNewOnDate": "New item on this date",
 	"leftRightSidebarLayout": "Left and right sidebar layout",
@@ -150,7 +151,7 @@
 	"keymapUnassigned": "Unassigned",
 	"keymapAdd": "Add shortcut",
 	"aiProviderHeadersTip": "Enter a JSON object with string values; custom headers override default headers with the same name, including authentication headers; Supports {{secrets.NAME}} and {{vars.NAME}}; secrets must allow the provider host, and direct values are stored in plaintext",
-	"cellPasteUnsupported": "Paste canceled: this cell does not support ${x}",
+	"cellPasteUnsupported": "Paste canceled: ${x} is not supported here",
 	"templateNameTip": "Enter a name without path separators",
 	"keymapUnset": "Not set",
 	"keymapPrimary": "Set as primary shortcut",

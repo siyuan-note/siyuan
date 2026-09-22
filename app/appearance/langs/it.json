@@ -1,4 +1,5 @@
 {
+	"checkBlockRefProgress": "Verifica dei riferimenti ai blocchi e dei collegamenti ai database...",
 	"calendarRowLimit": "Righe di elementi visibili",
 	"calendarNewOnDate": "Nuovo elemento in questa data",
 	"leftRightSidebarLayout": "Layout delle barre laterali sinistra e destra",
@@ -150,7 +151,7 @@
 	"keymapUnassigned": "Non assegnate",
 	"keymapAdd": "Aggiungi scorciatoia da tastiera",
 	"aiProviderHeadersTip": "Inserisci un oggetto JSON con valori stringa; le intestazioni personalizzate sostituiscono quelle predefinite con lo stesso nome, incluse quelle di autenticazione; Supporta {{secrets.NAME}} e {{vars.NAME}}; i segreti devono autorizzare l’host del fornitore e i valori diretti vengono salvati in chiaro",
-	"cellPasteUnsupported": "Incollaggio annullato: questa cella non supporta ${x}",
+	"cellPasteUnsupported": "Incollaggio annullato: qui non è supportato ${x}",
 	"templateNameTip": "Inserisci un nome senza separatori di percorso",
 	"keymapUnset": "Non impostato",
 	"keymapPrimary": "Imposta come scorciatoia principale",

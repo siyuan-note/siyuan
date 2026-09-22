@@ -1,4 +1,5 @@
 {
+	"checkBlockRefProgress": "Comprobando referencias de bloques y vínculos con bases de datos...",
 	"calendarRowLimit": "Filas de elementos visibles",
 	"calendarNewOnDate": "Nuevo elemento en esta fecha",
 	"leftRightSidebarLayout": "Disposición de las barras laterales izquierda y derecha",
@@ -150,7 +151,7 @@
 	"keymapUnassigned": "Sin asignar",
 	"keymapAdd": "Añadir atajo de teclado",
 	"aiProviderHeadersTip": "Introduce un objeto JSON con valores de texto; las cabeceras personalizadas sustituyen a las predeterminadas del mismo nombre, incluidas las de autenticación; Admite {{secrets.NAME}} y {{vars.NAME}}; los secretos deben permitir el host del proveedor y los valores directos se guardan en texto sin cifrar",
-	"cellPasteUnsupported": "Pegado cancelado: esta celda no admite ${x}",
+	"cellPasteUnsupported": "Pegado cancelado: aquí no se admite ${x}",
 	"templateNameTip": "Introduce un nombre sin separadores de ruta",
 	"keymapUnset": "Sin asignar",
 	"keymapPrimary": "Establecer como atajo principal",

@@ -1,4 +1,5 @@
 {
+	"checkBlockRefProgress": "Blokverwijzingen en databasekoppelingen controleren...",
 	"calendarRowLimit": "Zichtbare itemrijen",
 	"calendarNewOnDate": "Nieuw item op deze datum",
 	"leftRightSidebarLayout": "Indeling van linker- en rechterzijbalk",
@@ -150,7 +151,7 @@
 	"keymapUnassigned": "Niet toegewezen",
 	"keymapAdd": "Sneltoets toevoegen",
 	"aiProviderHeadersTip": "Voer een JSON-object met tekenreekswaarden in; aangepaste headers overschrijven standaardheaders met dezelfde naam, inclusief authenticatieheaders; Ondersteunt {{secrets.NAME}} en {{vars.NAME}}; geheimen moeten de providerhost toestaan en directe waarden worden als platte tekst opgeslagen",
-	"cellPasteUnsupported": "Plakken geannuleerd: deze cel ondersteunt ${x} niet",
+	"cellPasteUnsupported": "Plakken geannuleerd: ${x} wordt hier niet ondersteund",
 	"templateNameTip": "Voer een naam in zonder padscheidingstekens",
 	"keymapUnset": "Niet ingesteld",
 	"keymapPrimary": "Instellen als primaire sneltoets",

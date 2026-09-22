@@ -1,4 +1,5 @@
 {
+	"checkBlockRefProgress": "正在检查块引用和数据库绑定...",
 	"calendarRowLimit": "条目显示行数",
 	"calendarNewOnDate": "在此日期新建条目",
 	"leftRightSidebarLayout": "左右栏布局",
@@ -150,7 +151,7 @@
 	"keymapUnassigned": "未分配",
 	"keymapAdd": "添加快捷键",
 	"aiProviderHeadersTip": "输入值为字符串的 JSON 对象，自定义请求头会覆盖同名默认请求头，包括认证请求头；支持 {{secrets.NAME}} 和 {{vars.NAME}} 引用，密钥需允许供应商主机，直接填写的值以明文保存",
-	"cellPasteUnsupported": "已取消粘贴：此单元格不支持 ${x}",
+	"cellPasteUnsupported": "已取消粘贴：此处不支持 ${x}",
 	"templateNameTip": "请输入名称，不要包含路径分隔符",
 	"keymapUnset": "未设置",
 	"keymapPrimary": "设为主快捷键",

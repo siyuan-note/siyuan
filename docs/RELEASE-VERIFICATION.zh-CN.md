@@ -117,19 +117,21 @@ python -X utf8 scripts/build-release.py
 
 ### 5. 执行构建
 
-首次使用建议依次分平台执行，确认每个平台成功后再继续：
+一次性构建 Windows、WSL Linux、Android 和鸿蒙。正式版需要两个 Appx 包，保留 `--appx`：
+
+```powershell
+python -X utf8 scripts/build-release.py --appx --execute
+```
+
+各平台按 Windows、Linux、Android、鸿蒙的顺序串行构建，中途失败会停止后续步骤。
+
+补充：需要单独构建某个平台或排查构建问题时，可选择对应命令：
 
 ```powershell
 python -X utf8 scripts/build-release.py --platforms windows --appx --execute
 python -X utf8 scripts/build-release.py --platforms linux --execute
 python -X utf8 scripts/build-release.py --platforms android --execute
 python -X utf8 scripts/build-release.py --platforms harmony --execute
-```
-
-正式版需要两个 Appx 包，保留 `--appx`。确认各平台运行正常后，后续发布可一条命令构建 Windows、WSL Linux、Android 和鸿蒙：
-
-```powershell
-python -X utf8 scripts/build-release.py --appx --execute
 ```
 
 脚本自动构建、复制移动端内核和资源、验证安装包，并将通过验证的产物收集到桌面 `siyuan` 文件夹。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.5.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。

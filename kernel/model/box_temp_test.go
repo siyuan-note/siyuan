@@ -71,7 +71,7 @@ func TestClearWorkspaceTempRemovesLegacyPandoc(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clearWorkspaceTemp(false)
+	clearWorkspaceTemp("")
 
 	if _, err := os.Stat(pandocDir); !os.IsNotExist(err) {
 		t.Fatalf("legacy Pandoc temporary directory was not removed on exit: %v", err)

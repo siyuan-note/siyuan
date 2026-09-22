@@ -83,6 +83,7 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 	existingPkgPath := getNewVerInstallPkgPath()
 	if "" != existingPkgPath {
 		// 存在经过 sha256Hash 检查的安装包
+		clearOldInstallPackagesLocked(installPackageVersion(filepath.Base(existingPkgPath)), existingPkgPath)
 		util.PushUpdateMsg("update-pkg-ready", Conf.Language(62), 15*1000)
 		return
 	}
@@ -92,6 +93,8 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 	for _, downloadPkgURL := range downloadPkgURLs {
 		err = downloadInstallPkg(downloadPkgURL, checksum)
 		if err == nil {
+			pkgPath := filepath.Join(util.TempDir, "install", path.Base(downloadPkgURL))
+			clearOldInstallPackagesLocked(installPackageVersion(filepath.Base(pkgPath)), pkgPath)
 			success = true
 			break
 		}

@@ -13,15 +13,17 @@
 
 .b3-typography,
 .protyle-wysiwyg,
-.table__cell-rich {
+.table__cell-rich,
+.list-mindmap__content {
   font-variant-ligatures: no-common-ligatures;
   display: flex;
   flex-direction: column;
   font-size: var(--b3-font-size-editor);
   font-family: var(--b3-font-family-protyle);
 
-  &.table__cell-rich {
-    // 单元格富文本预览沿用表格设置的字号。
+  &.table__cell-rich,
+  &.list-mindmap__content {
+    // 富文本预览沿用所在单元格或脑图节点的字号。
     font-size: inherit;
   }
 

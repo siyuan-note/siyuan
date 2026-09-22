@@ -706,6 +706,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const relationChanges: unknown[] = [];
     const nodeStyles: unknown[] = [];
     const fullscreenChanges: boolean[] = [];
+    let interactions = 0;
     let undo = 0;
     let redo = 0;
     let finishAllowed: boolean | Promise<boolean> = true;
@@ -716,6 +717,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         nodeColors: () => [{label: "Appearance combined", color: "var(--b3-font-color1)",
             backgroundColor: "var(--b3-font-background1)", preview: {color: "#112233", backgroundColor: "#ddeeff"}}],
         onFullscreen: (enter: boolean) => fullscreenChanges.push(enter),
+        onInteractionStart: () => {
+            interactions++;
+            return () => interactions--;
+        },
         onEdit: (id: string) => edits.push(id),
         finishEdit: () => finishAllowed,
         onMove: (...args: unknown[]) => moves.push(args),
@@ -735,6 +740,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const view = new api.ListMindmapView(options);
     await settle();
     const viewport = host.querySelector<HTMLElement>(".list-mindmap__viewport");
+    check.equal(viewport.getAttribute("data-prevent-swipe"), "true");
     const originalCapture = HTMLElement.prototype.setPointerCapture;
     const originalHasCapture = HTMLElement.prototype.hasPointerCapture;
     const originalReleaseCapture = HTMLElement.prototype.releasePointerCapture;
@@ -770,9 +776,43 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(sourceRect.width >= 32 && sourceRect.height >= 32);
     check.equal(host.querySelector("[data-node-id]"), null);
     sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y);
+    check.equal(interactions, 1, "hover is suspended before the drag threshold");
     sendPointer(viewport, "pointerup", sourcePoint.x, sourcePoint.y);
+    check.equal(interactions, 0);
     check.equal(edits.length, 0);
     check.equal(moves.length, 0);
+
+    for (const type of ["pointercancel", "lostpointercapture"]) {
+        sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y);
+        check.equal(interactions, 1);
+        viewport.dispatchEvent(new PointerEvent(type, {pointerId: 1, bubbles: true}));
+        check.equal(interactions, 0, type);
+        check.equal(view.pointer, undefined);
+    }
+    sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y);
+    window.dispatchEvent(new Event("blur"));
+    check.equal(interactions, 0, "losing window focus resumes hover");
+    check.equal(view.pointer, undefined);
+
+    let finishPendingEdit: (result: boolean) => void;
+    finishAllowed = new Promise(resolve => finishPendingEdit = resolve);
+    sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y);
+    check.equal(interactions, 1, "pending editor commits also suspend hover");
+    sendPointer(document.body, "pointerup", sourcePoint.x, sourcePoint.y);
+    check.equal(interactions, 0, "releasing outside the canvas cancels a pending interaction");
+    finishPendingEdit(true);
+    await settle();
+    check.equal(view.pointer, undefined);
+    finishAllowed = true;
+
+    const cancelledHost = document.createElement("div");
+    document.body.append(cancelledHost);
+    const cancelledView = new api.ListMindmapView({...options, host: cancelledHost});
+    sendPointer(cancelledHost.querySelector(".list-mindmap__viewport"), "pointerdown", 5, 5);
+    check.equal(interactions, 1);
+    cancelledView.destroy();
+    cancelledHost.remove();
+    check.equal(interactions, 0, "destroying a view releases its interaction");
     const panOrigin = {x: view.offsetX, y: view.offsetY};
     sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y, 2);
     sendPointer(viewport, "pointermove", sourcePoint.x + 30, sourcePoint.y + 20, 2);
@@ -1944,6 +1984,60 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const taskStyle = document.createElement("style");
     taskStyle.textContent = taskCSS;
     document.head.append(taskStyle);
+
+    // 引用和行内格式在两种主题、窄屏、大字号及脱离编辑器的全屏布局中保持一致。
+    const inlineParent = document.createElement("div");
+    inlineParent.className = "protyle-wysiwyg";
+    const inlineList = reset("* Reference\n");
+    const inlineText = inlineList.querySelector<HTMLElement>("[contenteditable]");
+    const inlineTypes = ["block-ref", "virtual-block-ref", "file-annotation-ref", "a", "tag", "code", "strong", "em",
+        "s", "u", "mark", "kbd", "inline-memo"];
+    inlineText.innerHTML = inlineTypes.map(type => `<span data-type="${type}">Text</span>`).join(" ");
+    const inlineHost = document.createElement("div");
+    inlineParent.append(inlineList);
+    document.body.append(inlineParent);
+    inlineList.append(inlineHost);
+    const inlineView = new api.ListMindmapView({host: inlineHost, model: api.readListMindmap(inlineList), onExit: () => {}});
+    const rootStyle = document.documentElement.style.cssText;
+    const themeMode = document.documentElement.getAttribute("data-theme-mode");
+    const styleProperties = ["color", "background-image", "background-color", "border-bottom-style", "border-bottom-width",
+        "font-style", "font-weight", "text-decoration-line"];
+    const inlineStyle = (root: HTMLElement, type: string, properties: string[]) => {
+        const style = getComputedStyle(root.querySelector(`[data-type="${type}"]`));
+        return properties.map(property => style.getPropertyValue(property));
+    };
+    document.documentElement.style.setProperty("--b3-font-size-editor", "40px");
+    document.documentElement.style.setProperty("--b3-font-family-protyle", "monospace");
+    for (const mode of ["0", "1"]) {
+        document.documentElement.setAttribute("data-theme-mode", mode);
+        for (const name of ["blockref", "fileref", "link", "tag", "strong", "em", "s", "u", "mark"]) {
+            document.documentElement.style.setProperty(`--b3-protyle-inline-${name}-color`, mode === "0" ? "#334455" : "#ddeeff");
+        }
+        for (const width of [360, 760]) {
+            inlineParent.style.width = `${width}px`;
+            await settle();
+            const beforeFullscreen = inlineTypes.map(type => inlineStyle(inlineHost, type, [...styleProperties, "font-size", "font-family"]));
+            check.notEqual(inlineStyle(inlineHost, "block-ref", ["background-image"])[0], "none");
+            inlineTypes.forEach(type => check.deepEqual(inlineStyle(inlineHost, type, styleProperties),
+                inlineStyle(inlineText, type, styleProperties), type));
+            inlineHost.querySelector<HTMLButtonElement>('[aria-label="fullscreen"]').click();
+            await settle();
+            check.equal(inlineHost.parentElement, document.body);
+            inlineTypes.forEach((type, index) => check.deepEqual(inlineStyle(inlineHost, type,
+                [...styleProperties, "font-size", "font-family"]), beforeFullscreen[index], `${mode}/${width}/${type}`));
+            inlineHost.querySelector<HTMLButtonElement>('[aria-label="exitFullscreen"]').click();
+            await settle();
+        }
+    }
+    inlineView.destroy();
+    inlineParent.remove();
+    document.documentElement.style.cssText = rootStyle;
+    if (themeMode === null) {
+        document.documentElement.removeAttribute("data-theme-mode");
+    } else {
+        document.documentElement.setAttribute("data-theme-mode", themeMode);
+    }
+
     lute.SetArbitraryTaskListItemMarker(true);
     lute.SetDataTask(true);
     const taskParent = document.createElement("div");

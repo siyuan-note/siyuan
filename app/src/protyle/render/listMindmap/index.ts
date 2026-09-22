@@ -15,6 +15,7 @@ import {hideAllElements, hideElements} from "../../ui/hideElements";
 import {globalClickHideMenu} from "../../../boot/globalEvent/click";
 import {countBlockWord} from "../../../layout/status";
 import {openLink} from "../../../editor/openLink";
+import {suspendBlockPopover} from "../../../block/popover";
 import {matchHotKey} from "../../util/hotKey";
 import {setFullscreen} from "../../breadcrumb/action";
 import {
@@ -129,6 +130,7 @@ class ListMindmapController {
         this.view = new ListMindmapView({
             host: this.host, model: this.model, labels: window.siyuan.languages,
             onOpenLink: (href, event) => openLink(owner.app, href, event, event.ctrlKey || event.metaKey),
+            onInteractionStart: event => suspendBlockPopover(this.host, event),
             readOnly: !canEdit(owner, list),
             onFullscreen: (enter, button) => {
                 if (enter) {

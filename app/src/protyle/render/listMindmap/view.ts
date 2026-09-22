@@ -30,6 +30,7 @@ export interface ListMindmapViewOptions {
     onManageNodeColors?: () => void;
     onManageLineColors?: () => void;
     onFullscreen?: (enter: boolean, button: HTMLButtonElement) => void;
+    onInteractionStart?: (event: PointerEvent) => () => void;
     onEdit?: (id: string, contentHost: HTMLElement) => void;
     onRootTitleChange?: (title: string) => void;
     finishEdit?: () => boolean | void | Promise<boolean | void>;
@@ -121,6 +122,7 @@ export class ListMindmapView {
     private pointer?: PointerState;
     private pointerCapture?: HTMLElement;
     private pendingPointerId?: number;
+    private endInteraction?: () => void;
     private linkTimer = 0;
     private suppressLinkClick = false;
     private ghost?: HTMLDivElement;
@@ -149,6 +151,7 @@ export class ListMindmapView {
         this.toolbar = createElement("div", "list-mindmap__toolbar block__icons");
         this.toolbar.setAttribute("role", "toolbar");
         this.viewport = createElement("div", "list-mindmap__viewport");
+        this.viewport.setAttribute("data-prevent-swipe", "true");
         this.canvas = createElement("canvas", "list-mindmap__canvas");
         this.canvas.setAttribute("aria-hidden", "true");
         this.world = createElement("div", "list-mindmap__world");
@@ -185,15 +188,16 @@ export class ListMindmapView {
         this.listen(this.viewport, "pointercancel", this.cancelPointer);
         this.listen(this.viewport, "lostpointercapture", this.cancelPointer);
         this.listen(window, "pointerup", (event: PointerEvent) => {
-            if (this.pendingPointerId === event.pointerId) {
-                this.pendingPointerId = undefined;
+            if (this.pendingPointerId === event.pointerId && !this.pointer) {
+                this.cancelPointer();
             }
-        });
+        }, {capture: true});
         this.listen(window, "pointercancel", (event: PointerEvent) => {
             if (this.pendingPointerId === event.pointerId) {
-                this.pendingPointerId = undefined;
+                this.cancelPointer();
             }
-        });
+        }, {capture: true});
+        this.listen(window, "blur", this.cancelPointer);
         this.listen(this.viewport, "dblclick", this.doubleClick);
         this.listen(this.viewport, "click", this.contentClick);
         this.listen(this.viewport, "wheel", this.wheel, {passive: false});
@@ -918,7 +922,7 @@ export class ListMindmapView {
             event.stopPropagation();
             if (event.button === 0 && !this.options.readOnly && !this.pointer) {
                 event.preventDefault();
-                this.pendingPointerId = event.pointerId;
+                this.preparePointer(event);
                 this.finishThen(() => {
                     if (this.pendingPointerId === event.pointerId) {
                         this.beginRouteDrag(event, id, typeof part === "number" ? part : 0, endpoint);
@@ -1284,13 +1288,19 @@ export class ListMindmapView {
         this.suppressPanContextMenu = event.button === 2;
         const element = target.closest<HTMLElement>(".list-mindmap__node");
         const id = element?.dataset.mindmapId;
-        this.pendingPointerId = event.pointerId;
+        this.preparePointer(event);
         this.finishThen(() => {
             if (this.pendingPointerId === event.pointerId) {
                 this.beginPointer(event, id);
             }
         });
     };
+
+    private preparePointer(event: PointerEvent) {
+        this.pendingPointerId = event.pointerId;
+        // 按下时即暂停悬浮预览，等待编辑提交期间也不能补开旧浮窗。
+        this.endInteraction ||= this.options.onInteractionStart?.(event);
+    }
 
     private beginPointer(event: PointerEvent, id?: string) {
         if (this.panning || event.button === 2) {
@@ -1346,7 +1356,7 @@ export class ListMindmapView {
             this.pointerCapture = id ? event.target as HTMLElement : this.viewport;
             this.pointerCapture.setPointerCapture(event.pointerId);
         } catch {
-            this.pointer = undefined;
+            this.cancelPointer();
         }
     }
 
@@ -1585,6 +1595,8 @@ export class ListMindmapView {
             this.pointerCapture.releasePointerCapture(pointer.pointerId);
         }
         this.pointerCapture = undefined;
+        this.endInteraction?.();
+        this.endInteraction = undefined;
         this.ghost?.remove();
         this.ghost = undefined;
         this.viewport.classList.remove("list-mindmap__viewport--dragging");

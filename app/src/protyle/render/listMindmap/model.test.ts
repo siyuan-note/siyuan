@@ -1138,6 +1138,84 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.update(model);
     check.equal(nodeElement(beta).style.backgroundColor, "", "default removes the node color override");
     check.equal(nodeElement(beta).style.color, "", "default removes the node text color override");
+    await settle();
+    const lineContext = host.querySelector("canvas").getContext("2d");
+    const themedEdge = view.edges[view.edges.length - 1].to;
+    const originalRootStyle = model.metadata.nodes[model.root.id];
+    const originalEdgeStyle = model.metadata.nodes[themedEdge];
+    const originalScale = view.scale;
+    const themedProperties = ["color", "width", "hover-color", "hover-width", "selected-color", "selected-width"];
+    const setLineTheme = (property: string, value: string) =>
+        host.style.setProperty(`--b3-list-mindmap-line-${property}`, value);
+    const checkLine = (color: string, width: number) => {
+        view.draw();
+        check.equal(lineContext.strokeStyle, color);
+        check.equal(lineContext.lineWidth, width);
+    };
+    model.metadata.nodes[model.root.id] = {};
+    model.metadata.nodes[themedEdge] = {};
+    view.clearSelection();
+    view.setHoveredLine();
+    host.style.setProperty("--b3-border-color", "#314159");
+    view.scale = 0.5;
+    checkLine("#314159", 1.5);
+    view.setHoveredLine(`edge:${themedEdge}`);
+    checkLine("#314159", 4.5);
+    view.selectedEdge = themedEdge;
+    checkLine("#314159", 5.5);
+    view.setHoveredLine();
+    checkLine("#314159", 2.5);
+    view.clearSelection();
+    setLineTheme("color", "var(--b3-font-background1)");
+    setLineTheme("width", "2px");
+    checkLine("#334455", 2);
+    setLineTheme("hover-color", "#445566");
+    setLineTheme("hover-width", "4");
+    setLineTheme("selected-color", "#778899");
+    setLineTheme("selected-width", "6px");
+    view.setHoveredLine(`edge:${themedEdge}`);
+    checkLine("#445566", 4);
+    view.selectedEdge = themedEdge;
+    checkLine("#778899", 6);
+    view.setHoveredLine();
+    checkLine("#778899", 6);
+    view.clearSelection();
+    model.metadata.nodes[model.root.id] = {lineColor: "#aabbcc", lineWidth: 3};
+    checkLine("#aabbcc", 3);
+    model.metadata.nodes[themedEdge] = {lineColor: "#112233", lineWidth: 5};
+    checkLine("#112233", 5);
+    view.setHoveredLine(`edge:${themedEdge}`);
+    checkLine("#445566", 4);
+    setLineTheme("hover-color", "invalid-color");
+    for (const width of ["auto", "0", "-2", "Infinity", "2em", "3px-invalid"]) {
+        setLineTheme("hover-width", width);
+        checkLine("#112233", 8);
+    }
+    view.selectedEdge = themedEdge;
+    setLineTheme("selected-color", "initial");
+    setLineTheme("selected-width", "auto");
+    checkLine("#112233", 9);
+    view.clearSelection();
+    view.setHoveredLine();
+    model.metadata.nodes[model.root.id] = {};
+    model.metadata.nodes[themedEdge] = {};
+    setLineTheme("color", "invalid-color");
+    setLineTheme("width", "-1");
+    checkLine("#314159", 1.5);
+    view.scale = originalScale;
+    model.metadata.nodes[model.root.id] = originalRootStyle;
+    model.metadata.nodes[themedEdge] = originalEdgeStyle;
+    themedProperties.forEach(property => host.style.removeProperty(`--b3-list-mindmap-line-${property}`));
+    host.style.removeProperty("--b3-border-color");
+    view.draw();
+    const themedNodeBounds = nodeElement(themedEdge).getBoundingClientRect();
+    const themedPosition = view.positions.get(themedEdge);
+    const underlineY = viewport.getBoundingClientRect().top + view.offsetY +
+        (themedPosition.y + themedPosition.height) * view.scale;
+    check.ok(Math.abs(underlineY - themedNodeBounds.bottom - 3 * view.scale) < 0.1,
+        "node backgrounds leave a gap above their underline");
+    check.ok(Math.abs(centerPoint(addChildButton(themedEdge)).y - underlineY) <= view.scale + 1,
+        "node controls remain aligned with the underline");
     host.style.setProperty("--b3-font-background1", "#123456");
     model.metadata.nodes[model.root.id] = {lineColor: "var(--b3-font-background1)"};
     view.update(model);

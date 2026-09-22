@@ -561,15 +561,15 @@
 
   &__node:not(.list-mindmap__node--root) {
     > .list-mindmap__fold {
-      top: calc(100% - 8px);
+      top: calc(100% - 6px);
     }
 
     > .list-mindmap__add-child {
-      top: calc(100% - 8px);
+      top: calc(100% - 6px);
     }
 
     > .list-mindmap__add-bridge {
-      bottom: -12px;
+      bottom: -14px;
 
       // 补齐右下角斜向移出的路径，避免鼠标先落到连线上而收起操作按钮。
       &::before {
@@ -578,7 +578,7 @@
         right: 100%;
         bottom: 0;
         width: 12px;
-        height: 12px;
+        height: 14px;
       }
     }
   }

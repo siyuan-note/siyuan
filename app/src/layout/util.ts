@@ -331,16 +331,17 @@ const ensureAgentChatDock = (layout: Pick<Config.IUiLayout, "left" | "right" | "
 };
 
 const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
-    dockItem.forEach((existSubItem, index) => {
+    for (let index = dockItem.length - 1; index >= 0; index--) {
+        const existSubItem = dockItem[index];
         if ((window.siyuan.isPublish && (existSubItem.type === "inbox" || existSubItem.type === "agentChat")) ||
             (isDisabledFeature("ai") && existSubItem.type === "agentChat")) {
             dockItem.splice(index, 1);
-            return;
+            continue;
         }
         if (existSubItem.hotkeyLangId) {
             existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
         }
-    });
+    }
 };
 
 const JSONToDock = (json: any, app: App) => {

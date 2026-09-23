@@ -2387,7 +2387,7 @@ func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, lang
 	if compaction != nil {
 		if util.IsOpenAIResponsesProtocol(compaction.Protocol) && len(compaction.ResponseOutput) > 0 {
 			for _, item := range compaction.ResponseOutput {
-				input = append(input, append(json.RawMessage(nil), item...))
+				input = append(input, responseOutputItemToInput(item, compaction.Summary))
 			}
 		} else if strings.TrimSpace(compaction.Summary) != "" {
 			input = append(input, openai.ResponseInputMessage{
@@ -2430,7 +2430,7 @@ func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, lang
 		case "assistant":
 			if len(message.ResponseOutput) > 0 {
 				for _, item := range message.ResponseOutput {
-					input = append(input, append(json.RawMessage(nil), item...))
+					input = append(input, responseOutputItemToInput(item, message.Content))
 				}
 			} else {
 				content := message.Content
@@ -2480,6 +2480,40 @@ func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, lang
 		}
 	}
 	return input
+}
+
+func responseOutputItemToInput(item json.RawMessage, fallback string) any {
+	var output struct {
+		ID      string `json:"id"`
+		Type    string `json:"type"`
+		Content []struct {
+			Type    string `json:"type"`
+			Text    string `json:"text"`
+			Refusal string `json:"refusal"`
+		} `json:"content"`
+	}
+	if err := json.Unmarshal(item, &output); err != nil || output.Type != "message" || strings.HasPrefix(output.ID, "msg_") {
+		return append(json.RawMessage(nil), item...)
+	}
+
+	var content strings.Builder
+	for _, part := range output.Content {
+		switch part.Type {
+		case "output_text":
+			content.WriteString(part.Text)
+		case "refusal":
+			content.WriteString(part.Refusal)
+		}
+	}
+	if content.Len() == 0 {
+		content.WriteString(fallback)
+	}
+	if content.Len() == 0 {
+		content.WriteString(" ")
+	}
+	return openai.ResponseInputMessage{
+		Type: "message", Role: openai.ChatMessageRoleAssistant, Content: content.String(),
+	}
 }
 
 // agentMessagesToEntries 把后端运行期累积的 AgentMessage 派生为最小 entries，

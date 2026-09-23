@@ -32,6 +32,7 @@ const rendererSource = () => {
     // 使用实际事件入口、平台检测、选区恢复和事务生成，只替代网络及无关渲染。
     const source = `
         const Constants = {ZWSP: "\\u200b", ATTRIBUTE_EDITING: "data-editing"};
+        const dayjs = () => ({format: () => "20260923000000"});
         const getAVTemplateInteractiveElement = () => false;
         const getBlockSelectionModeElement = () => undefined;
         const revealTabsForTarget = () => {};

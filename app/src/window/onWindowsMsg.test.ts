@@ -11,6 +11,7 @@ test("system lock acknowledges only after all editor input has been submitted", 
     const submissions: Array<() => void> = [];
     const sent: Array<{channel: string, id: number}> = [];
     const dependencies = {
+        Constants: {SIYUAN_WINDOW_WORKSPACE_FLUSH: "siyuan-window-workspace-flush"},
         getAllEditor: () => [undefined, ...[1, 2].map(() => ({
             protyle: {wysiwyg: {}},
             flushPendingTransactions: () => new Promise<void>(resolve => submissions.push(resolve)),

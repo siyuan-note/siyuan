@@ -24,6 +24,7 @@ const browserCases = async (source: string) => {
         },
         Constants: {BLOCK_HINT_KEYS: ["((", "[["], INLINE_TYPE: ["strong"], ZWSP: "\u200b"},
         hideElements: () => {}, getUndoFocusContext: (): undefined => undefined, focusByRange: () => {},
+        isProtyleListItemFragment: () => false,
         hasClosestBlock: (node: Node) => (node instanceof Element ? node : node.parentElement).closest("[data-node-id]"),
         insertHTML: (html: string) => { inserted = html; },
     };

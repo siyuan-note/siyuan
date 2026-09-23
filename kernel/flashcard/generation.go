@@ -430,6 +430,7 @@ func (store *Store) reconcileSourceChanges(ctx context.Context, operationID stri
 			card.Flag = current.Flag
 			card.PresetOverrideID = current.PresetOverrideID
 			card.PriorityOverride = current.PriorityOverride
+			card.EditLater = current.EditLater
 			stateRevision, stateFound, stateErr := store.projection.CurrentEntity(ctx, EntityReviewState, card.ID)
 			if stateErr != nil {
 				return nil, ReconcileResult{}, stateErr

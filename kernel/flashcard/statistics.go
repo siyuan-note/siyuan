@@ -298,7 +298,7 @@ func (projection *Projection) collectCurrentStatistics(ctx context.Context, requ
 	futureStart := startOfStatisticsDay(time.UnixMilli(request.Now).In(location))
 	futureEnd := futureStart.AddDate(0, 0, request.FutureDays)
 	futureCounts := make(map[int64]int)
-	eligible, err := projection.SearchCards(ctx, nil, CardSearchOptions{Now: request.Now})
+	eligible, err := projection.SearchCards(ctx, nil, CardSearchOptions{Now: request.Now, ForStudy: true})
 	if err != nil {
 		return err
 	}

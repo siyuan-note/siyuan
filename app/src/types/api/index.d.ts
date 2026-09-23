@@ -1044,6 +1044,22 @@ export type FindAssetReferencesRequestInput = { "path"?: string; "paths"?: Array
 
 export type FindReplaceRequestInput = { "groupBy"?: number | null; "ids": Array<string>; "k": string; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "r": string; "replaceTypes"?: Record<string, boolean> | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
 
+export type FlashcardCard = { "createdAt": number; "editLater"?: FlashcardEditLater; "flag": number; "generationStatus": string; "id": string; "presetOverrideID"?: string; "priorityOverride"?: string; "sourceID": string; "templateID": string; "updatedAt": number; "variantData"?: JSONValue; "variantKey": string; };
+
+export type FlashcardEditLater = { "note": string; "updatedAt": number; };
+
+export type FlashcardEditLaterData = { "cardID": string; "editLater": FlashcardEditLater | null; "revisionID": string; };
+
+export type FlashcardQueryExpressionFieldsInput = { "children"?: Array<FlashcardQueryExpressionFieldsInput> | null; "comparator"?: string | null; "field"?: string | null; "operator": string; "value"?: JSONValue | null; };
+
+export type FlashcardQueryInput = { "root": FlashcardQueryExpressionFieldsInput; "version": number; };
+
+export type FlashcardReviewState = { "buriedReason"?: string; "buriedUntil"?: number; "cardID": string; "difficulty": number; "due": number; "elapsedDays": number; "lapses": number; "lastReview"?: number; "reps": number; "scheduledDays": number; "stability": number; "state": string; "stateRevisionID": string; "suspended": boolean; };
+
+export type FlashcardSearchOptionsInput = { "groupBySource"?: boolean | null; "includeBuried"?: boolean | null; "includeConflicts"?: boolean | null; "includeInactive"?: boolean | null; "includePaused"?: boolean | null; "includeSuspended"?: boolean | null; "limit"?: number | null; "now"?: number | null; "offset"?: number | null; "returnCards"?: boolean | null; };
+
+export type FlashcardSearchResult = { "card": FlashcardCard; "cardTagIDs": Array<string> | null; "defaultPresetID": string; "effectivePresetID": string; "effectivePriority": string; "effectiveTagIDs": Array<string> | null; "inheritedPriority": string; "reviewState": FlashcardReviewState; "sourceAvailable": boolean; "sourceBlockID"?: string; "sourceNotebookID"?: string; "sourcePath"?: string; "sourcePriority": string; "sourceRootID"?: string; "sourceStatus": string; "sourceTagIDs": Array<string> | null; "sourceTitle"?: string; "sourceType": string; };
+
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
 export type FullTextSearchBlockData = { "blocks": Array<SearchBlock | null> | null; "docMode": boolean; "matchedBlockCount": number; "matchedRootCount": number; "pageCount": number; };
@@ -1466,6 +1482,10 @@ export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": stri
 
 export type PutFileRequestInput = { "app"?: string; "file"?: Blob; "isDir"?: string; "modTime"?: string; "path"?: string; };
 
+export type QueryFlashcardsData = { "cards": Array<FlashcardSearchResult>; };
+
+export type QueryFlashcardsRequestInput = { "options"?: FlashcardSearchOptionsInput | null; "query"?: FlashcardQueryInput | null; };
+
 export type QuickFlashcardSourcesData = { "action": "created" | "removed"; "cardIDs": Array<string>; "sourceIDs": Array<string>; };
 
 export type ReadDirectoryRequestInput = { "path": string; };
@@ -1729,6 +1749,8 @@ export type SetEntryVisibilityRequestInput = { "active"?: string | null; "profil
 export type SetExportRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "docxTemplate"?: string | null; "fileAnnotationRefMode"?: number | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
 export type SetFiletreeRequestInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickExpand"?: boolean | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocClickExpand"?: boolean | null; "recentDocsMaxListCount"?: number | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
+
+export type SetFlashcardEditLaterRequestInput = { "cardID": string; "changedAt": number; "enabled": boolean; "expectedRevisionID"?: string; "note"?: string; "operationID": string; };
 
 export type SetFlashcardRequestInput = { "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "openMode"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
 
@@ -2461,7 +2483,6 @@ export type APILegacyPOSTPath =
     "/api/flashcard/previewAnkiPackage" |
     "/api/flashcard/previewMigration" |
     "/api/flashcard/previewReviewSet" |
-    "/api/flashcard/queryCards" |
     "/api/flashcard/reconcileSource" |
     "/api/flashcard/resolveConflict" |
     "/api/flashcard/restoreSourceHistory" |
@@ -4050,6 +4071,16 @@ export interface APIPOSTRoutes {
         request: CreateQuickFlashcardSourcesRequestInput;
         response: { "code": 0; "data": QuickFlashcardSourcesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+    };
+    "/api/flashcard/queryCards": {
+        request: QueryFlashcardsRequestInput;
+        response: { "code": 0; "data": QueryFlashcardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/flashcard/setCardEditLater": {
+        request: SetFlashcardEditLaterRequestInput;
+        response: { "code": 0; "data": FlashcardEditLaterData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/format/autoSpace": {
         request: TrimmedIDRequestInput;

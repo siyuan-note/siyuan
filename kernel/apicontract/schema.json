@@ -24859,6 +24859,444 @@
       ],
       "additionalProperties": false
     },
+    "FlashcardCard": {
+      "type": "object",
+      "properties": {
+        "createdAt": {
+          "type": "integer"
+        },
+        "editLater": {
+          "$ref": "#/$defs/FlashcardEditLater"
+        },
+        "flag": {
+          "type": "integer"
+        },
+        "generationStatus": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "presetOverrideID": {
+          "type": "string"
+        },
+        "priorityOverride": {
+          "type": "string"
+        },
+        "sourceID": {
+          "type": "string"
+        },
+        "templateID": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "integer"
+        },
+        "variantData": {
+          "$ref": "#/$defs/JSONValue"
+        },
+        "variantKey": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "createdAt",
+        "flag",
+        "generationStatus",
+        "id",
+        "sourceID",
+        "templateID",
+        "updatedAt",
+        "variantKey"
+      ],
+      "additionalProperties": false
+    },
+    "FlashcardEditLater": {
+      "type": "object",
+      "properties": {
+        "note": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "note",
+        "updatedAt"
+      ],
+      "additionalProperties": false
+    },
+    "FlashcardEditLaterData": {
+      "type": "object",
+      "properties": {
+        "cardID": {
+          "type": "string"
+        },
+        "editLater": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FlashcardEditLater"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revisionID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cardID",
+        "editLater",
+        "revisionID"
+      ],
+      "additionalProperties": false
+    },
+    "FlashcardQueryExpressionFieldsInput": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/FlashcardQueryExpressionFieldsInput"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comparator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operator": {
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JSONValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "operator"
+      ],
+      "additionalProperties": false
+    },
+    "FlashcardQueryInput": {
+      "type": "object",
+      "properties": {
+        "root": {
+          "$ref": "#/$defs/FlashcardQueryExpressionFieldsInput"
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "root",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "FlashcardReviewState": {
+      "type": "object",
+      "properties": {
+        "buriedReason": {
+          "type": "string"
+        },
+        "buriedUntil": {
+          "type": "integer"
+        },
+        "cardID": {
+          "type": "string"
+        },
+        "difficulty": {
+          "type": "number"
+        },
+        "due": {
+          "type": "integer"
+        },
+        "elapsedDays": {
+          "type": "integer"
+        },
+        "lapses": {
+          "type": "integer"
+        },
+        "lastReview": {
+          "type": "integer"
+        },
+        "reps": {
+          "type": "integer"
+        },
+        "scheduledDays": {
+          "type": "integer"
+        },
+        "stability": {
+          "type": "number"
+        },
+        "state": {
+          "type": "string"
+        },
+        "stateRevisionID": {
+          "type": "string"
+        },
+        "suspended": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cardID",
+        "difficulty",
+        "due",
+        "elapsedDays",
+        "lapses",
+        "reps",
+        "scheduledDays",
+        "stability",
+        "state",
+        "stateRevisionID",
+        "suspended"
+      ],
+      "additionalProperties": false
+    },
+    "FlashcardSearchOptionsInput": {
+      "type": "object",
+      "properties": {
+        "groupBySource": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includeBuried": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includeConflicts": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includeInactive": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includePaused": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includeSuspended": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "now": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "offset": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "returnCards": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "FlashcardSearchResult": {
+      "type": "object",
+      "properties": {
+        "card": {
+          "$ref": "#/$defs/FlashcardCard"
+        },
+        "cardTagIDs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "defaultPresetID": {
+          "type": "string"
+        },
+        "effectivePresetID": {
+          "type": "string"
+        },
+        "effectivePriority": {
+          "type": "string"
+        },
+        "effectiveTagIDs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inheritedPriority": {
+          "type": "string"
+        },
+        "reviewState": {
+          "$ref": "#/$defs/FlashcardReviewState"
+        },
+        "sourceAvailable": {
+          "type": "boolean"
+        },
+        "sourceBlockID": {
+          "type": "string"
+        },
+        "sourceNotebookID": {
+          "type": "string"
+        },
+        "sourcePath": {
+          "type": "string"
+        },
+        "sourcePriority": {
+          "type": "string"
+        },
+        "sourceRootID": {
+          "type": "string"
+        },
+        "sourceStatus": {
+          "type": "string"
+        },
+        "sourceTagIDs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sourceTitle": {
+          "type": "string"
+        },
+        "sourceType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "card",
+        "cardTagIDs",
+        "defaultPresetID",
+        "effectivePresetID",
+        "effectivePriority",
+        "effectiveTagIDs",
+        "inheritedPriority",
+        "reviewState",
+        "sourceAvailable",
+        "sourcePriority",
+        "sourceStatus",
+        "sourceTagIDs",
+        "sourceType"
+      ],
+      "additionalProperties": false
+    },
     "FullBlockInfo": {
       "type": "object",
       "properties": {
@@ -33022,6 +33460,47 @@
       },
       "additionalProperties": false
     },
+    "QueryFlashcardsData": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FlashcardSearchResult"
+          }
+        }
+      },
+      "required": [
+        "cards"
+      ],
+      "additionalProperties": false
+    },
+    "QueryFlashcardsRequestInput": {
+      "type": "object",
+      "properties": {
+        "options": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FlashcardSearchOptionsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "query": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FlashcardQueryInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "QuickFlashcardSourcesData": {
       "type": "object",
       "properties": {
@@ -38584,6 +39063,36 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "SetFlashcardEditLaterRequestInput": {
+      "type": "object",
+      "properties": {
+        "cardID": {
+          "type": "string"
+        },
+        "changedAt": {
+          "type": "integer"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "expectedRevisionID": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "operationID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cardID",
+        "changedAt",
+        "enabled",
+        "operationID"
+      ],
       "additionalProperties": false
     },
     "SetFlashcardRequestInput": {
@@ -134599,6 +135108,156 @@
               },
               "data": {
                 "$ref": "#/$defs/QuickFlashcardSourcesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/flashcard/queryCards",
+      "handler": "queryFlashcards",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/QueryFlashcardsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/QueryFlashcardsData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/flashcard/setCardEditLater",
+      "handler": "setFlashcardEditLater",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetFlashcardEditLaterRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/FlashcardEditLaterData"
               },
               "msg": {
                 "type": "string"

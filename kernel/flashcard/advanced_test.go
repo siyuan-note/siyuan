@@ -154,6 +154,10 @@ func TestUpdateAdvancedSourcePreservesStableCardSchedule(t *testing.T) {
 	request := AdvancedSourceUpdateRequest{OperationID: "advanced-update-config", SourceID: "source-update",
 		ExpectedRevision: created.SourceRevision.RevisionID, Mode: AdvancedModeOrderedSingle,
 		BlockIDs: []string{"block-second", "block-first"}, UpdatedAt: 20}
+	if _, err = store.SetCardEditLater(ctx, SetCardEditLaterRequest{OperationID: "advanced-edit-later",
+		CardID: cardID, Enabled: true, Note: "Revise the steps", ChangedAt: 16}); err != nil {
+		t.Fatal(err)
+	}
 	updated, err := store.UpdateAdvancedSource(ctx, request)
 	if err != nil {
 		t.Fatal(err)
@@ -164,6 +168,12 @@ func TestUpdateAdvancedSourcePreservesStableCardSchedule(t *testing.T) {
 	stateRevision, found, err = store.Projection().CurrentEntity(ctx, EntityReviewState, cardID)
 	if err != nil || !found || decodeStrictJSON(stateRevision.Payload, &state) != nil || state.Due != 999 {
 		t.Fatalf("advanced source update changed the review schedule: state=%+v found=%v err=%v", state, found, err)
+	}
+	cardRevision, found, err := store.Projection().CurrentEntity(ctx, EntityCard, cardID)
+	var editedCard Card
+	if err != nil || !found || decodeStrictJSON(cardRevision.Payload, &editedCard) != nil ||
+		editedCard.EditLater == nil || editedCard.EditLater.Note != "Revise the steps" {
+		t.Fatalf("advanced source update lost the pending edit: %+v %v", editedCard, err)
 	}
 	references, err := store.Projection().CardSourceReferences(ctx, request.SourceID)
 	if err != nil || len(references) != 2 || references[0].EntityID != "block-second" ||

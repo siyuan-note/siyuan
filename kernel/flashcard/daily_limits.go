@@ -266,7 +266,7 @@ func (projection *Projection) eligibleCardsByID(ctx context.Context, cardIDs []s
 		}
 		query := QueryAST{Version: QueryVersion, Root: QueryExpression{Operator: QueryPredicate,
 			Field: "cardID", Comparator: QueryIn, Value: value}}
-		results, err := projection.SearchCards(ctx, &query, CardSearchOptions{Now: now})
+		results, err := projection.SearchCards(ctx, &query, CardSearchOptions{Now: now, ForStudy: true})
 		if err != nil {
 			return nil, err
 		}

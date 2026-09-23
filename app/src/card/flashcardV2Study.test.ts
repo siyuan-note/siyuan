@@ -53,8 +53,10 @@ const queued = (id: string, status = "reviewed", generationStatus = "active") =>
 test("weak practice uses the last accepted rating and excludes skipped or unavailable cards", () => {
     const tracker = new FlashcardV2WeakCards();
     const queue = [queued("a"), queued("b"), queued("c"), queued("unseen", "queued"),
-        queued("deleted", "reviewed", "deleted"), queued("skipped", "skipped")];
-    ["a", "b", "deleted", "skipped"].forEach((id) => tracker.record(id, "again"));
+        queued("deleted", "reviewed", "deleted"), queued("skipped", "skipped"),
+        {card: {id: "pending", generationStatus: "active", editLater: {note: "", updatedAt: 1}},
+            sessionCard: {status: "reviewed"}}];
+    ["a", "b", "deleted", "skipped", "pending"].forEach((id) => tracker.record(id, "again"));
     tracker.record("c", "hard");
     tracker.record("a", "good");
     assert.deepEqual(tracker.cards(queue), ["b", "c"]);

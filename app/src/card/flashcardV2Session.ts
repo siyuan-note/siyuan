@@ -50,7 +50,9 @@ import {matchHotKey} from "../protyle/util/hotKey";
 import {flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
 import {openFlashcardReviewTab} from "./openFlashcardReviewTab";
-import {flashcardV2QueueProgress, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
+import {deferFlashcardV2QueueCard, flashcardV2QueueProgress, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
+import {openFlashcardV2Due} from "./flashcardV2Due";
+import {openFlashcardV2EditLater, type IFlashcardV2EditLater} from "./flashcardV2EditLater";
 import {FlashcardV2WeakCards, flashcardV2SubsetOptions} from "./flashcardV2Study";
 
 interface IFlashcardV2SessionQueueCard {
@@ -66,6 +68,7 @@ interface IFlashcardV2SessionQueueCard {
         sourceID: string;
         flag: number;
         generationStatus: "active" | "disabledByTemplate" | "orphaned" | "deleted";
+        editLater?: IFlashcardV2EditLater;
     };
     reviewState: {
         stateRevisionID: string;
@@ -74,6 +77,10 @@ interface IFlashcardV2SessionQueueCard {
         buriedUntil?: number;
     };
 }
+
+const openPendingEditList = () => {
+    void import("./flashcardV2").then(({openFlashcardV2PendingEdits}) => openFlashcardV2PendingEdits());
+};
 
 interface IFlashcardV2ReviewResult {
     event: {
@@ -409,7 +416,7 @@ const setActionsVisible = (dialog: IFlashcardSessionSurface, revealed: boolean) 
 const setReviewActionsEnabled = (dialog: IFlashcardSessionSurface, enabled: boolean) => {
     const contentElement = dialog.element.querySelector(".card__block");
     contentElement?.setAttribute("aria-busy", enabled ? "false" : "true");
-    dialog.element.querySelectorAll<HTMLButtonElement>("[data-type=show], [data-rating]").forEach((button) => {
+    dialog.element.querySelectorAll<HTMLButtonElement>("[data-type=show], [data-type=study-later], [data-rating]").forEach((button) => {
         button.disabled = !enabled;
     });
 };
@@ -496,45 +503,10 @@ const openFlashcardV2SessionTags = (targetType: "source" | "card", targetID: str
     });
 };
 
-const openFlashcardV2SessionDue = (cardID: string, due: number, callback: () => void) => {
-    const date = new Date(due || Date.now());
-    const value = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    const dueDialog = new Dialog({
-        title: window.siyuan.languages.setDueTime,
-        width: isMobile() ? "92vw" : "420px",
-        content: `<div class="b3-dialog__content card__v2-form"><input class="b3-text-field fn__block" type="datetime-local" value="${value}"></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-    });
-    const input = dueDialog.element.querySelector("input") as HTMLInputElement;
-    const buttons = dueDialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
-    buttons[0].addEventListener("click", () => dueDialog.destroy());
-    buttons[1].addEventListener("click", () => {
-        const nextDue = new Date(input.value).getTime();
-        if (!Number.isFinite(nextDue)) {
-            input.focus();
-            return;
-        }
-        fetchPost("/api/flashcard/manageCards", {
-            operationID: genUUID(),
-            cardIDs: [cardID],
-            action: "setDue",
-            changedAt: Date.now(),
-            due: nextDue,
-        }, () => {
-            dueDialog.destroy();
-            callback();
-        });
-    });
-    input.focus();
-};
-
 const sessionCompletionContent = (canUndo: boolean, weakCount = 0) => `<div class="card__empty-icon">🔮</div>
 <span>${window.siyuan.languages.noDueCard}</span>
 ${weakCount ? `<div class="fn__hr"></div><span class="ft__on-surface">${window.siyuan.languages.flashcardReviewReinforcementTip}</span>` : ""}
-<span class="card__v2-completion-actions">${weakCount ? `<button data-type="practice-weak" class="b3-button b3-button--outline">${escapeHtml(window.siyuan.languages.flashcardRetryWeak.replace("${count}", weakCount.toString()))}</button>` : ""}${canUndo ? `<button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button>` : ""}<button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.flashcardFinishSession}</button></span>`;
+<span class="card__v2-completion-actions"><button data-type="pending-edits" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardPendingEdits}</button>${weakCount ? `<button data-type="practice-weak" class="b3-button b3-button--outline">${escapeHtml(window.siyuan.languages.flashcardRetryWeak.replace("${count}", weakCount.toString()))}</button>` : ""}${canUndo ? `<button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button>` : ""}<button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.flashcardFinishSession}</button></span>`;
 
 const sessionContent = () => `<div class="b3-dialog__content fn__flex-column card__v2-session">
 <div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
@@ -557,7 +529,8 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
 <div data-flashcard-action="reveal" class="fn__flex card__action card__v2-session-actions">
     <button data-type="show" class="b3-button b3-button--text" disabled><div class="card__icon">👀</div>${window.siyuan.languages.cardShowAnswer}</button>
     <span class="fn__space"></span>
-    <button data-type="skip" class="b3-button b3-button--cancel"><div class="card__icon">💤</div>${window.siyuan.languages.skip}</button>
+    <button data-type="study-later" class="b3-button b3-button--cancel ariaLabel" aria-label="${window.siyuan.languages.flashcardStudyLaterTip}" disabled><div class="card__icon">💤</div>${window.siyuan.languages.flashcardStudyLater}</button>
+    <button data-type="skip" class="fn__none">${window.siyuan.languages.skip}</button>
 </div>
 <div data-flashcard-action="ratings" class="fn__flex card__action card__v2-session-actions fn__none">
     <button data-rating="again" class="b3-button b3-button--error" disabled><div class="card__icon">🙈</div>${window.siyuan.languages.cardRatingAgain}</button>
@@ -837,7 +810,7 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0) => {
     load();
 };
 
-const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => void) => {
+export const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => void) => {
     const editorHolder: { current?: Protyle } = {};
     const dialog = new Dialog({
         title: window.siyuan.languages.edit,
@@ -968,6 +941,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     completionDialog.element.setAttribute("data-flashcard-v2-review", "");
                     completionDialog.element.querySelector('[data-type="finish"]').addEventListener("click", () =>
                         completionDialog.destroy());
+                    completionDialog.element.querySelector('[data-type="pending-edits"]').addEventListener("click", () => {
+                        if (mount) {
+                            openPendingEditList();
+                        } else {
+                            completionDialog.dispose(openPendingEditList);
+                        }
+                    });
                     releaseOpening();
                 }).then(() => {
                     if (!completionShown) {
@@ -998,6 +978,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             };
             let lastReview: IFlashcardV2LastReview | undefined;
             const weakCards = new FlashcardV2WeakCards();
+            const deferredCardIDs: string[] = [];
             let renderGeneration = 0;
             let sessionEndEmitted = false;
             const flagDefinitions = new Map<number, string>();
@@ -1077,6 +1058,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 });
             };
             const renderCurrent = () => {
+                const deferred = deferredCardIDs.indexOf(queue[index].card.id);
+                if (deferred >= 0) {
+                    deferredCardIDs.splice(deferred, 1);
+                }
                 clearWaiting();
                 completedPending = false;
                 const generation = ++renderGeneration;
@@ -1146,7 +1131,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     refreshed = true;
                     refreshFlashcardV2Queue(queue, response.data.cards as IFlashcardV2SessionQueueCard[]);
                     requestPending = false;
-                    const selection = selectFlashcardV2Queue(queue, Date.now());
+                    const selection = selectFlashcardV2Queue(queue, Date.now(), deferredCardIDs);
                     index = selection.index < 0 ? queue.length : selection.index;
                     if (index < queue.length) {
                         renderCurrent();
@@ -1357,6 +1342,35 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     label: window.siyuan.languages.edit,
                     click: () => (dialog.element.querySelector('[data-type="edit-source"]') as HTMLElement).click(),
                 });
+                menu.addItem({
+                    id: "flashcardV2EditLater",
+                    icon: "iconEdit",
+                    label: window.siyuan.languages.flashcardEditLater,
+                    click: () => {
+                        requestPending = true;
+                        void openFlashcardV2EditLater(current.card.id, () => {
+                            lastReview = undefined;
+                            setUndoVisible(dialog, false);
+                            nextCard();
+                        }, () => !sessionFinished).finally(() => { requestPending = false; });
+                    },
+                });
+                menu.addItem({
+                    id: "flashcardV2StudyLater",
+                    label: window.siyuan.languages.flashcardStudyLater,
+                    click: () => (dialog.element.querySelector('[data-type="study-later"]') as HTMLElement).click(),
+                });
+                menu.addItem({
+                    id: "flashcardV2Skip",
+                    label: window.siyuan.languages.skip,
+                    click: () => (dialog.element.querySelector('[data-type="skip"]') as HTMLElement).click(),
+                });
+                menu.addItem({
+                    id: "flashcardV2PendingEdits",
+                    icon: "iconEdit",
+                    label: window.siyuan.languages.flashcardPendingEdits,
+                    click: openPendingEditList,
+                });
                 const buried = (current.reviewState.buriedUntil || 0) > Date.now();
                 menu.addItem({
                     id: "flashcardV2Bury",
@@ -1422,8 +1436,11 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     id: "flashcardV2SetDue",
                     icon: "iconCalendar",
                     label: window.siyuan.languages.setDueTime,
-                    click: () => openFlashcardV2SessionDue(current.card.id, current.reviewState.due,
+                    click: () => openFlashcardV2Due([current.card.id], current.reviewState.due,
                         () => {
+                            if (sessionFinished) {
+                                return;
+                            }
                             requestPending = true;
                             skipManagedSessionCards([current.card.id], "dueChanged");
                         }),
@@ -1502,6 +1519,14 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             });
             dialog.element.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
+                if (target.closest('[data-type="pending-edits"]')) {
+                    if (mount) {
+                        openPendingEditList();
+                    } else {
+                        dialog.dispose(openPendingEditList);
+                    }
+                    return;
+                }
                 const ratingElement = target.closest("[data-rating]") as HTMLElement;
                 const ratingsElement = dialog.element.querySelector('[data-flashcard-action="ratings"]');
                 if (ratingElement && !ratingsElement.classList.contains("fn__none") && canUseReviewActions()) {
@@ -1700,6 +1725,14 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 }
                 if (target.closest('[data-type="show"]')) {
                     reveal();
+                    return;
+                }
+                if (target.closest('[data-type="study-later"]') && canUseReviewActions()) {
+                    if (deferFlashcardV2QueueCard(queue, index, Date.now(), deferredCardIDs)) {
+                        nextCard();
+                    } else {
+                        showMessage(window.siyuan.languages.flashcardStudyLaterUnavailable);
+                    }
                     return;
                 }
                 if (target.closest('[data-type="skip"]') && !requestPending && index < queue.length) {

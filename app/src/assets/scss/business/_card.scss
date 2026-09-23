@@ -1,6 +1,23 @@
 @use "../util/function";
 
 .card {
+  &__v2-edit-later-actions {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  &__v2-edit-later-note {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  &__v2-edit-later-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
   &__main {
     @extend .fn__flex-column;
     box-sizing: border-box;
@@ -846,6 +863,7 @@
 
       > .b3-list-item__meta {
         margin: 0;
+        min-width: max-content;
       }
 
       > .b3-select {
@@ -1134,8 +1152,8 @@
     }
 
     &-selection > .b3-select {
-      flex: 1 1 160px;
-      max-width: none;
+        flex: 1 1 160px;
+        max-width: none;
     }
 
     &-pagination {

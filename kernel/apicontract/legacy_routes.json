@@ -23,7 +23,6 @@
   {"method":"POST","path":"/api/flashcard/previewAnkiPackage","handler":"previewAnkiFlashcardPackage"},
   {"method":"POST","path":"/api/flashcard/previewMigration","handler":"previewFlashcardMigration"},
   {"method":"POST","path":"/api/flashcard/previewReviewSet","handler":"previewFlashcardReviewSet"},
-  {"method":"POST","path":"/api/flashcard/queryCards","handler":"queryFlashcards"},
   {"method":"POST","path":"/api/flashcard/reconcileSource","handler":"reconcileFlashcardSource"},
   {"method":"POST","path":"/api/flashcard/resolveConflict","handler":"resolveFlashcardConflict"},
   {"method":"POST","path":"/api/flashcard/restoreSourceHistory","handler":"restoreFlashcardSourceHistory"},

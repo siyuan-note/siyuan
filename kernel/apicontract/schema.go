@@ -327,6 +327,9 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 		}}
 		return ref, nil
 	}
+	if t == reflect.TypeFor[FlashcardQueryExpression]() {
+		return b.schema(reflect.TypeFor[FlashcardQueryExpressionFields](), input)
+	}
 	if t == reflect.TypeFor[Base64Bytes]() {
 		if input {
 			return nullable(&Schema{AnyOf: []*Schema{{Type: "string"}, {Type: "array", Items: &Schema{Type: "integer"}}}}), nil

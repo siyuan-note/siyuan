@@ -600,6 +600,7 @@ func (store *Store) importAnkiNote(ctx context.Context, request AnkiImportReques
 			card.Flag = preserved.Flag
 			card.PresetOverrideID = preserved.PresetOverrideID
 			card.PriorityOverride = preserved.PriorityOverride
+			card.EditLater = preserved.EditLater
 			if !sameEntityPayload(preserved, card) {
 				card.UpdatedAt = request.ImportedAt
 			}

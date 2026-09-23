@@ -181,7 +181,7 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 	if mode == "normal" && (request.IncludeSuspended || request.IncludeBuried || request.IncludePaused) {
 		return StudyQueueResult{}, errors.New("normal flashcard review cannot include paused, suspended or buried cards")
 	}
-	options := CardSearchOptions{Now: request.Now}
+	options := CardSearchOptions{Now: request.Now, ForStudy: true}
 	if mode == "reinforcement" {
 		options.IncludeSuspended = request.IncludeSuspended
 		options.IncludeBuried = request.IncludeBuried
@@ -730,6 +730,10 @@ func (projection *Projection) SessionQueue(ctx context.Context, sessionID string
 		}
 		if err = decodeStrictJSON(cardPayload, &result.Card); err != nil {
 			return nil, err
+		}
+		if result.Card.EditLater != nil && (result.SessionCard.Status == "queued" || result.SessionCard.Status == "shown") {
+			result.SessionCard.Status = "skipped"
+			result.SessionCard.SkipReason = "edit-later"
 		}
 		if !sourceAvailable && result.Card.GenerationStatus == GenerationActive {
 			result.Card.GenerationStatus = GenerationOrphaned

@@ -124,11 +124,6 @@ type reconcileFlashcardSourceRequest struct {
 	UpdatedAt   int64  `json:"updatedAt"`
 }
 
-type queryFlashcardsRequest struct {
-	Query   *flashcardv2.QueryAST         `json:"query,omitempty"`
-	Options flashcardv2.CardSearchOptions `json:"options"`
-}
-
 type previewFlashcardReviewSetRequest struct {
 	ReviewSetID string                        `json:"reviewSetID"`
 	Query       *flashcardv2.QueryAST         `json:"query,omitempty"`
@@ -389,20 +384,17 @@ func updateBasicFlashcardDirection(c *gin.Context) {
 	ret.Data = result
 }
 
-func queryFlashcards(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	request := &queryFlashcardsRequest{}
-	if !bindFlashcardRequest(c, ret, request) {
-		return
-	}
-	results, err := model.QueryFlashcardV2Cards(c.Request.Context(), request.Query, request.Options)
+var setFlashcardEditLater = contractHandler(apicontract.SetFlashcardEditLater, func(c *gin.Context,
+	request apicontract.SetFlashcardEditLaterRequest) apicontract.Response[apicontract.FlashcardEditLaterData] {
+	result, err := model.SetFlashcardV2CardEditLater(c.Request.Context(), flashcardv2.SetCardEditLaterRequest{
+		OperationID: request.OperationID, CardID: request.CardID, Enabled: request.Enabled, Note: request.Note,
+		ChangedAt: request.ChangedAt, ExpectedRevisionID: request.ExpectedRevisionID,
+	})
 	if err != nil {
-		setFlashcardAPIError(ret, err)
-		return
+		return apicontract.Failure[apicontract.FlashcardEditLaterData](-1, err.Error())
 	}
-	ret.Data = map[string]any{"cards": results}
-}
+	return apicontract.Success(flashcardEditLaterData(result))
+})
 
 func previewFlashcardReviewSet(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

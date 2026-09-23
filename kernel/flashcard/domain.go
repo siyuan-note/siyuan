@@ -173,8 +173,15 @@ type Card struct {
 	Flag             int              `json:"flag"`
 	PresetOverrideID string           `json:"presetOverrideID,omitempty"`
 	PriorityOverride string           `json:"priorityOverride,omitempty"`
+	EditLater        *CardEditLater   `json:"editLater,omitempty"`
 	CreatedAt        int64            `json:"createdAt"`
 	UpdatedAt        int64            `json:"updatedAt"`
+}
+
+// CardEditLater 记录当前卡片的编辑待办，不修改排期或同源卡片。
+type CardEditLater struct {
+	Note      string `json:"note"`
+	UpdatedAt int64  `json:"updatedAt"`
 }
 
 // ReviewStateSnapshot 保存一张卡在某个时刻的完整 FSRS 状态。

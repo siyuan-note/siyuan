@@ -108,6 +108,9 @@ func (store *Store) ReviewCard(ctx context.Context, request ReviewRequest) (Revi
 	if card.GenerationStatus != GenerationActive {
 		return ReviewResult{}, fmt.Errorf("flashcard [%s] is not active", card.ID)
 	}
+	if card.EditLater != nil {
+		return ReviewResult{}, errors.New("flashcard is waiting for editing")
+	}
 	sourceRevision, found, err := store.projection.CurrentEntity(ctx, EntityCardSource, card.SourceID)
 	if err != nil {
 		return ReviewResult{}, err

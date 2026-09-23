@@ -417,6 +417,7 @@ func (store *Store) advancedCardMutations(ctx context.Context, request AdvancedS
 			}
 			card.ID, card.CreatedAt, card.Flag = current.ID, current.CreatedAt, current.Flag
 			card.PresetOverrideID, card.PriorityOverride = current.PresetOverrideID, current.PriorityOverride
+			card.EditLater = current.EditLater
 			state, stateFound, stateErr := store.projection.CurrentEntity(ctx, EntityReviewState, card.ID)
 			if stateErr != nil || !stateFound || state.Deleted {
 				if stateErr != nil {

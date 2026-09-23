@@ -272,6 +272,7 @@ func mergeDivergedLegacyRevision(incoming *EntityRevision, current EntityRevisio
 		incomingCard.Flag = currentCard.Flag
 		incomingCard.PresetOverrideID = currentCard.PresetOverrideID
 		incomingCard.PriorityOverride = currentCard.PriorityOverride
+		incomingCard.EditLater = currentCard.EditLater
 		incomingCard.CreatedAt = currentCard.CreatedAt
 		var err error
 		incoming.Payload, err = CanonicalJSON(incomingCard)

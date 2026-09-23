@@ -396,6 +396,9 @@ func (card *Card) validate(entityID string) error {
 	if card.PriorityOverride != "" && !validStudyPriority(card.PriorityOverride) {
 		return fmt.Errorf("unsupported card priority [%s]", card.PriorityOverride)
 	}
+	if card.EditLater != nil && (card.EditLater.UpdatedAt <= 0 || len([]rune(card.EditLater.Note)) > 4000) {
+		return errors.New("flashcard edit-later time or note is invalid")
+	}
 	return nil
 }
 

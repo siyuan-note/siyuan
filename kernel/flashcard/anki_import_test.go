@@ -129,12 +129,22 @@ func TestImportAnkiPackageWritesContentRelationsScheduleHistoryTagsAndMedia(t *t
 		t.Fatalf("Anki import operation accepted a different target: %v", err)
 	}
 	movedRequest := request
+	if _, err = store.SetCardEditLater(ctx, SetCardEditLaterRequest{OperationID: "anki-edit-later",
+		CardID: card.Card.ID, Enabled: true, Note: "Check the wording", ChangedAt: request.ImportedAt}); err != nil {
+		t.Fatal(err)
+	}
 	movedRequest.OperationID = "anki-import-moved"
 	movedRequest.ImportedAt++
 	movedRequest.PackagePath = createAnkiImportPackageForTestWithDefinitions(t, 2, true, true)
 	moved, err := store.ImportAnkiPackage(ctx, movedRequest)
 	if err != nil || moved.CollectionID != report.CollectionID || moved.Cards != 1 || moved.ReviewEvents != 0 {
 		t.Fatalf("Anki card deck move failed: report=%+v err=%v", moved, err)
+	}
+	markedRevision, found, err := store.Projection().CurrentEntity(ctx, EntityCard, card.Card.ID)
+	var marked Card
+	if err != nil || !found || decodeStrictJSON(markedRevision.Payload, &marked) != nil ||
+		marked.EditLater == nil || marked.EditLater.Note != "Check the wording" {
+		t.Fatalf("Anki reimport lost the pending edit: %+v %v", marked, err)
 	}
 	oldDeckCards, err := store.Projection().ReviewSetCardIDs(ctx,
 		DeterministicID("anki-review-set", report.CollectionID, "1"), CardSearchOptions{Now: movedRequest.ImportedAt,

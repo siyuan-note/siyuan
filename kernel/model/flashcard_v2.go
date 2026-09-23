@@ -1065,6 +1065,22 @@ func ManageFlashcardV2Cards(ctx context.Context,
 	return store.ManageCards(ctx, request)
 }
 
+// SetFlashcardV2CardEditLater 校验卡片内容隔离边界后保存编辑待办。
+func SetFlashcardV2CardEditLater(ctx context.Context,
+	request flashcardv2.SetCardEditLaterRequest) (flashcardv2.CardEditLaterResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.CardEditLaterResult{}, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, true); err != nil {
+		return flashcardv2.CardEditLaterResult{}, err
+	}
+	if err = validateFlashcardV2Card(ctx, store, request.CardID); err != nil {
+		return flashcardv2.CardEditLaterResult{}, err
+	}
+	return store.SetCardEditLater(ctx, request)
+}
+
 // SetFlashcardV2TagAssignments 原子替换一组卡源或卡片的独立闪卡标签。
 func SetFlashcardV2TagAssignments(ctx context.Context,
 	request flashcardv2.SetTagAssignmentsRequest) (flashcardv2.SetTagAssignmentsResult, error) {

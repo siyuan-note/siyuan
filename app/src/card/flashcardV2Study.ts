@@ -1,4 +1,5 @@
 import type {IFlashcardQueryAST} from "./flashcardV2Query";
+import type {IFlashcardV2EditLater} from "./flashcardV2EditLater";
 import type {IFlashcardV2ReviewSessionOptions} from "./flashcardV2Session";
 
 export interface IFlashcardV2StudyCard {
@@ -57,8 +58,9 @@ export class FlashcardV2WeakCards {
         }
     }
 
-    cards(queue: Array<{card: {id: string, generationStatus: string}, sessionCard: {status: string}}>): string[] {
-        return queue.filter((item) => item.card.generationStatus === "active" &&
+    cards(queue: Array<{card: {id: string, generationStatus: string, editLater?: IFlashcardV2EditLater},
+        sessionCard: {status: string}}>): string[] {
+        return queue.filter((item) => item.card.generationStatus === "active" && !item.card.editLater &&
             item.sessionCard.status === "reviewed" && ["again", "hard"].includes(this.ratings.get(item.card.id)))
             .map((item) => item.card.id);
     }

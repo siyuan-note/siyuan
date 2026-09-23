@@ -93,6 +93,7 @@ var queryFieldComparators = map[string]map[QueryComparator]struct{}{
 	"difficulty":       orderedComparators(),
 	"retrievability":   orderedComparators(),
 	"suspended":        comparatorSet(QueryEqual, QueryNotEqual),
+	"editLater":        comparatorSet(QueryEqual, QueryNotEqual),
 	"buried":           comparatorSet(QueryEqual, QueryNotEqual),
 	"flag":             comparatorSet(QueryEqual, QueryNotEqual, QueryIn, QueryNotIn),
 	"tagID":            comparatorSet(QueryEqual, QueryNotEqual, QueryIn, QueryNotIn, QueryDescendantOf),

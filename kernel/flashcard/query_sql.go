@@ -31,6 +31,8 @@ const maxCardSearchLimit = 1000000
 
 // CardSearchOptions 控制管理查询是否包含不可复习状态。
 type CardSearchOptions struct {
+	// 学习入口排除待编辑卡片；管理查询仍能查看和修复这些卡片。
+	ForStudy         bool  `json:"-"`
 	Now              int64 `json:"now"`
 	IncludeInactive  bool  `json:"includeInactive"`
 	IncludeSuspended bool  `json:"includeSuspended"`
@@ -142,6 +144,7 @@ var querySQLFields = map[string]string{
 	"stability":        "rs.stability",
 	"difficulty":       "rs.difficulty",
 	"suspended":        "rs.suspended",
+	"editLater":        "(json_extract(ce.payload, '$.editLater') IS NOT NULL)",
 	"flag":             "c.flag",
 	"priority":         effectivePrioritySQL,
 	"presetID":         "COALESCE(NULLIF(c.preset_override_id, ''), s.default_preset_id)",
@@ -207,6 +210,9 @@ func compileCardSearchFilter(query *QueryAST, options CardSearchOptions) ([]stri
 	}
 	where := []string{"(" + compiled.sql + ")"}
 	args := append([]any(nil), compiled.args...)
+	if options.ForStudy {
+		where = append(where, "json_extract(ce.payload, '$.editLater') IS NULL")
+	}
 	if !options.IncludeInactive {
 		where = append(where, effectiveGenerationStatusSQL+" = ?")
 		args = append(args, GenerationActive)
@@ -396,7 +402,7 @@ func (projection *Projection) ReviewSetSummaries(ctx context.Context, reviewSetI
 	}
 	dueCardIDs := make(map[string]struct{}, len(eligibleResults))
 	for _, result := range eligibleResults {
-		if !result.ReviewState.Suspended && result.ReviewState.BuriedUntil <= now &&
+		if result.Card.EditLater == nil && !result.ReviewState.Suspended && result.ReviewState.BuriedUntil <= now &&
 			result.EffectivePriority != "paused" && result.ReviewState.Due <= now {
 			dueCardIDs[result.Card.ID] = struct{}{}
 		}
@@ -694,10 +700,10 @@ func compileQueryPredicate(expression *QueryExpression, now int64) (compiledQuer
 				return compiledQuery{}, fmt.Errorf("flashcard query field [%s] requires a number", expression.Field)
 			}
 			values[index] = number
-		} else if expression.Field == "suspended" {
+		} else if expression.Field == "suspended" || expression.Field == "editLater" {
 			boolean, booleanErr := queryBool(value)
 			if booleanErr != nil {
-				return compiledQuery{}, errors.New("flashcard suspended query requires a boolean")
+				return compiledQuery{}, fmt.Errorf("flashcard %s query requires a boolean", expression.Field)
 			}
 			values[index] = boolean
 		} else {

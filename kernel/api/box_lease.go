@@ -68,6 +68,9 @@ func holdEncryptedBlockRequests(c *gin.Context, boxID string, ids []string, allo
 				continue
 			}
 			// 查不到的块直接拒绝，防止随后解锁的笔记本在第二次查找时被无租约访问。
+			if len(model.ListAllEncryptedBoxIDs()) == 0 {
+				return errors.New("block not found")
+			}
 			return errors.New("block not found or its encrypted notebook is locked")
 		}
 		if model.IsEncryptedBox(block.BoxID) {

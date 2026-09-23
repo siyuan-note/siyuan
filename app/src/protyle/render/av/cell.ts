@@ -1154,9 +1154,20 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
         }
         if (!preserveTemplateDisplay) {
             cellElement.parentElement.dataset.empty = cellValueIsEmpty(value, true, renderTemplate).toString();
-            cellElement.innerHTML = genAVValueHTML(value, cellElement.dataset.dateFormat as TAVDateFormat,
-                renderTemplate);
-            renderAVRichTextElements(cellElement);
+            // 输入框失焦保存时保留打开按钮，使随后的点击仍能到达该按钮。
+            const sourceURLLink = cellElement === sourceElement && value.type === "url" &&
+                cellElement.querySelector<HTMLAnchorElement>("a.block__icon");
+            if (sourceURLLink) {
+                if (value.url.content) {
+                    sourceURLLink.setAttribute("href", value.url.content);
+                } else {
+                    sourceURLLink.removeAttribute("href");
+                }
+            } else {
+                cellElement.innerHTML = genAVValueHTML(value, cellElement.dataset.dateFormat as TAVDateFormat,
+                    renderTemplate);
+                renderAVRichTextElements(cellElement);
+            }
         }
         if (value.type === "block") {
             const databaseRowElement = cellElement.closest<HTMLElement>(".protyle-db-row");

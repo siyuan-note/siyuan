@@ -4557,7 +4557,20 @@ export class WYSIWYG {
                 previewDiagram(diagramElement);
                 event.stopPropagation();
                 event.preventDefault();
+                return;
             }
+            /// #if MOBILE
+            const nodeElement = hasClosestBlock(target);
+            const selection = getSelection();
+            if (nodeElement && !isNotEditBlock(nodeElement) && !nodeElement.classList.contains("av") &&
+                !target.closest(".protyle-action, .protyle-attr, a, button, input, textarea, select") &&
+                target.closest("[contenteditable]")?.getAttribute("contenteditable") !== "false" &&
+                selection?.rangeCount && !selection.isCollapsed && selection.toString() &&
+                nodeElement.contains(selection.anchorNode) && nodeElement.contains(selection.focusNode)) {
+                protyle.toolbar.range = selection.getRangeAt(0);
+                contentMenu(protyle, nodeElement);
+            }
+            /// #endif
         });
         let mobileBlur = false;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {

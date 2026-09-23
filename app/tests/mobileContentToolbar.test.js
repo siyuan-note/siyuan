@@ -27,6 +27,7 @@ const runCases = async () => {
             hint: {element: document.createElement("div"), deactivateEmojiPanel() {}},
             gutter: gutter ? {renderMenu: (_protyle, block) => menus.push(block)} : undefined,
         };
+        window.bindContentDoubleClick.call({element}, protyle);
         const block = element.firstElementChild;
         const editable = block.querySelector('[contenteditable="true"]');
         const range = document.createRange();
@@ -83,6 +84,26 @@ const runCases = async () => {
     await click(marked, "select");
     assertTextSelection(marked);
 
+    // 双击文字选区复用内容工具栏，折叠选区、数据库与块多选不触发。
+    for (const table of [false, true]) {
+        const state = createEditor(false, table);
+        state.toolbar.subElement.classList.add("fn__none");
+        state.editable.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+        assert.equal(state.toolbar.subElement.classList.contains("fn__none"), false);
+        assert.equal(getSelection().toString(), "lph");
+        await click(state, "copy");
+        assert.deepEqual(commands.at(-1), {command: "copy", text: "lph"});
+        state.range.collapse(true);
+        window.focusContentRange(state.range);
+        state.editable.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+        assert.equal(state.toolbar.subElement.classList.contains("fn__none"), true);
+        state.range.setEnd(state.editable.firstChild, 4);
+        window.focusContentRange(state.range);
+        state.block.classList.add("av");
+        state.editable.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+        assert.equal(state.toolbar.subElement.classList.contains("fn__none"), true);
+    }
+
     // 有块菜单时继续支持再次全选，并通过现有多选菜单操作已选块。
     const documentEditor = createEditor(true);
     await click(documentEditor, "select");
@@ -121,6 +142,10 @@ const runElectron = async () => {
         const methodNames = ["showContent", "showMultiSelectMode", "isMultiSelectMode", "clearSubElement"];
         const methods = toolbarClass.members.filter(member => methodNames.includes(member.name?.getText(toolbarSource)));
         assert.equal(methods.length, methodNames.length);
+        const wysiwygSource = read("protyle/wysiwyg/index");
+        const doubleClickStart = wysiwygSource.indexOf('        this.element.addEventListener("dblclick",');
+        const doubleClickEnd = wysiwygSource.indexOf("        let mobileBlur =", doubleClickStart);
+        assert.ok(doubleClickStart > 0 && doubleClickEnd > doubleClickStart);
         // 使用真实工具栏事件、选区和多选实现，隔离定位、原生键盘、剪贴板及字数统计。
         const source = [
             'const Constants = {ZWSP: "\\u200b"};',
@@ -129,6 +154,9 @@ const runElectron = async () => {
             "const activeBlur = () => {}; const showMessage = () => {}; const showSelectAllIncompleteTip = () => {};",
             "const setPosition = () => {}; const getSelectionPosition = (_node, range) => range.getBoundingClientRect();",
             "const stripSemanticMarkersFromRangeText = range => range.toString();",
+            "const getAVTemplateInteractiveElement = () => undefined; const getDiagramBlock = () => undefined;",
+            "const isNotEditBlock = () => false;",
+            "const contentMenu = (protyle, node) => protyle.toolbar.showContent(protyle, getSelection().getRangeAt(0), node);",
             read("protyle/util/hasClosest"),
             read("protyle/wysiwyg/blockSelection"),
             read("protyle/toolbar/subElementLifecycle"),
@@ -139,6 +167,7 @@ const runElectron = async () => {
             "class ContentToolbar { private readonly LINE_HEIGHT = 32; render() {}\n" +
                 methods.map(method => method.getText(toolbarSource)).join("\n") + "\n}",
             "window.ContentToolbar = ContentToolbar; window.focusContentRange = focusByRange;",
+            "window.bindContentDoubleClick = function(protyle) {" + wysiwygSource.slice(doubleClickStart, doubleClickEnd) + "};",
         ].join("\n");
         const compiled = ts.transpileModule(source, {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},

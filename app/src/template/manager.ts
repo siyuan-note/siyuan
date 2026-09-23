@@ -312,7 +312,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             row.append(element);
             const more = document.createElement("button");
             more.type = "button";
-            more.className = "block__icon block__icon--show template-manager__more";
+            more.className = "b3-list-item__action template-manager__more";
             more.setAttribute("aria-label", lang.more + " " + entry.name);
             more.setAttribute("aria-haspopup", "menu");
             more.innerHTML = '<svg><use xlink:href="#iconMore"></use></svg>';

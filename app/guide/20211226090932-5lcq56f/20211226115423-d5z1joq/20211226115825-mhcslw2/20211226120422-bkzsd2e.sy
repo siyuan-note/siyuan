@@ -6,7 +6,7 @@
 		"id": "20211226120422-bkzsd2e",
 		"title": "文檔區塊和標題區塊的轉換",
 		"type": "doc",
-		"updated": "20260730184353"
+		"updated": "20260924013047"
 	},
 	"Children": [
 		{
@@ -480,7 +480,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20241018104604-vokj7e6",
-				"updated": "20260730184353"
+				"updated": "20260924013047"
 			},
 			"Children": [
 				{
@@ -509,7 +509,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20241018104604-53lc1kw",
-				"updated": "20241018104901"
+				"updated": "20260924013047"
 			},
 			"Children": [
 				{
@@ -549,7 +549,7 @@
 					},
 					"Properties": {
 						"id": "20241018104604-194ukvr",
-						"updated": "20241018104604"
+						"updated": "20260924013047"
 					},
 					"Children": [
 						{
@@ -557,12 +557,40 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241018104604-e1qzuat",
-								"updated": "20260730184353"
+								"updated": "20260924013047"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "列表項區塊的子區塊保持原樣"
+									"Data": "新文檔正文保留完整的列表項及巢狀內容，包括無序、有序或任務列表的類型、項目符號或編號、任務勾選狀態、列表項屬性和摺疊狀態"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260924013047-pavdj9c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260924013047-pavdj9c",
+						"updated": "20260924013047"
+					},
+					"Children": [
+						{
+							"ID": "20260924013047-vnqjian",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260924013047-vnqjian",
+								"updated": "20260924013047"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "原列表項的 ID 用作新文檔的 ID，原有引用繼續指向新文檔；正文中的列表項和外層列表使用新 ID，內部既有區塊的 ID 保持不變"
 								}
 							]
 						}

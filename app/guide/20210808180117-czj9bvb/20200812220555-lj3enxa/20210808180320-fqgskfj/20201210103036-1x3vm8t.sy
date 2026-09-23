@@ -6,7 +6,7 @@
 		"id": "20201210103036-1x3vm8t",
 		"title": "文档块和标题块的转换",
 		"type": "doc",
-		"updated": "20260426175505"
+		"updated": "20260924013047"
 	},
 	"Children": [
 		{
@@ -542,7 +542,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20241018104519-pb6ln2k",
-				"updated": "20260426175505"
+				"updated": "20260924013047"
 			},
 			"Children": [
 				{
@@ -571,7 +571,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20241018104519-kr24kek",
-				"updated": "20241018104519"
+				"updated": "20260924013047"
 			},
 			"Children": [
 				{
@@ -611,7 +611,7 @@
 					},
 					"Properties": {
 						"id": "20241018104519-y2qhagm",
-						"updated": "20241018104519"
+						"updated": "20260924013047"
 					},
 					"Children": [
 						{
@@ -619,12 +619,40 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241018104519-nfdaro6",
-								"updated": "20241018104519"
+								"updated": "20260924013047"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "列表项块的子块保持原样"
+									"Data": "新文档正文保留完整的列表项及嵌套内容，包括无序、有序或任务列表的类型、项目符号或编号、任务勾选状态、列表项属性和折叠状态"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260924013047-40tszo7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260924013047-40tszo7",
+						"updated": "20260924013047"
+					},
+					"Children": [
+						{
+							"ID": "20260924013047-siq9va0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260924013047-siq9va0",
+								"updated": "20260924013047"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "原列表项的 ID 用作新文档的 ID，原有引用继续指向新文档；正文中的列表项和外层列表使用新 ID，内部已有块的 ID 保持不变"
 								}
 							]
 						}

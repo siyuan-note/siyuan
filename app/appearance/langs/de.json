@@ -702,7 +702,7 @@
 	"docIconClickExpand": "Dokument- oder Notizbuchsymbol zum Ein- oder Ausklappen untergeordneter Dokumente anklicken",
 	"docIconClickExpandTip": "Wenn aktiviert, werden untergeordnete Dokumente durch Anklicken eines Dokument- oder Notizbuchsymbols ein- oder ausgeklappt; ohne untergeordnete Dokumente wird ein verfügbares Dokument geöffnet, andernfalls kann das Symbol geändert werden; wenn deaktiviert, wird das jeweils angeklickte Symbol geändert",
 	"parentDocClickExpand": "Titel des übergeordneten Dokuments zum Ein- oder Ausklappen untergeordneter Dokumente anklicken",
-	"parentDocClickExpandTip": "Wenn aktiviert, werden untergeordnete Dokumente durch Anklicken des Titels des übergeordneten Dokuments ein- oder ausgeklappt; das übergeordnete Dokument kann über „Dokument öffnen“ im Kontextmenü geöffnet werden. Ohne untergeordnete Dokumente wird das Dokument weiterhin direkt geöffnet; ein Doppelklick auf den Titel öffnet das übergeordnete Dokument, ohne den Aufklappzustand zu ändern",
+	"parentDocClickExpandTip": "Wenn aktiviert, klappt ein Klick oder Tipp auf den Titel Unterdokumente ein oder aus; Doppelklicken oder doppeltippen öffnet das übergeordnete Dokument ohne Änderung des Aufklappzustands; ohne Unterdokumente genügt ein Klick oder Tipp",
 	"mcpStatusAuthorizing": "Autorisierung läuft",
 	"mcpStatusAuthorizationRequired": "Autorisierung erforderlich",
 	"mcpAuthorize": "Autorisieren",

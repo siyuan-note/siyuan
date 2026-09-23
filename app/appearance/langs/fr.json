@@ -702,7 +702,7 @@
 	"docIconClickExpand": "Cliquer sur l’icône d’un document ou d’un carnet pour développer ou réduire les documents enfants",
 	"docIconClickExpandTip": "Lorsque cette option est activée, cliquer sur l’icône d’un document ou d’un carnet développe ou réduit les documents enfants ; en l’absence de document enfant, un document disponible s’ouvre, sinon l’icône peut être modifiée ; lorsqu’elle est désactivée, cliquer sur l’une ou l’autre icône permet de la modifier",
 	"parentDocClickExpand": "Cliquer sur le titre du document parent pour développer ou réduire les documents enfants",
-	"parentDocClickExpandTip": "Lorsque cette option est activée, cliquer sur le titre d’un document parent développe ou réduit ses documents enfants ; le document parent peut être ouvert avec « Ouvrir le document » dans le menu contextuel. En l’absence de documents enfants, le document s’ouvre toujours directement; un double-clic sur le titre ouvre le document parent sans modifier l’état de déploiement",
+	"parentDocClickExpandTip": "Une fois activé, un clic ou toucher sur le titre déplie ou replie les documents enfants ; un double-clic ou double toucher ouvre le document parent sans changer son état ; sans document enfant, un seul clic ou toucher suffit",
 	"mcpStatusAuthorizing": "Autorisation en cours",
 	"mcpStatusAuthorizationRequired": "Autorisation requise",
 	"mcpAuthorize": "Autoriser",

@@ -702,7 +702,7 @@
 	"docIconClickExpand": "Fai clic sull’icona di un documento o di un taccuino per espandere o comprimere i documenti secondari",
 	"docIconClickExpandTip": "Quando è attiva, facendo clic sull’icona di un documento o di un taccuino si espandono o comprimono i documenti secondari; se non sono presenti documenti secondari, viene aperto un documento disponibile, altrimenti è possibile modificare l’icona; quando è disattiva, facendo clic su una delle due icone la si modifica",
 	"parentDocClickExpand": "Fai clic sul titolo del documento principale per espandere o comprimere i documenti secondari",
-	"parentDocClickExpandTip": "Quando è attiva, facendo clic sul titolo di un documento principale si espandono o comprimono i documenti secondari; il documento principale può essere aperto tramite “Apri documento” nel menu contestuale. Se non sono presenti documenti secondari, il documento viene comunque aperto direttamente; un doppio clic sul titolo apre il documento principale senza modificare lo stato di espansione",
+	"parentDocClickExpandTip": "Se attiva, un clic o tocco sul titolo espande o comprime i documenti secondari; un doppio clic o doppio tocco apre il documento principale senza cambiare lo stato di espansione; senza documenti secondari basta un clic o tocco",
 	"mcpStatusAuthorizing": "Autorizzazione in corso",
 	"mcpStatusAuthorizationRequired": "Autorizzazione richiesta",
 	"mcpAuthorize": "Autorizza",

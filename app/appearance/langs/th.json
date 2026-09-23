@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "ไม่มีวันที่",
+	"calendarUndatedHint": "ลากรายการไปยังวันที่ หรือเลือกรายการแล้วเลือกวันที่",
 	"insertToCurrentDoc": "แทรกลงในเอกสารปัจจุบัน",
 	"calendarJump": "ไปยังวันที่หรือสัปดาห์ ISO",
 	"calendarISOWeek": "สัปดาห์ ISO",

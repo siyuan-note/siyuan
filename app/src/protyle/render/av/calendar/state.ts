@@ -1,13 +1,15 @@
 import {Constants} from "../../../../constants";
 import {calendarDay, getCalendarRange} from "./date";
 
-interface ICalendarState {
+export interface ICalendarState {
     anchor: number;
     mode: "month" | "week";
     weekStart: number;
     dateType?: TAVCol;
     rowLimit?: number;
     expandedWeeks: Set<number>;
+    undatedOpen: boolean;
+    undatedSearch: string;
 }
 
 const states = new WeakMap<Element, Map<string, ICalendarState>>();
@@ -30,7 +32,8 @@ export const getCalendarState = (blockElement: Element, viewID = blockElement.ge
     }
     let state = views.get(viewID);
     if (!state) {
-        state = {anchor: calendarDay(Date.now()), mode: getSavedMode(blockElement, viewID), weekStart: 1, expandedWeeks: new Set()};
+        state = {anchor: calendarDay(Date.now()), mode: getSavedMode(blockElement, viewID), weekStart: 1,
+            expandedWeeks: new Set(), undatedOpen: false, undatedSearch: ""};
         views.set(viewID, state);
     }
     return state;

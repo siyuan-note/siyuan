@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "Tarihsiz",
+	"calendarUndatedHint": "Bir öğeyi tarihe sürükleyin veya öğeyi seçip ardından tarihi seçin",
 	"insertToCurrentDoc": "Geçerli belgeye ekle",
 	"calendarJump": "Tarihe veya ISO haftasına git",
 	"calendarISOWeek": "ISO haftası",

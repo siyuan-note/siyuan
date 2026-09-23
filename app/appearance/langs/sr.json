@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "Без датума",
+	"calendarUndatedHint": "Превуците ставку на датум или је изаберите, па одаберите датум",
 	"insertToCurrentDoc": "Уметни у тренутни документ",
 	"calendarJump": "Иди на датум или ISO недељу",
 	"calendarISOWeek": "ISO недеља",

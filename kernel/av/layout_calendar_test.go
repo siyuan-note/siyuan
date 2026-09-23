@@ -86,8 +86,11 @@ func TestCalendarRangeIntersection(t *testing.T) {
 	if !reflect.DeepEqual(ids, []string{"spans", "pointAtStart", "futureTarget"}) || calendar.CalendarTargetDate == nil || *calendar.CalendarTargetDate != 1000 {
 		t.Fatalf("unexpected rows or target date: %+v", calendar)
 	}
+	if len(calendar.UndatedRows) != 1 || calendar.UndatedRows[0].ID != "noDate" {
+		t.Fatalf("undated rows must remain available independently of the visible range: %+v", calendar.UndatedRows)
+	}
 	calendar.Calendar.DateKeyID = "deleted"
-	if err := FilterCalendarRows(calendar, range_, ""); nil != err || len(calendar.Rows) != 0 {
+	if err := FilterCalendarRows(calendar, range_, ""); nil != err || len(calendar.Rows) != 0 || len(calendar.UndatedRows) != 0 {
 		t.Fatalf("missing binding must produce an empty calendar: %v", err)
 	}
 	for _, invalid := range []*CalendarRange{{}, {Start: 2, End: 1, TimeZone: "UTC"},

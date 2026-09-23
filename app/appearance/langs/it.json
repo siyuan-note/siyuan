@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "Senza data",
+	"calendarUndatedHint": "Trascina un elemento su una data oppure selezionalo e scegli una data",
 	"insertToCurrentDoc": "Inserisci nel documento corrente",
 	"calendarJump": "Vai a una data o settimana ISO",
 	"calendarISOWeek": "Settimana ISO",

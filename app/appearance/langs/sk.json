@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "Bez dátumu",
+	"calendarUndatedHint": "Presuňte položku na dátum alebo ju vyberte a potom zvoľte dátum",
 	"insertToCurrentDoc": "Vložiť do aktuálneho dokumentu",
 	"calendarJump": "Prejsť na dátum alebo týždeň ISO",
 	"calendarISOWeek": "Týždeň ISO",

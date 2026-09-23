@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "Tanpa tanggal",
+	"calendarUndatedHint": "Seret item ke tanggal, atau pilih item lalu pilih tanggal",
 	"insertToCurrentDoc": "Sisipkan ke dokumen saat ini",
 	"calendarJump": "Buka tanggal atau minggu ISO",
 	"calendarISOWeek": "Minggu ISO",

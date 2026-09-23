@@ -17,6 +17,7 @@ import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {escapeHtml} from "../../util/escape";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
+import {showMessage} from "../../dialog/message";
 
 export class Inbox extends Model {
     private element: Element;
@@ -259,6 +260,18 @@ ${data.shorthandContent}
                     this.move(ids);
                 }
             }).element);
+            /// #if MOBILE
+            const protyle = window.siyuan.mobile.editor?.protyle;
+            if (protyle?.block.rootID && !protyle.disabled && !window.siyuan.config.readonly && !window.siyuan.isPublish) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.insertToCurrentDoc,
+                    icon: "iconAdd",
+                    click: () => {
+                        void this.insertToCurrentDoc(ids, protyle.block.rootID);
+                    }
+                }).element);
+            }
+            /// #endif
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.remove,
                 icon: "iconTrashcan",
@@ -325,7 +338,10 @@ ${data.shorthandContent}
         if (!removeIds) {
             removeIds = this.selectIds;
         }
-        fetchPost("/api/inbox/removeShorthands", {ids: removeIds}, () => {
+        fetchPost("/api/inbox/removeShorthands", {ids: removeIds}, (response) => {
+            if (response.code !== 0) {
+                return;
+            }
             if (removeIds) {
                 this.back();
                 for (let i = this.selectIds.length - 1; i >= 0; i--) {
@@ -370,6 +386,42 @@ ${data.shorthandContent}
             flashcard: false
         });
     }
+
+    /// #if MOBILE
+    private async insertToCurrentDoc(ids: string[], rootID: string) {
+        const insertedIds: string[] = [];
+        try {
+            for (const id of [...ids]) {
+                const shorthand = await fetchSyncPost("/api/inbox/getShorthand", {id});
+                if (shorthand.code !== 0 || !shorthand.data) {
+                    break;
+                }
+                let md = shorthand.data.shorthandMd;
+                if (!md && !shorthand.data.shorthandContent && shorthand.data.shorthandURL) {
+                    md = `[${shorthand.data.shorthandTitle}](${shorthand.data.shorthandURL})`;
+                }
+                if (!md.trim()) {
+                    showMessage(window.siyuan.languages.empty);
+                    break;
+                }
+                const response = await fetchSyncPost("/api/block/appendBlock", {
+                    dataType: "markdown",
+                    data: md,
+                    parentID: rootID,
+                });
+                if (response.code !== 0) {
+                    break;
+                }
+                insertedIds.push(id);
+            }
+        } catch (error) {
+            showMessage((error as Error).message, 6000, "error");
+        }
+        if (insertedIds.length > 0) {
+            this.remove(insertedIds);
+        }
+    }
+    /// #endif
 
     private update() {
         const loadingElement = this.element.querySelector(".fn__loading");

@@ -1,4 +1,5 @@
 {
+	"insertToCurrentDoc": "Вставить в текущий документ",
 	"calendarJump": "Перейти к дате или неделе ISO",
 	"calendarISOWeek": "Неделя ISO",
 	"calendarISOWeekYear": "Год недели ISO",

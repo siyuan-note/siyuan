@@ -1,4 +1,5 @@
 {
+	"insertToCurrentDoc": "現在の文書に挿入",
 	"calendarJump": "日付または ISO 週に移動",
 	"calendarISOWeek": "ISO 週",
 	"calendarISOWeekYear": "ISO 週の年",

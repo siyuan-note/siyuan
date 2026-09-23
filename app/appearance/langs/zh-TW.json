@@ -1,4 +1,5 @@
 {
+	"insertToCurrentDoc": "插入至目前文件",
 	"calendarJump": "跳至日期或 ISO 週",
 	"calendarISOWeek": "ISO 週",
 	"calendarISOWeekYear": "ISO 週所屬年份",

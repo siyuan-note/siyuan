@@ -41,6 +41,7 @@ export class Inbox extends Model {
         <span class="inboxSelectCount ft__smaller ft__on-surface"></span>
     </div>
     <span class="fn__space"></span>
+    <svg data-type="refresh" class="toolbar__icon"><use xlink:href="#iconRefresh"></use></svg>
     <svg data-type="selectall" class="toolbar__icon"><use xlink:href="#iconUncheck"></use></svg>
     <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconLeft'></use></svg>
     <svg data-type="next" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconRight'></use></svg>
@@ -147,6 +148,10 @@ export class Inbox extends Model {
                     }
                     event.preventDefault();
                     break;
+                } else if (type === "refresh") {
+                    this.refresh();
+                    event.preventDefault();
+                    break;
                 } else if (type === "back") {
                     this.back();
                     event.preventDefault();
@@ -235,31 +240,7 @@ ${data.shorthandContent}
             label: window.siyuan.languages.refresh,
             icon: "iconRefresh",
             click: () => {
-                if (itemElement) {
-                    fetchPost("/api/inbox/getShorthand", {
-                        id: itemElement.dataset.id
-                    }, (response) => {
-                        if (response.code !== 0 || !response.data) {
-                            return;
-                        }
-                        this.data[response.data.oId] = response.data;
-                        itemElement.outerHTML = this.genItemHTML(response.data);
-                    });
-                } else if (detailsElement.classList.contains("fn__none")) {
-                    this.currentPage = 1;
-                    this.update();
-                } else {
-                    fetchPost("/api/inbox/getShorthand", {
-                        id: detailsElement.getAttribute("data-id")
-                    }, (response) => {
-                        if (response.code !== 0 || !response.data) {
-                            return;
-                        }
-                        this.data[response.data.oId] = response.data;
-                        detailsElement.innerHTML = this.genDetail(response.data);
-                        detailsElement.scrollTop = 0;
-                    });
-                }
+                this.refresh(itemElement);
             }
         }).element);
         let ids: string[] = [];
@@ -313,6 +294,31 @@ ${data.shorthandContent}
             y: rect ? rect.bottom : event.clientY + 16,
             h: rect ? rect.height : 0,
         });
+    }
+
+    private refresh(itemElement?: HTMLElement) {
+        const detailsElement = this.element.querySelector(".inboxDetails");
+        if (itemElement) {
+            fetchPost("/api/inbox/getShorthand", {id: itemElement.dataset.id}, (response) => {
+                if (response.code !== 0 || !response.data) {
+                    return;
+                }
+                this.data[response.data.oId] = response.data;
+                itemElement.outerHTML = this.genItemHTML(response.data);
+            });
+        } else if (detailsElement.classList.contains("fn__none")) {
+            this.currentPage = 1;
+            this.update();
+        } else {
+            fetchPost("/api/inbox/getShorthand", {id: detailsElement.getAttribute("data-id")}, (response) => {
+                if (response.code !== 0 || !response.data) {
+                    return;
+                }
+                this.data[response.data.oId] = response.data;
+                detailsElement.innerHTML = this.genDetail(response.data);
+                detailsElement.scrollTop = 0;
+            });
+        }
     }
 
     private remove(removeIds?: string[]) {

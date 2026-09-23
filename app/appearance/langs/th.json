@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "เอกสารต้นฉบับของแม่แบบไม่มีอยู่หรือไม่สามารถเข้าถึงได้",
+	"templateOpenSourceDoc": "เปิดเอกสารต้นฉบับของแม่แบบ",
 	"taskCompletionToggle": "สลับสถานะการทำงานเสร็จสิ้น",
 	"addAlias": "เพิ่มชื่อเรียกอื่น",
 	"listMindmapExpandToLevel": "ขยายถึงระดับ ${level}",

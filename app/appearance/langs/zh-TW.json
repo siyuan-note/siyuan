@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "匯出範本的來源文件不存在或無法存取",
+	"templateOpenSourceDoc": "開啟匯出範本的文件",
 	"taskCompletionToggle": "切換任務完成狀態",
 	"addAlias": "新增別名",
 	"listMindmapExpandToLevel": "展開到第 ${level} 級",

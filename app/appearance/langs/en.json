@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "The template source document does not exist or is inaccessible",
+	"templateOpenSourceDoc": "Open template source document",
 	"taskCompletionToggle": "Toggle task completion",
 	"addAlias": "Add alias",
 	"listMindmapExpandToLevel": "Expand to level ${level}",

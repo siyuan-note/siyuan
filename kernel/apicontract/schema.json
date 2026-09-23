@@ -47268,6 +47268,9 @@
         },
         "revision": {
           "type": "string"
+        },
+        "sourceDocID": {
+          "type": "string"
         }
       },
       "required": [

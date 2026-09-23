@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "Das Quelldokument der Vorlage existiert nicht oder ist nicht zugänglich",
+	"templateOpenSourceDoc": "Quelldokument der Vorlage öffnen",
 	"taskCompletionToggle": "Erledigungsstatus der Aufgabe umschalten",
 	"addAlias": "Alias hinzufügen",
 	"listMindmapExpandToLevel": "Bis Ebene ${level} aufklappen",

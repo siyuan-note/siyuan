@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "导出模板的源文档不存在或无法访问",
+	"templateOpenSourceDoc": "打开导出模板的文档",
 	"taskCompletionToggle": "切换任务完成状态",
 	"addAlias": "新增别名",
 	"listMindmapExpandToLevel": "展开到第 ${level} 级",

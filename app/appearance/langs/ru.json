@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "Исходный документ шаблона не существует или недоступен",
+	"templateOpenSourceDoc": "Открыть исходный документ шаблона",
 	"taskCompletionToggle": "Переключить состояние выполнения задачи",
 	"addAlias": "Добавить псевдоним",
 	"listMindmapExpandToLevel": "Развернуть до уровня ${level}",

@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "टेम्पलेट का स्रोत दस्तावेज़ मौजूद नहीं है या उस तक पहुँच नहीं है",
+	"templateOpenSourceDoc": "टेम्पलेट का स्रोत दस्तावेज़ खोलें",
 	"taskCompletionToggle": "कार्य की पूर्णता स्थिति बदलें",
 	"addAlias": "उपनाम जोड़ें",
 	"listMindmapExpandToLevel": "स्तर ${level} तक विस्तृत करें",

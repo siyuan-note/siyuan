@@ -2172,7 +2172,7 @@ export type TemplateFileRequestInput = { "action"?: string; "content"?: string; 
 
 export type TemplateFileRevision = { "revision": string; };
 
-export type TemplateFileSource = { "content": string; "path"?: string; "revision": string; };
+export type TemplateFileSource = { "content": string; "path"?: string; "revision": string; "sourceDocID"?: string; };
 
 export type TemplatePlan = { "count": number; "id": string; "nodes": Array<TemplatePlanNode | null> | null; };
 
@@ -5515,7 +5515,7 @@ export interface APIPOSTRoutes {
     };
     "/api/template/manage": {
         request: TemplateFileRequestInput;
-        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | (TemplateFileRevision & { "content"?: never; "path"?: never; }) | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | (TemplateFileRevision & { "content"?: never; "path"?: never; "sourceDocID"?: never; }) | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
     };
     "/api/template/render": {

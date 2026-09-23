@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "المستند المصدر للقالب غير موجود أو لا يمكن الوصول إليه",
+	"templateOpenSourceDoc": "فتح المستند المصدر للقالب",
 	"taskCompletionToggle": "تبديل حالة إكمال المهمة",
 	"addAlias": "إضافة اسم مستعار",
 	"listMindmapExpandToLevel": "توسيع حتى المستوى ${level}",

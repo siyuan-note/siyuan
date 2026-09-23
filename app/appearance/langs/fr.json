@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "Le document source du modèle est introuvable ou inaccessible",
+	"templateOpenSourceDoc": "Ouvrir le document source du modèle",
 	"taskCompletionToggle": "Basculer l’état d’achèvement de la tâche",
 	"addAlias": "Ajouter un alias",
 	"listMindmapExpandToLevel": "Développer jusqu’au niveau ${level}",

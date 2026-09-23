@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "Zdrojový dokument šablóny neexistuje alebo je neprístupný",
+	"templateOpenSourceDoc": "Otvoriť zdrojový dokument šablóny",
 	"taskCompletionToggle": "Prepnúť stav dokončenia úlohy",
 	"addAlias": "Pridať alias",
 	"listMindmapExpandToLevel": "Rozbaliť po úroveň ${level}",

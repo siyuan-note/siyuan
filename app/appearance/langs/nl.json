@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "Het brondocument van de sjabloon bestaat niet of is niet toegankelijk",
+	"templateOpenSourceDoc": "Brondocument van sjabloon openen",
 	"taskCompletionToggle": "Voltooiingsstatus van taak wisselen",
 	"addAlias": "Alias toevoegen",
 	"listMindmapExpandToLevel": "Uitvouwen tot niveau ${level}",

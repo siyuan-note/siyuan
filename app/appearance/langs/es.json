@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "El documento de origen de la plantilla no existe o no es accesible",
+	"templateOpenSourceDoc": "Abrir el documento de origen de la plantilla",
 	"taskCompletionToggle": "Alternar la finalización de la tarea",
 	"addAlias": "Añadir alias",
 	"listMindmapExpandToLevel": "Expandir hasta el nivel ${level}",

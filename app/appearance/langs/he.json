@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "מסמך המקור של התבנית אינו קיים או אינו נגיש",
+	"templateOpenSourceDoc": "פתיחת מסמך המקור של התבנית",
 	"taskCompletionToggle": "החלפת מצב השלמת המשימה",
 	"addAlias": "הוספת כינוי",
 	"listMindmapExpandToLevel": "הרחבה עד לרמה ${level}",

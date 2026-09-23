@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20260904091600"
+		"updated": "20260922175505"
 	},
 	"Children": [
 		{
@@ -56,6 +56,77 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ フォルダに保存して使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-kzu7qf4",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260922175505-kzu7qf4",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレート管理"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260922175505-hd2pnph",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-hd2pnph",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレートやフォルダーの横にあるその他ボタンから、名前の変更、移動、削除を行えます。デスクトップでは右クリックでも同じメニューを開けます。モバイルの編集画面にも、編集中のテンプレートを操作するその他ボタンがあります。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-ryhme24",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-ryhme24",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップのウィンドウに十分な幅がある場合、ソースとプレビューは左右に並びます。幅が狭いウィンドウやモバイルでは、プレビューはソースの下に表示されます。プレビューコンテキストでは、テンプレートの実行に使用する文書情報を選択します。プレビューによってその文書が変更されることはありません。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-vie0xdd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-vie0xdd",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エクスポート元の文書 ID が残っているテンプレートでは、プレビューボタンの横または項目メニューのテンプレートのエクスポート元文書を開くから、現在のワークスペースでアクセス可能な元の文書に戻れます。文書を開くとテンプレート管理は閉じます。編集して再度エクスポートした後、テンプレート管理を開き直すと更新されたテンプレートを読み込めます。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-w5kogof",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-w5kogof",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "モバイルでは、編集画面から戻るとテンプレート一覧が表示され、もう一度戻るとテンプレート管理を終了します。未保存の変更がある編集画面から離れる際には確認が表示され、キャンセルすると現在の内容が保持されます。"
 				}
 			]
 		},
@@ -144,7 +215,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": ".action{now | date \u0026quot;2006-01-02 15:04:05\u0026quot;}"
+					"TextMarkTextContent": ".action{now | date &quot;2006-01-02 15:04:05&quot;}"
 				},
 				{
 					"Type": "NodeText",
@@ -478,7 +549,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
+									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated > '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",

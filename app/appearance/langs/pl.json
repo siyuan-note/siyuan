@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "Dokument źródłowy szablonu nie istnieje lub jest niedostępny",
+	"templateOpenSourceDoc": "Otwórz dokument źródłowy szablonu",
 	"taskCompletionToggle": "Przełącz stan ukończenia zadania",
 	"addAlias": "Dodaj alias",
 	"listMindmapExpandToLevel": "Rozwiń do poziomu ${level}",

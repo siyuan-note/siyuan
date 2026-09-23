@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "Dokumen sumber templat tidak ada atau tidak dapat diakses",
+	"templateOpenSourceDoc": "Buka dokumen sumber templat",
 	"taskCompletionToggle": "Alihkan status penyelesaian tugas",
 	"addAlias": "Tambah alias",
 	"listMindmapExpandToLevel": "Perluas hingga tingkat ${level}",

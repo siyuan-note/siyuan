@@ -9,7 +9,7 @@ import type {TemplateEntry} from "./fileTree";
 import {getFileRenameTarget, getFileTree} from "../util/fileTree";
 import {getTemplateActionEntry, getTemplateActionState} from "./actionState";
 /// #if !MOBILE
-import {openBy} from "../editor/util";
+import {openBy, openFileById} from "../editor/util";
 /// #endif
 import {replaceFileName} from "../editor/rename";
 import {getHostCapabilities} from "../util/hostCapabilities";
@@ -17,6 +17,14 @@ import {isBrowser, isMobile} from "../util/functions";
 import type {TemplateFileRequestInput} from "../types/api";
 import {openModel} from "../mobile/menu/model";
 import {closeModel} from "../mobile/util/closePanel";
+import {loadMobileFileById} from "../mobile/editor";
+import {MenuItem} from "../menus/Menu";
+import {closeMobileBacklinkSheets} from "../mobile/util/backlinkPanels";
+import {Constants} from "../constants";
+import {setStorageVal} from "../protyle/util/compatibility";
+import {isEncryptedBox} from "../util/pathName";
+
+type TemplateActionTarget = {entry: TemplateEntry, revision: string, sourceDocID?: string};
 
 export const loadTemplateDirectories = async (select: HTMLSelectElement, initialDirectory?: string) => {
     const response = await fetchSyncPost("/api/template/manage", {action: "list"});
@@ -43,15 +51,18 @@ export const openTemplateManager = (contextID = "", onClose?: () => void, initia
     let useCRLF = false;
     let revision = "";
     let previewPath = "";
+    let sourceDocID = "";
     let busy = false;
     let closed = false;
+    let layoutObserver: ResizeObserver;
+    const canOpenFolder = !isBrowser() && !mobile && getHostCapabilities().localFileSystem;
     const expandedPaths = new Set<string>();
     const button = (action: string, label: string) => `<button type="button" class="b3-button b3-button--outline" data-action="${action}">${label}</button>`;
     const content = `<div class="template-manager${mobile ? " template-manager--mobile" : ""}">
-<div class="template-manager__actions">
+<div class="template-manager__actions template-manager__global-actions">
 ${button("new", lang.newTemplate)}${button("mkdir", lang.templateNewFolder)}
-${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", lang.remove)}${button("refresh", lang.refresh)}
-${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button("open", lang.showInFolder) : ""}
+${button("refresh", lang.refresh)}
+${canOpenFolder ? button("open", lang.showInFolder) : ""}
 </div>
 <div class="template-manager__panels">
 <div class="template-manager__sidebar">
@@ -59,9 +70,13 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
 <ul class="template-manager__files b3-list b3-list--background" aria-label="${lang.template}"></ul>
 </div>
 <div class="template-manager__editor">
-<div class="template-manager__path ft__breakword"></div>
+<div class="template-manager__source-panel">
+<div class="template-manager__heading"><div class="template-manager__path ft__breakword"></div>
+<button type="button" class="block__icon block__icon--show template-manager__more" data-action="more" aria-label="${lang.more}" aria-haspopup="menu"><svg><use xlink:href="#iconMore"></use></svg></button></div>
 <textarea class="b3-text-field template-manager__source" spellcheck="false" aria-label="${lang.templateSource}" disabled></textarea>
-<div class="template-manager__actions">${button("save", lang.save)}${button("preview", lang.templatePreview)}</div>
+<div class="template-manager__actions">${button("save", lang.save)}${button("preview", lang.templatePreview)}${button("source", lang.templateOpenSourceDoc)}</div>
+</div>
+<div class="template-manager__preview-panel">
 <div class="template-manager__context">
 <div>${lang.templateContext}<span class="template-manager__context-name"></span></div>
 <div class="ft__on-surface">${lang.templateContextTip}</div>
@@ -69,10 +84,11 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
 <input spellcheck="false" class="b3-text-field" type="search" placeholder="${lang.templateContextSearch}" aria-label="${lang.templateContextSearch}">
 <select class="b3-select" aria-label="${lang.templateContext}"></select></div></div>
 <div class="template-manager__preview"></div>
-</div></div>
+</div></div></div>
 </div>`;
     const onDestroy = () => {
         closed = true;
+        layoutObserver?.disconnect();
         clearTemplatePreview(preview);
         window.removeEventListener("beforeunload", beforeUnload);
         onClose?.();
@@ -80,7 +96,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
     let element: HTMLElement;
     const dialog = mobile ? undefined : new Dialog({
         title: lang.templateManager,
-        width: "min(1100px, 96vw)",
+        width: "min(1440px, 96vw)",
         height: "min(800px, 90vh)",
         content,
         destroyCallback: onDestroy,
@@ -111,6 +127,14 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
     const search = element.querySelector<HTMLInputElement>(".template-manager__context input");
     const context = element.querySelector<HTMLSelectElement>("select");
     const contextName = element.querySelector<HTMLElement>(".template-manager__context-name");
+    const editorMore = element.querySelector<HTMLButtonElement>(".template-manager__heading [data-action=more]");
+    const sourceButton = element.querySelector<HTMLButtonElement>("[data-action=source]");
+    if (!mobile) {
+        layoutObserver = new ResizeObserver(entries => {
+            root.classList.toggle("template-manager--wide", entries[0].contentRect.width >= 1180);
+        });
+        layoutObserver.observe(root);
+    }
     if (contextID) {
         context.add(new Option(contextID, contextID));
     }
@@ -132,24 +156,39 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
         if (busy || closed) {
             return;
         }
+        const proceed = () => {
+            if (!busy && !closed) {
+                action();
+            }
+        };
         if (dirty()) {
-            confirmDialog(lang.confirm, lang.discardUnsavedChanges, action);
+            confirmDialog(lang.confirm, lang.discardUnsavedChanges, proceed);
         } else {
-            action();
+            proceed();
         }
     };
     const destroy = mobile ? closeModel : dialog.destroy.bind(dialog);
-    const back = () => guard(() => {
-        if (mobile && root.classList.contains("template-manager--editing")) {
-            void run(async () => {
-                await select();
-                renderList();
-                element.closest("#model")?.querySelector<HTMLElement>(".toolbar__icon").focus({preventScroll: true});
-            });
-        } else {
-            destroy();
+    const back = () => {
+        const menu = window.siyuan.menus.menu;
+        if (!menu.element.classList.contains("fn__none")) {
+            menu.remove();
+            return;
         }
-    });
+        guard(() => {
+            if (mobile && root.classList.contains("template-manager--editing")) {
+                const path = editing?.path;
+                void run(async () => {
+                    await select();
+                    renderList();
+                    Array.from(list.querySelectorAll<HTMLElement>("li[data-path]"))
+                        .find(row => row.dataset.path === path)?.querySelector<HTMLButtonElement>(".template-manager__file")
+                        .focus({preventScroll: true});
+                });
+            } else {
+                destroy();
+            }
+        });
+    };
     if (dialog) {
         dialog.destroy = back;
     }
@@ -159,14 +198,22 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
         source.disabled = !editing;
         source.readOnly = busy;
         list.setAttribute("aria-busy", String(busy));
+        editorMore.disabled = !editing || busy;
+        sourceButton.classList.toggle("fn__none", !sourceDocID || !editing);
+        list.querySelectorAll<HTMLButtonElement>(".template-manager__more").forEach(button => {
+            button.disabled = busy;
+        });
         element.querySelectorAll<HTMLButtonElement>(".template-manager__actions > [data-action]").forEach(element => {
             const action = element.dataset.action;
             const state = getTemplateActionState(action, getTemplateActionEntry(action, selected, editing),
                 dirty(), busy, Boolean(context.value));
             element.title = state.packageMove ? lang.templatePackageMoveTip : "";
             element.disabled = state.disabled;
+            if (action === "source") {
+                element.disabled = !editing || !sourceDocID;
+            }
             // 请求期间保留按钮外观，由事件入口拦截重复操作。
-            element.setAttribute("aria-disabled", String(state.ariaDisabled));
+            element.setAttribute("aria-disabled", String(state.ariaDisabled || element.disabled));
         });
     };
     const run = async (action: () => Promise<void>) => {
@@ -263,6 +310,22 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
                 }
             });
             row.append(element);
+            const more = document.createElement("button");
+            more.type = "button";
+            more.className = "block__icon block__icon--show template-manager__more";
+            more.setAttribute("aria-label", lang.more + " " + entry.name);
+            more.setAttribute("aria-haspopup", "menu");
+            more.innerHTML = '<svg><use xlink:href="#iconMore"></use></svg>';
+            more.addEventListener("click", event => {
+                event.stopPropagation();
+                openEntryMenu(entry, more);
+            });
+            row.addEventListener("contextmenu", event => {
+                event.preventDefault();
+                event.stopPropagation();
+                openEntryMenu(entry, more, event);
+            });
+            row.append(more);
             list.append(row);
         });
         list.scrollTop = scrollTop;
@@ -270,6 +333,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
     const select = async (entry?: TemplateEntry, preserveEditor = false) => {
         let content = "";
         let absolutePath = "";
+        let documentID = "";
         if (entry) {
             const response = await api({action: "read", path: entry.path});
             if (!response?.data || Array.isArray(response.data) || !("content" in response.data)) {
@@ -278,6 +342,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             revision = response.data.revision;
             content = response.data.content;
             absolutePath = response.data.path || "";
+            documentID = response.data.sourceDocID || "";
         } else {
             revision = "";
         }
@@ -288,6 +353,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             editingRevision = editing ? revision : "";
             useCRLF = content.includes("\r\n") && !content.replace(/\r\n/g, "").includes("\n");
             previewPath = absolutePath;
+            sourceDocID = documentID;
             source.value = content;
             saved = source.value;
             clearTemplatePreview(preview);
@@ -319,7 +385,8 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             list.querySelector(".b3-list-item--focus")?.scrollIntoView({block: "nearest", inline: "nearest"});
         }
     };
-    const inputPath = (title: string, value: string, callback: (value: string) => Promise<void>, nameOnly = false) => {
+    const inputPath = (title: string, value: string, callback: (value: string) => Promise<void>, renamePath?: string) => {
+        const nameOnly = renamePath !== undefined;
         const prompt = openInputDialog({
             title,
             value,
@@ -333,7 +400,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
                     input.focus();
                     return;
                 }
-                if (nameOnly && getFileRenameTarget(selected.path, input.value.trim()) === undefined) {
+                if (nameOnly && getFileRenameTarget(renamePath, input.value.trim()) === undefined) {
                     input.setCustomValidity(lang.templateNameTip);
                     input.reportValidity();
                     return;
@@ -345,8 +412,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
         const input = prompt.element.querySelector<HTMLInputElement>("input");
         input.addEventListener("input", () => input.setCustomValidity(""));
     };
-    const move = () => {
-        const entry = selected;
+    const move = ({entry, revision}: TemplateActionTarget) => {
         const prompt = new Dialog({
             title: lang.move,
             width: "min(520px, 92vw)",
@@ -374,6 +440,135 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             });
         });
     };
+    const openSourceDocument = (id: string) => guard(() => {
+        void run(async () => {
+            const response = await fetchSyncPost("/api/block/getBlockInfo", {id});
+            if (closed || response.code !== 0) {
+                return;
+            }
+            if (response.data.rootID !== id) {
+                showMessage(lang.templateSourceDocUnavailable, 5000, "error");
+                return;
+            }
+            if (mobile) {
+                await closeMobileBacklinkSheets();
+                if (closed) {
+                    return;
+                }
+                const tabs = window.siyuan.mobile.tabs;
+                // 来源打开失败时保留管理页，不能通过恢复原页签的导航关闭当前面板。
+                const opened = tabs ? await tabs.open(id, {notebookId: response.data.box}) === "success" :
+                    await new Promise<boolean>(resolve => {
+                        loadMobileFileById(window.siyuan.ws.app, id, undefined, undefined, response.data.box,
+                            protyle => {
+                                const value = isEncryptedBox(protyle.notebookId) ? {id: ""} : {id};
+                                window.siyuan.storage[Constants.LOCAL_DOCINFO] = value;
+                                setStorageVal(Constants.LOCAL_DOCINFO, value);
+                                resolve(true);
+                            }, false, () => !closed, undefined, undefined, true, () => resolve(false));
+                    });
+                if (opened && !closed) {
+                    destroy();
+                } else if (!opened && !closed) {
+                    showMessage(lang.templateSourceDocUnavailable, 5000, "error");
+                }
+            } else {
+                /// #if !MOBILE
+                const tab = await openFileById({app: window.siyuan.ws.app, id, notebookId: response.data.box});
+                if (tab && !closed) {
+                    destroy();
+                }
+                /// #endif
+            }
+        });
+    });
+    const actOnEntry = (action: string, target: TemplateActionTarget) => {
+        const {entry, revision} = target;
+        if (getTemplateActionState(action, entry, dirty(), busy).ariaDisabled || closed) {
+            return;
+        }
+        if (action === "source") {
+            if (target.sourceDocID) {
+                openSourceDocument(target.sourceDocID);
+            }
+            return;
+        }
+        if (action === "open") {
+            /// #if !MOBILE
+            const root = window.siyuan.config.system.dataDir.replace(/\\/g, "/").replace(/\/$/, "") + "/templates";
+            openBy(root + "/" + entry.path, "folder");
+            /// #endif
+            return;
+        }
+        guard(() => {
+            if (action === "move") {
+                move(target);
+            } else if (action === "remove") {
+                confirmDialog(lang.remove, escapeHtml(entry.path) + "<br>" + lang.templateDeleteTip, () => {
+                    void run(async () => {
+                        if (await api({action: "remove", path: entry.path, revision})) {
+                            await reload("");
+                        }
+                    });
+                }, undefined, true);
+            } else if (action === "rename") {
+                inputPath(lang.rename, entry.path.split("/").pop(), async value => {
+                    const target = getFileRenameTarget(entry.path, value);
+                    if (target !== entry.path && await api({action: "move", path: entry.path, target, revision})) {
+                        await reload(target, true);
+                    }
+                }, entry.path);
+            }
+        });
+    };
+    const openEntryMenu = (entry: TemplateEntry, anchor: HTMLElement, event?: MouseEvent) => {
+        void run(async () => {
+            // 菜单固定操作对象和读取版本，打开菜单不切换编辑器或丢弃未保存的源码。
+            let target: TemplateActionTarget;
+            if (entry.path === editing?.path) {
+                target = {entry, revision: editingRevision, sourceDocID};
+            } else {
+                const response = await api({action: "read", path: entry.path});
+                if (!response?.data || Array.isArray(response.data) || !("content" in response.data) || closed) {
+                    return;
+                }
+                target = {entry, revision: response.data.revision, sourceDocID: response.data.sourceDocID};
+            }
+            const menu = window.siyuan.menus.menu;
+            menu.remove();
+            menu.element.setAttribute("data-name", "template-manager");
+            const add = (action: string, label: string, icon: string) => {
+                const state = getTemplateActionState(action, entry, dirty(), false);
+                const item = new MenuItem({
+                    id: action,
+                    label,
+                    icon,
+                    disabled: state.disabled,
+                    click: () => actOnEntry(action, target),
+                }).element;
+                if (state.packageMove) {
+                    item.title = lang.templatePackageMoveTip;
+                }
+                menu.append(item);
+            };
+            if (target.sourceDocID && !entry.isDir) {
+                add("source", lang.templateOpenSourceDoc, "iconFile");
+            }
+            add("rename", lang.rename, "iconEdit");
+            add("move", lang.move, "iconMove");
+            if (canOpenFolder) {
+                add("open", lang.showInFolder, "iconFolder");
+            }
+            add("remove", lang.remove, "iconTrashcan");
+            const rect = anchor.getBoundingClientRect();
+            menu.popup(event ? {x: event.clientX, y: event.clientY} : {x: rect.left, y: rect.bottom, h: rect.height});
+        });
+    };
+    editorMore.addEventListener("click", () => {
+        if (editing) {
+            openEntryMenu(editing, editorMore);
+        }
+    });
     source.addEventListener("input", () => {
         clearTemplatePreview(preview);
         update();
@@ -438,6 +633,9 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
                 if (response?.data && !Array.isArray(response.data)) {
                     saved = source.value;
                     editingRevision = response.data.revision;
+                    const current = await api({action: "read", path: editing.path});
+                    sourceDocID = current?.data && !Array.isArray(current.data) && "content" in current.data &&
+                        current.data.revision === editingRevision ? current.data.sourceDocID || "" : "";
                     if (selected?.path === editing.path) {
                         revision = editingRevision;
                     } else if (selected?.isDir && editing.path.startsWith(selected.path + "/")) {
@@ -451,45 +649,31 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
         } else if (action === "open") {
             /// #if !MOBILE
             const root = window.siyuan.config.system.dataDir.replace(/\\/g, "/").replace(/\/$/, "") + "/templates";
-            openBy(selected ? root + "/" + selected.path : root, selected ? "folder" : "app");
+            openBy(root, "app");
             /// #endif
         } else if (action === "preview") {
             previewTemplate(previewPath, preview, context.value, source.value);
+        } else if (action === "source") {
+            openSourceDocument(sourceDocID);
         } else {
             guard(() => {
                 if (action === "refresh") {
                     void run(() => reload());
-                } else if (action === "move") {
-                    move();
-                } else if (action === "remove") {
-                    confirmDialog(lang.remove, escapeHtml(selected.path) + "<br>" + lang.templateDeleteTip, () => {
-                        void run(async () => {
-                            if (await api({action: "remove", path: selected.path, revision})) {
-                                await reload("");
-                            }
-                        });
-                    }, undefined, true);
                 } else {
                     const directory = selected?.isDir ? selected.path + "/" : (selected?.path.substring(0, selected.path.lastIndexOf("/") + 1) || "");
-                    const initial = action === "rename" ? selected.path.split("/").pop() : directory + (action === "new" ? lang.untitled + ".md" : lang.untitled);
-                    inputPath(action === "mkdir" ? lang.templateNewFolder : (action === "rename" ? lang.rename : lang.newTemplate), initial, async value => {
+                    const initial = directory + (action === "new" ? lang.untitled + ".md" : lang.untitled);
+                    inputPath(action === "mkdir" ? lang.templateNewFolder : lang.newTemplate, initial, async value => {
                         let response;
                         if (action === "new") {
                             value = /\.md$/i.test(value) ? value : value + ".md";
                             response = await api({action: "write", path: value, content: "", revision: ""});
                         } else if (action === "mkdir") {
                             response = await api({action: "mkdir", path: value});
-                        } else {
-                            value = getFileRenameTarget(selected.path, value);
-                            if (value === selected.path) {
-                                return;
-                            }
-                            response = await api({action: "move", path: selected.path, target: value, revision});
                         }
                         if (response) {
                             await reload(value, true);
                         }
-                    }, action === "rename");
+                    });
                 }
             });
         }

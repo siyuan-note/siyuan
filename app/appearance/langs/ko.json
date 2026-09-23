@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "템플릿 원본 문서가 없거나 접근할 수 없습니다",
+	"templateOpenSourceDoc": "템플릿 원본 문서 열기",
 	"taskCompletionToggle": "작업 완료 상태 전환",
 	"addAlias": "별칭 추가",
 	"listMindmapExpandToLevel": "${level}단계까지 펼치기",

@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "Изворни документ шаблона не постоји или није доступан",
+	"templateOpenSourceDoc": "Отвори изворни документ шаблона",
 	"taskCompletionToggle": "Промени стање завршености задатка",
 	"addAlias": "Додај псеудоним",
 	"listMindmapExpandToLevel": "Прошири до нивоа ${level}",

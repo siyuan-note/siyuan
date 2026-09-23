@@ -1,4 +1,6 @@
 {
+	"templateSourceDocUnavailable": "Il documento di origine del modello non esiste o non è accessibile",
+	"templateOpenSourceDoc": "Apri il documento di origine del modello",
 	"taskCompletionToggle": "Alterna il completamento dell’attività",
 	"addAlias": "Aggiungi alias",
 	"listMindmapExpandToLevel": "Espandi fino al livello ${level}",

@@ -48,8 +48,9 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
             upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,
             lute: getTableCellEditorLute(getAVRichTextLute(),
                 window.siyuan.config.editor.markdown.blockFullWidthTaskList !== false),
-            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
+            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
+            richHTMLPaste: true,
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
     });
@@ -175,8 +176,9 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             lute: getTableCellEditorLute(getAVRichTextLute(),
                 window.siyuan.config.editor.markdown.blockFullWidthTaskList !== false),
             lockedOptions: {toolbar, hint},
-            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
+            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
+            richHTMLPaste: true,
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
         afterSetContent: (protyle, element) => {

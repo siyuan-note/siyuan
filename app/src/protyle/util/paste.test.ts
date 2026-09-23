@@ -11,19 +11,26 @@ const source = ts.transpileModule(readFileSync(join(process.cwd(), "src/protyle/
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
 }).outputText;
 
-const createHarness = (disabled = false) => {
+const createHarness = (disabled = false, richPaste = false) => {
     const uploads: Array<{files: unknown; options: {document: {rootID: string}; insertPosition: unknown}}> = [];
     const position = {range: {startContainer: {}}};
     let available = true;
     let localFiles: unknown[] = [];
+    let convertedHTML = "";
+    let convertedBy = "";
+    let checkedBlockDOM = "";
     const restrictedFallback = new Error("restricted fallback");
     const mocks: Record<string, unknown> = {
         "../../constants": {Constants: {SIYUAN_ASSETS_IMAGE: [".png", ".jpg"]}},
         "../runtimeCapabilities": {
             getProtyleBlockDOMSanitizer: () => (html: string) => html,
+            isProtyleRichHTMLPasteEnabled: () => richPaste,
             isProtyleUploadDisabled: () => disabled,
             areProtylePluginExtensionsEnabled: () => false,
-            getProtyleUnsupportedPasteBlocks: () => { throw restrictedFallback; },
+            getProtyleUnsupportedPasteBlocks: () => (blockDOM: string) => {
+                checkedBlockDOM = blockDOM;
+                throw restrictedFallback;
+            },
         },
         "../upload/insertPosition": {
             createUploadInsertPosition: () => position,
@@ -33,7 +40,8 @@ const createHarness = (disabled = false) => {
         "./selection": {getEditorRange: () => position.range},
         "./hasClosest": {hasClosestBlock: (): undefined => undefined},
         "./wpsPresentation": {extractWPSPresentationClipboard: (): undefined => undefined},
-        "./compatibility": {getLocalFiles: async () => localFiles, isInHarmony: () => false},
+        "./compatibility": {getLocalFiles: async () => localFiles, isInHarmony: () => false,
+            getTextSiyuanFromTextHTML: (html: string) => ({textSiyuan: "", textHtml: html})},
         "../upload": {
             uploadFiles: (_protyle: unknown, files: unknown, _element: unknown, _success: unknown,
                           _complete: unknown, options: typeof uploads[number]["options"]) => uploads.push({files, options}),
@@ -42,13 +50,29 @@ const createHarness = (disabled = false) => {
         },
     };
     const module = {exports: {}};
-    runInNewContext(source, {module, exports: module.exports, require: (id: string) => mocks[id] || {}});
+    runInNewContext(source, {module, exports: module.exports, require: (id: string) => mocks[id] || {},
+        document: {createElement: () => ({content: {querySelector: (): null => null}})},
+    });
     const api = module.exports as typeof import("./paste");
-    const paste = (files: unknown[] = [], siyuanHTML = "") => api.paste({wysiwyg: {element: {}}} as IProtyle, {
+    const paste = (files: unknown[] = [], siyuanHTML = "", textPlain = "", textHTML = "") => api.paste({
+        wysiwyg: {element: {}},
+        lute: {Md2BlockDOM: (html: string) => {
+            convertedHTML = html;
+            convertedBy = "markdown";
+            return `<div data-type="NodeParagraph">${html}</div>`;
+        }, HTML2BlockDOM: (html: string) => {
+            convertedHTML = html;
+            convertedBy = "html";
+            return `<div data-type="NodeParagraph">${html}</div>`;
+        }},
+    } as IProtyle, {
         target: {}, stopPropagation() {}, preventDefault() {},
-        clipboardData: {files, types: [], getData: (type: string) => type === "text/siyuan" ? siyuanHTML : ""},
+        clipboardData: {files, types: [], getData: (type: string) => type === "text/siyuan" ? siyuanHTML :
+                type === "text/plain" ? textPlain : type === "text/html" ? textHTML : ""},
     } as unknown as ClipboardEvent & {target: HTMLElement});
     return {paste, uploads, position, restrictedFallback, api: module.exports as typeof import("./paste"),
+        getConvertedHTML: () => convertedHTML, getConvertedBy: () => convertedBy,
+        getCheckedBlockDOM: () => checkedBlockDOM,
         setLocalFiles: (files: unknown[]) => { localFiles = files; },
         invalidate: () => { available = false; }};
 };
@@ -92,6 +116,27 @@ describe("restricted cell image paste", () => {
             assert.equal(harness.uploads.length, 0);
         });
     }
+
+    it("converts pasted HTML source before validating table cell content", async () => {
+        const harness = createHarness(false, true);
+        const html = '<span data-type="custom_example" style="--custom-example: #abc;">text</span>';
+        await assert.rejects(harness.paste([], "", html), harness.restrictedFallback);
+        assert.equal(harness.getConvertedHTML(), html);
+        assert.equal(harness.getConvertedBy(), "markdown");
+        assert.equal(harness.getCheckedBlockDOM(), `<div data-type="NodeParagraph">${html}</div>`);
+    });
+
+    it("retains custom spans in HTML clipboard content without changing ordinary HTML conversion", async () => {
+        const custom = '<span data-type="custom_example" style="--custom-example: #abc;">text</span>';
+        const customHarness = createHarness(false, true);
+        await assert.rejects(customHarness.paste([], "", "text", custom), customHarness.restrictedFallback);
+        assert.equal(customHarness.getConvertedBy(), "markdown");
+        assert.equal(customHarness.getCheckedBlockDOM(), `<div data-type="NodeParagraph">${custom}</div>`);
+        const ordinaryHarness = createHarness(false, true);
+        await assert.rejects(ordinaryHarness.paste([], "", "bold", "<strong>bold</strong>"),
+            ordinaryHarness.restrictedFallback);
+        assert.equal(ordinaryHarness.getConvertedBy(), "html");
+    });
 });
 
 describe("strip pasted IAL data attributes", () => {
@@ -130,6 +175,7 @@ describe("restricted cell selected text paste", () => {
             "../../constants": {Constants: {ZWSP: "\u200b"}},
             "../runtimeCapabilities": {
                 getProtyleBlockDOMSanitizer: () => (html: string) => html,
+                isProtyleRichHTMLPasteEnabled: () => false,
                 getProtyleUnsupportedPasteBlocks: () => () => options.unsupported ? ["Table"] : [],
                 getProtyleRestrictedPlainTextHTML: (text: string) => "plain:" + text,
                 isProtyleUploadDisabled: () => true,

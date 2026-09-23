@@ -13,7 +13,8 @@ const setup = () => {
     const calls: unknown[] = [];
     const completions: ((response: unknown) => void)[] = [];
     const Constants = {
-        CUSTOM_SY_READONLY: "custom-sy-readonly", CB_GET_HISTORY: "history", CB_GET_BACKLINK: "backlink",
+        CUSTOM_SY_READONLY: "custom-sy-readonly", CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap",
+        CB_GET_HISTORY: "history", CB_GET_BACKLINK: "backlink",
         CB_GET_APPEND: "append", CB_GET_BEFORE: "before",
     };
     const exports: {
@@ -40,6 +41,7 @@ const setup = () => {
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const mindmap = (content: string) => `<div data-type="NodeCodeBlock" data-subtype="mindmap">${content}</div>`;
+const oldListMindmap = (content: string) => `<div data-type="NodeList" custom-sy-list-mindmap="1">${content}</div>`;
 
 test("closing the editor cancels rendering while a migration request is pending", async () => {
     const {run, cancel, protyle, completions} = setup();
@@ -62,6 +64,17 @@ test("opening a document migrates once and resumes only the newest pending rende
     assert.deepEqual(rendered, [mindmap("latest render")]);
     assert.equal(run(protyle, mindmap("undo"), [], () => assert.fail("undo retriggered migration")), false);
     assert.equal(calls.length, 1);
+});
+
+test("a visible old list mind map waits for its type migration", async () => {
+    const {run, protyle, calls, completions} = setup();
+    const rendered: string[] = [];
+    assert.equal(run(protyle, oldListMindmap("old"), [], (html: string) => rendered.push(html)), true);
+    await tick();
+    assert.equal(calls.length, 1);
+    completions[0]({code: 0, data: {blocks: []}});
+    await tick();
+    assert.deepEqual(rendered, [oldListMindmap("old")]);
 });
 
 test("ordinary documents render while the full document migration runs", async () => {

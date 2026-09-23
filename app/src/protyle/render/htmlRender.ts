@@ -9,7 +9,7 @@ export const htmlRender = (element: Element) => {
         return;
     }
     htmlElements.forEach((e) => {
-        if (e.closest(".list-mindmap__preview-block")) {
+        if (e.closest(".mindmap-view__preview-block")) {
             return;
         }
         e.setAttribute("data-render", "true");

@@ -28,8 +28,11 @@ interface ListMindmapEditorOptions {
     onUndo: (redo: boolean) => void;
 }
 
+const nestedBranchType = (node: ListMindmapNode) =>
+    node.element?.parentElement?.getAttribute("data-type") === "NodeMindmap" ? "NodeMindmap" : "NodeList";
+
 const nodeContent = (node: ListMindmapNode) => Array.from(node.element?.children || []).filter(child =>
-    child.hasAttribute("data-node-id") && child.getAttribute("data-type") !== "NodeList")
+    child.hasAttribute("data-node-id") && child.getAttribute("data-type") !== nestedBranchType(node))
     .map(child => cleanListMindmapHTML(child.outerHTML)).join("");
 
 const independentBlockSelector = '[data-type="NodeAttributeView"], [data-type="NodeBlockQueryEmbed"]';
@@ -58,7 +61,7 @@ const retainIndependentBlocks = (html: string, node: ListMindmapNode) => {
     template.innerHTML = html;
     const current = new Map<string, Element>();
     Array.from(node.element.children).filter(child => child.hasAttribute("data-node-id") &&
-        child.getAttribute("data-type") !== "NodeList").forEach(child => {
+        child.getAttribute("data-type") !== nestedBranchType(node)).forEach(child => {
         const blocks = [child, ...Array.from(child.querySelectorAll(independentBlockSelector))];
         blocks.forEach(block => {
             if (block.matches(independentBlockSelector) && !block.closest(".protyle-wysiwyg__embed")) {
@@ -120,7 +123,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     // 保留未缩放的亚像素宽度，避免取整后响应式容器挤压文字，导致换行和整棵树重排。
     host.style.minWidth = getComputedStyle(host).width;
     host.replaceChildren();
-    host.classList.add("list-mindmap__editor");
+    host.classList.add("mindmap-view__editor");
     host.contentEditable = "false";
     const fragment = mountProtyleLiteFragment(host, {
         app: owner.app,
@@ -171,7 +174,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     });
     fragment.protyle.block.rootID = owner.block.rootID;
     const overlays = [fragment.hintElement, fragment.protyle.toolbar.element, fragment.protyle.toolbar.subElement];
-    const overlayRoot = host.closest(".list-mindmap") || document.body;
+    const overlayRoot = host.closest(".mindmap-view") || document.body;
     // 菜单使用未缩放的容器定位，同时保持在原生全屏元素内可见。
     overlays.forEach(element => overlayRoot.appendChild(element));
     let lastHTML = comparableContent(fragment.getBlockHTML());
@@ -206,9 +209,9 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         if (finished || composing) {
             return false;
         }
-        // 输入的新列表在结束本次编辑时转换为子节点，避免在连续输入中移走正在编辑的正文。
-        if (!finishSession && Array.from(fragment.wysiwyg.children).some(element =>
-            element.getAttribute("data-type") === "NodeList")) {
+        // 编辑器中创建的列表会成为子分支，结束编辑后再移动，避免改动正在输入的节点。
+        if (!finishSession &&
+            Array.from(fragment.wysiwyg.children).some(element => element.getAttribute("data-type") === "NodeList")) {
             return false;
         }
         const html = cleanListMindmapHTML(fragment.getBlockHTML());
@@ -252,7 +255,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         observer.disconnect();
         fragment.destroy();
         overlays.forEach(element => element.remove());
-        host.classList.remove("list-mindmap__editor");
+        host.classList.remove("mindmap-view__editor");
         host.style.minWidth = originalMinWidth;
         options.onFinish();
     };
@@ -345,7 +348,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
             event.preventDefault();
             event.stopImmediatePropagation();
-            const mindmap = host.closest<HTMLElement>(".list-mindmap");
+            const mindmap = host.closest<HTMLElement>(".mindmap-view");
             void finish().then(finished => {
                 // 退出节点编辑后将键盘焦点交回脑图，保留已选节点的快捷键操作。
                 if (finished && mindmap?.isConnected &&

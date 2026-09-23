@@ -28,7 +28,7 @@ import {openInlineStyleDialog} from "../../toolbar/inlineStyleDialog";
 import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
     moveListMindmapNode, readListMindmap, replaceListMindmapContent,
-    writeListMindmapMetadata, getListMindmapTabItem,
+    writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch,
 } from "./model";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
 import {getListMindmapElements, registerListMindmapRoot} from "./render";
@@ -49,7 +49,19 @@ const canEdit = (owner: IProtyle, list: HTMLElement) => canToggleView(owner, lis
     !list.closest(".protyle-wysiwyg__embed");
 
 export const toggleListMindmap = (owner: IProtyle, list: HTMLElement) => {
-    if (list.dataset.type !== "NodeList" || !canToggleView(owner, list)) {
+    if (!["NodeList", "NodeMindmap"].includes(list.dataset.type) || !canToggleView(owner, list)) {
+        return;
+    }
+    if (list.dataset.type === "NodeMindmap" || list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) == null) {
+        const before = cleanListMindmapHTML(list.outerHTML);
+        const toMindmap = list.dataset.type === "NodeList";
+        retagMindmapBranch(list, toMindmap);
+        if (!toMindmap) {
+            list.removeAttribute(Constants.CUSTOM_SY_LIST_MINDMAP);
+        }
+        hideElements(["gutter", "toolbar", "hint"], owner);
+        updateTransaction(owner, list, before);
+        roots.get(owner)?.refresh();
         return;
     }
     const previous = list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) || "";
@@ -87,14 +99,14 @@ class ListMindmapController {
         this.owner = owner;
         this.list = list;
         this.model = readListMindmap(list);
-        list.querySelector(":scope > .list-mindmap")?.remove();
+        list.querySelector(":scope > .mindmap-view")?.remove();
         this.host = document.createElement("div");
-        this.host.className = "list-mindmap";
+        this.host.className = "mindmap-view";
         this.host.contentEditable = "false";
         this.host.addEventListener("pointermove", event => {
             if (event.pointerType !== "mouse" || event.buttons || !owner.options.render.gutter ||
                 !owner.gutter || this.host.classList.contains("fullscreen") ||
-                (event.target as Element).closest(".list-mindmap__editor, .protyle-toolbar, .protyle-util")) {
+                (event.target as Element).closest(".mindmap-view__editor, .protyle-toolbar, .protyle-util")) {
                 return;
             }
             // 脑图内部的鼠标事件不冒泡到编辑器，块标仍定位到原列表块。
@@ -117,7 +129,7 @@ class ListMindmapController {
         }, {capture: true});
         this.host.addEventListener("keydown", event => {
             if (event.isComposing || (event.target instanceof Element &&
-                event.target.closest("input, textarea, select, .list-mindmap__editor"))) {
+                event.target.closest("input, textarea, select, .mindmap-view__editor"))) {
                 return;
             }
             const keys = owner.options?.action && window.siyuan.config.keymap.editor.general;
@@ -261,7 +273,14 @@ class ListMindmapController {
                 if (!target) {
                     return;
                 }
-                const item = genListItemElement(target.element || list);
+                const firstItem = Array.from(list.children).find(child =>
+                    ["NodeListItem", "NodeMindmapItem"].includes(child.getAttribute("data-type")));
+                const start = target.element ? undefined : Number.parseInt(firstItem?.getAttribute("data-marker") || "", 10) || 1;
+                const item = genListItemElement(target.element || list, 0, false, start);
+                if (list.dataset.type === "NodeMindmap") {
+                    item.dataset.type = "NodeMindmapItem";
+                    item.classList.replace("li", "mindmap-item");
+                }
                 if (!await this.change(() => addListMindmapNode(list, id, kind === "child" ? "child" : "after", item))) {
                     return;
                 }
@@ -311,7 +330,7 @@ class ListMindmapController {
                 metadata.relations = metadata.relations.filter(item => item.id !== id);
             }),
         });
-        list.dataset.listMindmapRendered = "true";
+        list.dataset.mindmapViewRendered = "true";
         this.snapshot = cleanListMindmapHTML(list.outerHTML);
         if (canEdit(owner, list)) {
             const range = focusListMindmap(list, this.host);
@@ -464,11 +483,11 @@ class ListMindmapController {
         }
         this.disposed = true;
         const restoreFocus = this.host.contains(document.activeElement) && this.list.isConnected &&
-            this.list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1";
+            this.list.dataset.type !== "NodeMindmap" && this.list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1";
         this.activeEditor?.destroy();
         this.view.destroy();
         this.host.remove();
-        this.list.removeAttribute("data-list-mindmap-rendered");
+        this.list.removeAttribute("data-mindmap-view-rendered");
         if (restoreFocus) {
             focusBlock(this.list);
         }
@@ -493,7 +512,7 @@ const completeList = async (owner: IProtyle, list: HTMLElement) => {
     const template = document.createElement("template");
     template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data?.dom || "");
     const full = template.content.firstElementChild;
-    if (full?.getAttribute("data-type") !== "NodeList" || full.getAttribute("data-node-id") !== list.dataset.nodeId) {
+    if (full?.getAttribute("data-type") !== list.dataset.type || full.getAttribute("data-node-id") !== list.dataset.nodeId) {
         return "failed";
     }
     const completed = completeTabsListSource(list, full);
@@ -534,15 +553,16 @@ export const initListMindmaps = (owner: IProtyle) => {
                 return;
             }
             const mount = () => {
-                if (disposed || !root.contains(list) || list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1") {
+                if (disposed || !root.contains(list) ||
+                    list.dataset.type !== "NodeMindmap" && list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1") {
                     return;
                 }
                 try {
                     instances.set(list, new ListMindmapController(owner, list));
                 } catch (error) {
                     console.error(error);
-                    list.querySelector(":scope > .list-mindmap")?.remove();
-                    list.removeAttribute("data-list-mindmap-rendered");
+                    list.querySelector(":scope > .mindmap-view")?.remove();
+                    list.removeAttribute("data-mindmap-view-rendered");
                 }
             };
             if (canEdit(owner, list)) {
@@ -577,8 +597,8 @@ export const initListMindmaps = (owner: IProtyle) => {
     const observer = new MutationObserver(records => {
         if (records.some(record => {
             const element = record.target instanceof Element ? record.target : record.target.parentElement;
-            return !element?.closest(".list-mindmap") && !(record.type === "attributes" &&
-                ["data-list-mindmap-rendered", Constants.ATTRIBUTE_EDITING].includes(record.attributeName));
+            return !element?.closest(".mindmap-view") && !(record.type === "attributes" &&
+                ["data-mindmap-view-rendered", Constants.ATTRIBUTE_EDITING].includes(record.attributeName));
         })) {
             schedule();
         }

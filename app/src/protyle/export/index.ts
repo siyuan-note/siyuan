@@ -327,12 +327,12 @@ const renderPDF = async (id: string) => {
             max-width: 100%;
         }
 
-        #preview .list-mindmap__toolbar {
+        #preview .mindmap-view__toolbar {
             display: none !important;
         }
 
-        #preview .list-mindmap {
-            height: var(--list-mindmap-print-height, 420px);
+        #preview .mindmap-view {
+            height: var(--mindmap-view-print-height, 420px);
             min-height: 0;
         }
 

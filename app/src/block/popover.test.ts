@@ -51,7 +51,7 @@ const browserCases = async (source: string) => {
     } as unknown as typeof window.siyuan;
     window.JSAndroid = {} as typeof window.JSAndroid;
     const root = document.createElement("div");
-    root.className = "list-mindmap";
+    root.className = "mindmap-view";
     root.innerHTML = '<span data-type="block-ref" data-id="test">Reference</span>';
     document.body.append(root);
     const ref = root.firstElementChild as HTMLElement;

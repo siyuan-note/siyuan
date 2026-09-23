@@ -18,7 +18,7 @@ export const replaceLegacyMindmapHTML = (html: string, blocks: {id: string, dom:
     const template = document.createElement("template");
     template.innerHTML = html;
     const replacements = new Map(blocks.map(block => [block.id, block.dom]));
-    template.content.querySelectorAll<HTMLElement>('[data-type="NodeCodeBlock"]')
+    template.content.querySelectorAll<HTMLElement>(`[data-type="NodeCodeBlock"], [data-type="NodeList"][${Constants.CUSTOM_SY_LIST_MINDMAP}="1"]`)
         .forEach(block => {
             if (block.closest('[data-type="NodeBlockQueryEmbed"]')) {
                 return;
@@ -44,7 +44,8 @@ export const migrateLegacyMindmapsBeforeRender = (protyle: IProtyle, html: strin
     }
     const previous = migrations.get(protyle);
     // 当前可见内容没有旧脑图时先渲染正文，后台仍迁移整篇文档中尚未加载的块。
-    const waitForMigration = html.includes("data-subtype=\"mindmap\"");
+    const waitForMigration = html.includes("data-subtype=\"mindmap\"") ||
+        html.includes(`${Constants.CUSTOM_SY_LIST_MINDMAP}="1"`);
     const callback = waitForMigration ?
         (blocks: {id: string, dom: string}[]) => resume(replaceLegacyMindmapHTML(html, blocks)) :
         () => {};

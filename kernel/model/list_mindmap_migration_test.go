@@ -28,7 +28,7 @@ func TestLegacyMindmapList(t *testing.T) {
 			code.SetIALAttr("custom-test", "preserved")
 			before := engine.RenderNodeBlockDOM(code)
 			list := legacyMindmapList(code, engine)
-			if list == nil || list.ID != code.ID || list.Type != ast.NodeList || list.IALAttr(listMindmapViewAttr) != "1" {
+			if list == nil || list.ID != code.ID || list.Type != ast.NodeMindmap || list.IALAttr(listMindmapViewAttr) != "" {
 				t.Fatalf("conversion failed: %+v", list)
 			}
 			if list.IALAttr("name") != "Name" || list.IALAttr("alias") != "Alias" || list.IALAttr("custom-test") != "preserved" {
@@ -57,6 +57,48 @@ func TestLegacyMindmapList(t *testing.T) {
 				t.Fatalf("task state changed: %s", dom)
 			}
 		})
+	}
+}
+
+func TestLegacyMindmapTypedListPreservesBlocksAndMetadata(t *testing.T) {
+	engine := util.NewLute()
+	_, tree := engine.Md2BlockDOMTree("- Root\n  - [/] Child\n    - Grandchild\n\n  Paragraph\n", false)
+	list := firstContentBlock(tree.Root)
+	list.SetIALAttr(listMindmapViewAttr, "1")
+	list.SetIALAttr(listMindmapMetadataAttr, `{"version":1,"nodes":{},"relations":[]}`)
+	list.SetIALAttr("name", "Keep")
+	before := engine.RenderNodeBlockDOM(list)
+	converted := legacyMindmapTypedList(list, engine)
+	if converted == nil || converted.Type != ast.NodeMindmap || converted.ID != list.ID ||
+		converted.IALAttr(listMindmapViewAttr) != "" || converted.IALAttr(listMindmapMetadataAttr) != list.IALAttr(listMindmapMetadataAttr) ||
+		converted.IALAttr("name") != "Keep" {
+		t.Fatalf("old list migration lost the root identity or metadata: %+v", converted)
+	}
+	if engine.RenderNodeBlockDOM(list) != before {
+		t.Fatal("source list was modified")
+	}
+	oldIDs, newIDs := []string{}, []string{}
+	for _, root := range []*ast.Node{list, converted} {
+		ids := &oldIDs
+		if root == converted {
+			ids = &newIDs
+		}
+		ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {
+			if entering && node.IsBlock() && node.Type != ast.NodeKramdownBlockIAL {
+				*ids = append(*ids, node.ID)
+			}
+			return ast.WalkContinue
+		})
+	}
+	if strings.Join(oldIDs, ",") != strings.Join(newIDs, ",") {
+		t.Fatalf("block identities changed: %v, %v", oldIDs, newIDs)
+	}
+	if item := converted.FirstChild; item == nil || item.Type != ast.NodeMindmapItem ||
+		item.ChildByType(ast.NodeMindmap) == nil || item.ChildByType(ast.NodeMindmap).FirstChild.Type != ast.NodeMindmapItem {
+		t.Fatal("nested list branches were not migrated")
+	}
+	if !strings.Contains(engine.RenderNodeBlockDOM(converted), `data-task="/"`) {
+		t.Fatal("task marker changed")
 	}
 }
 

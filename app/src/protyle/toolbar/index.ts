@@ -228,7 +228,7 @@ export class Toolbar {
         }
         // 内嵌编辑器的浮动工具栏使用外层容器边界，避免被短单元格或脑图节点挤到选区上。
         const cellEditor = protyle.element.closest(".table__cell-editor");
-        const mindmap = protyle.element.closest(".list-mindmap");
+        const mindmap = protyle.element.closest(".mindmap-view");
         const protyleRect = (mindmap || cellEditor?.parentElement.closest(".protyle") ||
             protyle.element).getBoundingClientRect();
         const viewportBoundary = element.dataset.positionBoundary === "viewport";

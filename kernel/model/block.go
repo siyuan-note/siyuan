@@ -86,7 +86,7 @@ type RiffCard struct {
 
 func (block *Block) IsContainerBlock() bool {
 	switch block.Type {
-	case "NodeDocument", "NodeBlockquote", "NodeList", "NodeListItem", "NodeSuperBlock", "NodeCallout", "NodeTabs", "NodeTabItem":
+	case "NodeDocument", "NodeBlockquote", "NodeList", "NodeListItem", "NodeSuperBlock", "NodeCallout", "NodeTabs", "NodeTabItem", "NodeMindmap", "NodeMindmapItem":
 		return true
 	}
 	return false

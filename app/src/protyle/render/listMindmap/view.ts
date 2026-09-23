@@ -100,14 +100,14 @@ export class ListMindmapView {
     private readonly zoomLabel: HTMLSpanElement;
     private readonly zoomSlider = createElement("input", "b3-slider");
     private readonly nodeElements = new Map<string, HTMLDivElement>();
-    private readonly previewID = `list-mindmap-${Lute.NewNodeID()}-`;
+    private readonly previewID = `mindmap-view-${Lute.NewNodeID()}-`;
     private readonly relationElements = new Map<string, HTMLButtonElement>();
     private readonly buttons = new Map<string, HTMLButtonElement>();
     private readonly folded = new Map<string, boolean>();
     private levelSelect?: HTMLSelectElement;
-    private readonly tooltip = createElement("div", "tooltip list-mindmap__tooltip");
+    private readonly tooltip = createElement("div", "tooltip mindmap-view__tooltip");
     private tooltipButton?: HTMLButtonElement;
-    private readonly colorProbe = createElement("span", "list-mindmap__color-probe");
+    private readonly colorProbe = createElement("span", "mindmap-view__color-probe");
     private positions = new Map<string, ListMindmapPosition>();
     private edges: {from: string, to: string}[] = [];
     private bounds = {width: 1, height: 1};
@@ -119,7 +119,7 @@ export class ListMindmapView {
     private linePaths: {id: string, relation: boolean, path: Path2D, end?: MindmapRoutePoint}[] = [];
     private relationRoutes = new Map<string, MindmapRoutePoint[]>();
     private readonly routeHandles = new Map<string, HTMLButtonElement>();
-    private readonly routeStatus = createElement("div", "list-mindmap__route-status");
+    private readonly routeStatus = createElement("div", "mindmap-view__route-status");
     private readonly fallbackRoutes = new Set<string>();
     private routeDragFrame = 0;
     private relationFrom?: string;
@@ -149,21 +149,21 @@ export class ListMindmapView {
         this.options = options;
         this.model = options.model;
         this.selectedId = options.model.root.id;
-        options.host.classList.add("list-mindmap");
+        options.host.classList.add("mindmap-view");
         options.host.contentEditable = "false";
         options.host.setAttribute("role", "group");
         options.host.setAttribute("aria-label", this.label("mindmap"));
         options.host.tabIndex = 0;
-        this.toolbar = createElement("div", "list-mindmap__toolbar block__icons");
+        this.toolbar = createElement("div", "mindmap-view__toolbar block__icons");
         this.toolbar.setAttribute("role", "toolbar");
-        this.viewport = createElement("div", "list-mindmap__viewport");
+        this.viewport = createElement("div", "mindmap-view__viewport");
         this.viewport.setAttribute("data-prevent-swipe", "true");
-        this.canvas = createElement("canvas", "list-mindmap__canvas");
+        this.canvas = createElement("canvas", "mindmap-view__canvas");
         this.canvas.setAttribute("aria-hidden", "true");
-        this.world = createElement("div", "list-mindmap__world");
-        this.inspector = createElement("div", "list-mindmap__inspector");
+        this.world = createElement("div", "mindmap-view__world");
+        this.inspector = createElement("div", "mindmap-view__inspector");
         this.inspector.hidden = true;
-        this.zoomLabel = createElement("span", "list-mindmap__zoom");
+        this.zoomLabel = createElement("span", "mindmap-view__zoom");
         this.viewport.append(this.canvas, this.world);
         this.tooltip.hidden = true;
         this.tooltip.setAttribute("role", "tooltip");
@@ -215,7 +215,7 @@ export class ListMindmapView {
             "compositionupdate", "compositionend", "copy", "cut", "paste", "focusin", "focusout", "keydown", "keyup",
             "wheel"].forEach(type => this.listen(options.host, type, event => {
                 if (type === "click" && !event.defaultPrevented && !this.options.onOpenLink &&
-                    (event.target as Element).closest(".list-mindmap__content a[href]")) {
+                    (event.target as Element).closest(".mindmap-view__content a[href]")) {
                     return;
                 }
                 event.stopPropagation();
@@ -234,7 +234,7 @@ export class ListMindmapView {
                 if (this.options.printLayout) {
                     this.fitPrint();
                 } else {
-                    this.options.host.style.removeProperty("--list-mindmap-print-height");
+                    this.options.host.style.removeProperty("--mindmap-view-print-height");
                     this.draw();
                 }
             }
@@ -270,7 +270,7 @@ export class ListMindmapView {
 
     private showButtonTooltip = (event: Event) => {
         const button = (event.target as Element).closest<HTMLButtonElement>("button[aria-label]");
-        if (!button || !this.options.host.contains(button) || button.classList.contains("list-mindmap__relation")) {
+        if (!button || !this.options.host.contains(button) || button.classList.contains("mindmap-view__relation")) {
             this.tooltip.hidden = true;
             return;
         }
@@ -312,7 +312,7 @@ export class ListMindmapView {
     private dismissControls = (event: PointerEvent) => {
         const target = event.target as Node;
         this.tooltip.hidden = true;
-        if (target instanceof Element && target.closest(".list-mindmap__relation-editor, .list-mindmap__route-handle")) {
+        if (target instanceof Element && target.closest(".mindmap-view__relation-editor, .mindmap-view__route-handle")) {
             return;
         }
         if (this.inspector.contains(target) || this.buttons.get("style")?.contains(target) ||
@@ -321,7 +321,7 @@ export class ListMindmapView {
             return;
         }
         this.inspector.hidden = true;
-        const node = target instanceof Element && target.closest(".list-mindmap__node, .list-mindmap__relation");
+        const node = target instanceof Element && target.closest(".mindmap-view__node, .mindmap-view__relation");
         if (!node || !this.options.host.contains(node)) {
             this.clearSelection();
         }
@@ -355,11 +355,11 @@ export class ListMindmapView {
             this.fullscreenChange();
         }
         this.nodeElements.forEach(element => {
-            const addChild = element.querySelector<HTMLButtonElement>(".list-mindmap__add-child");
+            const addChild = element.querySelector<HTMLButtonElement>(".mindmap-view__add-child");
             addChild.hidden = value;
             addChild.disabled = value;
-            element.querySelector<HTMLElement>(".list-mindmap__add-bridge").hidden = value;
-            const task = element.querySelector<HTMLButtonElement>(".list-mindmap__task");
+            element.querySelector<HTMLElement>(".mindmap-view__add-bridge").hidden = value;
+            const task = element.querySelector<HTMLButtonElement>(".mindmap-view__task");
             if (task) {
                 task.disabled = value;
             }
@@ -373,7 +373,7 @@ export class ListMindmapView {
             this.buttons.set(id, button);
             this.toolbar.append(button);
         };
-        this.toolbar.append(createElement("span", "list-mindmap__spacer fn__flex-1"));
+        this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"));
         if (!this.options.readOnly) {
             add("relation", "connect", "iconRoute", () => {
                 this.setPanning(false);
@@ -393,8 +393,8 @@ export class ListMindmapView {
         this.buttons.get("expandLevel").setAttribute("aria-haspopup", "menu");
         if (!this.options.onExpandLevelMenu) {
             // 独立导出页面使用原生选择菜单，不依赖应用菜单或移动端框架。
-            const control = createElement("div", "list-mindmap__level-control");
-            this.levelSelect = createElement("select", "list-mindmap__level-select");
+            const control = createElement("div", "mindmap-view__level-control");
+            this.levelSelect = createElement("select", "mindmap-view__level-select");
             this.levelSelect.setAttribute("aria-label", this.label("expandLevel"));
             this.levelSelect.addEventListener("change", () => {
                 const value = this.levelSelect.value;
@@ -420,8 +420,8 @@ export class ListMindmapView {
             });
         });
         this.setPanning(this.panning);
-        const zoomControl = createElement("div", "list-mindmap__zoom-control");
-        const zoomActions = createElement("div", "list-mindmap__zoom-actions");
+        const zoomControl = createElement("div", "mindmap-view__zoom-control");
+        const zoomActions = createElement("div", "mindmap-view__zoom-actions");
         this.zoomLabel.tabIndex = 0;
         this.zoomLabel.setAttribute("aria-label", this.label("zoom"));
         this.zoomSlider.type = "range";
@@ -440,7 +440,7 @@ export class ListMindmapView {
 
     private setPanning(value: boolean) {
         this.panning = value;
-        this.viewport.classList.toggle("list-mindmap__viewport--pan", value);
+        this.viewport.classList.toggle("mindmap-view__viewport--pan", value);
         const button = this.buttons.get("pan");
         button?.classList.toggle("block__icon--active", value);
         button?.setAttribute("aria-pressed", String(value));
@@ -485,22 +485,22 @@ export class ListMindmapView {
         model.nodes.forEach((node, id) => {
             let element = this.nodeElements.get(id);
             if (!element) {
-                element = createElement("div", "list-mindmap__node");
+                element = createElement("div", "mindmap-view__node");
                 element.dataset.mindmapId = id;
                 element.setAttribute("role", "treeitem");
-                element.append(createElement("div", "list-mindmap__content"));
-                const addBridge = createElement("span", "list-mindmap__add-bridge");
+                element.append(createElement("div", "mindmap-view__content"));
+                const addBridge = createElement("span", "mindmap-view__add-bridge");
                 addBridge.hidden = !!this.options.readOnly;
                 addBridge.setAttribute("aria-hidden", "true");
                 element.append(addBridge);
-                const fold = this.makeButton("collapse", "iconLeft", () => this.toggleFold(id), "list-mindmap__fold");
-                fold.append(createElement("span", "list-mindmap__fold-count"));
+                const fold = this.makeButton("collapse", "iconLeft", () => this.toggleFold(id), "mindmap-view__fold");
+                fold.append(createElement("span", "mindmap-view__fold-count"));
                 element.append(fold);
                 const addChild = this.makeButton("listMindmapChild", "iconAdd", () => {
                     if (!this.options.readOnly && this.model.nodes.has(id)) {
                         this.options.onAdd?.(id, "child");
                     }
-                }, "list-mindmap__add-child");
+                }, "mindmap-view__add-child");
                 addChild.hidden = !!this.options.readOnly;
                 addChild.disabled = !!this.options.readOnly;
                 element.append(addChild);
@@ -508,21 +508,21 @@ export class ListMindmapView {
                 this.world.append(element);
                 this.resizeObserver.observe(element);
             }
-            element.classList.toggle("list-mindmap__node--virtual", node.virtual);
-            element.classList.toggle("list-mindmap__node--untitled", node.virtual && !model.metadata.rootTitle);
+            element.classList.toggle("mindmap-view__node--virtual", node.virtual);
+            element.classList.toggle("mindmap-view__node--untitled", node.virtual && !model.metadata.rootTitle);
             if (node.virtual) {
                 element.setAttribute("aria-label", model.metadata.rootTitle || this.label("listMindmapRoot"));
             }
-            element.classList.toggle("list-mindmap__node--root", id === model.root.id);
+            element.classList.toggle("mindmap-view__node--root", id === model.root.id);
             this.renderTask(element, id);
-            element.classList.toggle("list-mindmap__node--branch", node.children.length > 0);
+            element.classList.toggle("mindmap-view__node--branch", node.children.length > 0);
             element.style.backgroundColor = model.metadata.nodes[id]?.backgroundColor || "";
             element.style.color = model.metadata.nodes[id]?.textColor || "";
             const collapsed = this.folded.get(id) ?? node.collapsed;
             element.setAttribute("aria-expanded", String(!collapsed));
-            const fold = element.querySelector<HTMLButtonElement>(".list-mindmap__fold");
+            const fold = element.querySelector<HTMLButtonElement>(".mindmap-view__fold");
             fold.hidden = !node.children.length;
-            fold.classList.toggle("list-mindmap__fold--closed", collapsed);
+            fold.classList.toggle("mindmap-view__fold--closed", collapsed);
             fold.setAttribute("aria-label", this.label(collapsed ? "expand" : "collapse"));
             fold.querySelector("span").textContent = String(descendants.get(id));
             if (id !== this.editingId) {
@@ -547,7 +547,7 @@ export class ListMindmapView {
                             }
                         });
                         const previewTabIDs = new Map<string, string>();
-                        clone.querySelectorAll(".protyle-attr, .protyle-action, .protyle-action__table, .protyle-icons, .list-mindmap")
+                        clone.querySelectorAll(".protyle-attr, .protyle-action, .protyle-action__table, .protyle-icons, .mindmap-view")
                             .forEach(item => item.remove());
                         [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))].forEach((item) => {
                             // 页签预览使用独立 DOM 标识切换正文，不携带可提交事务的块身份。
@@ -557,11 +557,11 @@ export class ListMindmapView {
                                 sourceTabIDs.set(item.id, item.getAttribute("data-node-id"));
                             }
                             if (item.hasAttribute("data-node-id")) {
-                                item.classList.add("list-mindmap__preview-block");
+                                item.classList.add("mindmap-view__preview-block");
                             }
                             if (item.hasAttribute("spellcheck")) {
-                                item.classList.add("list-mindmap__text");
-                                item.classList.toggle("list-mindmap__text--trailing-newline", item.textContent.endsWith("\n"));
+                                item.classList.add("mindmap-view__text");
+                                item.classList.toggle("mindmap-view__text--trailing-newline", item.textContent.endsWith("\n"));
                             }
                             item.removeAttribute("contenteditable");
                             item.removeAttribute("data-node-id");
@@ -584,7 +584,7 @@ export class ListMindmapView {
                     content.querySelectorAll("br").length > 1;
                 const empty = !node.virtual && !hasBlankLines && !content.textContent.replace(/[\u200b\ufeff]/g, "").trim() &&
                     !content.querySelector("img, svg, video, audio, iframe, canvas, hr, [data-content]");
-                content.classList.toggle("list-mindmap__content--empty", empty);
+                content.classList.toggle("mindmap-view__content--empty", empty);
                 content.dataset.placeholder = this.label("listMindmapPlaceholder");
                 if (content.querySelector('.tabs[data-type="NodeTabs"]')) {
                     tabsRender(content, {
@@ -630,18 +630,18 @@ export class ListMindmapView {
     }
 
     public getContentHost(id: string): HTMLElement | undefined {
-        return this.nodeElements.get(id)?.querySelector<HTMLElement>(".list-mindmap__content");
+        return this.nodeElements.get(id)?.querySelector<HTMLElement>(".mindmap-view__content");
     }
 
     public setEditing(id?: string) {
         if (this.editingId) {
-            this.nodeElements.get(this.editingId)?.classList.remove("list-mindmap__node--editing");
+            this.nodeElements.get(this.editingId)?.classList.remove("mindmap-view__node--editing");
         }
         this.editingId = id;
         if (id) {
             destroyTabsRender(this.getContentHost(id));
             this.selectNode(id);
-            this.nodeElements.get(id)?.classList.add("list-mindmap__node--editing");
+            this.nodeElements.get(id)?.classList.add("mindmap-view__node--editing");
         }
         this.refreshLayout();
     }
@@ -791,7 +791,7 @@ export class ListMindmapView {
         this.model.metadata.relations.forEach((relation) => {
             let element = this.relationElements.get(relation.id);
             if (!element) {
-                element = createElement("button", "list-mindmap__relation");
+                element = createElement("button", "mindmap-view__relation");
                 element.type = "button";
                 element.dataset.relationId = relation.id;
                 element.addEventListener("click", (event) => {
@@ -941,7 +941,7 @@ export class ListMindmapView {
             }
         });
         const invalid = this.pointer?.relation && !this.pointer.relation.valid;
-        this.viewport.classList.toggle("list-mindmap__viewport--route-invalid", !!invalid);
+        this.viewport.classList.toggle("mindmap-view__viewport--route-invalid", !!invalid);
         this.routeStatus.hidden = this.options.readOnly || !!this.options.printLayout || !!this.printTransform ||
             (!invalid && !this.fallbackRoutes.has(id));
         this.routeStatus.textContent = this.label(invalid ? "invalid" : "listMindmapRouteFallback");
@@ -953,11 +953,11 @@ export class ListMindmapView {
         if (handle) {
             return handle;
         }
-        handle = createElement("button", "list-mindmap__route-handle");
+        handle = createElement("button", "mindmap-view__route-handle");
         handle.type = "button";
         const endpoint = typeof part === "string" ? part : undefined;
         if (endpoint) {
-            handle.classList.add("list-mindmap__route-endpoint");
+            handle.classList.add("mindmap-view__route-endpoint");
             handle.dataset.endpoint = endpoint;
         }
         handle.setAttribute("aria-label", this.label(endpoint ?
@@ -1004,7 +1004,7 @@ export class ListMindmapView {
                     y: (parseFloat(handle.style.top) - this.offsetY) / this.scale} :
                     {x: (points[segment].x + points[segment + 1].x) / 2, y: (points[segment].y + points[segment + 1].y) / 2}}};
         try {
-            this.pointerCapture = (event.target as Element).closest<HTMLElement>(".list-mindmap__route-handle") || this.viewport;
+            this.pointerCapture = (event.target as Element).closest<HTMLElement>(".mindmap-view__route-handle") || this.viewport;
             this.pointerCapture.setPointerCapture(event.pointerId);
         } catch {
             this.cancelPointer();
@@ -1037,7 +1037,7 @@ export class ListMindmapView {
             if (points.length >= 2) {
                 this.relationRoutes.set(drag.id, points);
             }
-            this.nodeElements.forEach((element, id) => element.classList.toggle("list-mindmap__node--relation",
+            this.nodeElements.forEach((element, id) => element.classList.toggle("mindmap-view__node--relation",
                 drag.valid && id === drag.targetId));
             this.draw();
             return;
@@ -1103,7 +1103,7 @@ export class ListMindmapView {
         const defaultLine = theme.getPropertyValue("--b3-border-color").trim() || "#a8adb5";
         const primary = theme.getPropertyValue("--b3-theme-primary").trim() || "#3574f0";
         const readLineStyles = (type: "line" | "relation") => ["", "hover-", "selected-"].map(state => {
-            const prefix = `--b3-list-mindmap-${type}-${state}`;
+            const prefix = `--b3-mindmap-${type}-${state}`;
             const width = Number(theme.getPropertyValue(`${prefix}width`).trim().replace(/px$/, ""));
             return {
                 color: theme.getPropertyValue(`${prefix}color`).trim(),
@@ -1177,7 +1177,7 @@ export class ListMindmapView {
             context.strokeStyle = resolveColor(stateStyle?.color, baseColor);
             context.lineWidth = stateStyle?.width ?? baseWidth + (selected ? 1 : 0) + (hovered ? 1.5 / this.scale : 0);
             const emphasis = Math.max(0, context.lineWidth - baseWidth);
-            element.classList.toggle("list-mindmap__relation--hover", hovered);
+            element.classList.toggle("mindmap-view__relation--hover", hovered);
             context.setLineDash(relation.dash === false ? [] : [5, 4]);
             context.stroke(path);
             context.setLineDash([]);
@@ -1236,7 +1236,7 @@ export class ListMindmapView {
 
     private renderTask(element: HTMLElement, id: string) {
         const marker = this.model.nodes.get(id)?.taskMarker;
-        let task = element.querySelector<HTMLButtonElement>(".list-mindmap__task");
+        let task = element.querySelector<HTMLButtonElement>(".mindmap-view__task");
         if (marker === undefined) {
             task?.remove();
             element.removeAttribute("data-task");
@@ -1251,7 +1251,7 @@ export class ListMindmapView {
                     this.options.onTaskToggle?.(id);
                 }
             });
-            task.className = "protyle-action protyle-action--task list-mindmap__task";
+            task.className = "protyle-action protyle-action--task mindmap-view__task";
             task.addEventListener("contextmenu", event => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -1291,12 +1291,12 @@ export class ListMindmapView {
             this.relationPreview = undefined;
         }
         this.nodeElements.forEach((element, id) => {
-            element.classList.toggle("list-mindmap__node--selected", this.selectedId === id);
-            element.classList.toggle("list-mindmap__node--relation", this.relationFrom === id ||
+            element.classList.toggle("mindmap-view__node--selected", this.selectedId === id);
+            element.classList.toggle("mindmap-view__node--relation", this.relationFrom === id ||
                 this.relationPreview?.targetId === id);
             element.setAttribute("aria-selected", String(this.selectedId === id));
         });
-        this.relationElements.forEach((element, id) => element.classList.toggle("list-mindmap__relation--selected", this.selectedRelation === id));
+        this.relationElements.forEach((element, id) => element.classList.toggle("mindmap-view__relation--selected", this.selectedRelation === id));
         const node = this.model.nodes.get(this.selectedId);
         const disabled: Record<string, boolean> = {
             relation: !node || node.virtual,
@@ -1379,11 +1379,11 @@ export class ListMindmapView {
         this.suppressLinkClick = false;
         this.suppressPanContextMenu = false;
         const target = event.target as HTMLElement;
-        if (![0, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe, .list-mindmap__node--editing")) {
+        if (![0, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing")) {
             return;
         }
         this.suppressPanContextMenu = event.button === 2;
-        const element = target.closest<HTMLElement>(".list-mindmap__node");
+        const element = target.closest<HTMLElement>(".mindmap-view__node");
         const id = element?.dataset.mindmapId;
         this.preparePointer(event);
         this.finishThen(() => {
@@ -1460,7 +1460,7 @@ export class ListMindmapView {
     private pointerMove = (event: PointerEvent) => {
         if (this.relationFrom && !this.pointer?.rightButton) {
             const bounds = this.viewport.getBoundingClientRect();
-            const id = (event.target as Element).closest<HTMLElement>(".list-mindmap__node")?.dataset.mindmapId;
+            const id = (event.target as Element).closest<HTMLElement>(".mindmap-view__node")?.dataset.mindmapId;
             this.relationPreview = {
                 x: (event.clientX - bounds.left - this.offsetX) / this.scale,
                 y: (event.clientY - bounds.top - this.offsetY) / this.scale,
@@ -1476,8 +1476,8 @@ export class ListMindmapView {
                 return;
             }
             const target = event.target as Element;
-            const relation = target.closest<HTMLElement>(".list-mindmap__relation[data-relation-id]");
-            const line = target.closest(".list-mindmap__node, input, button") ? undefined : this.findLine(event);
+            const relation = target.closest<HTMLElement>(".mindmap-view__relation[data-relation-id]");
+            const line = target.closest(".mindmap-view__node, input, button") ? undefined : this.findLine(event);
             this.setHoveredLine(relation ? `relation:${relation.dataset.relationId}` :
                 line ? `${line.relation ? "relation" : "edge"}:${line.id}` : undefined);
             return;
@@ -1510,7 +1510,7 @@ export class ListMindmapView {
             }
             return;
         }
-        this.viewport.classList.add("list-mindmap__viewport--dragging");
+        this.viewport.classList.add("mindmap-view__viewport--dragging");
         if (!pointer.id) {
             this.offsetX = pointer.x + dx;
             this.offsetY = pointer.y + dy;
@@ -1520,19 +1520,19 @@ export class ListMindmapView {
         if (!this.ghost) {
             const source = this.nodeElements.get(pointer.id);
             this.ghost = source.cloneNode(true) as HTMLDivElement;
-            this.ghost.className = "list-mindmap__node list-mindmap__node--selected list-mindmap__ghost";
+            this.ghost.className = "mindmap-view__node mindmap-view__node--selected mindmap-view__ghost";
             this.ghost.removeAttribute("data-mindmap-id");
-            this.ghost.querySelectorAll(".list-mindmap__fold, .list-mindmap__add-child, .list-mindmap__add-bridge")
+            this.ghost.querySelectorAll(".mindmap-view__fold, .mindmap-view__add-child, .mindmap-view__add-bridge")
                 .forEach(button => button.remove());
             this.world.append(this.ghost);
-            source.classList.add("list-mindmap__node--dragging");
+            source.classList.add("mindmap-view__node--dragging");
         }
         const source = this.positions.get(pointer.id);
         this.ghost.style.left = `${source.x + dx / this.scale}px`;
         this.ghost.style.top = `${source.y + dy / this.scale}px`;
         this.clearDrop();
         const hit = document.elementFromPoint(event.clientX, event.clientY);
-        let target = hit?.closest<HTMLElement>(".list-mindmap__node");
+        let target = hit?.closest<HTMLElement>(".mindmap-view__node");
         let blankPlacement: PointerState["placement"];
         // 直接命中节点时保留原有操作，空白处再比较同级和子节点落点的二维距离。
         if (!target && hit && this.viewport.contains(hit)) {
@@ -1616,13 +1616,13 @@ export class ListMindmapView {
             return;
         }
         if (this.hoveredLine?.startsWith("edge:")) {
-            this.nodeElements.get(this.hoveredLine.slice(5))?.classList.remove("list-mindmap__node--line-hover");
+            this.nodeElements.get(this.hoveredLine.slice(5))?.classList.remove("mindmap-view__node--line-hover");
         }
         this.hoveredLine = key;
         if (key?.startsWith("edge:")) {
-            this.nodeElements.get(key.slice(5))?.classList.add("list-mindmap__node--line-hover");
+            this.nodeElements.get(key.slice(5))?.classList.add("mindmap-view__node--line-hover");
         }
-        this.viewport.classList.toggle("list-mindmap__viewport--line-hover", !!key);
+        this.viewport.classList.toggle("mindmap-view__viewport--line-hover", !!key);
         this.draw();
     }
 
@@ -1696,11 +1696,11 @@ export class ListMindmapView {
         this.endInteraction = undefined;
         this.ghost?.remove();
         this.ghost = undefined;
-        this.viewport.classList.remove("list-mindmap__viewport--dragging");
-        this.nodeElements.forEach(element => element.classList.remove("list-mindmap__node--dragging"));
+        this.viewport.classList.remove("mindmap-view__viewport--dragging");
+        this.nodeElements.forEach(element => element.classList.remove("mindmap-view__node--dragging"));
         if (pointer?.relation) {
             if (pointer.relation.endpoint) {
-                this.nodeElements.forEach(element => element.classList.remove("list-mindmap__node--relation"));
+                this.nodeElements.forEach(element => element.classList.remove("mindmap-view__node--relation"));
             }
             this.relationRoutes.set(pointer.relation.id, pointer.relation.points);
             this.draw();
@@ -1710,11 +1710,11 @@ export class ListMindmapView {
 
     private contentClick = (event: MouseEvent) => {
         const target = event.target as Element;
-        if (target.closest(".list-mindmap__node--editing")) {
+        if (target.closest(".mindmap-view__node--editing")) {
             return;
         }
         const link = target.closest<HTMLElement>('a[href], [data-type~="a"][data-href], [data-type~="block-ref"][data-id]');
-        if (!link?.closest(".list-mindmap__content")) {
+        if (!link?.closest(".mindmap-view__content")) {
             return;
         }
         clearTimeout(this.linkTimer);
@@ -1745,14 +1745,14 @@ export class ListMindmapView {
             return;
         }
         const target = event.target as HTMLElement;
-        if (target.closest(".list-mindmap__relation")) {
+        if (target.closest(".mindmap-view__relation")) {
             this.editRelationLabel(event);
             return;
         }
-        if (target.closest("button, input, select, audio, video, iframe, .list-mindmap__node--editing")) {
+        if (target.closest("button, input, select, audio, video, iframe, .mindmap-view__node--editing")) {
             return;
         }
-        const id = target.closest<HTMLElement>(".list-mindmap__node")?.dataset.mindmapId;
+        const id = target.closest<HTMLElement>(".mindmap-view__node")?.dataset.mindmapId;
         if (!id) {
             this.selectLine(event);
             if (this.selectedRelation) {
@@ -1779,13 +1779,13 @@ export class ListMindmapView {
     private editRootTitle(id: string, toEnd = false) {
         this.finishRelationEdit?.(true);
         const content = this.getContentHost(id);
-        const input = createElement("textarea", "list-mindmap__root-title");
-        const measure = createElement("span", "list-mindmap__root-title-measure");
+        const input = createElement("textarea", "mindmap-view__root-title");
+        const measure = createElement("span", "mindmap-view__root-title-measure");
         input.rows = 1;
         input.value = this.model.metadata.rootTitle || "";
         measure.textContent = input.value;
         input.setAttribute("aria-label", this.label("text"));
-        content.classList.add("list-mindmap__root-title-host");
+        content.classList.add("mindmap-view__root-title-host");
         this.setEditing(id);
         content.replaceChildren(measure, input);
         input.addEventListener("input", () => {
@@ -1800,7 +1800,7 @@ export class ListMindmapView {
             finished = true;
             this.finishRelationEdit = undefined;
             const title = input.value.trim();
-            content.classList.remove("list-mindmap__root-title-host");
+            content.classList.remove("mindmap-view__root-title-host");
             this.setEditing(undefined);
             if (save && title !== (this.model.metadata.rootTitle || "")) {
                 this.options.onRootTitleChange?.(title);
@@ -1836,7 +1836,7 @@ export class ListMindmapView {
         event.stopPropagation();
         this.finishRelationEdit?.(true);
         this.inspector.hidden = true;
-        const input = createElement("input", "b3-text-field list-mindmap__relation list-mindmap__relation-editor");
+        const input = createElement("input", "b3-text-field mindmap-view__relation mindmap-view__relation-editor");
         input.type = "text";
         input.value = relation.label || "";
         input.setAttribute("aria-label", this.label("text"));
@@ -1875,7 +1875,7 @@ export class ListMindmapView {
     }
 
     private wheel = (event: WheelEvent) => {
-        if ((event.target as HTMLElement).closest(".list-mindmap__node--editing")) {
+        if ((event.target as HTMLElement).closest(".mindmap-view__node--editing")) {
             return;
         }
         event.preventDefault();
@@ -1947,7 +1947,7 @@ export class ListMindmapView {
         const {left, top, right, bottom} = this.contentBounds();
         const width = this.viewport.clientWidth;
         this.scale = Math.min(1, Math.max(1, width - 24) / Math.max(1, right - left));
-        this.options.host.style.setProperty("--list-mindmap-print-height", `${Math.ceil((bottom - top) * this.scale + 26)}px`);
+        this.options.host.style.setProperty("--mindmap-view-print-height", `${Math.ceil((bottom - top) * this.scale + 26)}px`);
         this.offsetX = (width - (right - left) * this.scale) / 2 - left * this.scale;
         this.offsetY = 12 - top * this.scale;
         this.draw();
@@ -1976,7 +1976,7 @@ export class ListMindmapView {
 
     private keyDown = (event: KeyboardEvent) => {
         const target = event.target as HTMLElement;
-        if (event.isComposing || target.closest("input, textarea, select, audio, video, iframe, .list-mindmap__node--editing")) {
+        if (event.isComposing || target.closest("input, textarea, select, audio, video, iframe, .mindmap-view__node--editing")) {
             return;
         }
         if (this.pointer?.relation && event.key !== "Escape") {
@@ -1984,7 +1984,7 @@ export class ListMindmapView {
         }
         const isTaskCompletionToggle = this.options.isTaskCompletionToggle?.(event);
         if (!this.options.readOnly && (isTaskCompletionToggle || this.options.isTaskCycle?.(event))) {
-            const id = target.closest<HTMLElement>(".list-mindmap__node")?.dataset.mindmapId || this.selectedId;
+            const id = target.closest<HTMLElement>(".mindmap-view__node")?.dataset.mindmapId || this.selectedId;
             if (this.model.nodes.get(id)?.taskMarker !== undefined) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -2089,8 +2089,8 @@ export class ListMindmapView {
         }
         this.inspector.replaceChildren();
         const lineSelected = !!this.selectedRelation || !!this.selectedEdge;
-        this.inspector.classList.toggle("list-mindmap__inspector--node", !lineSelected);
-        this.inspector.classList.toggle("list-mindmap__inspector--line", lineSelected);
+        this.inspector.classList.toggle("mindmap-view__inspector--node", !lineSelected);
+        this.inspector.classList.toggle("mindmap-view__inspector--line", lineSelected);
         this.inspector.style.left = "";
         this.inspector.style.top = "";
         const squareButton = (key: string, icon: string, action: () => void) => {
@@ -2100,7 +2100,7 @@ export class ListMindmapView {
             return button;
         };
         const color = (value: string, action: (value: string) => void, key = "color") => {
-            const palette = createElement("div", "list-mindmap__palette");
+            const palette = createElement("div", "mindmap-view__palette");
             palette.setAttribute("role", "group");
             palette.setAttribute("aria-label", this.label(key));
             const colors = [{label: this.label("default"), value: ""}, ...(this.options.colors?.() || [])];
@@ -2189,7 +2189,7 @@ export class ListMindmapView {
             return;
         }
         // 移到独立容器，避免编辑器祖先的变换和裁剪改变全屏覆盖范围。
-        this.fullscreenMarker = document.createComment("list-mindmap");
+        this.fullscreenMarker = document.createComment("mindmap-view");
         this.options.host.before(this.fullscreenMarker);
         document.body.append(this.options.host);
         this.options.onFullscreen?.(true, this.buttons.get("fullscreen"));

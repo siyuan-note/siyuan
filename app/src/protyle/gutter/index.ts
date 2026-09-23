@@ -159,6 +159,8 @@ const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeHeading: "headings",
     NodeList: "list1",
     NodeListItem: "listItem",
+    NodeMindmap: "mindmap",
+    NodeMindmapItem: "mindmap",
     NodeBlockquote: "quote",
     NodeCallout: "callout",
     NodeTabs: "tabs",
@@ -3668,9 +3670,10 @@ export class Gutter {
         }
         let html = "";
         let nodeElement = selectedElement || element;
-        const mindmapElement = nodeElement.getAttribute("data-type") === "NodeList" &&
-            nodeElement.getAttribute("custom-sy-list-mindmap") === "1" ?
-            nodeElement.querySelector(":scope > .list-mindmap") : null;
+        const mindmapElement = (nodeElement.getAttribute("data-type") === "NodeMindmap" ||
+            nodeElement.getAttribute("data-type") === "NodeList" &&
+            nodeElement.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") ?
+            nodeElement.querySelector(":scope > .mindmap-view") : null;
         const tabsHeader = !isMultiSelect && nodeElement.getAttribute("data-type") === "NodeTabs" ?
             nodeElement.querySelector(":scope > .tabs-header") : null;
         if (tabsHeader) {

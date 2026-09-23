@@ -4,16 +4,18 @@
 
 .protyle-wysiwyg,
 .b3-typography {
-  [data-type="NodeList"][data-list-mindmap-rendered="true"] {
+  [data-type="NodeList"][data-mindmap-view-rendered="true"],
+  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] {
     height: auto !important;
   }
 
-  [data-type="NodeList"][data-list-mindmap-rendered="true"] > [data-type="NodeListItem"] {
+  [data-type="NodeList"][data-mindmap-view-rendered="true"] > [data-type="NodeListItem"],
+  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] > [data-type="NodeMindmapItem"] {
     display: none;
   }
 }
 
-.list-mindmap {
+.mindmap-view {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -112,8 +114,8 @@
     flex-shrink: 0;
     pointer-events: auto;
 
-    &:hover .list-mindmap__zoom-actions,
-    &:focus-within .list-mindmap__zoom-actions {
+    &:hover .mindmap-view__zoom-actions,
+    &:focus-within .mindmap-view__zoom-actions {
       display: flex;
     }
   }
@@ -168,11 +170,11 @@
   &__viewport--pan {
     cursor: grab;
 
-    .list-mindmap__world {
+    .mindmap-view__world {
       pointer-events: none;
     }
 
-    &.list-mindmap__viewport--dragging {
+    &.mindmap-view__viewport--dragging {
       cursor: grabbing;
     }
   }
@@ -202,7 +204,7 @@
     line-height: 1.5;
     cursor: grab;
 
-    &:hover:not(.list-mindmap__node--dragging):not(.list-mindmap__node--editing):not(.list-mindmap__node--selected) {
+    &:hover:not(.mindmap-view__node--dragging):not(.mindmap-view__node--editing):not(.mindmap-view__node--selected) {
       box-shadow: inset 0 0 0 2px var(--b3-list-hover);
     }
 
@@ -212,20 +214,20 @@
       box-shadow: inset 0 0 0 1px var(--b3-border-color);
       transition: background-color 120ms ease, box-shadow 120ms ease;
 
-      &:hover:not(.list-mindmap__node--dragging):not(.list-mindmap__node--editing):not(.list-mindmap__node--selected):not(.list-mindmap__node--relation) {
+      &:hover:not(.mindmap-view__node--dragging):not(.mindmap-view__node--editing):not(.mindmap-view__node--selected):not(.mindmap-view__node--relation) {
         background: var(--b3-list-hover);
         box-shadow: inset 0 0 0 1px var(--b3-border-color);
       }
     }
 
-    &--untitled:not(.list-mindmap__node--editing) {
+    &--untitled:not(.mindmap-view__node--editing) {
       width: 32px;
       min-width: 32px;
       height: 32px;
       min-height: 32px;
       padding: 0;
 
-      > .list-mindmap__content {
+      > .mindmap-view__content {
         display: grid;
         place-items: center;
         min-width: 0;
@@ -303,7 +305,7 @@
     min-height: 24px;
     overflow-wrap: anywhere;
 
-    .list-mindmap__node:not(.list-mindmap__node--editing) > &--empty:not(.list-mindmap__editor) {
+    .mindmap-view__node:not(.mindmap-view__node--editing) > &--empty:not(.mindmap-view__editor) {
       > * {
         display: none;
       }
@@ -315,7 +317,7 @@
     }
 
     > .p,
-    > .p.list-mindmap__preview-block {
+    > .p.mindmap-view__preview-block {
       margin: 0;
       padding: 0;
       font-size: inherit;
@@ -373,7 +375,7 @@
     column-gap: 6px;
     align-items: start;
 
-    > .list-mindmap__content {
+    > .mindmap-view__content {
       grid-column: 2;
       grid-row: 1;
     }
@@ -424,12 +426,12 @@
     }
   }
 
-  &__node.protyle-task--done:not([data-task="/"]) > .list-mindmap__content {
+  &__node.protyle-task--done:not([data-task="/"]) > .mindmap-view__content {
     > .p {
       @include task.completed-text;
     }
 
-    &.list-mindmap__editor .protyle-wysiwyg > .p {
+    &.mindmap-view__editor .protyle-wysiwyg > .p {
       @include task.completed-text;
     }
   }
@@ -513,7 +515,7 @@
       }
     }
 
-    &:not(.list-mindmap__fold--closed) .list-mindmap__fold-count {
+    &:not(.mindmap-view__fold--closed) .mindmap-view__fold-count {
       display: none;
     }
   }
@@ -559,16 +561,16 @@
     width: 39px;
   }
 
-  &__node:not(.list-mindmap__node--root) {
-    > .list-mindmap__fold {
+  &__node:not(.mindmap-view__node--root) {
+    > .mindmap-view__fold {
       top: calc(100% - 6px);
     }
 
-    > .list-mindmap__add-child {
+    > .mindmap-view__add-child {
       top: calc(100% - 6px);
     }
 
-    > .list-mindmap__add-bridge {
+    > .mindmap-view__add-bridge {
       bottom: -14px;
 
       // 补齐右下角斜向移出的路径，避免鼠标先落到连线上而收起操作按钮。
@@ -736,7 +738,7 @@
     flex-wrap: nowrap;
     gap: 0;
 
-    .list-mindmap__palette {
+    .mindmap-view__palette {
       margin: 0;
       flex-shrink: 0;
     }
@@ -771,9 +773,9 @@
 }
 
 @media print {
-  .list-mindmap {
+  .mindmap-view {
     break-inside: avoid;
-    height: var(--list-mindmap-print-height, 420px);
+    height: var(--mindmap-view-print-height, 420px);
     min-height: 0;
 
     &__toolbar,

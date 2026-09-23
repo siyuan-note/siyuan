@@ -5,7 +5,7 @@
   text-decoration: line-through;
 }
 
-.protyle-wysiwyg, .b3-typography, .list-mindmap {
+.protyle-wysiwyg, .b3-typography, .mindmap-view {
   .protyle-action--task[data-task] {
     --task-marker: attr(data-task);
   }

@@ -120,7 +120,7 @@ const collectCustomBlocks = (element: Element) => {
 
 const renderCustomBlock = (element: HTMLElement, force = false) => {
     const rootElement = element.closest<HTMLElement>(".protyle-wysiwyg");
-    const context = !element.closest(".list-mindmap__preview-block") && rootElement && rootContexts.get(rootElement);
+    const context = !element.closest(".mindmap-view__preview-block") && rootElement && rootContexts.get(rootElement);
     const info = element.getAttribute("data-info") || "";
     const content = element.getAttribute("data-content") || "";
     const decoded = decodeCustomBlockInfo(info);
@@ -150,7 +150,7 @@ const renderCustomBlock = (element: HTMLElement, force = false) => {
     let contentUpdateQueued = false;
     let rendering = true;
     const isCurrentRoot = () => element.closest<HTMLElement>(".protyle-wysiwyg") === rootElement &&
-        rootContexts.get(rootElement) === context && !element.closest(".list-mindmap__preview-block");
+        rootContexts.get(rootElement) === context && !element.closest(".mindmap-view__preview-block");
     const setContent = (newContent: string) => {
         if (typeof newContent !== "string" || !isCustomBlockContentValid(newContent) || rendering ||
             !context.ready || context.disabled() || !element.isConnected || !isCurrentRoot() ||

@@ -49,7 +49,7 @@ const cases = async (source: string) => {
     };
     const preview = (element: HTMLElement) => {
         const clone = element.cloneNode(true) as HTMLElement;
-        clone.classList.add("list-mindmap__preview-block");
+        clone.classList.add("mindmap-view__preview-block");
         clone.removeAttribute("data-node-id");
         root.append(clone);
         return clone;
@@ -89,7 +89,7 @@ const cases = async (source: string) => {
     check.equal(custom.dataset.content, "Source can still change");
     // 已排队的插件回调也重新确认容器归属。
     check.equal(sourceSetter("Queued change"), true);
-    custom.classList.add("list-mindmap__preview-block");
+    custom.classList.add("mindmap-view__preview-block");
     await Promise.resolve();
     check.equal(sourceSetter("Detached identity"), false);
     check.equal(updates.length, 1);

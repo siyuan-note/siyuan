@@ -2,7 +2,7 @@
 @use "toolbar" as *;
 @use "wysiwyg" as *;
 @use "attr" as *;
-@use "list-mindmap" as *;
+@use "mindmap-view" as *;
 
 .protyle-lite-fragment .protyle-action__menu {
   display: none;
@@ -13,7 +13,7 @@
 }
 
 .table__cell-editor,
-.list-mindmap__editor {
+.mindmap-view__editor {
   .code-block .protyle-action__menu {
     display: block;
   }
@@ -952,7 +952,7 @@
 
 .table__cell-rich .code-block,
 .table__cell-editor .code-block,
-.list-mindmap__content .code-block {
+.mindmap-view__content .code-block {
   // 预览与编辑共用最小宽度，为代码内容和顶部操作区保留空间。
   min-width: 200px;
 

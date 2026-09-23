@@ -11,12 +11,12 @@ export const registerListMindmapRoot = (root: Element, refresh: () => void) => {
 };
 
 export const getListMindmapElements = (root: Element) => {
-    const selector = `[data-type="NodeList"][${Constants.CUSTOM_SY_LIST_MINDMAP}="1"]`;
+    const selector = `[data-type="NodeMindmap"], [data-type="NodeList"][${Constants.CUSTOM_SY_LIST_MINDMAP}="1"]`;
     const lists = Array.from(root.querySelectorAll<HTMLElement>(selector));
     if (root.matches(selector)) {
         lists.unshift(root as HTMLElement);
     }
-    return lists.filter(list => !list.closest(".list-mindmap") &&
+    return lists.filter(list => !list.closest(".mindmap-view") &&
         !list.parentElement?.closest(selector));
 };
 
@@ -36,9 +36,9 @@ export const listMindmapRender = (root: Element, cdn?: string) => {
         }
         try {
             const model = readListMindmap(list);
-            list.querySelector(":scope > .list-mindmap")?.remove();
+            list.querySelector(":scope > .mindmap-view")?.remove();
             const host = document.createElement("div");
-            host.className = "list-mindmap";
+            host.className = "mindmap-view";
             host.contentEditable = "false";
             list.appendChild(host);
             const view = new ListMindmapView({
@@ -47,17 +47,17 @@ export const listMindmapRender = (root: Element, cdn?: string) => {
                 onExit: () => {
                     view.destroy();
                     host.remove();
-                    list.removeAttribute("data-list-mindmap-rendered");
+                    list.removeAttribute("data-mindmap-view-rendered");
                     previews.delete(list);
                 },
             });
             previews.set(list, view);
-            list.dataset.listMindmapRendered = "true";
+            list.dataset.mindmapViewRendered = "true";
         } catch (error) {
             // 无法识别配置时继续显示原列表，避免隐藏源内容。
             console.error(error);
-            list.querySelector(":scope > .list-mindmap")?.remove();
-            list.removeAttribute("data-list-mindmap-rendered");
+            list.querySelector(":scope > .mindmap-view")?.remove();
+            list.removeAttribute("data-mindmap-view-rendered");
         }
     });
 };

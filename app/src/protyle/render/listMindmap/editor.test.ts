@@ -370,7 +370,7 @@ const browserCases = async (sourceCode: string, css: string) => {
     // Esc 成功保存后恢复脑图焦点；保存失败时仍留在节点编辑器。
     for (const accept of [false, true]) {
         current = create();
-        current.container.className = "list-mindmap";
+        current.container.className = "mindmap-view";
         current.container.tabIndex = -1;
         current.host.tabIndex = -1;
         current.host.focus();
@@ -390,10 +390,10 @@ const browserCases = async (sourceCode: string, css: string) => {
     const fixture = document.createElement("div");
     fixture.className = "protyle-wysiwyg";
     document.body.append(fixture);
-    fixture.innerHTML = '<div class="list-mindmap"><div class="list-mindmap__node"><div class="list-mindmap__content">' +
-        '<div class="p list-mindmap__preview-block">Normal</div>' +
-        '<div class="bq list-mindmap__preview-block" data-type="NodeBlockquote"><div class="p list-mindmap__preview-block">Quote</div></div>' +
-        '<div class="h1 list-mindmap__preview-block" data-type="NodeHeading">Heading</div>' +
+    fixture.innerHTML = '<div class="mindmap-view"><div class="mindmap-view__node"><div class="mindmap-view__content">' +
+        '<div class="p mindmap-view__preview-block">Normal</div>' +
+        '<div class="bq mindmap-view__preview-block" data-type="NodeBlockquote"><div class="p mindmap-view__preview-block">Quote</div></div>' +
+        '<div class="h1 mindmap-view__preview-block" data-type="NodeHeading">Heading</div>' +
         "</div></div></div>";
     const quote = fixture.querySelector<HTMLElement>(".bq");
     check.equal(getComputedStyle(quote).position, "relative", "quote decoration is anchored to the quote block");
@@ -403,16 +403,16 @@ const browserCases = async (sourceCode: string, css: string) => {
     for (const [text, task] of ["", "Test text", '<span data-type="strong">11pppppp</span>', "First<br>Second", "First\nSecond",
         '<span data-type="strong">1水电费ppppp</span>', '<span data-type="strong">1水电费pppppp</span>']
         .flatMap(text => [[text, false], [text, true]] as const)) {
-        fixture.innerHTML = `<div data-node-id="list" data-type="NodeList"><div class="list-mindmap"><div class="list-mindmap__node"><div class="list-mindmap__content"><div class="p list-mindmap__preview-block" data-type="NodeParagraph"><div class="list-mindmap__text">${text}</div></div></div></div></div></div>`;
-        const node = fixture.querySelector<HTMLElement>(".list-mindmap__node");
+        fixture.innerHTML = `<div data-node-id="list" data-type="NodeList"><div class="mindmap-view"><div class="mindmap-view__node"><div class="mindmap-view__content"><div class="p mindmap-view__preview-block" data-type="NodeParagraph"><div class="mindmap-view__text">${text}</div></div></div></div></div></div>`;
+        const node = fixture.querySelector<HTMLElement>(".mindmap-view__node");
         if (task) {
             node.dataset.task = " ";
             const button = document.createElement("button");
-            button.className = "protyle-action protyle-action--task list-mindmap__task";
+            button.className = "protyle-action protyle-action--task mindmap-view__task";
             button.innerHTML = '<svg><use xlink:href="#iconUncheck"></use></svg>';
             node.prepend(button);
         }
-        const content = fixture.querySelector<HTMLElement>(".list-mindmap__content");
+        const content = fixture.querySelector<HTMLElement>(".mindmap-view__content");
         const before = {width: node.offsetWidth, height: node.offsetHeight};
         if (text === "Test text") {
             check.equal(before.height, 32, "single-line previews do not inherit extra block spacing");
@@ -421,7 +421,7 @@ const browserCases = async (sourceCode: string, css: string) => {
         for (const scale of [1, 0.65, 1.5]) {
             fixture.style.transform = `scale(${scale})`;
             content.style.minWidth = getComputedStyle(content).width;
-            content.classList.add("list-mindmap__editor", "protyle");
+            content.classList.add("mindmap-view__editor", "protyle");
             content.innerHTML = `<div class="protyle-content" data-padding-mode="responsive" data-device="desktop"><div class="protyle-wysiwyg" spellcheck="false" contenteditable="true"><div class="p" data-node-id="text" data-type="NodeParagraph"><div contenteditable="true" spellcheck="false">${text}</div></div></div></div>`;
             check.deepEqual({width: node.offsetWidth, height: node.offsetHeight}, before,
                 "entering edit mode preserves node dimensions with responsive padding and canvas zoom");
@@ -438,7 +438,7 @@ const browserCases = async (sourceCode: string, css: string) => {
             range.collapse(false);
             getSelection().removeAllRanges();
             getSelection().addRange(range);
-            await require("electron").ipcRenderer.invoke("list-mindmap-editor-type", "a");
+            await require("electron").ipcRenderer.invoke("mindmap-view-editor-type", "a");
             check.equal(editable.textContent, beforeInput + "a", "focused node content accepts native text input");
             editable.textContent = "A longer sentence that expands the node while editing";
             const expandedWidth = node.offsetWidth;
@@ -446,7 +446,7 @@ const browserCases = async (sourceCode: string, css: string) => {
             check.ok(expandedWidth <= 300, "editing respects the existing maximum width");
             editable.textContent = "A";
             check.ok(node.offsetWidth < expandedWidth, "deleting text shrinks the editor before blur");
-            content.classList.remove("list-mindmap__editor", "protyle");
+            content.classList.remove("mindmap-view__editor", "protyle");
             content.style.minWidth = "";
             content.innerHTML = preview;
             check.deepEqual({width: node.offsetWidth, height: node.offsetHeight}, before,
@@ -462,7 +462,7 @@ test("list mindmap editor flushes pending input and preserves text across finish
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-list-mindmap-editor-test-"));
+    const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-view-editor-test-"));
     const script = path.join(temporary, "run.cjs");
     const source = transpileModule(readFileSync(path.join(__dirname, "editor.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
@@ -476,7 +476,7 @@ app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
-    ipcMain.handle("list-mindmap-editor-type", async (_event, text) => {
+    ipcMain.handle("mindmap-view-editor-type", async (_event, text) => {
         await win.webContents.insertText(text);
     });
     try {

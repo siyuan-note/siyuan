@@ -16,7 +16,9 @@ import (
 const TableCellRichDocumentSpec = "4"
 const TableCellRichTableAttribute = "custom-sy-table-rich"
 
-func checkTableCellRichJSON(data []byte, spec string) error {
+// checkDocumentSpecJSON 在容错解析节点前验证需要特定文档版本的源数据。
+func checkDocumentSpecJSON(data []byte, spec string) error {
+	version, _ := strconv.Atoi(spec)
 	type rawNode struct {
 		Type          string
 		TableCellRich json.RawMessage
@@ -28,11 +30,13 @@ func checkTableCellRichJSON(data []byte, spec string) error {
 		if err := json.Unmarshal(raw, &node); nil != err {
 			return err
 		}
+		if version < 5 && (node.Type == "NodeMindmap" || node.Type == "NodeMindmapItem") {
+			return fmt.Errorf("mind map document requires spec 5")
+		}
 		if len(node.TableCellRich) > 0 {
 			if !utf8.Valid(node.TableCellRich) {
 				return fmt.Errorf("table cell rich text payload is not UTF-8")
 			}
-			version, _ := strconv.Atoi(spec)
 			if version < 4 || node.Type != "NodeTableCell" || context != "row" {
 				return fmt.Errorf("invalid table cell rich text document spec [%s]", spec)
 			}

@@ -24,7 +24,7 @@ var (
 	pluginPublishLock       sync.Mutex
 )
 
-// PluginPublishDeclaration 的资源为精确文件名，数据为可公开的顶层标量字段，不支持目录或通配符。
+// PluginPublishDeclaration 的资源为精确文件名或以 / 结尾的递归目录，数据为可公开的顶层标量字段。
 type PluginPublishDeclaration struct {
 	Resources []string `json:"resources"`
 	Data      []string `json:"data"`
@@ -68,7 +68,8 @@ func pluginPublishDeclaration(name string) (PluginPublishDeclaration, error) {
 		return ret, ErrPluginPublishInvalid
 	}
 	for _, resource := range ret.Resources {
-		if !util.IsPublishRelativePath(resource) || strings.EqualFold(resource, "plugin.json") || strings.EqualFold(resource, "kernel.js") {
+		if !util.IsPublishRelativePath(strings.TrimSuffix(resource, "/")) ||
+			strings.EqualFold(resource, "plugin.json") || strings.EqualFold(resource, "kernel.js") {
 			return ret, ErrPluginPublishInvalid
 		}
 	}
@@ -90,10 +91,21 @@ func pluginPublishDeclaration(name string) (PluginPublishDeclaration, error) {
 }
 
 func isPluginPublishResource(declaration PluginPublishDeclaration, resource string) bool {
+	if strings.EqualFold(resource, "plugin.json") || strings.EqualFold(resource, "kernel.js") {
+		return false
+	}
 	// 标准入口及语言包属于插件既有的前端文件约定，其余文件必须显式声明。
-	return resource == "index.js" || resource == "index.css" ||
+	if resource == "index.js" || resource == "index.css" ||
 		strings.HasPrefix(resource, "i18n/") && strings.Count(resource, "/") == 1 && strings.HasSuffix(resource, ".json") ||
-		slices.Contains(declaration.Resources, resource)
+		slices.Contains(declaration.Resources, resource) {
+		return true
+	}
+	for _, declared := range declaration.Resources {
+		if strings.HasSuffix(declared, "/") && strings.HasPrefix(resource, declared) {
+			return true
+		}
+	}
+	return false
 }
 
 func OpenPluginPublishResource(name, resource string) (*os.File, error) {

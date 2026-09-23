@@ -216,3 +216,55 @@ func TestPluginPublishResources(t *testing.T) {
 		t.Fatal("legacy entry unavailable")
 	}
 }
+
+func TestPluginPublishResourceDirectories(t *testing.T) {
+	write := setupPluginPublishTest(t)
+	root := filepath.Join(util.DataDir, "plugins", "example")
+	for _, name := range []string{"fonts/main.ttf", "fonts/nested/bold.ttf", "fonts-private/secret.ttf"} {
+		filePath := filepath.Join(root, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filePath, []byte(name), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write(`{"resources":["fonts/","image.png"]}`)
+	info, err := GetPluginPublishInfo("example")
+	if err != nil || len(info.Resources) != 2 || info.Resources[0] != "fonts/" {
+		t.Fatalf("directory declaration changed: %+v, %v", info, err)
+	}
+	for _, name := range []string{"fonts/main.ttf", "fonts/nested/bold.ttf", "image.png"} {
+		file, err := OpenPluginPublishResource("example", name)
+		if err != nil {
+			t.Fatalf("declared resource %s: %v", name, err)
+		}
+		file.Close()
+	}
+	for _, name := range []string{"fonts", "fonts/", "fonts-private/secret.ttf", "fonts/../private.json",
+		"fonts/%2e%2e/private.json", "fonts\\..\\private.json", "plugin.json", "kernel.js"} {
+		if file, err := OpenPluginPublishResource("example", name); err == nil {
+			file.Close()
+			t.Fatalf("undeclared resource %s", name)
+		}
+	}
+	link := filepath.Join(root, "fonts", "linked.ttf")
+	if err := os.Symlink(filepath.Join(root, "private.json"), link); err == nil {
+		if file, err := OpenPluginPublishResource("example", "fonts/linked.ttf"); err == nil {
+			file.Close()
+			t.Fatal("directory declaration exposed linked private data")
+		}
+	}
+	for _, declaration := range []string{"/", "../", "fonts//", "fonts/../", "fonts/%2e%2e/"} {
+		content, _ := json.Marshal(PluginPublishDeclaration{Resources: []string{declaration}})
+		write(string(content))
+		if _, err := pluginPublishDeclaration("example"); !errors.Is(err, ErrPluginPublishInvalid) {
+			t.Fatalf("invalid directory %q: %v", declaration, err)
+		}
+	}
+	write(`{"resources":["fonts"]}`)
+	if file, err := OpenPluginPublishResource("example", "fonts/main.ttf"); err == nil {
+		file.Close()
+		t.Fatal("exact filename treated as directory")
+	}
+}

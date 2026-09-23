@@ -67,7 +67,7 @@ Standard frontend entries (`index.js`, `index.css`, and direct `i18n/*.json` lan
 }
 ```
 
-Resources are exact relative filenames using `/`, without directories, wildcards, absolute paths, parent traversal, percent encoding, or links. `plugin.json` and `kernel.js` cannot be published. The limits are 4,096 resource files and 128 data fields. Plugins loading extra script chunks, images, fonts, or HTML must list them; plugins using only the standard entries need no resource declaration.
+Resources are exact relative filenames or directory paths ending in `/`. For example, `"fonts/"` publishes all files in that directory and its subdirectories; `"fonts"` remains an exact filename. Use `/` as the separator. Wildcards, absolute paths, parent traversal, percent encoding, and links are unsupported. `plugin.json` and `kernel.js` cannot be published. The limits are 4,096 resource declarations and 128 data fields. Plugins loading extra script chunks, images, fonts, or HTML must declare the relevant files or directories; plugins using only the standard entries need no resource declaration. Directory declarations also include files added later, so keep private files outside published directories.
 
 Static routes, the file API, and plugin loading apply the same plugin availability checks. Global disablement, plugin disablement, uninstall, author publish disablement, or user publish disablement denies subsequent reads. Published loading responses exclude kernel code. Links inside the data directory, including linked package directories and Windows junctions, are rejected for publishing; administrator access retains its existing behavior.
 

@@ -29,6 +29,7 @@ type PluginPublishRequest struct {
 }
 
 type PluginPublishInfo struct {
+	// Resources 返回声明的精确相对文件名或以 / 结尾的递归目录，不展开目录中的文件。
 	Resources []string `json:"resources" api:"nonnullable"`
 	Fields    []string `json:"fields" api:"nonnullable"`
 	Granted   bool     `json:"granted"`

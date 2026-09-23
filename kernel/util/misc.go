@@ -337,6 +337,7 @@ var unsafeSVGElements = map[string]struct{}{
 
 // SanitizeSVG 使用 XML 语义过滤 SVG，避免 HTML 与 XML 解析规则差异导致活动内容绕过过滤。
 func SanitizeSVG(svgInput string) (string, error) {
+	svgInput = strings.TrimPrefix(svgInput, "\ufeff")
 	decoder := xml.NewDecoder(strings.NewReader(svgInput))
 	decoder.Strict = true
 

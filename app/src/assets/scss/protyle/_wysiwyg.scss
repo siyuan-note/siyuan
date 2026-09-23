@@ -189,7 +189,8 @@
       }
     }
 
-    &.li {
+    &.li,
+    &.mindmap-item {
       padding: 0;
       display: flex;
       flex-direction: column;

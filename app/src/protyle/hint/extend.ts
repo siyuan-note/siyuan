@@ -176,11 +176,6 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         value: "- [ ] " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCheck"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.check}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.check.custom, "[]")}</div>`,
     }, {
-        filter: [window.siyuan.languages.mindmap, "mindmap", "思维导图", "siweidaotu", "swdt", "脑图", "naotu", "nt"],
-        id: "mindmap",
-        value: `- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMindmap"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.mindmap}</span></div>`,
-    }, {
         filter: [window.siyuan.languages.quote, "blockquote", "bq", "引述", "yinshu", "ys"],
         id: "quote",
         value: "> " + Lute.Caret,
@@ -190,6 +185,11 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         id: "tabs",
         value: `::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconTabs"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.tabs}</span></div>`,
+    }, {
+        filter: [window.siyuan.languages.mindmap, "mindmap", "思维导图", "siweidaotu", "swdt", "脑图", "naotu", "nt"],
+        id: "mindmap",
+        value: `- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMindmap"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.mindmap}</span></div>`,
     }, {
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "note"],
         id: "calloutNote",

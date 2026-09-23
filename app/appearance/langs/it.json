@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Spazio occupato dall’area di lavoro",
+	"workspaceStorageTip": "Dimensione dei file locali nell’area di lavoro corrente; le risorse sono incluse in data; l’utilizzo del disco indicato dal sistema può differire",
+	"workspaceStorageFailed": "Impossibile calcolare lo spazio occupato. Aggiorna per riprovare.",
+	"workspaceStorageChartFailed": "Impossibile caricare il grafico. I dettagli dello spazio occupato sono comunque disponibili.",
+	"workspaceStorageOther": "Altro",
 	"windowWorkspaceSwitch": "Passa",
 	"mainWindowLayouts": "Layout della finestra principale",
 	"windowWorkspaces": "Layout della nuova finestra",

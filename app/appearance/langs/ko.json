@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "작업 공간 용량",
+	"workspaceStorageTip": "현재 작업 공간에 저장된 로컬 파일의 크기이며 리소스는 data에 포함됩니다. 시스템에 표시되는 디스크 사용량과 다를 수 있습니다",
+	"workspaceStorageFailed": "용량을 계산할 수 없습니다. 새로 고침 후 다시 시도하세요.",
+	"workspaceStorageChartFailed": "차트를 불러올 수 없습니다. 용량 상세 정보는 계속 확인할 수 있습니다.",
+	"workspaceStorageOther": "기타",
 	"windowWorkspaceSwitch": "전환",
 	"mainWindowLayouts": "주 창 레이아웃",
 	"windowWorkspaces": "새 창 레이아웃",

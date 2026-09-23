@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Rozmiar obszaru roboczego",
+	"workspaceStorageTip": "Rozmiar plików lokalnych w bieżącym obszarze roboczym; zasoby są uwzględnione w data; zajętość dysku podawana przez system może się różnić",
+	"workspaceStorageFailed": "Nie udało się obliczyć rozmiaru. Odśwież, aby spróbować ponownie.",
+	"workspaceStorageChartFailed": "Nie udało się wczytać wykresu. Szczegóły rozmiaru są nadal dostępne.",
+	"workspaceStorageOther": "Pozostałe",
 	"windowWorkspaceSwitch": "Przełącz",
 	"mainWindowLayouts": "Układy głównego okna",
 	"windowWorkspaces": "Układy nowego okna",

@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Opslag van de werkruimte",
+	"workspaceStorageTip": "Grootte van lokale bestanden in de huidige werkruimte; bronnen zijn opgenomen in data; het schijfgebruik dat het systeem meldt kan afwijken",
+	"workspaceStorageFailed": "Kan de opslag niet berekenen. Vernieuw om het opnieuw te proberen.",
+	"workspaceStorageChartFailed": "Kan de grafiek niet laden. De opslagdetails zijn nog beschikbaar.",
+	"workspaceStorageOther": "Overig",
 	"windowWorkspaceSwitch": "Overschakelen",
 	"mainWindowLayouts": "Indelingen van het hoofdvenster",
 	"windowWorkspaces": "Indelingen voor nieuwe vensters",

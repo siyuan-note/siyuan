@@ -1,3 +1,101 @@
+.workspace-storage {
+  &__content {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    line-height: 1.5;
+  }
+
+  &__figure {
+    display: grid;
+    flex: 1 1 14em;
+    min-width: 0;
+  }
+
+  &__chart,
+  &__total {
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+
+  &__chart {
+    height: 16em;
+    max-height: 280px;
+  }
+
+  &__total {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  &__details {
+    flex: 1 1 16em;
+    min-width: 0;
+    margin: 0;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 3.5em;
+    gap: 8px;
+    margin: 8px 0;
+
+    dt {
+      display: flex;
+      align-items: baseline;
+      overflow-wrap: anywhere;
+    }
+
+    dd {
+      margin: 0;
+      text-align: end;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    &--assets {
+      padding-inline-start: 16px;
+    }
+  }
+
+  &__color {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    margin-inline-end: 8px;
+  }
+}
+
+.config--mobile .workspace-storage__content {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.config--mobile .workspace-storage__figure,
+.config--mobile .workspace-storage__details {
+  flex: auto;
+}
+
+@media (max-width: 750px) {
+  .workspace-storage__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 0;
+
+    dt {
+      grid-row: 1 / span 2;
+    }
+  }
+
+  .workspace-storage__percent {
+    grid-column: 2;
+  }
+}
+
 .config-body-gradient {
   display: flex;
   flex-wrap: wrap;

@@ -21,6 +21,7 @@ import type {TSettingTab} from "./setting/tabs";
 import type {App} from "../index";
 import {unmountAssetsTab} from "./assets";
 import {getHostCapabilities} from "../util/hostCapabilities";
+import {unmountWorkspaceStorage} from "./tabs/workspaceStorage";
 
 /// #if !MOBILE
 const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
@@ -69,6 +70,10 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
             }
             clearSyncTabElement();
             clearAccessTabElement();
+            const appRoot = settingDialogRef.element?.querySelector<HTMLElement>('.config__tab-container[data-name="app"]');
+            if (appRoot) {
+                unmountWorkspaceStorage(appRoot);
+            }
             if (range) {
                 focusByRange(range);
             }

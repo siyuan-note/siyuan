@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "พื้นที่จัดเก็บของพื้นที่ทำงาน",
+	"workspaceStorageTip": "ขนาดไฟล์ที่เก็บไว้ในเครื่องสำหรับพื้นที่ทำงานปัจจุบัน โดยรวมทรัพยากรไว้ใน data แล้ว และอาจต่างจากการใช้พื้นที่ดิสก์ที่ระบบแสดง",
+	"workspaceStorageFailed": "ไม่สามารถคำนวณพื้นที่จัดเก็บได้ โปรดรีเฟรชเพื่อลองอีกครั้ง",
+	"workspaceStorageChartFailed": "ไม่สามารถโหลดแผนภูมิได้ แต่ยังดูรายละเอียดพื้นที่จัดเก็บได้",
+	"workspaceStorageOther": "อื่น ๆ",
 	"windowWorkspaceSwitch": "สลับ",
 	"mainWindowLayouts": "เค้าโครงหน้าต่างหลัก",
 	"windowWorkspaces": "เค้าโครงหน้าต่างใหม่",

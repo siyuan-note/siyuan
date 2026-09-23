@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Armazenamento do espaço de trabalho",
+	"workspaceStorageTip": "Tamanho dos arquivos locais no espaço de trabalho atual; os recursos estão incluídos em data; o uso de disco informado pelo sistema pode ser diferente",
+	"workspaceStorageFailed": "Não foi possível calcular o armazenamento. Atualize para tentar novamente.",
+	"workspaceStorageChartFailed": "Não foi possível carregar o gráfico. Os detalhes de armazenamento continuam disponíveis.",
+	"workspaceStorageOther": "Outros",
 	"windowWorkspaceSwitch": "Alternar",
 	"mainWindowLayouts": "Layouts da janela principal",
 	"windowWorkspaces": "Layouts da nova janela",

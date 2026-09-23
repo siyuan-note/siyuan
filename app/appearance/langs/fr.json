@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Espace du répertoire de travail",
+	"workspaceStorageTip": "Taille des fichiers locaux du répertoire de travail actuel ; les ressources sont incluses dans data ; l’espace disque indiqué par le système peut différer",
+	"workspaceStorageFailed": "Impossible de calculer l’espace utilisé. Actualisez pour réessayer.",
+	"workspaceStorageChartFailed": "Impossible de charger le graphique. Les détails de stockage restent disponibles.",
+	"workspaceStorageOther": "Autres",
 	"windowWorkspaceSwitch": "Basculer",
 	"mainWindowLayouts": "Dispositions de la fenêtre principale",
 	"windowWorkspaces": "Dispositions de nouvelle fenêtre",

@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Speicherplatz des Arbeitsbereichs",
+	"workspaceStorageTip": "Größe der lokal gespeicherten Dateien im aktuellen Arbeitsbereich; Ressourcen sind in data enthalten; die vom System gemeldete Datenträgerbelegung kann abweichen",
+	"workspaceStorageFailed": "Speicherplatz konnte nicht berechnet werden. Bitte aktualisieren und erneut versuchen.",
+	"workspaceStorageChartFailed": "Diagramm konnte nicht geladen werden. Die Speicherplatzdetails sind weiterhin verfügbar.",
+	"workspaceStorageOther": "Sonstiges",
 	"windowWorkspaceSwitch": "Wechseln",
 	"mainWindowLayouts": "Layouts des Hauptfensters",
 	"windowWorkspaces": "Layouts für neue Fenster",

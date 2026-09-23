@@ -93,6 +93,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/exportConf", model.CheckAuth, model.CheckAdminRole, exportConf)
 	ginServer.Handle("POST", "/api/system/importConf", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importConf)
 	ginServer.Handle("POST", "/api/system/getWorkspaceInfo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getWorkspaceInfo)
+	ginServer.Handle("POST", "/api/system/getWorkspaceStorage", model.CheckAuth, model.CheckAdminRole, getWorkspaceStorage)
 	ginServer.Handle("POST", "/api/system/getRuntimeInfo", model.CheckAuth, model.CheckAdminRole, getRuntimeInfo)
 	ginServer.Handle("POST", "/api/system/reloadUI", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, deprecatedReloadUI) // TODO 请使用 /api/ui/reloadUI，该端点将于 2026 年 12 月 1 日后删除
 	ginServer.Handle("POST", "/api/system/addMicrosoftDefenderExclusion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addMicrosoftDefenderExclusion)

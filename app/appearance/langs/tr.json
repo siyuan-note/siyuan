@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Çalışma alanı depolaması",
+	"workspaceStorageTip": "Geçerli çalışma alanındaki yerel dosyaların boyutu; kaynaklar data kapsamındadır; sistemin bildirdiği disk kullanımı farklı olabilir",
+	"workspaceStorageFailed": "Depolama hesaplanamadı. Yenileyip tekrar deneyin.",
+	"workspaceStorageChartFailed": "Grafik yüklenemedi. Depolama ayrıntıları görüntülenebilir.",
+	"workspaceStorageOther": "Diğer",
 	"windowWorkspaceSwitch": "Geçiş yap",
 	"mainWindowLayouts": "Ana pencere düzenleri",
 	"windowWorkspaces": "Yeni pencere düzenleri",

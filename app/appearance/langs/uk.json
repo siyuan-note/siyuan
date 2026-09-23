@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Обсяг робочого простору",
+	"workspaceStorageTip": "Розмір локальних файлів поточного робочого простору; ресурси входять до data; показники зайнятого місця в системі можуть відрізнятися",
+	"workspaceStorageFailed": "Не вдалося підрахувати обсяг. Оновіть, щоб спробувати знову.",
+	"workspaceStorageChartFailed": "Не вдалося завантажити діаграму. Відомості про обсяг залишаються доступними.",
+	"workspaceStorageOther": "Інше",
 	"windowWorkspaceSwitch": "Перейти",
 	"mainWindowLayouts": "Макети головного вікна",
 	"windowWorkspaces": "Макети нового вікна",

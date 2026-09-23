@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Величина радног простора",
+	"workspaceStorageTip": "Величина локалних датотека у текућем радном простору; ресурси су укључени у data; заузеће диска које приказује систем може се разликовати",
+	"workspaceStorageFailed": "Није могуће израчунати величину. Освежите да бисте покушали поново.",
+	"workspaceStorageChartFailed": "Није могуће учитати графикон. Подаци о величини су и даље доступни.",
+	"workspaceStorageOther": "Остало",
 	"windowWorkspaceSwitch": "Пребаци",
 	"mainWindowLayouts": "Распореди главног прозора",
 	"windowWorkspaces": "Распореди новог прозора",

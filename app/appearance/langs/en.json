@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Workspace storage",
+	"workspaceStorageTip": "Local file sizes in the current workspace; assets are included in data; system-reported disk usage may differ",
+	"workspaceStorageFailed": "Unable to calculate storage. Refresh to retry.",
+	"workspaceStorageChartFailed": "Unable to load the chart. Storage details are still available.",
+	"workspaceStorageOther": "Other",
 	"windowWorkspaceSwitch": "Switch",
 	"mainWindowLayouts": "Main window layouts",
 	"windowWorkspaces": "New window layouts",

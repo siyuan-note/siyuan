@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "נפח האחסון של סביבת העבודה",
+	"workspaceStorageTip": "גודל הקבצים המקומיים בסביבת העבודה הנוכחית; המשאבים כלולים ב-data; השימוש בדיסק שמדווח על ידי המערכת עשוי להיות שונה",
+	"workspaceStorageFailed": "לא ניתן לחשב את נפח האחסון. יש לרענן כדי לנסות שוב.",
+	"workspaceStorageChartFailed": "לא ניתן לטעון את התרשים. פרטי האחסון עדיין זמינים.",
+	"workspaceStorageOther": "אחר",
 	"windowWorkspaceSwitch": "מעבר",
 	"mainWindowLayouts": "פריסות החלון הראשי",
 	"windowWorkspaces": "פריסות חלון חדש",

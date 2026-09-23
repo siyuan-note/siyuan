@@ -105835,6 +105835,57 @@
       ],
       "additionalProperties": false
     },
+    "WorkspaceStorageData": {
+      "type": "object",
+      "properties": {
+        "assetsSize": {
+          "type": "integer"
+        },
+        "calculatedAt": {
+          "type": "integer"
+        },
+        "directories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkspaceStorageEntry"
+          }
+        },
+        "totalSize": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "assetsSize",
+        "calculatedAt",
+        "directories",
+        "totalSize"
+      ],
+      "additionalProperties": false
+    },
+    "WorkspaceStorageEntry": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "data",
+            "repo",
+            "history",
+            "temp",
+            "conf",
+            "other"
+          ]
+        },
+        "size": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "size"
+      ],
+      "additionalProperties": false
+    },
     "ZipRequestInput": {
       "type": "object",
       "properties": {
@@ -154844,6 +154895,81 @@
               },
               "data": {
                 "$ref": "#/$defs/WorkspaceInfoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getWorkspaceStorage",
+      "handler": "getWorkspaceStorage",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/WorkspaceStorageData"
               },
               "msg": {
                 "type": "string"

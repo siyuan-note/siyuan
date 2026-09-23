@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Veľkosť pracovného priestoru",
+	"workspaceStorageTip": "Veľkosť lokálnych súborov v aktuálnom pracovnom priestore; zdroje sú zahrnuté v data; využitie disku hlásené systémom sa môže líšiť",
+	"workspaceStorageFailed": "Veľkosť sa nepodarilo vypočítať. Obnovte zobrazenie a skúste to znova.",
+	"workspaceStorageChartFailed": "Graf sa nepodarilo načítať. Podrobnosti o veľkosti sú naďalej dostupné.",
+	"workspaceStorageOther": "Ostatné",
 	"windowWorkspaceSwitch": "Prepnúť",
 	"mainWindowLayouts": "Rozloženia hlavného okna",
 	"windowWorkspaces": "Rozloženia nového okna",

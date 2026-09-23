@@ -11,7 +11,7 @@ type AccessibilitySetting = {enabled: boolean; override: boolean | null};
 type Invoke = (channel: string, data: {cmd: string; enabled?: boolean}) => Promise<AccessibilitySetting>;
 type Slot = {key: string; html: () => string; afterMount: (root: unknown) => Promise<void>};
 
-const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke): Slot | undefined => {
+const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke, slotKey = "accessibilitySupport"): Slot | undefined => {
     const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appTab.ts"), "utf8");
     const processed = parse(source, {BROWSER: browser, MOBILE: mobile}, false, true);
     const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
@@ -47,8 +47,14 @@ const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke
         },
     });
     moduleExports.registerAppTab({group: () => group});
-    return slots.find(slot => slot.key === "accessibilitySupport");
+    return slots.find(slot => slot.key === slotKey);
 };
+
+test("workspace storage is available in desktop, browser and mobile without local workspace management", () => {
+    for (const [browser, mobile] of [[false, false], [true, false], [true, true]]) {
+        assert.ok(getAccessibilitySlot(browser, mobile, undefined, "workspaceStorage"));
+    }
+});
 
 const controls = () => {
     let change: () => Promise<void>;

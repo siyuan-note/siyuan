@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "Penyimpanan ruang kerja",
+	"workspaceStorageTip": "Ukuran berkas lokal di ruang kerja saat ini; sumber daya sudah termasuk dalam data; penggunaan disk yang dilaporkan sistem dapat berbeda",
+	"workspaceStorageFailed": "Tidak dapat menghitung penyimpanan. Segarkan untuk mencoba lagi.",
+	"workspaceStorageChartFailed": "Tidak dapat memuat grafik. Rincian penyimpanan tetap tersedia.",
+	"workspaceStorageOther": "Lainnya",
 	"windowWorkspaceSwitch": "Beralih",
 	"mainWindowLayouts": "Tata letak jendela utama",
 	"windowWorkspaces": "Tata letak jendela baru",

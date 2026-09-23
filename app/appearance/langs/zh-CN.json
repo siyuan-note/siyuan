@@ -1,4 +1,9 @@
 {
+	"workspaceStorage": "工作空间容量",
+	"workspaceStorageTip": "当前工作空间已落盘文件的大小，资源已包含在 data 中，可能与系统显示的磁盘占用不同",
+	"workspaceStorageFailed": "容量统计失败，请刷新重试",
+	"workspaceStorageChartFailed": "图表加载失败，仍可查看容量明细",
+	"workspaceStorageOther": "其他",
 	"windowWorkspaceSwitch": "切换",
 	"mainWindowLayouts": "主窗口布局",
 	"windowWorkspaces": "新窗口布局",

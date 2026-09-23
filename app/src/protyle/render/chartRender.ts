@@ -1,4 +1,5 @@
 import {addScript} from "../util/addScript";
+import {loadECharts} from "../util/echarts";
 import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {looseJsonParse} from "../../util/functions";
@@ -60,7 +61,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     if (echartsElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/echarts/echarts.min.js?v=5.3.2`, "protyleEchartsScript").then(() => {
+    loadECharts(cdn).then(() => {
         addScript(`${cdn}/js/echarts/echarts-gl.min.js?v=2.0.9`, "protyleEchartsGLScript").then(() => {
             const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
             let width: number = undefined;

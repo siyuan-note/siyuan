@@ -8,6 +8,7 @@ import {unmountBazaarTab} from "../../config/bazaarTab";
 import {clearSyncTabElement} from "../../config/tabs/syncRuntime";
 import {clearAccessTabElement} from "../../config/tabs/accessRuntime";
 import {unmountAssetsTab} from "../../config/assets";
+import {unmountWorkspaceStorage} from "../../config/tabs/workspaceStorage";
 
 /** 卸载设置页中持有全局状态的模块，避免容器被替换后残留副作用 */
 export const unmountSettingTab = (root: HTMLElement, tabId: TSettingTab) => {
@@ -15,6 +16,8 @@ export const unmountSettingTab = (root: HTMLElement, tabId: TSettingTab) => {
         unmountBazaarTab(root);
     } else if (tabId === "assets") {
         unmountAssetsTab(root);
+    } else if (tabId === "app") {
+        unmountWorkspaceStorage(root);
     } else if (tabId === "sync") {
         clearSyncTabElement(root);
     } else if (tabId === "access") {

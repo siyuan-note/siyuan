@@ -2294,6 +2294,10 @@ export type WorkspaceAVPaletteRequestInput = { "app"?: string | null; "builtinCo
 
 export type WorkspaceInfoData = { "siyuanVer": string; "workspaceDir": string; };
 
+export type WorkspaceStorageData = { "assetsSize": number; "calculatedAt": number; "directories": Array<WorkspaceStorageEntry>; "totalSize": number; };
+
+export type WorkspaceStorageEntry = { "name": "data" | "repo" | "history" | "temp" | "conf" | "other"; "size": number; };
+
 export type ZipRequestInput = { "path": string; "zipPath": string; };
 
 export type APILegacyGETPath =
@@ -5319,6 +5323,11 @@ export interface APIPOSTRoutes {
     "/api/system/getWorkspaceInfo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": WorkspaceInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/getWorkspaceStorage": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": WorkspaceStorageData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
     "/api/system/getWorkspaces": {

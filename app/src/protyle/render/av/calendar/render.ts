@@ -355,7 +355,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     const search = blockElement.querySelector<HTMLElement>('[data-type="av-search"]');
     const query = search?.textContent || "";
     const isSearching = search === document.activeElement;
-    const hasUndated = state.undatedCount?.dateKeyID === dateColumn?.id && state.undatedCount.query === query.trim() &&
+    const hasUndated = !!dateColumn && state.undatedCount?.dateKeyID === dateColumn.id && state.undatedCount.query === query.trim() &&
         state.undatedCount.total > 0;
     const events: ICalendarEvent[] = [];
     view.rows.forEach((row, rowIndex) => {

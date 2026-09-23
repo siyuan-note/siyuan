@@ -1,4 +1,5 @@
 import {recordReplacementUndo} from "./replacementInput";
+import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
@@ -397,6 +398,7 @@ export class WYSIWYG {
     public tableControl: TableControl;
     private largeListVirtualizer?: LargeListVirtualizer;
     private disposeSpellcheckFocus?: () => void;
+    private disposeEmbedToolbarVisibility?: () => void;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -511,6 +513,7 @@ export class WYSIWYG {
         }
         this.bindCommonEvent(protyle);
         this.bindEvent(protyle);
+        this.disposeEmbedToolbarVisibility = bindEmbedToolbarVisibility(this.element);
         /// #if BROWSER
         if (!isMobile() && !isPhablet() && navigator.userAgent.includes("Chrome/")) {
             this.disposeSpellcheckFocus = bindSpellcheckFocus(this.element, () =>
@@ -539,6 +542,7 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.disposeEmbedToolbarVisibility?.();
         this.disposeSpellcheckFocus?.();
         this.largeListVirtualizer?.destroy();
     }

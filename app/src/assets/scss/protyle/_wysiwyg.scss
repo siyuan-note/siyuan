@@ -528,6 +528,11 @@
           // https://github.com/siyuan-note/siyuan/issues/14678
           z-index: 2;
 
+          &.protyle-icons--editing-obscured {
+            opacity: 0;
+            pointer-events: none;
+          }
+
           & + .protyle-wysiwyg__embed {
             border-top: 0;
           }

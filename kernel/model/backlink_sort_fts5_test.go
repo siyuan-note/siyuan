@@ -185,6 +185,36 @@ func TestBacklinkAnchorSortContext(t *testing.T) {
 			if err != nil || expired || len(contexts) != 2 || contexts[0].ID != ids[2] {
 				t.Fatalf("global contexts in %s notebook: %+v %v %v", name, contexts, expired, err)
 			}
+			tree, err = LoadTreeByBlockID(fixture.targetID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			refNode := treenode.GetNodeInTree(tree, ids[2])
+			refNode.Unlink()
+			child := treenode.NewParagraph(ast.NewNodeID())
+			child.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Transitive question")})
+			list := &ast.Node{Type: ast.NodeList, ID: ast.NewNodeID(), ListData: &ast.ListData{}}
+			item := &ast.Node{Type: ast.NodeListItem, ID: ast.NewNodeID(), ListData: &ast.ListData{}}
+			item.AppendChild(refNode)
+			item.AppendChild(child)
+			list.AppendChild(item)
+			tree.Root.AppendChild(list)
+			if _, err = filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.UpsertBlockTree(tree)
+			sql.IndexTreeQueue(tree)
+			sql.UpdateRefsTreeQueue(tree)
+			sql.FlushQueue()
+			newToken, _, _, _, expired, err := GetGlobalBacklinks(globalQuery, "", 0, "", allow)
+			if err != nil || expired {
+				t.Fatalf("refreshed global sorting in %s notebook: %v %v", name, expired, err)
+			}
+			contexts, expired, err = GetGlobalBacklinkContexts(globalQuery, newToken, []string{ids[2]}, allow)
+			if err != nil || expired || len(contexts) != 1 || contexts[0].ID != ids[2] ||
+				contexts[0].ReferenceBlockID != ids[2] || !bytes.Contains([]byte(contexts[0].DOM), []byte(`data-node-id="`+child.ID+`"`)) {
+				t.Fatalf("transitive global context in %s notebook: %+v %v %v", name, contexts, expired, err)
+			}
 			ClearGlobalBacklinkSnapshots(boxID)
 			if _, expired, _ = GetGlobalBacklinkContexts(globalQuery, token, []string{ids[0]}, allow); !expired {
 				t.Fatal("cleared notebook snapshot remained readable")

@@ -10,6 +10,14 @@ import {updateMobileTopBarLayout} from "./mobileTopBar";
 import {invalidateTrackedRanges} from "../../protyle/util/trackedRange";
 import {closeAVCellEditor} from "../../protyle/render/av/cellEditor";
 
+export const finishMobileStartup = () => {
+    const loadingElement = document.getElementById("loading");
+    if (loadingElement) {
+        loadingElement.remove();
+        document.body.style.removeProperty("background-color");
+    }
+};
+
 export const setEmpty = (app: App) => {
     closeAVCellEditor();
     if (window.siyuan.mobile.editor?.protyle) {
@@ -29,6 +37,7 @@ export const setEmpty = (app: App) => {
     const emptyElement = document.getElementById("empty");
     emptyElement.classList.remove("fn__none");
     if (emptyElement.innerHTML !== "") {
+        finishMobileStartup();
         return;
     }
     emptyElement.innerHTML = `<div id="emptySearch" class="b3-list-item">
@@ -86,6 +95,7 @@ export const setEmpty = (app: App) => {
             target = target.parentElement;
         }
     });
+    finishMobileStartup();
 };
 
 export const setEditor = (showTitle = true) => {
@@ -97,4 +107,7 @@ export const setEditor = (showTitle = true) => {
     document.getElementById("editor").classList.remove("fn__none");
     document.getElementById("empty").classList.add("fn__none");
     updateMobileTopBarLayout();
+    if (showTitle) {
+        finishMobileStartup();
+    }
 };

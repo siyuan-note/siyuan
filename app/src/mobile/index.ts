@@ -25,6 +25,7 @@ import {
 } from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
+import {finishMobileStartup} from "./util/setEmpty";
 import {initAssets} from "../util/assets";
 import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
@@ -205,7 +206,7 @@ class App {
                     bootSync();
                     appearanceConfigApi.apply(window.siyuan.config.appearance);
                     initMessage();
-                    initAssets();
+                    initAssets(true);
                     if (!isInMobileApp()) {
                         if (isChromeBrowser()) {
                             document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
@@ -233,6 +234,7 @@ class App {
                                 mainWs.flushMainMessages();
                             } catch (error) {
                                 console.error("Failed to initialize mobile framework:", error);
+                                finishMobileStartup();
                             }
                         });
                     });

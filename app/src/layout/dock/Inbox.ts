@@ -1,7 +1,8 @@
 /// #if !MOBILE
 import {Tab} from "../Tab";
 import {setPanelFocus} from "../util";
-import {getDockByType} from "../tabUtil";
+import {getActiveTab, getDockByType} from "../tabUtil";
+import {Editor} from "../../editor";
 /// #endif
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isInIOS, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
@@ -274,8 +275,15 @@ ${data.shorthandContent}
                     this.move(ids);
                 }
             }).element);
+            let protyle: IProtyle;
             /// #if MOBILE
-            const protyle = window.siyuan.mobile.editor?.protyle;
+            protyle = window.siyuan.mobile.editor?.protyle;
+            /// #else
+            const tab = getActiveTab(false);
+            if (tab?.model instanceof Editor) {
+                protyle = tab.model.editor?.protyle;
+            }
+            /// #endif
             if (protyle?.block.rootID && !protyle.disabled && !window.siyuan.config.readonly && !window.siyuan.isPublish) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.insertToCurrentDoc,
@@ -285,7 +293,6 @@ ${data.shorthandContent}
                     }
                 }).element);
             }
-            /// #endif
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.remove,
                 icon: "iconTrashcan",
@@ -402,7 +409,6 @@ ${data.shorthandContent}
         });
     }
 
-    /// #if MOBILE
     private async insertToCurrentDoc(ids: string[], rootID: string) {
         const insertedIds: string[] = [];
         try {
@@ -436,7 +442,6 @@ ${data.shorthandContent}
             this.remove(insertedIds);
         }
     }
-    /// #endif
 
     private update() {
         const loadingElement = this.element.querySelector(".fn__loading");

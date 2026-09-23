@@ -455,7 +455,7 @@ export class PinnedDocs {
         } else if (row.dataset.unavailable !== "true") {
             this.selectRow(row);
             if (window.siyuan.config.fileTree.parentDocClickExpand && Number(row.dataset.count) > 0) {
-                if (this.mobile || !target.closest(".b3-list-item__text") ||
+                if (!target.closest(".b3-list-item__text") ||
                     event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
                     this.toggle(row);
                     return;

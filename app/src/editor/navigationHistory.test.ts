@@ -113,3 +113,109 @@ test("tablet tab switches navigate A B C backward and forward without touching t
     await context.forward({});
     assert.deepEqual(visited, ["B", "A", "B", "C"]);
 });
+
+const restoreClosedHistoryEntry = async (disabled: boolean) => {
+    const historySource = createSourceFile("backForward.ts", readFileSync("src/util/backForward.ts", "utf8"), ScriptTarget.ES2021, true);
+    const declaration = historySource.statements.find(statement => isVariableStatement(statement) &&
+        statement.declarationList.declarations.some(item => item.name.getText(historySource) === "focusStack"));
+    const calls: string[] = [];
+    const oldElement = {};
+    const newElement = {};
+    const protyle = {element: newElement, block: {rootID: "A"}, disabled, title: {editElement: {}}};
+    let afterInit: () => void;
+    let editorOptions: any;
+    class ActiveElement {
+        blur() { calls.push("blur"); }
+    }
+    const previewTab = (id: string, focused: boolean) => ({
+        id,
+        headElement: {classList: {contains: (name: string) =>
+            name === "item--unupdate" || (name === "item--focus" && focused)}},
+    });
+    const wnd = {
+        children: [previewTab("current", true), previewTab("other", false)],
+        addTab(tab: any) { tab.callback(tab); },
+        removeTab(id: string, batch: boolean, animate: boolean) { calls.push(`remove:${id}:${batch}:${animate}`); },
+        showHeading() {},
+    };
+    const context: any = {
+        window: {siyuan: {
+            config: {fileTree: {openFilesUseCurrentTab: true}},
+            layout: {}, storage: {positions: {}}, backStack: [],
+        }},
+        document: {
+            activeElement: new ActiveElement(),
+            contains: (element: unknown) => element === newElement,
+            querySelector: () => ({getAttribute: () => "wnd"}),
+        },
+        HTMLElement: ActiveElement,
+        Constants: {LOCAL_FILEPOSITION: "positions", CB_GET_SCROLL: "scroll", CB_GET_ALL: "all", CB_GET_UNUNDO: "unundo"},
+        hideElements: () => {},
+        fetchSyncPost: async (path: string) => path.endsWith("checkBlockExist") ?
+            {code: 0, data: true} : {code: 0, data: {rootID: "A", rootTitle: "A", rootIcon: ""}},
+        getInstanceById: () => wnd,
+        isEncryptedBox: () => false,
+        isPhablet: () => false,
+        saveScroll: (): undefined => undefined,
+        forwardStack: [],
+        focusByOffset: () => calls.push("focus"),
+        Tab: class {
+            callback: (tab: any) => void;
+            headElement = {classList: {contains: (name: string) => name === "item--focus"}};
+            model: any;
+            constructor(options: any) { this.callback = options.callback; }
+            addModel(model: any) { this.model = model; }
+        },
+        Editor: class {
+            editor = {protyle};
+            constructor(options: any) {
+                editorOptions = options;
+                afterInit = () => options.afterInitProtyle(this.editor);
+            }
+        },
+    };
+    runInNewContext(transpileModule(declaration.getText(historySource).replace(/^export /, "") +
+        "\nglobalThis.restore = focusStack;", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText, context);
+    const stack = {id: "A", position: {start: 2, end: 2}, protyle: {element: oldElement, block: {rootID: "A"}, notebookId: "notebook"}};
+    assert.equal(await context.restore({}, stack), true);
+    return {calls, protyle, editorOptions, afterInit};
+};
+
+test("history restores a closed document through the focused preview tab without early focus", async () => {
+    const {calls, editorOptions, afterInit} = await restoreClosedHistoryEntry(false);
+    assert.deepEqual(calls, ["blur", "remove:current:false:false"]);
+    assert.equal(editorOptions.notebookId, "notebook");
+    assert.deepEqual(Array.from(editorOptions.action), ["scroll", "unundo"]);
+    afterInit();
+    assert.deepEqual(calls, ["blur", "remove:current:false:false", "focus"]);
+});
+
+test("history does not focus a read-only document after it loads", async () => {
+    const {calls, afterInit} = await restoreClosedHistoryEntry(true);
+    afterInit();
+    assert.deepEqual(calls, ["blur", "remove:current:false:false"]);
+});
+
+test("history switches to an open read-only tab without focusing its editor", async () => {
+    const historySource = createSourceFile("backForward.ts", readFileSync("src/util/backForward.ts", "utf8"), ScriptTarget.ES2021, true);
+    const declaration = historySource.statements.find(statement => isVariableStatement(statement) &&
+        statement.declarationList.declarations.some(item => item.name.getText(historySource) === "focusStack"));
+    const calls: unknown[][] = [];
+    const protyle = {
+        element: {}, block: {rootID: "A", showAll: false}, toolbar: {range: undefined as Range | undefined}, disabled: true,
+        title: {editElement: {getBoundingClientRect: () => ({height: 0})}},
+        model: {parent: {headElement: {}, parent: {switchTab: (...args: unknown[]) => calls.push(args)}}},
+    };
+    const context: any = {
+        document: {contains: () => true},
+        hideElements: () => {},
+        isPhablet: () => false,
+        readingPositions: new WeakMap(),
+        focusByOffset: () => calls.push(["focus"]),
+    };
+    runInNewContext(transpileModule(declaration.getText(historySource).replace(/^export /, "") +
+        "\nglobalThis.restore = focusStack;", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText, context);
+    assert.equal(await context.restore({}, {id: "A", position: {start: 0, end: 0}, protyle}), true);
+    assert.deepEqual(Array.from(calls[0]), [{}, false, true, true, true, false]);
+    assert.equal(calls.length, 1);
+});

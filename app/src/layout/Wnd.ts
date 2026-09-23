@@ -666,7 +666,8 @@ export class Wnd {
         }
     }
 
-    public switchTab(target: HTMLElement, pushBack = false, update = true, resize = true, isSaveLayout = true) {
+    public switchTab(target: HTMLElement, pushBack = false, update = true, resize = true, isSaveLayout = true,
+                     focusEditor = !isPhablet()) {
         let currentTab: Tab;
         let isInitActive = false;
         this.children.forEach((item) => {
@@ -762,7 +763,7 @@ export class Wnd {
             if (update) {
                 updatePanelByEditor({
                     protyle: currentTab.model.editor.protyle,
-                    focus: !isPhablet(),
+                    focus: focusEditor,
                     pushBackStack: pushBack,
                     reload: false,
                     resize,

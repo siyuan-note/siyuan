@@ -31,6 +31,7 @@ type GlobalBacklinkQuery struct {
 type GlobalBacklinkItem struct {
 	ID, RootID, Box, HPath, Anchor string
 	order                          int
+	content                        string
 }
 
 // 快照只保存排序所需的轻量元数据，不保存正文；锁定笔记本时立即清除。
@@ -172,12 +173,14 @@ func collectGlobalBacklinks(query GlobalBacklinkQuery, accessible func(string) b
 		targets[ref.BlockID][ref.DefBlockID] = true
 	}
 	var blocks []*Block
+	contents := map[string]string{}
 	for start := 0; start < len(ids); start += 512 {
 		for _, block := range sql.GetBlocksInBox(ids[start:min(start+512, len(ids))], query.Notebook) {
 			if block != nil && accessible(block.RootID) {
 				value := fromSQLBlock(block, "", 0)
 				if matchBacklinkKeyword(value, strings.Fields(query.Keyword)) {
 					blocks = append(blocks, value)
+					contents[block.ID] = strings.TrimSpace(block.Content)
 				}
 			}
 		}
@@ -203,7 +206,7 @@ func collectGlobalBacklinks(query GlobalBacklinkQuery, accessible func(string) b
 			}
 			order++
 			if block := selected[n.ID]; block != nil {
-				items = append(items, &GlobalBacklinkItem{ID: n.ID, RootID: rootID, Box: block.Box, HPath: block.HPath, Anchor: globalBacklinkAnchor(n, targets[n.ID]), order: order})
+				items = append(items, &GlobalBacklinkItem{ID: n.ID, RootID: rootID, Box: block.Box, HPath: block.HPath, Anchor: globalBacklinkAnchor(n, targets[n.ID]), order: order, content: contents[n.ID]})
 			}
 			return ast.WalkContinue
 		})
@@ -217,6 +220,13 @@ func collectGlobalBacklinks(query GlobalBacklinkQuery, accessible func(string) b
 			return true
 		}
 		less, greater := util.NaturalCompare(a.Anchor, b.Anchor), util.NaturalCompare(b.Anchor, a.Anchor)
+		if less != greater {
+			if query.Sort == 2 {
+				return greater
+			}
+			return less
+		}
+		less, greater = util.NaturalCompare(a.content, b.content), util.NaturalCompare(b.content, a.content)
 		if less != greater {
 			if query.Sort == 2 {
 				return greater
@@ -293,6 +303,10 @@ func GetGlobalBacklinkContexts(query GlobalBacklinkQuery, token string, ids []st
 		allowed[item.ID] = item
 	}
 	trees := map[string]*parse.Tree{}
+	avTargetsByRoot := map[string]map[string]*BacklinkAttributeViewTarget{}
+	var avRefs []*sql.Ref
+	avRefsLoaded := false
+	luteEngine := util.NewLute()
 	for _, id := range uniqueBacklinkStrings(ids) {
 		location, ok := allowed[id]
 		if !ok {
@@ -314,15 +328,59 @@ func GetGlobalBacklinkContexts(query GlobalBacklinkQuery, token string, ids []st
 		if node == nil {
 			return items, true, nil
 		}
-		// 只渲染条目自身，父级通过面包屑按需展开，不将兄弟引用合并进当前条目。
-		nodes := []*ast.Node{node}
-		fillBlockRefCount(nodes, tree.Box)
-		item := &Backlink{ID: id, Type: node.Type.String(), node: node, Expand: true, BlockPaths: buildBlockBreadcrumb(node, nil, false), DOM: renderVisibleBlockDOMByNodes(nodes, util.NewLute())}
-		if node.Type == ast.NodeAttributeView {
-			refs := sql.QueryRefsByDefIDInBox(query.ID, query.ContainChildren, query.Notebook)
-			appendBacklinkAttributeViewTargets(item, nodes, backlinkAttributeViewTargets(tree, refs))
+		// 每个引用仍以原块 ID 标识条目，传递型引用使用普通反链的父块上下文。
+		renderID := id
+		originalRefBlockIDs := map[string]string{}
+		if node.Type == ast.NodeParagraph {
+			for _, mapping := range buildBacklinkParentMappingsWithDocumentGrouping([]*Block{fromSQLBlock(block, "", 0)}, query.Notebook, true) {
+				if mapping.refBlock.ID == id {
+					renderID = mapping.parent.ID
+					originalRefBlockIDs[renderID] = id
+					break
+				}
+			}
 		}
+		renderNode := treenode.GetNodeInTree(tree, renderID)
+		if renderNode == nil {
+			return items, true, nil
+		}
+		var avTargets map[string]*BacklinkAttributeViewTarget
+		if globalBacklinkContextHasAttributeView(renderNode, originalRefBlockIDs) {
+			var cached bool
+			if avTargets, cached = avTargetsByRoot[location.RootID]; !cached {
+				if !avRefsLoaded {
+					avRefs = sql.QueryRefsByDefIDInBox(query.ID, query.ContainChildren, query.Notebook)
+					avRefsLoaded = true
+				}
+				avTargets = backlinkAttributeViewTargets(tree, avRefs)
+				avTargetsByRoot[location.RootID] = avTargets
+			}
+		}
+		item := buildBacklink(renderID, tree, originalRefBlockIDs, nil, false, luteEngine, avTargets)
+		if item == nil {
+			return items, true, nil
+		}
+		item.ID = id
+		item.BlockPaths = buildBlockBreadcrumb(renderNode, nil, false)
 		items = append(items, item)
 	}
 	return
+}
+
+func globalBacklinkContextHasAttributeView(node *ast.Node, originalRefBlockIDs map[string]string) bool {
+	nodes, _ := getBacklinkRenderNodes(node, originalRefBlockIDs)
+	for _, root := range nodes {
+		hasAttributeView := false
+		ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && n.Type == ast.NodeAttributeView {
+				hasAttributeView = true
+				return ast.WalkStop
+			}
+			return ast.WalkContinue
+		})
+		if hasAttributeView {
+			return true
+		}
+	}
+	return false
 }

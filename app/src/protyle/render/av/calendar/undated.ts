@@ -41,7 +41,7 @@ export const bindCalendarUndated = (options: {
 }) => {
     const {root, blockElement, data, state, query, onOpen, onSchedule} = options;
     const panel = root.querySelector<HTMLElement>("[data-calendar-undated-panel]");
-    const toggle = blockElement.querySelector<HTMLButtonElement>("[data-calendar-undated-toggle]");
+    const toggle = root.querySelector<HTMLButtonElement>("[data-calendar-undated-toggle]");
     const search = panel.querySelector<HTMLInputElement>("[data-calendar-undated-search]");
     const list = panel.querySelector<HTMLElement>("[data-calendar-undated-list]");
     const count = panel.querySelector<HTMLElement>("[data-calendar-undated-count]");
@@ -68,7 +68,7 @@ export const bindCalendarUndated = (options: {
         list.innerHTML = rows.length ? rows.map(row => {
             const primary = row.cells.find(cell => cell.value?.type === "block")?.value;
             const title = primary?.block?.content || window.siyuan.languages.untitled;
-            return `<div class="b3-menu__item av__calendar-undated-item" role="button" tabindex="0" aria-pressed="false" data-calendar-undated-row="${escapeAttr(row.id)}"><svg class="b3-menu__icon"><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label fn__ellipsis">${escapeHtml(title)}</span><button type="button" class="block__icon block__icon--show" data-calendar-undated-open="${escapeAttr(row.id)}" aria-label="${escapeAttr(window.siyuan.languages.open)}"><svg><use xlink:href="#iconOpen"></use></svg></button></div>`;
+            return `<div class="b3-menu__item av__calendar-undated-item" role="button" tabindex="0" aria-pressed="false" data-calendar-undated-row="${escapeAttr(row.id)}"><svg class="b3-menu__icon"><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label fn__ellipsis">${escapeHtml(title)}</span><button type="button" class="block__icon block__icon--show ariaLabel" data-calendar-undated-open="${escapeAttr(row.id)}" data-position="4west" aria-label="${escapeAttr(window.siyuan.languages.openBy)}"><svg><use xlink:href="#iconOpen"></use></svg></button></div>`;
         }).join("") : `<div class="av__calendar-undated-empty ft__on-surface">${escapeHtml(window.siyuan.languages.empty)}</div>`;
         more.classList.toggle("fn__none", page * PAGE_SIZE >= total);
         updateSelection();

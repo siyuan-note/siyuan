@@ -12,11 +12,6 @@
     padding-bottom: 8px;
   }
 
-  .av__calendar-undated-toggle {
-    gap: 4px;
-    white-space: nowrap;
-  }
-
   .av__calendar-undated-panel {
     position: absolute;
     top: 38px;
@@ -41,17 +36,22 @@
   }
 
   .av__calendar-undated-search {
-    padding: 0 8px;
+    box-sizing: border-box;
+    display: flex;
+    min-width: 0;
+    margin-bottom: 4px;
+    padding: 0 8px 0 4px;
 
     .b3-text-field {
-      width: 100%;
+      flex: 1;
       min-width: 0;
     }
   }
 
   .av__calendar-undated-hint {
-    padding: 8px;
+    padding: 0 8px;
     font-size: 12px;
+    line-height: 16px;
   }
 
   .av__calendar-undated-list {
@@ -499,10 +499,6 @@
 
 @media (max-width: 600px) {
   .av[data-av-type="calendar"] {
-    .av__calendar-undated-toggle > span {
-      display: none;
-    }
-
     .av__calendar-undated-panel {
       position: static;
       width: 100%;

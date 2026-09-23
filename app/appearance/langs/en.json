@@ -702,7 +702,7 @@
 	"docIconClickExpand": "Click document or notebook icon to expand or collapse child documents",
 	"docIconClickExpandTip": "When enabled, clicking a document or notebook icon expands or collapses child documents; when there are no child documents, an available document opens, otherwise the icon can be changed; when disabled, clicking either icon changes it",
 	"parentDocClickExpand": "Click parent document title to expand or collapse child documents",
-	"parentDocClickExpandTip": "When enabled, clicking a parent document title expands or collapses child documents, and the parent document can be opened using Open document in the context menu; when there are no child documents, clicking still opens the document directly; double-clicking the title opens the parent document without changing the expansion state",
+	"parentDocClickExpandTip": "When enabled, click or tap the title to toggle child documents; double-click or double-tap to open the parent without changing expansion. With no children, one click or tap opens it",
 	"mcpStatusAuthorizing": "Authorizing",
 	"mcpStatusAuthorizationRequired": "Authorization required",
 	"mcpAuthorize": "Authorize",

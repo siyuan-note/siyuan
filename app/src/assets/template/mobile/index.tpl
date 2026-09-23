@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, height=device-height, interactive-widget=overlays-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 </head>
-<body class="fn__flex-column">
+<body class="fn__flex-column" style="background-color: #1e1e1e">
 <div id="loading" class="b3-dialog b3-dialog--open" style="padding: 0;">
     <div class="b3-dialog__scrim" style="background-color: #1e1e1e"></div>
     <img style="position: absolute;width: 24vh;height: 24vh;" src="../../icon.svg">

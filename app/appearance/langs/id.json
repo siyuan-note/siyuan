@@ -702,7 +702,7 @@
 	"docIconClickExpand": "Klik ikon dokumen atau buku catatan untuk memperluas atau menciutkan dokumen anak",
 	"docIconClickExpandTip": "Jika diaktifkan, mengeklik ikon dokumen atau buku catatan akan memperluas atau menciutkan dokumen anak; jika tidak ada dokumen anak, dokumen yang tersedia akan dibuka, jika tidak, ikon dapat diubah; jika dinonaktifkan, mengeklik salah satu ikon akan mengubahnya",
 	"parentDocClickExpand": "Klik judul dokumen induk untuk memperluas atau menciutkan dokumen anak",
-	"parentDocClickExpandTip": "Jika diaktifkan, mengeklik judul dokumen induk akan memperluas atau menciutkan dokumen anak, dan dokumen induk dapat dibuka melalui “Buka dokumen” di menu konteks; jika tidak ada dokumen anak, mengeklik tetap akan membuka dokumen secara langsung; mengeklik dua kali judul membuka dokumen induk tanpa mengubah status perluasan",
+	"parentDocClickExpandTip": "Jika diaktifkan, klik atau ketuk judul untuk membuka atau menutup dokumen anak; klik atau ketuk dua kali untuk membuka dokumen induk tanpa mengubah status perluasan; tanpa dokumen anak, cukup sekali klik atau ketuk",
 	"mcpStatusAuthorizing": "Mengotorisasi",
 	"mcpStatusAuthorizationRequired": "Otorisasi diperlukan",
 	"mcpAuthorize": "Otorisasi",

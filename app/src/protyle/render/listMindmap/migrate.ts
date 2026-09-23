@@ -43,12 +43,16 @@ export const migrateLegacyMindmapsBeforeRender = (protyle: IProtyle, html: strin
         return false;
     }
     const previous = migrations.get(protyle);
-    const callback = (blocks: {id: string, dom: string}[]) => resume(replaceLegacyMindmapHTML(html, blocks));
+    // 当前可见内容没有旧脑图时先渲染正文，后台仍迁移整篇文档中尚未加载的块。
+    const waitForMigration = html.includes("data-subtype=\"mindmap\"");
+    const callback = waitForMigration ?
+        (blocks: {id: string, dom: string}[]) => resume(replaceLegacyMindmapHTML(html, blocks)) :
+        () => {};
     if (previous?.rootID === rootID) {
         if (previous.pending) {
             previous.resume = callback;
         }
-        return previous.pending;
+        return waitForMigration && previous.pending;
     }
     const migration: Migration = {rootID, pending: true, resume: callback};
     migrations.set(protyle, migration);
@@ -74,5 +78,5 @@ export const migrateLegacyMindmapsBeforeRender = (protyle: IProtyle, html: strin
         }
     };
     void run();
-    return true;
+    return waitForMigration;
 };

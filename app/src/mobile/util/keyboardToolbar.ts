@@ -1587,7 +1587,15 @@ export const initKeyboardToolbar = () => {
                 }
             } else if (slashBtnElement.getAttribute("data-focus") === "true" ||
                 liteSlashBtnElement && slashBtnElement.getAttribute("data-focus") !== "false") {
-                focusByRange(protyle.toolbar.range);
+                const selection = getSelection();
+                const editorRange = getEditorFocusRange(protyle.wysiwyg.element,
+                    selection?.rangeCount ? selection.getRangeAt(0) : undefined, protyle.toolbar.range);
+                if (editorRange && (document.activeElement === document.body ||
+                    protyle.wysiwyg.element.contains(document.activeElement))) {
+                    hideKeyboardToolbarUtil(true);
+                    restoreKeyboardToolbarRange(protyle, editorRange);
+                    showKeyboardToolbar();
+                }
             }
             return;
         }

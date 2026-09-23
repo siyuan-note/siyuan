@@ -356,6 +356,14 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 if (handleTemplateInteraction(protyle, event) || handleRichTextInteraction(protyle, event)) {
                     return;
                 }
+                const urlElement = (event.target as HTMLElement).closest<HTMLAnchorElement>(
+                    '.custom-attr__avvalue[data-type="url"] > a[href]');
+                if (urlElement) {
+                    openLink(protyle.app, urlElement.getAttribute("href"), event, event.ctrlKey || event.metaKey);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 const databaseElement = hasClosestByClassName(event.target as HTMLElement, "popover__block");
                 if (databaseElement && isTouchDevice() && !isLastPointerMouse() &&
                     hasClosestByClassName(databaseElement, "custom-attr__avheader")) {

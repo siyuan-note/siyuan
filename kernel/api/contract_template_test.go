@@ -58,6 +58,10 @@ func TestAPIContractTemplateManagement(t *testing.T) {
 	if err := os.WriteFile(file, []byte("original"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	exported := "Body\n\n{: id=\"20260921000000-abcdefg\" type=\"doc\"}"
+	if err := os.WriteFile(filepath.Join(root, "exported.md"), []byte(exported), 0644); err != nil {
+		t.Fatal(err)
+	}
 	engine := gin.New()
 	engine.POST("/api/template/manage", manageTemplateFiles)
 	for _, entry := range []struct {
@@ -67,6 +71,7 @@ func TestAPIContractTemplateManagement(t *testing.T) {
 		{`{"action":"list"}`, 0},
 		{`{"Action":"read","Path":"sample.md"}`, 0},
 		{`{"action":"read","path":"folder"}`, 0},
+		{`{"action":"read","path":"exported.md"}`, 0},
 		{`{"action":"write","path":"sample.md","content":"replacement","revision":"stale"}`, -1},
 		{`{"action":"read","path":"../outside.md"}`, -1},
 		{`{"action":false}`, -1},
@@ -87,6 +92,14 @@ func TestAPIContractTemplateManagement(t *testing.T) {
 		}
 		if strings.Contains(entry.body, `"path":"folder"`) && strings.Contains(string(response.Data), `"path"`) {
 			t.Fatalf("directory read gained a path field: %s", response.Data)
+		}
+		if strings.Contains(entry.body, `"path":"exported.md"`) {
+			var source map[string]string
+			if err := json.Unmarshal(response.Data, &source); err != nil || source["content"] != exported || source["sourceDocID"] != "20260921000000-abcdefg" {
+				t.Fatalf("export source metadata changed: %s, %v", response.Data, err)
+			}
+		} else if strings.Contains(entry.body, `"read"`) && strings.Contains(string(response.Data), `"sourceDocID"`) {
+			t.Fatalf("non-exported template gained source metadata: %s", response.Data)
 		}
 	}
 	content, err := os.ReadFile(file)

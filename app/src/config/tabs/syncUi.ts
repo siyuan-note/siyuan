@@ -539,7 +539,7 @@ type CloudSpaceDisplayData = Record<(typeof CLOUD_SPACE_DISPLAY_KEYS)[number], s
 const buildCloudSpaceHtml = (data: CloudSpaceDisplayData, loading: boolean) =>
     `<div class="fn__flex config-cloud-space${loading ? " config-cloud-space--loading" : ""}">
     <div class="config-cloud-space__body">
-        ${window.siyuan.languages.cloudStorage}
+        <div class="config-cloud-space__title">${window.siyuan.languages.cloudStorage}</div>
         <div class="config-cloud-space__placeholder">
         <div class="fn__hr"></div>
         <ul class="b3-list">
@@ -553,7 +553,7 @@ const buildCloudSpaceHtml = (data: CloudSpaceDisplayData, loading: boolean) =>
         </div>
     </div>
     <div class="config-cloud-space__body">
-        ${window.siyuan.languages.trafficStat}
+        <div class="config-cloud-space__title">${window.siyuan.languages.trafficStat}</div>
         <div class="config-cloud-space__placeholder">
         <div class="fn__hr"></div>
         <ul class="b3-list">

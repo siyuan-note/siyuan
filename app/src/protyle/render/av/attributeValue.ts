@@ -239,6 +239,7 @@ export const genAVAttributeRowHTML = (options: {
     const storedValue = cloneAVCellValueSnapshot(value);
     const textInputType = ["url", "email", "phone", "block"].includes(value.type);
     const hasOwnPlaceholder = ["text", "number", "date", "url", "phone", "template", "email"].includes(value.type);
+    const checkClass = value.type === "checkbox" ? (value.checkbox.checked ? " av__cell-check" : " av__cell-uncheck") : "";
     return `<div class="block__icons av__row" data-id="${options.nodeID}" data-col-id="${options.keyID}" data-empty="${options.empty}"${options.type === "block" ? ' data-primary="true"' : ""}>
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
     <div class="block__logo block__logo--icon ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAriaLabel(options.name)}<div class='ft__on-surface'>${escapeAriaLabel(options.desc || "")}</div>">
@@ -250,6 +251,6 @@ data-options="${options.selectOptions ? escapeAttr(JSON.stringify(options.select
 data-date-format="${options.dateFormat || ""}"
 ${options.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${hasOwnPlaceholder ? "" : `placeholder="${window.siyuan.languages.empty}"`}
-class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(value.type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(value, options.dateFormat, options.renderTemplate)}</div>
+class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(value.type) ? " custom-attr__avvalue--readonly" : ""}${checkClass}">${genAVValueHTML(value, options.dateFormat, options.renderTemplate)}</div>
 </div>`;
 };

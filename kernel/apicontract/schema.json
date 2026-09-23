@@ -6630,6 +6630,105 @@
       ],
       "additionalProperties": false
     },
+    "AVCalendarUndatedData": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVTableRow"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rows",
+        "total"
+      ],
+      "additionalProperties": false
+    },
+    "AVCalendarUndatedRequestInput": {
+      "type": "object",
+      "properties": {
+        "blockID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pageSize": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "query": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "search": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "viewID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "viewID"
+      ],
+      "additionalProperties": false
+    },
     "AVCardCoverPosition": {
       "type": "object",
       "properties": {
@@ -47267,6 +47366,9 @@
           "type": "string"
         },
         "revision": {
+          "type": "string"
+        },
+        "sourceDocID": {
           "type": "string"
         }
       },
@@ -116619,6 +116721,81 @@
                     "type": "null"
                   }
                 ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/av/getAttributeViewCalendarUndated",
+      "handler": "getAttributeViewCalendarUndated",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AVCalendarUndatedRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AVCalendarUndatedData"
               },
               "msg": {
                 "type": "string"

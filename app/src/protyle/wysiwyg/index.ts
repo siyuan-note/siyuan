@@ -191,6 +191,7 @@ import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard, prepareExternalClipboardHTML, prepareRichClipboardHTML} from "../util/richClipboard";
 import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
+import {expandQueryEmbedsForClipboard} from "../util/queryEmbedClipboard";
 import {cleanListMindmapHTML} from "../render/listMindmap/model";
 import {
     getSemanticInlineVisibleText,
@@ -1089,8 +1090,19 @@ export class WYSIWYG {
             if (protyle.disabled) {
                 html = getEnableHTML(html);
             }
-            textPlain = textPlain || protyle.lute.BlockDOM2StdMd(selectAVElement ? html :
-                transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy")).trimEnd();
+            const externalHTML = selectAVElement ? html : expandQueryEmbedsForClipboard(html);
+            if (externalHTML !== html) {
+                // 划选保留纯文本语义，整块复制沿用 Markdown 格式；空结果不回退到查询语句。
+                const template = document.createElement("template");
+                template.innerHTML = externalHTML;
+                textPlain = selectElements.length > 0 ? "" : Array.from(template.content.childNodes).map(item =>
+                    item.nodeType === Node.TEXT_NODE ? item.textContent :
+                        (item.nodeType === Node.ELEMENT_NODE ? getPlainText(item as HTMLElement) : ""))
+                    .filter(Boolean).join("\n");
+            }
+            const externalBlockDOM = selectAVElement ? externalHTML :
+                transformSemanticInlineHTML(normalizeSemanticInlineHTML(externalHTML), "legacy");
+            textPlain = textPlain || protyle.lute.BlockDOM2StdMd(externalBlockDOM).trimEnd();
             textPlain = removeZWJ(nbsp2space(textPlain)) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
@@ -1119,10 +1131,10 @@ export class WYSIWYG {
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 restoreLuteMarkdownSyntax(protyle);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                let exportedHTML = blockDOMClipboardRichData?.textHTML ??
+                let exportedHTML = (externalHTML === html ? blockDOMClipboardRichData?.textHTML : undefined) ??
                     removeZWJ((selectTableElement || selectTableRange) ? html :
-                        (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : clipboardBlockDOM) :
-                            protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : clipboardBlockDOM)));
+                        (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : externalBlockDOM) :
+                            protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : externalBlockDOM)));
                 exportedHTML = transformSemanticInlineHTML(exportedHTML, "remove");
                 if (copyAsRichText) {
                     const prepared = prepareRichClipboardHTML(exportedHTML);

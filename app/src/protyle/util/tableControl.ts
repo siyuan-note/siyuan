@@ -185,14 +185,19 @@ export const getCommonTableCellStyle = (cells: HTMLTableCellElement[], property:
     if (cells.length === 0) {
         return undefined;
     }
-    const value = cells[0].style.getPropertyValue(property);
-    return cells.every(cell => cell.style.getPropertyValue(property) === value) ? value : undefined;
+    const getValue = (cell: HTMLTableCellElement) => cell.style.getPropertyValue(property) ||
+        (property === "text-align" ? cell.getAttribute("align") || "" : "");
+    const value = getValue(cells[0]);
+    return cells.every(cell => getValue(cell) === value) ? value : undefined;
 };
 
 export const setTableCellStyle = (protyle: IProtyle, node: HTMLElement, cells: HTMLTableCellElement[],
                                   property: string, value: string) => {
     const oldHTML = node.outerHTML;
     cells.forEach(cell => {
+        if (property === "text-align") {
+            cell.removeAttribute("align");
+        }
         if (value) {
             cell.style.setProperty(property, value);
         } else {
@@ -1725,9 +1730,10 @@ export class TableControl {
             const row = document.createElement("tr");
             for (let column = 0; column < grid.columnCount; column++) {
                 const cell = document.createElement(tag);
-                const align = grid.grid[sourceRow]?.[column]?.getAttribute("align");
+                const source = grid.grid[sourceRow]?.[column];
+                const align = source?.style.textAlign || source?.getAttribute("align");
                 if (align) {
-                    cell.setAttribute("align", align);
+                    cell.style.textAlign = align;
                 }
                 row.append(cell);
             }
@@ -2421,9 +2427,10 @@ export class TableControl {
                 const row = document.createElement("tr");
                 for (let columnIndex = 0; columnIndex < targetColumns; columnIndex++) {
                     const cell = document.createElement("td");
-                    const align = grid.grid[sourceRow]?.[columnIndex]?.getAttribute("align");
+                    const source = grid.grid[sourceRow]?.[columnIndex];
+                    const align = source?.style.textAlign || source?.getAttribute("align");
                     if (align) {
-                        cell.setAttribute("align", align);
+                        cell.style.textAlign = align;
                     }
                     row.append(cell);
                 }

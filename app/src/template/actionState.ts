@@ -1,7 +1,7 @@
 import {TemplateEntry} from "./fileTree";
 
 export const getTemplateActionEntry = (action: string, selected: TemplateEntry | undefined, editing: TemplateEntry | undefined) =>
-    ["save", "preview"].includes(action) ? editing : selected;
+    ["save", "preview", "source", "more"].includes(action) ? editing : selected;
 
 export const getTemplateActionState = (action: string, selected: TemplateEntry | undefined, dirty: boolean, busy: boolean,
                                        hasPreviewContext = true) => {

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260921201901"
+		"updated": "20260923103343"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20260920084445"
+				"updated": "20260923103343"
 			},
 			"Children": [
 				{
@@ -687,7 +687,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260920225154-tz8a00o",
-				"updated": "20260921201901"
+				"updated": "20260923103343"
 			},
 			"Children": [
 				{
@@ -701,12 +701,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920225154-vz01ydx",
-				"updated": "20260920225154"
+				"updated": "20260923103343"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Displays dated entries by month or week. The week view has seven date columns; entries spanning multiple days continue across those days. Your browsing date and month/week choice are independent in each editor."
+					"Data": "Displays dated entries by month or week. The week view has seven date columns; entries spanning multiple days continue across those days. Each editor keeps its current mode and browsing date independently. The month/week choice is saved for each calendar view in this workspace and restored when opening it in a new editor or restarting SiYuan. A new editor starts browsing from today."
 				}
 			]
 		},
@@ -716,7 +716,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260920225154-qqxdh7e",
-				"updated": "20260921201901"
+				"updated": "20260923095432"
 			},
 			"Children": [
 				{
@@ -787,7 +787,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Date field: Choose one date, created time, or updated time field in the layout settings. If no suitable field exists, the calendar prompts you to choose or create one. It does not fill ordinary dates for existing entries; entries without a date are hidden"
+									"Data": "Date field: Choose one date, created time, or updated time field in the layout settings. If no suitable field exists, the calendar prompts you to choose or create one. It does not fill ordinary dates for existing entries; entries without a date stay out of the grid. With an ordinary date field, they remain available in the undated list"
 								}
 							]
 						}
@@ -802,7 +802,7 @@
 					},
 					"Properties": {
 						"id": "20260920225154-vblms0p",
-						"updated": "20260921201901"
+						"updated": "20260923095432"
 					},
 					"Children": [
 						{
@@ -810,12 +810,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260920225154-4wsrq3z",
-								"updated": "20260921201901"
+								"updated": "20260923095432"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Browsing: Use the previous/next buttons, Today, or the date picker. Month view collapses crowded dates; use the more button to expand that week. Dates follow your local time zone. Month view shows four, five, or six weeks as needed"
+									"Data": "Browsing: Use the previous/next buttons, Today, or the date picker. Month view collapses crowded dates; use the more button to expand that week. Dates follow your local time zone. Month view shows four, five, or six weeks as needed. Both views show ISO week numbers at the start of each row. Use the calendar button to jump by date or by ISO week year and number. When a week starts on a day other than Monday, its row number is determined by that row's Thursday"
 								}
 							]
 						}
@@ -843,7 +843,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Editing: Click an entry to open its existing database entry editor. With an ordinary date field, use the plus button on a day to create an entry, drag an entry to move its dates, or drag its end handles to adjust its range. Date changes support undo. On touch screens, use the move handle on the entry to drag it. New entries focus the primary field automatically. Dragging previews the resulting dates and highlights their cells; changes are saved on release. The context menu also offers copying, creating and binding documents, adding to another database, editing fields, and creating an entry on the selected date"
+									"Data": "Editing: Click an entry to open its existing database entry editor. With an ordinary date field, use the plus button on a day to create an entry, drag an entry to move its dates, or drag its end handles to adjust its range. Use No date beside the view filter to search undated entries, then drag one onto a day or select it and choose a day, including on touch screens. This assigns an all-day date; clearing it returns the entry to the undated list. Date changes support undo. On touch screens, use the move handle on an existing calendar entry to drag it. New entries focus the primary field automatically. Dragging previews the resulting dates and highlights their cells; changes are saved on release. The context menu also offers copying, creating and binding documents, adding to another database, editing fields, and creating an entry on the selected date"
 								}
 							]
 						}

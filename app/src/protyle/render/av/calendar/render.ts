@@ -1,5 +1,5 @@
 import {Constants} from "../../../../constants";
-import {openInputDialog} from "../../../../dialog/inputDialog";
+import {setStorageVal} from "../../../util/compatibility";
 import * as dayjs from "dayjs";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {transaction} from "../../../wysiwyg/transaction";
@@ -15,30 +15,35 @@ import {renderAVRichTextElements} from "../richText";
 import {avContextmenu} from "../action";
 import {bindAvSearch} from "../search";
 import {setAVData} from "../virtualScroll";
-import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarInterval, ICalendarEvent, ICalendarSegment,
+import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarInterval, getISOWeekForCalendarRow, ICalendarEvent, ICalendarSegment,
     moveCalendarDate, packCalendarWeek, resizeCalendarDate} from "./date";
+import {openCalendarJump} from "./jump";
+import {getCalendarDropDay} from "./hitTest";
 import {addCalendarDateField, bindCalendarSettings, getCalendarSettingsHTML, isCalendarDateColumn} from "./settings";
-import {getCalendarRequestRange, getCalendarState} from "./state";
+import {getCalendarRequestRange, getCalendarState, setCalendarMode} from "./state";
+import {bindCalendarUndated, getCalendarUndatedHTML} from "./undated";
 
 const iconButton = (action: string, icon: string, label: string) => `<button type="button" class="block__icon block__icon--show" data-calendar-action="${action}" aria-label="${escapeAttr(label)}"><svg><use xlink:href="#${icon}"></use></svg></button>`;
 
 const canEditCalendar = (protyle: IProtyle) => !protyle.disabled && !window.siyuan.isPublish &&
     !protyle.options.history?.created && !protyle.options.history?.snapshot;
 
-const openCalendarItem = (protyle: IProtyle, blockElement: HTMLElement, event: ICalendarEvent) => {
-    const primary = event.row.cells.find(cell => cell.valueType === "block" || cell.value?.type === "block");
+const openCalendarItem = (protyle: IProtyle, blockElement: HTMLElement, row: IAVRow) => {
+    const primary = row.cells.find(cell => cell.valueType === "block" || cell.value?.type === "block");
     if (!primary?.value) {
         return;
     }
     return openDatabaseRowByData(protyle, {
         avID: blockElement.dataset.avId, databaseBlockID: blockElement.dataset.nodeId, notebookID: protyle.notebookId,
-        itemID: event.row.id, valueID: primary.id || primary.value.id,
+        itemID: row.id, valueID: primary.id || primary.value.id,
         title: primary.value.block?.content || window.siyuan.languages.untitled,
         boundBlockID: primary.value.block?.id, isDetached: !!primary.value.isDetached,
     });
 };
 
-const updateCalendarDate = (protyle: IProtyle, blockElement: HTMLElement, event: ICalendarEvent, date: IAVCellDateValue) => {
+const updateCalendarDate = (protyle: IProtyle, blockElement: HTMLElement,
+                            event: Pick<ICalendarEvent, "row" | "date">, date: IAVCellDateValue,
+                            onUpdated?: () => void) => {
     if (event.date.value?.type !== "date" || !canEditCalendar(protyle)) {
         return;
     }
@@ -50,7 +55,7 @@ const updateCalendarDate = (protyle: IProtyle, blockElement: HTMLElement, event:
         action: "doUpdateUpdated", id: blockElement.dataset.nodeId, data: dayjs().format("YYYYMMDDHHmmss"),
     }], [{...operation, data: {type: "date", date: {...event.date.value.date}}}, {
         action: "doUpdateUpdated", id: blockElement.dataset.nodeId, data: blockElement.getAttribute("updated"),
-    }]);
+    }], {callback: onUpdated});
 };
 
 const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boolean) => {
@@ -72,7 +77,8 @@ const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boole
         if (!field || field.hidden) {
             return "";
         }
-        return `<div class="av__calendar-field" data-field-id="${field.id}" data-col-id="${field.id}" data-dtype="${field.type}" data-align="${field.align || ""}" data-wrap="${field.wrap}" title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, view.showIcon, "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
+        const checkClass = field.type === "checkbox" ? (cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck") : "";
+        return `<div class="av__calendar-field${checkClass}" data-field-id="${field.id}" data-col-id="${field.id}" data-dtype="${field.type}" data-align="${field.align || ""}" data-wrap="${field.wrap}"${field.renderTemplate?.trim() ? ' data-render-template="true"' : ""} title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, view.showIcon, "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
     }).join("");
     return `<div class="av__calendar-item${starts ? " av__calendar-item--start" : ""}${ends ? " av__calendar-item--end" : ""}" role="button" tabindex="0" data-calendar-item="${event.row.id}" data-id="${event.row.id}" title="${escapeAttr(title)}" style="grid-column:${segment.column + 1}/span ${segment.span};grid-row:${segment.lane + 1};${option ? `--b3-av-calendar-background:${getAVBackgroundColor(option)}` : ""}">
         ${drag && starts ? `<span class="av__calendar-resize av__calendar-resize--start" data-calendar-resize="start" title="${window.siyuan.languages.calendarResizeStart}"></span>` : ""}
@@ -102,19 +108,7 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
             return;
         }
         const controller = new AbortController();
-        const getDay = (x: number, y: number) => {
-            const viewport = root.querySelector(".av__calendar-scroll").getBoundingClientRect();
-            if (x < viewport.left || x > viewport.right || y < viewport.top || y > viewport.bottom) {
-                return;
-            }
-            for (const week of root.querySelectorAll<HTMLElement>("[data-calendar-week]")) {
-                const rect = week.getBoundingClientRect();
-                if (y >= rect.top && y <= rect.bottom && x >= rect.left && x <= rect.right) {
-                    return addCalendarDays(Number(week.dataset.calendarWeek), Math.min(6, Math.floor((x - rect.left) / (rect.width / 7))));
-                }
-            }
-        };
-        const origin = getDay(event.clientX, event.clientY);
+        const origin = getCalendarDropDay(root, event.clientX, event.clientY);
         let destination = origin;
         let dragging = false;
         const sourceItems = Array.from(root.querySelectorAll<HTMLElement>("[data-calendar-item]"))
@@ -180,14 +174,14 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
             dragging = true;
             root.classList.add("av__calendar--dragging");
             sourceItems.forEach(element => element.classList.add("av__calendar-item--dragging"));
-            destination = getDay(move.clientX, move.clientY);
+            destination = getCalendarDropDay(root, move.clientX, move.clientY);
             preview();
         }, {signal: controller.signal, passive: false});
         document.addEventListener("pointerup", up => {
             if (up.pointerId !== event.pointerId) {
                 return;
             }
-            destination = getDay(up.clientX, up.clientY);
+            destination = getCalendarDropDay(root, up.clientX, up.clientY);
             if (dragging && root.isConnected) {
                 const date = candidate();
                 if (date && JSON.stringify(date) !== JSON.stringify(entry.date.value.date)) {
@@ -259,6 +253,8 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             ${editable ? `<div class="av__calendar-setup">${getCalendarSettingsHTML(view)}</div><div class="av__calendar-create-fields">${(["date", "created", "updated"] as const).map(type => `<button class="b3-button b3-button--outline" data-calendar-create-field="${type}">${window.siyuan.languages.newCol} ${getColNameByType(type)}</button>`).join("")}</div>` : ""}</div>`;
     } else {
         for (let start = range.start; start < range.end; start = addCalendarDays(start, 7)) {
+            const isoWeek = getISOWeekForCalendarRow(start);
+            const weekLabel = `${window.siyuan.languages.calendarISOWeek} ${isoWeek.year}-W${String(isoWeek.week).padStart(2, "0")}`;
             const segments = packCalendarWeek(events, start);
             if (data.target?.status === "visible" && segments.some(segment => segment.event.row.id === data.target.itemID)) {
                 state.expandedWeeks.add(start);
@@ -269,7 +265,8 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             const dayHeaders = Array.from({length: 7}, (_, day) => {
                 const timestamp = addCalendarDays(start, day);
                 const date = new Date(timestamp);
-                return `<div class="av__calendar-day${date.getMonth() === anchor.getMonth() || state.mode === "week" ? "" : " av__calendar-day--outside"}${calendarDay(Date.now()) === timestamp ? " av__calendar-day--today" : ""}" data-calendar-day="${timestamp}">
+                return `<div class="av__calendar-day${day === 0 ? " av__calendar-day--first" : ""}${date.getMonth() === anchor.getMonth() || state.mode === "week" ? "" : " av__calendar-day--outside"}${calendarDay(Date.now()) === timestamp ? " av__calendar-day--today" : ""}" data-calendar-day="${timestamp}">
+                    ${day === 0 ? `<span class="av__calendar-week-number" title="${escapeAttr(weekLabel)}">W${String(isoWeek.week).padStart(2, "0")}</span>` : ""}
                     <span title="${escapeAttr(date.toLocaleDateString(locale))}">${date.getDate() === 1 ? date.toLocaleDateString(locale, {month: "short", day: "numeric"}) : date.getDate()}</span>
                     ${editable && dateColumn.type === "date" && date.getFullYear() >= 1 && date.getFullYear() <= 9999 ? `<button type="button" class="block__icon" data-calendar-add="${timestamp}" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></button>` : ""}
                 </div>`;
@@ -285,7 +282,8 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     }
     blockElement.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);
     replaceAVContainer(blockElement, `<div class="av__container fn__block">
-        ${genTabHeaderHTML(data, !!query || isSearching, editable, blockElement, editable && !!dateColumn)}
+        ${genTabHeaderHTML(data, !!query || isSearching, editable, blockElement, editable && !!dateColumn,
+        editable && dateColumn?.type === "date")}
         <div class="av__calendar" contenteditable="false">
             <div class="av__calendar-toolbar">
                 <span class="av__calendar-label">${escapeHtml(label)}</span>
@@ -293,10 +291,11 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
                 ${iconButton("previous", "iconLeft", window.siyuan.languages.previous)}
                 <button type="button" class="b3-button b3-button--cancel av__calendar-today" data-calendar-action="today">${window.siyuan.languages.calendarToday}</button>
                 ${iconButton("next", "iconRight", window.siyuan.languages.next)}
-                ${iconButton("jump", "iconCalendar", window.siyuan.languages.calendarJumpDate)}
+                ${iconButton("jump", "iconCalendar", window.siyuan.languages.calendarJump)}
                 <select class="b3-select" data-calendar-mode aria-label="${window.siyuan.languages.calendarView}"><option value="month"${state.mode === "month" ? " selected" : ""}>${window.siyuan.languages.month}</option><option value="week"${state.mode === "week" ? " selected" : ""}>${window.siyuan.languages.week}</option></select>
                 </div>
             </div>
+            ${editable && dateColumn?.type === "date" ? getCalendarUndatedHTML(state) : ""}
             ${dateColumn && dateColumn.type !== "date" ? `<div class="av__calendar-source ft__on-surface">${window.siyuan.languages.calendarReadOnlyDate}</div>` : ""}
             <div class="av__calendar-scroll" data-prevent-swipe="true">
                 ${dateColumn ? `<div class="av__calendar-weekdays">${days.map(day => `<div>${day}</div>`).join("")}</div>` : ""}
@@ -318,33 +317,28 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             position: {calendarDate: date}});
     };
     bindCalendarDrag(root, protyle, blockElement, eventsByID, view);
+    if (editable && dateColumn?.type === "date") {
+        bindCalendarUndated({root, blockElement, data, state, query,
+            onOpen: row => openCalendarItem(protyle, blockElement, row),
+            onSchedule: (row, cell, day, onUpdated) => updateCalendarDate(protyle, blockElement,
+                {row, date: cell},
+                {content: day, isNotEmpty: true, isNotTime: true, hasEndDate: false, isNotEmpty2: false}, onUpdated)});
+    }
     root.addEventListener("click", event => {
         event.stopPropagation();
         const target = event.target as HTMLElement;
         const item = target.closest<HTMLElement>("[data-calendar-item]");
         if (item) {
-            void openCalendarItem(protyle, blockElement, eventsByID.get(item.dataset.calendarItem));
+            void openCalendarItem(protyle, blockElement, eventsByID.get(item.dataset.calendarItem).row);
             return;
         }
         const action = target.closest<HTMLElement>("[data-calendar-action]")?.dataset.calendarAction;
         if (action) {
             if (action === "jump") {
-                openInputDialog({
-                    title: window.siyuan.languages.calendarJumpDate,
-                    type: "date",
-                    value: dayjs(state.anchor).format("YYYY-MM-DD"),
-                    min: "0001-01-01",
-                    max: "9999-12-31",
-                    onConfirm: (value, dialog) => {
-                        const input = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
-                        if (!value || !input.reportValidity()) {
-                            return;
-                        }
-                        state.anchor = new Date(`${value}T00:00:00`).getTime();
-                        state.expandedWeeks.clear();
-                        dialog.destroy();
-                        refresh();
-                    },
+                openCalendarJump(state.anchor, state.weekStart, date => {
+                    state.anchor = date;
+                    state.expandedWeeks.clear();
+                    refresh();
                 });
                 return;
             }
@@ -382,7 +376,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         const item = (event.target as HTMLElement).closest<HTMLElement>("[data-calendar-item]");
         if (item && (event.key === "Enter" || event.key === " ")) {
             event.preventDefault();
-            void openCalendarItem(protyle, blockElement, eventsByID.get(item.dataset.calendarItem));
+            void openCalendarItem(protyle, blockElement, eventsByID.get(item.dataset.calendarItem).row);
         }
     });
     root.addEventListener("contextmenu", event => {
@@ -396,7 +390,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         avContextmenu(protyle, item, {x: event.clientX, y: event.clientY}, {customize: menu => {
             menu.addSeparator();
             menu.addItem({icon: "iconOpen", label: window.siyuan.languages.open,
-                click: () => { void openCalendarItem(protyle, blockElement, entry); }});
+                click: () => { void openCalendarItem(protyle, blockElement, entry.row); }});
             if (editable && dateColumn?.type === "date") {
                 const week = item.closest<HTMLElement>("[data-calendar-week]");
                 const rect = week.getBoundingClientRect();
@@ -411,7 +405,10 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         }});
     });
     root.querySelector<HTMLSelectElement>("[data-calendar-mode]").addEventListener("change", event => {
-        state.mode = (event.target as HTMLSelectElement).value as "month" | "week";
+        const modes = setCalendarMode(blockElement, data.viewID, (event.target as HTMLSelectElement).value as "month" | "week");
+        if (modes) {
+            setStorageVal(Constants.LOCAL_AV_CALENDAR_MODES, modes);
+        }
         state.expandedWeeks.clear();
         refresh();
     });

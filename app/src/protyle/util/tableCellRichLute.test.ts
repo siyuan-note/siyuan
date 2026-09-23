@@ -22,6 +22,33 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const base = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const lute = api.getTableCellEditorLute(base);
+    const customHTML = '<span data-type="custom_symble_strong_CJK_rectangle_yin" ' +
+        'style="--custom-symble-strong: rgb(0 166 240 / 1);">test</span>';
+    const customBlockDOM = base.Md2BlockDOM(customHTML + "\n\nsecond");
+    const customCell = document.createElement("td");
+    const customValue = api.serializeTableCellRich(customBlockDOM);
+    api.updateTableCellEditingValue(customCell, customValue);
+    check.ok(customCell.hasAttribute("data-sy-table-cell-rich"));
+    const reopenedCustom = api.getTableCellRichBlockDOM(customCell);
+    check.match(reopenedCustom, /data-type="custom_symble_strong_CJK_rectangle_yin"/);
+    check.match(reopenedCustom, /--custom-symble-strong: rgb\(0 166 240 \/ 1\)/);
+    check.match(reopenedCustom, /second/);
+    check.doesNotMatch(api.sanitizeAVRichTextBlockDOM(customBlockDOM, true), /custom_symble/);
+    const unsafeCustom = api.sanitizeAVRichTextBlockDOM(
+        '<div data-type="NodeParagraph"><div contenteditable="true">' +
+        '<span data-type="custom_bad" style="--custom-bad: url(javascript:alert(1)); ' +
+        '--custom-safe: #abc;" onclick="alert(1)">safe</span></div></div>', true, true);
+    check.match(unsafeCustom, /--custom-safe: #abc;/);
+    check.doesNotMatch(unsafeCustom, /url\(|onclick|javascript:/);
+    const externalCustom = api.serializeTableCellRich(base.Md2BlockDOM(customHTML));
+    check.match(externalCustom.blockDOM, /data-type="custom_symble_strong_CJK_rectangle_yin"/);
+    check.match(externalCustom.blockDOM, /--custom-symble-strong: rgb\(0 166 240 \/ 1\)/);
+    const inlineCustomCell = document.createElement("td");
+    api.updateTableCellEditingValue(inlineCustomCell, externalCustom);
+    check.equal(inlineCustomCell.hasAttribute("data-sy-table-cell-rich"), false);
+    check.match(api.getTableCellRichBlockDOM(inlineCustomCell), /custom_symble_strong_CJK_rectangle_yin/);
+    const externalBold = api.serializeTableCellRich(base.HTML2BlockDOM("<strong>bold</strong>"));
+    check.match(externalBold.blockDOM, /data-type="strong"/);
     const editable = document.createElement("div");
     for (const text of ["```", "```go", "~~~~shell", "  ```js", "before\n\n```ts"]) {
         editable.textContent = text;
@@ -498,7 +525,7 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const hint = createSourceFile("hint.ts", read("../hint/index.ts"), ScriptTarget.Latest, true);
     const hintClass = hint.statements.find(isClassDeclaration);
     const fill = hintClass.members.find(member => isMethodDeclaration(member) && member.name.getText(hint) === "fill");
-    const hintSource = compile("class Hint {" + fill.getText(hint) + "}");
+    const hintSource = compile("const isProtyleListItemFragment = () => false; class Hint {" + fill.getText(hint) + "}");
     const editor = read("../render/tableCellRichEditor.ts");
     const start = editor.indexOf('host.addEventListener("keydown", event => {');
     const end = editor.indexOf("}, {capture: true, signal});", start) + "}, {capture: true, signal});".length;

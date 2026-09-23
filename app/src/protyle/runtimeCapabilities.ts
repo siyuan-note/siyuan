@@ -11,6 +11,7 @@ export interface ProtyleRuntimeCapabilities {
     listItemFragment?: boolean;
     sanitizeBlockDOM?: (blockDOM: string) => string;
     getUnsupportedPasteBlocks?: (blockDOM: string) => string[];
+    richHTMLPaste?: boolean;
     restoreLuteMarkdownSyntax?: (lute: Lute) => void;
 }
 
@@ -53,6 +54,9 @@ export const getProtyleBlockDOMSanitizer = (protyle: IProtyle) =>
 
 export const getProtyleUnsupportedPasteBlocks = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.getUnsupportedPasteBlocks;
+
+export const isProtyleRichHTMLPasteEnabled = (protyle: IProtyle) =>
+    protyleRuntimeCapabilities.get(protyle)?.richHTMLPaste === true;
 
 export const restoreProtyleLuteMarkdownSyntax = (protyle: IProtyle, restoreDefault: (lute: Lute) => void) => {
     const restore = protyleRuntimeCapabilities.get(protyle)?.restoreLuteMarkdownSyntax || restoreDefault;

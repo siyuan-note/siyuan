@@ -341,7 +341,6 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
             } else {
                 blockElement = selectElements[selectElements.length - 1];
             }
-            hideElements(["select"], protyle);
         } else {
             blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
             blockElement = getTopAloneElement(blockElement);
@@ -356,6 +355,8 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
     if (!blockElement) {
         return;
     }
+    // 插入新块前退出块选择模式，避免后续输入重新聚焦选中的块。
+    hideElements(["select"], protyle);
     // 页签项不能容纳同级普通块，上下插入以所属页签组为目标。
     if (blockElement.getAttribute("data-type") === "NodeTabItem" &&
         blockElement.parentElement.getAttribute("data-type") === "NodeTabs") {

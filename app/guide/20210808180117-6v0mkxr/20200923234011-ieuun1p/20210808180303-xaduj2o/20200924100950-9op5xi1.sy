@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260921221035"
+		"updated": "20260923083553"
 	},
 	"Children": [
 		{
@@ -4005,7 +4005,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260921105011"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -11914,7 +11914,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-ans1gna",
-				"updated": "20260921105011"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -11938,7 +11938,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-4oe7doq",
-				"updated": "20260921105011"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -12191,6 +12191,74 @@
 								{
 									"Type": "NodeText",
 									"Data": "Task list"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Toggle task list item completion"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Unassigned"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "To Do and In Progress become Done; other states become To Do. Works in the editor and list mindmaps. Configure in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "List block"
 								}
 							]
 						}
@@ -16676,12 +16744,26 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002135-5dfw1yo",
-				"updated": "20260913160005"
+				"updated": "20260922150640"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Document panel"
+				}
+			]
+		},
+		{
+			"ID": "20260922150640-l6dnc3c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922150640-l6dnc3c",
+				"updated": "20260922150640"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When “Click parent document title to expand or collapse child documents” is enabled, single-click a parent document title in the desktop document tree or pinned documents to expand or collapse its children after a short delay. Double-click the title to open the parent document without changing its expansion state. Documents without children still open with a single click"
 				}
 			]
 		},

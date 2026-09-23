@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20260904091600"
+		"updated": "20260922175505"
 	},
 	"Children": [
 		{
@@ -44,6 +44,77 @@
 				{
 					"Type": "NodeText",
 					"Data": " 後綴文件，存放在工作空間 data/templates 文件夾下。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-mj0agjm",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260922175505-mj0agjm",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "範本管理"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260922175505-vs8l1r3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-vs8l1r3",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊範本或資料夾旁的更多按鈕，可以重新命名、移動或刪除該項目。桌面端也可以按右鍵開啟同一選單。行動端編輯頁提供目前範本的更多按鈕。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-qt76rpk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-qt76rpk",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面視窗足夠寬時，原始碼與預覽左右排列；窄視窗和行動端的預覽位於原始碼下方。預覽上下文用於選擇執行範本時使用哪個文件的資訊，預覽不會修改該文件。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-ekb7fu9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-ekb7fu9",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "範本保留了匯出來源文件 ID 時，可以點擊預覽按鈕旁或項目選單中的開啟匯出範本的文件，返回仍可在目前工作空間存取的來源文件。開啟後會關閉範本管理；編輯並重新匯出後，再次開啟範本管理即可載入更新後的範本。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-lpm1s5w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-lpm1s5w",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "行動端從編輯頁返回時顯示範本清單，再次返回退出範本管理。離開有未儲存修改的編輯頁時需要確認，取消後保留目前內容。"
 				}
 			]
 		},
@@ -119,7 +190,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": ".action{now | date \u0026quot;2006-01-02 15:04:05\u0026quot;}"
+					"TextMarkTextContent": ".action{now | date &quot;2006-01-02 15:04:05&quot;}"
 				},
 				{
 					"Type": "NodeText",
@@ -460,7 +531,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
+									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated > '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",

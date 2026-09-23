@@ -1359,6 +1359,8 @@ declare namespace Config {
         prependListItem?: IKey;
         appendListItem?: IKey;
         checkToggle?: IKey;
+        /** 切换任务完成状态，默认未绑定；待办和进行中变为完成，其他状态变为待办。 */
+        taskCompletionToggle?: IKey;
         indent?: IKey;
         outdent?: IKey;
     }

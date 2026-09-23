@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260921221035"
+		"updated": "20260923083553"
 	},
 	"Children": [
 		{
@@ -4003,7 +4003,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260921191955"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -11902,7 +11902,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-x02vhoh",
-				"updated": "20260921105011"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -11922,7 +11922,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-yv5msrs",
-				"updated": "20260921105011"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -12171,6 +12171,78 @@
 								{
 									"Type": "NodeText",
 									"Data": "任务列表"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切换任务列表项完成状态"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "未绑定"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "待办和进行中切换为完成，其他状态切换为待办；适用于编辑器和列表脑图；可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快捷键"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "编辑器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "列表块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -16722,12 +16794,26 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619001156-26volkp",
-				"updated": "20260913160005"
+				"updated": "20260922150640"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "文档面板"
+				}
+			]
+		},
+		{
+			"ID": "20260922150640-fahlo11",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922150640-fahlo11",
+				"updated": "20260922150640"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "启用“单击父文档标题时展开或折叠下级文档”后，在桌面端文档树或置顶文档区单击父文档标题，会在短暂等待后展开或折叠下级文档；双击标题则打开父文档，且不改变展开或折叠状态。没有子文档时仍然单击直接打开"
 				}
 			]
 		},

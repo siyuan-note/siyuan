@@ -48,8 +48,9 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
             upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,
             lute: getTableCellEditorLute(getAVRichTextLute(),
                 window.siyuan.config.editor.markdown.blockFullWidthTaskList !== false),
-            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
+            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
+            richHTMLPaste: true,
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
     });
@@ -105,7 +106,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         showMessage(window.siyuan.languages.tableCellRichInvalid);
         return;
     }
-    hideElements(["gutter", "toolbar"], owner);
+    hideElements(["toolbar"], owner);
     // 记录预览中被点击的公式位置，在重建单元格后打开对应公式的编辑面板。
     const clickedMath = point?.target?.closest('[data-subtype="math"]');
     const clickedMathIndex = clickedMath && cell.contains(clickedMath) ?
@@ -149,10 +150,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             event.preventDefault();
         }
     }));
-    ["mouseover", "pointerover"].forEach(type => host.addEventListener(type, event => {
-        hideElements(["gutter"], owner);
-        event.stopPropagation();
-    }));
+    ["mouseover", "pointerover"].forEach(type => host.addEventListener(type, event => event.stopPropagation()));
+    owner.gutter?.render(owner, table, cell);
     const toolbar = getDefaultToolbar(isMobile()).filter(item => typeof item === "string" ? item !== "ai" : item.name !== "ai");
     const safeSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, hintSource: THintSource) =>
         hintSlash(key, protyle, hintSource).filter(item => TABLE_CELL_SLASH_IDS.has(item.id)));
@@ -177,8 +176,9 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             lute: getTableCellEditorLute(getAVRichTextLute(),
                 window.siyuan.config.editor.markdown.blockFullWidthTaskList !== false),
             lockedOptions: {toolbar, hint},
-            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
+            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
+            richHTMLPaste: true,
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
         afterSetContent: (protyle, element) => {

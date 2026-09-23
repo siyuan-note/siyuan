@@ -34,12 +34,21 @@ import {
 import {normalizeInlineFontFamilyStyle} from "../toolbar/fontFamilyCore";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {isProtyleListItemFirstParagraph} from "../runtimeCapabilities";
+import {isMobile} from "../../util/functions";
 
 interface IInputOperations {
     doOperations: IOperation[];
     undoOperations: IOperation[];
     undoContext?: Record<string, string>;
 }
+
+const updateGutterAfterInput = (protyle: IProtyle, blockElement: HTMLElement) => {
+    if (!isMobile()) {
+        hideElements(["gutter"], protyle);
+    } else if (protyle.gutter && !protyle.gutter.element.classList.contains("fn__none")) {
+        protyle.gutter.render(protyle, blockElement);
+    }
+};
 
 const normalizeInlineFontFamilyStyles = (element: ParentNode) => {
     element.querySelectorAll<HTMLElement>("span[style]").forEach(item => {
@@ -246,7 +255,7 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
         }
         focusByWbr(protyle.wysiwyg.element, range);
         protyle.hint.render(protyle);
-        hideElements(["gutter"], protyle);
+        updateGutterAfterInput(protyle, blockElement);
         updateInput(html, protyle, id, inputOperations);
         return;
     }
@@ -564,7 +573,7 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
         focusByWbr(protyle.wysiwyg.element, range);
         protyle.hint.render(protyle);
     }
-    hideElements(["gutter"], protyle);
+    updateGutterAfterInput(protyle, blockElement);
     updateInput(html, protyle, id, inputOperations);
 };
 

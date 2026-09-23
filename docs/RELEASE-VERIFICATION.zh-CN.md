@@ -175,18 +175,19 @@ python -X utf8 scripts/verify-release.py check --version 3.8.5
 - GitHub Releases 上传安装包和 `SHA256SUMS.txt` 
 - 同步 Gitee
 - 上传 R2 和百度网盘
-- 发布公告
-- 部署 Rhy，粘贴最终的 `SHA256SUMS.txt`
+- 链滴登录 `siyuan` 账号发布公告
+- 修改并部署 Rhy，粘贴最终的 `SHA256SUMS.txt`
 - 部署 Index（版本更新、构建和推送已由发布准备的 `--publish --execute` 完成）
 - 完成小米、华为、荣耀、OPPO、vivo、App Store、Microsoft Store、腾讯应用宝、Google Play、360 和腾讯电脑管家等应用市场上架
 
 上架应用市场：
 
 - [小米](https://dev.mi.com/distribute)
+  下面这几个一般情况下不需要单独传，小米上发布以后会自动同步发布
+  - [荣耀](https://developer.honor.com/)
+  - [OPPO](https://open.oppomobile.com/)
+  - [vivo](https://dev.vivo.com.cn/appLists)
 - [华为](https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/myApp)
-- [荣耀](https://developer.honor.com/)
-- [OPPO](https://open.oppomobile.com/)
-- [vivo](https://dev.vivo.com.cn/appLists)
 - [iOS](https://appstoreconnect.apple.com/apps/1583226508/appstore)
 - [微软](https://partner.microsoft.com/en-us/dashboard/windows/overview)
 - [腾讯应用宝](https://app.open.qq.com/p/app/detail?appId=1112307632)
@@ -236,6 +237,10 @@ python -X utf8 scripts/clean-release.py --execute
 ### 11. 等待 GitHub Actions 完成并部署用户指南
 
 最后等待本次发布相关的 GitHub Actions 执行完成，确认用于用户指南部署的构建成功、版本与本次发布一致，再部署用户指南。工作流失败时先处理失败原因，成功后再部署。
+
+---
+
+下面是脚本设计和实现相关内容。
 
 ## 直接检查安装包
 

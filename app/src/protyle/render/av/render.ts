@@ -94,7 +94,7 @@ interface ITableOptions {
 }
 
 export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boolean, blockElement: Element,
-                                 includeEditingControls = true) => {
+                                 includeEditingControls = true, showCalendarUndated = false) => {
     let tabHTML = "";
     let viewData = data.views.find((item) => item.id === data.viewID) || data.views[0];
     let hasFilter = false;
@@ -163,6 +163,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             <span data-type="av-filter" aria-label="${window.siyuan.languages.filter}" data-position="8south" class="ariaLabel block__icon${hasFilter ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
+            ${showCalendarUndated ? `<button type="button" class="block__icon block__icon--show av__calendar-undated-toggle" data-calendar-undated-toggle aria-label="${escapeAttr(window.siyuan.languages.calendarUndated)}" aria-expanded="false"><svg><use xlink:href="#iconInbox"></use></svg><span>${escapeHtml(window.siyuan.languages.calendarUndated)}</span></button>` : ""}
             <div class="fn__space"></div>
             ${blockElement.classList.contains("av") ? `<span data-type="av-context-filter" aria-label="${window.siyuan.languages.contextFilter}" data-position="8south" class="ariaLabel block__icon${getContextFilterKeyID(data.contextFilter) ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFocus"></use></svg>

@@ -79,6 +79,51 @@ func TestTableCellRichDocumentReaders(t *testing.T) {
 	}
 }
 
+func TestLegacyTableAlignmentReadersAndExports(t *testing.T) {
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.Editor = conf.NewEditor()
+	Conf.Export = conf.NewExport()
+	t.Cleanup(func() { Conf = originalConf })
+	legacy, err := os.ReadFile("../treenode/testdata/table-alignment-legacy.sy")
+	if err != nil {
+		t.Fatal(err)
+	}
+	readers := map[string]func([]byte) (*parse.Tree, error){
+		"document": func(data []byte) (*parse.Tree, error) {
+			return filesys.LoadTreeByData(data, "20260923000000-box0001", "/20260923000000-root001.sy", util.NewLute())
+		},
+		"history and recovery": loadTreeByData0,
+		"history diff":         func(data []byte) (*parse.Tree, error) { return parseDocVersionTree(data, "20260923000000-root001") },
+		"backup and snapshot": func(data []byte) (*parse.Tree, error) {
+			_, tree, err := parseTreeInSnapshot(data, util.NewLute())
+			return tree, err
+		},
+	}
+	for name, read := range readers {
+		t.Run(name, func(t *testing.T) {
+			tree, err := read(legacy)
+			if err != nil {
+				t.Fatal(err)
+			}
+			table := tree.Root.FirstChild
+			if table == nil || len(table.TableAligns) != 1 || table.TableAligns[0] != 2 ||
+				table.FirstChild.FirstChild.FirstChild.TableCellAlign != 2 || table.LastChild.FirstChild.TableCellAlign != 3 {
+				t.Fatal("legacy table alignment was not read")
+			}
+			engine := util.NewLute()
+			word := string(render.NewProtyleExportDocxRenderer(tree, engine.RenderOptions, engine.ParseOptions).Render())
+			if strings.Contains(word, ` align="`) || !strings.Contains(word, "text-align: center") || !strings.Contains(word, "text-align: right") {
+				t.Fatalf("legacy alignment was not exported as inline styles: %s", word)
+			}
+			markdown := string(render.NewProtyleExportMdRenderer(tree, engine.RenderOptions, engine.ParseOptions).Render())
+			if !strings.Contains(markdown, "text-align: right;") {
+				t.Fatalf("per-cell alignment was lost from Markdown: %s", markdown)
+			}
+		})
+	}
+}
+
 func TestTableCellRichHTMLAndMarkdownExports(t *testing.T) {
 	luteEngine := util.NewLute()
 	source := "- **first**\n- second\n\n```go\na | b\nc\n```\n" +

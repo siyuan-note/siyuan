@@ -306,11 +306,19 @@ export class MobileFiles extends Model {
                     const ulElement = hasTopClosestByTag(target, "UL");
                     const notebookId = ulElement ? ulElement.getAttribute("data-url") : "";
                     if (target.getAttribute("data-type") === "navigation-file") {
-                        openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL], undefined, notebookId);
+                        if (window.siyuan.config.fileTree.parentDocClickExpand && Number(target.getAttribute("data-count")) > 0) {
+                            this.toggleTreeItem(target);
+                        } else {
+                            openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL], undefined, notebookId);
+                        }
                     } else if (target.getAttribute("data-type") === "navigation-root") {
                         const boxDocID = target.getAttribute("data-node-id");
                         if (boxDocID) {
-                            openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL], undefined, notebookId);
+                            if (window.siyuan.config.fileTree.parentDocClickExpand && Number(target.getAttribute("data-count")) > 0) {
+                                this.toggleTreeItem(target);
+                            } else {
+                                openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL], undefined, notebookId);
+                            }
                         } else if (ulElement) {
                             this.getLeaf(target, notebookId);
                         }
@@ -927,12 +935,11 @@ export class MobileFiles extends Model {
 
     private genNotebook(item: INotebook) {
         const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
-        // 加密笔记本关闭（锁定）时用 🔒 提示需解锁
         const locked = item.encrypted && item.closed;
         const iconContent = locked
-            ? "🔒️"
+            ? getFileTreeIconHTML("", "lock")
             : getFileTreeIconHTML(item.icon, "notebook");
-        const defaultIconAttr = getFileTreeDefaultIconAttr(item.icon, "notebook", locked);
+        const defaultIconAttr = getFileTreeDefaultIconAttr(locked ? "" : item.icon, locked ? "lock" : "notebook");
         const isBoxDoc = !item.closed && window.siyuan.config.fileTree.boxDocEnabled;
         const hasChildren = isBoxDoc && item.subFileCount > 0;
         const iconAriaLabel = isBoxDoc ?

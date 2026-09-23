@@ -1257,6 +1257,7 @@
 
 .sy__agentChat--mobile {
   position: relative;
+  box-sizing: border-box;
   height: 100%;
   min-height: 0;
   background: var(--b3-theme-background);

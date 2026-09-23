@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20260904091600"
+		"updated": "20260922175505"
 	},
 	"Children": [
 		{
@@ -48,6 +48,77 @@
 				{
 					"Type": "NodeText",
 					"Data": " suffix files and are stored in the data/templates folder of the workspace."
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-i0dqml8",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260922175505-i0dqml8",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Template management"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260922175505-khz1yar",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-khz1yar",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use the More button beside a template or folder to rename, move or delete it. On desktop, right-click the entry to open the same menu. On mobile, the editor also provides a More button for the current template."
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-jh595vg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-jh595vg",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On wide desktop windows, the source and preview appear side by side. On narrow windows and mobile devices, the preview appears below the source. The preview context selects the document whose information is used to run the template; previewing does not modify that document."
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-13670ji",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-13670ji",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For templates that retain the exported document ID, use Open template source document beside the preview button or in the entry menu to return to that document. The source must still be available in the current workspace. Opening it closes template management; after editing and exporting again, reopen template management to load the updated template."
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-mbdsd8w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-mbdsd8w",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, returning from the editor shows the template list; returning again exits template management. Leaving unsaved edits requires confirmation. Cancelling keeps the current content."
 				}
 			]
 		},
@@ -127,7 +198,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": ".action{now | date \u0026quot;2006-01-02 15:04:05\u0026quot;}"
+					"TextMarkTextContent": ".action{now | date &quot;2006-01-02 15:04:05&quot;}"
 				},
 				{
 					"Type": "NodeText",
@@ -467,7 +538,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
+									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated > '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",

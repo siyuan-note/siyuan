@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260921221035"
+		"updated": "20260923083553"
 	},
 	"Children": [
 		{
@@ -3997,7 +3997,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260921105011"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -11914,7 +11914,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-td76oes",
-				"updated": "20260921105011"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -11934,7 +11934,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-qj1o02k",
-				"updated": "20260921105011"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -12183,6 +12183,78 @@
 								{
 									"Type": "NodeText",
 									"Data": "任務列表"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切換任務列表項完成狀態"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "未綁定"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "待辦和進行中切換為完成，其他狀態切換為待辦；適用於編輯器和列表心智圖；可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快速鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "編輯器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "列表區塊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中設定"
 								}
 							]
 						}
@@ -16664,12 +16736,26 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-zliquo3",
-				"updated": "20260913160005"
+				"updated": "20260922150640"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "文檔面板"
+				}
+			]
+		},
+		{
+			"ID": "20260922150640-nft4e80",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922150640-nft4e80",
+				"updated": "20260922150640"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "啟用「點擊父文件標題時展開或折疊下級文件」後，在桌面版文件樹或置頂文件區點擊父文件標題，會在短暫等待後展開或折疊下級文件；按兩下標題則開啟父文件，且不改變展開或折疊狀態。沒有子文件時仍然點擊直接開啟"
 				}
 			]
 		},

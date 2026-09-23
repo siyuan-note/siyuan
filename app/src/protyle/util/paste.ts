@@ -64,6 +64,7 @@ import {
 } from "./wpsPresentation";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
+import {expandQueryEmbedsForClipboard} from "./queryEmbedClipboard";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
 import {getTextWithoutSemanticMarkers, normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
@@ -72,6 +73,7 @@ import {
     getProtyleBlockDOMSanitizer,
     getProtyleUnsupportedPasteBlocks,
     getProtyleRestrictedPlainTextHTML,
+    isProtyleRichHTMLPasteEnabled,
     isProtyleUploadDisabled,
     restoreProtyleLuteMarkdownSyntax,
 } from "../runtimeCapabilities";
@@ -204,9 +206,16 @@ export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     return refText + ` <span data-type="block-ref" data-subtype="s" data-id="${blockElement.getAttribute("data-node-id")}">*</span>`;
 };
 
-export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
-    let text = "";
+export const getPlainText = (blockElement: HTMLElement, isNested = false): string => {
     const dataType = blockElement.dataset.type;
+    if (dataType === "NodeBlockQueryEmbed" || blockElement.classList.contains("protyle-wysiwyg__embed") ||
+        (!isNested && blockElement.querySelector('[data-type="NodeBlockQueryEmbed"], .protyle-wysiwyg__embed'))) {
+        const template = document.createElement("template");
+        template.innerHTML = expandQueryEmbedsForClipboard(blockElement.outerHTML);
+        return Array.from(template.content.children).map(item => getPlainText(item as HTMLElement, isNested))
+            .filter(Boolean).join("\n");
+    }
+    let text = "";
     if ("NodeHTMLBlock" === dataType) {
         text += blockElement.querySelector("protyle-html").getAttribute("data-content");
     } else if ("NodeAttributeView" === dataType) {
@@ -792,6 +801,19 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (localImages?.length > 0 && localImages.every(file => !file.isDir && isImage(file.path))) {
             await readLocalFile(protyle, localImages, directAssetUploadOptions, avAssetUploadSuccess);
             return;
+        }
+    }
+    if (blockDOMSanitizer && isProtyleRichHTMLPasteEnabled(protyle) && !siyuanHTML && !files?.length &&
+        (textHTML || /<[a-z][^>]*>/i.test(textPlain))) {
+        // 表格单元格将可解析的富文本转换为块 DOM，再统一检查不支持的块和净化行内标记。
+        const richBlockDOM = textHTML ?
+            (/^<span\b[^>]*\bdata-type\s*=\s*["']custom_[^>]*>[\s\S]*<\/span>$/i.test(textHTML.trim()) ?
+                protyle.lute.Md2BlockDOM(textHTML) : protyle.lute.HTML2BlockDOM(textHTML)) :
+            protyle.lute.Md2BlockDOM(textPlain);
+        const richTemplate = document.createElement("template");
+        richTemplate.innerHTML = richBlockDOM;
+        if (!richTemplate.content.querySelector(".img, img")) {
+            siyuanHTML = richBlockDOM;
         }
     }
     if (blockDOMSanitizer) {

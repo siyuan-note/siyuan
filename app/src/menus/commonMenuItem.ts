@@ -20,6 +20,7 @@ import {hideMessage, showMessage} from "../dialog/message";
 import {loadTemplateDirectories, openTemplateManager} from "../template/manager";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
+import {bindAliasInput} from "./aliasInput";
 import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
 /// #if !MOBILE
 import {openAsset, openAssetInBackground, openBy} from "../editor/util";
@@ -263,11 +264,11 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
                 <div class="fn__hr"></div>
                 <input spellcheck="${window.siyuan.config.editor.spellcheck}" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.attrNameTip}" data-name="name">
             </label>
-            <label class="b3-label b3-label--noborder">
+            <div class="b3-label b3-label--noborder">
                 ${window.siyuan.languages.alias}
                 <div class="fn__hr"></div>
-                <input spellcheck="${window.siyuan.config.editor.spellcheck}" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.attrAliasTip}" data-name="alias">
-            </label>
+                <div data-alias-input></div>
+            </div>
             <label class="b3-label b3-label--noborder">
                 ${window.siyuan.languages.memo}
                 <div class="fn__hr"></div>
@@ -287,6 +288,7 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
     </div>
 </div>`,
         destroyCallback() {
+            aliasInput.destroy();
             /// #if MOBILE
             disposeSheet();
             /// #else
@@ -312,7 +314,31 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
     dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);
     (dialog.element.querySelector('.b3-text-field[data-name="bookmark"]') as HTMLInputElement).value = attrs.bookmark || "";
     (dialog.element.querySelector('.b3-text-field[data-name="name"]') as HTMLInputElement).value = attrs.name || "";
-    (dialog.element.querySelector('.b3-text-field[data-name="alias"]') as HTMLInputElement).value = attrs.alias || "";
+    const aliasInput = bindAliasInput(dialog.element.querySelector("[data-alias-input]"), attrs.alias || "", {
+        addLabel: window.siyuan.languages.addAlias,
+        dragThreshold: Constants.SIZE_DRAG_THRESHOLD,
+        removeLabel: window.siyuan.languages.remove,
+        placeholder: window.siyuan.languages.attrAliasTip,
+        spellcheck: window.siyuan.config.editor.spellcheck,
+        save: async (alias) => {
+            try {
+                const response = await fetchSyncPost("/api/attr/setBlockAttrs", {id: attrs.id, attrs: {alias}});
+                return response.code === 0;
+            } catch (error) {
+                showMessage(String(error));
+                return false;
+            }
+        },
+    });
+    const destroyWithAliases = dialog.destroy.bind(dialog);
+    dialog.destroy = (options?: IObject) => {
+        // 关闭前提交草稿；保存失败时保留面板和输入，便于重试。
+        void aliasInput.commit().then(success => {
+            if (success) {
+                destroyWithAliases(options);
+            }
+        });
+    };
     (dialog.element.querySelector('.b3-text-field[data-name="memo"]') as HTMLInputElement).value = attrs.memo || "";
     dialog.element.querySelectorAll('.custom-attr[data-type="custom"] textarea.b3-text-field').forEach((item: HTMLTextAreaElement) => {
         item.value = attrs[item.dataset.name];
@@ -418,13 +444,15 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
             target = target.parentElement;
         }
     });
-    dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
+    dialog.element.querySelectorAll(".b3-text-field[data-name]").forEach((item: HTMLInputElement) => {
         if (focusName !== "av" && focusName !== "custom" && focusName === item.getAttribute("data-name")) {
             item.focus();
         }
         bindAttrInput(item, attrs.id);
     });
-    if (focusName === "av") {
+    if (focusName === "alias") {
+        aliasInput.focus();
+    } else if (focusName === "av") {
         dialog.element.dispatchEvent(new CustomEvent("click", {detail: "NodeAttributeView"}));
         (document.activeElement as HTMLElement)?.blur();
     } else if (focusName === "custom") {

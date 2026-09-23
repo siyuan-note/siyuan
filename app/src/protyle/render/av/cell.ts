@@ -1149,6 +1149,9 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
             cellElement.removeAttribute("data-id");
         }
         cellElement.dataset.cellValue = encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(value)));
+        if (value.type === "checkbox") {
+            renderCellAttr(cellElement, value);
+        }
         if (!preserveTemplateDisplay) {
             cellElement.parentElement.dataset.empty = cellValueIsEmpty(value, true, renderTemplate).toString();
             cellElement.innerHTML = genAVValueHTML(value, cellElement.dataset.dateFormat as TAVDateFormat,
@@ -1178,7 +1181,8 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
         updateAVSelectedCellValue(item, rowID, colID, value);
         item.querySelectorAll<HTMLElement>(
             `.av__row[data-id="${rowID}"] .av__cell[data-col-id="${colID}"], ` +
-            `.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${colID}"]`
+            `.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${colID}"]` +
+            (value.type === "checkbox" ? `, .av__calendar-item[data-id="${rowID}"] .av__calendar-field[data-col-id="${colID}"]` : "")
         ).forEach(cellElement => {
             if (cellElement === sourceElement) {
                 return;

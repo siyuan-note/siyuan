@@ -30,6 +30,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -165,6 +166,24 @@ func readTemplateSource(root *os.Root, p string) (string, error) {
 	return string(content), nil
 }
 
+// 从源码的文档级属性读取导出来源，不执行模板动作，也不使用解析器生成的 ID。
+func templateSourceDocumentID(content string) string {
+	engine := util.NewLute()
+	engine.SetKramdownBlockIAL(false)
+	engine.SetIndentCodeBlock(true)
+	tree := parse.Block("", []byte(content), engine.ParseOptions)
+	if tree == nil || tree.Root.LastChild == nil || tree.Root.LastChild.Type != ast.NodeParagraph {
+		return ""
+	}
+	// 导出器把文档属性写在末尾；单独解析属性，保留任意属性顺序并拒绝动态或无效 ID。
+	attrs := parseTemplateDocumentAttributes(strings.TrimSpace(string(tree.Root.LastChild.Tokens)))
+	id := parse.IAL2Map(attrs)["id"]
+	if !ast.IsNodeIDPattern(id) {
+		return ""
+	}
+	return id
+}
+
 // 同目录临时文件写入完成后替换，写入失败时保留原模板。
 func writeTemplateSource(root *os.Root, p, content string, create bool) error {
 	if !utf8.ValidString(content) {
@@ -263,7 +282,14 @@ func ManageTemplateFiles(request TemplateFileRequest) (ret any, err error) {
 			return map[string]string{"content": "", "revision": revision}, readErr
 		}
 		content, readErr := readTemplateSource(root, request.Path)
-		return map[string]string{"content": content, "revision": fmt.Sprintf("%x", sha256.Sum256([]byte(content))), "path": filepath.Join(util.DataDir, "templates", filepath.FromSlash(request.Path))}, readErr
+		if readErr != nil {
+			return nil, readErr
+		}
+		ret := map[string]string{"content": content, "revision": fmt.Sprintf("%x", sha256.Sum256([]byte(content))), "path": filepath.Join(util.DataDir, "templates", filepath.FromSlash(request.Path))}
+		if id := templateSourceDocumentID(content); id != "" {
+			ret["sourceDocID"] = id
+		}
+		return ret, nil
 	}
 	if info != nil {
 		revision, revisionErr := templateFileRevision(root, request.Path)

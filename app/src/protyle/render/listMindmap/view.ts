@@ -47,6 +47,7 @@ export interface ListMindmapViewOptions {
     onTabTaskToggle?: (id: string, itemId: string) => void;
     onTabTaskMenu?: (id: string, itemId: string, anchor: HTMLElement) => void;
     isTaskCycle?: (event: KeyboardEvent) => boolean;
+    isTaskCompletionToggle?: (event: KeyboardEvent) => boolean;
     onUndo?: () => void;
     onRedo?: () => void;
     onNodeStyle?: (id: string, patch: Partial<ListMindmapNodeStyle>) => void;
@@ -756,7 +757,7 @@ export class ListMindmapView {
                 element.hidden = !position;
                 if (position) {
                     element.style.left = `${position.x}px`;
-                    element.style.top = `${position.y - 1}px`;
+                    element.style.top = `${position.y - (id === this.model.root.id ? 1 : 3)}px`;
                 }
             });
             // 编辑、折叠或调整路径时固定操作节点，避免整棵树随布局边界跳动。
@@ -1101,9 +1102,19 @@ export class ListMindmapView {
         const theme = getComputedStyle(this.options.host);
         const defaultLine = theme.getPropertyValue("--b3-border-color").trim() || "#a8adb5";
         const primary = theme.getPropertyValue("--b3-theme-primary").trim() || "#3574f0";
+        const readLineStyles = (type: "line" | "relation") => ["", "hover-", "selected-"].map(state => {
+            const prefix = `--b3-list-mindmap-${type}-${state}`;
+            const width = Number(theme.getPropertyValue(`${prefix}width`).trim().replace(/px$/, ""));
+            return {
+                color: theme.getPropertyValue(`${prefix}color`).trim(),
+                width: Number.isFinite(width) && width > 0 ? width : undefined,
+            };
+        });
+        const lineStyles = readLineStyles("line");
+        const relationStyles = readLineStyles("relation");
         const colors = new Map<string, string>();
         const resolveColor = (value: string, fallback: string) => {
-            const key = value || fallback;
+            const key = `${fallback}\n${value || ""}`;
             if (!colors.has(key)) {
                 this.colorProbe.style.color = fallback;
                 if (value) {
@@ -1131,9 +1142,14 @@ export class ListMindmapView {
             path.lineTo(to.x + to.width, endY);
             this.linePaths.push({id: edge.to, relation: false, path});
             context.beginPath();
-            context.strokeStyle = resolveColor(style.lineColor, defaultLine);
-            context.lineWidth = (style.lineWidth || 1.5) + (this.selectedEdge === edge.to ? 1 : 0) +
-                (this.hoveredLine === `edge:${edge.to}` ? 1.5 / this.scale : 0);
+            const selected = this.selectedEdge === edge.to;
+            const hovered = this.hoveredLine === `edge:${edge.to}`;
+            const baseColor = resolveColor(style.lineColor, resolveColor(lineStyles[0].color, defaultLine));
+            const baseWidth = style.lineWidth || lineStyles[0].width || 1.5;
+            // 选中状态优先于悬停状态，未配置状态样式时保留节点配色和随缩放调整的加粗效果。
+            const stateStyle = selected ? lineStyles[2] : hovered ? lineStyles[1] : undefined;
+            context.strokeStyle = resolveColor(stateStyle?.color, baseColor);
+            context.lineWidth = stateStyle?.width ?? baseWidth + (selected ? 1 : 0) + (hovered ? 1.5 / this.scale : 0);
             context.setLineDash(style.lineDash ? [6, 4] : []);
             context.stroke(path);
         });
@@ -1153,18 +1169,22 @@ export class ListMindmapView {
             const {path, end, previous, arrowSizeLimit, labelPoint} = route;
             this.linePaths.push({id: relation.id, relation: true, path, end});
             context.beginPath();
-            context.strokeStyle = resolveColor(relation.color, primary);
-            const emphasis = (relation.id === this.selectedRelation ? 1 : 0) +
-                (this.hoveredLine === `relation:${relation.id}` ? 1.5 / this.scale : 0);
-            context.lineWidth = (relation.width || 1.5) + emphasis;
-            element.classList.toggle("list-mindmap__relation--hover", this.hoveredLine === `relation:${relation.id}`);
+            const selected = relation.id === this.selectedRelation;
+            const hovered = this.hoveredLine === `relation:${relation.id}`;
+            const baseColor = resolveColor(relation.color, resolveColor(relationStyles[0].color, primary));
+            const baseWidth = relation.width || relationStyles[0].width || 1.5;
+            const stateStyle = selected ? relationStyles[2] : hovered ? relationStyles[1] : undefined;
+            context.strokeStyle = resolveColor(stateStyle?.color, baseColor);
+            context.lineWidth = stateStyle?.width ?? baseWidth + (selected ? 1 : 0) + (hovered ? 1.5 / this.scale : 0);
+            const emphasis = Math.max(0, context.lineWidth - baseWidth);
+            element.classList.toggle("list-mindmap__relation--hover", hovered);
             context.setLineDash(relation.dash === false ? [] : [5, 4]);
             context.stroke(path);
             context.setLineDash([]);
             context.beginPath();
             const direction = Math.atan2(end.y - previous.y, end.x - previous.x);
             // 短线上的双向箭头预留间隙，避免合并成菱形。
-            const arrowSize = Math.min(Math.max(7 / this.scale, (relation.width || 1.5) * 2), arrowSizeLimit);
+            const arrowSize = Math.min(Math.max(7 / this.scale, baseWidth * 2), arrowSizeLimit);
             // 箭头随线条状态加宽，保持长度不变以保留双向箭头之间的间隙。
             const halfWidth = arrowSize / 2 + emphasis / 2;
             const baseX = end.x - arrowSize * Math.cos(Math.PI / 6) * Math.cos(direction);
@@ -1180,11 +1200,11 @@ export class ListMindmapView {
                 element.style.top = `${labelPoint.y}px`;
             }
         });
-        this.drawRelationPreview(context, primary);
+        this.drawRelationPreview(context, resolveColor(relationStyles[0].color, primary), relationStyles[0].width || 1.5);
         this.renderRouteControls();
     }
 
-    private drawRelationPreview(context: CanvasRenderingContext2D, color: string) {
+    private drawRelationPreview(context: CanvasRenderingContext2D, color: string, width: number) {
         const from = this.positions.get(this.relationFrom);
         if (!from || !this.relationPreview) {
             return;
@@ -1199,12 +1219,12 @@ export class ListMindmapView {
         const {path, end, previous, arrowSizeLimit} = route;
         context.beginPath();
         context.strokeStyle = color;
-        context.lineWidth = 1.5;
+        context.lineWidth = width;
         context.setLineDash([5, 4]);
         context.stroke(path);
         context.setLineDash([]);
         context.beginPath();
-        const size = Math.min(Math.max(7 / this.scale, 3), arrowSizeLimit);
+        const size = Math.min(Math.max(7 / this.scale, width * 2), arrowSizeLimit);
         const direction = Math.atan2(end.y - previous.y, end.x - previous.x);
         context.fillStyle = color;
         context.moveTo(end.x - size * Math.cos(direction - Math.PI / 6), end.y - size * Math.sin(direction - Math.PI / 6));
@@ -1962,7 +1982,8 @@ export class ListMindmapView {
         if (this.pointer?.relation && event.key !== "Escape") {
             return;
         }
-        if (!this.options.readOnly && this.options.isTaskCycle?.(event)) {
+        const isTaskCompletionToggle = this.options.isTaskCompletionToggle?.(event);
+        if (!this.options.readOnly && (isTaskCompletionToggle || this.options.isTaskCycle?.(event))) {
             const id = target.closest<HTMLElement>(".list-mindmap__node")?.dataset.mindmapId || this.selectedId;
             if (this.model.nodes.get(id)?.taskMarker !== undefined) {
                 event.preventDefault();
@@ -1970,7 +1991,7 @@ export class ListMindmapView {
                 if (!event.repeat) {
                     this.finishThen(() => {
                         if (!this.options.readOnly) {
-                            this.options.onTaskToggle?.(id, true);
+                            this.options.onTaskToggle?.(id, !isTaskCompletionToggle);
                         }
                     });
                 }

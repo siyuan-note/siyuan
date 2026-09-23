@@ -254,6 +254,10 @@ export type AVCalendarSettings = { "colorKeyID": string; "dateKeyID": string; "r
 
 export type AVCalendarSettingsInput = { "colorKeyID": string; "dateKeyID": string; "rowLimit"?: number; "weekStart": number; };
 
+export type AVCalendarUndatedData = { "rows": Array<AVTableRow | null> | null; "total": number; };
+
+export type AVCalendarUndatedRequestInput = { "blockID"?: string | null; "id": string; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "search"?: string | null; "viewID": string; };
+
 export type AVCardCoverPosition = { "image": string; "x": number; "y": number; };
 
 export type AVCardCoverPositionInput = { "image"?: string | null; "x"?: number | null; "y"?: number | null; };
@@ -2172,7 +2176,7 @@ export type TemplateFileRequestInput = { "action"?: string; "content"?: string; 
 
 export type TemplateFileRevision = { "revision": string; };
 
-export type TemplateFileSource = { "content": string; "path"?: string; "revision": string; };
+export type TemplateFileSource = { "content": string; "path"?: string; "revision": string; "sourceDocID"?: string; };
 
 export type TemplatePlan = { "count": number; "id": string; "nodes": Array<TemplatePlanNode | null> | null; };
 
@@ -2870,6 +2874,11 @@ export interface APIPOSTRoutes {
     "/api/av/getAttributeViewBoundBlockIDsByItemIDs": {
         request: GetAttributeViewBoundBlockIDsByItemIDsRequestInput;
         response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewCalendarUndated": {
+        request: AVCalendarUndatedRequestInput;
+        response: { "code": 0; "data": AVCalendarUndatedData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/av/getAttributeViewFieldViews": {
@@ -5515,7 +5524,7 @@ export interface APIPOSTRoutes {
     };
     "/api/template/manage": {
         request: TemplateFileRequestInput;
-        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | (TemplateFileRevision & { "content"?: never; "path"?: never; }) | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | (TemplateFileRevision & { "content"?: never; "path"?: never; "sourceDocID"?: never; }) | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
     };
     "/api/template/render": {

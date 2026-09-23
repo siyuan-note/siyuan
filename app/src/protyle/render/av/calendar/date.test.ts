@@ -1,6 +1,7 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {addCalendarDays, calendarDayDistance, getCalendarInterval, getCalendarRange, moveCalendarDate,
+import {addCalendarDays, calendarDayDistance, getCalendarInterval, getCalendarRange, getISOWeek,
+    getISOWeekForCalendarRow, getISOWeeksInYear, getISOWeekThursday, moveCalendarDate,
     packCalendarWeek, resizeCalendarDate} from "./date";
 
 const day = (date: string) => new Date(`${date}T00:00:00`).getTime();
@@ -69,6 +70,33 @@ test("calendar month boundaries stay at local midnight across daylight saving ch
             delete process.env.TZ;
         } else {
             process.env.TZ = previous;
+        }
+    }
+});
+
+test("ISO weeks keep their week year across calendar years and reject absent week 53", () => {
+    assert.deepEqual(getISOWeek(day("2027-01-01")), {year: 2026, week: 53});
+    assert.deepEqual(getISOWeek(day("2021-01-01")), {year: 2020, week: 53});
+    assert.deepEqual(getISOWeek(day("2019-12-30")), {year: 2020, week: 1});
+    assert.equal(getISOWeeksInYear(2026), 53);
+    assert.equal(getISOWeeksInYear(2027), 52);
+    assert.equal(getISOWeekThursday(2026, 53), day("2026-12-31"));
+    assert.equal(getISOWeekThursday(2020, 1), day("2020-01-02"));
+    assert.equal(getISOWeekThursday(2027, 53), undefined);
+    assert.equal(getISOWeekThursday(0, 1), undefined);
+    assert.equal(getISOWeekThursday(10000, 1), undefined);
+    assert.equal(getISOWeekThursday(2026, 1.5), undefined);
+});
+
+test("each displayed week has one ISO Thursday for every week start", () => {
+    for (let weekStart = 0; weekStart < 7; weekStart++) {
+        const range = getCalendarRange(day("2027-01-01"), "week", weekStart);
+        assert.deepEqual(getISOWeekForCalendarRow(range.start),
+            weekStart === 5 ? {year: 2027, week: 1} : {year: 2026, week: 53});
+    }
+    for (const year of [1, 99, 100, 2020, 2026, 2027, 9999]) {
+        for (let week = 1; week <= getISOWeeksInYear(year); week++) {
+            assert.deepEqual(getISOWeek(getISOWeekThursday(year, week)), {year, week});
         }
     }
 });

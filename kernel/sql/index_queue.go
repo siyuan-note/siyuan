@@ -19,6 +19,7 @@ package sql
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -107,6 +108,9 @@ func appendToIndexQueue(op *dbQueueOperation) {
 }
 
 func dbOpToIndexEntry(op *dbQueueOperation) *indexEntry {
+	if op.recoveryEntry != nil {
+		return op.recoveryEntry
+	}
 	switch op.action {
 	case "upsert":
 		return &indexEntry{Action: "upsert", ID: op.upsertTree.ID, Box: op.upsertTree.Box, Path: op.upsertTree.Path}
@@ -123,7 +127,7 @@ func dbOpToIndexEntry(op *dbQueueOperation) *indexEntry {
 	case "delete":
 		return &indexEntry{Action: "delete", Box: op.removeTreeBox, Path: op.removeTreePath}
 	case "delete_id":
-		return &indexEntry{Action: "delete_id", ID: op.removeTreeID}
+		return &indexEntry{Action: "delete_id", ID: op.removeTreeID, Box: op.removeTreeBox}
 	case "delete_ids":
 		return &indexEntry{Action: "delete_ids", IDs: op.removeTreeIDs}
 	case "delete_box":
@@ -148,52 +152,25 @@ func clearIndexQueue(snapshotSize int64) {
 
 	indexQueuePath := filepath.Join(util.QueueDir, "index.queue")
 
-	var preserved []indexEntry
-	fi, err := os.Stat(indexQueuePath)
-	if err == nil && fi.Size() > snapshotSize {
-		preserved = readIndexEntriesFrom(indexQueuePath, snapshotSize)
-	}
-
-	f, err := os.Create(indexQueuePath)
+	data, err := os.ReadFile(indexQueuePath)
 	if err != nil {
-		logging.LogErrorf("create index queue file failed: %s", err)
-		return
-	}
-
-	newSize := int64(0)
-	for _, e := range preserved {
-		data, _ := json.Marshal(e)
-		data = append(data, '\n')
-		n, _ := f.Write(data)
-		newSize += int64(n)
-	}
-	f.Close()
-	indexQueueSize.Store(newSize)
-}
-
-func readIndexEntriesFrom(indexQueuePath string, offset int64) (entries []indexEntry) {
-	f, err := os.Open(indexQueuePath)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-
-	if _, err = f.Seek(offset, 0); err != nil {
-		return
-	}
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := scanner.Bytes()
-		if 0 == len(line) {
-			continue
+		if os.IsNotExist(err) && snapshotSize == 0 {
+			return
 		}
-		var entry indexEntry
-		if nil == json.Unmarshal(line, &entry) {
-			entries = append(entries, entry)
-		}
+		logging.LogErrorf("read index queue file failed: %s", err)
+		return
 	}
-	return
+	if snapshotSize < 0 || snapshotSize > int64(len(data)) {
+		logging.LogErrorf("invalid index queue snapshot [%d/%d]", snapshotSize, len(data))
+		return
+	}
+	// 安全移除已提交的前缀，保留刷新期间追加的原始记录，写入失败时原队列仍可恢复。
+	remaining := data[snapshotSize:]
+	if err = gulu.File.WriteFileSafer(indexQueuePath, remaining, 0644); err != nil {
+		logging.LogErrorf("save index queue failed: %s", err)
+		return
+	}
+	indexQueueSize.Store(int64(len(remaining)))
 }
 
 func clearIndexQueueEntries() {
@@ -253,14 +230,13 @@ func recoverIndexQueue() {
 
 	logging.LogInfof("recovering [%d] index queue operations", len(entries))
 
-	luteEngine := lute.New()
 	dbQueueLock.Lock()
 	for _, e := range entries {
-		op := indexEntryToOp(e, luteEngine, "recover index queue")
-		if nil == op {
-			continue
-		}
-		operationQueue = append(operationQueue, op)
+		// 只恢复操作描述，执行时再读取文档，避免启动时同时持有所有文档树。
+		entry := e
+		operationQueue = append(operationQueue, &dbQueueOperation{
+			action: e.Action, box: e.Box, id: e.ID, recoveryEntry: &entry, inQueueTime: time.Now(),
+		})
 	}
 	dbQueueLock.Unlock()
 
@@ -268,66 +244,66 @@ func recoverIndexQueue() {
 	logging.LogInfof("recovered [%d] index queue operations, will be flushed soon", len(entries))
 }
 
-func indexEntryToOp(e indexEntry, luteEngine *lute.Lute, prefix string) *dbQueueOperation {
+func indexEntryToOp(e indexEntry, luteEngine *lute.Lute, prefix string) (*dbQueueOperation, error) {
 	switch e.Action {
 	case "upsert":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
 			logIndexEntryLoadError(prefix, "upsert", e, err)
-			return nil
+			return nil, err
 		}
-		return &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "upsert"}
+		return &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "upsert"}, nil
 	case "index":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
 			logIndexEntryLoadError(prefix, "index", e, err)
-			return nil
+			return nil, err
 		}
-		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "index"}
+		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "index", recoveredIndex: true}, nil
 	case "rename", "rename_doc":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
 			logIndexEntryLoadError(prefix, "rename", e, err)
-			return nil
+			return nil, err
 		}
-		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: e.Action}
+		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: e.Action}, nil
 	case "move":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
 			logIndexEntryLoadError(prefix, "move", e, err)
-			return nil
+			return nil, err
 		}
-		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "move"}
+		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "move"}, nil
 	case "update_refs":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
 			logIndexEntryLoadError(prefix, "update_refs", e, err)
-			return nil
+			return nil, err
 		}
-		return &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "update_refs"}
+		return &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "update_refs"}, nil
 	case "delete_refs":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
 			logIndexEntryLoadError(prefix, "delete_refs", e, err)
-			return nil
+			return nil, err
 		}
-		return &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "delete_refs"}
+		return &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "delete_refs"}, nil
 	case "delete":
-		return &dbQueueOperation{removeTreeBox: e.Box, removeTreePath: e.Path, inQueueTime: time.Now(), action: "delete"}
+		return &dbQueueOperation{removeTreeBox: e.Box, removeTreePath: e.Path, inQueueTime: time.Now(), action: "delete"}, nil
 	case "delete_id":
-		return &dbQueueOperation{removeTreeID: e.ID, inQueueTime: time.Now(), action: "delete_id"}
+		return &dbQueueOperation{removeTreeBox: e.Box, removeTreeID: e.ID, inQueueTime: time.Now(), action: "delete_id"}, nil
 	case "delete_ids":
-		return &dbQueueOperation{removeTreeIDs: e.IDs, inQueueTime: time.Now(), action: "delete_ids"}
+		return &dbQueueOperation{removeTreeIDs: e.IDs, inQueueTime: time.Now(), action: "delete_ids"}, nil
 	case "delete_box":
-		return &dbQueueOperation{box: e.Box, inQueueTime: time.Now(), action: "delete_box"}
+		return &dbQueueOperation{box: e.Box, inQueueTime: time.Now(), action: "delete_box"}, nil
 	case "delete_box_refs":
-		return &dbQueueOperation{box: e.Box, inQueueTime: time.Now(), action: "delete_box_refs"}
+		return &dbQueueOperation{box: e.Box, inQueueTime: time.Now(), action: "delete_box_refs"}, nil
 	case "delete_assets":
-		return &dbQueueOperation{removeAssetHashes: e.Hashes, inQueueTime: time.Now(), action: "delete_assets"}
+		return &dbQueueOperation{removeAssetHashes: e.Hashes, inQueueTime: time.Now(), action: "delete_assets"}, nil
 	case "index_node":
-		return &dbQueueOperation{id: e.ID, box: e.Box, inQueueTime: time.Now(), action: "index_node"}
+		return &dbQueueOperation{id: e.ID, box: e.Box, inQueueTime: time.Now(), action: "index_node"}, nil
 	}
-	return nil
+	return nil, fmt.Errorf("unknown index queue action [%s]", e.Action)
 }
 
 func logIndexEntryLoadError(prefix, action string, entry indexEntry, err error) {

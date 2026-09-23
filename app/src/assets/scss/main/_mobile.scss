@@ -1241,6 +1241,21 @@ body.mobile-topbar--merged {
     }
   }
 
+  #syncProviderConfig .b3-label--inner,
+  .config-account__payment-status,
+  .config-account__payment-remaining,
+  .config-cloud-space {
+    font-size: 14px;
+  }
+
+  .config-cloud-space .b3-list-item__meta {
+    font-size: inherit;
+  }
+
+  .config-cloud-space__title {
+    font-size: 15px;
+  }
+
   .config-assets {
     display: flex;
     flex-direction: column;

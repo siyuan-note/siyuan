@@ -284,6 +284,19 @@ type RenderAttributeViewRequest struct {
 	TargetGroupID    string                    `json:"targetGroupID" api:"optional,nullable"`
 }
 
+// AVCalendarUndatedRequest 只读取普通日期字段为空的条目，不修改视图或数据库。
+// query 沿用当前视图搜索，search 仅匹配待安排条目的标题；页码从 1 开始，页大小默认 50，最大 100。
+// 端点仅供可编辑用户使用，并按 blockID 保持加密笔记本读取租约。
+type AVCalendarUndatedRequest struct {
+	ID       string   `json:"id"`
+	BlockID  string   `json:"blockID" api:"optional,nullable"`
+	ViewID   string   `json:"viewID"`
+	Query    string   `json:"query" api:"optional,nullable"`
+	Search   string   `json:"search" api:"optional,nullable"`
+	Page     *float64 `json:"page" api:"optional,nullable"`
+	PageSize *float64 `json:"pageSize" api:"optional,nullable"`
+}
+
 type GetCurrentAttrViewImagesRequest struct {
 	ID      string `json:"id"`
 	BlockID string `json:"blockID" api:"optional,nullable,ignoretype"`

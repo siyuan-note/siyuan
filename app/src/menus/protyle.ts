@@ -2464,7 +2464,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     otherMenus.push({id: "separator_1", type: "separator"});
-    const horizontalCells = alignWholeTable ? Array.from(tableElement.rows[0].cells) : [cellElement];
+    const horizontalCells = [cellElement];
     const alignmentMenus: IMenu[] = [{
         id: "alignLeft",
         icon: "iconAlignLeft",

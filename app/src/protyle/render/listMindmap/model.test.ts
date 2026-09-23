@@ -1138,6 +1138,84 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.update(model);
     check.equal(nodeElement(beta).style.backgroundColor, "", "default removes the node color override");
     check.equal(nodeElement(beta).style.color, "", "default removes the node text color override");
+    await settle();
+    const lineContext = host.querySelector("canvas").getContext("2d");
+    const themedEdge = view.edges[view.edges.length - 1].to;
+    const originalRootStyle = model.metadata.nodes[model.root.id];
+    const originalEdgeStyle = model.metadata.nodes[themedEdge];
+    const originalScale = view.scale;
+    const themedProperties = ["color", "width", "hover-color", "hover-width", "selected-color", "selected-width"];
+    const setLineTheme = (property: string, value: string) =>
+        host.style.setProperty(`--b3-list-mindmap-line-${property}`, value);
+    const checkLine = (color: string, width: number) => {
+        view.draw();
+        check.equal(lineContext.strokeStyle, color);
+        check.equal(lineContext.lineWidth, width);
+    };
+    model.metadata.nodes[model.root.id] = {};
+    model.metadata.nodes[themedEdge] = {};
+    view.clearSelection();
+    view.setHoveredLine();
+    host.style.setProperty("--b3-border-color", "#314159");
+    view.scale = 0.5;
+    checkLine("#314159", 1.5);
+    view.setHoveredLine(`edge:${themedEdge}`);
+    checkLine("#314159", 4.5);
+    view.selectedEdge = themedEdge;
+    checkLine("#314159", 5.5);
+    view.setHoveredLine();
+    checkLine("#314159", 2.5);
+    view.clearSelection();
+    setLineTheme("color", "var(--b3-font-background1)");
+    setLineTheme("width", "2px");
+    checkLine("#334455", 2);
+    setLineTheme("hover-color", "#445566");
+    setLineTheme("hover-width", "4");
+    setLineTheme("selected-color", "#778899");
+    setLineTheme("selected-width", "6px");
+    view.setHoveredLine(`edge:${themedEdge}`);
+    checkLine("#445566", 4);
+    view.selectedEdge = themedEdge;
+    checkLine("#778899", 6);
+    view.setHoveredLine();
+    checkLine("#778899", 6);
+    view.clearSelection();
+    model.metadata.nodes[model.root.id] = {lineColor: "#aabbcc", lineWidth: 3};
+    checkLine("#aabbcc", 3);
+    model.metadata.nodes[themedEdge] = {lineColor: "#112233", lineWidth: 5};
+    checkLine("#112233", 5);
+    view.setHoveredLine(`edge:${themedEdge}`);
+    checkLine("#445566", 4);
+    setLineTheme("hover-color", "invalid-color");
+    for (const width of ["auto", "0", "-2", "Infinity", "2em", "3px-invalid"]) {
+        setLineTheme("hover-width", width);
+        checkLine("#112233", 8);
+    }
+    view.selectedEdge = themedEdge;
+    setLineTheme("selected-color", "initial");
+    setLineTheme("selected-width", "auto");
+    checkLine("#112233", 9);
+    view.clearSelection();
+    view.setHoveredLine();
+    model.metadata.nodes[model.root.id] = {};
+    model.metadata.nodes[themedEdge] = {};
+    setLineTheme("color", "invalid-color");
+    setLineTheme("width", "-1");
+    checkLine("#314159", 1.5);
+    view.scale = originalScale;
+    model.metadata.nodes[model.root.id] = originalRootStyle;
+    model.metadata.nodes[themedEdge] = originalEdgeStyle;
+    themedProperties.forEach(property => host.style.removeProperty(`--b3-list-mindmap-line-${property}`));
+    host.style.removeProperty("--b3-border-color");
+    view.draw();
+    const themedNodeBounds = nodeElement(themedEdge).getBoundingClientRect();
+    const themedPosition = view.positions.get(themedEdge);
+    const underlineY = viewport.getBoundingClientRect().top + view.offsetY +
+        (themedPosition.y + themedPosition.height) * view.scale;
+    check.ok(Math.abs(underlineY - themedNodeBounds.bottom - 3 * view.scale) < 0.1,
+        "node backgrounds leave a gap above their underline");
+    check.ok(Math.abs(centerPoint(addChildButton(themedEdge)).y - underlineY) <= view.scale + 1,
+        "node controls remain aligned with the underline");
     host.style.setProperty("--b3-font-background1", "#123456");
     model.metadata.nodes[model.root.id] = {lineColor: "var(--b3-font-background1)"};
     view.update(model);
@@ -1185,6 +1263,78 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.deepEqual(relationAdditions, [[beta, alpha]]);
     model.metadata.relations.push({id: "relation-test", from: alpha, to: beta, label: "Relation"});
     view.update(model);
+    await settle();
+    view.clearSelection();
+    view.setHoveredLine();
+    const relationScale = view.scale;
+    const primaryColor = host.style.getPropertyValue("--b3-theme-primary");
+    host.style.setProperty("--b3-theme-primary", "#123abc");
+    const setRelationTheme = (property: string, value: string) =>
+        host.style.setProperty(`--b3-list-mindmap-relation-${property}`, value);
+    const checkRelation = (color: string, width: number) => {
+        checkLine(color, width);
+        check.equal(lineContext.fillStyle, color, "relation arrows share the connector color");
+    };
+    view.scale = 0.5;
+    setLineTheme("color", "#abcdef");
+    setLineTheme("width", "9");
+    checkRelation("#123abc", 1.5);
+    view.setHoveredLine("relation:relation-test");
+    checkRelation("#123abc", 4.5);
+    view.selectedRelation = "relation-test";
+    checkRelation("#123abc", 5.5);
+    view.setHoveredLine();
+    checkRelation("#123abc", 2.5);
+    view.clearSelection();
+    setRelationTheme("color", "var(--b3-font-background1)");
+    setRelationTheme("width", "2px");
+    checkRelation("#123456", 2);
+    setRelationTheme("hover-color", "#445566");
+    setRelationTheme("hover-width", "4");
+    setRelationTheme("selected-color", "#778899");
+    setRelationTheme("selected-width", "6px");
+    view.setHoveredLine("relation:relation-test");
+    checkRelation("#445566", 4);
+    view.selectedRelation = "relation-test";
+    checkRelation("#778899", 6);
+    view.setHoveredLine();
+    checkRelation("#778899", 6);
+    view.clearSelection();
+    const themedRelation = model.metadata.relations[0];
+    themedRelation.color = "#aabbcc";
+    themedRelation.width = 3;
+    checkRelation("#aabbcc", 3);
+    view.setHoveredLine("relation:relation-test");
+    checkRelation("#445566", 4);
+    setRelationTheme("hover-color", "invalid-color");
+    for (const width of ["auto", "0", "-2", "Infinity", "2em", "3px-invalid"]) {
+        setRelationTheme("hover-width", width);
+        checkRelation("#aabbcc", 6);
+    }
+    view.selectedRelation = "relation-test";
+    setRelationTheme("selected-color", "initial");
+    setRelationTheme("selected-width", "auto");
+    checkRelation("#aabbcc", 7);
+    view.clearSelection();
+    view.setHoveredLine();
+    view.relationFrom = alpha;
+    view.relationPreview = {targetId: beta};
+    checkRelation("#123456", 2);
+    setRelationTheme("color", "invalid-color");
+    setRelationTheme("width", "-1");
+    checkRelation("#123abc", 1.5);
+    view.relationFrom = undefined;
+    view.relationPreview = undefined;
+    delete themedRelation.color;
+    delete themedRelation.width;
+    checkRelation("#123abc", 1.5);
+    view.scale = relationScale;
+    themedProperties.forEach(property => {
+        host.style.removeProperty(`--b3-list-mindmap-line-${property}`);
+        host.style.removeProperty(`--b3-list-mindmap-relation-${property}`);
+    });
+    host.style.setProperty("--b3-theme-primary", primaryColor);
+    view.draw();
     host.querySelector<HTMLButtonElement>(".list-mindmap__relation").click();
     const relationElement = host.querySelector<HTMLElement>(".list-mindmap__relation");
     relationElement.dispatchEvent(new PointerEvent("pointerover", {bubbles: true}));
@@ -2170,6 +2320,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         onRelationAdd: () => check.fail("Task control created a relation"),
         finishEdit: () => finishTask, onTaskMenu: () => menus++,
         isTaskCycle: (event: KeyboardEvent) => event.ctrlKey && event.key === "l",
+        isTaskCompletionToggle: (event: KeyboardEvent) => event.ctrlKey && event.key === "k",
         onTaskToggle: (id: string, cycle: boolean) => controller.setTask(id,
             cycle ? taskAPI.nextTaskListStatus : taskAPI.nextTaskListMarker)});
     const controller = Object.assign(new taskAPI.TaskController(), {owner, list: taskList, disposed: false,
@@ -2259,6 +2410,27 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     taskButton().dispatchEvent(new KeyboardEvent("keydown", {key: "l", ctrlKey: true, bubbles: true, cancelable: true}));
     await controller.taskChanges;
     check.equal(taskItem.dataset.task, "/");
+    for (const [marker, expected] of [[" ", "X"], ["/", "X"], ["X", " "], ["-", " "], ["?", " "]]) {
+        taskAPI.setTaskListItemMarker(owner, taskItem, marker);
+        controller.refresh();
+        const event = new KeyboardEvent("keydown", {key: "k", ctrlKey: true, bubbles: true, cancelable: true});
+        taskButton().dispatchEvent(event);
+        await controller.taskChanges;
+        check.equal(event.defaultPrevented, true);
+        check.equal(taskItem.dataset.task, expected);
+    }
+    const completedOperations = operations.length;
+    for (const readonly of [false, true]) {
+        taskView.setReadOnly(readonly);
+        taskButton().dispatchEvent(new KeyboardEvent("keydown", {
+            key: "k", ctrlKey: true, repeat: !readonly, bubbles: true, cancelable: true,
+        }));
+        await controller.taskChanges;
+        check.equal(operations.length, completedOperations);
+    }
+    taskView.setReadOnly(false);
+    taskAPI.setTaskListItemMarker(owner, taskItem, "/");
+    controller.refresh();
     taskButton().dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     check.equal(taskEdits, 0);
     finishTask = false;

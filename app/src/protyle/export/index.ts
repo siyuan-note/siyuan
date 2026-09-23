@@ -908,6 +908,7 @@ ${getIconScript(servePath)}
             const dialogOptions = {
                 cmd: "showOpenDialog",
                 title: "${window.siyuan.languages.export} PDF",
+                buttonLabel: ${JSON.stringify(window.siyuan.languages.save)},
                 properties: ["createDirectory", "openDirectory"],
             };
             if (defaultPath) {

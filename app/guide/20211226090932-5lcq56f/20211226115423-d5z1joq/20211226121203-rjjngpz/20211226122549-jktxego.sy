@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260923212237"
+		"updated": "20260923221935"
 	},
 	"Children": [
 		{
@@ -11934,7 +11934,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-qj1o02k",
-				"updated": "20260923083553"
+				"updated": "20260923221935"
 			},
 			"Children": [
 				{
@@ -12218,7 +12218,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "待辦和進行中切換為完成，其他狀態切換為待辦；適用於編輯器和列表心智圖；可在 "
+									"Data": "待辦和進行中切換為完成，其他狀態切換為待辦；適用於編輯器和心智圖區塊；可在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12365,13 +12365,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20260921221035"
+				"updated": "20260923221935"
 			},
 			"HeadingLevel": 3,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "心智圖"
+					"Data": "心智圖區塊"
 				}
 			]
 		},

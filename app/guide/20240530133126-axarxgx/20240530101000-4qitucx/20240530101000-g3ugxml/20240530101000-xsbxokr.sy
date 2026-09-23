@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260923212237"
+		"updated": "20260923221935"
 	},
 	"Children": [
 		{
@@ -11888,7 +11888,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-wqr5cs1",
-				"updated": "20260923083553"
+				"updated": "20260923221935"
 			},
 			"Children": [
 				{
@@ -12176,7 +12176,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "未着手と進行中は完了に、その他の状態は未着手に切り替えます。エディターとリストのマインドマップで使用できます。"
+									"Data": "未着手と進行中は完了に、その他の状態は未着手に切り替えます。エディターとマインドマップブロックで使用できます。"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12323,13 +12323,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-icqlkb6",
-				"updated": "20260921221035"
+				"updated": "20260923221935"
 			},
 			"HeadingLevel": 3,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "マインドマップ"
+					"Data": "マインドマップブロック"
 				}
 			]
 		},

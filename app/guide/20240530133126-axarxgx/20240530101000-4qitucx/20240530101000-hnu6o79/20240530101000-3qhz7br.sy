@@ -1,6 +1,6 @@
 {
 	"ID": "20240530101000-3qhz7br",
-	"Spec": "3",
+	"Spec": "5",
 	"Type": "NodeDocument",
 	"Properties": {
 		"ID": "20240530101000-rgsbrsc",
@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260921213529"
+		"updated": "20260923221935"
 	},
 	"Children": [
 		{
@@ -2044,23 +2044,22 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20260921213529"
+				"updated": "20260923221935"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "マインドマップ"
+					"Data": "マインドマップブロック"
 				}
 			]
 		},
 		{
 			"ID": "20240530101000-lrwpxpq",
-			"Type": "NodeList",
+			"Type": "NodeMindmap",
 			"Properties": {
 				"ID": "20240530101000-xheni2b",
 				"id": "20240530101000-lrwpxpq",
-				"updated": "20260921102009",
-				"custom-sy-list-mindmap": "1",
+				"updated": "20260923221935",
 				"custom-sy-list-mindmap-data": "{\"version\":1,\"nodes\":{},\"relations\":[]}"
 			},
 			"ListData": {
@@ -2072,10 +2071,10 @@
 			"Children": [
 				{
 					"ID": "20260920131944-fxnbecl",
-					"Type": "NodeListItem",
+					"Type": "NodeMindmapItem",
 					"Properties": {
 						"id": "20260920131944-fxnbecl",
-						"updated": "20260921102009"
+						"updated": "20260923221935"
 					},
 					"ListData": {
 						"Typ": 0,
@@ -2101,10 +2100,10 @@
 				},
 				{
 					"ID": "20260920131944-tivsbcd",
-					"Type": "NodeListItem",
+					"Type": "NodeMindmapItem",
 					"Properties": {
 						"id": "20260920131944-tivsbcd",
-						"updated": "20260921102009"
+						"updated": "20260923221935"
 					},
 					"ListData": {
 						"Typ": 0,
@@ -2128,10 +2127,10 @@
 						},
 						{
 							"ID": "20260920131944-8lzxm29",
-							"Type": "NodeList",
+							"Type": "NodeMindmap",
 							"Properties": {
 								"id": "20260920131944-8lzxm29",
-								"updated": "20260921102009"
+								"updated": "20260923221935"
 							},
 							"ListData": {
 								"Typ": 0,
@@ -2142,10 +2141,10 @@
 							"Children": [
 								{
 									"ID": "20260920131944-k7z53iz",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-k7z53iz",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2171,10 +2170,10 @@
 								},
 								{
 									"ID": "20260920131944-24y9af6",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-24y9af6",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2200,10 +2199,10 @@
 								},
 								{
 									"ID": "20260920131944-0d4drz3",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-0d4drz3",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2227,10 +2226,10 @@
 										},
 										{
 											"ID": "20260920131944-xz2el6g",
-											"Type": "NodeList",
+											"Type": "NodeMindmap",
 											"Properties": {
 												"id": "20260920131944-xz2el6g",
-												"updated": "20260921102009"
+												"updated": "20260923221935"
 											},
 											"ListData": {
 												"Typ": 0,
@@ -2241,10 +2240,10 @@
 											"Children": [
 												{
 													"ID": "20260920131944-zp3k4g1",
-													"Type": "NodeListItem",
+													"Type": "NodeMindmapItem",
 													"Properties": {
 														"id": "20260920131944-zp3k4g1",
-														"updated": "20260921102009"
+														"updated": "20260923221935"
 													},
 													"ListData": {
 														"Typ": 0,
@@ -2274,10 +2273,10 @@
 								},
 								{
 									"ID": "20260920131944-btnkm0h",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-btnkm0h",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2301,10 +2300,10 @@
 										},
 										{
 											"ID": "20260920131944-fx4s3uk",
-											"Type": "NodeList",
+											"Type": "NodeMindmap",
 											"Properties": {
 												"id": "20260920131944-fx4s3uk",
-												"updated": "20260921102009"
+												"updated": "20260923221935"
 											},
 											"ListData": {
 												"Typ": 0,
@@ -2315,10 +2314,10 @@
 											"Children": [
 												{
 													"ID": "20260920131944-cerwn1v",
-													"Type": "NodeListItem",
+													"Type": "NodeMindmapItem",
 													"Properties": {
 														"id": "20260920131944-cerwn1v",
-														"updated": "20260921102009"
+														"updated": "20260923221935"
 													},
 													"ListData": {
 														"Typ": 0,
@@ -2342,10 +2341,10 @@
 														},
 														{
 															"ID": "20260920131944-f1269cs",
-															"Type": "NodeList",
+															"Type": "NodeMindmap",
 															"Properties": {
 																"id": "20260920131944-f1269cs",
-																"updated": "20260921102009"
+																"updated": "20260923221935"
 															},
 															"ListData": {
 																"Typ": 0,
@@ -2356,10 +2355,10 @@
 															"Children": [
 																{
 																	"ID": "20260920131944-72s0v80",
-																	"Type": "NodeListItem",
+																	"Type": "NodeMindmapItem",
 																	"Properties": {
 																		"id": "20260920131944-72s0v80",
-																		"updated": "20260921102009"
+																		"updated": "20260923221935"
 																	},
 																	"ListData": {
 																		"Typ": 0,
@@ -2383,10 +2382,10 @@
 																		},
 																		{
 																			"ID": "20260920131944-92l9ke8",
-																			"Type": "NodeList",
+																			"Type": "NodeMindmap",
 																			"Properties": {
 																				"id": "20260920131944-92l9ke8",
-																				"updated": "20260921102009"
+																				"updated": "20260923221935"
 																			},
 																			"ListData": {
 																				"Typ": 0,
@@ -2397,10 +2396,10 @@
 																			"Children": [
 																				{
 																					"ID": "20260920131944-8x0hgje",
-																					"Type": "NodeListItem",
+																					"Type": "NodeMindmapItem",
 																					"Properties": {
 																						"id": "20260920131944-8x0hgje",
-																						"updated": "20260921102009"
+																						"updated": "20260923221935"
 																					},
 																					"ListData": {
 																						"Typ": 0,
@@ -2438,10 +2437,10 @@
 								},
 								{
 									"ID": "20260920131944-zyq95qw",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-zyq95qw",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2467,10 +2466,10 @@
 								},
 								{
 									"ID": "20260920131944-w2vou8e",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-w2vou8e",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2494,10 +2493,10 @@
 										},
 										{
 											"ID": "20260920131944-i0kv322",
-											"Type": "NodeList",
+											"Type": "NodeMindmap",
 											"Properties": {
 												"id": "20260920131944-i0kv322",
-												"updated": "20260921102009"
+												"updated": "20260923221935"
 											},
 											"ListData": {
 												"Typ": 0,
@@ -2508,10 +2507,10 @@
 											"Children": [
 												{
 													"ID": "20260920131944-87428op",
-													"Type": "NodeListItem",
+													"Type": "NodeMindmapItem",
 													"Properties": {
 														"id": "20260920131944-87428op",
-														"updated": "20260921102009"
+														"updated": "20260923221935"
 													},
 													"ListData": {
 														"Typ": 0,
@@ -2537,10 +2536,10 @@
 												},
 												{
 													"ID": "20260920131944-pnwvlsz",
-													"Type": "NodeListItem",
+													"Type": "NodeMindmapItem",
 													"Properties": {
 														"id": "20260920131944-pnwvlsz",
-														"updated": "20260921102009"
+														"updated": "20260923221935"
 													},
 													"ListData": {
 														"Typ": 0,
@@ -2564,10 +2563,10 @@
 														},
 														{
 															"ID": "20260920131944-27sp95n",
-															"Type": "NodeList",
+															"Type": "NodeMindmap",
 															"Properties": {
 																"id": "20260920131944-27sp95n",
-																"updated": "20260921102009"
+																"updated": "20260923221935"
 															},
 															"ListData": {
 																"Typ": 0,
@@ -2578,10 +2577,10 @@
 															"Children": [
 																{
 																	"ID": "20260920131944-trno8o3",
-																	"Type": "NodeListItem",
+																	"Type": "NodeMindmapItem",
 																	"Properties": {
 																		"id": "20260920131944-trno8o3",
-																		"updated": "20260921102009"
+																		"updated": "20260923221935"
 																	},
 																	"ListData": {
 																		"Typ": 0,
@@ -2607,10 +2606,10 @@
 																},
 																{
 																	"ID": "20260920131944-gkne8ce",
-																	"Type": "NodeListItem",
+																	"Type": "NodeMindmapItem",
 																	"Properties": {
 																		"id": "20260920131944-gkne8ce",
-																		"updated": "20260921102009"
+																		"updated": "20260923221935"
 																	},
 																	"ListData": {
 																		"Typ": 0,
@@ -2644,10 +2643,10 @@
 								},
 								{
 									"ID": "20260920131944-qr3jo02",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-qr3jo02",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2671,10 +2670,10 @@
 										},
 										{
 											"ID": "20260920131944-ssi9lhg",
-											"Type": "NodeList",
+											"Type": "NodeMindmap",
 											"Properties": {
 												"id": "20260920131944-ssi9lhg",
-												"updated": "20260921102009"
+												"updated": "20260923221935"
 											},
 											"ListData": {
 												"Typ": 0,
@@ -2685,10 +2684,10 @@
 											"Children": [
 												{
 													"ID": "20260920131944-zdigrkk",
-													"Type": "NodeListItem",
+													"Type": "NodeMindmapItem",
 													"Properties": {
 														"id": "20260920131944-zdigrkk",
-														"updated": "20260921102009"
+														"updated": "20260923221935"
 													},
 													"ListData": {
 														"Typ": 0,
@@ -2714,10 +2713,10 @@
 												},
 												{
 													"ID": "20260920131944-z6trqgt",
-													"Type": "NodeListItem",
+													"Type": "NodeMindmapItem",
 													"Properties": {
 														"id": "20260920131944-z6trqgt",
-														"updated": "20260921102009"
+														"updated": "20260923221935"
 													},
 													"ListData": {
 														"Typ": 0,
@@ -2743,10 +2742,10 @@
 												},
 												{
 													"ID": "20260920131944-9r2zkhb",
-													"Type": "NodeListItem",
+													"Type": "NodeMindmapItem",
 													"Properties": {
 														"id": "20260920131944-9r2zkhb",
-														"updated": "20260921102009"
+														"updated": "20260923221935"
 													},
 													"ListData": {
 														"Typ": 0,
@@ -2776,10 +2775,10 @@
 								},
 								{
 									"ID": "20260920131944-wsm0xtj",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-wsm0xtj",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2805,10 +2804,10 @@
 								},
 								{
 									"ID": "20260920131944-vagbu7q",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-vagbu7q",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2834,10 +2833,10 @@
 								},
 								{
 									"ID": "20260920131944-jttg9rl",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-jttg9rl",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2863,10 +2862,10 @@
 								},
 								{
 									"ID": "20260920131944-bf6bdo8",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-bf6bdo8",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2892,10 +2891,10 @@
 								},
 								{
 									"ID": "20260920131944-kxf2ljj",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-kxf2ljj",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2921,10 +2920,10 @@
 								},
 								{
 									"ID": "20260920131944-xsqawxu",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-xsqawxu",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2937,12 +2936,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260920131944-z3axxv2",
-												"updated": "20260921102009"
+												"updated": "20260923221935"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "マインドマップ"
+													"Data": "マインドマップブロック"
 												}
 											]
 										}
@@ -2950,10 +2949,10 @@
 								},
 								{
 									"ID": "20260920131944-cgykgo9",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-cgykgo9",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -2979,10 +2978,10 @@
 								},
 								{
 									"ID": "20260920131944-xcnae2c",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-xcnae2c",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -3008,10 +3007,10 @@
 								},
 								{
 									"ID": "20260920131944-90uz9yk",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-90uz9yk",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -3037,10 +3036,10 @@
 								},
 								{
 									"ID": "20260920131944-iojxjbo",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-iojxjbo",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -3066,10 +3065,10 @@
 								},
 								{
 									"ID": "20260920131944-llpzjlo",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-llpzjlo",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -3095,10 +3094,10 @@
 								},
 								{
 									"ID": "20260920131944-fsc4970",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-fsc4970",
-										"updated": "20260920131944"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -3124,10 +3123,10 @@
 								},
 								{
 									"ID": "20260920131944-pm0ry2p",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-pm0ry2p",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -3153,10 +3152,10 @@
 								},
 								{
 									"ID": "20260920131944-eugd55s",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-eugd55s",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,
@@ -3182,10 +3181,10 @@
 								},
 								{
 									"ID": "20260920131944-aulmuns",
-									"Type": "NodeListItem",
+									"Type": "NodeMindmapItem",
 									"Properties": {
 										"id": "20260920131944-aulmuns",
-										"updated": "20260921102009"
+										"updated": "20260923221935"
 									},
 									"ListData": {
 										"Typ": 0,

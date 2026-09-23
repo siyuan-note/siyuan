@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20260921215916"
+		"updated": "20260923221935"
 	},
 	"Children": [
 		{
@@ -64,7 +64,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210104091538-le8t1ci",
-				"updated": "20260921215916"
+				"updated": "20260923221935"
 			},
 			"Children": [
 				{
@@ -924,7 +924,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Mind map"
+									"Data": "Mind map block"
 								}
 							]
 						},
@@ -2533,12 +2533,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-r1kfene",
-				"updated": "20260921215916"
+				"updated": "20260923221935"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Mind map"
+					"Data": "Mind map block"
 				}
 			]
 		},
@@ -2547,12 +2547,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260921215248-t2cedml",
-				"updated": "20260921215916"
+				"updated": "20260923221935"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A mind map is a display mode for list blocks. Unordered lists, ordered lists, and task lists can be switched to mind map view. The block icon then changes to a mind map icon, while the content remains a list block."
+					"Data": "A mind map block is a dedicated block type. You can convert an unordered, ordered, or task list into a mind map block and convert it back to a list. Conversion preserves item content, numbering, and task states. Existing mind maps stored as lists are upgraded when their documents are opened for editing."
 				}
 			]
 		},

@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260923212237"
+		"updated": "20260923221935"
 	},
 	"Children": [
 		{
@@ -11922,7 +11922,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-yv5msrs",
-				"updated": "20260923083553"
+				"updated": "20260923221935"
 			},
 			"Children": [
 				{
@@ -12206,7 +12206,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "待办和进行中切换为完成，其他状态切换为待办；适用于编辑器和列表脑图；可在 "
+									"Data": "待办和进行中切换为完成，其他状态切换为待办；适用于编辑器和思维导图块；可在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12359,13 +12359,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20260921221035"
+				"updated": "20260923221935"
 			},
 			"HeadingLevel": 3,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思维导图"
+					"Data": "思维导图块"
 				}
 			]
 		},

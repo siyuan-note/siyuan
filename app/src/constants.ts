@@ -39,12 +39,10 @@ export abstract class Constants {
     public static readonly SIYUAN_EVENT: string = "siyuan-event";
     public static readonly SIYUAN_WINDOW_WORKSPACE_SAVED = "siyuan-window-workspace-saved";
 
-    // 新窗口布局操作
-    public static readonly WINDOW_WORKSPACE_SET = "setWindowWorkspace";
-    public static readonly WINDOW_WORKSPACE_FOCUS = "focusWindowWorkspace";
-    public static readonly WINDOW_WORKSPACE_GET_OPEN = "getOpenWindowWorkspaces";
-    public static readonly WINDOW_WORKSPACE_FLUSH_ALL = "flushWindowWorkspaces";
-    public static readonly WINDOW_WORKSPACE_FLUSH = "flushWindowWorkspace";
+    public static readonly SIYUAN_WINDOW_WORKSPACE_SET = "siyuan-window-workspace-set";
+    public static readonly SIYUAN_WINDOW_WORKSPACE_FOCUS = "siyuan-window-workspace-focus";
+    public static readonly SIYUAN_WINDOW_WORKSPACE_GET_OPEN = "siyuan-window-workspace-get-open";
+    public static readonly SIYUAN_WINDOW_WORKSPACE_FLUSH_ALL = "siyuan-window-workspace-flush-all";
 
     public static readonly SIYUAN_CONFIG_TRAY: string = "siyuan-config-tray";
     public static readonly SIYUAN_QUIT: string = "siyuan-quit";
@@ -72,6 +70,7 @@ export abstract class Constants {
     public static readonly SIYUAN_SHOW_WINDOW: string = "siyuan-show-window";
 
     // 主进程调渲染进程
+    public static readonly SIYUAN_WINDOW_WORKSPACE_FLUSH = "siyuan-window-workspace-flush";
     public static readonly SIYUAN_OPEN_URL: string = "siyuan-open-url";
     public static readonly SIYUAN_OPEN_FILE: string = "siyuan-open-file";
     public static readonly SIYUAN_SAVE_CLOSE: string = "siyuan-save-close";

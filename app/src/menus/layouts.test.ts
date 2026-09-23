@@ -14,7 +14,7 @@ const fixture = () => {
     let dialog: any;
     const dependencies = {
         Constants: {LOCAL_LAYOUTS: "layouts", LOCAL_FILESPATHS: "paths",
-            WINDOW_WORKSPACE_GET_OPEN: "getOpenWindowWorkspaces"},
+            SIYUAN_WINDOW_WORKSPACE_GET_OPEN: "siyuan-window-workspace-get-open"},
         setStorageVal: (key: string, value: unknown, callback?: () => void) => {
             calls.push({action: key, value: JSON.parse(JSON.stringify(value))});
             callback?.();

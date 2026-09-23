@@ -211,7 +211,7 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
     hideAllElements(["util"]);
     /// #if !BROWSER
     try {
-        if (!await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: Constants.WINDOW_WORKSPACE_FLUSH_ALL})) {
+        if (!await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: Constants.SIYUAN_WINDOW_WORKSPACE_FLUSH_ALL})) {
             showMessage(window.siyuan.languages.windowWorkspaceSaveError, 6000, "error");
             return;
         }

@@ -3342,19 +3342,20 @@ app.whenReady().then(() => {
         if (data.cmd === "getContentsId") {
             return event.sender.id;
         }
-        if (["setWindowWorkspace", "focusWindowWorkspace", "getOpenWindowWorkspaces", "flushWindowWorkspaces"].includes(data.cmd)) {
+        if (["siyuan-window-workspace-set", "siyuan-window-workspace-focus", "siyuan-window-workspace-get-open",
+            "siyuan-window-workspace-flush-all"].includes(data.cmd)) {
             const kernelTarget = getWindowKernelTarget(event.sender.id);
             if (!kernelTarget) {
                 return false;
             }
-            if (data.cmd === "getOpenWindowWorkspaces") {
+            if (data.cmd === "siyuan-window-workspace-get-open") {
                 return windowWorkspaces.list(kernelTarget.origin);
             }
-            if (data.cmd === "flushWindowWorkspaces") {
+            if (data.cmd === "siyuan-window-workspace-flush-all") {
                 return flushWindowWorkspaces(windowWorkspaces.list(kernelTarget.origin)
                     .map(id => windowWorkspaces.get(kernelTarget.origin, id)).filter(Boolean), ipcMain);
             }
-            if (data.cmd === "focusWindowWorkspace") {
+            if (data.cmd === "siyuan-window-workspace-focus") {
                 const window = windowWorkspaces.get(kernelTarget.origin, data.id);
                 if (window) {
                     showWindow(window);

@@ -38,8 +38,8 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
     const dependencies = {
         ...core,
         Constants: {LOCAL_WINDOW_WORKSPACE: prefix, SIYUAN_APPID: "test", SIYUAN_GET: "get",
-            WINDOW_WORKSPACE_SET: "setWindowWorkspace",
-            WINDOW_WORKSPACE_FOCUS: "focusWindowWorkspace"},
+            SIYUAN_WINDOW_WORKSPACE_SET: "siyuan-window-workspace-set",
+            SIYUAN_WINDOW_WORKSPACE_FOCUS: "siyuan-window-workspace-focus"},
         getSearch: (key: string) => url.searchParams.get(key),
         isBrowser: () => false,
         isWindow: () => true,
@@ -71,7 +71,7 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
         escapeHtml: (text: string) => text,
         openNewWindowByWorkspace: (workspace: string) => opened.push(workspace),
         ipcRenderer: {invoke: async (_channel: string, data: {cmd: string, id: string}) => {
-            if (data.cmd === "setWindowWorkspace") {
+            if (data.cmd === "siyuan-window-workspace-set") {
                 associated.push(data.id);
                 return true;
             }

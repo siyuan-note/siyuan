@@ -15,7 +15,7 @@ const closeTab = (ipcData: IWebSocketData) => {
 };
 export const onWindowsMsg = (ipcData: IWebSocketData) => {
     switch (ipcData.cmd) {
-        case Constants.WINDOW_WORKSPACE_FLUSH:
+        case Constants.SIYUAN_WINDOW_WORKSPACE_FLUSH:
             void flushWindowWorkspace().then(saved => {
                 ipcRenderer.send(Constants.SIYUAN_WINDOW_WORKSPACE_SAVED, {id: ipcData.data, saved});
             }).catch(() => {

@@ -136,9 +136,9 @@ export const getTabsContentDropTarget = (target: HTMLElement, hit: HTMLElement):
     } else {
         return target;
     }
-    const blocks = item?.querySelector<HTMLElement>(":scope > .tab-item-content")
-        ?.querySelectorAll<HTMLElement>(":scope > [data-node-id]");
-    return blocks?.[target === item ? blocks.length - 1 : 0] || null;
+    const content = item?.querySelector<HTMLElement>(":scope > .tab-item-content");
+    const blocks = content?.querySelectorAll<HTMLElement>(":scope > [data-node-id]");
+    return blocks?.[target === item ? blocks.length - 1 : 0] || content || null;
 };
 
 export const isSameSiblingMove = <T>(siblings: T[], sources: T[], target: T, isBottom: boolean) => {

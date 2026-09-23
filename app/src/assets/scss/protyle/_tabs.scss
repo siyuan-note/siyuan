@@ -185,7 +185,14 @@
 
   .tab-item-content {
     min-width: 0;
+    min-height: 1.5em;
     outline: none;
+
+    &.dragover__bottom {
+      outline: 2px solid var(--b3-theme-primary-lighter);
+      outline-offset: -2px;
+      border-radius: var(--b3-border-radius);
+    }
   }
 
   .tabs-tab--editing > .tabs-tab-label {

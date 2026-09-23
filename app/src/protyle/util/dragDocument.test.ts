@@ -136,12 +136,13 @@ describe("getTabsContentDropTarget", () => {
         assert.equal(getTabsContentDropTarget(tabs, bodyHit), tabs);
     });
 
-    it("rejects a tab body without a persisted block target", () => {
+    it("uses an empty tab body as the drop target", () => {
+        const emptyContent = {querySelectorAll: (): HTMLElement[] => []} as unknown as HTMLElement;
         const emptyItem = {
             getAttribute: item.getAttribute.bind(item),
-            querySelector: () => ({querySelectorAll: (): HTMLElement[] => []}),
+            querySelector: () => emptyContent,
         } as unknown as HTMLElement;
-        assert.equal(getTabsContentDropTarget(emptyItem, bodyHit), null);
+        assert.equal(getTabsContentDropTarget(emptyItem, bodyHit), emptyContent);
     });
 });
 

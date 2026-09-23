@@ -283,7 +283,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
     const removedSourceIDs = new Set(sourceElements.map(item => item.getAttribute("data-node-id"))
         .filter((id): id is string => !!id));
-    const targetId = targetElement.getAttribute("data-node-id");
+    const targetId = targetElement.classList.contains("tab-item-content") ?
+        targetElement.parentElement.getAttribute("data-node-id") : targetElement.getAttribute("data-node-id");
     const newSourceElements: Element[] = [];
     let tempTargetElement = targetElement;
     let isSameLi = true;
@@ -298,7 +299,14 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     let tabsPlaceholderID: string;
     const orderListElements: { [key: string]: { element: Element, start?: number } } = {};
     const sourceTabs = new Map<HTMLElement, {ids: string[], active: string}>();
+    const sourceTabItems = new Set<HTMLElement>();
     if (!isCopy) {
+        sourceElements.forEach(item => {
+            const tabItem = item.closest<HTMLElement>(".tab-item");
+            if (tabItem?.parentElement?.getAttribute("data-type") === "NodeTabs") {
+                sourceTabItems.add(tabItem);
+            }
+        });
         sourceElements.filter(item => item.getAttribute("data-type") === "NodeTabItem").forEach(item => {
             const tabs = item.parentElement;
             if (tabs.getAttribute("data-type") !== "NodeTabs") {
@@ -657,6 +665,17 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             tempTargetElement = isCopy ? copyElement : item;
         }
     }
+    sourceTabItems.forEach(tabItem => {
+        const content = tabItem.querySelector<HTMLElement>(":scope > .tab-item-content");
+        if (!content || content.querySelector(":scope > [data-node-id]")) {
+            return;
+        }
+        const paragraph = genEmptyElement(false, false);
+        content.appendChild(paragraph);
+        doOperations.push({action: "insert", id: paragraph.dataset.nodeId,
+            parentID: tabItem.dataset.nodeId, data: paragraph.outerHTML});
+        undoOperations.push({action: "delete", id: paragraph.dataset.nodeId});
+    });
     sourceTabs.forEach(({ids, active}, tabs) => {
         if (!tabs.isConnected) {
             return;
@@ -902,7 +921,8 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     if (!isCopy && isDragTargetInSource(sourceElements, targetElement)) {
         return;
     }
-    const siblingElements = Array.from(targetElement.parentElement.children)
+    const intoEmptyTab = targetElement.classList.contains("tab-item-content");
+    const siblingElements = Array.from((intoEmptyTab ? targetElement : targetElement.parentElement).children)
         .filter(item => item.hasAttribute("data-node-id"));
     if (!isCopy && isSameSiblingMove(siblingElements, sourceElements, targetElement, isBottom)) {
         return;
@@ -921,7 +941,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     });
 
     const sourceHasFoldHeading = sourceElements.some(isFoldedHeading);
-    const targetParentElement = targetElement.parentElement;
+    const targetParentElement = intoEmptyTab ? targetElement : targetElement.parentElement;
     const isColumnDrop = targetParentElement.classList.contains("sb") &&
         targetParentElement.getAttribute("data-sb-layout") === "col";
     const wrapUndoOperations: IOperation[] = [];
@@ -963,7 +983,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     const targetListStart = targetElement.getAttribute("data-type") === "NodeListItem" &&
         targetElement.getAttribute("data-subtype") === "o" ? getOrderedListStart(targetElement.parentElement) : undefined;
     const moveToResult = await moveTo(protyle, sourceElements, sourceRowElement || targetElement, isSameEditor,
-        sourceRowElement ? "afterbegin" : (isBottom ? "afterend" : "beforebegin"), isCopy, sourcePositions);
+        sourceRowElement || intoEmptyTab ? "afterbegin" : (isBottom ? "afterend" : "beforebegin"), isCopy, sourcePositions);
     if (sourceRowElement && isCopy) {
         clearCopiedColumnWidth(sourceRowElement, moveToResult.doOperations);
     }
@@ -1871,6 +1891,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 } else if (sourceElements.length > 0) {
+                    if (targetElement.classList.contains("tab-item-content")) {
+                        await dragSame(protyle, sourceElements, targetElement, false, isCopyDrag);
+                        dragoverElement = undefined;
+                        return;
+                    }
                     const isChild = targetClass.some((c: string) => c.indexOf("--child") > -1);
                     const isBottom = targetClass.some((c: string) => c.indexOf("dragover__bottom") === 0);
 
@@ -2695,6 +2720,21 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (isInEmbedBlock(targetElement)) {
             clearBlockDragoverTarget();
             hideDragTip();
+            return;
+        }
+        if (targetElement.classList.contains("tab-item-content")) {
+            const isSelf = !event.ctrlKey && !event.shiftKey && !event.altKey && gutterTypes[2]?.split(",").some(id =>
+                id && hasClosestByAttribute(targetElement as HTMLElement, "data-node-id", id));
+            if (isSelf) {
+                clearBlockDragoverTarget();
+                hideDragTip();
+                return;
+            }
+            if (dragoverElement !== targetElement || !targetElement.classList.contains("dragover__bottom")) {
+                clearBlockDragoverTarget();
+                targetElement.classList.add("dragover__bottom");
+                dragoverElement = targetElement;
+            }
             return;
         }
         const isNotAvItem = !targetElement.classList.contains("av__row") &&

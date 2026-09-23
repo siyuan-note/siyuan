@@ -4,7 +4,6 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as core from "./workspaceCore";
-import {windowWorkspaceCommands} from "../../electron/windowWorkspaceConstants";
 
 const compiled = transpileModule(readFileSync("src/window/workspace.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -39,8 +38,8 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
     const dependencies = {
         ...core,
         Constants: {LOCAL_WINDOW_WORKSPACE: prefix, SIYUAN_APPID: "test", SIYUAN_GET: "get",
-            WINDOW_WORKSPACE_SET: windowWorkspaceCommands.SET,
-            WINDOW_WORKSPACE_FOCUS: windowWorkspaceCommands.FOCUS},
+            WINDOW_WORKSPACE_SET: "setWindowWorkspace",
+            WINDOW_WORKSPACE_FOCUS: "focusWindowWorkspace"},
         getSearch: (key: string) => url.searchParams.get(key),
         isBrowser: () => false,
         isWindow: () => true,
@@ -72,7 +71,7 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
         escapeHtml: (text: string) => text,
         openNewWindowByWorkspace: (workspace: string) => opened.push(workspace),
         ipcRenderer: {invoke: async (_channel: string, data: {cmd: string, id: string}) => {
-            if (data.cmd === windowWorkspaceCommands.SET) {
+            if (data.cmd === "setWindowWorkspace") {
                 associated.push(data.id);
                 return true;
             }

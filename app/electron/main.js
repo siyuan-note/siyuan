@@ -74,7 +74,6 @@ const {
 } = require("./remoteKernel");
 const {dispatchWindowMessage} = require("./windowMessaging");
 const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorkspaces");
-const {windowWorkspaceCommands} = require("./windowWorkspaceConstants");
 const windowWorkspaces = new WindowWorkspaceRegistry();
 const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 const {
@@ -3343,20 +3342,19 @@ app.whenReady().then(() => {
         if (data.cmd === "getContentsId") {
             return event.sender.id;
         }
-        if ([windowWorkspaceCommands.SET, windowWorkspaceCommands.FOCUS, windowWorkspaceCommands.GET_OPEN,
-            windowWorkspaceCommands.FLUSH_ALL].includes(data.cmd)) {
+        if (["setWindowWorkspace", "focusWindowWorkspace", "getOpenWindowWorkspaces", "flushWindowWorkspaces"].includes(data.cmd)) {
             const kernelTarget = getWindowKernelTarget(event.sender.id);
             if (!kernelTarget) {
                 return false;
             }
-            if (data.cmd === windowWorkspaceCommands.GET_OPEN) {
+            if (data.cmd === "getOpenWindowWorkspaces") {
                 return windowWorkspaces.list(kernelTarget.origin);
             }
-            if (data.cmd === windowWorkspaceCommands.FLUSH_ALL) {
+            if (data.cmd === "flushWindowWorkspaces") {
                 return flushWindowWorkspaces(windowWorkspaces.list(kernelTarget.origin)
                     .map(id => windowWorkspaces.get(kernelTarget.origin, id)).filter(Boolean), ipcMain);
             }
-            if (data.cmd === windowWorkspaceCommands.FOCUS) {
+            if (data.cmd === "focusWindowWorkspace") {
                 const window = windowWorkspaces.get(kernelTarget.origin, data.id);
                 if (window) {
                     showWindow(window);

@@ -2,7 +2,6 @@ const {test} = require("node:test");
 const assert = require("node:assert/strict");
 const {EventEmitter} = require("node:events");
 const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorkspaces");
-const {windowWorkspaceCommands, windowWorkspaceSavedChannel} = require("./windowWorkspaceConstants");
 
 const id = "20260922100000-abcdefg";
 const origin = "http://127.0.0.1:6806";
@@ -66,19 +65,19 @@ test("退出前等待所有窗口保存，忽略其他窗口和子帧的确认",
     let completed = false;
     void task.then(() => completed = true);
     const respond = (index, saved, frame = windows[index].webContents.mainFrame) => {
-        ipc.emit(windowWorkspaceSavedChannel, {sender: windows[index].webContents, senderFrame: frame},
+        ipc.emit("siyuan-window-workspace-saved", {sender: windows[index].webContents, senderFrame: frame},
             {id: messages[index].data, saved});
     };
     respond(0, true);
     respond(1, true, {});
-    ipc.emit(windowWorkspaceSavedChannel, {sender: {id: 3, mainFrame: 1}, senderFrame: 1},
+    ipc.emit("siyuan-window-workspace-saved", {sender: {id: 3, mainFrame: 1}, senderFrame: 1},
         {id: messages[0].data, saved: true});
     await Promise.resolve();
     assert.equal(completed, false);
     respond(1, true);
     assert.equal(await task, true);
-    assert.equal(ipc.listenerCount(windowWorkspaceSavedChannel), 0);
-    assert.equal(messages[0].cmd, windowWorkspaceCommands.FLUSH);
+    assert.equal(ipc.listenerCount("siyuan-window-workspace-saved"), 0);
+    assert.equal(messages[0].cmd, "flushWindowWorkspace");
 });
 
 test("保存失败或窗口无响应时取消退出并清理监听器", async () => {
@@ -88,10 +87,10 @@ test("保存失败或窗口无响应时取消退出并清理监听器", async ()
         const contents = {id: 1, mainFrame: {}, send: (_channel, message) => requestID = message.data};
         const task = flushWindowWorkspaces([{isDestroyed: () => false, webContents: contents}], ipc, 10);
         if (!timeout) {
-            ipc.emit(windowWorkspaceSavedChannel, {sender: contents, senderFrame: contents.mainFrame},
+            ipc.emit("siyuan-window-workspace-saved", {sender: contents, senderFrame: contents.mainFrame},
                 {id: requestID, saved: false});
         }
         assert.equal(await task, false);
-        assert.equal(ipc.listenerCount(windowWorkspaceSavedChannel), 0);
+        assert.equal(ipc.listenerCount("siyuan-window-workspace-saved"), 0);
     }
 });

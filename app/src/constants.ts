@@ -1,4 +1,3 @@
-import {windowWorkspaceCommands, windowWorkspaceSavedChannel} from "../electron/windowWorkspaceConstants";
 declare const SIYUAN_VERSION: string;
 declare const NODE_ENV: string;
 
@@ -38,14 +37,14 @@ export abstract class Constants {
     public static readonly SIYUAN_CMD: string = "siyuan-cmd";
     public static readonly SIYUAN_GET: string = "siyuan-get";
     public static readonly SIYUAN_EVENT: string = "siyuan-event";
-    public static readonly SIYUAN_WINDOW_WORKSPACE_SAVED = windowWorkspaceSavedChannel;
+    public static readonly SIYUAN_WINDOW_WORKSPACE_SAVED = "siyuan-window-workspace-saved";
 
     // 新窗口布局操作
-    public static readonly WINDOW_WORKSPACE_SET = windowWorkspaceCommands.SET;
-    public static readonly WINDOW_WORKSPACE_FOCUS = windowWorkspaceCommands.FOCUS;
-    public static readonly WINDOW_WORKSPACE_GET_OPEN = windowWorkspaceCommands.GET_OPEN;
-    public static readonly WINDOW_WORKSPACE_FLUSH_ALL = windowWorkspaceCommands.FLUSH_ALL;
-    public static readonly WINDOW_WORKSPACE_FLUSH = windowWorkspaceCommands.FLUSH;
+    public static readonly WINDOW_WORKSPACE_SET = "setWindowWorkspace";
+    public static readonly WINDOW_WORKSPACE_FOCUS = "focusWindowWorkspace";
+    public static readonly WINDOW_WORKSPACE_GET_OPEN = "getOpenWindowWorkspaces";
+    public static readonly WINDOW_WORKSPACE_FLUSH_ALL = "flushWindowWorkspaces";
+    public static readonly WINDOW_WORKSPACE_FLUSH = "flushWindowWorkspace";
 
     public static readonly SIYUAN_CONFIG_TRAY: string = "siyuan-config-tray";
     public static readonly SIYUAN_QUIT: string = "siyuan-quit";

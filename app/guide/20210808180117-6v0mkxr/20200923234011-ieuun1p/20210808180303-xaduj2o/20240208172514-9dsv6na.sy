@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260923095432"
+		"updated": "20260923103343"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20260920084445"
+				"updated": "20260923103343"
 			},
 			"Children": [
 				{
@@ -687,7 +687,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260920225154-tz8a00o",
-				"updated": "20260923095432"
+				"updated": "20260923103343"
 			},
 			"Children": [
 				{
@@ -701,12 +701,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920225154-vz01ydx",
-				"updated": "20260920225154"
+				"updated": "20260923103343"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Displays dated entries by month or week. The week view has seven date columns; entries spanning multiple days continue across those days. Your browsing date and month/week choice are independent in each editor."
+					"Data": "Displays dated entries by month or week. The week view has seven date columns; entries spanning multiple days continue across those days. Each editor keeps its current mode and browsing date independently. The month/week choice is saved for each calendar view in this workspace and restored when opening it in a new editor or restarting SiYuan. A new editor starts browsing from today."
 				}
 			]
 		},

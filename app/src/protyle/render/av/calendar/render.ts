@@ -1,4 +1,5 @@
 import {Constants} from "../../../../constants";
+import {setStorageVal} from "../../../util/compatibility";
 import * as dayjs from "dayjs";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {transaction} from "../../../wysiwyg/transaction";
@@ -18,7 +19,7 @@ import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarInterval, 
     moveCalendarDate, packCalendarWeek, resizeCalendarDate} from "./date";
 import {openCalendarJump} from "./jump";
 import {addCalendarDateField, bindCalendarSettings, getCalendarSettingsHTML, isCalendarDateColumn} from "./settings";
-import {getCalendarRequestRange, getCalendarState} from "./state";
+import {getCalendarRequestRange, getCalendarState, setCalendarMode} from "./state";
 
 const iconButton = (action: string, icon: string, label: string) => `<button type="button" class="block__icon block__icon--show" data-calendar-action="${action}" aria-label="${escapeAttr(label)}"><svg><use xlink:href="#${icon}"></use></svg></button>`;
 
@@ -403,7 +404,10 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         }});
     });
     root.querySelector<HTMLSelectElement>("[data-calendar-mode]").addEventListener("change", event => {
-        state.mode = (event.target as HTMLSelectElement).value as "month" | "week";
+        const modes = setCalendarMode(blockElement, data.viewID, (event.target as HTMLSelectElement).value as "month" | "week");
+        if (modes) {
+            setStorageVal(Constants.LOCAL_AV_CALENDAR_MODES, modes);
+        }
         state.expandedWeeks.clear();
         refresh();
     });

@@ -200,6 +200,7 @@ export abstract class Constants {
     public static readonly LOCAL_MOVE_PATH = "local-move-path";
     public static readonly LOCAL_RECENT_DOCS = "local-recent-docs";
     public static readonly LOCAL_CLOSED_TABS = "local-closed-tabs";
+    public static readonly LOCAL_AV_CALENDAR_MODES = "local-av-calendar-modes";
 
     // dialog
     public static readonly DIALOG_CONFIRM = "dialog-confirm";

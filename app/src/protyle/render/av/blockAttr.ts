@@ -357,9 +357,12 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     return;
                 }
                 const urlElement = (event.target as HTMLElement).closest<HTMLAnchorElement>(
-                    '.custom-attr__avvalue[data-type="url"] > a[href]');
+                    '[data-av-id][data-type="url"] > a.block__icon');
                 if (urlElement) {
-                    openLink(protyle.app, urlElement.getAttribute("href"), event, event.ctrlKey || event.metaKey);
+                    const url = urlElement.parentElement.querySelector<HTMLInputElement>("input")?.value;
+                    if (url) {
+                        openLink(protyle.app, url, event, event.ctrlKey || event.metaKey);
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     return;

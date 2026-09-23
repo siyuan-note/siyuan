@@ -9,6 +9,7 @@ export interface ProtyleRuntimeCapabilities {
     customBlockRender?: boolean;
     // 片段内容作为列表项正文编辑，首段沿用列表输入规则。
     listItemFragment?: boolean;
+    getTransactionOwner?: (operations: IOperation[]) => IProtyle | undefined;
     sanitizeBlockDOM?: (blockDOM: string) => string;
     getUnsupportedPasteBlocks?: (blockDOM: string) => string[];
     richHTMLPaste?: boolean;
@@ -41,6 +42,9 @@ export const isProtyleCustomBlockRenderEnabled = (protyle: IProtyle) =>
 
 export const isProtyleListItemFragment = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.listItemFragment === true;
+
+export const getProtyleTransactionOwner = (protyle: IProtyle, operations: IOperation[]) =>
+    protyleRuntimeCapabilities.get(protyle)?.getTransactionOwner?.(operations);
 
 export const isProtyleListItemFirstParagraph = (protyle: IProtyle, blockElement: HTMLElement) =>
     isProtyleListItemFragment(protyle) && blockElement === protyle.wysiwyg.element.firstElementChild &&

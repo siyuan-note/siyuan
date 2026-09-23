@@ -649,7 +649,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (!options?.keepMenuOpen) {
         window.siyuan.menus.menu.remove();
     }
-    document.body.insertAdjacentHTML("beforeend", `<div class="av__mask" style="z-index: ${++window.siyuan.zIndex}">
+    document.body.insertAdjacentHTML("beforeend", `<div class="av__mask" data-av-block-id="${escapeAttr(blockElement.dataset.nodeId)}" style="z-index: ${++window.siyuan.zIndex}">
     ${html}
     </div>`);
     const avMaskElement = document.querySelector(".av__mask");

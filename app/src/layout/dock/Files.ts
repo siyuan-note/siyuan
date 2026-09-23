@@ -1434,12 +1434,11 @@ export class Files extends Model {
 
     private genNotebook(item: INotebook) {
         const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
-        // 加密笔记本关闭（锁定）时用 🔒 提示需解锁
         const locked = item.encrypted && item.closed;
         const iconContent = locked
-            ? "🔒️"
+            ? getFileTreeIconHTML("", "lock")
             : getFileTreeIconHTML(item.icon, "notebook");
-        const defaultIconAttr = getFileTreeDefaultIconAttr(item.icon, "notebook", locked);
+        const defaultIconAttr = getFileTreeDefaultIconAttr(locked ? "" : item.icon, locked ? "lock" : "notebook");
         const isBoxDoc = !item.closed && window.siyuan.config.fileTree.boxDocEnabled;
         const hasChildren = !item.closed && item.subFileCount > 0;
         const iconExpands = window.siyuan.config.fileTree.docIconClickExpand && hasChildren;

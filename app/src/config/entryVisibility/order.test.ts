@@ -35,7 +35,7 @@ test("database calendar view merges into saved slash orders and preserves plugin
     saved.splice(1, 0, "plugin:example:item");
     const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
     assert.deepEqual(merged.filter(key => key !== "databaseCalendarView"), saved);
-    assert.equal(merged[merged.indexOf("databaseListView") + 1], "databaseCalendarView");
+    assert.equal(merged[merged.indexOf("databaseKanbanView") + 1], "databaseCalendarView");
     const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
     assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
     assert.deepEqual(resolveEntryOrder(["databaseCalendarView", "databaseListView"], merged, separators),

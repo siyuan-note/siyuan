@@ -1,4 +1,5 @@
 import {showMessage} from "../../../dialog/message";
+import {setCustomBlockRootReady} from "../../../plugin/customBlockRender";
 import {escapeHtml} from "../../../util/escape";
 import {isMobile} from "../../../util/functions";
 import {hintRef, hintSlash} from "../../hint/extend";
@@ -9,12 +10,10 @@ import {setMobileToolbarUndo} from "../../lite/mobileToolbar";
 import {getDefaultToolbar} from "../../toolbar/defaults";
 import {hideElements} from "../../ui/hideElements";
 import {matchHotKey} from "../../util/hotKey";
-import {TABLE_CELL_SLASH_IDS} from "../../util/tableCellRichMenu";
-import {
-    configureAVRichTextLute, getAVRichTextLute, getAVRichTextUnsupportedPasteBlocks, sanitizeAVRichTextBlockDOM,
-} from "../av/richText";
+import {processRender} from "../../util/processCode";
+import {avRender} from "../av/render";
+import {blockRender} from "../blockRender";
 import {highlightRender} from "../highlightRender";
-import {mathRender} from "../mathRender";
 import {cleanListMindmapHTML} from "./model";
 import type {ListMindmapNode} from "./model";
 
@@ -33,15 +32,54 @@ const nodeContent = (node: ListMindmapNode) => Array.from(node.element?.children
     child.hasAttribute("data-node-id") && child.getAttribute("data-type") !== "NodeList")
     .map(child => cleanListMindmapHTML(child.outerHTML)).join("");
 
+const independentBlockSelector = '[data-type="NodeAttributeView"], [data-type="NodeBlockQueryEmbed"]';
+
+const comparableContent = (html: string) => {
+    const template = document.createElement("template");
+    template.innerHTML = cleanListMindmapHTML(html);
+    template.content.querySelectorAll<HTMLElement>(independentBlockSelector).forEach(block => {
+        if (block.dataset.type === "NodeAttributeView") {
+            const identity = document.createElement("div");
+            identity.dataset.type = block.dataset.type;
+            identity.dataset.nodeId = block.dataset.nodeId;
+            identity.dataset.avId = block.dataset.avId;
+            block.replaceWith(identity);
+        } else {
+            block.removeAttribute("updated");
+            block.removeAttribute("data-render");
+            block.replaceChildren();
+        }
+    });
+    return template.innerHTML;
+};
+
+const retainIndependentBlocks = (html: string, node: ListMindmapNode) => {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    const current = new Map<string, Element>();
+    Array.from(node.element.children).filter(child => child.hasAttribute("data-node-id") &&
+        child.getAttribute("data-type") !== "NodeList").forEach(child => {
+        const blocks = [child, ...Array.from(child.querySelectorAll(independentBlockSelector))];
+        blocks.forEach(block => {
+            if (block.matches(independentBlockSelector) && !block.closest(".protyle-wysiwyg__embed")) {
+                current.set(block.getAttribute("data-node-id"), block);
+            }
+        });
+    });
+    template.content.querySelectorAll<HTMLElement>(independentBlockSelector).forEach(block => {
+        const latest = current.get(block.dataset.nodeId);
+        if (latest && comparableContent(block.outerHTML) === comparableContent(latest.outerHTML)) {
+            block.replaceWith(latest.cloneNode(true));
+        }
+    });
+    return template.innerHTML;
+};
+
 // 编辑器只在双击时挂载到节点内容区，预览与编辑沿用同一尺寸和排版。
 export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     const {owner, node, host} = options;
     const initialBlockHTML = nodeContent(node);
     if (!options.canEdit() || !node.element?.isConnected) {
-        return;
-    }
-    if (getAVRichTextUnsupportedPasteBlocks(initialBlockHTML, true).length) {
-        showMessage(window.siyuan.languages.listMindmapUnsupported);
         return;
     }
     hideElements(["gutter", "toolbar", "hint"], owner);
@@ -54,40 +92,67 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     let pendingSave: Promise<boolean> | undefined;
     let pendingFinish: Promise<boolean> | undefined;
     let saveTimer: number;
-    let source = initialBlockHTML;
+    let source = comparableContent(initialBlockHTML);
     let recoveryShown = false;
     const events = new AbortController();
     const toolbar = getDefaultToolbar(isMobile()).filter(item =>
         typeof item === "string" ? item !== "ai" : item.name !== "ai");
     const slash = registerBuiltinSlashHint((key: string, protyle: IProtyle, hintSource: THintSource) =>
-        hintSlash(key, protyle, hintSource).filter(item => TABLE_CELL_SLASH_IDS.has(item.id) &&
-            !["list", "orderedList", "check"].includes(item.id)));
+        hintSlash(key, protyle, hintSource).filter(item => !["list", "orderedList", "check"].includes(item.id)));
     const hint: IProtyleOptions["hint"] = {
         extend: [{key: "((", hint: hintRef}, {key: "【【", hint: hintRef}, {key: "（（", hint: hintRef},
             {key: "[[", hint: hintRef}, {key: "/", hint: slash}, {key: "、", hint: slash}],
     };
     const originalMinWidth = host.style.minWidth;
+    const embedSourceIDs = new Set<string>();
+    const rememberEmbedSourceIDs = () => {
+        host.querySelectorAll<HTMLElement>(".protyle-wysiwyg__embed").forEach(result => {
+            if (result.dataset.id) {
+                embedSourceIDs.add(result.dataset.id);
+            }
+            result.querySelectorAll<HTMLElement>("[data-node-id]").forEach(block => {
+                embedSourceIDs.add(block.dataset.nodeId);
+            });
+        });
+    };
+    const embedSourceObserver = new MutationObserver(rememberEmbedSourceIDs);
+    embedSourceObserver.observe(host, {childList: true, subtree: true});
     // 保留未缩放的亚像素宽度，避免取整后响应式容器挤压文字，导致换行和整棵树重排。
     host.style.minWidth = getComputedStyle(host).width;
     host.replaceChildren();
     host.classList.add("list-mindmap__editor");
-    host.dataset.protyleLiteRender = "safe";
     host.contentEditable = "false";
     const fragment = mountProtyleLiteFragment(host, {
         app: owner.app,
         initialBlockHTML,
         protyleOptions: {notebookId: owner.notebookId, toolbar, hint},
         runtimeCapabilities: {
-            upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,
+            upload: false, websocket: false, pluginExtensions: false,
             listItemFragment: true,
-            lute: getAVRichTextLute(), lockedOptions: {toolbar, hint},
-            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
-            getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
-            restoreLuteMarkdownSyntax: configureAVRichTextLute,
+            getTransactionOwner: operations => {
+                const avIDs = new Set(Array.from(host.querySelectorAll<HTMLElement>(
+                    '[data-type="NodeAttributeView"][data-av-id]')).map(element => element.dataset.avId));
+                if (operations.some(operation => operation.action.includes("AttrView") &&
+                    avIDs.has("avID" in operation && typeof operation.avID === "string" ? operation.avID : operation.id))) {
+                    return owner;
+                }
+                rememberEmbedSourceIDs();
+                return operations.length > 0 && operations.every(operation =>
+                    embedSourceIDs.has(operation.id) || operation.action === "insert" &&
+                    [operation.parentID, operation.previousID, operation.nextID].some(id => embedSourceIDs.has(id))) ?
+                    owner : undefined;
+            },
+            lute: owner.lute, lockedOptions: {toolbar, hint},
         },
         afterSetContent: (protyle, element) => {
+            protyle.block.rootID = owner.block.rootID;
+            protyle.block.parentID = node.id;
+            protyle.path = owner.path;
+            setCustomBlockRootReady(element, true);
+            processRender(element);
             highlightRender(element);
-            mathRender(element);
+            blockRender(protyle, element, undefined, options.onResize);
+            void avRender(element, owner);
             protyle.undo.clear();
         },
         onChange: () => {
@@ -109,7 +174,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     const overlayRoot = host.closest(".list-mindmap") || document.body;
     // 菜单使用未缩放的容器定位，同时保持在原生全屏元素内可见。
     overlays.forEach(element => overlayRoot.appendChild(element));
-    let lastHTML = cleanListMindmapHTML(fragment.getBlockHTML());
+    let lastHTML = comparableContent(fragment.getBlockHTML());
     const recover = () => {
         if (recoveryShown) {
             return;
@@ -147,22 +212,23 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             return false;
         }
         const html = cleanListMindmapHTML(fragment.getBlockHTML());
-        if (html === lastHTML) {
+        const version = comparableContent(html);
+        if (version === lastHTML) {
             changed = false;
             return true;
         }
-        if (!options.canEdit() || !node.element.isConnected || nodeContent(node) !== source) {
+        if (!options.canEdit() || !node.element.isConnected || comparableContent(nodeContent(node)) !== source) {
             recover();
             return false;
         }
         saving = true;
         try {
-            if (!await options.onSave(html)) {
+            if (!await options.onSave(retainIndependentBlocks(html, node))) {
                 return false;
             }
-            source = nodeContent(node);
-            lastHTML = html;
-            changed = cleanListMindmapHTML(fragment.getBlockHTML()) !== html;
+            source = comparableContent(nodeContent(node));
+            lastHTML = version;
+            changed = comparableContent(fragment.getBlockHTML()) !== version;
             if (changed && !finishSession) {
                 saveTimer = window.setTimeout((): void => { void commit(); }, 350);
             }
@@ -175,19 +241,19 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         if (finished) {
             return;
         }
-        const html = cleanListMindmapHTML(fragment.getBlockHTML());
+        const html = comparableContent(fragment.getBlockHTML());
         if (html !== lastHTML) {
             recover();
         }
         finished = true;
         clearTimeout(saveTimer);
         events.abort();
+        embedSourceObserver.disconnect();
         observer.disconnect();
         fragment.destroy();
         overlays.forEach(element => element.remove());
         host.classList.remove("list-mindmap__editor");
         host.style.minWidth = originalMinWidth;
-        delete host.dataset.protyleLiteRender;
         options.onFinish();
     };
     const destroy = () => {
@@ -223,17 +289,35 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             if (!await commit(true)) {
                 return false;
             }
-        } while (cleanListMindmapHTML(fragment.getBlockHTML()) !== lastHTML);
+        } while (comparableContent(fragment.getBlockHTML()) !== lastHTML);
         cleanup();
         return true;
     };
     const undo = async (redo: boolean) => {
+        const selection = getSelection();
+        const anchor = selection.anchorNode instanceof Element ? selection.anchorNode : selection.anchorNode?.parentElement;
+        if (anchor && host.contains(anchor) && anchor.closest(".protyle-wysiwyg__embed, .av")) {
+            if (redo) {
+                owner.undo.redo(owner);
+            } else {
+                owner.undo.undo(owner);
+            }
+            return;
+        }
         if (await finish()) {
             options.onUndo(redo);
         }
     };
     setMobileToolbarUndo(fragment.protyle, owner, undo);
     const signal = events.signal;
+    host.addEventListener("beforeinput", event => {
+        const anchor = getSelection()?.anchorNode;
+        const element = anchor instanceof Element ? anchor : anchor?.parentElement;
+        const block = element?.closest<HTMLElement>(".protyle-wysiwyg__embed [data-node-id]");
+        if (block?.dataset.nodeId && (event.inputType.startsWith("insert") || event.inputType.startsWith("delete"))) {
+            fragment.protyle.wysiwyg.lastHTMLs[block.dataset.nodeId] = block.outerHTML;
+        }
+    }, {capture: true, signal});
     bindLiteCodeActions(host, fragment.protyle, {
         signal,
         canEdit: () => !finished && !closing && options.canEdit(),
@@ -282,9 +366,21 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             finish();
         }
     }), {capture: true, signal});
-    const belongs = (target: Node) => host.contains(target) || fragment.hintElement.contains(target) ||
-        fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target) ||
-        !!(target instanceof Element && target.closest("#keyboardToolbar, #commonMenu, .b3-dialog"));
+    const belongs = (target: Node) => {
+        if (host.contains(target) || fragment.hintElement.contains(target) ||
+            fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target)) {
+            return true;
+        }
+        if (!(target instanceof Element)) {
+            return false;
+        }
+        const avOverlay = target.closest<HTMLElement>(".av__panel, .av__mask");
+        if (avOverlay?.dataset.avBlockId && host.querySelector(
+            `[data-type="NodeAttributeView"][data-node-id="${avOverlay.dataset.avBlockId}"]`)) {
+            return true;
+        }
+        return !!target.closest("#keyboardToolbar, #commonMenu, .b3-dialog");
+    };
     document.addEventListener("pointerdown", event => {
         if (!belongs(event.target as Node)) {
             finish();

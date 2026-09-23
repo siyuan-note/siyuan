@@ -36,12 +36,14 @@ const browserCases = async (sourceCode: string, css: string) => {
         block.textContent = text;
         return block.outerHTML;
     };
-    const create = () => {
+    const create = (initialBlockHTML = textHTML("Initial")) => {
+        let transactionOwner: (operations: Array<{action: string; id: string; parentID?: string;
+            previousID?: string; nextID?: string}>) => unknown;
         const container = document.createElement("section");
         const element = document.createElement("div");
         element.dataset.type = "NodeListItem";
         element.dataset.nodeId = "item";
-        element.innerHTML = textHTML("Initial");
+        element.innerHTML = initialBlockHTML;
         const host = document.createElement("div");
         host.style.display = "inline-block";
         host.style.width = "120px";
@@ -66,7 +68,7 @@ const browserCases = async (sourceCode: string, css: string) => {
         const protyle = {
             block: {rootID: ""},
             undo: {clear: noop},
-            wysiwyg: {flushPendingInput: async () => {
+            wysiwyg: {lastHTMLs: {} as Record<string, string>, flushPendingInput: async () => {
                 state.flushed++;
                 await state.flush();
             }},
@@ -87,7 +89,9 @@ const browserCases = async (sourceCode: string, css: string) => {
                 initialBlockHTML: string;
                 onChange: () => void;
                 afterSetContent: (owner: unknown, element: HTMLElement) => void;
+                runtimeCapabilities: {getTransactionOwner: typeof transactionOwner};
             }) => {
+                transactionOwner = options.runtimeCapabilities.getTransactionOwner;
                 target.style.width = "";
                 wysiwyg.innerHTML = options.initialBlockHTML;
                 target.append(wysiwyg);
@@ -110,19 +114,18 @@ const browserCases = async (sourceCode: string, css: string) => {
             getDefaultToolbar: (): unknown[] => [],
             hideElements: noop,
             matchHotKey: () => false,
-            TABLE_CELL_SLASH_IDS: new Set<string>(),
-            configureAVRichTextLute: noop,
-            getAVRichTextLute: () => ({}),
-            getAVRichTextUnsupportedPasteBlocks: (): string[] => [],
-            sanitizeAVRichTextBlockDOM: (html: string) => html,
+            processRender: noop,
+            setCustomBlockRootReady: noop,
+            avRender: noop,
+            blockRender: noop,
             highlightRender: noop,
-            mathRender: noop,
             cleanListMindmapHTML: (html: string) => html,
         };
         const open = new Function(...Object.keys(dependencies), sourceCode + "; return openListMindmapEditor;")(
             ...Object.values(dependencies));
+        const owner = {app: {}, notebookId: "notebook", block: {rootID: "document"}};
         const editor = open({
-            owner: {app: {}, notebookId: "notebook", block: {rootID: "document"}},
+            owner,
             node: {element}, host,
             canEdit: () => element.isConnected,
             onResize: noop,
@@ -149,15 +152,129 @@ const browserCases = async (sourceCode: string, css: string) => {
             await until(() => state.destroyed === 1);
             container.remove();
         };
-        return {container, element, host, wysiwyg, state, editor, type, remove};
+        return {container, element, host, wysiwyg, protyle, state, editor, type, remove,
+            owner, transactionOwner: (operations: Parameters<typeof transactionOwner>[0]) => transactionOwner(operations)};
     };
     window.siyuan = {
         languages: {listMindmapStale: "Content changed", listMindmapUnsupported: "Unsupported"},
         config: {keymap: {editor: {general: {undo: "undo", redo: "redo"}}}},
     } as unknown as typeof window.siyuan;
 
+    // 特殊块与普通文字共存时仍可进入编辑，修改文字不会改变特殊块的源码和属性。
+    for (const type of ["NodeThematicBreak", "NodeTable", "NodeAttributeView", "NodeBlockQueryEmbed",
+        "NodeCustomBlock", "NodeHTMLBlock", "NodeIFrame", "NodeWidget", "NodeVideo", "NodeAudio",
+        "NodeCallout", "NodeSuperBlock", "NodeTabs"]) {
+        const special = document.createElement("div");
+        special.dataset.type = type;
+        special.dataset.nodeId = "special";
+        special.dataset.content = "Raw source & attributes";
+        special.setAttribute("custom-preserve", "Original value");
+        special.textContent = "Preserved content";
+        const current = create(textHTML("Initial") + special.outerHTML);
+        current.wysiwyg.firstElementChild.textContent = "Edited text";
+        await settle();
+        check.equal(await current.editor.finish(), true, type);
+        check.equal(current.element.firstElementChild.textContent, "Edited text", type);
+        check.equal(current.element.lastElementChild.outerHTML, special.outerHTML, type);
+        check.equal(current.state.messages.length, 0, type);
+        await current.remove();
+    }
+
+    // 数据库和嵌入结果在编辑期间重新渲染，不会挡住普通文字保存或覆盖新的独立块状态。
+    for (const type of ["NodeAttributeView", "NodeBlockQueryEmbed"]) {
+        const special = document.createElement("div");
+        special.dataset.type = type;
+        special.dataset.nodeId = "special";
+        if (type === "NodeAttributeView") {
+            special.dataset.avId = "database";
+        } else {
+            special.dataset.content = "select * from blocks";
+        }
+        special.textContent = "Old projection";
+        const current = create(textHTML("Initial") + special.outerHTML);
+        current.element.lastElementChild.setAttribute("updated", "20260923120000");
+        current.element.lastElementChild.textContent = "Latest projection";
+        current.wysiwyg.lastElementChild.setAttribute("data-render", "true");
+        current.wysiwyg.lastElementChild.textContent = "Editor projection";
+        await settle();
+        current.wysiwyg.firstElementChild.textContent = "Edited text";
+        await settle();
+        check.equal(await current.editor.finish(), true, type);
+        check.equal(current.element.firstElementChild.textContent, "Edited text", type);
+        check.equal(current.element.lastElementChild.textContent, "Latest projection", type);
+        check.equal(current.state.messages.length, 0, type);
+        await current.remove();
+    }
+
+    // 嵌套在超级块中的数据库要沿用最新属性，避免保存相邻文字时写回旧视图配置。
+    let nested = create(textHTML("Initial") +
+        '<div data-type="NodeSuperBlock" data-node-id="container"><div data-type="NodeAttributeView" ' +
+        'data-node-id="nested-database" data-av-id="database" custom-sy-av-view="old">Old projection</div></div>');
+    nested.element.querySelector('[data-node-id="nested-database"]').setAttribute("custom-sy-av-view", "new");
+    nested.wysiwyg.firstElementChild.textContent = "Edited text";
+    await settle();
+    check.equal(await nested.editor.finish(), true);
+    check.equal(nested.element.querySelector('[data-node-id="nested-database"]').getAttribute("custom-sy-av-view"), "new");
+    await nested.remove();
+
+    // 嵌入源块的拆分和删除与文字更新使用同一外层事务，普通节点正文仍留在片段中保存。
+    nested = create(textHTML("Initial") +
+        '<div data-type="NodeBlockQueryEmbed" data-node-id="embed" data-content="query"><div ' +
+        'class="protyle-wysiwyg__embed" data-id="source"><div data-type="NodeParagraph" ' +
+        'data-node-id="source">Source</div></div></div>');
+    await settle();
+    const result = nested.wysiwyg.querySelector(".protyle-wysiwyg__embed");
+    result.insertAdjacentHTML("beforeend", '<div data-type="NodeParagraph" data-node-id="new-source">New</div>');
+    check.equal(nested.transactionOwner([{action: "update", id: "source"},
+        {action: "insert", id: "new-source", previousID: "source"}]), nested.owner);
+    result.querySelector('[data-node-id="new-source"]').remove();
+    check.equal(nested.transactionOwner([{action: "delete", id: "new-source"}]), nested.owner);
+    check.equal(nested.transactionOwner([{action: "insert", id: "first-source", parentID: "source"}]), nested.owner);
+    check.equal(nested.transactionOwner([{action: "update", id: "paragraph"}]), undefined);
+    await nested.remove();
+
+    // 数据库浮层属于当前节点时保留编辑会话，其他位置的点击仍正常结束编辑。
+    for (const overlayClass of ["av__panel", "av__mask av__richtext-mask"]) {
+        const current = create(textHTML("Initial") +
+            '<div data-type="NodeAttributeView" data-node-id="database" data-av-id="view"></div>');
+        const overlay = document.createElement("div");
+        overlay.className = overlayClass;
+        overlay.dataset.avBlockId = "database";
+        document.body.append(overlay);
+        overlay.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+        await settle();
+        check.equal(current.state.destroyed, 0, overlayClass);
+        overlay.dataset.avBlockId = "other-database";
+        overlay.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+        await until(() => current.state.destroyed === 1);
+        overlay.remove();
+        await current.remove();
+    }
+
+    // 查询源码本身发生外部修改时仍视为冲突，避免旧编辑会话覆盖新查询。
+    let current = create(textHTML("Initial") +
+        '<div data-type="NodeBlockQueryEmbed" data-node-id="special" data-content="old query"></div>');
+    current.wysiwyg.firstElementChild.textContent = "Local text";
+    current.element.lastElementChild.setAttribute("data-content", "new query");
+    check.equal(await current.editor.finish(), false);
+    check.equal(current.state.saves.length, 0);
+    await current.remove();
+
+    // 浏览器将输入事件派发给编辑器根节点时，也要为嵌入源块保存有效的撤销快照。
+    current = create(textHTML("Initial") +
+        '<div data-type="NodeBlockQueryEmbed" data-node-id="special" data-content="query"><div class="protyle-wysiwyg__embed"><div data-node-id="source" data-type="NodeParagraph"><div contenteditable="true">Source</div></div></div></div>');
+    const sourceBlock = current.wysiwyg.querySelector<HTMLElement>('[data-node-id="source"]');
+    const range = document.createRange();
+    range.selectNodeContents(sourceBlock.firstElementChild);
+    range.collapse(false);
+    getSelection().removeAllRanges();
+    getSelection().addRange(range);
+    current.wysiwyg.dispatchEvent(new InputEvent("beforeinput", {bubbles: true, inputType: "insertText", data: " edited"}));
+    check.equal(current.protyle.wysiwyg.lastHTMLs.source, sourceBlock.outerHTML);
+    await current.remove();
+
     // 关闭前等待输入转换完成，保存转换后的最终内容后再销毁编辑器。
-    let current = create();
+    current = create();
     check.equal(current.host.offsetWidth, 120, "mounting the editor preserves the preview width");
     await current.type("Pending");
     const flushGate = gate();

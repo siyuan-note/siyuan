@@ -76,6 +76,7 @@ import {
 import {isEmptyParagraph} from "./emptyTextBlock";
 import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
 import {cleanListMindmapHTML, convertListMindmapToList} from "../render/listMindmap/model";
+import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
@@ -2359,6 +2360,11 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                                 templateDocTreePlanID?: string,
                                 trackedRangeInsertion?: ITrackedRangeInsertion,
                             }) => {
+    const owner = protyle?.lite && getProtyleTransactionOwner(protyle, doOperations);
+    if (owner && !owner.lite && owner !== protyle) {
+        transaction(owner, doOperations, undoOperations, options);
+        return;
+    }
     if (protyle) {
         const prepared = prepareViewFoldTransaction(protyle, doOperations, undoOperations);
         doOperations = prepared.doOperations;

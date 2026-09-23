@@ -22,7 +22,6 @@ const extract = (file: string, names: string[]) => {
 const cases = async (source: string) => {
     const check = require("node:assert/strict");
     const requests: {url: string, data: Record<string, string>}[] = [];
-    const messages: string[] = [];
     const chartRefreshes: Element[] = [];
     const dependencies = {
         fetchPost: (url: string, data: Record<string, string>) => requests.push({url, data}),
@@ -30,15 +29,12 @@ const cases = async (source: string) => {
         genRenderFrame: () => {},
         isEncryptedBox: () => false,
         hasClosestByClassName: (element: HTMLElement, name: string) => element.closest(`.${name}`),
-        showMessage: (message: string) => messages.push(message),
-        cleanListMindmapHTML: (html: string) => html,
         chartRender: (element: Element) => chartRefreshes.push(element),
-        mountProtyleLiteFragment: () => check.fail("Unsupported content was passed to the editor sanitizer"),
     };
     const api = new Function(...Object.keys(dependencies), source + "; return {customBlockRender, " +
         "registerCustomBlockRoot, setCustomBlockRootReady, unregisterCustomBlockRoot, activateCustomBlockPlugin, " +
         "deactivateCustomBlockPlugin, htmlRender, blockRender, avRender, getAVElements, getCell, getTableNode, " +
-        "TablePreviewControl, refreshChartTheme, getAVRichTextUnsupportedPasteBlocks, openListMindmapEditor};")(...Object.values(dependencies));
+        "TablePreviewControl, refreshChartTheme, getAVRichTextUnsupportedPasteBlocks};")(...Object.values(dependencies));
     const root = document.createElement("div");
     root.className = "protyle-wysiwyg";
     document.body.append(root);
@@ -152,20 +148,16 @@ const cases = async (source: string) => {
     controls.renderPinnedTableFrames();
     check.equal(controls.pinnedTableActions.size, 0);
 
-    // 复杂块在编辑入口处保留原文，不进入会丢弃不支持内容的富文本净化流程。
+    // 脑图预览保留复杂块，数据库和表格单元格仍按原有规则拒绝这些块。
     const types = ["NodeTable", "NodeAttributeView", "NodeBlockQueryEmbed", "NodeCustomBlock", "NodeHTMLBlock",
         "NodeIFrame", "NodeWidget", "NodeVideo", "NodeAudio", "NodeCallout", "NodeSuperBlock", "NodeTabs"];
     for (const type of types) {
         const item = block("NodeListItem");
         item.innerHTML = `<div data-node-id="special" data-type="${type}" data-content="raw source">Keep content</div>`;
-        const host = document.createElement("div");
         const original = item.outerHTML;
         check.ok(api.getAVRichTextUnsupportedPasteBlocks(item.innerHTML, true).length, type);
-        check.equal(api.openListMindmapEditor({node: {element: item}, host, canEdit: () => true}), undefined);
         check.equal(item.outerHTML, original, type);
-        check.equal(host.childElementCount, 0);
     }
-    check.equal(messages.length, types.length);
     check.deepEqual(api.getAVRichTextUnsupportedPasteBlocks('<div data-type="NodeParagraph"><img src="asset.png"></div>', true), []);
     for (const type of ["NodeParagraph", "NodeBlockquote", "NodeMathBlock"]) {
         check.deepEqual(api.getAVRichTextUnsupportedPasteBlocks(`<div data-type="${type}">Content</div>`, true), []);
@@ -196,8 +188,7 @@ test("special block previews cannot acquire document writes or lose unsupported 
         extract("../../util/tableControl.ts", ["getCell", "getTableNode"]) +
         compile(`class TablePreviewControl {${methods.map(method => method.getText(tableSource)).join("\n")}}`) +
         extract("../av/richText.ts", ["ALLOWED_BLOCK_TYPES", "isSupportedAVRichTextBlock", "getAVRichTextUnsupportedPasteBlocks"]) +
-        extract("../av/richTextValue.ts", ["EXECUTABLE_CODE_LANGUAGES", "isAVRichTextExecutableCodeLanguage"]) +
-        extract("editor.ts", ["nodeContent", "openListMindmapEditor"]);
+        extract("../av/richTextValue.ts", ["EXECUTABLE_CODE_LANGUAGES", "isAVRichTextExecutableCodeLanguage"]);
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-preview-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");

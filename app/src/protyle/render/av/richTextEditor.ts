@@ -103,6 +103,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     const mobile = isMobile();
     const maskElement = document.createElement("div");
     maskElement.className = "av__mask av__richtext-mask";
+    maskElement.dataset.avBlockId = options.nodeElement.dataset.nodeId;
     maskElement.style.zIndex = (++window.siyuan.zIndex).toString();
     maskElement.innerHTML = `<div class="av__richtext-editor" role="dialog">
     <div class="av__richtext-host"></div>

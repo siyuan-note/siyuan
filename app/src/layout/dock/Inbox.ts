@@ -46,7 +46,7 @@ export class Inbox extends Model {
     <svg data-type="selectall" class="toolbar__icon"><use xlink:href="#iconUncheck"></use></svg>
     <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconLeft'></use></svg>
     <svg data-type="next" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconRight'></use></svg>
-    <svg data-type="more" class="toolbar__icon"><use xlink:href='#iconMore'></use></svg>
+    <svg data-type="more" class="toolbar__icon fn__none"><use xlink:href='#iconMore'></use></svg>
 </div>
 <div class="fn__loading fn__none">
     <img width="64px" src="/stage/loading-pure.svg"></div>
@@ -117,6 +117,7 @@ export class Inbox extends Model {
                         useElement.setAttribute("xlink:href", "#iconUncheck");
                     }
                     countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
+                    this.updateMoreVisibility();
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     break;
@@ -131,6 +132,7 @@ export class Inbox extends Model {
                         useElement.setAttribute("xlink:href", "#iconUncheck");
                     }
                     countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
+                    this.updateMoreVisibility();
                     selectAllElement.querySelector("use").setAttribute("xlink:href", this.element.lastElementChild.querySelectorAll('[*|href="#iconCheck"]').length === this.element.lastElementChild.querySelectorAll(".b3-list-item").length ? "#iconCheck" : "#iconUncheck");
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
@@ -170,6 +172,7 @@ export class Inbox extends Model {
                     detailsElement.innerHTML = this.genDetail(data);
                     detailsElement.setAttribute("data-id", data.oId);
                     detailsElement.classList.remove("fn__none");
+                    this.updateMoreVisibility();
                     detailsElement.scrollTop = 0;
                     this.element.lastElementChild.classList.add("fn__none");
                     event.preventDefault();
@@ -187,6 +190,15 @@ export class Inbox extends Model {
         this.element.firstElementChild.querySelector('[data-type="next"]').classList.remove("fn__none");
         this.element.querySelector(".inboxDetails").classList.add("fn__none");
         this.element.lastElementChild.classList.remove("fn__none");
+        this.updateMoreVisibility();
+    }
+
+    private updateMoreVisibility() {
+        /// #if MOBILE
+        const detailsElement = this.element.querySelector(".inboxDetails");
+        this.element.firstElementChild.querySelector('[data-type="more"]').classList.toggle("fn__none",
+            detailsElement.classList.contains("fn__none") && this.selectIds.length === 0);
+        /// #endif
     }
 
     private genDetail(data: IInbox) {
@@ -237,6 +249,7 @@ ${data.shorthandContent}
     private more(event: MouseEvent, itemElement?: HTMLElement) {
         const detailsElement = this.element.querySelector(".inboxDetails");
         window.siyuan.menus.menu.remove();
+        /// #if !MOBILE
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.refresh,
             icon: "iconRefresh",
@@ -244,6 +257,7 @@ ${data.shorthandContent}
                 this.refresh(itemElement);
             }
         }).element);
+        /// #endif
         let ids: string[] = [];
         if (itemElement) {
             ids = [itemElement.dataset.id];
@@ -349,6 +363,7 @@ ${data.shorthandContent}
                         this.selectIds.splice(i, 1);
                     }
                 }
+                this.updateMoreVisibility();
             } else {
                 this.selectIds = [];
             }
@@ -461,6 +476,7 @@ ${data.shorthandContent}
 
             this.pageCount = response.data.data.pagination.paginationRecordCount;
             this.element.querySelector(".inboxSelectCount").innerHTML = `${this.selectIds.length}/${this.pageCount}`;
+            this.updateMoreVisibility();
 
             const previousElement = this.element.querySelector('[data-type="previous"]');
             const nextElement = this.element.querySelector('[data-type="next"]');

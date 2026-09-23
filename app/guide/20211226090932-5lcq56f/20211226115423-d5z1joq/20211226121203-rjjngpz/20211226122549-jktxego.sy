@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260923221935"
+		"updated": "20260923233001"
 	},
 	"Children": [
 		{
@@ -48,6 +48,65 @@
 				{
 					"Type": "NodeText",
 					"Data": " 組合的單一字元設為快捷鍵。"
+				}
+			]
+		},
+		{
+			"ID": "20260923233001-dx1k6zh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260923233001-dx1k6zh",
+				"updated": "20260923233001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 視窗中，從搜尋框按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可依序聚焦可見分類，再進入右側設定控制項。按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 反向移動，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開啟目前聚焦的分類。"
 				}
 			]
 		},

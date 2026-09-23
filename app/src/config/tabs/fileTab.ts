@@ -54,7 +54,7 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
     /// #endif
     group.switch("fileTree.parentDocClickExpand", {
         title: window.siyuan.languages.parentDocClickExpand,
-        desc: window.siyuan.mobile ? "" : window.siyuan.languages.parentDocClickExpandTip,
+        desc: window.siyuan.languages.parentDocClickExpandTip,
         save: (value) => fileConfigApi.patch("parentDocClickExpand", value, () => {
             /// #if !MOBILE
             getAllModels().files.forEach((files) => files.updateDocActions());

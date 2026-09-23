@@ -38,9 +38,9 @@ const loadInbox = (responses: {code: number; data?: Record<string, string>}[]) =
 
 test("inbox insertion removes only entries successfully appended to the current document", async () => {
     const {inbox, calls, removed} = loadInbox([
-        {code: 0, data: {shorthandMd: "First"}},
+        {code: 0, data: {shorthandMd: "First", shorthandTitle: "First title"}},
         {code: 0},
-        {code: 0, data: {shorthandMd: "Second"}},
+        {code: 0, data: {shorthandMd: "Second", shorthandTitle: "Second title"}},
         {code: -1},
     ]);
     await inbox.insertToCurrentDoc(["first", "second"], "doc-id");
@@ -49,6 +49,8 @@ test("inbox insertion removes only entries successfully appended to the current 
         "/api/inbox/getShorthand", "/api/block/appendBlock",
     ]);
     assert.equal(calls[1].data.parentID, "doc-id");
+    assert.equal(calls[1].data.data, "# First title\n\nFirst");
+    assert.equal(calls[3].data.data, "# Second title\n\nSecond");
     assert.deepEqual(removed, [["first"]]);
 });
 
@@ -65,6 +67,16 @@ test("inbox insertion preserves link-only entries as Markdown links", async () =
         {code: 0},
     ]);
     await inbox.insertToCurrentDoc(["link"], "doc-id");
-    assert.equal(calls[1].data.data, "[Source](https://example.com)");
+    assert.equal(calls[1].data.data, "# Source\n\n[Source](https://example.com)");
     assert.deepEqual(removed, [["link"]]);
+});
+
+test("inbox insertion keeps Markdown punctuation in the title as plain text", async () => {
+    const {inbox, calls, removed} = loadInbox([
+        {code: 0, data: {shorthandMd: "Body", shorthandTitle: "A *bold* [note]\ncontinued"}},
+        {code: 0},
+    ]);
+    await inbox.insertToCurrentDoc(["entry"], "doc-id");
+    assert.equal(calls[1].data.data, "# A \\*bold\\* \\[note\\] continued\n\nBody");
+    assert.deepEqual(removed, [["entry"]]);
 });

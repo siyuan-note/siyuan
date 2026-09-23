@@ -150,8 +150,11 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             event.preventDefault();
         }
     }));
-    ["mouseover", "pointerover"].forEach(type => host.addEventListener(type, event => event.stopPropagation()));
-    owner.gutter?.render(owner, table, cell);
+    ["mouseover", "pointerover"].forEach(type => host.addEventListener(type, event => {
+        event.stopPropagation();
+        hideElements(["gutter"], owner);
+    }));
+    owner.gutter?.render(owner, table, host);
     const toolbar = getDefaultToolbar(isMobile()).filter(item => typeof item === "string" ? item !== "ai" : item.name !== "ai");
     const safeSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, hintSource: THintSource) =>
         hintSlash(key, protyle, hintSource).filter(item => TABLE_CELL_SLASH_IDS.has(item.id)));

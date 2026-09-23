@@ -20,6 +20,7 @@ import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarInterval, 
     moveCalendarDate, packCalendarWeek, resizeCalendarDate} from "./date";
 import {openCalendarJump} from "./jump";
 import {getCalendarDropDay} from "./hitTest";
+import {createCalendarPreviewLayout} from "./preview";
 import {addCalendarDateField, bindCalendarSettings, getCalendarSettingsHTML, isCalendarDateColumn} from "./settings";
 import {getCalendarRequestRange, getCalendarState, setCalendarMode} from "./state";
 import {bindCalendarUndated, getCalendarUndatedHTML} from "./undated";
@@ -103,6 +104,9 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
         let destination = origin;
         let dragging = false;
         let cleaned = false;
+        let lastX = x;
+        let lastY = y;
+        const previewLayout = createCalendarPreviewLayout();
         const sourceItems = Array.from(root.querySelectorAll<HTMLElement>("[data-calendar-item]"))
             .filter(element => element.dataset.calendarItem === entry.row.id);
         const clearPreview = () => {
@@ -137,8 +141,9 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
                 card.removeAttribute("tabindex");
                 card.style.left = `${segment.column * 100 / 7}%`;
                 card.style.width = `calc(${segment.span * 100 / 7}% - 4px)`;
-                card.style.top = `${week.querySelector(".av__calendar-days").getBoundingClientRect().height}px`;
+                card.style.top = "0";
                 week.append(layer);
+                previewLayout.place(week, layer, card);
             });
         };
         const clean = () => {
@@ -147,6 +152,7 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
             }
             cleaned = true;
             clearPreview();
+            previewLayout.destroy();
             root.classList.remove("av__calendar--dragging", "av__calendar--invalid");
             sourceItems.forEach(element => element.classList.remove("av__calendar-item--dragging"));
             if (dragging) {
@@ -170,11 +176,19 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
                     return;
                 }
                 begin();
+                if (clientX === lastX && clientY === lastY) {
+                    return;
+                }
+                lastX = clientX;
+                lastY = clientY;
                 destination = getCalendarDropDay(root, clientX, clientY);
                 preview();
             },
             finish: (clientX: number, clientY: number) => {
-                destination = getCalendarDropDay(root, clientX, clientY);
+                // 占位扩展后，同一落点沿用已展示的预览日期，避免松手时跳到相邻周。
+                if (clientX !== lastX || clientY !== lastY) {
+                    destination = getCalendarDropDay(root, clientX, clientY);
+                }
                 if (dragging && root.isConnected) {
                     const date = candidate();
                     if (date && JSON.stringify(date) !== JSON.stringify(entry.date.value.date)) {

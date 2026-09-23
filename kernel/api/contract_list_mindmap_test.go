@@ -27,6 +27,9 @@ func testAPIContractMindmapMigration(t *testing.T, engine *gin.Engine, boxID, do
 		t.Fatal(err)
 	}
 	sourceBefore := model.GetBlockDOM(id)
+	if !strings.Contains(sourceBefore, "mindmap") {
+		t.Fatalf("unexpected migration source: %s", sourceBefore)
+	}
 	type response struct {
 		Code int                                   `json:"code"`
 		Data apicontract.MigrateLegacyMindmapsData `json:"data"`
@@ -55,8 +58,8 @@ func testAPIContractMindmapMigration(t *testing.T, engine *gin.Engine, boxID, do
 	if recorder.Code != 403 {
 		t.Fatalf("reader migration was not denied: %d", recorder.Code)
 	}
-	if model.GetBlockDOM(id) != sourceBefore {
-		t.Fatal("reader request modified source")
+	if source := model.GetBlockDOM(id); source != sourceBefore {
+		t.Fatalf("reader request modified source: %s", source)
 	}
 	result := post(string(body))
 	if result.Code != 0 || result.Data.Converted != 1 || len(result.Data.Blocks) != 1 || result.Data.Blocks[0].ID != id ||

@@ -255,12 +255,12 @@ func TestGlobalBacklinkLargeDataset(t *testing.T) {
 	}
 	sql.IndexTreeQueue(definition)
 	for doc := 0; doc < documents; doc++ {
-		tree := addFileOperationTestDoc(t, fixture, ast.NewNodeID(), fmt.Sprintf("Source%d", doc), false)
+		tree := addFileOperationTestDoc(t, fixture, fmt.Sprintf("20260923000000-d%06d", doc), fmt.Sprintf("Source%d", doc), false)
 		for tree.Root.FirstChild != nil {
 			tree.Root.FirstChild.Unlink()
 		}
 		for index := perDocument - 1; index >= 0; index-- {
-			p := treenode.NewParagraph(ast.NewNodeID())
+			p := treenode.NewParagraph(fmt.Sprintf("20260923000000-p%06d", index*documents+doc+1))
 			p.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: fixture.sourceID,
 				TextMarkBlockRefSubtype: "s", TextMarkTextContent: fmt.Sprintf("A%d", index*documents+doc+1)})
 			tree.Root.AppendChild(p)

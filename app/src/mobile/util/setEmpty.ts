@@ -88,12 +88,12 @@ export const setEmpty = (app: App) => {
     });
 };
 
-export const setEditor = () => {
+export const setEditor = (showTitle = true) => {
     document.getElementById("mobileTopBar").classList.remove("fn__none");
     const toolbarNameElement = document.getElementById("toolbarName") as HTMLInputElement;
     setTitle(toolbarNameElement.value);
-    toolbarNameElement.classList.remove("fn__hidden");
-    document.getElementById("toolbarNameReadonly").classList.remove("fn__hidden");
+    toolbarNameElement.classList.toggle("fn__hidden", !showTitle);
+    document.getElementById("toolbarNameReadonly").classList.toggle("fn__hidden", !showTitle);
     document.getElementById("editor").classList.remove("fn__none");
     document.getElementById("empty").classList.add("fn__none");
     updateMobileTopBarLayout();

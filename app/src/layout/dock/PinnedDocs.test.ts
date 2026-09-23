@@ -400,9 +400,13 @@ test("notebook root expansion requests physical root while documents keep their 
 });
 
 test("parent titles prefetch once and double clicks preserve expanded and collapsed pinned rows", async () => {
-    for (const expanded of [false, true]) {
+    for (const {expanded, mobile} of [
+        {expanded: false, mobile: false}, {expanded: true, mobile: false},
+        {expanded: false, mobile: true}, {expanded: true, mobile: true},
+    ]) {
         const {panel, config, calls} = loadPanel();
         config.fileTree.parentDocClickExpand = true;
+        panel.mobile = mobile;
         panel.generation = 0;
         panel.expanded = new Set(expanded ? ["doc"] : []);
         const row = {isConnected: true, dataset: {nodeId: "doc", notebook: "box", pinRow: "doc", path: "/doc.sy", count: "1"},

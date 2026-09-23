@@ -18,7 +18,7 @@ import {getDocByScroll, saveScroll} from "../protyle/scroll/saveScroll";
 import {isEncryptedBox} from "../util/pathName";
 import {bindMobileBarsScroll, pauseMobileBarsScroll} from "./util/mobileBars";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
-import {restoreMobileTopBarLayout, updateMobileTopBarLayout} from "./util/mobileTopBar";
+import {restoreMobileTopBarLayout} from "./util/mobileTopBar";
 import {stickyRow} from "../protyle/render/av/row";
 import {invalidateTrackedRanges} from "../protyle/util/trackedRange";
 import {getActiveMobileSecondaryEditor} from "./util/secondaryEditors";
@@ -70,12 +70,13 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                                    scrollAttr?: IScrollAttr, updateRecent = true,
                                    onFailure?: (invalid?: boolean) => void) => {
     let completed = false;
+    let titleHidden = false;
     const complete = (protyle: IProtyle) => {
         if (completed) {
             return;
         }
         completed = true;
-        updateMobileTopBarLayout();
+        setEditor();
         bindMobileBarsScroll(protyle.contentElement, () => {
             // 面包屑位移后同步数据库吸顶位置，避免数据库使用上一帧的面包屑位置
             protyle.wysiwyg.element.querySelectorAll(".av[data-render='true']").forEach((item: HTMLElement) => {
@@ -100,6 +101,9 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             return;
         }
         completed = true;
+        if (titleHidden && isValid() && window.siyuan.mobile.editor?.protyle.wysiwyg.element.childElementCount > 0) {
+            setEditor();
+        }
         onFailure?.(invalid);
     };
     if (!isValid()) {
@@ -208,6 +212,8 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 complete(editor.protyle);
             },
         };
+        setEditor(false);
+        titleHidden = true;
         if (window.siyuan.mobile.editor) {
             invalidateTrackedRanges(window.siyuan.mobile.editor.protyle);
             window.siyuan.mobile.editor.protyle.notebookId = data.data.box;
@@ -307,7 +313,6 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 return;
             }
         }
-        setEditor();
         closePanel();
     }, undefined, undefined, signal).then(() => {
         if (!blockInfoHandled) {

@@ -20,6 +20,7 @@ export const genWorkspaceStorageHtml = () => `<div class="b3-label config-item w
         ${genConfigItemMainHtml(window.siyuan.languages.workspaceStorage, window.siyuan.languages.workspaceStorageTip)}
         <span class="fn__space"></span>
         ${genButtonHtml("refreshWorkspaceStorage", window.siyuan.languages.refresh, "iconRefresh")}
+        <div class="b3-label__text workspace-storage__time" data-storage-time></div>
     </div>
     <div class="b3-label__text" data-storage-status role="status"></div>
     <div class="workspace-storage__content fn__none" data-storage-content>
@@ -33,7 +34,6 @@ export const genWorkspaceStorageHtml = () => `<div class="b3-label config-item w
         <dl class="workspace-storage__details" data-storage-details></dl>
     </div>
     <div class="b3-label__text fn__none" data-storage-chart-error role="status"></div>
-    <div class="b3-label__text" data-storage-time></div>
 </div>`;
 
 export const unmountWorkspaceStorage = (root: HTMLElement) => {
@@ -48,6 +48,7 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
         return;
     }
     const refresh = element.querySelector<HTMLButtonElement>("#refreshWorkspaceStorage");
+    const refreshIcon = refresh.querySelector("svg");
     const status = element.querySelector<HTMLElement>("[data-storage-status]");
     const content = element.querySelector<HTMLElement>("[data-storage-content]");
     const chartElement = element.querySelector<HTMLElement>("[data-storage-chart]");
@@ -116,7 +117,8 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
         }
         pending = true;
         refresh.disabled = true;
-        status.textContent = window.siyuan.languages.loading;
+        refreshIcon.classList.add("fn__rotate");
+        status.textContent = "";
         status.classList.remove("ft__error");
         element.setAttribute("aria-busy", "true");
         try {
@@ -131,13 +133,16 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
             total.textContent = formatStorageSize(data.totalSize);
             total.title = `${data.totalSize.toLocaleString()} B`;
             details.innerHTML = data.directories.map((entry, index) => {
+                if (entry.size === 0) {
+                    return "";
+                }
                 const name = entry.name === "other" ? window.siyuan.languages.workspaceStorageOther : entry.name;
                 const percent = data.totalSize > 0 ? entry.size / data.totalSize : 0;
                 return `<div class="workspace-storage__row">
     <dt><span class="workspace-storage__color" style="background-color:var(${colorVariables[index]})"></span><span>${escapeHtml(name)}</span></dt>
     <dd title="${entry.size.toLocaleString()} B"><bdi dir="ltr">${formatStorageSize(entry.size)}</bdi></dd>
     <dd class="workspace-storage__percent ft__on-surface">${percent.toLocaleString(undefined, {style: "percent", maximumFractionDigits: 1})}</dd>
-</div>${entry.name === "data" ? `<div class="workspace-storage__row workspace-storage__row--assets ft__on-surface">
+</div>${entry.name === "data" && data.assetsSize > 0 ? `<div class="workspace-storage__row workspace-storage__row--assets ft__on-surface">
     <dt>${escapeHtml(window.siyuan.languages.assets)}</dt>
     <dd title="${data.assetsSize.toLocaleString()} B"><bdi dir="ltr">${formatStorageSize(data.assetsSize)}</bdi></dd>
 </div>` : ""}`;
@@ -154,6 +159,7 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
             }
         } finally {
             pending = false;
+            refreshIcon.classList.remove("fn__rotate");
             if (active()) {
                 refresh.disabled = false;
                 element.setAttribute("aria-busy", "false");

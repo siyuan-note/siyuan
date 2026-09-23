@@ -1,4 +1,13 @@
 .workspace-storage {
+  &__header {
+    flex-wrap: wrap;
+  }
+
+  &__time {
+    flex: 1 0 100%;
+    text-align: right;
+  }
+
   &__content {
     display: flex;
     align-items: center;

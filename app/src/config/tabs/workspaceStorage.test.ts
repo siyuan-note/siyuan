@@ -101,10 +101,13 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     };
     check.equal(requests.length, 1);
     check.equal(button().disabled, true);
+    check.ok(button().querySelector("svg").classList.contains("fn__rotate"));
+    check.equal(status().textContent, "");
     button().dispatchEvent(new Event("click"));
     check.equal(requests.length, 1, "pending refresh must be coalesced");
     await succeed(0);
     check.equal(button().disabled, false);
+    check.ok(!button().querySelector("svg").classList.contains("fn__rotate"));
     check.equal(scriptLoads, 1);
     check.equal(root.querySelector("[data-storage-total]").textContent, "2 GiB");
     check.equal(root.querySelectorAll(".workspace-storage__row").length, 7);
@@ -136,12 +139,16 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     requests[1].resolve({code: -1, msg: "unreadable", data: null});
     await tick();
     check.equal(status().textContent, languages.workspaceStorageFailed);
+    check.ok(!button().querySelector("svg").classList.contains("fn__rotate"));
     check.equal(button().disabled, false);
     check.equal(root.querySelector("[data-storage-total]").textContent, "2 GiB", "failure must retain the previous dated result");
     button().click();
+    check.equal(status().textContent, "");
+    check.ok(button().querySelector("svg").classList.contains("fn__rotate"));
     await succeed(2, result(0));
     check.equal(root.querySelector("[data-storage-total]").textContent, "0 B");
     check.equal(chart().getOption().series[0].data.length, 0);
+    check.equal(root.querySelectorAll(".workspace-storage__row").length, 0);
     check.equal(status().textContent, "");
     await captures("empty-workspace");
     button().click();
@@ -168,6 +175,14 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     await succeed(6);
     check.ok(chart());
     check.ok(root.querySelector("[data-storage-chart-error]").classList.contains("fn__none"));
+    button().click();
+    const partial = result();
+    partial.assetsSize = 0;
+    partial.directories[1].size = 0;
+    await succeed(7, partial);
+    check.equal(root.querySelectorAll(".workspace-storage__row").length, 5);
+    check.equal(root.querySelector(".workspace-storage__row--assets"), null);
+    check.ok(!Array.from(root.querySelectorAll("dt")).some(node => node.textContent === "repo"));
     exports.unmountWorkspaceStorage(root);
     for (const [locale, mobile, width, fontSize] of [
         ["zh-CN", false, 850, 16], ["en", false, 620, 24], ["de", false, 850, 24],
@@ -186,6 +201,11 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
         const referenceRect = root.querySelector("#storageReferenceControl").getBoundingClientRect();
         check.ok(Math.abs(refreshRect.width - referenceRect.width) < 1, `${context}: shared button width`);
         check.ok(Math.abs(refreshRect.right - referenceRect.right) < 1, `${context}: shared button alignment`);
+        const timeElement = root.querySelector<HTMLElement>("[data-storage-time]");
+        const timeRect = timeElement.getBoundingClientRect();
+        check.ok(timeRect.top >= refreshRect.bottom, `${context}: time must be below refresh`);
+        check.ok(Math.abs(timeRect.right - refreshRect.right) < 1, `${context}: time right edge`);
+        check.equal(getComputedStyle(timeElement).textAlign, "right", `${context}: time alignment`);
         const sizeRects = Array.from(root.querySelectorAll(".workspace-storage__row dd:first-of-type"), node => node.getBoundingClientRect());
         const edge = locale === "ar" ? "left" : "right";
         check.ok(sizeRects.every(rect => Math.abs(rect[edge] - sizeRects[0][edge]) < 1), `${context}: size column alignment`);

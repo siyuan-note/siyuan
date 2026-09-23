@@ -449,13 +449,17 @@ func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBloc
 		return
 	}
 
-	embedBlock.Content = "" // 嵌入块每查询一次多一个结果 https://github.com/siyuan-note/siyuan/issues/7196
+	content := "" // 嵌入块每查询一次多一个结果 https://github.com/siyuan-note/siyuan/issues/7196
 	for _, block := range queryResultBlocks {
-		embedBlock.Content += block.Block.Markdown
+		content += block.Block.Markdown
 	}
-	if "" == embedBlock.Content {
-		embedBlock.Content = "no query result"
+	if "" == content {
+		content = "no query result"
 	}
+	if embedBlock.Content == content {
+		return
+	}
+	embedBlock.Content = content
 	sql.UpdateBlockContentQueue(embedBlock)
 }
 

@@ -381,8 +381,6 @@
     top: 0;
     bottom: 0;
     background: color-mix(in srgb, var(--b3-theme-primary) 12%, transparent);
-    outline: 1px solid var(--b3-theme-primary);
-    outline-offset: -1px;
   }
 
   .av__calendar-preview-layer {
@@ -397,7 +395,6 @@
     position: absolute;
     box-sizing: border-box;
     border-color: var(--b3-theme-primary);
-    box-shadow: var(--b3-point-shadow);
   }
 
   .av__calendar-item--dragging {
@@ -413,6 +410,10 @@
 
     .av__calendar-item {
       cursor: grabbing;
+    }
+
+    .av__calendar-item:not(.av__calendar-preview) {
+      border-color: transparent;
     }
   }
 

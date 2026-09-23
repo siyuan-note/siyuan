@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "تخطيطات النافذة الرئيسية",
 	"windowWorkspaces": "تخطيطات النافذة الجديدة",
 	"windowWorkspaceSave": "حفظ كتخطيط للنافذة الجديدة",
-	"windowWorkspaceRemoveTip": "هل تريد إزالة «${x}»؟ ستُحفظ المستندات والمرفقات، وستبقى النوافذ المفتوحة كما هي.",
+	"windowWorkspaceRemoveTip": "ستبقى النوافذ المفتوحة مفتوحة. هل تريد حذف تخطيط النافذة الجديدة «${x}»؟",
 	"windowWorkspaceSaveError": "تعذر حفظ تخطيط النافذة الجديدة. يرجى المحاولة مرة أخرى.",
 	"windowWorkspaceUnavailable": "تخطيط النافذة الجديدة غير متاح أو يستخدم تنسيقًا غير مدعوم.",
 	"calendarUndated": "بلا تاريخ",

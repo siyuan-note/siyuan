@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "Tata letak jendela utama",
 	"windowWorkspaces": "Tata letak jendela baru",
 	"windowWorkspaceSave": "Simpan sebagai tata letak jendela baru",
-	"windowWorkspaceRemoveTip": "Hapus “${x}”? Dokumen dan lampiran akan tetap disimpan, dan jendela yang terbuka akan tetap terbuka.",
+	"windowWorkspaceRemoveTip": "Jendela yang terbuka akan tetap terbuka. Yakin ingin menghapus tata letak jendela baru “${x}”?",
 	"windowWorkspaceSaveError": "Tidak dapat menyimpan tata letak jendela baru. Silakan coba lagi.",
 	"windowWorkspaceUnavailable": "Tata letak jendela baru tidak tersedia atau menggunakan format yang tidak didukung.",
 	"calendarUndated": "Tanpa tanggal",

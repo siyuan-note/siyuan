@@ -279,7 +279,7 @@ export const getLayoutSubMenu = (): IMenu[] => {
             });
             render();
             /// #if !BROWSER
-            void ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "getOpenWindowWorkspaces"}).then((ids: string[]) => {
+            void ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: Constants.WINDOW_WORKSPACE_GET_OPEN}).then((ids: string[]) => {
                 openIDs = Array.isArray(ids) ? ids : [];
                 if (menuElement.isConnected) {
                     render();

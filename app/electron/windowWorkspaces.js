@@ -1,3 +1,5 @@
+const {windowWorkspaceCommands, windowWorkspaceSavedChannel} = require("./windowWorkspaceConstants");
+
 class WindowWorkspaceRegistry {
     constructor() {
         this.windows = new Map();
@@ -61,7 +63,7 @@ const flushWindowWorkspaces = (windows, ipcMain, timeoutMs = 11000) => {
         const pending = new Set(contents.map(content => content.id));
         const finish = saved => {
             clearTimeout(timeout);
-            ipcMain.removeListener("siyuan-window-workspace-saved", onSaved);
+            ipcMain.removeListener(windowWorkspaceSavedChannel, onSaved);
             resolve(saved);
         };
         const onSaved = (event, response) => {
@@ -76,10 +78,10 @@ const flushWindowWorkspaces = (windows, ipcMain, timeoutMs = 11000) => {
             }
         };
         const timeout = setTimeout(() => finish(false), timeoutMs);
-        ipcMain.on("siyuan-window-workspace-saved", onSaved);
+        ipcMain.on(windowWorkspaceSavedChannel, onSaved);
         contents.forEach(content => {
             try {
-                content.send("siyuan-send-windows", {cmd: "flushWindowWorkspace", data: id});
+                content.send("siyuan-send-windows", {cmd: windowWorkspaceCommands.FLUSH, data: id});
             } catch {
                 finish(false);
             }

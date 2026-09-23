@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "Layouts des Hauptfensters",
 	"windowWorkspaces": "Layouts für neue Fenster",
 	"windowWorkspaceSave": "Als Layout für ein neues Fenster speichern",
-	"windowWorkspaceRemoveTip": "„${x}“ entfernen? Dokumente und Anhänge bleiben erhalten, und geöffnete Fenster bleiben geöffnet.",
+	"windowWorkspaceRemoveTip": "Geöffnete Fenster bleiben geöffnet. Layout für neue Fenster „${x}“ wirklich löschen?",
 	"windowWorkspaceSaveError": "Das Layout für ein neues Fenster konnte nicht gespeichert werden. Bitte erneut versuchen.",
 	"windowWorkspaceUnavailable": "Das Layout für ein neues Fenster ist nicht verfügbar oder verwendet ein nicht unterstütztes Format.",
 	"calendarUndated": "Ohne Datum",

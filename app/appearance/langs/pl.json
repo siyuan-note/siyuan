@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "Układy głównego okna",
 	"windowWorkspaces": "Układy nowego okna",
 	"windowWorkspaceSave": "Zapisz jako układ nowego okna",
-	"windowWorkspaceRemoveTip": "Usunąć „${x}”? Dokumenty i załączniki zostaną zachowane, a otwarte okna pozostaną otwarte.",
+	"windowWorkspaceRemoveTip": "Otwarte okna pozostaną otwarte. Czy na pewno usunąć układ nowego okna „${x}”?",
 	"windowWorkspaceSaveError": "Nie udało się zapisać układu nowego okna. Spróbuj ponownie.",
 	"windowWorkspaceUnavailable": "Układ nowego okna jest niedostępny lub używa nieobsługiwanego formatu.",
 	"calendarUndated": "Bez daty",

@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "Dispositions de la fenêtre principale",
 	"windowWorkspaces": "Dispositions de nouvelle fenêtre",
 	"windowWorkspaceSave": "Enregistrer comme disposition de nouvelle fenêtre",
-	"windowWorkspaceRemoveTip": "Supprimer « ${x} » ? Les documents et les pièces jointes seront conservés, et les fenêtres ouvertes resteront ouvertes.",
+	"windowWorkspaceRemoveTip": "Les fenêtres ouvertes resteront ouvertes. Confirmez-vous la suppression de la disposition de nouvelle fenêtre « ${x} » ?",
 	"windowWorkspaceSaveError": "Impossible d’enregistrer la disposition de nouvelle fenêtre. Veuillez réessayer.",
 	"windowWorkspaceUnavailable": "La disposition de nouvelle fenêtre est indisponible ou utilise un format non pris en charge.",
 	"calendarUndated": "Sans date",

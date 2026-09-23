@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {windowWorkspaceCommands} from "../../electron/windowWorkspaceConstants";
 
 const compiled = transpileModule(readFileSync("src/menus/layouts.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -13,7 +14,8 @@ const fixture = () => {
     const calls: Array<{action: string, value?: unknown}> = [];
     let dialog: any;
     const dependencies = {
-        Constants: {LOCAL_LAYOUTS: "layouts", LOCAL_FILESPATHS: "paths"},
+        Constants: {LOCAL_LAYOUTS: "layouts", LOCAL_FILESPATHS: "paths",
+            WINDOW_WORKSPACE_GET_OPEN: windowWorkspaceCommands.GET_OPEN},
         setStorageVal: (key: string, value: unknown, callback?: () => void) => {
             calls.push({action: key, value: JSON.parse(JSON.stringify(value))});
             callback?.();

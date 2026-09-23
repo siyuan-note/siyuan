@@ -140,7 +140,7 @@ const scheduleSave = () => {
 
 const associate = async (id?: string) => {
     /// #if !BROWSER
-    if (!await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "setWindowWorkspace", id: id || ""})) {
+    if (!await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: Constants.WINDOW_WORKSPACE_SET, id: id || ""})) {
         return false;
     }
     /// #endif
@@ -182,7 +182,7 @@ export const openWindowWorkspace = async (id: string) => {
         return;
     }
     /// #if !BROWSER
-    if (await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "focusWindowWorkspace", id})) {
+    if (await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: Constants.WINDOW_WORKSPACE_FOCUS, id})) {
         return;
     }
     /// #endif

@@ -147,14 +147,27 @@ func IsCrossSiteFetchSite(site string) bool {
 	return "" != site && "same-origin" != site && "none" != site
 }
 
-// IsSessionOriginAllowedRequest 校验会话认证请求是否允许放行：浏览器标记的跨站请求直接拒绝，
-// 其余请求继续校验 Origin。
+// IsSessionOriginAllowedRequest 校验会话认证请求：同站子域的应用页面导航可放行，
+// 其他跨源请求拒绝，其余请求继续校验 Origin。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
 func IsSessionOriginAllowedRequest(r *http.Request) bool {
 	if IsCrossSiteFetchSite(r.Header.Get("Sec-Fetch-Site")) {
-		return false
+		// 已登录用户可从同站子域进入应用页面；跨站导航和同站 API 请求仍须拒绝。
+		return r.Header.Get("Sec-Fetch-Site") == "same-site" &&
+			r.Method == http.MethodGet && r.Header.Get("Origin") == "" &&
+			r.Header.Get("Sec-Fetch-Mode") == "navigate" &&
+			r.Header.Get("Sec-Fetch-Dest") == "document" && isAppEntryPath(r.URL.Path)
 	}
 	return IsSessionOriginAllowed(r.Header.Get("Origin"), r.Host)
+}
+
+func isAppEntryPath(path string) bool {
+	switch path {
+	case "/", "/stage/build/app/", "/stage/build/desktop/", "/stage/build/mobile/",
+		"/stage/build/app/index.html", "/stage/build/desktop/index.html", "/stage/build/mobile/index.html":
+		return true
+	}
+	return false
 }
 
 func originHostEquals(origin, host string) bool {

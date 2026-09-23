@@ -90,10 +90,20 @@ func TestIsSessionOriginAllowedRequest(t *testing.T) {
 		site   string
 		origin string
 		host   string
+		path   string
+		mode   string
+		dest   string
 		want   bool
 	}{
 		{name: "cross-site navigation without Origin", site: "cross-site", origin: "", host: "127.0.0.1:6806", want: false},
 		{name: "same-site without Origin", site: "same-site", origin: "", host: "127.0.0.1:6806", want: false},
+		{name: "same-site app navigation", site: "same-site", host: "note.example.com", path: "/stage/build/desktop/", mode: "navigate", dest: "document", want: true},
+		{name: "same-site root navigation", site: "same-site", host: "note.example.com", path: "/", mode: "navigate", dest: "document", want: true},
+		{name: "same-site API navigation denied", site: "same-site", host: "note.example.com", path: "/api/system/exit", mode: "navigate", dest: "document", want: false},
+		{name: "same-site asset navigation denied", site: "same-site", host: "note.example.com", path: "/assets/file.png", mode: "navigate", dest: "document", want: false},
+		{name: "same-site app fetch denied", site: "same-site", host: "note.example.com", path: "/stage/build/desktop/", mode: "cors", dest: "empty", want: false},
+		{name: "same-site app navigation with Origin denied", site: "same-site", origin: "https://home.example.com", host: "note.example.com", path: "/stage/build/desktop/", mode: "navigate", dest: "document", want: false},
+		{name: "cross-site app navigation denied", site: "cross-site", host: "note.example.com", path: "/stage/build/desktop/", mode: "navigate", dest: "document", want: false},
 		{name: "same-origin without Origin", site: "same-origin", origin: "", host: "127.0.0.1:6806", want: true},
 		{name: "none without Origin", site: "none", origin: "", host: "127.0.0.1:6806", want: true},
 		{name: "absent fetch site with local origin", site: "", origin: "http://127.0.0.1:6806", host: "127.0.0.1:6806", want: true},
@@ -103,9 +113,15 @@ func TestIsSessionOriginAllowedRequest(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			request := httptest.NewRequest(http.MethodGet, "http://"+test.host+"/", nil)
+			path := test.path
+			if path == "" {
+				path = "/"
+			}
+			request := httptest.NewRequest(http.MethodGet, "http://"+test.host+path, nil)
 			request.Header.Set("Sec-Fetch-Site", test.site)
 			request.Header.Set("Origin", test.origin)
+			request.Header.Set("Sec-Fetch-Mode", test.mode)
+			request.Header.Set("Sec-Fetch-Dest", test.dest)
 			if got := IsSessionOriginAllowedRequest(request); got != test.want {
 				t.Fatalf("IsSessionOriginAllowedRequest(site=%q, origin=%q, host=%q) = %v, want %v", test.site, test.origin, test.host, got, test.want)
 			}

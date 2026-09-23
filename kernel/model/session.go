@@ -313,8 +313,9 @@ func CheckAuth(c *gin.Context) {
 		// 同时拒绝浏览器标记的跨站请求，防止跨站 GET 导航不带 Origin 时绕过校验
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
 		if !util.IsSessionOriginAllowedRequest(c.Request) {
-			logging.LogWarnf("invalid Origin [%s] for session auth [ip=%s]", c.GetHeader("Origin"), c.ClientIP())
-			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid Origin"})
+			logging.LogWarnf("invalid session request origin [origin=%s, fetch-site=%s, ip=%s]",
+				c.GetHeader("Origin"), c.GetHeader("Sec-Fetch-Site"), c.ClientIP())
+			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid request origin"})
 			c.Abort()
 			return
 		}

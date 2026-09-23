@@ -1,4 +1,7 @@
 {
+	"calendarJump": "ไปยังวันที่หรือสัปดาห์ ISO",
+	"calendarISOWeek": "สัปดาห์ ISO",
+	"calendarISOWeekYear": "ปีของสัปดาห์ ISO",
 	"templateSourceDocUnavailable": "เอกสารต้นฉบับของแม่แบบไม่มีอยู่หรือไม่สามารถเข้าถึงได้",
 	"templateOpenSourceDoc": "เปิดเอกสารต้นฉบับของแม่แบบ",
 	"taskCompletionToggle": "สลับสถานะเสร็จสิ้นของงานในรายการ",

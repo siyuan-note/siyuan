@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Иди на датум или ISO недељу",
+	"calendarISOWeek": "ISO недеља",
+	"calendarISOWeekYear": "Година ISO недеље",
 	"templateSourceDocUnavailable": "Изворни документ шаблона не постоји или није доступан",
 	"templateOpenSourceDoc": "Отвори изворни документ шаблона",
 	"taskCompletionToggle": "Промени стање завршености ставке листе задатака",

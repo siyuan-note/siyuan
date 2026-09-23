@@ -1,5 +1,4 @@
 import {Constants} from "../../../../constants";
-import {openInputDialog} from "../../../../dialog/inputDialog";
 import * as dayjs from "dayjs";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {transaction} from "../../../wysiwyg/transaction";
@@ -15,8 +14,9 @@ import {renderAVRichTextElements} from "../richText";
 import {avContextmenu} from "../action";
 import {bindAvSearch} from "../search";
 import {setAVData} from "../virtualScroll";
-import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarInterval, ICalendarEvent, ICalendarSegment,
+import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarInterval, getISOWeekForCalendarRow, ICalendarEvent, ICalendarSegment,
     moveCalendarDate, packCalendarWeek, resizeCalendarDate} from "./date";
+import {openCalendarJump} from "./jump";
 import {addCalendarDateField, bindCalendarSettings, getCalendarSettingsHTML, isCalendarDateColumn} from "./settings";
 import {getCalendarRequestRange, getCalendarState} from "./state";
 
@@ -260,6 +260,8 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             ${editable ? `<div class="av__calendar-setup">${getCalendarSettingsHTML(view)}</div><div class="av__calendar-create-fields">${(["date", "created", "updated"] as const).map(type => `<button class="b3-button b3-button--outline" data-calendar-create-field="${type}">${window.siyuan.languages.newCol} ${getColNameByType(type)}</button>`).join("")}</div>` : ""}</div>`;
     } else {
         for (let start = range.start; start < range.end; start = addCalendarDays(start, 7)) {
+            const isoWeek = getISOWeekForCalendarRow(start);
+            const weekLabel = `${window.siyuan.languages.calendarISOWeek} ${isoWeek.year}-W${String(isoWeek.week).padStart(2, "0")}`;
             const segments = packCalendarWeek(events, start);
             if (data.target?.status === "visible" && segments.some(segment => segment.event.row.id === data.target.itemID)) {
                 state.expandedWeeks.add(start);
@@ -270,7 +272,8 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             const dayHeaders = Array.from({length: 7}, (_, day) => {
                 const timestamp = addCalendarDays(start, day);
                 const date = new Date(timestamp);
-                return `<div class="av__calendar-day${date.getMonth() === anchor.getMonth() || state.mode === "week" ? "" : " av__calendar-day--outside"}${calendarDay(Date.now()) === timestamp ? " av__calendar-day--today" : ""}" data-calendar-day="${timestamp}">
+                return `<div class="av__calendar-day${day === 0 ? " av__calendar-day--first" : ""}${date.getMonth() === anchor.getMonth() || state.mode === "week" ? "" : " av__calendar-day--outside"}${calendarDay(Date.now()) === timestamp ? " av__calendar-day--today" : ""}" data-calendar-day="${timestamp}">
+                    ${day === 0 ? `<span class="av__calendar-week-number" title="${escapeAttr(weekLabel)}">W${String(isoWeek.week).padStart(2, "0")}</span>` : ""}
                     <span title="${escapeAttr(date.toLocaleDateString(locale))}">${date.getDate() === 1 ? date.toLocaleDateString(locale, {month: "short", day: "numeric"}) : date.getDate()}</span>
                     ${editable && dateColumn.type === "date" && date.getFullYear() >= 1 && date.getFullYear() <= 9999 ? `<button type="button" class="block__icon" data-calendar-add="${timestamp}" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></button>` : ""}
                 </div>`;
@@ -294,7 +297,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
                 ${iconButton("previous", "iconLeft", window.siyuan.languages.previous)}
                 <button type="button" class="b3-button b3-button--cancel av__calendar-today" data-calendar-action="today">${window.siyuan.languages.calendarToday}</button>
                 ${iconButton("next", "iconRight", window.siyuan.languages.next)}
-                ${iconButton("jump", "iconCalendar", window.siyuan.languages.calendarJumpDate)}
+                ${iconButton("jump", "iconCalendar", window.siyuan.languages.calendarJump)}
                 <select class="b3-select" data-calendar-mode aria-label="${window.siyuan.languages.calendarView}"><option value="month"${state.mode === "month" ? " selected" : ""}>${window.siyuan.languages.month}</option><option value="week"${state.mode === "week" ? " selected" : ""}>${window.siyuan.languages.week}</option></select>
                 </div>
             </div>
@@ -330,22 +333,10 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         const action = target.closest<HTMLElement>("[data-calendar-action]")?.dataset.calendarAction;
         if (action) {
             if (action === "jump") {
-                openInputDialog({
-                    title: window.siyuan.languages.calendarJumpDate,
-                    type: "date",
-                    value: dayjs(state.anchor).format("YYYY-MM-DD"),
-                    min: "0001-01-01",
-                    max: "9999-12-31",
-                    onConfirm: (value, dialog) => {
-                        const input = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
-                        if (!value || !input.reportValidity()) {
-                            return;
-                        }
-                        state.anchor = new Date(`${value}T00:00:00`).getTime();
-                        state.expandedWeeks.clear();
-                        dialog.destroy();
-                        refresh();
-                    },
+                openCalendarJump(state.anchor, state.weekStart, date => {
+                    state.anchor = date;
+                    state.expandedWeeks.clear();
+                    refresh();
                 });
                 return;
             }

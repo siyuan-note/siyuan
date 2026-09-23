@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Vai a una data o settimana ISO",
+	"calendarISOWeek": "Settimana ISO",
+	"calendarISOWeekYear": "Anno della settimana ISO",
 	"templateSourceDocUnavailable": "Il documento di origine del modello non esiste o non è accessibile",
 	"templateOpenSourceDoc": "Apri il documento di origine del modello",
 	"taskCompletionToggle": "Alterna lo stato di completamento dell’elemento dell’elenco attività",

@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Ir a una fecha o semana ISO",
+	"calendarISOWeek": "Semana ISO",
+	"calendarISOWeekYear": "Año de la semana ISO",
 	"templateSourceDocUnavailable": "El documento de origen de la plantilla no existe o no es accesible",
 	"templateOpenSourceDoc": "Abrir el documento de origen de la plantilla",
 	"taskCompletionToggle": "Alternar el estado de finalización del elemento de la lista de tareas",

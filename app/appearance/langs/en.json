@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Go to date or ISO week",
+	"calendarISOWeek": "ISO week",
+	"calendarISOWeekYear": "ISO week year",
 	"templateSourceDocUnavailable": "The template source document does not exist or is inaccessible",
 	"templateOpenSourceDoc": "Open template source document",
 	"taskCompletionToggle": "Toggle task list item completion",

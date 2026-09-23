@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Buka tanggal atau minggu ISO",
+	"calendarISOWeek": "Minggu ISO",
+	"calendarISOWeekYear": "Tahun minggu ISO",
 	"templateSourceDocUnavailable": "Dokumen sumber templat tidak ada atau tidak dapat diakses",
 	"templateOpenSourceDoc": "Buka dokumen sumber templat",
 	"taskCompletionToggle": "Alihkan status penyelesaian item daftar tugas",

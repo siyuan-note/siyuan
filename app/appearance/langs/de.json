@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Zu Datum oder ISO-Woche wechseln",
+	"calendarISOWeek": "ISO-Woche",
+	"calendarISOWeekYear": "ISO-Wochenjahr",
 	"templateSourceDocUnavailable": "Das Quelldokument der Vorlage existiert nicht oder ist nicht zugänglich",
 	"templateOpenSourceDoc": "Quelldokument der Vorlage öffnen",
 	"taskCompletionToggle": "Erledigungsstatus des Aufgabenlistenelements umschalten",

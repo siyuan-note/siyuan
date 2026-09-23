@@ -1,4 +1,7 @@
 {
+	"calendarJump": "日付または ISO 週に移動",
+	"calendarISOWeek": "ISO 週",
+	"calendarISOWeekYear": "ISO 週の年",
 	"templateSourceDocUnavailable": "テンプレートのエクスポート元文書が存在しないか、アクセスできません",
 	"templateOpenSourceDoc": "テンプレートのエクスポート元文書を開く",
 	"taskCompletionToggle": "タスクリスト項目の完了状態を切り替え",

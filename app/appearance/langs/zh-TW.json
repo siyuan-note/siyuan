@@ -1,4 +1,7 @@
 {
+	"calendarJump": "跳至日期或 ISO 週",
+	"calendarISOWeek": "ISO 週",
+	"calendarISOWeekYear": "ISO 週所屬年份",
 	"templateSourceDocUnavailable": "匯出範本的來源文件不存在或無法存取",
 	"templateOpenSourceDoc": "開啟匯出範本的文件",
 	"taskCompletionToggle": "切換任務列表項完成狀態",

@@ -1,4 +1,7 @@
 {
+	"calendarJump": "날짜 또는 ISO 주로 이동",
+	"calendarISOWeek": "ISO 주",
+	"calendarISOWeekYear": "ISO 주 연도",
 	"templateSourceDocUnavailable": "템플릿 원본 문서가 없거나 접근할 수 없습니다",
 	"templateOpenSourceDoc": "템플릿 원본 문서 열기",
 	"taskCompletionToggle": "작업 목록 항목 완료 상태 전환",

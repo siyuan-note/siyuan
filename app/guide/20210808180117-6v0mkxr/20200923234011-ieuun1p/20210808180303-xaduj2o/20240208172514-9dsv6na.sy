@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260921201901"
+		"updated": "20260923095432"
 	},
 	"Children": [
 		{
@@ -687,7 +687,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260920225154-tz8a00o",
-				"updated": "20260921201901"
+				"updated": "20260923095432"
 			},
 			"Children": [
 				{
@@ -716,7 +716,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260920225154-qqxdh7e",
-				"updated": "20260921201901"
+				"updated": "20260923095432"
 			},
 			"Children": [
 				{
@@ -802,7 +802,7 @@
 					},
 					"Properties": {
 						"id": "20260920225154-vblms0p",
-						"updated": "20260921201901"
+						"updated": "20260923095432"
 					},
 					"Children": [
 						{
@@ -810,12 +810,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260920225154-4wsrq3z",
-								"updated": "20260921201901"
+								"updated": "20260923095432"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Browsing: Use the previous/next buttons, Today, or the date picker. Month view collapses crowded dates; use the more button to expand that week. Dates follow your local time zone. Month view shows four, five, or six weeks as needed"
+									"Data": "Browsing: Use the previous/next buttons, Today, or the date picker. Month view collapses crowded dates; use the more button to expand that week. Dates follow your local time zone. Month view shows four, five, or six weeks as needed. Both views show ISO week numbers at the start of each row. Use the calendar button to jump by date or by ISO week year and number. When a week starts on a day other than Monday, its row number is determined by that row's Thursday"
 								}
 							]
 						}

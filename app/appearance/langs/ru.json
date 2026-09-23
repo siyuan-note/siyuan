@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Перейти к дате или неделе ISO",
+	"calendarISOWeek": "Неделя ISO",
+	"calendarISOWeekYear": "Год недели ISO",
 	"templateSourceDocUnavailable": "Исходный документ шаблона не существует или недоступен",
 	"templateOpenSourceDoc": "Открыть исходный документ шаблона",
 	"taskCompletionToggle": "Переключить состояние выполнения элемента списка задач",

@@ -1,4 +1,7 @@
 {
+	"calendarJump": "الانتقال إلى تاريخ أو أسبوع ISO",
+	"calendarISOWeek": "أسبوع ISO",
+	"calendarISOWeekYear": "سنة أسبوع ISO",
 	"templateSourceDocUnavailable": "المستند المصدر للقالب غير موجود أو لا يمكن الوصول إليه",
 	"templateOpenSourceDoc": "فتح المستند المصدر للقالب",
 	"taskCompletionToggle": "تبديل حالة إكمال عنصر قائمة المهام",

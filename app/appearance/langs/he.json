@@ -1,4 +1,7 @@
 {
+	"calendarJump": "מעבר לתאריך או לשבוע ISO",
+	"calendarISOWeek": "שבוע ISO",
+	"calendarISOWeekYear": "שנת שבוע ISO",
 	"templateSourceDocUnavailable": "מסמך המקור של התבנית אינו קיים או אינו נגיש",
 	"templateOpenSourceDoc": "פתיחת מסמך המקור של התבנית",
 	"taskCompletionToggle": "החלפת מצב ההשלמה של פריט ברשימת המשימות",

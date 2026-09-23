@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Ga naar datum of ISO-week",
+	"calendarISOWeek": "ISO-week",
+	"calendarISOWeekYear": "ISO-weekjaar",
 	"templateSourceDocUnavailable": "Het brondocument van de sjabloon bestaat niet of is niet toegankelijk",
 	"templateOpenSourceDoc": "Brondocument van sjabloon openen",
 	"taskCompletionToggle": "Voltooiingsstatus van takenlijstitem wisselen",

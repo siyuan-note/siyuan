@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Aller à une date ou une semaine ISO",
+	"calendarISOWeek": "Semaine ISO",
+	"calendarISOWeekYear": "Année de la semaine ISO",
 	"templateSourceDocUnavailable": "Le document source du modèle est introuvable ou inaccessible",
 	"templateOpenSourceDoc": "Ouvrir le document source du modèle",
 	"taskCompletionToggle": "Basculer l’état d’achèvement de l’élément de liste de tâches",

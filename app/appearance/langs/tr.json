@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Tarihe veya ISO haftasına git",
+	"calendarISOWeek": "ISO haftası",
+	"calendarISOWeekYear": "ISO hafta yılı",
 	"templateSourceDocUnavailable": "Şablonun kaynak belgesi mevcut değil veya erişilemiyor",
 	"templateOpenSourceDoc": "Şablonun kaynak belgesini aç",
 	"taskCompletionToggle": "Görev listesi öğesinin tamamlanma durumunu değiştir",

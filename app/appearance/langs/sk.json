@@ -1,4 +1,7 @@
 {
+	"calendarJump": "Prejsť na dátum alebo týždeň ISO",
+	"calendarISOWeek": "Týždeň ISO",
+	"calendarISOWeekYear": "Rok týždňa ISO",
 	"templateSourceDocUnavailable": "Zdrojový dokument šablóny neexistuje alebo je neprístupný",
 	"templateOpenSourceDoc": "Otvoriť zdrojový dokument šablóny",
 	"taskCompletionToggle": "Prepnúť stav dokončenia položky zoznamu úloh",

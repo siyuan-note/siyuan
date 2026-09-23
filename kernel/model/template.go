@@ -831,8 +831,8 @@ func templateAttributeViewPreviewTable(node *ast.Node, plan *templateAttributeVi
 	mdTable.AppendChild(mdTableHead)
 	mdTableHeadRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
 	mdTableHead.AppendChild(mdTableHeadRow)
-	for _, col := range table.Columns {
-		cell := &ast.Node{Type: ast.NodeTableCell}
+	for index, col := range table.Columns {
+		cell := &ast.Node{Type: ast.NodeTableCell, TableCellAlign: aligns[index]}
 		cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(col.Name)})
 		mdTableHeadRow.AppendChild(cell)
 	}

@@ -113,38 +113,36 @@ const goPreviousCell = (cellElement: HTMLElement, range: Range, isSelected = tru
 };
 
 export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], nodeElement: Element, type: string,
-                              range: Range, clearCellStyle = false) => {
+                              range: Range, alignWholeTable = false) => {
     range.insertNode(document.createElement("wbr"));
     const html = nodeElement.outerHTML;
-
     const tableElement = nodeElement.querySelector("table");
-    if (clearCellStyle) {
-        tableElement.querySelectorAll<HTMLElement>("th, td").forEach(cell => {
+    const grid = buildTableGrid(tableElement);
+    const columns = new Set<number>();
+    grid.cellInfos.forEach(info => {
+        if (cellElements.includes(info.cell)) {
+            for (let column = info.col; column < info.col + info.colspan; column++) {
+                columns.add(column);
+            }
+        }
+    });
+    const cells = new Set<HTMLTableCellElement>();
+    grid.cellInfos.forEach(info => {
+        if (alignWholeTable || Array.from({length: info.colspan}, (_, index) => info.col + index).some(column => columns.has(column))) {
+            cells.add(info.cell);
+        }
+    });
+    cells.forEach(cell => {
+        cell.removeAttribute("align");
+        if (type) {
+            cell.style.setProperty("text-align", type);
+        } else {
             cell.style.removeProperty("text-align");
             if (!cell.getAttribute("style")) {
                 cell.removeAttribute("style");
             }
-        });
-    }
-    const columnCnt = tableElement.rows[0].cells.length;
-    const rowCnt = tableElement.rows.length;
-    const currentColumns: number[] = [];
-
-    for (let i = 0; i < rowCnt; i++) {
-        for (let j = 0; j < columnCnt; j++) {
-            if (tableElement.rows[i].cells[j] === cellElements[currentColumns.length]) {
-                currentColumns.push(j);
-            }
         }
-        if (currentColumns.length > 0) {
-            break;
-        }
-    }
-    for (let k = 0; k < rowCnt; k++) {
-        currentColumns.forEach(item => {
-            tableElement.rows[k].cells[item].setAttribute("align", type);
-        });
-    }
+    });
     updateTransaction(protyle, nodeElement, html);
     focusByWbr(tableElement, range);
 };
@@ -157,7 +155,9 @@ export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
 
     let rowHTML = "";
     for (let m = 0; m < cellElement.parentElement.childElementCount; m++) {
-        rowHTML += `<td align="${cellElement.parentElement.children[m].getAttribute("align") || ""}"></td>`;
+        const source = cellElement.parentElement.children[m] as HTMLTableCellElement;
+        const align = source.style.textAlign || source.getAttribute("align");
+        rowHTML += `<td${["left", "center", "right"].includes(align) ? ` style="text-align: ${align}"` : ""}></td>`;
     }
     let newRowElement: HTMLTableRowElement;
     if (cellElement.tagName === "TH") {
@@ -192,7 +192,8 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
         // 不需要空格，否则列宽调整后在空格后插入图片会换行 https://github.com/siyuan-note/siyuan/issues/7631
         const classAttr = className ? ` class="${className}"` : "";
         const tag = cellElement.tagName === "TH" ? "th" : "td";
-        rowHTML += `<${tag}${classAttr} colspan="${currentCellElement.colSpan}" align="${currentCellElement.getAttribute("align") || ""}"></${tag}>`;
+        const align = currentCellElement.style.textAlign || currentCellElement.getAttribute("align");
+        rowHTML += `<${tag}${classAttr} colspan="${currentCellElement.colSpan}"${["left", "center", "right"].includes(align) ? ` style="text-align: ${align}"` : ""}></${tag}>`;
     }
 
     if (hasNone) {

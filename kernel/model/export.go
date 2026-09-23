@@ -3607,13 +3607,15 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 		mdTable.AppendChild(mdTableHead)
 		mdTableHeadRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
 		mdTableHead.AppendChild(mdTableHeadRow)
+		alignIndex := 0
 		for _, col := range table.Columns {
 			if avHiddenCol && col.Hidden {
 				// 按需跳过隐藏列 Improve database table view exporting https://github.com/siyuan-note/siyuan/issues/12232
 				continue
 			}
 
-			cell := &ast.Node{Type: ast.NodeTableCell}
+			cell := &ast.Node{Type: ast.NodeTableCell, TableCellAlign: aligns[alignIndex]}
+			alignIndex++
 			name := col.Name
 			if !wysiwyg {
 				name = string(lex.EscapeProtyleMarkers([]byte(col.Name)))
@@ -3628,14 +3630,25 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 		for _, row := range table.Rows {
 			mdTableRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
 			mdTable.AppendChild(mdTableRow)
-			for _, cell := range row.Cells {
-				if avHiddenCol && nil != cell.Value {
-					if col := table.GetColumn(cell.Value.KeyID); nil != col && col.Hidden {
+			alignIndex = 0
+			for columnIndex, cell := range row.Cells {
+				if avHiddenCol {
+					if columnIndex < len(table.Columns) && table.Columns[columnIndex].Hidden {
 						continue
+					}
+					if nil != cell.Value {
+						if col := table.GetColumn(cell.Value.KeyID); nil != col && col.Hidden {
+							continue
+						}
 					}
 				}
 
-				mdTableCell := &ast.Node{Type: ast.NodeTableCell}
+				cellAlign := 0
+				if alignIndex < len(aligns) {
+					cellAlign = aligns[alignIndex]
+				}
+				mdTableCell := &ast.Node{Type: ast.NodeTableCell, TableCellAlign: cellAlign}
+				alignIndex++
 				mdTableRow.AppendChild(mdTableCell)
 				var val string
 				if nil != cell.Value {

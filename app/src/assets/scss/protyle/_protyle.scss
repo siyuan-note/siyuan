@@ -1057,14 +1057,12 @@
 
 .protyle-wysiwyg :is(td, th) {
   // 普通左对齐抵消列表起始侧留白，居中和居右则使用单元格内容边界。
-  &[align="center"]:not([style*="text-align:"]),
   &[style*="text-align: center"] {
     --b3-table-cell-list-start: auto;
     --b3-table-cell-list-end: auto;
     --b3-table-cell-list-inset: 0px;
   }
 
-  &[align="right"]:not([style*="text-align:"]),
   &[style*="text-align: right"] {
     --b3-table-cell-list-start: auto;
     --b3-table-cell-list-end: 0;

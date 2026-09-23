@@ -2,6 +2,7 @@ import {Constants} from "../../../../constants";
 import {setStorageVal} from "../../../util/compatibility";
 import * as dayjs from "dayjs";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
+import {isMobile} from "../../../../util/functions";
 import {transaction} from "../../../wysiwyg/transaction";
 import {renderCell} from "../cell";
 import {getAVBackgroundColor} from "../color";
@@ -82,7 +83,7 @@ const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boole
     }).join("");
     return `<div class="av__calendar-item${starts ? " av__calendar-item--start" : ""}${ends ? " av__calendar-item--end" : ""}" role="button" tabindex="0" data-calendar-item="${event.row.id}" data-id="${event.row.id}" title="${escapeAttr(title)}" style="grid-column:${segment.column + 1}/span ${segment.span};grid-row:${segment.lane + 1};${option ? `--b3-av-calendar-background:${getAVBackgroundColor(option)}` : ""}">
         ${drag && starts ? `<span class="av__calendar-resize av__calendar-resize--start" data-calendar-resize="start" title="${window.siyuan.languages.calendarResizeStart}"></span>` : ""}
-        ${drag ? `<span class="av__calendar-move" data-calendar-move title="${window.siyuan.languages.move}"><svg><use xlink:href="#iconDrag"></use></svg></span>` : ""}
+        ${drag && !isMobile() ? `<span class="av__calendar-move" data-calendar-move title="${window.siyuan.languages.move}"><svg><use xlink:href="#iconDrag"></use></svg></span>` : ""}
         <div class="av__calendar-item-content">${time ? `<span class="av__calendar-time">${time}</span>` : ""}${event.invalid ? '<svg class="av__calendar-warning"><use xlink:href="#iconInfo"></use></svg>' : ""}${fields || escapeHtml(primary?.value?.block?.content || window.siyuan.languages.untitled)}</div>
         ${drag && ends ? `<span class="av__calendar-resize av__calendar-resize--end" data-calendar-resize="end" title="${window.siyuan.languages.calendarResizeEnd}"></span>` : ""}
     </div>`;
@@ -97,20 +98,11 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
             event.preventDefault();
         }
     }, true);
-    root.addEventListener("pointerdown", event => {
-        event.stopPropagation();
-        const target = event.target as HTMLElement;
-        const item = target.closest<HTMLElement>("[data-calendar-item]");
-        const entry = item && events.get(item.dataset.calendarItem);
-        const endpoint = target.closest<HTMLElement>("[data-calendar-resize]")?.dataset.calendarResize as "start" | "end" | undefined;
-        if (event.button !== 0 || !entry || entry.invalid || entry.date.value.type !== "date" || !canEditCalendar(protyle) ||
-            event.pointerType === "touch" && !endpoint && !target.closest("[data-calendar-move]")) {
-            return;
-        }
-        const controller = new AbortController();
-        const origin = getCalendarDropDay(root, event.clientX, event.clientY);
+    const createSession = (entry: ICalendarEvent, endpoint: "start" | "end" | undefined, x: number, y: number) => {
+        const origin = getCalendarDropDay(root, x, y);
         let destination = origin;
         let dragging = false;
+        let cleaned = false;
         const sourceItems = Array.from(root.querySelectorAll<HTMLElement>("[data-calendar-item]"))
             .filter(element => element.dataset.calendarItem === entry.row.id);
         const clearPreview = () => {
@@ -150,7 +142,10 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
             });
         };
         const clean = () => {
-            controller.abort();
+            if (cleaned) {
+                return;
+            }
+            cleaned = true;
             clearPreview();
             root.classList.remove("av__calendar--dragging", "av__calendar--invalid");
             sourceItems.forEach(element => element.classList.remove("av__calendar-item--dragging"));
@@ -158,6 +153,55 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
                 suppressClick = true;
                 setTimeout(() => { suppressClick = false; });
             }
+        };
+        const begin = () => {
+            if (dragging) {
+                return;
+            }
+            dragging = true;
+            root.classList.add("av__calendar--dragging");
+            sourceItems.forEach(element => element.classList.add("av__calendar-item--dragging"));
+        };
+        return {
+            begin,
+            move: (clientX: number, clientY: number) => {
+                if (!root.isConnected) {
+                    clean();
+                    return;
+                }
+                begin();
+                destination = getCalendarDropDay(root, clientX, clientY);
+                preview();
+            },
+            finish: (clientX: number, clientY: number) => {
+                destination = getCalendarDropDay(root, clientX, clientY);
+                if (dragging && root.isConnected) {
+                    const date = candidate();
+                    if (date && JSON.stringify(date) !== JSON.stringify(entry.date.value.date)) {
+                        updateCalendarDate(protyle, blockElement, entry, date);
+                    }
+                }
+                clean();
+            },
+            clean,
+        };
+    };
+    root.addEventListener("pointerdown", event => {
+        event.stopPropagation();
+        const target = event.target as HTMLElement;
+        const item = target.closest<HTMLElement>("[data-calendar-item]");
+        const entry = item && events.get(item.dataset.calendarItem);
+        const endpoint = target.closest<HTMLElement>("[data-calendar-resize]")?.dataset.calendarResize as "start" | "end" | undefined;
+        if (event.button !== 0 || !entry || entry.invalid || entry.date.value.type !== "date" || !canEditCalendar(protyle) ||
+            event.pointerType === "touch" && !endpoint && !target.closest("[data-calendar-move]")) {
+            return;
+        }
+        const controller = new AbortController();
+        const session = createSession(entry, endpoint, event.clientX, event.clientY);
+        let dragging = false;
+        const clean = () => {
+            controller.abort();
+            session.clean();
         };
         document.addEventListener("pointermove", move => {
             if (move.pointerId !== event.pointerId) {
@@ -172,22 +216,13 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
             }
             move.preventDefault();
             dragging = true;
-            root.classList.add("av__calendar--dragging");
-            sourceItems.forEach(element => element.classList.add("av__calendar-item--dragging"));
-            destination = getCalendarDropDay(root, move.clientX, move.clientY);
-            preview();
+            session.move(move.clientX, move.clientY);
         }, {signal: controller.signal, passive: false});
         document.addEventListener("pointerup", up => {
             if (up.pointerId !== event.pointerId) {
                 return;
             }
-            destination = getCalendarDropDay(root, up.clientX, up.clientY);
-            if (dragging && root.isConnected) {
-                const date = candidate();
-                if (date && JSON.stringify(date) !== JSON.stringify(entry.date.value.date)) {
-                    updateCalendarDate(protyle, blockElement, entry, date);
-                }
-            }
+            session.finish(up.clientX, up.clientY);
             clean();
         }, {signal: controller.signal});
         document.addEventListener("pointercancel", cancel => {
@@ -203,6 +238,80 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
             }
         }, {signal: controller.signal, capture: true});
     });
+    root.addEventListener("touchstart", event => {
+        if (!isMobile() || event.touches.length !== 1 || !canEditCalendar(protyle)) {
+            return;
+        }
+        const target = event.target as HTMLElement;
+        if (target.closest("[data-calendar-resize]")) {
+            return;
+        }
+        const item = target.closest<HTMLElement>("[data-calendar-item]");
+        const entry = item && events.get(item.dataset.calendarItem);
+        if (!entry || entry.invalid || entry.date.value.type !== "date") {
+            return;
+        }
+        const touch = event.touches[0];
+        const identifier = touch.identifier;
+        const startX = touch.clientX;
+        const startY = touch.clientY;
+        const session = createSession(entry, undefined, startX, startY);
+        const controller = new AbortController();
+        let dragging = false;
+        const clean = () => {
+            clearTimeout(timer);
+            controller.abort();
+            session.clean();
+        };
+        const timer = window.setTimeout(() => {
+            if (!root.isConnected) {
+                clean();
+                return;
+            }
+            dragging = true;
+            session.begin();
+        }, Constants.TIMEOUT_LONGPRESS);
+        root.addEventListener("touchmove", move => {
+            if (move.touches.length !== 1) {
+                clean();
+                return;
+            }
+            const point = Array.from(move.touches).find(current => current.identifier === identifier);
+            if (!point) {
+                clean();
+                return;
+            }
+            if (!dragging) {
+                if (Math.hypot(point.clientX - startX, point.clientY - startY) > 5) {
+                    clean();
+                }
+                return;
+            }
+            move.preventDefault();
+            move.stopPropagation();
+            session.move(point.clientX, point.clientY);
+        }, {signal: controller.signal, passive: false});
+        root.addEventListener("touchend", end => {
+            const point = Array.from(end.changedTouches).find(current => current.identifier === identifier);
+            if (!point) {
+                return;
+            }
+            if (dragging) {
+                end.preventDefault();
+                end.stopPropagation();
+                session.finish(point.clientX, point.clientY);
+            }
+            clean();
+        }, {signal: controller.signal});
+        root.addEventListener("touchcancel", clean, {signal: controller.signal});
+        root.addEventListener("contextmenu", menuEvent => {
+            if (dragging && item.contains(menuEvent.target as Node)) {
+                menuEvent.preventDefault();
+                menuEvent.stopImmediatePropagation();
+            }
+        }, {signal: controller.signal, capture: true});
+        window.addEventListener("blur", clean, {signal: controller.signal});
+    }, {passive: true});
 };
 
 export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyle, data: IAV, cb?: (data: IAV) => void) => {
@@ -232,6 +341,8 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     const search = blockElement.querySelector<HTMLElement>('[data-type="av-search"]');
     const query = search?.textContent || "";
     const isSearching = search === document.activeElement;
+    const hasUndated = state.undatedCount?.dateKeyID === dateColumn?.id && state.undatedCount.query === query.trim() &&
+        state.undatedCount.total > 0;
     const events: ICalendarEvent[] = [];
     view.rows.forEach((row, rowIndex) => {
         const date = row.cells.find(cell => cell.value?.keyID === dateColumn?.id);
@@ -287,7 +398,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             <div class="av__calendar-toolbar">
                 <span class="av__calendar-label">${escapeHtml(label)}</span>
                 <div class="av__calendar-controls">
-                ${editable && dateColumn?.type === "date" ? `<button type="button" class="block__icon block__icon--show ariaLabel" data-calendar-undated-toggle data-position="8south" aria-label="${escapeAttr(window.siyuan.languages.calendarUndated)}" aria-expanded="false"><svg><use xlink:href="#iconInbox"></use></svg></button>` : ""}
+                ${editable && dateColumn?.type === "date" ? `<button type="button" class="block__icon block__icon--show ariaLabel${hasUndated ? "" : " fn__none"}" data-calendar-undated-toggle data-position="8south" aria-label="${escapeAttr(window.siyuan.languages.calendarUndated)}" aria-expanded="false"><svg><use xlink:href="#iconInbox"></use></svg></button>` : ""}
                 ${iconButton("previous", "iconLeft", window.siyuan.languages.previous)}
                 <button type="button" class="b3-button b3-button--cancel av__calendar-today ariaLabel" data-calendar-action="today" data-position="8south" aria-label="${escapeAttr(window.siyuan.languages.calendarToday)}">${window.siyuan.languages.calendarToday}</button>
                 ${iconButton("next", "iconRight", window.siyuan.languages.next)}

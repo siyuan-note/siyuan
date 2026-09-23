@@ -11,6 +11,7 @@ export interface ICalendarState {
     undatedOpen: boolean;
     undatedSelectedID?: string;
     undatedSearch: string;
+    undatedCount?: {dateKeyID: string; query: string; total: number};
     undatedCache?: {dateKeyID: string; query: string; search: string; rows: IAVRow[]; total: number; page: number};
 }
 

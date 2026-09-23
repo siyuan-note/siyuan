@@ -62,6 +62,25 @@ export const bindCalendarUndated = (options: {
     let request: AbortController;
     let searchTimer: number;
     let suppressClick = false;
+    const countRequest = new AbortController();
+
+    const updateUndatedCount = (value: number) => {
+        state.undatedCount = {dateKeyID, query: normalizedQuery, total: value};
+        toggle.classList.toggle("fn__none", value === 0);
+    };
+    const refreshCount = async () => {
+        try {
+            const response = await fetchSyncPost("/api/av/getAttributeViewCalendarUndated", {
+                id: data.id, blockID: blockElement.dataset.nodeId || "", viewID: data.viewID,
+                query: normalizedQuery, search: "", page: 1, pageSize: 1,
+            }, undefined, false, countRequest.signal);
+            if (!countRequest.signal.aborted && root.isConnected && response.code === 0 && response.data) {
+                updateUndatedCount(response.data.total);
+            }
+        } catch {
+            // 保留已知的无日期条目数量，等待下一次视图刷新。
+        }
+    };
 
     const updateSelection = () => {
         list.querySelectorAll<HTMLElement>("[data-calendar-undated-row]").forEach(item => {
@@ -87,6 +106,9 @@ export const bindCalendarUndated = (options: {
     };
     const renderRows = () => {
         state.undatedCache = {dateKeyID, query: normalizedQuery, search: state.undatedSearch.trim(), rows: [...rows], total, page};
+        if (!state.undatedSearch.trim()) {
+            updateUndatedCount(total);
+        }
         count.textContent = total.toString();
         count.classList.remove("fn__none");
         const rowHTML = rows.map(row => {
@@ -138,6 +160,9 @@ export const bindCalendarUndated = (options: {
             rows = reset ? nextRows : [...rows, ...nextRows];
             page = nextPage;
             total = response.data.total;
+            if (!searchValue) {
+                countRequest.abort();
+            }
             renderRows();
         } catch {
             if (!controller.signal.aborted && root.isConnected && searchValue === state.undatedSearch.trim()) {
@@ -222,10 +247,16 @@ export const bindCalendarUndated = (options: {
         if (!row || !cell?.value || year < 1 || year > 9999) {
             return false;
         }
-        const closeMobileSheet = mobile && state.undatedOpen;
+        const remaining = Math.max(0, total - 1);
+        const knownUndatedCount = state.undatedCount?.dateKeyID === dateKeyID && state.undatedCount.query === normalizedQuery ?
+            state.undatedCount.total : total;
+        const remainingUndated = Math.max(0, knownUndatedCount - 1);
+        const closeMobileSheet = mobile && state.undatedOpen && remainingUndated === 0;
         if (closeMobileSheet) {
             state.undatedOpen = false;
         }
+        countRequest.abort();
+        updateUndatedCount(remainingUndated);
         request?.abort();
         onSchedule(row, cell, day, () => {
             if (root.isConnected && state.undatedOpen) {
@@ -233,7 +264,7 @@ export const bindCalendarUndated = (options: {
             }
         });
         rows = rows.filter(item => item.id !== rowID);
-        total = Math.max(0, total - 1);
+        total = remaining;
         selectedID = "";
         state.undatedSelectedID = "";
         updateDayTargets();
@@ -404,7 +435,6 @@ export const bindCalendarUndated = (options: {
         }
         const controller = new AbortController();
         let dragging = false;
-        let scheduled = false;
         let destination: number;
         let ghost: HTMLElement;
         const clean = () => {
@@ -414,7 +444,7 @@ export const bindCalendarUndated = (options: {
             item.classList.remove("av__calendar-item--dragging");
             ghost?.remove();
             if (dragging) {
-                if (!mobile || (!scheduled && state.undatedOpen)) {
+                if (!mobile || state.undatedOpen) {
                     setDragPreview(false);
                 }
                 suppressClick = true;
@@ -448,7 +478,7 @@ export const bindCalendarUndated = (options: {
             }
             destination = dropDay(up.clientX, up.clientY);
             if (dragging && root.isConnected && destination !== undefined) {
-                scheduled = schedule(item.dataset.calendarUndatedRow, destination);
+                schedule(item.dataset.calendarUndatedRow, destination);
             }
             clean();
         }, {signal: controller.signal});
@@ -479,7 +509,6 @@ export const bindCalendarUndated = (options: {
         const startY = touch.clientY;
         const controller = new AbortController();
         let dragging = false;
-        let scheduled = false;
         let ghost: HTMLElement;
         const clean = () => {
             clearTimeout(timer);
@@ -489,7 +518,7 @@ export const bindCalendarUndated = (options: {
             item.classList.remove("av__calendar-item--dragging");
             ghost?.remove();
             if (dragging) {
-                if (!scheduled && state.undatedOpen && window.siyuan.menus.menu.element.lastElementChild.contains(panel)) {
+                if (state.undatedOpen && window.siyuan.menus.menu.element.lastElementChild.contains(panel)) {
                     setDragPreview(false);
                 }
                 suppressClick = true;
@@ -537,7 +566,7 @@ export const bindCalendarUndated = (options: {
                 end.stopPropagation();
                 const day = dropDay(point.clientX, point.clientY);
                 if (root.isConnected && day !== undefined) {
-                    scheduled = schedule(item.dataset.calendarUndatedRow, day);
+                    schedule(item.dataset.calendarUndatedRow, day);
                 }
             }
             clean();
@@ -556,5 +585,8 @@ export const bindCalendarUndated = (options: {
     updateDayTargets();
     if (state.undatedOpen) {
         setOpen(true);
+    }
+    if (!state.undatedOpen || state.undatedSearch.trim()) {
+        void refreshCount();
     }
 };

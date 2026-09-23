@@ -19,6 +19,7 @@ package api
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -430,6 +431,61 @@ var renderAttributeView = contractHandler(apicontract.RenderAttributeView, func(
 		create = *request.CreateIfNotExist
 	}
 	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, fromContractAVCalendarRange(request.CalendarRange))
+})
+
+var getAttributeViewCalendarUndated = contractHandler(apicontract.GetAttributeViewCalendarUndated, func(c *gin.Context, request apicontract.AVCalendarUndatedRequest) apicontract.Response[apicontract.AVCalendarUndatedData] {
+	if err := holdAttributeViewRequest(c, request.BlockID, request.ID); err != nil {
+		return apicontract.Failure[apicontract.AVCalendarUndatedData](-1, model.Conf.Language(314))
+	}
+	view, _, _, err := model.RenderAttributeViewWithTargetReadOnly(request.BlockID, request.ID, request.ViewID, request.Query,
+		1, -1, nil, "", false, false, "", "")
+	if err != nil {
+		return apicontract.Failure[apicontract.AVCalendarUndatedData](-1, err.Error())
+	}
+	calendar, ok := view.(*av.Calendar)
+	if !ok || calendar.Calendar == nil {
+		return apicontract.Failure[apicontract.AVCalendarUndatedData](-1, av.ErrViewNotFound.Error())
+	}
+	key := calendar.GetColumn(calendar.Calendar.DateKeyID)
+	if key == nil || key.Type != av.KeyTypeDate {
+		return apicontract.Success(apicontract.AVCalendarUndatedData{Rows: []*apicontract.AVTableRow{}})
+	}
+	search := strings.ToLower(strings.TrimSpace(request.Search))
+	rows := make([]*av.TableRow, 0, len(calendar.UndatedRows))
+	for _, row := range calendar.UndatedRows {
+		if search != "" {
+			matched := false
+			for _, cell := range row.Cells {
+				if cell == nil || cell.Value == nil || cell.Value.Type != av.KeyTypeBlock || cell.Value.Block == nil {
+					continue
+				}
+				matched = strings.Contains(strings.ToLower(cell.Value.Block.Content), search)
+				break
+			}
+			if !matched {
+				continue
+			}
+		}
+		rows = append(rows, row)
+	}
+	total := len(rows)
+	page, pageSize := avPage(request.Page, 1), avPage(request.PageSize, 50)
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	} else if pageSize > 100 {
+		pageSize = 100
+	}
+	if page > (total+pageSize-1)/pageSize {
+		return apicontract.Success(apicontract.AVCalendarUndatedData{Rows: []*apicontract.AVTableRow{}, Total: total})
+	}
+	start := (page - 1) * pageSize
+	end := min(total, start+pageSize)
+	return apicontract.Success(apicontract.AVCalendarUndatedData{
+		Rows: avContractSlice(rows[start:end], toContractAVTableRow), Total: total,
+	})
 })
 
 func holdAttributeViewRequest(c *gin.Context, blockID, avID string) error {

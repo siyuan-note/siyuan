@@ -7,8 +7,90 @@
   }
 
   .av__calendar {
+    position: relative;
     user-select: none;
     padding-bottom: 8px;
+  }
+
+  .av__calendar-undated-toggle {
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .av__calendar-undated-panel {
+    position: absolute;
+    top: 38px;
+    right: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    width: min(320px, 100%);
+    max-height: min(65vh, 520px);
+  }
+
+  .av__calendar-undated-head {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 8px 8px;
+
+    > strong {
+      min-width: 0;
+      margin-right: auto;
+    }
+  }
+
+  .av__calendar-undated-search {
+    padding: 0 8px;
+
+    .b3-text-field {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  .av__calendar-undated-hint {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .av__calendar-undated-list {
+    min-height: 36px;
+    max-height: min(45vh, 360px);
+    overflow-y: auto;
+  }
+
+  .av__calendar-undated-item {
+    gap: 4px;
+    min-width: 0;
+
+    .b3-menu__label {
+      min-width: 0;
+      flex: 1;
+    }
+
+    &--selected {
+      background-color: var(--b3-theme-primary-lightest);
+    }
+  }
+
+  .av__calendar-undated-empty {
+    padding: 8px;
+  }
+
+  .av__calendar-undated-more,
+  .av__calendar-undated-retry {
+    align-self: stretch;
+    margin: 4px 8px 0;
+  }
+
+  .av__calendar--undated-open [data-calendar-day] {
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--b3-theme-primary);
+      outline-offset: -2px;
+    }
   }
 
   .av__calendar-toolbar {
@@ -412,6 +494,24 @@
 
   &.av--touch .av__calendar-move {
     display: block;
+  }
+}
+
+@media (max-width: 600px) {
+  .av[data-av-type="calendar"] {
+    .av__calendar-undated-toggle > span {
+      display: none;
+    }
+
+    .av__calendar-undated-panel {
+      position: static;
+      width: 100%;
+      max-height: none;
+    }
+
+    .av__calendar-undated-list {
+      max-height: 30vh;
+    }
   }
 }
 

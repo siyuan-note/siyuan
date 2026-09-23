@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "日付なし",
+	"calendarUndatedHint": "項目を日付にドラッグするか、項目を選択して日付を指定してください",
 	"insertToCurrentDoc": "現在の文書に挿入",
 	"calendarJump": "日付または ISO 週に移動",
 	"calendarISOWeek": "ISO 週",

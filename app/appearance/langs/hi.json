@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "बिना तारीख",
+	"calendarUndatedHint": "किसी आइटम को तारीख पर खींचें, या उसे चुनकर तारीख चुनें",
 	"insertToCurrentDoc": "वर्तमान दस्तावेज़ में जोड़ें",
 	"calendarJump": "तारीख या ISO सप्ताह पर जाएँ",
 	"calendarISOWeek": "ISO सप्ताह",

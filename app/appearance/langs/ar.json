@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "بلا تاريخ",
+	"calendarUndatedHint": "اسحب العنصر إلى تاريخ، أو حدده ثم اختر تاريخًا",
 	"insertToCurrentDoc": "إدراج في المستند الحالي",
 	"calendarJump": "الانتقال إلى تاريخ أو أسبوع ISO",
 	"calendarISOWeek": "أسبوع ISO",

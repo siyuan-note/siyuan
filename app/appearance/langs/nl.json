@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "Geen datum",
+	"calendarUndatedHint": "Sleep een item naar een datum of selecteer het en kies een datum",
 	"insertToCurrentDoc": "In huidig document invoegen",
 	"calendarJump": "Ga naar datum of ISO-week",
 	"calendarISOWeek": "ISO-week",

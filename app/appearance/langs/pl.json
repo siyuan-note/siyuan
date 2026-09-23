@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "Bez daty",
+	"calendarUndatedHint": "Przeciągnij element na datę albo wybierz element, a następnie datę",
 	"insertToCurrentDoc": "Wstaw do bieżącego dokumentu",
 	"calendarJump": "Przejdź do daty lub tygodnia ISO",
 	"calendarISOWeek": "Tydzień ISO",

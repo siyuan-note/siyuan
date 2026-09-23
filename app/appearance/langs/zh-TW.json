@@ -1,4 +1,6 @@
 {
+	"calendarUndated": "無日期",
+	"calendarUndatedHint": "將條目拖到日期，或選取條目後點選日期",
 	"insertToCurrentDoc": "插入至目前文件",
 	"calendarJump": "跳至日期或 ISO 週",
 	"calendarISOWeek": "ISO 週",

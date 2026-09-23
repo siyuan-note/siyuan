@@ -48,7 +48,7 @@ import {syncFileTreeItemDefaultIcon} from "../emoji/fileTreeIcon";
 import {getHostCapabilities} from "../util/hostCapabilities";
 /// #if MOBILE
 import {openEmojiPanel} from "../emoji";
-import {openMobileFileByIdInNewTab} from "../mobile/editor";
+import {openMobileFileById, openMobileFileByIdInNewTab} from "../mobile/editor";
 /// #endif
 
 const confirmEncryptedExport = (notebookId: string, callback: () => void) => {
@@ -432,7 +432,6 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOK);
     const notebookId = liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
-    /// #if !MOBILE
     const boxDocID = liElement.getAttribute("data-node-id");
     if (boxDocID && window.siyuan.config.fileTree.parentDocClickExpand &&
         Number(liElement.getAttribute("data-count")) > 0) {
@@ -441,15 +440,18 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             label: window.siyuan.languages.openDocument,
             icon: "iconOpen",
             click: () => {
+                /// #if MOBILE
+                openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL], undefined, notebookId);
+                /// #else
                 openFileById({
                     app,
                     id: boxDocID,
                     action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                 });
+                /// #endif
             }
         }).element);
     }
-    /// #endif
     if (!window.siyuan.config.readonly) {
         /// #if MOBILE
         window.siyuan.menus.menu.append(new MenuItem({
@@ -735,22 +737,24 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({id: "separator_open", type: "separator"}).element);
     /// #endif
-    /// #if !MOBILE
     if (window.siyuan.config.fileTree.parentDocClickExpand && Number(liElement.getAttribute("data-count")) > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "openDocument",
             label: window.siyuan.languages.openDocument,
             icon: "iconOpen",
             click: () => {
+                /// #if MOBILE
+                openMobileFileById(app, id, [Constants.CB_GET_SCROLL], undefined, notebookId);
+                /// #else
                 openFileById({
                     app,
                     id,
                     action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                 });
+                /// #endif
             }
         }).element);
     }
-    /// #endif
     if (!window.siyuan.config.readonly) {
         if (isCustomFileTreeList(liElement.getAttribute("data-pin-root") === "true" ? liElement : liElement.parentElement)) {
             window.siyuan.menus.menu.append(new MenuItem({

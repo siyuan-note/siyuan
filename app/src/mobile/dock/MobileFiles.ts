@@ -306,11 +306,19 @@ export class MobileFiles extends Model {
                     const ulElement = hasTopClosestByTag(target, "UL");
                     const notebookId = ulElement ? ulElement.getAttribute("data-url") : "";
                     if (target.getAttribute("data-type") === "navigation-file") {
-                        openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL], undefined, notebookId);
+                        if (window.siyuan.config.fileTree.parentDocClickExpand && Number(target.getAttribute("data-count")) > 0) {
+                            this.toggleTreeItem(target);
+                        } else {
+                            openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL], undefined, notebookId);
+                        }
                     } else if (target.getAttribute("data-type") === "navigation-root") {
                         const boxDocID = target.getAttribute("data-node-id");
                         if (boxDocID) {
-                            openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL], undefined, notebookId);
+                            if (window.siyuan.config.fileTree.parentDocClickExpand && Number(target.getAttribute("data-count")) > 0) {
+                                this.toggleTreeItem(target);
+                            } else {
+                                openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL], undefined, notebookId);
+                            }
                         } else if (ulElement) {
                             this.getLeaf(target, notebookId);
                         }

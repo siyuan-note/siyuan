@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "Rozloženia hlavného okna",
 	"windowWorkspaces": "Rozloženia nového okna",
 	"windowWorkspaceSave": "Uložiť ako rozloženie nového okna",
-	"windowWorkspaceRemoveTip": "Odstrániť „${x}“? Dokumenty a prílohy zostanú zachované a otvorené okná zostanú otvorené.",
+	"windowWorkspaceRemoveTip": "Otvorené okná zostanú otvorené. Naozaj odstrániť rozloženie nového okna „${x}“?",
 	"windowWorkspaceSaveError": "Rozloženie nového okna sa nepodarilo uložiť. Skúste to znova.",
 	"windowWorkspaceUnavailable": "Rozloženie nového okna nie je dostupné alebo používa nepodporovaný formát.",
 	"calendarUndated": "Bez dátumu",

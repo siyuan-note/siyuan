@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "Layouts da janela principal",
 	"windowWorkspaces": "Layouts da nova janela",
 	"windowWorkspaceSave": "Salvar como layout da nova janela",
-	"windowWorkspaceRemoveTip": "Remover “${x}”? Os documentos e anexos serão preservados, e as janelas abertas permanecerão abertas.",
+	"windowWorkspaceRemoveTip": "As janelas abertas permanecerão abertas. Confirma a exclusão do layout de nova janela “${x}”?",
 	"windowWorkspaceSaveError": "Não foi possível salvar o layout da nova janela. Tente novamente.",
 	"windowWorkspaceUnavailable": "O layout da nova janela não está disponível ou usa um formato não compatível.",
 	"calendarUndated": "Sem data",

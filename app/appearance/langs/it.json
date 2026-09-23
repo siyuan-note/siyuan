@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "Layout della finestra principale",
 	"windowWorkspaces": "Layout della nuova finestra",
 	"windowWorkspaceSave": "Salva come layout della nuova finestra",
-	"windowWorkspaceRemoveTip": "Rimuovere «${x}»? I documenti e gli allegati verranno conservati e le finestre aperte rimarranno aperte.",
+	"windowWorkspaceRemoveTip": "Le finestre aperte rimarranno aperte. Confermare l'eliminazione del layout della nuova finestra «${x}»?",
 	"windowWorkspaceSaveError": "Impossibile salvare il layout della nuova finestra. Riprova.",
 	"windowWorkspaceUnavailable": "Il layout della nuova finestra non è disponibile o utilizza un formato non supportato.",
 	"calendarUndated": "Senza data",

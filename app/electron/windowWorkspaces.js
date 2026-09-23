@@ -79,7 +79,7 @@ const flushWindowWorkspaces = (windows, ipcMain, timeoutMs = 11000) => {
         ipcMain.on("siyuan-window-workspace-saved", onSaved);
         contents.forEach(content => {
             try {
-                content.send("siyuan-send-windows", {cmd: "flushWindowWorkspace", data: id});
+                content.send("siyuan-send-windows", {cmd: "siyuan-window-workspace-flush", data: id});
             } catch {
                 finish(false);
             }

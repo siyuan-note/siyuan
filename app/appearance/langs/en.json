@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "Main window layouts",
 	"windowWorkspaces": "New window layouts",
 	"windowWorkspaceSave": "Save as new window layout",
-	"windowWorkspaceRemoveTip": "Remove “${x}”? Documents and attachments will be kept, and open windows will remain open.",
+	"windowWorkspaceRemoveTip": "Open windows will remain open. Delete new window layout “${x}”?",
 	"windowWorkspaceSaveError": "Could not save the new window layout. Please try again.",
 	"windowWorkspaceUnavailable": "The new window layout is unavailable or uses an unsupported format.",
 	"calendarUndated": "No date",

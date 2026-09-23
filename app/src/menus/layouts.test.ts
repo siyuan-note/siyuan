@@ -13,7 +13,8 @@ const fixture = () => {
     const calls: Array<{action: string, value?: unknown}> = [];
     let dialog: any;
     const dependencies = {
-        Constants: {LOCAL_LAYOUTS: "layouts", LOCAL_FILESPATHS: "paths"},
+        Constants: {LOCAL_LAYOUTS: "layouts", LOCAL_FILESPATHS: "paths",
+            SIYUAN_WINDOW_WORKSPACE_GET_OPEN: "siyuan-window-workspace-get-open"},
         setStorageVal: (key: string, value: unknown, callback?: () => void) => {
             calls.push({action: key, value: JSON.parse(JSON.stringify(value))});
             callback?.();

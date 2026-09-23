@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "Diseños de la ventana principal",
 	"windowWorkspaces": "Diseños de nueva ventana",
 	"windowWorkspaceSave": "Guardar como diseño de nueva ventana",
-	"windowWorkspaceRemoveTip": "¿Eliminar «${x}»? Se conservarán los documentos y los archivos adjuntos, y las ventanas abiertas seguirán abiertas.",
+	"windowWorkspaceRemoveTip": "Las ventanas abiertas seguirán abiertas. ¿Confirma que desea eliminar el diseño de ventana nueva «${x}»?",
 	"windowWorkspaceSaveError": "No se pudo guardar el diseño de nueva ventana. Inténtalo de nuevo.",
 	"windowWorkspaceUnavailable": "El diseño de nueva ventana no está disponible o utiliza un formato no compatible.",
 	"calendarUndated": "Sin fecha",

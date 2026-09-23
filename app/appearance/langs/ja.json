@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "メインウィンドウのレイアウト",
 	"windowWorkspaces": "新しいウィンドウのレイアウト",
 	"windowWorkspaceSave": "新しいウィンドウのレイアウトとして保存",
-	"windowWorkspaceRemoveTip": "「${x}」を削除しますか？ドキュメントと添付ファイルは保持され、開いているウィンドウもそのまま残ります。",
+	"windowWorkspaceRemoveTip": "開いているウィンドウは閉じません。新しいウィンドウのレイアウト「${x}」を削除しますか？",
 	"windowWorkspaceSaveError": "新しいウィンドウのレイアウトを保存できませんでした。もう一度お試しください。",
 	"windowWorkspaceUnavailable": "新しいウィンドウのレイアウトが利用できないか、非対応の形式です。",
 	"calendarUndated": "日付なし",

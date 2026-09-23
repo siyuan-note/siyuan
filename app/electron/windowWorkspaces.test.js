@@ -77,6 +77,7 @@ test("退出前等待所有窗口保存，忽略其他窗口和子帧的确认",
     respond(1, true);
     assert.equal(await task, true);
     assert.equal(ipc.listenerCount("siyuan-window-workspace-saved"), 0);
+    assert.equal(messages[0].cmd, "siyuan-window-workspace-flush");
 });
 
 test("保存失败或窗口无响应时取消退出并清理监听器", async () => {

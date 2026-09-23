@@ -3,7 +3,7 @@
 	"mainWindowLayouts": "Макеты главного окна",
 	"windowWorkspaces": "Макеты нового окна",
 	"windowWorkspaceSave": "Сохранить как макет нового окна",
-	"windowWorkspaceRemoveTip": "Удалить «${x}»? Документы и вложения сохранятся, а открытые окна останутся открытыми.",
+	"windowWorkspaceRemoveTip": "Открытые окна останутся открытыми. Подтвердить удаление макета нового окна «${x}»?",
 	"windowWorkspaceSaveError": "Не удалось сохранить макет нового окна. Попробуйте ещё раз.",
 	"windowWorkspaceUnavailable": "Макет нового окна недоступен или использует неподдерживаемый формат.",
 	"calendarUndated": "Без даты",

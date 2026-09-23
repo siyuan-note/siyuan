@@ -23,7 +23,7 @@ import {
     handleTouchStart,
     handleTouchUp,
 } from "./util/touch";
-import {fetchGet, fetchPost} from "../util/fetch";
+import {fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {finishMobileStartup} from "./util/setEmpty";
 import {initAssets} from "../util/assets";
@@ -70,6 +70,7 @@ import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 import {updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {showMobileBars} from "./util/mobileBars";
 import {initializeEnglishCommandTranslations} from "../command/english";
+import {loadLanguages} from "../boot/loadLanguages";
 import {scrollInputIntoView} from "./util/visibleViewport";
 import {installPluginStorageFetchAppId} from "../util/fetchAppId";
 
@@ -194,11 +195,11 @@ class App {
             correctHotkey(siyuanApp);
             await loadPlugins(this);
             getLocalStorage(() => {
-                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
-                    window.siyuan.languages = lauguages;
+                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, (languages: IObject) => {
+                    window.siyuan.languages = languages;
                     void initializeEnglishCommandTranslations(
                         window.siyuan.config.appearance.lang,
-                        lauguages as Record<string, string>,
+                        languages as Record<string, string>,
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);

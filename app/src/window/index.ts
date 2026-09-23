@@ -7,7 +7,7 @@ import "../assets/scss/base.scss";
 import {initBlockPopover} from "../block/popover";
 import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {genUUID} from "../util/genID";
-import {fetchGet, fetchPost} from "../util/fetch";
+import {fetchPost} from "../util/fetch";
 import {addBaseURL, getDocDisplayName, redirectToCheckAuth, setNoteBook} from "../util/pathName";
 import {openFileById} from "../editor/util";
 import {
@@ -41,6 +41,7 @@ import {updateServerAddresses} from "../config/tabs/accessRuntime";
 import {applyCloudUserState} from "../config/tabs/accountUi";
 import {emitToPlugins} from "../plugin/EventBusCore";
 import {initializeEnglishCommandTranslations} from "../command/english";
+import {loadLanguages} from "../boot/loadLanguages";
 import {installPluginStorageFetchAppId} from "../util/fetchAppId";
 
 class App {
@@ -229,11 +230,11 @@ class App {
             await notebookPromise;
             await loadPlugins(this);
             getLocalStorage(() => {
-                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
-                    window.siyuan.languages = lauguages;
+                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, (languages: IObject) => {
+                    window.siyuan.languages = languages;
                     void initializeEnglishCommandTranslations(
                         window.siyuan.config.appearance.lang,
-                        lauguages as Record<string, string>,
+                        languages as Record<string, string>,
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);

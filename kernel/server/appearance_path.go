@@ -68,6 +68,7 @@ func resolveAppearanceFilePath(root, requestPath string) (string, int) {
 	resolvedRoot, err := evalAppearanceSymlinks(root)
 	if err != nil {
 		logging.LogWarnf("resolve appearance root [%s] failed: %s", root, err)
+		logAppearanceRootDiagnostic(root, filepath.Join(append([]string{root}, segments...)...))
 		return "", http.StatusNotFound
 	}
 	root = resolvedRoot

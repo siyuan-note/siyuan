@@ -1,16 +1,5 @@
 .custom-attr {
 
-  &__aliases {
-    .b3-chip {
-      max-width: 100%;
-    }
-
-    .b3-chip > span {
-      min-width: 0;
-      overflow-wrap: anywhere;
-    }
-  }
-
   &__avbacklinks {
     border-bottom: 1px solid var(--b3-border-color);
     padding: 4px 8px 8px 36px;
@@ -243,6 +232,22 @@
 
   .b3-chip {
     margin: 1px 2px;
+  }
+
+  &__aliases {
+    padding: 0;
+
+    .b3-chip {
+      max-width: 100%;
+      margin: 0 8px 8px 0;
+    }
+
+    .b3-chip > span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      touch-action: none;
+      user-select: none;
+    }
   }
 
   .av__cellassetimg {

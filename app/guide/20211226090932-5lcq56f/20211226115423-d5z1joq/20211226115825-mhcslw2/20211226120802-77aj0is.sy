@@ -6,7 +6,7 @@
 		"id": "20211226120802-77aj0is",
 		"title": "内容區塊屬性",
 		"type": "doc",
-		"updated": "20260922145800"
+		"updated": "20260922175346"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120833-wzobna4",
-				"updated": "20260922145800"
+				"updated": "20260922175346"
 			},
 			"Children": [
 				{
@@ -63,7 +63,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226120833-5n4ui6o",
-				"updated": "20260922145800"
+				"updated": "20260922175346"
 			},
 			"Children": [
 				{
@@ -166,6 +166,19 @@
 								{
 									"Type": "NodeText",
 									"Data": " 取消本次輸入。新輸入會移除前後空白、過濾空項和完全相同的重複項。"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "拖曳別名可調整順序，放開後儲存；觸控螢幕也支援拖曳。拖曳時按 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Esc"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 可取消排序。"
 								}
 							]
 						}

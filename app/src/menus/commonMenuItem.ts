@@ -288,6 +288,7 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
     </div>
 </div>`,
         destroyCallback() {
+            aliasInput.destroy();
             /// #if MOBILE
             disposeSheet();
             /// #else
@@ -315,6 +316,7 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
     (dialog.element.querySelector('.b3-text-field[data-name="name"]') as HTMLInputElement).value = attrs.name || "";
     const aliasInput = bindAliasInput(dialog.element.querySelector("[data-alias-input]"), attrs.alias || "", {
         addLabel: window.siyuan.languages.addAlias,
+        dragThreshold: Constants.SIZE_DRAG_THRESHOLD,
         removeLabel: window.siyuan.languages.remove,
         placeholder: window.siyuan.languages.attrAliasTip,
         spellcheck: window.siyuan.config.editor.spellcheck,

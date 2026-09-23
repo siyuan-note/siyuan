@@ -6,7 +6,7 @@
 		"id": "20210613191509-cbkxcbz",
 		"title": "Content Block Attribute",
 		"type": "doc",
-		"updated": "20260922145800"
+		"updated": "20260922175346"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613191548-ckua3q3",
-				"updated": "20260922145800"
+				"updated": "20260922175346"
 			},
 			"Children": [
 				{
@@ -62,7 +62,7 @@
 			],
 			"Properties": {
 				"id": "20210613191548-n6dt4hc",
-				"updated": "20260922145800"
+				"updated": "20260922175346"
 			},
 			"Children": [
 				{
@@ -165,6 +165,19 @@
 								{
 									"Type": "NodeText",
 									"Data": " to cancel the current input. Leading and trailing whitespace, empty entries and exact duplicates are removed from new input."
+								},
+								{
+									"Type": "NodeText",
+									"Data": " Drag aliases to reorder them; the order is saved when you release. Touchscreens also support dragging. Press "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Esc"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " while dragging to cancel the reorder."
 								}
 							]
 						}

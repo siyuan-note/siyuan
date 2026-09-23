@@ -12,13 +12,17 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
     removeLabel: string,
     placeholder: string,
     spellcheck: boolean,
+    dragThreshold?: number,
     save: (value: string) => Promise<boolean>,
 }) => {
     let aliases = parseAliases(initialValue);
     let editing = -1;
     let pending: Promise<boolean>;
     let actions = Promise.resolve();
-    element.innerHTML = `<div class="b3-chips b3-chips__doctag custom-attr__aliases"></div>
+    let activeActions = 0;
+    let cancelDrag: () => void;
+    let suppressClick = false;
+    element.innerHTML = `<div class="b3-chips custom-attr__aliases"></div>
 <button type="button" class="b3-button b3-button--cancel"><svg><use xlink:href="#iconAdd"></use></svg><span></span></button>
 <input class="b3-text-field fn__block fn__none">`;
     const list = element.querySelector<HTMLElement>(".b3-chips");
@@ -28,11 +32,126 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
     input.placeholder = options.placeholder;
     input.setAttribute("aria-label", options.placeholder);
     input.spellcheck = options.spellcheck;
+    list.addEventListener("click", event => {
+        if (suppressClick && event.detail !== 0) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    }, true);
+    list.addEventListener("touchstart", event => {
+        // 别名上的触摸由排序处理，避免同时触发移动端面板的下拉关闭。
+        if ((event.target as Element).closest(".b3-chip")) {
+            event.stopPropagation();
+        }
+    }, {passive: true});
     list.addEventListener("pointerdown", event => {
+        suppressClick = false;
         // 点击标签时由点击处理器先提交草稿，避免失焦重绘移除正在点击的元素。
         if (document.activeElement === input) {
             event.preventDefault();
         }
+        const chip = (event.target as Element).closest<HTMLElement>(".b3-chip");
+        if (!chip || event.button !== 0 || !event.isPrimary || pending || activeActions || cancelDrag ||
+            !input.classList.contains("fn__none") || (event.target as Element).closest(".b3-chip__close")) {
+            return;
+        }
+        const rect = chip.getBoundingClientRect();
+        const offsetX = event.clientX - rect.left;
+        const offsetY = event.clientY - rect.top;
+        let clone: HTMLElement;
+        const cleanup = () => {
+            document.removeEventListener("pointermove", move);
+            document.removeEventListener("pointerup", drop);
+            document.removeEventListener("pointercancel", cancel);
+            document.removeEventListener("keydown", escape, true);
+            window.removeEventListener("blur", cancel);
+            list.removeEventListener("lostpointercapture", lostCapture);
+            if (list.hasPointerCapture(event.pointerId)) {
+                list.releasePointerCapture(event.pointerId);
+            }
+            clone?.remove();
+            chip.classList.remove("b3-chip--dragging");
+            cancelDrag = undefined;
+        };
+        const cancel = () => {
+            cleanup();
+            if (clone) {
+                render();
+            }
+        };
+        const lostCapture = (captureEvent: PointerEvent) => {
+            if (captureEvent.target === list && captureEvent.pointerId === event.pointerId) {
+                cancel();
+            }
+        };
+        const escape = (keyEvent: KeyboardEvent) => {
+            if (keyEvent.key === "Escape") {
+                keyEvent.preventDefault();
+                keyEvent.stopPropagation();
+                cancel();
+            }
+        };
+        const move = (moveEvent: PointerEvent) => {
+            if (moveEvent.pointerId !== event.pointerId) {
+                return;
+            }
+            if (!clone) {
+                if (Math.abs(moveEvent.clientX - event.clientX) < (options.dragThreshold ?? 5) &&
+                    Math.abs(moveEvent.clientY - event.clientY) < (options.dragThreshold ?? 5)) {
+                    return;
+                }
+                suppressClick = true;
+                clone = chip.cloneNode(true) as HTMLElement;
+                clone.classList.add("b3-chip--dragclone");
+                clone.setAttribute("aria-hidden", "true");
+                clone.querySelectorAll("[tabindex]").forEach(item => item.removeAttribute("tabindex"));
+                Object.assign(clone.style, {
+                    position: "fixed", width: `${rect.width}px`, height: `${rect.height}px`,
+                    margin: "0", zIndex: "9999", pointerEvents: "none", transition: "none",
+                });
+                document.body.append(clone);
+                chip.classList.add("b3-chip--dragging");
+                list.setPointerCapture(event.pointerId);
+            }
+            moveEvent.preventDefault();
+            clone.style.left = `${moveEvent.clientX - offsetX}px`;
+            clone.style.top = `${moveEvent.clientY - offsetY}px`;
+            const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)
+                ?.closest<HTMLElement>(".b3-chip");
+            if (target && target !== chip && target.parentElement === list) {
+                const targetRect = target.getBoundingClientRect();
+                if (moveEvent.clientX > targetRect.left + targetRect.width / 2) {
+                    target.after(chip);
+                } else {
+                    target.before(chip);
+                }
+            }
+        };
+        const drop = (upEvent: PointerEvent) => {
+            if (upEvent.pointerId !== event.pointerId) {
+                return;
+            }
+            const next = Array.from(list.children).map(item => item.querySelector("span").textContent);
+            cleanup();
+            if (!clone) {
+                return;
+            }
+            upEvent.preventDefault();
+            if (next.some((alias, index) => alias !== aliases[index])) {
+                activate(async () => {
+                    if (!await persist(next, false)) {
+                        render();
+                    }
+                });
+            }
+        };
+        cancelDrag = cancel;
+        document.addEventListener("pointermove", move, {passive: false});
+        document.addEventListener("pointerup", drop);
+        document.addEventListener("pointercancel", cancel);
+        document.addEventListener("keydown", escape, true);
+        window.addEventListener("blur", cancel);
+        list.addEventListener("lostpointercapture", lostCapture);
     });
     const finish = () => {
         editing = -1;
@@ -124,10 +243,13 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
     };
     const activate = (action: () => Promise<void>) => {
         // 标签操作依次提交，避免失焦保存和连续删除互相覆盖。
+        activeActions++;
         actions = actions.then(async () => {
             if (await commit()) {
                 await action();
             }
+        }).finally(() => {
+            activeActions--;
         });
     };
     add.addEventListener("click", open);
@@ -151,9 +273,11 @@ export const bindAliasInput = (element: HTMLElement, initialValue: string, optio
     render();
     return {
         commit: async () => {
+            cancelDrag?.();
             await actions;
             return commit();
         },
         focus: open,
+        destroy: () => cancelDrag?.(),
     };
 };

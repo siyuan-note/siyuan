@@ -6,7 +6,7 @@
 		"id": "20210612224500-ywcms1m",
 		"title": "内容块属性",
 		"type": "doc",
-		"updated": "20260922145800"
+		"updated": "20260922175346"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613004126-79loyta",
-				"updated": "20260922145800"
+				"updated": "20260922175346"
 			},
 			"Children": [
 				{
@@ -62,7 +62,7 @@
 			],
 			"Properties": {
 				"id": "20210613004249-56e0c6r",
-				"updated": "20260922145800"
+				"updated": "20260922175346"
 			},
 			"Children": [
 				{
@@ -165,6 +165,19 @@
 								{
 									"Type": "NodeText",
 									"Data": " 取消本次输入。新输入会去除首尾空白、过滤空项和完全相同的重复项。"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "拖动别名可调整顺序，松开后保存；触屏也支持拖动。拖动时按 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Esc"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 可取消排序。"
 								}
 							]
 						}

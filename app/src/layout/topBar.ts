@@ -86,7 +86,7 @@ export const initBar = (app: App) => {
     <svg><use xlink:href="#iconCloudSucc"></use></svg>
 </div>
 <button id="barDailyNote" data-topbar-entry="barDailyNote" class="ariaLabel toolbar__item${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.dailyNote} ${updateHotkeyTip(window.siyuan.config.keymap.general.dailyNote.custom)}">
-    <svg><use xlink:href="#iconCalendar"></use></svg>
+    <svg><use xlink:href="#iconCalendarPlus"></use></svg>
 </button>
 <button id="barRiffCard" data-topbar-entry="barRiffCard" class="ariaLabel toolbar__item${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.riffCard} ${updateHotkeyTip(window.siyuan.config.keymap.general.riffCard.custom)}">
     <svg><use xlink:href="#iconRiffCard"></use></svg>

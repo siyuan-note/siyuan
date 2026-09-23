@@ -67,6 +67,7 @@ import {
     getMissingDragIds,
     getSameSuperBlockEdgeTarget,
     getSuperBlockResizeDropTarget,
+    getTabsContentDropTarget,
     getTopListDragTarget,
     isAttributeViewTitleTarget,
     isCopyBlockDrag,
@@ -2665,6 +2666,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     });
                 }
             }
+        }
+
+        if (targetElement && gutterType && !isAvSubType && gutterTypes[0] !== "nodetabitem") {
+            // 页签标题栏和空白正文区指向当前页签的正文块，避免把普通块移为页签项的兄弟。
+            targetElement = getTabsContentDropTarget(targetElement, event.target);
         }
 
         if (!targetElement) {

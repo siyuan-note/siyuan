@@ -332,6 +332,16 @@ export class Menu {
         fullscreenCloseTimeout = window.setTimeout(() => this.removeImmediately(), Constants.TIMEOUT_DBLCLICK);
     }
 
+    // 保留菜单内容和触摸事件，在向菜单外拖拽时临时让出底层区域。
+    public setSheetDragPreview(active: boolean) {
+        if (!this.element.classList.contains("b3-menu--sheet")) {
+            return;
+        }
+        this.element.style.transition = active ? "none" : "";
+        this.element.style.transform = active ? "translateY(100%)" : "translateY(0px)";
+        this.getFullscreenScrim()?.classList.toggle("b3-menu__scrim--open", !active);
+    }
+
     private updateSheetTitle() {
         if (!this.element.classList.contains("b3-menu--sheet")) {
             return;

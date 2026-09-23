@@ -1,6 +1,8 @@
 import type {AVTableRow} from "../../../../types/api";
+import {Constants} from "../../../../constants";
 import {fetchSyncPost} from "../../../../util/fetch";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
+import {isMobile} from "../../../../util/functions";
 import {calendarDayDistance} from "./date";
 import {getCalendarDropDay} from "./hitTest";
 import type {ICalendarState} from "./state";
@@ -22,7 +24,7 @@ const toUndatedRow = (source: AVTableRow, dateKeyID: string): IAVRow | undefined
 };
 
 export const getCalendarUndatedHTML = (state: ICalendarState) => `<div class="b3-menu av__calendar-undated-panel${state.undatedOpen ? "" : " fn__none"}" data-calendar-undated-panel role="dialog" aria-label="${escapeAttr(window.siyuan.languages.calendarUndated)}">
-    <div class="av__calendar-undated-head"><strong>${escapeHtml(window.siyuan.languages.calendarUndated)}</strong><span class="counter counter--bg fn__none" data-calendar-undated-count></span></div>
+    <div class="av__calendar-undated-head"><span class="b3-menu__label">${escapeHtml(window.siyuan.languages.calendarUndated)}</span><span class="counter ${isMobile() ? "counter--compact" : "counter--bg"} fn__none" data-calendar-undated-count></span></div>
     <div class="av__calendar-undated-search"><input type="search" class="b3-text-field" data-calendar-undated-search aria-label="${escapeAttr(window.siyuan.languages.search)}" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}" value="${escapeAttr(state.undatedSearch)}"></div>
     <div class="av__calendar-undated-hint ft__on-surface">${escapeHtml(window.siyuan.languages.calendarUndatedHint)}</div>
     <div class="b3-menu__items av__calendar-undated-list" data-calendar-undated-list></div>
@@ -46,6 +48,7 @@ export const bindCalendarUndated = (options: {
     const count = panel.querySelector<HTMLElement>("[data-calendar-undated-count]");
     const more = panel.querySelector<HTMLButtonElement>("[data-calendar-undated-more]");
     const dateKeyID = (data.view as IAVTable).calendar.dateKeyID;
+    const mobile = isMobile();
     const normalizedQuery = query.trim();
     const cache = state.undatedCache?.dateKeyID === dateKeyID && state.undatedCache.query === normalizedQuery &&
         state.undatedCache.search === state.undatedSearch.trim() ? state.undatedCache : undefined;
@@ -53,7 +56,8 @@ export const bindCalendarUndated = (options: {
     let total = cache?.total || 0;
     let page = cache?.page || 0;
     let hasResult = !!cache;
-    let selectedID = "";
+    let selectedID = cache?.rows.some(row => row.id === state.undatedSelectedID) ? state.undatedSelectedID : "";
+    state.undatedSelectedID = selectedID;
     let loading = false;
     let request: AbortController;
     let searchTimer: number;
@@ -66,16 +70,33 @@ export const bindCalendarUndated = (options: {
             item.setAttribute("aria-pressed", selected.toString());
         });
     };
+    const updateDayTargets = () => {
+        const active = state.undatedOpen || !!selectedID;
+        root.classList.toggle("av__calendar--undated-open", active);
+        root.querySelectorAll<HTMLElement>("[data-calendar-day]").forEach(day => {
+            if (active) {
+                day.tabIndex = 0;
+                day.setAttribute("role", "button");
+                day.setAttribute("aria-label", new Date(Number(day.dataset.calendarDay)).toLocaleDateString(window.siyuan.config.lang));
+            } else {
+                day.removeAttribute("tabindex");
+                day.removeAttribute("role");
+                day.removeAttribute("aria-label");
+            }
+        });
+    };
     const renderRows = () => {
         state.undatedCache = {dateKeyID, query: normalizedQuery, search: state.undatedSearch.trim(), rows: [...rows], total, page};
         count.textContent = total.toString();
         count.classList.remove("fn__none");
-        list.innerHTML = rows.length ? rows.map(row => {
+        const rowHTML = rows.map(row => {
             const primary = row.cells.find(cell => cell.value?.type === "block")?.value;
             const title = primary?.block?.content || window.siyuan.languages.untitled;
             const previewID = primary?.isDetached ? "" : primary?.block?.id;
             return `<div class="b3-menu__item av__calendar-undated-item" role="button" tabindex="0" aria-pressed="false" data-calendar-undated-row="${escapeAttr(row.id)}"><svg class="b3-menu__icon${previewID ? " popover__block" : ""}"${previewID ? ` data-id="${escapeAttr(previewID)}"` : ""}><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label fn__ellipsis"><span${previewID ? ' class="av__celltext--ref"' : ""}>${escapeHtml(title)}</span></span><button type="button" class="block__icon block__icon--show ariaLabel" data-calendar-undated-open="${escapeAttr(row.id)}" data-position="4west" aria-label="${escapeAttr(window.siyuan.languages.openBy)}"><svg><use xlink:href="#iconOpen"></use></svg></button></div>`;
-        }).join("") : `<div class="av__calendar-undated-empty ft__on-surface">${escapeHtml(window.siyuan.languages.empty)}</div>`;
+        }).join("");
+        list.innerHTML = rows.length ? mobile ? `<div class="b3-menu__group-items">${rowHTML}</div>` : rowHTML :
+            `<div class="av__calendar-undated-empty ft__on-surface">${escapeHtml(window.siyuan.languages.empty)}</div>`;
         more.classList.toggle("fn__none", page * PAGE_SIZE >= total);
         updateSelection();
         hasResult = true;
@@ -87,6 +108,8 @@ export const bindCalendarUndated = (options: {
         if (reset) {
             request?.abort();
             selectedID = "";
+            state.undatedSelectedID = "";
+            updateDayTargets();
         } else if (loading) {
             return;
         }
@@ -126,43 +149,67 @@ export const bindCalendarUndated = (options: {
             }
         }
     };
+    let keepMobileSelection = false;
     const setOpen = (open: boolean, focusSearch = false) => {
+        const menu = mobile ? window.siyuan.menus.menu : undefined;
+        if (!open && mobile && menu.element.lastElementChild.contains(panel)) {
+            menu.closeSheet();
+            return;
+        }
+        if (open && mobile) {
+            menu.remove();
+        }
         dismissControllers.get(state)?.abort();
         dismissControllers.delete(state);
         state.undatedOpen = open;
         panel.classList.toggle("fn__none", !open);
-        root.classList.toggle("av__calendar--undated-open", open);
         toggle.setAttribute("aria-expanded", open.toString());
-        root.querySelectorAll<HTMLElement>("[data-calendar-day]").forEach(day => {
-            if (open) {
-                day.tabIndex = 0;
-                day.setAttribute("role", "button");
-                day.setAttribute("aria-label", new Date(Number(day.dataset.calendarDay)).toLocaleDateString(window.siyuan.config.lang));
-            } else {
-                day.removeAttribute("tabindex");
-                day.removeAttribute("role");
-                day.removeAttribute("aria-label");
-            }
-        });
+        updateDayTargets();
         if (open) {
-            const dismissController = new AbortController();
-            dismissControllers.set(state, dismissController);
-            document.addEventListener("pointerdown", event => {
-                const target = event.target as HTMLElement;
-                if (panel.contains(target) || toggle.contains(target) ||
-                    selectedID && target.closest("[data-calendar-day]")) {
-                    return;
-                }
-                setOpen(false);
-            }, {signal: dismissController.signal, capture: true});
+            if (mobile) {
+                panel.classList.remove("b3-menu");
+                list.classList.remove("b3-menu__items");
+                list.classList.add("b3-menu__groups");
+                menu.append(panel);
+                menu.removeCB = () => {
+                    panel.classList.add("fn__none");
+                    if (root.isConnected) {
+                        root.querySelector(".av__calendar-scroll")?.before(panel);
+                    } else {
+                        panel.remove();
+                    }
+                    if (!keepMobileSelection) {
+                        selectedID = "";
+                        state.undatedSelectedID = "";
+                    }
+                    keepMobileSelection = false;
+                    setOpen(false);
+                };
+                menu.fullscreen("bottom");
+            } else {
+                const dismissController = new AbortController();
+                dismissControllers.set(state, dismissController);
+                document.addEventListener("pointerdown", event => {
+                    const target = event.target as HTMLElement;
+                    if (panel.contains(target) || toggle.contains(target) ||
+                        selectedID && target.closest("[data-calendar-day]")) {
+                        return;
+                    }
+                    setOpen(false);
+                }, {signal: dismissController.signal, capture: true});
+            }
             void load(true);
-            if (focusSearch) {
+            if (focusSearch && !mobile) {
                 search.focus();
             }
         } else {
             clearTimeout(searchTimer);
             request?.abort();
-            selectedID = "";
+            if (!mobile) {
+                selectedID = "";
+                state.undatedSelectedID = "";
+                updateDayTargets();
+            }
             if (focusSearch) {
                 toggle.focus();
             }
@@ -173,7 +220,11 @@ export const bindCalendarUndated = (options: {
         const cell = row?.cells.find(item => item.value?.type === "date" && item.value.keyID === dateKeyID);
         const year = new Date(day).getFullYear();
         if (!row || !cell?.value || year < 1 || year > 9999) {
-            return;
+            return false;
+        }
+        const closeMobileSheet = mobile && state.undatedOpen;
+        if (closeMobileSheet) {
+            state.undatedOpen = false;
         }
         request?.abort();
         onSchedule(row, cell, day, () => {
@@ -184,7 +235,13 @@ export const bindCalendarUndated = (options: {
         rows = rows.filter(item => item.id !== rowID);
         total = Math.max(0, total - 1);
         selectedID = "";
+        state.undatedSelectedID = "";
+        updateDayTargets();
         renderRows();
+        if (closeMobileSheet) {
+            window.siyuan.menus.menu.closeSheet();
+        }
+        return true;
     };
     const clearPreview = () => {
         root.querySelectorAll(".av__calendar-undated-preview-layer").forEach(layer => layer.remove());
@@ -214,10 +271,24 @@ export const bindCalendarUndated = (options: {
             break;
         }
     };
+    let dragPreview = false;
+    const setDragPreview = (active: boolean) => {
+        dragPreview = active;
+        if (mobile) {
+            if (window.siyuan.menus.menu.element.lastElementChild.contains(panel)) {
+                window.siyuan.menus.menu.setSheetDragPreview(active);
+            }
+        } else {
+            panel.style.visibility = active ? "hidden" : "";
+        }
+    };
     const dropDay = (x: number, y: number) => {
-        const rect = panel.getBoundingClientRect();
-        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-            return;
+        if (!dragPreview) {
+            const rect = mobile && state.undatedOpen ? window.siyuan.menus.menu.element.getBoundingClientRect() :
+                panel.getBoundingClientRect();
+            if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                return;
+            }
         }
         return getCalendarDropDay(root, x, y);
     };
@@ -248,6 +319,9 @@ export const bindCalendarUndated = (options: {
         if (open) {
             const row = rows.find(item => item.id === open.dataset.calendarUndatedOpen);
             if (row) {
+                if (mobile) {
+                    window.siyuan.menus.menu.remove();
+                }
                 onOpen(row);
             }
             return;
@@ -255,7 +329,12 @@ export const bindCalendarUndated = (options: {
         const item = target.closest<HTMLElement>("[data-calendar-undated-row]");
         if (item && !suppressClick) {
             selectedID = selectedID === item.dataset.calendarUndatedRow ? "" : item.dataset.calendarUndatedRow;
+            state.undatedSelectedID = selectedID;
             updateSelection();
+            if (mobile && selectedID) {
+                keepMobileSelection = true;
+                window.siyuan.menus.menu.closeSheet();
+            }
         }
     });
     panel.addEventListener("keydown", event => {
@@ -270,7 +349,7 @@ export const bindCalendarUndated = (options: {
         }
     });
     root.addEventListener("click", event => {
-        if (!selectedID || !state.undatedOpen) {
+        if (!selectedID) {
             return;
         }
         const day = (event.target as HTMLElement).closest<HTMLElement>("[data-calendar-day]");
@@ -281,7 +360,7 @@ export const bindCalendarUndated = (options: {
         }
     }, true);
     root.addEventListener("keydown", event => {
-        if ((event.key !== "Enter" && event.key !== " ") || !selectedID || !state.undatedOpen) {
+        if ((event.key !== "Enter" && event.key !== " ") || !selectedID) {
             return;
         }
         const day = (event.target as HTMLElement).closest<HTMLElement>("[data-calendar-day]");
@@ -297,6 +376,26 @@ export const bindCalendarUndated = (options: {
             event.stopImmediatePropagation();
         }
     }, true);
+    const createGhost = (item: HTMLElement) => {
+        const rect = item.getBoundingClientRect();
+        const ghost = item.cloneNode(true) as HTMLElement;
+        ghost.classList.add("b3-menu__item--show", "av__calendar-undated-ghost");
+        ghost.removeAttribute("data-calendar-undated-row");
+        ghost.removeAttribute("role");
+        ghost.removeAttribute("tabindex");
+        ghost.removeAttribute("aria-pressed");
+        ghost.setAttribute("aria-hidden", "true");
+        ghost.style.width = `${rect.width}px`;
+        ghost.style.height = `${rect.height}px`;
+        document.body.append(ghost);
+        root.classList.add("av__calendar--dragging");
+        item.classList.add("av__calendar-item--dragging");
+        return ghost;
+    };
+    const moveGhost = (ghost: HTMLElement, x: number, y: number) => {
+        ghost.style.left = `${Math.max(8, Math.min(x + 12, window.innerWidth - parseFloat(ghost.style.width) - 8))}px`;
+        ghost.style.top = `${Math.max(8, Math.min(y + 12, window.innerHeight - parseFloat(ghost.style.height) - 8))}px`;
+    };
     panel.addEventListener("pointerdown", event => {
         const item = (event.target as HTMLElement).closest<HTMLElement>("[data-calendar-undated-row]");
         if (event.button !== 0 || event.pointerType === "touch" || !item ||
@@ -305,13 +404,9 @@ export const bindCalendarUndated = (options: {
         }
         const controller = new AbortController();
         let dragging = false;
+        let scheduled = false;
         let destination: number;
         let ghost: HTMLElement;
-        const sourceRect = item.getBoundingClientRect();
-        const moveGhost = (x: number, y: number) => {
-            ghost.style.left = `${Math.max(8, Math.min(x + 12, window.innerWidth - sourceRect.width - 8))}px`;
-            ghost.style.top = `${Math.max(8, Math.min(y + 12, window.innerHeight - sourceRect.height - 8))}px`;
-        };
         const clean = () => {
             controller.abort();
             clearPreview();
@@ -319,6 +414,9 @@ export const bindCalendarUndated = (options: {
             item.classList.remove("av__calendar-item--dragging");
             ghost?.remove();
             if (dragging) {
+                if (!mobile || (!scheduled && state.undatedOpen)) {
+                    setDragPreview(false);
+                }
                 suppressClick = true;
                 setTimeout(() => { suppressClick = false; });
             }
@@ -337,20 +435,10 @@ export const bindCalendarUndated = (options: {
             move.preventDefault();
             if (!dragging) {
                 dragging = true;
-                ghost = item.cloneNode(true) as HTMLElement;
-                ghost.classList.add("b3-menu__item--show", "av__calendar-undated-ghost");
-                ghost.removeAttribute("data-calendar-undated-row");
-                ghost.removeAttribute("role");
-                ghost.removeAttribute("tabindex");
-                ghost.removeAttribute("aria-pressed");
-                ghost.setAttribute("aria-hidden", "true");
-                ghost.style.width = `${sourceRect.width}px`;
-                ghost.style.height = `${sourceRect.height}px`;
-                document.body.append(ghost);
-                root.classList.add("av__calendar--dragging");
-                item.classList.add("av__calendar-item--dragging");
+                ghost = createGhost(item);
+                setDragPreview(true);
             }
-            moveGhost(move.clientX, move.clientY);
+            moveGhost(ghost, move.clientX, move.clientY);
             destination = dropDay(move.clientX, move.clientY);
             preview(destination);
         }, {signal: controller.signal, passive: false});
@@ -360,7 +448,7 @@ export const bindCalendarUndated = (options: {
             }
             destination = dropDay(up.clientX, up.clientY);
             if (dragging && root.isConnected && destination !== undefined) {
-                schedule(item.dataset.calendarUndatedRow, destination);
+                scheduled = schedule(item.dataset.calendarUndatedRow, destination);
             }
             clean();
         }, {signal: controller.signal});
@@ -377,9 +465,95 @@ export const bindCalendarUndated = (options: {
             }
         }, {signal: controller.signal, capture: true});
     });
+    panel.addEventListener("touchstart", event => {
+        if (!mobile || event.touches.length !== 1) {
+            return;
+        }
+        const item = (event.target as HTMLElement).closest<HTMLElement>("[data-calendar-undated-row]");
+        if (!item || (event.target as HTMLElement).closest("[data-calendar-undated-open]")) {
+            return;
+        }
+        const touch = event.touches[0];
+        const identifier = touch.identifier;
+        const startX = touch.clientX;
+        const startY = touch.clientY;
+        const controller = new AbortController();
+        let dragging = false;
+        let scheduled = false;
+        let ghost: HTMLElement;
+        const clean = () => {
+            clearTimeout(timer);
+            controller.abort();
+            clearPreview();
+            root.classList.remove("av__calendar--dragging", "av__calendar--invalid");
+            item.classList.remove("av__calendar-item--dragging");
+            ghost?.remove();
+            if (dragging) {
+                if (!scheduled && state.undatedOpen && window.siyuan.menus.menu.element.lastElementChild.contains(panel)) {
+                    setDragPreview(false);
+                }
+                suppressClick = true;
+                setTimeout(() => { suppressClick = false; }, 300);
+            }
+        };
+        const timer = window.setTimeout(() => {
+            if (!root.isConnected || !panel.isConnected) {
+                clean();
+                return;
+            }
+            dragging = true;
+            ghost = createGhost(item);
+            moveGhost(ghost, startX, startY);
+            setDragPreview(true);
+        }, Constants.TIMEOUT_LONGPRESS);
+        panel.addEventListener("touchmove", move => {
+            if (move.touches.length !== 1) {
+                clean();
+                return;
+            }
+            const point = Array.from(move.touches).find(current => current.identifier === identifier);
+            if (!point) {
+                clean();
+                return;
+            }
+            if (!dragging) {
+                if (Math.hypot(point.clientX - startX, point.clientY - startY) > 5) {
+                    clean();
+                }
+                return;
+            }
+            move.preventDefault();
+            move.stopPropagation();
+            moveGhost(ghost, point.clientX, point.clientY);
+            preview(dropDay(point.clientX, point.clientY));
+        }, {signal: controller.signal, passive: false});
+        panel.addEventListener("touchend", end => {
+            const point = Array.from(end.changedTouches).find(current => current.identifier === identifier);
+            if (!point) {
+                return;
+            }
+            if (dragging) {
+                end.preventDefault();
+                end.stopPropagation();
+                const day = dropDay(point.clientX, point.clientY);
+                if (root.isConnected && day !== undefined) {
+                    scheduled = schedule(item.dataset.calendarUndatedRow, day);
+                }
+            }
+            clean();
+        }, {signal: controller.signal});
+        panel.addEventListener("touchcancel", clean, {signal: controller.signal});
+        window.addEventListener("blur", clean, {signal: controller.signal});
+    }, {passive: true});
+    panel.addEventListener("contextmenu", event => {
+        if (mobile && (event.target as HTMLElement).closest("[data-calendar-undated-row]")) {
+            event.preventDefault();
+        }
+    });
     if (cache) {
         renderRows();
     }
+    updateDayTargets();
     if (state.undatedOpen) {
         setOpen(true);
     }

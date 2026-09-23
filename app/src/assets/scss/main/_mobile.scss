@@ -162,6 +162,12 @@ body.mobile-keyboard--open {
   line-height: 24px;
   height: 24px;
   font-size: 16px;
+
+  &.counter--compact {
+    font-size: 12px;
+    height: 22px;
+    line-height: 22px;
+  }
 }
 
 .toolbar {

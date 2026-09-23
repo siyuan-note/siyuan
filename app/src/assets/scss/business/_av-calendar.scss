@@ -11,7 +11,10 @@
     user-select: none;
     padding-bottom: 8px;
   }
+}
 
+.av[data-av-type="calendar"],
+#commonMenu {
   .av__calendar-undated-panel {
     position: absolute;
     top: 38px;
@@ -28,7 +31,7 @@
     align-items: center;
     padding: 0 16px 8px;
 
-    > strong {
+    .b3-menu__label {
       min-width: 0;
       margin-right: auto;
     }
@@ -60,7 +63,6 @@
   }
 
   .av__calendar-undated-item {
-    gap: 4px;
     min-width: 0;
 
     .b3-menu__label {
@@ -81,6 +83,12 @@
   .av__calendar-undated-retry {
     align-self: stretch;
     margin: 4px 8px 0;
+  }
+}
+
+.av[data-av-type="calendar"] {
+  .av__calendar-undated-item {
+    gap: 4px;
   }
 
   .av__calendar--undated-open [data-calendar-day] {
@@ -509,18 +517,20 @@
   }
 }
 
-@media (max-width: 600px) {
-  .av[data-av-type="calendar"] {
-    .av__calendar-undated-panel {
-      position: static;
-      width: 100%;
-      max-height: none;
-    }
+#commonMenu .av__calendar-undated-panel {
+  position: static;
+  width: 100%;
+  max-height: none;
+  box-shadow: none;
+}
 
-    .av__calendar-undated-list {
-      max-height: 30vh;
-    }
-  }
+#commonMenu .av__calendar-undated-list {
+  max-height: 40dvh;
+}
+
+#commonMenu .av__calendar-undated-hint {
+  line-height: 20px;
+  margin-bottom: 8px;
 }
 
 .av__calendar-jump-mode {

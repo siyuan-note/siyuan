@@ -9,6 +9,7 @@ export interface ICalendarState {
     rowLimit?: number;
     expandedWeeks: Set<number>;
     undatedOpen: boolean;
+    undatedSelectedID?: string;
     undatedSearch: string;
     undatedCache?: {dateKeyID: string; query: string; search: string; rows: IAVRow[]; total: number; page: number};
 }

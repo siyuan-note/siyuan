@@ -8,6 +8,7 @@ import {
     getMissingDragIds,
     getSameSuperBlockEdgeTarget,
     getSuperBlockResizeDropTarget,
+    getTabsContentDropTarget,
     getTopListDragTarget,
     isAttributeViewTitleTarget,
     isCopyBlockDrag,
@@ -106,6 +107,43 @@ const createSuperBlock = (layout = "col") => {
     children.push({hasAttribute: () => false, parentElement: superBlock} as unknown as Element);
     return {blocks, superBlock};
 };
+
+describe("getTabsContentDropTarget", () => {
+    const first = {} as HTMLElement;
+    const last = {} as HTMLElement;
+    const content = {querySelectorAll: () => [first, last]} as unknown as HTMLElement;
+    const item = {
+        getAttribute: (name: string) => name === "data-type" ? "NodeTabItem" : null,
+        querySelector: () => content,
+    } as unknown as HTMLElement;
+    const tabs = {
+        getAttribute: (name: string) => name === "data-type" ? "NodeTabs" : null,
+        querySelector: () => item,
+    } as unknown as HTMLElement;
+    const header = {parentElement: tabs} as HTMLElement;
+    const headerHit = {closest: () => header} as unknown as HTMLElement;
+    const bodyHit = {closest: (): null => null} as unknown as HTMLElement;
+
+    it("inserts at the start of the active tab when hovering over its header", () => {
+        assert.equal(getTabsContentDropTarget(tabs, headerHit), first);
+    });
+
+    it("uses the last body block when hovering over a tab item", () => {
+        assert.equal(getTabsContentDropTarget(item, bodyHit), last);
+    });
+
+    it("keeps the tab container as an outer drop target outside the header", () => {
+        assert.equal(getTabsContentDropTarget(tabs, bodyHit), tabs);
+    });
+
+    it("rejects a tab body without a persisted block target", () => {
+        const emptyItem = {
+            getAttribute: item.getAttribute.bind(item),
+            querySelector: () => ({querySelectorAll: (): HTMLElement[] => []}),
+        } as unknown as HTMLElement;
+        assert.equal(getTabsContentDropTarget(emptyItem, bodyHit), null);
+    });
+});
 
 describe("isSameDragEditor", () => {
     it("does not treat a nested Protyle as the target editor", () => {

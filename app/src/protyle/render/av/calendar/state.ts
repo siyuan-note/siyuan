@@ -10,6 +10,7 @@ export interface ICalendarState {
     expandedWeeks: Set<number>;
     undatedOpen: boolean;
     undatedSearch: string;
+    undatedCache?: {dateKeyID: string; query: string; search: string; rows: IAVRow[]; total: number; page: number};
 }
 
 const states = new WeakMap<Element, Map<string, ICalendarState>>();

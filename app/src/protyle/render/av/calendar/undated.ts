@@ -6,6 +6,7 @@ import {getCalendarDropDay} from "./hitTest";
 import type {ICalendarState} from "./state";
 
 const PAGE_SIZE = 50;
+const dismissControllers = new WeakMap<ICalendarState, AbortController>();
 
 const toUndatedRow = (source: AVTableRow, dateKeyID: string): IAVRow | undefined => {
     const primary = source.cells?.find(cell => cell?.value?.type === "block");
@@ -21,9 +22,7 @@ const toUndatedRow = (source: AVTableRow, dateKeyID: string): IAVRow | undefined
 };
 
 export const getCalendarUndatedHTML = (state: ICalendarState) => `<div class="b3-menu av__calendar-undated-panel${state.undatedOpen ? "" : " fn__none"}" data-calendar-undated-panel role="dialog" aria-label="${escapeAttr(window.siyuan.languages.calendarUndated)}">
-    <div class="av__calendar-undated-head"><strong>${escapeHtml(window.siyuan.languages.calendarUndated)}</strong><span data-calendar-undated-count></span>
-        <button type="button" class="block__icon block__icon--show" data-calendar-undated-close aria-label="${escapeAttr(window.siyuan.languages.close)}"><svg><use xlink:href="#iconClose"></use></svg></button>
-    </div>
+    <div class="av__calendar-undated-head"><strong>${escapeHtml(window.siyuan.languages.calendarUndated)}</strong><span class="counter counter--bg fn__none" data-calendar-undated-count></span></div>
     <div class="av__calendar-undated-search"><input type="search" class="b3-text-field" data-calendar-undated-search aria-label="${escapeAttr(window.siyuan.languages.search)}" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}" value="${escapeAttr(state.undatedSearch)}"></div>
     <div class="av__calendar-undated-hint ft__on-surface">${escapeHtml(window.siyuan.languages.calendarUndatedHint)}</div>
     <div class="b3-menu__items av__calendar-undated-list" data-calendar-undated-list></div>
@@ -47,9 +46,13 @@ export const bindCalendarUndated = (options: {
     const count = panel.querySelector<HTMLElement>("[data-calendar-undated-count]");
     const more = panel.querySelector<HTMLButtonElement>("[data-calendar-undated-more]");
     const dateKeyID = (data.view as IAVTable).calendar.dateKeyID;
-    let rows: IAVRow[] = [];
-    let total = 0;
-    let page = 0;
+    const normalizedQuery = query.trim();
+    const cache = state.undatedCache?.dateKeyID === dateKeyID && state.undatedCache.query === normalizedQuery &&
+        state.undatedCache.search === state.undatedSearch.trim() ? state.undatedCache : undefined;
+    let rows: IAVRow[] = cache ? [...cache.rows] : [];
+    let total = cache?.total || 0;
+    let page = cache?.page || 0;
+    let hasResult = !!cache;
     let selectedID = "";
     let loading = false;
     let request: AbortController;
@@ -64,14 +67,18 @@ export const bindCalendarUndated = (options: {
         });
     };
     const renderRows = () => {
-        count.textContent = `(${total})`;
+        state.undatedCache = {dateKeyID, query: normalizedQuery, search: state.undatedSearch.trim(), rows: [...rows], total, page};
+        count.textContent = total.toString();
+        count.classList.remove("fn__none");
         list.innerHTML = rows.length ? rows.map(row => {
             const primary = row.cells.find(cell => cell.value?.type === "block")?.value;
             const title = primary?.block?.content || window.siyuan.languages.untitled;
-            return `<div class="b3-menu__item av__calendar-undated-item" role="button" tabindex="0" aria-pressed="false" data-calendar-undated-row="${escapeAttr(row.id)}"><svg class="b3-menu__icon"><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label fn__ellipsis">${escapeHtml(title)}</span><button type="button" class="block__icon block__icon--show ariaLabel" data-calendar-undated-open="${escapeAttr(row.id)}" data-position="4west" aria-label="${escapeAttr(window.siyuan.languages.openBy)}"><svg><use xlink:href="#iconOpen"></use></svg></button></div>`;
+            const previewID = primary?.isDetached ? "" : primary?.block?.id;
+            return `<div class="b3-menu__item av__calendar-undated-item" role="button" tabindex="0" aria-pressed="false" data-calendar-undated-row="${escapeAttr(row.id)}"><svg class="b3-menu__icon${previewID ? " popover__block" : ""}"${previewID ? ` data-id="${escapeAttr(previewID)}"` : ""}><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label fn__ellipsis"><span${previewID ? ' class="av__celltext--ref"' : ""}>${escapeHtml(title)}</span></span><button type="button" class="block__icon block__icon--show ariaLabel" data-calendar-undated-open="${escapeAttr(row.id)}" data-position="4west" aria-label="${escapeAttr(window.siyuan.languages.openBy)}"><svg><use xlink:href="#iconOpen"></use></svg></button></div>`;
         }).join("") : `<div class="av__calendar-undated-empty ft__on-surface">${escapeHtml(window.siyuan.languages.empty)}</div>`;
         more.classList.toggle("fn__none", page * PAGE_SIZE >= total);
         updateSelection();
+        hasResult = true;
     };
     const load = async (reset = false) => {
         if (!root.isConnected || !state.undatedOpen) {
@@ -79,26 +86,25 @@ export const bindCalendarUndated = (options: {
         }
         if (reset) {
             request?.abort();
-            rows = [];
-            page = 0;
             selectedID = "";
         } else if (loading) {
             return;
         }
-        const nextPage = page + 1;
+        const nextPage = reset ? 1 : page + 1;
         const controller = new AbortController();
+        const searchValue = state.undatedSearch.trim();
         request = controller;
         loading = true;
         more.classList.add("fn__none");
-        if (reset) {
+        if (reset && !hasResult) {
             list.innerHTML = `<div class="av__calendar-undated-empty ft__on-surface">${escapeHtml(window.siyuan.languages.loading)}</div>`;
         }
         try {
             const response = await fetchSyncPost("/api/av/getAttributeViewCalendarUndated", {
                 id: data.id, blockID: blockElement.dataset.nodeId || "", viewID: data.viewID,
-                query: query.trim(), search: state.undatedSearch.trim(), page: nextPage, pageSize: PAGE_SIZE,
+                query: normalizedQuery, search: searchValue, page: nextPage, pageSize: PAGE_SIZE,
             }, undefined, false, controller.signal);
-            if (controller.signal.aborted || !root.isConnected) {
+            if (controller.signal.aborted || !root.isConnected || searchValue !== state.undatedSearch.trim()) {
                 return;
             }
             if (response.code !== 0 || !response.data) {
@@ -106,12 +112,12 @@ export const bindCalendarUndated = (options: {
             }
             const nextRows = (response.data.rows || []).filter((row): row is AVTableRow => !!row)
                 .map(row => toUndatedRow(row, dateKeyID)).filter((row): row is IAVRow => !!row);
-            rows.push(...nextRows);
+            rows = reset ? nextRows : [...rows, ...nextRows];
             page = nextPage;
             total = response.data.total;
             renderRows();
         } catch {
-            if (!controller.signal.aborted && root.isConnected) {
+            if (!controller.signal.aborted && root.isConnected && searchValue === state.undatedSearch.trim()) {
                 list.innerHTML = `<button type="button" class="b3-button b3-button--cancel av__calendar-undated-retry" data-calendar-undated-retry>${escapeHtml(window.siyuan.languages.retry)}</button>`;
             }
         } finally {
@@ -121,6 +127,8 @@ export const bindCalendarUndated = (options: {
         }
     };
     const setOpen = (open: boolean, focusSearch = false) => {
+        dismissControllers.get(state)?.abort();
+        dismissControllers.delete(state);
         state.undatedOpen = open;
         panel.classList.toggle("fn__none", !open);
         root.classList.toggle("av__calendar--undated-open", open);
@@ -137,6 +145,16 @@ export const bindCalendarUndated = (options: {
             }
         });
         if (open) {
+            const dismissController = new AbortController();
+            dismissControllers.set(state, dismissController);
+            document.addEventListener("pointerdown", event => {
+                const target = event.target as HTMLElement;
+                if (panel.contains(target) || toggle.contains(target) ||
+                    selectedID && target.closest("[data-calendar-day]")) {
+                    return;
+                }
+                setOpen(false);
+            }, {signal: dismissController.signal, capture: true});
             void load(true);
             if (focusSearch) {
                 search.focus();
@@ -157,6 +175,7 @@ export const bindCalendarUndated = (options: {
         if (!row || !cell?.value || year < 1 || year > 9999) {
             return;
         }
+        request?.abort();
         onSchedule(row, cell, day, () => {
             if (root.isConnected && state.undatedOpen) {
                 void load(true);
@@ -170,7 +189,14 @@ export const bindCalendarUndated = (options: {
     const clearPreview = () => {
         root.querySelectorAll(".av__calendar-undated-preview-layer").forEach(layer => layer.remove());
     };
+    let previewed = false;
+    let previewDay: number | undefined;
     const preview = (day?: number) => {
+        if (previewed && day === previewDay) {
+            return;
+        }
+        previewed = true;
+        previewDay = day;
         clearPreview();
         root.classList.toggle("av__calendar--invalid", day === undefined);
         if (day === undefined) {
@@ -200,9 +226,13 @@ export const bindCalendarUndated = (options: {
         event.stopPropagation();
         setOpen(!state.undatedOpen, true);
     });
-    panel.querySelector("[data-calendar-undated-close]").addEventListener("click", () => setOpen(false, true));
     more.addEventListener("click", () => { void load(); });
-    search.addEventListener("input", () => {
+    panel.addEventListener("beforeinput", event => event.stopPropagation());
+    panel.addEventListener("keyup", event => event.stopPropagation());
+    panel.addEventListener("compositionstart", event => event.stopPropagation());
+    panel.addEventListener("compositionend", event => event.stopPropagation());
+    search.addEventListener("input", event => {
+        event.stopPropagation();
         state.undatedSearch = search.value;
         clearTimeout(searchTimer);
         searchTimer = window.setTimeout(() => { void load(true); }, 200);
@@ -229,6 +259,7 @@ export const bindCalendarUndated = (options: {
         }
     });
     panel.addEventListener("keydown", event => {
+        event.stopPropagation();
         if (event.key === "Escape") {
             event.preventDefault();
             setOpen(false, true);
@@ -275,11 +306,18 @@ export const bindCalendarUndated = (options: {
         const controller = new AbortController();
         let dragging = false;
         let destination: number;
+        let ghost: HTMLElement;
+        const sourceRect = item.getBoundingClientRect();
+        const moveGhost = (x: number, y: number) => {
+            ghost.style.left = `${Math.max(8, Math.min(x + 12, window.innerWidth - sourceRect.width - 8))}px`;
+            ghost.style.top = `${Math.max(8, Math.min(y + 12, window.innerHeight - sourceRect.height - 8))}px`;
+        };
         const clean = () => {
             controller.abort();
             clearPreview();
             root.classList.remove("av__calendar--dragging", "av__calendar--invalid");
             item.classList.remove("av__calendar-item--dragging");
+            ghost?.remove();
             if (dragging) {
                 suppressClick = true;
                 setTimeout(() => { suppressClick = false; });
@@ -297,9 +335,22 @@ export const bindCalendarUndated = (options: {
                 return;
             }
             move.preventDefault();
-            dragging = true;
-            root.classList.add("av__calendar--dragging");
-            item.classList.add("av__calendar-item--dragging");
+            if (!dragging) {
+                dragging = true;
+                ghost = item.cloneNode(true) as HTMLElement;
+                ghost.classList.add("b3-menu__item--show", "av__calendar-undated-ghost");
+                ghost.removeAttribute("data-calendar-undated-row");
+                ghost.removeAttribute("role");
+                ghost.removeAttribute("tabindex");
+                ghost.removeAttribute("aria-pressed");
+                ghost.setAttribute("aria-hidden", "true");
+                ghost.style.width = `${sourceRect.width}px`;
+                ghost.style.height = `${sourceRect.height}px`;
+                document.body.append(ghost);
+                root.classList.add("av__calendar--dragging");
+                item.classList.add("av__calendar-item--dragging");
+            }
+            moveGhost(move.clientX, move.clientY);
             destination = dropDay(move.clientX, move.clientY);
             preview(destination);
         }, {signal: controller.signal, passive: false});
@@ -326,6 +377,9 @@ export const bindCalendarUndated = (options: {
             }
         }, {signal: controller.signal, capture: true});
     });
+    if (cache) {
+        renderRows();
+    }
     if (state.undatedOpen) {
         setOpen(true);
     }

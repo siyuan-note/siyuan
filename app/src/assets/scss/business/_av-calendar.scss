@@ -26,8 +26,7 @@
   .av__calendar-undated-head {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 0 8px 8px;
+    padding: 0 16px 8px;
 
     > strong {
       min-width: 0;
@@ -39,8 +38,8 @@
     box-sizing: border-box;
     display: flex;
     min-width: 0;
-    margin-bottom: 4px;
-    padding: 0 8px 0 4px;
+    margin-bottom: 8px;
+    padding: 0 16px;
 
     .b3-text-field {
       flex: 1;
@@ -49,7 +48,7 @@
   }
 
   .av__calendar-undated-hint {
-    padding: 0 8px;
+    padding: 0 16px;
     font-size: 12px;
     line-height: 16px;
   }
@@ -494,6 +493,19 @@
 
   &.av--touch .av__calendar-move {
     display: block;
+  }
+}
+
+.av__calendar-undated-ghost {
+  position: fixed;
+  z-index: 999997;
+  pointer-events: none;
+  margin: 0;
+  gap: 4px;
+  min-width: 0;
+
+  .b3-menu__label {
+    min-width: 0;
   }
 }
 

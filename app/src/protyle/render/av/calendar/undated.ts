@@ -21,9 +21,7 @@ const toUndatedRow = (source: AVTableRow, dateKeyID: string): IAVRow | undefined
 };
 
 export const getCalendarUndatedHTML = (state: ICalendarState) => `<div class="b3-menu av__calendar-undated-panel${state.undatedOpen ? "" : " fn__none"}" data-calendar-undated-panel role="dialog" aria-label="${escapeAttr(window.siyuan.languages.calendarUndated)}">
-    <div class="av__calendar-undated-head"><strong>${escapeHtml(window.siyuan.languages.calendarUndated)}</strong><span data-calendar-undated-count></span>
-        <button type="button" class="block__icon block__icon--show" data-calendar-undated-close aria-label="${escapeAttr(window.siyuan.languages.close)}"><svg><use xlink:href="#iconClose"></use></svg></button>
-    </div>
+    <div class="av__calendar-undated-head"><strong>${escapeHtml(window.siyuan.languages.calendarUndated)}</strong><span class="counter counter--bg fn__none" data-calendar-undated-count></span></div>
     <div class="av__calendar-undated-search"><input type="search" class="b3-text-field" data-calendar-undated-search aria-label="${escapeAttr(window.siyuan.languages.search)}" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}" value="${escapeAttr(state.undatedSearch)}"></div>
     <div class="av__calendar-undated-hint ft__on-surface">${escapeHtml(window.siyuan.languages.calendarUndatedHint)}</div>
     <div class="b3-menu__items av__calendar-undated-list" data-calendar-undated-list></div>
@@ -64,7 +62,8 @@ export const bindCalendarUndated = (options: {
         });
     };
     const renderRows = () => {
-        count.textContent = `(${total})`;
+        count.textContent = total.toString();
+        count.classList.remove("fn__none");
         list.innerHTML = rows.length ? rows.map(row => {
             const primary = row.cells.find(cell => cell.value?.type === "block")?.value;
             const title = primary?.block?.content || window.siyuan.languages.untitled;
@@ -200,7 +199,6 @@ export const bindCalendarUndated = (options: {
         event.stopPropagation();
         setOpen(!state.undatedOpen, true);
     });
-    panel.querySelector("[data-calendar-undated-close]").addEventListener("click", () => setOpen(false, true));
     more.addEventListener("click", () => { void load(); });
     search.addEventListener("input", () => {
         state.undatedSearch = search.value;
@@ -275,11 +273,18 @@ export const bindCalendarUndated = (options: {
         const controller = new AbortController();
         let dragging = false;
         let destination: number;
+        let ghost: HTMLElement;
+        const sourceRect = item.getBoundingClientRect();
+        const moveGhost = (x: number, y: number) => {
+            ghost.style.left = `${Math.max(8, Math.min(x + 12, window.innerWidth - sourceRect.width - 8))}px`;
+            ghost.style.top = `${Math.max(8, Math.min(y + 12, window.innerHeight - sourceRect.height - 8))}px`;
+        };
         const clean = () => {
             controller.abort();
             clearPreview();
             root.classList.remove("av__calendar--dragging", "av__calendar--invalid");
             item.classList.remove("av__calendar-item--dragging");
+            ghost?.remove();
             if (dragging) {
                 suppressClick = true;
                 setTimeout(() => { suppressClick = false; });
@@ -297,9 +302,22 @@ export const bindCalendarUndated = (options: {
                 return;
             }
             move.preventDefault();
-            dragging = true;
-            root.classList.add("av__calendar--dragging");
-            item.classList.add("av__calendar-item--dragging");
+            if (!dragging) {
+                dragging = true;
+                ghost = item.cloneNode(true) as HTMLElement;
+                ghost.classList.add("b3-menu__item--show", "av__calendar-undated-ghost");
+                ghost.removeAttribute("data-calendar-undated-row");
+                ghost.removeAttribute("role");
+                ghost.removeAttribute("tabindex");
+                ghost.removeAttribute("aria-pressed");
+                ghost.setAttribute("aria-hidden", "true");
+                ghost.style.width = `${sourceRect.width}px`;
+                ghost.style.height = `${sourceRect.height}px`;
+                document.body.append(ghost);
+                root.classList.add("av__calendar--dragging");
+                item.classList.add("av__calendar-item--dragging");
+            }
+            moveGhost(move.clientX, move.clientY);
             destination = dropDay(move.clientX, move.clientY);
             preview(destination);
         }, {signal: controller.signal, passive: false});

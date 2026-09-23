@@ -69,6 +69,14 @@
     --b3-list-mindmap-line-selected-color: initial;
     --b3-list-mindmap-line-selected-width: auto;
 
+    /* 列表脑图关系线：状态规则与父子连线一致，新建预览使用普通状态的颜色和线宽 */
+    --b3-list-mindmap-relation-color: var(--b3-theme-primary);
+    --b3-list-mindmap-relation-width: 1.5;
+    --b3-list-mindmap-relation-hover-color: initial;
+    --b3-list-mindmap-relation-hover-width: auto;
+    --b3-list-mindmap-relation-selected-color: initial;
+    --b3-list-mindmap-relation-selected-width: auto;
+
     /* 菜单 */
     --b3-menu-background: var(--b3-theme-background);
     --b3-menu-icon-color: rgba(0, 0, 0, .6);

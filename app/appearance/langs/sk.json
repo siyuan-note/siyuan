@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "Zdrojový dokument šablóny neexistuje alebo je neprístupný",
 	"templateOpenSourceDoc": "Otvoriť zdrojový dokument šablóny",
-	"taskCompletionToggle": "Prepnúť stav dokončenia úlohy",
+	"taskCompletionToggle": "Prepnúť stav dokončenia položky zoznamu úloh",
 	"addAlias": "Pridať alias",
 	"listMindmapExpandToLevel": "Rozbaliť po úroveň ${level}",
 	"checkBlockRefProgress": "Kontrolujú sa odkazy na bloky a prepojenia s databázami...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Priblíženie",
 	"invalid": "Neplatné",
 	"conflict": "Konflikt",
-	"checkToggle": "Prepnúť stav zoznamu úloh",
+	"checkToggle": "Prepnúť stav položky zoznamu úloh",
 	"heading1": "Blok nadpisu 1",
 	"heading2": "Blok nadpisu 2",
 	"heading3": "Blok nadpisu 3",

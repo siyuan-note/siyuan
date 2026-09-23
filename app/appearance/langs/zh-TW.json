@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "匯出範本的來源文件不存在或無法存取",
 	"templateOpenSourceDoc": "開啟匯出範本的文件",
-	"taskCompletionToggle": "切換任務完成狀態",
+	"taskCompletionToggle": "切換任務列表項完成狀態",
 	"addAlias": "新增別名",
 	"listMindmapExpandToLevel": "展開到第 ${level} 級",
 	"checkBlockRefProgress": "正在檢查區塊引用與資料庫綁定...",
@@ -2052,7 +2052,7 @@
 	"zoom": "縮放",
 	"invalid": "無效",
 	"conflict": "衝突",
-	"checkToggle": "工作清單狀態切換",
+	"checkToggle": "切換任務列表項狀態",
 	"heading1": "一級標題區塊",
 	"heading2": "二級標題區塊",
 	"heading3": "三級標題區塊",

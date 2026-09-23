@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "导出模板的源文档不存在或无法访问",
 	"templateOpenSourceDoc": "打开导出模板的文档",
-	"taskCompletionToggle": "切换任务完成状态",
+	"taskCompletionToggle": "切换任务列表项完成状态",
 	"addAlias": "新增别名",
 	"listMindmapExpandToLevel": "展开到第 ${level} 级",
 	"checkBlockRefProgress": "正在检查块引用和数据库绑定...",
@@ -2052,7 +2052,7 @@
 	"zoom": "缩放",
 	"invalid": "无效",
 	"conflict": "冲突",
-	"checkToggle": "任务列表状态切换",
+	"checkToggle": "切换任务列表项状态",
 	"heading1": "一级标题块",
 	"heading2": "二级标题块",
 	"heading3": "三级标题块",

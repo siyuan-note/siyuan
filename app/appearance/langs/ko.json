@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "템플릿 원본 문서가 없거나 접근할 수 없습니다",
 	"templateOpenSourceDoc": "템플릿 원본 문서 열기",
-	"taskCompletionToggle": "작업 완료 상태 전환",
+	"taskCompletionToggle": "작업 목록 항목 완료 상태 전환",
 	"addAlias": "별칭 추가",
 	"listMindmapExpandToLevel": "${level}단계까지 펼치기",
 	"checkBlockRefProgress": "블록 참조 및 데이터베이스 바인딩 확인 중...",
@@ -2052,7 +2052,7 @@
 	"zoom": "줌",
 	"invalid": "유효하지 않음",
 	"conflict": "충돌",
-	"checkToggle": "작업 목록 상태 전환",
+	"checkToggle": "작업 목록 항목 상태 전환",
 	"heading1": "제목 1 블록",
 	"heading2": "제목 2 블록",
 	"heading3": "제목 3 블록",

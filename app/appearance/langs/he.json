@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "מסמך המקור של התבנית אינו קיים או אינו נגיש",
 	"templateOpenSourceDoc": "פתיחת מסמך המקור של התבנית",
-	"taskCompletionToggle": "החלפת מצב השלמת המשימה",
+	"taskCompletionToggle": "החלפת מצב ההשלמה של פריט ברשימת המשימות",
 	"addAlias": "הוספת כינוי",
 	"listMindmapExpandToLevel": "הרחבה עד לרמה ${level}",
 	"checkBlockRefProgress": "בודק הפניות לבלוקים וקישורים למסדי נתונים...",
@@ -2052,7 +2052,7 @@
 	"zoom": "זום",
 	"invalid": "לא תקף",
 	"conflict": "סכסוך",
-	"checkToggle": "החלפת מצב ברשימת המשימות",
+	"checkToggle": "החלפת מצב פריט ברשימת המשימות",
 	"heading1": "בלוק כותרת 1",
 	"heading2": "בלוק כותרת 2",
 	"heading3": "בלוק כותרת 3",

@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "The template source document does not exist or is inaccessible",
 	"templateOpenSourceDoc": "Open template source document",
-	"taskCompletionToggle": "Toggle task completion",
+	"taskCompletionToggle": "Toggle task list item completion",
 	"addAlias": "Add alias",
 	"listMindmapExpandToLevel": "Expand to level ${level}",
 	"checkBlockRefProgress": "Checking block references and database bindings...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Zoom",
 	"invalid": "Invalid",
 	"conflict": "Conflict",
-	"checkToggle": "Cycle task list status",
+	"checkToggle": "Cycle task list item status",
 	"heading1": "Heading 1 block",
 	"heading2": "Heading 2 block",
 	"heading3": "Heading 3 block",

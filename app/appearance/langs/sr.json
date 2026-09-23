@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "Изворни документ шаблона не постоји или није доступан",
 	"templateOpenSourceDoc": "Отвори изворни документ шаблона",
-	"taskCompletionToggle": "Промени стање завршености задатка",
+	"taskCompletionToggle": "Промени стање завршености ставке листе задатака",
 	"addAlias": "Додај псеудоним",
 	"listMindmapExpandToLevel": "Прошири до нивоа ${level}",
 	"checkBlockRefProgress": "Провера референци на блокове и веза са базама података...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Zumiranje",
 	"invalid": "Nevažeće",
 	"conflict": "Konflikt",
-	"checkToggle": "Промени стање листе задатака",
+	"checkToggle": "Промени стање ставке листе задатака",
 	"heading1": "Blok naslova 1",
 	"heading2": "Blok naslova 2",
 	"heading3": "Blok naslova 3",

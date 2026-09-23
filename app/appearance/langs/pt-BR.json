@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "O documento de origem do modelo não existe ou está inacessível",
 	"templateOpenSourceDoc": "Abrir documento de origem do modelo",
-	"taskCompletionToggle": "Alternar a conclusão da tarefa",
+	"taskCompletionToggle": "Alternar o status de conclusão do item da lista de tarefas",
 	"addAlias": "Adicionar alias",
 	"listMindmapExpandToLevel": "Expandir até o nível ${level}",
 	"checkBlockRefProgress": "Verificando referências de blocos e vínculos com bancos de dados...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Zoom",
 	"invalid": "Inválido",
 	"conflict": "Conflito",
-	"checkToggle": "Alternar o status da lista de tarefas",
+	"checkToggle": "Alternar o status do item da lista de tarefas",
 	"heading1": "Bloco de título 1",
 	"heading2": "Bloco de título 2",
 	"heading3": "Bloco de título 3",

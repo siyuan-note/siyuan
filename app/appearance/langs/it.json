@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "Il documento di origine del modello non esiste o non è accessibile",
 	"templateOpenSourceDoc": "Apri il documento di origine del modello",
-	"taskCompletionToggle": "Alterna il completamento dell’attività",
+	"taskCompletionToggle": "Alterna lo stato di completamento dell’elemento dell’elenco attività",
 	"addAlias": "Aggiungi alias",
 	"listMindmapExpandToLevel": "Espandi fino al livello ${level}",
 	"checkBlockRefProgress": "Verifica dei riferimenti ai blocchi e dei collegamenti ai database...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Zoom",
 	"invalid": "Non valido",
 	"conflict": "Conflitto",
-	"checkToggle": "Scorri gli stati dell’elenco attività",
+	"checkToggle": "Scorri gli stati dell’elemento dell’elenco attività",
 	"heading1": "Blocco titolo 1",
 	"heading2": "Blocco titolo 2",
 	"heading3": "Blocco titolo 3",

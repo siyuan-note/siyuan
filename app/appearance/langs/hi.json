@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "टेम्पलेट का स्रोत दस्तावेज़ मौजूद नहीं है या उस तक पहुँच नहीं है",
 	"templateOpenSourceDoc": "टेम्पलेट का स्रोत दस्तावेज़ खोलें",
-	"taskCompletionToggle": "कार्य की पूर्णता स्थिति बदलें",
+	"taskCompletionToggle": "कार्य सूची आइटम की पूर्णता स्थिति बदलें",
 	"addAlias": "उपनाम जोड़ें",
 	"listMindmapExpandToLevel": "स्तर ${level} तक विस्तृत करें",
 	"checkBlockRefProgress": "ब्लॉक संदर्भों और डेटाबेस बाइंडिंग की जाँच हो रही है...",
@@ -2052,7 +2052,7 @@
 	"zoom": "ज़ूम",
 	"invalid": "अमान्य",
 	"conflict": "विरोध",
-	"checkToggle": "कार्य सूची की स्थिति बदलें",
+	"checkToggle": "कार्य सूची आइटम की स्थिति बदलें",
 	"heading1": "शीर्षक 1 ब्लॉक",
 	"heading2": "शीर्षक 2 ब्लॉक",
 	"heading3": "शीर्षक 3 ब्लॉक",

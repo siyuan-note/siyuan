@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "Şablonun kaynak belgesi mevcut değil veya erişilemiyor",
 	"templateOpenSourceDoc": "Şablonun kaynak belgesini aç",
-	"taskCompletionToggle": "Görevin tamamlanma durumunu değiştir",
+	"taskCompletionToggle": "Görev listesi öğesinin tamamlanma durumunu değiştir",
 	"addAlias": "Takma ad ekle",
 	"listMindmapExpandToLevel": "${level}. düzeye kadar genişlet",
 	"checkBlockRefProgress": "Blok referansları ve veritabanı bağlantıları kontrol ediliyor...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Yakınlaştır",
 	"invalid": "Geçersiz",
 	"conflict": "Çakışma",
-	"checkToggle": "Görev listesi durumunu değiştir",
+	"checkToggle": "Görev listesi öğesinin durumunu değiştir",
 	"heading1": "Başlık 1 bloğu",
 	"heading2": "Başlık 2 bloğu",
 	"heading3": "Başlık 3 bloğu",

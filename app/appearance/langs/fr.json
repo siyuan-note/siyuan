@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "Le document source du modèle est introuvable ou inaccessible",
 	"templateOpenSourceDoc": "Ouvrir le document source du modèle",
-	"taskCompletionToggle": "Basculer l’état d’achèvement de la tâche",
+	"taskCompletionToggle": "Basculer l’état d’achèvement de l’élément de liste de tâches",
 	"addAlias": "Ajouter un alias",
 	"listMindmapExpandToLevel": "Développer jusqu’au niveau ${level}",
 	"checkBlockRefProgress": "Vérification des références de blocs et des liaisons aux bases de données...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Zoom",
 	"invalid": "Invalide",
 	"conflict": "Conflit",
-	"checkToggle": "Faire défiler les états de la liste de tâches",
+	"checkToggle": "Faire défiler les états de l’élément de liste de tâches",
 	"heading1": "Bloc de titre 1",
 	"heading2": "Bloc de titre 2",
 	"heading3": "Bloc de titre 3",

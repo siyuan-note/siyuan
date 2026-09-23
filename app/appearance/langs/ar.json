@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "المستند المصدر للقالب غير موجود أو لا يمكن الوصول إليه",
 	"templateOpenSourceDoc": "فتح المستند المصدر للقالب",
-	"taskCompletionToggle": "تبديل حالة إكمال المهمة",
+	"taskCompletionToggle": "تبديل حالة إكمال عنصر قائمة المهام",
 	"addAlias": "إضافة اسم مستعار",
 	"listMindmapExpandToLevel": "توسيع حتى المستوى ${level}",
 	"checkBlockRefProgress": "جارٍ التحقق من مراجع الكتل وارتباطات قواعد البيانات...",
@@ -2052,7 +2052,7 @@
 	"zoom": "تكبير/تصغير",
 	"invalid": "غير صالح",
 	"conflict": "تعارض",
-	"checkToggle": "تبديل حالة قائمة المهام",
+	"checkToggle": "تبديل حالة عنصر قائمة المهام",
 	"heading1": "كتلة عنوان 1",
 	"heading2": "كتلة عنوان 2",
 	"heading3": "كتلة عنوان 3",

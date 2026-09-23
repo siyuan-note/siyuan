@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "Das Quelldokument der Vorlage existiert nicht oder ist nicht zugänglich",
 	"templateOpenSourceDoc": "Quelldokument der Vorlage öffnen",
-	"taskCompletionToggle": "Erledigungsstatus der Aufgabe umschalten",
+	"taskCompletionToggle": "Erledigungsstatus des Aufgabenlistenelements umschalten",
 	"addAlias": "Alias hinzufügen",
 	"listMindmapExpandToLevel": "Bis Ebene ${level} aufklappen",
 	"checkBlockRefProgress": "Blockreferenzen und Datenbankverknüpfungen werden geprüft...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Zoom",
 	"invalid": "Ungültig",
 	"conflict": "Konflikt",
-	"checkToggle": "Aufgabenlistenstatus wechseln",
+	"checkToggle": "Status des Aufgabenlistenelements wechseln",
 	"heading1": "Überschriftenblock 1",
 	"heading2": "Überschriftenblock 2",
 	"heading3": "Überschriftenblock 3",

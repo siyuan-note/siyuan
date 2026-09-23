@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "テンプレートのエクスポート元文書が存在しないか、アクセスできません",
 	"templateOpenSourceDoc": "テンプレートのエクスポート元文書を開く",
-	"taskCompletionToggle": "タスクの完了状態を切り替え",
+	"taskCompletionToggle": "タスクリスト項目の完了状態を切り替え",
 	"addAlias": "エイリアスを追加",
 	"listMindmapExpandToLevel": "第 ${level} 階層まで展開",
 	"checkBlockRefProgress": "ブロック参照とデータベースの紐付けを確認しています...",
@@ -2052,7 +2052,7 @@
 	"zoom": "ズーム",
 	"invalid": "無効です",
 	"conflict": "競合しています",
-	"checkToggle": "タスクリストの状態を切り替え",
+	"checkToggle": "タスクリスト項目の状態を切り替え",
 	"heading1": "見出し1ブロック",
 	"heading2": "見出し2ブロック",
 	"heading3": "見出し3ブロック",

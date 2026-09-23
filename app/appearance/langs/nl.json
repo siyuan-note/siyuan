@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "Het brondocument van de sjabloon bestaat niet of is niet toegankelijk",
 	"templateOpenSourceDoc": "Brondocument van sjabloon openen",
-	"taskCompletionToggle": "Voltooiingsstatus van taak wisselen",
+	"taskCompletionToggle": "Voltooiingsstatus van takenlijstitem wisselen",
 	"addAlias": "Alias toevoegen",
 	"listMindmapExpandToLevel": "Uitvouwen tot niveau ${level}",
 	"checkBlockRefProgress": "Blokverwijzingen en databasekoppelingen controleren...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Zoomen",
 	"invalid": "Ongeldig",
 	"conflict": "Konflikt",
-	"checkToggle": "Taaklijststatus wisselen",
+	"checkToggle": "Status van takenlijstitem wisselen",
 	"heading1": "Kopblok 1",
 	"heading2": "Kopblok 2",
 	"heading3": "Kopblok 3",

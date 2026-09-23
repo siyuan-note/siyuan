@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "เอกสารต้นฉบับของแม่แบบไม่มีอยู่หรือไม่สามารถเข้าถึงได้",
 	"templateOpenSourceDoc": "เปิดเอกสารต้นฉบับของแม่แบบ",
-	"taskCompletionToggle": "สลับสถานะการทำงานเสร็จสิ้น",
+	"taskCompletionToggle": "สลับสถานะเสร็จสิ้นของงานในรายการ",
 	"addAlias": "เพิ่มชื่อเรียกอื่น",
 	"listMindmapExpandToLevel": "ขยายถึงระดับ ${level}",
 	"checkBlockRefProgress": "กำลังตรวจสอบการอ้างอิงบล็อกและการเชื่อมโยงฐานข้อมูล...",
@@ -2052,7 +2052,7 @@
 	"zoom": "ซูม",
 	"invalid": "ไม่ถูกต้อง",
 	"conflict": "ขัดแย้ง",
-	"checkToggle": "สลับสถานะรายการงาน",
+	"checkToggle": "สลับสถานะของงานในรายการ",
 	"heading1": "บล็อกหัวข้อ 1",
 	"heading2": "บล็อกหัวข้อ 2",
 	"heading3": "บล็อกหัวข้อ 3",

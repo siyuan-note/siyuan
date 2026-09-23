@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "Dokument źródłowy szablonu nie istnieje lub jest niedostępny",
 	"templateOpenSourceDoc": "Otwórz dokument źródłowy szablonu",
-	"taskCompletionToggle": "Przełącz stan ukończenia zadania",
+	"taskCompletionToggle": "Przełącz stan ukończenia elementu listy zadań",
 	"addAlias": "Dodaj alias",
 	"listMindmapExpandToLevel": "Rozwiń do poziomu ${level}",
 	"checkBlockRefProgress": "Sprawdzanie odwołań do bloków i powiązań z bazami danych...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Przybliż",
 	"invalid": "Nieprawidłowy",
 	"conflict": "Konflikt",
-	"checkToggle": "Przełącz stan listy zadań",
+	"checkToggle": "Przełącz stan elementu listy zadań",
 	"heading1": "Blok nagłówka 1",
 	"heading2": "Blok nagłówka 2",
 	"heading3": "Blok nagłówka 3",

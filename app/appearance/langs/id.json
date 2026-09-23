@@ -1,7 +1,7 @@
 {
 	"templateSourceDocUnavailable": "Dokumen sumber templat tidak ada atau tidak dapat diakses",
 	"templateOpenSourceDoc": "Buka dokumen sumber templat",
-	"taskCompletionToggle": "Alihkan status penyelesaian tugas",
+	"taskCompletionToggle": "Alihkan status penyelesaian item daftar tugas",
 	"addAlias": "Tambah alias",
 	"listMindmapExpandToLevel": "Perluas hingga tingkat ${level}",
 	"checkBlockRefProgress": "Memeriksa referensi blok dan pengikatan basis data...",
@@ -2052,7 +2052,7 @@
 	"zoom": "Perbesar",
 	"invalid": "Tidak valid",
 	"conflict": "Konflik",
-	"checkToggle": "Ganti status daftar tugas",
+	"checkToggle": "Alihkan status item daftar tugas",
 	"heading1": "Blok judul 1",
 	"heading2": "Blok judul 2",
 	"heading3": "Blok judul 3",

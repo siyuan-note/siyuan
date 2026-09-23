@@ -4360,6 +4360,10 @@ export class WYSIWYG {
             if (!blockElement) {
                 return;
             }
+            // 输入可能改变列宽，隐藏已有调整线，待鼠标重新命中列边界后定位。
+            if (blockElement.classList.contains("table")) {
+                blockElement.querySelector(".table__resize")?.removeAttribute("style");
+            }
             if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {
                 protyle.hint.enableExtend = true;
             }

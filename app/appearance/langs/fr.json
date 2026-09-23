@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "Basculer",
+	"mainWindowLayouts": "Dispositions de la fenêtre principale",
+	"windowWorkspaces": "Dispositions de nouvelle fenêtre",
+	"windowWorkspaceSave": "Enregistrer comme disposition de nouvelle fenêtre",
+	"windowWorkspaceRemoveTip": "Supprimer « ${x} » ? Les documents et les pièces jointes seront conservés, et les fenêtres ouvertes resteront ouvertes.",
+	"windowWorkspaceSaveError": "Impossible d’enregistrer la disposition de nouvelle fenêtre. Veuillez réessayer.",
+	"windowWorkspaceUnavailable": "La disposition de nouvelle fenêtre est indisponible ou utilise un format non pris en charge.",
 	"listMindmapExpandToLevel": "Développer jusqu’au niveau ${level}",
 	"checkBlockRefProgress": "Vérification des références de blocs et des liaisons aux bases de données...",
 	"calendarRowLimit": "Lignes d’éléments visibles",

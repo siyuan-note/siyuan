@@ -6,7 +6,7 @@
 		"id": "20200822191536-rm6hwid",
 		"title": "窗口和页签",
 		"type": "doc",
-		"updated": "20260903130000"
+		"updated": "20260923114823"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-d150748",
-				"updated": "20260903130000"
+				"updated": "20260923114823"
 			},
 			"Children": [
 				{
@@ -780,6 +780,194 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-z5t2n3l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260922155242-z5t2n3l",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新窗口布局"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-5nc0zym",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-5nc0zym",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新窗口布局用于保存一个已命名窗口的页签、分屏和阅读位置。主窗口布局和新窗口布局在同一个布局菜单内分组显示，分别保存。此功能适用于桌面客户端；加密笔记本的页签不会写入布局配置。"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-h17mu6r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-h17mu6r",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "创建：在新窗口中安排好页签，点击钉住按钮旁的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存为新窗口布局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，输入名称并保存。之后会自动保存页签、分屏、文档阅读位置和 PDF 页码的变化。"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-v64m1ym",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-v64m1ym",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重新打开：在主窗口中打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "布局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新窗口布局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 并选择布局，即可在新窗口中恢复保存的布局。如果对应窗口已打开，则会切换到已有窗口。列表支持按名称搜索。"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-sujwuib",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-sujwuib",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "管理：点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主窗口布局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 右侧的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可保存当前主窗口布局。将鼠标移到条目或其右侧箭头上，会展开子菜单并保留布局列表。新窗口布局依次提供 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打开"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（对应窗口已打开时显示 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "切换"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重命名"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "删除"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。主窗口布局提供 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可加载选中的布局，以及 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更新"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可将当前主窗口保存到该条目；新窗口布局会自动保存。两类布局的子菜单末尾均显示最近保存时间。也可点击钉住按钮旁的布局图标重命名新窗口布局。重命名弹窗分别以 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主窗口布局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新窗口布局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 为标题，提供取消和确定按钮。删除布局会保留文档、附件和已打开的窗口。搜索框固定在顶部，下方列表可独立滚动。"
 				}
 			]
 		},

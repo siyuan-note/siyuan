@@ -2224,7 +2224,7 @@ declare namespace Config {
         ({instance?: "Layout"} & Partial<Pick<IUILayoutLayout, "direction" | "size" | "type" | "resize">>) |
         ({instance: "Wnd"} & Partial<Pick<IUILayoutWnd, "resize" | "width" | "height">>) |
         ({instance: "Tab"} & Partial<Pick<IUILayoutTab, "title" | "lang" | "icon" | "docIcon" | "pin" | "active" | "activeTime">>) |
-        ({instance: "Editor"} & Partial<Pick<IUILayoutTabEditor, "blockId" | "rootId" | "notebookId">>) |
+        ({instance: "Editor"} & Partial<Pick<IUILayoutTabEditor, "blockId" | "rootId" | "notebookId" | "scrollAttr">>) |
         ({instance: "Asset"} & Partial<Pick<IUILayoutTabAsset, "path" | "page">>) |
         ({instance: "Backlink"} & Partial<Pick<IUILayoutTabBacklink, "blockId" | "rootId" | "notebookId" | "type">>) |
         ({instance: "Graph"} & Partial<Pick<IUILayoutTabGraph, "blockId" | "rootId" | "notebookId" | "type">>) |
@@ -2474,6 +2474,10 @@ declare namespace Config {
          * (Editor) Document block ID
          */
         rootId: string;
+        /**
+         * 窗口布局独立保存的阅读位置，优先于全局文档阅读位置
+         */
+        scrollAttr?: IScrollAttr;
     }
 
     /**

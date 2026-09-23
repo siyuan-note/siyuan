@@ -209,6 +209,18 @@ const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean)
 
 export const exitSiYuan = async (setCurrentWorkspace = true) => {
     hideAllElements(["util"]);
+    /// #if !BROWSER
+    try {
+        if (!await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "flushWindowWorkspaces"})) {
+            showMessage(window.siyuan.languages.windowWorkspaceSaveError, 6000, "error");
+            return;
+        }
+    } catch (error) {
+        console.error(error);
+        showMessage(window.siyuan.languages.windowWorkspaceSaveError, 6000, "error");
+        return;
+    }
+    /// #endif
     /// #if MOBILE
     if (window.siyuan.mobile.editor) {
         await saveScroll(window.siyuan.mobile.editor.protyle);

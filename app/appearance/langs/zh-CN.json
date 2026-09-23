@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "切换",
+	"mainWindowLayouts": "主窗口布局",
+	"windowWorkspaces": "新窗口布局",
+	"windowWorkspaceSave": "保存为新窗口布局",
+	"windowWorkspaceRemoveTip": "移除「${x}」？文档和附件会保留，已打开的窗口也会保留。",
+	"windowWorkspaceSaveError": "新窗口布局保存失败，请重试。",
+	"windowWorkspaceUnavailable": "新窗口布局不可用或使用了不支持的格式。",
 	"listMindmapExpandToLevel": "展开到第 ${level} 级",
 	"checkBlockRefProgress": "正在检查块引用和数据库绑定...",
 	"calendarRowLimit": "条目显示行数",

@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "Пребаци",
+	"mainWindowLayouts": "Распореди главног прозора",
+	"windowWorkspaces": "Распореди новог прозора",
+	"windowWorkspaceSave": "Сачувај као распоред новог прозора",
+	"windowWorkspaceRemoveTip": "Уклонити „${x}“? Документи и прилози ће бити сачувани, а отворени прозори ће остати отворени.",
+	"windowWorkspaceSaveError": "Није могуће сачувати распоред новог прозора. Покушајте поново.",
+	"windowWorkspaceUnavailable": "Распоред новог прозора није доступан или користи неподржан формат.",
 	"listMindmapExpandToLevel": "Прошири до нивоа ${level}",
 	"checkBlockRefProgress": "Провера референци на блокове и веза са базама података...",
 	"calendarRowLimit": "Број видљивих редова ставки",

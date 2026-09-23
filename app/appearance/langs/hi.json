@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "स्विच करें",
+	"mainWindowLayouts": "मुख्य विंडो के लेआउट",
+	"windowWorkspaces": "नई विंडो के लेआउट",
+	"windowWorkspaceSave": "नई विंडो के लेआउट के रूप में सहेजें",
+	"windowWorkspaceRemoveTip": "“${x}” हटाएं? दस्तावेज़ और संलग्नक सुरक्षित रहेंगे, और खुली विंडो खुली रहेंगी।",
+	"windowWorkspaceSaveError": "नई विंडो का लेआउट सहेजा नहीं जा सका। कृपया फिर से प्रयास करें।",
+	"windowWorkspaceUnavailable": "नई विंडो का लेआउट उपलब्ध नहीं है या असमर्थित प्रारूप का उपयोग करता है।",
 	"listMindmapExpandToLevel": "स्तर ${level} तक विस्तृत करें",
 	"checkBlockRefProgress": "ब्लॉक संदर्भों और डेटाबेस बाइंडिंग की जाँच हो रही है...",
 	"calendarRowLimit": "दिखाई देने वाली आइटम पंक्तियाँ",

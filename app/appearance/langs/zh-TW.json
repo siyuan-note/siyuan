@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "切換",
+	"mainWindowLayouts": "主視窗版面配置",
+	"windowWorkspaces": "新視窗版面配置",
+	"windowWorkspaceSave": "儲存為新視窗版面配置",
+	"windowWorkspaceRemoveTip": "移除「${x}」？文件與附件會保留，已開啟的視窗也會保留。",
+	"windowWorkspaceSaveError": "新視窗版面配置儲存失敗，請重試。",
+	"windowWorkspaceUnavailable": "新視窗版面配置無法使用或使用了不支援的格式。",
 	"listMindmapExpandToLevel": "展開到第 ${level} 級",
 	"checkBlockRefProgress": "正在檢查區塊引用與資料庫綁定...",
 	"calendarRowLimit": "項目顯示行數",

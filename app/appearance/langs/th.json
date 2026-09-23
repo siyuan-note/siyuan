@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "สลับ",
+	"mainWindowLayouts": "เค้าโครงหน้าต่างหลัก",
+	"windowWorkspaces": "เค้าโครงหน้าต่างใหม่",
+	"windowWorkspaceSave": "บันทึกเป็นเค้าโครงหน้าต่างใหม่",
+	"windowWorkspaceRemoveTip": "ลบ “${x}” หรือไม่? เอกสารและไฟล์แนบจะยังคงอยู่ และหน้าต่างที่เปิดอยู่จะไม่ถูกปิด",
+	"windowWorkspaceSaveError": "ไม่สามารถบันทึกเค้าโครงหน้าต่างใหม่ได้ โปรดลองอีกครั้ง",
+	"windowWorkspaceUnavailable": "เค้าโครงหน้าต่างใหม่ไม่พร้อมใช้งาน หรือใช้รูปแบบที่ไม่รองรับ",
 	"listMindmapExpandToLevel": "ขยายถึงระดับ ${level}",
 	"checkBlockRefProgress": "กำลังตรวจสอบการอ้างอิงบล็อกและการเชื่อมโยงฐานข้อมูล...",
 	"calendarRowLimit": "จำนวนแถวรายการที่แสดง",

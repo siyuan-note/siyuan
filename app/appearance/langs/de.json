@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "Wechseln",
+	"mainWindowLayouts": "Layouts des Hauptfensters",
+	"windowWorkspaces": "Layouts für neue Fenster",
+	"windowWorkspaceSave": "Als Layout für ein neues Fenster speichern",
+	"windowWorkspaceRemoveTip": "„${x}“ entfernen? Dokumente und Anhänge bleiben erhalten, und geöffnete Fenster bleiben geöffnet.",
+	"windowWorkspaceSaveError": "Das Layout für ein neues Fenster konnte nicht gespeichert werden. Bitte erneut versuchen.",
+	"windowWorkspaceUnavailable": "Das Layout für ein neues Fenster ist nicht verfügbar oder verwendet ein nicht unterstütztes Format.",
 	"listMindmapExpandToLevel": "Bis Ebene ${level} aufklappen",
 	"checkBlockRefProgress": "Blockreferenzen und Datenbankverknüpfungen werden geprüft...",
 	"calendarRowLimit": "Angezeigte Eintragszeilen",

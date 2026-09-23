@@ -6,7 +6,7 @@
 		"id": "20200924100906-0u4zfq3",
 		"title": "Window and Tab",
 		"type": "doc",
-		"updated": "20260903130000"
+		"updated": "20260923114823"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-fdf0e30",
-				"updated": "20260903130000"
+				"updated": "20260923114823"
 			},
 			"Children": [
 				{
@@ -776,6 +776,194 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-zq7j067",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260922155242-zq7j067",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "New window layouts"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-he816jm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-he816jm",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A new window layout saves the tabs, splits, and reading positions of a named window. Main window layouts and new window layouts are grouped in the same layout menu and saved separately. This feature is available in the desktop client; tabs from encrypted notebooks are excluded."
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-py20wzf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-py20wzf",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Create: Arrange the tabs in a new window, click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Save as new window layout"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " beside the pin button, enter a name, and save. Changes to tabs, splits, document reading positions, and PDF pages are then saved automatically."
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-q8e48jj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-q8e48jj",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Reopen: In the main window, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Layout"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "New window layouts"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and select a layout to restore it in a new window. If its window is already open, SiYuan switches to that window. You can search the list by name."
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-ikklk4b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-ikklk4b",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manage: Click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Save"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to the right of "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Main window layouts"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to save the current main window layout. Move the pointer over an entry or its right arrow to open a submenu while keeping the layout list visible. New window layouts provide "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Open"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "( "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Switch"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " when the window is already open), "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Rename"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Delete"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Main window layouts provide "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Use"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to load the selected layout and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Update"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to save the current main window into that entry. New window layouts save automatically. Both types show the latest save time at the bottom of the submenu. You can also rename a new window layout using the layout icon beside the pin button. Rename dialogs are titled "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Main window layouts"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "New window layouts"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and provide Cancel and Confirm buttons. Deleting a layout keeps its documents, attachments, and open window. The search field stays at the top while the list scrolls below it."
 				}
 			]
 		},

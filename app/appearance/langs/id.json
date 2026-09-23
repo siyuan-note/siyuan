@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "Beralih",
+	"mainWindowLayouts": "Tata letak jendela utama",
+	"windowWorkspaces": "Tata letak jendela baru",
+	"windowWorkspaceSave": "Simpan sebagai tata letak jendela baru",
+	"windowWorkspaceRemoveTip": "Hapus “${x}”? Dokumen dan lampiran akan tetap disimpan, dan jendela yang terbuka akan tetap terbuka.",
+	"windowWorkspaceSaveError": "Tidak dapat menyimpan tata letak jendela baru. Silakan coba lagi.",
+	"windowWorkspaceUnavailable": "Tata letak jendela baru tidak tersedia atau menggunakan format yang tidak didukung.",
 	"listMindmapExpandToLevel": "Perluas hingga tingkat ${level}",
 	"checkBlockRefProgress": "Memeriksa referensi blok dan pengikatan basis data...",
 	"calendarRowLimit": "Baris item yang ditampilkan",

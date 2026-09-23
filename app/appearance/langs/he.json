@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "מעבר",
+	"mainWindowLayouts": "פריסות החלון הראשי",
+	"windowWorkspaces": "פריסות חלון חדש",
+	"windowWorkspaceSave": "שמירה כפריסת חלון חדש",
+	"windowWorkspaceRemoveTip": "להסיר את ״${x}״? המסמכים והקבצים המצורפים יישמרו, והחלונות הפתוחים יישארו פתוחים.",
+	"windowWorkspaceSaveError": "לא ניתן לשמור את פריסת החלון החדש. יש לנסות שוב.",
+	"windowWorkspaceUnavailable": "פריסת החלון החדש אינה זמינה או משתמשת בתבנית שאינה נתמכת.",
 	"listMindmapExpandToLevel": "הרחבה עד לרמה ${level}",
 	"checkBlockRefProgress": "בודק הפניות לבלוקים וקישורים למסדי נתונים...",
 	"calendarRowLimit": "שורות פריטים מוצגות",

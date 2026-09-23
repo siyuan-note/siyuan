@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "Przełącz",
+	"mainWindowLayouts": "Układy głównego okna",
+	"windowWorkspaces": "Układy nowego okna",
+	"windowWorkspaceSave": "Zapisz jako układ nowego okna",
+	"windowWorkspaceRemoveTip": "Usunąć „${x}”? Dokumenty i załączniki zostaną zachowane, a otwarte okna pozostaną otwarte.",
+	"windowWorkspaceSaveError": "Nie udało się zapisać układu nowego okna. Spróbuj ponownie.",
+	"windowWorkspaceUnavailable": "Układ nowego okna jest niedostępny lub używa nieobsługiwanego formatu.",
 	"listMindmapExpandToLevel": "Rozwiń do poziomu ${level}",
 	"checkBlockRefProgress": "Sprawdzanie odwołań do bloków i powiązań z bazami danych...",
 	"calendarRowLimit": "Widoczne wiersze elementów",

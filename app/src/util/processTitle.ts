@@ -2,6 +2,15 @@ import {escapeHtml} from "./escape";
 import {Constants} from "../constants";
 import {pathPosix} from "./pathName";
 
+let windowWorkspaceTitle = "";
+
+export const setWindowWorkspaceTitle = (name: string) => {
+    const prefix = windowWorkspaceTitle ? `${windowWorkspaceTitle} - ` : "";
+    const title = prefix && document.title.startsWith(prefix) ? document.title.slice(prefix.length) : document.title;
+    windowWorkspaceTitle = name;
+    document.title = name ? `${name} - ${title}` : title;
+};
+
 export const getWorkspaceName = () => {
     const dir = window.siyuan.config.system.workspaceDir;
     // 浏览器环境下内核不返回工作空间绝对路径，回退到“工作空间”（Workspace）。
@@ -29,5 +38,8 @@ export const setTitle = (title: string, showVersionTitle = false) => {
             dragElement.setAttribute("title", title);
             dragElement.innerHTML = escapeHtml(title);
         }
+    }
+    if (windowWorkspaceTitle) {
+        document.title = `${windowWorkspaceTitle} - ${document.title}`;
     }
 };

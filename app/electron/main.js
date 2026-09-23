@@ -73,6 +73,8 @@ const {
     unsafeRemoteChromiumSwitchNames,
 } = require("./remoteKernel");
 const {dispatchWindowMessage} = require("./windowMessaging");
+const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorkspaces");
+const windowWorkspaces = new WindowWorkspaceRegistry();
 const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 const {
     readAccessibilitySetting, writeAccessibilitySetting, getAccessibilityOverride, configureAccessibility,
@@ -3340,6 +3342,32 @@ app.whenReady().then(() => {
         if (data.cmd === "getContentsId") {
             return event.sender.id;
         }
+        if (["setWindowWorkspace", "focusWindowWorkspace", "getOpenWindowWorkspaces", "flushWindowWorkspaces"].includes(data.cmd)) {
+            const kernelTarget = getWindowKernelTarget(event.sender.id);
+            if (!kernelTarget) {
+                return false;
+            }
+            if (data.cmd === "getOpenWindowWorkspaces") {
+                return windowWorkspaces.list(kernelTarget.origin);
+            }
+            if (data.cmd === "flushWindowWorkspaces") {
+                return flushWindowWorkspaces(windowWorkspaces.list(kernelTarget.origin)
+                    .map(id => windowWorkspaces.get(kernelTarget.origin, id)).filter(Boolean), ipcMain);
+            }
+            if (data.cmd === "focusWindowWorkspace") {
+                const window = windowWorkspaces.get(kernelTarget.origin, data.id);
+                if (window) {
+                    showWindow(window);
+                    return true;
+                }
+                return false;
+            }
+            const window = getWindowByContentId(event.sender.id);
+            if (!window || getWindowPathname(window) !== "/stage/build/app/window.html") {
+                return false;
+            }
+            return windowWorkspaces.associate(window, kernelTarget.origin, data.id);
+        }
         if (data.cmd === "isAlwaysOnTop") {
             const wnd = getWindowByContentId(event.sender.id);
             if (!wnd) {
@@ -3739,6 +3767,17 @@ app.whenReady().then(() => {
         if (kernelTarget.mode === "remote") {
             windowURL.searchParams.set("remote", "1");
         }
+        const workspaceID = windowURL.searchParams.get("windowWorkspace");
+        if (workspaceID) {
+            if (!/^\d{14}-[a-z0-9]{7}$/.test(workspaceID)) {
+                return;
+            }
+            const existingWindow = windowWorkspaces.get(kernelTarget.origin, workspaceID);
+            if (existingWindow) {
+                showWindow(existingWindow);
+                return;
+            }
+        }
         const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
         const mainBounds = mainWindow.getBounds();
         const mainScreen = screen.getDisplayNearestPoint({x: mainBounds.x, y: mainBounds.y});
@@ -3768,6 +3807,10 @@ app.whenReady().then(() => {
         remote.enable(win.webContents);
         bindSpellcheckContextMenu(win.webContents);
         rememberWindowKernelTarget(win, kernelTarget);
+
+        if (workspaceID) {
+            windowWorkspaces.associate(win, kernelTarget.origin, workspaceID);
+        }
 
         if (data.position) {
             win.setPosition(data.position.x, data.position.y);

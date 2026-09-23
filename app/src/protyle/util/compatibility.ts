@@ -920,7 +920,7 @@ const sanitizeFilesPaths = (filesPaths: IFilesPath[]) => {
     return filesPaths.filter((item) => !isEncryptedBox(item.notebookId));
 };
 
-export const setStorageVal = (key: string, val: any, cb?: () => void) => {
+export const setStorageVal = (key: string, val: any, cb?: () => void, timeout = 0) => {
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
@@ -935,7 +935,7 @@ export const setStorageVal = (key: string, val: any, cb?: () => void) => {
     if ([Constants.LOCAL_SEARCHDATA, Constants.LOCAL_FILESPATHS, Constants.LOCAL_CLOSED_TABS].includes(key)) {
         window.siyuan.storage[key] = storageVal;
     }
-    fetchPost("/api/storage/setLocalStorageVal", {
+    return fetchPost("/api/storage/setLocalStorageVal", {
         app: Constants.SIYUAN_APPID,
         key,
         val: storageVal,
@@ -943,7 +943,7 @@ export const setStorageVal = (key: string, val: any, cb?: () => void) => {
         if (cb) {
             cb();
         }
-    });
+    }, undefined, undefined, undefined, timeout);
 };
 
 export const initWindowOpenOverride = (app: App, openExternal?: (url: string) => void) => {

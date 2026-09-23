@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "Перейти",
+	"mainWindowLayouts": "Макети головного вікна",
+	"windowWorkspaces": "Макети нового вікна",
+	"windowWorkspaceSave": "Зберегти як макет нового вікна",
+	"windowWorkspaceRemoveTip": "Видалити «${x}»? Документи й вкладення буде збережено, а відкриті вікна залишаться відкритими.",
+	"windowWorkspaceSaveError": "Не вдалося зберегти макет нового вікна. Спробуйте ще раз.",
+	"windowWorkspaceUnavailable": "Макет нового вікна недоступний або використовує непідтримуваний формат.",
 	"listMindmapExpandToLevel": "Розгорнути до рівня ${level}",
 	"checkBlockRefProgress": "Перевірка посилань на блоки та прив’язок до баз даних...",
 	"calendarRowLimit": "Кількість видимих рядків записів",

@@ -197,6 +197,7 @@ export const saveLayout = () => {
         saveCount = 0;
         if (isWindow()) {
             sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
+            window.dispatchEvent(new Event("siyuan-window-layout"));
         } else {
             if (!window.siyuan.config.readonly) {
                 const request = {
@@ -234,6 +235,7 @@ export const exportLayout = async (options: {
         };
         layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
         sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
+        window.dispatchEvent(new Event("siyuan-window-layout"));
         options.cb();
         return;
     }
@@ -736,6 +738,13 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
         json.action = (layout.editor.protyle.block.showAll && layout.editor.protyle.block.id !== layout.editor.protyle.block.rootID) ? Constants.CB_GET_ALL : Constants.CB_GET_SCROLL;
         json.databaseRowId = layout.editor.protyle.element.dataset.databaseRowId;
         json.instance = "Editor";
+        if (isWindow()) {
+            const scrollAttr = saveScroll(layout.editor.protyle, true);
+            if (scrollAttr && "rootId" in scrollAttr) {
+                json.scrollAttr = scrollAttr;
+                json.action = Constants.CB_GET_SCROLL;
+            }
+        }
     } else if (layout instanceof Asset) {
         json.path = layout.path;
         if (layout.pdfObject) {
@@ -941,6 +950,7 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             notebookId: json.notebookId,
             mode: json.mode,
             scrollPosition: json.scrollPosition,
+            scrollAttr: json.scrollAttr,
             action,
             afterInitProtyle(editor) {
                 if (json.databaseRowId) {

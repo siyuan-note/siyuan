@@ -1,0 +1,17 @@
+.window-workspace {
+  &__list {
+    width: min(256px, 70vw);
+  }
+
+  &__search {
+    padding: 2px;
+  }
+
+  &__entries {
+    overscroll-behavior: contain;
+  }
+
+  &__name {
+    min-width: 0;
+  }
+}

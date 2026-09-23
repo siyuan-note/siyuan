@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "تبديل",
+	"mainWindowLayouts": "تخطيطات النافذة الرئيسية",
+	"windowWorkspaces": "تخطيطات النافذة الجديدة",
+	"windowWorkspaceSave": "حفظ كتخطيط للنافذة الجديدة",
+	"windowWorkspaceRemoveTip": "هل تريد إزالة «${x}»؟ ستُحفظ المستندات والمرفقات، وستبقى النوافذ المفتوحة كما هي.",
+	"windowWorkspaceSaveError": "تعذر حفظ تخطيط النافذة الجديدة. يرجى المحاولة مرة أخرى.",
+	"windowWorkspaceUnavailable": "تخطيط النافذة الجديدة غير متاح أو يستخدم تنسيقًا غير مدعوم.",
 	"listMindmapExpandToLevel": "توسيع حتى المستوى ${level}",
 	"checkBlockRefProgress": "جارٍ التحقق من مراجع الكتل وارتباطات قواعد البيانات...",
 	"calendarRowLimit": "عدد صفوف العناصر المعروضة",

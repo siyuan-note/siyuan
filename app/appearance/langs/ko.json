@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "전환",
+	"mainWindowLayouts": "주 창 레이아웃",
+	"windowWorkspaces": "새 창 레이아웃",
+	"windowWorkspaceSave": "새 창 레이아웃으로 저장",
+	"windowWorkspaceRemoveTip": "“${x}”을(를) 제거할까요? 문서와 첨부 파일은 유지되며 열려 있는 창도 그대로 유지됩니다.",
+	"windowWorkspaceSaveError": "새 창 레이아웃을 저장하지 못했습니다. 다시 시도해 주세요.",
+	"windowWorkspaceUnavailable": "새 창 레이아웃을 사용할 수 없거나 지원하지 않는 형식입니다.",
 	"listMindmapExpandToLevel": "${level}단계까지 펼치기",
 	"checkBlockRefProgress": "블록 참조 및 데이터베이스 바인딩 확인 중...",
 	"calendarRowLimit": "표시할 항목 행 수",

@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "Geçiş yap",
+	"mainWindowLayouts": "Ana pencere düzenleri",
+	"windowWorkspaces": "Yeni pencere düzenleri",
+	"windowWorkspaceSave": "Yeni pencere düzeni olarak kaydet",
+	"windowWorkspaceRemoveTip": "“${x}” kaldırılsın mı? Belgeler ve ekler korunur, açık pencereler açık kalır.",
+	"windowWorkspaceSaveError": "Yeni pencere düzeni kaydedilemedi. Lütfen yeniden deneyin.",
+	"windowWorkspaceUnavailable": "Yeni pencere düzeni kullanılamıyor veya desteklenmeyen bir biçim kullanıyor.",
 	"listMindmapExpandToLevel": "${level}. düzeye kadar genişlet",
 	"checkBlockRefProgress": "Blok referansları ve veritabanı bağlantıları kontrol ediliyor...",
 	"calendarRowLimit": "Görünür öğe satırları",

@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "Prepnúť",
+	"mainWindowLayouts": "Rozloženia hlavného okna",
+	"windowWorkspaces": "Rozloženia nového okna",
+	"windowWorkspaceSave": "Uložiť ako rozloženie nového okna",
+	"windowWorkspaceRemoveTip": "Odstrániť „${x}“? Dokumenty a prílohy zostanú zachované a otvorené okná zostanú otvorené.",
+	"windowWorkspaceSaveError": "Rozloženie nového okna sa nepodarilo uložiť. Skúste to znova.",
+	"windowWorkspaceUnavailable": "Rozloženie nového okna nie je dostupné alebo používa nepodporovaný formát.",
 	"listMindmapExpandToLevel": "Rozbaliť po úroveň ${level}",
 	"checkBlockRefProgress": "Kontrolujú sa odkazy na bloky a prepojenia s databázami...",
 	"calendarRowLimit": "Počet zobrazených riadkov položiek",

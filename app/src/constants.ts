@@ -187,6 +187,7 @@ export abstract class Constants {
     public static readonly LOCAL_BAZAAR = "local-bazaar";
     public static readonly LOCAL_PDFTHEME = "local-pdftheme";
     public static readonly LOCAL_LAYOUTS = "local-layouts";
+    public static readonly LOCAL_WINDOW_WORKSPACE = "local-window-workspace-";
     public static readonly LOCAL_PLUGINTOPUNPIN = "local-plugintopunpin";
     public static readonly LOCAL_FLASHCARD = "local-flashcard";
     public static readonly LOCAL_FILEPOSITION = "local-fileposition";

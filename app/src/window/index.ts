@@ -1,3 +1,4 @@
+import {onWindowWorkspaceStorageChanged} from "./workspace";
 import {Constants} from "../constants";
 import {systemConfig} from "../config/systemConfig";
 import {Menus} from "../menus";
@@ -118,19 +119,23 @@ class App {
                             case "setLocalStorageVal":
                                 if (window.siyuan.storage) {
                                     window.siyuan.storage[data.data.key] = data.data.val;
+                                    onWindowWorkspaceStorageChanged(data.data.key);
                                 }
                                 break;
                             case "setLocalStorageVals":
                                 Object.keys(data.data.keyVals).forEach((k) => {
                                     window.siyuan.storage[k] = data.data.keyVals[k];
+                                    onWindowWorkspaceStorageChanged(k);
                                 });
                                 break;
                             case "removeLocalStorageVal":
                                 delete window.siyuan.storage[data.data.key];
+                                onWindowWorkspaceStorageChanged(data.data.key);
                                 break;
                             case "removeLocalStorageVals":
                                 data.data.keys.forEach((k: string) => {
                                     delete window.siyuan.storage[k];
+                                    onWindowWorkspaceStorageChanged(k);
                                 });
                                 break;
                             case "rename":

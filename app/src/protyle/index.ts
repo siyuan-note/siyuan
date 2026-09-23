@@ -441,8 +441,10 @@ export class Protyle {
                 return;
             }
 
+            const savedScroll = options.scrollAttr?.rootId === options.rootId ? options.scrollAttr :
+                window.siyuan.storage?.[Constants.LOCAL_FILEPOSITION]?.[options.rootId];
             if (this.protyle.options.mode !== "preview" &&
-                options.rootId && window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.rootId] &&
+                options.rootId && savedScroll &&
                 (
                     mergedOptions.action.includes(Constants.CB_GET_SCROLL) ||
                     (mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL) && options.rootId === options.blockId)
@@ -450,7 +452,7 @@ export class Protyle {
             ) {
                 getDocByScroll({
                     protyle: this.protyle,
-                    scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.rootId],
+                    scrollAttr: savedScroll,
                     mergedOptions,
                     cb: () => {
                         this.afterOnGet(mergedOptions);

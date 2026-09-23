@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "Перейти",
+	"mainWindowLayouts": "Макеты главного окна",
+	"windowWorkspaces": "Макеты нового окна",
+	"windowWorkspaceSave": "Сохранить как макет нового окна",
+	"windowWorkspaceRemoveTip": "Удалить «${x}»? Документы и вложения сохранятся, а открытые окна останутся открытыми.",
+	"windowWorkspaceSaveError": "Не удалось сохранить макет нового окна. Попробуйте ещё раз.",
+	"windowWorkspaceUnavailable": "Макет нового окна недоступен или использует неподдерживаемый формат.",
 	"listMindmapExpandToLevel": "Развернуть до уровня ${level}",
 	"checkBlockRefProgress": "Проверка ссылок на блоки и привязок к базам данных...",
 	"calendarRowLimit": "Число видимых строк записей",

@@ -28,6 +28,14 @@ const getWindowURL = (layout: unknown) => {
     return appendRemoteQuery(url).href;
 };
 
+export const openNewWindowByWorkspace = (id: string) => {
+    /// #if !BROWSER
+    const url = new URL(getWindowURL([]));
+    url.searchParams.set("windowWorkspace", id);
+    ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {url: url.href, alwaysOnTop: false});
+    /// #endif
+};
+
 export const openNewWindow = (tab: Tab, options: windowOptions = {}) => {
     const json = {};
     layoutToJSON(tab, json);

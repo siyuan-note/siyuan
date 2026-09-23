@@ -1,4 +1,11 @@
 {
+	"windowWorkspaceSwitch": "Overschakelen",
+	"mainWindowLayouts": "Indelingen van het hoofdvenster",
+	"windowWorkspaces": "Indelingen voor nieuwe vensters",
+	"windowWorkspaceSave": "Opslaan als indeling voor een nieuw venster",
+	"windowWorkspaceRemoveTip": "‘${x}’ verwijderen? Documenten en bijlagen blijven bewaard en geopende vensters blijven open.",
+	"windowWorkspaceSaveError": "De indeling voor een nieuw venster kon niet worden opgeslagen. Probeer het opnieuw.",
+	"windowWorkspaceUnavailable": "De indeling voor een nieuw venster is niet beschikbaar of gebruikt een niet-ondersteund formaat.",
 	"listMindmapExpandToLevel": "Uitvouwen tot niveau ${level}",
 	"checkBlockRefProgress": "Blokverwijzingen en databasekoppelingen controleren...",
 	"calendarRowLimit": "Zichtbare itemrijen",

@@ -1,3 +1,5 @@
+import {getLayoutSubMenu} from "./layouts";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -20,7 +22,7 @@ import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks, getAllModels} from "../layout/getAll";
 import {getDockHotkey} from "../layout/dock/hotkey";
-import {exportLayout, getAllLayout} from "../layout/util";
+import {exportLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
 import {exitSiYuan, lockScreen} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
@@ -30,103 +32,15 @@ import {escapeAttr, escapeHtml} from "../util/escape";
 import {viewCards} from "../card/viewCards";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {confirmDialog} from "../dialog/confirmDialog";
 import type {App} from "../index";
 import {isBrowser} from "../util/functions";
 import {openRecentDocs} from "../business/openRecentDocs";
-import * as dayjs from "dayjs";
-import {upDownHint} from "../util/upDownHint";
 import {openDataMigration} from "./dataMigration";
 import {openLink} from "../editor/openLink";
 import {adjustEditorFontSize} from "../util/editorFontSize";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {openTemplateManager} from "../template/manager";
-
-const editLayout = (layoutName?: string) => {
-    const dialog = openInputDialog({
-        positionId: Constants.DIALOG_SAVEWORKSPACE,
-        title: layoutName ? window.siyuan.languages.edit : window.siyuan.languages.save,
-        value: layoutName || "",
-        placeholder: window.siyuan.languages.memo,
-        width: "520px",
-        confirmText: window.siyuan.languages[layoutName ? "updateLayout" : "confirm"],
-        actions: layoutName ? [{
-            text: window.siyuan.languages.delete,
-            danger: true,
-            position: "beforeCancel",
-            onClick: (value, dialog) => {
-                window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout, index: number) => {
-                    if (layoutItem.name === layoutName) {
-                        window.siyuan.storage[Constants.LOCAL_LAYOUTS].splice(index, 1);
-                        setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
-                        return true;
-                    }
-                });
-                dialog.destroy();
-            },
-        }, {
-            text: window.siyuan.languages.rename,
-            onClick: (value, dialog) => {
-                if (!value) {
-                    showMessage(window.siyuan.languages["_kernel"]["142"]);
-                    return;
-                }
-                dialog.destroy();
-                window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout) => {
-                    if (layoutItem.name === layoutName) {
-                        layoutItem.name = value;
-                        layoutItem.time = Date.now();
-                        setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
-                        return true;
-                    }
-                });
-            },
-        }] : [],
-        onConfirm: (value, dialog) => {
-            if (!value) {
-                showMessage(window.siyuan.languages["_kernel"]["142"]);
-                return;
-            }
-            dialog.destroy();
-            if (layoutName) {
-                window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout) => {
-                    if (layoutItem.name === layoutName) {
-                        layoutItem.name = value;
-                        layoutItem.time = Date.now();
-                        layoutItem.layout = getAllLayout();
-                        layoutItem.filesPaths = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
-                        setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
-                        return true;
-                    }
-                });
-                return;
-            }
-            const hadName = window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((item: ISaveLayout) => {
-                if (item.name === value) {
-                    confirmDialog(window.siyuan.languages.save, window.siyuan.languages.exportTplTip, () => {
-                        item.layout = getAllLayout();
-                        item.time = Date.now();
-                        item.filesPaths = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
-                        setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
-                    });
-                    return true;
-                }
-            });
-            if (hadName) {
-                return;
-            }
-            window.siyuan.storage[Constants.LOCAL_LAYOUTS].push({
-                name: value,
-                time: Date.now(),
-                layout: getAllLayout(),
-                filesPaths: window.siyuan.storage[Constants.LOCAL_FILESPATHS]
-            });
-            setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
-        },
-    });
-    dialog.element.setAttribute("data-key", Constants.DIALOG_SAVEWORKSPACE);
-};
 
 const getApplicationZoomSubMenu = () => {
     const zoom = window.siyuan.storage[Constants.LOCAL_ZOOM];
@@ -423,115 +337,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
                 }).element);
             }
         }
-        const layoutSubMenu: IMenu[] = [{
-            id: "save",
-            iconHTML: "",
-            label: window.siyuan.languages.save,
-            click() {
-                editLayout();
-            }
-        }];
-        if (window.siyuan.storage[Constants.LOCAL_LAYOUTS].length > 0) {
-            layoutSubMenu.push({id: "separator_1", type: "separator"});
-            layoutSubMenu.push({
-                iconHTML: "",
-                type: "empty",
-                label: `<input spellcheck="false" class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.searchPlaceholder}">
-<div class="b3-list b3-list--background" style="width: 220px"></div>`,
-                bind(menuElement) {
-                    const genListHTML = (isInit = false) => {
-                        let html = "";
-                        window.siyuan.storage[Constants.LOCAL_LAYOUTS].sort((a: ISaveLayout, b: ISaveLayout) => {
-                            return a.name.localeCompare(b.name, undefined, {numeric: true});
-                        }).forEach((item: ISaveLayout) => {
-                            if (inputElement.value === "" || item.name.toLowerCase().indexOf(inputElement.value.toLowerCase()) > -1) {
-                                html += `<div data-name="${item.name}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action${!isInit && !html ? " b3-list-item--focus" : ""} ariaLabel" data-position="8east" aria-label="${escapeAttr(item.name)}" >
-    <div class="b3-list-item__text">${item.name}</div>
-    <span class="b3-list-item__meta">${item.time ? dayjs(item.time).format("YYYY-MM-DD HH:mm") : ""}</span>
-    <span class="b3-list-item__action">
-        <svg><use xlink:href="#iconEdit"></use></svg>
-    </span>
-</div>`;
-                            }
-                        });
-                        return html;
-                    };
-                    const inputElement = menuElement.querySelector(".b3-text-field") as HTMLInputElement;
-                    const listElement = menuElement.querySelector(".b3-list");
-                    inputElement.addEventListener("focus", () => {
-                        if (!menuElement.querySelector(".b3-list-item--focus")) {
-                            menuElement.querySelector(".b3-list-item")?.classList.add("b3-list-item--focus");
-                        }
-                    });
-                    inputElement.addEventListener("blur", () => {
-                        menuElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
-                    });
-                    inputElement.addEventListener("keydown", (event) => {
-                        event.stopPropagation();
-                        if (event.isComposing) {
-                            return;
-                        }
-                        upDownHint(listElement, event);
-                        if (event.key === "Escape" || (event.key === "ArrowLeft" && inputElement.value === "")) {
-                            window.siyuan.menus.menu.remove(true);
-                        } else if (event.key === "Enter") {
-                            const currentElement = listElement.querySelector(".b3-list-item--focus");
-                            if (currentElement) {
-                                listElement.dispatchEvent(new CustomEvent("click", {detail: currentElement.getAttribute("data-name")}));
-                            }
-                        }
-                    });
-                    inputElement.addEventListener("compositionend", () => {
-                        listElement.innerHTML = genListHTML();
-                    });
-                    inputElement.addEventListener("input", (event: InputEvent) => {
-                        if (event.isComposing) {
-                            return;
-                        }
-                        event.stopPropagation();
-                        listElement.innerHTML = genListHTML();
-                    });
-                    listElement.addEventListener("click", (event: MouseEvent) => {
-                        if (window.siyuan.config.readonly) {
-                            return;
-                        }
-                        const actionElement = hasClosestByClassName(event.target as Element, "b3-list-item__action");
-                        if (actionElement) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            editLayout(actionElement.parentElement.dataset.name);
-                            window.siyuan.menus.menu.remove();
-                            return;
-                        }
-                        const liElement = hasClosestByClassName(event.target as Element, "b3-list-item");
-                        if (liElement || event.detail) {
-                            const itemData: ISaveLayout = window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((item: ISaveLayout) => {
-                                if (typeof event.detail === "string") {
-                                    return item.name === event.detail;
-                                } else if (liElement) {
-                                    return item.name === liElement.dataset.name;
-                                }
-                            });
-                            if (itemData) {
-                                fetchPost("/api/system/setUILayout", {layout: itemData.layout}, () => {
-                                    if (itemData.filesPaths) {
-                                        window.siyuan.storage[Constants.LOCAL_FILESPATHS] = itemData.filesPaths;
-                                        setStorageVal(Constants.LOCAL_FILESPATHS, itemData.filesPaths, () => {
-                                            window.location.reload();
-                                        });
-                                    } else {
-                                        window.location.reload();
-                                    }
-                                });
-                            }
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                    });
-                    listElement.innerHTML = genListHTML(true);
-                }
-            });
-        }
+        const layoutSubMenu = getLayoutSubMenu();
         if (!window.siyuan.config.readonly) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "layout",

@@ -147,6 +147,10 @@
     resize: vertical;
     font-family: var(--b3-font-family-code);
     tab-size: 4;
+
+    &:disabled {
+      pointer-events: none;
+    }
   }
 
   &__context {

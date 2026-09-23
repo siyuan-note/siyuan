@@ -23,17 +23,19 @@ const compiled = transpileModule(`const handleTab = (event, range, nodeElement, 
 };
 handleTab;`, {compilerOptions: {module: ModuleKind.None, target: ScriptTarget.ES2021}}).outputText;
 
-const setup = () => {
+const setup = (codeTabSpaces = 4) => {
     const blocks = ["1", "2", "3", "4", "5", "6"];
     const commands: Array<{name: string, value: string}> = [];
     const codeBlockTabs: boolean[] = [];
+    const inserted: string[] = [];
     const handleTab = runInNewContext(compiled, {
         isNotCtrl: () => true,
         document: {execCommand: (name: string, _showUI: boolean, value: string) => {
             commands.push({name, value});
             blocks.splice(1, 4);
         }},
-        window: {siyuan: {config: {editor: {codeTabSpaces: 4}}}},
+        window: {siyuan: {config: {editor: {codeTabSpaces}}}},
+        insertHTML: (html: string) => inserted.push(html),
         tabCodeBlock: (_protyle: unknown, _block: unknown, _range: unknown, outdent: boolean) => {
             codeBlockTabs.push(outdent);
         },
@@ -50,16 +52,27 @@ const setup = () => {
     } as KeyboardEvent;
     const paragraph = {getAttribute: () => "NodeParagraph"} as unknown as HTMLElement;
     const codeBlock = {getAttribute: () => "NodeCodeBlock"} as unknown as HTMLElement;
-    return {blocks, commands, codeBlockTabs, handleTab, event, paragraph, codeBlock};
+    return {blocks, commands, inserted, codeBlockTabs, handleTab, event, paragraph, codeBlock};
 };
 
-test("Tab keeps a cross-block text selection and all selected blocks intact", () => {
-    const {blocks, commands, handleTab, event, paragraph} = setup();
+test("Tab replaces cross-block text through editor insertion instead of native DOM editing", () => {
+    const {blocks, commands, inserted, handleTab, event, paragraph} = setup();
     const result = handleTab(event, {collapsed: false} as Range, paragraph,
         {getAttribute: () => "NodeParagraph"} as unknown as HTMLElement, {} as IProtyle);
     assert.equal(result, true);
     assert.equal(event.defaultPrevented, true);
     assert.deepEqual(blocks, ["1", "2", "3", "4", "5", "6"]);
+    assert.equal(commands.length, 0);
+    assert.deepEqual(inserted, ["    "]);
+});
+
+test("cross-block Tab honors literal tabs while Shift+Tab preserves the selection", () => {
+    const {commands, inserted, handleTab, event, paragraph} = setup(0);
+    const end = {getAttribute: () => "NodeParagraph"} as unknown as HTMLElement;
+    handleTab(event, {collapsed: false} as Range, paragraph, end, {} as IProtyle);
+    assert.deepEqual(inserted, ["\t"]);
+    handleTab({...event, shiftKey: true}, {collapsed: false} as Range, paragraph, end, {} as IProtyle);
+    assert.deepEqual(inserted, ["\t"]);
     assert.equal(commands.length, 0);
 });
 

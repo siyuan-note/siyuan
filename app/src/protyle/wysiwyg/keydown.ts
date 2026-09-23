@@ -1,6 +1,7 @@
 import type {BlockQueryRequestInput} from "../../types/api";
 import {isProtyleListItemFragment} from "../runtimeCapabilities";
 import {hideElements} from "../ui/hideElements";
+import {insertHTML} from "../util/insertHTML";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
@@ -2586,8 +2587,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // tab 需等待 list 和 table 处理完成
         if (event.key === "Tab" && isNotCtrl(event) && !event.altKey) {
             event.preventDefault();
-            // 跨块选区不能交给原生插入，否则会删除选中的块。
+            // 跨块替换通过编辑器事务插入，保留块结构和撤销信息。
             if (!range.collapsed && nodeElement !== endElement) {
+                if (!event.shiftKey) {
+                    insertHTML(window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" :
+                        "".padStart(window.siyuan.config.editor.codeTabSpaces, " "), protyle);
+                }
                 return true;
             }
             let tabNodeElement = nodeElement;

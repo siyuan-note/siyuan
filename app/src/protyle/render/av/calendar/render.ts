@@ -23,7 +23,7 @@ import {addCalendarDateField, bindCalendarSettings, getCalendarSettingsHTML, isC
 import {getCalendarRequestRange, getCalendarState, setCalendarMode} from "./state";
 import {bindCalendarUndated, getCalendarUndatedHTML} from "./undated";
 
-const iconButton = (action: string, icon: string, label: string) => `<button type="button" class="block__icon block__icon--show" data-calendar-action="${action}" aria-label="${escapeAttr(label)}"><svg><use xlink:href="#${icon}"></use></svg></button>`;
+const iconButton = (action: string, icon: string, label: string) => `<button type="button" class="block__icon block__icon--show ariaLabel" data-calendar-action="${action}" data-position="8south" aria-label="${escapeAttr(label)}"><svg><use xlink:href="#${icon}"></use></svg></button>`;
 
 const canEditCalendar = (protyle: IProtyle) => !protyle.disabled && !window.siyuan.isPublish &&
     !protyle.options.history?.created && !protyle.options.history?.snapshot;
@@ -282,14 +282,14 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     }
     blockElement.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);
     replaceAVContainer(blockElement, `<div class="av__container fn__block">
-        ${genTabHeaderHTML(data, !!query || isSearching, editable, blockElement, editable && !!dateColumn,
-        editable && dateColumn?.type === "date")}
+        ${genTabHeaderHTML(data, !!query || isSearching, editable, blockElement, editable && !!dateColumn)}
         <div class="av__calendar" contenteditable="false">
             <div class="av__calendar-toolbar">
                 <span class="av__calendar-label">${escapeHtml(label)}</span>
                 <div class="av__calendar-controls">
+                ${editable && dateColumn?.type === "date" ? `<button type="button" class="block__icon block__icon--show ariaLabel" data-calendar-undated-toggle data-position="8south" aria-label="${escapeAttr(window.siyuan.languages.calendarUndated)}" aria-expanded="false"><svg><use xlink:href="#iconInbox"></use></svg></button>` : ""}
                 ${iconButton("previous", "iconLeft", window.siyuan.languages.previous)}
-                <button type="button" class="b3-button b3-button--cancel av__calendar-today" data-calendar-action="today">${window.siyuan.languages.calendarToday}</button>
+                <button type="button" class="b3-button b3-button--cancel av__calendar-today ariaLabel" data-calendar-action="today" data-position="8south" aria-label="${escapeAttr(window.siyuan.languages.calendarToday)}">${window.siyuan.languages.calendarToday}</button>
                 ${iconButton("next", "iconRight", window.siyuan.languages.next)}
                 ${iconButton("jump", "iconCalendar", window.siyuan.languages.calendarJump)}
                 <select class="b3-select" data-calendar-mode aria-label="${window.siyuan.languages.calendarView}"><option value="month"${state.mode === "month" ? " selected" : ""}>${window.siyuan.languages.month}</option><option value="week"${state.mode === "week" ? " selected" : ""}>${window.siyuan.languages.week}</option></select>
@@ -389,7 +389,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         const entry = eventsByID.get(item.dataset.calendarItem);
         avContextmenu(protyle, item, {x: event.clientX, y: event.clientY}, {customize: menu => {
             menu.addSeparator();
-            menu.addItem({icon: "iconOpen", label: window.siyuan.languages.open,
+            menu.addItem({icon: "iconOpen", label: window.siyuan.languages.openBy,
                 click: () => { void openCalendarItem(protyle, blockElement, entry.row); }});
             if (editable && dateColumn?.type === "date") {
                 const week = item.closest<HTMLElement>("[data-calendar-week]");

@@ -421,6 +421,11 @@ ${data.shorthandContent}
                 if (!md && !shorthand.data.shorthandContent && shorthand.data.shorthandURL) {
                     md = `[${shorthand.data.shorthandTitle}](${shorthand.data.shorthandURL})`;
                 }
+                const title = shorthand.data.shorthandTitle.replace(/[\r\n]+/g, " ").trim()
+                    .replace(/[\\`*_{}\[\]()#+\-.!>|~]/g, "\\$&");
+                if (title) {
+                    md = `# ${title}\n\n${md}`;
+                }
                 if (!md.trim()) {
                     showMessage(window.siyuan.languages.empty);
                     break;

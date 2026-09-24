@@ -94,7 +94,8 @@ const runCases = async () => {
         setPlatform(profile);
         document.body.innerHTML = `<div class="protyle-wysiwyg" contenteditable="true">${html}</div>`;
         const element = document.body.firstElementChild;
-        const protyle = {wysiwyg: {element, lastHTMLs: {}, escapeInline() {}}, transactions: [], inputs: 0};
+        const protyle = {wysiwyg: {element, lastHTMLs: {}, escapeInline() {},
+            runInput(callback) { return Promise.resolve(callback()); }}, transactions: [], inputs: 0};
         const flush = bind(protyle);
         const setRange = (node, start, end = start) => {
             const range = document.createRange();

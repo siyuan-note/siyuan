@@ -428,6 +428,7 @@ func TestCheckAuthLoopbackProxy(t *testing.T) {
 		want                                         int
 	}{
 		{name: "page redirects to login", method: http.MethodGet, path: "/stage/build/desktop/", site: "none", want: http.StatusFound},
+		{name: "same-site app navigation still requires login", method: http.MethodGet, path: "/stage/build/desktop/", site: "same-site", mode: "navigate", dest: "document", want: http.StatusFound},
 		{name: "login page accessible", method: http.MethodGet, path: "/check-auth", site: "same-origin", want: http.StatusNoContent},
 		{name: "assets require login", method: http.MethodGet, path: "/assets/icon.png", want: http.StatusFound},
 		{name: "local API requires credentials", method: http.MethodPost, path: "/api/system/exit", want: http.StatusUnauthorized},

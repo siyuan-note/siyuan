@@ -269,7 +269,7 @@ func CheckAuth(c *gin.Context) {
 	if localhost {
 		// 校验浏览器来源，防止恶意网页借助受害者浏览器作为环回客户端绕过锁屏鉴权
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-9gpj-3rm3-x42m
-		if util.IsCrossSiteFetchSite(c.GetHeader("Sec-Fetch-Site")) {
+		if util.IsCrossSiteFetchSite(c.GetHeader("Sec-Fetch-Site")) && !util.IsSessionOriginAllowedRequest(c.Request) {
 			logging.LogWarnf("invalid local host pass-through request [ip=%s, origin=%s, host=%s, uri=%s]",
 				c.ClientIP(), c.GetHeader("Origin"), c.Request.Host, c.Request.RequestURI)
 			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid request origin"})

@@ -4,6 +4,13 @@
 
 .protyle-wysiwyg,
 .b3-typography {
+  // 脑图初始化前仍显示原始节点，列表标记沿用普通列表的图标尺寸。
+  .mindmap-item > .protyle-action > svg {
+    display: block;
+    width: 34px;
+    height: max(14px, 1em - 4px);
+  }
+
   [data-type="NodeList"][data-mindmap-view-rendered="true"],
   [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] {
     height: auto !important;

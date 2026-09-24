@@ -113,6 +113,7 @@ func TestTableCellRichFrontendProjectionParity(t *testing.T) {
 		`var(--b3-font-family-editor), var(--b3-font-family);"}`
 	for _, source := range []string{
 		"- **first**\n- second\n\n```go\na < b && c\nd\n```\n\n$$\nx < y\n$$",
+		"- list\n\n$$\n\n$$",
 		"```go\na < b && c\n```\n" + `{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}`,
 		"![image](assets/image.png) ((20240101000000-abcdefg 'reference')) `a & b`",
 		styled,

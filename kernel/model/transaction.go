@@ -1911,7 +1911,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 		if ast.NodeTextMark == n.Type {
 			if n.IsTextMarkType("inline-math") {
-				if "" == strings.TrimSpace(n.TextMarkInlineMathContent) {
+				// 富文本单元格中的行级公式是派生投影，空公式块也需要保留对应节点。
+				if "" == strings.TrimSpace(n.TextMarkInlineMathContent) &&
+					(nil == n.Parent || nil == n.Parent.TableCellRich) {
 					// 剔除空白的行级公式
 					unlinks = append(unlinks, n)
 				}

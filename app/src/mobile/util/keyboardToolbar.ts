@@ -82,6 +82,9 @@ import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtim
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
 import {mountLiteSlashMenu} from "./liteSlashMenu";
+import {getTableCellRichContext} from "../../protyle/util/tableCellRichContext";
+import {insertEmptyBlock} from "../../block/util";
+import {getIconByType} from "../../editor/getIcon";
 
 const getCurrentEditor = () => getMobileToolbarProtyle()?.getInstance() || getDocumentEditor();
 let toolbarProtyle: IProtyle;
@@ -948,6 +951,14 @@ const renderKeyboardToolbar = () => {
             return;
         }
 
+        const blockButton = document.querySelector<HTMLElement>('#keyboardToolbar [data-type="block"]');
+        const blockType = nodeElement.getAttribute("data-type");
+        blockButton.querySelector("use").setAttribute("xlink:href",
+            `#${getIconByType(blockType, nodeElement.getAttribute("data-subtype")) || "iconParagraph"}`);
+        blockButton.setAttribute("aria-label", blockType === "NodeCodeBlock" ? window.siyuan.languages.code :
+            blockType === "NodeMathBlock" ? window.siyuan.languages.math :
+                blockType === "NodeParagraph" ? window.siyuan.languages.paragraph : window.siyuan.languages.contentBlock);
+
         const selectText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
         const startCellElement = hasClosestByTag(range.startContainer, "TD") ||
             hasClosestByTag(range.startContainer, "TH");
@@ -1078,7 +1089,8 @@ const showKeyboardToolbarElement = () => {
         toolbarProtyle = protyle;
         updateMobilePluginToolbar(protyle);
     }
-    toolbarElement.querySelector('[data-type="block"]').classList.toggle("fn__none", !protyle.gutter);
+    toolbarElement.querySelector('[data-type="block"]').classList.toggle("fn__none",
+        !protyle.gutter && !getTableCellRichContext(protyle));
     if (!toolbarElement.classList.contains("fn__none")) {
         return;
     }
@@ -1826,6 +1838,27 @@ export const initKeyboardToolbar = () => {
             protyle.toolbar.range = range;
             keyboardPanelClosing = false;
             hideKeyboardToolbarUtil();
+            if (!protyle.gutter && getTableCellRichContext(protyle)) {
+                const {MenuItem} = await import("../../menus/Menu");
+                if (!nodeElement.isConnected || protyle.disabled || !getTableCellRichContext(protyle)) {
+                    return;
+                }
+                window.siyuan.menus.menu.remove();
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "insertBefore",
+                    icon: "iconBefore",
+                    label: window.siyuan.languages.insertBefore,
+                    click: () => insertEmptyBlock(protyle, "beforebegin", nodeElement),
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "insertAfter",
+                    icon: "iconAfter",
+                    label: window.siyuan.languages.insertAfter,
+                    click: () => insertEmptyBlock(protyle, "afterend", nodeElement),
+                }).element);
+                window.siyuan.menus.menu.fullscreen("all", restoreMenuKeyboard);
+                return;
+            }
             protyle.gutter?.renderMenu(protyle, nodeElement);
             window.siyuan.menus.menu.fullscreen("all", restoreMenuKeyboard);
             return;

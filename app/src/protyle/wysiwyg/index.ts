@@ -395,6 +395,7 @@ export class WYSIWYG {
     private mouseDownTarget: EventTarget | null = null;
     private inputTimeout: number;
     private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
+    private runningInputTasks = new Set<Promise<void>>();
     public tableControl: TableControl;
     private largeListVirtualizer?: LargeListVirtualizer;
     private disposeSpellcheckFocus?: () => void;
@@ -410,7 +411,7 @@ export class WYSIWYG {
             if (this.inputTimeout === timeout) {
                 this.inputTimeout = undefined;
             }
-            void callback();
+            void this.runInput(callback);
         }, delay);
         this.pendingInputTimeouts.set(timeout, callback);
         if (replace) {
@@ -418,12 +419,25 @@ export class WYSIWYG {
         }
     }
 
+    private async runInput(callback: () => void | Promise<void>) {
+        const task = Promise.resolve(callback());
+        this.runningInputTasks.add(task);
+        try {
+            await task;
+        } finally {
+            this.runningInputTasks.delete(task);
+        }
+    }
+
     public async flushPendingInput() {
-        const callbacks = Array.from(this.pendingInputTimeouts.values());
-        this.pendingInputTimeouts.forEach((callback, timeout) => clearTimeout(timeout));
-        this.pendingInputTimeouts.clear();
-        this.inputTimeout = undefined;
-        await Promise.all(callbacks.map(callback => callback()));
+        // 输入处理可能等待块引用查询，交接编辑器前也需等待已经开始执行的任务。
+        while (this.pendingInputTimeouts.size || this.runningInputTasks.size) {
+            const callbacks = Array.from(this.pendingInputTimeouts.values());
+            this.pendingInputTimeouts.forEach((callback, timeout) => clearTimeout(timeout));
+            this.pendingInputTimeouts.clear();
+            this.inputTimeout = undefined;
+            await Promise.all([...this.runningInputTasks, ...callbacks.map(callback => this.runInput(callback))]);
+        }
     }
 
     public copyRichText() {
@@ -4171,7 +4185,7 @@ export class WYSIWYG {
                 // 小鹤音形 ;k 不能使用 setTimeout;
                 // wysiwyg.element contenteditable 为 false 时，连拼 needRender 必须为 false
                 // hr 渲染；任务列表、粗体、数学公示结尾 needRender 必须为 true
-                input(protyle, blockElement, range, true);
+                void this.runInput(() => input(protyle, blockElement, range, true));
             } else {
                 const id = blockElement.getAttribute("data-node-id");
                 if (protyle.wysiwyg.lastHTMLs[id]) {

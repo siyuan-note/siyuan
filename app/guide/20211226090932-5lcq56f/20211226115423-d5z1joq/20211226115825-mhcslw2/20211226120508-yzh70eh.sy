@@ -616,6 +616,20 @@
 			]
 		},
 		{
+			"ID": "20260924143000-oesbt3o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260924143000-oesbt3o",
+				"updated": "20260924143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "匯出圖片或 PDF 時會渲染 JavaScript 嵌入區塊，並等待指令碼和區塊查詢完成後再匯出。安全模式和遠端核心環境仍然禁止執行指令碼。"
+				}
+			]
+		},
+		{
 			"ID": "20260612202457-tp9uaus",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,

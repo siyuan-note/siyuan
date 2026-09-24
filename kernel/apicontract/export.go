@@ -117,7 +117,9 @@ type ExportHTMLRequest struct {
 	ExportTitleOptions
 }
 type ExportPreviewHTMLRequest struct {
-	ID                      string `json:"id" api:"trim"`
+	ID string `json:"id" api:"trim"`
+	// KeepJSEmbed 保留 JavaScript 嵌入块供受信任的前端异步渲染；默认关闭，内核不执行脚本。
+	KeepJSEmbed             bool   `json:"keepJSEmbed" api:"optional,nullable"`
 	KeepFold                bool   `json:"keepFold" api:"optional,nullable"`
 	Merge                   bool   `json:"merge" api:"optional,nullable"`
 	Image                   bool   `json:"image" api:"optional,nullable"`

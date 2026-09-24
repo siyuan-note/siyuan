@@ -22935,6 +22935,16 @@
             }
           ]
         },
+        "keepJSEmbed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "merge": {
           "anyOf": [
             {

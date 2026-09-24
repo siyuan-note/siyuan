@@ -932,7 +932,7 @@ export type ExportPreviewData = { "fillCSSVar": boolean; "html": string; };
 
 export type ExportPreviewHTMLData = { "attrs": Record<string, string> | null; "content": string; "id": string; "name": string; "type": string; };
 
-export type ExportPreviewHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "id": string; "image"?: boolean | null; "keepFold"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; };
+export type ExportPreviewHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "id": string; "image"?: boolean | null; "keepFold"?: boolean | null; "keepJSEmbed"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; };
 
 export type ExportRepoFileRequestInput = { "id": string; };
 

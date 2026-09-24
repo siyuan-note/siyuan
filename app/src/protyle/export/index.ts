@@ -513,7 +513,7 @@ const renderPDF = async (id: string) => {
       <div class="fn__flex-1"></div>
       <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
       <div class="fn__space"></div>
-      <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+      <button disabled class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
 <div id="previewContainer">
@@ -656,13 +656,29 @@ ${getIconScript(servePath)}
             }
         })
     }
-    const renderPreview = (data) => {
+    let previewReady = Promise.resolve();
+    let previewRevision = 0;
+    const renderPreview = async (data) => {
         previewElement.innerHTML = '<div style="padding:8px 0 0 0" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}">' + data.content + '</div>';
         const wysElement = previewElement.querySelector(".protyle-wysiwyg");
         wysElement.setAttribute("data-doc-type", data.type || "NodeDocument");
         Object.keys(data.attrs).forEach(key => {
             wysElement.setAttribute(key, data.attrs[key]);
         })
+        await Protyle.renderExportJSEmbeds(wysElement, {
+            disabled: ${window.siyuan.config.system.safeMode || getHostCapabilities().remoteKernel},
+            disabledTip: decodeURIComponent(${JSON.stringify(encodeURIComponent(window.siyuan.languages.safeModeJSTip))}),
+            rootID: "${id}",
+            headingMode: ${window.siyuan.config.editor.headingEmbedMode},
+        }, async (url, data) => {
+            const response = await fetch("${servePathWithoutTrailingSlash}" + url, {
+                method: "POST", body: JSON.stringify(data),
+            });
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+            return response.json();
+        });
         // https://github.com/siyuan-note/siyuan/issues/13669
         wysElement.querySelectorAll('[data-node-id]').forEach((item) => {
             if (item.querySelector(".img")) {
@@ -680,6 +696,7 @@ ${getIconScript(servePath)}
     }
     fetchPost("/api/export/exportPreviewHTML", {
         id: "${id}",
+        keepJSEmbed: true,
         keepFold: ${localData.keepFold},
         addTitle: ${window.siyuan.config.export.addTitle},
         customTitle: "",
@@ -778,9 +795,12 @@ ${getIconScript(servePath)}
         const removeAssetsElement = actionElement.querySelector("#removeAssets");
         const  watermarkElement = actionElement.querySelector('#watermark');
         const refreshPreview = () => {
+            const revision = ++previewRevision;
+            actionElement.querySelector('.b3-button--text').disabled = true;
             previewElement.innerHTML = '<div class="fn__loading" style="left:0;height: 100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>'
             fetchPost("/api/export/exportPreviewHTML", {
                 id: "${id}",
+                keepJSEmbed: true,
                 keepFold: keepFoldElement.checked,
                 addTitle: addTitleElement.checked,
                 customTitle: customTitleElement.value,
@@ -788,13 +808,22 @@ ${getIconScript(servePath)}
                 mergeDocHeadingMode: mergeDocHeadingModeElement.value,
                 mergeContentHeadingMode: mergeContentHeadingModeElement.value,
             }, response2 => {
+                if (revision !== previewRevision) {
+                    return;
+                }
                 if (response2.code !== 0) {
                     alert(response2.msg)
                     return;
                 }
                 setPadding();
-                renderPreview(response2.data);
-                reserveEmbeddedAssetSpace(removeAssetsElement.checked);
+                previewReady = renderPreview(response2.data).then(() => {
+                    if (revision !== previewRevision) {
+                        return;
+                    }
+                    reserveEmbeddedAssetSpace(removeAssetsElement.checked);
+                    fixBlockWidth();
+                    actionElement.querySelector('.b3-button--text').disabled = false;
+                });
             })
         };
 
@@ -903,6 +932,7 @@ ${getIconScript(servePath)}
             });
         }));
         actionElement.querySelector('.b3-button--text').addEventListener('click', async () => {
+            await previewReady;
             const {ipcRenderer}  = require("electron");
             const defaultPath = decodeURIComponent(${JSON.stringify(encodeURIComponent(defaultExportPath))});
             const dialogOptions = {
@@ -969,8 +999,14 @@ ${getIconScript(servePath)}
             ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", exportConfig);
         });
         setPadding();
-        renderPreview(response.data);
-        reserveEmbeddedAssetSpace(removeAssetsElement.checked);
+        previewReady = renderPreview(response.data).then(() => {
+            if (previewRevision !== 0) {
+                return;
+            }
+            reserveEmbeddedAssetSpace(removeAssetsElement.checked);
+            fixBlockWidth();
+            actionElement.querySelector('.b3-button--text').disabled = false;
+        });
         window.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {
                 const {ipcRenderer}  = require("electron");

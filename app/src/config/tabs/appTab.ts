@@ -506,6 +506,13 @@ const mountExportData = (root: HTMLElement) => {
 const registerAppMaintenanceGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("maintenance", window.siyuan.languages.configGroupMaintenance);
 
+    group.slot({
+        key: "workspaceStorage",
+        keywords: [window.siyuan.languages.workspaceStorage, window.siyuan.languages.workspaceStorageTip,
+            window.siyuan.languages.assets, "data", "repo", "history", "temp", "conf"],
+        html: genWorkspaceStorageHtml,
+        afterMount: mountWorkspaceStorage,
+    });
     group.button({
         id: "reloadUI",
         title: window.siyuan.languages.reloadUI,
@@ -573,13 +580,6 @@ const registerAppMaintenanceGroup = (tab: SettingTabBuilder) => {
 };
 
 export const registerAppTab = (tab: SettingTabBuilder) => {
-    tab.group("storage", window.siyuan.languages.workspace).slot({
-        key: "workspaceStorage",
-        keywords: [window.siyuan.languages.workspaceStorage, window.siyuan.languages.workspaceStorageTip,
-            window.siyuan.languages.assets, "data", "repo", "history", "temp", "conf"],
-        html: genWorkspaceStorageHtml,
-        afterMount: mountWorkspaceStorage,
-    });
     /// #if MOBILE
     registerAppWorkspaceGroup(tab);
     /// #endif

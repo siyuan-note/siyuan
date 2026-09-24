@@ -28,9 +28,14 @@
     min-width: 0;
   }
 
-  &__chart {
+  &__chart,
+  &__placeholder {
     height: 16em;
     max-height: 280px;
+  }
+
+  &__placeholder {
+    position: relative;
   }
 
   &__total {

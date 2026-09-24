@@ -23,6 +23,9 @@ export const genWorkspaceStorageHtml = () => `<div class="b3-label config-item w
         <div class="b3-label__text workspace-storage__time" data-storage-time></div>
     </div>
     <div class="b3-label__text" data-storage-status role="status"></div>
+    <div class="workspace-storage__placeholder fn__none" data-storage-loading role="status" aria-label="${window.siyuan.languages.loading}">
+        <div class="fn__loading"><img width="64" src="/stage/loading-pure.svg" alt=""></div>
+    </div>
     <div class="workspace-storage__content fn__none" data-storage-content>
         <div class="workspace-storage__figure">
             <div class="workspace-storage__chart" data-storage-chart aria-hidden="true"></div>
@@ -50,6 +53,7 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
     const refresh = element.querySelector<HTMLButtonElement>("#refreshWorkspaceStorage");
     const refreshIcon = refresh.querySelector("svg");
     const status = element.querySelector<HTMLElement>("[data-storage-status]");
+    const loading = element.querySelector<HTMLElement>("[data-storage-loading]");
     const content = element.querySelector<HTMLElement>("[data-storage-content]");
     const chartElement = element.querySelector<HTMLElement>("[data-storage-chart]");
     const chartError = element.querySelector<HTMLElement>("[data-storage-chart-error]");
@@ -119,6 +123,7 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
         refresh.disabled = true;
         refreshIcon.classList.add("fn__rotate");
         status.textContent = "";
+        loading.classList.toggle("fn__none", Boolean(data));
         status.classList.remove("ft__error");
         element.setAttribute("aria-busy", "true");
         try {
@@ -159,6 +164,7 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
             }
         } finally {
             pending = false;
+            loading.classList.add("fn__none");
             refreshIcon.classList.remove("fn__rotate");
             if (active()) {
                 refresh.disabled = false;

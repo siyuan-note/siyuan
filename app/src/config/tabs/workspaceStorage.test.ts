@@ -8,7 +8,7 @@ import {test} from "node:test";
 import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {WorkspaceStorageData} from "../../types/api";
 
-const browserCases = async (source: string, sharedSource: string, echartsPath: string, locales: Record<string, Record<string, string>>) => {
+const browserCases = async (source: string, sharedSource: string, echartsPath: string, locales: Record<string, Record<string, string>>, loadingImage: string) => {
     const languages = locales.en;
     const check = require("node:assert/strict");
     const shared = {} as typeof import("../render/fragments") & Pick<typeof import("../render/render"), "genButtonHtml" | "genButtonRowHtml" | "genConfigGroup">;
@@ -79,15 +79,19 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     };
     await surface(false, 850);
     const mount = () => {
-        root.innerHTML = shared.genConfigGroup(exports.genWorkspaceStorageHtml(), window.siyuan.languages.workspace) +
-            shared.genConfigGroup(shared.genButtonRowHtml("storageReferenceControl", window.siyuan.languages.reloadUI,
+        root.innerHTML = shared.genConfigGroup(exports.genWorkspaceStorageHtml() +
+            shared.genButtonRowHtml("storageReferenceControl", window.siyuan.languages.reloadUI,
                 window.siyuan.languages.reloadUITip, window.siyuan.languages.reloadUI, "iconRefresh"), window.siyuan.languages.configGroupMaintenance);
         exports.mountWorkspaceStorage(root);
+        const image = root.querySelector<HTMLImageElement>("[data-storage-loading] img");
+        check.equal(image.getAttribute("src"), "/stage/loading-pure.svg");
+        image.src = loadingImage;
     };
     mount();
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
     const button = () => root.querySelector<HTMLButtonElement>("button");
     const status = () => root.querySelector<HTMLElement>("[data-storage-status]");
+    const loading = () => root.querySelector<HTMLElement>("[data-storage-loading]");
     const result = (size = 1024 ** 3): WorkspaceStorageData => ({
         totalSize: size * 2, assetsSize: size / 2, calculatedAt: 1700000000000,
         directories: [
@@ -103,10 +107,16 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     check.equal(button().disabled, true);
     check.ok(button().querySelector("svg").classList.contains("fn__rotate"));
     check.equal(status().textContent, "");
+    check.ok(!loading().classList.contains("fn__none"));
+    check.ok(loading().clientHeight > 200, "initial loading must reserve chart space");
+    check.ok(loading().querySelector(".fn__loading").getBoundingClientRect().top >= button().getBoundingClientRect().bottom,
+        "loading overlay must stay below the header");
+    await captures("desktop-initial-loading");
     button().dispatchEvent(new Event("click"));
     check.equal(requests.length, 1, "pending refresh must be coalesced");
     await succeed(0);
     check.equal(button().disabled, false);
+    check.ok(loading().classList.contains("fn__none"));
     check.ok(!button().querySelector("svg").classList.contains("fn__rotate"));
     check.equal(scriptLoads, 1);
     check.equal(root.querySelector("[data-storage-total]").textContent, "2 GiB");
@@ -137,6 +147,7 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     await captures("mobile-dark-large-text");
     button().click();
     requests[1].resolve({code: -1, msg: "unreadable", data: null});
+    check.ok(loading().classList.contains("fn__none"), "refresh must preserve existing results without an overlay");
     await tick();
     check.equal(status().textContent, languages.workspaceStorageFailed);
     check.ok(!button().querySelector("svg").classList.contains("fn__rotate"));
@@ -184,6 +195,15 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     check.equal(root.querySelector(".workspace-storage__row--assets"), null);
     check.ok(!Array.from(root.querySelectorAll("dt")).some(node => node.textContent === "repo"));
     exports.unmountWorkspaceStorage(root);
+    mount();
+    requests[8].resolve({code: -1, msg: "unreadable", data: null});
+    await tick();
+    check.ok(loading().classList.contains("fn__none"), "initial failure must dismiss loading");
+    check.equal(status().textContent, languages.workspaceStorageFailed);
+    button().click();
+    check.ok(!loading().classList.contains("fn__none"), "retry without data must restore loading");
+    await succeed(9);
+    exports.unmountWorkspaceStorage(root);
     for (const [locale, mobile, width, fontSize] of [
         ["zh-CN", false, 850, 16], ["en", false, 620, 24], ["de", false, 850, 24],
         ["zh-CN", true, 320, 16], ["en", true, 340, 24], ["de", true, 375, 24], ["ar", true, 375, 24],
@@ -193,6 +213,10 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
         await surface(mobile, width, fontSize);
         const requestIndex = requests.length;
         mount();
+        if (mobile && locale === "zh-CN") {
+            check.ok(!loading().classList.contains("fn__none"));
+            await captures("mobile-initial-loading");
+        }
         await succeed(requestIndex, result(1024 ** 4 * 987.654));
         const context = `${locale}-${mobile ? "mobile" : "desktop"}-${width}-${fontSize}`;
         await captures(context);
@@ -245,8 +269,9 @@ test("workspace storage rendering, refresh, theme, mobile layout and lifecycle",
     const theme = readFileSync(path.resolve("appearance/themes/daylight/theme.css"), "utf8");
     const darkTheme = readFileSync(path.resolve("appearance/themes/midnight/theme.css"), "utf8");
     const icons = readFileSync(path.resolve("appearance/icons/litheness/icon.js"), "utf8");
+    const loadingImage = "data:image/svg+xml;base64," + readFileSync(path.resolve("stage/loading-pure.svg")).toString("base64");
     const commonCSS = theme + darkTheme.replace(/:root/g, ':root[data-theme-mode="dark"]') + "\nbody{margin:0;font:16px sans-serif;color:var(--b3-theme-on-background);background:var(--b3-theme-background)}";
-    const code = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(sharedSource)}, ${JSON.stringify(path.resolve("stage/protyle/js/echarts/echarts.min.js"))}, ${JSON.stringify(locales)})`;
+    const code = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(sharedSource)}, ${JSON.stringify(path.resolve("stage/protyle/js/echarts/echarts.min.js"))}, ${JSON.stringify(locales)}, ${JSON.stringify(loadingImage)})`;
     writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");

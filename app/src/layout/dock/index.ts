@@ -466,7 +466,15 @@ export class Dock {
         }
         resizeTabs(false);
         setTabPosition(true);
+        if (resolution.visible) {
+            this.showDockAfterResponsiveLayout();
+        }
         return this.isPanelVisible();
+    }
+
+    private showDockAfterResponsiveLayout() {
+        // 响应式布局完成后展示主动打开的浮动面板。
+        requestAnimationFrame(() => this.showDock());
     }
 
     public togglePin() {
@@ -994,6 +1002,9 @@ export class Dock {
             anotherWnd.element.style.width = "";
         }
         resizeTabs(isSaveLayout);
+        if (target.classList.contains("dock__item--active") && !removeDock && this.panelVisible) {
+            this.showDockAfterResponsiveLayout();
+        }
         if (target.classList.contains("dock__item--active") && !removeDock && (type === "graph" || type === "globalGraph")) {
             const graph = this.data[type] as Graph;
             graph.onGraph();

@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260924145647"
+		"updated": "20260924173802"
 	},
 	"Children": [
 		{
@@ -4022,7 +4022,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20260924145647"
+				"updated": "20260924173802"
 			},
 			"Children": [
 				{
@@ -11232,7 +11232,7 @@
 			"Properties": {
 				"ID": "20240530101000-xpeqztf",
 				"id": "20240530101000-emapwbq",
-				"updated": "20260811122156"
+				"updated": "20260924173802"
 			},
 			"Children": [
 				{
@@ -11907,6 +11907,47 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260924173802-3l46zgy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260924173802-3l46zgy",
+				"updated": "20260924173802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リストまたは1つ以上のリスト項目を選択し、上の見出しショートカットを使うか、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロックメニュー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "変換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "見出し1ブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（または別の見出しレベル）を選ぶと、各項目の最初の段落を変換できます。既存の見出しは選択したレベルに変更されます。リスト全体を選択した場合は、その直下の項目だけが対象となり、他の段落、子リスト、番号、タスクの状態は保持されます。最初のブロックが段落でも見出しでもない項目はスキップされます。モバイルでもリスト項目を選択し、同じブロックメニューを利用できます。段落内にカーソルを置くだけの場合、ショートカットはその段落を変換します。"
 				}
 			]
 		},

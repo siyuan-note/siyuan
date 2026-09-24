@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260924145647"
+		"updated": "20260924173802"
 	},
 	"Children": [
 		{
@@ -4062,7 +4062,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260924145647"
+				"updated": "20260924173802"
 			},
 			"Children": [
 				{
@@ -11287,7 +11287,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-n64nfza",
-				"updated": "20260811122156"
+				"updated": "20260924173802"
 			},
 			"Children": [
 				{
@@ -11952,6 +11952,47 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260924173802-r3fq7uc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260924173802-r3fq7uc",
+				"updated": "20260924173802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中列表或一个或多个列表项后，使用上方的标题快捷键，也可以通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "块菜单"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "转换为"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一级标题块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（或其他标题级别）转换各项的首个段落。已有标题会调整到目标级别。选中整个列表时仅处理当前层的列表项，保留其他段落、子列表、编号和任务状态。首块不是段落或标题的列表项会被跳过。移动端可选中列表项后使用相同的块菜单。仅将光标放在段落内时，快捷键转换当前段落。"
 				}
 			]
 		},

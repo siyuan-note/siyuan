@@ -674,6 +674,11 @@ test("heading conversions follow list conversions across block menu scopes", () 
         const headingIndex = keys.indexOf("heading1");
         assert.equal(headingIndex, keys.indexOf(path === "gutter.single.turnInto" ? "listMindmap" : "check") + 1);
         assert.deepEqual(keys.slice(headingIndex, headingIndex + headingKeys.length), headingKeys);
+        headingKeys.forEach(key => {
+            const entry = getEntryCatalogNode(`${path}.${key}`);
+            assert.equal(entry?.type, "entry");
+            assert.equal(entry?.simple, true);
+        });
     });
 });
 

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260924145647"
+		"updated": "20260924173802"
 	},
 	"Children": [
 		{
@@ -4064,7 +4064,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260924145647"
+				"updated": "20260924173802"
 			},
 			"Children": [
 				{
@@ -11299,7 +11299,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-6lhdzmm",
-				"updated": "20260811122156"
+				"updated": "20260924173802"
 			},
 			"Children": [
 				{
@@ -11964,6 +11964,47 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260924173802-6zzgsf2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260924173802-6zzgsf2",
+				"updated": "20260924173802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select a list or one or more list items, then use the heading shortcuts above or choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Block menu"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Turn into"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Heading 1 block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (or another heading level) to convert the first paragraph of each item. Existing headings are set to the chosen level. Selecting an entire list affects only its immediate items; other paragraphs, nested lists, numbering, and task states are preserved. Items whose first block is neither a paragraph nor a heading are skipped. On mobile, select the list items and use the same block menu. When only the caret is inside a paragraph, the shortcut converts that paragraph."
 				}
 			]
 		},

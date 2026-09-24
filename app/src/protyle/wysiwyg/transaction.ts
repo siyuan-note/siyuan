@@ -74,6 +74,7 @@ import {
     restoreBlockSelectionModeState
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
+import {getHeadingConversionElements, isListHeadingContainer} from "./headingConversion";
 import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
 import {cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource} from "../render/listMindmap/model";
 import {getProtyleTransactionOwner} from "../runtimeCapabilities";
@@ -1834,25 +1835,25 @@ export const turnsIntoTransaction = (options: {
     range?: Range,
     unfocus?: boolean,
 }) => {
-    // https://github.com/siyuan-note/siyuan/issues/14505
-    options.protyle.observerLoad?.disconnect();
     let selectsElement: Element[] = options.selectsElement;
     let range: Range;
     // 通过快捷键触发
     if (options.nodeElement) {
-        range = getSelection().getRangeAt(0);
-        range.insertNode(document.createElement("wbr"));
         selectsElement = Array.from(options.protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
         if (selectsElement.length === 0) {
             selectsElement = [options.nodeElement];
         }
+    }
+    const hasListHeadingTargets = options.type === "Blocks2Hs" && selectsElement.some(isListHeadingContainer);
+    if (hasListHeadingTargets) {
+        selectsElement = getHeadingConversionElements(selectsElement);
+    }
+    if (selectsElement.length === 0 || options.nodeElement && selectsElement.some(item => item.classList.contains("li"))) {
+        return;
+    }
+    if (options.nodeElement) {
         let isContinue = false;
-        let isList = false;
         selectsElement.find((item, index) => {
-            if (item.classList.contains("li")) {
-                isList = true;
-                return true;
-            }
             if (selectsElement[index + 1] && getNextBlockSibling(item) === selectsElement[index + 1]) {
                 isContinue = true;
             } else if (index !== selectsElement.length - 1) {
@@ -1860,16 +1861,20 @@ export const turnsIntoTransaction = (options: {
                 return true;
             }
         });
-        if (isList) {
-            return;
-        }
-        if (selectsElement.length === 1 && options.type === "Blocks2Hs" &&
+        if (!hasListHeadingTargets && selectsElement.length === 1 && options.type === "Blocks2Hs" &&
             selectsElement[0].getAttribute("data-type") === "NodeHeading" &&
             options.level === parseInt(selectsElement[0].getAttribute("data-subtype").substr(1))) {
             // 快捷键同级转换，消除标题
             options.type = "Blocks2Ps";
         }
         options.isContinue = isContinue;
+        range = getSelection().getRangeAt(0);
+        range.insertNode(document.createElement("wbr"));
+    }
+    // https://github.com/siyuan-note/siyuan/issues/14505
+    options.protyle.observerLoad?.disconnect();
+    if (hasListHeadingTargets) {
+        hideElements(["select"], options.protyle);
     }
 
     let html = "";

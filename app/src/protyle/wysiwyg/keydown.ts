@@ -78,6 +78,7 @@ import {
     updateTransaction
 } from "./transaction";
 import {isEmptyParagraph} from "./emptyTextBlock";
+import {isListHeadingContainer} from "./headingConversion";
 import {turnParagraphIntoCode} from "./turnIntoCode";
 import {getBlockquoteContext, shouldCancelBlockquote} from "./blockquote";
 import {fontEvent} from "../toolbar/Font";
@@ -1249,7 +1250,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return false;
             }
             const selectsElement = getBlockElementsByRange(range);
-            if (selectsElement.length < 2 || selectsElement.some(item => item.classList.contains("li"))) {
+            const listHeading = type === "Blocks2Hs" && selectsElement.some(isListHeadingContainer);
+            if (!listHeading && (selectsElement.length < 2 || selectsElement.some(item => item.classList.contains("li")))) {
                 return false;
             }
             const focusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);

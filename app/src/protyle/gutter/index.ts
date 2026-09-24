@@ -38,6 +38,7 @@ import {
 import {isEmptyParagraph} from "../wysiwyg/emptyTextBlock";
 import {removeBlockPreservingSelectionMode} from "../wysiwyg/remove";
 import {focusBlock, focusByRange, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
+import {getHeadingConversionElements} from "../wysiwyg/headingConversion";
 import {hideElements} from "../ui/hideElements";
 import {markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
@@ -1018,6 +1019,22 @@ export class Gutter {
         };
     }
 
+    private headingTurnIntoMenu(protyle: IProtyle, selectsElement: Element[]): IMenu[] {
+        if (getHeadingConversionElements(selectsElement).length === 0) {
+            return [];
+        }
+        return [1, 2, 3, 4, 5, 6].map(level => this.turnsInto({
+            menuId: `heading${level}`,
+            icon: `iconH${level}`,
+            label: window.siyuan.languages[`heading${level}`],
+            accelerator: window.siyuan.config.keymap.editor.heading[`heading${level}`].custom,
+            protyle,
+            selectsElement,
+            level,
+            type: "Blocks2Hs",
+        }));
+    }
+
     private emptyParagraphTurnIntoMenu(protyle: IProtyle, nodeElements: Element[]): IMenu[] {
         if (!nodeElements.every(isEmptyParagraph)) {
             return [];
@@ -1161,72 +1178,7 @@ export class Gutter {
                 type: "Blocks2Ps",
                 isContinue
             }));
-            turnIntoSubmenu.push(this.turnsInto({
-                menuId: "heading1",
-                icon: "iconH1",
-                label: window.siyuan.languages.heading1,
-                accelerator: window.siyuan.config.keymap.editor.heading.heading1.custom,
-                protyle,
-                selectsElement,
-                level: 1,
-                type: "Blocks2Hs",
-                isContinue
-            }));
-            turnIntoSubmenu.push(this.turnsInto({
-                menuId: "heading2",
-                icon: "iconH2",
-                label: window.siyuan.languages.heading2,
-                accelerator: window.siyuan.config.keymap.editor.heading.heading2.custom,
-                protyle,
-                selectsElement,
-                level: 2,
-                type: "Blocks2Hs",
-                isContinue
-            }));
-            turnIntoSubmenu.push(this.turnsInto({
-                menuId: "heading3",
-                icon: "iconH3",
-                label: window.siyuan.languages.heading3,
-                accelerator: window.siyuan.config.keymap.editor.heading.heading3.custom,
-                protyle,
-                selectsElement,
-                level: 3,
-                type: "Blocks2Hs",
-                isContinue
-            }));
-            turnIntoSubmenu.push(this.turnsInto({
-                menuId: "heading4",
-                icon: "iconH4",
-                label: window.siyuan.languages.heading4,
-                accelerator: window.siyuan.config.keymap.editor.heading.heading4.custom,
-                protyle,
-                selectsElement,
-                level: 4,
-                type: "Blocks2Hs",
-                isContinue
-            }));
-            turnIntoSubmenu.push(this.turnsInto({
-                menuId: "heading5",
-                icon: "iconH5",
-                label: window.siyuan.languages.heading5,
-                accelerator: window.siyuan.config.keymap.editor.heading.heading5.custom,
-                protyle,
-                selectsElement,
-                level: 5,
-                type: "Blocks2Hs",
-                isContinue
-            }));
-            turnIntoSubmenu.push(this.turnsInto({
-                menuId: "heading6",
-                icon: "iconH6",
-                label: window.siyuan.languages.heading6,
-                accelerator: window.siyuan.config.keymap.editor.heading.heading6.custom,
-                protyle,
-                selectsElement,
-                level: 6,
-                type: "Blocks2Hs",
-                isContinue
-            }));
+            turnIntoSubmenu.push(...this.headingTurnIntoMenu(protyle, selectsElement));
             turnIntoSubmenu.push(...this.emptyParagraphTurnIntoMenu(protyle, selectsElement));
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "turnInto",
@@ -1277,6 +1229,18 @@ export class Gutter {
                         type: "BlocksMergeSuperBlock",
                         level: "row"
                     })]
+                }).element);
+            }
+        }
+        if (isList && !protyle.disabled) {
+            const submenu = this.headingTurnIntoMenu(protyle, selectsElement);
+            if (submenu.length > 0) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "turnInto",
+                    icon: "iconTurnInto",
+                    label: window.siyuan.languages.turnInto,
+                    type: "submenu",
+                    submenu,
                 }).element);
             }
         }
@@ -1920,9 +1884,14 @@ export class Gutter {
                     },
                 });
             }
+            if (!isMindmap) {
+                turnIntoSubmenu.push(...this.headingTurnIntoMenu(protyle, [nodeElement]));
+            }
             if (!isMindmap && this.hasSublist([nodeElement])) {
                 turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
             }
+        } else if (type === "NodeListItem" && allowStructuralMutation) {
+            turnIntoSubmenu.push(...this.headingTurnIntoMenu(protyle, [nodeElement]));
         } else if (type === "NodeTabs" && allowStructuralMutation) {
             [
                 {menuId: "list", icon: "iconList", label: "list", type: "Tabs2UL"},

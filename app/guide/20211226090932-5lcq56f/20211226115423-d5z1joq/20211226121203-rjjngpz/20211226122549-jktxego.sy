@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260924145647"
+		"updated": "20260924173802"
 	},
 	"Children": [
 		{
@@ -4056,7 +4056,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260924145647"
+				"updated": "20260924173802"
 			},
 			"Children": [
 				{
@@ -11299,7 +11299,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-wez4zj6",
-				"updated": "20260811122156"
+				"updated": "20260924173802"
 			},
 			"Children": [
 				{
@@ -11964,6 +11964,47 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260924173802-11vvysw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260924173802-11vvysw",
+				"updated": "20260924173802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取列表或一個或多個列表項目後，使用上方的標題快捷鍵，也可以透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區塊選單"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "轉換為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一級標題區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（或其他標題層級）轉換各項目的第一個段落。已有標題會調整至目標層級。選取整個列表時僅處理目前層級的列表項目，保留其他段落、子列表、編號和任務狀態。第一個區塊不是段落或標題的列表項目會被略過。行動端可選取列表項目後使用相同的區塊選單。僅將游標放在段落內時，快捷鍵轉換目前段落。"
 				}
 			]
 		},

@@ -1859,7 +1859,9 @@ export const initKeyboardToolbar = () => {
                 window.siyuan.menus.menu.fullscreen("all", restoreMenuKeyboard);
                 return;
             }
-            protyle.gutter?.renderMenu(protyle, nodeElement);
+            // 多选时以已选块打开共享块菜单，使列表项转换作用于整个选区。
+            const selectedBlock = protyle.wysiwyg.element.querySelector<HTMLElement>(".protyle-wysiwyg--select");
+            protyle.gutter?.renderMenu(protyle, selectedBlock || nodeElement);
             window.siyuan.menus.menu.fullscreen("all", restoreMenuKeyboard);
             return;
         } else if (type === "outdent") {

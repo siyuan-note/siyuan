@@ -107,3 +107,39 @@ test("失败的任务不阻塞后续批次", async () => {
 
     assert.deepEqual(batches, [["next"]]);
 });
+
+test("大量积压的更新分批提交并保持任务顺序和完成边界", async () => {
+    const protyle = {} as IProtyle;
+    const blocker = deferred();
+    const batches: number[][] = [];
+    const events: Array<number | string> = [];
+    const promises: Array<Promise<void>> = [];
+    let active = false;
+    const submit = async (items: number[]) => {
+        assert.equal(active, false);
+        active = true;
+        await Promise.resolve();
+        batches.push([...items]);
+        events.push(...items);
+        active = false;
+    };
+    void queueTransaction(protyle, () => blocker.promise);
+    for (let i = 0; i < 70; i++) {
+        promises.push(queueTransactionBatch(protyle, "transactions", i, submit));
+    }
+    void queueTransaction(protyle, async () => {
+        events.push("structure");
+    });
+    void queueTransactionBatch(protyle, "transactions", 70, submit);
+
+    assert.equal(promises[0], promises[31]);
+    assert.notEqual(promises[31], promises[32]);
+    assert.equal(promises[32], promises[63]);
+    assert.notEqual(promises[63], promises[64]);
+    blocker.resolve();
+    await waitForPendingTransactions(protyle);
+    await Promise.all(promises);
+
+    assert.deepEqual(batches.map(items => items.length), [32, 32, 6, 1]);
+    assert.deepEqual(events, [...Array.from({length: 70}, (_, i) => i), "structure", 70]);
+});

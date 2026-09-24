@@ -17,7 +17,7 @@
   }
 
   [data-type="NodeList"][data-mindmap-view-rendered="true"] > [data-type="NodeListItem"],
-  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] > [data-type="NodeMindmapItem"] {
+  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] > .mindmap-item[data-type="NodeMindmapItem"][data-node-id] {
     display: none;
   }
 }

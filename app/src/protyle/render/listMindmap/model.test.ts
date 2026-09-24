@@ -2310,6 +2310,27 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     taskStyle.textContent = taskCSS;
     document.head.append(taskStyle);
 
+    const foldedMindmapRoot = document.createElement("div");
+    foldedMindmapRoot.className = "protyle-wysiwyg";
+    const foldedMindmapList = reset("* Java\n  * Spring\n* Go\n  * gofmt\n  * Wide\n* Node.js\n  * child one\n  * child two\n");
+    foldedMindmapList.querySelectorAll(":scope > [data-type=\"NodeListItem\"]")[2].setAttribute("fold", "1");
+    foldedMindmapRoot.append(foldedMindmapList);
+    document.body.append(foldedMindmapRoot);
+    api.retagMindmapBranch(foldedMindmapList, true);
+    const foldedMindmapHost = document.createElement("div");
+    foldedMindmapHost.className = "mindmap-view";
+    foldedMindmapList.append(foldedMindmapHost);
+    const foldedMindmapView = new api.ListMindmapView({host: foldedMindmapHost,
+        model: api.readListMindmap(foldedMindmapList)});
+    foldedMindmapList.dataset.mindmapViewRendered = "true";
+    const foldedMindmapItems = foldedMindmapList.querySelectorAll<HTMLElement>(":scope > [data-type=\"NodeMindmapItem\"]");
+    check.equal(foldedMindmapItems.length, 3);
+    foldedMindmapItems.forEach(item => check.equal(getComputedStyle(item).display, "none"));
+    check.equal(foldedMindmapRoot.children.length, 1);
+    check.equal(api.readListMindmap(foldedMindmapList).root.children[2].collapsed, true);
+    foldedMindmapView.destroy();
+    foldedMindmapRoot.remove();
+
     // 引用和行内格式在两种主题、窄屏、大字号及脱离编辑器的全屏布局中保持一致。
     const inlineParent = document.createElement("div");
     inlineParent.className = "protyle-wysiwyg";

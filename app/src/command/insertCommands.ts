@@ -1,16 +1,18 @@
-import {getCommandRegistry} from "../../command/service";
-import {getEnglishCommandLabel} from "../../command/english";
-import type {ICommandContextSnapshot, ICommandDefinition} from "../../command/types";
-import {getBuiltinSlashMenuItems} from "../../protyle/hint/extend";
-import {isBuiltinInlineStyleVisible, type TBuiltinInlineStyleID} from "../../protyle/toolbar/inlineStyle";
-import {focusByRange} from "../../protyle/util/selection";
-import {isDisabledFeature, isInAndroid} from "../../protyle/util/compatibility";
-import {getHostCapabilities} from "../../util/hostCapabilities";
-import {callMobileAppShowKeyboard} from "./mobileAppUtil";
+import {getCommandRegistry} from "./service";
+import {getEnglishCommandLabel} from "./english";
+import type {ICommandContextSnapshot, ICommandDefinition} from "./types";
+import {getBuiltinSlashMenuItems} from "../protyle/hint/extend";
+import {isBuiltinInlineStyleVisible, type TBuiltinInlineStyleID} from "../protyle/toolbar/inlineStyle";
+import {focusByRange} from "../protyle/util/selection";
+import {isDisabledFeature, isInAndroid} from "../protyle/util/compatibility";
+import {getHostCapabilities} from "../util/hostCapabilities";
+/// #if MOBILE
+import {callMobileAppShowKeyboard} from "../mobile/util/mobileAppUtil";
+/// #endif
 
 const initializedApps = new WeakSet<object>();
 
-// 与移动端加号菜单的内置插入项保持一致，具体插入值仍由斜杠菜单提供。
+// 与加号菜单的内置插入项保持一致，具体插入值仍由斜杠菜单提供。
 const INSERT_IDS = [
     "template", "widget", "assets", "ref", "blockEmbed", "aiWriting", "database", "newSubDocRef",
     "insertAsset", "insertIframeURL", "insertImgURL", "insertVideoURL", "insertAudioURL", "emoji",
@@ -109,12 +111,15 @@ const executeInsert = (context: ICommandContextSnapshot, id: string) => {
     protyle.hint.lastIndex = -1;
     focusByRange(protyle.toolbar.range);
     protyle.hint.fill(item.value, protyle, false);
-    if (id === "ref" || id === "blockEmbed") {
+    if ((context.environment === "mobile" || context.environment === "browser-mobile") &&
+        (id === "ref" || id === "blockEmbed")) {
+        /// #if MOBILE
         callMobileAppShowKeyboard();
+        /// #endif
     }
 };
 
-export const ensureMobileInsertCommands = (app: object) => {
+export const ensureInsertCommands = (app: object, mobile: boolean) => {
     if (initializedApps.has(app)) {
         return;
     }
@@ -122,15 +127,16 @@ export const ensureMobileInsertCommands = (app: object) => {
     const owner = {};
     const disposers: Array<() => boolean> = [];
     try {
-        [...INSERT_IDS, "insertImage", "insertPhoto"].forEach((id, order) => {
+        [...INSERT_IDS, ...(mobile ? ["insertImage", "insertPhoto"] : [])].forEach((id, order) => {
             const command: ICommandDefinition = {
-                id: `core.mobile.insert.${id}`,
+                id: `core.${mobile ? "mobile." : ""}insert.${id}`,
                 category: "core",
                 label: () => label(id),
                 englishLabel: () => label(id, true),
                 keywords: () => [id],
                 surfaces: ["commandPanel"],
-                platform: environment => environment === "mobile" || environment === "browser-mobile",
+                platform: environment => mobile ? environment === "mobile" || environment === "browser-mobile" :
+                    environment === "desktop" || environment === "desktop-window" || environment === "browser-desktop",
                 order: 2000 + order,
                 when: context => available(context, id),
                 execute: context => executeInsert(context, id),

@@ -15,9 +15,9 @@ import {
     COMMAND_PALETTE_HISTORY_KEY, createPaletteFocusLifecycle, queryCommandPalette, recordPaletteCommand,
 } from "../../../command/paletteCore";
 import type {ICommandContextSnapshot, ICommandDefinition} from "../../../command/types";
+import {ensureInsertCommands} from "../../../command/insertCommands";
 /// #if MOBILE
 import {activeBlur} from "../../../mobile/util/keyboardToolbar";
-import {ensureMobileInsertCommands} from "../../../mobile/util/mobileInsertCommands";
 /// #endif
 
 const renderCommands = (listElement: HTMLElement, commands: ICommandDefinition[]) => {
@@ -67,9 +67,7 @@ export const commandPanel = (app: App) => {
     }
     const context = captureCommandContext({app, source: "commandPanel"});
     const registry = ensureCommandSystem(app);
-    /// #if MOBILE
-    ensureMobileInsertCommands(app);
-    /// #endif
+    ensureInsertCommands(app, isMobile());
     const restoreFocusAfterCancel = !isMobile() || document.body.classList.contains("mobile-keyboard--open");
     const focusLifecycle = createPaletteFocusLifecycle(() => {
         if (context.range?.startContainer.isConnected) {

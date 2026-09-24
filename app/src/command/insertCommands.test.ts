@@ -4,15 +4,15 @@ import {join} from "node:path";
 import test from "node:test";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
-import {getCommandRegistry} from "../../command/service";
-import {queryCommandPalette, recordPaletteCommand} from "../../command/paletteCore";
-import type {ICommandContextSnapshot} from "../../command/types";
+import {getCommandRegistry} from "./service";
+import {queryCommandPalette, recordPaletteCommand} from "./paletteCore";
+import type {ICommandContextSnapshot} from "./types";
 
-const source = ts.transpileModule(readFileSync(join(process.cwd(), "src/mobile/util/mobileInsertCommands.ts"), "utf8"), {
+const source = ts.transpileModule(readFileSync(join(process.cwd(), "src/command/insertCommands.ts"), "utf8"), {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
 }).outputText;
 
-test("mobile insert commands search and execute the existing insertion actions at the saved cursor", async () => {
+test("insert commands search and execute existing insertion actions at the saved cursor on mobile and desktop", async () => {
     const languages = new Proxy({template: "模板", assets: "资源", callout: "提示"} as Record<string, string>, {
         get: (target, key: string) => target[key] || key,
     });
@@ -31,22 +31,22 @@ test("mobile insert commands search and execute the existing insertion actions a
         body: {append: (host: unknown) => assert.equal(host, uploadHost)}};
     const module = {exports: {}};
     const mocks: Record<string, unknown> = {
-        "../../command/service": {getCommandRegistry},
-        "../../command/english": {getEnglishCommandLabel: (key: string) => key},
-        "../../protyle/hint/extend": {getBuiltinSlashMenuItems: () => [
+        "./service": {getCommandRegistry},
+        "./english": {getEnglishCommandLabel: (key: string) => key},
+        "../protyle/hint/extend": {getBuiltinSlashMenuItems: () => [
             {id: "template", value: "template-value"}, {id: "ref", value: "(("},
         ]},
-        "../../protyle/toolbar/inlineStyle": {isBuiltinInlineStyleVisible: () => true},
-        "../../protyle/util/selection": {focusByRange: (range: unknown) => focused.push(range)},
-        "../../protyle/util/compatibility": {isDisabledFeature: () => false, isInAndroid: () => false},
-        "../../util/hostCapabilities": {getHostCapabilities: () => ({widgets: true, remoteKernel: false})},
-        "./mobileAppUtil": {callMobileAppShowKeyboard: () => keyboards++},
+        "../protyle/toolbar/inlineStyle": {isBuiltinInlineStyleVisible: () => true},
+        "../protyle/util/selection": {focusByRange: (range: unknown) => focused.push(range)},
+        "../protyle/util/compatibility": {isDisabledFeature: () => false, isInAndroid: () => false},
+        "../util/hostCapabilities": {getHostCapabilities: () => ({widgets: true, remoteKernel: false})},
+        "../mobile/util/mobileAppUtil": {callMobileAppShowKeyboard: () => keyboards++},
     };
     runInNewContext(source, {module, exports: module.exports, require: (id: string) => mocks[id] || {},
         window: {siyuan}, document});
-    const {ensureMobileInsertCommands} = module.exports as typeof import("./mobileInsertCommands");
+    const {ensureInsertCommands} = module.exports as typeof import("./insertCommands");
     const app = {};
-    ensureMobileInsertCommands(app);
+    ensureInsertCommands(app, true);
     const registry = getCommandRegistry(app);
     const container = {isConnected: true};
     const range = {startContainer: container, endContainer: container, cloneRange() { return {...this}; }};
@@ -82,6 +82,18 @@ test("mobile insert commands search and execute the existing insertion actions a
     assert.equal(input.accept, "image/*");
     assert.equal(uploadHost.hidden, true);
     assert.equal(registry.list({...context, environment: "desktop"}).length, 0);
+    const desktopApp = {};
+    ensureInsertCommands(desktopApp, false);
+    const desktopRegistry = getCommandRegistry(desktopApp);
+    const desktopContext = {...context, app: desktopApp, environment: "desktop"} as ICommandContextSnapshot;
+    const desktopVisible = desktopRegistry.list(desktopContext).map(command => command.id);
+    assert.ok(desktopVisible.includes("core.insert.template"));
+    assert.ok(desktopVisible.includes("core.insert.mindmap"));
+    assert.ok(!desktopVisible.includes("core.insert.insertPhoto"));
+    assert.equal(queryCommandPalette(desktopRegistry, desktopContext, "模板")[0].id, "core.insert.template");
+    assert.equal((await desktopRegistry.execute("core.insert.template", desktopContext)).status, "executed");
+    assert.deepEqual(fills, ["template-value", "((", "template-value"]);
+    assert.equal(keyboards, 1);
     siyuan.config.readonly = true;
     assert.equal(registry.list(context).length, 0);
     siyuan.config.readonly = false;

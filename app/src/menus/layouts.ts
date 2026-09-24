@@ -1,7 +1,7 @@
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {fetchPost} from "../util/fetch";
-import {getAllLayout} from "../layout/util";
+import {getAllLayout, suspendLayoutSaving} from "../layout/util";
 import {showMessage} from "../dialog/message";
 import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -11,9 +11,13 @@ import {isBrowser} from "../util/functions";
 import {editWindowWorkspace, getWindowWorkspaces, openWindowWorkspace, removeWindowWorkspace} from "../window/workspace";
 import {MenuItem} from "./Menu";
 import * as dayjs from "dayjs";
+import {captureWindowGeometry, restoreWindowGeometry} from "../window/geometry";
+import type {IWindowGeometry} from "../window/geometry";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
+
+type SavedLayout = ISaveLayout & {windowGeometry?: IWindowGeometry};
 
 const editLayout = (layoutName?: string) => {
     const dialog = openInputDialog({
@@ -24,7 +28,7 @@ const editLayout = (layoutName?: string) => {
         placeholder: window.siyuan.languages.memo,
         width: "520px",
         confirmText: window.siyuan.languages.confirm,
-        onConfirm: (value, dialog) => {
+        onConfirm: async (value, dialog) => {
             value = value.trim();
             if (!value) {
                 showMessage(window.siyuan.languages["_kernel"]["142"]);
@@ -42,9 +46,10 @@ const editLayout = (layoutName?: string) => {
                 });
                 return;
             }
-            const hadName = window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((item: ISaveLayout) => {
+            const hadName = window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((item: SavedLayout) => {
                 if (item.name === value) {
-                    confirmDialog(window.siyuan.languages.save, window.siyuan.languages.exportTplTip, () => {
+                    confirmDialog(window.siyuan.languages.save, window.siyuan.languages.exportTplTip, async () => {
+                        item.windowGeometry = await captureWindowGeometry() ?? item.windowGeometry;
                         item.layout = getAllLayout();
                         item.time = Date.now();
                         item.filesPaths = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
@@ -57,6 +62,7 @@ const editLayout = (layoutName?: string) => {
                 return;
             }
             window.siyuan.storage[Constants.LOCAL_LAYOUTS].push({
+                windowGeometry: await captureWindowGeometry(),
                 name: value,
                 time: Date.now(),
                 layout: getAllLayout(),
@@ -68,26 +74,46 @@ const editLayout = (layoutName?: string) => {
     dialog.element.setAttribute("data-key", Constants.DIALOG_SAVEWORKSPACE);
 };
 
-const openLayout = (name: string) => {
-    const item: ISaveLayout = window.siyuan.storage[Constants.LOCAL_LAYOUTS]
+let openingLayout = false;
+const openLayout = async (name: string) => {
+    const item: SavedLayout = window.siyuan.storage[Constants.LOCAL_LAYOUTS]
         .find((layout: ISaveLayout) => layout.name === name);
-    if (!item) {
+    if (!item || openingLayout) {
         return;
     }
-    fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {
+    openingLayout = true;
+    const resumeLayoutSaving = await suspendLayoutSaving();
+    let reloading = false;
+    try {
+        await restoreWindowGeometry(item.windowGeometry).catch(console.error);
         if (item.filesPaths) {
+            const previous = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
             window.siyuan.storage[Constants.LOCAL_FILESPATHS] = item.filesPaths;
-            setStorageVal(Constants.LOCAL_FILESPATHS, item.filesPaths, () => window.location.reload());
-        } else {
-            window.location.reload();
+            let saved = false;
+            await setStorageVal(Constants.LOCAL_FILESPATHS, item.filesPaths, () => saved = true);
+            if (!saved) {
+                window.siyuan.storage[Constants.LOCAL_FILESPATHS] = previous;
+                return;
+            }
         }
-    });
+        await fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {
+            reloading = true;
+            window.location.reload();
+        });
+    } catch (error) {
+        console.error(error);
+    } finally {
+        if (!reloading) {
+            resumeLayoutSaving();
+            openingLayout = false;
+        }
+    }
 };
 
 export const openSelectedLayouts = async (mainName: string, workspaceIDs: string[]) => {
     await Promise.allSettled(workspaceIDs.map(id => openWindowWorkspace(id)));
     if (mainName) {
-        openLayout(mainName);
+        await openLayout(mainName);
     }
 };
 
@@ -103,17 +129,18 @@ export const getLayoutActions = (target: LayoutTarget, time?: number): IMenu[] =
             if (target.type === "window") {
                 void openWindowWorkspace(target.id);
             } else {
-                openLayout(target.name);
+                void openLayout(target.name);
             }
         },
     }, ...(target.type === "main" ? [{
         id: "update",
         icon: "iconRefresh",
         label: window.siyuan.languages.update,
-        click: () => {
-            const item: ISaveLayout = window.siyuan.storage[Constants.LOCAL_LAYOUTS]
+        click: async () => {
+            const item: SavedLayout = window.siyuan.storage[Constants.LOCAL_LAYOUTS]
                 .find((layout: ISaveLayout) => layout.name === target.name);
             if (item) {
+                item.windowGeometry = await captureWindowGeometry() ?? item.windowGeometry;
                 item.layout = getAllLayout();
                 item.filesPaths = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
                 item.time = Date.now();

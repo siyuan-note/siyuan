@@ -3,27 +3,51 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import type {IWindowGeometry} from "../window/geometry";
+
+const tick = () => new Promise<void>(resolve => setImmediate(resolve));
 
 const compiled = transpileModule(readFileSync("src/menus/layouts.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
+const compiledUtil = transpileModule(readFileSync("src/layout/util.ts", "utf8"), {
+    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+}).outputText;
 
-const fixture = () => {
-    const layouts = [{name: "Reading", time: 1, layout: {saved: true}, filesPaths: ["saved-path"]}];
+const fixture = (geometryAvailable = true) => {
+    const layouts = [{name: "Reading", time: 1, layout: {saved: true}, filesPaths: ["saved-path"],
+        windowGeometry: undefined as IWindowGeometry | undefined}];
+    const geometry: IWindowGeometry = {version: 1, x: 80, y: 100, width: 1100, height: 800, maximized: true, fullscreen: false};
     const calls: Array<{action: string, value?: unknown}> = [];
+    const util = {} as typeof import("../layout/util");
+    class Layout {
+        direction = "lr";
+        children: unknown[] = [];
+    }
     let dialog: any;
     const dependencies = {
+        Layout,
         Constants: {LOCAL_LAYOUTS: "layouts", LOCAL_FILESPATHS: "paths",
             SIYUAN_WINDOW_WORKSPACE_GET_OPEN: "siyuan-window-workspace-get-open"},
-        setStorageVal: (key: string, value: unknown, callback?: () => void) => {
+        setStorageVal: async (key: string, value: unknown, callback?: () => void) => {
             calls.push({action: key, value: JSON.parse(JSON.stringify(value))});
             callback?.();
         },
-        fetchPost: (url: string, value: unknown, callback: () => void) => {
+        fetchPost: async (url: string, value: unknown, callback?: () => void) => {
             calls.push({action: url, value});
-            callback();
+            callback?.();
         },
         getAllLayout: () => ({current: true}),
+        suspendLayoutSaving: () => util.suspendLayoutSaving(),
+        isWindow: () => false,
+        getAllEditor: (): unknown[] => [],
+        withFetchTimeout: async (callback: () => Promise<void>) => callback(),
+        captureWindowGeometry: async () => geometryAvailable ? geometry : undefined,
+        restoreWindowGeometry: async (value?: IWindowGeometry) => {
+            if (value) {
+                calls.push({action: "geometry", value});
+            }
+        },
         openInputDialog: (options: unknown) => {
             dialog = options;
             return {element: {setAttribute: () => {}}};
@@ -34,14 +58,19 @@ const fixture = () => {
         openWindowWorkspace: (value: string) => calls.push({action: "open", value}),
         removeWindowWorkspace: (value: string) => calls.push({action: "delete", value}),
     };
-    const window = {siyuan: {
+    const dock = {elements: [{querySelectorAll: (): unknown[] => []}, {querySelectorAll: (): unknown[] => []}]};
+    const window = {clearTimeout, setTimeout, siyuan: {
+        layout: {layout: new Layout(), bottomDock: dock, leftDock: dock, rightDock: dock},
+        config: {readonly: false},
         storage: {layouts, paths: ["current-path"]},
         languages: {openBy: "Open", windowWorkspaceSwitch: "Switch", use: "Use", update: "Update", rename: "Rename",
             delete: "Delete", confirm: "Confirm", mainWindowLayouts: "Main window layouts", _kernel: {142: "Empty"}},
     }, location: {reload: () => calls.push({action: "reload"})}};
+    runInNewContext(compiledUtil, {exports: util, require: () => dependencies, window,
+        document: {querySelector: () => ({getAttribute: () => "#iconDock"})}});
     const api = {} as typeof import("./layouts");
     runInNewContext(compiled, {exports: api, require: () => dependencies, window});
-    return {api, window, calls, dialog: () => dialog};
+    return {api, util, dependencies, window, calls, geometry, dialog: () => dialog};
 };
 
 test("主窗口布局更多菜单按使用、更新、重命名、删除排列", () => {
@@ -68,6 +97,7 @@ test("新窗口布局不提供更新，已打开时显示切换", () => {
 
 test("重命名仅改变名称，弹窗以主窗口布局为标题并使用确定按钮", () => {
     const f = fixture();
+    f.window.siyuan.storage.layouts[0].windowGeometry = {...f.geometry, width: 900};
     f.api.getLayoutActions({type: "main", name: "Reading"})[2].click(undefined, undefined);
     assert.equal(f.dialog().title, "Main window layouts");
     assert.equal(f.dialog().confirmText, "Confirm");
@@ -76,24 +106,28 @@ test("重命名仅改变名称，弹窗以主窗口布局为标题并使用确�
     assert.equal(f.window.siyuan.storage.layouts[0].name, "Renamed");
     assert.deepEqual(f.window.siyuan.storage.layouts[0].layout, {saved: true});
     assert.deepEqual(f.window.siyuan.storage.layouts[0].filesPaths, ["saved-path"]);
+    assert.equal(f.window.siyuan.storage.layouts[0].windowGeometry.width, 900);
 });
 
-test("更新保存当前布局和文档树状态，打开恢复已保存布局", () => {
+test("更新保存当前布局、文档树状态和窗口边界，打开后先恢复窗口再刷新", async () => {
     const f = fixture();
     const actions = f.api.getLayoutActions({type: "main", name: "Reading"});
-    actions[1].click(undefined, undefined);
+    await actions[1].click(undefined, undefined);
     assert.equal(f.window.siyuan.storage.layouts[0].name, "Reading");
     assert.deepEqual(JSON.parse(JSON.stringify(f.window.siyuan.storage.layouts[0].layout)), {current: true});
     assert.deepEqual(f.window.siyuan.storage.layouts[0].filesPaths, ["current-path"]);
+    assert.deepEqual(f.window.siyuan.storage.layouts[0].windowGeometry, f.geometry);
     actions[0].click(undefined, undefined);
-    assert.equal(f.calls[1].action, "/api/system/setUILayout");
-    assert.deepEqual(JSON.parse(JSON.stringify(f.calls[1].value)), {layout: {current: true}});
+    await tick();
+    assert.equal(f.calls[3].action, "/api/system/setUILayout");
+    assert.deepEqual(JSON.parse(JSON.stringify(f.calls[3].value)), {layout: {current: true}});
     assert.equal(f.calls[f.calls.length - 1].action, "reload");
+    assert.deepEqual(f.calls.slice(-4).map(call => call.action), ["geometry", "paths", "/api/system/setUILayout", "reload"]);
 });
 
 test("删除只移除选中的布局", () => {
     const f = fixture();
-    f.window.siyuan.storage.layouts.push({name: "Other", time: 1, layout: {saved: true}, filesPaths: []});
+    f.window.siyuan.storage.layouts.push({name: "Other", time: 1, layout: {saved: true}, filesPaths: [], windowGeometry: undefined});
     f.api.getLayoutActions({type: "main", name: "Reading"})[3].click(undefined, undefined);
     assert.deepEqual(f.window.siyuan.storage.layouts.map(item => item.name), ["Other"]);
     assert.deepEqual(f.window.siyuan.storage.paths, ["current-path"]);
@@ -102,7 +136,8 @@ test("删除只移除选中的布局", () => {
 test("批量打开先启动所有新窗口布局，再恢复主窗口布局", async () => {
     const f = fixture();
     await f.api.openSelectedLayouts("Reading", ["window-a", "window-b"]);
-    assert.deepEqual(f.calls.map(call => call.action), ["open", "open", "/api/system/setUILayout", "paths", "reload"]);
+    await tick();
+    assert.deepEqual(f.calls.map(call => call.action), ["open", "open", "paths", "/api/system/setUILayout", "reload"]);
     assert.deepEqual(f.calls.slice(0, 2).map(call => call.value), ["window-a", "window-b"]);
 });
 
@@ -110,4 +145,67 @@ test("批量打开可以只选择新窗口布局", async () => {
     const f = fixture();
     await f.api.openSelectedLayouts("", ["window-a", "window-b"]);
     assert.deepEqual(f.calls.map(call => call.action), ["open", "open"]);
+});
+
+test("无法获取原生窗口状态时更新布局保留已保存的窗口边界", async () => {
+    const f = fixture(false);
+    f.window.siyuan.storage.layouts[0].windowGeometry = f.geometry;
+    await f.api.getLayoutActions({type: "main", name: "Reading"})[1].click(undefined, undefined);
+    assert.deepEqual(f.window.siyuan.storage.layouts[0].windowGeometry, f.geometry);
+    assert.deepEqual(JSON.parse(JSON.stringify(f.window.siyuan.storage.layouts[0].layout)), {current: true});
+});
+
+test("切换等待在途保存，窗口缩放及刷新前的延迟保存不会覆盖目标布局", async () => {
+    const f = fixture();
+    let completeSave: () => void;
+    let completeStorage: () => void;
+    const fetchPost = f.dependencies.fetchPost;
+    f.dependencies.fetchPost = async (url, value, callback) => {
+        await new Promise<void>(resolve => completeSave = resolve);
+        await fetchPost(url, value, callback);
+    };
+    f.util.saveLayout();
+    const storage = f.dependencies.setStorageVal;
+    f.dependencies.setStorageVal = async (key, value, callback) => {
+        await new Promise<void>(resolve => completeStorage = resolve);
+        await storage(key, value, callback);
+    };
+    f.window.siyuan.storage.layouts[0].windowGeometry = f.geometry;
+    const opening = f.api.openSelectedLayouts("Reading", []);
+    await tick();
+    assert.deepEqual(f.calls, []);
+    f.dependencies.fetchPost = fetchPost;
+    completeSave();
+    await tick();
+    assert.deepEqual(f.calls.map(call => call.action), ["/api/system/setUILayout", "geometry"]);
+    f.util.saveLayout();
+    await f.util.exportLayout({cb: () => {}, errorExit: false});
+    assert.equal(f.calls.length, 2);
+    completeStorage();
+    await opening;
+    f.util.saveLayout();
+    assert.deepEqual(f.calls.map(call => call.action),
+        ["/api/system/setUILayout", "geometry", "paths", "/api/system/setUILayout", "reload"]);
+    assert.deepEqual(JSON.parse(JSON.stringify(f.calls[3].value)), {layout: {saved: true}});
+});
+
+test("恢复请求失败后恢复自动保存并允许再次切换", async () => {
+    for (const failure of ["storage", "layout"]) {
+        const f = fixture();
+        const storage = f.dependencies.setStorageVal;
+        const fetchPost = f.dependencies.fetchPost;
+        if (failure === "storage") {
+            f.dependencies.setStorageVal = async () => {};
+        } else {
+            f.dependencies.fetchPost = async () => {};
+        }
+        await f.api.openSelectedLayouts("Reading", []);
+        assert.equal(f.calls.some(call => call.action === "reload"), false);
+        f.dependencies.setStorageVal = storage;
+        f.dependencies.fetchPost = fetchPost;
+        f.util.saveLayout();
+        assert.equal(f.calls.at(-1).action, "/api/system/setUILayout");
+        await f.api.openSelectedLayouts("Reading", []);
+        assert.equal(f.calls.at(-1).action, "reload");
+    }
 });

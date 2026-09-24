@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as core from "./workspaceCore";
+import type {IWindowGeometry} from "./geometry";
 
 const compiled = transpileModule(readFileSync("src/window/workspace.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -28,12 +29,14 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
         incomplete: false,
         focus: false,
         gate: undefined as Promise<void> | undefined,
+        geometry: undefined as IWindowGeometry | undefined,
     };
     let dialogOptions: any;
     let url = new URL(`http://127.0.0.1:6806/stage/build/app/window.html?windowWorkspace=${workspaceID}`);
     const writes: Array<{key: string, value: any}> = [];
     const messages: string[] = [];
     const opened: string[] = [];
+    const openedGeometries: Array<IWindowGeometry | undefined> = [];
     const associated: string[] = [];
     const dependencies = {
         ...core,
@@ -43,6 +46,7 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
         getSearch: (key: string) => url.searchParams.get(key),
         isBrowser: () => false,
         isWindow: () => true,
+        captureWindowGeometry: async () => state.geometry,
         setStorageVal: async (key: string, value: unknown, callback: () => void) => {
             writes.push({key, value: clone(value)});
             if (state.gate) {
@@ -69,7 +73,10 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
         confirmDialog: (_title: string, _message: string, confirm: () => void) => confirm(),
         showMessage: (message: string) => messages.push(message),
         escapeHtml: (text: string) => text,
-        openNewWindowByWorkspace: (workspace: string) => opened.push(workspace),
+        openNewWindowByWorkspace: (workspace: string, geometry?: IWindowGeometry) => {
+            opened.push(workspace);
+            openedGeometries.push(geometry);
+        },
         ipcRenderer: {invoke: async (_channel: string, data: {cmd: string, id: string}) => {
             if (data.cmd === "siyuan-window-workspace-set") {
                 associated.push(data.id);
@@ -99,7 +106,7 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
         console, URL, Event, Lute: {NewNodeID: () => id},
     });
     return {
-        api, state, storage, disk, writes, messages, opened, associated, window,
+        api, state, storage, disk, writes, messages, opened, openedGeometries, associated, window,
         dialog: () => dialogOptions,
         boot: () => {
             const restored = api.getWindowWorkspaceLayout();
@@ -116,11 +123,13 @@ const savedStorage = () => ({
 
 test("保存命名窗口，重新加载后恢复文档、PDF 页码和阅读位置", async () => {
     const f = fixture();
+    f.state.geometry = {version: 1, x: 80, y: 60, width: 900, height: 700, maximized: false, fullscreen: false};
     f.boot();
     f.api.editWindowWorkspace();
     await f.dialog().onConfirm(" Reading ", {destroy: () => {}});
     assert.equal((f.disk[prefix + id] as core.IWindowWorkspace).name, "Reading");
     assert.deepEqual(f.associated, [id]);
+    assert.deepEqual((f.disk[prefix + id + "-layout"] as core.IWindowWorkspaceSnapshot).windowGeometry, f.state.geometry);
     const reopened = fixture(f.disk, id);
     assert.equal(reopened.api.getWindowWorkspaces()[0].time,
         (f.disk[prefix + id + "-layout"] as core.IWindowWorkspaceSnapshot).time);
@@ -130,6 +139,30 @@ test("保存命名窗口，重新加载后恢复文档、PDF 页码和阅读位�
     reopened.state.focus = true;
     await reopened.api.openWindowWorkspace(id);
     assert.deepEqual(reopened.opened, [id]);
+});
+
+test("移动或缩放新窗口也会自动保存，重新打开时传递窗口边界", async () => {
+    const f = fixture(savedStorage(), id);
+    f.boot();
+    f.state.geometry = {version: 1, x: -1200, y: 80, width: 900, height: 700, maximized: false, fullscreen: false};
+    assert.equal(await f.api.flushWindowWorkspace(), true);
+    assert.deepEqual((f.disk[prefix + id + "-layout"] as core.IWindowWorkspaceSnapshot).windowGeometry, f.state.geometry);
+    assert.equal(await f.api.flushWindowWorkspace(), true);
+    assert.equal(f.writes.length, 1);
+    f.state.geometry = {...f.state.geometry, x: -1100, width: 1000, maximized: true};
+    assert.equal(await f.api.flushWindowWorkspace(), true);
+    assert.equal(f.writes.length, 2);
+    const reopened = fixture(f.disk, id);
+    reopened.boot();
+    await reopened.api.openWindowWorkspace(id);
+    assert.deepEqual(reopened.openedGeometries, [f.state.geometry]);
+});
+
+test("旧窗口快照没有窗口边界时仍可打开", async () => {
+    const f = fixture(savedStorage(), id);
+    assert.deepEqual(clone(f.boot()), layout());
+    await f.api.openWindowWorkspace(id);
+    assert.deepEqual(f.openedGeometries, [undefined]);
 });
 
 test("自动保存布局不会覆盖其他窗口写入的工作区名称", async () => {

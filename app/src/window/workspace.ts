@@ -10,6 +10,7 @@ import {showMessage} from "../dialog/message";
 import {escapeHtml} from "../util/escape";
 import {setWindowWorkspaceTitle} from "../util/processTitle";
 import {openNewWindowByWorkspace} from "./openNewWindow";
+import {captureWindowGeometry} from "./geometry";
 import {
     isWindowWorkspace,
     isWindowWorkspaceID,
@@ -29,6 +30,9 @@ let initialized = false;
 let saveTimer = 0;
 let lastSaved = "";
 let lastSaveOK = true;
+
+const snapshotContent = (snapshot: IWindowWorkspaceSnapshot) =>
+    JSON.stringify({layout: snapshot.layout, windowGeometry: snapshot.windowGeometry});
 
 export const getWindowWorkspace = (id: string) => {
     const value: unknown = window.siyuan.storage?.[infoKey(id)];
@@ -91,14 +95,14 @@ const writer = new WindowWorkspaceWriter<{id: string, snapshot: IWindowWorkspace
     const saved = await persist(layoutKey(id), snapshot);
     if (currentID === id) {
         if (saved) {
-            lastSaved = JSON.stringify(snapshot.layout);
+            lastSaved = snapshotContent(snapshot);
         }
         lastSaveOK = saved;
     }
     return saved;
 });
 
-const capture = (): IWindowWorkspaceSnapshot | undefined => {
+const capture = async (): Promise<IWindowWorkspaceSnapshot | undefined> => {
     if (!window.siyuan.layout?.layout) {
         return;
     }
@@ -109,6 +113,16 @@ const capture = (): IWindowWorkspaceSnapshot | undefined => {
         return;
     }
     const snapshot: IWindowWorkspaceSnapshot = {version: 1, time: Date.now(), layout};
+    try {
+        snapshot.windowGeometry = await captureWindowGeometry();
+        const previous: unknown = currentID ? window.siyuan.storage[layoutKey(currentID)] : undefined;
+        if (!snapshot.windowGeometry && isWindowWorkspaceSnapshot(previous)) {
+            snapshot.windowGeometry = previous.windowGeometry;
+        }
+    } catch (error) {
+        console.error(error);
+        return;
+    }
     return isWindowWorkspaceSnapshot(snapshot) ? snapshot : undefined;
 };
 
@@ -117,11 +131,15 @@ export const flushWindowWorkspace = async () => {
     if (!currentID || !ready || window.siyuan.config.readonly || !getWindowWorkspace(currentID)) {
         return true;
     }
-    const snapshot = capture();
+    const id = currentID;
+    const snapshot = await capture();
+    if (id !== currentID) {
+        return true;
+    }
     if (!snapshot) {
         return false;
     }
-    if (lastSaveOK && JSON.stringify(snapshot.layout) === lastSaved) {
+    if (lastSaveOK && snapshotContent(snapshot) === lastSaved) {
         return true;
     }
     lastSaveOK = false;
@@ -168,7 +186,7 @@ export const getWindowWorkspaceLayout = () => {
         return;
     }
     currentID = id;
-    lastSaved = JSON.stringify(snapshot.layout);
+    lastSaved = snapshotContent(snapshot);
     return JSON.parse(JSON.stringify(snapshot.layout)) as Config.TPersistedUILayoutItem;
 };
 
@@ -186,11 +204,12 @@ export const openWindowWorkspace = async (id: string) => {
         return;
     }
     /// #endif
-    if (!getWindowWorkspace(id) || !isWindowWorkspaceSnapshot(window.siyuan.storage[layoutKey(id)])) {
+    const snapshot: unknown = window.siyuan.storage[layoutKey(id)];
+    if (!getWindowWorkspace(id) || !isWindowWorkspaceSnapshot(snapshot)) {
         showMessage(window.siyuan.languages.windowWorkspaceUnavailable, 6000, "error");
         return;
     }
-    openNewWindowByWorkspace(id);
+    openNewWindowByWorkspace(id, snapshot.windowGeometry);
 };
 
 const removeWorkspace = async (id: string) => {
@@ -253,7 +272,7 @@ export const editWindowWorkspace = (id?: string) => {
                         throw new Error("Window workspace rename failed");
                     }
                 } else {
-                    const snapshot = capture();
+                    const snapshot = await capture();
                     if (!snapshot) {
                         throw new Error("Window layout is not ready");
                     }
@@ -266,7 +285,7 @@ export const editWindowWorkspace = (id?: string) => {
                     if (!await associate(newID)) {
                         throw new Error("Window workspace association failed");
                     }
-                    lastSaved = JSON.stringify(snapshot.layout);
+                    lastSaved = snapshotContent(snapshot);
                     lastSaveOK = true;
                 }
                 dialog.destroy();
@@ -328,9 +347,10 @@ export const initWindowWorkspace = () => {
     toolbar.insertBefore(button, document.getElementById("pinWindow"));
     button.addEventListener("click", () => editWindowWorkspace(currentID));
     window.addEventListener("siyuan-window-layout", scheduleSave);
+    window.addEventListener("resize", scheduleSave);
     document.addEventListener("scroll", scheduleSave, true);
     window.addEventListener("blur", () => void flushWindowWorkspace());
-    // PDF 页码由嵌入页面更新，定期比较快照，仅在布局或阅读位置改变时写入。
+    // 定期比较布局、阅读位置和窗口边界，仅在状态改变时写入。
     window.setInterval(() => {
         if (currentID && document.visibilityState === "visible") {
             void flushWindowWorkspace();

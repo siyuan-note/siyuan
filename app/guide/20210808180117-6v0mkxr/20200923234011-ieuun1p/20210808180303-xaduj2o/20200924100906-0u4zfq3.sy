@@ -804,7 +804,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A new window layout saves the tabs, splits, and reading positions of a named window. Main window layouts and new window layouts are grouped in the same layout menu and saved separately. Select up to one main window layout and multiple new window layouts, then click Open above the list to open them together. This selection is not saved. This feature is available in the desktop client; tabs from encrypted notebooks are excluded."
+					"Data": "A new window layout saves the tabs, splits, and reading positions of a named window. Main window layouts and new window layouts are grouped in the same layout menu and saved separately. Saving or updating a main window layout also records its size, position, and maximized or fullscreen state. Named new windows save this information automatically. Opening a layout restores these window settings; if the display configuration has changed, the window is adjusted to an available display. Older layouts without window settings remain usable. Window positioning and resizing depend on the operating system and may be restricted on Wayland. Select up to one main window layout and multiple new window layouts, then click Open above the list to open them together. This selection is not saved. This feature is available in the desktop client; tabs from encrypted notebooks are excluded."
 				}
 			]
 		},

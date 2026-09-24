@@ -163,8 +163,23 @@ export const resetLayout = () => {
 };
 
 let saveCount = 0;
+let saveRetryTimeout = 0;
+let layoutSavingSuspended = false;
+const layoutSaveRequests = new Set<Promise<void>>();
+
+// 切换布局前停止自动保存并等待在途请求，成功后保持暂停直到页面刷新，失败时由调用方恢复。
+export const suspendLayoutSaving = async () => {
+    layoutSavingSuspended = true;
+    window.clearTimeout(saveRetryTimeout);
+    saveCount = 0;
+    await Promise.allSettled(layoutSaveRequests);
+    return () => {
+        layoutSavingSuspended = false;
+    };
+};
+
 export const saveLayout = () => {
-    if (!window.siyuan.layout?.layout) {
+    if (layoutSavingSuspended || !window.siyuan.layout?.layout) {
         return;
     }
     const breakObj = {};
@@ -190,7 +205,7 @@ export const saveLayout = () => {
     }
     if (Object.keys(breakObj).length > 0 && saveCount < 10) {
         saveCount++;
-        setTimeout(() => {
+        saveRetryTimeout = window.setTimeout(() => {
             saveLayout();
         }, Constants.TIMEOUT_LOAD * saveCount);
     } else {
@@ -204,7 +219,9 @@ export const saveLayout = () => {
                     layout: layoutJSON,
                     errorExit: false    // 后台不接受该参数，用于请求发生错误时退出程序
                 };
-                fetchPost("/api/system/setUILayout", request);
+                const saving = fetchPost("/api/system/setUILayout", request);
+                layoutSaveRequests.add(saving);
+                void saving.then(() => layoutSaveRequests.delete(saving), () => layoutSaveRequests.delete(saving));
             }
         }
     }
@@ -229,6 +246,10 @@ export const exportLayout = async (options: {
         // 关闭时滚动位置保存超时，继续保存布局并执行退出流程。
         console.warn("Save scroll timed out before closing");
     });
+    if (layoutSavingSuspended) {
+        options.cb();
+        return;
+    }
     if (isWindow()) {
         const layoutJSON: any = {
             layout: {},

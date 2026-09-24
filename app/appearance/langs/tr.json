@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "Zihin haritasına aynı düzeyde düğüm ekle",
+	"mindmapAddChild": "Zihin haritasına alt düğüm ekle",
 	"layoutSelectedCount": "${x} seçildi",
 	"workspaceStorage": "Çalışma alanı depolaması",
 	"workspaceStorageTip": "Geçerli çalışma alanındaki yerel dosyaların boyutu; kaynaklar data kapsamındadır; sistemin bildirdiği disk kullanımı farklı olabilir",

@@ -24,6 +24,7 @@ interface ListMindmapEditorOptions {
     canEdit: () => boolean;
     onSave: (html: string) => Promise<boolean>;
     onResize: () => void;
+    onAdd: (kind: "child" | "sibling") => Promise<void>;
     onFinish: () => void;
     onUndo: (redo: boolean) => void;
 }
@@ -90,6 +91,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     let closing = false;
     let composing = false;
     let finishAfterComposition = false;
+    let addingNode = false;
     let changed = false;
     let saving = false;
     let pendingSave: Promise<boolean> | undefined;
@@ -339,10 +341,32 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             return;
         }
         const keymap = window.siyuan.config.keymap.editor.general;
+        const listKeymap = window.siyuan.config.keymap.editor.list;
+        const kind = listKeymap?.mindmapAddSibling && matchHotKey(listKeymap.mindmapAddSibling, event) ? "sibling" :
+            listKeymap?.mindmapAddChild && matchHotKey(listKeymap.mindmapAddChild, event) ? "child" : undefined;
         if (matchHotKey(keymap.undo, event) || matchHotKey(keymap.redo, event)) {
             event.preventDefault();
             event.stopImmediatePropagation();
             undo(matchHotKey(keymap.redo, event));
+        } else if (kind && !finished && !closing && options.canEdit() &&
+            fragment.hintElement.classList.contains("fn__none") &&
+            fragment.protyle.toolbar.element.classList.contains("fn__none") &&
+            fragment.protyle.toolbar.subElement.classList.contains("fn__none") &&
+            !(event.target instanceof Element && event.target.closest(
+                "input, textarea, select, button, .protyle-wysiwyg__embed, .av, .code-block, .table"))) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (event.repeat || addingNode) {
+                return;
+            }
+            addingNode = true;
+            void finish().then(async saved => {
+                if (saved && options.canEdit()) {
+                    await options.onAdd(kind);
+                }
+            }).catch(error => console.error(error)).finally(() => {
+                addingNode = false;
+            });
         } else if (event.key === "Escape" && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {

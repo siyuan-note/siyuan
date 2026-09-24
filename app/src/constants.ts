@@ -673,6 +673,8 @@ export abstract class Constants {
                 taskCompletionToggle: {default: "", custom: ""},
                 prependListItem: {default: "", custom: ""},
                 appendListItem: {default: "", custom: ""},
+                mindmapAddSibling: {default: "⌘↩", custom: "⌘↩"},
+                mindmapAddChild: {default: "⇧⌘↩", custom: "⇧⌘↩"},
             },
             table: {
                 insertRowAbove: {default: "", custom: ""},

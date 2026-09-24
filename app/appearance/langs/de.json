@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "Gleichrangigen Mindmap-Knoten hinzufügen",
+	"mindmapAddChild": "Untergeordneten Mindmap-Knoten hinzufügen",
 	"layoutSelectedCount": "${x} ausgewählt",
 	"workspaceStorage": "Speicherplatz des Arbeitsbereichs",
 	"workspaceStorageTip": "Größe der lokal gespeicherten Dateien im aktuellen Arbeitsbereich; Ressourcen sind in data enthalten; die vom System gemeldete Datenträgerbelegung kann abweichen",

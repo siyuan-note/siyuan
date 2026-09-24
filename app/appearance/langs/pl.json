@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "Dodaj węzeł równorzędny mapy myśli",
+	"mindmapAddChild": "Dodaj węzeł podrzędny mapy myśli",
 	"layoutSelectedCount": "Wybrano: ${x}",
 	"workspaceStorage": "Rozmiar obszaru roboczego",
 	"workspaceStorageTip": "Rozmiar plików lokalnych w bieżącym obszarze roboczym; zasoby są uwzględnione w data; zajętość dysku podawana przez system może się różnić",

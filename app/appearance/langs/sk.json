@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "Pridať súrodenecký uzol myšlienkovej mapy",
+	"mindmapAddChild": "Pridať podradený uzol myšlienkovej mapy",
 	"layoutSelectedCount": "Vybrané: ${x}",
 	"workspaceStorage": "Veľkosť pracovného priestoru",
 	"workspaceStorageTip": "Veľkosť lokálnych súborov v aktuálnom pracovnom priestore; zdroje sú zahrnuté v data; využitie disku hlásené systémom sa môže líšiť",

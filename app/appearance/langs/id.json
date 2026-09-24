@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "Tambah simpul setingkat pada peta pikiran",
+	"mindmapAddChild": "Tambah simpul anak pada peta pikiran",
 	"layoutSelectedCount": "${x} dipilih",
 	"workspaceStorage": "Penyimpanan ruang kerja",
 	"workspaceStorageTip": "Ukuran berkas lokal di ruang kerja saat ini; sumber daya sudah termasuk dalam data; penggunaan disk yang dilaporkan sistem dapat berbeda",

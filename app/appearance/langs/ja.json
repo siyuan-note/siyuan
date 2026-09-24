@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "同階層のマインドマップノードを追加",
+	"mindmapAddChild": "子マインドマップノードを追加",
 	"layoutSelectedCount": "${x} 件選択済み",
 	"workspaceStorage": "ワークスペースの容量",
 	"workspaceStorageTip": "現在のワークスペースに保存されたファイルのサイズ。アセットは data に含まれ、システムが表示するディスク使用量とは異なる場合があります",

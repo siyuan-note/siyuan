@@ -663,6 +663,11 @@ const refreshKeymapBindings = (root: HTMLElement) => {
             owners.set(normalized, matches);
         }
     }));
+    const agentSend = `general${Constants.ZWSP}agentSend`;
+    const mindmapShortcuts = new Set([
+        `editor${Constants.ZWSP}list${Constants.ZWSP}mindmapAddSibling`,
+        `editor${Constants.ZWSP}list${Constants.ZWSP}mindmapAddChild`,
+    ]);
     rows.forEach(row => {
         const keys = getRowBindings(row);
         const config = getKeymapItem(window.siyuan.config.keymap, row.dataset.key.split(Constants.ZWSP));
@@ -678,7 +683,14 @@ const refreshKeymapBindings = (root: HTMLElement) => {
         const reset = controls.querySelector<HTMLButtonElement>('[data-type="reset"]');
         reset.style.display = changed ? "" : "none";
         reset.tabIndex = changed ? 0 : -1;
-        const conflicts = keys.map(key => (owners.get(normalizeShortcutKey(key, isMac()))?.size || 0) > 1);
+        const conflicts = keys.map(key => Array.from(owners.get(normalizeShortcutKey(key, isMac())) || []).some(other => {
+            if (other === row) {
+                return false;
+            }
+            // AI 输入框和思维导图使用不同的按键作用域，同一默认键不会相互触发。
+            return !(row.dataset.key === agentSend && mindmapShortcuts.has(other.dataset.key) ||
+                other.dataset.key === agentSend && mindmapShortcuts.has(row.dataset.key));
+        }));
         row.dataset.conflict = String(conflicts.some(Boolean));
         row.querySelectorAll<HTMLElement>(".config-keymap__chip").forEach(chip => {
             chip.classList.toggle("config-keymap__chip--conflict", conflicts[Number(chip.dataset.index)]);

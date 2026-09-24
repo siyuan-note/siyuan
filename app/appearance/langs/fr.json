@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "Ajouter un nœud frère à la carte mentale",
+	"mindmapAddChild": "Ajouter un nœud enfant à la carte mentale",
 	"layoutSelectedCount": "${x} sélectionné(s)",
 	"workspaceStorage": "Espace du répertoire de travail",
 	"workspaceStorageTip": "Taille des fichiers locaux du répertoire de travail actuel ; les ressources sont incluses dans data ; l’espace disque indiqué par le système peut différer",

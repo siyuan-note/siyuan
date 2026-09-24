@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "Add a sibling mind map node",
+	"mindmapAddChild": "Add a child mind map node",
 	"layoutSelectedCount": "${x} selected",
 	"workspaceStorage": "Workspace storage",
 	"workspaceStorageTip": "Local file sizes in the current workspace; assets are included in data; system-reported disk usage may differ",

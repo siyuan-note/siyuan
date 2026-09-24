@@ -60,6 +60,7 @@ const browserCases = async (sourceCode: string, css: string) => {
             destroyed: 0,
             finished: 0,
             saves: [] as string[],
+            additions: [] as string[],
             messages: [] as string[],
             accept: true,
             flush: async (): Promise<void> => undefined,
@@ -113,7 +114,12 @@ const browserCases = async (sourceCode: string, css: string) => {
             setMobileToolbarUndo: noop,
             getDefaultToolbar: (): unknown[] => [],
             hideElements: noop,
-            matchHotKey: () => false,
+            matchHotKey: (key: {custom?: string} | string, event: KeyboardEvent) => {
+                const binding = typeof key === "string" ? key : key?.custom;
+                return !!binding && binding.endsWith("↩") && event.key === "Enter" &&
+                    event.ctrlKey === binding.includes("⌘") && event.shiftKey === binding.includes("⇧") &&
+                    event.altKey === binding.includes("⌥");
+            },
             processRender: noop,
             setCustomBlockRootReady: noop,
             avRender: noop,
@@ -129,6 +135,7 @@ const browserCases = async (sourceCode: string, css: string) => {
             node: {element}, host,
             canEdit: () => element.isConnected,
             onResize: noop,
+            onAdd: async (kind: string) => { state.additions.push(kind); },
             onFinish: () => state.finished++,
             onUndo: noop,
             onSave: async (html: string) => {
@@ -152,12 +159,18 @@ const browserCases = async (sourceCode: string, css: string) => {
             await until(() => state.destroyed === 1);
             container.remove();
         };
-        return {container, element, host, wysiwyg, protyle, state, editor, type, remove,
+        return {container, element, host, wysiwyg, hintElement, protyle, state, editor, type, remove,
             owner, transactionOwner: (operations: Parameters<typeof transactionOwner>[0]) => transactionOwner(operations)};
     };
     window.siyuan = {
         languages: {listMindmapStale: "Content changed", listMindmapUnsupported: "Unsupported"},
-        config: {keymap: {editor: {general: {undo: "undo", redo: "redo"}}}},
+        config: {keymap: {editor: {
+            general: {undo: "undo", redo: "redo"},
+            list: {
+                mindmapAddSibling: {default: "⌘↩", custom: "⌘↩"},
+                mindmapAddChild: {default: "⇧⌘↩", custom: "⇧⌘↩"},
+            },
+        }}},
     } as unknown as typeof window.siyuan;
 
     // 特殊块与普通文字共存时仍可进入编辑，修改文字不会改变特殊块的源码和属性。
@@ -382,6 +395,71 @@ const browserCases = async (sourceCode: string, css: string) => {
         check.equal(document.activeElement, accept ? current.container : current.host);
         await current.remove();
     }
+
+    // 编辑态组合键保存当前节点后直接创建新节点，重复按键只创建一次。
+    for (const [kind, shiftKey] of [["sibling", false], ["child", true]] as const) {
+        current = create();
+        await current.type(`Edited ${kind}`);
+        const shortcut = () => current.host.dispatchEvent(new KeyboardEvent("keydown", {
+            key: "Enter", ctrlKey: true, shiftKey, bubbles: true, cancelable: true,
+        }));
+        shortcut();
+        const repeated = new KeyboardEvent("keydown", {
+            key: "Enter", ctrlKey: true, shiftKey, repeat: true, bubbles: true, cancelable: true,
+        });
+        current.host.dispatchEvent(repeated);
+        check.equal(repeated.defaultPrevented, true);
+        shortcut();
+        await until(() => current.state.additions.length === 1);
+        check.deepEqual(current.state.additions, [kind]);
+        check.equal(current.element.textContent, `Edited ${kind}`);
+        check.equal(current.state.finished, 1);
+        await current.remove();
+    }
+
+    // 保存失败时不得新增节点；修正后再次按快捷键可以完成操作。
+    current = create();
+    await current.type("Retry shortcut");
+    current.state.accept = false;
+    current.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true}));
+    await until(() => current.state.saves.length === 1);
+    await settle();
+    check.deepEqual(current.state.additions, []);
+    check.equal(current.state.finished, 0);
+    current.state.accept = true;
+    current.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true}));
+    await until(() => current.state.additions.length === 1);
+    check.deepEqual(current.state.additions, ["sibling"]);
+    await current.remove();
+
+    // 提示弹层、输入法组合输入和嵌套输入控件保留原有按键行为。
+    current = create();
+    current.hintElement.classList.remove("fn__none");
+    current.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true}));
+    current.hintElement.classList.add("fn__none");
+    current.host.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+    current.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true}));
+    current.host.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
+    const nestedInput = document.createElement("input");
+    current.host.append(nestedInput);
+    nestedInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true}));
+    await settle();
+    check.deepEqual(current.state.additions, []);
+    check.equal(current.state.finished, 0);
+    await current.remove();
+
+    // 快捷键读取用户配置，修改绑定后旧按键不再触发。
+    current = create();
+    window.siyuan.config.keymap.editor.list.mindmapAddSibling.custom = "⌥⌘↩";
+    current.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true}));
+    check.equal(current.state.finished, 0);
+    current.host.dispatchEvent(new KeyboardEvent("keydown", {
+        key: "Enter", ctrlKey: true, altKey: true, bubbles: true,
+    }));
+    await until(() => current.state.additions.length === 1);
+    check.deepEqual(current.state.additions, ["sibling"]);
+    window.siyuan.config.keymap.editor.list.mindmapAddSibling.custom = "⌘↩";
+    await current.remove();
 
     // 使用完整样式和外层文档结构，覆盖嵌套编辑器的最小高度及行高继承。
     const style = document.createElement("style");

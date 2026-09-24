@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "Een knooppunt op hetzelfde niveau toevoegen aan de mindmap",
+	"mindmapAddChild": "Een onderliggend knooppunt toevoegen aan de mindmap",
 	"layoutSelectedCount": "${x} geselecteerd",
 	"workspaceStorage": "Opslag van de werkruimte",
 	"workspaceStorageTip": "Grootte van lokale bestanden in de huidige werkruimte; bronnen zijn opgenomen in data; het schijfgebruik dat het systeem meldt kan afwijken",

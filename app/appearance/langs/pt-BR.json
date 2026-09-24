@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "Adicionar nó irmão ao mapa mental",
+	"mindmapAddChild": "Adicionar nó filho ao mapa mental",
 	"layoutSelectedCount": "${x} selecionados",
 	"workspaceStorage": "Armazenamento do espaço de trabalho",
 	"workspaceStorageTip": "Tamanho dos arquivos locais no espaço de trabalho atual; os recursos estão incluídos em data; o uso de disco informado pelo sistema pode ser diferente",

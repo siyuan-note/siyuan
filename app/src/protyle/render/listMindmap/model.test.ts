@@ -781,6 +781,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             return () => interactions--;
         },
         onEdit: (id: string) => edits.push(id),
+        isAddSiblingShortcut: (event: KeyboardEvent) => event.ctrlKey && event.key === "Enter" && !event.shiftKey,
+        isAddChildShortcut: (event: KeyboardEvent) => event.ctrlKey && event.key === "Enter" && event.shiftKey,
         finishEdit: () => finishAllowed,
         onMove: (...args: unknown[]) => moves.push(args),
         onAdd: (...args: unknown[]) => additions.push(args),
@@ -1102,11 +1104,30 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(event.defaultPrevented, true, "nested mindmap handles keys instead of moving toolbar focus");
     }
     check.deepEqual(additions.slice(beforeShortcuts), [[beta, "child"], [beta, "sibling"]]);
+    for (const shiftKey of [false, true]) {
+        const event = new KeyboardEvent("keydown", {
+            key: "Enter", ctrlKey: true, shiftKey, bubbles: true, cancelable: true,
+        });
+        host.dispatchEvent(event);
+        check.equal(event.defaultPrevented, true);
+    }
+    check.deepEqual(additions.slice(beforeShortcuts + 2), [[beta, "sibling"], [beta, "child"]]);
+    const repeatedShortcut = new KeyboardEvent("keydown", {
+        key: "Enter", ctrlKey: true, repeat: true, bubbles: true, cancelable: true,
+    });
+    host.dispatchEvent(repeatedShortcut);
+    check.equal(repeatedShortcut.defaultPrevented, true);
+    check.equal(additions.length, beforeShortcuts + 4);
     view.setEditing(beta);
     host.dispatchEvent(new KeyboardEvent("keydown", {key: "Tab", bubbles: true}));
     host.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
-    check.equal(additions.length, beforeShortcuts + 2, "editing does not create nodes via selection shortcuts");
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true}));
+    check.equal(additions.length, beforeShortcuts + 4, "editing does not create nodes via selection shortcuts");
     view.setEditing();
+    view.setReadOnly(true);
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true}));
+    check.equal(additions.length, beforeShortcuts + 4, "read-only mindmaps ignore configured node shortcuts");
+    view.setReadOnly(false);
     additions.length = beforeShortcuts;
     host.parentElement.contentEditable = originalEditable;
     const blank = () => {

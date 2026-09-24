@@ -236,6 +236,14 @@ class ListMindmapController {
                 }
             },
             onEdit: (id, contentHost) => this.edit(id, contentHost),
+            isAddSiblingShortcut: event => {
+                const key = window.siyuan.config.keymap.editor.list?.mindmapAddSibling;
+                return !!key && matchHotKey(key, event);
+            },
+            isAddChildShortcut: event => {
+                const key = window.siyuan.config.keymap.editor.list?.mindmapAddChild;
+                return !!key && matchHotKey(key, event);
+            },
             onTaskToggle: (id, cycle) => this.setTask(id, cycle ? nextTaskListStatus : nextTaskListMarker),
             onTabTaskToggle: (id, itemId) => this.setTabTask(id, itemId, nextTaskListMarker),
             onTabTaskMenu: (id, itemId, anchor) => {
@@ -268,27 +276,7 @@ class ListMindmapController {
                 metadata.rootTitle = title;
             }),
             onMove: (id, target, placement) => this.change(() => moveListMindmapNode(list, id, target, placement)),
-            onAdd: async (id, kind) => {
-                const target = this.model.nodes.get(id);
-                if (!target) {
-                    return;
-                }
-                const firstItem = Array.from(list.children).find(child =>
-                    ["NodeListItem", "NodeMindmapItem"].includes(child.getAttribute("data-type")));
-                const start = target.element ? undefined : Number.parseInt(firstItem?.getAttribute("data-marker") || "", 10) || 1;
-                const item = genListItemElement(target.element || list, 0, false, start);
-                if (list.dataset.type === "NodeMindmap") {
-                    item.dataset.type = "NodeMindmapItem";
-                    item.classList.replace("li", "mindmap-item");
-                }
-                if (!await this.change(() => addListMindmapNode(list, id, kind === "child" ? "child" : "after", item))) {
-                    return;
-                }
-                const content = this.view.getContentHost(item.dataset.nodeId);
-                if (content) {
-                    this.edit(item.dataset.nodeId, content);
-                }
-            },
+            onAdd: (id, kind) => this.add(id, kind),
             onDelete: id => this.change(() => deleteListMindmapNode(list, id)),
             onFold: id => this.change(() => {
                 const node = this.model.nodes.get(id);
@@ -424,6 +412,31 @@ class ListMindmapController {
         }
     }
 
+    private async add(id: string, kind: "child" | "sibling") {
+        if (!canEdit(this.owner, this.list)) {
+            return;
+        }
+        const target = this.model.nodes.get(id);
+        if (!target) {
+            return;
+        }
+        const firstItem = Array.from(this.list.children).find(child =>
+            ["NodeListItem", "NodeMindmapItem"].includes(child.getAttribute("data-type")));
+        const start = target.element ? undefined : Number.parseInt(firstItem?.getAttribute("data-marker") || "", 10) || 1;
+        const item = genListItemElement(target.element || this.list, 0, false, start);
+        if (this.list.dataset.type === "NodeMindmap") {
+            item.dataset.type = "NodeMindmapItem";
+            item.classList.replace("li", "mindmap-item");
+        }
+        if (!await this.change(() => addListMindmapNode(this.list, id, kind === "child" ? "child" : "after", item))) {
+            return;
+        }
+        const content = this.view.getContentHost(item.dataset.nodeId);
+        if (content) {
+            void this.edit(item.dataset.nodeId, content);
+        }
+    }
+
     private async edit(id: string, host: HTMLElement) {
         const request = ++this.editRequest;
         if (!canEdit(this.owner, this.list) || (this.activeEditor && !await this.activeEditor.finish()) ||
@@ -440,6 +453,7 @@ class ListMindmapController {
             canEdit: () => !this.disposed && this.list.isConnected && canEdit(this.owner, this.list),
             onSave: html => this.change(() => replaceListMindmapContent(this.list, id, html), true),
             onResize: () => this.view.refreshLayout(),
+            onAdd: kind => this.add(id, kind),
             onFinish: () => {
                 this.activeEditor = undefined;
                 this.view.setEditing(undefined);

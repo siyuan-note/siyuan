@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "إضافة عقدة خريطة ذهنية شقيقة",
+	"mindmapAddChild": "إضافة عقدة خريطة ذهنية فرعية",
 	"layoutSelectedCount": "تم تحديد ${x}",
 	"workspaceStorage": "مساحة تخزين مساحة العمل",
 	"workspaceStorageTip": "حجم الملفات المحلية في مساحة العمل الحالية؛ الموارد مضمنة في data؛ قد يختلف استخدام القرص الذي يعرضه النظام",

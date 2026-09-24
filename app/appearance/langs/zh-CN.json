@@ -1,4 +1,6 @@
 {
+	"mindmapAddSibling": "添加同级思维导图节点",
+	"mindmapAddChild": "添加子思维导图节点",
 	"layoutSelectedCount": "已选 ${x} 个",
 	"workspaceStorage": "工作空间容量",
 	"workspaceStorageTip": "当前工作空间已落盘文件的大小，资源已包含在 data 中，可能与系统显示的磁盘占用不同",

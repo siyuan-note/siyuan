@@ -34,6 +34,8 @@ export interface ListMindmapViewOptions {
     onFullscreen?: (enter: boolean, button: HTMLButtonElement) => void;
     onInteractionStart?: (event: PointerEvent) => () => void;
     onEdit?: (id: string, contentHost: HTMLElement) => void;
+    isAddSiblingShortcut?: (event: KeyboardEvent) => boolean;
+    isAddChildShortcut?: (event: KeyboardEvent) => boolean;
     onRootTitleChange?: (title: string) => void;
     finishEdit?: () => boolean | void | Promise<boolean | void>;
     onMove?: (id: string, targetId: string, placement: "before" | "child" | "after") => void;
@@ -1982,6 +1984,9 @@ export class ListMindmapView {
         if (this.pointer?.relation && event.key !== "Escape") {
             return;
         }
+        const noModifiers = !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey;
+        const siblingShortcut = event.key === "Enter" && noModifiers || this.options.isAddSiblingShortcut?.(event);
+        const childShortcut = event.key === "Tab" && noModifiers || this.options.isAddChildShortcut?.(event);
         const isTaskCompletionToggle = this.options.isTaskCompletionToggle?.(event);
         if (!this.options.readOnly && (isTaskCompletionToggle || this.options.isTaskCycle?.(event))) {
             const id = target.closest<HTMLElement>(".mindmap-view__node")?.dataset.mindmapId || this.selectedId;
@@ -2000,7 +2005,7 @@ export class ListMindmapView {
         }
         if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(event.key) &&
             !this.editingId && !this.relationFrom && this.selectedId &&
-            !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+            noModifiers &&
             !target.isContentEditable && !target.closest("button, a")) {
             const node = this.model.nodes.get(this.selectedId);
             if (!node) {
@@ -2038,16 +2043,20 @@ export class ListMindmapView {
                     this.selectNode(next);
                 }
             }
-        } else if ((event.key === "Tab" || event.key === "Enter") && !this.options.readOnly &&
-            !this.editingId && !this.relationFrom && this.selectedId && !event.repeat &&
-            !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+        } else if (!this.options.readOnly && !this.editingId && !this.relationFrom && this.selectedId &&
+            (siblingShortcut || childShortcut) &&
             !target.isContentEditable && !target.closest("button, a")) {
-            const id = this.selectedId;
-            const node = this.model.nodes.get(id);
-            if (!node || (event.key === "Enter" && node.virtual)) {
+            if (event.repeat) {
+                event.preventDefault();
+                event.stopPropagation();
                 return;
             }
-            const kind = event.key === "Tab" ? "child" : "sibling";
+            const id = this.selectedId;
+            const node = this.model.nodes.get(id);
+            const kind = siblingShortcut ? "sibling" : "child";
+            if (!node || (kind === "sibling" && node.virtual)) {
+                return;
+            }
             this.finishThen(() => {
                 if (this.selectedId === id) {
                     this.options.onAdd?.(id, kind);

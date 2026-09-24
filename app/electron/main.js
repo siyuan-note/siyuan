@@ -74,6 +74,7 @@ const {
 } = require("./remoteKernel");
 const {dispatchWindowMessage} = require("./windowMessaging");
 const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorkspaces");
+const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = require("./windowGeometry");
 const windowWorkspaces = new WindowWorkspaceRegistry();
 const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 const {
@@ -3123,6 +3124,14 @@ app.whenReady().then(() => {
         app.exit();
     });
     ipcMain.handle("siyuan-get", async (event, data) => {
+        if (data.cmd === "getWindowGeometry" || data.cmd === "setWindowGeometry") {
+            const window = getWindowByContentId(event.sender.id);
+            if (!window || !getWindowKernelTarget(event.sender.id) || event.senderFrame !== event.sender.mainFrame) {
+                return false;
+            }
+            return data.cmd === "getWindowGeometry" ? captureWindowGeometry(window) :
+                restoreWindowGeometry(window, data.geometry, screen);
+        }
         if (data.cmd === "getLinuxInputMethodSetting" || data.cmd === "setLinuxInputMethodSetting") {
             if (process.platform !== "linux" || !initializedWindowIds.has(event.sender.id) ||
                 !getWindowKernelTarget(event.sender.id) || event.senderFrame !== event.sender.mainFrame) {
@@ -3782,12 +3791,14 @@ app.whenReady().then(() => {
         const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
         const mainBounds = mainWindow.getBounds();
         const mainScreen = screen.getDisplayNearestPoint({x: mainBounds.x, y: mainBounds.y});
+        const geometry = workspaceID ? normalizeWindowGeometry(data.windowGeometry, screen) : undefined;
         const win = new BrowserWindow({
             title: "SiYuan",
             show: true,
             trafficLightPosition: {x: 8, y: 13},
             width: Math.floor(data.width || mainScreen.size.width * 0.7),
             height: Math.floor(data.height || mainScreen.size.height * 0.9),
+            ...geometry,
             minWidth: 493,
             minHeight: 376,
             fullscreenable: true,
@@ -3813,7 +3824,14 @@ app.whenReady().then(() => {
             windowWorkspaces.associate(win, kernelTarget.origin, workspaceID);
         }
 
-        if (data.position) {
+        if (geometry) {
+            if (data.windowGeometry.maximized) {
+                win.maximize();
+            }
+            if (data.windowGeometry.fullscreen) {
+                win.setFullScreen(true);
+            }
+        } else if (data.position) {
             win.setPosition(data.position.x, data.position.y);
         } else {
             win.center();
@@ -3837,7 +3855,7 @@ app.whenReady().then(() => {
             event.preventDefault();
         });
         const targetScreen = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
-        if (mainScreen.id !== targetScreen.id) {
+        if (!geometry && mainScreen.id !== targetScreen.id) {
             win.setBounds(targetScreen.workArea);
         }
     });

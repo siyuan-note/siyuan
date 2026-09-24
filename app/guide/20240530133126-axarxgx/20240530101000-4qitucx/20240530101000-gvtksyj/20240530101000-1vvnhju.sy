@@ -658,6 +658,20 @@
 			]
 		},
 		{
+			"ID": "20260924143000-en2de29",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260924143000-en2de29",
+				"updated": "20260924143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "画像や PDF のエクスポート時には JavaScript 埋め込みブロックも描画され、スクリプトとブロックのクエリが完了してから出力されます。セーフモードおよびリモートカーネル環境では、スクリプトの実行は引き続き無効です。"
+				}
+			]
+		},
+		{
 			"ID": "20260612202513-ewrm2vu",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,

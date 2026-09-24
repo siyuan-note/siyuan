@@ -1,3 +1,5 @@
+import type {IWindowGeometry} from "./geometry";
+
 export interface IWindowWorkspace {
     version: 1;
     id: string;
@@ -9,6 +11,7 @@ export interface IWindowWorkspaceSnapshot {
     version: 1;
     time: number;
     layout: Config.TPersistedUILayoutItem;
+    windowGeometry?: IWindowGeometry;
 }
 
 const isObject = (value: unknown): value is Record<string, unknown> =>

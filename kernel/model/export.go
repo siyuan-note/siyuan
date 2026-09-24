@@ -1347,6 +1347,16 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool, mergeHeadingOpti
 
 func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle bool, customTitle string,
 	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
+	return exportHTMLWithTitle(id, savePath, pdf, keepFold, merge, addTitle, customTitle, false, mergeHeadingOptions...)
+}
+
+func ExportPreviewHTMLWithTitle(id string, keepFold, merge, addTitle bool, customTitle string, keepJSEmbed bool,
+	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
+	return exportHTMLWithTitle(id, "", true, keepFold, merge, addTitle, customTitle, keepJSEmbed, mergeHeadingOptions...)
+}
+
+func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle bool, customTitle string, keepJSEmbed bool,
+	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
 	if err := prepareExportBlockAssets(id, merge); err != nil {
 		util.PushErrMsg(err.Error(), 7000)
 		return
@@ -1394,6 +1404,9 @@ func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 			}
 		}
 
+		if keepJSEmbed {
+			preserveExportJSEmbeds(tree)
+		}
 		tree, exportTreeErr := exportTree(tree, true, true, keepFold, true,
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
@@ -1473,6 +1486,18 @@ func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 		luteEngine.SetSanitize(false)
 
 		renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+		if keepJSEmbed {
+			renderHTML := renderer.RendererFuncs[ast.NodeHTMLBlock]
+			renderer.RendererFuncs[ast.NodeHTMLBlock] = func(n *ast.Node, entering bool) ast.WalkStatus {
+				if n.IALAttr("data-export-js-embed") != "true" {
+					return renderHTML(n, entering)
+				}
+				if entering {
+					renderer.Write(n.Tokens)
+				}
+				return ast.WalkSkipChildren
+			}
+		}
 		dom = gulu.Str.FromBytes(renderer.Render())
 		return nil
 	}); exportErr != nil {

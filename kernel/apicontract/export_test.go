@@ -88,3 +88,15 @@ func TestExportResourcesOptionalPaths(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestExportPreviewJSEmbedCompatibility(t *testing.T) {
+	for _, extra := range []string{"", `,"keepJSEmbed":null`, `,"keepJSEmbed":false`, `,"keepJSEmbed":true`} {
+		request, err := ExportPreviewHTML.Decode(strings.NewReader(`{"id":"id"` + extra + `}`))
+		if err != nil || request.KeepJSEmbed != strings.Contains(extra, "true") {
+			t.Fatalf("unexpected JavaScript embed option: %+v %v", request, err)
+		}
+	}
+	if _, err := ExportPreviewHTML.Decode(strings.NewReader(`{"id":"id","keepJSEmbed":"true"}`)); err == nil {
+		t.Fatal("invalid JavaScript embed option accepted")
+	}
+}

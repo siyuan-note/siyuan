@@ -630,6 +630,10 @@ func docAssets(rootID string, retainQueryStr bool, itemFilter attributeViewItemF
 	}
 
 	ret = getAssetsLinkDestsWithAttributeViewItemFilter(tree.Root, false, itemFilter)
+	// 题头图存储在文档属性中，也属于文档引用的附件。
+	if titleImg := treenode.GetDocTitleImgPath(tree.Root); util.IsAssetLinkDest([]byte(titleImg), false) {
+		ret = append(ret, titleImg)
+	}
 	if !retainQueryStr {
 		for i, asset := range ret {
 			if before, _, ok := strings.Cut(asset, "?"); ok {

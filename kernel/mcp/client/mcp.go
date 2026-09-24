@@ -31,6 +31,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -70,11 +71,31 @@ var (
 	mcpServers       []conf.MCPServer
 	mcpConnecting    bool // 是否有后台连接 goroutine 正在进行，防止重复启动
 	mcpConnectCancel context.CancelFunc
+	mcpConnectDone   <-chan struct{}
 	mcpGeneration    uint64
 	mcpRuntime       = map[string]mcpRuntimeState{}
+	mcpRecoveryMu    sync.Mutex
 )
 
 type mcpGenerationContextKey struct{}
+
+type mcpToolRequestContextKey struct{}
+
+// sessionMissingRoundTripper 记录当前工具请求是否因旧会话不存在而被服务器拒绝。
+type sessionMissingRoundTripper struct {
+	base http.RoundTripper
+}
+
+func (t *sessionMissingRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	resp, err := t.base.RoundTrip(req)
+	if err == nil && resp.StatusCode == http.StatusNotFound && req.Method == http.MethodPost &&
+		req.Header.Get("Mcp-Session-Id") != "" {
+		if rejected, ok := req.Context().Value(mcpToolRequestContextKey{}).(*atomic.Bool); ok {
+			rejected.Store(true)
+		}
+	}
+	return resp, err
+}
 
 func setMCPRuntimeState(serverID, status string, toolsCount int, errMsg, authorizationURL string) {
 	mcpMu.Lock()
@@ -629,7 +650,7 @@ func connectHTTP(ctx context.Context, client *mcp.Client, server conf.MCPServer,
 		transport.OAuthHandler = oauthHandler
 	}
 	// 所有 MCP HTTP 出站请求统一带上 SiYuan UA，便于第三方 MCP server 识别客户端身份
-	uaBase := httpclient.NewUserAgentRoundTripper(http.DefaultTransport)
+	uaBase := &sessionMissingRoundTripper{base: httpclient.NewUserAgentRoundTripper(http.DefaultTransport)}
 	if len(server.Headers) > 0 {
 		transport.HTTPClient = &http.Client{
 			Transport: &headerRoundTripper{
@@ -675,7 +696,23 @@ func mcpToolContextHandler(serverName, toolName string, timeout time.Duration,
 	structuredContentExpected bool) func(context.Context, map[string]any) (tools.CallToolResult, error) {
 	return func(ctx context.Context, args map[string]any) (tools.CallToolResult, error) {
 		result := callMCPToolOnce(func() (*mcp.CallToolResult, error) {
-			result, err := callMCPTool(ctx, serverName, toolName, timeout, args)
+			connection := getMCPConnection(serverName)
+			result, rejected, err := callMCPTool(ctx, connection, toolName, timeout, args)
+			if rejected && errors.Is(err, mcp.ErrSessionMissing) && ctx.Err() == nil {
+				logging.LogWarnf("mcp: server [%s] tool [%s] session expired, reconnecting", serverName, toolName)
+				recoveryCtx, cancel := context.WithTimeout(ctx, timeout)
+				reconnected := reconnectMCPAndWait(recoveryCtx, connection)
+				cancel()
+				if reconnected != nil {
+					result, rejected, err = callMCPTool(ctx, reconnected, toolName, timeout, args)
+					if rejected && errors.Is(err, mcp.ErrSessionMissing) {
+						err = errors.New("mcp session expired again after reconnect")
+						go reconnectMCP(serverName)
+					}
+				} else {
+					err = errors.New("mcp session expired and reconnect failed")
+				}
+			}
 			updateMCPRuntimeAfterToolCall(serverName, err)
 			return result, err
 		}, func(err error) {
@@ -723,7 +760,7 @@ func updateMCPRuntimeAfterToolCall(serverName string, callErr error) {
 	mcpMu.Unlock()
 }
 
-// callMCPToolOnce 保证一次工具请求最多发送一次。断线时只恢复后续调用所需的连接，不重放当前请求。
+// callMCPToolOnce 转换一次调用的结果；仅上层确认请求未执行时，才允许在调用闭包内重放。
 func callMCPToolOnce(call func() (*mcp.CallToolResult, error), reconnect func(error),
 	structuredContentExpected bool) tools.CallToolResult {
 	result, err := call()
@@ -806,30 +843,98 @@ func trustedReadOnlyHint(server conf.MCPServer, tool *mcp.Tool) bool {
 	return server.TrustToolAnnotations && tool.Annotations != nil && tool.Annotations.ReadOnlyHint
 }
 
-func callMCPTool(parentCtx context.Context, serverName, toolName string, timeout time.Duration, args map[string]any) (*mcp.CallToolResult, error) {
-	session := getMCPSession(serverName)
-	if session == nil {
-		return nil, fmt.Errorf("mcp server [%s] not connected", serverName)
+func callMCPTool(parentCtx context.Context, connection *Connection, toolName string, timeout time.Duration,
+	args map[string]any) (*mcp.CallToolResult, bool, error) {
+	if connection == nil || connection.Session == nil {
+		return nil, false, errors.New("mcp server not connected")
 	}
 
 	ctx, cancel := context.WithTimeout(parentCtx, timeout)
 	defer cancel()
+	rejected := &atomic.Bool{}
+	ctx = context.WithValue(ctx, mcpToolRequestContextKey{}, rejected)
 
-	return session.CallTool(ctx, &mcp.CallToolParams{
+	result, err := connection.Session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      toolName,
 		Arguments: args,
 	})
+	return result, rejected.Load(), err
 }
 
-func getMCPSession(serverName string) *mcp.ClientSession {
+func getMCPConnection(serverName string) *Connection {
 	mcpMu.Lock()
 	defer mcpMu.Unlock()
 	for _, conn := range mcpConns {
 		if conn.ServerName == serverName {
-			return conn.Session
+			return &conn
 		}
 	}
 	return nil
+}
+
+// reconnectMCPAndWait 等待失效的 HTTP 会话被替换，并避免并发调用重复发起重连。
+func reconnectMCPAndWait(ctx context.Context, expired *Connection) *Connection {
+	if expired == nil || expired.Session == nil || expired.Config.Type != "http" {
+		return nil
+	}
+	mcpRecoveryMu.Lock()
+	defer mcpRecoveryMu.Unlock()
+	forced := false
+	for ctx.Err() == nil {
+		mcpMu.Lock()
+		servers := append([]conf.MCPServer(nil), mcpServers...)
+		configured := false
+		for _, server := range servers {
+			if server.ID == expired.ServerID && server.Enabled && reflect.DeepEqual(server, expired.Config) {
+				configured = true
+				break
+			}
+		}
+		var current *Connection
+		for _, connection := range mcpConns {
+			if connection.ServerID == expired.ServerID {
+				current = &connection
+				break
+			}
+		}
+		connecting, done := mcpConnecting, mcpConnectDone
+		mcpMu.Unlock()
+		if !configured {
+			return nil
+		}
+		if current != nil && current.Session != expired.Session {
+			if reflect.DeepEqual(current.Config, expired.Config) {
+				return current
+			}
+			return nil
+		}
+		if connecting {
+			if !waitMCPReconnect(ctx, done) {
+				return nil
+			}
+			continue
+		}
+		if forced {
+			return nil
+		}
+		forced = true
+		if !waitMCPReconnect(ctx, ReconnectMCPAsync(servers, []string{expired.ServerID}, nil)) {
+			return nil
+		}
+	}
+	return nil
+}
+
+func waitMCPReconnect(ctx context.Context, done <-chan struct{}) bool {
+	if done == nil {
+		return false
+	}
+	select {
+	case <-done:
+		return ctx.Err() == nil
+	case <-ctx.Done():
+		return false
+	}
 }
 
 // reconnectMCP 关闭现有连接并重新注册工具。
@@ -875,9 +980,12 @@ func reconnectMCPServer(serverID string) bool {
 
 // ReconnectMCPAsync 用最新的 server 配置异步重连，不阻塞调用方（如 setAI 配置保存）。
 // 适用于配置变更（开关切换、编辑、增删 server）后让连接立即跟上，而非等下次 Agent 请求。
-func ReconnectMCPAsync(servers []conf.MCPServer, forceServerIDs, interactiveServerIDs []string) {
+// 返回的通道在本轮连接完成后关闭。
+func ReconnectMCPAsync(servers []conf.MCPServer, forceServerIDs, interactiveServerIDs []string) <-chan struct{} {
 	if util.IsDisabledFeature("ai") {
-		return
+		done := make(chan struct{})
+		close(done)
+		return done
 	}
 	servers = append([]conf.MCPServer(nil), servers...)
 	force := make(map[string]bool, len(forceServerIDs))
@@ -894,6 +1002,8 @@ func ReconnectMCPAsync(servers []conf.MCPServer, forceServerIDs, interactiveServ
 	}
 	mcpGeneration++
 	generation := mcpGeneration
+	done := make(chan struct{})
+	mcpConnectDone = done
 	connectCtx, connectCancel := context.WithCancel(context.WithValue(context.Background(), mcpGenerationContextKey{}, generation))
 	mcpConnectCancel = connectCancel
 	mcpServers = servers
@@ -935,10 +1045,12 @@ func ReconnectMCPAsync(servers []conf.MCPServer, forceServerIDs, interactiveServ
 	mcpMu.Unlock()
 	closeConnections(closing)
 	if len(connectingServers) == 0 {
-		return
+		close(done)
+		return done
 	}
 
 	go func() {
+		defer close(done)
 		defer connectCancel()
 		connectServers(connectCtx, connectingServers, interactive, func(connection Connection) bool {
 			mcpMu.Lock()
@@ -958,6 +1070,7 @@ func ReconnectMCPAsync(servers []conf.MCPServer, forceServerIDs, interactiveServ
 		mcpConnectCancel = nil
 		mcpMu.Unlock()
 	}()
+	return done
 }
 
 // isReconnectableError 判断 MCP 调用失败是否可能因连接断开，值得尝试重连。

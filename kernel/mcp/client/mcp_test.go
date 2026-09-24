@@ -17,12 +17,17 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"slices"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -188,6 +193,134 @@ func TestCallMCPToolOnceDoesNotReplayDisconnectedCall(t *testing.T) {
 	}
 	if !result.IsError || !result.ExecutionUnknown {
 		t.Fatalf("disconnected call was not marked unknown: %#v", result)
+	}
+}
+
+func TestSessionMissingRoundTripperOnlyMarksToolPOSTWithSession(t *testing.T) {
+	transport := &sessionMissingRoundTripper{base: roundTripFunc(func(*http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: http.StatusNotFound, Body: io.NopCloser(strings.NewReader(""))}, nil
+	})}
+	for _, test := range []struct {
+		name      string
+		method    string
+		sessionID string
+		marked    bool
+	}{
+		{name: "tool POST", method: http.MethodPost, sessionID: "old", marked: true},
+		{name: "sessionless POST", method: http.MethodPost},
+		{name: "SSE GET", method: http.MethodGet, sessionID: "old"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			rejected := &atomic.Bool{}
+			ctx := context.WithValue(context.Background(), mcpToolRequestContextKey{}, rejected)
+			req, err := http.NewRequestWithContext(ctx, test.method, "http://example.com/mcp", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			req.Header.Set("Mcp-Session-Id", test.sessionID)
+			resp, err := transport.RoundTrip(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			resp.Body.Close()
+			if rejected.Load() != test.marked {
+				t.Fatalf("unexpected rejected state: %v", rejected.Load())
+			}
+		})
+	}
+}
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}
+
+func TestMCPToolRetriesAfterSessionRejection(t *testing.T) {
+	server := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "1"}, nil)
+	var executions, attempts atomic.Int32
+	mcp.AddTool(server, &mcp.Tool{Name: "execute"},
+		func(context.Context, *mcp.CallToolRequest, struct{}) (*mcp.CallToolResult, struct{}, error) {
+			executions.Add(1)
+			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "done"}}}, struct{}{}, nil
+		})
+	handler := mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return server }, nil)
+	reject := &atomic.Bool{}
+	reject.Store(true)
+	denyInitialize := &atomic.Bool{}
+	httpServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if req.Method == http.MethodPost && req.Header.Get("Mcp-Session-Id") == "" && denyInitialize.Load() {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+		if req.Method == http.MethodPost && req.Header.Get("Mcp-Session-Id") != "" {
+			body, err := io.ReadAll(req.Body)
+			if err != nil {
+				t.Error(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			req.Body = io.NopCloser(bytes.NewReader(body))
+			if bytes.Contains(body, []byte(`"method":"tools/call"`)) {
+				attempts.Add(1)
+				if reject.CompareAndSwap(true, false) {
+					w.WriteHeader(http.StatusNotFound)
+					return
+				}
+			}
+		}
+		handler.ServeHTTP(w, req)
+	}))
+	defer httpServer.Close()
+
+	configured := conf.MCPServer{ID: "expired-session-test", Name: "expired-session-test", Type: "http",
+		URL: httpServer.URL, Enabled: true, DisableStandaloneSSE: true, Timeout: 5}
+	session, _, _, err := connectServer(context.Background(), configured, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mcpMu.Lock()
+	oldConns, oldServers, oldRuntime := mcpConns, mcpServers, mcpRuntime
+	oldConnecting, oldCancel, oldDone, oldGeneration := mcpConnecting, mcpConnectCancel, mcpConnectDone, mcpGeneration
+	mcpConns = []Connection{{ServerID: configured.ID, ServerName: configured.Name, Session: session, Config: configured}}
+	mcpServers = []conf.MCPServer{configured}
+	mcpRuntime = map[string]mcpRuntimeState{configured.ID: {Status: "connected"}}
+	mcpConnecting = false
+	mcpConnectCancel = nil
+	mcpConnectDone = nil
+	mcpMu.Unlock()
+	t.Cleanup(func() {
+		mcpMu.Lock()
+		if mcpConnectCancel != nil {
+			mcpConnectCancel()
+		}
+		connections := mcpConns
+		mcpConns, mcpServers, mcpRuntime = oldConns, oldServers, oldRuntime
+		mcpConnecting, mcpConnectCancel, mcpConnectDone, mcpGeneration = oldConnecting, oldCancel, oldDone, oldGeneration
+		mcpMu.Unlock()
+		closeConnections(connections)
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	result, err := mcpToolContextHandler(configured.Name, "execute", 5*time.Second, false)(ctx, nil)
+	if err != nil || result.IsError || result.ExecutionUnknown || len(result.Content) == 0 || result.Content[0].Text != "done" {
+		t.Fatalf("unexpected tool result: result=%#v err=%v", result, err)
+	}
+	if attempts.Load() != 2 || executions.Load() != 1 {
+		t.Fatalf("unexpected call counts: attempts=%d executions=%d", attempts.Load(), executions.Load())
+	}
+
+	reject.Store(true)
+	denyInitialize.Store(true)
+	failedCtx, failedCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer failedCancel()
+	result, err = mcpToolContextHandler(configured.Name, "execute", 5*time.Second, false)(failedCtx, nil)
+	if err != nil || !result.IsError || result.ExecutionUnknown {
+		t.Fatalf("reconnect failure was not reported as a known rejection: result=%#v err=%v", result, err)
+	}
+	if attempts.Load() != 3 || executions.Load() != 1 {
+		t.Fatalf("unexpected counts after reconnect failure: attempts=%d executions=%d", attempts.Load(), executions.Load())
 	}
 }
 
@@ -400,6 +533,7 @@ func TestReconnectMCPAsyncKeepsOtherConnections(t *testing.T) {
 	oldRuntime := mcpRuntime
 	oldConnecting := mcpConnecting
 	oldCancel := mcpConnectCancel
+	oldDone := mcpConnectDone
 	oldGeneration := mcpGeneration
 	mcpConns = []Connection{
 		{ServerID: serverA.ID, ServerName: serverA.Name, Config: serverA},
@@ -420,6 +554,7 @@ func TestReconnectMCPAsyncKeepsOtherConnections(t *testing.T) {
 		mcpRuntime = oldRuntime
 		mcpConnecting = oldConnecting
 		mcpConnectCancel = oldCancel
+		mcpConnectDone = oldDone
 		mcpGeneration = oldGeneration
 		mcpMu.Unlock()
 	})

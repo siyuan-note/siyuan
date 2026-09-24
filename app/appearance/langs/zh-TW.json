@@ -1,4 +1,5 @@
 {
+	"layoutSelectedCount": "已選 ${x} 個",
 	"workspaceStorage": "工作空間容量",
 	"workspaceStorageTip": "目前工作空間已儲存檔案的大小，資源已包含在 data 中，可能與系統顯示的磁碟用量不同",
 	"workspaceStorageFailed": "容量統計失敗，請重新整理後再試",

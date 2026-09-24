@@ -1,4 +1,5 @@
 {
+	"layoutSelectedCount": "${x} sélectionné(s)",
 	"workspaceStorage": "Espace du répertoire de travail",
 	"workspaceStorageTip": "Taille des fichiers locaux du répertoire de travail actuel ; les ressources sont incluses dans data ; l’espace disque indiqué par le système peut différer",
 	"workspaceStorageFailed": "Impossible de calculer l’espace utilisé. Actualisez pour réessayer.",

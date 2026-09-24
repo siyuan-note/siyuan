@@ -84,6 +84,13 @@ const openLayout = (name: string) => {
     });
 };
 
+export const openSelectedLayouts = async (mainName: string, workspaceIDs: string[]) => {
+    await Promise.allSettled(workspaceIDs.map(id => openWindowWorkspace(id)));
+    if (mainName) {
+        openLayout(mainName);
+    }
+};
+
 type LayoutTarget = {type: "main", name: string} | {type: "window", id: string, opened: boolean};
 
 export const getLayoutActions = (target: LayoutTarget, time?: number): IMenu[] => {
@@ -157,12 +164,32 @@ export const getLayoutSubMenu = (): IMenu[] => {
         iconHTML: "",
         type: "empty",
         label: `<div class="fn__flex-column b3-menu__filter window-workspace__list"><div class="window-workspace__search fn__flex-shrink"><input spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}"></div>
-<div class="fn__hr"></div><div class="fn__flex-1 window-workspace__entries"></div></div>`,
+<div class="window-workspace__toolbar fn__flex"><span class="fn__flex-1" data-type="selected-count"></span><button data-id="open-selected" class="b3-button b3-button--outline b3-button--small">${window.siyuan.languages.openBy}</button></div>
+<div class="fn__flex-1 window-workspace__entries"></div></div>`,
         bind(menuElement) {
             const input = menuElement.querySelector<HTMLInputElement>(".b3-text-field");
             const list = menuElement.querySelector<HTMLElement>(".window-workspace__entries");
             const menu = window.siyuan.menus.menu;
             let openIDs: string[] = [];
+            let selectedMain = "";
+            const selectedWindows = new Set<string>();
+            const updateSelection = () => {
+                const count = Number(!!selectedMain) + selectedWindows.size;
+                const button = menuElement.querySelector<HTMLButtonElement>("[data-id='open-selected']");
+                const label = menuElement.querySelector<HTMLElement>("[data-type='selected-count']");
+                if (button) {
+                    button.disabled = count === 0;
+                }
+                if (label) {
+                    label.textContent = window.siyuan.languages.layoutSelectedCount.replace("${x}", count.toString());
+                }
+            };
+            menuElement.querySelector<HTMLButtonElement>("[data-id='open-selected']").addEventListener("click", event => {
+                event.preventDefault();
+                event.stopPropagation();
+                menu.remove();
+                void openSelectedLayouts(selectedMain, Array.from(selectedWindows));
+            });
             const closeActions = () => {
                 list.querySelectorAll<HTMLElement>(":scope > .b3-menu__item").forEach(row => {
                     row.classList.remove("b3-menu__item--show");
@@ -186,7 +213,7 @@ export const getLayoutSubMenu = (): IMenu[] => {
             };
             const appendRow = (target: LayoutTarget, name: string, time?: number) => {
                 const element = new MenuItem({
-                    icon: target.type === "main" ? "iconLayout" : "iconOpenWindow",
+                    iconHTML: "",
                     label: escapeHtml(name),
                     type: "submenu",
                     submenu: getLayoutActions(target, time),
@@ -206,6 +233,38 @@ export const getLayoutSubMenu = (): IMenu[] => {
                 } else {
                     element.dataset.name = target.name;
                 }
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.className = "window-workspace__check";
+                checkbox.checked = target.type === "main" ? selectedMain === target.name : selectedWindows.has(target.id);
+                checkbox.setAttribute("aria-label", name);
+                checkbox.addEventListener("click", event => event.stopPropagation());
+                checkbox.addEventListener("keydown", event => event.stopPropagation());
+                checkbox.addEventListener("change", () => {
+                    if (target.type === "main") {
+                        selectedMain = checkbox.checked ? target.name : "";
+                        list.querySelectorAll<HTMLInputElement>("[data-name] .window-workspace__check").forEach(other => {
+                            if (other !== checkbox) {
+                                other.checked = false;
+                            }
+                        });
+                    } else if (checkbox.checked) {
+                        selectedWindows.add(target.id);
+                    } else {
+                        selectedWindows.delete(target.id);
+                    }
+                    updateSelection();
+                });
+                const selection = document.createElement("span");
+                selection.className = "window-workspace__selection";
+                selection.append(checkbox);
+                selection.addEventListener("click", event => {
+                    event.stopPropagation();
+                    if (event.target !== checkbox) {
+                        checkbox.click();
+                    }
+                });
+                element.insertBefore(selection, element.firstChild);
                 const label = element.querySelector<HTMLElement>(".b3-menu__label");
                 label.classList.add("fn__ellipsis", "window-workspace__name");
                 label.setAttribute("title", name);
@@ -233,10 +292,11 @@ export const getLayoutSubMenu = (): IMenu[] => {
                     .filter(item => item.name.toLowerCase().includes(query))
                     .forEach(item => appendRow({type: "main", name: item.name}, item.name, item.time));
                 const workspaces = isBrowser() ? [] : getWindowWorkspaces().filter(item => item.name.toLowerCase().includes(query));
-                if (!isBrowser() && (!query || workspaces.length)) {
+                if (!isBrowser()) {
                     list.insertAdjacentHTML("beforeend", `<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label">${window.siyuan.languages.windowWorkspaces}</span></div>`);
                     workspaces.forEach(item => appendRow({type: "window", id: item.id, opened: openIDs.includes(item.id)}, item.name, item.time));
                 }
+                updateSelection();
                 if (selectFirst) {
                     menu.element.querySelectorAll(".b3-menu__item--current").forEach(item => {
                         item.classList.remove("b3-menu__item--current");

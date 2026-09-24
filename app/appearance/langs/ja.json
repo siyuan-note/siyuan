@@ -1,4 +1,5 @@
 {
+	"layoutSelectedCount": "${x} 件選択済み",
 	"workspaceStorage": "ワークスペースの容量",
 	"workspaceStorageTip": "現在のワークスペースに保存されたファイルのサイズ。アセットは data に含まれ、システムが表示するディスク使用量とは異なる場合があります",
 	"workspaceStorageFailed": "容量を集計できませんでした。更新して再試行してください。",

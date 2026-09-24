@@ -14,4 +14,38 @@
   &__name {
     min-width: 0;
   }
+
+  &__check {
+    flex: none;
+    margin: 0;
+  }
+
+  &__selection {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    position: relative;
+    flex: none;
+    box-sizing: border-box;
+    width: 36px;
+    height: auto;
+    margin-left: -8px;
+    padding-left: 10px;
+    cursor: pointer;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      bottom: -1px;
+      left: 0;
+      right: -6px;
+    }
+  }
+
+  &__toolbar {
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px 0 9px;
+  }
 }

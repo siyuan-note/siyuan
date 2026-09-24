@@ -98,3 +98,16 @@ test("删除只移除选中的布局", () => {
     assert.deepEqual(f.window.siyuan.storage.layouts.map(item => item.name), ["Other"]);
     assert.deepEqual(f.window.siyuan.storage.paths, ["current-path"]);
 });
+
+test("批量打开先启动所有新窗口布局，再恢复主窗口布局", async () => {
+    const f = fixture();
+    await f.api.openSelectedLayouts("Reading", ["window-a", "window-b"]);
+    assert.deepEqual(f.calls.map(call => call.action), ["open", "open", "/api/system/setUILayout", "paths", "reload"]);
+    assert.deepEqual(f.calls.slice(0, 2).map(call => call.value), ["window-a", "window-b"]);
+});
+
+test("批量打开可以只选择新窗口布局", async () => {
+    const f = fixture();
+    await f.api.openSelectedLayouts("", ["window-a", "window-b"]);
+    assert.deepEqual(f.calls.map(call => call.action), ["open", "open"]);
+});

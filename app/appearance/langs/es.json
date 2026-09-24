@@ -1,4 +1,5 @@
 {
+	"layoutSelectedCount": "${x} seleccionados",
 	"workspaceStorage": "Almacenamiento del espacio de trabajo",
 	"workspaceStorageTip": "Tamaño de los archivos locales del espacio de trabajo actual; los recursos se incluyen en data; el uso de disco indicado por el sistema puede ser diferente",
 	"workspaceStorageFailed": "No se pudo calcular el almacenamiento. Actualiza para reintentar.",

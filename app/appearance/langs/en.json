@@ -1,4 +1,5 @@
 {
+	"layoutSelectedCount": "${x} selected",
 	"workspaceStorage": "Workspace storage",
 	"workspaceStorageTip": "Local file sizes in the current workspace; assets are included in data; system-reported disk usage may differ",
 	"workspaceStorageFailed": "Unable to calculate storage. Refresh to retry.",

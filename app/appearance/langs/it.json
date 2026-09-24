@@ -1,4 +1,5 @@
 {
+	"layoutSelectedCount": "${x} selezionati",
 	"workspaceStorage": "Spazio occupato dall’area di lavoro",
 	"workspaceStorageTip": "Dimensione dei file locali nell’area di lavoro corrente; le risorse sono incluse in data; l’utilizzo del disco indicato dal sistema può differire",
 	"workspaceStorageFailed": "Impossibile calcolare lo spazio occupato. Aggiorna per riprovare.",

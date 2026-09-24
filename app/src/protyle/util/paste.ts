@@ -53,6 +53,7 @@ import {
     shouldPreservePastedBlockStructure
 } from "./pasteSource";
 import {normalizePasteResponse} from "./pasteResponse";
+import {shouldPasteMarkdownFromHTML} from "./markdownClipboard";
 import {applyLuteMarkdownSyntax} from "../render/luteMarkdownSyntax";
 import {convertOfficeLists} from "./officeList";
 import {extractOfficeMathHTML} from "./officeMath";
@@ -807,7 +808,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         (textHTML || /<[a-z][^>]*>/i.test(textPlain))) {
         // 表格单元格将可解析的富文本转换为块 DOM，再统一检查不支持的块和净化行内标记。
         const richBlockDOM = textHTML ?
-            (/^<span\b[^>]*\bdata-type\s*=\s*["']custom_[^>]*>[\s\S]*<\/span>$/i.test(textHTML.trim()) ?
+            (!preserveSourceFormat && shouldPasteMarkdownFromHTML(textHTML, textPlain) ?
+                protyle.lute.Md2BlockDOM(textPlain) :
+                /^<span\b[^>]*\bdata-type\s*=\s*["']custom_[^>]*>[\s\S]*<\/span>$/i.test(textHTML.trim()) ?
                 protyle.lute.Md2BlockDOM(textHTML) : protyle.lute.HTML2BlockDOM(textHTML)) :
             protyle.lute.Md2BlockDOM(textPlain);
         const richTemplate = document.createElement("template");
@@ -1307,6 +1310,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     0 > textHTMLLowercase.indexOf("</h3>") && 0 > textHTMLLowercase.indexOf("</h4>") &&
                     0 > textHTMLLowercase.indexOf("</h5>") && 0 > textHTMLLowercase.indexOf("</h6>"))) {
                 // 豆包复制粘贴问题 https://github.com/siyuan-note/siyuan/issues/13265 https://github.com/siyuan-note/siyuan/issues/14313
+                isHTML = false;
+            }
+            // 豆包同时提供 Markdown 和未解析公式的 HTML，内容与结构一致时使用完整原文。
+            // https://github.com/siyuan-note/siyuan/issues/19820
+            if (isHTML && !preserveSourceFormat && !officeListConverted && !files?.length &&
+                !mathML && !office && !officeMathHTML && !wps && !wpsPresentation &&
+                shouldPasteMarkdownFromHTML(textHTML, textPlain)) {
                 isHTML = false;
             }
         } else if (textPlain && textPlain.trimStart().startsWith("<")) {

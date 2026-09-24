@@ -738,7 +738,9 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
         min: 0,
         save: (value) => {
             if (typeof value === "number") {
-                fetchPost("/api/notebook/setNotebookCryptoAutoLock", {autoLockMinutes: value});
+                fetchPost("/api/notebook/setNotebookCryptoAutoLock", {autoLockMinutes: value}, () => {
+                    window.siyuan.config.notebookCrypto.autoLockMinutes = value;
+                });
             }
         },
     });

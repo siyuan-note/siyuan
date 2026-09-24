@@ -179,6 +179,21 @@ export class Toolbar {
         const element = document.createElement("div");
         element.className = "protyle-toolbar fn__none";
         this.element = element;
+        element.addEventListener("mousedown", event => {
+            const range = this.range;
+            if (!range || range.collapsed || !(event.target as Element).closest("button")) {
+                return;
+            }
+            const start = range.startContainer.nodeType === Node.ELEMENT_NODE ?
+                range.startContainer as Element : range.startContainer.parentElement;
+            const end = range.endContainer.nodeType === Node.ELEMENT_NODE ?
+                range.endContainer as Element : range.endContainer.parentElement;
+            const title = start?.closest(".tab-item-info");
+            // 点击格式按钮时保留页签标题焦点，避免选区在 click 前因失焦而消失。
+            if (title && title === end?.closest(".tab-item-info")) {
+                event.preventDefault();
+            }
+        });
         this.subElement = document.createElement("div");
         /// #if MOBILE
         this.subElement.className = "protyle-util fn__none protyle-util--mobile";

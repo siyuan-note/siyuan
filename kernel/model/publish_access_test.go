@@ -1740,6 +1740,11 @@ func TestFilterCriteriaByPublishAccess(t *testing.T) {
 }
 
 func TestFilterAssetContentByPublishAccess(t *testing.T) {
+	t.Run("body", func(t *testing.T) { testPublishDocAssets(t, false) })
+	t.Run("title image", func(t *testing.T) { testPublishDocAssets(t, true) })
+}
+
+func testPublishDocAssets(t *testing.T, titleImage bool) {
 	const (
 		boxID             = "20260804030000-boxid01"
 		publicDocID       = "20260804030001-public1"
@@ -1775,6 +1780,10 @@ func TestFilterAssetContentByPublishAccess(t *testing.T) {
 		dom := `<div data-node-id="` + docID + `" data-type="htmlblock"><img src="` + asset + `" data-src="` + asset + `" /></div>`
 		node := util.NewLute().BlockDOM2Tree(dom).Root.FirstChild
 		tree.Root.AppendChild(node)
+		if titleImage {
+			node.Unlink()
+			tree.Root.SetIALAttr("title-img", `background-image: url(&quot;`+asset+`?v=1&amp;size=large&quot;); background-position: center;`)
+		}
 		if _, err := filesys.WriteTree(tree); err != nil {
 			t.Fatal(err)
 		}
@@ -1801,6 +1810,18 @@ func TestFilterAssetContentByPublishAccess(t *testing.T) {
 
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	if titleImage {
+		assets, err := DocAssets(publicDocID, true)
+		if err != nil || len(assets) != 1 || assets[0] != publicAsset+"?v=1&size=large" {
+			t.Fatalf("unexpected title image assets with query: %v, %v", assets, err)
+		}
+	}
+	for _, asset := range []string{publicAsset, protectedAsset, disabledAsset, "assets/unreferenced.png"} {
+		got := CheckAbsPathAccessableByPublishAccess(c, filepath.Join(util.DataDir, asset), publishAccess)
+		if got != (asset == publicAsset) {
+			t.Errorf("unexpected unauthenticated access to %s: %v", asset, got)
+		}
+	}
 	filtered := FilterAssetContentByPublishAccess(c, publishAccess, newAssetContents())
 	if len(filtered) != 1 || filtered[0].Path != publicAsset {
 		t.Fatalf("unexpected unauthenticated asset contents: %+v", filtered)
@@ -1811,6 +1832,9 @@ func TestFilterAssetContentByPublishAccess(t *testing.T) {
 		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
 	})
 	filtered = FilterAssetContentByPublishAccess(c, publishAccess, newAssetContents())
+	if !CheckAbsPathAccessableByPublishAccess(c, filepath.Join(util.DataDir, protectedAsset), publishAccess) {
+		t.Error("password protected asset should be accessible after authorization")
+	}
 	if len(filtered) != 2 || filtered[0].Path != publicAsset || filtered[1].Path != protectedAsset {
 		t.Fatalf("unexpected authenticated asset contents: %+v", filtered)
 	}

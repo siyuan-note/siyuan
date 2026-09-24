@@ -282,16 +282,26 @@ export const cleanListMindmapHTML = (html: string): string => {
     return template.innerHTML;
 };
 
-// 转换列表类型时退出脑图显示，保留节点、连接元数据及原 DOM 供撤销使用。
-export const convertListMindmapToList = (element: Element, type: string, lute: Lute): string | undefined => {
-    if (element.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1" ||
-        !["OL2UL", "UL2OL", "UL2TL", "OL2TL", "TL2UL", "TL2OL"].includes(type)) {
-        return;
-    }
+// 转换前将思维导图块还原为列表结构，并移除视图节点。
+export const listMindmapConversionSource = (element: Element): Element => {
     const template = document.createElement("template");
     template.innerHTML = cleanListMindmapHTML(element.outerHTML);
     const source = template.content.firstElementChild;
+    if (source.getAttribute("data-type") === "NodeMindmap") {
+        retagMindmapBranch(source, false);
+    }
     source.removeAttribute(Constants.CUSTOM_SY_LIST_MINDMAP);
+    return source;
+};
+
+// 转换列表类型时退出脑图显示，保留节点、连接元数据及原 DOM 供撤销使用。
+export const convertListMindmapToList = (element: Element, type: string, lute: Lute): string | undefined => {
+    if (element.getAttribute("data-type") !== "NodeMindmap" &&
+        element.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1" ||
+        !["OL2UL", "UL2OL", "UL2TL", "OL2TL", "TL2UL", "TL2OL"].includes(type)) {
+        return;
+    }
+    const source = listMindmapConversionSource(element);
     const from = {o: "OL", t: "TL", u: "UL"}[source.getAttribute("data-subtype")] || "UL";
     const to = type.split("2")[1];
     if (from === to) {

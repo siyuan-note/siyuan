@@ -127,9 +127,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                             inputSource: string) => {
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
-        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
+        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
-        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, ListMindmapView};")(
+        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView};")(
         async (element: Element) => {
             const formulas = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
             await Promise.resolve();
@@ -669,6 +669,44 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.ok(result.textContent.includes("Alpha") && result.textContent.includes("Beta"));
         }
     }
+    const typedSource = document.createElement("div");
+    typedSource.innerHTML = lute.Md2BlockDOM("* Alpha\n  * Nested\n* Beta\n");
+    const typedList = typedSource.firstElementChild as HTMLElement;
+    const typedIDs = ids(typedList);
+    const typedMetadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: "Example"});
+    typedList.setAttribute("custom-sy-list-mindmap-data", typedMetadata);
+    api.retagMindmapBranch(typedList, true);
+    typedList.append(derived.cloneNode(true));
+    const typedBefore = typedList.outerHTML;
+    const normalized = api.listMindmapConversionSource(typedList);
+    check.equal(normalized.getAttribute("data-type"), "NodeList");
+    check.deepEqual(ids(normalized), typedIDs);
+    check.equal(normalized.querySelector(".mindmap-view"), null);
+    check.equal(typedList.outerHTML, typedBefore, "preparing a conversion never mutates the undo source");
+    for (const [conversion, subtype] of [["OL2UL", "u"], ["UL2OL", "o"], ["UL2TL", "t"]]) {
+        const converted = document.createElement("div");
+        converted.innerHTML = api.convertListMindmapToList(typedList, conversion, lute);
+        const result = converted.firstElementChild as HTMLElement;
+        check.equal(result.getAttribute("data-type"), "NodeList");
+        check.equal(result.getAttribute("data-subtype"), subtype);
+        check.equal(result.querySelector("[data-type=\"NodeMindmapItem\"]"), null);
+        check.equal(result.querySelector("[data-type=\"NodeMindmap\"]"), null);
+        check.deepEqual(ids(result), typedIDs);
+        check.equal(result.getAttribute("custom-sy-list-mindmap-data"), typedMetadata);
+        check.equal(result.querySelector(".mindmap-view"), null);
+        check.ok(result.textContent.includes("Nested"));
+    }
+    const paragraphs = document.createElement("div");
+    // @ts-expect-error Lute 的类型声明未包含列表取消方法。
+    paragraphs.innerHTML = lute.CancelList(normalized.outerHTML);
+    check.ok(paragraphs.textContent.includes("Alpha") && paragraphs.textContent.includes("Nested"));
+    check.equal(paragraphs.querySelector('[data-type="NodeMindmap"]'), null);
+    lute.SetTabs(true);
+    const convertedTabs = api.convertTabsList(normalized, "List2Tabs", lute);
+    check.equal(convertedTabs.getAttribute("data-type"), "NodeTabs");
+    check.equal(convertedTabs.querySelectorAll(':scope > [data-type="NodeTabItem"]').length, 2);
+    check.ok(convertedTabs.textContent.includes("Nested"));
+    check.equal(typedList.outerHTML, typedBefore);
     check.equal(cleaned.includes("Derived editor"), false);
     check.equal(cleaned.includes("data-mindmap-view-rendered"), false);
     check.equal(cleaned.includes("data-mindmap-view-editing"), false);
@@ -730,7 +768,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     let interactions = 0;
     let undo = 0;
     let redo = 0;
-    let exits = 0;
     let finishAllowed: boolean | Promise<boolean> = true;
     const options = {
         host, model,
@@ -755,21 +792,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         onRelationAdd: (...args: unknown[]) => relationAdditions.push(args),
         onRelationChange: (...args: unknown[]) => relationChanges.push(args),
         onRelationDelete: (id: string) => relationDeletions.push(id),
-        onExit: () => exits++,
+        onExit: (): void => undefined,
     };
     const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     const settle = async () => { await frame(); await frame(); };
     const view = new api.ListMindmapView(options);
     await settle();
-    const listButton = host.querySelector<HTMLButtonElement>('.mindmap-view__toolbar button[aria-label="listBlock"]');
-    check.ok(listButton);
-    check.equal(listButton.querySelector("use").getAttribute("xlink:href"), "#iconList");
-    finishAllowed = false;
-    listButton.click();
-    check.equal(exits, 0, "conversion waits for pending node edits");
-    finishAllowed = true;
-    listButton.click();
-    check.equal(exits, 1, "the toolbar restores the list conversion action");
     const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
     check.equal(viewport.getAttribute("data-prevent-swipe"), "true");
     const originalCapture = HTMLElement.prototype.setPointerCapture;
@@ -1826,7 +1854,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
 
     const readonly = new api.ListMindmapView({...options, readOnly: true});
     await settle();
-    check.equal(host.querySelector('.mindmap-view__toolbar [aria-label="listBlock"]'), null);
     check.equal(host.querySelector('.mindmap-view__toolbar [aria-label="listMindmapChild"]'), null);
     check.equal(host.querySelector('[aria-label="undo"]'), null);
     nodeElement(beta).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
@@ -2775,7 +2802,8 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsRender.ts"]
             .map(file => compile(path.join(__dirname, file))).join("\n") +
         "return {tabsRender, destroyTabsRender, getTabTask};})();\n";
-    const source = tabsSource + compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
+    const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +
+        compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
         compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "fold.ts")) +
         compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "view.ts")) +
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +

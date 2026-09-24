@@ -1797,7 +1797,7 @@ export class Gutter {
                     type: "Blocks2Hs",
                 }));
             }
-        } else if (type === "NodeList" && allowStructuralMutation) {
+        } else if ((type === "NodeList" || type === "NodeMindmap") && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsOneInto({
                 menuId: "paragraph",
                 id,
@@ -1835,7 +1835,8 @@ export class Gutter {
                 type: "List2Tabs"
             }));
             const listSubtype = nodeElement.getAttribute("data-subtype");
-            const isMindmap = nodeElement.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1";
+            const isMindmap = type === "NodeMindmap" ||
+                nodeElement.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1";
             if (isMindmap) {
                 [
                     {menuId: "list", icon: "iconList", label: "list", type: "OL2UL"},

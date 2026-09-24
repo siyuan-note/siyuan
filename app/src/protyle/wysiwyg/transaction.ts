@@ -75,7 +75,7 @@ import {
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
 import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
-import {cleanListMindmapHTML, convertListMindmapToList} from "../render/listMindmap/model";
+import {cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource} from "../render/listMindmap/model";
 import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
@@ -2284,15 +2284,18 @@ export const turnsOneInto = async (options: {
             source = completeTabsListSource(source, full);
             oldHTML = source.outerHTML;
         }
-        const converted = convertTabsList(source, options.type, options.protyle.lute);
+        const converted = convertTabsList(source.getAttribute("data-type") === "NodeMindmap" ?
+            listMindmapConversionSource(source) : source, options.type, options.protyle.lute);
         if (!converted) {
             return;
         }
         newHTML = converted.outerHTML;
     } else {
         const listHTML = convertListMindmapToList(options.nodeElement, options.type, options.protyle.lute);
+        const sourceHTML = options.type === "CancelList" && options.nodeElement.getAttribute("data-type") === "NodeMindmap" ?
+            listMindmapConversionSource(options.nodeElement).outerHTML : cleanListMindmapHTML(options.nodeElement.outerHTML);
         // @ts-ignore
-        newHTML = listHTML ?? options.protyle.lute[options.type](cleanListMindmapHTML(options.nodeElement.outerHTML), options.level);
+        newHTML = listHTML ?? options.protyle.lute[options.type](sourceHTML, options.level);
     }
     disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);

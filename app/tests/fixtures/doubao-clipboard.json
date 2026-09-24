@@ -1,0 +1,4 @@
+{
+  "text": "**示例**\r\n名义增长率 $g=4.2\\%$\r\n国民收入恒等式 $S-A=C_A$\r\n\r\n$$\r\n\\(Y=C+I+G\\)\r\n$$\r\n\r\n**现象**：\r\n在思源编辑器手动输入 `$g=4.2\\%$`、`$S-A=C_A$`，预览可以正常渲染。\r\n\r\n**问题**：\r\n1. 点击豆包下方的复制按钮，复制内容粘贴到思源，粘贴后文本变成：\r\n`示例 名义增长率 $\\(g=4.2\\%\\)$ 国民收入恒等式 $$S-A=C_A$$`\r\n块公式粘贴后变成 `$$(\\(Y=C+I+G\\))$$`\r\n2. `$g=4.2\\%$` 里百分号前面的反斜杠 `\\` 丢失",
+  "html": "<!--StartFragment--><html><head></head><body><p><strong>示例</strong>\n名义增长率 $g=4.2%$\n国民收入恒等式 $S-A=C_A$</p>\n<p>$$\n(Y=C+I+G)\n$$</p>\n<p><strong>现象</strong>：\n在思源编辑器手动输入 <code>$g=4.2\\%$</code>、<code>$S-A=C_A$</code>，预览可以正常渲染。</p>\n<p><strong>问题</strong>：</p>\n<ol style=\"list-style-type: decimal;\">\n<li>点击豆包下方的复制按钮，复制内容粘贴到思源，粘贴后文本变成：\n<code>示例 名义增长率 $\\(g=4.2\\%\\)$ 国民收入恒等式 $$S-A=C_A$$</code>\n块公式粘贴后变成 <code>$$(\\(Y=C+I+G\\))$$</code></li>\n<li><code>$g=4.2\\%$</code> 里百分号前面的反斜杠 <code>\\</code> 丢失</li>\n</ol>\n</body></html><!--EndFragment-->"
+}

@@ -19,6 +19,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -28,6 +29,16 @@ func serviceTestWrite(c *gin.Context, response apicontract.Response[apicontract.
 }
 func serviceTestHandler(c *gin.Context) {
 	serviceTestWrite(c, PreparePrivateService(c, apicontract.EmptyRequest{}))
+}
+
+// newPluginServiceWorkspace 把工作空间指向临时目录，插件私有服务的文件响应以此为边界。
+func newPluginServiceWorkspace(t *testing.T) (ret string) {
+	t.Helper()
+	oldWorkspaceDir := util.WorkspaceDir
+	ret = t.TempDir()
+	util.WorkspaceDir = ret
+	t.Cleanup(func() { util.WorkspaceDir = oldWorkspaceDir })
+	return
 }
 
 func newServiceTestPlugin(t *testing.T, script string) (*KernelPlugin, context.CancelFunc) {
@@ -57,7 +68,7 @@ func TestPluginServiceHTTPBranches(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	file := filepath.Join(t.TempDir(), "content.txt")
+	file := filepath.Join(newPluginServiceWorkspace(t), "content.txt")
 	if err = os.WriteFile(file, []byte("file content"), 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +202,7 @@ func TestPluginServiceProxyAndFiles(t *testing.T) {
 }
 
 func TestPluginServiceFileRangesRedirectAndPriority(t *testing.T) {
-	file := filepath.Join(t.TempDir(), "range.txt")
+	file := filepath.Join(newPluginServiceWorkspace(t), "range.txt")
 	if err := os.WriteFile(file, []byte("0123456789"), 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -281,4 +292,88 @@ func TestPluginServiceStreamingLifecycle(t *testing.T) {
 	case <-time.After(3 * time.Second):
 		t.Fatal("plugin cancellation did not close SSE")
 	}
+}
+
+// TestPluginServiceFileConfinedToWorkspace 校验插件私有服务只能服务工作空间内的文件。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phmw-4rgv-r4xv
+func TestPluginServiceFileConfinedToWorkspace(t *testing.T) {
+	root := newPluginServiceWorkspace(t)
+	const secret = "PLUGIN-FILE-DISCLOSURE-SECRET"
+
+	outsideDir := t.TempDir()
+	outside := filepath.Join(outsideDir, "secret.txt")
+	if err := os.WriteFile(outside, []byte(secret), 0600); err != nil {
+		t.Fatal(err)
+	}
+	inside := filepath.Join(root, "inside.txt")
+	if err := os.WriteFile(inside, []byte("inside content"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	request := func(path string) *httptest.ResponseRecorder {
+		engine := gin.New()
+		engine.Any("/plugin/private/:name/*path", func(c *gin.Context) {
+			serviceTestWrite(c, pluginServiceHTTPResponse(c, "test", &HttpResponse{
+				StatusCode: 200,
+				Body:       &ResponseBody{File: &ResponseFile{Path: path}},
+			}))
+		})
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("GET", "/plugin/private/test/file", nil))
+		return recorder
+	}
+
+	// 控制组：工作空间内的文件照常服务
+	recorder := request(inside)
+	if "inside content" != recorder.Body.String() || http.StatusOK != recorder.Code {
+		t.Fatalf("in-workspace file was not served: %d %q", recorder.Code, recorder.Body.String())
+	}
+
+	// 控制组：ResponseFile.Path 的文档示例形式（以工作空间根为基准、带前导斜杠）照常服务
+	example := filepath.Join(root, "data", "plugins", "sample", "app", "index.html")
+	if err := os.MkdirAll(filepath.Dir(example), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(example, []byte("plugin page"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	recorder = request("/data/plugins/sample/app/index.html")
+	if "plugin page" != recorder.Body.String() || http.StatusOK != recorder.Code {
+		t.Fatalf("documented leading-slash path was not served: %d %q", recorder.Code, recorder.Body.String())
+	}
+
+	for _, tt := range []struct {
+		name string
+		path string
+	}{
+		{"absolute path outside the workspace", outside},
+		{"relative traversal outside the workspace", strings.Repeat("../", 16) + "etc/hosts"},
+		{"workspace escaped by ..", filepath.Join(root, "..", "..", filepath.Base(outsideDir), "secret.txt")},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			recorder := request(tt.path)
+			if strings.Contains(recorder.Body.String(), secret) {
+				t.Fatalf("plugin service served a file outside the workspace: %q", recorder.Body.String())
+			}
+			if http.StatusNotFound != recorder.Code {
+				t.Fatalf("unexpected status %d: %q", recorder.Code, recorder.Body.String())
+			}
+		})
+	}
+
+	// 工作空间内的符号链接指向工作空间外时同样拒绝
+	t.Run("symlink pointing outside the workspace", func(t *testing.T) {
+		link := filepath.Join(root, "link.txt")
+		if err := os.Symlink(outside, link); err != nil {
+			// Windows 未开启开发者模式时创建符号链接需要特权，链接解析本身由 model 的用例覆盖
+			t.Skipf("symlink is unavailable: %s", err)
+		}
+		recorder := request(link)
+		if strings.Contains(recorder.Body.String(), secret) {
+			t.Fatalf("plugin service followed a symlink outside the workspace: %q", recorder.Body.String())
+		}
+		if http.StatusNotFound != recorder.Code {
+			t.Fatalf("unexpected status %d: %q", recorder.Code, recorder.Body.String())
+		}
+	})
 }

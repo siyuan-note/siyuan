@@ -40,6 +40,7 @@ const createHarness = (disabled = false, richPaste = false) => {
         "./selection": {getEditorRange: () => position.range},
         "./hasClosest": {hasClosestBlock: (): undefined => undefined},
         "./wpsPresentation": {extractWPSPresentationClipboard: (): undefined => undefined},
+        "./markdownClipboard": {shouldPasteMarkdownFromHTML: () => false},
         "./compatibility": {getLocalFiles: async () => localFiles, isInHarmony: () => false,
             getTextSiyuanFromTextHTML: (html: string) => ({textSiyuan: "", textHtml: html})},
         "../upload": {

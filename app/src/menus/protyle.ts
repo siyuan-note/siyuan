@@ -2608,6 +2608,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             });
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (!event.isComposing && event.key === "Enter") {
+                    event.preventDefault();
+                    event.stopPropagation();
                     insertRowAbove(protyle, range, cellElement, nodeElement, parseInt(element.querySelector("input").value));
                     window.siyuan.menus.menu.remove();
                 }
@@ -2632,6 +2634,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                 });
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     if (!event.isComposing && event.key === "Enter") {
+                        event.preventDefault();
+                        event.stopPropagation();
                         insertRow(protyle, range, cellElement, nodeElement, parseInt(element.querySelector("input").value));
                         window.siyuan.menus.menu.remove();
                     }
@@ -2657,6 +2661,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                 });
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     if (!event.isComposing && event.key === "Enter") {
+                        event.preventDefault();
+                        event.stopPropagation();
                         insertColumn(protyle, nodeElement, cellElement, "beforebegin", range, parseInt(element.querySelector("input").value));
                         window.siyuan.menus.menu.remove();
                     }
@@ -2682,6 +2688,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                 });
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     if (!event.isComposing && event.key === "Enter") {
+                        event.preventDefault();
+                        event.stopPropagation();
                         insertColumn(protyle, nodeElement, cellElement, "afterend", range, parseInt(element.querySelector("input").value));
                         window.siyuan.menus.menu.remove();
                     }

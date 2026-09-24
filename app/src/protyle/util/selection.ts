@@ -749,9 +749,9 @@ export const restoreFocusContext = (protyle: IProtyle, context: Pick<IOperation[
             cell.tabIndex = -1;
             cell.focus({preventScroll: true});
             focusByRange(range);
-            void import("../render/tableCellRichEditor").then(module => {
+            void import("../render/tableCellRichEditor").then(async module => {
                 if (cell.isConnected && cell.contains(getSelection().focusNode)) {
-                    module.openTableCellRichEditor(protyle, cell, undefined, undefined, saved);
+                    await module.openTableCellRichEditor(protyle, cell, undefined, undefined, saved);
                     if (getSelection().rangeCount) {
                         protyle.toolbar.range = getSelection().getRangeAt(0);
                     }

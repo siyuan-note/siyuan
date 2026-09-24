@@ -40,6 +40,7 @@ const openCalendarItem = (protyle: IProtyle, blockElement: HTMLElement, row: IAV
         itemID: row.id, valueID: primary.id || primary.value.id,
         title: primary.value.block?.content || window.siyuan.languages.untitled,
         boundBlockID: primary.value.block?.id, isDetached: !!primary.value.isDetached,
+        focusPrimary: true,
     });
 };
 

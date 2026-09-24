@@ -162,7 +162,10 @@ var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Con
 		content := c.Query("content")
 		id := c.Query("id")
 		if strings.Contains(content, ".action{") {
-			// 模板内容会按 id 读取工作区数据，只读角色必须通过发布访问控制后才能执行 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-whcx-xxqh-c838
+			// 模板内容会按 id 读取工作区数据，只读角色必须通过发布访问控制后才能执行
+			// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-whcx-xxqh-c838
+			// 只读角色的模板源码由内核从块已保存的图标属性中取得，不使用请求中的 content
+			// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-cxwr-r7cq-xw52
 			if !dynamicIconContentAccessable(c, id) {
 				// 空内容保持与 id 不存在时一致的响应结构，避免泄露文档的可访问状态
 				svg = generateTypeEightSVG(color, "")

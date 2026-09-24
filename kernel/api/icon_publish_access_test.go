@@ -91,9 +91,12 @@ func TestGetDynamicIconEnforcesPublishAccess(t *testing.T) {
 
 	treenode.InitBlockTree(true)
 
-	addDoc := func(id, title string) {
+	addDoc := func(id, title, icon string) {
 		tree := treenode.NewTree(boxID, "/"+id+".sy", "/"+title, title)
 		tree.Root.FirstChild.Unlink()
+		if "" != icon {
+			tree.Root.SetIALAttr("icon", icon)
+		}
 		node := &ast.Node{Type: ast.NodeParagraph, ID: id[:21] + "c"}
 		node.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("body")})
 		tree.Root.AppendChild(node)
@@ -102,10 +105,14 @@ func TestGetDynamicIconEnforcesPublishAccess(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	addDoc(publicID, "Public Doc")
-	addDoc(hiddenID, "Hidden Doc")
-	addDoc(disabledID, "Disabled Doc")
-	addDoc(passwordID, "Password Doc")
+	// 文档图标保存为动态图标模板，只读角色渲染时必须使用这份已保存的源码
+	storedIcon := func(id string) string {
+		return "api/icon/getDynamicIcon?type=8&color=%23d23f31&content=.action%7B.title%7D&id=" + id
+	}
+	addDoc(publicID, "Public Doc", storedIcon(publicID))
+	addDoc(hiddenID, "Hidden Doc", "")
+	addDoc(disabledID, "Disabled Doc", "")
+	addDoc(passwordID, "Password Doc", storedIcon(passwordID))
 
 	if err := model.SetPublishAccess(model.PublishAccess{
 		{ID: hiddenID, Visible: false},
@@ -147,6 +154,17 @@ func TestGetDynamicIconEnforcesPublishAccess(t *testing.T) {
 		t.Fatalf("administrator cannot render a template icon: %s", svg)
 	}
 
+	// 只读角色不能自带模板源码：请求中的 content 被忽略，渲染的是文档已保存的图标模板
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-cxwr-r7cq-xw52
+	submittedContent := ".action%7BgetHPathByID%20%22" + disabledID + "%22%7D"
+	if svg := requestIcon(model.RoleReader, publicID, submittedContent); !strings.Contains(svg, "Public Doc") || strings.Contains(svg, "Disabled Doc") {
+		t.Fatalf("publish reader replaced the saved template icon: %s", svg)
+	}
+	// 文档没有已保存的动态图标模板时，请求中的模板不参与渲染
+	if svg := requestIcon(model.RoleReader, hiddenID, titleContent); strings.Contains(svg, "Hidden Doc") {
+		t.Fatalf("publish reader rendered an unsaved template: %s", svg)
+	}
+
 	// 隐藏（不列出）与禁止发布、密码保护不同：发布访问控制按设计仍允许按 ID 读取隐藏文档，
 	// 仅禁止其被枚举，因此这里只断言禁止与密码保护两类
 	for _, id := range []string{disabledID, passwordID} {
@@ -164,11 +182,10 @@ func TestGetDynamicIconEnforcesPublishAccess(t *testing.T) {
 		t.Fatalf("authenticated publish reader cannot render the template icon: %s", svg)
 	}
 
-	hPathContent := ".action%7BgetHPathByID%20%22" + disabledID + "%22%7D"
 	statContent := ".action%7BstatBlock%20%22" + disabledID + "%22%7D"
 
 	// 通用模板函数不得成为绕过发布访问控制的第二条通路
-	if svg := requestIcon(model.RoleReader, publicID, hPathContent); strings.Contains(svg, "Disabled Doc") {
+	if svg := requestIcon(model.RoleReader, publicID, submittedContent); strings.Contains(svg, "Disabled Doc") {
 		t.Fatalf("publish reader read a protected doc path through getHPathByID: %s", svg)
 	}
 	// statBlock 返回结构体，模板渲染为 {runeCount wordCount linkCount imageCount refCount blockCount}
@@ -177,7 +194,7 @@ func TestGetDynamicIconEnforcesPublishAccess(t *testing.T) {
 	}
 
 	// 可写角色不受影响
-	if svg := requestIcon(model.RoleAdministrator, publicID, hPathContent); !strings.Contains(svg, "Disabled Doc") {
+	if svg := requestIcon(model.RoleAdministrator, publicID, submittedContent); !strings.Contains(svg, "Disabled Doc") {
 		t.Fatalf("administrator cannot use getHPathByID in a template icon: %s", svg)
 	}
 	if svg := requestIcon(model.RoleAdministrator, publicID, statContent); !strings.Contains(svg, "{4 1 0 0 0 1}") {
@@ -185,7 +202,7 @@ func TestGetDynamicIconEnforcesPublishAccess(t *testing.T) {
 	}
 
 	// 模板解析失败时不应回显模板原文
-	if svg := requestIcon(model.RoleReader, publicID, ".action%7B%7B.title%7D%7D"); strings.Contains(svg, ".title") {
+	if svg := requestIcon(model.RoleAdministrator, publicID, ".action%7B%7B.title%7D%7D"); strings.Contains(svg, ".title") {
 		t.Fatalf("dynamic icon echoed the raw template content: %s", svg)
 	}
 }

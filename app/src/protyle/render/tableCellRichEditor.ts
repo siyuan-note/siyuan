@@ -219,6 +219,11 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
             }
         },
     });
+    const mobileRenderOverlay = isMobile() ? fragment.protyle.toolbar.subElement : undefined;
+    if (mobileRenderOverlay) {
+        // 移动端正文有独立层叠上下文，源码编辑框需要挂在页面层以覆盖顶栏。
+        document.body.appendChild(mobileRenderOverlay);
+    }
     fragment.protyle.block.rootID = owner.block.rootID;
     fragment.protyle.block.parentID = table.dataset.nodeId;
     fragment.protyle.path = owner.path;
@@ -275,6 +280,7 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
         controller.abort();
         observer.disconnect();
         fragment.destroy();
+        mobileRenderOverlay?.remove();
         if (cell.isConnected && host.isConnected) {
             renderTableCellRich(cell);
             if (cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE)) {

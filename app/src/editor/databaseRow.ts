@@ -6,7 +6,7 @@ import {Protyle} from "../protyle";
 import {getEditorHorizontalPadding} from "../protyle/ui/padding";
 import {searchMarkRender} from "../protyle/render/searchMarkRender";
 import {registerDatabaseRowRefresh} from "../protyle/render/av/databaseRowRefresh";
-import {focusNewDatabasePrimary} from "../protyle/render/av/primaryFocus";
+import {focusDatabasePrimary} from "../protyle/render/av/primaryFocus";
 
 export const newDatabaseRowModel = (options: {
     app: App,
@@ -72,7 +72,7 @@ export const newDatabaseRowModel = (options: {
             previousBodyElement.replaceWith(element);
             updateLayout(custom);
             updateTitle(custom, element);
-            focusNewDatabasePrimary(custom.element, contextProtyle, data);
+            focusDatabasePrimary(custom.element, contextProtyle, data);
             if (!data.keywords?.length) {
                 return;
             }

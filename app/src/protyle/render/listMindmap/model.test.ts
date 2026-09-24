@@ -730,6 +730,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     let interactions = 0;
     let undo = 0;
     let redo = 0;
+    let exits = 0;
     let finishAllowed: boolean | Promise<boolean> = true;
     const options = {
         host, model,
@@ -754,12 +755,21 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         onRelationAdd: (...args: unknown[]) => relationAdditions.push(args),
         onRelationChange: (...args: unknown[]) => relationChanges.push(args),
         onRelationDelete: (id: string) => relationDeletions.push(id),
-        onExit: (): void => undefined,
+        onExit: () => exits++,
     };
     const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     const settle = async () => { await frame(); await frame(); };
     const view = new api.ListMindmapView(options);
     await settle();
+    const listButton = host.querySelector<HTMLButtonElement>('.mindmap-view__toolbar button[aria-label="listBlock"]');
+    check.ok(listButton);
+    check.equal(listButton.querySelector("use").getAttribute("xlink:href"), "#iconList");
+    finishAllowed = false;
+    listButton.click();
+    check.equal(exits, 0, "conversion waits for pending node edits");
+    finishAllowed = true;
+    listButton.click();
+    check.equal(exits, 1, "the toolbar restores the list conversion action");
     const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
     check.equal(viewport.getAttribute("data-prevent-swipe"), "true");
     const originalCapture = HTMLElement.prototype.setPointerCapture;
@@ -1816,6 +1826,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
 
     const readonly = new api.ListMindmapView({...options, readOnly: true});
     await settle();
+    check.equal(host.querySelector('.mindmap-view__toolbar [aria-label="listBlock"]'), null);
     check.equal(host.querySelector('.mindmap-view__toolbar [aria-label="listMindmapChild"]'), null);
     check.equal(host.querySelector('[aria-label="undo"]'), null);
     nodeElement(beta).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));

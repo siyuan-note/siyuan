@@ -24,6 +24,7 @@ const setup = () => {
         closest: (selector: string) => selector === ".protyle-wysiwyg" ? root : embed,
         getAttribute: (name: string) => attrs.get(name),
         setAttribute: (name: string, value: string) => attrs.set(name, value),
+        removeAttribute: (name: string) => attrs.delete(name),
     };
     const operations: {doOperations: any[], undoOperations: any[]}[] = [];
     const updates: string[] = [];
@@ -50,6 +51,17 @@ test("a regular list becomes a dedicated mind map block", () => {
     api.toggleListMindmap(owner, list);
     assert.equal(list.dataset.type, "NodeMindmap");
     assert.deepEqual(updates, ['<div data-type="NodeList"></div>']);
+    assert.equal(operations.length, 0);
+});
+
+test("a dedicated mind map becomes a list block", () => {
+    const {owner, list, attrs, attribute, operations, updates, api} = setup();
+    attrs.delete(attribute);
+    list.dataset.type = "NodeMindmap";
+    list.outerHTML = '<div data-type="NodeMindmap"></div>';
+    api.toggleListMindmap(owner, list);
+    assert.equal(list.dataset.type, "NodeList");
+    assert.deepEqual(updates, ['<div data-type="NodeMindmap"></div>']);
     assert.equal(operations.length, 0);
 });
 

@@ -278,7 +278,7 @@
 	"toggleRightDockPanel": "Pokaż/ukryj prawy panel dokowania",
 	"toggleBottomDockPanel": "Pokaż/ukryj dolny panel dokowania",
 	"cursorSurroundingLines": "Wiersze kontekstu wokół kursora",
-	"cursorSurroundingLinesTip": "Minimalna liczba widocznych wierszy między kursorem a górną lub dolną krawędzią edytora podczas pionowej nawigacji klawiaturą, 0 wyłącza funkcję",
+	"cursorSurroundingLinesTip": "Minimalna liczba widocznych wierszy między kursorem a górną lub dolną krawędzią edytora podczas pisania lub pionowej nawigacji klawiaturą, 0 wyłącza funkcję",
 	"applicationZoom": "Powiększenie interfejsu aplikacji",
 	"increaseEditorFontSize": "Zwiększ rozmiar czcionki edytora",
 	"decreaseEditorFontSize": "Zmniejsz rozmiar czcionki edytora",

@@ -278,7 +278,7 @@
 	"toggleRightDockPanel": "Sağ dock panelini göster/gizle",
 	"toggleBottomDockPanel": "Alt dock panelini göster/gizle",
 	"cursorSurroundingLines": "İmleç çevresindeki bağlam satırları",
-	"cursorSurroundingLinesTip": "Klavye ile dikey gezinirken imleç ile düzenleyicinin üst veya alt kenarı arasında görünecek en az satır sayısı, devre dışı bırakmak için 0",
+	"cursorSurroundingLinesTip": "Yazarken veya klavye ile dikey gezinirken imleç ile düzenleyicinin üst veya alt kenarı arasında görünecek en az satır sayısı, devre dışı bırakmak için 0",
 	"applicationZoom": "Uygulama arayüzü yakınlaştırması",
 	"increaseEditorFontSize": "Düzenleyici yazı tipi boyutunu artır",
 	"decreaseEditorFontSize": "Düzenleyici yazı tipi boyutunu azalt",

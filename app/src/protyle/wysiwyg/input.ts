@@ -35,6 +35,7 @@ import {normalizeInlineFontFamilyStyle} from "../toolbar/fontFamilyCore";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {isProtyleListItemFirstParagraph} from "../runtimeCapabilities";
 import {isMobile} from "../../util/functions";
+import {scheduleCaretScroll} from "./caretScroll";
 
 interface IInputOperations {
     doOperations: IOperation[];
@@ -583,6 +584,9 @@ export const input = async (...args: Parameters<typeof inputBlock>) => {
         await inputBlock(...args);
     } finally {
         resume();
+    }
+    if (args[0].options.typewriterMode) {
+        scheduleCaretScroll(args[0], "down");
     }
 };
 

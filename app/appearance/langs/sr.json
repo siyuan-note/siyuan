@@ -278,7 +278,7 @@
 	"toggleRightDockPanel": "Prikaži/sakrij desni panel",
 	"toggleBottomDockPanel": "Prikaži/sakrij donji panel",
 	"cursorSurroundingLines": "Redovi oko kursora",
-	"cursorSurroundingLinesTip": "Najmanji broj vidljivih redova između kursora i gornje ili donje ivice uređivača prilikom vertikalnog kretanja tastaturom, 0 da se onemogući",
+	"cursorSurroundingLinesTip": "Najmanji broj vidljivih redova između kursora i gornje ili donje ivice uređivača prilikom kucanja ili vertikalnog kretanja tastaturom, 0 da se onemogući",
 	"applicationZoom": "Zumiranje aplikacije",
 	"increaseEditorFontSize": "Povećaj veličinu fonta u uređivaču",
 	"decreaseEditorFontSize": "Smanji veličinu fonta u uređivaču",

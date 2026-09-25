@@ -278,7 +278,7 @@
 	"toggleRightDockPanel": "Show/Hide Right Dock Panel",
 	"toggleBottomDockPanel": "Show/Hide Bottom Dock Panel",
 	"cursorSurroundingLines": "Cursor surrounding lines",
-	"cursorSurroundingLinesTip": "Minimum number of visible lines between the cursor and the top or bottom edge of the editor when navigating vertically with the keyboard, 0 to disable",
+	"cursorSurroundingLinesTip": "Minimum number of visible lines between the cursor and the top or bottom edge of the editor while typing or navigating vertically with the keyboard, 0 to disable",
 	"applicationZoom": "Application Zoom",
 	"increaseEditorFontSize": "Increase Editor Font Size",
 	"decreaseEditorFontSize": "Decrease Editor Font Size",

@@ -1,5 +1,5 @@
 import {Constants} from "../../constants";
-import {escapeHtml} from "../../util/escape";
+import {escapeHtml, escapeMarkdownPlainText} from "../../util/escape";
 import {getTableCellPlainText} from "./tableCellRich";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import type {IUploadInsertOptions} from "../upload";
@@ -284,27 +284,7 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element, prep
 
         // 这里必须多加一个反斜杆，因为 Lute 在进行 Markdown 嵌套节点转换平铺标记节点时会剔除 Backslash 节点，
         // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符
-        clipText = clipText.replace(/\\/g, "\\\\")
-            .replace(/\*/g, "\\*")
-            .replace(/_/g, "\\_")
-            .replace(/\[/g, "\\[")
-            .replace(/]/g, "\\]")
-            .replace(/!/g, "\\!")
-            .replace(/`/g, "\\`")
-            .replace(/</g, "\\<")
-            .replace(/>/g, "\\>")
-            .replace(/&/g, "\\&")
-            .replace(/~/g, "\\~")
-            .replace(/\{/g, "\\{")
-            .replace(/}/g, "\\}")
-            .replace(/\(/g, "\\(")
-            .replace(/\)/g, "\\)")
-            .replace(/=/g, "\\=")
-            .replace(/#/g, "\\#")
-            .replace(/\$/g, "\\$")
-            .replace(/\^/g, "\\^")
-            .replace(/\|/g, "\\|")
-            .replace(/\./g, "\\.");
+        clipText = escapeMarkdownPlainText(clipText);
         // 转义文本不能使用 DOM 结构 https://github.com/siyuan-note/siyuan/issues/11778
         paste(protyle, {textPlain: clipText, textHTML: "", target: nodeElement as HTMLElement});
     } catch (e) {

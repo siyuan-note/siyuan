@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
+import {escapeMarkdownPlainText} from "../../util/escape";
 
 const loadInbox = (responses: {code: number; data?: Record<string, string>}[]) => {
     const calls: {url: string; data: Record<string, string>}[] = [];
@@ -25,6 +26,7 @@ const loadInbox = (responses: {code: number; data?: Record<string, string>}[]) =
                 }};
             }
             if (name.endsWith("/message")) { return {showMessage: (message: string) => messages.push(message)}; }
+            if (name.endsWith("/escape")) { return {escapeMarkdownPlainText}; }
             return {};
         },
     });
@@ -73,10 +75,10 @@ test("inbox insertion preserves link-only entries as Markdown links", async () =
 
 test("inbox insertion keeps Markdown punctuation in the title as plain text", async () => {
     const {inbox, calls, removed} = loadInbox([
-        {code: 0, data: {shorthandMd: "Body", shorthandTitle: "A *bold* [note] $x$ ==mark== &amp; #tag#\ncontinued"}},
+        {code: 0, data: {shorthandMd: "Body", shorthandTitle: "A *bold* [note] $x$ ==mark== &amp; #tag# 1+2 50%?\ncontinued"}},
         {code: 0},
     ]);
     await inbox.insertToCurrentDoc(["entry"], "doc-id");
-    assert.equal(calls[1].data.data, "# A \\*bold\\* \\[note\\] \\$x\\$ \\=\\=mark\\=\\= \\&amp\\; \\#tag\\# continued\n\nBody");
+    assert.equal(calls[1].data.data, "# A \\*bold\\* \\[note\\] \\$x\\$ \\=\\=mark\\=\\= \\&amp; \\#tag\\# 1+2 50%? continued\n\nBody");
     assert.deepEqual(removed, [["entry"]]);
 });

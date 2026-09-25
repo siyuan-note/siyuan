@@ -15,7 +15,7 @@ import {getDisplayName, movePathTo, pathPosix} from "../../util/pathName";
 import type {App} from "../../index";
 import {getCloudURL} from "../../config/util/about";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {escapeHtml} from "../../util/escape";
+import {escapeHtml, escapeMarkdownPlainText} from "../../util/escape";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {showMessage} from "../../dialog/message";
@@ -421,9 +421,7 @@ ${data.shorthandContent}
                 if (!md && !shorthand.data.shorthandContent && shorthand.data.shorthandURL) {
                     md = `[${shorthand.data.shorthandTitle}](${shorthand.data.shorthandURL})`;
                 }
-                // 转义 ASCII 标点，避免剪藏标题中的符号被解析为行内语法。
-                const title = shorthand.data.shorthandTitle.replace(/[\r\n]+/g, " ").trim()
-                    .replace(/[\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/g, "\\$&");
+                const title = escapeMarkdownPlainText(shorthand.data.shorthandTitle.replace(/[\r\n]+/g, " ").trim());
                 if (title) {
                     md = `# ${title}\n\n${md}`;
                 }

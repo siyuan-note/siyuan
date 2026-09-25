@@ -5,6 +5,31 @@ export const escapeHtml = (html: string) => {
     return html.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 };
 
+// 将纯文本中的 Markdown 标记转义，保留编辑器重新解析时的字面内容。
+export const escapeMarkdownPlainText = (text: string) => {
+    return text.replace(/\\/g, "\\\\")
+        .replace(/\*/g, "\\*")
+        .replace(/_/g, "\\_")
+        .replace(/\[/g, "\\[")
+        .replace(/]/g, "\\]")
+        .replace(/!/g, "\\!")
+        .replace(/`/g, "\\`")
+        .replace(/</g, "\\<")
+        .replace(/>/g, "\\>")
+        .replace(/&/g, "\\&")
+        .replace(/~/g, "\\~")
+        .replace(/\{/g, "\\{")
+        .replace(/}/g, "\\}")
+        .replace(/\(/g, "\\(")
+        .replace(/\)/g, "\\)")
+        .replace(/=/g, "\\=")
+        .replace(/#/g, "\\#")
+        .replace(/\$/g, "\\$")
+        .replace(/\^/g, "\\^")
+        .replace(/\|/g, "\\|")
+        .replace(/\./g, "\\.");
+};
+
 export const stripSearchMark = (html: string) => {
     return html.replace(/<\/?mark>/g, "");
 };

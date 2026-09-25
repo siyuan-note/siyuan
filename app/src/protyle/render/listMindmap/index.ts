@@ -40,7 +40,7 @@ import {getListMindmapFoldStates} from "./fold";
 import {isMobile} from "../../../util/functions";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
-    restoreFocus: (listID: string, selectedID: string | undefined, oldHost: HTMLElement) => void, destroy: () => void}>();
+    restoreFocus: (listID: string, candidateIDs: string[]) => void, destroy: () => void}>();
 
 export const mountNewListMindmap = (owner: IProtyle, list: HTMLElement) => roots.get(owner)?.mountNew(list);
 
@@ -451,6 +451,7 @@ class ListMindmapController {
         if (!await this.change(() => addListMindmapNode(this.list, id, kind === "child" ? "child" : "after", item))) {
             return;
         }
+        this.view.focusNode(item.dataset.nodeId);
         const content = this.view.getContentHost(item.dataset.nodeId);
         if (content) {
             void this.edit(item.dataset.nodeId, content);
@@ -481,7 +482,7 @@ class ListMindmapController {
                     this.view.update(this.model);
                 }
             },
-            onUndo: redo => this.undo(redo),
+            onUndo: redo => this.undo(redo, id),
         });
         if (!this.activeEditor) {
             this.view.setEditing(undefined);
@@ -489,9 +490,13 @@ class ListMindmapController {
         }
     }
 
-    private async undo(redo: boolean) {
-        const selectedID = this.view.getSelectedId();
-        const hadFocus = this.host.contains(document.activeElement);
+    private async undo(redo: boolean, editingID?: string) {
+        const selectedID = editingID || this.view.getSelectedId();
+        const selected = selectedID ? this.model.nodes.get(selectedID) : undefined;
+        const siblings = selected?.parentId ? this.model.nodes.get(selected.parentId)?.children || [] : [];
+        const index = siblings.findIndex(node => node.id === selectedID);
+        const candidateIDs = [selectedID, siblings[index - 1]?.id, siblings[index + 1]?.id,
+            selected?.parentId].filter((id): id is string => !!id);
         if (!canEdit(this.owner, this.list) || (this.activeEditor && !await this.activeEditor.finish())) {
             return;
         }
@@ -500,13 +505,11 @@ class ListMindmapController {
         } else {
             await this.owner.undo.undo(this.owner);
         }
-        if (hadFocus) {
-            roots.get(this.owner)?.restoreFocus(this.list.dataset.nodeId, selectedID, this.host);
-        }
+        roots.get(this.owner)?.restoreFocus(this.list.dataset.nodeId, candidateIDs);
     }
 
-    public focusNode(id?: string) {
-        this.view.focusNode(id && this.model.nodes.has(id) ? id : this.model.root.id);
+    public focusNode(candidateIDs: string[]) {
+        this.view.focusNode(candidateIDs.find(id => this.model.nodes.has(id)) || this.model.root.id);
     }
 
     public refresh() {
@@ -573,7 +576,7 @@ export const initListMindmaps = (owner: IProtyle) => {
     const instances = new Map<HTMLElement, ListMindmapController>();
     const loading = new WeakSet<HTMLElement>();
     const newlyCreated = new WeakSet<HTMLElement>();
-    let pendingFocus: {listID: string, selectedID?: string, oldHost: HTMLElement};
+    let pendingFocus: {listID: string, candidateIDs: string[]};
     let frame = 0;
     let disposed = false;
     const refresh = () => {
@@ -608,10 +611,7 @@ export const initListMindmaps = (owner: IProtyle) => {
                     const instance = new ListMindmapController(owner, list);
                     instances.set(list, instance);
                     if (pendingFocus?.listID === list.dataset.nodeId) {
-                        if (document.activeElement === document.body || pendingFocus.oldHost.contains(document.activeElement) ||
-                            list.contains(document.activeElement)) {
-                            instance.focusNode(pendingFocus.selectedID);
-                        }
+                        instance.focusNode(pendingFocus.candidateIDs);
                         pendingFocus = undefined;
                     }
                 } catch (error) {
@@ -665,17 +665,16 @@ export const initListMindmaps = (owner: IProtyle) => {
             newlyCreated.add(list);
             refresh();
         }
-    }, restoreFocus: (listID, selectedID, oldHost) => {
+    }, restoreFocus: (listID, candidateIDs) => {
         const list = getListMindmapElements(root).find(item => item.dataset.nodeId === listID);
-        if (!list || document.activeElement !== document.body && !oldHost.contains(document.activeElement) &&
-            !list.contains(document.activeElement)) {
+        if (!list) {
             return;
         }
-        pendingFocus = {listID, selectedID, oldHost};
+        pendingFocus = {listID, candidateIDs};
         refresh();
         const instance = instances.get(list);
         if (instance) {
-            instance.focusNode(selectedID);
+            instance.focusNode(candidateIDs);
             pendingFocus = undefined;
         }
     }, destroy: () => {

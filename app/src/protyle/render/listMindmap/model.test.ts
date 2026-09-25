@@ -174,7 +174,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     inputHost.contentEditable = "true";
     document.body.append(inputHost);
     const inputProtyle = {lute, wysiwyg: {element: inputHost, lastHTMLs: {}},
-        hint: {render: () => {}}, toolbar: {}, block: {parentID: "document"}} as unknown as IProtyle;
+        hint: {render: () => {}}, toolbar: {}, block: {parentID: "document"},
+        options: {typewriterMode: false}} as unknown as IProtyle;
     const caretOffset = (element: Element) => {
         const selection = getSelection();
         check.ok(selection.isCollapsed);

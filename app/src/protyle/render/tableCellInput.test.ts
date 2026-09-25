@@ -78,7 +78,8 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         document.body.appendChild(element);
         const table = wysiwyg.firstElementChild as HTMLElement;
         const queue = Object.assign(new Queue(), {element: wysiwyg, lastHTMLs: {[table.dataset.nodeId]: table.outerHTML}});
-        const owner = {element, wysiwyg: queue, lute, contentElement: wysiwyg, hint: {render: noop},
+        const owner = {element, wysiwyg: queue, lute, contentElement: wysiwyg, options: {typewriterMode: false},
+            hint: {render: noop},
             block: {rootID: "root"}, disabled: false} as unknown as IProtyle;
         const range = document.createRange();
         range.selectNodeContents(table.querySelector("th"));

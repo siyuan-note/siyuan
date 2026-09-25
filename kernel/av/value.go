@@ -607,6 +607,9 @@ func validateValueTextRichTreeWithImages(tree *parse.Tree, images bool) (err err
 		if images && ast.NodeKramdownBlockIAL == node.Type {
 			allowed = isAllowedValueTextRichBlockIAL(node, true)
 		}
+		if images && !allowed {
+			allowed = isAllowedTableCellRichCustomNode(node)
+		}
 		if !allowed && !(images && isAllowedTableCellRichImageNode(node)) {
 			err = fmt.Errorf("unsupported attribute view rich text node [%s]", node.Type.String())
 			return ast.WalkStop
@@ -1285,7 +1288,7 @@ func normalizeValueTextRichBuiltinStyleValue(property, value string) (ret string
 		match[1], valueSuffix, match[1], legacySuffix), true
 }
 
-func normalizeValueTextRichTreeStyles(tree *parse.Tree) (err error) {
+func normalizeValueTextRichTreeStyles(tree *parse.Tree, images bool) (err error) {
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeTextMark != node.Type || 1 > len(node.KramdownIAL) {
 			return ast.WalkContinue
@@ -1293,7 +1296,12 @@ func normalizeValueTextRichTreeStyles(tree *parse.Tree) (err error) {
 		style := node.IALAttr("style")
 		var normalized string
 		var ok bool
-		if normalized, ok = normalizeValueTextRichStyle(style); !ok {
+		if images && isTableCellRichCustomTextMark(node) {
+			normalized, ok = normalizeTableCellRichCustomStyle(style)
+		} else {
+			normalized, ok = normalizeValueTextRichStyle(style)
+		}
+		if !ok {
 			err = fmt.Errorf("unsupported attribute view rich text style")
 			return ast.WalkStop
 		}
@@ -2175,7 +2183,7 @@ func normalizeValueTextRichTreeSourceWithImages(tree *parse.Tree, images bool) (
 	normalizedTree = tree
 	previous := ""
 	for iteration := 0; iteration < 4; iteration++ {
-		if err = normalizeValueTextRichTreeStyles(normalizedTree); nil != err {
+		if err = normalizeValueTextRichTreeStyles(normalizedTree, images); nil != err {
 			return "", nil, err
 		}
 		luteEngine := newValueTextRichLute()

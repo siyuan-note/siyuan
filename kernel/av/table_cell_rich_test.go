@@ -67,3 +67,51 @@ func TestTableCellRichRejectsInvalidCodeSettings(t *testing.T) {
 		}
 	}
 }
+
+func TestTableCellRichCustomInlineStyle(t *testing.T) {
+	for _, style := range []string{
+		"--custom-symble-strong: rgb(0 166 240 / 1);",
+		"--custom-symble-strong: var(--b3-font-color12);",
+	} {
+		source := `before <span data-type="custom_symble_strong_CJK_rectangle_yin" style="` + style + `">after</span>`
+		rich := &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
+		for pass := 0; pass < 3; pass++ {
+			tree, err := ParseTableCellRich(rich)
+			if err != nil {
+				t.Fatal(err)
+			}
+			content, err := RenderTableCellRich(tree)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(content, style) || !strings.Contains(content, "before") ||
+				!strings.Contains(content, "after") || pass > 0 && content != rich.Content {
+				t.Fatalf("table custom inline source changed: %q != %q", content, rich.Content)
+			}
+			rich.Content = content
+		}
+		if _, err := ParseValueTextRich(&ValueTextRich{Spec: ValueTextRichSpec,
+			Format: ValueTextRichFormatKramdown, Content: source}); err == nil {
+			t.Fatal("table custom inline must not expand the database rich text whitelist")
+		}
+	}
+}
+
+func TestTableCellRichRejectsUnsafeCustomInlineStyle(t *testing.T) {
+	for _, style := range []string{
+		"--custom-symble-strong: url(javascript:alert(1));",
+		"--custom-symble-strong: var(--theme-color);",
+		"--custom-symble-strong: var(--b3-font-color14);",
+		"--custom-symble-strong: rgb(256 0 0 / 1);",
+		"--custom-symble-strong: #abc; background-image: url(javascript:alert(1));",
+	} {
+		source := `<span data-type="custom_symble_strong_CJK_rectangle_yin" style="` + style + `">unsafe</span>`
+		rich := &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
+		if _, err := ParseTableCellRich(rich); nil == err {
+			t.Fatalf("accepted unsafe table custom inline style: %q", style)
+		}
+		if rich.Content != source {
+			t.Fatal("rejected source must remain unchanged")
+		}
+	}
+}

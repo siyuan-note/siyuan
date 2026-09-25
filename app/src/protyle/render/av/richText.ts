@@ -122,6 +122,10 @@ const sanitizeTableCellCustomStyle = (style: string) => {
             declarations.push(`${property}: ${value};`);
             return;
         }
+        if (/^var\(--b3-font-(?:color|background)(?:[1-9]|1[0-3])\)$/.test(value)) {
+            declarations.push(`${property}: ${value};`);
+            return;
+        }
         const rgb = value.match(/^rgba?\(\s*(\d{1,3})(?:,\s*|\s+)(\d{1,3})(?:,\s*|\s+)(\d{1,3})(?:\s*[,/]\s*(0(?:\.\d+)?|1(?:\.0+)?))?\s*\)$/i);
         if (rgb && [rgb[1], rgb[2], rgb[3]].every(channel => Number(channel) <= 255)) {
             declarations.push(`${property}: ${value};`);

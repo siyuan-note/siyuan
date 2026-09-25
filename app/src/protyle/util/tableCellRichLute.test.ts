@@ -34,12 +34,20 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     check.match(reopenedCustom, /--custom-symble-strong: rgb\(0 166 240 \/ 1\)/);
     check.match(reopenedCustom, /second/);
     check.doesNotMatch(api.sanitizeAVRichTextBlockDOM(customBlockDOM, true), /custom_symble/);
+    const variableHTML = '<span data-type="custom_symble_strong_CJK_rectangle_yin" ' +
+        'style="--custom-symble-strong: var(--b3-font-color12);">colored</span>';
+    const variableValue = api.serializeTableCellRich(base.Md2BlockDOM("before " + variableHTML));
+    const variableCell = document.createElement("td");
+    api.updateTableCellEditingValue(variableCell, variableValue);
+    check.match(variableValue.markdown, /--custom-symble-strong: var\(--b3-font-color12\)/);
+    check.match(api.getTableCellRichBlockDOM(variableCell), /--custom-symble-strong: var\(--b3-font-color12\)/);
+    check.match(api.getTableCellRichBlockDOM(variableCell), /before/);
     const unsafeCustom = api.sanitizeAVRichTextBlockDOM(
         '<div data-type="NodeParagraph"><div contenteditable="true">' +
         '<span data-type="custom_bad" style="--custom-bad: url(javascript:alert(1)); ' +
-        '--custom-safe: #abc;" onclick="alert(1)">safe</span></div></div>', true, true);
+        '--custom-unknown: var(--theme-color); --custom-safe: #abc;" onclick="alert(1)">safe</span></div></div>', true, true);
     check.match(unsafeCustom, /--custom-safe: #abc;/);
-    check.doesNotMatch(unsafeCustom, /url\(|onclick|javascript:/);
+    check.doesNotMatch(unsafeCustom, /url\(|onclick|javascript:|--custom-unknown/);
     const externalCustom = api.serializeTableCellRich(base.Md2BlockDOM(customHTML));
     check.match(externalCustom.blockDOM, /data-type="custom_symble_strong_CJK_rectangle_yin"/);
     check.match(externalCustom.blockDOM, /--custom-symble-strong: rgb\(0 166 240 \/ 1\)/);

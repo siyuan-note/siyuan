@@ -15,6 +15,7 @@ import {findMindmapDrop} from "./drop";
 import {destroyTabsRender, tabsRender} from "../tabsRender";
 import {getListMindmapFoldStates} from "./fold";
 import type {ListMindmapFoldTarget} from "./fold";
+import {clampMindmapPanOffset} from "./pan";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -778,6 +779,9 @@ export class ListMindmapView {
                 this.initialFit = false;
                 this.fit(1);
             } else {
+                const bounded = this.boundedPan(this.offsetX, this.offsetY);
+                this.offsetX = bounded.x;
+                this.offsetY = bounded.y;
                 this.draw();
             }
         });
@@ -1514,9 +1518,21 @@ export class ListMindmapView {
         }
         this.viewport.classList.add("mindmap-view__viewport--dragging");
         if (!pointer.id) {
-            this.offsetX = pointer.x + dx;
-            this.offsetY = pointer.y + dy;
+            const bounded = this.boundedPan(pointer.x + dx, pointer.y + dy);
+            const remainingY = pointer.y + dy - bounded.y;
+            this.offsetX = bounded.x;
+            this.offsetY = bounded.y;
             this.draw();
+            if (event.pointerType === "touch" && remainingY && !this.fullscreenMarker) {
+                const scrollHost = this.options.host.closest<HTMLElement>(".protyle-content");
+                if (scrollHost) {
+                    scrollHost.scrollTop -= remainingY;
+                }
+            }
+            pointer.x = this.offsetX;
+            pointer.y = this.offsetY;
+            pointer.startX = event.clientX;
+            pointer.startY = event.clientY;
             return;
         }
         if (!this.ghost) {
@@ -1880,9 +1896,9 @@ export class ListMindmapView {
         if ((event.target as HTMLElement).closest(".mindmap-view__node--editing")) {
             return;
         }
-        event.preventDefault();
-        event.stopPropagation();
         if (this.pointer?.relation) {
+            event.preventDefault();
+            event.stopPropagation();
             return;
         }
         const mode = event.deltaMode;
@@ -1892,26 +1908,43 @@ export class ListMindmapView {
             mode === WheelEvent.DOM_DELTA_PAGE ? this.viewport.clientHeight : 1;
         // 浏览器将触控板捏合转换为带 Ctrl 的滚轮事件，和鼠标组合滚轮共用光标锚点缩放。
         if (event.ctrlKey) {
+            event.preventDefault();
+            event.stopPropagation();
             const bounds = this.viewport.getBoundingClientRect();
             const delta = Math.max(-24, Math.min(24, event.deltaY * unitY));
             this.zoomAt(this.scale * Math.exp(-delta * .01),
                 event.clientX - bounds.left, event.clientY - bounds.top);
             return;
         }
-        if (event.shiftKey) {
-            this.offsetX -= event.deltaX ? event.deltaX * unitX : event.deltaY * unitX;
-        } else {
-            this.offsetX -= event.deltaX * unitX;
-            this.offsetY -= event.deltaY * unitY;
+        const next = this.boundedPan(this.offsetX - (event.shiftKey ?
+            (event.deltaX ? event.deltaX : event.deltaY) * unitX : event.deltaX * unitX),
+            this.offsetY - (event.shiftKey ? 0 : event.deltaY * unitY));
+        if (!this.fullscreenMarker && !event.shiftKey && event.deltaY && next.y === this.offsetY) {
+            return;
         }
+        event.preventDefault();
+        event.stopPropagation();
+        this.offsetX = next.x;
+        this.offsetY = next.y;
         this.draw();
     };
+
+    private boundedPan(x: number, y: number) {
+        const {left, top, right, bottom} = this.contentBounds();
+        return {
+            x: clampMindmapPanOffset(x, left, right, this.scale, this.viewport.clientWidth),
+            y: clampMindmapPanOffset(y, top, bottom, this.scale, this.viewport.clientHeight),
+        };
+    }
 
     private zoomAt(scale: number, x = this.viewport.clientWidth / 2, y = this.viewport.clientHeight / 2) {
         const next = Math.min(2.5, Math.max(.15, scale));
         this.offsetX = x - (x - this.offsetX) * next / this.scale;
         this.offsetY = y - (y - this.offsetY) * next / this.scale;
         this.scale = next;
+        const bounded = this.boundedPan(this.offsetX, this.offsetY);
+        this.offsetX = bounded.x;
+        this.offsetY = bounded.y;
         this.draw();
     }
 

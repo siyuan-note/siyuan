@@ -9,6 +9,7 @@ import {getNextBlockSibling} from "../protyle/wysiwyg/getBlock";
 import {turnsIntoGroupsTransaction, turnsIntoTransaction, turnsOneInto} from "../protyle/wysiwyg/transaction";
 import {turnParagraphIntoCode} from "../protyle/wysiwyg/turnIntoCode";
 import {getListConversionType, type TListSubtype} from "../protyle/wysiwyg/listContext";
+import {getHeadingConversionElements} from "../protyle/wysiwyg/headingConversion";
 import {removeBlockPreservingSelectionMode} from "../protyle/wysiwyg/remove";
 import {foldBlocksRecursively, foldHeadingGroup, getFoldBlock, setFold} from "../protyle/util/blockFold";
 import {pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
@@ -169,14 +170,12 @@ export const ensureContextCommands = (app: App) => {
         });
         return turnsIntoGroupsTransaction({protyle: context.protyle, selectsElementGroups: groups, type});
     }, ["editor", "insert", key]));
+    const textConvertible = (context: ICommandContextSnapshot) => editable(context) &&
+        blocks(context).every(element => ["NodeParagraph", "NodeHeading", "NodeList", "NodeListItem"].includes(element.dataset.type)) &&
+        getHeadingConversionElements(blocks(context)).length > 0;
     ["paragraph", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6"].forEach(key =>
-        add(`block.${key}`, ["turnInto", key], context => convertible(context) || key === "paragraph" &&
-            editable(context) && (Boolean(selectedList(context)) || blocks(context).length === 1 &&
-                blocks(context)[0].dataset.type === "NodeBlockquote"), context => {
-        const list = key === "paragraph" && selectedList(context);
-        if (list) {
-            return turnsOneInto({protyle: context.protyle, nodeElement: list, id: list.dataset.nodeId, type: "CancelList"});
-        }
+        add(`block.${key}`, ["turnInto", key], context => textConvertible(context) || key === "paragraph" &&
+            editable(context) && blocks(context).length === 1 && blocks(context)[0].dataset.type === "NodeBlockquote", context => {
         const blockquote = blocks(context)[0];
         if (key === "paragraph" && blockquote.dataset.type === "NodeBlockquote") {
             return turnsOneInto({protyle: context.protyle, nodeElement: blockquote,

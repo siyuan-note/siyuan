@@ -671,6 +671,8 @@ test("heading conversions follow list conversions across block menu scopes", () 
     const headingKeys = ["heading1", "heading2", "heading3", "heading4", "heading5", "heading6"];
     ["gutter.single.turnInto", "gutter.multi.turnInto"].forEach((path) => {
         const keys = getEntryCatalogChildren(path).map(item => item.key);
+        assert.equal(keys[0], "paragraph");
+        assert.equal(getEntryCatalogNode(`${path}.paragraph`)?.simple, true);
         const headingIndex = keys.indexOf("heading1");
         assert.equal(headingIndex, keys.indexOf(path === "gutter.single.turnInto" ? "listMindmap" : "check") + 1);
         assert.deepEqual(keys.slice(headingIndex, headingIndex + headingKeys.length), headingKeys);

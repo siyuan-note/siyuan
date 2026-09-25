@@ -1249,20 +1249,27 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return false;
             }
             const selectsElement = getBlockElementsByRange(range);
-            const listHeading = type === "Blocks2Hs" && selectsElement.some(isListHeadingContainer);
+            const listHeading = ["Blocks2Hs", "Blocks2Ps"].includes(type) && selectsElement.some(isListHeadingContainer);
             if (!listHeading && (selectsElement.length < 2 || selectsElement.some(item => item.classList.contains("li")))) {
                 return false;
             }
             const focusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
-            turnsIntoTransaction({
+            const pending = turnsIntoTransaction({
                 protyle,
                 selectsElement,
                 type,
                 level,
                 unfocus: true,
             });
-            if (focusContext) {
-                restoreFocusContext(protyle, focusContext);
+            const restore = () => {
+                if (focusContext) {
+                    restoreFocusContext(protyle, focusContext);
+                }
+            };
+            if (pending) {
+                void pending.then(restore);
+            } else {
+                restore();
             }
             event.preventDefault();
             event.stopPropagation();
@@ -1949,18 +1956,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
             } else {
                 const type = selectsElement[0].getAttribute("data-type");
-                if (type === "NodeHeading") {
+                if (type === "NodeHeading" || isListHeadingContainer(selectsElement[0])) {
                     turnsIntoTransaction({
                         protyle,
                         nodeElement: selectsElement[0],
                         type: "Blocks2Ps",
-                    });
-                } else if (type === "NodeList") {
-                    turnsOneInto({
-                        protyle,
-                        nodeElement: selectsElement[0],
-                        id: selectsElement[0].getAttribute("data-node-id"),
-                        type: "CancelList",
                     });
                 } else if (type === "NodeBlockquote") {
                     turnsOneInto({

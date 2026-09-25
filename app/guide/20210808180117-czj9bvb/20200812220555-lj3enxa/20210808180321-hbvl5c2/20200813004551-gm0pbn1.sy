@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260925094732"
+		"updated": "20260925172309"
 	},
 	"Children": [
 		{
@@ -11960,7 +11960,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-r3fq7uc",
-				"updated": "20260924173802"
+				"updated": "20260925172309"
 			},
 			"Children": [
 				{
@@ -11992,7 +11992,34 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "（或其他标题级别）转换各项的首个段落。已有标题会调整到目标级别。选中整个列表时仅处理当前层的列表项，保留其他段落、子列表、编号和任务状态。首块不是段落或标题的列表项会被跳过。移动端可选中列表项后使用相同的块菜单。仅将光标放在段落内时，快捷键转换当前段落。"
+					"Data": "（或其他标题级别），会移除所选列表项的项目符号或复选框，并将首块转换为独立标题。后续段落和子列表保持顺序，未选项仍保留为列表。选择整个列表时只处理直属列表项。要将首块转换为普通段落，请使用段落快捷键，或选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "块菜单"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "转换为"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "段落块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，这也会移除已有标题格式。块 ID、数据库关联和字段值均会保留。首块既非段落也非标题的列表项会跳过。移动端使用同一块菜单。仅将光标放在段落或标题内时，快捷键只转换该块，不取消外围列表。"
 				}
 			]
 		},

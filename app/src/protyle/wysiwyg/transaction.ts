@@ -78,6 +78,7 @@ import {getHeadingConversionElements, isListHeadingContainer} from "./headingCon
 import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
 import {cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource} from "../render/listMindmap/model";
 import {buildCancelListOperations} from "./cancelList";
+import {buildListConversionOperations} from "./listConversion";
 import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
@@ -1845,9 +1846,8 @@ export const turnsIntoTransaction = (options: {
             selectsElement = [options.nodeElement];
         }
     }
-    const hasListHeadingTargets = options.type === "Blocks2Hs" && selectsElement.some(isListHeadingContainer);
-    if (hasListHeadingTargets) {
-        selectsElement = getHeadingConversionElements(selectsElement);
+    if (selectsElement.some(isListHeadingContainer)) {
+        return turnListBlocksInto(options, selectsElement);
     }
     if (selectsElement.length === 0 || options.nodeElement && selectsElement.some(item => item.classList.contains("li"))) {
         return;
@@ -1862,7 +1862,7 @@ export const turnsIntoTransaction = (options: {
                 return true;
             }
         });
-        if (!hasListHeadingTargets && selectsElement.length === 1 && options.type === "Blocks2Hs" &&
+        if (selectsElement.length === 1 && options.type === "Blocks2Hs" &&
             selectsElement[0].getAttribute("data-type") === "NodeHeading" &&
             options.level === parseInt(selectsElement[0].getAttribute("data-subtype").substr(1))) {
             // 快捷键同级转换，消除标题
@@ -1874,9 +1874,6 @@ export const turnsIntoTransaction = (options: {
     }
     // https://github.com/siyuan-note/siyuan/issues/14505
     options.protyle.observerLoad?.disconnect();
-    if (hasListHeadingTargets) {
-        hideElements(["select"], options.protyle);
-    }
 
     let html = "";
     const doOperations: IOperation[] = [];
@@ -2077,10 +2074,108 @@ const unfoldListHeadings = async (protyle: IProtyle, nodeElements: Element[]) =>
     return foldOperations.reverse();
 };
 
+const turnListBlocksInto = async (options: {
+    protyle: IProtyle,
+    type: TTurnInto,
+    level?: number,
+    range?: Range,
+    unfocus?: boolean,
+    recursively?: boolean,
+}, elements: Element[]) => {
+    const protyle = options.protyle;
+    const selected = elements.filter(element => !elements.some(parent => parent !== element && parent.contains(element)));
+    const conversionElements = options.recursively ? selected.flatMap(element => [element,
+        ...Array.from(element.querySelectorAll('[data-type="NodeList"]')).filter(list =>
+            list.getAttribute("data-subtype") === element.getAttribute("data-subtype"))]).reverse() : selected;
+    const targets = getHeadingConversionElements(conversionElements);
+    if (targets.length === 0) {
+        return;
+    }
+    const lists = new Map<Element, Set<string>>();
+    conversionElements.filter(isListHeadingContainer).forEach(element => {
+        const list = element.getAttribute("data-type") === "NodeList" ? element : element.parentElement;
+        const itemIDs = lists.get(list) || new Set<string>();
+        const items = element === list ? Array.from(list.children) : [element];
+        items.forEach(item => {
+            const first = Array.from(item.children).find(child => child.hasAttribute("data-node-id"));
+            if (targets.includes(first)) {
+                itemIDs.add(item.getAttribute("data-node-id"));
+            }
+        });
+        if (itemIDs.size > 0) {
+            lists.set(list, itemIDs);
+        }
+    });
+    if (!options.unfocus && !targets[0].querySelector("wbr")) {
+        getContenteditableElement(targets[0])?.insertAdjacentHTML("afterbegin", "<wbr>");
+    }
+    const foldOperations = await unfoldListHeadings(protyle, Array.from(lists.keys()));
+    protyle.observerLoad?.disconnect();
+    hideElements(["select"], protyle);
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const convert = (html: string): string => {
+        // @ts-ignore Lute 声明尚未包含块类型转换方法。
+        return protyle.lute[options.type](html, options.level);
+    };
+    for (const [list, itemIDs] of lists) {
+        let previousID = getPreviousBlockSibling(list)?.getAttribute("data-node-id");
+        let parentID = getEmbedChildOperationParentID(list) || getParentBlock(list)?.getAttribute("data-node-id") ||
+            protyle.block.parentID || protyle.block.rootID;
+        if (!previousID && protyle.block.showAll) {
+            const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
+                id: list.getAttribute("data-node-id"), notebook: protyle.notebookId,
+            });
+            if (response.code !== 0) {
+                throw new Error(response.msg);
+            }
+            previousID = response.data.previousID;
+            parentID = response.data.parentID || parentID;
+        }
+        const operations = buildListConversionOperations(list, {itemIDs, previousID, parentID, convert,
+            newID: () => Lute.NewNodeID()});
+        doOperations.push(...operations.doOperations);
+        undoOperations.unshift(...operations.undoOperations);
+        disposeCustomBlocksInElement(list);
+        list.insertAdjacentHTML("afterend", operations.html);
+        list.remove();
+    }
+    selected.filter(element => ["NodeHeading", "NodeParagraph"].includes(element.getAttribute("data-type"))).forEach(element => {
+        const id = element.getAttribute("data-node-id");
+        let html = convert(element.outerHTML);
+        let foldData;
+        if (element.getAttribute("data-type") === "NodeHeading" && element.getAttribute("fold") === "1" &&
+            (options.type === "Blocks2Ps" || element.getAttribute("data-subtype") !== `h${options.level}`)) {
+            foldData = setFold(protyle, element as HTMLElement, undefined, undefined, true);
+            html = html.replace(' fold="1"', "");
+            doOperations.push(...(foldData?.doOperations || []));
+        }
+        doOperations.push({action: "update", id, data: html});
+        undoOperations.push({action: "update", id, data: element.outerHTML});
+        undoOperations.push(...(foldData?.undoOperations || []));
+        disposeCustomBlocksInElement(element);
+        element.outerHTML = html;
+    });
+    transaction(protyle, doOperations.concat(foldOperations), undoOperations.concat(foldOperations.map(operation => ({...operation}))));
+    if (!hasViewFoldContext(protyle)) {
+        onTransaction(protyle, foldOperations, false, true);
+    }
+    blockRender(protyle, protyle.wysiwyg.element);
+    processRender(protyle.wysiwyg.element);
+    highlightRender(protyle.wysiwyg.element);
+    avRender(protyle.wysiwyg.element, protyle);
+    if (!options.unfocus) {
+        focusByWbr(protyle.wysiwyg.element, options.range || getEditorRange(protyle.wysiwyg.element));
+    }
+};
+
 export const turnListsRecursively = async (options: {
     protyle: IProtyle,
     nodeElements: Element[],
 } & TRecursiveListConversion) => {
+    if (options.type === "CancelListRecursively") {
+        return turnListBlocksInto({protyle: options.protyle, type: "Blocks2Ps", recursively: true}, options.nodeElements);
+    }
     const listElements = options.nodeElements.filter((item, index, elements) => {
         return item.getAttribute("data-type") === "NodeList" &&
             !elements.some((parent, parentIndex) => parentIndex !== index &&
@@ -2097,71 +2192,30 @@ export const turnListsRecursively = async (options: {
         nodeElement.removeAttribute("select-start");
         nodeElement.removeAttribute("select-end");
     });
-    const contexts = await Promise.all(listElements.map(async (nodeElement) => {
-        const previousBlockElement = getPreviousBlockSibling(nodeElement);
-        let previousId = previousBlockElement?.getAttribute("data-node-id");
-        if (!previousBlockElement && options.type === "CancelListRecursively" && options.protyle.block.showAll) {
-            const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
-                id: nodeElement.getAttribute("data-node-id"),
-                notebook: options.protyle.notebookId,
-            });
-            if (response.code !== 0) {
-                throw new Error(response.msg);
-            }
-            previousId = response.data.previousID;
-        }
-        return {
-            id: nodeElement.getAttribute("data-node-id"),
-            nodeElement,
-            parentId: getEmbedChildOperationParentID(nodeElement) ||
-                getParentBlock(nodeElement).getAttribute("data-node-id") ||
-                options.protyle.block.parentID ||
-                options.protyle.block.rootID,
-            previousId,
-        };
-    }));
     const foldOperations = await unfoldListHeadings(options.protyle, listElements);
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    contexts.forEach((context) => {
-        const nodeElement = context.nodeElement;
+    listElements.forEach((nodeElement) => {
         const oldHTML = cleanHeadingNumberHTML(nodeElement.outerHTML);
-        const newHTML = cleanHeadingNumberHTML(options.type === "ConvertListType" ?
-            options.protyle.lute.ConvertListType(nodeElement.outerHTML, options.targetListType) :
-            options.protyle.lute.CancelListRecursively(nodeElement.outerHTML));
-        if (options.type === "ConvertListType") {
-            if (newHTML === oldHTML) {
-                return;
-            }
-            doOperations.push({
-                action: "update",
-                id: context.id,
-                data: newHTML
-            });
-            undoOperations.push({
-                action: "update",
-                id: context.id,
-                data: oldHTML
-            });
-            disposeCustomBlocksInElement(nodeElement);
-            nodeElement.insertAdjacentHTML("afterend", newHTML);
-            const newElement = nodeElement.nextElementSibling as HTMLElement;
-            nodeElement.remove();
-            newElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+        const newHTML = cleanHeadingNumberHTML(options.protyle.lute.ConvertListType(nodeElement.outerHTML, options.targetListType));
+        if (newHTML === oldHTML) {
             return;
         }
-
-        const doPreviousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id") || context.previousId;
-        const operations = buildCancelListOperations(nodeElement, {
-            previousID: doPreviousId,
-            parentID: context.parentId,
-            recursively: true,
+        doOperations.push({
+            action: "update",
+            id: nodeElement.getAttribute("data-node-id"),
+            data: newHTML
         });
-        doOperations.push(...operations.doOperations);
-        undoOperations.unshift(...operations.undoOperations);
+        undoOperations.push({
+            action: "update",
+            id: nodeElement.getAttribute("data-node-id"),
+            data: oldHTML
+        });
         disposeCustomBlocksInElement(nodeElement);
         nodeElement.insertAdjacentHTML("afterend", newHTML);
+        const newElement = nodeElement.nextElementSibling as HTMLElement;
         nodeElement.remove();
+        newElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
     });
     const doFoldOperations = foldOperations.map((operation) => ({...operation}));
     const undoFoldOperations = foldOperations.map((operation) => ({...operation}));

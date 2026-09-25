@@ -226,7 +226,7 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("orderedList", lang("ordered-list")),
         node("check", lang("check")),
         ...(!multi ? [node("listMindmap", lang("mindmap"))] : []),
-        // 列表及列表项的首块转换复用标题入口，保持单选、多选的配置标识和默认顺序一致。
+        // 列表及列表项复用段落和标题入口，保持单选、多选的配置标识和默认顺序一致。
         node("heading1", lang("heading1")),
         node("heading2", lang("heading2")),
         node("heading3", lang("heading3")),

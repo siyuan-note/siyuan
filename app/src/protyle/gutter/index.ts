@@ -1015,16 +1015,16 @@ export class Gutter {
             label: options.label,
             accelerator: options.accelerator,
             click() {
-                turnsIntoTransaction(options);
+                return turnsIntoTransaction(options);
             }
         };
     }
 
-    private headingTurnIntoMenu(protyle: IProtyle, selectsElement: Element[]): IMenu[] {
+    private headingTurnIntoMenu(protyle: IProtyle, selectsElement: Element[], includeParagraph = false): IMenu[] {
         if (getHeadingConversionElements(selectsElement).length === 0) {
             return [];
         }
-        return [1, 2, 3, 4, 5, 6].map(level => this.turnsInto({
+        const items = [1, 2, 3, 4, 5, 6].map(level => this.turnsInto({
             menuId: `heading${level}`,
             icon: `iconH${level}`,
             label: window.siyuan.languages[`heading${level}`],
@@ -1034,6 +1034,13 @@ export class Gutter {
             level,
             type: "Blocks2Hs",
         }));
+        if (includeParagraph) {
+            items.unshift(this.turnsInto({menuId: "paragraph", icon: "iconParagraph",
+                label: window.siyuan.languages.paragraph,
+                accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
+                protyle, selectsElement, type: "Blocks2Ps"}));
+        }
+        return items;
     }
 
     private emptyParagraphTurnIntoMenu(protyle: IProtyle, nodeElements: Element[]): IMenu[] {
@@ -1234,7 +1241,7 @@ export class Gutter {
             }
         }
         if (isList && !protyle.disabled) {
-            const submenu = this.headingTurnIntoMenu(protyle, selectsElement);
+            const submenu = this.headingTurnIntoMenu(protyle, selectsElement, true);
             if (submenu.length > 0) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "turnInto",
@@ -1763,7 +1770,11 @@ export class Gutter {
                 }));
             }
         } else if ((type === "NodeList" || type === "NodeMindmap") && allowStructuralMutation) {
-            turnIntoSubmenu.push(this.turnsOneInto({
+            turnIntoSubmenu.push(type === "NodeList" ? this.turnsInto({
+                menuId: "paragraph", icon: "iconParagraph", label: window.siyuan.languages.paragraph,
+                accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
+                protyle, selectsElement: [nodeElement], type: "Blocks2Ps",
+            }) : this.turnsOneInto({
                 menuId: "paragraph",
                 id,
                 icon: "iconParagraph",
@@ -1892,7 +1903,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
             }
         } else if (type === "NodeListItem" && allowStructuralMutation) {
-            turnIntoSubmenu.push(...this.headingTurnIntoMenu(protyle, [nodeElement]));
+            turnIntoSubmenu.push(...this.headingTurnIntoMenu(protyle, [nodeElement], true));
         } else if (type === "NodeTabs" && allowStructuralMutation) {
             [
                 {menuId: "list", icon: "iconList", label: "list", type: "Tabs2UL"},

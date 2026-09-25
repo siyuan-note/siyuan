@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260925094732"
+		"updated": "20260925172309"
 	},
 	"Children": [
 		{
@@ -11972,7 +11972,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-6zzgsf2",
-				"updated": "20260924173802"
+				"updated": "20260925172309"
 			},
 			"Children": [
 				{
@@ -12004,7 +12004,34 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " (or another heading level) to convert the first paragraph of each item. Existing headings are set to the chosen level. Selecting an entire list affects only its immediate items; other paragraphs, nested lists, numbering, and task states are preserved. Items whose first block is neither a paragraph nor a heading are skipped. On mobile, select the list items and use the same block menu. When only the caret is inside a paragraph, the shortcut converts that paragraph."
+					"Data": " (or another heading level) to remove the selected items’ bullets or checkboxes and turn their first blocks into independent headings. Later paragraphs and nested lists stay in order, and unselected items remain lists. Selecting a whole list affects its immediate items only. To turn the first blocks into ordinary paragraphs, use the paragraph shortcut or choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Block menu"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Turn into"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Paragraph block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". This also removes existing heading formatting. Block IDs, database bindings, and field values are preserved. Items whose first block is neither a paragraph nor a heading are skipped. Mobile uses the same block menu. With only a caret inside a paragraph or heading, the shortcut changes that block without removing its surrounding list."
 				}
 			]
 		},

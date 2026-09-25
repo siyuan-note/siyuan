@@ -561,6 +561,7 @@ export class ListMindmapView {
                             }
                             if (item.hasAttribute("data-node-id")) {
                                 item.classList.add("mindmap-view__preview-block");
+                                item.dataset.mindmapSourceId = item.dataset.nodeId;
                             }
                             if (item.hasAttribute("spellcheck")) {
                                 item.classList.add("mindmap-view__text");
@@ -634,6 +635,44 @@ export class ListMindmapView {
 
     public getContentHost(id: string): HTMLElement | undefined {
         return this.nodeElements.get(id)?.querySelector<HTMLElement>(".mindmap-view__content");
+    }
+
+    public getBlockById(id: string) {
+        return this.nodeElements.get(id) ||
+            this.options.host.querySelector<HTMLElement>(`[data-mindmap-source-id="${id}"]`);
+    }
+
+    public revealNode(id: string) {
+        const node = this.nodeElements.get(id);
+        if (!node || node.hidden) {
+            return;
+        }
+        const reveal = () => {
+            if (this.destroyed || node.hidden) {
+                return;
+            }
+            const viewport = this.viewport.getBoundingClientRect();
+            const rect = node.getBoundingClientRect();
+            if (!viewport.width || !viewport.height || !rect.width || !rect.height) {
+                return;
+            }
+            const margin = 16;
+            const x = rect.left < viewport.left + margin ? viewport.left + margin - rect.left :
+                rect.right > viewport.right - margin ? viewport.right - margin - rect.right : 0;
+            const y = rect.top < viewport.top + margin ? viewport.top + margin - rect.top :
+                rect.bottom > viewport.bottom - margin ? viewport.bottom - margin - rect.bottom : 0;
+            if (x || y) {
+                const bounded = this.boundedPan(this.offsetX + x, this.offsetY + y);
+                this.offsetX = bounded.x;
+                this.offsetY = bounded.y;
+                this.draw();
+            }
+        };
+        if (this.frame) {
+            requestAnimationFrame(reveal);
+        } else {
+            reveal();
+        }
     }
 
     public getSelectedId() {

@@ -123,12 +123,12 @@ func pruneListMindmapMetadata(list *ast.Node) (string, bool) {
 		current := pending[len(pending)-1]
 		pending = pending[:len(pending)-1]
 		for item := current.FirstChild; item != nil; item = item.Next {
-			if item.Type != ast.NodeListItem {
+			if item.Type != ast.NodeListItem && item.Type != ast.NodeMindmapItem {
 				continue
 			}
 			ids[item.ID] = true
 			for child := item.FirstChild; child != nil; child = child.Next {
-				if child.Type == ast.NodeList {
+				if child.Type == ast.NodeList || child.Type == ast.NodeMindmap {
 					pending = append(pending, child)
 				}
 			}
@@ -188,7 +188,7 @@ func (tx *Transaction) normalizeListMindmapMetadata() (ret *TxErr) {
 	var undo []*Operation
 	for _, tree := range tx.trees {
 		ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || node.Type != ast.NodeList || node.IALAttr(listMindmapMetadataAttr) == "" {
+			if !entering || (node.Type != ast.NodeList && node.Type != ast.NodeMindmap) || node.IALAttr(listMindmapMetadataAttr) == "" {
 				return ast.WalkContinue
 			}
 			previous := node.IALAttr(listMindmapMetadataAttr)

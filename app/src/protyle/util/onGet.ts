@@ -4,6 +4,7 @@ import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "./processCode";
 import {migrateLegacyMindmapsBeforeRender} from "../render/listMindmap/migrate";
+import {resolveVisibleListMindmapBlock} from "../render/listMindmap/render";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {revealTabsForTarget} from "../render/tabsRender";
@@ -625,6 +626,41 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         focusElement = protyle.wysiwyg.element.lastElementChild;
     } else if (!focusElement || action.includes(Constants.CB_GET_FOCUSFIRST)) {
         focusElement = protyle.wysiwyg.element.firstElementChild;
+    }
+    const visibleMindmap = resolveVisibleListMindmapBlock(focusElement);
+    if (visibleMindmap !== undefined) {
+        protyle.observerLoad?.disconnect();
+        if (!visibleMindmap) {
+            return;
+        }
+        if (action.includes(Constants.CB_GET_HL)) {
+            preventScroll(protyle);
+            bgFade(visibleMindmap.carrier);
+        }
+        if (!suppressFocus && (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST))) {
+            setTimeout(() => {
+                visibleMindmap.focus();
+                /// #if !MOBILE
+                if (!action.includes(Constants.CB_GET_UNUNDO)) {
+                    const editable = getContenteditableElement(focusElement);
+                    if (editable) {
+                        const range = document.createRange();
+                        range.selectNodeContents(editable);
+                        range.collapse(true);
+                        pushBack(protyle, range, focusElement);
+                    }
+                }
+                /// #endif
+            }, 0);
+        }
+        if (scrollAttr && typeof scrollAttr.scrollTop === "number") {
+            protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+        } else if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_SCROLL) ||
+            action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
+            scrollCenter(protyle, visibleMindmap.scrollElement, scrollPosition);
+        }
+        visibleMindmap.reveal();
+        return;
     }
     const hasScrollTop = scrollAttr && typeof scrollAttr.scrollTop === "number";
     const savedFocusElement = focusElement;

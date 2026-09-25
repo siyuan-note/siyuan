@@ -89,6 +89,10 @@ func validateBlockSwap(ref, def *ast.Node, includeChildren bool) error {
 	if ref == nil || def == nil || ref.Parent == nil || def.Parent == nil {
 		return errors.New("block swap requires two non-document blocks")
 	}
+	if ref.Type == ast.NodeMindmapItem || def.Type == ast.NodeMindmapItem ||
+		ref.Parent.Type == ast.NodeMindmapItem || def.Parent.Type == ast.NodeMindmapItem {
+		return errors.New("cannot swap blocks inside a mind map")
+	}
 	if ref.Parent.Type == ast.NodeListItem {
 		ref = ref.Parent
 	}

@@ -49,6 +49,28 @@ func TestPruneListMindmapMetadata(t *testing.T) {
 	}
 }
 
+func TestNormalizeTypedMindmapMetadata(t *testing.T) {
+	tree, list, child := mindmapTestTree()
+	list.Type = ast.NodeMindmap
+	list.FirstChild.Type = ast.NodeMindmapItem
+	child.Parent.Type = ast.NodeMindmap
+	child.Type = ast.NodeMindmapItem
+	original := `{"version":1,"nodes":{"child":{"bold":true},"deleted":{}},"relations":[{"id":"r","from":"` + list.ID + `","to":"child","label":""}]}`
+	list.SetIALAttr(listMindmapMetadataAttr, original)
+	cleaned, changed := pruneListMindmapMetadata(list)
+	if !changed || !strings.Contains(cleaned, `"child"`) || strings.Contains(cleaned, `"deleted"`) {
+		t.Fatalf("typed branch metadata was not preserved: %s", cleaned)
+	}
+	child.Unlink()
+	tx := &Transaction{trees: map[string]*parse.Tree{tree.ID: tree}, DoOperations: []*Operation{{Action: "delete", ID: child.ID}}}
+	if ret := tx.normalizeListMindmapMetadata(); ret != nil {
+		t.Fatal(ret)
+	}
+	if len(tx.DoOperations) != 2 || strings.Contains(list.IALAttr(listMindmapMetadataAttr), `"child"`) {
+		t.Fatalf("typed mind map metadata was not cleaned: %s", list.IALAttr(listMindmapMetadataAttr))
+	}
+}
+
 func TestPruneListMindmapPreservesInvalidRoutes(t *testing.T) {
 	for _, route := range []string{
 		`null`, `{}`, `{"version":2,"points":[{"x":0,"y":0,"t":0.5}]}`,

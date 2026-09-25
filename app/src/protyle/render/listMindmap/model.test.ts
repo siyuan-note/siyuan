@@ -129,7 +129,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
-        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView};")(
+        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView, registerListMindmapView, resolveVisibleListMindmapBlock};")(
         async (element: Element) => {
             const formulas = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
             await Promise.resolve();
@@ -2217,6 +2217,39 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await nativeKey("Backspace");
     check.ok(nodeElement(deleteModel.root.id), "the last root is preserved for the macOS Delete key");
     deleting.destroy();
+    const locateList = reset("* Root\n  * Child\n");
+    const locateHost = document.createElement("div");
+    locateList.append(locateHost);
+    hostParent.append(locateList);
+    const locateModel = api.readListMindmap(locateList);
+    const locateView = new api.ListMindmapView({host: locateHost, model: locateModel, onExit: () => {}});
+    locateList.dataset.mindmapViewRendered = "true";
+    const unregisterLocate = api.registerListMindmapView(locateList, locateView, locateHost);
+    await settle();
+    const locateChild = locateModel.root.children[0];
+    const locateParagraph = locateChild.contentBlocks[0];
+    const located = api.resolveVisibleListMindmapBlock(locateParagraph);
+    check.equal(located.carrier.dataset.mindmapSourceId, locateParagraph.dataset.nodeId);
+    check.equal(located.carrier.hasAttribute("data-node-id"), false);
+    check.equal(located.scrollElement, locateHost);
+    check.equal(api.resolveVisibleListMindmapBlock(locateList).carrier, locateHost);
+    located.reveal();
+    located.focus();
+    check.equal(document.activeElement, locateHost);
+    check.equal(locateHost.querySelector(`[data-mindmap-id="${locateChild.id}"]`).getAttribute("aria-selected"), "true");
+    const missingBlock = document.createElement("div");
+    missingBlock.dataset.nodeId = "missing-block";
+    locateChild.element.append(missingBlock);
+    check.equal(api.resolveVisibleListMindmapBlock(missingBlock), null);
+    missingBlock.remove();
+    const locateNode = locateHost.querySelector<HTMLElement>(`[data-mindmap-id="${locateChild.id}"]`);
+    locateNode.hidden = true;
+    check.equal(api.resolveVisibleListMindmapBlock(locateParagraph), null);
+    locateNode.hidden = false;
+    unregisterLocate();
+    check.equal(api.resolveVisibleListMindmapBlock(locateParagraph), null);
+    locateView.destroy();
+    locateList.remove();
     // 公式在副本上异步渲染；链接单击跳转，双击和拖拽不跳转。
     const richList = reset("* $x^2$ [example](https://example.com)\n  * child\n");
     const richHost = document.createElement("div");
@@ -2880,17 +2913,17 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         ${shortcutStatements.map(item => item.getText(keydownSource)).join("\n")}
     };
     class ListHint {${fill.getText(hintSource)}}`, {compilerOptions: {target: typescript.ScriptTarget.ES2021}}).outputText;
-    const tabsSource = "const {tabsRender, destroyTabsRender, getTabTask} = (() => {" +
+    const tabsSource = "const {tabsRender, destroyTabsRender, getTabTask, revealTabsForTarget} = (() => {" +
         ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsRender.ts"]
             .map(file => compile(path.join(__dirname, file))).join("\n") +
-        "return {tabsRender, destroyTabsRender, getTabTask};})();\n";
+        "return {tabsRender, destroyTabsRender, getTabTask, revealTabsForTarget};})();\n";
     const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +
         compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
         compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "fold.ts")) +
         compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "pan.ts")) +
         compile(path.join(__dirname, "view.ts")) +
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +
-        compile(path.join(__dirname, "create.ts"));
+        compile(path.join(__dirname, "create.ts")) + compile(path.join(__dirname, "render.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_color.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_tooltips.scss")).css +

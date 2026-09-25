@@ -17,11 +17,22 @@ import {isPhablet} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
 import type {App} from "../index";
 import {onGet} from "../protyle/util/onGet";
+import {resolveVisibleListMindmapBlock} from "../protyle/render/listMindmap/render";
 import {isEncryptedBox} from "./pathName";
 
 let forwardStack: IBackStack[] = [];
 let previousIsBack = false;
 const readingPositions = new WeakMap<IBackStack, IScrollAttr>();
+
+const focusHistoryBlock = (block: HTMLElement, position: {start: number, end: number}) => {
+    const visible = resolveVisibleListMindmapBlock(block);
+    if (visible !== undefined) {
+        visible?.focus();
+        visible?.reveal();
+        return;
+    }
+    focusByOffset(getContenteditableElement(block), position.start, position.end);
+};
 
 export const saveBackScroll = (protyle?: IProtyle) => {
     if (!isPhablet()) {
@@ -108,7 +119,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                                     !isInEmbedBlock(item));
                                 if (blockElement) {
                                     if (!protyle.disabled && !isPhablet()) {
-                                        focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
+                                        focusHistoryBlock(blockElement, stack.position);
                                     }
                                     scrollCenter(protyle, blockElement, "start");
                                 }
@@ -218,7 +229,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                 false, true, true, true, false);
         }
         if (!stack.protyle.disabled && !isPhablet()) {
-            focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
+            focusHistoryBlock(blockElement, stack.position);
         }
         scrollCenter(stack.protyle, blockElement, "start");
         getAllModels().outline.forEach(item => {
@@ -267,7 +278,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                             }
                         });
                         if (!stack.protyle.disabled && !isPhablet()) {
-                            focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
+                            focusHistoryBlock(blockElement, stack.position);
                         }
                         scrollCenter(stack.protyle, blockElement, "start");
                     }
@@ -298,7 +309,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                     }
                 });
                 if (!stack.protyle.disabled && !isPhablet()) {
-                    focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
+                    focusHistoryBlock(blockElement, stack.position);
                 }
                 scrollCenter(stack.protyle, blockElement, "start");
             }

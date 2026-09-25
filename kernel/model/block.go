@@ -740,6 +740,9 @@ func SwapBlockRef(refID, defID string, includeChildren, originalToEmbed bool) (e
 	if nil == defNode {
 		return
 	}
+	if err = validateBlockSwap(refNode, defNode, includeChildren); err != nil {
+		return
+	}
 	swapBlockRefNodes(refNode, defNode, defID, includeChildren, originalToEmbed)
 
 	if err = indexWriteTreeUpsertQueue(refTree); err != nil {

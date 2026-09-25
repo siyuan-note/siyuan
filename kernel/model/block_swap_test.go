@@ -139,6 +139,29 @@ func TestSwapBlockRefNodes(t *testing.T) {
 	}
 }
 
+func TestValidateBlockSwapRejectsMindmapItems(t *testing.T) {
+	root := &ast.Node{Type: ast.NodeDocument}
+	ref := treenode.NewParagraph("")
+	root.AppendChild(ref)
+	list := &ast.Node{Type: ast.NodeMindmap, ListData: &ast.ListData{}}
+	item := &ast.Node{Type: ast.NodeMindmapItem, ListData: &ast.ListData{}}
+	def := treenode.NewParagraph("")
+	root.AppendChild(list)
+	list.AppendChild(item)
+	item.AppendChild(def)
+	for _, node := range []*ast.Node{item, def} {
+		if err := validateBlockSwap(ref, node, false); err == nil {
+			t.Fatalf("mind map block %s was accepted", node.Type)
+		}
+		if err := validateBlockSwap(node, ref, false); err == nil {
+			t.Fatalf("mind map reference %s was accepted", node.Type)
+		}
+	}
+	if err := validateBlockSwap(ref, list, false); err != nil {
+		t.Fatalf("mind map container should remain swappable: %v", err)
+	}
+}
+
 func assertBlockSwapFragments(t *testing.T, expected, actual []blockSwapFragment) {
 	t.Helper()
 	if len(expected) != len(actual) {

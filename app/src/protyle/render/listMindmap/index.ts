@@ -31,7 +31,7 @@ import {
     writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch,
 } from "./model";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
-import {getListMindmapElements, registerListMindmapRoot} from "./render";
+import {getListMindmapElements, registerListMindmapRoot, registerListMindmapView} from "./render";
 import {ListMindmapView} from "./view";
 import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
@@ -97,6 +97,7 @@ class ListMindmapController {
     private editRequest = 0;
     private disposed = false;
     private taskChanges: Promise<void> = Promise.resolve();
+    private unregisterVisible?: () => void;
 
     constructor(owner: IProtyle, list: HTMLElement) {
         this.owner = owner;
@@ -322,10 +323,24 @@ class ListMindmapController {
             }),
         });
         list.dataset.mindmapViewRendered = "true";
+        this.unregisterVisible = registerListMindmapView(list, this.view, this.host);
         this.snapshot = cleanListMindmapHTML(list.outerHTML);
         if (canEdit(owner, list)) {
+            const focusSource = getSelection()?.anchorNode;
+            let focusedID: string;
+            for (let element = focusSource instanceof Element ? focusSource : focusSource?.parentElement;
+                 element && list.contains(element); element = element.parentElement) {
+                const id = (element as HTMLElement).dataset.nodeId;
+                if (id && this.model.nodes.has(id)) {
+                    focusedID = id;
+                    break;
+                }
+            }
             const range = focusListMindmap(list, this.host);
             if (range) {
+                if (focusedID) {
+                    this.view.focusNode(focusedID);
+                }
                 owner.toolbar.range = range;
             }
         }
@@ -511,6 +526,7 @@ class ListMindmapController {
         const restoreFocus = this.host.contains(document.activeElement) && this.list.isConnected &&
             this.list.dataset.type !== "NodeMindmap" && this.list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1";
         this.activeEditor?.destroy();
+        this.unregisterVisible?.();
         this.view.destroy();
         this.host.remove();
         this.list.removeAttribute("data-mindmap-view-rendered");

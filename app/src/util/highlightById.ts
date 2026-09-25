@@ -1,4 +1,5 @@
 import {revealTabsForTarget} from "../protyle/render/tabsRender";
+import {resolveVisibleListMindmapBlock} from "../protyle/render/listMindmap/render";
 import {hasClosestBlock, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {focusByRange, getEditorRange} from "../protyle/util/selection";
 import {getStartScrollTop} from "./highlightPosition";
@@ -32,6 +33,16 @@ export const highlightById = (protyle: IProtyle, id: string, position: ScrollLog
         }
     });
     if (nodeElement) {
+        const visible = resolveVisibleListMindmapBlock(nodeElement);
+        if (visible === null) {
+            return undefined;
+        }
+        if (visible) {
+            visible.reveal();
+            scrollCenter(protyle, visible.scrollElement, position);
+            bgFade(visible.carrier);
+            return visible.carrier;
+        }
         scrollCenter(protyle, nodeElement, position);
         bgFade(nodeElement);
         return nodeElement;// 仅配合前进后退使用
@@ -48,6 +59,16 @@ export const scrollCenter = (
     position: ScrollLogicalPosition = "nearest",
     behavior: ScrollBehavior = "auto"
 ) => {
+    if (nodeElement instanceof HTMLElement) {
+        const visible = resolveVisibleListMindmapBlock(nodeElement);
+        if (visible === null) {
+            return;
+        }
+        if (visible) {
+            visible.reveal();
+            nodeElement = visible.scrollElement;
+        }
+    }
     const cellEditor = protyle.wysiwyg.element.closest(".table__cell-editor");
     const cellScroll = cellEditor?.parentElement.closest<HTMLElement>(".protyle-content");
     if (cellScroll && position === "nearest") {

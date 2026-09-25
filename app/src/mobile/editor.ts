@@ -7,6 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
 import {highlightById, scrollCenter} from "../util/highlightById";
+import {resolveVisibleListMindmapBlock} from "../protyle/render/listMindmap/render";
 import {isInEmbedBlock} from "../protyle/util/hasClosest";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {hideElements} from "../protyle/ui/hideElements";
@@ -129,9 +130,11 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             }
         });
         const protyle = window.siyuan.mobile.editor.protyle;
+        const visibleMindmap = blockElement && resolveVisibleListMindmapBlock(blockElement);
         const shouldReload = forceReload ||
             (action.includes(Constants.CB_GET_ALL) && (!protyle.block.showAll || protyle.block.id !== id)) ||
-            blockElement?.clientHeight === 0;
+            (visibleMindmap === undefined ? blockElement?.clientHeight === 0 :
+                visibleMindmap ? visibleMindmap.scrollElement.clientHeight === 0 : false);
         if (blockElement && !shouldReload) {
             if (action.includes(Constants.CB_GET_HL)) {
                 highlightById(protyle, id, scrollPosition);

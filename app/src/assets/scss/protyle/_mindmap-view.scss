@@ -40,6 +40,10 @@
   line-height: 1.5;
   outline: none;
 
+  &__preview-block.protyle-wysiwyg--hl {
+    position: relative;
+  }
+
   [hidden] {
     display: none !important;
   }

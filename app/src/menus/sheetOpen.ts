@@ -34,3 +34,16 @@ export const waitForSheetViewport = (options: {
         options.cancelFrame(frame);
     };
 };
+
+export const getVisibleSheetViewport = (layoutHeight: number, visualViewport?: {
+    height: number;
+    offsetTop: number;
+}) => {
+    const top = Math.max(0, Math.min(layoutHeight, visualViewport?.offsetTop ?? 0));
+    const bottom = Math.max(top, Math.min(layoutHeight, (visualViewport?.offsetTop ?? 0) +
+        (visualViewport?.height ?? layoutHeight)));
+    return {
+        height: bottom - top,
+        bottomOffset: Math.max(0, layoutHeight - bottom),
+    };
+};

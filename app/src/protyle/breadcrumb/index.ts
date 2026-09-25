@@ -44,6 +44,10 @@ import {mountBreadcrumbButtons} from "../../plugin/breadcrumbButton";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {bindMobileMenuKeyboard} from "../../mobile/util/keyboardToolbar";
+/// #if MOBILE
+import {commandPanel} from "../../boot/globalEvent/command/panel";
+import {getEditorFocusRange} from "../util/editorFocus";
+/// #endif
 
 const genDocumentStatLabel = (stat: IBlockStat, statWithEmbed?: IBlockStat, embedStat?: IEmbedStat) => {
     const runeEmbedAttrs = statWithEmbed ? ` class="ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.runeCountWithEmbed, statWithEmbed.runeCount, embedStat))}"` : "";
@@ -86,6 +90,7 @@ export class Breadcrumb {
 <div class="protyle-breadcrumb__plugin"></div>
 <button class="protyle-breadcrumb__icon fn__none ariaLabel" aria-label="${updateHotkeyTip(window.siyuan.config.keymap.editor.general.exitFocus.custom)}" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
 ${padHTML}
+${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type="command-panel" aria-label="${escapeAttr(window.siyuan.languages.commandPanel)}"><svg><use xlink:href="#iconTerminal"></use></svg></button>` : ""}
 <button class="block__icon fn__flex-center ariaLabel${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.lockEdit}" data-type="readonly" data-subtype="unlock"><svg><use xlink:href="#iconUnlock"></use></svg></button>
 <button class="block__icon fn__flex-center ariaLabel" data-type="doc" aria-label="${isMac() ? window.siyuan.languages.gutterTip2 : window.siyuan.languages.gutterTip2.replace("⇧", "Shift+")}"><svg><use xlink:href="#iconFile"></use></svg></button>
 <button class="block__icon fn__flex-center ariaLabel" data-type="more" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
@@ -93,7 +98,15 @@ ${padHTML}
         this.element = element.firstElementChild as HTMLElement;
         mountBreadcrumbButtons(protyle, element.querySelector(".protyle-breadcrumb__plugin"));
         const takeMenuKeyboard = bindMobileMenuKeyboard(element,
-            'button[data-type="mobile-menu"], button[data-type="doc"], button[data-type="more"]', () => protyle);
+            'button[data-type="mobile-menu"], button[data-type="doc"], button[data-type="more"], button[data-type="command-panel"]',
+            () => protyle);
+        /// #if MOBILE
+        element.addEventListener("pointerdown", event => {
+            if ((event.target as Element).closest('button[data-type="command-panel"]')) {
+                event.preventDefault();
+            }
+        });
+        /// #endif
         element.addEventListener("click", async (event) => {
             const restoreMenuKeyboard = takeMenuKeyboard();
             let target = event.target as HTMLElement;
@@ -138,6 +151,16 @@ ${padHTML}
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                /// #if MOBILE
+                } else if (type === "command-panel") {
+                    const selection = document.getSelection();
+                    const range = getEditorFocusRange(protyle.wysiwyg.element,
+                        selection?.rangeCount ? selection.getRangeAt(0) : undefined, protyle.toolbar.range);
+                    commandPanel(protyle.app, {protyle, range, restoreKeyboard: restoreMenuKeyboard});
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                /// #endif
                 } else if (type === "doc") {
                     // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
                     if (event.shiftKey) {

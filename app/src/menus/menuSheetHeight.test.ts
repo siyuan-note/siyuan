@@ -4,6 +4,7 @@ import * as assert from "node:assert/strict";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {Menu} from "./Menu";
+import {getVisibleSheetViewport} from "./sheetOpen";
 
 const source = createSourceFile("Menu.ts", readFileSync("src/menus/Menu.ts", "utf8"), ScriptTarget.ES2021, true);
 const declaration = source.statements.find(statement => isClassDeclaration(statement) && statement.name?.text === "Menu");
@@ -11,7 +12,14 @@ const compiled = transpileModule(declaration.getText(source), {
     compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
 }).outputText;
 
-const setup = (options: {fit: boolean, contentHeight: number, viewportHeight: number}) => {
+const setup = (options: {
+    fit: boolean,
+    contentHeight: number,
+    viewportHeight: number,
+    visualHeight?: number,
+    visualOffsetTop?: number,
+    preserveKeyboard?: boolean,
+}) => {
     const windowResizeListeners = new Set<() => void>();
     const viewportResizeListeners = new Set<() => void>();
     const classes = new Set<string>(["b3-menu--sheet"]);
@@ -38,6 +46,7 @@ const setup = (options: {fit: boolean, contentHeight: number, viewportHeight: nu
     const module = {exports: {} as {Menu: typeof Menu}};
     runInNewContext(compiled, {
         exports: module.exports,
+        getVisibleSheetViewport,
         window: {
             innerHeight: options.viewportHeight,
             siyuan: {mobile: {size: {portrait: {height1: options.viewportHeight}}}},
@@ -52,6 +61,8 @@ const setup = (options: {fit: boolean, contentHeight: number, viewportHeight: nu
                 }
             },
             visualViewport: {
+                height: options.visualHeight ?? options.viewportHeight,
+                offsetTop: options.visualOffsetTop ?? 0,
                 addEventListener: (name: string, listener: () => void) => {
                     if (name === "resize") {
                         viewportResizeListeners.add(listener);
@@ -68,6 +79,7 @@ const setup = (options: {fit: boolean, contentHeight: number, viewportHeight: nu
     const menu = Object.create(module.exports.Menu.prototype) as Menu;
     Object.assign(menu, {
         element,
+        preserveSheetKeyboard: options.preserveKeyboard ?? false,
         updateSheetTitle: () => {},
         updateTargetPosition: () => {},
     });
@@ -75,6 +87,20 @@ const setup = (options: {fit: boolean, contentHeight: number, viewportHeight: nu
 };
 
 describe("mobile menu sheet content fit", () => {
+    it("positions a keyboard-preserving sheet within the visible viewport", () => {
+        const {menu, element} = setup({
+            fit: false,
+            contentHeight: 272,
+            viewportHeight: 808,
+            visualHeight: 476,
+            visualOffsetTop: 32,
+            preserveKeyboard: true,
+        });
+        menu.resetPosition();
+        assert.equal(element.style.bottom, "300px");
+        assert.ok(Math.abs(parseFloat(element.style.height) - 428.4) < .001);
+    });
+
     it("keeps the standard sheet height when fitting is not requested", () => {
         const {menu, element} = setup({fit: false, contentHeight: 272, viewportHeight: 2000});
         menu.resetPosition();

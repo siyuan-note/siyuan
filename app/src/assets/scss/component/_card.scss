@@ -97,12 +97,27 @@
 
 // 题头图封面选择
 .b3-cover {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
 
   &__tabs {
     display: flex;
     flex-wrap: wrap;
+    flex-shrink: 0;
+    max-height: 50%;
+    overflow: auto;
     padding: 16px 16px 0;
     gap: 8px;
+  }
+
+  &__cards {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    align-content: start;
+    padding: 16px;
   }
 
   &__card {

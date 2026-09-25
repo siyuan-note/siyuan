@@ -141,9 +141,9 @@ func TestAPIContractSyncHTTPResponses(t *testing.T) {
 
 func TestAPIContractSyncBootRole(t *testing.T) {
 	syncTestConfiguration(t)
-	previous := model.BootSyncSucc
-	model.BootSyncSucc = 1
-	t.Cleanup(func() { model.BootSyncSucc = previous })
+	previous := model.BootSyncSucc.Load()
+	model.BootSyncSucc.Store(1)
+	t.Cleanup(func() { model.BootSyncSucc.Store(previous) })
 	model.Conf.Sync.Enabled = true
 	for _, role := range []model.Role{model.RoleAdministrator, model.RoleReader} {
 		engine := gin.New()

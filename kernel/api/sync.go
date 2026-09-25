@@ -398,7 +398,7 @@ func getBootSyncContract(c *gin.Context, request apicontract.EmptyRequest) (ret 
 		return
 	}
 
-	if model.Conf.Sync.Enabled && 1 == model.BootSyncSucc {
+	if model.Conf.Sync.Enabled && 1 == model.BootSyncSucc.Load() {
 		ret = apicontract.Failure[apicontract.Null](1, model.Conf.Language(17))
 		return
 	}
@@ -444,8 +444,8 @@ var performBootSync = contractHandler(apicontract.PerformBootSync, performBootSy
 func performBootSyncContract(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.Null]) {
 	ret = apicontract.Success(apicontract.Null{})
 	model.BootSyncData()
-	if model.BootSyncSucc != 0 {
-		ret = apicontract.Failure[apicontract.Null](model.BootSyncSucc, "")
+	if syncResult := model.BootSyncSucc.Load(); syncResult != 0 {
+		ret = apicontract.Failure[apicontract.Null](int(syncResult), "")
 	}
 	return
 }

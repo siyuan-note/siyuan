@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "मोबाइल स्लैश मेनू",
+	"mobileSlashMenuTip": "चालू होने पर, सामग्री ब्लॉक खोजने और डालने के लिए मोबाइल संपादक में / टाइप करें",
 	"mindmapAddSibling": "माइंड मैप में समान स्तर का नोड जोड़ें",
 	"mindmapAddChild": "माइंड मैप में उप नोड जोड़ें",
 	"layoutSelectedCount": "${x} चुने गए",

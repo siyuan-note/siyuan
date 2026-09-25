@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "Menú de barra diagonal en móvil",
+	"mobileSlashMenuTip": "Al activarlo, escribe / en el editor móvil para buscar e insertar bloques de contenido",
 	"mindmapAddSibling": "Añadir un nodo hermano al mapa mental",
 	"mindmapAddChild": "Añadir un nodo hijo al mapa mental",
 	"layoutSelectedCount": "${x} seleccionados",

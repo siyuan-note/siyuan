@@ -1,6 +1,6 @@
 import {Constants} from "../../constants";
 import {isBrowser, isMobile} from "../../util/functions";
-import {updateHotkeyTip} from "../../protyle/util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../../protyle/util/compatibility";
 import {editorConfigApi} from "./editorRuntime";
 import type {SettingTabBuilder} from "../setting/builder";
 import {controlSelect} from "../setting/control";
@@ -64,6 +64,18 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.hashTagSearch,
         desc: window.siyuan.languages.hashTagSearchTip,
     });
+    if (isMobile()) {
+        group.switch("mobile.slashMenu", {
+            title: window.siyuan.languages.mobileSlashMenu,
+            desc: window.siyuan.languages.mobileSlashMenuTip,
+            readConfig: () => window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU]?.enabled === true,
+            save: (value) => {
+                const config = {enabled: value === true};
+                window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU] = config;
+                setStorageVal(Constants.LOCAL_MOBILE_SLASH_MENU, config);
+            },
+        });
+    }
     group.switch("editor.pasteURLAutoConvert", {
         title: window.siyuan.languages.pasteURLAutoConvert,
         desc: window.siyuan.languages.pasteURLAutoConvertTip,

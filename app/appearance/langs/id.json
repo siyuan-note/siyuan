@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "Menu garis miring di ponsel",
+	"mobileSlashMenuTip": "Jika diaktifkan, ketik / di editor ponsel untuk mencari dan menyisipkan blok konten",
 	"mindmapAddSibling": "Tambah simpul setingkat pada peta pikiran",
 	"mindmapAddChild": "Tambah simpul anak pada peta pikiran",
 	"layoutSelectedCount": "${x} dipilih",

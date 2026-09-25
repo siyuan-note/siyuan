@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "Menu barre oblique sur mobile",
+	"mobileSlashMenuTip": "Une fois activé, saisissez / dans l’éditeur mobile pour rechercher et insérer des blocs de contenu",
 	"mindmapAddSibling": "Ajouter un nœud frère à la carte mentale",
 	"mindmapAddChild": "Ajouter un nœud enfant à la carte mentale",
 	"layoutSelectedCount": "${x} sélectionné(s)",

@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "Mobile slash menu",
+	"mobileSlashMenuTip": "When enabled, type / in the mobile editor to search for and insert content blocks",
 	"mindmapAddSibling": "Add a sibling mind map node",
 	"mindmapAddChild": "Add a child mind map node",
 	"layoutSelectedCount": "${x} selected",

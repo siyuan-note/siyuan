@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "Slash-Menü auf Mobilgeräten",
+	"mobileSlashMenuTip": "Nach dem Aktivieren / im mobilen Editor eingeben, um Inhaltsblöcke zu suchen und einzufügen",
 	"mindmapAddSibling": "Gleichrangigen Mindmap-Knoten hinzufügen",
 	"mindmapAddChild": "Untergeordneten Mindmap-Knoten hinzufügen",
 	"layoutSelectedCount": "${x} ausgewählt",

@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "Menu de barra no celular",
+	"mobileSlashMenuTip": "Quando ativado, digite / no editor móvel para pesquisar e inserir blocos de conteúdo",
 	"mindmapAddSibling": "Adicionar nó irmão ao mapa mental",
 	"mindmapAddChild": "Adicionar nó filho ao mapa mental",
 	"layoutSelectedCount": "${x} selecionados",

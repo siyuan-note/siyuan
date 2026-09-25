@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "Mobil eğik çizgi menüsü",
+	"mobileSlashMenuTip": "Etkinleştirildiğinde içerik bloklarını aramak ve eklemek için mobil düzenleyicide / yazın",
 	"mindmapAddSibling": "Zihin haritasına aynı düzeyde düğüm ekle",
 	"mindmapAddChild": "Zihin haritasına alt düğüm ekle",
 	"layoutSelectedCount": "${x} seçildi",

@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "移动端斜杠菜单",
+	"mobileSlashMenuTip": "开启后，在移动端编辑器输入 / 可搜索并插入内容块",
 	"mindmapAddSibling": "添加同级思维导图节点",
 	"mindmapAddChild": "添加子思维导图节点",
 	"layoutSelectedCount": "已选 ${x} 个",

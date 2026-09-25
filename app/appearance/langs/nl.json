@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "Slashmenu op mobiel",
+	"mobileSlashMenuTip": "Typ na inschakelen / in de mobiele editor om inhoudsblokken te zoeken en in te voegen",
 	"mindmapAddSibling": "Een knooppunt op hetzelfde niveau toevoegen aan de mindmap",
 	"mindmapAddChild": "Een onderliggend knooppunt toevoegen aan de mindmap",
 	"layoutSelectedCount": "${x} geselecteerd",

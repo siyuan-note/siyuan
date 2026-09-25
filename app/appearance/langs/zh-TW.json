@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "行動端斜線選單",
+	"mobileSlashMenuTip": "啟用後，在行動端編輯器輸入 / 可搜尋並插入內容區塊",
 	"mindmapAddSibling": "新增同級心智圖節點",
 	"mindmapAddChild": "新增子心智圖節點",
 	"layoutSelectedCount": "已選 ${x} 個",

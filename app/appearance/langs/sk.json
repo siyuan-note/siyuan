@@ -1,4 +1,6 @@
 {
+	"mobileSlashMenu": "Ponuka lomky v mobile",
+	"mobileSlashMenuTip": "Po zapnutí zadajte / v mobilnom editore na vyhľadanie a vloženie blokov obsahu",
 	"mindmapAddSibling": "Pridať súrodenecký uzol myšlienkovej mapy",
 	"mindmapAddChild": "Pridať podradený uzol myšlienkovej mapy",
 	"layoutSelectedCount": "Vybrané: ${x}",

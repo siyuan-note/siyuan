@@ -333,6 +333,11 @@ export class Hint {
             if (!this.enableSlash || !blockElement || isInEmbedBlock(blockElement)) {
                 return;
             }
+            if (!protyle.lite && isMobile() &&
+                (this.splitChar !== "/" || window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU]?.enabled !== true)) {
+                this.element.classList.add("fn__none");
+                return;
+            }
             if (protyle.lite) {
                 protyle.options.hint.extend.find((item) => {
                     if (item.key === "/" && item.hint) {
@@ -340,7 +345,10 @@ export class Hint {
                         return true;
                     }
                 });
-            } else if (!isMobile()) {
+            } else {
+                if (isMobile()) {
+                    protyle.toolbar.range = protyle.toolbar.range.cloneRange();
+                }
                 const slashData = hintSlash(key, protyle);
                 if (slashData.length === 0) {
                     if (endsWithMultiCharHintPrefix(key, protyle.options.hint.extend.map((item) => item.key))) {

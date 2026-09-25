@@ -877,7 +877,7 @@ if (response.code === 0 && response.data) {
   ```
 
     * `action.data`：新插入块生成的 DOM
-    * `action.id`：新插入块的 ID
+    * `action.id`：首个插入的顶层块 ID；如果一次插入多个顶层块且需要逐个取得 ID，请每次请求只插入一个块
 
 ### 插入前置子块
 
@@ -963,7 +963,7 @@ if (response.code === 0 && response.data) {
   ```
 
     * `action.data`：新插入块生成的 DOM
-    * `action.id`：新插入块的 ID
+    * `action.id`：首个追加的顶层块 ID；如果一次追加多个顶层块且需要逐个取得 ID，请每次请求只追加一个块
 
 ### 更新块
 
@@ -1328,6 +1328,8 @@ if (response.code === 0 && response.data) {
     "data": null
   }
   ```
+
+`appendBlock` 和 `insertBlock` 返回前已提交块树，但 SQL `blocks` 表会异步建立索引。写入成功后，先调用 `POST /api/sqlite/flushTransaction` 并等待返回 `code: 0`，再查询 `/api/query/sql`。`getBlockKramdown` 读取块树，因此可能在 SQL 索引完成前就返回完整内容。Kramdown、DOM 和 SQL 列是不同的内容表示，均非规范化纯文本。
 
 ## 模板
 

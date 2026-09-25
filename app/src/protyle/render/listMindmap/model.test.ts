@@ -2881,7 +2881,8 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +
         compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
         compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "fold.ts")) +
-        compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "view.ts")) +
+        compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "pan.ts")) +
+        compile(path.join(__dirname, "view.ts")) +
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +
         compile(path.join(__dirname, "create.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +

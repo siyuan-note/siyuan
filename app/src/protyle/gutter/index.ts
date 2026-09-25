@@ -44,6 +44,7 @@ import {markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {toggleListMindmap} from "../render/listMindmap";
+import {getBlockHeightTarget, setBlockHeight} from "./height";
 import {
     getContenteditableElement,
     getEmbedGutterOperationContext,
@@ -2317,35 +2318,11 @@ export class Gutter {
             }).element);
         } else if (type === "NodeCodeBlock" && !protyle.disabled && nodeElement.getAttribute("data-subtype") === "echarts") {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_chart", type: "separator"}).element);
-            const height = (nodeElement as HTMLElement).style.height;
-            let html = nodeElement.outerHTML;
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "chart",
                 label: window.siyuan.languages.chart,
                 icon: "iconCode",
                 submenu: [{
-                    id: "height",
-                    iconHTML: "",
-                    type: "readonly",
-                    label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" value="${height ? parseInt(height) : "420"}" step="1" min="148" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}"><span class="fn__flex-center">px</span></div>`,
-                    bind: (element) => {
-                        element.querySelector("input").addEventListener("change", (event) => {
-                            const newHeight = ((event.target as HTMLInputElement).value || "420") + "px";
-                            (nodeElement as HTMLElement).style.height = newHeight;
-                            updateTransaction(protyle, nodeElement, html);
-                            html = nodeElement.outerHTML;
-                            event.stopPropagation();
-                            const renderElement = nodeElement.querySelector('[contenteditable="false"]') as HTMLElement;
-                            if (renderElement) {
-                                renderElement.style.height = newHeight;
-                                const chartInstance = window.echarts.getInstanceById(renderElement.getAttribute("_echarts_instance_"));
-                                if (chartInstance) {
-                                    chartInstance.resize();
-                                }
-                            }
-                        });
-                    }
-                }, {
                     id: "update",
                     label: window.siyuan.languages.update,
                     icon: "iconEdit",
@@ -3324,26 +3301,32 @@ export class Gutter {
     }
 
     private genHeights(nodeElements: Element[], protyle: IProtyle) {
-        if (nodeElements.length === 0 ||
-            nodeElements.some(item => item.getAttribute("data-type") !== "NodeCodeBlock" || item.getAttribute("data-subtype"))) {
+        if (nodeElements.length === 0 || nodeElements.some(item => !getBlockHeightTarget(item as HTMLElement))) {
             return;
         }
+        const getHeight = (item: HTMLElement) => {
+            const target = getBlockHeightTarget(item);
+            return target.element.style[target.property] ||
+                (["NodeIFrame", "NodeWidget"].includes(item.dataset.type) ? item.querySelector("iframe")?.style.height || "" : "");
+        };
+        const setHeight = setBlockHeight;
         let rangeElement: HTMLInputElement;
         const firstElement = nodeElements[0] as HTMLElement;
+        const firstHeight = getHeight(firstElement);
         const styles: IMenu[] = [{
             id: "heightInput",
             iconHTML: "",
             type: "readonly",
-            label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" value="${firstElement.style.maxHeight.endsWith("px") ? parseInt(firstElement.style.maxHeight) : ""}" type="number" min="1" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}"><span class="fn__flex-center">px</span></div>`,
+            label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" value="${firstHeight.endsWith("px") ? parseInt(firstHeight) : ""}" type="number" min="1" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}"><span class="fn__flex-center">px</span></div>`,
             bind: (element) => {
                 const inputElement = element.querySelector("input");
                 inputElement.addEventListener("input", () => {
-                    const maxHeight = inputElement.value ? inputElement.value + "px" : "";
+                    const heightValue = inputElement.value ? inputElement.value + "px" : "";
                     nodeElements.forEach((item: HTMLElement) => {
-                        item.style.maxHeight = maxHeight;
+                        setHeight(item, heightValue);
                     });
                     rangeElement.value = "0";
-                    rangeElement.parentElement.setAttribute("aria-label", maxHeight || window.siyuan.languages.default);
+                    rangeElement.parentElement.setAttribute("aria-label", heightValue || window.siyuan.languages.default);
                 });
                 this.updateNodeElements(nodeElements, protyle, inputElement);
             }
@@ -3355,7 +3338,7 @@ export class Gutter {
                 label: item,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.maxHeight = parseInt(item) + "vh";
+                        setHeight(e, parseInt(item) + "vh");
                     });
                 }
             });
@@ -3364,7 +3347,7 @@ export class Gutter {
             id: "separator_1",
             type: "separator"
         });
-        const height = firstElement.style.maxHeight.endsWith("vh") ? parseInt(firstElement.style.maxHeight) : 0;
+        const height = firstHeight.endsWith("vh") ? parseInt(firstHeight) : 0;
         window.siyuan.menus.menu.append(new MenuItem({
             id: "height",
             icon: "iconHeight",
@@ -3373,12 +3356,12 @@ export class Gutter {
                 id: "heightDrag",
                 iconHTML: "",
                 type: "readonly",
-                label: `<div style="margin: 4px 0;" aria-label="${firstElement.style.maxHeight ? firstElement.style.maxHeight.replace("vh", "%") : window.siyuan.languages.default}" class="b3-tooltips b3-tooltips__n"><input style="box-sizing: border-box" value="${height}" class="b3-slider fn__block" max="100" min="1" step="1" type="range"></div>`,
+                label: `<div style="margin: 4px 0;" aria-label="${firstHeight ? firstHeight.replace("vh", "%") : window.siyuan.languages.default}" class="b3-tooltips b3-tooltips__n"><input style="box-sizing: border-box" value="${height}" class="b3-slider fn__block" max="100" min="1" step="1" type="range"></div>`,
                 bind: (element) => {
                     rangeElement = element.querySelector("input");
                     rangeElement.addEventListener("input", () => {
                         nodeElements.forEach((e: HTMLElement) => {
-                            e.style.maxHeight = rangeElement.value + "vh";
+                            setHeight(e, rangeElement.value + "vh");
                         });
                         rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
                     });
@@ -3393,9 +3376,7 @@ export class Gutter {
                 label: window.siyuan.languages.default,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        if (e.style.maxHeight) {
-                            e.style.maxHeight = "";
-                        }
+                        setHeight(e, "");
                     });
                 }
             }]),

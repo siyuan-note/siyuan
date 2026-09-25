@@ -1,4 +1,5 @@
 import {Constants} from "../../../constants";
+import {syncListMindmapHeight} from "./height";
 import {readListMindmap} from "./model";
 import {ListMindmapView} from "./view";
 import {revealTabsForTarget} from "../tabsRender";
@@ -91,6 +92,10 @@ export const listMindmapRender = (root: Element, cdn?: string) => {
     getListMindmapElements(root).forEach(list => {
         const previous = previews.get(list);
         if (previous) {
+            const host = list.querySelector<HTMLElement>(":scope > .mindmap-view");
+            if (host) {
+                syncListMindmapHeight(list, host);
+            }
             previous.refreshLayout();
             return;
         }
@@ -99,6 +104,7 @@ export const listMindmapRender = (root: Element, cdn?: string) => {
             list.querySelector(":scope > .mindmap-view")?.remove();
             const host = document.createElement("div");
             host.className = "mindmap-view";
+            syncListMindmapHeight(list, host);
             host.contentEditable = "false";
             list.appendChild(host);
             const view = new ListMindmapView({

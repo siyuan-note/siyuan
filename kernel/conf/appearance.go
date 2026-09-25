@@ -168,6 +168,7 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 		if version < 6 {
 			migrateTaskStatusMenu(profile)
 		}
+		migrateChartHeightMenu(profile)
 		profileIDs[profile.ID] = true
 		profiles = append(profiles, profile)
 	}

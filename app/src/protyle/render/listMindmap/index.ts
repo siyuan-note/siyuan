@@ -32,6 +32,7 @@ import {
 } from "./model";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
 import {getListMindmapElements, registerListMindmapRoot, registerListMindmapView} from "./render";
+import {syncListMindmapHeight} from "./height";
 import {ListMindmapView} from "./view";
 import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
@@ -106,6 +107,7 @@ class ListMindmapController {
         list.querySelector(":scope > .mindmap-view")?.remove();
         this.host = document.createElement("div");
         this.host.className = "mindmap-view";
+        syncListMindmapHeight(list, this.host);
         this.host.contentEditable = "false";
         this.host.addEventListener("pointermove", event => {
             if (event.pointerType !== "mouse" || event.buttons || !owner.options.render.gutter ||
@@ -509,6 +511,7 @@ class ListMindmapController {
 
     public refresh() {
         this.view.setReadOnly(!canEdit(this.owner, this.list));
+        syncListMindmapHeight(this.list, this.host);
         const snapshot = cleanListMindmapHTML(this.list.outerHTML);
         if (snapshot === this.snapshot) {
             return;

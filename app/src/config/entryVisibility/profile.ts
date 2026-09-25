@@ -21,6 +21,22 @@ export type TEntryVisibilityImportProfile = {
 export const isEntryVisibilityImportVersionSupported = (version: number, currentVersion: number) =>
     Number.isInteger(version) && version >= 1 && version <= currentVersion;
 
+// 将图表高度配置合并到公共高度入口，保留已有公共配置及插件顺序。
+export const migrateChartHeightMenu = (profile: Pick<Config.IEntryVisibilityProfile, "entries" | "orders">) => {
+    const legacy = "gutter.single.chart.height";
+    const target = "gutter.single.height";
+    if (legacy in profile.entries) {
+        if (!(target in profile.entries)) {
+            profile.entries[target] = profile.entries[legacy] && profile.entries["gutter.single.chart"] !== false;
+        }
+        delete profile.entries[legacy];
+    }
+    const order = profile.orders["gutter.single.chart"];
+    if (order?.includes("height")) {
+        profile.orders["gutter.single.chart"] = order.filter(key => key !== "height");
+    }
+};
+
 // 展开任务状态子菜单，合并重复入口的可见性，并在原菜单位置保留子项顺序及插件位置。
 export const migrateTaskStatusMenu = (profile: Pick<Config.IEntryVisibilityProfile, "entries" | "orders">) => {
     const parent = "gutter.single.listBlock";
@@ -128,5 +144,6 @@ export const normalizeEntryVisibilityImportProfile = (
     if (version < 6) {
         migrateTaskStatusMenu({entries, orders});
     }
+    migrateChartHeightMenu({entries, orders});
     return {name: profile.name, entries, orders};
 };

@@ -27,8 +27,8 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 460px;
-  min-height: 260px;
+  height: var(--mindmap-view-height, 460px);
+  min-height: min(260px, var(--mindmap-view-height, 260px));
   box-sizing: border-box;
   overflow: hidden;
   border: 1px solid var(--b3-border-color);

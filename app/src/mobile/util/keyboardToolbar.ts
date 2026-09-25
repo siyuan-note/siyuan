@@ -822,6 +822,25 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     }, 1000);   // 防止光标改变后斜杆菜单消失
 };
 
+const hideAndroidKeyboardForPanel = (protyle: IProtyle) => {
+    if (!window.JSAndroid?.hideKeyboard) {
+        return;
+    }
+    const blurEditor = () => {
+        const activeElement = document.activeElement as HTMLElement;
+        if (protyle.wysiwyg.element.contains(activeElement)) {
+            activeElement.blur();
+        }
+    };
+    // 键盘收起时移走编辑焦点，避免输入法立即重新弹出；选区由面板和原生回调保留。
+    window.addEventListener("siyuan-mobile-keyboard-hiding", blurEditor, {once: true});
+    window.JSAndroid.hideKeyboard();
+    window.setTimeout(() => {
+        window.removeEventListener("siyuan-mobile-keyboard-hiding", blurEditor);
+        blurEditor();
+    }, 100);
+};
+
 const resetKeyboardToolbarUtilButtons = () => {
     unmountLiteSlashMenu?.();
     unmountLiteSlashMenu = undefined;
@@ -1788,7 +1807,7 @@ export const initKeyboardToolbar = () => {
                 }));
             }
             showKeyboardToolbarUtil(protyle.contentElement.scrollTop);
-            window.JSAndroid?.hideKeyboard();
+            hideAndroidKeyboardForPanel(protyle);
             return;
         } else if (type === "text") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
@@ -1801,14 +1820,16 @@ export const initKeyboardToolbar = () => {
                 const oldScrollTop = protyle.contentElement.scrollTop;
                 renderTextMenu(protyle, toolbarElement);
                 showKeyboardToolbarUtil(oldScrollTop);
-                window.JSAndroid?.hideKeyboard();
-                setTimeout(() => {
-                    focusByRange(range);
-                    preventRender = true;
+                hideAndroidKeyboardForPanel(protyle);
+                if (!window.JSAndroid) {
                     setTimeout(() => {
-                        preventRender = false;
-                    }, 1000);
-                }, Constants.TIMEOUT_TRANSITION);
+                        focusByRange(range);
+                        preventRender = true;
+                        setTimeout(() => {
+                            preventRender = false;
+                        }, 1000);
+                    }, Constants.TIMEOUT_TRANSITION);
+                }
             }
             return;
         } else if (type === "moveup") {
@@ -1836,7 +1857,7 @@ export const initKeyboardToolbar = () => {
             renderSlashMenu(protyle, toolbarElement);
             showKeyboardToolbarUtil(oldScrollTop);
             (document.activeElement as HTMLElement)?.blur();
-            window.JSAndroid?.hideKeyboard();
+            hideAndroidKeyboardForPanel(protyle);
             return;
         } else if (type === "block") {
             event.preventDefault();

@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260924173802"
+		"updated": "20260925094732"
 	},
 	"Children": [
 		{
@@ -4062,7 +4062,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260924173802"
+				"updated": "20260925094732"
 			},
 			"Children": [
 				{
@@ -12459,7 +12459,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20260924145647"
+				"updated": "20260925094732"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12474,7 +12474,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-fr0uxw6",
-				"updated": "20260924145647",
+				"updated": "20260925094732",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -12524,7 +12524,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "编辑选中节点"
+									"Data": "编辑选中节点（光标位于末尾）"
 								}
 							]
 						},
@@ -12544,6 +12544,32 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "替换选中节点的首段文字（保留其他块和子节点）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "直接输入文字"
 								}
 							]
 						}

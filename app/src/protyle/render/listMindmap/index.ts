@@ -235,7 +235,7 @@ class ListMindmapController {
                     this.destroy();
                 }
             },
-            onEdit: (id, contentHost) => this.edit(id, contentHost),
+            onEdit: (id, contentHost, replaceFirstParagraph) => this.edit(id, contentHost, replaceFirstParagraph),
             isAddSiblingShortcut: event => {
                 const key = window.siyuan.config.keymap.editor.list?.mindmapAddSibling;
                 return !!key && matchHotKey(key, event);
@@ -437,7 +437,7 @@ class ListMindmapController {
         }
     }
 
-    private async edit(id: string, host: HTMLElement) {
+    private async edit(id: string, host: HTMLElement, replaceFirstParagraph?: string) {
         const request = ++this.editRequest;
         if (!canEdit(this.owner, this.list) || (this.activeEditor && !await this.activeEditor.finish()) ||
             request !== this.editRequest || this.disposed || !host.isConnected) {
@@ -449,7 +449,7 @@ class ListMindmapController {
         }
         this.view.setEditing(id);
         this.activeEditor = openListMindmapEditor({
-            owner: this.owner, node, host,
+            owner: this.owner, node, host, replaceFirstParagraph,
             canEdit: () => !this.disposed && this.list.isConnected && canEdit(this.owner, this.list),
             onSave: html => this.change(() => replaceListMindmapContent(this.list, id, html), true),
             onResize: () => this.view.refreshLayout(),

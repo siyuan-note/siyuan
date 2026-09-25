@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260924173802"
+		"updated": "20260925094732"
 	},
 	"Children": [
 		{
@@ -4056,7 +4056,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260924173802"
+				"updated": "20260925094732"
 			},
 			"Children": [
 				{
@@ -12465,7 +12465,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20260924145647"
+				"updated": "20260925094732"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12480,7 +12480,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-f8y6pxv",
-				"updated": "20260924145647",
+				"updated": "20260925094732",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -12530,7 +12530,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "編輯選取的節點"
+									"Data": "編輯選取的節點（游標位於末尾）"
 								}
 							]
 						},
@@ -12542,6 +12542,32 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Space"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "取代選取節點的首段文字（保留其他區塊與子節點）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "直接輸入文字"
 								}
 							]
 						}

@@ -36,7 +36,7 @@ const browserCases = async (sourceCode: string, css: string) => {
         block.textContent = text;
         return block.outerHTML;
     };
-    const create = (initialBlockHTML = textHTML("Initial")) => {
+    const create = (initialBlockHTML = textHTML("Initial"), replaceFirstParagraph?: string) => {
         let transactionOwner: (operations: Array<{action: string; id: string; parentID?: string;
             previousID?: string; nextID?: string}>) => unknown;
         const container = document.createElement("section");
@@ -76,6 +76,13 @@ const browserCases = async (sourceCode: string, css: string) => {
             toolbar: {element: toolbarElement, subElement},
         };
         const dependencies = {
+            genEmptyElement: () => {
+                const paragraph = document.createElement("div");
+                paragraph.dataset.type = "NodeParagraph";
+                paragraph.dataset.nodeId = "created";
+                paragraph.innerHTML = '<div contenteditable="true"></div>';
+                return paragraph;
+            },
             showMessage: (message: string) => state.messages.push(message),
             escapeHtml: (value: string) => {
                 const node = document.createElement("span");
@@ -114,6 +121,20 @@ const browserCases = async (sourceCode: string, css: string) => {
             setMobileToolbarUndo: noop,
             getDefaultToolbar: (): unknown[] => [],
             hideElements: noop,
+            getDefaultKeymapBindings: (item: {default?: string}) => item.default ? [item.default] : [],
+            getKeymapBindings: (item: {custom?: string}) => item.custom ? [item.custom] : [],
+            visitKeymapItems: (keymap: {editor: object}, visit: (item: unknown, path: string[]) => void) => {
+                const walk = (value: object, path: string[]) => {
+                    Object.entries(value).forEach(([key, item]) => {
+                        if (item && typeof item.custom === "string") {
+                            visit(item, [...path, key]);
+                        } else if (item && typeof item === "object") {
+                            walk(item, [...path, key]);
+                        }
+                    });
+                };
+                walk(keymap.editor, ["editor"]);
+            },
             matchHotKey: (key: {custom?: string} | string, event: KeyboardEvent) => {
                 const binding = typeof key === "string" ? key : key?.custom;
                 return !!binding && binding.endsWith("↩") && event.key === "Enter" &&
@@ -132,7 +153,7 @@ const browserCases = async (sourceCode: string, css: string) => {
         const owner = {app: {}, notebookId: "notebook", block: {rootID: "document"}};
         const editor = open({
             owner,
-            node: {element}, host,
+            node: {element}, host, replaceFirstParagraph,
             canEdit: () => element.isConnected,
             onResize: noop,
             onAdd: async (kind: string) => { state.additions.push(kind); },
@@ -165,13 +186,38 @@ const browserCases = async (sourceCode: string, css: string) => {
     window.siyuan = {
         languages: {listMindmapStale: "Content changed", listMindmapUnsupported: "Unsupported"},
         config: {keymap: {editor: {
-            general: {undo: "undo", redo: "redo"},
+            general: {
+                undo: "undo", redo: "redo",
+                insertBefore: {default: "⇧⌘B", custom: "⇧⌘B"},
+                insertAfter: {default: "⇧⌘A", custom: "⇧⌘A"},
+            },
             list: {
                 mindmapAddSibling: {default: "⌘↩", custom: "⌘↩"},
                 mindmapAddChild: {default: "⇧⌘↩", custom: "⇧⌘↩"},
             },
         }}},
     } as unknown as typeof window.siyuan;
+
+    // 直接键入只替换首个段落，保留其余内容块。
+    const paragraph = (id: string, html: string) =>
+        `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true">${html}</div></div>`;
+    let typed = create(paragraph("first", "Old <strong>rich</strong>") +
+        paragraph("second", "Keep") + '<div data-type="NodeThematicBreak" data-node-id="special"></div>', "N");
+    check.equal(typed.wysiwyg.querySelector('[data-node-id="first"] > [contenteditable="true"]').textContent, "N");
+    check.equal(typed.wysiwyg.querySelector('[data-node-id="second"] > [contenteditable="true"]').textContent, "Keep");
+    await typed.editor.finish();
+    check.equal(typed.element.querySelector('[data-node-id="first"] > [contenteditable="true"]').textContent, "N");
+    check.equal(typed.element.querySelector('[data-node-id="second"] > [contenteditable="true"]').textContent, "Keep");
+    check.ok(typed.element.querySelector('[data-node-id="special"]'));
+    await typed.remove();
+
+    // 首个正文不是段落时，在其前面新建段落，不改写特殊块。
+    typed = create('<div data-type="NodeThematicBreak" data-node-id="special"></div>', "Z");
+    check.equal(typed.wysiwyg.firstElementChild.getAttribute("data-type"), "NodeParagraph");
+    check.equal(typed.wysiwyg.firstElementChild.textContent, "Z");
+    await typed.editor.finish();
+    check.ok(typed.element.querySelector('[data-node-id="special"]'));
+    await typed.remove();
 
     // 特殊块与普通文字共存时仍可进入编辑，修改文字不会改变特殊块的源码和属性。
     for (const type of ["NodeThematicBreak", "NodeTable", "NodeAttributeView", "NodeBlockQueryEmbed",
@@ -414,6 +460,34 @@ const browserCases = async (sourceCode: string, css: string) => {
         check.deepEqual(current.state.additions, [kind]);
         check.equal(current.element.textContent, `Edited ${kind}`);
         check.equal(current.state.finished, 1);
+        await current.remove();
+    }
+
+    // 用户为其他编辑命令新增相同绑定时，按键交给节点内部编辑器处理。
+    for (const [action, kind, binding, shiftKey] of [
+        ["insertAfter", "sibling", "⌘↩", false],
+        ["insertBefore", "child", "⇧⌘↩", true],
+    ] as const) {
+        current = create();
+        const keymap = window.siyuan.config.keymap.editor.general[action];
+        keymap.custom = binding;
+        let innerKeydowns = 0;
+        current.wysiwyg.addEventListener("keydown", () => innerKeydowns++);
+        const shortcut = () => {
+            const event = new KeyboardEvent("keydown", {
+                key: "Enter", ctrlKey: true, shiftKey, bubbles: true, cancelable: true,
+            });
+            current.wysiwyg.dispatchEvent(event);
+            return event;
+        };
+        check.equal(shortcut().defaultPrevented, false, action);
+        check.equal(innerKeydowns, 1, action);
+        check.deepEqual(current.state.additions, [], action);
+        keymap.custom = keymap.default;
+        check.equal(shortcut().defaultPrevented, true, kind);
+        await until(() => current.state.additions.length === 1);
+        check.deepEqual(current.state.additions, [kind]);
+        check.equal(innerKeydowns, 1, kind);
         await current.remove();
     }
 

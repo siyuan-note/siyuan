@@ -1,7 +1,9 @@
+import {genEmptyElement} from "../../../block/util";
 import {showMessage} from "../../../dialog/message";
 import {setCustomBlockRootReady} from "../../../plugin/customBlockRender";
 import {escapeHtml} from "../../../util/escape";
 import {isMobile} from "../../../util/functions";
+import {getDefaultKeymapBindings, getKeymapBindings, visitKeymapItems} from "../../../util/keymapBindings";
 import {hintRef, hintSlash} from "../../hint/extend";
 import {registerBuiltinSlashHint} from "../../hint/builtinSlash";
 import {mountProtyleLiteFragment} from "../../lite/fragmentEditor";
@@ -27,6 +29,7 @@ interface ListMindmapEditorOptions {
     onAdd: (kind: "child" | "sibling") => Promise<void>;
     onFinish: () => void;
     onUndo: (redo: boolean) => void;
+    replaceFirstParagraph?: string;
 }
 
 const nestedBranchType = (node: ListMindmapNode) =>
@@ -79,7 +82,20 @@ const retainIndependentBlocks = (html: string, node: ListMindmapNode) => {
     return template.innerHTML;
 };
 
-// 编辑器只在双击时挂载到节点内容区，预览与编辑沿用同一尺寸和排版。
+const matchesCustomizedEditorShortcut = (event: KeyboardEvent) => {
+    let matched = false;
+    visitKeymapItems({editor: window.siyuan.config.keymap.editor}, (item, path) => {
+        if (matched || path[1] === "list" &&
+            (path[2] === "mindmapAddSibling" || path[2] === "mindmapAddChild")) {
+            return;
+        }
+        const defaults = getDefaultKeymapBindings(item);
+        matched = getKeymapBindings(item).some(key => !defaults.includes(key) && matchHotKey(key, event));
+    });
+    return matched;
+};
+
+// 编辑器挂载到节点内容区，预览与编辑沿用同一尺寸和排版。
 export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     const {owner, node, host} = options;
     const initialBlockHTML = nodeContent(node);
@@ -348,7 +364,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             event.preventDefault();
             event.stopImmediatePropagation();
             undo(matchHotKey(keymap.redo, event));
-        } else if (kind && !finished && !closing && options.canEdit() &&
+        } else if (kind && !matchesCustomizedEditorShortcut(event) && !finished && !closing && options.canEdit() &&
             fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none") &&
@@ -417,6 +433,28 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     window.addEventListener("pagehide", () => void finish(), {signal});
     const observer = new ResizeObserver(() => options.onResize());
     observer.observe(host);
-    fragment.focus(true);
+    if (options.replaceFirstParagraph === undefined) {
+        fragment.focus(true);
+    } else {
+        let paragraph = fragment.wysiwyg.querySelector<HTMLElement>(":scope > [data-type='NodeParagraph']");
+        if (!paragraph) {
+            paragraph = genEmptyElement(false, false);
+            fragment.wysiwyg.prepend(paragraph);
+        }
+        const editable = paragraph.querySelector<HTMLElement>(":scope > [contenteditable='true']");
+        editable.focus({preventScroll: true});
+        const selection = getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(editable);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        if (options.replaceFirstParagraph && !document.execCommand("insertText", false, options.replaceFirstParagraph)) {
+            editable.textContent = options.replaceFirstParagraph;
+            range.selectNodeContents(editable);
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
     return {finish, destroy};
 };

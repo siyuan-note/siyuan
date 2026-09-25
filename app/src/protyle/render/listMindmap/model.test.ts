@@ -756,6 +756,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const alpha = model.root.children[0].id;
     const beta = model.root.children[1].id;
     const edits: string[] = [];
+    const editTexts: Array<string | undefined> = [];
     const moves: unknown[] = [];
     const additions: unknown[] = [];
     const folds: string[] = [];
@@ -780,7 +781,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             interactions++;
             return () => interactions--;
         },
-        onEdit: (id: string) => edits.push(id),
+        onEdit: (id: string, _contentHost: HTMLElement, text?: string) => {
+            edits.push(id);
+            editTexts.push(text);
+        },
         isAddSiblingShortcut: (event: KeyboardEvent) => event.ctrlKey && event.key === "Enter" && !event.shiftKey,
         isAddChildShortcut: (event: KeyboardEvent) => event.ctrlKey && event.key === "Enter" && event.shiftKey,
         finishEdit: () => finishAllowed,
@@ -1081,8 +1085,32 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.setReadOnly(false);
     navigate(" ");
     check.equal(edits[edits.length - 1], beta, "space opens the selected node editor");
+    check.equal(editTexts[editTexts.length - 1], undefined, "space keeps the node content");
     navigate("ArrowUp");
     check.equal(view.selectedId, beta, "editing keeps arrow keys inside the editor");
+    view.setEditing();
+    navigate("x");
+    check.equal(edits[edits.length - 1], beta, "typing opens the selected node editor");
+    check.equal(editTexts[editTexts.length - 1], "x", "typing replaces the first paragraph");
+    view.setEditing();
+    const editsBeforeModifiers = edits.length;
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "x", ctrlKey: true, bubbles: true}));
+    check.equal(edits.length, editsBeforeModifiers, "modified keys do not replace node text");
+    view.setReadOnly(true);
+    navigate("x");
+    check.equal(edits.length, editsBeforeModifiers, "read-only nodes cannot be edited by typing");
+    view.setReadOnly(false);
+    const composition = new KeyboardEvent("keydown", {key: "Process", bubbles: true, cancelable: true});
+    host.dispatchEvent(composition);
+    check.equal(composition.defaultPrevented, false, "composition can continue in the node editor");
+    check.equal(editTexts[editTexts.length - 1], "", "composition selects the first paragraph");
+    view.setEditing();
+    const composingKey = new KeyboardEvent("keydown", {
+        key: "a", isComposing: true, bubbles: true, cancelable: true,
+    });
+    host.dispatchEvent(composingKey);
+    check.equal(composingKey.defaultPrevented, false);
+    check.equal(editTexts[editTexts.length - 1], "", "composing text is not inserted as a literal key");
     view.setEditing();
     select(model.root.id);
     navigate(" ");
@@ -1092,6 +1120,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(titleInput.selectionEnd, titleInput.value.length);
     titleInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     check.equal(document.activeElement, host);
+    select(model.root.id);
+    navigate("R");
+    const typedTitleInput = host.querySelector<HTMLTextAreaElement>(".mindmap-view__root-title");
+    check.equal(typedTitleInput.value, "R", "typing replaces the virtual root title");
+    typedTitleInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     edits.length = beforeSpaceEdit;
     model.nodes.get(alpha).collapsed = true;
     view.update(model);
@@ -1877,9 +1910,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await settle();
     check.equal(host.querySelector('.mindmap-view__toolbar [aria-label="listMindmapChild"]'), null);
     check.equal(host.querySelector('[aria-label="undo"]'), null);
+    const editsBeforeReadonly = edits.length;
     nodeElement(beta).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     host.dispatchEvent(new KeyboardEvent("keydown", {key: "z", ctrlKey: true, bubbles: true}));
-    check.equal(edits.length, 1);
+    check.equal(edits.length, editsBeforeReadonly);
     check.equal(undo, 0);
     const persistedBeforeFold = list.outerHTML;
     pressDelete();

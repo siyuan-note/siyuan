@@ -33,7 +33,7 @@ export interface ListMindmapViewOptions {
     onManageLineColors?: () => void;
     onFullscreen?: (enter: boolean, button: HTMLButtonElement) => void;
     onInteractionStart?: (event: PointerEvent) => () => void;
-    onEdit?: (id: string, contentHost: HTMLElement) => void;
+    onEdit?: (id: string, contentHost: HTMLElement, replaceFirstParagraph?: string) => void;
     isAddSiblingShortcut?: (event: KeyboardEvent) => boolean;
     isAddChildShortcut?: (event: KeyboardEvent) => boolean;
     onRootTitleChange?: (title: string) => void;
@@ -1778,13 +1778,13 @@ export class ListMindmapView {
         });
     };
 
-    private editRootTitle(id: string, toEnd = false) {
+    private editRootTitle(id: string, toEnd = false, replaceText?: string) {
         this.finishRelationEdit?.(true);
         const content = this.getContentHost(id);
         const input = createElement("textarea", "mindmap-view__root-title");
         const measure = createElement("span", "mindmap-view__root-title-measure");
         input.rows = 1;
-        input.value = this.model.metadata.rootTitle || "";
+        input.value = replaceText === undefined ? this.model.metadata.rootTitle || "" : replaceText;
         measure.textContent = input.value;
         input.setAttribute("aria-label", this.label("text"));
         content.classList.add("mindmap-view__root-title-host");
@@ -1821,7 +1821,7 @@ export class ListMindmapView {
             }
         });
         input.focus();
-        if (toEnd) {
+        if (toEnd || replaceText !== undefined) {
             input.setSelectionRange(input.value.length, input.value.length);
         } else {
             input.select();
@@ -1978,17 +1978,24 @@ export class ListMindmapView {
 
     private keyDown = (event: KeyboardEvent) => {
         const target = event.target as HTMLElement;
-        if (event.isComposing || target.closest("input, textarea, select, audio, video, iframe, .mindmap-view__node--editing")) {
+        const startingComposition = event.isComposing || event.key === "Process" || event.key === "Dead" ||
+            event.keyCode === 229;
+        if (target.closest("input, textarea, select, audio, video, iframe, .mindmap-view__node--editing")) {
             return;
         }
         if (this.pointer?.relation && event.key !== "Escape") {
             return;
         }
         const noModifiers = !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey;
-        const siblingShortcut = event.key === "Enter" && noModifiers || this.options.isAddSiblingShortcut?.(event);
-        const childShortcut = event.key === "Tab" && noModifiers || this.options.isAddChildShortcut?.(event);
-        const isTaskCompletionToggle = this.options.isTaskCompletionToggle?.(event);
-        if (!this.options.readOnly && (isTaskCompletionToggle || this.options.isTaskCycle?.(event))) {
+        const siblingShortcut = !startingComposition &&
+            (event.key === "Enter" && noModifiers || this.options.isAddSiblingShortcut?.(event));
+        const childShortcut = !startingComposition &&
+            (event.key === "Tab" && noModifiers || this.options.isAddChildShortcut?.(event));
+        const text = !startingComposition && !event.ctrlKey && !event.metaKey && !event.altKey &&
+            event.key !== " " && Array.from(event.key).length === 1 ? event.key : undefined;
+        const isTaskCompletionToggle = !startingComposition && this.options.isTaskCompletionToggle?.(event);
+        if (!startingComposition && !this.options.readOnly &&
+            (isTaskCompletionToggle || this.options.isTaskCycle?.(event))) {
             const id = target.closest<HTMLElement>(".mindmap-view__node")?.dataset.mindmapId || this.selectedId;
             if (this.model.nodes.get(id)?.taskMarker !== undefined) {
                 event.preventDefault();
@@ -2003,7 +2010,7 @@ export class ListMindmapView {
             }
             return;
         }
-        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(event.key) &&
+        if (!startingComposition && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(event.key) &&
             !this.editingId && !this.relationFrom && this.selectedId &&
             noModifiers &&
             !target.isContentEditable && !target.closest("button, a")) {
@@ -2044,6 +2051,31 @@ export class ListMindmapView {
                 }
             }
         } else if (!this.options.readOnly && !this.editingId && !this.relationFrom && this.selectedId &&
+            (text !== undefined || startingComposition && !event.ctrlKey && !event.metaKey && !event.altKey) &&
+            !target.isContentEditable && !target.closest("button, a")) {
+            const id = this.selectedId;
+            if (event.repeat) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            this.finishThen(() => {
+                const node = this.model.nodes.get(id);
+                if (this.selectedId !== id || !node) {
+                    return;
+                }
+                if (node.virtual) {
+                    this.editRootTitle(id, false, text);
+                } else {
+                    this.setEditing(id);
+                    this.options.onEdit?.(id, this.getContentHost(id), text ?? "");
+                }
+            });
+            if (startingComposition) {
+                event.stopPropagation();
+                return;
+            }
+        } else if (!this.options.readOnly && !this.editingId && !this.relationFrom && this.selectedId &&
             (siblingShortcut || childShortcut) &&
             !target.isContentEditable && !target.closest("button, a")) {
             if (event.repeat) {
@@ -2062,7 +2094,7 @@ export class ListMindmapView {
                     this.options.onAdd?.(id, kind);
                 }
             });
-        } else if ((event.key === "Delete" || event.key === "Backspace") &&
+        } else if (!startingComposition && (event.key === "Delete" || event.key === "Backspace") &&
             !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
             const selectedId = this.selectedId;
             const selectedRelation = this.selectedRelation;
@@ -2071,7 +2103,7 @@ export class ListMindmapView {
                     this.deleteSelection();
                 }
             });
-        } else if (event.key === "Escape") {
+        } else if (!startingComposition && event.key === "Escape") {
             const draggingRoute = !!this.pointer?.relation;
             this.cancelPointer();
             if (draggingRoute) {

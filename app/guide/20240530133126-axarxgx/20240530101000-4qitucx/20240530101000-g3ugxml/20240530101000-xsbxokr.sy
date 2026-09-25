@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260924173802"
+		"updated": "20260925094732"
 	},
 	"Children": [
 		{
@@ -4022,7 +4022,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20260924173802"
+				"updated": "20260925094732"
 			},
 			"Children": [
 				{
@@ -12423,7 +12423,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-icqlkb6",
-				"updated": "20260924145647"
+				"updated": "20260925094732"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12438,7 +12438,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-01k7syf",
-				"updated": "20260924145647",
+				"updated": "20260925094732",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -12488,7 +12488,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選択したノードを編集"
+									"Data": "選択したノードを編集（カーソルは末尾）"
 								}
 							]
 						},
@@ -12500,6 +12500,32 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Space"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択したノードの最初の段落を置換（他のブロックと子ノードは保持）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文字を直接入力"
 								}
 							]
 						}

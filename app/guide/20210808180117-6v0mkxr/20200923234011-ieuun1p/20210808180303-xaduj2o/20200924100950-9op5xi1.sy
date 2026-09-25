@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260924173802"
+		"updated": "20260925094732"
 	},
 	"Children": [
 		{
@@ -4064,7 +4064,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260924173802"
+				"updated": "20260925094732"
 			},
 			"Children": [
 				{
@@ -12469,7 +12469,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20260924145647"
+				"updated": "20260925094732"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12484,7 +12484,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-3srqnh0",
-				"updated": "20260924145647",
+				"updated": "20260925094732",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -12534,7 +12534,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Edit the selected node"
+									"Data": "Edit the selected node (caret at end)"
 								}
 							]
 						},
@@ -12546,6 +12546,32 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Space"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Replace the first paragraph of the selected node (keep other blocks and child nodes)"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Type text directly"
 								}
 							]
 						}

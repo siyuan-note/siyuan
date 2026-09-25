@@ -3,12 +3,16 @@ package api
 import (
 	"encoding/json"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -47,6 +51,85 @@ func TestAPIContractSearchPermissions(t *testing.T) {
 		}
 		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != entry.code || string(response.Data) != entry.data {
 			t.Fatalf("search permission response changed: %s: %s, %v", path, recorder.Body.String(), err)
+		}
+	}
+}
+
+func TestAPIContractSearchAssetFilters(t *testing.T) {
+	assetsDir := setupAssetContractWorkspace(t)
+	model.Conf.Search = conf.NewSearch()
+	files := []string{"alpha-cover.png", "alpha-note.txt", "beta-cover.PNG", "covers/gamma-cover.webp"}
+	for _, name := range files {
+		path := filepath.Join(assetsDir, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte("asset"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cache.LoadAssets()
+	t.Cleanup(func() {
+		for _, name := range files {
+			_ = os.Remove(filepath.Join(assetsDir, filepath.FromSlash(name)))
+		}
+		cache.LoadAssets()
+	})
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator) })
+	engine.POST("/api/search/searchAsset", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, searchAsset)
+	search := func(body string) (int, []string) {
+		t.Helper()
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/search/searchAsset", strings.NewReader(body)))
+		requireAPIContract(t, "POST", "/api/search/searchAsset", recorder)
+		var response struct {
+			Code int                        `json:"code"`
+			Data []*apicontract.SearchAsset `json:"data"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+			t.Fatalf("asset search response: %s, %v", recorder.Body.String(), err)
+		}
+		var paths []string
+		for _, asset := range response.Data {
+			paths = append(paths, asset.Path)
+		}
+		return response.Code, paths
+	}
+	for _, entry := range []struct {
+		body string
+		want []string
+	}{
+		{`{"k":"","exts":[".png"]}`, []string{"assets/alpha-cover.png", "assets/beta-cover.PNG"}},
+		{`{"k":"","exts":["png"],"match":{"mode":"suffix","value":"PHA-COVER.png"}}`, []string{"assets/alpha-cover.png"}},
+		{`{"k":"","match":{"mode":"prefix","value":"ALPHA"},"page":1,"pageSize":2}`, []string{"assets/alpha-cover.png", "assets/alpha-note.txt"}},
+		{`{"k":"","match":{"field":"path","mode":"prefix","value":"ASSETS/COVERS/"}}`, []string{"assets/covers/gamma-cover.webp"}},
+		{`{"k":"","match":{"mode":"regex","value":"(?i)^beta-.*\\.png$"}}`, []string{"assets/beta-cover.PNG"}},
+		{`{"k":"","match":{"field":"path","mode":"regex","value":"^assets/covers/.*\\.webp$"}}`, []string{"assets/covers/gamma-cover.webp"}},
+	} {
+		code, paths := search(entry.body)
+		if code != 0 || !reflect.DeepEqual(paths, entry.want) {
+			t.Fatalf("asset search %s: code=%d paths=%v", entry.body, code, paths)
+		}
+	}
+	firstCode, first := search(`{"k":"","page":1,"pageSize":2}`)
+	secondCode, second := search(`{"k":"","page":2,"pageSize":2}`)
+	thirdCode, third := search(`{"k":"","page":3,"pageSize":2}`)
+	_, repeated := search(`{"k":"","page":1,"pageSize":2}`)
+	seen := map[string]bool{}
+	for _, path := range append(first, second...) {
+		seen[path] = true
+	}
+	if firstCode != 0 || secondCode != 0 || thirdCode != 0 || len(first) != 2 || len(second) != 2 ||
+		len(third) != 0 || len(seen) != len(files) || !reflect.DeepEqual(first, repeated) {
+		t.Fatalf("asset pagination changed: first=%v second=%v third=%v repeated=%v", first, second, third, repeated)
+	}
+	for _, body := range []string{
+		`{"k":"","match":{"mode":"regex","value":"["}}`,
+		`{"k":"","page":0,"pageSize":2}`,
+	} {
+		if code, _ := search(body); code != -1 {
+			t.Fatalf("invalid asset search accepted: %s", body)
 		}
 	}
 }

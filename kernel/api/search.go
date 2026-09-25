@@ -141,9 +141,21 @@ var findReplace = contractHandler(apicontract.FindReplace, func(c *gin.Context, 
 })
 
 var searchAsset = contractHandler(apicontract.SearchAssetByName, func(c *gin.Context, request apicontract.SearchAssetRequest) apicontract.Response[[]*apicontract.SearchAsset] {
-	var exts []string
-	exts = append(exts, request.Exts...)
-	assets := model.SearchAssetsByName(request.K, exts)
+	page, pageSize := 1, model.Conf.Search.Limit
+	if request.Page != nil {
+		page = *request.Page
+	}
+	if request.PageSize != nil {
+		pageSize = *request.PageSize
+	}
+	var match *model.AssetSearchMatch
+	if request.Match != nil {
+		match = &model.AssetSearchMatch{Field: request.Match.Field, Mode: request.Match.Mode, Value: request.Match.Value}
+	}
+	assets, err := model.SearchAssetsByNamePage(request.K, request.Exts, match, page, pageSize)
+	if err != nil {
+		return apicontract.Failure[[]*apicontract.SearchAsset](-1, err.Error())
+	}
 	var result []*apicontract.SearchAsset
 	if assets != nil {
 		result = make([]*apicontract.SearchAsset, len(assets))

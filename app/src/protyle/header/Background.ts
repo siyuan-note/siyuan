@@ -355,25 +355,28 @@ export class Background {
                         };
 
                         let activeCategory = "all";
-
-                        const renderContent = (): void => {
-                            const bodyEl = dialog.element.querySelector(".b3-dialog__body");
-                            if (bodyEl) {
-                                bodyEl.innerHTML = `${buildTabs(activeCategory)}
-        <div class="b3-cards b3-cover__cards" style="padding:16px">${buildCards(activeCategory)}</div>`;
-                            }
-                        };
-
-                        renderContent();
+                        const bodyEl = dialog.element.querySelector(".b3-dialog__body") as HTMLElement;
+                        bodyEl.innerHTML = `<div class="b3-cover">
+    ${buildTabs(activeCategory)}
+    <div class="b3-cards b3-cover__cards">${buildCards(activeCategory)}</div>
+</div>`;
+                        const tabsEl = bodyEl.querySelector(".b3-cover__tabs") as HTMLElement;
+                        const cardsEl = bodyEl.querySelector(".b3-cover__cards") as HTMLElement;
 
                         // 点击事件委托
-                        dialog.element.querySelector(".b3-dialog__body")!.addEventListener("click", (event) => {
+                        bodyEl.addEventListener("click", (event) => {
                             const target = event.target as HTMLElement;
-                            const chip = target.closest(".b3-chip") as HTMLElement;
-                            if (chip && chip.hasAttribute("data-category")) {
-                                activeCategory = chip.getAttribute("data-category") || "all";
-                                renderContent();
-                                dialog.element.querySelector(".b3-dialog__body")!.scrollTop = 0;
+                            const chip = target.closest<HTMLElement>(".b3-chip[data-category]");
+                            if (chip && tabsEl.contains(chip)) {
+                                const category = chip.dataset.category || "all";
+                                if (category === activeCategory) {
+                                    return;
+                                }
+                                tabsEl.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
+                                chip.classList.add("b3-chip--current");
+                                activeCategory = category;
+                                cardsEl.innerHTML = buildCards(activeCategory);
+                                cardsEl.scrollTop = 0;
                             } else if (target.closest(".b3-cover__card")) {
                                 const card = target.closest(".b3-cover__card") as HTMLElement;
                                 const name = card.getAttribute("data-name");

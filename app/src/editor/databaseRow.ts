@@ -7,6 +7,7 @@ import {getEditorHorizontalPadding} from "../protyle/ui/padding";
 import {searchMarkRender} from "../protyle/render/searchMarkRender";
 import {registerDatabaseRowRefresh} from "../protyle/render/av/databaseRowRefresh";
 import {focusDatabasePrimary} from "../protyle/render/av/primaryFocus";
+import {setPanelFocus} from "../layout/util";
 
 export const newDatabaseRowModel = (options: {
     app: App,
@@ -108,6 +109,14 @@ export const newDatabaseRowModel = (options: {
         </div>
     </div>
 </div>`;
+            const activatePanel = () => {
+                const wndElement = custom.element.closest('[data-type="wnd"]');
+                if (wndElement) {
+                    setPanelFocus(wndElement);
+                }
+            };
+            custom.element.addEventListener("pointerdown", activatePanel);
+            custom.element.addEventListener("focusin", activatePanel);
             custom.element.querySelector(".protyle-db-row__title span").textContent = options.data.title || window.siyuan.languages.untitled;
             custom.element.addEventListener("database-row-title-update", (event) => {
                 const title = (event as CustomEvent<string>).detail;

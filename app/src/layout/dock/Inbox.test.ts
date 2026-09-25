@@ -73,10 +73,10 @@ test("inbox insertion preserves link-only entries as Markdown links", async () =
 
 test("inbox insertion keeps Markdown punctuation in the title as plain text", async () => {
     const {inbox, calls, removed} = loadInbox([
-        {code: 0, data: {shorthandMd: "Body", shorthandTitle: "A *bold* [note]\ncontinued"}},
+        {code: 0, data: {shorthandMd: "Body", shorthandTitle: "A *bold* [note] $x$ ==mark== &amp; #tag#\ncontinued"}},
         {code: 0},
     ]);
     await inbox.insertToCurrentDoc(["entry"], "doc-id");
-    assert.equal(calls[1].data.data, "# A \\*bold\\* \\[note\\] continued\n\nBody");
+    assert.equal(calls[1].data.data, "# A \\*bold\\* \\[note\\] \\$x\\$ \\=\\=mark\\=\\= \\&amp\\; \\#tag\\# continued\n\nBody");
     assert.deepEqual(removed, [["entry"]]);
 });

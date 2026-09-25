@@ -1329,7 +1329,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-`appendBlock` 和 `insertBlock` 返回前已提交块树，但 SQL `blocks` 表会异步建立索引。写入成功后，先调用 `POST /api/sqlite/flushTransaction` 并等待返回 `code: 0`，再查询 `/api/query/sql`。`getBlockKramdown` 读取块树，因此可能在 SQL 索引完成前就返回完整内容。Kramdown、DOM 和 SQL 列是不同的内容表示，均非规范化纯文本。
+写块接口可能在块树事务已提交、异步 SQL 索引尚未完成时返回。如需随后通过 `/api/query/sql` 立即读取该写入，请在写入后调用 `POST /api/sqlite/flushTransaction`，等待返回 `code: 0`，再查询 SQL。例如，`getBlockKramdown` 读取块树，可能比 SQL 索引更早显示新写入的内容。Kramdown、DOM 和 SQL 列是不同的内容表示，均非规范化纯文本。
 
 ## 模板
 

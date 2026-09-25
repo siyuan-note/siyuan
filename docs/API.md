@@ -1332,7 +1332,7 @@ Note: To ensure data security, access to this interface is prohibited in Publish
   }
   ```
 
-`appendBlock` and `insertBlock` commit the block tree before returning, while the SQL `blocks` table is indexed asynchronously. After a successful write, call `POST /api/sqlite/flushTransaction` and wait for `code: 0` before querying `/api/query/sql`. `getBlockKramdown` reads the block tree, so it can return the full content before the SQL index catches up. Kramdown, DOM, and SQL columns are different representations and are not normalized plain text.
+Block-writing APIs can return after their block-tree transaction is committed but before asynchronous SQL indexing has caught up. If a subsequent `/api/query/sql` call must observe that write, call `POST /api/sqlite/flushTransaction` after the write and wait for `code: 0` before querying SQL. For example, `getBlockKramdown` reads the block tree and can show newly written content before the SQL index does. Kramdown, DOM, and SQL columns are different representations and are not normalized plain text.
 
 ## Templates
 

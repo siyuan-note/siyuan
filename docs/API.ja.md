@@ -1324,7 +1324,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-`appendBlock` と `insertBlock` はブロックツリーの保存後に応答しますが、SQL の `blocks` テーブルは非同期で索引付けされます。書き込み成功後に `POST /api/sqlite/flushTransaction` を呼び出し、`code: 0` の応答を待ってから `/api/query/sql` で検索してください。`getBlockKramdown` はブロックツリーを読み取るため、SQL の索引付けが終わる前でも全文を返す場合があります。Kramdown、DOM、SQL の列は異なる表現であり、正規化されたプレーンテキストではありません。
+ブロックを書き込む API は、ブロックツリーのトランザクションが確定していても、非同期の SQL 索引付けが終わる前に応答する場合があります。その書き込みを直後の `/api/query/sql` で読み取る必要がある場合は、書き込み後に `POST /api/sqlite/flushTransaction` を呼び出し、`code: 0` の応答を待ってから SQL を照会してください。例えば、`getBlockKramdown` はブロックツリーを読み取るため、SQL の索引より先に新しい内容を返す場合があります。Kramdown、DOM、SQL の列は異なる表現であり、正規化されたプレーンテキストではありません。
 
 ## テンプレート
 

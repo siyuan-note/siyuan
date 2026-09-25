@@ -1,8 +1,22 @@
 import {Constants} from "../../constants";
 import {addScript} from "../util/addScript";
 import {previewImages} from "./image";
+import {getPlantumlImageURL} from "../render/plantumlImage";
 
-const DIAGRAM_SUBTYPES = ["mermaid", "graphviz", "flowchart", "echarts"];
+const DIAGRAM_SUBTYPES = ["mermaid", "graphviz", "flowchart", "echarts", "plantuml"];
+
+// 独立入口不依赖嵌入 SVG 文档的事件冒泡，桌面和移动端共用。
+export const handleDiagramPreviewClick = (event: MouseEvent) => {
+    const button = (event.target as Element).closest(".protyle-action__preview");
+    const diagram = button && getDiagramBlock(button.closest("[data-subtype]") as HTMLElement);
+    if (!diagram) {
+        return false;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    previewDiagram(diagram);
+    return true;
+};
 
 export const getDiagramBlock = (element: HTMLElement) => {
     if (!element) {
@@ -45,6 +59,13 @@ const createDiagramSVG = (element: SVGSVGElement) => {
 
 // SVG 图表保留矢量内容，画布图表使用 PNG，共用图片预览的缩放和拖动控件。
 export const previewDiagram = (diagramElement: HTMLElement) => {
+    if (diagramElement.getAttribute("data-subtype") === "plantuml") {
+        const url = getPlantumlImageURL(diagramElement);
+        if (url) {
+            previewImages([url], url);
+        }
+        return Promise.resolve();
+    }
     return addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image").then(async () => {
         const type = diagramElement.getAttribute("data-subtype");
         const renderElement = type === "echarts" ?

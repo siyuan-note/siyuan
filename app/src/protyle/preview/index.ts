@@ -3,7 +3,7 @@ import {focusByRange} from "../util/selection";
 import {openLink} from "../../editor/openLink";
 import {showMessage} from "../../dialog/message";
 import {previewDocImage} from "./image";
-import {getDiagramBlock, previewDiagram} from "./diagram";
+import {getDiagramBlock, handleDiagramPreviewClick, previewDiagram} from "./diagram";
 import {needSubscribe} from "../../util/needSubscribe";
 import {Constants} from "../../constants";
 /// #if !BROWSER
@@ -128,6 +128,9 @@ export class Preview {
         /// #endif
 
         this.element.addEventListener("click", (event) => {
+            if (handleDiagramPreviewClick(event)) {
+                return;
+            }
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
                 if (target.tagName === "A") {
@@ -146,6 +149,13 @@ export class Preview {
                     openLink(protyle.app, linkAddress, event, isOnlyMeta(event));
                     break;
                 } else if (target.tagName === "IMG") {
+                    const diagramElement = getDiagramBlock(target.closest('[data-subtype="plantuml"]') as HTMLElement);
+                    if (diagramElement) {
+                        previewDiagram(diagramElement);
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    }
                     previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);
                     event.stopPropagation();
                     event.preventDefault();

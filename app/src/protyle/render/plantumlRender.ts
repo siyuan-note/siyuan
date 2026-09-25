@@ -21,6 +21,15 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
             if (!e.firstElementChild.classList.contains("protyle-icons")) {
                 e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
             }
+            // 导出容器没有只读标记，不添加交互控件。
+            if (!wysiswgElement || wysiswgElement.hasAttribute("data-readonly")) {
+                if (!e.firstElementChild.querySelector(".protyle-action__preview")) {
+                    e.firstElementChild.insertAdjacentHTML("afterbegin", `<button type="button" aria-label="${window.siyuan.languages.preview}" data-position="4north" class="ariaLabel block__icon block__icon--show protyle-action__preview"><svg><use xlink:href="#iconImage"></use></svg></button>`);
+                }
+                e.firstElementChild.classList.add("protyle-icons--show");
+                const previewButton = e.firstElementChild.querySelector(".protyle-action__preview") as HTMLButtonElement;
+                previewButton.disabled = !e.getAttribute("data-content");
+            }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             if (!e.getAttribute("data-content")) {
                 renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span>`;

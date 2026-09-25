@@ -96,6 +96,8 @@ for (const position of ["beforebegin", "afterend"]) {
                 const exports: {insertEmptyBlock?: (...args: unknown[]) => Promise<void>} = {};
                 let operations: Array<{id: string; previousID?: string; nextID?: string}>;
                 let inverse: Array<{action: string; id: string; context: object}>;
+                let focusedRange: typeof range;
+                let keyboardRequests = 0;
                 runInNewContext(compiled, {
                     exports,
                     clearBlockSelectionMode,
@@ -109,8 +111,18 @@ for (const position of ["beforebegin", "afterend"]) {
                         operations = forward;
                         inverse = backward;
                     },
-                    focusByWbr: () => range.startContainer = inserted,
+                    focusByWbr: () => {
+                        range.startContainer = inserted;
+                        return range;
+                    },
                     scrollCenter: () => {},
+                    isMobile: () => true,
+                    restoreEditorFocusRange: (element: TestElement, restoredRange: typeof range) => {
+                        assert.equal(element, editor);
+                        focusedRange = restoredRange;
+                        return true;
+                    },
+                    callMobileAppShowKeyboard: () => keyboardRequests++,
                 });
 
                 await exports.insertEmptyBlock(protyle, position,
@@ -121,6 +133,8 @@ for (const position of ["beforebegin", "afterend"]) {
                 assert.equal(first.getAttribute("select-start"), null);
                 assert.equal(last.getAttribute("select-end"), null);
                 assert.equal(range.startContainer, inserted);
+                assert.equal(focusedRange, range);
+                assert.equal(keyboardRequests, 1);
                 const anchor = targetKind === "multiple" && position === "afterend" ? last : first;
                 assert.equal(editor.children.indexOf(inserted), editor.children.indexOf(anchor) +
                     (position === "afterend" ? 1 : -1));

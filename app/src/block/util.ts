@@ -25,6 +25,9 @@ import {
 import {shouldFocusJumpTarget, shouldFocusParentDocumentTitle} from "./jumpToParent";
 import {getHorizontalSuperBlockChild} from "./superBlock";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../asset/html";
+import {isMobile} from "../util/functions";
+import {restoreEditorFocusRange} from "../protyle/util/editorFocus";
+import {callMobileAppShowKeyboard} from "../mobile/util/mobileAppUtil";
 
 export const getCancelSBOperations = async (nodeElement: Element, options: {
     notebookID?: string,
@@ -426,8 +429,11 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
         }
         transaction(protyle, doOperations, undoOperations);
     }
-    focusByWbr(protyle.wysiwyg.element, range);
+    const insertedRange = focusByWbr(protyle.wysiwyg.element, range);
     scrollCenter(protyle);
+    if (isMobile() && insertedRange && restoreEditorFocusRange(protyle.wysiwyg.element, insertedRange)) {
+        callMobileAppShowKeyboard();
+    }
 };
 
 export const insertEmptySuperBlockColumn = (protyle: IProtyle, position: "left" | "right", target?: Element) => {

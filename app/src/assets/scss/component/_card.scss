@@ -106,9 +106,7 @@
     display: flex;
     flex-wrap: wrap;
     flex-shrink: 0;
-    max-height: 50%;
-    overflow: auto;
-    padding: 16px 16px 0;
+    padding: 16px;
     gap: 8px;
   }
 
@@ -134,5 +132,12 @@
     &:hover {
       opacity: 0.86;
     }
+  }
+}
+
+@media screen and (max-width: 520px) {
+  .b3-cover__tabs {
+    max-height: 50%;
+    overflow: auto;
   }
 }

@@ -787,7 +787,7 @@ var getConf = contractHandler(apicontract.SystemGetConf, func(c *gin.Context, re
 	if err != nil {
 		return apicontract.Failure[apicontract.SystemConfData](-1, "get conf failed: "+err.Error())
 	}
-	ret = apicontract.Success(apicontract.SystemConfData{Conf: config, Start: !util.IsUILoaded, IsPublish: isPublish})
+	ret = apicontract.Success(apicontract.SystemConfData{Conf: config, Start: !util.IsUILoaded.Load(), IsPublish: isPublish})
 	return
 })
 

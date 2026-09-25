@@ -211,9 +211,10 @@ func BootSyncData() {
 		notifySyncPending(true)
 	}
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
+	var cloudPublished bool
 	var err error
 	if iosAfterBoot {
-		_, err = syncRepoWithDNSRetry(false, false)
+		cloudPublished, err = syncRepoWithDNSRetry(false, false)
 	} else {
 		err = bootSyncRepoWithDNSRetry()
 	}
@@ -236,6 +237,9 @@ func BootSyncData() {
 	if 1 == code {
 		// 启动同步成功后消费本地速记临时文件，避免移动端开启云同步时需手动触发同步才能刷新闪念速记
 		consumeShorthands()
+	}
+	if iosAfterBoot {
+		completeSyncPerception(cloudPublished, err)
 	}
 	return
 }
@@ -350,6 +354,12 @@ func syncDataLocked(exit, byHand bool) error {
 		consumeShorthands()
 	}
 
+	completeSyncPerception(cloudPublished, err)
+	return err
+}
+
+// completeSyncPerception 恢复感知连接，并在自动同步成功发布新版本后通知其他设备。
+func completeSyncPerception(cloudPublished bool, err error) {
 	if nil == webSocketConn && Conf.Sync.Perception {
 		// 如果 websocket 连接已经断开，则重新连接
 		connectSyncWebSocket()
@@ -365,7 +375,6 @@ func syncDataLocked(exit, byHand bool) error {
 			logging.LogErrorf("write websocket message failed: %v", writeErr)
 		}
 	}
-	return err
 }
 
 func checkSync(boot, exit, byHand bool) bool {

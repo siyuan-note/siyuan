@@ -18,8 +18,51 @@ package util
 
 import (
 	"os"
+	"sync"
 	"testing"
+	"testing/synctest"
+	"time"
+
+	"github.com/olahol/melody"
 )
+
+func TestUILoadedWaitsForMainSession(t *testing.T) {
+	previous := IsUILoaded.Swap(false)
+	t.Cleanup(func() { IsUILoaded.Store(previous) })
+	synctest.Test(t, func(t *testing.T) {
+		defer IsUILoaded.Store(true)
+		go HookUILoaded()
+		done := make(chan struct{})
+		go func() {
+			WaitForUILoaded()
+			close(done)
+		}()
+		synctest.Wait()
+		select {
+		case <-done:
+			t.Fatal("UI wait completed without a main session")
+		default:
+		}
+
+		const appID = "test-ui-loaded"
+		appSessions := &sync.Map{}
+		session := &melody.Session{}
+		session.Set("type", "main")
+		appSessions.Store("main", session)
+		sessions.Store(appID, appSessions)
+		defer sessions.Delete(appID)
+		time.Sleep(400 * time.Millisecond)
+		synctest.Wait()
+		select {
+		case <-done:
+		default:
+			t.Fatal("UI wait did not complete after the main session connected")
+		}
+		if !IsUILoaded.Load() {
+			t.Fatal("main session did not mark the UI as loaded")
+		}
+	})
+}
 
 func TestSetNetworkProxy(t *testing.T) {
 	for _, name := range networkProxyEnvironmentNames {

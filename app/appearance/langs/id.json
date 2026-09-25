@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Arsipkan dan keluarkan",
+	"archiveEncryptedNotebooksTip": "Pilih buku catatan terenkripsi yang terkunci beserta data pemulihannya; kata sandi utama tidak diperlukan",
+	"restoreEncryptedNotebooks": "Pulihkan arsip terenkripsi",
+	"restoreEncryptedNotebooksTip": "Gunakan ruang kerja terpisah tanpa kunci enkripsi dan dengan sinkronisasi dimatikan; masukkan kata sandi utama lama dan pilih cadangan kunci yang ditemukan jika ada",
+	"confirmArchiveSaved": "Saya telah menyimpan arsip di luar ruang kerja ini. Keluarkan buku catatan terpilih dan riwayat terkait; penghapusan juga disinkronkan ke perangkat lain",
+	"archivedEncryptedNotebooks": "Pengarsipan dan pengeluaran selesai. Setelah semua data pemulihan lama diarsipkan, nonaktifkan lalu aktifkan kembali buku catatan terenkripsi untuk menetapkan kata sandi utama baru",
+	"archiveKeyFile": "Cadangan kunci (opsional)",
+	"archiveHistoryOnly": "Hanya riwayat dan snapshot",
 	"openContextMenu": "Buka menu konteks",
 	"mobileSlashMenu": "Menu garis miring di ponsel",
 	"mobileSlashMenuTip": "Jika diaktifkan, ketik / di editor ponsel untuk mencari dan menyisipkan blok konten",
@@ -2947,6 +2955,13 @@
 		"397": "Perangkat ini tidak dapat membuat berkas yang disinkronkan. Ubah namanya di SiYuan pada perangkat yang dapat mengaksesnya, lalu sinkronkan kembali: %s",
 		"398": "Memeriksa sumber daya dan snapshot lama...",
 		"399": "Mengunduh sumber daya dan konten snapshot lama yang hilang...",
-		"400": "Tidak dapat memeriksa atau melengkapi sumber daya dan snapshot lama. Penyedia sinkronisasi tidak diubah: %s"
+		"400": "Tidak dapat memeriksa atau melengkapi sumber daya dan snapshot lama. Penyedia sinkronisasi tidak diubah: %s",
+		"401": "Arsip buku catatan terenkripsi tidak valid, rusak, atau menggunakan versi yang tidak didukung",
+		"402": "Data atau bahan pemulihan telah berubah. Buat dan simpan arsip baru sebelum mengeluarkannya",
+		"403": "Tutup dan kunci buku catatan serta selesaikan pemulihan tertunda sebelum mencoba lagi",
+		"404": "Pulihkan ke ruang kerja terpisah tanpa kunci atau data terenkripsi dan dengan sinkronisasi dimatikan",
+		"405": "Autentikasi gagal. Periksa kata sandi utama lama dan cadangan kunci yang sesuai; arsip tetap disimpan",
+		"406": "Pengarsipan gagal. Data asli tetap disimpan; periksa ruang kosong, izin, dan unduhan sumber daya",
+		"407": "Arsipkan semua data pemulihan buku catatan terenkripsi sebelum menonaktifkan enkripsi"
 	}
 }

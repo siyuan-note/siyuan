@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Archivieren und entfernen",
+	"archiveEncryptedNotebooksTip": "Gesperrte verschlüsselte Notizbücher und ihre Wiederherstellungsdaten auswählen; das Hauptpasswort ist nicht erforderlich",
+	"restoreEncryptedNotebooks": "Verschlüsseltes Archiv wiederherstellen",
+	"restoreEncryptedNotebooksTip": "Einen separaten Arbeitsbereich ohne Verschlüsselungsschlüssel und mit deaktivierter Synchronisierung verwenden; altes Hauptpasswort eingeben und optional eine wiedergefundene Schlüsselsicherung auswählen",
+	"confirmArchiveSaved": "Ich habe das Archiv außerhalb dieses Arbeitsbereichs gespeichert. Die ausgewählten Notizbücher und zugehörigen Verläufe entfernen; dies wird auch auf andere Geräte synchronisiert",
+	"archivedEncryptedNotebooks": "Archiviert und entfernt. Nach der Archivierung aller alten Wiederherstellungsdaten die verschlüsselten Notizbücher deaktivieren und erneut aktivieren, um ein neues Hauptpasswort festzulegen",
+	"archiveKeyFile": "Schlüsselsicherung (optional)",
+	"archiveHistoryOnly": "Nur Verlauf und Schnappschüsse",
 	"openContextMenu": "Kontextmenü öffnen",
 	"mobileSlashMenu": "Slash-Menü auf Mobilgeräten",
 	"mobileSlashMenuTip": "Nach dem Aktivieren / im mobilen Editor eingeben, um Inhaltsblöcke zu suchen und einzufügen",
@@ -2947,6 +2955,13 @@
 		"397": "Dieses Gerät kann die synchronisierte Datei nicht erstellen. Benennen Sie sie in SiYuan auf einem Gerät um, auf dem sie zugänglich ist, und synchronisieren Sie erneut: %s",
 		"398": "Ressourcen und frühere Schnappschüsse werden geprüft...",
 		"399": "Fehlende Ressourcen und Inhalte früherer Schnappschüsse werden heruntergeladen...",
-		"400": "Ressourcen und frühere Schnappschüsse konnten nicht geprüft oder vervollständigt werden. Der Synchronisierungsanbieter wurde nicht geändert: %s"
+		"400": "Ressourcen und frühere Schnappschüsse konnten nicht geprüft oder vervollständigt werden. Der Synchronisierungsanbieter wurde nicht geändert: %s",
+		"401": "Das verschlüsselte Notizbucharchiv ist ungültig, beschädigt oder hat eine nicht unterstützte Version",
+		"402": "Daten oder Wiederherstellungsinformationen wurden geändert. Vor dem Entfernen ein neues Archiv erstellen und speichern",
+		"403": "Notizbücher schließen und sperren sowie ausstehende Wiederherstellungen abschließen, dann erneut versuchen",
+		"404": "In einem separaten Arbeitsbereich ohne Verschlüsselungsschlüssel oder verschlüsselte Daten und mit deaktivierter Synchronisierung wiederherstellen",
+		"405": "Authentifizierung fehlgeschlagen. Altes Hauptpasswort und passende Schlüsselsicherung prüfen; das Archiv bleibt erhalten",
+		"406": "Archivierung fehlgeschlagen. Die Originaldaten bleiben erhalten; freien Speicherplatz, Berechtigungen und Ressourcendownloads prüfen",
+		"407": "Vor dem Deaktivieren der Verschlüsselung alle Wiederherstellungsdaten verschlüsselter Notizbücher archivieren"
 	}
 }

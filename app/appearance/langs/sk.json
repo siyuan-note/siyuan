@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Archivovať a odstrániť",
+	"archiveEncryptedNotebooksTip": "Vyberte zamknuté šifrované poznámkové bloky a ich údaje na obnovu; hlavné heslo nie je potrebné",
+	"restoreEncryptedNotebooks": "Obnoviť šifrovaný archív",
+	"restoreEncryptedNotebooksTip": "Použite samostatný pracovný priestor bez šifrovacích kľúčov a s vypnutou synchronizáciou; zadajte staré hlavné heslo a prípadne vyberte nájdenú zálohu kľúča",
+	"confirmArchiveSaved": "Archív som uložil mimo tohto pracovného priestoru. Odstrániť vybrané poznámkové bloky a ich históriu; odstránenie sa zosynchronizuje aj s ostatnými zariadeniami",
+	"archivedEncryptedNotebooks": "Archivácia a odstránenie dokončené. Po archivácii všetkých starých údajov na obnovu vypnite a znova zapnite šifrované poznámkové bloky a nastavte nové hlavné heslo",
+	"archiveKeyFile": "Záloha kľúča (voliteľné)",
+	"archiveHistoryOnly": "Iba história a snímky",
 	"openContextMenu": "Otvoriť kontextové menu",
 	"mobileSlashMenu": "Ponuka lomky v mobile",
 	"mobileSlashMenuTip": "Po zapnutí zadajte / v mobilnom editore na vyhľadanie a vloženie blokov obsahu",
@@ -2947,6 +2955,13 @@
 		"397": "Toto zariadenie nemôže vytvoriť synchronizovaný súbor. Premenujte ho v SiYuan na zariadení, kde je dostupný, a potom zopakujte synchronizáciu: %s",
 		"398": "Kontrolujú sa zdroje a staršie snímky...",
 		"399": "Sťahujú sa chýbajúce zdroje a obsah starších snímok...",
-		"400": "Zdroje a staršie snímky sa nepodarilo skontrolovať alebo doplniť. Poskytovateľ synchronizácie sa nezmenil: %s"
+		"400": "Zdroje a staršie snímky sa nepodarilo skontrolovať alebo doplniť. Poskytovateľ synchronizácie sa nezmenil: %s",
+		"401": "Archív šifrovaných poznámkových blokov je neplatný, poškodený alebo má nepodporovanú verziu",
+		"402": "Údaje alebo podklady na obnovu sa zmenili. Pred odstránením vytvorte a uložte nový archív",
+		"403": "Zatvorte a zamknite poznámkové bloky a dokončite prebiehajúce obnovenia pred ďalším pokusom",
+		"404": "Obnovte v samostatnom pracovnom priestore bez kľúčov a šifrovaných údajov s vypnutou synchronizáciou",
+		"405": "Overenie zlyhalo. Skontrolujte staré hlavné heslo a zodpovedajúcu zálohu kľúča; archív zostal zachovaný",
+		"406": "Archivácia zlyhala. Pôvodné údaje zostali zachované; skontrolujte voľné miesto, oprávnenia a sťahovanie zdrojov",
+		"407": "Pred vypnutím šifrovania archivujte všetky údaje na obnovu šifrovaných poznámkových blokov"
 	}
 }

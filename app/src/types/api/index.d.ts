@@ -778,6 +778,8 @@ export type CloudSyncDir = { "cloudName": string; "hSize": string; "saveDir": st
 
 export type CloudSyncDirsData = { "checkedSyncDir": string; "hSize": string; "syncDirs": Array<CloudSyncDir | null> | null; };
 
+export type CommitNotebookArchiveRequestInput = { "id": string; "saved": boolean; };
+
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
 export type ContinueImportSYRequestInput = { "notebook": string; "token": string; };
@@ -1208,6 +1210,8 @@ export type ImportDocumentData = { "type": "document"; };
 
 export type ImportMarkdownRequestInput = { "localPath": string; "notebook": string; "skipRoot"?: boolean | null; "toPath": string; };
 
+export type ImportNotebookArchiveRequestInput = { "file": Blob; "key"?: Blob; "password": string; };
+
 export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
 
 export type ImportRepoKeyRequestInput = { "key": string; };
@@ -1376,6 +1380,12 @@ export type NetworkServeTLSRequestInput = { "networkServeTLS": boolean; };
 
 export type Notebook = { "closed": boolean; "dueFlashcardCount": number; "encrypted": boolean; "flashcardCount": number; "icon": string; "id": string; "name": string; "newFlashcardCount": number; "sort": number; "sortMode": number; "state"?: "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error"; "subFileCount": number; "unlocked": boolean; };
 
+export type NotebookArchiveCandidate = { "current": boolean; "id": string; };
+
+export type NotebookArchiveCandidatesData = { "notebooks": Array<NotebookArchiveCandidate>; };
+
+export type NotebookArchiveData = { "file": string; "id": string; };
+
 export type NotebookConf = { "boxCrypt": NotebookEncryption | null; "closed": boolean; "dailyNoteSavePath": string; "dailyNoteTemplatePath": string; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "encrypted": boolean; "icon": string; "name": string; "refCreateSaveBox": string; "refCreateSavePath": string; "sort": number; "sortMode": number; };
 
 export type NotebookConfData = { "box": string; "conf": NotebookConf | null; "name": string; };
@@ -1455,6 +1465,8 @@ export type PluginRPCNotification = { "jsonrpc": "2.0"; "method": string; "param
 export type PluginRPCRequestFieldsInput = { "id"?: string | number | null; "jsonrpc": "2.0"; "method": string; "params"?: Array<JSONValue> | { [key: string]: JSONValue } | null; };
 
 export type PluginRPCSuccess = { "id": string | number | null; "jsonrpc": "2.0"; "result": JSONValue; };
+
+export type PrepareNotebookArchiveRequestInput = { "notebooks": Array<string>; };
 
 export type PrepareRichTextRequestInput = { "assets": Array<RichClipboardAssetInput>; };
 
@@ -4261,6 +4273,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/notebook/commitNotebookArchive": {
+        request: CommitNotebookArchiveRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/notebook/createEncryptedNotebook": {
         request: CreateEncryptedNotebookRequestInput;
         response: { "code": 0; "data": CreateNotebookData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4291,6 +4308,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": EncryptedNotebookStatusData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/notebook/getNotebookArchiveCandidates": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": NotebookArchiveCandidatesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
     "/api/notebook/getNotebookConf": {
         request: CloseNotebookRequestInput;
         response: { "code": 0; "data": NotebookConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4300,6 +4322,11 @@ export interface APIPOSTRoutes {
         request: NotebookIDRequestInput;
         response: { "code": 0; "data": NotebookInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/notebook/importNotebookArchive": {
+        request: ImportNotebookArchiveRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
     };
     "/api/notebook/importNotebookCryptoBackup": {
         request: ImportNotebookCryptoBackupRequestInput;
@@ -4324,6 +4351,11 @@ export interface APIPOSTRoutes {
     "/api/notebook/openNotebook": {
         request: OpenNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/prepareNotebookArchive": {
+        request: PrepareNotebookArchiveRequestInput;
+        response: { "code": 0; "data": NotebookArchiveData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/notebook/removeNotebook": {

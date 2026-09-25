@@ -6,7 +6,7 @@
 		"id": "20260907120000-cryen01",
 		"title": "Encrypted Notebook",
 		"type": "doc",
-		"updated": "20260908162209"
+		"updated": "20260925180231"
 	},
 	"Children": [
 		{
@@ -1200,6 +1200,163 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-tsba9iv",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260925180231-tsba9iv",
+				"updated": "20260925180231"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Archive and recover locked notebooks"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-e14557m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-e14557m",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Authentication"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Encrypted notebooks"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Archive and remove"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and select the locked notebooks to archive. No master password is required. The archive includes the original ciphertext, related history, local repository snapshots, and available key recovery material."
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-d8i6s9h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-d8i6s9h",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Save the archive outside the workspace, then explicitly confirm that it has been saved before removing the selected notebooks. Canceling the save does not remove data. Removal propagates through normal synchronization; repository snapshots are not automatically deleted."
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-0c0gpz5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-0c0gpz5",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Removing three of five locked notebooks leaves the other two and the old key configuration in place. After all old notebook and recovery dependencies are archived, turn encrypted notebooks off and on again to set a new master password. The application also retains recovery copies; keep your independently saved archive."
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-s02q6ja",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-s02q6ja",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After recovering the matching key and password, create a separate workspace without encryption keys, turn off synchronization, and open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Authentication"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Encrypted notebooks"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Restore encrypted archive"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Select the archive and enter the old master password. If the archive lacks a usable key backup, also select the matching key backup you recovered. A workspace that already has encryption keys cannot import this archive."
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-cj1nt43",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-cj1nt43",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Restoration verifies the key and ciphertext before writing data and keeps the notebooks locked. Related history is restored; archived repository snapshots appear as notebook deletion history. Damaged archives, incorrect passwords, and unsupported versions do not overwrite existing data. Archiving cannot replace a lost password or missing recovery material."
 				}
 			]
 		},

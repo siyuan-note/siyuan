@@ -240,6 +240,10 @@ func InitConf() {
 	initLang()
 
 	Conf = NewAppConf()
+	// 先回滚未提交的目录移动，即使配置文件丢失也必须在挂载和同步之前恢复。
+	if err := recoverNotebookArchiveOperations(); err != nil {
+		logging.LogErrorf("recover notebook archive operations failed: %s", err)
+	}
 	clearEncryptedExportTempOnBoot()
 	clearOldInstallPackages("")
 	confPath := filepath.Join(util.ConfDir, "conf.json")

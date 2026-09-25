@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Archive and remove",
+	"archiveEncryptedNotebooksTip": "Select locked encrypted notebooks and their recovery data; no master password is required",
+	"restoreEncryptedNotebooks": "Restore encrypted archive",
+	"restoreEncryptedNotebooksTip": "Use a separate workspace with no encryption keys and sync turned off; enter the old master password and optionally select a recovered key backup",
+	"confirmArchiveSaved": "I have saved the archive outside this workspace. Remove the selected notebooks and related history; removal also propagates through sync",
+	"archivedEncryptedNotebooks": "Archived and removed. After all old recovery dependencies are archived, disable and re-enable encrypted notebooks to set a new master password",
+	"archiveKeyFile": "Key backup (optional)",
+	"archiveHistoryOnly": "History and snapshots only",
 	"openContextMenu": "Open context menu",
 	"mobileSlashMenu": "Mobile slash menu",
 	"mobileSlashMenuTip": "When enabled, type / in the mobile editor to search for and insert content blocks",
@@ -2947,6 +2955,13 @@
 		"397": "This device cannot create the synced file. Rename it in SiYuan on a device where it is accessible, then sync again: %s",
 		"398": "Checking resources and historical snapshots...",
 		"399": "Downloading missing resources and historical snapshot content...",
-		"400": "Unable to check or complete resources and historical snapshots. The sync provider was not changed: %s"
+		"400": "Unable to check or complete resources and historical snapshots. The sync provider was not changed: %s",
+		"401": "The encrypted notebook archive is invalid, damaged, or uses an unsupported version",
+		"402": "Data or recovery material changed. Generate and save a new archive before removing it",
+		"403": "Close and lock the notebooks and finish pending recovery operations before trying again",
+		"404": "Restore into a separate workspace with no encryption keys or encrypted data and sync turned off",
+		"405": "Authentication failed. Check the old master password and matching key backup; the archive has been preserved",
+		"406": "The archive operation failed. Original data has been preserved; check available space, permissions, and resource downloads",
+		"407": "Archive all encrypted notebook recovery dependencies before disabling encryption"
 	}
 }

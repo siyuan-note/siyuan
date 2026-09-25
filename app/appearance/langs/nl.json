@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Archiveren en verwijderen",
+	"archiveEncryptedNotebooksTip": "Selecteer vergrendelde versleutelde notitieboeken en hun herstelgegevens; het hoofdwachtwoord is niet nodig",
+	"restoreEncryptedNotebooks": "Versleuteld archief herstellen",
+	"restoreEncryptedNotebooksTip": "Gebruik een aparte werkruimte zonder versleutelingssleutels en met synchronisatie uitgeschakeld; voer het oude hoofdwachtwoord in en selecteer eventueel een teruggevonden sleutelback-up",
+	"confirmArchiveSaved": "Ik heb het archief buiten deze werkruimte opgeslagen. Verwijder de geselecteerde notitieboeken en bijbehorende geschiedenis; dit wordt ook met andere apparaten gesynchroniseerd",
+	"archivedEncryptedNotebooks": "Gearchiveerd en verwijderd. Schakel versleutelde notitieboeken uit en weer in nadat alle oude herstelgegevens zijn gearchiveerd om een nieuw hoofdwachtwoord in te stellen",
+	"archiveKeyFile": "Sleutelback-up (optioneel)",
+	"archiveHistoryOnly": "Alleen geschiedenis en momentopnamen",
 	"openContextMenu": "Contextmenu openen",
 	"mobileSlashMenu": "Slashmenu op mobiel",
 	"mobileSlashMenuTip": "Typ na inschakelen / in de mobiele editor om inhoudsblokken te zoeken en in te voegen",
@@ -2947,6 +2955,13 @@
 		"397": "Dit apparaat kan het gesynchroniseerde bestand niet aanmaken. Hernoem het in SiYuan op een apparaat waarop het toegankelijk is en synchroniseer opnieuw: %s",
 		"398": "Bronnen en eerdere momentopnamen controleren...",
 		"399": "Ontbrekende bronnen en inhoud van eerdere momentopnamen downloaden...",
-		"400": "Bronnen en eerdere momentopnamen konden niet worden gecontroleerd of aangevuld. De synchronisatieprovider is niet gewijzigd: %s"
+		"400": "Bronnen en eerdere momentopnamen konden niet worden gecontroleerd of aangevuld. De synchronisatieprovider is niet gewijzigd: %s",
+		"401": "Het archief met versleutelde notitieboeken is ongeldig, beschadigd of heeft een niet-ondersteunde versie",
+		"402": "Gegevens of herstelmateriaal zijn gewijzigd. Maak en bewaar een nieuw archief voordat u ze verwijdert",
+		"403": "Sluit en vergrendel de notitieboeken en voltooi openstaande herstelbewerkingen voordat u het opnieuw probeert",
+		"404": "Herstel in een aparte werkruimte zonder sleutels of versleutelde gegevens en met synchronisatie uitgeschakeld",
+		"405": "Authenticatie mislukt. Controleer het oude hoofdwachtwoord en de bijbehorende sleutelback-up; het archief is bewaard",
+		"406": "Archivering mislukt. De oorspronkelijke gegevens zijn bewaard; controleer vrije ruimte, machtigingen en het downloaden van bronnen",
+		"407": "Archiveer alle herstelgegevens van versleutelde notitieboeken voordat u versleuteling uitschakelt"
 	}
 }

@@ -23,6 +23,7 @@ import {
 import {sendAppSetting} from "./appRuntime";
 import zxcvbn = require("zxcvbn");
 import {canOpenExternalURL, getHostCapabilities} from "../../util/hostCapabilities";
+import {openNotebookArchiveDialog, openNotebookArchiveImportDialog} from "../notebookArchive";
 
 const getPasswordStrength = (password: string) => {
     const score = zxcvbn(password).score;
@@ -732,6 +733,28 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
 </div>`,
         afterMount: mountEncryptedNotebook,
     });
+    if (!disableImportExport) {
+        group.button({
+            id: "archiveEncryptedNotebooks",
+            title: window.siyuan.languages.archiveEncryptedNotebooks,
+            desc: window.siyuan.languages.archiveEncryptedNotebooksTip,
+            label: window.siyuan.languages.archiveEncryptedNotebooks,
+            icon: "iconUpload",
+            afterMount: (root) => root.querySelector("#archiveEncryptedNotebooks")?.addEventListener("click", () => {
+                openNotebookArchiveDialog(() => refreshEncryptedNotebookStatus(root));
+            }),
+        });
+        group.button({
+            id: "restoreEncryptedNotebooks",
+            title: window.siyuan.languages.restoreEncryptedNotebooks,
+            desc: window.siyuan.languages.restoreEncryptedNotebooksTip,
+            label: window.siyuan.languages.import,
+            icon: "iconDownload",
+            afterMount: (root) => root.querySelector("#restoreEncryptedNotebooks")?.addEventListener("click", () => {
+                openNotebookArchiveImportDialog(() => {});
+            }),
+        });
+    }
     group.number("notebookCrypto.autoLockMinutes", {
         title: window.siyuan.languages.encryptedNotebookAutoLock,
         desc: window.siyuan.languages.encryptedNotebookAutoLockDesc,
@@ -758,24 +781,31 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
     }
 };
 
+const refreshEncryptedNotebookStatus = (root: HTMLElement) => {
+    fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
+        const enabled = response.data.state === "Enabled";
+        const switchElement = root.querySelector<HTMLInputElement>("#encryptedNotebookSwitch");
+        if (!switchElement) {
+            return;
+        }
+        // 待恢复配置也允许关闭；内核仍会阻止清除尚有笔记本或历史依赖的密钥。
+        switchElement.checked = response.data.state !== "Disabled";
+        window.siyuan.config.notebookCrypto.enabled = enabled;
+        root.querySelector("#encryptedNotebookEnabledActions").classList.toggle("fn__none", !enabled);
+        root.querySelector("#importCryptoBackupBtn").classList.toggle("fn__none", enabled || !getHostCapabilities().importExport);
+        root.querySelector("#encryptedNotebookActions").classList.remove("fn__none");
+        root.querySelector("#encryptedNotebookMigrationAlert").classList.toggle("fn__none", !response.data.migrationPending);
+        const restoreButton = root.querySelector<HTMLButtonElement>("#restoreEncryptedNotebooks");
+        if (restoreButton) {
+            restoreButton.disabled = response.data.state !== "Disabled";
+        }
+    });
+};
+
 const mountEncryptedNotebook = (root: HTMLElement) => {
     const switchElement = root.querySelector("#encryptedNotebookSwitch") as HTMLInputElement;
     const actionsElement = root.querySelector("#encryptedNotebookActions");
-    const enabledActionsElement = root.querySelector("#encryptedNotebookEnabledActions");
-    const importCryptoBackupBtnElement = root.querySelector("#importCryptoBackupBtn");
-    const migrationAlertElement = root.querySelector("#encryptedNotebookMigrationAlert");
-    const refresh = () => {
-        fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
-            const enabled = response.data.state === "Enabled";
-            switchElement.checked = enabled;
-            window.siyuan.config.notebookCrypto.enabled = enabled;
-            // 修改主密码和导出密钥仅在配置完整时可见；Disabled 或 RecoveryRequired 状态提供导入恢复入口。
-            enabledActionsElement.classList.toggle("fn__none", !enabled);
-            importCryptoBackupBtnElement.classList.toggle("fn__none", enabled || !getHostCapabilities().importExport);
-            actionsElement.classList.remove("fn__none");
-            migrationAlertElement.classList.toggle("fn__none", !response.data.migrationPending);
-        });
-    };
+    const refresh = () => refreshEncryptedNotebookStatus(root);
     refresh();
 
     actionsElement.querySelector("#changeMasterPasswordBtn")?.addEventListener("click", () => {

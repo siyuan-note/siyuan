@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Archiver et retirer",
+	"archiveEncryptedNotebooksTip": "Sélectionnez les carnets chiffrés verrouillés et leurs données de récupération ; le mot de passe principal n’est pas nécessaire",
+	"restoreEncryptedNotebooks": "Restaurer une archive chiffrée",
+	"restoreEncryptedNotebooksTip": "Utilisez un espace de travail distinct sans clés de chiffrement et sans synchronisation ; saisissez l’ancien mot de passe principal et sélectionnez éventuellement une sauvegarde de clé retrouvée",
+	"confirmArchiveSaved": "J’ai enregistré l’archive hors de cet espace de travail. Retirer les carnets sélectionnés et leur historique ; ce retrait sera aussi synchronisé avec les autres appareils",
+	"archivedEncryptedNotebooks": "Archivage et retrait terminés. Après avoir archivé toutes les anciennes données de récupération, désactivez puis réactivez les carnets chiffrés pour définir un nouveau mot de passe principal",
+	"archiveKeyFile": "Sauvegarde de clé (facultatif)",
+	"archiveHistoryOnly": "Historique et instantanés uniquement",
 	"openContextMenu": "Ouvrir le menu contextuel",
 	"mobileSlashMenu": "Menu barre oblique sur mobile",
 	"mobileSlashMenuTip": "Une fois activé, saisissez / dans l’éditeur mobile pour rechercher et insérer des blocs de contenu",
@@ -2947,6 +2955,13 @@
 		"397": "Cet appareil ne peut pas créer le fichier synchronisé. Renommez-le dans SiYuan sur un appareil où il est accessible, puis relancez la synchronisation : %s",
 		"398": "Vérification des ressources et des anciens instantanés...",
 		"399": "Téléchargement des ressources et du contenu manquant des anciens instantanés...",
-		"400": "Impossible de vérifier ou de compléter les ressources et les anciens instantanés. Le fournisseur de synchronisation n’a pas été modifié : %s"
+		"400": "Impossible de vérifier ou de compléter les ressources et les anciens instantanés. Le fournisseur de synchronisation n’a pas été modifié : %s",
+		"401": "L’archive de carnets chiffrés est invalide, endommagée ou utilise une version non prise en charge",
+		"402": "Les données ou éléments de récupération ont changé. Créez et enregistrez une nouvelle archive avant le retrait",
+		"403": "Fermez et verrouillez les carnets, puis terminez les opérations de récupération en attente avant de réessayer",
+		"404": "Restaurez dans un espace de travail distinct sans clés ni données chiffrées, avec la synchronisation désactivée",
+		"405": "Échec de l’authentification. Vérifiez l’ancien mot de passe principal et la sauvegarde de clé correspondante ; l’archive est conservée",
+		"406": "Échec de l’archivage. Les données originales sont conservées ; vérifiez l’espace disponible, les autorisations et les téléchargements de ressources",
+		"407": "Archivez toutes les données de récupération des carnets chiffrés avant de désactiver le chiffrement"
 	}
 }

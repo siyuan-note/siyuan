@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Arşivle ve kaldır",
+	"archiveEncryptedNotebooksTip": "Kilitli şifreli not defterlerini ve kurtarma verilerini seçin; ana parola gerekmez",
+	"restoreEncryptedNotebooks": "Şifreli arşivi geri yükle",
+	"restoreEncryptedNotebooksTip": "Şifreleme anahtarı olmayan ve eşitlemesi kapalı ayrı bir çalışma alanı kullanın; eski ana parolayı girin ve gerekirse bulunan anahtar yedeğini seçin",
+	"confirmArchiveSaved": "Arşivi bu çalışma alanının dışına kaydettim. Seçili not defterlerini ve ilgili geçmişi kaldır; bu işlem eşitleme yoluyla diğer cihazlara da uygulanır",
+	"archivedEncryptedNotebooks": "Arşivlendi ve kaldırıldı. Tüm eski kurtarma verilerini arşivledikten sonra yeni ana parola belirlemek için şifreli not defterlerini kapatıp yeniden açın",
+	"archiveKeyFile": "Anahtar yedeği (isteğe bağlı)",
+	"archiveHistoryOnly": "Yalnızca geçmiş ve anlık görüntüler",
 	"openContextMenu": "Bağlam menüsünü aç",
 	"mobileSlashMenu": "Mobil eğik çizgi menüsü",
 	"mobileSlashMenuTip": "Etkinleştirildiğinde içerik bloklarını aramak ve eklemek için mobil düzenleyicide / yazın",
@@ -2947,6 +2955,13 @@
 		"397": "Bu cihaz eşitlenen dosyayı oluşturamıyor. Dosyaya erişilebilen bir cihazda SiYuan üzerinden dosyayı yeniden adlandırıp tekrar eşitleyin: %s",
 		"398": "Kaynaklar ve geçmiş anlık görüntüler kontrol ediliyor...",
 		"399": "Eksik kaynaklar ve geçmiş anlık görüntü içerikleri indiriliyor...",
-		"400": "Kaynaklar ve geçmiş anlık görüntüler kontrol edilemedi veya tamamlanamadı. Senkronizasyon sağlayıcısı değiştirilmedi: %s"
+		"400": "Kaynaklar ve geçmiş anlık görüntüler kontrol edilemedi veya tamamlanamadı. Senkronizasyon sağlayıcısı değiştirilmedi: %s",
+		"401": "Şifreli not defteri arşivi geçersiz, bozuk veya desteklenmeyen bir sürümde",
+		"402": "Veriler veya kurtarma malzemeleri değişti. Kaldırmadan önce yeni bir arşiv oluşturup kaydedin",
+		"403": "Yeniden denemeden önce not defterlerini kapatıp kilitleyin ve bekleyen kurtarma işlemlerini tamamlayın",
+		"404": "Anahtar veya şifreli veri olmayan, eşitlemesi kapalı ayrı bir çalışma alanına geri yükleyin",
+		"405": "Kimlik doğrulama başarısız. Eski ana parolayı ve eşleşen anahtar yedeğini kontrol edin; arşiv korundu",
+		"406": "Arşivleme başarısız. Özgün veriler korundu; boş alanı, izinleri ve kaynak indirmelerini kontrol edin",
+		"407": "Şifrelemeyi kapatmadan önce tüm şifreli not defteri kurtarma verilerini arşivleyin"
 	}
 }

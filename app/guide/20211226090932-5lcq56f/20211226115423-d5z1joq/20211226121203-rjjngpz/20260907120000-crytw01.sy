@@ -6,7 +6,7 @@
 		"id": "20260907120000-crytw01",
 		"title": "加密筆記本",
 		"type": "doc",
-		"updated": "20260908162209"
+		"updated": "20260925180231"
 	},
 	"Children": [
 		{
@@ -1200,6 +1200,163 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-gsybyqh",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260925180231-gsybyqh",
+				"updated": "20260925180231"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "無法解鎖的筆記本的封存與復原"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-72oyis6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-72oyis6",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鑑權"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "加密筆記本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "封存並移出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，選擇要封存的已鎖定筆記本，無需輸入主密碼。封存檔包含原始密文、相關歷史、本機資料倉庫快照及現存金鑰復原材料。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-3pdlb4x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-3pdlb4x",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將封存檔儲存到工作空間以外的位置，明確確認已儲存後，再移出所選筆記本。取消儲存不會移除資料。移出會透過正常同步影響其他裝置，不會自動刪除資料倉庫快照。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-2z2rtvy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-2z2rtvy",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "5 個無法解鎖的筆記本只移出 3 個時，另外 2 個和舊金鑰設定仍保留。全部舊筆記本及復原相依資料封存後，可關閉再重新啟用加密筆記本，設定新主密碼。軟體也會保留復原副本，請同時妥善保存自行匯出的封存檔。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-s6h50ap",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-s6h50ap",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "找回相符的舊金鑰及密碼後，建立尚未設定加密金鑰的獨立工作空間，關閉同步，開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鑑權"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "加密筆記本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "復原加密封存檔"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。選擇封存檔並輸入舊主密碼；封存檔缺少可用金鑰備份時，可另選找回的相符金鑰備份。已有加密金鑰設定的工作空間不允許匯入這種封存檔。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-i3fp12z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-i3fp12z",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "復原會先驗證金鑰及密文，全部通過後再寫入資料，筆記本仍保持鎖定。相關歷史一併復原，封存檔中的倉庫快照會作為筆記本刪除歷史提供復原。損毀的封存檔、錯誤密碼及不支援的版本不會覆寫既有資料。封存不能取代遺失的密碼或復原材料。"
 				}
 			]
 		},

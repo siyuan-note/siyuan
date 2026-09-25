@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Arquivar e remover",
+	"archiveEncryptedNotebooksTip": "Selecione os cadernos criptografados bloqueados e seus dados de recuperação; a senha mestra não é necessária",
+	"restoreEncryptedNotebooks": "Restaurar arquivo criptografado",
+	"restoreEncryptedNotebooksTip": "Use um espaço de trabalho separado sem chaves de criptografia e com sincronização desativada; informe a senha mestra antiga e, opcionalmente, um backup de chave recuperado",
+	"confirmArchiveSaved": "Salvei o arquivo fora deste espaço de trabalho. Remover os cadernos selecionados e seu histórico; a remoção também será sincronizada com outros dispositivos",
+	"archivedEncryptedNotebooks": "Arquivamento e remoção concluídos. Após arquivar todos os dados de recuperação antigos, desative e reative os cadernos criptografados para definir uma nova senha mestra",
+	"archiveKeyFile": "Backup da chave (opcional)",
+	"archiveHistoryOnly": "Somente histórico e instantâneos",
 	"openContextMenu": "Abrir menu de contexto",
 	"mobileSlashMenu": "Menu de barra no celular",
 	"mobileSlashMenuTip": "Quando ativado, digite / no editor móvel para pesquisar e inserir blocos de conteúdo",
@@ -2947,6 +2955,13 @@
 		"397": "Este dispositivo não pode criar o arquivo sincronizado. Renomeie-o no SiYuan em um dispositivo onde ele esteja acessível e sincronize novamente: %s",
 		"398": "Verificando recursos e snapshots anteriores...",
 		"399": "Baixando recursos e conteúdo ausente de snapshots anteriores...",
-		"400": "Não foi possível verificar ou completar os recursos e os snapshots anteriores. O provedor de sincronização não foi alterado: %s"
+		"400": "Não foi possível verificar ou completar os recursos e os snapshots anteriores. O provedor de sincronização não foi alterado: %s",
+		"401": "O arquivo de cadernos criptografados é inválido, está danificado ou usa uma versão não compatível",
+		"402": "Os dados ou materiais de recuperação mudaram. Gere e salve um novo arquivo antes de removê-los",
+		"403": "Feche e bloqueie os cadernos e conclua as recuperações pendentes antes de tentar novamente",
+		"404": "Restaure em um espaço de trabalho separado sem chaves ou dados criptografados e com sincronização desativada",
+		"405": "Falha na autenticação. Confira a senha mestra antiga e o backup de chave correspondente; o arquivo foi preservado",
+		"406": "Falha no arquivamento. Os dados originais foram preservados; verifique espaço livre, permissões e downloads de recursos",
+		"407": "Arquive todos os dados de recuperação dos cadernos criptografados antes de desativar a criptografia"
 	}
 }

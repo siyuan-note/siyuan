@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Archiwizuj i usuń",
+	"archiveEncryptedNotebooksTip": "Wybierz zablokowane zaszyfrowane notesy i ich dane odzyskiwania; hasło główne nie jest wymagane",
+	"restoreEncryptedNotebooks": "Przywróć zaszyfrowane archiwum",
+	"restoreEncryptedNotebooksTip": "Użyj osobnego obszaru roboczego bez kluczy szyfrowania i z wyłączoną synchronizacją; wpisz stare hasło główne i opcjonalnie wybierz odzyskaną kopię klucza",
+	"confirmArchiveSaved": "Archiwum zapisano poza tym obszarem roboczym. Usuń wybrane notesy i ich historię; usunięcie zostanie również zsynchronizowane z innymi urządzeniami",
+	"archivedEncryptedNotebooks": "Zarchiwizowano i usunięto. Po zarchiwizowaniu wszystkich starych danych odzyskiwania wyłącz i włącz ponownie zaszyfrowane notesy, aby ustawić nowe hasło główne",
+	"archiveKeyFile": "Kopia klucza (opcjonalnie)",
+	"archiveHistoryOnly": "Tylko historia i migawki",
 	"openContextMenu": "Otwórz menu kontekstowe",
 	"mobileSlashMenu": "Menu ukośnika na urządzeniu mobilnym",
 	"mobileSlashMenuTip": "Po włączeniu wpisz / w edytorze mobilnym, aby wyszukać i wstawić bloki treści",
@@ -2947,6 +2955,13 @@
 		"397": "To urządzenie nie może utworzyć synchronizowanego pliku. Zmień jego nazwę w SiYuan na urządzeniu, na którym jest dostępny, a następnie zsynchronizuj ponownie: %s",
 		"398": "Sprawdzanie zasobów i wcześniejszych migawek...",
 		"399": "Pobieranie brakujących zasobów i zawartości wcześniejszych migawek...",
-		"400": "Nie można sprawdzić ani uzupełnić zasobów i wcześniejszych migawek. Dostawca synchronizacji nie został zmieniony: %s"
+		"400": "Nie można sprawdzić ani uzupełnić zasobów i wcześniejszych migawek. Dostawca synchronizacji nie został zmieniony: %s",
+		"401": "Archiwum zaszyfrowanych notesów jest nieprawidłowe, uszkodzone lub ma nieobsługiwaną wersję",
+		"402": "Dane lub materiały odzyskiwania uległy zmianie. Utwórz i zapisz nowe archiwum przed usunięciem",
+		"403": "Zamknij i zablokuj notesy oraz zakończ oczekujące operacje odzyskiwania przed ponowną próbą",
+		"404": "Przywróć w osobnym obszarze roboczym bez kluczy i zaszyfrowanych danych, z wyłączoną synchronizacją",
+		"405": "Uwierzytelnianie nie powiodło się. Sprawdź stare hasło główne i pasującą kopię klucza; archiwum zachowano",
+		"406": "Archiwizacja nie powiodła się. Zachowano dane źródłowe; sprawdź wolne miejsce, uprawnienia i pobieranie zasobów",
+		"407": "Przed wyłączeniem szyfrowania zarchiwizuj wszystkie dane odzyskiwania zaszyfrowanych notesów"
 	}
 }

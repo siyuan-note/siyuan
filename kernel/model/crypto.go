@@ -318,6 +318,9 @@ func ExportNotebookCryptoBackup() (downloadPath string, err error) {
 func ImportNotebookCryptoBackup(data []byte, password string) error {
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
+	if err := checkPendingNotebookArchives(); err != nil {
+		return err
+	}
 
 	Conf.m.RLock()
 	current := *Conf.NotebookCrypto
@@ -1000,6 +1003,9 @@ func EnableEncryptedNotebook(password string) error {
 
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
+	if err := checkPendingNotebookArchives(); err != nil {
+		return err
+	}
 
 	Conf.m.RLock()
 	current := *Conf.NotebookCrypto
@@ -1087,8 +1093,13 @@ func EnableEncryptedNotebook(password string) error {
 // 且不能有依赖当前密钥备份的已删除笔记本历史（否则禁用并删除备份会让这些历史永久锁死，违反 §19）。
 // 清除全局加密配置（MasterSalt/KEKVerifier），KEK/DEK 不再可用。
 func DisableEncryptedNotebook() error {
+	lockSync()
+	defer unlockSync()
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
+	if err := checkPendingNotebookArchives(); err != nil {
+		return err
+	}
 
 	// 检查是否还有加密笔记本（含 conf 损坏但存在备份的）
 	ids, listErr := listAllEncryptedBoxIDs()
@@ -1107,12 +1118,15 @@ func DisableEncryptedNotebook() error {
 	if hasHistory {
 		return errors.New(Conf.Language(323))
 	}
+	if err := preserveNotebookCryptoBeforeDisable(); err != nil {
+		logging.LogErrorf("preserve notebook crypto before disabling failed: %s", err)
+		return errors.New(Conf.Language(407))
+	}
 
 	Conf.m.Lock()
-	Conf.NotebookCrypto.Enabled = false
-	Conf.NotebookCrypto.MasterSalt = nil
-	Conf.NotebookCrypto.KEKVerifier = nil
-	Conf.NotebookCrypto.VerifierNonce = nil
+	autoLockMinutes := Conf.NotebookCrypto.AutoLockMinutes
+	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	Conf.NotebookCrypto.AutoLockMinutes = autoLockMinutes
 	Conf.m.Unlock()
 
 	Conf.Save()
@@ -1218,6 +1232,9 @@ func deriveNotebookCryptoBackupCandidate(password string) (backup *conf.Notebook
 
 // deriveKEK 从主密码派生 KEK 并校验。校验失败返回错误。KEK 仅在函数作用域内有效，调用方负责使用。
 func deriveKEK(password string) ([]byte, error) {
+	if err := checkPendingNotebookArchives(); err != nil {
+		return nil, err
+	}
 	Conf.m.RLock()
 	nc := *Conf.NotebookCrypto
 	Conf.m.RUnlock()

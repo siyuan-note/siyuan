@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Archivia e rimuovi",
+	"archiveEncryptedNotebooksTip": "Seleziona i quaderni cifrati bloccati e i relativi dati di recupero; non è necessaria la password principale",
+	"restoreEncryptedNotebooks": "Ripristina archivio cifrato",
+	"restoreEncryptedNotebooksTip": "Usa uno spazio di lavoro separato senza chiavi di cifratura e con sincronizzazione disattivata; inserisci la vecchia password principale e, facoltativamente, un backup della chiave ritrovato",
+	"confirmArchiveSaved": "Ho salvato l’archivio fuori da questo spazio di lavoro. Rimuovi i quaderni selezionati e la relativa cronologia; la rimozione verrà sincronizzata anche con gli altri dispositivi",
+	"archivedEncryptedNotebooks": "Archiviato e rimosso. Dopo aver archiviato tutti i vecchi dati di recupero, disattiva e riattiva i quaderni cifrati per impostare una nuova password principale",
+	"archiveKeyFile": "Backup della chiave (facoltativo)",
+	"archiveHistoryOnly": "Solo cronologia e istantanee",
 	"openContextMenu": "Apri menu contestuale",
 	"mobileSlashMenu": "Menu barra nell'editor mobile",
 	"mobileSlashMenuTip": "Quando è attivo, digita / nell'editor mobile per cercare e inserire blocchi di contenuto",
@@ -2947,6 +2955,13 @@
 		"397": "Questo dispositivo non può creare il file sincronizzato. Rinominalo in SiYuan su un dispositivo da cui è accessibile, quindi sincronizza di nuovo: %s",
 		"398": "Verifica delle risorse e delle istantanee precedenti...",
 		"399": "Download delle risorse e dei contenuti mancanti delle istantanee precedenti...",
-		"400": "Impossibile verificare o completare le risorse e le istantanee precedenti. Il provider di sincronizzazione non è stato modificato: %s"
+		"400": "Impossibile verificare o completare le risorse e le istantanee precedenti. Il provider di sincronizzazione non è stato modificato: %s",
+		"401": "L’archivio dei quaderni cifrati non è valido, è danneggiato o usa una versione non supportata",
+		"402": "I dati o il materiale di recupero sono cambiati. Genera e salva un nuovo archivio prima della rimozione",
+		"403": "Chiudi e blocca i quaderni e completa i recuperi in sospeso prima di riprovare",
+		"404": "Ripristina in uno spazio di lavoro separato senza chiavi o dati cifrati e con sincronizzazione disattivata",
+		"405": "Autenticazione non riuscita. Controlla la vecchia password principale e il backup della chiave corrispondente; l’archivio è stato conservato",
+		"406": "Archiviazione non riuscita. I dati originali sono stati conservati; controlla spazio disponibile, autorizzazioni e download delle risorse",
+		"407": "Archivia tutti i dati di recupero dei quaderni cifrati prima di disattivare la cifratura"
 	}
 }

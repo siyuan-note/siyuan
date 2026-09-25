@@ -1,4 +1,12 @@
 {
+	"archiveEncryptedNotebooks": "Archivar y retirar",
+	"archiveEncryptedNotebooksTip": "Seleccione cuadernos cifrados bloqueados y sus datos de recuperación; no se necesita la contraseña maestra",
+	"restoreEncryptedNotebooks": "Restaurar archivo cifrado",
+	"restoreEncryptedNotebooksTip": "Use un espacio de trabajo independiente sin claves de cifrado y con la sincronización desactivada; introduzca la contraseña maestra anterior y, opcionalmente, una copia recuperada de la clave",
+	"confirmArchiveSaved": "He guardado el archivo fuera de este espacio de trabajo. Retirar los cuadernos seleccionados y su historial; la retirada también se sincronizará con otros dispositivos",
+	"archivedEncryptedNotebooks": "Archivado y retirado. Tras archivar todos los datos de recuperación anteriores, desactive y reactive los cuadernos cifrados para establecer una nueva contraseña maestra",
+	"archiveKeyFile": "Copia de la clave (opcional)",
+	"archiveHistoryOnly": "Solo historial e instantáneas",
 	"openContextMenu": "Abrir menú contextual",
 	"mobileSlashMenu": "Menú de barra diagonal en móvil",
 	"mobileSlashMenuTip": "Al activarlo, escribe / en el editor móvil para buscar e insertar bloques de contenido",
@@ -2947,6 +2955,13 @@
 		"397": "Este dispositivo no puede crear el archivo sincronizado. Cámbiele el nombre en SiYuan desde un dispositivo donde sea accesible y vuelva a sincronizar: %s",
 		"398": "Comprobando recursos e instantáneas anteriores...",
 		"399": "Descargando recursos y contenido de instantáneas anteriores que faltan...",
-		"400": "No se pudieron comprobar o completar los recursos y las instantáneas anteriores. El proveedor de sincronización no ha cambiado: %s"
+		"400": "No se pudieron comprobar o completar los recursos y las instantáneas anteriores. El proveedor de sincronización no ha cambiado: %s",
+		"401": "El archivo de cuadernos cifrados no es válido, está dañado o usa una versión no compatible",
+		"402": "Los datos o el material de recuperación han cambiado. Genere y guarde un nuevo archivo antes de retirarlos",
+		"403": "Cierre y bloquee los cuadernos y finalice las recuperaciones pendientes antes de volver a intentarlo",
+		"404": "Restaure en un espacio de trabajo independiente sin claves ni datos cifrados y con la sincronización desactivada",
+		"405": "Error de autenticación. Compruebe la contraseña maestra anterior y la copia de clave correspondiente; el archivo se ha conservado",
+		"406": "Error al archivar. Se han conservado los datos originales; compruebe el espacio libre, los permisos y las descargas de recursos",
+		"407": "Archive todos los datos de recuperación de cuadernos cifrados antes de desactivar el cifrado"
 	}
 }

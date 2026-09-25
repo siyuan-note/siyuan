@@ -1,7 +1,6 @@
 import type {BlockQueryRequestInput} from "../../types/api";
 import {isProtyleListItemFragment} from "../runtimeCapabilities";
 import {hideElements} from "../ui/hideElements";
-import {insertHTML} from "../util/insertHTML";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
@@ -2589,11 +2588,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // tab 需等待 list 和 table 处理完成
         if (event.key === "Tab" && isNotCtrl(event) && !event.altKey) {
             event.preventDefault();
-            // 跨块替换通过编辑器事务插入，保留块结构和撤销信息。
-            if (!range.collapsed && nodeElement !== endElement) {
+            // 跨块替换需合并末尾文本块，并保留块引用确认和撤销信息。
+            if (!range.collapsed && endElement && nodeElement !== endElement) {
                 if (!event.shiftKey) {
-                    insertHTML(window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" :
-                        "".padStart(window.siyuan.config.editor.codeTabSpaces, " "), protyle);
+                    await removeCrossBlockRange(protyle, range, nodeElement, endElement, false, {
+                        text: window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" :
+                            "".padStart(window.siyuan.config.editor.codeTabSpaces, " "),
+                    });
                 }
                 return true;
             }

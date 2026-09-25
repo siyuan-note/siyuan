@@ -536,6 +536,12 @@ func ControlConcurrency(c *gin.Context) {
 		return
 	}
 
+	// 文件上传在表单接收完成后由处理函数串行写入，避免等待锁的上传占满 HTTP/2 接收窗口。
+	if reqPath == "/api/file/putFile" {
+		c.Next()
+		return
+	}
+
 	// Improve the concurrency of the kernel data reading interfaces https://github.com/siyuan-note/siyuan/issues/10149
 	if strings.HasPrefix(reqPath, "/stage/") ||
 		strings.HasPrefix(reqPath, "/assets/") ||

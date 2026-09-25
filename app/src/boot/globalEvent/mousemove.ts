@@ -290,6 +290,8 @@ export const windowMouseMove = (event: MouseEvent) => {
                     resizeElement.setAttribute("data-col-index", (getColIndex(cellElement) - 1).toString());
                     resizeElement.setAttribute("data-left", (cellElement.offsetLeft - 3).toString());
                     resizeElement.setAttribute("style", `top:${resizeBounds.top}px;height:${resizeBounds.height}px;left: ${Math.round(cellElement.offsetLeft - blockElement.firstElementChild.scrollLeft - 3)}px;display:block`);
+                } else {
+                    resizeElement.setAttribute("style", "display:none");
                 }
             }
         }

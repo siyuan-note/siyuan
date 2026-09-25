@@ -4379,9 +4379,7 @@ export class WYSIWYG {
                 return;
             }
             // 输入可能改变列宽，隐藏已有调整线，待鼠标重新命中列边界后定位。
-            if (blockElement.classList.contains("table")) {
-                blockElement.querySelector(".table__resize")?.removeAttribute("style");
-            }
+            blockElement.closest(".table")?.querySelector(".table__resize")?.setAttribute("style", "display:none");
             if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {
                 protyle.hint.enableExtend = true;
             }

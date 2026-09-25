@@ -238,13 +238,14 @@ class App {
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);
-                    fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await init(this);
                         setTitle("", true);
                         initMessage();
                         window.siyuan.isReady = true;
                         mainWs.flushMainMessages();
+                        fetchPost("/api/setting/getCloudUser", {});
                     });
                 });
             });

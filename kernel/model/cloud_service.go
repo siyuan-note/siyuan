@@ -388,6 +388,14 @@ func refreshAnnouncement() {
 	}
 }
 
+// GetCloudUser 在启动时读取内存账户；需要刷新时保留资源来源切换保护。
+func GetCloudUser(token string, cached bool) (*conf.User, error) {
+	if cached {
+		return Conf.GetUser(), nil
+	}
+	return RefreshUser(token)
+}
+
 func RefreshUser(token string) (ret *conf.User, err error) {
 	release := lockAssetSourceChange()
 	defer release()

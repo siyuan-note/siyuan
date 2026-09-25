@@ -1852,7 +1852,7 @@ export type SettingCapabilityPolicy = { "default": string; "overrides": Record<s
 
 export type SettingCapabilityPolicyInput = { "default"?: string | null; "overrides"?: Record<string, string> | null; };
 
-export type SettingCloudUserRequestInput = { "token"?: string | null; };
+export type SettingCloudUserRequestInput = { "cached"?: boolean; "token"?: string | null; };
 
 export type SettingDecision = { "apiKey": string; "enabled": boolean; "endpoint": string; "name": string; "timeout": number; };
 

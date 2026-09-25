@@ -822,7 +822,7 @@ var getPublish = contractHandler(apicontract.GetPublish, func(c *gin.Context, re
 })
 
 var getCloudUser = contractHandler(apicontract.GetCloudUser, func(c *gin.Context, request apicontract.SettingCloudUserRequest) apicontract.Response[*apicontract.SettingUser] {
-	user, err := model.RefreshUser(request.Token)
+	user, err := model.GetCloudUser(request.Token, request.Cached)
 	data := settingUserPayload(user)
 	if err == nil {
 		return apicontract.Success(data)

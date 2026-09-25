@@ -40997,6 +40997,9 @@
     "SettingCloudUserRequestInput": {
       "type": "object",
       "properties": {
+        "cached": {
+          "type": "boolean"
+        },
         "token": {
           "anyOf": [
             {

@@ -932,7 +932,7 @@ const renderKeyboardToolbar = () => {
         if (!selection || selection.rangeCount === 0) {
             return;
         }
-        if (!showUtil) {
+        if (!showUtil && keyboardPanelTop === undefined) {
             hideKeyboardToolbarUtil();
         }
         showKeyboardToolbarElement();
@@ -1067,7 +1067,7 @@ const showKeyboardToolbarElement = () => {
     if (pendingFocus && getCurrentEditor()?.protyle === pendingFocus.protyle && !pendingFocus.protyle.disabled) {
         restoreEditorFocusRange(pendingFocus.protyle.wysiwyg.element, pendingFocus.range);
     }
-    if (!showUtil) {
+    if (!showUtil && keyboardPanelTop === undefined) {
         hideKeyboardToolbarUtil();
     }
     const selection = getSelection();
@@ -1215,7 +1215,8 @@ export const hideKeyboardToolbar = () => {
     }
     clearTimeout(scrollSelectionIntoViewTimeout);
     clearRenderGutterAfterScroll?.();
-    if (showUtil) {
+    // 键盘退场时保留已展开的移动端菜单，菜单由用户操作或编辑器切换关闭。
+    if (showUtil || keyboardPanelTop !== undefined) {
         return;
     }
     pendingKeyboardFocus = undefined;
@@ -1260,11 +1261,15 @@ export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
         return KeyboardHideResult.Cleanup;
     }
     hideElements(["util"], editor.protyle);
-    const range = selection?.rangeCount > 0 && !selection.isCollapsed ? selection.getRangeAt(0) : undefined;
-    const hasVisibleEditorSelection = !!range && hasVisibleSelectionText(stripSemanticMarkersFromRangeText(range)) &&
+    const range = selection?.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+    const hasEditorRange = !!range &&
         editor.protyle.wysiwyg.element.contains(range.startContainer) &&
         editor.protyle.wysiwyg.element.contains(range.endContainer);
-    const result = getKeyboardHideResult(preserveSelection, tableCellSelectionRestored, hasVisibleEditorSelection);
+    const hasVisibleEditorSelection = hasEditorRange && !range.collapsed &&
+        hasVisibleSelectionText(stripSemanticMarkersFromRangeText(range));
+    // 菜单仍需使用当前选区，通知原生端保留 WebView 焦点和选区。
+    const result = getKeyboardHideResult(preserveSelection, tableCellSelectionRestored,
+        hasVisibleEditorSelection, keyboardPanelTop !== undefined && hasEditorRange);
     if (result === KeyboardHideResult.PreserveSelection || !hasVisibleEditorSelection) {
         return result;
     }

@@ -7,7 +7,7 @@
 		"id": "20240530101000-7yv4y5z",
 		"title": "ウィンドウとタブ",
 		"type": "doc",
-		"updated": "20260923114823"
+		"updated": "20260925230000"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-5b80d49",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
@@ -794,7 +794,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260922155242-vua2yiz",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
@@ -808,12 +808,52 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-d7ab3nk",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "新しいウィンドウのレイアウトには、名前を付けたウィンドウのタブ、画面分割、閲覧位置が保存されます。メインウィンドウのレイアウトと新しいウィンドウのレイアウトは同じレイアウトメニュー内でグループ分けされ、別々に保存されます。メインウィンドウのレイアウトを保存または更新すると、ウィンドウのサイズ、位置、最大化や全画面表示の状態も記録されます。名前を付けた新しいウィンドウでは、これらの情報が自動保存されます。レイアウトを開くとウィンドウの状態が復元され、ディスプレイ構成が変わった場合は利用可能な画面内に調整されます。ウィンドウ情報を含まない以前のレイアウトも引き続き使用できます。位置とサイズの復元はOSの制約を受け、Wayland環境では利用できない場合があります。メインウィンドウのレイアウトは最大1件、新しいウィンドウのレイアウトは複数選択でき、一覧の上にある開くボタンでまとめて開けます。この選択内容は保存されません。この機能はデスクトップクライアントで利用できます。暗号化されたノートブックのタブは保存されません。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "レイアウトボタンをもう一度クリックすると、名前の入力ダイアログが閉じます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "メニューとボタンの表示と順序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新しいウィンドウのトップバー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でレイアウトボタンと最前面表示ボタンの表示・非表示と順序を設定できます。"
 				}
 			]
 		},

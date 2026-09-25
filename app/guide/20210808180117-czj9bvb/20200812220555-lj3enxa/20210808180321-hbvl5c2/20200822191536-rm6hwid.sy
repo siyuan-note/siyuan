@@ -6,7 +6,7 @@
 		"id": "20200822191536-rm6hwid",
 		"title": "窗口和页签",
 		"type": "doc",
-		"updated": "20260923114823"
+		"updated": "20260925230000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-d150748",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
@@ -789,7 +789,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260922155242-z5t2n3l",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
@@ -803,12 +803,52 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-5nc0zym",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "新窗口布局用于保存一个已命名窗口的页签、分屏和阅读位置。主窗口布局和新窗口布局在同一个布局菜单内分组显示，分别保存。保存或更新主窗口布局时，也会记录窗口大小、位置以及最大化或全屏状态；已命名的新窗口会自动保存这些信息。打开布局时会恢复相应窗口状态，显示器配置变化后会调整到可用显示器内。没有窗口信息的旧布局仍可正常使用。窗口位置和大小的恢复受操作系统限制，Wayland 环境可能不支持。最多勾选一个主窗口布局，并可勾选多个新窗口布局，然后点击列表上方的打开按钮即可一起打开；本次勾选不会保存。此功能适用于桌面客户端；加密笔记本的页签不会写入布局配置。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "再次点击布局按钮可关闭命名弹窗。可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "菜单和按钮的显隐与排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新窗口顶栏"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中配置布局按钮和置顶按钮的显隐与排序。"
 				}
 			]
 		},

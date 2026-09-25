@@ -593,6 +593,7 @@ const toolbarCatalogSection: IEntryCatalogSection = {
 
 export const TOP_BAR_ROOT_PATH = "topBar";
 export const STATUS_BAR_ROOT_PATH = "statusBar";
+export const WINDOW_TOP_BAR_ROOT_PATH = "windowTopBar";
 
 const statusBarCatalogSection: IEntryCatalogSection = {
     key: STATUS_BAR_ROOT_PATH,
@@ -686,6 +687,14 @@ const dockCatalogSection: IEntryCatalogSection = {
 
 export const entryCatalog: IEntryCatalogSection[] = [
     topBarCatalogSection,
+    {
+        key: WINDOW_TOP_BAR_ROOT_PATH,
+        label: lang("entryWindowTopBar"),
+        children: [
+            node("windowWorkspace", lang("layout")),
+            node("pinWindow", lang("pin")),
+        ],
+    },
     statusBarCatalogSection,
     dockCatalogSection,
     {

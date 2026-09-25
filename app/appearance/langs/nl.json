@@ -1,4 +1,5 @@
 {
+	"entryWindowTopBar": "Bovenbalk van nieuwe vensters",
 	"archiveEncryptedNotebooks": "Archiveren en verwijderen",
 	"archiveEncryptedNotebooksTip": "Selecteer vergrendelde versleutelde notitieboeken en hun herstelgegevens; het hoofdwachtwoord is niet nodig",
 	"restoreEncryptedNotebooks": "Versleuteld archief herstellen",

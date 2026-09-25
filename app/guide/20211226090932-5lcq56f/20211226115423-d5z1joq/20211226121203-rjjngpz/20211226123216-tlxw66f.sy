@@ -6,7 +6,7 @@
 		"id": "20211226123216-tlxw66f",
 		"title": "視窗和分頁",
 		"type": "doc",
-		"updated": "20260923114823"
+		"updated": "20260925230000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-3a8f750",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
@@ -789,7 +789,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260922155242-cvaq88b",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
@@ -803,12 +803,52 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-4dgh9o5",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "新視窗版面配置用於儲存已命名視窗的分頁、分割畫面和閱讀位置。主視窗版面配置和新視窗版面配置在同一個版面配置選單內分組顯示，分別儲存。儲存或更新主視窗版面配置時，也會記錄視窗大小、位置，以及最大化或全螢幕狀態；已命名的新視窗會自動儲存這些資訊。開啟版面配置時會還原相應的視窗狀態，顯示器配置改變後會調整至可用顯示器內。沒有視窗資訊的舊版面配置仍可正常使用。視窗位置和大小的還原受作業系統限制，Wayland 環境可能不支援。最多勾選一個主視窗版面配置，並可勾選多個新視窗版面配置，再點擊清單上方的開啟按鈕一起開啟；本次勾選不會儲存。此功能適用於桌面用戶端；加密筆記本的分頁不會寫入版面配置。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "再次點擊版面配置按鈕可關閉命名對話方塊。可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "選單和按鈕的顯隱與排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新視窗頂欄"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中設定版面配置按鈕和置頂按鈕的顯示與排序。"
 				}
 			]
 		},

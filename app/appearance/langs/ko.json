@@ -1,4 +1,5 @@
 {
+	"entryWindowTopBar": "새 창 상단 표시줄",
 	"archiveEncryptedNotebooks": "보관 후 내보내기",
 	"archiveEncryptedNotebooksTip": "잠긴 암호화 노트북과 복구 데이터를 선택하세요. 마스터 비밀번호는 필요하지 않습니다",
 	"restoreEncryptedNotebooks": "암호화 보관 파일 복원",

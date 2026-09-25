@@ -11,6 +11,7 @@ import {escapeHtml} from "../util/escape";
 import {setWindowWorkspaceTitle} from "../util/processTitle";
 import {openNewWindowByWorkspace} from "./openNewWindow";
 import {captureWindowGeometry} from "./geometry";
+import {applyWindowTopBarEntryVisibility} from "../config/entryVisibility/runtime";
 import {
     isWindowWorkspace,
     isWindowWorkspaceID,
@@ -240,7 +241,15 @@ export const removeWindowWorkspace = (id: string) => {
     }
 };
 
+let workspaceDialog: ReturnType<typeof openInputDialog>;
+let savingWorkspaceDialog = false;
 export const editWindowWorkspace = (id?: string) => {
+    if (workspaceDialog) {
+        if (!savingWorkspaceDialog) {
+            workspaceDialog.destroy();
+        }
+        return;
+    }
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
@@ -249,22 +258,22 @@ export const editWindowWorkspace = (id?: string) => {
         showMessage(window.siyuan.languages.windowWorkspaceUnavailable, 6000, "error");
         return;
     }
-    let saving = false;
-    openInputDialog({
+    workspaceDialog = openInputDialog({
         title: workspace ? window.siyuan.languages.windowWorkspaces :
             window.siyuan.languages.windowWorkspaceSave,
         value: workspace?.name || "",
         maxLength: 100,
         confirmText: window.siyuan.languages[workspace ? "confirm" : "save"],
+        destroyCallback: () => workspaceDialog = undefined,
         onConfirm: async (value, dialog) => {
             const name = value.trim();
-            if (!name || saving) {
+            if (!name || savingWorkspaceDialog) {
                 if (!name) {
                     showMessage(window.siyuan.languages._kernel[142]);
                 }
                 return;
             }
-            saving = true;
+            savingWorkspaceDialog = true;
             try {
                 if (workspace) {
                     const latest = getWindowWorkspace(id);
@@ -293,7 +302,7 @@ export const editWindowWorkspace = (id?: string) => {
                 console.error(error);
                 showMessage(window.siyuan.languages.windowWorkspaceSaveError, 6000, "error");
             } finally {
-                saving = false;
+                savingWorkspaceDialog = false;
             }
         },
     });
@@ -342,9 +351,12 @@ export const initWindowWorkspace = () => {
     initialized = true;
     const button = document.createElement("button");
     button.id = "windowWorkspace";
+    button.dataset.windowTopbarEntry = "windowWorkspace";
     button.className = "toolbar__item ariaLabel window-workspace__button";
     button.innerHTML = '<svg><use xlink:href="#iconLayout"></use></svg>';
     toolbar.insertBefore(button, document.getElementById("pinWindow"));
+    applyWindowTopBarEntryVisibility();
+    window.addEventListener("siyuan-entry-visibility", () => setTabPosition(true));
     button.addEventListener("click", () => editWindowWorkspace(currentID));
     window.addEventListener("siyuan-window-layout", scheduleSave);
     window.addEventListener("resize", scheduleSave);

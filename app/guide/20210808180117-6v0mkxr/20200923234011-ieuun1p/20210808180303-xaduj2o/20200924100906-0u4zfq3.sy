@@ -6,7 +6,7 @@
 		"id": "20200924100906-0u4zfq3",
 		"title": "Window and Tab",
 		"type": "doc",
-		"updated": "20260923114823"
+		"updated": "20260925230000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-fdf0e30",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
@@ -785,7 +785,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260922155242-zq7j067",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
@@ -799,12 +799,52 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-he816jm",
-				"updated": "20260923114823"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "A new window layout saves the tabs, splits, and reading positions of a named window. Main window layouts and new window layouts are grouped in the same layout menu and saved separately. Saving or updating a main window layout also records its size, position, and maximized or fullscreen state. Named new windows save this information automatically. Opening a layout restores these window settings; if the display configuration has changed, the window is adjusted to an available display. Older layouts without window settings remain usable. Window positioning and resizing depend on the operating system and may be restricted on Wayland. Select up to one main window layout and multiple new window layouts, then click Open above the list to open them together. This selection is not saved. This feature is available in the desktop client; tabs from encrypted notebooks are excluded."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Click the layout button again to close the naming dialog. The visibility and order of the layout and pin buttons can be configured in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Menu and button visibility and order"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "New window top bar"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

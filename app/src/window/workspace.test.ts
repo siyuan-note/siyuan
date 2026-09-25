@@ -32,6 +32,8 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
         geometry: undefined as IWindowGeometry | undefined,
     };
     let dialogOptions: any;
+    const dialogEvents = {opened: 0, closed: 0};
+    let dialogHandle: {destroy: () => void};
     let url = new URL(`http://127.0.0.1:6806/stage/build/app/window.html?windowWorkspace=${workspaceID}`);
     const writes: Array<{key: string, value: any}> = [];
     const messages: string[] = [];
@@ -69,7 +71,15 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
         },
         setTabPosition: () => {},
         setWindowWorkspaceTitle: () => {},
-        openInputDialog: (options: unknown) => dialogOptions = options,
+        openInputDialog: (options: {destroyCallback: () => void}) => {
+            dialogEvents.opened++;
+            dialogOptions = options;
+            dialogHandle = {destroy: () => {
+                dialogEvents.closed++;
+                options.destroyCallback();
+            }};
+            return dialogHandle;
+        },
         confirmDialog: (_title: string, _message: string, confirm: () => void) => confirm(),
         showMessage: (message: string) => messages.push(message),
         escapeHtml: (text: string) => text,
@@ -108,6 +118,8 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
     return {
         api, state, storage, disk, writes, messages, opened, openedGeometries, associated, window,
         dialog: () => dialogOptions,
+        dialogEvents,
+        closeDialog: () => dialogHandle.destroy(),
         boot: () => {
             const restored = api.getWindowWorkspaceLayout();
             api.activateWindowWorkspace();
@@ -119,6 +131,35 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
 const savedStorage = () => ({
     [prefix + id]: {version: 1, id, name: "Reading"},
     [prefix + id + "-layout"]: {version: 1, time: 1, layout: layout()},
+});
+
+test("重复点击布局按钮关闭命名弹窗，取消后可以重新打开", () => {
+    for (const workspaceID of ["", id]) {
+        const f = fixture(savedStorage(), workspaceID);
+        f.api.editWindowWorkspace(workspaceID || undefined);
+        f.api.editWindowWorkspace(workspaceID || undefined);
+        assert.deepEqual(f.dialogEvents, {opened: 1, closed: 1});
+        assert.equal(f.writes.length, 0);
+        f.api.editWindowWorkspace(workspaceID || undefined);
+        f.closeDialog();
+        f.api.editWindowWorkspace(workspaceID || undefined);
+        assert.deepEqual(f.dialogEvents, {opened: 3, closed: 2});
+    }
+});
+
+test("命名保存期间重复点击不会创建或关闭弹窗，保存后可重新打开", async () => {
+    const f = fixture(savedStorage(), id);
+    f.boot();
+    let finish: () => void;
+    f.state.gate = new Promise<void>(resolve => finish = resolve);
+    f.api.editWindowWorkspace(id);
+    const saving = f.dialog().onConfirm("Renamed", {destroy: f.closeDialog});
+    f.api.editWindowWorkspace(id);
+    assert.deepEqual(f.dialogEvents, {opened: 1, closed: 0});
+    finish();
+    await saving;
+    f.api.editWindowWorkspace(id);
+    assert.deepEqual(f.dialogEvents, {opened: 2, closed: 1});
 });
 
 test("保存命名窗口，重新加载后恢复文档、PDF 页码和阅读位置", async () => {

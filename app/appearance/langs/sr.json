@@ -1,4 +1,5 @@
 {
+	"entryWindowTopBar": "Горња трака новог прозора",
 	"archiveEncryptedNotebooks": "Архивирај и уклони",
 	"archiveEncryptedNotebooksTip": "Изаберите закључане шифроване бележнице и податке за опоравак; главна лозинка није потребна",
 	"restoreEncryptedNotebooks": "Врати шифровану архиву",

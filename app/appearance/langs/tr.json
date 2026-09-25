@@ -1,4 +1,5 @@
 {
+	"entryWindowTopBar": "Yeni pencere üst çubuğu",
 	"archiveEncryptedNotebooks": "Arşivle ve kaldır",
 	"archiveEncryptedNotebooksTip": "Kilitli şifreli not defterlerini ve kurtarma verilerini seçin; ana parola gerekmez",
 	"restoreEncryptedNotebooks": "Şifreli arşivi geri yükle",

@@ -14,6 +14,7 @@ import {
     refreshTopBarCatalog,
     TOP_BAR_ROOT_PATH,
     STATUS_BAR_ROOT_PATH,
+    WINDOW_TOP_BAR_ROOT_PATH,
 } from "./catalog";
 import {
     mergeEntryOrderPreservingUnknown,
@@ -448,6 +449,24 @@ export const applyTopBarEntryVisibility = () => {
     /// #endif
 };
 
+export const applyWindowTopBarEntryVisibility = () => {
+    /// #if !MOBILE
+    const toolbar = document.querySelector(".toolbar__window");
+    if (!toolbar) {
+        return;
+    }
+    const children = Array.from(toolbar.children) as HTMLElement[];
+    reorderEntrySlots(children, getEntryOrder(WINDOW_TOP_BAR_ROOT_PATH), item => item.dataset.windowTopbarEntry)
+        .forEach(item => toolbar.append(item));
+    children.forEach(item => {
+        const key = item.dataset.windowTopbarEntry;
+        if (key && getEntryCatalogNode(`${WINDOW_TOP_BAR_ROOT_PATH}.${key}`)) {
+            item.classList.toggle("fn__none", !isEntryVisible(`${WINDOW_TOP_BAR_ROOT_PATH}.${key}`));
+        }
+    });
+    /// #endif
+};
+
 export const applyStatusBarEntryVisibility = () => {
     /// #if !MOBILE
     const status = document.getElementById("status");
@@ -478,6 +497,7 @@ const applyEntryVisibilityLocal = (config: Config.IEntryVisibility) => {
     /// #if !MOBILE
     window.siyuan.menus?.menu?.remove();
     applyTopBarEntryVisibility();
+    applyWindowTopBarEntryVisibility();
     applyStatusBarEntryVisibility();
     applyDockEntryVisibility();
     document.querySelectorAll<HTMLElement>(".protyle-toolbar").forEach(applyToolbarEntryVisibility);

@@ -6,6 +6,29 @@ import (
 	"testing"
 )
 
+func TestSearchAssetContractInput(t *testing.T) {
+	for _, body := range []string{`{"k":""}`, `{"k":"","exts":[]}`, `{"k":"","exts":null,"match":null,"page":null,"pageSize":null}`} {
+		request, err := SearchAssetByName.Decode(strings.NewReader(body))
+		if err != nil || request.K != "" || request.Match != nil || request.Page != nil || request.PageSize != nil {
+			t.Fatalf("legacy asset search input changed: %s: %+v, %v", body, request, err)
+		}
+	}
+	request, err := SearchAssetByName.Decode(strings.NewReader(`{"k":"cover","exts":["png"],"match":{"field":"path","mode":"regex","value":"cover"},"page":2,"pageSize":32}`))
+	if err != nil || request.Match == nil || request.Match.Field != "path" || request.Match.Mode != "regex" ||
+		request.Match.Value != "cover" || request.Page == nil || *request.Page != 2 || request.PageSize == nil || *request.PageSize != 32 {
+		t.Fatalf("asset search options changed: %+v, %v", request, err)
+	}
+	for _, body := range []string{
+		`{"k":"","match":{"mode":"contains","value":"cover"}}`,
+		`{"k":"","match":{"field":"folder","mode":"prefix","value":"cover"}}`,
+		`{"k":"","page":"2"}`,
+	} {
+		if _, err := SearchAssetByName.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid asset search input accepted: %s", body)
+		}
+	}
+}
+
 func TestSearchQueryCompatibility(t *testing.T) {
 	for _, body := range []string{`{}`, `null`, `{"page":null,"pageSize":null}`, `{"page":0.9,"pageSize":-2}`} {
 		request, err := SemanticSearchBlock.Decode(strings.NewReader(body))

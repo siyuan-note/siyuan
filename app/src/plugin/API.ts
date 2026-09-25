@@ -35,6 +35,7 @@ import type {MobileFiles} from "../mobile/dock/MobileFiles";
 import type {Files} from "../layout/dock/Files";
 import {ProtyleMethod} from "./ProtyleMethod";
 import {openEmojiPanel} from "../emoji";
+import {openAssetPicker} from "../asset/picker";
 import {adjustEditorFontSize, setEditorFontSize} from "../util/editorFontSize";
 /// #if !MOBILE
 import {isDockPanelVisible, toggleDockPanel} from "../layout/dock/panel";
@@ -435,6 +436,7 @@ const createAPI = () => ({
     globalCommand,
     expandDocTree,
     openEmoji,
+    openAssetPicker,
     toggleLeftDock,
     toggleRightDock,
     toggleBottomDock,

@@ -37,8 +37,24 @@ type SearchPathRequest struct {
 }
 
 type SearchAssetRequest struct {
-	K    string   `json:"k"`
+	// K 保留原有文件名和路径的关键词搜索与排序语义。
+	K string `json:"k"`
+	// Exts 可省略或留空以搜索全部类型，扩展名接受 png 和 .png 两种写法，匹配时不区分大小写。
 	Exts []string `json:"exts" api:"optional,nullable"`
+	// Match 在关键词和扩展名筛选后、分页前作用于原始文件名或 assets/ 相对路径。
+	Match *SearchAssetMatch `json:"match" api:"optional,nullable"`
+	// Page 和 PageSize 同时支持省略；省略时保留第一页和现有搜索上限的行为，显式值必须为正且 PageSize 不超过搜索上限。
+	Page     *int `json:"page" api:"optional,nullable"`
+	PageSize *int `json:"pageSize" api:"optional,nullable"`
+}
+
+type SearchAssetMatch struct {
+	// Field 省略时匹配去掉资源 ID 的文件名；path 匹配返回的 assets/ 相对路径。
+	Field string `json:"field,omitempty" api:"optional,nullable,enum=name|path"`
+	// Mode 的 prefix 和 suffix 不区分大小写；regex 使用 Go 正则语法，默认区分大小写，可用 (?i) 忽略大小写。
+	Mode string `json:"mode" api:"enum=prefix|suffix|regex"`
+	// Value 最多 1024 字节，空字符串不筛选；无效正则返回错误，不退回到普通文本匹配。
+	Value string `json:"value"`
 }
 
 type SearchAsset struct {

@@ -35476,6 +35476,41 @@
       },
       "additionalProperties": false
     },
+    "SearchAssetMatchInput": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "enum": [
+            "name",
+            "path"
+          ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "prefix",
+            "suffix",
+            "regex"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "value"
+      ],
+      "additionalProperties": false
+    },
     "SearchAssetRequestInput": {
       "type": "object",
       "properties": {
@@ -35494,6 +35529,36 @@
         },
         "k": {
           "type": "string"
+        },
+        "match": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SearchAssetMatchInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pageSize": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

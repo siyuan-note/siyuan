@@ -134,11 +134,9 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
             let searchTimer = 0;
             let requestSequence = 0;
             let controller: AbortController;
-            // 列表内容变化后重新适配面板高度，避免下方留白
-            const updateSheetHeight = () => {
-                if (menu.element.classList.contains("b3-menu--fit")) {
-                    window.siyuan.menus.menu.resetPosition();
-                }
+            // 列表内容变化后重新适配菜单位置和面板高度。
+            const updateMenuPosition = () => {
+                window.siyuan.menus.menu.resetPosition();
             };
             const loadList = (keyword: string, cb?: () => void) => {
                 controller?.abort();
@@ -149,7 +147,7 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
                         return;
                     }
                     cb?.();
-                    updateSheetHeight();
+                    updateMenuPosition();
                 });
             };
             const search = () => {
@@ -179,6 +177,9 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
                     return;
                 }
                 UDLRHint(listElement, event);
+                if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+                    updateMenuPosition();
+                }
                 if (event.key === "Enter") {
                     event.preventDefault();
                     event.stopPropagation();
@@ -209,8 +210,8 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
                         }
                         event.preventDefault();
                         event.stopPropagation();
-                        // 展开或收起视图后重新适配面板高度
-                        updateSheetHeight();
+                        // 展开或收起视图后重新适配菜单位置和面板高度。
+                        updateMenuPosition();
                         break;
                     } else if (clickTarget.classList.contains("b3-list-item")) {
                         event.preventDefault();
@@ -232,7 +233,6 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
             });
         }
     });
-    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
     if (isMobile()) {
         // 移动端底部面板按内容收缩，避免列表下方留白
         menu.element.classList.add("b3-menu--fit");

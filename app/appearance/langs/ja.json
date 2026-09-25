@@ -1,4 +1,5 @@
 {
+	"openContextMenu": "コンテキストメニューを開く",
 	"mobileSlashMenu": "モバイルのスラッシュメニュー",
 	"mobileSlashMenuTip": "有効にすると、モバイルエディターで / を入力してコンテンツブロックを検索、挿入できます",
 	"mindmapAddSibling": "同階層のマインドマップノードを追加",

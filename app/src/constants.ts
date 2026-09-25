@@ -485,11 +485,12 @@ export abstract class Constants {
     });
     // 冲突不使用 "⌘S/Q"
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←",
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←",
     // "⌘Home", "⌘End", "⇧↩", "PageUp", "PageDown", "⌫", "⌦", "Escape" 不可自定义
     // "⌥↩" 写死，但可自定义
     public static readonly SIYUAN_KEYMAP: Config.IKeymap = {
         general: {
+            openContextMenu: {default: "⌘/", custom: "⌘/"},
             mainMenu: {default: "⌥\\", custom: "⌥\\"},
             commandPanel: {default: "⌥⇧P", custom: "⌥⇧P"},
             increaseEditorFontSize: {default: "", custom: ""},

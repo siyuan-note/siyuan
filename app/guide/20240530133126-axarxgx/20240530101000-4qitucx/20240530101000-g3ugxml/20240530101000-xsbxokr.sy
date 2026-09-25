@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260925172309"
+		"updated": "20260925174006"
 	},
 	"Children": [
 		{
@@ -46,6 +46,52 @@
 				{
 					"Type": "NodeText",
 					"Data": " と組み合わせた単一文字をショートカットに設定することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20260925174006-lw5d4uc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925174006-lw5d4uc",
+				"updated": "20260925174006"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ショートカット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一般"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "コンテキストメニューを開く"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でショートカットを変更または解除できます。既定値は Windows/Linux では Ctrl+/、macOS では Cmd+/ です。現在のフォーカスに応じて、エディター内のコンテンツ、データベースの行、検索結果、ナビゲーション項目のコンテキストメニューを開きます。文字 / の入力によるスラッシュメニューの表示は変わりません。"
 				}
 			]
 		},

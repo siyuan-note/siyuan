@@ -779,7 +779,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    if (matchHotKey("⌘/", event)) {
+    if (matchHotKey(window.siyuan.config.keymap.general.openContextMenu, event)) {
         const liRect = liElements[0].getBoundingClientRect();
         if (isFile) {
             initFileMenu(app, notebookId, pathString, liElements[0]).popup({

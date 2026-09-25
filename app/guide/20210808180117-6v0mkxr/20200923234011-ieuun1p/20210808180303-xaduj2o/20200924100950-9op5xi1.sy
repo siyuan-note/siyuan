@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260925172309"
+		"updated": "20260925174006"
 	},
 	"Children": [
 		{
@@ -48,6 +48,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " cannot be set as a shortcut."
+				}
+			]
+		},
+		{
+			"ID": "20260925174006-1syj8e1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925174006-1syj8e1",
+				"updated": "20260925174006"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can customize or unbind "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Keymap"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "General"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Open context menu"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". The default is Ctrl+/ on Windows/Linux and Cmd+/ on macOS. It opens the context menu for the current editor content, database rows, search results, or navigation items. Typing / still opens the slash menu."
 				}
 			]
 		},

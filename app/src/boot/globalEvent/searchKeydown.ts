@@ -116,7 +116,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
             return true;
         }
         const id = currentList.getAttribute("data-node-id");
-        if (matchHotKey("⌘/", event)) {
+        if (matchHotKey(window.siyuan.config.keymap.general.openContextMenu, event)) {
             const currentRect = currentList.getBoundingClientRect();
             initSearchMenu(id).popup({
                 x: currentRect.left + 30,

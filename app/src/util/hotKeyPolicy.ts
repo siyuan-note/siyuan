@@ -2,7 +2,7 @@ import {getKeymapBindings, IShortcutKeymap, setKeymapBindings} from "./keymapBin
 
 const MODIFIER_KEYS = "⌃⌥⇧⌘";
 const NON_CHARACTER_KEYS = new Set(["←", "↑", "→", "↓", "⇥", "⌫", "⌦", "↩"]);
-const RESERVED_KEYMAPS = new Set(["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥",
+const RESERVED_KEYMAPS = new Set(["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥",
     "⌃D", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "Escape"]);
 
 export const isReservedKeymap = (hotkey: string, keyPath: string[]) =>

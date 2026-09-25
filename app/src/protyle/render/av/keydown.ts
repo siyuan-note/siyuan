@@ -285,7 +285,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         }
     }
     if (selectRowElements.length > 0) {
-        if (matchHotKey("⌘/", event)) {
+        if (matchHotKey(window.siyuan.config.keymap.general.openContextMenu, event)) {
             event.stopPropagation();
             event.preventDefault();
             avContextmenu(protyle, selectRowElements[0] as HTMLElement, {

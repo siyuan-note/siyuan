@@ -1,4 +1,5 @@
 {
+	"openContextMenu": "Buka menu konteks",
 	"mobileSlashMenu": "Menu garis miring di ponsel",
 	"mobileSlashMenuTip": "Jika diaktifkan, ketik / di editor ponsel untuk mencari dan menyisipkan blok konten",
 	"mindmapAddSibling": "Tambah simpul setingkat pada peta pikiran",

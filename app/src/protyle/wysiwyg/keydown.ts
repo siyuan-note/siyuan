@@ -921,7 +921,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             !protyle.hint.element.classList.contains("fn__none") && protyle.hint.select(event, protyle)) {
             return;
         }
-        if (matchHotKey("⌘/", event) && !isInEmbedBlock(nodeElement)) {
+        if (matchHotKey(window.siyuan.config.keymap.general.openContextMenu, event) && !isInEmbedBlock(nodeElement)) {
             event.stopPropagation();
             event.preventDefault();
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));

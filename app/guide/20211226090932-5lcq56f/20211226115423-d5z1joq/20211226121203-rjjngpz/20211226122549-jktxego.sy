@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260925172309"
+		"updated": "20260925174006"
 	},
 	"Children": [
 		{
@@ -48,6 +48,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " 組合的單一字元設為快捷鍵。"
+				}
+			]
+		},
+		{
+			"ID": "20260925174006-m7i1hw9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925174006-m7i1hw9",
+				"updated": "20260925174006"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快速鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "通用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "開啟快顯功能表"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中修改或解除快捷鍵綁定，預設在 Windows/Linux 上為 Ctrl+/，在 macOS 上為 Cmd+/。它會依目前焦點開啟編輯器內容、資料庫列、搜尋結果或導覽項目的快顯功能表。輸入 / 仍用於觸發斜線選單。"
 				}
 			]
 		},

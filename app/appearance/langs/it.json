@@ -1,4 +1,5 @@
 {
+	"openContextMenu": "Apri menu contestuale",
 	"mobileSlashMenu": "Menu barra nell'editor mobile",
 	"mobileSlashMenuTip": "Quando è attivo, digita / nell'editor mobile per cercare e inserire blocchi di contenuto",
 	"mindmapAddSibling": "Aggiungi un nodo allo stesso livello nella mappa mentale",

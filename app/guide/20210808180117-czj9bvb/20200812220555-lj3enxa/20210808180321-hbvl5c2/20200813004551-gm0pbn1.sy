@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260925172309"
+		"updated": "20260925174006"
 	},
 	"Children": [
 		{
@@ -48,6 +48,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " 组合的单个字符设置为快捷键。"
+				}
+			]
+		},
+		{
+			"ID": "20260925174006-mz00jbc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925174006-mz00jbc",
+				"updated": "20260925174006"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快捷键"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "通用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打开上下文菜单"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中修改或解绑快捷键，默认在 Windows/Linux 上为 Ctrl+/，在 macOS 上为 Cmd+/。它根据当前焦点打开编辑器内容、数据库行、搜索结果或导航项的上下文菜单。输入 / 仍用于触发斜杠菜单。"
 				}
 			]
 		},

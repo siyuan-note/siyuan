@@ -8,6 +8,7 @@ it("stops startup and shows the failed language URL when the server returns 404"
     const originalConsoleError = console.error;
     let displayed = "";
     let role = "";
+    let className = "";
     let booted = false;
     globalThis.fetch = async () => new Response("", {status: 404});
     console.error = () => {};
@@ -15,6 +16,7 @@ it("stops startup and shows the failed language URL when the server returns 404"
         createElement: (tag: string) => {
             assert.equal(tag, "pre");
             return {
+                className: "",
                 textContent: "",
                 setAttribute: (name: string, value: string) => {
                     if (name === "role") {
@@ -24,13 +26,18 @@ it("stops startup and shows the failed language URL when the server returns 404"
             };
         },
         body: {
-            replaceChildren: (element: {textContent: string}) => displayed = element.textContent,
+            appendChild: (element: {className: string; textContent: string}) => {
+                displayed = element.textContent;
+                className = element.className;
+            },
+            replaceChildren: () => assert.fail("startup markup must remain available"),
         },
     } as unknown as Document;
     try {
         await loadLanguages("zh-CN", "3.8.6", () => booted = true);
         assert.equal(booted, false);
         assert.equal(role, "alert");
+        assert.equal(className, "language-load-error");
         assert.match(displayed, /\/appearance\/langs\/zh-CN\.json\?v=3\.8\.6\nError: HTTP 404/);
     } finally {
         globalThis.fetch = originalFetch;

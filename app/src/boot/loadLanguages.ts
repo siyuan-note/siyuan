@@ -15,9 +15,10 @@ export const loadLanguages = async (lang: string, version: string, onLoaded: (la
     } catch (error) {
         console.error(url, error);
         const element = document.createElement("pre");
+        element.className = "language-load-error";
         element.setAttribute("role", "alert");
         element.textContent = `${url}\n${String(error)}`;
-        document.body.replaceChildren(element);
+        document.body.appendChild(element);
         return;
     }
     onLoaded(languages);

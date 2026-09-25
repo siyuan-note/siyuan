@@ -1,4 +1,4 @@
-//go:build !linux && !windows
+//go:build windows
 
 // SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
@@ -18,8 +18,9 @@
 
 package server
 
-import "path/filepath"
+import "github.com/siyuan-note/siyuan/kernel/model"
 
 func evalAppearanceSymlinks(name string) (string, error) {
-	return filepath.EvalSymlinks(name)
+	// 通过句柄解析完整链路，兼容可打开但无法逐级解析的目录联接。
+	return model.ResolveRealPath(name)
 }

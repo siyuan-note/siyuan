@@ -18,6 +18,21 @@ html {
   color-scheme: light;
 }
 
+// 语言包或主题不可用时，仍使用系统配色显示启动错误。
+.language-load-error {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 24px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  color: CanvasText;
+  background-color: Canvas;
+}
+
 body {
   text-rendering: optimizeLegibility;
   margin: 0;

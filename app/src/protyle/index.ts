@@ -591,7 +591,7 @@ export class Protyle {
         resize(this.protyle);   // 需等待 fullwidth 获取后设定完毕再重新计算 padding 和元素
         // 需等待 getDoc 完成后再执行，否则在无页签的时候 updatePanelByEditor 会执行2次
         // 只能用 focusin，否则点击表格无法执行
-        this.protyle.wysiwyg.element.addEventListener("focusin", () => {
+        const activateEditorPanel = () => {
             /// #if !MOBILE
             if (this.protyle && this.protyle.model) {
                 let needUpdate = true;
@@ -619,7 +619,10 @@ export class Protyle {
                 });
             }
             /// #endif
-        });
+        };
+        this.protyle.wysiwyg.element.addEventListener("focusin", activateEditorPanel);
+        this.protyle.databaseAttributePanel?.element.addEventListener("focusin", activateEditorPanel);
+        this.protyle.databaseAttributePanel?.element.addEventListener("pointerdown", activateEditorPanel);
         // 需等渲染完后再回调，用于定位搜索字段 https://github.com/siyuan-note/siyuan/issues/3171
         if (mergedOptions.after) {
             mergedOptions.after(this);

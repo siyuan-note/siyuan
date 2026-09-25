@@ -1244,7 +1244,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         text = `<span class="av__celltext av__celltext--template" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(storedValue)))}">${getAVTemplateHTML(cellValue.renderedContent || "")}</span>`;
         if (cellValue.type === "block") {
             const bindLabel = cellValue?.isDetached ? window.siyuan.languages.bind : window.siyuan.languages.rebind;
-            const updateIcon = cellValue?.isDetached ? "iconLink" : "iconRefresh";
+            const updateIcon = cellValue?.isDetached ? "iconRef" : "iconRefresh";
             text += `<span class="av__row-actions"><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-row-open"><svg><use xlink:href="#iconOpen"></use></svg></button><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${bindLabel}" data-type="av-row-update"><svg><use xlink:href="#${updateIcon}"></use></svg></button></span>`;
         }
     } else if ("template" === cellValue.type) {
@@ -1269,7 +1269,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
             text = `<span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${escapeAttr(cellValue.block.icon || "")}">${getFileTreeIconHTML(cellValue.block.icon, "file")}</span><span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(cellValue.block.content)}</span>`;
         }
         const bindLabel = cellValue?.isDetached ? window.siyuan.languages.bind : window.siyuan.languages.rebind;
-        const updateIcon = cellValue?.isDetached ? "iconLink" : "iconRefresh";
+        const updateIcon = cellValue?.isDetached ? "iconRef" : "iconRefresh";
         text += `<span class="av__row-actions"><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-row-open"><svg><use xlink:href="#iconOpen"></use></svg></button><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${bindLabel}" data-type="av-row-update"><svg><use xlink:href="#${updateIcon}"></use></svg></button></span>`;
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;

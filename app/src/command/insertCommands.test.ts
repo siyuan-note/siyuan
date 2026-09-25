@@ -64,6 +64,11 @@ test("insert commands search and execute existing insertion actions at the saved
     assert.ok(visible.includes("core.mobile.insert.insertAsset"));
     assert.ok(visible.includes("core.mobile.insert.mindmap"));
     assert.ok(!visible.includes("core.mobile.insert.insertPhoto"));
+    assert.ok(registry.list({...context, environment: "browser-mobile"}).some(command => command.id === "core.mobile.insert.template"));
+    assert.deepEqual(Array.from(registry.get("core.mobile.insert.heading1")?.keymapPath || []), ["editor", "heading", "heading1"]);
+    assert.deepEqual(Array.from(registry.get("core.mobile.insert.orderedList")?.keymapPath || []), ["editor", "insert", "ordered-list"]);
+    assert.deepEqual(Array.from(registry.get("core.mobile.insert.ref")?.keymapPath || []), ["editor", "insert", "ref"]);
+    assert.equal(registry.get("core.mobile.insert.template")?.keymapPath, undefined);
     assert.equal(queryCommandPalette(registry, context, "模板")[0].id, "core.mobile.insert.template");
     const recent = recordPaletteCommand([], "core.mobile.insert.assets");
     assert.equal(queryCommandPalette(registry, context, "", recent)[0].id, "core.mobile.insert.assets");
@@ -90,6 +95,8 @@ test("insert commands search and execute existing insertion actions at the saved
     assert.ok(desktopVisible.includes("core.insert.template"));
     assert.ok(desktopVisible.includes("core.insert.mindmap"));
     assert.ok(!desktopVisible.includes("core.insert.insertPhoto"));
+    assert.ok(desktopRegistry.list({...desktopContext, environment: "desktop-window"}).some(command => command.id === "core.insert.template"));
+    assert.ok(desktopRegistry.list({...desktopContext, environment: "browser-desktop"}).some(command => command.id === "core.insert.template"));
     assert.equal(queryCommandPalette(desktopRegistry, desktopContext, "模板")[0].id, "core.insert.template");
     assert.equal((await desktopRegistry.execute("core.insert.template", desktopContext)).status, "executed");
     assert.deepEqual(fills, ["template-value", "((", "template-value"]);

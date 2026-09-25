@@ -29,12 +29,16 @@ const renderCommands = (listElement: HTMLElement, commands: ICommandDefinition[]
         const textElement = document.createElement("span");
         textElement.className = "b3-list-item__text";
         textElement.textContent = command.label();
-        const hotkeyElement = document.createElement("span");
-        hotkeyElement.className = `b3-list-item__meta${isMobile() ? " fn__none" : ""}`;
-        hotkeyElement.textContent = command.keymapPath ?
+        const hotkey = command.keymapPath ?
             getKeymapBindings(getKeymapItem(window.siyuan.config.keymap, command.keymapPath)).map(key => updateHotkeyTip(key)).join(" / ") :
             updateHotkeyTip(command.hotkey?.() || "");
-        itemElement.append(textElement, hotkeyElement);
+        itemElement.append(textElement);
+        if (hotkey) {
+            const hotkeyElement = document.createElement("span");
+            hotkeyElement.className = "b3-list-item__meta";
+            hotkeyElement.textContent = hotkey;
+            itemElement.append(hotkeyElement);
+        }
         fragment.append(itemElement);
     });
     listElement.replaceChildren(fragment);

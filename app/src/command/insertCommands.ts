@@ -1,6 +1,6 @@
 import {getCommandRegistry} from "./service";
 import {getEnglishCommandLabel} from "./english";
-import type {ICommandContextSnapshot, ICommandDefinition} from "./types";
+import type {ICommandContextSnapshot, ICommandDefinition, TCommandKeymapPath} from "./types";
 import {getBuiltinSlashMenuItems} from "../protyle/hint/extend";
 import {isBuiltinInlineStyleVisible, type TBuiltinInlineStyleID} from "../protyle/toolbar/inlineStyle";
 import {focusByRange} from "../protyle/util/selection";
@@ -27,6 +27,19 @@ const BUILTIN_STYLES: Record<string, TBuiltinInlineStyleID> = {
 };
 const SPECIAL_LABELS: Record<string, string> = {
     html: "HTML", flowChart: "Flow Chart", graph: "Graph", mermaid: "Mermaid", UML: "UML",
+};
+const INSERT_KEYMAP_IDS = new Set(["ref", "list", "orderedList", "check", "quote", "code", "table"]);
+
+const keymapPath = (id: string): TCommandKeymapPath | undefined => {
+    if (/^heading[1-6]$/.test(id)) {
+        return ["editor", "heading", id];
+    }
+    if (id === "aiWriting") {
+        return ["editor", "general", id];
+    }
+    if (INSERT_KEYMAP_IDS.has(id)) {
+        return ["editor", "insert", id === "orderedList" ? "ordered-list" : id];
+    }
 };
 
 const labelKey = (id: string) => id === "orderedList" ? "ordered-list" : id;
@@ -134,6 +147,7 @@ export const ensureInsertCommands = (app: object, mobile: boolean) => {
                 label: () => label(id),
                 englishLabel: () => label(id, true),
                 keywords: () => [id],
+                keymapPath: keymapPath(id),
                 surfaces: ["commandPanel"],
                 platform: environment => mobile ? environment === "mobile" || environment === "browser-mobile" :
                     environment === "desktop" || environment === "desktop-window" || environment === "browser-desktop",

@@ -377,9 +377,10 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
         const rowElement = hasClosestByClassName(cellElement, "av__row");
         if (avScrollElement && rowElement) {
             const stickyElement = rowElement.querySelector(".av__colsticky");
-            if (!stickyElement.contains(cellElement)) { // https://github.com/siyuan-note/siyuan/issues/12162
-                const stickyRight = stickyElement.getBoundingClientRect().right;
+            const unfreeze = rowElement.parentElement.classList.contains("av__body--unfreeze");
+            if (unfreeze || !stickyElement.contains(cellElement)) { // https://github.com/siyuan-note/siyuan/issues/12162
                 const avScrollRect = avScrollElement.getBoundingClientRect();
+                const stickyRight = unfreeze ? avScrollRect.left : stickyElement.getBoundingClientRect().right;
                 if (stickyRight > cellRect.left || avScrollRect.right < cellRect.left) {
                     avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
                 } else if (stickyRight < cellRect.left && avScrollRect.right < cellRect.right) {

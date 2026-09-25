@@ -1,4 +1,5 @@
 import {isTableLikeView} from "./viewType";
+import {updateFrozenColumns} from "./frozenColumns";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByAttribute} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
@@ -592,6 +593,7 @@ const syncFixedRowPos = (item: HTMLElement, bodyRect: DOMRect, scrollLeft: numbe
 };
 
 export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement, status: "top" | "bottom" | "all") => {
+    updateFrozenColumns(blockElement);
     // 内部滚动的反链数据库不使用相对窗口固定的表头，避免占位和固定坐标干扰内部布局。
     const skipFixed = blockElement.classList.contains("av--backlink") || hasTopClosestByAttribute(blockElement, "fold", "1");
     if (skipFixed) {

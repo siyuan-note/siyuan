@@ -790,7 +790,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         finishEdit: () => finishAllowed,
         onMove: (...args: unknown[]) => moves.push(args),
         onAdd: (...args: unknown[]) => additions.push(args),
-        onDelete: (id: string) => deletions.push(id),
+        onDelete: (id: string) => {
+            deletions.push(id);
+        },
         onFold: (id: string) => folds.push(id),
         onUndo: () => undo++,
         onRedo: () => redo++,
@@ -2190,6 +2192,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(deleteList.querySelector(`[data-node-id="${deleteFirst}"]`), null);
     check.equal(nodeElement(deleteFirst), null);
     check.ok(deleteList.querySelector(`[data-node-id="${deleteSecond}"]`));
+    check.equal(nodeElement(deleteSecond).getAttribute("aria-selected"), "true");
+    check.equal(document.activeElement, host);
     await clickMouse(nodeElement(deleteSecond));
     const beforeProtectedDelete = deleteList.outerHTML;
     deleting.setEditing(deleteSecond);
@@ -2207,6 +2211,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(deleteList.querySelector(`[data-node-id="${deleteSecond}"]`), null);
     check.equal(nodeElement(deleteSecond), null);
     check.ok(nodeElement(deleteModel.root.id));
+    check.equal(nodeElement(deleteModel.root.id).getAttribute("aria-selected"), "true");
+    check.equal(document.activeElement, host);
     await clickMouse(nodeElement(deleteModel.root.id));
     await nativeKey("Backspace");
     check.ok(nodeElement(deleteModel.root.id), "the last root is preserved for the macOS Delete key");

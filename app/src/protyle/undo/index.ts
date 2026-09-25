@@ -10,9 +10,9 @@ import {scrollCenter} from "../../util/highlightById";
 
 // 撤销/重做统一契约：kernel 模式由 Undo 实现（转发 kernel），lite 模式由 LocalUndo 实现（前端操作日志）。
 export interface IUndo {
-    undo(protyle: IProtyle): void;
+    undo(protyle: IProtyle): void | Promise<void>;
 
-    redo(protyle: IProtyle): void;
+    redo(protyle: IProtyle): void | Promise<void>;
 
     add(doOperations: IOperation[], undoOperations: IOperation[], protyle: IProtyle): void;
 
@@ -48,7 +48,7 @@ export class Undo implements IUndo {
         this.lastHistoryRootID = rootID;
         protyle.wysiwyg.flushPendingInput();
         // 转发到全局 Manager，由 kernel 弹栈 + 广播，发起窗口本地乐观应用
-        requestUndo(protyle, rootID);
+        return requestUndo(protyle, rootID);
     }
 
     public redo(protyle: IProtyle) {
@@ -58,7 +58,7 @@ export class Undo implements IUndo {
         const rootID = getUndoRootID(protyle, undefined, this.lastHistoryRootID);
         this.lastHistoryRootID = rootID;
         protyle.wysiwyg.flushPendingInput();
-        requestRedo(protyle, rootID);
+        return requestRedo(protyle, rootID);
     }
 
     // renderLocal 仅在发起窗口本地应用操作（isUndo=true），不 POST 到 kernel

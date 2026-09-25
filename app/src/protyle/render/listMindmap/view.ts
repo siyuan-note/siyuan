@@ -41,7 +41,7 @@ export interface ListMindmapViewOptions {
     finishEdit?: () => boolean | void | Promise<boolean | void>;
     onMove?: (id: string, targetId: string, placement: "before" | "child" | "after") => void;
     onAdd?: (id: string, kind: "child" | "sibling") => void;
-    onDelete?: (id: string) => void;
+    onDelete?: (id: string) => boolean | void | Promise<boolean | void>;
     onFold?: (id: string) => void;
     onFoldLevel?: (level: ListMindmapFoldTarget) => Promise<boolean>;
     onExpandLevelMenu?: (anchor: HTMLElement, select: (level: ListMindmapFoldTarget) => void) => void;
@@ -634,6 +634,18 @@ export class ListMindmapView {
 
     public getContentHost(id: string): HTMLElement | undefined {
         return this.nodeElements.get(id)?.querySelector<HTMLElement>(".mindmap-view__content");
+    }
+
+    public getSelectedId() {
+        return this.selectedId;
+    }
+
+    public focusNode(id: string) {
+        if (this.destroyed || !this.model.nodes.has(id)) {
+            return;
+        }
+        this.selectNode(id);
+        this.options.host.focus({preventScroll: true});
     }
 
     public setEditing(id?: string) {
@@ -1375,7 +1387,17 @@ export class ListMindmapView {
         } else {
             const node = this.model.nodes.get(this.selectedId);
             if (node && !node.virtual && node !== this.model.root) {
-                this.options.onDelete?.(node.id);
+                const siblings = this.model.nodes.get(node.parentId)?.children || [];
+                const index = siblings.findIndex(item => item.id === node.id);
+                const nextId = siblings[index + 1]?.id || siblings[index - 1]?.id || node.parentId;
+                if (this.options.onDelete) {
+                    void Promise.resolve(this.options.onDelete(node.id)).then(deleted => {
+                        if (deleted !== false && !this.model.nodes.has(node.id) && nextId &&
+                            (!this.selectedId || this.selectedId === node.id)) {
+                            this.focusNode(nextId);
+                        }
+                    }).catch(error => console.error(error));
+                }
             }
         }
     }

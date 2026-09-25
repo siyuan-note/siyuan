@@ -405,8 +405,6 @@ const gutterSingle = () => [
         node("md27", lang("md27")),
         node("saveCodeBlockAsFile", lang("saveCodeBlockAsFile")),
     ]),
-    separator("separator_chart"),
-    node("chart", lang("chart"), true, [node("update", lang("update"))]),
     separator("separator_table"),
     gutterTable(),
     separator("separator_exportCSV"),

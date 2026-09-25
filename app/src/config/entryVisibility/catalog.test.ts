@@ -822,7 +822,8 @@ test("super block actions and vertical alignment use their respective menu group
 });
 
 test("gutter height menus follow width and stay aligned across selection scopes", () => {
-    assert.deepEqual(getEntryCatalogNode("gutter.single.chart")?.children?.map(item => item.key), ["update"]);
+    assert.equal(getEntryCatalogNode("gutter.single.chart"), undefined);
+    assert.equal(getEntryCatalogNode("gutter.single.separator_chart"), undefined);
     assert.equal(getEntryCatalogNode("gutter.single.chart.height"), undefined);
     const expectedHeightOrder = [
         "heightInput",

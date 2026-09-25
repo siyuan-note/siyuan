@@ -1413,6 +1413,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         let rangeElement: HTMLInputElement;
         window.siyuan.menus.menu.append(new MenuItem({
             id: "width",
+            icon: "iconWidth",
             label: window.siyuan.languages.width,
             submenu: [{
                 id: "widthInput",

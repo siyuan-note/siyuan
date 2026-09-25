@@ -2316,21 +2316,6 @@ export class Gutter {
                     }
                 }] : [])]
             }).element);
-        } else if (type === "NodeCodeBlock" && !protyle.disabled && nodeElement.getAttribute("data-subtype") === "echarts") {
-            window.siyuan.menus.menu.append(new MenuItem({id: "separator_chart", type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "chart",
-                label: window.siyuan.languages.chart,
-                icon: "iconCode",
-                submenu: [{
-                    id: "update",
-                    label: window.siyuan.languages.update,
-                    icon: "iconEdit",
-                    click() {
-                        protyle.toolbar.showRender(protyle, nodeElement);
-                    }
-                }]
-            }).element);
         } else if (type === "NodeTable" && !protyle.disabled) {
             let range = getEditorRange(nodeElement);
             const tableElement = nodeElement.querySelector("table");

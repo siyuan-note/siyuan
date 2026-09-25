@@ -38,7 +38,9 @@ import {focusListMindmap} from "./create";
 import {getListMindmapFoldStates} from "./fold";
 import {isMobile} from "../../../util/functions";
 
-const roots = new WeakMap<IProtyle, {refresh: () => void, destroy: () => void}>();
+const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void, destroy: () => void}>();
+
+export const mountNewListMindmap = (owner: IProtyle, list: HTMLElement) => roots.get(owner)?.mountNew(list);
 
 const canToggleView = (owner: IProtyle, list: HTMLElement) => !owner.disabled && !owner.lite &&
     list.isConnected && !!list.dataset.nodeId &&
@@ -541,6 +543,7 @@ export const initListMindmaps = (owner: IProtyle) => {
     const root = owner.wysiwyg.element;
     const instances = new Map<HTMLElement, ListMindmapController>();
     const loading = new WeakSet<HTMLElement>();
+    const newlyCreated = new WeakSet<HTMLElement>();
     let frame = 0;
     let disposed = false;
     const refresh = () => {
@@ -579,7 +582,7 @@ export const initListMindmaps = (owner: IProtyle) => {
                     list.removeAttribute("data-mindmap-view-rendered");
                 }
             };
-            if (canEdit(owner, list)) {
+            if (canEdit(owner, list) && !newlyCreated.has(list)) {
                 loading.add(list);
                 let retry = false;
                 void completeList(owner, list).then(complete => {
@@ -595,6 +598,7 @@ export const initListMindmaps = (owner: IProtyle) => {
                     }
                 });
             } else {
+                newlyCreated.delete(list);
                 mount();
             }
         });
@@ -618,7 +622,12 @@ export const initListMindmaps = (owner: IProtyle) => {
         }
     });
     observer.observe(root, {childList: true, subtree: true, attributes: true, characterData: true});
-    roots.set(owner, {refresh: schedule, destroy: () => {
+    roots.set(owner, {refresh: schedule, mountNew: list => {
+        if (root.contains(list)) {
+            newlyCreated.add(list);
+            refresh();
+        }
+    }, destroy: () => {
         disposed = true;
         unregister();
         observer.disconnect();

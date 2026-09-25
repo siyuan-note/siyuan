@@ -34,6 +34,7 @@ import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
 import {spinListMindmapDOM} from "../render/listMindmap/create";
+import {mountNewListMindmap} from "../render/listMindmap";
 import {assetMenu, imgMenu} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
@@ -1269,6 +1270,9 @@ ${genHintItemHTML(item)}
                     });
                 } else {
                     focusByWbr(nodeElement, range);
+                    if (isMindmap && nodeElement.dataset.type === "NodeMindmap") {
+                        mountNewListMindmap(protyle, nodeElement);
+                    }
                 }
             }
         }

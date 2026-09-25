@@ -8,9 +8,12 @@ import {promisify} from "node:util";
 import {createSourceFile, isClassDeclaration, isMethodDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 import type {Node} from "typescript";
 
-const browserCases = (source: string, menuSource: string, rangeSource: string) => {
+const browserCases = async (source: string, menuSource: string, rangeSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const lute = Lute.New();
+    lute.SetKramdownIAL(true);
+    lute.SetProtyleWYSIWYG(true);
+    lute.SetDataTask(true);
     const editor = document.createElement("div");
     document.body.append(editor);
     const batches: Array<{doOperations: IOperation[], undoOperations: IOperation[]}> = [];
@@ -43,11 +46,24 @@ const browserCases = (source: string, menuSource: string, rangeSource: string) =
         getSemanticMarkerPrefixLengthForNode: () => 0,
         hasPreviousSibling: (element: Element) => element.previousSibling,
         setFold: () => check.fail("List folding must not unfold unrelated content"),
+        unfoldListHeadings: async (): Promise<IOperation[]> => [],
+        cleanHeadingNumberHTML: (html: string) => html,
+        cleanListMindmapHTML: (html: string) => html,
+        convertListMindmapToList: (): undefined => undefined,
+        isTabsListConversion: () => false,
+        getPreviousBlockSibling: (element: Element) => element.previousElementSibling,
+        getParentBlock: (element: Element) => element.parentElement,
+        getEmbedChildOperationParentID: (): undefined => undefined,
+        getContenteditableElement: (element: Element) => element.querySelector('[contenteditable="true"]'),
+        getEditorRange: () => document.createRange(),
+        hasViewFoldContext: () => false,
+        onTransaction: noop,
     };
     const api = new Function(...Object.keys(dependencies), source +
-        "\nreturn {turnsIntoTransaction, getHeadingConversionElements, isListHeadingContainer};")(...Object.values(dependencies)) as
-        typeof import("./transaction") & typeof import("./headingConversion");
-    const protyle = {wysiwyg: {element: editor}, lute, observerLoad: {disconnect: () => disconnects++}} as unknown as IProtyle;
+        "\nreturn {turnsIntoTransaction, turnsOneInto, turnListsRecursively, getHeadingConversionElements, isListHeadingContainer, buildCancelListOperations};")(...Object.values(dependencies)) as
+        typeof import("./transaction") & typeof import("./headingConversion") & typeof import("./cancelList");
+    const protyle = {wysiwyg: {element: editor}, lute, block: {rootID: "document", parentID: "document"},
+        observerLoad: {disconnect: () => disconnects++}} as unknown as IProtyle;
     const Gutter = new Function("turnsIntoTransaction", "getHeadingConversionElements", menuSource + "\nreturn Gutter;")(
         api.turnsIntoTransaction, api.getHeadingConversionElements);
     const gutter = new Gutter() as {
@@ -190,11 +206,96 @@ const browserCases = (source: string, menuSource: string, rangeSource: string) =
     check.equal(batches[0].doOperations.length, 4);
     check.equal(editor.lastElementChild.getAttribute("data-type"), "NodeHeading");
     check.equal(editor.querySelectorAll('[data-type="NodeList"]').length, 2);
+    // 使用真实块 DOM 比较取消列表与 Lute 的结果，并往返重放结构操作。
+    editor.innerHTML = lute.Md2BlockDOM("# First\n\n## Second");
+    Array.from(editor.children).forEach(block => block.setAttribute("custom-avs", "database"));
+    batches.length = 0;
+    api.turnsIntoTransaction({protyle, selectsElement: Array.from(editor.children), type: "Blocks2Ps", isContinue: true});
+    check.deepEqual(batches[0].doOperations.map(operation => operation.action), ["update", "update"]);
+    check.deepEqual(batches[0].undoOperations.map(operation => operation.action), ["update", "update"]);
+    check.equal(editor.querySelectorAll('[data-type="NodeParagraph"][custom-avs="database"]').length, 2);
+    for (const marker of ["-", "1.", "- [x]"]) {
+        for (const recursively of [false, true]) {
+            editor.innerHTML = lute.Md2BlockDOM(`${marker} # Heading\n\n    tail\n\n    ${marker} nested\n\n    > ${marker} quoted\n\n${marker} second`);
+            const sourceList = editor.firstElementChild;
+            sourceList.querySelectorAll('[data-type="NodeHeading"], [data-type="NodeParagraph"]').forEach(block => {
+                block.setAttribute("custom-avs", "database");
+                block.setAttribute("custom-av-database-field", "value");
+            });
+            const originalWithAttributes = editor.innerHTML;
+            // @ts-expect-error Lute 声明尚未包含 CancelList。
+            const expected = recursively ? lute.CancelListRecursively(sourceList.outerHTML) : lute.CancelList(sourceList.outerHTML);
+            const shape = (html: string) => {
+                const template = document.createElement("template");
+                template.innerHTML = html;
+                return Array.from(template.content.querySelectorAll("[data-node-id]")).map(block => ({
+                    id: id(block), type: block.getAttribute("data-type"), parent: block.parentElement?.getAttribute("data-node-id"),
+                    avs: block.getAttribute("custom-avs"), field: block.getAttribute("custom-av-database-field"),
+                    text: block.querySelector(':scope > [contenteditable="true"]')?.textContent,
+                }));
+            };
+            const operations = api.buildCancelListOperations(sourceList, {parentID: "document", recursively});
+            check.equal(editor.innerHTML, originalWithAttributes, "building operations must not mutate the editor");
+            const boundNodes = Array.from(editor.querySelectorAll("[custom-avs]"));
+            const replayStructure = (batch: IOperation[]) => batch.forEach(operation => {
+                const node = editor.querySelector(`[data-node-id="${operation.id}"]`);
+                if (operation.action === "delete") {
+                    check.equal(node.querySelectorAll("[custom-avs]").length, 0, "delete only empty list shells");
+                    node.remove();
+                    return;
+                }
+                let moved = node;
+                if (operation.action === "insert") {
+                    const template = document.createElement("template");
+                    template.innerHTML = operation.data as string;
+                    moved = template.content.firstElementChild;
+                    check.equal(moved.querySelectorAll("[custom-avs]").length, 0, "never reinsert bound content");
+                } else {
+                    check.equal(operation.action, "move");
+                }
+                if (operation.previousID) {
+                    editor.querySelector(`[data-node-id="${operation.previousID}"]`).after(moved);
+                } else {
+                    const parent = operation.parentID === "document" ? editor :
+                        editor.querySelector(`[data-node-id="${operation.parentID}"]`);
+                    const firstBlock = Array.from(parent.children).find(child => child.hasAttribute("data-node-id"));
+                    if (firstBlock) {
+                        firstBlock.before(moved);
+                    } else if (parent.lastElementChild?.classList.contains("protyle-attr")) {
+                        parent.lastElementChild.before(moved);
+                    } else {
+                        parent.append(moved);
+                    }
+                }
+            });
+            for (let cycle = 0; cycle < 3; cycle++) {
+                replayStructure(operations.doOperations);
+                check.deepEqual(shape(editor.innerHTML), shape(expected));
+                boundNodes.forEach(node => check.equal(editor.querySelector(`[data-node-id="${id(node)}"]`), node));
+                replayStructure(operations.undoOperations);
+                check.equal(editor.innerHTML, originalWithAttributes);
+            }
+        }
+    }
+    for (const recursively of [false, true]) {
+        editor.innerHTML = lute.Md2BlockDOM("- # Bound\n\n    - nested");
+        batches.length = 0;
+        const sourceList = editor.firstElementChild;
+        if (recursively) {
+            await api.turnListsRecursively({protyle, nodeElements: [sourceList], type: "CancelListRecursively"});
+        } else {
+            await api.turnsOneInto({protyle, nodeElement: sourceList, id: id(sourceList), type: "CancelList"});
+        }
+        check.equal(batches.length, 1);
+        check.ok(batches[0].doOperations.some(operation => operation.action === "move"));
+        check.ok(batches[0].doOperations.every(operation => operation.action !== "insert"));
+        check.equal(editor.querySelectorAll('[data-type="NodeList"]').length, recursively ? 0 : 1);
+    }
     editor.remove();
     return "List heading conversion cases passed";
 };
 
-test("list heading menus and shortcuts preserve containers, content, IDs and undo operations", {
+test("list heading conversion and cancellation preserve content, IDs, database bindings and undo operations", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -216,7 +317,8 @@ test("list heading menus and shortcuts preserve containers, content, IDs and und
         assert.ok(result, name);
         return result;
     };
-    const source = compile(read("headingConversion.ts") + "\n" + extract("transaction.ts", "turnsIntoTransaction") +
+    const source = compile(read("headingConversion.ts") + "\n" + read("cancelList.ts") + "\n" + extract("transaction.ts", "turnsIntoTransaction") +
+        "\n" + extract("transaction.ts", "turnsOneInto") + "\n" + extract("transaction.ts", "turnListsRecursively") +
         "\n" + extract("getBlock.ts", "getNextBlockSibling") + "\n" + extract("../util/selection.ts", "focusByWbr"));
     const rangeSource = compile(extract("keydown.ts", "turnCrossBlockRangeInto"));
     const parsed = createSourceFile("gutter.ts", read("../gutter/index.ts"), ScriptTarget.Latest, true);
@@ -235,8 +337,11 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, menuSource, rangeSource].map(value => JSON.stringify(value)).join(",") + ")")}));
+        const result = await win.webContents.executeJavaScript(${JSON.stringify("(async () => { try { const __name = value => value; return {value: await (" +
+        browserCases.toString() + ")(" + [source, menuSource, rangeSource].map(value => JSON.stringify(value)).join(",") +
+        ")}; } catch (error) { return {error: error.stack}; } })()")} );
+        if (result.error) { throw new Error(result.error); }
+        console.log(result.value);
         win.destroy();
         app.exit(0);
     } catch (error) {

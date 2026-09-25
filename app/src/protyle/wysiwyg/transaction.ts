@@ -77,6 +77,7 @@ import {isEmptyParagraph} from "./emptyTextBlock";
 import {getHeadingConversionElements, isListHeadingContainer} from "./headingConversion";
 import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
 import {cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource} from "../render/listMindmap/model";
+import {buildCancelListOperations} from "./cancelList";
 import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
@@ -1881,6 +1882,8 @@ export const turnsIntoTransaction = (options: {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let previousId: string;
+    const updateParagraphsIndividually = options.type === "Blocks2Ps" && selectsElement.every(item =>
+        ["NodeHeading", "NodeParagraph"].includes(item.getAttribute("data-type")));
     selectsElement.forEach((item: HTMLElement, index) => {
         item.classList.remove("protyle-wysiwyg--select");
         item.removeAttribute("select-start");
@@ -1889,7 +1892,7 @@ export const turnsIntoTransaction = (options: {
         const id = item.getAttribute("data-node-id");
 
         const tempElement = document.createElement("template");
-        if (!options.isContinue || options.level) {
+        if (!options.isContinue || options.level || updateParagraphsIndividually) {
             // @ts-ignore
             let newHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
             tempElement.innerHTML = newHTML;
@@ -2149,35 +2152,13 @@ export const turnListsRecursively = async (options: {
         }
 
         const doPreviousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id") || context.previousId;
-        doOperations.push({
-            action: "delete",
-            id: context.id
+        const operations = buildCancelListOperations(nodeElement, {
+            previousID: doPreviousId,
+            parentID: context.parentId,
+            recursively: true,
         });
-        const tempElement = document.createElement("template");
-        tempElement.innerHTML = newHTML;
-        let tempPreviousId = doPreviousId;
-        Array.from(tempElement.content.children).forEach((item) => {
-            const tempId = item.getAttribute("data-node-id");
-            doOperations.push({
-                action: "insert",
-                data: item.outerHTML,
-                id: tempId,
-                previousID: tempPreviousId,
-                parentID: context.parentId
-            });
-            undoOperations.push({
-                action: "delete",
-                id: tempId
-            });
-            tempPreviousId = tempId;
-        });
-        undoOperations.push({
-            action: "insert",
-            data: oldHTML,
-            id: context.id,
-            previousID: context.previousId,
-            parentID: context.parentId
-        });
+        doOperations.push(...operations.doOperations);
+        undoOperations.unshift(...operations.undoOperations);
         disposeCustomBlocksInElement(nodeElement);
         nodeElement.insertAdjacentHTML("afterend", newHTML);
         nodeElement.remove();
@@ -2302,6 +2283,11 @@ export const turnsOneInto = async (options: {
         // @ts-ignore
         newHTML = listHTML ?? options.protyle.lute[options.type](sourceHTML, options.level);
     }
+    const cancelListOperations = options.type === "CancelList" &&
+        options.nodeElement.getAttribute("data-type") === "NodeList" ? buildCancelListOperations(options.nodeElement, {
+        previousID: previousId,
+        parentID: parentId,
+    }) : undefined;
     disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);
     options.nodeElement = options.nodeElement.nextElementSibling as HTMLElement;
@@ -2309,34 +2295,36 @@ export const turnsOneInto = async (options: {
     if (["CancelBlockquote", "CancelList", "CancelCallout"].includes(options.type)) {
         const tempElement = document.createElement("template");
         tempElement.innerHTML = newHTML;
-        const doOperations: IOperation[] = [{
+        const doOperations: IOperation[] = cancelListOperations?.doOperations || [{
             action: "delete",
             id: options.id
         }];
-        const undoOperations: IOperation[] = [];
+        const undoOperations: IOperation[] = cancelListOperations?.undoOperations || [];
         let tempPreviousId = previousId;
-        Array.from(tempElement.content.children).forEach((item) => {
-            const tempId = item.getAttribute("data-node-id");
-            doOperations.push({
-                action: "insert",
-                data: item.outerHTML,
-                id: tempId,
-                previousID: tempPreviousId,
-                parentID: parentId
+        if (!cancelListOperations) {
+            Array.from(tempElement.content.children).forEach((item) => {
+                const tempId = item.getAttribute("data-node-id");
+                doOperations.push({
+                    action: "insert",
+                    data: item.outerHTML,
+                    id: tempId,
+                    previousID: tempPreviousId,
+                    parentID: parentId
+                });
+                undoOperations.push({
+                    action: "delete",
+                    id: tempId
+                });
+                tempPreviousId = tempId;
             });
             undoOperations.push({
-                action: "delete",
-                id: tempId
+                action: "insert",
+                data: oldHTML,
+                id: options.id,
+                previousID: previousId,
+                parentID: parentId
             });
-            tempPreviousId = tempId;
-        });
-        undoOperations.push({
-            action: "insert",
-            data: oldHTML,
-            id: options.id,
-            previousID: previousId,
-            parentID: parentId
-        });
+        }
         if (options.additionalOperations) {
             doOperations.unshift(...options.additionalOperations.doOperations);
             undoOperations.push(...options.additionalOperations.undoOperations);

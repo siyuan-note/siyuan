@@ -139,7 +139,7 @@ const runCases = async () => {
         renderAVAttribute: (body, _id, _protyle, callback) => {
             pendingRenders.push(text => {
                 const value = encodeURIComponent(JSON.stringify({block: {content: text}}));
-                body.innerHTML = `<div data-primary="true"><span data-cell-value="${value}">${text}</span></div>`;
+                body.innerHTML = `<div data-av-id="database" data-primary="true"><span data-cell-value="${value}">${text}</span></div>`;
                 callback(body);
             });
         },

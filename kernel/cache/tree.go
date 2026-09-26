@@ -23,7 +23,8 @@ import (
 )
 
 type treeCacheEntry struct {
-	raw []byte
+	raw        []byte
+	generation uint64
 }
 
 var (
@@ -32,8 +33,9 @@ var (
 		MaxCost:     1024 * 1024 * 200,
 		BufferItems: 64,
 	})
-	treeCacheKeys   = map[string]map[string]struct{}{}
-	treeCacheKeysMu sync.Mutex
+	treeCacheKeys       = map[string]map[string]uint64{}
+	treeCacheKeysMu     sync.Mutex
+	treeCacheGeneration uint64
 )
 
 func treeCacheKey(rootID, boxID string) string {
@@ -45,11 +47,18 @@ func GetTreeData(rootID string) (raw []byte, ok bool) {
 }
 
 func GetTreeDataInBox(rootID, boxID string) (raw []byte, ok bool) {
-	v, _ := treeCache.Get(treeCacheKey(rootID, boxID))
+	treeCacheKeysMu.Lock()
+	defer treeCacheKeysMu.Unlock()
+	key := treeCacheKey(rootID, boxID)
+	v, _ := treeCache.Get(key)
 	if nil == v {
 		return nil, false
 	}
 	e := v.(*treeCacheEntry)
+	// 异步准入可能保留较早的写入，只接受当前版本，否则交由调用方读取源文件。
+	if e.generation != treeCacheKeys[rootID][key] {
+		return nil, false
+	}
 	return e.raw, true
 }
 
@@ -62,24 +71,24 @@ func SetTreeDataInBox(rootID, boxID string, raw []byte) {
 		return
 	}
 	key := treeCacheKey(rootID, boxID)
-	entry := &treeCacheEntry{raw: raw}
-	treeCache.Set(key, entry, int64(len(raw)))
-
 	treeCacheKeysMu.Lock()
 	defer treeCacheKeysMu.Unlock()
+	treeCacheGeneration++
+	entry := &treeCacheEntry{raw: raw, generation: treeCacheGeneration}
 	keys := treeCacheKeys[rootID]
 	if keys == nil {
-		keys = map[string]struct{}{}
+		keys = map[string]uint64{}
 		treeCacheKeys[rootID] = keys
 	}
-	keys[key] = struct{}{}
+	keys[key] = entry.generation
+	treeCache.Set(key, entry, int64(len(raw)))
 }
 
 func RemoveTreeData(rootID string) {
 	treeCacheKeysMu.Lock()
+	defer treeCacheKeysMu.Unlock()
 	keys := treeCacheKeys[rootID]
 	delete(treeCacheKeys, rootID)
-	treeCacheKeysMu.Unlock()
 
 	treeCache.Del(rootID)
 	treeCache.Del(treeCacheKey(rootID, ""))
@@ -90,10 +99,9 @@ func RemoveTreeData(rootID string) {
 
 func RemoveTreeDataInBox(rootID, boxID string) {
 	key := treeCacheKey(rootID, boxID)
-	treeCache.Del(key)
-
 	treeCacheKeysMu.Lock()
 	defer treeCacheKeysMu.Unlock()
+	treeCache.Del(key)
 	if keys := treeCacheKeys[rootID]; keys != nil {
 		delete(keys, key)
 		if len(keys) == 0 {
@@ -104,7 +112,7 @@ func RemoveTreeDataInBox(rootID, boxID string) {
 
 func ClearTreeCache() {
 	treeCacheKeysMu.Lock()
-	treeCacheKeys = map[string]map[string]struct{}{}
-	treeCacheKeysMu.Unlock()
+	defer treeCacheKeysMu.Unlock()
+	treeCacheKeys = map[string]map[string]uint64{}
 	treeCache.Clear()
 }

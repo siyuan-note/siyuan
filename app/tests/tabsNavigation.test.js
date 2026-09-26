@@ -69,7 +69,7 @@ const cases = (source) => {
         (_protyle, target) => { scrolls++; target.dataset.tabsHidden = "false"; }, () => {}, () => {});
     root.innerHTML = '<div class="tab-item" data-node-id="target" data-tabs-hidden="false">Target</div>';
     const target = root.firstElementChild;
-    const protyle = {wysiwyg: {element: root}, contentElement: root,
+    const protyle = {element: root, wysiwyg: {element: root}, contentElement: root,
         preview: {element: {classList: {contains: () => true}}}, toolbar: {}, block: {rootID: "doc"}};
     const editor = {editor: {protyle}, parent: {parent: {switchTab() {}, showHeading() {}}}};
     const start = () => {

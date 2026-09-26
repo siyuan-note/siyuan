@@ -1,4 +1,5 @@
 {
+	"removeList": "取消列表",
 	"entryWindowTopBar": "新窗口顶栏",
 	"archiveEncryptedNotebooks": "打包移出",
 	"archiveEncryptedNotebooksTip": "选择已锁定的加密笔记本及其恢复数据，无需输入主密码",

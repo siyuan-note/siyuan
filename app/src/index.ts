@@ -333,7 +333,7 @@ export class App {
                     );
                     window.siyuan.menus = new Menus(this);
                     bootSync();
-                    fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
                         await setNoteBook();
@@ -350,6 +350,7 @@ export class App {
                         /// #endif
                         window.siyuan.isReady = true;
                         mainWs.flushMainMessages();
+                        fetchPost("/api/setting/getCloudUser", {});
                     });
                 });
             });

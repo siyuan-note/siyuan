@@ -396,7 +396,7 @@ export type AVUnavailableNotebook = { "unavailableNotebook": true; };
 
 export type AVUpdated = { "includeTime": boolean; };
 
-export type AVValue = { "block"?: AVValueBlock; "blockID"?: string; "checkbox"?: AVValueCheckbox; "created"?: AVValueCreated; "createdAt"?: number; "date"?: AVValueDate; "email"?: AVValueEmail; "id"?: string; "isDetached"?: boolean; "keyID"?: string; "mAsset"?: Array<AVValueAsset | null>; "mSelect"?: Array<AVValueSelect | null>; "number"?: AVValueNumber; "phone"?: AVValuePhone; "relation"?: AVValueRelation; "renderedContent"?: string; "rollup"?: AVValueRollup; "template"?: AVValueTemplate; "text"?: AVValueText; "type"?: "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVValueUpdated; "updatedAt"?: number; "url"?: AVValueURL; };
+export type AVValue = { "block"?: AVValueBlock; "blockID"?: string; "checkbox"?: AVValueCheckbox; "created"?: AVValueCreated; "createdAt"?: number; "date"?: AVValueDate; "email"?: AVValueEmail; "hasRenderTemplate"?: boolean; "id"?: string; "isDetached"?: boolean; "keyID"?: string; "mAsset"?: Array<AVValueAsset | null>; "mSelect"?: Array<AVValueSelect | null>; "number"?: AVValueNumber; "phone"?: AVValuePhone; "relation"?: AVValueRelation; "renderedContent"?: string; "rollup"?: AVValueRollup; "template"?: AVValueTemplate; "text"?: AVValueText; "type"?: "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVValueUpdated; "updatedAt"?: number; "url"?: AVValueURL; };
 
 export type AVValueAsset = { "content": string; "name": string; "type": "file" | "image"; };
 
@@ -424,7 +424,7 @@ export type AVValueEmail = { "content": string; };
 
 export type AVValueEmailInput = { "content"?: string | null; };
 
-export type AVValueInput = { "block"?: AVValueBlockInput | null; "blockID"?: string | null; "checkbox"?: AVValueCheckboxInput | null; "created"?: AVValueCreatedInput | null; "createdAt"?: number | null; "date"?: AVValueDateInput | null; "email"?: AVValueEmailInput | null; "id"?: string | null; "isDetached"?: boolean | null; "keyID"?: string | null; "mAsset"?: Array<AVValueAssetInput | null> | null; "mSelect"?: Array<AVValueSelectInput | null> | null; "number"?: AVValueNumberInput | null; "phone"?: AVValuePhoneInput | null; "relation"?: AVValueRelationInput | null; "renderedContent"?: string | null; "rollup"?: AVValueRollupInput | null; "template"?: AVValueTemplateInput | null; "text"?: AVValueTextInput | null; "type"?: "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVValueUpdatedInput | null; "updatedAt"?: number | null; "url"?: AVValueURLInput | null; };
+export type AVValueInput = { "block"?: AVValueBlockInput | null; "blockID"?: string | null; "checkbox"?: AVValueCheckboxInput | null; "created"?: AVValueCreatedInput | null; "createdAt"?: number | null; "date"?: AVValueDateInput | null; "email"?: AVValueEmailInput | null; "hasRenderTemplate"?: boolean | null; "id"?: string | null; "isDetached"?: boolean | null; "keyID"?: string | null; "mAsset"?: Array<AVValueAssetInput | null> | null; "mSelect"?: Array<AVValueSelectInput | null> | null; "number"?: AVValueNumberInput | null; "phone"?: AVValuePhoneInput | null; "relation"?: AVValueRelationInput | null; "renderedContent"?: string | null; "rollup"?: AVValueRollupInput | null; "template"?: AVValueTemplateInput | null; "text"?: AVValueTextInput | null; "type"?: "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVValueUpdatedInput | null; "updatedAt"?: number | null; "url"?: AVValueURLInput | null; };
 
 export type AVValueNumber = { "content": number; "format": string; "formattedContent": string; "isNotEmpty": boolean; };
 
@@ -1852,7 +1852,7 @@ export type SettingCapabilityPolicy = { "default": string; "overrides": Record<s
 
 export type SettingCapabilityPolicyInput = { "default"?: string | null; "overrides"?: Record<string, string> | null; };
 
-export type SettingCloudUserRequestInput = { "token"?: string | null; };
+export type SettingCloudUserRequestInput = { "cached"?: boolean; "token"?: string | null; };
 
 export type SettingDecision = { "apiKey": string; "enabled": boolean; "endpoint": string; "name": string; "timeout": number; };
 

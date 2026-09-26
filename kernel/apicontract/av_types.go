@@ -71,6 +71,9 @@ type AVValue struct {
 	Relation        *AVValueRelation `json:"relation,omitempty" api:"optional,nullable"`
 	Rollup          *AVValueRollup   `json:"rollup,omitempty" api:"optional,nullable"`
 	RenderedContent string           `json:"renderedContent,omitempty" api:"optional,nullable"`
+	// 显示模板已计算时为 true，空结果仍以模板显示；关联内容使用目标主键模板，原始 block 内容和标识不变。
+	// 这是运行时显示信息，不写入数据库文件；旧响应未包含此字段时沿用 renderedContent 和字段模板配置。
+	HasRenderTemplate bool `json:"hasRenderTemplate,omitempty" api:"optional,nullable"`
 }
 
 type AVValueBlock struct {

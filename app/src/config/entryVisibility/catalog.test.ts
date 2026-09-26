@@ -38,6 +38,16 @@ import {
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
+test("remove list follows paragraph conversion in single and multiple block menus", () => {
+    for (const path of ["gutter.single.turnInto", "gutter.multi.turnInto"]) {
+        assert.deepEqual(getEntryCatalogChildren(path).slice(0, 2).map(item => item.key), ["paragraph", "removeList"]);
+        const entry = getEntryCatalogNode(`${path}.removeList`);
+        assert.equal(entry.type, "entry");
+        assert.equal(entry.simple, true);
+        assert.equal(getEntryParentPath(`${path}.removeList`), path);
+    }
+});
+
 test("document tree duplication follows single-document duplication in the configurable menu", () => {
     const children = getEntryCatalogChildren("docTree.document.copy");
     assert.deepEqual(children.slice(-2).map(item => item.key), ["duplicate", "duplicateTree"]);

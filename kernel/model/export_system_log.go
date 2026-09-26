@@ -4,7 +4,27 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime/pprof"
 )
+
+// writeSystemGoroutineLog 记录导出时所有协程的调用栈，不等待编辑事务或数据库索引完成。
+func writeSystemGoroutineLog(exportFolder string) error {
+	filePath := filepath.Join(exportFolder, "goroutine.log")
+	output, err := os.OpenFile(filePath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+	writeErr := pprof.Lookup("goroutine").WriteTo(output, 2)
+	closeErr := output.Close()
+	if writeErr != nil || closeErr != nil {
+		os.Remove(filePath)
+		if writeErr != nil {
+			return writeErr
+		}
+		return closeErr
+	}
+	return nil
+}
 
 // collectOptionalSystemLogs 收集崩溃诊断副本和 Windows 安装日志，缺失时不影响导出。
 func collectOptionalSystemLogs(crashDir, systemTempDir, exportFolder string, windows bool) {

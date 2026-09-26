@@ -62,7 +62,7 @@ git push origin v3.8.5-beta.1
 
 ### 1. 完成发布准备
 
-- 生成 changelogs
+生成本次正式版 changelogs，确认各仓库已切到待发布分支。
 
 在主仓库根目录指定本次正式版版本，先查看准备计划：
 
@@ -70,7 +70,7 @@ git push origin v3.8.5-beta.1
 python -X utf8 scripts/prepare-release.py 3.8.5
 ```
 
-脚本更新本文版本示例（包括上传命令）、内核 `Mode=prod` 和 `Ver`、`app/package.json`、两个 Appx 清单、Android 和鸿蒙版本。文档顶部的 `release-version` 标记用于识别待替换版本，请保留。Android、鸿蒙版本名称变化时版本代码各加一；同版本重复执行不再递增，可用 `--android-code`、`--harmony-code` 显式指定版本代码。必须传入目标正式版版本号，脚本不自动查询最新版本。
+脚本更新本文版本示例（包括下载地址）、内核、前端、Appx、Android 和鸿蒙版本。检查计划中的版本和路径后，选择以下一种方式执行。
 
 仅修改文件，留待人工检查和提交：
 
@@ -85,9 +85,7 @@ python -X utf8 scripts/prepare-release.py 3.8.5 --publish
 python -X utf8 scripts/prepare-release.py 3.8.5 --publish --execute
 ```
 
-`--publish` 准备版本后提交主仓库、Android、鸿蒙仓库的全部已跟踪改动，推送各自当前分支到 `origin`，创建并推送 Android 标签 `v3.8.5`，随后自动更新 `b3log-index` 的思源版本、编译官网、检查页面并提交推送。不会自动切换分支。未跟踪文件须先人工确认并纳入版本管理，官网允许本次编译新增的页面；远端分支必须是本地 HEAD 的祖先，否则先同步仓库。不会强推或覆盖已有标签。跨仓库发布不是原子操作，失败后检查已完成步骤并重跑同一命令；已发布版本需要修改内容时应使用新的版本号。官网代码在此阶段推送，服务器部署仍在安装包上传完成后进行。
-
-官网步骤更新 `src/siyuan/src/version.pug`，在 `b3log-index/src/siyuan` 执行 `pnpm install --frozen-lockfile` 和 `pnpm run build`，检查中英文页面的下载版本后，提交版本文件和编译页面。官网工程的 `package.json` 版本不是思源版本，不修改。存在其他未提交改动或远端领先时预检停止；官网构建或校验失败不会提交推送官网，保留文件供排查。重复执行且内容不变时不会创建空提交。
+`--publish` 会提交并推送主仓库、Android、鸿蒙的全部已跟踪改动，创建并推送 Android 标签，并更新、构建和推送官网。执行前处理未跟踪文件并确认各仓库分支；官网服务器在安装包发布并验证后部署。参数及失败处理见[发布准备脚本说明](#发布准备脚本说明)。
 
 如果各仓库已手动提交并推送，可仅在 Android 当前提交版本匹配且工作区干净时创建本地标签，然后自行推送：
 
@@ -112,7 +110,7 @@ python -X utf8 scripts/prepare-release.py 3.8.5 --tag-android --execute
 ### 4. 查看计划
 
 ```powershell
-python -X utf8 scripts/build-release.py
+python -X utf8 scripts/build-release.py --appx
 ```
 
 此命令只显示计划，不构建、不修改文件，也不检查构建工具或签名环境。
@@ -171,14 +169,32 @@ python -X utf8 scripts/verify-release.py check --version 3.8.5
 
 ### 9. 手动发布与上架
 
-- 合并 master，触发 Docker 镜像构建
-- GitHub Releases 上传安装包和 `SHA256SUMS.txt` 
+将发布代码合并并推送到 `master`，确认其构建输入与已验证安装包对应的发布提交一致，再为该提交创建并推送正式版标签：
+
+```powershell
+git tag v3.8.5 master
+git push origin refs/tags/v3.8.5
+```
+
+正式版标签推送会触发 [Release Docker Image](../.github/workflows/dockerimage.yml)，仅合并分支不会触发。已有标签先核对指向，不覆盖或重复创建。
+
+- 将公开分发的安装包和最终的 `SHA256SUMS.txt` 上传至 `siyuan-note/siyuan` 的 GitHub Release，选择标签 `v3.8.5`，核对文件名后公开正式版
+- 通过下载域名下载安装包并核对摘要
 - 同步 Gitee
-- 上传 R2 和百度网盘
+- 上传百度网盘
 - 链滴登录 `siyuan` 账号发布公告
 - 修改并部署 Rhy，粘贴最终的 `SHA256SUMS.txt`
 - 部署 Index（版本更新、构建和推送已由发布准备的 `--publish --execute` 完成）
 - 完成小米、华为、荣耀、OPPO、vivo、App Store、Microsoft Store、腾讯应用宝、Google Play、360 和腾讯电脑管家等应用市场上架
+
+`release.liuyun.io` 通过 Cloudflare Worker `siyuan-release` 从正式版安装包文件名提取版本号，代理 GitHub Release 下载：
+
+```text
+公开下载地址：https://release.liuyun.io/siyuan/siyuan-3.8.5-win.exe
+GitHub 源地址：https://github.com/siyuan-note/siyuan/releases/download/v3.8.5/siyuan-3.8.5-win.exe
+```
+
+预发布安装包及 `SHA256SUMS.txt` 使用 GitHub Release 地址。
 
 上架应用市场：
 
@@ -194,29 +210,6 @@ python -X utf8 scripts/verify-release.py check --version 3.8.5
 - [Google Play](https://play.google.com/console/developers)
 - [360软件开放平台](https://open.soft.360.cn/softlist.php)
 - [腾讯电脑管家软件开放平台](https://guanjia.qq.com/software-platform/softwarelibrary)
-
-上传发布包：
-
-```
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5.apk -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5.apk --content-type application/vnd.android.package-archive --remote
-
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.AppImage --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.tar.gz --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.deb --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.rpm --remote
-
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.AppImage --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.tar.gz --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.deb --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.rpm --remote
-
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-mac.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-mac.dmg --content-type application/octet-stream --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-mac-arm64.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-mac-arm64.dmg --content-type application/octet-stream --remote
-
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-win.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-win.exe --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-win-arm64.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-win-arm64.exe --remote
-echo 'complete'
-```
 
 ### 10. 清理发布产物
 
@@ -241,6 +234,15 @@ python -X utf8 scripts/clean-release.py --execute
 ---
 
 下面是脚本设计和实现相关内容。
+
+## 发布准备脚本说明
+
+- 必须传入目标正式版版本号，脚本将内核 `Mode` 设置为 `prod`，同步各端版本，并依据文档顶部的 `release-version` 标记更新示例；请保留该标记
+- Android、鸿蒙版本名称变化时版本代码各加一，同版本重复执行不再递增；可用 `--android-code`、`--harmony-code` 显式指定
+- `--publish` 推送各仓库当前分支，不自动切换分支；远端分支必须是本地 HEAD 的祖先，未跟踪文件须先人工处理，不强推或覆盖已有标签
+- 官网更新 `src/siyuan/src/version.pug`，在 `b3log-index/src/siyuan` 执行 `pnpm install --frozen-lockfile` 和 `pnpm run build`，检查中英文页面后提交版本文件和编译页面；官网工程的 `package.json` 版本不修改
+- 官网仅允许版本文件和编译页面存在改动，允许新增编译页面；构建或校验失败时保留文件供排查，内容不变时不创建空提交
+- 跨仓库发布不是原子操作，失败后检查已完成步骤，再重跑同一命令；已公开版本需要修改内容时使用新的版本号
 
 ## 直接检查安装包
 

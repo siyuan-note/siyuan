@@ -459,6 +459,17 @@
   }
 }
 
+// 阅读模式保留独立预览入口，工具栏放在文档流中，避免遮挡图表链接。
+.protyle-preview [data-subtype="plantuml"] > .protyle-icons {
+  display: flex;
+  position: static;
+  justify-content: flex-end;
+
+  > :not(.protyle-action__preview) {
+    display: none;
+  }
+}
+
 .protyle-content[data-padding-mode="responsive"],
 .protyle-preview[data-padding-mode="responsive"] {
   container-name: protyle-padding;

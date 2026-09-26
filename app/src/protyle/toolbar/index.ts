@@ -61,7 +61,8 @@ import {hideElements} from "../ui/hideElements";
 import {electronUndo} from "../undo";
 import {clearTemplatePreview, mergeSameInlineElement, previewTemplate, toolbarKeyToMenu} from "./util";
 import {openTemplateManager} from "../../template/manager";
-import {showMessage} from "../../dialog/message";
+import {hideMessage, showMessage} from "../../dialog/message";
+import {getPlantumlImageBlob} from "../render/plantumlImage";
 import {InlineMath} from "./InlineMath";
 import {InlineMemo} from "./InlineMemo";
 import {mathRender} from "../render/mathRender";
@@ -1693,13 +1694,18 @@ export class Toolbar {
             }
             const msgId = showMessage(window.siyuan.languages.exporting, 0);
             if (renderElement.getAttribute("data-subtype") === "plantuml") {
-                fetch(renderElement.querySelector("object").getAttribute("data")).then(function (response) {
-                    return response.blob();
-                }).then(function (blob) {
-                    const formData = new ContractFormData({file: blob, type: "image/svg+xml"});
-                    fetchPost("/api/export/exportAsFile", formData, (response) => {
+                getPlantumlImageBlob(renderElement).then(async (blob) => {
+                    if (!blob) {
+                        return;
+                    }
+                    const formData = new ContractFormData({file: blob, type: blob.type.split(";")[0]});
+                    await fetchPost("/api/export/exportAsFile", formData, (response) => {
                         saveExportFile(response.data.file, msgId);
                     });
+                }).catch((error) => {
+                    showMessage(escapeHtml(String(error)), 6000, "error");
+                }).finally(() => {
+                    hideMessage(msgId);
                 });
                 return;
             }

@@ -1,4 +1,5 @@
 {
+	"removeList": "取消列表",
 	"entryWindowTopBar": "新視窗頂欄",
 	"archiveEncryptedNotebooks": "封存並移出",
 	"archiveEncryptedNotebooksTip": "選擇已鎖定的加密筆記本及其復原資料，無需輸入主密碼",

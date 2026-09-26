@@ -1431,6 +1431,7 @@ interface IAVCellValue {
     blockID?: string // 为 row id
     type?: TAVCol,
     renderedContent?: string,
+    hasRenderTemplate?: boolean,
     isDetached?: boolean,
     text?: {
         content: string,

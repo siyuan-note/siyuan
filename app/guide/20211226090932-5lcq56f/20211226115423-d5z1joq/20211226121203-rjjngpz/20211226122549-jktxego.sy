@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260925174006"
+		"updated": "20260926131843"
 	},
 	"Children": [
 		{
@@ -4106,7 +4106,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260925094732"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -11349,7 +11349,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-wez4zj6",
-				"updated": "20260924173802"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12022,7 +12022,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-11vvysw",
-				"updated": "20260925172309"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12082,6 +12082,37 @@
 				{
 					"Type": "NodeText",
 					"Data": "，這也會移除既有標題格式。區塊 ID、資料庫關聯和欄位值均會保留。首個區塊既非段落也非標題的列表項會略過。行動端使用相同的區塊選單。僅將游標放在段落或標題內時，快捷鍵只轉換該區塊，不取消外圍列表。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "如需僅移除列表結構並保留標題等內容區塊類型，請選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區塊選單"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "轉換為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消列表"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。可操作整個列表或選取的列表項，保留子列表、內容區塊 ID、資料庫關聯和欄位值，行動端同樣適用。"
 				}
 			]
 		},

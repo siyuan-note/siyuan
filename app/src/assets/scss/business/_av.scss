@@ -1592,6 +1592,10 @@
     }
   }
 
+  &__body--unfreeze .av__colsticky--freeze {
+    position: relative;
+  }
+
   &__colsticky {
     position: sticky;
     left: 0;

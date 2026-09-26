@@ -1,4 +1,5 @@
 {
+	"removeList": "Zrušiť formátovanie zoznamu",
 	"entryWindowTopBar": "Horná lišta nového okna",
 	"archiveEncryptedNotebooks": "Archivovať a odstrániť",
 	"archiveEncryptedNotebooksTip": "Vyberte zamknuté šifrované poznámkové bloky a ich údaje na obnovu; hlavné heslo nie je potrebné",

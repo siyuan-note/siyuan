@@ -90,6 +90,9 @@ type SettingIconRequest struct {
 }
 type SettingCloudUserRequest struct {
 	Token string `json:"token" api:"optional,nullable"`
+	// Cached 为 true 时仅返回内存账户（未登录时为 null），忽略 token，不联网或等待同步锁。
+	// 默认 false，保留账户恢复、令牌刷新及错误响应；两种模式均仅向管理员返回账户。
+	Cached bool `json:"cached" api:"optional"`
 }
 type SettingLogin2faRequest struct {
 	Token string `json:"token"`

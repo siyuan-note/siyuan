@@ -2074,9 +2074,12 @@ const unfoldListHeadings = async (protyle: IProtyle, nodeElements: Element[]) =>
     return foldOperations.reverse();
 };
 
+export const removeListStructure = (protyle: IProtyle, nodeElements: Element[]) =>
+    turnListBlocksInto({protyle}, nodeElements.filter(isListHeadingContainer));
+
 const turnListBlocksInto = async (options: {
     protyle: IProtyle,
-    type: TTurnInto,
+    type?: TTurnInto,
     level?: number,
     range?: Range,
     unfocus?: boolean,
@@ -2087,7 +2090,12 @@ const turnListBlocksInto = async (options: {
     const conversionElements = options.recursively ? selected.flatMap(element => [element,
         ...Array.from(element.querySelectorAll('[data-type="NodeList"]')).filter(list =>
             list.getAttribute("data-subtype") === element.getAttribute("data-subtype"))]).reverse() : selected;
-    const targets = getHeadingConversionElements(conversionElements);
+    // 取消列表只移除外层结构，任意类型的首块均可保留。
+    const targets = options.type ? getHeadingConversionElements(conversionElements) : conversionElements.flatMap(element => {
+        const items = element.getAttribute("data-type") === "NodeList" ?
+            Array.from(element.children).filter(item => item.getAttribute("data-type") === "NodeListItem") : [element];
+        return items.map(item => Array.from(item.children).find(child => child.hasAttribute("data-node-id"))).filter(Boolean);
+    });
     if (targets.length === 0) {
         return;
     }
@@ -2132,7 +2140,8 @@ const turnListBlocksInto = async (options: {
             previousID = response.data.previousID;
             parentID = response.data.parentID || parentID;
         }
-        const operations = buildListConversionOperations(list, {itemIDs, previousID, parentID, convert,
+        const operations = buildListConversionOperations(list, {itemIDs, previousID, parentID,
+            convert: options.type ? convert : undefined,
             newID: () => Lute.NewNodeID()});
         doOperations.push(...operations.doOperations);
         undoOperations.unshift(...operations.undoOperations);

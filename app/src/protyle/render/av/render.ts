@@ -64,6 +64,7 @@ import {getAVColorStyle} from "./color";
 import {getContextFilterKeyID} from "./contextFilterState";
 import {isAVCellPanelForBlock} from "./panelTarget";
 import {replaceAVContainer} from "./container";
+import {updateFrozenColumns} from "./frozenColumns";
 
 interface IIds {
     groupId: string,
@@ -419,11 +420,13 @@ export const initUnfoldedGroupTables = (blockElement: HTMLElement, protyle: IPro
         totalLoadedRows > GROUP_TABLE_INITIAL_ROW_BUDGET || bodies.some(bodyElement =>
             bodyElement.querySelector(".av__spacer")));
     renderAVRichTextElements(blockElement);
+    updateFrozenColumns(blockElement);
     initVirtualScroll({protyle, blockElement, data, selectedItemPoints});
     restoreAVCellSelection(blockElement);
 };
 
 const afterRenderTable = (options: ITableOptions) => {
+    updateFrozenColumns(options.blockElement);
     setAVData(options.blockElement, options.data);
     renderAVRichTextElements(options.blockElement);
     if (!refreshAVCellSelection(options.blockElement, options.data)) {
@@ -933,6 +936,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     columnElement.style.width = operation.data;
                 }
             });
+            updateFrozenColumns(item);
         });
         return;
     }
@@ -946,6 +950,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     }
                 });
             });
+            updateFrozenColumns(item);
         });
         return;
     }

@@ -1,4 +1,5 @@
 {
+	"removeList": "Rimuovi formattazione elenco",
 	"entryWindowTopBar": "Barra superiore delle nuove finestre",
 	"archiveEncryptedNotebooks": "Archivia e rimuovi",
 	"archiveEncryptedNotebooksTip": "Seleziona i quaderni cifrati bloccati e i relativi dati di recupero; non è necessaria la password principale",

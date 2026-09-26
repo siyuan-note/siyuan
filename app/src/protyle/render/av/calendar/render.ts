@@ -15,7 +15,7 @@ import {replaceAVContainer} from "../container";
 import {renderAVRichTextElements} from "../richText";
 import {avContextmenu} from "../action";
 import {bindAvSearch} from "../search";
-import {setAVData} from "../virtualScroll";
+import {getAVSelectedItemIDs, setAVData} from "../virtualScroll";
 import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarInterval, getISOWeekForCalendarRow, ICalendarEvent, ICalendarSegment,
     moveCalendarDate, packCalendarWeek, resizeCalendarDate} from "./date";
 import {openCalendarJump} from "./jump";
@@ -407,6 +407,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         }
     }
     blockElement.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);
+    const selectedItemIDs = new Set(getAVSelectedItemIDs(blockElement));
     replaceAVContainer(blockElement, `<div class="av__container fn__block">
         ${genTabHeaderHTML(data, !!query || isSearching, editable, blockElement, editable && !!dateColumn)}
         <div class="av__calendar" contenteditable="false">
@@ -433,6 +434,9 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     blockElement.dataset.render = "true";
     setAVData(blockElement, data);
     const root = blockElement.querySelector<HTMLElement>(".av__calendar");
+    root.querySelectorAll<HTMLElement>("[data-calendar-item]").forEach(item => {
+        item.classList.toggle("av__gallery-item--select", selectedItemIDs.has(item.dataset.calendarItem));
+    });
     const refresh = () => {
         blockElement.removeAttribute("data-render");
         void avRender(blockElement, protyle);
@@ -452,6 +456,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     }
     root.addEventListener("click", event => {
         event.stopPropagation();
+        window.siyuan.menus.menu.remove();
         const target = event.target as HTMLElement;
         const item = target.closest<HTMLElement>("[data-calendar-item]");
         if (item) {

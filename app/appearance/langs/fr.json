@@ -1,4 +1,5 @@
 {
+	"removeList": "Retirer la mise en forme de liste",
 	"entryWindowTopBar": "Barre supérieure des nouvelles fenêtres",
 	"archiveEncryptedNotebooks": "Archiver et retirer",
 	"archiveEncryptedNotebooksTip": "Sélectionnez les carnets chiffrés verrouillés et leurs données de récupération ; le mot de passe principal n’est pas nécessaire",

@@ -12,7 +12,7 @@ import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import {getColIconByType, getColId} from "./col";
-import {genAVValueHTML, getAVTemplateHTML} from "./attributeValue";
+import {genAVRelationHTML, genAVValueHTML, getAVTemplateHTML} from "./attributeValue";
 import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
 import {getAssetExtension, getAssetName} from "../../../util/pathName";
@@ -169,6 +169,10 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         Array.from(cellElement.querySelectorAll(".av__cell--relation")).forEach((relationItem: HTMLElement) => {
             const item = relationItem.querySelector(".av__celltext") as HTMLElement;
             blockIDs.push(relationItem.dataset.rowId);
+            if (relationItem.dataset.relationValue) {
+                contents.push(JSON.parse(decodeURIComponent(relationItem.dataset.relationValue)));
+                return;
+            }
             contents.push({
                 isDetached: !item.classList.contains("av__celltext--ref"),
                 block: {
@@ -377,9 +381,10 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
         const rowElement = hasClosestByClassName(cellElement, "av__row");
         if (avScrollElement && rowElement) {
             const stickyElement = rowElement.querySelector(".av__colsticky");
-            if (!stickyElement.contains(cellElement)) { // https://github.com/siyuan-note/siyuan/issues/12162
-                const stickyRight = stickyElement.getBoundingClientRect().right;
+            const unfreeze = rowElement.parentElement.classList.contains("av__body--unfreeze");
+            if (unfreeze || !stickyElement.contains(cellElement)) { // https://github.com/siyuan-note/siyuan/issues/12162
                 const avScrollRect = avScrollElement.getBoundingClientRect();
+                const stickyRight = unfreeze ? avScrollRect.left : stickyElement.getBoundingClientRect().right;
                 if (stickyRight > cellRect.left || avScrollRect.right < cellRect.left) {
                     avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
                 } else if (stickyRight < cellRect.left && avScrollRect.right < cellRect.right) {
@@ -1340,15 +1345,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         }
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {
-            if (item && item.block) {
-                const rowID = cellValue.relation.blockIDs[index];
-                if (item?.isDetached) {
-                    text += `<span data-row-id="${rowID}" class="av__cell--relation"><span${showIcon ? "" : ' class="fn__none"'}><svg><use xlink:href="#iconLine"></use></svg><span class="fn__space--5"></span></span><span class="av__celltext">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
-                } else {
-                    // data-block-id 用于更新 emoji
-                    text += `<span data-row-id="${rowID}" class="av__cell--relation" data-block-id="${item.block.id}"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${escapeAttr(item.block.icon || "")}">${getFileTreeIconHTML(item.block.icon, "file")}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="${getAVBlockRefSubtype(item)}" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
-                }
-            }
+            text += genAVRelationHTML(item, cellValue.relation.blockIDs[index], showIcon);
         });
         if (text && text.endsWith(", ")) {
             text = text.substring(0, text.length - 2);

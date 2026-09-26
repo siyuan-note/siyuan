@@ -1,4 +1,5 @@
 {
+	"removeList": "إلغاء تنسيق القائمة",
 	"entryWindowTopBar": "الشريط العلوي للنافذة الجديدة",
 	"archiveEncryptedNotebooks": "أرشفة وإزالة",
 	"archiveEncryptedNotebooksTip": "حدد دفاتر الملاحظات المشفرة المقفلة وبيانات استعادتها؛ لا يلزم إدخال كلمة المرور الرئيسية",

@@ -13,7 +13,7 @@ import {htmlRender} from "../../../protyle/render/htmlRender";
 import {showMessage} from "../../../dialog/message";
 import {openLink} from "../../../editor/openLink";
 import {previewImages} from "../../../protyle/preview/image";
-import {getDiagramBlock, previewDiagram} from "../../../protyle/preview/diagram";
+import {getDiagramBlock, handleDiagramPreviewClick, previewDiagram} from "../../../protyle/preview/diagram";
 import {removeCompressURL} from "../../../util/image";
 import {writeClipboardData} from "../../../protyle/util/compatibility";
 /// #if !MOBILE
@@ -292,10 +292,11 @@ export const postRender = (container: HTMLElement, app?: App, onNavigate?: () =>
 export const bindAgentMessageEvents = (container: HTMLElement, app?: App, onNavigate?: () => void): void => {
     if (container.dataset.agentPreviewBound !== "true") {
         container.dataset.agentPreviewBound = "true";
+        container.addEventListener("click", handleDiagramPreviewClick);
         container.addEventListener("dblclick", (event: MouseEvent) => {
             const target = event.target as HTMLElement;
             const img = target.closest("img:not(.emoji)") as HTMLImageElement;
-            if (!img || !container.contains(img)) {
+            if (!img || !container.contains(img) || img.closest('[data-subtype="plantuml"]')) {
                 const diagramElement = getDiagramBlock(target.closest("[data-subtype]") as HTMLElement);
                 if (diagramElement && container.contains(diagramElement)) {
                     previewDiagram(diagramElement);

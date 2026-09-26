@@ -221,7 +221,7 @@ class App {
                     } else if (!isInIOS()) {
                         document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-visual, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
                     }
-                    fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
                         fetchPost("/api/system/getEmojiConf", {}, async emojiResponse => {
@@ -233,6 +233,7 @@ class App {
                                 openChangelog();
                                 window.siyuan.isReady = true;
                                 mainWs.flushMainMessages();
+                                fetchPost("/api/setting/getCloudUser", {});
                             } catch (error) {
                                 console.error("Failed to initialize mobile framework:", error);
                                 finishMobileStartup();

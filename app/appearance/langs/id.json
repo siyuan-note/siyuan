@@ -1,4 +1,5 @@
 {
+	"removeList": "Hapus format daftar",
 	"entryWindowTopBar": "Bilah atas jendela baru",
 	"archiveEncryptedNotebooks": "Arsipkan dan keluarkan",
 	"archiveEncryptedNotebooksTip": "Pilih buku catatan terenkripsi yang terkunci beserta data pemulihannya; kata sandi utama tidak diperlukan",

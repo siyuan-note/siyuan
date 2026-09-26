@@ -12,7 +12,7 @@ test("sticky views follow breadcrumbs and keep wrapped height in sync when resiz
     const exports: {stickyRow?: (block: unknown, scroll: unknown, status: string) => void} = {};
     runInNewContext(compiled, {
         exports,
-        require: () => ({hasTopClosestByAttribute: () => false}),
+        require: () => ({hasTopClosestByAttribute: () => false, updateFrozenColumns: () => {}}),
         window: {innerHeight: 800},
     });
     let paneBottom = 800;
@@ -96,7 +96,7 @@ test("sticky views follow breadcrumbs and keep wrapped height in sync when resiz
 
 test("backlink scrolling clears fixed rows and their spacers without calculating window positions", () => {
     const exports: {stickyRow?: (block: unknown, scroll: unknown, status: string) => void} = {};
-    runInNewContext(compiled, {exports, require: () => ({})});
+    runInNewContext(compiled, {exports, require: () => ({updateFrozenColumns: () => {}})});
     const makeRow = (fixedClass: string, placeholderClass: string) => {
         const classes = new Set([fixedClass]);
         const placeholder = {

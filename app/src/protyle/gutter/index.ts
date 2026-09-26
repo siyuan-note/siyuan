@@ -25,6 +25,7 @@ import {
     writeText
 } from "../util/compatibility";
 import {
+    removeListStructure,
     transaction,
     turnListsRecursively,
     turnsIntoGroupsTransaction,
@@ -1043,6 +1044,21 @@ export class Gutter {
         return items;
     }
 
+    private removeListMenu(protyle: IProtyle, nodeElements: Element[]): IMenu {
+        return {
+            id: "removeList",
+            icon: "iconOutdent",
+            label: window.siyuan.languages.removeList,
+            click: () => removeListStructure(protyle, nodeElements),
+        };
+    }
+
+    private listTurnIntoMenu(protyle: IProtyle, nodeElements: Element[]): IMenu[] {
+        const items = this.headingTurnIntoMenu(protyle, nodeElements, true);
+        items.splice(items.length ? 1 : 0, 0, this.removeListMenu(protyle, nodeElements));
+        return items;
+    }
+
     private emptyParagraphTurnIntoMenu(protyle: IProtyle, nodeElements: Element[]): IMenu[] {
         if (!nodeElements.every(isEmptyParagraph)) {
             return [];
@@ -1186,6 +1202,9 @@ export class Gutter {
                 type: "Blocks2Ps",
                 isContinue
             }));
+            if (selectsElement.some(element => element.getAttribute("data-type") === "NodeList")) {
+                turnIntoSubmenu.push(this.removeListMenu(protyle, selectsElement));
+            }
             turnIntoSubmenu.push(...this.headingTurnIntoMenu(protyle, selectsElement));
             turnIntoSubmenu.push(...this.emptyParagraphTurnIntoMenu(protyle, selectsElement));
             window.siyuan.menus.menu.append(new MenuItem({
@@ -1241,7 +1260,7 @@ export class Gutter {
             }
         }
         if (isList && !protyle.disabled) {
-            const submenu = this.headingTurnIntoMenu(protyle, selectsElement, true);
+            const submenu = this.listTurnIntoMenu(protyle, selectsElement);
             if (submenu.length > 0) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "turnInto",
@@ -1784,6 +1803,9 @@ export class Gutter {
                 nodeElement,
                 type: "CancelList"
             }));
+            if (type === "NodeList") {
+                turnIntoSubmenu.push(this.removeListMenu(protyle, [nodeElement]));
+            }
             turnIntoSubmenu.push(this.turnsIntoOne({
                 menuId: "quote",
                 icon: "iconQuote",
@@ -1903,7 +1925,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
             }
         } else if (type === "NodeListItem" && allowStructuralMutation) {
-            turnIntoSubmenu.push(...this.headingTurnIntoMenu(protyle, [nodeElement], true));
+            turnIntoSubmenu.push(...this.listTurnIntoMenu(protyle, [nodeElement]));
         } else if (type === "NodeTabs" && allowStructuralMutation) {
             [
                 {menuId: "list", icon: "iconList", label: "list", type: "Tabs2UL"},

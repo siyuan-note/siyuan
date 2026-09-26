@@ -130,6 +130,8 @@ export class ListMindmapView {
     private editingId?: string;
     private pointer?: PointerState;
     private pointerCapture?: HTMLElement;
+    private pinching = false;
+    private pinch?: {distance: number, scale: number};
     private pendingPointerId?: number;
     private endInteraction?: () => void;
     private linkTimer = 0;
@@ -159,6 +161,7 @@ export class ListMindmapView {
         options.host.tabIndex = 0;
         this.toolbar = createElement("div", "mindmap-view__toolbar block__icons");
         this.toolbar.setAttribute("role", "toolbar");
+        this.toolbar.setAttribute("data-prevent-swipe", "true");
         this.viewport = createElement("div", "mindmap-view__viewport");
         this.viewport.setAttribute("data-prevent-swipe", "true");
         this.canvas = createElement("canvas", "mindmap-view__canvas");
@@ -189,6 +192,14 @@ export class ListMindmapView {
         this.listen(this.viewport, "pointermove", this.pointerMove);
         this.listen(this.viewport, "pointerleave", () => this.setHoveredLine());
         this.listen(this.viewport, "pointerup", this.pointerUp);
+        this.listen(this.viewport, "touchstart", this.pinchStart, {passive: false});
+        this.listen(this.viewport, "touchmove", this.pinchMove, {passive: false});
+        this.listen(this.viewport, "touchend", this.pinchEnd, {passive: false});
+        this.listen(this.viewport, "touchcancel", this.pinchEnd, {passive: false});
+        this.listen(window, "blur", () => {
+            this.pinching = false;
+            this.pinch = undefined;
+        });
         this.listen(this.viewport, "contextmenu", (event: MouseEvent) => {
             if (this.suppressPanContextMenu) {
                 event.preventDefault();
@@ -1441,7 +1452,55 @@ export class ListMindmapView {
         }
     }
 
+    private pinchStart = (event: TouchEvent) => {
+        if (event.touches.length !== 2 || Array.from(event.touches).some(touch =>
+            !this.viewport.contains(touch.target as Node) ||
+            (touch.target as Element).closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing"))) {
+            this.pinch = undefined;
+            return;
+        }
+        event.preventDefault();
+        this.cancelPointer();
+        clearTimeout(this.linkTimer);
+        this.suppressLinkClick = true;
+        this.pinching = true;
+        const [first, second] = Array.from(event.touches);
+        this.pinch = {distance: Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY), scale: this.scale};
+    };
+
+    private pinchMove = (event: TouchEvent) => {
+        if (!this.pinching) {
+            return;
+        }
+        event.preventDefault();
+        if (!this.pinch || event.touches.length !== 2 || this.pinch.distance === 0) {
+            return;
+        }
+        const [first, second] = Array.from(event.touches);
+        const bounds = this.viewport.getBoundingClientRect();
+        this.zoomAt(this.pinch.scale * Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY) /
+            this.pinch.distance, (first.clientX + second.clientX) / 2 - bounds.left,
+            (first.clientY + second.clientY) / 2 - bounds.top);
+    };
+
+    private pinchEnd = (event: TouchEvent) => {
+        if (!this.pinching) {
+            return;
+        }
+        event.preventDefault();
+        this.pinch = undefined;
+        // 双指结束后等待所有手指离开，避免剩余手指触发节点拖动或点击。
+        if (event.touches.length === 0) {
+            this.pinching = false;
+        } else if (event.touches.length === 2) {
+            this.pinchStart(event);
+        }
+    };
+
     private pointerDown = (event: PointerEvent) => {
+        if (this.pinching || event.pointerType === "touch" && !event.isPrimary) {
+            return;
+        }
         clearTimeout(this.linkTimer);
         this.suppressLinkClick = false;
         this.suppressPanContextMenu = false;
@@ -1525,6 +1584,9 @@ export class ListMindmapView {
     }
 
     private pointerMove = (event: PointerEvent) => {
+        if (this.pinching) {
+            return;
+        }
         if (this.relationFrom && !this.pointer?.rightButton) {
             const bounds = this.viewport.getBoundingClientRect();
             const id = (event.target as Element).closest<HTMLElement>(".mindmap-view__node")?.dataset.mindmapId;
@@ -1820,7 +1882,7 @@ export class ListMindmapView {
 
     private doubleClick = (event: MouseEvent) => {
         clearTimeout(this.linkTimer);
-        if (this.options.readOnly || this.relationFrom || this.panning) {
+        if (this.options.readOnly || this.relationFrom || this.panning || this.pinching) {
             return;
         }
         const target = event.target as HTMLElement;

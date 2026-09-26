@@ -303,7 +303,6 @@
     display: flex;
     align-items: center;
     min-width: 0;
-    max-height: 64px;
     overflow: hidden;
 
     &:not(:empty) {
@@ -318,7 +317,8 @@
     }
 
     &[data-wrap="true"] .av__celltext {
-      white-space: normal;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     &[data-align="center"] {

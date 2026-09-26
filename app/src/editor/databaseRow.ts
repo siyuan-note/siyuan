@@ -69,6 +69,10 @@ export const newDatabaseRowModel = (options: {
             if (destroyed || currentRenderVersion !== renderVersion || !previousBodyElement.isConnected) {
                 return;
             }
+            if (!element.querySelector(`[data-av-id="${data.avID}"]`)) {
+                custom.tab.parent.removeTab(custom.tab.id);
+                return;
+            }
             // 保留当前内容，待属性和反链加载完成后一次替换，避免刷新期间出现空白。
             previousBodyElement.replaceWith(element);
             updateLayout(custom);

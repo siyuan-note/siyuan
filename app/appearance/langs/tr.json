@@ -1,4 +1,5 @@
 {
+	"removeList": "Liste biçimini kaldır",
 	"entryWindowTopBar": "Yeni pencere üst çubuğu",
 	"archiveEncryptedNotebooks": "Arşivle ve kaldır",
 	"archiveEncryptedNotebooksTip": "Kilitli şifreli not defterlerini ve kurtarma verilerini seçin; ana parola gerekmez",

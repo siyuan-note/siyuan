@@ -43,7 +43,7 @@ export const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string
 
 export const hasAVRenderTemplateResult = (value: IAVCellValue, renderTemplate?: string) =>
     value.type !== "template" &&
-    (typeof value.renderedContent === "string" || Boolean(renderTemplate?.trim()));
+    (value.hasRenderTemplate || typeof value.renderedContent === "string" || Boolean(renderTemplate?.trim()));
 
 export const cellValueIsEmpty = (value: IAVCellValue, useRenderedContent = false, renderTemplate?: string) => {
     if (useRenderedContent && hasAVRenderTemplateResult(value, renderTemplate)) {
@@ -129,7 +129,8 @@ export const genEmptyAVCellValue = (colType: TAVCol): IAVCellValue => {
 };
 
 export const cloneAVCellValueSnapshot = (value: IAVCellValue): IAVCellValue => {
-    const snapshot = JSON.parse(JSON.stringify(value, (key, item) => key === "renderedContent" ? undefined : item)) as IAVCellValue;
+    const snapshot = JSON.parse(JSON.stringify(value, (key, item) =>
+        ["renderedContent", "hasRenderTemplate"].includes(key) ? undefined : item)) as IAVCellValue;
     if ((snapshot.type === "mSelect" || snapshot.type === "select") && !snapshot.mSelect) {
         snapshot.mSelect = [];
     } else if (snapshot.type === "mAsset" && !snapshot.mAsset) {

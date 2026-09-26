@@ -21,6 +21,7 @@ import {addCol, getColIconByType, getColNameByType, showColMenu} from "./col";
 import {deleteRow, duplicateRows, insertRows, selectRow, setPageSize, updateHeader} from "./row";
 import {
     getAVPrimaryCell,
+    getAVSelectedItemIDs,
     getAVSelectedItemInfos,
     getAVSelectedItemPoints,
     getAVSelectedItems,
@@ -215,6 +216,7 @@ const updateDatabaseRow = (protyle: IProtyle, target: HTMLElement) => {
 };
 
 const getAVEditFieldMenuItems = (protyle: IProtyle, blockElement: HTMLElement): IMenu[] => {
+    const singleItem = getAVSelectedItemIDs(blockElement).length === 1;
     return getEditableAVFields(blockElement).map(field => {
         const item: IMenu = {
             iconHTML: field.icon ? unicode2Emoji(field.icon, "b3-menu__icon", true) :
@@ -248,7 +250,7 @@ const getAVEditFieldMenuItems = (protyle: IProtyle, blockElement: HTMLElement): 
                     });
                 }
             }];
-        } else if (["mSelect", "mAsset", "relation"].includes(field.type)) {
+        } else if (["mAsset", "relation"].includes(field.type) || (field.type === "mSelect" && !singleItem)) {
             item.type = "submenu";
             item.submenu = [{
                 iconHTML: "",

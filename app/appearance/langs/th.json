@@ -1,4 +1,5 @@
 {
+	"removeList": "ยกเลิกรูปแบบรายการ",
 	"entryWindowTopBar": "แถบด้านบนของหน้าต่างใหม่",
 	"archiveEncryptedNotebooks": "เก็บถาวรและนำออก",
 	"archiveEncryptedNotebooksTip": "เลือกสมุดบันทึกที่เข้ารหัสและล็อกไว้พร้อมข้อมูลกู้คืน โดยไม่ต้องใช้รหัสผ่านหลัก",

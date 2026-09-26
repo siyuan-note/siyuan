@@ -1,4 +1,5 @@
 {
+	"removeList": "リストを解除",
 	"entryWindowTopBar": "新しいウィンドウのトップバー",
 	"archiveEncryptedNotebooks": "アーカイブして移出",
 	"archiveEncryptedNotebooksTip": "ロック済みの暗号化ノートブックと復元データを選択します。マスターパスワードは不要です",

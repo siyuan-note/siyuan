@@ -2976,6 +2976,8 @@
 		"404": "In einem separaten Arbeitsbereich ohne Verschlüsselungsschlüssel oder verschlüsselte Daten und mit deaktivierter Synchronisierung wiederherstellen",
 		"405": "Authentifizierung fehlgeschlagen. Altes Hauptpasswort und passende Schlüsselsicherung prüfen; das Archiv bleibt erhalten",
 		"406": "Archivierung fehlgeschlagen. Die Originaldaten bleiben erhalten; freien Speicherplatz, Berechtigungen und Ressourcendownloads prüfen",
-		"407": "Vor dem Deaktivieren der Verschlüsselung alle Wiederherstellungsdaten verschlüsselter Notizbücher archivieren"
+		"407": "Vor dem Deaktivieren der Verschlüsselung alle Wiederherstellungsdaten verschlüsselter Notizbücher archivieren",
+		"408": "DNS-Auflösung fehlgeschlagen. Bitte prüfen Sie Ihre Netzwerk-, DNS- oder Proxy-Einstellungen",
+		"409": "Die Netzwerkverbindung wurde unterbrochen oder konnte nicht hergestellt werden. Bitte prüfen Sie Ihre Netzwerk-, Proxy- oder Firewall-Einstellungen"
 	}
 }

@@ -2976,6 +2976,8 @@
 		"404": "Ripristina in uno spazio di lavoro separato senza chiavi o dati cifrati e con sincronizzazione disattivata",
 		"405": "Autenticazione non riuscita. Controlla la vecchia password principale e il backup della chiave corrispondente; l’archivio è stato conservato",
 		"406": "Archiviazione non riuscita. I dati originali sono stati conservati; controlla spazio disponibile, autorizzazioni e download delle risorse",
-		"407": "Archivia tutti i dati di recupero dei quaderni cifrati prima di disattivare la cifratura"
+		"407": "Archivia tutti i dati di recupero dei quaderni cifrati prima di disattivare la cifratura",
+		"408": "Risoluzione DNS non riuscita. Controlla le impostazioni di rete, DNS o proxy",
+		"409": "La connessione di rete è stata interrotta o non è stato possibile stabilirla. Controlla le impostazioni di rete, proxy o firewall"
 	}
 }

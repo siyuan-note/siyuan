@@ -2976,6 +2976,8 @@
 		"404": "Anahtar veya şifreli veri olmayan, eşitlemesi kapalı ayrı bir çalışma alanına geri yükleyin",
 		"405": "Kimlik doğrulama başarısız. Eski ana parolayı ve eşleşen anahtar yedeğini kontrol edin; arşiv korundu",
 		"406": "Arşivleme başarısız. Özgün veriler korundu; boş alanı, izinleri ve kaynak indirmelerini kontrol edin",
-		"407": "Şifrelemeyi kapatmadan önce tüm şifreli not defteri kurtarma verilerini arşivleyin"
+		"407": "Şifrelemeyi kapatmadan önce tüm şifreli not defteri kurtarma verilerini arşivleyin",
+		"408": "DNS çözümlemesi başarısız oldu. Ağ, DNS veya vekil sunucu ayarlarınızı kontrol edin",
+		"409": "Ağ bağlantısı kesildi veya kurulamadı. Ağ, vekil sunucu veya güvenlik duvarı ayarlarınızı kontrol edin"
 	}
 }

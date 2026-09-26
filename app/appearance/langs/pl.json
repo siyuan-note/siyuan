@@ -2976,6 +2976,8 @@
 		"404": "Przywróć w osobnym obszarze roboczym bez kluczy i zaszyfrowanych danych, z wyłączoną synchronizacją",
 		"405": "Uwierzytelnianie nie powiodło się. Sprawdź stare hasło główne i pasującą kopię klucza; archiwum zachowano",
 		"406": "Archiwizacja nie powiodła się. Zachowano dane źródłowe; sprawdź wolne miejsce, uprawnienia i pobieranie zasobów",
-		"407": "Przed wyłączeniem szyfrowania zarchiwizuj wszystkie dane odzyskiwania zaszyfrowanych notesów"
+		"407": "Przed wyłączeniem szyfrowania zarchiwizuj wszystkie dane odzyskiwania zaszyfrowanych notesów",
+		"408": "Rozwiązywanie nazw DNS nie powiodło się. Sprawdź ustawienia sieci, DNS lub serwera proxy",
+		"409": "Połączenie sieciowe zostało przerwane lub nie można go nawiązać. Sprawdź ustawienia sieci, serwera proxy lub zapory"
 	}
 }

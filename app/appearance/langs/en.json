@@ -2976,6 +2976,8 @@
 		"404": "Restore into a separate workspace with no encryption keys or encrypted data and sync turned off",
 		"405": "Authentication failed. Check the old master password and matching key backup; the archive has been preserved",
 		"406": "The archive operation failed. Original data has been preserved; check available space, permissions, and resource downloads",
-		"407": "Archive all encrypted notebook recovery dependencies before disabling encryption"
+		"407": "Archive all encrypted notebook recovery dependencies before disabling encryption",
+		"408": "DNS resolution failed, please check your network, DNS, or proxy settings",
+		"409": "The network connection was interrupted or could not be established, please check your network, proxy, or firewall settings"
 	}
 }

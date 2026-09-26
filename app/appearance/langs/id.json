@@ -2976,6 +2976,8 @@
 		"404": "Pulihkan ke ruang kerja terpisah tanpa kunci atau data terenkripsi dan dengan sinkronisasi dimatikan",
 		"405": "Autentikasi gagal. Periksa kata sandi utama lama dan cadangan kunci yang sesuai; arsip tetap disimpan",
 		"406": "Pengarsipan gagal. Data asli tetap disimpan; periksa ruang kosong, izin, dan unduhan sumber daya",
-		"407": "Arsipkan semua data pemulihan buku catatan terenkripsi sebelum menonaktifkan enkripsi"
+		"407": "Arsipkan semua data pemulihan buku catatan terenkripsi sebelum menonaktifkan enkripsi",
+		"408": "Resolusi DNS gagal. Periksa pengaturan jaringan, DNS, atau proksi",
+		"409": "Koneksi jaringan terputus atau tidak dapat dibuat. Periksa pengaturan jaringan, proksi, atau firewall"
 	}
 }

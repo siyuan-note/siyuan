@@ -2976,6 +2976,8 @@
 		"404": "Obnovte v samostatnom pracovnom priestore bez kľúčov a šifrovaných údajov s vypnutou synchronizáciou",
 		"405": "Overenie zlyhalo. Skontrolujte staré hlavné heslo a zodpovedajúcu zálohu kľúča; archív zostal zachovaný",
 		"406": "Archivácia zlyhala. Pôvodné údaje zostali zachované; skontrolujte voľné miesto, oprávnenia a sťahovanie zdrojov",
-		"407": "Pred vypnutím šifrovania archivujte všetky údaje na obnovu šifrovaných poznámkových blokov"
+		"407": "Pred vypnutím šifrovania archivujte všetky údaje na obnovu šifrovaných poznámkových blokov",
+		"408": "Preklad názvu DNS zlyhal. Skontrolujte nastavenia siete, DNS alebo proxy",
+		"409": "Sieťové pripojenie bolo prerušené alebo sa ho nepodarilo nadviazať. Skontrolujte nastavenia siete, proxy alebo brány firewall"
 	}
 }

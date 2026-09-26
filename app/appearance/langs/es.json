@@ -2976,6 +2976,8 @@
 		"404": "Restaure en un espacio de trabajo independiente sin claves ni datos cifrados y con la sincronización desactivada",
 		"405": "Error de autenticación. Compruebe la contraseña maestra anterior y la copia de clave correspondiente; el archivo se ha conservado",
 		"406": "Error al archivar. Se han conservado los datos originales; compruebe el espacio libre, los permisos y las descargas de recursos",
-		"407": "Archive todos los datos de recuperación de cuadernos cifrados antes de desactivar el cifrado"
+		"407": "Archive todos los datos de recuperación de cuadernos cifrados antes de desactivar el cifrado",
+		"408": "La resolución DNS ha fallado. Compruebe la configuración de red, DNS o proxy",
+		"409": "La conexión de red se ha interrumpido o no se ha podido establecer. Compruebe la configuración de red, proxy o cortafuegos"
 	}
 }

@@ -2976,6 +2976,8 @@
 		"404": "Restaurez dans un espace de travail distinct sans clés ni données chiffrées, avec la synchronisation désactivée",
 		"405": "Échec de l’authentification. Vérifiez l’ancien mot de passe principal et la sauvegarde de clé correspondante ; l’archive est conservée",
 		"406": "Échec de l’archivage. Les données originales sont conservées ; vérifiez l’espace disponible, les autorisations et les téléchargements de ressources",
-		"407": "Archivez toutes les données de récupération des carnets chiffrés avant de désactiver le chiffrement"
+		"407": "Archivez toutes les données de récupération des carnets chiffrés avant de désactiver le chiffrement",
+		"408": "La résolution DNS a échoué. Vérifiez les paramètres du réseau, du DNS ou du proxy",
+		"409": "La connexion réseau a été interrompue ou n’a pas pu être établie. Vérifiez les paramètres du réseau, du proxy ou du pare-feu"
 	}
 }

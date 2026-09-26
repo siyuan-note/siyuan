@@ -2976,6 +2976,8 @@
 		"404": "Restaure em um espaço de trabalho separado sem chaves ou dados criptografados e com sincronização desativada",
 		"405": "Falha na autenticação. Confira a senha mestra antiga e o backup de chave correspondente; o arquivo foi preservado",
 		"406": "Falha no arquivamento. Os dados originais foram preservados; verifique espaço livre, permissões e downloads de recursos",
-		"407": "Arquive todos os dados de recuperação dos cadernos criptografados antes de desativar a criptografia"
+		"407": "Arquive todos os dados de recuperação dos cadernos criptografados antes de desativar a criptografia",
+		"408": "Falha na resolução de DNS. Verifique as configurações de rede, DNS ou proxy",
+		"409": "A conexão de rede foi interrompida ou não pôde ser estabelecida. Verifique as configurações de rede, proxy ou firewall"
 	}
 }

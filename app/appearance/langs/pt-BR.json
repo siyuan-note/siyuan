@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Resumo",
+	"listMindmapSummarySelect": "Selecione o último nó com o mesmo pai no intervalo; os resumos não podem se sobrepor",
 	"mcpOAuthServer": "OAuth do servidor MCP",
 	"mcpOAuthTip": "Exige uma senha de bloqueio ou login OIDC e uma origem HTTPS pública; desativar ou alterar a origem revoga todas as autorizações",
 	"mcpOAuthPublicURL": "Origem HTTPS pública",

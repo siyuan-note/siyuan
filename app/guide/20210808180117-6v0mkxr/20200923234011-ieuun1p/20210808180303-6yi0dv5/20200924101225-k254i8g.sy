@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20260923221935"
+		"updated": "20260926152549"
 	},
 	"Children": [
 		{
@@ -2533,7 +2533,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-r1kfene",
-				"updated": "20260923221935"
+				"updated": "20260926151827"
 			},
 			"Children": [
 				{
@@ -2553,6 +2553,57 @@
 				{
 					"Type": "NodeText",
 					"Data": "A mind map block is a dedicated block type. You can convert an unordered, ordered, or task list into a mind map block and convert it back to a list. Conversion preserves item content, numbering, and task states. Existing mind maps stored as lists are upgraded when their documents are opened for editing."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-kkcg79g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-kkcg79g",
+				"updated": "20260926152549"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select the first node in a range, click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Summary"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the mind map toolbar, then select the last sibling node to add a bracket and summary text. The range must be contiguous and cannot overlap or contain another summary. These steps also work on mobile. You can also use the up and down arrow keys to select the last node, Enter to confirm the range, and Esc to cancel."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-2f033n1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-2f033n1",
+				"updated": "20260926151827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Double-click the summary text, or select the summary and use the edit button at the bottom, to edit it. Enter saves and Esc cancels. You can change its color or delete it using the bottom toolbar; Delete also removes the selected summary. These changes support undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-z49ph4y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-z49ph4y",
+				"updated": "20260926151827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Converting to a list hides the summary but preserves its data; converting back restores it. Nodes inserted inside the range are included automatically. Removing or moving members out shrinks the range; one remaining member keeps the summary, while removing all members removes it. Summary text is an annotation, not an independently searchable or referenceable block. SiYuan-format HTML and PDF previews display summaries."
 				}
 			]
 		},

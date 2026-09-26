@@ -28,7 +28,7 @@ import {openInlineStyleDialog} from "../../toolbar/inlineStyleDialog";
 import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
     moveListMindmapNode, readListMindmap, replaceListMindmapContent,
-    writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch,
+    writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch, normalizeListMindmapSummaryMetadata,
 } from "./model";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
 import {getListMindmapElements, registerListMindmapRoot, registerListMindmapView} from "./render";
@@ -38,6 +38,7 @@ import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
 import {getListMindmapFoldStates} from "./fold";
 import {isMobile} from "../../../util/functions";
+import {getListMindmapSiblingIDs, getListMindmapSummaryRange} from "./summary";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
     restoreFocus: (listID: string, candidateIDs: string[]) => void, destroy: () => void}>();
@@ -323,6 +324,32 @@ class ListMindmapController {
             onRelationDelete: id => this.metadata(metadata => {
                 metadata.relations = metadata.relations.filter(item => item.id !== id);
             }),
+            onSummaryAdd: async (from, to) => {
+                const id = Lute.NewNodeID();
+                const saved = await this.change(() => {
+                    const model = readListMindmap(list);
+                    const nodeIds = getListMindmapSummaryRange(model, from, to);
+                    if (!nodeIds.length) {
+                        return false;
+                    }
+                    model.metadata.summaries ||= [];
+                    model.metadata.summaries.push({id, parentId: model.nodes.get(from).parentId,
+                        nodeIds, label: window.siyuan.languages.listMindmapSummary});
+                    writeListMindmapMetadata(list, model.metadata);
+                });
+                return saved ? id : undefined;
+            },
+            onSummaryChange: (id, patch, expected) => this.metadata(metadata => {
+                const summary = metadata.summaries?.find(item => item.id === id);
+                if (!summary || (expected !== undefined && JSON.stringify(summary) !== expected)) {
+                    showMessage(window.siyuan.languages.listMindmapStale);
+                    return false;
+                }
+                Object.assign(summary, patch);
+            }),
+            onSummaryDelete: id => this.metadata(metadata => {
+                metadata.summaries = metadata.summaries?.filter(item => item.id !== id) || [];
+            }),
         });
         list.dataset.mindmapViewRendered = "true";
         this.unregisterVisible = registerListMindmapView(list, this.view, this.host);
@@ -419,9 +446,11 @@ class ListMindmapController {
         }
         const before = cleanListMindmapHTML(this.list.outerHTML);
         try {
+            const previous = getListMindmapSiblingIDs(readListMindmap(this.list));
             if (change() === false) {
                 return false;
             }
+            normalizeListMindmapSummaryMetadata(this.list, previous);
             updateTransaction(this.owner, this.list, before);
             this.refresh();
             return true;

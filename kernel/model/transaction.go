@@ -2621,6 +2621,7 @@ type Transaction struct {
 	attributeViewDeletionErr  error
 	structureCheckNodes       map[*ast.Node]struct{}
 	crossTreeMoveRefRefreshes []crossTreeMoveRefRefresh
+	mindmapSummarySiblings    map[string]map[string][]string
 
 	luteEngine *lute.Lute
 	m          *sync.Mutex
@@ -2673,6 +2674,7 @@ func (tx *Transaction) begin() (err error) {
 	tx.templateDocTreeRootSnapshot = nil
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
+	tx.mindmapSummarySiblings = nil
 	tx.mutatedRootIDs = nil
 	tx.changedRootIDs = nil
 	tx.boxIcons = map[string]string{}
@@ -2903,6 +2905,7 @@ func (tx *Transaction) commit() (err error) {
 // releaseCommittedResources 释放执行期间的文档树；操作中的撤销快照及广播所需的文档 ID 继续保留。
 func (tx *Transaction) releaseCommittedResources() {
 	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
+	tx.mindmapSummarySiblings = nil
 	tx.relatedAvIDs = nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
@@ -2919,6 +2922,7 @@ func (tx *Transaction) releaseCommittedResources() {
 }
 
 func (tx *Transaction) rollback() {
+	tx.mindmapSummarySiblings = nil
 	tx.finishAttributeViewMutation(true)
 	for _, tree := range tx.blockSwapOriginalTrees {
 		treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
@@ -3030,6 +3034,7 @@ func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.T
 		return
 	}
 	tx.trees[bt.RootID] = ret
+	tx.captureListMindmapSummarySiblings(ret)
 	return
 }
 
@@ -3062,6 +3067,7 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 		return
 	}
 	tx.trees[rootID] = ret
+	tx.captureListMindmapSummarySiblings(ret)
 	return
 }
 

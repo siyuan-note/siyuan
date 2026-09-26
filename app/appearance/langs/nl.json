@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Samenvatting",
+	"listMindmapSummarySelect": "Selecteer de laatste knoop met dezelfde ouder in het bereik; samenvattingen mogen niet overlappen",
 	"mcpOAuthServer": "OAuth voor MCP-server",
 	"mcpOAuthTip": "Vereist een vergrendelwachtwoord of OIDC-aanmelding en een openbare HTTPS-oorsprong; uitschakelen of wijzigen van de oorsprong trekt alle machtigingen in",
 	"mcpOAuthPublicURL": "Openbare HTTPS-oorsprong",

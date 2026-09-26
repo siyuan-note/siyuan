@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Súhrn",
+	"listMindmapSummarySelect": "Vyberte posledný uzol s rovnakým rodičom v rozsahu; súhrny sa nesmú prekrývať",
 	"mcpOAuthServer": "OAuth servera MCP",
 	"mcpOAuthTip": "Vyžaduje heslo uzamknutia alebo prihlásenie OIDC a verejný pôvod HTTPS; vypnutie alebo zmena pôvodu odvolá všetky autorizácie",
 	"mcpOAuthPublicURL": "Verejný pôvod HTTPS",

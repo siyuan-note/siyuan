@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Summary",
+	"listMindmapSummarySelect": "Select the last sibling node in the summary range; summaries cannot overlap",
 	"mcpOAuthServer": "MCP server OAuth",
 	"mcpOAuthTip": "Requires a lock screen password or OIDC login and a public HTTPS origin; disabling or changing the origin revokes all authorizations",
 	"mcpOAuthPublicURL": "Public HTTPS origin",

@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "סיכום",
+	"listMindmapSummarySelect": "יש לבחור את הצומת האח האחרון בטווח הסיכום; סיכומים אינם יכולים לחפוף",
 	"mcpOAuthServer": "OAuth של שרת MCP",
 	"mcpOAuthTip": "נדרשים סיסמת נעילת מסך או כניסת OIDC ומקור HTTPS ציבורי; השבתה או שינוי המקור מבטלים את כל ההרשאות",
 	"mcpOAuthPublicURL": "מקור HTTPS ציבורי",

@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260926131843"
+		"updated": "20260926152753"
 	},
 	"Children": [
 		{
@@ -12573,7 +12573,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20260925094732"
+				"updated": "20260926152753"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13075,6 +13075,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260926152753-0k1m0f6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926152753-0k1m0f6",
+				"updated": "20260926152753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選擇概要範圍時，使用上下方向鍵選擇末端同層節點，Enter 確認，Esc 取消。編輯概要文字時，Enter 儲存，Esc 取消。選取概要後，Delete 或 Backspace 刪除概要。"
 				}
 			]
 		},

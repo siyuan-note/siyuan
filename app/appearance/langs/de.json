@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Zusammenfassung",
+	"listMindmapSummarySelect": "Wähle den letzten gleichgeordneten Knoten des Bereichs; Zusammenfassungen dürfen sich nicht überschneiden",
 	"mcpOAuthServer": "OAuth für MCP-Server",
 	"mcpOAuthTip": "Erfordert ein Sperrbildschirmpasswort oder eine OIDC-Anmeldung und einen öffentlichen HTTPS-Ursprung; Deaktivieren oder Ändern des Ursprungs widerruft alle Autorisierungen",
 	"mcpOAuthPublicURL": "Öffentlicher HTTPS-Ursprung",

@@ -66,6 +66,27 @@ test("manual relation routes are optional, versioned and validated without dropp
     }
 });
 
+test("summary metadata is optional and rejects damaged groups while retaining extension fields", () => {
+    const old = '{"version":1,"rootTitle":"Root","nodes":{},"relations":[]}';
+    assert.equal(JSON.stringify(parseListMindmapMetadata(old)), old);
+    const summary = {id: "s", parentId: "root", nodeIds: ["a", "b"], label: "Summary", extension: "keep"};
+    const value = {...JSON.parse(old), summaries: [summary]};
+    assert.equal(JSON.stringify(parseListMindmapMetadata(JSON.stringify(value))), JSON.stringify(value));
+    for (const summaries of [null, {}, [{...summary, nodeIds: []}], [{...summary, nodeIds: ["a", "a"]}],
+        [{...summary, nodeIds: ["root"]}], [{...summary, label: 1}], [{...summary, color: 1}],
+        [summary, {...summary, id: "other"}], [summary, {...summary, nodeIds: ["c"]}]]) {
+        assert.throws(() => parseListMindmapMetadata(JSON.stringify({...value, summaries})), /Invalid list mindmap metadata/);
+    }
+});
+
+test("large summary labels reserve space on both sides of the group", () => {
+    const root = measured("root", 100, 40, [measured("before"), measured("a"), measured("b"), measured("after")]);
+    const {nodes} = layoutListMindmap(root, {summaries: [{nodeIds: ["a", "b"], height: 500}]});
+    const center = (nodes.get("a").y + nodes.get("b").y + 40) / 2;
+    assert.ok(center - 250 > nodes.get("before").y + 40);
+    assert.ok(center + 250 < nodes.get("after").y);
+});
+
 test("variable-size mindmap branches keep their order and never overlap", () => {
     const root = measured("root", 90, 55, [
         measured("a", 220, 200, [measured("a1", 150, 36), measured("a2", 90, 92)]),
@@ -128,6 +149,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
+        "getListMindmapSiblingIDs, normalizeListMindmapSummaryMetadata, getListMindmapSummaryRange, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
         "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView, registerListMindmapView, resolveVisibleListMindmapBlock};")(
         async (element: Element) => {
@@ -2476,14 +2498,15 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     taskParent.append(taskHost);
     const operations: {id: string, before: string, after: string}[] = [];
     const taskAPI = new Function("readListMindmap", "canEdit", "Constants", "dayjs", "updateTransaction", "showMessage",
-        "getListMindmapTabItem", "getTabTask", "cleanListMindmapHTML",
+        "getListMindmapTabItem", "getTabTask", "cleanListMindmapHTML", "getListMindmapSiblingIDs", "normalizeListMindmapSummaryMetadata",
         taskSource + "; return {setTaskListItemMarker, nextTaskListMarker, nextTaskListStatus, TaskController};")(
         api.readListMindmap, (owner: any) => !owner.disabled && !owner.history && !owner.embedded,
         {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing"},
         () => ({format: () => "20260920000000"}),
         (_owner: unknown, element: HTMLElement, before: string) => operations.push({id: element.dataset.nodeId,
             before, after: api.cleanListMindmapHTML(element.outerHTML)}), () => check.fail("Task update failed"),
-        api.getListMindmapTabItem, api.getTabTask, api.cleanListMindmapHTML);
+        api.getListMindmapTabItem, api.getTabTask, api.cleanListMindmapHTML,
+        api.getListMindmapSiblingIDs, api.normalizeListMindmapSummaryMetadata);
     const owner = {disabled: false, history: false, embedded: false, options: {action: [] as string[]}};
     let finishTask: boolean | Promise<boolean> = true;
     let menus = 0;
@@ -2851,6 +2874,111 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     dragParent.remove();
     taskStyle.remove();
     hostParent.remove();
+
+    // 概要的触屏点选、编辑、复制及列表往返使用真实 DOM 和 Lute。
+    const summaryList = reset("- Root\n  - First\n    - Descendant\n  - Second\n  - Third\n");
+    const summaryModel = api.readListMindmap(summaryList);
+    const summaryIds = summaryModel.root.children.map((node: ListMindmapNode) => node.id);
+    const summaryHost = document.createElement("div");
+    summaryHost.style.width = "700px";
+    document.body.append(summaryHost);
+    let summaryView: any;
+    summaryView = new api.ListMindmapView({host: summaryHost, model: summaryModel, onExit: () => {},
+        labels: new Proxy({}, {get: (_target, key) => String(key)}),
+        onSummaryAdd: async (from: string, to: string) => {
+            const model = api.readListMindmap(summaryList);
+            const nodeIds = api.getListMindmapSummaryRange(model, from, to);
+            check.equal(nodeIds.length, 3);
+            model.metadata.summaries = [{id: "summary", parentId: model.root.id, nodeIds, label: "Summary"}];
+            api.writeListMindmapMetadata(summaryList, model.metadata);
+            summaryView.update(api.readListMindmap(summaryList));
+            return "summary";
+        },
+        onSummaryChange: (id: string, patch: object, expected: string) => {
+            const model = api.readListMindmap(summaryList);
+            const summary = model.metadata.summaries.find((item: {id: string}) => item.id === id);
+            check.equal(JSON.stringify(summary), expected);
+            Object.assign(summary, patch);
+            api.writeListMindmapMetadata(summaryList, model.metadata);
+            summaryView.update(api.readListMindmap(summaryList));
+        }});
+    await settle();
+    summaryView.focusNode(summaryIds[0]);
+    const summaryButton = summaryHost.querySelector<HTMLButtonElement>('[aria-label="listMindmapSummary"]');
+    check.equal(summaryButton.disabled, false);
+    summaryButton.click();
+    check.equal(summaryButton.getAttribute("aria-pressed"), "true");
+    summaryHost.querySelector(`[data-mindmap-id="${summaryIds[2]}"]`).dispatchEvent(new PointerEvent("pointerdown",
+        {bubbles: true, pointerId: 71, pointerType: "touch", isPrimary: true, button: 0}));
+    await settle();
+    await settle();
+    const summaryInput = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
+    check.ok(summaryInput, "new summaries enter text editing on touch selection");
+    summaryInput.value = "<script>plain text</script> " + "Long summary ".repeat(25);
+    summaryInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    await settle();
+    const summaryLabel = summaryHost.querySelector<HTMLElement>(".mindmap-view__summary");
+    check.ok(summaryLabel.textContent.startsWith("<script>"));
+    check.equal(summaryLabel.querySelector("script"), null);
+    const savedSummary = api.readListMindmap(summaryList).metadata.summaries[0];
+    const originalIDs = ids(summaryList);
+    api.retagMindmapBranch(summaryList, true);
+    const plain = api.convertListMindmapToList(summaryList, "UL2OL", lute);
+    const converted = document.createElement("div");
+    converted.innerHTML = plain;
+    check.equal(converted.firstElementChild.getAttribute("data-type"), "NodeList");
+    check.deepEqual(api.readListMindmap(converted.firstElementChild).metadata.summaries, [savedSummary]);
+    api.retagMindmapBranch(converted.firstElementChild, true);
+    check.deepEqual(ids(converted.firstElementChild as HTMLElement), originalIDs);
+    check.deepEqual(api.readListMindmap(converted.firstElementChild).metadata.summaries, [savedSummary]);
+    const copied = summaryList.cloneNode(true) as HTMLElement;
+    const copiedIDs = new Map<string, string>();
+    [copied, ...Array.from(copied.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(element => {
+        const id = Lute.NewNodeID();
+        copiedIDs.set(element.dataset.nodeId, id);
+        element.dataset.nodeId = id;
+    });
+    api.remapListMindmapIDs(copied, copiedIDs);
+    const copiedSummary = api.readListMindmap(copied).metadata.summaries[0];
+    check.equal(copiedSummary.parentId, copiedIDs.get(savedSummary.parentId));
+    check.deepEqual(copiedSummary.nodeIds, savedSummary.nodeIds.map((id: string) => copiedIDs.get(id)));
+    const keyboardModel = api.readListMindmap(summaryList);
+    keyboardModel.metadata.summaries = [];
+    api.writeListMindmapMetadata(summaryList, keyboardModel.metadata);
+    summaryView.update(api.readListMindmap(summaryList));
+    summaryView.focusNode(summaryIds[0]);
+    summaryButton.click();
+    for (const key of ["ArrowDown", "ArrowDown", "Enter"]) {
+        summaryHost.dispatchEvent(new KeyboardEvent("keydown", {key, bubbles: true}));
+    }
+    await settle();
+    await settle();
+    const keyboardInput = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
+    check.ok(keyboardInput, "keyboard range selection creates an editable summary");
+    keyboardInput.value = savedSummary.label;
+    keyboardInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    await settle();
+    summaryView.destroy();
+    summaryHost.style.width = "280px";
+    summaryView = new api.ListMindmapView({host: summaryHost, model: api.readListMindmap(summaryList),
+        readOnly: true, printLayout: true, onExit: () => {}});
+    await settle();
+    await settle();
+    const printedLabel = summaryHost.querySelector<HTMLElement>(".mindmap-view__summary");
+    const printedBounds = printedLabel.getBoundingClientRect();
+    const printViewport = summaryHost.querySelector(".mindmap-view__viewport").getBoundingClientRect();
+    check.ok(printedBounds.right <= printViewport.right + 1, "narrow PDF previews include the full summary width");
+    check.ok(printedBounds.bottom <= printViewport.bottom + 1, "PDF previews include tall summary labels");
+    printedLabel.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    check.equal(summaryHost.querySelector(".mindmap-view__summary-editor"), null);
+    check.equal(summaryHost.querySelector('[aria-label="listMindmapSummary"]'), null);
+    summaryView.destroy();
+    summaryHost.remove();
+    api.deleteListMindmapNode(summaryList, summaryIds[0]);
+    api.deleteListMindmapNode(summaryList, summaryIds[1]);
+    check.deepEqual(api.readListMindmap(summaryList).metadata.summaries[0].nodeIds, [summaryIds[2]]);
+    api.deleteListMindmapNode(summaryList, summaryIds[2]);
+    check.deepEqual(api.readListMindmap(summaryList).metadata.summaries, []);
     style.remove();
     return "List mindmap DOM cases passed";
 };
@@ -2920,12 +3048,13 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         "return {tabsRender, destroyTabsRender, getTabTask, revealTabsForTarget};})();\n";
     const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +
         compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
-        compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "fold.ts")) +
+        compile(path.join(__dirname, "summary.ts")) + compile(path.join(__dirname, "model.ts")) + compile(path.join(__dirname, "fold.ts")) +
         compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "pan.ts")) +
         compile(path.join(__dirname, "view.ts")) +
         compile(path.join(__dirname, "legacy.ts")) + compile(path.join(__dirname, "migrate.ts")) +
         compile(path.join(__dirname, "create.ts")) + compile(path.join(__dirname, "render.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_button.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_color.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_tooltips.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/protyle/_mindmap-view.scss")).css;

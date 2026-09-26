@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260926131843"
+		"updated": "20260926152753"
 	},
 	"Children": [
 		{
@@ -12567,7 +12567,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20260925094732"
+				"updated": "20260926152753"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13157,6 +13157,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260926152753-tamny2o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926152753-tamny2o",
+				"updated": "20260926152753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选择概要范围时，使用上下方向键选择末端同级节点，Enter 确认，Esc 取消。编辑概要文字时，Enter 保存，Esc 取消。选中概要后，Delete 或 Backspace 删除概要。"
 				}
 			]
 		},

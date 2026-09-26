@@ -649,6 +649,25 @@
     }
   }
 
+  &__summary {
+    position: absolute;
+    width: max-content;
+    max-width: 240px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+
+    &--selected {
+      outline: 2px solid var(--b3-theme-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  &__summary-editor {
+    position: absolute;
+    width: 240px;
+    z-index: 6;
+  }
+
   &__route-handle {
     position: absolute;
     z-index: 4;
@@ -801,6 +820,7 @@
     }
 
     &__node--selected,
+    &__summary--selected,
     &__relation--selected {
       outline: none;
     }

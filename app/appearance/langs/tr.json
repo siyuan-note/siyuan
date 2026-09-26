@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Özet",
+	"listMindmapSummarySelect": "Özet aralığında aynı üst düğüme bağlı son düğümü seçin; özetler çakışamaz",
 	"mcpOAuthServer": "MCP sunucusu OAuth",
 	"mcpOAuthTip": "Ekran kilidi parolası veya OIDC oturumu ve herkese açık bir HTTPS kaynağı gerektirir; kapatmak veya kaynağı değiştirmek tüm yetkileri iptal eder",
 	"mcpOAuthPublicURL": "Herkese açık HTTPS kaynağı",

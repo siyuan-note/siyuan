@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "ملخص",
+	"listMindmapSummarySelect": "حدد آخر عقدة شقيقة في نطاق الملخص؛ لا يمكن أن تتداخل الملخصات",
 	"mcpOAuthServer": "OAuth لخادم MCP",
 	"mcpOAuthTip": "يتطلب كلمة مرور قفل الشاشة أو تسجيل دخول OIDC وأصل HTTPS عامًا؛ يؤدي التعطيل أو تغيير الأصل إلى إلغاء جميع التفويضات",
 	"mcpOAuthPublicURL": "أصل HTTPS العام",

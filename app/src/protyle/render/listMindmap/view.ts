@@ -16,6 +16,8 @@ import {destroyTabsRender, tabsRender} from "../tabsRender";
 import {getListMindmapFoldStates} from "./fold";
 import type {ListMindmapFoldTarget} from "./fold";
 import {clampMindmapPanOffset} from "./pan";
+import {getListMindmapSummaryRange, layoutListMindmapSummaries} from "./summary";
+import type {ListMindmapSummary, ListMindmapSummaryPosition} from "./summary";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -57,6 +59,9 @@ export interface ListMindmapViewOptions {
     onRelationAdd?: (from: string, to: string) => void;
     onRelationChange?: (id: string, patch: Partial<ListMindmapRelation>, expected?: string) => void;
     onRelationDelete?: (id: string) => void;
+    onSummaryAdd?: (from: string, to: string) => Promise<string | undefined>;
+    onSummaryChange?: (id: string, patch: Pick<Partial<ListMindmapSummary>, "label" | "color">, expected?: string) => void;
+    onSummaryDelete?: (id: string) => void;
     onExit: () => void;
 }
 
@@ -105,6 +110,13 @@ export class ListMindmapView {
     private readonly nodeElements = new Map<string, HTMLDivElement>();
     private readonly previewID = `mindmap-view-${Lute.NewNodeID()}-`;
     private readonly relationElements = new Map<string, HTMLButtonElement>();
+    private readonly summaryElements = new Map<string, HTMLButtonElement>();
+    private summaryPositions = new Map<string, ListMindmapSummaryPosition>();
+    private readonly summaryStatus = createElement("div", "mindmap-view__route-status");
+    private selectedSummary?: string;
+    private summaryFrom?: string;
+    private finishSummaryEdit?: (save: boolean) => void;
+    private editingSummary?: string;
     private readonly buttons = new Map<string, HTMLButtonElement>();
     private readonly folded = new Map<string, boolean>();
     private levelSelect?: HTMLSelectElement;
@@ -119,7 +131,7 @@ export class ListMindmapView {
     private selectedEdge?: string;
     private hoveredLine?: string;
     private finishRelationEdit?: (save: boolean) => void;
-    private linePaths: {id: string, relation: boolean, path: Path2D, end?: MindmapRoutePoint}[] = [];
+    private linePaths: {id: string, relation: boolean, summary?: boolean, path: Path2D, end?: MindmapRoutePoint}[] = [];
     private relationRoutes = new Map<string, MindmapRoutePoint[]>();
     private readonly routeHandles = new Map<string, HTMLButtonElement>();
     private readonly routeStatus = createElement("div", "mindmap-view__route-status");
@@ -177,6 +189,10 @@ export class ListMindmapView {
         this.routeStatus.hidden = true;
         this.routeStatus.setAttribute("role", "status");
         options.host.append(this.toolbar, this.viewport, this.inspector, this.tooltip, this.colorProbe, this.routeStatus);
+        this.summaryStatus.hidden = true;
+        this.summaryStatus.setAttribute("role", "status");
+        this.summaryStatus.textContent = this.label("listMindmapSummarySelect");
+        options.host.append(this.summaryStatus);
         this.createToolbar();
         this.listen(document, "pointerdown", this.dismissControls, {capture: true});
         this.listen(options.host, "pointerover", this.showButtonTooltip);
@@ -284,7 +300,8 @@ export class ListMindmapView {
 
     private showButtonTooltip = (event: Event) => {
         const button = (event.target as Element).closest<HTMLButtonElement>("button[aria-label]");
-        if (!button || !this.options.host.contains(button) || button.classList.contains("mindmap-view__relation")) {
+        if (!button || !this.options.host.contains(button) || button.classList.contains("mindmap-view__relation") ||
+            button.classList.contains("mindmap-view__summary")) {
             this.tooltip.hidden = true;
             return;
         }
@@ -313,35 +330,40 @@ export class ListMindmapView {
 
     private clearSelection() {
         this.inspector.hidden = true;
-        if (!this.selectedId && !this.selectedRelation && !this.selectedEdge && !this.relationFrom) {
+        if (!this.selectedId && !this.selectedRelation && !this.selectedEdge && !this.relationFrom &&
+            !this.selectedSummary && !this.summaryFrom) {
             return;
         }
         this.selectedId = undefined;
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
         this.relationFrom = undefined;
+        this.selectedSummary = undefined;
+        this.summaryFrom = undefined;
         this.updateSelection();
     }
 
     private dismissControls = (event: PointerEvent) => {
         const target = event.target as Node;
         this.tooltip.hidden = true;
-        if (target instanceof Element && target.closest(".mindmap-view__relation-editor, .mindmap-view__route-handle")) {
+        if (target instanceof Element && target.closest(".mindmap-view__relation-editor, .mindmap-view__route-handle, .mindmap-view__summary-editor")) {
             return;
         }
         if (this.inspector.contains(target) || this.buttons.get("style")?.contains(target) ||
             this.buttons.get("relation")?.contains(target) || this.buttons.get("expandLevel")?.contains(target) ||
+            this.buttons.get("summary")?.contains(target) ||
             this.levelSelect?.contains(target)) {
             return;
         }
         this.inspector.hidden = true;
-        const node = target instanceof Element && target.closest(".mindmap-view__node, .mindmap-view__relation");
+        const node = target instanceof Element && target.closest(".mindmap-view__node, .mindmap-view__relation, .mindmap-view__summary");
         if (!node || !this.options.host.contains(node)) {
             this.clearSelection();
         }
     };
 
     private finishThen(action: () => void) {
+        this.finishSummaryEdit?.(true);
         const finished = this.options.finishEdit?.();
         if (finished instanceof Promise) {
             void finished.then(result => {
@@ -359,6 +381,8 @@ export class ListMindmapView {
             return;
         }
         this.options.readOnly = value;
+        this.finishSummaryEdit?.(false);
+        this.summaryFrom = undefined;
         this.cancelPointer();
         this.relationFrom = undefined;
         this.inspector.hidden = true;
@@ -389,7 +413,15 @@ export class ListMindmapView {
         };
         this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"));
         if (!this.options.readOnly) {
+            add("summary", "listMindmapSummary", "iconGroups", () => {
+                this.setPanning(false);
+                this.inspector.hidden = true;
+                this.relationFrom = undefined;
+                this.summaryFrom = this.summaryFrom ? undefined : this.selectedId;
+                this.updateSelection();
+            });
             add("relation", "connect", "iconRoute", () => {
+                this.summaryFrom = undefined;
                 this.setPanning(false);
                 this.inspector.hidden = true;
                 this.relationFrom = this.relationFrom ? undefined : this.selectedId;
@@ -453,6 +485,9 @@ export class ListMindmapView {
     }
 
     private setPanning(value: boolean) {
+        if (value) {
+            this.summaryFrom = undefined;
+        }
         this.panning = value;
         this.viewport.classList.toggle("mindmap-view__viewport--pan", value);
         const button = this.buttons.get("pan");
@@ -468,6 +503,7 @@ export class ListMindmapView {
             return;
         }
         this.model = model;
+        this.summaryFrom = undefined;
         if (this.levelSelect) {
             const placeholder = new Option(this.label("expandLevel"), "");
             placeholder.disabled = true;
@@ -638,7 +674,12 @@ export class ListMindmapView {
             this.selectedEdge = undefined;
             this.inspector.hidden = true;
         }
+        if (this.selectedSummary && !model.metadata.summaries?.some(summary => summary.id === this.selectedSummary)) {
+            this.selectedSummary = undefined;
+            this.inspector.hidden = true;
+        }
         this.updateRelations();
+        this.updateSummaries();
         this.updateSelection();
         this.renderInspector();
         this.refreshLayout();
@@ -740,7 +781,15 @@ export class ListMindmapView {
                 this.model.metadata.relations.find(relation => relation.id === this.selectedRelation)?.from;
             const previous = anchorId ? this.positions.get(anchorId) : undefined;
             const layoutRoot = makeLayoutNode(this.model.root.id);
-            let result = layoutListMindmap(layoutRoot);
+            const summarySizes = new Map<string, {width: number, height: number}>();
+            this.summaryElements.forEach((element, id) => {
+                element.hidden = false;
+                summarySizes.set(id, {width: Math.max(1, element.offsetWidth), height: Math.max(1, element.offsetHeight)});
+            });
+            const summaries = (this.model.metadata.summaries || []).map(summary => ({
+                nodeIds: summary.nodeIds, height: summarySizes.get(summary.id)?.height || 0,
+            }));
+            let result = layoutListMindmap(layoutRoot, {summaries});
             const horizontalGaps = new Map<string, number>();
             const verticalGaps = new Map<string, number>();
             const reserve = (gaps: Map<string, number>, id: string, size: number) => {
@@ -781,15 +830,21 @@ export class ListMindmapView {
                 }
             });
             if (horizontalGaps.size || verticalGaps.size) {
-                result = layoutListMindmap(layoutRoot, {horizontalGaps, verticalGaps});
+                result = layoutListMindmap(layoutRoot, {horizontalGaps, verticalGaps, summaries});
             }
             this.positions = result.nodes;
+            this.summaryPositions = layoutListMindmapSummaries(this.model, this.positions, summarySizes);
             this.relationRoutes.clear();
             this.fallbackRoutes.clear();
             this.edges = result.edges;
             this.bounds = result;
             let top = 0;
             let left = 0;
+            this.summaryPositions.forEach(position => {
+                top = Math.min(top, position.top - 32);
+                this.bounds.width = Math.max(this.bounds.width, position.labelX + position.width + 32);
+                this.bounds.height = Math.max(this.bounds.height, position.bottom + 32);
+            });
             // 每条连接独立避让节点和按钮，已有关系线不影响路径选择。
             this.model.metadata.relations.forEach((relation) => {
                 const from = this.positions.get(relation.from);
@@ -814,6 +869,13 @@ export class ListMindmapView {
                     point.x -= left;
                     point.y -= top;
                 }));
+                this.summaryPositions.forEach(position => {
+                    position.x -= left;
+                    position.labelX -= left;
+                    position.top -= top;
+                    position.bottom -= top;
+                    position.labelY -= top;
+                });
                 this.bounds.height -= top;
                 this.bounds.width -= left;
             }
@@ -849,6 +911,145 @@ export class ListMindmapView {
         });
     }
 
+    private updateSummaries() {
+        this.summaryElements.forEach((element, id) => {
+            if (!this.model.metadata.summaries?.some(summary => summary.id === id)) {
+                this.resizeObserver.unobserve(element);
+                element.remove();
+                this.summaryElements.delete(id);
+            }
+        });
+        (this.model.metadata.summaries || []).forEach(summary => {
+            let element = this.summaryElements.get(summary.id);
+            if (!element) {
+                element = createElement("button", "b3-button b3-button--outline mindmap-view__summary");
+                element.type = "button";
+                element.dataset.summaryId = summary.id;
+                element.addEventListener("click", event => {
+                    event.stopPropagation();
+                    this.finishThen(() => this.selectSummary(summary.id));
+                });
+                this.summaryElements.set(summary.id, element);
+                this.world.append(element);
+                this.resizeObserver.observe(element);
+            }
+            element.textContent = summary.label || this.label("listMindmapSummary");
+            element.setAttribute("aria-label", element.textContent);
+            element.style.color = summary.color || "";
+        });
+    }
+
+    private selectSummary(id: string) {
+        this.selectedSummary = id;
+        this.selectedId = undefined;
+        this.selectedRelation = undefined;
+        this.selectedEdge = undefined;
+        this.relationFrom = undefined;
+        this.summaryFrom = undefined;
+        this.inspector.hidden = !!this.options.readOnly;
+        this.updateSelection();
+        this.renderInspector();
+    }
+
+    private finishSummaryRange(id: string) {
+        const from = this.summaryFrom;
+        if (!from || !getListMindmapSummaryRange(this.model, from, id).length) {
+            return;
+        }
+        this.summaryFrom = undefined;
+        this.updateSelection();
+        void this.options.onSummaryAdd?.(from, id).then(summaryId => {
+            if (summaryId && !this.destroyed) {
+                this.selectSummary(summaryId);
+                requestAnimationFrame(() => {
+                    if (!this.destroyed && this.selectedSummary === summaryId) {
+                        this.editSummaryLabel(summaryId);
+                    }
+                });
+            }
+        }).catch(error => console.error(error));
+    }
+
+    private editSummaryLabel(id: string) {
+        const summary = this.model.metadata.summaries?.find(item => item.id === id);
+        const position = this.summaryPositions.get(id);
+        if (this.options.readOnly || !summary || !position) {
+            return;
+        }
+        this.finishSummaryEdit?.(true);
+        this.finishRelationEdit?.(true);
+        this.inspector.hidden = true;
+        const expected = JSON.stringify(summary);
+        const input = createElement("input", "b3-text-field mindmap-view__summary-editor");
+        input.type = "text";
+        input.value = summary.label;
+        input.setAttribute("aria-label", this.label("listMindmapSummary"));
+        input.style.left = `${position.labelX}px`;
+        input.style.top = `${position.labelY}px`;
+        this.editingSummary = id;
+        let finished = false;
+        const finish = (save: boolean) => {
+            if (finished) {
+                return;
+            }
+            finished = true;
+            this.finishSummaryEdit = undefined;
+            this.editingSummary = undefined;
+            input.remove();
+            if (save && input.value !== summary.label) {
+                this.options.onSummaryChange?.(id, {label: input.value}, expected);
+            }
+            this.draw();
+        };
+        this.finishSummaryEdit = finish;
+        input.addEventListener("blur", () => finish(true));
+        input.addEventListener("keydown", event => {
+            if (!event.isComposing && (event.key === "Enter" || event.key === "Escape")) {
+                event.preventDefault();
+                event.stopPropagation();
+                finish(event.key === "Enter");
+                this.options.host.focus({preventScroll: true});
+            }
+        });
+        this.world.append(input);
+        this.draw();
+        input.focus();
+        input.select();
+    }
+
+    private drawSummaries(context: CanvasRenderingContext2D, resolveColor: (color: string) => string, primary: string) {
+        (this.model.metadata.summaries || []).forEach(summary => {
+            const position = this.summaryPositions.get(summary.id);
+            const element = this.summaryElements.get(summary.id);
+            if (!element) {
+                return;
+            }
+            element.hidden = !position;
+            if (!position) {
+                return;
+            }
+            const {x, top, bottom, labelX, labelY} = position;
+            const path = new Path2D();
+            path.moveTo(x - 10, top);
+            path.lineTo(x, top);
+            path.lineTo(x, bottom);
+            path.lineTo(x - 10, bottom);
+            path.moveTo(x, (top + bottom) / 2);
+            path.lineTo(labelX - 6, (top + bottom) / 2);
+            const selected = this.selectedSummary === summary.id && !this.printTransform && !this.options.printLayout;
+            context.strokeStyle = selected ? primary : resolveColor(summary.color);
+            context.lineWidth = selected ? 2.5 : 1.5;
+            context.setLineDash([]);
+            context.stroke(path);
+            this.linePaths.push({id: summary.id, relation: false, summary: true, path});
+            element.style.left = `${labelX}px`;
+            element.style.top = `${labelY}px`;
+            element.style.visibility = this.editingSummary === summary.id ? "hidden" : "";
+            element.classList.toggle("mindmap-view__summary--selected", selected);
+            element.setAttribute("aria-pressed", String(selected));
+        });
+    }
+
     private updateRelations() {
         this.relationElements.forEach((element, id) => {
             if (!this.model.metadata.relations.some(relation => relation.id === id)) {
@@ -866,6 +1067,8 @@ export class ListMindmapView {
                     event.stopPropagation();
                     this.finishThen(() => {
                         this.selectedRelation = relation.id;
+                        this.selectedSummary = undefined;
+                        this.summaryFrom = undefined;
                         this.selectedEdge = undefined;
                         this.relationFrom = undefined;
                         this.selectedId = undefined;
@@ -888,7 +1091,11 @@ export class ListMindmapView {
     private routingObstacles() {
         return [...this.positions.values()].map(node => ({...node,
             controlY: node.y + (node.id === this.model.root.id ? node.height / 2 : node.height),
-        }));
+        })).concat([...this.summaryPositions.values()].map(summary => ({
+            id: `summary:${summary.id}`, x: summary.x - 10, y: summary.top,
+            width: summary.labelX + summary.width - summary.x + 10, height: summary.bottom - summary.top,
+            controlY: summary.top,
+        })));
     }
 
     private relationPath(id: string | undefined, from: ListMindmapPosition, to: ListMindmapPosition, label?: HTMLElement) {
@@ -930,7 +1137,7 @@ export class ListMindmapView {
         const height = label.offsetHeight;
         const segments = points.slice(1).map((p, i) => ({a: points[i], b: p,
             length: Math.hypot(p.x - points[i].x, p.y - points[i].y)})).sort((a, b) => b.length - a.length);
-        const nodes = [...this.positions.values()];
+        const nodes = this.routingObstacles();
         const available = (p: MindmapRoutePoint) => !nodes.some(node =>
             p.x + width / 2 > node.x - 4 && p.x - width / 2 < node.x + node.width + 4 &&
             p.y + height / 2 > node.y - 4 && p.y - height / 2 < node.y + node.height + 4);
@@ -1269,6 +1476,7 @@ export class ListMindmapView {
             }
         });
         this.drawRelationPreview(context, resolveColor(relationStyles[0].color, primary), relationStyles[0].width || 1.5);
+        this.drawSummaries(context, color => resolveColor(color, defaultLine), primary);
         this.renderRouteControls();
     }
 
@@ -1343,10 +1551,11 @@ export class ListMindmapView {
     private selectNode(id: string) {
         const changed = this.selectedId !== id || !!this.selectedRelation;
         this.selectedId = id;
+        this.selectedSummary = undefined;
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
         this.updateSelection();
-        if (!this.options.readOnly && !this.relationFrom) {
+        if (!this.options.readOnly && !this.relationFrom && !this.summaryFrom) {
             this.inspector.hidden = false;
         }
         if (changed || !this.inspector.hidden) {
@@ -1361,13 +1570,15 @@ export class ListMindmapView {
         this.nodeElements.forEach((element, id) => {
             element.classList.toggle("mindmap-view__node--selected", this.selectedId === id);
             element.classList.toggle("mindmap-view__node--relation", this.relationFrom === id ||
-                this.relationPreview?.targetId === id);
+                this.relationPreview?.targetId === id || !!this.summaryFrom &&
+                getListMindmapSummaryRange(this.model, this.summaryFrom, id).length > 0);
             element.setAttribute("aria-selected", String(this.selectedId === id));
         });
         this.relationElements.forEach((element, id) => element.classList.toggle("mindmap-view__relation--selected", this.selectedRelation === id));
         const node = this.model.nodes.get(this.selectedId);
         const disabled: Record<string, boolean> = {
             relation: !node || node.virtual,
+            summary: !this.summaryFrom && (!node || !getListMindmapSummaryRange(this.model, node.id, node.id).length),
             style: !node && !this.selectedRelation && !this.selectedEdge,
         };
         Object.keys(disabled).forEach((key) => {
@@ -1377,6 +1588,9 @@ export class ListMindmapView {
             }
         });
         this.buttons.get("relation")?.classList.toggle("block__icon--active", !!this.relationFrom);
+        this.buttons.get("summary")?.classList.toggle("block__icon--active", !!this.summaryFrom);
+        this.buttons.get("summary")?.setAttribute("aria-pressed", String(!!this.summaryFrom));
+        this.summaryStatus.hidden = !this.summaryFrom;
         this.draw();
     }
 
@@ -1419,6 +1633,8 @@ export class ListMindmapView {
             }
         }
         this.selectedId = selected.id;
+        this.selectedSummary = undefined;
+        this.summaryFrom = undefined;
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
         this.relationFrom = undefined;
@@ -1432,7 +1648,9 @@ export class ListMindmapView {
         if (this.options.readOnly) {
             return;
         }
-        if (this.selectedRelation) {
+        if (this.selectedSummary) {
+            this.options.onSummaryDelete?.(this.selectedSummary);
+        } else if (this.selectedRelation) {
             this.options.onRelationDelete?.(this.selectedRelation);
         } else {
             const node = this.model.nodes.get(this.selectedId);
@@ -1526,6 +1744,12 @@ export class ListMindmapView {
     }
 
     private beginPointer(event: PointerEvent, id?: string) {
+        if (this.summaryFrom && id && !this.options.readOnly && event.button === 0 && !this.panning) {
+            event.preventDefault();
+            this.suppressLinkClick = true;
+            this.finishSummaryRange(id);
+            return;
+        }
         if (this.panning || event.button === 2) {
             id = undefined;
             event.preventDefault();
@@ -1608,7 +1832,7 @@ export class ListMindmapView {
             const relation = target.closest<HTMLElement>(".mindmap-view__relation[data-relation-id]");
             const line = target.closest(".mindmap-view__node, input, button") ? undefined : this.findLine(event);
             this.setHoveredLine(relation ? `relation:${relation.dataset.relationId}` :
-                line ? `${line.relation ? "relation" : "edge"}:${line.id}` : undefined);
+                line ? `${line.summary ? "summary" : line.relation ? "relation" : "edge"}:${line.id}` : undefined);
             return;
         }
         this.setHoveredLine();
@@ -1805,6 +2029,12 @@ export class ListMindmapView {
         if (!line) {
             return;
         }
+        if (line.summary) {
+            this.selectSummary(line.id);
+            return;
+        }
+        this.selectedSummary = undefined;
+        this.summaryFrom = undefined;
         this.selectedId = undefined;
         this.relationFrom = undefined;
         this.selectedRelation = line.relation ? line.id : undefined;
@@ -1859,7 +2089,7 @@ export class ListMindmapView {
             return;
         }
         clearTimeout(this.linkTimer);
-        if (this.panning || this.suppressLinkClick || this.relationFrom || event.detail > 1) {
+        if (this.panning || this.suppressLinkClick || this.relationFrom || this.summaryFrom || event.detail > 1) {
             event.preventDefault();
             return;
         }
@@ -1882,10 +2112,15 @@ export class ListMindmapView {
 
     private doubleClick = (event: MouseEvent) => {
         clearTimeout(this.linkTimer);
-        if (this.options.readOnly || this.relationFrom || this.panning || this.pinching) {
+        if (this.options.readOnly || this.relationFrom || this.summaryFrom || this.panning || this.pinching) {
             return;
         }
         const target = event.target as HTMLElement;
+        const summary = target.closest<HTMLElement>(".mindmap-view__summary");
+        if (summary) {
+            this.editSummaryLabel(summary.dataset.summaryId);
+            return;
+        }
         if (target.closest(".mindmap-view__relation")) {
             this.editRelationLabel(event);
             return;
@@ -1898,6 +2133,8 @@ export class ListMindmapView {
             this.selectLine(event);
             if (this.selectedRelation) {
                 this.editRelationLabel(event);
+            } else if (this.selectedSummary) {
+                this.editSummaryLabel(this.selectedSummary);
             }
             return;
         }
@@ -2085,6 +2322,9 @@ export class ListMindmapView {
         };
         this.positions.forEach(node => include(node.x, node.y - 1, node.width, node.height + 1));
         this.relationRoutes.forEach(points => points.forEach(point => include(point.x, point.y)));
+        this.summaryPositions.forEach(summary => {
+            include(summary.x - 10, summary.top, summary.labelX + summary.width - summary.x + 10, summary.bottom - summary.top);
+        });
         this.relationElements.forEach(element => {
             if (!element.hidden && element.style.visibility !== "hidden") {
                 const x = parseFloat(element.style.left);
@@ -2140,6 +2380,27 @@ export class ListMindmapView {
             return;
         }
         if (this.pointer?.relation && event.key !== "Escape") {
+            return;
+        }
+        if (this.summaryFrom && event.key !== "Escape") {
+            if (startingComposition || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
+                return;
+            }
+            if (event.key === "Enter") {
+                this.finishSummaryRange(this.selectedId);
+            } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                const parent = this.model.nodes.get(this.model.nodes.get(this.summaryFrom)?.parentId);
+                const index = parent?.children.findIndex(node => node.id === this.selectedId) ?? -1;
+                const next = parent?.children[index + (event.key === "ArrowUp" ? -1 : 1)];
+                if (next) {
+                    this.selectNode(next.id);
+                    this.revealNode(next.id);
+                }
+            } else {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
             return;
         }
         const noModifiers = !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey;
@@ -2254,8 +2515,9 @@ export class ListMindmapView {
             !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
             const selectedId = this.selectedId;
             const selectedRelation = this.selectedRelation;
+            const selectedSummary = this.selectedSummary;
             this.finishThen(() => {
-                if (selectedId === this.selectedId && selectedRelation === this.selectedRelation) {
+                if (selectedId === this.selectedId && selectedRelation === this.selectedRelation && selectedSummary === this.selectedSummary) {
                     this.deleteSelection();
                 }
             });
@@ -2268,6 +2530,7 @@ export class ListMindmapView {
                 return;
             }
             this.relationFrom = undefined;
+            this.summaryFrom = undefined;
             this.inspector.hidden = true;
             if (this.fullscreenMarker) {
                 this.exitFullscreen();
@@ -2285,7 +2548,7 @@ export class ListMindmapView {
             return;
         }
         this.inspector.replaceChildren();
-        const lineSelected = !!this.selectedRelation || !!this.selectedEdge;
+        const lineSelected = !!this.selectedRelation || !!this.selectedEdge || !!this.selectedSummary;
         this.inspector.classList.toggle("mindmap-view__inspector--node", !lineSelected);
         this.inspector.classList.toggle("mindmap-view__inspector--line", lineSelected);
         this.inspector.style.left = "";
@@ -2315,6 +2578,15 @@ export class ListMindmapView {
             }
             this.inspector.append(palette);
         };
+        if (this.selectedSummary) {
+            const summary = this.model.metadata.summaries?.find(item => item.id === this.selectedSummary);
+            if (summary) {
+                color(summary.color, value => this.options.onSummaryChange?.(summary.id, {color: value}));
+                this.inspector.append(squareButton("edit", "iconEdit", () => this.editSummaryLabel(summary.id)),
+                    squareButton("delete", "iconTrashcan", () => this.options.onSummaryDelete?.(summary.id)));
+            }
+            return;
+        }
         if (this.selectedRelation) {
             const relation = this.model.metadata.relations.find(item => item.id === this.selectedRelation);
             if (!relation) {
@@ -2421,6 +2693,7 @@ export class ListMindmapView {
     };
 
     public destroy() {
+        this.finishSummaryEdit?.(false);
         this.finishRelationEdit?.(false);
         if (this.destroyed) {
             return;
@@ -2437,6 +2710,7 @@ export class ListMindmapView {
         this.nodeElements.forEach((_element, id) => destroyTabsRender(this.getContentHost(id)));
         this.nodeElements.clear();
         this.relationElements.clear();
+        this.summaryElements.clear();
         this.options.host.replaceChildren();
     }
 }

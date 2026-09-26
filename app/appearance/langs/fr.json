@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Résumé",
+	"listMindmapSummarySelect": "Sélectionnez le dernier nœud de même parent dans la plage ; les résumés ne peuvent pas se chevaucher",
 	"mcpOAuthServer": "OAuth du serveur MCP",
 	"mcpOAuthTip": "Nécessite un mot de passe de verrouillage ou une connexion OIDC et une origine HTTPS publique ; désactiver ou modifier cette origine révoque toutes les autorisations",
 	"mcpOAuthPublicURL": "Origine HTTPS publique",

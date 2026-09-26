@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Resumen",
+	"listMindmapSummarySelect": "Selecciona el último nodo del mismo nivel del rango; los resúmenes no pueden superponerse",
 	"mcpOAuthServer": "OAuth del servidor MCP",
 	"mcpOAuthTip": "Requiere una contraseña de bloqueo o inicio de sesión OIDC y un origen HTTPS público; desactivarlo o cambiar el origen revoca todas las autorizaciones",
 	"mcpOAuthPublicURL": "Origen HTTPS público",

@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Riepilogo",
+	"listMindmapSummarySelect": "Seleziona l'ultimo nodo con lo stesso genitore nell'intervallo; i riepiloghi non possono sovrapporsi",
 	"mcpOAuthServer": "OAuth del server MCP",
 	"mcpOAuthTip": "Richiede una password di blocco o un accesso OIDC e un’origine HTTPS pubblica; disattivare o modificare l’origine revoca tutte le autorizzazioni",
 	"mcpOAuthPublicURL": "Origine HTTPS pubblica",

@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "概要",
+	"listMindmapSummarySelect": "选择概要范围的末端同级节点，范围不能与已有概要重叠",
 	"mcpOAuthServer": "MCP 服务端 OAuth",
 	"mcpOAuthTip": "需要锁屏密码或 OIDC 登录，以及公开的 HTTPS 地址；关闭或修改地址会撤销全部授权",
 	"mcpOAuthPublicURL": "公开 HTTPS 地址",

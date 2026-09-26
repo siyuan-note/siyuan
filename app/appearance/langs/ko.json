@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "요약",
+	"listMindmapSummarySelect": "요약 범위에서 부모가 같은 마지막 노드를 선택하세요. 요약 범위는 겹칠 수 없습니다",
 	"mcpOAuthServer": "MCP 서버 OAuth",
 	"mcpOAuthTip": "화면 잠금 암호 또는 OIDC 로그인과 공개 HTTPS 출처가 필요하며, 비활성화하거나 출처를 변경하면 모든 승인이 취소됩니다",
 	"mcpOAuthPublicURL": "공개 HTTPS 출처",

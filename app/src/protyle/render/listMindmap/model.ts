@@ -1,6 +1,8 @@
 import {Constants} from "../../../constants";
 import {getOrderedListMarkerUpdates} from "../../wysiwyg/listContext";
 import type {MindmapManualRoute} from "./routing";
+import {getListMindmapSiblingIDs, normalizeListMindmapSummaries} from "./summary";
+import type {ListMindmapSummary} from "./summary";
 
 export interface ListMindmapNodeStyle {
     textColor?: string;
@@ -32,6 +34,7 @@ export interface ListMindmapMetadata {
     rootTitle?: string;
     nodes: Record<string, ListMindmapNodeStyle>;
     relations: ListMindmapRelation[];
+    summaries?: ListMindmapSummary[];
 }
 
 export interface ListMindmapNode {
@@ -128,6 +131,28 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
         }
         relationIds.add(relation.id);
     }
+    if ("summaries" in data) {
+        if (!Array.isArray(data.summaries)) {
+            throw invalidMetadata();
+        }
+        const summaryIds = new Set<string>();
+        const members = new Set<string>();
+        for (const summary of data.summaries) {
+            if (!isRecord(summary) || typeof summary.id !== "string" || !summary.id || summaryIds.has(summary.id) ||
+                typeof summary.parentId !== "string" || !summary.parentId || typeof summary.label !== "string" ||
+                !Array.isArray(summary.nodeIds) || !summary.nodeIds.length ||
+                ("color" in summary && typeof summary.color !== "string")) {
+                throw invalidMetadata();
+            }
+            summaryIds.add(summary.id);
+            for (const id of summary.nodeIds) {
+                if (typeof id !== "string" || !id || id === summary.parentId || members.has(id)) {
+                    throw invalidMetadata();
+                }
+                members.add(id);
+            }
+        }
+    }
     return data as unknown as ListMindmapMetadata;
 };
 
@@ -179,11 +204,18 @@ export const remapListMindmapIDs = (root: Element, ids: Map<string, string>) => 
             }
             nodes[mappedId] = style;
         });
-        return {list, metadata: {...metadata, nodes, relations: metadata.relations.map(relation => ({
+        const copied = {...metadata, nodes, relations: metadata.relations.map(relation => ({
             ...relation,
             from: ids.get(relation.from) || relation.from,
             to: ids.get(relation.to) || relation.to,
-        })).filter(relation => validIds.has(relation.from) && validIds.has(relation.to))}};
+        })).filter(relation => validIds.has(relation.from) && validIds.has(relation.to))};
+        if (metadata.summaries) {
+            copied.summaries = metadata.summaries.map(summary => ({...summary,
+                parentId: ids.get(summary.parentId) || summary.parentId,
+                nodeIds: summary.nodeIds.map(id => ids.get(id) || id).filter(id => validIds.has(id)),
+            })).filter(summary => validIds.has(summary.parentId) && summary.nodeIds.length > 0);
+        }
+        return {list, metadata: copied};
     });
     updates.forEach(({list, metadata}) => list.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA, JSON.stringify(metadata)));
     cleanListMindmapDOM(root);
@@ -318,6 +350,7 @@ export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
     padding?: number;
     horizontalGaps?: Map<string, number>;
     verticalGaps?: Map<string, number>;
+    summaries?: {nodeIds: string[], height: number}[];
 } = {}) => {
     const horizontalGap = options.horizontalGap ?? 40;
     const verticalGap = options.verticalGap ?? 24;
@@ -347,6 +380,20 @@ export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
     const heights = new Map<string, number>();
     [...ordered].reverse().forEach(({node}) => {
         const children = node.collapsed ? [] : node.children;
+        (options.summaries || []).forEach(summary => {
+            const start = children.findIndex(child => child.id === summary.nodeIds[0]);
+            if (start < 0 || !summary.nodeIds.every((id, index) => children[start + index]?.id === id)) {
+                return;
+            }
+            const total = summary.nodeIds.reduce((sum, id, index) => sum + heights.get(id) + (index ? gapBefore(id) : 0), 0);
+            if (summary.height + 16 > total) {
+                const extra = (summary.height + 16 - total) / 2;
+                const first = summary.nodeIds[0];
+                const last = summary.nodeIds[summary.nodeIds.length - 1];
+                heights.set(first, heights.get(first) + extra);
+                heights.set(last, heights.get(last) + extra);
+            }
+        });
         const childHeight = children.reduce((sum, child, index) => sum + heights.get(child.id) +
             (index ? gapBefore(child.id) : 0), 0);
         heights.set(node.id, Math.max(node.height, childHeight));
@@ -507,7 +554,21 @@ export const moveListMindmapNode = (list: HTMLElement, sourceId: string, targetI
             normalizeList(oldList, oldStart);
         }
     }
+    normalizeListMindmapSummaryMetadata(list, getListMindmapSiblingIDs(model), new Set([sourceId]));
     return true;
+};
+
+export const normalizeListMindmapSummaryMetadata = (list: HTMLElement, previous: Map<string, string[]>,
+                                                   moved?: Set<string>) => {
+    const model = readListMindmap(list);
+    if (!model.metadata.summaries) {
+        return;
+    }
+    const summaries = normalizeListMindmapSummaries(model.metadata.summaries, getListMindmapSiblingIDs(model), previous, moved);
+    if (JSON.stringify(summaries) !== JSON.stringify(model.metadata.summaries)) {
+        model.metadata.summaries = summaries;
+        writeListMindmapMetadata(list, model.metadata);
+    }
 };
 
 export const addListMindmapNode = (list: HTMLElement, targetId: string, placement: ListMindmapPlacement,
@@ -535,6 +596,7 @@ export const addListMindmapNode = (list: HTMLElement, targetId: string, placemen
     const start = getListStart(destination);
     insertItem(destination, item, model.nodes.get(targetId)?.element, placement);
     normalizeList(destination, start);
+    normalizeListMindmapSummaryMetadata(list, getListMindmapSiblingIDs(model));
     return true;
 };
 
@@ -561,6 +623,7 @@ export const deleteListMindmapNode = (list: HTMLElement, id: string): boolean =>
         !removedIds.has(relation.from) && !removedIds.has(relation.to));
     if (list.hasAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA)) {
         writeListMindmapMetadata(list, model.metadata);
+        normalizeListMindmapSummaryMetadata(list, getListMindmapSiblingIDs(model));
     }
     return true;
 };

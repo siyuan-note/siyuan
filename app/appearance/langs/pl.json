@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Podsumowanie",
+	"listMindmapSummarySelect": "Wybierz ostatni węzeł o tym samym rodzicu w zakresie; podsumowania nie mogą się nakładać",
 	"mcpOAuthServer": "OAuth serwera MCP",
 	"mcpOAuthTip": "Wymaga hasła blokady lub logowania OIDC oraz publicznego adresu HTTPS; wyłączenie lub zmiana adresu cofa wszystkie autoryzacje",
 	"mcpOAuthPublicURL": "Publiczny adres HTTPS",

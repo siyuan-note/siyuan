@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Сажетак",
+	"listMindmapSummarySelect": "Изаберите последњи чвор са истим родитељем у опсегу; сажеци се не смеју преклапати",
 	"mcpOAuthServer": "OAuth MCP сервера",
 	"mcpOAuthTip": "Захтева лозинку за закључавање или OIDC пријаву и јавну HTTPS адресу; искључивање или промена адресе опозива сва овлашћења",
 	"mcpOAuthPublicURL": "Јавна HTTPS адреса",

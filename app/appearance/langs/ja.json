@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "要約",
+	"listMindmapSummarySelect": "要約範囲の末端にある同じ親のノードを選択してください。要約範囲は重複できません",
 	"mcpOAuthServer": "MCP サーバー OAuth",
 	"mcpOAuthTip": "画面ロックのパスワードまたは OIDC ログインと公開 HTTPS オリジンが必要です。無効化またはオリジンの変更で全認可が取り消されます",
 	"mcpOAuthPublicURL": "公開 HTTPS オリジン",

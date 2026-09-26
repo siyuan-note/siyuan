@@ -1,4 +1,6 @@
 {
+	"listMindmapSummary": "Ringkasan",
+	"listMindmapSummarySelect": "Pilih simpul terakhir dengan induk yang sama dalam rentang ringkasan; ringkasan tidak boleh tumpang tindih",
 	"mcpOAuthServer": "OAuth server MCP",
 	"mcpOAuthTip": "Memerlukan kata sandi layar kunci atau login OIDC dan origin HTTPS publik; menonaktifkan atau mengubah origin mencabut semua otorisasi",
 	"mcpOAuthPublicURL": "Origin HTTPS publik",

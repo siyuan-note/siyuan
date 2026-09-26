@@ -59,6 +59,23 @@
     --b3-list-hover: rgba(255, 255, 255, .10);
     --b3-list-icon-hover: rgba(201, 209, 217, .1);
 
+    /* 列表脑图父子连线：线宽使用正数或 px，表示缩放前的像素值；节点自定义样式优先于普通状态 */
+    --b3-mindmap-line-color: var(--b3-border-color);
+    --b3-mindmap-line-width: 1.5;
+    /* 选中状态优先于悬停状态；initial 沿用普通配色，auto 根据普通线宽和缩放加粗 */
+    --b3-mindmap-line-hover-color: initial;
+    --b3-mindmap-line-hover-width: auto;
+    --b3-mindmap-line-selected-color: initial;
+    --b3-mindmap-line-selected-width: auto;
+
+    /* 列表脑图关系线：状态规则与父子连线一致，新建预览使用普通状态的颜色和线宽 */
+    --b3-mindmap-relation-color: var(--b3-theme-primary);
+    --b3-mindmap-relation-width: 1.5;
+    --b3-mindmap-relation-hover-color: initial;
+    --b3-mindmap-relation-hover-width: auto;
+    --b3-mindmap-relation-selected-color: initial;
+    --b3-mindmap-relation-selected-width: auto;
+
     /* 菜单 */
     --b3-menu-background: var(--b3-theme-background);
     --b3-menu-icon-color: rgba(255, 255, 255, .7);

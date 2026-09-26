@@ -115,13 +115,13 @@ const getCell = (target: EventTarget | Node) => {
     const element = target instanceof Element ? target : (target as Node)?.parentElement;
     const cell = element?.closest?.("th, td") as HTMLTableCellElement;
     const editor = element?.closest?.(".table__cell-editor");
-    return cell && !cell.closest(".list-mindmap__preview-block") &&
+    return cell && !cell.closest(".mindmap-view__preview-block") &&
         (element.closest(".protyle-wysiwyg") === cell.closest(".protyle-wysiwyg") ||
         editor?.parentElement === cell) ? cell : undefined;
 };
 
 const getTableNode = (cell: HTMLTableCellElement) => {
-    if (cell?.closest(".protyle-custom, .list-mindmap__preview-block")) {
+    if (cell?.closest(".protyle-custom, .mindmap-view__preview-block")) {
         return;
     }
     return cell?.closest<HTMLElement>('[data-type="NodeTable"]');
@@ -185,14 +185,19 @@ export const getCommonTableCellStyle = (cells: HTMLTableCellElement[], property:
     if (cells.length === 0) {
         return undefined;
     }
-    const value = cells[0].style.getPropertyValue(property);
-    return cells.every(cell => cell.style.getPropertyValue(property) === value) ? value : undefined;
+    const getValue = (cell: HTMLTableCellElement) => cell.style.getPropertyValue(property) ||
+        (property === "text-align" ? cell.getAttribute("align") || "" : "");
+    const value = getValue(cells[0]);
+    return cells.every(cell => getValue(cell) === value) ? value : undefined;
 };
 
 export const setTableCellStyle = (protyle: IProtyle, node: HTMLElement, cells: HTMLTableCellElement[],
                                   property: string, value: string) => {
     const oldHTML = node.outerHTML;
     cells.forEach(cell => {
+        if (property === "text-align") {
+            cell.removeAttribute("align");
+        }
         if (value) {
             cell.style.setProperty(property, value);
         } else {
@@ -1135,7 +1140,7 @@ export class TableControl {
     private getEdgeHover(clientX: number, clientY: number) {
         const candidates: ITableEdgeHover[] = [];
         this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
-            if (table.closest(".protyle-custom, .list-mindmap__preview-block")) {
+            if (table.closest(".protyle-custom, .mindmap-view__preview-block")) {
                 return;
             }
             const gridRect = this.getTableGridRect(table);
@@ -1298,7 +1303,7 @@ export class TableControl {
         const actions = new Map<HTMLTableElement, HTMLElement>();
         this.wysiwygElement.querySelectorAll<HTMLTableElement>(
             '[data-type="NodeTable"][custom-pinthead="true"] table').forEach(table => {
-            if (table.closest(".protyle-custom, .list-mindmap__preview-block")) {
+            if (table.closest(".protyle-custom, .mindmap-view__preview-block")) {
                 return;
             }
             const action = table.nextElementSibling as HTMLElement;
@@ -1725,9 +1730,10 @@ export class TableControl {
             const row = document.createElement("tr");
             for (let column = 0; column < grid.columnCount; column++) {
                 const cell = document.createElement(tag);
-                const align = grid.grid[sourceRow]?.[column]?.getAttribute("align");
+                const source = grid.grid[sourceRow]?.[column];
+                const align = source?.style.textAlign || source?.getAttribute("align");
                 if (align) {
-                    cell.setAttribute("align", align);
+                    cell.style.textAlign = align;
                 }
                 row.append(cell);
             }
@@ -2421,9 +2427,10 @@ export class TableControl {
                 const row = document.createElement("tr");
                 for (let columnIndex = 0; columnIndex < targetColumns; columnIndex++) {
                     const cell = document.createElement("td");
-                    const align = grid.grid[sourceRow]?.[columnIndex]?.getAttribute("align");
+                    const source = grid.grid[sourceRow]?.[columnIndex];
+                    const align = source?.style.textAlign || source?.getAttribute("align");
                     if (align) {
-                        cell.setAttribute("align", align);
+                        cell.style.textAlign = align;
                     }
                     row.append(cell);
                 }

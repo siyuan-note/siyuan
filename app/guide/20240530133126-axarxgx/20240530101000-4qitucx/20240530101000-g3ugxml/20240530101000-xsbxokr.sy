@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260921111101"
+		"updated": "20260925174006"
 	},
 	"Children": [
 		{
@@ -46,6 +46,111 @@
 				{
 					"Type": "NodeText",
 					"Data": " と組み合わせた単一文字をショートカットに設定することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20260925174006-lw5d4uc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925174006-lw5d4uc",
+				"updated": "20260925174006"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ショートカット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一般"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "コンテキストメニューを開く"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でショートカットを変更または解除できます。既定値は Windows/Linux では Ctrl+/、macOS では Cmd+/ です。現在のフォーカスに応じて、エディター内のコンテンツ、データベースの行、検索結果、ナビゲーション項目のコンテキストメニューを開きます。文字 / の入力によるスラッシュメニューの表示は変わりません。"
+				}
+			]
+		},
+		{
+			"ID": "20260923233001-0vynujv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260923233001-0vynujv",
+				"updated": "20260923233001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ウィンドウでは、検索欄から "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、表示中のカテゴリに順番にフォーカスが移り、その後、右側の設定項目に移ります。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で逆方向に移動し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でフォーカス中のカテゴリを開きます。"
 				}
 			]
 		},
@@ -3963,7 +4068,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20260921105011"
+				"updated": "20260925094732"
 			},
 			"Children": [
 				{
@@ -11173,7 +11278,7 @@
 			"Properties": {
 				"ID": "20240530101000-xpeqztf",
 				"id": "20240530101000-emapwbq",
-				"updated": "20260811122156"
+				"updated": "20260924173802"
 			},
 			"Children": [
 				{
@@ -11852,13 +11957,81 @@
 			]
 		},
 		{
+			"ID": "20260924173802-3l46zgy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260924173802-3l46zgy",
+				"updated": "20260925172309"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リストまたは1つ以上のリスト項目を選択し、上の見出しショートカットを使うか、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロックメニュー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "変換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "見出し1ブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（または別の見出しレベル）を選ぶと、選択した項目の箇条書き記号やチェックボックスが取り除かれ、最初のブロックが独立した見出しになります。後続の段落と子リストの順序は保たれ、選択していない項目はリストのまま残ります。リスト全体を選択した場合は直下の項目だけが対象です。最初のブロックを通常の段落にするには、段落のショートカットを使うか、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロックメニュー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "変換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "段落ブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選びます。この操作では既存の見出し書式も解除されます。ブロック ID、データベースとの関連付け、フィールド値は保持されます。最初のブロックが段落でも見出しでもない項目はスキップされます。モバイルでも同じブロックメニューを利用できます。段落や見出し内にカーソルを置くだけの場合、ショートカットはそのブロックだけを変換し、外側のリストは解除しません。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-yl0e0sq",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"ID": "20240530101000-uaq4ub6",
 				"id": "20240530101000-yl0e0sq",
-				"updated": "20260921105011"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -11888,7 +12061,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-wqr5cs1",
-				"updated": "20260921105011"
+				"updated": "20260923221935"
 			},
 			"Children": [
 				{
@@ -12156,6 +12329,78 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "タスクリスト項目の完了状態を切り替え"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "未割り当て"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "未着手と進行中は完了に、その他の状態は未着手に切り替えます。エディターとマインドマップブロックで使用できます。"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ショートカット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エディタ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "リストブロック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で設定できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "未着手と進行中は完了に、その他の状態は未着手に切り替え"
 								}
 							]
@@ -12251,13 +12496,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-icqlkb6",
-				"updated": "20260921111101"
+				"updated": "20260925094732"
 			},
 			"HeadingLevel": 3,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "マインドマップ"
+					"Data": "マインドマップブロック"
 				}
 			]
 		},
@@ -12266,7 +12511,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-01k7syf",
-				"updated": "20260921111101",
+				"updated": "20260925094732",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -12316,7 +12561,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選択したノードを編集"
+									"Data": "選択したノードを編集（カーソルは末尾）"
 								}
 							]
 						},
@@ -12328,6 +12573,32 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Space"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択したノードの最初の段落を置換（他のブロックと子ノードは保持）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文字を直接入力"
 								}
 							]
 						}
@@ -12382,6 +12653,78 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択中または編集中に同階層のノードを作成"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択中または編集中に子ノードを作成"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Shift+Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧⌘Enter"
 								}
 							]
 						}
@@ -12625,6 +12968,32 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "ホイール"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "キャンバスを移動"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "マウスの右ボタンを押しながらドラッグ"
 								}
 							]
 						}
@@ -16644,12 +17013,26 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20240530101000-mifghto",
-				"updated": "20260913160005"
+				"updated": "20260922150640"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "ドキュメントパネル"
+				}
+			]
+		},
+		{
+			"ID": "20260922150640-g5u649a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922150640-g5u649a",
+				"updated": "20260923212237"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "親文書のタイトルをクリックして子文書を展開または折りたたむ設定が有効な場合、ドキュメントツリーやピン留めした文書で親文書のタイトルをクリックまたはタップすると、少し待ってから子文書を展開または折りたたみます。タイトルをダブルクリックまたはダブルタップすると、展開状態を変えずに親文書を開きます。子文書がない場合は、これまでどおり1回のクリックまたはタップで直接開きます"
 				}
 			]
 		},

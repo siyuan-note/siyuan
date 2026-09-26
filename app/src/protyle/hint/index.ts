@@ -34,6 +34,7 @@ import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
 import {spinListMindmapDOM} from "../render/listMindmap/create";
+import {mountNewListMindmap} from "../render/listMindmap";
 import {assetMenu, imgMenu} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
@@ -79,7 +80,7 @@ import {getLiteSlashMenuHTML} from "../../mobile/util/liteSlashMenu";
 import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
 import {getSemanticInlineVisibleText, stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
-import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
+import {areProtylePluginExtensionsEnabled, isProtyleListItemFragment} from "../runtimeCapabilities";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -332,6 +333,11 @@ export class Hint {
             if (!this.enableSlash || !blockElement || isInEmbedBlock(blockElement)) {
                 return;
             }
+            if (!protyle.lite && isMobile() &&
+                (this.splitChar !== "/" || window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU]?.enabled !== true)) {
+                this.element.classList.add("fn__none");
+                return;
+            }
             if (protyle.lite) {
                 protyle.options.hint.extend.find((item) => {
                     if (item.key === "/" && item.hint) {
@@ -339,7 +345,10 @@ export class Hint {
                         return true;
                     }
                 });
-            } else if (!isMobile()) {
+            } else {
+                if (isMobile()) {
+                    protyle.toolbar.range = protyle.toolbar.range.cloneRange();
+                }
                 const slashData = hintSlash(key, protyle);
                 if (slashData.length === 0) {
                     if (endsWithMultiCharHintPrefix(key, protyle.options.hint.extend.map((item) => item.key))) {
@@ -771,6 +780,11 @@ ${genHintItemHTML(item)}
         if (!nodeElement) {
             return;
         }
+        if (["/", "、"].includes(this.splitChar) && isProtyleListItemFragment(protyle) &&
+            ["- " + Lute.Caret, "1. " + Lute.Caret, "- [ ] " + Lute.Caret].includes(value)) {
+            this.enableExtend = false;
+            return;
+        }
         // 新建标签的搜索状态：用选中的标签替换原空标签
         if (this.hashTagSearchElement && this.source === "hint") {
             const tagElement = this.hashTagSearchElement;
@@ -936,7 +950,8 @@ ${genHintItemHTML(item)}
         } else if (this.splitChar === "/" || this.splitChar === "、") {
             // 精简模式的自定义候选按文本插入，内置候选执行命令；块引用保留本地事务和后续提示。
             if (protyle.lite && (Constants.BLOCK_HINT_KEYS.includes(value) ||
-                !isBuiltinSlashHint(protyle.options.hint.extend.find((item) => item.key === "/" && item.hint)?.hint))) {
+                !isBuiltinSlashHint(protyle.options.hint.extend.find((item) => item.key === "/" && item.hint)?.hint,
+                    value, protyle))) {
                 insertHTML(value, protyle, false, false, false, undefined, undoContext);
                 if (Constants.BLOCK_HINT_KEYS.includes(value)) {
                     this.enableExtend = true;
@@ -1263,6 +1278,9 @@ ${genHintItemHTML(item)}
                     });
                 } else {
                     focusByWbr(nodeElement, range);
+                    if (isMindmap && nodeElement.dataset.type === "NodeMindmap") {
+                        mountNewListMindmap(protyle, nodeElement);
+                    }
                 }
             }
         }

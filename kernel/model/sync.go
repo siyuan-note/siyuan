@@ -158,9 +158,13 @@ var (
 	syncPlanTimeLock = sync.Mutex{}
 	syncPlanTime     = time.Now().Add(fixSyncInterval)
 
-	BootSyncSucc = -1 // -1：未执行，0：执行成功，1：执行失败
+	BootSyncSucc atomic.Int32 // -1：未执行，0：执行成功，1：执行失败
 	ExitSyncSucc = -1
 )
+
+func init() {
+	BootSyncSucc.Store(-1)
+}
 
 func SyncDataJob() {
 	syncPlanTimeLock.Lock()
@@ -188,24 +192,54 @@ func BootSyncData() {
 	lockSync()
 	defer unlockSync()
 
-	util.IncBootProgress(3, Conf.Language(307))
-	BootSyncSucc = 0
-	logging.LogInfof("sync before boot")
+	iosAfterBoot := util.ContainerIOS == util.Container && util.IsBooted()
+	if !iosAfterBoot {
+		util.IncBootProgress(3, Conf.Language(307))
+	}
+	BootSyncSucc.Store(-1)
+	if iosAfterBoot {
+		logging.LogInfof("sync after boot")
+	} else {
+		logging.LogInfof("sync before boot")
+	}
 
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
 	revision := pendingSync.begin()
+	if iosAfterBoot {
+		// 本地界面已可编辑，保持同步入口可见直到云端合并成功。
+		notifySyncPending(true)
+	}
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	err := bootSyncRepoWithDNSRetry()
+	var cloudPublished bool
+	var err error
+	if iosAfterBoot {
+		cloudPublished, err = syncRepoWithDNSRetry(false, false)
+	} else {
+		err = bootSyncRepoWithDNSRetry()
+	}
 	code := 1
 	if err != nil {
 		code = 2
+		BootSyncSucc.Store(1)
+		if iosAfterBoot {
+			msg := formatSyncRepoErrorMsg(err)
+			Conf.Sync.Stat = msg
+			Conf.Save()
+			pushSyncStatusBar(msg)
+			util.PushErrMsg(msg, 0)
+		}
+	} else {
+		BootSyncSucc.Store(0)
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 	if 1 == code {
 		// 启动同步成功后消费本地速记临时文件，避免移动端开启云同步时需手动触发同步才能刷新闪念速记
 		consumeShorthands()
+	}
+	if iosAfterBoot {
+		completeSyncPerception(cloudPublished, err)
 	}
 	return
 }
@@ -310,6 +344,8 @@ func syncDataLocked(exit, byHand bool) error {
 	code := 1
 	if err != nil {
 		code = 2
+	} else {
+		BootSyncSucc.Store(0)
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
@@ -318,6 +354,12 @@ func syncDataLocked(exit, byHand bool) error {
 		consumeShorthands()
 	}
 
+	completeSyncPerception(cloudPublished, err)
+	return err
+}
+
+// completeSyncPerception 恢复感知连接，并在自动同步成功发布新版本后通知其他设备。
+func completeSyncPerception(cloudPublished bool, err error) {
 	if nil == webSocketConn && Conf.Sync.Perception {
 		// 如果 websocket 连接已经断开，则重新连接
 		connectSyncWebSocket()
@@ -333,7 +375,6 @@ func syncDataLocked(exit, byHand bool) error {
 			logging.LogErrorf("write websocket message failed: %v", writeErr)
 		}
 	}
-	return err
 }
 
 func checkSync(boot, exit, byHand bool) bool {

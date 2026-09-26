@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20260906220233"
+		"updated": "20260923221935"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-6nam42g",
 				"id": "20240530101000-n0tipvh",
-				"updated": "20260906003609"
+				"updated": "20260921215916"
 			},
 			"Children": [
 				{
@@ -73,7 +73,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-7ed5u6l",
-				"updated": "20260906003609"
+				"updated": "20260923221935"
 			},
 			"Children": [
 				{
@@ -956,6 +956,75 @@
 										},
 										{
 											"Type": "NodeLinkText",
+											"Data": "mindmap-list"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/mindmap-list-20260921215248-e039c4.svg"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "マインドマップブロック"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "コンテナブロック"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
 											"Data": "list-item"
 										},
 										{
@@ -1422,7 +1491,7 @@
 			"Properties": {
 				"ID": "20240530101000-rjjxxn8",
 				"id": "20240530101000-p035stn",
-				"updated": "20260906220233"
+				"updated": "20260921215916"
 			},
 			"Children": [
 				{
@@ -2621,6 +2690,35 @@
 				{
 					"Type": "NodeText",
 					"Data": "タスクリストブロックにはリスト項目ブロックのみを含めることができ、隣接するタスクリストブロック同士の間隔は広くなります。"
+				}
+			]
+		},
+		{
+			"ID": "20260921215916-odykie5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260921215916-odykie5",
+				"updated": "20260923221935"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マインドマップブロック"
+				}
+			]
+		},
+		{
+			"ID": "20260921215248-kduw3ym",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921215248-kduw3ym",
+				"updated": "20260923221935"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マインドマップブロックは独立したブロックタイプです。箇条書き、番号付きリスト、タスクリストから変換でき、リストに戻すこともできます。変換時には項目の内容、番号、タスクの状態が保持されます。リストとして保存された以前のマインドマップは、文書を編集用に開いたときに更新されます。"
 				}
 			]
 		},

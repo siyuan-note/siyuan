@@ -13,7 +13,7 @@ import {Custom} from "../../../layout/dock/Custom";
 /// #endif
 import {searchMarkRender} from "../searchMarkRender";
 import {registerDatabaseRowRefresh} from "./databaseRowRefresh";
-import {focusNewDatabasePrimary} from "./primaryFocus";
+import {focusDatabasePrimary} from "./primaryFocus";
 
 export interface IDatabaseRowOpenData {
     avID: string;
@@ -89,6 +89,10 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
             if (currentRenderVersion !== renderVersion || !previousBodyElement.isConnected) {
                 return;
             }
+            if (!element.querySelector(`[data-av-id="${data.avID}"]`)) {
+                dialog.destroy();
+                return;
+            }
             // 保留当前内容，待属性和反链加载完成后一次替换，避免刷新期间出现空白。
             previousBodyElement.replaceWith(element);
             const primaryElement = element.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');
@@ -99,7 +103,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
                 rowElement.querySelector(".protyle-db-row__title span").textContent = currentTitle;
             }
             highlightDatabaseRow(contextProtyle, rowElement, data);
-            focusNewDatabasePrimary(rowElement, contextProtyle, data);
+            focusDatabasePrimary(rowElement, contextProtyle, data);
         }, {
             avID: data.avID,
             itemID: data.itemID,
@@ -133,7 +137,7 @@ const showDatabaseRowPreview = (model: Editor, data: IDatabaseRowOpenData) => {
     editorProtyle.contentElement.scrollTop = 0;
     editorProtyle.databaseAttributePanel?.afterRender(() => {
         highlightDatabaseRow(editorProtyle, editorProtyle.contentElement, data);
-        focusNewDatabasePrimary(editorProtyle.contentElement, editorProtyle, data);
+        focusDatabasePrimary(editorProtyle.contentElement, editorProtyle, data);
     });
 };
 
@@ -198,7 +202,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
             editorProtyle.contentElement.scrollTop = 0;
             editorProtyle.databaseAttributePanel?.afterRender(() => {
                 highlightDatabaseRow(editorProtyle, editorProtyle.contentElement, data);
-                focusNewDatabasePrimary(editorProtyle.contentElement, editorProtyle, data);
+                focusDatabasePrimary(editorProtyle.contentElement, editorProtyle, data);
             });
         }, true);
     return true;

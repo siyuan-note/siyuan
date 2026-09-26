@@ -1,24 +1,34 @@
 @use "../util/mixin" as *;
+@use "inline";
 @use "task";
 
 .protyle-wysiwyg,
 .b3-typography {
-  [data-type="NodeList"][data-list-mindmap-rendered="true"] {
+  // 脑图初始化前仍显示原始节点，列表标记沿用普通列表的图标尺寸。
+  .mindmap-item > .protyle-action > svg {
+    display: block;
+    width: 34px;
+    height: max(14px, 1em - 4px);
+  }
+
+  [data-type="NodeList"][data-mindmap-view-rendered="true"],
+  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] {
     height: auto !important;
   }
 
-  [data-type="NodeList"][data-list-mindmap-rendered="true"] > [data-type="NodeListItem"] {
+  [data-type="NodeList"][data-mindmap-view-rendered="true"] > [data-type="NodeListItem"],
+  [data-type="NodeMindmap"][data-mindmap-view-rendered="true"] > .mindmap-item[data-type="NodeMindmapItem"][data-node-id] {
     display: none;
   }
 }
 
-.list-mindmap {
+.mindmap-view {
   position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 460px;
-  min-height: 260px;
+  height: var(--mindmap-view-height, 460px);
+  min-height: min(260px, var(--mindmap-view-height, 260px));
   box-sizing: border-box;
   overflow: hidden;
   border: 1px solid var(--b3-border-color);
@@ -29,6 +39,10 @@
   font-size: 14px;
   line-height: 1.5;
   outline: none;
+
+  &__preview-block.protyle-wysiwyg--hl {
+    position: relative;
+  }
 
   [hidden] {
     display: none !important;
@@ -74,6 +88,26 @@
     flex: 1;
   }
 
+  &__level-control {
+    position: relative;
+    flex-shrink: 0;
+
+    &:focus-within {
+      outline: 1px solid var(--b3-theme-primary);
+      border-radius: var(--b3-border-radius);
+    }
+  }
+
+  &__level-select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
   &__zoom {
     flex-shrink: 0;
     min-width: 34px;
@@ -91,8 +125,8 @@
     flex-shrink: 0;
     pointer-events: auto;
 
-    &:hover .list-mindmap__zoom-actions,
-    &:focus-within .list-mindmap__zoom-actions {
+    &:hover .mindmap-view__zoom-actions,
+    &:focus-within .mindmap-view__zoom-actions {
       display: flex;
     }
   }
@@ -147,11 +181,11 @@
   &__viewport--pan {
     cursor: grab;
 
-    .list-mindmap__world {
+    .mindmap-view__world {
       pointer-events: none;
     }
 
-    &.list-mindmap__viewport--dragging {
+    &.mindmap-view__viewport--dragging {
       cursor: grabbing;
     }
   }
@@ -181,7 +215,7 @@
     line-height: 1.5;
     cursor: grab;
 
-    &:hover:not(.list-mindmap__node--dragging):not(.list-mindmap__node--editing):not(.list-mindmap__node--selected) {
+    &:hover:not(.mindmap-view__node--dragging):not(.mindmap-view__node--editing):not(.mindmap-view__node--selected) {
       box-shadow: inset 0 0 0 2px var(--b3-list-hover);
     }
 
@@ -191,20 +225,20 @@
       box-shadow: inset 0 0 0 1px var(--b3-border-color);
       transition: background-color 120ms ease, box-shadow 120ms ease;
 
-      &:hover:not(.list-mindmap__node--dragging):not(.list-mindmap__node--editing):not(.list-mindmap__node--selected):not(.list-mindmap__node--relation) {
+      &:hover:not(.mindmap-view__node--dragging):not(.mindmap-view__node--editing):not(.mindmap-view__node--selected):not(.mindmap-view__node--relation) {
         background: var(--b3-list-hover);
         box-shadow: inset 0 0 0 1px var(--b3-border-color);
       }
     }
 
-    &--untitled:not(.list-mindmap__node--editing) {
+    &--untitled:not(.mindmap-view__node--editing) {
       width: 32px;
       min-width: 32px;
       height: 32px;
       min-height: 32px;
       padding: 0;
 
-      > .list-mindmap__content {
+      > .mindmap-view__content {
         display: grid;
         place-items: center;
         min-width: 0;
@@ -276,11 +310,13 @@
   }
 
   &__content {
+    @include inline.interactive-marks;
+
     min-width: 0;
     min-height: 24px;
     overflow-wrap: anywhere;
 
-    .list-mindmap__node:not(.list-mindmap__node--editing) > &--empty:not(.list-mindmap__editor) {
+    .mindmap-view__node:not(.mindmap-view__node--editing) > &--empty:not(.mindmap-view__editor) {
       > * {
         display: none;
       }
@@ -292,7 +328,7 @@
     }
 
     > .p,
-    > .p.list-mindmap__preview-block {
+    > .p.mindmap-view__preview-block {
       margin: 0;
       padding: 0;
       font-size: inherit;
@@ -345,11 +381,12 @@
 
   &__node[data-task] {
     display: grid;
-    grid-template-columns: max-content minmax(0, 1fr);
+    // 空任务正文也保留输入宽度，确保光标能落入编辑器。
+    grid-template-columns: max-content minmax(1em, 1fr);
     column-gap: 6px;
     align-items: start;
 
-    > .list-mindmap__content {
+    > .mindmap-view__content {
       grid-column: 2;
       grid-row: 1;
     }
@@ -400,12 +437,12 @@
     }
   }
 
-  &__node.protyle-task--done:not([data-task="/"]) > .list-mindmap__content {
+  &__node.protyle-task--done:not([data-task="/"]) > .mindmap-view__content {
     > .p {
       @include task.completed-text;
     }
 
-    &.list-mindmap__editor .protyle-wysiwyg > .p {
+    &.mindmap-view__editor .protyle-wysiwyg > .p {
       @include task.completed-text;
     }
   }
@@ -489,7 +526,7 @@
       }
     }
 
-    &:not(.list-mindmap__fold--closed) .list-mindmap__fold-count {
+    &:not(.mindmap-view__fold--closed) .mindmap-view__fold-count {
       display: none;
     }
   }
@@ -535,17 +572,17 @@
     width: 39px;
   }
 
-  &__node:not(.list-mindmap__node--root) {
-    > .list-mindmap__fold {
-      top: calc(100% - 8px);
+  &__node:not(.mindmap-view__node--root) {
+    > .mindmap-view__fold {
+      top: calc(100% - 6px);
     }
 
-    > .list-mindmap__add-child {
-      top: calc(100% - 8px);
+    > .mindmap-view__add-child {
+      top: calc(100% - 6px);
     }
 
-    > .list-mindmap__add-bridge {
-      bottom: -12px;
+    > .mindmap-view__add-bridge {
+      bottom: -14px;
 
       // 补齐右下角斜向移出的路径，避免鼠标先落到连线上而收起操作按钮。
       &::before {
@@ -554,7 +591,7 @@
         right: 100%;
         bottom: 0;
         width: 12px;
-        height: 12px;
+        height: 14px;
       }
     }
   }
@@ -712,7 +749,7 @@
     flex-wrap: nowrap;
     gap: 0;
 
-    .list-mindmap__palette {
+    .mindmap-view__palette {
       margin: 0;
       flex-shrink: 0;
     }
@@ -723,17 +760,11 @@
   }
 
   &__tooltip {
+    // 本地提示保留脑图内的定位和边界约束，供编辑器及导出页面共同使用。
     position: absolute;
     z-index: 7;
     max-width: calc(100% - 16px);
-    padding: 4px 8px;
-    border-radius: var(--b3-border-radius);
-    background: var(--b3-tooltips-background);
-    color: var(--b3-tooltips-color);
-    box-sizing: border-box;
-    font-size: 12px;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
+    max-height: calc(100% - 8px);
     pointer-events: none;
   }
 
@@ -753,9 +784,9 @@
 }
 
 @media print {
-  .list-mindmap {
+  .mindmap-view {
     break-inside: avoid;
-    height: var(--list-mindmap-print-height, 420px);
+    height: var(--mindmap-view-print-height, 420px);
     min-height: 0;
 
     &__toolbar,

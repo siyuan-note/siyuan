@@ -3,6 +3,7 @@ package model
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -31,8 +32,9 @@ func TestTabsUserGuideExamplesRoundTrip(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		if tree.Root.Spec != "3" {
-			t.Fatalf("%s: tabs require spec 3", path)
+		spec, err := strconv.Atoi(tree.Root.Spec)
+		if err != nil || spec < 3 {
+			t.Fatalf("%s: tabs require spec 3 or newer, got %q", path, tree.Root.Spec)
 		}
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || n.Type != ast.NodeTabs {

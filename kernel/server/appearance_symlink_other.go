@@ -1,4 +1,4 @@
-//go:build !linux
+//go:build !linux && !windows
 
 // SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org

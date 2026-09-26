@@ -10,6 +10,7 @@ interface ITransactionQueue {
 }
 
 const transactionQueues = new WeakMap<IProtyle, ITransactionQueue>();
+const MAX_TRANSACTION_BATCH_SIZE = 32;
 
 const getTransactionQueue = (protyle: IProtyle) => {
     let queue = transactionQueues.get(protyle);
@@ -43,7 +44,8 @@ export const queueTransactionBatch = <T>(protyle: IProtyle, key: string, item: T
                                           task: (items: T[]) => Promise<void>) => {
     const queue = getTransactionQueue(protyle);
     const pendingBatch = queue.pendingBatches.get(key) as ITransactionBatch<T> | undefined;
-    if (pendingBatch) {
+    // 限制一次请求持有的编辑操作数量，积压的更新按原顺序分批提交。
+    if (pendingBatch && pendingBatch.items.length < MAX_TRANSACTION_BATCH_SIZE) {
         pendingBatch.items.push(item);
         return pendingBatch.promise;
     }

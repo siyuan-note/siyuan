@@ -6,6 +6,7 @@ import {
     IDockResponsiveSideInput,
     resolveDockResponsiveLayout,
     resolveDockResponsiveWidth,
+    resolveResponsiveManualOverrideClearance,
 } from "./responsiveLayout";
 
 const createSide = (overrides: Partial<IDockResponsiveSideInput> = {}): IDockResponsiveSideInput => ({
@@ -185,6 +186,46 @@ describe("responsive dock width", () => {
             floating: false,
             constrained: false,
         }), {clearConstraint: false});
+    });
+});
+
+describe("responsive manual override", () => {
+    it("keeps a manually fixed dock fixed while its panel is hidden", () => {
+        const left = {preferredSize: 240, pinned: true, visible: true, active: true, manualOverride: false};
+        const right = {preferredSize: 260, pinned: true, visible: false, active: true, manualOverride: true};
+
+        assert.deepEqual(resolveResponsiveManualOverrideClearance(900, 500, 8, 32, left, right),
+            {left: false, right: false});
+        assert.deepEqual(resolveResponsiveManualOverrideClearance(1048, 500, 8, 32, left, right),
+            {left: false, right: true});
+    });
+
+    it("keeps a manually fixed dock fixed after its last item closes and reopens", () => {
+        const left = {preferredSize: 240, pinned: true, visible: true, active: true, manualOverride: false};
+        const right = {preferredSize: 0, pinned: true, visible: false, active: false, manualOverride: true};
+
+        assert.deepEqual(resolveResponsiveManualOverrideClearance(900, 500, 8, 32, left, right),
+            {left: false, right: false});
+        assert.deepEqual(resolveResponsiveManualOverrideClearance(1200, 500, 8, 32, left, right),
+            {left: false, right: false});
+        assert.deepEqual(resolveDockResponsiveLayout(createInput({
+            availableSize: 900,
+            left: createSide(),
+            right: createSide({preferredSize: 260, manualOverride: right.manualOverride}),
+        })), {
+            left: {autoFloating: true, fixedSize: 0},
+            right: {autoFloating: false, fixedSize: 260},
+        });
+        assert.deepEqual(resolveResponsiveManualOverrideClearance(1048, 500, 8, 32, left,
+            {...right, preferredSize: 260, visible: true, active: true}), {left: false, right: true});
+    });
+
+    it("clears an active side without discarding an inactive side override", () => {
+        const left = {preferredSize: 240, pinned: true, visible: true, active: true, manualOverride: true};
+        const right = {preferredSize: 0, pinned: true, visible: false, active: false, manualOverride: true};
+
+        assert.deepEqual(resolveResponsiveManualOverrideClearance(900, 500, 8, 32, left, right),
+            {left: true, right: false});
     });
 });
 

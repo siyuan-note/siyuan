@@ -1,7 +1,8 @@
 /// #if !MOBILE
 import {Tab} from "../Tab";
 import {setPanelFocus} from "../util";
-import {getDockByType} from "../tabUtil";
+import {getActiveTab, getDockByType} from "../tabUtil";
+import {Editor} from "../../editor";
 /// #endif
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isInIOS, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
@@ -14,9 +15,10 @@ import {getDisplayName, movePathTo, pathPosix} from "../../util/pathName";
 import type {App} from "../../index";
 import {getCloudURL} from "../../config/util/about";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {escapeHtml} from "../../util/escape";
+import {escapeHtml, escapeMarkdownPlainText} from "../../util/escape";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
+import {showMessage} from "../../dialog/message";
 
 export class Inbox extends Model {
     private element: Element;
@@ -41,10 +43,11 @@ export class Inbox extends Model {
         <span class="inboxSelectCount ft__smaller ft__on-surface"></span>
     </div>
     <span class="fn__space"></span>
+    <svg data-type="refresh" class="toolbar__icon"><use xlink:href="#iconRefresh"></use></svg>
     <svg data-type="selectall" class="toolbar__icon"><use xlink:href="#iconUncheck"></use></svg>
     <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconLeft'></use></svg>
     <svg data-type="next" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconRight'></use></svg>
-    <svg data-type="more" class="toolbar__icon"><use xlink:href='#iconMore'></use></svg>
+    <svg data-type="more" class="toolbar__icon fn__none"><use xlink:href='#iconMore'></use></svg>
 </div>
 <div class="fn__loading fn__none">
     <img width="64px" src="/stage/loading-pure.svg"></div>
@@ -115,6 +118,7 @@ export class Inbox extends Model {
                         useElement.setAttribute("xlink:href", "#iconUncheck");
                     }
                     countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
+                    this.updateMoreVisibility();
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     break;
@@ -129,6 +133,7 @@ export class Inbox extends Model {
                         useElement.setAttribute("xlink:href", "#iconUncheck");
                     }
                     countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
+                    this.updateMoreVisibility();
                     selectAllElement.querySelector("use").setAttribute("xlink:href", this.element.lastElementChild.querySelectorAll('[*|href="#iconCheck"]').length === this.element.lastElementChild.querySelectorAll(".b3-list-item").length ? "#iconCheck" : "#iconUncheck");
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
@@ -145,6 +150,10 @@ export class Inbox extends Model {
                         this.currentPage++;
                         this.update();
                     }
+                    event.preventDefault();
+                    break;
+                } else if (type === "refresh") {
+                    this.refresh();
                     event.preventDefault();
                     break;
                 } else if (type === "back") {
@@ -164,6 +173,7 @@ export class Inbox extends Model {
                     detailsElement.innerHTML = this.genDetail(data);
                     detailsElement.setAttribute("data-id", data.oId);
                     detailsElement.classList.remove("fn__none");
+                    this.updateMoreVisibility();
                     detailsElement.scrollTop = 0;
                     this.element.lastElementChild.classList.add("fn__none");
                     event.preventDefault();
@@ -181,6 +191,15 @@ export class Inbox extends Model {
         this.element.firstElementChild.querySelector('[data-type="next"]').classList.remove("fn__none");
         this.element.querySelector(".inboxDetails").classList.add("fn__none");
         this.element.lastElementChild.classList.remove("fn__none");
+        this.updateMoreVisibility();
+    }
+
+    private updateMoreVisibility() {
+        /// #if MOBILE
+        const detailsElement = this.element.querySelector(".inboxDetails");
+        this.element.firstElementChild.querySelector('[data-type="more"]').classList.toggle("fn__none",
+            detailsElement.classList.contains("fn__none") && this.selectIds.length === 0);
+        /// #endif
     }
 
     private genDetail(data: IInbox) {
@@ -231,37 +250,15 @@ ${data.shorthandContent}
     private more(event: MouseEvent, itemElement?: HTMLElement) {
         const detailsElement = this.element.querySelector(".inboxDetails");
         window.siyuan.menus.menu.remove();
+        /// #if !MOBILE
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.refresh,
             icon: "iconRefresh",
             click: () => {
-                if (itemElement) {
-                    fetchPost("/api/inbox/getShorthand", {
-                        id: itemElement.dataset.id
-                    }, (response) => {
-                        if (response.code !== 0 || !response.data) {
-                            return;
-                        }
-                        this.data[response.data.oId] = response.data;
-                        itemElement.outerHTML = this.genItemHTML(response.data);
-                    });
-                } else if (detailsElement.classList.contains("fn__none")) {
-                    this.currentPage = 1;
-                    this.update();
-                } else {
-                    fetchPost("/api/inbox/getShorthand", {
-                        id: detailsElement.getAttribute("data-id")
-                    }, (response) => {
-                        if (response.code !== 0 || !response.data) {
-                            return;
-                        }
-                        this.data[response.data.oId] = response.data;
-                        detailsElement.innerHTML = this.genDetail(response.data);
-                        detailsElement.scrollTop = 0;
-                    });
-                }
+                this.refresh(itemElement);
             }
         }).element);
+        /// #endif
         let ids: string[] = [];
         if (itemElement) {
             ids = [itemElement.dataset.id];
@@ -278,6 +275,24 @@ ${data.shorthandContent}
                     this.move(ids);
                 }
             }).element);
+            let protyle: IProtyle;
+            /// #if MOBILE
+            protyle = window.siyuan.mobile.editor?.protyle;
+            /// #else
+            const tab = getActiveTab(false);
+            if (tab?.model instanceof Editor) {
+                protyle = tab.model.editor?.protyle;
+            }
+            /// #endif
+            if (protyle?.block.rootID && !protyle.disabled && !window.siyuan.config.readonly && !window.siyuan.isPublish) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.insertToCurrentDoc,
+                    icon: "iconAdd",
+                    click: () => {
+                        void this.insertToCurrentDoc(ids, protyle.block.rootID);
+                    }
+                }).element);
+            }
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.remove,
                 icon: "iconTrashcan",
@@ -315,11 +330,39 @@ ${data.shorthandContent}
         });
     }
 
+    private refresh(itemElement?: HTMLElement) {
+        const detailsElement = this.element.querySelector(".inboxDetails");
+        if (itemElement) {
+            fetchPost("/api/inbox/getShorthand", {id: itemElement.dataset.id}, (response) => {
+                if (response.code !== 0 || !response.data) {
+                    return;
+                }
+                this.data[response.data.oId] = response.data;
+                itemElement.outerHTML = this.genItemHTML(response.data);
+            });
+        } else if (detailsElement.classList.contains("fn__none")) {
+            this.currentPage = 1;
+            this.update();
+        } else {
+            fetchPost("/api/inbox/getShorthand", {id: detailsElement.getAttribute("data-id")}, (response) => {
+                if (response.code !== 0 || !response.data) {
+                    return;
+                }
+                this.data[response.data.oId] = response.data;
+                detailsElement.innerHTML = this.genDetail(response.data);
+                detailsElement.scrollTop = 0;
+            });
+        }
+    }
+
     private remove(removeIds?: string[]) {
         if (!removeIds) {
             removeIds = this.selectIds;
         }
-        fetchPost("/api/inbox/removeShorthands", {ids: removeIds}, () => {
+        fetchPost("/api/inbox/removeShorthands", {ids: removeIds}, (response) => {
+            if (response.code !== 0) {
+                return;
+            }
             if (removeIds) {
                 this.back();
                 for (let i = this.selectIds.length - 1; i >= 0; i--) {
@@ -327,6 +370,7 @@ ${data.shorthandContent}
                         this.selectIds.splice(i, 1);
                     }
                 }
+                this.updateMoreVisibility();
             } else {
                 this.selectIds = [];
             }
@@ -363,6 +407,44 @@ ${data.shorthandContent}
             },
             flashcard: false
         });
+    }
+
+    private async insertToCurrentDoc(ids: string[], rootID: string) {
+        const insertedIds: string[] = [];
+        try {
+            for (const id of [...ids]) {
+                const shorthand = await fetchSyncPost("/api/inbox/getShorthand", {id});
+                if (shorthand.code !== 0 || !shorthand.data) {
+                    break;
+                }
+                let md = shorthand.data.shorthandMd;
+                if (!md && !shorthand.data.shorthandContent && shorthand.data.shorthandURL) {
+                    md = `[${shorthand.data.shorthandTitle}](${shorthand.data.shorthandURL})`;
+                }
+                const title = escapeMarkdownPlainText(shorthand.data.shorthandTitle.replace(/[\r\n]+/g, " ").trim());
+                if (title) {
+                    md = `# ${title}\n\n${md}`;
+                }
+                if (!md.trim()) {
+                    showMessage(window.siyuan.languages.empty);
+                    break;
+                }
+                const response = await fetchSyncPost("/api/block/appendBlock", {
+                    dataType: "markdown",
+                    data: md,
+                    parentID: rootID,
+                });
+                if (response.code !== 0) {
+                    break;
+                }
+                insertedIds.push(id);
+            }
+        } catch (error) {
+            showMessage((error as Error).message, 6000, "error");
+        }
+        if (insertedIds.length > 0) {
+            this.remove(insertedIds);
+        }
     }
 
     private update() {
@@ -403,6 +485,7 @@ ${data.shorthandContent}
 
             this.pageCount = response.data.data.pagination.paginationRecordCount;
             this.element.querySelector(".inboxSelectCount").innerHTML = `${this.selectIds.length}/${this.pageCount}`;
+            this.updateMoreVisibility();
 
             const previousElement = this.element.querySelector('[data-type="previous"]');
             const nextElement = this.element.querySelector('[data-type="next"]');

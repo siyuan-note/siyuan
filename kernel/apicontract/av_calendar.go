@@ -34,3 +34,10 @@ type AVLayoutCalendar struct {
 	RowIDs   []string             `json:"rowIds" api:"optional,nullable"`
 	Settings AVCalendarSettings   `json:"settings"`
 }
+
+// AVCalendarUndatedData 返回当前日历视图中待安排条目的单页数据。
+// total 在视图筛选、上下文筛选、全局搜索及本列表标题搜索之后计算；日期范围不影响结果。
+type AVCalendarUndatedData struct {
+	Rows  []*AVTableRow `json:"rows" api:"optional,nullable"`
+	Total int           `json:"total"`
+}

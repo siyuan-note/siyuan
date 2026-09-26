@@ -20,22 +20,50 @@ const setup = () => {
     const list = {
         isConnected: true,
         dataset: {type: "NodeList", nodeId: "source-list"},
+        outerHTML: '<div data-type="NodeList"></div>',
         closest: (selector: string) => selector === ".protyle-wysiwyg" ? root : embed,
         getAttribute: (name: string) => attrs.get(name),
         setAttribute: (name: string, value: string) => attrs.set(name, value),
+        removeAttribute: (name: string) => attrs.delete(name),
     };
     const operations: {doOperations: any[], undoOperations: any[]}[] = [];
+    const updates: string[] = [];
     const context: any = {
         Constants: {CB_GET_HISTORY: "history", CUSTOM_SY_LIST_MINDMAP: attribute},
         roots: new WeakMap(), hideElements: () => {}, readListMindmap: () => {},
+        cleanListMindmapHTML: (html: string) => html,
+        retagMindmapBranch: (_element: Element, toMindmap: boolean) => {
+            list.dataset.type = toMindmap ? "NodeMindmap" : "NodeList";
+        },
+        updateTransaction: (_owner: unknown, _element: Element, previous: string) => updates.push(previous),
         transaction: (actualOwner: unknown, doOperations: any[], undoOperations: any[]) => {
             assert.equal(actualOwner, owner);
             operations.push({doOperations, undoOperations});
         },
     };
     runInNewContext(compiled, context);
-    return {owner, list, attrs, attribute, operations, api: context.api};
+    return {owner, list, attrs, attribute, operations, updates, api: context.api};
 };
+
+test("a regular list becomes a dedicated mind map block", () => {
+    const {owner, list, attrs, attribute, operations, updates, api} = setup();
+    attrs.delete(attribute);
+    api.toggleListMindmap(owner, list);
+    assert.equal(list.dataset.type, "NodeMindmap");
+    assert.deepEqual(updates, ['<div data-type="NodeList"></div>']);
+    assert.equal(operations.length, 0);
+});
+
+test("a dedicated mind map becomes a list block", () => {
+    const {owner, list, attrs, attribute, operations, updates, api} = setup();
+    attrs.delete(attribute);
+    list.dataset.type = "NodeMindmap";
+    list.outerHTML = '<div data-type="NodeMindmap"></div>';
+    api.toggleListMindmap(owner, list);
+    assert.equal(list.dataset.type, "NodeList");
+    assert.deepEqual(updates, ['<div data-type="NodeMindmap"></div>']);
+    assert.equal(operations.length, 0);
+});
 
 test("embedded mind maps persist view changes against the source list with undo", () => {
     const {owner, list, attrs, attribute, operations, api} = setup();

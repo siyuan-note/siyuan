@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {getPlantumlImageURL} from "../render/plantumlImage";
 
 const compiled = transpileModule(readFileSync("src/protyle/preview/diagram.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -52,5 +53,46 @@ for (const scenario of [
         assert.equal(previewBlob.type, "image/svg+xml");
         cleanup();
         assert.deepEqual(revoked, ["blob:diagram"]);
+    });
+}
+
+for (const carrier of ["object", "img", "empty"]) {
+    test(`PlantUML preview uses the ${carrier} resource without rasterizing or fetching`, async () => {
+        const url = "https://example.com/plantuml/svg/diagram";
+        const previews: string[][] = [];
+        const diagram = {
+            getAttribute: () => "plantuml",
+            querySelector: (selector: string) => selector === carrier ? {getAttribute: () => url} : null,
+        };
+        const exports = {} as {
+            previewDiagram: (element: unknown) => Promise<void>;
+            getDiagramBlock: (element: unknown) => unknown;
+            handleDiagramPreviewClick: (event: unknown) => boolean;
+        };
+        runInNewContext(compiled, {
+            exports,
+            require: () => ({
+                getPlantumlImageURL,
+                previewImages: (urls: string[], current: string) => {
+                    assert.equal(current, url);
+                    previews.push(Array.from(urls));
+                },
+                addScript: () => assert.fail("PlantUML preview must not load the rasterizer"),
+            }),
+        });
+        assert.equal(exports.getDiagramBlock(diagram), diagram);
+        await exports.previewDiagram(diagram);
+        assert.deepEqual(previews, carrier === "empty" ? [] : [[url]]);
+
+        let prevented = false;
+        let stopped = false;
+        assert.equal(exports.handleDiagramPreviewClick({
+            target: {closest: () => ({closest: () => diagram})},
+            preventDefault: () => { prevented = true; },
+            stopPropagation: () => { stopped = true; },
+        }), true);
+        assert.equal(prevented, true);
+        assert.equal(stopped, true);
+        assert.equal(exports.handleDiagramPreviewClick({target: {closest: (): Element => null}}), false);
     });
 }

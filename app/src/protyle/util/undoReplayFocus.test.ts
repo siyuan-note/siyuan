@@ -49,8 +49,14 @@ const browserCases = async (source: string) => {
                 api.focusByWbr(element, document.createRange());
             }
         },
-        loadRichCellEditor: async () => ({openTableCellRichEditor: (_owner: unknown, cell: HTMLTableCellElement,
-            _navigation: unknown, _point: unknown, saved: unknown) => openedCells.push({cell, saved})}),
+        loadRichCellEditor: async () => ({openTableCellRichEditor: async (_owner: unknown, cell: HTMLTableCellElement,
+            _navigation: unknown, _point: unknown, saved: unknown) => {
+            await Promise.resolve();
+            const range = getSelection().getRangeAt(0).cloneRange();
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+            openedCells.push({cell, saved});
+        }}),
         updateTransaction: (_protyle: unknown, node: Element, before: string, undoContext: Record<string, string>,
                             operations?: {context: Record<string, string>}) => {
             if (node.outerHTML === before && !operations) {
@@ -67,7 +73,7 @@ const browserCases = async (source: string) => {
     editor.contentEditable = "true";
     document.body.append(editor);
     const protyle = {wysiwyg: {element: editor}, element: editor, contentElement: editor,
-        scroll: {lastScrollTop: 0}, toolbar: {}};
+        scroll: {lastScrollTop: 0}, toolbar: {range: document.createRange()}};
     const focus = (element: Element) => {
         const range = document.createRange();
         range.selectNodeContents(element);
@@ -144,15 +150,17 @@ const browserCases = async (source: string) => {
     const richContext = api.getUndoFocusContext(editor, focus(richCell), true);
     getSelection().removeAllRanges();
     check.equal(api.restoreUndoFocus(protyle, [{context: richContext}]), true);
-    await Promise.resolve();
+    await new Promise(resolve => setTimeout(resolve, 0));
     check.equal(openedCells[0].cell, richCell, "rich cells must reopen the cell editor");
     check.equal(openedCells[0].saved, undefined);
+    check.equal(protyle.toolbar.range, getSelection().getRangeAt(0), "toolbar range follows asynchronous cell focus");
     assertCaret(richCell, 11);
     const saved = {startIndex: 1, endIndex: 1, start: 2, end: 4, backward: true};
     check.equal(api.restoreUndoFocus(protyle, [{context: {...richContext,
         undoFocusTableSelection: JSON.stringify(saved)}}]), true);
-    await Promise.resolve();
+    await new Promise(resolve => setTimeout(resolve, 0));
     check.deepEqual(openedCells[1].saved, saved, "existing rich text selections must be preserved");
+    check.equal(protyle.toolbar.range, getSelection().getRangeAt(0));
     check.equal(api.restoreUndoFocus(protyle, [{context: {...richContext,
         undoFocusTableSelection: "null"}}]), false);
 

@@ -771,7 +771,7 @@ func buildBlockBreadcrumbChild(node *ast.Node, excludeTypes []string) (ret *Bloc
 	} else if ast.NodeTabItem == node.Type && "" == name {
 		name = getNodeRefText0(node, maxNameLen, true)
 	} else if "" == name {
-		if ast.NodeListItem == node.Type || ast.NodeList == node.Type || ast.NodeSuperBlock == node.Type ||
+		if ast.NodeListItem == node.Type || ast.NodeList == node.Type || ast.NodeMindmapItem == node.Type || ast.NodeMindmap == node.Type || ast.NodeSuperBlock == node.Type ||
 			ast.NodeBlockquote == node.Type || ast.NodeCallout == node.Type {
 			name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes, true), maxNameLen)
 		} else {
@@ -836,7 +836,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 			name = getNodeRefText0(parent, maxNameLen, true)
 		} else {
 			if "" == name {
-				if ast.NodeListItem == parent.Type || ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type || ast.NodeCallout == parent.Type {
+				if ast.NodeListItem == parent.Type || ast.NodeList == parent.Type || ast.NodeMindmapItem == parent.Type || ast.NodeMindmap == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type || ast.NodeCallout == parent.Type {
 					name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes, true), maxNameLen)
 				} else {
 					name = gulu.Str.SubStr(renderBlockText(parent, excludeTypes, true), maxNameLen)
@@ -848,7 +848,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 		}
 
 		add := true
-		if ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type || ast.NodeCallout == parent.Type {
+		if ast.NodeList == parent.Type || ast.NodeMindmap == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type || ast.NodeCallout == parent.Type {
 			add = false
 			if parent == node {
 				// https://github.com/siyuan-note/siyuan/issues/13141#issuecomment-2476789553

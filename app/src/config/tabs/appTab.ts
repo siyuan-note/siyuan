@@ -26,6 +26,7 @@ import {afterExport} from "../../protyle/export/util";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {sendAppSetting} from "./appRuntime";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {genWorkspaceStorageHtml, mountWorkspaceStorage} from "./workspaceStorage";
 
 /// #if MOBILE
 const registerAppWorkspaceGroup = (tab: SettingTabBuilder) => {
@@ -505,6 +506,13 @@ const mountExportData = (root: HTMLElement) => {
 const registerAppMaintenanceGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("maintenance", window.siyuan.languages.configGroupMaintenance);
 
+    group.slot({
+        key: "workspaceStorage",
+        keywords: [window.siyuan.languages.workspaceStorage, window.siyuan.languages.workspaceStorageTip,
+            window.siyuan.languages.assets, "data", "repo", "history", "temp", "conf"],
+        html: genWorkspaceStorageHtml,
+        afterMount: mountWorkspaceStorage,
+    });
     group.button({
         id: "reloadUI",
         title: window.siyuan.languages.reloadUI,

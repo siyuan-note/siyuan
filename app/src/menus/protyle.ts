@@ -1413,6 +1413,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         let rangeElement: HTMLInputElement;
         window.siyuan.menus.menu.append(new MenuItem({
             id: "width",
+            icon: "iconWidth",
             label: window.siyuan.languages.width,
             submenu: [{
                 id: "widthInput",
@@ -1478,6 +1479,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         let rangeHeightElement: HTMLInputElement;
         window.siyuan.menus.menu.append(new MenuItem({
             id: "height",
+            icon: "iconHeight",
             label: window.siyuan.languages.height,
             submenu: [{
                 id: "heightInput",
@@ -1495,9 +1497,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         imgElement.parentElement.style.width = "";
                     });
                     inputElement.addEventListener("blur", () => {
-                        if (inputElement.value === imgElement.style.height.replace("px", "")) {
-                            return;
-                        }
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, nodeElement, html);
                         window.siyuan.menus.menu.remove();
@@ -2464,7 +2463,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     otherMenus.push({id: "separator_1", type: "separator"});
-    const horizontalCells = alignWholeTable ? Array.from(tableElement.rows[0].cells) : [cellElement];
+    const horizontalCells = [cellElement];
     const alignmentMenus: IMenu[] = [{
         id: "alignLeft",
         icon: "iconAlignLeft",
@@ -2608,6 +2607,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             });
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (!event.isComposing && event.key === "Enter") {
+                    event.preventDefault();
+                    event.stopPropagation();
                     insertRowAbove(protyle, range, cellElement, nodeElement, parseInt(element.querySelector("input").value));
                     window.siyuan.menus.menu.remove();
                 }
@@ -2632,6 +2633,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                 });
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     if (!event.isComposing && event.key === "Enter") {
+                        event.preventDefault();
+                        event.stopPropagation();
                         insertRow(protyle, range, cellElement, nodeElement, parseInt(element.querySelector("input").value));
                         window.siyuan.menus.menu.remove();
                     }
@@ -2657,6 +2660,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                 });
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     if (!event.isComposing && event.key === "Enter") {
+                        event.preventDefault();
+                        event.stopPropagation();
                         insertColumn(protyle, nodeElement, cellElement, "beforebegin", range, parseInt(element.querySelector("input").value));
                         window.siyuan.menus.menu.remove();
                     }
@@ -2682,6 +2687,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                 });
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     if (!event.isComposing && event.key === "Enter") {
+                        event.preventDefault();
+                        event.stopPropagation();
                         insertColumn(protyle, nodeElement, cellElement, "afterend", range, parseInt(element.querySelector("input").value));
                         window.siyuan.menus.menu.remove();
                     }

@@ -159,7 +159,7 @@ type ResponseSerializedData struct {
 
 type ResponseFile struct {
 	Name string `json:"name"` // e.g. "index.html". If Name is not empty, the file will be sent with Content-Disposition header.
-	Path string `json:"path"` // e.g. "/data/plugins/<plugin-name>/app/index.html"
+	Path string `json:"path"` // e.g. "/data/plugins/<plugin-name>/app/index.html"; must resolve inside the workspace, otherwise the kernel answers 404
 }
 
 type ResponseString struct {

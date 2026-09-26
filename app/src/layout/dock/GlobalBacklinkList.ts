@@ -29,6 +29,9 @@ interface IGlobalBacklinkAnchor {
     offset: number;
 }
 
+// 底部反链与正文共用滚动容器，条目只露出边缘时不作为正文滚动锚点
+const MIN_SHARED_ANCHOR_VISIBLE_HEIGHT = 32;
+
 // 固定数量的页容器与编辑器留在视口附近，其余位置由高度占位维持。
 export class GlobalBacklinkList {
     public readonly element = document.createElement("div");
@@ -62,7 +65,9 @@ export class GlobalBacklinkList {
             this.frame = window.requestAnimationFrame(() => {
                 this.frame = 0;
                 this.lastAnchor = this.captureAnchor() || this.lastAnchor;
-                this.options.state()?.set(this.anchorField(), this.lastAnchor);
+                if (!this.options.sharedScroll && this.lastAnchor) {
+                    this.options.state()?.set(this.anchorField(), this.lastAnchor);
+                }
                 void this.updateViewport();
             });
         }
@@ -84,6 +89,7 @@ export class GlobalBacklinkList {
         app: App;
         host: HTMLElement;
         scroll: HTMLElement;
+        sharedScroll: boolean;
         state: () => ViewStateService | undefined;
         foldedTypes: () => string[];
         open: (id: string) => void;
@@ -118,7 +124,8 @@ export class GlobalBacklinkList {
             this.controller.abort();
             this.key = key;
             this.query = query;
-            this.lastAnchor = this.options.state()?.get<IGlobalBacklinkAnchor>(this.anchorField());
+            this.lastAnchor = this.options.sharedScroll ? undefined :
+                this.options.state()?.get<IGlobalBacklinkAnchor>(this.anchorField());
             this.heights.clear();
             void this.refresh(false);
         } else if (refresh) {
@@ -161,7 +168,9 @@ export class GlobalBacklinkList {
         for (const page of Array.from(this.pages.entries()).sort((a, b) => a[0] - b[0])) {
             for (const element of Array.from(page[1].children)) {
                 const rect = element.getBoundingClientRect();
-                if (rect.bottom > viewport.top && rect.top < viewport.bottom) {
+                const visibleHeight = Math.min(rect.bottom, viewport.bottom) - Math.max(rect.top, viewport.top);
+                if (visibleHeight >= (this.options.sharedScroll ?
+                    Math.min(MIN_SHARED_ANCHOR_VISIBLE_HEIGHT, rect.height) : 0) && visibleHeight > 0) {
                     return {id: element.getAttribute("data-global-backlink-id"), offset: rect.top - viewport.top};
                 }
             }
@@ -169,6 +178,16 @@ export class GlobalBacklinkList {
     }
 
     private restoreAnchor(anchor?: IGlobalBacklinkAnchor) {
+        if (this.options.sharedScroll) {
+            // 正文有光标或焦点时，反链异步渲染不得改变正文滚动位置
+            const owner = this.options.scroll.closest(".protyle");
+            const active = document.activeElement;
+            const selection = window.getSelection()?.focusNode;
+            if (owner && ((active && owner.contains(active) && !this.element.contains(active)) ||
+                (selection && owner.contains(selection) && !this.element.contains(selection)))) {
+                return;
+            }
+        }
         const record = anchor && this.records.get(anchor.id);
         if (record) {
             this.options.scroll.scrollTop += record.element.getBoundingClientRect().top -
@@ -181,7 +200,9 @@ export class GlobalBacklinkList {
         const generation = ++this.generation;
         this.controller.abort();
         this.controller = new AbortController();
-        const anchor = preserve ? this.captureAnchor() || this.lastAnchor : this.lastAnchor;
+        // 共用正文滚动容器时只保持当前可见的锚点，不读取上次停留在反链列表时保存的锚点
+        const anchor = this.options.sharedScroll ? this.captureAnchor() :
+            (preserve ? this.captureAnchor() || this.lastAnchor : this.lastAnchor);
         this.pendingAnchor = anchor;
         this.dirty = false;
         await Promise.all(Array.from(this.records.values()).map(record =>
@@ -218,7 +239,7 @@ export class GlobalBacklinkList {
             this.addPage(data.offset, data.items);
             this.updateSpacers();
             this.restoreAnchor(this.pendingAnchor || anchor);
-            this.lastAnchor = this.pendingAnchor || anchor || this.lastAnchor;
+            this.lastAnchor = this.pendingAnchor || anchor || (this.options.sharedScroll ? undefined : this.lastAnchor);
             this.pendingAnchor = undefined;
             this.message.textContent = this.total === 0 ? window.siyuan.languages.emptyContent : "";
             this.message.classList.toggle("fn__none", this.total > 0);
@@ -470,7 +491,9 @@ export class GlobalBacklinkList {
 
     public destroy() {
         this.lastAnchor = this.captureAnchor() || this.lastAnchor;
-        if (this.lastAnchor) { this.options.state()?.set(this.anchorField(), this.lastAnchor); }
+        if (!this.options.sharedScroll && this.lastAnchor) {
+            this.options.state()?.set(this.anchorField(), this.lastAnchor);
+        }
         this.destroyed = true;
         this.controller.abort();
         this.generation++;

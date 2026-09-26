@@ -6,7 +6,7 @@ describe("template manager action state", () => {
     it("keeps editing actions on the open file when a directory is selected", () => {
         const selected = {path: "folder", isDir: true};
         const editing = {path: "folder/note.md", isDir: false};
-        for (const action of ["save", "preview"]) {
+        for (const action of ["save", "preview", "source", "more"]) {
             const entry = getTemplateActionEntry(action, selected, editing);
             assert.equal(entry, editing);
             assert.equal(getTemplateActionState(action, entry, true, false).disabled, false);

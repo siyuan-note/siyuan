@@ -23,8 +23,9 @@ import {
     handleTouchStart,
     handleTouchUp,
 } from "./util/touch";
-import {fetchGet, fetchPost} from "../util/fetch";
+import {fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
+import {finishMobileStartup} from "./util/setEmpty";
 import {initAssets} from "../util/assets";
 import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
@@ -69,6 +70,7 @@ import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 import {updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {showMobileBars} from "./util/mobileBars";
 import {initializeEnglishCommandTranslations} from "../command/english";
+import {loadLanguages} from "../boot/loadLanguages";
 import {scrollInputIntoView} from "./util/visibleViewport";
 import {installPluginStorageFetchAppId} from "../util/fetchAppId";
 
@@ -193,11 +195,11 @@ class App {
             correctHotkey(siyuanApp);
             await loadPlugins(this);
             getLocalStorage(() => {
-                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
-                    window.siyuan.languages = lauguages;
+                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, (languages: IObject) => {
+                    window.siyuan.languages = languages;
                     void initializeEnglishCommandTranslations(
                         window.siyuan.config.appearance.lang,
-                        lauguages as Record<string, string>,
+                        languages as Record<string, string>,
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);
@@ -205,7 +207,7 @@ class App {
                     bootSync();
                     appearanceConfigApi.apply(window.siyuan.config.appearance);
                     initMessage();
-                    initAssets();
+                    initAssets(true);
                     if (!isInMobileApp()) {
                         if (isChromeBrowser()) {
                             document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
@@ -219,7 +221,7 @@ class App {
                     } else if (!isInIOS()) {
                         document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-visual, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
                     }
-                    fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
                         fetchPost("/api/system/getEmojiConf", {}, async emojiResponse => {
@@ -231,8 +233,10 @@ class App {
                                 openChangelog();
                                 window.siyuan.isReady = true;
                                 mainWs.flushMainMessages();
+                                fetchPost("/api/setting/getCloudUser", {});
                             } catch (error) {
                                 console.error("Failed to initialize mobile framework:", error);
+                                finishMobileStartup();
                             }
                         });
                     });

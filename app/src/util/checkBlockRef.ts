@@ -1,5 +1,6 @@
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
+import {progressLoading} from "../dialog/processSystem";
 import {waitForPendingTransactions} from "../protyle/util/transactionQueue";
 import {fetchSyncPost} from "./fetch";
 
@@ -13,12 +14,22 @@ export interface IBlockRefCheckOptions {
 }
 
 const pendingChecks = new WeakSet<IProtyle>();
+let activeChecks = 0;
+let progressTimeout: number;
+const progressID = "checkBlockRefProgress";
 
 export const checkBlockRef = async (options: IBlockRefCheckOptions, protyle?: IProtyle) => {
     if (window.siyuan.config.editor.checkBlockRef === false) {
         return false;
     }
+    activeChecks++;
     try {
+        if (activeChecks === 1) {
+            // 检查持续一段时间后再显示遮罩，避免快速删除或剪切时闪屏。
+            progressTimeout = window.setTimeout(() => {
+                progressLoading({code: 1, msg: window.siyuan.languages.checkBlockRefProgress}, progressID);
+            }, 300);
+        }
         if (protyle) {
             await waitForPendingTransactions(protyle);
         }
@@ -35,6 +46,12 @@ export const checkBlockRef = async (options: IBlockRefCheckOptions, protyle?: IP
     } catch (error) {
         console.warn("Check block ref failed:", error);
         showMessage(error instanceof Error ? error.message : String(error), 7000, "error");
+    } finally {
+        activeChecks--;
+        if (activeChecks === 0) {
+            window.clearTimeout(progressTimeout);
+            progressLoading({code: 2, msg: ""}, progressID);
+        }
     }
 };
 

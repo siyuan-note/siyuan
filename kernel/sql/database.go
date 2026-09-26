@@ -1796,9 +1796,9 @@ func nSort(n *ast.Node) int {
 		return 10
 	case ast.NodeHTMLBlock:
 		return 10
-	case ast.NodeList:
+	case ast.NodeList, ast.NodeMindmap:
 		return 20
-	case ast.NodeListItem:
+	case ast.NodeListItem, ast.NodeMindmapItem:
 		return 20
 	case ast.NodeBlockquote:
 		return 20

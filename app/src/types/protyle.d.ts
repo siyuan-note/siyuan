@@ -499,6 +499,7 @@ interface IProtyleOptions {
     }[],
     action?: TProtyleAction[],
     scrollPosition?: ScrollLogicalPosition,
+    scrollAttr?: IScrollAttr,
     mode?: TEditorMode,
     blockId?: string
     rootId?: string

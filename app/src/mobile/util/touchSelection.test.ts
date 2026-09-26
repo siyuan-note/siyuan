@@ -48,6 +48,11 @@ describe("mobile touch selection", () => {
         assert.equal(getKeyboardHideResult(false, false, true), KeyboardHideResult.Cleanup);
     });
 
+    it("preserves editor selection and caret while a keyboard panel is open", () => {
+        assert.equal(getKeyboardHideResult(false, false, true, true), KeyboardHideResult.PreserveSelection);
+        assert.equal(getKeyboardHideResult(false, false, false, true), KeyboardHideResult.PreserveSelection);
+    });
+
     it("restores table cell selection before considering ordinary text selection", () => {
         assert.equal(getKeyboardHideResult(true, true, true), KeyboardHideResult.RestoreTableCellSelection);
         assert.equal(getKeyboardHideResult(true, true, false), KeyboardHideResult.RestoreTableCellSelection);

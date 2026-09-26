@@ -2,15 +2,19 @@ import {Constants} from "../constants";
 import {escapeAttr} from "../util/escape";
 import {unicode2Emoji} from "./iconValue";
 
-export type TFileTreeDefaultIcon = "notebook" | "folder" | "file";
+export type TFileTreeDefaultIcon = "notebook" | "folder" | "file" | "lock";
 
 const FILE_TREE_SVG_ICONS: Record<TFileTreeDefaultIcon, string> = {
     notebook: "iconNotebook",
     folder: "iconFileText",
     file: "iconFile",
+    lock: "iconLock",
 };
 
 const getDefaultEmoji = (defaultIcon: TFileTreeDefaultIcon) => {
+    if (defaultIcon === "lock") {
+        return "1f512-fe0f";
+    }
     const images = window.siyuan.storage[Constants.LOCAL_IMAGES];
     if (defaultIcon === "notebook") {
         return images.note;
@@ -19,7 +23,7 @@ const getDefaultEmoji = (defaultIcon: TFileTreeDefaultIcon) => {
 };
 
 const isDefaultIcon = (value: string | undefined): value is TFileTreeDefaultIcon =>
-    value === "notebook" || value === "folder" || value === "file";
+    value === "notebook" || value === "folder" || value === "file" || value === "lock";
 
 const getDirectIconElement = (liElement: HTMLElement) => Array.from(liElement.children).find((item) =>
     item.classList.contains("b3-list-item__icon") || item.classList.contains("b3-list-item__graphic")) as HTMLElement | undefined;
@@ -54,6 +58,9 @@ const resolveDefaultIcon = (liElement: HTMLElement): TFileTreeDefaultIcon => {
     if (liElement.getAttribute("data-type") === "navigation-root" ||
         liElement.dataset.defaultIcon === "notebook") {
         return "notebook";
+    }
+    if (liElement.dataset.defaultIcon === "lock") {
+        return "lock";
     }
     const toggleElement = Array.from(liElement.children).find((item) =>
         item.classList.contains("b3-list-item__toggle"));

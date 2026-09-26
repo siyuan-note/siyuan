@@ -1911,7 +1911,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 		if ast.NodeTextMark == n.Type {
 			if n.IsTextMarkType("inline-math") {
-				if "" == strings.TrimSpace(n.TextMarkInlineMathContent) {
+				// 富文本单元格中的行级公式是派生投影，空公式块也需要保留对应节点。
+				if "" == strings.TrimSpace(n.TextMarkInlineMathContent) &&
+					(nil == n.Parent || nil == n.Parent.TableCellRich) {
 					// 剔除空白的行级公式
 					unlinks = append(unlinks, n)
 				}
@@ -2589,6 +2591,7 @@ type Transaction struct {
 	nodes          map[string]*ast.Node   // 事务中变更的节点
 	relatedAvIDs   []string               // 事务中变更的属性视图 ID
 	changedRootIDs []string               // 变更的树 ID 列表（包含了变更定义块后影响的动态锚文本所在的树）
+	mutatedRootIDs []string               // 提交后保留实际修改的文档 ID，避免为查询结果持有文档树
 	boxIcons       map[string]string      // 事务提交后需要同步的笔记本图标
 
 	isGlobalAssetsInit           bool   // 是否初始化过全局资源判断
@@ -2625,9 +2628,7 @@ type Transaction struct {
 }
 
 func (tx *Transaction) GetChangedRootIDs() (ret []string) {
-	for t := range tx.trees {
-		ret = append(ret, t)
-	}
+	ret = tx.GetMutatedRootIDs()
 
 	for _, id := range tx.changedRootIDs {
 		ret = append(ret, id)
@@ -2649,6 +2650,7 @@ func (tx *Transaction) MarkReplay() {
 // GetMutatedRootIDs 返回真正被写盘修改结构的树 rootID，不含 refreshDynamicRefTexts 刷新的引用树。
 // 用于跨文档撤销判定：单文档编辑返回 1 个 rootID，跨文档移动返回多个，引用文本刷新不计入。
 func (tx *Transaction) GetMutatedRootIDs() (ret []string) {
+	ret = append(ret, tx.mutatedRootIDs...)
 	for t := range tx.trees {
 		ret = append(ret, t)
 	}
@@ -2671,6 +2673,8 @@ func (tx *Transaction) begin() (err error) {
 	tx.templateDocTreeRootSnapshot = nil
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
+	tx.mutatedRootIDs = nil
+	tx.changedRootIDs = nil
 	tx.boxIcons = map[string]string{}
 	tx.removedCreatedDocs = nil
 	tx.removedTemplateCreatedDocs = nil
@@ -2881,21 +2885,37 @@ func (tx *Transaction) commit() (err error) {
 
 	crossTreeMoveRefRefreshes := append([]crossTreeMoveRefRefresh(nil), tx.crossTreeMoveRefRefreshes...)
 	IncSync()
+	tx.mutatedRootIDs = tx.GetMutatedRootIDs()
 	tx.state.Store(2)
 	committed = true
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
 	GlobalUndoLog.Record(tx)
 	tx.finishAttributeViewMutation(false)
-	tx.blockSwapOriginalTrees = nil
-	tx.templateDocTreeRootSnapshot = nil
-	tx.attemptedTemplateCreatedDocs = nil
-	tx.writeTransactionTree = nil
+	tx.releaseCommittedResources()
 	tx.m.Unlock()
 	if 0 < len(crossTreeMoveRefRefreshes) {
 		task.AppendAsyncTaskWithDelay(task.RefreshCrossTreeMoveRefs, util.SQLFlushInterval,
 			refreshCrossTreeMoveRefs, crossTreeMoveRefRefreshes)
 	}
 	return
+}
+
+// releaseCommittedResources 释放执行期间的文档树；操作中的撤销快照及广播所需的文档 ID 继续保留。
+func (tx *Transaction) releaseCommittedResources() {
+	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
+	tx.relatedAvIDs = nil
+	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
+	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
+	tx.restoredCreatedDocBoxes, tx.attemptedTemplateCreatedDocs = nil, nil
+	tx.blockSwapOriginalTrees = nil
+	tx.templateDocTreeRootSnapshot = nil
+	tx.listItemFoldCandidates, tx.listItemFoldCandidateIDs = nil, nil
+	tx.deletedAttrViewBlockIDs, tx.deletedAttrViewCarriers = nil, nil
+	tx.attributeViewDeletionUndo, tx.attributeViewDeletionErr = nil, nil
+	tx.structureCheckNodes = nil
+	tx.crossTreeMoveRefRefreshes = nil
+	tx.removeCreatedDoc, tx.writeTransactionTree = nil, nil
+	tx.luteEngine = nil
 }
 
 func (tx *Transaction) rollback() {

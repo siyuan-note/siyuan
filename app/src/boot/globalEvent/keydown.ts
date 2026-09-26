@@ -769,7 +769,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    if (matchHotKey("⌘/", event)) {
+    if (matchHotKey(window.siyuan.config.keymap.general.openContextMenu, event)) {
         const liRect = liElements[0].getBoundingClientRect();
         if (isFile) {
             initFileMenu(app, notebookId, pathString, liElements[0]).popup({
@@ -1096,6 +1096,14 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
     if (!matchCollapse && !matchExpand &&
         !event.key.startsWith("Arrow") && event.key !== "Enter") {
         return false;
+    }
+    if (!event.repeat && (matchCollapse || matchExpand) && activePanelElement.classList.contains("sy__outline")) {
+        const outline = getAllModels().outline.find(item => item.element.parentElement === activePanelElement);
+        if (outline) {
+            outline.setAllExpanded(!matchCollapse);
+            event.preventDefault();
+            return true;
+        }
     }
     if (!event.repeat && matchCollapse) {
         const collapseElement = activePanelElement.querySelector('.block__icon[data-type="collapse"]');

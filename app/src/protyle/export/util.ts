@@ -3,7 +3,8 @@ import {escapeHtml} from "../../util/escape";
 import * as path from "path";
 /// #endif
 import {hideMessage, showMessage} from "../../dialog/message";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {renderExportJSEmbeds} from "./jsEmbed";
 import {ContractFormData} from "../../util/contractFormData";
 import {Dialog} from "../../dialog";
 import {addScript} from "../util/addScript";
@@ -97,6 +98,7 @@ export const exportImage = (id: string, copyOnly = false) => {
     let outputting = false;
     let titleRefreshTimer: number;
     let titleComposing = false;
+    let previewRevision = 0;
 
     const setActionDisabled = (disabled: boolean) => {
         cancelButton.disabled = disabled;
@@ -230,18 +232,20 @@ export const exportImage = (id: string, copyOnly = false) => {
         outputImage("export");
     });
     const refreshExportPreview = () => {
+        const revision = ++previewRevision;
         setActionDisabled(true);
         if (!exportDialog.element.querySelector(".fn__loading")) {
             exportButton.parentElement.insertAdjacentHTML("afterend", '<div class="fn__loading"><img height="128px" width="128px" src="stage/loading-pure.svg"></div>');
         }
         fetchPost("/api/export/exportPreviewHTML", {
             id,
+            keepJSEmbed: true,
             keepFold: foldElement.checked,
             image: true,
             addTitle: addTitleElement.checked,
             customTitle: customTitleElement.value,
         }, (response) => {
-            refreshPreview(response);
+            refreshPreview(response, revision);
         });
     };
     addTitleElement.addEventListener("change", () => {
@@ -296,12 +300,24 @@ export const exportImage = (id: string, copyOnly = false) => {
             watermarkPreviewElement.removeAttribute("style");
         }
     };
-    const refreshPreview = async (response: IWebSocketData) => {
+    const refreshPreview = async (response: IWebSocketData, revision: number) => {
+        if (revision !== previewRevision) {
+            return;
+        }
         previewElement.innerHTML = response.data.content;
         previewElement.setAttribute("data-doc-type", response.data.type || "NodeDocument");
         Object.keys(response.data.attrs).forEach(key => {
             previewElement.setAttribute(key, response.data.attrs[key]);
         });
+        await renderExportJSEmbeds(previewElement, {
+            disabled: window.siyuan.config.system.safeMode || getHostCapabilities().remoteKernel,
+            disabledTip: window.siyuan.languages.safeModeJSTip,
+            rootID: id,
+            headingMode: window.siyuan.config.editor.headingEmbedMode,
+        }, fetchSyncPost);
+        if (revision !== previewRevision) {
+            return;
+        }
         previewElement.querySelectorAll(".code-block").forEach(item => {
             item.setAttribute("linewrap", "true");
         });
@@ -315,6 +331,9 @@ export const exportImage = (id: string, copyOnly = false) => {
         });
 
         await updateWatermark();
+        if (revision !== previewRevision) {
+            return;
+        }
         exportDialog.element.querySelector(".fn__loading")?.remove();
         if (copyOnly) {
             await outputImage("copy");
@@ -324,12 +343,13 @@ export const exportImage = (id: string, copyOnly = false) => {
     };
     fetchPost("/api/export/exportPreviewHTML", {
         id,
+        keepJSEmbed: true,
         keepFold: foldElement.checked,
         image: true,
         addTitle: addTitleElement.checked,
         customTitle: customTitleElement.value,
     }, (response) => {
         imageName = response.data.name + ".png";
-        refreshPreview(response);
+        refreshPreview(response, 0);
     });
 };

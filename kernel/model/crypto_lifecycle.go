@@ -118,7 +118,8 @@ func NotebookCryptoLifecycleState(hasRecoveryDependency bool) NotebookCryptoStat
 		}
 		return NotebookCryptoStateRecoveryRequired
 	}
-	if hasRecoveryDependency || filelock.IsExist(dataCryptoBackupPath()) {
+	if hasRecoveryDependency || filelock.IsExist(dataCryptoBackupPath()) || len(notebookCrypto.MasterSalt) != 0 ||
+		len(notebookCrypto.KEKVerifier) != 0 || len(notebookCrypto.HistoryKEKs) != 0 || notebookCrypto.BackupID != "" || len(notebookCrypto.KEKMAC) != 0 {
 		return NotebookCryptoStateRecoveryRequired
 	}
 	return NotebookCryptoStateDisabled

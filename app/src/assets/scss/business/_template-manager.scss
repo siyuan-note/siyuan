@@ -16,6 +16,12 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+
+    > .b3-button {
+      max-width: 100%;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
   }
 
   &__panels {
@@ -28,7 +34,8 @@
   &__sidebar {
     display: flex;
     flex-direction: column;
-    width: 28%;
+    width: clamp(200px, 25%, 280px);
+    flex-shrink: 0;
     min-width: 0;
     min-height: 0;
     gap: 8px;
@@ -107,6 +114,32 @@
     gap: 8px;
   }
 
+  &__source-panel,
+  &__preview-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 8px;
+    flex: 1 0 auto;
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__path {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__heading &__more {
+    min-width: 32px;
+    min-height: 36px;
+    justify-content: center;
+  }
+
   &__source {
     flex: 1 0 180px;
     width: 100%;
@@ -114,6 +147,10 @@
     resize: vertical;
     font-family: var(--b3-font-family-code);
     tab-size: 4;
+
+    &:disabled {
+      pointer-events: none;
+    }
   }
 
   &__context {
@@ -147,6 +184,26 @@
   }
 }
 
+.template-manager--wide {
+  .template-manager__editor {
+    flex-direction: row;
+    overflow: hidden;
+    gap: 16px;
+  }
+
+  .template-manager__source-panel,
+  .template-manager__preview-panel {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .template-manager__preview {
+    flex: 1 0 180px;
+    max-height: none;
+  }
+}
+
 @media (max-width: 600px) {
   .template-manager {
     &__panels {
@@ -170,6 +227,11 @@
 }
 
 .template-manager--mobile {
+  .template-manager__more {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
   .template-manager__sidebar {
     width: 100%;
     flex: 1;
@@ -182,6 +244,10 @@
   }
 
   &.template-manager--editing {
+    .template-manager__global-actions {
+      display: none;
+    }
+
     .template-manager__sidebar {
       display: none;
     }

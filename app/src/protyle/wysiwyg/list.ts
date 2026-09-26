@@ -134,7 +134,7 @@ export const openOrderedListStartDialog = (protyle: IProtyle, listElement: HTMLE
 
 export const setTaskListItemMarker = (protyle: IProtyle, taskItemElement: Element, marker: string): void => {
     if (!taskItemElement.isConnected || protyle.disabled || protyle.options.action.includes(Constants.CB_GET_HISTORY) ||
-        taskItemElement.getAttribute("data-type") !== "NodeListItem" ||
+        !["NodeListItem", "NodeMindmapItem"].includes(taskItemElement.getAttribute("data-type")) ||
         taskItemElement.getAttribute("data-subtype") !== "t" || !isTaskListMarker(marker)) {
         return;
     }

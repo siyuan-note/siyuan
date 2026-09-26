@@ -28,6 +28,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -630,6 +631,10 @@ func docAssets(rootID string, retainQueryStr bool, itemFilter attributeViewItemF
 	}
 
 	ret = getAssetsLinkDestsWithAttributeViewItemFilter(tree.Root, false, itemFilter)
+	// 题头图存储在文档属性中，也属于文档引用的附件。
+	if titleImg := treenode.GetDocTitleImgPath(tree.Root); util.IsAssetLinkDest([]byte(titleImg), false) {
+		ret = append(ret, titleImg)
+	}
 	if !retainQueryStr {
 		for i, asset := range ret {
 			if before, _, ok := strings.Cut(asset, "?"); ok {
@@ -906,29 +911,80 @@ func DownloadNetAssets2LocalAssets(tree *parse.Tree, onlyImg bool, originalURL s
 	netAssets2LocalAssets0(tree, onlyImg, originalURL, assetsDirPath, false)
 }
 
+type AssetSearchMatch struct {
+	Field string
+	Mode  string
+	Value string
+}
+
 func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
+	ret, _ = SearchAssetsByNamePage(keyword, exts, nil, 1, Conf.Search.Limit)
+	return
+}
+
+// SearchAssetsByNamePage 根据文件名、路径和扩展名筛选资源，并按稳定顺序返回指定页。
+func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMatch, page, pageSize int) (ret []*cache.Asset, err error) {
 	ret = []*cache.Asset{}
+	if page < 1 || pageSize < 1 || pageSize > Conf.Search.Limit {
+		return nil, errors.New("invalid asset search page")
+	}
+	allowedExts := map[string]bool{}
+	for _, ext := range exts {
+		ext = strings.TrimPrefix(strings.ToLower(strings.TrimSpace(ext)), ".")
+		if ext != "" {
+			allowedExts["."+ext] = true
+		}
+	}
+	var pattern *regexp.Regexp
+	if match != nil {
+		if match.Field != "" && match.Field != "name" && match.Field != "path" {
+			return nil, errors.New("invalid asset match field")
+		}
+		if match.Mode != "prefix" && match.Mode != "suffix" && match.Mode != "regex" {
+			return nil, errors.New("invalid asset match mode")
+		}
+		if len(match.Value) > 1024 {
+			return nil, errors.New("asset match is too long")
+		}
+		if match.Mode == "regex" {
+			pattern, err = regexp.Compile(match.Value)
+			if err != nil {
+				return nil, fmt.Errorf("invalid asset regex: %w", err)
+			}
+		}
+	}
 	var keywords []string
 	keywords = append(keywords, keyword)
 	if "" != keyword {
 		keywords = append(keywords, strings.Split(keyword, " ")...)
 	}
 	pathHitCount := map[string]int{}
-	filterByExt := 0 < len(exts)
 	filterAsset := func(path string, asset *cache.Asset) bool {
 
 		// 扩展名过滤
-		if filterByExt {
-			ext := filepath.Ext(asset.HName)
-			includeExt := false
-			for _, e := range exts {
-				if strings.ToLower(ext) == strings.ToLower(e) {
-					includeExt = true
-					break
-				}
-			}
-			if !includeExt {
+		if len(exts) > 0 {
+			if !allowedExts[strings.ToLower(filepath.Ext(asset.HName))] {
 				return false
+			}
+		}
+		if match != nil && match.Value != "" {
+			value := asset.HName
+			if match.Field == "path" {
+				value = asset.Path
+			}
+			switch match.Mode {
+			case "prefix":
+				if !strings.HasPrefix(strings.ToLower(value), strings.ToLower(match.Value)) {
+					return false
+				}
+			case "suffix":
+				if !strings.HasSuffix(strings.ToLower(value), strings.ToLower(match.Value)) {
+					return false
+				}
+			case "regex":
+				if !pattern.MatchString(value) {
+					return false
+				}
 			}
 		}
 
@@ -985,15 +1041,9 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 		}
 	}
 
-	// 添加高亮
 	for _, asset := range matchedAssets {
-		hitCount := pathHitCount[asset.Path]
-		hName := asset.HName
-		if hitCount > 0 {
-			_, hName = search.MarkText(asset.HName, strings.Join(keywords, search.TermSep), 64, Conf.Search.CaseSensitive)
-		}
 		ret = append(ret, &cache.Asset{
-			HName:   hName,
+			HName:   asset.HName,
 			Path:    asset.Path,
 			Updated: asset.Updated,
 		})
@@ -1001,16 +1051,40 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 
 	if 0 < len(pathHitCount) {
 		sort.Slice(ret, func(i, j int) bool {
-			return pathHitCount[ret[i].Path] > pathHitCount[ret[j].Path]
+			iHits, jHits := pathHitCount[ret[i].Path], pathHitCount[ret[j].Path]
+			if iHits != jHits {
+				return iHits > jHits
+			}
+			return ret[i].Path < ret[j].Path
 		})
 	} else {
 		sort.Slice(ret, func(i, j int) bool {
-			return ret[i].Updated > ret[j].Updated
+			if ret[i].Updated != ret[j].Updated {
+				return ret[i].Updated > ret[j].Updated
+			}
+			return ret[i].Path < ret[j].Path
 		})
 	}
 
-	if Conf.Search.Limit <= len(ret) {
-		ret = ret[:Conf.Search.Limit]
+	// 排序后再分页，保证同一批资源的页边界稳定。
+	if page-1 > len(ret)/pageSize {
+		return []*cache.Asset{}, nil
+	}
+	start := (page - 1) * pageSize
+	if start >= len(ret) {
+		return []*cache.Asset{}, nil
+	}
+	end := start + pageSize
+	if end > len(ret) {
+		end = len(ret)
+	}
+	ret = ret[start:end]
+	// 仅处理当前页的高亮内容，避免对其他页重复渲染。
+	highlightKeyword := strings.Join(keywords, search.TermSep)
+	for _, asset := range ret {
+		if pathHitCount[asset.Path] > 0 {
+			_, asset.HName = search.MarkText(asset.HName, highlightKeyword, 64, Conf.Search.CaseSensitive)
+		}
 	}
 	return
 }

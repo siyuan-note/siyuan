@@ -97,12 +97,25 @@
 
 // 题头图封面选择
 .b3-cover {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
 
   &__tabs {
     display: flex;
     flex-wrap: wrap;
-    padding: 16px 16px 0;
+    flex-shrink: 0;
+    padding: 16px;
     gap: 8px;
+  }
+
+  &__cards {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    align-content: start;
+    padding: 16px;
   }
 
   &__card {
@@ -119,5 +132,12 @@
     &:hover {
       opacity: 0.86;
     }
+  }
+}
+
+@media screen and (max-width: 520px) {
+  .b3-cover__tabs {
+    max-height: 50%;
+    overflow: auto;
   }
 }

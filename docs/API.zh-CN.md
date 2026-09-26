@@ -877,7 +877,7 @@ if (response.code === 0 && response.data) {
   ```
 
     * `action.data`：新插入块生成的 DOM
-    * `action.id`：新插入块的 ID
+    * `action.id`：首个插入的顶层块 ID；如果一次插入多个顶层块且需要逐个取得 ID，请每次请求只插入一个块
 
 ### 插入前置子块
 
@@ -963,7 +963,7 @@ if (response.code === 0 && response.data) {
   ```
 
     * `action.data`：新插入块生成的 DOM
-    * `action.id`：新插入块的 ID
+    * `action.id`：首个追加的顶层块 ID；如果一次追加多个顶层块且需要逐个取得 ID，请每次请求只追加一个块
 
 ### 更新块
 
@@ -1328,6 +1328,8 @@ if (response.code === 0 && response.data) {
     "data": null
   }
   ```
+
+写块接口可能在块树事务已提交、异步 SQL 索引尚未完成时返回。如需随后通过 `/api/query/sql` 立即读取该写入，请在写入后调用 `POST /api/sqlite/flushTransaction`，等待返回 `code: 0`，再查询 SQL。例如，`getBlockKramdown` 读取块树，可能比 SQL 索引更早显示新写入的内容。Kramdown、DOM 和 SQL 列是不同的内容表示，均非规范化纯文本。
 
 ## 模板
 

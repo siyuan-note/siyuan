@@ -356,6 +356,17 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 if (handleTemplateInteraction(protyle, event) || handleRichTextInteraction(protyle, event)) {
                     return;
                 }
+                const urlElement = (event.target as HTMLElement).closest<HTMLAnchorElement>(
+                    '[data-av-id][data-type="url"] > a.block__icon');
+                if (urlElement) {
+                    const url = urlElement.parentElement.querySelector<HTMLInputElement>("input")?.value;
+                    if (url) {
+                        openLink(protyle.app, url, event, event.ctrlKey || event.metaKey);
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 const databaseElement = hasClosestByClassName(event.target as HTMLElement, "popover__block");
                 if (databaseElement && isTouchDevice() && !isLastPointerMouse() &&
                     hasClosestByClassName(databaseElement, "custom-attr__avheader")) {

@@ -51,10 +51,57 @@ func legacyMindmapList(node *ast.Node, engine *lute.Lute) *ast.Node {
 	list.ID = node.ID
 	list.SetIALAttr("id", node.ID)
 	list.SetIALAttr(listMindmapViewAttr, "1")
+	retagLegacyMindmapList(list)
+	retagNestedLegacyMindmaps(list)
 	if treenode.ValidateBlockReplacement(node, list) != nil {
 		return nil
 	}
 	return list
+}
+
+// legacyMindmapTypedList 在副本中升级旧列表，保留原块供事务撤销。
+func legacyMindmapTypedList(node *ast.Node, engine *lute.Lute) *ast.Node {
+	if node.Type != ast.NodeList || node.IALAttr(listMindmapViewAttr) != "1" {
+		return nil
+	}
+	cloned := engine.BlockDOM2Tree(engine.RenderNodeBlockDOM(node))
+	blocks := blockChildrenOf(cloned.Root)
+	if len(blocks) != 1 || blocks[0].Type != ast.NodeList || blocks[0].ID != node.ID {
+		return nil
+	}
+	list := blocks[0]
+	retagLegacyMindmapList(list)
+	retagNestedLegacyMindmaps(list)
+	if treenode.ValidateBlockReplacement(node, list) != nil {
+		return nil
+	}
+	return list
+}
+
+// retagLegacyMindmapList 仅转换导图直属的列表分支，正文容器内的普通列表仍保持原类型。
+func retagLegacyMindmapList(list *ast.Node) {
+	list.Type = ast.NodeMindmap
+	list.RemoveIALAttr(listMindmapViewAttr)
+	for item := list.FirstChild; item != nil; item = item.Next {
+		if item.Type != ast.NodeListItem {
+			continue
+		}
+		item.Type = ast.NodeMindmapItem
+		for child := item.FirstChild; child != nil; child = child.Next {
+			if child.Type == ast.NodeList {
+				retagLegacyMindmapList(child)
+			}
+		}
+	}
+}
+
+func retagNestedLegacyMindmaps(root *ast.Node) {
+	ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.Type == ast.NodeList && node.IALAttr(listMindmapViewAttr) == "1" {
+			retagLegacyMindmapList(node)
+		}
+		return ast.WalkContinue
+	})
 }
 
 func isLegacyMindmap(node *ast.Node) bool {
@@ -115,6 +162,12 @@ func MigrateLegacyMindmaps(id string) (tx *Transaction, visible map[string]strin
 			}
 			tx.DoOperations = append(tx.DoOperations, &Operation{Action: "update", ID: n.ID, Data: dom})
 			tx.UndoOperations = append(tx.UndoOperations, &Operation{Action: "update", ID: n.ID, Data: engine.RenderNodeBlockDOM(n)})
+			return ast.WalkSkipChildren
+		}
+		if list := legacyMindmapTypedList(n, engine); list != nil {
+			tx.DoOperations = append(tx.DoOperations, &Operation{Action: "update", ID: n.ID, Data: engine.RenderNodeBlockDOM(list)})
+			tx.UndoOperations = append(tx.UndoOperations, &Operation{Action: "update", ID: n.ID, Data: engine.RenderNodeBlockDOM(n)})
+			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue
 	})
@@ -132,7 +185,8 @@ func MigrateLegacyMindmaps(id string) (tx *Transaction, visible map[string]strin
 	}
 	visible = map[string]string{}
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
-		if entering && (node.Type == ast.NodeList && node.IALAttr(listMindmapViewAttr) == "1" ||
+		if entering && (node.Type == ast.NodeMindmap && (node.Parent == nil || node.Parent.Type != ast.NodeMindmapItem) ||
+			node.Type == ast.NodeList && node.IALAttr(listMindmapViewAttr) == "1" ||
 			isLegacyMindmap(node)) {
 			visible[node.ID] = engine.RenderNodeBlockDOM(node)
 			if isLegacyMindmap(node) && node.IALAttr(legacyMindmapCodeAttr) == "1" {

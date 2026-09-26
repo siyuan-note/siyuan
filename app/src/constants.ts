@@ -37,6 +37,12 @@ export abstract class Constants {
     public static readonly SIYUAN_CMD: string = "siyuan-cmd";
     public static readonly SIYUAN_GET: string = "siyuan-get";
     public static readonly SIYUAN_EVENT: string = "siyuan-event";
+    public static readonly SIYUAN_WINDOW_WORKSPACE_SAVED = "siyuan-window-workspace-saved";
+
+    public static readonly SIYUAN_WINDOW_WORKSPACE_SET = "siyuan-window-workspace-set";
+    public static readonly SIYUAN_WINDOW_WORKSPACE_FOCUS = "siyuan-window-workspace-focus";
+    public static readonly SIYUAN_WINDOW_WORKSPACE_GET_OPEN = "siyuan-window-workspace-get-open";
+    public static readonly SIYUAN_WINDOW_WORKSPACE_FLUSH_ALL = "siyuan-window-workspace-flush-all";
 
     public static readonly SIYUAN_CONFIG_TRAY: string = "siyuan-config-tray";
     public static readonly SIYUAN_QUIT: string = "siyuan-quit";
@@ -64,6 +70,7 @@ export abstract class Constants {
     public static readonly SIYUAN_SHOW_WINDOW: string = "siyuan-show-window";
 
     // 主进程调渲染进程
+    public static readonly SIYUAN_WINDOW_WORKSPACE_FLUSH = "siyuan-window-workspace-flush";
     public static readonly SIYUAN_OPEN_URL: string = "siyuan-open-url";
     public static readonly SIYUAN_OPEN_FILE: string = "siyuan-open-file";
     public static readonly SIYUAN_SAVE_CLOSE: string = "siyuan-save-close";
@@ -174,6 +181,7 @@ export abstract class Constants {
     public static readonly LOCAL_SEARCHUNREF = "local-searchunref";
     public static readonly LOCAL_DOCINFO = "local-docinfo"; // only mobile
     public static readonly LOCAL_MOBILE_TABS = "local-mobile-tabs"; // only mobile
+    public static readonly LOCAL_MOBILE_SLASH_MENU = "local-mobile-slash-menu"; // only mobile
     public static readonly LOCAL_MOBILE_BOTTOM_BAR = "local-mobile-bottom-bar"; // only mobile
     public static readonly LOCAL_MOBILE_SIDE_PANEL = "local-mobile-side-panel"; // only mobile
     public static readonly LOCAL_DAILYNOTEID = "local-dailynoteid"; // string
@@ -187,6 +195,7 @@ export abstract class Constants {
     public static readonly LOCAL_BAZAAR = "local-bazaar";
     public static readonly LOCAL_PDFTHEME = "local-pdftheme";
     public static readonly LOCAL_LAYOUTS = "local-layouts";
+    public static readonly LOCAL_WINDOW_WORKSPACE = "local-window-workspace-";
     public static readonly LOCAL_PLUGINTOPUNPIN = "local-plugintopunpin";
     public static readonly LOCAL_FLASHCARD = "local-flashcard";
     public static readonly LOCAL_FILEPOSITION = "local-fileposition";
@@ -200,6 +209,7 @@ export abstract class Constants {
     public static readonly LOCAL_MOVE_PATH = "local-move-path";
     public static readonly LOCAL_RECENT_DOCS = "local-recent-docs";
     public static readonly LOCAL_CLOSED_TABS = "local-closed-tabs";
+    public static readonly LOCAL_AV_CALENDAR_MODES = "local-av-calendar-modes";
 
     // dialog
     public static readonly DIALOG_CONFIRM = "dialog-confirm";
@@ -475,11 +485,12 @@ export abstract class Constants {
     });
     // 冲突不使用 "⌘S/Q"
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←",
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←",
     // "⌘Home", "⌘End", "⇧↩", "PageUp", "PageDown", "⌫", "⌦", "Escape" 不可自定义
     // "⌥↩" 写死，但可自定义
     public static readonly SIYUAN_KEYMAP: Config.IKeymap = {
         general: {
+            openContextMenu: {default: "⌘/", custom: "⌘/"},
             mainMenu: {default: "⌥\\", custom: "⌥\\"},
             commandPanel: {default: "⌥⇧P", custom: "⌥⇧P"},
             increaseEditorFontSize: {default: "", custom: ""},
@@ -661,8 +672,11 @@ export abstract class Constants {
                 indent: {default: "⇥", custom: "⇥"},
                 outdent: {default: "⇧⇥", custom: "⇧⇥"},
                 checkToggle: {default: "⇧⌘L", custom: "⇧⌘L"},
+                taskCompletionToggle: {default: "", custom: ""},
                 prependListItem: {default: "", custom: ""},
                 appendListItem: {default: "", custom: ""},
+                mindmapAddSibling: {default: "⌘↩", custom: "⌘↩"},
+                mindmapAddChild: {default: "⇧⌘↩", custom: "⇧⌘↩"},
             },
             table: {
                 insertRowAbove: {default: "", custom: ""},

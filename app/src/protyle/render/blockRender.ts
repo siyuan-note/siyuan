@@ -27,7 +27,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
         return;
     }
     blockElements.forEach((item: HTMLElement) => {
-        if (item.closest(".list-mindmap__preview-block")) {
+        if (item.closest(".mindmap-view__preview-block")) {
             return;
         }
         const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));

@@ -1,12 +1,19 @@
 package plugin
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func PreparePrivateService(c *gin.Context, _ apicontract.EmptyRequest) apicontract.Response[apicontract.PluginServiceContent] {
@@ -116,10 +123,18 @@ func pluginServiceHTTPResponse(c *gin.Context, name string, response *HttpRespon
 			}
 		} else if response.Body.File != nil {
 			// 文件由 HTTP 文件服务处理范围请求和条件读取，不预先加载文件内容。
+			fileAbsPath, pathErr := pluginServiceFileAbsPath(response.Body.File.Path)
+			if nil != pathErr {
+				if errors.Is(pathErr, errPluginServiceFilePathOutsideWorkspace) {
+					logging.LogWarnf("[plugin:%s] Rejected file response path [%s] outside the workspace", name, response.Body.File.Path)
+				}
+				// 越界与文件缺失返回同样的响应，插件无法借状态差异探测工作空间外的文件
+				return pluginServiceError(c, http.StatusNotFound, fmt.Sprintf("[plugin:%s] file not found", name))
+			}
 			if response.Body.File.Name != "" {
-				return pluginServiceStream(apicontract.PluginServiceFile, 200, func() { c.FileAttachment(response.Body.File.Path, response.Body.File.Name) })
+				return pluginServiceStream(apicontract.PluginServiceFile, 200, func() { c.FileAttachment(fileAbsPath, response.Body.File.Name) })
 			} else {
-				return pluginServiceStream(apicontract.PluginServiceFile, 200, func() { c.File(response.Body.File.Path) })
+				return pluginServiceStream(apicontract.PluginServiceFile, 200, func() { c.File(fileAbsPath) })
 			}
 		} else if response.Body.String != nil {
 			return pluginServiceStream(apicontract.PluginServiceString, response.StatusCode, func() { c.String(response.StatusCode, response.Body.String.Format, response.Body.String.Values...) })
@@ -132,4 +147,49 @@ func pluginServiceHTTPResponse(c *gin.Context, name string, response *HttpRespon
 		}
 	}
 	return pluginServiceStream(apicontract.PluginServiceEmpty, response.StatusCode, func() { c.Status(response.StatusCode) })
+}
+
+// errPluginServiceFilePathOutsideWorkspace 表示插件响应请求的文件落在工作空间之外。
+var errPluginServiceFilePathOutsideWorkspace = errors.New("plugin service file path is outside the workspace")
+
+// pluginServiceFileAbsPath 校验插件私有服务返回的文件路径，只允许服务工作空间内的文件。
+// 插件与管理员 API 的能力边界必须一致：/api/file/getFile 依赖工作空间边界阻挡工作空间外的读取，
+// 插件私有服务若不做同样的限制，插件就能借内核读取宿主机上的任意文件
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phmw-4rgv-r4xv
+func pluginServiceFileAbsPath(p string) (ret string, err error) {
+	p = strings.TrimSpace(p)
+	if "" == p {
+		return "", os.ErrNotExist
+	}
+	if "" == util.WorkspaceDir {
+		return "", errPluginServiceFilePathOutsideWorkspace
+	}
+
+	// 插件可以传工作空间内的绝对路径，也可以传工作空间相对路径（相对路径允许带前导斜杠，
+	// 与 ResponseFile.Path 的文档示例 "/data/plugins/<plugin-name>/app/index.html" 一致）。
+	// 工作空间外的绝对路径按相对路径解释，落到工作空间内不存在的文件上，与文件不存在不可区分
+	cleanPath := filepath.Clean(p)
+	candidates := []string{cleanPath}
+	if !util.IsAbsPathInWorkspace(cleanPath) {
+		candidates = append(candidates, filepath.Join(util.WorkspaceDir, cleanPath))
+	}
+
+	for _, candidate := range candidates {
+		if !util.IsAbsPathInWorkspace(candidate) {
+			continue
+		}
+
+		// 符号链接与目录联接可能指向工作空间外，解析后必须仍在工作空间内。这里不沿用
+		// /api/file/getFile 对管理员的豁免，因为插件私有服务的调用方还包括浏览器发起的请求
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-g7gf-v79m-jwrm
+		resolved, resolveErr := model.ResolveAssetPathWithMissingLeaf(candidate)
+		if nil != resolveErr {
+			continue
+		}
+		if !gulu.File.IsSubPath(util.NormalizeAndResolve(util.WorkspaceDir), util.NormalizeAndResolve(resolved)) {
+			continue
+		}
+		return resolved, nil
+	}
+	return "", errPluginServiceFilePathOutsideWorkspace
 }

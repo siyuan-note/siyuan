@@ -4,6 +4,8 @@ import {lockScreen} from "../dialog/processSystem";
 import {clearTabDragPreview} from "../layout/tabDrag";
 import {getAllEditor} from "../layout/getAll";
 import {ipcRenderer} from "electron";
+import {Constants} from "../constants";
+import {flushWindowWorkspace} from "./workspace";
 
 const closeTab = (ipcData: IWebSocketData) => {
     const tab = getInstanceById(ipcData.data);
@@ -13,6 +15,13 @@ const closeTab = (ipcData: IWebSocketData) => {
 };
 export const onWindowsMsg = (ipcData: IWebSocketData) => {
     switch (ipcData.cmd) {
+        case Constants.SIYUAN_WINDOW_WORKSPACE_FLUSH:
+            void flushWindowWorkspace().then(saved => {
+                ipcRenderer.send(Constants.SIYUAN_WINDOW_WORKSPACE_SAVED, {id: ipcData.data, saved});
+            }).catch(() => {
+                ipcRenderer.send(Constants.SIYUAN_WINDOW_WORKSPACE_SAVED, {id: ipcData.data, saved: false});
+            });
+            break;
         case "prepareNotebookSystemLock":
             void Promise.all(getAllEditor().filter(editor => editor?.protyle?.wysiwyg)
                 .map(editor => editor.flushPendingTransactions())).then(() => {

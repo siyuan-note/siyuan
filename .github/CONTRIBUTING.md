@@ -10,7 +10,7 @@
 
 Electron 44 requires macOS 13 or later and supports only 64-bit Windows and Linux builds.
 
-Install Node.js 24 to match CI, then install pnpm using npm: `npm install -g pnpm@12.3.4`.
+Install Node.js 24 to match CI, then install pnpm using npm: `npm install -g pnpm@12.5.1`.
 
 Use the version specified by the `packageManager` field in [`app/package.json`](../app/package.json); update the version in the command above if that field changes. This uses the same installation method as [CI](workflows/cd.yml).
 
@@ -21,10 +21,10 @@ Do not mix this method with pnpm's standalone installation scripts (`@pnpm/exe`)
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.4.1 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.4.5 -D`
 * Windows:
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@44.4.1 -D`
+  * `pnpm install electron@44.4.5 -D`
 
 NPM mirror:
 
@@ -34,7 +34,7 @@ NPM mirror:
 
 Enter the app folder and execute:
 
-* `pnpm install electron@44.4.1 -D`
+* `pnpm install electron@44.4.5 -D`
 * `pnpm run install:electron`
 * `pnpm run dev`
 * `pnpm run start`

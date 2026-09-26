@@ -7,7 +7,7 @@
 		"id": "20240530101000-7yv4y5z",
 		"title": "ウィンドウとタブ",
 		"type": "doc",
-		"updated": "20260903130000"
+		"updated": "20260925230000"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-5b80d49",
-				"updated": "20260903130000"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
@@ -785,6 +785,234 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-vua2yiz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260922155242-vua2yiz",
+				"updated": "20260925230000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新しいウィンドウのレイアウト"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-d7ab3nk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-d7ab3nk",
+				"updated": "20260925230000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新しいウィンドウのレイアウトには、名前を付けたウィンドウのタブ、画面分割、閲覧位置が保存されます。メインウィンドウのレイアウトと新しいウィンドウのレイアウトは同じレイアウトメニュー内でグループ分けされ、別々に保存されます。メインウィンドウのレイアウトを保存または更新すると、ウィンドウのサイズ、位置、最大化や全画面表示の状態も記録されます。名前を付けた新しいウィンドウでは、これらの情報が自動保存されます。レイアウトを開くとウィンドウの状態が復元され、ディスプレイ構成が変わった場合は利用可能な画面内に調整されます。ウィンドウ情報を含まない以前のレイアウトも引き続き使用できます。位置とサイズの復元はOSの制約を受け、Wayland環境では利用できない場合があります。メインウィンドウのレイアウトは最大1件、新しいウィンドウのレイアウトは複数選択でき、一覧の上にある開くボタンでまとめて開けます。この選択内容は保存されません。この機能はデスクトップクライアントで利用できます。暗号化されたノートブックのタブは保存されません。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "レイアウトボタンをもう一度クリックすると、名前の入力ダイアログが閉じます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "メニューとボタンの表示と順序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新しいウィンドウのトップバー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でレイアウトボタンと最前面表示ボタンの表示・非表示と順序を設定できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-30pjomk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-30pjomk",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "作成：新しいウィンドウでタブを配置し、ピン留めボタンの横にある "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新しいウィンドウのレイアウトとして保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をクリックして、名前を入力して保存します。その後はタブ、画面分割、ドキュメントの閲覧位置、PDF のページ番号の変更が自動的に保存されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-k4faa32",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-k4faa32",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "再度開く：メインウィンドウで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "レイアウト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新しいウィンドウのレイアウト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、レイアウトを選択すると、新しいウィンドウに保存したレイアウトが復元されます。対応するウィンドウが開いている場合は、そのウィンドウに切り替わります。一覧は名前で検索できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-hc8rau9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-hc8rau9",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "管理："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "メインウィンドウのレイアウト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の右側にある "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をクリックすると、現在のメインウィンドウのレイアウトを保存できます。各項目または右側の矢印にマウスポインターを合わせると、一覧を表示したままサブメニューが開きます。新しいウィンドウのレイアウトでは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "開く"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（対応するウィンドウが開いている場合は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "切り替え"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "名前の変更"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "削除"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の順に表示されます。メインウィンドウのレイアウトには "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用する"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更新"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " があり、前者は選択したレイアウトを読み込み、後者は現在のメインウィンドウをその項目に保存します。新しいウィンドウのレイアウトは自動的に保存されます。どちらもサブメニューの末尾に最終保存日時が表示されます。ピン留めボタンの横にあるレイアウトアイコンからも名前を変更できます。名前変更ダイアログのタイトルはそれぞれ "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "メインウィンドウのレイアウト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新しいウィンドウのレイアウト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、キャンセルと確認のボタンが表示されます。レイアウトを削除しても、ドキュメント、添付ファイル、開いているウィンドウは保持されます。検索欄は上部に固定され、その下の一覧だけをスクロールできます。"
 				}
 			]
 		},

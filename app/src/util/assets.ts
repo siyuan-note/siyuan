@@ -290,9 +290,9 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     await Promise.all(scriptLoads);
 };
 
-export const initAssets = () => {
+export const initAssets = (keepLoading = false) => {
     const loadingElement = document.getElementById("loading");
-    if (loadingElement) {
+    if (loadingElement && !keepLoading) {
         setTimeout(() => {
             loadingElement.remove();
         }, 160);
@@ -464,6 +464,11 @@ const updateMobileTheme = (OSTheme: string) => {
             }
             const fallback = mode === 0 ? "#ffffffff" : "#1e1e1eff";
             const backgroundColor = rgbaToHex(cssVarToRgba("--b3-theme-background")) || fallback;
+            const loadingElement = document.getElementById("loading");
+            if (loadingElement) {
+                document.body.style.backgroundColor = backgroundColor;
+                loadingElement.querySelector<HTMLElement>(".b3-dialog__scrim")?.style.setProperty("background-color", backgroundColor);
+            }
             // 统一传 #RRGGBBAA：iOS 按 #RRGGBBAA 解析，Android / Harmony 将 #RRGGBBAA 转为 #AARRGGBB
             if (isInIOS()) {
                 window.webkit.messageHandlers.changeStatusBar.postMessage(backgroundColor + " " + mode);

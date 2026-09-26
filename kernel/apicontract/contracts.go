@@ -259,6 +259,7 @@ var (
 	IgnoreAddMicrosoftDefenderExclusion = define[EmptyRequest, Null]("ignoreAddMicrosoftDefenderExclusion", "/api/system/ignoreAddMicrosoftDefenderExclusion", NoBody, ResponseOptions{}, "POST")
 	AddMicrosoftDefenderExclusion       = define[EmptyRequest, Null]("addMicrosoftDefenderExclusion", "/api/system/addMicrosoftDefenderExclusion", NoBody, ResponseOptions{}, "POST")
 	GetWorkspaceInfo                    = define[EmptyRequest, WorkspaceInfoData]("getWorkspaceInfo", "/api/system/getWorkspaceInfo", NoBody, ResponseOptions{}, "POST")
+	GetWorkspaceStorage                 = define[EmptyRequest, WorkspaceStorageData]("getWorkspaceStorage", "/api/system/getWorkspaceStorage", NoBody, ResponseOptions{}, "POST")
 	GetNetwork                          = define[EmptyRequest, NetworkData]("getNetwork", "/api/system/getNetwork", NoBody, ResponseOptions{}, "POST")
 	GetRuntimeInfo                      = define[EmptyRequest, SystemRuntimeInfoData]("getRuntimeInfo", "/api/system/getRuntimeInfo", NoBody, ResponseOptions{}, "POST")
 	CurrentTime                         = define[EmptyRequest, int64]("currentTime", "/api/system/currentTime", NoBody, ResponseOptions{}, "POST")
@@ -318,6 +319,10 @@ var (
 	ChangeMasterPassword                 = define[ChangeMasterPasswordRequest, Null]("changeMasterPassword", "/api/notebook/changeMasterPassword", JSONBody, ResponseOptions{}, "POST")
 	ExportNotebookCryptoBackup           = define[EmptyRequest, NotebookCryptoBackupData]("exportNotebookCryptoBackup", "/api/notebook/exportNotebookCryptoBackup", NoBody, ResponseOptions{}, "POST")
 	TouchEncryptedNotebooks              = define[EmptyRequest, Null]("touchEncryptedNotebooks", "/api/notebook/touchEncryptedNotebooks", NoBody, ResponseOptions{}, "POST")
+	GetNotebookArchiveCandidates         = define[EmptyRequest, NotebookArchiveCandidatesData]("getNotebookArchiveCandidates", "/api/notebook/getNotebookArchiveCandidates", NoBody, ResponseOptions{}, "POST")
+	PrepareNotebookArchive               = define[PrepareNotebookArchiveRequest, NotebookArchiveData]("prepareNotebookArchive", "/api/notebook/prepareNotebookArchive", JSONBody, ResponseOptions{}, "POST")
+	CommitNotebookArchive                = define[CommitNotebookArchiveRequest, Null]("commitNotebookArchive", "/api/notebook/commitNotebookArchive", JSONBody, ResponseOptions{}, "POST")
+	ImportNotebookArchive                = define[ImportNotebookArchiveRequest, Null]("importNotebookArchive", "/api/notebook/importNotebookArchive", MultipartBody, ResponseOptions{}, "POST")
 )
 
 var (
@@ -923,6 +928,7 @@ var SearchAttributeView = define[SearchAttributeViewRequest, AVSearchData]("sear
 var RenderSnapshotAttributeView = define[RenderSnapshotAttributeViewRequest, AVArchiveRenderData]("renderSnapshotAttributeView", "/api/av/renderSnapshotAttributeView", JSONBody, ResponseOptions{}, "POST")
 var RenderHistoryAttributeView = define[RenderHistoryAttributeViewRequest, AVArchiveRenderData]("renderHistoryAttributeView", "/api/av/renderHistoryAttributeView", JSONBody, ResponseOptions{}, "POST")
 var RenderAttributeView = define[RenderAttributeViewRequest, AVRenderResult]("renderAttributeView", "/api/av/renderAttributeView", JSONBody, ResponseOptions{DataOnError: true, FastJSON: true}, "POST")
+var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalendarUndatedData]("getAttributeViewCalendarUndated", "/api/av/getAttributeViewCalendarUndated", JSONBody, ResponseOptions{}, "POST")
 var GetCurrentAttrViewImages = define[GetCurrentAttrViewImagesRequest, []string]("getCurrentAttrViewImages", "/api/av/getCurrentAttrViewImages", JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewKeys = define[GetAttributeViewKeysRequest, []*AVBlockAttributeViewKeys]("getAttributeViewKeys", "/api/av/getAttributeViewKeys", JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewSearchTarget = define[GetAttributeViewSearchTargetRequest, *AVAttributeViewSearchTarget]("getAttributeViewSearchTarget", "/api/av/getAttributeViewSearchTarget", JSONBody, ResponseOptions{}, "POST")

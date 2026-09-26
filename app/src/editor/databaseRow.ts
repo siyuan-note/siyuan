@@ -6,7 +6,8 @@ import {Protyle} from "../protyle";
 import {getEditorHorizontalPadding} from "../protyle/ui/padding";
 import {searchMarkRender} from "../protyle/render/searchMarkRender";
 import {registerDatabaseRowRefresh} from "../protyle/render/av/databaseRowRefresh";
-import {focusNewDatabasePrimary} from "../protyle/render/av/primaryFocus";
+import {focusDatabasePrimary} from "../protyle/render/av/primaryFocus";
+import {setPanelFocus} from "../layout/util";
 
 export const newDatabaseRowModel = (options: {
     app: App,
@@ -68,11 +69,15 @@ export const newDatabaseRowModel = (options: {
             if (destroyed || currentRenderVersion !== renderVersion || !previousBodyElement.isConnected) {
                 return;
             }
+            if (!element.querySelector(`[data-av-id="${data.avID}"]`)) {
+                custom.tab.parent.removeTab(custom.tab.id);
+                return;
+            }
             // 保留当前内容，待属性和反链加载完成后一次替换，避免刷新期间出现空白。
             previousBodyElement.replaceWith(element);
             updateLayout(custom);
             updateTitle(custom, element);
-            focusNewDatabasePrimary(custom.element, contextProtyle, data);
+            focusDatabasePrimary(custom.element, contextProtyle, data);
             if (!data.keywords?.length) {
                 return;
             }
@@ -108,6 +113,14 @@ export const newDatabaseRowModel = (options: {
         </div>
     </div>
 </div>`;
+            const activatePanel = () => {
+                const wndElement = custom.element.closest('[data-type="wnd"]');
+                if (wndElement) {
+                    setPanelFocus(wndElement);
+                }
+            };
+            custom.element.addEventListener("pointerdown", activatePanel);
+            custom.element.addEventListener("focusin", activatePanel);
             custom.element.querySelector(".protyle-db-row__title span").textContent = options.data.title || window.siyuan.languages.untitled;
             custom.element.addEventListener("database-row-title-update", (event) => {
                 const title = (event as CustomEvent<string>).detail;

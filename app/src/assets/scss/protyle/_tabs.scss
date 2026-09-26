@@ -31,7 +31,7 @@
     align-items: center;
     min-width: 0;
     gap: 4px;
-    font-size: 87.5%;
+    font-size: min(87.5%, 16px);
     border-bottom: 1px solid var(--b3-theme-background-light);
     padding: 0 4px;
     user-select: none;
@@ -185,7 +185,14 @@
 
   .tab-item-content {
     min-width: 0;
+    min-height: 1.5em;
     outline: none;
+
+    &.dragover__bottom {
+      outline: 2px solid var(--b3-theme-primary-lighter);
+      outline-offset: -2px;
+      border-radius: var(--b3-border-radius);
+    }
   }
 
   .tabs-tab--editing > .tabs-tab-label {
@@ -208,7 +215,7 @@
     border-radius: var(--b3-border-radius);
     background: transparent;
     color: var(--b3-theme-on-background);
-    font-size: 87.5%;
+    font-size: min(87.5%, 16px);
     line-height: 22px;
     user-select: text;
 

@@ -20,6 +20,9 @@ type TemplateFileSource struct {
 	Content  string  `json:"content"`
 	Revision string  `json:"revision"`
 	Path     *string `json:"path,omitempty"`
+	// SourceDocID 是原始模板末尾文档级属性中的有效 ID；未声明时省略，不执行模板动作或检查来源可访问性。
+	// 该 ID 仅用于尝试打开导出来源，不代表预览上下文；目录、普通 Markdown 和代码示例不提供来源。
+	SourceDocID *string `json:"sourceDocID,omitempty"`
 }
 
 type TemplateFileRevision struct {

@@ -4,6 +4,7 @@ import {
     type ICenterMinimumLayoutNode,
     resolveDockResponsiveLayout,
     resolveDockResponsiveWidth,
+    resolveResponsiveManualOverrideClearance,
 } from "./responsiveLayout";
 import {runWithoutDockTransitions} from "./responsiveTransition";
 
@@ -116,12 +117,27 @@ export const reconcileResponsiveDockLayout = () => {
         const rightActive = rightDock.hasActive();
         const leftParticipating = leftDock.pin && leftDock.isPanelVisible();
         const rightParticipating = rightDock.pin && rightDock.isPanelVisible();
-        const preferredOccupiedSize = centerMinimumSize +
-            (leftParticipating ? leftPreferredSize + gapSize : 0) +
-            (rightParticipating ? rightPreferredSize + gapSize : 0);
-
-        if (availableSize >= preferredOccupiedSize + RESPONSIVE_HYSTERESIS) {
+        const overrideClearance = resolveResponsiveManualOverrideClearance(
+            availableSize, centerMinimumSize, gapSize, RESPONSIVE_HYSTERESIS,
+            {
+                preferredSize: leftPreferredSize,
+                pinned: leftDock.pin,
+                visible: leftDock.isPanelVisible(),
+                active: leftActive,
+                manualOverride: leftDock.hasResponsiveManualOverride(),
+            },
+            {
+                preferredSize: rightPreferredSize,
+                pinned: rightDock.pin,
+                visible: rightDock.isPanelVisible(),
+                active: rightActive,
+                manualOverride: rightDock.hasResponsiveManualOverride(),
+            },
+        );
+        if (overrideClearance.left) {
             leftDock.clearResponsiveManualOverride();
+        }
+        if (overrideClearance.right) {
             rightDock.clearResponsiveManualOverride();
         }
 

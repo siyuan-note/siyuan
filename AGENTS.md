@@ -99,6 +99,10 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
     - After contract changes, run `pnpm run api:generate --petal ../../petal` and `pnpm run api:check --petal ../../petal` from `app/`; synchronize related public declarations in `petal` and do not hand-edit generated declarations or schemas
     - Run `pnpm run lint` from `app/`, `go test ./apicontract/...` from `kernel/`, and the applicable API compatibility and route coverage tests described in the maintenance document. Verify that existing CI selections and documented commands discover new regression cases; automatic discovery or coverage by an existing full-suite command satisfies this requirement without a documentation edit. Update CI selections and documented commands only when they would otherwise miss the new tests. Report task-specific verification commands and results in the task response or PR description
 
+11. **Desktop and mobile parity:**
+    - When changing functionality shared by desktop and mobile, inspect the corresponding mobile implementation under `app/src/mobile/` and update it in the same task. This includes menus, toolbars, dialogs, interactions, and their event handlers; do not assume that desktop changes automatically apply to mobile
+    - Before finishing, verify both implementations and their shared dependencies, preserving platform-appropriate interactions. If no corresponding mobile feature exists or the change is desktop-only, state why mobile changes are not needed in the task response
+
 ---
 
 ## 3. Coding conventions
@@ -110,6 +114,12 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 5. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
    - When moving or extracting a symbol into another module, update all affected imports to reference its defining module directly. Do not leave forwarding re-exports in the original module merely to avoid updating callers
 6. **CSS:** Do not use the `:has()` selector because of its performance impact
+   - Before adding or styling a basic control, inspect and reuse the existing component, markup pattern, and shared styles in `app/src/assets/scss/component/` (for example, `b3-button`, `b3-select`, and `b3-text-field`), including existing modifiers; use `block__icon` for established icon-button patterns
+   - Apply the same reuse-first rule to menus, dialogs, tooltips, and drag interactions: inspect existing implementations and APIs before adding a feature-specific replacement
+   - Feature styles should describe layout (such as placement, width constraints, gaps, and wrapping), rather than duplicate or override basic control appearance (such as height, padding, typography, colors, borders, shadows, and hover/focus/disabled states). Do not use deeper selectors, inline styles, or `!important` merely to restyle a shared control
+   - If existing controls cannot meet a requirement, explain the concrete need and prefer extending a shared component or modifier when the need is reusable. Keep necessary feature-specific exceptions narrowly scoped; use theme variables for appearance and retain keyboard focus and disabled feedback
+   - Reuse components according to their purpose; do not borrow an unrelated component (for example, menu items for a form) and then cancel its styles. Preserve useful feature classes as theme hooks when switching to shared controls
+   - When reviewing control-style changes, check consistency with shared controls, theme overrides through shared classes, light/dark themes, narrow layouts, and large editor fonts. Preserve necessary layout and touch-target constraints; do not remove all feature styles indiscriminately
 7. **CSS positioning and scrolling:** When changing `position`, `transform`, `contain`, or `overflow` on a shared container, check the effects on descendant positioning reference frames, overlay coverage, and clipping. Prefer a dedicated container when a local control needs a positioning reference. For settings dialog changes, verify detail overlays, the top drag area, and scrollbar placement at different window widths
 
 8. **Built-in custom attributes:** Use the `custom-sy-` prefix for custom attributes owned by built-in features
@@ -206,6 +216,7 @@ All Go libraries above are dependencies in `kernel/go.mod`. GitHub org: `siyuan-
 - **Editing Go dependencies:** To test a local change, add a temporary `replace` in `kernel/go.mod` pointing at your local checkout; **never commit that temporary `replace`**.
 - **Rebuilding `lute.min.js`:** Change `lute`, rebuild with GopherJS, and copy the artifact into `app/stage/protyle/js/lute/`.
 - **Type declarations:** when changing files under `app/src/types/` or other TypeScript declarations and constants exposed to plugins, synchronize the corresponding declarations and constants in the `petal` repository in the same task.
+- **Petal changelog:** Whenever changing files in the `petal` repository, update `petal/CHANGELOG.md` in the same task. Add a concise entry under the current unreleased version before committing the Petal change.
 - **Petal documentation:** Keep `petal/README.md` limited to the project title and the `plugin-sample` link. Do not add feature descriptions, API usage explanations, or code examples to the README. Document API behavior, constraints, and lifecycle in comments on the corresponding API declarations in `petal`; put executable usage examples in the actual source code of `plugin-sample`.
 
 ---

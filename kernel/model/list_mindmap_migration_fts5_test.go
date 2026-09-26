@@ -48,7 +48,7 @@ func TestMigrateLegacyMindmapsPersistsAndReplays(t *testing.T) {
 			t.Fatalf("unexpected persisted node: %+v", node)
 		}
 	}
-	check(ast.NodeList)
+	check(ast.NodeMindmap)
 	entry := GlobalUndoLog.Peek(fixture.sourceID)
 	if entry == nil || len(entry.UndoOperationsForReplay()) != 1 || entry.UndoOperationsForReplay()[0].ID != codeID {
 		t.Fatal("migration did not enter the document undo stack")
@@ -75,9 +75,78 @@ func TestMigrateLegacyMindmapsPersistsAndReplays(t *testing.T) {
 		if i == 0 {
 			check(ast.NodeCodeBlock)
 		} else {
-			check(ast.NodeList)
+			check(ast.NodeMindmap)
 		}
 	}
+}
+
+func TestMigrateLegacyListMindmapPersistsAndReplays(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	originalHistory := util.HistoryDir
+	util.HistoryDir = t.TempDir()
+	t.Cleanup(func() { util.HistoryDir = originalHistory })
+	engine := util.NewLute()
+	_, parsed := engine.Md2BlockDOMTree("- Root\n  - Child\n", false)
+	list := firstContentBlock(parsed.Root)
+	list.SetIALAttr(listMindmapViewAttr, "1")
+	list.SetIALAttr(listMindmapMetadataAttr, `{"version":1,"nodes":{},"relations":[]}`)
+	list.SetIALAttr("name", "keep")
+	listID := list.ID
+	if _, err := PerformBlockOperation(&Operation{Action: "appendInsert", ParentID: fixture.sourceID, Data: engine.RenderNodeBlockDOM(list)}); err != nil {
+		t.Fatal(err)
+	}
+	sourcePath := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourceID+".sy")
+	before, err := os.ReadFile(sourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tx, visible, err := MigrateLegacyMindmaps(fixture.sourceID)
+	if err != nil || len(tx.DoOperations) != 1 || !strings.Contains(visible[listID], `data-type="NodeMindmap"`) {
+		t.Fatalf("old list was not migrated: %+v, %v", tx, err)
+	}
+	check := func(typ ast.NodeType) {
+		t.Helper()
+		cache.RemoveTreeData(fixture.sourceID)
+		tree, loadErr := LoadTreeByBlockID(fixture.sourceID)
+		if loadErr != nil {
+			t.Fatal(loadErr)
+		}
+		node := treenode.GetNodeInTree(tree, listID)
+		if node == nil || node.Type != typ || node.IALAttr("name") != "keep" ||
+			node.IALAttr(listMindmapMetadataAttr) != list.IALAttr(listMindmapMetadataAttr) {
+			t.Fatalf("old list identity or metadata changed: %+v", node)
+		}
+		if typ == ast.NodeMindmap && (node.IALAttr(listMindmapViewAttr) != "" || node.FirstChild.Type != ast.NodeMindmapItem) {
+			t.Fatal("old list was not converted to dedicated node types")
+		}
+	}
+	check(ast.NodeMindmap)
+	histories, err := filepath.Glob(filepath.Join(util.HistoryDir, "*-format", fixture.box.ID, fixture.sourceID+".sy"))
+	if err != nil || len(histories) != 1 {
+		t.Fatalf("missing migration history: %v, %v", histories, err)
+	}
+	history, err := os.ReadFile(histories[0])
+	if err != nil || !bytes.Equal(before, history) {
+		t.Fatal("history did not preserve the original list")
+	}
+	again, _, err := MigrateLegacyMindmaps(fixture.sourceID)
+	if err != nil || len(again.DoOperations) != 0 {
+		t.Fatalf("migration is not idempotent: %+v, %v", again, err)
+	}
+	for i, operations := range [][]*Operation{tx.UndoOperations, tx.DoOperations} {
+		replay := &Transaction{DoOperations: operations}
+		replay.MarkReplay()
+		if err = PerformTxSync(replay); err != nil {
+			t.Fatal(err)
+		}
+		if i == 0 {
+			check(ast.NodeList)
+		} else {
+			check(ast.NodeMindmap)
+		}
+	}
+	t.Cleanup(func() { GlobalUndoLog.Clear(fixture.sourceID) })
 }
 
 func TestMigrateLegacyMindmapsHistoryFailureAndQueuedEdits(t *testing.T) {

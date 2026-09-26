@@ -29,6 +29,7 @@ import {canEnterCodeBlock} from "../wysiwyg/codeBlockEnter";
 import {bindLiteCodeActions} from "../lite/codeActions";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
+let openingEditor: object | undefined;
 
 export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCellElement[], type: string,
                                            textObj?: ITextOption) => {
@@ -48,8 +49,9 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
             upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,
             lute: getTableCellEditorLute(getAVRichTextLute(),
                 window.siyuan.config.editor.markdown.blockFullWidthTaskList !== false),
-            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
+            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
+            richHTMLPaste: true,
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
     });
@@ -81,9 +83,9 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
     }
 };
 
-export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElement,
-                                       navigation?: {key: string, goalX: number}, point?: {x: number, y: number, target?: Element},
-                                       restoredSelection?: ReturnType<typeof captureRichCellSelection>) => {
+export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCellElement,
+                                             navigation?: {key: string, goalX: number}, point?: {x: number, y: number, target?: Element},
+                                             restoredSelection?: ReturnType<typeof captureRichCellSelection>) => {
     if (owner.disabled || !cell.isConnected || activeEditor?.cell === cell) {
         return;
     }
@@ -91,8 +93,30 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     if (activeEditor) {
         return;
     }
-    const table = cell.closest<HTMLElement>('[data-type="NodeTable"]');
+    let table = cell.closest<HTMLElement>('[data-type="NodeTable"]');
     if (!table || cell.closest(".protyle-wysiwyg") !== owner.wysiwyg.element) {
+        return;
+    }
+    const request = {};
+    openingEditor = request;
+    const tableID = table.dataset.nodeId;
+    const tableParent = table.parentElement;
+    const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+    const cellIndex = cell.cellIndex;
+    // 记录预览中被点击的公式位置，在重建单元格后打开对应公式的编辑面板。
+    const clickedMath = point?.target?.closest('[data-subtype="math"]');
+    const clickedMathIndex = clickedMath && cell.contains(clickedMath) ?
+        Array.from(cell.querySelectorAll('[data-subtype="math"]')).indexOf(clickedMath) : -1;
+    // 外层输入先完成解析和事务，避免把即将挂载的单元格编辑界面当作正文。
+    await owner.wysiwyg.flushPendingInput();
+    if (openingEditor !== request || owner.disabled || !owner.element.isConnected) {
+        return;
+    }
+    if (!table.isConnected) {
+        table = Array.from(tableParent.children).find(element => element.getAttribute("data-node-id") === tableID) as HTMLElement;
+        cell = table?.querySelector("table")?.rows[rowIndex]?.cells[cellIndex];
+    }
+    if (!cell?.isConnected || cell.closest(".protyle-wysiwyg") !== owner.wysiwyg.element || activeEditor) {
         return;
     }
     let initialBlockHTML: string;
@@ -105,11 +129,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         showMessage(window.siyuan.languages.tableCellRichInvalid);
         return;
     }
-    hideElements(["gutter", "toolbar"], owner);
-    // 记录预览中被点击的公式位置，在重建单元格后打开对应公式的编辑面板。
-    const clickedMath = point?.target?.closest('[data-subtype="math"]');
-    const clickedMathIndex = clickedMath && cell.contains(clickedMath) ?
-        Array.from(cell.querySelectorAll('[data-subtype="math"]')).indexOf(clickedMath) : -1;
+    hideElements(["toolbar"], owner);
     const selection = getSelection();
     const initialRange = selection.rangeCount ? selection.getRangeAt(0) : undefined;
     const richSelection = cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE) ? captureRichCellSelection(cell, selection) : undefined;
@@ -150,9 +170,10 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         }
     }));
     ["mouseover", "pointerover"].forEach(type => host.addEventListener(type, event => {
-        hideElements(["gutter"], owner);
         event.stopPropagation();
+        hideElements(["gutter"], owner);
     }));
+    owner.gutter?.render(owner, table, host);
     const toolbar = getDefaultToolbar(isMobile()).filter(item => typeof item === "string" ? item !== "ai" : item.name !== "ai");
     const safeSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, hintSource: THintSource) =>
         hintSlash(key, protyle, hintSource).filter(item => TABLE_CELL_SLASH_IDS.has(item.id)));
@@ -177,8 +198,9 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             lute: getTableCellEditorLute(getAVRichTextLute(),
                 window.siyuan.config.editor.markdown.blockFullWidthTaskList !== false),
             lockedOptions: {toolbar, hint},
-            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
+            sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
+            richHTMLPaste: true,
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
         afterSetContent: (protyle, element) => {
@@ -197,6 +219,11 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             }
         },
     });
+    const mobileRenderOverlay = isMobile() ? fragment.protyle.toolbar.subElement : undefined;
+    if (mobileRenderOverlay) {
+        // 移动端正文有独立层叠上下文，源码编辑框需要挂在页面层以覆盖顶栏。
+        document.body.appendChild(mobileRenderOverlay);
+    }
     fragment.protyle.block.rootID = owner.block.rootID;
     fragment.protyle.block.parentID = table.dataset.nodeId;
     fragment.protyle.path = owner.path;
@@ -253,6 +280,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         controller.abort();
         observer.disconnect();
         fragment.destroy();
+        mobileRenderOverlay?.remove();
         if (cell.isConnected && host.isConnected) {
             renderTableCellRich(cell);
             if (cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE)) {

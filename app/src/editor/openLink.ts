@@ -29,6 +29,9 @@ import {openMobilePDF} from "../mobile/pdf";
 /// #endif
 
 const isPreviewableAsset = (assetPath: string) => {
+    if (isLocalPath(assetPath) && !assetPath.startsWith("assets/") && !assetPath.startsWith("file://")) {
+        return false;
+    }
     const extension = getAssetExtension(assetPath).toLowerCase();
     return Constants.SIYUAN_ASSETS_EXTS.includes(extension) &&
         isBrowserRenderableImagePath(assetPath) &&

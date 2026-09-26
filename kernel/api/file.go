@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -749,7 +750,13 @@ var removeFile = contractHandler(apicontract.RemoveFile, func(c *gin.Context, re
 	return apicontract.Success(apicontract.Null{})
 })
 
+var putFileLock sync.Mutex
+
 var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request apicontract.PutFileRequest) apicontract.Response[apicontract.Null] {
+	// 表单已由 contractHandler 接收完成，串行保护路径检查、文件写入、时间更新和变更通知。
+	putFileLock.Lock()
+	defer putFileLock.Unlock()
+
 	ret := gulu.Ret.NewResult()
 
 	isDirStr := request.IsDir

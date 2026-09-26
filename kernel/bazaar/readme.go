@@ -186,6 +186,7 @@ func renderPackageREADME(linkBase string, mdData []byte) (ret string) {
 func renderPackageREADMEWithImageResolver(linkBase string, mdData []byte, resolveImage func(string) string) (ret string) {
 	mdData = bytes.Clone(bytes.TrimPrefix(mdData, []byte("\xef\xbb\xbf"))) // 移除文件开头的 BOM 并隔离解析缓冲区
 	luteEngine := lute.New()
+	luteEngine.SetCallout(true)
 	luteEngine.SetSanitize(true)
 	luteEngine.SetSoftBreak2HardBreak(false)
 	luteEngine.SetCodeSyntaxHighlight(false)

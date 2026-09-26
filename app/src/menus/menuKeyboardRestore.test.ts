@@ -99,6 +99,18 @@ const setup = () => {
 };
 
 describe("mobile menu keyboard lifecycle", () => {
+    it("opens above an existing keyboard without dismissing it or waiting for a viewport reset", () => {
+        const {menu, element, events, tick} = setup();
+        menu.fullscreen("bottom", () => events.push("restore"), {preserveKeyboard: true});
+        assert.deepEqual(events, []);
+        assert.equal(element.style.transform, "translateY(0px)");
+        tick(16);
+        assert.equal(element.style.transform, "translateY(0px)");
+        menu.closeSheet();
+        assert.deepEqual(events, ["restore"]);
+        assert.equal(element.classList.contains("fn__none"), true);
+    });
+
     it("still hides the keyboard and waits for the restored viewport before opening", () => {
         const {menu, element, events, tick} = setup();
         menu.fullscreen("all", () => events.push("restore"));

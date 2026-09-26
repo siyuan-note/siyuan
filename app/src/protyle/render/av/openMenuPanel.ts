@@ -85,6 +85,7 @@ import {clearSelect} from "../../util/clear";
 import {applyAVColorPalette, getAVCustomColors} from "./color";
 import {bindContextFilterEvent, getContextFilterHTML} from "./contextFilter";
 import {setAVCellPanelTarget} from "./panelTarget";
+import {setSelectMenuPosition} from "./selectPosition";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -226,7 +227,7 @@ export const openMenuPanel = (options: {
             }
         }
 
-        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex};">
+        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" data-av-block-id="${escapeAttr(blockID)}" style="z-index: ${++window.siyuan.zIndex};">
     <div class="b3-dialog__scrim" data-type="close"></div>
     <div class="b3-menu${options.type === "filters" ? " av__filter-panel" : ""}${options.type === "relation" ? " av__relation-panel" : ""}" ${options.keepMenuOpen ? "data-menu=\"true\"" : ""} ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${options.type === "relation" ? `width: 760px;max-width: ${isMobile() ? "90vw" : "calc(100vw - 32px)"};` : isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
@@ -316,7 +317,11 @@ export const openMenuPanel = (options: {
                     inputElement.select();
                     inputElement.focus();
                 }
-                setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+                if (options.type === "select") {
+                    setSelectMenuPosition(menuElement, lastElement || options.cellElements[options.cellElements.length - 1]);
+                } else {
+                    setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+                }
             }
         } else {
             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);

@@ -93,6 +93,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/exportConf", model.CheckAuth, model.CheckAdminRole, exportConf)
 	ginServer.Handle("POST", "/api/system/importConf", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importConf)
 	ginServer.Handle("POST", "/api/system/getWorkspaceInfo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getWorkspaceInfo)
+	ginServer.Handle("POST", "/api/system/getWorkspaceStorage", model.CheckAuth, model.CheckAdminRole, getWorkspaceStorage)
 	ginServer.Handle("POST", "/api/system/getRuntimeInfo", model.CheckAuth, model.CheckAdminRole, getRuntimeInfo)
 	ginServer.Handle("POST", "/api/system/reloadUI", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, deprecatedReloadUI) // TODO 请使用 /api/ui/reloadUI，该端点将于 2026 年 12 月 1 日后删除
 	ginServer.Handle("POST", "/api/system/addMicrosoftDefenderExclusion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addMicrosoftDefenderExclusion)
@@ -156,6 +157,10 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notebook/getEncryptedNotebookStatus", model.CheckAuth, model.CheckAdminRole, getEncryptedNotebookStatus)
 	ginServer.Handle("POST", "/api/notebook/exportNotebookCryptoBackup", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, exportNotebookCryptoBackup)
 	ginServer.Handle("POST", "/api/notebook/importNotebookCryptoBackup", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importNotebookCryptoBackup)
+	ginServer.Handle("POST", "/api/notebook/getNotebookArchiveCandidates", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getNotebookArchiveCandidates)
+	ginServer.Handle("POST", "/api/notebook/prepareNotebookArchive", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, prepareNotebookArchive)
+	ginServer.Handle("POST", "/api/notebook/commitNotebookArchive", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, commitNotebookArchive)
+	ginServer.Handle("POST", "/api/notebook/importNotebookArchive", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importNotebookArchive)
 	ginServer.Handle("POST", "/api/notebook/setNotebookCryptoAutoLock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNotebookCryptoAutoLock)
 	ginServer.Handle("POST", "/api/notebook/setEncryptedNotebookFollowSystemLock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setEncryptedNotebookFollowSystemLock)
 	ginServer.Handle("POST", "/api/notebook/lockEncryptedNotebooksOnSystemLock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, lockEncryptedNotebooksOnSystemLock)
@@ -634,6 +639,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/snippet/removeSnippet", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeSnippet)
 
 	ginServer.Handle("POST", "/api/av/renderAttributeView", model.CheckAuth, renderAttributeView)
+	ginServer.Handle("POST", "/api/av/getAttributeViewCalendarUndated", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewCalendarUndated)
 	ginServer.Handle("POST", "/api/av/getAttributeViewItemStatuses", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewItemStatuses)
 	ginServer.Handle("POST", "/api/av/renderHistoryAttributeView", model.CheckAuth, model.CheckAdminRole, renderHistoryAttributeView)
 	ginServer.Handle("POST", "/api/av/renderSnapshotAttributeView", model.CheckAuth, model.CheckAdminRole, renderSnapshotAttributeView)

@@ -1,0 +1,20 @@
+{
+  "ID": "20260923000000-root001",
+  "Type": "NodeDocument",
+  "Spec": "2",
+  "Properties": {"id": "20260923000000-root001", "title": "Legacy table alignment"},
+  "Children": [{
+    "ID": "20260923000001-table01",
+    "Type": "NodeTable",
+    "Properties": {"id": "20260923000001-table01"},
+    "TableAligns": [2],
+    "Children": [
+      {"Type": "NodeTableHead", "Children": [{"Type": "NodeTableRow", "TableAligns": [2], "Children": [
+        {"Type": "NodeTableCell", "TableCellAlign": 2, "Children": [{"Type": "NodeText", "Data": "Header"}]}
+      ]}]},
+      {"Type": "NodeTableRow", "TableAligns": [2], "Children": [
+        {"Type": "NodeTableCell", "TableCellAlign": 3, "Children": [{"Type": "NodeText", "Data": "Value"}]}
+      ]}
+    ]
+  }]
+}

@@ -160,3 +160,73 @@ func TestAVContractCalendarPublishTarget(t *testing.T) {
 		t.Fatalf("publish filtering leaked calendar target metadata: %s", body)
 	}
 }
+
+func TestAVContractCalendarUndated(t *testing.T) {
+	fixture := setupAttributeViewContextFilterAPITest(t)
+	database := fixture.attrView
+	view := database.Views[0]
+	dateKey := av.NewKey(ast.NewNodeID(), "Date", "", av.KeyTypeDate)
+	primary := database.GetBlockKeyValues()
+	dates := &av.KeyValues{Key: dateKey}
+	ids := []string{ast.NewNodeID(), ast.NewNodeID(), ast.NewNodeID(), ast.NewNodeID()}
+	for index, title := range []string{"Plan alpha", "Plan beta", "Review", "Dated"} {
+		primary.Values = append(primary.Values, &av.Value{ID: ast.NewNodeID(), KeyID: primary.Key.ID,
+			BlockID: ids[index], Type: av.KeyTypeBlock, IsDetached: true, Block: &av.ValueBlock{Content: title}})
+		date := &av.ValueDate{}
+		if index == 3 {
+			date = &av.ValueDate{Content: 1788220800000, IsNotEmpty: true, IsNotTime: true}
+		}
+		dates.Values = append(dates.Values, &av.Value{ID: ast.NewNodeID(), KeyID: dateKey.ID,
+			BlockID: ids[index], Type: av.KeyTypeDate, Date: date})
+	}
+	database.KeyValues = append(database.KeyValues, dates)
+	view.ItemIDs = ids
+	view.LayoutType = av.LayoutTypeCalendar
+	view.Calendar = &av.LayoutCalendar{LayoutTable: view.Table, Settings: av.CalendarSettings{DateKeyID: dateKey.ID, WeekStart: 1}}
+	view.Table = nil
+	view.Calendar.Columns = append(view.Calendar.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: dateKey.ID}})
+	if err := av.SaveAttributeView(database); err != nil {
+		t.Fatal(err)
+	}
+	path := "/api/av/getAttributeViewCalendarUndated"
+	response := callAttributeViewContextFilterAPI(t, path, map[string]any{
+		"id": database.ID, "viewID": view.ID, "page": 2, "pageSize": 1,
+	}, getAttributeViewCalendarUndated)
+	requireAPIContract(t, http.MethodPost, path, response)
+	var result struct {
+		Code int `json:"code"`
+		Data struct {
+			Rows  []*av.TableRow `json:"rows"`
+			Total int            `json:"total"`
+		} `json:"data"`
+	}
+	decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+	if result.Code != 0 || result.Data.Total != 3 || len(result.Data.Rows) != 1 || result.Data.Rows[0].ID != ids[1] {
+		t.Fatalf("unexpected undated page: %s", response.Body.String())
+	}
+	if value := result.Data.Rows[0].GetValue(dateKey.ID); value == nil || value.Type != av.KeyTypeDate || value.Date == nil {
+		t.Fatalf("undated row has no editable date cell: %s", response.Body.String())
+	}
+	for _, test := range []struct {
+		request map[string]any
+		wantID  string
+	}{
+		{map[string]any{"id": database.ID, "viewID": view.ID, "search": "beta"}, ids[1]},
+		{map[string]any{"id": database.ID, "viewID": view.ID, "query": "Plan", "search": "alpha"}, ids[0]},
+	} {
+		response = callAttributeViewContextFilterAPI(t, path, test.request, getAttributeViewCalendarUndated)
+		requireAPIContract(t, http.MethodPost, path, response)
+		decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+		if result.Code != 0 || result.Data.Total != 1 || len(result.Data.Rows) != 1 || result.Data.Rows[0].ID != test.wantID {
+			t.Fatalf("undated search returned the wrong rows: %s", response.Body.String())
+		}
+	}
+	response = callAttributeViewContextFilterAPI(t, path, map[string]any{
+		"id": database.ID, "blockID": fixture.databaseID, "viewID": view.ID,
+	}, getAttributeViewCalendarUndated)
+	requireAPIContract(t, http.MethodPost, path, response)
+	decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+	if result.Code != 0 || result.Data.Total != 0 || len(result.Data.Rows) != 0 {
+		t.Fatalf("context filter was bypassed: %s", response.Body.String())
+	}
+}

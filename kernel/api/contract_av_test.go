@@ -88,6 +88,11 @@ func TestAVContractTransportMapping(t *testing.T) {
 		assertAVContractJSONEqual(t, view, avContractView(view))
 	}
 	assertAVContractJSONEqual(t, value, toContractAVValue(value))
+	for _, content := range []string{"", "<b>display</b>"} {
+		value.Relation.Contents = []*av.Value{{Type: av.KeyTypeBlock, Block: &av.ValueBlock{Content: "original"},
+			HasRenderTemplate: true, RenderedContent: content}}
+		assertAVContractJSONEqual(t, value, toContractAVValue(value))
+	}
 	assertAVContractJSONEqual(t, &av.ViewTableColumn{BaseField: &av.BaseField{ID: "key", Calc: &av.FieldCalc{}}, Calc: nil}, toContractAVViewTableColumn(&av.ViewTableColumn{BaseField: &av.BaseField{ID: "key", Calc: &av.FieldCalc{}}, Calc: nil}))
 	fixture := setupAttributeViewContextFilterAPITest(t)
 	assertAVContractJSONEqual(t, model.NewAttributeViewData(fixture.attrView), toContractAVAttributeViewData(model.NewAttributeViewData(fixture.attrView)))

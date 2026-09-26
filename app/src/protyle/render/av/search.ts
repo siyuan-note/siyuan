@@ -31,6 +31,11 @@ export const bindAvSearch = (options: {
         if (event.isComposing) {
             return;
         }
+        if (event.key === "Enter") {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         electronUndo(event);
     });
     const searchInputChange = (event: Event) => {

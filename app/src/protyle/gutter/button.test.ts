@@ -1,5 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
+import {getIconByType} from "../../editor/getIcon";
 import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
 
 describe("genGutterBlockButtonHTML", () => {
@@ -17,6 +18,17 @@ describe("genGutterBlockButtonHTML", () => {
 
         assert.match(html, /draggable="true"/);
         assert.doesNotMatch(html, /data-embed-id=/);
+    });
+
+    it("renders the mind map block icon after its node type changes", () => {
+        const html = genGutterBlockButtonHTML({
+            ...baseOptions,
+            type: "NodeMindmap",
+            icon: getIconByType("NodeMindmap"),
+        });
+
+        assert.match(html, /data-type="NodeMindmap"/);
+        assert.match(html, /<use xlink:href="#iconMindmap"><\/use>/);
     });
 
     it("routes embedded child gutters without making them draggable", () => {

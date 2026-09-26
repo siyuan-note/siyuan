@@ -7,7 +7,10 @@ import io
 import json
 from pathlib import Path
 import tempfile
+import subprocess
+import tarfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 
@@ -16,20 +19,81 @@ release = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(release)
 
 
+class SevenZipTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.dest = self.root / "output"
+        self.dest.mkdir()
+        self.unpacker = release.Unpacker(self.root, release.find_7z() or "7z")
+
+    @unittest.skipUnless(release.find_7z(), "需要已安装的 7-Zip")
+    def test_real_sevenzip_skips_links_and_keeps_regular_files(self):
+        source = self.root / "links.tar"
+        with tarfile.open(source, "w") as archive:
+            for name in ("icon.png", "resources/kernel/SiYuan-Kernel"):
+                item = tarfile.TarInfo(name)
+                item.size = 4
+                archive.addfile(item, io.BytesIO(b"data"))
+            for name in (".DirIcon", "siyuan.png", "图标链接"):
+                item = tarfile.TarInfo(name)
+                item.type = tarfile.SYMTYPE
+                item.linkname = "icon.png"
+                archive.addfile(item)
+        self.unpacker.extract_sevenzip(source, self.dest)
+        self.assertEqual((self.dest / "icon.png").read_bytes(), b"data")
+        self.assertEqual((self.dest / "resources/kernel/SiYuan-Kernel").read_bytes(), b"data")
+        for name in (".DirIcon", "siyuan.png", "图标链接"):
+            self.assertFalse((self.dest / name).exists())
+
+    def test_squashfs_mode_links_are_excluded_literally(self):
+        listing = "----------\nPath = .DirIcon\nMode = lrwxrwxrwx\n\nPath = icon[1]*\nMode = lrwxrwxrwx\n\nPath = file\nMode = -rw-r--r--\n"
+
+        def run(command, **kwargs):
+            self.assertEqual(kwargs["encoding"], "utf-8")
+            self.assertIn("-sccUTF-8", command)
+            if command[1] == "l":
+                return subprocess.CompletedProcess(command, 0, listing, "")
+            self.assertIn("-spd", command)
+            exclusions = next(item[3:] for item in command if item.startswith("-x@"))
+            self.assertEqual(Path(exclusions).read_text(encoding="utf-8"), ".DirIcon\nicon[1]*\n")
+            return subprocess.CompletedProcess(command, 0, "", "")
+
+        with patch.object(release.subprocess, "run", side_effect=run):
+            self.unpacker.extract_sevenzip(self.root / "test.AppImage", self.dest)
+
+    def test_extraction_error_is_not_ignored(self):
+        results = [subprocess.CompletedProcess([], 0, "----------\nPath = file\nMode = -rw-r--r--\n", ""),
+                   subprocess.CompletedProcess([], 2, "", "CRC failed")]
+        with patch.object(release.subprocess, "run", side_effect=results):
+            with self.assertRaisesRegex(release.VerificationError, "CRC failed"):
+                self.unpacker.extract_sevenzip(self.root / "test.AppImage", self.dest)
+
+    def test_listing_error_stops_extraction(self):
+        with patch.object(release.subprocess, "run", return_value=subprocess.CompletedProcess([], 2, "", "bad archive")) as run:
+            with self.assertRaisesRegex(release.VerificationError, "bad archive"):
+                self.unpacker.extract_sevenzip(self.root / "test.AppImage", self.dest)
+            self.assertEqual(run.call_count, 1)
+
+
 class ReleaseTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.resources = {
-            "stage/build/mobile/index.html": b"<html></html>",
-            "stage/build/mobile/main.js": b"current frontend",
-            "stage/build/export/protyle-method.js": b"current export frontend",
+            "stage/build/mobile/index.html": b'<script src="main.js"></script>',
+            "stage/build/mobile/main.js": b'Constants.SIYUAN_VERSION="3.8.4";',
+            "stage/build/export/protyle-method.js": b'Constants.SIYUAN_VERSION="3.8.4";',
             "appearance/langs/en.json": b"{}",
             "guide/document.sy": b"guide",
             "changelogs/v3.8.4/en.md": b"release notes",
         }
-        self.kernel = b"new kernel"
+        header = bytearray(64)
+        header[:6] = b"\x7fELF\x02\x01"
+        release.struct.pack_into("<H", header, 18, 183)
+        self.kernel = bytes(header) + b"SiYuan v3.8.4 (pdfcpu "
         self.baseline = {
             "file": "test.release-baseline.json", "target": "android-arm64", "version": "3.8.4",
             "kernels": [release.hashlib.sha256(self.kernel).hexdigest()],
@@ -54,7 +118,7 @@ class ReleaseTests(unittest.TestCase):
 
     def test_old_kernel_fails_even_with_current_frontend(self):
         with self.assertRaisesRegex(release.VerificationError, "内核与所有基准均不匹配"):
-            release.verify_package(self.package(kernel=b"old kernel"), [self.baseline], None)
+            release.verify_package(self.package(kernel=self.kernel + b"old build"), [self.baseline], None)
 
     def test_missing_and_changed_resources_fail(self):
         for name, data in [("stage/build/mobile/main.js", b"old frontend"),
@@ -177,6 +241,40 @@ class DirectReleaseTests(unittest.TestCase):
         self.assertEqual(result["kernels"][0]["version"], "3.8.4")
         self.assertEqual(result["frontend_versions"]["stage/build/mobile/index.html"], ["3.8.4"])
 
+    def test_standalone_hap_is_not_supported(self):
+        hap = self.package().rename(self.root / "entry.hap")
+        with self.assertRaisesRegex(release.VerificationError, "不支持的安装包格式"):
+            release.verify_package(hap, version="3.8.4")
+        self.package()
+        args = argparse.Namespace(directory=self.root, version="3.8.4", baseline=None,
+                                  report=self.root / "report.json", sevenzip=None)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(release.verify(args), 1)
+        report = json.loads(args.report.read_text(encoding="utf-8"))
+        self.assertEqual(report["unknown"], ["entry.hap"])
+        self.assertEqual([entry["name"] for entry in report["packages"]], ["test.apk"])
+
+    def test_harmony_app_unpacks_embedded_hap(self):
+        payload = self.package().read_bytes()
+        app = self.root / "siyuan-harmony-default-unsigned.app"
+        with zipfile.ZipFile(app, "w") as archive:
+            archive.writestr("entry.hap", payload)
+        result = release.verify_package(app, version="3.8.4")
+        self.assertEqual(result["kernels"][0]["version"], "3.8.4")
+
+    def test_ipa_is_not_supported(self):
+        ipa = self.package().rename(self.root / "siyuan.ipa")
+        with self.assertRaisesRegex(release.VerificationError, "不支持的安装包格式"):
+            release.verify_package(ipa, version="3.8.4")
+        self.package()
+        args = argparse.Namespace(directory=self.root, version="3.8.4", baseline=None,
+                                  report=self.root / "report.json", sevenzip=None)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(release.verify(args), 1)
+        report = json.loads(args.report.read_text(encoding="utf-8"))
+        self.assertEqual(report["unknown"], ["siyuan.ipa"])
+        self.assertEqual([entry["name"] for entry in report["packages"]], ["test.apk"])
+
     def desktop_resources(self):
         resources = dict(self.resources)
         for frontend in ("app", "desktop"):
@@ -184,6 +282,7 @@ class DirectReleaseTests(unittest.TestCase):
                 if name.startswith("stage/build/mobile/"):
                     resources[name.replace("stage/build/mobile/", f"stage/build/{frontend}/")] = data
         resources["stage/build/app/window.html"] = resources["stage/build/app/index.html"]
+        resources["app/package.json"] = b'{"version":"3.8.4"}'
         return resources
 
     def desktop_package(self, resources):
@@ -226,6 +325,57 @@ class DirectReleaseTests(unittest.TestCase):
                      if not name.startswith("stage/build/mobile/")}
         with self.assertRaisesRegex(release.VerificationError, "stage/build/mobile/index.html"):
             release.verify_package(self.package(resources=resources), version="3.8.4")
+
+    def matching_baseline(self, resources=None):
+        resources = self.resources if resources is None else resources
+        return dict(self.baseline, kernels=[release.hashlib.sha256(self.kernel).hexdigest()],
+                    resources={name: release.hashlib.sha256(data).hexdigest()
+                               for name, data in resources.items() if name.split("/")[0] in release.GROUPS})
+
+    def test_baseline_does_not_bypass_filename_version(self):
+        package = self.package().rename(self.root / "siyuan-3.8.3.apk")
+        with self.assertRaisesRegex(release.VerificationError, "包名版本不匹配"):
+            release.verify_package(package, [self.matching_baseline()], version="3.8.4")
+
+    def test_baseline_does_not_bypass_kernel_version_or_architecture(self):
+        for invalid in ("version", "architecture"):
+            with self.subTest(invalid=invalid):
+                self.kernel = self.native_kernel("3.8.3" if invalid == "version" else "3.8.4")
+                if invalid == "architecture":
+                    header = bytearray(self.kernel)
+                    release.struct.pack_into("<H", header, 18, 62)
+                    self.kernel = bytes(header)
+                with self.assertRaisesRegex(release.VerificationError, "内核版本不匹配|ABI 目录"):
+                    release.verify_package(self.package(), [self.matching_baseline()], version="3.8.4")
+
+    def test_baseline_does_not_bypass_frontend_validation(self):
+        original = dict(self.resources)
+        for invalid in ("version", "reference"):
+            with self.subTest(invalid=invalid):
+                self.resources = dict(original)
+                if invalid == "version":
+                    self.resources["stage/build/mobile/main.js"] = original["stage/build/mobile/main.js"].replace(b"3.8.4", b"3.8.3")
+                else:
+                    del self.resources["stage/build/mobile/base.css"]
+                with self.assertRaisesRegex(release.VerificationError, "前端版本不匹配|资源引用缺失"):
+                    release.verify_package(self.package(), [self.matching_baseline()], version="3.8.4")
+
+    def test_desktop_metadata_required_in_both_modes(self):
+        for metadata in (None, b'{"version":"3.8.3"}', b'[]'):
+            for use_baseline in (False, True):
+                with self.subTest(metadata=metadata, baseline=use_baseline):
+                    resources = self.desktop_resources()
+                    if metadata is None:
+                        del resources["app/package.json"]
+                    else:
+                        resources["app/package.json"] = metadata
+                    baseline = [self.matching_baseline(resources)] if use_baseline else None
+                    with self.assertRaisesRegex(release.VerificationError, "桌面外壳"):
+                        release.verify_package(self.desktop_package(resources), baseline, version="3.8.4")
+
+    def test_complete_desktop_with_baseline_passes(self):
+        resources = self.desktop_resources()
+        release.verify_package(self.desktop_package(resources), [self.matching_baseline(resources)], version="3.8.4")
 
     def test_beta_kernel_in_stable_apk(self):
         with self.assertRaisesRegex(release.VerificationError, "3.8.4-beta.2"):

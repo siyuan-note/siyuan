@@ -39,6 +39,14 @@ export interface IDockResponsiveWidthResult {
     maximumWidth?: number;
 }
 
+export interface IDockOverrideSide {
+    preferredSize: number;
+    pinned: boolean;
+    visible: boolean;
+    active: boolean;
+    manualOverride: boolean;
+}
+
 export interface ICenterMinimumLayoutNode {
     inactive?: boolean;
     direction?: "lr" | "tb";
@@ -52,6 +60,27 @@ interface INormalizedSide extends IDockResponsiveSideInput {
 type SideName = "left" | "right";
 
 const normalizeSize = (size: number) => Number.isFinite(size) ? Math.max(0, size) : 0;
+
+export const resolveResponsiveManualOverrideClearance = (
+    availableSize: number,
+    centerMinimumSize: number,
+    gapSize: number,
+    hysteresis: number,
+    left: IDockOverrideSide,
+    right: IDockOverrideSide,
+) => {
+    let preferredOccupiedSize = normalizeSize(centerMinimumSize);
+    for (const side of [left, right]) {
+        if (side.pinned && side.active && (side.visible || side.manualOverride)) {
+            preferredOccupiedSize += normalizeSize(side.preferredSize) + normalizeSize(gapSize);
+        }
+    }
+    const hasSpace = normalizeSize(availableSize) >= preferredOccupiedSize + normalizeSize(hysteresis);
+    return {
+        left: hasSpace && left.pinned && left.active && left.manualOverride,
+        right: hasSpace && right.pinned && right.active && right.manualOverride,
+    };
+};
 
 export const resolveDockResponsiveWidth = (input: IDockResponsiveWidthInput): IDockResponsiveWidthResult => {
     if (!input.active) {

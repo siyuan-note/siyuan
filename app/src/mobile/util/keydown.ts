@@ -11,6 +11,10 @@ export const mobileKeydown = (app: App, event: KeyboardEvent) => {
         return;
     }
     const matchGeneral = Object.keys(window.siyuan.config.keymap.general).sort().find((key) => {
+        // 上下文菜单由当前编辑器或数据库处理，未处理时继续分发快捷键。
+        if (key === "openContextMenu") {
+            return false;
+        }
         if (matchHotKey(window.siyuan.config.keymap.general[key], event)) {
             const protyle = getCurrentEditor()?.protyle;
             if (protyle) {

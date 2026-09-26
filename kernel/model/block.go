@@ -86,7 +86,7 @@ type RiffCard struct {
 
 func (block *Block) IsContainerBlock() bool {
 	switch block.Type {
-	case "NodeDocument", "NodeBlockquote", "NodeList", "NodeListItem", "NodeSuperBlock", "NodeCallout", "NodeTabs", "NodeTabItem":
+	case "NodeDocument", "NodeBlockquote", "NodeList", "NodeListItem", "NodeSuperBlock", "NodeCallout", "NodeTabs", "NodeTabItem", "NodeMindmap", "NodeMindmapItem":
 		return true
 	}
 	return false
@@ -738,6 +738,9 @@ func SwapBlockRef(refID, defID string, includeChildren, originalToEmbed bool) (e
 		defNode = treenode.GetNodeInTree(refTree, defID)
 	}
 	if nil == defNode {
+		return
+	}
+	if err = validateBlockSwap(refNode, defNode, includeChildren); err != nil {
 		return
 	}
 	swapBlockRefNodes(refNode, defNode, defID, includeChildren, originalToEmbed)

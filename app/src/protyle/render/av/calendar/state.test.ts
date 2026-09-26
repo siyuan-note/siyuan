@@ -7,16 +7,19 @@ import * as ts from "typescript";
 import * as dates from "./date";
 
 const stateExports = {};
+const storage: Record<string, Record<string, string>> = {"local-av-calendar-modes": {}};
 runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "state.ts"), "utf8"), {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
 }).outputText, {
     exports: stateExports,
-    require: (id: string) => id === "./date" ? dates : {Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view"}},
+    require: (id: string) => id === "./date" ? dates :
+        {Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view", LOCAL_AV_CALENDAR_MODES: "local-av-calendar-modes"}},
+    window: {siyuan: {storage}},
 });
-const {getCalendarCreationDate, getCalendarState} = stateExports as typeof import("./state");
+const {getCalendarCreationDate, getCalendarRequestRange, getCalendarState, setCalendarMode} = stateExports as typeof import("./state");
 
-const block = (viewID: string, type = "calendar") => ({getAttribute: (key: string) =>
-    key === "data-av-type" ? type : viewID}) as unknown as Element;
+const block = (viewID: string, type = "calendar", avID = "database") => ({getAttribute: (key: string) =>
+    key === "data-av-type" ? type : key === "data-av-id" ? avID : viewID}) as unknown as Element;
 
 test("calendar navigation is independent between editors and database views", () => {
     const first = block("view-a");
@@ -29,6 +32,26 @@ test("calendar navigation is independent between editors and database views", ()
     assert.equal(getCalendarState(second).anchor, secondAnchor);
     assert.equal(getCalendarState(second).mode, "month");
     assert.equal(getCalendarState(first, "view-b").mode, "month");
+});
+
+test("calendar mode survives reopening without restoring the browsing date or changing other views", () => {
+    const first = block("persisted-view");
+    const state = getCalendarState(first);
+    state.anchor = new Date(2020, 0, 1).getTime();
+    assert.equal(setCalendarMode(first, "persisted-view", "week")["database:persisted-view"], "week");
+    assert.equal(storage["local-av-calendar-modes"]["database:persisted-view"], "week");
+
+    const reopened = block("persisted-view");
+    assert.equal(getCalendarState(reopened).mode, "week");
+    assert.equal(getCalendarState(reopened).anchor, dates.calendarDay(Date.now()));
+    const range = getCalendarRequestRange(reopened);
+    assert.equal(dates.calendarDayDistance(range.start, range.end), 7);
+    assert.equal(getCalendarState(block("other-view")).mode, "month");
+    assert.equal(getCalendarState(block("persisted-view", "calendar", "other-database")).mode, "month");
+
+    setCalendarMode(reopened, "persisted-view", "month");
+    assert.equal(storage["local-av-calendar-modes"]["database:persisted-view"], undefined);
+    assert.equal(getCalendarState(block("persisted-view")).mode, "month");
 });
 
 test("only a calendar with an ordinary date source supplies the date of a new entry", () => {

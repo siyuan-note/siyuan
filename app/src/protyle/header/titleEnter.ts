@@ -31,6 +31,9 @@ const enterLoadedDocumentStart = (protyle: IProtyle) => {
     protyle.contentElement.scrollTop = 0;
     protyle.scroll.lastScrollTop = 1;
     if (action === "focus") {
+        /// #if MOBILE
+        (editElement as HTMLElement)?.focus({preventScroll: true});
+        /// #endif
         // 配合提示文本使用，避免提示文本挤压到第二个块中
         focusBlock(firstElement, protyle.wysiwyg.element);
         return;
@@ -39,6 +42,9 @@ const enterLoadedDocumentStart = (protyle: IProtyle) => {
     const newId = Lute.NewNodeID();
     const newElement = genEmptyElement(false, true, newId);
     protyle.wysiwyg.element.insertAdjacentElement("afterbegin", newElement);
+    /// #if MOBILE
+    (getContenteditableElement(newElement) as HTMLElement).focus({preventScroll: true});
+    /// #endif
     focusByWbr(newElement, protyle.toolbar.range || getEditorRange(newElement));
     transaction(protyle, [{
         action: "insert",
@@ -54,10 +60,10 @@ const enterLoadedDocumentStart = (protyle: IProtyle) => {
 export const enterDocumentFromTitle = (protyle: IProtyle, options?: {
     beforeLoad?: Promise<unknown>,
     isValid?: () => boolean,
-}) => {
+}): Promise<void> => {
     const isValid = options?.isValid || (() => true);
     if (!isValid()) {
-        return;
+        return Promise.resolve();
     }
     const firstElement = protyle.wysiwyg.element.firstElementChild;
     const editElement = firstElement ? getContenteditableElement(firstElement) : undefined;
@@ -70,13 +76,13 @@ export const enterDocumentFromTitle = (protyle: IProtyle, options?: {
     });
     if (action !== "load") {
         enterLoadedDocumentStart(protyle);
-        return;
+        return Promise.resolve();
     }
 
     const rootID = protyle.block.rootID;
-    const loadDocumentStart = () => {
+    const loadDocumentStart = (): Promise<void> => {
         if (!isValid() || protyle.block.rootID !== rootID) {
-            return;
+            return Promise.resolve();
         }
         const getDocParam: FileTreeGetDocRequestInput = {
             id: rootID,
@@ -86,7 +92,7 @@ export const enterDocumentFromTitle = (protyle: IProtyle, options?: {
         if (isEncryptedBox(protyle.notebookId)) {
             getDocParam.notebook = protyle.notebookId;
         }
-        fetchPost("/api/filetree/getDoc", getDocParam, (response) => {
+        return fetchPost("/api/filetree/getDoc", getDocParam, (response) => {
             if (!isValid() || protyle.block.rootID !== rootID) {
                 return;
             }
@@ -104,8 +110,7 @@ export const enterDocumentFromTitle = (protyle: IProtyle, options?: {
         });
     };
     if (options?.beforeLoad) {
-        void options.beforeLoad.then(loadDocumentStart, loadDocumentStart);
-    } else {
-        loadDocumentStart();
+        return options.beforeLoad.then(loadDocumentStart, loadDocumentStart);
     }
+    return loadDocumentStart();
 };

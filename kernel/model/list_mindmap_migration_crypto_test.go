@@ -93,6 +93,56 @@ func TestMigrateLegacyMindmapsEncrypted(t *testing.T) {
 			t.Fatalf("undo or redo wrote plaintext: %v", readErr)
 		}
 	}
+	oldDocID := ast.NewNodeID()
+	oldTree := treenode.NewTree(boxID, "/"+oldDocID+".sy", "/Old list", "Old list")
+	_, oldSource := engine.Md2BlockDOMTree("- Secret root\n  - Secret child\n", false)
+	oldList := firstContentBlock(oldSource.Root)
+	oldList.Unlink()
+	oldList.SetIALAttr(listMindmapViewAttr, "1")
+	oldList.SetIALAttr(listMindmapMetadataAttr, `{"version":1,"nodes":{},"relations":[]}`)
+	oldTree.Root.AppendChild(oldList)
+	if _, err = filesys.WriteTree(oldTree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(oldTree)
+	oldPath := filepath.Join(util.DataDir, boxID, oldTree.Path)
+	oldBefore, err := os.ReadFile(oldPath)
+	if err != nil || !util.IsCiphertext(oldBefore) {
+		t.Fatalf("old list source is not encrypted: %v", err)
+	}
+	oldTx, _, err := MigrateLegacyMindmaps(oldDocID)
+	if err != nil || len(oldTx.DoOperations) != 1 {
+		t.Fatalf("encrypted old list migration failed: %+v, %v", oldTx, err)
+	}
+	oldAfter, err := os.ReadFile(oldPath)
+	if err != nil || !util.IsCiphertext(oldAfter) || bytes.Equal(oldBefore, oldAfter) || bytes.Contains(oldAfter, []byte("Secret root")) {
+		t.Fatalf("old list migration did not preserve encryption: %v", err)
+	}
+	migrated, err := LoadTreeByBlockID(oldDocID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	newList := treenode.GetNodeInTree(migrated, oldList.ID)
+	if newList == nil || newList.Type != ast.NodeMindmap || newList.IALAttr(listMindmapViewAttr) != "" ||
+		newList.IALAttr(listMindmapMetadataAttr) != oldList.IALAttr(listMindmapMetadataAttr) {
+		t.Fatal("encrypted old list lost its identity or metadata")
+	}
+	oldHistories, err := filepath.Glob(filepath.Join(util.HistoryDir, "*-format", boxID, oldDocID+".sy"))
+	if err != nil || len(oldHistories) != 1 {
+		t.Fatalf("missing encrypted old list history: %v, %v", oldHistories, err)
+	}
+	oldHistory, err := os.ReadFile(oldHistories[0])
+	if err != nil || !bytes.Equal(oldBefore, oldHistory) {
+		t.Fatal("encrypted old list recovery data changed")
+	}
+	oldRelative, err := filepath.Rel(util.WorkspaceDir, oldHistories[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _, oldContent, _, err := GetDocHistoryContent(oldRelative, "", false)
+	if err != nil || !strings.Contains(oldContent, `data-type="NodeList"`) || !strings.Contains(oldContent, "Secret root") {
+		t.Fatalf("encrypted old list history cannot recover the source: %v", err)
+	}
 	corrupt, _ := os.ReadFile(path)
 	corrupt[len(corrupt)-1] ^= 1
 	if err = os.WriteFile(path, corrupt, 0644); err != nil {

@@ -767,6 +767,7 @@ export const getLocalStorage = (cb: () => void) => {
             version: 1,
             tabs: [],
         };
+        defaultStorage[Constants.LOCAL_MOBILE_SLASH_MENU] = {enabled: false};
         defaultStorage["local-mobile-bars"] = {autoHide: true};
         defaultStorage[Constants.LOCAL_MOBILE_BOTTOM_BAR] = {
             version: 1,
@@ -806,9 +807,11 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
         defaultStorage[Constants.LOCAL_MOVE_PATH] = {keys: [], k: ""};
         defaultStorage[Constants.LOCAL_RECENT_DOCS] = {type: "viewedAt"};   // TRecentDocsSort
+        defaultStorage[Constants.LOCAL_AV_CALENDAR_MODES] = {};
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_EXPORTPATH, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_MOBILE_TABS,
+            Constants.LOCAL_MOBILE_SLASH_MENU,
             Constants.LOCAL_MOBILE_BOTTOM_BAR, Constants.LOCAL_MOBILE_SIDE_PANEL, "local-mobile-bars",
             Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS,
@@ -816,7 +819,7 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
             Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS,
-            Constants.LOCAL_CLOSED_TABS].forEach((key) => {
+            Constants.LOCAL_CLOSED_TABS, Constants.LOCAL_AV_CALENDAR_MODES].forEach((key) => {
             const value = response.data[key];
             if (typeof value === "string") {
                 try {
@@ -920,7 +923,7 @@ const sanitizeFilesPaths = (filesPaths: IFilesPath[]) => {
     return filesPaths.filter((item) => !isEncryptedBox(item.notebookId));
 };
 
-export const setStorageVal = (key: string, val: any, cb?: () => void) => {
+export const setStorageVal = (key: string, val: any, cb?: () => void, timeout = 0) => {
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
@@ -935,7 +938,7 @@ export const setStorageVal = (key: string, val: any, cb?: () => void) => {
     if ([Constants.LOCAL_SEARCHDATA, Constants.LOCAL_FILESPATHS, Constants.LOCAL_CLOSED_TABS].includes(key)) {
         window.siyuan.storage[key] = storageVal;
     }
-    fetchPost("/api/storage/setLocalStorageVal", {
+    return fetchPost("/api/storage/setLocalStorageVal", {
         app: Constants.SIYUAN_APPID,
         key,
         val: storageVal,
@@ -943,7 +946,7 @@ export const setStorageVal = (key: string, val: any, cb?: () => void) => {
         if (cb) {
             cb();
         }
-    });
+    }, undefined, undefined, undefined, timeout);
 };
 
 export const initWindowOpenOverride = (app: App, openExternal?: (url: string) => void) => {

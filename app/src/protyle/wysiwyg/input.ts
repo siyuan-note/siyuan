@@ -33,12 +33,23 @@ import {
 } from "../util/inlineElementMarker";
 import {normalizeInlineFontFamilyStyle} from "../toolbar/fontFamilyCore";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
+import {isProtyleListItemFirstParagraph} from "../runtimeCapabilities";
+import {isMobile} from "../../util/functions";
+import {scheduleCaretScroll} from "./caretScroll";
 
 interface IInputOperations {
     doOperations: IOperation[];
     undoOperations: IOperation[];
     undoContext?: Record<string, string>;
 }
+
+const updateGutterAfterInput = (protyle: IProtyle, blockElement: HTMLElement) => {
+    if (!isMobile()) {
+        hideElements(["gutter"], protyle);
+    } else if (protyle.gutter && !protyle.gutter.element.classList.contains("fn__none")) {
+        protyle.gutter.render(protyle, blockElement);
+    }
+};
 
 const normalizeInlineFontFamilyStyles = (element: ParentNode) => {
     element.querySelectorAll<HTMLElement>("span[style]").forEach(item => {
@@ -245,7 +256,7 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
         }
         focusByWbr(protyle.wysiwyg.element, range);
         protyle.hint.render(protyle);
-        hideElements(["gutter"], protyle);
+        updateGutterAfterInput(protyle, blockElement);
         updateInput(html, protyle, id, inputOperations);
         return;
     }
@@ -423,8 +434,9 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
     tempElement.innerHTML = html;
     // 列表项内紧挨标记的首个段落块不生成子列表，仅移除触发标记并保留现有内容
     // https://github.com/siyuan-note/siyuan/issues/17890 https://github.com/siyuan-note/siyuan/issues/18355
-    if (blockElement.closest('[data-type="NodeListItem"]') &&
-        blockElement.previousElementSibling?.classList.contains("protyle-action")) {
+    if ((blockElement.closest('[data-type="NodeListItem"]') &&
+        blockElement.previousElementSibling?.classList.contains("protyle-action")) ||
+        isProtyleListItemFirstParagraph(protyle, blockElement)) {
         if (tempElement.content.firstElementChild.classList.contains("list")) {
             if (editElement.contains(wbrElement)) {
                 const markerRange = document.createRange();
@@ -562,7 +574,7 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
         focusByWbr(protyle.wysiwyg.element, range);
         protyle.hint.render(protyle);
     }
-    hideElements(["gutter"], protyle);
+    updateGutterAfterInput(protyle, blockElement);
     updateInput(html, protyle, id, inputOperations);
 };
 
@@ -572,6 +584,9 @@ export const input = async (...args: Parameters<typeof inputBlock>) => {
         await inputBlock(...args);
     } finally {
         resume();
+    }
+    if (args[0].options.typewriterMode) {
+        scheduleCaretScroll(args[0], "down");
     }
 };
 

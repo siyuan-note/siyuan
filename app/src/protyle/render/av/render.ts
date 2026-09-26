@@ -64,6 +64,7 @@ import {getAVColorStyle} from "./color";
 import {getContextFilterKeyID} from "./contextFilterState";
 import {isAVCellPanelForBlock} from "./panelTarget";
 import {replaceAVContainer} from "./container";
+import {updateFrozenColumns} from "./frozenColumns";
 
 interface IIds {
     groupId: string,
@@ -419,11 +420,13 @@ export const initUnfoldedGroupTables = (blockElement: HTMLElement, protyle: IPro
         totalLoadedRows > GROUP_TABLE_INITIAL_ROW_BUDGET || bodies.some(bodyElement =>
             bodyElement.querySelector(".av__spacer")));
     renderAVRichTextElements(blockElement);
+    updateFrozenColumns(blockElement);
     initVirtualScroll({protyle, blockElement, data, selectedItemPoints});
     restoreAVCellSelection(blockElement);
 };
 
 const afterRenderTable = (options: ITableOptions) => {
+    updateFrozenColumns(options.blockElement);
     setAVData(options.blockElement, options.data);
     renderAVRichTextElements(options.blockElement);
     if (!refreshAVCellSelection(options.blockElement, options.data)) {
@@ -566,7 +569,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
     }
     for (let i = 0; i < avElements.length; i++) {
         const e = avElements[i] as HTMLElement;
-        if (e.closest(".list-mindmap__preview-block")) {
+        if (e.closest(".mindmap-view__preview-block")) {
             continue;
         }
         e.removeAttribute("data-rendering");
@@ -783,7 +786,7 @@ const refreshTimeouts: {
 
 const getAVElements = (protyle: IProtyle, avID: string, viewID?: string): HTMLElement[] => {
     const elements = Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>(`.av[data-av-id="${avID}"]`))
-        .filter(item => !item.closest(".list-mindmap__preview-block"));
+        .filter(item => !item.closest(".mindmap-view__preview-block"));
     if (viewID) {
         return elements.filter((item) => getViewIDByAVElement(item) === viewID);
     }
@@ -933,6 +936,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     columnElement.style.width = operation.data;
                 }
             });
+            updateFrozenColumns(item);
         });
         return;
     }
@@ -946,6 +950,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     }
                 });
             });
+            updateFrozenColumns(item);
         });
         return;
     }

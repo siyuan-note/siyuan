@@ -254,6 +254,10 @@ export type AVCalendarSettings = { "colorKeyID": string; "dateKeyID": string; "r
 
 export type AVCalendarSettingsInput = { "colorKeyID": string; "dateKeyID": string; "rowLimit"?: number; "weekStart": number; };
 
+export type AVCalendarUndatedData = { "rows": Array<AVTableRow | null> | null; "total": number; };
+
+export type AVCalendarUndatedRequestInput = { "blockID"?: string | null; "id": string; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "search"?: string | null; "viewID": string; };
+
 export type AVCardCoverPosition = { "image": string; "x": number; "y": number; };
 
 export type AVCardCoverPositionInput = { "image"?: string | null; "x"?: number | null; "y"?: number | null; };
@@ -392,7 +396,7 @@ export type AVUnavailableNotebook = { "unavailableNotebook": true; };
 
 export type AVUpdated = { "includeTime": boolean; };
 
-export type AVValue = { "block"?: AVValueBlock; "blockID"?: string; "checkbox"?: AVValueCheckbox; "created"?: AVValueCreated; "createdAt"?: number; "date"?: AVValueDate; "email"?: AVValueEmail; "id"?: string; "isDetached"?: boolean; "keyID"?: string; "mAsset"?: Array<AVValueAsset | null>; "mSelect"?: Array<AVValueSelect | null>; "number"?: AVValueNumber; "phone"?: AVValuePhone; "relation"?: AVValueRelation; "renderedContent"?: string; "rollup"?: AVValueRollup; "template"?: AVValueTemplate; "text"?: AVValueText; "type"?: "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVValueUpdated; "updatedAt"?: number; "url"?: AVValueURL; };
+export type AVValue = { "block"?: AVValueBlock; "blockID"?: string; "checkbox"?: AVValueCheckbox; "created"?: AVValueCreated; "createdAt"?: number; "date"?: AVValueDate; "email"?: AVValueEmail; "hasRenderTemplate"?: boolean; "id"?: string; "isDetached"?: boolean; "keyID"?: string; "mAsset"?: Array<AVValueAsset | null>; "mSelect"?: Array<AVValueSelect | null>; "number"?: AVValueNumber; "phone"?: AVValuePhone; "relation"?: AVValueRelation; "renderedContent"?: string; "rollup"?: AVValueRollup; "template"?: AVValueTemplate; "text"?: AVValueText; "type"?: "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVValueUpdated; "updatedAt"?: number; "url"?: AVValueURL; };
 
 export type AVValueAsset = { "content": string; "name": string; "type": "file" | "image"; };
 
@@ -420,7 +424,7 @@ export type AVValueEmail = { "content": string; };
 
 export type AVValueEmailInput = { "content"?: string | null; };
 
-export type AVValueInput = { "block"?: AVValueBlockInput | null; "blockID"?: string | null; "checkbox"?: AVValueCheckboxInput | null; "created"?: AVValueCreatedInput | null; "createdAt"?: number | null; "date"?: AVValueDateInput | null; "email"?: AVValueEmailInput | null; "id"?: string | null; "isDetached"?: boolean | null; "keyID"?: string | null; "mAsset"?: Array<AVValueAssetInput | null> | null; "mSelect"?: Array<AVValueSelectInput | null> | null; "number"?: AVValueNumberInput | null; "phone"?: AVValuePhoneInput | null; "relation"?: AVValueRelationInput | null; "renderedContent"?: string | null; "rollup"?: AVValueRollupInput | null; "template"?: AVValueTemplateInput | null; "text"?: AVValueTextInput | null; "type"?: "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVValueUpdatedInput | null; "updatedAt"?: number | null; "url"?: AVValueURLInput | null; };
+export type AVValueInput = { "block"?: AVValueBlockInput | null; "blockID"?: string | null; "checkbox"?: AVValueCheckboxInput | null; "created"?: AVValueCreatedInput | null; "createdAt"?: number | null; "date"?: AVValueDateInput | null; "email"?: AVValueEmailInput | null; "hasRenderTemplate"?: boolean | null; "id"?: string | null; "isDetached"?: boolean | null; "keyID"?: string | null; "mAsset"?: Array<AVValueAssetInput | null> | null; "mSelect"?: Array<AVValueSelectInput | null> | null; "number"?: AVValueNumberInput | null; "phone"?: AVValuePhoneInput | null; "relation"?: AVValueRelationInput | null; "renderedContent"?: string | null; "rollup"?: AVValueRollupInput | null; "template"?: AVValueTemplateInput | null; "text"?: AVValueTextInput | null; "type"?: "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVValueUpdatedInput | null; "updatedAt"?: number | null; "url"?: AVValueURLInput | null; };
 
 export type AVValueNumber = { "content": number; "format": string; "formattedContent": string; "isNotEmpty": boolean; };
 
@@ -774,6 +778,8 @@ export type CloudSyncDir = { "cloudName": string; "hSize": string; "saveDir": st
 
 export type CloudSyncDirsData = { "checkedSyncDir": string; "hSize": string; "syncDirs": Array<CloudSyncDir | null> | null; };
 
+export type CommitNotebookArchiveRequestInput = { "id": string; "saved": boolean; };
+
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
 export type ContinueImportSYRequestInput = { "notebook": string; "token": string; };
@@ -930,7 +936,7 @@ export type ExportPreviewData = { "fillCSSVar": boolean; "html": string; };
 
 export type ExportPreviewHTMLData = { "attrs": Record<string, string> | null; "content": string; "id": string; "name": string; "type": string; };
 
-export type ExportPreviewHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "id": string; "image"?: boolean | null; "keepFold"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; };
+export type ExportPreviewHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "id": string; "image"?: boolean | null; "keepFold"?: boolean | null; "keepJSEmbed"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; };
 
 export type ExportRepoFileRequestInput = { "id": string; };
 
@@ -1222,6 +1228,8 @@ export type ImportDocumentData = { "type": "document"; };
 
 export type ImportMarkdownRequestInput = { "localPath": string; "notebook": string; "skipRoot"?: boolean | null; "toPath": string; };
 
+export type ImportNotebookArchiveRequestInput = { "file": Blob; "key"?: Blob; "password": string; };
+
 export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
 
 export type ImportRepoKeyRequestInput = { "key": string; };
@@ -1390,6 +1398,12 @@ export type NetworkServeTLSRequestInput = { "networkServeTLS": boolean; };
 
 export type Notebook = { "closed": boolean; "dueFlashcardCount": number; "encrypted": boolean; "flashcardCount": number; "icon": string; "id": string; "name": string; "newFlashcardCount": number; "sort": number; "sortMode": number; "state"?: "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error"; "subFileCount": number; "unlocked": boolean; };
 
+export type NotebookArchiveCandidate = { "current": boolean; "id": string; };
+
+export type NotebookArchiveCandidatesData = { "notebooks": Array<NotebookArchiveCandidate>; };
+
+export type NotebookArchiveData = { "file": string; "id": string; };
+
 export type NotebookConf = { "boxCrypt": NotebookEncryption | null; "closed": boolean; "dailyNoteSavePath": string; "dailyNoteTemplatePath": string; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "encrypted": boolean; "icon": string; "name": string; "refCreateSaveBox": string; "refCreateSavePath": string; "sort": number; "sortMode": number; };
 
 export type NotebookConfData = { "box": string; "conf": NotebookConf | null; "name": string; };
@@ -1469,6 +1483,8 @@ export type PluginRPCNotification = { "jsonrpc": "2.0"; "method": string; "param
 export type PluginRPCRequestFieldsInput = { "id"?: string | number | null; "jsonrpc": "2.0"; "method": string; "params"?: Array<JSONValue> | { [key: string]: JSONValue } | null; };
 
 export type PluginRPCSuccess = { "id": string | number | null; "jsonrpc": "2.0"; "result": JSONValue; };
+
+export type PrepareNotebookArchiveRequestInput = { "notebooks": Array<string>; };
 
 export type PrepareRichTextRequestInput = { "assets": Array<RichClipboardAssetInput>; };
 
@@ -1652,7 +1668,9 @@ export type SearchAssetContentData = { "assetContents": Array<AssetContent | nul
 
 export type SearchAssetContentRequestInput = { "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "types"?: Record<string, boolean> | null; };
 
-export type SearchAssetRequestInput = { "exts"?: Array<string> | null; "k": string; };
+export type SearchAssetMatchInput = { "field"?: "name" | "path"; "mode": "prefix" | "suffix" | "regex"; "value": string; };
+
+export type SearchAssetRequestInput = { "exts"?: Array<string> | null; "k": string; "match"?: SearchAssetMatchInput | null; "page"?: number | null; "pageSize"?: number | null; };
 
 export type SearchAttributeViewRelationKeyRequestInput = { "avID": string; "keyword": string; };
 
@@ -1860,7 +1878,7 @@ export type SettingCapabilityPolicy = { "default": string; "overrides": Record<s
 
 export type SettingCapabilityPolicyInput = { "default"?: string | null; "overrides"?: Record<string, string> | null; };
 
-export type SettingCloudUserRequestInput = { "token"?: string | null; };
+export type SettingCloudUserRequestInput = { "cached"?: boolean; "token"?: string | null; };
 
 export type SettingDecision = { "apiKey": string; "enabled": boolean; "endpoint": string; "name": string; "timeout": number; };
 
@@ -2198,7 +2216,7 @@ export type TemplateFileRequestInput = { "action"?: string; "content"?: string; 
 
 export type TemplateFileRevision = { "revision": string; };
 
-export type TemplateFileSource = { "content": string; "path"?: string; "revision": string; };
+export type TemplateFileSource = { "content": string; "path"?: string; "revision": string; "sourceDocID"?: string; };
 
 export type TemplatePlan = { "count": number; "id": string; "nodes": Array<TemplatePlanNode | null> | null; };
 
@@ -2315,6 +2333,10 @@ export type WorkspaceAVBuiltinColorUpdateInput = { "customized"?: boolean | null
 export type WorkspaceAVPaletteRequestInput = { "app"?: string | null; "builtinColors"?: Array<WorkspaceAVBuiltinColorUpdateInput | null> | null; "colors": Array<AttributeViewCustomColorInput | null>; "order": Array<string>; };
 
 export type WorkspaceInfoData = { "siyuanVer": string; "workspaceDir": string; };
+
+export type WorkspaceStorageData = { "assetsSize": number; "calculatedAt": number; "directories": Array<WorkspaceStorageEntry>; "totalSize": number; };
+
+export type WorkspaceStorageEntry = { "name": "data" | "repo" | "history" | "temp" | "conf" | "other"; "size": number; };
 
 export type ZipRequestInput = { "path": string; "zipPath": string; };
 
@@ -2933,6 +2955,11 @@ export interface APIPOSTRoutes {
     "/api/av/getAttributeViewBoundBlockIDsByItemIDs": {
         request: GetAttributeViewBoundBlockIDsByItemIDsRequestInput;
         response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewCalendarUndated": {
+        request: AVCalendarUndatedRequestInput;
+        response: { "code": 0; "data": AVCalendarUndatedData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/av/getAttributeViewFieldViews": {
@@ -4324,6 +4351,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/notebook/commitNotebookArchive": {
+        request: CommitNotebookArchiveRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/notebook/createEncryptedNotebook": {
         request: CreateEncryptedNotebookRequestInput;
         response: { "code": 0; "data": CreateNotebookData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4354,6 +4386,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": EncryptedNotebookStatusData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/notebook/getNotebookArchiveCandidates": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": NotebookArchiveCandidatesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
     "/api/notebook/getNotebookConf": {
         request: CloseNotebookRequestInput;
         response: { "code": 0; "data": NotebookConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4363,6 +4400,11 @@ export interface APIPOSTRoutes {
         request: NotebookIDRequestInput;
         response: { "code": 0; "data": NotebookInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/notebook/importNotebookArchive": {
+        request: ImportNotebookArchiveRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
     };
     "/api/notebook/importNotebookCryptoBackup": {
         request: ImportNotebookCryptoBackupRequestInput;
@@ -4387,6 +4429,11 @@ export interface APIPOSTRoutes {
     "/api/notebook/openNotebook": {
         request: OpenNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/prepareNotebookArchive": {
+        request: PrepareNotebookArchiveRequestInput;
+        response: { "code": 0; "data": NotebookArchiveData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/notebook/removeNotebook": {
@@ -5390,6 +5437,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": WorkspaceInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/system/getWorkspaceStorage": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": WorkspaceStorageData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
     "/api/system/getWorkspaces": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<SystemWorkspace | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5593,7 +5645,7 @@ export interface APIPOSTRoutes {
     };
     "/api/template/manage": {
         request: TemplateFileRequestInput;
-        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | (TemplateFileRevision & { "content"?: never; "path"?: never; }) | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | (TemplateFileRevision & { "content"?: never; "path"?: never; "sourceDocID"?: never; }) | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
     };
     "/api/template/render": {

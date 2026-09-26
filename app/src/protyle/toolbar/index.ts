@@ -61,7 +61,8 @@ import {hideElements} from "../ui/hideElements";
 import {electronUndo} from "../undo";
 import {clearTemplatePreview, mergeSameInlineElement, previewTemplate, toolbarKeyToMenu} from "./util";
 import {openTemplateManager} from "../../template/manager";
-import {showMessage} from "../../dialog/message";
+import {hideMessage, showMessage} from "../../dialog/message";
+import {getPlantumlImageBlob} from "../render/plantumlImage";
 import {InlineMath} from "./InlineMath";
 import {InlineMemo} from "./InlineMemo";
 import {mathRender} from "../render/mathRender";
@@ -179,6 +180,21 @@ export class Toolbar {
         const element = document.createElement("div");
         element.className = "protyle-toolbar fn__none";
         this.element = element;
+        element.addEventListener("mousedown", event => {
+            const range = this.range;
+            if (!range || range.collapsed || !(event.target as Element).closest("button")) {
+                return;
+            }
+            const start = range.startContainer.nodeType === Node.ELEMENT_NODE ?
+                range.startContainer as Element : range.startContainer.parentElement;
+            const end = range.endContainer.nodeType === Node.ELEMENT_NODE ?
+                range.endContainer as Element : range.endContainer.parentElement;
+            const title = start?.closest(".tab-item-info");
+            // 点击格式按钮时保留页签标题焦点，避免选区在 click 前因失焦而消失。
+            if (title && title === end?.closest(".tab-item-info")) {
+                event.preventDefault();
+            }
+        });
         this.subElement = document.createElement("div");
         /// #if MOBILE
         this.subElement.className = "protyle-util fn__none protyle-util--mobile";
@@ -228,7 +244,7 @@ export class Toolbar {
         }
         // 内嵌编辑器的浮动工具栏使用外层容器边界，避免被短单元格或脑图节点挤到选区上。
         const cellEditor = protyle.element.closest(".table__cell-editor");
-        const mindmap = protyle.element.closest(".list-mindmap");
+        const mindmap = protyle.element.closest(".mindmap-view");
         const protyleRect = (mindmap || cellEditor?.parentElement.closest(".protyle") ||
             protyle.element).getBoundingClientRect();
         const viewportBoundary = element.dataset.positionBoundary === "viewport";
@@ -1678,13 +1694,18 @@ export class Toolbar {
             }
             const msgId = showMessage(window.siyuan.languages.exporting, 0);
             if (renderElement.getAttribute("data-subtype") === "plantuml") {
-                fetch(renderElement.querySelector("object").getAttribute("data")).then(function (response) {
-                    return response.blob();
-                }).then(function (blob) {
-                    const formData = new ContractFormData({file: blob, type: "image/svg+xml"});
-                    fetchPost("/api/export/exportAsFile", formData, (response) => {
+                getPlantumlImageBlob(renderElement).then(async (blob) => {
+                    if (!blob) {
+                        return;
+                    }
+                    const formData = new ContractFormData({file: blob, type: blob.type.split(";")[0]});
+                    await fetchPost("/api/export/exportAsFile", formData, (response) => {
                         saveExportFile(response.data.file, msgId);
                     });
+                }).catch((error) => {
+                    showMessage(escapeHtml(String(error)), 6000, "error");
+                }).finally(() => {
+                    hideMessage(msgId);
                 });
                 return;
             }
@@ -2444,8 +2465,16 @@ export class Toolbar {
                 }
                 this.subElement.classList.add("fn__none");
             } else if (action === "select") {
-                selectAll(protyle, nodeElement, range);
-                this.subElement.classList.add("fn__none");
+                if (selectAll(protyle, nodeElement, range, !!protyle.gutter)) {
+                    this.showContent(protyle, range, nodeElement, pluginMenus);
+                } else {
+                    const selectedElement = protyle.wysiwyg.element.querySelector<HTMLElement>(".protyle-wysiwyg--select");
+                    if (selectedElement && protyle.gutter) {
+                        this.showMultiSelectMode(protyle, selectedElement);
+                    } else {
+                        this.subElement.classList.add("fn__none");
+                    }
+                }
             } else if (action === "copyPlainText") {
                 focusByRange(getEditorRange(nodeElement));
                 copyPlainText(stripSemanticMarkersFromRangeText(getSelection().getRangeAt(0)));

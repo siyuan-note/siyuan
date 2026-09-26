@@ -2,7 +2,7 @@
 @use "toolbar" as *;
 @use "wysiwyg" as *;
 @use "attr" as *;
-@use "list-mindmap" as *;
+@use "mindmap-view" as *;
 
 .protyle-lite-fragment .protyle-action__menu {
   display: none;
@@ -13,7 +13,7 @@
 }
 
 .table__cell-editor,
-.list-mindmap__editor {
+.mindmap-view__editor {
   .code-block .protyle-action__menu {
     display: block;
   }
@@ -456,6 +456,17 @@
     > .sy__backlink--bottom {
       transition: none;
     }
+  }
+}
+
+// 阅读模式保留独立预览入口，工具栏放在文档流中，避免遮挡图表链接。
+.protyle-preview [data-subtype="plantuml"] > .protyle-icons {
+  display: flex;
+  position: static;
+  justify-content: flex-end;
+
+  > :not(.protyle-action__preview) {
+    display: none;
   }
 }
 
@@ -952,7 +963,7 @@
 
 .table__cell-rich .code-block,
 .table__cell-editor .code-block,
-.list-mindmap__content .code-block {
+.mindmap-view__content .code-block {
   // 预览与编辑共用最小宽度，为代码内容和顶部操作区保留空间。
   min-width: 200px;
 
@@ -1057,14 +1068,12 @@
 
 .protyle-wysiwyg :is(td, th) {
   // 普通左对齐抵消列表起始侧留白，居中和居右则使用单元格内容边界。
-  &[align="center"]:not([style*="text-align:"]),
   &[style*="text-align: center"] {
     --b3-table-cell-list-start: auto;
     --b3-table-cell-list-end: auto;
     --b3-table-cell-list-inset: 0px;
   }
 
-  &[align="right"]:not([style*="text-align:"]),
   &[style*="text-align: right"] {
     --b3-table-cell-list-start: auto;
     --b3-table-cell-list-end: 0;

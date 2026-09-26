@@ -78,6 +78,7 @@ import {reorderSortedFileTree} from "../../util/fileTreeReorder";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {PinnedDocs} from "./PinnedDocs";
 import {selectFileTreeRange} from "./fileTreeSelection";
+import {ParentDocClick} from "./parentDocClick";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -86,6 +87,7 @@ export class Files extends Model {
     public lastSelectedElement: Element = null;
     private actionsElement: HTMLElement;
     private pinnedDocs: PinnedDocs;
+    private parentDocClick = new ParentDocClick();
     private reloadNotebookInfoTimeout: number;
     private docSortModeRefreshTimeout: number;
     private docSortModeChanges = new Map<string, IDocSortModeChanged>();
@@ -129,7 +131,7 @@ export class Files extends Model {
         this.closeElement = options.tab.panelElement.lastElementChild as HTMLElement;
         this.pinnedDocs = new PinnedDocs(options.app, this.element, (id) => {
             openFileById({app: options.app, id, action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]});
-        });
+        }, false, this.parentDocClick);
         this.closeElement.addEventListener("click", (event) => {
             setPanelFocus(this.element.parentElement);
             let target = event.target as HTMLElement;
@@ -187,6 +189,7 @@ export class Files extends Model {
         });
         // 为了快捷键的 dispatch
         this.actionsElement.querySelector('[data-type="collapse"]').addEventListener("click", () => {
+            this.parentDocClick.cancel();
             this.pinnedDocs.collapse();
             Array.from(this.element.children).forEach(item => {
                 const liElement = item.firstElementChild;
@@ -255,6 +258,9 @@ export class Files extends Model {
         });
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
+            if (!target.closest(".b3-list-item__text") || !isNotCtrl(event) || event.altKey || event.shiftKey) {
+                this.parentDocClick.cancel();
+            }
             const ulElement = hasTopClosestByTag(target, "UL");
             let needFocus = true;
             if (ulElement) {
@@ -372,12 +378,41 @@ export class Files extends Model {
                         Number(target.parentElement.getAttribute("data-count")) > 0) {
                         this.lastSelectedElement = target.parentElement;
                         this.setCurrent(target.parentElement, false);
-                        this.toggleLeaf(target.parentElement, notebookId);
+                        const row = target.parentElement;
+                        this.parentDocClick.click(row, async () => {
+                            const expanded = !!row.querySelector(".b3-list-item__arrow--open");
+                            const path = row.getAttribute("data-path");
+                            const response = expanded ? undefined : await fetchSyncPost("/api/filetree/listDocsByPath", {
+                                notebook: notebookId,
+                                path,
+                                app: Constants.SIYUAN_APPID,
+                            });
+                            return () => {
+                                if (!window.siyuan.config.fileTree.parentDocClickExpand ||
+                                    row.getAttribute("data-path") !== path ||
+                                    !!row.querySelector(".b3-list-item__arrow--open") !== expanded) { return; }
+                                if (expanded) {
+                                    this.toggleLeaf(row, notebookId);
+                                } else if (response.code === 0) {
+                                    toggleFileTree(row, () => this.getOpenPaths(), () => {
+                                        this.onLsHTML(response.data);
+                                        this.getOpenPaths();
+                                    });
+                                }
+                            };
+                        }, () => {
+                            openFileById({
+                                app: options.app,
+                                id: row.getAttribute("data-node-id"),
+                                action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                            });
+                        });
                         event.preventDefault();
                         event.stopPropagation();
                         window.siyuan.menus.menu.remove();
                         break;
                     } else if (target.tagName === "LI") {
+                        this.parentDocClick.cancel();
                         if (isOnlyMeta(event) && !event.altKey && !event.shiftKey) {
                             target.classList.toggle("b3-list-item--focus");
                             this.lastSelectedElement = target;
@@ -454,6 +489,7 @@ export class Files extends Model {
             }
         });
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
+            this.parentDocClick.cancel();
             if (window.siyuan.config.readonly) return;
             window.getSelection().removeAllRanges();
             hideTooltip();
@@ -1348,19 +1384,18 @@ export class Files extends Model {
         let currentPath = filePath;
         let liElement;
         while (!liElement) {
-            liElement = treeElement.querySelector(`[data-path="${currentPath}"]`);
-            if (!liElement) {
-                const dirname = pathPosix().dirname(currentPath);
-                if (dirname === "/") {
-                    const rootElement = treeElement.firstElementChild as HTMLElement;
-                    if (rootElement.querySelector(".b3-list-item__arrow--open")) {
-                        this.getLeaf(rootElement, notebookId, true);
-                    }
-                    break;
-                } else {
-                    currentPath = dirname + ".sy";
+            // 新文档只影响父级的子文档状态，从父路径开始查找。
+            const dirname = pathPosix().dirname(currentPath);
+            if (dirname === "/") {
+                const rootElement = treeElement.firstElementChild as HTMLElement;
+                if (rootElement.querySelector(".b3-list-item__arrow--open")) {
+                    this.getLeaf(rootElement, notebookId, true);
                 }
-            } else {
+                break;
+            }
+            currentPath = dirname + ".sy";
+            liElement = treeElement.querySelector(`[data-path="${currentPath}"]`);
+            if (liElement) {
                 const hiddenElement = liElement.querySelector(".fn__hidden");
                 if (hiddenElement) {
                     // 原先无子文档：显示展开箭头
@@ -1399,12 +1434,11 @@ export class Files extends Model {
 
     private genNotebook(item: INotebook) {
         const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
-        // 加密笔记本关闭（锁定）时用 🔒 提示需解锁
         const locked = item.encrypted && item.closed;
         const iconContent = locked
-            ? "🔒️"
+            ? getFileTreeIconHTML("", "lock")
             : getFileTreeIconHTML(item.icon, "notebook");
-        const defaultIconAttr = getFileTreeDefaultIconAttr(item.icon, "notebook", locked);
+        const defaultIconAttr = getFileTreeDefaultIconAttr(locked ? "" : item.icon, locked ? "lock" : "notebook");
         const isBoxDoc = !item.closed && window.siyuan.config.fileTree.boxDocEnabled;
         const hasChildren = !item.closed && item.subFileCount > 0;
         const iconExpands = window.siyuan.config.fileTree.docIconClickExpand && hasChildren;
@@ -1827,6 +1861,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     private onLsHTML(data: IFileTreeList, scrollTop?: number) {
+        this.parentDocClick.cancel();
         if (data.files.length === 0) {
             return;
         }
@@ -1937,6 +1972,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     private toggleLeaf(liElement: Element, notebookId: string) {
+        this.parentDocClick.cancel();
         toggleFileTree(
             liElement,
             () => this.getOpenPaths(),
@@ -1961,6 +1997,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     public getLeaf(liElement: Element, notebookId: string, focusUpdate = false) {
+        this.parentDocClick.cancel();
         const toggleElement = liElement.querySelector(".b3-list-item__arrow");
         if (cancelFileTreeCollapse(liElement)) {
             this.getOpenPaths();
@@ -2132,6 +2169,7 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
     }
 
     public destroy() {
+        this.parentDocClick.cancel();
         this.pinnedDocs.destroy();
     }
 

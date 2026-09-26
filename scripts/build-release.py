@@ -227,11 +227,12 @@ class Builder:
             if not path.is_file() or path.stat().st_size == 0 or path.stat().st_mtime < started - 2:
                 raise BuildError(f"{label} 产物不是本次构建生成的有效文件：{path}")
             name = (names or {}).get(path.name, path.name)
-            target = self.work / "packages" / name
+            target = self.args.output / name
             if target.exists():
-                raise BuildError(f"安装包文件名重复：{name}")
-            copy_verified(path, target, self.work)
+                raise BuildError(f"输出目录已有同名文件，未覆盖：{target}")
+            copy_verified(path, target, self.args.output)
             self.artifacts.append(target)
+            print(f"已收集，待最终校验：{target}", flush=True)
 
     def windows(self):
         run(["go", "install", "github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest"], ROOT / "kernel")
@@ -344,6 +345,20 @@ class Builder:
             self.check_kernel(source, architecture)
             # 两个脚本写同一个文件名，必须在下一次构建前分别复制。
             copy_verified(source, self.args.harmony_dir / "entry/libs" / abi / "libkernel.so", self.args.harmony_dir)
+            header = source.with_suffix(".h")
+            if not header.is_file() or header.stat().st_mtime < started - 2:
+                raise BuildError(f"鸿蒙内核头文件未更新：{header}")
+            # 各架构保存配套头文件，正式版原生模块使用 ARM64 的公共头文件。
+            headers = sorted(source.parent.glob("*.h"))
+            for path in headers:
+                copy_verified(path, self.args.harmony_dir / "entry/libs" / abi / path.name, self.args.harmony_dir)
+                if architecture == "arm64":
+                    copy_verified(path, self.args.harmony_dir / "entry/src/main/cpp/include" / path.name,
+                                  self.args.harmony_dir)
+        for name in ("libkernel.h", "lan_sync_bridge.h"):
+            header = self.args.harmony_dir / "entry/src/main/cpp/include" / name
+            if not header.is_file() or header.stat().st_size == 0:
+                raise BuildError(f"鸿蒙工程缺少头文件：{header}")
         copy_verified(assets, self.args.harmony_dir / "entry/src/main/resources/rawfile/app.zip", self.args.harmony_dir)
         env = dict(os.environ)
         env["DEVECO_SDK_HOME"] = str(self.args.deveco / "sdk")
@@ -355,26 +370,15 @@ class Builder:
         run(command + ["clean"], self.args.harmony_dir, env)
         started = time.time()
         run(command + ["assembleApp"], self.args.harmony_dir, env)
-        app = self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-unsigned.app"
-        hap = self.args.harmony_dir / "entry/build/default/outputs/default/entry-default-signed.hap"
-        self.collect([app, hap], "鸿蒙", started)
+        app = self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-signed.app"
+        self.collect([app], "鸿蒙", started)
 
     def finish(self):
-        for artifact in self.artifacts:
-            print(f"校验安装包：{artifact.name}", flush=True)
-            VERIFY.verify_package(artifact, sevenzip=VERIFY.find_7z(self.args.sevenzip), version=self.version)
-        output = self.args.output
-        output.mkdir(parents=True, exist_ok=True)
-        for artifact in self.artifacts:
-            if (output / artifact.name).exists():
-                raise BuildError(f"输出目录已有同名文件，未覆盖：{output / artifact.name}；验证后的产物保留在 {self.work}")
-        existing = [path for path in output.iterdir() if path.is_file() and path.name.lower() != "checksum.exe"
-                    and path.name.lower().endswith(VERIFY.PACKAGES)]
-        for path in existing:
-            VERIFY.verify_package(path, sevenzip=VERIFY.find_7z(self.args.sevenzip), version=self.version)
-        for artifact in self.artifacts:
-            copy_verified(artifact, output / artifact.name, output)
-        print(f"完成：{len(self.artifacts)} 个安装包已校验并收集到 {output}")
+        args = argparse.Namespace(directory=self.args.output, version=self.version, baseline=None,
+                                  report=None, sevenzip=self.args.sevenzip)
+        if VERIFY.verify(args):
+            raise BuildError(f"安装包校验未通过，已收集的产物保留在 {self.args.output}")
+        print(f"完成：本次收集 {len(self.artifacts)} 个安装包，{self.args.output} 中的安装包已全部校验")
 
 
 def parser():
@@ -415,12 +419,12 @@ def main():
         "windows": "构建 AMD64/ARM64 内核 - YubiKey 签名 - 生成两个 NSIS 安装包 - 检查签名",
         "linux": f"WSL 用户 {args.wsl_user}、目录 {args.wsl_repo} - 检查源代码一致 - 双架构构建 TAR/AppImage/DEB/RPM",
         "android": "生成新 kernel.aar - 核对版本和架构 - 自动复制内核及 app.zip - Gradle 四渠道 release 构建",
-        "harmony": "WSL 构建两种架构内核并分别复制 - 更新 app.zip - Hvigor release 构建 APP/HAP",
+        "harmony": "WSL 构建两种架构内核并分别复制 - 更新 app.zip - Hvigor release 构建 APP",
     }
     print("本地前端仅构建一次；Linux 前端在 WSL 中构建")
     for platform in args.platforms:
         print(f"  {platform}: {descriptions[platform]}")
-    print("最后逐个验证安装包，全部通过后复制产物")
+    print("各平台产物生成后立即复制到收集目录，最后统一校验该目录中的安装包")
     if not args.execute:
         print("当前仅显示计划，没有执行构建或修改文件；添加 --execute 开始")
         return 0

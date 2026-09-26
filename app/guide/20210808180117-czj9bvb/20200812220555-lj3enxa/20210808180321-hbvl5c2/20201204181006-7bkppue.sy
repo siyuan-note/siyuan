@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20260904091600"
+		"updated": "20260922175505"
 	},
 	"Children": [
 		{
@@ -60,6 +60,77 @@
 				{
 					"Type": "NodeText",
 					"Data": " 后缀文件，存放在工作空间 data/templates 文件夹下。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-xgufvef",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260922175505-xgufvef",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模板管理"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260922175505-uy1blur",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-uy1blur",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击模板或文件夹旁的更多按钮，可以重命名、移动或删除该条目。桌面端也可以右键打开同一菜单。移动端编辑页提供当前模板的更多按钮。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-trnfvug",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-trnfvug",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面窗口足够宽时，源码与预览左右排列；窄窗口和移动端的预览位于源码下方。预览上下文用于选择运行模板时使用哪个文档的信息，预览不会修改该文档。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-7isxnce",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-7isxnce",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模板保留了导出源文档 ID 时，可以点击预览按钮旁或条目菜单中的打开导出模板的文档，返回仍可在当前工作空间访问的源文档。打开后会关闭模板管理；编辑并重新导出后，再次打开模板管理即可加载更新后的模板。"
+				}
+			]
+		},
+		{
+			"ID": "20260922175505-oqrt5k3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922175505-oqrt5k3",
+				"updated": "20260922175505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移动端从编辑页返回时显示模板列表，再次返回退出模板管理。离开有未保存修改的编辑页时需要确认，取消后保留当前内容。"
 				}
 			]
 		},
@@ -139,7 +210,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": ".action{now | date \u0026quot;2006-01-02 15:04:05\u0026quot;}"
+					"TextMarkTextContent": ".action{now | date &quot;2006-01-02 15:04:05&quot;}"
 				},
 				{
 					"Type": "NodeText",
@@ -479,7 +550,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
+									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated > '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",

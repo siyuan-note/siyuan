@@ -77,6 +77,8 @@ const ALLOWED_INLINE_TYPES = new Set([
     "text",
     "u",
 ]);
+const TABLE_CELL_CUSTOM_INLINE_TYPE = /^custom_[A-Za-z0-9_-]{1,128}$/;
+const TABLE_CELL_CUSTOM_STYLE_PROPERTY = /^--custom-[a-z0-9-]{1,128}$/;
 const previewCache = new Map<string, string>();
 const PREVIEW_CACHE_LIMIT = 256;
 let richTextLute: Lute | undefined;
@@ -99,6 +101,37 @@ export const getAVRichTextLute = () => {
 
 const replaceWithText = (element: Element) => {
     element.replaceWith(document.createTextNode(element.textContent || ""));
+};
+
+const sanitizeTableCellCustomStyle = (style: string) => {
+    if (style.length > 2048) {
+        return "";
+    }
+    const declarations: string[] = [];
+    style.split(";").forEach(declaration => {
+        const separator = declaration.indexOf(":");
+        if (separator < 0) {
+            return;
+        }
+        const property = declaration.slice(0, separator).trim();
+        const value = declaration.slice(separator + 1).trim();
+        if (!TABLE_CELL_CUSTOM_STYLE_PROPERTY.test(property)) {
+            return;
+        }
+        if (/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value)) {
+            declarations.push(`${property}: ${value};`);
+            return;
+        }
+        if (/^var\(--b3-font-(?:color|background)(?:[1-9]|1[0-3])\)$/.test(value)) {
+            declarations.push(`${property}: ${value};`);
+            return;
+        }
+        const rgb = value.match(/^rgba?\(\s*(\d{1,3})(?:,\s*|\s+)(\d{1,3})(?:,\s*|\s+)(\d{1,3})(?:\s*[,/]\s*(0(?:\.\d+)?|1(?:\.0+)?))?\s*\)$/i);
+        if (rgb && [rgb[1], rgb[2], rgb[3]].every(channel => Number(channel) <= 255)) {
+            declarations.push(`${property}: ${value};`);
+        }
+    });
+    return declarations.join(" ");
 };
 
 const removeUnsupportedBlockAttributes = (element: HTMLElement, codeSettings: boolean) => {
@@ -146,7 +179,7 @@ export const getAVRichTextUnsupportedPasteBlocks = (blockDOM: string, images = f
     return Array.from(names);
 };
 
-export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false) => {
+export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false, tableCellCustomInline = false) => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
     // 在过滤临时属性前恢复边界，避免把显示占位符当成富文本内容保存。
@@ -178,11 +211,15 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false) => 
         if (images && types.length === 1 && types[0] === "img") {
             return;
         }
-        if (types.some((type) => !ALLOWED_INLINE_TYPES.has(type))) {
+        if (types.some((type) => !ALLOWED_INLINE_TYPES.has(type) &&
+            !(tableCellCustomInline && TABLE_CELL_CUSTOM_INLINE_TYPE.test(type)))) {
             replaceWithText(element);
             return;
         }
-        const style = types.includes("text") ? sanitizeAVRichTextInlineStyle(element.getAttribute("style")) : "";
+        const hasCustomType = tableCellCustomInline && types.some(type => TABLE_CELL_CUSTOM_INLINE_TYPE.test(type));
+        const sourceStyle = element.getAttribute("style") || "";
+        const style = [types.includes("text") || hasCustomType ? sanitizeAVRichTextInlineStyle(sourceStyle) : "",
+            hasCustomType ? sanitizeTableCellCustomStyle(sourceStyle) : ""].filter(Boolean).join(" ");
         if (style) {
             element.setAttribute("style", style);
         } else {
@@ -335,8 +372,9 @@ const getAVRichTextPlainContent = (blockDOM: string, lute: Lute) => {
     return projectAVRichTextPlainBlocks(blocks, lute.BlockDOM2Content(blockDOM));
 };
 
-export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTextLute(), images = false) => {
-    const sanitizedBlockDOM = sanitizeAVRichTextBlockDOM(blockDOM, images);
+export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTextLute(), images = false,
+                                          tableCellCustomInline = false) => {
+    const sanitizedBlockDOM = sanitizeAVRichTextBlockDOM(blockDOM, images, tableCellCustomInline);
     let cleanBlockDOM = cleanAVRichTextBlockDOMStructure(sanitizedBlockDOM);
     const template = document.createElement("template");
     template.innerHTML = cleanBlockDOM;
@@ -354,7 +392,8 @@ export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTe
     const protectedBlockDOM = protectAVRichTextStyleBackslashes(cleanBlockDOM, styleBackslashEncoding);
     const markdown = protectedBlockDOM ?
         styleBackslashEncoding.encodeMarkdown(lute.BlockDOM2Md(protectedBlockDOM).trim()) : "";
-    const normalizedBlockDOM = markdown ? sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown, lute), images) : "";
+    const normalizedBlockDOM = markdown ?
+        sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown, lute), images, tableCellCustomInline) : "";
     return {
         blockDOM: normalizedBlockDOM,
         markdown,
@@ -362,8 +401,8 @@ export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTe
     };
 };
 
-export const getAVRichTextBlockDOM = (markdown: string, images = false) => markdown ?
-    sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown), images) : "";
+export const getAVRichTextBlockDOM = (markdown: string, images = false, tableCellCustomInline = false) => markdown ?
+    sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown), images, tableCellCustomInline) : "";
 
 const getAVRichTextPreviewBlockDOM = (blockDOM: string) => {
     const template = document.createElement("template");

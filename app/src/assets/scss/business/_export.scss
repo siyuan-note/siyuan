@@ -4,7 +4,7 @@
   border-radius: var(--b3-border-radius-b);
 
   // 图片导出只保留脑图内容，不包含悬停控件和选中状态。
-  .list-mindmap {
+  .mindmap-view {
     &__toolbar,
     &__inspector,
     &__tooltip,

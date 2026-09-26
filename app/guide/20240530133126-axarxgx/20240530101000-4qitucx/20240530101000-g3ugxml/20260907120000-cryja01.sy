@@ -6,7 +6,7 @@
 		"id": "20260907120000-cryja01",
 		"title": "暗号化ノートブック",
 		"type": "doc",
-		"updated": "20260908162209"
+		"updated": "20260925180231"
 	},
 	"Children": [
 		{
@@ -1200,6 +1200,159 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-8huz7ss",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260925180231-8huz7ss",
+				"updated": "20260925180231"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ロック解除できないノートブックのアーカイブと復元"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-j889vl7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-j889vl7",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "認証"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "暗号化ノートブック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アーカイブして移出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、アーカイブするロック済みノートブックを選択します。マスターパスワードは不要です。元の暗号文、関連履歴、ローカルリポジトリのスナップショット、現存する鍵の復元情報が含まれます。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-88n6f8g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-88n6f8g",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アーカイブをワークスペースの外に保存し、保存済みであることを明示的に確認してから、選択したノートブックを移出します。保存を取り消してもデータは削除されません。移出は通常の同期で他の端末にも反映されますが、リポジトリのスナップショットは自動削除されません。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-e9r5qdu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-e9r5qdu",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ロック解除できない5冊のうち3冊を移出した場合、残りの2冊と以前の鍵の設定は保持されます。以前のノートブックと復元に必要なデータをすべてアーカイブした後、暗号化ノートブックを無効化して再度有効化すると、新しいマスターパスワードを設定できます。アプリにも復元用コピーが保持されますが、別途保存したアーカイブを大切に保管してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-93bxvo7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-93bxvo7",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "対応する以前の鍵とパスワードを見つけたら、暗号鍵が未設定の別のワークスペースを作成し、同期を無効にして "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "認証"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "暗号化ノートブック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "暗号化アーカイブを復元"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開きます。アーカイブを選択し、以前のマスターパスワードを入力します。有効な鍵のバックアップが含まれていない場合は、見つかった対応するバックアップも選択します。暗号鍵が設定済みのワークスペースにはインポートできません。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-78557m3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-78557m3",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "復元では鍵と暗号文を検証し、すべて成功した後にデータを書き込みます。ノートブックはロックされたままです。関連履歴も復元され、アーカイブされたリポジトリのスナップショットはノートブックの削除履歴として復元できます。破損したアーカイブ、誤ったパスワード、未対応のバージョンでは既存データを上書きしません。アーカイブは失われたパスワードや復元情報の代わりにはなりません。"
 				}
 			]
 		},

@@ -74,6 +74,33 @@ func TestTemplateFileManagement(t *testing.T) {
 	}
 }
 
+func TestTemplateSourceDocumentID(t *testing.T) {
+	id := "20260921000000-abcdefg"
+	attrs := `{: id="` + id + `" title="Source" type="doc"}`
+	for _, test := range []struct {
+		name, content, want string
+	}{
+		{"exported", "Body\n\n" + attrs, id},
+		{"crlf", "Body\r\n\r\n" + attrs + "\r\n", id},
+		{"attribute order", `Body` + "\n\n" + `{: type="doc" title="Source" id="` + id + `"}`, id},
+		{"plain", "Body", ""},
+		{"block", "Body\n{: id=\"" + id + "\"}", ""},
+		{"code", "```markdown\n" + attrs + "\n```", ""},
+		{"indented code", "    " + attrs, ""},
+		{"standalone attributes", "```" + templateDocumentAttributeMarker + "\n" + attrs + "\n```", ""},
+		{"dynamic identity", "Body\n\n{: id=\".action{.id}\" type=\"doc\"}", ""},
+		{"invalid identity", "Body\n\n{: id=\"invalid\" type=\"doc\"}", ""},
+		{"unexecuted action", ".action{fail \"must not execute\"}\n\n" + attrs, id},
+		{"example and source", "```markdown\n{: id=\"20260921000000-example\" type=\"doc\"}\n```\n\n" + attrs, id},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := templateSourceDocumentID(test.content); got != test.want {
+				t.Fatalf("source document = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
 func TestTemplateDeletePreservesLegacyTrash(t *testing.T) {
 	previous := util.DataDir
 	util.DataDir = t.TempDir()

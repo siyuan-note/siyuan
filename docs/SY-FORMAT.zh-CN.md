@@ -115,7 +115,7 @@
 
 **叶子块**：`NodeParagraph`、`NodeHeading`、`NodeThematicBreak`、`NodeHTMLBlock`、`NodeCodeBlock`、`NodeMathBlock`、`NodeTable`、`NodeBlockQueryEmbed`、`NodeAttributeView`、`NodeIFrame`、`NodeVideo`、`NodeAudio`、`NodeWidget`、`NodeCustomBlock`
 
-**容器块**：`NodeList`、`NodeListItem`、`NodeBlockquote`、`NodeCallout`、`NodeSuperBlock`、`NodeTabs`、`NodeTabItem`
+**容器块**：`NodeList`、`NodeListItem`、`NodeBlockquote`、`NodeCallout`、`NodeSuperBlock`、`NodeTabs`、`NodeTabItem`、`NodeMindmap`、`NodeMindmapItem`
 
 ### 内联或标记节点（规范数据中无 ID）
 
@@ -340,11 +340,15 @@ NodeList                        NodeList
 
 `TabItemTitle` 是可省略的行级 Markdown，使用与 `CalloutTitle` 相同的行级文本标记表示，不作为独立子块持久化。允许空标题和重名。子节点数组决定顺序。`tabs-active-id` 指向直属页签项 ID，缺失或失效时回退到第一页。`tabs-position` 仅接受 `top`（默认）和 `left`。两项属性均保存并同步，仅切换选中项不改变正文修改时间。重建块 ID 时，也必须映射选中项 ID 及标题中的内部引用。
 
-包含这两类节点的文档必须至少使用 `Spec: "3"`；使用表格单元格富文本的文档为 Spec 4，普通文档保持 Spec 2。移除功能后不降低版本。向容错解析器传递 JSON 之前，先读取根的原始 `Spec`，避免未知节点的子内容被清空；不得修复并写回不支持的版本。
+包含页签节点的文档必须至少使用 `Spec: "3"`；使用表格单元格富文本的文档为 Spec 4，包含思维导图节点的文档为 Spec 5，普通文档保持 Spec 2。移除功能后不降低版本。向容错解析器传递 JSON 之前，先读取根的原始 `Spec`，避免未知节点的子内容被清空；不得修复并写回不支持的版本。
 
 内部 Markdown 使用 `::: tabs` 开始一组页签，`@tab <行级标题>` 开始一个页签项，`@tab:active <行级标题>` 标识选中项。开始围栏至少包含三个冒号，冒号与 `tabs` 之间需要空格或制表符，规范输出使用一个空格。页签项没有单独的结束标记；整组以独占一行、与开始围栏冒号数量相同的结束围栏闭合。外层围栏必须比内层长，缩进可选；规范输出根据嵌套深度计算围栏长度，不额外缩进页签正文。旧的 `:::tabs`、`:::tab` 语法不再识别，但既有 `.sy` 页签节点结构保持不变。
 
 页签项的 IAL 位于标题标记的下一行，中间不留空行，之后以空行分隔正文。整组容器的 IAL 位于结束围栏之后，正文块的 IAL 位于对应正文块之后。导入时，第一个有效的 `@tab:active` 标记决定 `tabs-active-id`，优先于组 IAL 中的值；没有选中标记时保留有效的 `tabs-active-id`，缺失或失效时回退到第一页。嵌套各组独立保存选择。代码块中的标记按字面保留；正文行首的字面标记使用 `\@tab` 或 `\@tab:active` 转义。标准 Markdown 导出所有页签的标题段落及正文；HTML 可增强为交互页签，打印、PDF 和 Word 展示全部页签。完整约定参见[页签块](TAB-BLOCK.zh-CN.md)。
+
+### 5.9.2 思维导图容器与节点（Spec 5）
+
+`NodeMindmap` 仅容纳 `NodeMindmapItem`。思维导图节点可以容纳普通内容块及嵌套的 `NodeMindmap`，但不能直接容纳 `NodeList`、`NodeListItem`、另一个 `NodeMindmapItem`、`NodeDocument` 或 `NodeFootnotesDef`。两种新类型各有独立的块 ID，并使用 `ListData` 保存有序编号和任务标记。新思维导图使用独立节点类型，不需要 `custom-sy-list-mindmap="1"`；打开可编辑文档时，带此属性的既有列表块会在保留块 ID 和元数据的前提下升级。只读内容和历史内容仍可按旧格式读取。标准 Markdown 导出为列表，`.sy` JSON 保留独立节点类型。
 
 ### 5.10 代码块（四段结构，仅围栏式）
 
@@ -591,13 +595,15 @@ NodeList                        NodeList
 | 容器 | 可含 | 不可含 |
 |---|---|---|
 | `NodeList` | **仅** `NodeListItem` | 任何其他块（段落/代码块/子列表都必须先套 `NodeListItem`） |
-| `NodeListItem` | 任意非 `NodeListItem` 块（段落/代码块/子 `NodeList`/超级块…） | `NodeListItem`（嵌套要再套 `NodeList`） |
-| `NodeBlockquote` | 任意非 `NodeListItem` 块 + 一个 `NodeBlockquoteMarker` | `NodeListItem` |
-| `NodeCallout` | 任意非 `NodeListItem` 块 | `NodeListItem` |
-| `NodeSuperBlock` | 内容块（含嵌套超级块），位于开始、布局和结束标记组成的包络内 | `NodeDocument`、裸 `NodeListItem`、裸 `NodeTabItem` |
-| `NodeDocument` | 任意非 `NodeListItem` 块 | `NodeListItem` |
+| `NodeListItem` | 普通内容块及嵌套的 `NodeList`、`NodeMindmap` | 裸 `NodeListItem`、裸 `NodeMindmapItem` |
+| `NodeBlockquote` | 普通内容块及一个 `NodeBlockquoteMarker` | 裸 `NodeListItem`、裸 `NodeMindmapItem` |
+| `NodeCallout` | 普通内容块 | 裸 `NodeListItem`、裸 `NodeMindmapItem` |
+| `NodeSuperBlock` | 内容块（含嵌套超级块），位于开始、布局和结束标记组成的包络内 | `NodeDocument`、裸 `NodeListItem`、裸 `NodeTabItem`、裸 `NodeMindmapItem` |
+| `NodeDocument` | 普通内容块 | 裸 `NodeListItem`、裸 `NodeMindmapItem` |
 | `NodeTabs` | 仅 `NodeTabItem`，至少一个 | 其他内容块 |
 | `NodeTabItem` | 普通内容块及嵌套 `NodeTabs`，至少一个 | `NodeDocument`、`NodeListItem`、`NodeTabItem` |
+| `NodeMindmap` | 仅 `NodeMindmapItem` | 其他内容块 |
+| `NodeMindmapItem` | 普通内容块及嵌套 `NodeMindmap` | `NodeDocument`、`NodeList`、`NodeListItem`、`NodeMindmapItem`、`NodeFootnotesDef` |
 > `NodeTabItem` 必须直接属于 `NodeTabs`，上述其他容器均不能直接容纳页签项。
 
 

@@ -20,6 +20,38 @@ export const calendarDayDistance = (from: number, to: number) => {
     return Math.round((dayUTC(to) - dayUTC(from)) / 86400000);
 };
 
+const calendarDate = (year: number, month: number, day: number) => {
+    const date = new Date(0);
+    date.setFullYear(year, month, day);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime();
+};
+
+export const getISOWeek = (value: number) => {
+    const date = new Date(value);
+    const thursday = addCalendarDays(calendarDay(value), 4 - (date.getDay() || 7));
+    const year = new Date(thursday).getFullYear();
+    const januaryFourth = calendarDate(year, 0, 4);
+    const firstThursday = addCalendarDays(januaryFourth, 4 - (new Date(januaryFourth).getDay() || 7));
+    return {year, week: 1 + calendarDayDistance(firstThursday, thursday) / 7};
+};
+
+// 非周一开头的显示行以其中的星期四确定 ISO 周号。
+export const getISOWeekForCalendarRow = (start: number) =>
+    getISOWeek(addCalendarDays(start, (4 - new Date(start).getDay() + 7) % 7));
+
+export const getISOWeeksInYear = (year: number) => getISOWeek(calendarDate(year, 11, 28)).week;
+
+export const getISOWeekThursday = (year: number, week: number) => {
+    if (!Number.isInteger(year) || year < 1 || year > 9999 || !Number.isInteger(week) || week < 1 ||
+        week > getISOWeeksInYear(year)) {
+        return;
+    }
+    const januaryFourth = calendarDate(year, 0, 4);
+    const firstThursday = addCalendarDays(januaryFourth, 4 - (new Date(januaryFourth).getDay() || 7));
+    return addCalendarDays(firstThursday, (week - 1) * 7);
+};
+
 export const getCalendarRange = (anchor: number, mode: "month" | "week", weekStart: number): IAVCalendarRange => {
     const date = new Date(calendarDay(anchor));
     if (mode === "month") {

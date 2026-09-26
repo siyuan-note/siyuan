@@ -24,7 +24,7 @@ The component list is informational and does not replace the license terms. Copy
 | DOMPurify | 3.3.3 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | app/stage/protyle/js/protyle-html.js |
 | html-to-image | 1.11.13 | MIT | [upstream](https://github.com/bubkoo/html-to-image) | app/stage/protyle/js/html-to-image.min.js |
 | modern-screenshot | 4.6.6 | MIT | [upstream](https://github.com/qq15725/modern-screenshot) | app/stage/protyle/js/modern-screenshot.min.js |
-| abcjs | 6.7.0 | MIT | [upstream](https://github.com/paulrosen/abcjs) | app/stage/protyle/js/abcjs/ |
+| abcjs | 6.7.1 | MIT | [upstream](https://github.com/paulrosen/abcjs) | app/stage/protyle/js/abcjs/ |
 | Apache ECharts | 5.3.2 | Apache-2.0 | [upstream](https://github.com/apache/echarts) | app/stage/protyle/js/echarts/echarts.min.js |
 | ZRender | 5.3.0 | BSD-3-Clause | [upstream](https://github.com/ecomfe/zrender) | Bundled by Apache ECharts |
 | echarts-gl | 2.0.9 | MIT | [upstream](https://github.com/ecomfe/echarts-gl) | app/stage/protyle/js/echarts/echarts-gl.min.js |
@@ -2740,7 +2740,7 @@ The following comments are extracted verbatim from the JavaScript and CSS artifa
 ### app/stage/protyle/js/abcjs/abcjs-basic-min.js
 
 ```text
-/*! abcjs_basic v6.7.0 Copyright © 2009-2026 Paul Rosen and Gregory Dyke (https://abcjs.net) */
+/*! abcjs_basic v6.7.1 Copyright © 2009-2026 Paul Rosen and Gregory Dyke (https://abcjs.net) */
 
 /*! For license information please see abcjs_basic.LICENSE */
 ```

@@ -39,7 +39,7 @@ export const setTabTask = (protyle: IProtyle, item: HTMLElement, marker: string)
 
 const canEdit = (protyle: IProtyle, element: Element) => !protyle.disabled &&
     !protyle.options.action.includes(Constants.CB_GET_HISTORY) &&
-    !element.closest(".protyle-wysiwyg__embed, .list-mindmap__preview-block") &&
+    !element.closest(".protyle-wysiwyg__embed, .mindmap-view__preview-block") &&
     element.closest(".protyle-wysiwyg") === protyle.wysiwyg.element;
 
 // 同一事务提交受影响的最外层容器，嵌套移动时避免父子更新相互覆盖。

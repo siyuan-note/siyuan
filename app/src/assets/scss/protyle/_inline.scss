@@ -1,0 +1,82 @@
+@mixin interactive-marks {
+  span[data-inline-wrap="token"],
+  span[data-inline-wrap][data-type~="code"],
+  span[data-inline-wrap][data-type~="tag"],
+  span[data-inline-wrap][data-type~="kbd"] {
+    word-break: break-all;
+  }
+
+  span[data-type~="tag"] {
+    // https://github.com/siyuan-note/siyuan/issues/12305
+    padding-left: 1px;
+    padding-right: 1px;
+    border-bottom: 1px solid;
+    color: var(--b3-protyle-inline-tag-color);
+    transition: var(--b3-transition);
+    cursor: pointer; // 预览导出无此元素，只读和编辑状态都需要点击 https://github.com/siyuan-note/siyuan/issues/11854
+  }
+
+  span[data-type~="a"] {
+    color: var(--b3-protyle-inline-link-color);
+    cursor: pointer;
+    transition: var(--b3-transition);
+    border-bottom: 1px solid;
+  }
+
+  span[data-type~="search-mark"] {
+    background-color: var(--b3-protyle-inline-mark-background);
+    color: var(--b3-protyle-inline-mark-color);
+
+    &.search-mark--hl {
+      background-color: var(--b3-theme-primary-lighter);
+      box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
+    }
+  }
+
+  span[data-type="virtual-block-ref"] {
+    border-bottom: 1px dashed var(--b3-theme-on-surface);
+    transition: var(--b3-transition);
+
+    &:hover {
+      border-color: var(--b3-theme-on-background);
+    }
+  }
+
+  .def--mark {
+    background-color: var(--b3-theme-secondary);
+  }
+
+  span[data-type~="block-ref"]:not(.av__celltext),
+  span[data-type~="file-annotation-ref"] {
+    --protyle-ref-line-color: var(--b3-protyle-inline-blockref-color);
+    transition: var(--b3-transition);
+  }
+
+  span[data-type~="file-annotation-ref"] {
+    --protyle-ref-line-color: var(--b3-protyle-inline-fileref-color);
+  }
+
+  span[data-type~="block-ref"]:not(.av__celltext),
+  span[data-type~="file-annotation-ref"] {
+    // 按固定长度绘制虚线，并在换行后的每段文字下方重复显示。
+    padding-bottom: 2px;
+    background-image: repeating-linear-gradient(to right, var(--protyle-ref-line-color) 0 6px, transparent 6px 9px);
+    background-position: left bottom;
+    background-size: 9px 1px;
+    background-repeat: repeat-x;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  span[data-type="virtual-block-ref"]:hover,
+  span[data-type~="block-ref"]:not(.av__celltext):hover,
+  span[data-type~="file-annotation-ref"]:hover {
+    background-color: var(--b3-list-hover);
+    border-radius: 2px;
+  }
+
+  span[data-type~="block-ref"],
+  span[data-type~="file-annotation-ref"] {
+    cursor: pointer;
+  }
+}

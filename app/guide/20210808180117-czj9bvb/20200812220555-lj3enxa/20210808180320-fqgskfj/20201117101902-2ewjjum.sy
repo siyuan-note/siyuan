@@ -672,6 +672,20 @@
 			]
 		},
 		{
+			"ID": "20260924143000-ohuxobn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260924143000-ohuxobn",
+				"updated": "20260924143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "导出图片或 PDF 时会渲染 JavaScript 嵌入块，并等待脚本和块查询完成后再导出。安全模式和远程内核环境仍然禁止执行脚本。"
+				}
+			]
+		},
+		{
 			"ID": "20260612202058-1tfila8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,

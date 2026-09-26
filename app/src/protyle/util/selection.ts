@@ -65,7 +65,10 @@ export const fixTableRange = (range: Range) => {
     }
 };
 
-export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range): boolean => {
+export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range, allowBlockSelection = true): boolean => {
+    if (!allowBlockSelection) {
+        hideElements(["select"], protyle);
+    }
     const blockSelectionAction = getSelectAllBlockAction(protyle.wysiwyg.element);
     if (blockSelectionAction !== "none") {
         range.collapse(true);
@@ -135,6 +138,10 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                 return true;
             }
         }
+    }
+    if (!allowBlockSelection) {
+        // 没有块菜单的编辑器保留文字选区，供工具栏继续操作。
+        return !range.collapsed;
     }
     range.collapse(true);
     hideElements(["select", "toolbar"], protyle);
@@ -742,9 +749,9 @@ export const restoreFocusContext = (protyle: IProtyle, context: Pick<IOperation[
             cell.tabIndex = -1;
             cell.focus({preventScroll: true});
             focusByRange(range);
-            void import("../render/tableCellRichEditor").then(module => {
+            void import("../render/tableCellRichEditor").then(async module => {
                 if (cell.isConnected && cell.contains(getSelection().focusNode)) {
-                    module.openTableCellRichEditor(protyle, cell, undefined, undefined, saved);
+                    await module.openTableCellRichEditor(protyle, cell, undefined, undefined, saved);
                     if (getSelection().rangeCount) {
                         protyle.toolbar.range = getSelection().getRangeAt(0);
                     }

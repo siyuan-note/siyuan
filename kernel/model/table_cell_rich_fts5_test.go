@@ -59,3 +59,56 @@ func TestTableCellRichCodeSettingsTransactions(t *testing.T) {
 		}
 	}
 }
+
+func TestTableCellRichEmptyMathBlockTransaction(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	luteEngine := util.NewLute()
+	makeTable := func(source string) *parse.Tree {
+		result := parse.Parse("", []byte("| Header |\n| --- |\n| cell |"), luteEngine.ParseOptions)
+		result.Root.FirstChild.LastChild.FirstChild.TableCellRich = &ast.TableCellRich{
+			Spec: 1, Format: "kramdown", Content: source,
+		}
+		if err := treenode.RefreshTableCellRichProjection(result.Root); err != nil {
+			t.Fatal(err)
+		}
+		return result
+	}
+	initial := makeTable("- list")
+	table := initial.Root.FirstChild
+	table.ID = ast.NewNodeID()
+	table.SetIALAttr("id", table.ID)
+	tree.Root.AppendChild(table)
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	for _, source := range []string{
+		"- list\n\n$$\n\n$$",
+		"- list\n\n$$\n\n$$\n\nnext",
+		"- list\n\n```\n\n```",
+		"- list\n\n```\n\n```\n\nnext",
+		"- list\n\n$$\nx^2\n$$",
+	} {
+		updated := makeTable(source)
+		updated.Root.FirstChild.ID = table.ID
+		updated.Root.FirstChild.SetIALAttr("id", table.ID)
+		tx := &Transaction{DoOperations: []*Operation{{Action: "update", ID: table.ID,
+			Data: luteEngine.Tree2BlockDOM(updated, luteEngine.RenderOptions, luteEngine.ParseOptions)}}}
+		if err = PerformTxSync(tx); err != nil {
+			t.Fatalf("updating rich table cell with %q failed: %s", source, err)
+		}
+		restored, err := LoadTreeByBlockID(table.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cell := treenode.GetNodeInTree(restored, table.ID).LastChild.FirstChild
+		if cell.TableCellRich == nil || cell.TableCellRich.Content != source {
+			t.Fatalf("saved rich source changed: %#v", cell.TableCellRich)
+		}
+	}
+}

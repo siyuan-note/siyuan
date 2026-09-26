@@ -125,6 +125,22 @@ export const getAVRowDropTarget = (targetElement: HTMLElement | false): HTMLElem
     return rowElement || targetElement;
 };
 
+export const getTabsContentDropTarget = (target: HTMLElement, hit: HTMLElement): HTMLElement | null => {
+    let item: HTMLElement;
+    if (target.getAttribute("data-type") === "NodeTabItem") {
+        item = target;
+    } else if (target.getAttribute("data-type") === "NodeTabs" &&
+        hit.closest(".tabs-header")?.parentElement === target) {
+        item = target.querySelector<HTMLElement>(':scope > .tab-item[data-tabs-hidden="false"]') ||
+            target.querySelector<HTMLElement>(":scope > .tab-item");
+    } else {
+        return target;
+    }
+    const content = item?.querySelector<HTMLElement>(":scope > .tab-item-content");
+    const blocks = content?.querySelectorAll<HTMLElement>(":scope > [data-node-id]");
+    return blocks?.[target === item ? blocks.length - 1 : 0] || content || null;
+};
+
 export const isSameSiblingMove = <T>(siblings: T[], sources: T[], target: T, isBottom: boolean) => {
     if (sources.length === 0 || sources.includes(target)) {
         return sources.includes(target);

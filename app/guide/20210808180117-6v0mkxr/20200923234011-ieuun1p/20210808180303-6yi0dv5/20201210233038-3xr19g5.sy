@@ -6,7 +6,7 @@
 		"id": "20201210233038-3xr19g5",
 		"title": "Conversion of Document and Heading",
 		"type": "doc",
-		"updated": "20260426180032"
+		"updated": "20260924013047"
 	},
 	"Children": [
 		{
@@ -543,7 +543,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20241018105907-fja873w",
-				"updated": "20260426180027"
+				"updated": "20260924013047"
 			},
 			"Children": [
 				{
@@ -572,7 +572,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20241018105907-m783fzm",
-				"updated": "20241018105907"
+				"updated": "20260924013047"
 			},
 			"Children": [
 				{
@@ -612,7 +612,7 @@
 					},
 					"Properties": {
 						"id": "20241018105907-ayck4c3",
-						"updated": "20241018105907"
+						"updated": "20260924013047"
 					},
 					"Children": [
 						{
@@ -620,12 +620,40 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241018105907-xna1wua",
-								"updated": "20241018105907"
+								"updated": "20260924013047"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "The sub-blocks of the list item block will remain unchanged"
+									"Data": "The new document preserves the complete list item and its nested content, including the unordered, ordered, or task list type, bullet or number, task completion state, list item attributes, and folded state"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260924013047-vn7b5ul",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260924013047-vn7b5ul",
+						"updated": "20260924013047"
+					},
+					"Children": [
+						{
+							"ID": "20260924013047-bubmw08",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260924013047-bubmw08",
+								"updated": "20260924013047"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The original list item ID becomes the new document ID, so existing references point to the new document; the list item in the document and its enclosing list receive new IDs, while existing blocks inside the item keep their IDs"
 								}
 							]
 						}

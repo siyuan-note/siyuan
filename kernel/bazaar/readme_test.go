@@ -124,6 +124,15 @@ func TestReadmeCandidatesRejectTraversal(t *testing.T) {
 	}
 }
 
+func TestRenderPackageREADMECallout(t *testing.T) {
+	html := renderPackageREADME("https://example.com/package", []byte("> [!WARNING]\n> Check the settings.\n\n> Ordinary quote"))
+	for _, expected := range []string{`class="callout"`, `data-subtype="WARNING"`, "Check the settings.", "<blockquote>", "Ordinary quote"} {
+		if !strings.Contains(html, expected) {
+			t.Fatalf("rendered README is missing %q:\n%s", expected, html)
+		}
+	}
+}
+
 func TestRenderPackageREADMEDoesNotMutateInput(t *testing.T) {
 	source := []byte(`<div style="display: flex;">
   <!-- 按钮：感谢您的支持 -->

@@ -30,6 +30,8 @@ type LayoutCalendar struct {
 
 type Calendar struct {
 	*Table
+	// 无日期条目只供独立的待安排列表读取，不进入常规日历响应。
+	UndatedRows []*TableRow `json:"-"`
 }
 
 func (*Calendar) GetType() LayoutType { return LayoutTypeCalendar }
@@ -111,6 +113,7 @@ func FilterCalendarRows(calendar *Calendar, dateRange *CalendarRange, targetItem
 	}
 	calendar.CalendarRange = dateRange
 	calendar.CalendarTargetDate = nil
+	calendar.UndatedRows = nil
 	key := calendar.GetColumn(calendar.Calendar.DateKeyID)
 	if nil == key || !IsCalendarDateType(key.Type) {
 		calendar.Rows = []*TableRow{}
@@ -121,6 +124,9 @@ func FilterCalendarRows(calendar *Calendar, dateRange *CalendarRange, targetItem
 	for _, row := range calendar.Rows {
 		start, end, ok := CalendarInterval(row.GetValue(key.ID), location)
 		if !ok {
+			if key.Type == KeyTypeDate {
+				calendar.UndatedRows = append(calendar.UndatedRows, row)
+			}
 			continue
 		}
 		target := targetItemID != "" && row.ID == targetItemID

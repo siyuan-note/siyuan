@@ -51,14 +51,16 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
             getAllModels().files.forEach((files) => files.updateDocActions());
         }),
     });
+    /// #endif
     group.switch("fileTree.parentDocClickExpand", {
         title: window.siyuan.languages.parentDocClickExpand,
         desc: window.siyuan.languages.parentDocClickExpandTip,
         save: (value) => fileConfigApi.patch("parentDocClickExpand", value, () => {
+            /// #if !MOBILE
             getAllModels().files.forEach((files) => files.updateDocActions());
+            /// #endif
         }),
     });
-    /// #endif
     group.switch("fileTree.alwaysSelectOpenedFile", {
         title: window.siyuan.languages.selectOpen,
         desc: window.siyuan.languages.fileTree2,

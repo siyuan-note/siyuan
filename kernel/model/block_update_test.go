@@ -17,6 +17,7 @@
 package model
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
@@ -79,6 +80,37 @@ func TestResolveSuperBlockListItemAfterBlockDOMRoundTrip(t *testing.T) {
 	}
 	if err = treenode.ValidateBlockReplacement(oldItem, resolvedNode); err != nil {
 		t.Fatalf("super block list item replacement should be valid: %s", err)
+	}
+}
+
+func TestResolveMindmapItemAfterBlockDOMRoundTrip(t *testing.T) {
+	const oldID = "20260924140000-mindmapitem"
+	luteEngine := util.NewLute()
+	blockDOM, _ := luteEngine.Md2BlockDOMTree("* [ ] updated", true)
+	blockDOM = strings.ReplaceAll(blockDOM, `data-type="NodeList"`, `data-type="NodeMindmap"`)
+	blockDOM = strings.ReplaceAll(blockDOM, `data-type="NodeListItem"`, `data-type="NodeMindmapItem"`)
+	oldMindmap := &ast.Node{Type: ast.NodeMindmap, ListData: &ast.ListData{}}
+	oldItem := &ast.Node{Type: ast.NodeMindmapItem, ID: oldID, ListData: &ast.ListData{}}
+	oldMindmap.AppendChild(oldItem)
+	normalizedTree, updatedItem, err := normalizeBlockUpdateTree(oldItem, luteEngine.BlockDOM2Tree(blockDOM), luteEngine)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updatedItem.SetIALAttr("id", oldID)
+	normalizedDOM := luteEngine.Tree2BlockDOM(normalizedTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	transactionTree := luteEngine.BlockDOM2Tree(normalizedDOM)
+	if ast.NodeMindmap != firstContentBlock(transactionTree.Root).Type {
+		t.Fatal("standalone mind map item DOM should be wrapped in a mind map when parsed")
+	}
+	updatedNode, err := resolveBlockUpdateNode(oldItem, transactionTree.Root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ast.NodeMindmapItem != updatedNode.Type || oldID != updatedNode.ID {
+		t.Fatalf("unexpected resolved node [%s] [%s]", updatedNode.Type.String(), updatedNode.ID)
+	}
+	if err = treenode.ValidateBlockReplacement(oldItem, updatedNode); err != nil {
+		t.Fatalf("mind map item replacement should be valid: %s", err)
 	}
 }
 

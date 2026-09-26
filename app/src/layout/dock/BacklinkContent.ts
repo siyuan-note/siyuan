@@ -939,6 +939,7 @@ export class BacklinkContent extends Model {
                 app: this.app,
                 host: this.tree.element,
                 scroll: this.getScrollElement(this.tree),
+                sharedScroll: this.type === "bottom",
                 state: () => this.viewState,
                 foldedTypes: () => normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes")),
                 open: id => this.openDocument({app: this.app, id, action: [Constants.CB_GET_CONTEXT]}),

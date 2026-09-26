@@ -8,7 +8,7 @@ import {getEventName, isDisabledFeature, isInMobileApp} from "../../protyle/util
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
-import {setEmpty} from "./setEmpty";
+import {finishMobileStartup, setEmpty} from "./setEmpty";
 import {getOpenNotebookCount, parseUriInfo} from "../../util/pathName";
 import {popMenu} from "../menu";
 import {MobileFiles} from "../dock/MobileFiles";
@@ -376,6 +376,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
         const info = parseUriInfo();
         if (info.id) {
             if (openStandaloneDatabaseItemByURI(app, info)) {
+                finishMobileStartup();
                 return;
             }
             if (info.avItemID) {
@@ -431,6 +432,8 @@ export const initFramework = async (app: App, isStart: boolean) => {
 const initEditorName = () => {
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
     let titleSavePromise: Promise<unknown> = Promise.resolve();
+    let titleSavedOnEnter: {rootID: string, value: string} | undefined;
+    let enteringDocument = false;
     const saveTitle = () => {
         if (inputElement.getAttribute("readonly") === "readonly") {
             return titleSavePromise;
@@ -450,6 +453,12 @@ const initEditorName = () => {
     };
     inputElement.setAttribute("placeholder", window.siyuan.languages._kernel[16]);
     inputElement.addEventListener("blur", () => {
+        const skipSave = titleSavedOnEnter?.rootID === window.siyuan.mobile.editor?.protyle.block.rootID &&
+            titleSavedOnEnter.value === inputElement.value;
+        titleSavedOnEnter = undefined;
+        if (skipSave) {
+            return;
+        }
         void saveTitle();
     });
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -463,10 +472,17 @@ const initEditorName = () => {
         const rootID = protyle.block.rootID;
         event.preventDefault();
         event.stopPropagation();
-        inputElement.blur();
-        enterDocumentFromTitle(protyle, {
-            beforeLoad: titleSavePromise,
+        if (enteringDocument) {
+            return;
+        }
+        enteringDocument = true;
+        const beforeLoad = saveTitle();
+        titleSavedOnEnter = {rootID, value: inputElement.value};
+        void enterDocumentFromTitle(protyle, {
+            beforeLoad,
             isValid: () => window.siyuan.mobile.editor?.protyle === protyle && protyle.block.rootID === rootID,
+        }).finally(() => {
+            enteringDocument = false;
         });
     });
 };

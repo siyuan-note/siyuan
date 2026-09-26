@@ -1987,7 +1987,7 @@ func syncRepoDownload() (err error) {
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
-	BootSyncSucc = 0
+	BootSyncSucc.Store(0)
 
 	calcPetalDiff(beforeSyncPetals, mergeResult)
 	postProcessStart := time.Now()
@@ -2063,7 +2063,7 @@ func syncRepoUpload() (err error) {
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
-	BootSyncSucc = 0
+	BootSyncSucc.Store(0)
 
 	postProcessStart := time.Now()
 	processSyncMergeResult(false, true, &dejavu.MergeResult{}, trafficStat, "u", elapsed)
@@ -2157,7 +2157,7 @@ func bootSyncRepo() (err error) {
 		Conf.Save()
 		pushSyncStatusBar(msg)
 		util.PushErrMsg(msg, 0)
-		BootSyncSucc = 1
+		BootSyncSucc.Store(1)
 		isBootSyncing.Store(false)
 		return
 	}

@@ -133,12 +133,14 @@ class BuildTests(unittest.TestCase):
         def fake_wsl(command, directory=None, capture=False):
             architecture = "arm64" if command[-1] == "build.sh" else "amd64"
             self.write(remote / "kernel/harmony/libkernel.so", kernel(architecture=architecture))
+            self.write(remote / "kernel/harmony/libkernel.h", architecture.encode())
+            self.write(remote / "kernel/harmony/lan_sync_bridge.h", b"bridge")
 
         def fake_run(command, cwd, env=None, capture=False):
             if command[-1] == "assembleApp":
                 self.assertIn("buildMode=release", command)
                 self.write(self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-unsigned.app")
-                self.write(self.args.harmony_dir / "entry/build/default/outputs/default/entry-default-signed.hap")
+                self.write(self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-signed.app", b"signed app")
             return ""
 
         with patch.object(self.builder, "wsl", side_effect=fake_wsl), patch.object(build, "run", side_effect=fake_run):
@@ -147,7 +149,44 @@ class BuildTests(unittest.TestCase):
         amd = self.args.harmony_dir / "entry/libs/x86_64/libkernel.so"
         self.assertEqual(arm.read_bytes(), kernel(architecture="arm64"))
         self.assertEqual(amd.read_bytes(), kernel(architecture="amd64"))
-        self.assertEqual(len(self.builder.artifacts), 2)
+        self.assertEqual([path.name for path in self.builder.artifacts], ["siyuan-harmony-default-signed.app"])
+        self.assertEqual(self.builder.artifacts[0].read_bytes(), b"signed app")
+        self.assertEqual((self.args.harmony_dir / "entry/src/main/cpp/include/libkernel.h").read_bytes(), b"arm64")
+        self.assertEqual((self.args.harmony_dir / "entry/src/main/cpp/include/lan_sync_bridge.h").read_bytes(), b"bridge")
+        self.assertEqual((self.args.harmony_dir / "entry/libs/x86_64/libkernel.h").read_bytes(), b"amd64")
+
+    def test_harmony_rejects_unsigned_only_output(self):
+        self.builder.wsl_root = self.root / "wsl"
+        assets = self.write(self.root / "app.zip")
+        bridge = self.write(self.args.harmony_dir / "entry/src/main/cpp/include/lan_sync_bridge.h", b"maintained bridge")
+
+        def fake_wsl(command, directory=None, capture=False):
+            architecture = "arm64" if command[-1] == "build.sh" else "amd64"
+            self.write(self.builder.wsl_root / "kernel/harmony/libkernel.so", kernel(architecture=architecture))
+            self.write(self.builder.wsl_root / "kernel/harmony/libkernel.h")
+
+        def fake_run(command, cwd, env=None, capture=False):
+            if command[-1] == "assembleApp":
+                self.write(self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-unsigned.app")
+            return ""
+
+        with patch.object(self.builder, "wsl", side_effect=fake_wsl), patch.object(build, "run", side_effect=fake_run):
+            with self.assertRaises(build.BuildError):
+                self.builder.harmony(assets)
+        self.assertEqual(self.builder.artifacts, [])
+        self.assertEqual(bridge.read_bytes(), b"maintained bridge")
+
+    def test_harmony_missing_generated_header_stops_packaging(self):
+        self.builder.wsl_root = self.root / "wsl"
+        assets = self.write(self.root / "app.zip")
+
+        def fake_wsl(command, directory=None, capture=False):
+            self.write(self.builder.wsl_root / "kernel/harmony/libkernel.so", kernel())
+
+        with patch.object(self.builder, "wsl", side_effect=fake_wsl), patch.object(build, "run") as run:
+            with self.assertRaisesRegex(build.BuildError, "头文件未更新"):
+                self.builder.harmony(assets)
+            run.assert_not_called()
 
     def test_android_new_aar_is_copied_before_gradle(self):
         sdk = self.root / "sdk"
@@ -177,19 +216,21 @@ class BuildTests(unittest.TestCase):
             "siyuan-3.8.4-googleplay-release.aab", "siyuan-3.8.4-huawei-release.aab",
         })
 
-    def test_failed_validation_does_not_publish(self):
-        self.builder.artifacts = [self.write(self.builder.work / "bad.apk")]
-        with patch.object(build.VERIFY, "verify_package", side_effect=build.VERIFY.VerificationError("old kernel")):
-            with self.assertRaises(build.VERIFY.VerificationError), contextlib.redirect_stdout(io.StringIO()):
+    def test_failed_validation_preserves_collected_packages(self):
+        artifact = self.write(self.builder.work / "bad.apk")
+        self.builder.collect([artifact], "Android", time.time())
+        with patch.object(build.VERIFY, "verify", return_value=1) as verify:
+            with self.assertRaises(build.BuildError), contextlib.redirect_stdout(io.StringIO()):
                 self.builder.finish()
-        self.assertFalse(self.args.output.exists())
+        self.assertEqual((self.args.output / "bad.apk").read_bytes(), artifact.read_bytes())
+        self.assertEqual(verify.call_args.args[0].directory, self.args.output)
 
     def test_add_platform_preserves_existing_packages_and_checksums(self):
         existing = self.write(self.args.output / "siyuan-3.8.4-win.exe", b"signed windows")
         artifact = self.write(self.builder.work / "siyuan-3.8.4.apk", b"android")
         self.write(self.args.output / "SHA256SUMS.txt", b"old sums")
-        self.builder.artifacts = [artifact]
-        with patch.object(build.VERIFY, "verify_package"), contextlib.redirect_stdout(io.StringIO()):
+        self.builder.collect([artifact], "Android", time.time())
+        with patch.object(build.VERIFY, "verify", return_value=0), contextlib.redirect_stdout(io.StringIO()):
             self.builder.finish()
         self.assertEqual((self.args.output / "SHA256SUMS.txt").read_bytes(), b"old sums")
         self.assertTrue((self.args.output / "siyuan-3.8.4.apk").is_file())
@@ -197,8 +238,8 @@ class BuildTests(unittest.TestCase):
 
     def test_finish_does_not_generate_checksums(self):
         artifact = self.write(self.builder.work / "siyuan-3.8.4.apk", b"android")
-        self.builder.artifacts = [artifact]
-        with patch.object(build.VERIFY, "verify_package"), contextlib.redirect_stdout(io.StringIO()):
+        self.builder.collect([artifact], "Android", time.time())
+        with patch.object(build.VERIFY, "verify", return_value=0), contextlib.redirect_stdout(io.StringIO()):
             self.builder.finish()
         self.assertEqual((self.args.output / artifact.name).read_bytes(), b"android")
         self.assertFalse((self.args.output / "SHA256SUMS.txt").exists())
@@ -209,6 +250,17 @@ class BuildTests(unittest.TestCase):
                 contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(build.main(), 0)
         command.assert_not_called()
+
+    def test_collection_is_immediate_and_does_not_overwrite(self):
+        artifact = self.write(self.builder.work / "test.apk", b"first")
+        with patch.object(build.VERIFY, "verify") as verify:
+            self.builder.collect([artifact], "Android", time.time())
+            verify.assert_not_called()
+        self.assertEqual((self.args.output / "test.apk").read_bytes(), b"first")
+        artifact.write_bytes(b"second")
+        with self.assertRaises(build.BuildError):
+            self.builder.collect([artifact], "Android", time.time())
+        self.assertEqual((self.args.output / "test.apk").read_bytes(), b"first")
 
 
 if __name__ == "__main__":

@@ -7,7 +7,6 @@ from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path, PurePosixPath
-import plistlib
 import posixpath
 import re
 import shutil
@@ -24,7 +23,7 @@ from urllib.parse import unquote, urlsplit
 REPO = Path(__file__).resolve().parents[1]
 GROUPS = ("stage", "appearance", "guide", "changelogs")
 PACKAGES = (".exe", ".zip", ".7z", ".tar.gz", ".tgz", ".deb", ".rpm",
-            ".appimage", ".dmg", ".apk", ".aab", ".hap", ".app", ".ipa", ".appx", ".msix")
+            ".appimage", ".dmg", ".apk", ".aab", ".app", ".appx", ".msix")
 SIDECARS = (".blockmap", ".yml", ".yaml", ".release-baseline.json")
 KERNEL_NAMES = {"siyuan-kernel", "siyuan-kernel.exe", "libgojni.so", "libkernel.so"}
 VERSION = r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z.-]+)?"
@@ -70,6 +69,38 @@ class Unpacker:
         self.sevenzip = sevenzip
         self.count = 0
 
+    def extract_sevenzip(self, source, dest):
+        if not self.sevenzip:
+            raise VerificationError(f"解包 {source.name} 需要 7-Zip，请指定 --sevenzip")
+        result = subprocess.run([self.sevenzip, "l", "-slt", "-sccUTF-8", str(source)],
+                                capture_output=True, encoding="utf-8", errors="replace", timeout=600)
+        if result.returncode:
+            raise VerificationError(f"7-Zip 无法读取 {source.name}：{result.stderr.strip()}")
+        listing = result.stdout.replace("\r\n", "\n").partition("----------\n")
+        if not listing[1]:
+            raise VerificationError(f"无法识别 7-Zip 文件清单：{source.name}")
+        links = []
+        for block in listing[2].split("\n\n"):
+            properties = dict(line.split(" = ", 1) for line in block.splitlines() if " = " in line)
+            name = properties.get("Path")
+            if name is None:
+                continue
+            safe_name(name)
+            if properties.get("Symbolic Link") or properties.get("Mode", "").startswith("l"):
+                links.append(name)
+        command = [self.sevenzip, "x", "-y", "-bd", "-bso0", "-bsp0", "-sccUTF-8", f"-o{dest}"]
+        # 与 ZIP/TAR 解包保持一致，跳过符号链接；必要资源仍由后续完整性检查确认。
+        # 使用精确路径排除，避免通配符扩大范围；列表放在载荷目录之外。
+        with tempfile.TemporaryDirectory(prefix="siyuan-7z-links-", dir=self.root) as temporary:
+            if links:
+                exclusions = Path(temporary) / "links.txt"
+                exclusions.write_text("\n".join(links) + "\n", encoding="utf-8")
+                command.extend(("-spd", "-scsUTF-8", f"-x@{exclusions}"))
+            result = subprocess.run(command + [str(source)], capture_output=True,
+                                    encoding="utf-8", errors="replace", timeout=600)
+            if result.returncode:
+                raise VerificationError(f"7-Zip 无法完整解包 {source.name}：{result.stderr.strip()}")
+
     def extract(self, source):
         self.count += 1
         if self.count > 64:
@@ -113,12 +144,7 @@ class Unpacker:
                     with archive.extractfile(entry) as src, target.open("wb") as out:
                         shutil.copyfileobj(src, out)
         else:
-            if not self.sevenzip:
-                raise VerificationError(f"解包 {source.name} 需要 7-Zip，请指定 --sevenzip")
-            command = [self.sevenzip, "x", "-y", "-bd", "-bso0", "-bsp0", f"-o{dest}", str(source)]
-            result = subprocess.run(command, capture_output=True, text=True, errors="replace", timeout=600)
-            if result.returncode:
-                raise VerificationError(f"7-Zip 无法完整解包 {source.name}：{result.stderr.strip()}")
+            self.extract_sevenzip(source, dest)
         return dest
 
     def layers(self, package):
@@ -131,7 +157,7 @@ class Unpacker:
                 if not path.is_file() or path.is_symlink():
                     continue
                 name = path.name.lower()
-                # 只展开安装器的载荷，不展开前端资源中的第三方归档。
+                # 只展开安装器的载荷，包括鸿蒙 APP 内部的 HAP，不展开前端资源中的第三方归档。
                 if (name == "app.zip" or name.endswith((".hap", ".appx", ".msix", ".cpio", ".hfs", ".img"))
                         or (name.startswith("app-") and name.endswith(".7z"))
                         or name.startswith("data.tar") or ".cpio." in name):
@@ -430,69 +456,60 @@ def check_frontend(paths, expected_version, mobile):
 
 
 def verify_package(package, baselines=None, sevenzip=None, version=None):
+    if not package.name.lower().endswith(PACKAGES):
+        raise VerificationError(f"不支持的安装包格式：{package.name}")
     with tempfile.TemporaryDirectory(prefix="siyuan-release-") as temp:
         layers = Unpacker(Path(temp), sevenzip).layers(package)
         kernels = kernel_files(layers)
         roots = resource_roots(layers)
-        if not kernels and package.suffix.lower() == ".ipa":
-            for layer in layers:
-                for info in layer.glob("Payload/*.app/Info.plist"):
-                    metadata = plistlib.loads(info.read_bytes())
-                    executable = metadata.get("CFBundleExecutable", "")
-                    if executable and Path(executable).name == executable and (info.parent / executable).is_file():
-                        kernels.append(info.parent / executable)
         if not kernels:
-            raise VerificationError("未找到可独立校验的内核；iOS 静态链接或加密内核需要另行验证")
+            raise VerificationError("未找到可独立校验的内核")
         if len(roots) != 1:
             raise VerificationError(f"应找到一个完整前端资源目录，实际找到 {len(roots)} 个")
         kernel_hashes = sorted({digest(path) for path in kernels})
         actual = package_resources(layers, roots[0])
-        mobile = package.suffix.lower() in {".apk", ".aab", ".hap", ".app", ".ipa"}
+        mobile = package.suffix.lower() in {".apk", ".aab", ".app"}
+        expected = version or (baselines[0]["version"] if baselines else None)
+        if not expected:
+            match = PACKAGE_VERSION.match(package.name)
+            if not match:
+                raise VerificationError("无法从包名确定发布版本，请指定 --version")
+            expected = match[1]
+        infos = [kernel_info(path) for path in kernels]
+        errors = [f"内核版本不匹配：{info['name']} 为 {info['version']}，预期 {expected}"
+                  for info in infos if info["version"] != expected]
+        package_version = PACKAGE_VERSION.match(package.name)
+        if package_version and package_version[1] != expected:
+            errors.append(f"包名版本不匹配：{package_version[1]}，预期 {expected}")
+        for info in infos:
+            if "-arm64" in package.name.lower() and info["architecture"] != "arm64":
+                errors.append(f"内核架构与包名不匹配：{info['architecture']}")
+            if package.suffix.lower() in {".apk", ".aab", ".app"} and info["format"] != "ELF":
+                errors.append(f"移动端内核格式不匹配：{info['format']}")
+        for path, info in zip(kernels, infos):
+            for abi, architecture in (("arm64-v8a", "arm64"), ("armeabi-v7a", "arm"), ("x86_64", "amd64"), ("x86", "386")):
+                if abi in path.parts and info["architecture"] != architecture:
+                    errors.append(f"内核架构与 ABI 目录 {abi} 不匹配：{info['architecture']}")
+        paths = resource_paths(layers, roots[0])
+        frontend, frontend_errors = check_frontend(paths, expected, mobile)
+        errors.extend(frontend_errors)
+        metadata = roots[0] / "app/package.json"
+        if not mobile and not metadata.is_file():
+            errors.append("缺少桌面外壳元数据：app/package.json")
+        if metadata.is_file():
+            metadata_value = json.loads(metadata.read_text(encoding="utf-8"))
+            actual_version = metadata_value.get("version") if isinstance(metadata_value, dict) else None
+            if actual_version != expected:
+                errors.append(f"桌面外壳版本不匹配：{actual_version}，预期 {expected}")
+        if errors:
+            raise VerificationError("\n".join(errors[:40]))
+        if baselines and any(b["version"] != expected for b in baselines):
+            raise VerificationError("基准版本与预期发布版本不匹配")
         if not baselines:
-            expected = version
-            if not expected:
-                match = PACKAGE_VERSION.match(package.name)
-                if not match:
-                    raise VerificationError("无法从包名确定发布版本，请指定 --version")
-                expected = match[1]
-            infos = [kernel_info(path) for path in kernels]
-            errors = [f"内核版本不匹配：{info['name']} 为 {info['version']}，预期 {expected}"
-                      for info in infos if info["version"] != expected]
-            package_version = PACKAGE_VERSION.match(package.name)
-            if package_version and package_version[1] != expected:
-                errors.append(f"包名版本不匹配：{package_version[1]}，预期 {expected}")
-            for info in infos:
-                if "-arm64" in package.name.lower() and info["architecture"] != "arm64":
-                    errors.append(f"内核架构与包名不匹配：{info['architecture']}")
-                if package.suffix.lower() in {".apk", ".aab", ".hap", ".app"} and info["format"] != "ELF":
-                    errors.append(f"移动端内核格式不匹配：{info['format']}")
-            for path, info in zip(kernels, infos):
-                for abi, architecture in (("arm64-v8a", "arm64"), ("armeabi-v7a", "arm"), ("x86_64", "amd64"), ("x86", "386")):
-                    if abi in path.parts and info["architecture"] != architecture:
-                        errors.append(f"内核架构与 ABI 目录 {abi} 不匹配：{info['architecture']}")
-            paths = resource_paths(layers, roots[0])
-            frontend, frontend_errors = check_frontend(paths, expected, mobile)
-            errors.extend(frontend_errors)
-            metadata = roots[0] / "app/package.json"
-            if metadata.is_file():
-                actual_version = json.loads(metadata.read_text(encoding="utf-8")).get("version")
-                if actual_version != expected:
-                    errors.append(f"桌面外壳版本不匹配：{actual_version}，预期 {expected}")
-            if errors:
-                raise VerificationError("\n".join(errors[:40]))
             return {"target": ", ".join(f"{info['format']}/{info['architecture']}" for info in infos),
                     "version": expected, "kernels": infos, "frontend_versions": frontend,
                     "kernel_sha256": kernel_hashes, "resource_count": len(actual),
                     "scope": "包内版本及可解析资源引用检查；不证明同版本产物为最新构建"}
-        # 基准摘要一致也必须满足入口完整性，避免不完整基准掩盖整套前端缺失。
-        errors = check_frontend_entries(actual, mobile)
-        if errors:
-            raise VerificationError("\n".join(errors))
-        metadata = roots[0] / "app/package.json"
-        if metadata.is_file():
-            actual_version = json.loads(metadata.read_text(encoding="utf-8"))["version"]
-            if actual_version != baselines[0]["version"]:
-                raise VerificationError(f"桌面应用版本不匹配：{actual_version}")
         candidates = [b for b in baselines if b["kernels"] == kernel_hashes]
         if not candidates:
             raise VerificationError("内核与所有基准均不匹配：可能漏拷贝内核、选错架构，或缺少该平台基准；"

@@ -761,7 +761,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 		parentID = node.Parent.ID
 		parent2ID = parentID
 		tmp := node
-		if ast.NodeListItem == node.Type {
+		if ast.NodeListItem == node.Type || ast.NodeMindmapItem == node.Type {
 			// 列表项聚焦返回和面包屑保持一致 https://github.com/siyuan-note/siyuan/issues/4914
 			tmp = node.Parent
 		}

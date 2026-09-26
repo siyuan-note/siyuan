@@ -70,11 +70,11 @@ func ExceedLargeFileWarningSize(fileSize int) bool {
 }
 
 // IsUILoaded 是否已经加载了 UI。
-var IsUILoaded = false
+var IsUILoaded atomic.Bool
 
 func WaitForUILoaded() {
 	start := time.Now()
-	for !IsUILoaded {
+	for !IsUILoaded.Load() {
 		time.Sleep(200 * time.Millisecond)
 		if time.Since(start) > 30*time.Second {
 			logging.LogErrorf("wait for ui loaded timeout: %s", logging.ShortStack())
@@ -84,9 +84,9 @@ func WaitForUILoaded() {
 }
 
 func HookUILoaded() {
-	for !IsUILoaded {
+	for !IsUILoaded.Load() {
 		if 0 < len(SessionsByType("main")) {
-			IsUILoaded = true
+			IsUILoaded.Store(true)
 			return
 		}
 		time.Sleep(200 * time.Millisecond)

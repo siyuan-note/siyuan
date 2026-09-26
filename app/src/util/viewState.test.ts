@@ -53,6 +53,37 @@ describe("getViewStateKey", () => {
 });
 
 describe("ViewStateService", () => {
+    it("keeps publish state in memory without requesting administrator storage", async () => {
+        const previousError = console.error;
+        const errors: unknown[][] = [];
+        console.error = (...args: unknown[]) => { errors.push(args); };
+        const previousWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+        Object.defineProperty(globalThis, "window", {
+            configurable: true,
+            value: {siyuan: {isPublish: true}},
+        });
+        const service = new ViewStateService(identity, {flushDelay: 60_000});
+        try {
+            await service.ready;
+            assert.equal(errors.length, 0);
+            assert.deepEqual(service.snapshot(), {});
+            service.set("folded", true);
+            await service.flush();
+            assert.equal(service.get("folded"), true);
+            service.remove("folded");
+            await service.flush();
+            assert.equal(service.has("folded"), false);
+        } finally {
+            console.error = previousError;
+            await service.destroy();
+            if (previousWindow) {
+                Object.defineProperty(globalThis, "window", previousWindow);
+            } else {
+                Reflect.deleteProperty(globalThis, "window");
+            }
+        }
+    });
+
     it("loads only its exact key and sends field-level changes including false", async () => {
         const getKeys: string[] = [];
         const patches: Array<{key: string, values: TViewStateData, removeKeys: string[]}> = [];

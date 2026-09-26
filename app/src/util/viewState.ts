@@ -47,12 +47,19 @@ const checkResponse = (response: IWebSocketData, action: string) => {
 
 const defaultTransport: IViewStateTransport = {
     async get(key) {
+        // 发布服务的视图状态仅保留在当前实例中，不读取管理员的工作空间状态。
+        if (window.siyuan.isPublish) {
+            return {};
+        }
         const {fetchSyncPost} = await import("./fetch");
         const response = await fetchSyncPost("/api/storage/getViewState", {key});
         checkResponse(response, "get");
         return isViewStateData(response.data) ? response.data : {};
     },
     async patch(key, values, removeKeys) {
+        if (window.siyuan.isPublish) {
+            return;
+        }
         const {fetchSyncPost} = await import("./fetch");
         const response = await fetchSyncPost("/api/storage/patchViewState", {key, values, removeKeys});
         checkResponse(response, "patch");

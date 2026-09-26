@@ -21,6 +21,7 @@ import type {TSettingTab} from "./setting/tabs";
 import type {App} from "../index";
 import {unmountAssetsTab} from "./assets";
 import {getHostCapabilities} from "../util/hostCapabilities";
+import {unmountWorkspaceStorage} from "./tabs/workspaceStorage";
 
 /// #if !MOBILE
 const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
@@ -33,7 +34,7 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
     const tabPanels: string[] = [];
     for (const def of getSettingTabDefs()) {
         const isActive = def.id === initialTab;
-        tabListItems.push(`<li data-name="${def.id}" class="b3-list-item${isActive ? " b3-list-item--focus" : ""}${def.hidden ? " fn__none" : ""}"><svg class="b3-list-item__graphic"><use xlink:href="#${def.icon}"></use></svg><span class="b3-list-item__text">${def.title}</span></li>`);
+        tabListItems.push(`<li data-name="${def.id}" tabindex="0" role="button" class="b3-list-item${isActive ? " b3-list-item--focus" : ""}${def.hidden ? " fn__none" : ""}"><svg class="b3-list-item__graphic"><use xlink:href="#${def.icon}"></use></svg><span class="b3-list-item__text">${def.title}</span></li>`);
         tabPanels.push(`<div class="config__tab-container${isActive ? "" : " fn__none"}" data-name="${def.id}"></div>`);
     }
     const settingDialogRef: {element?: HTMLElement} = {};
@@ -47,7 +48,7 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
             </div>
             <input spellcheck="false" placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block">
         </div>
-        <ul class="config__tab-scroll">
+        <ul class="config__tab-scroll" tabindex="-1">
             ${tabListItems.join("")}
         </ul>
     </div>
@@ -69,6 +70,10 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
             }
             clearSyncTabElement();
             clearAccessTabElement();
+            const appRoot = settingDialogRef.element?.querySelector<HTMLElement>('.config__tab-container[data-name="app"]');
+            if (appRoot) {
+                unmountWorkspaceStorage(appRoot);
+            }
             if (range) {
                 focusByRange(range);
             }
@@ -87,6 +92,13 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
         item.addEventListener("click", () => {
             const tabId = item.getAttribute("data-name") as TSettingTab;
             switchSettingTab(dialog.element, app, tabId);
+        });
+        item.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (!event.isComposing && (event.key === "Enter" || event.key === " ")) {
+                event.preventDefault();
+                event.stopPropagation();
+                (item as HTMLElement).click();
+            }
         });
     });
     switchSettingTab(dialog.element, app, initialTab);

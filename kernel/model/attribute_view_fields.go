@@ -325,7 +325,7 @@ func cloneAttributeViewForFieldMutation(view *av.AttributeView) (*av.AttributeVi
 	if err != nil {
 		return nil, err
 	}
-	ret := &av.AttributeView{}
+	ret := &av.AttributeView{RenderedViewables: map[string]av.Viewable{}}
 	err = json.Unmarshal(data, ret)
 	return ret, err
 }

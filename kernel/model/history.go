@@ -110,6 +110,8 @@ func ChangeHistoryTick(minutes int) {
 }
 
 func ClearWorkspaceHistory() (err error) {
+	notebookArchiveHistoryMu.Lock()
+	defer notebookArchiveHistoryMu.Unlock()
 	historyDir := util.HistoryDir
 	if gulu.File.IsDir(historyDir) {
 		if err = os.RemoveAll(historyDir); err != nil {
@@ -1027,6 +1029,8 @@ func ClearOutdatedHistoryDirJob() {
 }
 
 func clearOutdatedHistoryDir() {
+	notebookArchiveHistoryMu.Lock()
+	defer notebookArchiveHistoryMu.Unlock()
 	historyDir := util.HistoryDir
 	if !gulu.File.IsExist(historyDir) {
 		return
@@ -1222,6 +1226,8 @@ func ReindexHistory() {
 }
 
 func fullReindexHistory() {
+	notebookArchiveHistoryMu.Lock()
+	defer notebookArchiveHistoryMu.Unlock()
 	historyDirs, err := os.ReadDir(util.HistoryDir)
 	if err != nil {
 		logging.LogErrorf("read history dir [%s] failed: %s", util.HistoryDir, err)

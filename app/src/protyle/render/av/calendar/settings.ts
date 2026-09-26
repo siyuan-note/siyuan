@@ -40,7 +40,7 @@ export const getCalendarSettingsHTML = (view: IAVTable, asMenu = false) => getCa
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;
     }
-    return `<label class="b3-menu__item"><span class="b3-menu__label">${item.label}</span>
+    return `<label class="av__calendar-setting"><span>${item.label}</span>
     <select class="b3-select" data-calendar-setting="${item.key}" aria-label="${item.label}">
         ${item.choices.map(choice => `<option value="${escapeAttr(choice.value)}"${choice.value === value ? " selected" : ""}>${escapeHtml(item.key === "dateKeyID" && choice.value === "" ? window.siyuan.languages.calendarSelectDateField : choice.label)}</option>`).join("")}
     </select>

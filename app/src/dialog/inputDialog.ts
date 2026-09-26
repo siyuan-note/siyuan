@@ -19,6 +19,7 @@ export const openInputDialog = (options: {
     // 说明沿用现有本地化文案的 HTML 语义。
     description?: string,
     // 附加控件由调用方提供可信 HTML 并绑定交互。
+    prefixContent?: string,
     extraContent?: string,
     confirmText?: string,
     actions?: {
@@ -48,7 +49,7 @@ export const openInputDialog = (options: {
     const dialog = new Dialog({
         title: options.title,
         positionId: options.positionId,
-        content: `<div class="b3-dialog__content">${options.label ? `<label>${escapeHtml(options.label)}<div class="fn__hr"></div>${inputHTML}</label>` : inputHTML}${options.description ? `<div class="b3-label__text">${options.description}</div>` : ""}${options.extraContent || ""}</div>
+        content: `<div class="b3-dialog__content">${options.prefixContent || ""}${options.label ? `<label>${escapeHtml(options.label)}<div class="fn__hr"></div>${inputHTML}</label>` : inputHTML}${options.description ? `<div class="b3-label__text">${options.description}</div>` : ""}${options.extraContent || ""}</div>
 <div class="b3-dialog__action">
     ${actionHTML}
 </div>`,

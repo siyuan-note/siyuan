@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260921111101"
+		"updated": "20260925174006"
 	},
 	"Children": [
 		{
@@ -48,6 +48,115 @@
 				{
 					"Type": "NodeText",
 					"Data": " 組合的單一字元設為快捷鍵。"
+				}
+			]
+		},
+		{
+			"ID": "20260925174006-m7i1hw9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925174006-m7i1hw9",
+				"updated": "20260925174006"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快速鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "通用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "開啟快顯功能表"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中修改或解除快捷鍵綁定，預設在 Windows/Linux 上為 Ctrl+/，在 macOS 上為 Cmd+/。它會依目前焦點開啟編輯器內容、資料庫列、搜尋結果或導覽項目的快顯功能表。輸入 / 仍用於觸發斜線選單。"
+				}
+			]
+		},
+		{
+			"ID": "20260923233001-dx1k6zh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260923233001-dx1k6zh",
+				"updated": "20260923233001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 視窗中，從搜尋框按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可依序聚焦可見分類，再進入右側設定控制項。按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 反向移動，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開啟目前聚焦的分類。"
 				}
 			]
 		},
@@ -3997,7 +4106,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260921105011"
+				"updated": "20260925094732"
 			},
 			"Children": [
 				{
@@ -11240,7 +11349,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-wez4zj6",
-				"updated": "20260811122156"
+				"updated": "20260924173802"
 			},
 			"Children": [
 				{
@@ -11909,12 +12018,80 @@
 			]
 		},
 		{
+			"ID": "20260924173802-11vvysw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260924173802-11vvysw",
+				"updated": "20260925172309"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取列表或一個或多個列表項目後，使用上方的標題快捷鍵，也可以透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區塊選單"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "轉換為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一級標題區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（或其他標題層級），會移除所選列表項的項目符號或覈取方塊，並將首個區塊轉換為獨立標題。後續段落和子列表保持順序，未選項仍保留為列表。選取整個列表時只處理直屬列表項。要將首個區塊轉換為一般段落，請使用段落快捷鍵，或選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區塊選單"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "轉換為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "段落區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，這也會移除既有標題格式。區塊 ID、資料庫關聯和欄位值均會保留。首個區塊既非段落也非標題的列表項會略過。行動端使用相同的區塊選單。僅將游標放在段落或標題內時，快捷鍵只轉換該區塊，不取消外圍列表。"
+				}
+			]
+		},
+		{
 			"ID": "20211226122652-td76oes",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-td76oes",
-				"updated": "20260921105011"
+				"updated": "20260923083553"
 			},
 			"Children": [
 				{
@@ -11934,7 +12111,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-qj1o02k",
-				"updated": "20260921105011"
+				"updated": "20260923221935"
 			},
 			"Children": [
 				{
@@ -12198,6 +12375,78 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "切換任務列表項完成狀態"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "未綁定"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "待辦和進行中切換為完成，其他狀態切換為待辦；適用於編輯器和心智圖區塊；可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快速鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "編輯器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "列表區塊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中設定"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "待辦和進行中切換為完成，其他狀態切換為待辦"
 								}
 							]
@@ -12293,13 +12542,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20260921111101"
+				"updated": "20260925094732"
 			},
 			"HeadingLevel": 3,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "心智圖"
+					"Data": "心智圖區塊"
 				}
 			]
 		},
@@ -12308,7 +12557,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-f8y6pxv",
-				"updated": "20260921111101",
+				"updated": "20260925094732",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -12358,7 +12607,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "編輯選取的節點"
+									"Data": "編輯選取的節點（游標位於末尾）"
 								}
 							]
 						},
@@ -12370,6 +12619,32 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Space"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "取代選取節點的首段文字（保留其他區塊與子節點）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "直接輸入文字"
 								}
 							]
 						}
@@ -12424,6 +12699,78 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選取或編輯時建立同級節點"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選取或編輯時建立子節點"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Shift+Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧⌘Enter"
 								}
 							]
 						}
@@ -12667,6 +13014,32 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "滾輪"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "移動畫布"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "按住滑鼠右鍵拖曳"
 								}
 							]
 						}
@@ -16638,12 +17011,26 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-zliquo3",
-				"updated": "20260913160005"
+				"updated": "20260922150640"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "文檔面板"
+				}
+			]
+		},
+		{
+			"ID": "20260922150640-nft4e80",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922150640-nft4e80",
+				"updated": "20260923212237"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "啟用「點擊父文件標題時展開或折疊下級文件」後，在文件樹或置頂文件區點擊或點按父文件標題，會在短暫等待後展開或折疊下級文件；按兩下或連續點按兩次標題則開啟父文件，且不改變展開或折疊狀態。沒有子文件時仍然點擊或點按直接開啟"
 				}
 			]
 		},

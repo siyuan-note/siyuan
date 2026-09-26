@@ -5,7 +5,7 @@ type GlobalBacklinkQuery struct {
 	ID              string                `json:"id"`
 	Notebook        string                `json:"notebook" api:"optional"`
 	Keyword         string                `json:"keyword" api:"optional"`
-	Sort            int                   `json:"sort"` // 1 自然升序，2 自然降序
+	Sort            int                   `json:"sort"` // 1 自然升序，2 自然降序；先比锚文本，同锚文本再比引用块全文
 	ContainChildren bool                  `json:"containChildren"`
 	SourceFilter    *BacklinkSourceFilter `json:"sourceFilter" api:"optional"`
 }
@@ -18,7 +18,7 @@ type GlobalBacklinkListRequest struct {
 }
 
 type GlobalBacklinkItem struct {
-	ID     string `json:"id"`
+	ID     string `json:"id"` // 引用块 ID；传递型反链仍以该 ID 区分独立条目
 	RootID string `json:"rootID"`
 	Box    string `json:"box"`
 	HPath  string `json:"hPath"`
@@ -41,5 +41,5 @@ type GlobalBacklinkContextRequest struct {
 
 type GlobalBacklinkContextData struct {
 	Expired bool               `json:"expired"`
-	Items   []*BacklinkContext `json:"items"`
+	Items   []*BacklinkContext `json:"items"` // ID 保持引用块 ID，DOM 可包含传递型父块和子内容
 }

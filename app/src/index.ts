@@ -11,7 +11,7 @@ import {initBlockPopover} from "./block/popover";
 import {applyCloudUserState, onSetaccount} from "./config/tabs/accountUi";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
-import {fetchGet, fetchPost} from "./util/fetch";
+import {fetchPost} from "./util/fetch";
 import {
     addBaseURL,
     getDocDisplayName,
@@ -63,6 +63,7 @@ import {ensureUILayout} from "./util/ensureUILayout";
 import {applyEntryVisibility} from "./config/entryVisibility/runtime";
 import {removeBlockPanelEditors} from "./block/panelRemoval";
 import {initializeEnglishCommandTranslations} from "./command/english";
+import {loadLanguages} from "./boot/loadLanguages";
 import {installPluginStorageFetchAppId} from "./util/fetchAppId";
 
 export class App {
@@ -323,16 +324,16 @@ export class App {
             await notebookPromise;
             await loadPlugins(this);
             getLocalStorage(() => {
-                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
-                    window.siyuan.languages = lauguages;
+                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, (languages: IObject) => {
+                    window.siyuan.languages = languages;
                     void initializeEnglishCommandTranslations(
                         window.siyuan.config.appearance.lang,
-                        lauguages as Record<string, string>,
+                        languages as Record<string, string>,
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);
                     bootSync();
-                    fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
                         await setNoteBook();
@@ -349,6 +350,7 @@ export class App {
                         /// #endif
                         window.siyuan.isReady = true;
                         mainWs.flushMainMessages();
+                        fetchPost("/api/setting/getCloudUser", {});
                     });
                 });
             });

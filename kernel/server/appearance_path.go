@@ -68,6 +68,7 @@ func resolveAppearanceFilePath(root, requestPath string) (string, int) {
 	resolvedRoot, err := evalAppearanceSymlinks(root)
 	if err != nil {
 		logging.LogWarnf("resolve appearance root [%s] failed: %s", root, err)
+		logAppearanceRootDiagnostic(root, filepath.Join(append([]string{root}, segments...)...))
 		return "", http.StatusNotFound
 	}
 	root = resolvedRoot
@@ -83,7 +84,8 @@ func resolveAppearanceFilePath(root, requestPath string) (string, int) {
 			logging.LogWarnf("stat appearance resource [%s] failed: %s", target, statErr)
 			return "", http.StatusForbidden
 		}
-		if info.Mode()&os.ModeSymlink != 0 {
+		// Windows 目录联接可能标记为 ModeIrregular，同样需要检查真实路径。
+		if info.Mode()&(os.ModeSymlink|os.ModeIrregular) != 0 {
 			resolvedTarget, resolveErr := evalAppearanceSymlinks(target)
 			if resolveErr != nil {
 				logging.LogWarnf("resolve appearance link [%s] failed: %s", target, resolveErr)

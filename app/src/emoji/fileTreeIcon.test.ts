@@ -66,6 +66,7 @@ describe("file tree icon", () => {
         assert.match(getFileTreeIconHTML("", "notebook", "", false, true), /#iconNotebook/);
         assert.match(getFileTreeIconHTML("", "folder", "", false, true), /#iconFileText/);
         assert.match(getFileTreeIconHTML("", "file", "", false, true), /#iconFile/);
+        assert.match(getFileTreeIconHTML("", "lock", "", false, true), /#iconLock/);
         assert.equal(getFileTreeIconHTML("", "notebook", "b3-menu__icon", true, true),
             '<svg class="b3-menu__icon"><use xlink:href="#iconNotebook"></use></svg>');
         assert.equal(getDocumentIconHTML("", "mobile-tabs__item-icon", true),
@@ -76,6 +77,7 @@ describe("file tree icon", () => {
         assert.equal(getFileTreeIconHTML("", "notebook", "", false, false), "🗃");
         assert.equal(getFileTreeIconHTML("", "folder", "", false, false), "📑");
         assert.equal(getFileTreeIconHTML("", "file", "", false, false), "📄");
+        assert.equal(getFileTreeIconHTML("", "lock", "", false, false), "🔒️");
         assert.equal(getDocumentIconHTML("", "mobile-tabs__item-icon", false),
             '<span class="mobile-tabs__item-icon">📄</span>');
     });
@@ -87,6 +89,7 @@ describe("file tree icon", () => {
         assert.equal(getFileTreeDefaultIconAttr("1f4c4", "folder"), "");
         assert.equal(getFileTreeDefaultIconAttr("", "folder"), ' data-default-icon="folder"');
         assert.equal(getFileTreeDefaultIconAttr("", "notebook", true), "");
+        assert.equal(getFileTreeDefaultIconAttr("", "lock"), ' data-default-icon="lock"');
     });
 
     it("updates only marked default icons when document state or the setting changes", () => {
@@ -115,5 +118,19 @@ describe("file tree icon", () => {
         refreshDefaultFileTreeIcons({querySelectorAll: () => [liElement]} as unknown as ParentNode);
         assert.equal(dataset.defaultIcon, "file");
         assert.equal(iconElement.innerHTML, "📄");
+    });
+
+    it("refreshes locked notebook icons with the SVG setting", () => {
+        const iconElement = {classList: {contains: (value: string) => value === "b3-list-item__icon"}, innerHTML: ""};
+        const liElement = {
+            children: [iconElement],
+            dataset: {defaultIcon: "lock"},
+        } as unknown as HTMLElement;
+        window.siyuan.config.fileTree.useSVGDefaultIcon = true;
+        refreshDefaultFileTreeIcons({querySelectorAll: () => [liElement]} as unknown as ParentNode);
+        assert.match(iconElement.innerHTML, /#iconLock/);
+        window.siyuan.config.fileTree.useSVGDefaultIcon = false;
+        refreshDefaultFileTreeIcons({querySelectorAll: () => [liElement]} as unknown as ParentNode);
+        assert.equal(iconElement.innerHTML, "🔒️");
     });
 });

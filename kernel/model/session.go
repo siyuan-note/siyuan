@@ -269,7 +269,7 @@ func CheckAuth(c *gin.Context) {
 	if localhost {
 		// 校验浏览器来源，防止恶意网页借助受害者浏览器作为环回客户端绕过锁屏鉴权
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-9gpj-3rm3-x42m
-		if util.IsCrossSiteFetchSite(c.GetHeader("Sec-Fetch-Site")) {
+		if util.IsCrossSiteFetchSite(c.GetHeader("Sec-Fetch-Site")) && !util.IsSessionOriginAllowedRequest(c.Request) {
 			logging.LogWarnf("invalid local host pass-through request [ip=%s, origin=%s, host=%s, uri=%s]",
 				c.ClientIP(), c.GetHeader("Origin"), c.Request.Host, c.Request.RequestURI)
 			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid request origin"})
@@ -313,8 +313,9 @@ func CheckAuth(c *gin.Context) {
 		// 同时拒绝浏览器标记的跨站请求，防止跨站 GET 导航不带 Origin 时绕过校验
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
 		if !util.IsSessionOriginAllowedRequest(c.Request) {
-			logging.LogWarnf("invalid Origin [%s] for session auth [ip=%s]", c.GetHeader("Origin"), c.ClientIP())
-			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid Origin"})
+			logging.LogWarnf("invalid session request origin [origin=%s, fetch-site=%s, ip=%s]",
+				c.GetHeader("Origin"), c.GetHeader("Sec-Fetch-Site"), c.ClientIP())
+			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid request origin"})
 			c.Abort()
 			return
 		}
@@ -531,6 +532,12 @@ func ControlConcurrency(c *gin.Context) {
 
 	// 插件 RPC 独立处理各次调用，避免单个调用阻塞其他插件或信息查询。
 	if reqPath == "/api/plugin/rpc" {
+		c.Next()
+		return
+	}
+
+	// 文件上传在表单接收完成后由处理函数串行写入，避免等待锁的上传占满 HTTP/2 接收窗口。
+	if reqPath == "/api/file/putFile" {
 		c.Next()
 		return
 	}

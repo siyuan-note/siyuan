@@ -47,6 +47,7 @@ let lastClientX: number;    // 和起始方向不一致时，记录最后一次�
 let scrollBlock: boolean;
 let isFirstMove = true;
 let swipeStartSidebar: MobileSidebarSide;
+let preventSwipe = false;
 // 长按进入多选的定时器
 let longPressTimer: number;
 let longPressBlockElement: HTMLElement;
@@ -147,6 +148,9 @@ export const handleTouchSelectionChange = () => {
 
 export const handleTouchEnd = (event: TouchEvent) => {
     updateSidebarSwipeState();
+    if (preventSwipe) {
+        return;
+    }
     const target = event.target as HTMLElement;
     const currentTime = Date.now();
     const editor = getCurrentEditor();
@@ -300,6 +304,22 @@ export const handleTouchEnd = (event: TouchEvent) => {
     popSidebar(getOpeningSidebar(firstDirection));
 };
 
+const resetTouchGesture = () => {
+    isFirstMove = true;
+    clientX = null;
+    clientY = null;
+    xDiff = undefined;
+    yDiff = undefined;
+    firstDirection = undefined;
+    firstXY = undefined;
+    lastClientX = undefined;
+    previousClientX = undefined;
+    swipeStartSidebar = undefined;
+    scrollBlock = false;
+    preventSwipe = false;
+    clearLongPress();
+};
+
 export const handleTouchCancel = () => {
     updateSidebarSwipeState();
     if (!isFirstMove) {
@@ -312,23 +332,13 @@ export const handleTouchCancel = () => {
     if (window.siyuan.mobile.editor) {
         window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "";
     }
-    isFirstMove = true;
-    clientX = null;
-    clientY = null;
-    xDiff = undefined;
-    yDiff = undefined;
-    firstDirection = undefined;
-    firstXY = undefined;
-    lastClientX = undefined;
-    previousClientX = undefined;
-    swipeStartSidebar = undefined;
-    scrollBlock = false;
-    clearLongPress();
+    resetTouchGesture();
     handleTouchUp();
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
     updateSidebarSwipeState();
+    resetTouchGesture();
     time = Date.now();
     longPressBlockElement = undefined;
     longPressTouchRange = undefined;
@@ -339,10 +349,9 @@ export const handleTouchStart = (event: TouchEvent) => {
         activeBlur();
         return;
     }
-    // 可滚动面板内容优先处理原生滚动，避免斜向滑动触发侧栏关闭
-    if (hasClosestByAttribute(target, "data-prevent-swipe", null, true)) {
-        clientX = null;
-        clientY = null;
+    // 自行处理触摸的内容独占整轮手势，松手和取消时也不操作外层侧栏。
+    preventSwipe = !!hasClosestByAttribute(target, "data-prevent-swipe", null, true);
+    if (preventSwipe) {
         return;
     }
     // 存在其他拖拽元素时
@@ -364,12 +373,6 @@ export const handleTouchStart = (event: TouchEvent) => {
         window.siyuan.mobile.touchRange = getRangeByPoint(event.touches[0].clientX, event.touches[0].clientY);
     }
 
-    firstDirection = null;
-    xDiff = undefined;
-    yDiff = undefined;
-    lastClientX = undefined;
-    firstXY = undefined;
-    previousClientX = undefined;
     if (isIPhone() ||
         (event.touches[0].clientX > 8 && event.touches[0].clientX < window.innerWidth - 8)) {
         clientX = event.touches[0].clientX;
@@ -379,10 +382,7 @@ export const handleTouchStart = (event: TouchEvent) => {
         clientY = null;
         event.stopImmediatePropagation();
     }
-    isFirstMove = true;
-    scrollBlock = false;
     // 长按编辑器内块达到阈值时直接进入多选模式，无需抬手
-    clearLongPress();
     if (clientX && clientY && editor && !editor.protyle.toolbar.isMultiSelectMode()) {
         const blockElement = hasClosestBlock(target);
         if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement) &&

@@ -5,8 +5,11 @@ import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {getPinnedDropPosition} from "../../util/pinnedDocsDrop";
+import {ParentDocClick} from "./parentDocClick";
+import {setTimeout as delay} from "node:timers/promises";
 
 interface IPanelHarness {
+    parentDocClick: ParentDocClick;
     element: unknown;
     heading: unknown;
     sourceTree: unknown;
@@ -24,7 +27,7 @@ interface IPanelHarness {
     drop(ids: string[], x: number, y: number, allowSource?: boolean): Promise<void>;
     click(event: unknown): void;
     menu(row: unknown, position: {x: number, y: number, h: number}): void;
-    toggle(row: unknown): void;
+    toggle(row: unknown, expand?: boolean, prefetched?: unknown): void;
     open(id: string, notebook: string): void;
     mobile?: boolean;
     previewDrop(x: number, y: number, allowSource?: boolean): boolean | void;
@@ -92,6 +95,7 @@ const loadPanel = (fetchCode = 0) => {
         },
     });
     const panel = Object.create(exports.PinnedDocs.prototype) as IPanelHarness;
+    panel.parentDocClick = new ParentDocClick();
     panel.clearDrop = () => { panel.dropTarget = undefined; };
     panel.scheduleRefresh = () => {};
     panel.list = {querySelectorAll: (): unknown[] => []};
@@ -393,6 +397,51 @@ test("notebook root expansion requests physical root while documents keep their 
     }
     assert.equal(JSON.stringify(calls[0].args[1]), JSON.stringify({notebook: "notebook", path: "/", maxListCount: 0}));
     assert.equal(JSON.stringify(calls[1].args[1]), JSON.stringify({notebook: "notebook", path: "/document.sy", maxListCount: 0}));
+});
+
+test("parent titles prefetch once and double clicks preserve expanded and collapsed pinned rows", async () => {
+    for (const {expanded, mobile} of [
+        {expanded: false, mobile: false}, {expanded: true, mobile: false},
+        {expanded: false, mobile: true}, {expanded: true, mobile: true},
+    ]) {
+        const {panel, config, calls} = loadPanel();
+        config.fileTree.parentDocClickExpand = true;
+        panel.mobile = mobile;
+        panel.generation = 0;
+        panel.expanded = new Set(expanded ? ["doc"] : []);
+        const row = {isConnected: true, dataset: {nodeId: "doc", notebook: "box", pinRow: "doc", path: "/doc.sy", count: "1"},
+            classList: {add: () => {}}};
+        const event = {stopPropagation: () => {}, target: {closest: (selector: string) =>
+            selector === "[data-pin-row]" || selector === ".b3-list-item__text" ? row : null}};
+        panel.open = () => calls.push({kind: "open", args: []});
+        panel.toggle = (...args) => { calls.push({kind: "toggle", args}); };
+        panel.click(event);
+        assert.equal(calls.filter(call => call.kind === "http").length, expanded ? 0 : 1);
+        await delay(0);
+        assert.equal(calls.filter(call => call.kind === "toggle").length, 0);
+        panel.click(event);
+        await delay(330);
+        assert.equal(calls.filter(call => call.kind === "open").length, 1);
+        assert.equal(calls.filter(call => call.kind === "toggle").length, 0);
+        assert.equal(panel.expanded.has("doc"), expanded);
+    }
+});
+
+test("single parent click reuses prefetched children after the click window", async () => {
+    const {panel, config, calls, childData} = loadPanel();
+    config.fileTree.parentDocClickExpand = true;
+    panel.generation = 0;
+    panel.expanded = new Set();
+    const row = {isConnected: true, dataset: {nodeId: "doc", notebook: "box", pinRow: "doc", path: "/doc.sy", count: "1"},
+        classList: {add: () => {}}};
+    const event = {stopPropagation: () => {}, target: {closest: (selector: string) =>
+        selector === "[data-pin-row]" || selector === ".b3-list-item__text" ? row : null}};
+    panel.open = () => assert.fail("unexpected open");
+    panel.toggle = (...args) => { calls.push({kind: "toggle", args}); };
+    panel.click(event);
+    await delay(330);
+    assert.equal(calls.filter(call => call.kind === "http").length, 1);
+    assert.deepEqual(calls.find(call => call.kind === "toggle").args, [row, true, childData]);
 });
 
 test("pinned area follows list contents on initial load, pin, unpin and sync", async () => {

@@ -6,7 +6,7 @@
 		"id": "20260907120000-crycn01",
 		"title": "加密笔记本",
 		"type": "doc",
-		"updated": "20260908162209"
+		"updated": "20260925180231"
 	},
 	"Children": [
 		{
@@ -1200,6 +1200,163 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-wqj5mq8",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260925180231-wqj5mq8",
+				"updated": "20260925180231"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "无法解锁的笔记本的归档与恢复"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-cw38cp8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-cw38cp8",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鉴权"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "加密笔记本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打包移出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，选择要归档的已锁定笔记本，无需输入主密码。归档包含原始密文、相关历史、本地数据仓库快照和现存密钥恢复材料。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-ipq0n2f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-ipq0n2f",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将归档保存到工作区以外的位置，明确确认已保存后，再移出所选笔记本。取消保存不会移除数据。移出会通过正常同步影响其他设备，不会自动删除数据仓库快照。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-3htujkf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-3htujkf",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "5 个无法解锁的笔记本只移出 3 个时，另外 2 个和旧密钥配置仍保留。全部旧笔记本及恢复依赖归档后，可关闭再重新启用加密笔记本，设置新主密码。软件也会保留恢复副本，请同时妥善保存自行导出的归档。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-jsu1bwe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-jsu1bwe",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "找回匹配的旧密钥和密码后，新建未配置加密密钥的独立工作区，关闭同步，打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鉴权"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "加密笔记本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "恢复加密归档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。选择归档并输入旧主密码；归档缺少可用密钥备份时，可另选找回的匹配密钥备份。已有加密密钥配置的工作区不允许导入这种归档。"
+				}
+			]
+		},
+		{
+			"ID": "20260925180231-7whxd48",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925180231-7whxd48",
+				"updated": "20260925180231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "恢复会先验证密钥和密文，全部通过后再写入数据，笔记本仍保持锁定。相关历史一并恢复，归档中的仓库快照作为笔记本删除历史提供恢复。损坏的归档、错误密码和不支持的版本不会覆盖已有数据。归档不能替代丢失的密码或恢复材料。"
 				}
 			]
 		},

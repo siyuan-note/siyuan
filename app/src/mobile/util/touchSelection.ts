@@ -25,11 +25,12 @@ export const getKeyboardHideResult = (
     preserveSelection: boolean,
     tableCellSelectionRestored: boolean,
     hasVisibleEditorSelection: boolean,
+    hasActiveEditorPanel = false,
 ) => {
     if (preserveSelection && tableCellSelectionRestored) {
         return KeyboardHideResult.RestoreTableCellSelection;
     }
-    if (preserveSelection && hasVisibleEditorSelection) {
+    if (hasActiveEditorPanel || (preserveSelection && hasVisibleEditorSelection)) {
         return KeyboardHideResult.PreserveSelection;
     }
     return KeyboardHideResult.Cleanup;

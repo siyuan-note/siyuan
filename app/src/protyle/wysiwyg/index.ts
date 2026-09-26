@@ -1,4 +1,5 @@
 import {recordReplacementUndo} from "./replacementInput";
+import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
@@ -45,7 +46,7 @@ import {mergeTableCellContents} from "../util/tableCellRich";
 import {resolveDocumentBlockElement} from "../util/outlineBlock";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
-import {getDiagramBlock, previewDiagram} from "../preview/diagram";
+import {getDiagramBlock, handleDiagramPreviewClick, previewDiagram} from "../preview/diagram";
 import {
     contentMenu,
     enterBack,
@@ -191,6 +192,7 @@ import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard, prepareExternalClipboardHTML, prepareRichClipboardHTML} from "../util/richClipboard";
 import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
+import {expandQueryEmbedsForClipboard} from "../util/queryEmbedClipboard";
 import {cleanListMindmapHTML} from "../render/listMindmap/model";
 import {
     getSemanticInlineVisibleText,
@@ -393,9 +395,11 @@ export class WYSIWYG {
     private mouseDownTarget: EventTarget | null = null;
     private inputTimeout: number;
     private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
+    private runningInputTasks = new Set<Promise<void>>();
     public tableControl: TableControl;
     private largeListVirtualizer?: LargeListVirtualizer;
     private disposeSpellcheckFocus?: () => void;
+    private disposeEmbedToolbarVisibility?: () => void;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -407,7 +411,7 @@ export class WYSIWYG {
             if (this.inputTimeout === timeout) {
                 this.inputTimeout = undefined;
             }
-            void callback();
+            void this.runInput(callback);
         }, delay);
         this.pendingInputTimeouts.set(timeout, callback);
         if (replace) {
@@ -415,12 +419,25 @@ export class WYSIWYG {
         }
     }
 
+    private async runInput(callback: () => void | Promise<void>) {
+        const task = Promise.resolve(callback());
+        this.runningInputTasks.add(task);
+        try {
+            await task;
+        } finally {
+            this.runningInputTasks.delete(task);
+        }
+    }
+
     public async flushPendingInput() {
-        const callbacks = Array.from(this.pendingInputTimeouts.values());
-        this.pendingInputTimeouts.forEach((callback, timeout) => clearTimeout(timeout));
-        this.pendingInputTimeouts.clear();
-        this.inputTimeout = undefined;
-        await Promise.all(callbacks.map(callback => callback()));
+        // 输入处理可能等待块引用查询，交接编辑器前也需等待已经开始执行的任务。
+        while (this.pendingInputTimeouts.size || this.runningInputTasks.size) {
+            const callbacks = Array.from(this.pendingInputTimeouts.values());
+            this.pendingInputTimeouts.forEach((callback, timeout) => clearTimeout(timeout));
+            this.pendingInputTimeouts.clear();
+            this.inputTimeout = undefined;
+            await Promise.all([...this.runningInputTasks, ...callbacks.map(callback => this.runInput(callback))]);
+        }
     }
 
     public copyRichText() {
@@ -510,6 +527,7 @@ export class WYSIWYG {
         }
         this.bindCommonEvent(protyle);
         this.bindEvent(protyle);
+        this.disposeEmbedToolbarVisibility = bindEmbedToolbarVisibility(this.element);
         /// #if BROWSER
         if (!isMobile() && !isPhablet() && navigator.userAgent.includes("Chrome/")) {
             this.disposeSpellcheckFocus = bindSpellcheckFocus(this.element, () =>
@@ -538,6 +556,7 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.disposeEmbedToolbarVisibility?.();
         this.disposeSpellcheckFocus?.();
         this.largeListVirtualizer?.destroy();
     }
@@ -1089,8 +1108,19 @@ export class WYSIWYG {
             if (protyle.disabled) {
                 html = getEnableHTML(html);
             }
-            textPlain = textPlain || protyle.lute.BlockDOM2StdMd(selectAVElement ? html :
-                transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy")).trimEnd();
+            const externalHTML = selectAVElement ? html : expandQueryEmbedsForClipboard(html);
+            if (externalHTML !== html) {
+                // 划选保留纯文本语义，整块复制沿用 Markdown 格式；空结果不回退到查询语句。
+                const template = document.createElement("template");
+                template.innerHTML = externalHTML;
+                textPlain = selectElements.length > 0 ? "" : Array.from(template.content.childNodes).map(item =>
+                    item.nodeType === Node.TEXT_NODE ? item.textContent :
+                        (item.nodeType === Node.ELEMENT_NODE ? getPlainText(item as HTMLElement) : ""))
+                    .filter(Boolean).join("\n");
+            }
+            const externalBlockDOM = selectAVElement ? externalHTML :
+                transformSemanticInlineHTML(normalizeSemanticInlineHTML(externalHTML), "legacy");
+            textPlain = textPlain || protyle.lute.BlockDOM2StdMd(externalBlockDOM).trimEnd();
             textPlain = removeZWJ(nbsp2space(textPlain)) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
@@ -1119,10 +1149,10 @@ export class WYSIWYG {
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 restoreLuteMarkdownSyntax(protyle);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                let exportedHTML = blockDOMClipboardRichData?.textHTML ??
+                let exportedHTML = (externalHTML === html ? blockDOMClipboardRichData?.textHTML : undefined) ??
                     removeZWJ((selectTableElement || selectTableRange) ? html :
-                        (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : clipboardBlockDOM) :
-                            protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : clipboardBlockDOM)));
+                        (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : externalBlockDOM) :
+                            protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : externalBlockDOM)));
                 exportedHTML = transformSemanticInlineHTML(exportedHTML, "remove");
                 if (copyAsRichText) {
                     const prepared = prepareRichClipboardHTML(exportedHTML);
@@ -4155,7 +4185,7 @@ export class WYSIWYG {
                 // 小鹤音形 ;k 不能使用 setTimeout;
                 // wysiwyg.element contenteditable 为 false 时，连拼 needRender 必须为 false
                 // hr 渲染；任务列表、粗体、数学公示结尾 needRender 必须为 true
-                input(protyle, blockElement, range, true);
+                void this.runInput(() => input(protyle, blockElement, range, true));
             } else {
                 const id = blockElement.getAttribute("data-node-id");
                 if (protyle.wysiwyg.lastHTMLs[id]) {
@@ -4348,6 +4378,8 @@ export class WYSIWYG {
             if (!blockElement) {
                 return;
             }
+            // 输入可能改变列宽，隐藏已有调整线，待鼠标重新命中列边界后定位。
+            blockElement.closest(".table")?.querySelector(".table__resize")?.setAttribute("style", "display:none");
             if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {
                 protyle.hint.enableExtend = true;
             }
@@ -4531,7 +4563,8 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
-            if (target.tagName === "IMG" && !target.classList.contains("emoji")) {
+            if (target.tagName === "IMG" && !target.classList.contains("emoji") &&
+                !target.closest('[data-subtype="plantuml"]')) {
                 previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);
                 return;
             }
@@ -4541,13 +4574,29 @@ export class WYSIWYG {
                 previewDiagram(diagramElement);
                 event.stopPropagation();
                 event.preventDefault();
+                return;
             }
+            /// #if MOBILE
+            const nodeElement = hasClosestBlock(target);
+            const selection = getSelection();
+            if (nodeElement && !isNotEditBlock(nodeElement) && !nodeElement.classList.contains("av") &&
+                !target.closest(".protyle-action, .protyle-attr, a, button, input, textarea, select") &&
+                target.closest("[contenteditable]")?.getAttribute("contenteditable") !== "false" &&
+                selection?.rangeCount && !selection.isCollapsed && selection.toString() &&
+                nodeElement.contains(selection.anchorNode) && nodeElement.contains(selection.focusNode)) {
+                protyle.toolbar.range = selection.getRangeAt(0);
+                contentMenu(protyle, nodeElement);
+            }
+            /// #endif
         });
         let mobileBlur = false;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             if (protyle.toolbar.isMultiSelectMode()) {
                 event.preventDefault();
                 event.stopPropagation();
+                return;
+            }
+            if (handleDiagramPreviewClick(event)) {
                 return;
             }
             /// #if MOBILE

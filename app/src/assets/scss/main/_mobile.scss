@@ -162,6 +162,12 @@ body.mobile-keyboard--open {
   line-height: 24px;
   height: 24px;
   font-size: 16px;
+
+  &.counter--compact {
+    font-size: 12px;
+    height: 22px;
+    line-height: 22px;
+  }
 }
 
 .toolbar {
@@ -605,6 +611,8 @@ body.mobile-topbar--merged {
   position: absolute;
   inset: var(--mobile-top-safe-area) 0 0;
   box-sizing: border-box;
+  // 外壳不创建 iOS 滚动层叠上下文，使固定定位工具栏能覆盖标题栏。
+  -webkit-overflow-scrolling: auto;
   // 绝对定位的主编辑器需继承键盘占位，保持软键盘与工具栏菜单切换时的滚动视口高度。
   padding-bottom: inherit;
 
@@ -642,6 +650,8 @@ body.mobile-topbar--merged {
 
   > .protyle-content,
   > .protyle-preview {
+    // 实际滚动区域保留触摸滚动及其后代的继承行为。
+    -webkit-overflow-scrolling: touch;
     margin-left: env(safe-area-inset-left);
     margin-right: env(safe-area-inset-right);
   }
@@ -1235,6 +1245,21 @@ body.mobile-topbar--merged {
       margin: 0 16px;
       padding: 16px 0;
     }
+  }
+
+  #syncProviderConfig .b3-label--inner,
+  .config-account__payment-status,
+  .config-account__payment-remaining,
+  .config-cloud-space {
+    font-size: 14px;
+  }
+
+  .config-cloud-space .b3-list-item__meta {
+    font-size: inherit;
+  }
+
+  .config-cloud-space__title {
+    font-size: 15px;
   }
 
   .config-assets {

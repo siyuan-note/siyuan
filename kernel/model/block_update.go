@@ -243,12 +243,16 @@ func resolveBlockUpdateNode(oldNode, root *ast.Node) (updatedNode *ast.Node, err
 	if nil == updatedNode {
 		return nil, errors.New("parse tree failed")
 	}
-	if ast.NodeListItem == oldNode.Type && ast.NodeList == updatedNode.Type {
-		listItem := firstContentBlock(updatedNode)
-		if nil == listItem || ast.NodeListItem != listItem.Type {
-			return nil, errors.New("list block has no list item")
+	if ast.NodeListItem == oldNode.Type && ast.NodeList == updatedNode.Type ||
+		ast.NodeMindmapItem == oldNode.Type && ast.NodeMindmap == updatedNode.Type {
+		item := firstContentBlock(updatedNode)
+		if nil == item || oldNode.Type != item.Type {
+			if ast.NodeListItem == oldNode.Type {
+				return nil, errors.New("list block has no list item")
+			}
+			return nil, errors.New("mind map block has no mind map item")
 		}
-		updatedNode = listItem
+		updatedNode = item
 	}
 	return
 }

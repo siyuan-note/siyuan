@@ -6,7 +6,7 @@
 		"id": "20211226123216-tlxw66f",
 		"title": "視窗和分頁",
 		"type": "doc",
-		"updated": "20260903130000"
+		"updated": "20260925230000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-3a8f750",
-				"updated": "20260903130000"
+				"updated": "20260925230000"
 			},
 			"Children": [
 				{
@@ -780,6 +780,234 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-cvaq88b",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260922155242-cvaq88b",
+				"updated": "20260925230000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新視窗版面配置"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-4dgh9o5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-4dgh9o5",
+				"updated": "20260925230000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新視窗版面配置用於儲存已命名視窗的分頁、分割畫面和閱讀位置。主視窗版面配置和新視窗版面配置在同一個版面配置選單內分組顯示，分別儲存。儲存或更新主視窗版面配置時，也會記錄視窗大小、位置，以及最大化或全螢幕狀態；已命名的新視窗會自動儲存這些資訊。開啟版面配置時會還原相應的視窗狀態，顯示器配置改變後會調整至可用顯示器內。沒有視窗資訊的舊版面配置仍可正常使用。視窗位置和大小的還原受作業系統限制，Wayland 環境可能不支援。最多勾選一個主視窗版面配置，並可勾選多個新視窗版面配置，再點擊清單上方的開啟按鈕一起開啟；本次勾選不會儲存。此功能適用於桌面用戶端；加密筆記本的分頁不會寫入版面配置。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "再次點擊版面配置按鈕可關閉命名對話方塊。可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "選單和按鈕的顯隱與排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新視窗頂欄"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中設定版面配置按鈕和置頂按鈕的顯示與排序。"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-ez4wspy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-ez4wspy",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "建立：在新視窗中安排好分頁，點擊釘選按鈕旁的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "儲存為新視窗版面配置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，輸入名稱並儲存。之後會自動儲存分頁、分割畫面、文件閱讀位置和 PDF 頁碼的變更。"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-chpn51p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-chpn51p",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重新開啟：在主視窗中開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "佈局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新視窗版面配置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 並選取版面配置，即可在新視窗中還原儲存的版面配置。如果對應視窗已開啟，則會切換到既有視窗。清單支援依名稱搜尋。"
+				}
+			]
+		},
+		{
+			"ID": "20260922155242-j375giy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260922155242-j375giy",
+				"updated": "20260923114823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "管理：點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主視窗版面配置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 右側的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可儲存目前的主視窗版面配置。將滑鼠移到項目或其右側箭頭上，會展開子選單並保留版面配置清單。新視窗版面配置依序提供 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打開"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（對應視窗已開啟時顯示 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "切換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重命名"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "刪除"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。主視窗版面配置提供 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可載入選取的版面配置，以及 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更新"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可將目前的主視窗儲存至該項目；新視窗版面配置會自動儲存。兩類版面配置的子選單末尾均顯示最近儲存時間。也可點擊釘選按鈕旁的版面配置圖示重新命名新視窗版面配置。重新命名對話方塊分別以 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主視窗版面配置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新視窗版面配置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 為標題，提供取消和確定按鈕。刪除版面配置會保留文件、附件和已開啟的視窗。搜尋框固定在頂部，下方清單可獨立捲動。"
 				}
 			]
 		},

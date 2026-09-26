@@ -1,7 +1,7 @@
 import {popTextCell} from "./cell";
 
-// 新建条目只在首次完成渲染后进入主键编辑，刷新不重复聚焦，也不覆盖模板内容。
-export const focusNewDatabasePrimary = (root: Element, protyle: IProtyle,
+// 打开条目后只在首次完成渲染时进入主键编辑，刷新不重复聚焦，也不覆盖现有内容。
+export const focusDatabasePrimary = (root: Element, protyle: IProtyle,
                                         request: {avID: string; itemID: string; focusPrimary?: boolean}) => {
     if (!request.focusPrimary || !root.isConnected) {
         return;

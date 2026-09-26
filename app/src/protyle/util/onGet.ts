@@ -4,6 +4,7 @@ import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "./processCode";
 import {migrateLegacyMindmapsBeforeRender} from "../render/listMindmap/migrate";
+import {resolveVisibleListMindmapBlock} from "../render/listMindmap/render";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {revealTabsForTarget} from "../render/tabsRender";
@@ -626,6 +627,41 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     } else if (!focusElement || action.includes(Constants.CB_GET_FOCUSFIRST)) {
         focusElement = protyle.wysiwyg.element.firstElementChild;
     }
+    const visibleMindmap = resolveVisibleListMindmapBlock(focusElement);
+    if (visibleMindmap !== undefined) {
+        protyle.observerLoad?.disconnect();
+        if (!visibleMindmap) {
+            return;
+        }
+        if (action.includes(Constants.CB_GET_HL)) {
+            preventScroll(protyle);
+            bgFade(visibleMindmap.carrier);
+        }
+        if (!suppressFocus && (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST))) {
+            setTimeout(() => {
+                visibleMindmap.focus();
+                /// #if !MOBILE
+                if (!action.includes(Constants.CB_GET_UNUNDO)) {
+                    const editable = getContenteditableElement(focusElement);
+                    if (editable) {
+                        const range = document.createRange();
+                        range.selectNodeContents(editable);
+                        range.collapse(true);
+                        pushBack(protyle, range, focusElement);
+                    }
+                }
+                /// #endif
+            }, 0);
+        }
+        if (scrollAttr && typeof scrollAttr.scrollTop === "number") {
+            protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+        } else if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_SCROLL) ||
+            action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
+            scrollCenter(protyle, visibleMindmap.scrollElement, scrollPosition);
+        }
+        visibleMindmap.reveal();
+        return;
+    }
     const hasScrollTop = scrollAttr && typeof scrollAttr.scrollTop === "number";
     const savedFocusElement = focusElement;
     if (hasScrollTop && scrollAttr.focusId && !action.includes(Constants.CB_GET_HL)) {
@@ -682,32 +718,37 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         return;
     }
     // 加强定位
-    // 使用 AbortController 监听用户手势（滚轮/触摸/方向键），一旦用户主动滚动即停止强制定位，否则顶部为数据库等异步渲染块撑高内容时会反复重置滚动位置
-    const userScrollAbort = new AbortController();
-    const onUserScroll = () => userScrollAbort.abort();
-    protyle.contentElement.addEventListener("wheel", onUserScroll, {
+    // 使用 AbortController 监听用户滚动或编辑，停止后续布局变化引起的重复定位
+    const positioningAbort = new AbortController();
+    const cancelPositioning = () => positioningAbort.abort();
+    protyle.contentElement.addEventListener("wheel", cancelPositioning, {
         capture: true,
         passive: true,
-        signal: userScrollAbort.signal
+        signal: positioningAbort.signal
     });
-    protyle.contentElement.addEventListener("touchstart", onUserScroll, {
+    protyle.contentElement.addEventListener("touchstart", cancelPositioning, {
         capture: true,
         passive: true,
-        signal: userScrollAbort.signal
+        signal: positioningAbort.signal
     });
-    protyle.contentElement.addEventListener("touchmove", onUserScroll, {
+    protyle.contentElement.addEventListener("touchmove", cancelPositioning, {
         capture: true,
         passive: true,
-        signal: userScrollAbort.signal
+        signal: positioningAbort.signal
+    });
+    // 开始编辑后停止自动定位，避免输入引起的布局变化把可见光标重新滚到视口顶部
+    protyle.element.addEventListener("beforeinput", cancelPositioning, {
+        capture: true,
+        signal: positioningAbort.signal
     });
     protyle.contentElement.addEventListener("keydown", (event: KeyboardEvent) => {
         // 仅拦截会触发滚动的按键，避免影响正常编辑输入
         if (["PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown", " "].includes(event.key)) {
-            userScrollAbort.abort();
+            positioningAbort.abort();
         }
-    }, {capture: true, signal: userScrollAbort.signal});
+    }, {capture: true, signal: positioningAbort.signal});
     protyle.observerLoad = new ResizeObserver(() => {
-        if (userScrollAbort.signal.aborted) {
+        if (positioningAbort.signal.aborted) {
             // 用户已主动滚动，停止强制定位并将滚动权交还给用户
             protyle.observerLoad.disconnect();
             protyle.observer.observe(protyle.wysiwyg.element);
@@ -726,13 +767,13 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     protyle.observer.unobserve(protyle.wysiwyg.element);
     setTimeout(() => {
         protyle.observerLoad.disconnect();
-        userScrollAbort.abort();
+        positioningAbort.abort();
         protyle.observer.observe(protyle.wysiwyg.element);
     }, 1000 * 3);
 
     if (focusElement === protyle.wysiwyg.element.firstElementChild && !hasScrollTop) {
         protyle.observerLoad.disconnect();
-        userScrollAbort.abort();
+        positioningAbort.abort();
     }
 };
 

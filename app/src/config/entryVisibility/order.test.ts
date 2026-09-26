@@ -35,7 +35,7 @@ test("database calendar view merges into saved slash orders and preserves plugin
     saved.splice(1, 0, "plugin:example:item");
     const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
     assert.deepEqual(merged.filter(key => key !== "databaseCalendarView"), saved);
-    assert.equal(merged[merged.indexOf("databaseListView") + 1], "databaseCalendarView");
+    assert.equal(merged[merged.indexOf("databaseKanbanView") + 1], "databaseCalendarView");
     const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
     assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
     assert.deepEqual(resolveEntryOrder(["databaseCalendarView", "databaseListView"], merged, separators),
@@ -70,8 +70,8 @@ test("custom task status merges into saved list menus without moving existing en
         merged, new Set(["separator_numbering"])), ["appendListItem", "plugin:example:item", "customTaskStatus", "prependListItem"]);
 });
 
-test("list mind map view merges into saved list menus and preserves plugin slots", () => {
-    const entries = getEntryCatalogChildren("gutter.single.listBlock");
+test("list mind map view merges into conversion menus and preserves plugin slots", () => {
+    const entries = getEntryCatalogChildren("gutter.single.turnInto");
     const defaults = entries.map(item => item.key);
     const saved = defaults.filter(key => key !== "listMindmap");
     saved.splice(1, 0, "plugin:example:item");
@@ -79,10 +79,10 @@ test("list mind map view merges into saved list menus and preserves plugin slots
     const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
     assert.deepEqual(merged.filter(key => key !== "listMindmap"), saved);
     assert.equal(merged[1], "plugin:example:item");
-    assert.equal(merged[merged.indexOf("appendListItem") + 1], "listMindmap");
+    assert.equal(merged[merged.indexOf("check") + 1], "listMindmap");
     assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
-    assert.deepEqual(resolveEntryOrder(["prependListItem", "appendListItem", "listMindmap"], merged, separators),
-        ["prependListItem", "appendListItem", "listMindmap"]);
+    assert.deepEqual(resolveEntryOrder(["list", "check", "listMindmap"], merged, separators),
+        ["list", "check", "listMindmap"]);
 });
 
 test("definition conversion submenus preserve custom order and plugin slots", () => {

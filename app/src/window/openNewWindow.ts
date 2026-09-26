@@ -10,6 +10,7 @@ import {getAssetExtension, getDisplayName} from "../util/pathName";
 import {getSearch} from "../util/functions";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {appendRemoteQuery} from "../util/hostCapabilities";
+import type {IWindowGeometry} from "./geometry";
 
 interface windowOptions {
     position?: {
@@ -26,6 +27,14 @@ const getWindowURL = (layout: unknown) => {
     url.searchParams.set("v", Constants.SIYUAN_VERSION);
     url.searchParams.set("json", JSON.stringify(layout));
     return appendRemoteQuery(url).href;
+};
+
+export const openNewWindowByWorkspace = (id: string, windowGeometry?: IWindowGeometry) => {
+    /// #if !BROWSER
+    const url = new URL(getWindowURL([]));
+    url.searchParams.set("windowWorkspace", id);
+    ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {url: url.href, alwaysOnTop: false, windowGeometry});
+    /// #endif
 };
 
 export const openNewWindow = (tab: Tab, options: windowOptions = {}) => {

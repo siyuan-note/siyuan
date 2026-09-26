@@ -13,7 +13,7 @@ import * as dayjs from "dayjs";
 import {getFieldsByData} from "./view";
 import {getFieldIdByCellElement} from "./row";
 import {Constants} from "../../../constants";
-import {setPosition} from "../../../util/setPosition";
+import {setSelectMenuPosition} from "./selectPosition";
 import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
 import {
     AV_MANAGE_CUSTOM_COLORS_TYPE,
@@ -163,8 +163,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     const menuElement = hasClosestByClassName(target, "b3-menu");
     target.remove();
     if (menuElement) {
-        const cellRect = cellElements[cellElements.length - 1].getBoundingClientRect();
-        setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+        setSelectMenuPosition(menuElement, cellElements[cellElements.length - 1]);
     }
 };
 
@@ -269,8 +268,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         if (selectedElement) {
             menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
             // chips 增减导致菜单高度变化后重新定位（锁底部，顶部自适应，避免底部溢出视口）
-            const cellRect = cellElements[cellElements.length - 1].getBoundingClientRect();
-            setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+            setSelectMenuPosition(menuElement, cellElements[cellElements.length - 1]);
         }
     }, keepMenuOpen);
     if (menu.isOpen) {
@@ -398,8 +396,7 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
                 if (selectedElement) {
                     menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
                     // chips 增减导致菜单高度变化后重新定位（锁底部，顶部自适应，避免底部溢出视口）
-                    const cellRect = cellElements[cellElements.length - 1].getBoundingClientRect();
-                    setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+                    setSelectMenuPosition(menuElement, cellElements[cellElements.length - 1]);
                 }
             }, undefined, true);
         }
@@ -506,8 +503,7 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
                     }
                     menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll;
                     // chips 增减导致菜单高度变化后重新定位（锁底部，顶部自适应，避免底部溢出视口）
-                    const cellRect = cellElements[cellElements.length - 1].getBoundingClientRect();
-                    setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+                    setSelectMenuPosition(menuElement, cellElements[cellElements.length - 1]);
                     name = inputElement.value;
                     desc = descElement.value;
                     color = newColor;
@@ -744,8 +740,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         }
         menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
         // chips 增减导致菜单高度变化后重新定位（锁底部，顶部自适应，避免底部溢出视口）
-        const cellRect = cellElements[cellElements.length - 1].getBoundingClientRect();
-        setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+        setSelectMenuPosition(menuElement, cellElements[cellElements.length - 1]);
     }
 };
 

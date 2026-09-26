@@ -360,12 +360,13 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
         });
         document.body.insertAdjacentHTML("beforeend", `<div class="toolbar__window">
 <div class="toolbar__window-drag"></div>
-<div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages[isAlwaysOnTop ? "unpin" : "pin"]}" id="pinWindow">
+<div class="toolbar__item ariaLabel" data-window-topbar-entry="pinWindow" aria-label="${window.siyuan.languages[isAlwaysOnTop ? "unpin" : "pin"]}" id="pinWindow">
     <svg>
         <use xlink:href="#icon${isAlwaysOnTop ? "Unpin" : "Pin"}"></use>
     </svg>
 </div></div>`);
         const pinElement = document.getElementById("pinWindow");
+        void import("../window/workspace").then(({initWindowWorkspace}) => initWindowWorkspace());
         pinElement.addEventListener("click", () => {
             if (pinElement.getAttribute("aria-label") === window.siyuan.languages.pin) {
                 pinElement.querySelector("use").setAttribute("xlink:href", "#iconUnpin");

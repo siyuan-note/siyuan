@@ -102,7 +102,7 @@ const assets = {
             <ul class="b3-list b3-list--background config-assets__list">
                 <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
             </ul>
-            <div class="config-assets__preview"></div>
+            <div class="config-assets__preview${mobile ? " fn__none" : ""}"></div>
         </div>
         <div class="fn__none config-assets${mobile ? " b3-list--mobile" : ""}" data-type="removeAV">
             <div class="fn__hr--b"></div>
@@ -117,7 +117,7 @@ const assets = {
             <ul class="b3-list b3-list--background config-assets__list">
                 <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
             </ul>
-            <div class="config-assets__preview" style="display: block;padding: 8px;"></div>
+            <div class="config-assets__preview${mobile ? " fn__none" : ""}" style="display: block;padding: 8px;"></div>
         </div>
         <div class="fn__none config-assets${mobile ? " b3-list--mobile" : ""}" data-type="missing">
             <div class="fn__hr"></div>
@@ -136,6 +136,21 @@ const assets = {
         }
         const assetsListElement = root.querySelector('.config-assets[data-type="remove"] .config-assets__list');
         const avListElement = root.querySelector('.config-assets[data-type="removeAV"] .config-assets__list');
+        const mobile = isMobile();
+        const assetsPreviewElement = assetsListElement.nextElementSibling as HTMLElement;
+        const avPreviewElement = avListElement.nextElementSibling as HTMLElement;
+        const hideMobilePreview = (listElement: Element, previewElement: HTMLElement) => {
+            if (!mobile) {
+                return;
+            }
+            listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+            previewElement.classList.add("fn__none");
+            previewElement.removeAttribute("data-item");
+        };
+        const clearAssetPreview = () => {
+            assetsPreviewElement.innerHTML = "";
+            hideMobilePreview(assetsListElement, assetsPreviewElement);
+        };
         const editor = new Protyle(app, avListElement.nextElementSibling as HTMLElement, {
             blockId: "",
             action: [Constants.CB_GET_HISTORY],
@@ -165,7 +180,7 @@ const assets = {
                             });
                             /// #endif
                             assetsListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                            assetsListElement.nextElementSibling.innerHTML = "";
+                            clearAssetPreview();
                         });
                     }, undefined, true);
                     event.preventDefault();
@@ -175,13 +190,18 @@ const assets = {
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAllAV}`, () => {
                         fetchPost("/api/av/removeUnusedAttributeViews", {}, () => {
                             avListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                            avListElement.nextElementSibling.innerHTML = "";
+                            avPreviewElement.innerHTML = "";
+                            hideMobilePreview(avListElement, avPreviewElement);
                         });
                     }, undefined, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (target.classList.contains("item") && !target.classList.contains("item--focus")) {
+                    if (mobile) {
+                        clearAssetPreview();
+                        hideMobilePreview(avListElement, avPreviewElement);
+                    }
                     root.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
                     target.classList.add("item--focus");
                     root.querySelectorAll(".config-assets").forEach(item => {
@@ -210,9 +230,32 @@ const assets = {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (mobile && target.getAttribute("data-tab-type") === "unrefAssets") {
+                    const selected = target.classList.contains("b3-list-item--focus");
+                    clearAssetPreview();
+                    if (!selected) {
+                        target.classList.add("b3-list-item--focus");
+                        assetsPreviewElement.setAttribute("data-item", target.dataset.item || "");
+                        assetsPreviewElement.innerHTML = renderAssetsPreview(target.dataset.path || "", target.dataset.item);
+                        assetsPreviewElement.classList.remove("fn__none");
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (target.getAttribute("data-tab-type") === "unRefAV") {
+                    const selected = mobile && target.classList.contains("b3-list-item--focus");
                     avListElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                    if (selected) {
+                        hideMobilePreview(avListElement, avPreviewElement);
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    }
                     target.classList.add("b3-list-item--focus");
+                    if (mobile) {
+                        avPreviewElement.setAttribute("data-item", target.dataset.item || "");
+                        avPreviewElement.classList.remove("fn__none");
+                    }
                     onGet({
                         data: {
                             data: {
@@ -295,6 +338,9 @@ const assets = {
                                         action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                                     });
                                 }
+                                if (avPreviewElement.getAttribute("data-item") === id) {
+                                    hideMobilePreview(avListElement, avPreviewElement);
+                                }
                             });
                         } else {
                             fetchPost("/api/asset/removeUnusedAsset", {
@@ -312,7 +358,7 @@ const assets = {
                                 } else {
                                     liElement.remove();
                                 }
-                                assetsListElement.nextElementSibling.innerHTML = "";
+                                clearAssetPreview();
                             });
                         }
                     }, undefined, true);
@@ -324,14 +370,16 @@ const assets = {
             }
         });
 
-        assetsListElement.addEventListener("mouseover", (event) => {
-            const liElement = hasClosestByClassName(event.target as Element, "b3-list-item");
-            if (liElement && liElement.getAttribute("data-item") !== assetsListElement.nextElementSibling.getAttribute("data-item")) {
-                const item = liElement.getAttribute("data-item");
-                assetsListElement.nextElementSibling.setAttribute("data-item", item);
-                assetsListElement.nextElementSibling.innerHTML = renderAssetsPreview(liElement.getAttribute("data-path"), item);
-            }
-        });
+        if (!mobile) {
+            assetsListElement.addEventListener("mouseover", (event) => {
+                const liElement = hasClosestByClassName(event.target as Element, "b3-list-item");
+                if (liElement && liElement.getAttribute("data-item") !== assetsPreviewElement.getAttribute("data-item")) {
+                    const item = liElement.getAttribute("data-item");
+                    assetsPreviewElement.setAttribute("data-item", item);
+                    assetsPreviewElement.innerHTML = renderAssetsPreview(liElement.getAttribute("data-path"), item);
+                }
+            });
+        }
         fetchPost("/api/asset/getUnusedAssets", {}, response => {
             assets._renderList(response.data, assetsListElement, "unrefAssets");
         });

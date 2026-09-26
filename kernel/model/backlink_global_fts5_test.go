@@ -119,6 +119,93 @@ func TestGlobalBacklinkPagination(t *testing.T) {
 	}
 }
 
+func TestGlobalBacklinkTransitiveContextsAndContentSort(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	Conf.Search = conf.NewSearch()
+	t.Cleanup(func() { ClearGlobalBacklinkSnapshots("") })
+	definition, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sql.IndexTreeQueue(definition)
+	tree, err := LoadTreeByBlockID(fixture.targetID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for tree.Root.FirstChild != nil {
+		tree.Root.FirstChild.Unlink()
+	}
+	ref := func(anchor string) *ast.Node {
+		return &ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: fixture.sourceID,
+			TextMarkBlockRefSubtype: "s", TextMarkTextContent: anchor}
+	}
+	list := &ast.Node{Type: ast.NodeList, ID: ast.NewNodeID(), ListData: &ast.ListData{}}
+	refIDs := []string{}
+	childIDs := []string{}
+	for _, anchor := range []string{"A1", "A2"} {
+		item := &ast.Node{Type: ast.NodeListItem, ID: ast.NewNodeID(), ListData: &ast.ListData{}}
+		paragraph := treenode.NewParagraph(ast.NewNodeID())
+		paragraph.AppendChild(ref(anchor))
+		child := treenode.NewParagraph(ast.NewNodeID())
+		child.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Question " + anchor)})
+		item.AppendChild(paragraph)
+		item.AppendChild(child)
+		list.AppendChild(item)
+		refIDs = append(refIDs, paragraph.ID)
+		childIDs = append(childIDs, child.ID)
+	}
+	tree.Root.AppendChild(list)
+	for _, suffix := range []string{"10", "2"} {
+		paragraph := treenode.NewParagraph(ast.NewNodeID())
+		paragraph.AppendChild(ref("Z"))
+		paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(" " + suffix)})
+		tree.Root.AppendChild(paragraph)
+		refIDs = append(refIDs, paragraph.ID)
+	}
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	sql.IndexTreeQueue(tree)
+	sql.UpdateRefsTreeQueue(tree)
+	sql.FlushQueue()
+	allow := func(string) bool { return true }
+	query := GlobalBacklinkQuery{ID: fixture.sourceID, Sort: 1}
+	token, items, total, _, expired, err := GetGlobalBacklinks(query, "", 0, "", allow)
+	if err != nil || expired || total != 4 {
+		t.Fatalf("global references: %+v %d %v %v", items, total, expired, err)
+	}
+	want := []string{refIDs[0], refIDs[1], refIDs[3], refIDs[2]}
+	for i, item := range items {
+		if item.ID != want[i] {
+			t.Fatalf("ascending reference %d = %s, want %s", i, item.ID, want[i])
+		}
+	}
+	contexts, expired, err := GetGlobalBacklinkContexts(query, token, refIDs[:2], allow)
+	if err != nil || expired || len(contexts) != 2 {
+		t.Fatalf("transitive contexts: %+v %v %v", contexts, expired, err)
+	}
+	for i, context := range contexts {
+		if context.ID != refIDs[i] || context.ReferenceBlockID != refIDs[i] ||
+			!strings.Contains(context.DOM, `data-node-id="`+childIDs[i]+`"`) ||
+			strings.Contains(context.DOM, `data-node-id="`+childIDs[1-i]+`"`) {
+			t.Fatalf("reference %d lost or merged its list content: %+v", i, context)
+		}
+	}
+	query.Sort = 2
+	_, items, _, _, expired, err = GetGlobalBacklinks(query, "", 0, "", allow)
+	if err != nil || expired {
+		t.Fatalf("descending references: %v %v", expired, err)
+	}
+	want = []string{refIDs[2], refIDs[3], refIDs[1], refIDs[0]}
+	for i, item := range items {
+		if item.ID != want[i] {
+			t.Fatalf("descending reference %d = %s, want %s", i, item.ID, want[i])
+		}
+	}
+}
+
 func TestGlobalBacklinkSnapshotBounds(t *testing.T) {
 	t.Cleanup(func() { ClearGlobalBacklinkSnapshots("") })
 	query := GlobalBacklinkQuery{ID: "id", Sort: 1}
@@ -168,12 +255,12 @@ func TestGlobalBacklinkLargeDataset(t *testing.T) {
 	}
 	sql.IndexTreeQueue(definition)
 	for doc := 0; doc < documents; doc++ {
-		tree := addFileOperationTestDoc(t, fixture, ast.NewNodeID(), fmt.Sprintf("Source%d", doc), false)
+		tree := addFileOperationTestDoc(t, fixture, fmt.Sprintf("20260923000000-d%06d", doc), fmt.Sprintf("Source%d", doc), false)
 		for tree.Root.FirstChild != nil {
 			tree.Root.FirstChild.Unlink()
 		}
 		for index := perDocument - 1; index >= 0; index-- {
-			p := treenode.NewParagraph(ast.NewNodeID())
+			p := treenode.NewParagraph(fmt.Sprintf("20260923000000-p%06d", index*documents+doc+1))
 			p.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: fixture.sourceID,
 				TextMarkBlockRefSubtype: "s", TextMarkTextContent: fmt.Sprintf("A%d", index*documents+doc+1)})
 			tree.Root.AppendChild(p)

@@ -11,6 +11,25 @@ import {
     normalizeEntryVisibilityImportProfile,
 } from "./profile";
 
+test("chart height migration retains shared visibility and plugin order", () => {
+    for (const existing of [undefined, true, false]) {
+        const entries: Record<string, boolean> = {"gutter.single.chart.height": false};
+        if (existing !== undefined) {
+            entries["gutter.single.height"] = existing;
+        }
+        const profile = normalizeEntryVisibilityImportProfile({name: "Custom", entries, orders: {
+            "gutter.single": ["pluginBefore", "width", "height", "pluginAfter"],
+            "gutter.single.chart": ["pluginBefore", "height", "update", "pluginAfter"],
+        }}, 6, {});
+        assert.deepEqual(profile.entries, {"gutter.single.height": existing ?? false});
+        assert.deepEqual(profile.orders, {
+            "gutter.single": ["pluginBefore", "width", "height", "pluginAfter"],
+            "gutter.single.chart": ["pluginBefore", "update", "pluginAfter"],
+        });
+        assert.deepEqual(normalizeEntryVisibilityImportProfile(profile, 6, {}), profile);
+    }
+});
+
 test("task state imports match kernel migrations and remain stable on reimport", () => {
     const fixtures = JSON.parse(readFileSync(resolve(process.cwd(), "../kernel/conf/testdata/task_status_menu.json"), "utf8"));
     for (const fixture of fixtures) {

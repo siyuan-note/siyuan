@@ -40,6 +40,9 @@ type FileTreeHeadingDocRequest struct {
 	FileTreeBlockDocOptions
 	fields fileTreeFields
 }
+
+// FileTreeListItemDocRequest 将完整列表项移为文档，保留列表类型、任务状态、嵌套内容和列表项属性。
+// 原列表项 ID 用作文档 ID，正文列表和列表项使用新 ID，内部块 ID 保持不变。
 type FileTreeListItemDocRequest struct {
 	SrcListItemID  string `json:"srcListItemID"`
 	TargetNotebook string `json:"targetNoteBook"`

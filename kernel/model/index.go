@@ -50,6 +50,9 @@ import (
 // databaseIndexDataLock 用于避免索引任务读取正在被替换或删除的笔记本目录。
 var databaseIndexDataLock sync.Mutex
 
+const indexBatchDocuments = 32
+const indexBatchBytes int64 = 8 * 1024 * 1024
+
 func UpsertIndexes(paths []string) {
 	var syFiles []string
 	for _, p := range paths {
@@ -205,7 +208,10 @@ func indexBox(boxID string) {
 		}
 
 		lock.Lock()
-		avNodes = append(avNodes, tree.Root.ChildrenByType(ast.NodeAttributeView)...)
+		for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
+			// 关联镜像只需要节点标识，避免父节点和兄弟节点引用把整篇文档保留到重建结束。
+			avNodes = append(avNodes, &ast.Node{Type: ast.NodeAttributeView, ID: node.ID, AttributeViewID: node.AttributeViewID})
+		}
 		lock.Unlock()
 
 		cache.PutDocIALInBox(file.path, tree.Box, docIAL)
@@ -216,7 +222,20 @@ func indexBox(boxID string) {
 			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, (len(files))-i))
 		}
 	})
+	defer p.Release()
+	var batchDocuments int
+	var batchBytes int64
+	flushBatch := func() {
+		waitGroup.Wait()
+		sql.FlushQueue()
+		batchDocuments, batchBytes = 0, 0
+		debug.FreeOSMemory()
+	}
 	for _, file := range files {
+		if util.IsExiting.Load() {
+			waitGroup.Wait()
+			return
+		}
 		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
 			continue
 		}
@@ -225,16 +244,22 @@ func indexBox(boxID string) {
 			// 不以块 ID 命名的 .sy 文件不应该被加载到思源中 https://github.com/siyuan-note/siyuan/issues/16089
 			continue
 		}
+		// 同时限制文档数量和源文件体积；单篇大文档独立处理，避免与其他文档叠加峰值。
+		if batchDocuments > 0 && (batchDocuments >= indexBatchDocuments || batchBytes+file.size > indexBatchBytes) {
+			flushBatch()
+		}
 
 		waitGroup.Add(1)
 		invokeErr := p.Invoke(file)
 		if nil != invokeErr {
+			waitGroup.Done()
 			logging.LogErrorf("invoke [%s] failed: %s", file.path, invokeErr)
 			continue
 		}
+		batchDocuments++
+		batchBytes += file.size
 	}
-	waitGroup.Wait()
-	p.Release()
+	flushBatch()
 
 	// 关联数据库和块
 	av.BatchUpsertBlockRel(avNodes)
@@ -424,13 +449,17 @@ func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBloc
 		return
 	}
 
-	embedBlock.Content = "" // 嵌入块每查询一次多一个结果 https://github.com/siyuan-note/siyuan/issues/7196
+	content := "" // 嵌入块每查询一次多一个结果 https://github.com/siyuan-note/siyuan/issues/7196
 	for _, block := range queryResultBlocks {
-		embedBlock.Content += block.Block.Markdown
+		content += block.Block.Markdown
 	}
-	if "" == embedBlock.Content {
-		embedBlock.Content = "no query result"
+	if "" == content {
+		content = "no query result"
 	}
+	if embedBlock.Content == content {
+		return
+	}
+	embedBlock.Content = content
 	sql.UpdateBlockContentQueue(embedBlock)
 }
 

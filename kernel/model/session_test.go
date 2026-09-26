@@ -423,11 +423,12 @@ func TestCheckAuthLoopbackProxy(t *testing.T) {
 	}
 
 	for _, test := range []struct {
-		name, method, path, origin, site string
-		authenticated                    bool
-		want                             int
+		name, method, path, origin, site, mode, dest string
+		authenticated                                bool
+		want                                         int
 	}{
 		{name: "page redirects to login", method: http.MethodGet, path: "/stage/build/desktop/", site: "none", want: http.StatusFound},
+		{name: "same-site app navigation still requires login", method: http.MethodGet, path: "/stage/build/desktop/", site: "same-site", mode: "navigate", dest: "document", want: http.StatusFound},
 		{name: "login page accessible", method: http.MethodGet, path: "/check-auth", site: "same-origin", want: http.StatusNoContent},
 		{name: "assets require login", method: http.MethodGet, path: "/assets/icon.png", want: http.StatusFound},
 		{name: "local API requires credentials", method: http.MethodPost, path: "/api/system/exit", want: http.StatusUnauthorized},
@@ -438,6 +439,9 @@ func TestCheckAuthLoopbackProxy(t *testing.T) {
 		{name: "authenticated cross-origin API denied", method: http.MethodPost, path: "/api/test", origin: "https://evil.example", authenticated: true, want: http.StatusUnauthorized},
 		{name: "authenticated cross-site navigation denied", method: http.MethodGet, path: "/assets/icon.png", site: "cross-site", authenticated: true, want: http.StatusUnauthorized},
 		{name: "authenticated same-site request denied", method: http.MethodPost, path: "/api/system/exit", site: "same-site", authenticated: true, want: http.StatusUnauthorized},
+		{name: "authenticated same-site app navigation", method: http.MethodGet, path: "/stage/build/desktop/", site: "same-site", mode: "navigate", dest: "document", authenticated: true, want: http.StatusNoContent},
+		{name: "authenticated same-site API navigation denied", method: http.MethodGet, path: "/api/test", site: "same-site", mode: "navigate", dest: "document", authenticated: true, want: http.StatusUnauthorized},
+		{name: "authenticated cross-site app navigation denied", method: http.MethodGet, path: "/stage/build/desktop/", site: "cross-site", mode: "navigate", dest: "document", authenticated: true, want: http.StatusUnauthorized},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			request := httptest.NewRequest(test.method, test.path, nil)
@@ -447,6 +451,8 @@ func TestCheckAuthLoopbackProxy(t *testing.T) {
 			request.Header.Set("X-Forwarded-Host", request.Host)
 			request.Header.Set("Origin", test.origin)
 			request.Header.Set("Sec-Fetch-Site", test.site)
+			request.Header.Set("Sec-Fetch-Mode", test.mode)
+			request.Header.Set("Sec-Fetch-Dest", test.dest)
 			if test.authenticated {
 				for _, responseCookie := range loginRecorder.Result().Cookies() {
 					request.AddCookie(responseCookie)

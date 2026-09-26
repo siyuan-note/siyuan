@@ -6630,6 +6630,105 @@
       ],
       "additionalProperties": false
     },
+    "AVCalendarUndatedData": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVTableRow"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rows",
+        "total"
+      ],
+      "additionalProperties": false
+    },
+    "AVCalendarUndatedRequestInput": {
+      "type": "object",
+      "properties": {
+        "blockID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pageSize": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "query": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "search": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "viewID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "viewID"
+      ],
+      "additionalProperties": false
+    },
     "AVCardCoverPosition": {
       "type": "object",
       "properties": {
@@ -10971,6 +11070,9 @@
         "email": {
           "$ref": "#/$defs/AVValueEmail"
         },
+        "hasRenderTemplate": {
+          "type": "boolean"
+        },
         "id": {
           "type": "string"
         },
@@ -11564,6 +11666,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/AVValueEmailInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hasRenderTemplate": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -19480,6 +19592,22 @@
       ],
       "additionalProperties": false
     },
+    "CommitNotebookArchiveRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "saved": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "saved"
+      ],
+      "additionalProperties": false
+    },
     "ContentWordCountRequestInput": {
       "type": "object",
       "properties": {
@@ -22870,6 +22998,16 @@
           ]
         },
         "keepFold": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keepJSEmbed": {
           "anyOf": [
             {
               "type": "boolean"
@@ -27976,6 +28114,27 @@
       ],
       "additionalProperties": false
     },
+    "ImportNotebookArchiveRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        },
+        "key": {
+          "type": "string",
+          "format": "binary"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "password"
+      ],
+      "additionalProperties": false
+    },
     "ImportNotebookCryptoBackupRequestInput": {
       "type": "object",
       "properties": {
@@ -31943,6 +32102,53 @@
       ],
       "additionalProperties": false
     },
+    "NotebookArchiveCandidate": {
+      "type": "object",
+      "properties": {
+        "current": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "current",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "NotebookArchiveCandidatesData": {
+      "type": "object",
+      "properties": {
+        "notebooks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NotebookArchiveCandidate"
+          }
+        }
+      },
+      "required": [
+        "notebooks"
+      ],
+      "additionalProperties": false
+    },
+    "NotebookArchiveData": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "id"
+      ],
+      "additionalProperties": false
+    },
     "NotebookConf": {
       "type": "object",
       "properties": {
@@ -33299,6 +33505,21 @@
         "id",
         "jsonrpc",
         "result"
+      ],
+      "additionalProperties": false
+    },
+    "PrepareNotebookArchiveRequestInput": {
+      "type": "object",
+      "properties": {
+        "notebooks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "notebooks"
       ],
       "additionalProperties": false
     },
@@ -35929,6 +36150,41 @@
       },
       "additionalProperties": false
     },
+    "SearchAssetMatchInput": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "enum": [
+            "name",
+            "path"
+          ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "prefix",
+            "suffix",
+            "regex"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "value"
+      ],
+      "additionalProperties": false
+    },
     "SearchAssetRequestInput": {
       "type": "object",
       "properties": {
@@ -35947,6 +36203,36 @@
         },
         "k": {
           "type": "string"
+        },
+        "match": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SearchAssetMatchInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pageSize": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -41326,6 +41612,9 @@
     "SettingCloudUserRequestInput": {
       "type": "object",
       "properties": {
+        "cached": {
+          "type": "boolean"
+        },
         "token": {
           "anyOf": [
             {
@@ -47873,6 +48162,9 @@
           "type": "string"
         },
         "revision": {
+          "type": "string"
+        },
+        "sourceDocID": {
           "type": "string"
         }
       },
@@ -106339,6 +106631,57 @@
       ],
       "additionalProperties": false
     },
+    "WorkspaceStorageData": {
+      "type": "object",
+      "properties": {
+        "assetsSize": {
+          "type": "integer"
+        },
+        "calculatedAt": {
+          "type": "integer"
+        },
+        "directories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkspaceStorageEntry"
+          }
+        },
+        "totalSize": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "assetsSize",
+        "calculatedAt",
+        "directories",
+        "totalSize"
+      ],
+      "additionalProperties": false
+    },
+    "WorkspaceStorageEntry": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "data",
+            "repo",
+            "history",
+            "temp",
+            "conf",
+            "other"
+          ]
+        },
+        "size": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "size"
+      ],
+      "additionalProperties": false
+    },
     "ZipRequestInput": {
       "type": "object",
       "properties": {
@@ -117225,6 +117568,81 @@
                     "type": "null"
                   }
                 ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/av/getAttributeViewCalendarUndated",
+      "handler": "getAttributeViewCalendarUndated",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AVCalendarUndatedRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AVCalendarUndatedData"
               },
               "msg": {
                 "type": "string"
@@ -139057,6 +139475,81 @@
     },
     {
       "method": "POST",
+      "path": "/api/notebook/commitNotebookArchive",
+      "handler": "commitNotebookArchive",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/CommitNotebookArchiveRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/notebook/createEncryptedNotebook",
       "handler": "createEncryptedNotebook",
       "body": "json",
@@ -139507,6 +140000,81 @@
     },
     {
       "method": "POST",
+      "path": "/api/notebook/getNotebookArchiveCandidates",
+      "handler": "getNotebookArchiveCandidates",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NotebookArchiveCandidatesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/notebook/getNotebookConf",
       "handler": "getNotebookConf",
       "body": "json",
@@ -139601,6 +140169,81 @@
               },
               "data": {
                 "$ref": "#/$defs/NotebookInfoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/notebook/importNotebookArchive",
+      "handler": "importNotebookArchive",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/ImportNotebookArchiveRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
               },
               "msg": {
                 "type": "string"
@@ -139983,6 +140626,81 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/notebook/prepareNotebookArchive",
+      "handler": "prepareNotebookArchive",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/PrepareNotebookArchiveRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NotebookArchiveData"
               },
               "msg": {
                 "type": "string"
@@ -155498,6 +156216,81 @@
               },
               "data": {
                 "$ref": "#/$defs/WorkspaceInfoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getWorkspaceStorage",
+      "handler": "getWorkspaceStorage",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/WorkspaceStorageData"
               },
               "msg": {
                 "type": "string"

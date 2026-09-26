@@ -81,6 +81,7 @@ const createTouchHarness = (side: "left" | "right", options: {
     const target = {
         id: options.closed ? "editor" : side === "left" ? "sidebar" : "sidebarRight",
         tagName: "DIV", dataset: {}, parentElement: null as HTMLElement | null,
+        preventSwipe: false,
         closest: (): null => null,
         scrollWidth: options.scrollable ? 600 : 300, clientWidth: 300, scrollLeft: 100,
     };
@@ -100,7 +101,8 @@ const createTouchHarness = (side: "left" | "right", options: {
         "./mobileBarsConfig": {getMobileSidebarConfig: () => ({sidebarSwipe: !options.disabled})},
         "../../protyle/util/hasClosest": {
             hasClosestByAttribute: (element: typeof target, key: string, value: string) =>
-                key === "id" && element.id === value ? element : undefined,
+                (key === "id" && element.id === value) || (key === "data-prevent-swipe" && element.preventSwipe) ?
+                    element : undefined,
             hasClosestByClassName: (): undefined => undefined,
             hasTopClosestByClassName: (): undefined => undefined,
             hasClosestBlock: (): undefined => undefined,
@@ -128,7 +130,7 @@ const createTouchHarness = (side: "left" | "right", options: {
     });
     return {
         actions, panel, target,
-        start: () => touch.handleTouchStart(event(180)),
+        start: (x = 180, y = 200) => touch.handleTouchStart(event(x, y)),
         move: (x: number, y = 200, count = 1) => touch.handleTouchMove(event(x, y, count)),
         end: (x: number, y = 200) => { now += 100; touch.handleTouchEnd(event(x, y)); },
         cancel: () => touch.handleTouchCancel(),
@@ -138,6 +140,34 @@ const createTouchHarness = (side: "left" | "right", options: {
 for (const side of ["left", "right"] as const) {
     const nextX = side === "left" ? 240 : 120;
     const closeX = side === "left" ? 120 : 240;
+    test(`${side} sidebar ignores the complete gesture inside a protected canvas and resumes outside it`, () => {
+        const harness = createTouchHarness(side, {closed: true});
+        harness.start();
+        harness.move(nextX);
+        harness.end(nextX);
+        harness.actions.length = 0;
+
+        harness.target.preventSwipe = true;
+        harness.start();
+        harness.target.preventSwipe = false;
+        harness.move(nextX);
+        harness.end(nextX);
+        harness.cancel();
+        assert.deepEqual(harness.actions, []);
+
+        harness.target.preventSwipe = true;
+        harness.start(1, 1);
+        harness.end(1, 1);
+        harness.cancel();
+        assert.deepEqual(harness.actions, [], "a protected tap near the origin cannot reuse previous swipe state");
+
+        harness.target.preventSwipe = false;
+        harness.start();
+        harness.move(nextX);
+        harness.end(nextX);
+        assert.deepEqual(harness.actions, [`open:${side}`]);
+    });
+
     test(`${side} sidebar restores its selected tab only after a committed swipe`, () => {
         const harness = createTouchHarness(side, {closed: true});
         harness.start();

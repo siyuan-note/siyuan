@@ -1,5 +1,6 @@
 export const isAbnormalItem = (currentHintElement: HTMLElement, className: string) => {
-    return currentHintElement && (!currentHintElement.classList.contains(className) || currentHintElement.getBoundingClientRect().height === 0);
+    return currentHintElement && (!currentHintElement.classList.contains(className) ||
+        currentHintElement.classList.contains("b3-menu__item--readonly") || currentHintElement.getBoundingClientRect().height === 0);
 };
 
 export const upDownHint = (listElement: Element, event: KeyboardEvent, classActiveName = "b3-list-item--focus", defaultElement?: Element) => {
@@ -50,8 +51,7 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent, classActi
 
         if (!currentHintElement) {
             currentHintElement = listElement.children[listElement.children.length - 1] as HTMLElement;
-            while (currentHintElement &&
-            (currentHintElement.classList.contains("fn__none") || !currentHintElement.classList.contains(className))) {
+            while (isAbnormalItem(currentHintElement, className)) {
                 currentHintElement = currentHintElement.previousElementSibling as HTMLElement;
             }
         }

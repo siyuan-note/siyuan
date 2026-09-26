@@ -526,6 +526,11 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                     passive: true,
                     signal: userScrollAbort.signal
                 });
+                // 开始编辑后停止定位补偿，避免输入改变布局时把光标滚回原位置
+                editor.editor.protyle.element.addEventListener("beforeinput", stopObserve, {
+                    capture: true,
+                    signal: userScrollAbort.signal
+                });
                 editor.editor.protyle.contentElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     if (["PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown", " "].includes(event.key)) {
                         stopObserve();

@@ -1,4 +1,5 @@
 {
+	"removeList": "Liste auflösen",
 	"entryWindowTopBar": "Obere Leiste neuer Fenster",
 	"archiveEncryptedNotebooks": "Archivieren und entfernen",
 	"archiveEncryptedNotebooksTip": "Gesperrte verschlüsselte Notizbücher und ihre Wiederherstellungsdaten auswählen; das Hauptpasswort ist nicht erforderlich",

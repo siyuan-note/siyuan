@@ -213,6 +213,7 @@ const gutterCopyChildren = (single = false) => [
 
 const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), true, [
         node("paragraph", lang("paragraph")),
+        node("removeList", lang("removeList")),
         node("quote", lang("quote")),
         node("callout", lang("callout")),
         node("calloutNote", location(lang("callout"), literal("Note"))),

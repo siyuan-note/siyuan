@@ -1,4 +1,5 @@
 {
+	"removeList": "सूची का स्वरूप हटाएँ",
 	"entryWindowTopBar": "नई विंडो की शीर्ष पट्टी",
 	"archiveEncryptedNotebooks": "संग्रहित करके हटाएँ",
 	"archiveEncryptedNotebooksTip": "लॉक की गई एन्क्रिप्टेड नोटबुक और उनका पुनर्प्राप्ति डेटा चुनें; मास्टर पासवर्ड की आवश्यकता नहीं है",

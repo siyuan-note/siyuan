@@ -1,4 +1,5 @@
 {
+	"removeList": "Usuń formatowanie listy",
 	"entryWindowTopBar": "Górny pasek nowego okna",
 	"archiveEncryptedNotebooks": "Archiwizuj i usuń",
 	"archiveEncryptedNotebooksTip": "Wybierz zablokowane zaszyfrowane notesy i ich dane odzyskiwania; hasło główne nie jest wymagane",

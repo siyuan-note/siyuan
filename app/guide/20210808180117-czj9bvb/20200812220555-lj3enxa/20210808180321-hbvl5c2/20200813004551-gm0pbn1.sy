@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260925174006"
+		"updated": "20260926131843"
 	},
 	"Children": [
 		{
@@ -4112,7 +4112,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260925094732"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -11337,7 +11337,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-n64nfza",
-				"updated": "20260924173802"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12010,7 +12010,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-r3fq7uc",
-				"updated": "20260925172309"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12070,6 +12070,37 @@
 				{
 					"Type": "NodeText",
 					"Data": "，这也会移除已有标题格式。块 ID、数据库关联和字段值均会保留。首块既非段落也非标题的列表项会跳过。移动端使用同一块菜单。仅将光标放在段落或标题内时，快捷键只转换该块，不取消外围列表。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "如需仅移除列表结构并保留标题等内容块类型，请选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "块菜单"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "转换为"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消列表"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。可操作整个列表或选中的列表项，保留子列表、内容块 ID、数据库关联和字段值，移动端同样适用。"
 				}
 			]
 		},

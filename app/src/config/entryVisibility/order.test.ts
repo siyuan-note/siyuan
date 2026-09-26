@@ -70,6 +70,21 @@ test("custom task status merges into saved list menus without moving existing en
         merged, new Set(["separator_numbering"])), ["appendListItem", "plugin:example:item", "customTaskStatus", "prependListItem"]);
 });
 
+test("remove list merges into saved conversion menus and preserves plugin slots", () => {
+    for (const path of ["gutter.single.turnInto", "gutter.multi.turnInto"]) {
+        const entries = getEntryCatalogChildren(path);
+        const defaults = entries.map(item => item.key);
+        const saved = defaults.filter(key => key !== "removeList").reverse();
+        saved.splice(1, 0, "plugin:example:item");
+        const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+        assert.deepEqual(merged.filter(key => key !== "removeList"), saved);
+        assert.equal(merged[merged.indexOf("paragraph") + 1], "removeList");
+        const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+        assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+        assert.deepEqual(resolveEntryOrder(["paragraph", "removeList"], merged, separators), ["paragraph", "removeList"]);
+    }
+});
+
 test("list mind map view merges into conversion menus and preserves plugin slots", () => {
     const entries = getEntryCatalogChildren("gutter.single.turnInto");
     const defaults = entries.map(item => item.key);

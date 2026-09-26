@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260925174006"
+		"updated": "20260926131843"
 	},
 	"Children": [
 		{
@@ -4068,7 +4068,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20260925094732"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -11278,7 +11278,7 @@
 			"Properties": {
 				"ID": "20240530101000-xpeqztf",
 				"id": "20240530101000-emapwbq",
-				"updated": "20260924173802"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -11961,7 +11961,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-3l46zgy",
-				"updated": "20260925172309"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12021,6 +12021,37 @@
 				{
 					"Type": "NodeText",
 					"Data": " を選びます。この操作では既存の見出し書式も解除されます。ブロック ID、データベースとの関連付け、フィールド値は保持されます。最初のブロックが段落でも見出しでもない項目はスキップされます。モバイルでも同じブロックメニューを利用できます。段落や見出し内にカーソルを置くだけの場合、ショートカットはそのブロックだけを変換し、外側のリストは解除しません。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "見出しなどのブロックの種類を保ったままリスト構造だけを解除するには、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロックメニュー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "変換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "リストを解除"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選びます。リスト全体または選択したリスト項目が対象となり、子リスト、内容ブロックの ID、データベースとの関連付け、フィールド値は保持されます。モバイルでも利用できます。"
 				}
 			]
 		},

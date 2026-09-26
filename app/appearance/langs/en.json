@@ -1,4 +1,5 @@
 {
+	"removeList": "Remove list",
 	"entryWindowTopBar": "New window top bar",
 	"archiveEncryptedNotebooks": "Archive and remove",
 	"archiveEncryptedNotebooksTip": "Select locked encrypted notebooks and their recovery data; no master password is required",

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260925174006"
+		"updated": "20260926131843"
 	},
 	"Children": [
 		{
@@ -4114,7 +4114,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260925094732"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -11349,7 +11349,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-6lhdzmm",
-				"updated": "20260924173802"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12022,7 +12022,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-6zzgsf2",
-				"updated": "20260925172309"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12082,6 +12082,37 @@
 				{
 					"Type": "NodeText",
 					"Data": ". This also removes existing heading formatting. Block IDs, database bindings, and field values are preserved. Items whose first block is neither a paragraph nor a heading are skipped. Mobile uses the same block menu. With only a caret inside a paragraph or heading, the shortcut changes that block without removing its surrounding list."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " To remove only the list structure while keeping headings and other content block types, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Block menu"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Turn into"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Remove list"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". This works for a whole list or selected list items, preserves nested lists and content block IDs, database bindings, and field values, and is also available on mobile."
 				}
 			]
 		},

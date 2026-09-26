@@ -33,14 +33,15 @@ const browserCases = async (source: string, menuSource: string, rangeSource: str
         hasViewFoldContext: () => false,
     };
     const api = new Function(...Object.keys(dependencies), source +
-        "\nreturn {turnsIntoTransaction, turnListsRecursively, getHeadingConversionElements, isListHeadingContainer};")(...Object.values(dependencies)) as
+        "\nreturn {turnsIntoTransaction, turnListsRecursively, removeListStructure, getHeadingConversionElements, isListHeadingContainer};")(...Object.values(dependencies)) as
         typeof import("./transaction") & typeof import("./headingConversion");
     const protyle = {wysiwyg: {element: editor}, lute, block: {rootID: "document", parentID: "document"},
         observerLoad: {disconnect: noop}} as unknown as IProtyle;
-    const Gutter = new Function("turnsIntoTransaction", "getHeadingConversionElements", menuSource + "\nreturn Gutter;")(
-        api.turnsIntoTransaction, api.getHeadingConversionElements);
+    const Gutter = new Function("turnsIntoTransaction", "getHeadingConversionElements", "removeListStructure", menuSource + "\nreturn Gutter;")(
+        api.turnsIntoTransaction, api.getHeadingConversionElements, api.removeListStructure);
     const gutter = new Gutter() as {
         headingTurnIntoMenu: (protyle: IProtyle, elements: Element[], includeParagraph?: boolean) => Array<{id: string, click: () => Promise<void>}>,
+        listTurnIntoMenu: (protyle: IProtyle, elements: Element[]) => Array<{id: string, click: () => Promise<void>}>,
     };
     window.siyuan = {languages: {}, config: {keymap: {editor: {heading: {paragraph: {custom: "Alt+Ctrl+0"}}}}}} as typeof window.siyuan;
     for (let level = 1; level <= 6; level++) {
@@ -106,7 +107,7 @@ const browserCases = async (source: string, menuSource: string, rangeSource: str
     const fixtures: unknown[] = [];
     for (const marker of ["-", "3.", "- [x]"]) {
         for (const mask of [1, 2, 4, 3, 5, 6, 7]) {
-            for (let level = 0; level <= 6; level++) {
+            for (let level = -1; level <= 6; level++) {
                 editor.innerHTML = lute.Md2BlockDOM(`${marker} **one**\n\n    tail\n\n    - nested\n\n${marker} two\n\n${marker} three`);
                 const list = editor.firstElementChild;
                 const listItems = items(list);
@@ -114,8 +115,8 @@ const browserCases = async (source: string, menuSource: string, rangeSource: str
                 targets.forEach(target => {
                     target.setAttribute("custom-avs", "database");
                     target.setAttribute("custom-av-database-field", "retained");
-                    if (level === 0) {
-                        // 段落转换必须移除已有标题格式。
+                    if (level <= 0) {
+                        // 取消列表保留标题，段落转换移除标题格式。
                         // @ts-expect-error Lute 声明尚未包含 Blocks2Hs。
                         const html = lute.Blocks2Hs(target.outerHTML, "2");
                         target.outerHTML = html;
@@ -125,9 +126,9 @@ const browserCases = async (source: string, menuSource: string, rangeSource: str
                 const selection = mask === 7 ? [list] : listItems.filter((_item, index) => mask & (1 << index));
                 const before = editor.innerHTML;
                 batches.length = 0;
-                const menu = gutter.headingTurnIntoMenu(protyle, selection, true);
-                check.deepEqual(menu.map(item => item.id), ["paragraph", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6"]);
-                await menu[level].click();
+                const menu = gutter.listTurnIntoMenu(protyle, selection);
+                check.deepEqual(menu.map(item => item.id), ["paragraph", "removeList", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6"]);
+                await menu.find(item => item.id === (level === -1 ? "removeList" : level ? `heading${level}` : "paragraph")).click();
                 check.equal(batches.length, 1);
                 const after = editor.innerHTML;
                 targetIDs.forEach((targetID, index) => {
@@ -138,7 +139,7 @@ const browserCases = async (source: string, menuSource: string, rangeSource: str
                         check.equal(block.parentElement, editor);
                         check.equal(block.getAttribute("data-type"), level ? "NodeHeading" : "NodeParagraph");
                         if (level) {
-                            check.equal(block.getAttribute("data-subtype"), `h${level}`);
+                            check.equal(block.getAttribute("data-subtype"), `h${level === -1 ? 2 : level}`);
                         }
                     } else {
                         check.equal(id(block.parentElement), id(listItems[index]));
@@ -152,8 +153,12 @@ const browserCases = async (source: string, menuSource: string, rangeSource: str
                     replay(batches[0].doOperations);
                     check.deepEqual(shape(clean(editor.innerHTML)), shape(clean(after)));
                 }
-                if (mask === ({"-": 7, "3.": 2, "- [x]": 5}[marker]) && [0, 3].includes(level)) {
-                    fixtures.push({before, after: clean(after), targetIDs, ...batches[0]});
+                if (level === -1) {
+                    const contentIDs = shape(before).filter(block => !["NodeList", "NodeListItem"].includes(block.type)).map(block => block.id);
+                    check.ok(batches[0].doOperations.every(operation => operation.action !== "update" || !contentIDs.includes(operation.id)));
+                }
+                if (mask === ({"-": 7, "3.": 2, "- [x]": 5}[marker]) && [-1, 0, 3].includes(level)) {
+                    fixtures.push({before, after: clean(after), targetIDs, ...batches[0], ...(level === -1 ? {removeList: true} : {})});
                 }
             }
         }
@@ -214,6 +219,45 @@ const browserCases = async (source: string, menuSource: string, rangeSource: str
             fixtures.push({before, after: clean(after), targetIDs: boundTargets.map(id), ...batches[0]});
         }
     }
+    // 取消列表不要求首块为段落或标题，并支持多列表、嵌套选择去重及混合选区。
+    for (const scenario of ["code", "nested", "overlap", "multiple", "mixed"]) {
+        editor.innerHTML = lute.Md2BlockDOM("- # outer\n\n    - ## inner\n\n- # last");
+        const list = editor.firstElementChild;
+        const nested = list.querySelector('[data-type="NodeList"]');
+        let selection = [list];
+        if (scenario === "code") {
+            items(list).forEach(item => {
+                const block = first(item);
+                const code = document.createElement("div");
+                code.innerHTML = lute.Md2BlockDOM("```js\nconst value = 1;\n```");
+                code.firstElementChild.setAttribute("data-node-id", id(block));
+                block.replaceWith(code.firstElementChild);
+            });
+            check.deepEqual(gutter.listTurnIntoMenu(protyle, selection).map(item => item.id), ["removeList"]);
+        } else if (scenario === "nested") {
+            selection = [nested];
+        } else if (scenario === "overlap") {
+            selection = [list, items(list)[0], nested];
+        } else {
+            editor.insertAdjacentHTML("beforeend", lute.Md2BlockDOM(scenario === "mixed" ? "# outside" : "1. # another"));
+            selection = Array.from(editor.children);
+        }
+        const before = editor.innerHTML;
+        const content = shape(before).filter(block => !["NodeList", "NodeListItem"].includes(block.type));
+        batches.length = 0;
+        await gutter.listTurnIntoMenu(protyle, selection).find(item => item.id === "removeList").click();
+        const after = editor.innerHTML;
+        check.equal(batches.length, 1);
+        const withoutParent = (block: ReturnType<typeof shape>[number]): ReturnType<typeof shape>[number] => ({...block, parent: undefined});
+        check.deepEqual(shape(after).filter(block => content.some(original => original.id === block.id)).map(withoutParent), content.map(withoutParent));
+        if (scenario !== "nested") {
+            check.ok(editor.querySelector(`[data-node-id="${id(nested)}"]`), "keep nested lists");
+        }
+        replay(batches[0].undoOperations);
+        check.deepEqual(shape(clean(editor.innerHTML)), shape(before), scenario);
+        replay(batches[0].doOperations);
+        check.deepEqual(shape(clean(editor.innerHTML)), shape(clean(after)), scenario);
+    }
     editor.remove();
     return {message: "List conversion cases passed", fixtures};
 };
@@ -240,11 +284,12 @@ test("list conversion removes selected wrappers and preserves content, database 
     };
     const source = compile(read("headingConversion.ts") + "\n" + read("listConversion.ts") + "\n" +
         extract("transaction.ts", "turnsIntoTransaction") + "\n" + extract("transaction.ts", "turnListBlocksInto") +
-        "\n" + extract("transaction.ts", "turnListsRecursively"));
+        "\n" + extract("transaction.ts", "turnListsRecursively") + "\n" + extract("transaction.ts", "removeListStructure"));
     const rangeSource = compile(extract("keydown.ts", "turnCrossBlockRangeInto"));
     const parsed = createSourceFile("gutter.ts", read("../gutter/index.ts"), ScriptTarget.Latest, true);
     const gutter = parsed.statements.find(isClassDeclaration);
-    const methods = gutter.members.filter(member => isMethodDeclaration(member) && ["headingTurnIntoMenu", "turnsInto"].includes(member.name.getText(parsed)));
+    const methods = gutter.members.filter(member => isMethodDeclaration(member) &&
+        ["headingTurnIntoMenu", "listTurnIntoMenu", "removeListMenu", "turnsInto"].includes(member.name.getText(parsed)));
     const menuSource = compile("class Gutter {\n" + methods.map(member => member.getText(parsed)).join("\n") + "\n}");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-list-conversion-"));
     const script = path.join(temporary, "run.cjs");
@@ -272,6 +317,11 @@ app.whenReady().then(async () => {
         assert.equal(result.message, "List conversion cases passed");
         if (process.env.SIYUAN_UPDATE_LIST_CONVERSION_FIXTURE === "1") {
             writeFileSync(path.resolve(__dirname, "../../../../kernel/model/testdata/list_conversion.json"), JSON.stringify(result.fixtures, null, 2) + "\n");
+        } else if (process.env.SIYUAN_UPDATE_LIST_CONVERSION_FIXTURE === "removeList") {
+            const fixturePath = path.resolve(__dirname, "../../../../kernel/model/testdata/list_conversion.json");
+            const fixtures = JSON.parse(readFileSync(fixturePath, "utf8")).filter((fixture: {removeList?: boolean}) => !fixture.removeList);
+            fixtures.push(...result.fixtures.filter((fixture: {removeList?: boolean}) => fixture.removeList));
+            writeFileSync(fixturePath, JSON.stringify(fixtures, null, 2) + "\n");
         }
     } finally {
         if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) && path.basename(temporary).startsWith("siyuan-list-conversion-")) {

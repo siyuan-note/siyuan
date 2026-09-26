@@ -1,4 +1,5 @@
 {
+	"removeList": "Remover formatação de lista",
 	"entryWindowTopBar": "Barra superior de novas janelas",
 	"archiveEncryptedNotebooks": "Arquivar e remover",
 	"archiveEncryptedNotebooksTip": "Selecione os cadernos criptografados bloqueados e seus dados de recuperação; a senha mestra não é necessária",

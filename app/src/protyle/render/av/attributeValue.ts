@@ -23,6 +23,22 @@ export const getAVTemplateHTML = (content: string) => {
     return window.DOMPurify.sanitize(content);
 };
 
+export const genAVRelationHTML = (item: IAVCellValue, rowID: string, showIcon = true, attributePanel = false) => {
+    if (!item?.block) {
+        return "";
+    }
+    const useTemplate = hasAVRenderTemplateResult(item);
+    const content = useTemplate ? getAVTemplateHTML(item.renderedContent || "") :
+        Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled);
+    const templateClass = useTemplate ? " av__celltext--template" : "";
+    const storedValue = escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(item))));
+    const attributes = `data-row-id="${escapeAttr(rowID)}" data-relation-value="${storedValue}" class="av__cell--relation"`;
+    if (item.isDetached) {
+        return `<span ${attributes}><span${showIcon ? "" : ' class="fn__none"'}><svg${attributePanel ? ' style="height: 26px"' : ""}><use xlink:href="#iconLine"></use></svg><span class="fn__space--5"></span></span><span class="av__celltext${templateClass}">${content}</span></span>`;
+    }
+    return `<span ${attributes} data-block-id="${item.block.id}"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${escapeAttr(item.block.icon || "")}">${getFileTreeIconHTML(item.block.icon, "file")}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="${getAVBlockRefSubtype(item)}" class="av__celltext av__celltext--ref${templateClass}">${content}</span></span>`;
+};
+
 const AV_TEMPLATE_INTERACTIVE_SELECTOR = [
     "a[href]",
     "button",
@@ -188,14 +204,7 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
             break;
         case "relation":
             value?.relation?.contents?.forEach((item, index) => {
-                if (item && item.block) {
-                    const rowID = value.relation.blockIDs[index];
-                    if (item?.isDetached) {
-                        html += `<span data-row-id="${rowID}" class="av__cell--relation"><span><svg style="height: 26px"><use xlink:href="#iconLine"></use></svg><span class="fn__space--5"></span></span><span class="av__celltext">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
-                    } else {
-                        html += `<span data-row-id="${rowID}" class="av__cell--relation" data-block-id="${item.block.id}"><span class="b3-menu__avemoji" data-unicode="${escapeAttr(item.block.icon || "")}">${getFileTreeIconHTML(item.block.icon, "file")}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="${getAVBlockRefSubtype(item)}" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
-                    }
-                }
+                html += genAVRelationHTML(item, value.relation.blockIDs[index], true, true);
             });
             if (html && html.endsWith(", ")) {
                 html = html.substring(0, html.length - 2);

@@ -3497,7 +3497,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A display template reads each field's original stored value, not the display result produced by another display template. Filters, sorts, and groups can use either the original value or the template-rendered value. Clear the display template to restore the field's original display."
+     "Data": "A display template reads each field's original stored value, not the display result produced by another display template. Filters, sorts, and groups can use either the original value or the template-rendered value. Clear the display template to restore the field's original display. Relation fields follow the display template of the target database's primary key, including empty results, while preserving the original primary key value and relation."
 				}
 			]
 		},

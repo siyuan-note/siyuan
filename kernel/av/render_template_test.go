@@ -29,7 +29,8 @@ func TestSuspendRenderedContents(t *testing.T) {
 		RenderedContent: "<strong>rendered</strong>",
 	}
 	nestedValue := &Value{Type: KeyTypeText, Text: &ValueText{Content: "nested"}, RenderedContent: "nested rendered"}
-	storedValue.Relation = &ValueRelation{Contents: []*Value{nestedValue}}
+	emptyValue := &Value{Type: KeyTypeBlock, Block: &ValueBlock{Content: "original"}, HasRenderTemplate: true}
+	storedValue.Relation = &ValueRelation{Contents: []*Value{nestedValue, emptyValue}}
 	filterValue := &Value{Type: KeyTypeText, Text: &ValueText{Content: "filter"}, RenderedContent: "filter rendered"}
 	attrView := &AttributeView{
 		KeyValues: []*KeyValues{{Key: &Key{ID: "key", Type: KeyTypeText}, Values: []*Value{storedValue}}},
@@ -51,7 +52,7 @@ func TestSuspendRenderedContents(t *testing.T) {
 	if nil != err {
 		t.Fatal(err)
 	}
-	if bytes.Contains(data, []byte("renderedContent")) {
+	if bytes.Contains(data, []byte("renderedContent")) || bytes.Contains(data, []byte("hasRenderTemplate")) {
 		t.Fatalf("rendered content leaked into persisted attribute view: %s", data)
 	}
 	if "" != storedValue.RenderedContent || "" != nestedValue.RenderedContent || "" != filterValue.RenderedContent {
@@ -59,6 +60,9 @@ func TestSuspendRenderedContents(t *testing.T) {
 	}
 
 	restore()
+	if !emptyValue.HasRenderTemplate {
+		t.Fatal("empty template result marker was not restored")
+	}
 	if "<strong>rendered</strong>" != storedValue.RenderedContent || "nested rendered" != nestedValue.RenderedContent ||
 		"filter rendered" != filterValue.RenderedContent {
 		t.Fatal("rendered content was not restored after serialization")
@@ -70,12 +74,13 @@ func TestCloneStoredValueRemovesRenderedContents(t *testing.T) {
 		Type:            KeyTypeRollup,
 		RenderedContent: "outer",
 		Rollup: &ValueRollup{Contents: []*Value{{
-			Type: KeyTypeText, Text: &ValueText{Content: "stored"}, RenderedContent: "inner",
+			Type: KeyTypeText, Text: &ValueText{Content: "stored"}, RenderedContent: "inner", HasRenderTemplate: true,
 		}}},
 	}
 
 	cloned := CloneStoredValue(value)
-	if nil == cloned || "" != cloned.RenderedContent || "" != cloned.Rollup.Contents[0].RenderedContent {
+	if nil == cloned || "" != cloned.RenderedContent || "" != cloned.Rollup.Contents[0].RenderedContent ||
+		cloned.Rollup.Contents[0].HasRenderTemplate {
 		t.Fatalf("rendered content leaked into stored clone: %+v", cloned)
 	}
 	if "outer" != value.RenderedContent || "inner" != value.Rollup.Contents[0].RenderedContent {

@@ -11070,6 +11070,9 @@
         "email": {
           "$ref": "#/$defs/AVValueEmail"
         },
+        "hasRenderTemplate": {
+          "type": "boolean"
+        },
         "id": {
           "type": "string"
         },
@@ -11663,6 +11666,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/AVValueEmailInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hasRenderTemplate": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

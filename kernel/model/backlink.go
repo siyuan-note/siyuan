@@ -1059,10 +1059,16 @@ func quoteFTSPhrase(phrase string) string {
 	return "\"" + strings.ReplaceAll(phrase, "\"", "\"\"") + "\""
 }
 
-func buildBackmentionQuery(matchExpression, rootID string, limit int) (query string, args []any) {
+func buildBackmentionQuery(matchExpression, rootID, beforeID string, limit int) (query string, args []any) {
 	query = "SELECT * FROM blocks_fts WHERE blocks_fts MATCH ? AND root_id != ?" +
-		" AND type IN ('d', 'h', 'p', 't') ORDER BY id DESC LIMIT ?"
-	args = []any{matchExpression, rootID, limit}
+		" AND type IN ('d', 'h', 'p', 't')"
+	args = []any{matchExpression, rootID}
+	if "" != beforeID {
+		query += " AND id < ?"
+		args = append(args, beforeID)
+	}
+	query += " ORDER BY id DESC LIMIT ?"
+	args = append(args, limit)
 	return
 }
 
@@ -1091,77 +1097,75 @@ func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBac
 	if "" != keyword {
 		buf.WriteString(" AND (" + quoteFTSPhrase(keyword) + ")")
 	}
-	query, args := buildBackmentionQuery(buf.String(), rootID, Conf.Search.Limit)
-
-	sqlBlocks := sql.SelectBlocksRawStmtArgsInBox(query, args, Conf.Search.Limit, boxID)
 	terms := mentionKeywords
 	if "" != keyword {
 		terms = append(terms, keyword)
 	}
-	blocks := fromSQLBlocks(&sqlBlocks, strings.Join(terms, search.TermSep), beforeLen)
-
 	luteEngine := util.NewLute()
-	var tmp []*Block
-	for _, b := range blocks {
-		tree := parse.Parse("", gulu.Str.ToBytes(b.Markdown), luteEngine.ParseOptions)
-		if nil == tree {
-			continue
+	limit := Conf.Search.Limit
+	beforeID := ""
+	// 按块 ID 分批补取候选，正文校验和反链排除后的有效提及才占用结果额度。
+	for len(ret) < limit {
+		query, args := buildBackmentionQuery(buf.String(), rootID, beforeID, limit)
+		sqlBlocks := sql.SelectBlocksRawStmtArgsInBox(query, args, limit, boxID)
+		if len(sqlBlocks) == 0 {
+			break
 		}
+		beforeID = sqlBlocks[len(sqlBlocks)-1].ID
+		blocks := fromSQLBlocks(&sqlBlocks, strings.Join(terms, search.TermSep), beforeLen)
+		for _, b := range blocks {
+			if excludeBacklinkIDs.Contains(b.ID) {
+				continue
+			}
+			tree := parse.Parse("", gulu.Str.ToBytes(b.Markdown), luteEngine.ParseOptions)
+			if nil == tree {
+				continue
+			}
 
-		textBuf := &bytes.Buffer{}
-		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || n.IsBlock() {
+			textBuf := &bytes.Buffer{}
+			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || n.IsBlock() {
+					return ast.WalkContinue
+				}
+				if ast.NodeText == n.Type /* NodeText 包含了标签命中的情况 */ || ast.NodeLinkText == n.Type {
+					textBuf.Write(n.Tokens)
+				}
 				return ast.WalkContinue
-			}
-			if ast.NodeText == n.Type /* NodeText 包含了标签命中的情况 */ || ast.NodeLinkText == n.Type {
-				textBuf.Write(n.Tokens)
-			}
-			return ast.WalkContinue
-		})
+			})
 
-		text := textBuf.String()
-		text = strings.TrimSpace(text)
-		if "" == text {
-			continue
+			text := textBuf.String()
+			text = strings.TrimSpace(text)
+			if "" == text {
+				continue
+			}
+
+			newText, matched := markReplaceSpanWithSplit(text, mentionKeywords, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
+			if matched {
+				ret = append(ret, b)
+
+				k := getMarkedTextContents(newText, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
+				retMentionKeywords = append(retMentionKeywords, k...)
+			} else {
+				// columnFilter 中的命名、别名和备注命中的情况
+				// 反链提及搜索范围增加命名、别名和备注 https://github.com/siyuan-note/siyuan/issues/7639
+				if gulu.Str.Contains(trimMarkTags(b.Name), mentionKeywords) ||
+					gulu.Str.Contains(trimMarkTags(b.Alias), mentionKeywords) ||
+					gulu.Str.Contains(trimMarkTags(b.Memo), mentionKeywords) {
+					ret = append(ret, b)
+				}
+			}
+			if len(ret) == limit {
+				break
+			}
 		}
-
-		newText, matched := markReplaceSpanWithSplit(text, mentionKeywords, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
-		if matched {
-			tmp = append(tmp, b)
-
-			k := getMarkedTextContents(newText, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
-			retMentionKeywords = append(retMentionKeywords, k...)
-		} else {
-			// columnFilter 中的命名、别名和备注命中的情况
-			// 反链提及搜索范围增加命名、别名和备注 https://github.com/siyuan-note/siyuan/issues/7639
-			if gulu.Str.Contains(trimMarkTags(b.Name), mentionKeywords) ||
-				gulu.Str.Contains(trimMarkTags(b.Alias), mentionKeywords) ||
-				gulu.Str.Contains(trimMarkTags(b.Memo), mentionKeywords) {
-				tmp = append(tmp, b)
-			}
+		if len(sqlBlocks) < limit {
+			break
 		}
 	}
-	blocks = tmp
 	retMentionKeywords = gulu.Str.RemoveDuplicatedElem(retMentionKeywords)
-	mentionKeywords = retMentionKeywords
-
-	mentionBlockMap := map[string]*Block{}
-	for _, block := range blocks {
-		mentionBlockMap[block.ID] = block
-
-		refText := getContainStr(block.Content, mentionKeywords)
-		block.RefText = refText
+	for _, block := range ret {
+		block.RefText = getContainStr(block.Content, retMentionKeywords)
 	}
-
-	for _, mentionBlock := range mentionBlockMap {
-		if !excludeBacklinkIDs.Contains(mentionBlock.ID) {
-			ret = append(ret, mentionBlock)
-		}
-	}
-
-	sort.SliceStable(ret, func(i, j int) bool {
-		return ret[i].ID > ret[j].ID
-	})
 	return
 }
 

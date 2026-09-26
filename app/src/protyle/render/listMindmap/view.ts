@@ -159,6 +159,7 @@ export class ListMindmapView {
         options.host.tabIndex = 0;
         this.toolbar = createElement("div", "mindmap-view__toolbar block__icons");
         this.toolbar.setAttribute("role", "toolbar");
+        this.toolbar.setAttribute("data-prevent-swipe", "true");
         this.viewport = createElement("div", "mindmap-view__viewport");
         this.viewport.setAttribute("data-prevent-swipe", "true");
         this.canvas = createElement("canvas", "mindmap-view__canvas");

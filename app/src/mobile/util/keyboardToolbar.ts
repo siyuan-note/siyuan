@@ -695,8 +695,15 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
 const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     protyle.hint.splitChar = "/";
     protyle.hint.lastIndex = -1;
-    if (protyle.lite) {
-        // 轻量编辑器沿用自己的插入候选，保留单元格内容限制和智能体技能入口。
+    const range = protyle.toolbar.range;
+    const target = range?.startContainer instanceof Element ? range.startContainer : range?.startContainer.parentElement;
+    const cell = target?.closest("td, th");
+    const inTableCell = cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element && cell.contains(range.endContainer);
+    if (protyle.lite || inTableCell) {
+        // 单元格和轻量编辑器沿用各自的插入候选，保留内容限制和智能体技能入口。
+        if (inTableCell) {
+            focusByRange(range);
+        }
         unmountLiteSlashMenu = mountLiteSlashMenu(protyle, toolbarElement.querySelector(".keyboard__util"));
         return;
     }

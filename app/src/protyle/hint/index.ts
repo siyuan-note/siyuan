@@ -1,6 +1,7 @@
 import {isTableLikeView} from "../render/av/viewType";
 import {Constants} from "../../constants";
 import {isBuiltinSlashHint} from "./builtinSlash";
+import {isTableCellBlockSlash} from "../util/tableCellRichMenu";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -780,6 +781,34 @@ ${genHintItemHTML(item)}
         if (!nodeElement) {
             return;
         }
+        if (["/", "、"].includes(this.splitChar) && isTableCellBlockSlash(value)) {
+            const target = range.startContainer instanceof Element ? range.startContainer : range.startContainer.parentElement;
+            const cell = target?.closest<HTMLTableCellElement>("td, th");
+            if (cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element && cell.contains(range.endContainer)) {
+                // 块级命令在单元格片段中执行，先保留完整命令选区，避免替换整张表格。
+                if (this.lastIndex > -1) {
+                    range.setStart(range.startContainer, this.lastIndex);
+                }
+                focusByRange(range);
+                const splitChar = this.splitChar;
+                this.enableExtend = false;
+                void import("../render/tableCellRichEditor").then(async module => {
+                    if (!cell.contains(getSelection().anchorNode) || !cell.contains(getSelection().focusNode)) {
+                        return;
+                    }
+                    const editor = await module.openTableCellRichEditor(protyle, cell, undefined, undefined, undefined, true);
+                    if (!editor) {
+                        return;
+                    }
+                    editor.hint.splitChar = splitChar;
+                    editor.hint.lastIndex = -1;
+                    editor.hint.source = "hint";
+                    editor.toolbar.range = getSelection().getRangeAt(0);
+                    editor.hint.fill(value, editor, false, refIsS);
+                });
+                return;
+            }
+        }
         if (["/", "、"].includes(this.splitChar) && isProtyleListItemFragment(protyle) &&
             ["- " + Lute.Caret, "1. " + Lute.Caret, "- [ ] " + Lute.Caret].includes(value)) {
             this.enableExtend = false;
@@ -1283,19 +1312,6 @@ ${genHintItemHTML(item)}
                     }
                 }
             }
-        }
-        // 新建表格后直接接管当前单元格，后续输入与鼠标点击进入编辑使用相同的限制。
-        const selection = getSelection();
-        const focus = selection?.focusNode;
-        const focusElement = focus instanceof Element ? focus : focus?.parentElement;
-        const cell = focusElement?.closest<HTMLTableCellElement>("td, th");
-        if (cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element &&
-            cell.contains(selection.anchorNode)) {
-            void import("../render/tableCellRichEditor").then(module => {
-                if (cell.contains(getSelection()?.focusNode)) {
-                    module.openTableCellRichEditor(protyle, cell);
-                }
-            });
         }
     }
 

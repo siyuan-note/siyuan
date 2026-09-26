@@ -43,6 +43,8 @@ import {
 } from "../util/selection";
 import {Constants} from "../../constants";
 import {mergeTableCellContents} from "../util/tableCellRich";
+import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
+import {navigateToRichTableCell} from "../util/tableCellRichNavigation";
 import {resolveDocumentBlockElement} from "../util/outlineBlock";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
@@ -4001,7 +4003,7 @@ export class WYSIWYG {
         };
         this.element.addEventListener("keyup", (event: KeyboardEvent) => {
             if (event.isComposing || protyle.disabled || event.ctrlKey || event.metaKey || event.altKey ||
-                !["Tab", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) ||
+                !["Tab", "Enter", "Backspace", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) ||
                 (event.shiftKey && event.key !== "Tab")) {
                 return;
             }
@@ -4009,11 +4011,15 @@ export class WYSIWYG {
             const target = selection?.focusNode;
             const element = target instanceof Element ? target : target?.parentElement;
             const cell = element?.closest<HTMLTableCellElement>("th, td");
-            if (cell && cell.closest(".protyle-wysiwyg") === this.element && cell.contains(selection.anchorNode)) {
+            if (cell?.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE) &&
+                cell.closest(".protyle-wysiwyg") === this.element && cell.contains(selection.anchorNode)) {
                 void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, cell));
             }
         });
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (navigateToRichTableCell(protyle, event)) {
+                return;
+            }
             if ((event.key === "Backspace" || event.key === "Delete") && getSelection().rangeCount > 0) {
                 prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0));
             }
@@ -4638,7 +4644,8 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
-            if (richCell && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && !protyle.disabled &&
+            if (richCell?.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE) &&
+                !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && !protyle.disabled &&
                 richCell.closest(".protyle-wysiwyg") === this.element &&
                 !event.target.closest("a, [data-type~='block-ref'], [data-type~='a'], img")) {
                 event.preventDefault();

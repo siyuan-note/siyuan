@@ -13,12 +13,12 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const codeTabAttribute = "custom-sy-code-tab-spaces";
     const api = new Function("Constants", source + "\nreturn {getAgentLute, configureAVRichTextLute, getTableCellEditorLute, " +
         "canEnterCodeBlock, hasCodeBlockFence, getTableCellInlineHTML, serializeTableCellRich, " +
-        "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM};")({
+        "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM, isTableCellBlockSlash};")({
         CUSTOM_SY_CODE_TAB_SPACES: codeTabAttribute,
     }) as
         typeof import("../render/setLute") & typeof import("../render/av/richTextValue") &
         typeof import("./tableCellRichLute") & typeof import("../wysiwyg/codeBlockEnter") &
-        typeof import("./tableCellRich") & typeof import("../render/av/richText");
+        typeof import("./tableCellRich") & typeof import("../render/av/richText") & typeof import("./tableCellRichMenu");
     const base = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const lute = api.getTableCellEditorLute(base);
@@ -529,7 +529,7 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const source = ["longTextWrap.ts", "inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts", "../../util/escape.ts",
         "../render/setLute.ts", "../wysiwyg/codeBlockUtil.ts", "../render/av/richTextValue.ts", "../render/av/richText.ts",
         "../wysiwyg/taskListMarker.ts", "../wysiwyg/codeBlockEnter.ts", "tableCellRichLute.ts", "tableCellRichValue.ts",
-        "tableCellRich.ts"].map(file => compile(read(file))).join("\n");
+        "tableCellRich.ts", "tableCellRichMenu.ts"].map(file => compile(read(file))).join("\n");
     const hint = createSourceFile("hint.ts", read("../hint/index.ts"), ScriptTarget.Latest, true);
     const hintClass = hint.statements.find(isClassDeclaration);
     const fill = hintClass.members.find(member => isMethodDeclaration(member) && member.name.getText(hint) === "fill");

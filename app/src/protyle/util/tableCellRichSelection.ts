@@ -1,4 +1,25 @@
 import {focusByOffset, focusByRange, getSelectionOffset} from "./selection";
+import {mapTrackedTokenRange} from "./trackedRangeAnchor";
+
+const getInlineCellSelectionText = (cell: Element) => {
+    const clone = cell.cloneNode(true) as Element;
+    // 与选区偏移一致，软换行和表情各占一个额外位置。
+    clone.querySelectorAll("br, .emoji").forEach(element => element.before("\n"));
+    return clone.textContent.split("");
+};
+
+export const captureInlineCellSelection = (cell: Element, range: Range) => {
+    if (!cell.contains(range.startContainer) || !cell.contains(range.endContainer)) {
+        return;
+    }
+    return {text: getInlineCellSelectionText(cell), ...getSelectionOffset(cell, undefined, range)};
+};
+
+export const restoreInlineCellSelection = (cell: Element, saved: ReturnType<typeof captureInlineCellSelection>) => {
+    const mapped = mapTrackedTokenRange(saved.text, getInlineCellSelectionText(cell), saved,
+        saved.start === saved.end, "before");
+    return mapped && focusByOffset(cell, mapped.start, mapped.end);
+};
 
 const getCellEditables = (root: Element) => Array.from(root.querySelectorAll<HTMLElement>(
     '[data-type="NodeParagraph"] > [contenteditable]:not(.protyle-attr), ' +

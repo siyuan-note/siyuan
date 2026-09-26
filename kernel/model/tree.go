@@ -24,6 +24,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/lute"
@@ -315,6 +316,18 @@ func loadTreeByBlockIDInBox0(id, boxID string, logNotFound bool) (ret *parse.Tre
 
 var searchTreeLimiter = rate.NewLimiter(rate.Every(3*time.Second), 1)
 
+// 关闭笔记本的提示按工作区和笔记本去重，重新打开后允许再次提示。
+var closedBoxNotifications sync.Map
+
+func markClosedBoxNotification(boxID string) bool {
+	_, loaded := closedBoxNotifications.LoadOrStore(filepath.Join(util.DataDir, boxID), struct{}{})
+	return !loaded
+}
+
+func clearClosedBoxNotification(boxID string) {
+	closedBoxNotifications.Delete(filepath.Join(util.DataDir, boxID))
+}
+
 func indexTreeInFilesystem(blockID string) error {
 	return indexTreeInFilesystem0(blockID, false)
 }
@@ -357,7 +370,9 @@ func indexTreeInFilesystem0(blockID string, normalOnly bool) error {
 		for _, b := range Conf.GetClosedBoxes() {
 			if b.ID == boxID {
 				logging.LogInfof("box [%s] is closed", boxID)
-				util.PushErrMsg(fmt.Sprintf(Conf.language(197), b.Name), 7000)
+				if markClosedBoxNotification(boxID) {
+					util.PushErrMsg(fmt.Sprintf(Conf.language(197), b.Name), 7000)
+				}
 				return ErrBoxUnindexed
 			}
 		}

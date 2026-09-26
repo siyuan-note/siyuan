@@ -153,6 +153,9 @@ export const bindDateEvent = (options: {
 
     inputElements.forEach(item => {
         item.addEventListener("keydown", (event) => {
+            if (event.key !== "Escape") {
+                event.stopPropagation();
+            }
             if (event.isComposing) {
                 return;
             }

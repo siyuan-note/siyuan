@@ -28,6 +28,18 @@ import (
 func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Use(boxLeaseMiddleware)
 
+	ginServer.GET("/.well-known/oauth-protected-resource/mcp", mcpOAuthResource)
+	ginServer.GET("/.well-known/oauth-protected-resource", mcpOAuthResourceRoot)
+	ginServer.GET("/.well-known/oauth-authorization-server", mcpOAuthMetadata)
+	ginServer.GET("/oauth/mcp/authorize", mcpOAuthServerAuthorize)
+	ginServer.POST("/oauth/mcp/consent", mcpOAuthConsent)
+	ginServer.POST("/oauth/mcp/token", mcpOAuthToken)
+	ginServer.POST("/oauth/mcp/revoke", mcpOAuthRevoke)
+	ginServer.POST("/api/mcp/getOAuth", model.CheckAuth, model.CheckAdminRole, mcpOAuthGet)
+	ginServer.POST("/api/mcp/setOAuth", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, mcpOAuthSet)
+	ginServer.POST("/api/mcp/addOAuthClient", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, mcpOAuthAddClient)
+	ginServer.POST("/api/mcp/removeOAuthClient", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, mcpOAuthRemoveClient)
+
 	// 不需要鉴权
 
 	ginServer.Handle("GET", "/api/system/bootProgress", bootProgress)

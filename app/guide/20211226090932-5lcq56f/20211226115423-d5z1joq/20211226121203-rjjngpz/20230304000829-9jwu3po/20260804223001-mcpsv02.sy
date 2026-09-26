@@ -6,7 +6,7 @@
 		"id": "20260804223001-mcpsv02",
 		"title": "MCP 服務",
 		"type": "doc",
-		"updated": "20260804230000"
+		"updated": "20260926135700"
 	},
 	"Children": [
 		{"ID": "20260804223201-mcptw01", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223201-mcptw01", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "概述"}]},
@@ -21,6 +21,11 @@
 		{"ID": "20260804223210-mcptw10", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223210-mcptw10", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "權限和安全"}]},
 		{"ID": "20260804223211-mcptw11", "Type": "NodeParagraph", "Properties": {"id": "20260804223211-mcptw11", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "MCP 端點只允許通過鑑權的管理員存取。API token 代表工作空間的管理員權限，連線的用戶端可以讀取資料，也可能修改或刪除資料、存取工作空間檔案、執行 SQL 或觸發同步等操作，因此只應連線可信任的用戶端。"}]},
 		{"ID": "20260804223212-mcptw12", "Type": "NodeParagraph", "Properties": {"id": "20260804223212-mcptw12", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "唯讀模式會拒絕 MCP 的 POST 和 DELETE 請求，因此無法正常呼叫工具。不要直接將思源服務連接埠暴露到不可信任的網路；遠端使用時應設定 HTTPS、反向代理或防火牆，並在 token 洩露後立即更換。"}]},
-		{"ID": "20260804223213-mcptw13", "Type": "NodeParagraph", "Properties": {"id": "20260804223213-mcptw13", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "若要直接透過 HTTP 介面操作思源，請參閱 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20211226121329-c5v3dto", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "Kernel API"}, {"Type": "NodeText", "Data": "；若要為思源 AI 智能體設定外部 MCP 服務，請參閱 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20260804171002-aiagt02", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "AI 智能體"}, {"Type": "NodeText", "Data": "。"}]}
+		{"ID": "20260804223213-mcptw13", "Type": "NodeParagraph", "Properties": {"id": "20260804223213-mcptw13", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "若要直接透過 HTTP 介面操作思源，請參閱 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20211226121329-c5v3dto", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "Kernel API"}, {"Type": "NodeText", "Data": "；若要為思源 AI 智能體設定外部 MCP 服務，請參閱 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20260804171002-aiagt02", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "AI 智能體"}, {"Type": "NodeText", "Data": "。"}]},
+		{"ID": "20260926135700-8fdatrx", "Type": "NodeHeading", "Properties": {"id": "20260926135700-8fdatrx", "updated": "20260926135700"}, "Children": [{"Type": "NodeText", "Data": "OAuth 連線"}], "HeadingLevel": 2},
+		{"ID": "20260926135700-128t5g7", "Type": "NodeParagraph", "Properties": {"id": "20260926135700-128t5g7", "updated": "20260926135700"}, "Children": [{"Type": "NodeText", "Data": "在 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "設定"}, {"Type": "NodeText", "Data": " - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "AI"}, {"Type": "NodeText", "Data": " - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "MCP"}, {"Type": "NodeText", "Data": " 中設定 MCP 伺服器 OAuth。預設停用，需要設定鎖定畫面密碼或 OIDC 登入。填寫公開的 HTTPS 網址，例如 https://note.example.com，不包含路徑。MCP 網址為 https://note.example.com/mcp；反向代理需要保留公開的 Host，同時轉送 /.well-known/、/oauth/mcp/、/mcp 和登入頁面。"}]},
+		{"ID": "20260926135700-81unhnf", "Type": "NodeParagraph", "Properties": {"id": "20260926135700-81unhnf", "updated": "20260926135700"}, "Children": [{"Type": "NodeText", "Data": "使用用戶端名稱和 MCP 用戶端（例如 ChatGPT）顯示的完整回呼網址註冊用戶端。立即儲存用戶端 ID 和密鑰，密鑰僅顯示一次。在用戶端的 OAuth 連線設定中填寫兩者，連線至 MCP 網址，登入思源並確認授權。不支援動態用戶端註冊。"}]},
+		{"ID": "20260926135700-ksuwtso", "Type": "NodeParagraph", "Properties": {"id": "20260926135700-ksuwtso", "updated": "20260926135700"}, "Children": [{"Type": "NodeText", "Data": "授權允許使用目前工作空間對外開放的全部 MCP 工具，包括讀取、寫入、刪除和管理能力。OAuth 權杖僅能用於 /mcp。唯讀模式和加密筆記本鎖定仍然生效，授權不會解鎖筆記本。原有 API Token 連線方式仍可使用。"}]},
+		{"ID": "20260926135700-k0enag2", "Type": "NodeParagraph", "Properties": {"id": "20260926135700-k0enag2", "updated": "20260926135700"}, "Children": [{"Type": "NodeText", "Data": "存取權杖有效期為一小時。申請 offline_access 的用戶端會取得輪換的更新權杖，其有效期最長為授權後的三十天。移除用戶端會撤銷其權杖；撤銷全部授權會保留用戶端註冊。停用 OAuth、修改公開網址或修改管理員認證設定都會撤銷既有授權。設定與憑證摘要儲存在本機 conf/mcp-oauth.json，請妥善保管此檔案，不要在工作空間之間共用。"}]}
 	]
 }

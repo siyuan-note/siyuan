@@ -29264,6 +29264,175 @@
       ],
       "additionalProperties": false
     },
+    "MCPOAuthClient": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "redirectURI": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "redirectURI"
+      ],
+      "additionalProperties": false
+    },
+    "MCPOAuthClientRequestInput": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "redirectURI": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "redirectURI"
+      ],
+      "additionalProperties": false
+    },
+    "MCPOAuthClientSecret": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "redirectURI": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "redirectURI",
+        "secret"
+      ],
+      "additionalProperties": false
+    },
+    "MCPOAuthConfigInput": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "publicURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "publicURL"
+      ],
+      "additionalProperties": false
+    },
+    "MCPOAuthConsentRequestInput": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "type": "string"
+        },
+        "ticket": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MCPOAuthRemoveRequestInput": {
+      "type": "object",
+      "properties": {
+        "all": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MCPOAuthStatus": {
+      "type": "object",
+      "properties": {
+        "clients": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MCPOAuthClient"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "publicURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "clients",
+        "enabled",
+        "publicURL"
+      ],
+      "additionalProperties": false
+    },
+    "MCPOAuthTokenRequestInput": {
+      "type": "object",
+      "properties": {
+        "client_id": {
+          "type": "string"
+        },
+        "client_secret": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "code_verifier": {
+          "type": "string"
+        },
+        "grant_type": {
+          "type": "string"
+        },
+        "redirect_uri": {
+          "type": "string"
+        },
+        "refresh_token": {
+          "type": "string"
+        },
+        "resource": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "token_type_hint": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
     "MarkdownHTMLRequestInput": {
       "type": "object",
       "properties": {
@@ -107080,6 +107249,258 @@
     },
     {
       "method": "GET",
+      "path": "/.well-known/oauth-authorization-server",
+      "handler": "mcpOAuthMetadata",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "application/json"
+        },
+        {
+          "status": 400,
+          "contentType": "application/json"
+        },
+        {
+          "status": 401,
+          "contentType": "application/json"
+        },
+        {
+          "status": 404,
+          "contentType": "application/json"
+        },
+        {
+          "status": 429,
+          "contentType": "application/json"
+        },
+        {
+          "status": 500,
+          "contentType": "application/json"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/.well-known/oauth-protected-resource",
+      "handler": "mcpOAuthResourceRoot",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "application/json"
+        },
+        {
+          "status": 400,
+          "contentType": "application/json"
+        },
+        {
+          "status": 401,
+          "contentType": "application/json"
+        },
+        {
+          "status": 404,
+          "contentType": "application/json"
+        },
+        {
+          "status": 429,
+          "contentType": "application/json"
+        },
+        {
+          "status": 500,
+          "contentType": "application/json"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/.well-known/oauth-protected-resource/mcp",
+      "handler": "mcpOAuthResource",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "application/json"
+        },
+        {
+          "status": 400,
+          "contentType": "application/json"
+        },
+        {
+          "status": 401,
+          "contentType": "application/json"
+        },
+        {
+          "status": 404,
+          "contentType": "application/json"
+        },
+        {
+          "status": 429,
+          "contentType": "application/json"
+        },
+        {
+          "status": 500,
+          "contentType": "application/json"
+        }
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/api/ai/mcp/oauth/callback/:flowID",
       "handler": "mcpOAuthCallback",
       "body": "none",
@@ -108250,6 +108671,78 @@
         "contentType": "text/event-stream",
         "upstreamStatuses": true
       }
+    },
+    {
+      "method": "GET",
+      "path": "/oauth/mcp/authorize",
+      "handler": "mcpOAuthServerAuthorize",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "text/html"
+        },
+        {
+          "status": 302,
+          "contentType": "text/html"
+        },
+        {
+          "status": 400,
+          "contentType": "text/html"
+        }
+      ]
     },
     {
       "method": "GET",
@@ -138120,6 +138613,306 @@
     },
     {
       "method": "POST",
+      "path": "/api/mcp/addOAuthClient",
+      "handler": "mcpOAuthAddClient",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthClientRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/MCPOAuthClientSecret"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/getOAuth",
+      "handler": "mcpOAuthGet",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/MCPOAuthStatus"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/removeOAuthClient",
+      "handler": "mcpOAuthRemoveClient",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthRemoveRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/setOAuth",
+      "handler": "mcpOAuthSet",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthConfigInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/network/echo",
       "handler": "echo",
       "body": "raw",
@@ -159749,6 +160542,242 @@
           }
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/oauth/mcp/consent",
+      "handler": "mcpOAuthConsent",
+      "body": "form",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthConsentRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 302,
+          "contentType": "text/html"
+        },
+        {
+          "status": 400,
+          "contentType": "text/html"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/oauth/mcp/revoke",
+      "handler": "mcpOAuthRevoke",
+      "body": "form",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthTokenRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "application/json"
+        },
+        {
+          "status": 400,
+          "contentType": "application/json"
+        },
+        {
+          "status": 401,
+          "contentType": "application/json"
+        },
+        {
+          "status": 404,
+          "contentType": "application/json"
+        },
+        {
+          "status": 429,
+          "contentType": "application/json"
+        },
+        {
+          "status": 500,
+          "contentType": "application/json"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/oauth/mcp/token",
+      "handler": "mcpOAuthToken",
+      "body": "form",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthTokenRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "application/json"
+        },
+        {
+          "status": 400,
+          "contentType": "application/json"
+        },
+        {
+          "status": 401,
+          "contentType": "application/json"
+        },
+        {
+          "status": 404,
+          "contentType": "application/json"
+        },
+        {
+          "status": 429,
+          "contentType": "application/json"
+        },
+        {
+          "status": 500,
+          "contentType": "application/json"
+        }
+      ]
     },
     {
       "method": "POST",

@@ -48,7 +48,6 @@ const navigate = (action: string[], tablet = true, suppressFocus = false) => {
         block: {id: "block", rootID: "root"},
         wysiwyg: {element: {ownerDocument: {activeElement: null}, querySelectorAll: () => [element], firstElementChild: element}},
         contentElement: {addEventListener: () => {}},
-        element: {addEventListener: () => {}},
         observer: {unobserve: () => {}},
     }, action, undefined, undefined, false, suppressFocus);
     return {records, focused};

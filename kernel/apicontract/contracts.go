@@ -75,6 +75,19 @@ type ResponseOptions struct {
 
 var definitions []Definition
 
+// MCP OAuth 协议入口返回标准 OAuth JSON 或授权页面，不使用内核结果信封。
+var MCPOAuthResource = define[EmptyRequest, BinaryContent]("mcpOAuthResource", "/.well-known/oauth-protected-resource/mcp", NoBody, mcpOAuthContentOptions(), "GET")
+var MCPOAuthResourceRoot = define[EmptyRequest, BinaryContent]("mcpOAuthResourceRoot", "/.well-known/oauth-protected-resource", NoBody, mcpOAuthContentOptions(), "GET")
+var MCPOAuthMetadata = define[EmptyRequest, BinaryContent]("mcpOAuthMetadata", "/.well-known/oauth-authorization-server", NoBody, mcpOAuthContentOptions(), "GET")
+var MCPOAuthToken = define[MCPOAuthTokenRequest, BinaryContent]("mcpOAuthToken", "/oauth/mcp/token", FormBody, mcpOAuthContentOptions(), "POST")
+var MCPOAuthRevoke = define[MCPOAuthTokenRequest, BinaryContent]("mcpOAuthRevoke", "/oauth/mcp/revoke", FormBody, mcpOAuthContentOptions(), "POST")
+var MCPOAuthAuthorize = define[EmptyRequest, BinaryContent]("mcpOAuthServerAuthorize", "/oauth/mcp/authorize", NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 302, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}), "GET")
+var MCPOAuthConsent = define[MCPOAuthConsentRequest, BinaryContent]("mcpOAuthConsent", "/oauth/mcp/consent", FormBody, HTTPContentOptions(HTTPContentVariant{Status: 302, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}), "POST")
+var MCPOAuthGet = define[EmptyRequest, MCPOAuthStatus]("mcpOAuthGet", "/api/mcp/getOAuth", NoBody, ResponseOptions{}, "POST")
+var MCPOAuthSet = define[MCPOAuthConfig, Null]("mcpOAuthSet", "/api/mcp/setOAuth", JSONBody, ResponseOptions{}, "POST")
+var MCPOAuthAddClient = define[MCPOAuthClientRequest, MCPOAuthClientSecret]("mcpOAuthAddClient", "/api/mcp/addOAuthClient", JSONBody, ResponseOptions{}, "POST")
+var MCPOAuthRemoveClient = define[MCPOAuthRemoveRequest, Null]("mcpOAuthRemoveClient", "/api/mcp/removeOAuthClient", JSONBody, ResponseOptions{}, "POST")
+
 var (
 	GetChildBlocks     = define[BlockQueryRequest, []*ChildBlock]("getChildBlocks", "/api/block/getChildBlocks", JSONBody, ResponseOptions{NonNullable: true}, "POST")
 	GetTailChildBlocks = define[TailChildBlocksRequest, []*ChildBlock]("getTailChildBlocks", "/api/block/getTailChildBlocks", JSONBody, ResponseOptions{NonNullable: true}, "POST")

@@ -1304,6 +1304,22 @@ export type LockScreenRequestInput = { "lockScreenMode": number; };
 
 export type Login2faEnvelope = { "code": number; "data": ({ "code": number; "msg": string; } & { [key: string]: JSONValue }) | null; "msg": string; };
 
+export type MCPOAuthClient = { "id": string; "name": string; "redirectURI": string; };
+
+export type MCPOAuthClientRequestInput = { "name": string; "redirectURI": string; };
+
+export type MCPOAuthClientSecret = { "id": string; "name": string; "redirectURI": string; "secret": string; };
+
+export type MCPOAuthConfigInput = { "enabled": boolean; "publicURL": string; };
+
+export type MCPOAuthConsentRequestInput = { "decision"?: string; "ticket"?: string; };
+
+export type MCPOAuthRemoveRequestInput = { "all"?: boolean; "id"?: string; };
+
+export type MCPOAuthStatus = { "clients": Array<MCPOAuthClient> | null; "enabled": boolean; "publicURL": string; };
+
+export type MCPOAuthTokenRequestInput = { "client_id"?: string; "client_secret"?: string; "code"?: string; "code_verifier"?: string; "grant_type"?: string; "redirect_uri"?: string; "refresh_token"?: string; "resource"?: string; "scope"?: string; "token"?: string; "token_type_hint"?: string; };
+
 export type MarkdownHTMLRequestInput = { "markdown": string; "mode"?: string | null; };
 
 export type MigrateLegacyMindmapsData = { "blocks": Array<BlockDOMData> | null; "converted": number; };
@@ -2318,6 +2334,27 @@ export type APILegacyGETPath =
     never;
 
 export interface APIGETRoutes {
+    "/.well-known/oauth-authorization-server": {
+        request: EmptyRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "binary";
+        contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
+    };
+    "/.well-known/oauth-protected-resource": {
+        request: EmptyRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "binary";
+        contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
+    };
+    "/.well-known/oauth-protected-resource/mcp": {
+        request: EmptyRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "binary";
+        contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
+    };
     "/api/ai/mcp/oauth/callback/:flowID": {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2416,6 +2453,13 @@ export interface APIGETRoutes {
         body: "none";
         output: "proxy";
         proxy: {"kind":"eventSource","contentType":"text/event-stream","upstreamStatuses":true};
+    };
+    "/oauth/mcp/authorize": {
+        request: EmptyRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "binary";
+        contentVariants: [{"status":200,"contentType":"text/html"},{"status":302,"contentType":"text/html"},{"status":400,"contentType":"text/html"}];
     };
     "/plugin/private/:name/*path": {
         request: Blob;
@@ -4236,6 +4280,26 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": WPSPresentationData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "converted"?: never; "dom"?: never; }) | null | (WPSPresentationData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
     };
+    "/api/mcp/addOAuthClient": {
+        request: MCPOAuthClientRequestInput;
+        response: { "code": 0; "data": MCPOAuthClientSecret; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/mcp/getOAuth": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": MCPOAuthStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/mcp/removeOAuthClient": {
+        request: MCPOAuthRemoveRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/mcp/setOAuth": {
+        request: MCPOAuthConfigInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/network/echo": {
         request: Blob;
         response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5639,6 +5703,27 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/oauth/mcp/consent": {
+        request: MCPOAuthConsentRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "form";
+        output: "binary";
+        contentVariants: [{"status":302,"contentType":"text/html"},{"status":400,"contentType":"text/html"}];
+    };
+    "/oauth/mcp/revoke": {
+        request: MCPOAuthTokenRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "form";
+        output: "binary";
+        contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
+    };
+    "/oauth/mcp/token": {
+        request: MCPOAuthTokenRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "form";
+        output: "binary";
+        contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
     };
     "/plugin/private/:name/*path": {
         request: Blob;

@@ -31,6 +31,7 @@ import {
 } from "./aiSkillUi";
 import {isAgentStreamingMarkdownEnabled, setAgentStreamingMarkdownEnabled} from "./agentStreamingMarkdown";
 import {openSkillManager} from "../../../ai/skills/manager";
+import {genMcpOAuthHtml, mountMcpOAuth} from "./mcpOAuthUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -228,6 +229,13 @@ const registerAiSkillsGroup = (tab: SettingTabBuilder) => {
 
 const registerAiMcpGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("mcp", window.siyuan.languages.configGroupMcp);
+
+    group.slot({
+        key: "mcpOAuthServer",
+        keywords: [window.siyuan.languages.mcpOAuthServer, "OAuth", "ChatGPT"],
+        html: genMcpOAuthHtml,
+        afterMount: mountMcpOAuth,
+    });
 
     group.slot({
         key: "mcpServers",

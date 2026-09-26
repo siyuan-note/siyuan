@@ -5,9 +5,9 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {createSourceFile, isClassDeclaration, isMethodDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isClassDeclaration, isMethodDeclaration, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string, hintSource: string, keyboardSource: string) => {
+const browserCases = async (source: string, hintSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const {mount, render, paddingElement} = new Function(source + hintSource +
         "\nreturn {mount: mountLiteSlashMenu, render: Hint.prototype.getHTMLByData, paddingElement: getMobileToolbarPaddingElement};")() as {
@@ -108,34 +108,6 @@ const browserCases = async (source: string, hintSource: string, keyboardSource: 
     mount(protyle, panel);
     toolbar.style.width = "390px";
 
-    const tableEditor = document.createElement("div");
-    tableEditor.className = "protyle-wysiwyg";
-    tableEditor.innerHTML = "<table contenteditable='true'><tbody><tr><td>inline</td></tr></tbody></table>";
-    document.body.appendChild(tableEditor);
-    const range = document.createRange();
-    range.selectNodeContents(tableEditor.querySelector("td"));
-    range.collapse(false);
-    Object.assign(protyle, {lite: false, wysiwyg: {element: tableEditor}, toolbar: {range}});
-    const keyboard = new Function("mountLiteSlashMenu", "focusByRange",
-        "let unmountLiteSlashMenu;" + keyboardSource +
-        "\nreturn {render: renderSlashMenu, unmount: () => unmountLiteSlashMenu()};")(mount, (saved: Range) => {
-        getSelection().removeAllRanges();
-        getSelection().addRange(saved);
-    });
-    provider.hint = () => {
-        check.ok(tableEditor.querySelector("td").contains(getSelection().focusNode));
-        return items.slice(0, 2);
-    };
-    getSelection().removeAllRanges();
-    keyboard.render(protyle, toolbar);
-    check.equal(panel.querySelectorAll("button.keyboard__slash-item[data-value]").length, 2);
-    check.equal(panel.querySelector('[data-value="upload"]'), null);
-    check.equal(protyle.hint.splitChar, "/");
-    check.equal(protyle.hint.lastIndex, -1);
-    check.equal(tableEditor.querySelector(".table__cell-editor"), null);
-    keyboard.unmount();
-    tableEditor.remove();
-
     const agent = document.createElement("div");
     agent.className = "sy__agentChat sy__agentChat--mobile fn__flex-column";
     agent.style.position = "fixed";
@@ -181,13 +153,6 @@ test("mobile slash panel retains synchronous and asynchronous candidates and rel
     const hintSource = transpileModule("class Hint {" + render.getText(hintFile) + "}", {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;
-    const keyboardFile = createSourceFile("keyboardToolbar.ts", readFileSync(path.join(__dirname, "keyboardToolbar.ts"), "utf8"),
-        ScriptTarget.Latest, true);
-    const keyboardRender = keyboardFile.statements.find(statement => isVariableStatement(statement) &&
-        statement.declarationList.declarations.some(declaration => declaration.name.getText(keyboardFile) === "renderSlashMenu"));
-    const keyboardSource = transpileModule(keyboardRender.getText(keyboardFile), {
-        compilerOptions: {target: ScriptTarget.ES2021},
-    }).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mobile-slash-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -204,7 +169,7 @@ app.whenReady().then(async () => {
         await win.webContents.insertCSS(require(${JSON.stringify(require.resolve("sass"))}).compile(
             ${JSON.stringify(path.resolve(__dirname, "../../assets/scss/mobile.scss"))}, {logger: {warn() {}}}).css);
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, hintSource, keyboardSource].map(value => JSON.stringify(value)).join(",") + ")")}));
+        browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(hintSource) + ")")}));
         if (process.env.SIYUAN_MOBILE_SLASH_SCREENSHOT) {
             await new Promise(resolve => setTimeout(resolve, 200));
             require("node:fs").writeFileSync(process.env.SIYUAN_MOBILE_SLASH_SCREENSHOT, (await win.webContents.capturePage()).toPNG());

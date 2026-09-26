@@ -3,8 +3,3 @@ export const TABLE_CELL_SLASH_IDS = new Set([
     "quote", "code", "math", "link", "bold", "italic", "underline", "strike", "mark", "sup", "sub", "inlineCode",
     "kbd", "tag", "inlineMath",
 ]);
-
-export const isTableCellBlockSlash = (value: string) =>
-    value === "```" || value === "$$" ||
-    ["# ", "## ", "### ", "#### ", "##### ", "###### ", "- ", "1. ", "- [ ] ", "> "]
-        .some(prefix => value === prefix + Lute.Caret);

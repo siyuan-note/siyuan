@@ -19,7 +19,7 @@ import {focusEditableAtGoalX, getCaretGoalX} from "../wysiwyg/verticalCaret";
 import {fixTable} from "../util/table";
 import {updateTableCellContentLayout} from "../util/tableCellRich";
 import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
-import {captureInlineCellSelection, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreInlineCellSelection, restoreRichCellSelection} from "../util/tableCellRichSelection";
+import {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection} from "../util/tableCellRichSelection";
 import {matchHotKey} from "../util/hotKey";
 import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
 import {getTableCellEditorLute} from "../util/tableCellRichLute";
@@ -85,7 +85,7 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
 
 export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCellElement,
                                              navigation?: {key: string, goalX: number}, point?: {x: number, y: number, target?: Element},
-                                             restoredSelection?: ReturnType<typeof captureRichCellSelection>, convert = false) => {
+                                             restoredSelection?: ReturnType<typeof captureRichCellSelection>) => {
     if (owner.disabled || !cell.isConnected || activeEditor?.cell === cell) {
         return;
     }
@@ -99,27 +99,6 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
     }
     const request = {};
     openingEditor = request;
-    if (!convert && !cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE)) {
-        // 普通单元格直接编辑，跨单元格导航保留进入方向和光标横坐标。
-        owner.wysiwyg.element.focus({preventScroll: true});
-        if (restoredSelection) {
-            const range = focusByOffset(cell, restoredSelection.start, restoredSelection.end);
-            if (range && restoredSelection.backward) {
-                getSelection().setBaseAndExtent(range.endContainer, range.endOffset, range.startContainer, range.startOffset);
-            }
-        } else if (navigation) {
-            const backward = navigation.key === "ArrowLeft" || navigation.key === "ArrowUp";
-            if (!["ArrowUp", "ArrowDown"].includes(navigation.key) ||
-                !focusEditableAtGoalX(cell, backward ? "up" : "down", navigation.goalX, owner.contentElement)) {
-                const range = document.createRange();
-                range.selectNodeContents(cell);
-                range.collapse(!backward);
-                focusByRange(range);
-            }
-        }
-        updateOutlineCurrentBlock(owner, cell);
-        return;
-    }
     const tableID = table.dataset.nodeId;
     const tableParent = table.parentElement;
     const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
@@ -128,8 +107,6 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
     const clickedMath = point?.target?.closest('[data-subtype="math"]');
     const clickedMathIndex = clickedMath && cell.contains(clickedMath) ?
         Array.from(cell.querySelectorAll('[data-subtype="math"]')).indexOf(clickedMath) : -1;
-    const commandSelection = convert && !cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE) && getSelection().rangeCount ?
-        captureInlineCellSelection(cell, getSelection().getRangeAt(0)) : undefined;
     // 外层输入先完成解析和事务，避免把即将挂载的单元格编辑界面当作正文。
     await owner.wysiwyg.flushPendingInput();
     if (openingEditor !== request || owner.disabled || !owner.element.isConnected) {
@@ -140,9 +117,6 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
         cell = table?.querySelector("table")?.rows[rowIndex]?.cells[cellIndex];
     }
     if (!cell?.isConnected || cell.closest(".protyle-wysiwyg") !== owner.wysiwyg.element || activeEditor) {
-        return;
-    }
-    if (commandSelection && !restoreInlineCellSelection(cell, commandSelection)) {
         return;
     }
     let initialBlockHTML: string;
@@ -534,12 +508,12 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
         const mathElement = fragment.wysiwyg.querySelectorAll('[data-subtype="math"]')[clickedMathIndex];
         if (mathElement) {
             fragment.protyle.toolbar.showRender(fragment.protyle, mathElement);
-            return fragment.protyle;
+            return;
         }
     }
     if (restoredSelection && restoreRichCellSelection(fragment.wysiwyg, restoredSelection)) {
         undoSelection = restoredSelection;
-        return fragment.protyle;
+        return;
     }
     if (navigation) {
         const editables = fragment.wysiwyg.querySelectorAll<HTMLElement>('[contenteditable="true"]');
@@ -548,40 +522,38 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
         if (edit) {
             if ((navigation.key === "ArrowUp" || navigation.key === "ArrowDown") &&
                 focusEditableAtGoalX(edit, backward ? "up" : "down", navigation.goalX, owner.contentElement)) {
-                return fragment.protyle;
+                return;
             }
             const range = document.createRange();
             range.selectNodeContents(edit);
             range.collapse(!backward);
             focusByRange(range);
         }
-        return fragment.protyle;
+        return;
     }
     if (clickedSelection && restoreRichCellSelection(fragment.wysiwyg, clickedSelection)) {
-        return fragment.protyle;
+        return;
     }
     if (richSelection && (preserveSelection || !point) && restoreRichCellSelection(fragment.wysiwyg, richSelection)) {
         if (preserveSelection) {
             fragment.protyle.toolbar.render(fragment.protyle, getSelection().getRangeAt(0));
         }
-        return fragment.protyle;
+        return;
     }
     if (point && !preserveSelection) {
         const range = document.caretRangeFromPoint(point.x, point.y);
         if (range && fragment.wysiwyg.contains(range.startContainer)) {
             focusByRange(range);
-            return fragment.protyle;
+            return;
         }
     }
     if (initialOffset) {
         const edit = fragment.wysiwyg.querySelector('[contenteditable="true"]');
         if (edit) {
             focusByOffset(edit, initialOffset.start, initialOffset.end);
-            undoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection());
             if (preserveSelection) {
                 fragment.protyle.toolbar.render(fragment.protyle, getSelection().getRangeAt(0));
             }
         }
     }
-    return fragment.protyle;
 };

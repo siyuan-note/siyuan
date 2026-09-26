@@ -62,6 +62,7 @@ import {
 } from "./touchSelection";
 import {getVisibleViewportBounds} from "./visibleViewport";
 import {createInlineMathSelection} from "./inlineMathSelection";
+import {isCommittedTextInput} from "../../protyle/wysiwyg/compositionInput";
 import {
     getTextWithoutSemanticMarkers,
     stripSemanticMarkersFromRangeText
@@ -1364,6 +1365,11 @@ export const initKeyboardToolbar = () => {
     }, true);
     document.addEventListener("compositionend", () => {
         composing = false;
+    }, true);
+    document.addEventListener("input", (event: InputEvent) => {
+        if (isCommittedTextInput(event)) {
+            composing = false;
+        }
     }, true);
     document.addEventListener("selectionchange", () => {
         inlineMathSelection.update(getMathEditor(), getSelection(), composing);

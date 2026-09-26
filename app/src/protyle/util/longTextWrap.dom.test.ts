@@ -151,6 +151,17 @@ const browserCases = async (source: string) => {
     check.equal(composing.textContent, long.substring(0, 12) + "输入z" + long.substring(12));
     checkCaret(composing, 15);
 
+    // 组合结束事件缺失后，明确提交的文本恢复折行，候选更新仍保持原始文本节点。
+    composing.textContent = long;
+    select(composing.firstChild, 15);
+    renderLongTextRuns(editor);
+    editor.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+    editor.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertCompositionText", isComposing: false}));
+    check.equal(composing.querySelector('[data-inline-wrap="token"]'), null);
+    editor.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", isComposing: false}));
+    check.ok(composing.querySelector('[data-inline-wrap="token"]'));
+    checkCaret(composing, 15);
+
     // 编辑器之外的选区和无选区状态不受渲染影响。
     const outside = document.createElement("div");
     outside.contentEditable = "true";
@@ -176,7 +187,8 @@ test("long text wrapping preserves list input and DOM selection boundaries", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const source = transpileModule(readFileSync(path.join(__dirname, "longTextWrap.ts"), "utf8")
+    const source = transpileModule((readFileSync(path.join(__dirname, "../wysiwyg/compositionInput.ts"), "utf8") +
+        readFileSync(path.join(__dirname, "longTextWrap.ts"), "utf8").replace(/^import .*;\r?\n/gm, ""))
         .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-long-text-test-"));
     const script = path.join(temporary, "run.cjs");

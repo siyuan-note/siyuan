@@ -8,6 +8,7 @@ import {renderLongTextRuns} from "../util/longTextWrap";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
+import {isCommittedTextInput} from "./compositionInput";
 import {isDirectMathClick} from "../util/mathClick";
 import {
     beforePaste,
@@ -3978,6 +3979,8 @@ export class WYSIWYG {
 
         // 输入法测试点 https://github.com/siyuan-note/siyuan/issues/3027
         let isComposition = false; // for iPhone
+        let recoveredComposition = false;
+        let compositionSnapshot: {element: HTMLElement; html: string};
         // 组合输入已由 beforeinput 处理时，忽略其后到达的 compositionend，避免重复生成事务。
         let beforeInputCompositionHandled = false;
         // 原生软换行在 input 触发前已经修改 DOM，需预存选区供撤销恢复。
@@ -4108,6 +4111,8 @@ export class WYSIWYG {
                 return;
             }
             isComposition = true;
+            recoveredComposition = false;
+            compositionSnapshot = undefined;
             crossBlockComposition = undefined;
             // 微软双拼由于 focusByRange 导致无法输入文字，因此不再 keydown 中记录了，但 keyup 会记录拼音字符，因此使用 isComposition 阻止 keyup 记录。
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
@@ -4142,6 +4147,12 @@ export class WYSIWYG {
             if ((selectionModeElement || !isMac()) && nodeElement && !crossBlockComposition) {
                 setInsertWbrHTML(nodeElement, range, protyle);
             }
+            if (nodeElement && !crossBlockComposition) {
+                compositionSnapshot = {
+                    element: nodeElement,
+                    html: this.lastHTMLs[nodeElement.getAttribute("data-node-id")],
+                };
+            }
             event.stopPropagation();
         });
 
@@ -4154,6 +4165,11 @@ export class WYSIWYG {
             if (getAVTemplateInteractiveElement(event.target)) {
                 return;
             }
+            // 已提交的文本会沿普通输入链路保存，迟到的结束事件不能再次提交或恢复旧光标。
+            if (recoveredComposition) {
+                return;
+            }
+            compositionSnapshot = undefined;
             if (crossBlockComposition) {
                 const currentComposition = crossBlockComposition;
                 beforeInputCompositionHandled = false;
@@ -4387,6 +4403,22 @@ export class WYSIWYG {
             blockElement.closest(".table")?.querySelector(".table__resize")?.setAttribute("style", "display:none");
             if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {
                 protyle.hint.enableExtend = true;
+            }
+            // 外接键盘的结束事件可能缺失，收到明确提交的文本后恢复输入处理。
+            // 跨块组合由其独立事务完成，不能在这里拆开提交。
+            if (isComposition && !crossBlockComposition && isCommittedTextInput(event)) {
+                isComposition = false;
+                recoveredComposition = true;
+                beforeInputCompositionHandled = false;
+                compositionRange = undefined;
+                if (compositionSnapshot?.html && this.element.contains(compositionSnapshot.element)) {
+                    if (compositionSnapshot.element === blockElement) {
+                        this.lastHTMLs[blockElement.getAttribute("data-node-id")] = compositionSnapshot.html;
+                    } else {
+                        updateTransaction(protyle, compositionSnapshot.element, compositionSnapshot.html);
+                    }
+                }
+                compositionSnapshot = undefined;
             }
             if (event.isComposing || isComposition ||
                 // https://github.com/siyuan-note/siyuan/issues/337 编辑器内容拖拽问题

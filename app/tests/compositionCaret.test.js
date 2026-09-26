@@ -15,11 +15,15 @@ const rendererSource = () => {
     };
     const wysiwyg = ts.createSourceFile("index.ts", read("wysiwyg/index"), ts.ScriptTarget.Latest, true);
     const handlers = {};
+    const inputMethods = [];
     let isAfterInlineMath;
     const visit = node => {
         if (ts.isCallExpression(node) && node.expression.getText(wysiwyg) === "this.element.addEventListener" &&
-            ["compositionstart", "compositionend"].includes(node.arguments[0]?.text)) {
+            ["compositionstart", "compositionend", "input", "focusout"].includes(node.arguments[0]?.text)) {
             handlers[node.arguments[0].text] = node.arguments[1].getText(wysiwyg);
+        }
+        if (ts.isMethodDeclaration(node) && ["scheduleInput", "runInput", "flushPendingInput"].includes(node.name.getText(wysiwyg))) {
+            inputMethods.push(node.getText(wysiwyg));
         }
         if (ts.isVariableDeclaration(node) && node.name.getText(wysiwyg) === "isAfterInlineMath") {
             isAfterInlineMath = node.initializer.getText(wysiwyg);
@@ -27,8 +31,19 @@ const rendererSource = () => {
         ts.forEachChild(node, visit);
     };
     visit(wysiwyg);
-    assert.deepEqual(Object.keys(handlers).sort(), ["compositionend", "compositionstart"]);
+    assert.deepEqual(Object.keys(handlers).sort(), ["compositionend", "compositionstart", "focusout", "input"]);
     assert.ok(isAfterInlineMath);
+    const mobile = ts.createSourceFile("keyboardToolbar.ts", read("../mobile/util/keyboardToolbar"), ts.ScriptTarget.Latest, true);
+    let mobileInput;
+    const visitMobile = node => {
+        if (ts.isCallExpression(node) && node.expression.getText(mobile) === "document.addEventListener" &&
+            node.arguments[0]?.text === "input" && node.arguments[1].getText(mobile).includes("isCommittedTextInput")) {
+            mobileInput = node.arguments[1].getText(mobile);
+        }
+        ts.forEachChild(node, visitMobile);
+    };
+    visitMobile(mobile);
+    assert.ok(mobileInput);
     // 使用实际事件入口、平台检测、选区恢复和事务生成，只替代网络及无关渲染。
     const source = `
         const Constants = {ZWSP: "\\u200b", ATTRIBUTE_EDITING: "data-editing"};
@@ -38,13 +53,25 @@ const rendererSource = () => {
         const revealTabsForTarget = () => {};
         const getAtomicVerticalNavigationOwner = () => undefined;
         const getSemanticMarkerPrefixLengthForNode = () => 0;
+        const normalizeInlineElementBoundaries = () => {};
+        const renderLongTextRuns = () => {};
+        class InputQueue {
+            pendingInputTimeouts = new Map();
+            runningInputTasks = new Set();
+            ${inputMethods.join("\n")}
+        }
         const cleanListMindmapHTML = html => html, cleanHeadingNumberHTML = html => html;
         const cleanTableCellRichHTML = html => html, cleanBlockSelectionModeHTML = html => html;
         const transaction = (protyle, doOperations, undoOperations) => {
             protyle.transactions.push({doOperations, undoOperations});
         };
-        const input = protyle => { protyle.inputs++; };
-    ` + read("wysiwyg/compositionCaret") + read("util/browserCompatibility") +
+        const input = (protyle, block) => {
+            protyle.inputs++;
+            const id = block.getAttribute("data-node-id");
+            updateTransaction(protyle, block, protyle.wysiwyg.lastHTMLs[id]);
+            protyle.wysiwyg.lastHTMLs[id] = block.outerHTML;
+        };
+    ` + read("wysiwyg/compositionCaret") + read("wysiwyg/compositionInput") + read("util/browserCompatibility") +
         extract("util/compatibility", ["isIOSDevice", "isMac"]) +
         extract("util/hasClosest", ["hasClosestBlock", "hasClosestByAttribute", "hasClosestByClassName",
             "hasClosestByTag", "isBlockElement"]) +
@@ -52,16 +79,32 @@ const rendererSource = () => {
         extract("util/selection", ["getEditorRange", "focusByRange", "getSelectionOffset", "selectIsEditor",
             "focusByOffset", "searchNode", "setLastNodeRange", "setInsertWbrHTML", "focusByWbr"]) +
         extract("wysiwyg/transaction", ["updateTransaction"]) + `
+        export function checkMobileInput(event) {
+            let composing = true;
+            (${mobileInput})(event);
+            return composing;
+        }
         export function bind(protyle) {
             let isComposition = false, beforeInputCompositionHandled = false;
+            let recoveredComposition = false, compositionSnapshot;
+            let lineBreakUndoContext, forwardDeleteUndoContext;
             let compositionRange, crossBlockComposition;
             const isAfterInlineMath = ${isAfterInlineMath};
             const pending = [];
+            Object.assign(protyle.wysiwyg, new InputQueue());
+            for (const name of ["scheduleInput", "runInput", "flushPendingInput"]) {
+                protyle.wysiwyg[name] = InputQueue.prototype[name];
+            }
+            protyle.toolbar = {};
+            protyle.hint = {};
             const handlers = (function () {
-                return {start: ${handlers.compositionstart}, end: ${handlers.compositionend}};
+                return {start: ${handlers.compositionstart}, end: ${handlers.compositionend},
+                    input: ${handlers.input}, focusout: ${handlers.focusout}};
             }).call(protyle.wysiwyg);
             protyle.wysiwyg.element.addEventListener("compositionstart", handlers.start);
             protyle.wysiwyg.element.addEventListener("compositionend", event => pending.push(handlers.end(event)));
+            protyle.wysiwyg.element.addEventListener("input", handlers.input);
+            protyle.wysiwyg.element.addEventListener("focusout", handlers.focusout);
             return () => Promise.all(pending.splice(0));
         }
     `;
@@ -123,6 +166,88 @@ const runCases = async () => {
         return {element, protyle, start, finish, flush, setRange, assertCaret};
     };
     let cases = 0;
+    {
+        const {checkMobileInput} = window.compositionCaret;
+        assert.equal(checkMobileInput({isComposing: false, inputType: "insertText"}), false);
+        assert.equal(checkMobileInput({isComposing: true, inputType: "insertText"}), true);
+        assert.equal(checkMobileInput({isComposing: false, inputType: "insertCompositionText"}), true);
+        cases++;
+    }
+    {
+        const f = setup(paragraph("first") + paragraph("second").replace('data-node-id="p"', 'data-node-id="other"'));
+        const first = f.element.firstElementChild.querySelector('[contenteditable="true"]').firstChild;
+        const second = f.element.lastElementChild.querySelector('[contenteditable="true"]').firstChild;
+        f.start(first, first.length);
+        first.appendData("pending");
+        f.setRange(second, second.length);
+        setInsertWbrHTML(f.element.lastElementChild, getSelection().getRangeAt(0), f.protyle);
+        second.appendData("next");
+        f.setRange(second, second.length);
+        f.element.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", data: "next", isComposing: false}));
+        await f.protyle.wysiwyg.flushPendingInput();
+        assert.equal(f.protyle.transactions.length, 2);
+        assert.match(f.protyle.transactions[0].doOperations[0].data, /firstpending/);
+        assert.match(f.protyle.transactions[0].undoOperations[0].data, /first<wbr>/);
+        assert.match(f.protyle.transactions[1].doOperations[0].data, /secondnext/);
+        assert.match(f.protyle.transactions[1].undoOperations[0].data, /second<wbr>/);
+        await f.finish("");
+        assert.equal(f.protyle.transactions.length, 2);
+        f.assertCaret(second, second.length);
+        cases++;
+    }
+    for (const profile of profiles) {
+        for (const inputType of ["insertText", "insertReplacementText", "insertFromComposition"]) {
+            const f = setup(paragraph("base"), profile);
+            const node = f.element.querySelector('[contenteditable="true"]').firstChild;
+            const type = (text, type, isComposing) => {
+                node.appendData(text);
+                f.setRange(node, node.length);
+                const event = new InputEvent("input", {bubbles: true, data: text, inputType: type, isComposing});
+                // Chromium 会清空其不支持的输入类型，这里保留其他浏览器提交事件的类型。
+                if (event.inputType !== type) {
+                    Object.defineProperty(event, "inputType", {value: type});
+                }
+                f.element.dispatchEvent(event);
+            };
+            f.start(node, node.length);
+            type("a", "insertCompositionText", true);
+            type("b", "insertCompositionText", false);
+            type("c", "insertText", true);
+            await f.protyle.wysiwyg.flushPendingInput();
+            assert.equal(f.protyle.inputs, 0, "candidate updates must not be committed");
+            f.element.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
+            // 模拟普通按键覆盖撤销快照，恢复时仍需保留组合输入开始前的内容。
+            setInsertWbrHTML(f.element.firstElementChild, getSelection().getRangeAt(0), f.protyle);
+            type("d", inputType, false);
+            await f.protyle.wysiwyg.flushPendingInput();
+            assert.equal(f.protyle.inputs, 1, `${profile.name}: ${inputType}`);
+            assert.equal(f.protyle.transactions.length, 1);
+            const saved = f.protyle.transactions[0];
+            assert.match(saved.doOperations[0].data, /baseabcd/);
+            assert.match(saved.undoOperations[0].data, /base<wbr>/);
+            assert.doesNotMatch(saved.undoOperations[0].data, /basea/);
+            await f.finish("");
+            await f.finish("abcd");
+            assert.equal(f.protyle.inputs, 1, "late end must not submit twice");
+            assert.equal(f.protyle.transactions.length, 1);
+            f.assertCaret(node, node.length);
+            type("e", "insertText", false);
+            await f.protyle.wysiwyg.flushPendingInput();
+            assert.equal(f.protyle.inputs, 2);
+            assert.match(f.protyle.transactions[1].doOperations[0].data, /baseabcde/);
+            f.start(node, node.length);
+            type("f", "insertCompositionText", true);
+            await f.finish("f");
+            await f.protyle.wysiwyg.flushPendingInput();
+            assert.equal(f.protyle.inputs, 3, "next composition must finish normally");
+            f.element.firstElementChild.outerHTML = saved.undoOperations[0].data;
+            focusByWbr(f.element, document.createRange());
+            assert.equal(f.element.textContent, "base");
+            f.element.firstElementChild.outerHTML = saved.doOperations[0].data;
+            assert.equal(f.element.textContent, "baseabcd");
+            cases++;
+        }
+    }
     for (const profile of profiles) {
         const f = setup(paragraph("前后"), profile);
         const node = f.element.querySelector('[contenteditable="true"]').firstChild;
@@ -302,7 +427,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
                 require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
-            assert.match(stdout, /Composition caret: 19 Electron cases passed/);
+            assert.match(stdout, /Composition caret: 39 Electron cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-composition-caret-"));

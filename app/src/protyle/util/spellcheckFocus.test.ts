@@ -162,6 +162,20 @@ describe("spellcheck focus after document restoration", () => {
         f.dispose();
     });
 
+    it("recovers after committed input without a composition end", () => {
+        const f = fixture();
+        f.restore();
+        f.listeners.get("compositionstart")();
+        f.listeners.get("input")({inputType: "insertCompositionText", isComposing: false});
+        f.mouseDown();
+        assert.equal(f.blurCount(), 0);
+        f.listeners.get("input")({inputType: "insertText", isComposing: false});
+        f.mouseDown();
+        assert.equal(f.blurCount(), 1);
+        f.dispose();
+        assert.equal(f.listeners.has("input"), false);
+    });
+
     it("skips disabled, readonly, detached and no longer focused editors", () => {
         for (const change of [
             (f: ReturnType<typeof fixture>) => f.setEnabled(false),

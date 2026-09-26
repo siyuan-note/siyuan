@@ -987,9 +987,7 @@
         }
 
         &[data-dtype="mAsset"] .av__cellassetimg:first-child,
-        &[data-dtype="mAsset"] .b3-chip:first-child,
-        &[data-dtype="mSelect"] .b3-chip:first-child,
-        &[data-dtype="select"] .b3-chip:first-child {
+        &[data-dtype="mAsset"] .b3-chip:first-child {
           margin-left: 0;
         }
       }
@@ -1409,6 +1407,23 @@
     padding: 2px 6px;
     line-height: calc(1.625em - 6px);
     font-size: inherit;
+  }
+
+  &__cell,
+  &__calendar-field {
+    &[data-dtype="select"],
+    &[data-dtype="mSelect"] {
+      > .b3-chip {
+        display: inline-block;
+        margin: 1px 4px 1px 0;
+        vertical-align: top;
+      }
+
+      &[data-wrap="true"] > .b3-chip {
+        max-width: calc(100% - 4px);
+        word-break: break-all;
+      }
+    }
   }
 
   &__drag-fill {

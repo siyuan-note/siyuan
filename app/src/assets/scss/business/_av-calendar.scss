@@ -321,12 +321,24 @@
       overflow-wrap: anywhere;
     }
 
+    &[data-dtype="select"],
+    &[data-dtype="mSelect"] {
+      display: block;
+      white-space: nowrap;
+
+      &[data-wrap="true"] {
+        white-space: pre-wrap;
+      }
+    }
+
     &[data-align="center"] {
       justify-content: center;
+      text-align: center;
     }
 
     &[data-align="right"] {
       justify-content: flex-end;
+      text-align: right;
     }
   }
 

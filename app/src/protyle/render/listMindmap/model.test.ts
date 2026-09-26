@@ -677,6 +677,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         sourceList.setAttribute("data-mindmap-view-rendered", "true");
         const metadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: "Example"});
         sourceList.setAttribute("custom-sy-list-mindmap-data", metadata);
+        sourceList.classList.add("protyle-wysiwyg--select");
+        sourceList.querySelector('[contenteditable="true"]').insertAdjacentHTML("afterbegin", "<wbr>");
         sourceList.prepend(derived.cloneNode(true));
         for (const [conversion, subtype] of conversions) {
             const converted = document.createElement("div");
@@ -689,6 +691,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.equal(result.getAttribute("custom-sy-list-mindmap-data"), metadata);
             check.equal(result.querySelector(".mindmap-view"), null);
             check.equal(result.hasAttribute("data-mindmap-view-rendered"), false);
+            check.equal(result.classList.contains("protyle-wysiwyg--select"), false);
+            check.ok(result.querySelector('[data-type="NodeParagraph"] [contenteditable="true"] > wbr'));
+            check.ok(sourceList.classList.contains("protyle-wysiwyg--select"));
             check.ok(result.textContent.includes("Alpha") && result.textContent.includes("Beta"));
         }
     }
@@ -699,6 +704,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const typedMetadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: "Example"});
     typedList.setAttribute("custom-sy-list-mindmap-data", typedMetadata);
     api.retagMindmapBranch(typedList, true);
+    typedList.classList.add("protyle-wysiwyg--select");
+    typedList.querySelector('[contenteditable="true"]').insertAdjacentHTML("afterbegin", "<wbr>");
     typedList.append(derived.cloneNode(true));
     const typedBefore = typedList.outerHTML;
     const normalized = api.listMindmapConversionSource(typedList);
@@ -717,6 +724,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.deepEqual(ids(result), typedIDs);
         check.equal(result.getAttribute("custom-sy-list-mindmap-data"), typedMetadata);
         check.equal(result.querySelector(".mindmap-view"), null);
+        check.equal(result.classList.contains("protyle-wysiwyg--select"), false);
+        check.ok(result.querySelector('[data-type="NodeParagraph"] [contenteditable="true"] > wbr'));
         check.ok(result.textContent.includes("Nested"));
     }
     const paragraphs = document.createElement("div");

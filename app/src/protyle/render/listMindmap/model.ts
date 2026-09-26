@@ -337,7 +337,8 @@ export const convertListMindmapToList = (element: Element, type: string, lute: L
     const from = {o: "OL", t: "TL", u: "UL"}[source.getAttribute("data-subtype")] || "UL";
     const to = type.split("2")[1];
     if (from === to) {
-        return source.outerHTML;
+        // 同类型转换也规范化块 DOM，清除脑图遗留的块选中状态并保留正文光标。
+        return lute.SpinBlockDOM(source.outerHTML);
     }
     // @ts-expect-error Lute 的类型声明未包含列表转换方法。
     return lute[`${from}2${to}`](source.outerHTML);

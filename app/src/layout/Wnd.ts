@@ -987,6 +987,7 @@ export class Wnd {
                 item.model.beforeDestroy();
             }
             if (item.model instanceof Editor) {
+                saveBackScroll(item.model.editor.protyle);
                 saveScroll(item.model.editor.protyle);
                 // 更新文档关闭时间（批量关闭页签时由 closeTabByType 批量处理，这里不单独调用）
                 if (!isBatchClose) {

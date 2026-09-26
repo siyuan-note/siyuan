@@ -101,6 +101,7 @@ import {blockRender} from "../render/blockRender";
 import {getAllModels} from "../../layout/getAll";
 import {pushBack, pushBackByClick} from "../../util/backForward";
 import {bindTouchNavigation} from "./touchNavigation";
+import {openTouchReference} from "./touchReference";
 import {openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
 /// #else
@@ -541,6 +542,9 @@ export class WYSIWYG {
         /// #if !MOBILE
         bindTouchNavigation(this.element, (target, point) => {
             if (!protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive) {
+                if (openTouchReference(protyle, target, point)) {
+                    return true;
+                }
                 pushBackByClick(protyle, target, point);
             }
         });

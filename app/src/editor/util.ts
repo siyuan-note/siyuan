@@ -419,6 +419,24 @@ const getUnInitTab = (options: IOpenFileOptions) => {
     });
 };
 
+const pushBackByEditor = (protyle: IProtyle, block?: Element) => {
+    // 浏览页签时记录位置，不聚焦编辑器，避免唤起软键盘。
+    const range = protyle.toolbar.range;
+    const container = block || protyle.element;
+    if (range && container.contains(range.startContainer) && container.contains(range.endContainer)) {
+        pushBack(protyle, range, block);
+    } else {
+        block = block || protyle.wysiwyg.element.firstElementChild;
+        const editable = block && getContenteditableElement(block);
+        if (editable) {
+            const initialRange = document.createRange();
+            initialRange.selectNodeContents(editable);
+            initialRange.collapse(true);
+            pushBack(protyle, initialRange, block);
+        }
+    }
+};
+
 const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IModels) => {
     if (options.keepCursor) {
         editor.parent.headElement.setAttribute("keep-cursor", options.id);
@@ -549,7 +567,11 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                 scrollCenter(editor.editor.protyle, undefined, options.scrollPosition);
             }
         }
-        pushBack(editor.editor.protyle, editor.editor.protyle.toolbar.range);
+        if (isPhablet()) {
+            pushBackByEditor(editor.editor.protyle, nodeElement);
+        } else {
+            pushBack(editor.editor.protyle, editor.editor.protyle.toolbar.range);
+        }
     }
     // https://github.com/siyuan-note/siyuan/issues/16445
     if (options.action?.includes(Constants.CB_GET_OUTLINE)) {
@@ -695,21 +717,7 @@ export const updatePanelByEditor = (options: {
             }
         }
         if (!options.focus && options.pushBackStack && options.protyle.preview.element.classList.contains("fn__none")) {
-            // 浏览页签时记录位置，不聚焦编辑器，避免唤起软键盘。
-            const protyle = options.protyle;
-            const range = protyle.toolbar.range;
-            if (range && protyle.element.contains(range.startContainer) && protyle.element.contains(range.endContainer)) {
-                pushBack(protyle, range);
-            } else {
-                const block = protyle.wysiwyg.element.firstElementChild;
-                const editable = block && getContenteditableElement(block);
-                if (editable) {
-                    const initialRange = document.createRange();
-                    initialRange.selectNodeContents(editable);
-                    initialRange.collapse(true);
-                    pushBack(protyle, initialRange, block);
-                }
-            }
+            pushBackByEditor(options.protyle);
         }
         if (window.siyuan.config.fileTree.alwaysSelectOpenedFile && options.protyle) {
             const fileModel = getDockByType("file")?.data.file;

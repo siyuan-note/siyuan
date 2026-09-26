@@ -1,7 +1,7 @@
 import {Constants} from "../../constants";
 
 export const bindTouchNavigation = (element: HTMLElement,
-                                    onTap: (target: HTMLElement, point: {x: number, y: number}) => void) => {
+                                    onTap: (target: HTMLElement, point: {x: number, y: number}) => boolean | void) => {
     let start: {id: number, x: number, y: number, time: number, target: HTMLElement} | undefined;
     element.addEventListener("touchstart", (event: TouchEvent) => {
         start = undefined;
@@ -32,8 +32,11 @@ export const bindTouchNavigation = (element: HTMLElement,
             Math.abs(touch.clientY - tap.y) >= Constants.SIZE_DRAG_THRESHOLD) {
             return;
         }
-        onTap(tap.target, {x: touch.clientX, y: touch.clientY});
-    }, {passive: true});
+        if (onTap(tap.target, {x: touch.clientX, y: touch.clientY})) {
+            // 已处理链接导航，阻止浏览器随后合成点击而重复打开。
+            event.preventDefault();
+        }
+    }, {passive: false});
     element.addEventListener("touchcancel", () => {
         start = undefined;
     }, {passive: true});

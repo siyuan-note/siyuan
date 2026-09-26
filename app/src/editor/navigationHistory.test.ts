@@ -5,9 +5,11 @@ import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const source = createSourceFile("util.ts", readFileSync("src/editor/util.ts", "utf8"), ScriptTarget.ES2021, true);
-const declaration = source.statements.find(statement => isVariableStatement(statement) &&
-    statement.declarationList.declarations.some(item => item.name.getText(source) === "updatePanelByEditor"));
-const compiled = transpileModule(declaration.getText(source).replace(/^export /, "") + "\nglobalThis.update = updatePanelByEditor;", {
+const declarations = source.statements.filter(statement => isVariableStatement(statement) &&
+    statement.declarationList.declarations.some(item =>
+        ["updatePanelByEditor", "pushBackByEditor", "switchEditor"].includes(item.name.getText(source))));
+const compiled = transpileModule(declarations.map(item => item.getText(source).replace(/^export /, "")).join("\n") +
+    "\nglobalThis.update = updatePanelByEditor; globalThis.openExisting = switchEditor;", {
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText;
 
@@ -67,54 +69,90 @@ test("history restoration and preview tab switches do not create history entries
     assert.equal(records.length, 0);
 });
 
-test("tablet tab switches navigate A B C backward and forward without touching the editor", async () => {
-    const {context} = setup();
-    const historySource = createSourceFile("backForward.ts", readFileSync("src/util/backForward.ts", "utf8"), ScriptTarget.ES2021, true);
-    const names = ["pushBack", "goBack", "goForward", "forwardStack", "previousIsBack"];
-    const declarations = historySource.statements.filter(statement => isVariableStatement(statement) &&
-        statement.declarationList.declarations.some(item => names.includes(item.name.getText(historySource))));
-    const history = declarations.map(item => item.getText(historySource).replace(/^export /, "")).join("\n");
-    const stacks: any[] = [];
-    const visited: string[] = [];
-    context.window.siyuan.backStack = stacks;
-    context.document.contains = () => true;
-    context.document.querySelector = (): undefined => undefined;
-    context.Constants = {SIZE_UNDO: 128};
-    context.readingPositions = new WeakMap();
-    context.saveBackScroll = () => {};
-    context.hasClosestBlock = (node: unknown) => node;
-    context.getSelectionOffset = () => ({start: 0, end: 0});
-    const switchTab = (protyle: unknown, pushBackStack: boolean) => context.update({
-        protyle, focus: false, pushBackStack, resize: false, reload: false,
-    });
-    context.focusStack = async (_app: unknown, stack: any) => {
-        visited.push(stack.protyle.block.rootID);
-        switchTab(stack.protyle, false);
-        return true;
-    };
-    runInNewContext(transpileModule(history + "\nglobalThis.back = goBack; globalThis.forward = goForward;", {
-        compilerOptions: {target: ScriptTarget.ES2021},
-    }).outputText, context);
-    const tabs = ["A", "B", "C"].map(id => {
-        const block = {getAttribute: () => id + "-block", classList: {contains: () => false}};
-        return {
-            model: {}, block: {rootID: id}, path: "/" + id + ".sy",
-            element: {classList: {contains: () => false}, contains: (node: unknown) => node === block},
-            toolbar: {}, wysiwyg: {element: {firstElementChild: block}},
-            preview: {element: {classList: {contains: () => true}}},
-        };
-    });
-    tabs.forEach(tab => switchTab(tab, true));
-    switchTab(tabs[2], true);
-    assert.deepEqual(stacks.map(stack => stack.protyle.block.rootID), ["A", "B", "C"]);
-    await context.back({});
-    await context.back({});
-    await context.forward({});
-    await context.forward({});
-    assert.deepEqual(visited, ["B", "A", "B", "C"]);
+test("tablet links to an already loaded block record the destination instead of a stale caret", () => {
+    const {context, records, protyle, block} = setup();
+    const target = {clientHeight: 20, contains: () => false};
+    protyle.toolbar.range = {startContainer: block, endContainer: block};
+    Object.assign(protyle.wysiwyg.element, {querySelectorAll: () => [target]});
+    context.isPhablet = () => true;
+    context.isInEmbedBlock = () => false;
+    context.revealTabsForTarget = () => {};
+    context.preventScroll = () => {};
+    context.highlightById = () => {};
+    context.Constants = {CB_GET_HL: "highlight", CB_GET_FOCUS: "focus"};
+    context.openExisting({editor: {protyle}, parent: {headElement: {}, parent: {
+        switchTab: () => {}, showHeading: () => {},
+    }}}, {id: "target", rootID: "doc", action: ["highlight"]}, {});
+    assert.equal(records.length, 1);
+    assert.equal(records[0].range.startContainer, target);
+    assert.equal(records[0].range.endContainer, target);
 });
 
-const restoreClosedHistoryEntry = async (disabled: boolean) => {
+for (const fromFileTree of [false, true]) {
+    test(`tablet ${fromFileTree ? "file tree opens" : "tab switches"} navigate A B C backward and forward without touching the editor`, async () => {
+        const {context} = setup();
+        const historySource = createSourceFile("backForward.ts", readFileSync("src/util/backForward.ts", "utf8"), ScriptTarget.ES2021, true);
+        const names = ["pushBack", "goBack", "goForward", "forwardStack", "previousIsBack"];
+        const declarations = historySource.statements.filter(statement => isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(item => names.includes(item.name.getText(historySource))));
+        const history = declarations.map(item => item.getText(historySource).replace(/^export /, "")).join("\n");
+        const stacks: any[] = [];
+        const visited: string[] = [];
+        context.window.siyuan.backStack = stacks;
+        context.document.contains = () => true;
+        context.document.querySelector = (): undefined => undefined;
+        context.Constants = {SIZE_UNDO: 128};
+        context.readingPositions = new WeakMap();
+        context.saveBackScroll = () => {};
+        context.hasClosestBlock = (node: unknown) => node;
+        context.getSelectionOffset = () => ({start: 0, end: 0});
+        context.isPhablet = () => true;
+        context.preventScroll = () => {};
+        const switchTab = (protyle: unknown, pushBackStack: boolean) => context.update({
+            protyle, focus: false, pushBackStack, resize: false, reload: false,
+        });
+        context.focusStack = async (_app: unknown, stack: any) => {
+            visited.push(stack.protyle.block.rootID);
+            switchTab(stack.protyle, false);
+            return true;
+        };
+        runInNewContext(transpileModule(history + "\nglobalThis.back = goBack; globalThis.forward = goForward;", {
+            compilerOptions: {target: ScriptTarget.ES2021},
+        }).outputText, context);
+        const tabs = ["A", "B", "C"].map(id => {
+            const block = {getAttribute: () => id + "-block", classList: {contains: () => false}};
+            return {
+                model: {}, block: {rootID: id}, path: "/" + id + ".sy",
+                element: {classList: {contains: () => false}, contains: (node: unknown) => node === block},
+                toolbar: {}, wysiwyg: {element: {firstElementChild: block, querySelectorAll: () => []}},
+                preview: {element: {classList: {contains: () => true}}},
+            };
+        });
+        const open = (protyle: typeof tabs[number]) => {
+            if (fromFileTree) {
+                context.openExisting({
+                    editor: {protyle},
+                    parent: {headElement: {}, parent: {
+                        switchTab: (_head: unknown, pushBackStack = false) => switchTab(protyle, pushBackStack),
+                        showHeading: () => {},
+                    }},
+                }, {id: protyle.block.rootID, rootID: protyle.block.rootID, action: ["scroll"]}, {});
+            } else {
+                switchTab(protyle, true);
+            }
+        };
+        tabs.forEach(open);
+        open(tabs[2]);
+        assert.deepEqual(stacks.map(stack => stack.protyle.block.rootID), ["A", "B", "C"]);
+        await context.back({});
+        await context.back({});
+        await context.forward({});
+        await context.forward({});
+        assert.deepEqual(visited, ["B", "A", "B", "C"]);
+    });
+}
+
+const restoreClosedHistoryEntry = async (disabled: boolean, readingPosition?: IScrollAttr, encrypted = false) => {
     const historySource = createSourceFile("backForward.ts", readFileSync("src/util/backForward.ts", "utf8"), ScriptTarget.ES2021, true);
     const declaration = historySource.statements.find(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => item.name.getText(historySource) === "focusStack"));
@@ -154,8 +192,9 @@ const restoreClosedHistoryEntry = async (disabled: boolean) => {
         fetchSyncPost: async (path: string) => path.endsWith("checkBlockExist") ?
             {code: 0, data: true} : {code: 0, data: {rootID: "A", rootTitle: "A", rootIcon: ""}},
         getInstanceById: () => wnd,
-        isEncryptedBox: () => false,
-        isPhablet: () => false,
+        isEncryptedBox: () => encrypted,
+        isPhablet: () => !!readingPosition,
+        readingPositions: new WeakMap(),
         saveScroll: (): undefined => undefined,
         forwardStack: [],
         focusByOffset: () => calls.push("focus"),
@@ -177,8 +216,12 @@ const restoreClosedHistoryEntry = async (disabled: boolean) => {
     runInNewContext(transpileModule(declaration.getText(historySource).replace(/^export /, "") +
         "\nglobalThis.restore = focusStack;", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText, context);
     const stack = {id: "A", position: {start: 2, end: 2}, protyle: {element: oldElement, block: {rootID: "A"}, notebookId: "notebook"}};
+    if (readingPosition) {
+        stack.id = "A-block";
+        context.readingPositions.set(stack, readingPosition);
+    }
     assert.equal(await context.restore({}, stack), true);
-    return {calls, protyle, editorOptions, afterInit};
+    return {calls, protyle, editorOptions, afterInit, storage: context.window.siyuan.storage.positions};
 };
 
 test("history restores a closed document through the focused preview tab without early focus", async () => {
@@ -195,6 +238,21 @@ test("history does not focus a read-only document after it loads", async () => {
     afterInit();
     assert.deepEqual(calls, ["blur", "remove:current:false:false"]);
 });
+
+for (const encrypted of [false, true]) {
+    test(`closed tablet history restores its own reading position for encrypted=${encrypted}`, async () => {
+        const readingPosition = {rootId: "A", startId: "first", endId: "last", scrollTop: 1133};
+        const {calls, editorOptions, afterInit, storage} = await restoreClosedHistoryEntry(false, readingPosition, encrypted);
+        assert.equal(editorOptions.scrollAttr.scrollTop, 1133);
+        assert.equal(editorOptions.scrollAttr.startId, "first");
+        assert.equal(editorOptions.scrollAttr.endId, "last");
+        assert.equal(editorOptions.scrollAttr.focusId, "A-block");
+        assert.equal("focusId" in readingPosition, false);
+        assert.equal(!!storage.A, !encrypted);
+        afterInit();
+        assert.deepEqual(calls, ["blur", "remove:current:false:false"]);
+    });
+}
 
 test("history switches to an open read-only tab without focusing its editor", async () => {
     const historySource = createSourceFile("backForward.ts", readFileSync("src/util/backForward.ts", "utf8"), ScriptTarget.ES2021, true);

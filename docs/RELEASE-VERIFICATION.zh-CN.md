@@ -172,9 +172,9 @@ python -X utf8 scripts/verify-release.py check --version 3.8.5
 ### 9. 手动发布与上架
 
 - 合并 master，触发 Docker 镜像构建
-- GitHub Releases 上传安装包和 `SHA256SUMS.txt` 
+- GitHub Releases 上传安装包和 `SHA256SUMS.txt`，公开本次正式版并验证下载域名
 - 同步 Gitee
-- 上传 R2 和百度网盘
+- 上传百度网盘
 - 链滴登录 `siyuan` 账号发布公告
 - 修改并部署 Rhy，粘贴最终的 `SHA256SUMS.txt`
 - 部署 Index（版本更新、构建和推送已由发布准备的 `--publish --execute` 完成）
@@ -197,26 +197,18 @@ python -X utf8 scripts/verify-release.py check --version 3.8.5
 
 上传发布包：
 
+- 将需要公开分发的安装包及最终的 `SHA256SUMS.txt` 上传至 `siyuan-note/siyuan` 的 GitHub Release，确认标签为 `v3.8.5`，资产文件名与本地产物一致，并公开正式版
+- `release.liuyun.io` 通过 Cloudflare Worker `siyuan-release` 代理 GitHub Release 下载，保留 `/siyuan/文件名` 路径，从正式版安装包文件名提取版本号
+- 百度网盘仍需上传本次发布产物，应用市场按各自要求上传渠道包
+
+下载地址映射示例：
+
+```text
+公开下载地址：https://release.liuyun.io/siyuan/siyuan-3.8.5-win.exe
+GitHub 源地址：https://github.com/siyuan-note/siyuan/releases/download/v3.8.5/siyuan-3.8.5-win.exe
 ```
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5.apk -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5.apk --content-type application/vnd.android.package-archive --remote
 
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.AppImage --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.tar.gz --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.deb --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux.rpm --remote
-
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.AppImage -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.AppImage --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.tar.gz -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.tar.gz --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.deb -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.deb --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-linux-arm64.rpm -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-linux-arm64.rpm --remote
-
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-mac.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-mac.dmg --content-type application/octet-stream --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-mac-arm64.dmg -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-mac-arm64.dmg --content-type application/octet-stream --remote
-
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-win.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-win.exe --remote
-wrangler r2 object put siyuan-releases/siyuan/siyuan-3.8.5-win-arm64.exe -f C:\Users\DL882\Desktop\siyuan\siyuan-3.8.5-win-arm64.exe --remote
-echo 'complete'
-```
+发布公告和部署官网前，通过下载域名下载安装包并核对摘要；预发布安装包及 `SHA256SUMS.txt` 使用 GitHub Release 地址。
 
 ### 10. 清理发布产物
 

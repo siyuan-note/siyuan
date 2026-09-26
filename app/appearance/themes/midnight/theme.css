@@ -76,6 +76,12 @@
     --b3-mindmap-relation-selected-color: initial;
     --b3-mindmap-relation-selected-width: auto;
 
+    /* 思维导图概要线：线宽使用正数或 px，选中线宽为 auto 时在普通线宽上增加 1，打印使用普通样式 */
+    --b3-mindmap-summary-color: var(--b3-border-color);
+    --b3-mindmap-summary-width: 1.5;
+    --b3-mindmap-summary-selected-color: var(--b3-theme-primary);
+    --b3-mindmap-summary-selected-width: auto;
+
     /* 菜单 */
     --b3-menu-background: var(--b3-theme-background);
     --b3-menu-icon-color: rgba(255, 255, 255, .7);

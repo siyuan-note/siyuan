@@ -2921,6 +2921,52 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(summaryLabel.textContent.startsWith("<script>"));
     check.equal(summaryLabel.querySelector("script"), null);
     const savedSummary = api.readListMindmap(summaryList).metadata.summaries[0];
+    const summaryContext = summaryHost.querySelector("canvas").getContext("2d");
+    const setSummaryTheme = (property: string, value: string) =>
+        summaryHost.style.setProperty(`--b3-mindmap-summary-${property}`, value);
+    const checkSummaryStyle = (color: string, width: number) => {
+        summaryView.draw();
+        check.equal(summaryContext.strokeStyle, color);
+        check.equal(summaryContext.lineWidth, width);
+    };
+    summaryHost.style.setProperty("--b3-border-color", "#123456");
+    summaryHost.style.setProperty("--b3-theme-primary", "#abcdef");
+    summaryView.selectedSummary = undefined;
+    checkSummaryStyle("#123456", 1.5);
+    summaryView.selectedSummary = "summary";
+    checkSummaryStyle("#abcdef", 2.5);
+    setSummaryTheme("color", "var(--b3-theme-primary)");
+    setSummaryTheme("width", "3px");
+    summaryView.selectedSummary = undefined;
+    checkSummaryStyle("#abcdef", 3);
+    summaryView.model.metadata.summaries[0].color = "#445566";
+    checkSummaryStyle("#445566", 3);
+    summaryView.selectedSummary = "summary";
+    checkSummaryStyle("#abcdef", 4);
+    setSummaryTheme("selected-color", "#778899");
+    setSummaryTheme("selected-width", "6");
+    checkSummaryStyle("#778899", 6);
+    summaryView.options.printLayout = true;
+    checkSummaryStyle("#445566", 3);
+    summaryView.options.printLayout = false;
+    summaryView.printTransform = {scale: 1, offsetX: 0, offsetY: 0};
+    checkSummaryStyle("#445566", 3);
+    summaryView.printTransform = undefined;
+    setSummaryTheme("selected-color", "invalid-color");
+    for (const width of ["auto", "0", "-2", "Infinity", "2em", "3px-invalid"]) {
+        setSummaryTheme("selected-width", width);
+        checkSummaryStyle("#abcdef", 4);
+    }
+    delete summaryView.model.metadata.summaries[0].color;
+    summaryView.selectedSummary = undefined;
+    setSummaryTheme("color", "invalid-color");
+    setSummaryTheme("width", "-1");
+    checkSummaryStyle("#123456", 1.5);
+    ["color", "width", "selected-color", "selected-width"].forEach(property =>
+        summaryHost.style.removeProperty(`--b3-mindmap-summary-${property}`));
+    summaryHost.style.removeProperty("--b3-border-color");
+    summaryHost.style.removeProperty("--b3-theme-primary");
+    summaryView.draw();
     const originalIDs = ids(summaryList);
     api.retagMindmapBranch(summaryList, true);
     const plain = api.convertListMindmapToList(summaryList, "UL2OL", lute);

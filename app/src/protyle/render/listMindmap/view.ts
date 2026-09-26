@@ -1017,7 +1017,8 @@ export class ListMindmapView {
         input.select();
     }
 
-    private drawSummaries(context: CanvasRenderingContext2D, resolveColor: (color: string) => string, primary: string) {
+    private drawSummaries(context: CanvasRenderingContext2D,
+                          resolveStyle: (color: string, selected: boolean) => {color: string, width: number}) {
         (this.model.metadata.summaries || []).forEach(summary => {
             const position = this.summaryPositions.get(summary.id);
             const element = this.summaryElements.get(summary.id);
@@ -1037,8 +1038,9 @@ export class ListMindmapView {
             path.moveTo(x, (top + bottom) / 2);
             path.lineTo(labelX - 6, (top + bottom) / 2);
             const selected = this.selectedSummary === summary.id && !this.printTransform && !this.options.printLayout;
-            context.strokeStyle = selected ? primary : resolveColor(summary.color);
-            context.lineWidth = selected ? 2.5 : 1.5;
+            const style = resolveStyle(summary.color, selected);
+            context.strokeStyle = style.color;
+            context.lineWidth = style.width;
             context.setLineDash([]);
             context.stroke(path);
             this.linePaths.push({id: summary.id, relation: false, summary: true, path});
@@ -1377,7 +1379,7 @@ export class ListMindmapView {
         const theme = getComputedStyle(this.options.host);
         const defaultLine = theme.getPropertyValue("--b3-border-color").trim() || "#a8adb5";
         const primary = theme.getPropertyValue("--b3-theme-primary").trim() || "#3574f0";
-        const readLineStyles = (type: "line" | "relation") => ["", "hover-", "selected-"].map(state => {
+        const readLineStyles = (type: "line" | "relation" | "summary", states = ["", "hover-", "selected-"]) => states.map(state => {
             const prefix = `--b3-mindmap-${type}-${state}`;
             const width = Number(theme.getPropertyValue(`${prefix}width`).trim().replace(/px$/, ""));
             return {
@@ -1387,6 +1389,7 @@ export class ListMindmapView {
         });
         const lineStyles = readLineStyles("line");
         const relationStyles = readLineStyles("relation");
+        const summaryStyles = readLineStyles("summary", ["", "selected-"]);
         const colors = new Map<string, string>();
         const resolveColor = (value: string, fallback: string) => {
             const key = `${fallback}\n${value || ""}`;
@@ -1476,7 +1479,14 @@ export class ListMindmapView {
             }
         });
         this.drawRelationPreview(context, resolveColor(relationStyles[0].color, primary), relationStyles[0].width || 1.5);
-        this.drawSummaries(context, color => resolveColor(color, defaultLine), primary);
+        this.drawSummaries(context, (color, selected) => {
+            const baseWidth = summaryStyles[0].width || 1.5;
+            return {
+                color: selected ? resolveColor(summaryStyles[1].color, primary) :
+                    resolveColor(color, resolveColor(summaryStyles[0].color, defaultLine)),
+                width: selected ? summaryStyles[1].width ?? baseWidth + 1 : baseWidth,
+            };
+        });
         this.renderRouteControls();
     }
 

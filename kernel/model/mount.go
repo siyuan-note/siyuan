@@ -539,6 +539,7 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 
 	for _, box := range Conf.GetOpenedBoxes() {
 		if box.ID == boxID {
+			clearClosedBoxNotification(boxID)
 			return true, nil
 		}
 	}
@@ -569,6 +570,9 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 	box = Conf.Box(boxID)
 	if 0 < len(files) || (nil != box && box.Exist(boxDocPath(box.ID))) {
 		box.Index()
+	}
+	if Conf.Box(boxID) != nil {
+		clearClosedBoxNotification(boxID)
 	}
 
 	if reMountGuide {

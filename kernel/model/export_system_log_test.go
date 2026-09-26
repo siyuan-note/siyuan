@@ -3,8 +3,39 @@ package model
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
+
+func TestWriteSystemGoroutineLog(t *testing.T) {
+	started, release := make(chan struct{}), make(chan struct{})
+	go waitForSystemLogTest(started, release)
+	defer close(release)
+	<-started
+
+	exportFolder := t.TempDir()
+	if err := writeSystemGoroutineLog(exportFolder); err != nil {
+		t.Fatal(err)
+	}
+	content, err := os.ReadFile(filepath.Join(exportFolder, "goroutine.log"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 除导出请求自身外，也必须包含正在等待的其他协程。
+	for _, want := range []string{"goroutine ", "writeSystemGoroutineLog", "waitForSystemLogTest"} {
+		if !strings.Contains(string(content), want) {
+			t.Fatalf("goroutine log does not contain %q", want)
+		}
+	}
+	if err := writeSystemGoroutineLog(filepath.Join(exportFolder, "missing")); err == nil {
+		t.Fatal("expected error for missing export directory")
+	}
+}
+
+func waitForSystemLogTest(started, release chan struct{}) {
+	close(started)
+	<-release
+}
 
 func TestCollectOptionalSystemLogs(t *testing.T) {
 	crashDir, systemTempDir := t.TempDir(), t.TempDir()

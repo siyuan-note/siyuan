@@ -113,14 +113,7 @@ type TAndroidTableCellSelectAll = {
 };
 
 const ANDROID_TABLE_CELL_SELECT_ALL_TIMEOUT = 2000;
-const inlineMathSelection = createInlineMathSelection((editor, math) => {
-    const protyle = getCurrentEditor()?.protyle;
-    if (!protyle || protyle.disabled || protyle.toolbar.isMultiSelectMode() || protyle.wysiwyg.element !== editor) {
-        return;
-    }
-    protyle.toolbar.range = getSelection().getRangeAt(0).cloneRange();
-    protyle.toolbar.showRender(protyle, math);
-});
+const inlineMathSelection = createInlineMathSelection();
 
 let renderKeyboardToolbarFrame: number | undefined;
 let scrollSelectionIntoViewTimeout: number;

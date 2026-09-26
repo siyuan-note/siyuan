@@ -1,21 +1,13 @@
-export const createInlineMathSelection = (onSettled: (editor: HTMLElement, math: HTMLElement) => void) => {
+export const createInlineMathSelection = () => {
     let previousRange: Range;
     let previousEditor: HTMLElement;
-    let pending: ReturnType<typeof setTimeout>;
-
-    const cancel = () => {
-        clearTimeout(pending);
-        pending = undefined;
-    };
 
     const reset = () => {
-        cancel();
         previousRange = undefined;
         previousEditor = undefined;
     };
 
     const normalize = (editor: HTMLElement, selection: Selection, composing = false) => {
-        cancel();
         if (!editor || composing || !selection?.isCollapsed || selection.rangeCount !== 1 ||
             !editor.contains(selection.anchorNode)) {
             reset();
@@ -64,28 +56,19 @@ export const createInlineMathSelection = (onSettled: (editor: HTMLElement, math:
     };
 
     const update = (editor: HTMLElement, selection: Selection, composing = false) => {
-        cancel();
         const element = selection?.anchorNode?.nodeType === 1 ? selection.anchorNode as Element :
             selection?.anchorNode?.parentElement;
-        if (!editor || composing || !selection?.isCollapsed || !editor.contains(element) ||
+        if (previousEditor !== editor) {
+            reset();
+        }
+        // 原生光标手柄经过公式时保留选区，仅在输入前校正边界，避免中断拖动或误打开公式编辑。
+        if (!editor || composing || selection?.rangeCount !== 1 || !selection.isCollapsed || !editor.contains(element) ||
             !element?.closest('[data-type~="inline-math"]')) {
             normalize(editor, selection, composing);
-            return;
         }
-        const math = element.closest<HTMLElement>('[data-type~="inline-math"]');
-        // 原生光标手柄拖动时改变焦点会中断手势，停稳后再打开公式编辑。
-        pending = setTimeout(() => {
-            if (editor.isConnected && editor.contains(editor.ownerDocument.activeElement) &&
-                selection.rangeCount === 1 && selection.isCollapsed && math.isConnected &&
-                editor.contains(math) && math.contains(selection.anchorNode) && math.parentElement.isContentEditable) {
-                reset();
-                onSettled(editor, math);
-            }
-        }, 300);
     };
 
     const prepareInput = (editor: HTMLElement, selection: Selection) => {
-        cancel();
         if (!editor || selection?.rangeCount !== 1) {
             reset();
             return false;

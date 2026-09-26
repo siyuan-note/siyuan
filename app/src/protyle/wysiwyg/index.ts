@@ -8,6 +8,7 @@ import {renderLongTextRuns} from "../util/longTextWrap";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
+import {isDirectMathClick} from "../util/mathClick";
 import {
     beforePaste,
     convertPastedListItemSubtype,
@@ -5088,7 +5089,8 @@ export class WYSIWYG {
 
             // 需放在属性后，否则数学公式无法点击属性；需放在 action 后，否则嵌入块的的 action 无法打开；需放在嵌入块后，否则嵌入块中的数学公式会被打开
             const mathElement = hasClosestByAttribute(event.target, "data-subtype", "math");
-            if (!event.shiftKey && !ctrlIsPressed && mathElement && !protyle.disabled) {
+            if (!event.shiftKey && !ctrlIsPressed && mathElement && !protyle.disabled &&
+                (!isInAndroid() || isDirectMathClick(mathElement, event))) {
                 protyle.toolbar.showRender(protyle, mathElement);
                 event.stopPropagation();
                 return;

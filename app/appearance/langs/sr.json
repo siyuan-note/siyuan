@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "Потребно је бар једно правило тврдњи ако администраторски приступ није додељен свим потврђеним корисницима",
+	"oidcGitHubClaimRulesTip": "GitHub пример (замените YOUR_GITHUB_USERNAME својим GitHub корисничким именом): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Прилагођена упутства",
 	"agentInstructionsTip": "Подешавања радног простора чувају се у data/ai/AGENTS.md и синхронизују ако нису изузета; UTF-8 текст до 32 KiB, примењује се од следећег круга разговора",
 	"agentInstructionsTooLarge": "Упутства не смеју бити већа од 32 KiB",

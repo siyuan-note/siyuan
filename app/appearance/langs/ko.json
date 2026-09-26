@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "인증된 모든 사용자에게 관리자 권한을 부여하지 않는 경우 클레임 규칙을 하나 이상 설정해야 합니다",
+	"oidcGitHubClaimRulesTip": "GitHub 예시 (YOUR_GITHUB_USERNAME을 본인의 GitHub 사용자 이름으로 바꾸세요): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "사용자 지정 지침",
 	"agentInstructionsTip": "작업 공간 전체의 기본 설정은 data/ai/AGENTS.md에 저장되며 제외되지 않으면 동기화됩니다. 최대 32 KiB의 UTF-8 텍스트를 지원하며 다음 대화 차례부터 적용됩니다",
 	"agentInstructionsTooLarge": "지침은 32 KiB를 초과할 수 없습니다",

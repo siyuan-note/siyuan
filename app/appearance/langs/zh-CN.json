@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "未开启“授予所有已认证用户管理员权限”时，必须配置至少一条声明规则",
+	"oidcGitHubClaimRulesTip": "GitHub 示例（将 YOUR_GITHUB_USERNAME 替换为你的 GitHub 用户名）：[{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "自定义指令",
 	"agentInstructionsTip": "工作空间级偏好保存在 data/ai/AGENTS.md 中，未被忽略时参与同步；支持最多 32 KiB 的 UTF-8 文本，保存后下一轮对话生效",
 	"agentInstructionsTooLarge": "指令内容不能超过 32 KiB",

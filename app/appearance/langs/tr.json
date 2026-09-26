@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "Kimliği doğrulanmış tüm kullanıcılara yönetici erişimi verilmediyse en az bir talep kuralı gereklidir",
+	"oidcGitHubClaimRulesTip": "GitHub örneği (YOUR_GITHUB_USERNAME yerine GitHub kullanıcı adınızı yazın): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Özel talimatlar",
 	"agentInstructionsTip": "Çalışma alanı tercihleri data/ai/AGENTS.md dosyasında saklanır ve hariç tutulmadıkça eşitlenir; en fazla 32 KiB UTF-8 metin, sonraki konuşma turundan itibaren geçerlidir",
 	"agentInstructionsTooLarge": "Talimatlar 32 KiB boyutunu aşmamalıdır",

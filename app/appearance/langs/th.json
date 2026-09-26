@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "ต้องกำหนดกฎการอ้างสิทธิ์อย่างน้อยหนึ่งข้อ หากไม่ได้ให้สิทธิ์ผู้ดูแลระบบแก่ผู้ใช้ที่ยืนยันตัวตนแล้วทุกคน",
+	"oidcGitHubClaimRulesTip": "ตัวอย่าง GitHub (แทนที่ YOUR_GITHUB_USERNAME ด้วยชื่อผู้ใช้ GitHub ของคุณ): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "คำสั่งที่กำหนดเอง",
 	"agentInstructionsTip": "บันทึกการตั้งค่าสำหรับพื้นที่ทำงานใน data/ai/AGENTS.md และซิงค์หากไม่ได้ยกเว้น รองรับข้อความ UTF-8 สูงสุด 32 KiB โดยมีผลในรอบสนทนาถัดไป",
 	"agentInstructionsTooLarge": "คำสั่งต้องมีขนาดไม่เกิน 32 KiB",

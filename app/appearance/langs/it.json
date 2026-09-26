@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "È necessaria almeno una regola sui claim se non si concede accesso amministratore a tutti gli utenti autenticati",
+	"oidcGitHubClaimRulesTip": "Esempio GitHub (sostituisci YOUR_GITHUB_USERNAME con il tuo nome utente GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Istruzioni personalizzate",
 	"agentInstructionsTip": "Preferenze dell’area di lavoro salvate in data/ai/AGENTS.md e sincronizzate salvo esclusione; testo UTF-8 fino a 32 KiB, valido dal prossimo turno di conversazione",
 	"agentInstructionsTooLarge": "Le istruzioni non devono superare 32 KiB",

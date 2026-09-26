@@ -6,7 +6,7 @@
 		"id": "20260804190001-oidctw1",
 		"title": "OIDC 登入",
 		"type": "doc",
-		"updated": "20260804211501"
+		"updated": "20260926170202"
 	},
 	"Children": [
 		{
@@ -174,7 +174,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804130011-tw0000c",
-				"updated": "20260804193000"
+				"updated": "20260926170202"
 			},
 			"Children": [
 				{
@@ -610,7 +610,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804130034-tw0000z",
-				"updated": "20260804193000"
+				"updated": "20260926170202"
 			},
 			"Children": [
 				{
@@ -732,6 +732,54 @@
 				{
 					"Type": "NodeText",
 					"Data": " 比對其中的群組名稱。規則名稱和值必須與提供者實際回傳的宣告完全對應。"
+				}
+			]
+		},
+		{
+			"ID": "20260926170202-63dqbhs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926170202-63dqbhs",
+				"updated": "20260926170202"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 GitHub 時，可將下方範例填入宣告規則，並將 YOUR_GITHUB_USERNAME 替換為允許登入的 GitHub 使用者名稱（不是顯示名稱）。保持「授予所有已驗證使用者管理員權限」關閉，再點擊「驗證並儲存」，使用該 GitHub 帳號完成登入。空陣列 [] 不符合必填要求；驗證成功後設定才會生效。"
+				}
+			]
+		},
+		{
+			"ID": "20260926170202-higq4rx",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260926170202-higq4rx",
+				"updated": "20260926170202"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "[\n  {\n    \"claim\": \"login\",\n    \"operator\": \"equals\",\n    \"values\": [\n      \"YOUR_GITHUB_USERNAME\"\n    ]\n  }\n]\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

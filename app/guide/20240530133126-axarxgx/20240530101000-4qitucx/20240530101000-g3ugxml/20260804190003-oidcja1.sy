@@ -6,7 +6,7 @@
 		"id": "20260804190003-oidcja1",
 		"title": "OIDC ログイン",
 		"type": "doc",
-		"updated": "20260804211503"
+		"updated": "20260926170202"
 	},
 	"Children": [
 		{
@@ -174,7 +174,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804190011-ja0000c",
-				"updated": "20260804193000"
+				"updated": "20260926170202"
 			},
 			"Children": [
 				{
@@ -606,7 +606,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804190034-ja0000z",
-				"updated": "20260804193000"
+				"updated": "20260926170202"
 			},
 			"Children": [
 				{
@@ -728,6 +728,54 @@
 				{
 					"Type": "NodeText",
 					"Data": " を使用してグループ名を照合できます。クレーム名と値は、プロバイダーの実際の応答と一致させてください。"
+				}
+			]
+		},
+		{
+			"ID": "20260926170202-21hf8l3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926170202-21hf8l3",
+				"updated": "20260926170202"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "GitHub を使用する場合は、以下の例をクレームルールに入力し、YOUR_GITHUB_USERNAME をログインを許可する GitHub ユーザー名（表示名ではありません）に置き換えます。認証済みの全ユーザーへの管理者権限の付与は無効のままにし、「検証して保存」を選択して、その GitHub アカウントでログインしてください。空の配列 [] は必須条件を満たしません。検証に成功すると設定が有効になります。"
+				}
+			]
+		},
+		{
+			"ID": "20260926170202-u51w46i",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260926170202-u51w46i",
+				"updated": "20260926170202"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "[\n  {\n    \"claim\": \"login\",\n    \"operator\": \"equals\",\n    \"values\": [\n      \"YOUR_GITHUB_USERNAME\"\n    ]\n  }\n]\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20260804190000-oidccn1",
 		"title": "OIDC 登录",
 		"type": "doc",
-		"updated": "20260820190627"
+		"updated": "20260926170202"
 	},
 	"Children": [
 		{
@@ -174,7 +174,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804100011-cn0000c",
-				"updated": "20260820190627"
+				"updated": "20260926170202"
 			},
 			"Children": [
 				{
@@ -610,7 +610,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804100034-cn0000z",
-				"updated": "20260804193000"
+				"updated": "20260926170202"
 			},
 			"Children": [
 				{
@@ -732,6 +732,54 @@
 				{
 					"Type": "NodeText",
 					"Data": " 匹配其中的组名。规则名称和值必须与提供商实际返回的声明完全对应。"
+				}
+			]
+		},
+		{
+			"ID": "20260926170202-z22h7uu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926170202-z22h7uu",
+				"updated": "20260926170202"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 GitHub 时，可将下方示例填入声明规则，并将 YOUR_GITHUB_USERNAME 替换为允许登录的 GitHub 用户名（不是显示名称）。保持“授予所有已认证用户管理员权限”关闭，再点击“验证并保存”，使用该 GitHub 账号完成登录。空数组 [] 不满足必填要求；验证成功后配置才会生效。"
+				}
+			]
+		},
+		{
+			"ID": "20260926170202-p9bhdka",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260926170202-p9bhdka",
+				"updated": "20260926170202"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "[\n  {\n    \"claim\": \"login\",\n    \"operator\": \"equals\",\n    \"values\": [\n      \"YOUR_GITHUB_USERNAME\"\n    ]\n  }\n]\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

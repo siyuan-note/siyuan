@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "Wymagana jest co najmniej jedna reguła oświadczeń, jeśli nie przyznano uprawnień administratora wszystkim uwierzytelnionym użytkownikom",
+	"oidcGitHubClaimRulesTip": "Przykład GitHub (zastąp YOUR_GITHUB_USERNAME swoją nazwą użytkownika GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Własne instrukcje",
 	"agentInstructionsTip": "Preferencje obszaru roboczego zapisane w data/ai/AGENTS.md i synchronizowane, o ile nie zostały wykluczone; tekst UTF-8 do 32 KiB, stosowany od następnej tury rozmowy",
 	"agentInstructionsTooLarge": "Instrukcje nie mogą przekraczać 32 KiB",

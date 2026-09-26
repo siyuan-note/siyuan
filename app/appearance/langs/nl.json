@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "Minstens één claimregel is vereist als niet alle geauthenticeerde gebruikers beheerderstoegang krijgen",
+	"oidcGitHubClaimRulesTip": "GitHub-voorbeeld (vervang YOUR_GITHUB_USERNAME door uw GitHub-gebruikersnaam): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Aangepaste instructies",
 	"agentInstructionsTip": "Voorkeuren voor de hele werkruimte worden opgeslagen in data/ai/AGENTS.md en gesynchroniseerd tenzij uitgesloten; UTF-8-tekst tot 32 KiB, van kracht vanaf de volgende gespreksbeurt",
 	"agentInstructionsTooLarge": "Instructies mogen maximaal 32 KiB groot zijn",

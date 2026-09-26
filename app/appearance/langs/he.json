@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "נדרש לפחות כלל הצהרה אחד אם לא ניתנות הרשאות מנהל לכל המשתמשים המאומתים",
+	"oidcGitHubClaimRulesTip": "דוגמת GitHub (יש להחליף את YOUR_GITHUB_USERNAME בשם המשתמש שלך ב-GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "הוראות מותאמות אישית",
 	"agentInstructionsTip": "העדפות סביבת העבודה נשמרות ב־data/ai/AGENTS.md ומסונכרנות אלא אם הוחרגו; טקסט UTF-8 עד 32 KiB, בתוקף מסבב השיחה הבא",
 	"agentInstructionsTooLarge": "גודל ההוראות לא יכול לעלות על 32 KiB",

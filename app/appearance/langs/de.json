@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "Mindestens eine Claim-Regel ist erforderlich, sofern nicht alle authentifizierten Benutzer Administratorrechte erhalten",
+	"oidcGitHubClaimRulesTip": "GitHub-Beispiel (YOUR_GITHUB_USERNAME durch Ihren GitHub-Benutzernamen ersetzen): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Benutzerdefinierte Anweisungen",
 	"agentInstructionsTip": "Arbeitsbereichsweite Vorgaben werden in data/ai/AGENTS.md gespeichert und synchronisiert, sofern nicht ausgeschlossen; UTF-8-Text bis 32 KiB, gültig ab dem nächsten Gesprächsschritt",
 	"agentInstructionsTooLarge": "Anweisungen dürfen höchstens 32 KiB groß sein",

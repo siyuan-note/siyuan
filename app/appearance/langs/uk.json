@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "Потрібне принаймні одне правило тверджень, якщо права адміністратора не надано всім автентифікованим користувачам",
+	"oidcGitHubClaimRulesTip": "Приклад GitHub (замініть YOUR_GITHUB_USERNAME своїм іменем користувача GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Власні інструкції",
 	"agentInstructionsTip": "Налаштування робочого простору зберігаються в data/ai/AGENTS.md і синхронізуються, якщо не виключені; текст UTF-8 до 32 KiB, застосовується з наступного ходу розмови",
 	"agentInstructionsTooLarge": "Розмір інструкцій не має перевищувати 32 KiB",

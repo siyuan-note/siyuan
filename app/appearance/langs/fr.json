@@ -1,4 +1,6 @@
 {
+	"oidcClaimRulesRequired": "Au moins une règle de revendication est requise si les droits administrateur ne sont pas accordés à tous les utilisateurs authentifiés",
+	"oidcGitHubClaimRulesTip": "Exemple GitHub (remplacez YOUR_GITHUB_USERNAME par votre nom d’utilisateur GitHub) : [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Instructions personnalisées",
 	"agentInstructionsTip": "Préférences de l’espace de travail enregistrées dans data/ai/AGENTS.md et synchronisées sauf exclusion ; texte UTF-8 de 32 KiB maximum, appliqué au prochain tour de conversation",
 	"agentInstructionsTooLarge": "Les instructions ne doivent pas dépasser 32 KiB",

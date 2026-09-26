@@ -190,6 +190,7 @@ import {chartRender} from "../render/chartRender";
 import {reloadProtyle} from "../util/reload";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 import {setFold, toggleListFold} from "../util/blockFold";
+import {bindHeadingFoldIndicators} from "../util/headingFoldIndicator";
 import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
@@ -403,6 +404,7 @@ export class WYSIWYG {
     private largeListVirtualizer?: LargeListVirtualizer;
     private disposeSpellcheckFocus?: () => void;
     private disposeEmbedToolbarVisibility?: () => void;
+    private disposeHeadingFoldIndicators?: () => void;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -554,6 +556,11 @@ export class WYSIWYG {
         if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
             return;
         }
+        this.disposeHeadingFoldIndicators = bindHeadingFoldIndicators(protyle, this.element, (ids, notebook, done) => {
+            fetchPost("/api/block/getBlockTreeInfos", {ids, notebook}, response => {
+                done(response.code === 0 ? response.data : null);
+            });
+        });
         if (!isMobile() && !protyle.options.backlinkData && !protyle.lite) {
             this.largeListVirtualizer = new LargeListVirtualizer(protyle.element, this.element, protyle.id);
         }
@@ -562,6 +569,7 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.disposeHeadingFoldIndicators?.();
         this.disposeEmbedToolbarVisibility?.();
         this.disposeSpellcheckFocus?.();
         this.largeListVirtualizer?.destroy();

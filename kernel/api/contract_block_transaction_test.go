@@ -107,6 +107,31 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 	}
 	treenode.UpsertBlockTree(tree)
 	engine := gin.New()
+	engine.POST("/api/block/getBlockTreeInfos", getBlockTreeInfos)
+	infoRecorder := httptest.NewRecorder()
+	infoBody, _ := json.Marshal(map[string]any{"ids": []string{heading.ID, child.ID, paragraphID}})
+	engine.ServeHTTP(infoRecorder, httptest.NewRequest("POST", "/api/block/getBlockTreeInfos", strings.NewReader(string(infoBody))))
+	requireAPIContract(t, "POST", "/api/block/getBlockTreeInfos", infoRecorder)
+	var infoResponse struct {
+		Code int                                   `json:"code"`
+		Data map[string]*apicontract.BlockTreeInfo `json:"data"`
+	}
+	if err := json.Unmarshal(infoRecorder.Body.Bytes(), &infoResponse); err != nil {
+		t.Fatal(err)
+	}
+	if infoResponse.Code != 0 || infoResponse.Data[heading.ID] == nil || infoResponse.Data[child.ID] == nil ||
+		infoResponse.Data[paragraphID] == nil {
+		t.Fatalf("missing block tree info: %s", infoRecorder.Body.String())
+	}
+	if children := infoResponse.Data[heading.ID].HeadingChildren; children == nil || !*children {
+		t.Fatal("parent heading must have children")
+	}
+	if children := infoResponse.Data[child.ID].HeadingChildren; children == nil || *children {
+		t.Fatal("empty heading must explicitly report false")
+	}
+	if infoResponse.Data[paragraphID].HeadingChildren != nil {
+		t.Fatal("non-heading must omit heading children")
+	}
 	engine.POST("/api/block/foldBlock", foldBlock)
 	engine.POST("/api/block/unfoldBlock", unfoldBlock)
 	engine.POST("/api/block/moveBlock", moveBlock)

@@ -210,6 +210,23 @@ func GetParentFoldedHeading(node *ast.Node) (parentFoldedHeading *ast.Node) {
 	return
 }
 
+// HasHeadingChildren 判断标题在同一容器内是否有下辖块，不展开折叠内容或扫描整个标题范围。
+func HasHeadingChildren(heading *ast.Node) bool {
+	if nil == heading || ast.NodeHeading != heading.Type {
+		return false
+	}
+	for node := heading.Next; nil != node; node = node.Next {
+		if ast.NodeSuperBlockCloseMarker == node.Type ||
+			(ast.NodeHeading == node.Type && node.HeadingLevel <= heading.HeadingLevel) {
+			return false
+		}
+		if node.IsBlock() && ast.NodeKramdownBlockIAL != node.Type {
+			return true
+		}
+	}
+	return false
+}
+
 func HeadingChildren(heading *ast.Node) (ret []*ast.Node) {
 	start := heading.Next
 	if nil == start {

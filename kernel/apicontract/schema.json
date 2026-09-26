@@ -18766,6 +18766,9 @@
     "BlockTreeInfo": {
       "type": "object",
       "properties": {
+        "headingChildren": {
+          "type": "boolean"
+        },
         "id": {
           "type": "string"
         },

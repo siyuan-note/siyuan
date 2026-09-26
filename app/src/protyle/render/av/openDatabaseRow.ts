@@ -89,6 +89,10 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
             if (currentRenderVersion !== renderVersion || !previousBodyElement.isConnected) {
                 return;
             }
+            if (!element.querySelector(`[data-av-id="${data.avID}"]`)) {
+                dialog.destroy();
+                return;
+            }
             // 保留当前内容，待属性和反链加载完成后一次替换，避免刷新期间出现空白。
             previousBodyElement.replaceWith(element);
             const primaryElement = element.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');

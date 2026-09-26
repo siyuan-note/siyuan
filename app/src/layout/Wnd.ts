@@ -49,7 +49,7 @@ import {closeWindow} from "../window/closeWin";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {setPosition} from "../util/setPosition";
 import {clearOBG} from "./dock/util";
-import {recordBeforeResizeTop} from "../protyle/util/resize";
+import {recordBeforeResizeTop, restoreBeforeResizeTop} from "../protyle/util/resize";
 import {isPhablet, sanitizeClosedTabs, setStorageVal} from "../protyle/util/compatibility";
 import {setTitle} from "../util/processTitle";
 import {dragOverScroll} from "../boot/globalEvent/dragover";
@@ -1105,6 +1105,8 @@ export class Wnd {
     }
 
     public moveTab(tab: Tab, nextId?: string) {
+        const protyle = tab.model instanceof Editor ? tab.model.editor.protyle : undefined;
+        const scrollTop = protyle?.contentElement.scrollTop;
         let rangeData: {
             id: string,
             start: number,
@@ -1177,6 +1179,12 @@ export class Wnd {
         tab.parent = this;
         hideAllElements(["toolbar"]);
         setTabPosition();
+        if (protyle) {
+            // 在浏览器绘制前恢复阅读位置，保留锚点供尺寸动画结束后再次校准。
+            if (!restoreBeforeResizeTop(protyle, false)) {
+                protyle.contentElement.scrollTop = scrollTop;
+            }
+        }
     }
 
     public split(direction: Config.TUILayoutDirection, after = true) {

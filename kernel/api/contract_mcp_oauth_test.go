@@ -127,13 +127,16 @@ func TestAPIContractMCPOAuthFlow(t *testing.T) {
 	if page.Code != 200 || strings.Contains(page.Body.String(), "<script>") || page.Header().Get("X-Frame-Options") != "DENY" {
 		t.Fatal(page.Code, page.Body.String())
 	}
+	if policy := page.Header().Get("Referrer-Policy"); policy != "same-origin" {
+		t.Fatalf("consent form must retain its same-origin POST Origin, got policy %q", policy)
+	}
 	match := regexp.MustCompile(`name="ticket" value="([^"]+)"`).FindStringSubmatch(page.Body.String())
 	if len(match) != 2 {
 		t.Fatal(page.Body.String())
 	}
 	cookies = append(cookies, page.Result().Cookies()...)
 	consent := url.Values{"ticket": {match[1]}, "decision": {"approve"}}
-	for _, origin := range []string{"https://evil.example", ""} {
+	for _, origin := range []string{"https://evil.example", "", "null"} {
 		res := call("POST", "/oauth/mcp/consent", consent.Encode(), "application/x-www-form-urlencoded", "", cookies, origin)
 		if res.Code != 400 {
 			t.Fatal("cross-origin consent accepted", res.Code)
@@ -142,6 +145,9 @@ func TestAPIContractMCPOAuthFlow(t *testing.T) {
 	approved := call("POST", "/oauth/mcp/consent", consent.Encode(), "application/x-www-form-urlencoded", "", cookies, "https://note.example.com")
 	if approved.Code != 302 {
 		t.Fatal(approved.Code, approved.Body.String())
+	}
+	if policy := approved.Header().Get("Referrer-Policy"); policy != "no-referrer" {
+		t.Fatalf("callback redirect must not disclose the authorization page URL, got policy %q", policy)
 	}
 	callback, _ := url.Parse(approved.Header().Get("Location"))
 	if callback.Query().Get("iss") != "https://note.example.com" || callback.Query().Get("state") != "original" {

@@ -267,6 +267,10 @@ var mcpOAuthPage = template.Must(template.New("mcp-oauth").Parse(`<!doctype html
 
 func mcpOAuthHTML(c *gin.Context, status int, ticket string, client apicontract.MCPOAuthClient) apicontract.Response[apicontract.BinaryContent] {
 	mcpOAuthHeaders(c)
+	if ticket != "" {
+		// 同源表单提交需要保留 Origin；跨站导航不发送 Referer。
+		c.Header("Referrer-Policy", "same-origin")
+	}
 	c.Header("Content-Security-Policy", "default-src 'none'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'")
 	c.Header("X-Frame-Options", "DENY")
 	data := map[string]string{"Title": mcpOAuthLanguage("mcpOAuthServer"), "Workspace": util.WorkspaceName, "Name": client.Name, "Redirect": client.RedirectURI,

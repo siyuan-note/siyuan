@@ -85,6 +85,7 @@ import {clearSelect} from "../../util/clear";
 import {applyAVColorPalette, getAVCustomColors} from "./color";
 import {bindContextFilterEvent, getContextFilterHTML} from "./contextFilter";
 import {setAVCellPanelTarget} from "./panelTarget";
+import {setSelectMenuPosition} from "./selectPosition";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -316,7 +317,11 @@ export const openMenuPanel = (options: {
                     inputElement.select();
                     inputElement.focus();
                 }
-                setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+                if (options.type === "select") {
+                    setSelectMenuPosition(menuElement, lastElement || options.cellElements[options.cellElements.length - 1]);
+                } else {
+                    setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+                }
             }
         } else {
             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);

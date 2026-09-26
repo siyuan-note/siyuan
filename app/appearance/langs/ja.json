@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "カスタム指示",
+	"agentInstructionsTip": "ワークスペース全体の設定を data/ai/AGENTS.md に保存し、除外されていなければ同期します。最大 32 KiB の UTF-8 テキストに対応し、次の会話ターンから適用されます",
+	"agentInstructionsTooLarge": "指示は 32 KiB 以下にしてください",
+	"agentInstructionsConflict": "AGENTS.md が変更されました。編集内容をコピーし、エディターを開き直して変更を統合してから保存してください",
 	"listMindmapSummary": "要約",
 	"listMindmapSummarySelect": "要約範囲の末端にある同じ親のノードを選択してください。要約範囲は重複できません",
 	"mcpOAuthServer": "MCP サーバー OAuth",

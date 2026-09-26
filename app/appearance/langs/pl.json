@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Własne instrukcje",
+	"agentInstructionsTip": "Preferencje obszaru roboczego zapisane w data/ai/AGENTS.md i synchronizowane, o ile nie zostały wykluczone; tekst UTF-8 do 32 KiB, stosowany od następnej tury rozmowy",
+	"agentInstructionsTooLarge": "Instrukcje nie mogą przekraczać 32 KiB",
+	"agentInstructionsConflict": "Plik AGENTS.md został zmieniony. Skopiuj swoje zmiany, otwórz edytor ponownie i scal je przed zapisaniem",
 	"listMindmapSummary": "Podsumowanie",
 	"listMindmapSummarySelect": "Wybierz ostatni węzeł o tym samym rodzicu w zakresie; podsumowania nie mogą się nakładać",
 	"mcpOAuthServer": "OAuth serwera MCP",

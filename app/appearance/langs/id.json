@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Instruksi khusus",
+	"agentInstructionsTip": "Preferensi ruang kerja disimpan di data/ai/AGENTS.md dan disinkronkan kecuali dikecualikan; teks UTF-8 hingga 32 KiB, berlaku mulai giliran percakapan berikutnya",
+	"agentInstructionsTooLarge": "Instruksi tidak boleh melebihi 32 KiB",
+	"agentInstructionsConflict": "AGENTS.md telah berubah. Salin perubahan Anda, buka kembali editor, lalu gabungkan sebelum menyimpan",
 	"listMindmapSummary": "Ringkasan",
 	"listMindmapSummarySelect": "Pilih simpul terakhir dengan induk yang sama dalam rentang ringkasan; ringkasan tidak boleh tumpang tindih",
 	"mcpOAuthServer": "OAuth server MCP",

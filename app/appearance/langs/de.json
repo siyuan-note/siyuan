@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Benutzerdefinierte Anweisungen",
+	"agentInstructionsTip": "Arbeitsbereichsweite Vorgaben werden in data/ai/AGENTS.md gespeichert und synchronisiert, sofern nicht ausgeschlossen; UTF-8-Text bis 32 KiB, gültig ab dem nächsten Gesprächsschritt",
+	"agentInstructionsTooLarge": "Anweisungen dürfen höchstens 32 KiB groß sein",
+	"agentInstructionsConflict": "AGENTS.md wurde geändert. Kopieren Sie Ihre Änderungen, öffnen Sie den Editor erneut und führen Sie die Änderungen vor dem Speichern zusammen",
 	"listMindmapSummary": "Zusammenfassung",
 	"listMindmapSummarySelect": "Wähle den letzten gleichgeordneten Knoten des Bereichs; Zusammenfassungen dürfen sich nicht überschneiden",
 	"mcpOAuthServer": "OAuth für MCP-Server",

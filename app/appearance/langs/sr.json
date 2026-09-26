@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Прилагођена упутства",
+	"agentInstructionsTip": "Подешавања радног простора чувају се у data/ai/AGENTS.md и синхронизују ако нису изузета; UTF-8 текст до 32 KiB, примењује се од следећег круга разговора",
+	"agentInstructionsTooLarge": "Упутства не смеју бити већа од 32 KiB",
+	"agentInstructionsConflict": "AGENTS.md је промењен. Копирајте своје измене, поново отворите уређивач и обједините их пре чувања",
 	"listMindmapSummary": "Сажетак",
 	"listMindmapSummarySelect": "Изаберите последњи чвор са истим родитељем у опсегу; сажеци се не смеју преклапати",
 	"mcpOAuthServer": "OAuth MCP сервера",

@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20260816130653"
+		"updated": "20260926163337"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170025-arr6px9",
-				"updated": "20260804180000"
+				"updated": "20260926163337"
 			},
 			"Children": [
 				{
@@ -159,6 +159,113 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中設定支援圖片輸出的模型。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-a9sacr9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260926163337-a9sacr9",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自訂指令"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-lt8blyw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-lt8blyw",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "智能體"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自訂指令"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中編輯長期偏好，例如寫作風格、引用習慣和筆記整理規則。桌面端和行動端共用同一份工作空間指令。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-zznm7nc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-zznm7nc",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "指令儲存於工作空間的 data/ai/AGENTS.md，支援最多 32 KiB 的 UTF-8 文字。啟用資料同步且未被同步忽略規則排除時，此檔案會隨工作空間同步。也可以使用文字編輯器直接編輯檔案；檔案不存在或為空時不加入自訂指令。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-7gtjdje",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-7gtjdje",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存後下一輪對話生效，正在執行的工具呼叫和上下文壓縮繼續使用本輪開始時的指令快照。指令會占用模型上下文。目前訊息可以覆蓋一般偏好，但不能透過指令繞過工具權限、審批或存取控制。首版不支援筆記本或文件層級繼承，也不自動載入同名筆記或附件。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-dy69wao",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-dy69wao",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "檔案讀取失敗、編碼錯誤或內容超限時，會顯示錯誤並停止本輪請求，原檔案不會被覆蓋或截斷。如果儲存時發現檔案已被其他視窗或同步修改，請先複製尚未儲存的內容，重新開啟編輯器並合併修改後再儲存。"
 				}
 			]
 		},

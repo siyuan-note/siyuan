@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "הוראות מותאמות אישית",
+	"agentInstructionsTip": "העדפות סביבת העבודה נשמרות ב־data/ai/AGENTS.md ומסונכרנות אלא אם הוחרגו; טקסט UTF-8 עד 32 KiB, בתוקף מסבב השיחה הבא",
+	"agentInstructionsTooLarge": "גודל ההוראות לא יכול לעלות על 32 KiB",
+	"agentInstructionsConflict": "AGENTS.md השתנה. יש להעתיק את העריכות, לפתוח מחדש את העורך ולמזג את השינויים לפני השמירה",
 	"listMindmapSummary": "סיכום",
 	"listMindmapSummarySelect": "יש לבחור את הצומת האח האחרון בטווח הסיכום; סיכומים אינם יכולים לחפוף",
 	"mcpOAuthServer": "OAuth של שרת MCP",

@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20260816130653"
+		"updated": "20260926163337"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170025-2kdbnc8",
-				"updated": "20260804180000"
+				"updated": "20260926163337"
 			},
 			"Children": [
 				{
@@ -159,6 +159,113 @@
 				{
 					"Type": "NodeText",
 					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-6d5c7t2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260926163337-6d5c7t2",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Custom instructions"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-o09flio",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-o09flio",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Edit persistent preferences in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Agent"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Custom instructions"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", such as writing style, citation habits, and note organization rules. Desktop and mobile use the same workspace instructions."
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-lzrrvoq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-lzrrvoq",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Instructions are stored in data/ai/AGENTS.md inside the workspace as UTF-8 text, up to 32 KiB. The file syncs with the workspace when data sync is enabled and no sync ignore rule excludes it. You can also edit the file directly with a text editor. A missing or empty file adds no custom instructions."
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-5cpn50j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-5cpn50j",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Saved changes take effect on the next conversation turn. Tool calls and context compaction in an ongoing turn keep the snapshot read at the start of that turn. Instructions count toward the model context. Your current message can override general preferences, but instructions cannot bypass tool permissions, approvals, or access controls. Notebook and document inheritance are not supported, and notes or attachments with the same name are not loaded automatically."
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-7q90dky",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-7q90dky",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Read failures, invalid encoding, or oversized content display an error and stop the turn without overwriting or truncating the original file. If another window or sync changes the file before you save, copy your unsaved edits, reopen the editor, and merge the changes before saving."
 				}
 			]
 		},

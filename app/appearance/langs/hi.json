@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "कस्टम निर्देश",
+	"agentInstructionsTip": "कार्यस्थान की प्राथमिकताएँ data/ai/AGENTS.md में सहेजी जाती हैं और बाहर न रखे जाने पर सिंक होती हैं; अधिकतम 32 KiB का UTF-8 पाठ, बातचीत के अगले चरण से लागू",
+	"agentInstructionsTooLarge": "निर्देश 32 KiB से अधिक नहीं होने चाहिए",
+	"agentInstructionsConflict": "AGENTS.md बदल गया है। अपने बदलाव कॉपी करें, संपादक फिर से खोलें और सहेजने से पहले बदलावों को मिलाएँ",
 	"listMindmapSummary": "सारांश",
 	"listMindmapSummarySelect": "सारांश के दायरे में समान मूल नोड वाला अंतिम नोड चुनें; सारांशों के दायरे आपस में नहीं मिलने चाहिए",
 	"mcpOAuthServer": "MCP सर्वर OAuth",

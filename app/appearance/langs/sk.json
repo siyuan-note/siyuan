@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Vlastné pokyny",
+	"agentInstructionsTip": "Predvoľby pracovného priestoru uložené v data/ai/AGENTS.md a synchronizované, ak nie sú vylúčené; text UTF-8 do 32 KiB, platný od ďalšieho kola konverzácie",
+	"agentInstructionsTooLarge": "Pokyny nesmú presiahnuť 32 KiB",
+	"agentInstructionsConflict": "Súbor AGENTS.md sa zmenil. Skopírujte svoje zmeny, znova otvorte editor a pred uložením ich zlúčte",
 	"listMindmapSummary": "Súhrn",
 	"listMindmapSummarySelect": "Vyberte posledný uzol s rovnakým rodičom v rozsahu; súhrny sa nesmú prekrývať",
 	"mcpOAuthServer": "OAuth servera MCP",

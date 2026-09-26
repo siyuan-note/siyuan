@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Özel talimatlar",
+	"agentInstructionsTip": "Çalışma alanı tercihleri data/ai/AGENTS.md dosyasında saklanır ve hariç tutulmadıkça eşitlenir; en fazla 32 KiB UTF-8 metin, sonraki konuşma turundan itibaren geçerlidir",
+	"agentInstructionsTooLarge": "Talimatlar 32 KiB boyutunu aşmamalıdır",
+	"agentInstructionsConflict": "AGENTS.md değişti. Düzenlemelerinizi kopyalayın, düzenleyiciyi yeniden açın ve kaydetmeden önce değişiklikleri birleştirin",
 	"listMindmapSummary": "Özet",
 	"listMindmapSummarySelect": "Özet aralığında aynı üst düğüme bağlı son düğümü seçin; özetler çakışamaz",
 	"mcpOAuthServer": "MCP sunucusu OAuth",

@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Istruzioni personalizzate",
+	"agentInstructionsTip": "Preferenze dell’area di lavoro salvate in data/ai/AGENTS.md e sincronizzate salvo esclusione; testo UTF-8 fino a 32 KiB, valido dal prossimo turno di conversazione",
+	"agentInstructionsTooLarge": "Le istruzioni non devono superare 32 KiB",
+	"agentInstructionsConflict": "AGENTS.md è cambiato. Copia le tue modifiche, riapri l’editor e uniscile prima di salvare",
 	"listMindmapSummary": "Riepilogo",
 	"listMindmapSummarySelect": "Seleziona l'ultimo nodo con lo stesso genitore nell'intervallo; i riepiloghi non possono sovrapporsi",
 	"mcpOAuthServer": "OAuth del server MCP",

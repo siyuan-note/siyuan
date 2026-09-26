@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Instruções personalizadas",
+	"agentInstructionsTip": "Preferências do espaço de trabalho salvas em data/ai/AGENTS.md e sincronizadas salvo exclusão; texto UTF-8 de até 32 KiB, aplicado a partir do próximo turno da conversa",
+	"agentInstructionsTooLarge": "As instruções não podem exceder 32 KiB",
+	"agentInstructionsConflict": "AGENTS.md foi alterado. Copie suas alterações, reabra o editor e combine-as antes de salvar",
 	"listMindmapSummary": "Resumo",
 	"listMindmapSummarySelect": "Selecione o último nó com o mesmo pai no intervalo; os resumos não podem se sobrepor",
 	"mcpOAuthServer": "OAuth do servidor MCP",

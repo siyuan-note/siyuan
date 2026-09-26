@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Custom instructions",
+	"agentInstructionsTip": "Workspace-wide preferences stored in data/ai/AGENTS.md and synced unless excluded; UTF-8 text up to 32 KiB, effective from the next conversation turn",
+	"agentInstructionsTooLarge": "Instructions must be at most 32 KiB",
+	"agentInstructionsConflict": "AGENTS.md has changed. Copy your edits, reopen the editor, and merge them before saving",
 	"listMindmapSummary": "Summary",
 	"listMindmapSummarySelect": "Select the last sibling node in the summary range; summaries cannot overlap",
 	"mcpOAuthServer": "MCP server OAuth",

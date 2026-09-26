@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20260816130653"
+		"updated": "20260926163337"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170025-r2m4o0b",
-				"updated": "20260804180000"
+				"updated": "20260926163337"
 			},
 			"Children": [
 				{
@@ -155,6 +155,109 @@
 				{
 					"Type": "NodeText",
 					"Data": " で画像出力に対応するモデルを設定します。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-49n3p0a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260926163337-49n3p0a",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カスタム指示"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-nrlrrlv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-nrlrrlv",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エージェント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "カスタム指示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、文体、引用方法、ノートの整理ルールなどの長期的な設定を編集します。デスクトップ版とモバイル版は同じワークスペースの指示を使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-f5ixseu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-f5ixseu",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "指示はワークスペース内の data/ai/AGENTS.md に最大 32 KiB の UTF-8 テキストとして保存されます。データ同期が有効で、同期の除外ルールに該当しなければ、ワークスペースとともに同期されます。テキストエディターで直接編集することもできます。ファイルが存在しない場合や空の場合、カスタム指示は追加されません。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-ycm8nwf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-ycm8nwf",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保存した変更は次の会話ターンから適用されます。実行中のツール呼び出しとコンテキスト圧縮には、そのターンの開始時に読み込んだ指示が引き続き使用されます。指示はモデルのコンテキストを消費します。現在のメッセージは一般的な設定より優先されますが、指示でツール権限、承認、アクセス制御を回避することはできません。ノートブックやドキュメント単位の継承には対応しておらず、同名のノートや添付ファイルも自動では読み込みません。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-e2pfywv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-e2pfywv",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "読み込み失敗、文字コードの問題、サイズ超過があると、エラーを表示してそのターンを停止します。元のファイルは上書きも切り詰めもされません。保存前に別のウィンドウや同期によってファイルが変更された場合は、未保存の編集内容をコピーし、エディターを開き直して変更を統合してから保存してください。"
 				}
 			]
 		},

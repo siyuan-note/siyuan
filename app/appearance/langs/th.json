@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "คำสั่งที่กำหนดเอง",
+	"agentInstructionsTip": "บันทึกการตั้งค่าสำหรับพื้นที่ทำงานใน data/ai/AGENTS.md และซิงค์หากไม่ได้ยกเว้น รองรับข้อความ UTF-8 สูงสุด 32 KiB โดยมีผลในรอบสนทนาถัดไป",
+	"agentInstructionsTooLarge": "คำสั่งต้องมีขนาดไม่เกิน 32 KiB",
+	"agentInstructionsConflict": "AGENTS.md มีการเปลี่ยนแปลง โปรดคัดลอกสิ่งที่คุณแก้ไข เปิดตัวแก้ไขอีกครั้ง แล้วรวมการเปลี่ยนแปลงก่อนบันทึก",
 	"listMindmapSummary": "สรุป",
 	"listMindmapSummarySelect": "เลือกโหนดสุดท้ายที่มีโหนดแม่เดียวกันในช่วงสรุป โดยช่วงสรุปต้องไม่ทับซ้อนกัน",
 	"mcpOAuthServer": "OAuth ของเซิร์ฟเวอร์ MCP",

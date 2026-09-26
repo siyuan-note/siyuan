@@ -12,6 +12,10 @@ export type AIAgentGoogleToolCallProviderData = { "thoughtSignature"?: string; }
 
 export type AIAgentGoogleToolCallProviderDataInput = { "thoughtSignature"?: string | null; };
 
+export type AIAgentInstructionsData = { "content": string; "revision": string; };
+
+export type AIAgentInstructionsSaveRequestInput = { "content": string; "revision": string; };
+
 export type AIAgentMessage = { "content": string; "editorContext"?: AIEditorContext; "entryID"?: string; "nativeContent"?: AINativeContent; "reasoningContent"?: string; "references"?: Array<AIReference>; "responseOutput"?: Array<JSONValue>; "responseOutputTokens"?: number; "role": string; "roundID"?: string; "toolCalls"?: Array<AIAgentToolCall>; };
 
 export type AIAgentMessageInput = { "content"?: string | null; "editorContext"?: AIEditorContextInput | null; "entryID"?: string | null; "nativeContent"?: AINativeContentInput | null; "reasoningContent"?: string | null; "references"?: Array<AIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "role"?: string | null; "roundID"?: string | null; "toolCalls"?: Array<AIAgentToolCallInput> | null; };
@@ -2547,6 +2551,11 @@ export interface APIPOSTRoutes {
         body: "structJSON";
         additionalErrorStatuses: [409];
     };
+    "/api/ai/agent/getInstructions": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AIAgentInstructionsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
     "/api/ai/agent/getSession": {
         request: AISessionIDRequestInput;
         response: { "code": 0; "data": AISessionExtensionAISessionFields | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2610,6 +2619,11 @@ export interface APIPOSTRoutes {
         request: AISkillSaveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+    };
+    "/api/ai/agent/setInstructions": {
+        request: AIAgentInstructionsSaveRequestInput;
+        response: { "code": 0; "data": AIAgentInstructionsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/ai/agent/setPermission": {
         request: AIPermissionRequestInput;

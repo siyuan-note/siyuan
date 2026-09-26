@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "تعليمات مخصصة",
+	"agentInstructionsTip": "تُحفظ تفضيلات مساحة العمل في data/ai/AGENTS.md وتُزامَن ما لم تُستثنَ؛ نص UTF-8 بحجم أقصى 32 KiB، يسري بدءًا من الجولة التالية من المحادثة",
+	"agentInstructionsTooLarge": "يجب ألا يتجاوز حجم التعليمات 32 KiB",
+	"agentInstructionsConflict": "تم تغيير AGENTS.md. انسخ تعديلاتك، وأعد فتح المحرر، ثم ادمج التغييرات قبل الحفظ",
 	"listMindmapSummary": "ملخص",
 	"listMindmapSummarySelect": "حدد آخر عقدة شقيقة في نطاق الملخص؛ لا يمكن أن تتداخل الملخصات",
 	"mcpOAuthServer": "OAuth لخادم MCP",

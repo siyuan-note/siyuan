@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Пользовательские инструкции",
+	"agentInstructionsTip": "Настройки рабочего пространства хранятся в data/ai/AGENTS.md и синхронизируются, если не исключены; текст UTF-8 до 32 KiB, применяется со следующего хода диалога",
+	"agentInstructionsTooLarge": "Размер инструкций не должен превышать 32 KiB",
+	"agentInstructionsConflict": "AGENTS.md изменён. Скопируйте свои правки, заново откройте редактор и объедините изменения перед сохранением",
 	"listMindmapSummary": "Обобщение",
 	"listMindmapSummarySelect": "Выберите последний узел с тем же родителем в диапазоне; обобщения не могут пересекаться",
 	"mcpOAuthServer": "OAuth сервера MCP",

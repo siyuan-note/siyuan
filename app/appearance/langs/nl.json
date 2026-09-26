@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "Aangepaste instructies",
+	"agentInstructionsTip": "Voorkeuren voor de hele werkruimte worden opgeslagen in data/ai/AGENTS.md en gesynchroniseerd tenzij uitgesloten; UTF-8-tekst tot 32 KiB, van kracht vanaf de volgende gespreksbeurt",
+	"agentInstructionsTooLarge": "Instructies mogen maximaal 32 KiB groot zijn",
+	"agentInstructionsConflict": "AGENTS.md is gewijzigd. Kopieer je wijzigingen, open de editor opnieuw en voeg ze samen voordat je opslaat",
 	"listMindmapSummary": "Samenvatting",
 	"listMindmapSummarySelect": "Selecteer de laatste knoop met dezelfde ouder in het bereik; samenvattingen mogen niet overlappen",
 	"mcpOAuthServer": "OAuth voor MCP-server",

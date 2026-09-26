@@ -1,4 +1,8 @@
 {
+	"agentInstructions": "自定义指令",
+	"agentInstructionsTip": "工作空间级偏好保存在 data/ai/AGENTS.md 中，未被忽略时参与同步；支持最多 32 KiB 的 UTF-8 文本，保存后下一轮对话生效",
+	"agentInstructionsTooLarge": "指令内容不能超过 32 KiB",
+	"agentInstructionsConflict": "AGENTS.md 已发生变化。请先复制你的修改，重新打开编辑器并合并后再保存",
 	"listMindmapSummary": "概要",
 	"listMindmapSummarySelect": "选择概要范围的末端同级节点，范围不能与已有概要重叠",
 	"mcpOAuthServer": "MCP 服务端 OAuth",

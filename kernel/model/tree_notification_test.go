@@ -2,6 +2,8 @@ package model
 
 import (
 	"errors"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"sync"
 	"sync/atomic"
@@ -55,6 +57,17 @@ func TestClosedBoxNotification(t *testing.T) {
 }
 
 func TestClosedBoxRepeatedLookupPreservesError(t *testing.T) {
+	// 独立进程隔离其他用例遗留的索引任务，保留真实请求入口的索引状态检查。
+	const subprocessEnv = "SIYUAN_TEST_CLOSED_BOX_LOOKUP"
+	if os.Getenv(subprocessEnv) != "1" {
+		cmd := exec.Command(os.Args[0], "-test.run=^TestClosedBoxRepeatedLookupPreservesError$", "-test.timeout=30s")
+		cmd.Env = append(os.Environ(), subprocessEnv+"=1")
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("closed notebook lookup subprocess failed: %v\n%s", err, output)
+		}
+		return
+	}
+
 	fixture := setupFileOperationTest(t)
 	originalLimiter := searchTreeLimiter
 	searchTreeLimiter = rate.NewLimiter(rate.Inf, 1)

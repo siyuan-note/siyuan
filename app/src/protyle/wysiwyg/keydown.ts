@@ -1641,6 +1641,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const trackedRangeInsertion = prepareTrackedRangeInsertion(protyle, range);
             try {
                 if (softEnter(range, nodeElement, protyle, trackedRangeInsertion)) {
+                    if (protyle.options.typewriterMode) {
+                        scheduleCaretScroll(protyle, "down");
+                    }
                     event.stopPropagation();
                     event.preventDefault();
                     return;
@@ -1682,6 +1685,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const trackedRangeInsertion = prepareTrackedRangeInsertion(protyle, range);
             try {
                 await enter(nodeElement, range, protyle, trackedRangeInsertion);
+                if (protyle.options.typewriterMode) {
+                    scheduleCaretScroll(protyle, "down");
+                }
             } finally {
                 endTrackedRangeInsertion(trackedRangeInsertion);
             }

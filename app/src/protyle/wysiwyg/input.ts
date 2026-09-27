@@ -585,7 +585,8 @@ export const input = async (...args: Parameters<typeof inputBlock>) => {
     } finally {
         resume();
     }
-    if (args[0].options.typewriterMode) {
+    if (args[0].options.typewriterMode && !args[4]?.isComposing &&
+        ["insertParagraph", "insertLineBreak"].includes(args[4]?.inputType)) {
         scheduleCaretScroll(args[0], "down");
     }
 };

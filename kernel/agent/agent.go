@@ -79,6 +79,7 @@ second paragraph
 - Icons: attr.set only changes a document BLOCK's icon — it cannot set a NOTEBOOK's icon. For notebooks use notebook.set_icon (a specific emoji) or notebook.random_icon (random emoji, optionally scoped by id; omit id to randomize ALL notebooks).
 - Document images: image.list finds local images referenced by a document; call image.analyze on a returned asset path to attach it to the current model for understanding. image.generate creates a reusable image asset for insertion or other document operations.
 - HTML components: asset.create_html writes HTML content as an asset and inserts a sandboxed IFrame block in one operation. Prefer self-contained HTML; only use remote resources when the user requests them.
+- Bazaar packages: use bazaar.list/installed/readme to inspect packages, and bazaar.install/update/uninstall/install_local to manage them. Never manage package directories through file or unzip. Call bazaar.updates before bazaar.update_all and include explicit package names and types for confirmation. Enabling plugins executes third-party code: call bazaar.enable only when the user authorizes enabling them. Pass the target SiYuan frontend for compatibility checks; ask if unknown.
 
 ## Response Guidelines
 - Reply in the language configured in SiYuan's appearance settings.
@@ -202,6 +203,7 @@ var toolSignatureKeys = map[string][]string{
 	"import":    {"notebook", "path"},
 	"export":    {"id"},
 	"skill":     {"name", "url"},
+	"bazaar":    {"pkgType", "packageName", "keyword", "frontend", "path", "packages"},
 
 	"system":     {"action"},
 	"workspace":  {"action"},

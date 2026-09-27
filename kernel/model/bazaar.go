@@ -478,10 +478,27 @@ func refreshInstalledPackageREADME(pkgType string, installed, available *bazaar.
 // GetBazaarPackages 获取在线集市包列表
 func GetBazaarPackages(pkgType, frontend, keyword string) (bazaarPackages []*bazaar.Package) {
 	bazaarPackages = bazaar.GetBazaarPackages(pkgType, frontend)
+	return enrichBazaarPackages(bazaarPackages, pkgType, keyword)
+}
+
+// GetBazaarPackagesWithError 获取在线集市包，并保留网络错误供工具调用方区分空列表与请求失败。
+func GetBazaarPackagesWithError(pkgType, frontend, keyword string) ([]*bazaar.Package, error) {
+	packages, err := bazaar.GetBazaarPackagesMap(pkgType, frontend)
+	if err != nil {
+		return nil, err
+	}
+	list := make([]*bazaar.Package, 0, len(packages))
+	for _, pkg := range packages {
+		list = append(list, pkg)
+	}
+	return enrichBazaarPackages(list, pkgType, keyword), nil
+}
+
+func enrichBazaarPackages(bazaarPackages []*bazaar.Package, pkgType, keyword string) []*bazaar.Package {
 	bazaarPackages = bazaar.FilterPackages(bazaarPackages, keyword)
 	installedInfos, _, _, err := GetInstalledPackageInfos(pkgType)
 	if err != nil {
-		return
+		return bazaarPackages
 	}
 	installedMap := make(map[string]*bazaar.Package, len(installedInfos))
 	for _, info := range installedInfos {
@@ -504,7 +521,7 @@ func GetBazaarPackages(pkgType, frontend, keyword string) (bazaarPackages []*baz
 			pkg.Current = pkg.Name == Conf.Appearance.Icon
 		}
 	}
-	return
+	return bazaarPackages
 }
 
 func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType string) (ret string) {

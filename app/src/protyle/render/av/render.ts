@@ -679,10 +679,12 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const locateParams = getAVLocateParams(e, !created && !snapshot);
         let data: IAV;
         if (!avData) {
+            // 未引用数据库预览没有实际载体，不向内核传递临时块 ID。
+            const standalone = protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE);
             const common = {
                 calendarRange: getCalendarRequestRange(e, locateParams?.viewID || undefined),
                 id: e.getAttribute("data-av-id"),
-                blockID: e.getAttribute("data-node-id"),
+                blockID: standalone ? "" : e.getAttribute("data-node-id"),
                 viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(e) : ""),
             };
             const paging = {
@@ -698,7 +700,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
                 ...common, ...paging,
                 initialLayout: e.getAttribute("data-av-type"),
-                createIfNotExist: !window.siyuan.isPublish && !protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE),
+                createIfNotExist: !window.siyuan.isPublish && !standalone,
                 targetItemID: locateParams?.targetItemID || "",
                 targetGroupID: locateParams?.targetGroupID || "",
             }, undefined, false));

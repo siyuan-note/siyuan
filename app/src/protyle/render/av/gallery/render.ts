@@ -267,11 +267,12 @@ export const renderGallery = async (options: {
 
     let data: IAV = options.data;
     if (!data) {
+        const standalone = options.protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE);
         const avPageSize = getPageSize(options.blockElement);
         const locateParams = getAVLocateParams(options.blockElement, !created && !snapshot);
         const common = {
             id: options.blockElement.getAttribute("data-av-id"),
-            blockID: options.blockElement.getAttribute("data-node-id"),
+            blockID: standalone ? "" : options.blockElement.getAttribute("data-node-id"),
             viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(options.blockElement) : ""),
         };
         const paging = {
@@ -287,7 +288,7 @@ export const renderGallery = async (options: {
         }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
             ...common, ...paging,
             initialLayout: options.blockElement.getAttribute("data-av-type"),
-            createIfNotExist: !window.siyuan.isPublish,
+            createIfNotExist: !window.siyuan.isPublish && !standalone,
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
         }, undefined, false));

@@ -212,7 +212,7 @@
 	"backlinkHideReference": "Sakrij blokove referenci u prenetim povratnim vezama",
 	"backlinkHideReferenceTip": "Sakrij blokove koji sadrže samo reference na blokove u prenetim povratnim vezama kada ostali sadržaj ostaje vidljiv, i prikaži ih ponovo tokom uređivanja",
 	"uploadInsertTargetUnavailable": "Prvobitno odredište otpremanja više nije dostupno. Rezultat nije umetnut; otpremljeni fajlovi su sačuvani.",
-	"mobileToolbarEntryTip": "Подесите видљивост и редослед ставки мобилне траке са алаткама; профили се чувају на овом уређају и не синхронизују се између уређаја",
+	"mobileToolbarEntryTip": "Подесите видљивост и редослед ставки мобилне траке са алаткама и менија косе црте; профили се чувају на овом уређају и не синхронизују се између уређаја",
 	"keymapAssigned": "Dodeljeno",
 	"keymapCustomized": "Moje izmene",
 	"keymapUnassigned": "Nedodeljeno",

@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260926152753"
+		"updated": "20260927164841"
 	},
 	"Children": [
 		{
@@ -98,6 +98,61 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中修改或解除快捷鍵綁定，預設在 Windows/Linux 上為 Ctrl+/，在 macOS 上為 Cmd+/。它會依目前焦點開啟編輯器內容、資料庫列、搜尋結果或導覽項目的快顯功能表。輸入 / 仍用於觸發斜線選單。"
+				}
+			]
+		},
+		{
+			"ID": "20260927164841-m2ossua",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927164841-m2ossua",
+				"updated": "20260927164841"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在行動端開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "選單和按鈕的顯隱與排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，檢視或編輯方案後選擇斜線選單分類。行動端斜線選單開關預設關閉，修改後立即生效，並保留既有設定。此開關與方案中的斜線選單開關皆開啟時，輸入 / 可搜尋內容區塊，選擇候選項目後在原游標處插入。"
+				}
+			]
+		},
+		{
+			"ID": "20260927164841-7yj0cwc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927164841-7yj0cwc",
+				"updated": "20260927164841"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編輯自訂方案時，可透過分類選擇框切換工具列與斜線選單。拖曳項目左側的六點把手調整順序，使用項目開關調整顯隱；拖至清單邊緣可捲動。排序前需清空搜尋，修改後確認儲存方案。內建方案唯讀，可複製後自訂，再啟用儲存的方案。方案儲存在本裝置，不跨裝置同步。"
 				}
 			]
 		},

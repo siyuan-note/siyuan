@@ -943,7 +943,9 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     /// #endif
     group.slot({
         key: "entryVisibility",
-        keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip],
+        keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip,
+            window.siyuan.languages.entryToolbar, window.siyuan.languages.entrySlashMenu,
+            ...(isMobile() ? [window.siyuan.languages.mobileSlashMenu, window.siyuan.languages.mobileToolbarEntryTip] : [])],
         html: genEntryVisibilityHtml,
         afterMount: mountEntryVisibility,
     });

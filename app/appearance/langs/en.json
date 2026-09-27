@@ -212,7 +212,7 @@
 	"backlinkHideReference": "Hide reference blocks in propagated backlinks",
 	"backlinkHideReferenceTip": "Hide blocks containing only block references in propagated backlinks when other content remains visible, and show them again while editing",
 	"uploadInsertTargetUnavailable": "The original upload target is no longer available. The result was not inserted; uploaded files are retained.",
-	"mobileToolbarEntryTip": "Configure mobile toolbar visibility and order; profiles are saved on this device and are not synced across devices",
+	"mobileToolbarEntryTip": "Configure the visibility and order of mobile toolbar and slash menu items; profiles are saved on this device and are not synced across devices",
 	"keymapAssigned": "Assigned",
 	"keymapCustomized": "Customized by me",
 	"keymapUnassigned": "Unassigned",

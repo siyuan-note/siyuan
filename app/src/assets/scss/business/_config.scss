@@ -1328,6 +1328,7 @@
       }
 
       .config-entry-visibility__column {
+        box-sizing: border-box;
         flex: 1 0 100%;
       }
 
@@ -1335,13 +1336,33 @@
         margin: 0 8px 8px;
       }
 
-      .config-entry-visibility__drag,
       .config-entry-visibility__arrow-space {
         display: none;
       }
 
       .config-entry-visibility__row {
         min-height: 44px;
+      }
+
+      .config-entry-visibility__drag {
+        min-height: 32px;
+        min-width: 24px;
+        touch-action: none;
+      }
+    }
+
+    &__mobile-header {
+      flex: 0 1 auto;
+      min-height: 0;
+      max-height: 60%;
+      overflow-y: auto;
+    }
+
+    &__mobile-controls {
+      margin: 0 8px 8px;
+
+      > .b3-select {
+        width: 100%;
       }
     }
 
@@ -1358,7 +1379,8 @@
       margin: 0 0 16px;
     }
 
-    &__content > .config-group + .config-group {
+    &__content > .config-group + .config-group,
+    &__mobile-header > .config-group + .config-group {
       margin-top: 0;
     }
 
@@ -1543,17 +1565,11 @@
     }
 
     &__drag {
-      color: var(--b3-theme-on-surface-light);
       cursor: grab;
-      flex: 0 0 16px;
-      height: 16px;
       margin-right: 8px;
-      width: 16px;
 
       svg {
-        height: 16px;
         pointer-events: none;
-        width: 16px;
       }
 
       &:active {

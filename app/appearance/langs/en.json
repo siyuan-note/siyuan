@@ -6,7 +6,7 @@
 	"conditionalColorTarget": "Apply to",
 	"conditionalColorFirstOption": "Match first option",
 	"conditionalColorsTip": "Rules are evaluated from top to bottom; the first matching color wins for each target",
-	"newFileAtPath": "Choose location and create doc...",
+	"newFileAtPath": "Choose location and create document",
 	"oidcClaimRulesRequired": "At least one claim rule is required unless administrator access is granted to all authenticated users",
 	"oidcGitHubClaimRulesTip": "GitHub example (replace YOUR_GITHUB_USERNAME with your GitHub username): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Custom instructions",

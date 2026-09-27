@@ -6,7 +6,7 @@
 	"conditionalColorTarget": "適用先",
 	"conditionalColorFirstOption": "最初の選択肢に合わせる",
 	"conditionalColorsTip": "ルールは上から順に評価され、各対象には最初に一致した色が適用されます",
-	"newFileAtPath": "保存先を選択してドキュメントを作成...",
+	"newFileAtPath": "保存先を選択してドキュメントを作成",
 	"oidcClaimRulesRequired": "認証済みの全ユーザーに管理者権限を付与しない場合、少なくとも1つのクレームルールが必要です",
 	"oidcGitHubClaimRulesTip": "GitHub の例（YOUR_GITHUB_USERNAME を自分の GitHub ユーザー名に置き換えてください）：[{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "カスタム指示",

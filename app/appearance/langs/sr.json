@@ -6,7 +6,7 @@
 	"conditionalColorTarget": "Примени на",
 	"conditionalColorFirstOption": "Боја прве опције",
 	"conditionalColorsTip": "Правила се проверавају одозго надоле; за сваки циљ важи прва одговарајућа боја",
-	"newFileAtPath": "Изабери локацију и направи документ...",
+	"newFileAtPath": "Изабери локацију и направи документ",
 	"oidcClaimRulesRequired": "Потребно је бар једно правило тврдњи ако администраторски приступ није додељен свим потврђеним корисницима",
 	"oidcGitHubClaimRulesTip": "GitHub пример (замените YOUR_GITHUB_USERNAME својим GitHub корисничким именом): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Прилагођена упутства",

@@ -6,7 +6,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Ref Content Block",
 		"type": "doc",
-		"updated": "20260927161549"
+		"updated": "20260927183214"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200924101312-jj4e0v3",
-				"updated": "20260927161549"
+				"updated": "20260927183214"
 			},
 			"Children": [
 				{
@@ -61,7 +61,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260927091603-y3kej6k",
-				"updated": "20260927161549"
+				"updated": "20260927183214"
 			},
 			"Children": [
 				{
@@ -89,7 +89,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Choose location and create doc..."
+					"TextMarkTextContent": "Choose location and create document"
 				},
 				{
 					"Type": "NodeText",

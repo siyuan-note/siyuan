@@ -11,7 +11,7 @@ const runCases = async (sources, mobile) => {
     const results = notebooks.map(item => ({box: item.id, path: "/parent.sy", hPath: item.name + "/Parent"}));
     window.siyuan = {
         dialogs: [], zIndex: 1, notebooks,
-        languages: {cancel: "Cancel", confirm: "Confirm", searchPlaceholder: "Search", newFileAtPath: "Choose location and create doc..."},
+        languages: {cancel: "Cancel", confirm: "Confirm", searchPlaceholder: "Search", newFileAtPath: "Choose location and create document"},
         storage: {move: {k: "", keys: []}}, config: {search: {caseSensitive: false, limit: 20}},
         menus: {menu: {element: document.createElement("div"), remove() {}}},
     };

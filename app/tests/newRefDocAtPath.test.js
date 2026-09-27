@@ -19,7 +19,7 @@ const load = (name, dependencies, window, Lute) => {
 
 const fixture = () => {
     const window = {siyuan: {
-        languages: {newFileAtPath: "Choose location and create doc...", newFile: "Create doc", newSubDoc: "Create sub doc"},
+        languages: {newFileAtPath: "Choose location and create document", newFile: "Create doc", newSubDoc: "Create sub doc"},
         notebooks: [{id: "source"}, {id: "other"}, {id: "secret", encrypted: true}, {id: "secret2", encrypted: true}],
         config: {editor: {blockRefDynamicAnchorTextMaxLen: 64}},
     }};

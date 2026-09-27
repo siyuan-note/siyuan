@@ -6,7 +6,7 @@
 	"conditionalColorTarget": "تطبيق على",
 	"conditionalColorFirstOption": "استخدام لون الخيار الأول",
 	"conditionalColorsTip": "تُفحص القواعد من الأعلى إلى الأسفل ويُستخدم أول لون مطابق لكل هدف",
-	"newFileAtPath": "اختيار الموقع وإنشاء مستند...",
+	"newFileAtPath": "اختيار الموقع وإنشاء مستند",
 	"oidcClaimRulesRequired": "يجب إعداد قاعدة مطالبة واحدة على الأقل ما لم تُمنح صلاحيات المسؤول لجميع المستخدمين المصادق عليهم",
 	"oidcGitHubClaimRulesTip": "مثال GitHub (استبدل YOUR_GITHUB_USERNAME باسم مستخدم GitHub الخاص بك): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "تعليمات مخصصة",

@@ -6,7 +6,7 @@
 	"conditionalColorTarget": "Применить к",
 	"conditionalColorFirstOption": "Цвет первого варианта",
 	"conditionalColorsTip": "Правила проверяются сверху вниз; для каждой цели используется первый подходящий цвет",
-	"newFileAtPath": "Выбрать расположение и создать документ...",
+	"newFileAtPath": "Выбрать расположение и создать документ",
 	"oidcClaimRulesRequired": "Необходимо хотя бы одно правило утверждений, если права администратора не предоставлены всем прошедшим проверку пользователям",
 	"oidcGitHubClaimRulesTip": "Пример для GitHub (замените YOUR_GITHUB_USERNAME своим именем пользователя GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Пользовательские инструкции",

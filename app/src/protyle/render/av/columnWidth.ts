@@ -35,8 +35,8 @@ export const getAVColumnFitWidth = (name: string, type: TAVCol, values: string[]
 
 export const getAVRelationColumnWidth = (fitWidth: string, type: TAVCol, primary: boolean) => {
     const width = parseFloat(fitWidth) || 64;
-    const minWidth = primary ? 120 : 64;
-    const maxWidth = ["relation", "rollup", "mAsset"].includes(type) ? 200 : 160;
+    const minWidth = primary ? 240 : 64;
+    const maxWidth = primary ? 400 : ["relation", "rollup", "mAsset"].includes(type) ? 200 : 160;
     return `${Math.min(maxWidth, Math.max(minWidth, width))}px`;
 };
 

@@ -15,6 +15,7 @@ const runCases = sources => {
         return content;
     }};
     const dependencies = {
+        "../../util/compatibility": {setStorageVal: () => {}},
         "../../../util/escape": {escapeAttr: escape, escapeHtml: escape},
         "../../../emoji/fileTreeIcon": {getFileTreeIconHTML: () => ""},
         "../../../util/hostCapabilities": {getHostCapabilities: () => ({remoteKernel: true})},
@@ -65,6 +66,35 @@ const runCases = sources => {
     }
     assert.ok(sanitized.includes(""));
     assert.ok(sanitized.some(content => content.includes("<b>Formatted</b>")));
+    window.siyuan.storage = {};
+    const {bindRelationLayout} = load("./relationLayout");
+    const root = document.createElement("div");
+    root.innerHTML = '<button data-type="relationFields"></button><div class="av__relation-fields fn__none"></div>' +
+        '<div class="av__relation-table-header"><span data-relation-column="primary"></span><span data-relation-column="other"></span></div>' +
+        '<div class="av__relation-table-row"><span data-relation-column="primary">Entry</span><span data-relation-column="other">Value</span></div>';
+    const columns = [{id: "primary", name: "Title"}, {id: "other", name: "Other"}];
+    const update = bindRelationLayout(root, "database", () => {});
+    update(columns, "32px 240px 160px");
+    root.querySelector("button").click();
+    assert.equal(root.querySelector('[data-column="primary"]').disabled, true);
+    const other = root.querySelector('[data-column="other"]');
+    other.checked = false;
+    other.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.equal(root.querySelectorAll('[data-relation-column="other"].fn__none').length, 2);
+    const width = root.querySelector('[data-width="primary"]');
+    width.value = "360";
+    width.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.equal(window.siyuan.storage["local-av-relation-layout"].database.widths.primary, 360);
+    assert.deepEqual(window.siyuan.storage["local-av-relation-layout"].database.hidden, ["other"]);
+    update(columns, "32px 240px 160px");
+    assert.match(root.querySelector(".av__relation-table-row").style.gridTemplateColumns, /360px/);
+    const reopened = root.cloneNode(true);
+    bindRelationLayout(reopened, "database", () => {})(columns, "32px 240px 160px");
+    assert.equal(reopened.querySelectorAll('[data-relation-column="other"].fn__none').length, 2);
+    assert.match(reopened.querySelector(".av__relation-table-row").style.gridTemplateColumns, /360px/);
+    const independent = root.cloneNode(true);
+    bindRelationLayout(independent, "another", () => {})(columns, "32px 240px 160px");
+    assert.equal(independent.querySelectorAll('[data-relation-column="other"].fn__none').length, 0);
 };
 
 const runElectron = async () => {
@@ -76,7 +106,7 @@ const runElectron = async () => {
     let exitCode = 0;
     try {
         const ts = require("typescript");
-        const sources = Object.fromEntries(["cell", "cellValue", "attributeValue"].map(name => ["./" + name,
+        const sources = Object.fromEntries(["cell", "cellValue", "attributeValue", "relationLayout"].map(name => ["./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
         await win.loadURL("data:text/html,<html><body></body></html>");

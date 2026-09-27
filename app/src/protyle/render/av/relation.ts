@@ -24,6 +24,7 @@ import {getAVTemplateHTML} from "./attributeValue";
 import {hasAVRenderTemplateResult} from "./cellValue";
 import {renderAVRichTextElements} from "./richText";
 import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {bindRelationLayout} from "./relationLayout";
 
 interface IAVItem {
     avID: string;
@@ -417,9 +418,10 @@ const genRelationHeaderHTML = (columns: IAVColumn[], gridTemplate: string) => {
     let html = `<div class="av__relation-table-header" data-relation-type="header" style="grid-template-columns:${gridTemplate}">
 <span class="av__relation-table-check"></span>`;
     columns.forEach((column, index) => {
-        html += `<span class="av__relation-table-cell${index === 0 ? " av__relation-table-primary" : ""}">
+        html += `<span data-relation-column="${escapeAttr(column.id)}" class="av__relation-table-cell${index === 0 ? " av__relation-table-primary" : ""}">
     <svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>
     <span class="fn__ellipsis">${escapeHtml(column.name)}</span>
+    <span class="av__widthdrag"></span>
 </span>`;
     });
     return html + "</div>";
@@ -443,7 +445,7 @@ style="grid-template-columns:${gridTemplate}">
             const useRenderedContent = hasAVRenderTemplateResult(primaryValue, column.renderTemplate);
             const content = useRenderedContent ? getAVTemplateHTML(primaryValue.renderedContent || "") :
                 Lute.EscapeHTMLStr(primaryValue.block?.content || window.siyuan.languages.untitled);
-            html += `<span class="av__relation-table-cell av__relation-table-primary" data-row-id="${escapeAttr(row.id)}"
+            html += `<span data-relation-column="${escapeAttr(column.id)}" class="av__relation-table-cell av__relation-table-primary" data-row-id="${escapeAttr(row.id)}"
 data-value-id="${escapeAttr(primaryCell.id || "")}"
 style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}${primaryCell.color ? `color:${primaryCell.color};` : ""}">
     ${selected ? '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>' : ""}
@@ -456,7 +458,7 @@ style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}$
         data-position="north" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></button>` : ""}
 </span>`;
         } else {
-            html += `<div class="av__relation-table-cell"
+            html += `<div data-relation-column="${escapeAttr(column.id)}" class="av__relation-table-cell"
 style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
                 renderCell(cell.value, 0, false, "table", column.options, column.dateFormat, column.renderTemplate) : ""}</div>`;
         }
@@ -644,6 +646,7 @@ export const bindRelationEvent = (options: {
             listElement.querySelector('[data-relation-type="loader"]').insertAdjacentHTML("beforebegin", footerHTML);
         }
     };
+    const updateLayout = bindRelationLayout(relationElement, relationElement.dataset.avId, resize);
     const renderPage = (data: {
         columns: IAVColumn[],
         selectedRows: IAVRow[],
@@ -676,6 +679,7 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
             }
         }
         renderAVRichTextElements(listElement);
+        updateLayout(state.columns, gridTemplate);
         renderFooter(!!listElement.querySelector('[data-relation-type="candidate"]'));
         if (!listElement.querySelector(".b3-menu__item--current")) {
             listElement.querySelector('[data-type="setRelationCell"]')?.classList.add("b3-menu__item--current");
@@ -888,6 +892,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     });
     if (colRelationData && colRelationData.avID) {
         return `<div data-av-id="${colRelationData.avID}" data-source-av-id="${data.id}" data-key-id="${colId}" class="fn__flex-column av__relation">
+<div>
 <div class="b3-menu__item" data-type="nobg">
     <div class="b3-form__icona fn__flex-1" style="overflow: visible">
         <input spellcheck="false" class="b3-text-field fn__block" style="min-width: 190px"/>
@@ -895,6 +900,10 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     </div>
     <span class="fn__space"></span>
     <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>
+    <span class="fn__space"></span>
+    <button type="button" class="block__icon" data-type="relationFields" aria-expanded="false" aria-label="${window.siyuan.languages.fields}"><svg><use xlink:href="#iconSettings"></use></svg></button>
+</div>
+<div class="av__relation-fields fn__none"></div>
 </div>
 <div class="b3-menu__items av__relation-table">
     ${genRelationLoaderHTML(true, false)}
@@ -924,13 +933,13 @@ const getRelationValue = (menuElement: HTMLElement) => {
 
 const genCreatedRelationRowHTML = (menuElement: HTMLElement, rowID: string, content: string) => {
     const headerElement = menuElement.querySelector('[data-relation-type="header"]') as HTMLElement;
-    const columnCount = headerElement?.querySelectorAll(".av__relation-table-cell").length || 1;
-    let cellsHTML = `<span class="av__relation-table-cell av__relation-table-primary" data-row-id="${rowID}">
+    const columns = headerElement?.querySelectorAll<HTMLElement>(".av__relation-table-cell");
+    let cellsHTML = `<span data-relation-column="${escapeAttr(columns?.[0]?.dataset.relationColumn || "")}" class="av__relation-table-cell av__relation-table-primary" data-row-id="${rowID}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <span class="b3-menu__label fn__ellipsis" data-id="">${Lute.EscapeHTMLStr(content)}</span>
 </span>`;
-    for (let i = 1; i < columnCount; i++) {
-        cellsHTML += '<span class="av__relation-table-cell"></span>';
+    for (let i = 1; i < (columns?.length || 1); i++) {
+        cellsHTML += `<span data-relation-column="${escapeAttr(columns[i].dataset.relationColumn)}" class="av__relation-table-cell${columns[i].classList.contains("fn__none") ? " fn__none" : ""}"></span>`;
     }
     return `<div data-row-id="${rowID}" data-position="west" data-type="setRelationCell"
 data-relation-type="selected" class="b3-menu__item av__relation-table-row" draggable="true"

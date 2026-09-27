@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260927123058"
+		"updated": "20260927185714"
 	},
 	"Children": [
 		{
@@ -2883,7 +2883,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208172555-hv2afdr",
-				"updated": "20250615172312"
+				"updated": "20260927185714"
 			},
 			"Children": [
 				{
@@ -3001,6 +3001,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20260927185714-cye5231",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927185714-cye5231",
+				"updated": "20260927185714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the relation selection panel, use the Fields button to hide unnecessary fields and set column widths in pixels. The primary key always remains visible. You can also drag column boundaries in the header to resize them. These display preferences are remembered for each related database and do not change its views or stored values."
 				}
 			]
 		},

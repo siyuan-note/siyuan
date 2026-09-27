@@ -27,8 +27,8 @@ describe("getAVColumnFitWidth", () => {
 
 describe("getAVRelationColumnWidth", () => {
     it("keeps relation previews compact", () => {
-        assert.equal(getAVRelationColumnWidth("64px", "block", true), "120px");
-        assert.equal(getAVRelationColumnWidth("480px", "block", true), "160px");
+        assert.equal(getAVRelationColumnWidth("64px", "block", true), "240px");
+        assert.equal(getAVRelationColumnWidth("480px", "block", true), "400px");
         assert.equal(getAVRelationColumnWidth("480px", "text", false), "160px");
         assert.equal(getAVRelationColumnWidth("480px", "relation", false), "200px");
         assert.equal(getAVRelationColumnWidth("120px", "date", false), "120px");

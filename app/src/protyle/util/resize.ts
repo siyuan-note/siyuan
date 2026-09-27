@@ -7,6 +7,7 @@ import {lineNumberRender} from "../render/highlightRender";
 import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {stickyRow} from "../render/av/row";
+import {restoreGutterBySelection} from "../gutter/restore";
 
 export const clearBeforeResizeTop = () => {
     /// #if !MOBILE
@@ -90,5 +91,7 @@ export const resize = (protyle: IProtyle) => {
             }
         });
         restoreBeforeResizeTop(protyle);
+        // 等待恢复滚动位置触发的 scroll 事件清理块标后，再按最新选区渲染。
+        requestAnimationFrame(() => restoreGutterBySelection(protyle));
     }, Constants.TIMEOUT_TRANSITION + 100);   // 等待 setPadding 动画结束
 };

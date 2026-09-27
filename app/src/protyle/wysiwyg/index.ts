@@ -230,6 +230,7 @@ import {
     resolveBlockDragSelectStart
 } from "./blockDragSelect";
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
+import {restoreGutterBySelection} from "../gutter/restore";
 import {bindTouchBlockDragSelect} from "./touchBlockDragSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldFoldEmbeddedListByAlt, shouldOpenListItemAttr} from "./listContext";
@@ -2993,6 +2994,9 @@ export class WYSIWYG {
                 }
 
                 const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+                if (startsFromPadding && selectElement.length > 0) {
+                    requestAnimationFrame(() => restoreGutterBySelection(protyle, selectElement[0]));
+                }
                 if (avDragSelectMode === "items" && avDragSelectElement) {
                     setAVDragItemAnchor(avDragSelectElement);
                     countBlockWord([], protyle);

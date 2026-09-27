@@ -9,6 +9,7 @@ import {getBlockDragSelectBlock} from "./blockDragSelect";
 import {bindBlockDragSelectionGesture} from "./blockDragSelectionGesture";
 import {BLOCK_SELECTION_CLASS, clearBlockSelectionMode, setBlockSelectionModeElement} from "./blockSelection";
 import {isContainerBlock} from "./getBlock";
+import {restoreGutterBySelection} from "../gutter/restore";
 
 export const bindBoundedBlockDragSelect = (protyle: IProtyle, element: HTMLElement) => {
     let selected: HTMLElement[] = [];
@@ -98,6 +99,7 @@ export const bindBoundedBlockDragSelect = (protyle: IProtyle, element: HTMLEleme
                     // 保留单块内的折叠光标，让复制、剪切和删除复用已有块选区处理。
                     focusBlock(activeBlock);
                     setBlockSelectionModeElement(element, activeBlock);
+                    requestAnimationFrame(() => restoreGutterBySelection(protyle));
                 }
             }
             countBlockWord(selected.map(item => item.getAttribute("data-node-id")), protyle);

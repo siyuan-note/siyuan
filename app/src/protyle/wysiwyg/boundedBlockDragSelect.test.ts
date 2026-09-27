@@ -20,6 +20,8 @@ const fixture = (mobile = false) => {
     let focused: unknown;
     let modeElement: unknown;
     let toolbarCount = 0;
+    let gutterRestored = 0;
+    const frames: FrameRequestCallback[] = [];
     const states = [new Set<string>(), new Set<string>()];
     const blocks = states.map((state, index) => ({
         classList: {add: (name: string) => state.add(name), remove: (name: string) => state.delete(name)},
@@ -59,11 +61,13 @@ const fixture = (mobile = false) => {
             getBlockRangeSelectElements: () => ({selectElements: blocks}),
         },
         "../ui/hideElements": {hideElements: () => {}},
+        "../gutter/restore": {restoreGutterBySelection: () => gutterRestored++},
         "../../util/functions": {isMobile: () => mobile},
         "../../layout/status": {countBlockWord: () => {}},
         "../../mobile/util/multiSelectToolbar": {updateMultiSelectToolbar: (_element: unknown, count: number) => toolbarCount = count},
     };
-    runInNewContext(compiled, {exports, require: (name: string) => modules[name], window: {siyuan: {}}});
+    runInNewContext(compiled, {exports, require: (name: string) => modules[name], window: {siyuan: {}},
+        requestAnimationFrame: (callback: FrameRequestCallback) => frames.push(callback)});
     // 构造 WYSIWYG 时实例尚未赋给 protyle，绑定阶段不能从 protyle 读取编辑器元素。
     exports.bindBoundedBlockDragSelect(protyle, element);
     protyle.wysiwyg = {element};
@@ -84,7 +88,8 @@ const fixture = (mobile = false) => {
         setBacklink: () => backlink = true,
         detach: () => blockOwned = false,
         enterMultiSelect: () => multiSelect = true,
-        state: () => ({focused, modeElement, multiSelect, selectionCleared, toolbarCount}),
+        flushFrames: () => frames.splice(0).forEach(callback => callback(0)),
+        state: () => ({focused, modeElement, multiSelect, selectionCleared, toolbarCount, gutterRestored}),
     };
 };
 
@@ -126,6 +131,9 @@ test("desktop completion uses existing block selection and a focusable block wit
     assert.equal(f.state().modeElement, f.blocks[1]);
     assert.equal(f.classes.has("protyle-wysiwyg--hiderange"), false);
     assert.equal(f.options.canStart("mouse"), true);
+    assert.equal(f.state().gutterRestored, 0);
+    f.flushFrames();
+    assert.equal(f.state().gutterRestored, 1);
 });
 
 test("mobile completion retains the multi-select toolbar and cancellation does not steal focus", () => {
@@ -137,10 +145,22 @@ test("mobile completion retains the multi-select toolbar and cancellation does n
     f.options.select(f.blocks[0], f.blocks[1], "touch");
     assert.equal(f.state().toolbarCount, 2);
     f.options.finish("touch", true);
+    f.flushFrames();
+    assert.equal(f.state().gutterRestored, 0, "mobile keeps its multi-select toolbar");
     assert.equal(f.classes.has("protyle-wysiwyg--hiderange"), false);
     const removed = fixture();
     removed.options.select(removed.blocks[0], removed.blocks[1], "mouse");
     removed.detach();
     removed.options.finish("mouse", false);
+    removed.flushFrames();
+    assert.equal(removed.state().gutterRestored, 0);
     assert.equal(removed.state().focused, undefined);
+});
+
+test("cancelled bounded selection does not restore a gutter after losing focus", () => {
+    const f = fixture();
+    f.options.select(f.blocks[0], f.blocks[1], "touch");
+    f.options.finish("touch", true);
+    f.flushFrames();
+    assert.equal(f.state().gutterRestored, 0);
 });

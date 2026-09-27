@@ -82,6 +82,7 @@ import {applyMobileToolbarEntries} from "./toolbarEntries";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
+import {restoreGutterBySelection} from "../../protyle/gutter/restore";
 import {mountLiteSlashMenu} from "./liteSlashMenu";
 import {getTableCellRichContext} from "../../protyle/util/tableCellRichContext";
 import {insertEmptyBlock} from "../../block/util";
@@ -1162,14 +1163,7 @@ const scrollKeyboardSelectionIntoView = () => {
         const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
         if (contentElement) {
             const renderGutter = () => {
-                const blockElement = hasClosestBlock(range.startContainer);
-                if (!editor?.protyle.gutter || !editor.protyle.options.render.gutter ||
-                    !blockElement || !editor.protyle.wysiwyg.element.contains(blockElement)) {
-                    return;
-                }
-                const targetElement = range.startContainer.nodeType === Node.ELEMENT_NODE ?
-                    range.startContainer as Element : range.startContainer.parentElement;
-                editor.protyle.gutter.render(editor.protyle, blockElement, targetElement);
+                restoreGutterBySelection(editor.protyle);
             };
             let cursorTop = getSelectionPosition(contentElement, range.cloneRange()).top;
             if (cursorTop < 0 && window.siyuan.mobile.touchRange) {

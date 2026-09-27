@@ -16,6 +16,47 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestExportFootnotesAcrossNotebooksFormats(t *testing.T) {
+	setupExportPublishTest(t)
+	Conf.Appearance = conf.NewAppearance()
+	oldAppearance := util.AppearancePath
+	util.AppearancePath = t.TempDir()
+	t.Cleanup(func() { util.AppearancePath = oldAppearance })
+	writeAppearanceTestEmojiFont(t)
+	for _, dir := range []string{"themes/daylight", "themes/midnight", "icons/litheness"} {
+		if err := os.MkdirAll(filepath.Join(util.AppearancePath, dir), 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	source := newFootnoteTestDoc(t, "20260927000004-box0005", "source")
+	target := newFootnoteTestDoc(t, "20260927000005-box0006", "cross notebook body")
+	nested := newFootnoteTestDoc(t, source.Box, "nested footnote body")
+	source.Root.FirstChild.AppendChild(newFootnoteTestRef(target.Root.FirstChild.ID))
+	target.Root.FirstChild.AppendChild(newFootnoteTestRef(nested.Root.FirstChild.ID))
+	for _, tree := range []*parse.Tree{source, target, nested} {
+		writeAssetDownloadDocumentTest(t, tree)
+	}
+	for _, format := range []string{"pdf", "html", "markdown-html", "word"} {
+		t.Run(format, func(t *testing.T) {
+			var content string
+			if format == "pdf" || format == "html" {
+				_, content, _ = ExportHTMLWithTitle(source.ID, "", format == "pdf", false, false, false, "")
+			} else {
+				var err error
+				_, content, err = exportMarkdownHTML(source.ID, t.TempDir(), format == "word", false)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			for _, want := range []string{"cross notebook body", "nested footnote body"} {
+				if !strings.Contains(content, want) {
+					t.Fatalf("%s lost footnote %q: %s", format, want, content)
+				}
+			}
+		})
+	}
+}
+
 func TestExportFootnotesAfterEmbedExpansion(t *testing.T) {
 	setupExportPublishTest(t)
 	const boxID = "20260918000000-box0001"

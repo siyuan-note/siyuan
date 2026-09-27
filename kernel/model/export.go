@@ -3985,30 +3985,13 @@ func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[strin
 	footnotesDefBlock = &ast.Node{Type: ast.NodeFootnotesDefBlock}
 	var rendered []string
 
-	var bts map[string]*treenode.BlockTree
-	if currentTree.Box == "" {
-		bts = treenode.GetBlockTrees(*refFootnoteOrder)
-	} else {
-		bts = treenode.GetBlockTreesInBox(*refFootnoteOrder, currentTree.Box)
-	}
 	for _, defID := range *refFootnoteOrder {
 		foot := refFootnotesByID[defID]
 		if nil == foot {
 			continue
 		}
-		bt := bts[defID]
-		if nil == bt {
-			logging.LogWarnf("not found block tree for footnote def [%s] refNum [%s]", defID, foot.refNum)
-			continue
-		}
-
-		var t *parse.Tree
-		var err error
-		if currentTree.Box == "" {
-			t, err = LoadTreeByBlockID(bt.RootID)
-		} else {
-			t, err = LoadTreeByBlockIDInExactBox(bt.RootID, currentTree.Box)
-		}
+		// 按引用目标所属笔记本加载脚注，同时保留源笔记本的加密边界限制。
+		t, err := loadExportRelatedTree(defID, currentTree.Box)
 		if nil != err {
 			logging.LogWarnf("load tree for footnote def [%s] refNum [%s] failed: %s", defID, foot.refNum, err)
 			continue
@@ -4184,18 +4167,14 @@ func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *
 	if 4096 < *depth {
 		return
 	}
-	b := treenode.GetBlockTreeInBox(id, currentTree.Box)
-	if nil == b {
-		return
-	}
-	t, err := LoadTreeByBlockIDInExactBox(b.RootID, currentTree.Box)
+	t, err := loadExportRelatedTree(id, currentTree.Box)
 	if nil != err {
 		return
 	}
 
-	node := treenode.GetNodeInTree(t, b.ID)
+	node := treenode.GetNodeInTree(t, id)
 	if nil == node {
-		logging.LogErrorf("not found node [%s] in tree [%s]", b.ID, t.Root.ID)
+		logging.LogErrorf("not found node [%s] in tree [%s]", id, t.Root.ID)
 		return
 	}
 	collectFootnotesDefs0(currentTree, node, refFootnoteOrder, refFootnotesByID, depth)

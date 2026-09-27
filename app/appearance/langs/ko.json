@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "기본 필드는 항상 한 행 전체를 차지합니다. 다른 필드를 조밀하게 배치하려면 필드 이름을 숨기세요",
 	"searchFileOrSnapshot": "파일 이름 또는 스냅샷 ID 검색",
 	"calendarWeekLabel": "주",
 	"conditionalColors": "조건부 색상",

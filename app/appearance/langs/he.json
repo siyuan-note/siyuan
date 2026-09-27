@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "השדה הראשי תמיד תופס שורה שלמה; יש להסתיר את שמות השדות כדי לסדר את שאר השדות בצפיפות",
 	"searchFileOrSnapshot": "חיפוש שם קובץ או מזהה תמונת מצב",
 	"calendarWeekLabel": "ש",
 	"conditionalColors": "צבעים מותנים",

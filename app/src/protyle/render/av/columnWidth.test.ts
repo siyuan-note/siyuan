@@ -42,6 +42,39 @@ describe("getAVRelationColumnWidth", () => {
 });
 
 describe("getAVTableFitWidths", () => {
+    it("reserves icon space only for bound primary values with visible icons", () => {
+        const view = {
+            columns: [{id: "title", name: "T", type: "block"}],
+            rows: [{cells: [{value: {
+                keyID: "title", type: "block", isDetached: false, block: {content: "1234567890"},
+            }}]}],
+            showIcon: true,
+            rowCount: 1,
+        } as IAVTable;
+        const fit = () => getAVTableFitWidths(view, value => value.block.content, measureText, undefined, 26.5);
+        assert.equal(fit().title, "147px");
+        view.showIcon = false;
+        assert.equal(fit().title, "120px");
+        view.showIcon = true;
+        const value = view.rows[0].cells[0].value;
+        value.isDetached = true;
+        assert.equal(fit().title, "120px");
+        value.isDetached = false;
+        value.renderedContent = "1234567890";
+        assert.equal(fit().title, "120px");
+        delete value.renderedContent;
+        view.columns[0].renderTemplate = "template";
+        assert.equal(fit().title, "120px");
+        delete view.columns[0].renderTemplate;
+        view.rows.push({id: "detached", cells: [{value: {
+            keyID: "title", type: "block", isDetached: true, block: {content: "123456789012345"},
+        }}]} as IAVRow);
+        assert.equal(fit().title, "170px");
+        view.groups = [{...view, groups: [], groupHidden: 0}] as IAVTable[];
+        view.rows = [];
+        assert.equal(fit().title, "170px");
+    });
+
     it("uses visible groups, field IDs and total line counts", () => {
         const columns = [
             {id: "title", name: "Title", type: "text", hidden: false},

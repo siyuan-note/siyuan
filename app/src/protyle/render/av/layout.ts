@@ -50,6 +50,9 @@ const getCardFullRowHTML = (view: IAVGallery | IAVKanban) => {
         <span class="b3-menu__label ft__center">${window.siyuan.languages.fullRow}</span>
     </button>
     <button class="b3-menu__separator"></button>
+    <div class="b3-menu__item b3-menu__item--readonly">
+        <span class="b3-menu__label ft__on-surface fn__flex"><span class="fn__flex-center">${window.siyuan.languages.cardFullRowTip}</span></span>
+    </div>
     ${fieldsHTML}
 </div>`;
 };

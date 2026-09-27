@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "主鍵欄位始終獨佔整列；關閉「顯示欄位名稱」後，其他欄位才能緊湊排列",
 	"searchFileOrSnapshot": "搜尋檔案名稱或快照 ID",
 	"calendarWeekLabel": "週",
 	"conditionalColors": "條件顏色",

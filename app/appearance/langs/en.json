@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "The primary field always occupies a full row; hide field names to arrange other fields compactly",
 	"searchFileOrSnapshot": "Search file name or snapshot ID",
 	"calendarWeekLabel": "W",
 	"conditionalColors": "Conditional colors",

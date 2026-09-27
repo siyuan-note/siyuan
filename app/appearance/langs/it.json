@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "Il campo principale occupa sempre un'intera riga; nascondi i nomi dei campi per disporre gli altri in modo compatto",
 	"searchFileOrSnapshot": "Cerca nome file o ID snapshot",
 	"calendarWeekLabel": "S",
 	"conditionalColors": "Colori condizionali",

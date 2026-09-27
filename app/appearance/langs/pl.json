@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "Pole główne zawsze zajmuje cały wiersz; ukryj nazwy pól, aby rozmieścić pozostałe pola w sposób zwarty",
 	"searchFileOrSnapshot": "Szukaj nazwy pliku lub ID migawki",
 	"calendarWeekLabel": "T",
 	"conditionalColors": "Kolory warunkowe",

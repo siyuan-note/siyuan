@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "मुख्य फ़ील्ड हमेशा पूरी पंक्ति घेरता है; अन्य फ़ील्ड को सघन रूप से व्यवस्थित करने के लिए फ़ील्ड के नाम छिपाएँ",
 	"searchFileOrSnapshot": "फ़ाइल नाम या स्नैपशॉट ID खोजें",
 	"calendarWeekLabel": "स.",
 	"conditionalColors": "सशर्त रंग",

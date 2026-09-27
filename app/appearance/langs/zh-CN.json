@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "主键字段始终独占整行；关闭「显示字段名称」后，其他字段才能紧凑排列",
 	"searchFileOrSnapshot": "搜索文件名或快照 ID",
 	"calendarWeekLabel": "周",
 	"conditionalColors": "条件颜色",

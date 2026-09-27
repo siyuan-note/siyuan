@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "Het primaire veld neemt altijd een volledige rij in beslag; verberg veldnamen om andere velden compact te rangschikken",
 	"searchFileOrSnapshot": "Bestandsnaam of snapshot-ID zoeken",
 	"calendarWeekLabel": "W",
 	"conditionalColors": "Voorwaardelijke kleuren",

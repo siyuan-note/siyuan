@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "Primárne pole vždy zaberá celý riadok; skryte názvy polí, aby sa ostatné polia usporiadali kompaktne",
 	"searchFileOrSnapshot": "Hľadať názov súboru alebo ID snímky",
 	"calendarWeekLabel": "T",
 	"conditionalColors": "Podmienené farby",

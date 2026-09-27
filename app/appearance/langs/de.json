@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "Das Primärfeld belegt immer eine ganze Zeile; blende die Feldnamen aus, um andere Felder kompakt anzuordnen",
 	"searchFileOrSnapshot": "Dateiname oder Snapshot-ID suchen",
 	"calendarWeekLabel": "KW",
 	"conditionalColors": "Bedingte Farben",

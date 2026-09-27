@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "主キーフィールドは常に行全体を占有します。他のフィールドをコンパクトに配置するには、フィールド名の表示をオフにしてください",
 	"searchFileOrSnapshot": "ファイル名またはスナップショット ID を検索",
 	"calendarWeekLabel": "週",
 	"conditionalColors": "条件付きの色",

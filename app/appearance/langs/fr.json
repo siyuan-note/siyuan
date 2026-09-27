@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "Le champ principal occupe toujours une ligne entière ; masquez les noms des champs pour disposer les autres de façon compacte",
 	"searchFileOrSnapshot": "Rechercher un nom de fichier ou un ID d’instantané",
 	"calendarWeekLabel": "S",
 	"conditionalColors": "Couleurs conditionnelles",

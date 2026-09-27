@@ -1,4 +1,5 @@
 {
+	"cardFullRowTip": "ฟิลด์หลักจะใช้พื้นที่เต็มแถวเสมอ ซ่อนชื่อฟิลด์เพื่อจัดเรียงฟิลด์อื่นให้กระชับ",
 	"searchFileOrSnapshot": "ค้นหาชื่อไฟล์หรือ ID สแนปช็อต",
 	"calendarWeekLabel": "สัป.",
 	"conditionalColors": "สีตามเงื่อนไข",

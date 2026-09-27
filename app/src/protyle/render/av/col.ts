@@ -23,7 +23,7 @@ import {getFieldsByData} from "./view";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {openFieldVisibility} from "./fieldVisibility";
 import {createEmptyAVValue, genAVAttributeRowHTML} from "./attributeValue";
-import {getAVColumnTextMeasurer, getAVDistributedColumnWidth, getAVTableFitWidths} from "./columnWidth";
+import {getAVColumnIconWidth, getAVColumnTextMeasurer, getAVDistributedColumnWidth, getAVTableFitWidths} from "./columnWidth";
 import {getAVData} from "./virtualScroll";
 import {getAVColorStyle, getNextAVOptionColor} from "./color";
 /// #if MOBILE
@@ -857,6 +857,7 @@ export const autoFitAVColumns = (protyle: IProtyle, blockElement: HTMLElement, c
         getCellValueText,
         getAVColumnTextMeasurer(blockElement),
         columnIDs,
+        getAVColumnIconWidth(blockElement),
     ));
 };
 

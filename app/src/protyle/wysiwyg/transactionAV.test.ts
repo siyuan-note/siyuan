@@ -40,6 +40,7 @@ const fixture = () => {
         countBlockWord: (): void => undefined,
         handleViewFoldSourceOperation: () => false,
         queueHeadingNumberRefresh: (): void => undefined,
+        refreshHeadingFoldIndicators: (): void => undefined,
         applyViewFoldStates: (): void => undefined,
         fetchPost: (_url: string, data: {transactions: unknown[]}, callback: (response: unknown) => void) =>
             new Promise<void>(resolve => {

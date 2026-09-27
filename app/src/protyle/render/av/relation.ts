@@ -871,6 +871,7 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
     window.addEventListener("resize", resize);
     loadPage(true);
     return () => {
+        updateLayout.close();
         state.controller?.abort();
         window.removeEventListener("resize", resize);
         options.menuElement.removeEventListener("relationrefresh", refresh);
@@ -903,9 +904,8 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     <span class="fn__space"></span>
     <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>
     <span class="fn__space"></span>
-    <button type="button" class="block__icon" data-type="relationFields" aria-expanded="false" aria-label="${window.siyuan.languages.fields}"><svg><use xlink:href="#iconMore"></use></svg></button>
+    <button type="button" class="block__icon block__icon--show ariaLabel" data-type="relationFields" data-position="north" aria-haspopup="menu" aria-expanded="false" aria-label="${window.siyuan.languages.fields}"><svg><use xlink:href="#iconMore"></use></svg></button>
 </div>
-<div class="av__relation-fields fn__none"></div>
 </div>
 <div class="b3-menu__items av__relation-table">
     ${genRelationLoaderHTML(true, false)}

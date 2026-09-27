@@ -2563,12 +2563,6 @@ img.av__cellassetimg {
     min-width: 0;
   }
 
-  .av__relation-fields {
-    max-height: min(180px, 30vh);
-    overflow: auto;
-    padding: 8px;
-  }
-
   .av__relation-table {
     border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
     overflow: auto;

@@ -2,6 +2,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {setStorageVal} from "../../util/compatibility";
 import {getColIconByType} from "./col";
 import {unicode2Emoji} from "../../../emoji";
+import {Menu} from "../../../plugin/Menu";
 
 const STORAGE_KEY = "local-av-relation-layout";
 
@@ -13,8 +14,14 @@ interface IRelationLayout {
 export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResize: () => void) => {
     const saved = window.siyuan.storage[STORAGE_KEY]?.[databaseID] as IRelationLayout | undefined;
     const layout: IRelationLayout = {hidden: [...(saved?.hidden || [])], widths: {...saved?.widths}};
-    const fields = root.querySelector<HTMLElement>(".av__relation-fields");
+    const fields = document.createElement("div");
+    fields.className = "av__relation-fields";
     const button = root.querySelector<HTMLButtonElement>('[data-type="relationFields"]');
+    let menu: Menu;
+    const positionMenu = () => {
+        const rect = button.getBoundingClientRect();
+        menu?.open({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true, target: button});
+    };
     let columns: IAVColumn[] = [];
     let defaultWidths: string[] = [];
     let initialized = !!saved;
@@ -46,9 +53,9 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
                 return "";
             }
             return `${hidden ? '<button class="b3-menu__separator"></button>' : ""}
-<button class="b3-menu__item" data-type="nobg" data-all="${hidden ? "show" : "hide"}">
+<button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label">${window.siyuan.languages[hidden ? "hideCol" : "showCol"]}</span>
-    <span class="block__icon">${window.siyuan.languages[hidden ? "showAll" : "hideAll"]}
+    <span class="block__icon block__icon--show" data-all="${hidden ? "show" : "hide"}">${window.siyuan.languages[hidden ? "showAll" : "hideAll"]}
         <span class="fn__space"></span><svg><use xlink:href="#${hidden ? "iconEye" : "iconEyeoff"}"></use></svg>
     </span>
 </button>${group.map(column => `<button class="b3-menu__item" data-column="${escapeAttr(column.id)}" ${column === columns[0] ? 'data-type="nobg" aria-disabled="true"' : ""}>
@@ -60,10 +67,22 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
     };
     button.addEventListener("click", event => {
         event.stopPropagation();
-        fields.classList.toggle("fn__none");
-        button.setAttribute("aria-expanded", String(!fields.classList.contains("fn__none")));
+        if (menu) {
+            menu.close();
+            return;
+        }
+        menu = new Menu("av-relation-fields", () => {
+            fields.remove();
+            menu = undefined;
+            button.setAttribute("aria-expanded", "false");
+            button.classList.remove("block__icon--active");
+        });
+        menu.element.style.width = "280px";
+        menu.element.lastElementChild.appendChild(fields);
+        button.setAttribute("aria-expanded", "true");
+        button.classList.add("block__icon--active");
         renderFields();
-        onResize();
+        positionMenu();
     });
     fields.addEventListener("click", event => {
         event.stopPropagation();
@@ -84,11 +103,7 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
         save();
         renderFields();
         onResize();
-    });
-    fields.addEventListener("keydown", event => {
-        if (event.key !== "Escape") {
-            event.stopPropagation();
-        }
+        positionMenu();
     });
     root.addEventListener("pointerdown", event => {
         const handle = (event.target as HTMLElement).closest<HTMLElement>(".av__widthdrag");
@@ -118,7 +133,7 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
         handle.addEventListener("pointermove", move);
         handle.addEventListener("lostpointercapture", finish);
     });
-    return (nextColumns: IAVColumn[], gridTemplate: string) => {
+    const update = (nextColumns: IAVColumn[], gridTemplate: string) => {
         columns = nextColumns;
         if (!initialized && columns.length > 0) {
             layout.hidden = columns.slice(4).map(column => column.id);
@@ -126,8 +141,10 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
         }
         defaultWidths = gridTemplate.split(" ").slice(1);
         apply();
-        if (!fields.classList.contains("fn__none")) {
+        if (menu) {
             renderFields();
+            positionMenu();
         }
     };
+    return Object.assign(update, {close: () => menu?.close()});
 };

@@ -430,7 +430,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             ${editable && dateColumn?.type === "date" ? getCalendarUndatedHTML(state) : ""}
             ${dateColumn && dateColumn.type !== "date" ? `<div class="av__calendar-source ft__on-surface">${window.siyuan.languages.calendarReadOnlyDate}</div>` : ""}
             <div class="av__calendar-scroll" data-prevent-swipe="true">
-                ${dateColumn ? `<div class="av__calendar-weekdays"><div class="av__calendar-week-label fn__ellipsis" title="${escapeAttr(window.siyuan.languages.calendarISOWeek)}">${escapeHtml(window.siyuan.languages.week)}</div>${days.map(day => `<div>${day}</div>`).join("")}</div>` : ""}
+                ${dateColumn ? `<div class="av__calendar-weekdays"><div class="av__calendar-week-label fn__ellipsis" title="${escapeAttr(window.siyuan.languages.calendarISOWeek)}">${escapeHtml(window.siyuan.languages.calendarWeekLabel)}</div>${days.map(day => `<div>${day}</div>`).join("")}</div>` : ""}
                 <div class="av__body av__calendar-grid${dateColumn ? "" : " av__calendar-grid--empty"}" data-group-id="" style="--av-calendar-saturday:${(6 - weekStartDay + 7) % 7};--av-calendar-sunday:${(7 - weekStartDay) % 7};">${body}</div>
             </div>
         </div>

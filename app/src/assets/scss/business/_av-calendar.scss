@@ -172,6 +172,7 @@
   .av__calendar-week-label {
     align-self: center;
     font-size: 10px;
+    white-space: nowrap;
   }
 
   .av__calendar-week-row {
@@ -193,6 +194,9 @@
   }
 
   .av__calendar-week-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 3px 2px;
     border-right: 1px solid var(--b3-border-color);
     color: var(--b3-theme-on-surface);

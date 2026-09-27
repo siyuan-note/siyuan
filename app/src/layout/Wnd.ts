@@ -39,13 +39,12 @@ import {Asset} from "../asset";
 import {newFile} from "../util/newFile";
 import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
-import {getFrontend, isWindow} from "../util/functions";
+import {getFrontend} from "../util/functions";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 import {Custom} from "./dock/Custom";
 import type {App} from "../index";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
-import {closeWindow} from "../window/closeWin";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {setPosition} from "../util/setPosition";
 import {clearOBG} from "./dock/util";
@@ -1062,12 +1061,6 @@ export class Wnd {
         if (window.siyuan.layout.centerLayout) {
             const wnd = getWndByLayout(window.siyuan.layout.centerLayout);
             if (!wnd) {
-                /// #if !BROWSER
-                if (isWindow()) {
-                    closeWindow(this.app);
-                    return;
-                }
-                /// #endif
                 const wnd = new Wnd(this.app);
                 window.siyuan.layout.centerLayout.addWnd(wnd);
                 wnd.addTab(newCenterEmptyTab(this.app), false, false);

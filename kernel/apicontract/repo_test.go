@@ -6,6 +6,24 @@ import (
 	"testing"
 )
 
+func TestRepoSnapshotIDContract(t *testing.T) {
+	for _, body := range []string{`{"page":1}`, `{"page":1,"id":""}`, `{"page":1,"id":null}`} {
+		request, err := GetRepoSnapshots.Decode(strings.NewReader(body))
+		if err != nil || request.ID != "" {
+			t.Fatalf("optional ID: %s %v", body, err)
+		}
+	}
+	request, err := GetRepoSnapshots.Decode(strings.NewReader(`{"page":2.75,"id":" abc "}`))
+	if err != nil || request.ID != "abc" || request.Page != 2.75 {
+		t.Fatalf("ID trimming and page compatibility: %+v %v", request, err)
+	}
+	for _, body := range []string{`{"page":1,"id":123}`, `{"page":1,"id":[]}`, `{"id":"abc"}`} {
+		if _, err := GetRepoSnapshots.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid request accepted: %s", body)
+		}
+	}
+}
+
 func TestSnapshotContracts(t *testing.T) {
 	for _, body := range []string{`{}`, `{"memo":""}`, `{"memo":"note"}`} {
 		if _, err := CreateSnapshot.Decode(strings.NewReader(body)); err != nil {

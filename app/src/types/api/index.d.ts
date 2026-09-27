@@ -1140,7 +1140,7 @@ export type GetRepoDocHistoryRequestInput = { "id": string; "page": number; };
 
 export type GetRepoFileRequestInput = { "id": string; };
 
-export type GetRepoSnapshotsRequestInput = { "page": number; };
+export type GetRepoSnapshotsRequestInput = { "id"?: string; "page": number; };
 
 export type GetSnippetRequestInput = { "enabled": number; "keyword"?: string | null; "type": string; };
 

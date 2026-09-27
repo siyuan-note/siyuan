@@ -59,6 +59,9 @@ type UploadCloudSnapshotRequest struct {
 }
 type GetRepoSnapshotsRequest struct {
 	Page float64 `json:"page"`
+	// ID 可选，去除首尾空白后按完整的 40 位十六进制快照 ID 查询本地仓库，忽略分页。
+	// 省略或留空时保留分页列表；未找到返回空列表，格式错误及仓库读取失败返回错误。
+	ID string `json:"id" api:"optional"`
 }
 type SearchRepoFileRequest struct {
 	Keyword string  `json:"keyword" api:"trim"`
@@ -320,6 +323,10 @@ func init() {
 		if request.Page, err = legacyField[float64](fields, "page", "Number", true); err != nil {
 			return request, err
 		}
+		if request.ID, err = legacyField[string](fields, "id", "String", false); err != nil {
+			return request, err
+		}
+		request.ID = strings.TrimSpace(request.ID)
 		return request, nil
 	}
 	SearchRepoFile.decodeRequest = func(reader io.Reader) (request SearchRepoFileRequest, err error) {

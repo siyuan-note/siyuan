@@ -164,7 +164,14 @@ var uploadCloudSnapshot = contractHandler(apicontract.UploadCloudSnapshot, func(
 })
 
 var getRepoSnapshots = contractHandler(apicontract.GetRepoSnapshots, func(c *gin.Context, request apicontract.GetRepoSnapshotsRequest) apicontract.Response[apicontract.RepoSnapshotsData] {
-	snapshots, pageCount, totalCount, err := model.GetRepoSnapshots(int(request.Page))
+	var snapshots []*model.Snapshot
+	var pageCount, totalCount int
+	var err error
+	if request.ID != "" {
+		snapshots, pageCount, totalCount, err = model.SearchRepoSnapshot(request.ID)
+	} else {
+		snapshots, pageCount, totalCount, err = model.GetRepoSnapshots(int(request.Page))
+	}
 	if err != nil {
 		return apicontract.Failure[apicontract.RepoSnapshotsData](-1, err.Error())
 	}

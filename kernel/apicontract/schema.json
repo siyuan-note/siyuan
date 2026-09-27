@@ -26465,6 +26465,9 @@
     "GetRepoSnapshotsRequestInput": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string"
+        },
         "page": {
           "type": "number"
         }

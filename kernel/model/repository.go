@@ -23,6 +23,7 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math"
@@ -986,6 +987,42 @@ type Snapshot struct {
 type TypeCount struct {
 	Type  string `json:"type"`
 	Count int    `json:"count"`
+}
+
+// SearchRepoSnapshot 按完整 ID 读取本地快照，复用列表的元数据和下载状态计算。
+func SearchRepoSnapshot(id string) (ret []*Snapshot, pageCount, totalCount int, err error) {
+	ret = []*Snapshot{}
+	id = strings.ToLower(strings.TrimSpace(id))
+	decoded, decodeErr := hex.DecodeString(id)
+	if decodeErr != nil || len(decoded) != sha1.Size {
+		return ret, 0, 0, errors.New("invalid snapshot ID")
+	}
+	if len(Conf.Repo.Key) == 0 {
+		return ret, 0, 0, errors.New(Conf.Language(26))
+	}
+	repo, err := newRepository()
+	if err != nil {
+		return
+	}
+	index, err := repo.GetIndex(id)
+	if os.IsNotExist(err) || errors.Is(err, dejavu.ErrNotFoundIndex) {
+		return ret, 0, 0, nil
+	}
+	if err != nil {
+		return
+	}
+	files, err := repo.GetFiles(index)
+	if err != nil {
+		return
+	}
+	ret = buildSnapshots([]*dejavu.Log{{
+		ID: index.ID, Memo: index.Memo, Created: index.Created,
+		HCreated: time.UnixMilli(index.Created).Format("2006-01-02 15:04:05"),
+		Files:    files, Count: index.Count, Size: index.Size,
+		HSize:    humanize.BytesCustomCeil(uint64(index.Size), 2),
+		SystemID: index.SystemID, SystemName: index.SystemName, SystemOS: index.SystemOS,
+	}})
+	return ret, 1, 1, nil
 }
 
 func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err error) {

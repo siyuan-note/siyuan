@@ -387,7 +387,9 @@ const renderRepo = async (element: Element, currentPage: number) => {
     const selectValue = getRepoSnapshotType(element);
     const searchInputElement = element.querySelector<HTMLInputElement>(".b3-text-field");
     const keyword = searchInputElement.value.trim();
-    const searching = Boolean(keyword && selectValue === "getRepoSnapshots");
+    const searchModeElement = element.querySelector<HTMLSelectElement>('[data-type="repoSearchMode"]');
+    const searchSnapshot = Boolean(keyword && selectValue === "getRepoSnapshots" && searchModeElement.value === "id");
+    const searching = Boolean(keyword && selectValue === "getRepoSnapshots" && !searchSnapshot);
     const tagged = selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots";
     const listElement = element.querySelector('[data-type="repoList"]');
     const pageBtn = element.querySelector('button[data-type="jumpRepoPage"]');
@@ -401,6 +403,7 @@ const renderRepo = async (element: Element, currentPage: number) => {
     element.setAttribute("data-page", String(currentPage));
     pageBtn.textContent = String(currentPage);
     searchInputElement.parentElement.classList.toggle("fn__none", selectValue !== "getRepoSnapshots");
+    searchModeElement.classList.toggle("fn__none", selectValue !== "getRepoSnapshots");
     searchButton.disabled = true;
     [previousElement, nextElement, pageBtn].forEach(button => {
         button.classList.toggle("fn__none", tagged);
@@ -409,7 +412,9 @@ const renderRepo = async (element: Element, currentPage: number) => {
     pageElement.classList.add("fn__none");
     let response: IWebSocketData;
     try {
-        if (searching) {
+        if (searchSnapshot) {
+            response = await fetchSyncPost("/api/repo/getRepoSnapshots", {id: keyword, page: 1}, undefined, false);
+        } else if (searching) {
             response = await fetchSyncPost("/api/repo/searchRepoFile", {keyword, page: currentPage}, undefined, false);
         } else if (tagged) {
             response = await fetchSyncPost(`/api/repo/${selectValue}`, {}, undefined, false);
@@ -580,6 +585,10 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                     <span class="ft__on-surface fn__flex-shrink ft__selectnone fn__none">${window.siyuan.languages.pageCountAndSnapshotCount}</span>
                     <span class="fn__space"></span>
                     <div class="fn__flex-1"></div>
+                    <select class="b3-select fn__none" data-type="repoSearchMode" aria-label="${window.siyuan.languages.search}">
+                        <option value="file">${window.siyuan.languages.searchFileName}</option>
+                        <option value="id">${window.siyuan.languages.searchSnapshotID}</option>
+                    </select>
                     <div class="b3-form__icon fn__none">
                        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                        <input class="b3-text-field b3-form__icon-input fn__size200" style="padding-right: 44px;" spellcheck="false" placeholder="${window.siyuan.languages.searchFileName}">
@@ -707,6 +716,12 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
         itemElement.classList.add("b3-list-item--focus");
     };
     const searchFileElement = repoElement.querySelector<HTMLInputElement>(".b3-text-field");
+    const searchModeElement = repoElement.querySelector<HTMLSelectElement>('[data-type="repoSearchMode"]');
+    searchModeElement.addEventListener("change", () => {
+        searchFileElement.placeholder = searchModeElement.value === "id" ?
+            window.siyuan.languages.searchSnapshotID : window.siyuan.languages.searchFileName;
+        renderRepo(repoElement, 1);
+    });
     searchFileElement.nextElementSibling.addEventListener("click", () => {
         renderRepo(repoElement, 1);
     });

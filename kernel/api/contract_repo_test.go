@@ -621,6 +621,56 @@ func TestRepoContractHTTPFailures(t *testing.T) {
 	}
 }
 
+func TestRepoSnapshotIDContractHTTP(t *testing.T) {
+	root, _ := setupArchiveWorkspace(t)
+	previousConf, previousRepo, previousTemp := model.Conf, util.RepoDir, util.TempDir
+	model.Conf = model.NewAppConf()
+	model.Conf.Repo = conf.NewRepo()
+	model.Conf.Sync = conf.NewSync()
+	model.Conf.System = &conf.System{ID: "contract-device", Name: "contract-device", OS: "test"}
+	model.Conf.Repo.Key = bytes.Repeat([]byte{1}, 32)
+	util.RepoDir, util.TempDir = filepath.Join(root, "repo"), filepath.Join(root, "temp")
+	t.Cleanup(func() { model.Conf, util.RepoDir, util.TempDir = previousConf, previousRepo, previousTemp })
+	store, err := dejavu.NewStore(util.RepoDir, model.Conf.Repo.Key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	id := fmt.Sprintf("%040x", 19905)
+	if err = store.PutIndex(&entity.Index{ID: id, Memo: "snapshot lookup", Created: 1790000000000}); err != nil {
+		t.Fatal(err)
+	}
+	bundle, err := apicontract.BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	const endpoint = "/api/repo/getRepoSnapshots"
+	engine.POST(endpoint, getRepoSnapshots)
+	for _, test := range []struct {
+		id    string
+		code  int
+		count int
+	}{{" " + strings.ToUpper(id) + " ", 0, 1}, {strings.Repeat("0", 40), 0, 0}, {"../invalid", -1, 0}} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, endpoint,
+			strings.NewReader(fmt.Sprintf(`{"page":99,"id":%q}`, test.id))))
+		if err = bundle.ValidateResponse(http.MethodPost, endpoint, recorder.Body.Bytes()); err != nil {
+			t.Fatal(err)
+		}
+		var response struct {
+			Code int                           `json:"code"`
+			Data apicontract.RepoSnapshotsData `json:"data"`
+		}
+		if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != test.code ||
+			len(response.Data.Snapshots) != test.count || response.Data.TotalCount != test.count || response.Data.PageCount != test.count {
+			t.Fatalf("snapshot lookup: %s, %v", recorder.Body.String(), err)
+		}
+		if test.count == 1 && response.Data.Snapshots[0].ID != id {
+			t.Fatalf("unexpected snapshot: %s", recorder.Body.String())
+		}
+	}
+}
+
 func TestRepoContractLockedFileAdmission(t *testing.T) {
 	root, boxID := setupArchiveWorkspace(t)
 	previousConf, previousRepo, previousTemp := model.Conf, util.RepoDir, util.TempDir

@@ -981,6 +981,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     }
     const targetListStart = targetElement.getAttribute("data-type") === "NodeListItem" &&
         targetElement.getAttribute("data-subtype") === "o" ? getOrderedListStart(targetElement.parentElement) : undefined;
+    const previousBlockElement = getPreviousBlockSibling(targetElement);
     const moveToResult = await moveTo(protyle, sourceElements, sourceRowElement || targetElement, isSameEditor,
         sourceRowElement || intoEmptyTab ? "afterbegin" : (isBottom ? "afterend" : "beforebegin"), isCopy, sourcePositions);
     if (sourceRowElement && isCopy) {
@@ -997,7 +998,6 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     }
     undoOperations.push(...wrapUndoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
-    const previousBlockElement = getPreviousBlockSibling(targetElement);
     const unfoldHeadingElements = new Set<Element>();
     if (!isColumnDrop && isBottom &&
         targetElement.getAttribute("data-type") === "NodeHeading" &&

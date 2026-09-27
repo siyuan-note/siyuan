@@ -2076,7 +2076,7 @@
         }
       }
 
-      .block__icon {
+      .block__icon:not([data-conditional-drag]) {
         line-height: 20px;
         padding: 0 4px;
         font-size: 12px;
@@ -2250,7 +2250,7 @@
       background-color: var(--b3-list-hover);
     }
 
-    .block__icon {
+    .block__icon:not([data-conditional-drag]) {
       line-height: 20px;
       padding: 0 4px;
       font-size: 12px;
@@ -2872,8 +2872,8 @@ img.av__cellassetimg {
 
     > [data-conditional-drag] {
       position: absolute;
-      top: 14px;
-      left: -14px;
+      top: 10px;
+      left: -16px;
       margin: 0;
       opacity: 0;
       pointer-events: none;
@@ -2949,12 +2949,12 @@ img.av__cellassetimg {
 
   @media (hover: none), (any-pointer: coarse) {
     .av__conditional-rule {
-      grid-template-columns: 20px minmax(0, 1fr) 22px;
+      grid-template-columns: 24px minmax(0, 1fr) 22px;
 
       > [data-conditional-drag] {
         position: static;
         align-self: start;
-        margin-top: 6px;
+        margin-top: 2px;
         opacity: 1;
         pointer-events: auto;
       }

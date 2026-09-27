@@ -2760,6 +2760,17 @@ img.av__cellassetimg {
       border-right: 0;
     }
 
+    .av__cell--relation {
+      display: inline-flex;
+      align-items: center;
+      min-width: 0;
+      max-width: 100%;
+
+      > :first-child {
+        flex-shrink: 0;
+      }
+    }
+
     .av__celltext,
     .b3-menu__label {
       overflow: hidden;

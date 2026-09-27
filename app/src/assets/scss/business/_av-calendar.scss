@@ -135,7 +135,7 @@
   }
 
   .av__calendar-scroll {
-    --av-calendar-week-width: 36px;
+    --av-calendar-week-width: 20px;
     overflow-x: auto;
   }
 
@@ -169,6 +169,11 @@
     font-size: 12px;
   }
 
+  .av__calendar-week-label {
+    align-self: center;
+    font-size: 10px;
+  }
+
   .av__calendar-week-row {
     display: grid;
     grid-template-columns: var(--av-calendar-week-width) minmax(0, 1fr);
@@ -191,7 +196,7 @@
     padding: 3px 2px;
     border-right: 1px solid var(--b3-border-color);
     color: var(--b3-theme-on-surface);
-    font-size: 11px;
+    font-size: 10px;
     line-height: 24px;
     text-align: center;
   }

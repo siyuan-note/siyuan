@@ -402,7 +402,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
                 const hidden = segments.filter(segment => segment.lane >= rowLimit && segment.column <= day && segment.column + segment.span > day).length;
                 return hidden && !expanded ? `<button class="b3-button b3-button--cancel b3-button--small av__calendar-more" data-calendar-expand="${start}" style="grid-column:${day + 1}">${escapeHtml(window.siyuan.languages.calendarMore.replace("${x}", hidden.toString()))}</button>` : "";
             }).join("");
-            body += `<div class="av__calendar-week-row"><span class="av__calendar-week-number" title="${escapeAttr(weekLabel)}">W${String(isoWeek.week).padStart(2, "0")}</span>
+            body += `<div class="av__calendar-week-row"><span class="av__calendar-week-number" title="${escapeAttr(weekLabel)}">${String(isoWeek.week).padStart(2, "0")}</span>
                 <div class="av__calendar-week" data-calendar-week="${start}"><div class="av__calendar-days">${dayHeaders}</div>
                 <div class="av__calendar-events" style="grid-template-rows:repeat(${Math.max(1, maxLane)},auto)">${visible.map(segment => getEventHTML(segment, view, editable)).join("")}</div>
                 ${overflow ? `<div class="av__calendar-overflow">${overflow}</div>` : ""}</div></div>`;
@@ -427,7 +427,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             ${editable && dateColumn?.type === "date" ? getCalendarUndatedHTML(state) : ""}
             ${dateColumn && dateColumn.type !== "date" ? `<div class="av__calendar-source ft__on-surface">${window.siyuan.languages.calendarReadOnlyDate}</div>` : ""}
             <div class="av__calendar-scroll" data-prevent-swipe="true">
-                ${dateColumn ? `<div class="av__calendar-weekdays"><span aria-hidden="true"></span>${days.map(day => `<div>${day}</div>`).join("")}</div>` : ""}
+                ${dateColumn ? `<div class="av__calendar-weekdays"><div class="av__calendar-week-label fn__ellipsis" title="${escapeAttr(window.siyuan.languages.calendarISOWeek)}">${escapeHtml(window.siyuan.languages.week)}</div>${days.map(day => `<div>${day}</div>`).join("")}</div>` : ""}
                 <div class="av__body av__calendar-grid${dateColumn ? "" : " av__calendar-grid--empty"}" data-group-id="" style="--av-calendar-saturday:${(6 - weekStartDay + 7) % 7};--av-calendar-sunday:${(7 - weekStartDay) % 7};">${body}</div>
             </div>
         </div>

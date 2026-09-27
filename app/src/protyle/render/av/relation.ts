@@ -904,7 +904,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     <span class="fn__space"></span>
     <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>
     <span class="fn__space"></span>
-    <button type="button" class="block__icon block__icon--show ariaLabel" data-type="relationFields" data-position="north" aria-haspopup="menu" aria-expanded="false" aria-label="${window.siyuan.languages.fields}"><svg><use xlink:href="#iconMore"></use></svg></button>
+    <svg class="b3-menu__action b3-menu__action--show ariaLabel" data-type="relationFields" data-position="north" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg>
 </div>
 </div>
 <div class="b3-menu__items av__relation-table">

@@ -16,7 +16,7 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
     const layout: IRelationLayout = {hidden: [...(saved?.hidden || [])], widths: {...saved?.widths}};
     const fields = document.createElement("div");
     fields.className = "av__relation-fields";
-    const button = root.querySelector<HTMLButtonElement>('[data-type="relationFields"]');
+    const button = root.querySelector<HTMLElement>('[data-type="relationFields"]');
     let menu: Menu;
     const positionMenu = () => {
         const rect = button.getBoundingClientRect();
@@ -75,14 +75,19 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
             fields.remove();
             menu = undefined;
             button.setAttribute("aria-expanded", "false");
-            button.classList.remove("block__icon--active");
         });
         menu.element.style.width = "280px";
         menu.element.lastElementChild.appendChild(fields);
         button.setAttribute("aria-expanded", "true");
-        button.classList.add("block__icon--active");
         renderFields();
         positionMenu();
+    });
+    button.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            event.stopPropagation();
+            button.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        }
     });
     fields.addEventListener("click", event => {
         event.stopPropagation();

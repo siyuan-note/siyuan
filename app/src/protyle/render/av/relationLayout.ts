@@ -82,6 +82,7 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
         renderFields();
         positionMenu();
     });
+    button.addEventListener("mousedown", event => event.preventDefault());
     button.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();

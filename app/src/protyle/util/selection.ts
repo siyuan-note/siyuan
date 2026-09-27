@@ -30,6 +30,7 @@ import {
     stripSemanticMarkersFromRangeText
 } from "./inlineElementMarker";
 import {getSelectAllBlockAction, setBlockSelectionModeElement} from "../wysiwyg/blockSelection";
+import {restoreListMindmapFocus} from "../render/listMindmap/render";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -717,6 +718,9 @@ export const restoreFocusContext = (protyle: IProtyle, context: Pick<IOperation[
     if (startEmbed !== endEmbed || (context.undoFocusEmbedId &&
         (!startEmbed || startEmbed.getAttribute("data-node-id") !== context.undoFocusEmbedId))) {
         return false;
+    }
+    if (startBlockElement === endBlockElement && restoreListMindmapFocus(protyle.wysiwyg.element, startBlockElement)) {
+        return true;
     }
     if (context.undoFocusTableCell !== undefined && startBlockElement.getAttribute("data-type") === "NodeTable") {
         const index = Number(context.undoFocusTableCell);

@@ -2537,7 +2537,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         isTaskCompletionToggle: (event: KeyboardEvent) => event.ctrlKey && event.key === "k",
         onTaskToggle: (id: string, cycle: boolean) => controller.setTask(id,
             cycle ? taskAPI.nextTaskListStatus : taskAPI.nextTaskListMarker)});
-    const controller = Object.assign(new taskAPI.TaskController(), {owner, list: taskList, disposed: false,
+    const controller = Object.assign(new taskAPI.TaskController(), {owner, list: taskList, view: taskView, disposed: false,
         taskChanges: Promise.resolve(), refresh: () => taskView.update(api.readListMindmap(taskList))});
     const taskNode = () => taskHost.querySelector<HTMLElement>(`[data-mindmap-id="${taskId}"]`);
     const taskButton = () => taskNode().querySelector<HTMLButtonElement>(".mindmap-view__task");
@@ -2711,6 +2711,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.ok(anchor.classList.contains("tabs-task"));
             tabMenus++;
         }});
+    tabController.view = tabView;
     const outerOptions = {readonly: () => false, task: () => check.fail("Outer editor claimed a preview task")};
     api.tabsRender(taskParent, outerOptions);
     const previewTask = (index = 1) => tabHost.querySelectorAll<HTMLElement>(".tabs-task")[index];

@@ -1331,7 +1331,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     model.metadata.nodes[themedEdge] = {lineColor: "#112233", lineWidth: 5};
     checkLine("#112233", 5);
     view.setHoveredLine(`edge:${themedEdge}`);
-    checkLine("#445566", 4);
+    checkLine("#112233", 4);
+    view.selectedEdge = themedEdge;
+    checkLine("#112233", 6);
+    view.selectedEdge = undefined;
     setLineTheme("hover-color", "invalid-color");
     for (const width of ["auto", "0", "-2", "Infinity", "2em", "3px-invalid"]) {
         setLineTheme("hover-width", width);
@@ -1451,7 +1454,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     themedRelation.width = 3;
     checkRelation("#aabbcc", 3);
     view.setHoveredLine("relation:relation-test");
-    checkRelation("#445566", 4);
+    checkRelation("#aabbcc", 4);
+    view.selectedRelation = "relation-test";
+    checkRelation("#aabbcc", 6);
+    view.selectedRelation = undefined;
     setRelationTheme("hover-color", "invalid-color");
     for (const width of ["auto", "0", "-2", "Infinity", "2em", "3px-invalid"]) {
         setRelationTheme("hover-width", width);
@@ -2974,10 +2980,15 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const bracketCenter = summaryViewport.getBoundingClientRect().top + summaryView.offsetY +
         (summaryPosition.top + summaryPosition.bottom) / 2 * summaryView.scale;
     check.ok(Math.abs((summaryBounds.top + summaryBounds.bottom) / 2 - bracketCenter) < 1);
-    const visibleBounds = Array.from(summaryHost.querySelectorAll<HTMLElement>("[data-mindmap-id]"))
-        .filter(element => element.dataset.mindmapId !== summaryView.model.root.id).map(element => element.getBoundingClientRect());
-    check.ok(Math.abs((Math.min(...visibleBounds.map(rect => rect.top)) + Math.max(...visibleBounds.map(rect => rect.bottom))) / 2 -
-        bracketCenter) < 1, "summary brackets center on the displayed member nodes");
+    const memberCenters = [summaryIds[0], summaryIds[2]].map(id => {
+        const rect = summaryHost.querySelector(`[data-mindmap-id="${id}"]`).getBoundingClientRect();
+        return (rect.top + rect.bottom) / 2;
+    });
+    const summaryOriginY = summaryViewport.getBoundingClientRect().top + summaryView.offsetY;
+    check.ok(Math.abs(summaryOriginY + summaryPosition.top * summaryView.scale - memberCenters[0]) < 1);
+    check.ok(Math.abs(summaryOriginY + summaryPosition.bottom * summaryView.scale - memberCenters[1]) < 1);
+    check.ok(Math.abs((memberCenters[0] + memberCenters[1]) / 2 - bracketCenter) < 1,
+        "summary brackets connect the displayed first and last member centers");
     summaryView.clearSelection();
     summaryLabel.focus();
     check.equal(document.activeElement, summaryLabel);
@@ -3015,7 +3026,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     summaryView.selectedSummary = undefined;
     checkSummaryStyle("#123456", 1.5);
     summaryView.selectedSummary = "summary";
-    checkSummaryStyle("#abcdef", 2.5);
+    checkSummaryStyle("#123456", 2.5);
     setSummaryTheme("color", "var(--b3-theme-primary)");
     setSummaryTheme("width", "3px");
     summaryView.selectedSummary = undefined;
@@ -3023,10 +3034,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     summaryView.model.metadata.summaries[0].color = "#445566";
     checkSummaryStyle("#445566", 3);
     summaryView.selectedSummary = "summary";
-    checkSummaryStyle("#abcdef", 4);
+    checkSummaryStyle("#445566", 4);
     setSummaryTheme("selected-color", "#778899");
     setSummaryTheme("selected-width", "6");
-    checkSummaryStyle("#778899", 6);
+    checkSummaryStyle("#445566", 6);
     summaryView.options.printLayout = true;
     checkSummaryStyle("#445566", 3);
     summaryView.options.printLayout = false;
@@ -3036,14 +3047,51 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     setSummaryTheme("selected-color", "invalid-color");
     for (const width of ["auto", "0", "-2", "Infinity", "2em", "3px-invalid"]) {
         setSummaryTheme("selected-width", width);
-        checkSummaryStyle("#abcdef", 4);
+        checkSummaryStyle("#445566", 4);
     }
     delete summaryView.model.metadata.summaries[0].color;
     summaryView.selectedSummary = undefined;
     setSummaryTheme("color", "invalid-color");
     setSummaryTheme("width", "-1");
     checkSummaryStyle("#123456", 1.5);
-    ["color", "width", "selected-color", "selected-width"].forEach(property =>
+    setSummaryTheme("color", "#112233");
+    setSummaryTheme("width", "2");
+    setSummaryTheme("hover-color", "#556677");
+    setSummaryTheme("hover-width", "4px");
+    setSummaryTheme("selected-color", "#778899");
+    setSummaryTheme("selected-width", "6");
+    summaryView.setHoveredLine("summary:summary");
+    checkSummaryStyle("#556677", 4);
+    summaryView.selectedSummary = "summary";
+    checkSummaryStyle("#778899", 6);
+    for (const value of ["initial", "unset", "invalid-color"]) {
+        setSummaryTheme("selected-color", value);
+        checkSummaryStyle("#112233", 6);
+    }
+    summaryView.model.metadata.summaries[0].color = "#445566";
+    setSummaryTheme("selected-color", "#778899");
+    checkSummaryStyle("#445566", 6);
+    summaryView.selectedSummary = undefined;
+    checkSummaryStyle("#445566", 4);
+    summaryView.options.printLayout = true;
+    checkSummaryStyle("#445566", 2);
+    summaryView.options.printLayout = false;
+    summaryView.printTransform = {scale: 1, offsetX: 0, offsetY: 0};
+    checkSummaryStyle("#445566", 2);
+    summaryView.printTransform = undefined;
+    delete summaryView.model.metadata.summaries[0].color;
+    setSummaryTheme("hover-color", "initial");
+    setSummaryTheme("hover-width", "auto");
+    const summaryScale = summaryView.scale;
+    summaryView.scale = 0.5;
+    checkSummaryStyle("#112233", 5);
+    summaryView.scale = summaryScale;
+    summaryView.setHoveredLine();
+    sendPointer(summaryLabel, "pointermove", summaryBounds.left + 1, summaryBounds.top + 1);
+    check.equal(summaryView.hoveredLine, "summary:summary");
+    summaryViewport.dispatchEvent(new PointerEvent("pointerleave"));
+    check.equal(summaryView.hoveredLine, undefined);
+    ["color", "width", "hover-color", "hover-width", "selected-color", "selected-width"].forEach(property =>
         summaryHost.style.removeProperty(`--b3-mindmap-summary-${property}`));
     summaryHost.style.removeProperty("--b3-border-color");
     summaryHost.style.removeProperty("--b3-theme-primary");

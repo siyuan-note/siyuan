@@ -46,7 +46,7 @@ test("summary creation accepts sibling ranges and rejects cross-level, overlappi
     assert.deepEqual(getListMindmapSummaryRange(model, "c", "c"), ["c"]);
 });
 
-test("summary brackets cover visible descendants and disappear with their members", () => {
+test("summary brackets align member centers, avoid descendants and disappear with their members", () => {
     const model = makeModel();
     model.metadata.summaries = [summary(["a", "b"])];
     const positions = new Map([
@@ -57,9 +57,20 @@ test("summary brackets cover visible descendants and disappear with their member
     const sizes = new Map([["s", {width: 150, height: 60}]]);
     const expanded = layoutListMindmapSummaries(model, positions, sizes).get("s");
     assert.equal(expanded.x, 476);
-    assert.equal(expanded.top, 9);
-    assert.equal(expanded.bottom, 215);
+    assert.equal(expanded.top, 57);
+    assert.equal(expanded.bottom, 182);
     assert.equal(expanded.labelY + expanded.height / 2, (expanded.top + expanded.bottom) / 2);
+    sizes.set("s", {width: 150, height: 400});
+    const tall = layoutListMindmapSummaries(model, positions, sizes).get("s");
+    assert.equal(tall.top, expanded.top);
+    assert.equal(tall.bottom, expanded.bottom);
+    assert.equal(tall.labelY + tall.height / 2, (expanded.top + expanded.bottom) / 2);
+    model.metadata.summaries = [summary(["a"])];
+    const single = layoutListMindmapSummaries(model, positions, sizes).get("s");
+    assert.equal(single.top, 57);
+    assert.equal(single.bottom, 57);
+    assert.equal(single.x, 476);
+    model.metadata.summaries = [summary(["a", "b"])];
     positions.delete("nested");
     assert.equal(layoutListMindmapSummaries(model, positions, sizes).get("s").x, 256);
     positions.delete("a");

@@ -89,7 +89,7 @@ export const getListMindmapSummaryRange = (model: ListMindmapModel, from: string
     return nodeIds;
 };
 
-// 括号包围成员的可见子树，文字尺寸参与边界计算，折叠隐藏的成员不产生独立概要。
+// 括号连接首尾成员的垂直中心，横向避让可见子树，标签高度独立参与画布边界计算。
 export const layoutListMindmapSummaries = (model: ListMindmapModel, positions: Map<string, ListMindmapPosition>,
                                           sizes: Map<string, {width: number, height: number}>) => {
     const result = new Map<string, ListMindmapSummaryPosition>();
@@ -105,8 +105,6 @@ export const layoutListMindmapSummaries = (model: ListMindmapModel, positions: M
             return;
         }
         let right = 0;
-        let top = Infinity;
-        let bottom = -Infinity;
         const pending = [...summary.nodeIds];
         while (pending.length) {
             const id = pending.pop();
@@ -115,16 +113,16 @@ export const layoutListMindmapSummaries = (model: ListMindmapModel, positions: M
                 continue;
             }
             right = Math.max(right, position.x + position.width);
-            // 节点向上避让下划线，括号和标签按实际显示边界居中。
-            const nodeTop = position.y - (id === model.root.id ? 1 : 3);
-            top = Math.min(top, nodeTop);
-            bottom = Math.max(bottom, nodeTop + position.height);
             pending.push(...(model.nodes.get(id)?.children.map(node => node.id) || []));
         }
+        const nodeCenter = (id: string) => {
+            const position = positions.get(id);
+            return position.y - (id === model.root.id ? 1 : 3) + position.height / 2;
+        };
+        const top = nodeCenter(summary.nodeIds[0]);
+        const bottom = nodeCenter(summary.nodeIds[summary.nodeIds.length - 1]);
         const center = (top + bottom) / 2;
-        result.set(summary.id, {id: summary.id, x: right + 36,
-            top: Math.min(top - 8, center - size.height / 2),
-            bottom: Math.max(bottom + 8, center + size.height / 2),
+        result.set(summary.id, {id: summary.id, x: right + 36, top, bottom,
             labelX: right + 60, labelY: center - size.height / 2, ...size});
     });
     return result;

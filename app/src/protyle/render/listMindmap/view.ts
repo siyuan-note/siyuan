@@ -842,9 +842,9 @@ export class ListMindmapView {
             let top = 0;
             let left = 0;
             this.summaryPositions.forEach(position => {
-                top = Math.min(top, position.top - 32);
+                top = Math.min(top, position.top - 32, position.labelY - 32);
                 this.bounds.width = Math.max(this.bounds.width, position.labelX + position.width + 32);
-                this.bounds.height = Math.max(this.bounds.height, position.bottom + 32);
+                this.bounds.height = Math.max(this.bounds.height, position.bottom + 32, position.labelY + position.height + 32);
             });
             // 每条连接独立避让节点和按钮，已有关系线不影响路径选择。
             this.model.metadata.relations.forEach((relation) => {
@@ -1033,7 +1033,7 @@ export class ListMindmapView {
     }
 
     private drawSummaries(context: CanvasRenderingContext2D,
-                          resolveStyle: (color: string, selected: boolean) => {color: string, width: number}) {
+                          resolveStyle: (color: string, selected: boolean, hovered: boolean) => {color: string, width: number}) {
         (this.model.metadata.summaries || []).forEach(summary => {
             const position = this.summaryPositions.get(summary.id);
             const element = this.summaryElements.get(summary.id);
@@ -1048,15 +1048,18 @@ export class ListMindmapView {
             const radius = Math.min(6, (bottom - top) / 2);
             const path = new Path2D();
             path.moveTo(x - 10, top);
-            path.lineTo(x - radius, top);
-            path.quadraticCurveTo(x, top, x, top + radius);
-            path.lineTo(x, bottom - radius);
-            path.quadraticCurveTo(x, bottom, x - radius, bottom);
-            path.lineTo(x - 10, bottom);
-            path.moveTo(x, (top + bottom) / 2);
+            if (bottom > top) {
+                path.lineTo(x - radius, top);
+                path.quadraticCurveTo(x, top, x, top + radius);
+                path.lineTo(x, bottom - radius);
+                path.quadraticCurveTo(x, bottom, x - radius, bottom);
+                path.lineTo(x - 10, bottom);
+                path.moveTo(x, (top + bottom) / 2);
+            }
             path.lineTo(labelX - 6, (top + bottom) / 2);
             const selected = this.selectedSummary === summary.id && !this.printTransform && !this.options.printLayout;
-            const style = resolveStyle(summary.color, selected);
+            const hovered = this.hoveredLine === `summary:${summary.id}` && !this.printTransform && !this.options.printLayout;
+            const style = resolveStyle(summary.color, selected, hovered);
             context.strokeStyle = style.color;
             context.lineWidth = style.width;
             context.setLineDash([]);
@@ -1113,8 +1116,9 @@ export class ListMindmapView {
         return [...this.positions.values()].map(node => ({...node,
             controlY: node.y + (node.id === this.model.root.id ? node.height / 2 : node.height),
         })).concat([...this.summaryPositions.values()].map(summary => ({
-            id: `summary:${summary.id}`, x: summary.x - 10, y: summary.top,
-            width: summary.labelX + summary.width - summary.x + 10, height: summary.bottom - summary.top,
+            id: `summary:${summary.id}`, x: summary.x - 10, y: Math.min(summary.top, summary.labelY),
+            width: summary.labelX + summary.width - summary.x + 10,
+            height: Math.max(summary.bottom, summary.labelY + summary.height) - Math.min(summary.top, summary.labelY),
             controlY: summary.top,
         })));
     }
@@ -1398,7 +1402,7 @@ export class ListMindmapView {
         const theme = getComputedStyle(this.options.host);
         const defaultLine = theme.getPropertyValue("--b3-border-color").trim() || "#a8adb5";
         const primary = theme.getPropertyValue("--b3-theme-primary").trim() || "#3574f0";
-        const readLineStyles = (type: "line" | "relation" | "summary", states = ["", "hover-", "selected-"]) => states.map(state => {
+        const readLineStyles = (type: "line" | "relation" | "summary") => ["", "hover-", "selected-"].map(state => {
             const prefix = `--b3-mindmap-${type}-${state}`;
             const width = Number(theme.getPropertyValue(`${prefix}width`).trim().replace(/px$/, ""));
             return {
@@ -1408,7 +1412,7 @@ export class ListMindmapView {
         });
         const lineStyles = readLineStyles("line");
         const relationStyles = readLineStyles("relation");
-        const summaryStyles = readLineStyles("summary", ["", "selected-"]);
+        const summaryStyles = readLineStyles("summary");
         const colors = new Map<string, string>();
         const resolveColor = (value: string, fallback: string) => {
             const key = `${fallback}\n${value || ""}`;
@@ -1420,6 +1424,18 @@ export class ListMindmapView {
                 colors.set(key, getComputedStyle(this.colorProbe).color);
             }
             return colors.get(key);
+        };
+        const resolveLineStyle = (styles: typeof lineStyles, color: string, width: number, fallback: string,
+                                  selected: boolean, hovered: boolean) => {
+            const baseColor = resolveColor(styles[0].color, fallback);
+            const baseWidth = width || styles[0].width || 1.5;
+            const stateStyle = selected ? styles[2] : hovered ? styles[1] : undefined;
+            return {
+                // 显式颜色始终优先，状态颜色缺省时沿用普通主题色。
+                color: resolveColor(color, resolveColor(stateStyle?.color, baseColor)),
+                width: stateStyle?.width ?? baseWidth + (selected ? 1 : 0) + (hovered ? 1.5 / this.scale : 0),
+                baseWidth,
+            };
         };
         this.edges.forEach((edge) => {
             const from = this.positions.get(edge.from);
@@ -1441,12 +1457,9 @@ export class ListMindmapView {
             context.beginPath();
             const selected = this.selectedEdge === edge.to;
             const hovered = this.hoveredLine === `edge:${edge.to}`;
-            const baseColor = resolveColor(style.lineColor, resolveColor(lineStyles[0].color, defaultLine));
-            const baseWidth = style.lineWidth || lineStyles[0].width || 1.5;
-            // 选中状态优先于悬停状态，未配置状态样式时保留节点配色和随缩放调整的加粗效果。
-            const stateStyle = selected ? lineStyles[2] : hovered ? lineStyles[1] : undefined;
-            context.strokeStyle = resolveColor(stateStyle?.color, baseColor);
-            context.lineWidth = stateStyle?.width ?? baseWidth + (selected ? 1 : 0) + (hovered ? 1.5 / this.scale : 0);
+            const lineStyle = resolveLineStyle(lineStyles, style.lineColor, style.lineWidth, defaultLine, selected, hovered);
+            context.strokeStyle = lineStyle.color;
+            context.lineWidth = lineStyle.width;
             context.setLineDash(style.lineDash ? [6, 4] : []);
             context.stroke(path);
         });
@@ -1468,11 +1481,10 @@ export class ListMindmapView {
             context.beginPath();
             const selected = relation.id === this.selectedRelation;
             const hovered = this.hoveredLine === `relation:${relation.id}`;
-            const baseColor = resolveColor(relation.color, resolveColor(relationStyles[0].color, primary));
-            const baseWidth = relation.width || relationStyles[0].width || 1.5;
-            const stateStyle = selected ? relationStyles[2] : hovered ? relationStyles[1] : undefined;
-            context.strokeStyle = resolveColor(stateStyle?.color, baseColor);
-            context.lineWidth = stateStyle?.width ?? baseWidth + (selected ? 1 : 0) + (hovered ? 1.5 / this.scale : 0);
+            const lineStyle = resolveLineStyle(relationStyles, relation.color, relation.width, primary, selected, hovered);
+            const baseWidth = lineStyle.baseWidth;
+            context.strokeStyle = lineStyle.color;
+            context.lineWidth = lineStyle.width;
             const emphasis = Math.max(0, context.lineWidth - baseWidth);
             element.classList.toggle("mindmap-view__relation--hover", hovered);
             context.setLineDash(relation.dash === false ? [] : [5, 4]);
@@ -1498,14 +1510,8 @@ export class ListMindmapView {
             }
         });
         this.drawRelationPreview(context, resolveColor(relationStyles[0].color, primary), relationStyles[0].width || 1.5);
-        this.drawSummaries(context, (color, selected) => {
-            const baseWidth = summaryStyles[0].width || 1.5;
-            return {
-                color: selected ? resolveColor(summaryStyles[1].color, primary) :
-                    resolveColor(color, resolveColor(summaryStyles[0].color, defaultLine)),
-                width: selected ? summaryStyles[1].width ?? baseWidth + 1 : baseWidth,
-            };
-        });
+        this.drawSummaries(context, (color, selected, hovered) =>
+            resolveLineStyle(summaryStyles, color, undefined, defaultLine, selected, hovered));
         this.renderRouteControls();
     }
 
@@ -1862,8 +1868,9 @@ export class ListMindmapView {
             }
             const target = event.target as Element;
             const relation = target.closest<HTMLElement>(".mindmap-view__relation[data-relation-id]");
+            const summary = target.closest<HTMLElement>(".mindmap-view__summary[data-summary-id]");
             const line = target.closest(".mindmap-view__node, input, button") ? undefined : this.findLine(event);
-            this.setHoveredLine(relation ? `relation:${relation.dataset.relationId}` :
+            this.setHoveredLine(summary ? `summary:${summary.dataset.summaryId}` : relation ? `relation:${relation.dataset.relationId}` :
                 line ? `${line.summary ? "summary" : line.relation ? "relation" : "edge"}:${line.id}` : undefined);
             return;
         }
@@ -2356,6 +2363,7 @@ export class ListMindmapView {
         this.relationRoutes.forEach(points => points.forEach(point => include(point.x, point.y)));
         this.summaryPositions.forEach(summary => {
             include(summary.x - 10, summary.top, summary.labelX + summary.width - summary.x + 10, summary.bottom - summary.top);
+            include(summary.labelX, summary.labelY, summary.width, summary.height);
         });
         this.relationElements.forEach(element => {
             if (!element.hidden && element.style.visibility !== "hidden") {

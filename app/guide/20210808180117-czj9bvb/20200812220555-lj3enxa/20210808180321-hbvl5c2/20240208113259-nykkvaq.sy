@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20260927185714"
+		"updated": "20260927123058"
 	},
 	"Children": [
 		{
@@ -2883,7 +2883,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208120825-ktzju1z",
-				"updated": "20260927185714"
+				"updated": "20250615173511"
 			},
 			"Children": [
 				{
@@ -3001,20 +3001,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "​。"
-				}
-			]
-		},
-		{
-			"ID": "20260927185714-ufwobnu",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260927185714-ufwobnu",
-				"updated": "20260927185714"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在关联选择面板中，点击字段按钮可隐藏不需要的字段，并输入列宽（像素）。主键始终显示，也可以拖动表头的列边界调整宽度。这些显示偏好按关联数据库保存，不会改变数据库的视图或已存储的字段值。"
 				}
 			]
 		},

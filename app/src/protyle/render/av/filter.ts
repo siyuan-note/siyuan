@@ -798,7 +798,7 @@ ${genRelationFilterTriggerContent(avID, selectedBlockIDs, path)}<svg class="av__
 
 // readInlineValue 从叶子行内 DOM 读取值，按类型返回 { value, relativeDate, relativeDate2 }。
 // 修正点①：date 用 data-type 精确定位，废弃全局 textElements 索引。
-const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: string, filter: IAVFilter): { newValue: IAVCellValue, relativeDate: IAVRelativeDate, relativeDate2: IAVRelativeDate } => {
+const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: string, filter: IAVFilter, menuElement: HTMLElement): { newValue: IAVCellValue, relativeDate: IAVRelativeDate, relativeDate2: IAVRelativeDate } => {
     let newValue: IAVCellValue = filter.value;
     let relativeDate: IAVRelativeDate = filter.relativeDate;
     let relativeDate2: IAVRelativeDate = filter.relativeDate2;
@@ -869,10 +869,10 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
             relativeDate2 = undefined;
         }
     } else if (valueType === "select" || valueType === "mSelect") {
-        // 扫描下拉面板内选中的 chip（#iconCheck）。下拉在行外（fixed 定位），用 path 全局查找
+        // 下拉位于行外，按路径在当前筛选编辑器内读取选中的选项。
         const path = rowElement.dataset.path;
         const mSelect: IAVCellSelectValue[] = [];
-        const dropdown = document.querySelector(`[data-type="selectDropdown"][data-path="${path}"]`);
+        const dropdown = menuElement.querySelector(`[data-type="selectDropdown"][data-path="${path}"]`);
         const searchRoot = dropdown || rowElement; // 兜底：兼容旧结构
         searchRoot.querySelectorAll('[data-type="selectOption"]').forEach((option: HTMLElement) => {
             const useEl = option.querySelector(".av__select-option-check use");
@@ -972,7 +972,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         const {type: valueType} = resolveFilterValueType(filter, colData);
         const operatorSel = rowElement.querySelector('[data-type="operation"]') as HTMLSelectElement;
         const operator = (operatorSel?.value || filter.operator) as TAVFilterOperator;
-        const {newValue, relativeDate, relativeDate2} = readInlineValue(rowElement, valueType, operator, filter);
+        const {newValue, relativeDate, relativeDate2} = readInlineValue(rowElement, valueType, operator, filter, menuElement);
         const quantifierSel = rowElement.querySelector('[data-type="quantifier"]') as HTMLSelectElement;
         const newFilter: IAVFilter = {
             column: filter.column,

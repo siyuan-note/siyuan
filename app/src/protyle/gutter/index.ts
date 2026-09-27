@@ -876,7 +876,7 @@ export class Gutter {
         });
         const submenu: IMenu[] = [{
             id: "recursiveRemoveList",
-            icon: "iconListItem",
+            icon: "iconOutdent",
             label: window.siyuan.languages.removeList,
             click: () => removeListStructure(protyle, listElements, true),
         }];

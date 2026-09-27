@@ -11,10 +11,12 @@ const browserCases = async (source: string, css: string) => {
     const check: typeof assert = require("node:assert/strict");
     const api = new Function("Constants", "isInEmbedBlock", source +
         "\nreturn {LargeTableVirtualizer, cleanTableVirtualizationHTML, protectLuteTableVirtualization, " +
-        "restoreTableVirtualizationDOM, getTableVirtualRowIndex, getVirtualTableGrid, setTableVirtualSelection, TableGridCache, buildTableGrid, getTableGridRect, searchMarkRender, " +
+        "restoreTableVirtualizationDOM, getTableVirtualizationHTML, getTableVirtualCellIndex, setTableCellRichEventTarget, " +
+        "getTableVirtualRowIndex, getVirtualTableGrid, setTableVirtualSelection, TableGridCache, buildTableGrid, getTableGridRect, searchMarkRender, " +
         "cleanBlockSelectionModeOperations, createEditor: protyle => new VirtualizedEditor(protyle)};")({TIMEOUT_TRANSITION: 0}, () => false) as
         typeof import("./tableVirtualization") & typeof import("../util/tableVirtualizationDOM") &
-        typeof import("../util/tableGridCache") & typeof import("../util/table") & typeof import("../render/searchMarkRender") & {
+        typeof import("../util/tableCellRichContext") & typeof import("../util/tableGridCache") &
+        typeof import("../util/table") & typeof import("../render/searchMarkRender") & {
             cleanBlockSelectionModeOperations: (operations: IOperation[]) => void,
             createEditor: (protyle: IProtyle) => {
                 prepareBlockVirtualization: (content: Element, replace: boolean) => void,
@@ -97,6 +99,9 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         await tick();
         reduced(f.table, "hover does not materialize offscreen rows");
         check.equal(api.cleanTableVirtualizationHTML(f.editor.innerHTML), f.original, "source round trip is lossless");
+        check.equal(api.getTableVirtualizationHTML(f.editor.firstElementChild), f.original,
+            "a complete snapshot is serialized directly without mounting cached rows");
+        reduced(f.table, "snapshot preserves the live window");
         check.ok(Math.abs(f.table.getBoundingClientRect().height - f.height) < 2, "initial height is retained");
         for (const progress of [0.4, 0.95, 0.1, 0.7, 0]) {
             f.scroller.scrollTop = (f.scroller.scrollHeight - f.scroller.clientHeight) * progress;
@@ -110,6 +115,7 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
             });
             const rowIndex = Number(/Row (\d+)/.exec(row.textContent)[1]);
             check.equal(api.getTableVirtualRowIndex(row), rowIndex + 1, "cell editor indexes include offscreen rows");
+            check.equal(api.getTableVirtualCellIndex(row.cells[3]), (rowIndex + 1) * 5 + 3);
             check.equal(getComputedStyle(row).backgroundColor, rowIndex % 2 === 1 ? "rgb(12, 34, 56)" : "rgba(0, 0, 0, 0)",
                 "window changes retain alternating row backgrounds");
         }
@@ -247,7 +253,7 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         await tick();
         const cell = f.table.querySelector<HTMLTableCellElement>("tbody td");
         cell.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
-        cell.innerHTML = '<div class="table__cell-editor table__cell--inline"><div contenteditable="true">Editing</div>' +
+        cell.innerHTML = '<div class="table__cell-editor table__cell--inline"><div class="protyle-wysiwyg" contenteditable="true">Editing</div>' +
             '<button class="fn__none"><svg></svg></button></div>';
         const host = cell.firstElementChild;
         cell.style.verticalAlign = "top";
@@ -255,6 +261,22 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         cell.dispatchEvent(new PointerEvent("pointerup", {bubbles: true}));
         await tick();
         reduced(f.table, "cell and selection styles do not materialize the table");
+        const editable = host.querySelector('[contenteditable="true"]');
+        const textRange = document.createRange();
+        textRange.selectNodeContents(editable);
+        getSelection().addRange(textRange);
+        document.dispatchEvent(new Event("selectionchange"));
+        for (const type of ["keydown", "beforeinput", "copy", "cut", "paste", "compositionstart", "compositionend"]) {
+            editable.dispatchEvent(new Event(type, {bubbles: true}));
+            await tick();
+            reduced(f.table, `cell-local ${type} keeps the window`);
+        }
+        const forwarded = new KeyboardEvent("keydown", {bubbles: true, key: "a"});
+        api.setTableCellRichEventTarget(forwarded, host as HTMLElement);
+        f.root.dispatchEvent(forwarded);
+        reduced(f.table, "forwarded shortcuts retain their cell editor origin");
+        editable.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, buttons: 1, movementX: 10}));
+        reduced(f.table, "text selection inside the editor keeps the window");
         for (const progress of [0.5, 1, 0]) {
             f.scroller.scrollTop = (f.scroller.scrollHeight - f.scroller.clientHeight) * progress;
             f.root.dispatchEvent(new WheelEvent("wheel", {bubbles: true}));
@@ -333,7 +355,7 @@ test("large tables retain complete source, editing, selection, search and layout
         return compile(source.statements.filter(isVariableStatement).find(statement =>
             statement.declarationList.declarations.some(declaration => declaration.name.getText(source) === name)).getText(source));
     };
-    const source = ["../util/tableVirtualizationDOM.ts", "../util/tableGridCache.ts", "tableVirtualization.ts",
+    const source = ["../util/tableVirtualizationDOM.ts", "../util/tableCellRichContext.ts", "../util/tableGridCache.ts", "tableVirtualization.ts",
         "../render/searchMarkRender.ts"].map(file => compile(read(file))).join("\n") +
         "\nconst cleanListMindmapHTML = value => value; const cleanTableCellRichHTML = value => value; " +
         "const cleanBlockSelectionModeHTML = value => value;\n" +

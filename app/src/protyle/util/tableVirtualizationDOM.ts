@@ -65,6 +65,47 @@ export const getTableVirtualRowIndex = (row: HTMLTableRowElement) => {
     return row.rowIndex;
 };
 
+export const getTableVirtualCellIndex = (cell: HTMLTableCellElement) => {
+    const table = cell.closest("table");
+    if (table.hasAttribute(TABLE_VIRTUAL_ID)) {
+        return getTableVirtualRowIndex(cell.parentElement as HTMLTableRowElement) * table.rows[0].cells.length + cell.cellIndex;
+    }
+    return Array.from(table.querySelectorAll("th, td")).indexOf(cell);
+};
+
+// 只序列化可见内容与容器，屏外分段直接使用源字符串；不挂载或修改快照对应的节点。
+export const getTableVirtualizationHTML = (root: Element, cellReplacements = new Map<Element, string>()): string => {
+    const replacements = new Map(cellReplacements);
+    root.querySelectorAll(`[${TABLE_VIRTUAL_ROWS}], [${TABLE_VIRTUAL_COLUMNS}]`).forEach(element => {
+        replacements.set(element, element.getAttribute(TABLE_VIRTUAL_ROWS) ?? element.getAttribute(TABLE_VIRTUAL_COLUMNS));
+    });
+    const ancestors = new Set<Element>();
+    [...replacements.keys(), ...Array.from(root.querySelectorAll(`[${TABLE_VIRTUAL_ID}]`)), root].forEach(element => {
+        while (element && !ancestors.has(element) && root.contains(element)) {
+            ancestors.add(element);
+            element = element.parentElement;
+        }
+    });
+    const holder = document.createElement("div");
+    const serialize = (node: Node): string => {
+        if (!(node instanceof Element)) {
+            holder.replaceChildren(node.cloneNode(true));
+            return holder.innerHTML;
+        }
+        if (replacements.has(node)) {
+            return replacements.get(node);
+        }
+        if (!ancestors.has(node)) {
+            return node.outerHTML;
+        }
+        const shell = node.cloneNode(false) as Element;
+        shell.removeAttribute(TABLE_VIRTUAL_ID);
+        const closing = `</${node.localName}>`;
+        return shell.outerHTML.slice(0, -closing.length) + Array.from(node.childNodes).map(serialize).join("") + closing;
+    };
+    return serialize(root);
+};
+
 // 当前编辑器复用已卸载的行节点，快照仍由占位属性独立保存完整内容。
 export const cacheTableVirtualizationRows = (placeholder: HTMLTableRowElement, rows: HTMLTableRowElement[]) => {
     const html = rows.map(row => row.outerHTML).join("");

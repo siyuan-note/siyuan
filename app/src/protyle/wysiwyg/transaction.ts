@@ -76,8 +76,8 @@ import {
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
 import {getHeadingConversionElements, isListHeadingContainer} from "./headingConversion";
-import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
-import {cleanTableVirtualizationHTML} from "../util/tableVirtualizationDOM";
+import {cleanTableCellRichHTML, getTableBlockHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
+import {cleanTableVirtualizationHTML, TABLE_VIRTUAL_ID} from "../util/tableVirtualizationDOM";
 import {cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource} from "../render/listMindmap/model";
 import {buildCancelListOperations} from "./cancelList";
 import {buildListConversionOperations} from "./listConversion";
@@ -292,8 +292,7 @@ const promiseTransaction = (options: {
                     updatedEmbed = true;
                 };
 
-                const allTempElement = document.createElement("template");
-                allTempElement.innerHTML = cleanBlockSelectionModeHTML(getVisibleFoldHeadingHTML(operation.data));
+                let allTempElement: HTMLTemplateElement;
                 updateElements.forEach((item) => {
                     if ((currentEmbedElement && isInEmbedBlock(item, false) === currentEmbedElement) ||
                         (range && (item === range.startContainer || item.contains(range.startContainer)))) {
@@ -311,6 +310,11 @@ const promiseTransaction = (options: {
                         item.removeAttribute(Constants.ATTRIBUTE_EDITING);
                     } else {
                         // https://github.com/siyuan-note/siyuan/issues/14495
+                        // 仅在嵌入副本需要查找子块时解析完整快照，当前块的本地输入无需构建整块 DOM。
+                        if (!allTempElement) {
+                            allTempElement = document.createElement("template");
+                            allTempElement.innerHTML = cleanBlockSelectionModeHTML(getVisibleFoldHeadingHTML(operation.data));
+                        }
                         const newTempElement = allTempElement.content.querySelector(`[data-node-id="${item.getAttribute("data-id")}"]`);
                         if (newTempElement && !isInEmbedBlock(newTempElement)) {
                             updateHTML(item.querySelector("[data-node-id]"), newTempElement.outerHTML);
@@ -2597,14 +2601,16 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         refreshSbResize(element);
     }
     const id = element.getAttribute("data-node-id");
-    let newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(element.outerHTML))));
+    const getHTML = () => element.getAttribute("data-type") === "NodeTable" && element.querySelector(`[${TABLE_VIRTUAL_ID}]`) ?
+        getTableBlockHTML(element) : element.outerHTML;
+    let newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(getHTML()))));
     const cleanOldHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(oldHTML))));
     if (newHTML === cleanOldHTML.replace("<wbr>", "") && !additionalOperations) {
         return;
     }
     if (element.getAttribute("data-type") === "NodeTable") {
         element.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-        newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(element.outerHTML))));
+        newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(getHTML()))));
     }
     element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
     const doOperations: IOperation[] = [{

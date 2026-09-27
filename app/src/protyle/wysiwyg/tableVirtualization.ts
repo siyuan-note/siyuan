@@ -1,4 +1,5 @@
 import {cacheTableVirtualizationRows, isTableVirtualSelectionRow, restoreTableVirtualizationDOM, restoreTableVirtualizationRows, setTableVirtualSelection, TABLE_VIRTUAL_COLUMNS, TABLE_VIRTUAL_ID} from "../util/tableVirtualizationDOM";
+import {getTableCellRichEventTarget, getTableCellRichSelectionHost} from "../util/tableCellRichContext";
 
 export const LARGE_TABLE_ROW_THRESHOLD = 256;
 // 奇数行替换为一个占位行后，后续内容的隔行底色顺序保持不变。
@@ -23,7 +24,7 @@ interface ITableViewport {
 export const isTableChunkVisible = (top: number, height: number, viewportTop: number, viewportBottom: number) =>
     top + height >= viewportTop && top <= viewportBottom;
 
-// 普通表格仍使用完整块 DOM 编辑；浏览时将屏外行序列化为独立、可恢复的占位分段。
+// 屏外行保存为独立、可恢复的分段，普通单元格编辑期间仍保留视口内的行。
 export class LargeTableVirtualizer {
     private states = new Map<HTMLTableElement, ITableViewport>();
     private excluded = new WeakSet<HTMLTableElement>();
@@ -70,9 +71,14 @@ export class LargeTableVirtualizer {
             this.schedule();
         }, {signal});
         root.addEventListener("scroll", () => this.schedule(), {capture: true, passive: true, signal});
-        // 输入和块级操作在事件分发前恢复全部行，原生选区及后续事件处理仍面对完整表格。
+        // 内联输入由单元格编辑器处理，块级操作仍在事件分发前恢复全部行。
         ["pointerdown", "keydown", "beforeinput", "copy", "cut", "paste", "dragstart", "contextmenu"].forEach(type => {
             window.addEventListener(type, event => {
+                const host = getTableCellRichEventTarget(event);
+                if (host && ["keydown", "beforeinput", "copy", "cut", "paste"].includes(type) &&
+                    (getSelection()?.isCollapsed || getTableCellRichSelectionHost(getSelection()) === host)) {
+                    return;
+                }
                 this.interacting = type === "pointerdown" || type === "keydown";
                 if (type === "pointerdown") {
                     const pointer = event as PointerEvent;
@@ -85,6 +91,9 @@ export class LargeTableVirtualizer {
                         }
                         return;
                     }
+                    if (host && pointer.button === 0) {
+                        return;
+                    }
                 }
                 this.restore();
             }, {capture: true, signal});
@@ -93,7 +102,7 @@ export class LargeTableVirtualizer {
         window.addEventListener("pointercancel", () => { this.interacting = false; this.dragTable = undefined; }, {capture: true, signal});
         root.addEventListener("pointermove", event => {
             if (event.buttons && (event.movementX || event.movementY)) {
-                if (!this.dragTable?.contains(event.target as Node)) {
+                if (!getTableCellRichEventTarget(event) && !this.dragTable?.contains(event.target as Node)) {
                     this.dragTable = undefined;
                     this.restore();
                 }
@@ -106,7 +115,10 @@ export class LargeTableVirtualizer {
                 this.schedule();
             }
         }, {capture: true, signal});
-        root.addEventListener("compositionstart", () => {
+        root.addEventListener("compositionstart", event => {
+            if (getTableCellRichEventTarget(event)) {
+                return;
+            }
             this.composing = true;
             this.restore();
         }, {capture: true, signal});
@@ -122,7 +134,7 @@ export class LargeTableVirtualizer {
         }, {passive: true, signal});
         document.addEventListener("selectionchange", () => {
             const selection = getSelection();
-            if (!this.dragTable && selection && !selection.isCollapsed && selection.rangeCount &&
+            if (!this.dragTable && !getTableCellRichSelectionHost(selection) && selection && !selection.isCollapsed && selection.rangeCount &&
                 selection.getRangeAt(0).intersectsNode(this.editor)) {
                 this.restore();
             }
@@ -296,7 +308,7 @@ export class LargeTableVirtualizer {
             return;
         }
         if (!this.editor.isConnected || this.composing || this.blocked() ||
-            !this.dragTable && selection && !selection.isCollapsed && selection.rangeCount &&
+            !this.dragTable && !getTableCellRichSelectionHost(selection) && selection && !selection.isCollapsed && selection.rangeCount &&
             selection.getRangeAt(0).intersectsNode(this.editor)) {
             this.restore();
             return;

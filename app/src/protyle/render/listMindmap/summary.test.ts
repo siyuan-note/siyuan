@@ -57,8 +57,9 @@ test("summary brackets cover visible descendants and disappear with their member
     const sizes = new Map([["s", {width: 150, height: 60}]]);
     const expanded = layoutListMindmapSummaries(model, positions, sizes).get("s");
     assert.equal(expanded.x, 476);
-    assert.equal(expanded.top, 12);
-    assert.equal(expanded.bottom, 218);
+    assert.equal(expanded.top, 9);
+    assert.equal(expanded.bottom, 215);
+    assert.equal(expanded.labelY + expanded.height / 2, (expanded.top + expanded.bottom) / 2);
     positions.delete("nested");
     assert.equal(layoutListMindmapSummaries(model, positions, sizes).get("s").x, 256);
     positions.delete("a");

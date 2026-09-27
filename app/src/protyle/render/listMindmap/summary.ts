@@ -115,8 +115,10 @@ export const layoutListMindmapSummaries = (model: ListMindmapModel, positions: M
                 continue;
             }
             right = Math.max(right, position.x + position.width);
-            top = Math.min(top, position.y);
-            bottom = Math.max(bottom, position.y + position.height);
+            // 节点向上避让下划线，括号和标签按实际显示边界居中。
+            const nodeTop = position.y - (id === model.root.id ? 1 : 3);
+            top = Math.min(top, nodeTop);
+            bottom = Math.max(bottom, nodeTop + position.height);
             pending.push(...(model.nodes.get(id)?.children.map(node => node.id) || []));
         }
         const center = (top + bottom) / 2;

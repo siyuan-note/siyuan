@@ -2110,19 +2110,27 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await settle();
     check.equal(single.scale, 1, "initial layout keeps a single node at its normal size");
     const panButton = host.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
+    const panViewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
+    check.equal(getComputedStyle(panViewport).cursor, "default");
+    check.equal(getComputedStyle(host.querySelector(".mindmap-view__node")).cursor, "default");
+    check.equal(panButton.querySelector("use").getAttribute("xlink:href"), "#iconPan");
     panButton.click();
     check.equal(panButton.getAttribute("aria-pressed"), "true");
+    check.equal(getComputedStyle(panViewport).cursor, "grab");
     const panNode = host.querySelector<HTMLElement>(".mindmap-view__node");
     check.equal(getComputedStyle(panNode).pointerEvents, "none");
     const panBefore = {x: single.offsetX, y: single.offsetY};
     panNode.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerId: 81, clientX: 100, clientY: 100}));
     panNode.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerId: 81, clientX: 140, clientY: 125}));
+    check.equal(getComputedStyle(panViewport).cursor, "grabbing");
     panNode.dispatchEvent(new PointerEvent("pointerup", {bubbles: true, pointerId: 81, clientX: 140, clientY: 125}));
+    check.equal(getComputedStyle(panViewport).cursor, "grab");
     check.equal(single.offsetX, panBefore.x + 40, "hand tool pans from a node instead of moving it");
     check.equal(single.offsetY, panBefore.y + 25);
     check.equal(host.querySelector(".mindmap-view__ghost"), null);
     panButton.click();
     check.equal(panButton.getAttribute("aria-pressed"), "false");
+    check.equal(getComputedStyle(panViewport).cursor, "default");
     check.ok(getComputedStyle(panNode).pointerEvents !== "none");
     single.fit();
     check.ok(single.scale > 1 && single.scale <= 2.5, "fit enlarges small maps within the zoom limit");
@@ -2929,6 +2937,47 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const summaryLabel = summaryHost.querySelector<HTMLElement>(".mindmap-view__summary");
     check.ok(summaryLabel.textContent.startsWith("<script>"));
     check.equal(summaryLabel.querySelector("script"), null);
+    check.equal(summaryLabel.tagName, "DIV");
+    check.ok(summaryLabel.classList.contains("mindmap-view__node--summary"));
+    check.ok(summaryLabel.classList.contains("mindmap-view__node--selected"));
+    check.equal(summaryLabel.classList.contains("b3-button"), false);
+    const ordinaryNode = summaryHost.querySelector<HTMLElement>(".mindmap-view__node[data-mindmap-id]");
+    for (const property of ["padding", "border-radius", "font-size", "line-height"]) {
+        check.equal(getComputedStyle(summaryLabel).getPropertyValue(property), getComputedStyle(ordinaryNode).getPropertyValue(property));
+    }
+    const summaryViewport = summaryHost.querySelector<HTMLElement>(".mindmap-view__viewport");
+    const summaryPosition = summaryView.summaryPositions.get("summary");
+    const summaryBounds = summaryLabel.getBoundingClientRect();
+    const bracketCenter = summaryViewport.getBoundingClientRect().top + summaryView.offsetY +
+        (summaryPosition.top + summaryPosition.bottom) / 2 * summaryView.scale;
+    check.ok(Math.abs((summaryBounds.top + summaryBounds.bottom) / 2 - bracketCenter) < 1);
+    const visibleBounds = Array.from(summaryHost.querySelectorAll<HTMLElement>("[data-mindmap-id]"))
+        .filter(element => element.dataset.mindmapId !== summaryView.model.root.id).map(element => element.getBoundingClientRect());
+    check.ok(Math.abs((Math.min(...visibleBounds.map(rect => rect.top)) + Math.max(...visibleBounds.map(rect => rect.bottom))) / 2 -
+        bracketCenter) < 1, "summary brackets center on the displayed member nodes");
+    summaryView.clearSelection();
+    summaryLabel.focus();
+    check.equal(document.activeElement, summaryLabel);
+    // 离屏窗口未获得系统焦点时，显式派发聚焦事件以覆盖节点选择行为。
+    summaryLabel.dispatchEvent(new FocusEvent("focus"));
+    check.equal(summaryView.selectedSummary, "summary", "focusing the summary selects it");
+    for (const key of [" ", "Enter"]) {
+        summaryView.clearSelection();
+        const event = new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true});
+        summaryLabel.dispatchEvent(event);
+        check.equal(event.defaultPrevented, true);
+        check.equal(summaryView.selectedSummary, "summary", `keyboard activation with ${key}`);
+    }
+    summaryView.clearSelection();
+    summaryLabel.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: "touch", pointerId: 91,
+        isPrimary: true, button: 0}));
+    check.equal(summaryView.pointer, undefined, "selecting a summary does not start canvas or node dragging");
+    summaryLabel.click();
+    check.equal(summaryView.selectedSummary, "summary", "touching the summary selects it");
+    summaryLabel.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    const reopenedSummary = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
+    check.ok(reopenedSummary);
+    reopenedSummary.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     const savedSummary = api.readListMindmap(summaryList).metadata.summaries[0];
     const summaryContext = summaryHost.querySelector("canvas").getContext("2d");
     const setSummaryTheme = (property: string, value: string) =>

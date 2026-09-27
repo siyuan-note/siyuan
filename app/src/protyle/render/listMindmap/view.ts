@@ -110,7 +110,7 @@ export class ListMindmapView {
     private readonly nodeElements = new Map<string, HTMLDivElement>();
     private readonly previewID = `mindmap-view-${Lute.NewNodeID()}-`;
     private readonly relationElements = new Map<string, HTMLButtonElement>();
-    private readonly summaryElements = new Map<string, HTMLButtonElement>();
+    private readonly summaryElements = new Map<string, HTMLDivElement>();
     private summaryPositions = new Map<string, ListMindmapSummaryPosition>();
     private readonly summaryStatus = createElement("div", "mindmap-view__route-status");
     private selectedSummary?: string;
@@ -454,7 +454,7 @@ export class ListMindmapView {
             button.before(control);
             control.append(button, this.levelSelect);
         }
-        add("pan", "cursorHand", "iconHand", () => {
+        add("pan", "cursorHand", "iconPan", () => {
             this.finishThen(() => {
                 this.finishRelationEdit?.(true);
                 this.cancelPointer();
@@ -922,12 +922,26 @@ export class ListMindmapView {
         (this.model.metadata.summaries || []).forEach(summary => {
             let element = this.summaryElements.get(summary.id);
             if (!element) {
-                element = createElement("button", "b3-button b3-button--outline mindmap-view__summary");
-                element.type = "button";
+                element = createElement("div", "mindmap-view__node mindmap-view__node--summary mindmap-view__summary");
+                element.setAttribute("role", "button");
+                element.tabIndex = 0;
                 element.dataset.summaryId = summary.id;
                 element.addEventListener("click", event => {
                     event.stopPropagation();
-                    this.finishThen(() => this.selectSummary(summary.id));
+                    if (!this.panning && !this.suppressLinkClick) {
+                        this.finishThen(() => this.selectSummary(summary.id));
+                    }
+                });
+                element.addEventListener("focus", () => this.finishThen(() => this.selectSummary(summary.id)));
+                element.addEventListener("keydown", event => {
+                    if (!event.isComposing && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+                        (event.key === "Enter" || event.key === " ")) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (!event.repeat) {
+                            this.finishThen(() => this.selectSummary(summary.id));
+                        }
+                    }
                 });
                 this.summaryElements.set(summary.id, element);
                 this.world.append(element);
@@ -1030,10 +1044,13 @@ export class ListMindmapView {
                 return;
             }
             const {x, top, bottom, labelX, labelY} = position;
+            const radius = Math.min(6, (bottom - top) / 2);
             const path = new Path2D();
             path.moveTo(x - 10, top);
-            path.lineTo(x, top);
-            path.lineTo(x, bottom);
+            path.lineTo(x - radius, top);
+            path.quadraticCurveTo(x, top, x, top + radius);
+            path.lineTo(x, bottom - radius);
+            path.quadraticCurveTo(x, bottom, x - radius, bottom);
             path.lineTo(x - 10, bottom);
             path.moveTo(x, (top + bottom) / 2);
             path.lineTo(labelX - 6, (top + bottom) / 2);
@@ -1048,6 +1065,7 @@ export class ListMindmapView {
             element.style.top = `${labelY}px`;
             element.style.visibility = this.editingSummary === summary.id ? "hidden" : "";
             element.classList.toggle("mindmap-view__summary--selected", selected);
+            element.classList.toggle("mindmap-view__node--selected", selected);
             element.setAttribute("aria-pressed", String(selected));
         });
     }
@@ -1734,6 +1752,9 @@ export class ListMindmapView {
         this.suppressPanContextMenu = false;
         const target = event.target as HTMLElement;
         if (![0, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing")) {
+            return;
+        }
+        if (event.button === 0 && !this.panning && target.closest(".mindmap-view__summary")) {
             return;
         }
         this.suppressPanContextMenu = event.button === 2;

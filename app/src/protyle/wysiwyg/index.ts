@@ -2189,6 +2189,8 @@ export class WYSIWYG {
                 }
             }
             let moveCellElement: HTMLElement;
+            let tableSelectionGrid: ReturnType<typeof buildTableGrid>;
+            let tableSelectionMerged = false;
             let hasLeftTableBlock = false;
             let avDragSelectMode: "items" | "blocks" | undefined;
             let avDragSelectFrame: number | undefined;
@@ -2327,7 +2329,9 @@ export class WYSIWYG {
                             tableBlockElement.firstElementChild.style.webkitUserModify = "read-only";
                             const tableElement = tableBlockElement.querySelector("table");
                             const tableRect = tableElement.getBoundingClientRect();
-                            const rowRects = Array.from(tableElement.rows).map(row => row.getBoundingClientRect());
+                            const rowRects = Array.from(tableElement.children)
+                                .filter(section => ["THEAD", "TBODY", "TFOOT"].includes(section.tagName))
+                                .map(section => section.getBoundingClientRect()).filter(rect => rect.height > 0);
                             const gridRect = {
                                 left: Math.min(...rowRects.map(rect => rect.left)) - tableRect.left,
                                 top: Math.min(...rowRects.map(rect => rect.top)) - tableRect.top,
@@ -2346,12 +2350,19 @@ export class WYSIWYG {
                             let selectionRects: ReturnType<typeof getCellRect>[] = [];
                             let logicalSelection = false;
                             if (target.tagName === "TH" || target.tagName === "TD") {
-                                const grid = buildTableGrid(tableElement);
+                                if (!tableSelectionGrid) {
+                                    tableSelectionGrid = buildTableGrid(tableElement);
+                                    tableSelectionMerged = tableSelectionGrid.cellInfos.some(info =>
+                                        info.rowspan > 1 || info.colspan > 1);
+                                }
+                                const grid = tableSelectionGrid;
                                 const targetInfo = grid.cellInfos.find(item => item.cell === target);
                                 const moveTargetInfo = grid.cellInfos.find(item => item.cell === moveTarget);
                                 const selectedInfos = getTableCellsInRectangle(grid.cellInfos, targetInfo, moveTargetInfo);
                                 if (selectedInfos.length > 0) {
-                                    selectionRects = selectedInfos.map(item => getCellRect(item.cell));
+                                    // 无合并单元格时矩形由首尾确定，不逐个测量选中的单元格。
+                                    selectionRects = tableSelectionMerged ? selectedInfos.map(item => getCellRect(item.cell)) :
+                                        [getCellRect(target), getCellRect(moveTarget)];
                                     logicalSelection = true;
                                 }
                             }

@@ -1,4 +1,4 @@
-import {restoreTableVirtualizationDOM, TABLE_VIRTUAL_COLUMNS, TABLE_VIRTUAL_ID, TABLE_VIRTUAL_ROWS} from "../util/tableVirtualizationDOM";
+import {cacheTableVirtualizationRows, restoreTableVirtualizationDOM, restoreTableVirtualizationRows, TABLE_VIRTUAL_COLUMNS, TABLE_VIRTUAL_ID} from "../util/tableVirtualizationDOM";
 
 export const LARGE_TABLE_ROW_THRESHOLD = 256;
 // 奇数行替换为一个占位行后，后续内容的隔行底色顺序保持不变。
@@ -50,11 +50,14 @@ export class LargeTableVirtualizer {
             const layout = [this.viewport.clientWidth, this.editor.clientWidth, style.paddingLeft, style.paddingRight].join("/");
             const changedHeight = Array.from(this.states.values()).some(state =>
                 Math.abs(state.table.getBoundingClientRect().height - state.height) > 2);
-            if (layout !== this.layout || style.font !== this.font || changedHeight) {
+            if (layout !== this.layout || style.font !== this.font) {
                 this.layout = layout;
                 this.font = style.font;
                 this.restore();
                 this.scan = true;
+                this.schedule();
+            } else if (changedHeight) {
+                this.states.forEach(state => this.measureChunks(state));
                 this.schedule();
             }
         });
@@ -68,13 +71,26 @@ export class LargeTableVirtualizer {
         root.addEventListener("scroll", () => this.schedule(), {capture: true, passive: true, signal});
         // 输入和块级操作在事件分发前恢复全部行，原生选区及后续事件处理仍面对完整表格。
         ["pointerdown", "keydown", "beforeinput", "copy", "cut", "paste", "dragstart", "contextmenu"].forEach(type => {
-            window.addEventListener(type, () => {
+            window.addEventListener(type, event => {
                 this.interacting = type === "pointerdown" || type === "keydown";
+                if (type === "pointerdown") {
+                    const pointer = event as PointerEvent;
+                    const cell = (event.target as Element).closest?.("td, th");
+                    if (pointer.button === 0 && !pointer.shiftKey && !pointer.ctrlKey && !pointer.metaKey &&
+                        !pointer.altKey && cell && this.states.has(cell.closest("table"))) {
+                        return;
+                    }
+                }
                 this.restore();
             }, {capture: true, signal});
         });
         window.addEventListener("pointerup", () => { this.interacting = false; }, {capture: true, signal});
         window.addEventListener("pointercancel", () => { this.interacting = false; }, {capture: true, signal});
+        root.addEventListener("pointermove", event => {
+            if (event.buttons && (event.movementX || event.movementY)) {
+                this.restore();
+            }
+        }, {capture: true, signal});
         window.addEventListener("keyup", event => {
             this.interacting = false;
             if (["PageDown", "PageUp", "Home", "End"].includes(event.key)) {
@@ -96,15 +112,6 @@ export class LargeTableVirtualizer {
             this.scan = true;
             this.schedule();
         }, {passive: true, signal});
-        root.addEventListener("pointermove", event => {
-            // 滚动引起的命中区域变化不退出虚拟窗口，实际移动指针后恢复表格操作控件。
-            if (event.pointerType === "mouse" && event.buttons === 0 && (event.movementX || event.movementY)) {
-                const table = (event.target as Element).closest?.<HTMLTableElement>(`table[${TABLE_VIRTUAL_ID}]`);
-                if (table) {
-                    this.restore(table);
-                }
-            }
-        }, {capture: true, signal});
         document.addEventListener("selectionchange", () => {
             const selection = getSelection();
             if (selection && !selection.isCollapsed && selection.rangeCount &&
@@ -144,8 +151,23 @@ export class LargeTableVirtualizer {
         });
         this.states.forEach((state, table) => {
             if (!table.isConnected || records.some(record => table.contains(record.target) ||
-                record.target instanceof Element && record.target.contains(table))) {
-                this.restore(table);
+                record.type === "childList" && record.target instanceof Element && record.target.contains(table))) {
+                const relevant = records.filter(record => table.contains(record.target));
+                const cellContentOnly = table.isConnected && relevant.length > 0 && relevant.every(record => {
+                    const element = record.target instanceof Element ? record.target : record.target.parentElement;
+                    const cell = element?.closest("td, th");
+                    return cell?.closest("table") === table && (record.type !== "attributes" ||
+                        record.attributeName === "class" || record.attributeName === "style") &&
+                        !cell.matches(".fn__none, [hidden], [style*='display: none'], [style*='display:none']") &&
+                        !cell.querySelector(".table__cell-rich, table, img, video, audio, iframe, canvas, math") &&
+                        !Array.from(record.addedNodes).some(node => node instanceof Element && node.matches("tr, td, th"));
+                });
+                if (cellContentOnly) {
+                    this.measureChunks(state);
+                    this.schedule();
+                } else {
+                    this.restore(table);
+                }
             }
         });
         // 内联编辑器异步挂载完成后重新扫描，避免首次滚动早于编辑器就绪而停留在完整表格。
@@ -178,6 +200,17 @@ export class LargeTableVirtualizer {
         if (rules !== this.styleElement.textContent) {
             this.styleElement.textContent = rules;
         }
+    }
+
+    private measureChunks(state: ITableViewport) {
+        const top = state.body.getBoundingClientRect().top;
+        state.chunks.forEach(chunk => {
+            const first = (chunk.rows?.[0] || chunk.placeholder).getBoundingClientRect();
+            const last = (chunk.rows?.[chunk.rows.length - 1] || chunk.placeholder).getBoundingClientRect();
+            chunk.top = first.top - top;
+            chunk.height = last.bottom - first.top;
+        });
+        state.height = state.table.getBoundingClientRect().height;
     }
 
     private prepare(table: HTMLTableElement): ITableViewport | undefined {
@@ -251,7 +284,10 @@ export class LargeTableVirtualizer {
     private refresh() {
         this.onMutations(this.observer.takeRecords());
         const selection = getSelection();
-        if (!this.editor.isConnected || this.interacting || this.composing || this.blocked() ||
+        if (this.interacting) {
+            return;
+        }
+        if (!this.editor.isConnected || this.composing || this.blocked() ||
             selection && !selection.isCollapsed && selection.rangeCount &&
             selection.getRangeAt(0).intersectsNode(this.editor)) {
             this.restore();
@@ -291,14 +327,11 @@ export class LargeTableVirtualizer {
                     !!row.querySelector(".table__cell-editor"));
                 if (pinned || isTableChunkVisible(chunk.top, chunk.height, top, bottom)) {
                     if (!chunk.rows) {
-                        const source = document.createElement("tbody");
-                        source.innerHTML = chunk.placeholder.getAttribute(TABLE_VIRTUAL_ROWS);
-                        chunk.rows = Array.from(source.rows);
-                        chunk.placeholder.replaceWith(...chunk.rows);
-                        chunk.placeholder.removeAttribute(TABLE_VIRTUAL_ROWS);
+                        chunk.rows = restoreTableVirtualizationRows(chunk.placeholder);
                     }
                 } else if (chunk.rows) {
-                    chunk.placeholder.setAttribute(TABLE_VIRTUAL_ROWS, chunk.rows.map(row => row.outerHTML).join(""));
+                    chunk.placeholder.cells[0].style.height = `${chunk.height}px`;
+                    cacheTableVirtualizationRows(chunk.placeholder, chunk.rows);
                     chunk.rows[0].before(chunk.placeholder);
                     chunk.rows.forEach(row => row.remove());
                     chunk.rows = undefined;

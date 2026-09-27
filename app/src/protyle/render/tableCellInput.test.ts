@@ -41,10 +41,11 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     const api = new Function(...Object.keys(dependencies), source + "\nreturn {input, insertRow, insertRowAbove, insertColumn, " +
         "getAgentLute, configureAVRichTextLute, getTableCellEditorLute, getAVRichTextLute, " +
         "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, " +
-        "setTableCellRich, getTableCellInlineHTML, getSelectionOffset, focusByOffset};")(...Object.values(dependencies)) as
+        "setTableCellRich, getTableCellInlineHTML, getSelectionOffset, focusByOffset, " +
+        "getTableVirtualRowIndex, restoreTableVirtualizationDOM};")(...Object.values(dependencies)) as
         typeof import("../wysiwyg/input") & typeof import("../util/table") & typeof import("./setLute") &
         typeof import("./av/richText") & typeof import("./av/richTextValue") & typeof import("../util/tableCellRichLute") &
-        typeof import("../util/tableCellRich") & typeof import("../util/selection");
+        typeof import("../util/tableCellRich") & typeof import("../util/selection") & typeof import("../util/tableVirtualizationDOM");
     const lute = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const Queue = new Function(queueSource + "\nreturn InputQueue;")() as new () => {

@@ -27,6 +27,7 @@ import {setTableCellRichContext} from "../util/tableCellRichContext";
 import {updateOutlineCurrentBlock} from "../util/outlineBlock";
 import {canEnterCodeBlock} from "../wysiwyg/codeBlockEnter";
 import {bindLiteCodeActions} from "../lite/codeActions";
+import {getTableVirtualRowIndex, restoreTableVirtualizationDOM} from "../util/tableVirtualizationDOM";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 let openingEditor: object | undefined;
@@ -101,7 +102,7 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
     openingEditor = request;
     const tableID = table.dataset.nodeId;
     const tableParent = table.parentElement;
-    const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+    const rowIndex = getTableVirtualRowIndex(cell.parentElement as HTMLTableRowElement);
     const cellIndex = cell.cellIndex;
     // 记录预览中被点击的公式位置，在重建单元格后打开对应公式的编辑面板。
     const clickedMath = point?.target?.closest('[data-subtype="math"]');
@@ -237,6 +238,8 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
                 contentChanged = false;
                 return;
             }
+            // 事务的撤销定位使用完整单元格索引，提交修改前恢复屏外行。
+            restoreTableVirtualizationDOM(table);
             const oldHTML = cleanTableCellRichHTML(table.outerHTML);
             const redoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection(), true) || undoSelection;
             const tableRange = document.createRange();

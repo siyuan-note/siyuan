@@ -1,6 +1,6 @@
 import {MenuItem} from "../../menus/Menu";
 import {getTableGridRect, TableGridCache} from "./tableGridCache";
-import {TABLE_VIRTUAL_ID} from "./tableVirtualizationDOM";
+import {TABLE_VIRTUAL_ID, TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
 import {clearTableCellContent, getTableCellPlainText, mergeTableCellContents} from "./tableCellRich";
 import {renderTableCellRichElements} from "../render/tableCellRich";
 import {updateTransaction} from "../wysiwyg/transaction";
@@ -117,7 +117,7 @@ const getCell = (target: EventTarget | Node) => {
     const element = target instanceof Element ? target : (target as Node)?.parentElement;
     const cell = element?.closest?.("th, td") as HTMLTableCellElement;
     const editor = element?.closest?.(".table__cell-editor");
-    return cell && !cell.closest(".mindmap-view__preview-block") &&
+    return cell && !cell.closest(`.mindmap-view__preview-block, tr[${TABLE_VIRTUAL_ROWS}]`) &&
         (element.closest(".protyle-wysiwyg") === cell.closest(".protyle-wysiwyg") ||
         editor?.parentElement === cell) ? cell : undefined;
 };
@@ -484,9 +484,10 @@ export class TableControl {
         if (!node || !table || getTableNode(activeCell) !== node || activeCell.closest("table") !== table) {
             return false;
         }
-        const grid = buildTableGrid(table);
-        const anchorInfo = grid.cellInfos.find(item => item.cell === anchorCell);
-        const activeInfo = grid.cellInfos.find(item => item.cell === activeCell);
+        const cached = this.gridCache.get(table);
+        const grid = cached.grid;
+        const anchorInfo = cached.cells.get(anchorCell);
+        const activeInfo = cached.cells.get(activeCell);
         const cells = getTableCellsInRectangle(grid.cellInfos, anchorInfo, activeInfo).map(item => item.cell);
         if (cells.length === 0) {
             return false;
@@ -1129,7 +1130,7 @@ export class TableControl {
     private getEdgeHover(clientX: number, clientY: number) {
         const candidates: ITableEdgeHover[] = [];
         this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
-            if (table.hasAttribute(TABLE_VIRTUAL_ID) || table.closest(".protyle-custom, .mindmap-view__preview-block")) {
+            if (table.closest(".protyle-custom, .mindmap-view__preview-block")) {
                 return;
             }
             const gridRect = getTableGridRect(table);
@@ -1340,7 +1341,7 @@ export class TableControl {
         const cell = hoverCell || caretCell || selectionCell;
         const node = getTableNode(cell);
         const table = cell?.closest("table") as HTMLTableElement;
-        const visible = !!cell && !!node && !!table && !table.hasAttribute(TABLE_VIRTUAL_ID) && !this.protyle.disabled;
+        const visible = !!cell && !!node && !!table && !this.protyle.disabled;
         [this.rowHandle, this.columnHandle, this.cellHandle, this.addRowButton, this.addColumnButton,
             this.addBothButton].forEach(item => {
             item.classList.add("fn__none");
@@ -1369,7 +1370,9 @@ export class TableControl {
             const columnRect = typeof columnIndex === "number" ?
                 this.getColumnRect(table, grid, columnIndex) : undefined;
             const visibleColumnRect = columnRect ? intersectRects(columnRect, viewportRect) : undefined;
-            const merged = grid === cached.grid ? cached.merged : grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1);
+            // 虚拟窗口的跨列占位行不属于合并单元格，操作前会恢复完整网格。
+            const merged = !table.hasAttribute(TABLE_VIRTUAL_ID) &&
+                (grid === cached.grid ? cached.merged : grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1));
             this.rowHandle.classList.toggle("protyle-table-control__handle--drag-disabled", merged ||
                 (this.selection?.table === table && this.selection.mode === "row" &&
                     this.selection.indexes.size > 1 && this.selection.indexes.has(0)));
@@ -1418,8 +1421,7 @@ export class TableControl {
                     rowControlCenter);
             }
         }
-        if (!this.dragState && !this.selection && caretCell && getTableNode(caretCell) &&
-            !caretCell.closest(`table[${TABLE_VIRTUAL_ID}]`) && !this.protyle.disabled) {
+        if (!this.dragState && !this.selection && caretCell && getTableNode(caretCell) && !this.protyle.disabled) {
             const table = caretCell.closest("table") as HTMLTableElement;
             const viewportRect = table ? this.getTableGridViewportRect(table) : undefined;
             if (viewportRect) {

@@ -11,7 +11,7 @@ const browserCases = async (source: string, css: string) => {
     const check: typeof assert = require("node:assert/strict");
     const api = new Function("Constants", "isInEmbedBlock", source +
         "\nreturn {LargeTableVirtualizer, cleanTableVirtualizationHTML, protectLuteTableVirtualization, " +
-        "restoreTableVirtualizationDOM, TableGridCache, buildTableGrid, getTableGridRect, searchMarkRender, " +
+        "restoreTableVirtualizationDOM, getTableVirtualRowIndex, TableGridCache, buildTableGrid, getTableGridRect, searchMarkRender, " +
         "cleanBlockSelectionModeOperations, createEditor: protyle => new VirtualizedEditor(protyle)};")({TIMEOUT_TRANSITION: 0}, () => false) as
         typeof import("./tableVirtualization") & typeof import("../util/tableVirtualizationDOM") &
         typeof import("../util/tableGridCache") & typeof import("../util/table") & typeof import("../render/searchMarkRender") & {
@@ -52,6 +52,7 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         const table = editor.querySelector("table");
         mutate?.(table);
         const original = editor.innerHTML;
+        const originalLastRow = table.rows[table.rows.length - 1];
         const height = table.getBoundingClientRect().height;
         const widths = Array.from(table.rows[1].cells).map(cell => cell.getBoundingClientRect().width);
         const scroller = pinned ? table.parentElement : viewport;
@@ -63,7 +64,7 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         const editorController = api.createEditor(owner);
         editorController.prepareBlockVirtualization(editor, true);
         const virtualizer = editorController.virtualizer;
-        return {root, viewport, editor, table, original, height, widths, scroller, virtualizer, highlight,
+        return {root, viewport, editor, table, original, originalLastRow, height, widths, scroller, virtualizer, highlight,
             owner, editorController,
             destroy: () => { virtualizer.destroy(); root.remove(); }};
     };
@@ -90,6 +91,11 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         });
         await tick();
         reduced(f.table, `initial pinned=${pinned}`);
+        f.table.querySelector("tbody td").dispatchEvent(new PointerEvent("pointermove", {
+            bubbles: true, pointerType: "mouse", movementX: 10, movementY: 5,
+        }));
+        await tick();
+        reduced(f.table, "hover does not materialize offscreen rows");
         check.equal(api.cleanTableVirtualizationHTML(f.editor.innerHTML), f.original, "source round trip is lossless");
         check.ok(Math.abs(f.table.getBoundingClientRect().height - f.height) < 2, "initial height is retained");
         for (const progress of [0.4, 0.95, 0.1, 0.7, 0]) {
@@ -103,6 +109,7 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
                 check.ok(Math.abs(cell.getBoundingClientRect().width - f.widths[index]) < 1, "column widths stay stable");
             });
             const rowIndex = Number(/Row (\d+)/.exec(row.textContent)[1]);
+            check.equal(api.getTableVirtualRowIndex(row), rowIndex + 1, "cell editor indexes include offscreen rows");
             check.equal(getComputedStyle(row).backgroundColor, rowIndex % 2 === 1 ? "rgb(12, 34, 56)" : "rgba(0, 0, 0, 0)",
                 "window changes retain alternating row backgrounds");
         }
@@ -119,7 +126,11 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         const reference = f.table.querySelector('tbody [data-type="virtual-block-ref"]');
         reference.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: pinned ? "touch" : "mouse"}));
         check.ok(reference.isConnected, "reference interaction retains its event target");
-        check.equal(f.table.tBodies[0].rows.length, 2000, "reference interaction restores the complete table");
+        reduced(f.table, "single-cell interaction keeps offscreen rows detached");
+        reference.dispatchEvent(new Event("copy", {bubbles: true}));
+        check.equal(f.table.tBodies[0].rows.length, 2000, "copy restores the complete table");
+        check.equal(f.table.rows[f.table.rows.length - 1], f.originalLastRow,
+            "interaction reuses offscreen row nodes without parsing the table again");
         reference.dispatchEvent(new PointerEvent("pointerup", {bubbles: true}));
         rowsMatch(protectedLute.SpinBlockDOM(snapshot));
         const operations: IOperation[] = [{action: "update", id: "table", data: snapshot},
@@ -184,6 +195,8 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         check.equal(getSelection().anchorNode, range.startContainer);
         reduced(f.table);
         cell.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: "mouse"}));
+        reduced(f.table, "click does not materialize the entire table");
+        cell.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerType: "mouse", buttons: 1, movementX: 10}));
         check.equal(f.table.tBodies[0].rows.length, 2000, "pointer handling sees all rows synchronously");
         check.ok(cell.isConnected, "materialization preserves the clicked node");
         cell.dispatchEvent(new PointerEvent("pointerup", {bubbles: true, pointerType: "mouse"}));
@@ -197,7 +210,7 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         const next = f.table.querySelector<HTMLTableCellElement>("tbody > tr:not([data-sy-table-virtual-rows]) td");
         next.textContent = "Programmatic edit";
         await tick();
-        rowsMatch(f.editor.innerHTML);
+        rowsMatch(api.cleanTableVirtualizationHTML(f.editor.innerHTML));
         check.ok(f.editor.textContent.includes("Programmatic edit"), "source updates keep visible edits and offscreen rows");
         f.destroy();
     }
@@ -223,8 +236,11 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         cell.innerHTML = '<div class="table__cell-editor table__cell--inline"><div contenteditable="true">Editing</div>' +
             '<button class="fn__none"><svg></svg></button></div>';
         const host = cell.firstElementChild;
+        cell.style.verticalAlign = "top";
+        f.editor.classList.add("protyle-wysiwyg--hiderange");
         cell.dispatchEvent(new PointerEvent("pointerup", {bubbles: true}));
         await tick();
+        reduced(f.table, "cell and selection styles do not materialize the table");
         for (const progress of [0.5, 1, 0]) {
             f.scroller.scrollTop = (f.scroller.scrollHeight - f.scroller.clientHeight) * progress;
             f.root.dispatchEvent(new WheelEvent("wheel", {bubbles: true}));

@@ -2,13 +2,59 @@ export const TABLE_VIRTUAL_ROWS = "data-sy-table-virtual-rows";
 export const TABLE_VIRTUAL_ID = "data-sy-table-virtual-id";
 export const TABLE_VIRTUAL_COLUMNS = "data-sy-table-virtual-columns";
 
+const detachedRows = new WeakMap<HTMLTableRowElement, {html: string, rows: HTMLTableRowElement[]}>();
+
+export const getTableVirtualRowIndex = (row: HTMLTableRowElement) => {
+    let index = 0;
+    for (const current of Array.from(row.closest("table").rows)) {
+        if (current === row) {
+            return index;
+        }
+        const source = current.getAttribute(TABLE_VIRTUAL_ROWS);
+        if (source === null) {
+            index++;
+        } else {
+            const cached = detachedRows.get(current);
+            if (cached?.html === source) {
+                index += cached.rows.length;
+            } else {
+                const body = document.createElement("tbody");
+                body.innerHTML = source;
+                index += body.rows.length;
+            }
+        }
+    }
+    return row.rowIndex;
+};
+
+// 当前编辑器复用已卸载的行节点，快照仍由占位属性独立保存完整内容。
+export const cacheTableVirtualizationRows = (placeholder: HTMLTableRowElement, rows: HTMLTableRowElement[]) => {
+    const html = rows.map(row => row.outerHTML).join("");
+    placeholder.setAttribute(TABLE_VIRTUAL_ROWS, html);
+    detachedRows.set(placeholder, {html, rows});
+};
+
+export const restoreTableVirtualizationRows = (placeholder: HTMLTableRowElement) => {
+    const html = placeholder.getAttribute(TABLE_VIRTUAL_ROWS);
+    const cached = detachedRows.get(placeholder);
+    detachedRows.delete(placeholder);
+    let rows: HTMLTableRowElement[];
+    if (cached?.html === html) {
+        rows = cached.rows;
+    } else {
+        const body = document.createElement("tbody");
+        body.innerHTML = html;
+        rows = Array.from(body.rows);
+    }
+    placeholder.replaceWith(...rows);
+    placeholder.removeAttribute(TABLE_VIRTUAL_ROWS);
+    return rows;
+};
+
 // 占位行携带完整源内容，克隆、撤销快照和编辑器销毁后仍能独立还原。
 export const restoreTableVirtualizationDOM = (root: ParentNode) => {
     root.querySelectorAll<HTMLTableRowElement>(`tr[${TABLE_VIRTUAL_ROWS}]`).forEach(placeholder => {
-        const table = document.createElement("table");
-        const body = table.createTBody();
-        body.innerHTML = placeholder.getAttribute(TABLE_VIRTUAL_ROWS);
-        placeholder.replaceWith(...Array.from(body.childNodes));
+        restoreTableVirtualizationRows(placeholder);
     });
     root.querySelectorAll(`[${TABLE_VIRTUAL_COLUMNS}]`).forEach(columns => {
         const table = document.createElement("table");

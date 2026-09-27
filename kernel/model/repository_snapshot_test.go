@@ -22,7 +22,7 @@ func TestSearchRepoSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{index.ID, " \n" + strings.ToUpper(index.ID) + "\t"} {
+	for _, id := range []string{index.ID, index.ID[:7], index.ID[:15], " \n" + strings.ToUpper(index.ID[:7]) + "\t", " \n" + strings.ToUpper(index.ID) + "\t"} {
 		found, pages, total, searchErr := SearchRepoSnapshot(id)
 		if searchErr != nil || len(found) != 1 || pages != 1 || total != 1 {
 			t.Fatalf("search %q: %v %d %d %v", id, found, pages, total, searchErr)
@@ -43,7 +43,7 @@ func TestSearchRepoSnapshot(t *testing.T) {
 	if found, pages, total, err := SearchRepoSnapshot(missing); err != nil || len(found) != 0 || pages != 0 || total != 0 {
 		t.Fatalf("missing snapshot: %v %d %d %v", found, pages, total, err)
 	}
-	for _, id := range []string{"", "short", "../../outside", strings.Repeat("z", 40)} {
+	for _, id := range []string{"", "short", "abcdef", "abcdefg", "../../outside", strings.Repeat("z", 40), strings.Repeat("a", 41)} {
 		if _, _, _, err := SearchRepoSnapshot(id); err == nil {
 			t.Fatalf("invalid ID accepted: %q", id)
 		}
@@ -51,6 +51,16 @@ func TestSearchRepoSnapshot(t *testing.T) {
 	store, err := dejavu.NewStore(util.RepoDir, Conf.Repo.Key)
 	if err != nil {
 		t.Fatal(err)
+	}
+	other := *index
+	other.ID = index.ID[:7] + strings.Repeat("0", 33)
+	other.Created = index.Created + 1000
+	if err = store.PutIndex(&other); err != nil {
+		t.Fatal(err)
+	}
+	if found, pages, total, searchErr := SearchRepoSnapshot(index.ID[:7]); searchErr != nil || pages != 1 || total != 2 ||
+		len(found) != 2 || found[0].ID != other.ID || found[1].ID != index.ID {
+		t.Fatalf("shared prefix: %v %d %d %v", found, pages, total, searchErr)
 	}
 	corruptID := strings.Repeat("1", 40)
 	dir, file := store.IndexAbsPath(corruptID)
@@ -63,6 +73,9 @@ func TestSearchRepoSnapshot(t *testing.T) {
 	}
 	if _, _, _, err = SearchRepoSnapshot(corruptID); err == nil {
 		t.Fatal("corrupt snapshot returned as missing")
+	}
+	if _, _, _, err = SearchRepoSnapshot(corruptID[:7]); err == nil {
+		t.Fatal("corrupt snapshot prefix returned as missing")
 	}
 	if unchanged, err := os.ReadFile(file); err != nil || !bytes.Equal(unchanged, corrupt) {
 		t.Fatal("corrupt source was modified")

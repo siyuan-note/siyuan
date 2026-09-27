@@ -650,7 +650,7 @@ func TestRepoSnapshotIDContractHTTP(t *testing.T) {
 		id    string
 		code  int
 		count int
-	}{{" " + strings.ToUpper(id) + " ", 0, 1}, {strings.Repeat("0", 40), 0, 0}, {"../invalid", -1, 0}} {
+	}{{" " + strings.ToUpper(id) + " ", 0, 1}, {id[:7], 0, 1}, {strings.Repeat("0", 40), 0, 0}, {"abcdef0", 0, 0}, {"../invalid", -1, 0}} {
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, endpoint,
 			strings.NewReader(fmt.Sprintf(`{"page":99,"id":%q}`, test.id))))

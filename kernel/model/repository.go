@@ -23,7 +23,6 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math"
@@ -989,12 +988,11 @@ type TypeCount struct {
 	Count int    `json:"count"`
 }
 
-// SearchRepoSnapshot 按完整 ID 读取本地快照，复用列表的元数据和下载状态计算。
+// SearchRepoSnapshot 按完整 ID 或至少 7 位前缀读取本地快照，复用列表的元数据和下载状态计算。
 func SearchRepoSnapshot(id string) (ret []*Snapshot, pageCount, totalCount int, err error) {
 	ret = []*Snapshot{}
 	id = strings.ToLower(strings.TrimSpace(id))
-	decoded, decodeErr := hex.DecodeString(id)
-	if decodeErr != nil || len(decoded) != sha1.Size {
+	if len(id) < 7 || len(id) > sha1.Size*2 || strings.Trim(id, "0123456789abcdef") != "" {
 		return ret, 0, 0, errors.New("invalid snapshot ID")
 	}
 	if len(Conf.Repo.Key) == 0 {
@@ -1004,25 +1002,51 @@ func SearchRepoSnapshot(id string) (ret []*Snapshot, pageCount, totalCount int, 
 	if err != nil {
 		return
 	}
-	index, err := repo.GetIndex(id)
-	if os.IsNotExist(err) || errors.Is(err, dejavu.ErrNotFoundIndex) {
+	ids := []string{id}
+	if len(id) < sha1.Size*2 {
+		entries, readErr := os.ReadDir(filepath.Join(repo.Path, "indexes"))
+		if os.IsNotExist(readErr) {
+			return ret, 0, 0, nil
+		}
+		if readErr != nil {
+			return ret, 0, 0, readErr
+		}
+		ids = nil
+		for _, entry := range entries {
+			name := entry.Name()
+			if !entry.IsDir() && len(name) == sha1.Size*2 && strings.HasPrefix(name, id) &&
+				strings.Trim(name, "0123456789abcdef") == "" {
+				ids = append(ids, name)
+			}
+		}
+	}
+	var logs []*dejavu.Log
+	for _, fullID := range ids {
+		index, readErr := repo.GetIndex(fullID)
+		if os.IsNotExist(readErr) || errors.Is(readErr, dejavu.ErrNotFoundIndex) {
+			continue
+		}
+		if readErr != nil {
+			return ret, 0, 0, readErr
+		}
+		files, readErr := repo.GetFiles(index)
+		if readErr != nil {
+			return ret, 0, 0, readErr
+		}
+		logs = append(logs, &dejavu.Log{
+			ID: index.ID, Memo: index.Memo, Created: index.Created,
+			HCreated: time.UnixMilli(index.Created).Format("2006-01-02 15:04:05"),
+			Files:    files, Count: index.Count, Size: index.Size,
+			HSize:    humanize.BytesCustomCeil(uint64(index.Size), 2),
+			SystemID: index.SystemID, SystemName: index.SystemName, SystemOS: index.SystemOS,
+		})
+	}
+	if len(logs) == 0 {
 		return ret, 0, 0, nil
 	}
-	if err != nil {
-		return
-	}
-	files, err := repo.GetFiles(index)
-	if err != nil {
-		return
-	}
-	ret = buildSnapshots([]*dejavu.Log{{
-		ID: index.ID, Memo: index.Memo, Created: index.Created,
-		HCreated: time.UnixMilli(index.Created).Format("2006-01-02 15:04:05"),
-		Files:    files, Count: index.Count, Size: index.Size,
-		HSize:    humanize.BytesCustomCeil(uint64(index.Size), 2),
-		SystemID: index.SystemID, SystemName: index.SystemName, SystemOS: index.SystemOS,
-	}})
-	return ret, 1, 1, nil
+	sort.SliceStable(logs, func(i, j int) bool { return logs[i].Created > logs[j].Created })
+	ret = buildSnapshots(logs)
+	return ret, 1, len(ret), nil
 }
 
 func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err error) {

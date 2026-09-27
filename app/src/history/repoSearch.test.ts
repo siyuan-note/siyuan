@@ -20,7 +20,7 @@ it("keeps snapshot ID lookup separate from file search and normal pagination", a
         const next = {...node(), nextElementSibling: {nextElementSibling: node()}};
         const nodes: Record<string, unknown> = {
             ".b3-text-field": searchInput,
-            '[data-type="repoSearchMode"]': {...node(), value: test.mode},
+            '[data-type="repoSearchMode"]': {...node(), value: test.mode, parentElement: node()},
             '[data-type="repoList"]': node(),
             'button[data-type="jumpRepoPage"]': node(),
             '[data-type="previous"]': node(),

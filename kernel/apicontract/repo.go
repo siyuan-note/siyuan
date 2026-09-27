@@ -59,7 +59,8 @@ type UploadCloudSnapshotRequest struct {
 }
 type GetRepoSnapshotsRequest struct {
 	Page float64 `json:"page"`
-	// ID 可选，去除首尾空白后按完整的 40 位十六进制快照 ID 查询本地仓库，忽略分页。
+	// ID 可选，去除首尾空白后按 7 至 40 位十六进制快照 ID 前缀查询本地仓库，不区分大小写，忽略分页。
+	// 前缀匹配多个快照时全部返回，按创建时间降序排列。
 	// 省略或留空时保留分页列表；未找到返回空列表，格式错误及仓库读取失败返回错误。
 	ID string `json:"id" api:"optional"`
 }

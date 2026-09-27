@@ -248,6 +248,34 @@
     border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
   }
 
+  &__repo-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  &__repo-search {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    flex: 1 1 320px;
+    min-width: 0;
+
+    .b3-select {
+      max-width: 100%;
+      flex-shrink: 0;
+    }
+
+    .b3-form__icon {
+      flex: 1 1 160px;
+      min-width: 0;
+    }
+
+    .b3-text-field {
+      width: 100%;
+    }
+  }
+
   &__date {
     text-align: center;
     line-height: 20px;

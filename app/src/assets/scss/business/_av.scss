@@ -2564,7 +2564,7 @@ img.av__cellassetimg {
   }
 
   .av__relation-fields {
-    max-height: 180px;
+    max-height: min(180px, 30vh);
     overflow: auto;
     padding: 8px;
   }

@@ -53,7 +53,11 @@ data-width="${escapeAttr(column.id)}" aria-label="${escapeAttr(column.name + " "
         onResize();
     });
     fields.addEventListener("click", event => event.stopPropagation());
-    fields.addEventListener("keydown", event => event.stopPropagation());
+    fields.addEventListener("keydown", event => {
+        if (event.key !== "Escape") {
+            event.stopPropagation();
+        }
+    });
     fields.addEventListener("change", event => {
         event.stopPropagation();
         const input = event.target as HTMLInputElement;

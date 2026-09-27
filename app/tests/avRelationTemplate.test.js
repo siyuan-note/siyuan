@@ -75,6 +75,12 @@ const runCases = sources => {
     const columns = [{id: "primary", name: "Title"}, {id: "other", name: "Other"}];
     const update = bindRelationLayout(root, "database", () => {});
     update(columns, "32px 240px 160px");
+    const bubbledKeys = [];
+    root.addEventListener("keydown", event => bubbledKeys.push(event.key));
+    for (const key of ["ArrowUp", "Escape"]) {
+        root.querySelector(".av__relation-fields").dispatchEvent(new KeyboardEvent("keydown", {key, bubbles: true}));
+    }
+    assert.deepEqual(bubbledKeys, ["Escape"]);
     root.querySelector("button").click();
     assert.equal(root.querySelector('[data-column="primary"]').disabled, true);
     const other = root.querySelector('[data-column="other"]');

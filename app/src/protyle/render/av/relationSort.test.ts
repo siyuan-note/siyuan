@@ -4,6 +4,32 @@ import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {transpileModule, ScriptTarget} from "typescript";
 
+it("keeps the footer loader hidden while refreshing existing candidates", () => {
+    const source = readFileSync(join(__dirname, "relation.ts"), "utf8");
+    const start = source.indexOf("    const loadPage = (reset: boolean) => {");
+    const end = source.indexOf('    listElement.addEventListener("mousedown"', start);
+    assert.ok(start > 0 && end > start);
+    for (const test of [{initial: true, reset: true, loader: true},
+        {initial: false, reset: true, loader: false}, {initial: false, reset: false, loader: true}]) {
+        const loading: boolean[] = [];
+        const dependencies = {
+            state: {loading: false, page: 1, total: 32, keyword: "", controller: undefined as AbortController | undefined},
+            initialLoad: test.initial,
+            hasMore: () => true,
+            getSelectedItems: (): {id: string}[] => [],
+            setLoading: (show: boolean) => loading.push(show),
+            relationElement: {getAttribute: () => "database"},
+            RELATION_PAGE_SIZE: 16,
+            fetchPost: () => ({finally() {}}),
+        };
+        const loadPage = new Function(...Object.keys(dependencies), transpileModule(source.slice(start, end), {
+            compilerOptions: {target: ScriptTarget.ES2021},
+        }).outputText + "\nreturn loadPage;")(...Object.values(dependencies));
+        loadPage(test.reset);
+        assert.deepEqual(loading, [test.loader]);
+    }
+});
+
 it("toggles one candidate sort, resets paging, and ignores width dragging", () => {
     const source = readFileSync(join(__dirname, "relation.ts"), "utf8");
     const start = source.indexOf('    listElement.addEventListener("click", event => {');

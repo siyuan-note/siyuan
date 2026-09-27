@@ -677,7 +677,7 @@ export const bindRelationEvent = (options: {
 <div class="av__relation-table-selected" data-relation-type="selectedRows">${selectedHTML}</div>
 <div class="b3-menu__separator" data-relation-type="separator"></div>
 <div class="av__relation-table-candidates" data-relation-type="candidateRows">${candidateHTML}</div>
-${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
+${genRelationLoaderHTML(false)}`;
         } else {
             candidateHTML = genRelationRowsHTML(data.rows || [], state.columns, "candidate", gridTemplate, excludedIDs);
             if (candidateHTML) {
@@ -713,7 +713,8 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
         const selectedItems = getSelectedItems();
         state.controller = controller;
         state.loading = true;
-        setLoading(true, initialLoad && reset, controller);
+        // 已有条目刷新时保留列表尺寸，首次加载和追加分页显示底部加载提示。
+        setLoading(initialLoad || !reset, initialLoad && reset, controller);
         let succeeded = false;
         fetchPost("/api/av/getAttributeViewRelationCandidates", {
             avID: relationElement.getAttribute("data-source-av-id"),

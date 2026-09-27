@@ -1,5 +1,7 @@
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {setStorageVal} from "../../util/compatibility";
+import {getColIconByType} from "./col";
+import {unicode2Emoji} from "../../../emoji";
 
 const STORAGE_KEY = "local-av-relation-layout";
 
@@ -15,6 +17,7 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
     const button = root.querySelector<HTMLButtonElement>('[data-type="relationFields"]');
     let columns: IAVColumn[] = [];
     let defaultWidths: string[] = [];
+    let initialized = !!saved;
     const widthOf = (index: number) => {
         const width = layout.widths[columns[index].id];
         return Number.isFinite(width) ? `${Math.max(64, Math.min(800, width))}px` : defaultWidths[index];
@@ -37,13 +40,23 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
         setStorageVal(STORAGE_KEY, value);
     };
     const renderFields = () => {
-        fields.innerHTML = columns.map((column, index) => `<div class="av__relation-field">
-<label class="fn__flex fn__flex-1"><input type="checkbox" class="b3-switch" data-column="${escapeAttr(column.id)}"
-${index === 0 ? "checked disabled" : layout.hidden.includes(column.id) ? "" : "checked"}>
-<span class="fn__space"></span><span class="fn__ellipsis">${escapeHtml(column.name)}</span></label>
-<input type="number" class="b3-text-field" min="64" max="800" step="1" value="${parseFloat(widthOf(index))}"
-data-width="${escapeAttr(column.id)}" aria-label="${escapeAttr(column.name + " " + window.siyuan.languages.width)}">
-</div>`).join("");
+        fields.innerHTML = [false, true].map(hidden => {
+            const group = columns.filter((column, index) => (index > 0 && layout.hidden.includes(column.id)) === hidden);
+            if (group.length === 0) {
+                return "";
+            }
+            return `${hidden ? '<button class="b3-menu__separator"></button>' : ""}
+<button class="b3-menu__item" data-type="nobg" data-all="${hidden ? "show" : "hide"}">
+    <span class="b3-menu__label">${window.siyuan.languages[hidden ? "hideCol" : "showCol"]}</span>
+    <span class="block__icon">${window.siyuan.languages[hidden ? "showAll" : "hideAll"]}
+        <span class="fn__space"></span><svg><use xlink:href="#${hidden ? "iconEye" : "iconEyeoff"}"></use></svg>
+    </span>
+</button>${group.map(column => `<button class="b3-menu__item" data-column="${escapeAttr(column.id)}" ${column === columns[0] ? 'data-type="nobg" aria-disabled="true"' : ""}>
+    ${column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
+    <span class="b3-menu__label">${escapeHtml(column.name) || "&nbsp;"}</span>
+    <svg class="b3-menu__action b3-menu__action--show${column === columns[0] ? " fn__none" : ""}"><use xlink:href="#${hidden ? "iconEye" : "iconEyeoff"}"></use></svg>
+</button>`).join("")}`;
+        }).join("");
     };
     button.addEventListener("click", event => {
         event.stopPropagation();
@@ -52,31 +65,30 @@ data-width="${escapeAttr(column.id)}" aria-label="${escapeAttr(column.name + " "
         renderFields();
         onResize();
     });
-    fields.addEventListener("click", event => event.stopPropagation());
+    fields.addEventListener("click", event => {
+        event.stopPropagation();
+        const target = (event.target as HTMLElement).closest<HTMLElement>("[data-column], [data-all]");
+        if (!target) {
+            return;
+        }
+        if (target.dataset.all) {
+            layout.hidden = target.dataset.all === "hide" ? columns.slice(1).map(column => column.id) : [];
+        } else {
+            const id = target.dataset.column;
+            if (id === columns[0]?.id) {
+                return;
+            }
+            layout.hidden = layout.hidden.includes(id) ? layout.hidden.filter(item => item !== id) : [...layout.hidden, id];
+        }
+        apply();
+        save();
+        renderFields();
+        onResize();
+    });
     fields.addEventListener("keydown", event => {
         if (event.key !== "Escape") {
             event.stopPropagation();
         }
-    });
-    fields.addEventListener("change", event => {
-        event.stopPropagation();
-        const input = event.target as HTMLInputElement;
-        if (input.dataset.column) {
-            layout.hidden = layout.hidden.filter(id => id !== input.dataset.column);
-            if (!input.checked) {
-                layout.hidden.push(input.dataset.column);
-            }
-        } else if (input.dataset.width) {
-            if (!Number.isFinite(input.valueAsNumber)) {
-                renderFields();
-                return;
-            }
-            layout.widths[input.dataset.width] = Math.max(64, Math.min(800, Math.round(input.valueAsNumber)));
-            input.value = String(layout.widths[input.dataset.width]);
-        }
-        apply();
-        save();
-        onResize();
     });
     root.addEventListener("pointerdown", event => {
         const handle = (event.target as HTMLElement).closest<HTMLElement>(".av__widthdrag");
@@ -108,6 +120,10 @@ data-width="${escapeAttr(column.id)}" aria-label="${escapeAttr(column.name + " "
     });
     return (nextColumns: IAVColumn[], gridTemplate: string) => {
         columns = nextColumns;
+        if (!initialized && columns.length > 0) {
+            layout.hidden = columns.slice(4).map(column => column.id);
+            initialized = true;
+        }
         defaultWidths = gridTemplate.split(" ").slice(1);
         apply();
         if (!fields.classList.contains("fn__none")) {

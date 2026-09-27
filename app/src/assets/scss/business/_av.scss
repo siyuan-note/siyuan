@@ -2569,22 +2569,6 @@ img.av__cellassetimg {
     padding: 8px;
   }
 
-  .av__relation-field {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-
-    label {
-      min-width: 0;
-      align-items: center;
-    }
-
-    .b3-text-field {
-      width: 80px;
-    }
-  }
-
   .av__relation-table {
     border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
     overflow: auto;

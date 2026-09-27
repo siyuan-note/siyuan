@@ -15,6 +15,8 @@ const runCases = sources => {
         return content;
     }};
     const dependencies = {
+        "./col": {getColIconByType: () => "iconText"},
+        "../../../emoji": {unicode2Emoji: () => ""},
         "../../util/compatibility": {setStorageVal: () => {}},
         "../../../util/escape": {escapeAttr: escape, escapeHtml: escape},
         "../../../emoji/fileTreeIcon": {getFileTreeIconHTML: () => ""},
@@ -82,18 +84,15 @@ const runCases = sources => {
     }
     assert.deepEqual(bubbledKeys, ["Escape"]);
     root.querySelector("button").click();
-    assert.equal(root.querySelector('[data-column="primary"]').disabled, true);
+    assert.equal(root.querySelector('[data-column="primary"]').getAttribute("aria-disabled"), "true");
     const other = root.querySelector('[data-column="other"]');
-    other.checked = false;
-    other.dispatchEvent(new Event("change", {bubbles: true}));
+    other.click();
     assert.equal(root.querySelectorAll('[data-relation-column="other"].fn__none').length, 2);
-    const width = root.querySelector('[data-width="primary"]');
-    width.value = "360";
-    width.dispatchEvent(new Event("change", {bubbles: true}));
-    assert.equal(window.siyuan.storage["local-av-relation-layout"].database.widths.primary, 360);
+    assert.equal(root.querySelector("input"), null);
+    assert.equal(root.querySelector('[data-column="other"] .b3-menu__action use').getAttribute("xlink:href"), "#iconEye");
     assert.deepEqual(window.siyuan.storage["local-av-relation-layout"].database.hidden, ["other"]);
     update(columns, "32px 240px 160px");
-    assert.match(root.querySelector(".av__relation-table-row").style.gridTemplateColumns, /360px/);
+    window.siyuan.storage["local-av-relation-layout"].database.widths.primary = 360;
     const reopened = root.cloneNode(true);
     bindRelationLayout(reopened, "database", () => {})(columns, "32px 240px 160px");
     assert.equal(reopened.querySelectorAll('[data-relation-column="other"].fn__none').length, 2);
@@ -101,6 +100,20 @@ const runCases = sources => {
     const independent = root.cloneNode(true);
     bindRelationLayout(independent, "another", () => {})(columns, "32px 240px 160px");
     assert.equal(independent.querySelectorAll('[data-relation-column="other"].fn__none').length, 0);
+    const many = [...columns, {id: "third", name: "Third"}, {id: "fourth", name: "Fourth"}, {id: "fifth", name: "Fifth"}];
+    const defaults = root.cloneNode(true);
+    const updateDefaults = bindRelationLayout(defaults, "defaults", () => {});
+    updateDefaults(many, "32px 240px 160px 160px 160px 160px");
+    assert.equal(defaults.querySelector('[data-column="fourth"] .b3-menu__action use').getAttribute("xlink:href"), "#iconEyeoff");
+    assert.equal(defaults.querySelector('[data-column="fifth"] .b3-menu__action use').getAttribute("xlink:href"), "#iconEye");
+    defaults.querySelector('[data-column="fifth"]').click();
+    assert.deepEqual(window.siyuan.storage["local-av-relation-layout"].defaults.hidden, []);
+    updateDefaults(many, "32px 240px 160px 160px 160px 160px");
+    assert.equal(defaults.querySelector('[data-column="fifth"] .b3-menu__action use').getAttribute("xlink:href"), "#iconEyeoff");
+    defaults.querySelector('[data-all="hide"]').click();
+    assert.deepEqual(window.siyuan.storage["local-av-relation-layout"].defaults.hidden, ["other", "third", "fourth", "fifth"]);
+    defaults.querySelector('[data-all="show"]').click();
+    assert.deepEqual(window.siyuan.storage["local-av-relation-layout"].defaults.hidden, []);
 };
 
 const runElectron = async () => {

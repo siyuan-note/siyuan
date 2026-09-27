@@ -180,6 +180,7 @@ export class ListMindmapView {
         this.canvas.setAttribute("aria-hidden", "true");
         this.world = createElement("div", "mindmap-view__world");
         this.inspector = createElement("div", "mindmap-view__inspector");
+        this.inspector.setAttribute("data-prevent-swipe", "true");
         this.inspector.hidden = true;
         this.zoomLabel = createElement("span", "mindmap-view__zoom");
         this.viewport.append(this.canvas, this.world);

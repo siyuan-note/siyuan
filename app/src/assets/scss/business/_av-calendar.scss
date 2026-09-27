@@ -332,6 +332,12 @@
       text-decoration: underline .5px var(--b3-border-color);
     }
 
+    .b3-menu__avemoji {
+      height: 20px;
+      line-height: 20px;
+      vertical-align: top;
+    }
+
     &[data-wrap="true"] {
       display: block;
       overflow: visible;
@@ -340,6 +346,10 @@
         white-space: pre-wrap;
         word-break: normal;
         overflow-wrap: anywhere;
+
+        &--rich {
+          white-space: normal;
+        }
       }
 
       .av__cell--relation {

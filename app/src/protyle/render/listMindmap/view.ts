@@ -2236,14 +2236,14 @@ export class ListMindmapView {
         }
     }
 
-    private editRelationLabel(event: MouseEvent) {
+    private editRelationLabel(event?: MouseEvent) {
         const relation = this.model.metadata.relations.find(item => item.id === this.selectedRelation);
         const element = this.relationElements.get(this.selectedRelation);
         if (!relation || !element) {
             return;
         }
-        event.preventDefault();
-        event.stopPropagation();
+        event?.preventDefault();
+        event?.stopPropagation();
         this.finishRelationEdit?.(true);
         this.inspector.hidden = true;
         const input = createElement("input", "b3-text-field mindmap-view__relation mindmap-view__relation-editor");
@@ -2626,8 +2626,8 @@ export class ListMindmapView {
             }
             const change = (patch: Partial<ListMindmapRelation>) => this.options.onRelationChange?.(relation.id, patch);
             color(relation.color, value => change({color: value}));
-            const remove = squareButton("delete", "iconTrashcan", () => this.options.onRelationDelete?.(relation.id));
-            this.inspector.append(remove);
+            this.inspector.append(squareButton("edit", "iconEdit", () => this.editRelationLabel()),
+                squareButton("delete", "iconTrashcan", () => this.options.onRelationDelete?.(relation.id)));
             return;
         }
         if (this.selectedEdge) {

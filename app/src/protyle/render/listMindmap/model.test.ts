@@ -1651,6 +1651,28 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.selectedRelation = "drag-route";
     view.updateSelection();
     relationChanges.length = 0;
+    for (const scale of [.5, 1, 2]) {
+        view.scale = scale;
+        view.draw();
+        host.querySelector<HTMLButtonElement>('.mindmap-view__relation[data-relation-id="drag-route"]').click();
+        const edit = inspector.querySelector<HTMLButtonElement>('[aria-label="edit"]');
+        check.ok(edit, "short relations expose text editing outside their route handles");
+        edit.click();
+        const input = host.querySelector<HTMLInputElement>(".mindmap-view__relation-editor");
+        check.equal(document.activeElement, input);
+        check.equal(input.value, "");
+        input.value = "Short connection";
+        input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+        check.deepEqual(relationChanges.pop(), ["drag-route", {label: "Short connection"}]);
+        check.equal(host.querySelector(".mindmap-view__relation-editor"), null);
+        host.querySelector<HTMLButtonElement>('.mindmap-view__relation[data-relation-id="drag-route"]').click();
+        inspector.querySelector<HTMLButtonElement>('[aria-label="edit"]').click();
+        host.querySelector<HTMLInputElement>(".mindmap-view__relation-editor")
+            .dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+        check.equal(relationChanges.length, 0);
+    }
+    view.scale = 1;
+    view.draw();
     const automaticRoute = JSON.stringify(view.relationRoutes.get("drag-route"));
     const screenNodes = () => [alpha, beta].map(id => {
         const bounds = nodeElement(id).getBoundingClientRect();

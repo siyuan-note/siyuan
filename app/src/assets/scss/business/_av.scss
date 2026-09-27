@@ -1,3 +1,333 @@
+// 单字段条件编辑器供筛选菜单和条件颜色对话框共用。
+@mixin av-filter-editor {
+  .b3-menu__item.av__filter-row {
+    margin: 6px 0;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .av__filter-rowinner {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    min-height: 28px;
+    gap: 6px;
+  }
+
+  .av__filter-group-children .b3-menu__item.av__filter-row,
+  .av__filter-group-children .av__filter-group-item {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  // 筛选面板内的下拉/输入控件统一为描边卡片样式（与字段选择器一致）
+  .av__filter-row .b3-select,
+  .av__filter-row .b3-text-field--text,
+  .av__filter-group-left .b3-select {
+    border: 1px solid var(--b3-theme-surface-lighter);
+    border-radius: var(--b3-border-radius);
+    background-color: var(--b3-menu-background);
+    box-shadow: none;
+
+    &:hover,
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .av__filter-field {
+    max-width: 120px;
+  }
+
+  .av__filter-num {
+    width: 50px;
+  }
+
+  .av__field-wrapper {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    height: 28px;
+    border: 1px solid var(--b3-theme-surface-lighter);
+    border-radius: var(--b3-border-radius);
+    padding: 0 4px 0 6px;
+    gap: 2px;
+    box-sizing: border-box;
+    background-color: var(--b3-menu-background);
+  }
+
+  // 字段选择器嵌入描边容器内，去掉自身描边避免双重描边
+  .av__field-wrapper .b3-select {
+    border: 0;
+    box-shadow: none;
+    background-color: transparent;
+
+    &:hover,
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .av__field-wrapper .b3-menu__icon {
+    margin-right: 0;
+    width: 16px;
+    height: 16px;
+  }
+
+  .b3-menu__item.av__filter-row:hover {
+    background-color: transparent;
+  }
+
+  .av__filter-value {
+    display: inline-flex;
+    align-items: center;
+    flex: 1;
+    min-width: 60px;
+  }
+
+  .av__filter-date-controls {
+    display: inline-flex;
+    align-items: center;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 60px;
+  }
+
+  .av__filter-date-config {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  &.av__filter-panel {
+    min-width: 340px;
+    max-width: 80vw;
+    width: fit-content;
+  }
+
+  .av__filter-date-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .av__filter-date-col {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .av__select-trigger {
+    display: inline-flex;
+    align-items: center;
+    flex: 1;
+    min-width: 60px;
+    cursor: pointer;
+    overflow: hidden;
+    gap: 4px;
+    color: var(--b3-theme-on-surface);
+
+    .ft__on-surface {
+      font-size: 14px;
+    }
+
+    &-arrow {
+      flex-shrink: 0;
+      width: 10px;
+      height: 10px;
+    }
+  }
+
+  .av__select-dropdown {
+    position: fixed;
+    width: fit-content;
+    min-width: 120px;
+    max-height: 240px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 4px;
+    box-shadow: var(--b3-dialog-shadow);
+    border-radius: var(--b3-border-radius);
+    background-color: var(--b3-menu-background);
+  }
+
+  .av__select-options {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  // 触发器内已选 chip
+  .av__select-chip {
+    margin: 1px 2px;
+  }
+
+  // 下拉面板内的选项
+  .av__select-option {
+    margin: 2px 0;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background-color: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    &:hover {
+      background-color: var(--b3-list-hover);
+    }
+
+    &-check {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+
+    .b3-chip {
+      max-width: calc(100% - 18px);
+      overflow: hidden;
+    }
+
+    .b3-chip .fn__ellipsis {
+      min-width: 0;
+    }
+  }
+
+  // 下拉内搜索框，复用 input 的外观但占满宽度
+  .av__select-dropdown .b3-text-field {
+    margin: 0 0 4px 0;
+    height: 28px;
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .av__relation-filter-trigger {
+    max-width: 280px;
+
+    .av__relation-filter-chip {
+      max-width: 112px;
+    }
+  }
+
+  .av__relation-filter-dropdown {
+    display: flex;
+    flex-direction: column;
+    max-height: 320px;
+    overflow: hidden;
+  }
+
+  .av__relation-filter-selected {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 4px;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  .av__relation-filter-selected-chips {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-height: 88px;
+    overflow-y: auto;
+  }
+
+  .av__relation-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    max-width: 180px;
+    gap: 4px;
+    background-color: var(--b3-list-hover);
+    color: var(--b3-theme-on-background);
+  }
+
+  .av__relation-filter-id,
+  .av__relation-filter-option-id {
+    flex-shrink: 0;
+    color: var(--b3-theme-on-surface);
+    font-size: 11px;
+  }
+
+  .av__relation-filter-remove {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--b3-theme-on-surface);
+    cursor: pointer;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  .av__relation-filter-clear {
+    flex-shrink: 0;
+    padding: 2px 4px;
+  }
+
+  .av__relation-filter-count {
+    flex-shrink: 0;
+  }
+
+  .av__relation-filter-options {
+    display: flex;
+    flex-direction: column;
+    min-height: 28px;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .av__relation-filter-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 30px;
+    padding: 4px 6px;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background: transparent;
+    color: var(--b3-theme-on-background);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--b3-list-hover);
+    }
+  }
+
+  .av__relation-filter-option-icon,
+  .av__relation-filter-option-check {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  .av__relation-filter-option-check {
+    margin-left: auto;
+  }
+}
+
 .av {
   user-select: none;
   box-sizing: border-box;
@@ -793,7 +1123,7 @@
         inset: 0;
         position: absolute;
         border-radius: inherit;
-        background-color: var(--b3-theme-background);
+        background-color: var(--b3-av-item-background, var(--b3-theme-background));
       }
 
       &:hover {
@@ -1894,332 +2224,7 @@
         background-color: var(--b3-list-hover);
       }
 
-      .b3-menu__item.av__filter-row {
-        margin: 6px 0;
-        gap: 6px;
-        align-items: center;
-      }
-
-      .av__filter-rowinner {
-        display: flex;
-        flex-wrap: nowrap;
-        align-items: center;
-        min-height: 28px;
-        gap: 6px;
-      }
-
-      .av__filter-group-children .b3-menu__item.av__filter-row,
-      .av__filter-group-children .av__filter-group-item {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      // 筛选面板内的下拉/输入控件统一为描边卡片样式（与字段选择器一致）
-      .av__filter-row .b3-select,
-      .av__filter-row .b3-text-field--text,
-      .av__filter-group-left .b3-select {
-        border: 1px solid var(--b3-theme-surface-lighter);
-        border-radius: var(--b3-border-radius);
-        background-color: var(--b3-menu-background);
-        box-shadow: none;
-
-        &:hover,
-        &:focus {
-          box-shadow: none;
-        }
-      }
-
-      .av__filter-field {
-        max-width: 120px;
-      }
-
-      .av__filter-num {
-        width: 50px;
-      }
-
-      .av__field-wrapper {
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-        height: 28px;
-        border: 1px solid var(--b3-theme-surface-lighter);
-        border-radius: var(--b3-border-radius);
-        padding: 0 4px 0 6px;
-        gap: 2px;
-        box-sizing: border-box;
-        background-color: var(--b3-menu-background);
-      }
-
-      // 字段选择器嵌入描边容器内，去掉自身描边避免双重描边
-      .av__field-wrapper .b3-select {
-        border: 0;
-        box-shadow: none;
-        background-color: transparent;
-
-        &:hover,
-        &:focus {
-          box-shadow: none;
-        }
-      }
-
-      .av__field-wrapper .b3-menu__icon {
-        margin-right: 0;
-        width: 16px;
-        height: 16px;
-      }
-
-      .b3-menu__item.av__filter-row:hover {
-        background-color: transparent;
-      }
-
-      .av__filter-value {
-        display: inline-flex;
-        align-items: center;
-        flex: 1;
-        min-width: 60px;
-      }
-
-      .av__filter-date-controls {
-        display: inline-flex;
-        align-items: center;
-        flex: 1;
-        flex-wrap: wrap;
-        gap: 6px;
-        min-width: 60px;
-      }
-
-      .av__filter-date-config {
-        display: inline-flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-
-      &.av__filter-panel {
-        min-width: 340px;
-        max-width: 80vw;
-        width: fit-content;
-      }
-
-      .av__filter-date-row {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-
-      .av__filter-date-col {
-        display: inline-flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-
-      .av__select-trigger {
-        display: inline-flex;
-        align-items: center;
-        flex: 1;
-        min-width: 60px;
-        cursor: pointer;
-        overflow: hidden;
-        gap: 4px;
-        color: var(--b3-theme-on-surface);
-
-        .ft__on-surface {
-          font-size: 14px;
-        }
-
-        &-arrow {
-          flex-shrink: 0;
-          width: 10px;
-          height: 10px;
-        }
-      }
-
-      .av__select-dropdown {
-        position: fixed;
-        width: fit-content;
-        min-width: 120px;
-        max-height: 240px;
-        overflow-x: hidden;
-        overflow-y: auto;
-        padding: 4px;
-        box-shadow: var(--b3-dialog-shadow);
-        border-radius: var(--b3-border-radius);
-        background-color: var(--b3-menu-background);
-      }
-
-      .av__select-options {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        overflow: hidden;
-      }
-
-      // 触发器内已选 chip
-      .av__select-chip {
-        margin: 1px 2px;
-      }
-
-      // 下拉面板内的选项
-      .av__select-option {
-        margin: 2px 0;
-        width: 100%;
-        padding: 0;
-        border: 0;
-        border-radius: var(--b3-border-radius);
-        background-color: transparent;
-        color: inherit;
-        font: inherit;
-        text-align: left;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
-        box-sizing: border-box;
-        overflow: hidden;
-
-        &:hover {
-          background-color: var(--b3-list-hover);
-        }
-
-        &-check {
-          width: 12px;
-          height: 12px;
-          flex-shrink: 0;
-        }
-
-        .b3-chip {
-          max-width: calc(100% - 18px);
-          overflow: hidden;
-        }
-
-        .b3-chip .fn__ellipsis {
-          min-width: 0;
-        }
-      }
-
-      // 下拉内搜索框，复用 input 的外观但占满宽度
-      .av__select-dropdown .b3-text-field {
-        margin: 0 0 4px 0;
-        height: 28px;
-        font-size: 14px;
-        width: 100%;
-      }
-
-      .av__relation-filter-trigger {
-        max-width: 280px;
-
-        .av__relation-filter-chip {
-          max-width: 112px;
-        }
-      }
-
-      .av__relation-filter-dropdown {
-        display: flex;
-        flex-direction: column;
-        max-height: 320px;
-        overflow: hidden;
-      }
-
-      .av__relation-filter-selected {
-        display: flex;
-        align-items: flex-start;
-        gap: 4px;
-        margin-bottom: 4px;
-
-        &:empty {
-          display: none;
-        }
-      }
-
-      .av__relation-filter-selected-chips {
-        display: flex;
-        flex: 1;
-        flex-wrap: wrap;
-        gap: 4px;
-        max-height: 88px;
-        overflow-y: auto;
-      }
-
-      .av__relation-filter-chip {
-        display: inline-flex;
-        align-items: center;
-        min-width: 0;
-        max-width: 180px;
-        gap: 4px;
-        background-color: var(--b3-list-hover);
-        color: var(--b3-theme-on-background);
-      }
-
-      .av__relation-filter-id,
-      .av__relation-filter-option-id {
-        flex-shrink: 0;
-        color: var(--b3-theme-on-surface);
-        font-size: 11px;
-      }
-
-      .av__relation-filter-remove {
-        display: inline-flex;
-        flex-shrink: 0;
-        padding: 0;
-        border: 0;
-        background: transparent;
-        color: var(--b3-theme-on-surface);
-        cursor: pointer;
-
-        svg {
-          width: 12px;
-          height: 12px;
-        }
-      }
-
-      .av__relation-filter-clear {
-        flex-shrink: 0;
-        padding: 2px 4px;
-      }
-
-      .av__relation-filter-count {
-        flex-shrink: 0;
-      }
-
-      .av__relation-filter-options {
-        display: flex;
-        flex-direction: column;
-        min-height: 28px;
-        max-height: 180px;
-        overflow-y: auto;
-      }
-
-      .av__relation-filter-option {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        width: 100%;
-        min-height: 30px;
-        padding: 4px 6px;
-        border: 0;
-        border-radius: var(--b3-border-radius);
-        background: transparent;
-        color: var(--b3-theme-on-background);
-        font: inherit;
-        text-align: left;
-        cursor: pointer;
-
-        &:hover {
-          background-color: var(--b3-list-hover);
-        }
-      }
-
-      .av__relation-filter-option-icon,
-      .av__relation-filter-option-check {
-        width: 14px;
-        height: 14px;
-        flex-shrink: 0;
-      }
-
-      .av__relation-filter-option-check {
-        margin-left: auto;
-      }
+      @include av-filter-editor;
     }
   }
 
@@ -2367,13 +2372,13 @@
         box-shadow: rgba(0, 0, 0, 0.04) 0 2px 4px 0, var(--b3-av-kanban-background) 0 0 0 1px;
 
         &::before {
-          background-color: var(--b3-av-kanban-background);
-          opacity: 0.26;
+          background-color: var(--b3-av-item-background, var(--b3-av-kanban-background));
+          opacity: var(--b3-av-item-opacity, 0.26);
         }
 
         &:hover:not(.av__gallery-item--select)::before {
-          background-color: var(--b3-av-kanban-background);
-          opacity: 0.38;
+          background-color: var(--b3-av-item-background, var(--b3-av-kanban-background));
+          opacity: var(--b3-av-item-opacity, 0.38);
         }
       }
 
@@ -2814,5 +2819,64 @@ img.av__cellassetimg {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+}
+
+// 条件背景使用变量传递，保留选中、聚焦、拖拽和冻结列的反馈层。
+.av__row--conditional:not(.av__row--select):not(.av__row--hl) {
+  background-color: var(--b3-av-item-background);
+
+  .av__cell {
+    background-color: var(--b3-av-cell-background, var(--b3-av-item-background, var(--b3-theme-background)));
+  }
+
+  .av__firstcol {
+    background-color: var(--b3-av-item-background, var(--b3-theme-background));
+  }
+}
+
+.av__conditional-colors {
+  @include av-filter-editor;
+
+  max-height: 70vh;
+  overflow: auto;
+
+  [data-rules] {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .av__conditional-rule {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .av__filter-rowinner,
+  .av__filter-date-controls,
+  .av__filter-date-config,
+  .av__conditional-controls,
+  .av__field-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .av__filter-value {
+    min-width: 100px;
+    flex: 1;
+  }
+
+  .av__field-wrapper .b3-select {
+    max-width: 200px;
+  }
+
+  .av__conditional-swatch {
+    width: 1em;
+    height: 1em;
+    margin-right: 8px;
   }
 }

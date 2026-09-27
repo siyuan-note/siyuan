@@ -1,3 +1,4 @@
+import {getConditionalItemStyle, getConditionalCellStyle} from "./conditionalColor";
 import {isTableLikeView} from "./viewType";
 import {updateFrozenColumns} from "./frozenColumns";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByAttribute} from "../../util/hasClosest";
@@ -65,7 +66,7 @@ export const getRowHTML = (options: {
         const primaryHidden = galleryData.fields.find(field => field.type === "block")?.hidden === true;
         const hasVisibleFields = galleryData.fields.some(field => !field.hidden);
         const emptyClass = !hasVisibleFields && galleryData.coverFrom === 0 ? " av__gallery-item--empty" : "";
-        html += `<div data-id="${galleryRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${emptyClass}">`;
+        html += `<div data-id="${galleryRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${emptyClass}" style="${getConditionalItemStyle(galleryRow)}">`;
         if (galleryData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + galleryData.cardAspectRatio;
             if (galleryRow.coverURL) {
@@ -136,7 +137,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     if (options.type === "kanban") {
         const kanbanRow = options.row as IAVGalleryItem;
         const kanbanData = options.data as IAVKanban;
-        html += `<div data-id="${kanbanRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item">`;
+        html += `<div data-id="${kanbanRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item" style="${getConditionalItemStyle(kanbanRow)}">`;
         if (kanbanData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
             if (kanbanRow.coverURL) {
@@ -207,7 +208,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     const isList = options.type === "list";
     const pinIndex = isList ? -1 : options.pinIndex;
 
-    html = `<div class="av__row" data-index="${options.rowIndex}" data-id="${tableRow.id}">`;
+    html = `<div class="av__row${tableRow.conditionalColors ? " av__row--conditional" : ""}" data-index="${options.rowIndex}" data-id="${tableRow.id}" style="${getConditionalItemStyle(tableRow)}">`;
     if (pinIndex > -1) {
         html += `<div class="av__colsticky av__colsticky--freeze"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg>${getFreezeDragHTML()}</div>`;
     } else {
@@ -231,8 +232,8 @@ data-date-format="${column.dateFormat || ""}"
 ${column.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 data-align="${column.align || ""}"
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
-style="${isList ? "" : `width: ${escapeAttr(column.width) || "200px"};`}
-${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
+style="${getConditionalCellStyle(tableRow, column.id)}${isList ? "" : `width: ${escapeAttr(column.width) || "200px"};`}
+${cell.bgColor && !tableRow.conditionalColors?.background && !tableRow.conditionalColors?.properties?.[column.id] ? `background-color:${cell.bgColor};` : ""}
 ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat, column.renderTemplate)}</div>`;
 
         if (pinIndex === index) {

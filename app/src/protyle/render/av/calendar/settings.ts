@@ -17,9 +17,6 @@ const getCalendarSettingItems = (view: IAVTable): Array<{
         key: "dateKeyID", label: window.siyuan.languages.calendarDateField,
         choices: fields(view.columns.filter(isCalendarDateColumn)),
     }, {
-        key: "colorKeyID", label: window.siyuan.languages.calendarColorField,
-        choices: fields(view.columns.filter(field => field.type === "select")),
-    }, {
         key: "rowLimit", label: window.siyuan.languages.calendarRowLimit,
         choices: [3, 5, 10, -1].map(value => ({value: value.toString(),
             label: value === -1 ? window.siyuan.languages.all : value.toString()})),

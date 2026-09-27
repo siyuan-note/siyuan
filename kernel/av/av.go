@@ -303,21 +303,22 @@ var widthValuePattern = regexp.MustCompile(`^\d+(\.\d+)?(px|em|rem|%)$`)
 
 // View 描述了视图的结构。
 type View struct {
-	ID               string          `json:"id"`                // 视图 ID
-	Icon             string          `json:"icon"`              // 视图图标
-	Name             string          `json:"name"`              // 视图名称
-	HideAttrViewName bool            `json:"hideAttrViewName"`  // 是否隐藏属性视图名称
-	Desc             string          `json:"desc"`              // 视图描述
-	Filters          []*ViewFilter   `json:"filters,omitempty"` // 过滤规则
-	Sorts            []*ViewSort     `json:"sorts,omitempty"`   // 排序规则
-	PageSize         int             `json:"pageSize"`          // 每页条目数
-	LayoutType       LayoutType      `json:"type"`              // 当前布局类型
-	Table            *LayoutTable    `json:"table,omitempty"`   // 表格布局
-	Calendar         *LayoutCalendar `json:"calendar,omitempty"`
-	List             *LayoutList     `json:"list,omitempty"`    // 列表布局
-	Gallery          *LayoutGallery  `json:"gallery,omitempty"` // 卡片布局
-	Kanban           *LayoutKanban   `json:"kanban,omitempty"`  // 看板布局
-	ItemIDs          []string        `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
+	ConditionalColors []*ConditionalColorRule `json:"conditionalColors"` // nil 兼容旧日历，空数组禁用颜色
+	ID                string                  `json:"id"`                // 视图 ID
+	Icon              string                  `json:"icon"`              // 视图图标
+	Name              string                  `json:"name"`              // 视图名称
+	HideAttrViewName  bool                    `json:"hideAttrViewName"`  // 是否隐藏属性视图名称
+	Desc              string                  `json:"desc"`              // 视图描述
+	Filters           []*ViewFilter           `json:"filters,omitempty"` // 过滤规则
+	Sorts             []*ViewSort             `json:"sorts,omitempty"`   // 排序规则
+	PageSize          int                     `json:"pageSize"`          // 每页条目数
+	LayoutType        LayoutType              `json:"type"`              // 当前布局类型
+	Table             *LayoutTable            `json:"table,omitempty"`   // 表格布局
+	Calendar          *LayoutCalendar         `json:"calendar,omitempty"`
+	List              *LayoutList             `json:"list,omitempty"`    // 列表布局
+	Gallery           *LayoutGallery          `json:"gallery,omitempty"` // 卡片布局
+	Kanban            *LayoutKanban           `json:"kanban,omitempty"`  // 看板布局
+	ItemIDs           []string                `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
 	Group        *ViewGroup `json:"group,omitempty"`     // 分组规则
 	GroupCreated int64      `json:"groupCreated"`        // 分组生成时间戳
@@ -1332,6 +1333,12 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 		view.ID = ast.NewNodeID()
 
 		remapFilterColumns(view.Filters, keyIDMap)
+		for _, rule := range view.ConditionalColors {
+			if nil != rule {
+				rule.ID = ast.NewNodeID()
+				remapFilterColumns([]*ViewFilter{rule.Filter}, keyIDMap)
+			}
+		}
 		for _, s := range view.Sorts {
 			s.Column = keyIDMap[s.Column]
 		}

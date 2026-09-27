@@ -1,4 +1,10 @@
 {
+	"conditionalColors": "条件颜色",
+	"conditionalColorItem": "整个条目",
+	"conditionalColorProperty": "此属性",
+	"conditionalColorTarget": "应用于",
+	"conditionalColorFirstOption": "匹配第一个选项",
+	"conditionalColorsTip": "规则从上到下匹配，每个目标采用首个命中的颜色",
 	"newFileAtPath": "选择位置并新建...",
 	"oidcClaimRulesRequired": "未开启“授予所有已认证用户管理员权限”时，必须配置至少一条声明规则",
 	"oidcGitHubClaimRulesTip": "GitHub 示例（将 YOUR_GITHUB_USERNAME 替换为你的 GitHub 用户名）：[{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",

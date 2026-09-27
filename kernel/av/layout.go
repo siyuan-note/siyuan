@@ -52,17 +52,18 @@ type BaseValue struct {
 
 // BaseInstance 描述了实例的基础结构。
 type BaseInstance struct {
-	ID               string        `json:"id"`               // ID
-	Icon             string        `json:"icon"`             // 图标
-	Name             string        `json:"name"`             // 名称
-	Desc             string        `json:"desc"`             // 描述
-	HideAttrViewName bool          `json:"hideAttrViewName"` // 是否隐藏属性视图名称
-	Filters          []*ViewFilter `json:"filters"`          // 过滤规则
-	Sorts            []*ViewSort   `json:"sorts"`            // 排序规则
-	Group            *ViewGroup    `json:"group"`            // 分组规则
-	PageSize         int           `json:"pageSize"`         // 每页项目数
-	ShowIcon         bool          `json:"showIcon"`         // 是否显示字段图标
-	WrapField        bool          `json:"wrapField"`        // 是否换行字段内容
+	ConditionalColors []*ConditionalColorRule `json:"conditionalColors"`
+	ID                string                  `json:"id"`               // ID
+	Icon              string                  `json:"icon"`             // 图标
+	Name              string                  `json:"name"`             // 名称
+	Desc              string                  `json:"desc"`             // 描述
+	HideAttrViewName  bool                    `json:"hideAttrViewName"` // 是否隐藏属性视图名称
+	Filters           []*ViewFilter           `json:"filters"`          // 过滤规则
+	Sorts             []*ViewSort             `json:"sorts"`            // 排序规则
+	Group             *ViewGroup              `json:"group"`            // 分组规则
+	PageSize          int                     `json:"pageSize"`         // 每页项目数
+	ShowIcon          bool                    `json:"showIcon"`         // 是否显示字段图标
+	WrapField         bool                    `json:"wrapField"`        // 是否换行字段内容
 
 	GroupKey    *Key       `json:"groupKey,omitempty"`   // 分组字段
 	GroupValue  *Value     `json:"groupValue,omitempty"` // 分组值
@@ -86,22 +87,23 @@ func NewViewBaseInstance(view *View) *BaseInstance {
 		wrapField = view.Kanban.WrapField
 	}
 	return &BaseInstance{
-		ID:               view.ID,
-		Icon:             view.Icon,
-		Name:             view.Name,
-		Desc:             view.Desc,
-		HideAttrViewName: view.HideAttrViewName,
-		Filters:          view.Filters,
-		Sorts:            view.Sorts,
-		Group:            view.Group,
-		GroupKey:         view.GroupKey,
-		GroupValue:       view.GroupVal,
-		GroupCalc:        view.GroupCalc,
-		GroupFolded:      view.GroupFolded,
-		GroupHidden:      view.GroupHidden,
-		PageSize:         view.PageSize,
-		ShowIcon:         showIcon,
-		WrapField:        wrapField,
+		ConditionalColors: view.EffectiveConditionalColors(),
+		ID:                view.ID,
+		Icon:              view.Icon,
+		Name:              view.Name,
+		Desc:              view.Desc,
+		HideAttrViewName:  view.HideAttrViewName,
+		Filters:           view.Filters,
+		Sorts:             view.Sorts,
+		Group:             view.Group,
+		GroupKey:          view.GroupKey,
+		GroupValue:        view.GroupVal,
+		GroupCalc:         view.GroupCalc,
+		GroupFolded:       view.GroupFolded,
+		GroupHidden:       view.GroupHidden,
+		PageSize:          view.PageSize,
+		ShowIcon:          showIcon,
+		WrapField:         wrapField,
 	}
 }
 

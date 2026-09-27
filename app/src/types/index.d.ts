@@ -1193,7 +1193,23 @@ interface IAVNewItemTemplate {
     hideInFileTree?: boolean;
 }
 
+/** 单字段条件颜色规则按顺序匹配，默认背景同样占据优先级。 */
+interface IAVConditionalColorRule {
+    id: string;
+    filter: IAVFilter;
+    target: "item" | "property";
+    color: IAVCellSelectValue | null;
+    matchOption: boolean;
+}
+
+/** 渲染结果附在条目上，不写回字段值；前面的属性色优先于后面的整条目色。 */
+interface IAVItemConditionalColors {
+    background?: IAVCellSelectValue;
+    properties?: {[key: string]: IAVCellSelectValue};
+}
+
 interface IAVView {
+    conditionalColors?: IAVConditionalColorRule[];
     name?: string;
     desc?: string;
     id?: string;
@@ -1399,11 +1415,13 @@ interface IAVColumn {
 }
 
 interface IAVRow {
+    conditionalColors?: IAVItemConditionalColors;
     id: string,
     cells: IAVCell[]
 }
 
 interface IAVGalleryItem {
+    conditionalColors?: IAVItemConditionalColors;
     coverURL?: string;
     coverContent?: string;
     coverPosition?: IAVCardCoverPosition;

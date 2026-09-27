@@ -1,4 +1,10 @@
 {
+	"conditionalColors": "Voorwaardelijke kleuren",
+	"conditionalColorItem": "Geheel item",
+	"conditionalColorProperty": "Deze eigenschap",
+	"conditionalColorTarget": "Toepassen op",
+	"conditionalColorFirstOption": "Eerste optie overnemen",
+	"conditionalColorsTip": "Regels worden van boven naar beneden beoordeeld; per doel geldt de eerste overeenkomende kleur",
 	"newFileAtPath": "Locatie kiezen en document maken...",
 	"oidcClaimRulesRequired": "Minstens één claimregel is vereist als niet alle geauthenticeerde gebruikers beheerderstoegang krijgen",
 	"oidcGitHubClaimRulesTip": "GitHub-voorbeeld (vervang YOUR_GITHUB_USERNAME door uw GitHub-gebruikersnaam): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",

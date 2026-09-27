@@ -1,4 +1,10 @@
 {
+	"conditionalColors": "Умовні кольори",
+	"conditionalColorItem": "Увесь запис",
+	"conditionalColorProperty": "Ця властивість",
+	"conditionalColorTarget": "Застосувати до",
+	"conditionalColorFirstOption": "Колір першого варіанта",
+	"conditionalColorsTip": "Правила перевіряються згори вниз; для кожної цілі використовується перший відповідний колір",
 	"newFileAtPath": "Вибрати розташування та створити документ...",
 	"oidcClaimRulesRequired": "Потрібне принаймні одне правило тверджень, якщо права адміністратора не надано всім автентифікованим користувачам",
 	"oidcGitHubClaimRulesTip": "Приклад GitHub (замініть YOUR_GITHUB_USERNAME своїм іменем користувача GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",

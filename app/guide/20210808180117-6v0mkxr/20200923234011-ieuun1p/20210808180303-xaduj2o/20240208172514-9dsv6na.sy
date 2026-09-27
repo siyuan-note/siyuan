@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260924110133"
+		"updated": "20260927113016"
 	},
 	"Children": [
 		{
@@ -716,7 +716,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260920225154-qqxdh7e",
-				"updated": "20260924110133"
+				"updated": "20260927113016"
 			},
 			"Children": [
 				{
@@ -914,7 +914,7 @@
 					},
 					"Properties": {
 						"id": "20260920225154-3w6c98i",
-						"updated": "20260921201901"
+						"updated": "20260927113016"
 					},
 					"Children": [
 						{
@@ -922,12 +922,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260920225154-8p9e3ov",
-								"updated": "20260921201901"
+								"updated": "20260927113016"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "View settings: Filtering, sorting, field visibility, and new-entry templates use the existing database settings. A single-select field can supply entry colors. Grouping is suspended in calendar layout, and its settings are retained when switching back. Visible item rows can be set to 3, 5, 10, or all in the layout settings, with 3 as the default. This setting is saved per calendar view and only controls folding in month view; week view displays all entries, and the complete date range is still loaded"
+									"Data": "View settings: Filtering, sorting, field visibility, and new-entry templates use the existing database settings. Conditional colors can set entry backgrounds. Grouping is suspended in calendar layout, and its settings are retained when switching back. Visible item rows can be set to 3, 5, 10, or all in the layout settings, with 3 as the default. This setting is saved per calendar view and only controls folding in month view; week view displays all entries, and the complete date range is still loaded"
 								}
 							]
 						}
@@ -1212,7 +1212,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613162855-sxaxx5x",
-				"updated": "20260613171129"
+				"updated": "20260927112821"
 			},
 			"Children": [
 				{
@@ -1408,6 +1408,114 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260927112821-dmce6cp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260927112821-dmce6cp",
+				"updated": "20260927112821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Conditional colors"
+				}
+			]
+		},
+		{
+			"ID": "20260927112821-u18f0d0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927112821-u18f0d0",
+				"updated": "20260927112821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open the database view settings and choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Conditional colors"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to add a rule. Select one field and a condition, then choose a background color and its target. Changes take effect immediately and support undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20260927112821-xoxibjc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927112821-xoxibjc",
+				"updated": "20260927112821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rules belong to the current view. Table, list, calendar, kanban, and gallery views support entry backgrounds. Table views also support coloring the property used by the condition. Property rules remain stored but do not apply in other layouts."
+				}
+			]
+		},
+		{
+			"ID": "20260927112821-7hfkus2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927112821-7hfkus2",
+				"updated": "20260927112821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Each rule evaluates its own single-field condition; rules are not combined with AND. Use the up and down buttons to change priority. The first matching rule for each property wins. A matching entry rule colors the remaining area and stops evaluation; earlier property colors are retained. Default background also counts as a match."
+				}
+			]
+		},
+		{
+			"ID": "20260927112821-qw0iuyn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927112821-qw0iuyn",
+				"updated": "20260927112821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, place a blue property rule first and a green entry rule second. An entry matching both keeps that property blue and uses green elsewhere. Move the green entry rule first to make the whole entry green."
+				}
+			]
+		},
+		{
+			"ID": "20260927112821-e6uldts",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927112821-e6uldts",
+				"updated": "20260927112821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For select and multi-select fields, Match first option uses the first selected option in the entry, including its default color; it does not use the order of option definitions. You can also choose a fixed built-in or custom color. Conditions use the existing filter operators and can use rendered values when available."
+				}
+			]
+		},
+		{
+			"ID": "20260927112821-ks3ham9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927112821-ks3ham9",
+				"updated": "20260927112821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Colors do not change field values or filter out entries. Hidden fields can still drive rules. Incomplete conditions and rules referring to deleted fields do not apply. Copying a view copies its rules; editing one view does not change the other. Existing calendar option colors remain available as a compatible rule, and deleting all rules clears the colors."
 				}
 			]
 		},
@@ -3497,7 +3605,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-     "Data": "A display template reads each field's original stored value, not the display result produced by another display template. Filters, sorts, and groups can use either the original value or the template-rendered value. Clear the display template to restore the field's original display. Relation fields follow the display template of the target database's primary key, including empty results, while preserving the original primary key value and relation."
+					"Data": "A display template reads each field's original stored value, not the display result produced by another display template. Filters, sorts, and groups can use either the original value or the template-rendered value. Clear the display template to restore the field's original display. Relation fields follow the display template of the target database's primary key, including empty results, while preserving the original primary key value and relation."
 				}
 			]
 		},

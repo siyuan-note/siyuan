@@ -12,11 +12,19 @@ import {Constants} from "../../../constants";
 import {countFilterLeaves} from "./filterTree";
 import {getAVColorStyle} from "./color";
 
+interface FilterEditorOptions {
+    action?: IAVFilterOperation["action"];
+    keyID?: string;
+    save?: (filters: IAVFilter[]) => void;
+    render?: () => string;
+    root?: HTMLElement;
+}
+
 const isExactRelationOperator = (operator: string) =>
     operator === "Contains any item" || operator === "Does not contain any item";
 
 const getSetFiltersOperation = (avID: string, blockID: string, data: IAVFilter[],
-                                filterOperation?: IAVFilterOperation): IOperation => {
+                                filterOperation?: FilterEditorOptions): IOperation => {
     return {
         action: filterOperation?.action || "setAttrViewFilters",
         avID,
@@ -167,7 +175,7 @@ export const addFilter = (options: {
     protyle: IProtyle
     blockElement: Element,
     parentPath?: string,
-    filterOperation?: IAVFilterOperation,
+    filterOperation?: FilterEditorOptions,
 }) => {
     const menu = new Menu(Constants.MENU_AV_ADD_FILTER);
     // 定位目标分组：支持向指定分组内追加，同分组允许同列多条件（如 状态=完成 OR 状态=进行中）
@@ -215,7 +223,7 @@ export const addFilter = (options: {
     });
 };
 
-export const getFiltersHTML = (data: IAV) => {
+export const getFiltersHTML = (data: IAV, single = false) => {
     let html = "";
     const fields = getFieldsByData(data);
     const measureEl = document.createElement("span");
@@ -299,7 +307,7 @@ export const getFiltersHTML = (data: IAV) => {
             : "";
         const inlineHTML = genInlineFilterHTML(node, colData, path);
         const leafAndOrHTML = 0 === index ? genWhenLabel() : 1 === index ? genAndOrSelect(groupPath, groupCombination) : genAndOrLabel(groupCombination);
-        return `<div class="b3-menu__item av__filter-row" data-path="${path}" data-column="${node.column}">${leafAndOrHTML}<div class="fn__flex-1 av__filter-rowinner">${fieldWrapper}${valueSourceSelect}${inlineHTML}</div><svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg></div>`;
+        return `<div class="${single ? "" : "b3-menu__item "}av__filter-row" data-path="${path}" data-column="${node.column}">${single ? "" : leafAndOrHTML}<div class="fn__flex-1 av__filter-rowinner">${fieldWrapper}${valueSourceSelect}${inlineHTML}</div>${single ? "" : `<svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg>`}</div>`;
     };
 
     const isRootGroup = data.view.filters.length === 1 && (data.view.filters[0].filters || data.view.filters[0].combination);
@@ -309,6 +317,9 @@ export const getFiltersHTML = (data: IAV) => {
         : "and";
     html = genNodeHTML(root, "", 0, "", rootCombination);
 
+    if (single) {
+        return html;
+    }
     const leafCount = countFilterLeaves(root.filters || []);
 
     return `<div class="b3-menu__items">
@@ -556,7 +567,7 @@ const genEmptyCellValue = (type: TAVCol): IAVCellValue => type === "checkbox"
     ? genCellValue(type, {checked: undefined})
     : {type} as IAVCellValue;
 
-const genEmptyFilterValue = (column: IAVColumn, valueSource: "stored" | "rendered" = "stored"): { operator: TAVFilterOperator, value: IAVCellValue } => {
+export const genEmptyFilterValue = (column: IAVColumn, valueSource: "stored" | "rendered" = "stored"): { operator: TAVFilterOperator, value: IAVCellValue } => {
     if (valueSource === "rendered") {
         return {
             operator: getDefaultOperatorByType("template"),
@@ -896,7 +907,7 @@ const readRelativeDate = (rowElement: HTMLElement, suffix: string): IAVRelativeD
 // commitFilter 即时保存单个条件的修改。reRender=true 时重渲染整个面板（结构变化场景）。
 export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, protyle: IProtyle, blockID: string,
                              avID: string, menuElement: HTMLElement, reRender: boolean,
-                             filterOperation?: IAVFilterOperation) => {
+                             filterOperation?: FilterEditorOptions) => {
     const editable = getEditableFilters(data);
     const {parent, index} = getParentByPath(editable, path);
     if (!parent || index < 0 || index >= parent.length) {
@@ -905,26 +916,30 @@ export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, prot
     const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
     parent[index] = newFilter;
 
-    transaction(protyle, [
-        getSetFiltersOperation(avID, blockID, JSON.parse(JSON.stringify(data.view.filters)), filterOperation)
-    ], [
-        getSetFiltersOperation(avID, blockID, oldFilters, filterOperation)
-    ]);
+    if (filterOperation?.save) {
+        filterOperation.save(data.view.filters);
+    } else {
+        transaction(protyle, [
+            getSetFiltersOperation(avID, blockID, JSON.parse(JSON.stringify(data.view.filters)), filterOperation)
+        ], [
+            getSetFiltersOperation(avID, blockID, oldFilters, filterOperation)
+        ]);
+    }
 
     if (reRender && menuElement) {
-        menuElement.innerHTML = getFiltersHTML(data);
+        menuElement.innerHTML = filterOperation?.render?.() || getFiltersHTML(data);
     }
 };
 
 // bindInlineFilterEvents 绑定内联筛选编辑的事件（事件委托到面板）。即时保存。
 export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, protyle: IProtyle, blockID: string,
-                                       avID: string, filterOperation?: IAVFilterOperation) => {
+                                       avID: string, filterOperation?: FilterEditorOptions) => {
     // 防重复绑定：事件委托绑在 panelElement 上，同一面板实例只需绑一次
     if (panelElement.dataset.filterEventsBound === "true") {
         return;
     }
     panelElement.dataset.filterEventsBound = "true";
-    const menuElement = panelElement.querySelector(".b3-menu") as HTMLElement;
+    const menuElement = filterOperation?.root || panelElement.querySelector(".b3-menu") as HTMLElement;
     const fields = getFieldsByData(data);
 
     // 通过 data-path 定位叶子行

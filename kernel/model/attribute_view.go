@@ -4971,6 +4971,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	view.PageSize = masterView.PageSize
 
 	view.Filters = av.CloneFilters(masterView.Filters)
+	view.ConditionalColors = av.CloneConditionalColors(masterView.ConditionalColors)
 
 	for _, s := range masterView.Sorts {
 		view.Sorts = append(view.Sorts, &av.ViewSort{
@@ -8794,6 +8795,11 @@ func syncAttributeViewOptionColor(attrView *av.AttributeView, keyID, name, color
 	}
 	for _, view := range attrView.Views {
 		av.RenameSelectOptionInFilters(view.Filters, keyID, name, name, color)
+		for _, rule := range view.ConditionalColors {
+			if nil != rule {
+				av.RenameSelectOptionInFilters([]*av.ViewFilter{rule.Filter}, keyID, name, name, color)
+			}
+		}
 	}
 	renameAttrViewOptionInFieldFilters(attrView, attrView.ID, keyID, name, name, color)
 }

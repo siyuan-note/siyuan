@@ -84,8 +84,9 @@ type Kanban struct {
 
 // KanbanCard 描述了看板实例卡片的结构。
 type KanbanCard struct {
-	ID     string              `json:"id"`     // 卡片 ID
-	Values []*KanbanFieldValue `json:"values"` // 卡片字段值
+	ConditionalColors *ItemConditionalColors `json:"conditionalColors,omitempty"`
+	ID                string                 `json:"id"`     // 卡片 ID
+	Values            []*KanbanFieldValue    `json:"values"` // 卡片字段值
 
 	CoverURL      string             `json:"coverURL"`                // 卡片封面超链接
 	CoverContent  string             `json:"coverContent"`            // 卡片封面文本内容

@@ -1,4 +1,10 @@
 {
+	"conditionalColors": "Podmienené farby",
+	"conditionalColorItem": "Celá položka",
+	"conditionalColorProperty": "Táto vlastnosť",
+	"conditionalColorTarget": "Použiť na",
+	"conditionalColorFirstOption": "Farba prvej možnosti",
+	"conditionalColorsTip": "Pravidlá sa vyhodnocujú zhora nadol; každý cieľ použije prvú zodpovedajúcu farbu",
 	"newFileAtPath": "Vybrať umiestnenie a vytvoriť dokument...",
 	"oidcClaimRulesRequired": "Ak nemajú všetci overení používatelia práva správcu, vyžaduje sa aspoň jedno pravidlo tvrdení",
 	"oidcGitHubClaimRulesTip": "Príklad pre GitHub (nahraďte YOUR_GITHUB_USERNAME svojím používateľským menom GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",

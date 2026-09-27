@@ -1,4 +1,10 @@
 {
+	"conditionalColors": "Colores condicionales",
+	"conditionalColorItem": "Elemento completo",
+	"conditionalColorProperty": "Esta propiedad",
+	"conditionalColorTarget": "Aplicar a",
+	"conditionalColorFirstOption": "Usar la primera opción",
+	"conditionalColorsTip": "Las reglas se evalúan de arriba abajo; cada destino usa el primer color coincidente",
 	"newFileAtPath": "Elegir ubicación y crear documento...",
 	"oidcClaimRulesRequired": "Se requiere al menos una regla de atributos si no se concede acceso de administrador a todos los usuarios autenticados",
 	"oidcGitHubClaimRulesTip": "Ejemplo de GitHub (sustituye YOUR_GITHUB_USERNAME por tu nombre de usuario de GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",

@@ -61,7 +61,7 @@ test("calendar setup creates and binds a field only on request in one undoable t
 });
 
 test("calendar layout submenus filter choices, mark selection and preserve undo", () => {
-    for (const key of ["dateKeyID", "colorKeyID", "weekStart"] as const) {
+    for (const key of ["dateKeyID", "weekStart"] as const) {
         const {methods, transactions, menus} = setup();
         const current = data();
         const view = current.view as IAVTable;
@@ -70,6 +70,7 @@ test("calendar layout submenus filter choices, mark selection and preserve undo"
             {id: "updated", type: "updated", name: "Updated"}, {id: "color", type: "select", name: "Color"},
             {id: "text", type: "text", name: "Text"}] as IAVColumn[];
         assert.doesNotMatch(methods.getCalendarSettingsHTML(view, true), /<select/);
+        assert.doesNotMatch(methods.getCalendarSettingsHTML(view, true), /data-calendar-setting="colorKeyID"/);
         let click: (event: {preventDefault: () => void; stopPropagation: () => void}) => void;
         let refreshed = 0;
         const button = {tagName: "BUTTON", dataset: {calendarSetting: key},
@@ -79,14 +80,14 @@ test("calendar layout submenus filter choices, mark selection and preserve undo"
             menuElement: {querySelectorAll: () => [button]} as unknown as Element, onChange: () => { refreshed++; }});
         click({preventDefault() { return; }, stopPropagation() { return; }});
         const items = menus[0];
-        assert.equal(items.length, key === "weekStart" ? 7 : key === "dateKeyID" ? 4 : 2);
+        assert.equal(items.length, key === "weekStart" ? 7 : 4);
         assert.equal(items.filter(item => item.checked).length, 1);
         items.find(item => item.checked).click();
         assert.equal(transactions.length, 0);
         items[0].click();
         assert.equal(transactions.length, 1);
         assert.equal(settingsOf(transactions[0].do[0])[key], key === "weekStart" ? 0 : "");
-        assert.equal(settingsOf(transactions[0].undo[0])[key], key === "weekStart" ? 1 : key === "dateKeyID" ? "date" : "color");
+        assert.equal(settingsOf(transactions[0].undo[0])[key], key === "weekStart" ? 1 : "date");
         assert.equal(refreshed, 1);
     }
 });

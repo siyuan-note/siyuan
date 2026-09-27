@@ -6,6 +6,7 @@ import {runInNewContext} from "node:vm";
 import {transpileModule, ModuleKind, ScriptTarget} from "typescript";
 import * as dates from "./date";
 import {cellValueIsEmpty, createEmptyAVValue} from "../cellValue";
+import {getConditionalBackground} from "../conditionalColor";
 
 test("calendar omits empty fields while preserving zero, unchecked boxes and rendered values", async () => {
     const start = new Date(2026, 8, 1).getTime();
@@ -28,6 +29,7 @@ test("calendar omits empty fields while preserving zero, unchecked boxes and ren
         "./state": {getCalendarState: () => ({anchor: start, mode: "week", rowLimit: 3}), getCalendarRequestRange: () => range},
         "./settings": {isCalendarDateColumn: () => true},
         "../cellValue": {cellValueIsEmpty},
+        "../conditionalColor": {getConditionalBackground},
         "../cell": {renderCell: () => "<span></span>"},
         "../render": {genTabHeaderHTML: () => ""},
         "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
@@ -45,12 +47,13 @@ test("calendar omits empty fields while preserving zero, unchecked boxes and ren
         {disabled: true, options: {}} as IProtyle, {viewID: "calendar", view: {
             calendar: {dateKeyID: "date"}, calendarRange: range,
             columns: values.map(value => ({id: value.keyID, type: value.type, name: value.keyID})),
-            rows: [{id: "row", cells: values.map(value => ({value}))}],
+            rows: [{id: "row", cells: values.map(value => ({value})), conditionalColors: {background: {content: "", color: "3"}}}],
         }} as unknown as IAV), error => error === complete);
     for (const type of types) {
         assert.doesNotMatch(html, new RegExp(`data-field-id="empty-${type}"`));
     }
     assert.doesNotMatch(html, /data-field-id="blank-rendered"/);
+    assert.match(html, /--b3-av-calendar-background:var\(--b3-font-background3\)/);
     for (const key of ["primary", "date", "zero", "unchecked", "rendered"]) {
         assert.match(html, new RegExp(`data-field-id="${key}"`));
     }

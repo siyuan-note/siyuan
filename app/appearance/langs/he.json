@@ -1,4 +1,10 @@
 {
+	"conditionalColors": "צבעים מותנים",
+	"conditionalColorItem": "הפריט כולו",
+	"conditionalColorProperty": "מאפיין זה",
+	"conditionalColorTarget": "החל על",
+	"conditionalColorFirstOption": "צבע האפשרות הראשונה",
+	"conditionalColorsTip": "הכללים נבדקים מלמעלה למטה; לכל יעד מוחל הצבע הראשון שתואם",
 	"newFileAtPath": "בחירת מיקום ויצירת מסמך...",
 	"oidcClaimRulesRequired": "נדרש לפחות כלל הצהרה אחד אם לא ניתנות הרשאות מנהל לכל המשתמשים המאומתים",
 	"oidcGitHubClaimRulesTip": "דוגמת GitHub (יש להחליף את YOUR_GITHUB_USERNAME בשם המשתמש שלך ב-GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",

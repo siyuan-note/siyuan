@@ -1,4 +1,10 @@
 {
+	"conditionalColors": "Koşullu renkler",
+	"conditionalColorItem": "Öğenin tamamı",
+	"conditionalColorProperty": "Bu özellik",
+	"conditionalColorTarget": "Uygulama hedefi",
+	"conditionalColorFirstOption": "İlk seçeneğin rengini kullan",
+	"conditionalColorsTip": "Kurallar yukarıdan aşağıya değerlendirilir; her hedef için eşleşen ilk renk kullanılır",
 	"newFileAtPath": "Konum seç ve belge oluştur...",
 	"oidcClaimRulesRequired": "Kimliği doğrulanmış tüm kullanıcılara yönetici erişimi verilmediyse en az bir talep kuralı gereklidir",
 	"oidcGitHubClaimRulesTip": "GitHub örneği (YOUR_GITHUB_USERNAME yerine GitHub kullanıcı adınızı yazın): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",

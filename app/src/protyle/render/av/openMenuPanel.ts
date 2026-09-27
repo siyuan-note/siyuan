@@ -1,3 +1,4 @@
+import {openConditionalColors} from "./conditionalColorDialog";
 import {isTableLikeView} from "./viewType";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
@@ -906,6 +907,12 @@ export const openMenuPanel = (options: {
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     bindLayoutEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
                     window.siyuan.menus.menu.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goConditionalColors") {
+                    avPanelElement.remove();
+                    openConditionalColors(options.protyle, options.blockElement as HTMLElement, data);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

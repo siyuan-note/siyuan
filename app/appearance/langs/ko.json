@@ -1,4 +1,10 @@
 {
+	"conditionalColors": "조건부 색상",
+	"conditionalColorItem": "항목 전체",
+	"conditionalColorProperty": "이 속성",
+	"conditionalColorTarget": "적용 대상",
+	"conditionalColorFirstOption": "첫 번째 옵션 색상 사용",
+	"conditionalColorsTip": "규칙은 위에서 아래로 평가되며 각 대상에 처음 일치하는 색상이 적용됩니다",
 	"newFileAtPath": "위치 선택 후 문서 만들기...",
 	"oidcClaimRulesRequired": "인증된 모든 사용자에게 관리자 권한을 부여하지 않는 경우 클레임 규칙을 하나 이상 설정해야 합니다",
 	"oidcGitHubClaimRulesTip": "GitHub 예시 (YOUR_GITHUB_USERNAME을 본인의 GitHub 사용자 이름으로 바꾸세요): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",

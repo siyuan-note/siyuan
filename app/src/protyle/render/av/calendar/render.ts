@@ -7,6 +7,7 @@ import {transaction} from "../../../wysiwyg/transaction";
 import {renderCell} from "../cell";
 import {cellValueIsEmpty} from "../cellValue";
 import {getAVBackgroundColor} from "../color";
+import {getConditionalBackground} from "../conditionalColor";
 import {getColNameByType} from "../col";
 import {finishAVLocate} from "../locate";
 import {createAttributeViewItem} from "../newItemTemplate";
@@ -67,7 +68,9 @@ const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boole
     const primary = event.row.cells.find(cell => cell.value?.type === "block");
     const colorValue = event.row.cells.find(cell => cell.value?.keyID === view.calendar.colorKeyID)?.value;
     const colorField = view.columns.find(field => field.id === view.calendar.colorKeyID && field.type === "select");
-    const option = colorField?.options?.find(item => item.name === colorValue?.mSelect?.[0]?.content);
+    const option = !view.conditionalColors ? colorField?.options?.find(item => item.name === colorValue?.mSelect?.[0]?.content) : undefined;
+    const background = getConditionalBackground(event.row.conditionalColors?.background) ||
+        (option ? getAVBackgroundColor(option) : "");
     const dateValue = event.date.value;
     const column = view.columns.find(field => field.id === dateValue.keyID);
     const rawDate = dateValue.type === "date" ? dateValue.date : dateValue.type === "created" ? dateValue.created : dateValue.updated;
@@ -85,7 +88,7 @@ const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boole
         const checkClass = field.type === "checkbox" ? (cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck") : "";
         return `<div class="av__calendar-field${checkClass}" data-field-id="${field.id}" data-col-id="${field.id}" data-dtype="${field.type}" data-align="${field.align || ""}" data-wrap="${field.wrap}"${field.renderTemplate?.trim() ? ' data-render-template="true"' : ""} title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, view.showIcon, "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
     }).join("");
-    return `<div class="av__calendar-item${starts ? " av__calendar-item--start" : ""}${ends ? " av__calendar-item--end" : ""}" role="button" tabindex="0" data-calendar-item="${event.row.id}" data-id="${event.row.id}" title="${escapeAttr(title)}" style="grid-column:${segment.column + 1}/span ${segment.span};grid-row:${segment.lane + 1};${option ? `--b3-av-calendar-background:${getAVBackgroundColor(option)}` : ""}">
+    return `<div class="av__calendar-item${starts ? " av__calendar-item--start" : ""}${ends ? " av__calendar-item--end" : ""}" role="button" tabindex="0" data-calendar-item="${event.row.id}" data-id="${event.row.id}" title="${escapeAttr(title)}" style="grid-column:${segment.column + 1}/span ${segment.span};grid-row:${segment.lane + 1};${background ? `--b3-av-calendar-background:${background}` : ""}">
         ${drag && starts ? `<span class="av__calendar-resize av__calendar-resize--start" data-calendar-resize="start" title="${window.siyuan.languages.calendarResizeStart}"></span>` : ""}
         ${drag && !isMobile() ? `<span class="av__calendar-move" data-calendar-move title="${window.siyuan.languages.move}"><svg><use xlink:href="#iconDrag"></use></svg></span>` : ""}
         <div class="av__calendar-item-content">${time ? `<span class="av__calendar-time">${time}</span>` : ""}${event.invalid ? '<svg class="av__calendar-warning"><use xlink:href="#iconInfo"></use></svg>' : ""}${fields || escapeHtml(primary?.value?.block?.content || window.siyuan.languages.untitled)}</div>

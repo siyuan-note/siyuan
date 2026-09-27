@@ -90,8 +90,9 @@ type TableColumn struct {
 
 // TableRow 描述了表格实例行的结构。
 type TableRow struct {
-	ID    string       `json:"id"`    // 行 ID
-	Cells []*TableCell `json:"cells"` // 行单元格
+	ConditionalColors *ItemConditionalColors `json:"conditionalColors,omitempty"`
+	ID                string                 `json:"id"`    // 行 ID
+	Cells             []*TableCell           `json:"cells"` // 行单元格
 }
 
 // TableCell 描述了表格实例单元格的结构。

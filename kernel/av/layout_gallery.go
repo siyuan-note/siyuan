@@ -152,8 +152,9 @@ type Gallery struct {
 
 // GalleryCard 描述了卡片实例的结构。
 type GalleryCard struct {
-	ID     string               `json:"id"`     // 卡片 ID
-	Values []*GalleryFieldValue `json:"values"` // 卡片字段值
+	ConditionalColors *ItemConditionalColors `json:"conditionalColors,omitempty"`
+	ID                string                 `json:"id"`     // 卡片 ID
+	Values            []*GalleryFieldValue   `json:"values"` // 卡片字段值
 
 	CoverURL      string             `json:"coverURL"`                // 卡片封面超链接
 	CoverContent  string             `json:"coverContent"`            // 卡片封面文本内容

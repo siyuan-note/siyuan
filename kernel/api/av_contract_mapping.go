@@ -61,23 +61,24 @@ func toContractAVBaseInstance(value *av.BaseInstance) *apicontract.AVBaseInstanc
 		return nil
 	}
 	return &apicontract.AVBaseInstance{
-		ID:               value.ID,
-		Icon:             value.Icon,
-		Name:             value.Name,
-		Desc:             value.Desc,
-		HideAttrViewName: value.HideAttrViewName,
-		Filters:          avContractSlice(value.Filters, func(value *av.ViewFilter) *apicontract.AVViewFilter { return toContractAVViewFilter(value) }),
-		Sorts:            avContractSlice(value.Sorts, func(value *av.ViewSort) *apicontract.AVViewSort { return toContractAVViewSort(value) }),
-		Group:            toContractAVViewGroup(value.Group),
-		PageSize:         value.PageSize,
-		ShowIcon:         value.ShowIcon,
-		WrapField:        value.WrapField,
-		GroupKey:         toContractAVKey(value.GroupKey),
-		GroupValue:       toContractAVValue(value.GroupValue),
-		Groups:           avContractSlice(value.Groups, func(value av.Viewable) apicontract.AVViewInstance { return avContractView(value) }),
-		GroupCalc:        toContractAVGroupCalc(value.GroupCalc),
-		GroupFolded:      value.GroupFolded,
-		GroupHidden:      value.GroupHidden,
+		ConditionalColors: avContractSlice(value.ConditionalColors, toContractAVConditionalColorRule),
+		ID:                value.ID,
+		Icon:              value.Icon,
+		Name:              value.Name,
+		Desc:              value.Desc,
+		HideAttrViewName:  value.HideAttrViewName,
+		Filters:           avContractSlice(value.Filters, func(value *av.ViewFilter) *apicontract.AVViewFilter { return toContractAVViewFilter(value) }),
+		Sorts:             avContractSlice(value.Sorts, func(value *av.ViewSort) *apicontract.AVViewSort { return toContractAVViewSort(value) }),
+		Group:             toContractAVViewGroup(value.Group),
+		PageSize:          value.PageSize,
+		ShowIcon:          value.ShowIcon,
+		WrapField:         value.WrapField,
+		GroupKey:          toContractAVKey(value.GroupKey),
+		GroupValue:        toContractAVValue(value.GroupValue),
+		Groups:            avContractSlice(value.Groups, func(value av.Viewable) apicontract.AVViewInstance { return avContractView(value) }),
+		GroupCalc:         toContractAVGroupCalc(value.GroupCalc),
+		GroupFolded:       value.GroupFolded,
+		GroupHidden:       value.GroupHidden,
 	}
 }
 func toContractAVViewFilter(value *av.ViewFilter) *apicontract.AVViewFilter {
@@ -764,8 +765,9 @@ func toContractAVTableRow(value *av.TableRow) *apicontract.AVTableRow {
 		return nil
 	}
 	return &apicontract.AVTableRow{
-		ID:    value.ID,
-		Cells: avContractSlice(value.Cells, func(value *av.TableCell) *apicontract.AVTableCell { return toContractAVTableCell(value) }),
+		ConditionalColors: toContractAVItemConditionalColors(value.ConditionalColors),
+		ID:                value.ID,
+		Cells:             avContractSlice(value.Cells, func(value *av.TableCell) *apicontract.AVTableCell { return toContractAVTableCell(value) }),
 	}
 }
 func toContractAVTableCell(value *av.TableCell) *apicontract.AVTableCell {
@@ -823,7 +825,8 @@ func toContractAVGalleryCard(value *av.GalleryCard) *apicontract.AVGalleryCard {
 		return nil
 	}
 	return &apicontract.AVGalleryCard{
-		ID: value.ID,
+		ConditionalColors: toContractAVItemConditionalColors(value.ConditionalColors),
+		ID:                value.ID,
 		Values: avContractSlice(value.Values, func(value *av.GalleryFieldValue) *apicontract.AVGalleryFieldValue {
 			return toContractAVGalleryFieldValue(value)
 		}),
@@ -886,7 +889,8 @@ func toContractAVKanbanCard(value *av.KanbanCard) *apicontract.AVKanbanCard {
 		return nil
 	}
 	return &apicontract.AVKanbanCard{
-		ID: value.ID,
+		ConditionalColors: toContractAVItemConditionalColors(value.ConditionalColors),
+		ID:                value.ID,
 		Values: avContractSlice(value.Values, func(value *av.KanbanFieldValue) *apicontract.AVKanbanFieldValue {
 			return toContractAVKanbanFieldValue(value)
 		}),
@@ -1023,31 +1027,32 @@ func toContractAVView(value *av.View) *apicontract.AVView {
 		return nil
 	}
 	return &apicontract.AVView{
-		ID:               value.ID,
-		Icon:             value.Icon,
-		Name:             value.Name,
-		HideAttrViewName: value.HideAttrViewName,
-		Desc:             value.Desc,
-		Filters:          avContractSlice(value.Filters, func(value *av.ViewFilter) *apicontract.AVViewFilter { return toContractAVViewFilter(value) }),
-		Sorts:            avContractSlice(value.Sorts, func(value *av.ViewSort) *apicontract.AVViewSort { return toContractAVViewSort(value) }),
-		PageSize:         value.PageSize,
-		LayoutType:       string(value.LayoutType),
-		Table:            toContractAVLayoutTable(value.Table),
-		List:             toContractAVLayoutTable(value.List),
-		Calendar:         toContractAVLayoutCalendar(value.Calendar),
-		Gallery:          toContractAVLayoutGallery(value.Gallery),
-		Kanban:           toContractAVLayoutKanban(value.Kanban),
-		ItemIDs:          value.ItemIDs,
-		Group:            toContractAVViewGroup(value.Group),
-		GroupCreated:     value.GroupCreated,
-		Groups:           avContractSlice(value.Groups, func(value *av.View) *apicontract.AVView { return toContractAVView(value) }),
-		GroupItemIDs:     value.GroupItemIDs,
-		GroupCalc:        toContractAVGroupCalc(value.GroupCalc),
-		GroupKey:         toContractAVKey(value.GroupKey),
-		GroupVal:         toContractAVValue(value.GroupVal),
-		GroupFolded:      value.GroupFolded,
-		GroupHidden:      value.GroupHidden,
-		GroupSort:        value.GroupSort,
+		ConditionalColors: avContractSlice(value.ConditionalColors, toContractAVConditionalColorRule),
+		ID:                value.ID,
+		Icon:              value.Icon,
+		Name:              value.Name,
+		HideAttrViewName:  value.HideAttrViewName,
+		Desc:              value.Desc,
+		Filters:           avContractSlice(value.Filters, func(value *av.ViewFilter) *apicontract.AVViewFilter { return toContractAVViewFilter(value) }),
+		Sorts:             avContractSlice(value.Sorts, func(value *av.ViewSort) *apicontract.AVViewSort { return toContractAVViewSort(value) }),
+		PageSize:          value.PageSize,
+		LayoutType:        string(value.LayoutType),
+		Table:             toContractAVLayoutTable(value.Table),
+		List:              toContractAVLayoutTable(value.List),
+		Calendar:          toContractAVLayoutCalendar(value.Calendar),
+		Gallery:           toContractAVLayoutGallery(value.Gallery),
+		Kanban:            toContractAVLayoutKanban(value.Kanban),
+		ItemIDs:           value.ItemIDs,
+		Group:             toContractAVViewGroup(value.Group),
+		GroupCreated:      value.GroupCreated,
+		Groups:            avContractSlice(value.Groups, func(value *av.View) *apicontract.AVView { return toContractAVView(value) }),
+		GroupItemIDs:      value.GroupItemIDs,
+		GroupCalc:         toContractAVGroupCalc(value.GroupCalc),
+		GroupKey:          toContractAVKey(value.GroupKey),
+		GroupVal:          toContractAVValue(value.GroupVal),
+		GroupFolded:       value.GroupFolded,
+		GroupHidden:       value.GroupHidden,
+		GroupSort:         value.GroupSort,
 	}
 }
 func toContractAVLayoutTable(value *av.LayoutTable) *apicontract.AVLayoutTable {
@@ -1329,4 +1334,25 @@ func toContractAVCreateAttributeViewItemDocsResult(value *model.CreateAttributeV
 		SkippedItemIDs: value.SkippedItemIDs,
 		Warnings:       value.Warnings,
 	}
+}
+
+func toContractAVConditionalColorRule(value *av.ConditionalColorRule) *apicontract.AVConditionalColorRule {
+	if value == nil {
+		return nil
+	}
+	return &apicontract.AVConditionalColorRule{ID: value.ID, Filter: toContractAVViewFilter(value.Filter), Target: value.Target, Color: toContractAVValueSelect(value.Color), MatchOption: value.MatchOption}
+}
+
+func toContractAVItemConditionalColors(value *av.ItemConditionalColors) *apicontract.AVItemConditionalColors {
+	if value == nil {
+		return nil
+	}
+	result := &apicontract.AVItemConditionalColors{Background: toContractAVValueSelect(value.Background)}
+	if value.Properties != nil {
+		result.Properties = map[string]*apicontract.AVValueSelect{}
+		for id, color := range value.Properties {
+			result.Properties[id] = toContractAVValueSelect(color)
+		}
+	}
+	return result
 }

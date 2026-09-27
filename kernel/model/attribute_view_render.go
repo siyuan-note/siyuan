@@ -995,6 +995,12 @@ func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av
 		return false
 	}
 
+	for _, rule := range view.EffectiveConditionalColors() {
+		if nil != rule && nil != rule.Filter && (templateKeyIDs[rule.Filter.Column] ||
+			(renderTemplateKeyIDs[rule.Filter.Column] && rule.Filter.ValueSource == av.ValueSourceRendered)) {
+			return false
+		}
+	}
 	for keyID := range templateKeyIDs {
 		if attrViewFiltersContainColumn(view.Filters, keyID) {
 			return false
@@ -1129,6 +1135,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 		}
 		kanban.Cards = kanban.Cards[start:end]
 	}
+	av.RenderConditionalColors(viewable, view, attrView, rollupFurtherCollections, cachedAttrViews)
 	return
 }
 

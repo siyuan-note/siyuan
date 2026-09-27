@@ -456,9 +456,8 @@ style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}$
     ${selected ? '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>' : ""}
     ${isDetached ? "" : `<span class="av__relation-row-icon">${getFileTreeIconHTML(primaryValue.block?.icon, "file")}</span>`}
     <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}${useRenderedContent ? " av__celltext--template" : ""}"
-        ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'}
         data-icon="${escapeAttr(primaryValue.block?.icon || "")}"
-        data-id="${escapeAttr(primaryValue.block?.id || "")}" data-content="${escapeAttr(primaryValue.block?.content || "")}">${content}</span>
+        data-id="${escapeAttr(primaryValue.block?.id || "")}" data-content="${escapeAttr(primaryValue.block?.content || "")}">${isDetached ? content : `<span class="av__celltext--ref">${content}</span>`}</span>
     ${primaryCell.id ? `<button type="button" class="av__relation-row-open ariaLabel" data-type="openRelationRow" draggable="false"
         data-position="north" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></button>` : ""}
 </span>`;

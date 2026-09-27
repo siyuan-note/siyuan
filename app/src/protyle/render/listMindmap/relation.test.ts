@@ -35,7 +35,8 @@ test("manual route save and reset use one transaction and reject stale relation 
         canEdit: () => true,
         getListMindmapSiblingIDs: () => new Map(),
         normalizeListMindmapSummaryMetadata: () => {},
-        readListMindmap: () => ({metadata: JSON.parse(JSON.stringify(data)), nodes: new Map(["a", "b", "c"].map(id => [id, {}]))}),
+        readListMindmap: () => ({root: {id: "a"}, metadata: JSON.parse(JSON.stringify(data)),
+            nodes: new Map(["a", "b", "c"].map(id => [id, {}]))}),
         writeListMindmapMetadata: (_list: unknown, next: typeof data) => data = next,
         cleanListMindmapHTML: (html: string) => html,
         updateTransaction: (_owner: unknown, _list: unknown, before: string) => transactions.push({before, after: list.outerHTML}),
@@ -44,7 +45,7 @@ test("manual route save and reset use one transaction and reject stale relation 
     };
     runInNewContext(compiled, context);
     const target = new context.Controller();
-    Object.assign(target, {list, owner: {}, refresh: () => {}});
+    Object.assign(target, {list, owner: {}, view: {getSelectedId: () => "a"}, refresh: () => {}});
     const route = {version: 1, points: [{x: -40, y: 20, t: .5}]};
     const snapshot = JSON.stringify(data.relations[0]);
     target.onRelationChange("r", {route}, snapshot);

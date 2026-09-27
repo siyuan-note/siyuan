@@ -83,6 +83,7 @@ const rendererModules = () => {
         const getAVTemplateInteractiveElement = () => false;
         const focusAVByArrow = () => { throw new Error("Unexpected legacy AV keyup fallback"); };
         export function bind(protyle) {
+            const isComposition = false;
             let arrowStartElement = protyle.wysiwyg.element;
             const handler = function(event) { ${keyupStatements} };
             protyle.wysiwyg.element.addEventListener("keyup", handler.bind(protyle.wysiwyg));
@@ -92,6 +93,7 @@ const rendererModules = () => {
     modules["util/selectionFocus"] = readFileSync(path.join(root, "util/selectionFocus.ts"), "utf8");
     modules["util/restoreNavigationFocus"] = `import {getUndoFocusElement} from "./selectionFocus";
         import {isInEmbedBlock} from "./hasClosest";
+        const restoreListMindmapFocus = () => false;
         const focusByOffset = element => { window.restoredFocusElement = element; return true; };\n` +
         extract("util/selection", ["restoreFocusContext"]);
     for (const name of ["virtualScroll", "selectionState", "rangeSelect", "groupTableVirtual", "backlinkScroll", "viewType"]) {

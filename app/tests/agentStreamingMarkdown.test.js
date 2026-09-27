@@ -16,6 +16,7 @@ const sources = () => {
         "layout/dock/agent/AgentReasoning",
         "protyle/render/setLute",
         "protyle/util/inlineElementBoundary",
+        "protyle/util/tableVirtualizationDOM",
         "util/escape",
     ].map(name => [name, ts.transpileModule(readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
@@ -577,7 +578,7 @@ const runCases = async (sources, css, luteScript) => {
     // 实际浏览器 Worker 加载实际 Lute；模块在内存转译，不构建或替换应用产物。
     body.remove();
     const workerModules = Object.fromEntries(["protyle/render/setLute", "protyle/util/inlineElementBoundary",
-        "layout/dock/agent/AgentMarkdownWorker"]
+        "protyle/util/tableVirtualizationDOM", "layout/dock/agent/AgentMarkdownWorker"]
         .map(name => [name, sources[name]]));
     const bootstrap = modules => {
         const cache = {};

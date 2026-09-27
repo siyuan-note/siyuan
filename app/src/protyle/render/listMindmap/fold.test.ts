@@ -128,7 +128,7 @@ test("batch folding saves a single undo snapshot and reads the source after fini
     };
     runInNewContext(compiled, context);
     const target = new context.Controller(list);
-    Object.assign(target, {owner: {}, refresh: () => {}});
+    Object.assign(target, {owner: {}, view: {getSelectedId: () => root.id}, refresh: () => {}});
     const before = snapshot();
     assert.equal(await target.onFoldLevel(1), true);
     assert.equal(transactions.length, 1);

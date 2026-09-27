@@ -2828,7 +2828,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const services = {
         Constants: {ZWSP: "\u200b"},
         getAVTemplateInteractiveElement: absent, getAVSelectionRoot: absent, isAVDragSelectSupported: absent,
-        isTableLikeView: absent, isMobile: absent, shouldFoldEmbeddedListByAlt: absent,
+        isTableLikeView: absent, isMobile: absent, isPhablet: absent, shouldFoldEmbeddedListByAlt: absent,
         shouldOpenListItemAttr: absent, isHiddenTabContent: absent,
         isOnlyMeta: (event: MouseEvent) => (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey,
         repairHiddenTabSelection: noop, clearSelect: noop, hideAllElements: noop, globalClickHideMenu: noop,
@@ -3270,9 +3270,10 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     const dragSource = compile(path.join(__dirname, "../../util/hasClosest.ts")) +
         compile(path.join(__dirname, "../../wysiwyg/getBlock.ts")) +
         compile(path.join(__dirname, "../../wysiwyg/blockDragSelect.ts")) +
-        "const {getBlockSelectionModeElement, clearBlockSelectionMode} = (() => {" +
+        "const {BLOCK_SELECTION_CLASS, getBlockSelectionModeElement, clearBlockSelectionMode} = (() => {" +
         compile(path.join(__dirname, "../../wysiwyg/blockSelection.ts")) +
-        "return {getBlockSelectionModeElement, clearBlockSelectionMode};})();\n" +
+        "return {BLOCK_SELECTION_CLASS, getBlockSelectionModeElement, clearBlockSelectionMode};})();\n" +
+        compile(path.join(__dirname, "../../gutter/restore.ts")) +
         "const {hideElements} = (() => {" + compile(path.join(__dirname, "../../ui/hideElements.ts")) +
         "return {hideElements};})();\n" +
         typescript.transpileModule(mouseDownBinding.getText(wysiwygSource) + ";\n" + pointerDownBinding.getText(indexSource), {

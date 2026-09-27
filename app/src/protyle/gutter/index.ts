@@ -85,9 +85,8 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu, limitRecentFontStyleRows} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {emitOpenMenu} from "../../plugin/EventBus";
-import {insertAttrViewBlockAnimation, selectRow, updateHeader} from "../render/av/row";
+import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {getAVSelectedItemPoints} from "../render/av/virtualScroll";
-import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {genCellValueByElement} from "../render/av/cell";
@@ -275,18 +274,15 @@ export class Gutter {
                     }
                 });
                 const rowElement = avElement.querySelector(`.av__body${buttonElement.dataset.groupId ? `[data-group-id="${buttonElement.dataset.groupId}"]` : ""} .av__row[data-id="${buttonElement.dataset.rowId}"]`);
-                if (!rowElement.classList.contains("av__row--select")) {
-                    clearSelect(["row"], avElement);
-                    selectRow(rowElement.querySelector(".av__firstcol"), "select");
-                    setAVItemAnchor(avElement, rowElement as HTMLElement);
+                if (rowElement.classList.contains("av__row--select")) {
+                    getAVSelectedItemPoints(avElement).forEach(item => {
+                        selectIds.push(item.itemID + (item.groupID ? "@" + item.groupID : ""));
+                    });
+                    selectElements = Array.from(avElement.querySelectorAll(".av__row--select:not(.av__row--header)"));
+                } else {
+                    selectIds = [buttonElement.dataset.rowId + (buttonElement.dataset.groupId ? "@" + buttonElement.dataset.groupId : "")];
+                    selectElements = [rowElement];
                 }
-                updateHeader(rowElement as HTMLElement);
-                getAVSelectedItemPoints(avElement).forEach(item => {
-                    selectIds.push(item.itemID + (item.groupID ? "@" + item.groupID : ""));
-                });
-                avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
-                    selectElements.push(item);
-                });
             } else {
                 const gutterId = buttonElement.getAttribute("data-node-id");
                 const gutterNodeElement = this.getNodeElement(protyle, buttonElement) as HTMLElement;

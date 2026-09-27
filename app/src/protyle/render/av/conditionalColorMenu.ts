@@ -1,37 +1,51 @@
-import {Dialog} from "../../../dialog";
 import {Menu} from "../../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
-import {isMobile} from "../../../util/functions";
 import {transaction} from "../../wysiwyg/transaction";
 import {getFieldsByData} from "./view";
 import {bindInlineFilterEvents, genEmptyFilterValue, getFiltersHTML, prepareFilterColumns} from "./filter";
 import {AV_MANAGE_CUSTOM_COLORS_TYPE, getAVColorGridHTML, getAVColorOrder, getAVCustomColors} from "./color";
-import {getConditionalBackground} from "./conditionalColor";
+import {getConditionalBackground, moveConditionalColorRule} from "./conditionalColor";
 import {openAVCustomColorDialog} from "./colorDialog";
+import {openViewSettingMenu} from "./viewSettingMenu";
 
 const cloneRules = (rules: IAVConditionalColorRule[]) => JSON.parse(JSON.stringify(rules || [])) as IAVConditionalColorRule[];
 
-export const openConditionalColors = async (protyle: IProtyle, blockElement: HTMLElement, data: IAV) => {
+export const openConditionalColorsMenu = async (options: {
+    protyle: IProtyle,
+    blockElement: HTMLElement,
+    data: IAV,
+    menuElement: HTMLElement,
+    onResize: () => void,
+}) => {
+    const {protyle, blockElement, data, menuElement, onResize} = options;
     if (protyle.disabled || window.siyuan.isPublish || window.siyuan.config.readonly ||
         protyle.options.history?.created || protyle.options.history?.snapshot) {
         return;
     }
-    await prepareFilterColumns(data);
-    const fields = getFieldsByData(data).filter(field => field.type !== "lineNumber");
     let rules = cloneRules(data.view.conditionalColors);
     const lang = window.siyuan.languages;
-    const dialog = new Dialog({
-        title: lang.conditionalColors,
-        width: isMobile() ? "92vw" : "760px",
-        content: `<div class="b3-dialog__content av__conditional-colors">
+    menuElement.classList.remove("av__filter-panel");
+    menuElement.classList.add("av__conditional-panel");
+    menuElement.innerHTML = `<div class="b3-menu__items">
+<button class="b3-menu__item" data-type="nobg">
+    <span class="block__icon" data-type="go-config"><svg><use xlink:href="#iconLeft"></use></svg></span>
+    <span class="b3-menu__label ft__center">${lang.conditionalColors}</span>
+</button>
+<button class="b3-menu__separator"></button>
+<div class="av__conditional-colors">
 <div class="ft__on-surface">${lang.conditionalColorsTip}</div>
 <div class="fn__hr"></div><div data-rules></div>
-<button type="button" class="b3-button b3-button--outline" data-action="add"><svg><use xlink:href="#iconAdd"></use></svg>${lang.new}</button>
-</div>`,
-    });
-    const root = dialog.element.querySelector<HTMLElement>("[data-rules]");
-    const icon = (action: string, name: string, label: string, disabled = false) =>
-        `<button type="button" class="block__icon block__icon--show ariaLabel" data-action="${action}" aria-label="${escapeAttr(label)}"${disabled ? " disabled" : ""}><svg><use xlink:href="#${name}"></use></svg></button>`;
+<button type="button" class="b3-menu__item" data-action="add" disabled><svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg><span class="b3-menu__label">${lang.new}</span></button>
+</div></div>`;
+    const panelElement = menuElement.querySelector<HTMLElement>(".av__conditional-colors");
+    const root = panelElement.querySelector<HTMLElement>("[data-rules]");
+    onResize();
+    await prepareFilterColumns(data);
+    // 返回上级或关闭菜单后，不再更新已经移除的面板。
+    if (!panelElement.isConnected) {
+        return;
+    }
+    const fields = getFieldsByData(data).filter(field => field.type !== "lineNumber");
     const save = (next: IAVConditionalColorRule[], redraw = true) => {
         const previous = cloneRules(rules);
         rules = cloneRules(next);
@@ -47,11 +61,12 @@ export const openConditionalColors = async (protyle: IProtyle, blockElement: HTM
         save(rules.map(rule => rule.id === id ? {...rule, ...patch} : rule), redraw);
     };
     const render = () => {
-        root.innerHTML = rules.map((rule, index) => `<div class="av__conditional-rule" data-rule-id="${escapeAttr(rule.id)}">
-<div class="fn__flex"><span class="fn__flex-1">${index + 1}</span>
-${icon("up", "iconUp", lang.moveToUp, index === 0)}${icon("down", "iconDown", lang.moveToDown, index === rules.length - 1)}
-${icon("remove", "iconTrashcan", lang.delete)}</div>
+        root.innerHTML = rules.map(rule => `<div class="av__conditional-rule" data-rule-id="${escapeAttr(rule.id)}">
+<div class="av__conditional-condition">
+<span class="block__icon block__icon--show fn__grab ariaLabel" draggable="true" data-conditional-drag aria-label="${lang.move}"><svg><use xlink:href="#iconDrag"></use></svg></span>
 <div data-filter></div>
+<div class="fn__flex">
+<svg class="b3-menu__action b3-menu__action--show b3-menu__action--warning ariaLabel" data-action="remove" role="button" tabindex="0" aria-label="${lang.delete}"><use xlink:href="#iconTrashcan"></use></svg></div></div>
 <div class="av__conditional-controls">
 <select class="b3-select" data-action="target" aria-label="${lang.conditionalColorTarget}">
 <option value="item"${rule.target === "item" ? " selected" : ""}>${lang.conditionalColorItem}</option>
@@ -80,33 +95,60 @@ ${data.viewType === "table" || rule.target === "property" ? `<option value="prop
                 },
             });
         });
-        dialog.element.querySelector<HTMLButtonElement>('[data-action="add"]').disabled = rules.length >= 100 || fields.length === 0;
+        panelElement.querySelector<HTMLButtonElement>('[data-action="add"]').disabled = rules.length >= 100 || fields.length === 0;
+        onResize();
     };
-    dialog.element.addEventListener("change", event => {
+    panelElement.addEventListener("change", event => {
         const target = event.target as HTMLSelectElement;
         if (target.dataset.action === "target") {
             update(target.closest<HTMLElement>("[data-rule-id]").dataset.ruleId,
                 {target: target.value === "property" ? "property" : "item"});
         }
     });
-    dialog.element.addEventListener("click", event => {
-        const target = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
-        if (!target || target.tagName !== "BUTTON") {
+    root.addEventListener("drop", (event: DragEvent) => {
+        const source = window.siyuan.dragElement;
+        if (!source?.dataset.ruleId || !root.contains(source)) {
             return;
         }
+        event.preventDefault();
+        event.stopPropagation();
+        const target = (event.target as HTMLElement).closest<HTMLElement>("[data-rule-id]");
+        source.style.opacity = "";
+        window.siyuan.dragElement = undefined;
+        root.querySelectorAll(".dragover__top, .dragover__bottom").forEach(element => {
+            element.classList.remove("dragover__top", "dragover__bottom");
+        });
+        if (!target || !root.contains(target)) {
+            return;
+        }
+        const rect = target.getBoundingClientRect();
+        const next = moveConditionalColorRule(rules, source.dataset.ruleId, target.dataset.ruleId,
+            event.clientY <= rect.top + rect.height / 2);
+        if (next !== rules) {
+            save(next);
+        }
+    });
+    panelElement.addEventListener("keydown", event => {
+        const target = (event.target as HTMLElement).closest<HTMLElement>('[data-action="remove"]');
+        if (target && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            event.stopPropagation();
+            target.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        }
+    });
+    panelElement.addEventListener("click", event => {
+        const target = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
+        if (!target || (target.tagName !== "BUTTON" && target.dataset.action !== "remove")) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
         const action = target.dataset.action;
         const id = target.closest<HTMLElement>("[data-rule-id]")?.dataset.ruleId;
         const index = rules.findIndex(rule => rule.id === id);
         const rule = rules[index];
         if (action === "remove") {
             save(rules.filter(rule => rule.id !== id));
-        } else if (action === "up" || action === "down") {
-            const next = cloneRules(rules);
-            const to = index + (action === "up" ? -1 : 1);
-            if (index >= 0 && to >= 0 && to < next.length) {
-                next.splice(to, 0, next.splice(index, 1)[0]);
-                save(next);
-            }
         } else if (action === "add") {
             const menu = new Menu();
             fields.forEach(field => menu.addItem({label: escapeHtml(field.name), click: () => {
@@ -115,8 +157,7 @@ ${data.viewType === "table" || rule.target === "property" ? `<option value="prop
                     matchOption: ["select", "mSelect"].includes(field.type),
                     filter: {column: field.id, operator: field.type === "checkbox" ? operator : "Is not empty", value}}]);
             }}));
-            const rect = target.getBoundingClientRect();
-            menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+            openViewSettingMenu(menu, target);
         } else if (action === "color" && rule) {
             const menu = new Menu();
             menu.addItem({label: lang.default, checked: !rule.matchOption && !rule.color?.color,
@@ -142,8 +183,7 @@ ${data.viewType === "table" || rule.target === "property" ? `<option value="prop
                     });
                 },
             });
-            const rect = target.getBoundingClientRect();
-            menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+            openViewSettingMenu(menu, target);
         }
     });
     render();

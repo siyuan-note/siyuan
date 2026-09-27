@@ -501,6 +501,11 @@
       background-color: transparent;
     }
 
+    &--warning:hover,
+    &--warning:focus-visible {
+      color: var(--b3-theme-error);
+    }
+
     &--hint:hover {
       color: var(--b3-theme-on-surface-light);
       background-color: transparent;

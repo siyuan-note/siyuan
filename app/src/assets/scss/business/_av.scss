@@ -1,4 +1,4 @@
-// 单字段条件编辑器供筛选菜单和条件颜色对话框共用。
+// 单字段条件编辑器供筛选和条件颜色菜单共用。
 @mixin av-filter-editor {
   .b3-menu__item.av__filter-row {
     margin: 6px 0;
@@ -2038,6 +2038,12 @@
       min-width: 290px;
       max-width: 290px;
 
+      &.av__conditional-panel:not(.b3-menu--fullscreen) {
+        width: fit-content;
+        min-width: min(340px, 90vw);
+        max-width: 80vw;
+      }
+
       &__items {
         max-height: calc(100vh - 60px);
       }
@@ -2090,7 +2096,10 @@
           opacity: .38;
           cursor: not-allowed;
         }
+      }
 
+      &__item,
+      .av__conditional-rule {
         &.dragover__top::after,
         &.dragover__bottom::after {
           content: '';
@@ -2835,22 +2844,35 @@ img.av__cellassetimg {
   }
 }
 
-.av__conditional-colors {
-  @include av-filter-editor;
-
-  max-height: 70vh;
-  overflow: auto;
+.av__panel .av__conditional-colors {
+  padding: 8px;
 
   [data-rules] {
     display: grid;
-    gap: 16px;
-    margin-bottom: 16px;
+    gap: 12px;
+    margin-bottom: 8px;
   }
 
   .av__conditional-rule {
+    position: relative;
     display: grid;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
+  }
+
+  .av__conditional-condition {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+
+    [data-filter] {
+      flex: 1;
+      min-width: 0;
+    }
+
+    > .fn__flex {
+      flex-shrink: 0;
+    }
   }
 
   .av__filter-rowinner,
@@ -2861,7 +2883,7 @@ img.av__cellassetimg {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
   }
 

@@ -307,7 +307,7 @@ export const getFiltersHTML = (data: IAV, single = false) => {
             : "";
         const inlineHTML = genInlineFilterHTML(node, colData, path);
         const leafAndOrHTML = 0 === index ? genWhenLabel() : 1 === index ? genAndOrSelect(groupPath, groupCombination) : genAndOrLabel(groupCombination);
-        return `<div class="${single ? "" : "b3-menu__item "}av__filter-row" data-path="${path}" data-column="${node.column}">${single ? "" : leafAndOrHTML}<div class="fn__flex-1 av__filter-rowinner">${fieldWrapper}${valueSourceSelect}${inlineHTML}</div>${single ? "" : `<svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg>`}</div>`;
+        return `<div class="${single ? "" : "b3-menu__item "}av__filter-row" data-path="${path}" data-column="${node.column}">${single ? "" : leafAndOrHTML}<div class="${single ? "" : "fn__flex-1 "}av__filter-rowinner">${fieldWrapper}${valueSourceSelect}${inlineHTML}</div>${single ? "" : `<svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg>`}</div>`;
     };
 
     const isRootGroup = data.view.filters.length === 1 && (data.view.filters[0].filters || data.view.filters[0].combination);
@@ -934,7 +934,8 @@ export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, prot
 // bindInlineFilterEvents 绑定内联筛选编辑的事件（事件委托到面板）。即时保存。
 export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, protyle: IProtyle, blockID: string,
                                        avID: string, filterOperation?: FilterEditorOptions) => {
-    // 防重复绑定：事件委托绑在 panelElement 上，同一面板实例只需绑一次
+    // 事件由最近的已绑定编辑器处理，避免嵌套条件修改外层视图筛选。
+    // 同一面板实例只绑定一次。
     if (panelElement.dataset.filterEventsBound === "true") {
         return;
     }
@@ -1091,6 +1092,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
     // operator change：切换操作符，可能需要重渲染（结构变化如 Is between/Is empty）
     panelElement.addEventListener("change", (event: Event) => {
         const target = event.target as HTMLElement;
+        if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
+            return;
+        }
         const type = target.dataset.type;
         if (!type) return;
         const path = target.dataset.path;
@@ -1159,6 +1163,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
     // 值输入 blur / Enter 保存
     panelElement.addEventListener("blur", (event: Event) => {
         const target = event.target as HTMLElement;
+        if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
+            return;
+        }
         if (target.dataset.type === "filterValue" || target.dataset.type?.startsWith("absDate") || target.dataset.type?.startsWith("relCount")) {
             const path = target.dataset.path;
             const row = getRow(target);
@@ -1168,6 +1175,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
 
     panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
         const target = event.target as HTMLElement;
+        if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
+            return;
+        }
         if (event.key !== "Enter" || event.isComposing) return;
         if (target.dataset.type === "filterValue") {
             const path = target.dataset.path;
@@ -1182,6 +1192,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
     // select 下拉触发：点击展开/收起选项面板
     panelElement.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
+        if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
+            return;
+        }
         // 先处理 selectTrigger（展开/收起下拉）
         const trigger = target.closest('[data-type="selectTrigger"]') as HTMLElement;
         if (trigger) {
@@ -1269,6 +1282,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
     // 精确关联筛选：打开远程搜索下拉，并在下拉内增删选中的关联行。
     panelElement.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
+        if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
+            return;
+        }
         const trigger = target.closest('[data-type="relationFilterTrigger"]') as HTMLElement;
         if (trigger) {
             const path = trigger.dataset.path;
@@ -1329,6 +1345,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
     // 点击面板空白处收起所有 select 下拉
     panelElement.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
+        if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
+            return;
+        }
         if (!target.closest('[data-type="selectTrigger"]') && !target.closest('[data-type="selectDropdown"]')) {
             menuElement.querySelectorAll('[data-type="selectDropdown"]').forEach((el: HTMLElement) => {
                 el.style.display = "none";
@@ -1350,6 +1369,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
     // select 搜索过滤
     panelElement.addEventListener("input", (event: InputEvent) => {
         const target = event.target as HTMLElement;
+        if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
+            return;
+        }
         if (target.dataset.type === "relationFilterSearch") {
             const dropdown = target.closest('[data-type="relationFilterDropdown"]') as HTMLElement;
             if (dropdown) {
@@ -1418,6 +1440,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
     // relation 候选点击填值
     panelElement.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
+        if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
+            return;
+        }
         const item = target.closest('[data-type="relList"] .b3-list-item') as HTMLElement;
         if (!item) return;
         const listEl = item.closest('[data-type="relList"]') as HTMLElement;

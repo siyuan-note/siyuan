@@ -147,6 +147,11 @@ export const handleTouchSelectionChange = () => {
 };
 
 export const handleTouchEnd = (event: TouchEvent) => {
+    if (event.defaultPrevented) {
+        resetTouchGesture();
+        handleTouchUp();
+        return;
+    }
     updateSidebarSwipeState();
     if (preventSwipe) {
         return;
@@ -442,6 +447,10 @@ const isHorizontalScrollable = (target: HTMLElement, xDiff: number) => {
 };
 
 export const handleTouchMove = (event: TouchEvent) => {
+    if (event.defaultPrevented) {
+        resetTouchGesture();
+        return;
+    }
     const target = event.target as HTMLElement;
     // 位移超过阈值说明是滑动而非长按，取消进入多选的定时器
     if (clientX && clientY &&

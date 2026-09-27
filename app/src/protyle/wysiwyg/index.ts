@@ -1,4 +1,5 @@
 import {recordReplacementUndo} from "./replacementInput";
+import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
 import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
@@ -406,6 +407,7 @@ export class WYSIWYG {
     private disposeSpellcheckFocus?: () => void;
     private disposeEmbedToolbarVisibility?: () => void;
     private disposeHeadingFoldIndicators?: () => void;
+    private disposeBoundedBlockDragSelect?: () => void;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -545,6 +547,9 @@ export class WYSIWYG {
         if (!isMobile()) {
             bindTouchBlockDragSelect(this.element, () => !protyle.toolbar.isMultiSelectMode());
         }
+        if (isAndroid() || isIOSDevice()) {
+            this.disposeBoundedBlockDragSelect = bindBoundedBlockDragSelect(protyle, this.element);
+        }
         /// #if !MOBILE
         bindTouchNavigation(this.element, (target, point) => {
             if (!protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive) {
@@ -576,6 +581,7 @@ export class WYSIWYG {
         this.disposeHeadingFoldIndicators?.();
         this.disposeEmbedToolbarVisibility?.();
         this.disposeSpellcheckFocus?.();
+        this.disposeBoundedBlockDragSelect?.();
         this.largeListVirtualizer?.destroy();
     }
 

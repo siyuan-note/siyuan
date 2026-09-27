@@ -1,5 +1,5 @@
 {
-	"searchSnapshotID": "ค้นหาด้วย ID สแนปช็อต",
+	"searchFileOrSnapshot": "ค้นหาชื่อไฟล์หรือ ID สแนปช็อต",
 	"calendarWeekLabel": "สัป.",
 	"conditionalColors": "สีตามเงื่อนไข",
 	"conditionalColorItem": "ทั้งรายการ",

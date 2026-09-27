@@ -1,5 +1,5 @@
 {
-	"searchSnapshotID": "Претрага по ID снимка",
+	"searchFileOrSnapshot": "Претражи назив датотеке или ID снимка",
 	"calendarWeekLabel": "Н",
 	"conditionalColors": "Условне боје",
 	"conditionalColorItem": "Цела ставка",

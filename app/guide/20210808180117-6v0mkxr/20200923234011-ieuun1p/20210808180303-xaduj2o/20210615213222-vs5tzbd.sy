@@ -1599,7 +1599,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "To locate a local snapshot using an ID supplied by a plugin or another source, switch the search mode to Search snapshot ID, paste the full 40-character ID or a prefix of at least 7 characters, and search. Matching is case-insensitive. If multiple snapshots share the prefix, all matches are listed from newest to oldest. The result keeps the usual snapshot actions, including rollback. Clear the search text to return to the full list, or switch back to file-name search to find files within snapshots."
+					"Data": "Enter a file name or snapshot ID directly in the search box to search local snapshots. A hexadecimal ID of 7 to 40 characters is matched against snapshot ID prefixes, ignoring case. If multiple snapshots match, all matches are listed from newest to oldest. If no snapshot ID matches, the same text is used to search file names. Results retain the usual snapshot actions, including rollback. Clear the search text to return to the full list."
 				}
 			]
 		},

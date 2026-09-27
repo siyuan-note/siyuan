@@ -1,5 +1,5 @@
 {
-	"searchSnapshotID": "Buscar por ID de instantánea",
+	"searchFileOrSnapshot": "Buscar nombre de archivo o ID de instantánea",
 	"calendarWeekLabel": "S",
 	"conditionalColors": "Colores condicionales",
 	"conditionalColorItem": "Elemento completo",

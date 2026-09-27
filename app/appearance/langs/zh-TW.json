@@ -1,5 +1,5 @@
 {
-	"searchSnapshotID": "依快照 ID 搜尋",
+	"searchFileOrSnapshot": "搜尋檔案名稱或快照 ID",
 	"calendarWeekLabel": "週",
 	"conditionalColors": "條件顏色",
 	"conditionalColorItem": "整個條目",

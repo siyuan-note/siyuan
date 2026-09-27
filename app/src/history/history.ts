@@ -387,9 +387,8 @@ const renderRepo = async (element: Element, currentPage: number) => {
     const selectValue = getRepoSnapshotType(element);
     const searchInputElement = element.querySelector<HTMLInputElement>(".b3-text-field");
     const keyword = searchInputElement.value.trim();
-    const searchModeElement = element.querySelector<HTMLSelectElement>('[data-type="repoSearchMode"]');
-    const searchSnapshot = Boolean(keyword && selectValue === "getRepoSnapshots" && searchModeElement.value === "id");
-    const searching = Boolean(keyword && selectValue === "getRepoSnapshots" && !searchSnapshot);
+    const searchSnapshot = selectValue === "getRepoSnapshots" && /^[0-9a-f]{7,40}$/i.test(keyword);
+    let searching = Boolean(keyword && selectValue === "getRepoSnapshots" && !searchSnapshot);
     const tagged = selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots";
     const listElement = element.querySelector('[data-type="repoList"]');
     const pageBtn = element.querySelector('button[data-type="jumpRepoPage"]');
@@ -397,24 +396,30 @@ const renderRepo = async (element: Element, currentPage: number) => {
     const nextElement = element.querySelector('[data-type="next"]');
     const pageElement = nextElement.nextElementSibling.nextElementSibling;
     const searchButton = searchInputElement.nextElementSibling as HTMLButtonElement;
-    setRepoSearchLayout(element, searching);
     listElement.innerHTML = '<li class="history__snapshot-loading"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
     updateRepoSelection(element);
     element.setAttribute("data-page", String(currentPage));
     pageBtn.textContent = String(currentPage);
     searchInputElement.parentElement.classList.toggle("fn__none", selectValue !== "getRepoSnapshots");
-    searchModeElement.classList.toggle("fn__none", selectValue !== "getRepoSnapshots");
-    searchModeElement.parentElement.classList.toggle("fn__none", selectValue !== "getRepoSnapshots");
     searchButton.disabled = true;
     [previousElement, nextElement, pageBtn].forEach(button => {
         button.classList.toggle("fn__none", tagged);
         button.setAttribute("disabled", "disabled");
     });
-    pageElement.classList.add("fn__none");
+    if (tagged) {
+        pageElement.classList.add("fn__none");
+    }
     let response: IWebSocketData;
     try {
         if (searchSnapshot) {
             response = await fetchSyncPost("/api/repo/getRepoSnapshots", {id: keyword, page: 1}, undefined, false);
+            if (repoRequests.get(element) !== request || !element.isConnected) {
+                return;
+            }
+            searching = response.code === 0 && response.data.totalCount === 0;
+            if (searching) {
+                response = await fetchSyncPost("/api/repo/searchRepoFile", {keyword, page: currentPage}, undefined, false);
+            }
         } else if (searching) {
             response = await fetchSyncPost("/api/repo/searchRepoFile", {keyword, page: currentPage}, undefined, false);
         } else if (tagged) {
@@ -428,6 +433,7 @@ const renderRepo = async (element: Element, currentPage: number) => {
         if (response.code !== 0) {
             throw new Error(response.msg);
         }
+        setRepoSearchLayout(element, searching);
         if (searching) {
             renderRepoSearchResult(response, element);
         } else {
@@ -579,23 +585,17 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
         <div data-type="repo" class="fn__none history__repo">
             <div class="history__action">
                 <div class="block__icons history__repo-actions">
-                    <div class="fn__flex fn__flex-center">
+                    <div class="history__repo-pagination">
                     <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <button class="b3-button b3-button--text ft__selectnone" data-type="jumpRepoPage" data-totalpage="1">1</button>
                     <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                     <span class="fn__space"></span>
                     <span class="ft__on-surface fn__flex-shrink ft__selectnone fn__none">${window.siyuan.languages.pageCountAndSnapshotCount}</span>
                     </div>
-                    <div class="history__repo-search fn__none">
-                    <select class="b3-select fn__none" data-type="repoSearchMode" aria-label="${window.siyuan.languages.search}">
-                        <option value="file">${window.siyuan.languages.searchFileName}</option>
-                        <option value="id">${window.siyuan.languages.searchSnapshotID}</option>
-                    </select>
-                    <div class="b3-form__icon fn__none">
+                    <div class="b3-form__icon history__repo-search fn__none">
                        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                       <input class="b3-text-field b3-form__icon-input" style="padding-right: 44px;" spellcheck="false" placeholder="${window.siyuan.languages.searchFileName}">
+                       <input class="b3-text-field b3-form__icon-input" style="padding-right: 44px;" spellcheck="false" placeholder="${window.siyuan.languages.searchFileOrSnapshot}">
                        <button class="b3-button b3-button--text" style="position: absolute;right: 0;top: 0;">${window.siyuan.languages.search}</button>
-                    </div>
                     </div>
                     <button class="b3-button b3-button--outline" disabled data-type="compare">${window.siyuan.languages.compare}</button>
                     <button class="b3-button b3-button--outline" data-type="genRepo">
@@ -717,12 +717,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
         itemElement.classList.add("b3-list-item--focus");
     };
     const searchFileElement = repoElement.querySelector<HTMLInputElement>(".b3-text-field");
-    const searchModeElement = repoElement.querySelector<HTMLSelectElement>('[data-type="repoSearchMode"]');
-    searchModeElement.addEventListener("change", () => {
-        searchFileElement.placeholder = searchModeElement.value === "id" ?
-            window.siyuan.languages.searchSnapshotID : window.siyuan.languages.searchFileName;
-        renderRepo(repoElement, 1);
-    });
     searchFileElement.nextElementSibling.addEventListener("click", () => {
         renderRepo(repoElement, 1);
     });

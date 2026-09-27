@@ -1,5 +1,5 @@
 {
-	"searchSnapshotID": "Search snapshot ID",
+	"searchFileOrSnapshot": "Search file name or snapshot ID",
 	"calendarWeekLabel": "W",
 	"conditionalColors": "Conditional colors",
 	"conditionalColorItem": "Entire item",

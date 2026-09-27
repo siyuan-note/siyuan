@@ -1,5 +1,5 @@
 {
-	"searchSnapshotID": "Szukaj według ID migawki",
+	"searchFileOrSnapshot": "Szukaj nazwy pliku lub ID migawki",
 	"calendarWeekLabel": "T",
 	"conditionalColors": "Kolory warunkowe",
 	"conditionalColorItem": "Cały element",

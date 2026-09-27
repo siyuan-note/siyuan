@@ -1,5 +1,5 @@
 {
-	"searchSnapshotID": "Поиск по ID снимка",
+	"searchFileOrSnapshot": "Поиск по имени файла или ID снимка",
 	"calendarWeekLabel": "Н",
 	"conditionalColors": "Условные цвета",
 	"conditionalColorItem": "Вся запись",

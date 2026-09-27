@@ -253,23 +253,14 @@
     gap: 4px;
   }
 
-  &__repo-search {
+  &__repo-pagination {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 4px;
-    flex: 1 1 320px;
+  }
+
+  &__repo-search {
+    flex: 1 1 200px;
     min-width: 0;
-
-    .b3-select {
-      max-width: 100%;
-      flex-shrink: 0;
-    }
-
-    .b3-form__icon {
-      flex: 1 1 160px;
-      min-width: 0;
-    }
 
     .b3-text-field {
       width: 100%;

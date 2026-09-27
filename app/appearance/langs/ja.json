@@ -1,5 +1,5 @@
 {
-	"searchSnapshotID": "スナップショット ID で検索",
+	"searchFileOrSnapshot": "ファイル名またはスナップショット ID を検索",
 	"calendarWeekLabel": "週",
 	"conditionalColors": "条件付きの色",
 	"conditionalColorItem": "項目全体",

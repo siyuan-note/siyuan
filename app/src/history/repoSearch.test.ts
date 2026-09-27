@@ -4,13 +4,16 @@ import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {ScriptTarget, transpileModule} from "typescript";
 
-it("keeps snapshot ID lookup separate from file search and normal pagination", async () => {
+it("detects snapshot IDs and falls back to file search without a mode switch", async () => {
     const source = readFileSync(join(__dirname, "history.ts"), "utf8");
     const code = source.slice(source.indexOf("const renderRepo ="), source.indexOf("const renderRmNotebook ="));
     for (const test of [
-        {mode: "id", keyword: " abc ", path: "getRepoSnapshots", body: {id: "abc", page: 1}, files: false},
-        {mode: "file", keyword: "abc", path: "searchRepoFile", body: {keyword: "abc", page: 3}, files: true},
-        {mode: "id", keyword: "  ", path: "getRepoSnapshots", body: {page: 3}, files: false},
+        {keyword: " ABC1234 ", snapshotCount: 1, paths: ["getRepoSnapshots"], bodies: [{id: "ABC1234", page: 1}], files: false},
+        {keyword: "a".repeat(40), snapshotCount: 2, paths: ["getRepoSnapshots"], bodies: [{id: "a".repeat(40), page: 1}], files: false},
+        {keyword: "abc1234", snapshotCount: 0, paths: ["getRepoSnapshots", "searchRepoFile"], bodies: [{id: "abc1234", page: 1}, {keyword: "abc1234", page: 3}], files: true},
+        {keyword: "abc", snapshotCount: 0, paths: ["searchRepoFile"], bodies: [{keyword: "abc", page: 3}], files: true},
+        {keyword: "abcdef0.sy", snapshotCount: 0, paths: ["searchRepoFile"], bodies: [{keyword: "abcdef0.sy", page: 3}], files: true},
+        {keyword: "  ", snapshotCount: 0, paths: ["getRepoSnapshots"], bodies: [{page: 3}], files: false},
     ]) {
         const noop = () => {};
         const node = () => ({classList: {contains: () => false, toggle: noop, add: noop, remove: noop},
@@ -20,7 +23,6 @@ it("keeps snapshot ID lookup separate from file search and normal pagination", a
         const next = {...node(), nextElementSibling: {nextElementSibling: node()}};
         const nodes: Record<string, unknown> = {
             ".b3-text-field": searchInput,
-            '[data-type="repoSearchMode"]': {...node(), value: test.mode, parentElement: node()},
             '[data-type="repoList"]': node(),
             'button[data-type="jumpRepoPage"]': node(),
             '[data-type="previous"]': node(),
@@ -37,7 +39,7 @@ it("keeps snapshot ID lookup separate from file search and normal pagination", a
             updateRepoSelection: noop,
             fetchSyncPost: async (path: string, body: unknown) => {
                 requests.push({path, body});
-                return {code: 0, data: {pageCount: 1, totalCount: 0}};
+                return {code: 0, data: {pageCount: 1, totalCount: test.snapshotCount}};
             },
             renderRepoSearchResult: () => rendered.push("files"),
             renderRepoItem: () => rendered.push("snapshots"),
@@ -48,7 +50,7 @@ it("keeps snapshot ID lookup separate from file search and normal pagination", a
             compilerOptions: {target: ScriptTarget.ES2021},
         }).outputText + "\nreturn renderRepo;")(...Object.values(dependencies));
         await renderRepo(pane, 3);
-        assert.deepEqual(requests, [{path: "/api/repo/" + test.path, body: test.body}]);
+        assert.deepEqual(requests, test.paths.map((path, index) => ({path: "/api/repo/" + path, body: test.bodies[index]})));
         assert.deepEqual(rendered, [test.files ? "files" : "snapshots"]);
         assert.equal(fileLayout, test.files);
         assert.equal(searchButton.disabled, false);

@@ -1,5 +1,5 @@
 {
-	"searchSnapshotID": "Zoeken op snapshot-ID",
+	"searchFileOrSnapshot": "Bestandsnaam of snapshot-ID zoeken",
 	"calendarWeekLabel": "W",
 	"conditionalColors": "Voorwaardelijke kleuren",
 	"conditionalColorItem": "Geheel item",

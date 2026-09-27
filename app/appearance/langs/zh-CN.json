@@ -1,5 +1,5 @@
 {
-	"searchSnapshotID": "按快照 ID 搜索",
+	"searchFileOrSnapshot": "搜索文件名或快照 ID",
 	"calendarWeekLabel": "周",
 	"conditionalColors": "条件颜色",
 	"conditionalColorItem": "整个条目",

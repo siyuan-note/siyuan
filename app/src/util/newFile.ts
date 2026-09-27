@@ -248,7 +248,7 @@ function getNewFilePath(): Pick<NewDocRequest, "notebookId" | "currentPath" | "h
         hasFocusTarget = true;
     }
     if (!notebookId) {
-        const fileModel = getDockByType("file").data.file;
+        const fileModel = getDockByType("file")?.data.file;
         if (fileModel instanceof Files) {
             const currentElement = fileModel.element.querySelector(".b3-list-item--focus");
             if (currentElement) {

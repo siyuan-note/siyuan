@@ -69,8 +69,9 @@ export const isSensitiveTab = (tab: Tab) => {
 
 export const setPanelFocus = (element: Element, isSaveLayout = true) => {
     if (element.getAttribute("data-type") === "wnd") {
-        const title = element.querySelector('.layout-tab-bar .item--focus[data-type="tab-header"] .item__text')?.textContent || "";
-        setTitle(title, title ? false : true);
+        const tabHeader = element.querySelector('.layout-tab-bar .item--focus[data-type="tab-header"]');
+        const title = tabHeader?.querySelector(".item__text")?.textContent || "";
+        setTitle(title, !title, tabHeader?.querySelector(".item__icon"));
     }
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
         return;

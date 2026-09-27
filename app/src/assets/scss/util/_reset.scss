@@ -178,6 +178,10 @@ body {
       height: 42px;
       position: relative;
 
+      .toolbar__title-icon {
+        display: none;
+      }
+
       &::before,
       &::after {
         content: "";

@@ -850,6 +850,9 @@ export const openEmojiPanel = (
         targetID?: string,
         insertRange?: Range,
     }) => {
+    if ((type === "doc" || type === "notebook") && (window.siyuan.config.readonly || window.siyuan.isPublish)) {
+        return;
+    }
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
     }

@@ -2599,11 +2599,22 @@ img.av__cellassetimg {
         right: 0;
       }
 
+      > .av__relation-header-icon,
       > svg {
         flex-shrink: 0;
         height: 14px;
         margin-right: 6px;
         width: 14px;
+      }
+
+      .av__relation-header-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        object-fit: contain;
+        line-height: 1;
+        font-family: var(--b3-font-family-emoji);
+        font-variant-emoji: emoji;
       }
 
       .av__relation-sort {

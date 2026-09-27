@@ -24,6 +24,7 @@ import {getAVTemplateHTML} from "./attributeValue";
 import {hasAVRenderTemplateResult} from "./cellValue";
 import {renderAVRichTextElements} from "./richText";
 import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {unicode2Emoji} from "../../../emoji";
 import {bindRelationLayout} from "./relationLayout";
 import {getTopBarHeight} from "../../../layout/getTopBarHeight";
 
@@ -421,7 +422,8 @@ const genRelationHeaderHTML = (columns: IAVColumn[], gridTemplate: string, sort?
     columns.forEach((column, index) => {
         const sorted = sort?.column === column.id;
         html += `<span data-relation-column="${escapeAttr(column.id)}" role="columnheader" tabindex="0" aria-sort="${sorted ? sort.order === "ASC" ? "ascending" : "descending" : "none"}" class="av__relation-table-cell fn__pointer${index === 0 ? " av__relation-table-primary" : ""}">
-    <svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>
+    ${column.icon ? unicode2Emoji(column.icon, "av__relation-header-icon", true) :
+        `<svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
     <span class="fn__ellipsis">${escapeHtml(column.name)}</span>
     <svg class="av__relation-sort${sorted ? "" : " fn__hidden"}" aria-hidden="true"><use xlink:href="#${sort?.order === "DESC" ? "iconDown" : "iconUp"}"></use></svg>
     <span class="av__widthdrag"></span>
@@ -463,7 +465,7 @@ style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}$
         } else {
             html += `<div data-relation-column="${escapeAttr(column.id)}" class="av__relation-table-cell"
 style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
-                renderCell(cell.value, 0, false, "table", column.options, column.dateFormat, column.renderTemplate) : ""}</div>`;
+                renderCell(cell.value, 0, true, "table", column.options, column.dateFormat, column.renderTemplate) : ""}</div>`;
         }
     });
     return html + "</div>";

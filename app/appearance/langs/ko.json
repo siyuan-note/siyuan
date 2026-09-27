@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "위치 선택 후 문서 만들기...",
 	"oidcClaimRulesRequired": "인증된 모든 사용자에게 관리자 권한을 부여하지 않는 경우 클레임 규칙을 하나 이상 설정해야 합니다",
 	"oidcGitHubClaimRulesTip": "GitHub 예시 (YOUR_GITHUB_USERNAME을 본인의 GitHub 사용자 이름으로 바꾸세요): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "사용자 지정 지침",

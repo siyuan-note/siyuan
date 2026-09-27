@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "Pilih lokasi dan buat dokumen...",
 	"oidcClaimRulesRequired": "Setidaknya satu aturan klaim diperlukan jika akses administrator tidak diberikan kepada semua pengguna terautentikasi",
 	"oidcGitHubClaimRulesTip": "Contoh GitHub (ganti YOUR_GITHUB_USERNAME dengan nama pengguna GitHub Anda): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Instruksi khusus",

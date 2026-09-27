@@ -23,6 +23,7 @@ import {
     getDocCreateTemplatePath,
     isConfiguredCreateTargetCurrentSubDoc,
     newFileByRefHint,
+    newFileByRefHintAtPath,
     newFileBySelectRange,
     newFileInProtyle,
     newSubDocByRefHint
@@ -679,6 +680,11 @@ export class Hint {
                     const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
                     searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${hideConfiguredCreate && response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div></button>`;
+                    if (source !== "av") {
+                        const pathRefText = `((newFileAtPath "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
+                        searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(pathRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.data.k}</mark></span></div></button>`;
+                    }
                 }
                 response.data.blocks.forEach((item: IBlock, index: number) => {
                     let blockRefHTML;
@@ -880,12 +886,14 @@ ${genHintItemHTML(item)}
             return;
         }
         // 新建文件
-        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
-            const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
+        const choosePath = value.startsWith("((newFileAtPath ");
+        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && (value.startsWith("((newFile ") || choosePath) && value.endsWith(`${Lute.Caret}'))`)) {
+            const prefix = choosePath ? "((newFileAtPath " : "((newFile ";
+            const fileNames = value.substring(prefix.length + 1, value.length - 4).split(`"${Constants.ZWSP}'`);
             const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
-            newFileByRefHint(protyle, realFileName, (id) => {
+            const insertRef = (id: string, insertRange: Range) => {
                 // https://github.com/siyuan-note/siyuan/issues/10133
-                protyle.toolbar.range = range;
+                protyle.toolbar.range = insertRange;
                 const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",
                     color: `${id}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${getBlockRefAnchorText(refIsS ? fileNames[0] : realFileName)}`
@@ -894,7 +902,12 @@ ${genHintItemHTML(item)}
                     protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
                 }
                 protyle.toolbar.range.collapse(false);
-            });
+            };
+            if (choosePath) {
+                newFileByRefHintAtPath(protyle, realFileName, range, insertRef);
+            } else {
+                newFileByRefHint(protyle, realFileName, (id) => insertRef(id, range));
+            }
             return;
         }
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar)) {

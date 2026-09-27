@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "Wybierz lokalizację i utwórz dokument...",
 	"oidcClaimRulesRequired": "Wymagana jest co najmniej jedna reguła oświadczeń, jeśli nie przyznano uprawnień administratora wszystkim uwierzytelnionym użytkownikom",
 	"oidcGitHubClaimRulesTip": "Przykład GitHub (zastąp YOUR_GITHUB_USERNAME swoją nazwą użytkownika GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Własne instrukcje",

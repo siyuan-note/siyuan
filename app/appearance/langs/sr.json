@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "Изабери локацију и направи документ...",
 	"oidcClaimRulesRequired": "Потребно је бар једно правило тврдњи ако администраторски приступ није додељен свим потврђеним корисницима",
 	"oidcGitHubClaimRulesTip": "GitHub пример (замените YOUR_GITHUB_USERNAME својим GitHub корисничким именом): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Прилагођена упутства",

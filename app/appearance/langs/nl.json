@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "Locatie kiezen en document maken...",
 	"oidcClaimRulesRequired": "Minstens één claimregel is vereist als niet alle geauthenticeerde gebruikers beheerderstoegang krijgen",
 	"oidcGitHubClaimRulesTip": "GitHub-voorbeeld (vervang YOUR_GITHUB_USERNAME door uw GitHub-gebruikersnaam): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Aangepaste instructies",

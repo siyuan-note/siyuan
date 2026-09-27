@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "Choisir un emplacement et créer un document...",
 	"oidcClaimRulesRequired": "Au moins une règle de revendication est requise si les droits administrateur ne sont pas accordés à tous les utilisateurs authentifiés",
 	"oidcGitHubClaimRulesTip": "Exemple GitHub (remplacez YOUR_GITHUB_USERNAME par votre nom d’utilisateur GitHub) : [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Instructions personnalisées",

@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "اختيار الموقع وإنشاء مستند...",
 	"oidcClaimRulesRequired": "يجب إعداد قاعدة مطالبة واحدة على الأقل ما لم تُمنح صلاحيات المسؤول لجميع المستخدمين المصادق عليهم",
 	"oidcGitHubClaimRulesTip": "مثال GitHub (استبدل YOUR_GITHUB_USERNAME باسم مستخدم GitHub الخاص بك): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "تعليمات مخصصة",

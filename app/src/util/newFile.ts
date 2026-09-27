@@ -7,7 +7,7 @@ import {openFileById} from "../editor/util";
 import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #endif
 import {fetchPost, fetchSyncPost} from "./fetch";
-import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
+import {getDisplayName, getOpenNotebookCount, isMoveTargetAllowed, movePathTo, pathPosix} from "./pathName";
 import {Constants} from "../constants";
 import {replaceFileName, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
@@ -476,6 +476,48 @@ export const newFileByRefHint = (
                 createRefDocAsSubDoc(target, onCreated, presetId);
             }
         });
+    });
+};
+
+/** 选择本次块引新建位置，创建前后均校验原文档和选区 */
+export const newFileByRefHintAtPath = (
+    protyle: IProtyle,
+    name: string,
+    range: Range,
+    onCreated: (id: string, range: Range) => void,
+) => {
+    const context = createNewFileSelectionContext(protyle, range);
+    const title = replaceFileName(name.trim());
+    if (!context || !isNewFileSelectionValid(protyle, context) || (title && !validateName(title))) {
+        return;
+    }
+    let submitted = false;
+    movePathTo({
+        title: window.siyuan.languages.newFileAtPath,
+        flashcard: false,
+        sourceNotebookIds: [context.notebookId],
+        restoreFocus() {
+            if (isNewFileSelectionValid(protyle, context)) {
+                focusByRange(context.range);
+            }
+        },
+        cb(paths, notebooks) {
+            if (submitted || !paths[0] || !notebooks[0] || !isNewFileSelectionValid(protyle, context) ||
+                !isMoveTargetAllowed([context.notebookId], notebooks[0])) {
+                return;
+            }
+            submitted = true;
+            createRefDocAsSubDoc({
+                kind: "subDoc",
+                targetNotebookId: notebooks[0],
+                parentPath: paths[0],
+                title,
+            }, (id) => {
+                if (isNewFileSelectionValid(protyle, context)) {
+                    onCreated(id, context.range);
+                }
+            });
+        },
     });
 };
 

@@ -613,6 +613,14 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
 <span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div>`,
                 });
                 createItemCount++;
+                if (source !== "av") {
+                    dataList.push({
+                        value: `((newFileAtPath "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
+                        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.data.k}</mark></span></div>`,
+                    });
+                    createItemCount++;
+                }
             }
             response.data.blocks.forEach((item: IBlock) => {
                 const name = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");

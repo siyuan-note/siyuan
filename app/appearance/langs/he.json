@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "בחירת מיקום ויצירת מסמך...",
 	"oidcClaimRulesRequired": "נדרש לפחות כלל הצהרה אחד אם לא ניתנות הרשאות מנהל לכל המשתמשים המאומתים",
 	"oidcGitHubClaimRulesTip": "דוגמת GitHub (יש להחליף את YOUR_GITHUB_USERNAME בשם המשתמש שלך ב-GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "הוראות מותאמות אישית",

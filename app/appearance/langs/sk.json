@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "Vybrať umiestnenie a vytvoriť dokument...",
 	"oidcClaimRulesRequired": "Ak nemajú všetci overení používatelia práva správcu, vyžaduje sa aspoň jedno pravidlo tvrdení",
 	"oidcGitHubClaimRulesTip": "Príklad pre GitHub (nahraďte YOUR_GITHUB_USERNAME svojím používateľským menom GitHub): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "Vlastné pokyny",

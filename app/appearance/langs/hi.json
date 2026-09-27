@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "स्थान चुनें और दस्तावेज़ बनाएँ...",
 	"oidcClaimRulesRequired": "यदि सभी प्रमाणित उपयोगकर्ताओं को व्यवस्थापक पहुँच नहीं दी गई है, तो कम से कम एक क्लेम नियम आवश्यक है",
 	"oidcGitHubClaimRulesTip": "GitHub उदाहरण (YOUR_GITHUB_USERNAME को अपने GitHub उपयोगकर्ता नाम से बदलें): [{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "कस्टम निर्देश",

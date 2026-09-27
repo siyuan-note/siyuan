@@ -1,4 +1,5 @@
 {
+	"newFileAtPath": "保存先を選択してドキュメントを作成...",
 	"oidcClaimRulesRequired": "認証済みの全ユーザーに管理者権限を付与しない場合、少なくとも1つのクレームルールが必要です",
 	"oidcGitHubClaimRulesTip": "GitHub の例（YOUR_GITHUB_USERNAME を自分の GitHub ユーザー名に置き換えてください）：[{\"claim\": \"login\", \"operator\": \"equals\", \"values\": [\"YOUR_GITHUB_USERNAME\"]}]",
 	"agentInstructions": "カスタム指示",

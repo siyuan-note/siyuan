@@ -33,8 +33,9 @@ export const getAVColumnFitWidth = (name: string, type: TAVCol, values: string[]
     return `${Math.ceil(Math.min(480, Math.max(64, headerWidth, contentWidth)))}px`;
 };
 
-export const getAVRelationColumnWidth = (fitWidth: string, type: TAVCol, primary: boolean) => {
-    const width = parseFloat(fitWidth) || 64;
+export const getAVRelationColumnWidth = (fitWidth: string, type: TAVCol, primary: boolean, nameWidth = 0) => {
+    // 表头为字段图标、排序箭头和内边距预留空间。
+    const width = Math.max(parseFloat(fitWidth) || 64, nameWidth + 62);
     const minWidth = primary ? 240 : 64;
     const maxWidth = primary ? 400 : ["relation", "rollup", "mAsset"].includes(type) ? 200 : 160;
     return `${Math.min(maxWidth, Math.max(minWidth, width))}px`;

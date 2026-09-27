@@ -2585,6 +2585,7 @@ img.av__cellassetimg {
     position: sticky;
     top: 0;
     z-index: 4;
+    white-space: nowrap;
 
     .av__relation-table-cell {
       font-weight: 600;
@@ -2599,6 +2600,7 @@ img.av__cellassetimg {
       }
 
       > svg {
+        flex-shrink: 0;
         height: 14px;
         margin-right: 6px;
         width: 14px;

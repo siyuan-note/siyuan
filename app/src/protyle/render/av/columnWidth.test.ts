@@ -33,6 +33,12 @@ describe("getAVRelationColumnWidth", () => {
         assert.equal(getAVRelationColumnWidth("480px", "relation", false), "200px");
         assert.equal(getAVRelationColumnWidth("120px", "date", false), "120px");
     });
+
+    it("reserves header space for the sort arrow before sorting", () => {
+        assert.equal(getAVRelationColumnWidth("84px", "checkbox", false, 42), "104px");
+        assert.equal(getAVRelationColumnWidth("150px", "text", false, 30), "150px");
+        assert.equal(getAVRelationColumnWidth("480px", "text", false, 480), "160px");
+    });
 });
 
 describe("getAVTableFitWidths", () => {

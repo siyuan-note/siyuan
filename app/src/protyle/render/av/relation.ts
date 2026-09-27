@@ -407,7 +407,7 @@ const getRelationGridTemplate = (columns: IAVColumn[], rows: IAVRow[],
     } as IAVTable, getCellValueText, measureText);
     return `32px ${columns.map((column, index) => {
         const width = widths[column.id] || "64px";
-        return getAVRelationColumnWidth(width, column.type, index === 0);
+        return getAVRelationColumnWidth(width, column.type, index === 0, measureText(column.name));
     }).join(" ")}`;
 };
 
@@ -423,7 +423,7 @@ const genRelationHeaderHTML = (columns: IAVColumn[], gridTemplate: string, sort?
         html += `<span data-relation-column="${escapeAttr(column.id)}" role="columnheader" tabindex="0" aria-sort="${sorted ? sort.order === "ASC" ? "ascending" : "descending" : "none"}" class="av__relation-table-cell fn__pointer${index === 0 ? " av__relation-table-primary" : ""}">
     <svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>
     <span class="fn__ellipsis">${escapeHtml(column.name)}</span>
-    ${sorted ? `<svg class="av__relation-sort"><use xlink:href="#${sort.order === "ASC" ? "iconUp" : "iconDown"}"></use></svg>` : ""}
+    <svg class="av__relation-sort${sorted ? "" : " fn__hidden"}" aria-hidden="true"><use xlink:href="#${sort?.order === "DESC" ? "iconDown" : "iconUp"}"></use></svg>
     <span class="av__widthdrag"></span>
 </span>`;
     });

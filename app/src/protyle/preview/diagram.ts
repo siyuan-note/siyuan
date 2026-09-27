@@ -5,19 +5,6 @@ import {getPlantumlImageURL} from "../render/plantumlImage";
 
 const DIAGRAM_SUBTYPES = ["mermaid", "graphviz", "flowchart", "echarts", "plantuml"];
 
-// 独立入口不依赖嵌入 SVG 文档的事件冒泡，桌面和移动端共用。
-export const handleDiagramPreviewClick = (event: MouseEvent) => {
-    const button = (event.target as Element).closest(".protyle-action__preview");
-    const diagram = button && getDiagramBlock(button.closest("[data-subtype]") as HTMLElement);
-    if (!diagram) {
-        return false;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    previewDiagram(diagram);
-    return true;
-};
-
 export const getDiagramBlock = (element: HTMLElement) => {
     if (!element) {
         return false;

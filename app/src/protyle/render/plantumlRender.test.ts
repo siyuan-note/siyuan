@@ -9,11 +9,8 @@ const compiled = transpileModule(readFileSync("src/protyle/render/plantumlRender
 }).outputText;
 
 for (const mode of ["editor", "readonly", "preview", "export", "remote"]) {
-    test(`PlantUML ${mode} preserves rendering and only exposes interactive preview controls`, async () => {
-        let button: {disabled: boolean};
-        let buttonCount = 0;
+    test(`PlantUML ${mode} renders an image without preview controls`, async () => {
         let rendered: {tag: string; src?: string; data?: string};
-        let onObjectError: () => void;
         const classes = new Set(["protyle-icons"]);
         const renderElement = {
             classList: {remove: () => {}, add: () => {}},
@@ -21,8 +18,7 @@ for (const mode of ["editor", "readonly", "preview", "export", "remote"]) {
         };
         const icons = {
             classList: {contains: (name: string) => classes.has(name), add: (name: string) => classes.add(name)},
-            querySelector: () => button,
-            insertAdjacentHTML: () => { button = {disabled: false}; buttonCount++; },
+            insertAdjacentHTML: () => assert.fail("No preview button should be inserted"),
             nextElementSibling: renderElement,
         };
         const attributes = new Map([["data-subtype", "plantuml"], ["data-content", "Alice -> Bob"]]);
@@ -43,25 +39,17 @@ for (const mode of ["editor", "readonly", "preview", "export", "remote"]) {
             Lute: {UnEscapeHTMLStr: (value: string) => value},
             window: {siyuan: {languages: {preview: "Preview"}, config: {editor: {plantUMLServePath: "https://example.com/svg/"}}},
                 plantumlEncoder: {encode: () => "encoded"}},
-            document: {createElement: (tag: string) => ({tag, addEventListener: (_name: string, callback: () => void) => { onObjectError = callback; }})},
+            document: {createElement: (tag: string) => ({tag})},
         });
         exports.plantumlRender(block);
         await Promise.resolve();
-        assert.equal(rendered.tag, mode === "remote" ? "img" : "object");
+        assert.equal(rendered.tag, "img");
         assert.equal(rendered.src || rendered.data, "https://example.com/svg/encoded");
-        assert.equal(buttonCount, mode === "export" ? 0 : 1);
-        if (mode !== "remote") {
-            onObjectError();
-            assert.equal(rendered.tag, "img");
-            assert.equal(rendered.src, "https://example.com/svg/encoded");
-        }
+        assert.equal(classes.has("protyle-icons--show"), false);
         attributes.delete("data-render");
         attributes.set("data-content", "");
         exports.plantumlRender(block);
         await Promise.resolve();
-        assert.equal(buttonCount, mode === "export" ? 0 : 1);
-        if (button) {
-            assert.equal(button.disabled, true);
-        }
+        assert.equal(classes.has("protyle-icons--show"), false);
     });
 }

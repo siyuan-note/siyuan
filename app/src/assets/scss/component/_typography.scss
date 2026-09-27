@@ -648,6 +648,7 @@
 
   [data-subtype="plantuml"] img {
     border-radius: var(--b3-border-radius);
+    touch-action: manipulation;
   }
 
   .abcjs-container svg,

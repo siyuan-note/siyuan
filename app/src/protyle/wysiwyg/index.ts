@@ -48,7 +48,7 @@ import {mergeTableCellContents} from "../util/tableCellRich";
 import {resolveDocumentBlockElement} from "../util/outlineBlock";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
-import {getDiagramBlock, handleDiagramPreviewClick, previewDiagram} from "../preview/diagram";
+import {getDiagramBlock, previewDiagram} from "../preview/diagram";
 import {
     contentMenu,
     enterBack,
@@ -4639,9 +4639,6 @@ export class WYSIWYG {
             if (protyle.toolbar.isMultiSelectMode()) {
                 event.preventDefault();
                 event.stopPropagation();
-                return;
-            }
-            if (handleDiagramPreviewClick(event)) {
                 return;
             }
             /// #if MOBILE

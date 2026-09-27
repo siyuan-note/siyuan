@@ -875,16 +875,10 @@ export class Gutter {
                     parent.getAttribute("data-type") === "NodeList" && parent.contains(item));
         });
         const submenu: IMenu[] = [{
-            id: "recursiveParagraph",
-            icon: "iconParagraph",
-            label: window.siyuan.languages.paragraph,
-            click() {
-                turnListsRecursively({
-                    protyle,
-                    nodeElements: listElements,
-                    type: "CancelListRecursively"
-                });
-            }
+            id: "recursiveRemoveList",
+            icon: "iconListItem",
+            label: window.siyuan.languages.removeList,
+            click: () => removeListStructure(protyle, listElements, true),
         }];
         [{
             id: "recursiveList",
@@ -915,6 +909,18 @@ export class Gutter {
                     });
                 }
             });
+        });
+        submenu.push({
+            id: "recursiveParagraph",
+            icon: "iconParagraph",
+            label: window.siyuan.languages.paragraph,
+            click() {
+                turnListsRecursively({
+                    protyle,
+                    nodeElements: listElements,
+                    type: "CancelListRecursively"
+                });
+            }
         });
         return {
             id: "includeSublists",
@@ -1785,49 +1791,9 @@ export class Gutter {
                 }));
             }
         } else if ((type === "NodeList" || type === "NodeMindmap") && allowStructuralMutation) {
-            turnIntoSubmenu.push(type === "NodeList" ? this.turnsInto({
-                menuId: "paragraph", icon: "iconParagraph", label: window.siyuan.languages.paragraph,
-                accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
-                protyle, selectsElement: [nodeElement], type: "Blocks2Ps",
-            }) : this.turnsOneInto({
-                menuId: "paragraph",
-                id,
-                icon: "iconParagraph",
-                label: window.siyuan.languages.paragraph,
-                accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
-                protyle,
-                nodeElement,
-                type: "CancelList"
-            }));
             if (type === "NodeList") {
                 turnIntoSubmenu.push(this.removeListMenu(protyle, [nodeElement]));
             }
-            turnIntoSubmenu.push(this.turnsIntoOne({
-                menuId: "quote",
-                icon: "iconQuote",
-                label: window.siyuan.languages.quote,
-                accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
-                protyle,
-                selectsElement: [nodeElement],
-                type: "Blocks2Blockquote"
-            }));
-            turnIntoSubmenu.push(this.turnsIntoOne({
-                menuId: "callout",
-                icon: "iconCallout",
-                label: window.siyuan.languages.callout,
-                protyle,
-                selectsElement: [nodeElement],
-                type: "Blocks2Callout"
-            }));
-            turnIntoSubmenu.push(this.turnsOneInto({
-                menuId: "tabs",
-                id,
-                icon: "iconTabs",
-                label: window.siyuan.languages.tabs,
-                protyle,
-                nodeElement,
-                type: "List2Tabs"
-            }));
             const listSubtype = nodeElement.getAttribute("data-subtype");
             const isMindmap = type === "NodeMindmap" ||
                 nodeElement.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1";
@@ -1914,11 +1880,51 @@ export class Gutter {
                     },
                 });
             }
-            if (!isMindmap) {
-                turnIntoSubmenu.push(...this.headingTurnIntoMenu(protyle, [nodeElement]));
-            }
             if (!isMindmap && this.hasSublist([nodeElement])) {
                 turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
+            }
+            turnIntoSubmenu.push(type === "NodeList" ? this.turnsInto({
+                menuId: "paragraph", icon: "iconParagraph", label: window.siyuan.languages.paragraph,
+                accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
+                protyle, selectsElement: [nodeElement], type: "Blocks2Ps",
+            }) : this.turnsOneInto({
+                menuId: "paragraph",
+                id,
+                icon: "iconParagraph",
+                label: window.siyuan.languages.paragraph,
+                accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
+                protyle,
+                nodeElement,
+                type: "CancelList"
+            }));
+            turnIntoSubmenu.push(this.turnsIntoOne({
+                menuId: "quote",
+                icon: "iconQuote",
+                label: window.siyuan.languages.quote,
+                accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
+                protyle,
+                selectsElement: [nodeElement],
+                type: "Blocks2Blockquote"
+            }));
+            turnIntoSubmenu.push(this.turnsIntoOne({
+                menuId: "callout",
+                icon: "iconCallout",
+                label: window.siyuan.languages.callout,
+                protyle,
+                selectsElement: [nodeElement],
+                type: "Blocks2Callout"
+            }));
+            turnIntoSubmenu.push(this.turnsOneInto({
+                menuId: "tabs",
+                id,
+                icon: "iconTabs",
+                label: window.siyuan.languages.tabs,
+                protyle,
+                nodeElement,
+                type: "List2Tabs"
+            }));
+            if (!isMindmap) {
+                turnIntoSubmenu.push(...this.headingTurnIntoMenu(protyle, [nodeElement]));
             }
         } else if (type === "NodeListItem" && allowStructuralMutation) {
             turnIntoSubmenu.push(...this.listTurnIntoMenu(protyle, [nodeElement]));

@@ -2077,8 +2077,8 @@ const unfoldListHeadings = async (protyle: IProtyle, nodeElements: Element[]) =>
     return foldOperations.reverse();
 };
 
-export const removeListStructure = (protyle: IProtyle, nodeElements: Element[]) =>
-    turnListBlocksInto({protyle}, nodeElements.filter(isListHeadingContainer));
+export const removeListStructure = (protyle: IProtyle, nodeElements: Element[], recursively = false) =>
+    turnListBlocksInto({protyle, recursively}, nodeElements.filter(isListHeadingContainer));
 
 const turnListBlocksInto = async (options: {
     protyle: IProtyle,

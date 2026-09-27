@@ -37,11 +37,12 @@ const browserCases = async (source: string, menuSource: string, rangeSource: str
         typeof import("./transaction") & typeof import("./headingConversion");
     const protyle = {wysiwyg: {element: editor}, lute, block: {rootID: "document", parentID: "document"},
         observerLoad: {disconnect: noop}} as unknown as IProtyle;
-    const Gutter = new Function("turnsIntoTransaction", "getHeadingConversionElements", "removeListStructure", menuSource + "\nreturn Gutter;")(
-        api.turnsIntoTransaction, api.getHeadingConversionElements, api.removeListStructure);
+    const Gutter = new Function("turnsIntoTransaction", "getHeadingConversionElements", "removeListStructure", "turnListsRecursively", menuSource + "\nreturn Gutter;")(
+        api.turnsIntoTransaction, api.getHeadingConversionElements, api.removeListStructure, api.turnListsRecursively);
     const gutter = new Gutter() as {
         headingTurnIntoMenu: (protyle: IProtyle, elements: Element[], includeParagraph?: boolean) => Array<{id: string, click: () => Promise<void>}>,
         listTurnIntoMenu: (protyle: IProtyle, elements: Element[]) => Array<{id: string, click: () => Promise<void>}>,
+        recursiveListMenu: (protyle: IProtyle, elements: Element[]) => {submenu: Array<{id: string, click: () => Promise<void>}>},
     };
     window.siyuan = {languages: {}, config: {keymap: {editor: {heading: {paragraph: {custom: "Alt+Ctrl+0"}}}}}} as typeof window.siyuan;
     for (let level = 1; level <= 6; level++) {
@@ -220,7 +221,7 @@ const browserCases = async (source: string, menuSource: string, rangeSource: str
         }
     }
     // 取消列表不要求首块为段落或标题，并支持多列表、嵌套选择去重及混合选区。
-    for (const scenario of ["code", "nested", "overlap", "multiple", "mixed"]) {
+    for (const scenario of ["code", "nested", "overlap", "multiple", "mixed", "recursive"]) {
         editor.innerHTML = lute.Md2BlockDOM("- # outer\n\n    - ## inner\n\n- # last");
         const list = editor.firstElementChild;
         const nested = list.querySelector('[data-type="NodeList"]');
@@ -238,19 +239,26 @@ const browserCases = async (source: string, menuSource: string, rangeSource: str
             selection = [nested];
         } else if (scenario === "overlap") {
             selection = [list, items(list)[0], nested];
-        } else {
+        } else if (scenario !== "recursive") {
             editor.insertAdjacentHTML("beforeend", lute.Md2BlockDOM(scenario === "mixed" ? "# outside" : "1. # another"));
             selection = Array.from(editor.children);
         }
         const before = editor.innerHTML;
         const content = shape(before).filter(block => !["NodeList", "NodeListItem"].includes(block.type));
         batches.length = 0;
-        await gutter.listTurnIntoMenu(protyle, selection).find(item => item.id === "removeList").click();
+        if (scenario === "recursive") {
+            const menu = gutter.recursiveListMenu(protyle, selection).submenu;
+            check.deepEqual(menu.map(item => item.id), ["recursiveRemoveList", "recursiveList", "recursiveOrderedList", "recursiveCheck", "recursiveParagraph"]);
+            await menu[0].click();
+            check.equal(editor.querySelector('[data-type="NodeList"]'), null);
+        } else {
+            await gutter.listTurnIntoMenu(protyle, selection).find(item => item.id === "removeList").click();
+        }
         const after = editor.innerHTML;
         check.equal(batches.length, 1);
         const withoutParent = (block: ReturnType<typeof shape>[number]): ReturnType<typeof shape>[number] => ({...block, parent: undefined});
         check.deepEqual(shape(after).filter(block => content.some(original => original.id === block.id)).map(withoutParent), content.map(withoutParent));
-        if (scenario !== "nested") {
+        if (scenario !== "nested" && scenario !== "recursive") {
             check.ok(editor.querySelector(`[data-node-id="${id(nested)}"]`), "keep nested lists");
         }
         replay(batches[0].undoOperations);
@@ -289,7 +297,7 @@ test("list conversion removes selected wrappers and preserves content, database 
     const parsed = createSourceFile("gutter.ts", read("../gutter/index.ts"), ScriptTarget.Latest, true);
     const gutter = parsed.statements.find(isClassDeclaration);
     const methods = gutter.members.filter(member => isMethodDeclaration(member) &&
-        ["headingTurnIntoMenu", "listTurnIntoMenu", "removeListMenu", "turnsInto"].includes(member.name.getText(parsed)));
+        ["headingTurnIntoMenu", "listTurnIntoMenu", "removeListMenu", "recursiveListMenu", "turnsInto"].includes(member.name.getText(parsed)));
     const menuSource = compile("class Gutter {\n" + methods.map(member => member.getText(parsed)).join("\n") + "\n}");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-list-conversion-"));
     const script = path.join(temporary, "run.cjs");

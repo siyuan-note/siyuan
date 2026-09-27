@@ -78,10 +78,22 @@ test("remove list merges into saved conversion menus and preserves plugin slots"
         saved.splice(1, 0, "plugin:example:item");
         const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
         assert.deepEqual(merged.filter(key => key !== "removeList"), saved);
-        assert.equal(merged[merged.indexOf("paragraph") + 1], "removeList");
+        assert.equal(merged[merged.indexOf("list") - 1], "removeList");
         const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
         assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
         assert.deepEqual(resolveEntryOrder(["paragraph", "removeList"], merged, separators), ["paragraph", "removeList"]);
+    }
+});
+
+test("recursive remove list merges without changing saved actions or plugin slots", () => {
+    for (const root of ["gutter.single", "gutter.multi"]) {
+        const defaults = getEntryCatalogChildren(`${root}.turnInto.includeSublists`).map(item => item.key);
+        const saved = ["recursiveParagraph", "plugin:example:item", "recursiveList", "recursiveOrderedList", "recursiveCheck"];
+        const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+        assert.deepEqual(merged.filter(key => key !== "recursiveRemoveList"), saved);
+        assert.equal(merged[1], "plugin:example:item");
+        assert.equal(merged[merged.indexOf("recursiveList") - 1], "recursiveRemoveList");
+        assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, new Set()), merged);
     }
 });
 
@@ -233,7 +245,7 @@ test("tab conversion merges into saved block menus without moving plugin slots",
     const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
     assert.deepEqual(merged.filter(key => key !== "tabs"), saved);
     assert.equal(merged[1], "plugin:example:item");
-    assert.equal(merged[merged.indexOf("tabs") + 1], "list");
+    assert.equal(merged[merged.indexOf("tabs") + 1], "heading1");
 });
 
 test("document tree profiles merge sibling creation while preserving custom order and plugin slots", () => {

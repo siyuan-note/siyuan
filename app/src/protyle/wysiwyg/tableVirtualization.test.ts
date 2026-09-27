@@ -11,7 +11,7 @@ const browserCases = async (source: string, css: string) => {
     const check: typeof assert = require("node:assert/strict");
     const api = new Function("Constants", "isInEmbedBlock", source +
         "\nreturn {LargeTableVirtualizer, cleanTableVirtualizationHTML, protectLuteTableVirtualization, " +
-        "restoreTableVirtualizationDOM, getTableVirtualRowIndex, TableGridCache, buildTableGrid, getTableGridRect, searchMarkRender, " +
+        "restoreTableVirtualizationDOM, getTableVirtualRowIndex, getVirtualTableGrid, setTableVirtualSelection, TableGridCache, buildTableGrid, getTableGridRect, searchMarkRender, " +
         "cleanBlockSelectionModeOperations, createEditor: protyle => new VirtualizedEditor(protyle)};")({TIMEOUT_TRANSITION: 0}, () => false) as
         typeof import("./tableVirtualization") & typeof import("../util/tableVirtualizationDOM") &
         typeof import("../util/tableGridCache") & typeof import("../util/table") & typeof import("../render/searchMarkRender") & {
@@ -184,7 +184,7 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
     {
         const f = fixture();
         await tick();
-        const cell = f.table.querySelector("tbody td");
+        const cell = f.table.querySelector<HTMLTableCellElement>("tbody td");
         const range = document.createRange();
         range.selectNodeContents(cell);
         range.collapse(true);
@@ -197,9 +197,23 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         cell.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: "mouse"}));
         reduced(f.table, "click does not materialize the entire table");
         cell.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerType: "mouse", buttons: 1, movementX: 10}));
-        check.equal(f.table.tBodies[0].rows.length, 2000, "pointer handling sees all rows synchronously");
-        check.ok(cell.isConnected, "materialization preserves the clicked node");
+        reduced(f.table, "dragging inside the table does not materialize offscreen rows");
+        const logical = api.getVirtualTableGrid(f.table);
+        check.equal(logical.rowCount, 2001);
+        check.equal(logical.cellInfos.length, 10005);
+        check.equal(logical.grid[2000][0].parentElement, f.originalLastRow);
+        const renderedCells = f.table.querySelectorAll<HTMLTableCellElement>("tbody > tr:not([data-sy-table-virtual-rows]) td");
+        const endpoint = renderedCells[renderedCells.length - 1];
+        api.setTableVirtualSelection(f.table, [cell, endpoint]);
+        f.scroller.scrollTop = f.scroller.scrollHeight * 0.9;
+        await tick();
+        reduced(f.table, "drag scrolling retains a bounded window");
+        check.ok(cell.isConnected && endpoint.isConnected, "selection endpoints stay connected across scrolling");
         cell.dispatchEvent(new PointerEvent("pointerup", {bubbles: true, pointerType: "mouse"}));
+        cell.dispatchEvent(new Event("copy", {bubbles: true}));
+        check.equal(f.table.tBodies[0].rows.length, 2000, "copy restores all selected rows");
+        check.ok(logical.grid[2000][0].isConnected, "logical selection identities survive materialization");
+        api.setTableVirtualSelection(f.table);
         cell.textContent = "Edited cell";
         f.root.dispatchEvent(new WheelEvent("wheel", {bubbles: true}));
         await tick();
@@ -231,7 +245,7 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
     {
         const f = fixture();
         await tick();
-        const cell = f.table.querySelector("tbody td");
+        const cell = f.table.querySelector<HTMLTableCellElement>("tbody td");
         cell.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
         cell.innerHTML = '<div class="table__cell-editor table__cell--inline"><div contenteditable="true">Editing</div>' +
             '<button class="fn__none"><svg></svg></button></div>';
@@ -328,6 +342,7 @@ test("large tables retain complete source, editing, selection, search and layout
     const prepare = wysiwyg.statements.find(isClassDeclaration).members.find(member =>
         member.name?.getText(wysiwyg) === "prepareBlockVirtualization");
     const integration = compile(`class VirtualizedEditor {
+        tableControl = {getSelectedCells: () => [], hasVirtualCellSelection: () => false};
         pendingInputTimeouts = new Map();
         runningInputTasks = new Set();
         constructor(protyle) {this.protyle = protyle; this.element = protyle.wysiwyg.element;}

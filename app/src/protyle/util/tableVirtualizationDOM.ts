@@ -3,6 +3,44 @@ export const TABLE_VIRTUAL_ID = "data-sy-table-virtual-id";
 export const TABLE_VIRTUAL_COLUMNS = "data-sy-table-virtual-columns";
 
 const detachedRows = new WeakMap<HTMLTableRowElement, {html: string, rows: HTMLTableRowElement[]}>();
+const selectionEndpoints = new WeakMap<HTMLTableElement, HTMLTableCellElement[]>();
+
+export const setTableVirtualSelection = (table: HTMLTableElement, cells?: HTMLTableCellElement[]) => {
+    if (cells) {
+        selectionEndpoints.set(table, cells);
+    } else {
+        selectionEndpoints.delete(table);
+    }
+};
+
+export const isTableVirtualSelectionRow = (table: HTMLTableElement, row: HTMLTableRowElement) =>
+    selectionEndpoints.get(table)?.some(cell => row.contains(cell));
+
+// 普通虚拟表格没有合并单元格，逻辑网格直接复用屏外缓存，不挂载屏外行。
+export const getVirtualTableGrid = (table: HTMLTableElement): import("./table").ITableGrid => {
+    const rows = Array.from(table.rows).flatMap(row => {
+        const source = row.getAttribute(TABLE_VIRTUAL_ROWS);
+        if (source === null) {
+            return [row];
+        }
+        let cached = detachedRows.get(row);
+        if (cached?.html !== source) {
+            const body = document.createElement("tbody");
+            body.innerHTML = source;
+            cached = {html: source, rows: Array.from(body.rows)};
+            detachedRows.set(row, cached);
+        }
+        return cached.rows;
+    });
+    const grid = rows.map(row => Array.from(row.cells));
+    return {
+        grid,
+        rowCount: rows.length,
+        columnCount: grid[0]?.length || 0,
+        sectionOfRow: rows.map(row => row.parentElement?.tagName === "THEAD" ? "thead" : "tbody"),
+        cellInfos: grid.flatMap((cells, row) => cells.map((cell, col) => ({cell, row, col, rowspan: 1, colspan: 1}))),
+    };
+};
 
 export const getTableVirtualRowIndex = (row: HTMLTableRowElement) => {
     let index = 0;

@@ -1,6 +1,6 @@
 import {MenuItem} from "../../menus/Menu";
 import {getTableGridRect, TableGridCache} from "./tableGridCache";
-import {TABLE_VIRTUAL_ID, TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
+import {getVirtualTableGrid, setTableVirtualSelection, TABLE_VIRTUAL_ID, TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
 import {clearTableCellContent, getTableCellPlainText, mergeTableCellContents} from "./tableCellRich";
 import {renderTableCellRichElements} from "../render/tableCellRich";
 import {updateTransaction} from "../wysiwyg/transaction";
@@ -345,7 +345,7 @@ export class TableControl {
     private selectedCells: HTMLTableCellElement[] = [];
     private selectionGrid: ITableGrid;
     private gridCache = new TableGridCache(table => {
-        const grid = buildTableGrid(table);
+        const grid = table.hasAttribute(TABLE_VIRTUAL_ID) ? getVirtualTableGrid(table) : buildTableGrid(table);
         return {grid, cells: new Map(grid.cellInfos.map(info => [info.cell, info])),
             merged: grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1)};
     });
@@ -457,6 +457,9 @@ export class TableControl {
     }
 
     public clear() {
+        if (this.selection) {
+            setTableVirtualSelection(this.selection.table);
+        }
         this.cancelResize();
         this.clearDragPreview();
         this.dragState = undefined;
@@ -503,6 +506,7 @@ export class TableControl {
             activeCell,
         };
         this.caretCell = undefined;
+        setTableVirtualSelection(table, [anchorCell, activeCell]);
         this.updateSelectedCells(grid);
         getSelection()?.removeAllRanges();
         this.scheduleRender();
@@ -1034,6 +1038,10 @@ export class TableControl {
         return this.selectedCells.filter(cell => cell.isConnected);
     }
 
+    public hasVirtualCellSelection() {
+        return this.selection?.mode === "cell" && this.selection.table.hasAttribute(TABLE_VIRTUAL_ID);
+    }
+
     private updateSelectedCells(grid?: ITableGrid) {
         if (!this.selection) {
             this.selectedCells = [];
@@ -1364,7 +1372,7 @@ export class TableControl {
             const grid = this.selection?.table === table && this.selectionGrid ? this.selectionGrid : cached.grid;
             const cellInfo = grid === cached.grid ? cached.cells.get(cell) : grid.cellInfos.find(item => item.cell === cell);
             const rowIndex = cellInfo?.row;
-            const rowRect = typeof rowIndex === "number" ? table.rows[rowIndex]?.getBoundingClientRect() : undefined;
+            const rowRect = typeof rowIndex === "number" ? cell.parentElement.getBoundingClientRect() : undefined;
             const visibleRowRect = rowRect ? intersectRects(rowRect, viewportRect) : undefined;
             const columnIndex = cellInfo?.col;
             const columnRect = typeof columnIndex === "number" ?
@@ -1472,7 +1480,8 @@ export class TableControl {
                 }
             });
         } else if (this.isRectangle()) {
-            const cells = this.getSelectedCells();
+            const cells = this.hasVirtualCellSelection() ?
+                [this.selection.anchor as HTMLTableCellElement, this.selection.activeCell] : this.getSelectedCells();
             const rects = cells.map(item => item.getBoundingClientRect());
             if (rects.length > 0) {
                 const left = Math.min(...rects.map(rect => rect.left));

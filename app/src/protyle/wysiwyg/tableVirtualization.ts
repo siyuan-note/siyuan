@@ -1,4 +1,4 @@
-import {cacheTableVirtualizationRows, restoreTableVirtualizationDOM, restoreTableVirtualizationRows, TABLE_VIRTUAL_COLUMNS, TABLE_VIRTUAL_ID} from "../util/tableVirtualizationDOM";
+import {cacheTableVirtualizationRows, isTableVirtualSelectionRow, restoreTableVirtualizationDOM, restoreTableVirtualizationRows, setTableVirtualSelection, TABLE_VIRTUAL_COLUMNS, TABLE_VIRTUAL_ID} from "../util/tableVirtualizationDOM";
 
 export const LARGE_TABLE_ROW_THRESHOLD = 256;
 // 奇数行替换为一个占位行后，后续内容的隔行底色顺序保持不变。
@@ -34,12 +34,13 @@ export class LargeTableVirtualizer {
     private frame = 0;
     private scan = true;
     private interacting = false;
+    private dragTable?: HTMLTableElement;
     private composing = false;
     private font = "";
     private layout = "";
 
     constructor(private root: HTMLElement, private editor: HTMLElement, private viewport: HTMLElement,
-                private blocked: () => boolean = () => false) {
+                private blocked: () => boolean = () => false, private virtualCellSelection = true) {
         root.appendChild(this.styleElement);
         const signal = this.abortController.signal;
         this.observer = new MutationObserver(records => this.onMutations(records));
@@ -75,20 +76,27 @@ export class LargeTableVirtualizer {
                 this.interacting = type === "pointerdown" || type === "keydown";
                 if (type === "pointerdown") {
                     const pointer = event as PointerEvent;
-                    const cell = (event.target as Element).closest?.("td, th");
+                    const cell = (event.target as Element).closest?.<HTMLTableCellElement>("td, th");
                     if (pointer.button === 0 && !pointer.shiftKey && !pointer.ctrlKey && !pointer.metaKey &&
                         !pointer.altKey && cell && this.states.has(cell.closest("table"))) {
+                        if (this.virtualCellSelection && pointer.pointerType === "mouse") {
+                            this.dragTable = cell.closest("table");
+                            setTableVirtualSelection(this.dragTable, [cell]);
+                        }
                         return;
                     }
                 }
                 this.restore();
             }, {capture: true, signal});
         });
-        window.addEventListener("pointerup", () => { this.interacting = false; }, {capture: true, signal});
-        window.addEventListener("pointercancel", () => { this.interacting = false; }, {capture: true, signal});
+        window.addEventListener("pointerup", () => { this.interacting = false; this.dragTable = undefined; }, {capture: true, signal});
+        window.addEventListener("pointercancel", () => { this.interacting = false; this.dragTable = undefined; }, {capture: true, signal});
         root.addEventListener("pointermove", event => {
             if (event.buttons && (event.movementX || event.movementY)) {
-                this.restore();
+                if (!this.dragTable?.contains(event.target as Node)) {
+                    this.dragTable = undefined;
+                    this.restore();
+                }
             }
         }, {capture: true, signal});
         window.addEventListener("keyup", event => {
@@ -114,7 +122,7 @@ export class LargeTableVirtualizer {
         }, {passive: true, signal});
         document.addEventListener("selectionchange", () => {
             const selection = getSelection();
-            if (selection && !selection.isCollapsed && selection.rangeCount &&
+            if (!this.dragTable && selection && !selection.isCollapsed && selection.rangeCount &&
                 selection.getRangeAt(0).intersectsNode(this.editor)) {
                 this.restore();
             }
@@ -284,11 +292,11 @@ export class LargeTableVirtualizer {
     private refresh() {
         this.onMutations(this.observer.takeRecords());
         const selection = getSelection();
-        if (this.interacting) {
+        if (this.interacting && !this.dragTable) {
             return;
         }
         if (!this.editor.isConnected || this.composing || this.blocked() ||
-            selection && !selection.isCollapsed && selection.rangeCount &&
+            !this.dragTable && selection && !selection.isCollapsed && selection.rangeCount &&
             selection.getRangeAt(0).intersectsNode(this.editor)) {
             this.restore();
             return;
@@ -323,7 +331,7 @@ export class LargeTableVirtualizer {
         plans.forEach(({state, top, bottom}) => {
             state.chunks.forEach(chunk => {
                 // 内联单元格编辑器包含交互状态，即使光标移走也不能序列化或卸载。
-                const pinned = chunk.rows?.some(row => row.contains(selection?.anchorNode) ||
+                const pinned = chunk.rows?.some(row => row.contains(selection?.anchorNode) || isTableVirtualSelectionRow(state.table, row) ||
                     !!row.querySelector(".table__cell-editor"));
                 if (pinned || isTableChunkVisible(chunk.top, chunk.height, top, bottom)) {
                     if (!chunk.rows) {

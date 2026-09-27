@@ -145,6 +145,7 @@ import {
     setTableCellStyle,
     TableControl,
 } from "../util/tableControl";
+import {TABLE_VIRTUAL_ID} from "../util/tableVirtualizationDOM";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
@@ -597,9 +598,9 @@ export class WYSIWYG {
             this.largeTableVirtualizer = new LargeTableVirtualizer(protyle.element, this.element, protyle.contentElement,
                 () => !!protyle.highlight?.ranges?.length ||
                     this.pendingInputTimeouts.size > 0 || this.runningInputTasks.size > 0 ||
-                    !!this.tableControl?.getSelectedCells().length ||
+                    !!this.tableControl?.getSelectedCells().length && !this.tableControl.hasVirtualCellSelection() ||
                     !!window.siyuan.menus?.menu?.element && !window.siyuan.menus.menu.element.classList.contains("fn__none") ||
-                    !!window.siyuan.dragElement || !!this.element.querySelector(".protyle-wysiwyg--select"));
+                    !!window.siyuan.dragElement || !!this.element.querySelector(".protyle-wysiwyg--select"), !!this.tableControl);
         }
     }
 
@@ -2349,7 +2350,10 @@ export class WYSIWYG {
                             };
                             let selectionRects: ReturnType<typeof getCellRect>[] = [];
                             let logicalSelection = false;
-                            if (target.tagName === "TH" || target.tagName === "TD") {
+                            if (tableElement.hasAttribute(TABLE_VIRTUAL_ID) && (target.tagName === "TH" || target.tagName === "TD")) {
+                                selectionRects = [getCellRect(target), getCellRect(moveTarget)];
+                                logicalSelection = true;
+                            } else if (target.tagName === "TH" || target.tagName === "TD") {
                                 if (!tableSelectionGrid) {
                                     tableSelectionGrid = buildTableGrid(tableElement);
                                     tableSelectionMerged = tableSelectionGrid.cellInfos.some(info =>

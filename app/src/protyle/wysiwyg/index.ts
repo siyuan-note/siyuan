@@ -236,6 +236,7 @@ import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldFoldEmbeddedListByAlt, shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
 import {LargeListVirtualizer} from "./listVirtualization";
+import {LargeTableVirtualizer} from "./tableVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {syncRootAttributes} from "../util/syncRootAttributes";
@@ -405,6 +406,7 @@ export class WYSIWYG {
     private persistComposition?: () => void;
     public tableControl: TableControl;
     private largeListVirtualizer?: LargeListVirtualizer;
+    private largeTableVirtualizer?: LargeTableVirtualizer;
     private disposeSpellcheckFocus?: () => void;
     private disposeEmbedToolbarVisibility?: () => void;
     private disposeHeadingFoldIndicators?: () => void;
@@ -584,10 +586,21 @@ export class WYSIWYG {
         this.disposeSpellcheckFocus?.();
         this.disposeBoundedBlockDragSelect?.();
         this.largeListVirtualizer?.destroy();
+        this.largeTableVirtualizer?.destroy();
     }
 
-    public prepareLargeListVirtualization(contentElement: Element, replace: boolean) {
+    public prepareBlockVirtualization(contentElement: Element, replace: boolean) {
         this.largeListVirtualizer?.prepare(contentElement, replace);
+        const protyle = this.protyle;
+        // 此时 initUI 已创建正文滚动容器，桌面和移动端共用表格窗口。
+        if (!this.largeTableVirtualizer && !protyle.options.backlinkData && !protyle.lite) {
+            this.largeTableVirtualizer = new LargeTableVirtualizer(protyle.element, this.element, protyle.contentElement,
+                () => !!protyle.highlight?.ranges?.length ||
+                    this.pendingInputTimeouts.size > 0 || this.runningInputTasks.size > 0 ||
+                    !!this.tableControl?.getSelectedCells().length ||
+                    !!window.siyuan.menus?.menu?.element && !window.siyuan.menus.menu.element.classList.contains("fn__none") ||
+                    !!window.siyuan.dragElement || !!this.element.querySelector(".protyle-wysiwyg--select"));
+        }
     }
 
     public renderCustom(ial: Record<string, string>) {

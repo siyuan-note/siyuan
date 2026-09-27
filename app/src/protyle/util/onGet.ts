@@ -269,7 +269,7 @@ const setHTML = (options: {
     });
     normalizeHTMLAssetIFrameSources(doc);
     updateWidgetCacheVersion(doc, Constants.SIYUAN_VERSION);
-    protyle.wysiwyg.prepareLargeListVirtualization(
+    protyle.wysiwyg.prepareBlockVirtualization(
         doc.body,
         !options.action.includes(Constants.CB_GET_APPEND) && !options.action.includes(Constants.CB_GET_BEFORE)
     );

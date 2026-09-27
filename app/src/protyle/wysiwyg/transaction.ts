@@ -77,6 +77,7 @@ import {
 import {isEmptyParagraph} from "./emptyTextBlock";
 import {getHeadingConversionElements, isListHeadingContainer} from "./headingConversion";
 import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
+import {cleanTableVirtualizationHTML} from "../util/tableVirtualizationDOM";
 import {cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource} from "../render/listMindmap/model";
 import {buildCancelListOperations} from "./cancelList";
 import {buildListConversionOperations} from "./listConversion";
@@ -93,7 +94,8 @@ const cleanBlockSelectionModeOperations = (operations?: IOperation[]) => {
     operations?.forEach(operation => {
         if (["appendInsert", "insert", "prependInsert", "update"].includes(operation.action) &&
             typeof operation.data === "string") {
-            operation.data = cleanListMindmapHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(operation.data)));
+            operation.data = cleanListMindmapHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(
+                cleanTableVirtualizationHTML(operation.data))));
         }
         if (operation.action === "unfoldHeading" && typeof operation.retData === "string") {
             operation.retData = cleanBlockSelectionModeHTML(operation.retData);

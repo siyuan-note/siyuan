@@ -1,5 +1,6 @@
 import {Constants} from "../../constants";
 import {isInEmbedBlock} from "../util/hasClosest";
+import {restoreTableVirtualizationDOM} from "../util/tableVirtualizationDOM";
 
 export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: string | number, cb?: () => void,
                                  options?: {
@@ -11,6 +12,7 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
         return;
     }
     setTimeout(() => {
+        restoreTableVirtualizationDOM(protyle.wysiwyg.element);
         protyle.highlight.markHL.clear();
         protyle.highlight.mark.clear();
         protyle.highlight.rangeIndex = 0;

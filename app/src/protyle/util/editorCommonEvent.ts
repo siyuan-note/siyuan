@@ -284,6 +284,19 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         .filter((id): id is string => !!id));
     const targetId = targetElement.classList.contains("tab-item-content") ?
         targetElement.parentElement.getAttribute("data-node-id") : targetElement.getAttribute("data-node-id");
+    let targetPreviousID: string;
+    // 聚焦视图首块的前一个同级块可能未渲染，必须从文档树取得真实位置。
+    if (position === "beforebegin" && !getPreviousBlockSibling(targetElement) &&
+        getParentBlock(targetElement) === protyle.wysiwyg.element && protyle.block.showAll === false) {
+        const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
+            id: targetId,
+            notebook: protyle.notebookId,
+        });
+        if (response.code !== 0) {
+            throw new Error(response.msg);
+        }
+        targetPreviousID = response.data.previousID;
+    }
     const newSourceElements: Element[] = [];
     let tempTargetElement = targetElement;
     let isSameLi = true;
@@ -360,7 +373,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 action: "insert",
                 data: newListElement.outerHTML,
                 id: newListId,
-                previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(tempTargetElement)?.getAttribute("data-node-id")),
+                previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(tempTargetElement)?.getAttribute("data-node-id") || targetPreviousID),
                 parentID: position === "afterbegin" ? targetId : (getParentBlock(tempTargetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
             });
             undoOperations.push({
@@ -438,7 +451,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     action: "insert",
                     id: copyNewId,
                     data: copyElement.outerHTML,
-                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(copyElement)?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
+                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(copyElement)?.getAttribute("data-node-id") || targetPreviousID), // 不能使用常量，移动后会被修改
                     parentID: position === "afterbegin" ? targetId : (getParentBlock(copyElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(copyElement);
@@ -510,7 +523,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 doOperations.push({
                     action: "move",
                     id,
-                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(item)?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
+                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(item)?.getAttribute("data-node-id") || targetPreviousID), // 不能使用常量，移动后会被修改
                     parentID: position === "afterbegin" ? targetId : (getParentBlock(item)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                     context: {moveGroupID},
                 });

@@ -28,6 +28,7 @@ const sources = () => {
             }).outputText;
         })(),
         extract("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]),
+        extract("protyle/util/tabsCopy.ts", ["preserveTabTask", "remapTabsDOMIDs"]),
         extract("protyle/render/tabsState.ts", ["adjacentTabID", "resolveTabID", "tabKeyboardTarget"]),
         extract("protyle/render/tabsAttributes.ts", ["clearTabsAttributes", "renderTabsAttributes"]),
         extract("util/escape.ts", ["escapeHtml"]),
@@ -60,9 +61,15 @@ const cases = async (source) => {
     const constants = {ZWSP: "\u200b", SIYUAN_DROP_BLOCK: "application/siyuan-block", SIYUAN_DROP_GUTTER: "application/siyuan-gutter"};
     const protyle = {lute, wysiwyg: {element: root}, notebookId: "notebook", block: {rootID: "doc"}};
     window.siyuan = {config: {system: {workspaceDir: "workspace"}}};
-    const {moveTo, bindTabsDrag, isDraggingTabs, syncBlockAttrs, tabsRender, destroyTabsRender} = new Function("Constants", "genEmptyElement", "root", "protyle",
+    const fetchSyncPost = async (url, data) => {
+        check.equal(url, "/api/block/getBlockRelevantIDs");
+        check.equal(data.id, root.firstElementChild.dataset.nodeId);
+        check.equal(data.notebook, "notebook");
+        return {code: 0, data: {previousID: "outside-focus", parentID: "doc"}};
+    };
+    const {moveTo, bindTabsDrag, isDraggingTabs, syncBlockAttrs, tabsRender, destroyTabsRender} = new Function("Constants", "genEmptyElement", "root", "protyle", "fetchSyncPost", "remapListMindmapIDs",
         source + "; return {moveTo, bindTabsDrag, isDraggingTabs, syncBlockAttrs, tabsRender, destroyTabsRender};")(
-        constants, genEmptyElement, root, protyle);
+        constants, genEmptyElement, root, protyle, fetchSyncPost, () => {});
     const list = document.createElement("div");
     const button = document.createElement("button");
     button.className = "tabs-tab";
@@ -168,6 +175,21 @@ const cases = async (source) => {
     check.equal(layoutTabs.firstElementChild, header);
     check.equal(layoutTabs.querySelectorAll(":scope > .tabs-header").length, 1);
     destroyTabsRender(root);
+    for (const copy of [false, true]) {
+        root.innerHTML = lute.Md2BlockDOM("## Focus\n\nFirst\n\nSecond");
+        protyle.block.showAll = false;
+        const heading = root.firstElementChild;
+        const moving = Array.from(root.children).slice(1);
+        const focusedMove = await moveTo(protyle, moving, heading, true, "beforebegin", copy);
+        const placements = focusedMove.doOperations.filter(op => op.action === (copy ? "insert" : "move"));
+        check.equal(placements.length, 2);
+        check.equal(placements[0].previousID, "outside-focus");
+        check.equal(placements[1].previousID, "outside-focus");
+        check.equal(root.children[2], heading);
+        if (!copy) {
+            check.equal(focusedMove.undoOperations[0].previousID, heading.dataset.nodeId);
+        }
+    }
     root.remove();
     return "Tabs drag cases passed";
 };

@@ -1392,6 +1392,9 @@ export const initKeyboardToolbar = () => {
         viewportHandler();
     }
     document.addEventListener("selectionchange", () => {
+        if (composing) {
+            return;
+        }
         rememberAndroidTableCellSelectAll();
         if (preserveAndroidBoundedSelection()) {
             return;

@@ -400,6 +400,7 @@ export class WYSIWYG {
     private inputTimeout: number;
     private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
     private runningInputTasks = new Set<Promise<void>>();
+    private persistComposition?: () => void;
     public tableControl: TableControl;
     private largeListVirtualizer?: LargeListVirtualizer;
     private disposeSpellcheckFocus?: () => void;
@@ -435,6 +436,7 @@ export class WYSIWYG {
     }
 
     public async flushPendingInput() {
+        this.persistComposition?.();
         // 输入处理可能等待块引用查询，交接编辑器前也需等待已经开始执行的任务。
         while (this.pendingInputTimeouts.size || this.runningInputTasks.size) {
             const callbacks = Array.from(this.pendingInputTimeouts.values());
@@ -569,6 +571,8 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.persistComposition?.();
+        this.persistComposition = undefined;
         this.disposeHeadingFoldIndicators?.();
         this.disposeEmbedToolbarVisibility?.();
         this.disposeSpellcheckFocus?.();
@@ -4026,6 +4030,9 @@ export class WYSIWYG {
             }
         });
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.isComposing) {
+                return;
+            }
             if ((event.key === "Backspace" || event.key === "Delete") && getSelection().rangeCount > 0) {
                 prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0));
             }
@@ -4100,6 +4107,26 @@ export class WYSIWYG {
             hasRetainedText?: (range: Range) => boolean;
         };
         let crossBlockComposition: ICrossBlockComposition;
+        this.persistComposition = () => {
+            if (!isComposition || crossBlockComposition || !compositionSnapshot?.html ||
+                !this.element.contains(compositionSnapshot.element)) {
+                return;
+            }
+            // 仅序列化副本，不重绘候选文本或移动原生光标；结束或取消组合时继续提交后续差异。
+            const element = compositionSnapshot.element;
+            const html = element.outerHTML;
+            updateTransaction(protyle, element.cloneNode(true) as HTMLElement, compositionSnapshot.html);
+            compositionSnapshot.html = html;
+            this.lastHTMLs[element.getAttribute("data-node-id")] = html;
+        };
+        this.element.addEventListener("focusout", () => {
+            // 等待同一轮原生结束事件，焦点仍在编辑器内部时不提前保存候选内容。
+            queueMicrotask(() => {
+                if (!this.element.contains(this.element.ownerDocument.activeElement)) {
+                    this.persistComposition?.();
+                }
+            });
+        });
         const isAfterInlineMath = (range: Range) => {
             let previousNode: Node;
             if (range.startContainer.nodeType === Node.TEXT_NODE) {
@@ -4118,6 +4145,7 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            this.persistComposition?.();
             isComposition = true;
             recoveredComposition = false;
             compositionSnapshot = undefined;
@@ -4156,9 +4184,12 @@ export class WYSIWYG {
                 setInsertWbrHTML(nodeElement, range, protyle);
             }
             if (nodeElement && !crossBlockComposition) {
+                const id = nodeElement.getAttribute("data-node-id");
+                const html = this.lastHTMLs[id] || nodeElement.outerHTML;
+                this.lastHTMLs[id] = html;
                 compositionSnapshot = {
                     element: nodeElement,
-                    html: this.lastHTMLs[nodeElement.getAttribute("data-node-id")],
+                    html,
                 };
             }
             event.stopPropagation();
@@ -4249,7 +4280,8 @@ export class WYSIWYG {
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
             recordReplacementUndo(event, this.element, this.lastHTMLs);
-            if ((event.inputType.startsWith("insert") || event.inputType.startsWith("delete")) &&
+            if (!event.isComposing && !isComposition &&
+                (event.inputType.startsWith("insert") || event.inputType.startsWith("delete")) &&
                 getSelection().rangeCount > 0) {
                 prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0));
             }
@@ -4402,6 +4434,10 @@ export class WYSIWYG {
                 window.siyuan.menus.menu.remove();
                 return;
             }
+            // 输入法可能暂时清空选区或把光标放到编辑器根节点，候选更新不能触发选区修复。
+            if (event.isComposing || (isComposition && !isCommittedTextInput(event))) {
+                return;
+            }
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
             if (!blockElement) {
@@ -4460,6 +4496,9 @@ export class WYSIWYG {
         this.element.addEventListener("keyup", (event) => {
             if (getAVTemplateInteractiveElement(event.target)) {
                 event.stopPropagation();
+                return;
+            }
+            if (event.isComposing || isComposition) {
                 return;
             }
             const range = getEditorRange(this.element).cloneRange();

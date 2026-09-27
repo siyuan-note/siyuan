@@ -17,33 +17,46 @@ const rendererSource = () => {
     const handlers = {};
     const inputMethods = [];
     let isAfterInlineMath;
+    let persistComposition;
     const visit = node => {
         if (ts.isCallExpression(node) && node.expression.getText(wysiwyg) === "this.element.addEventListener" &&
-            ["compositionstart", "compositionend", "input", "focusout"].includes(node.arguments[0]?.text)) {
+            ["compositionstart", "compositionend", "input", "focusout", "keyup"].includes(node.arguments[0]?.text)) {
             handlers[node.arguments[0].text] = node.arguments[1].getText(wysiwyg);
         }
-        if (ts.isMethodDeclaration(node) && ["scheduleInput", "runInput", "flushPendingInput"].includes(node.name.getText(wysiwyg))) {
+        if (ts.isMethodDeclaration(node) && ["scheduleInput", "runInput", "flushPendingInput", "destroy"].includes(node.name.getText(wysiwyg))) {
             inputMethods.push(node.getText(wysiwyg));
         }
         if (ts.isVariableDeclaration(node) && node.name.getText(wysiwyg) === "isAfterInlineMath") {
             isAfterInlineMath = node.initializer.getText(wysiwyg);
         }
+        if (ts.isBinaryExpression(node) && node.left.getText(wysiwyg) === "this.persistComposition") {
+            if (ts.isArrowFunction(node.right)) {
+                persistComposition = node.right.getText(wysiwyg);
+            }
+        }
         ts.forEachChild(node, visit);
     };
     visit(wysiwyg);
-    assert.deepEqual(Object.keys(handlers).sort(), ["compositionend", "compositionstart", "focusout", "input"]);
+    assert.deepEqual(Object.keys(handlers).sort(), ["compositionend", "compositionstart", "focusout", "input", "keyup"]);
     assert.ok(isAfterInlineMath);
+    assert.ok(persistComposition);
     const mobile = ts.createSourceFile("keyboardToolbar.ts", read("../mobile/util/keyboardToolbar"), ts.ScriptTarget.Latest, true);
     let mobileInput;
+    let mobileSelectionChange;
     const visitMobile = node => {
         if (ts.isCallExpression(node) && node.expression.getText(mobile) === "document.addEventListener" &&
             node.arguments[0]?.text === "input" && node.arguments[1].getText(mobile).includes("isCommittedTextInput")) {
             mobileInput = node.arguments[1].getText(mobile);
         }
+        if (ts.isCallExpression(node) && node.expression.getText(mobile) === "document.addEventListener" &&
+            node.arguments[0]?.text === "selectionchange" && node.arguments[1].getText(mobile).includes("rememberAndroidTableCellSelectAll")) {
+            mobileSelectionChange = node.arguments[1].getText(mobile);
+        }
         ts.forEachChild(node, visitMobile);
     };
     visitMobile(mobile);
     assert.ok(mobileInput);
+    assert.ok(mobileSelectionChange);
     // 使用实际事件入口、平台检测、选区恢复和事务生成，只替代网络及无关渲染。
     const source = `
         const Constants = {ZWSP: "\\u200b", ATTRIBUTE_EDITING: "data-editing"};
@@ -55,6 +68,9 @@ const rendererSource = () => {
         const getSemanticMarkerPrefixLengthForNode = () => 0;
         const normalizeInlineElementBoundaries = () => {};
         const renderLongTextRuns = () => {};
+        const bindVerticalNavigationReset = () => {};
+        let editorRangeReads = 0;
+        export const getEditorRangeReads = () => editorRangeReads;
         class InputQueue {
             pendingInputTimeouts = new Map();
             runningInputTasks = new Set();
@@ -77,12 +93,25 @@ const rendererSource = () => {
             "hasClosestByTag", "isBlockElement"]) +
         extract("wysiwyg/getBlock", ["getContenteditableElement", "isContainerBlock", "isNotEditBlock", "hasPreviousSibling"]) +
         extract("util/selection", ["getEditorRange", "focusByRange", "getSelectionOffset", "selectIsEditor",
-            "focusByOffset", "searchNode", "setLastNodeRange", "setInsertWbrHTML", "focusByWbr"]) +
+            "focusByOffset", "searchNode", "setLastNodeRange", "setInsertWbrHTML", "focusByWbr"])
+            .replace("export const getEditorRange =", "const readEditorRange =") +
+        "const getEditorRange = (element) => { editorRangeReads++; return readEditorRange(element); };" +
+        extract("wysiwyg/keydown", ["keydown"]) +
         extract("wysiwyg/transaction", ["updateTransaction"]) + `
         export function checkMobileInput(event) {
             let composing = true;
             (${mobileInput})(event);
             return composing;
+        }
+        export function checkMobileSelection(composing) {
+            const calls = [];
+            const rememberAndroidTableCellSelectAll = () => calls.push("remember");
+            const preserveAndroidBoundedSelection = () => {calls.push("preserve"); return false;};
+            const getCurrentEditor = () => undefined;
+            const renderKeyboardToolbar = () => calls.push("render");
+            const preventRender = false;
+            (${mobileSelectionChange})();
+            return calls;
         }
         export function bind(protyle) {
             let isComposition = false, beforeInputCompositionHandled = false;
@@ -92,19 +121,22 @@ const rendererSource = () => {
             const isAfterInlineMath = ${isAfterInlineMath};
             const pending = [];
             Object.assign(protyle.wysiwyg, new InputQueue());
-            for (const name of ["scheduleInput", "runInput", "flushPendingInput"]) {
+            for (const name of ["scheduleInput", "runInput", "flushPendingInput", "destroy"]) {
                 protyle.wysiwyg[name] = InputQueue.prototype[name];
             }
             protyle.toolbar = {};
             protyle.hint = {};
             const handlers = (function () {
+                this.persistComposition = ${persistComposition};
                 return {start: ${handlers.compositionstart}, end: ${handlers.compositionend},
-                    input: ${handlers.input}, focusout: ${handlers.focusout}};
+                    input: ${handlers.input}, focusout: ${handlers.focusout}, keyup: ${handlers.keyup}};
             }).call(protyle.wysiwyg);
             protyle.wysiwyg.element.addEventListener("compositionstart", handlers.start);
             protyle.wysiwyg.element.addEventListener("compositionend", event => pending.push(handlers.end(event)));
             protyle.wysiwyg.element.addEventListener("input", handlers.input);
             protyle.wysiwyg.element.addEventListener("focusout", handlers.focusout);
+            protyle.wysiwyg.element.addEventListener("keyup", handlers.keyup);
+            keydown(protyle, protyle.wysiwyg.element);
             return () => Promise.all(pending.splice(0));
         }
     `;
@@ -115,6 +147,10 @@ const rendererSource = () => {
 
 const runCases = async () => {
     const assert = require("node:assert/strict");
+    const errors = [];
+    const onError = event => errors.push(event.message || String(event.reason));
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onError);
     const {bind, focusByRange, focusByWbr, setInsertWbrHTML, captureCompositionText} = window.compositionCaret;
     const profiles = [
         {name: "iPhone", platform: "iPhone", userAgent: "iPhone", maxTouchPoints: 5, ios: true},
@@ -149,7 +185,8 @@ const runCases = async () => {
         };
         const start = (node, offset, end = offset) => {
             const range = setRange(node, offset, end);
-            setInsertWbrHTML(element.firstElementChild, range, protyle);
+            const block = (node.nodeType === 1 ? node : node.parentElement).closest("[data-node-id]");
+            setInsertWbrHTML(block, range, protyle);
             element.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
         };
         const finish = async (data = "") => {
@@ -166,11 +203,120 @@ const runCases = async () => {
         return {element, protyle, start, finish, flush, setRange, assertCaret};
     };
     let cases = 0;
+    for (const profile of profiles) {
+        const f = setup(paragraph('<span data-type="inline-math" contenteditable="false">x</span>base'), profile);
+        const node = f.element.querySelector('[contenteditable="true"]').lastChild;
+        f.start(node, node.length);
+        node.appendData("candidate");
+        const reads = window.compositionCaret.getEditorRangeReads();
+        // 模拟 Android 输入法更新候选区时短暂暴露的根节点选区和空选区。
+        for (const empty of [false, true]) {
+            if (empty) {
+                getSelection().removeAllRanges();
+            } else {
+                getSelection().collapse(f.element, 0);
+            }
+            f.element.dispatchEvent(new InputEvent("input", {
+                bubbles: true, inputType: "insertCompositionText", data: "candidate", isComposing: true,
+            }));
+            f.element.dispatchEvent(new KeyboardEvent("keydown", {bubbles: true, key: "Process", isComposing: true}));
+            f.element.dispatchEvent(new KeyboardEvent("keyup", {bubbles: true, key: "Process", isComposing: true}));
+            assert.equal(window.compositionCaret.getEditorRangeReads(), reads, profile.name);
+            assert.equal(getSelection().rangeCount, empty ? 0 : 1);
+            if (!empty) {
+                assert.equal(getSelection().anchorNode, f.element);
+                assert.equal(getSelection().anchorOffset, 0);
+            }
+        }
+        f.setRange(node, node.length);
+        await f.finish("candidate");
+        assert.equal(f.protyle.inputs, 1);
+        assert.match(f.protyle.transactions[0].doOperations[0].data, /basecandidate/);
+        cases++;
+    }
+    for (const action of ["flush", "focusout", "destroy"]) {
+        const f = setup(paragraph('<span data-type="inline-math" contenteditable="false">x</span>base'));
+        const node = f.element.querySelector('[contenteditable="true"]').lastChild;
+        f.element.focus();
+        f.start(node, node.length);
+        node.appendData("pending");
+        f.setRange(node, node.length);
+        const html = f.element.innerHTML;
+        if (action === "flush") {
+            await f.protyle.wysiwyg.flushPendingInput();
+            f.assertCaret(node, node.length);
+        } else if (action === "focusout") {
+            const outside = document.createElement("button");
+            document.body.append(outside);
+            outside.focus();
+            f.element.dispatchEvent(new FocusEvent("focusout", {bubbles: true, relatedTarget: outside}));
+            await Promise.resolve();
+            assert.equal(document.activeElement, outside);
+        } else {
+            f.protyle.wysiwyg.destroy();
+        }
+        assert.equal(f.protyle.transactions.length, 1, action);
+        assert.equal(f.element.innerHTML, html, "saving must not rewrite the IME's live DOM");
+        const saved = f.protyle.transactions[0];
+        assert.match(saved.doOperations[0].data, /basepending/);
+        assert.match(saved.undoOperations[0].data, /base<wbr>/);
+        assert.equal(f.protyle.inputs, 0, "saving candidates must not trigger parsing or rendering");
+        await f.protyle.wysiwyg.flushPendingInput();
+        assert.equal(f.protyle.transactions.length, 1, "unchanged candidates must not submit twice");
+        if (action !== "destroy") {
+            // 候选取消仍需写回原文，不能让提前保存的候选留在磁盘中。
+            node.data = "base";
+            f.setRange(node, node.length);
+            await f.finish("");
+            assert.equal(f.protyle.transactions.length, 2);
+            assert.doesNotMatch(f.protyle.transactions[1].doOperations[0].data, /pending/);
+            assert.match(f.protyle.transactions[1].undoOperations[0].data, /basepending/);
+        }
+        cases++;
+    }
+    {
+        const f = setup(paragraph("base"), profiles[3]);
+        const node = f.element.querySelector('[contenteditable="true"]').firstChild;
+        f.setRange(node, node.length);
+        f.element.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+        node.appendData("pending");
+        f.setRange(node, node.length);
+        await f.protyle.wysiwyg.flushPendingInput();
+        assert.equal(f.protyle.transactions.length, 1, "missing keydown snapshots must not lose text");
+        assert.match(f.protyle.transactions[0].undoOperations[0].data, />base</);
+        await f.finish("pending");
+        assert.equal(f.protyle.transactions.length, 1, "normal completion must not duplicate a checkpoint");
+        node.appendData("next");
+        f.setRange(node, node.length);
+        f.element.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", data: "next"}));
+        await f.protyle.wysiwyg.flushPendingInput();
+        assert.equal(f.protyle.transactions.length, 2);
+        assert.match(f.protyle.transactions[1].doOperations[0].data, /basependingnext/);
+        cases++;
+    }
+    {
+        const f = setup(paragraph("first") + paragraph("second").replace('data-node-id="p"', 'data-node-id="other"'));
+        const first = f.element.firstElementChild.querySelector('[contenteditable="true"]').firstChild;
+        const second = f.element.lastElementChild.querySelector('[contenteditable="true"]').firstChild;
+        f.start(first, first.length);
+        first.appendData("pending");
+        f.start(second, second.length);
+        assert.equal(f.protyle.transactions.length, 1, "a new composition must preserve the interrupted one");
+        assert.match(f.protyle.transactions[0].doOperations[0].data, /firstpending/);
+        second.appendData("next");
+        f.setRange(second, second.length);
+        await f.finish("next");
+        assert.equal(f.protyle.transactions.length, 2);
+        assert.match(f.protyle.transactions[1].doOperations[0].data, /secondnext/);
+        cases++;
+    }
     {
         const {checkMobileInput} = window.compositionCaret;
         assert.equal(checkMobileInput({isComposing: false, inputType: "insertText"}), false);
         assert.equal(checkMobileInput({isComposing: true, inputType: "insertText"}), true);
         assert.equal(checkMobileInput({isComposing: false, inputType: "insertCompositionText"}), true);
+        assert.deepEqual(window.compositionCaret.checkMobileSelection(true), []);
+        assert.deepEqual(window.compositionCaret.checkMobileSelection(false), ["remember", "preserve", "render"]);
         cases++;
     }
     {
@@ -213,7 +359,7 @@ const runCases = async () => {
             type("a", "insertCompositionText", true);
             type("b", "insertCompositionText", false);
             type("c", "insertText", true);
-            await f.protyle.wysiwyg.flushPendingInput();
+            await new Promise(resolve => setTimeout(resolve, 0));
             assert.equal(f.protyle.inputs, 0, "candidate updates must not be committed");
             f.element.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
             // 模拟普通按键覆盖撤销快照，恢复时仍需保留组合输入开始前的内容。
@@ -386,6 +532,10 @@ const runCases = async () => {
         assert.equal(f.protyle.inputs, 1);
         cases++;
     }
+    await new Promise(resolve => setTimeout(resolve, 0));
+    window.removeEventListener("error", onError);
+    window.removeEventListener("unhandledrejection", onError);
+    assert.deepEqual(errors, [], "event handlers must not throw");
     return cases;
 };
 
@@ -427,7 +577,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
                 require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
-            assert.match(stdout, /Composition caret: 39 Electron cases passed/);
+            assert.match(stdout, /Composition caret: 50 Electron cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-composition-caret-"));

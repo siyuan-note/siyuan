@@ -2847,6 +2847,10 @@ img.av__cellassetimg {
 .av__panel .av__conditional-colors {
   padding: 8px;
 
+  .av__conditional-hint {
+    line-height: 16px;
+  }
+
   [data-rules] {
     display: grid;
     gap: 12px;

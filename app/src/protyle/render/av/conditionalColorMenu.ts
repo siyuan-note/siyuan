@@ -33,8 +33,8 @@ export const openConditionalColorsMenu = async (options: {
 </button>
 <button class="b3-menu__separator"></button>
 <div class="av__conditional-colors">
-<div class="ft__on-surface">${lang.conditionalColorsTip}</div>
-<div class="fn__hr"></div><div data-rules></div>
+<div class="av__conditional-hint ft__on-surface ft__smaller">${lang.conditionalColorsTip}</div>
+<div data-rules></div>
 <button type="button" class="b3-menu__item" data-action="add" disabled><svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg><span class="b3-menu__label">${lang.new}</span></button>
 </div></div>`;
     const panelElement = menuElement.querySelector<HTMLElement>(".av__conditional-colors");

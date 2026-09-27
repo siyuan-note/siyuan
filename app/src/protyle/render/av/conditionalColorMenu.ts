@@ -96,6 +96,29 @@ ${data.viewType === "table" || rule.target === "property" ? `<select class="b3-s
         panelElement.querySelector<HTMLButtonElement>('[data-action="add"]').disabled = rules.length >= 100 || fields.length === 0;
         onResize();
     };
+    // 在整个规则面板捕获点击，收起其他规则或条件区域内打开的选项面板。
+    const closeDropdowns = (event: MouseEvent) => {
+        if (!panelElement.isConnected) {
+            menuElement.removeEventListener("click", closeDropdowns, true);
+            return;
+        }
+        const target = event.target as HTMLElement;
+        const dropdownTypes = [
+            ["selectDropdown", '[data-type="selectTrigger"]'],
+            ["relationFilterDropdown", '[data-type="relationFilterTrigger"]'],
+            ["relList", '[data-type-rel="relation"]'],
+        ];
+        dropdownTypes.forEach(([type, triggerSelector]) => {
+            const trigger = target.closest(triggerSelector);
+            root.querySelectorAll<HTMLElement>(`[data-type="${type}"]`).forEach(dropdown => {
+                if (!dropdown.contains(target) &&
+                    (!trigger || trigger.closest("[data-filter]") !== dropdown.closest("[data-filter]"))) {
+                    dropdown.style.display = "none";
+                }
+            });
+        });
+    };
+    menuElement.addEventListener("click", closeDropdowns, true);
     panelElement.addEventListener("change", event => {
         const target = event.target as HTMLSelectElement;
         if (target.dataset.action === "target") {
@@ -158,13 +181,21 @@ ${data.viewType === "table" || rule.target === "property" ? `<select class="b3-s
             openViewSettingMenu(menu, target);
         } else if (action === "color" && rule) {
             const menu = new Menu();
-            menu.addItem({label: lang.default, checked: !rule.matchOption && !rule.color?.color,
-                click: () => update(id, {color: null, matchOption: false})});
             const field = fields.find(field => field.id === rule.filter.column);
             if (["select", "mSelect"].includes(field?.type) && rule.filter.valueSource !== "rendered") {
-                menu.addItem({label: lang.conditionalColorFirstOption, checked: rule.matchOption,
-                    click: () => update(id, {matchOption: true})});
+                menu.addItem({iconHTML: "",
+                    label: `<label class="fn__flex fn__pointer"><span>${lang.conditionalColorFirstOption}</span><span class="fn__space fn__flex-1"></span><input type="checkbox" class="b3-switch b3-switch--menu"${rule.matchOption ? " checked" : ""}></label>`,
+                    bind(element) {
+                        const switchElement = element.querySelector<HTMLInputElement>(".b3-switch");
+                        switchElement.addEventListener("change", () => {
+                            update(id, {matchOption: switchElement.checked});
+                        });
+                    },
+                });
+                menu.addSeparator();
             }
+            menu.addItem({label: lang.default, iconHTML: "",
+                click: () => update(id, {color: null, matchOption: false})});
             menu.addItem({type: "empty", iconHTML: "",
                 label: `<div class="fn__flex fn__flex-wrap av__option-colors">${getAVColorGridHTML(getAVCustomColors(), rule.color?.color || "", lang.manageColors, getAVColorOrder())}</div>`,
                 bind(element) {

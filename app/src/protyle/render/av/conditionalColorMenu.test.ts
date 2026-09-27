@@ -42,15 +42,19 @@ test("returning from the color menu during field loading does not restore or bin
     assert.equal(resized, 1);
 });
 
-test("dropping a rule saves the new priority with an undo snapshot and SVG deletion remains clickable", async () => {
+test("rule menus dismiss outside dropdowns, preserve selections, and support drag sorting and SVG deletion", async () => {
     const methods = {} as typeof import("./conditionalColorMenu");
     const listeners = new Map<string, (event: unknown) => void>();
     const transactions: Array<{perform: IOperation[], undo: IOperation[]}> = [];
     const source = {dataset: {ruleId: "a"}, style: {opacity: ".38"}};
     const target = {dataset: {ruleId: "c"}, getBoundingClientRect: () => ({top: 100, height: 40})};
+    const filterRoot = {};
+    const option = {};
+    const dropdown = {style: {display: "block"}, contains: (element: unknown) => element === option,
+        closest: () => filterRoot};
     const root = {
         innerHTML: "", contains: (element: unknown) => element === source || element === target,
-        querySelectorAll: (): HTMLElement[] => [],
+        querySelectorAll: (selector: string) => selector === '[data-type="selectDropdown"]' ? [dropdown] : [],
         addEventListener: (type: string, callback: (event: unknown) => void) => listeners.set(type, callback),
     };
     const content = {
@@ -79,13 +83,26 @@ test("dropping a rule saves the new priority with an undo snapshot and SVG delet
         protyle: {options: {}} as IProtyle,
         blockElement: {dataset: {nodeId: "carrier"}} as unknown as HTMLElement,
         data: {id: "database", viewID: "view", view: {conditionalColors: rules}} as IAV,
-        menuElement: {classList: {add() {}, remove() {}}, querySelector: () => content} as unknown as HTMLElement,
+        menuElement: {classList: {add() {}, remove() {}}, querySelector: () => content,
+            addEventListener: (type: string, callback: (event: unknown) => void) => listeners.set(`${type}:capture`, callback),
+        } as unknown as HTMLElement,
         onResize() {},
     });
     assert.match(root.innerHTML, /draggable="true" data-conditional-drag/);
     assert.match(root.innerHTML, /b3-menu__action b3-menu__action--show/);
     assert.match(root.innerHTML, /b3-menu__action--warning/);
     assert.doesNotMatch(root.innerHTML, /data-action="(?:up|down)"/);
+    const dismiss = listeners.get("click:capture");
+    dismiss({target: {...option, closest: (): HTMLElement => null}});
+    assert.equal(dropdown.style.display, "none");
+    dropdown.style.display = "block";
+    Object.assign(option, {closest: (): HTMLElement => null});
+    dismiss({target: option});
+    assert.equal(dropdown.style.display, "block");
+    dismiss({target: {closest: () => ({closest: () => filterRoot})}});
+    assert.equal(dropdown.style.display, "block");
+    dismiss({target: {closest: () => ({closest: () => ({})})}});
+    assert.equal(dropdown.style.display, "none");
     const event = {target: {closest: () => target}, clientY: 139, preventDefault() {}, stopPropagation() {}};
     listeners.get("drop")(event);
     const ids = (operation: IOperation) => {

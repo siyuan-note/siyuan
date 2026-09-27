@@ -126,6 +126,12 @@ export class LargeTableVirtualizer {
     }
 
     private onMutations(records: MutationRecord[]) {
+        // 内嵌编辑器的浮动控件随滚动更新样式，不属于表格正文变化。
+        records = records.filter(record => {
+            const element = record.target instanceof Element ? record.target : record.target.parentElement;
+            const host = element?.closest(".table__cell-editor.table__cell--inline");
+            return !host || element === host || host.contains(element.closest(".protyle-wysiwyg"));
+        });
         if (records.length === 0) {
             return;
         }
@@ -142,8 +148,15 @@ export class LargeTableVirtualizer {
                 this.restore(table);
             }
         });
+        // 内联编辑器异步挂载完成后重新扫描，避免首次滚动早于编辑器就绪而停留在完整表格。
+        const inlineEditorReady = records.some(record => {
+            const element = record.target instanceof Element ? record.target : record.target.parentElement;
+            return element?.matches(".table__cell-editor.table__cell--inline") ||
+                Array.from(record.addedNodes).some(node => node instanceof Element &&
+                    node.matches(".table__cell-editor.table__cell--inline"));
+        });
         // 文档加载及事务替换会引入新的表格，单元格输入无需反复初始化。
-        if (records.some(record => Array.from(record.addedNodes).some(node => node instanceof Element &&
+        if (inlineEditorReady || records.some(record => Array.from(record.addedNodes).some(node => node instanceof Element &&
             (node.matches('[data-type="NodeTable"]') || !!node.querySelector('[data-type="NodeTable"]'))))) {
             this.scan = true;
             this.schedule();
@@ -171,11 +184,12 @@ export class LargeTableVirtualizer {
         const body = table.tBodies[0];
         if (table.tBodies.length !== 1 || table.tFoot || !body || body.rows.length <= LARGE_TABLE_ROW_THRESHOLD ||
             table.closest(".protyle-wysiwyg__embed, .protyle-custom, .mindmap-view, .table__cell-rich") ||
-            table.querySelector("table, img, video, audio, iframe, canvas, svg, math, input, textarea, select, button, " +
+            Array.from(table.querySelectorAll("table, img, video, audio, iframe, canvas, svg, math, input, textarea, select, button, " +
                 "object, embed, details, [hidden], [style*='display: none'], [style*='display:none'], " +
                 ".table__cell-rich, .table__cell-editor, " +
                 '[data-type~="inline-math"], [data-type~="search-mark"], [data-type~="block-ref"], ' +
-                '[data-type~="virtual-block-ref"], wbr, .fn__none') ||
+                "wbr, .fn__none")).some(element =>
+                !element.closest(".table__cell-editor.table__cell--inline")) ||
             table.querySelectorAll(":scope > colgroup").length > 1) {
             this.excluded.add(table);
             return;
@@ -272,7 +286,9 @@ export class LargeTableVirtualizer {
         // 先完成全部几何读取，再移除或恢复行；光标所在分段保持连接以保护原生选区。
         plans.forEach(({state, top, bottom}) => {
             state.chunks.forEach(chunk => {
-                const pinned = chunk.rows?.some(row => row.contains(selection?.anchorNode));
+                // 内联单元格编辑器包含交互状态，即使光标移走也不能序列化或卸载。
+                const pinned = chunk.rows?.some(row => row.contains(selection?.anchorNode) ||
+                    !!row.querySelector(".table__cell-editor"));
                 if (pinned || isTableChunkVisible(chunk.top, chunk.height, top, bottom)) {
                     if (!chunk.rows) {
                         const source = document.createElement("tbody");

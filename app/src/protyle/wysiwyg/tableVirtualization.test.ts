@@ -80,7 +80,14 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         check.doesNotMatch(html, /data-sy-table-virtual/);
     };
     for (const pinned of [false, true]) {
-        const f = fixture(2000, pinned);
+        const f = fixture(2000, pinned, table => {
+            // 自动识别的虚拟块引用可出现在表头和任意正文行中。
+            table.rows[0].cells[0].innerHTML = '<span data-type="virtual-block-ref">Column</span> 0';
+            Array.from(table.tBodies[0].rows).forEach(row => {
+                const link = row.cells[0].firstElementChild;
+                link.innerHTML = link.innerHTML.replace("Row", '<span data-type="virtual-block-ref">Row</span>');
+            });
+        });
         await tick();
         reduced(f.table, `initial pinned=${pinned}`);
         check.equal(api.cleanTableVirtualizationHTML(f.editor.innerHTML), f.original, "source round trip is lossless");
@@ -89,6 +96,7 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
             f.scroller.scrollTop = (f.scroller.scrollHeight - f.scroller.clientHeight) * progress;
             await tick();
             reduced(f.table, `progress=${progress}, pinned=${pinned}`);
+            check.ok(f.table.querySelector('tbody [data-type="virtual-block-ref"]'), "restored rows retain virtual references");
             check.ok(Math.abs(f.table.getBoundingClientRect().height - f.height) < 2, "scrolling retains variable row heights");
             const row = f.table.querySelector<HTMLTableRowElement>("tbody > tr:not([data-sy-table-virtual-rows])");
             Array.from(row.cells).forEach((cell, index) => {
@@ -108,6 +116,11 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         const protectedLute = api.protectLuteTableVirtualization(lute);
         check.ok(lute.BlockDOM2StdMd(f.original).includes("Row 1999 cell 4"));
         check.equal(protectedLute.BlockDOM2StdMd(snapshot), lute.BlockDOM2StdMd(f.original), "copy/export retains all rows");
+        const reference = f.table.querySelector('tbody [data-type="virtual-block-ref"]');
+        reference.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: pinned ? "touch" : "mouse"}));
+        check.ok(reference.isConnected, "reference interaction retains its event target");
+        check.equal(f.table.tBodies[0].rows.length, 2000, "reference interaction restores the complete table");
+        reference.dispatchEvent(new PointerEvent("pointerup", {bubbles: true}));
         rowsMatch(protectedLute.SpinBlockDOM(snapshot));
         const operations: IOperation[] = [{action: "update", id: "table", data: snapshot},
             {action: "insert", id: "copy", data: snapshot}];
@@ -200,6 +213,31 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         f.scroller.scrollTop = f.scroller.scrollHeight / 2;
         await tick();
         rowsMatch(f.editor.innerHTML);
+        f.destroy();
+    }
+    {
+        const f = fixture();
+        await tick();
+        const cell = f.table.querySelector("tbody td");
+        cell.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+        cell.innerHTML = '<div class="table__cell-editor table__cell--inline"><div contenteditable="true">Editing</div>' +
+            '<button class="fn__none"><svg></svg></button></div>';
+        const host = cell.firstElementChild;
+        cell.dispatchEvent(new PointerEvent("pointerup", {bubbles: true}));
+        await tick();
+        for (const progress of [0.5, 1, 0]) {
+            f.scroller.scrollTop = (f.scroller.scrollHeight - f.scroller.clientHeight) * progress;
+            f.root.dispatchEvent(new WheelEvent("wheel", {bubbles: true}));
+            await tick();
+            reduced(f.table, "scrolling with an inline cell editor");
+            host.querySelector("button").style.top = `${progress * 100}px`;
+            await tick();
+            reduced(f.table, "inline editor overlay updates after scrolling");
+            check.ok(host.isConnected, "the active editor survives scrolling outside the viewport");
+            check.equal(cell.firstElementChild, host, "the editor is never recreated from serialized HTML");
+            check.ok(Array.from(f.table.querySelectorAll("tr[data-sy-table-virtual-rows]")).every(row =>
+                !row.getAttribute("data-sy-table-virtual-rows").includes("table__cell-editor")));
+        }
         f.destroy();
     }
     for (const event of ["copy", "cut", "paste", "keydown", "beforeinput", "compositionstart", "beforeprint"]) {

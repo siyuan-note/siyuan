@@ -1292,6 +1292,12 @@ body.mobile-topbar--merged {
   top: 0;
   transform: translateX(100vw);
 
+  > .toolbar {
+    flex-shrink: 0;
+    padding-left: max(5px, env(safe-area-inset-left));
+    padding-right: max(5px, env(safe-area-inset-right));
+  }
+
   .mobile-main-menu {
     &__search {
       background-color: var(--b3-theme-surface);

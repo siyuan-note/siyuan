@@ -68,7 +68,7 @@ const renderMobilePluginDockMenu = (app: App, menuElement: HTMLElement) => {
 /** 分发单层元素的点击：handled 表示已响应，ignored 表示继续向上查找，abort 表示终止本次事件处理 */
 const dispatchMobileMainMenuClick = (app: App, target: HTMLElement, search: IMainMenuSearch):
     "handled" | "ignored" | "abort" => {
-    if (target.classList.contains("b3-menu__title")) {
+    if (target.dataset.type === "close-menu") {
         closePanel();
         return "handled";
     }

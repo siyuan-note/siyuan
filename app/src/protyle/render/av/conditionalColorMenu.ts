@@ -62,16 +62,14 @@ export const openConditionalColorsMenu = async (options: {
     };
     const render = () => {
         root.innerHTML = rules.map(rule => `<div class="av__conditional-rule" data-rule-id="${escapeAttr(rule.id)}">
-<div class="av__conditional-condition">
 <span class="block__icon block__icon--show fn__grab ariaLabel" draggable="true" data-conditional-drag aria-label="${lang.move}"><svg><use xlink:href="#iconDrag"></use></svg></span>
-<div data-filter></div>
-<div class="fn__flex">
-<svg class="b3-menu__action b3-menu__action--show b3-menu__action--warning ariaLabel" data-action="remove" role="button" tabindex="0" aria-label="${lang.delete}"><use xlink:href="#iconTrashcan"></use></svg></div></div>
+<div class="av__conditional-condition" data-filter></div>
+<svg class="b3-menu__action b3-menu__action--show b3-menu__action--warning ariaLabel" data-action="remove" role="button" tabindex="0" aria-label="${lang.delete}"><use xlink:href="#iconTrashcan"></use></svg>
 <div class="av__conditional-controls">
-<select class="b3-select" data-action="target" aria-label="${lang.conditionalColorTarget}">
+${data.viewType === "table" || rule.target === "property" ? `<select class="b3-select" data-action="target" aria-label="${lang.conditionalColorTarget}">
 <option value="item"${rule.target === "item" ? " selected" : ""}>${lang.conditionalColorItem}</option>
-${data.viewType === "table" || rule.target === "property" ? `<option value="property"${rule.target === "property" ? " selected" : ""}>${lang.conditionalColorProperty}</option>` : ""}</select>
-<button type="button" class="b3-button b3-button--outline" data-action="color"><span class="av__conditional-swatch" style="background-color:${getConditionalBackground(rule.color) || "var(--b3-theme-background)"}"></span>${rule.matchOption ? lang.conditionalColorFirstOption : rule.color?.color ? lang.color : lang.default}</button>
+<option value="property"${rule.target === "property" ? " selected" : ""}>${lang.conditionalColorProperty}</option></select>` : ""}
+<button type="button" class="b3-button b3-button--cancel" data-action="color"><span class="av__conditional-swatch" style="background-color:${getConditionalBackground(rule.color) || "var(--b3-theme-background)"}"></span>${rule.matchOption ? lang.conditionalColorFirstOption : rule.color?.color ? lang.color : lang.default}</button>
 </div></div>`).join("");
         root.querySelectorAll<HTMLElement>("[data-rule-id]").forEach(element => {
             const rule = rules.find(rule => rule.id === element.dataset.ruleId);

@@ -2039,9 +2039,9 @@
       max-width: 290px;
 
       &.av__conditional-panel:not(.b3-menu--fullscreen) {
-        width: fit-content;
-        min-width: min(340px, 90vw);
-        max-width: 80vw;
+        width: 420px;
+        min-width: min(340px, calc(100vw - 32px));
+        max-width: calc(100vw - 32px);
       }
 
       &__items {
@@ -2856,30 +2856,42 @@ img.av__cellassetimg {
   .av__conditional-rule {
     position: relative;
     display: grid;
-    gap: 6px;
+    grid-template-columns: minmax(0, 1fr) 22px;
+    align-items: start;
+    gap: 8px 6px;
     min-width: 0;
+    padding: 8px;
+    border-radius: var(--b3-border-radius);
+    background-color: var(--b3-theme-surface);
+
+    > [data-action="remove"] {
+      align-self: start;
+      margin-top: 3px;
+      margin-left: 0;
+    }
+
+    > [data-conditional-drag] {
+      position: absolute;
+      top: 14px;
+      left: -14px;
+      margin: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    &:hover > [data-conditional-drag],
+    &:focus-within > [data-conditional-drag] {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
   .av__conditional-condition {
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-
-    [data-filter] {
-      flex: 1;
-      min-width: 0;
-    }
-
-    > .fn__flex {
-      flex-shrink: 0;
-    }
+    min-width: 0;
   }
 
   .av__filter-rowinner,
-  .av__filter-date-controls,
-  .av__filter-date-config,
-  .av__conditional-controls,
-  .av__field-wrapper {
+  .av__filter-date-config {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -2887,18 +2899,69 @@ img.av__cellassetimg {
     min-width: 0;
   }
 
-  .av__filter-value {
-    min-width: 100px;
-    flex: 1;
+  .av__filter-date-controls {
+    display: contents;
   }
 
-  .av__field-wrapper .b3-select {
-    max-width: 200px;
+  .av__filter-date-config {
+    order: 1;
+    flex-basis: 100%;
+  }
+
+  .av__filter-value {
+    order: 2;
+    flex-basis: 100%;
+    min-width: 0;
+  }
+
+  .av__conditional-controls {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+
+    [data-action="color"] {
+      margin-left: auto;
+      max-width: 100%;
+      white-space: normal;
+    }
+  }
+
+  .av__field-wrapper {
+    width: 128px;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .b3-select {
+    max-width: 100%;
   }
 
   .av__conditional-swatch {
     width: 1em;
     height: 1em;
+    flex-shrink: 0;
     margin-right: 8px;
+  }
+
+  @media (hover: none), (any-pointer: coarse) {
+    .av__conditional-rule {
+      grid-template-columns: 20px minmax(0, 1fr) 22px;
+
+      > [data-conditional-drag] {
+        position: static;
+        align-self: start;
+        margin-top: 6px;
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    .av__conditional-controls {
+      grid-column: 2 / -1;
+    }
   }
 }

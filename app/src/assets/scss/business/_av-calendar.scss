@@ -316,9 +316,30 @@
       white-space: nowrap;
     }
 
-    &[data-wrap="true"] .av__celltext {
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
+    .av__celltext--ref {
+      border-bottom: 0;
+      text-decoration: underline .5px var(--b3-border-color);
+    }
+
+    &[data-wrap="true"] {
+      display: block;
+      overflow: visible;
+
+      .av__celltext {
+        white-space: pre-wrap;
+        word-break: normal;
+        overflow-wrap: anywhere;
+      }
+
+      .av__cell--relation {
+        display: inline-flex;
+        max-width: 100%;
+        vertical-align: top;
+
+        > :first-child {
+          flex-shrink: 0;
+        }
+      }
     }
 
     &[data-dtype="select"],

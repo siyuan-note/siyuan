@@ -5,6 +5,56 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {transpileModule, ModuleKind, ScriptTarget} from "typescript";
 import * as dates from "./date";
+import {cellValueIsEmpty, createEmptyAVValue} from "../cellValue";
+
+test("calendar omits empty fields while preserving zero, unchecked boxes and rendered values", async () => {
+    const start = new Date(2026, 8, 1).getTime();
+    const range = {start, end: dates.addCalendarDays(start, 7), timeZone: "UTC"};
+    const types: TAVCol[] = ["text", "number", "phone", "url", "email", "template", "select", "mSelect", "relation", "rollup", "mAsset", "date"];
+    const values = types.map(type => createEmptyAVValue(`empty-${type}`, type));
+    values.push(
+        {...createEmptyAVValue("date", "date"), date: {content: start, isNotEmpty: true, isNotTime: true}},
+        {...createEmptyAVValue("zero", "number"), number: {content: 0, isNotEmpty: true}},
+        createEmptyAVValue("unchecked", "checkbox"),
+        {...createEmptyAVValue("rendered", "text"), renderedContent: "Rendered", hasRenderTemplate: true},
+        {...createEmptyAVValue("blank-rendered", "text"), text: {content: "Source"}, renderedContent: "", hasRenderTemplate: true},
+        createEmptyAVValue("primary", "block"),
+    );
+    let html = "";
+    const complete = new Error("rendered");
+    const api = {} as typeof import("./render");
+    const modules: Record<string, unknown> = {
+        "./date": dates,
+        "./state": {getCalendarState: () => ({anchor: start, mode: "week", rowLimit: 3}), getCalendarRequestRange: () => range},
+        "./settings": {isCalendarDateColumn: () => true},
+        "../cellValue": {cellValueIsEmpty},
+        "../cell": {renderCell: () => "<span></span>"},
+        "../render": {genTabHeaderHTML: () => ""},
+        "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
+        "../../../../constants": {Constants: {}},
+        "../virtualScroll": {getAVSelectedItemIDs: (): string[] => []},
+        "../container": {replaceAVContainer: (_block: unknown, value: string) => { html = value; throw complete; }},
+    };
+    runInNewContext(transpileModule(readFileSync(join(__dirname, "render.ts"), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+    }).outputText, {
+        exports: api, require: (name: string) => modules[name] || {},
+        window: {siyuan: {config: {lang: "en"}, languages: {}}}, document: {activeElement: null},
+    });
+    await assert.rejects(api.renderCalendar({querySelector: (): null => null, removeAttribute() {}} as unknown as HTMLElement,
+        {disabled: true, options: {}} as IProtyle, {viewID: "calendar", view: {
+            calendar: {dateKeyID: "date"}, calendarRange: range,
+            columns: values.map(value => ({id: value.keyID, type: value.type, name: value.keyID})),
+            rows: [{id: "row", cells: values.map(value => ({value}))}],
+        }} as unknown as IAV), error => error === complete);
+    for (const type of types) {
+        assert.doesNotMatch(html, new RegExp(`data-field-id="empty-${type}"`));
+    }
+    assert.doesNotMatch(html, /data-field-id="blank-rendered"/);
+    for (const key of ["primary", "date", "zero", "unchecked", "rendered"]) {
+        assert.match(html, new RegExp(`data-field-id="${key}"`));
+    }
+});
 
 test("calendar without a date field renders its setup instead of reading an absent undated cache", async () => {
     const range = {start: new Date(2026, 8, 1).getTime(), end: new Date(2026, 8, 8).getTime(), timeZone: "UTC"};

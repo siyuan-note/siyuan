@@ -5,6 +5,7 @@ import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {isMobile} from "../../../../util/functions";
 import {transaction} from "../../../wysiwyg/transaction";
 import {renderCell} from "../cell";
+import {cellValueIsEmpty} from "../cellValue";
 import {getAVBackgroundColor} from "../color";
 import {getColNameByType} from "../col";
 import {finishAVLocate} from "../locate";
@@ -77,7 +78,8 @@ const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boole
     const title = `${primary?.value?.block?.content || window.siyuan.languages.untitled}\n${rawDate.formattedContent || ""}${event.invalid ? `\n${window.siyuan.languages.calendarInvalidRange}` : ""}`;
     const fields = event.row.cells.map((cell, index) => {
         const field = view.columns[index];
-        if (!field || field.hidden) {
+        if (!field || field.hidden || !cell.value ||
+            (field.type !== "block" && cellValueIsEmpty(cell.value, true, field.renderTemplate))) {
             return "";
         }
         const checkClass = field.type === "checkbox" ? (cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck") : "";

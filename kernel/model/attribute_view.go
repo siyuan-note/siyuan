@@ -2644,7 +2644,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, p
 	return
 }
 
-func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, selectedBlockIDs []string, page, pageSize int) (
+func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, selectedBlockIDs []string, page, pageSize int, candidateSort *av.ViewSort) (
 	attributeViewName string, databaseBlockIDs []string, customColors []*av.AttributeViewCustomColor,
 	columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
 	total int, err error,
@@ -2682,6 +2682,23 @@ func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, 
 		return
 	}
 	columns = table.Columns
+	if candidateSort != nil {
+		if candidateSort.Order != av.SortOrderAsc && candidateSort.Order != av.SortOrderDesc {
+			err = errors.New("invalid relation candidate sort order")
+			return
+		}
+		found := false
+		for _, column := range columns {
+			if column.ID == candidateSort.Column {
+				found = true
+				break
+			}
+		}
+		if !found {
+			err = av.ErrKeyNotFound
+			return
+		}
+	}
 
 	rowsByID := map[string]*av.TableRow{}
 	for _, row := range table.Rows {
@@ -2709,14 +2726,14 @@ func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, 
 		av.Filter(table, attrView, sql.GetFurtherCollections(attrView, cachedAttrViews), cachedAttrViews)
 	}
 
-	rows, total = filterSortPageRelationCandidates(table.Rows, keyword, page, pageSize)
+	rows, total = filterSortPageRelationCandidates(table, attrView, keyword, page, pageSize, candidateSort)
 	return
 }
 
-func filterSortPageRelationCandidates(tableRows []*av.TableRow, keyword string, page, pageSize int) (
+func filterSortPageRelationCandidates(table *av.Table, attrView *av.AttributeView, keyword string, page, pageSize int, candidateSort *av.ViewSort) (
 	rows []*av.TableRow, total int,
 ) {
-	for _, row := range tableRows {
+	for _, row := range table.Rows {
 		if relationCandidateMatches(row, keyword) {
 			rows = append(rows, row)
 		}
@@ -2729,6 +2746,12 @@ func filterSortPageRelationCandidates(tableRows []*av.TableRow, keyword string, 
 		}
 		return iCreated > jCreated
 	})
+	if candidateSort != nil {
+		table.Rows = rows
+		table.Sorts = []*av.ViewSort{candidateSort}
+		av.Sort(table, attrView)
+		rows = table.Rows
+	}
 
 	total = len(rows)
 	if 1 > page {

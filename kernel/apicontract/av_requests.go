@@ -108,6 +108,14 @@ type GetAttributeViewRelationCandidatesRequest struct {
 	Page             *float64 `json:"page" api:"optional,nullable"`
 	PageSize         *float64 `json:"pageSize" api:"optional,nullable"`
 	SelectedBlockIDs []string `json:"selectedBlockIDs" api:"optional,nullable,filterstrings"`
+	// Sort 仅对本次候选查询排序，在搜索过滤后、分页前应用；不修改数据库视图或已选条目的顺序。
+	// 省略时按创建时间倒序；指定时 column 必须属于关联数据库，order 为 ASC 或 DESC。
+	Sort *AVRelationCandidateSort `json:"sort" api:"optional,nullable"`
+}
+
+type AVRelationCandidateSort struct {
+	Column string `json:"column"`
+	Order  string `json:"order"`
 }
 
 type AppendAttributeViewDetachedBlocksWithValuesRequest struct {

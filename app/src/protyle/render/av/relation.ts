@@ -415,13 +415,15 @@ const getRelationPrimaryCell = (row: IAVRow) => {
     return row.cells.find((cell) => cell.value?.type === "block");
 };
 
-const genRelationHeaderHTML = (columns: IAVColumn[], gridTemplate: string) => {
+const genRelationHeaderHTML = (columns: IAVColumn[], gridTemplate: string, sort?: {column: string, order: "ASC" | "DESC"}) => {
     let html = `<div class="av__relation-table-header" data-relation-type="header" style="grid-template-columns:${gridTemplate}">
 <span class="av__relation-table-check"></span>`;
     columns.forEach((column, index) => {
-        html += `<span data-relation-column="${escapeAttr(column.id)}" class="av__relation-table-cell${index === 0 ? " av__relation-table-primary" : ""}">
+        const sorted = sort?.column === column.id;
+        html += `<span data-relation-column="${escapeAttr(column.id)}" role="columnheader" tabindex="0" aria-sort="${sorted ? sort.order === "ASC" ? "ascending" : "descending" : "none"}" class="av__relation-table-cell fn__pointer${index === 0 ? " av__relation-table-primary" : ""}">
     <svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>
     <span class="fn__ellipsis">${escapeHtml(column.name)}</span>
+    ${sorted ? `<svg class="av__relation-sort"><use xlink:href="#${sort.order === "ASC" ? "iconUp" : "iconDown"}"></use></svg>` : ""}
     <span class="av__widthdrag"></span>
 </span>`;
     });
@@ -518,6 +520,7 @@ export const bindRelationEvent = (options: {
         loaderVisible: false,
         columns: [] as IAVColumn[],
         gridTemplate: "",
+        sort: undefined as {column: string, order: "ASC" | "DESC"} | undefined,
         controller: undefined as AbortController | undefined,
     };
     let searchTimer: number;
@@ -654,6 +657,7 @@ export const bindRelationEvent = (options: {
         selectedRows: IAVRow[],
         rows: IAVRow[]
     }, reset: boolean) => {
+        const focusedColumn = listElement.querySelector<HTMLElement>('[role="columnheader"]:focus')?.dataset.relationColumn;
         state.columns = data.columns || state.columns;
         if (reset || !state.gridTemplate) {
             state.gridTemplate = getRelationGridTemplate(state.columns,
@@ -669,7 +673,7 @@ export const bindRelationEvent = (options: {
             const selectedHTML = genRelationRowsHTML(data.selectedRows || [], state.columns, "selected",
                 gridTemplate, excludedIDs);
             candidateHTML = genRelationRowsHTML(data.rows || [], state.columns, "candidate", gridTemplate, excludedIDs);
-            listElement.innerHTML = `${genRelationHeaderHTML(state.columns, gridTemplate)}
+            listElement.innerHTML = `${genRelationHeaderHTML(state.columns, gridTemplate, state.sort)}
 <div class="av__relation-table-selected" data-relation-type="selectedRows">${selectedHTML}</div>
 <div class="b3-menu__separator" data-relation-type="separator"></div>
 <div class="av__relation-table-candidates" data-relation-type="candidateRows">${candidateHTML}</div>
@@ -682,6 +686,10 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
         }
         renderAVRichTextElements(listElement);
         updateLayout(state.columns, gridTemplate);
+        if (focusedColumn) {
+            Array.from(listElement.querySelectorAll<HTMLElement>('[role="columnheader"]'))
+                .find(header => header.dataset.relationColumn === focusedColumn)?.focus();
+        }
         renderFooter(!!listElement.querySelector('[data-relation-type="candidate"]'));
         if (!listElement.querySelector(".b3-menu__item--current")) {
             listElement.querySelector('[data-type="setRelationCell"]')?.classList.add("b3-menu__item--current");
@@ -714,6 +722,7 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
             page,
             pageSize: RELATION_PAGE_SIZE,
             selectedBlockIDs: selectedItems.map((item) => item.id),
+            sort: state.sort,
         }, response => {
             if (controller.signal.aborted || keyword !== state.keyword) {
                 return;
@@ -776,6 +785,35 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
             }
         });
     };
+    listElement.addEventListener("mousedown", event => {
+        const target = event.target as HTMLElement;
+        if (target.closest('[role="columnheader"]') && !target.closest(".av__widthdrag")) {
+            event.preventDefault();
+        }
+    });
+    listElement.addEventListener("click", event => {
+        const target = event.target as HTMLElement;
+        if (target.closest(".av__widthdrag")) {
+            return;
+        }
+        const header = target.closest<HTMLElement>('[role="columnheader"]');
+        if (!header) {
+            return;
+        }
+        event.stopPropagation();
+        const column = header.dataset.relationColumn;
+        state.sort = {column, order: state.sort?.column === column && state.sort.order === "ASC" ? "DESC" : "ASC"};
+        listElement.scrollTop = 0;
+        loadPage(true);
+    });
+    listElement.addEventListener("keydown", event => {
+        const header = (event.target as HTMLElement).closest<HTMLElement>('[role="columnheader"]');
+        if (header && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            event.stopPropagation();
+            header.click();
+        }
+    });
     const search = () => {
         state.keyword = inputElement.value;
         state.controller?.abort();

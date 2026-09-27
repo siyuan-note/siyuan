@@ -360,6 +360,8 @@ export type AVPrimaryValuesData = { "blockIDs": Array<string> | null; "name": st
 
 export type AVRelation = { "avID": string; "backKeyID": string; "candidateFilters"?: Array<AVViewFilter | null>; "isTwoWay": boolean; };
 
+export type AVRelationCandidateSortInput = { "column": string; "order": string; };
+
 export type AVRelationCandidatesData = { "blockIDs": Array<string> | null; "columns": Array<AVTableColumn | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "name": string; "notebookID": string; "rows": Array<AVTableRow | null> | null; "selectedRows": Array<AVTableRow | null> | null; "total": number; };
 
 export type AVRelativeDate = { "count": number; "direction": number; "unit": number; };
@@ -1088,7 +1090,7 @@ export type GetAttributeViewPasteRowsRequestInput = { "avID": string; "blockID":
 
 export type GetAttributeViewPrimaryKeyValuesRequestInput = { "blockIDs"?: Array<string> | null; "id": string; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; };
 
-export type GetAttributeViewRelationCandidatesRequestInput = { "avID"?: string | null; "id"?: string | null; "keyID"?: string | null; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; "selectedBlockIDs"?: Array<string> | null; };
+export type GetAttributeViewRelationCandidatesRequestInput = { "avID"?: string | null; "id"?: string | null; "keyID"?: string | null; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; "selectedBlockIDs"?: Array<string> | null; "sort"?: AVRelationCandidateSortInput | null; };
 
 export type GetAttributeViewRequestInput = { "id": string; };
 

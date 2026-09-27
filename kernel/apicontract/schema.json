@@ -9751,6 +9751,22 @@
       ],
       "additionalProperties": false
     },
+    "AVRelationCandidateSortInput": {
+      "type": "object",
+      "properties": {
+        "column": {
+          "type": "string"
+        },
+        "order": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "column",
+        "order"
+      ],
+      "additionalProperties": false
+    },
     "AVRelationCandidatesData": {
       "type": "object",
       "properties": {
@@ -25882,6 +25898,16 @@
               "items": {
                 "type": "string"
               }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sort": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationCandidateSortInput"
             },
             {
               "type": "null"

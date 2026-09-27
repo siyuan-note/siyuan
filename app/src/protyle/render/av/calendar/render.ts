@@ -393,8 +393,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             const dayHeaders = Array.from({length: 7}, (_, day) => {
                 const timestamp = addCalendarDays(start, day);
                 const date = new Date(timestamp);
-                return `<div class="av__calendar-day${day === 0 ? " av__calendar-day--first" : ""}${date.getMonth() === anchor.getMonth() || state.mode === "week" ? "" : " av__calendar-day--outside"}${calendarDay(Date.now()) === timestamp ? " av__calendar-day--today" : ""}" data-calendar-day="${timestamp}">
-                    ${day === 0 ? `<span class="av__calendar-week-number" title="${escapeAttr(weekLabel)}">W${String(isoWeek.week).padStart(2, "0")}</span>` : ""}
+                return `<div class="av__calendar-day${date.getMonth() === anchor.getMonth() || state.mode === "week" ? "" : " av__calendar-day--outside"}${calendarDay(Date.now()) === timestamp ? " av__calendar-day--today" : ""}" data-calendar-day="${timestamp}">
                     <span title="${escapeAttr(date.toLocaleDateString(locale))}">${date.getDate() === 1 ? date.toLocaleDateString(locale, {month: "short", day: "numeric"}) : date.getDate()}</span>
                     ${editable && dateColumn.type === "date" && date.getFullYear() >= 1 && date.getFullYear() <= 9999 ? `<button type="button" class="block__icon" data-calendar-add="${timestamp}" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></button>` : ""}
                 </div>`;
@@ -403,9 +402,10 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
                 const hidden = segments.filter(segment => segment.lane >= rowLimit && segment.column <= day && segment.column + segment.span > day).length;
                 return hidden && !expanded ? `<button class="b3-button b3-button--cancel b3-button--small av__calendar-more" data-calendar-expand="${start}" style="grid-column:${day + 1}">${escapeHtml(window.siyuan.languages.calendarMore.replace("${x}", hidden.toString()))}</button>` : "";
             }).join("");
-            body += `<div class="av__calendar-week" data-calendar-week="${start}"><div class="av__calendar-days">${dayHeaders}</div>
+            body += `<div class="av__calendar-week-row"><span class="av__calendar-week-number" title="${escapeAttr(weekLabel)}">W${String(isoWeek.week).padStart(2, "0")}</span>
+                <div class="av__calendar-week" data-calendar-week="${start}"><div class="av__calendar-days">${dayHeaders}</div>
                 <div class="av__calendar-events" style="grid-template-rows:repeat(${Math.max(1, maxLane)},auto)">${visible.map(segment => getEventHTML(segment, view, editable)).join("")}</div>
-                ${overflow ? `<div class="av__calendar-overflow">${overflow}</div>` : ""}</div>`;
+                ${overflow ? `<div class="av__calendar-overflow">${overflow}</div>` : ""}</div></div>`;
         }
     }
     blockElement.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);
@@ -427,7 +427,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             ${editable && dateColumn?.type === "date" ? getCalendarUndatedHTML(state) : ""}
             ${dateColumn && dateColumn.type !== "date" ? `<div class="av__calendar-source ft__on-surface">${window.siyuan.languages.calendarReadOnlyDate}</div>` : ""}
             <div class="av__calendar-scroll" data-prevent-swipe="true">
-                ${dateColumn ? `<div class="av__calendar-weekdays">${days.map(day => `<div>${day}</div>`).join("")}</div>` : ""}
+                ${dateColumn ? `<div class="av__calendar-weekdays"><span aria-hidden="true"></span>${days.map(day => `<div>${day}</div>`).join("")}</div>` : ""}
                 <div class="av__body av__calendar-grid${dateColumn ? "" : " av__calendar-grid--empty"}" data-group-id="" style="--av-calendar-saturday:${(6 - weekStartDay + 7) % 7};--av-calendar-sunday:${(7 - weekStartDay) % 7};">${body}</div>
             </div>
         </div>

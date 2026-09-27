@@ -135,11 +135,12 @@
   }
 
   .av__calendar-scroll {
+    --av-calendar-week-width: 36px;
     overflow-x: auto;
   }
 
   .av__calendar-grid {
-    min-width: 560px;
+    min-width: calc(560px + var(--av-calendar-week-width));
     box-sizing: border-box;
     border: 1px solid var(--b3-border-color);
     border-radius: var(--b3-border-radius);
@@ -150,7 +151,6 @@
     }
   }
 
-  .av__calendar-weekdays,
   .av__calendar-days,
   .av__calendar-overflow {
     display: grid;
@@ -158,29 +158,48 @@
   }
 
   .av__calendar-weekdays {
-    min-width: 560px;
+    display: grid;
+    grid-template-columns: var(--av-calendar-week-width) repeat(7, minmax(0, 1fr));
+    min-width: calc(560px + var(--av-calendar-week-width));
+    box-sizing: border-box;
     direction: ltr;
-    padding: 8px 0;
+    padding: 8px 1px;
     text-align: center;
     color: var(--b3-theme-on-surface);
     font-size: 12px;
   }
 
-  .av__calendar-week {
-    position: relative;
+  .av__calendar-week-row {
+    display: grid;
+    grid-template-columns: var(--av-calendar-week-width) minmax(0, 1fr);
+    border-top: 1px solid var(--b3-border-color);
+
     &:first-child {
       border-top: 0;
-      border-top-left-radius: max(0px, calc(var(--b3-border-radius) - 1px));
-      border-top-right-radius: max(0px, calc(var(--b3-border-radius) - 1px));
+
+      .av__calendar-week {
+        border-top-right-radius: max(0px, calc(var(--b3-border-radius) - 1px));
+      }
     }
 
-    &:last-child {
-      border-bottom-left-radius: max(0px, calc(var(--b3-border-radius) - 1px));
+    &:last-child .av__calendar-week {
       border-bottom-right-radius: max(0px, calc(var(--b3-border-radius) - 1px));
     }
+  }
 
+  .av__calendar-week-number {
+    padding: 3px 2px;
+    border-right: 1px solid var(--b3-border-color);
+    color: var(--b3-theme-on-surface);
+    font-size: 11px;
+    line-height: 24px;
+    text-align: center;
+  }
+
+  .av__calendar-week {
+    position: relative;
+    min-width: 0;
     min-height: 130px;
-    border-top: 1px solid var(--b3-border-color);
     padding-bottom: 6px;
     background-image:
       linear-gradient(to right,
@@ -219,24 +238,11 @@
       white-space: nowrap;
     }
 
-    &--first > span:nth-child(2) {
-      min-width: 0;
-      margin-left: auto;
-    }
-
-    .av__calendar-week-number {
-      flex-shrink: 0;
-      min-width: 0;
-      padding: 0 1px;
-      color: var(--b3-theme-on-surface);
-      font-size: 11px;
-    }
-
     &--outside {
       color: var(--b3-theme-on-surface-light);
     }
 
-    &--today > span:not(.av__calendar-week-number) {
+    &--today > span {
       background: var(--b3-theme-primary);
       color: var(--b3-theme-on-primary);
     }

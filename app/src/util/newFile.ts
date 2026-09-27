@@ -487,23 +487,43 @@ export const newFileByRefHintAtPath = (
     onCreated: (id: string, range: Range) => void,
 ) => {
     const context = createNewFileSelectionContext(protyle, range);
-    const title = replaceFileName(name.trim());
-    if (!context || !isNewFileSelectionValid(protyle, context) || (title && !validateName(title))) {
+    if (!context) {
+        return;
+    }
+    newFileAtPath({
+        notebookId: context.notebookId,
+        name,
+        isValid: () => !!isNewFileSelectionValid(protyle, context),
+        restoreFocus: () => focusByRange(context.range),
+        onCreated: (id) => onCreated(id, context.range),
+    });
+};
+
+/** 在选定位置新建文档，仅在调用方上下文仍有效时创建和回调 */
+export const newFileAtPath = (options: {
+    notebookId: string;
+    name: string;
+    isValid: () => boolean;
+    restoreFocus?: () => void;
+    onCreated: (id: string, title: string) => void;
+}) => {
+    const title = replaceFileName(options.name.trim());
+    if (!options.isValid() || (title && !validateName(title))) {
         return;
     }
     let submitted = false;
     movePathTo({
         title: window.siyuan.languages.newFileAtPath,
         flashcard: false,
-        sourceNotebookIds: [context.notebookId],
+        sourceNotebookIds: [options.notebookId],
         restoreFocus() {
-            if (isNewFileSelectionValid(protyle, context)) {
-                focusByRange(context.range);
+            if (options.isValid()) {
+                options.restoreFocus?.();
             }
         },
         cb(paths, notebooks) {
-            if (submitted || !paths[0] || !notebooks[0] || !isNewFileSelectionValid(protyle, context) ||
-                !isMoveTargetAllowed([context.notebookId], notebooks[0])) {
+            if (submitted || !paths[0] || !notebooks[0] || !options.isValid() ||
+                !isMoveTargetAllowed([options.notebookId], notebooks[0])) {
                 return;
             }
             submitted = true;
@@ -513,8 +533,8 @@ export const newFileByRefHintAtPath = (
                 parentPath: paths[0],
                 title,
             }, (id) => {
-                if (isNewFileSelectionValid(protyle, context)) {
-                    onCreated(id, context.range);
+                if (options.isValid()) {
+                    options.onCreated(id, title);
                 }
             });
         },

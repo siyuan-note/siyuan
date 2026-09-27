@@ -75,7 +75,7 @@ const fixture = () => {
     hint.genHTML = items => { hint.items = items; };
     protyle.hint = hint;
     protyle.toolbar.setInlineMark = (...args) => { inserted.push(args); return []; };
-    return {api, deps, paths, window, Lute, protyle, hint, range, text, requests, inserted, focused,
+    return {api, deps, paths, window, Lute, protyle, hint, range, text, block, requests, inserted, focused,
         get picker() { return picker; },
         open() { api.newFileByRefHintAtPath(protyle, "New title", range, (...args) => inserted.push(args)); },
     };
@@ -180,7 +180,7 @@ test("hint selection preserves reference subtype, anchor text and undo context",
     }
 });
 
-test("typed and searched reference suggestions offer location selection, excluding database bindings", async () => {
+test("typed and searched reference suggestions offer location selection including database bindings", async () => {
     for (const source of ["hint", "search", "av"]) {
         for (const hideConfigured of [true, false]) {
             const f = fixture();
@@ -189,13 +189,118 @@ test("typed and searched reference suggestions offer location selection, excludi
             extend.hintRef("New title", f.protyle, source);
             f.requests[0].cb({data: {newDoc: true, k: "New title", blocks: []}});
             await Promise.resolve();
-            assert.equal(f.hint.items.some(item => item.value.startsWith("((newFileAtPath ")), source !== "av");
+            assert.equal(f.hint.items.some(item => item.value.startsWith("((newFileAtPath ")), true);
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newFile ")), !hideConfigured);
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newSubDoc ")), true);
             f.hint.genSearchHTML(f.protyle, {value: "New title"}, false, "Original anchor", source);
             f.requests[1].cb({data: {newDoc: true, k: "New title", blocks: []}});
             await Promise.resolve();
-            assert.equal(f.hint.element.lastElementChild.innerHTML.includes("newFileAtPath"), source !== "av");
+            assert.equal(f.hint.element.lastElementChild.innerHTML.includes("newFileAtPath"), true);
+        }
+    }
+});
+
+const databaseFixture = (view = "table", isDetached = true) => {
+    const f = fixture();
+    const cell = {isConnected: true};
+    const row = {dataset: {id: "original-item"}, contains: node => node === cell};
+    let currentValue = {type: "block", isDetached, block: {id: isDetached ? "" : "old-doc", content: "Original"}};
+    Object.assign(f.block, {
+        isConnected: true,
+        dataset: {nodeId: "database-block"},
+        getAttribute: name => name === "data-av-type" ? view : "database",
+        contains: node => node === row,
+    });
+    f.protyle.id = "editor";
+    f.protyle.wysiwyg.element.contains = node => node === f.block || node === f.text;
+    f.hint.source = "av";
+    const operations = [];
+    const animations = [];
+    Object.assign(f.deps, load("protyle/render/av/binding", f.deps, f.window, f.Lute),
+        load("protyle/render/av/viewType", f.deps, f.window, f.Lute), {
+        hasClosestByClassName: (node, name) => {
+            if (name === "av__cell") {
+                return cell;
+            }
+            assert.equal(name, ["table", "list"].includes(view) ? "av__row" : "av__gallery-item");
+            return row;
+        },
+        genCellValueByElement: () => currentValue,
+        transaction: (_protyle, doOperations, undoOperations) => operations.push({doOperations, undoOperations}),
+        updateAttrViewCellAnimation: (target, value) => animations.push({target, value}),
+    });
+    return Object.assign(f, {cell, row, operations, animations,
+        changeValue: value => { currentValue = value; },
+        openDatabase() {
+            f.hint.fill(`((newFileAtPath "Original"\u200b'New title${f.Lute.Caret}'))`, f.protyle, false);
+        },
+    });
+};
+
+test("database creation binds only after success and preserves item identity and undo", () => {
+    for (const view of ["table", "list", "gallery", "kanban"]) {
+        for (const isDetached of [false, true]) {
+            const f = databaseFixture(view, isDetached);
+            f.openDatabase();
+            f.picker.cb(["/chosen-parent.sy"], ["other"]);
+            assert.equal(f.operations.length, 0);
+            assert.equal(f.animations.length, 0);
+            assert.equal(f.requests[0].data.path, "/chosen-parent/20260927120000-newdoc1.sy");
+            f.requests[0].cb({code: 0});
+            assert.equal(f.operations.length, 1);
+            const {doOperations, undoOperations} = f.operations[0];
+            assert.equal(doOperations[0].previousID, "original-item");
+            assert.equal(doOperations[0].avID, "database");
+            assert.equal(doOperations[0].blockID, "database-block");
+            assert.equal(doOperations[0].nextID, "20260927120000-newdoc1");
+            assert.equal(undoOperations[0].isDetached, isDetached);
+            assert.equal(undoOperations[0].nextID, isDetached ? "" : "old-doc");
+            assert.equal(f.animations.length, 1);
+            assert.equal(f.animations[0].target, f.cell);
+            assert.equal(f.animations[0].value.block.content, "New title");
+            assert.equal(f.inserted.length, 0);
+        }
+    }
+});
+
+test("canceling database location selection leaves the original binding and display intact", () => {
+    const f = databaseFixture();
+    f.openDatabase();
+    f.picker.restoreFocus();
+    assert.equal(f.requests.length, 0);
+    assert.equal(f.operations.length, 0);
+    assert.equal(f.animations.length, 0);
+    assert.equal(f.focused.length, 1);
+});
+
+test("database context changes before confirmation or after creation starts cannot replace another binding", () => {
+    const changes = [
+        f => { f.cell.isConnected = false; },
+        f => { f.block.isConnected = false; },
+        f => { f.row.dataset.id = "other-item"; },
+        f => { f.block.dataset.nodeId = "other-carrier"; },
+        f => { f.block.getAttribute = () => "other-database"; },
+        f => { f.protyle.block.rootID = "other-document"; },
+        f => { f.protyle.notebookId = "other"; },
+        f => { f.changeValue({type: "block", isDetached: false, block: {id: "another-doc", content: "Changed"}}); },
+        f => { f.changeValue({type: "block", isDetached: true, block: {id: "", content: "Edited title"}}); },
+    ];
+    for (const change of changes) {
+        for (const afterCreate of [false, true]) {
+            const f = databaseFixture();
+            f.openDatabase();
+            if (afterCreate) {
+                f.picker.cb(["/"], ["other"]);
+            }
+            change(f);
+            if (afterCreate) {
+                f.requests[0].cb({code: 0});
+            } else {
+                f.picker.cb(["/"], ["other"]);
+                assert.equal(f.requests.length, 0);
+            }
+            assert.equal(f.operations.length, 0);
+            assert.equal(f.animations.length, 0);
         }
     }
 });

@@ -22,6 +22,7 @@ import {
     getBlockRefAnchorText,
     getDocCreateTemplatePath,
     isConfiguredCreateTargetCurrentSubDoc,
+    newFileAtPath,
     newFileByRefHint,
     newFileByRefHintAtPath,
     newFileBySelectRange,
@@ -64,6 +65,7 @@ import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
 import {getAVBindingOperations} from "../render/av/binding";
+import {isRangeInEditor} from "../../util/newFileSelection";
 import {genCellValueByElement} from "../render/av/cell";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
@@ -680,11 +682,9 @@ export class Hint {
                     const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
                     searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${hideConfiguredCreate && response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div></button>`;
-                    if (source !== "av") {
-                        const pathRefText = `((newFileAtPath "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
-                        searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(pathRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
+                    const pathRefText = `((newFileAtPath "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
+                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(pathRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.data.k}</mark></span></div></button>`;
-                    }
                 }
                 response.data.blocks.forEach((item: IBlock, index: number) => {
                     let blockRefHTML;
@@ -824,6 +824,43 @@ ${genHintItemHTML(item)}
             const previousID = rowElement.dataset.id;
             const avID = nodeElement.getAttribute("data-av-id");
             const previousValue = genCellValueByElement("block", cellElement);
+            if (value.startsWith("((newFileAtPath ") && value.endsWith(`${Lute.Caret}'))`)) {
+                const fileNames = value.substring("((newFileAtPath \"".length, value.length - 4).split(`"${Constants.ZWSP}'`);
+                const name = fileNames.length === 1 ? fileNames[0] : fileNames[1];
+                const {notebookId, path, block: {rootID}} = protyle;
+                const blockID = nodeElement.dataset.nodeId;
+                const bindingCell = cellElement;
+                const savedValue = JSON.stringify(previousValue);
+                const savedRange = range.cloneRange();
+                // 选址期间条目可能被删除、换绑或重绘，始终校验原条目及其主键值。
+                const isValid = () => protyle.notebookId === notebookId && protyle.path === path &&
+                    protyle.block.rootID === rootID && nodeElement.isConnected && bindingCell.isConnected &&
+                    protyle.wysiwyg.element.contains(nodeElement) && nodeElement.contains(rowElement) &&
+                    rowElement.contains(bindingCell) && nodeElement.dataset.nodeId === blockID &&
+                    nodeElement.getAttribute("data-av-id") === avID && rowElement.dataset.id === previousID &&
+                    JSON.stringify(genCellValueByElement("block", bindingCell)) === savedValue;
+                newFileAtPath({
+                    notebookId,
+                    name,
+                    isValid,
+                    restoreFocus() {
+                        if (isRangeInEditor(protyle.wysiwyg.element, savedRange)) {
+                            focusByRange(savedRange);
+                        }
+                    },
+                    onCreated(id, title) {
+                        const operations = getAVBindingOperations(avID, previousID, id, blockID,
+                            previousValue, {protyleID: protyle.id});
+                        transaction(protyle, operations.doOperations, operations.undoOperations);
+                        updateAttrViewCellAnimation(bindingCell, {
+                            type: "block",
+                            isDetached: false,
+                            block: {content: title, id},
+                        });
+                    },
+                });
+                return;
+            }
             let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;

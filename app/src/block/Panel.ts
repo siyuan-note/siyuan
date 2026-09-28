@@ -26,6 +26,7 @@ import {
     planBlockPanelRemoval
 } from "./panelRemoval";
 import {getBlockPanelLoadPlan} from "./panelLoad";
+import {positionBlockPanel} from "./panelPosition";
 
 const BLOCK_PANEL_EDITOR_MIN_HEIGHT = 155;
 
@@ -610,23 +611,10 @@ export class BlockPanel {
                         } else {
                             targetRect = this.targetElement.getBoundingClientRect();
                         }
-                        // 下部位置大的话就置于下部 https://ld246.com/article/1690333302147
-                        if (window.innerHeight - targetRect.bottom - 4 > targetRect.top + 12) {
-                            this.element.style.maxHeight = Math.floor(window.innerHeight - targetRect.bottom - 12) + "px";
-                        }
-                        // 靠边不宜拖拽 https://github.com/siyuan-note/siyuan/issues/2937
-                        setPosition(this.element, targetRect.left, targetRect.bottom + 4, targetRect.height + 12, 8);
+                        positionBlockPanel(this.element, targetRect);
                     } else if (typeof this.x === "number" && typeof this.y === "number") {
                         setPosition(this.element, this.x, this.y);
                         this.element.style.maxHeight = Math.floor(window.innerHeight - Math.max(this.y, topBarHeight) - 12) + "px";
-                    }
-                    const elementRect = this.element.getBoundingClientRect();
-                    if (this.targetElement && !this.targetElement.classList.contains("protyle-wysiwyg__embed")) {
-                        if (elementRect.top < targetRect.top) {
-                            this.element.style.maxHeight = Math.floor(targetRect.top - elementRect.top - 8) + "px";
-                        } else {
-                            this.element.style.maxHeight = Math.floor(window.innerHeight - elementRect.top - 8) + "px";
-                        }
                     }
                     this.element.classList.add("block__popover--open");
                     this.element.style.zIndex = (++window.siyuan.zIndex).toString();

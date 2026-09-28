@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Vincular documento",
+	"selectOneDocument": "Selecciona un solo documento",
 	"listMindmapLock": "Bloquear vista",
 	"listMindmapUnlock": "Desbloquear vista",
 	"historySnapshots": "Instantáneas etiquetadas relacionadas",

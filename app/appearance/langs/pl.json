@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Powiąż dokument",
+	"selectOneDocument": "Wybierz jeden dokument",
 	"listMindmapLock": "Zablokuj widok",
 	"listMindmapUnlock": "Odblokuj widok",
 	"historySnapshots": "Powiązane oznaczone migawki",

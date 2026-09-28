@@ -1,4 +1,6 @@
 {
+	"bindDocument": "ربط مستند",
+	"selectOneDocument": "يرجى تحديد مستند واحد",
 	"listMindmapLock": "قفل العرض",
 	"listMindmapUnlock": "إلغاء قفل العرض",
 	"historySnapshots": "اللقطات الموسومة المرتبطة",

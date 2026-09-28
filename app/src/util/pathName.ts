@@ -251,6 +251,7 @@ export const moveToPath = (fromPaths: string[], toNotebook: string, toPath: stri
 
 export const movePathTo = (options: {
     cb: (toPath: string[], toNotebook: string[]) => void,
+    validate?: (toPath: string[], toNotebook: string[]) => boolean,
     paths?: string[],
     range?: Range,
     restoreFocus?: () => void,
@@ -659,8 +660,10 @@ export const movePathTo = (options: {
                 pathList.push(item.getAttribute("data-path"));
                 notebookIdList.push(item.getAttribute("data-box"));
             });
-            options.cb(pathList, notebookIdList);
-            dialog.destroy();
+            if (!options.validate || options.validate(pathList, notebookIdList)) {
+                options.cb(pathList, notebookIdList);
+                dialog.destroy();
+            }
             event.preventDefault();
         }
     });
@@ -689,8 +692,10 @@ export const movePathTo = (options: {
                     pathList.push(item.getAttribute("data-path"));
                     notebookIdList.push(item.getAttribute("data-box"));
                 });
-                options.cb(pathList, notebookIdList);
-                dialog.destroy();
+                if (!options.validate || options.validate(pathList, notebookIdList)) {
+                    options.cb(pathList, notebookIdList);
+                    dialog.destroy();
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 break;

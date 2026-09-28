@@ -1,4 +1,6 @@
 {
+	"bindDocument": "दस्तावेज़ जोड़ें",
+	"selectOneDocument": "कृपया एक दस्तावेज़ चुनें",
 	"listMindmapLock": "दृश्य लॉक करें",
 	"listMindmapUnlock": "दृश्य अनलॉक करें",
 	"historySnapshots": "संबंधित टैग किए गए स्नैपशॉट",

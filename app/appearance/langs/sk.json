@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Prepojiť dokument",
+	"selectOneDocument": "Vyberte jeden dokument",
 	"listMindmapLock": "Zamknúť zobrazenie",
 	"listMindmapUnlock": "Odomknúť zobrazenie",
 	"historySnapshots": "Súvisiace označené snímky",

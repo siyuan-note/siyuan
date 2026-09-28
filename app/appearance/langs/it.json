@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Collega documento",
+	"selectOneDocument": "Seleziona un solo documento",
 	"listMindmapLock": "Blocca vista",
 	"listMindmapUnlock": "Sblocca vista",
 	"historySnapshots": "Istantanee contrassegnate correlate",

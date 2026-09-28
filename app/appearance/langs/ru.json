@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Привязать документ",
+	"selectOneDocument": "Выберите один документ",
 	"listMindmapLock": "Заблокировать вид",
 	"listMindmapUnlock": "Разблокировать вид",
 	"historySnapshots": "Связанные помеченные снимки",

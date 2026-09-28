@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Bind document",
+	"selectOneDocument": "Please select one document",
 	"listMindmapLock": "Lock view",
 	"listMindmapUnlock": "Unlock view",
 	"historySnapshots": "Related tagged snapshots",

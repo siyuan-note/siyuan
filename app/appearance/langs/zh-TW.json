@@ -1,4 +1,6 @@
 {
+	"bindDocument": "綁定文件",
+	"selectOneDocument": "請選擇一個文件",
 	"listMindmapLock": "鎖定視圖",
 	"listMindmapUnlock": "解鎖視圖",
 	"historySnapshots": "關聯標記快照",

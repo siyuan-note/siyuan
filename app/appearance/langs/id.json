@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Tautkan dokumen",
+	"selectOneDocument": "Silakan pilih satu dokumen",
 	"listMindmapLock": "Kunci tampilan",
 	"listMindmapUnlock": "Buka kunci tampilan",
 	"historySnapshots": "Snapshot bertanda terkait",

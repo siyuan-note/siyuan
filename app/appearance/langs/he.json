@@ -1,4 +1,6 @@
 {
+	"bindDocument": "קישור מסמך",
+	"selectOneDocument": "נא לבחור מסמך אחד",
 	"listMindmapLock": "נעילת התצוגה",
 	"listMindmapUnlock": "ביטול נעילת התצוגה",
 	"historySnapshots": "תמונות מצב מתויגות קשורות",

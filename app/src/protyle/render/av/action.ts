@@ -55,6 +55,7 @@ import {removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 import {createAttributeViewItem, createAttributeViewItemDocs, openNewItemTemplateMenu} from "./newItemTemplate";
 import {openDatabaseRowByData} from "./openDatabaseRow";
+import {openAVBindDocument} from "./bindDocument";
 import {openKanbanGroupMenu} from "./kanban/groupMenu";
 import {getGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {setPublishAVFolds, setPublishAVView} from "./publishState";
@@ -1311,6 +1312,16 @@ ${window.siyuan.languages[isTableLikeView(avType) ? "insertRowAfter" : "insertIt
                 }
             });
             menu.addSeparator({id: "separator_2"});
+        }
+        if (selectedItemInfos.length === 1 && primaryRows[0].isDetached) {
+            menu.addItem({
+                id: "bindDocument",
+                label: window.siyuan.languages.bindDocument,
+                icon: "iconLink",
+                click() {
+                    openAVBindDocument(protyle, blockElement, selectedItemInfos[0].itemID);
+                }
+            });
         }
         if (hasBlock) {
             menu.addItem({

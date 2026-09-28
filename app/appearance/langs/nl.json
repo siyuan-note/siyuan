@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Document koppelen",
+	"selectOneDocument": "Selecteer één document",
 	"listMindmapLock": "Weergave vergrendelen",
 	"listMindmapUnlock": "Weergave ontgrendelen",
 	"historySnapshots": "Gerelateerde gemarkeerde momentopnamen",

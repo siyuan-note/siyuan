@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Повежи документ",
+	"selectOneDocument": "Изаберите један документ",
 	"listMindmapLock": "Закључај приказ",
 	"listMindmapUnlock": "Откључај приказ",
 	"historySnapshots": "Повезани означени снимци",

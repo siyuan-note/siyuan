@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Dokument verknüpfen",
+	"selectOneDocument": "Bitte genau ein Dokument auswählen",
 	"listMindmapLock": "Ansicht sperren",
 	"listMindmapUnlock": "Ansicht entsperren",
 	"historySnapshots": "Zugehörige markierte Schnappschüsse",

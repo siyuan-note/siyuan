@@ -1,4 +1,6 @@
 {
+	"bindDocument": "ドキュメントを関連付ける",
+	"selectOneDocument": "ドキュメントを1つ選択してください",
 	"listMindmapLock": "表示をロック",
 	"listMindmapUnlock": "表示のロックを解除",
 	"historySnapshots": "関連するタグ付きスナップショット",

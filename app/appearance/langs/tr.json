@@ -1,4 +1,6 @@
 {
+	"bindDocument": "Belge bağla",
+	"selectOneDocument": "Lütfen bir belge seçin",
 	"listMindmapLock": "Görünümü kilitle",
 	"listMindmapUnlock": "Görünümün kilidini aç",
 	"historySnapshots": "İlgili etiketli anlık görüntüler",

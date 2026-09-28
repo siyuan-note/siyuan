@@ -17,6 +17,7 @@ import {isBrowser, isTouchDevice} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {removeCompressURL} from "../../../util/image";
 import {openDatabaseRowByData} from "./openDatabaseRow";
+import {openAVBindDocument} from "./bindDocument";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {
     createEmptyAVValue,
@@ -411,6 +412,16 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     event.stopPropagation();
                     return;
                 }
+                const bindElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "av-bind-document");
+                if (bindElement) {
+                    const field = bindElement.closest<HTMLElement>("[data-row-id][data-col-id]");
+                    const blockElement = hasClosestBlock(bindElement) as HTMLElement;
+                    if (field && blockElement) {
+                        openAVBindDocument(protyle, blockElement, field.dataset.rowId);
+                    }
+                    event.stopPropagation();
+                    return;
+                }
                 const removeElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "remove");
                 if (removeElement) {
                     if (protyle.disabled) {
@@ -524,6 +535,10 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         element.dataset.readonly = String(Boolean(protyle.disabled));
         element.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea").forEach(item => {
             item.readOnly = Boolean(protyle.disabled);
+        });
+        element.querySelectorAll<HTMLButtonElement>('[data-type="av-bind-document"]').forEach(item => {
+            item.disabled = Boolean(protyle.disabled || window.siyuan.isPublish ||
+                protyle.options.history?.created || protyle.options.history?.snapshot);
         });
         tables.forEach((table: IAVAttributeTableData) => {
             const blockElement = element.querySelector<HTMLElement>(`[data-attribute-id="${id}"][data-av-id="${table.avID}"]`);

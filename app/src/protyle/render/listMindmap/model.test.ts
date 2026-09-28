@@ -2766,6 +2766,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     tabContent.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab First\n\nOne\n@tab Second\n\nTwo\n:::\n{: tabs-task=\"true\"}\n");
     tabNode.querySelector(".p").replaceWith(tabContent.firstElementChild);
     const tabSource = tabNode.querySelector<HTMLElement>(".tabs");
+    const nestedSource = document.createElement("div");
+    nestedSource.innerHTML = lute.Md2BlockDOM("- Nested parent\n  - Nested child\n");
+    const nestedList = nestedSource.firstElementChild as HTMLElement;
+    api.retagMindmapBranch(nestedList, true);
+    tabSource.querySelectorAll(".tab-item-content")[1].append(nestedList);
     const sourceActiveTab = tabSource.getAttribute("tabs-active-id");
     const tabItemIDs = Array.from(tabSource.querySelectorAll<HTMLElement>(":scope > .tab-item"))
         .map(item => item.dataset.nodeId);
@@ -2785,9 +2790,29 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     tabController.view = tabView;
     const outerOptions = {readonly: () => false, task: () => check.fail("Outer editor claimed a preview task")};
     api.tabsRender(taskParent, outerOptions);
+    const tabSnapshot = api.cleanListMindmapHTML(tabList.outerHTML);
+    api.destroyTabsRender(taskParent);
+    api.tabsRender(taskParent, outerOptions);
+    check.equal(api.cleanListMindmapHTML(tabList.outerHTML), tabSnapshot,
+        "recreating tab navigation must not change the mindmap content snapshot");
+    const savedTabs = document.createElement("div");
+    savedTabs.innerHTML = tabSnapshot;
+    check.equal(savedTabs.querySelector(".tabs-header, .tabs-divider, [data-tabs-hidden]"), null);
+    check.equal(savedTabs.querySelectorAll(".tab-item").length, 2, "hidden tab content is retained");
+    check.equal(savedTabs.querySelector(".tabs").getAttribute("tabs-task"), "true");
+    check.equal(lute.BlockDOM2StdMd(savedTabs.querySelector(".tabs").outerHTML), lute.BlockDOM2StdMd(tabSource.outerHTML));
     const previewTask = (index = 1) => tabHost.querySelectorAll<HTMLElement>(".tabs-task")[index];
     const previewTab = (index = 1) => tabHost.querySelectorAll<HTMLElement>(".tabs-tab")[index];
     previewTab().click();
+    const nestedPreview = () => tabHost.querySelector<HTMLElement>(".mindmap-view--nested");
+    check.ok(nestedPreview());
+    check.equal(nestedPreview().querySelectorAll(".mindmap-view__node").length, 2);
+    check.equal(nestedPreview().getAttribute("role"), "img");
+    check.ok(nestedPreview().getAttribute("aria-label").includes("Nested child"));
+    check.ok(Array.from(nestedPreview().children).every((child: HTMLElement) => child.inert),
+        "nested previews leave editing to their owner node");
+    check.ok(nestedPreview().textContent.includes("Nested child"));
+    const previousNestedView = (tabView as any).nestedViews.get(tabNodeID)[0];
     operations.length = 0;
     previewTask().click();
     await tabController.taskChanges;
@@ -2795,6 +2820,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(operations[0].id, tabList.dataset.nodeId);
     check.equal(api.getTabTask(api.getListMindmapTabItem(tabList, tabNodeID, tabItemIDs[1])), "X");
     check.equal(previewTask().getAttribute("data-task"), "X");
+    check.equal(previousNestedView.destroyed, true, "refresh disposes the nested view and its observers");
+    check.ok(nestedPreview());
     check.equal(previewTab().getAttribute("aria-selected"), "true", "saving a task preserves the visible preview tab");
     check.equal(tabHost.querySelector(".tabs-control"), null, "preview only exposes supported writes");
     check.equal(tabHost.querySelector("[data-node-id]"), null);
@@ -2838,7 +2865,16 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     removedTab.remove();
     await tabController.setTabTask(tabNodeID, tabItemIDs[1], () => "X");
     check.equal(operations.length, savedCount, "removed tab IDs never produce an update");
+    const lastNestedView = (tabView as any).nestedViews.get(tabNodeID)[0];
+    tabView.setEditing(tabNodeID);
+    check.equal(lastNestedView.destroyed, true, "entering the fragment editor disposes its nested previews");
+    tabView.setEditing(undefined);
+    tabSource.append(removedTab);
+    tabView.update(api.readListMindmap(tabList));
+    const finalNestedViews = Array.from((tabView as any).nestedViews.values()).flat();
+    check.equal(finalNestedViews.length, 1);
     tabView.destroy();
+    check.ok(finalNestedViews.every((view: any) => view.destroyed));
     api.destroyTabsRender(taskParent);
     taskParent.remove();
 

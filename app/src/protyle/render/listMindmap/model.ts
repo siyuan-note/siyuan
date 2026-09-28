@@ -290,6 +290,19 @@ export const readListMindmap = (list: HTMLElement): ListMindmapModel => {
 
 const cleanListMindmapDOM = (root: Element | DocumentFragment) => {
     root.querySelectorAll(".mindmap-view, .list-mindmap").forEach(element => element.remove());
+    // 页签导航和面板标识由渲染器生成，不参与正文比较或脑图节点事务。
+    root.querySelectorAll(".tabs-header, .tabs-divider, .tabs-attributes").forEach(element => element.remove());
+    root.querySelectorAll('[data-type="NodeTabs"], [data-type="NodeTabItem"]').forEach(element => {
+        ["data-tabs-ready", "data-tabs-orientation", "data-tabs-hidden", "data-tabs-editing", "data-tabs-attributes"]
+            .forEach(name => element.removeAttribute(name));
+    });
+    root.querySelectorAll(".tab-item-content").forEach(element => {
+        ["id", "role", "aria-labelledby", "tabindex"].forEach(name => element.removeAttribute(name));
+    });
+    root.querySelectorAll(".tab-item-info").forEach(element => {
+        element.classList.remove("tabs-title-editor");
+        element.removeAttribute("style");
+    });
     const elements = Array.from(root.querySelectorAll("[data-mindmap-view-rendered], [data-mindmap-view-editing]"));
     if (root.nodeType === 1) {
         elements.push(root as Element);
@@ -309,7 +322,7 @@ const cleanListMindmapDOM = (root: Element | DocumentFragment) => {
 };
 
 export const cleanListMindmapHTML = (html: string): string => {
-    if (!html.includes("mindmap-view") && !html.includes("list-mindmap")) {
+    if (!html.includes("mindmap-view") && !html.includes("list-mindmap") && !html.includes("NodeTabs")) {
         return html;
     }
     const template = document.createElement("template");

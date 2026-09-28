@@ -5,6 +5,7 @@ import {
     ListMindmapNodeStyle,
     ListMindmapPosition,
     ListMindmapRelation,
+    readListMindmap,
 } from "./model";
 import {routeMindmapRelation, routeManualMindmapRelation, adjustMindmapRoute,
     MindmapRoutePoint, MindmapManualRoute} from "./routing";
@@ -109,6 +110,7 @@ export class ListMindmapView {
     private readonly zoomLabel: HTMLSpanElement;
     private readonly zoomSlider = createElement("input", "b3-slider");
     private readonly nodeElements = new Map<string, HTMLDivElement>();
+    private readonly nestedViews = new Map<string, ListMindmapView[]>();
     private readonly previewID = `mindmap-view-${Lute.NewNodeID()}-`;
     private readonly relationElements = new Map<string, HTMLButtonElement>();
     private readonly summaryElements = new Map<string, HTMLDivElement>();
@@ -576,7 +578,7 @@ export class ListMindmapView {
         }
         this.nodeElements.forEach((element, id) => {
             if (!model.nodes.has(id)) {
-                destroyTabsRender(this.getContentHost(id));
+                this.destroyContentViews(id);
                 this.resizeObserver.unobserve(element);
                 element.remove();
                 this.nodeElements.delete(id);
@@ -631,14 +633,14 @@ export class ListMindmapView {
                 content.querySelectorAll<HTMLElement>('.tab-item[data-tabs-hidden="false"]').forEach(item => {
                     activeTabs.set(item.parentElement.id, item.id);
                 });
-                destroyTabsRender(content);
+                this.destroyContentViews(id);
                 content.replaceChildren();
                 const sourceTabIDs = new Map<string, string>();
                 if (node.virtual) {
                     content.textContent = this.model.metadata.rootTitle || "";
                 } else {
                     node.contentBlocks.forEach((block) => {
-                        const clone = block.cloneNode(true) as HTMLElement;
+                        let clone = block.cloneNode(true) as HTMLElement;
                         const sourceCanvases = block.querySelectorAll("canvas");
                         clone.querySelectorAll("canvas").forEach((canvas, index) => {
                             const source = sourceCanvases[index];
@@ -647,6 +649,22 @@ export class ListMindmapView {
                             }
                         });
                         const previewTabIDs = new Map<string, string>();
+                        // 嵌套脑图使用独立模型生成静态预览，双击仍由外层节点打开正文编辑。
+                        const nested: {host: HTMLElement, model: ListMindmapModel}[] = [];
+                        const selector = '[data-type="NodeMindmap"], [data-type="NodeList"][custom-sy-list-mindmap="1"]';
+                        const nestedLists = Array.from(clone.querySelectorAll<HTMLElement>(selector));
+                        if (clone.matches(selector)) {
+                            nestedLists.unshift(clone);
+                        }
+                        nestedLists.filter(list => !list.parentElement?.closest(selector)).forEach(list => {
+                            const host = createElement("div", "mindmap-view--nested");
+                            nested.push({host, model: readListMindmap(list)});
+                            if (list === clone) {
+                                clone = host;
+                            } else {
+                                list.replaceWith(host);
+                            }
+                        });
                         clone.querySelectorAll(".protyle-attr, .protyle-action, .protyle-action__table, .protyle-icons, .mindmap-view")
                             .forEach(item => item.remove());
                         [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))].forEach((item) => {
@@ -679,6 +697,20 @@ export class ListMindmapView {
                                 }
                             });
                         content.append(clone);
+                        nested.forEach(({host, model}) => {
+                            const view = new ListMindmapView({host, model, readOnly: true,
+                                printLayout: this.options.printLayout, labels: this.options.labels,
+                                cdn: this.options.cdn, onExit: () => {}});
+                            host.setAttribute("role", "img");
+                            host.setAttribute("aria-label", Array.from(model.nodes.values()).map(node =>
+                                node.virtual ? model.metadata.rootTitle || "" :
+                                    node.contentBlocks.map(block => block.textContent).join("\n")).join("\n") || this.label("mindmap"));
+                            Array.from(host.children).forEach((child: HTMLElement) => child.inert = true);
+                            host.tabIndex = -1;
+                            const views = this.nestedViews.get(id) || [];
+                            views.push(view);
+                            this.nestedViews.set(id, views);
+                        });
                     });
                 }
                 const hasBlankLines = node.contentBlocks.length > 1 || content.textContent.includes("\n") ||
@@ -739,6 +771,12 @@ export class ListMindmapView {
         return this.nodeElements.get(id)?.querySelector<HTMLElement>(".mindmap-view__content");
     }
 
+    private destroyContentViews(id: string) {
+        this.nestedViews.get(id)?.forEach(view => view.destroy());
+        this.nestedViews.delete(id);
+        destroyTabsRender(this.getContentHost(id));
+    }
+
     public getBlockById(id: string) {
         return this.nodeElements.get(id) ||
             this.options.host.querySelector<HTMLElement>(`[data-mindmap-source-id="${id}"]`);
@@ -795,7 +833,7 @@ export class ListMindmapView {
         }
         this.editingId = id;
         if (id) {
-            destroyTabsRender(this.getContentHost(id));
+            this.destroyContentViews(id);
             this.selectNode(id);
             this.nodeElements.get(id)?.classList.add("mindmap-view__node--editing");
         }
@@ -2812,7 +2850,7 @@ export class ListMindmapView {
         this.resizeObserver.disconnect();
         this.disposers.forEach(dispose => dispose());
         this.exitFullscreen();
-        this.nodeElements.forEach((_element, id) => destroyTabsRender(this.getContentHost(id)));
+        this.nodeElements.forEach((_element, id) => this.destroyContentViews(id));
         this.nodeElements.clear();
         this.relationElements.clear();
         this.summaryElements.clear();

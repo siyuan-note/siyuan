@@ -40,6 +40,16 @@
   line-height: 1.5;
   outline: none;
 
+  &--nested {
+    width: 260px;
+    --mindmap-view-height: 260px;
+    pointer-events: none;
+
+    > .mindmap-view__toolbar {
+      display: none;
+    }
+  }
+
   &__preview-block.protyle-wysiwyg--hl {
     position: relative;
   }

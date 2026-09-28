@@ -1,4 +1,4 @@
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchSyncPost} from "../../util/fetch";
 import {markToolbarHotkey} from "./hotkey";
 import {Constants} from "../../constants";
 import {focusByRange, focusByWbr} from "../util/selection";
@@ -35,13 +35,13 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
     }
     const request = {};
     templatePreviewRequests.set(element, request);
-    fetchPost("/api/template/render", {
+    fetchSyncPost("/api/template/render", {
         id: parentId,
         path: pathString,
         mode: "preview",
         preview: true,
         ...(source === undefined ? {} : {content: source})
-    }, (response) => {
+    }).then((response) => {
         // 切换模板或关闭预览后，忽略先前请求的返回结果。
         if (templatePreviewRequests.get(element) !== request || !element.isConnected) {
             return;
@@ -57,6 +57,10 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
                 window.siyuan.languages.newSubDoc));
         }
         tabsRender(element.firstElementChild, {label: window.siyuan.languages.tabItem});
+    }).catch(() => {
+        if (templatePreviewRequests.get(element) === request) {
+            clearTemplatePreview(element);
+        }
     });
 };
 

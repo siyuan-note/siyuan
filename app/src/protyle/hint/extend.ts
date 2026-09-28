@@ -576,7 +576,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
     const nodeElement = hasClosestBlock((source === "av" ? protyle.toolbar.range :
         getEditorRange(protyle.wysiwyg.element)).startContainer);
     const createTarget = protyle.hint.prepareCreateTarget(protyle, "ref");
-    protyle.hint.genLoading(protyle);
+    protyle.hint.genLoading(protyle, 0, source);
     let refParam: import("../../types/api").SearchRefBlockRequestInput;
     if (protyle.lite) {
         refParam = {k: key, id: "", rootID: "", beforeLen: 48, isDatabase: false, isSquareBrackets: true};

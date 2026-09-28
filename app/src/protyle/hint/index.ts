@@ -135,6 +135,7 @@ export class Hint {
     private emojiPanel?: EmojiPanelController;
     private emojiBrowseMode = false;
     private loadingAnimation?: Animation;
+    private bindingDismissController?: AbortController;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -190,6 +191,7 @@ export class Hint {
     }
 
     public destroy() {
+        this.bindingDismissController?.abort();
         this.cancelLoadingAnimation();
         this.destroyEmojiPanel();
     }
@@ -458,7 +460,21 @@ export class Hint {
         this.loadingAnimation = undefined;
     }
 
-    public genLoading(protyle: IProtyle, delay = 0) {
+    public genLoading(protyle: IProtyle, delay = 0, source = this.source) {
+        this.source = source;
+        this.bindingDismissController?.abort();
+        if (source === "av" && getAVBindingCell(protyle.toolbar.range)?.dataset.rowId) {
+            // 独立条目面板没有编辑器的空白点击处理，使用捕获事件兼容鼠标和触摸。
+            const controller = new AbortController();
+            this.bindingDismissController = controller;
+            document.addEventListener("pointerdown", event => {
+                if (this.element.contains(event.target as Node)) {
+                    return;
+                }
+                this.element.classList.add("fn__none");
+                controller.abort();
+            }, {capture: true, signal: controller.signal});
+        }
         const delayPanel = this.loadingAnimation?.playState === "running" &&
             (this.loadingAnimation.effect as KeyframeEffect)?.target === this.element;
         this.cancelLoadingAnimation();
@@ -631,6 +647,7 @@ export class Hint {
                     this.fill(decodeURIComponent(this.element.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, false, isNotCtrl(event));
                     event.preventDefault();
                 } else if (event.key === "Escape") {
+                    this.bindingDismissController?.abort();
                     this.element.classList.add("fn__none");
                     focusByRange(protyle.toolbar.range);
                 }
@@ -774,6 +791,7 @@ ${genHintItemHTML(item)}
     }
 
     public fill(value: string, protyle: IProtyle, updateRange = true, refIsS = false) {
+        this.bindingDismissController?.abort();
         hideElements(["hint", "toolbar"], protyle);
         if (updateRange && this.source !== "av") {
             protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);

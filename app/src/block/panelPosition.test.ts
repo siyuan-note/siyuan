@@ -139,7 +139,11 @@ app.whenReady().then(async () => {
         const win = new BrowserWindow({show: false, width, height: 900, useContentSize: true,
             webPreferences: {nodeIntegration: true, contextIsolation: false}});
         try {
+            // 创建窗口时可能受屏幕工作区限制，显式设置内容尺寸以固定测试视口。
+            win.setContentSize(width, 900);
             await win.loadURL("data:text/html,<html><body></body></html>");
+            const viewport = await win.webContents.executeJavaScript("[innerWidth, innerHeight]");
+            require("node:assert/strict").deepEqual(viewport, [width, 900]);
             const result = await win.webContents.executeJavaScript(${JSON.stringify(
         `(() => { const __name = value => value; try {
             return (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)});

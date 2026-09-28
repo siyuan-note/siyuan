@@ -185,7 +185,7 @@ test("special block previews cannot acquire document writes or lose unsupported 
         extract("../htmlRender.ts", ["htmlRender"]) + extract("../blockRender.ts", ["blockRender"]) +
         extract("../chartRender.ts", ["refreshChartTheme"]) +
         extract("../av/render.ts", ["avRender", "getAVElements"]) +
-        extract("../../util/tableVirtualizationDOM.ts", ["TABLE_VIRTUAL_ID"]) +
+        extract("../../util/tableVirtualizationDOM.ts", ["TABLE_VIRTUAL_ID", "TABLE_VIRTUAL_ROWS"]) +
         extract("../../util/tableControl.ts", ["getCell", "getTableNode"]) +
         compile(`class TablePreviewControl {${methods.map(method => method.getText(tableSource)).join("\n")}}`) +
         extract("../av/richText.ts", ["ALLOWED_BLOCK_TYPES", "isSupportedAVRichTextBlock", "getAVRichTextUnsupportedPasteBlocks"]) +

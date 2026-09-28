@@ -51,6 +51,81 @@ class BuildTests(unittest.TestCase):
             build.copy_verified(source, self.root / "outside", self.root / "allowed")
         self.assertFalse((self.root / "outside").exists())
 
+    def test_wsl_sync_skips_matching_commit(self):
+        with patch.object(self.builder, "wsl", return_value="target") as wsl, patch.object(build, "run") as run:
+            self.builder.sync_wsl("target")
+        wsl.assert_called_once_with(["git", "rev-parse", "HEAD"], capture=True)
+        run.assert_not_called()
+
+    def test_wsl_authentication_precedes_environment_checks(self):
+        events = []
+
+        def source_preflight(*args):
+            events.append("environment")
+            raise build.BuildError("stop before build")
+
+        with patch.object(build, "run", return_value="target"), \
+                patch.object(self.builder, "sync_wsl", side_effect=lambda head: events.append("sync")), \
+                patch.object(build, "source_preflight", side_effect=source_preflight), \
+                patch.object(build, "certificate_thumbprint") as certificate, contextlib.redirect_stdout(io.StringIO()):
+            with self.assertRaises(build.BuildError):
+                self.builder.preflight()
+        self.assertEqual(events, ["sync", "environment"])
+        certificate.assert_not_called()
+
+    def test_windows_only_skips_wsl_authentication(self):
+        self.args.platforms = ["windows"]
+        with patch.object(self.builder, "sync_wsl") as sync, \
+                patch.object(build, "source_preflight"), patch.object(build, "certificate_thumbprint"), \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.builder.preflight()
+        sync.assert_not_called()
+
+    def test_wsl_sync_pins_windows_commit(self):
+        heads = iter(("old", "target"))
+
+        def wsl(command, capture=False):
+            return next(heads) if command == ["git", "rev-parse", "HEAD"] else ""
+
+        with patch.object(self.builder, "wsl", side_effect=wsl) as remote, \
+                patch.object(build, "run", side_effect=("", "dev")), contextlib.redirect_stdout(io.StringIO()):
+            self.builder.sync_wsl("target")
+        self.assertEqual([call.args[0] for call in remote.call_args_list], [
+            ["git", "rev-parse", "HEAD"],
+            ["git", "status", "--porcelain", "--untracked-files=all"],
+            ["git", "fetch", "--no-tags", "origin", "refs/heads/dev"],
+            ["git", "merge-base", "--is-ancestor", "target", "FETCH_HEAD"],
+            ["git", "merge-base", "--is-ancestor", "HEAD", "target"],
+            ["git", "switch", "--detach", "target"],
+            ["git", "rev-parse", "HEAD"],
+        ])
+
+    def test_wsl_sync_rejects_dirty_worktrees(self):
+        for local_status, remote_status in ((" M app/package.json", ""), ("", "?? notes")):
+            with self.subTest(local=local_status, remote=remote_status), \
+                    patch.object(build, "run", return_value=local_status), \
+                    patch.object(self.builder, "wsl", side_effect=("old", remote_status)) as remote:
+                with self.assertRaises(build.BuildError):
+                    self.builder.sync_wsl("target")
+                self.assertFalse(any(call.args[0][1] in ("fetch", "switch") for call in remote.call_args_list))
+
+    def test_wsl_sync_stops_before_checkout_on_fetch_or_ancestry_failure(self):
+        for failed in ("fetch", "published", "diverged"):
+            def wsl(command, capture=False):
+                if command == ["git", "rev-parse", "HEAD"]:
+                    return "old"
+                if (command[1] == "fetch" and failed == "fetch" or
+                        command[1] == "merge-base" and command[3] == "target" and failed == "published" or
+                        command[1] == "merge-base" and command[3] == "HEAD" and failed == "diverged"):
+                    raise build.BuildError("sync failed")
+                return ""
+
+            with self.subTest(failed=failed), patch.object(build, "run", side_effect=("", "dev")), \
+                    patch.object(self.builder, "wsl", side_effect=wsl) as remote:
+                with self.assertRaises(build.BuildError):
+                    self.builder.sync_wsl("target")
+                self.assertFalse(any(call.args[0][1] == "switch" for call in remote.call_args_list))
+
     def test_copy_updates_old_file_and_verifies_hash(self):
         source = self.write(self.root / "source", b"new kernel")
         target = self.write(self.root / "target", b"old kernel")

@@ -95,9 +95,13 @@ python -X utf8 scripts/prepare-release.py 3.8.6 --tag-android --execute
 
 准备脚本默认使用主仓库同级的 `siyuan-android`、`siyuan-harmony`、`b3log-index`，可用 `--android-dir`、`--harmony-dir`、`--index-dir` 指定路径。主仓库正式版标签仍在最终发布步骤中创建，iOS 仓库仍需手动准备和同步。
 
-### 2. 同步 WSL 仓库
+### 2. 确认 WSL 自动同步条件
 
-在 WSL 中以用户 `d` 进入 `/home/d/88250/siyuan`，切到对应发布分支并拉取代码，确保与 Windows 是同一提交，受检查的构建输入一致。脚本不会自动拉取。
+构建包含 Linux 或鸿蒙时，`build-release.py --execute` 会在预检阶段自动同步 WSL 仓库，无需手动拉取。默认使用用户 `d` 和 `/home/d/88250/siyuan`，目录须已有仓库及可用的 `origin` 远端。
+
+WSL 同步安排在环境检查和签名证书检查之前。如果 SSH 需要私钥口令，启动脚本后按提示输入即可；同步完成后才继续检查和构建，后续构建不会再次拉取仓库。已通过 SSH 代理解锁或两端提交一致时不会提示输入。脚本不保存口令。Windows 签名期间仍可能提示输入 YubiKey PIN 或要求触摸，不能保证全程无人值守。
+
+两端提交不同时，脚本要求 Windows 和 WSL 工作区均无未提交或未跟踪文件，从 WSL 的 `origin` 获取 Windows 当前分支，确认 Windows 当前提交已在该远端分支中，且包含 WSL 当前提交，再以分离 HEAD 方式检出 Windows 的确切提交。不会跟随远端后续新增的提交，也不会强制重置、清理或暂存本地改动；遇到未推送提交、分叉或 WSL 超前时停止，由发布者处理。两端已是同一提交时跳过同步，继续检查构建输入一致性。只查看计划时不执行同步。
 
 ### 3. 准备构建环境
 
@@ -290,7 +294,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - `--platforms` 接受逗号分隔的平台名称，可选 `windows`、`linux`、`android`、`harmony`；默认构建四个平台，Appx 需额外指定 `--appx`
 - `--output` 可指定产物收集目录，默认桌面 `siyuan`；脚本不覆盖已有同名安装包
 - 脚本保留现有 Android 与鸿蒙签名配置，不读取或输出这些配置里的密码
-- WSL 默认用户 `d`、仓库 `/home/d/88250/siyuan`，可通过 `--wsl-user`、`--wsl-repo`、`--wsl-distro` 调整；Windows 与 WSL 必须处于同一提交，受检查的构建输入须一致
+- WSL 默认用户 `d`、仓库 `/home/d/88250/siyuan`，可通过 `--wsl-user`、`--wsl-repo`、`--wsl-distro` 调整；Linux 或鸿蒙构建预检时自动同步到 Windows 的确切提交，受检查的构建输入须一致，自动同步条件见步骤 2
 - Android、鸿蒙仓库默认在思源仓库同级，可用 `--android-dir`、`--harmony-dir` 调整；工具路径可用 `--arm64-cc`、`--deveco`、`--sevenzip` 调整
 
 ### 流程

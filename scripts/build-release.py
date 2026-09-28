@@ -191,13 +191,34 @@ class Builder:
                    "--exec", "bash", "-lc", "exec " + shlex.join([str(item) for item in command])]
         return run(prefix, ROOT, capture=capture)
 
+    def sync_wsl(self, local_head):
+        if self.wsl(["git", "rev-parse", "HEAD"], capture=True) == local_head:
+            return
+        # 同步只接受干净工作区，避免遗漏 Windows 改动或覆盖 WSL 中的发布现场。
+        status = ["git", "status", "--porcelain", "--untracked-files=all"]
+        if run(status, ROOT, capture=True) or self.wsl(status, capture=True):
+            raise BuildError("自动同步 WSL 前，Windows 和 WSL 工作区必须干净，请先处理未提交和未跟踪文件")
+        branch = run(["git", "symbolic-ref", "--quiet", "--short", "HEAD"], ROOT, capture=True)
+        self.wsl(["git", "fetch", "--no-tags", "origin", "refs/heads/" + branch])
+        # 目标必须已推送且包含 WSL 当前提交；远端后来新增的提交不进入本次构建。
+        self.wsl(["git", "merge-base", "--is-ancestor", local_head, "FETCH_HEAD"])
+        self.wsl(["git", "merge-base", "--is-ancestor", "HEAD", local_head])
+        self.wsl(["git", "switch", "--detach", local_head])
+        if self.wsl(["git", "rev-parse", "HEAD"], capture=True) != local_head:
+            raise BuildError("WSL 同步后的提交与 Windows 不一致")
+        print(f"WSL 已同步到 Windows 提交：{local_head}（分离 HEAD）", flush=True)
+
     def preflight(self):
+        # 先完成需要交互的仓库认证，再检查环境和开始耗时构建。
+        if {"linux", "harmony"} & set(self.args.platforms):
+            print("先同步 WSL 仓库；如提示 SSH 私钥口令，请现在输入，完成后继续构建预检", flush=True)
+            local_head = run(["git", "rev-parse", "HEAD"], ROOT, capture=True)
+            self.sync_wsl(local_head)
         source_preflight(self.args, self.version)
         if "windows" in self.args.platforms:
             self.thumbprint = certificate_thumbprint(self.args.certificate_subject, self.args.certificate_sha1)
             print(f"Windows 签名证书：{self.thumbprint}；签名时请按系统提示输入 YubiKey PIN", flush=True)
         if {"linux", "harmony"} & set(self.args.platforms):
-            local_head = run(["git", "rev-parse", "HEAD"], ROOT, capture=True)
             remote_head = self.wsl(["git", "rev-parse", "HEAD"], capture=True)
             if local_head != remote_head:
                 raise BuildError("WSL 与 Windows 仓库提交不同；请先同步到同一次发布提交")
@@ -422,6 +443,8 @@ def main():
         "harmony": "WSL 构建两种架构内核并分别复制 - 更新 app.zip - Hvigor release 构建 APP",
     }
     print("本地前端仅构建一次；Linux 前端在 WSL 中构建")
+    if {"linux", "harmony"} & set(args.platforms):
+        print("构建前自动同步 WSL 到 Windows 当前提交；提交不同时要求两端工作区干净，目标已推送且包含 WSL 当前提交")
     for platform in args.platforms:
         print(f"  {platform}: {descriptions[platform]}")
     print("各平台产物生成后立即复制到收集目录，最后统一校验该目录中的安装包")

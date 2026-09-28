@@ -320,6 +320,10 @@
     min-width: 0;
     overflow: hidden;
 
+    &[role="checkbox"] {
+      pointer-events: auto;
+    }
+
     &:not(:empty) {
       min-height: 20px;
     }

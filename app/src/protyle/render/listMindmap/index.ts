@@ -145,7 +145,7 @@ class ListMindmapController {
             }
         }, {capture: true});
         this.host.addEventListener("keydown", event => {
-            if (event.isComposing || (event.target instanceof Element &&
+            if (this.view?.isLocked() || event.isComposing || (event.target instanceof Element &&
                 event.target.closest("input, textarea, select, .mindmap-view__editor"))) {
                 return;
             }
@@ -163,6 +163,9 @@ class ListMindmapController {
             onOpenLink: (href, event) => openLink(owner.app, href, event, event.ctrlKey || event.metaKey),
             onInteractionStart: event => suspendBlockPopover(this.host, event),
             readOnly: !canEdit(owner, list),
+            onLockChange: locked => canEdit(owner, list) ? this.metadata(metadata => {
+                metadata.viewLocked = locked;
+            }) : Promise.resolve(true),
             onExpandLevelMenu: (anchor, select) => {
                 const menu = new Menu();
                 for (let level = 1; level <= 6; level++) {
@@ -386,7 +389,7 @@ class ListMindmapController {
     }
 
     private metadata(change: (metadata: ListMindmapMetadata) => void | false) {
-        this.change(() => {
+        return this.change(() => {
             const metadata = readListMindmap(this.list).metadata;
             if (change(metadata) === false) {
                 return false;

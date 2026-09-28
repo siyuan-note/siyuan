@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Ansicht sperren",
+	"listMindmapUnlock": "Ansicht entsperren",
 	"historySnapshots": "Zugehörige markierte Schnappschüsse",
 	"historySnapshotsError": "Zugehörige Schnappschüsse konnten nicht geladen werden",
 	"historySnapshotMissing": "Dieser Schnappschuss ist nicht mehr verfügbar",

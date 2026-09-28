@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Kunci tampilan",
+	"listMindmapUnlock": "Buka kunci tampilan",
 	"historySnapshots": "Snapshot bertanda terkait",
 	"historySnapshotsError": "Tidak dapat memuat snapshot terkait",
 	"historySnapshotMissing": "Snapshot ini sudah tidak tersedia",

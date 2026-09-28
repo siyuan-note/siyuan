@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "ล็อกมุมมอง",
+	"listMindmapUnlock": "ปลดล็อกมุมมอง",
 	"historySnapshots": "สแนปช็อตที่ติดแท็กที่เกี่ยวข้อง",
 	"historySnapshotsError": "ไม่สามารถโหลดสแนปช็อตที่เกี่ยวข้องได้",
 	"historySnapshotMissing": "สแนปช็อตนี้ไม่มีอยู่แล้ว",

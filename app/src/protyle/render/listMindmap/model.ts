@@ -32,6 +32,7 @@ export interface ListMindmapRelation {
 export interface ListMindmapMetadata {
     version: 1;
     rootTitle?: string;
+    viewLocked?: boolean;
     nodes: Record<string, ListMindmapNodeStyle>;
     relations: ListMindmapRelation[];
     summaries?: ListMindmapSummary[];
@@ -95,6 +96,9 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
     }
     const stringKeys = ["textColor", "backgroundColor", "borderColor", "lineColor"];
     if (data.rootTitle !== undefined && typeof data.rootTitle !== "string") {
+        throw invalidMetadata();
+    }
+    if (data.viewLocked !== undefined && typeof data.viewLocked !== "boolean") {
         throw invalidMetadata();
     }
     const numberKeys = ["fontSize", "borderWidth", "borderRadius", "lineWidth"];

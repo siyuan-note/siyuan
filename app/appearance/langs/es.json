@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Bloquear vista",
+	"listMindmapUnlock": "Desbloquear vista",
 	"historySnapshots": "Instantáneas etiquetadas relacionadas",
 	"historySnapshotsError": "No se pueden cargar las instantáneas relacionadas",
 	"historySnapshotMissing": "Esta instantánea ya no está disponible",

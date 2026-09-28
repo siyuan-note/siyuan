@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "נעילת התצוגה",
+	"listMindmapUnlock": "ביטול נעילת התצוגה",
 	"historySnapshots": "תמונות מצב מתויגות קשורות",
 	"historySnapshotsError": "לא ניתן לטעון תמונות מצב קשורות",
 	"historySnapshotMissing": "תמונת מצב זו אינה זמינה עוד",

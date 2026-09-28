@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "表示をロック",
+	"listMindmapUnlock": "表示のロックを解除",
 	"historySnapshots": "関連するタグ付きスナップショット",
 	"historySnapshotsError": "関連するスナップショットを読み込めません",
 	"historySnapshotMissing": "このスナップショットは存在しません",

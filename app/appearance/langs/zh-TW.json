@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "鎖定視圖",
+	"listMindmapUnlock": "解鎖視圖",
 	"historySnapshots": "關聯標記快照",
 	"historySnapshotsError": "無法載入關聯快照",
 	"historySnapshotMissing": "此快照已不存在",

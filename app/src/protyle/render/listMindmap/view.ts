@@ -23,6 +23,7 @@ export interface ListMindmapViewOptions {
     host: HTMLElement;
     model: ListMindmapModel;
     readOnly?: boolean;
+    onLockChange?: (locked: boolean) => Promise<boolean>;
     printLayout?: boolean;
     labels?: Record<string, string>;
     cdn?: string;
@@ -151,6 +152,8 @@ export class ListMindmapView {
     private ghost?: HTMLDivElement;
     private scale = 1;
     private panning = false;
+    private locked = false;
+    private persistedLocked = false;
     private offsetX = 0;
     private offsetY = 0;
     private foldAnchor?: {id: string, collapsed: boolean};
@@ -165,6 +168,7 @@ export class ListMindmapView {
     constructor(options: ListMindmapViewOptions) {
         this.options = options;
         this.model = options.model;
+        this.locked = this.persistedLocked = !!options.model.metadata.viewLocked;
         this.selectedId = options.model.root.id;
         options.host.classList.add("mindmap-view");
         options.host.contentEditable = "false";
@@ -382,6 +386,29 @@ export class ListMindmapView {
             return;
         }
         this.options.readOnly = value;
+        this.refreshControls();
+        this.update(this.model);
+    }
+
+    public isLocked() {
+        return this.locked;
+    }
+
+    private get readOnly() {
+        return this.locked || this.options.readOnly;
+    }
+
+    private setLocked(value: boolean) {
+        this.locked = value;
+        this.pinching = false;
+        this.pinch = undefined;
+        this.setPanning(false);
+        this.clearSelection();
+        this.refreshControls();
+    }
+
+    private refreshControls() {
+        const value = !!this.readOnly;
         this.finishSummaryEdit?.(false);
         this.summaryFrom = undefined;
         this.cancelPointer();
@@ -403,7 +430,6 @@ export class ListMindmapView {
                 task.disabled = value;
             }
         });
-        this.update(this.model);
     }
 
     private createToolbar() {
@@ -413,7 +439,26 @@ export class ListMindmapView {
             this.toolbar.append(button);
         };
         this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"));
-        if (!this.options.readOnly) {
+        this.levelSelect = undefined;
+        this.options.host.classList.toggle("mindmap-view--locked", this.locked);
+        add("lock", this.locked ? "listMindmapUnlock" : "listMindmapLock", this.locked ? "iconLock" : "iconUnlock", () => {
+            this.finishRelationEdit?.(true);
+            const locked = !this.locked;
+            const button = this.buttons.get("lock");
+            button.disabled = true;
+            void Promise.resolve(this.options.onLockChange?.(locked)).then(result => {
+                if (result !== false && !this.destroyed) {
+                    this.setLocked(locked);
+                    this.update(this.model);
+                }
+            }).catch(error => console.error(error)).finally(() => button.disabled = false);
+        });
+        this.buttons.get("lock").setAttribute("aria-pressed", String(this.locked));
+        if (this.locked) {
+            add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
+            return;
+        }
+        if (!this.readOnly) {
             add("summary", "listMindmapSummary", "iconGroups", () => {
                 this.setPanning(false);
                 this.inspector.hidden = true;
@@ -504,6 +549,10 @@ export class ListMindmapView {
             return;
         }
         this.model = model;
+        if (!!model.metadata.viewLocked !== this.persistedLocked) {
+            this.persistedLocked = !!model.metadata.viewLocked;
+            this.setLocked(this.persistedLocked);
+        }
         this.summaryFrom = undefined;
         if (this.levelSelect) {
             const placeholder = new Option(this.label("expandLevel"), "");
@@ -541,19 +590,19 @@ export class ListMindmapView {
                 element.setAttribute("role", "treeitem");
                 element.append(createElement("div", "mindmap-view__content"));
                 const addBridge = createElement("span", "mindmap-view__add-bridge");
-                addBridge.hidden = !!this.options.readOnly;
+                addBridge.hidden = !!this.readOnly;
                 addBridge.setAttribute("aria-hidden", "true");
                 element.append(addBridge);
                 const fold = this.makeButton("collapse", "iconLeft", () => this.toggleFold(id), "mindmap-view__fold");
                 fold.append(createElement("span", "mindmap-view__fold-count"));
                 element.append(fold);
                 const addChild = this.makeButton("listMindmapChild", "iconAdd", () => {
-                    if (!this.options.readOnly && this.model.nodes.has(id)) {
+                    if (!this.readOnly && this.model.nodes.has(id)) {
                         this.options.onAdd?.(id, "child");
                     }
                 }, "mindmap-view__add-child");
-                addChild.hidden = !!this.options.readOnly;
-                addChild.disabled = !!this.options.readOnly;
+                addChild.hidden = !!this.readOnly;
+                addChild.disabled = !!this.readOnly;
                 element.append(addChild);
                 this.nodeElements.set(id, element);
                 this.world.append(element);
@@ -641,18 +690,18 @@ export class ListMindmapView {
                 if (content.querySelector('.tabs[data-type="NodeTabs"]')) {
                     tabsRender(content, {
                         readonly: () => true,
-                        taskReadonly: () => !!this.options.readOnly || !this.options.onTabTaskToggle,
+                        taskReadonly: () => !!this.readOnly || !this.options.onTabTaskToggle,
                         taskLabel: this.label("taskList"),
                         task: item => {
                             const itemId = sourceTabIDs.get(item.id);
-                            if (!this.options.readOnly && itemId) {
+                            if (!this.readOnly && itemId) {
                                 this.options.onTabTaskToggle?.(id, itemId);
                             }
                         },
                         taskMenu: item => {
                             const itemId = sourceTabIDs.get(item.id);
                             const anchor = content.querySelector<HTMLElement>(`.tabs-task[data-tab-id="${item.id}"]`);
-                            if (!this.options.readOnly && itemId && anchor) {
+                            if (!this.readOnly && itemId && anchor) {
                                 this.options.onTabTaskMenu?.(id, itemId, anchor);
                             }
                         },
@@ -961,7 +1010,7 @@ export class ListMindmapView {
         this.selectedEdge = undefined;
         this.relationFrom = undefined;
         this.summaryFrom = undefined;
-        this.inspector.hidden = !!this.options.readOnly;
+        this.inspector.hidden = !!this.readOnly;
         this.updateSelection();
         this.renderInspector();
     }
@@ -988,7 +1037,7 @@ export class ListMindmapView {
     private editSummaryLabel(id: string) {
         const summary = this.model.metadata.summaries?.find(item => item.id === id);
         const position = this.summaryPositions.get(id);
-        if (this.options.readOnly || !summary || !position) {
+        if (this.readOnly || !summary || !position) {
             return;
         }
         this.finishSummaryEdit?.(true);
@@ -1097,7 +1146,7 @@ export class ListMindmapView {
                         this.relationFrom = undefined;
                         this.selectedId = undefined;
                         this.updateSelection();
-                        if (!this.options.readOnly) {
+                        if (!this.readOnly) {
                             this.inspector.hidden = false;
                             this.renderInspector();
                         }
@@ -1178,7 +1227,7 @@ export class ListMindmapView {
             }
         }
         // 调整关系线时隐藏文字，保留测量尺寸，避免遮挡手柄或改变节点布局。
-        label.style.visibility = !labelPoint || (id === this.selectedRelation && !this.options.readOnly &&
+        label.style.visibility = !labelPoint || (id === this.selectedRelation && !this.readOnly &&
             !this.printTransform && !this.options.printLayout) ? "hidden" : "";
         return {path, end, previous, arrowSizeLimit, labelPoint};
     }
@@ -1200,7 +1249,7 @@ export class ListMindmapView {
     private renderRouteControls() {
         const id = this.selectedRelation;
         const drag = this.pointer?.relation;
-        const editable = !this.options.readOnly && !this.printTransform && !this.options.printLayout && !this.finishRelationEdit;
+        const editable = !this.readOnly && !this.printTransform && !this.options.printLayout && !this.finishRelationEdit;
         const points = editable && !drag?.endpoint ? drag?.points || this.relationRoutes.get(id) || [] : [];
         const visible = new Set<string>();
         for (let i = 0; i < points.length - 1; i++) {
@@ -1242,7 +1291,7 @@ export class ListMindmapView {
         });
         const invalid = this.pointer?.relation && !this.pointer.relation.valid;
         this.viewport.classList.toggle("mindmap-view__viewport--route-invalid", !!invalid);
-        this.routeStatus.hidden = this.options.readOnly || !!this.options.printLayout || !!this.printTransform ||
+        this.routeStatus.hidden = this.readOnly || !!this.options.printLayout || !!this.printTransform ||
             (!invalid && !this.fallbackRoutes.has(id));
         this.routeStatus.textContent = this.label(invalid ? "invalid" : "listMindmapRouteFallback");
     }
@@ -1264,7 +1313,7 @@ export class ListMindmapView {
             endpoint === "from" ? "listMindmapRouteStart" : "listMindmapRouteEnd" : "listMindmapRouteHandle"));
         handle.addEventListener("pointerdown", event => {
             event.stopPropagation();
-            if (event.button === 0 && !this.options.readOnly && !this.pointer) {
+            if (event.button === 0 && !this.readOnly && !this.pointer) {
                 event.preventDefault();
                 this.preparePointer(event);
                 this.finishThen(() => {
@@ -1286,7 +1335,7 @@ export class ListMindmapView {
     private beginRouteDrag(event: PointerEvent, id: string, segment: number, endpoint?: "from" | "to") {
         const relation = this.model.metadata.relations.find(item => item.id === id);
         const points = this.relationRoutes.get(id);
-        if (this.options.readOnly || !relation || !points?.[segment + 1]) {
+        if (this.readOnly || !relation || !points?.[segment + 1]) {
             return;
         }
         this.selectedId = undefined;
@@ -1364,13 +1413,13 @@ export class ListMindmapView {
     }
 
     private resetRelationRoute(id: string) {
-        if (this.options.readOnly) {
+        if (this.readOnly) {
             return;
         }
         this.cancelPointer();
         this.finishThen(() => {
             const relation = this.model.metadata.relations.find(item => item.id === id);
-            if (!this.options.readOnly && relation?.route) {
+            if (!this.readOnly && relation?.route) {
                 this.options.onRelationChange?.(id, {route: undefined}, JSON.stringify(relation));
             }
         });
@@ -1558,7 +1607,7 @@ export class ListMindmapView {
         element.classList.toggle("protyle-task--done", marker !== " ");
         if (!task) {
             task = this.makeButton("task", "iconUncheck", () => {
-                if (!this.options.readOnly && this.model.nodes.get(id)?.taskMarker !== undefined) {
+                if (!this.readOnly && this.model.nodes.get(id)?.taskMarker !== undefined) {
                     this.options.onTaskToggle?.(id);
                 }
             });
@@ -1571,14 +1620,14 @@ export class ListMindmapView {
             element.prepend(task);
         }
         task.dataset.task = marker;
-        task.disabled = !!this.options.readOnly;
+        task.disabled = !!this.readOnly;
         const key = {" ": "taskStatusTodo", "/": "taskStatusInProgress", X: "taskStatusDone", "-": "taskStatusCanceled"}[marker.toUpperCase()];
         task.setAttribute("aria-label", key ? this.label(key) : `${this.label("customTaskStatus")} ${marker}`);
         task.querySelector("use").setAttribute("xlink:href", marker === " " ? "#iconUncheck" : "#iconCheck");
     }
 
     private openTaskMenu(id: string, anchor: HTMLElement) {
-        if (!this.options.readOnly && this.model.nodes.get(id)?.taskMarker !== undefined) {
+        if (!this.readOnly && this.model.nodes.get(id)?.taskMarker !== undefined) {
             this.options.onTaskMenu?.(id, anchor);
         }
     }
@@ -1590,7 +1639,7 @@ export class ListMindmapView {
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
         this.updateSelection();
-        if (!this.options.readOnly && !this.relationFrom && !this.summaryFrom) {
+        if (!this.readOnly && !this.relationFrom && !this.summaryFrom) {
             this.inspector.hidden = false;
         }
         if (changed || !this.inspector.hidden) {
@@ -1630,12 +1679,15 @@ export class ListMindmapView {
     }
 
     private toggleFold(id: string) {
+        if (this.locked) {
+            return;
+        }
         const node = this.model.nodes.get(id);
         if (!node?.children.length) {
             return;
         }
         this.foldAnchor = {id, collapsed: !(this.folded.get(id) ?? node.collapsed)};
-        if (this.options.readOnly || node.virtual) {
+        if (this.readOnly || node.virtual) {
             this.folded.set(id, !(this.folded.get(id) ?? node.collapsed));
             this.update(this.model);
         } else {
@@ -1644,16 +1696,19 @@ export class ListMindmapView {
     }
 
     private async expandToLevel(level: ListMindmapFoldTarget, selectedId = this.selectedId) {
+        if (this.locked) {
+            return;
+        }
         this.finishRelationEdit?.(true);
         this.cancelPointer();
-        if (!this.options.readOnly && !await this.options.onFoldLevel?.(level)) {
+        if (!this.readOnly && !await this.options.onFoldLevel?.(level)) {
             return;
         }
         if (this.destroyed) {
             return;
         }
         getListMindmapFoldStates(this.model.root, level).forEach((collapsed, id) => {
-            if (this.options.readOnly || this.model.nodes.get(id)?.virtual) {
+            if (this.readOnly || this.model.nodes.get(id)?.virtual) {
                 this.folded.set(id, collapsed);
             } else {
                 this.folded.delete(id);
@@ -1680,7 +1735,7 @@ export class ListMindmapView {
     }
 
     private deleteSelection() {
-        if (this.options.readOnly) {
+        if (this.readOnly) {
             return;
         }
         if (this.selectedSummary) {
@@ -1706,7 +1761,7 @@ export class ListMindmapView {
     }
 
     private pinchStart = (event: TouchEvent) => {
-        if (event.touches.length !== 2 || Array.from(event.touches).some(touch =>
+        if (this.locked || event.touches.length !== 2 || Array.from(event.touches).some(touch =>
             !this.viewport.contains(touch.target as Node) ||
             (touch.target as Element).closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing"))) {
             this.pinch = undefined;
@@ -1751,7 +1806,7 @@ export class ListMindmapView {
     };
 
     private pointerDown = (event: PointerEvent) => {
-        if (this.pinching || event.pointerType === "touch" && !event.isPrimary) {
+        if (this.locked || this.pinching || event.pointerType === "touch" && !event.isPrimary) {
             return;
         }
         clearTimeout(this.linkTimer);
@@ -1782,7 +1837,7 @@ export class ListMindmapView {
     }
 
     private beginPointer(event: PointerEvent, id?: string) {
-        if (this.summaryFrom && id && !this.options.readOnly && event.button === 0 && !this.panning) {
+        if (this.summaryFrom && id && !this.readOnly && event.button === 0 && !this.panning) {
             event.preventDefault();
             this.suppressLinkClick = true;
             this.finishSummaryRange(id);
@@ -1792,7 +1847,7 @@ export class ListMindmapView {
             id = undefined;
             event.preventDefault();
         }
-        if (event.button !== 2 && !this.panning && !id && !this.options.readOnly && !this.relationFrom) {
+        if (event.button !== 2 && !this.panning && !id && !this.readOnly && !this.relationFrom) {
             const line = this.findLine(event);
             const points = line?.relation && this.relationRoutes.get(line.id);
             if (points) {
@@ -1829,7 +1884,7 @@ export class ListMindmapView {
         this.pointer = {
             pointerId: event.pointerId,
             rightButton: event.button === 2,
-            id: !this.options.readOnly && id && !this.model.nodes.get(id)?.virtual ? id : undefined,
+            id: !this.readOnly && id && !this.model.nodes.get(id)?.virtual ? id : undefined,
             startX: event.clientX,
             startY: event.clientY,
             x: this.offsetX,
@@ -1998,10 +2053,10 @@ export class ListMindmapView {
             const drag = pointer.relation;
             this.cancelPointer();
             const relation = this.model.metadata.relations.find(item => item.id === drag.id);
-            if (moved && drag.endpoint && drag.valid && relation && !this.options.readOnly &&
+            if (moved && drag.endpoint && drag.valid && relation && !this.readOnly &&
                 relation[drag.endpoint] !== drag.targetId && this.canReconnectRelation(relation, drag.endpoint, drag.targetId)) {
                 this.options.onRelationChange?.(drag.id, {[drag.endpoint]: drag.targetId, route: undefined}, drag.original);
-            } else if (moved && !drag.endpoint && Math.abs(drag.offset) > .01 && drag.valid && drag.route && !this.options.readOnly) {
+            } else if (moved && !drag.endpoint && Math.abs(drag.offset) > .01 && drag.valid && drag.route && !this.readOnly) {
                 this.options.onRelationChange?.(drag.id, {route: drag.route}, drag.original);
             }
             return;
@@ -2010,7 +2065,7 @@ export class ListMindmapView {
         this.cancelPointer();
         if (moved && id && targetId && placement) {
             this.options.onMove?.(id, targetId, placement);
-        } else if (!moved && !id && !pointer.rightButton && !this.options.readOnly && !this.panning) {
+        } else if (!moved && !id && !pointer.rightButton && !this.readOnly && !this.panning) {
             this.selectLine(event);
         }
     };
@@ -2151,7 +2206,7 @@ export class ListMindmapView {
 
     private doubleClick = (event: MouseEvent) => {
         clearTimeout(this.linkTimer);
-        if (this.options.readOnly || this.relationFrom || this.summaryFrom || this.panning || this.pinching) {
+        if (this.readOnly || this.relationFrom || this.summaryFrom || this.panning || this.pinching) {
             return;
         }
         const target = event.target as HTMLElement;
@@ -2292,7 +2347,7 @@ export class ListMindmapView {
     }
 
     private wheel = (event: WheelEvent) => {
-        if ((event.target as HTMLElement).closest(".mindmap-view__node--editing")) {
+        if (this.locked || (event.target as HTMLElement).closest(".mindmap-view__node--editing")) {
             return;
         }
         if (this.pointer?.relation) {
@@ -2337,6 +2392,9 @@ export class ListMindmapView {
     }
 
     private zoomAt(scale: number, x = this.viewport.clientWidth / 2, y = this.viewport.clientHeight / 2) {
+        if (this.locked) {
+            return;
+        }
         const next = Math.min(2.5, Math.max(.15, scale));
         this.offsetX = x - (x - this.offsetX) * next / this.scale;
         this.offsetY = y - (y - this.offsetY) * next / this.scale;
@@ -2413,6 +2471,13 @@ export class ListMindmapView {
     }
 
     private keyDown = (event: KeyboardEvent) => {
+        if (this.locked) {
+            if (event.key === "Escape" && this.fullscreenMarker) {
+                event.preventDefault();
+                this.toggleFullscreen();
+            }
+            return;
+        }
         const target = event.target as HTMLElement;
         const startingComposition = event.isComposing || event.key === "Process" || event.key === "Dead" ||
             event.keyCode === 229;
@@ -2451,7 +2516,7 @@ export class ListMindmapView {
         const text = !startingComposition && !event.ctrlKey && !event.metaKey && !event.altKey &&
             event.key !== " " && Array.from(event.key).length === 1 ? event.key : undefined;
         const isTaskCompletionToggle = !startingComposition && this.options.isTaskCompletionToggle?.(event);
-        if (!startingComposition && !this.options.readOnly &&
+        if (!startingComposition && !this.readOnly &&
             (isTaskCompletionToggle || this.options.isTaskCycle?.(event))) {
             const id = target.closest<HTMLElement>(".mindmap-view__node")?.dataset.mindmapId || this.selectedId;
             if (this.model.nodes.get(id)?.taskMarker !== undefined) {
@@ -2459,7 +2524,7 @@ export class ListMindmapView {
                 event.stopPropagation();
                 if (!event.repeat) {
                     this.finishThen(() => {
-                        if (!this.options.readOnly) {
+                        if (!this.readOnly) {
                             this.options.onTaskToggle?.(id, !isTaskCompletionToggle);
                         }
                     });
@@ -2476,7 +2541,7 @@ export class ListMindmapView {
                 return;
             }
             if (event.key === " ") {
-                if (this.options.readOnly || event.repeat) {
+                if (this.readOnly || event.repeat) {
                     return;
                 }
                 this.finishThen(() => {
@@ -2507,7 +2572,7 @@ export class ListMindmapView {
                     this.selectNode(next);
                 }
             }
-        } else if (!this.options.readOnly && !this.editingId && !this.relationFrom && this.selectedId &&
+        } else if (!this.readOnly && !this.editingId && !this.relationFrom && this.selectedId &&
             (text !== undefined || startingComposition && !event.ctrlKey && !event.metaKey && !event.altKey) &&
             !target.isContentEditable && !target.closest("button, a")) {
             const id = this.selectedId;
@@ -2532,7 +2597,7 @@ export class ListMindmapView {
                 event.stopPropagation();
                 return;
             }
-        } else if (!this.options.readOnly && !this.editingId && !this.relationFrom && this.selectedId &&
+        } else if (!this.readOnly && !this.editingId && !this.relationFrom && this.selectedId &&
             (siblingShortcut || childShortcut) &&
             !target.isContentEditable && !target.closest("button, a")) {
             if (event.repeat) {
@@ -2584,7 +2649,7 @@ export class ListMindmapView {
     };
 
     private renderInspector() {
-        if (this.inspector.hidden || this.options.readOnly) {
+        if (this.inspector.hidden || this.readOnly) {
             return;
         }
         this.inspector.replaceChildren();

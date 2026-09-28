@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Lock view",
+	"listMindmapUnlock": "Unlock view",
 	"historySnapshots": "Related tagged snapshots",
 	"historySnapshotsError": "Unable to load related snapshots",
 	"historySnapshotMissing": "This snapshot is no longer available",

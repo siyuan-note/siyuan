@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Bloquear visualização",
+	"listMindmapUnlock": "Desbloquear visualização",
 	"historySnapshots": "Snapshots marcados relacionados",
 	"historySnapshotsError": "Não foi possível carregar os snapshots relacionados",
 	"historySnapshotMissing": "Este snapshot não está mais disponível",

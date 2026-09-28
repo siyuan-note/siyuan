@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Weergave vergrendelen",
+	"listMindmapUnlock": "Weergave ontgrendelen",
 	"historySnapshots": "Gerelateerde gemarkeerde momentopnamen",
 	"historySnapshotsError": "Gerelateerde momentopnamen kunnen niet worden geladen",
 	"historySnapshotMissing": "Deze momentopname is niet meer beschikbaar",

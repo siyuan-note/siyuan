@@ -45,6 +45,7 @@ test("mindmap metadata rejects unknown formats and invalid values without replac
     for (const invalid of ["", "null", "[]", "{", '{"version":2,"nodes":{},"relations":[]}',
         '{"version":1,"nodes":{"a":{"fontSize":"18"}},"relations":[]}',
         '{"version":1,"nodes":{"a":{"lineWidth":-1}},"relations":[]}',
+        '{"version":1,"nodes":{},"relations":[],"viewLocked":"true"}',
         '{"version":1,"nodes":{},"relations":[{"id":"r","from":"a","to":"b"}]}',
         '{"version":1,"nodes":{},"relations":[{"id":"r","from":"a","to":"b","label":"","dash":0}]}']) {
         assert.throws(() => parseListMindmapMetadata(invalid), /Invalid list mindmap metadata/);
@@ -1933,6 +1934,48 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await settle();
     check.equal(host.offsetHeight, screenHeight);
     check.deepEqual([view.scale, view.offsetX, view.offsetY], screenTransform);
+
+    // 锁定保留当前画面，滚轮与触摸交给文档，解锁后恢复原有编辑权限。
+    const lockTransform = [view.scale, view.offsetX, view.offsetY];
+    const editsBeforeLock = edits.length;
+    const foldsBeforeLock = folds.length;
+    host.querySelector<HTMLButtonElement>('[aria-label="listMindmapLock"]').click();
+    await settle();
+    check.equal(view.isLocked(), true);
+    check.equal(getComputedStyle(viewport).touchAction, "pan-y");
+    check.ok(host.querySelector('[aria-label="listMindmapUnlock"]'));
+    check.equal(host.querySelector('[aria-label="cursorHand"]'), null);
+    for (const ctrlKey of [false, true]) {
+        const wheel = new WheelEvent("wheel", {bubbles: true, cancelable: true, deltaY: 120, ctrlKey});
+        viewport.dispatchEvent(wheel);
+        check.equal(wheel.defaultPrevented, false);
+    }
+    const finger = (identifier: number, clientX: number) => new Touch({identifier, target: viewport, clientX, clientY: 100});
+    viewport.dispatchEvent(new TouchEvent("touchstart", {bubbles: true, cancelable: true, touches: [finger(1, 100), finger(2, 200)]}));
+    viewport.dispatchEvent(new TouchEvent("touchmove", {bubbles: true, cancelable: true, touches: [finger(1, 50), finger(2, 250)]}));
+    sendPointer(viewport, "pointerdown", 100, 100);
+    sendPointer(viewport, "pointermove", 200, 200);
+    sendPointer(viewport, "pointerup", 200, 200);
+    nodeElement(beta).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    nodeElement(model.root.id).querySelector<HTMLButtonElement>(".mindmap-view__fold").click();
+    host.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    await settle();
+    check.deepEqual([view.scale, view.offsetX, view.offsetY], lockTransform);
+    check.equal(edits.length, editsBeforeLock);
+    check.equal(folds.length, foldsBeforeLock);
+    view.setReadOnly(true);
+    host.querySelector<HTMLButtonElement>('[aria-label="listMindmapUnlock"]').click();
+    await settle();
+    check.equal(view.isLocked(), false);
+    check.equal(getComputedStyle(viewport).touchAction, "none");
+    nodeElement(beta).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    check.equal(edits.length, editsBeforeLock, "unlocking a read-only document does not enable editing");
+    view.setReadOnly(false);
+    const savedLock = {...model, metadata: {...model.metadata, viewLocked: true}};
+    view.update(savedLock);
+    check.equal(view.isLocked(), true);
+    view.update(model);
+    check.equal(view.isLocked(), false, "undoing a saved lock updates the live view");
 
     // 全屏使用编辑器同款窗口内布局，不调用浏览器全屏，并在退出和销毁时恢复原位置。
     Object.defineProperty(host, "requestFullscreen", {configurable: true, value: () => check.fail("Native fullscreen must not be requested")});

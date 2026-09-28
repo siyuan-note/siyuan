@@ -88,6 +88,16 @@
     flex: 1;
   }
 
+  &--locked &__viewport {
+    touch-action: pan-y;
+  }
+
+  &--locked &__fold,
+  &--locked &__add-child,
+  &--locked &__add-bridge {
+    display: none;
+  }
+
   &__level-control {
     position: relative;
     flex-shrink: 0;

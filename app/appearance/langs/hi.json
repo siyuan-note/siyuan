@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "दृश्य लॉक करें",
+	"listMindmapUnlock": "दृश्य अनलॉक करें",
 	"historySnapshots": "संबंधित टैग किए गए स्नैपशॉट",
 	"historySnapshotsError": "संबंधित स्नैपशॉट लोड नहीं हो सके",
 	"historySnapshotMissing": "यह स्नैपशॉट अब उपलब्ध नहीं है",

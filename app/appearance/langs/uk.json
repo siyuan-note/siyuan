@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Заблокувати вигляд",
+	"listMindmapUnlock": "Розблокувати вигляд",
 	"historySnapshots": "Пов’язані позначені знімки",
 	"historySnapshotsError": "Не вдалося завантажити пов’язані знімки",
 	"historySnapshotMissing": "Цей знімок більше недоступний",

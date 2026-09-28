@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Заблокировать вид",
+	"listMindmapUnlock": "Разблокировать вид",
 	"historySnapshots": "Связанные помеченные снимки",
 	"historySnapshotsError": "Не удалось загрузить связанные снимки",
 	"historySnapshotMissing": "Этот снимок больше недоступен",

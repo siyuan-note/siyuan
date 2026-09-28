@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Zablokuj widok",
+	"listMindmapUnlock": "Odblokuj widok",
 	"historySnapshots": "Powiązane oznaczone migawki",
 	"historySnapshotsError": "Nie można wczytać powiązanych migawek",
 	"historySnapshotMissing": "Ta migawka nie jest już dostępna",

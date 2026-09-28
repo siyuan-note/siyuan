@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Закључај приказ",
+	"listMindmapUnlock": "Откључај приказ",
 	"historySnapshots": "Повезани означени снимци",
 	"historySnapshotsError": "Није могуће учитати повезане снимке",
 	"historySnapshotMissing": "Овај снимак више није доступан",

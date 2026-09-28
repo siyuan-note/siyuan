@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Görünümü kilitle",
+	"listMindmapUnlock": "Görünümün kilidini aç",
 	"historySnapshots": "İlgili etiketli anlık görüntüler",
 	"historySnapshotsError": "İlgili anlık görüntüler yüklenemedi",
 	"historySnapshotMissing": "Bu anlık görüntü artık mevcut değil",

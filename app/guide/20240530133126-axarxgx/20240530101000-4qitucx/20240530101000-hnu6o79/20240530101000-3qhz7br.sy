@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260928090424"
+		"updated": "20260928143000"
 	},
 	"Children": [
 		{
@@ -2044,12 +2044,26 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20260923221935"
+				"updated": "20260928143000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "マインドマップブロック"
+				}
+			]
+		},
+		{
+			"ID": "20260928143000-unwwtu3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260928143000-unwwtu3",
+				"updated": "20260928143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マインドマップのツールバーで「表示をロック」を押すと、編集、拡大・縮小、移動が無効になります。マップ上でのスワイプやマウスホイール操作は文書をスクロールします。「表示のロックを解除」で操作を再開できます。ロック状態はブロックとともに保存されます。"
 				}
 			]
 		},

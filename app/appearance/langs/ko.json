@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "보기 잠금",
+	"listMindmapUnlock": "보기 잠금 해제",
 	"historySnapshots": "관련 태그 스냅샷",
 	"historySnapshotsError": "관련 스냅샷을 불러올 수 없습니다",
 	"historySnapshotMissing": "이 스냅샷은 더 이상 사용할 수 없습니다",

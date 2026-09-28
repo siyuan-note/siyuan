@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "Zamknúť zobrazenie",
+	"listMindmapUnlock": "Odomknúť zobrazenie",
 	"historySnapshots": "Súvisiace označené snímky",
 	"historySnapshotsError": "Súvisiace snímky sa nepodarilo načítať",
 	"historySnapshotMissing": "Táto snímka už nie je dostupná",

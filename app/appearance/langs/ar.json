@@ -1,4 +1,6 @@
 {
+	"listMindmapLock": "قفل العرض",
+	"listMindmapUnlock": "إلغاء قفل العرض",
 	"historySnapshots": "اللقطات الموسومة المرتبطة",
 	"historySnapshotsError": "تعذّر تحميل اللقطات المرتبطة",
 	"historySnapshotMissing": "هذه اللقطة لم تعد متاحة",

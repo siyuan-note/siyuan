@@ -131,8 +131,25 @@ const getTargetListItem = (targetElement: Element, isBottom: boolean) => {
 };
 
 type TDragSourcePosition = {
+    nextID?: string,
     previousID: string,
     parentID: string
+};
+
+const getDragSourceNextID = (element: Element, sources: Element[]) => {
+    let current = element;
+    while (current) {
+        let next = getNextBlockSibling(current);
+        // 折叠标题下辖块与其他源块都会移动，撤销锚点必须留在原容器中。
+        while (next && shouldUnfoldMovedHeading(current, next)) {
+            next = getNextBlockSibling(next);
+        }
+        if (!next || !sources.includes(next)) {
+            return next?.getAttribute("data-node-id") || "";
+        }
+        current = next;
+    }
+    return "";
 };
 
 type TDragSourceContainerSnapshot = {
@@ -221,6 +238,7 @@ const cancelDragSourceSB = async (nodeElement: Element, excludedChildIDs: Set<st
 const wrapInRowSB = async (protyle: IProtyle, elements: Element[]) => {
     const firstElement = elements[0];
     const sourcePosition: TDragSourcePosition = {
+        nextID: getDragSourceNextID(firstElement, elements),
         previousID: getPreviousBlockSibling(firstElement)?.getAttribute("data-node-id") || "",
         parentID: await getDragSourceParentID(protyle, firstElement)
     };
@@ -284,19 +302,6 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         .filter((id): id is string => !!id));
     const targetId = targetElement.classList.contains("tab-item-content") ?
         targetElement.parentElement.getAttribute("data-node-id") : targetElement.getAttribute("data-node-id");
-    let targetPreviousID: string;
-    // 聚焦视图首块的前一个同级块可能未渲染，必须从文档树取得真实位置。
-    if (position === "beforebegin" && !getPreviousBlockSibling(targetElement) &&
-        getParentBlock(targetElement) === protyle.wysiwyg.element && protyle.block.showAll) {
-        const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
-            id: targetId,
-            notebook: protyle.notebookId,
-        });
-        if (response.code !== 0) {
-            throw new Error(response.msg);
-        }
-        targetPreviousID = response.data.previousID;
-    }
     const newSourceElements: Element[] = [];
     let tempTargetElement = targetElement;
     let isSameLi = true;
@@ -337,6 +342,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             const id = item.getAttribute("data-node-id");
             if (id && !sourcePositions.has(id)) {
                 sourcePositions.set(id, {
+                    nextID: getDragSourceNextID(item, sourceElements),
                     previousID: getPreviousBlockSibling(item)?.getAttribute("data-node-id") || "",
                     parentID: await getDragSourceParentID(protyle, item)
                 });
@@ -373,7 +379,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 action: "insert",
                 data: newListElement.outerHTML,
                 id: newListId,
-                previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(tempTargetElement)?.getAttribute("data-node-id") || targetPreviousID),
+                nextID: position === "beforebegin" ? tempTargetElement.getAttribute("data-node-id") : undefined,
+                previousID: position === "afterend" ? targetId : undefined,
                 parentID: position === "afterbegin" ? targetId : (getParentBlock(tempTargetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
             });
             undoOperations.push({
@@ -401,10 +408,11 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             });
         } else {
             // 用 DOM 移动前预捕获的源位置构造撤销操作，避免移动后 item 的父/兄弟已变导致撤销移到错误位置
-            const srcPos = sourcePositions.get(id) || {previousID: "", parentID};
+            const srcPos = sourcePositions.get(id) || {nextID: "", previousID: "", parentID};
             undoMoveOperation = {
                 action: "move",
                 id,
+                nextID: srcPos.nextID,
                 previousID: srcPos.previousID,
                 parentID: srcPos.parentID,
                 context: {moveGroupID},
@@ -451,7 +459,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     action: "insert",
                     id: copyNewId,
                     data: copyElement.outerHTML,
-                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(copyElement)?.getAttribute("data-node-id") || targetPreviousID), // 不能使用常量，移动后会被修改
+                    nextID: position === "beforebegin" ? tempTargetElement.getAttribute("data-node-id") : undefined,
+                    previousID: position === "afterend" ? targetId : undefined,
                     parentID: position === "afterbegin" ? targetId : (getParentBlock(copyElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(copyElement);
@@ -523,7 +532,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 doOperations.push({
                     action: "move",
                     id,
-                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(item)?.getAttribute("data-node-id") || targetPreviousID), // 不能使用常量，移动后会被修改
+                    nextID: position === "beforebegin" ? tempTargetElement.getAttribute("data-node-id") : undefined,
+                    previousID: position === "afterend" ? targetId : undefined,
                     parentID: position === "afterbegin" ? targetId : (getParentBlock(item)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                     context: {moveGroupID},
                 });
@@ -801,6 +811,9 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         wrapUndoOperations.splice(0, 0, ...targetWrap.undoOperations);
         targetElement = targetWrap.element;
         sourcePositions.forEach(position => {
+            if (position.nextID === targetID) {
+                position.nextID = targetElement.getAttribute("data-node-id");
+            }
             if (position.previousID === targetID) {
                 position.previousID = targetElement.getAttribute("data-node-id");
             }
@@ -973,6 +986,9 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         wrapUndoOperations.splice(0, 0, ...targetWrap.undoOperations);
         targetElement = targetWrap.element;
         sourcePositions.forEach(position => {
+            if (position.nextID === targetID) {
+                position.nextID = targetElement.getAttribute("data-node-id");
+            }
             if (position.previousID === targetID) {
                 position.previousID = targetElement.getAttribute("data-node-id");
             }

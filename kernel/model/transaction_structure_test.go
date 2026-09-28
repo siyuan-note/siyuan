@@ -125,6 +125,12 @@ func TestMoveRejectsParagraphDirectlyUnderList(t *testing.T) {
 				return &Operation{Action: "move", ID: sourceID, ParentID: listID, PreviousID: itemID}
 			},
 		},
+		{
+			name: "next id",
+			operation: func(sourceID, listID, itemID string) *Operation {
+				return &Operation{Action: "move", ID: sourceID, ParentID: listID, NextID: itemID}
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

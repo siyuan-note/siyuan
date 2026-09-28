@@ -374,7 +374,14 @@ const promiseTransaction = (options: {
                         }
                     });
                     let hasFind = false;
-                    if (operation.previousID && updateElements.length > 0) {
+                    if (operation.nextID && updateElements.length > 0) {
+                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.nextID}"]`).forEach(item => {
+                            if (!isInEmbedBlock(item) && !item.contains(range.startContainer)) {
+                                item.before(...cloneMoveElements(primaryMoveElements));
+                                hasFind = true;
+                            }
+                        });
+                    } else if (operation.previousID && updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
                             if (!isInEmbedBlock(item) && !getNextBlockSibling(item)?.contains(range.startContainer)) {
                                 item.after(...cloneMoveElements(primaryMoveElements));
@@ -416,7 +423,7 @@ const promiseTransaction = (options: {
                     pendingEmbedElements.add(item);
                 });
                 // 移动块（含撤销移动）后刷新相关超级块的拖拽手柄，避免手柄残留/缺失
-                const moveEls = [operation.id, operation.parentID, operation.previousID]
+                const moveEls = [operation.id, operation.parentID, operation.previousID, operation.nextID]
                     .map(id => id ? protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) : null)
                     .filter(Boolean) as Element[];
                 refreshSbs(...moveEls);
@@ -1224,7 +1231,14 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     originSbs.push(sb);
                 }
             });
-            if (operation.previousID && updateElements.length > 0) {
+            if (operation.nextID && updateElements.length > 0) {
+                protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.nextID}"]`).forEach(item => {
+                    if (!isInEmbedBlock(item)) {
+                        item.before(...cloneMoveElements(primaryMoveElements));
+                        hasFind = true;
+                    }
+                });
+            } else if (operation.previousID && updateElements.length > 0) {
                 const previousElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`);
                 if (previousElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
                     // 反链面板删除超级块中的最后一个段落块后撤销重做
@@ -1307,7 +1321,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 }
             });
             // 移动块（含重做/同步）后刷新相关超级块的拖拽手柄
-            const moveEls = [operation.id, operation.parentID, operation.previousID]
+            const moveEls = [operation.id, operation.parentID, operation.previousID, operation.nextID]
                 .map(id => id ? protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) : null)
                 .filter(Boolean) as Element[];
             refreshSbs(...moveEls);

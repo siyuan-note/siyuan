@@ -1,9 +1,9 @@
 export const getMoveAffectedEmbedElements = (
     embedElements: Iterable<Element>,
-    operation: Pick<IOperation, "id" | "blockIDs" | "parentID" | "previousID">,
+    operation: Pick<IOperation, "id" | "blockIDs" | "parentID" | "previousID" | "nextID">,
     editingEmbedElement?: Element,
 ) => {
-    const anchorIDs = [operation.id, operation.parentID, operation.previousID].filter(Boolean);
+    const anchorIDs = [operation.id, operation.parentID, operation.previousID, operation.nextID].filter(Boolean);
     const blockIDs = new Set(operation.blockIDs || []);
     if (anchorIDs.length === 0 && blockIDs.size === 0) {
         return [];

@@ -52,6 +52,11 @@ describe("getMoveAffectedEmbedElements", () => {
             {id: "heading", blockIDs: ["heading-child"]},
         ), [embed]);
     });
+
+    it("refreshes embeds containing only the next sibling anchor", () => {
+        const embed = asElement(new TestEmbedElement(["next"]));
+        assert.deepEqual(getMoveAffectedEmbedElements([embed], {id: "moved", nextID: "next"}), [embed]);
+    });
 });
 
 describe("shouldSyncMoveCopies", () => {

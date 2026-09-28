@@ -17,8 +17,9 @@ const sources = () => {
         }).outputText;
     };
     return [
-        extract("protyle/util/editorCommonEvent.ts", ["getDragSourceParentID", "moveTo"]),
-        extract("protyle/wysiwyg/getBlock.ts", ["getParentBlock", "getPreviousBlockSibling", "getTopAloneElement"]),
+        extract("protyle/util/editorCommonEvent.ts", ["getDragSourceParentID", "getDragSourceNextID", "moveTo"]),
+        extract("protyle/util/foldHeadingMove.ts", ["isFoldedHeading", "getHeadingLevel", "shouldUnfoldMovedHeading"]),
+        extract("protyle/wysiwyg/getBlock.ts", ["getParentBlock", "getPreviousBlockSibling", "getNextBlockSibling", "getTopAloneElement"]),
         (() => {
             const file = ts.createSourceFile("tabsRender.ts", readFileSync(path.join(__dirname,
                 "../src/protyle/render/tabsRender.ts"), "utf8"), ts.ScriptTarget.Latest, true);
@@ -69,8 +70,8 @@ const cases = async (source) => {
         check.equal(data.notebook, "notebook");
         return {code: 0, data: {previousID: "outside-focus", parentID: "doc"}};
     };
-    const {moveTo, bindTabsDrag, isDraggingTabs, syncBlockAttrs, tabsRender, destroyTabsRender} = new Function("Constants", "genEmptyElement", "root", "protyle", "fetchSyncPost", "remapListMindmapIDs",
-        source + "; return {moveTo, bindTabsDrag, isDraggingTabs, syncBlockAttrs, tabsRender, destroyTabsRender};")(
+    const {moveTo, getDragSourceNextID, bindTabsDrag, isDraggingTabs, syncBlockAttrs, tabsRender, destroyTabsRender} = new Function("Constants", "genEmptyElement", "root", "protyle", "fetchSyncPost", "remapListMindmapIDs",
+        source + "; return {moveTo, getDragSourceNextID, bindTabsDrag, isDraggingTabs, syncBlockAttrs, tabsRender, destroyTabsRender};")(
         constants, genEmptyElement, root, protyle, fetchSyncPost, () => {});
     const list = document.createElement("div");
     const button = document.createElement("button");
@@ -131,7 +132,9 @@ const cases = async (source) => {
                 template.innerHTML = lute.SpinBlockDOM(operation.data);
                 moving = template.content.firstElementChild;
             }
-            if (operation.previousID) {
+            if (operation.nextID) {
+                find(operation.nextID).before(moving);
+            } else if (operation.previousID) {
                 find(operation.previousID).after(moving);
             } else {
                 find(operation.parentID).prepend(moving);
@@ -191,9 +194,12 @@ const cases = async (source) => {
                 const requestsBefore = relevantIDRequests;
                 const focusedMove = await moveTo(protyle, moving, heading, true, "beforebegin", copy);
                 const placements = focusedMove.doOperations.filter(op => op.action === (copy ? "insert" : "move"));
-                check.equal(relevantIDRequests - requestsBefore, focused ? 1 : 0);
+                check.equal(relevantIDRequests - requestsBefore, 0);
                 check.equal(placements.length, count);
-                placements.forEach(op => check.equal(op.previousID, focused ? "outside-focus" : undefined));
+                placements.forEach((op, i) => {
+                    check.equal(op.previousID, undefined);
+                    check.equal(op.nextID, i === 0 ? heading.dataset.nodeId : placements[i - 1].id);
+                });
                 check.equal(root.children[count], heading);
                 if (!copy) {
                     check.equal(focusedMove.undoOperations[0].previousID, heading.dataset.nodeId);
@@ -213,6 +219,22 @@ const cases = async (source) => {
             }
         }
     }
+    for (const count of [1, 2]) {
+        root.innerHTML = lute.Md2BlockDOM(count === 1 ? "First\n\nTarget" : "First\n\nSecond\n\nTarget");
+        protyle.block.showAll = true;
+        stored.innerHTML = '<div data-node-id="outside-focus">Hidden predecessor</div>' + root.innerHTML;
+        const originalIDs = Array.from(stored.children).map(node => node.dataset.nodeId);
+        const target = root.lastElementChild;
+        const moving = Array.from(root.children).slice(0, count);
+        const operations = await moveTo(protyle, moving, target, true, "afterend", false);
+        operations.undoOperations.forEach(op => check.equal(op.nextID, target.dataset.nodeId));
+        replay(operations.doOperations);
+        replay(operations.undoOperations);
+        check.deepEqual(Array.from(stored.children).map(node => node.dataset.nodeId), originalIDs);
+    }
+    root.innerHTML = lute.Md2BlockDOM("## Heading\n\nChild\n\n### Nested\n\nNested child\n\n## Boundary");
+    root.firstElementChild.setAttribute("fold", "1");
+    check.equal(getDragSourceNextID(root.firstElementChild, [root.firstElementChild]), root.lastElementChild.dataset.nodeId);
     root.remove();
     return "Tabs drag cases passed";
 };

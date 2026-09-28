@@ -90,7 +90,7 @@ type FileTreeDailyNoteRequest struct {
 	fields   fileTreeFields
 }
 
-// FileTreeCreateMarkdownRequest 的 path 是文档层级路径，标题中的半角斜杠须编码为 U+F0000，路径分隔符仍为 /。
+// FileTreeCreateMarkdownRequest 的 path 是文档层级路径，标题中的半角斜杠须编码为全角斜杠，路径分隔符仍为 /。
 type FileTreeCreateMarkdownRequest struct {
 	FileTreePathRequest
 	Markdown     string  `json:"markdown"`

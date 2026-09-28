@@ -1,5 +1,5 @@
 import {showMessage} from "../dialog/message";
-import {decodeDocTitle, encodeDocTitle, sanitizeDocTitleInput} from "../util/docTitle";
+import {sanitizeDocTitleInput} from "../util/docTitle";
 import {openInputDialog} from "../dialog/inputDialog";
 import {focusByRange} from "../protyle/util/selection";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
@@ -56,7 +56,7 @@ export const rename = (options: {
     if (window.siyuan.config.readonly) {
         return;
     }
-    const initialName = options.empty ? "" : (options.type === "file" ? decodeDocTitle(options.name) : options.name);
+    const initialName = options.empty ? "" : options.name;
     const dialog = openInputDialog({
         title: window.siyuan.languages.rename,
         value: initialName,
@@ -74,7 +74,7 @@ export const rename = (options: {
                 dialog.destroy();
                 return;
             }
-            name = options.type === "file" ? encodeDocTitle(sanitizeDocTitleInput(name)) : replaceFileName(name);
+            name = options.type === "file" ? sanitizeDocTitleInput(name) : replaceFileName(name);
             if (options.type === "notebook") {
                 if (!name) {
                     name = window.siyuan.languages.untitled;

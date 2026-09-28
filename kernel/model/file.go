@@ -2471,7 +2471,6 @@ func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
 }
 
 func normalizeDocTitle(title string) string {
-	title = util.DecodeDocTitlePath(title)
 	// 不要踢掉 零宽连字符，否则有的 Emoji 会变形 https://github.com/siyuan-note/siyuan/issues/11480
 	title = strings.ReplaceAll(title, string(gulu.ZWJ), "__@ZWJ@__")
 	title = util.RemoveInvalid(title)

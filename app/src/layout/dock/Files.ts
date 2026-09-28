@@ -5,7 +5,6 @@ import {getInstanceById, setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
-import {decodeDocTitle} from "../../util/docTitle";
 import {newFileInTree} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {isDocTreeDragSelectionAllowed} from "../../menus/navigationSelection";
@@ -1656,7 +1655,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         const fileItemElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
         if (fileItemElement) {
             fileItemElement.setAttribute("data-name", data.title);
-            fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(decodeDocTitle(data.title));
+            fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(data.title);
         }
         const parentPath = pathPosix().dirname(data.path);
         const listPath = parentPath === "/" ? "/" : `${parentPath}.sy`;

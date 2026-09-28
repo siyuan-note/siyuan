@@ -6,7 +6,7 @@ import {openMobileOnboarding} from "../../onboarding";
 import {validateName} from "../../editor/rename";
 import {getEventName, isDisabledFeature, isInMobileApp} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
-import {encodeDocTitle, sanitizeDocTitleInput} from "../../util/docTitle";
+import {sanitizeDocTitleInput} from "../../util/docTitle";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
 import {finishMobileStartup, setEmpty} from "./setEmpty";
@@ -449,7 +449,7 @@ const initEditorName = () => {
         titleSavePromise = fetchPost("/api/filetree/renameDoc", {
             notebook: window.siyuan.mobile.editor.protyle.notebookId,
             path: window.siyuan.mobile.editor.protyle.path,
-            title: encodeDocTitle(title),
+            title,
         });
         setTitle(title);
         return titleSavePromise;

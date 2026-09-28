@@ -19,7 +19,7 @@ package util
 import "strings"
 
 // DocTitleSlash 是文档标题中的斜杠在层级路径中的编码。
-const DocTitleSlash = "\U000F0000"
+const DocTitleSlash = "／"
 
 func EncodeDocTitlePath(title string) string {
 	return strings.ReplaceAll(title, "/", DocTitleSlash)

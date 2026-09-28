@@ -133,8 +133,11 @@ func addFileOperationTestDoc(t *testing.T, fixture *fileOperationTestFixture, id
 
 func TestDocTitleSlashUsesEncodedHPath(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	if got := normalizeDocTitle("Parent" + util.DocTitleSlash + "One"); got != "Parent/One" {
-		t.Fatalf("encoded slash was not decoded: %q", got)
+	if got := normalizeDocTitle("Parent/One"); got != "Parent/One" {
+		t.Fatalf("slash in title was changed: %q", got)
+	}
+	if got := normalizeDocTitle("Parent" + util.DocTitleSlash + "One"); got != "Parent"+util.DocTitleSlash+"One" {
+		t.Fatalf("fullwidth slash in title was changed: %q", got)
 	}
 	parent := treenode.NewTree(fixture.box.ID, fixture.sourcePath, "/Parent"+util.DocTitleSlash+"One", normalizeDocTitle("Parent/One"))
 	if _, err := filesys.WriteTree(parent); err != nil {

@@ -10,7 +10,7 @@ import {fetchPost, fetchSyncPost} from "./fetch";
 import {getDisplayName, getOpenNotebookCount, isMoveTargetAllowed, movePathTo, pathPosix} from "./pathName";
 import {Constants} from "../constants";
 import {validateName} from "../editor/rename";
-import {decodeDocTitle, encodeDocTitle, sanitizeDocTitleInput} from "./docTitle";
+import {encodeDocTitle, sanitizeDocTitleInput} from "./docTitle";
 import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
@@ -33,7 +33,7 @@ import {
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 
 export const getBlockRefAnchorText = (title: string) => {
-    const trimmed = decodeDocTitle(title || "").trim();
+    const trimmed = (title || "").trim();
     if (!trimmed) {
         return window.siyuan.languages._kernel[16];
     }

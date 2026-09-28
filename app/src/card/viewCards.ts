@@ -15,7 +15,9 @@ import type {App} from "../index";
 import {confirmDialog} from "../dialog/confirmDialog";
 
 export const viewCards = (app: App, deckID: string, title: string, deckType: "Tree" | "" | "Notebook", cb?: (response: IWebSocketData) => void) => {
-    title = decodeDocTitle(title);
+    if (deckType === "Tree") {
+        title = decodeDocTitle(title);
+    }
     let pageIndex = 1;
     let pageCount = 1;
     let edit: Protyle;

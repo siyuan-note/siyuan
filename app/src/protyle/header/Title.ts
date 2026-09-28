@@ -7,7 +7,7 @@ import {
 } from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {validateName} from "../../editor/rename";
-import {decodeDocTitle, encodeDocTitle, sanitizeDocTitleInput} from "../../util/docTitle";
+import {sanitizeDocTitleInput} from "../../util/docTitle";
 import {MenuItem} from "../../menus/Menu";
 import {openFileAttr,} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
@@ -354,7 +354,7 @@ export class Title {
             fetchPost("/api/filetree/renameDoc", {
                 notebook: protyle.notebookId,
                 path: protyle.path,
-                title: encodeDocTitle(fileName),
+                title: fileName,
             });
             if (fileName !== this.editElement.textContent) {
                 const offset = getSelectionOffset(this.editElement);
@@ -365,7 +365,6 @@ export class Title {
     }
 
     public setTitle(title: string, empty = false) {
-        title = decodeDocTitle(title);
         /// #if MOBILE
         if (this.editElement) {
             if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {

@@ -14,7 +14,6 @@ import {resizeSide} from "./resizeSide";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showDocVersionDiff} from "./docDiff";
 import {pairSnapshotFilesByPath} from "./snapshotDiffCore";
-import {decodeDocTitle} from "../util/docTitle";
 
 type SnapshotDiffAggregate = "all" | "data" | "extension" | "other";
 type SnapshotFileKind = "document" | "database" | "asset" | "plugin" | "widget" | "template" | "snippet" | "bazaar" | "workspaceData" | "other";
@@ -380,8 +379,8 @@ const renderCompare = (app: App, element: HTMLElement) => {
                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
             });
         }
-        titleElement.textContent = decodeDocTitle(response.data.title);
-        titleElement.setAttribute("title", decodeDocTitle(response.data.title));
+        titleElement.textContent = response.data.title;
+        titleElement.setAttribute("title", response.data.title);
         leftElement.querySelector(".history__date").textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
     });
     if (id2) {
@@ -411,8 +410,8 @@ const renderCompare = (app: App, element: HTMLElement) => {
                     action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                 });
             }
-            titleElement.textContent = decodeDocTitle(response.data.title);
-            titleElement.setAttribute("title", decodeDocTitle(response.data.title));
+            titleElement.textContent = response.data.title;
+            titleElement.setAttribute("title", response.data.title);
             rightElement.querySelector(".history__date").textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
         });
     } else {

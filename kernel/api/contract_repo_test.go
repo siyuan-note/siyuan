@@ -669,6 +669,30 @@ func TestRepoSnapshotIDContractHTTP(t *testing.T) {
 			t.Fatalf("unexpected snapshot: %s", recorder.Body.String())
 		}
 	}
+	for _, tc := range []struct {
+		body        string
+		code, count int
+	}{
+		{`{"page":1,"startTime":1790000000000,"endTime":1790000000001}`, 0, 1},
+		{`{"page":1,"endTime":1790000000000}`, 0, 0},
+		{`{"page":1,"startTime":1790000000001}`, 0, 0},
+		{fmt.Sprintf(`{"page":99,"id":%q,"endTime":1790000000000}`, id), 0, 0},
+		{`{"page":1,"startTime":2,"endTime":1}`, -1, 0},
+	} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, endpoint, strings.NewReader(tc.body)))
+		if err = bundle.ValidateResponse(http.MethodPost, endpoint, recorder.Body.Bytes()); err != nil {
+			t.Fatal(err)
+		}
+		var response struct {
+			Code int                           `json:"code"`
+			Data apicontract.RepoSnapshotsData `json:"data"`
+		}
+		if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != tc.code ||
+			len(response.Data.Snapshots) != tc.count || response.Data.TotalCount != tc.count {
+			t.Fatalf("snapshot range HTTP: %s %v", recorder.Body.String(), err)
+		}
+	}
 }
 
 func TestRepoContractLockedFileAdmission(t *testing.T) {

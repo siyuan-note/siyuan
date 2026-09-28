@@ -1126,7 +1126,7 @@ export type GetBazaarThemeRequestInput = { "frontend"?: string | null; "keyword"
 
 export type GetBazaarWidgetRequestInput = { "keyword"?: string | null; };
 
-export type GetCloudRepoSnapshotsRequestInput = { "page": number; };
+export type GetCloudRepoSnapshotsRequestInput = { "endTime"?: number; "page": number; "startTime"?: number; };
 
 export type GetCurrentAttrViewImagesRequestInput = { "blockID"?: string | null; "id": string; "query"?: string | null; "viewID"?: string | null; };
 
@@ -1150,7 +1150,7 @@ export type GetRepoDocHistoryRequestInput = { "id": string; "page": number; };
 
 export type GetRepoFileRequestInput = { "id": string; };
 
-export type GetRepoSnapshotsRequestInput = { "id"?: string; "includeFiles"?: boolean; "page": number; };
+export type GetRepoSnapshotsRequestInput = { "endTime"?: number; "id"?: string; "includeFiles"?: boolean; "page": number; "startTime"?: number; };
 
 export type GetSnippetRequestInput = { "enabled": number; "keyword"?: string | null; "type": string; };
 

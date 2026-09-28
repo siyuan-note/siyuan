@@ -59,6 +59,7 @@ type UploadCloudSnapshotRequest struct {
 }
 type GetRepoSnapshotsRequest struct {
 	Page float64 `json:"page"`
+	RepoSnapshotTimeRange
 	// ID 可选，去除首尾空白后按 7 至 40 位十六进制快照 ID 前缀查询本地仓库，不区分大小写，忽略分页。
 	// 前缀匹配多个快照时全部返回，按创建时间降序排列。
 	// 省略或留空时保留分页列表；未找到返回空列表，格式错误及仓库读取失败返回错误。
@@ -79,7 +80,36 @@ type ExportRepoFileRequest struct {
 }
 type GetCloudRepoSnapshotsRequest struct {
 	Page float64 `json:"page"`
+	RepoSnapshotTimeRange
 }
+
+// RepoSnapshotTimeRange 在分页前按创建时间筛选，省略或为 0 表示该端无界。
+// 本地 ID 查询同样筛选时间，但仍忽略分页；云端会遍历索引页，错误时不返回部分结果。
+type RepoSnapshotTimeRange struct {
+	// StartTime 为包含在范围内的起始 Unix 毫秒时间戳，必须是非负整数。
+	StartTime int64 `json:"startTime" api:"optional"`
+	// EndTime 为不包含在范围内的结束 Unix 毫秒时间戳，必须是非负整数。
+	// 两端均非 0 时，EndTime 必须大于 StartTime。
+	EndTime int64 `json:"endTime" api:"optional"`
+}
+
+func decodeRepoSnapshotTimeRange(fields map[string]json.RawMessage) (ret RepoSnapshotTimeRange, err error) {
+	for key, target := range map[string]*int64{"startTime": &ret.StartTime, "endTime": &ret.EndTime} {
+		if raw, exists := fields[key]; exists {
+			if string(raw) == "null" {
+				return ret, fmt.Errorf("%s must be a non-negative integer", key)
+			}
+			if err = json.Unmarshal(raw, target); err != nil || *target < 0 {
+				return ret, fmt.Errorf("%s must be a non-negative integer", key)
+			}
+		}
+	}
+	if ret.EndTime != 0 && ret.StartTime >= ret.EndTime {
+		return ret, errors.New("endTime must be greater than startTime")
+	}
+	return ret, nil
+}
+
 type RemoveCloudRepoTagSnapshotRequest struct {
 	Tag string `json:"tag" api:"trim"`
 }
@@ -332,6 +362,9 @@ func init() {
 		if request.Page, err = legacyField[float64](fields, "page", "Number", true); err != nil {
 			return request, err
 		}
+		if request.RepoSnapshotTimeRange, err = decodeRepoSnapshotTimeRange(fields); err != nil {
+			return request, err
+		}
 		if request.ID, err = legacyField[string](fields, "id", "String", false); err != nil {
 			return request, err
 		}
@@ -388,6 +421,9 @@ func init() {
 			return request, err
 		}
 		if request.Page, err = legacyField[float64](fields, "page", "Number", true); err != nil {
+			return request, err
+		}
+		if request.RepoSnapshotTimeRange, err = decodeRepoSnapshotTimeRange(fields); err != nil {
 			return request, err
 		}
 		return request, nil

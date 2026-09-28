@@ -20,7 +20,8 @@ import {resizeSide} from "./resizeSide";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
 import {openDocHistory} from "./doc";
-import {getRepoSnapshotType, initRepoPanel, updateRepoSelection} from "./repoPanel";
+import {getRepoSnapshotRange, getRepoSnapshotType, initRepoPanel, updateRepoSelection} from "./repoPanel";
+import {repoSnapshotInRange} from "./repoRange";
 
 let historyEditor: Protyle;
 const repoPanelCleanup = new WeakMap<Element, () => void>();
@@ -387,8 +388,10 @@ const renderRepo = async (element: Element, currentPage: number) => {
     const request = (repoRequests.get(element) || 0) + 1;
     repoRequests.set(element, request);
     const selectValue = getRepoSnapshotType(element);
+    const range = getRepoSnapshotRange(element);
+    const hasRange = !!(range.startTime || range.endTime);
     const searchInputElement = element.querySelector<HTMLInputElement>(".b3-text-field");
-    const keyword = searchInputElement.value.trim();
+    const keyword = hasRange ? "" : searchInputElement.value.trim();
     const searchSnapshot = selectValue === "getRepoSnapshots" && /^[0-9a-f]{7,40}$/i.test(keyword);
     let searching = Boolean(keyword && selectValue === "getRepoSnapshots" && !searchSnapshot);
     const tagged = selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots";
@@ -402,7 +405,7 @@ const renderRepo = async (element: Element, currentPage: number) => {
     updateRepoSelection(element);
     element.setAttribute("data-page", String(currentPage));
     pageBtn.textContent = String(currentPage);
-    searchInputElement.parentElement.classList.toggle("fn__none", selectValue !== "getRepoSnapshots");
+    searchInputElement.parentElement.classList.toggle("fn__none", selectValue !== "getRepoSnapshots" || hasRange);
     searchButton.disabled = true;
     [previousElement, nextElement, pageBtn].forEach(button => {
         button.classList.toggle("fn__none", tagged);
@@ -427,13 +430,16 @@ const renderRepo = async (element: Element, currentPage: number) => {
         } else if (tagged) {
             response = await fetchSyncPost(`/api/repo/${selectValue}`, {}, undefined, false);
         } else {
-            response = await fetchSyncPost(`/api/repo/${selectValue}`, {page: currentPage}, undefined, false);
+            response = await fetchSyncPost(`/api/repo/${selectValue}`, {page: currentPage, ...range}, undefined, false);
         }
         if (repoRequests.get(element) !== request || !element.isConnected) {
             return;
         }
         if (response.code !== 0) {
             throw new Error(response.msg);
+        }
+        if (tagged && hasRange) {
+            response.data.snapshots = response.data.snapshots.filter((snapshot: {created: number}) => repoSnapshotInRange(snapshot.created, range));
         }
         setRepoSearchLayout(element, searching);
         if (searching) {

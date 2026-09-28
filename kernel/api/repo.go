@@ -169,8 +169,21 @@ var getRepoSnapshots = contractHandler(apicontract.GetRepoSnapshots, func(c *gin
 	var err error
 	if request.ID != "" || request.IncludeFiles {
 		snapshots, pageCount, totalCount, err = model.SearchRepoSnapshot(request.ID, request.IncludeFiles)
+		if err == nil && (request.StartTime != 0 || request.EndTime != 0) {
+			filtered := make([]*model.Snapshot, 0, len(snapshots))
+			for _, snapshot := range snapshots {
+				if model.SnapshotCreatedInRange(snapshot.Created, request.StartTime, request.EndTime) {
+					filtered = append(filtered, snapshot)
+				}
+			}
+			snapshots, totalCount = filtered, len(filtered)
+			pageCount = 0
+			if totalCount > 0 {
+				pageCount = 1
+			}
+		}
 	} else {
-		snapshots, pageCount, totalCount, err = model.GetRepoSnapshots(int(request.Page))
+		snapshots, pageCount, totalCount, err = model.GetRepoSnapshotsByTime(int(request.Page), request.StartTime, request.EndTime)
 	}
 	if err != nil {
 		return apicontract.Failure[apicontract.RepoSnapshotsData](-1, err.Error())
@@ -242,7 +255,7 @@ func holdRepoFileRequest(c *gin.Context, id string, ret *gulu.Result) bool {
 }
 
 var getCloudRepoSnapshots = contractHandler(apicontract.GetCloudRepoSnapshots, func(c *gin.Context, request apicontract.GetCloudRepoSnapshotsRequest) apicontract.Response[apicontract.RepoCloudSnapshotsData] {
-	snapshots, pageCount, totalCount, err := model.GetCloudRepoSnapshots(int(request.Page))
+	snapshots, pageCount, totalCount, err := model.GetCloudRepoSnapshotsByTime(int(request.Page), request.StartTime, request.EndTime)
 	if err != nil {
 		return apicontract.Failure[apicontract.RepoCloudSnapshotsData](-1, err.Error())
 	}

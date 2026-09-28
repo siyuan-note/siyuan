@@ -26362,8 +26362,14 @@
     "GetCloudRepoSnapshotsRequestInput": {
       "type": "object",
       "properties": {
+        "endTime": {
+          "type": "integer"
+        },
         "page": {
           "type": "number"
+        },
+        "startTime": {
+          "type": "integer"
         }
       },
       "required": [
@@ -26617,6 +26623,9 @@
     "GetRepoSnapshotsRequestInput": {
       "type": "object",
       "properties": {
+        "endTime": {
+          "type": "integer"
+        },
         "id": {
           "type": "string"
         },
@@ -26625,6 +26634,9 @@
         },
         "page": {
           "type": "number"
+        },
+        "startTime": {
+          "type": "integer"
         }
       },
       "required": [

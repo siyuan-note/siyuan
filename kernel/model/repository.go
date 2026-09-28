@@ -1735,6 +1735,10 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 }
 
 func GetCloudRepoSnapshots(page int) (ret []*dejavu.Log, pageCount, totalCount int, err error) {
+	return GetCloudRepoSnapshotsByTime(page, 0, 0)
+}
+
+func GetCloudRepoSnapshotsByTime(page int, startTime, endTime int64) (ret []*dejavu.Log, pageCount, totalCount int, err error) {
 	assetDownloadSourceMu.RLock()
 	defer assetDownloadSourceMu.RUnlock()
 	ret = []*dejavu.Log{}
@@ -1767,7 +1771,7 @@ func GetCloudRepoSnapshots(page int) (ret []*dejavu.Log, pageCount, totalCount i
 		page = 1
 	}
 
-	logs, pageCount, totalCount, err := repo.GetCloudRepoLogs(page)
+	logs, pageCount, totalCount, err := cloudRepoSnapshotsByTime(page, startTime, endTime, repo.GetCloudRepoLogs)
 	if err != nil {
 		return
 	}

@@ -6,6 +6,31 @@ import (
 	"testing"
 )
 
+func TestRepoSnapshotTimeRangeContract(t *testing.T) {
+	for _, body := range []string{`{"page":1}`, `{"page":1.75,"startTime":0,"endTime":0}`,
+		`{"page":1,"startTime":1790000000000}`, `{"page":1,"endTime":1790000000000}`,
+		`{"page":1,"startTime":1790000000000,"endTime":1790086400000}`} {
+		local, err := GetRepoSnapshots.Decode(strings.NewReader(body))
+		if err != nil {
+			t.Fatalf("local range: %s %v", body, err)
+		}
+		cloud, err := GetCloudRepoSnapshots.Decode(strings.NewReader(body))
+		if err != nil || local.RepoSnapshotTimeRange != cloud.RepoSnapshotTimeRange || local.Page != cloud.Page {
+			t.Fatalf("cloud range: %s %v", body, err)
+		}
+	}
+	for _, body := range []string{`{"page":1,"startTime":null}`, `{"page":1,"endTime":"1"}`,
+		`{"page":1,"startTime":-1}`, `{"page":1,"endTime":1.5}`, `{"page":1,"startTime":true}`,
+		`{"page":1,"startTime":2,"endTime":1}`, `{"page":1,"startTime":1,"endTime":1}`} {
+		if _, err := GetRepoSnapshots.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("local range accepted: %s", body)
+		}
+		if _, err := GetCloudRepoSnapshots.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("cloud range accepted: %s", body)
+		}
+	}
+}
+
 func TestRepoSnapshotIDContract(t *testing.T) {
 	for _, enabled := range []bool{false, true} {
 		body, _ := json.Marshal(map[string]interface{}{"page": 1, "includeFiles": enabled})

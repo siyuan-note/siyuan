@@ -14,6 +14,8 @@ it("detects snapshot IDs and falls back to file search without a mode switch", a
         {keyword: "abc", snapshotCount: 0, paths: ["searchRepoFile"], bodies: [{keyword: "abc", page: 3}], files: true},
         {keyword: "abcdef0.sy", snapshotCount: 0, paths: ["searchRepoFile"], bodies: [{keyword: "abcdef0.sy", page: 3}], files: true},
         {keyword: "  ", snapshotCount: 0, paths: ["getRepoSnapshots"], bodies: [{page: 3}], files: false},
+        {keyword: "old file search", snapshotCount: 1, paths: ["getRepoSnapshots"],
+            range: {startTime: 1000, endTime: 2000}, bodies: [{page: 3, startTime: 1000, endTime: 2000}], files: false},
     ]) {
         const noop = () => {};
         const node = () => ({classList: {contains: () => false, toggle: noop, add: noop, remove: noop},
@@ -35,6 +37,7 @@ it("detects snapshot IDs and falls back to file search without a mode switch", a
         const dependencies = {
             repoRequests: new WeakMap(),
             getRepoSnapshotType: () => "getRepoSnapshots",
+            getRepoSnapshotRange: () => "range" in test ? test.range : {},
             setRepoSearchLayout: (_element: Element, files: boolean) => { fileLayout = files; },
             updateRepoSelection: noop,
             fetchSyncPost: async (path: string, body: unknown) => {

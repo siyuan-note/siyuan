@@ -29,8 +29,8 @@ export const clearTemplatePreview = (element: Element) => {
 };
 
 export const previewTemplate = (pathString: string, element: Element, parentId: string, source?: string) => {
-    clearTemplatePreview(element);
     if (!pathString || !element.isConnected || element.closest(".fn__none")) {
+        clearTemplatePreview(element);
         return;
     }
     const request = {};
@@ -43,7 +43,11 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
         ...(source === undefined ? {} : {content: source})
     }, (response) => {
         // 切换模板或关闭预览后，忽略先前请求的返回结果。
-        if (templatePreviewRequests.get(element) !== request || !element.isConnected || response.code !== 0) {
+        if (templatePreviewRequests.get(element) !== request || !element.isConnected) {
+            return;
+        }
+        clearTemplatePreview(element);
+        if (response.code !== 0) {
             return;
         }
         const content = normalizeHTMLAssetIFrameBlockDOM(response.data.content.replace(/contenteditable="true"/g, ""));

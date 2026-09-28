@@ -8,6 +8,7 @@ import {searchMarkRender} from "../protyle/render/searchMarkRender";
 import {registerDatabaseRowRefresh} from "../protyle/render/av/databaseRowRefresh";
 import {focusDatabasePrimary} from "../protyle/render/av/primaryFocus";
 import {setPanelFocus} from "../layout/util";
+import {preserveAVBindingRange} from "../protyle/render/av/binding";
 
 export const newDatabaseRowModel = (options: {
     app: App,
@@ -23,6 +24,7 @@ export const newDatabaseRowModel = (options: {
         matchedKeyID?: string,
         keywords?: string[],
         focusPrimary?: boolean,
+        bindPrimary?: boolean,
     },
 }) => {
     let customModel: Custom;
@@ -74,7 +76,9 @@ export const newDatabaseRowModel = (options: {
                 return;
             }
             // 保留当前内容，待属性和反链加载完成后一次替换，避免刷新期间出现空白。
+            const restoreBindingRange = preserveAVBindingRange(contextProtyle, previousBodyElement);
             previousBodyElement.replaceWith(element);
+            restoreBindingRange(element);
             updateLayout(custom);
             updateTitle(custom, element);
             focusDatabasePrimary(custom.element, contextProtyle, data);
@@ -142,7 +146,7 @@ export const newDatabaseRowModel = (options: {
                         getAVID: () => (customModel.data as typeof options.data).avID,
                         refresh: () => render(customModel),
                     });
-                    custom.element.append(contextProtyle.highlight.styleElement);
+                    custom.element.append(contextProtyle.highlight.styleElement, contextProtyle.hint.element);
                     render(custom);
                 },
             });

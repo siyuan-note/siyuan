@@ -55,7 +55,6 @@ import {removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 import {createAttributeViewItem, createAttributeViewItemDocs, openNewItemTemplateMenu} from "./newItemTemplate";
 import {openDatabaseRowByData} from "./openDatabaseRow";
-import {openAVBindDocument} from "./bindDocument";
 import {openKanbanGroupMenu} from "./kanban/groupMenu";
 import {getGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {setPublishAVFolds, setPublishAVView} from "./publishState";
@@ -1190,6 +1189,25 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                 }
             });
         }
+        if (selectedItemInfos.length === 1 && primaryRows[0].isDetached) {
+            menu.addItem({
+                id: "bindDocument",
+                label: window.siyuan.languages.bind,
+                icon: "iconLink",
+                click() {
+                    openDatabaseRowByData(protyle, {
+                        avID: blockElement.dataset.avId,
+                        databaseBlockID: blockElement.dataset.nodeId,
+                        notebookID: protyle.notebookId,
+                        itemID: selectedItemInfos[0].itemID,
+                        valueID: primaryRows[0].valueID,
+                        title: primaryRows[0].content.trim(),
+                        isDetached: true,
+                        bindPrimary: true,
+                    });
+                }
+            });
+        }
         menu.addItem({
             id: "addToDatabase",
             label: window.siyuan.languages.addToDatabase,
@@ -1312,16 +1330,6 @@ ${window.siyuan.languages[isTableLikeView(avType) ? "insertRowAfter" : "insertIt
                 }
             });
             menu.addSeparator({id: "separator_2"});
-        }
-        if (selectedItemInfos.length === 1 && primaryRows[0].isDetached) {
-            menu.addItem({
-                id: "bindDocument",
-                label: window.siyuan.languages.bindDocument,
-                icon: "iconLink",
-                click() {
-                    openAVBindDocument(protyle, blockElement, selectedItemInfos[0].itemID);
-                }
-            });
         }
         if (hasBlock) {
             menu.addItem({

@@ -14,6 +14,7 @@ import {Custom} from "../../../layout/dock/Custom";
 import {searchMarkRender} from "../searchMarkRender";
 import {registerDatabaseRowRefresh} from "./databaseRowRefresh";
 import {focusDatabasePrimary} from "./primaryFocus";
+import {preserveAVBindingRange} from "./binding";
 
 export interface IDatabaseRowOpenData {
     avID: string;
@@ -28,6 +29,7 @@ export interface IDatabaseRowOpenData {
     matchedKeyID?: string;
     keywords?: string[];
     focusPrimary?: boolean;
+    bindPrimary?: boolean;
 }
 
 const highlightDatabaseRow = (protyle: IProtyle, rootElement: HTMLElement, data: IDatabaseRowOpenData) => {
@@ -94,7 +96,9 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
                 return;
             }
             // 保留当前内容，待属性和反链加载完成后一次替换，避免刷新期间出现空白。
+            const restoreBindingRange = preserveAVBindingRange(contextProtyle, previousBodyElement);
             previousBodyElement.replaceWith(element);
+            restoreBindingRange(element);
             const primaryElement = element.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');
             if (primaryElement?.dataset.cellValue) {
                 const value = JSON.parse(decodeURIComponent(primaryElement.dataset.cellValue)) as IAVCellValue;
@@ -121,7 +125,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
                 getAVID: () => data.avID,
                 refresh: () => render(contextProtyle),
             });
-            rowElement.append(contextProtyle.highlight.styleElement);
+            rowElement.append(contextProtyle.highlight.styleElement, contextProtyle.hint.element);
             render(contextProtyle);
         },
     });
@@ -232,6 +236,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
                     matchedKeyID: data.matchedKeyID,
                     keywords: data.keywords,
                     focusPrimary: data.focusPrimary,
+                    bindPrimary: data.bindPrimary,
                 },
             },
             afterOpen(model) {

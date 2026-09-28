@@ -1,6 +1,4 @@
 {
-	"bindDocument": "เชื่อมโยงเอกสาร",
-	"selectOneDocument": "โปรดเลือกเอกสารหนึ่งรายการ",
 	"horizontalSuperBlock": "ซูเปอร์บล็อกแนวนอน",
 	"verticalSuperBlock": "ซูเปอร์บล็อกแนวตั้ง",
 	"prependSuperBlockColumn": "เพิ่มคอลัมน์ที่จุดเริ่มต้นของซูเปอร์บล็อกปัจจุบัน",

@@ -1,6 +1,4 @@
 {
-	"bindDocument": "Bind document",
-	"selectOneDocument": "Please select one document",
 	"horizontalSuperBlock": "Horizontal super block",
 	"verticalSuperBlock": "Vertical super block",
 	"prependSuperBlockColumn": "Add a column to the beginning of the current super block",

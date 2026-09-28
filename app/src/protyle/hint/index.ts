@@ -66,7 +66,7 @@ import {isNotCtrl, isOnlyMeta} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
-import {getAVBindingOperations} from "../render/av/binding";
+import {getAVBindingCell, getAVBindingOperations} from "../render/av/binding";
 import {isRangeInEditor} from "../../util/newFileSelection";
 import {genCellValueByElement} from "../render/av/cell";
 import {setFold} from "../util/blockFold";
@@ -468,7 +468,7 @@ export class Hint {
             this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><img width="64px" src="/stage/loading-pure.svg"></div>';
             this.element.classList.remove("fn__none");
             if (this.source === "av") {
-                const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+                const cellElement = getAVBindingCell(protyle.toolbar.range);
                 if (cellElement) {
                     const cellRect = cellElement.getBoundingClientRect();
                     /// #if !MOBILE
@@ -587,7 +587,7 @@ export class Hint {
             this.element.classList.remove("hint--menu");
         }
         if (this.source === "av") {
-            const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+            const cellElement = getAVBindingCell(protyle.toolbar.range);
             if (cellElement) {
                 const cellRect = cellElement.getBoundingClientRect();
                 /// #if !MOBILE
@@ -807,20 +807,28 @@ ${genHintItemHTML(item)}
             return;
         }
         if (this.source === "av") {
-            let cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+            let cellElement = getAVBindingCell(protyle.toolbar.range);
             if (!cellElement) {
                 cellElement = nodeElement.querySelector(".av__cell--select") as HTMLElement;
             }
-            if (!cellElement) {
+            if (!cellElement?.isConnected || protyle.disabled || window.siyuan.isPublish ||
+                protyle.options.history?.created || protyle.options.history?.snapshot) {
                 return;
             }
-            const rowElement = hasClosestByClassName(cellElement, isTableLikeView(nodeElement.getAttribute("data-av-type")) ? "av__row" : "av__gallery-item");
+            const panelCell = cellElement.hasAttribute("data-row-id");
+            const rowElement = panelCell ? cellElement : hasClosestByClassName(cellElement,
+                isTableLikeView(nodeElement.getAttribute("data-av-type")) ? "av__row" : "av__gallery-item");
             if (!rowElement) {
                 return;
             }
-            const previousID = rowElement.dataset.id;
+            const previousID = panelCell ? rowElement.dataset.rowId : rowElement.dataset.id;
             const avID = nodeElement.getAttribute("data-av-id");
             const previousValue = genCellValueByElement("block", cellElement);
+            const updatePreview = (nextValue: IAVCellValue) => {
+                if (!panelCell) {
+                    updateAttrViewCellAnimation(cellElement, nextValue);
+                }
+            };
             if (value.startsWith("((newFileAtPath ") && value.endsWith(`${Lute.Caret}'))`)) {
                 const fileNames = value.substring("((newFileAtPath \"".length, value.length - 4).split(`"${Constants.ZWSP}'`);
                 const name = fileNames.length === 1 ? fileNames[0] : fileNames[1];
@@ -832,9 +840,10 @@ ${genHintItemHTML(item)}
                 // 选址期间条目可能被删除、换绑或重绘，始终校验原条目及其主键值。
                 const isValid = () => protyle.notebookId === notebookId && protyle.path === path &&
                     protyle.block.rootID === rootID && nodeElement.isConnected && bindingCell.isConnected &&
-                    protyle.wysiwyg.element.contains(nodeElement) && nodeElement.contains(rowElement) &&
+                    (panelCell || protyle.wysiwyg.element.contains(nodeElement)) && nodeElement.contains(rowElement) &&
                     rowElement.contains(bindingCell) && nodeElement.dataset.nodeId === blockID &&
-                    nodeElement.getAttribute("data-av-id") === avID && rowElement.dataset.id === previousID &&
+                    nodeElement.getAttribute("data-av-id") === avID &&
+                    (panelCell ? rowElement.dataset.rowId : rowElement.dataset.id) === previousID &&
                     JSON.stringify(genCellValueByElement("block", bindingCell)) === savedValue;
                 newFileAtPath({
                     notebookId,
@@ -849,7 +858,7 @@ ${genHintItemHTML(item)}
                         const operations = getAVBindingOperations(avID, previousID, id, blockID,
                             previousValue, {protyleID: protyle.id});
                         transaction(protyle, operations.doOperations, operations.undoOperations);
-                        updateAttrViewCellAnimation(bindingCell, {
+                        updatePreview({
                             type: "block",
                             isDetached: false,
                             block: {content: title, id},
@@ -877,7 +886,7 @@ ${genHintItemHTML(item)}
                 } else {
                     newFileByRefHint(protyle, realFileName, bindNewDoc, newID);
                 }
-                updateAttrViewCellAnimation(cellElement, {
+                updatePreview({
                     type: "block",
                     isDetached: false,
                     block: {content: realFileName, id: newID}
@@ -887,7 +896,7 @@ ${genHintItemHTML(item)}
                 const operations = getAVBindingOperations(avID, previousID, sourceId, nodeElement.dataset.nodeId,
                     previousValue, {protyleID: protyle.id});
                 transaction(protyle, operations.doOperations, operations.undoOperations);
-                updateAttrViewCellAnimation(cellElement, {
+                updatePreview({
                     type: "block",
                     isDetached: false,
                     block: {

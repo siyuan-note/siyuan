@@ -1,6 +1,4 @@
 {
-	"bindDocument": "문서 연결",
-	"selectOneDocument": "문서를 하나 선택하세요",
 	"horizontalSuperBlock": "가로 슈퍼 블록",
 	"verticalSuperBlock": "세로 슈퍼 블록",
 	"prependSuperBlockColumn": "현재 슈퍼 블록 시작 부분에 열 추가",

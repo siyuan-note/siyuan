@@ -133,7 +133,7 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
     switch (value.type) {
         case "block":
             html = `<input data-id="${value.block.id}" value="${escapeAttr(value.block.content)}" type="text" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
-<button type="button" data-type="av-bind-document" class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${value.isDetached || !value.block.id ? window.siyuan.languages.bindDocument : window.siyuan.languages.rebind}"><svg><use xlink:href="#iconLink"></use></svg></button>`;
+<button type="button" data-type="av-bind-document" class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${value.isDetached || !value.block.id ? window.siyuan.languages.bind : window.siyuan.languages.rebind}"><svg><use xlink:href="#iconLink"></use></svg></button>`;
             break;
         case "text": {
             const source = getAVTextSource(value);

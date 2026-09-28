@@ -1,6 +1,4 @@
 {
-	"bindDocument": "綁定文件",
-	"selectOneDocument": "請選擇一個文件",
 	"horizontalSuperBlock": "橫向超級區塊",
 	"verticalSuperBlock": "縱向超級區塊",
 	"prependSuperBlockColumn": "在目前超級區塊開頭新增分欄",

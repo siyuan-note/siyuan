@@ -573,7 +573,8 @@ export const genHintItemHTML = (item: IBlock) => {
 };
 
 export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IHintData[] => {
-    const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
+    const nodeElement = hasClosestBlock((source === "av" ? protyle.toolbar.range :
+        getEditorRange(protyle.wysiwyg.element)).startContainer);
     const createTarget = protyle.hint.prepareCreateTarget(protyle, "ref");
     protyle.hint.genLoading(protyle);
     let refParam: import("../../types/api").SearchRefBlockRequestInput;

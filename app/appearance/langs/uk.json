@@ -1,6 +1,4 @@
 {
-	"bindDocument": "Прив’язати документ",
-	"selectOneDocument": "Виберіть один документ",
 	"horizontalSuperBlock": "Горизонтальний суперблок",
 	"verticalSuperBlock": "Вертикальний суперблок",
 	"prependSuperBlockColumn": "Додати стовпець на початок поточного суперблока",

@@ -1,6 +1,4 @@
 {
-	"bindDocument": "ドキュメントを関連付ける",
-	"selectOneDocument": "ドキュメントを1つ選択してください",
 	"horizontalSuperBlock": "横向きスーパーブロック",
 	"verticalSuperBlock": "縦向きスーパーブロック",
 	"prependSuperBlockColumn": "現在のスーパーブロックの先頭に列を追加",

@@ -1,6 +1,4 @@
 {
-	"bindDocument": "ربط مستند",
-	"selectOneDocument": "يرجى تحديد مستند واحد",
 	"horizontalSuperBlock": "كتلة خارقة أفقية",
 	"verticalSuperBlock": "كتلة خارقة عمودية",
 	"prependSuperBlockColumn": "إضافة عمود إلى بداية الكتلة الخارقة الحالية",

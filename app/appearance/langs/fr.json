@@ -1,6 +1,4 @@
 {
-	"bindDocument": "Lier un document",
-	"selectOneDocument": "Veuillez sélectionner un seul document",
 	"horizontalSuperBlock": "Superblock horizontal",
 	"verticalSuperBlock": "Superblock vertical",
 	"prependSuperBlockColumn": "Ajouter une colonne au début du superblock actuel",

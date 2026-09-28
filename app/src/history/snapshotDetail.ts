@@ -96,7 +96,7 @@ export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot
         root.querySelector(".history__snapshot-detail-content").classList.remove("fn__none");
         if (selected) {
             select(selected);
-            selected.scrollIntoView({block: "nearest"});
+            selected.scrollIntoView({block: "start"});
         }
     } catch (error) {
         if (!abort.signal.aborted && root.isConnected) {

@@ -35316,6 +35316,19 @@
         "tag": {
           "type": "string"
         },
+        "tags": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "typesCount": {
           "anyOf": [
             {
@@ -35352,6 +35365,7 @@
         "systemName",
         "systemOS",
         "tag",
+        "tags",
         "typesCount"
       ],
       "additionalProperties": false

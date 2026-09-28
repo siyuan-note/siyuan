@@ -981,6 +981,7 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 
 type Snapshot struct {
 	*dejavu.Log
+	Tags             []string     `json:"tags"`
 	TypesCount       []*TypeCount `json:"typesCount"`
 	RequiresDownload bool         `json:"requiresDownload"`
 }
@@ -1051,6 +1052,9 @@ func SearchRepoSnapshot(id string, includeFiles bool) (ret []*Snapshot, pageCoun
 	}
 	sort.SliceStable(logs, func(i, j int) bool { return logs[i].Created > logs[j].Created })
 	ret = buildSnapshots(logs, includeFiles)
+	if err = attachSnapshotTags(repo, ret); err != nil {
+		return ret, 0, 0, err
+	}
 	return ret, 1, len(ret), nil
 }
 
@@ -1079,10 +1083,27 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 	}
 
 	ret = buildSnapshots(logs, false)
+	err = attachSnapshotTags(repo, ret)
 	if 1 > len(ret) {
 		ret = []*Snapshot{}
 	}
 	return
+}
+
+func attachSnapshotTags(repo *dejavu.Repo, snapshots []*Snapshot) error {
+	if len(snapshots) == 0 {
+		return nil
+	}
+	_, tags, err := localTaggedSnapshotIndexes(context.Background(), repo)
+	if err != nil {
+		return err
+	}
+	for _, snapshot := range snapshots {
+		if names := tags[snapshot.ID]; len(names) > 0 {
+			snapshot.Tags = names
+		}
+	}
+	return nil
 }
 
 func buildSnapshots(logs []*dejavu.Log, includeFiles bool) (ret []*Snapshot) {
@@ -1101,6 +1122,7 @@ func buildSnapshots(logs []*dejavu.Log, includeFiles bool) (ret []*Snapshot) {
 		}
 		ret = append(ret, &Snapshot{
 			Log:              l,
+			Tags:             []string{},
 			TypesCount:       typesCount,
 			RequiresDownload: requiresDownload,
 		})
@@ -1773,6 +1795,7 @@ func GetTagSnapshots() (ret []*Snapshot, err error) {
 		return
 	}
 	ret = buildSnapshots(logs, false)
+	err = attachSnapshotTags(repo, ret)
 	if 1 > len(ret) {
 		ret = []*Snapshot{}
 	}

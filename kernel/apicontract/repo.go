@@ -145,6 +145,9 @@ type RepoKeyData struct {
 }
 type RepoSnapshot struct {
 	RepoLog
+	// Tags 为该快照的全部本地标记，按名称排序；未标记时为空数组。
+	// Tag 保留标记快照视图中当前行的单个标记，供上传、移除等操作使用。
+	Tags             []string         `json:"tags"`
 	TypesCount       []*RepoTypeCount `json:"typesCount"`
 	RequiresDownload bool             `json:"requiresDownload"`
 }

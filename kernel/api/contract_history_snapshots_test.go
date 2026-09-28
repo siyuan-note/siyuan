@@ -103,6 +103,9 @@ func TestAPIContractDocHistorySnapshots(t *testing.T) {
 		if (len(response.Data.Snapshots[0].Files) > 0) != include {
 			t.Fatalf("unexpected file metadata: %s", recorder.Body.String())
 		}
+		if tags := response.Data.Snapshots[0].Tags; len(tags) != 1 || tags[0] != "release" {
+			t.Fatalf("missing snapshot tags: %s", recorder.Body.String())
+		}
 	}
 	for _, test := range []struct {
 		body string

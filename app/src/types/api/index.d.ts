@@ -1616,7 +1616,7 @@ export type RepoOpenFileData = { "content": string; "displayInText": boolean; "t
 
 export type RepoSearchData = { "files": Array<RepoDiffFile | null> | null; "pageCount": number; "totalCount": number; };
 
-export type RepoSnapshot = { "count": number; "created": number; "files": Array<RepoFile | null> | null; "hCreated": string; "hSize": string; "hTagUpdated": string; "id": string; "memo": string; "requiresDownload": boolean; "size": number; "systemID": string; "systemName": string; "systemOS": string; "tag": string; "typesCount": Array<RepoTypeCount | null> | null; };
+export type RepoSnapshot = { "count": number; "created": number; "files": Array<RepoFile | null> | null; "hCreated": string; "hSize": string; "hTagUpdated": string; "id": string; "memo": string; "requiresDownload": boolean; "size": number; "systemID": string; "systemName": string; "systemOS": string; "tag": string; "tags": Array<string> | null; "typesCount": Array<RepoTypeCount | null> | null; };
 
 export type RepoSnapshotsData = { "pageCount": number; "snapshots": Array<RepoSnapshot | null> | null; "totalCount": number; };
 

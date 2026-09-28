@@ -280,6 +280,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         systemName: string,
         systemOS: string,
         tag: string,
+        tags?: string[],
         requiresDownload?: boolean,
         typesCount: { type: string, count: number }[]
     }) => {
@@ -293,6 +294,7 @@ ${window.siyuan.languages.fileCount} ${item.count}<span class="fn__space"></span
             });
             statHTML += "</div>";
         }
+        const tags = type === "getRepoSnapshots" ? item.tags || [] : (item.tag ? [item.tag] : []);
         const infoHTML = `<div${isPhone ? ' style="padding-top:8px"' : ""}>
     <span data-type="hCreated">${item.hCreated}</span>
     <span class="fn__space"></span>
@@ -300,7 +302,7 @@ ${window.siyuan.languages.fileCount} ${item.count}<span class="fn__space"></span
     <span class="fn__space"></span>
     ${item.systemOS}${(item.systemName && item.systemOS) ? "/" : ""}${item.systemName}
     <span class="fn__space"></span>
-    <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${escapeHtml(item.tag)}</span>
+    ${tags.map(tag => `<span class="b3-chip b3-chip--secondary b3-chip--small">${escapeHtml(tag)}</span>`).join(" ")}
 </div>
 ${item.requiresDownload && ["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) ?
     `<div class="ft__smaller ft__error" style="white-space:normal">${escapeHtml(window.siyuan.languages.syncAssetSnapshotIncomplete)}</div>` : ""}

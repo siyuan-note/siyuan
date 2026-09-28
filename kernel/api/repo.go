@@ -442,7 +442,7 @@ func repoSnapshots(values []*model.Snapshot) []*apicontract.RepoSnapshot {
 		if value == nil {
 			continue
 		}
-		snapshot := &apicontract.RepoSnapshot{RepoLog: *repoLog(value.Log), RequiresDownload: value.RequiresDownload}
+		snapshot := &apicontract.RepoSnapshot{RepoLog: *repoLog(value.Log), Tags: value.Tags, RequiresDownload: value.RequiresDownload}
 		if value.TypesCount != nil {
 			snapshot.TypesCount = make([]*apicontract.RepoTypeCount, len(value.TypesCount))
 			for j, count := range value.TypesCount {

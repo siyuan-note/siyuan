@@ -9,6 +9,7 @@ import {escapeAttr, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
 import {pathPosix} from "../util/pathName";
 import {getHostCapabilities} from "../util/hostCapabilities";
+import {decodeDocTitle} from "../util/docTitle";
 import * as dayjs from "dayjs";
 
 interface IRepoFile {
@@ -46,7 +47,7 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
 </li>`;
             return;
         }
-        const pathHTML = showPath && item.hPath ? `${escapeHtml(item.hPath)}<span class="fn__space"></span>` : "";
+        const pathHTML = showPath && item.hPath ? `${escapeHtml(decodeDocTitle(item.hPath))}<span class="fn__space"></span>` : "";
         /// #if MOBILE
         html += `<li class="b3-list-item" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}">
     <div class="fn__flex-1">

@@ -63,6 +63,10 @@ func TestExportMarkdownHPathIncludesNotebook(t *testing.T) {
 	if target != "/Notebook B/Folder/Target.md" {
 		t.Fatalf("unexpected target path: %q", target)
 	}
+	withSlash := exportMarkdownHPath("20260814000000-box0001", "/Parent"+util.DocTitleSlash+"One/Child.md", boxPaths)
+	if withSlash != "/Notebook A/Parent／One/Child.md" {
+		t.Fatalf("encoded slash leaked into export path: %q", withSlash)
+	}
 	reference := exportMarkdownRelativePath(filepath.ToSlash(filepath.Dir(source)), target+"#20260814000000-block01")
 	if reference != "../Notebook B/Folder/Target.md#20260814000000-block01" {
 		t.Fatalf("unexpected cross-notebook reference: %q", reference)

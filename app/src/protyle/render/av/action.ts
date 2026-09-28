@@ -1,4 +1,5 @@
 import {isTableLikeView} from "./viewType";
+import {decodeDocTitle} from "../../../util/docTitle";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {transaction} from "../../wysiwyg/transaction";
@@ -1101,7 +1102,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                         if (response.code !== 0 || typeof response.data !== "string") {
                             continue;
                         }
-                        content = response.data;
+                        content = decodeDocTitle(response.data);
                     }
 
                     if (ids.length > 1) {

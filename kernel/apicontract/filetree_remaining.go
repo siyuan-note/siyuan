@@ -62,6 +62,7 @@ type FileTreeMoveIDsRequest struct {
 }
 type FileTreeRenameRequest struct {
 	FileTreePathRequest
+	// 标题允许半角斜杠，文档层级路径会单独编码该字符。
 	Title string `json:"title"`
 }
 type FileTreeRenameIDRequest struct {
@@ -77,6 +78,7 @@ type FileTreeCreateOptions struct {
 }
 type FileTreeCreateRequest struct {
 	FileTreePathRequest
+	// 标题允许半角斜杠，path 仍使用文档 ID 作为路径段。
 	Title string   `json:"title"`
 	MD    string   `json:"md"`
 	Sorts []string `json:"sorts" api:"optional,nullable"`
@@ -87,6 +89,8 @@ type FileTreeDailyNoteRequest struct {
 	App      string `json:"app" api:"optional,nullable"`
 	fields   fileTreeFields
 }
+
+// FileTreeCreateMarkdownRequest 的 path 是文档层级路径，标题中的半角斜杠须编码为 U+F0000，路径分隔符仍为 /。
 type FileTreeCreateMarkdownRequest struct {
 	FileTreePathRequest
 	Markdown     string  `json:"markdown"`

@@ -21,6 +21,7 @@ import {expandFileTree} from "../layout/dock/fileTreeAnimation";
 import {getHostCapabilities} from "./hostCapabilities";
 import {highlightSearchText} from "./searchHighlight";
 import {addClearButton} from "./addClearButton";
+import {getDocTitleText} from "./docTitle";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     if (!getHostCapabilities().localFileSystem) {
@@ -158,7 +159,7 @@ export const getDocDisplayName = (name: string, titleEmpty?: boolean, escape?: b
     if (titleEmpty) {
         return window.siyuan.languages["_kernel"][16];
     }
-    const displayName = getDisplayName(name, true, true);
+    const displayName = getDocTitleText(name);
     if (escape) {
         return Lute.EscapeHTMLStr(displayName);
     }

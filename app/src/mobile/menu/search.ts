@@ -9,6 +9,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
 import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix} from "../../util/pathName";
+import {decodeDocTitle} from "../../util/docTitle";
 import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {isDisabledFeature, setStorageVal} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
@@ -125,7 +126,7 @@ const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConf
     const searchPathElement = element.querySelector("#searchPath");
     if (newConfig.hPath) {
         searchPathElement.classList.remove("fn__none");
-        searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(newConfig.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
+        searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(decodeDocTitle(newConfig.hPath))}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
     } else {
         searchPathElement.classList.add("fn__none");
     }
@@ -183,7 +184,7 @@ const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig,
     let currentData;
     let newData;
     data.forEach((item: IBlock) => {
-        const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
+        const title = getNotebookName(item.box) + decodeDocTitle(getDisplayName(item.hPath, false));
         if (item.children) {
             resultHTML += `<div class="b3-list-item">
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
@@ -533,7 +534,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                     config.hPath = response.data[0];
                     const searchPathElement = element.querySelector("#searchPath");
                     searchPathElement.classList.remove("fn__none");
-                    searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
+                    searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(decodeDocTitle(config.hPath))}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
 
                     const includeElement = element.querySelector('[data-type="include"]');
                     includeElement.classList.remove("toolbar__icon--active");
@@ -567,7 +568,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
 
                             const searchPathElement = element.querySelector("#searchPath");
                             searchPathElement.classList.remove("fn__none");
-                            searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
+                            searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(decodeDocTitle(config.hPath))}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
 
                             const includeElement = element.querySelector('[data-type="include"]');
                             includeElement.classList.add("toolbar__icon--active");
@@ -840,7 +841,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
     <div id="searchList" style="overflow:auto;" class="fn__flex-1 b3-list b3-list--background"></div>
     <div id="searchPath" class="b3-chips${config.hPath ? "" : " fn__none"}" style="background-color: var(--b3-theme-background);">
         <div class="b3-chip b3-chip--middle">
-            ${escapeHtml(config.hPath)}
+            ${escapeHtml(decodeDocTitle(config.hPath))}
             <svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg>
         </div>
     </div>
@@ -985,7 +986,7 @@ const getUnRefListMobile = (element: Element, page = 1) => {
         }
         let resultHTML = "";
         response.data.blocks.forEach((item: IBlock, index: number) => {
-            const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
+            const title = escapeHtml(getNotebookName(item.box)) + decodeDocTitle(getDisplayName(item.hPath, false));
             resultHTML += `<div class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-type="search-item" data-node-id="${item.id}">
 <div class="b3-list-item__first">
     <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>

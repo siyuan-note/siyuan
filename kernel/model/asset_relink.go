@@ -190,7 +190,7 @@ func (p *assetRelinkPlan) scan() error {
 			rel, _ := filepath.Rel(boxDir, absPath)
 			tree.Box, tree.Path = boxID, "/"+filepath.ToSlash(rel)
 			tree.Root.Box, tree.Root.Path = tree.Box, tree.Path
-			tree.HPath = "/" + tree.Root.IALAttr("title")
+			tree.HPath = "/" + util.EncodeDocTitlePath(tree.Root.IALAttr("title"))
 			if readErr = filesys.NormalizeTreeForRead(tree); readErr != nil {
 				return readErr
 			}
@@ -224,7 +224,7 @@ func (p *assetRelinkPlan) scan() error {
 		parts := strings.Split(strings.TrimSuffix(strings.TrimPrefix(tree.Path, "/"), ".sy"), "/")
 		for i, id := range parts {
 			if title, ok := titles[id]; ok {
-				parts[i] = title
+				parts[i] = util.EncodeDocTitlePath(title)
 			}
 		}
 		tree.HPath = "/" + strings.Join(parts, "/")

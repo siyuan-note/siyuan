@@ -1667,7 +1667,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			if nil == unescapeErr {
 				title = unescapedTitle
 			}
-			hPath = path.Join(path.Dir(hPath), title)
+			hPath = path.Join(path.Dir(hPath), util.EncodeDocTitlePath(title))
 			updated := yfmUpdated
 			fname := path.Base(targetPath)
 			targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
@@ -1825,7 +1825,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		tree.Root.SetIALAttr("title", title)
 		tree.Box = boxID
 		tree.Path = targetPath
-		tree.HPath = path.Join(baseHPath, title)
+		tree.HPath = path.Join(baseHPath, util.EncodeDocTitlePath(title))
 		tree.Root.Spec = treenode.CurrentSpec
 
 		localPathParentDir := filepath.Dir(localPath)

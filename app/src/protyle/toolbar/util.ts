@@ -1,4 +1,5 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {decodeDocTitle} from "../../util/docTitle";
 import {markToolbarHotkey} from "./hotkey";
 import {Constants} from "../../constants";
 import {focusByRange, focusByWbr} from "../util/selection";
@@ -398,7 +399,7 @@ export const copyTextByType = async (ids: string[],
             if (response.code !== 0 || typeof response.data !== "string") {
                 continue;
             }
-            text += response.data;
+            text += decodeDocTitle(response.data);
         } else if (type === "webURL") {
             text += `${window.location.origin}?id=${id}`;
         } else if (type === "id") {

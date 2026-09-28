@@ -771,6 +771,8 @@ var RemoveIndexes = define[FileTreePathsRequest, Null]("removeIndexes", "/api/fi
 var Doc2Heading = define[FileTreeDocHeadingRequest, FileTreeDocHeadingData]("doc2Heading", "/api/filetree/doc2Heading", JSONBody, ResponseOptions{}, "POST")
 var Heading2Doc = define[FileTreeHeadingDocRequest, Null]("heading2Doc", "/api/filetree/heading2Doc", JSONBody, ResponseOptions{}, "POST")
 var Li2Doc = define[FileTreeListItemDocRequest, Null]("li2Doc", "/api/filetree/li2Doc", JSONBody, ResponseOptions{}, "POST")
+
+// HPath 使用 / 分隔文档，标题内的 / 编码为 U+F0000；查询 HPath 时须原样传回编码值。
 var GetHPathByPath = define[FileTreePathRequest, string]("getHPathByPath", "/api/filetree/getHPathByPath", JSONBody, ResponseOptions{}, "POST")
 var GetHPathsByPaths = define[FileTreePathsRequest, []string]("getHPathsByPaths", "/api/filetree/getHPathsByPaths", JSONBody, ResponseOptions{}, "POST")
 var GetHPathByID = define[FileTreeIDRequest, string]("getHPathByID", "/api/filetree/getHPathByID", JSONBody, ResponseOptions{}, "POST")

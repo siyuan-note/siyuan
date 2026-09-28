@@ -131,6 +131,53 @@ func addFileOperationTestDoc(t *testing.T, fixture *fileOperationTestFixture, id
 	return tree
 }
 
+func TestDocTitleSlashUsesEncodedHPath(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	if got := normalizeDocTitle("Parent" + util.DocTitleSlash + "One"); got != "Parent/One" {
+		t.Fatalf("encoded slash was not decoded: %q", got)
+	}
+	parent := treenode.NewTree(fixture.box.ID, fixture.sourcePath, "/Parent"+util.DocTitleSlash+"One", normalizeDocTitle("Parent/One"))
+	if _, err := filesys.WriteTree(parent); err != nil {
+		t.Fatalf("write parent with slash failed: %v", err)
+	}
+	treenode.UpsertBlockTree(parent)
+	loaded, err := filesys.LoadTree(fixture.box.ID, fixture.sourcePath, util.NewLute())
+	if err != nil {
+		t.Fatalf("load document with slash failed: %v", err)
+	}
+	if got := loaded.Root.IALAttr("title"); got != "Parent/One" {
+		t.Fatalf("unexpected title: %q", got)
+	}
+	if got := loaded.HPath; got != "/Parent"+util.DocTitleSlash+"One" {
+		t.Fatalf("unexpected path: %q", got)
+	}
+
+	childID := ast.NewNodeID()
+	childPath := "/" + fixture.sourceID + "/" + childID + ".sy"
+	child, err := validateCreateDoc(fixture.box.ID, childPath, "Child/Two", false)
+	if err != nil {
+		t.Fatalf("validate child with slash failed: %v", err)
+	}
+	if got := child.title; got != "Child/Two" {
+		t.Fatalf("unexpected child title: %q", got)
+	}
+	if got := child.hPath; got != loaded.HPath+"/Child"+util.DocTitleSlash+"Two" {
+		t.Fatalf("unexpected child path: %q", got)
+	}
+	called := false
+	_, err = createDocsByHPath0(fixture.box.ID, child.hPath, "", fixture.sourceID, childID, false,
+		func(boxID, p, title, dom string, titleEmpty bool) (*parse.Tree, error) {
+			called = true
+			if boxID != fixture.box.ID || p != childPath || title != "Child/Two" {
+				t.Fatalf("decoded path target changed: box=%q, path=%q, title=%q", boxID, p, title)
+			}
+			return nil, nil
+		})
+	if err != nil || !called {
+		t.Fatalf("encoded HPath was not resolved: called=%t, err=%v", called, err)
+	}
+}
+
 func TestListDocTreeUsesPathIDForInvalidPropertiesID(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	ial := filesys.DocIAL(filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath))

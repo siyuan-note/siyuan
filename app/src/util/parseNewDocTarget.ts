@@ -15,6 +15,7 @@
  */
 
 import {mergePathSegments} from "./mergePathSegments";
+import {encodeDocTitle} from "./docTitle";
 
 /** 内核 `createDocsByHPath` 按 HPath 逐级创建 */
 export type NewDocTargetByHPath = {
@@ -128,7 +129,7 @@ export const getNewDocTargetFromSavePath = (request: {
 
     let hPath: string;
     if (title) {
-        hPath = "/" + [...parentPathSegments, title].join("/");
+        hPath = "/" + [...parentPathSegments, encodeDocTitle(title)].join("/");
     } else {
         // 空标题时保留尾 `/` 使 hPath 末段为空，内核按父文档链在其内新建子文档
         hPath = parentPathSegments.length === 0 ? "/" : "/" + parentPathSegments.join("/") + "/";

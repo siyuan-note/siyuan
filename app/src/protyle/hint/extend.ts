@@ -17,7 +17,7 @@ import {
     getSbChildBlockCount,
     getTopAloneElement
 } from "../wysiwyg/getBlock";
-import {replaceFileName} from "../../editor/rename";
+import {sanitizeDocTitleInput} from "../../util/docTitle";
 import {transaction} from "../wysiwyg/transaction";
 import {getAssetExtension, getAssetName, getDisplayName, isEncryptedBox} from "../../util/pathName";
 import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../../block/util";
@@ -598,7 +598,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
             const dataList: IHintData[] = [];
             let createItemCount = 0;
             if (response.data.newDoc) {
-                const newFileName = Lute.UnEscapeHTMLStr(replaceFileName(response.data.k));
+                const newFileName = Lute.UnEscapeHTMLStr(sanitizeDocTitleInput(response.data.k));
                 if (!hideConfiguredCreate) {
                     dataList.push({
                         value: `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,

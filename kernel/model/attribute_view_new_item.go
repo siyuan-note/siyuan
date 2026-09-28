@@ -463,7 +463,7 @@ func newItemDocumentPreview(blockTree *treenode.BlockTree, boxID, renderedPath, 
 			preview.HPath = "/"
 		}
 	} else {
-		preview.HPath = path.Join(parentHPath, primary)
+		preview.HPath = path.Join(parentHPath, util.EncodeDocTitlePath(primary))
 	}
 	if inherited && boxID != blockTree.BoxID {
 		preview.parentID = ""

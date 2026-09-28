@@ -1,4 +1,5 @@
 import {BlockPanel} from "./Panel";
+import {decodeDocTitle} from "../util/docTitle";
 import {isAbove} from "../util/zIndex";
 import {hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -250,8 +251,8 @@ export const initBlockPopover = (app: App) => {
                             if (signal.aborted) {
                                 return;
                             }
-                            showTooltip(escapeLessThans(response.data), tab.headElement);
-                            tab.headElement.setAttribute("aria-label", escapeLessThans(response.data));
+                            showTooltip(escapeLessThans(decodeDocTitle(response.data)), tab.headElement);
+                            tab.headElement.setAttribute("aria-label", escapeLessThans(decodeDocTitle(response.data)));
                             if (tooltipAbortController === capturedController) {
                                 tooltipAbortController = null;
                             }

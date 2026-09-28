@@ -233,7 +233,7 @@ func (collector *templateDocTreeCollector) bindNodes(nodes []*TemplateDocTreeNod
 	for _, node := range nodes {
 		node.ParentID = parentID
 		node.path = strings.TrimSuffix(parentPath, ".sy") + "/" + node.ID + ".sy"
-		node.HPath = path.Join(parentHPath, node.Title)
+		node.HPath = path.Join(parentHPath, util.EncodeDocTitlePath(node.Title))
 		collector.bindNodes(node.Children, node.ID, node.path, node.HPath)
 	}
 }

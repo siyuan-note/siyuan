@@ -281,7 +281,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 
 	parts = parts[1 : len(parts)-1] // 去掉开头的斜杆和结尾的自己
 	if 1 > len(parts) {
-		ret.HPath = "/" + ret.Root.IALAttr("title")
+		ret.HPath = "/" + util.EncodeDocTitlePath(ret.Root.IALAttr("title"))
 		ret.Hash = treenode.NodeHash(ret.Root, ret, luteEngine)
 		return
 	}
@@ -326,10 +326,10 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 		if "" == title {
 			title = "Untitled"
 		}
-		hPathBuilder.WriteString(title)
+		hPathBuilder.WriteString(util.EncodeDocTitlePath(title))
 		hPathBuilder.WriteString("/")
 	}
-	hPathBuilder.WriteString(ret.Root.IALAttr("title"))
+	hPathBuilder.WriteString(util.EncodeDocTitlePath(ret.Root.IALAttr("title")))
 	ret.HPath = hPathBuilder.String()
 	ret.Hash = treenode.NodeHash(ret.Root, ret, luteEngine)
 	return

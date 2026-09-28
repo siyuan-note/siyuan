@@ -1,4 +1,5 @@
 import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {decodeDocTitle} from "../util/docTitle";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 import {Constants} from "../constants";
 import {escapeHtml} from "../util/escape";
@@ -36,7 +37,7 @@ const renderRecentDocsContent = async (data: {
             id: data[0].rootID // 过滤后的第一个文档 ID
         });
         if (pathResponse.code === 0 && typeof pathResponse.data === "string") {
-            switchPath = escapeHtml(pathResponse.data);
+            switchPath = escapeHtml(decodeDocTitle(pathResponse.data));
         }
     }
     let dockHtml = "";

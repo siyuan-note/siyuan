@@ -1,5 +1,6 @@
 import {getKeymapBindings} from "../../util/keymapBindings";
 import {fetchPost} from "../../util/fetch";
+import {decodeDocTitle} from "../../util/docTitle";
 import {escapeHtml} from "../../util/escape";
 import {openCard} from "../../card/openCard";
 import {getDockByType} from "../../layout/tabUtil";
@@ -79,7 +80,7 @@ export const windowKeyUp = (app: App, event: KeyboardEvent) => {
                     fetchPost("/api/filetree/getFullHPathByID", {
                         id: rootId
                     }, (response) => {
-                        currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = escapeHtml(response.data);
+                        currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = escapeHtml(decodeDocTitle(response.data));
                     });
                 } else {
                     currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = currentLiElement.querySelector(".b3-list-item__text").innerHTML;

@@ -1,6 +1,7 @@
 import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {matchHotKey} from "../util/hotKey";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {decodeDocTitle} from "../../util/docTitle";
 import {isMac, writeText} from "../util/compatibility";
 import {focusBlock, getSelectionOffset, setFirstNodeRange, setLastNodeRange,} from "../util/selection";
 import {getContenteditableElement, getNextBlock} from "./getBlock";
@@ -52,7 +53,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
         fetchPost("/api/filetree/getHPathByID", {
             id: protyle.block.rootID
         }, (response) => {
-            writeText(response.data);
+            writeText(decodeDocTitle(response.data));
         });
         event.preventDefault();
         event.stopPropagation();

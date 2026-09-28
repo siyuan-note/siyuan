@@ -187,9 +187,9 @@ func prepareDuplicateDocTree(boxID, rootPath string) (*duplicateDocTreePlan, err
 		if i == 0 {
 			title := tree.Root.IALAttr("title") + " (Duplicated " + time.Now().Format("2006-01-02 15:04:05") + ")"
 			tree.Root.SetIALAttr("title", title)
-			tree.HPath = path.Join(path.Dir(tree.HPath), title)
+			tree.HPath = path.Join(path.Dir(tree.HPath), util.EncodeDocTitlePath(title))
 		} else {
-			tree.HPath = hpaths[path.Dir(originalPath)+".sy"] + "/" + tree.Root.IALAttr("title")
+			tree.HPath = hpaths[path.Dir(originalPath)+".sy"] + "/" + util.EncodeDocTitlePath(tree.Root.IALAttr("title"))
 		}
 		hpaths[originalPath] = tree.HPath
 		parts := strings.Split(strings.TrimSuffix(originalPath, ".sy"), "/")

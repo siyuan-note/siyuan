@@ -13,6 +13,7 @@ import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
 import {MenuItem} from "../menus/Menu";
 import {getDisplayName, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix, useShell} from "../util/pathName";
+import {decodeDocTitle} from "../util/docTitle";
 import {Protyle} from "../protyle";
 import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
@@ -153,8 +154,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         <span id="searchResult" class="fn__flex-shrink ft__selectnone"></span>
         <span class="fn__space"></span>
         <span class="fn__flex-1${closeCB ? " resize__move" : ""}" style="min-height: 100%"></span>
-        <span id="searchPathInput" data-position="9south" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeAriaLabel(escapeHtml(escapeHtml(config.hPath)))}">
-            ${escapeHtml(config.hPath)}
+        <span id="searchPathInput" data-position="9south" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeAriaLabel(escapeHtml(escapeHtml(decodeDocTitle(config.hPath))))}">
+            ${escapeHtml(decodeDocTitle(config.hPath))}
             <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconCloseRound"></use></svg>
         </span>
         <span class="fn__space"></span>
@@ -544,8 +545,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                             }
                             config.hPath = hPathList.join(" ");
                             config.page = 1;
-                            searchPathInputElement.innerHTML = `${escapeHtml(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-                            searchPathInputElement.setAttribute("aria-label", escapeHtml(config.hPath));
+                            searchPathInputElement.innerHTML = `${escapeHtml(decodeDocTitle(config.hPath))}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
+                            searchPathInputElement.setAttribute("aria-label", escapeHtml(decodeDocTitle(config.hPath)));
                             const includeElement = element.querySelector("#searchInclude");
                             includeElement.firstElementChild.classList.add("ft__primary");
                             if (enableIncludeChild) {
@@ -1575,7 +1576,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
     let currentData;
     let newData;
     data.forEach((item) => {
-        const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
+        const title = escapeHtml(getNotebookName(item.box)) + decodeDocTitle(getDisplayName(item.hPath, false));
         let countHTML = "";
         if (item.children) {
             resultHTML += `<div class="b3-list-item">

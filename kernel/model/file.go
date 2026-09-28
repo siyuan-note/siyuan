@@ -2252,7 +2252,7 @@ func renameDoc0(boxID, p, title string) (err error) {
 
 	var emptyAttrUpdated bool
 	if titleChanged {
-		tree.HPath = path.Join(path.Dir(tree.HPath), title)
+		tree.HPath = path.Join(path.Dir(tree.HPath), util.EncodeDocTitlePath(title))
 		tree.Root.SetIALAttr("title", title)
 	}
 
@@ -2342,7 +2342,7 @@ func validateCreateDoc(boxID, p, title string, titleEmpty bool) (ret *createDocV
 	}
 
 	folder := path.Dir(p)
-	hPath := "/" + title
+	hPath := "/" + util.EncodeDocTitlePath(title)
 	if "/" != folder {
 		parentID := path.Base(folder)
 		parentTree, loadErr := LoadTreeByBlockID(parentID)
@@ -2355,7 +2355,7 @@ func validateCreateDoc(boxID, p, title string, titleEmpty bool) (ret *createDocV
 			logging.LogErrorf("parent tree [%s] does not match box [%s] and folder [%s]", parentID, boxID, folder)
 			return nil, ErrBlockNotFound
 		}
-		hPath = path.Join(parentTree.HPath, title)
+		hPath = path.Join(parentTree.HPath, util.EncodeDocTitlePath(title))
 	}
 
 	if depth := strings.Count(p, "/"); 7 < depth && !Conf.FileTree.AllowCreateDeeper {
@@ -2471,7 +2471,7 @@ func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
 }
 
 func normalizeDocTitle(title string) string {
-	title = strings.ReplaceAll(title, "/", "")
+	title = util.DecodeDocTitlePath(title)
 	// 不要踢掉 零宽连字符，否则有的 Emoji 会变形 https://github.com/siyuan-note/siyuan/issues/11480
 	title = strings.ReplaceAll(title, string(gulu.ZWJ), "__@ZWJ@__")
 	title = util.RemoveInvalid(title)

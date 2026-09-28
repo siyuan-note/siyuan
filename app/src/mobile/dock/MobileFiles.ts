@@ -4,6 +4,7 @@ import {getTreeItemTailHTML} from "../../util/treeItemTail";
 import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
+import {decodeDocTitle} from "../../util/docTitle";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {
     getPublishAccessLevel,
@@ -1242,7 +1243,7 @@ export class MobileFiles extends Model {
         const fileItemElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
         if (fileItemElement) {
             fileItemElement.setAttribute("data-name", data.title);
-            fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(data.title);
+            fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(decodeDocTitle(data.title));
         }
         const parentPath = pathPosix().dirname(data.path);
         const listPath = parentPath === "/" ? "/" : `${parentPath}.sy`;

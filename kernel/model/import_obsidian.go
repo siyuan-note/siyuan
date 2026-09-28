@@ -769,7 +769,7 @@ func planObsidianDocuments(ctx context.Context, vault *obsidianVaultContext) err
 			dirDoc := dirDocs[obsidianPathKey(dir)]
 			dirDoc.Title = uniqueObsidianTitle(parentTarget, dirDoc.Title, titleUses, vault.Analysis)
 			dirDoc.TargetPath = path.Join(parentTarget, dirDoc.ID+".sy")
-			dirDoc.HPath = path.Join(parentHPath, dirDoc.Title)
+			dirDoc.HPath = path.Join(parentHPath, util.EncodeDocTitlePath(dirDoc.Title))
 			contentTarget = path.Join(parentTarget, dirDoc.ID)
 			contentHPath = dirDoc.HPath
 		}
@@ -794,7 +794,7 @@ func planObsidianDocuments(ctx context.Context, vault *obsidianVaultContext) err
 		for _, doc := range directDocs {
 			doc.Title = uniqueObsidianTitle(contentTarget, doc.Title, titleUses, vault.Analysis)
 			doc.TargetPath = path.Join(contentTarget, doc.ID+".sy")
-			doc.HPath = path.Join(contentHPath, doc.Title)
+			doc.HPath = path.Join(contentHPath, util.EncodeDocTitlePath(doc.Title))
 		}
 
 		var childDirs []string

@@ -3,6 +3,7 @@ import * as path from "path";
 /// #endif
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {fetchPost} from "../../util/fetch";
+import {decodeDocTitle} from "../../util/docTitle";
 import {Constants} from "../../constants";
 import {newFile} from "../../util/newFile";
 import type {App} from "../../index";
@@ -148,7 +149,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
             fetchPost("/api/filetree/getHPathByID", {
                 id
             }, (response) => {
-                writeText(response.data);
+                writeText(decodeDocTitle(response.data));
             });
             return true;
         }

@@ -1,5 +1,6 @@
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
+import {decodeDocTitle} from "../../util/docTitle";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {waitForPendingTransactions} from "../util/transactionQueue";
@@ -177,7 +178,7 @@ const resolveRootNames = async (rootIDs: string[]): Promise<string[]> => {
         let name = id;
         await fetchPost("/api/filetree/getHPathByID", {id}, (response: IWebSocketData) => {
             if (response.code === 0 && response.data) {
-                name = response.data as string;
+                name = decodeDocTitle(response.data as string);
             }
         });
         names.push(name);

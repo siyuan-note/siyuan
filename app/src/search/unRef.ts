@@ -7,6 +7,7 @@ import {escapeAriaLabel, escapeLessThans} from "../util/escape";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {getDisplayName, getNotebookName} from "../util/pathName";
+import {decodeDocTitle} from "../util/docTitle";
 import {Protyle} from "../protyle";
 import {resize} from "../protyle/util/resize";
 import {Menu} from "../plugin/Menu";
@@ -107,7 +108,7 @@ export const getUnRefList = (element: Element, edit: Protyle, page = 1) => {
         }
         let resultHTML = "";
         response.data.blocks.forEach((item: IBlock, index: number) => {
-            const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
+            const title = getNotebookName(item.box) + decodeDocTitle(getDisplayName(item.hPath, false));
             resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${item.id}" data-root-id="${item.rootID}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
 ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}

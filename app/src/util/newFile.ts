@@ -9,7 +9,8 @@ import {getActiveTab, getDockByType} from "../layout/tabUtil";
 import {fetchPost, fetchSyncPost} from "./fetch";
 import {getDisplayName, getOpenNotebookCount, isMoveTargetAllowed, movePathTo, pathPosix} from "./pathName";
 import {Constants} from "../constants";
-import {replaceFileName, validateName} from "../editor/rename";
+import {validateName} from "../editor/rename";
+import {decodeDocTitle, encodeDocTitle, sanitizeDocTitleInput} from "./docTitle";
 import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
@@ -32,7 +33,7 @@ import {
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 
 export const getBlockRefAnchorText = (title: string) => {
-    const trimmed = (title || "").trim();
+    const trimmed = decodeDocTitle(title || "").trim();
     if (!trimmed) {
         return window.siyuan.languages._kernel[16];
     }
@@ -72,7 +73,7 @@ export const newFile = (app: App, name?: string) => {
             notebookId,
             currentPath,
             hasFocusTarget,
-            name: replaceFileName(name.trim()),
+            name: sanitizeDocTitleInput(name.trim()),
             onCreated: () => hideElements(["dialog"]),
         });
     }
@@ -137,7 +138,7 @@ export const newFileBySelect = (protyle: IProtyle, newFileName: string, context:
     if (!isNewFileSelectionValid(protyle, context)) {
         return;
     }
-    const hPath = pathPosix().join(pathDir, newFileName || window.siyuan.languages._kernel[16]);
+    const hPath = pathPosix().join(pathDir, encodeDocTitle(newFileName) || window.siyuan.languages._kernel[16]);
     fetchPost("/api/filetree/getIDsByHPath", {
         path: hPath,
         notebook: targetNotebookId
@@ -190,7 +191,7 @@ export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "s
     const sourcePath = selectionContext.path;
     const fileName = name === undefined ? (selectText.trim() ||
         protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "").trim()) : name.trim();
-    const newFileName = replaceFileName(fileName);
+    const newFileName = sanitizeDocTitleInput(fileName);
     if (target === "subDoc") {
         fetchPost("/api/filetree/getHPathByPath", {
             notebook: sourceNotebookId,
@@ -456,7 +457,7 @@ export const newFileByRefHint = (
     onCreated?: (id: string, title: string) => void,
     presetId?: string,
 ) => {
-    const requestName = replaceFileName(name.trim());
+    const requestName = sanitizeDocTitleInput(name.trim());
     fetchPost("/api/filetree/getRefCreateSavePath", {notebook: protyle.notebookId}, (savePathResponse) => {
         const templatePath = savePathResponse.data.path as string;
         const targetNotebookId = savePathResponse.data.box as string;
@@ -507,7 +508,7 @@ export const newFileAtPath = (options: {
     restoreFocus?: () => void;
     onCreated: (id: string, title: string) => void;
 }) => {
-    const title = replaceFileName(options.name.trim());
+    const title = sanitizeDocTitleInput(options.name.trim());
     if (!options.isValid() || (title && !validateName(title))) {
         return;
     }
@@ -552,7 +553,7 @@ export const newSubDocByRefHint = (
         templatePath: "",
         currentNotebookId: protyle.notebookId,
         currentPath: protyle.path,
-        name: replaceFileName(name.trim()),
+        name: sanitizeDocTitleInput(name.trim()),
     });
     createRefDocAsSubDoc(target, onCreated, presetId);
 };

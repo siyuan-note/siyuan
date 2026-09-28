@@ -1,4 +1,5 @@
 import type {BlockQueryRequestInput} from "../../types/api";
+import {decodeDocTitle} from "../../util/docTitle";
 import {isAbove} from "../../util/zIndex";
 import {stripSemanticMarkersFromRangeText} from "../../protyle/util/inlineElementMarker";
 import {
@@ -201,7 +202,7 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
             fetchPost("/api/filetree/getFullHPathByID", {
                 id: rootId
             }, (response) => {
-                pathElement.innerHTML = escapeHtml(response.data);
+                pathElement.innerHTML = escapeHtml(decodeDocTitle(response.data));
             });
         } else {
             pathElement.innerHTML = currentLiElement.querySelector(".b3-list-item__text").innerHTML;

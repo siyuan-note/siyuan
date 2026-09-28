@@ -211,7 +211,7 @@ func createBoxDoc(box *Box, boxDocID string) error {
 		title = Conf.Language(16)
 	}
 	p := boxDocPath(boxDocID)
-	tree := treenode.NewTree(box.ID, p, "/"+title, html.EscapeAttrVal(title))
+	tree := treenode.NewTree(box.ID, p, "/"+util.EncodeDocTitlePath(title), html.EscapeAttrVal(title))
 	tree.Root.SetIALAttr(DocHiddenAttr, "true")
 	if "" != boxConf.Icon {
 		tree.Root.SetIALAttr("icon", boxConf.Icon)
@@ -248,12 +248,12 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 		title = Conf.Language(16)
 	}
 	titleChanged := tree.Root.IALAttr("title") != title
-	changed := titleChanged || tree.HPath != "/"+title || tree.Root.IALAttr(DocHiddenAttr) != "true" ||
+	changed := titleChanged || tree.HPath != "/"+util.EncodeDocTitlePath(title) || tree.Root.IALAttr(DocHiddenAttr) != "true" ||
 		tree.Root.IALAttr("icon") != boxConf.Icon
 	if !changed {
 		return nil
 	}
-	tree.HPath = "/" + title
+	tree.HPath = "/" + util.EncodeDocTitlePath(title)
 	tree.Root.SetIALAttr("title", title)
 	tree.Root.SetIALAttr(DocHiddenAttr, "true")
 	if "" == boxConf.Icon {

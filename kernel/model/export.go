@@ -474,7 +474,7 @@ func Export2Liandi(id string) (err error) {
 			apiURL += "/" + articleId
 		}
 
-		title := path.Base(tree.HPath)
+		title := tree.Root.IALAttr("title")
 		tags := tree.Root.IALAttr("tags")
 		content := exportMarkdownContent0(id, tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.GetUser().UserId+"/",
 			true, false, false,
@@ -676,7 +676,7 @@ func ExportSYs(ids []string) (zipPath string) {
 		return
 	}
 	box := Conf.Box(block.BoxID)
-	baseFolderName := path.Base(block.HPath)
+	baseFolderName := strings.ReplaceAll(path.Base(block.HPath), util.DocTitleSlash, "／")
 	if "." == baseFolderName {
 		baseFolderName = path.Base(block.Path)
 	}
@@ -1238,7 +1238,7 @@ func exportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptio
 		if nil != exportTreeErr {
 			return exportTreeErr
 		}
-		name = path.Base(tree.HPath)
+		name = strings.ReplaceAll(path.Base(tree.HPath), util.DocTitleSlash, "／")
 		name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 		savePath = strings.TrimSpace(savePath)
 
@@ -1420,7 +1420,7 @@ func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 			return exportTreeErr
 		}
 		adjustHeadingLevel(bt, tree, addTitle)
-		name = path.Base(tree.HPath)
+		name = strings.ReplaceAll(path.Base(tree.HPath), util.DocTitleSlash, "／")
 		name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
 		if "" != savePath {
@@ -2299,7 +2299,7 @@ func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath s
 		return
 	}
 	box := Conf.Box(block.BoxID)
-	baseFolderName := path.Base(block.HPath)
+	baseFolderName := strings.ReplaceAll(path.Base(block.HPath), util.DocTitleSlash, "／")
 	if "." == baseFolderName {
 		baseFolderName = path.Base(block.Path)
 	}
@@ -3253,6 +3253,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 }
 
 func exportMarkdownHPath(boxID, hPath string, boxPaths map[string]string) string {
+	hPath = strings.ReplaceAll(hPath, util.DocTitleSlash, "／")
 	if boxPath := boxPaths[boxID]; boxPath != "" {
 		return path.Join("/", boxPath, strings.TrimPrefix(hPath, "/"))
 	}

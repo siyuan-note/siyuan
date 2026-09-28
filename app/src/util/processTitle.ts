@@ -1,6 +1,7 @@
 import {escapeHtml} from "./escape";
 import {Constants} from "../constants";
 import {pathPosix} from "./pathName";
+import {decodeDocTitle} from "./docTitle";
 
 let windowWorkspaceTitle = "";
 
@@ -32,7 +33,7 @@ export const setTitle = (title: string, showVersionTitle = false, iconElement?: 
             dragElement.setAttribute("title", versionTitle);
         }
     } else {
-        title = title.trim() || window.siyuan.languages["_kernel"][16];
+        title = decodeDocTitle(title.trim()) || window.siyuan.languages["_kernel"][16];
         document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
         if (!window.siyuan.config.appearance.hideToolbar && dragElement) {
             dragElement.setAttribute("title", title);

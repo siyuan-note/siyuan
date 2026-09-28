@@ -60,7 +60,7 @@ func createDocsByHPath0(boxID, hPath, content, parentID, id string, titleEmpty b
 		if nil != preferredParent && preferredParent.RootID == parentID {
 			// 如果父文档存在且 ID 一致，则直接在父文档下创建
 			p := strings.TrimSuffix(preferredParent.Path, ".sy") + "/" + id + ".sy"
-			if _, err = createDocFn(boxID, p, name, content, titleEmpty); err != nil {
+			if _, err = createDocFn(boxID, p, util.DecodeDocTitlePath(name), content, titleEmpty); err != nil {
 				logging.LogErrorf("create doc [%s] failed: %s", p, err)
 			}
 			return
@@ -106,11 +106,11 @@ func createDocsByHPath0(boxID, hPath, content, parentID, id string, titleEmpty b
 			pathBuilder.WriteString(rootID)
 			docP := pathBuilder.String() + ".sy"
 			if isNotLast {
-				if _, err = createDocFn(boxID, docP, part, "", false); err != nil {
+				if _, err = createDocFn(boxID, docP, util.DecodeDocTitlePath(part), "", false); err != nil {
 					return
 				}
 			} else {
-				if _, err = createDocFn(boxID, docP, part, content, titleEmpty); err != nil {
+				if _, err = createDocFn(boxID, docP, util.DecodeDocTitlePath(part), content, titleEmpty); err != nil {
 					return
 				}
 			}

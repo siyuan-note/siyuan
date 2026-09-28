@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var ErrHPathRefreshBusy = errors.New("blocktree writer is busy")
@@ -97,7 +98,7 @@ func CurrentParentHPath(tree *parse.Tree) string {
 		return tree.HPath
 	}
 	if doc := GetBlockTreeInBox(path.Base(parent), tree.Box); doc != nil && doc.BoxID == tree.Box && doc.Path == parent+".sy" {
-		return doc.HPath + "/" + tree.Root.IALAttr("title")
+		return doc.HPath + "/" + util.EncodeDocTitlePath(tree.Root.IALAttr("title"))
 	}
 	return tree.HPath
 }

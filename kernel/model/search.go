@@ -723,8 +723,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			tags := node.IALAttr("tags")
 			if 0 == method {
 				if strings.Contains(title, keyword) {
-					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
-					renameRootTitles[node.ID] = strings.ReplaceAll(title, keyword, docTitleReplacement)
+					renameRootTitles[node.ID] = strings.ReplaceAll(title, keyword, replacement)
 					renameRoots = append(renameRoots, node)
 				}
 
@@ -738,8 +737,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 				}
 			} else if 3 == method {
 				if nil != r && r.MatchString(title) {
-					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
-					renameRootTitles[node.ID] = r.ReplaceAllString(title, docTitleReplacement)
+					renameRootTitles[node.ID] = r.ReplaceAllString(title, replacement)
 					renameRoots = append(renameRoots, node)
 				}
 

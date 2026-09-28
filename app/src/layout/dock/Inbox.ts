@@ -10,7 +10,7 @@ import {Model} from "../Model";
 import {needSubscribe} from "../../util/needSubscribe";
 import {MenuItem} from "../../menus/Menu";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {replaceFileName} from "../../editor/rename";
+import {sanitizeDocTitleInput} from "../../util/docTitle";
 import {getDisplayName, movePathTo, pathPosix} from "../../util/pathName";
 import type {App} from "../../index";
 import {getCloudURL} from "../../config/util/about";
@@ -398,7 +398,7 @@ ${data.shorthandContent}
                     await fetchSyncPost("/api/filetree/createDoc", {
                         notebook: toNotebook[0],
                         path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
-                        title: replaceFileName(response.data.shorthandTitle),
+                        title: sanitizeDocTitleInput(response.data.shorthandTitle),
                         md,
                         listDocTree: true,
                     });

@@ -410,7 +410,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 
 	tree.Box = boxID
 	tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
-	tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
+	tree.HPath = parentHPath + "/" + util.EncodeDocTitlePath(tree.Root.IALAttr("title"))
 
 	if needResetTree {
 		resetTree(tree, "", true)

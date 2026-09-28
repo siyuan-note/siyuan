@@ -12,7 +12,7 @@ import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
 import {MenuItem} from "../menus/Menu";
-import {getDisplayName, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix, useShell} from "../util/pathName";
+import {getDisplayName, getNotebookHPath, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix, useShell} from "../util/pathName";
 import {decodeDocTitle} from "../util/docTitle";
 import {Protyle} from "../protyle";
 import {onGet} from "../protyle/util/onGet";
@@ -534,7 +534,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                             toPath.forEach((item, index) => {
                                 if (item === "/") {
                                     config.idPath.push(toNotebook[index]);
-                                    hPathList.push(getNotebookName(toNotebook[index]));
+                                    hPathList.push(getNotebookHPath(toNotebook[index]));
                                 } else {
                                     enableIncludeChild = true;
                                     config.idPath.push(pathPosix().join(toNotebook[index], item.replace(".sy", "")));
@@ -1152,8 +1152,8 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     }
     const searchPathInputElement = element.querySelector("#searchPathInput");
     if (runtimeConfig.hPath) {
-        searchPathInputElement.innerHTML = `${escapeHtml(runtimeConfig.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-        searchPathInputElement.setAttribute("aria-label", escapeHtml(runtimeConfig.hPath));
+        searchPathInputElement.innerHTML = `${escapeHtml(decodeDocTitle(runtimeConfig.hPath))}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
+        searchPathInputElement.setAttribute("aria-label", escapeHtml(decodeDocTitle(runtimeConfig.hPath)));
     } else {
         searchPathInputElement.innerHTML = "";
         searchPathInputElement.setAttribute("aria-label", "");

@@ -3379,7 +3379,7 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 		hPath := treeHPath
 		box := Conf.Box(node.Box)
 		if nil != box {
-			hPath = box.Name + hPath
+			hPath = util.EncodeDocTitlePath(box.Name) + hPath
 		}
 		resolveHPathElapsed += time.Since(resolveHPathStart)
 		resolveHPathCount++

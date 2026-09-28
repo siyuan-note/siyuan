@@ -4,6 +4,7 @@ import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} 
 import {UDLRHint, upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeAttr, escapeHtml, escapeLessThans} from "../../../util/escape";
+import {decodeDocTitle} from "../../../util/docTitle";
 import {transaction} from "../../wysiwyg/transaction";
 import {genCellValueByElement, getCellValueText, renderCell, updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
@@ -79,7 +80,7 @@ const genSearchList = (element: Element, keyword: string, options: IOpenSearchAV
         <div class="b3-list-item__first">
             <span class="b3-list-item__text">${escapeHtml(item.avName || window.siyuan.languages._kernel[267])}</span>
         </div>
-        <div class="b3-list-item__meta b3-list-item__showall">${escapeLessThans(item.hPath)}</div>
+        <div class="b3-list-item__meta b3-list-item__showall">${escapeLessThans(decodeDocTitle(item.hPath))}</div>
     </div>
     <svg aria-label="${window.siyuan.languages.thisDatabase}" style="margin: 0 0 0 4px" class="b3-list-item__hinticon ariaLabel${item.avID === options.avID ? "" : " fn__none"}"><use xlink:href="#iconInfo"></use></svg>
 </div>`;

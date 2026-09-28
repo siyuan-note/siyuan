@@ -21,7 +21,7 @@ import {expandFileTree} from "../layout/dock/fileTreeAnimation";
 import {getHostCapabilities} from "./hostCapabilities";
 import {highlightSearchText} from "./searchHighlight";
 import {addClearButton} from "./addClearButton";
-import {getDocTitleText} from "./docTitle";
+import {decodeDocTitle, encodeDocTitle, getDocTitleText} from "./docTitle";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     if (!getHostCapabilities().localFileSystem) {
@@ -302,7 +302,7 @@ export const movePathTo = (options: {
     dialog.element.setAttribute("data-key", Constants.DIALOG_MOVEPATHTO);
     if (options.paths && options.paths.length > 0) {
         fetchPost("/api/filetree/getHPathsByPaths", {paths: options.paths}, (response) => {
-            dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(" "));
+            dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(decodeDocTitle(response.data.join(" ")));
         });
     }
     const searchListElement = dialog.element.querySelector("#foldList");
@@ -389,7 +389,7 @@ export const movePathTo = (options: {
                 }
                 fileHTML += `<li class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}"${getFileTreeDefaultIconAttr(item.boxIcon, "notebook")}>
     ${getFileTreeIconHTML(item.boxIcon, "notebook", "b3-list-item__graphic", true)}
-    <span class="b3-list-item__showall fn__flex-1" style="padding: 4px 0; min-width: 0">${highlight(item.hPath)}</span>
+    <span class="b3-list-item__showall fn__flex-1" style="padding: 4px 0; min-width: 0">${highlight(decodeDocTitle(item.hPath))}</span>
     ${attributesHTML}
     ${countHTML}
 </li>`;
@@ -800,6 +800,8 @@ export const getNotebookName = (id: string) => {
     });
     return rootPath;
 };
+
+export const getNotebookHPath = (id: string) => encodeDocTitle(getNotebookName(id));
 
 export const getNotebookIcon = (id: string) => {
     let rootPath = "";

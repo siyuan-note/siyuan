@@ -6,7 +6,8 @@ import {fetchPost, fetchSyncPost} from "./fetch";
 import {ContractFormData} from "./contractFormData";
 import {Dialog} from "../dialog";
 import {getOpenNotebookCount} from "./pathName";
-import {replaceFileName, validateName} from "../editor/rename";
+import {validateName} from "../editor/rename";
+import {sanitizeDocTitleInput} from "./docTitle";
 import {escapeHtml} from "../util/escape";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {openFileById} from "../editor/util";
@@ -165,7 +166,7 @@ export const newNotebook = () => {
         if (!validateName(name)) {
             return false;
         }
-        name = replaceFileName(name);
+        name = sanitizeDocTitleInput(name);
         fetchPost("/api/notebook/createNotebook", {
             name
         });
@@ -184,7 +185,7 @@ export const newNotebook = () => {
             notebookNameElement.focus();
             return;
         }
-        fetchPost("/api/notebook/createNotebook", {name: replaceFileName(name)}, (response) => {
+        fetchPost("/api/notebook/createNotebook", {name: sanitizeDocTitleInput(name)}, (response) => {
             const notebookID = response.data?.notebook?.id as string | undefined;
             if (!notebookID) {
                 return;
@@ -356,7 +357,7 @@ export const newEncryptedNotebook = () => {
             }
             btnsElement[1].disabled = true;
             const response = await fetchSyncPost("/api/notebook/createEncryptedNotebook", {
-                name: replaceFileName(name),
+                name: sanitizeDocTitleInput(name),
                 password
             });
             if (response.code === 0) {

@@ -13,7 +13,7 @@ import {openMobileFileById} from "../../mobile/editor";
 import {Constants} from "../../constants";
 import {openCardByData} from "../../card/openCard";
 import {viewCards} from "../../card/viewCards";
-import {getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../../util/pathName";
+import {getDisplayName, getNotebookHPath, isEncryptedBox, pathPosix, useShell} from "../../util/pathName";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import * as dayjs from "dayjs";
@@ -229,7 +229,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     fetchPost("/api/filetree/getHPathByID", {
                         id: protyle.block.rootID
                     }, (response) => {
-                        viewCards(protyle.app, protyle.block.rootID, pathPosix().join(getNotebookName(protyle.notebookId), (response.data)), "Tree");
+                        viewCards(protyle.app, protyle.block.rootID, pathPosix().join(getNotebookHPath(protyle.notebookId), (response.data)), "Tree");
                     });
                 }
             }, {
@@ -274,7 +274,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             async click() {
                 const searchPath = isBoxDoc ? "" : getDisplayName(protyle.path, false, true);
                 /// #if MOBILE
-                let hPath = getNotebookName(protyle.notebookId);
+                let hPath = getNotebookHPath(protyle.notebookId);
                 if (!isBoxDoc) {
                     const pathResponse = await fetchSyncPost("/api/filetree/getHPathByPath", {
                         notebook: protyle.notebookId,

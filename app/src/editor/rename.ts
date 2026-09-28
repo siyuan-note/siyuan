@@ -74,7 +74,7 @@ export const rename = (options: {
                 dialog.destroy();
                 return;
             }
-            name = options.type === "file" ? sanitizeDocTitleInput(name) : replaceFileName(name);
+            name = sanitizeDocTitleInput(name);
             if (options.type === "notebook") {
                 if (!name) {
                     name = window.siyuan.languages.untitled;

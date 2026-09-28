@@ -23,6 +23,7 @@ import {closeMobileBacklinkSheets} from "../mobile/util/backlinkPanels";
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {isEncryptedBox} from "../util/pathName";
+import {decodeDocTitle} from "../util/docTitle";
 
 type TemplateActionTarget = {entry: TemplateEntry, revision: string, sourceDocID?: string};
 
@@ -602,7 +603,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             response.data.forEach((doc: {path: string, hPath: string}) => {
                 const id = doc.path.split("/").pop().replace(/\.sy$/, "");
                 if (id !== context.value) {
-                    context.add(new Option(doc.hPath, id));
+                    context.add(new Option(decodeDocTitle(doc.hPath), id));
                 }
             });
             updateContextName();

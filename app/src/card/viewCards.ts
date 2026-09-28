@@ -15,9 +15,6 @@ import type {App} from "../index";
 import {confirmDialog} from "../dialog/confirmDialog";
 
 export const viewCards = (app: App, deckID: string, title: string, deckType: "Tree" | "" | "Notebook", cb?: (response: IWebSocketData) => void) => {
-    if (deckType === "Tree") {
-        title = decodeDocTitle(title);
-    }
     let pageIndex = 1;
     let pageCount = 1;
     let edit: Protyle;
@@ -35,7 +32,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
             positionId: Constants.DIALOG_VIEWCARDS,
             content: `<div class="fn__flex-column" style="height: 100%">
     <div class="block__icons" style="border-bottom: 1px solid var(--b3-border-color)">
-        <span class="fn__flex-center resize__move">${escapeHtml(title)}</span>
+        <span class="fn__flex-center resize__move">${escapeHtml(deckType ? decodeDocTitle(title) : title)}</span>
         <span class="fn__space${(deckType === "" && deckID === "") ? " fn__none" : ""}"></span>
         <span data-type="resetAll" data-position="north" class="block__icon block__icon--show ariaLabel${(deckType === "" && deckID === "") ? " fn__none" : ""}" aria-label="${window.siyuan.languages.reset}"><svg><use xlink:href='#iconUndo'></use></svg></span>
         <span class="fn__space"></span>

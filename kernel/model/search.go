@@ -404,7 +404,7 @@ func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, 
 	boxNames := Conf.BoxNames(boxIDs)
 	for _, embedBlock := range ret {
 		name := boxNames[embedBlock.Block.Box]
-		embedBlock.Block.HPath = name + embedBlock.Block.HPath
+		embedBlock.Block.HPath = util.EncodeDocTitlePath(name) + embedBlock.Block.HPath
 	}
 
 	if 1 > len(ret) {
@@ -620,7 +620,7 @@ func prependNotebookNameInHPath(blocks []*Block) {
 	boxNames := Conf.BoxNames(boxIDs)
 	for _, b := range blocks {
 		name := boxNames[b.Box]
-		b.HPath = util.EscapeHTML(name) + b.HPath
+		b.HPath = util.EscapeHTML(util.EncodeDocTitlePath(name)) + b.HPath
 	}
 }
 

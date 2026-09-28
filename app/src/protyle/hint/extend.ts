@@ -1,4 +1,5 @@
 import {fetchPost} from "../../util/fetch";
+import {decodeDocTitle} from "../../util/docTitle";
 import {registerBuiltinSlashHint} from "./builtinSlash";
 import {insertHTML} from "../util/insertHTML";
 import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
@@ -558,7 +559,7 @@ export const genHintItemHTML = (item: IBlock) => {
     ${iconHTML}
     <span class="b3-list-item__text">${item.content}</span>${countHTML}
 </div>
-<div class="b3-list-item__meta b3-list-item__showall">${item.hPath}</div>`;
+<div class="b3-list-item__meta b3-list-item__showall">${decodeDocTitle(item.hPath)}</div>`;
 };
 
 export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IHintData[] => {

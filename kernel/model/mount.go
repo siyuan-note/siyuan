@@ -164,7 +164,6 @@ func RenameBox(boxID, name string) (err error) {
 }
 
 func normalizeBoxName(name string) string {
-	name = strings.ReplaceAll(name, "/", "")
 	name = normalizeDocTitle(name)
 	if "" == name {
 		name = normalizeDocTitle(Conf.language(105))

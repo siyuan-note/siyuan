@@ -5,7 +5,7 @@ import {FileFilter, ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
-import {getDisplayName, getNotebookName, getTopPaths, isEncryptedBox, pathPosix, useShell} from "../util/pathName";
+import {getDisplayName, getNotebookHPath, getNotebookName, getTopPaths, isEncryptedBox, pathPosix, useShell} from "../util/pathName";
 import {pinnedDocIDs, updatePinnedDocs} from "../util/pinnedDocs";
 import {showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -567,7 +567,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 iconHTML: "",
                 label: window.siyuan.languages.manage,
                 click: () => {
-                    viewCards(app, notebookId, name, "Notebook");
+                    viewCards(app, notebookId, getNotebookHPath(notebookId), "Notebook");
                     /// #if MOBILE
                     closePanel();
                     /// #endif
@@ -584,7 +584,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             /// #if MOBILE
             popSearch(app, {
                 hasReplace: false,
-                hPath: getNotebookName(notebookId),
+                hPath: getNotebookHPath(notebookId),
                 idPath: [notebookId],
                 page: 1,
             });
@@ -607,7 +607,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 /// #if MOBILE
                 popSearch(app, {
                     hasReplace: true,
-                    hPath: getNotebookName(notebookId),
+                    hPath: getNotebookHPath(notebookId),
                     idPath: [notebookId],
                     page: 1,
                 });
@@ -923,7 +923,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     fetchPost("/api/filetree/getHPathByID", {
                         id
                     }, (response) => {
-                        viewCards(app, id, pathPosix().join(getNotebookName(notebookId), response.data), "Tree");
+                        viewCards(app, id, pathPosix().join(getNotebookHPath(notebookId), response.data), "Tree");
                     });
                     /// #if MOBILE
                     closePanel();
@@ -988,7 +988,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 }
                 popSearch(app, {
                     hasReplace: false,
-                    hPath: pathPosix().join(getNotebookName(notebookId), response.data),
+                    hPath: pathPosix().join(getNotebookHPath(notebookId), response.data),
                     idPath: [pathPosix().join(notebookId, searchPath)],
                     page: 1,
                 });
@@ -1019,7 +1019,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 }
                 popSearch(app, {
                     hasReplace: true,
-                    hPath: pathPosix().join(getNotebookName(notebookId), response.data),
+                    hPath: pathPosix().join(getNotebookHPath(notebookId), response.data),
                     idPath: [pathPosix().join(notebookId, searchPath)],
                     page: 1,
                 });

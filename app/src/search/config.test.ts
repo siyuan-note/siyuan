@@ -251,6 +251,7 @@ describe("search configuration scope", () => {
         const notebooks = [{id: "notebook", name: "Old Notebook"}];
 
         assert.equal(resolveSearchNotebookHPath("notebook", notebooks), "Old Notebook");
+        assert.equal(resolveSearchNotebookHPath("notebook", [{id: "notebook", name: "Old/Notebook"}]), "Old／Notebook");
         assert.equal(resolveSearchNotebookHPath("notebook", notebooks, {notebook: "Renamed Notebook"}),
             "Renamed Notebook");
         assert.equal(resolveSearchNotebookHPath("document", notebooks), undefined);

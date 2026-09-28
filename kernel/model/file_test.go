@@ -920,6 +920,26 @@ func TestGetHPathsByPathsUsesDocumentRoot(t *testing.T) {
 	}
 }
 
+func TestNotebookSlashUsesEncodedFullHPath(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	if err := RenameBox(fixture.box.ID, "  Work/Notes  "); err != nil {
+		t.Fatalf("rename notebook with slash failed: %v", err)
+	}
+	if name := fixture.box.GetConf().Name; name != "Work/Notes" {
+		t.Fatalf("notebook name changed: %q", name)
+	}
+
+	want := "Work" + util.DocTitleSlash + "Notes/Source"
+	hPaths, err := GetHPathsByPaths([]string{fixture.sourcePath})
+	if err != nil || !reflect.DeepEqual([]string{want}, hPaths) {
+		t.Fatalf("unexpected document paths: got %v, err=%v", hPaths, err)
+	}
+	hPath, err := GetFullHPathByID(fixture.sourceID)
+	if err != nil || hPath != want {
+		t.Fatalf("unexpected full path: got %q, err=%v", hPath, err)
+	}
+}
+
 func TestGetBoxesByPathsStrictRejectsInvalidPaths(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	tests := []struct {

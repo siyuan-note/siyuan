@@ -653,7 +653,7 @@ func exportNotebooksBaseName(boxes []*Box) string {
 	if len(boxes) < 1 {
 		return "notebooks"
 	}
-	name := util.FilterFileName(boxes[0].Name)
+	name := util.FilterFileName(util.EncodeDocTitlePath(boxes[0].Name))
 	if name == "" {
 		name = boxes[0].ID
 	}
@@ -2351,7 +2351,7 @@ func ExportNotebookMarkdown(boxID string) (zipPath string) {
 	}
 
 	defBlockIDs, docPaths := prepareExportTrees(docPaths, boxID)
-	zipPath = exportPandocConvertZip(boxID, box.Name, docPaths, defBlockIDs, "", "", ".md")
+	zipPath = exportPandocConvertZip(boxID, util.EncodeDocTitlePath(box.Name), docPaths, defBlockIDs, "", "", ".md")
 	return
 }
 
@@ -2403,7 +2403,7 @@ func exportNotebookMarkdownPaths(boxes []*Box, trees map[string]*parse.Tree) map
 	ret := map[string]string{}
 	used := map[string]struct{}{}
 	addBox := func(boxID, name string) {
-		name = util.FilterFileName(name)
+		name = util.FilterFileName(util.EncodeDocTitlePath(name))
 		if name == "" {
 			name = boxID
 		}
@@ -2530,7 +2530,7 @@ func exportBoxSYZip(boxID string) (zipPath string) {
 		logging.LogErrorf("not found box [%s]", boxID)
 		return
 	}
-	baseFolderName := box.Name
+	baseFolderName := util.EncodeDocTitlePath(box.Name)
 
 	var docPaths []string
 	docFiles := box.ListFiles("/")

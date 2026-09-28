@@ -167,7 +167,7 @@ func TestBuildRootIDExclusionFilter(t *testing.T) {
 
 func TestNormalizeBoxName(t *testing.T) {
 	name := "  notebook/name\x00  "
-	if normalized := normalizeBoxName(name); "notebookname" != normalized {
+	if normalized := normalizeBoxName(name); "notebook/name" != normalized {
 		t.Fatalf("unexpected normalized notebook name: %q", normalized)
 	}
 }

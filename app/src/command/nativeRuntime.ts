@@ -3,7 +3,7 @@ import {Constants} from "../constants";
 import {isMobile} from "../util/functions";
 import {addEditorToDatabase, addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 import {hasClosestBlock, hasTopClosestByTag} from "../protyle/util/hasClosest";
-import {getDisplayName, getNotebookName, getTopPaths, movePathTo, moveToPath, pathPosix} from "../util/pathName";
+import {getDisplayName, getNotebookHPath, getTopPaths, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {hintMoveBlock} from "../protyle/hint/extend";
 import {fetchSyncPost} from "../util/fetch";
 import {globalCommand} from "../boot/globalEvent/command/global";
@@ -76,7 +76,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 popSearch(app, {
                     page: 1,
                     hasReplace: true,
-                    hPath: pathPosix().join(getNotebookName(protyle.notebookId), response.data),
+                    hPath: pathPosix().join(getNotebookHPath(protyle.notebookId), response.data),
                     idPath: [pathPosix().join(protyle.notebookId, protyle.path)],
                 });
                 /// #else
@@ -127,7 +127,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 popSearch(app, {
                     page: 1,
                     hasReplace: false,
-                    hPath: pathPosix().join(getNotebookName(protyle.notebookId), response.data),
+                    hPath: pathPosix().join(getNotebookHPath(protyle.notebookId), response.data),
                     idPath: [pathPosix().join(protyle.notebookId, protyle.path)],
                 });
                 /// #else

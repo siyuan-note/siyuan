@@ -93,6 +93,7 @@ type NotebookPasswordRequest struct {
 }
 
 type CreateEncryptedNotebookRequest struct {
+	// Name 保留半角斜杠，作为 HPath 的笔记本片段时编码为全角斜杠。
 	Name string `json:"name"`
 	NotebookPasswordRequest
 }
@@ -130,10 +131,12 @@ type SetNotebookIconRequest struct {
 
 type RenameNotebookRequest struct {
 	NotebookIDRequest
+	// Name 保留半角斜杠，作为 HPath 的笔记本片段时编码为全角斜杠。
 	Name string `json:"name"`
 }
 
 type CreateNotebookRequest struct {
+	// Name 保留半角斜杠，作为 HPath 的笔记本片段时编码为全角斜杠。
 	Name string `json:"name"`
 }
 

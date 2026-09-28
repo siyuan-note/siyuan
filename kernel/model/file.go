@@ -269,7 +269,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 		if 0 < len(keywords) {
 			for _, box := range boxes {
 				if containsSearchDocKeyword(box.Name, keywords, Conf.Search.CaseSensitive) {
-					data := map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon}
+					data := map[string]string{"path": "/", "hPath": util.EncodeDocTitlePath(box.Name) + "/", "box": box.ID, "boxIcon": box.Icon}
 					if flashcard {
 						newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 						if 1 > flashcardCount {
@@ -287,7 +287,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 			rootBlocks = queryRootBlocks(condition, keyword, Conf.Search.Limit, args...)
 		} else {
 			for _, box := range boxes {
-				data := map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon}
+				data := map[string]string{"path": "/", "hPath": util.EncodeDocTitlePath(box.Name) + "/", "box": box.ID, "boxIcon": box.Icon}
 				if flashcard {
 					newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 					if 1 > flashcardCount {
@@ -310,7 +310,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 		if !IsBoxDocEnabled() && IsBoxDoc(rootBlock.Box, rootBlock.RootID) {
 			continue
 		}
-		hPath := b.Name + rootBlock.HPath
+		hPath := util.EncodeDocTitlePath(b.Name) + rootBlock.HPath
 		data := map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon,
 			"name": rootBlock.Name, "alias": rootBlock.Alias}
 		if flashcard {
@@ -1553,10 +1553,11 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 			continue
 		}
 
+		name := util.EncodeDocTitlePath(box.Name)
 		if IsBoxDoc(box.ID, bt.RootID) {
-			hPaths = append(hPaths, box.Name)
+			hPaths = append(hPaths, name)
 		} else {
-			hPaths = append(hPaths, box.Name+bt.HPath)
+			hPaths = append(hPaths, name+bt.HPath)
 		}
 	}
 	return
@@ -1598,10 +1599,10 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 		return
 	}
 	if IsBoxDoc(box.ID, tree.ID) {
-		hPath = box.Name
+		hPath = util.EncodeDocTitlePath(box.Name)
 		return
 	}
-	hPath = box.Name + tree.HPath
+	hPath = util.EncodeDocTitlePath(box.Name) + tree.HPath
 	return
 }
 

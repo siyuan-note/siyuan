@@ -35,6 +35,7 @@ func TestExportNotebookMarkdownPathsKeepsDuplicateNamesSeparate(t *testing.T) {
 		{ID: "20260814000000-box0001", Name: "Notes"},
 		{ID: "20260814000000-box0002", Name: "Notes"},
 		{ID: "20260814000000-box0003", Name: "notes"},
+		{ID: "20260814000000-box0004", Name: "Work/Notes"},
 	}
 	paths := exportNotebookMarkdownPaths(boxes, nil)
 	if paths[boxes[0].ID] != "Notes" {
@@ -47,6 +48,9 @@ func TestExportNotebookMarkdownPathsKeepsDuplicateNamesSeparate(t *testing.T) {
 	expectedThird := "notes-" + boxes[2].ID
 	if paths[boxes[2].ID] != expectedThird {
 		t.Fatalf("unexpected third notebook path: %q", paths[boxes[2].ID])
+	}
+	if paths[boxes[3].ID] != "Work"+util.DocTitleSlash+"Notes" {
+		t.Fatalf("unexpected notebook path with slash: %q", paths[boxes[3].ID])
 	}
 }
 
@@ -70,6 +74,25 @@ func TestExportMarkdownHPathIncludesNotebook(t *testing.T) {
 	reference := exportMarkdownRelativePath(filepath.ToSlash(filepath.Dir(source)), target+"#20260814000000-block01")
 	if reference != "../Notebook B/Folder/Target.md#20260814000000-block01" {
 		t.Fatalf("unexpected cross-notebook reference: %q", reference)
+	}
+}
+
+func TestExportNotebookSYEncodesSlashInArchivePath(t *testing.T) {
+	const boxID = "20260814000000-box0004"
+	const docID = "20260814000001-doc0004"
+	setupExportRelatedTest(t, boxID)
+	box := &Box{ID: boxID}
+	boxConf := box.GetConf()
+	boxConf.Name = "Work/Notes"
+	if err := box.SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	writeExportRelatedTestTree(t, treenode.NewTree(boxID, "/"+docID+".sy", "/Document", "Document"))
+
+	archive := openExportArchive(t, ExportNotebookSY(boxID))
+	want := "Work" + util.DocTitleSlash + "Notes/" + docID + ".sy"
+	if findArchiveFile(archive.File, want) == nil {
+		t.Fatalf("missing document in notebook archive: %s", want)
 	}
 }
 
@@ -204,7 +227,10 @@ func openExportArchive(t *testing.T, exportPath string) *zip.ReadCloser {
 	if exportPath == "" {
 		t.Fatal("export returned an empty archive path")
 	}
-	absPath := filepath.Join(util.TempDir, filepath.FromSlash(strings.TrimPrefix(exportPath, "/")))
+	absPath, err := exportedFilePath(exportPath)
+	if err != nil {
+		t.Fatalf("resolve exported archive failed: %s", err)
+	}
 	archive, err := zip.OpenReader(absPath)
 	if err != nil {
 		t.Fatalf("open exported archive failed: %s", err)

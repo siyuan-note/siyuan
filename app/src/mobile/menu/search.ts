@@ -8,7 +8,7 @@ import {fetchPost} from "../../util/fetch";
 import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
 import {openModel} from "./model";
-import {getDisplayName, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix} from "../../util/pathName";
+import {getDisplayName, getNotebookHPath, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix} from "../../util/pathName";
 import {decodeDocTitle} from "../../util/docTitle";
 import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {isDisabledFeature, setStorageVal} from "../../protyle/util/compatibility";
@@ -555,7 +555,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                             toPath.forEach((item, index) => {
                                 if (item === "/") {
                                     config.idPath.push(toNotebook[index]);
-                                    hPathList.push(getNotebookName(toNotebook[index]));
+                                    hPathList.push(getNotebookHPath(toNotebook[index]));
                                 } else {
                                     enableIncludeChild = true;
                                     config.idPath.push(pathPosix().join(toNotebook[index], item.replace(".sy", "")));

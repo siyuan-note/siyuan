@@ -1,4 +1,4 @@
-import {getNotebookName, pathPosix} from "../util/pathName";
+import {getNotebookHPath, pathPosix} from "../util/pathName";
 import {Constants} from "../constants";
 import {Dialog} from "../dialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -38,9 +38,9 @@ export const openSearch = async (options: {
     let idPath: string[] = [];
     if (options.notebookIds?.length) {
         idPath = [...options.notebookIds];
-        hPath = options.notebookIds.map((notebookId) => getNotebookName(notebookId)).join(" ");
+        hPath = options.notebookIds.map((notebookId) => getNotebookHPath(notebookId)).join(" ");
     } else if (options.notebookId) {
-        hPath = getNotebookName(options.notebookId);
+        hPath = getNotebookHPath(options.notebookId);
         idPath.push(options.notebookId);
         if (options.searchPath && options.searchPath !== "/") {
             const response = await fetchSyncPost("/api/filetree/getHPathByPath", {

@@ -1,4 +1,5 @@
 import {normalizeSearchTypes} from "./getDefault";
+import {encodeDocTitle} from "../util/docTitle";
 import type {FullTextSearchBlockRequestInput} from "../types/api";
 
 export const buildSearchRequest = (config: Config.IUILayoutTabSearchConfig): FullTextSearchBlockRequestInput => {
@@ -61,7 +62,7 @@ export const resolveSearchNotebookHPath = (path: string, notebooks: {id: string,
     const id = getSearchPathID(path);
     const notebook = notebooks.find((item) => item.id === id);
     if (notebook) {
-        return notebookNames[id] || notebook.name;
+        return encodeDocTitle(notebookNames[id] || notebook.name);
     }
 };
 

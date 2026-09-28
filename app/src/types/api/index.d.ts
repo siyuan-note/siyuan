@@ -1504,6 +1504,8 @@ export type PluginRPCSuccess = { "id": string | number | null; "jsonrpc": "2.0";
 
 export type PrepareNotebookArchiveRequestInput = { "notebooks": Array<string>; };
 
+export type PreparePasteAssetsRequestInput = { "assets": Array<string>; "notebook": string; };
+
 export type PrepareRichTextRequestInput = { "assets": Array<RichClipboardAssetInput>; };
 
 export type PrependBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
@@ -3651,6 +3653,11 @@ export interface APIPOSTRoutes {
     "/api/clipboard/cleanupRichText": {
         request: CleanupRichTextRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/clipboard/preparePasteAssets": {
+        request: PreparePasteAssetsRequestInput;
+        response: { "code": 0; "data": Record<string, string>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/clipboard/prepareRichText": {

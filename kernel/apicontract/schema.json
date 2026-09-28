@@ -33611,6 +33611,25 @@
       ],
       "additionalProperties": false
     },
+    "PreparePasteAssetsRequestInput": {
+      "type": "object",
+      "properties": {
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notebook": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "assets",
+        "notebook"
+      ],
+      "additionalProperties": false
+    },
     "PrepareRichTextRequestInput": {
       "type": "object",
       "properties": {
@@ -129521,6 +129540,84 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/clipboard/preparePasteAssets",
+      "handler": "preparePasteAssets",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/PreparePasteAssetsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
               },
               "msg": {
                 "type": "string"

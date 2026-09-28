@@ -1,4 +1,6 @@
 import {Constants} from "../../constants";
+import {isEncryptedBox} from "../../util/pathName";
+import {preparePasteAssets} from "./pasteAssets";
 import {escapeHtml, escapeMarkdownPlainText} from "../../util/escape";
 import {getTableCellPlainText} from "./tableCellRich";
 import {uploadFiles, uploadLocalFiles} from "../upload";
@@ -1036,6 +1038,17 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         insertAtPasteRange(removeZWJ(textPlain).replace(/```/g, "\u200D```"), range);
         return;
     } else if (siyuanHTML) {
+        if (isEncryptedBox(protyle.notebookId)) {
+            const prepared = await preparePasteAssets(protyle.notebookId, siyuanHTML);
+            if (prepared === null) {
+                return;
+            }
+            siyuanHTML = prepared;
+            range = restorePasteInsertRange();
+            if (!range) {
+                return;
+            }
+        }
         async function streamInsert(container: HTMLElement, bigHtmlString: string) {
             // 大段内容使用惰性解析避免将 HTML 写入同源 iframe，防止 script 执行
             const doc = new DOMParser().parseFromString(bigHtmlString, "text/html");

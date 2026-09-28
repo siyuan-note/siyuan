@@ -6,49 +6,64 @@ import {ModuleKind, transpileModule} from "typescript";
 import * as catalog from "./catalog";
 import * as profile from "./profile";
 
-test("mobile slash total switch reuses existing preferences and respects candidate visibility", () => {
+test("slash visibility shares profile settings and only platform defaults differ", () => {
     const root = catalog.SLASH_MENU_ROOT_PATH;
-    const storageKey = "local-mobile-slash-menu";
-    const custom = {id: "custom", entries: {[root]: false, [`${root}.heading1`]: false}, orders: {}};
+    const custom = {id: "custom", entries: {} as Record<string, boolean>, orders: {}};
     const config = {active: "custom", profiles: [custom]};
-    const storage: Record<string, {enabled: boolean}> = {};
-    let mobile = true;
-    const api = {} as typeof import("./runtime");
-    runInNewContext(transpileModule(readFileSync("src/config/entryVisibility/runtime.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS},
-    }).outputText, {
-        exports: api,
-        window: {siyuan: {config: {appearance: {entryVisibility: config}}, storage}},
-        require: () => ({
-            ...catalog, ...profile,
-            Constants: {LOCAL_MOBILE_SLASH_MENU: storageKey},
-            isMobile: () => mobile,
-            TOOLBAR_ENTRY_ROOT_PATH: "editor.toolbar",
-        }),
-    });
-    assert.equal(api.isEntryVisible(root), false);
-    for (const active of ["simple", "full", "custom"]) {
-        config.active = active;
-        for (const enabled of [false, true]) {
-            storage[storageKey] = {enabled};
-            assert.equal(api.isEntryVisible(root), enabled);
-            assert.equal(api.getConfiguredEntryVisibility(root), enabled);
-            assert.equal(api.getConfiguredEntryVisibility(root, true), true);
+    const runtimeWindow = {siyuan: {mobile: undefined as object | undefined,
+        config: {appearance: {entryVisibility: config}}, storage: {"local-mobile-slash-menu": {enabled: true}}}};
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {configurable: true, value: runtimeWindow});
+    try {
+        const api = {} as typeof import("./runtime");
+        runInNewContext(transpileModule(readFileSync("src/config/entryVisibility/runtime.ts", "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS},
+        }).outputText, {
+            exports: api,
+            window: runtimeWindow,
+            require: () => ({...catalog, ...profile, TOOLBAR_ENTRY_ROOT_PATH: "editor.toolbar"}),
+        });
+        for (const mobile of [false, true]) {
+            runtimeWindow.siyuan.mobile = mobile ? {} : undefined;
+            assert.equal(catalog.getEntryCatalogDefaultVisibility(root), !mobile);
+            assert.equal(catalog.getEntryCatalogCustomDefaultVisibility(root), !mobile);
+            for (const active of ["simple", "full", "custom"]) {
+                config.active = active;
+                for (const legacy of [false, true]) {
+                    runtimeWindow.siyuan.storage["local-mobile-slash-menu"].enabled = legacy;
+                    assert.equal(api.isEntryVisible(root), !mobile);
+                    assert.equal(api.getConfiguredEntryVisibility(`${root}.heading1`), !mobile);
+                }
+            }
+            for (const template of ["simple", "full"] as const) {
+                assert.equal(api.createEntryProfileSnapshot(template)[root], !mobile);
+            }
+            config.active = "custom";
+            for (const enabled of [true, false]) {
+                custom.entries[root] = enabled;
+                assert.equal(api.isEntryVisible(root), enabled);
+                assert.equal(api.getConfiguredEntryVisibility(`${root}.heading2`), enabled);
+            }
+            custom.entries[root] = true;
+            custom.entries[`${root}.heading1`] = false;
+            assert.equal(api.isEntryVisible(`${root}.heading1`), false);
+            assert.equal(api.isEntryVisible(`${root}.heading2`), true);
+            custom.entries = {};
+        }
+        config.active = "custom";
+        custom.entries[root] = true;
+        runtimeWindow.siyuan.mobile = undefined;
+        assert.equal(api.getConfiguredEntryVisibility(root), true);
+        runtimeWindow.siyuan.mobile = {};
+        assert.equal(api.getConfiguredEntryVisibility(root), true);
+        custom.entries[root] = false;
+        runtimeWindow.siyuan.mobile = undefined;
+        assert.equal(api.getConfiguredEntryVisibility(root), false);
+    } finally {
+        if (descriptor) {
+            Object.defineProperty(globalThis, "window", descriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
         }
     }
-    config.active = "custom";
-    assert.equal(api.isEntryVisible(`${root}.heading1`), false);
-    assert.equal(api.isEntryVisible(`${root}.heading2`), true);
-    storage[storageKey].enabled = false;
-    assert.equal(api.isEntryVisible(`${root}.heading2`), false);
-    assert.equal(api.getConfiguredEntryVisibility(`${root}.heading2`, true), true);
-    assert.equal(api.getConfiguredEntryVisibility(`${root}.heading1`, true), false);
-    mobile = false;
-    storage[storageKey].enabled = true;
-    assert.equal(api.getConfiguredEntryVisibility(root), false);
-    assert.equal(api.getConfiguredEntryVisibility(root, true), false);
-    config.active = "full";
-    storage[storageKey].enabled = false;
-    assert.equal(api.getConfiguredEntryVisibility(root), true);
-    assert.equal(custom.entries[root], false);
 });

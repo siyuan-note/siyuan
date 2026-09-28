@@ -47,8 +47,6 @@
 	"archiveKeyFile": "نسخة احتياطية للمفتاح (اختياري)",
 	"archiveHistoryOnly": "السجل واللقطات فقط",
 	"openContextMenu": "فتح قائمة السياق",
-	"mobileSlashMenu": "قائمة الشرطة المائلة على الهاتف",
-	"mobileSlashMenuTip": "عند التفعيل، اكتب / في محرر الهاتف للبحث عن كتل المحتوى وإدراجها",
 	"mindmapAddSibling": "إضافة عقدة خريطة ذهنية شقيقة",
 	"mindmapAddChild": "إضافة عقدة خريطة ذهنية فرعية",
 	"layoutSelectedCount": "تم تحديد ${x}",

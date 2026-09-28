@@ -47,8 +47,6 @@
 	"archiveKeyFile": "Backup da chave (opcional)",
 	"archiveHistoryOnly": "Somente histórico e instantâneos",
 	"openContextMenu": "Abrir menu de contexto",
-	"mobileSlashMenu": "Menu de barra no celular",
-	"mobileSlashMenuTip": "Quando ativado, digite / no editor móvel para pesquisar e inserir blocos de conteúdo",
 	"mindmapAddSibling": "Adicionar nó irmão ao mapa mental",
 	"mindmapAddChild": "Adicionar nó filho ao mapa mental",
 	"layoutSelectedCount": "${x} selecionados",

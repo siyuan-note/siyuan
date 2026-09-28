@@ -441,7 +441,7 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
 };
 
 export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
-    const enabled = getConfiguredEntryVisibility(SLASH_MENU_ROOT_PATH, protyle.lite);
+    const enabled = getConfiguredEntryVisibility(SLASH_MENU_ROOT_PATH);
     if (!enabled) {
         return [];
     }
@@ -489,7 +489,7 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
         canUpload: !!(protyle.options.upload.handler || (protyle.options.upload.url && protyle.upload)),
         key,
         order: getEntryOrder(SLASH_MENU_ROOT_PATH),
-        visible: (entryKey) => getConfiguredEntryVisibility(getSlashMenuEntryPath(entryKey), protyle.lite),
+        visible: (entryKey) => getConfiguredEntryVisibility(getSlashMenuEntryPath(entryKey)),
     });
 });
 

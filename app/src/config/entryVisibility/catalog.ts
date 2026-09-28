@@ -584,6 +584,7 @@ const slashMenuBuiltinChildren = [
 
 const slashMenuRoot = {
     ...node("menu", lang("entrySlashMenu"), true, [...slashMenuBuiltinChildren], true),
+    defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
     displayChildrenDirectly: true,
 };
 

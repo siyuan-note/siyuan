@@ -29,7 +29,6 @@ import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {resolveToolbarItems} from "../../protyle/toolbar/entryVisibility";
 import {syncDockBarVisibility} from "../../layout/dock/barVisibility";
 import {genUUID} from "../../util/genID";
-import {isMobile} from "../../util/functions";
 import {
     applyDockEntryOrderSnapshot,
     getCurrentDockEntryOrderSnapshot,
@@ -72,11 +71,7 @@ export const isEntryVisible = (path: string): boolean => {
     return getConfiguredEntryVisibility(path);
 };
 
-export const getConfiguredEntryVisibility = (path: string, ignoreMobileSlashSwitch = false): boolean => {
-    // 移动端总开关沿用本机偏好，方案中的候选显隐与排序仍独立保存。
-    if (path === SLASH_MENU_ROOT_PATH && isMobile()) {
-        return ignoreMobileSlashSwitch || window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU]?.enabled === true;
-    }
+export const getConfiguredEntryVisibility = (path: string): boolean => {
     const config = getConfig();
     const active = config.active;
     let visible: boolean;
@@ -92,7 +87,7 @@ export const getConfiguredEntryVisibility = (path: string, ignoreMobileSlashSwit
     }
     const parentPath = getEntryParentPath(path);
     if (parentPath && getEntryCatalogNode(parentPath)) {
-        return getConfiguredEntryVisibility(parentPath, ignoreMobileSlashSwitch);
+        return getConfiguredEntryVisibility(parentPath);
     }
     return true;
 };

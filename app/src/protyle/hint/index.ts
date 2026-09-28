@@ -336,10 +336,6 @@ export class Hint {
             if (!this.enableSlash || !blockElement || isInEmbedBlock(blockElement)) {
                 return;
             }
-            if (!protyle.lite && isMobile() && this.splitChar !== "/") {
-                this.element.classList.add("fn__none");
-                return;
-            }
             if (protyle.lite) {
                 protyle.options.hint.extend.find((item) => {
                     if (item.key === "/" && item.hint) {

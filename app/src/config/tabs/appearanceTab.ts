@@ -950,7 +950,7 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         key: "entryVisibility",
         keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip,
             window.siyuan.languages.entryToolbar, window.siyuan.languages.entrySlashMenu,
-            ...(isMobile() ? [window.siyuan.languages.mobileSlashMenu, window.siyuan.languages.mobileToolbarEntryTip] : [])],
+            ...(isMobile() ? [window.siyuan.languages.mobileToolbarEntryTip] : [])],
         html: genEntryVisibilityHtml,
         afterMount: mountEntryVisibility,
     });

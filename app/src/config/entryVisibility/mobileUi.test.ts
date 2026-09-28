@@ -14,11 +14,9 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         }
     };
     let mobile = true;
-    const writes: unknown[] = [];
     const cache: Record<string, Record<string, any>> = {};
     const noop = () => {};
-    const storageKey = "local-mobile-slash-menu";
-    window.siyuan = {languages, storage: {}, config: {editor: {codeTabSpaces: 4}, appearance: {
+    window.siyuan = {languages, mobile: {}, storage: {}, config: {editor: {codeTabSpaces: 4}, appearance: {
         entryVisibility: {active: "custom", profiles: [{id: "custom", name: "Custom", entries: {}, orders: {}}]},
     }}, layout: {}} as unknown as typeof window.siyuan;
     const load = (id: string): Record<string, any> => {
@@ -28,9 +26,8 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         if (id === "config/entryVisibility/runtime") {
             return {
                 ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple", ENTRY_VISIBILITY_VERSION: 1,
-                createEntryProfileSnapshot: () => ({}), createEntryOrderSnapshot: () => ({}),
-                getConfiguredEntryVisibility: (entryPath: string) => entryPath !== "editor.slash.menu" || !mobile ||
-                    window.siyuan.storage[storageKey]?.enabled === true,
+                createEntryProfileSnapshot: () => ({"editor.slash.menu": !mobile}), createEntryOrderSnapshot: () => ({}),
+                getConfiguredEntryVisibility: () => true,
                 saveEntryVisibility: (config: Config.IEntryVisibility) => {
                     window.siyuan.config.appearance.entryVisibility = config;
                 },
@@ -41,10 +38,9 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
                 "util/functions": {isMobile: () => mobile},
                 "util/hostCapabilities": {getHostCapabilities: () => ({importExport: false})},
                 "util/genID": {genUUID: () => "new"},
-                "constants": {Constants: {LOCAL_MOBILE_SLASH_MENU: storageKey}},
                 "dialog/confirmDialog": {confirmDialog: (_title: string, _text: string, callback: () => void) => callback()},
                 "dialog/message": {showMessage: noop},
-                "protyle/util/compatibility": {isInMobileApp: () => true, setStorageVal: (...args: unknown[]) => writes.push(args)},
+                "protyle/util/compatibility": {isInMobileApp: () => true},
             };
             check(id in mocks, `Missing module ${id}`);
             return mocks[id];
@@ -84,12 +80,12 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         select.dispatchEvent(new Event("change", {bubbles: true}));
     };
     if (narrow) {
-        window.siyuan.storage[storageKey] = {enabled: true};
         for (const id of ["", "custom"]) {
             view = open(id);
             check(Boolean(view.querySelector("[data-profile-field='template']")) === !id,
                 "New profiles must include the template selector");
             selectSlash();
+            view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']").click();
             const list = view.querySelector<HTMLElement>(".config-entry-visibility__column-list");
             const bounds = list.getBoundingClientRect();
             check(bounds.height >= 132, `${id || "new"} profile list is too short: ${bounds.height}px`);
@@ -97,7 +93,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
             check(action.bottom <= innerHeight && bounds.bottom <= action.top,
                 "List and actions must remain inside the viewport");
             const header = view.querySelector<HTMLElement>(".config-entry-visibility__mobile-header");
-            for (const selector of ["[data-profile-field='name']", "[data-type='mobile-slash-menu']"]) {
+            for (const selector of ["[data-profile-field='name']", "[data-entry-path='editor.slash.menu']"]) {
                 const control = view.querySelector<HTMLElement>(selector);
                 control.scrollIntoView({block: "nearest"});
                 const rect = control.getBoundingClientRect();
@@ -122,11 +118,10 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         return "Narrow new and existing profiles passed";
     }
     selectSlash();
-    let enabled = view.querySelector<HTMLInputElement>("[data-type='mobile-slash-menu']");
+    let enabled = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
     check(!enabled.checked, "Mobile slash defaults to off");
     enabled.click();
-    check(window.siyuan.storage[storageKey].enabled && writes.length === 1, "Device switch must persist immediately");
-    check(!view.querySelector("[data-entry-path='editor.slash.menu']"), "Mobile must not show a second profile root switch");
+    check(config().profiles[0].entries["editor.slash.menu"] !== true, "Total switch must remain a draft until confirmed");
     check(view.querySelectorAll("[data-type='entry-mobile-options'] input").length === 1, "Only one total switch is shown");
     check(!view.querySelector("[data-entry-move]"), "No arrow sort controls");
     const browser = view.querySelector<HTMLElement>("[data-type='entry-browser']");
@@ -178,34 +173,35 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     check(!browser.querySelector(".config-entry-visibility__row--drop-after"), "Outside release clears drop target");
     view.querySelector<HTMLElement>("[data-action='confirm']").click();
     const order = config().profiles[0].orders["editor.slash.menu"];
+    check(config().profiles[0].entries["editor.slash.menu"] === true, "Confirm saves total switch in the profile");
     check(order.includes("plugin:missing:item"), "Unavailable plugin slots must survive sorting");
     check(order.indexOf("heading3") < order.indexOf("heading1"), "Confirmed order must persist");
     view = open();
     selectSlash();
-    enabled = view.querySelector<HTMLInputElement>("[data-type='mobile-slash-menu']");
-    check(enabled.checked, "Reopening must preserve device setting");
+    enabled = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
+    check(enabled.checked, "Reopening must preserve profile setting");
     const search = view.querySelector<HTMLInputElement>("[data-type='entry-search']");
     search.value = "heading1";
     search.dispatchEvent(new Event("input", {bubbles: true}));
     check(!view.querySelector(".config-entry-visibility__drag"), "Search results must not permit partial-list sorting");
     search.value = "";
     search.dispatchEvent(new Event("input", {bubbles: true}));
-    const rootSwitch = view.querySelector<HTMLInputElement>("[data-type='mobile-slash-menu']");
+    const rootSwitch = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
     rootSwitch.click();
     check(!view.querySelector(".config-entry-visibility__drag"), "Disabled menu must not be draggable");
     check(view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.heading1']").disabled,
         "Disabled menu must disable candidate controls");
     view.querySelector<HTMLElement>("[data-action='cancel']").click();
-    check(config().profiles[0].entries["editor.slash.menu"] !== false, "Device switch must not overwrite profile data");
-    check(window.siyuan.storage[storageKey].enabled === false, "Device switch remains effective after closing");
+    check(config().profiles[0].entries["editor.slash.menu"] === true, "Cancel must discard the total switch change");
     view = open("full");
     selectSlash();
     check(!view.querySelector(".config-entry-visibility__drag"), "Built-in profiles must remain read-only");
-    enabled = view.querySelector<HTMLInputElement>("[data-type='mobile-slash-menu']");
+    enabled = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
     enabled.click();
-    check(window.siyuan.storage[storageKey].enabled === true, "Total switch is editable while viewing built-in profiles");
+    check(!enabled.checked, "Built-in total switch follows mobile default and remains read-only");
     view.querySelector<HTMLElement>("[data-action='cancel']").click();
     mobile = false;
+    delete window.siyuan.mobile;
     view = open();
     check(!view.querySelector("[data-type='entry-section']"), "Desktop retains its location column");
     check(view.querySelector(".config-entry-visibility__column--locations"), "Desktop locations remain reachable");
@@ -222,6 +218,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     check(desktopOrder.indexOf("heading1") < desktopOrder.indexOf("heading3"), "Desktop drag still updates order");
     check(catalog.getEntryCatalogChildren("editor.slash.menu").length > 20, "Exercise the actual slash catalog");
     mobile = true;
+    window.siyuan.mobile = {} as typeof window.siyuan.mobile;
     view = open();
     const toolbarBrowser = view.querySelector<HTMLElement>("[data-type='entry-browser']");
     toolbarBrowser.setPointerCapture = () => { captured = true; };

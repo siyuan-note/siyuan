@@ -17,7 +17,6 @@ import {
     refreshTopBarCatalog,
     TOP_BAR_ROOT_PATH,
     STATUS_BAR_ROOT_PATH,
-    SLASH_MENU_ROOT_PATH,
 } from "./catalog";
 import {
     createEntryProfileSnapshot,
@@ -43,8 +42,7 @@ import {
 } from "./profile";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isMobile} from "../../util/functions";
-import {isInMobileApp, setStorageVal} from "../../protyle/util/compatibility";
-import {Constants} from "../../constants";
+import {isInMobileApp} from "../../protyle/util/compatibility";
 import {bindTouchOrder} from "./touchOrder";
 import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {
@@ -457,9 +455,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     let nodes = directDisplayRoot?.children || section.children;
     let prefix = directDisplayRoot ? directDisplayRootPath : section.key;
     let title = directDisplayRoot?.label() || section.label();
-    let parentEnabled = isMobile() && directDisplayRootPath === SLASH_MENU_ROOT_PATH
-        ? isEntryVisible(SLASH_MENU_ROOT_PATH)
-        : directDisplayRoot
+    let parentEnabled = directDisplayRoot
         ? getProfileEntryVisibility(profile, directDisplayRootPath,
             getEntryCatalogCustomDefaultVisibility(directDisplayRootPath))
         : true;
@@ -645,9 +641,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             view.querySelector("[data-type='entry-mobile-options']").innerHTML = directRoot ? `
                 <label class="fn__flex b3-label config-item">
                     <div class="fn__flex-1"><div class="config-name">${escapeHtml(directRoot.label())}</div></div>
-                    <span class="fn__space"></span>
-                    <input class="b3-switch" type="checkbox" data-type="mobile-slash-menu"
-                        ${window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU]?.enabled === true ? " checked" : ""}>
+                    ${renderEntrySwitch(draft, `${section.key}.${directRoot.key}`, directRoot, true, builtin)}
                 </label>` : "";
         }
         browser.innerHTML = renderEntryColumns(draft, selectedSectionKey, selectedPaths, builtin,
@@ -844,13 +838,6 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             selectedSectionKey = control.value;
             selectedPaths = [];
             renderBrowser(false, true);
-            return;
-        }
-        if (control.dataset.type === "mobile-slash-menu") {
-            const config = {enabled: (control as HTMLInputElement).checked};
-            window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU] = config;
-            setStorageVal(Constants.LOCAL_MOBILE_SLASH_MENU, config);
-            renderBrowser();
             return;
         }
         if (builtin) {

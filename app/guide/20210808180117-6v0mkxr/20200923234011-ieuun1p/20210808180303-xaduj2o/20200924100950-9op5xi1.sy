@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260928164213"
+		"updated": "20260928175046"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-wub2unw",
-				"updated": "20260928164213"
+				"updated": "20260928175046"
 			},
 			"Children": [
 				{
@@ -10007,7 +10007,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260927164841-n9zgr7r",
-				"updated": "20260928164213"
+				"updated": "20260928175046"
 			},
 			"Children": [
 				{
@@ -10039,7 +10039,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and view or edit a profile, then select the slash menu category. The slash menu has one total switch on mobile. It is off by default, takes effect immediately, and preserves your existing mobile preference. When enabled, type / to search for content blocks and select a result to insert at the original cursor position. This switch applies to this device; candidate visibility and order are configured separately in each profile."
+					"Data": " and select the slash menu category while editing a custom profile. Mobile and desktop use the same profile settings for the total switch, candidate visibility, and order. The default is on for desktop and off for mobile. Enable the switch, confirm to save, and activate the profile; then type / to search for content blocks and select a result to insert at the original cursor position."
 				}
 			]
 		},
@@ -10048,12 +10048,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260927164841-clwu05c",
-				"updated": "20260928164213"
+				"updated": "20260928175046"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In custom profiles, use the category selector to switch between the toolbar and slash menu. Drag the six-dot handle on the left of an item to change its order, or use its switch to change visibility. Drag near the list edge to scroll. Clear the search before sorting, and confirm to save the profile. Candidate settings in built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices."
+					"Data": "In custom profiles, use the category selector to switch between the toolbar and slash menu. Drag the six-dot handle on the left of an item to change its order, or use its switch to change visibility. Drag near the list edge to scroll. Clear the search before sorting, and confirm to save the profile. Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices."
 				}
 			]
 		},

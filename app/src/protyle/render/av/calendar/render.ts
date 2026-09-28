@@ -149,7 +149,9 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
                 card.style.width = `calc(${segment.span * 100 / 7}% - 4px)`;
                 card.style.top = "0";
                 week.append(layer);
-                previewLayout.place(week, layer, card);
+                const source = next.start === entry.start && next.end === entry.end ?
+                    sourceItems.find(element => week.contains(element)) : undefined;
+                previewLayout.place(week, layer, card, source);
             });
         };
         const clean = () => {

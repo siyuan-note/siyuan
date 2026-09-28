@@ -11,6 +11,7 @@ import {getFieldsByData} from "./view";
 import {Constants} from "../../../constants";
 import {countFilterLeaves} from "./filterTree";
 import {getAVColorStyle} from "./color";
+import {setFilterSelectPosition} from "./selectPosition";
 
 interface FilterEditorOptions {
     action?: IAVFilterOperation["action"];
@@ -736,7 +737,7 @@ const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string
         : "";
     const chips = options.map(option => {
         const selected = selectedValues.some((s: IAVCellSelectValue) => s.content === option.name);
-        return `<button type="button" class="av__select-option" data-name="${escapeAttr(option.name)}" data-color="${escapeAttr(option.color)}" data-type="selectOption" data-path="${path}">
+        return `<button type="button" class="av__select-option" title="${escapeAttr(option.name)}" data-name="${escapeAttr(option.name)}" data-color="${escapeAttr(option.color)}" data-type="selectOption" data-path="${path}">
 <svg class="av__select-option-check"><use xlink:href="#${selected ? "iconCheck" : "iconUncheck"}"></use></svg>
 <span class="b3-chip b3-chip--middle" style="${getAVColorStyle(option)}"><span class="fn__ellipsis">${escapeHtml(option.name)}</span></span>
 </button>`;
@@ -1208,23 +1209,8 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                 });
                 if (dropdown.style.display === "none") {
                     // 展开时用 fixed 定位到 trigger 下方（避免被 overflow:auto 裁剪）
-                    const rect = trigger.getBoundingClientRect();
                     dropdown.style.zIndex = (++window.siyuan.zIndex).toString();
-                    dropdown.style.left = rect.left + "px";
-                    dropdown.style.width = Math.max(rect.width, 120) + "px";
-                    // 先临时显示以测量真实高度，再决定向上还是向下展开
-                    dropdown.style.visibility = "hidden";
-                    dropdown.style.display = "block";
-                    const dropdownHeight = dropdown.offsetHeight;
-                    dropdown.style.visibility = "";
-                    const spaceBelow = window.innerHeight - rect.bottom;
-                    if (spaceBelow < dropdownHeight + 8 && rect.top > dropdownHeight + 8) {
-                        // 下方不够且上方够：向上展开，紧贴 trigger 上方
-                        dropdown.style.top = (rect.top - dropdownHeight - 4) + "px";
-                    } else {
-                        // 向下展开
-                        dropdown.style.top = (rect.bottom + 4) + "px";
-                    }
+                    setFilterSelectPosition(dropdown, trigger);
                 } else {
                     dropdown.style.display = "none";
                 }

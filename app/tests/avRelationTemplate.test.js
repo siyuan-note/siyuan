@@ -43,6 +43,28 @@ const runCases = sources => {
         return dependencies[name];
     };
     const {renderCell, genCellValueByElement} = load("./cell");
+    const {deselect} = load("./relationSelection");
+    const selectionMenu = document.createElement("div");
+    selectionMenu.innerHTML = `<div data-relation-type="selectedRows"><div data-relation-type="selected" data-row-id="one" draggable="true">
+<span class="av__relation-table-check"><svg><use xlink:href="#iconCheck"></use></svg></span>
+<span class="av__relation-table-primary"><svg class="fn__grab"></svg><span class="b3-menu__label" data-content="One">One</span></span>
+</div></div><div data-relation-type="candidateRows"><div data-relation-type="candidate" data-row-id="two">Two</div></div>`;
+    document.body.replaceChildren(selectionMenu);
+    const deselectedRow = selectionMenu.querySelector('[data-row-id="one"]');
+    let refreshed = false;
+    selectionMenu.addEventListener("relationrefresh", () => {
+        refreshed = true;
+    });
+    deselect(deselectedRow, selectionMenu, (_protyle, _node, value) => {
+        assert.deepEqual(value.blockIDs, []);
+        assert.deepEqual(value.contents, []);
+    });
+    assert.equal(refreshed, true);
+    assert.equal(selectionMenu.querySelectorAll("[data-row-id]").length, 2);
+    assert.equal(deselectedRow.parentElement.dataset.relationType, "candidateRows");
+    assert.equal(deselectedRow.hasAttribute("draggable"), false);
+    assert.equal(deselectedRow.querySelector(".fn__grab"), null);
+    assert.equal(deselectedRow.querySelector("use").getAttribute("xlink:href"), "#iconUncheck");
     const {createPosition} = load("./relationPosition");
     for (const rowClass of ["av__row", "av__gallery-item", "av__calendar-item", ""]) {
         const blockElement = document.createElement("div");
@@ -168,6 +190,16 @@ const runElectron = async () => {
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
         const relationSource = readFileSync(path.join(__dirname, "../src/protyle/render/av/relation.ts"), "utf8");
+        const valueStart = relationSource.indexOf("const getRelationValue =");
+        const valueEnd = relationSource.indexOf("const genCreatedRelationRowHTML =", valueStart);
+        const deselectStart = relationSource.indexOf('            target.dataset.relationType = "candidate";');
+        const deselectEnd = relationSource.indexOf("        } else if (rowId)", deselectStart);
+        assert.ok(valueStart > 0 && valueEnd > valueStart && deselectStart > 0 && deselectEnd > deselectStart);
+        sources["./relationSelection"] = ts.transpileModule(
+            `${relationSource.slice(valueStart, valueEnd)}
+export const deselect = (target, menuElement, updateCellsValue) => { const protyle = {}, nodeElement = {}, cellElements = [];
+${relationSource.slice(deselectStart, deselectEnd)} };`,
+            {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         const positionStart = relationSource.indexOf("    let anchorElement =");
         const positionEnd = relationSource.indexOf("    const resize =", positionStart);
         assert.ok(positionStart > 0 && positionEnd > positionStart);

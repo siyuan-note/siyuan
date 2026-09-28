@@ -1034,7 +1034,11 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
     if (target.classList.contains("b3-menu__item")) {
         const rowId = target.getAttribute("data-row-id");
         if (target.dataset.relationType === "selected") {
-            target.remove();
+            target.dataset.relationType = "candidate";
+            target.removeAttribute("draggable");
+            target.querySelector(".av__relation-table-check use").setAttribute("xlink:href", "#iconUncheck");
+            target.querySelector(".av__relation-table-primary > .fn__grab")?.remove();
+            menuElement.querySelector('[data-relation-type="candidateRows"]').prepend(target);
             updateCellsValue(protyle, nodeElement, getRelationValue(menuElement), cellElements);
             menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
         } else if (rowId) {

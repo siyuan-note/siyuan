@@ -761,6 +761,8 @@ declare namespace Config {
          * Whether to enable RTL (left-to-right chirography) mode
          */
         rtl: boolean;
+        /** 默认关闭；自动判定段落和标题的文本方向，手动方向优先，不改变列表和表格布局 */
+        autoDirection: boolean;
         /**
          * Whether to enable spell checking
          */

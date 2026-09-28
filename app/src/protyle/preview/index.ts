@@ -29,6 +29,7 @@ import {hasTopClosestByAttribute} from "../util/hasClosest";
 import {addScriptSync} from "../util/addScript";
 import {prepareWechatCopy, prepareZhihuCopy} from "./platformCopy";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {destroyAutoDirection, setAutoDirection} from "../render/autoDirection";
 
 export class Preview {
     public element: HTMLElement;
@@ -227,6 +228,7 @@ export class Preview {
     }
 
     public destroy() {
+        destroyAutoDirection(this.previewElement);
         destroyTabsRender(this.previewElement);
         window.clearTimeout(this.mdTimeoutId);
         /// #if !BROWSER
@@ -275,6 +277,7 @@ export class Preview {
                     ?.classList.add("protyle-preview__title");
                 /// #endif
                 processRender(protyle.preview.previewElement);
+                setAutoDirection(protyle.preview.previewElement, window.siyuan.config.editor.autoDirection);
                 tabsRender(protyle.preview.previewElement, {label: window.siyuan.languages.tabItem,
                     shown: item => processRender(item)});
                 highlightRender(protyle.preview.previewElement);

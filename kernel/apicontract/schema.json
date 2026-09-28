@@ -38062,6 +38062,16 @@
             }
           ]
         },
+        "autoDirection": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "backlinkBlockSort": {
           "anyOf": [
             {
@@ -41639,6 +41649,9 @@
             }
           ]
         },
+        "autoDirection": {
+          "type": "boolean"
+        },
         "backlinkBlockSort": {
           "type": "integer"
         },
@@ -41934,6 +41947,7 @@
         "allowHTMLBLockScript",
         "allowSVGScript",
         "assetOpen",
+        "autoDirection",
         "backlinkBlockSort",
         "backlinkContainChildren",
         "backlinkExpandCount",

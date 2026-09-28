@@ -1,4 +1,6 @@
 {
+	"autoDirection": "自動文字方向",
+	"autoDirectionTip": "根據首個具有強方向性的字元自動判定段落和標題的方向，手動設定的方向優先",
 	"cardFullRowTip": "主鍵欄位始終獨佔整列；關閉「顯示欄位名稱」後，其他欄位才能緊湊排列",
 	"searchFileOrSnapshot": "搜尋檔案名稱或快照 ID",
 	"calendarWeekLabel": "週",

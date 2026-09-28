@@ -1,4 +1,6 @@
 {
+	"autoDirection": "Arah teks otomatis",
+	"autoDirectionTip": "Deteksi arah paragraf dan judul dari karakter pertama dengan arah kuat; arah yang diatur secara manual diutamakan",
 	"cardFullRowTip": "Kolom utama selalu menempati satu baris penuh; sembunyikan nama kolom untuk menata kolom lain secara ringkas",
 	"searchFileOrSnapshot": "Cari nama berkas atau ID snapshot",
 	"calendarWeekLabel": "M",

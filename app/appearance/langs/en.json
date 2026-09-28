@@ -1,4 +1,6 @@
 {
+	"autoDirection": "Automatic text direction",
+	"autoDirectionTip": "Detect paragraph and heading direction from the first strong directional character; manual direction takes priority",
 	"cardFullRowTip": "The primary field always occupies a full row; hide field names to arrange other fields compactly",
 	"searchFileOrSnapshot": "Search file name or snapshot ID",
 	"calendarWeekLabel": "W",

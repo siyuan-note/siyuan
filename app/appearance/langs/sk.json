@@ -1,4 +1,6 @@
 {
+	"autoDirection": "Automatický smer textu",
+	"autoDirectionTip": "Určiť smer odsekov a nadpisov podľa prvého znaku so silnou smerovosťou; ručné nastavenie má prednosť",
 	"cardFullRowTip": "Primárne pole vždy zaberá celý riadok; skryte názvy polí, aby sa ostatné polia usporiadali kompaktne",
 	"searchFileOrSnapshot": "Hľadať názov súboru alebo ID snímky",
 	"calendarWeekLabel": "T",

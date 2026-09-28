@@ -1,4 +1,6 @@
 {
+	"autoDirection": "Direction automatique du texte",
+	"autoDirectionTip": "Détecter la direction des paragraphes et des titres à partir du premier caractère directionnel fort ; la direction manuelle est prioritaire",
 	"cardFullRowTip": "Le champ principal occupe toujours une ligne entière ; masquez les noms des champs pour disposer les autres de façon compacte",
 	"searchFileOrSnapshot": "Rechercher un nom de fichier ou un ID d’instantané",
 	"calendarWeekLabel": "S",

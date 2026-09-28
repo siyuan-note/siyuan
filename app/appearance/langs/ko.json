@@ -1,4 +1,6 @@
 {
+	"autoDirection": "자동 텍스트 방향",
+	"autoDirectionTip": "첫 번째 강한 방향성 문자를 기준으로 문단과 제목의 방향을 감지하며, 수동으로 지정한 방향을 우선 적용",
 	"cardFullRowTip": "기본 필드는 항상 한 행 전체를 차지합니다. 다른 필드를 조밀하게 배치하려면 필드 이름을 숨기세요",
 	"searchFileOrSnapshot": "파일 이름 또는 스냅샷 ID 검색",
 	"calendarWeekLabel": "주",

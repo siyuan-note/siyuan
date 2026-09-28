@@ -1,4 +1,6 @@
 {
+	"autoDirection": "Automatische tekstrichting",
+	"autoDirectionTip": "Bepaal de richting van alinea’s en koppen op basis van het eerste teken met een sterke schrijfrichting; handmatige instellingen hebben voorrang",
 	"cardFullRowTip": "Het primaire veld neemt altijd een volledige rij in beslag; verberg veldnamen om andere velden compact te rangschikken",
 	"searchFileOrSnapshot": "Bestandsnaam of snapshot-ID zoeken",
 	"calendarWeekLabel": "W",

@@ -1,4 +1,6 @@
 {
+	"autoDirection": "テキスト方向の自動判定",
+	"autoDirectionTip": "最初の強い方向性を持つ文字に基づいて段落と見出しの方向を自動判定し、手動で指定した方向を優先します",
 	"cardFullRowTip": "主キーフィールドは常に行全体を占有します。他のフィールドをコンパクトに配置するには、フィールド名の表示をオフにしてください",
 	"searchFileOrSnapshot": "ファイル名またはスナップショット ID を検索",
 	"calendarWeekLabel": "週",

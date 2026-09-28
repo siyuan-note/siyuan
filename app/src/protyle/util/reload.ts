@@ -12,12 +12,14 @@ import {restoreLuteMarkdownSyntax} from "./paste";
 import {invalidateTrackedRanges} from "./trackedRange";
 import {updateBacklinkReferenceVisibility} from "../wysiwyg/backlinkReference";
 import {shouldReloadProtyle} from "./reloadState";
+import {setAutoDirection} from "../render/autoDirection";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
     if (!shouldReloadProtyle(protyle)) {
         return;
     }
     updateBacklinkReferenceVisibility(protyle);
+    setAutoDirection(protyle.wysiwyg.element, window.siyuan.config.editor.autoDirection);
     protyle.wysiwyg.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
     invalidateTrackedRanges(protyle);
     /// #if MOBILE

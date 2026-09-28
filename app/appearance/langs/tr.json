@@ -1,4 +1,6 @@
 {
+	"autoDirection": "Otomatik metin yönü",
+	"autoDirectionTip": "Paragraf ve başlık yönünü güçlü yönlülüğe sahip ilk karakterden algıla; elle ayarlanan yön önceliklidir",
 	"cardFullRowTip": "Birincil alan her zaman tam bir satır kaplar; diğer alanları sıkışık yerleştirmek için alan adlarını gizleyin",
 	"searchFileOrSnapshot": "Dosya adı veya anlık görüntü kimliği ara",
 	"calendarWeekLabel": "H",

@@ -166,6 +166,11 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.rtlTip,
         save: (value) => editorConfigApi.patch("editor.rtl", value),
     });
+    group.switch("editor.autoDirection", {
+        title: window.siyuan.languages.autoDirection,
+        desc: window.siyuan.languages.autoDirectionTip,
+        save: (value) => editorConfigApi.patch("editor.autoDirection", value),
+    });
 };
 
 const genFontListItemHtml = (item: IFontItem, checked: boolean) => {

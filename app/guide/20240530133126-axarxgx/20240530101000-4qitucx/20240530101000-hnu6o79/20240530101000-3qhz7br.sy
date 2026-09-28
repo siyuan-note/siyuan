@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260923221935"
+		"updated": "20260928090424"
 	},
 	"Children": [
 		{
@@ -5574,6 +5574,62 @@
 				"ID": "20240530101000-54uew8g",
 				"id": "20240530101000-qa9slig"
 			}
+		},
+		{
+			"ID": "20260928090424-7oo5lua",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260928090424-7oo5lua",
+				"updated": "20260928090424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テキスト方向の自動判定"
+				}
+			]
+		},
+		{
+			"ID": "20260928090424-8to4vwd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260928090424-8to4vwd",
+				"updated": "20260928090424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版とモバイル版では、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外観"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "テキスト方向の自動判定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で有効にできます。スイッチは「右から左へ（RTL）」の下にあり、初期状態では無効です。段落と見出しの最初の強い方向性を持つ文字に基づいて、右から左または左から右を自動判定します。先頭の数字、句読点、絵文字は方向を決定しません。手動で指定したブロック単位とインラインの方向が優先されます。リスト記号の位置と表の列順序は従来の設定を維持します。プレビューおよび HTML・PDF エクスポートにも自動判定が適用されます。"
+				}
+			]
 		}
 	]
 }

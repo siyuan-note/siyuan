@@ -7,6 +7,7 @@ import {
 } from "../../protyle/util/hasClosest";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
+import {getSuperBlockCommand} from "../../block/superBlock";
 import {focusBlock, focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {getCurrentEditor as getDocumentEditor} from "../editor";
 import {getMobileToolbarPaddingElement, getMobileToolbarProtyle, getMobileToolbarUndo} from "../../protyle/lite/mobileToolbar";
@@ -751,6 +752,8 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
     ${getSlashItem("- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
     ${getSlashItem("> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
+    ${getSlashItem(getSuperBlockCommand("col"), "iconSuper", window.siyuan.languages.horizontalSuperBlock, "true")}
+    ${getSlashItem(getSuperBlockCommand("row"), "iconSuper", window.siyuan.languages.verticalSuperBlock, "true")}
     ${getSlashItem(`::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`, "iconTabs", window.siyuan.languages.tabs, "true")}
     ${getSlashItem(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
     ${getSlashItem(`> [!NOTE]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">✏️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span>`, "true")}

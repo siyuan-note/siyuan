@@ -1,5 +1,6 @@
 import {fetchPost} from "../../util/fetch";
 import {registerBuiltinSlashHint} from "./builtinSlash";
+import {getSuperBlockCommand} from "../../block/superBlock";
 import {insertHTML} from "../util/insertHTML";
 import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
 import {getIconByType} from "../../editor/getIcon";
@@ -180,6 +181,16 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         id: "quote",
         value: "> " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.quote.custom, ">")}</div>`,
+    }, {
+        filter: [window.siyuan.languages.horizontalSuperBlock, window.siyuan.languages.superBlock, "horizontal super block", "columns", "layout", "横向超级块", "hengxiangchaojikuai", "hx", "超级块", "chaojikuai", "cjk", "分栏", "fenlan", "fl"],
+        id: "horizontalSuperBlock",
+        value: getSuperBlockCommand("col"),
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSuper"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.horizontalSuperBlock}</span></div>`,
+    }, {
+        filter: [window.siyuan.languages.verticalSuperBlock, window.siyuan.languages.superBlock, "vertical super block", "columns", "layout", "纵向超级块", "zongxiangchaojikuai", "zx", "超级块", "chaojikuai", "cjk", "分栏", "fenlan", "fl"],
+        id: "verticalSuperBlock",
+        value: getSuperBlockCommand("row"),
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSuper"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.verticalSuperBlock}</span></div>`,
     }, {
         filter: [window.siyuan.languages.tabs, "tabs", "页签", "yeqian", "yq"],
         id: "tabs",

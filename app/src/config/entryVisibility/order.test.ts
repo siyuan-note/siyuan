@@ -10,6 +10,34 @@ import {
     resolveEntryOrderWithBoundaryDefaults,
 } from "./order";
 
+test("super block creation merges into saved menu orders and preserves plugin slots", () => {
+    const groups: Array<[string, string[]]> = [
+        ["gutter.single.superBlock", ["prependSuperBlockColumn", "prependSuperBlockChild", "appendSuperBlockColumn", "appendSuperBlockChild"]],
+        ["gutter.single", ["createSuperBlockLeft", "createSuperBlockRight"]],
+        ["editor.slash.menu", ["horizontalSuperBlock", "verticalSuperBlock"]],
+    ];
+    groups.forEach(([path, added]) => {
+        const entries = getEntryCatalogChildren(path);
+        const defaults = entries.map(item => item.key);
+        const saved = defaults.filter(key => !added.includes(key)).reverse();
+        saved.splice(1, 0, "plugin:example:item");
+        const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+        assert.deepEqual(merged.filter(key => !added.includes(key)), saved);
+        added.forEach(key => {
+            assert.equal(merged.filter(item => item === key).length, 1);
+            assert.equal(entries.find(item => item.key === key).simple, true);
+        });
+        const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+        const resolved = resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators);
+        assert.equal(resolved.includes("plugin:example:item"), true);
+        assert.equal(separators.has(resolved[0]), false);
+        assert.equal(separators.has(resolved[resolved.length - 1]), false);
+        resolved.forEach((key, index) => {
+            assert.equal(separators.has(key) && separators.has(resolved[index + 1]), false);
+        });
+    });
+});
+
 test("document tree duplication merges into saved orders and retains plugin slots", () => {
     const entries = getEntryCatalogChildren("docTree.document.copy");
     const defaults = entries.map(item => item.key);

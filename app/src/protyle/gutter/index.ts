@@ -71,6 +71,7 @@ import {setDragTipGhost} from "../util/dragTip";
 import {stringifyBlockDragData} from "../util/dragDocument";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
+import {createSuperBlockColumn, insertSuperBlockChild} from "../../block/insertSuperBlock";
 import {mathRender} from "../render/mathRender";
 import {duplicateBlock} from "../wysiwyg/commonHotkey";
 import {isEncryptedBox, movePathTo, useShell} from "../../util/pathName";
@@ -2218,6 +2219,25 @@ export class Gutter {
                     hideElements(["gutter"], protyle);
                 }
             });
+            if (allowStructuralMutation) {
+                superBlockSubmenu.push({
+                    id: isCol ? "prependSuperBlockColumn" : "prependSuperBlockChild",
+                    icon: isCol ? "iconInsertLeft" : "iconBefore",
+                    label: window.siyuan.languages[isCol ? "prependSuperBlockColumn" : "prependSuperBlockChild"],
+                    click() {
+                        countBlockWord([], protyle);
+                        void insertSuperBlockChild(protyle, nodeElement, "start");
+                    }
+                }, {
+                    id: isCol ? "appendSuperBlockColumn" : "appendSuperBlockChild",
+                    icon: isCol ? "iconInsertRight" : "iconAfter",
+                    label: window.siyuan.languages[isCol ? "appendSuperBlockColumn" : "appendSuperBlockChild"],
+                    click() {
+                        countBlockWord([], protyle);
+                        void insertSuperBlockChild(protyle, nodeElement, "end");
+                    }
+                });
+            }
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "superBlock",
                 icon: "iconSuper",
@@ -2813,6 +2833,26 @@ export class Gutter {
                         hideElements(["select"], protyle);
                         countBlockWord([], protyle);
                         insertEmptySuperBlockColumn(protyle, "right", nodeElement);
+                    }
+                }).element);
+            } else if (nodeElement.parentElement?.getAttribute("data-type") === "NodeSuperBlock" &&
+                nodeElement.parentElement.getAttribute("data-sb-layout") === "row") {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "createSuperBlockLeft",
+                    icon: "iconInsertLeft",
+                    label: window.siyuan.languages.createSuperBlockLeft,
+                    click() {
+                        countBlockWord([], protyle);
+                        void createSuperBlockColumn(protyle, nodeElement, "left");
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "createSuperBlockRight",
+                    icon: "iconInsertRight",
+                    label: window.siyuan.languages.createSuperBlockRight,
+                    click() {
+                        countBlockWord([], protyle);
+                        void createSuperBlockColumn(protyle, nodeElement, "right");
                     }
                 }).element);
             }

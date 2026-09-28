@@ -398,6 +398,10 @@ const gutterSingle = () => [
         node("cancelSuperBlock", () => `${window.siyuan.languages.cancel} ${window.siyuan.languages.superBlock}`),
         node("turnIntoVLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.vLayout}`),
         node("turnIntoHLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.hLayout}`),
+        node("prependSuperBlockColumn", lang("prependSuperBlockColumn")),
+        node("prependSuperBlockChild", lang("prependSuperBlockChild")),
+        node("appendSuperBlockColumn", lang("appendSuperBlockColumn")),
+        node("appendSuperBlockChild", lang("appendSuperBlockChild")),
     ]),
     separator("separator_code"),
     node("code", lang("code"), true, [
@@ -468,6 +472,8 @@ const gutterSingle = () => [
     node("insertAfter", lang("insertAfter")),
     node("insertSuperBlockLeft", lang("insertSuperBlockLeft")),
     node("insertSuperBlockRight", lang("insertSuperBlockRight")),
+    node("createSuperBlockLeft", lang("createSuperBlockLeft")),
+    node("createSuperBlockRight", lang("createSuperBlockRight")),
     node("jumpTo", lang("jumpTo"), false, [
         node("jumpToParentPrev", lang("jumpToParentPrev"), false),
         node("jumpToParentNext", lang("jumpToParentNext"), false),
@@ -529,6 +535,8 @@ const slashMenuBuiltinChildren = [
     node("orderedList", lang("ordered-list")),
     node("check", lang("check")),
     node("quote", lang("quote")),
+    node("horizontalSuperBlock", lang("horizontalSuperBlock")),
+    node("verticalSuperBlock", lang("verticalSuperBlock")),
     node("tabs", lang("tabs")),
     node("mindmap", lang("mindmap")),
     node("calloutNote", location(lang("callout"), literal("Note"))),

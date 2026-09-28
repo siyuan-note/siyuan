@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20260926152549"
+		"updated": "20260928225427"
 	},
 	"Children": [
 		{
@@ -1405,7 +1405,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20260921215916"
+				"updated": "20260928225427"
 			},
 			"Children": [
 				{
@@ -2983,7 +2983,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-lubwy1k",
-				"updated": "20250330192603"
+				"updated": "20260928225427"
 			},
 			"Children": [
 				{
@@ -3014,6 +3014,182 @@
 				{
 					"Type": "NodeText",
 					"Data": ". It can be used to combine continuous content blocks in a document, and also to support horizontal typesetting."
+				}
+			]
+		},
+		{
+			"ID": "20260928225427-pmkcfru",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260928225427-pmkcfru",
+				"updated": "20260928225427"
+			},
+			"Children": [
+				{
+					"ID": "20260928225427-4wel37x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-4wel37x",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-yrq8l73",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-yrq8l73",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Type "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Horizontal super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Vertical super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to create two empty paragraphs arranged side by side or vertically, with the cursor in the first paragraph. Search for “columns” to find these options. On mobile, they are also available in the keyboard toolbar's insert panel"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260928225427-ldrjy5i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-ldrjy5i",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-6yzyax0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-6yzyax0",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "In the super block's block icon menu, select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Add a column to the beginning of the current super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Add a column to the end of the current super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to add an empty paragraph at either end of a horizontal layout. For a vertical layout, the corresponding actions add a block. The new block does not copy the type or content of existing children"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260928225427-29pl5zd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-29pl5zd",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-9sn0h7t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-9sn0h7t",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "In the menu of a direct child of a vertical super block, select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Create local columns to the left"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Create local columns to the right"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to group that block and a new empty paragraph into a nested horizontal super block. Other blocks keep their layout. These actions do not change the scope of existing left/right column insertion shortcuts"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

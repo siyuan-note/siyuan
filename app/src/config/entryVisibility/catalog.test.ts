@@ -95,6 +95,8 @@ const slashMenuBuiltinOrder = [
     "orderedList",
     "check",
     "quote",
+    "horizontalSuperBlock",
+    "verticalSuperBlock",
     "tabs",
     "mindmap",
     "calloutNote",
@@ -508,7 +510,7 @@ test("slash menu catalog follows the built-in hint order", () => {
     assert.deepEqual(section?.children.map((item) => item.key), ["menu"]);
     const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
     assert.deepEqual(children.map((item) => item.key), slashMenuBuiltinOrder);
-    assert.equal(children.filter((item) => item.type === "entry").length, 66);
+    assert.equal(children.filter((item) => item.type === "entry").length, 68);
     assert.equal(children.filter((item) => item.type === "separator").length, 5);
     assert.equal(children.every((item) => item.simple), true);
 });
@@ -819,6 +821,10 @@ test("super block actions and vertical alignment use their respective menu group
         "cancelSuperBlock",
         "turnIntoVLayout",
         "turnIntoHLayout",
+        "prependSuperBlockColumn",
+        "prependSuperBlockChild",
+        "appendSuperBlockColumn",
+        "appendSuperBlockChild",
     ]);
 
     const singleLayoutKeys = getEntryCatalogChildren("gutter.single.layout").map((item) => item.key);
@@ -871,11 +877,13 @@ test("gutter height menus follow width and stay aligned across selection scopes"
 test("super block column insertion actions follow block insertion actions", () => {
     const keys = getEntryCatalogChildren("gutter.single").map((item) => item.key);
     const insertBeforeIndex = keys.indexOf("insertBefore");
-    assert.deepEqual(keys.slice(insertBeforeIndex, insertBeforeIndex + 4), [
+    assert.deepEqual(keys.slice(insertBeforeIndex, insertBeforeIndex + 6), [
         "insertBefore",
         "insertAfter",
         "insertSuperBlockLeft",
         "insertSuperBlockRight",
+        "createSuperBlockLeft",
+        "createSuperBlockRight",
     ]);
 });
 

@@ -1,6 +1,8 @@
 import {isTableLikeView} from "../render/av/viewType";
 import {Constants} from "../../constants";
 import {isBuiltinSlashHint} from "./builtinSlash";
+import {getSuperBlockCommandLayout} from "../../block/superBlock";
+import {genEmptySuperBlock} from "../../block/insertSuperBlock";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -1121,6 +1123,7 @@ ${genHintItemHTML(item)}
                     this.fixImageCursor(range);
                 }
                 const isMindmap = value === `- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`;
+                const superBlockLayout = getSuperBlockCommandLayout(value);
                 let textContent = isMindmap ? `- ${Lute.Caret}` : value;
                 if (value === "```") {
                     textContent = value + (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(window.siyuan.storage[Constants.LOCAL_CODELANG]) ? "" : window.siyuan.storage[Constants.LOCAL_CODELANG]) + Lute.Caret + "\n```";
@@ -1154,9 +1157,13 @@ ${genHintItemHTML(item)}
                         clientY: rect.top
                     });
                     return;
-                } else if (editableElement.textContent === "" && nodeElement.getAttribute("data-type") === "NodeParagraph") {
+                } else if ((editableElement.textContent === "" ||
+                    superBlockLayout && editableElement.textContent.split(Constants.ZWSP).join("") === "") &&
+                    nodeElement.getAttribute("data-type") === "NodeParagraph") {
                     let newHTML = "";
-                    if (value === "<div>") {
+                    if (superBlockLayout) {
+                        newHTML = genEmptySuperBlock(superBlockLayout, nodeElement).outerHTML;
+                    } else if (value === "<div>") {
                         newHTML = `<div data-node-id="${id}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     } else {
                         editableElement.textContent = textContent;
@@ -1207,7 +1214,8 @@ ${genHintItemHTML(item)}
                         }]);
                     }
                 } else {
-                    let newHTML = isMindmap ? spinListMindmapDOM(protyle.lute, textContent) :
+                    let newHTML = superBlockLayout ? genEmptySuperBlock(superBlockLayout).outerHTML :
+                        isMindmap ? spinListMindmapDOM(protyle.lute, textContent) :
                         protyle.lute.SpinBlockDOM(textContent);
                     if (value === "<div>") {
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;

@@ -86,7 +86,7 @@ test("slash menu separator normalization removes leading, trailing, and consecut
 test("lite slash menu hides document-dependent entries and keeps local editing entries", () => {
     const unavailable = ["database", "databaseTableView", "databaseListView", "databaseCalendarView", "databaseKanbanView", "databaseGalleryView",
         "newFileRef", "newSubDocRef", "template", "blockEmbed", "aiWriting", "widget", "unknown"];
-    const available = ["ref", "assets", "heading1", "table", "bold", "mermaid"];
+    const available = ["ref", "assets", "heading1", "table", "bold", "mermaid", "horizontalSuperBlock", "verticalSuperBlock"];
     const items = [...unavailable, ...available].map((id) => entry(id));
     assert.deepEqual(resolve(items, {lite: true}).map((item) => item.id), available);
     assert.deepEqual(resolve(items), items);

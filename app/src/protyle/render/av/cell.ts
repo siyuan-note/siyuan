@@ -1223,6 +1223,9 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
 
 export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
     if (value.type === "checkbox") {
+        if (cellElement.getAttribute("role") === "checkbox") {
+            cellElement.setAttribute("aria-checked", String(!!value.checkbox?.checked));
+        }
         if (value.checkbox.checked) {
             cellElement.classList.add("av__cell-check");
             cellElement.classList.remove("av__cell-uncheck");

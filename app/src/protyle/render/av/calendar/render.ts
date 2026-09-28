@@ -4,7 +4,7 @@ import * as dayjs from "dayjs";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {isMobile} from "../../../../util/functions";
 import {transaction} from "../../../wysiwyg/transaction";
-import {renderCell} from "../cell";
+import {renderCell, updateCellsValue} from "../cell";
 import {cellValueIsEmpty} from "../cellValue";
 import {getAVBackgroundColor} from "../color";
 import {getConditionalBackground} from "../conditionalColor";
@@ -86,7 +86,9 @@ const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boole
             return "";
         }
         const checkClass = field.type === "checkbox" ? (cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck") : "";
-        return `<div class="av__calendar-field${checkClass}" data-field-id="${field.id}" data-col-id="${field.id}" data-dtype="${field.type}" data-align="${field.align || ""}" data-wrap="${field.wrap}"${field.renderTemplate?.trim() ? ' data-render-template="true"' : ""} title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, view.showIcon, "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
+        const checkbox = field.type === "checkbox" && !field.renderTemplate?.trim() ?
+            ` role="checkbox" tabindex="${editable ? "0" : "-1"}" aria-checked="${!!cell.value.checkbox?.checked}" aria-disabled="${!editable}" aria-label="${escapeAttr(field.name)}"` : "";
+        return `<div class="av__calendar-field${checkClass}"${checkbox} data-field-id="${field.id}" data-col-id="${field.id}" data-dtype="${field.type}" data-align="${field.align || ""}" data-wrap="${field.wrap}"${field.renderTemplate?.trim() ? ' data-render-template="true"' : ""} title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, view.showIcon, "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
     }).join("");
     return `<div class="av__calendar-item${starts ? " av__calendar-item--start" : ""}${ends ? " av__calendar-item--end" : ""}" role="button" tabindex="0" data-calendar-item="${event.row.id}" data-id="${event.row.id}" title="${escapeAttr(title)}" style="grid-column:${segment.column + 1}/span ${segment.span};grid-row:${segment.lane + 1};${background ? `--b3-av-calendar-background:${background}` : ""}">
         ${drag && starts ? `<span class="av__calendar-resize av__calendar-resize--start" data-calendar-resize="start" title="${window.siyuan.languages.calendarResizeStart}"></span>` : ""}
@@ -214,7 +216,7 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
         const item = target.closest<HTMLElement>("[data-calendar-item]");
         const entry = item && events.get(item.dataset.calendarItem);
         const endpoint = target.closest<HTMLElement>("[data-calendar-resize]")?.dataset.calendarResize as "start" | "end" | undefined;
-        if (event.button !== 0 || !entry || entry.invalid || entry.date.value.type !== "date" || !canEditCalendar(protyle) ||
+        if (target.closest('[role="checkbox"]') || event.button !== 0 || !entry || entry.invalid || entry.date.value.type !== "date" || !canEditCalendar(protyle) ||
             event.pointerType === "touch" && !endpoint && !target.closest("[data-calendar-move]")) {
             return;
         }
@@ -265,7 +267,7 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
             return;
         }
         const target = event.target as HTMLElement;
-        if (target.closest("[data-calendar-resize]")) {
+        if (target.closest('[data-calendar-resize], [role="checkbox"]')) {
             return;
         }
         const item = target.closest<HTMLElement>("[data-calendar-item]");
@@ -461,10 +463,31 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
                 {row, date: cell},
                 {content: day, isNotEmpty: true, isNotTime: true, hasEndDate: false, isNotEmpty2: false}, onUpdated)});
     }
+    const toggleCheckbox = (target: HTMLElement) => {
+        const field = target.closest<HTMLElement>('.av__calendar-field[role="checkbox"]');
+        if (!field) {
+            return false;
+        }
+        const item = field.closest<HTMLElement>("[data-calendar-item]");
+        const entry = item && eventsByID.get(item.dataset.calendarItem);
+        const colIndex = view.columns.findIndex(column => column.id === field.dataset.colId);
+        const cell = entry?.row.cells[colIndex];
+        if (canEditCalendar(protyle) && cell?.value?.type === "checkbox") {
+            void updateCellsValue(protyle, blockElement, {checked: !cell.value.checkbox?.checked},
+                undefined, undefined, undefined, false, false, false, [{
+                    groupID: "", rowID: entry.row.id, colID: field.dataset.colId,
+                    rowIndex: entry.rowIndex || 0, colIndex, cell, column: view.columns[colIndex],
+                }]);
+        }
+        return true;
+    };
     root.addEventListener("click", event => {
         event.stopPropagation();
         window.siyuan.menus.menu.remove();
         const target = event.target as HTMLElement;
+        if (toggleCheckbox(target)) {
+            return;
+        }
         const item = target.closest<HTMLElement>("[data-calendar-item]");
         if (item) {
             void openCalendarItem(protyle, blockElement, eventsByID.get(item.dataset.calendarItem).row);
@@ -514,7 +537,9 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         const item = (event.target as HTMLElement).closest<HTMLElement>("[data-calendar-item]");
         if (item && (event.key === "Enter" || event.key === " ")) {
             event.preventDefault();
-            void openCalendarItem(protyle, blockElement, eventsByID.get(item.dataset.calendarItem).row);
+            if (!toggleCheckbox(event.target as HTMLElement)) {
+                void openCalendarItem(protyle, blockElement, eventsByID.get(item.dataset.calendarItem).row);
+            }
         }
     });
     root.addEventListener("contextmenu", event => {

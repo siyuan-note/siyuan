@@ -1914,9 +1914,9 @@
   &__checkbox {
     color: var(--b3-theme-on-surface);
     height: 1.625em;
-    width: calc(1.625em - 10px);
+    width: 1.25em;
     box-sizing: border-box;
-    padding: 5px 0;
+    padding: .1875em 0;
     display: block;
 
     &:hover {

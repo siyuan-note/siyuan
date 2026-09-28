@@ -151,3 +151,82 @@ test("calendar refresh keeps selected event segments and blank clicks dismiss th
     assert.equal(menuClosed, 1);
     assert.equal(stopped, true);
 });
+
+test("calendar checkbox clicks and keyboard activation update only the chosen field and honor readonly modes", async () => {
+    for (const mode of ["desktop", "mobile", "disabled", "publish", "history", "snapshot"]) {
+        const start = new Date(2026, 8, 1).getTime();
+        const range = {start, end: dates.addCalendarDays(start, 7), timeZone: "UTC"};
+        const values = [
+            {...createEmptyAVValue("date", "date"), date: {content: start, isNotEmpty: true, isNotTime: true}},
+            createEmptyAVValue("first", "checkbox"), createEmptyAVValue("second", "checkbox"),
+        ];
+        const cells = values.map(value => ({id: value.keyID, value}));
+        const handlers: Record<string, (event: unknown) => void> = {};
+        const updates: unknown[] = [];
+        let opens = 0;
+        let html = "";
+        const root = {
+            querySelectorAll: (): unknown[] => [],
+            querySelector: () => ({addEventListener() {}}),
+            addEventListener(type: string, listener: (event: unknown) => void, capture?: boolean) {
+                if (capture !== true) {
+                    handlers[type] = listener;
+                }
+            },
+        };
+        const modules: Record<string, unknown> = {
+            "./date": dates,
+            "./state": {getCalendarState: () => ({anchor: start, mode: "week", rowLimit: 3}), getCalendarRequestRange: () => range},
+            "./settings": {isCalendarDateColumn: () => true, bindCalendarSettings() {}},
+            "./undated": {getCalendarUndatedHTML: () => "", bindCalendarUndated() {}},
+            "../render": {genTabHeaderHTML: () => ""},
+            "../cellValue": {cellValueIsEmpty},
+            "../conditionalColor": {getConditionalBackground},
+            "../cell": {renderCell: () => "<span></span>", updateCellsValue: (...args: unknown[]) => updates.push(args)},
+            "../openDatabaseRow": {openDatabaseRowByData: () => opens++},
+            "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
+            "../../../../util/functions": {isMobile: () => mode === "mobile"},
+            "../../../../constants": {Constants: {ZWSP: ""}},
+            "../container": {replaceAVContainer: (_block: unknown, value: string) => { html = value; }},
+            "../virtualScroll": {getAVSelectedItemIDs: (): string[] => [], setAVData() {}},
+            "../search": {bindAvSearch() {}},
+            "../richText": {renderAVRichTextElements() {}},
+            "../locate": {finishAVLocate() {}},
+        };
+        const exports = {} as typeof import("./render");
+        runInNewContext(transpileModule(readFileSync(join(__dirname, "render.ts"), "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+        }).outputText, {
+            exports, require: (name: string) => modules[name] || {},
+            window: {siyuan: {isPublish: mode === "publish", config: {lang: "en"}, languages: {}, menus: {menu: {remove() {}}}}},
+            document: {activeElement: null},
+        });
+        const block = {dataset: {avId: "database", nodeId: "carrier"},
+            querySelector: (selector: string) => selector === ".av__calendar" ? root : null, removeAttribute() {}};
+        const protyle = {disabled: mode === "disabled", options: {history: {
+            created: mode === "history" ? "history" : "", snapshot: mode === "snapshot" ? "snapshot" : "",
+        }}} as IProtyle;
+        await exports.renderCalendar(block as unknown as HTMLElement, protyle, {viewID: "calendar", view: {
+            calendar: {dateKeyID: "date"}, calendarRange: range,
+            columns: values.map(value => ({id: value.keyID, type: value.type, name: value.keyID})),
+            rows: [{id: "row", cells}],
+        }} as unknown as IAV);
+        const editable = mode === "desktop" || mode === "mobile";
+        assert.match(html, new RegExp(`role="checkbox" tabindex="${editable ? "0" : "-1"}" aria-checked="false" aria-disabled="${!editable}"`));
+        const item = {dataset: {calendarItem: "row"}};
+        const field = {dataset: {colId: "second"}, closest: () => item};
+        const target = {closest: (selector: string) => selector.includes("checkbox") ? field : item};
+        handlers.click({target, stopPropagation() {}});
+        handlers.keydown({target, key: " ", preventDefault() {}, stopPropagation() {}});
+        handlers.pointerdown({target, button: 0, pointerType: "mouse", stopPropagation() {}});
+        handlers.touchstart({target, touches: [{}]});
+        assert.equal(opens, 0);
+        assert.equal(updates.length, editable ? 2 : 0);
+        for (const args of updates as Parameters<typeof import("../cell").updateCellsValue>[]) {
+            assert.deepEqual(JSON.parse(JSON.stringify(args[2])), {checked: true});
+            assert.equal(args[9][0].cell, cells[2]);
+            assert.equal(args[9][0].rowID, "row");
+            assert.equal(args[9][0].colID, "second");
+        }
+    }
+});

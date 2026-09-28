@@ -22,6 +22,7 @@
     "build:desktop": "webpack --mode production --config webpack.desktop.js",
     "build:export": "webpack --mode production --config webpack.export.js",
     "gen:types": "tsc -d",
+    "gen:arch": "node ../scripts/generate-arch-svg.js",
     "start": "cross-env NODE_ENV=development electron ./electron/main.js",
     "start:simulate-rosetta": "cross-env NODE_ENV=development electron ./electron/main.js --simulate-rosetta",
     "install:electron": "cross-env ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ node node_modules/electron/install.js",

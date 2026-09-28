@@ -561,12 +561,32 @@ export const bindRelationEvent = (options: {
         listNaturalMaxHeight = naturalHeight;
         return updateListMaxHeight();
     };
+    let anchorElement = options.cellElements[options.cellElements.length - 1];
+    let anchorRect = anchorElement.getBoundingClientRect();
+    const anchorRow = anchorElement.closest<HTMLElement>(".av__row, .av__gallery-item, .av__calendar-item");
+    const anchorColumnAttribute = anchorElement.dataset.colId ? "data-col-id" : "data-field-id";
+    const anchorColumnID = anchorElement.getAttribute(anchorColumnAttribute);
+    const anchorRowID = anchorRow?.dataset.id || anchorElement.dataset.rowId;
+    const anchorRowClass = ["av__row", "av__gallery-item", "av__calendar-item"].find(name => anchorRow?.classList.contains(name));
+    const anchorSelector = anchorRow ?
+        `.${anchorRowClass}[data-id="${CSS.escape(anchorRowID)}"] [${anchorColumnAttribute}="${CSS.escape(anchorColumnID)}"]` :
+        anchorRowID ? `[data-row-id="${CSS.escape(anchorRowID)}"][${anchorColumnAttribute}="${CSS.escape(anchorColumnID)}"]` :
+            `.fn__flex-1[${anchorColumnAttribute}="${CSS.escape(anchorColumnID)}"]`;
     const positionMenu = (reset = false) => {
         if (reset) {
             resetPosition();
         }
-        const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
-        setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+        // 数据库刷新会替换单元格，重新查找锚点；条目不可见时沿用最后的有效位置。
+        if (!anchorElement?.isConnected) {
+            anchorElement = options.blockElement.querySelector<HTMLElement>(anchorSelector);
+        }
+        if (anchorElement?.isConnected) {
+            const rect = anchorElement.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                anchorRect = rect;
+            }
+        }
+        setPosition(options.menuElement, anchorRect.left, anchorRect.bottom, anchorRect.height, 0, true);
         positionInitialized = true;
     };
     const resize = () => {

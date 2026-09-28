@@ -43,6 +43,33 @@ const runCases = sources => {
         return dependencies[name];
     };
     const {renderCell, genCellValueByElement} = load("./cell");
+    const {createPosition} = load("./relationPosition");
+    for (const rowClass of ["av__row", "av__gallery-item", "av__calendar-item", ""]) {
+        const blockElement = document.createElement("div");
+        const attribute = rowClass === "av__gallery-item" ? "data-field-id" : "data-col-id";
+        const markup = rowClass ? `<div class="${rowClass}" data-id="row"><div ${attribute}="column"></div></div>` :
+            `<div data-row-id="row" ${attribute}="column"></div>`;
+        blockElement.innerHTML = markup;
+        document.body.replaceChildren(blockElement);
+        const cell = blockElement.querySelector(`[${attribute}]`);
+        cell.getBoundingClientRect = () => ({left: 200, bottom: 300, width: 100, height: 30});
+        const positions = [];
+        let resets = 0;
+        const position = createPosition({blockElement, cellElements: [cell], menuElement: {}},
+            () => resets++, (_menu, left, bottom, height) => positions.push([left, bottom, height]));
+        position();
+        blockElement.innerHTML = markup;
+        cell.getBoundingClientRect = () => ({left: 0, bottom: 0, width: 0, height: 0});
+        const replacement = blockElement.querySelector(`[${attribute}]`);
+        replacement.getBoundingClientRect = () => ({left: 220, bottom: 320, width: 100, height: 30});
+        position(true);
+        replacement.getBoundingClientRect = () => ({left: 0, bottom: 0, width: 0, height: 0});
+        position(true);
+        blockElement.replaceChildren();
+        position(true);
+        assert.deepEqual(positions, [[200, 300, 30], [220, 320, 30], [220, 320, 30], [220, 320, 30]]);
+        assert.equal(resets, 3);
+    }
     const {genAVValueHTML, getAVTemplateInteractiveElement} = load("./attributeValue");
     for (const isDetached of [true, false]) {
         for (const renderedContent of [undefined, "", '<b>Formatted</b><a href="https://example.com">Link</a>']) {
@@ -140,6 +167,14 @@ const runElectron = async () => {
         const sources = Object.fromEntries(["cell", "cellValue", "attributeValue", "relationLayout"].map(name => ["./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
+        const relationSource = readFileSync(path.join(__dirname, "../src/protyle/render/av/relation.ts"), "utf8");
+        const positionStart = relationSource.indexOf("    let anchorElement =");
+        const positionEnd = relationSource.indexOf("    const resize =", positionStart);
+        assert.ok(positionStart > 0 && positionEnd > positionStart);
+        sources["./relationPosition"] = ts.transpileModule(
+            `export const createPosition = (options, resetPosition, setPosition) => { let positionInitialized = false;
+${relationSource.slice(positionStart, positionEnd)} return positionMenu; };`,
+            {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)})`);
         console.log("AV relation template cases passed");

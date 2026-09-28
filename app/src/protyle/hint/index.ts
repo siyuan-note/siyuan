@@ -336,8 +336,7 @@ export class Hint {
             if (!this.enableSlash || !blockElement || isInEmbedBlock(blockElement)) {
                 return;
             }
-            if (!protyle.lite && isMobile() &&
-                (this.splitChar !== "/" || window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU]?.enabled !== true)) {
+            if (!protyle.lite && isMobile() && this.splitChar !== "/") {
                 this.element.classList.add("fn__none");
                 return;
             }

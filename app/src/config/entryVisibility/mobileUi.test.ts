@@ -29,7 +29,8 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
             return {
                 ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple", ENTRY_VISIBILITY_VERSION: 1,
                 createEntryProfileSnapshot: () => ({}), createEntryOrderSnapshot: () => ({}),
-                getConfiguredEntryVisibility: () => true,
+                getConfiguredEntryVisibility: (entryPath: string) => entryPath !== "editor.slash.menu" || !mobile ||
+                    window.siyuan.storage[storageKey]?.enabled === true,
                 saveEntryVisibility: (config: Config.IEntryVisibility) => {
                     window.siyuan.config.appearance.entryVisibility = config;
                 },
@@ -83,6 +84,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         select.dispatchEvent(new Event("change", {bubbles: true}));
     };
     if (narrow) {
+        window.siyuan.storage[storageKey] = {enabled: true};
         for (const id of ["", "custom"]) {
             view = open(id);
             check(Boolean(view.querySelector("[data-profile-field='template']")) === !id,
@@ -102,7 +104,9 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
                 check(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2) === control,
                     `${selector} must be reachable by scrolling the form`);
             }
-            check(header.scrollHeight > header.clientHeight, "Upper form must scroll independently");
+            if (!id) {
+                check(header.scrollHeight > header.clientHeight, "New profile form must scroll independently");
+            }
             const candidate = list.querySelector<HTMLInputElement>("input[data-entry-path]");
             candidate.scrollIntoView({block: "nearest"});
             const rect = candidate.getBoundingClientRect();
@@ -122,7 +126,8 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     check(!enabled.checked, "Mobile slash defaults to off");
     enabled.click();
     check(window.siyuan.storage[storageKey].enabled && writes.length === 1, "Device switch must persist immediately");
-    check(view.querySelector("[data-entry-path='editor.slash.menu']"), "Profile root switch must be reachable");
+    check(!view.querySelector("[data-entry-path='editor.slash.menu']"), "Mobile must not show a second profile root switch");
+    check(view.querySelectorAll("[data-type='entry-mobile-options'] input").length === 1, "Only one total switch is shown");
     check(!view.querySelector("[data-entry-move]"), "No arrow sort controls");
     const browser = view.querySelector<HTMLElement>("[data-type='entry-browser']");
     // 合成指针不属于浏览器的活动指针，仅替换捕获状态，命中测试和事件分发仍使用真实 DOM。
@@ -185,19 +190,20 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     check(!view.querySelector(".config-entry-visibility__drag"), "Search results must not permit partial-list sorting");
     search.value = "";
     search.dispatchEvent(new Event("input", {bubbles: true}));
-    const rootSwitch = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
+    const rootSwitch = view.querySelector<HTMLInputElement>("[data-type='mobile-slash-menu']");
     rootSwitch.click();
     check(!view.querySelector(".config-entry-visibility__drag"), "Disabled menu must not be draggable");
     check(view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.heading1']").disabled,
         "Disabled menu must disable candidate controls");
     view.querySelector<HTMLElement>("[data-action='cancel']").click();
-    check(config().profiles[0].entries["editor.slash.menu"] !== false, "Cancelling must discard profile changes");
+    check(config().profiles[0].entries["editor.slash.menu"] !== false, "Device switch must not overwrite profile data");
+    check(window.siyuan.storage[storageKey].enabled === false, "Device switch remains effective after closing");
     view = open("full");
     selectSlash();
     check(!view.querySelector(".config-entry-visibility__drag"), "Built-in profiles must remain read-only");
     enabled = view.querySelector<HTMLInputElement>("[data-type='mobile-slash-menu']");
     enabled.click();
-    check(window.siyuan.storage[storageKey].enabled === false, "Device preference is editable while viewing built-in profiles");
+    check(window.siyuan.storage[storageKey].enabled === true, "Total switch is editable while viewing built-in profiles");
     view.querySelector<HTMLElement>("[data-action='cancel']").click();
     mobile = false;
     view = open();

@@ -17,6 +17,7 @@ import {
     refreshTopBarCatalog,
     TOP_BAR_ROOT_PATH,
     STATUS_BAR_ROOT_PATH,
+    SLASH_MENU_ROOT_PATH,
 } from "./catalog";
 import {
     createEntryProfileSnapshot,
@@ -456,7 +457,9 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     let nodes = directDisplayRoot?.children || section.children;
     let prefix = directDisplayRoot ? directDisplayRootPath : section.key;
     let title = directDisplayRoot?.label() || section.label();
-    let parentEnabled = directDisplayRoot
+    let parentEnabled = isMobile() && directDisplayRootPath === SLASH_MENU_ROOT_PATH
+        ? isEntryVisible(SLASH_MENU_ROOT_PATH)
+        : directDisplayRoot
         ? getProfileEntryVisibility(profile, directDisplayRootPath,
             getEntryCatalogCustomDefaultVisibility(directDisplayRootPath))
         : true;
@@ -642,11 +645,6 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             view.querySelector("[data-type='entry-mobile-options']").innerHTML = directRoot ? `
                 <label class="fn__flex b3-label config-item">
                     <div class="fn__flex-1"><div class="config-name">${escapeHtml(directRoot.label())}</div></div>
-                    ${renderEntrySwitch(draft, `${section.key}.${directRoot.key}`, directRoot, true, builtin)}
-                </label>
-                <label class="fn__flex b3-label config-item">
-                    <div class="fn__flex-1"><div class="config-name">${window.siyuan.languages.mobileSlashMenu}</div>
-                        <div class="b3-label__text">${window.siyuan.languages.mobileSlashMenuTip}</div></div>
                     <span class="fn__space"></span>
                     <input class="b3-switch" type="checkbox" data-type="mobile-slash-menu"
                         ${window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU]?.enabled === true ? " checked" : ""}>
@@ -852,6 +850,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             const config = {enabled: (control as HTMLInputElement).checked};
             window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU] = config;
             setStorageVal(Constants.LOCAL_MOBILE_SLASH_MENU, config);
+            renderBrowser();
             return;
         }
         if (builtin) {

@@ -15,6 +15,7 @@ import {
     TOP_BAR_ROOT_PATH,
     STATUS_BAR_ROOT_PATH,
     WINDOW_TOP_BAR_ROOT_PATH,
+    SLASH_MENU_ROOT_PATH,
 } from "./catalog";
 import {
     mergeEntryOrderPreservingUnknown,
@@ -28,6 +29,7 @@ import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {resolveToolbarItems} from "../../protyle/toolbar/entryVisibility";
 import {syncDockBarVisibility} from "../../layout/dock/barVisibility";
 import {genUUID} from "../../util/genID";
+import {isMobile} from "../../util/functions";
 import {
     applyDockEntryOrderSnapshot,
     getCurrentDockEntryOrderSnapshot,
@@ -62,14 +64,19 @@ const getTemplateVisibility = (path: string, template: TEntryVisibilityTemplate)
 
 export const isEntryVisible = (path: string): boolean => {
     /// #if MOBILE
-    if (!path.startsWith(`${TOOLBAR_ENTRY_ROOT_PATH}.`)) {
+    if (!path.startsWith(`${TOOLBAR_ENTRY_ROOT_PATH}.`) &&
+        path !== SLASH_MENU_ROOT_PATH && !path.startsWith(`${SLASH_MENU_ROOT_PATH}.`)) {
         return true;
     }
     /// #endif
     return getConfiguredEntryVisibility(path);
 };
 
-export const getConfiguredEntryVisibility = (path: string): boolean => {
+export const getConfiguredEntryVisibility = (path: string, ignoreMobileSlashSwitch = false): boolean => {
+    // 移动端总开关沿用本机偏好，方案中的候选显隐与排序仍独立保存。
+    if (path === SLASH_MENU_ROOT_PATH && isMobile()) {
+        return ignoreMobileSlashSwitch || window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU]?.enabled === true;
+    }
     const config = getConfig();
     const active = config.active;
     let visible: boolean;
@@ -85,7 +92,7 @@ export const getConfiguredEntryVisibility = (path: string): boolean => {
     }
     const parentPath = getEntryParentPath(path);
     if (parentPath && getEntryCatalogNode(parentPath)) {
-        return getConfiguredEntryVisibility(parentPath);
+        return getConfiguredEntryVisibility(parentPath, ignoreMobileSlashSwitch);
     }
     return true;
 };

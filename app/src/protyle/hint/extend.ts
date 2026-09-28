@@ -35,7 +35,7 @@ import {
     refreshSlashMenuCatalog,
     SLASH_MENU_ROOT_PATH,
 } from "../../config/entryVisibility/catalog";
-import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
+import {getConfiguredEntryVisibility, getEntryOrder} from "../../config/entryVisibility/runtime";
 import {resolveSlashMenuItems, TSlashMenuItem} from "./slashMenu";
 import {
     getBuiltinInlineStylePropertyValue,
@@ -441,7 +441,7 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
 };
 
 export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
-    const enabled = isEntryVisible(SLASH_MENU_ROOT_PATH);
+    const enabled = getConfiguredEntryVisibility(SLASH_MENU_ROOT_PATH, protyle.lite);
     if (!enabled) {
         return [];
     }
@@ -489,7 +489,7 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
         canUpload: !!(protyle.options.upload.handler || (protyle.options.upload.url && protyle.upload)),
         key,
         order: getEntryOrder(SLASH_MENU_ROOT_PATH),
-        visible: (entryKey) => isEntryVisible(getSlashMenuEntryPath(entryKey)),
+        visible: (entryKey) => getConfiguredEntryVisibility(getSlashMenuEntryPath(entryKey), protyle.lite),
     });
 });
 

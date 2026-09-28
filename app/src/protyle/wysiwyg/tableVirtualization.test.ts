@@ -35,6 +35,7 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
 .table[custom-pinthead="true"] > div {max-height:300px;}
 .table[custom-pinthead="true"] thead {position:sticky;top:0;}
 .table tbody > tr:nth-child(even) {background-color:rgb(12, 34, 56);}
+.test-relative-table table {width:100%;}
 `;
     document.head.appendChild(style);
     const fixture = (count = 2000, pinned = false, mutate?: (table: HTMLTableElement) => void) => {
@@ -82,6 +83,87 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         check.ok(holder.textContent.includes(`Row ${count - 1} cell 4`));
         check.doesNotMatch(html, /data-sy-table-virtual/);
     };
+    {
+        const f = fixture(1000, false, table => {
+            const block = table.parentElement.parentElement;
+            block.after(block.cloneNode(true), block.cloneNode(true));
+        });
+        await tick();
+        const tables = Array.from(f.editor.querySelectorAll("table"));
+        tables.forEach(table => reduced(table));
+        const ids = tables.map(table => table.getAttribute("data-sy-table-virtual-id"));
+        let restores = 0;
+        const restore = f.virtualizer.restore.bind(f.virtualizer);
+        f.virtualizer.restore = table => { restores++; restore(table); };
+        const outside = document.createElement("input");
+        document.body.appendChild(outside);
+        for (const type of ["pointerdown", "keydown", "beforeinput", "copy", "cut", "paste", "contextmenu"]) {
+            outside.dispatchEvent(new Event(type, {bubbles: true}));
+        }
+        for (const width of [600, 540, 460, 380, 640]) {
+            f.viewport.style.width = `${width}px`;
+            f.editor.style.paddingLeft = `${(640 - width) / 10}px`;
+            f.root.dispatchEvent(new Event("touchmove", {bubbles: true}));
+            await tick();
+            tables.forEach(table => reduced(table, "sidebar animation keeps all table windows"));
+        }
+        await new Promise(resolve => setTimeout(resolve, 250));
+        await tick();
+        check.equal(restores, 0, "outside interactions and viewport resizing do not materialize intrinsic-width tables");
+        check.deepEqual(tables.map(table => table.getAttribute("data-sy-table-virtual-id")), ids,
+            "sidebar animation does not rebuild table windows");
+        tables.forEach(table => {
+            check.ok(Math.abs(table.getBoundingClientRect().height - f.height) < 2);
+            Array.from(table.rows[0].cells).forEach((cell, index) => {
+                check.ok(Math.abs(cell.getBoundingClientRect().width - f.widths[index]) < 1);
+            });
+        });
+        const other = fixture(300);
+        await tick();
+        other.editor.dispatchEvent(new Event("copy", {bubbles: true}));
+        rowsMatch(other.editor.innerHTML, 300);
+        tables.forEach(table => reduced(table, "another editor's clipboard events leave this editor virtualized"));
+        other.destroy();
+        outside.dispatchEvent(new KeyboardEvent("keydown", {bubbles: true, key: "f", ctrlKey: true}));
+        tables.forEach(table => check.equal(table.tBodies[0].rows.length, 1000, "browser find restores every table"));
+        outside.dispatchEvent(new KeyboardEvent("keyup", {bubbles: true, key: "f", ctrlKey: true}));
+        outside.remove();
+        f.destroy();
+    }
+    for (const sizing of ["inline", "theme", "fallback"]) {
+        const f = fixture(600, false, table => {
+            if (sizing !== "theme") {
+                table.style.width = "100%";
+            }
+            if (sizing === "fallback") {
+                Object.defineProperty(table, "computedStyleMap", {value: undefined});
+            }
+            table.querySelectorAll("th, td").forEach(cell => { cell.textContent = "Cell"; });
+        });
+        await tick();
+        let restores = 0;
+        const restore = f.virtualizer.restore.bind(f.virtualizer);
+        f.virtualizer.restore = table => { restores++; restore(table); };
+        if (sizing === "theme") {
+            f.root.classList.add("test-relative-table");
+        }
+        for (const width of [600, 520, 440, 360]) {
+            f.viewport.style.width = `${width}px`;
+            await tick();
+            reduced(f.table);
+        }
+        await new Promise(resolve => setTimeout(resolve, 250));
+        await tick();
+        check.equal(restores, 1, "container-dependent tables are measured once after resizing settles");
+        check.ok(Math.abs(f.table.getBoundingClientRect().width - f.table.parentElement.clientWidth) < 2,
+            "percentage widths follow the final container size");
+        reduced(f.table);
+        f.viewport.style.width = "500px";
+        await tick();
+        f.destroy();
+        await new Promise(resolve => setTimeout(resolve, 250));
+        check.equal(restores, 2, "destroy cancels the pending layout refresh");
+    }
     for (const pinned of [false, true]) {
         const f = fixture(2000, pinned, table => {
             // 自动识别的虚拟块引用可出现在表头和任意正文行中。
@@ -228,8 +310,11 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
         rowsMatch(after);
         check.ok(after.includes("Edited cell"));
         const next = f.table.querySelector<HTMLTableCellElement>("tbody > tr:not([data-sy-table-virtual-rows]) td");
-        next.textContent = "Programmatic edit";
+        const tableWidth = f.table.getBoundingClientRect().width;
+        next.textContent = "Programmatic edit " + "Long cell content ".repeat(40);
         await tick();
+        check.ok(Math.abs(f.table.getBoundingClientRect().width - tableWidth) < 1,
+            "cell edits preserve the column widths used by offscreen row measurements");
         rowsMatch(api.cleanTableVirtualizationHTML(f.editor.innerHTML));
         check.ok(f.editor.textContent.includes("Programmatic edit"), "source updates keep visible edits and offscreen rows");
         f.destroy();

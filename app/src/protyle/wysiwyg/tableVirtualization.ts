@@ -21,6 +21,15 @@ interface ITableViewport {
     height: number;
 }
 
+// 固有宽度表格的列宽不随侧栏伸缩变化；无法读取原始宽度语义时保留重新测量。
+const isTableResizeDependent = (table: HTMLTableElement) => {
+    const styles = (table as HTMLTableElement & {
+        computedStyleMap?: () => {get: (property: string) => {toString: () => string}},
+    }).computedStyleMap?.();
+    return !styles || styles.get("width")?.toString() !== "max-content" ||
+        !["0px", "auto"].includes(styles.get("min-width")?.toString()) || styles.get("max-width")?.toString() !== "none";
+};
+
 export const isTableChunkVisible = (top: number, height: number, viewportTop: number, viewportBottom: number) =>
     top + height >= viewportTop && top <= viewportBottom;
 
@@ -39,6 +48,7 @@ export class LargeTableVirtualizer {
     private composing = false;
     private font = "";
     private layout = "";
+    private resizeTimeout = 0;
 
     constructor(private root: HTMLElement, private editor: HTMLElement, private viewport: HTMLElement,
                 private blocked: () => boolean = () => false, private virtualCellSelection = true) {
@@ -47,21 +57,51 @@ export class LargeTableVirtualizer {
         this.observer = new MutationObserver(records => this.onMutations(records));
         this.observer.observe(editor, {childList: true, subtree: true, characterData: true, attributes: true,
             attributeFilter: ["style", "class", "rowspan", "colspan", "custom-pinthead"]});
+        const initialStyle = getComputedStyle(editor);
+        this.font = initialStyle.font;
+        this.layout = [viewport.clientWidth, editor.clientWidth, initialStyle.paddingLeft, initialStyle.paddingRight].join("/");
         this.resizeObserver = new ResizeObserver(() => {
             const style = getComputedStyle(this.editor);
             const layout = [this.viewport.clientWidth, this.editor.clientWidth, style.paddingLeft, style.paddingRight].join("/");
-            const changedHeight = Array.from(this.states.values()).some(state =>
-                Math.abs(state.table.getBoundingClientRect().height - state.height) > 2);
-            if (layout !== this.layout || style.font !== this.font) {
-                this.layout = layout;
+            if (style.font !== this.font) {
+                clearTimeout(this.resizeTimeout);
                 this.font = style.font;
                 this.restore();
                 this.scan = true;
                 this.schedule();
-            } else if (changedHeight) {
-                this.states.forEach(state => this.measureChunks(state));
+            } else if (layout !== this.layout) {
+                clearTimeout(this.resizeTimeout);
+                // 侧栏动画和正文内边距会连续变化，待尺寸稳定后再检查表格的原始宽度规则。
+                this.resizeTimeout = window.setTimeout(() => {
+                    const sheet = this.styleElement.sheet;
+                    if (!sheet || !this.editor.isConnected || !this.states.size) {
+                        return;
+                    }
+                    const disabled = sheet.disabled;
+                    let tables: HTMLTableElement[];
+                    // 查询期间只切换样式规则，不挂载屏外行；随后立即恢复固定列宽，保护行高缓存。
+                    sheet.disabled = true;
+                    try {
+                        tables = Array.from(this.states.keys()).filter(isTableResizeDependent);
+                    } finally {
+                        sheet.disabled = disabled;
+                    }
+                    if (tables.length) {
+                        tables.forEach(table => this.restore(table));
+                        this.scan = true;
+                        this.schedule();
+                    }
+                }, 200);
+                this.scan = true;
                 this.schedule();
             }
+            this.layout = layout;
+            this.states.forEach(state => {
+                if (Math.abs(state.table.getBoundingClientRect().height - state.height) > 2) {
+                    this.measureChunks(state);
+                    this.schedule();
+                }
+            });
         });
         this.resizeObserver.observe(viewport);
         this.resizeObserver.observe(editor);
@@ -75,8 +115,19 @@ export class LargeTableVirtualizer {
         ["pointerdown", "keydown", "beforeinput", "copy", "cut", "paste", "dragstart", "contextmenu"].forEach(type => {
             window.addEventListener(type, event => {
                 const host = getTableCellRichEventTarget(event);
+                const selection = getSelection();
+                const globalFind = event instanceof KeyboardEvent && type === "keydown" &&
+                    (event.key === "F3" || !event.altKey && (event.ctrlKey || event.metaKey) &&
+                        ["f", "g"].includes(event.key.toLowerCase()));
+                const selectedClipboard = ["copy", "cut"].includes(type) && selection?.rangeCount &&
+                    selection.getRangeAt(0).intersectsNode(this.editor);
+                // 侧栏、其他编辑器和外部输入框的操作不恢复本编辑器，浏览器查找和正文选区复制仍读取完整内容。
+                if (!globalFind && !selectedClipboard &&
+                    !(event.target instanceof Node && this.root.contains(event.target)) && !(host && this.root.contains(host))) {
+                    return;
+                }
                 if (host && ["keydown", "beforeinput", "copy", "cut", "paste"].includes(type) &&
-                    (getSelection()?.isCollapsed || getTableCellRichSelectionHost(getSelection()) === host)) {
+                    (selection?.isCollapsed || getTableCellRichSelectionHost(selection) === host)) {
                     return;
                 }
                 this.interacting = type === "pointerdown" || type === "keydown";
@@ -363,6 +414,7 @@ export class LargeTableVirtualizer {
 
     public destroy() {
         cancelAnimationFrame(this.frame);
+        clearTimeout(this.resizeTimeout);
         this.abortController.abort();
         this.resizeObserver.disconnect();
         this.restore();

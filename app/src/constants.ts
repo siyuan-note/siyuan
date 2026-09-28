@@ -536,6 +536,7 @@ export abstract class Constants {
             goToTab9: {default: "⌘9", custom: "⌘9"},
             goToTabNext: {default: "⇧⌘]", custom: "⇧⌘]"},
             goToTabPrev: {default: "⇧⌘[", custom: "⇧⌘["},
+            switchTab: {default: "", custom: ""},
             goToEditTabNext: {default: "⌃⇥", custom: "⌃⇥"},
             goToEditTabPrev: {default: "⌃⇧⇥", custom: "⌃⇧⇥"},
             recentClosed: {default: "⇧⌘T", custom: "⇧⌘T"},

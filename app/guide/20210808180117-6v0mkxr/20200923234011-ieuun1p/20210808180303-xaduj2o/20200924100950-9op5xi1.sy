@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260927164841"
+		"updated": "20260928085827"
 	},
 	"Children": [
 		{
@@ -48,6 +48,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " cannot be set as a shortcut."
+				}
+			]
+		},
+		{
+			"ID": "20260928085827-jxtln5i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260928085827-jxtln5i",
+				"updated": "20260928085827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop, configure "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Keymap"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "General"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Switcher"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to assign a shortcut to the tab switcher menu; no shortcut is assigned by default. The menu lists tabs in the active pane in tab bar order. Use the up/down arrow keys to select a tab, Enter to switch, and Esc to close the menu. This command is also available in the command panel."
 				}
 			]
 		},

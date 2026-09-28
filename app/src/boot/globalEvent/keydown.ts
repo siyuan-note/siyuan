@@ -1774,6 +1774,14 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
 
+    if (matchHotKey(window.siyuan.config.keymap.general.switchTab, event)) {
+        if (!event.repeat) {
+            globalCommand("switchTab", app);
+        }
+        event.preventDefault();
+        return;
+    }
+
     if (matchHotKey(window.siyuan.config.keymap.general.goToTab1, event) && !event.repeat) {
         switchTabByIndex(0);
         event.preventDefault();

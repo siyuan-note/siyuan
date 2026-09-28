@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260927164841"
+		"updated": "20260928085827"
 	},
 	"Children": [
 		{
@@ -46,6 +46,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " と組み合わせた単一文字をショートカットに設定することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20260928085827-0dy3tdl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260928085827-0dy3tdl",
+				"updated": "20260928085827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ショートカット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一般"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "タブの切り替え"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でタブ切り替えメニューのショートカットを設定できます。既定では割り当てられていません。メニューには、アクティブな分割ペインのタブがタブバーと同じ順序で表示されます。上下の矢印キーで選択し、Enter で切り替え、Esc で閉じます。コマンドパネルからも実行できます。"
 				}
 			]
 		},

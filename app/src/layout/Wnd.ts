@@ -861,7 +861,10 @@ export class Wnd {
         event.stopPropagation();
     }
 
-    private renderTabList(target: HTMLElement) {
+    public renderTabList(target = this.headersElement.parentElement.querySelector<HTMLElement>('[data-type="more"]'), focus = false) {
+        if (!target || this.headersElement.children.length === 0) {
+            return;
+        }
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
             window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TAB_LIST) {
             window.siyuan.menus.menu.remove();
@@ -920,6 +923,22 @@ export class Wnd {
             h: rect.height,
             isLeft: true
         });
+        if (focus) {
+            const menu = window.siyuan.menus.menu;
+            const activeElement = document.activeElement;
+            const currentElement = menu.element.querySelector<HTMLElement>(".b3-menu__item--selected") ||
+                menu.element.querySelector<HTMLElement>(".b3-menu__item");
+            currentElement?.classList.add("b3-menu__item--current");
+            currentElement?.focus({preventScroll: true});
+            currentElement?.scrollIntoView({block: "nearest"});
+            // 仅在焦点仍位于菜单内时恢复，避免页签切换后抢回原编辑器焦点。
+            menu.removeCB = () => {
+                if (activeElement instanceof HTMLElement && activeElement.isConnected &&
+                    menu.element.contains(document.activeElement)) {
+                    activeElement.focus({preventScroll: true});
+                }
+            };
+        }
     }
 
     private removeOverCounter(isSaveLayout = false) {

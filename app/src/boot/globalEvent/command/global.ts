@@ -154,6 +154,9 @@ export const globalCommand = (command: string, app: App, range?: Range) => {
         case "goToTabPrev":
             switchTabByIndex(-2);
             return true;
+        case "switchTab":
+            getActiveTab(false)?.parent.renderTabList(undefined, true);
+            return true;
         case "mainMenu":
             if (!isWindow()) {
                 workspaceMenu(app, document.querySelector("#barWorkspace").getBoundingClientRect());

@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260927164841"
+		"updated": "20260928085827"
 	},
 	"Children": [
 		{
@@ -48,6 +48,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " 組合的單一字元設為快捷鍵。"
+				}
+			]
+		},
+		{
+			"ID": "20260928085827-6l4hbie",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260928085827-6l4hbie",
+				"updated": "20260928085827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快速鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "通用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "分頁切換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中設定開啟頁籤切換選單的快捷鍵，預設未綁定按鍵。選單按頁籤列順序列出目前作用中分割視窗的頁籤，可使用上下方向鍵選擇、Enter 鍵切換、Esc 關閉。也可從命令面板執行此命令。"
 				}
 			]
 		},

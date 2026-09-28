@@ -8,7 +8,7 @@ export const DESKTOP_COMMAND_PANEL_GENERAL_KEYS = [
     "splitLR", "splitMoveB", "splitMoveR", "splitTB", "switchLeftDock", "switchRightDock", "switchBottomDock",
     "tabToWindow", "stickSearch", "toggleDock", "toggleLeftDockPanel", "toggleRightDockPanel",
     "toggleBottomDockPanel", "unsplitAll", "unsplit", "recentClosed", "increaseEditorFontSize",
-    "decreaseEditorFontSize", "resetEditorFontSize", "toggleWin",
+    "decreaseEditorFontSize", "resetEditorFontSize", "toggleWin", "switchTab",
 ] as const;
 
 export const MOBILE_COMMAND_PANEL_GENERAL_KEYS = [

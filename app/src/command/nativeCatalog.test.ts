@@ -21,7 +21,7 @@ const expectedDesktopGeneralKeys = [
     "splitLR", "splitMoveB", "splitMoveR", "splitTB", "switchLeftDock", "switchRightDock", "switchBottomDock",
     "tabToWindow", "stickSearch", "toggleDock", "toggleLeftDockPanel", "toggleRightDockPanel",
     "toggleBottomDockPanel", "unsplitAll", "unsplit", "recentClosed", "increaseEditorFontSize",
-    "decreaseEditorFontSize", "resetEditorFontSize", "toggleWin",
+    "decreaseEditorFontSize", "resetEditorFontSize", "toggleWin", "switchTab",
 ];
 
 const expectedMobileGeneralKeys = [
@@ -40,21 +40,25 @@ describe("native command catalog", () => {
         assert.deepEqual([...DESKTOP_COMMAND_PANEL_GENERAL_KEYS], expectedDesktopGeneralKeys);
         assert.deepEqual([...MOBILE_COMMAND_PANEL_GENERAL_KEYS], expectedMobileGeneralKeys);
         assert.deepEqual([...COMMAND_PANEL_EDITOR_KEYS], ["switchReadonly", "switchAdjust"]);
-        assert.equal(DESKTOP_COMMAND_PANEL_GENERAL_KEYS.length, 67);
+        assert.equal(DESKTOP_COMMAND_PANEL_GENERAL_KEYS.length, 68);
         assert.equal(MOBILE_COMMAND_PANEL_GENERAL_KEYS.length, 26);
         assert.equal(COMMAND_PANEL_EDITOR_KEYS.length, 2);
-        assert.equal(NATIVE_COMMAND_CATALOG.length, 69);
+        assert.equal(NATIVE_COMMAND_CATALOG.length, 70);
         assert.equal(new Set(NATIVE_COMMAND_CATALOG.map(item => item.id)).size, NATIVE_COMMAND_CATALOG.length);
     });
 
     it("filters all five frontends without exposing desktop-only commands", () => {
-        assert.equal(getSupportedIds("desktop").length, 69);
-        assert.equal(getSupportedIds("desktop-window").length, 69);
-        assert.equal(getSupportedIds("browser-desktop").length, 68);
+        assert.equal(getSupportedIds("desktop").length, 70);
+        assert.equal(getSupportedIds("desktop-window").length, 70);
+        assert.equal(getSupportedIds("browser-desktop").length, 69);
         assert.equal(getSupportedIds("mobile").length, 28);
         assert.equal(getSupportedIds("browser-mobile").length, 28);
         assert.equal(getSupportedIds("browser-desktop").includes("core.general.toggleWin"), false);
         assert.equal(getSupportedIds("mobile").includes("core.general.graphView"), false);
+        assert.equal(getSupportedIds("desktop-window").includes("core.general.switchTab"), true);
+        assert.equal(getSupportedIds("browser-desktop").includes("core.general.switchTab"), true);
+        assert.equal(getSupportedIds("mobile").includes("core.general.switchTab"), false);
+        assert.equal(getSupportedIds("browser-mobile").includes("core.general.switchTab"), false);
     });
 
     it("maps legacy keys to stable IDs and keymap paths", () => {

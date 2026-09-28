@@ -40,6 +40,7 @@ import {getFileTreeIconHTML, updateFileTreeItemIcon} from "./fileTreeIcon";
 import {bindBottomSheetDialog} from "../mobile/util/bindBottomSheetDialog";
 import {activeBlur} from "../mobile/util/keyboardToolbar";
 import {bindEmojiSheetSelection} from "../mobile/util/bindEmojiSheetSelection";
+import {getDynamicIconValue} from "./dynamicIcon";
 
 export {unicode2Emoji};
 
@@ -1457,7 +1458,7 @@ export const openEmojiPanel = (
                     unicode = target.getAttribute("data-unicode");
                     dialog.destroy();
                 } else if (target.classList.contains("emoji__dynamic-item")) {
-                    unicode = target.getAttribute("src");
+                    unicode = getDynamicIconValue(target.getAttribute("src"));
                     dialog.destroy();
                 } else {
                     // 随机

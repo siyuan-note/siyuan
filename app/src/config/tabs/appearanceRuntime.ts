@@ -21,6 +21,7 @@ import {getCurrentThemeName, isCurrentThemeSupported, shouldUnloadThemeScript} f
 import {remountOpenSettingTab} from "../setting/mount";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 import {syncBodyGradient} from "./bodyGradient";
+import {refreshDynamicIcons} from "../../emoji/dynamicIcon";
 
 /** 主题模式下拉框初值：合并 mode / modeOS */
 export const appearanceThemeModeValue = (): number =>
@@ -116,6 +117,7 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
     if (JSON.stringify(data.globalFontFamilies) !== JSON.stringify(prevAppearance.globalFontFamilies)) {
         await setInlineStyle();
         refreshHeadingNumberMeasurements();
+        refreshDynamicIcons();
     }
     /// #if !MOBILE
     void remountOpenSettingTab("appearance");

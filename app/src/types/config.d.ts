@@ -304,7 +304,7 @@ declare namespace Config {
             light: {color: string; opacity: number};
             dark: {color: string; opacity: number};
         };
-        /** 全局默认字体，按优先级从高到低排列 */
+        /** 全局默认字体，按优先级从高到低排列；动态图标也使用此列表和首选字重，字体由客户端解析 */
         globalFontFamilies: IEditor["fontFamilies"];
         /**
          * Close button behavior

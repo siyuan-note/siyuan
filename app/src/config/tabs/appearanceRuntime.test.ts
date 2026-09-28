@@ -8,16 +8,20 @@ import {ModuleKind, transpileModule} from "typescript";
 const {parse} = require("ifdef-loader/preprocessor");
 
 for (const mobile of [true, false]) {
-    for (const change of ["gradient", "duplicate", "theme", "initial"] as const) {
+    for (const change of ["gradient", "duplicate", "theme", "initial", "font", "font-reset"] as const) {
         test(`appearance updates preserve gradient controls without skipping theme initialization (${change}, mobile=${mobile})`, async () => {
             const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appearanceRuntime.ts"), "utf8");
             const processed = parse(source, {MOBILE: mobile, BROWSER: true}, false, true);
             const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
-            const appearance = {lang: "en_US", mode: 0, bodyGradient: {mode: "auto"}};
+            const appearance = {
+                lang: "en_US", mode: 0, bodyGradient: {mode: "auto"},
+                globalFontFamilies: change === "font-reset" ? [{family: "Arial", weight: 700}] : [],
+            };
             const next = change === "initial" ? appearance : {
                 ...appearance,
                 mode: change === "theme" ? 1 : 0,
                 bodyGradient: {mode: change === "duplicate" ? "auto" : "custom"},
+                globalFontFamilies: change === "font" ? [{family: "Arial", weight: 700}] : [],
             };
             const siyuan = {config: {appearance}};
             const calls: string[] = [];
@@ -49,6 +53,7 @@ for (const mobile of [true, false]) {
             assert.equal(calls.includes("setBodyHighlight"), updatesInPlace);
             assert.equal(calls.includes("loadAssets"), !updatesInPlace);
             assert.equal(calls.includes("remountOpenSettingTab"), !updatesInPlace && !mobile);
+            assert.equal(calls.includes("refreshDynamicIcons"), change === "font" || change === "font-reset");
         });
     }
 }

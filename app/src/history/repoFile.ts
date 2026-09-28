@@ -32,7 +32,7 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
     files.forEach((item) => {
         if (showCompare) {
             html += `<li class="b3-list-item b3-list-item--hide-action" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}" data-title="${escapeAttr(escapeHtml(item.title))}">
-    <span class="b3-list-item__text">${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}</span>
+    <div class="fn__flex-1 fn__flex-column"><span class="b3-list-item__text">${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}</span><span data-history-tags="${escapeAttr(item.fileID)}"></span></div>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>

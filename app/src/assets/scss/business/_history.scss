@@ -43,6 +43,11 @@
     flex-direction: column;
   }
 
+  &__snapshot-detail-status {
+    padding: 12px 16px;
+    overflow-wrap: anywhere;
+  }
+
   &__snapshot-detail-meta {
     padding: 12px 16px;
     max-height: 25vh;

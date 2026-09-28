@@ -5,7 +5,7 @@ import {join} from "node:path";
 import {ScriptTarget, transpileModule} from "typescript";
 import {escapeAttr, escapeHtml} from "../util/escape";
 
-const setup = () => {
+const setup = (notebook = "") => {
     const source = readFileSync(join(__dirname, "docSnapshots.ts"), "utf8");
     const code = source.slice(source.indexOf("const views =")).replace(/export /g, "");
     const panel = {innerHTML: "", textContent: "", classList: {toggle() {}, add() {}}, setAttribute() {}, querySelector: (): HTMLElement | null => null};
@@ -21,6 +21,7 @@ const setup = () => {
     const pending: ((response: unknown) => void)[] = [];
     const signals: AbortSignal[] = [];
     const opened: unknown[] = [];
+    const notebooks: string[] = [];
     const dependencies = {
         document: {createElement: () => panel},
         window: {siyuan: {languages: {loading: "loading", historySnapshots: "snapshots", historySnapshotsError: "failed", retry: "retry"}}},
@@ -28,17 +29,32 @@ const setup = () => {
             signals.push(signal);
             return new Promise(resolve => pending.push(resolve));
         },
-        openSnapshotDetail: (_app: unknown, snapshot: unknown) => opened.push(snapshot),
+        openSnapshotDetail: (_app: unknown, snapshot: unknown, notebook: string) => { opened.push(snapshot); notebooks.push(notebook); },
         escapeAttr, escapeHtml, dayjs: () => ({format: () => "date"}),
     };
     const View = new Function(...Object.keys(dependencies), transpileModule(code, {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText + "\nreturn DocHistorySnapshots;")(...Object.values(dependencies));
-    return {view: new View({}, element, "doc"), panel, summary, pending, signals, opened, listeners, element};
+    return {view: new View({}, element, "doc", notebook), panel, summary, pending, signals, opened, notebooks, listeners, element};
 };
 
 const snapshot = (id: string) => ({id, fileID: "file", tags: ["<tag>"], memo: "<script>alert(1)</script>\nline", created: 1});
 const response = (ids: string[]) => ({code: 0, data: {histories: [{created: "1", historyPath: "history/path", snapshots: ids.map(snapshot)}]}});
+
+it("renders repository version associations without querying file history and retains notebook context", () => {
+    const {view, panel, summary, pending, opened, notebooks, listeners} = setup("notebook");
+    view.setEntries([{created: "1", historyPath: "", snapshots: [snapshot("first"), snapshot("second")]}]);
+    view.select("1");
+    assert.equal(pending.length, 0);
+    assert.match(summary.innerHTML, /\+1/);
+    assert.match(panel.innerHTML, /snapshots \(2\)/);
+    listeners.click({target: {closest: () => ({hasAttribute: () => false, dataset: {historyCreated: "1", historySnapshot: "second"}})}, stopPropagation() {}});
+    assert.deepEqual(opened, [snapshot("second")]);
+    assert.deepEqual(notebooks, ["notebook"]);
+    view.reset();
+    view.setEntries([{created: "1", historyPath: "", snapshots: []}]);
+    assert.equal(summary.innerHTML, "");
+});
 
 it("keeps all matching snapshots, escapes notes and opens the clicked snapshot", async () => {
     const {view, panel, summary, pending, opened, listeners} = setup();

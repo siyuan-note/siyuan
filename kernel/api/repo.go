@@ -399,7 +399,13 @@ func repoDocHistories(values []*model.RepoDocHistory) []*apicontract.RepoDocHist
 	}
 	ret := make([]*apicontract.RepoDocHistory, len(values))
 	for i, value := range values {
-		ret[i] = (*apicontract.RepoDocHistory)(value)
+		if value == nil {
+			continue
+		}
+		ret[i] = &apicontract.RepoDocHistory{
+			FileID: value.FileID, IndexID: value.IndexID, Title: value.Title, HSize: value.HSize, Updated: value.Updated,
+			Snapshots: docHistorySnapshots(value.Snapshots),
+		}
 	}
 	return ret
 }

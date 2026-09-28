@@ -87,6 +87,7 @@ func TestAPIContractDocHistorySnapshots(t *testing.T) {
 	const endpoint = "/api/history/getDocHistorySnapshots"
 	engine.POST(endpoint, getDocHistorySnapshots)
 	engine.POST("/api/repo/getRepoSnapshots", getRepoSnapshots)
+	engine.POST("/api/repo/getRepoDocHistory", getRepoDocHistory)
 	for _, include := range []bool{false, true} {
 		body, _ := json.Marshal(map[string]interface{}{"id": index.ID, "page": 1, "includeFiles": include})
 		recorder := httptest.NewRecorder()
@@ -134,6 +135,30 @@ func TestAPIContractDocHistorySnapshots(t *testing.T) {
 			if snapshot.ID != index.ID || snapshot.Memo != "memo\nline" || len(snapshot.Tags) != 1 || snapshot.Tags[0] != "release" {
 				t.Fatalf("metadata lost: %+v", snapshot)
 			}
+		}
+	}
+	for _, tagged := range []bool{true, false} {
+		if !tagged {
+			if err = repo.RemoveTag("release"); err != nil {
+				t.Fatal(err)
+			}
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/repo/getRepoDocHistory", strings.NewReader(`{"id":"`+id+`","page":1}`)))
+		requireAPIContract(t, "POST", "/api/repo/getRepoDocHistory", recorder)
+		var response struct {
+			Code int                            `json:"code"`
+			Data apicontract.RepoDocHistoryData `json:"data"`
+		}
+		if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || len(response.Data.Files) != 1 {
+			t.Fatalf("repository document history: %s, %v", recorder.Body.String(), err)
+		}
+		associations := response.Data.Files[0].Snapshots
+		if associations == nil || (len(associations) == 1) != tagged {
+			t.Fatalf("repository associations: %s", recorder.Body.String())
+		}
+		if tagged && (associations[0].ID != index.ID || associations[0].FileID != response.Data.Files[0].FileID || associations[0].Memo != "memo\nline" || associations[0].Tags[0] != "release") {
+			t.Fatalf("repository association metadata: %s", recorder.Body.String())
 		}
 	}
 }

@@ -34980,6 +34980,26 @@
         "indexID": {
           "type": "string"
         },
+        "snapshots": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/DocHistorySnapshot"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "title": {
           "type": "string"
         },
@@ -34991,6 +35011,7 @@
         "fileID",
         "hSize",
         "indexID",
+        "snapshots",
         "title",
         "updated"
       ],

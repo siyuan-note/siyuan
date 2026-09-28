@@ -78,9 +78,16 @@ const runCases = async (sources, css, mobile, dark) => {
     const history = new Dialog({title: "项目计划 - 文件历史", width: mobile ? "100vw" : "90vw", height: mobile ? "100dvh" : "80vh",
         content: '<div class="history__repo fn__block" style="height:100%"><div class="fn__flex fn__flex-1 history__panel"><ul class="b3-list b3-list--background history__side" style="width:240px"><li class="b3-list-item b3-list-item--focus"><div class="fn__flex-1 fn__flex-column"><span class="b3-list-item__text">2026-09-28 09:00:00</span><span data-history-tags="1"></span></div></li></ul><div class="fn__flex-1 fn__flex-column"><div class="protyle-title__input">项目计划</div><textarea class="history__text fn__flex-1" readonly>原文件历史预览</textarea></div></div></div>'});
     const root = history.element.querySelector(".history__repo");
-    const view = new DocHistorySnapshots({}, root, "doc");
-    await view.load(["1"], "all");
-    view.select("1");
+    const view = new DocHistorySnapshots({}, root, "doc", "notebook");
+    if (dark) {
+        load("history/repoFile").renderRepoFileList([{fileID: "doc-file", indexID: snapshots[0].id, title: "项目计划", updated: 1790557200000, hSize: "1 KB"}], root.querySelector(".history__side"), false, true);
+        view.setEntries([{created: "doc-file", historyPath: "", snapshots}]);
+        view.select("doc-file");
+        assert.match(root.querySelector("[data-history-tags]").textContent, /发布版本/);
+    } else {
+        await view.load(["1"], "all");
+        view.select("1");
+    }
     await tick();
     const links = root.querySelectorAll(".history__association button");
     assert.equal(links.length, 2);
@@ -126,6 +133,9 @@ const runCases = async (sources, css, mobile, dark) => {
     responseMode = "pending";
     links[0].click();
     await tick();
+    const loading = window.siyuan.dialogs.at(-1).element.querySelector("[data-detail-status]");
+    assert.ok(parseFloat(getComputedStyle(loading).paddingLeft) >= 16, "loading status needs horizontal spacing");
+    assert.ok(parseFloat(getComputedStyle(loading).paddingTop) >= 12, "loading status needs vertical spacing");
     closeNotebookHistoryDialogs("notebook");
     await tick();
     assert.ok(signal.aborted);

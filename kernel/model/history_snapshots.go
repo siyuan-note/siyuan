@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
@@ -99,41 +100,9 @@ func GetDocHistorySnapshots(ctx context.Context, id string, histories []*DocHist
 	if err != nil {
 		return err
 	}
-	// 只读取标记引用与索引，避免为每个标记重复展开整个快照的文件列表。
-	tags, err := os.ReadDir(filepath.Join(repo.Path, "refs", "tags"))
-	if os.IsNotExist(err) {
-		return nil
-	}
+	indexes, indexTags, err := localTaggedSnapshotIndexes(ctx, repo)
 	if err != nil {
 		return err
-	}
-	indexes := map[string]*entity.Index{}
-	indexTags := map[string][]string{}
-	for _, tag := range tags {
-		if err := ctx.Err(); err != nil {
-			return err
-		}
-		if tag.IsDir() {
-			continue
-		}
-		indexID, readErr := repo.GetTag(tag.Name())
-		if readErr != nil {
-			return readErr
-		}
-		if _, readErr = hex.DecodeString(indexID); len(indexID) != 40 || readErr != nil {
-			return errors.New("invalid tagged snapshot ID")
-		}
-		if indexes[indexID] == nil {
-			index, readErr := repo.GetIndex(indexID)
-			if readErr != nil {
-				return readErr
-			}
-			if index.ID != indexID || !index.VerifyAESKey(Conf.Repo.Key) {
-				return errors.New("invalid tagged snapshot index")
-			}
-			indexes[indexID] = index
-		}
-		indexTags[indexID] = append(indexTags[indexID], tag.Name())
 	}
 	fileMatches := map[string][]*DocHistorySnapshotEntry{}
 	for indexID, index := range indexes {
@@ -213,4 +182,83 @@ func docHistorySnapshotDigest(data []byte, id string) ([sha256.Size]byte, error)
 		return [sha256.Size]byte{}, fmt.Errorf("history snapshot document ID does not match [%s]", id)
 	}
 	return sha256.Sum256(data), nil
+}
+
+// attachRepoDocHistorySnapshots 按文件版本关联所有标记索引，避免去重列表的单个 IndexID 丢失关联。
+func attachRepoDocHistorySnapshots(repo *dejavu.Repo, histories []*RepoDocHistory) error {
+	if len(histories) == 0 {
+		return nil
+	}
+	files := map[string]*RepoDocHistory{}
+	for _, history := range histories {
+		history.Snapshots = []*DocHistorySnapshot{}
+		files[history.FileID] = history
+	}
+	indexes, tags, err := localTaggedSnapshotIndexes(context.Background(), repo)
+	if err != nil {
+		return err
+	}
+	for id, index := range indexes {
+		seen := map[string]bool{}
+		for _, fileID := range index.Files {
+			history := files[fileID]
+			if history == nil || seen[fileID] {
+				continue
+			}
+			seen[fileID] = true
+			history.Snapshots = append(history.Snapshots, &DocHistorySnapshot{
+				ID: id, FileID: fileID, Tags: tags[id], Memo: index.Memo, Created: index.Created,
+			})
+		}
+	}
+	for _, history := range histories {
+		sort.Slice(history.Snapshots, func(i, j int) bool {
+			a, b := history.Snapshots[i], history.Snapshots[j]
+			if a.Created == b.Created {
+				return a.ID < b.ID
+			}
+			return a.Created > b.Created
+		})
+	}
+	return nil
+}
+
+func localTaggedSnapshotIndexes(ctx context.Context, repo *dejavu.Repo) (map[string]*entity.Index, map[string][]string, error) {
+	// 只读取标记引用与索引，避免为每个标记重复展开整个快照的文件列表。
+	tags, err := os.ReadDir(filepath.Join(repo.Path, "refs", "tags"))
+	if os.IsNotExist(err) {
+		return map[string]*entity.Index{}, map[string][]string{}, nil
+	}
+	if err != nil {
+		return nil, nil, err
+	}
+	indexes := map[string]*entity.Index{}
+	indexTags := map[string][]string{}
+	for _, tag := range tags {
+		if err := ctx.Err(); err != nil {
+			return nil, nil, err
+		}
+		if tag.IsDir() {
+			continue
+		}
+		indexID, readErr := repo.GetTag(tag.Name())
+		if readErr != nil {
+			return nil, nil, readErr
+		}
+		if _, readErr = hex.DecodeString(indexID); len(indexID) != 40 || readErr != nil {
+			return nil, nil, errors.New("invalid tagged snapshot ID")
+		}
+		if indexes[indexID] == nil {
+			index, readErr := repo.GetIndex(indexID)
+			if readErr != nil {
+				return nil, nil, readErr
+			}
+			if index.ID != indexID || !index.VerifyAESKey(Conf.Repo.Key) {
+				return nil, nil, errors.New("invalid tagged snapshot index")
+			}
+			indexes[indexID] = index
+		}
+		indexTags[indexID] = append(indexTags[indexID], tag.Name())
+	}
+	return indexes, indexTags, nil
 }

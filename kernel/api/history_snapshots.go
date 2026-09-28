@@ -34,13 +34,18 @@ var getDocHistorySnapshots = contractHandler(apicontract.GetDocHistorySnapshots,
 	}
 	data := apicontract.DocHistorySnapshotsData{Histories: make([]*apicontract.DocHistorySnapshotEntry, 0, len(histories))}
 	for _, history := range histories {
-		entry := &apicontract.DocHistorySnapshotEntry{Created: history.Created, HistoryPath: history.HistoryPath, Snapshots: []*apicontract.DocHistorySnapshot{}}
-		for _, snapshot := range history.Snapshots {
-			entry.Snapshots = append(entry.Snapshots, &apicontract.DocHistorySnapshot{
-				ID: snapshot.ID, FileID: snapshot.FileID, Tags: snapshot.Tags, Memo: snapshot.Memo, Created: snapshot.Created,
-			})
-		}
+		entry := &apicontract.DocHistorySnapshotEntry{Created: history.Created, HistoryPath: history.HistoryPath, Snapshots: docHistorySnapshots(history.Snapshots)}
 		data.Histories = append(data.Histories, entry)
 	}
 	return apicontract.Success(data)
 })
+
+func docHistorySnapshots(values []*model.DocHistorySnapshot) []*apicontract.DocHistorySnapshot {
+	ret := make([]*apicontract.DocHistorySnapshot, 0, len(values))
+	for _, snapshot := range values {
+		ret = append(ret, &apicontract.DocHistorySnapshot{
+			ID: snapshot.ID, FileID: snapshot.FileID, Tags: snapshot.Tags, Memo: snapshot.Memo, Created: snapshot.Created,
+		})
+	}
+	return ret
+}

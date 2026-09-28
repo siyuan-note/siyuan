@@ -82,6 +82,18 @@ func TestDocHistorySnapshotsMatching(t *testing.T) {
 		entry.Snapshots[0].FileID == "" {
 		t.Fatalf("unexpected snapshot associations: %+v", entry.Snapshots)
 	}
+	versions, _, _, err := GetRepoDocHistory(historySnapshotDocID, 1)
+	if err != nil || len(versions) != 1 || len(versions[0].Snapshots) != 2 {
+		t.Fatalf("deduplicated repository version lost associations: %+v %v", versions, err)
+	}
+	if versions[0].Snapshots[0].ID != second.ID || versions[0].Snapshots[1].ID != first.ID ||
+		strings.Join(versions[0].Snapshots[1].Tags, ",") != "alias,first" || versions[0].Snapshots[0].Memo != "second\nline" {
+		t.Fatalf("repository snapshot metadata lost: %+v", versions[0].Snapshots)
+	}
+	unmatched := &RepoDocHistory{FileID: strings.Repeat("f", 40)}
+	if err := attachRepoDocHistorySnapshots(repo, []*RepoDocHistory{unmatched}); err != nil || unmatched.Snapshots == nil || len(unmatched.Snapshots) != 0 {
+		t.Fatalf("unmatched repository version must have an empty list: %+v %v", unmatched, err)
+	}
 	if len(query(historySnapshotData("different")).Snapshots) != 0 {
 		t.Fatal("different document data matched")
 	}
@@ -95,6 +107,10 @@ func TestDocHistorySnapshotsMatching(t *testing.T) {
 	if len(entry.Snapshots) != 1 || entry.Snapshots[0].Memo != "edited" {
 		t.Fatal("tag deletion or memo edit was hidden by stale associations")
 	}
+	versions, _, _, err = GetRepoDocHistory(historySnapshotDocID, 1)
+	if err != nil || len(versions) != 1 || len(versions[0].Snapshots) != 1 || versions[0].Snapshots[0].Memo != "edited" {
+		t.Fatalf("repository history retained stale tags or memo: %+v %v", versions, err)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	if err = GetDocHistorySnapshots(ctx, historySnapshotDocID, []*DocHistorySnapshotEntry{entry}); err != context.Canceled {
@@ -105,6 +121,9 @@ func TestDocHistorySnapshotsMatching(t *testing.T) {
 	writeHistorySnapshotTestFile(t, tagPath, corrupt)
 	if err = GetDocHistorySnapshots(context.Background(), historySnapshotDocID, []*DocHistorySnapshotEntry{entry}); err == nil {
 		t.Fatal("corrupt tag was treated as no match")
+	}
+	if _, _, _, err = GetRepoDocHistory(historySnapshotDocID, 1); err == nil {
+		t.Fatal("repository history ignored a corrupt tag")
 	}
 	if actual, err := os.ReadFile(tagPath); err != nil || !bytes.Equal(actual, corrupt) {
 		t.Fatal("corrupt tag was modified")

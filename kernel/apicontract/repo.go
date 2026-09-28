@@ -167,6 +167,9 @@ type RepoDocHistory struct {
 	Title   string `json:"title"`
 	HSize   string `json:"hSize"`
 	Updated int64  `json:"updated"`
+	// Snapshots 包含引用此文件版本的全部本地标记快照，按快照时间倒序排列；同一快照的标记合并。
+	// 以仓库文件 ID 匹配，不只查询 IndexID；仅返回标记、备注等元数据，不读取文件正文。
+	Snapshots []*DocHistorySnapshot `json:"snapshots"`
 }
 type RepoTypeCount struct {
 	Type  string `json:"type"`

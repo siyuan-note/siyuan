@@ -9,6 +9,7 @@ import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import type {App} from "../index";
+import type {APIPOSTRoutes, APITransportError} from "../types/api";
 import {resizeSide} from "./resizeSide";
 import {escapeHtml} from "../util/escape";
 import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
@@ -96,6 +97,7 @@ const renderRepo = async (element: HTMLElement, currentPage: number, id: string)
     if (element.getAttribute("data-loading") === "true") {
         return;
     }
+    getDocHistorySnapshots(element)?.reset();
     const previousElement = element.querySelector('[data-type="snapshotprevious"]');
     const nextElement = element.querySelector('[data-type="snapshotnext"]');
     const pageNumElement = element.querySelector('[data-type="jumpSnapshotPage"]');
@@ -115,17 +117,23 @@ const renderRepo = async (element: HTMLElement, currentPage: number, id: string)
     nextElement.setAttribute("disabled", "disabled");
     listElement.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
 
-    let response: IWebSocketData;
+    let response: APIPOSTRoutes["/api/repo/getRepoDocHistory"]["response"] | APITransportError;
     try {
         response = await fetchSyncPost("/api/repo/getRepoDocHistory", {
             id,
             page: currentPage
         });
     } catch (e) {
+        if (!element.isConnected) {
+            return;
+        }
         console.warn("get repo doc history failed", e);
         element.removeAttribute("data-loading");
         listElement.innerHTML = `${genCurrentVersionItem()}<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
         element.dispatchEvent(new CustomEvent("versionListRendered"));
+        return;
+    }
+    if (!element.isConnected) {
         return;
     }
     if (response.code !== 0) {
@@ -146,11 +154,14 @@ const renderRepo = async (element: HTMLElement, currentPage: number, id: string)
     }
     pageNumElement.setAttribute("data-totalpage", Math.max(pageCount, 1).toString());
     pageInfoElement.textContent = window.siyuan.languages.pageCountAndSnapshotCount
-        .replace("${x}", pageCount)
-        .replace("${y}", response.data.totalCount);
+        .replace("${x}", String(pageCount))
+        .replace("${y}", String(response.data.totalCount));
     pageInfoElement.classList.remove("fn__none");
     renderRepoFileList(response.data.files, listElement, false, true);
     listElement.insertAdjacentHTML("afterbegin", genCurrentVersionItem());
+    getDocHistorySnapshots(element)?.setEntries(response.data.files.map(file => ({
+        created: file.fileID, historyPath: "", snapshots: file.snapshots || []
+    })));
     element.dispatchEvent(new CustomEvent("versionListRendered"));
 };
 
@@ -257,6 +268,7 @@ export const openDocHistory = (options: {
         destroyCallback() {
             forgetNotebookHistoryDialog(dialog);
             getDocHistorySnapshots(fileElement)?.destroy();
+            getDocHistorySnapshots(repoElement)?.destroy();
             historyEditor?.destroy();
             historyEditor = undefined;
             repoHistoryEditors.get(repoElement)?.destroy();
@@ -307,6 +319,7 @@ export const openDocHistory = (options: {
     const fileElement = dialog.element.querySelector('#docHistoryContainer [data-type="doc"]') as HTMLElement;
     const historySnapshots = new DocHistorySnapshots(options.app, fileElement, options.id);
     const repoElement = dialog.element.querySelector('#docHistoryContainer [data-type="repo"]') as HTMLElement;
+    const repoSnapshots = new DocHistorySnapshots(options.app, repoElement, options.id, options.notebookId);
     fileElement.addEventListener("versionListRendered", syncVersionSelection);
     repoElement.addEventListener("versionListRendered", syncVersionSelection);
     const opElement = fileElement.querySelector(".b3-select") as HTMLSelectElement;
@@ -336,6 +349,7 @@ export const openDocHistory = (options: {
     const pageNumElement = fileElement.querySelector('[data-type="jumpRepoPage"]');
     const titleElement = fileElement.querySelector(".protyle-title__input");
     const previewRepoFile = (element: Element) => {
+        repoSnapshots.select(element.getAttribute("data-id"));
         repoHistoryEditors.get(repoElement)?.destroy();
         repoHistoryEditors.delete(repoElement);
         repoTitleElement.textContent = element.getAttribute("data-title") ||
@@ -428,6 +442,7 @@ export const openDocHistory = (options: {
                 break;
             } else if (target.classList.contains("b3-list-item") && type === "currentVersionItem") {
                 historySnapshots.select("");
+                repoSnapshots.select("");
                 toggleVersionSelection(currentVersion);
                 event.stopPropagation();
                 event.preventDefault();

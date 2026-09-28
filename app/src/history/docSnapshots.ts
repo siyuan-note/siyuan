@@ -20,7 +20,7 @@ export class DocHistorySnapshots {
     private abort?: AbortController;
     private panel: HTMLElement;
 
-    constructor(private app: App, private element: HTMLElement, private id: string) {
+    constructor(private app: App, private element: HTMLElement, private id: string, private notebook = "") {
         views.set(element, this);
         this.panel = document.createElement("section");
         this.panel.className = "history__associations fn__none";
@@ -40,7 +40,7 @@ export class DocHistorySnapshots {
             const entry = this.entries.get(target.dataset.historyCreated);
             const snapshot = entry?.snapshots.find(item => item.id === target.dataset.historySnapshot);
             if (snapshot) {
-                void openSnapshotDetail(this.app, snapshot, entry.historyPath.split("/").filter(Boolean)[2]);
+                void openSnapshotDetail(this.app, snapshot, this.notebook || entry.historyPath.split("/").filter(Boolean)[2]);
             }
         });
     }
@@ -63,6 +63,14 @@ export class DocHistorySnapshots {
 
     select(created: string) {
         this.selected = created;
+        this.renderPanel();
+    }
+
+    setEntries(entries: DocHistorySnapshotEntry[]) {
+        this.entries = new Map(entries.map(entry => [entry.created, entry]));
+        this.error = "";
+        this.loading = false;
+        this.renderSummaries();
         this.renderPanel();
     }
 
@@ -99,6 +107,11 @@ export class DocHistorySnapshots {
             this.error = error instanceof Error ? error.message : String(error);
         }
         this.loading = false;
+        this.renderSummaries();
+        this.renderPanel();
+    }
+
+    private renderSummaries() {
         this.element.querySelectorAll<HTMLElement>("[data-history-tags]").forEach(summary => {
             const created = summary.dataset.historyTags;
             const snapshots = this.entries.get(created)?.snapshots || [];
@@ -111,7 +124,6 @@ export class DocHistorySnapshots {
                 summary.innerHTML = "";
             }
         });
-        this.renderPanel();
     }
 
     private renderPanel() {

@@ -15,7 +15,7 @@ export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot
     const abort = new AbortController();
     const dialog = new Dialog({
         title: escapeHtml(reference.tags.join(" / ")),
-        content: `<div class="history__snapshot-detail"><div data-detail-status>${lang.loading}</div><div class="history__snapshot-detail-content fn__none"><div class="history__snapshot-detail-meta"></div><div class="history__snapshot-detail-panels"><ul class="b3-list b3-list--background history__snapshot-detail-files"></ul><div class="history__snapshot-detail-preview"></div></div></div></div>`,
+        content: `<div class="history__snapshot-detail"><div class="history__snapshot-detail-status" data-detail-status role="status">${lang.loading}</div><div class="history__snapshot-detail-content fn__none"><div class="history__snapshot-detail-meta"></div><div class="history__snapshot-detail-panels"><ul class="b3-list b3-list--background history__snapshot-detail-files"></ul><div class="history__snapshot-detail-preview"></div></div></div></div>`,
         width: isMobile() ? "100vw" : "85vw",
         height: isMobile() ? "100dvh" : "80vh",
         containerClassName: "b3-dialog__container--theme",

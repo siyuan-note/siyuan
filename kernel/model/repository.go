@@ -558,11 +558,12 @@ type DiffFile struct {
 }
 
 type RepoDocHistory struct {
-	FileID  string `json:"fileID"`
-	IndexID string `json:"indexID"`
-	Title   string `json:"title"`
-	HSize   string `json:"hSize"`
-	Updated int64  `json:"updated"`
+	FileID    string                `json:"fileID"`
+	IndexID   string                `json:"indexID"`
+	Title     string                `json:"title"`
+	HSize     string                `json:"hSize"`
+	Updated   int64                 `json:"updated"`
+	Snapshots []*DocHistorySnapshot `json:"snapshots"`
 }
 
 type DiffIndex struct {
@@ -853,6 +854,7 @@ func GetRepoDocHistory(id string, page int) (ret []*RepoDocHistory, pageCount, t
 			Updated: file.Updated,
 		})
 	}
+	err = attachRepoDocHistorySnapshots(repo, ret)
 	return
 }
 

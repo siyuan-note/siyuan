@@ -1600,7 +1600,7 @@ export type RepoDiffFile = { "fileID": string; "hPath"?: string; "hSize": string
 
 export type RepoDiffIndex = { "created": number; "id": string; };
 
-export type RepoDocHistory = { "fileID": string; "hSize": string; "indexID": string; "title": string; "updated": number; };
+export type RepoDocHistory = { "fileID": string; "hSize": string; "indexID": string; "snapshots": Array<DocHistorySnapshot | null> | null; "title": string; "updated": number; };
 
 export type RepoDocHistoryData = { "files": Array<RepoDocHistory | null> | null; "pageCount": number; "totalCount": number; };
 

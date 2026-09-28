@@ -534,7 +534,8 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 		}
 
 		if merged, ok := mergedDocs[bt.RootID]; !ok {
-			doc.Title = path.Base(bt.HPath) // Recent docs not updated after renaming https://github.com/siyuan-note/siyuan/issues/7827
+			// 使用当前路径补全最近文档标题 https://github.com/siyuan-note/siyuan/issues/7827
+			doc.Title = util.DecodeDocTitlePath(path.Base(bt.HPath))
 			mergedDocs[bt.RootID] = doc
 			rootIDs = append(rootIDs, bt.RootID)
 		} else {
@@ -555,6 +556,9 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	attrs := sql.BatchGetBlockAttrs(rootIDs)
 	for rootID, doc := range mergedDocs {
 		if ial, ok := attrs[rootID]; ok {
+			if title, ok := ial["title"]; ok {
+				doc.Title = title
+			}
 			if icon, ok := ial["icon"]; ok && icon != "" {
 				if filteredIcon, valid := util.FilterIconValue(icon); valid {
 					doc.Icon = filteredIcon
@@ -604,8 +608,9 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 				continue
 			}
 
-			// 解析 IAL 获取 icon
+			// 解析 IAL 获取标题和图标
 			icon := ""
+			title := util.DecodeDocTitlePath(path.Base(bt.HPath))
 			if sqlBlock.IAL != "" {
 				ialStr := strings.TrimPrefix(sqlBlock.IAL, "{:")
 				ialStr = strings.TrimSuffix(ialStr, "}")
@@ -613,12 +618,11 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 				for _, kv := range ial {
 					if kv[0] == "icon" {
 						icon = kv[1]
-						break
+					} else if kv[0] == "title" {
+						title = kv[1]
 					}
 				}
 			}
-			// 获取文档标题
-			title := path.Base(bt.HPath)
 			doc := &RecentDoc{
 				RootID: sqlBlock.ID,
 				Icon:   icon,

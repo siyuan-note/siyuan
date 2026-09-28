@@ -97,6 +97,13 @@ func TestParseTemplateDocTreeDefinitionAllowsDuplicateTitles(t *testing.T) {
 	}
 }
 
+func TestParseTemplateDocTreeDefinitionAllowsSlashInTitle(t *testing.T) {
+	nodes, err := parseTemplateDocTreeDefinition([]any{map[string]any{"title": "/"}})
+	if err != nil || len(nodes) != 1 || nodes[0].Title != "/" {
+		t.Fatalf("document title slash was rejected: nodes=%+v, err=%v", nodes, err)
+	}
+}
+
 func TestParseTemplateDocTreeDefinitionRejectsInvalidSchema(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -107,7 +114,6 @@ func TestParseTemplateDocTreeDefinitionRejectsInvalidSchema(t *testing.T) {
 		{name: "missing title", definition: []any{map[string]any{}}},
 		{name: "non-string title", definition: []any{map[string]any{"title": true}}},
 		{name: "empty title", definition: []any{map[string]any{"title": " \t\r\n"}}},
-		{name: "title empty after normalization", definition: []any{map[string]any{"title": "/"}}},
 		{name: "title is too long", definition: []any{map[string]any{"title": strings.Repeat("文", 513)}}},
 		{name: "unknown field", definition: []any{map[string]any{"title": "资料", "titel": "typo"}}},
 		{name: "non-string template", definition: []any{map[string]any{"title": "资料", "template": 1}}},

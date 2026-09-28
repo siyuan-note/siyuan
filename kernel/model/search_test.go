@@ -523,6 +523,31 @@ func TestFromHPathSearchSQLBlockOnlyMarksHPath(t *testing.T) {
 	}
 }
 
+func TestDocumentSearchResultUsesTitleAttribute(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	sqlBlock := &sql.Block{
+		ID:      "20260928120000-title01",
+		RootID:  "20260928120000-title01",
+		HPath:   "/Parent／One",
+		Content: "Parent／One",
+		IAL:     `{: title="Parent/One"}`,
+		Type:    "d",
+	}
+	block := fromSQLBlockWithHPathTerms(sqlBlock, "Parent", "", -1)
+	if block.Content != "<mark>Parent</mark>/One" {
+		t.Fatalf("document search displayed encoded path title: %q", block.Content)
+	}
+	if block.HPath != "/Parent／One" {
+		t.Fatalf("document path changed: %q", block.HPath)
+	}
+
+	sqlBlock.IAL = `{: title="Parent／One"}`
+	block = fromSQLBlockWithHPathTerms(sqlBlock, "", "", -1)
+	if block.Content != "Parent／One" {
+		t.Fatalf("literal fullwidth slash in title changed: %q", block.Content)
+	}
+}
+
 func TestFromMixedHPathSearchSQLBlockMarksDirectContent(t *testing.T) {
 	setSearchCaseSensitive(t, true)
 	terms := "从这里" + search.TermSep + "会员"

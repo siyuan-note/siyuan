@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"runtime/debug"
 	"sort"
 	"sync"
@@ -436,7 +435,8 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 			break
 		}
 
-		err = updateRootContent(tx, path.Base(op.indexTree.HPath), op.indexTree.Root.IALAttr("updated"), treenode.IALStr(op.indexTree.Root), op.indexTree.ID)
+		// 文档索引保存原始标题，层级路径中的全角斜杠只用于区分路径分隔符。
+		err = updateRootContent(tx, op.indexTree.Root.IALAttr("title"), op.indexTree.Root.IALAttr("updated"), treenode.IALStr(op.indexTree.Root), op.indexTree.ID)
 		if nil == err {
 			tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
 		}

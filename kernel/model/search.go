@@ -3038,6 +3038,21 @@ func fromSQLBlockWithHPathTerms(sqlBlock *sql.Block, contentTerms, hPathTerms st
 
 	id := sqlBlock.ID
 	content := sqlBlock.Content
+	var ial map[string]string
+	if "" != sqlBlock.IAL {
+		ial = map[string]string{}
+		ialStr := strings.TrimPrefix(sqlBlock.IAL, "{:")
+		ialStr = strings.TrimSuffix(ialStr, "}")
+		for _, kv := range parse.Tokens2IAL([]byte(ialStr)) {
+			ial[kv[0]] = kv[1]
+		}
+		if sqlBlock.Type == "d" {
+			// 文档搜索结果从标题属性获取可见文本。
+			if title, ok := ial["title"]; ok {
+				content = title
+			}
+		}
+	}
 	if 1 < strings.Count(content, search.SearchMarkRight) && strings.HasSuffix(content, search.SearchMarkRight+"...") {
 		// 返回多个关键字命中时需要检查最后一个关键字是否被截断
 		firstKeyword := gulu.Str.SubStringBetween(content, search.SearchMarkLeft, search.SearchMarkRight)
@@ -3074,15 +3089,7 @@ func fromSQLBlockWithHPathTerms(sqlBlock *sql.Block, contentTerms, hPathTerms st
 		Created:  sqlBlock.Created,
 		Updated:  sqlBlock.Updated,
 	}
-	if "" != sqlBlock.IAL {
-		block.IAL = map[string]string{}
-		ialStr := strings.TrimPrefix(sqlBlock.IAL, "{:")
-		ialStr = strings.TrimSuffix(ialStr, "}")
-		ial := parse.Tokens2IAL([]byte(ialStr))
-		for _, kv := range ial {
-			block.IAL[kv[0]] = kv[1]
-		}
-	}
+	block.IAL = ial
 
 	hPathBeforeLen := 18
 	if "" != hPathTerms {

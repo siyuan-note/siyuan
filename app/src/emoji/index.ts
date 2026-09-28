@@ -953,7 +953,7 @@ export const openEmojiPanel = (
                 <div class="color__square fn__pointer${dynamicCurrentObj.color === "#93627f" ? " color__square--current" : ""}" style="background-color:#93627f"></div>
                 <div class="color__square fn__pointer${dynamicCurrentObj.color === "#5f6368" ? " color__square--current" : ""}" style="background-color:#5f6368"></div>
                 <div class="fn__space--small"></div>
-                <input type="text" class="b3-text-field fn__flex-1 fn__flex-center" value="${dynamicCurrentObj.color}">
+                <input type="color" class="b3-text-field fn__flex-1 fn__flex-center" value="${dynamicCurrentObj.color}" aria-label="${window.siyuan.languages.colorFont}">
             </div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
@@ -1531,8 +1531,8 @@ export const openEmojiPanel = (
                 }
                 break;
             } else if (target.classList.contains("color__square")) {
-                dynamicTextElements[0].value = target.getAttribute("style").replace("background-color:", "");
-                dynamicTextElements[0].dispatchEvent(new CustomEvent("input"));
+                dynamicColorElement.value = target.getAttribute("style").replace("background-color:", "");
+                dynamicColorElement.dispatchEvent(new CustomEvent("input"));
                 break;
             } else if ("clearDate" === target.dataset.action) {
                 dynamicDateElement.value = "";
@@ -1570,29 +1570,27 @@ export const openEmojiPanel = (
             item.setAttribute("src", dynamicURL + url.toString());
         });
     });
-    const dynamicTextElements: NodeListOf<HTMLInputElement> = dialog.element.querySelectorAll('[data-type="tab-dynamic"] [type="text"]');
+    const dynamicColorElement = dialog.element.querySelector<HTMLInputElement>('[data-type="tab-dynamic"] [type="color"]');
+    const dynamicTextElement = dialog.element.querySelector<HTMLInputElement>('[data-type="tab-dynamic"] input[type="text"]');
     const dynamicTextImgElement = dialog.element.querySelector('.emoji__dynamic-item[data-type="text"]');
-    dynamicTextElements[0].addEventListener("input", () => {
-        if (!dynamicTextElements[0].value.startsWith("#")) {
-            return;
-        }
+    dynamicColorElement.addEventListener("input", () => {
         dialog.element.querySelectorAll(".emoji__dynamic-item").forEach(item => {
             const url = new URLSearchParams(item.getAttribute("src").replace(dynamicURL, ""));
-            url.set("color", dynamicTextElements[0].value);
+            url.set("color", dynamicColorElement.value);
             item.setAttribute("src", dynamicURL + url.toString());
         });
         dialog.element.querySelectorAll(".color__square").forEach((item: HTMLElement) => {
-            if (item.style.backgroundColor === dynamicTextElements[0].value) {
+            if (item.getAttribute("style").replace("background-color:", "") === dynamicColorElement.value) {
                 item.classList.add("color__square--current");
             } else {
                 item.classList.remove("color__square--current");
             }
         });
     });
-    dynamicTextElements[1].value = dynamicCurrentObj.content;
-    dynamicTextElements[1].addEventListener("input", () => {
+    dynamicTextElement.value = dynamicCurrentObj.content;
+    dynamicTextElement.addEventListener("input", () => {
         const url = new URLSearchParams(dynamicTextImgElement.getAttribute("src").replace(dynamicURL, ""));
-        url.set("content", dynamicTextElements[1].value);
+        url.set("content", dynamicTextElement.value);
         dynamicTextImgElement.setAttribute("src", dynamicURL + url.toString());
     });
 };

@@ -1306,6 +1306,7 @@ export const activeBlur = (force = false) => {
 };
 
 export const initKeyboardToolbar = () => {
+    window.addEventListener("siyuan-mobile-toolbar-focus", renderKeyboardToolbar);
     window.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => {
         if (event.detail) {
             getMobileToolbarPaddingElement(event.detail).style.paddingBottom = "";

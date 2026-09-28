@@ -34,7 +34,14 @@ export const bindMobileToolbar = (protyle: IProtyle) => {
     const element = protyle.wysiwyg.element;
     editors.set(element, protyle);
     const activate = (event: Event) => {
-        if ((event.target as Element).closest(".protyle-wysiwyg") !== element || activeEditor === protyle) {
+        if ((event.target as Element).closest(".protyle-wysiwyg") !== element) {
+            return;
+        }
+        if (activeEditor === protyle) {
+            // 重新获得焦点时刷新工具栏，同时保留当前编辑器已经展开的菜单。
+            if (event.type === "focusin") {
+                window.dispatchEvent(new Event("siyuan-mobile-toolbar-focus"));
+            }
             return;
         }
         const previous = activeEditor;

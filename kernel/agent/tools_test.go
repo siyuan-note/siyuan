@@ -344,6 +344,14 @@ func TestBazaarToolActionEffects(t *testing.T) {
 		buildDoomSignature("bazaar", "readme", map[string]any{"packageName": "two"}) {
 		t.Fatal("different package requests must not be treated as a repeated call")
 	}
+	if buildDoomSignature("bazaar", "installed", map[string]any{"offset": 0, "enabled": true}) ==
+		buildDoomSignature("bazaar", "installed", map[string]any{"offset": 20, "enabled": true}) {
+		t.Fatal("different pages must not be treated as a repeated call")
+	}
+	if buildDoomSignature("bazaar", "installed", map[string]any{"enabled": true}) ==
+		buildDoomSignature("bazaar", "installed", map[string]any{"enabled": false}) {
+		t.Fatal("different enable filters must not be treated as a repeated call")
+	}
 }
 
 func TestQueryToolActionEffects(t *testing.T) {

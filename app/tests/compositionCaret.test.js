@@ -97,6 +97,7 @@ const rendererSource = () => {
             .replace("export const getEditorRange =", "const readEditorRange =") +
         "const getEditorRange = (element) => { editorRangeReads++; return readEditorRange(element); };" +
         extract("wysiwyg/keydown", ["keydown"]) +
+        extract("util/tableVirtualizationDOM", ["TABLE_VIRTUAL_ID"]) +
         extract("wysiwyg/transaction", ["updateTransaction"]) + `
         export function checkMobileInput(event) {
             let composing = true;
@@ -203,6 +204,29 @@ const runCases = async () => {
         return {element, protyle, start, finish, flush, setRange, assertCaret};
     };
     let cases = 0;
+    for (const profile of profiles) {
+        for (const trigger of ["、", "：", ":", "【", "（", "/"]) {
+            const f = setup(paragraph("base"), profile);
+            f.protyle.hint.enableExtend = false;
+            const node = f.element.querySelector('[contenteditable="true"]').firstChild;
+            f.start(node, node.length);
+            node.appendData(trigger);
+            getSelection().removeAllRanges();
+            const reads = window.compositionCaret.getEditorRangeReads();
+            f.element.dispatchEvent(new InputEvent("input", {
+                bubbles: true, inputType: "insertCompositionText", data: trigger, isComposing: true,
+            }));
+            assert.equal(f.protyle.hint.enableExtend, trigger !== "：", profile.name + trigger);
+            assert.equal(window.compositionCaret.getEditorRangeReads(), reads, profile.name);
+            assert.equal(getSelection().rangeCount, 0);
+            assert.equal(f.protyle.inputs, 0);
+            f.setRange(node, node.length);
+            await f.finish(trigger);
+            assert.equal(f.protyle.inputs, 1);
+            assert.equal(f.protyle.hint.enableExtend, trigger !== "：");
+            cases++;
+        }
+    }
     for (const profile of profiles) {
         const f = setup(paragraph('<span data-type="inline-math" contenteditable="false">x</span>base'), profile);
         const node = f.element.querySelector('[contenteditable="true"]').lastChild;
@@ -577,7 +601,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
                 require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
-            assert.match(stdout, /Composition caret: 50 Electron cases passed/);
+            assert.match(stdout, /Composition caret: 86 Electron cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-composition-caret-"));

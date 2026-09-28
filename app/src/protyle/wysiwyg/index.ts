@@ -4472,6 +4472,9 @@ export class WYSIWYG {
                 window.siyuan.menus.menu.remove();
                 return;
             }
+            if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {
+                protyle.hint.enableExtend = true;
+            }
             // 输入法可能暂时清空选区或把光标放到编辑器根节点，候选更新不能触发选区修复。
             if (event.isComposing || (isComposition && !isCommittedTextInput(event))) {
                 return;
@@ -4483,9 +4486,6 @@ export class WYSIWYG {
             }
             // 输入可能改变列宽，隐藏已有调整线，待鼠标重新命中列边界后定位。
             blockElement.closest(".table")?.querySelector(".table__resize")?.setAttribute("style", "display:none");
-            if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {
-                protyle.hint.enableExtend = true;
-            }
             // 外接键盘的结束事件可能缺失，收到明确提交的文本后恢复输入处理。
             // 跨块组合由其独立事务完成，不能在这里拆开提交。
             if (isComposition && !crossBlockComposition && isCommittedTextInput(event)) {

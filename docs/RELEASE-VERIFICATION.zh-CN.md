@@ -140,6 +140,18 @@ python -X utf8 scripts/build-release.py --platforms harmony --execute
 
 脚本自动构建、复制移动端内核和资源，各平台产物生成后立即收集到桌面 `siyuan` 文件夹，不等待全部平台完成；所有选定平台构建结束后，在桌面目录统一校验，包含目录中已有的安装包。后续平台构建或最终校验失败时，已收集的包仍保留，但不能视为校验通过。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.6.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。
 
+实际执行时，脚本在主仓库同级的 `release-records/版本号/时间-随机后缀/` 保存本次记录，例如 `D:\88250\release-records\3.8.6\20260929-093000-xxxxxxxx\`。启动和结束时都会打印完整目录，构建失败后也会保留。可用 `--records-dir` 指定记录根目录；记录须与源码仓库、安装包目录及系统临时目录分开。仅预览计划不会创建记录。
+
+| 文件 | 内容 |
+| --- | --- |
+| `build.log` | 带时间的脚本输出、构建命令输出和错误信息，同时保留终端显示 |
+| `progress.json` | 总体状态、各阶段状态、开始与结束时间、耗时、已收集产物路径、最后执行的命令及失败原因 |
+| `verification.json` | 进入最终校验阶段后生成的安装包检查结果和 SHA256；校验尚未开始时不生成 |
+
+进度文件在阶段开始、结束、命令执行及产物收集时原子更新，Windows AMD64 和 ARM64 分别记录。状态为 `pending`（未开始）、`running`（进行中）、`succeeded`（完成）、`failed`（失败）或 `interrupted`（收到中断）。平台阶段完成仅表示构建和收集完成，全部检查结果以最终校验为准。按 Ctrl+C 时记录中断状态；进程被强制结束或机器断电时，文件可能停留在 `running`，不能据此认为仍在运行。当前记录用于查看和排查，不自动续跑或复用产物。
+
+SSH 拉取保留直接终端交互，不采集认证命令的终端输出或键盘输入；日志记录命令和退出结果。内部查询命令的返回内容不直接写入日志，也不保存环境变量、私钥口令或 YubiKey PIN。
+
 ### 6. 汇总其他平台产物
 
 macOS、iOS 在对应构建机器上完成构建和签名。macOS 完成公证并收集双架构 DMG；iOS 同步内核、资源及 changelogs，确认版本号后完成上架构建。Windows 编排脚本不执行这两个平台的构建。
@@ -229,7 +241,7 @@ python -X utf8 scripts/clean-release.py --execute
 
 脚本清理发布脚本留下的系统临时构建目录、本地及 WSL 的 `app/build`、Linux 内核目录、鸿蒙生成的内核及头文件，以及 Android、鸿蒙工程中的构建输出和复制进去的内核、资源包。桌面 `siyuan` 始终保留；受 Git 管理的文件（包括鸿蒙公共头文件）、源码、签名配置、依赖和工具缓存、开发前端 `app/stage/build` 均保留。清理后再次打包需要重新生成内核和移动端资源包。
 
-自定义过构建参数时，清理时传入相同的 `--android-dir`、`--harmony-dir`、`--wsl-distro`、`--wsl-user`、`--wsl-repo`；使用自定义收集目录时，必须同时传入 `--output` 保护该目录。`--skip-wsl` 可只清理 Windows 本地。脚本拒绝越界路径、与保留目录重叠的目标以及自身或上级为链接的清理入口；构建目录内部的符号链接和目录联接只删除链接本身，不清理其指向的目录。不会清理其他电脑上的 macOS 或 iOS 构建产物。
+自定义过构建参数时，清理时传入相同的 `--android-dir`、`--harmony-dir`、`--wsl-distro`、`--wsl-user`、`--wsl-repo`；使用自定义收集目录时，必须同时传入 `--output` 保护该目录，使用自定义记录目录时传入相同的 `--records-dir`。默认的 `release-records` 发布记录始终保留。`--skip-wsl` 可只清理 Windows 本地。脚本拒绝越界路径、与保留目录重叠的目标以及自身或上级为链接的清理入口；构建目录内部的符号链接和目录联接只删除链接本身，不清理其指向的目录。不会清理其他电脑上的 macOS 或 iOS 构建产物。
 
 ### 11. 等待 GitHub Actions 完成并部署用户指南
 
@@ -293,6 +305,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - 脚本检查内核 `Ver`、`Mode`、Android、鸿蒙版本，以及启用 Appx 时的清单版本，不自动修改版本号或 `versionCode`
 - `--platforms` 接受逗号分隔的平台名称，可选 `windows`、`linux`、`android`、`harmony`；默认构建四个平台，Appx 需额外指定 `--appx`
 - `--output` 可指定产物收集目录，默认桌面 `siyuan`；脚本不覆盖已有同名安装包
+- `--records-dir` 可指定持久化记录根目录，默认主仓库同级 `release-records`；每次执行创建独立目录，保存日志、阶段进度和最终校验报告，清理发布产物时保留
 - 脚本保留现有 Android 与鸿蒙签名配置，不读取或输出这些配置里的密码
 - WSL 默认用户 `d`、仓库 `/home/d/88250/siyuan`，可通过 `--wsl-user`、`--wsl-repo`、`--wsl-distro` 调整；Linux 或鸿蒙构建预检时自动同步到 Windows 的确切提交，受检查的构建输入须一致，自动同步条件见步骤 2
 - Android、鸿蒙仓库默认在思源仓库同级，可用 `--android-dir`、`--harmony-dir` 调整；工具路径可用 `--arm64-cc`、`--deveco`、`--sevenzip` 调整

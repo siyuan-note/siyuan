@@ -138,6 +138,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--execute", action="store_true", help="实际删除；执行前停止构建并确认发布包已收齐")
     parser.add_argument("--output", type=Path, help="额外保留的自定义收集目录，与构建时 --output 一致")
+    parser.add_argument("--records-dir", type=Path, default=ROOT.parent / "release-records",
+                        help="保留发布记录目录，与构建时 --records-dir 一致")
     parser.add_argument("--android-dir", type=Path, default=ROOT.parent / "siyuan-android")
     parser.add_argument("--harmony-dir", type=Path, default=ROOT.parent / "siyuan-harmony")
     parser.add_argument("--wsl-distro", help="与构建时一致的 WSL 发行版")
@@ -145,7 +147,7 @@ def main():
     parser.add_argument("--wsl-repo", default="/home/d/88250/siyuan")
     parser.add_argument("--skip-wsl", action="store_true", help="只清理 Windows 本地工程及临时产物")
     args = parser.parse_args()
-    protected = [BUILD.VERIFY.desktop_folder().resolve()]
+    protected = [BUILD.VERIFY.desktop_folder().resolve(), args.records_dir.resolve()]
     if args.output:
         protected.append(args.output.resolve())
     for path in protected:

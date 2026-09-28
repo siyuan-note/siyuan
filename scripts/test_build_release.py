@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 import shutil
 import struct
+import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -322,9 +324,11 @@ class BuildTests(unittest.TestCase):
 
     def test_default_plan_does_not_run_commands(self):
         with patch.object(build.sys, "argv", ["build-release.py"]), patch.object(build, "run") as command, \
+                patch.object(build, "create_record") as record, \
                 contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(build.main(), 0)
         command.assert_not_called()
+        record.assert_not_called()
 
     def test_collection_is_immediate_and_does_not_overwrite(self):
         artifact = self.write(self.builder.work / "test.apk", b"first")
@@ -336,6 +340,216 @@ class BuildTests(unittest.TestCase):
         with self.assertRaises(build.BuildError):
             self.builder.collect([artifact], "Android", time.time())
         self.assertEqual((self.args.output / "test.apk").read_bytes(), b"first")
+
+
+class RecordTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name).resolve()
+        self.args = build.parser().parse_args([])
+        self.args.platforms = ["windows", "linux"]
+        self.args.output = self.root / "output"
+        self.args.android_dir = self.root / "android"
+        self.args.harmony_dir = self.root / "harmony"
+        self.args.records_dir = self.root / "records"
+        self.directory = self.root / "run"
+        self.directory.mkdir()
+        self.record = build.BuildRecord(self.directory, self.args, "3.8.4")
+
+    def progress(self):
+        return json.loads((self.directory / "progress.json").read_text(encoding="utf-8"))
+
+    def test_command_output_is_streamed_to_terminal_and_log(self):
+        acknowledged = self.root / "acknowledged"
+        script = self.root / "output.py"
+        script.write_text(
+            "import pathlib, sys, time\n"
+            "print('实时输出', end='', flush=True)\n"
+            f"ack = pathlib.Path({str(acknowledged)!r})\n"
+            "deadline = time.monotonic() + 5\n"
+            "while not ack.exists() and time.monotonic() < deadline:\n"
+            "    time.sleep(0.01)\n"
+            "if not ack.exists():\n"
+            "    sys.exit(9)\n"
+            "print('错误流输出', file=sys.stderr, flush=True)\n", encoding="utf-8")
+
+        class Terminal(io.StringIO):
+            def write(terminal, value):
+                if "实时输出" in value:
+                    acknowledged.touch()
+                return super().write(value)
+
+        terminal = Terminal()
+        with contextlib.redirect_stdout(terminal), self.record.session(), self.record.stage("preflight"):
+            build.run([sys.executable, "-X", "utf8", "-u", script], self.root)
+        log = (self.directory / "build.log").read_text(encoding="utf-8")
+        for value in ("实时输出", "错误流输出", "发布记录已保存"):
+            self.assertIn(value, log)
+            self.assertIn(value, terminal.getvalue())
+        self.assertRegex(log, r"\[\d{4}-\d{2}-\d{2}T")
+        self.assertEqual(self.progress()["last_command"]["returncode"], 0)
+        self.assertIsNone(build.ACTIVE_RECORD)
+
+    def test_failed_command_preserves_stage_and_later_pending_steps(self):
+        script = self.root / "failure.py"
+        script.write_text("import sys\nprint('build failed', file=sys.stderr)\nsys.exit(7)\n", encoding="utf-8")
+        with contextlib.redirect_stdout(io.StringIO()), self.assertRaises(build.BuildError):
+            with self.record.session(), self.record.stage("preflight"):
+                build.run([sys.executable, script], self.root)
+        progress = self.progress()
+        self.assertEqual(progress["status"], "failed")
+        self.assertEqual(progress["stages"][0]["status"], "failed")
+        self.assertTrue(all(stage["status"] == "pending" for stage in progress["stages"][1:]))
+        self.assertEqual(progress["last_command"]["returncode"], 7)
+        self.assertIn("build failed", (self.directory / "build.log").read_text(encoding="utf-8"))
+        self.assertIsNone(build.ACTIVE_RECORD)
+
+    def test_interrupt_preserves_progress(self):
+        with contextlib.redirect_stdout(io.StringIO()), self.assertRaises(KeyboardInterrupt):
+            with self.record.session(), self.record.stage("preflight"):
+                raise KeyboardInterrupt()
+        progress = self.progress()
+        self.assertEqual(progress["status"], "interrupted")
+        self.assertEqual(progress["stages"][0]["status"], "interrupted")
+        self.assertIsNone(build.ACTIVE_RECORD)
+
+    def test_ssh_authentication_keeps_terminal_handles(self):
+        builder = build.Builder(self.args, "3.8.4", self.root, self.record)
+        result = subprocess.CompletedProcess([], 0)
+        with contextlib.redirect_stdout(io.StringIO()), self.record.session(), \
+                patch.object(build.subprocess, "run", return_value=result) as run, \
+                patch.object(build.subprocess, "Popen") as popen:
+            builder.wsl(["git", "fetch", "origin", "refs/heads/dev"])
+        self.assertIsNone(run.call_args.kwargs["stdout"])
+        self.assertIsNone(run.call_args.kwargs["stderr"])
+        self.assertNotIn("stdin", run.call_args.kwargs)
+        self.assertTrue(self.progress()["last_command"]["interactive"])
+        popen.assert_not_called()
+
+    def test_capture_output_and_environment_are_not_dumped(self):
+        result = subprocess.CompletedProcess([], 0, stdout="private capture", stderr="")
+        with contextlib.redirect_stdout(io.StringIO()), self.record.session(), \
+                patch.object(build.subprocess, "run", return_value=result):
+            value = build.run(["git", "diff", "HEAD"], self.root, env={"TOKEN": "private environment"}, capture=True)
+        self.assertEqual(value, "private capture")
+        for filename in ("build.log", "progress.json"):
+            content = (self.directory / filename).read_text(encoding="utf-8")
+            self.assertNotIn("private capture", content)
+            self.assertNotIn("private environment", content)
+
+    def test_atomic_progress_write_preserves_previous_snapshot_on_failure(self):
+        self.record.save()
+        original = self.progress()
+        self.record.data["status"] = "running"
+        with patch.object(build.os, "replace", side_effect=OSError("write failed")), self.assertRaises(OSError):
+            self.record.save()
+        self.assertEqual(self.progress(), original)
+        self.assertFalse((self.directory / "progress.json.tmp").exists())
+
+    def test_record_directories_are_unique_and_outside_outputs(self):
+        with patch.object(build.tempfile, "gettempdir", return_value=str(self.root / "system-temp")):
+            first = build.create_record(self.args, "3.8.4")
+            second = build.create_record(self.args, "3.8.4")
+        self.assertNotEqual(first.directory, second.directory)
+        self.assertEqual(first.directory.parent, self.args.records_dir / "3.8.4")
+        self.assertFalse(self.args.output.exists())
+
+    def test_record_directory_rejects_build_and_package_locations(self):
+        for path in (build.ROOT / "records", self.args.android_dir / "records", self.args.harmony_dir / "records",
+                     self.args.output, self.args.output / "records", Path(tempfile.gettempdir()) / "release-records"):
+            self.args.records_dir = path
+            with self.subTest(path=path), self.assertRaises(build.BuildError):
+                build.create_record(self.args, "3.8.4")
+
+    def test_execution_records_partial_windows_success(self):
+        def windows_arch(builder, arch, config):
+            if arch == "arm64":
+                raise build.BuildError("ARM64 build failed")
+            package = builder.work / "windows.exe"
+            package.write_bytes(b"package")
+            builder.collect([package], "Windows", time.time())
+
+        with contextlib.redirect_stdout(io.StringIO()), patch.object(build.tempfile, "tempdir", str(self.root)), \
+                patch.object(build.Builder, "preflight"), patch.object(build.Builder, "build_ui"), \
+                patch.object(build.Builder, "windows_tools"), \
+                patch.object(build.Builder, "windows_arch", windows_arch), \
+                patch.object(build.Builder, "linux") as linux, self.assertRaises(build.BuildError):
+            with self.record.session():
+                build.execute_build(self.args, "3.8.4", self.record)
+        stages = {stage["id"]: stage for stage in self.progress()["stages"]}
+        self.assertEqual(stages["windows_amd64"]["status"], "succeeded")
+        self.assertEqual(stages["windows_amd64"]["artifacts"], [str(self.args.output / "windows.exe")])
+        self.assertEqual(stages["windows_arm64"]["status"], "failed")
+        self.assertEqual(stages["linux"]["status"], "pending")
+        self.assertEqual(stages["verification"]["status"], "pending")
+        linux.assert_not_called()
+
+    def test_complete_execution_persists_report_and_all_stage_results(self):
+        def windows_arch(builder, arch, config):
+            package = builder.work / f"siyuan-3.8.4-win-{arch}.exe"
+            package.write_bytes(b"package")
+            builder.collect([package], "Windows", time.time())
+
+        def linux(builder):
+            package = builder.work / "siyuan-3.8.4-linux.AppImage"
+            package.write_bytes(b"package")
+            builder.collect([package], "Linux", time.time())
+
+        with contextlib.redirect_stdout(io.StringIO()), patch.object(build.tempfile, "tempdir", str(self.root)), \
+                patch.object(build.Builder, "preflight"), patch.object(build.Builder, "build_ui"), \
+                patch.object(build.Builder, "windows_tools"), \
+                patch.object(build.Builder, "windows_arch", windows_arch), patch.object(build.Builder, "linux", linux), \
+                patch.object(build.VERIFY, "verify_package", return_value={"target": "test", "resource_count": 1}):
+            with self.record.session():
+                build.execute_build(self.args, "3.8.4", self.record)
+        progress = self.progress()
+        self.assertEqual(progress["status"], "succeeded")
+        self.assertTrue(all(stage["status"] == "succeeded" for stage in progress["stages"]))
+        self.assertEqual(len(json.loads(self.record.report.read_text(encoding="utf-8"))["packages"]), 3)
+        self.assertFalse((self.args.output / "build.log").exists())
+        self.assertFalse((self.args.output / "progress.json").exists())
+
+    def test_preflight_failure_is_saved_before_work_directory_creation(self):
+        with contextlib.redirect_stdout(io.StringIO()), \
+                patch.object(build.Builder, "preflight", side_effect=build.BuildError("missing tool")), \
+                patch.object(build.Builder, "build_ui") as ui, self.assertRaises(build.BuildError):
+            with self.record.session():
+                build.execute_build(self.args, "3.8.4", self.record)
+        self.assertEqual(self.progress()["status"], "failed")
+        self.assertEqual(self.progress()["stages"][0]["error"], "missing tool")
+        self.assertIsNone(self.progress()["work_directory"])
+        self.assertFalse(self.record.report.exists())
+        ui.assert_not_called()
+
+    def test_verification_report_is_written_on_success_and_failure(self):
+        self.args.output.mkdir()
+        package = self.args.output / "siyuan-3.8.4-linux.AppImage"
+        package.write_bytes(b"package")
+        for failure in (False, True):
+            record = build.BuildRecord(self.directory, self.args, "3.8.4")
+            builder = build.Builder(self.args, "3.8.4", self.root, record)
+            effect = build.VERIFY.VerificationError("invalid package") if failure else None
+            with patch.object(build.VERIFY, "verify_package", side_effect=effect,
+                              return_value={"target": "ELF/amd64", "resource_count": 1}), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                if failure:
+                    with self.assertRaises(build.BuildError):
+                        builder.finish()
+                else:
+                    builder.finish()
+            report = json.loads(record.report.read_text(encoding="utf-8"))
+            self.assertEqual(report["packages"][0]["status"], "FAIL" if failure else "PASS")
+            self.assertEqual(report["packages"][0]["sha256"], build.VERIFY.digest(package))
+            record.report.unlink()
+
+    def test_verification_startup_failure_is_reported(self):
+        builder = build.Builder(self.args, "3.8.4", self.root, self.record)
+        with self.assertRaises(build.VERIFY.VerificationError):
+            builder.finish()
+        report = json.loads(self.record.report.read_text(encoding="utf-8"))
+        self.assertEqual(report["status"], "FAIL")
+        self.assertIn("error", report)
 
 
 if __name__ == "__main__":

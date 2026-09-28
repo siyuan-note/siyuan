@@ -1,9 +1,12 @@
+import contextlib
 import importlib.util
+import io
 import os
 from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 SPEC = importlib.util.spec_from_file_location("clean_release", Path(__file__).with_name("clean-release.py"))
@@ -31,6 +34,31 @@ class CleanupTests(unittest.TestCase):
         CLEAN.clean([(self.root, self.build)], [self.output], execute=True)
         self.assertFalse(self.build.exists())
         self.assertEqual((self.output / "release.app").read_bytes(), b"signed package")
+
+    def test_main_preserves_default_release_records(self):
+        records = self.root / "release-records/3.8.4/run"
+        records.mkdir(parents=True)
+        (records / "build.log").write_text("build output", encoding="utf-8")
+        with patch.object(CLEAN, "ROOT", self.root / "repo"), \
+                patch.object(CLEAN.sys, "argv", ["clean-release.py", "--execute"]), \
+                patch.object(CLEAN.BUILD.VERIFY, "desktop_folder", return_value=self.output), \
+                patch.object(CLEAN, "collect_targets", return_value=[(self.root, self.build)]), \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(CLEAN.main(), 0)
+        self.assertEqual((records / "build.log").read_text(), "build output")
+        self.assertFalse(self.build.exists())
+
+    def test_custom_release_records_prevent_overlapping_cleanup(self):
+        records = self.build / "records"
+        records.mkdir()
+        (records / "progress.json").write_text("{}", encoding="utf-8")
+        with patch.object(CLEAN.sys, "argv", ["clean-release.py", "--execute", "--records-dir", str(records)]), \
+                patch.object(CLEAN.BUILD.VERIFY, "desktop_folder", return_value=self.output), \
+                patch.object(CLEAN, "collect_targets", return_value=[(self.root, self.build)]), \
+                contextlib.redirect_stdout(io.StringIO()), self.assertRaises(CLEAN.CleanupError):
+            CLEAN.main()
+        self.assertTrue((records / "progress.json").exists())
+        self.assertTrue((self.build / "release.app").exists())
 
     def test_protected_directory_and_ancestors_rejected_before_any_deletion(self):
         for path in (self.output, self.output.parent, self.output / "release.app"):

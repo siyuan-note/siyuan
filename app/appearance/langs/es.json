@@ -1,4 +1,7 @@
 {
+	"historySnapshots": "Instantáneas etiquetadas relacionadas",
+	"historySnapshotsError": "No se pueden cargar las instantáneas relacionadas",
+	"historySnapshotMissing": "Esta instantánea ya no está disponible",
 	"autoDirection": "Dirección automática del texto",
 	"autoDirectionTip": "Detectar la dirección de párrafos y encabezados a partir del primer carácter direccional fuerte; la dirección manual tiene prioridad",
 	"cardFullRowTip": "El campo principal siempre ocupa una fila completa; oculta los nombres de los campos para distribuir los demás de forma compacta",

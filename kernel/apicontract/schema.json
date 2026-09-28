@@ -21530,6 +21530,132 @@
       ],
       "additionalProperties": false
     },
+    "DocHistorySnapshot": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "integer"
+        },
+        "fileID": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "memo": {
+          "type": "string"
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "created",
+        "fileID",
+        "id",
+        "memo",
+        "tags"
+      ],
+      "additionalProperties": false
+    },
+    "DocHistorySnapshotEntry": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string"
+        },
+        "historyPath": {
+          "type": "string"
+        },
+        "snapshots": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/DocHistorySnapshot"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "created",
+        "historyPath",
+        "snapshots"
+      ],
+      "additionalProperties": false
+    },
+    "DocHistorySnapshotsData": {
+      "type": "object",
+      "properties": {
+        "histories": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/DocHistorySnapshotEntry"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "histories"
+      ],
+      "additionalProperties": false
+    },
+    "DocHistorySnapshotsRequestInput": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "op": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "created",
+        "id"
+      ],
+      "additionalProperties": false
+    },
     "DocInfo": {
       "type": "object",
       "properties": {
@@ -26493,6 +26619,9 @@
       "properties": {
         "id": {
           "type": "string"
+        },
+        "includeFiles": {
+          "type": "boolean"
         },
         "page": {
           "type": "number"
@@ -137384,6 +137513,81 @@
               },
               "data": {
                 "$ref": "#/$defs/DocHistoryContentData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/history/getDocHistorySnapshots",
+      "handler": "getDocHistorySnapshots",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/DocHistorySnapshotsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/DocHistorySnapshotsData"
               },
               "msg": {
                 "type": "string"

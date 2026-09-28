@@ -1,4 +1,7 @@
 {
+	"historySnapshots": "İlgili etiketli anlık görüntüler",
+	"historySnapshotsError": "İlgili anlık görüntüler yüklenemedi",
+	"historySnapshotMissing": "Bu anlık görüntü artık mevcut değil",
 	"autoDirection": "Otomatik metin yönü",
 	"autoDirectionTip": "Paragraf ve başlık yönünü güçlü yönlülüğe sahip ilk karakterden algıla; elle ayarlanan yön önceliklidir",
 	"cardFullRowTip": "Birincil alan her zaman tam bir satır kaplar; diğer alanları sıkışık yerleştirmek için alan adlarını gizleyin",

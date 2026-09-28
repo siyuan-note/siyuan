@@ -1,4 +1,7 @@
 {
+	"historySnapshots": "Related tagged snapshots",
+	"historySnapshotsError": "Unable to load related snapshots",
+	"historySnapshotMissing": "This snapshot is no longer available",
 	"autoDirection": "Automatic text direction",
 	"autoDirectionTip": "Detect paragraph and heading direction from the first strong directional character; manual direction takes priority",
 	"cardFullRowTip": "The primary field always occupies a full row; hide field names to arrange other fields compactly",

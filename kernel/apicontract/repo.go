@@ -63,6 +63,8 @@ type GetRepoSnapshotsRequest struct {
 	// 前缀匹配多个快照时全部返回，按创建时间降序排列。
 	// 省略或留空时保留分页列表；未找到返回空列表，格式错误及仓库读取失败返回错误。
 	ID string `json:"id" api:"optional"`
+	// IncludeFiles 默认为 false；为 true 时 ID 必须完整，返回该快照的文件元数据，不读取文件正文。
+	IncludeFiles bool `json:"includeFiles" api:"optional"`
 }
 type SearchRepoFileRequest struct {
 	Keyword string  `json:"keyword" api:"trim"`
@@ -328,6 +330,14 @@ func init() {
 			return request, err
 		}
 		request.ID = strings.TrimSpace(request.ID)
+		if raw, exists := fields["includeFiles"]; exists {
+			if string(raw) == "null" {
+				return request, errors.New("includeFiles must be a boolean")
+			}
+			if err = json.Unmarshal(raw, &request.IncludeFiles); err != nil {
+				return request, err
+			}
+		}
 		return request, nil
 	}
 	SearchRepoFile.decodeRequest = func(reader io.Reader) (request SearchRepoFileRequest, err error) {

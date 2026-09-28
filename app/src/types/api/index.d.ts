@@ -862,6 +862,14 @@ export type DocHistoryContentData = { "content": string; "id": string; "isLargeD
 
 export type DocHistoryContentRequestInput = { "highlight"?: boolean | null; "historyPath": string; "k"?: string | null; };
 
+export type DocHistorySnapshot = { "created": number; "fileID": string; "id": string; "memo": string; "tags": Array<string> | null; };
+
+export type DocHistorySnapshotEntry = { "created": string; "historyPath": string; "snapshots": Array<DocHistorySnapshot | null> | null; };
+
+export type DocHistorySnapshotsData = { "histories": Array<DocHistorySnapshotEntry | null> | null; };
+
+export type DocHistorySnapshotsRequestInput = { "created": Array<string>; "id": string; "op"?: string; };
+
 export type DocInfo = { "attrViews": Array<DocAttrView | null> | null; "ial": Record<string, string> | null; "icon": string; "id": string; "name": string; "refCount": number; "refIDs": Array<string> | null; "rootID": string; "subFileCount": number; };
 
 export type DocOrdersRequestInput = { "id": string; };
@@ -1142,7 +1150,7 @@ export type GetRepoDocHistoryRequestInput = { "id": string; "page": number; };
 
 export type GetRepoFileRequestInput = { "id": string; };
 
-export type GetRepoSnapshotsRequestInput = { "id"?: string; "page": number; };
+export type GetRepoSnapshotsRequestInput = { "id"?: string; "includeFiles"?: boolean; "page": number; };
 
 export type GetSnippetRequestInput = { "enabled": number; "keyword"?: string | null; "type": string; };
 
@@ -4160,6 +4168,11 @@ export interface APIPOSTRoutes {
     "/api/history/getDocHistoryContent": {
         request: DocHistoryContentRequestInput;
         response: { "code": 0; "data": DocHistoryContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/history/getDocHistorySnapshots": {
+        request: DocHistorySnapshotsRequestInput;
+        response: { "code": 0; "data": DocHistorySnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/history/getHistoryItems": {

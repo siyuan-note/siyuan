@@ -7,6 +7,18 @@ import (
 )
 
 func TestRepoSnapshotIDContract(t *testing.T) {
+	for _, enabled := range []bool{false, true} {
+		body, _ := json.Marshal(map[string]interface{}{"page": 1, "includeFiles": enabled})
+		request, err := GetRepoSnapshots.Decode(strings.NewReader(string(body)))
+		if err != nil || request.IncludeFiles != enabled {
+			t.Fatalf("includeFiles: %+v %v", request, err)
+		}
+	}
+	for _, value := range []string{"null", `"true"`, "1", "[]"} {
+		if _, err := GetRepoSnapshots.Decode(strings.NewReader(`{"page":1,"includeFiles":` + value + `}`)); err == nil {
+			t.Fatalf("invalid includeFiles accepted: %s", value)
+		}
+	}
 	for _, body := range []string{`{"page":1}`, `{"page":1,"id":""}`, `{"page":1,"id":null}`} {
 		request, err := GetRepoSnapshots.Decode(strings.NewReader(body))
 		if err != nil || request.ID != "" {

@@ -228,6 +228,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/history/rollbackNotebookHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackNotebookHistory)
 	ginServer.Handle("POST", "/api/history/rollbackAssetsHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackAssetsHistory)
 	ginServer.Handle("POST", "/api/history/getDocHistoryContent", model.CheckAuth, model.CheckAdminRole, getDocHistoryContent)
+	ginServer.Handle("POST", "/api/history/getDocHistorySnapshots", model.CheckAuth, model.CheckAdminRole, getDocHistorySnapshots)
 	ginServer.Handle("POST", "/api/history/diffDocVersions", model.CheckAuth, model.CheckAdminRole, diffDocVersions)
 	ginServer.Handle("POST", "/api/history/rollbackDocHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackDocHistory)
 	ginServer.Handle("POST", "/api/history/clearWorkspaceHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, clearWorkspaceHistory)

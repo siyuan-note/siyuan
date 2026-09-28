@@ -167,8 +167,8 @@ var getRepoSnapshots = contractHandler(apicontract.GetRepoSnapshots, func(c *gin
 	var snapshots []*model.Snapshot
 	var pageCount, totalCount int
 	var err error
-	if request.ID != "" {
-		snapshots, pageCount, totalCount, err = model.SearchRepoSnapshot(request.ID)
+	if request.ID != "" || request.IncludeFiles {
+		snapshots, pageCount, totalCount, err = model.SearchRepoSnapshot(request.ID, request.IncludeFiles)
 	} else {
 		snapshots, pageCount, totalCount, err = model.GetRepoSnapshots(int(request.Page))
 	}

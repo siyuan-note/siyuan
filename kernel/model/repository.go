@@ -989,11 +989,14 @@ type TypeCount struct {
 }
 
 // SearchRepoSnapshot 按完整 ID 或至少 7 位前缀读取本地快照，复用列表的元数据和下载状态计算。
-func SearchRepoSnapshot(id string) (ret []*Snapshot, pageCount, totalCount int, err error) {
+func SearchRepoSnapshot(id string, includeFiles bool) (ret []*Snapshot, pageCount, totalCount int, err error) {
 	ret = []*Snapshot{}
 	id = strings.ToLower(strings.TrimSpace(id))
 	if len(id) < 7 || len(id) > sha1.Size*2 || strings.Trim(id, "0123456789abcdef") != "" {
 		return ret, 0, 0, errors.New("invalid snapshot ID")
+	}
+	if includeFiles && len(id) != sha1.Size*2 {
+		return ret, 0, 0, errors.New("complete snapshot ID is required to include files")
 	}
 	if len(Conf.Repo.Key) == 0 {
 		return ret, 0, 0, errors.New(Conf.Language(26))
@@ -1045,7 +1048,7 @@ func SearchRepoSnapshot(id string) (ret []*Snapshot, pageCount, totalCount int, 
 		return ret, 0, 0, nil
 	}
 	sort.SliceStable(logs, func(i, j int) bool { return logs[i].Created > logs[j].Created })
-	ret = buildSnapshots(logs)
+	ret = buildSnapshots(logs, includeFiles)
 	return ret, 1, len(ret), nil
 }
 
@@ -1073,14 +1076,14 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 		return
 	}
 
-	ret = buildSnapshots(logs)
+	ret = buildSnapshots(logs, false)
 	if 1 > len(ret) {
 		ret = []*Snapshot{}
 	}
 	return
 }
 
-func buildSnapshots(logs []*dejavu.Log) (ret []*Snapshot) {
+func buildSnapshots(logs []*dejavu.Log, includeFiles bool) (ret []*Snapshot) {
 	chunkAvailability := map[string]bool{}
 	for _, l := range logs {
 		typesCount := statTypesByPath(l.Files)
@@ -1091,7 +1094,9 @@ func buildSnapshots(logs []*dejavu.Log) (ret []*Snapshot) {
 				break
 			}
 		}
-		l.Files = nil // 置空，否则返回前端数据量太大
+		if !includeFiles {
+			l.Files = nil // 列表仅返回概要，避免传输所有快照的文件列表。
+		}
 		ret = append(ret, &Snapshot{
 			Log:              l,
 			TypesCount:       typesCount,
@@ -1765,7 +1770,7 @@ func GetTagSnapshots() (ret []*Snapshot, err error) {
 	if err != nil {
 		return
 	}
-	ret = buildSnapshots(logs)
+	ret = buildSnapshots(logs, false)
 	if 1 > len(ret) {
 		ret = []*Snapshot{}
 	}

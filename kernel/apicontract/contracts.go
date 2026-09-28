@@ -601,6 +601,8 @@ var GetNotebookHistory = define[EmptyRequest, NotebookHistoryData]("getNotebookH
 
 var GetDocHistoryContent = define[DocHistoryContentRequest, DocHistoryContentData]("getDocHistoryContent", "/api/history/getDocHistoryContent", JSONBody, ResponseOptions{}, "POST")
 
+var GetDocHistorySnapshots = define[DocHistorySnapshotsRequest, DocHistorySnapshotsData]("getDocHistorySnapshots", "/api/history/getDocHistorySnapshots", JSONBody, ResponseOptions{}, "POST")
+
 var CreateDocHistory = define[CreateDocHistoryRequest, Null]("createDocHistory", "/api/history/createDocHistory", JSONBody, ResponseOptions{}, "POST")
 
 var CreateAssetHistory = define[CreateAssetHistoryRequest, Null]("createAssetHistory", "/api/history/createAssetHistory", JSONBody, ResponseOptions{}, "POST")

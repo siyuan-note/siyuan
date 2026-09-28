@@ -22,8 +22,14 @@ func TestSearchRepoSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if found, _, _, err := SearchRepoSnapshot(index.ID, true); err != nil || len(found) != 1 || len(found[0].Files) != len(index.Files) {
+		t.Fatalf("snapshot file metadata missing: %v %v", found, err)
+	}
+	if _, _, _, err := SearchRepoSnapshot(index.ID[:7], true); err == nil {
+		t.Fatal("file listing accepted an ambiguous snapshot prefix")
+	}
 	for _, id := range []string{index.ID, index.ID[:7], index.ID[:15], " \n" + strings.ToUpper(index.ID[:7]) + "\t", " \n" + strings.ToUpper(index.ID) + "\t"} {
-		found, pages, total, searchErr := SearchRepoSnapshot(id)
+		found, pages, total, searchErr := SearchRepoSnapshot(id, false)
 		if searchErr != nil || len(found) != 1 || pages != 1 || total != 1 {
 			t.Fatalf("search %q: %v %d %d %v", id, found, pages, total, searchErr)
 		}
@@ -40,11 +46,11 @@ func TestSearchRepoSnapshot(t *testing.T) {
 		}
 	}
 	missing := strings.Repeat("0", 40)
-	if found, pages, total, err := SearchRepoSnapshot(missing); err != nil || len(found) != 0 || pages != 0 || total != 0 {
+	if found, pages, total, err := SearchRepoSnapshot(missing, false); err != nil || len(found) != 0 || pages != 0 || total != 0 {
 		t.Fatalf("missing snapshot: %v %d %d %v", found, pages, total, err)
 	}
 	for _, id := range []string{"", "short", "abcdef", "abcdefg", "../../outside", strings.Repeat("z", 40), strings.Repeat("a", 41)} {
-		if _, _, _, err := SearchRepoSnapshot(id); err == nil {
+		if _, _, _, err := SearchRepoSnapshot(id, false); err == nil {
 			t.Fatalf("invalid ID accepted: %q", id)
 		}
 	}
@@ -58,7 +64,7 @@ func TestSearchRepoSnapshot(t *testing.T) {
 	if err = store.PutIndex(&other); err != nil {
 		t.Fatal(err)
 	}
-	if found, pages, total, searchErr := SearchRepoSnapshot(index.ID[:7]); searchErr != nil || pages != 1 || total != 2 ||
+	if found, pages, total, searchErr := SearchRepoSnapshot(index.ID[:7], false); searchErr != nil || pages != 1 || total != 2 ||
 		len(found) != 2 || found[0].ID != other.ID || found[1].ID != index.ID {
 		t.Fatalf("shared prefix: %v %d %d %v", found, pages, total, searchErr)
 	}
@@ -71,10 +77,10 @@ func TestSearchRepoSnapshot(t *testing.T) {
 	if err = os.WriteFile(file, corrupt, 0644); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, err = SearchRepoSnapshot(corruptID); err == nil {
+	if _, _, _, err = SearchRepoSnapshot(corruptID, false); err == nil {
 		t.Fatal("corrupt snapshot returned as missing")
 	}
-	if _, _, _, err = SearchRepoSnapshot(corruptID[:7]); err == nil {
+	if _, _, _, err = SearchRepoSnapshot(corruptID[:7], false); err == nil {
 		t.Fatal("corrupt snapshot prefix returned as missing")
 	}
 	if unchanged, err := os.ReadFile(file); err != nil || !bytes.Equal(unchanged, corrupt) {

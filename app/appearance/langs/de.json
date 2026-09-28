@@ -1,4 +1,7 @@
 {
+	"historySnapshots": "Zugehörige markierte Schnappschüsse",
+	"historySnapshotsError": "Zugehörige Schnappschüsse konnten nicht geladen werden",
+	"historySnapshotMissing": "Dieser Schnappschuss ist nicht mehr verfügbar",
 	"autoDirection": "Automatische Textrichtung",
 	"autoDirectionTip": "Richtung von Absätzen und Überschriften anhand des ersten Zeichens mit starker Schreibrichtung automatisch bestimmen; manuelle Einstellungen haben Vorrang",
 	"cardFullRowTip": "Das Primärfeld belegt immer eine ganze Zeile; blende die Feldnamen aus, um andere Felder kompakt anzuordnen",

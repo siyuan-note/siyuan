@@ -13,10 +13,10 @@ import {resizeSide} from "./resizeSide";
 import {escapeHtml} from "../util/escape";
 import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
 import {showDocVersionDiff, type IDocVersionRef} from "./docDiff";
+import {DocHistorySnapshots, getDocHistorySnapshots} from "./docSnapshots";
+import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "./notebookDialogs";
 
-let historyEditor: Protyle;
 const repoHistoryEditors = new WeakMap<HTMLElement, Protyle>();
-let isLoading = false;
 
 const genCurrentVersionItem = () => `<li class="b3-list-item history__current-version" data-type="currentVersionItem">
     <span class="b3-list-item__text">${window.siyuan.languages.currentVer}</span>
@@ -27,6 +27,9 @@ const genCurrentVersionItem = () => `<li class="b3-list-item history__current-ve
 </li>`;
 
 const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
+    getDocHistorySnapshots(element)?.reset();
+    const request = (Number(element.dataset.historyRequest) || 0) + 1;
+    element.dataset.historyRequest = String(request);
     const previousElement = element.querySelector('[data-type="docprevious"]');
     const nextElement = element.querySelector('[data-type="docnext"]');
     if (currentPage > 1) {
@@ -45,6 +48,9 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         op: opElement.value,
         type: 3
     }, (response) => {
+        if (!element.isConnected || element.dataset.historyRequest !== String(request)) {
+            return;
+        }
         if (currentPage < response.data.pageCount) {
             nextElement.removeAttribute("disabled");
         } else {
@@ -70,7 +76,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         let logsHTML = genCurrentVersionItem();
         histories.forEach((item: string) => {
             logsHTML += `<li class="b3-list-item b3-list-item--hide-action" data-created="${item}">
-    <span class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
+    <div class="fn__flex-1 fn__flex-column"><span class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span><span data-history-tags="${item}"></span></div>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
@@ -82,6 +88,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         });
         listElement.innerHTML = logsHTML;
         element.dispatchEvent(new CustomEvent("versionListRendered"));
+        void getDocHistorySnapshots(element)?.load(histories, opElement.value);
     });
 };
 
@@ -153,6 +160,20 @@ export const openDocHistory = (options: {
     notebookId: string,
     pathString: string
 }) => {
+    let historyEditor: Protyle;
+    let isLoading = false;
+    const getHistoryPath = (target: Element, op: string, id: string, cb: (item: {path: string, title: string}) => void) => {
+        isLoading = true;
+        const created = target.getAttribute("data-created");
+        historyEditor.protyle.options.history.created = created;
+        fetchPost("/api/history/getHistoryItems", {query: id, op, type: 3, created}, response => {
+            if (!target.isConnected || !historyEditor || !response.data.items.length) {
+                isLoading = false;
+                return;
+            }
+            cb(response.data.items[0]);
+        });
+    };
     const currentVersion = {
         type: "current" as const,
         id: options.id,
@@ -234,12 +255,16 @@ export const openDocHistory = (options: {
         height: isMobile() ? "100dvh" : "80vh",
         containerClassName: "b3-dialog__container--theme",
         destroyCallback() {
+            forgetNotebookHistoryDialog(dialog);
+            getDocHistorySnapshots(fileElement)?.destroy();
+            historyEditor?.destroy();
             historyEditor = undefined;
             repoHistoryEditors.get(repoElement)?.destroy();
             repoHistoryEditors.delete(repoElement);
         }
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORYDOC);
+    trackNotebookHistoryDialog(dialog, [options.notebookId]);
 
     const versionKey = (version: IDocVersionRef) => `${version.type}:${version.id || version.path || ""}`;
     const syncVersionSelection = () => {
@@ -280,6 +305,7 @@ export const openDocHistory = (options: {
     };
 
     const fileElement = dialog.element.querySelector('#docHistoryContainer [data-type="doc"]') as HTMLElement;
+    const historySnapshots = new DocHistorySnapshots(options.app, fileElement, options.id);
     const repoElement = dialog.element.querySelector('#docHistoryContainer [data-type="repo"]') as HTMLElement;
     fileElement.addEventListener("versionListRendered", syncVersionSelection);
     repoElement.addEventListener("versionListRendered", syncVersionSelection);
@@ -401,6 +427,7 @@ export const openDocHistory = (options: {
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item") && type === "currentVersionItem") {
+                historySnapshots.select("");
                 toggleVersionSelection(currentVersion);
                 event.stopPropagation();
                 event.preventDefault();
@@ -429,11 +456,16 @@ export const openDocHistory = (options: {
                 break;
             } else if (target.classList.contains("b3-list-item") &&
                 target.getAttribute("data-type") !== "searchFileItem" && !isLoading) {
+                historySnapshots.select(target.getAttribute("data-created"));
                 getHistoryPath(target, opElement.value, options.id, (item) => {
                     const dataPath = item.path;
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
                     }, (response) => {
+                        if (!target.isConnected || !historyEditor) {
+                            isLoading = false;
+                            return;
+                        }
                         if (response.data.isLargeDoc) {
                             mdElement.value = response.data.content;
                             mdElement.classList.remove("fn__none");
@@ -510,22 +542,4 @@ export const openDocHistory = (options: {
     });
     resizeSide(fileElement.querySelector(".history__resize"), fileElement.querySelector(".history__side"), "sideDocWidth");
     resizeSide(repoElement.querySelector(".history__resize"), repoElement.querySelector(".history__side"), "sideDocWidth");
-};
-
-const getHistoryPath = (target: Element, op: string, id: string, cb: (item: any) => void) => {
-    isLoading = true;
-    const path = target.getAttribute("data-path");
-    if (path) {
-        cb(path);
-    }
-    const created = target.getAttribute("data-created");
-    historyEditor.protyle.options.history.created = created;
-    fetchPost("/api/history/getHistoryItems", {
-        query: id,
-        op,
-        type: 3,
-        created
-    }, (response) => {
-        cb(response.data.items[0]);
-    });
 };

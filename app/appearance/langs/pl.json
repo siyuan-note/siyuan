@@ -1,4 +1,7 @@
 {
+	"historySnapshots": "Powiązane oznaczone migawki",
+	"historySnapshotsError": "Nie można wczytać powiązanych migawek",
+	"historySnapshotMissing": "Ta migawka nie jest już dostępna",
 	"autoDirection": "Automatyczny kierunek tekstu",
 	"autoDirectionTip": "Wykrywaj kierunek akapitów i nagłówków na podstawie pierwszego znaku o silnej kierunkowości; kierunek ustawiony ręcznie ma pierwszeństwo",
 	"cardFullRowTip": "Pole główne zawsze zajmuje cały wiersz; ukryj nazwy pól, aby rozmieścić pozostałe pola w sposób zwarty",

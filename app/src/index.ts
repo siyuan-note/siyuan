@@ -1,4 +1,5 @@
 import {Constants} from "./constants";
+import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
 import {systemConfig} from "./config/systemConfig";
 import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
 /// #if BROWSER
@@ -197,6 +198,7 @@ export class App {
                             break;
                         case "closeBox":
                         case "removeBox":
+                            closeNotebookHistoryDialogs(data.data.box);
                             removeBlockPanelEditors({notebookId: data.data.box});
                             getAllTabs().forEach((tab) => {
                                 if (tab.headElement) {

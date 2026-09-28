@@ -1,4 +1,5 @@
 import {onWindowWorkspaceStorageChanged} from "./workspace";
+import {closeNotebookHistoryDialogs} from "../history/notebookDialogs";
 import {Constants} from "../constants";
 import {systemConfig} from "../config/systemConfig";
 import {Menus} from "../menus";
@@ -154,6 +155,7 @@ class App {
                                 break;
                             case "closeBox":
                             case "removeBox":
+                                closeNotebookHistoryDialogs(data.data.box);
                                 removeBlockPanelEditors({notebookId: data.data.box});
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {

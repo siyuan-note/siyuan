@@ -5,6 +5,18 @@ import (
 	"testing"
 )
 
+func TestDocHistorySnapshotsContract(t *testing.T) {
+	request, err := GetDocHistorySnapshots.Decode(strings.NewReader(`{"id":" 20260928100000-abcdefg ","created":["123"]}`))
+	if err != nil || request.ID != "20260928100000-abcdefg" || request.Op != "" || len(request.Created) != 1 {
+		t.Fatalf("unexpected request: %+v %v", request, err)
+	}
+	for _, body := range []string{`{}`, `{"id":"doc","created":null}`, `{"id":"doc","created":[null]}`, `{"id":"doc","created":[1]}`, `{"id":"doc","created":[],"op":false}`} {
+		if _, err = GetDocHistorySnapshots.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid request accepted: %s", body)
+		}
+	}
+}
+
 func TestHistoryItemsRequestCompatibility(t *testing.T) {
 	request, err := GetHistoryItems.Decode(strings.NewReader(`{"created":" time ","query":" query ","notebook":null,"op":" op ","type":1.9}`))
 	if err != nil || request.Created != "time" || request.Query != " query " || request.Notebook != "" || request.Op != " op " || request.Type == nil || *request.Type != 1.9 {

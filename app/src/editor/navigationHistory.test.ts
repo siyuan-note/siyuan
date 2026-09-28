@@ -14,7 +14,7 @@ const compiled = transpileModule(declarations.map(item => item.getText(source).r
 }).outputText;
 
 const setup = () => {
-    const records: {protyle: any, range: any}[] = [];
+    const records: {protyle: any, range: any, block: any}[] = [];
     const context: any = {
         hasClosestByClassName: () => true,
         window: {siyuan: {config: {fileTree: {alwaysSelectOpenedFile: false}}}},
@@ -25,7 +25,7 @@ const setup = () => {
             }),
         },
         getContenteditableElement: (block: unknown) => block,
-        pushBack: (protyle: unknown, range: unknown) => records.push({protyle, range}),
+        pushBack: (protyle: unknown, range: unknown, block: unknown) => records.push({protyle, range, block}),
         forEachPluginSubscriber: () => {},
         getAllModels: () => ({}),
         updateOutline: () => {},
@@ -69,6 +69,28 @@ test("history restoration and preview tab switches do not create history entries
     assert.equal(records.length, 0);
 });
 
+test("a saved title selection records the document without resolving it as a body block", () => {
+    const {records, protyle, block, update} = setup();
+    const title = {contains: (node: unknown) => node === block};
+    Object.assign(protyle, {title: {editElement: title}});
+    protyle.toolbar.range = {startContainer: block, endContainer: block};
+    update();
+    assert.equal(records.length, 1);
+    assert.equal(records[0].block, title);
+    assert.equal(records[0].range, protyle.toolbar.range);
+});
+
+test("a noneditable first block still records document navigation through the title", () => {
+    const {records, protyle, context, update} = setup();
+    const title = {};
+    Object.assign(protyle, {title: {editElement: title}});
+    context.getContenteditableElement = (): undefined => undefined;
+    update();
+    assert.equal(records.length, 1);
+    assert.equal(records[0].block, title);
+    assert.equal(records[0].range.startContainer, title);
+});
+
 test("tablet links to an already loaded block record the destination instead of a stale caret", () => {
     const {context, records, protyle, block} = setup();
     const target = {clientHeight: 20, contains: () => false};
@@ -89,67 +111,71 @@ test("tablet links to an already loaded block record the destination instead of 
 });
 
 for (const fromFileTree of [false, true]) {
-    test(`tablet ${fromFileTree ? "file tree opens" : "tab switches"} navigate A B C backward and forward without touching the editor`, async () => {
-        const {context} = setup();
-        const historySource = createSourceFile("backForward.ts", readFileSync("src/util/backForward.ts", "utf8"), ScriptTarget.ES2021, true);
-        const names = ["pushBack", "goBack", "goForward", "forwardStack", "previousIsBack"];
-        const declarations = historySource.statements.filter(statement => isVariableStatement(statement) &&
-            statement.declarationList.declarations.some(item => names.includes(item.name.getText(historySource))));
-        const history = declarations.map(item => item.getText(historySource).replace(/^export /, "")).join("\n");
-        const stacks: any[] = [];
-        const visited: string[] = [];
-        context.window.siyuan.backStack = stacks;
-        context.document.contains = () => true;
-        context.document.querySelector = (): undefined => undefined;
-        context.Constants = {SIZE_UNDO: 128};
-        context.readingPositions = new WeakMap();
-        context.saveBackScroll = () => {};
-        context.hasClosestBlock = (node: unknown) => node;
-        context.getSelectionOffset = () => ({start: 0, end: 0});
-        context.isPhablet = () => true;
-        context.preventScroll = () => {};
-        const switchTab = (protyle: unknown, pushBackStack: boolean) => context.update({
-            protyle, focus: false, pushBackStack, resize: false, reload: false,
-        });
-        context.focusStack = async (_app: unknown, stack: any) => {
-            visited.push(stack.protyle.block.rootID);
-            switchTab(stack.protyle, false);
-            return true;
-        };
-        runInNewContext(transpileModule(history + "\nglobalThis.back = goBack; globalThis.forward = goForward;", {
-            compilerOptions: {target: ScriptTarget.ES2021},
-        }).outputText, context);
-        const tabs = ["A", "B", "C"].map(id => {
-            const block = {getAttribute: () => id + "-block", classList: {contains: () => false}};
-            return {
-                model: {}, block: {rootID: id}, path: "/" + id + ".sy",
-                element: {classList: {contains: () => false}, contains: (node: unknown) => node === block},
-                toolbar: {}, wysiwyg: {element: {firstElementChild: block, querySelectorAll: () => []}},
-                preview: {element: {classList: {contains: () => true}}},
+    for (const emptyLastDocument of [false, true]) {
+        test(`tablet ${fromFileTree ? "file tree opens" : "tab switches"} navigate backward and forward with empty last document ${emptyLastDocument}`, async () => {
+            const {context} = setup();
+            const historySource = createSourceFile("backForward.ts", readFileSync("src/util/backForward.ts", "utf8"), ScriptTarget.ES2021, true);
+            const names = ["pushBack", "goBack", "goForward", "forwardStack", "previousIsBack"];
+            const declarations = historySource.statements.filter(statement => isVariableStatement(statement) &&
+                statement.declarationList.declarations.some(item => names.includes(item.name.getText(historySource))));
+            const history = declarations.map(item => item.getText(historySource).replace(/^export /, "")).join("\n");
+            const stacks: any[] = [];
+            const visited: string[] = [];
+            context.window.siyuan.backStack = stacks;
+            context.document.contains = () => true;
+            context.document.querySelector = (): undefined => undefined;
+            context.Constants = {SIZE_UNDO: 128};
+            context.readingPositions = new WeakMap();
+            context.saveBackScroll = () => {};
+            context.hasClosestBlock = (node: unknown) => node;
+            context.getSelectionOffset = () => ({start: 0, end: 0});
+            context.isPhablet = () => true;
+            context.preventScroll = () => {};
+            const switchTab = (protyle: unknown, pushBackStack: boolean) => context.update({
+                protyle, focus: false, pushBackStack, resize: false, reload: false,
+            });
+            context.focusStack = async (_app: unknown, stack: any) => {
+                visited.push(stack.protyle.block.rootID);
+                switchTab(stack.protyle, false);
+                return true;
             };
+            runInNewContext(transpileModule(history + "\nglobalThis.back = goBack; globalThis.forward = goForward;", {
+                compilerOptions: {target: ScriptTarget.ES2021},
+            }).outputText, context);
+            const tabs = ["A", "B", "C", "D"].map(id => {
+                const block = {getAttribute: () => id + "-block", classList: {contains: () => false}};
+                const title = {getAttribute: (): string => undefined, classList: {contains: () => true}};
+                return {
+                    model: {}, block: {rootID: id}, path: "/" + id + ".sy",
+                    title: {editElement: title},
+                    element: {classList: {contains: () => false}, contains: (node: unknown) => node === block},
+                    toolbar: {}, wysiwyg: {element: {firstElementChild: emptyLastDocument && id === "D" ? undefined : block, querySelectorAll: () => []}},
+                    preview: {element: {classList: {contains: () => true}}},
+                };
+            });
+            const open = (protyle: typeof tabs[number]) => {
+                if (fromFileTree) {
+                    context.openExisting({
+                        editor: {protyle},
+                        parent: {headElement: {}, parent: {
+                            switchTab: (_head: unknown, pushBackStack = false) => switchTab(protyle, pushBackStack),
+                            showHeading: () => {},
+                        }},
+                    }, {id: protyle.block.rootID, rootID: protyle.block.rootID, action: ["scroll"]}, {});
+                } else {
+                    switchTab(protyle, true);
+                }
+            };
+            tabs.forEach(open);
+            open(tabs[3]);
+            assert.deepEqual(stacks.map(stack => stack.protyle.block.rootID), ["A", "B", "C", "D"]);
+            await context.back({});
+            await context.back({});
+            await context.forward({});
+            await context.forward({});
+            assert.deepEqual(visited, ["C", "B", "C", "D"]);
         });
-        const open = (protyle: typeof tabs[number]) => {
-            if (fromFileTree) {
-                context.openExisting({
-                    editor: {protyle},
-                    parent: {headElement: {}, parent: {
-                        switchTab: (_head: unknown, pushBackStack = false) => switchTab(protyle, pushBackStack),
-                        showHeading: () => {},
-                    }},
-                }, {id: protyle.block.rootID, rootID: protyle.block.rootID, action: ["scroll"]}, {});
-            } else {
-                switchTab(protyle, true);
-            }
-        };
-        tabs.forEach(open);
-        open(tabs[2]);
-        assert.deepEqual(stacks.map(stack => stack.protyle.block.rootID), ["A", "B", "C"]);
-        await context.back({});
-        await context.back({});
-        await context.forward({});
-        await context.forward({});
-        assert.deepEqual(visited, ["B", "A", "B", "C"]);
-    });
+    }
 }
 
 const restoreClosedHistoryEntry = async (disabled: boolean, readingPosition?: IScrollAttr, encrypted = false) => {

@@ -424,10 +424,19 @@ const pushBackByEditor = (protyle: IProtyle, block?: Element) => {
     const range = protyle.toolbar.range;
     const container = block || protyle.element;
     if (range && container.contains(range.startContainer) && container.contains(range.endContainer)) {
+        if (!block && protyle.title?.editElement?.contains(range.startContainer) &&
+            protyle.title.editElement.contains(range.endContainer)) {
+            block = protyle.title.editElement;
+        }
         pushBack(protyle, range, block);
     } else {
         block = block || protyle.wysiwyg.element.firstElementChild;
-        const editable = block && getContenteditableElement(block);
+        let editable = block && getContenteditableElement(block);
+        if (!editable) {
+            // 空正文或不可编辑的首块仍需记录文档导航，使用标题作为定位入口。
+            block = protyle.title?.editElement;
+            editable = block;
+        }
         if (editable) {
             const initialRange = document.createRange();
             initialRange.selectNodeContents(editable);

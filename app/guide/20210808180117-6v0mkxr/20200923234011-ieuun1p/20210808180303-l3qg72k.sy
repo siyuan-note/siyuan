@@ -82,7 +82,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", enable Mind map block to find a whole mind map by its node text in block reference and embed suggestions. In global search, select Mind map block in Search type. Mind map item can be enabled separately to find individual branches. Mind map block is enabled by default; Mind map item is disabled by default. Older search configurations inherit these options from the global search settings, while explicit choices are preserved."
+					"Data": ", enable Mind map block to find a whole mind map by its node text in block reference and embed suggestions. In global search, select Mind map block in Search type. Mind map item block can be enabled separately to find individual branches. Mind map block is enabled by default; Mind map item block is disabled by default. Older search configurations inherit these options from the global search settings, while explicit choices are preserved."
 				}
 			]
 		},

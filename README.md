@@ -114,7 +114,7 @@ Some features are only available to paid members, for more details please refer 
 
 ## 🏗️ Architecture and Ecosystem
 
-![SiYuan Arch](screenshots/SiYuan_Arch.png "SiYuan Arch")
+![SiYuan Arch](screenshots/SiYuan_Arch.svg "SiYuan Arch")
 
 | Project                                                  | Description           | Forks                                                                           | Stars                                                                                | 
 |----------------------------------------------------------|-----------------------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|

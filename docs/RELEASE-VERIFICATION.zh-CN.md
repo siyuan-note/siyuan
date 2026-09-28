@@ -70,7 +70,7 @@ git push origin v3.8.6-beta.1
 python -X utf8 scripts/prepare-release.py 3.8.6
 ```
 
-脚本更新本文版本示例（包括下载地址）、内核、前端、Appx、Android 和鸿蒙版本。检查计划中的版本和路径后，选择以下一种方式执行。
+脚本更新本文版本示例（包括下载地址）、内核、前端、Appx、Android、鸿蒙和 `b3log-index` 官网版本。版本准备阶段即需准备好 `b3log-index`。检查计划中的版本和路径后，选择以下一种方式执行。
 
 仅修改文件，留待人工检查和提交：
 
@@ -85,7 +85,7 @@ python -X utf8 scripts/prepare-release.py 3.8.6 --publish
 python -X utf8 scripts/prepare-release.py 3.8.6 --publish --execute
 ```
 
-`--publish` 会提交并推送主仓库、Android、鸿蒙的全部已跟踪改动，创建并推送 Android 标签，并更新、构建和推送官网。执行前处理未跟踪文件并确认各仓库分支；官网服务器在安装包发布并验证后部署。参数及失败处理见[发布准备脚本说明](#发布准备脚本说明)。
+`--publish --execute` 会先完成版本准备，再提交并推送主仓库、Android、鸿蒙的全部已跟踪改动，创建并推送 Android 标签，并构建、校验、提交和推送官网。执行前处理未跟踪文件并确认各仓库分支；官网服务器在安装包发布并验证后部署。参数及失败处理见[发布准备脚本说明](#发布准备脚本说明)。
 
 如果各仓库已手动提交并推送，可仅在 Android 当前提交版本匹配且工作区干净时创建本地标签，然后自行推送：
 
@@ -240,7 +240,8 @@ python -X utf8 scripts/clean-release.py --execute
 - 必须传入目标正式版版本号，脚本将内核 `Mode` 设置为 `prod`，同步各端版本，并依据文档顶部的 `release-version` 标记更新示例；请保留该标记
 - Android、鸿蒙版本名称变化时版本代码各加一，同版本重复执行不再递增；可用 `--android-code`、`--harmony-code` 显式指定
 - `--publish` 推送各仓库当前分支，不自动切换分支；远端分支必须是本地 HEAD 的祖先，未跟踪文件须先人工处理，不强推或覆盖已有标签
-- 官网更新 `src/siyuan/src/version.pug`，在 `b3log-index/src/siyuan` 执行 `pnpm install --frozen-lockfile` 和 `pnpm run build`，检查中英文页面后提交版本文件和编译页面；官网工程的 `package.json` 版本不修改
+- `--execute` 在版本准备阶段更新官网 `src/siyuan/src/version.pug`，不构建或推送官网；官网工程的 `package.json` 版本不修改
+- `--publish --execute` 完成版本准备后，在 `b3log-index/src/siyuan` 执行 `pnpm install --frozen-lockfile` 和 `pnpm run build`，检查中英文页面后提交并推送版本文件和编译页面
 - 官网仅允许版本文件和编译页面存在改动，允许新增编译页面；构建或校验失败时保留文件供排查，内容不变时不创建空提交
 - 跨仓库发布不是原子操作，失败后检查已完成步骤，再重跑同一命令；已公开版本需要修改内容时使用新的版本号
 

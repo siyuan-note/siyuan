@@ -22,9 +22,10 @@ class PrepareTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.args = argparse.Namespace(repo=self.root / "main", android_dir=self.root / "android",
-                                       harmony_dir=self.root / "harmony", version="3.8.6",
+                                       harmony_dir=self.root / "harmony", index_dir=self.root / "index", version="3.8.6",
                                        android_code=None, harmony_code=None, execute=True)
         files = {
+            self.args.index_dir / prepare.INDEX_VERSION_FILE: '- const siyuanVersion = "3.8.5"\r\n',
             self.args.repo / "app/package.json": '{"version": "3.8.5"}\r\n',
             self.args.repo / "kernel/util/working.go": 'var Mode = "dev"\r\nconst Ver = "3.8.5"\r\n',
             self.args.repo / "docs/RELEASE-VERIFICATION.zh-CN.md":
@@ -40,9 +41,10 @@ class PrepareTests(unittest.TestCase):
 
     def test_versions_and_document_update_idempotently(self):
         changes = prepare.plan(self.args)
-        self.assertEqual(len(changes), 7)
+        self.assertEqual(len(changes), 8)
         prepare.apply(changes)
         self.assertEqual(prepare.plan(self.args), [])
+        self.assertIn('"3.8.6"', prepare.read(self.args.index_dir / prepare.INDEX_VERSION_FILE))
         self.assertIn('Mode = "prod"', prepare.read(self.args.repo / "kernel/util/working.go"))
         self.assertIn('siyuanVersionCode = 399', prepare.read(self.args.android_dir / "build.gradle"))
         self.assertIn('1000097', prepare.read(self.args.harmony_dir / "AppScope/app.json5"))
@@ -129,10 +131,23 @@ class PrepareTests(unittest.TestCase):
 
     def test_dry_run_does_not_write(self):
         argv = ["prepare-release.py", "3.8.6", "--repo", str(self.args.repo),
-                "--android-dir", str(self.args.android_dir), "--harmony-dir", str(self.args.harmony_dir)]
+                "--android-dir", str(self.args.android_dir), "--harmony-dir", str(self.args.harmony_dir),
+                "--index-dir", str(self.args.index_dir)]
         with patch.object(prepare.sys, "argv", argv), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(prepare.main(), 0)
         self.assertIn('"3.8.5"', prepare.read(self.args.repo / "app/package.json"))
+        self.assertIn('"3.8.5"', prepare.read(self.args.index_dir / prepare.INDEX_VERSION_FILE))
+
+    def test_execute_prepares_index_without_build_or_publish(self):
+        argv = ["prepare-release.py", "3.8.6", "--execute", "--repo", str(self.args.repo),
+                "--android-dir", str(self.args.android_dir), "--harmony-dir", str(self.args.harmony_dir),
+                "--index-dir", str(self.args.index_dir)]
+        with patch.object(prepare.sys, "argv", argv), patch.object(prepare, "build_index") as build, \
+                patch.object(prepare, "git") as git, contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(prepare.main(), 0)
+        self.assertIn('"3.8.6"', prepare.read(self.args.index_dir / prepare.INDEX_VERSION_FILE))
+        build.assert_not_called()
+        git.assert_not_called()
 
 
 class PublishCommandTests(unittest.TestCase):
@@ -149,7 +164,7 @@ class PublishCommandTests(unittest.TestCase):
                         patch.object(prepare, "publish") as publish, \
                         patch.object(prepare, "publish_index") as index, contextlib.redirect_stdout(io.StringIO()):
                     self.assertEqual(prepare.main(), 0)
-                index_plan.assert_called_once()
+                index_plan.assert_not_called()
                 preflight.assert_called_once()
                 index.assert_called_once()
                 self.assertEqual(index.call_args.args[0].execute, execute)
@@ -198,6 +213,7 @@ class IndexPublishTests(unittest.TestCase):
                             encoding="utf-8")
 
     def test_publish_and_retry(self):
+        prepare.apply(prepare.index_plan(self.args))
         with patch.object(prepare, "build_index", side_effect=self.build), contextlib.redirect_stdout(io.StringIO()):
             prepare.publish_index(self.args)
             head = prepare.git(self.repo, "rev-parse", "HEAD")
@@ -215,6 +231,7 @@ class IndexPublishTests(unittest.TestCase):
         self.assertIn("3.8.4", prepare.read(self.repo / prepare.INDEX_VERSION_FILE))
 
     def test_build_failure_does_not_commit_or_push(self):
+        prepare.apply(prepare.index_plan(self.args))
         head = prepare.git(self.repo, "rev-parse", "HEAD")
         with patch.object(prepare, "build_index", side_effect=prepare.PreparationError("build failed")), \
                 contextlib.redirect_stdout(io.StringIO()), self.assertRaises(prepare.PreparationError):

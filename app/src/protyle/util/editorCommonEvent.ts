@@ -287,7 +287,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     let targetPreviousID: string;
     // 聚焦视图首块的前一个同级块可能未渲染，必须从文档树取得真实位置。
     if (position === "beforebegin" && !getPreviousBlockSibling(targetElement) &&
-        getParentBlock(targetElement) === protyle.wysiwyg.element && protyle.block.showAll === false) {
+        getParentBlock(targetElement) === protyle.wysiwyg.element && protyle.block.showAll) {
         const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
             id: targetId,
             notebook: protyle.notebookId,

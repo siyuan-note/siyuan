@@ -61,7 +61,9 @@ const cases = async (source) => {
     const constants = {ZWSP: "\u200b", SIYUAN_DROP_BLOCK: "application/siyuan-block", SIYUAN_DROP_GUTTER: "application/siyuan-gutter"};
     const protyle = {lute, wysiwyg: {element: root}, notebookId: "notebook", block: {rootID: "doc"}};
     window.siyuan = {config: {system: {workspaceDir: "workspace"}}};
+    let relevantIDRequests = 0;
     const fetchSyncPost = async (url, data) => {
+        relevantIDRequests++;
         check.equal(url, "/api/block/getBlockRelevantIDs");
         check.equal(data.id, root.firstElementChild.dataset.nodeId);
         check.equal(data.notebook, "notebook");
@@ -175,19 +177,40 @@ const cases = async (source) => {
     check.equal(layoutTabs.firstElementChild, header);
     check.equal(layoutTabs.querySelectorAll(":scope > .tabs-header").length, 1);
     destroyTabsRender(root);
-    for (const copy of [false, true]) {
-        root.innerHTML = lute.Md2BlockDOM("## Focus\n\nFirst\n\nSecond");
-        protyle.block.showAll = false;
-        const heading = root.firstElementChild;
-        const moving = Array.from(root.children).slice(1);
-        const focusedMove = await moveTo(protyle, moving, heading, true, "beforebegin", copy);
-        const placements = focusedMove.doOperations.filter(op => op.action === (copy ? "insert" : "move"));
-        check.equal(placements.length, 2);
-        check.equal(placements[0].previousID, "outside-focus");
-        check.equal(placements[1].previousID, "outside-focus");
-        check.equal(root.children[2], heading);
-        if (!copy) {
-            check.equal(focusedMove.undoOperations[0].previousID, heading.dataset.nodeId);
+    for (const focused of [true, false]) {
+        for (const count of [1, 2]) {
+            for (const copy of [false, true]) {
+                root.innerHTML = lute.Md2BlockDOM(count === 1 ? "## 222\n\n333" : "## 222\n\n333\n\n444");
+                // 聚焦加载包含 CB_GET_ALL，因此 showAll 为 true。
+                protyle.block.showAll = focused;
+                const heading = root.firstElementChild;
+                const moving = Array.from(root.children).slice(1);
+                stored.innerHTML = (focused ? '<div data-node-id="outside-focus">111</div>' : "") + root.innerHTML;
+                const storedIDs = () => Array.from(stored.children).map(node => node.dataset.nodeId);
+                const originalIDs = storedIDs();
+                const requestsBefore = relevantIDRequests;
+                const focusedMove = await moveTo(protyle, moving, heading, true, "beforebegin", copy);
+                const placements = focusedMove.doOperations.filter(op => op.action === (copy ? "insert" : "move"));
+                check.equal(relevantIDRequests - requestsBefore, focused ? 1 : 0);
+                check.equal(placements.length, count);
+                placements.forEach(op => check.equal(op.previousID, focused ? "outside-focus" : undefined));
+                check.equal(root.children[count], heading);
+                if (!copy) {
+                    check.equal(focusedMove.undoOperations[0].previousID, heading.dataset.nodeId);
+                }
+                const expectedIDs = [
+                    ...(focused ? ["outside-focus"] : []),
+                    ...placements.map(op => op.id).reverse(),
+                    heading.dataset.nodeId,
+                    ...(copy ? moving.map(node => node.dataset.nodeId) : []),
+                ];
+                replay(focusedMove.doOperations);
+                check.deepEqual(storedIDs(), expectedIDs);
+                replay(focusedMove.undoOperations);
+                check.deepEqual(storedIDs(), originalIDs);
+                replay(focusedMove.doOperations);
+                check.deepEqual(storedIDs(), expectedIDs);
+            }
         }
     }
     root.remove();

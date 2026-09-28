@@ -25,6 +25,8 @@ import (
 )
 
 type Search struct {
+	Mindmap     *bool `json:"mindmap"`
+	MindmapItem *bool `json:"mindmapItem"`
 	CustomBlock *bool `json:"customBlock"`
 
 	Document      bool `json:"document"`
@@ -73,6 +75,8 @@ type Search struct {
 
 func NewSearch() *Search {
 	return &Search{
+		Mindmap:       new(true),
+		MindmapItem:   new(false),
 		CustomBlock:   new(true),
 		Document:      true,
 		Heading:       true,
@@ -163,8 +167,24 @@ func (s *Search) CustomBlockEnabled() bool {
 	return s.CustomBlock == nil || *s.CustomBlock
 }
 
+// MindmapEnabled 为缺少新字段的配置启用思维导图搜索。
+func (s *Search) MindmapEnabled() bool {
+	return s.Mindmap == nil || *s.Mindmap
+}
+
+// MindmapItemEnabled 仅在显式开启时搜索思维导图项。
+func (s *Search) MindmapItemEnabled() bool {
+	return s.MindmapItem != nil && *s.MindmapItem
+}
+
 func (s *Search) TypeFilter() string {
 	buf := bytes.Buffer{}
+	if s.MindmapEnabled() {
+		buf.WriteString("'mindmap',")
+	}
+	if s.MindmapItemEnabled() {
+		buf.WriteString("'mindmap_item',")
+	}
 	if s.Document {
 		buf.WriteByte('\'')
 		buf.WriteString(treenode.TypeAbbr(ast.NodeDocument.String()))

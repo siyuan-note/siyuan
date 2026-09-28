@@ -20991,6 +20991,12 @@
         "mathBlock": {
           "type": "boolean"
         },
+        "mindmap": {
+          "type": "boolean"
+        },
+        "mindmapItem": {
+          "type": "boolean"
+        },
         "paragraph": {
           "type": "boolean"
         },
@@ -21171,6 +21177,26 @@
           ]
         },
         "mathBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mindmap": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mindmapItem": {
           "anyOf": [
             {
               "type": "boolean"
@@ -40081,6 +40107,26 @@
             }
           ]
         },
+        "mindmap": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mindmapItem": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "name": {
           "anyOf": [
             {
@@ -44219,6 +44265,26 @@
         "memo": {
           "type": "boolean"
         },
+        "mindmap": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mindmapItem": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "name": {
           "type": "boolean"
         },
@@ -44283,6 +44349,8 @@
         "listItem",
         "mathBlock",
         "memo",
+        "mindmap",
+        "mindmapItem",
         "name",
         "paragraph",
         "superBlock",

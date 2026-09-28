@@ -1607,6 +1607,10 @@ declare namespace Config {
         callout: boolean;
         tabs?: boolean;
         tabItem?: boolean;
+        /** 思维导图搜索；缺省时默认开启，更新设置时省略则保留当前值 */
+        mindmap?: boolean;
+        /** 思维导图项搜索；缺省时默认关闭，更新设置时省略则保留当前值 */
+        mindmapItem?: boolean;
         customBlock?: boolean;
         /**
          * Whether to distinguish between uppercase and lowercase letters when searching
@@ -2833,6 +2837,10 @@ declare namespace Config {
         callout: boolean;
         tabs?: boolean;
         tabItem?: boolean;
+        /** 思维导图搜索；旧配置继承全局设置，初始默认开启 */
+        mindmap?: boolean;
+        /** 思维导图项搜索；旧配置继承全局设置，初始默认关闭 */
+        mindmapItem?: boolean;
         customBlock?: boolean;
         /**
          * Search results contain code blocks

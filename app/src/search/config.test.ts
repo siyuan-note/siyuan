@@ -35,6 +35,27 @@ import {
 } from "./config";
 
 describe("search request configuration", () => {
+    it("defaults legacy mind map filters and preserves explicit choices", () => {
+        const types = {...getDefaultType()};
+        delete types.mindmap;
+        delete types.mindmapItem;
+        assert.equal(buildSearchRequest({types}).types.mindmap, true);
+        assert.equal(buildSearchRequest({types}).types.mindmapItem, false);
+        window.siyuan.config.search.mindmap = false;
+        window.siyuan.config.search.mindmapItem = true;
+        try {
+            assert.equal(buildSearchRequest({types}).types.mindmap, false);
+            assert.equal(buildSearchRequest({types}).types.mindmapItem, true);
+            const explicit = buildSearchRequest({types: {...types, mindmap: true, mindmapItem: false}});
+            assert.equal(explicit.types.mindmap, true);
+            assert.equal(explicit.types.mindmapItem, false);
+            assert.equal(getDefaultType().mindmap, false);
+            assert.equal(getDefaultType().mindmapItem, true);
+        } finally {
+            delete window.siyuan.config.search.mindmap;
+            delete window.siyuan.config.search.mindmapItem;
+        }
+    });
     it("defaults legacy custom block filters and preserves explicit choices", () => {
         const types: Config.IUILayoutTabSearchConfigTypes = {...getDefaultType()};
         delete types.customBlock;
@@ -93,7 +114,7 @@ describe("search request configuration", () => {
         assert.deepEqual(buildSearchRequest({...config, hasReplace: true}), {...search, searchHPath: false});
         assert.equal(search.query, "ancestor");
         assert.deepEqual(search.paths, config.idPath);
-        assert.deepEqual(search.types, {...config.types, customBlock: true});
+        assert.deepEqual(search.types, {...config.types, mindmap: true, mindmapItem: false, customBlock: true});
         assert.equal(search.groupBy, 1);
         assert.equal(search.orderBy, 2);
         assert.equal(search.page, 3);

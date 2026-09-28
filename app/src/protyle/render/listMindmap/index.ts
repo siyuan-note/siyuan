@@ -110,14 +110,24 @@ class ListMindmapController {
         this.host.className = "mindmap-view";
         syncListMindmapHeight(list, this.host);
         this.host.contentEditable = "false";
-        this.host.addEventListener("pointermove", event => {
-            if (event.pointerType !== "mouse" || event.buttons || !owner.options.render.gutter ||
+        const renderGutter = (event: PointerEvent) => {
+            if (!owner.options.render.gutter ||
                 !owner.gutter || this.host.classList.contains("fullscreen") ||
                 (event.target as Element).closest(".mindmap-view__editor, .protyle-toolbar, .protyle-util")) {
                 return;
             }
-            // 脑图内部的鼠标事件不冒泡到编辑器，块标仍定位到原列表块。
+            // 脑图内部的指针事件不冒泡到编辑器，块标仍定位到原列表块。
             owner.gutter.render(owner, list, this.host);
+        };
+        this.host.addEventListener("pointermove", event => {
+            if (event.pointerType === "mouse" && !event.buttons) {
+                renderGutter(event);
+            }
+        });
+        this.host.addEventListener("pointerup", event => {
+            if (event.pointerType !== "mouse" && event.isPrimary) {
+                renderGutter(event);
+            }
         });
         this.host.addEventListener("pointerdown", event => {
             const target = event.target as HTMLElement;

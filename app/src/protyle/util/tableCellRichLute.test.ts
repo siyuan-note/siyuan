@@ -533,7 +533,8 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const hint = createSourceFile("hint.ts", read("../hint/index.ts"), ScriptTarget.Latest, true);
     const hintClass = hint.statements.find(isClassDeclaration);
     const fill = hintClass.members.find(member => isMethodDeclaration(member) && member.name.getText(hint) === "fill");
-    const hintSource = compile("const isProtyleListItemFragment = () => false; class Hint {" + fill.getText(hint) + "}");
+    const hintSource = compile(read("../../block/superBlock.ts") +
+        "\nconst isProtyleListItemFragment = () => false; class Hint {" + fill.getText(hint) + "}");
     const editor = read("../render/tableCellRichEditor.ts");
     const start = editor.indexOf('host.addEventListener("keydown", event => {');
     const end = editor.indexOf("}, {capture: true, signal});", start) + "}, {capture: true, signal});".length;

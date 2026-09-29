@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {isProtyleListItemFragment, registerProtyleRuntimeCapabilities} from "../../runtimeCapabilities";
 
 const source = createSourceFile("index.ts", readFileSync("src/protyle/render/listMindmap/index.ts", "utf8"),
     ScriptTarget.ES2021, true);
@@ -30,6 +31,7 @@ const setup = () => {
     const updates: string[] = [];
     const context: any = {
         Constants: {CB_GET_HISTORY: "history", CUSTOM_SY_LIST_MINDMAP: attribute},
+        isProtyleListItemFragment,
         roots: new WeakMap(), hideElements: () => {}, readListMindmap: () => {},
         cleanListMindmapHTML: (html: string) => html,
         retagMindmapBranch: (_element: Element, toMindmap: boolean) => {
@@ -91,6 +93,20 @@ test("read-only, history and lightweight editors cannot persist embedded view ch
         }
         api.toggleListMindmap(owner, list);
         assert.equal(operations.length, 0);
+    }
+});
+
+test("list item fragments can persist embedded view changes unless disabled or showing history", () => {
+    for (const mode of ["editable", "disabled", "history"]) {
+        const {owner, list, operations, api} = setup();
+        owner.lite = true;
+        registerProtyleRuntimeCapabilities(owner as unknown as IProtyle, {listItemFragment: true});
+        owner.disabled = mode === "disabled";
+        if (mode === "history") {
+            owner.options.action.push("history");
+        }
+        api.toggleListMindmap(owner, list);
+        assert.equal(operations.length, mode === "editable" ? 1 : 0);
     }
 });
 

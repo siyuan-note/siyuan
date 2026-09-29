@@ -23,7 +23,7 @@ const setup = () => {
     let cancelled = 0;
     Object.assign(target, {
         scale: 1, offsetX: 0, offsetY: 0, pinching: false,
-        viewport: {contains: (element: {outside?: boolean}) => !element.outside,
+        viewport: {contains: (element: {outside?: boolean} | null) => !!element && !element.outside,
             getBoundingClientRect: () => ({left: 10, top: 20})},
         cancelPointer: () => { cancelled++; target.pendingPointerId = undefined; },
         boundedPan: (x: number, y: number) => ({x, y}), draw: () => {},
@@ -32,7 +32,7 @@ const setup = () => {
 };
 
 const touch = (clientX: number, clientY = 120, excluded = false, outside = false) => ({
-    clientX, clientY, target: {closest: () => excluded, outside},
+    clientX, clientY, target: {closest: () => excluded ? {} : null, outside},
 });
 const event = (...touches: ReturnType<typeof touch>[]) => ({touches, preventDefault() {}});
 

@@ -186,7 +186,7 @@ const runElectron = async () => {
     let exitCode = 0;
     try {
         const ts = require("typescript");
-        const sources = Object.fromEntries(["cell", "cellValue", "attributeValue", "relationLayout"].map(name => ["./" + name,
+        const sources = Object.fromEntries(["cell", "cellValue", "attributeValue", "blockIcon", "relationLayout"].map(name => ["./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
         const relationSource = readFileSync(path.join(__dirname, "../src/protyle/render/av/relation.ts"), "utf8");
@@ -208,7 +208,9 @@ ${relationSource.slice(deselectStart, deselectEnd)} };`,
 ${relationSource.slice(positionStart, positionEnd)} return positionMenu; };`,
             {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         await win.loadURL("data:text/html,<html><body></body></html>");
-        await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)})`);
+        const failure = await win.webContents.executeJavaScript(`Promise.resolve().then(() =>
+            (${runCases.toString()})(${JSON.stringify(sources)})).then(() => null, error => error.stack || String(error))`);
+        assert.equal(failure, null);
         console.log("AV relation template cases passed");
     } catch (error) {
         console.error(error);

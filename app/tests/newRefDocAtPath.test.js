@@ -36,7 +36,7 @@ const fixture = () => {
     const protyle = {
         notebookId: "source", path: "/source.sy", block: {rootID: "sourceDoc"},
         wysiwyg: {element: {contains: node => node === text}}, toolbar: {range},
-        element: {clientWidth: 800},
+        element: {clientWidth: 800}, options: {},
     };
     const requests = [];
     const inserted = [];
@@ -202,7 +202,8 @@ test("typed and searched reference suggestions offer location selection includin
 
 const databaseFixture = (view = "table", isDetached = true) => {
     const f = fixture();
-    const cell = {isConnected: true};
+    const cell = {isConnected: true, hasAttribute: () => false};
+    f.text.parentElement = {closest: () => cell};
     const row = {dataset: {id: "original-item"}, contains: node => node === cell};
     let currentValue = {type: "block", isDetached, block: {id: isDetached ? "" : "old-doc", content: "Original"}};
     Object.assign(f.block, {

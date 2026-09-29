@@ -21,6 +21,7 @@ const fixture = (mobile = false) => {
     let modeElement: unknown;
     let toolbarCount = 0;
     let gutterRestored = 0;
+    let gutterTarget: unknown;
     const frames: FrameRequestCallback[] = [];
     const states = [new Set<string>(), new Set<string>()];
     const blocks = states.map((state, index) => ({
@@ -64,7 +65,10 @@ const fixture = (mobile = false) => {
             getBlockRangeSelectElements: () => ({selectElements: blocks}),
         },
         "../ui/hideElements": {hideElements: () => {}},
-        "../gutter/restore": {restoreGutterBySelection: () => gutterRestored++},
+        "../gutter/restore": {restoreGutterBySelection: (_protyle: unknown, block: unknown) => {
+            gutterRestored++;
+            gutterTarget = block;
+        }},
         "../../util/functions": {isMobile: () => mobile},
         "../../layout/status": {countBlockWord: () => {}},
         "../../mobile/util/multiSelectToolbar": {updateMultiSelectToolbar: (_element: unknown, count: number) => toolbarCount = count},
@@ -93,7 +97,7 @@ const fixture = (mobile = false) => {
         detach: () => blockOwned = false,
         enterMultiSelect: () => multiSelect = true,
         flushFrames: () => frames.splice(0).forEach(callback => callback(0)),
-        state: () => ({focused, modeElement, multiSelect, selectionCleared, toolbarCount, gutterRestored}),
+        state: () => ({focused, modeElement, multiSelect, selectionCleared, toolbarCount, gutterRestored, gutterTarget}),
     };
 };
 
@@ -145,6 +149,7 @@ test("desktop completion uses existing block selection and a focusable block wit
     assert.equal(f.state().gutterRestored, 0);
     f.flushFrames();
     assert.equal(f.state().gutterRestored, 1);
+    assert.equal(f.state().gutterTarget, f.blocks[1]);
 });
 
 test("mobile completion retains the multi-select toolbar and cancellation does not steal focus", () => {

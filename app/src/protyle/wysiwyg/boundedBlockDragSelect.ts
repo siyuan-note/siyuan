@@ -99,7 +99,7 @@ export const bindBoundedBlockDragSelect = (protyle: IProtyle, element: HTMLEleme
                     // 保留单块内的折叠光标，让复制、剪切和删除复用已有块选区处理。
                     focusBlock(activeBlock);
                     setBlockSelectionModeElement(element, activeBlock);
-                    requestAnimationFrame(() => restoreGutterBySelection(protyle));
+                    requestAnimationFrame(() => restoreGutterBySelection(protyle, activeBlock));
                 }
             }
             countBlockWord(selected.map(item => item.getAttribute("data-node-id")), protyle);

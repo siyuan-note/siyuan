@@ -152,7 +152,8 @@ export class LargeTableVirtualizer {
         window.addEventListener("pointerup", () => { this.interacting = false; this.dragTable = undefined; }, {capture: true, signal});
         window.addEventListener("pointercancel", () => { this.interacting = false; this.dragTable = undefined; }, {capture: true, signal});
         root.addEventListener("pointermove", event => {
-            if (event.buttons && (event.movementX || event.movementY)) {
+            // 仅处理本编辑器内开始的拖选，外部分隔条拖动经过正文时保留屏外行缓存。
+            if (this.interacting && event.buttons && (event.movementX || event.movementY)) {
                 if (!getTableCellRichEventTarget(event) && !this.dragTable?.contains(event.target as Node)) {
                     this.dragTable = undefined;
                     this.restore();

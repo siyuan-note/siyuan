@@ -130,6 +130,10 @@
     }
   }
 
+  [data-primary="true"] .b3-menu__avemoji {
+    margin-left: 0;
+  }
+
   &__avheader {
     display: flex;
     padding: 0 8px 0 40px;

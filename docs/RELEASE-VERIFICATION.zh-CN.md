@@ -318,7 +318,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.6.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
 - 鸿蒙先构建并复制 ARM64 内核，再构建并复制 x86_64 内核，避免同名 `libkernel.so` 被覆盖后拷错；使用同一份新 `app.zip`，通过 Hvigor release 模式执行 `assembleApp`，对应 DevEco Studio 的“构建 - 编译 Hap(s)/APP(s) - 编译 APP(s)”，只收集 `build/outputs/default/siyuan-harmony-default-signed.app`，缺少签名产物时失败，不收集 `unsigned.app` 或单独的 HAP
 - 每条命令失败立即停止，产物必须是本次生成，复制时再次核对摘要
-- 鸿蒙各架构内核构建后同时复制构建目录中的 `.h` 文件到对应 `entry/libs/<ABI>/`，并将 ARM64 的头文件同步到 `entry/src/main/cpp/include/`；`libkernel.h` 必须为本次生成，`lan_sync_bridge.h` 若由构建目录提供则同步，否则保留工程中维护的版本，缺少必需头文件时停止构建
+- 鸿蒙各架构的 `entry/libs/<ABI>/` 只接收 `libkernel.so`，头文件仅从 ARM64 构建目录同步到 `entry/src/main/cpp/include/`；`libkernel.h` 必须为本次生成，`lan_sync_bridge.h` 若由构建目录提供则同步，否则保留工程中维护的版本，缺少必需头文件时停止构建
 - 各平台产物生成后立即复制到桌面 `siyuan`，不覆盖同名包；最后统一检查桌面目录，失败时保留已复制的包。需要重新构建同名包时，先人工移走旧包；校验失败修复后可直接对桌面目录重跑 `verify-release.py check`。保留已有的 `SHA256SUMS.txt`，校验和清单由发布者最终手动生成
 - 构建目录保留在系统临时目录，控制台打印实际路径，失败后可检查并取回产物；不会自动提交、推送、打标签、上传或发布公告
 

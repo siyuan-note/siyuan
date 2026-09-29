@@ -558,11 +558,9 @@ class Builder:
             header = source.with_suffix(".h")
             if not header.is_file() or header.stat().st_mtime < started - 2:
                 raise BuildError(f"鸿蒙内核头文件未更新：{header}")
-            # 各架构保存配套头文件，正式版原生模块使用 ARM64 的公共头文件。
-            headers = sorted(source.parent.glob("*.h"))
-            for path in headers:
-                copy_verified(path, self.args.harmony_dir / "entry/libs" / abi / path.name, self.args.harmony_dir)
-                if architecture == "arm64":
+            # 原生模块从公共包含目录读取头文件，使用 ARM64 构建生成的版本。
+            if architecture == "arm64":
+                for path in sorted(source.parent.glob("*.h")):
                     copy_verified(path, self.args.harmony_dir / "entry/src/main/cpp/include" / path.name,
                                   self.args.harmony_dir)
         for name in ("libkernel.h", "lan_sync_bridge.h"):

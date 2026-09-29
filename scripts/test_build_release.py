@@ -230,7 +230,9 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(self.builder.artifacts[0].read_bytes(), b"signed app")
         self.assertEqual((self.args.harmony_dir / "entry/src/main/cpp/include/libkernel.h").read_bytes(), b"arm64")
         self.assertEqual((self.args.harmony_dir / "entry/src/main/cpp/include/lan_sync_bridge.h").read_bytes(), b"bridge")
-        self.assertEqual((self.args.harmony_dir / "entry/libs/x86_64/libkernel.h").read_bytes(), b"amd64")
+        for abi in ("arm64-v8a", "x86_64"):
+            self.assertEqual({path.name for path in (self.args.harmony_dir / "entry/libs" / abi).iterdir()},
+                             {"libkernel.so"})
 
     def test_harmony_rejects_unsigned_only_output(self):
         self.builder.wsl_root = self.root / "wsl"

@@ -234,7 +234,7 @@ python -X utf8 scripts/clean-release.py
 python -X utf8 scripts/clean-release.py --execute
 ```
 
-脚本清理发布脚本留下的系统临时构建目录、本地及 WSL 的 `app/build`、Linux 内核目录、鸿蒙生成的内核及头文件，以及 Android、鸿蒙工程中的构建输出和复制进去的内核、资源包。桌面 `siyuan` 始终保留；受 Git 管理的文件（包括鸿蒙公共头文件）、源码、签名配置、依赖和工具缓存、开发前端 `app/stage/build` 均保留。清理后再次打包需要重新生成内核和移动端资源包。
+脚本清理发布脚本留下的系统临时构建目录、本地及 WSL 的 `app/build`、Linux 内核目录，以及 Android、鸿蒙工程中的构建输出。保留 Android 工程中的 `app/libs/kernel.aar`、`app/src/main/assets/app.zip`，保留鸿蒙工程中的 `entry/libs/` 内核库及头文件、`entry/src/main/cpp/include/` 公共头文件和 `entry/src/main/resources/rawfile/app.zip`，同时保留本地及 WSL 的 `kernel/harmony/` 内核库及头文件。桌面 `siyuan`、受 Git 管理的文件、源码、签名配置、依赖和工具缓存、开发前端 `app/stage/build` 均保留。系统临时构建目录中的副本仍随临时目录清理，不影响移动端工程中已复制的文件。
 
 自定义过构建参数时，清理时传入相同的 `--android-dir`、`--harmony-dir`、`--wsl-distro`、`--wsl-user`、`--wsl-repo`；使用自定义收集目录时，必须同时传入 `--output` 保护该目录，使用自定义记录目录时传入相同的 `--records-dir`。默认的 `release-records` 发布记录始终保留。`--skip-wsl` 可只清理 Windows 本地。脚本拒绝越界路径、与保留目录重叠的目标以及自身或上级为链接的清理入口；构建目录内部的符号链接和目录联接只删除链接本身，不清理其指向的目录。不会清理其他电脑上的 macOS 或 iOS 构建产物。
 

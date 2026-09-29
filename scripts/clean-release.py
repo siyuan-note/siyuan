@@ -17,20 +17,16 @@ SPEC = importlib.util.spec_from_file_location("build_release", ROOT / "scripts/b
 BUILD = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(BUILD)
 
-# 只列出发布构建写入的位置，不使用 git clean，也不清理开发前端或工具缓存。
+# 只清理构建输出，保留移动端内核、资源包及头文件，不使用 git clean。
 MAIN_OUTPUTS = (
     "app/build", "app/kernel-linux", "app/kernel-linux-arm64",
-    "kernel/harmony/libkernel.so", "kernel/harmony/libkernel.h",
 )
 ANDROID_OUTPUTS = (
     "build", "app/build", "app/build-release", "app/.cxx",
-    "app/libs/kernel.aar", "app/src/main/assets/app.zip",
 )
 HARMONY_OUTPUTS = (
     "build", "entry/build", "entry/.cxx",
-    "entry/src/main/resources/rawfile/app.zip",
-) + tuple(f"entry/libs/{abi}/{name}" for abi in ("arm64-v8a", "x86_64")
-          for name in ("libkernel.so", "libkernel.h", "lan_sync_bridge.h"))
+)
 
 
 class CleanupError(Exception):

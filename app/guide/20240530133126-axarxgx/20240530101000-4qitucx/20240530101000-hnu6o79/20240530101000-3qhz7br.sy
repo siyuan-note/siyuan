@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260928143000"
+		"updated": "20260929221400"
 	},
 	"Children": [
 		{
@@ -5609,7 +5609,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260928090424-8to4vwd",
-				"updated": "20260928090424"
+				"updated": "20260929221400"
 			},
 			"Children": [
 				{
@@ -5641,7 +5641,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で有効にできます。スイッチは「右から左へ（RTL）」の下にあり、初期状態では無効です。段落と見出しの最初の強い方向性を持つ文字に基づいて、右から左または左から右を自動判定します。先頭の数字、句読点、絵文字は方向を決定しません。手動で指定したブロック単位とインラインの方向が優先されます。リスト記号の位置と表の列順序は従来の設定を維持します。プレビューおよび HTML・PDF エクスポートにも自動判定が適用されます。"
+					"Data": " で有効にできます。スイッチは「右から左へ（RTL）」の下にあり、初期状態では無効です。段落と見出しの最初の強い方向性を持つ文字に基づいて、右から左または左から右を自動判定します。先頭の数字、句読点、絵文字は方向を決定しません。手動で指定したブロック単位とインラインの方向が優先されます。入れ子の項目を含む各リスト項目は、自身の最初の本文ブロックの方向に個別に従います。チェックボックス、箇条書き記号、番号、インデントも対応する側に移動し、手動で指定したリストの方向が優先されます。表の列順序は従来の設定を維持します。プレビューおよび HTML・PDF エクスポートにも自動判定が適用されます。"
 				}
 			]
 		}

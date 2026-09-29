@@ -750,6 +750,22 @@
   ol {
     padding: revert-layer;
     margin: 4px 0;
+
+    &[data-auto-direction="list"] {
+      padding-left: 0;
+      padding-right: 0;
+
+      & > li {
+        margin-left: 2em;
+        margin-right: 0;
+      }
+
+      & > li[data-auto-list-direction="rtl"],
+      & > li[dir="rtl"] {
+        margin-left: 0;
+        margin-right: 2em;
+      }
+    }
   }
 
   hr {

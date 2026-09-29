@@ -124,6 +124,7 @@ import {
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
 import {getEmbedHeadingLevel, isHeadingEmbed, renderEmbedHeadings} from "../render/embedHeading";
 import {getBlockSelectionModeElement} from "../wysiwyg/blockSelection";
+import {getAutoListDirection} from "../render/autoDirection";
 import {
     getBacklinkGutterContentTop,
     getContainerGutterSpace,
@@ -3922,7 +3923,9 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
         // 脑图中的原始列表项已隐藏，使用可见面板定位列表块标。
         let rect = (mindmapElement || element).getBoundingClientRect();
         let marginHeight = 0;
-        const isRTL = window.siyuan.config.editor.rtl || getComputedStyle(element).direction === "rtl";
+        const autoListDirection = getAutoListDirection(element);
+        const isRTL = autoListDirection ? autoListDirection === "rtl" :
+            window.siyuan.config.editor.rtl || getComputedStyle(element).direction === "rtl";
         if (mindmapElement) {
             space = 0;
         } else if (listItem && !isRTL) {

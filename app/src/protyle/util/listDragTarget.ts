@@ -8,28 +8,39 @@ export const cleanupDragIndicators = (scope: ParentNode) => {
 };
 
 export const createListDragTarget = () => {
-    let dragCache: {node: HTMLElement, indent: number, rgb: {r: number, g: number, b: number}, guides: string};
+    let dragCache: {node: HTMLElement, rtl: boolean, indent: number, rgb: {r: number, g: number, b: number}, guides: string};
     return (htmlTarget: HTMLElement, event: Pick<DragEvent, "clientX" | "clientY">) => {
         const node = htmlTarget;
-        if (!dragCache || dragCache.node !== node) {
+        const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
+        if (!dragCache || dragCache.node !== node || dragCache.rtl !== isRTL) {
             const contentBlock = Array.from(htmlTarget.children).find(c => (c.hasAttribute("data-node-id") || c.hasAttribute("data-table-cell-node"))) as HTMLElement;
-            const indent = contentBlock ? parseFloat(getComputedStyle(contentBlock).marginLeft) || 34 : 34;
+            const indent = contentBlock ? parseFloat(getComputedStyle(contentBlock)[isRTL ? "marginRight" : "marginLeft"]) || 34 : 34;
             const depth = getListDepth(htmlTarget);
             const computedColor = getComputedStyle(htmlTarget).getPropertyValue("--b3-theme-primary-lighter").trim();
             const rgb = parseHexColor(computedColor) || {r: 53, g: 115, b: 217};
             let siblingGuides = "";
+            let ancestor = htmlTarget.parentElement?.closest<HTMLElement>(".li");
+            const rect = htmlTarget.getBoundingClientRect();
+            const anchor = isRTL ? rect.right - indent / 2 : rect.left + indent / 2;
             for (let n = 1; n <= depth; n++) {
                 if (siblingGuides) siblingGuides += ", ";
                 // guide 竖线透明度从 0.5（最近）渐变到 0.1（最远），均低于插入线（0.6）以突出目标位置
                 const opacity = depth <= 1 ? 0.3 : 0.5 - (n - 1) / (depth - 1) * 0.4;
-                siblingGuides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
+                let offset = (isRTL ? n : -n) * indent;
+                if (htmlTarget.hasAttribute("data-auto-direction") && ancestor) {
+                    // 混合方向的祖先引导线使用实际位置，避免将另一侧的层级线镜像到当前侧。
+                    const ancestorRect = ancestor.getBoundingClientRect();
+                    offset = (getComputedStyle(ancestor).direction === "rtl" ?
+                        ancestorRect.right - indent / 2 : ancestorRect.left + indent / 2) - anchor;
+                    ancestor = ancestor.parentElement?.closest<HTMLElement>(".li");
+                }
+                siblingGuides += `${offset}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
             }
-            dragCache = {node, indent, rgb, guides: siblingGuides || "none"};
+            dragCache = {node, rtl: isRTL, indent, rgb, guides: siblingGuides || "none"};
         }
         const {indent, rgb, guides} = dragCache;
 
         const liRect = htmlTarget.getBoundingClientRect();
-        const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
         const offsetX = isRTL ? (liRect.right - event.clientX) : (event.clientX - liRect.left);
         // 用内容块（不含子列表）的 rect 判断上下半，避免有子列表时下半区域过小难以命中
         const contentBlockForRect = Array.from(htmlTarget.children).find(c =>

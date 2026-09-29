@@ -7,6 +7,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -87,7 +88,7 @@ func setNewCalendarItemDate(attrView *av.AttributeView, blockID, viewID string, 
 		return fmt.Errorf("invalid calendar item date")
 	}
 	key, err := attrView.GetKey(view.Calendar.Settings.DateKeyID)
-	if nil != err || key.Type != av.KeyTypeDate {
+	if nil != err || key.Type != av.KeyTypeDate || strings.TrimSpace(key.RenderTemplate) != "" {
 		return fmt.Errorf("calendar date field is not editable")
 	}
 	values[key.ID] = &av.Value{Type: av.KeyTypeDate, KeyID: key.ID,

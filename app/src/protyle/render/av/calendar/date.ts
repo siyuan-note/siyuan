@@ -1,3 +1,5 @@
+import {parseDateValue} from "../dateFormat";
+
 export const calendarDay = (value: number | Date) => {
     const date = new Date(value);
     date.setHours(0, 0, 0, 0);
@@ -74,10 +76,40 @@ export interface ICalendarInterval {
     invalid: boolean;
 }
 
+export const isCalendarDateEditable = (field: {type?: TAVCol; renderTemplate?: string; hasRenderTemplate?: boolean}) =>
+    field?.type === "date" && !field.renderTemplate?.trim() && !field.hasRenderTemplate;
+
+// 与内核使用相同的纯文本格式，按设备本地时区解析，不改写单元格原值。
+export const getCalendarDate = (value: IAVCellValue, format: TAVDateFormat = ""): IAVCellDateValue | undefined => {
+    if (value?.type !== "date") {
+        return value?.type === "created" ? value.created : value?.type === "updated" ? value.updated : undefined;
+    }
+    if (!value.hasRenderTemplate) {
+        return value.date;
+    }
+    const content = value.renderedContent?.trim() || "";
+    const time = /[ T](\d{2}):(\d{2})(?::(\d{2}))?$/.exec(content);
+    const dateText = time ? content.slice(0, time.index) : content;
+    for (const candidate of new Set<TAVDateFormat>(["", format, "full"])) {
+        const parsed = parseDateValue(dateText, candidate);
+        if (!parsed.isNotEmpty || parsed.hasEndDate || !parsed.isNotTime) {
+            continue;
+        }
+        const date = new Date(parsed.content);
+        const [hour, minute, second] = time ? time.slice(1).map(part => Number(part || 0)) : [0, 0, 0];
+        const day = date.getDate();
+        date.setHours(hour, minute, second, 0);
+        if (date.getFullYear() < 1 || date.getDate() !== day || date.getHours() !== hour ||
+            date.getMinutes() !== minute || date.getSeconds() !== second) {
+            return;
+        }
+        return {content: date.getTime(), isNotEmpty: true, isNotTime: !time, formattedContent: content};
+    }
+};
+
 // 全天结束日期包含当天，带时间的结束端点不包含自身；缺失端点不补造时长。
-export const getCalendarInterval = (value: IAVCellValue): ICalendarInterval | undefined => {
-    const date = value?.type === "date" ? value.date : value?.type === "created" ? value.created :
-        value?.type === "updated" ? value.updated : undefined;
+export const getCalendarInterval = (value: IAVCellValue, format: TAVDateFormat = ""): ICalendarInterval | undefined => {
+    const date = getCalendarDate(value, format);
     if (!date) {
         return;
     }

@@ -137,6 +137,10 @@ func TestAttributeViewCalendarNewDateAndReadOnlySources(t *testing.T) {
 			if err != nil || !values[key.ID].Date.IsNotTime || values[key.ID].Date.Content != 1756684800000 || values["other"].Text.Content != "template" {
 				t.Fatalf("calendar creation did not merge with template: %v", err)
 			}
+			key.RenderTemplate = "2026-09-30"
+			if err = setNewCalendarItemDate(attrView, "", view.ID, 0, values); err == nil || values[key.ID].Date.Content != 1756684800000 {
+				t.Fatal("computed date source must reject rescheduling and preserve values")
+			}
 		} else if err == nil || len(values) != 1 {
 			t.Fatal("system date source must reject rescheduling")
 		}

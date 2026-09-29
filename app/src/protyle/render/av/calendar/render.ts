@@ -18,8 +18,8 @@ import {renderAVRichTextElements} from "../richText";
 import {avContextmenu} from "../action";
 import {bindAvSearch} from "../search";
 import {getAVData, getAVSelectedItemIDs, setAVData} from "../virtualScroll";
-import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarInterval, getISOWeekForCalendarRow, ICalendarEvent, ICalendarSegment,
-    moveCalendarDate, packCalendarWeek, resizeCalendarDate} from "./date";
+import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarDate, getCalendarInterval, getISOWeekForCalendarRow, ICalendarEvent, ICalendarSegment,
+    isCalendarDateEditable, moveCalendarDate, packCalendarWeek, resizeCalendarDate} from "./date";
 import {openCalendarJump} from "./jump";
 import {getCalendarDropDay} from "./hitTest";
 import {createCalendarPreviewLayout} from "./preview";
@@ -58,7 +58,7 @@ const openCalendarItem = (protyle: IProtyle, blockElement: HTMLElement, row: IAV
 const updateCalendarDate = (protyle: IProtyle, blockElement: HTMLElement,
                             event: Pick<ICalendarEvent, "row" | "date">, date: IAVCellDateValue,
                             onUpdated?: () => void) => {
-    if (event.date.value?.type !== "date" || !canEditCalendar(protyle)) {
+    if (!isCalendarDateEditable(event.date.value) || !canEditCalendar(protyle)) {
         return;
     }
     const operation = {
@@ -82,11 +82,11 @@ const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boole
         (option ? getAVBackgroundColor(option) : "");
     const dateValue = event.date.value;
     const column = view.columns.find(field => field.id === dateValue.keyID);
-    const rawDate = dateValue.type === "date" ? dateValue.date : dateValue.type === "created" ? dateValue.created : dateValue.updated;
+    const rawDate = getCalendarDate(dateValue, column?.dateFormat);
     const showTime = dateValue.type === "date" ? !rawDate.isNotTime : !!column?.[dateValue.type as "created" | "updated"]?.includeTime;
     const formatTime = (value: number) => new Date(value).toLocaleTimeString(window.siyuan.config.lang, {hour: "2-digit", minute: "2-digit"});
     const time = showTime ? formatTime(event.start) + (event.end > event.start && calendarDay(event.start) === calendarDay(event.end) ? ` - ${formatTime(event.end)}` : "") : "";
-    const drag = editable && dateValue.type === "date" && !event.invalid;
+    const drag = editable && isCalendarDateEditable(dateValue) && !event.invalid;
     const title = `${primary?.value?.block?.content || window.siyuan.languages.untitled}\n${rawDate.formattedContent || ""}${event.invalid ? `\n${window.siyuan.languages.calendarInvalidRange}` : ""}`;
     const fields = event.row.cells.map((cell, index) => {
         const field = view.columns[index];
@@ -226,7 +226,7 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
         const item = target.closest<HTMLElement>("[data-calendar-item]");
         const entry = item && events.get(item.dataset.calendarItem);
         const endpoint = target.closest<HTMLElement>("[data-calendar-resize]")?.dataset.calendarResize as "start" | "end" | undefined;
-        if (target.closest('[role="checkbox"]') || event.button !== 0 || !entry || entry.invalid || entry.date.value.type !== "date" || !canEditCalendar(protyle) ||
+        if (target.closest('[role="checkbox"]') || event.button !== 0 || !entry || entry.invalid || !isCalendarDateEditable(entry.date.value) || !canEditCalendar(protyle) ||
             event.pointerType === "touch" && !endpoint && !target.closest("[data-calendar-move]")) {
             return;
         }
@@ -282,7 +282,7 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
         }
         const item = target.closest<HTMLElement>("[data-calendar-item]");
         const entry = item && events.get(item.dataset.calendarItem);
-        if (!entry || entry.invalid || entry.date.value.type !== "date") {
+        if (!entry || entry.invalid || !isCalendarDateEditable(entry.date.value)) {
             return;
         }
         const touch = event.touches[0];
@@ -359,6 +359,8 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     const dateColumn = view.columns.find(field => field.id === view.calendar.dateKeyID && isCalendarDateColumn(field));
     state.weekStart = view.calendar.weekStart;
     state.dateType = dateColumn?.type;
+    state.dateHasTemplate = !!dateColumn?.renderTemplate?.trim();
+    const dateEditable = isCalendarDateEditable(dateColumn);
     if (view.calendarTargetDate !== undefined) {
         const current = getCalendarRequestRange(blockElement, data.viewID);
         if (view.calendarTargetDate < current.start || view.calendarTargetDate >= current.end) {
@@ -380,7 +382,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     const events: ICalendarEvent[] = [];
     view.rows.forEach((row, rowIndex) => {
         const date = row.cells.find(cell => cell.value?.keyID === dateColumn?.id);
-        const interval = getCalendarInterval(date?.value);
+        const interval = getCalendarInterval(date?.value, dateColumn?.dateFormat);
         if (interval) {
             events.push({...interval, row, date, rowIndex});
         }
@@ -412,7 +414,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
                 const date = new Date(timestamp);
                 return `<div class="av__calendar-day${date.getMonth() === anchor.getMonth() || state.mode === "week" ? "" : " av__calendar-day--outside"}${calendarDay(Date.now()) === timestamp ? " av__calendar-day--today" : ""}" data-calendar-day="${timestamp}">
                     <span title="${escapeAttr(date.toLocaleDateString(locale))}">${date.getDate() === 1 ? date.toLocaleDateString(locale, {month: "short", day: "numeric"}) : date.getDate()}</span>
-                    ${editable && dateColumn.type === "date" && date.getFullYear() >= 1 && date.getFullYear() <= 9999 ? `<button type="button" class="block__icon" data-calendar-add="${timestamp}" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></button>` : ""}
+                    ${editable && dateEditable && date.getFullYear() >= 1 && date.getFullYear() <= 9999 ? `<button type="button" class="block__icon" data-calendar-add="${timestamp}" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></button>` : ""}
                 </div>`;
             }).join("");
             const overflow = Array.from({length: 7}, (_, day) => {
@@ -433,7 +435,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             <div class="av__calendar-toolbar">
                 <span class="av__calendar-label">${escapeHtml(label)}</span>
                 <div class="av__calendar-controls">
-                ${editable && dateColumn?.type === "date" ? `<button type="button" class="block__icon block__icon--show ariaLabel${hasUndated ? "" : " fn__none"}" data-calendar-undated-toggle data-position="8south" aria-label="${escapeAttr(window.siyuan.languages.calendarUndated)}" aria-expanded="false"><svg><use xlink:href="#iconInbox"></use></svg></button>` : ""}
+                ${editable && dateEditable ? `<button type="button" class="block__icon block__icon--show ariaLabel${hasUndated ? "" : " fn__none"}" data-calendar-undated-toggle data-position="8south" aria-label="${escapeAttr(window.siyuan.languages.calendarUndated)}" aria-expanded="false"><svg><use xlink:href="#iconInbox"></use></svg></button>` : ""}
                 ${iconButton("previous", "iconLeft", window.siyuan.languages.previous)}
                 <button type="button" class="b3-button b3-button--cancel av__calendar-today ariaLabel" data-calendar-action="today" data-position="8south" aria-label="${escapeAttr(window.siyuan.languages.calendarToday)}">${window.siyuan.languages.calendarToday}</button>
                 ${iconButton("next", "iconRight", window.siyuan.languages.next)}
@@ -441,7 +443,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
                 <select class="b3-select" data-calendar-mode aria-label="${window.siyuan.languages.calendarView}"><option value="month"${state.mode === "month" ? " selected" : ""}>${window.siyuan.languages.month}</option><option value="week"${state.mode === "week" ? " selected" : ""}>${window.siyuan.languages.week}</option></select>
                 </div>
             </div>
-            ${editable && dateColumn?.type === "date" ? getCalendarUndatedHTML(state) : ""}
+            ${editable && dateEditable ? getCalendarUndatedHTML(state) : ""}
             ${dateColumn && dateColumn.type !== "date" ? `<div class="av__calendar-source ft__on-surface">${window.siyuan.languages.calendarReadOnlyDate}</div>` : ""}
             <div class="av__calendar-scroll" data-prevent-swipe="true">
                 ${dateColumn ? `<div class="av__calendar-weekdays"><div class="av__calendar-week-label fn__ellipsis" title="${escapeAttr(window.siyuan.languages.calendarISOWeek)}">${escapeHtml(window.siyuan.languages.calendarWeekLabel)}</div>${days.map(day => `<div>${day}</div>`).join("")}</div>` : ""}
@@ -461,7 +463,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         void avRender(blockElement, protyle);
     };
     const create = (date: number) => {
-        if (!canEditCalendar(protyle)) {
+        if (!dateEditable || !canEditCalendar(protyle)) {
             return;
         }
         state.anchor = date;
@@ -469,7 +471,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             position: {calendarDate: date}});
     };
     bindCalendarDrag(root, protyle, blockElement, eventsByID, view);
-    if (editable && dateColumn?.type === "date") {
+    if (editable && dateEditable) {
         bindCalendarUndated({root, blockElement, data, state, query,
             onOpen: row => openCalendarItem(protyle, blockElement, row),
             onSchedule: (row, cell, day, onUpdated) => updateCalendarDate(protyle, blockElement,
@@ -567,7 +569,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             menu.addSeparator();
             menu.addItem({icon: "iconOpen", label: window.siyuan.languages.openBy,
                 click: () => { void openCalendarItem(protyle, blockElement, entry.row); }});
-            if (canEditCalendar(protyle) && dateColumn?.type === "date") {
+            if (canEditCalendar(protyle) && dateEditable) {
                 const week = item.closest<HTMLElement>("[data-calendar-week]");
                 const rect = week.getBoundingClientRect();
                 const day = addCalendarDays(Number(week.dataset.calendarWeek),

@@ -6,6 +6,7 @@ export interface ICalendarState {
     mode: "month" | "week";
     weekStart: number;
     dateType?: TAVCol;
+    dateHasTemplate?: boolean;
     rowLimit?: number;
     expandedWeeks: Set<number>;
     undatedOpen: boolean;
@@ -66,7 +67,7 @@ export const getCalendarRequestRange = (blockElement: Element, viewID?: string) 
 
 export const getCalendarCreationDate = (blockElement: Element) => {
     const state = getCalendarState(blockElement);
-    if (blockElement.getAttribute("data-av-type") === "calendar" && state.dateType === "date") {
+    if (blockElement.getAttribute("data-av-type") === "calendar" && state.dateType === "date" && !state.dateHasTemplate) {
         return state.anchor;
     }
 };

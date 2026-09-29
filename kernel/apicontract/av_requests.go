@@ -204,7 +204,7 @@ type GetAttributeViewFieldViewsRequest struct {
 type CreateAttributeViewItemRequest struct {
 	// 日历新条目的全天日期，单位为毫秒；仅支持绑定普通 date 字段的日历视图。
 	// 覆盖模板中该字段的值，与模板其他字段及条目创建共用一个可撤销事务。
-	// 绑定 created 或 updated 时拒绝指定日期；省略或传 null 时沿用常规创建流程。
+	// 绑定 created、updated 或带显示模板的 date 字段时拒绝指定日期；省略或传 null 时沿用常规创建流程。
 	CalendarDate *int64 `json:"calendarDate" api:"optional,nullable"`
 	AvID         string `json:"avID"`
 	BlockID      string `json:"blockID"`
@@ -293,6 +293,7 @@ type RenderAttributeViewRequest struct {
 }
 
 // AVCalendarUndatedRequest 只读取普通日期字段为空的条目，不修改视图或数据库。
+// 绑定带显示模板的日期字段时返回空列表，计算日期需要通过模板或来源字段调整。
 // query 沿用当前视图搜索，search 仅匹配待安排条目的标题；页码从 1 开始，页大小默认 50，最大 100。
 // 端点仅供可编辑用户使用，并按 blockID 保持加密笔记本读取租约。
 type AVCalendarUndatedRequest struct {

@@ -1245,10 +1245,14 @@ interface IAVFieldView {
 interface IAVCalendarSettings {
     /**
      * 绑定一个 date、created 或 updated 字段；系统时间不支持通过日历拖动修改。
+     * date 字段设置显示模板时按模板结果排布，原始日期保持不变。
+     * 支持 YYYY-MM-DD、字段 dateFormat 指定的数字日期格式，以及当前语言的本地日期格式。
+     * 可附加 HH:mm[:ss]（以空格或 T 分隔），按日历请求时区解析，忽略首尾空白；斜杠日期不猜测日月顺序。
+     * 空值或无效结果不显示，也不进入待安排列表；计算日期不支持拖动、清空或按日期新建。
      * 空字符串表示未绑定；字段缺失或类型变化时保留绑定，日历返回空行，不自动改绑或回填日期。
      * createAttributeViewItem 的可选 calendarDate 是毫秒时间戳，仅支持绑定普通 date 字段的日历。
      * 指定时按全天日期覆盖模板中该字段的值，与模板其他字段及条目创建共用一个可撤销事务。
-     * 系统时间源拒绝指定 calendarDate；省略或传 null 时沿用常规创建流程。
+     * 系统时间源或带显示模板的日期字段拒绝指定 calendarDate；省略或传 null 时沿用常规创建流程。
      */
     dateKeyID: string;
     /** 可选单选字段，使用已有选项颜色；空字符串表示不使用字段颜色。 */

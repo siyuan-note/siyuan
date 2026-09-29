@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260929105001"
+		"updated": "20260929123717"
 	},
 	"Children": [
 		{
@@ -88,7 +88,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20260923103343"
+				"updated": "20260929123717"
 			},
 			"Children": [
 				{
@@ -730,7 +730,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260920225154-tz8a00o",
-				"updated": "20260924110133"
+				"updated": "20260929123717"
 			},
 			"Children": [
 				{
@@ -759,7 +759,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260920225154-qqxdh7e",
-				"updated": "20260927113016"
+				"updated": "20260929123717"
 			},
 			"Children": [
 				{
@@ -831,6 +831,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "Date field: Choose one date, created time, or updated time field in the layout settings. If no suitable field exists, the calendar prompts you to choose or create one. It does not fill ordinary dates for existing entries; entries without a date stay out of the grid. With an ordinary date field, they remain available in the undated list"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260929122307-2ixnrxo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260929122307-2ixnrxo",
+						"updated": "20260929123717"
+					},
+					"Children": [
+						{
+							"ID": "20260929122307-ftq006m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260929122307-ftq006m",
+								"updated": "20260929123717"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Template dates: When a date field has a display template, the calendar places entries on the calculated date without changing the stored date. Output a plain text date in YYYY-MM-DD, the field's selected numeric date format, or the current language's local date format (such as October 2, 2026). An optional HH:mm or HH:mm:ss time can follow a space or T. Dates use the current device's local time zone; slash-separated dates follow the field format without guessing the month/day order. Empty results, invalid dates, and other formats appear neither on the calendar nor in the undated list. Calculated dates cannot be dragged, cleared, or assigned when creating an entry on a day; change the source field or template to adjust the date. Use YYYY-MM-DD for templates shared across languages"
 								}
 							]
 						}

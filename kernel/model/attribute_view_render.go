@@ -994,6 +994,11 @@ func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av
 	if 0 == len(templateKeyIDs) && 0 == len(renderTemplateKeyIDs) {
 		return false
 	}
+	// 日历日期模板参与区间筛选和定位，必须在筛选条目之前完成计算。
+	if view.LayoutType == av.LayoutTypeCalendar && view.Calendar != nil &&
+		renderTemplateKeyIDs[view.Calendar.Settings.DateKeyID] {
+		return false
+	}
 
 	for _, rule := range view.EffectiveConditionalColors() {
 		if nil != rule && nil != rule.Filter && (templateKeyIDs[rule.Filter.Column] ||

@@ -6,6 +6,9 @@ package av
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
 	_ "time/tzdata"
 )
@@ -69,6 +72,78 @@ func IsCalendarDateType(keyType KeyType) bool {
 	return KeyTypeDate == keyType || KeyTypeCreated == keyType || KeyTypeUpdated == keyType
 }
 
+var calendarTemplateTimePattern = regexp.MustCompile(`[ T](\d{2}):(\d{2})(?::(\d{2}))?$`)
+
+// newCalendarTemplateDateParser 复用字段日期格式和当前语言的月份、日期模板，每次日历渲染只编译一次。
+func newCalendarTemplateDateParser(format DateDisplayFormat) func(string, *time.Location) *ValueDate {
+	layouts := []string{"2006-1-2"}
+	switch format {
+	case DateDisplayFormatMonthDayYear:
+		layouts = append(layouts, "1/2/2006")
+	case DateDisplayFormatDayMonthYear:
+		layouts = append(layouts, "2/1/2006")
+	case DateDisplayFormatYearMonthDay:
+		layouts = append(layouts, "2006/1/2")
+	}
+	months := strings.Split(GetAttributeViewI18n("dateMonths"), "|")
+	monthPatterns := make([]string, len(months))
+	for i, month := range months {
+		monthPatterns[i] = regexp.QuoteMeta(month)
+	}
+	pattern := regexp.QuoteMeta(GetAttributeViewI18n("dateFormatFullTemplate"))
+	for token, replacement := range map[string]string{
+		"${year}": `(?P<year>\d{4})`, "${day}": `(?P<day>\d{1,2})`,
+		"${month}": "(?P<month>" + strings.Join(monthPatterns, "|") + ")",
+	} {
+		pattern = strings.ReplaceAll(pattern, regexp.QuoteMeta(token), replacement)
+	}
+	fullDate := regexp.MustCompile("(?i)^" + pattern + "$")
+	return func(content string, location *time.Location) *ValueDate {
+		content = strings.TrimSpace(content)
+		hour, minute, second := 0, 0, 0
+		timeParts := calendarTemplateTimePattern.FindStringSubmatch(content)
+		if timeParts != nil {
+			hour, _ = strconv.Atoi(timeParts[1])
+			minute, _ = strconv.Atoi(timeParts[2])
+			second, _ = strconv.Atoi(timeParts[3])
+			content = strings.TrimSpace(content[:len(content)-len(timeParts[0])])
+		}
+		var date time.Time
+		found := false
+		for _, layout := range layouts {
+			if parsed, err := time.ParseInLocation(layout, content, location); err == nil {
+				date = parsed
+				found = true
+				break
+			}
+		}
+		if !found {
+			parts := fullDate.FindStringSubmatch(content)
+			if parts == nil || fullDate.SubexpIndex("year") < 0 || fullDate.SubexpIndex("day") < 0 || fullDate.SubexpIndex("month") < 0 {
+				return nil
+			}
+			year, _ := strconv.Atoi(parts[fullDate.SubexpIndex("year")])
+			day, _ := strconv.Atoi(parts[fullDate.SubexpIndex("day")])
+			month := 0
+			for i, name := range months {
+				if strings.EqualFold(name, parts[fullDate.SubexpIndex("month")]) {
+					month = i + 1
+					break
+				}
+			}
+			date = time.Date(year, time.Month(month), day, 0, 0, 0, 0, location)
+			if int(date.Month()) != month || date.Day() != day {
+				return nil
+			}
+		}
+		parsed := time.Date(date.Year(), date.Month(), date.Day(), hour, minute, second, 0, location)
+		if date.Year() < 1 || parsed.Day() != date.Day() || parsed.Hour() != hour || parsed.Minute() != minute || parsed.Second() != second {
+			return nil
+		}
+		return &ValueDate{Content: parsed.UnixMilli(), IsNotEmpty: true, IsNotTime: timeParts == nil}
+	}
+}
+
 // CalendarInterval 保留源值，按本地日历日解释全天结束日期；缺失端点作为单点显示。
 func CalendarInterval(value *Value, location *time.Location) (start, end int64, ok bool) {
 	if nil == value {
@@ -121,10 +196,23 @@ func FilterCalendarRows(calendar *Calendar, dateRange *CalendarRange, targetItem
 		return nil
 	}
 	rows := make([]*TableRow, 0, len(calendar.Rows))
+	computed := key.Type == KeyTypeDate && strings.TrimSpace(key.RenderTemplate) != ""
+	var parseDate func(string, *time.Location) *ValueDate
+	if computed {
+		parseDate = newCalendarTemplateDateParser(key.DateFormat)
+	}
 	for _, row := range calendar.Rows {
-		start, end, ok := CalendarInterval(row.GetValue(key.ID), location)
+		value := row.GetValue(key.ID)
+		if computed {
+			var date *ValueDate
+			if value != nil && value.HasRenderTemplate {
+				date = parseDate(value.RenderedContent, location)
+			}
+			value = &Value{Type: KeyTypeDate, Date: date}
+		}
+		start, end, ok := CalendarInterval(value, location)
 		if !ok {
-			if key.Type == KeyTypeDate {
+			if key.Type == KeyTypeDate && !computed {
 				calendar.UndatedRows = append(calendar.UndatedRows, row)
 			}
 			continue

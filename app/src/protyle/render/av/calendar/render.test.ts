@@ -153,13 +153,17 @@ test("calendar refresh keeps selected event segments and blank clicks dismiss th
 });
 
 test("calendar checkbox clicks and keyboard activation update only the chosen field and honor readonly modes", async () => {
-    for (const mode of ["desktop", "mobile", "disabled", "publish", "history", "snapshot"]) {
+    for (const mode of ["desktop", "mobile", "disabled", "publish", "history", "snapshot", "desktop-template", "mobile-template"]) {
+        const computed = mode.endsWith("-template");
         const start = new Date(2026, 8, 1).getTime();
         const range = {start, end: dates.addCalendarDays(start, 7), timeZone: "UTC"};
         const values = [
             {...createEmptyAVValue("date", "date"), date: {content: start, isNotEmpty: true, isNotTime: true}},
             createEmptyAVValue("first", "checkbox"), createEmptyAVValue("second", "checkbox"),
         ];
+        if (computed) {
+            values[0] = {...values[0], date: {isNotEmpty: false}, hasRenderTemplate: true, renderedContent: "2026-09-01"};
+        }
         const cells = values.map(value => ({id: value.keyID, value}));
         const handlers: Record<string, (event: unknown) => void> = {};
         const updates: unknown[] = [];
@@ -167,6 +171,7 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
         let html = "";
         let startDrag: () => void;
         let menusClosed = 0;
+        const menuIcons: string[] = [];
         const root = {
             isConnected: true,
             classList: {add() {}},
@@ -190,8 +195,12 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
             "../conditionalColor": {getConditionalBackground},
             "../cell": {renderCell: () => "<span></span>", updateCellsValue: (...args: unknown[]) => updates.push(args)},
             "../openDatabaseRow": {openDatabaseRowByData: () => opens++},
+            "../action": {avContextmenu: (_protyle: unknown, _item: unknown, _position: unknown,
+                options: {customize: (menu: unknown) => void}) => options.customize({
+                addSeparator() {}, addItem: (item: {icon: string}) => menuIcons.push(item.icon),
+            })},
             "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
-            "../../../../util/functions": {isMobile: () => mode === "mobile"},
+            "../../../../util/functions": {isMobile: () => mode.startsWith("mobile")},
             "../../../../constants": {Constants: {ZWSP: ""}},
             "../container": {replaceAVContainer: (_block: unknown, value: string) => { html = value; }},
             "../virtualScroll": {getAVSelectedItemIDs: (): string[] => [], setAVData() {}},
@@ -217,10 +226,11 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
         }}} as IProtyle;
         await exports.renderCalendar(block as unknown as HTMLElement, protyle, {viewID: "calendar", view: {
             calendar: {dateKeyID: "date"}, calendarRange: range,
-            columns: values.map(value => ({id: value.keyID, type: value.type, name: value.keyID})),
+            columns: values.map(value => ({id: value.keyID, type: value.type, name: value.keyID,
+                renderTemplate: computed && value.type === "date" ? "2026-09-01" : ""})),
             rows: [{id: "row", cells}],
         }} as unknown as IAV);
-        const editable = mode === "desktop" || mode === "mobile";
+        const editable = mode === "desktop" || mode === "mobile" || computed;
         assert.match(html, new RegExp(`role="checkbox" tabindex="${editable ? "0" : "-1"}" aria-checked="false" aria-disabled="${!editable}"`));
         const item = {dataset: {calendarItem: "row"}};
         const field = {dataset: {colId: "second"}, closest: () => item};
@@ -236,6 +246,17 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
             assert.equal(args[9][0].cell, cells[2]);
             assert.equal(args[9][0].rowID, "row");
             assert.equal(args[9][0].colID, "second");
+        }
+        if (computed) {
+            assert.match(html, /data-calendar-item="row"/);
+            assert.match(html, /2026-09-01/);
+            assert.doesNotMatch(html, /data-calendar-(move|resize|add|undated-toggle)/);
+            const eventTarget = {closest: (selector: string) => selector === "[data-calendar-item]" ? item : null};
+            handlers.pointerdown({target: eventTarget, button: 0, pointerType: "mouse", stopPropagation() {}});
+            handlers.touchstart({target: eventTarget, touches: [{identifier: 1, clientX: 10, clientY: 20}]});
+            assert.equal(startDrag, undefined);
+            handlers.contextmenu({target: eventTarget, clientX: 10, clientY: 20, preventDefault() {}, stopPropagation() {}});
+            assert.deepEqual(menuIcons, ["iconOpen"]);
         }
         if (mode === "mobile") {
             const closedBeforeDrag = menusClosed;

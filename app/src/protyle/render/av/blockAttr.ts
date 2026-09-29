@@ -1,10 +1,9 @@
 import {fetchPost} from "../../../util/fetch";
 import {addCol, getColIconByType} from "./col";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
-import {cellValueIsEmpty, popTextCell, updateCellsValue} from "./cell";
+import {cellValueIsEmpty, openAVCellIcon, popTextCell, updateCellsValue} from "./cell";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
-import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
-import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {openLink} from "../../../editor/openLink";
@@ -658,15 +657,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
     while (target && element !== target) {
         const type = target.getAttribute("data-type");
         if (target.classList.contains("b3-menu__avemoji")) {
-            const rect = target.getBoundingClientRect();
-            openEmojiPanel(target.nextElementSibling.getAttribute("data-id"), "doc", {
-                x: rect.left,
-                y: rect.bottom,
-                h: rect.height,
-                w: rect.width,
-            }, (unicode) => {
-                target.innerHTML = getFileTreeIconHTML(unicode, "file");
-            }, target.querySelector("img"), {ownerElement: protyle.element});
+            openAVCellIcon(protyle, target);
             event.preventDefault();
             event.stopPropagation();
             return true;

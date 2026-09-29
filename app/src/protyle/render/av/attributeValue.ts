@@ -1,6 +1,6 @@
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {unicode2Emoji} from "../../../emoji";
-import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {renderAVBlockIcon} from "./blockIcon";
 import {getCompressURL} from "../../../util/image";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {formatDateDisplay, formatDateValue} from "./dateFormat";
@@ -23,7 +23,7 @@ export const getAVTemplateHTML = (content: string) => {
     return window.DOMPurify.sanitize(content);
 };
 
-export const genAVRelationHTML = (item: IAVCellValue, rowID: string, showIcon = true, attributePanel = false) => {
+export const genAVRelationHTML = (item: IAVCellValue, rowID: string, showIcon = true) => {
     if (!item?.block) {
         return "";
     }
@@ -34,9 +34,9 @@ export const genAVRelationHTML = (item: IAVCellValue, rowID: string, showIcon = 
     const storedValue = escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(item))));
     const attributes = `data-row-id="${escapeAttr(rowID)}" data-relation-value="${storedValue}" class="av__cell--relation"`;
     if (item.isDetached) {
-        return `<span ${attributes}><span${showIcon ? "" : ' class="fn__none"'}><svg${attributePanel ? ' style="height: 26px"' : ""}><use xlink:href="#iconLine"></use></svg><span class="fn__space--5"></span></span><span class="av__celltext${templateClass}">${content}</span></span>`;
+        return `<span ${attributes}>${renderAVBlockIcon(item, showIcon)}<span class="av__celltext${templateClass}">${content}</span></span>`;
     }
-    return `<span ${attributes} data-block-id="${item.block.id}"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${escapeAttr(item.block.icon || "")}">${getFileTreeIconHTML(item.block.icon, "file")}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="${getAVBlockRefSubtype(item)}" class="av__celltext av__celltext--ref${templateClass}">${content}</span></span>`;
+    return `<span ${attributes} data-block-id="${item.block.id}">${renderAVBlockIcon(item, showIcon)}<span data-type="block-ref" data-id="${item.block.id}" data-subtype="${getAVBlockRefSubtype(item)}" class="av__celltext av__celltext--ref${templateClass}">${content}</span></span>`;
 };
 
 const AV_TEMPLATE_INTERACTIVE_SELECTOR = [
@@ -127,12 +127,12 @@ const genAVRollupHTML = (value: IAVCellValue) => {
 export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = "", renderTemplate?: string) => {
     if (hasAVRenderTemplateResult(value, renderTemplate)) {
         const storedValue = cloneAVCellValueSnapshot(value);
-        return `<div class="fn__flex-1 av__celltext--template" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(storedValue)))}" placeholder="${window.siyuan.languages.empty}">${getAVTemplateHTML(value.renderedContent || "")}</div>`;
+        return `${value.type === "block" ? renderAVBlockIcon(value) : ""}<div class="fn__flex-1 av__celltext--template" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(storedValue)))}" placeholder="${window.siyuan.languages.empty}">${getAVTemplateHTML(value.renderedContent || "")}</div>`;
     }
     let html = "";
     switch (value.type) {
         case "block":
-            html = `<input data-id="${value.block.id}" value="${escapeAttr(value.block.content)}" type="text" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
+            html = `${renderAVBlockIcon(value)}<input data-id="${value.block.id || ""}" value="${escapeAttr(value.block.content)}" type="text" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <button type="button" data-type="av-bind-document" class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${value.isDetached || !value.block.id ? window.siyuan.languages.bind : window.siyuan.languages.rebind}"><svg><use xlink:href="#iconLink"></use></svg></button>`;
             break;
         case "text": {
@@ -205,7 +205,7 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
             break;
         case "relation":
             value?.relation?.contents?.forEach((item, index) => {
-                html += genAVRelationHTML(item, value.relation.blockIDs[index], true, true);
+                html += genAVRelationHTML(item, value.relation.blockIDs[index]);
             });
             if (html && html.endsWith(", ")) {
                 html = html.substring(0, html.length - 2);

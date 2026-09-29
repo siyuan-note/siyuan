@@ -12,6 +12,7 @@ import {getFieldsByData} from "./view";
 import {getColIconByType} from "./col";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {renderAVBlockIcon} from "./blockIcon";
 import {upDownHint} from "../../../util/upDownHint";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
@@ -344,7 +345,7 @@ const renderRelationFieldValue = (target: HTMLElement, options: IRelationOption[
     const selected = new Set(getSelectedOptionNames(target));
     const html = options.filter(option => selected.has(option.id)).map(option => {
         if (option.isDetached) {
-            return `<span class="av__cell--relation" data-row-id="${escapeAttr(option.id)}"><span><svg><use xlink:href="#iconLine"></use></svg><span class="fn__space--5"></span></span><span class="av__celltext">${escapeHtml(option.content)}</span></span>`;
+            return `<span class="av__cell--relation" data-row-id="${escapeAttr(option.id)}">${renderAVBlockIcon({isDetached: true, block: {content: option.content, icon: option.icon}})}<span class="av__celltext">${escapeHtml(option.content)}</span></span>`;
         }
         const icon = getFileTreeIconHTML(option.icon, "file");
         return `<span class="av__cell--relation" data-row-id="${escapeAttr(option.id)}" data-block-id="${escapeAttr(option.blockID)}"><span class="b3-menu__avemoji" data-unicode="${escapeAttr(option.icon)}">${icon}</span><span data-type="block-ref" data-id="${escapeAttr(option.blockID)}" data-subtype="${option.refSubtype}" class="av__celltext av__celltext--ref">${escapeHtml(option.content)}</span></span>`;

@@ -11,6 +11,7 @@ import {
     getCellText,
     getCellValueText,
     getTypeByCellElement,
+    openAVCellIcon,
     popTextCell,
     renderCell,
     renderCellAttr,
@@ -35,8 +36,7 @@ import {hintRef} from "../../hint/extend";
 import {focusBlock, focusByRange} from "../../util/selection";
 import {showMessage} from "../../../dialog/message";
 import {previewAttrViewImages} from "../../preview/image";
-import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
-import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {unicode2Emoji} from "../../../emoji";
 import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender, initUnfoldedGroupTables, setAVGroupFolded as setGroupFolded} from "./render";
@@ -69,6 +69,7 @@ import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValu
 import {isMobile} from "../../../util/functions";
 import {getAVCurrentViewID} from "./viewVisibility";
 import {cloneAVCellValueSnapshot} from "./cellValue";
+import {getAVBlockIconHTML} from "./blockIcon";
 import {formatAVItemLinks, genAVItemLink} from "./itemLink";
 import {openLink} from "../../../editor/openLink";
 import {
@@ -142,6 +143,7 @@ const unbindDatabaseRows = async (protyle: IProtyle, blockElement: HTMLElement, 
             isDetached: true,
             block: {
                 content: primaryInfo.content,
+                icon: primaryInfo.value.block.icon || "",
             },
         };
         doOperations.push({
@@ -597,15 +599,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (target.classList.contains("b3-menu__avemoji") && !protyle.disabled) {
-            const rect = target.getBoundingClientRect();
-            openEmojiPanel(target.nextElementSibling.getAttribute("data-id"), "doc", {
-                x: rect.left,
-                y: rect.bottom,
-                h: rect.height,
-                w: rect.width,
-            }, (unicode) => {
-                target.innerHTML = getFileTreeIconHTML(unicode, "file");
-            }, target.querySelector("img"), {ownerElement: protyle.element});
+            openAVCellIcon(protyle, target);
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -1466,6 +1460,10 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
             const valueElement = cellElement.querySelector<HTMLElement>("[data-cell-value]");
             if (valueElement) {
                 valueElement.dataset.cellValue = encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(value)));
+            }
+            if (iconElement && value.type === "block") {
+                iconElement.setAttribute("data-unicode", value.block.icon || "");
+                iconElement.innerHTML = getAVBlockIconHTML(value);
             }
             renderCellAttr(cellElement, value);
             return;

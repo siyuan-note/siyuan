@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260927123058"
+		"updated": "20260929105001"
 	},
 	"Children": [
 		{
@@ -36,6 +36,49 @@
 				{
 					"Type": "NodeText",
 					"Data": "Databases consist of content blocks or non-content block data, and are presented in different views, such as table view, list view, calendar view, kanban view, and card view."
+				}
+			]
+		},
+		{
+			"ID": "20260929105001-jav2qb7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260929105001-jav2qb7",
+				"updated": "20260929105001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Entry icons"
+				}
+			]
+		},
+		{
+			"ID": "20260929105001-d3q9qik",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929105001-d3q9qik",
+				"updated": "20260929105001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Unbound entries can have their own icons. Click the icon beside the primary-key value or in the entry details to change or remove it. Entries without a custom icon show a neutral default icon, and the view's icon visibility setting still applies."
+				}
+			]
+		},
+		{
+			"ID": "20260929105001-pdids8d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929105001-pdids8d",
+				"updated": "20260929105001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Binding or rebinding an entry replaces its icon with the target block's icon. Bound entries continue to share their icons with the bound blocks; for a document block, this is the document icon. Unbinding preserves the last displayed icon, which can then be changed independently."
 				}
 			]
 		},

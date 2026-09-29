@@ -23,7 +23,7 @@ import {getSearchAVFocus} from "./searchAVFocus";
 import {getAVTemplateHTML} from "./attributeValue";
 import {hasAVRenderTemplateResult} from "./cellValue";
 import {renderAVRichTextElements} from "./richText";
-import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {getAVBlockIconHTML} from "./blockIcon";
 import {unicode2Emoji} from "../../../emoji";
 import {bindRelationLayout} from "./relationLayout";
 import {getTopBarHeight} from "../../../layout/getTopBarHeight";
@@ -454,7 +454,7 @@ style="grid-template-columns:${gridTemplate}">
 data-value-id="${escapeAttr(primaryCell.id || "")}"
 style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}${primaryCell.color ? `color:${primaryCell.color};` : ""}">
     ${selected ? '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>' : ""}
-    ${isDetached ? "" : `<span class="av__relation-row-icon">${getFileTreeIconHTML(primaryValue.block?.icon, "file")}</span>`}
+    <span class="av__relation-row-icon">${getAVBlockIconHTML(primaryValue)}</span>
     <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}${useRenderedContent ? " av__celltext--template" : ""}"
         data-icon="${escapeAttr(primaryValue.block?.icon || "")}"
         data-id="${escapeAttr(primaryValue.block?.id || "")}" data-content="${escapeAttr(primaryValue.block?.content || "")}">${isDetached ? content : `<span class="av__celltext--ref">${content}</span>`}</span>
@@ -998,6 +998,7 @@ const genCreatedRelationRowHTML = (menuElement: HTMLElement, rowID: string, cont
     const columns = headerElement?.querySelectorAll<HTMLElement>(".av__relation-table-cell");
     let cellsHTML = `<span data-relation-column="${escapeAttr(columns?.[0]?.dataset.relationColumn || "")}" class="av__relation-table-cell av__relation-table-primary" data-row-id="${rowID}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
+    <span class="av__relation-row-icon">${getAVBlockIconHTML({isDetached: true})}</span>
     <span class="b3-menu__label fn__ellipsis" data-id="">${Lute.EscapeHTMLStr(content)}</span>
 </span>`;
     for (let i = 1; i < (columns?.length || 1); i++) {

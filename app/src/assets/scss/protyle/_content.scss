@@ -8,7 +8,7 @@
   flex-direction: column;
 
   &.rtl {
-    .protyle-title__input,
+    .protyle-title__input:not([dir]),
     .protyle-wysiwyg .p,
     .protyle-wysiwyg .table table,
     .protyle-wysiwyg .render-node protyle-html,

@@ -1,4 +1,5 @@
 import {Constants} from "../../constants";
+import {setTitleAutoDirection} from "../../protyle/render/autoDirection";
 import {openStandaloneDatabaseItemByURI} from "../../protyle/render/av/openStandaloneDatabaseItem";
 import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
@@ -431,6 +432,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
 
 const initEditorName = () => {
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
+    setTitleAutoDirection(inputElement, window.siyuan.config.editor.autoDirection);
     let titleSavePromise: Promise<unknown> = Promise.resolve();
     let titleSavedOnEnter: {rootID: string, value: string} | undefined;
     let enteringDocument = false;

@@ -5,6 +5,18 @@ const excludedSelector = 'pre, code, .render-node, [data-type="NodeCodeBlock"], 
 const disposers = new WeakMap<HTMLElement, () => void>();
 const directionAttribute = "data-auto-direction";
 
+/** 文档标题使用浏览器的实时方向判定，保留显式指定的方向。 */
+export const setTitleAutoDirection = (element: HTMLElement, enabled: boolean) => {
+    if (!element || element.hasAttribute("dir") && element.dir !== "auto") {
+        return;
+    }
+    if (enabled) {
+        element.dir = "auto";
+    } else {
+        element.removeAttribute("dir");
+    }
+};
+
 const clearDirection = (element: HTMLElement) => {
     if (element.dir === element.getAttribute(directionAttribute)) {
         element.removeAttribute("dir");

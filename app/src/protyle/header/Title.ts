@@ -31,6 +31,7 @@ import {scheduleCaretScroll} from "../wysiwyg/caretScroll";
 import {getParentDocumentID} from "../util/parentDocument";
 import {getTextSiyuanFromClipboardData} from "../util/clipboardData";
 import {enterDocumentFromTitle} from "./titleEnter";
+import {setTitleAutoDirection} from "../render/autoDirection";
 
 export class Title {
     public element: HTMLElement;
@@ -50,6 +51,7 @@ export class Title {
             this.element.innerHTML = `<span aria-label="${isMac() ? window.siyuan.languages.gutterTip2 : window.siyuan.languages.gutterTip2.replace("⇧", "Shift+")}" data-position="west" class="protyle-title__icon ariaLabel"><svg><use xlink:href="#iconFile"></use></svg></span>
 <div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}" class="protyle-title__input" data-tip="${window.siyuan.languages._kernel[16]}"> </div><div class="protyle-attr"></div>`;
             this.editElement = this.element.querySelector(".protyle-title__input");
+            setTitleAutoDirection(this.editElement, window.siyuan.config.editor.autoDirection);
             this.editElement.addEventListener("paste", (event: ClipboardEvent) => {
                 event.stopPropagation();
                 event.preventDefault();

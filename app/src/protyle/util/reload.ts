@@ -12,7 +12,7 @@ import {restoreLuteMarkdownSyntax} from "./paste";
 import {invalidateTrackedRanges} from "./trackedRange";
 import {updateBacklinkReferenceVisibility} from "../wysiwyg/backlinkReference";
 import {shouldReloadProtyle} from "./reloadState";
-import {setAutoDirection} from "../render/autoDirection";
+import {setAutoDirection, setTitleAutoDirection} from "../render/autoDirection";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
     if (!shouldReloadProtyle(protyle)) {
@@ -20,6 +20,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
     }
     updateBacklinkReferenceVisibility(protyle);
     setAutoDirection(protyle.wysiwyg.element, window.siyuan.config.editor.autoDirection);
+    setTitleAutoDirection(protyle.title?.editElement, window.siyuan.config.editor.autoDirection);
     protyle.wysiwyg.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
     invalidateTrackedRanges(protyle);
     /// #if MOBILE

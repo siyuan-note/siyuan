@@ -7,6 +7,9 @@ import {createConfigNamespaceApi} from "../util/namespaceApi";
 import {shouldResetBottomBacklinkPanel} from "./editorRuntimeState";
 import {objEquals} from "../../util/functions";
 import {lineNumberRender} from "../../protyle/render/highlightRender";
+/// #if MOBILE
+import {setTitleAutoDirection} from "../../protyle/render/autoDirection";
+/// #endif
 
 const applyEditorConfig = (data: Config.IEditor) => {
     const refreshKeepLoadedContent = window.siyuan.config.editor.keepLoadedContent !== data.keepLoadedContent;
@@ -18,6 +21,9 @@ const applyEditorConfig = (data: Config.IEditor) => {
         !objEquals(window.siyuan.config.editor.fontFamilies, data.fontFamilies);
     const refreshCodeLineNumbers = !objEquals(window.siyuan.config.editor.codeFontFamilies, data.codeFontFamilies);
     window.siyuan.config.editor = data;
+    /// #if MOBILE
+    setTitleAutoDirection(document.getElementById("toolbarName"), data.autoDirection);
+    /// #endif
     const models = getAllModels();
     models.editor.forEach(item => item.updateBacklinkPanel(resetBottomBacklinkPanel));
     if (refreshDatabaseRowLayout) {

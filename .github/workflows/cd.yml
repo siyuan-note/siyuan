@@ -245,7 +245,6 @@ jobs:
             electron_args: "dist"
             goos: "windows"
             gobin: "bin"
-            mingwsys: "MINGW64"
             goarch: "amd64"
             suffix: "win.exe"
             e2e_shards: "attribute-view:6808"
@@ -255,11 +254,12 @@ jobs:
         with:
           path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
 
-      - name: Set up MingGW
+      - name: Set up MSYS2 UCRT64
         uses: msys2/setup-msys2@v2
         if: "contains( matrix.config.goos, 'windows')"
         with:
-          install: p7zip mingw-w64-x86_64-lua
+          msystem: UCRT64
+          install: p7zip mingw-w64-ucrt-x86_64-lua
 
       - name: Set up Go
         uses: actions/setup-go@v6

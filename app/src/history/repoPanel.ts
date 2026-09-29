@@ -94,8 +94,11 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     <button type="button" class="b3-button b3-button--text" data-action="normal" aria-pressed="true">${lang.dataSnapshot}</button>
     <button type="button" class="b3-button b3-button--text" data-action="tagged" aria-pressed="false">${lang.repoTaggedSnapshots}</button>
     <span class="fn__flex-1"></span>
-    <label>${lang.startDate} <input type="date" class="b3-text-field" data-range="start" min="1970-01-01" max="9999-12-31"></label>
-    <label>${lang.endDate} <input type="date" class="b3-text-field" data-range="end" min="1970-01-01" max="9999-12-31"></label>
+    <div class="history__snapshot-range">
+        <input type="date" class="b3-text-field" data-range="start" aria-label="${lang.startDate}" min="1970-01-01" max="9999-12-31">
+        <span aria-hidden="true">-</span>
+        <input type="date" class="b3-text-field" data-range="end" aria-label="${lang.endDate}" min="1970-01-01" max="9999-12-31">
+    </div>
     <button type="submit" class="b3-button b3-button--outline">${lang.filter}</button>
     <button type="button" class="b3-button b3-button--text" data-action="range-clear">${lang.clear}</button>
     <button type="button" class="b3-button b3-button--outline fn__none" data-action="manage">${lang.repoBatchManage}</button>

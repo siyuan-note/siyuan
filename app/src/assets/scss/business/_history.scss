@@ -238,6 +238,12 @@
       }
     }
 
+    &-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     &-sources {
       display: none;
       padding: 0;

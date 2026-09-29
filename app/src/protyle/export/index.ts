@@ -1119,10 +1119,9 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
-    const screenWidth = getScreenWidth();
     const isInMobile = isInMobileApp();
     const mobileHtml = isInMobile ? {
-        js: `document.body.style.minWidth = "${screenWidth}px";`,
+        js: exportOption.type === "pdf" ? "" : `document.body.style.minWidth = "${getScreenWidth()}px";`,
         css: `@page { size: A4; margin: 10mm 0 10mm 0; background-color: var(--b3-theme-background); }
 .protyle-wysiwyg {padding: 0; margin: 0;}`
     } : {js: "", css: ""};

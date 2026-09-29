@@ -2,13 +2,16 @@ import * as assert from "node:assert/strict";
 import {test} from "node:test";
 import {getDynamicIconValue, refreshDynamicIcons} from "./dynamicIcon";
 
-test("font refresh reloads only local dynamic icons and preserves saved values", () => {
+test("font refresh reloads only local text icons and preserves date icons and saved values", () => {
     assert.equal(getDynamicIconValue("api/icon/getDynamicIcon?_fontRefresh=old"), "api/icon/getDynamicIcon");
     const sources = [
         "api/icon/getDynamicIcon?type=8&content=%E6%97%A5&id=target",
-        "/api/icon/getDynamicIcon?type=1&date=&_fontRefresh=old",
-        "http://localhost/api/icon/getDynamicIcon?type=2",
-        "https://example.com/api/icon/getDynamicIcon?type=1",
+        "/api/icon/getDynamicIcon?type=8&content=Text&_fontRefresh=old",
+        "http://localhost/api/icon/getDynamicIcon?type=8&content=Text",
+        ...["1", "2", "3", "4", "5", "6", "7", "", "unknown"].map(type =>
+            `api/icon/getDynamicIcon?type=${type}&date=&_fontRefresh=old`),
+        "api/icon/getDynamicIcon",
+        "https://example.com/api/icon/getDynamicIcon?type=8",
         "/emojis/custom.svg",
         "http://[invalid",
     ];

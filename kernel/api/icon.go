@@ -181,7 +181,7 @@ var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Con
 	}
 
 	var fonts []*conf.EditorFont
-	if nil != model.Conf.Appearance {
+	if "8" == iconType && nil != model.Conf.Appearance {
 		fonts = model.Conf.Appearance.GlobalFontFamilies
 	}
 	svg = applyDynamicIconFont(svg, fonts)

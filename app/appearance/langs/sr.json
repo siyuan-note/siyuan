@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "Dodaj blok na kraj trenutnog superbloka",
 	"createSuperBlockLeft": "Napravi lokalne kolone levo",
 	"createSuperBlockRight": "Napravi lokalne kolone desno",
+	"mindmapItem": "Blok stavke mape uma",
 	"listMindmapLock": "Закључај приказ",
 	"listMindmapUnlock": "Откључај приказ",
 	"historySnapshots": "Повезани означени снимци",

@@ -18,6 +18,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
     const filterDialog = new Dialog({
         title: window.siyuan.languages.searchType,
         content: `<div class="b3-dialog__content">
+    ${(["mindmap", "mindmapItem"] as const).map(type => `<label class="fn__flex b3-label"><svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#${type === "mindmap" ? "iconMindmap" : "iconListItem"}"></use></svg><span class="fn__space"></span><div class="fn__flex-1 fn__flex-center">${window.siyuan.languages[type]} <sup>[1]</sup></div><input class="b3-switch fn__flex-center" data-type="${type}" type="checkbox"${config.types[type] ? " checked" : ""}></label>`).join("")}
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconPlugin"></use></svg>
         <span class="fn__space"></span>

@@ -39,6 +39,7 @@ export const getIconByType = (type: string, sub?: string) => {
             }
             break;
         case "NodeListItem":
+        case "NodeMindmapItem":
             iconName = "iconListItem";
             break;
         case "NodeMindmap":

@@ -509,6 +509,8 @@ func settingSearchPayload(value *conf.Search) *apicontract.SettingSearch {
 		return nil
 	}
 	result := &apicontract.SettingSearch{}
+	result.Mindmap = value.Mindmap
+	result.MindmapItem = value.MindmapItem
 	result.Document = value.Document
 	result.Heading = value.Heading
 	result.List = value.List

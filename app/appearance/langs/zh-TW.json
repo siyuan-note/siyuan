@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "在目前超級區塊末尾新增區塊",
 	"createSuperBlockLeft": "在左側建立局部分欄",
 	"createSuperBlockRight": "在右側建立局部分欄",
+	"mindmapItem": "心智圖項目區塊",
 	"listMindmapLock": "鎖定視圖",
 	"listMindmapUnlock": "解鎖視圖",
 	"historySnapshots": "關聯標記快照",

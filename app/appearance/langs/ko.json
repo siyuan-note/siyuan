@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "현재 슈퍼 블록 끝에 블록 추가",
 	"createSuperBlockLeft": "왼쪽에 부분 열 레이아웃 만들기",
 	"createSuperBlockRight": "오른쪽에 부분 열 레이아웃 만들기",
+	"mindmapItem": "마인드맵 항목 블록",
 	"listMindmapLock": "보기 잠금",
 	"listMindmapUnlock": "보기 잠금 해제",
 	"historySnapshots": "관련 태그 스냅샷",

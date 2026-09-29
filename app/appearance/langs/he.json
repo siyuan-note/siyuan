@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "הוספת בלוק לסוף הבלוק העליון הנוכחי",
 	"createSuperBlockLeft": "יצירת עמודות מקומיות משמאל",
 	"createSuperBlockRight": "יצירת עמודות מקומיות מימין",
+	"mindmapItem": "בלוק פריט במפת חשיבה",
 	"listMindmapLock": "נעילת התצוגה",
 	"listMindmapUnlock": "ביטול נעילת התצוגה",
 	"historySnapshots": "תמונות מצב מתויגות קשורות",

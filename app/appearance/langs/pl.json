@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "Dodaj blok na końcu bieżącego super bloku",
 	"createSuperBlockLeft": "Utwórz lokalne kolumny po lewej",
 	"createSuperBlockRight": "Utwórz lokalne kolumny po prawej",
+	"mindmapItem": "Blok elementu mapy myśli",
 	"listMindmapLock": "Zablokuj widok",
 	"listMindmapUnlock": "Odblokuj widok",
 	"historySnapshots": "Powiązane oznaczone migawki",

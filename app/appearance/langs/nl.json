@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "Blok toevoegen aan het einde van het huidige superblok",
 	"createSuperBlockLeft": "Lokale kolommen links maken",
 	"createSuperBlockRight": "Lokale kolommen rechts maken",
+	"mindmapItem": "Mindmap-itemblok",
 	"listMindmapLock": "Weergave vergrendelen",
 	"listMindmapUnlock": "Weergave ontgrendelen",
 	"historySnapshots": "Gerelateerde gemarkeerde momentopnamen",

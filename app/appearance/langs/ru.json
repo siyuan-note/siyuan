@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "Добавить блок в конец текущего супер блока",
 	"createSuperBlockLeft": "Создать локальные столбцы слева",
 	"createSuperBlockRight": "Создать локальные столбцы справа",
+	"mindmapItem": "Блок элемента интеллект-карты",
 	"listMindmapLock": "Заблокировать вид",
 	"listMindmapUnlock": "Разблокировать вид",
 	"historySnapshots": "Связанные помеченные снимки",

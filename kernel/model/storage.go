@@ -140,6 +140,8 @@ type Criterion struct {
 }
 
 type CriterionTypes struct {
+	Mindmap     *bool `json:"mindmap,omitempty"`
+	MindmapItem *bool `json:"mindmapItem,omitempty"`
 	CustomBlock *bool `json:"customBlock,omitempty"`
 
 	MathBlock     bool `json:"mathBlock"`

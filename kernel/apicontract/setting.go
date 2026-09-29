@@ -324,6 +324,9 @@ type SettingFileTree struct {
 }
 
 type SettingSearch struct {
+	// 思维导图默认开启，思维导图项默认关闭；更新时省略或传 null 保留当前值。
+	Mindmap                      *bool `json:"mindmap" api:"optional,nullable"`
+	MindmapItem                  *bool `json:"mindmapItem" api:"optional,nullable"`
 	CustomBlock                  *bool `json:"customBlock" api:"optional,nullable"`
 	Document                     bool  `json:"document" api:"optional,nullable"`
 	Heading                      bool  `json:"heading" api:"optional,nullable"`

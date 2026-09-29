@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "Pridať blok na koniec aktuálneho super bloku",
 	"createSuperBlockLeft": "Vytvoriť lokálne stĺpce vľavo",
 	"createSuperBlockRight": "Vytvoriť lokálne stĺpce vpravo",
+	"mindmapItem": "Blok položky myšlienkovej mapy",
 	"listMindmapLock": "Zamknúť zobrazenie",
 	"listMindmapUnlock": "Odomknúť zobrazenie",
 	"historySnapshots": "Súvisiace označené snímky",

@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "在当前超级块末尾添加块",
 	"createSuperBlockLeft": "在左侧创建局部分栏",
 	"createSuperBlockRight": "在右侧创建局部分栏",
+	"mindmapItem": "思维导图项块",
 	"listMindmapLock": "锁定视图",
 	"listMindmapUnlock": "解锁视图",
 	"historySnapshots": "关联标记快照",

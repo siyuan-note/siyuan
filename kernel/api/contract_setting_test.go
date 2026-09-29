@@ -86,6 +86,13 @@ func TestAPIContractSettingConfigCompatibility(t *testing.T) {
 	compareSettingConfig(t, apicontract.SetPublish, func() *conf.Publish { return &conf.Publish{} }, append(common, `{"auth":null,"port":65535.0}`, `{"port":65536}`, `{"auth":{"accounts":[null]}}`))
 }
 
+func TestAPIContractSettingMindmapCompatibility(t *testing.T) {
+	compareSettingConfig(t, apicontract.SetSearch, func() *conf.Search { return &conf.Search{} }, []string{
+		`{}`, `{"mindmap":true,"mindmapItem":false}`, `{"mindmap":false,"mindmapItem":true}`,
+		`{"mindmap":null,"mindmapItem":null}`, `{"mindmap":"bad"}`, `{"mindmapItem":1}`,
+	})
+}
+
 func TestAPIContractSettingParserCompatibility(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	for _, body := range []string{"", `{`, `[]`, `false`, `{"unknown":1e1000}`, `{"app":1e1000,"app":1}`, `{"fontSize":16}{"extra":true}`} {

@@ -711,6 +711,12 @@ func InitConf() {
 	if nil == Conf.Search.CustomBlock {
 		Conf.Search.CustomBlock = new(true)
 	}
+	if nil == Conf.Search.Mindmap {
+		Conf.Search.Mindmap = new(true)
+	}
+	if nil == Conf.Search.MindmapItem {
+		Conf.Search.MindmapItem = new(false)
+	}
 	if 1 > Conf.Search.Limit {
 		Conf.Search.Limit = 64
 	}

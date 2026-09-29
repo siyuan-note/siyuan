@@ -18,6 +18,9 @@ type Criterion struct {
 }
 
 type CriterionTypes struct {
+	// 缺省值由客户端继承搜索设置；保留缺省与显式关闭的区别。
+	Mindmap     *bool `json:"mindmap,omitempty" api:"optional,nullable"`
+	MindmapItem *bool `json:"mindmapItem,omitempty" api:"optional,nullable"`
 	CustomBlock *bool `json:"customBlock,omitempty" api:"optional,nullable"`
 
 	MathBlock     bool `json:"mathBlock" api:"optional,nullable"`

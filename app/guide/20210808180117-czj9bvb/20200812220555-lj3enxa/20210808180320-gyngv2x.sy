@@ -7,7 +7,7 @@
 		"id": "20210808180320-gyngv2x",
 		"title": "搜索进阶",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260929000700"
 	},
 	"Children": [
 		{
@@ -36,6 +36,53 @@
 				{
 					"Type": "NodeText",
 					"Data": "全局搜索支持查询语法进行高级搜索，包括 AND/OR/NOT 逻辑组合、类型过滤、字段筛选等。同时提供数据库表直查、忽略索引和忽略搜索等进阶功能，满足从简单关键词到复杂条件的各类搜索需求。以下子文档将逐一介绍这些功能的详细用法。"
+				}
+			]
+		},
+		{
+			"ID": "20260929000700-huot6nw",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260929000700-huot6nw",
+				"updated": "20260929000700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思维导图搜索"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260929000700-kuhjj5g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929000700-kuhjj5g",
+				"updated": "20260929000700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中启用「思维导图块」，即可在块引用和嵌入块候选搜索中通过节点文本找到整张思维导图。全局搜索需在「搜索类型」中勾选「思维导图块」。也可以单独开启「思维导图项块」以搜索各个分支。思维导图块默认开启，思维导图项块默认关闭。旧搜索配置缺少这些选项时继承全局搜索设置，已明确选择的开关状态会保留。"
 				}
 			]
 		},

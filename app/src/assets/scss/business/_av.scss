@@ -161,6 +161,10 @@
     overflow: hidden;
   }
 
+  [data-type="selectDropdown"] .av__select-option .fn__ellipsis {
+    white-space: nowrap;
+  }
+
   // 触发器内已选 chip
   .av__select-chip {
     margin: 1px 2px;

@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "現在のスーパーブロックの末尾にブロックを追加",
 	"createSuperBlockLeft": "左側に局所的な段組みを作成",
 	"createSuperBlockRight": "右側に局所的な段組みを作成",
+	"mindmapItem": "マインドマップ項目ブロック",
 	"listMindmapLock": "表示をロック",
 	"listMindmapUnlock": "表示のロックを解除",
 	"historySnapshots": "関連するタグ付きスナップショット",

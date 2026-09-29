@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "Tambahkan blok ke akhir super blok saat ini",
 	"createSuperBlockLeft": "Buat kolom lokal di sebelah kiri",
 	"createSuperBlockRight": "Buat kolom lokal di sebelah kanan",
+	"mindmapItem": "Blok item peta pikiran",
 	"listMindmapLock": "Kunci tampilan",
 	"listMindmapUnlock": "Buka kunci tampilan",
 	"historySnapshots": "Snapshot bertanda terkait",

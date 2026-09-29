@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "Aggiungi un blocco alla fine del super blocco corrente",
 	"createSuperBlockLeft": "Crea colonne locali a sinistra",
 	"createSuperBlockRight": "Crea colonne locali a destra",
+	"mindmapItem": "Blocco elemento della mappa mentale",
 	"listMindmapLock": "Blocca vista",
 	"listMindmapUnlock": "Sblocca vista",
 	"historySnapshots": "Istantanee contrassegnate correlate",

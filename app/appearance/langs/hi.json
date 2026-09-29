@@ -7,6 +7,7 @@
 	"appendSuperBlockChild": "वर्तमान सुपर ब्लॉक के अंत में ब्लॉक जोड़ें",
 	"createSuperBlockLeft": "बाईं ओर स्थानीय कॉलम बनाएँ",
 	"createSuperBlockRight": "दाईं ओर स्थानीय कॉलम बनाएँ",
+	"mindmapItem": "माइंड मैप आइटम ब्लॉक",
 	"listMindmapLock": "दृश्य लॉक करें",
 	"listMindmapUnlock": "दृश्य अनलॉक करें",
 	"historySnapshots": "संबंधित टैग किए गए स्नैपशॉट",

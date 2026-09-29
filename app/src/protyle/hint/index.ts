@@ -931,7 +931,7 @@ ${genHintItemHTML(item)}
             id = nodeElement.getAttribute("data-node-id");
         }
         const html = nodeElement.outerHTML;
-        const undoContext = shouldCaptureHintUndoFocus(this.splitChar, Constants.BLOCK_HINT_KEYS, protyle.lite, value) ?
+        const undoContext = shouldCaptureHintUndoFocus(this.splitChar, Constants.BLOCK_HINT_KEYS, value) ?
             getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
         // 自顶向下法新建文档后光标定位问题 https://github.com/siyuan-note/siyuan/issues/299
         if (this.lastIndex > -1) {
@@ -1058,13 +1058,13 @@ ${genHintItemHTML(item)}
                 range.deleteContents();
                 this.fixImageCursor(range);
                 protyle.toolbar.showTpl(protyle, nodeElement, range);
-                updateTransaction(protyle, nodeElement, html);
+                updateTransaction(protyle, nodeElement, html, undoContext);
                 return;
             } else if (value === Constants.ZWSP + 1) {
                 range.deleteContents();
                 this.fixImageCursor(range);
                 protyle.toolbar.showWidget(protyle, nodeElement, range);
-                updateTransaction(protyle, nodeElement, html);
+                updateTransaction(protyle, nodeElement, html, undoContext);
                 return;
             } else if (value === Constants.ZWSP + 2) {
                 range.deleteContents();
@@ -1072,7 +1072,7 @@ ${genHintItemHTML(item)}
                 protyle.toolbar.range = range;
                 const rangePosition = getSelectionPosition(nodeElement, range);
                 assetMenu(protyle, {x: rangePosition.left, y: rangePosition.top + 26, w: 0, h: 26});
-                updateTransaction(protyle, nodeElement, html);
+                updateTransaction(protyle, nodeElement, html, undoContext);
                 return;
             } else if (value === Constants.ZWSP + 3) {
                 range.deleteContents();
@@ -1128,7 +1128,7 @@ ${genHintItemHTML(item)}
                 range.deleteContents();
                 this.fixImageCursor(range);
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
-                updateTransaction(protyle, nodeElement, html);
+                updateTransaction(protyle, nodeElement, html, undoContext);
                 return;
             } else if (value.startsWith("plugin") && areProtylePluginExtensionsEnabled(protyle)) {
                 protyle.app.plugins.find((plugin) => {
@@ -1163,7 +1163,7 @@ ${genHintItemHTML(item)}
                     nodeElement = nodeElement.nextElementSibling as HTMLElement;
                     nodeElement.previousElementSibling.remove();
                     focusByWbr(nodeElement, range);
-                    updateTransaction(protyle, nodeElement, html);
+                    updateTransaction(protyle, nodeElement, html, undoContext);
                     let imgElement: HTMLElement = range.startContainer.childNodes[range.startOffset - 1] as HTMLElement || range.startContainer as HTMLElement;
                     if (imgElement && imgElement.nodeType !== 3 && imgElement.classList.contains("img")) {
                         // 已经找到图片
@@ -1218,7 +1218,7 @@ ${genHintItemHTML(item)}
                                 item.style.minWidth = "60px";
                             });
                         }
-                        updateTransaction(protyle, nodeElement, html);
+                        updateTransaction(protyle, nodeElement, html, undoContext);
                     } else {
                         // 保留空段落：原段落清空内容，新列表用 insert 操作
                         editableElement.textContent = "";
@@ -1234,7 +1234,8 @@ ${genHintItemHTML(item)}
                         }], [{
                             action: "update",
                             id: id,
-                            data: html
+                            data: html,
+                            context: undoContext,
                         }, {
                             action: "delete",
                             id: nodeElement.getAttribute("data-node-id")
@@ -1274,7 +1275,8 @@ ${genHintItemHTML(item)}
                         }], [{
                             action: "update",
                             id: id,
-                            data: html
+                            data: html,
+                            context: undoContext,
                         }, {
                             action: "delete",
                             id: newListId
@@ -1313,6 +1315,7 @@ ${genHintItemHTML(item)}
                         action: "delete"
                     }, {
                         data: html,
+                        context: undoContext,
                         id,
                         action: "update"
                     }];

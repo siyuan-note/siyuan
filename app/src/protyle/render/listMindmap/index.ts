@@ -39,13 +39,18 @@ import {focusListMindmap} from "./create";
 import {getListMindmapFoldStates} from "./fold";
 import {isMobile} from "../../../util/functions";
 import {getListMindmapSiblingIDs, getListMindmapSummaryRange} from "./summary";
+import {isProtyleListItemFragment} from "../../runtimeCapabilities";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
-    restoreFocus: (listID: string, candidateIDs: string[]) => void, focusRevision: number, destroy: () => void}>();
+    restoreFocus: (listID: string, candidateIDs: string[]) => void, focusRevision: number,
+    finish: () => Promise<boolean>, destroy: () => void}>();
+
+export const finishListMindmaps = async (owner: IProtyle) => roots.get(owner)?.finish() ?? true;
 
 export const mountNewListMindmap = (owner: IProtyle, list: HTMLElement) => roots.get(owner)?.mountNew(list);
 
-const canToggleView = (owner: IProtyle, list: HTMLElement) => !owner.disabled && !owner.lite &&
+const canToggleView = (owner: IProtyle, list: HTMLElement) => !owner.disabled &&
+    (!owner.lite || isProtyleListItemFragment(owner)) &&
     list.isConnected && !!list.dataset.nodeId &&
     !owner.options.action.includes(Constants.CB_GET_HISTORY) &&
     list.closest(".protyle-wysiwyg") === owner.wysiwyg.element;
@@ -146,7 +151,8 @@ class ListMindmapController {
         }, {capture: true});
         this.host.addEventListener("keydown", event => {
             if (this.view?.isLocked() || event.isComposing || (event.target instanceof Element &&
-                event.target.closest("input, textarea, select, .mindmap-view__editor"))) {
+                (event.target.closest("input, textarea, select") ||
+                    this.host.contains(event.target.closest(".mindmap-view__editor"))))) {
                 return;
             }
             const keys = owner.options?.action && window.siyuan.config.keymap.editor.general;
@@ -519,7 +525,7 @@ class ListMindmapController {
     private async edit(id: string, host: HTMLElement, replaceFirstParagraph?: string) {
         const request = ++this.editRequest;
         if (!canEdit(this.owner, this.list) || (this.activeEditor && !await this.activeEditor.finish()) ||
-            request !== this.editRequest || this.disposed || !host.isConnected) {
+            request !== this.editRequest || this.disposed || !host?.isConnected) {
             return;
         }
         const node = this.model.nodes.get(id);
@@ -572,6 +578,11 @@ class ListMindmapController {
 
     public focusNode(candidateIDs: string[]) {
         this.view.focusNode(candidateIDs.find(id => this.model.nodes.has(id)) || this.model.root.id);
+    }
+
+    public async finish() {
+        await this.taskChanges;
+        return this.activeEditor ? this.activeEditor.finish() : true;
     }
 
     public refresh() {
@@ -631,7 +642,7 @@ const completeList = async (owner: IProtyle, list: HTMLElement) => {
 };
 
 export const initListMindmaps = (owner: IProtyle) => {
-    if (owner.lite || roots.has(owner)) {
+    if (owner.lite && !isProtyleListItemFragment(owner) || roots.has(owner)) {
         return;
     }
     const root = owner.wysiwyg.element;
@@ -718,7 +729,7 @@ export const initListMindmaps = (owner: IProtyle) => {
                     list.removeAttribute("data-mindmap-view-rendered");
                 }
             };
-            if (canEdit(owner, list) && !newlyCreated.has(list)) {
+            if (!owner.lite && canEdit(owner, list) && !newlyCreated.has(list)) {
                 loading.add(list);
                 let retry = false;
                 void completeList(owner, list).then(complete => {
@@ -775,14 +786,21 @@ export const initListMindmaps = (owner: IProtyle) => {
     const observer = new MutationObserver(records => {
         if (records.some(record => {
             const element = record.target instanceof Element ? record.target : record.target.parentElement;
-            return !element?.closest(".mindmap-view") && !(record.type === "attributes" &&
+            return !root.contains(element?.closest(".mindmap-view")) && !(record.type === "attributes" &&
                 ["data-mindmap-view-rendered", Constants.ATTRIBUTE_EDITING].includes(record.attributeName));
         })) {
             schedule();
         }
     });
     observer.observe(root, {childList: true, subtree: true, attributes: true, characterData: true});
-    roots.set(owner, {refresh: schedule, mountNew: list => {
+    roots.set(owner, {refresh: schedule, finish: async () => {
+        for (const instance of instances.values()) {
+            if (!await instance.finish()) {
+                return false;
+            }
+        }
+        return true;
+    }, mountNew: list => {
         if (root.contains(list)) {
             newlyCreated.add(list);
             refresh();

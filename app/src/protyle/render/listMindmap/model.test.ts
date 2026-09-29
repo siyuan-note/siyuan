@@ -152,7 +152,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
         "getListMindmapSiblingIDs, normalizeListMindmapSummaryMetadata, getListMindmapSummaryRange, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
-        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView, registerListMindmapView, resolveVisibleListMindmapBlock};")(
+        "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView, registerListMindmapView, resolveVisibleListMindmapBlock, getListMindmapElements, registerListMindmapRoot, restoreListMindmapFocus};")(
         async (element: Element) => {
             const formulas = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
             await Promise.resolve();
@@ -2766,6 +2766,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     tabContent.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab First\n\nOne\n@tab Second\n\nTwo\n:::\n{: tabs-task=\"true\"}\n");
     tabNode.querySelector(".p").replaceWith(tabContent.firstElementChild);
     const tabSource = tabNode.querySelector<HTMLElement>(".tabs");
+    tabSource.querySelector(".tab-item-title").textContent = "";
     const nestedSource = document.createElement("div");
     nestedSource.innerHTML = lute.Md2BlockDOM("- Nested parent\n  - Nested child\n");
     const nestedList = nestedSource.firstElementChild as HTMLElement;
@@ -2780,6 +2781,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         taskChanges: Promise.resolve(), refresh: () => tabView.update(api.readListMindmap(tabList))});
     let tabMenus = 0;
     const tabView = new api.ListMindmapView({host: tabHost, model: api.readListMindmap(tabList), onExit: () => {},
+        labels: {tabItem: "页签项块"},
         onTabTaskToggle: (id: string, itemID: string) => tabController.setTabTask(id, itemID, taskAPI.nextTaskListMarker),
         onTabTaskMenu: (id: string, itemID: string, anchor: HTMLElement) => {
             check.equal(id, tabNodeID);
@@ -2788,6 +2790,43 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             tabMenus++;
         }});
     tabController.view = tabView;
+    check.equal(tabHost.querySelector(".tabs-tab-label").textContent, "页签项块");
+    const fragmentHost = document.createElement("div");
+    fragmentHost.className = "mindmap-view";
+    const fragmentRoot = document.createElement("div");
+    fragmentRoot.className = "protyle-wysiwyg";
+    fragmentRoot.innerHTML = api.cleanListMindmapHTML(nestedList.outerHTML);
+    fragmentHost.append(fragmentRoot);
+    document.body.append(fragmentHost);
+    const fragmentList = fragmentRoot.firstElementChild as HTMLElement;
+    const localLists = api.getListMindmapElements(fragmentRoot);
+    check.equal(localLists.length, 1);
+    check.equal(localLists[0], fragmentList);
+    const previewHost = document.createElement("div");
+    previewHost.className = "mindmap-view";
+    previewHost.append(fragmentList.cloneNode(true));
+    fragmentList.append(previewHost);
+    check.equal(api.getListMindmapElements(fragmentRoot).length, 1, "preview copies are never editable source maps");
+    let restored = "";
+    const unregisterFragment = api.registerListMindmapRoot(fragmentRoot, () => {}, (id: string) => restored = id);
+    check.equal(api.restoreListMindmapFocus(fragmentRoot, fragmentList.firstElementChild), true);
+    check.equal(restored, fragmentList.dataset.nodeId);
+    fragmentHost.classList.add("mindmap-view__node--editing");
+    previewHost.replaceChildren();
+    let nestedEdited = "";
+    const editableNestedView = new api.ListMindmapView({host: previewHost, model: api.readListMindmap(fragmentList),
+        onExit: () => {}, onEdit: (id: string) => nestedEdited = id});
+    const nestedNode = previewHost.querySelector<HTMLElement>(".mindmap-view__node");
+    nestedNode.querySelector(".mindmap-view__content").dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    check.equal(nestedEdited, nestedNode.dataset.mindmapId, "an outer editing node must not disable inner double-clicks");
+    nestedEdited = "";
+    editableNestedView.setEditing(undefined);
+    editableNestedView.focusNode(nestedNode.dataset.mindmapId);
+    nestedNode.dispatchEvent(new KeyboardEvent("keydown", {key: "x", bubbles: true}));
+    check.equal(nestedEdited, nestedNode.dataset.mindmapId, "inner keyboard editing remains available");
+    editableNestedView.destroy();
+    unregisterFragment();
+    fragmentHost.remove();
     const outerOptions = {readonly: () => false, task: () => check.fail("Outer editor claimed a preview task")};
     api.tabsRender(taskParent, outerOptions);
     const tabSnapshot = api.cleanListMindmapHTML(tabList.outerHTML);

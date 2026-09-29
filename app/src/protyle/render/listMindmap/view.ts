@@ -721,6 +721,7 @@ export class ListMindmapView {
                 content.dataset.placeholder = this.label("listMindmapPlaceholder");
                 if (content.querySelector('.tabs[data-type="NodeTabs"]')) {
                     tabsRender(content, {
+                        label: this.label("tabItem"),
                         readonly: () => true,
                         taskReadonly: () => !!this.readOnly || !this.options.onTabTaskToggle,
                         taskLabel: this.label("taskList"),
@@ -1801,7 +1802,8 @@ export class ListMindmapView {
     private pinchStart = (event: TouchEvent) => {
         if (this.locked || event.touches.length !== 2 || Array.from(event.touches).some(touch =>
             !this.viewport.contains(touch.target as Node) ||
-            (touch.target as Element).closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing"))) {
+            ((touch.target as Element).closest("button, input, select, textarea, audio, video, iframe") ||
+                this.viewport.contains((touch.target as Element).closest(".mindmap-view__node--editing"))))) {
             this.pinch = undefined;
             return;
         }
@@ -1851,7 +1853,8 @@ export class ListMindmapView {
         this.suppressLinkClick = false;
         this.suppressPanContextMenu = false;
         const target = event.target as HTMLElement;
-        if (![0, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing")) {
+        if (![0, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe") ||
+            this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
             return;
         }
         if (event.button === 0 && !this.panning && target.closest(".mindmap-view__summary")) {
@@ -2213,7 +2216,7 @@ export class ListMindmapView {
 
     private contentClick = (event: MouseEvent) => {
         const target = event.target as Element;
-        if (target.closest(".mindmap-view__node--editing")) {
+        if (this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
             return;
         }
         const link = target.closest<HTMLElement>('a[href], [data-type~="a"][data-href], [data-type~="block-ref"][data-id]');
@@ -2257,7 +2260,8 @@ export class ListMindmapView {
             this.editRelationLabel(event);
             return;
         }
-        if (target.closest("button, input, select, audio, video, iframe, .mindmap-view__node--editing")) {
+        if (target.closest("button, input, select, audio, video, iframe") ||
+            this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
             return;
         }
         const id = target.closest<HTMLElement>(".mindmap-view__node")?.dataset.mindmapId;
@@ -2277,12 +2281,16 @@ export class ListMindmapView {
         event.stopPropagation();
         this.cancelPointer();
         this.finishThen(() => {
+            const content = this.getContentHost(id);
+            if (!content?.isConnected || !this.model.nodes.has(id)) {
+                return;
+            }
             if (this.model.nodes.get(id)?.virtual) {
                 this.editRootTitle(id);
                 return;
             }
             this.setEditing(id);
-            this.options.onEdit?.(id, this.getContentHost(id));
+            this.options.onEdit?.(id, content);
         });
     };
 
@@ -2385,7 +2393,7 @@ export class ListMindmapView {
     }
 
     private wheel = (event: WheelEvent) => {
-        if (this.locked || (event.target as HTMLElement).closest(".mindmap-view__node--editing")) {
+        if (this.locked || this.viewport.contains((event.target as HTMLElement).closest(".mindmap-view__node--editing"))) {
             return;
         }
         if (this.pointer?.relation) {
@@ -2519,7 +2527,8 @@ export class ListMindmapView {
         const target = event.target as HTMLElement;
         const startingComposition = event.isComposing || event.key === "Process" || event.key === "Dead" ||
             event.keyCode === 229;
-        if (target.closest("input, textarea, select, audio, video, iframe, .mindmap-view__node--editing")) {
+        if (target.closest("input, textarea, select, audio, video, iframe") ||
+            this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
             return;
         }
         if (this.pointer?.relation && event.key !== "Escape") {

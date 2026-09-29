@@ -65,6 +65,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             accept: true,
             flush: async (): Promise<void> => undefined,
             saveBarrier: undefined as Promise<void> | undefined,
+            finishNested: async (): Promise<boolean> => true,
         };
         const protyle = {
             block: {rootID: ""},
@@ -146,6 +147,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             avRender: noop,
             blockRender: noop,
             highlightRender: noop,
+            finishListMindmaps: () => state.finishNested(),
             cleanListMindmapHTML: new Function(cleanupSource + "; return cleanListMindmapHTML;")(),
         };
         const open = new Function(...Object.keys(dependencies), sourceCode + "; return openListMindmapEditor;")(
@@ -255,6 +257,29 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     check.equal(tabsEditor.element.querySelector('[data-node-id="paragraph"]').textContent, "Edited body");
     check.equal(tabsEditor.element.querySelector(".tabs").getAttribute("tabs-position"), "top");
     await tabsEditor.remove();
+    const nestedEditor = create(tabsHTML);
+    nestedEditor.state.finishNested = async () => false;
+    check.equal(await nestedEditor.editor.finish(), false);
+    check.equal(nestedEditor.state.destroyed, 0, "failed nested saves keep the outer editor open");
+    nestedEditor.state.finishNested = async () => {
+        nestedEditor.wysiwyg.querySelector('[data-node-id="paragraph"]').textContent = "Nested edit";
+        return true;
+    };
+    check.equal(await nestedEditor.editor.finish(), true);
+    check.equal(nestedEditor.element.querySelector('[data-node-id="paragraph"]').textContent, "Nested edit");
+    await nestedEditor.remove();
+
+    const nestedKeys = create(tabsHTML);
+    const nestedView = document.createElement("div");
+    nestedView.className = "mindmap-view";
+    nestedView.tabIndex = 0;
+    nestedKeys.wysiwyg.append(nestedView);
+    nestedView.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    nestedView.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true}));
+    await settle();
+    check.equal(nestedKeys.state.finished, 0, "nested shortcuts must not finish the outer editor");
+    check.deepEqual(nestedKeys.state.additions, []);
+    await nestedKeys.remove();
     const conflictingTabs = create(tabsHTML);
     conflictingTabs.element.querySelector('[data-node-id="paragraph"]').textContent = "External change";
     conflictingTabs.wysiwyg.querySelector('[data-node-id="paragraph"]').textContent = "Local change";

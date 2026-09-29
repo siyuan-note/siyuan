@@ -22,7 +22,9 @@ export const registerListMindmapView = (list: HTMLElement, view: ListMindmapView
 export const resolveVisibleListMindmapBlock = (source: Element): {
     carrier: HTMLElement, scrollElement: HTMLElement, reveal: () => void, focus: () => void
 } | null | undefined => {
-    if (source.closest(".mindmap-view")) {
+    const view = source.closest(".mindmap-view");
+    const editor = source.closest(".protyle-wysiwyg");
+    if (view && (!editor || editor.contains(view))) {
         return undefined;
     }
     const list = source.closest<HTMLElement>('[data-mindmap-view-rendered="true"]');
@@ -76,7 +78,7 @@ export const registerListMindmapRoot = (root: Element, refresh: () => void,
 // 撤销回放会替换源块，节点焦点交给编辑器在脑图重新挂载后恢复。
 export const restoreListMindmapFocus = (root: Element, source: Element) => {
     const registered = editorRoots.get(root);
-    if (!registered || source.closest(".mindmap-view")) {
+    if (!registered || root.contains(source.closest(".mindmap-view"))) {
         return false;
     }
     const list = getListMindmapElements(root).find(item => item.contains(source));
@@ -100,8 +102,10 @@ export const getListMindmapElements = (root: Element) => {
     if (root.matches(selector)) {
         lists.unshift(root as HTMLElement);
     }
-    return lists.filter(list => !list.closest(".mindmap-view") &&
-        !list.parentElement?.closest(selector));
+    return lists.filter(list => (!list.closest(".mindmap-view") ||
+        root.matches(".protyle-wysiwyg") && list.closest(".protyle-wysiwyg") === root &&
+        !root.contains(list.closest(".mindmap-view"))) &&
+        !root.contains(list.parentElement?.closest(selector)));
 };
 
 // 导出页面和只读预览共用节点布局，源列表始终保留在文档中。

@@ -18,6 +18,7 @@ import {blockRender} from "../blockRender";
 import {highlightRender} from "../highlightRender";
 import {cleanListMindmapHTML} from "./model";
 import type {ListMindmapNode} from "./model";
+import {finishListMindmaps} from "./index";
 
 interface ListMindmapEditorOptions {
     owner: IProtyle;
@@ -303,6 +304,10 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             finishAfterComposition = true;
             return false;
         }
+        // 退出外层节点前先保存内层脑图，避免清理预览时遗漏尚未提交的正文。
+        if (!await finishListMindmaps(fragment.protyle)) {
+            return false;
+        }
         if (pendingSave) {
             await pendingSave;
         }
@@ -353,6 +358,10 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         .forEach(type => host.addEventListener(type, event => event.stopPropagation(), {signal}));
     host.addEventListener("keydown", event => event.stopPropagation(), {signal});
     host.addEventListener("keydown", event => {
+        if (event.target instanceof Element &&
+            fragment.wysiwyg.contains(event.target.closest(".mindmap-view"))) {
+            return;
+        }
         if (event.isComposing || composing) {
             return;
         }

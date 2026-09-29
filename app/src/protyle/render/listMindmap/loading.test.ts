@@ -27,6 +27,7 @@ const browserCases = async (source: string, css: string) => {
             host.style.setProperty("--mindmap-view-height", list.style.height);
         },
         canEdit: () => true,
+        isProtyleListItemFragment: (owner: {fragment?: boolean}) => owner.fragment === true,
         completeList: () => {
             requests++;
             return new Promise<string>(resolve => { resolveLoad = resolve; });
@@ -43,6 +44,7 @@ const browserCases = async (source: string, css: string) => {
                 list.insertAdjacentHTML("beforeend", '<div class="mindmap-view">Rendered</div>');
             }
             refresh() {}
+            async finish() { return true; }
             destroy() {}
         },
     };
@@ -100,6 +102,23 @@ const browserCases = async (source: string, css: string) => {
         root.remove();
     }
     check.deepEqual(errors, []);
+    for (const fragment of [false, true]) {
+        const root = document.createElement("div");
+        root.className = "protyle-wysiwyg";
+        root.innerHTML = '<div data-type="NodeMindmap" data-node-id="local"><div>Local content</div></div>';
+        document.body.append(root);
+        const owner = {lite: true, fragment, wysiwyg: {element: root}};
+        const previousRequests = requests;
+        init(owner);
+        await frame();
+        check.equal(!!root.querySelector(".mindmap-view"), fragment);
+        check.equal(requests, previousRequests, "local fragments must not reload content from the kernel");
+        if (fragment) {
+            check.equal(await roots.get(owner).finish(), true);
+            roots.get(owner).destroy();
+        }
+        root.remove();
+    }
     return "Mindmap loading cases passed";
 };
 

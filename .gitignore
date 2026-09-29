@@ -2,6 +2,7 @@
 *.exe
 !app/elevator/elevator-*.exe
 *.dll
+!app/nsis-resources/x86-unicode/nsProcess.dll
 *.so
 *.dylib
 *.aar

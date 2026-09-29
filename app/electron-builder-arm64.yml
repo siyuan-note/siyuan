@@ -9,6 +9,7 @@ extraMetadata:
   main: "electron/main.js"
 directories:
   output: "build"
+  buildResources: "nsis-resources"
 files:
   - "electron"
 afterPack: "./scripts/afterPack.js"

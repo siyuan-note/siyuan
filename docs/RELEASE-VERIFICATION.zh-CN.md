@@ -93,7 +93,7 @@ python -X utf8 scripts/prepare-release.py 3.8.6 --publish --execute
 python -X utf8 scripts/prepare-release.py 3.8.6 --tag-android --execute
 ```
 
-准备脚本默认使用主仓库同级的 `siyuan-android`、`siyuan-harmony`、`b3log-index`，可用 `--android-dir`、`--harmony-dir`、`--index-dir` 指定路径。主仓库正式版标签仍在最终发布步骤中创建，iOS 仓库仍需手动准备和同步。
+准备脚本默认使用主仓库同级的 `siyuan-android`、`siyuan-harmony`、`b3log-index`，可用 `--android-dir`、`--harmony-dir`、`--index-dir` 指定路径。主仓库正式版标签在 GitHub 发布 Release 时创建，iOS 仓库仍需手动准备和同步。
 
 ### 2. 确认 WSL 自动同步条件
 
@@ -184,16 +184,12 @@ python -X utf8 scripts/verify-release.py check --version 3.8.6
 
 ### 9. 手动发布与上架
 
-将发布代码合并并推送到 `master`，确认其构建输入与已验证安装包对应的发布提交一致，再为该提交创建并推送正式版标签：
+将发布代码合并并推送到 `master`，确认其构建输入与已验证安装包对应的发布提交一致。
 
-```powershell
-git tag v3.8.6 master
-git push origin refs/tags/v3.8.6
-```
+在 GitHub 创建 Release 时输入新标签 `v3.8.6`，选择创建新标签，目标分支选择 `master`，核对目标提交。发布 Release 时由 GitHub 创建标签，无需在本地手动打标签或推送标签。已有同名标签时先核对其指向，不覆盖或重复创建。
 
-正式版标签推送会触发 [Release Docker Image](../.github/workflows/dockerimage.yml)，仅合并分支不会触发。已有标签先核对指向，不覆盖或重复创建。
-
-- 将公开分发的安装包和最终的 `SHA256SUMS.txt` 上传至 `siyuan-note/siyuan` 的 GitHub Release，选择标签 `v3.8.6`，核对文件名后公开正式版
+- 将公开分发的安装包和最终的 `SHA256SUMS.txt` 上传至 `siyuan-note/siyuan` 的 GitHub Release，核对版本、目标提交和文件名后公开正式版
+- 确认正式版标签已创建，并检查 [Release Docker Image](../.github/workflows/dockerimage.yml) 的运行状态；该工作流监听正式版标签的推送事件，仅合并分支不会触发
 - 通过下载域名下载安装包并核对摘要
 - 同步 Gitee
 - 上传百度网盘

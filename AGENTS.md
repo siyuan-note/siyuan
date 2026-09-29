@@ -6,6 +6,18 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 ## 1. Non-negotiable constraints
 
+### Requirement evaluation
+
+Before implementing a requirement, evaluate its premise and approach with effort proportional to its complexity and risk
+
+1. **Check the premise and existing capabilities:** Inspect the relevant implementation, settings, shortcuts, APIs, or plugin capabilities, and reproduce reported behavior when feasible. Check applicable repository rules, encrypted notebook compatibility, the `.sy` format, and API contracts. Distinguish the user's goal and acceptance criteria from a suggested implementation; evaluate whether that implementation addresses the underlying problem. State any limits to verification
+2. **Choose an appropriate approach:** Prefer the smallest sufficient change consistent with existing practices and compatibility requirements. Consider whether an existing capability or a documentation correction already satisfies the need, including the option of making no code change
+3. **Briefly report before editing:** State the conclusion, key evidence, and remaining uncertainty in a progress update before the first change. Discuss alternatives only when they involve meaningful tradeoffs; simple tasks need only a short explanation
+4. **Ask only when a decision is needed:** If the premise is false or implementation is unwarranted, explain the evidence and ask how to proceed unless the user's existing instructions already resolve the next step. Ask before changing the agreed goal or scope, or making an unresolved product, priority, or compatibility tradeoff. Do not silently narrow or broaden the task
+5. **Otherwise proceed directly:** When the requirement is reasonable, implement it without another confirmation round. Choosing a different implementation that meets the agreed goal and acceptance criteria does not itself require approval
+
+Unambiguous mechanical edits with no behavioral or compatibility impact need no separate evaluation round. Continue to follow applicable repository checks; a rename, version bump, or documentation update is not automatically exempt
+
 ### Do not hand-edit
 
 - `app/stage/protyle/js/lute/lute.min.js` (built from upstream `88250/lute`)

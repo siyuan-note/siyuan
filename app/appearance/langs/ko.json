@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "미러 사본 만들기",
 	"duplicateCompletely": "완전한 사본 만들기",
 	"isMsStoreVerTip": "현재 사용 중인 버전은 Microsoft Store 버전입니다. Microsoft Store에서 업데이트를 확인하세요",
-	"andSubFile": "<b>${x}</b> 및 그 하위 문서 ${y}개를 삭제하시겠습니까?",
+	"andSubFile": "<b>${x}</b> 및 그 <b>하위 문서 ${y}개</b>를 삭제하시겠습니까?",
 	"confirmDeleteTip": "<b>${x}</b>을(를) 삭제하시겠습니까?",
 	"rollbackTip": "삭제 후 [데이터 히스토리]에서 복원할 수 있으며, [설정 - 문서 - 파일 관리 - 히스토리 보존 일수]에 따라 <code class= 'fn__code'>${x}</code>일 동안 보관됩니다",
 	"newView": "뷰 추가",

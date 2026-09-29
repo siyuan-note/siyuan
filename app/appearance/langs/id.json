@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "Buat salinan cermin",
 	"duplicateCompletely": "Buat salinan lengkap",
 	"isMsStoreVerTip": "Versi yang saat ini digunakan adalah versi Microsoft Store, silakan periksa pembaruan di Microsoft Store",
-	"andSubFile": "Apakah Anda yakin ingin menghapus <b>${x}</b> dan ${y} sub-dokumennya?",
+	"andSubFile": "Apakah Anda yakin ingin menghapus <b>${x}</b> dan <b>${y} sub-dokumennya</b>?",
 	"confirmDeleteTip": "Apakah Anda yakin ingin menghapus <b>${x}</b>?",
 	"rollbackTip": "Setelah dihapus, dapat dipulihkan di [Riwayat Data], disimpan <code class='fn__code'>${x}</code> hari sesuai [Pengaturan - Dokumen - Manajemen File - Hari Penyimpanan Riwayat]",
 	"newView": "Tambah Tampilan",

@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "Criar cópia espelhada",
 	"duplicateCompletely": "Criar cópia completa",
 	"isMsStoreVerTip": "A versão atualmente usada é da Microsoft Store, verifique atualizações na Microsoft Store",
-	"andSubFile": "Tem certeza que deseja excluir <b>${x}</b> e seus ${y} subdocumentos?",
+	"andSubFile": "Tem certeza que deseja excluir <b>${x}</b> e seus <b>${y} subdocumentos</b>?",
 	"confirmDeleteTip": "Tem certeza que deseja excluir <b>${x}</b>?",
 	"rollbackTip": "Após exclusão, pode ser restaurado em [Histórico de Dados], retido por <code class= 'fn__code'>${x}</code> dias de acordo com [Configurações - Documentos - Gerenciamento de arquivos - Dias de Retenção de Histórico]",
 	"newView": "Adicionar Visualização",

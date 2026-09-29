@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "建立鏡像副本",
 	"duplicateCompletely": "建立完整副本",
 	"isMsStoreVerTip": "目前使用的版本為 Microsoft Store 版本，請在 Microsoft Store 中檢查更新",
-	"andSubFile": "決定刪除 <b>${x}</b> 及其 ${y} 個子文件嗎？",
+	"andSubFile": "決定刪除 <b>${x}</b> 及其 <b>${y} 個子文件</b>嗎？",
 	"confirmDeleteTip": "確定刪除<b>${x}</b> 嗎？",
 	"rollbackTip": "刪除後可在 [資料歷史] 中恢復，按 [設定 - 文件 - 檔案管理 - 歷史保留天數] 保留 <code class= 'fn__code'>${x}</code> 天",
 	"newView": "新增視圖",

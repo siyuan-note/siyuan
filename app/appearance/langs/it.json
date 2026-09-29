@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "Crea copia speculare",
 	"duplicateCompletely": "Crea copia completa",
 	"isMsStoreVerTip": "La versione attualmente utilizzata è la versione Microsoft Store, controlla gli aggiornamenti nel Microsoft Store",
-	"andSubFile": "Sei sicuro di voler eliminare <b>${x}</b> e i suoi ${y} sotto-documenti?",
+	"andSubFile": "Sei sicuro di voler eliminare <b>${x}</b> e i suoi <b>${y} sotto-documenti</b>?",
 	"confirmDeleteTip": "Sei sicuro di voler eliminare <b>${x}</b>?",
 	"rollbackTip": "Dopo l'eliminazione, può essere ripristinato in [Cronologia dati], conservato <code class= 'fn__code'>${x}</code> giorni in base a [Impostazioni - Documenti - Gestione file - Giorni di conservazione della cronologia]",
 	"newView": "Aggiungi vista",

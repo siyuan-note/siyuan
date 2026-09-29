@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "Vytvoriť zrkadlovú kópiu",
 	"duplicateCompletely": "Vytvoriť úplnú kópiu",
 	"isMsStoreVerTip": "Používate verziu z Microsoft Store, skontrolujte aktualizácie tam",
-	"andSubFile": "Naozaj chcete odstrániť <b>${x}</b> a jeho ${y} poddokumentov?",
+	"andSubFile": "Naozaj chcete odstrániť <b>${x}</b> a jeho <b>${y} poddokumentov</b>?",
 	"confirmDeleteTip": "Naozaj chcete odstrániť <b>${x}</b>?",
 	"rollbackTip": "Po odstránení je možné dokument obnoviť v [Histórii dát], uchováva sa <code class='fn__code'>${x}</code> dní podľa [Nastavenia - Dokumenty - Správa súborov - Dni uchovávania histórie]",
 	"newView": "Pridať zobrazenie",

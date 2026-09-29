@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "Ayna kopyası oluştur",
 	"duplicateCompletely": "Tam kopya oluştur",
 	"isMsStoreVerTip": "Kullanılan sürüm Microsoft Store sürümüdür, lütfen Microsoft Store’dan güncellemeleri kontrol et",
-	"andSubFile": "<b>${x}</b> ve onun ${y} alt dosyasını silmek istediğine emin misin?",
+	"andSubFile": "<b>${x}</b> ve onun <b>${y} alt dosyasını</b> silmek istediğine emin misin?",
 	"confirmDeleteTip": "<b>${x}</b> öğesini silmek istediğine emin misin?",
 	"rollbackTip": "Silindikten sonra [Veri Geçmişi] kısmından geri yüklenebilir, [Ayarlar - Belgeler - Dosya Yönetimi - Geçmişi saklama süresi (gün)] ayarına göre <code class= 'fn__code'>${x}</code> gün saklanır",
 	"newView": "Görünüm ekle",

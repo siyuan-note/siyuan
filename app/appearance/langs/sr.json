@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "Napravi zrcalnu kopiju",
 	"duplicateCompletely": "Napravi potpunu kopiju",
 	"isMsStoreVerTip": "Trenutno korišćena verzija je Microsoft Store verzija. Ažuriranja proveriti u Microsoft Store-u",
-	"andSubFile": "Da li ste sigurni da želite da obrišete <b>${x}</b> i njegove poddokumente (${y})?",
+	"andSubFile": "Da li ste sigurni da želite da obrišete <b>${x}</b> i njegove <b>poddokumente (${y})</b>?",
 	"confirmDeleteTip": "Da li ste sigurni da želite da obrišete <b>${x}</b>?",
 	"rollbackTip": "Posle brisanja može da se povrati u [Istorija podataka]; čuva se <code class='fn__code'>${x}</code> dana prema podešavanju [Podešavanja - Dokumenti - Upravljanje fajlovima - Broj dana čuvanja istorije]",
 	"newView": "Dodaj prikaz",

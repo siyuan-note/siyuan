@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "Créer une copie miroir",
 	"duplicateCompletely": "Créer une copie complète",
 	"isMsStoreVerTip": "La version actuellement utilisée est la version du Microsoft Store, veuillez vérifier les mises à jour dans le Microsoft Store",
-	"andSubFile": "Êtes-vous sûr de vouloir supprimer <b>${x}</b> et ses sous-documents ${y} ?",
+	"andSubFile": "Êtes-vous sûr de vouloir supprimer <b>${x}</b> et ses <b>sous-documents ${y}</b> ?",
 	"confirmDeleteTip": "Êtes-vous sûr de supprimer <b>${x}</b> ?",
 	"rollbackTip": "Après la suppression, il peut être restauré dans [Historique des données], conservé <code class= 'fn__code'>${x}</code> jours selon [Paramètres - Documents - Gestion des fichiers - Jours de rétention historiques]",
 	"newView": "Ajouter une vue",

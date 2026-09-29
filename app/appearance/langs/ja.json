@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "ミラーのコピーを作成",
 	"duplicateCompletely": "完全なコピーを作成",
 	"isMsStoreVerTip": "現在使用中のバージョンは Microsoft Store バージョンです。Microsoft Store で更新プログラムを確認してください",
-	"andSubFile": "<b>${x}</b> とそのサブドキュメント ${y} を削除してもよろしいですか？",
+	"andSubFile": "<b>${x}</b> とその<b>サブドキュメント ${y}</b> を削除してもよろしいですか？",
 	"confirmDeleteTip": "<b>${x}</b> を削除してもよろしいですか？",
 	"rollbackTip": "削除後は [設定 - ドキュメント - ファイル管理 - 履歴の保存日数] の現在の設定により、<code class= 'fn__code'>${x}</code> 日間は [データ履歴] から復元できます",
 	"newView": "ビューを追加",

@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "Spiegelkopie maken",
 	"duplicateCompletely": "Volledige kopie maken",
 	"isMsStoreVerTip": "Dit is de Microsoft Store-versie, controleer updates in de Microsoft Store",
-	"andSubFile": "Weet u zeker dat u <b>${x}</b> en zijn ${y} subdocumenten wilt verwijderen?",
+	"andSubFile": "Weet u zeker dat u <b>${x}</b> en zijn <b>${y} subdocumenten</b> wilt verwijderen?",
 	"confirmDeleteTip": "Weet u zeker dat u <b>${x}</b> wilt verwijderen?",
 	"rollbackTip": "Na verwijdering kan het worden hersteld in [Gegevensgeschiedenis], bewaard <code class='fn__code'>${x}</code> dagen volgens [Instellingen - Documenten - Bestandsbeheer - Bewaartermijn geschiedenis]",
 	"newView": "Weergave toevoegen",

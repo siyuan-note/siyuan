@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "Spiegelkopie erstellen",
 	"duplicateCompletely": "Vollständige Kopie erstellen",
 	"isMsStoreVerTip": "Die derzeit verwendete Version ist die Microsoft Store-Version, bitte überprüfen Sie die Updates im Microsoft Store",
-	"andSubFile": "Sind Sie sicher, dass Sie <b>${x}</b> und seine ${y} Unterdokumente löschen möchten?",
+	"andSubFile": "Sind Sie sicher, dass Sie <b>${x}</b> und seine <b>${y} Unterdokumente</b> löschen möchten?",
 	"confirmDeleteTip": "Sind Sie sicher, dass Sie <b>${x}</b> löschen möchten?",
 	"rollbackTip": "Nach dem Löschen kann es in [Datenhistorie] wiederhergestellt werden, es wird <code class='fn__code'>${x}</code> Tage gemäß [Einstellungen - Dokumente - Dateiverwaltung - Aufbewahrungstage der Historien] aufbewahrt.",
 	"newView": "Neue Ansicht hinzufügen",

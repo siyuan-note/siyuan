@@ -1233,7 +1233,7 @@
 	"duplicateMirror": "Create mirror copy",
 	"duplicateCompletely": "Create complete copy",
 	"isMsStoreVerTip": "The currently used version is the Microsoft Store version, please check for updates in the Microsoft Store",
-	"andSubFile": "Are you sure you want to delete <b>${x}</b> and its ${y} subdocs?",
+	"andSubFile": "Are you sure you want to delete <b>${x}</b> and its <b>${y} subdocs</b>?",
 	"confirmDeleteTip": "Are you sure to delete <b>${x}</b>?",
 	"rollbackTip": "After deletion, it can be restored in [Data History], retained <code class='fn__code'>${x}</code> days according to [Settings - Documents - File Management - History Retention Days]",
 	"newView": "Add View",

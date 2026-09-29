@@ -55,7 +55,6 @@ class LoggedStream:
 class BuildRecord:
     def __init__(self, directory, args, version):
         self.directory = Path(directory)
-        self.report = self.directory / "verification.json"
         self.log = None
         self.line_start = True
         self.active_stage = None
@@ -69,7 +68,6 @@ class BuildRecord:
                            ("windows_arm64", "Windows ARM64")))
         stages.extend((platform, {"linux": "Linux", "android": "Android", "harmony": "鸿蒙"}[platform])
                       for platform in PLATFORMS[1:] if platform in args.platforms)
-        stages.append(("verification", "安装包校验"))
         self.data = {"schema_version": 1, "version": version, "platforms": args.platforms, "appx": args.appx,
                      "output_directory": str(args.output), "work_directory": None, "status": "pending",
                      "current_stage": None, "stages": [dict(id=key, name=name, status="pending", artifacts=[])
@@ -310,8 +308,6 @@ def source_preflight(args, version):
         for filename in ("AppxManifest.xml", "AppxManifest-arm64.xml"):
             check_version((ROOT / "app/appx" / filename).read_text(encoding="utf-8"),
                           r'\bVersion="([^"]+)"', version.split("-")[0] + ".0", filename)
-    if not VERIFY.find_7z(args.sevenzip):
-        raise BuildError("最终安装包验证需要 7-Zip，请安装或指定 --sevenzip")
     commands = {"git"}
     if set(args.platforms) & {"windows", "android", "harmony"}:
         commands.update(("node", "pnpm"))
@@ -582,19 +578,12 @@ class Builder:
         self.collect([app], "鸿蒙", started)
 
     def finish(self):
-        args = argparse.Namespace(directory=self.args.output, version=self.version, baseline=None,
-                                  report=self.record.report if self.record else None, sevenzip=self.args.sevenzip)
-        try:
-            failed = VERIFY.verify(args)
-        except (VERIFY.VerificationError, OSError, ValueError, subprocess.SubprocessError) as error:
-            if args.report and not args.report.exists():
-                args.report.write_text(json.dumps({"version": self.version, "directory": str(args.directory),
-                                                  "status": "FAIL", "error": str(error), "packages": []},
-                                                 ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            raise
-        if failed:
-            raise BuildError(f"安装包校验未通过，已收集的产物保留在 {self.args.output}")
-        print(f"完成：本次收集 {len(self.artifacts)} 个安装包，{self.args.output} 中的安装包已全部校验")
+        print(f"构建完成：本次收集 {len(self.artifacts)} 个安装包到 {self.args.output}；请单独执行安装包校验")
+        command = ["python", "-X", "utf8", "scripts/verify-release.py", "check", str(self.args.output),
+                   "--version", self.version]
+        if self.args.sevenzip:
+            command.extend(("--sevenzip", self.args.sevenzip))
+        print(subprocess.list2cmdline(command))
 
 
 def parser():
@@ -614,7 +603,7 @@ def parser():
     result.add_argument("--android-dir", type=Path, default=ROOT.parent / "siyuan-android")
     result.add_argument("--harmony-dir", type=Path, default=ROOT.parent / "siyuan-harmony")
     result.add_argument("--deveco", type=Path, default=Path("D:/Program Files/Huawei/DevEco Studio"))
-    result.add_argument("--sevenzip", help="安装包校验使用的 7-Zip 可执行文件")
+    result.add_argument("--sevenzip", help="仅用于完成后提示的手动校验命令，不在构建时调用")
     return result
 
 
@@ -645,7 +634,7 @@ def main():
         print("构建前自动同步 WSL 到 Windows 当前提交；提交不同时要求两端工作区干净，目标已推送且包含 WSL 当前提交")
     for platform in args.platforms:
         print(f"  {platform}: {descriptions[platform]}")
-    print("各平台产物生成后立即复制到收集目录，最后统一校验该目录中的安装包")
+    print("各平台产物生成后立即复制到收集目录，构建完成后请单独执行安装包校验")
     if not args.execute:
         print("当前仅显示计划，没有执行构建或修改文件；添加 --execute 开始")
         return 0
@@ -681,8 +670,7 @@ def execute_build(args, version, record):
             method = getattr(builder, platform)
             with record.stage(platform) if platform != "windows" else nullcontext():
                 method(assets) if platform in {"android", "harmony"} else method()
-    with record.stage("verification"):
-        builder.finish()
+    builder.finish()
 
 
 if __name__ == "__main__":

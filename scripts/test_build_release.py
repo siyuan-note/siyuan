@@ -295,14 +295,16 @@ class BuildTests(unittest.TestCase):
             "siyuan-3.8.4-googleplay-release.aab", "siyuan-3.8.4-huawei-release.aab",
         })
 
-    def test_failed_validation_preserves_collected_packages(self):
+    def test_finish_only_prints_manual_validation_command(self):
         artifact = self.write(self.builder.work / "bad.apk")
         self.builder.collect([artifact], "Android", time.time())
-        with patch.object(build.VERIFY, "verify", return_value=1) as verify:
-            with self.assertRaises(build.BuildError), contextlib.redirect_stdout(io.StringIO()):
-                self.builder.finish()
+        output = io.StringIO()
+        with patch.object(build.VERIFY, "verify") as verify, contextlib.redirect_stdout(output):
+            self.builder.finish()
         self.assertEqual((self.args.output / "bad.apk").read_bytes(), artifact.read_bytes())
-        self.assertEqual(verify.call_args.args[0].directory, self.args.output)
+        verify.assert_not_called()
+        self.assertIn("scripts/verify-release.py check", output.getvalue())
+        self.assertIn("--version 3.8.4", output.getvalue())
 
     def test_add_platform_preserves_existing_packages_and_checksums(self):
         existing = self.write(self.args.output / "siyuan-3.8.4-win.exe", b"signed windows")
@@ -484,10 +486,10 @@ class RecordTests(unittest.TestCase):
         self.assertEqual(stages["windows_amd64"]["artifacts"], [str(self.args.output / "windows.exe")])
         self.assertEqual(stages["windows_arm64"]["status"], "failed")
         self.assertEqual(stages["linux"]["status"], "pending")
-        self.assertEqual(stages["verification"]["status"], "pending")
+        self.assertNotIn("verification", stages)
         linux.assert_not_called()
 
-    def test_complete_execution_persists_report_and_all_stage_results(self):
+    def test_complete_execution_persists_progress_without_validation(self):
         def windows_arch(builder, arch, config):
             package = builder.work / f"siyuan-3.8.4-win-{arch}.exe"
             package.write_bytes(b"package")
@@ -502,13 +504,15 @@ class RecordTests(unittest.TestCase):
                 patch.object(build.Builder, "preflight"), patch.object(build.Builder, "build_ui"), \
                 patch.object(build.Builder, "windows_tools"), \
                 patch.object(build.Builder, "windows_arch", windows_arch), patch.object(build.Builder, "linux", linux), \
-                patch.object(build.VERIFY, "verify_package", return_value={"target": "test", "resource_count": 1}):
+                patch.object(build.VERIFY, "verify") as verify:
             with self.record.session():
                 build.execute_build(self.args, "3.8.4", self.record)
         progress = self.progress()
         self.assertEqual(progress["status"], "succeeded")
         self.assertTrue(all(stage["status"] == "succeeded" for stage in progress["stages"]))
-        self.assertEqual(len(json.loads(self.record.report.read_text(encoding="utf-8"))["packages"]), 3)
+        verify.assert_not_called()
+        self.assertFalse((self.directory / "verification.json").exists())
+        self.assertNotIn("verification", [stage["id"] for stage in progress["stages"]])
         self.assertFalse((self.args.output / "build.log").exists())
         self.assertFalse((self.args.output / "progress.json").exists())
 
@@ -521,38 +525,8 @@ class RecordTests(unittest.TestCase):
         self.assertEqual(self.progress()["status"], "failed")
         self.assertEqual(self.progress()["stages"][0]["error"], "missing tool")
         self.assertIsNone(self.progress()["work_directory"])
-        self.assertFalse(self.record.report.exists())
+        self.assertFalse((self.directory / "verification.json").exists())
         ui.assert_not_called()
-
-    def test_verification_report_is_written_on_success_and_failure(self):
-        self.args.output.mkdir()
-        package = self.args.output / "siyuan-3.8.4-linux.AppImage"
-        package.write_bytes(b"package")
-        for failure in (False, True):
-            record = build.BuildRecord(self.directory, self.args, "3.8.4")
-            builder = build.Builder(self.args, "3.8.4", self.root, record)
-            effect = build.VERIFY.VerificationError("invalid package") if failure else None
-            with patch.object(build.VERIFY, "verify_package", side_effect=effect,
-                              return_value={"target": "ELF/amd64", "resource_count": 1}), \
-                    contextlib.redirect_stdout(io.StringIO()):
-                if failure:
-                    with self.assertRaises(build.BuildError):
-                        builder.finish()
-                else:
-                    builder.finish()
-            report = json.loads(record.report.read_text(encoding="utf-8"))
-            self.assertEqual(report["packages"][0]["status"], "FAIL" if failure else "PASS")
-            self.assertEqual(report["packages"][0]["sha256"], build.VERIFY.digest(package))
-            record.report.unlink()
-
-    def test_verification_startup_failure_is_reported(self):
-        builder = build.Builder(self.args, "3.8.4", self.root, self.record)
-        with self.assertRaises(build.VERIFY.VerificationError):
-            builder.finish()
-        report = json.loads(self.record.report.read_text(encoding="utf-8"))
-        self.assertEqual(report["status"], "FAIL")
-        self.assertIn("error", report)
-
 
 if __name__ == "__main__":
     unittest.main()

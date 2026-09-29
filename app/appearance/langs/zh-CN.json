@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "难度高的优先",
 	"flashcardStudyLapsesFirst": "遗忘次数多的优先",
 	"flashcardRetryWeak": "再练薄弱卡片（${count} 张）",
+	"embedHTMLFileBelow": "在下方嵌入 HTML 文件",
 	"horizontalSuperBlock": "横向超级块",
 	"verticalSuperBlock": "纵向超级块",
 	"prependSuperBlockColumn": "在当前超级块开头添加分栏",

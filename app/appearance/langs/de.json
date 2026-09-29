@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "Schwierigste zuerst",
 	"flashcardStudyLapsesFirst": "Häufig vergessene zuerst",
 	"flashcardRetryWeak": "Schwache Karten erneut üben (${count})",
+	"embedHTMLFileBelow": "HTML-Datei darunter einbetten",
 	"horizontalSuperBlock": "Horizontaler Superblock",
 	"verticalSuperBlock": "Vertikaler Superblock",
 	"prependSuperBlockColumn": "Spalte am Anfang des aktuellen Superblocks hinzufügen",

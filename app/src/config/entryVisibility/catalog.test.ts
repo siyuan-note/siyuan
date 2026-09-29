@@ -1254,6 +1254,13 @@ test("multiple document and notebook settings have distinct labels", () => {
     }
 });
 
+test("HTML attachment embedding follows rename in the link menu", () => {
+    const children = getEntryCatalogChildren("inline.link");
+    const renameIndex = children.findIndex((item) => item.key === "rename");
+    assert.ok(renameIndex >= 0);
+    assert.equal(children[renameIndex + 1]?.key, "embedHTMLFileBelow");
+});
+
 test("HTML file insertion follows general asset insertion", () => {
     const children = getEntryCatalogChildren("document.more");
     const insertAssetIndex = children.findIndex((item) => item.key === "insertAsset");

@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "सबसे कठिन पहले",
 	"flashcardStudyLapsesFirst": "सबसे ज़्यादा भूले गए पहले",
 	"flashcardRetryWeak": "कमज़ोर कार्डों का फिर अभ्यास करें (${count})",
+	"embedHTMLFileBelow": "नीचे HTML फ़ाइल एम्बेड करें",
 	"horizontalSuperBlock": "क्षैतिज सुपर ब्लॉक",
 	"verticalSuperBlock": "लंबवत सुपर ब्लॉक",
 	"prependSuperBlockColumn": "वर्तमान सुपर ब्लॉक की शुरुआत में कॉलम जोड़ें",

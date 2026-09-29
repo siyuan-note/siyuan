@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "Najťažšie ako prvé",
 	"flashcardStudyLapsesFirst": "Najčastejšie zabudnuté ako prvé",
 	"flashcardRetryWeak": "Znovu precvičiť slabšie kartičky (${count})",
+	"embedHTMLFileBelow": "Vložiť súbor HTML nižšie",
 	"horizontalSuperBlock": "Horizontálny super blok",
 	"verticalSuperBlock": "Vertikálny super blok",
 	"prependSuperBlockColumn": "Pridať stĺpec na začiatok aktuálneho super bloku",

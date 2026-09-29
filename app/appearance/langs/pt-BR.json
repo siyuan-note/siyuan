@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "Mais difíceis primeiro",
 	"flashcardStudyLapsesFirst": "Mais esquecidos primeiro",
 	"flashcardRetryWeak": "Praticar novamente os cartões difíceis (${count})",
+	"embedHTMLFileBelow": "Incorporar arquivo HTML abaixo",
 	"horizontalSuperBlock": "Super bloco horizontal",
 	"verticalSuperBlock": "Super bloco vertical",
 	"prependSuperBlockColumn": "Adicionar uma coluna ao início do super bloco atual",

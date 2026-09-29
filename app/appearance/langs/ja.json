@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "難しい順",
 	"flashcardStudyLapsesFirst": "忘れた回数が多い順",
 	"flashcardRetryWeak": "苦手なカードをもう一度練習（${count} 枚）",
+	"embedHTMLFileBelow": "下に HTML ファイルを埋め込む",
 	"horizontalSuperBlock": "横向きスーパーブロック",
 	"verticalSuperBlock": "縦向きスーパーブロック",
 	"prependSuperBlockColumn": "現在のスーパーブロックの先頭に列を追加",

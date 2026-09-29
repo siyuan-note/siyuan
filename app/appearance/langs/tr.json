@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "Önce en zorlar",
 	"flashcardStudyLapsesFirst": "Önce en çok unutulanlar",
 	"flashcardRetryWeak": "Zayıf kartları yeniden çalış (${count})",
+	"embedHTMLFileBelow": "HTML dosyasını aşağıya göm",
 	"horizontalSuperBlock": "Yatay süper blok",
 	"verticalSuperBlock": "Dikey süper blok",
 	"prependSuperBlockColumn": "Geçerli süper bloğun başına sütun ekle",

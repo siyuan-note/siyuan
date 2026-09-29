@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "Moeilijkste eerst",
 	"flashcardStudyLapsesFirst": "Vaakst vergeten eerst",
 	"flashcardRetryWeak": "Zwakke kaarten opnieuw oefenen (${count})",
+	"embedHTMLFileBelow": "HTML-bestand hieronder insluiten",
 	"horizontalSuperBlock": "Horizontaal superblok",
 	"verticalSuperBlock": "Verticaal superblok",
 	"prependSuperBlockColumn": "Kolom toevoegen aan het begin van het huidige superblok",

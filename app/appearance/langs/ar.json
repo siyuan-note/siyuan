@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "الأصعب أولاً",
 	"flashcardStudyLapsesFirst": "الأكثر نسياناً أولاً",
 	"flashcardRetryWeak": "التدرب مجدداً على البطاقات الضعيفة (${count})",
+	"embedHTMLFileBelow": "تضمين ملف HTML أدناه",
 	"horizontalSuperBlock": "كتلة خارقة أفقية",
 	"verticalSuperBlock": "كتلة خارقة عمودية",
 	"prependSuperBlockColumn": "إضافة عمود إلى بداية الكتلة الخارقة الحالية",

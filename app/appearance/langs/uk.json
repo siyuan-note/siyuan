@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "Спочатку найскладніші",
 	"flashcardStudyLapsesFirst": "Спочатку найчастіше забуті",
 	"flashcardRetryWeak": "Знову потренувати складні картки (${count})",
+	"embedHTMLFileBelow": "Вбудувати HTML-файл нижче",
 	"horizontalSuperBlock": "Горизонтальний суперблок",
 	"verticalSuperBlock": "Вертикальний суперблок",
 	"prependSuperBlockColumn": "Додати стовпець на початок поточного суперблока",

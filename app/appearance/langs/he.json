@@ -32,6 +32,7 @@
 	"flashcardStudyDifficultFirst": "הקשות ביותר תחילה",
 	"flashcardStudyLapsesFirst": "הנשכחות ביותר תחילה",
 	"flashcardRetryWeak": "תרגול נוסף של כרטיסיות חלשות (${count})",
+	"embedHTMLFileBelow": "הטמעת קובץ HTML מתחת",
 	"horizontalSuperBlock": "בלוק עליון אופקי",
 	"verticalSuperBlock": "בלוק עליון אנכי",
 	"prependSuperBlockColumn": "הוספת עמודה לתחילת הבלוק העליון הנוכחי",

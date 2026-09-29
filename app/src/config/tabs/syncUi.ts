@@ -285,7 +285,8 @@ const renderProviderConfig = (root: Element) => {
         if (!def.isProviderConfigAllowed()) {
             html = def.genUnpaidIntro();
         } else if (isThirdPartySyncProviderDef(def)) {
-            html = `${def.genIntro()}${def.fields.map(genProviderField).join("")}${genProviderActionButtons(def.configKey)}`;
+            const warning = def.configKey === "s3" ? `<div data-type="s3-endpoint-warning" class="b3-label b3-label--inner ft__error fn__none" role="status">${window.siyuan.languages.s3EndpointBucketWarning}</div>` : "";
+            html = `${def.genIntro()}${def.fields.map(genProviderField).join("")}${warning}${genProviderActionButtons(def.configKey)}`;
         } else {
             html = def.genIntro();
         }
@@ -402,11 +403,13 @@ const bindProviderConfigEvent = (configElement: Element, root: Element) => {
         return;
     }
     syncProviderConfigBoundElements.add(configElement);
+    configElement.addEventListener("input", () => updateS3EndpointWarning(configElement));
     configElement.addEventListener("change", (event: Event) => {
         const target = event.target as HTMLElement;
         if (!target.matches(".b3-text-field, .b3-select")) {
             return;
         }
+        updateS3EndpointWarning(configElement);
         saveSyncProviderConfigValues(configElement);
     });
 };
@@ -443,6 +446,7 @@ const saveSyncProviderConfigValues = (configElement: Element) => {
                         element.value = String(response.data[configKey][key]);
                     }
                 });
+                updateS3EndpointWarning(configElement);
             }
         })
         .catch(() => {});
@@ -462,6 +466,25 @@ const fillSyncProviderConfigValues = (configElement: Element) => {
             el.value = String(data[key]);
         }
     });
+    updateS3EndpointWarning(configElement);
+};
+
+const updateS3EndpointWarning = (configElement: Element) => {
+    const warning = configElement.querySelector('[data-type="s3-endpoint-warning"]');
+    if (!warning) {
+        return;
+    }
+    const endpoint = configElement.querySelector<HTMLInputElement>("#endpoint").value.trim();
+    const bucket = configElement.querySelector<HTMLInputElement>("#bucket").value.trim().toLowerCase();
+    let suspicious = false;
+    try {
+        const url = new URL(endpoint.includes("://") ? endpoint : `https://${endpoint}`);
+        suspicious = !!bucket && ["http:", "https:"].includes(url.protocol) &&
+            url.hostname.toLowerCase().startsWith(`${bucket}.`);
+    } catch {
+        // 不完整的地址由配置校验处理，这里只提示重复桶名。
+    }
+    warning.classList.toggle("fn__none", !suspicious);
 };
 
 const readProviderConfigFields = <T extends object>(configElement: Element, template: T): T => {

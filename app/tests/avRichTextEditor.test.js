@@ -126,6 +126,24 @@ const runCases = async (sources) => {
         assert.equal(hasAVEditorSession(state.owner), false);
         assert.equal(document.querySelector(".av__richtext-mask"), null);
 
+        if (mobile) {
+            const cancelled = createOwner(true);
+            fragment.input.append(document.createTextNode("discarded"));
+            document.querySelector('[data-type="cancel"]').click();
+            await settle();
+            assert.equal(cancelled.saves.length, 0);
+            assert.equal(cancelled.closed(), 1);
+            assert.equal(document.querySelector(".av__richtext-mask"), null);
+
+            const returned = createOwner(true);
+            fragment.pendingInput = "pending";
+            editor.destroyAVRichTextEditor(true);
+            await settle();
+            assert.equal(returned.saves[0][0].text.content, "Initialpending");
+            assert.equal(returned.closed(), 1);
+            assert.equal(document.querySelector(".av__richtext-mask"), null);
+        }
+
         const removed = createOwner(mode !== "document");
         fragment.input.append(document.createTextNode("unsaved"));
         await settle();

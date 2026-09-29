@@ -165,7 +165,11 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
         const updates: unknown[] = [];
         let opens = 0;
         let html = "";
+        let startDrag: () => void;
+        let menusClosed = 0;
         const root = {
+            isConnected: true,
+            classList: {add() {}},
             querySelectorAll: (): unknown[] => [],
             querySelector: () => ({addEventListener() {}}),
             addEventListener(type: string, listener: (event: unknown) => void, capture?: boolean) {
@@ -179,6 +183,8 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
             "./state": {getCalendarState: () => ({anchor: start, mode: "week", rowLimit: 3}), getCalendarRequestRange: () => range},
             "./settings": {isCalendarDateColumn: () => true, bindCalendarSettings() {}},
             "./undated": {getCalendarUndatedHTML: () => "", bindCalendarUndated() {}},
+            "./hitTest": {getCalendarDropDay: () => start},
+            "./preview": {createCalendarPreviewLayout: () => ({})},
             "../render": {genTabHeaderHTML: () => ""},
             "../cellValue": {cellValueIsEmpty},
             "../conditionalColor": {getConditionalBackground},
@@ -198,7 +204,10 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
         }).outputText, {
             exports, require: (name: string) => modules[name] || {},
-            window: {siyuan: {isPublish: mode === "publish", config: {lang: "en"}, languages: {}, menus: {menu: {remove() {}}}}},
+            window: {siyuan: {isPublish: mode === "publish", config: {lang: "en"}, languages: {},
+                menus: {menu: {remove() { menusClosed++; }}}},
+            setTimeout: (callback: () => void) => { startDrag = callback; return 1; }, addEventListener() {}},
+            AbortController,
             document: {activeElement: null},
         });
         const block = {dataset: {avId: "database", nodeId: "carrier"},
@@ -228,5 +237,97 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
             assert.equal(args[9][0].rowID, "row");
             assert.equal(args[9][0].colID, "second");
         }
+        if (mode === "mobile") {
+            const closedBeforeDrag = menusClosed;
+            handlers.touchstart({
+                target: {closest: (selector: string) => selector === "[data-calendar-item]" ? item : null},
+                touches: [{identifier: 1, clientX: 10, clientY: 20}],
+            });
+            assert.equal(menusClosed, closedBeforeDrag, "touching an event does not dismiss its menu before dragging");
+            startDrag();
+            assert.equal(menusClosed, closedBeforeDrag + 1, "long-press dragging dismisses the item menu");
+        }
+    }
+});
+
+test("calendar edit-mode changes refresh controls and stale actions cannot create rows", async () => {
+    for (const mobile of [false, true]) {
+        const start = new Date(2026, 8, 1).getTime();
+        const range = {start, end: dates.addCalendarDays(start, 7), timeZone: "UTC"};
+        const state = {anchor: start, mode: "week", rowLimit: 3, expandedWeeks: new Set()};
+        const handlers: Record<string, (event: unknown) => void> = {};
+        let html = "";
+        let created = 0;
+        const root = {
+            querySelectorAll: (): unknown[] => [],
+            querySelector: () => ({addEventListener() {}}),
+            addEventListener(type: string, listener: (event: unknown) => void, capture?: boolean) {
+                if (capture !== true) {
+                    handlers[type] = listener;
+                }
+            },
+        };
+        const block = {dataset: {avId: "database", nodeId: "carrier"},
+            querySelector: (selector: string) => selector === ".av__calendar" ? root : null, removeAttribute() {}};
+        const data = {viewID: "calendar", viewType: "calendar", view: {
+            calendar: {dateKeyID: "date"}, calendarRange: range,
+            columns: [{id: "date", type: "date"}], rows: [],
+        }} as unknown as IAV;
+        const protyle = {disabled: true, options: {}, element: {getAttribute: (): null => null},
+            wysiwyg: {element: {style: {}, setAttribute() {},
+                querySelectorAll: (selector: string) => selector === '.av[data-av-type="calendar"]' ? [block] : []}},
+        } as unknown as IProtyle;
+        const calendar = {} as typeof import("./render");
+        const modules: Record<string, unknown> = {
+            "./date": dates,
+            "./state": {getCalendarState: () => state, getCalendarRequestRange: () => range},
+            "./settings": {isCalendarDateColumn: () => true},
+            "./undated": {getCalendarUndatedHTML: () => "", bindCalendarUndated() {}},
+            "../render": {genTabHeaderHTML: () => ""},
+            "../newItemTemplate": {createAttributeViewItem: () => created++},
+            "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
+            "../../../../constants": {Constants: {ZWSP: ""}},
+            "../container": {replaceAVContainer: (_block: unknown, value: string) => { html = value; }},
+            "../virtualScroll": {getAVData: () => data, getAVSelectedItemIDs: (): string[] => [], setAVData() {}},
+            "../search": {bindAvSearch() {}},
+            "../richText": {renderAVRichTextElements() {}},
+            "../locate": {finishAVLocate() {}},
+            "../render/av/calendar/render": calendar,
+            "../../util/functions": {isMobile: () => mobile},
+            "../ui/hideElements": {hideElements() {}},
+            "./disabledWYSIWYG": {disabledWYSIWYG() {}},
+            "./setEditMode": {updateMobileTitleReadonly() {}},
+            "../../dialog/tooltip": {hideTooltip() {}},
+            "./compatibility": {isAndroid: () => mobile, isIPhone: () => false},
+        };
+        const context = {
+            require: (name: string) => modules[name] || {},
+            window: {siyuan: {config: {lang: "en"}, languages: {}, menus: {menu: {remove() {}}}}},
+            document: {activeElement: null as Element | null},
+        };
+        const compile = (file: string) => transpileModule(readFileSync(file, "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+        }).outputText;
+        runInNewContext(compile(join(__dirname, "render.ts")), {...context, exports: calendar});
+        const modes = {} as typeof import("../../../util/onGet");
+        runInNewContext(compile(join(__dirname, "../../../util/onGet.ts")), {...context, exports: modes});
+        await calendar.renderCalendar(block as unknown as HTMLElement, protyle, data);
+        assert.doesNotMatch(html, /data-calendar-add=/);
+        modes.enableProtyle(protyle);
+        assert.match(html, /data-calendar-add=/);
+        const editableClick = handlers.click;
+        const clickAdd = () => editableClick({stopPropagation() {}, target: {
+            closest: (selector: string) => selector === "[data-calendar-add]" ? {dataset: {calendarAdd: start}} : null,
+        }});
+        clickAdd();
+        assert.equal(created, 1);
+        modes.disabledProtyle(protyle);
+        assert.doesNotMatch(html, /data-calendar-add=/);
+        clickAdd();
+        assert.equal(created, 1, "a handler retained before locking must check the current mode");
+        modes.enableProtyle(protyle);
+        assert.match(html, /data-calendar-add=/);
+        clickAdd();
+        assert.equal(created, 2);
     }
 });

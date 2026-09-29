@@ -17,7 +17,7 @@ import {replaceAVContainer} from "../container";
 import {renderAVRichTextElements} from "../richText";
 import {avContextmenu} from "../action";
 import {bindAvSearch} from "../search";
-import {getAVSelectedItemIDs, setAVData} from "../virtualScroll";
+import {getAVData, getAVSelectedItemIDs, setAVData} from "../virtualScroll";
 import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarInterval, getISOWeekForCalendarRow, ICalendarEvent, ICalendarSegment,
     moveCalendarDate, packCalendarWeek, resizeCalendarDate} from "./date";
 import {openCalendarJump} from "./jump";
@@ -31,6 +31,15 @@ const iconButton = (action: string, icon: string, label: string) => `<button typ
 
 const canEditCalendar = (protyle: IProtyle) => !protyle.disabled && !window.siyuan.isPublish &&
     !protyle.options.history?.created && !protyle.options.history?.snapshot;
+
+export const refreshCalendarReadonly = (protyle: IProtyle) => {
+    protyle.wysiwyg.element.querySelectorAll<HTMLElement>('.av[data-av-type="calendar"]').forEach(blockElement => {
+        const data = getAVData(blockElement);
+        if (data?.viewType === "calendar") {
+            void renderCalendar(blockElement, protyle, data);
+        }
+    });
+};
 
 const openCalendarItem = (protyle: IProtyle, blockElement: HTMLElement, row: IAVRow) => {
     const primary = row.cells.find(cell => cell.valueType === "block" || cell.value?.type === "block");
@@ -175,6 +184,7 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
                 return;
             }
             dragging = true;
+            window.siyuan.menus.menu.remove();
             root.classList.add("av__calendar--dragging");
             sourceItems.forEach(element => element.classList.add("av__calendar-item--dragging"));
         };
@@ -451,6 +461,9 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         void avRender(blockElement, protyle);
     };
     const create = (date: number) => {
+        if (!canEditCalendar(protyle)) {
+            return;
+        }
         state.anchor = date;
         createAttributeViewItem({protyle, blockElement, templateID: data.defaultTemplateID,
             position: {calendarDate: date}});
@@ -528,7 +541,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             void renderCalendar(blockElement, protyle, data);
         }
         const field = target.closest<HTMLElement>("[data-calendar-create-field]");
-        if (field && editable) {
+        if (field && canEditCalendar(protyle)) {
             addCalendarDateField(protyle, blockElement, data, field.dataset.calendarCreateField as "date" | "created" | "updated");
         }
     });
@@ -554,7 +567,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
             menu.addSeparator();
             menu.addItem({icon: "iconOpen", label: window.siyuan.languages.openBy,
                 click: () => { void openCalendarItem(protyle, blockElement, entry.row); }});
-            if (editable && dateColumn?.type === "date") {
+            if (canEditCalendar(protyle) && dateColumn?.type === "date") {
                 const week = item.closest<HTMLElement>("[data-calendar-week]");
                 const rect = week.getBoundingClientRect();
                 const day = addCalendarDays(Number(week.dataset.calendarWeek),

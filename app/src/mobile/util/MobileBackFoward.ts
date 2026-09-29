@@ -3,6 +3,8 @@ import {hideElements} from "../../protyle/ui/hideElements";
 import {getCurrentEditor} from "../editor";
 import {closePanel} from "./closePanel";
 import {backModel, destroyModel} from "../menu/model";
+import {destroyAVRichTextEditor} from "../../protyle/render/av/richTextEditor";
+import {isAbove} from "../../util/zIndex";
 
 export const clearMobileBackForward = (notebookId?: string) => {
     if (notebookId) {
@@ -23,12 +25,18 @@ export const goForward = () => {
 export const goBack = () => {
     const editor = getCurrentEditor();
     const menuElement = document.getElementById("menu");
+    const richTextElement = document.querySelector<HTMLElement>(".av__richtext-mask");
+    const topDialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
     if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;
     } else if (window.siyuan.viewer && !window.siyuan.viewer.destroyed) {
         window.siyuan.viewer.destroy();
+        return;
+    } else if (richTextElement && (!topDialog ||
+        isAbove(richTextElement, topDialog.element.querySelector(".b3-dialog")))) {
+        destroyAVRichTextEditor(true);
         return;
     } else if (window.siyuan.dialogs.length !== 0) {
         window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();

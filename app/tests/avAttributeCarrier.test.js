@@ -21,6 +21,7 @@ const runCases = async () => {
             }
         },
         renderAVRichTextElements: () => {},
+        preserveAVBindingRange: () => () => {},
         getColIconByType: () => "iconDatabase",
         genAVAttributeRowHTML: ({value}) => `<div data-row-id="${value.blockID}" data-col-id="${value.keyID}"></div>`,
         getPageSize: () => ({unGroupPageSize: 20, groupPageSize: {}}),
@@ -126,6 +127,7 @@ const runCases = async () => {
             constructor(_app, _element, options) {
                 initialize = () => options.after({protyle: {
                     id: "row-editor", highlight: {styleElement: document.createElement("style")},
+                    hint: {element: document.createElement("div")},
                 }});
             }
             destroy() {}

@@ -20,6 +20,7 @@ import {isMobile} from "../../util/functions";
 import {foldPassiveType} from "../wysiwyg/renderBacklink";
 import {showMessage} from "../../dialog/message";
 import {avRender} from "../render/av/render";
+import {refreshCalendarReadonly} from "../render/av/calendar/render";
 import {hideTooltip} from "../../dialog/tooltip";
 import {stickyRow} from "../render/av/row";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
@@ -516,6 +517,7 @@ export const disabledForeverProtyle = (protyle: IProtyle) => {
 
 /** 禁用编辑器 */
 export const disabledProtyle = (protyle: IProtyle) => {
+    const wasDisabled = protyle.disabled;
     window.siyuan.menus.menu.remove();
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
     protyle.disabled = true;
@@ -531,6 +533,9 @@ export const disabledProtyle = (protyle: IProtyle) => {
         protyle.background.element.classList.remove("protyle-background--enable");
     }
     disabledWYSIWYG(protyle.wysiwyg.element);
+    if (!wasDisabled) {
+        refreshCalendarReadonly(protyle);
+    }
     if (protyle.breadcrumb) {
         const readonlyButton = protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]');
         readonlyButton.querySelector("use").setAttribute("xlink:href", "#iconLock");
@@ -552,6 +557,7 @@ export const enableProtyle = (protyle: IProtyle) => {
     if (protyle.element.getAttribute("disabled-forever") === "true") {
         return;
     }
+    const wasDisabled = protyle.disabled;
     protyle.disabled = false;
     protyle.databaseAttributePanel?.updateReadonly();
     if (isMobile()) {
@@ -587,6 +593,9 @@ export const enableProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
         stickyRow(item, protyle.contentElement, "all");
     });
+    if (wasDisabled) {
+        refreshCalendarReadonly(protyle);
+    }
     if (protyle.breadcrumb) {
         const readonlyButton = protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]');
         readonlyButton.querySelector("use").setAttribute("xlink:href", "#iconUnlock");

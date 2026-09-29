@@ -203,13 +203,19 @@ export const initMobileBars = () => {
     }
     initialized = true;
     window.addEventListener("siyuan-mobile-keyboard-change", ((event: CustomEvent<boolean>) => {
+        pauseMobileBarsScroll();
         barsState = reduceMobileBarsState(barsState, {
             type: "set-editing",
             active: event.detail,
             scrollTop: scrollElement?.scrollTop,
         });
+        if (!isMobileBarsAutoHide()) {
+            barsState = reduceMobileBarsState(barsState, {type: "set-reading-bars", visible: true});
+        }
         renderMobileBars();
     }) as EventListener);
+    window.addEventListener("resize", () => pauseMobileBarsScroll());
+    window.visualViewport?.addEventListener("resize", () => pauseMobileBarsScroll());
     document.addEventListener("selectionchange", onSelectionChange);
 
     panelObserver?.disconnect();

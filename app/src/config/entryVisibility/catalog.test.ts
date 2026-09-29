@@ -348,7 +348,7 @@ test("plugin top bar entries use the legacy unpinned list as their default visib
 });
 
 test("toolbar catalog follows the default toolbar declaration", () => {
-    const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH);
+    const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH).filter(item => !item.key.startsWith("mobile-"));
     assert.deepEqual(children.map((item) => item.key), DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key));
     assert.equal(children.filter((item) => item.type === "separator").length, 2);
     const familyIndex = children.findIndex(item => item.key === "font-family");
@@ -377,7 +377,7 @@ test("toolbar catalog follows plugin insertion slots and removes unloaded plugin
             [defaults[0], pluginItem, "|", ...defaults.slice(1)], "plugin.name", () => "Plugin Name - Shared Item")
             .map((item) => typeof item === "string" ? {name: item} : item);
         refreshToolbarCatalog(toolbar);
-        const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH);
+        const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH).filter(item => !item.key.startsWith("mobile-"));
         assert.deepEqual(children.slice(0, 4).map((item) => item.key), [
             DESKTOP_TOOLBAR_ENTRIES[0].key,
             pluginKey,

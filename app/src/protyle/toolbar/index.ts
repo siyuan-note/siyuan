@@ -740,7 +740,7 @@ export class Toolbar {
             return;
         }
 
-        const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic").nextElementSibling : this.element;
+        const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic") : this.element;
         const actionBtn = action === "toolbar" ? toolbarElement.querySelector(`[data-type="${type}"]`) : undefined;
         const remove = INLINE_FORMAT_TYPES.includes(type) && !textObj ?
             getRangesInlineFormats(ranges).includes(type) :
@@ -1012,7 +1012,7 @@ export class Toolbar {
                 }
             });
         }
-        const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic").nextElementSibling : this.element;
+        const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic") : this.element;
         const actionBtn = action === "toolbar" ? toolbarElement.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
         let startContainer: Node;

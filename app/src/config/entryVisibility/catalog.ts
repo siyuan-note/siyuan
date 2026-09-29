@@ -6,6 +6,7 @@ import {
     TOOLBAR_ENTRY_ROOT_PATH,
 } from "../../protyle/toolbar/defaults";
 import {mergeEntryOrderPreservingUnknown} from "./order";
+import {getMobileToolbarActionKey, MOBILE_TOOLBAR_ACTIONS, MOBILE_TOOLBAR_INSERTS} from "../../mobile/util/toolbarActions";
 import {getPluginDockEntryKey} from "../../plugin/dockKey";
 import {
     getLegacyPluginTopBarEntryKey,
@@ -501,17 +502,23 @@ const gutterSingle = () => [
 export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
 
 // 共享工具栏声明决定目录默认顺序，字体和字号位于外观之前。
-const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => {
-    if (item.separator) {
-        return separator(item.key);
-    }
-    const fontControl = ["font-family", "font-size"].includes(item.key);
-    return node(item.key, lang(item.lang), !fontControl, undefined, undefined,
-        fontControl ? {
-            defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
-            customDefaultVisible: false,
-        } : undefined);
-});
+const toolbarBuiltinChildren = [
+    ...MOBILE_TOOLBAR_ACTIONS.map(item => node(getMobileToolbarActionKey(item.name), lang(item.lang), true)),
+    separator("mobile-separator"),
+    ...DESKTOP_TOOLBAR_ENTRIES.map((item) => {
+        if (item.separator) {
+            return separator(item.key);
+        }
+        const fontControl = ["font-family", "font-size"].includes(item.key);
+        return node(item.key, lang(item.lang), !fontControl, undefined, undefined,
+            fontControl ? {
+                defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
+                customDefaultVisible: false,
+            } : undefined);
+    }),
+    ...MOBILE_TOOLBAR_INSERTS.map(item => node(getMobileToolbarActionKey(item.name), lang(item.lang), false,
+        undefined, undefined, {defaultVisible: () => false, customDefaultVisible: false})),
+];
 const toolbarBuiltinNodeMap = new Map(toolbarBuiltinChildren.map((item) => [item.key, item]));
 
 const slashMenuBuiltinChildren = [
@@ -1303,8 +1310,12 @@ export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
         pluginLabels.set(key, label);
         nodes.set(key, menuItem.name === "|" ? separator(key) : node(key, literal(label)));
     });
-    const order = mergeEntryOrderPreservingUnknown(toolbarBuiltinChildren.map((item) => item.key), actualOrder);
-    const children = normalizeToolbarCatalogSeparators(order.flatMap((key) => nodes.get(key) || []));
+    const order = mergeEntryOrderPreservingUnknown(DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key), actualOrder);
+    const children = normalizeToolbarCatalogSeparators([
+        ...toolbarBuiltinChildren.filter(item => item.key.startsWith("mobile-") && item.simple),
+        ...order.flatMap((key) => nodes.get(key) || []),
+        ...toolbarBuiltinChildren.filter(item => item.key.startsWith("mobile-") && !item.simple),
+    ]);
     const signature = JSON.stringify(children.map((item) => toolbarCatalogNodeSignature(item, pluginLabels)));
     if (signature === toolbarCatalogSignature) {
         return;

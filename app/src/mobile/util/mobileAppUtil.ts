@@ -1,5 +1,6 @@
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {notifyMobileKeyboardChange} from "./mobileKeyboardChange";
+import {isMobileSelectionMode, suppressMobileSelectionFocus} from "./selectionKeyboard";
 
 export let keyboardLockUntil = 0;
 
@@ -10,6 +11,9 @@ export const armKeyboardLock = () => {
 };
 
 export const callMobileAppShowKeyboard = () => {
+    if (isMobileSelectionMode() || suppressMobileSelectionFocus(document.activeElement)) {
+        return;
+    }
     armKeyboardLock();
     notifyMobileKeyboardChange(true);
 

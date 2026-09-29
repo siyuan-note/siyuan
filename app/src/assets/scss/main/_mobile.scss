@@ -1342,6 +1342,11 @@ body.mobile-topbar--merged {
   flex-direction: column;
   z-index: 1;
 
+  &--selection {
+    width: calc(100% - 16px);
+    max-width: 480px;
+  }
+
   &__dynamic {
     overflow: auto;
     display: flex;

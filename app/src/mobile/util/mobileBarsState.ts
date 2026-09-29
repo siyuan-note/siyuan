@@ -73,7 +73,7 @@ export const createMobileBarsState = (scrollTop = 0): IMobileBarsState => ({
 });
 
 export const isMobileBarsScrollPaused = (state: IMobileBarsState) => {
-    return state.editing || state.selecting || state.panelOpen || state.programmaticScrolling;
+    return state.selecting || state.panelOpen || state.programmaticScrolling;
 };
 
 export const getMobileBarsVisibility = (
@@ -111,7 +111,7 @@ export const reduceMobileBarsState = (
         return {
             ...resetScrollTracking(state, action.scrollTop),
             editing: action.active,
-            readingBarsOffset: action.active ? 0 : state.readingBarsOffset,
+            readingBarsOffset: action.active && !state.editing ? scrollOptions.maxOffset : state.readingBarsOffset,
         };
     }
 

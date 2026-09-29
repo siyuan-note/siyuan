@@ -60,7 +60,9 @@ import {
 const getVisibleEntryCatalog = () => isMobile() ? entryCatalog.filter(item =>
     item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash")
     .map(item => item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child =>
-        child.type === "separator" || MOBILE_TOOLBAR_NAMES.includes(child.key) || child.key.startsWith("plugin:"))} : item) : entryCatalog.map(item =>
+        child.type === "separator" || child.key.startsWith("mobile-") ||
+        MOBILE_TOOLBAR_NAMES.includes(child.key) || child.key.startsWith("plugin:"))} : item) : entryCatalog.map(item =>
+    item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child => !child.key.startsWith("mobile-"))} :
     item.key === TOP_BAR_ROOT_PATH && !isInMobileApp() ?
         {...item, children: item.children.filter(child => child.key !== "barExit")} : item);
 

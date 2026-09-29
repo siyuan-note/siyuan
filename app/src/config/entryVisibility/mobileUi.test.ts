@@ -245,7 +245,8 @@ test("mobile entry settings preserve preferences and support touch sorting witho
 }, async () => {
     const modules = ["config/entryVisibility/ui", "config/entryVisibility/catalog", "config/entryVisibility/order",
         "config/entryVisibility/profile", "config/entryVisibility/dockOrder", "config/entryVisibility/touchOrder",
-        "protyle/toolbar/defaults", "protyle/wysiwyg/codeBlockUtil", "plugin/dockKey", "plugin/topBarKey", "util/escape"];
+        "protyle/toolbar/defaults", "mobile/util/toolbarActions", "protyle/wysiwyg/codeBlockUtil",
+        "plugin/dockKey", "plugin/topBarKey", "util/escape"];
     const sources = Object.fromEntries(modules.map(id => [id, transpileModule(
         readFileSync(path.resolve(process.cwd(), "src", id + ".ts"), "utf8") +
         (id.endsWith("/ui") ? "\nexports.open = openProfileEditor;" : ""),

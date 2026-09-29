@@ -105,6 +105,7 @@
     &--managing {
       [data-type="repoitem"] .b3-list-item__action,
       [data-type="compare"],
+      .history__snapshot-footer,
       .history__snapshot-pane > .history__action {
         display: none;
       }
@@ -242,6 +243,17 @@
       padding: 0;
       gap: 4px;
       border: 0;
+    }
+
+    &-footer {
+      justify-content: center;
+      border-bottom: 0;
+      border-top: 1px solid var(--b3-border-color);
+
+      .history__repo-pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
     }
 
     &-heading,

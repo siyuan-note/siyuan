@@ -95,7 +95,6 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     <button class="b3-button b3-button--text" data-action="tagged" aria-pressed="false">${lang.repoTaggedSnapshots}</button>
     <span class="fn__flex-1"></span>
     <button class="b3-button b3-button--outline fn__none" data-action="manage">${lang.repoBatchManage}</button>
-    <button class="b3-button b3-button--outline" data-type="genRepo">${lang.createSnapshot}</button>
 </div>
 <form class="history__snapshot-toolbar" data-role="date-range">
     <label>${lang.startDate} <input type="date" class="b3-text-field" data-range="start" min="1970-01-01" max="9999-12-31"></label>
@@ -124,9 +123,19 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     <button class="b3-button b3-button--text${canPurgeRepo(source, window.siyuan.config.sync.provider) ? "" : " fn__none"}" data-action="purge">${source === "local" ? lang.dataRepoPurge : lang.cloudStoragePurge}</button>
 </div>
 <label class="history__snapshot-toolbar fn__none"><input type="checkbox" class="history__snapshot-check" data-repo-all> ${lang.selectAll}</label>${template}`;
-        pane.querySelector('[data-type="genRepo"]').remove();
+        const createButton = pane.querySelector('[data-type="genRepo"]');
+        if (source === "local") {
+            pane.querySelector('[data-action="purge"]').before(createButton);
+        } else {
+            createButton.remove();
+        }
+        const pagination = document.createElement("div");
+        pagination.className = "history__snapshot-toolbar history__snapshot-footer";
+        pagination.append(pane.querySelector(".history__repo-pagination"));
+        pane.append(pagination);
         if (source === "cloud") {
             pane.querySelector('[data-type="compare"]').classList.add("fn__none");
+            pane.querySelector(".history__action").classList.add("fn__none");
         }
         pane.querySelector("[data-repo-all]").addEventListener("change", (event) => {
             const checked = (event.target as HTMLInputElement).checked;

@@ -39,6 +39,58 @@ installLogDone:
     Pop $R9
 FunctionEnd
 
+!macro StopSiYuanProcess ProcessName
+    nsProcess::_FindProcess /NOUNLOAD "${ProcessName}"
+    Pop $R8
+    ${If} $R8 == 0
+        nsProcess::_KillProcess /NOUNLOAD "${ProcessName}"
+        Pop $R8
+        !insertmacro WriteInstallLog "process-stop version=${VERSION} process=${ProcessName} result=$R8"
+    ${EndIf}
+!macroend
+
+Function StopSiYuanProcesses
+    Push $R7
+    Push $R8
+    Push $R9
+
+stopSiYuanRetry:
+    # 使用安装器内的插件关闭进程，避免依赖外部命令。
+    !insertmacro StopSiYuanProcess "SiYuan.exe"
+    !insertmacro StopSiYuanProcess "SiYuan-Kernel.exe"
+    StrCpy $R9 0
+
+stopSiYuanWait:
+    nsProcess::_FindProcess /NOUNLOAD "SiYuan.exe"
+    Pop $R8
+    nsProcess::_FindProcess /NOUNLOAD "SiYuan-Kernel.exe"
+    Pop $R7
+    # 只有明确返回未找到进程时才继续安装，检测失败不能视为进程已退出。
+    ${If} $R8 == 603
+    ${AndIf} $R7 == 603
+        !insertmacro WriteInstallLog "process-cleanup-complete version=${VERSION} app-result=$R8 kernel-result=$R7"
+        Goto stopSiYuanDone
+    ${EndIf}
+
+    IntOp $R9 $R9 + 1
+    ${If} $R9 < 10
+        Sleep 200
+        Goto stopSiYuanWait
+    ${EndIf}
+
+    !insertmacro WriteInstallLog "process-cleanup-blocked version=${VERSION} app-result=$R8 kernel-result=$R7"
+    MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(appCannotBeClosed)" /SD IDCANCEL IDRETRY stopSiYuanRetry
+    nsProcess::_Unload
+    SetErrorLevel 1
+    Quit
+
+stopSiYuanDone:
+    nsProcess::_Unload
+    Pop $R9
+    Pop $R8
+    Pop $R7
+FunctionEnd
+
 !macro preInit
     SetOutPath "$TEMP"
     ${IfNot} ${AtLeastWin10}
@@ -49,15 +101,9 @@ FunctionEnd
     ${EndIf}
 
     !insertmacro WriteInstallLog "installer-start version=${VERSION} package=$EXEPATH"
-    Push $R8
-    Push $R7
-    nsExec::Exec '"$SYSDIR\taskkill.exe" /F /IM "SiYuan.exe"'
-    Pop $R8
-    nsExec::Exec '"$SYSDIR\taskkill.exe" /F /IM "SiYuan-Kernel.exe"'
-    Pop $R7
-    !insertmacro WriteInstallLog "process-cleanup-complete version=${VERSION} app-result=$R8 kernel-result=$R7"
-    Pop $R7
-    Pop $R8
+    !ifndef BUILD_UNINSTALLER
+        Call StopSiYuanProcesses
+    !endif
 !macroend
 
 !macro customInit

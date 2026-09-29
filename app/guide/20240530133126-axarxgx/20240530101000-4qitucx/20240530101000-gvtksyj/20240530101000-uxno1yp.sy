@@ -7,7 +7,7 @@
 		"id": "20240530101000-uxno1yp",
 		"title": "コンテンツブロックの参照",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260927183214"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-3mutq27",
 				"id": "20240530101000-ggy8jav",
-				"updated": "20240530101000"
+				"updated": "20260927183214"
 			},
 			"Children": [
 				{
@@ -65,6 +65,43 @@
 				{
 					"Type": "NodeText",
 					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20260927091603-uttae8i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927091603-uttae8i",
+				"updated": "20260927183214"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[["
+				},
+				{
+					"Type": "NodeText",
+					"Data": " とドキュメントのタイトルを入力した後、参照候補から "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存先を選択してドキュメントを作成"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、ノートブックのルートまたは親ドキュメントを指定できます。確定すると、その場所にドキュメントを作成し、元の位置に参照を挿入します。選択した保存先は今回の作成にのみ適用され、既定の保存先は変更されません。キャンセルするとドキュメントは作成されません。デスクトップ版とモバイル版の両方で利用できます。データベースの項目にドキュメントをバインドまたは再バインドするときも、この操作を利用できます。ドキュメントの作成が成功した後にのみ項目をバインドします。キャンセルした場合や作成に失敗した場合、元のバインドは変更されません。"
 				}
 			]
 		},

@@ -30,6 +30,9 @@ func validListMindmapMetadata(data map[string]any) bool {
 			return false
 		}
 	}
+	if summaries, exists := data["summaries"]; exists && !validListMindmapSummaries(summaries) {
+		return false
+	}
 	validFields := func(value map[string]any, strings, numbers, booleans []string) bool {
 		for _, key := range strings {
 			if field, exists := value[key]; exists {
@@ -110,7 +113,7 @@ func validListMindmapRoute(value any) bool {
 	return true
 }
 
-func pruneListMindmapMetadata(list *ast.Node) (string, bool) {
+func pruneListMindmapMetadata(list *ast.Node, contexts ...*listMindmapSummaryContext) (string, bool) {
 	original := list.IALAttr(listMindmapMetadataAttr)
 	var data map[string]any
 	if json.Unmarshal([]byte(original), &data) != nil || !validListMindmapMetadata(data) {
@@ -135,6 +138,15 @@ func pruneListMindmapMetadata(list *ast.Node) (string, bool) {
 		}
 	}
 	changed := false
+	var raw map[string]json.RawMessage
+	_ = json.Unmarshal([]byte(original), &raw)
+	if summaries, exists := raw["summaries"]; exists {
+		var context *listMindmapSummaryContext
+		if len(contexts) > 0 {
+			context = contexts[0]
+		}
+		raw["summaries"], changed = normalizeListMindmapSummaries(summaries, listMindmapSiblingIDs(list), context)
+	}
 	nodes := data["nodes"].(map[string]any)
 	for id := range nodes {
 		if !ids[id] {
@@ -155,8 +167,6 @@ func pruneListMindmapMetadata(list *ast.Node) (string, bool) {
 		return original, false
 	}
 	// 使用原始 JSON 字段重组，避免扩展字段中的大整数在浮点解码后丢失精度。
-	var raw map[string]json.RawMessage
-	_ = json.Unmarshal([]byte(original), &raw)
 	var rawNodes map[string]json.RawMessage
 	_ = json.Unmarshal(raw["nodes"], &rawNodes)
 	for id := range rawNodes {
@@ -185,6 +195,12 @@ func (tx *Transaction) normalizeListMindmapMetadata() (ret *TxErr) {
 		return nil
 	}
 	hasUndo := len(tx.UndoOperations) > 0
+	moved := map[string]bool{}
+	for _, operation := range tx.DoOperations {
+		if operation.Action == "move" {
+			moved[operation.ID] = true
+		}
+	}
 	var undo []*Operation
 	for _, tree := range tx.trees {
 		ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
@@ -192,7 +208,9 @@ func (tx *Transaction) normalizeListMindmapMetadata() (ret *TxErr) {
 				return ast.WalkContinue
 			}
 			previous := node.IALAttr(listMindmapMetadataAttr)
-			next, changed := pruneListMindmapMetadata(node)
+			next, changed := pruneListMindmapMetadata(node, &listMindmapSummaryContext{
+				previous: tx.mindmapSummarySiblings[node.ID], moved: moved,
+			})
 			if !changed {
 				return ast.WalkContinue
 			}

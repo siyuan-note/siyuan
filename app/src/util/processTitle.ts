@@ -21,7 +21,7 @@ export const getWorkspaceName = () => {
     return dir ? pathPosix().basename(dir.replace(/\\/g, "/")) : window.siyuan.languages?.workspace;
 };
 
-export const setTitle = (title: string, showVersionTitle = false) => {
+export const setTitle = (title: string, showVersionTitle = false, iconElement?: Element) => {
     const dragElement = document.getElementById("drag");
     const workspaceName = getWorkspaceName();
     if (showVersionTitle) {
@@ -37,6 +37,13 @@ export const setTitle = (title: string, showVersionTitle = false) => {
         if (!window.siyuan.config.appearance.hideToolbar && dragElement) {
             dragElement.setAttribute("title", title);
             dragElement.innerHTML = escapeHtml(title);
+            if (iconElement) {
+                const icon = document.createElement("span");
+                icon.className = "toolbar__title-icon";
+                icon.setAttribute("aria-hidden", "true");
+                iconElement.childNodes.forEach(node => icon.appendChild(node.cloneNode(true)));
+                dragElement.prepend(icon);
+            }
         }
     }
     if (windowWorkspaceTitle) {

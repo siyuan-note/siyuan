@@ -207,6 +207,12 @@ func removeAttributeViewColumnOptionValues(attrView *av.AttributeView, operation
 	// 如果存在选项对应的过滤条件，则删除过滤条件中设置的选项值 https://github.com/siyuan-note/siyuan/issues/15536
 	for _, view := range attrView.Views {
 		view.Filters = av.RemoveSelectOptionFromFilters(view.Filters, operation.ID, optName)
+		for _, rule := range view.ConditionalColors {
+			if nil != rule {
+				// 保留规则占位，删空选项后的条件不匹配条目，撤销时可恢复原条件。
+				av.RemoveSelectOptionFromFilters([]*av.ViewFilter{rule.Filter}, operation.ID, optName)
+			}
+		}
 		if 0 == len(view.Filters) {
 			// 保持 spec 5 根组不变量
 			view.Filters = []*av.ViewFilter{{Combination: av.FilterCombinationAnd}}
@@ -313,6 +319,11 @@ func updateAttributeViewColumnOptionValues(attrView *av.AttributeView, operation
 	// 如果存在选项对应的过滤条件，需要更新过滤条件中设置的选项值
 	for _, view := range attrView.Views {
 		av.RenameSelectOptionInFilters(view.Filters, key.ID, oldName, newName, newColor)
+		for _, rule := range view.ConditionalColors {
+			if nil != rule {
+				av.RenameSelectOptionInFilters([]*av.ViewFilter{rule.Filter}, key.ID, oldName, newName, newColor)
+			}
+		}
 	}
 	renameAttrViewOptionInFieldFilters(attrView, attrView.ID, key.ID, oldName, newName, newColor)
 

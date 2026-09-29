@@ -301,7 +301,7 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Install Electron Binary
-        run: pnpm run install:electron
+        run: node node_modules/electron/install.js
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Building UI
@@ -414,7 +414,7 @@ jobs:
       - name: Run End-to-End Tests
         if: matrix.config.e2e_shards != ''
         continue-on-error: true
-        timeout-minutes: 30
+        timeout-minutes: 50
         shell: bash
         run: |
           TEST_PIDS=()
@@ -424,13 +424,18 @@ jobs:
             port="${shard_config#*:}"
             (
               # UI 测试共享同一内核及全局界面状态，必须串行运行
-              # 串行执行保留 25 分钟总时限，外层步骤仍由 30 分钟超时保护
+              # 编辑器分组用例较多，保留 45 分钟总时限；其他分组保持 25 分钟
+              # 外层步骤保留 5 分钟余量，单项用例仍使用测试配置中的超时
+              test_timeout=1500000
+              if [ "${shard}" = "editor" ]; then
+                test_timeout=2700000
+              fi
               SIYUAN_BASE_URL="http://127.0.0.1:${port}" \
               SIYUAN_E2E_SHARD="${shard}" \
               SIYUAN_TEST_RESULTS_DIR="test-results-${shard}" \
               PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-${shard}" \
               pnpm exec playwright test --config=config/playwright.focused.config.ts \
-                --global-timeout=1500000 --workers=1 \
+                --global-timeout="${test_timeout}" --workers=1 \
                 --reporter=line,html --output="test-results-${shard}"
             ) &
             TEST_PID=$!

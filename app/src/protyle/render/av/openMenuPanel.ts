@@ -1,3 +1,4 @@
+import {openConditionalColorsMenu} from "./conditionalColorMenu";
 import {isTableLikeView} from "./viewType";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
@@ -346,7 +347,12 @@ export const openMenuPanel = (options: {
         let counter = 0;
         avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
             const sourceElement = event.target as HTMLElement;
-            window.siyuan.dragElement = sourceElement.closest<HTMLElement>('[data-option-row="true"]') || sourceElement;
+            counter = 0;
+            const conditionalRule = sourceElement.closest("[data-conditional-drag]")?.closest<HTMLElement>("[data-rule-id]");
+            window.siyuan.dragElement = conditionalRule || sourceElement.closest<HTMLElement>('[data-option-row="true"]') || sourceElement;
+            if (conditionalRule) {
+                event.dataTransfer.setDragImage(conditionalRule, 16, 14);
+            }
             if (window.siyuan.dragElement.dataset.relationType === "selected") {
                 const primaryElement = window.siyuan.dragElement.querySelector(".av__relation-table-primary");
                 if (primaryElement) {
@@ -659,11 +665,11 @@ export const openMenuPanel = (options: {
                 return;
             }
             const target = event.target as HTMLElement;
-            let targetElement = target.closest<HTMLElement>('[data-option-row="true"]') ||
+            let targetElement = target.closest<HTMLElement>(".av__conditional-rule") || target.closest<HTMLElement>('[data-option-row="true"]') ||
                 hasClosestByAttribute(target, "draggable", "true");
             if (!targetElement) {
                 const nearbyElement = document.elementFromPoint(event.clientX, event.clientY - 1);
-                targetElement = nearbyElement?.closest<HTMLElement>('[data-option-row="true"]') ||
+                targetElement = nearbyElement?.closest<HTMLElement>(".av__conditional-rule") || nearbyElement?.closest<HTMLElement>('[data-option-row="true"]') ||
                     hasClosestByAttribute(nearbyElement, "draggable", "true");
             }
             if (!targetElement || targetElement === window.siyuan.dragElement) {
@@ -697,6 +703,11 @@ export const openMenuPanel = (options: {
             counter++;
         });
         avPanelElement.addEventListener("dragend", () => {
+            counter = 0;
+            dragoverElement = undefined;
+            avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach(element => {
+                element.classList.remove("dragover__bottom", "dragover__top");
+            });
             if (window.siyuan.dragElement) {
                 window.siyuan.dragElement.style.opacity = "";
                 window.siyuan.dragElement = undefined;
@@ -858,6 +869,10 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "go-config") {
+                    if (menuElement.classList.contains("av__conditional-panel")) {
+                        delete menuElement.dataset.positionX;
+                    }
+                    menuElement.classList.remove("av__conditional-panel");
                     if (options.filterOperation) {
                         avPanelElement.remove();
                         openMenuPanel({
@@ -906,6 +921,23 @@ export const openMenuPanel = (options: {
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     bindLayoutEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
                     window.siyuan.menus.menu.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goConditionalColors") {
+                    window.siyuan.menus.menu.remove();
+                    openConditionalColorsMenu({
+                        protyle: options.protyle,
+                        blockElement: options.blockElement as HTMLElement,
+                        data,
+                        menuElement,
+                        onResize: () => {
+                            if (!isMobile()) {
+                                delete menuElement.dataset.positionX;
+                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
+                            }
+                        },
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

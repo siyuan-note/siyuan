@@ -138,6 +138,23 @@ html[data-frontend="browser-desktop"] {
     }
   }
 
+  &__title-icon {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    vertical-align: middle;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+
+    img, svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
   &__item {
     flex-shrink: 0;
     cursor: pointer;

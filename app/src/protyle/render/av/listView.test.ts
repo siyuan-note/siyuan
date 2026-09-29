@@ -5,12 +5,14 @@ import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import * as viewType from "./viewType";
+import * as conditionalColor from "./conditionalColor";
 import {resolveAVSelectedCell} from "./selectionState";
 
 // 使用实际行渲染与字段定位函数，检查列表沿用行列交互时的字段映射。
 const loadModule = (name: string) => {
     const mocks: Record<string, unknown> = {
         "./viewType": viewType,
+        "./conditionalColor": conditionalColor,
         "./cell": {renderCell: (value: IAVCellValue) => value?.text?.content || value?.block?.content || ""},
         "./blockAttr": {isCustomAttr: () => false},
         "../../util/hasClosest": {hasClosestByClassName: (element: HTMLElement, className: string) =>

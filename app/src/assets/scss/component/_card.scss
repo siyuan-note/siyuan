@@ -114,6 +114,8 @@
     flex: 1;
     min-height: 0;
     overflow: auto;
+    // 按卡片内容确定行高，避免滚动区域压缩网格行。
+    grid-auto-rows: max-content;
     align-content: start;
     padding: 16px;
   }

@@ -58,8 +58,10 @@ export const syncHideToolbarLayout = () => {
     if (!isWindow()) {
         sendTrafficLightPosition(window.siyuan.storage[Constants.LOCAL_ZOOM]);
         if (!window.siyuan.config.appearance.hideToolbar) {
-            const title = document.querySelector('.layout-tab-bar .item--focus[data-type="tab-header"] .item__text')?.textContent || "";
-            setTitle(title, title ? false : true);
+            const tabHeader = document.querySelector('.layout__wnd--active .layout-tab-bar .item--focus[data-type="tab-header"]') ||
+                document.querySelector('.layout-tab-bar .item--focus[data-type="tab-header"]');
+            const title = tabHeader?.querySelector(".item__text")?.textContent || "";
+            setTitle(title, !title, tabHeader?.querySelector(".item__icon"));
         }
     } else {
         return;

@@ -11,7 +11,7 @@ export const setModelsHash = () => {
     let hash = "";
     getAllTabs().forEach(tab => {
         if (!tab.model) {
-            const initTab = tab.headElement.getAttribute("data-initdata");
+            const initTab = tab.headElement?.getAttribute("data-initdata");
             if (initTab) {
                 const initTabData = JSON.parse(initTab);
                 if (initTabData.instance === "Editor") {

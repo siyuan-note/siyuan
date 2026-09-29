@@ -40,11 +40,13 @@ func (value TransactionOperationData) MarshalJSON() ([]byte, error) {
 }
 
 type TransactionOperationFields struct {
-	Action            string                   `json:"action" api:"optional,nullable"`
-	ID                string                   `json:"id" api:"optional,nullable"`
-	RootID            string                   `json:"rootID" api:"optional,nullable"`
-	ParentID          string                   `json:"parentID" api:"optional,nullable"`
-	PreviousID        string                   `json:"previousID" api:"optional,nullable"`
+	Action     string `json:"action" api:"optional,nullable"`
+	ID         string `json:"id" api:"optional,nullable"`
+	RootID     string `json:"rootID" api:"optional,nullable"`
+	ParentID   string `json:"parentID" api:"optional,nullable"`
+	PreviousID string `json:"previousID" api:"optional,nullable"`
+	// NextID 用于 insert、move 的前置同级锚点，优先于 previousID 和 parentID。
+	// move 保留源块及折叠标题下辖块的顺序，不将整列表自动解包为列表项。
 	NextID            string                   `json:"nextID" api:"optional,nullable"`
 	BlockIDs          []string                 `json:"blockIDs" api:"optional,nullable"`
 	BlockID           string                   `json:"blockID" api:"optional,nullable"`

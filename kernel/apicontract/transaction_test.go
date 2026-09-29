@@ -57,6 +57,8 @@ func TestTransactionFiniteActionSchemas(t *testing.T) {
 		{"sortAttrViewView", `"unRefresh"`},
 		{"updateAttrViewCell", `{"text":null}`},
 		{"setAttrViewFilters", `[{"column":"key","value":{"text":{"content":"x"}}}]`},
+		{"setAttrViewConditionalColors", `[{"id":"rule","filter":{"column":"key","operator":"Is not empty"},"target":"item","color":null,"matchOption":false}]`},
+		{"setAttrViewConditionalColors", `[]`},
 		{"sortAttrViewRow", `null`},
 		{"plugin-custom", `{"extension":[true,1,null]}`},
 	} {

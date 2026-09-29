@@ -7,7 +7,7 @@ import test from "node:test";
 import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sourceCode: string, css: string) => {
+const browserCases = async (sourceCode: string, css: string, cleanupSource: string) => {
     const check = require("node:assert/strict");
     const noop = (): void => undefined;
     const settle = async () => {
@@ -146,7 +146,7 @@ const browserCases = async (sourceCode: string, css: string) => {
             avRender: noop,
             blockRender: noop,
             highlightRender: noop,
-            cleanListMindmapHTML: (html: string) => html,
+            cleanListMindmapHTML: new Function(cleanupSource + "; return cleanListMindmapHTML;")(),
         };
         const open = new Function(...Object.keys(dependencies), sourceCode + "; return openListMindmapEditor;")(
             ...Object.values(dependencies));
@@ -238,6 +238,30 @@ const browserCases = async (sourceCode: string, css: string) => {
         check.equal(current.state.messages.length, 0, type);
         await current.remove();
     }
+
+    // 页签重新渲染和切换编辑状态不会伪造正文冲突，隐藏页签的内容仍参与冲突检测。
+    const tabsHTML = '<div data-type="NodeTabs" data-node-id="tabs" class="tabs" tabs-position="top">' +
+        '<div data-type="NodeTabItem" data-node-id="tab" class="tab-item"><div class="tab-item-info">Title</div>' +
+        '<div class="tab-item-content">' + textHTML("Body") + "</div></div></div>";
+    const tabsEditor = create(tabsHTML);
+    tabsEditor.element.firstElementChild.insertAdjacentHTML("afterbegin", '<div class="tabs-header">Navigation</div>');
+    tabsEditor.element.querySelector(".tab-item-content").setAttribute("id", "siyuan-tabs-1-panel-0");
+    tabsEditor.wysiwyg.querySelector(".tab-item-content").setAttribute("id", "siyuan-tabs-2-panel-0");
+    tabsEditor.wysiwyg.querySelector(".tab-item").setAttribute("data-tabs-editing", "true");
+    tabsEditor.wysiwyg.querySelector('[data-node-id="paragraph"]').textContent = "Edited body";
+    await settle();
+    check.equal(await tabsEditor.editor.finish(), true);
+    check.equal(tabsEditor.state.messages.length, 0);
+    check.equal(tabsEditor.element.querySelector('[data-node-id="paragraph"]').textContent, "Edited body");
+    check.equal(tabsEditor.element.querySelector(".tabs").getAttribute("tabs-position"), "top");
+    await tabsEditor.remove();
+    const conflictingTabs = create(tabsHTML);
+    conflictingTabs.element.querySelector('[data-node-id="paragraph"]').textContent = "External change";
+    conflictingTabs.wysiwyg.querySelector('[data-node-id="paragraph"]').textContent = "Local change";
+    await settle();
+    check.equal(await conflictingTabs.editor.finish(), false);
+    check.equal(conflictingTabs.state.saves.length, 0);
+    await conflictingTabs.remove();
 
     // 数据库和嵌入结果在编辑期间重新渲染，不会挡住普通文字保存或覆盖新的独立块状态。
     for (const type of ["NodeAttributeView", "NodeBlockQueryEmbed"]) {
@@ -623,6 +647,10 @@ test("list mindmap editor flushes pending input and preserves text across finish
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/base.scss"), {
         logger: require("sass").Logger.silent,
     }).css;
+    const modelSource = readFileSync(path.join(__dirname, "model.ts"), "utf8");
+    const cleanupSource = transpileModule(modelSource.slice(modelSource.indexOf("const cleanListMindmapDOM ="),
+        modelSource.indexOf("// 转换前将思维导图块还原为列表结构"))
+        .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const code = `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
@@ -634,7 +662,7 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         const result = await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)});
+        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(cleanupSource)})`)});
         console.log(result);
         win.destroy();
         app.exit(0);

@@ -558,11 +558,12 @@ type DiffFile struct {
 }
 
 type RepoDocHistory struct {
-	FileID  string `json:"fileID"`
-	IndexID string `json:"indexID"`
-	Title   string `json:"title"`
-	HSize   string `json:"hSize"`
-	Updated int64  `json:"updated"`
+	FileID    string                `json:"fileID"`
+	IndexID   string                `json:"indexID"`
+	Title     string                `json:"title"`
+	HSize     string                `json:"hSize"`
+	Updated   int64                 `json:"updated"`
+	Snapshots []*DocHistorySnapshot `json:"snapshots"`
 }
 
 type DiffIndex struct {
@@ -853,6 +854,7 @@ func GetRepoDocHistory(id string, page int) (ret []*RepoDocHistory, pageCount, t
 			Updated: file.Updated,
 		})
 	}
+	err = attachRepoDocHistorySnapshots(repo, ret)
 	return
 }
 
@@ -979,6 +981,7 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 
 type Snapshot struct {
 	*dejavu.Log
+	Tags             []string     `json:"tags"`
 	TypesCount       []*TypeCount `json:"typesCount"`
 	RequiresDownload bool         `json:"requiresDownload"`
 }
@@ -986,6 +989,73 @@ type Snapshot struct {
 type TypeCount struct {
 	Type  string `json:"type"`
 	Count int    `json:"count"`
+}
+
+// SearchRepoSnapshot 按完整 ID 或至少 7 位前缀读取本地快照，复用列表的元数据和下载状态计算。
+func SearchRepoSnapshot(id string, includeFiles bool) (ret []*Snapshot, pageCount, totalCount int, err error) {
+	ret = []*Snapshot{}
+	id = strings.ToLower(strings.TrimSpace(id))
+	if len(id) < 7 || len(id) > sha1.Size*2 || strings.Trim(id, "0123456789abcdef") != "" {
+		return ret, 0, 0, errors.New("invalid snapshot ID")
+	}
+	if includeFiles && len(id) != sha1.Size*2 {
+		return ret, 0, 0, errors.New("complete snapshot ID is required to include files")
+	}
+	if len(Conf.Repo.Key) == 0 {
+		return ret, 0, 0, errors.New(Conf.Language(26))
+	}
+	repo, err := newRepository()
+	if err != nil {
+		return
+	}
+	ids := []string{id}
+	if len(id) < sha1.Size*2 {
+		entries, readErr := os.ReadDir(filepath.Join(repo.Path, "indexes"))
+		if os.IsNotExist(readErr) {
+			return ret, 0, 0, nil
+		}
+		if readErr != nil {
+			return ret, 0, 0, readErr
+		}
+		ids = nil
+		for _, entry := range entries {
+			name := entry.Name()
+			if !entry.IsDir() && len(name) == sha1.Size*2 && strings.HasPrefix(name, id) &&
+				strings.Trim(name, "0123456789abcdef") == "" {
+				ids = append(ids, name)
+			}
+		}
+	}
+	var logs []*dejavu.Log
+	for _, fullID := range ids {
+		index, readErr := repo.GetIndex(fullID)
+		if os.IsNotExist(readErr) || errors.Is(readErr, dejavu.ErrNotFoundIndex) {
+			continue
+		}
+		if readErr != nil {
+			return ret, 0, 0, readErr
+		}
+		files, readErr := repo.GetFiles(index)
+		if readErr != nil {
+			return ret, 0, 0, readErr
+		}
+		logs = append(logs, &dejavu.Log{
+			ID: index.ID, Memo: index.Memo, Created: index.Created,
+			HCreated: time.UnixMilli(index.Created).Format("2006-01-02 15:04:05"),
+			Files:    files, Count: index.Count, Size: index.Size,
+			HSize:    humanize.BytesCustomCeil(uint64(index.Size), 2),
+			SystemID: index.SystemID, SystemName: index.SystemName, SystemOS: index.SystemOS,
+		})
+	}
+	if len(logs) == 0 {
+		return ret, 0, 0, nil
+	}
+	sort.SliceStable(logs, func(i, j int) bool { return logs[i].Created > logs[j].Created })
+	ret = buildSnapshots(logs, includeFiles)
+	if err = attachSnapshotTags(repo, ret); err != nil {
+		return ret, 0, 0, err
+	}
+	return ret, 1, len(ret), nil
 }
 
 func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err error) {
@@ -1012,14 +1082,31 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 		return
 	}
 
-	ret = buildSnapshots(logs)
+	ret = buildSnapshots(logs, false)
+	err = attachSnapshotTags(repo, ret)
 	if 1 > len(ret) {
 		ret = []*Snapshot{}
 	}
 	return
 }
 
-func buildSnapshots(logs []*dejavu.Log) (ret []*Snapshot) {
+func attachSnapshotTags(repo *dejavu.Repo, snapshots []*Snapshot) error {
+	if len(snapshots) == 0 {
+		return nil
+	}
+	_, tags, err := localTaggedSnapshotIndexes(context.Background(), repo)
+	if err != nil {
+		return err
+	}
+	for _, snapshot := range snapshots {
+		if names := tags[snapshot.ID]; len(names) > 0 {
+			snapshot.Tags = names
+		}
+	}
+	return nil
+}
+
+func buildSnapshots(logs []*dejavu.Log, includeFiles bool) (ret []*Snapshot) {
 	chunkAvailability := map[string]bool{}
 	for _, l := range logs {
 		typesCount := statTypesByPath(l.Files)
@@ -1030,9 +1117,12 @@ func buildSnapshots(logs []*dejavu.Log) (ret []*Snapshot) {
 				break
 			}
 		}
-		l.Files = nil // 置空，否则返回前端数据量太大
+		if !includeFiles {
+			l.Files = nil // 列表仅返回概要，避免传输所有快照的文件列表。
+		}
 		ret = append(ret, &Snapshot{
 			Log:              l,
+			Tags:             []string{},
 			TypesCount:       typesCount,
 			RequiresDownload: requiresDownload,
 		})
@@ -1645,6 +1735,10 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 }
 
 func GetCloudRepoSnapshots(page int) (ret []*dejavu.Log, pageCount, totalCount int, err error) {
+	return GetCloudRepoSnapshotsByTime(page, 0, 0)
+}
+
+func GetCloudRepoSnapshotsByTime(page int, startTime, endTime int64) (ret []*dejavu.Log, pageCount, totalCount int, err error) {
 	assetDownloadSourceMu.RLock()
 	defer assetDownloadSourceMu.RUnlock()
 	ret = []*dejavu.Log{}
@@ -1677,7 +1771,7 @@ func GetCloudRepoSnapshots(page int) (ret []*dejavu.Log, pageCount, totalCount i
 		page = 1
 	}
 
-	logs, pageCount, totalCount, err := repo.GetCloudRepoLogs(page)
+	logs, pageCount, totalCount, err := cloudRepoSnapshotsByTime(page, startTime, endTime, repo.GetCloudRepoLogs)
 	if err != nil {
 		return
 	}
@@ -1704,7 +1798,8 @@ func GetTagSnapshots() (ret []*Snapshot, err error) {
 	if err != nil {
 		return
 	}
-	ret = buildSnapshots(logs)
+	ret = buildSnapshots(logs, false)
+	err = attachSnapshotTags(repo, ret)
 	if 1 > len(ret) {
 		ret = []*Snapshot{}
 	}

@@ -24,6 +24,9 @@ import {getAVTemplateHTML} from "./attributeValue";
 import {hasAVRenderTemplateResult} from "./cellValue";
 import {renderAVRichTextElements} from "./richText";
 import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {unicode2Emoji} from "../../../emoji";
+import {bindRelationLayout} from "./relationLayout";
+import {getTopBarHeight} from "../../../layout/getTopBarHeight";
 
 interface IAVItem {
     avID: string;
@@ -405,7 +408,7 @@ const getRelationGridTemplate = (columns: IAVColumn[], rows: IAVRow[],
     } as IAVTable, getCellValueText, measureText);
     return `32px ${columns.map((column, index) => {
         const width = widths[column.id] || "64px";
-        return getAVRelationColumnWidth(width, column.type, index === 0);
+        return getAVRelationColumnWidth(width, column.type, index === 0, measureText(column.name));
     }).join(" ")}`;
 };
 
@@ -413,13 +416,17 @@ const getRelationPrimaryCell = (row: IAVRow) => {
     return row.cells.find((cell) => cell.value?.type === "block");
 };
 
-const genRelationHeaderHTML = (columns: IAVColumn[], gridTemplate: string) => {
+const genRelationHeaderHTML = (columns: IAVColumn[], gridTemplate: string, sort?: {column: string, order: "ASC" | "DESC"}) => {
     let html = `<div class="av__relation-table-header" data-relation-type="header" style="grid-template-columns:${gridTemplate}">
 <span class="av__relation-table-check"></span>`;
     columns.forEach((column, index) => {
-        html += `<span class="av__relation-table-cell${index === 0 ? " av__relation-table-primary" : ""}">
-    <svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>
+        const sorted = sort?.column === column.id;
+        html += `<span data-relation-column="${escapeAttr(column.id)}" role="columnheader" tabindex="0" aria-sort="${sorted ? sort.order === "ASC" ? "ascending" : "descending" : "none"}" class="av__relation-table-cell fn__pointer${index === 0 ? " av__relation-table-primary" : ""}">
+    ${column.icon ? unicode2Emoji(column.icon, "av__relation-header-icon", true) :
+        `<svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
     <span class="fn__ellipsis">${escapeHtml(column.name)}</span>
+    <svg class="av__relation-sort${sorted ? "" : " fn__hidden"}" aria-hidden="true"><use xlink:href="#${sort?.order === "DESC" ? "iconDown" : "iconUp"}"></use></svg>
+    <span class="av__widthdrag"></span>
 </span>`;
     });
     return html + "</div>";
@@ -443,22 +450,21 @@ style="grid-template-columns:${gridTemplate}">
             const useRenderedContent = hasAVRenderTemplateResult(primaryValue, column.renderTemplate);
             const content = useRenderedContent ? getAVTemplateHTML(primaryValue.renderedContent || "") :
                 Lute.EscapeHTMLStr(primaryValue.block?.content || window.siyuan.languages.untitled);
-            html += `<span class="av__relation-table-cell av__relation-table-primary" data-row-id="${escapeAttr(row.id)}"
+            html += `<span data-relation-column="${escapeAttr(column.id)}" class="av__relation-table-cell av__relation-table-primary" data-row-id="${escapeAttr(row.id)}"
 data-value-id="${escapeAttr(primaryCell.id || "")}"
 style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}${primaryCell.color ? `color:${primaryCell.color};` : ""}">
     ${selected ? '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>' : ""}
     ${isDetached ? "" : `<span class="av__relation-row-icon">${getFileTreeIconHTML(primaryValue.block?.icon, "file")}</span>`}
     <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}${useRenderedContent ? " av__celltext--template" : ""}"
-        ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'}
         data-icon="${escapeAttr(primaryValue.block?.icon || "")}"
-        data-id="${escapeAttr(primaryValue.block?.id || "")}" data-content="${escapeAttr(primaryValue.block?.content || "")}">${content}</span>
+        data-id="${escapeAttr(primaryValue.block?.id || "")}" data-content="${escapeAttr(primaryValue.block?.content || "")}">${isDetached ? content : `<span class="av__celltext--ref">${content}</span>`}</span>
     ${primaryCell.id ? `<button type="button" class="av__relation-row-open ariaLabel" data-type="openRelationRow" draggable="false"
         data-position="north" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></button>` : ""}
 </span>`;
         } else {
-            html += `<div class="av__relation-table-cell"
+            html += `<div data-relation-column="${escapeAttr(column.id)}" class="av__relation-table-cell"
 style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
-                renderCell(cell.value, 0, false, "table", column.options, column.dateFormat, column.renderTemplate) : ""}</div>`;
+                renderCell(cell.value, 0, true, "table", column.options, column.dateFormat, column.renderTemplate, false) : ""}</div>`;
         }
     });
     return html + "</div>";
@@ -515,6 +521,7 @@ export const bindRelationEvent = (options: {
         loaderVisible: false,
         columns: [] as IAVColumn[],
         gridTemplate: "",
+        sort: undefined as {column: string, order: "ASC" | "DESC"} | undefined,
         controller: undefined as AbortController | undefined,
     };
     let searchTimer: number;
@@ -533,7 +540,8 @@ export const bindRelationEvent = (options: {
             return false;
         }
         const menuStyle = getComputedStyle(options.menuElement);
-        const maxMenuHeight = parseFloat(menuStyle.maxHeight) || window.innerHeight - 32;
+        const maxMenuHeight = Math.min(parseFloat(menuStyle.maxHeight) || window.innerHeight - 32,
+            window.innerHeight - getTopBarHeight() - 8);
         const headerHeight = listElement.previousElementSibling?.getBoundingClientRect().height || 0;
         const chromeHeight = headerHeight + parseFloat(menuStyle.paddingTop) + parseFloat(menuStyle.paddingBottom) +
             parseFloat(menuStyle.borderTopWidth) + parseFloat(menuStyle.borderBottomWidth);
@@ -553,12 +561,32 @@ export const bindRelationEvent = (options: {
         listNaturalMaxHeight = naturalHeight;
         return updateListMaxHeight();
     };
+    let anchorElement = options.cellElements[options.cellElements.length - 1];
+    let anchorRect = anchorElement.getBoundingClientRect();
+    const anchorRow = anchorElement.closest<HTMLElement>(".av__row, .av__gallery-item, .av__calendar-item");
+    const anchorColumnAttribute = anchorElement.dataset.colId ? "data-col-id" : "data-field-id";
+    const anchorColumnID = anchorElement.getAttribute(anchorColumnAttribute);
+    const anchorRowID = anchorRow?.dataset.id || anchorElement.dataset.rowId;
+    const anchorRowClass = ["av__row", "av__gallery-item", "av__calendar-item"].find(name => anchorRow?.classList.contains(name));
+    const anchorSelector = anchorRow ?
+        `.${anchorRowClass}[data-id="${CSS.escape(anchorRowID)}"] [${anchorColumnAttribute}="${CSS.escape(anchorColumnID)}"]` :
+        anchorRowID ? `[data-row-id="${CSS.escape(anchorRowID)}"][${anchorColumnAttribute}="${CSS.escape(anchorColumnID)}"]` :
+            `.fn__flex-1[${anchorColumnAttribute}="${CSS.escape(anchorColumnID)}"]`;
     const positionMenu = (reset = false) => {
         if (reset) {
             resetPosition();
         }
-        const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
-        setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+        // 数据库刷新会替换单元格，重新查找锚点；条目不可见时沿用最后的有效位置。
+        if (!anchorElement?.isConnected) {
+            anchorElement = options.blockElement.querySelector<HTMLElement>(anchorSelector);
+        }
+        if (anchorElement?.isConnected) {
+            const rect = anchorElement.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                anchorRect = rect;
+            }
+        }
+        setPosition(options.menuElement, anchorRect.left, anchorRect.bottom, anchorRect.height, 0, true);
         positionInitialized = true;
     };
     const resize = () => {
@@ -644,11 +672,13 @@ export const bindRelationEvent = (options: {
             listElement.querySelector('[data-relation-type="loader"]').insertAdjacentHTML("beforebegin", footerHTML);
         }
     };
+    const updateLayout = bindRelationLayout(relationElement, relationElement.dataset.avId, resize);
     const renderPage = (data: {
         columns: IAVColumn[],
         selectedRows: IAVRow[],
         rows: IAVRow[]
     }, reset: boolean) => {
+        const focusedColumn = listElement.querySelector<HTMLElement>('[role="columnheader"]:focus')?.dataset.relationColumn;
         state.columns = data.columns || state.columns;
         if (reset || !state.gridTemplate) {
             state.gridTemplate = getRelationGridTemplate(state.columns,
@@ -664,11 +694,11 @@ export const bindRelationEvent = (options: {
             const selectedHTML = genRelationRowsHTML(data.selectedRows || [], state.columns, "selected",
                 gridTemplate, excludedIDs);
             candidateHTML = genRelationRowsHTML(data.rows || [], state.columns, "candidate", gridTemplate, excludedIDs);
-            listElement.innerHTML = `${genRelationHeaderHTML(state.columns, gridTemplate)}
+            listElement.innerHTML = `${genRelationHeaderHTML(state.columns, gridTemplate, state.sort)}
 <div class="av__relation-table-selected" data-relation-type="selectedRows">${selectedHTML}</div>
 <div class="b3-menu__separator" data-relation-type="separator"></div>
 <div class="av__relation-table-candidates" data-relation-type="candidateRows">${candidateHTML}</div>
-${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
+${genRelationLoaderHTML(false)}`;
         } else {
             candidateHTML = genRelationRowsHTML(data.rows || [], state.columns, "candidate", gridTemplate, excludedIDs);
             if (candidateHTML) {
@@ -676,6 +706,11 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
             }
         }
         renderAVRichTextElements(listElement);
+        updateLayout(state.columns, gridTemplate);
+        if (focusedColumn) {
+            Array.from(listElement.querySelectorAll<HTMLElement>('[role="columnheader"]'))
+                .find(header => header.dataset.relationColumn === focusedColumn)?.focus();
+        }
         renderFooter(!!listElement.querySelector('[data-relation-type="candidate"]'));
         if (!listElement.querySelector(".b3-menu__item--current")) {
             listElement.querySelector('[data-type="setRelationCell"]')?.classList.add("b3-menu__item--current");
@@ -699,7 +734,8 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
         const selectedItems = getSelectedItems();
         state.controller = controller;
         state.loading = true;
-        setLoading(true, initialLoad && reset, controller);
+        // 已有条目刷新时保留列表尺寸，首次加载和追加分页显示底部加载提示。
+        setLoading(initialLoad || !reset, initialLoad && reset, controller);
         let succeeded = false;
         fetchPost("/api/av/getAttributeViewRelationCandidates", {
             avID: relationElement.getAttribute("data-source-av-id"),
@@ -708,6 +744,7 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
             page,
             pageSize: RELATION_PAGE_SIZE,
             selectedBlockIDs: selectedItems.map((item) => item.id),
+            sort: state.sort,
         }, response => {
             if (controller.signal.aborted || keyword !== state.keyword) {
                 return;
@@ -770,6 +807,35 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
             }
         });
     };
+    listElement.addEventListener("mousedown", event => {
+        const target = event.target as HTMLElement;
+        if (target.closest('[role="columnheader"]') && !target.closest(".av__widthdrag")) {
+            event.preventDefault();
+        }
+    });
+    listElement.addEventListener("click", event => {
+        const target = event.target as HTMLElement;
+        if (target.closest(".av__widthdrag")) {
+            return;
+        }
+        const header = target.closest<HTMLElement>('[role="columnheader"]');
+        if (!header) {
+            return;
+        }
+        event.stopPropagation();
+        const column = header.dataset.relationColumn;
+        state.sort = {column, order: state.sort?.column === column && state.sort.order === "ASC" ? "DESC" : "ASC"};
+        listElement.scrollTop = 0;
+        loadPage(true);
+    });
+    listElement.addEventListener("keydown", event => {
+        const header = (event.target as HTMLElement).closest<HTMLElement>('[role="columnheader"]');
+        if (header && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            event.stopPropagation();
+            header.click();
+        }
+    });
     const search = () => {
         state.keyword = inputElement.value;
         state.controller?.abort();
@@ -865,6 +931,7 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
     window.addEventListener("resize", resize);
     loadPage(true);
     return () => {
+        updateLayout.close();
         state.controller?.abort();
         window.removeEventListener("resize", resize);
         options.menuElement.removeEventListener("relationrefresh", refresh);
@@ -888,6 +955,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     });
     if (colRelationData && colRelationData.avID) {
         return `<div data-av-id="${colRelationData.avID}" data-source-av-id="${data.id}" data-key-id="${colId}" class="fn__flex-column av__relation">
+<div>
 <div class="b3-menu__item" data-type="nobg">
     <div class="b3-form__icona fn__flex-1" style="overflow: visible">
         <input spellcheck="false" class="b3-text-field fn__block" style="min-width: 190px"/>
@@ -895,6 +963,9 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     </div>
     <span class="fn__space"></span>
     <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>
+    <span class="fn__space"></span>
+    <svg class="b3-menu__action b3-menu__action--show ariaLabel" data-type="relationFields" data-position="north" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg>
+</div>
 </div>
 <div class="b3-menu__items av__relation-table">
     ${genRelationLoaderHTML(true, false)}
@@ -924,13 +995,13 @@ const getRelationValue = (menuElement: HTMLElement) => {
 
 const genCreatedRelationRowHTML = (menuElement: HTMLElement, rowID: string, content: string) => {
     const headerElement = menuElement.querySelector('[data-relation-type="header"]') as HTMLElement;
-    const columnCount = headerElement?.querySelectorAll(".av__relation-table-cell").length || 1;
-    let cellsHTML = `<span class="av__relation-table-cell av__relation-table-primary" data-row-id="${rowID}">
+    const columns = headerElement?.querySelectorAll<HTMLElement>(".av__relation-table-cell");
+    let cellsHTML = `<span data-relation-column="${escapeAttr(columns?.[0]?.dataset.relationColumn || "")}" class="av__relation-table-cell av__relation-table-primary" data-row-id="${rowID}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <span class="b3-menu__label fn__ellipsis" data-id="">${Lute.EscapeHTMLStr(content)}</span>
 </span>`;
-    for (let i = 1; i < columnCount; i++) {
-        cellsHTML += '<span class="av__relation-table-cell"></span>';
+    for (let i = 1; i < (columns?.length || 1); i++) {
+        cellsHTML += `<span data-relation-column="${escapeAttr(columns[i].dataset.relationColumn)}" class="av__relation-table-cell${columns[i].classList.contains("fn__none") ? " fn__none" : ""}"></span>`;
     }
     return `<div data-row-id="${rowID}" data-position="west" data-type="setRelationCell"
 data-relation-type="selected" class="b3-menu__item av__relation-table-row" draggable="true"
@@ -963,7 +1034,11 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
     if (target.classList.contains("b3-menu__item")) {
         const rowId = target.getAttribute("data-row-id");
         if (target.dataset.relationType === "selected") {
-            target.remove();
+            target.dataset.relationType = "candidate";
+            target.removeAttribute("draggable");
+            target.querySelector(".av__relation-table-check use").setAttribute("xlink:href", "#iconUncheck");
+            target.querySelector(".av__relation-table-primary > .fn__grab")?.remove();
+            menuElement.querySelector('[data-relation-type="candidateRows"]').prepend(target);
             updateCellsValue(protyle, nodeElement, getRelationValue(menuElement), cellElements);
             menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
         } else if (rowId) {

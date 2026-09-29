@@ -7,7 +7,7 @@
 		"id": "20211226120933-vnjgwwh",
 		"title": "搜索進階",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260929000700"
 	},
 	"Children": [
 		{
@@ -36,6 +36,53 @@
 				{
 					"Type": "NodeText",
 					"Data": "全域搜尋支援查詢語法進行進階搜尋，包括 AND/OR/NOT 邏輯組合、類型過濾、字段篩選等。同時提供資料庫表直查、忽略索引和忽略搜尋等進階功能，滿足從簡單關鍵字到複雜條件的各類搜尋需求。以下子文檔將逐一介紹這些功能的詳細用法。"
+				}
+			]
+		},
+		{
+			"ID": "20260929000700-1t67phl",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260929000700-1t67phl",
+				"updated": "20260929000700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "心智圖搜尋"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260929000700-ba18qgo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929000700-ba18qgo",
+				"updated": "20260929000700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜尋"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中啟用「心智圖區塊」，即可在區塊引用和嵌入區塊候選搜尋中透過節點文字找到整張心智圖。全域搜尋需在「搜尋類型」中勾選「心智圖區塊」。也可以單獨開啟「心智圖項目區塊」以搜尋各個分支。心智圖區塊預設開啟，心智圖項目區塊預設關閉。舊搜尋設定缺少這些選項時繼承全域搜尋設定，已明確選擇的開關狀態會保留。"
 				}
 			]
 		},

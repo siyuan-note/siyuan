@@ -181,7 +181,6 @@ export abstract class Constants {
     public static readonly LOCAL_SEARCHUNREF = "local-searchunref";
     public static readonly LOCAL_DOCINFO = "local-docinfo"; // only mobile
     public static readonly LOCAL_MOBILE_TABS = "local-mobile-tabs"; // only mobile
-    public static readonly LOCAL_MOBILE_SLASH_MENU = "local-mobile-slash-menu"; // only mobile
     public static readonly LOCAL_MOBILE_BOTTOM_BAR = "local-mobile-bottom-bar"; // only mobile
     public static readonly LOCAL_MOBILE_SIDE_PANEL = "local-mobile-side-panel"; // only mobile
     public static readonly LOCAL_DAILYNOTEID = "local-dailynoteid"; // string
@@ -536,6 +535,7 @@ export abstract class Constants {
             goToTab9: {default: "⌘9", custom: "⌘9"},
             goToTabNext: {default: "⇧⌘]", custom: "⇧⌘]"},
             goToTabPrev: {default: "⇧⌘[", custom: "⇧⌘["},
+            switchTab: {default: "", custom: ""},
             goToEditTabNext: {default: "⌃⇥", custom: "⌃⇥"},
             goToEditTabPrev: {default: "⌃⇧⇥", custom: "⌃⇧⇥"},
             recentClosed: {default: "⇧⌘T", custom: "⇧⌘T"},

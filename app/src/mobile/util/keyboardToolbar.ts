@@ -7,6 +7,7 @@ import {
 } from "../../protyle/util/hasClosest";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
+import {getSuperBlockCommand} from "../../block/superBlock";
 import {focusBlock, focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {getCurrentEditor as getDocumentEditor} from "../editor";
 import {getMobileToolbarPaddingElement, getMobileToolbarProtyle, getMobileToolbarUndo} from "../../protyle/lite/mobileToolbar";
@@ -62,6 +63,7 @@ import {
 } from "./touchSelection";
 import {getVisibleViewportBounds} from "./visibleViewport";
 import {createInlineMathSelection} from "./inlineMathSelection";
+import {isCommittedTextInput} from "../../protyle/wysiwyg/compositionInput";
 import {
     getTextWithoutSemanticMarkers,
     stripSemanticMarkersFromRangeText
@@ -81,6 +83,7 @@ import {applyMobileToolbarEntries} from "./toolbarEntries";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
+import {restoreGutterBySelection} from "../../protyle/gutter/restore";
 import {mountLiteSlashMenu} from "./liteSlashMenu";
 import {getTableCellRichContext} from "../../protyle/util/tableCellRichContext";
 import {insertEmptyBlock} from "../../block/util";
@@ -113,14 +116,7 @@ type TAndroidTableCellSelectAll = {
 };
 
 const ANDROID_TABLE_CELL_SELECT_ALL_TIMEOUT = 2000;
-const inlineMathSelection = createInlineMathSelection((editor, math) => {
-    const protyle = getCurrentEditor()?.protyle;
-    if (!protyle || protyle.disabled || protyle.toolbar.isMultiSelectMode() || protyle.wysiwyg.element !== editor) {
-        return;
-    }
-    protyle.toolbar.range = getSelection().getRangeAt(0).cloneRange();
-    protyle.toolbar.showRender(protyle, math);
-});
+const inlineMathSelection = createInlineMathSelection();
 
 let renderKeyboardToolbarFrame: number | undefined;
 let scrollSelectionIntoViewTimeout: number;
@@ -756,6 +752,8 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
     ${getSlashItem("- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
     ${getSlashItem("> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
+    ${getSlashItem(getSuperBlockCommand("col"), "iconSuper", window.siyuan.languages.horizontalSuperBlock, "true")}
+    ${getSlashItem(getSuperBlockCommand("row"), "iconSuper", window.siyuan.languages.verticalSuperBlock, "true")}
     ${getSlashItem(`::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`, "iconTabs", window.siyuan.languages.tabs, "true")}
     ${getSlashItem(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
     ${getSlashItem(`> [!NOTE]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">✏️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span>`, "true")}
@@ -1168,14 +1166,7 @@ const scrollKeyboardSelectionIntoView = () => {
         const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
         if (contentElement) {
             const renderGutter = () => {
-                const blockElement = hasClosestBlock(range.startContainer);
-                if (!editor?.protyle.gutter || !editor.protyle.options.render.gutter ||
-                    !blockElement || !editor.protyle.wysiwyg.element.contains(blockElement)) {
-                    return;
-                }
-                const targetElement = range.startContainer.nodeType === Node.ELEMENT_NODE ?
-                    range.startContainer as Element : range.startContainer.parentElement;
-                editor.protyle.gutter.render(editor.protyle, blockElement, targetElement);
+                restoreGutterBySelection(editor.protyle);
             };
             let cursorTop = getSelectionPosition(contentElement, range.cloneRange()).top;
             if (cursorTop < 0 && window.siyuan.mobile.touchRange) {
@@ -1318,6 +1309,7 @@ export const activeBlur = (force = false) => {
 };
 
 export const initKeyboardToolbar = () => {
+    window.addEventListener("siyuan-mobile-toolbar-focus", renderKeyboardToolbar);
     window.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => {
         if (event.detail) {
             getMobileToolbarPaddingElement(event.detail).style.paddingBottom = "";
@@ -1372,6 +1364,11 @@ export const initKeyboardToolbar = () => {
     document.addEventListener("compositionend", () => {
         composing = false;
     }, true);
+    document.addEventListener("input", (event: InputEvent) => {
+        if (isCommittedTextInput(event)) {
+            composing = false;
+        }
+    }, true);
     document.addEventListener("selectionchange", () => {
         inlineMathSelection.update(getMathEditor(), getSelection(), composing);
     }, true);
@@ -1393,6 +1390,9 @@ export const initKeyboardToolbar = () => {
         viewportHandler();
     }
     document.addEventListener("selectionchange", () => {
+        if (composing) {
+            return;
+        }
         rememberAndroidTableCellSelectAll();
         if (preserveAndroidBoundedSelection()) {
             return;

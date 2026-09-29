@@ -2,6 +2,8 @@
 """在 Windows 上编排 Windows、WSL Linux、Android 和鸿蒙发布构建。默认仅显示计划。"""
 
 import argparse
+import codecs
+from contextlib import contextmanager, nullcontext, redirect_stderr, redirect_stdout
 from datetime import datetime
 import importlib.util
 import json
@@ -22,13 +24,152 @@ SPEC = importlib.util.spec_from_file_location("verify_release", Path(__file__).w
 VERIFY = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VERIFY)
 PLATFORMS = ("windows", "linux", "android", "harmony")
+ACTIVE_RECORD = None
 
 
 class BuildError(Exception):
     pass
 
 
-def run(command, cwd, env=None, capture=False):
+def timestamp():
+    return datetime.now().astimezone().isoformat(timespec="seconds")
+
+
+class LoggedStream:
+    def __init__(self, terminal, record):
+        self.terminal, self.record = terminal, record
+
+    def write(self, text):
+        self.terminal.write(text)
+        self.record.write(text)
+        return len(text)
+
+    def flush(self):
+        self.terminal.flush()
+        self.record.log.flush()
+
+    def __getattr__(self, name):
+        return getattr(self.terminal, name)
+
+
+class BuildRecord:
+    def __init__(self, directory, args, version):
+        self.directory = Path(directory)
+        self.log = None
+        self.line_start = True
+        self.active_stage = None
+        stages = [("preflight", "构建预检")]
+        if set(args.platforms) & {"windows", "android", "harmony"}:
+            stages.append(("frontend", "前端构建"))
+        if set(args.platforms) & {"android", "harmony"}:
+            stages.append(("assets", "移动端资源归档"))
+        if "windows" in args.platforms:
+            stages.extend((("windows_tools", "Windows 资源准备"), ("windows_amd64", "Windows AMD64"),
+                           ("windows_arm64", "Windows ARM64")))
+        stages.extend((platform, {"linux": "Linux", "android": "Android", "harmony": "鸿蒙"}[platform])
+                      for platform in PLATFORMS[1:] if platform in args.platforms)
+        self.data = {"schema_version": 1, "version": version, "platforms": args.platforms, "appx": args.appx,
+                     "output_directory": str(args.output), "work_directory": None, "status": "pending",
+                     "current_stage": None, "stages": [dict(id=key, name=name, status="pending", artifacts=[])
+                                                       for key, name in stages]}
+
+    def save(self):
+        self.data["updated_at"] = timestamp()
+        # 同目录原子替换，查看进度时不会读到写入一半的 JSON。
+        path = self.directory / "progress.json.tmp"
+        try:
+            with path.open("w", encoding="utf-8", newline="\n") as stream:
+                json.dump(self.data, stream, ensure_ascii=False, indent=2)
+                stream.write("\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(path, self.directory / "progress.json")
+        finally:
+            path.unlink(missing_ok=True)
+
+    def write(self, text):
+        for part in text.splitlines(keepends=True):
+            if self.line_start:
+                self.log.write(f"[{timestamp()}] ")
+            self.log.write(part)
+            self.line_start = part.endswith(("\n", "\r"))
+        self.log.flush()
+
+    @contextmanager
+    def session(self):
+        global ACTIVE_RECORD
+        previous = ACTIVE_RECORD
+        started = time.monotonic()
+        with (self.directory / "build.log").open("x", encoding="utf-8", newline="\n") as self.log:
+            with redirect_stdout(LoggedStream(sys.stdout, self)), redirect_stderr(LoggedStream(sys.stderr, self)):
+                ACTIVE_RECORD = self
+                try:
+                    self.data.update(status="running", started_at=timestamp())
+                    self.save()
+                    print(f"发布记录目录：{self.directory}", flush=True)
+                    yield self
+                except BaseException as error:
+                    status = "interrupted" if isinstance(error, KeyboardInterrupt) else "failed"
+                    self.data.update(status=status, error=str(error) or type(error).__name__)
+                    self.write(f"\n[FAIL] {self.data['error']}\n")
+                    raise
+                else:
+                    self.data["status"] = "succeeded"
+                finally:
+                    try:
+                        self.data.update(finished_at=timestamp(), elapsed_seconds=round(time.monotonic() - started, 3))
+                        self.save()
+                        print(f"发布记录已保存：{self.directory}；状态：{self.data['status']}", flush=True)
+                    finally:
+                        ACTIVE_RECORD = previous
+
+    @contextmanager
+    def stage(self, key):
+        stage = next(item for item in self.data["stages"] if item["id"] == key)
+        started = time.monotonic()
+        self.active_stage = stage
+        self.data["current_stage"] = key
+        stage.update(status="running", started_at=timestamp())
+        self.save()
+        print(f"开始：{stage['name']}", flush=True)
+        try:
+            yield
+        except BaseException as error:
+            stage.update(status="interrupted" if isinstance(error, KeyboardInterrupt) else "failed",
+                         error=str(error) or type(error).__name__)
+            raise
+        else:
+            stage["status"] = "succeeded"
+        finally:
+            stage.update(finished_at=timestamp(), elapsed_seconds=round(time.monotonic() - started, 3))
+            self.active_stage = None
+            self.data["current_stage"] = None
+            self.save()
+            print(f"阶段结束：{stage['name']}；状态：{stage['status']}；耗时：{stage['elapsed_seconds']} 秒", flush=True)
+
+    def artifact(self, path):
+        if self.active_stage is not None:
+            self.active_stage["artifacts"].append(str(path))
+            self.save()
+
+
+def create_record(args, version):
+    base = args.records_dir.resolve()
+    if not re.fullmatch(VERIFY.VERSION, version):
+        raise BuildError(f"无效版本号：{version}")
+    parent = (base / version).resolve()
+    # 记录不能混入源码、安装包或可清理的临时构建目录。
+    for protected in (ROOT, args.android_dir, args.harmony_dir, args.output, Path(tempfile.gettempdir())):
+        protected = protected.resolve()
+        if (base.is_relative_to(protected) or protected.is_relative_to(base) or
+                parent.is_relative_to(protected) or protected.is_relative_to(parent)):
+            raise BuildError(f"发布记录目录须与源码、安装包和系统临时目录分开：{base}")
+    parent.mkdir(parents=True, exist_ok=True)
+    directory = Path(tempfile.mkdtemp(prefix=f"{datetime.now():%Y%m%d-%H%M%S}-", dir=parent))
+    return BuildRecord(directory, args, version)
+
+
+def run(command, cwd, env=None, capture=False, interactive=False):
     command = [str(value) for value in command]
     executable = shutil.which(command[0]) or command[0]
     command[0] = executable
@@ -42,14 +183,44 @@ def run(command, cwd, env=None, capture=False):
         invocation = command
     if not capture:
         print(f"[{cwd}] {subprocess.list2cmdline(command)}", flush=True)
-    result = subprocess.run(invocation, cwd=cwd, env=env, shell=shell, check=False,
-                            stdout=subprocess.PIPE if capture else None,
-                            stderr=subprocess.PIPE if capture else None,
-                            encoding="utf-8", errors="replace")
-    if result.returncode:
-        detail = (result.stderr or "").strip() if capture else "请查看上方输出"
-        raise BuildError(f"命令失败（{result.returncode}）：{command[0]}；{detail}")
-    return (result.stdout or "").strip() if capture else ""
+    if ACTIVE_RECORD is not None:
+        ACTIVE_RECORD.data["last_command"] = {"arguments": command, "directory": str(cwd),
+                                               "started_at": timestamp(), "interactive": interactive}
+        ACTIVE_RECORD.save()
+        if capture:
+            ACTIVE_RECORD.write(f"[{cwd}] {subprocess.list2cmdline(command)}\n")
+    if ACTIVE_RECORD is not None and not capture and not interactive:
+        # 只采集输出，标准输入仍连接终端；SSH 认证单独保留完整终端交互。
+        with subprocess.Popen(invocation, cwd=cwd, env=env, shell=shell,
+                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
+            decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+            try:
+                while chunk := process.stdout.read1(65536):
+                    sys.stdout.write(decoder.decode(chunk))
+                    sys.stdout.flush()
+                sys.stdout.write(decoder.decode(b"", final=True))
+                sys.stdout.flush()
+                returncode = process.wait()
+            except BaseException:
+                if process.poll() is None:
+                    process.terminate()
+                process.wait()
+                raise
+        output, detail = "", "请查看上方输出或 build.log"
+    else:
+        result = subprocess.run(invocation, cwd=cwd, env=env, shell=shell, check=False,
+                                stdout=subprocess.PIPE if capture else None,
+                                stderr=subprocess.PIPE if capture else None,
+                                encoding="utf-8", errors="replace")
+        returncode = result.returncode
+        output = (result.stdout or "").strip() if capture else ""
+        detail = (result.stderr or "").strip() if capture else "请查看上方终端输出"
+    if ACTIVE_RECORD is not None:
+        ACTIVE_RECORD.data["last_command"].update(returncode=returncode, finished_at=timestamp())
+        ACTIVE_RECORD.save()
+    if returncode:
+        raise BuildError(f"命令失败（{returncode}）：{command[0]}；{detail}")
+    return output
 
 
 def powershell(script, values=None):
@@ -137,8 +308,6 @@ def source_preflight(args, version):
         for filename in ("AppxManifest.xml", "AppxManifest-arm64.xml"):
             check_version((ROOT / "app/appx" / filename).read_text(encoding="utf-8"),
                           r'\bVersion="([^"]+)"', version.split("-")[0] + ".0", filename)
-    if not VERIFY.find_7z(args.sevenzip):
-        raise BuildError("最终安装包验证需要 7-Zip，请安装或指定 --sevenzip")
     commands = {"git"}
     if set(args.platforms) & {"windows", "android", "harmony"}:
         commands.update(("node", "pnpm"))
@@ -177,8 +346,9 @@ def create_mobile_assets(destination, version):
 
 
 class Builder:
-    def __init__(self, args, version, work):
+    def __init__(self, args, version, work, record=None):
         self.args, self.version, self.work = args, version, work
+        self.record = record
         self.artifacts = []
         self.thumbprint = None
         self.wsl_root = None
@@ -189,15 +359,41 @@ class Builder:
             prefix += ["--distribution", self.args.wsl_distro]
         prefix += ["--user", self.args.wsl_user, "--cd", directory or self.args.wsl_repo,
                    "--exec", "bash", "-lc", "exec " + shlex.join([str(item) for item in command])]
+        if command[:2] == ["git", "fetch"]:
+            return run(prefix, ROOT, capture=capture, interactive=True)
         return run(prefix, ROOT, capture=capture)
 
+    def stage(self, key):
+        return self.record.stage(key) if self.record else nullcontext()
+
+    def sync_wsl(self, local_head):
+        if self.wsl(["git", "rev-parse", "HEAD"], capture=True) == local_head:
+            return
+        # 同步只接受干净工作区，避免遗漏 Windows 改动或覆盖 WSL 中的发布现场。
+        status = ["git", "status", "--porcelain", "--untracked-files=all"]
+        if run(status, ROOT, capture=True) or self.wsl(status, capture=True):
+            raise BuildError("自动同步 WSL 前，Windows 和 WSL 工作区必须干净，请先处理未提交和未跟踪文件")
+        branch = run(["git", "symbolic-ref", "--quiet", "--short", "HEAD"], ROOT, capture=True)
+        self.wsl(["git", "fetch", "--no-tags", "origin", "refs/heads/" + branch])
+        # 目标必须已推送且包含 WSL 当前提交；远端后来新增的提交不进入本次构建。
+        self.wsl(["git", "merge-base", "--is-ancestor", local_head, "FETCH_HEAD"])
+        self.wsl(["git", "merge-base", "--is-ancestor", "HEAD", local_head])
+        self.wsl(["git", "switch", "--detach", local_head])
+        if self.wsl(["git", "rev-parse", "HEAD"], capture=True) != local_head:
+            raise BuildError("WSL 同步后的提交与 Windows 不一致")
+        print(f"WSL 已同步到 Windows 提交：{local_head}（分离 HEAD）", flush=True)
+
     def preflight(self):
+        # 先完成需要交互的仓库认证，再检查环境和开始耗时构建。
+        if {"linux", "harmony"} & set(self.args.platforms):
+            print("先同步 WSL 仓库；如提示 SSH 私钥口令，请现在输入，完成后继续构建预检", flush=True)
+            local_head = run(["git", "rev-parse", "HEAD"], ROOT, capture=True)
+            self.sync_wsl(local_head)
         source_preflight(self.args, self.version)
         if "windows" in self.args.platforms:
             self.thumbprint = certificate_thumbprint(self.args.certificate_subject, self.args.certificate_sha1)
             print(f"Windows 签名证书：{self.thumbprint}；签名时请按系统提示输入 YubiKey PIN", flush=True)
         if {"linux", "harmony"} & set(self.args.platforms):
-            local_head = run(["git", "rev-parse", "HEAD"], ROOT, capture=True)
             remote_head = self.wsl(["git", "rev-parse", "HEAD"], capture=True)
             if local_head != remote_head:
                 raise BuildError("WSL 与 Windows 仓库提交不同；请先同步到同一次发布提交")
@@ -232,48 +428,58 @@ class Builder:
                 raise BuildError(f"输出目录已有同名文件，未覆盖：{target}")
             copy_verified(path, target, self.args.output)
             self.artifacts.append(target)
+            if self.record:
+                self.record.artifact(target)
             print(f"已收集，待最终校验：{target}", flush=True)
 
     def windows(self):
+        with self.stage("windows_tools"):
+            self.windows_tools()
+        for arch, config in (("amd64", "electron-builder.yml"), ("arm64", "electron-builder-arm64.yml")):
+            with self.stage("windows_" + arch):
+                self.windows_arch(arch, config)
+
+    def windows_tools(self):
         run(["go", "install", "github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest"], ROOT / "kernel")
         go_bin = run(["go", "env", "GOBIN"], ROOT, capture=True)
         if not go_bin:
             go_bin = str(Path(run(["go", "env", "GOPATH"], ROOT, capture=True).split(os.pathsep)[0]) / "bin")
         run([Path(go_bin) / "goversioninfo.exe", "-platform-specific=true", "-icon=resource/icon.ico",
              "-manifest=resource/goversioninfo.exe.manifest"], ROOT / "kernel")
+
+    def windows_arch(self, arch, config):
         output = self.work / "windows"
-        for arch, config in (("amd64", "electron-builder.yml"), ("arm64", "electron-builder-arm64.yml")):
-            started = time.time()
-            env = dict(os.environ, GOOS="windows", GOARCH=arch, CGO_ENABLED="1")
-            if arch == "arm64":
-                env["CC"] = '"' + str(self.args.arm64_cc) + '"'
-            kernel = self.work / "kernels" / arch / "SiYuan-Kernel.exe"
-            kernel.parent.mkdir(parents=True, exist_ok=True)
-            run(["go", "build", "-tags", "fts5 sqlcipher", "-ldflags=-s -w", "-o", kernel, "."], ROOT / "kernel", env)
-            self.check_kernel(kernel, arch)
-            copy_verified(ROOT / "app/elevator" / f"elevator-{arch}.exe", kernel.parent / "elevator.exe", self.work)
-            generated_config = self.work / f"windows-{arch}.json"
-            run(["node", ROOT / "scripts/release-windows-config.cjs", ROOT / "app" / config,
-                 kernel.parent, output, self.thumbprint, generated_config], ROOT / "app")
-            signing_env = dict(os.environ)
-            for key in ("CSC_LINK", "CSC_KEY_PASSWORD", "WIN_CSC_LINK", "WIN_CSC_KEY_PASSWORD"):
-                signing_env.pop(key, None)
-            run(["pnpm", "exec", "electron-builder", "--config", generated_config, "--win",
-                 "--arm64" if arch == "arm64" else "--x64", "--publish=never"], ROOT / "app", signing_env)
-            suffix = "-arm64" if arch == "arm64" else ""
-            installer = output / f"siyuan-{self.version}-win{suffix}.exe"
-            verify_signature(installer, self.thumbprint)
-            self.collect([installer], "Windows", started)
-            if self.args.appx:
-                unpacked = output / ("win-arm64-unpacked" if arch == "arm64" else "win-unpacked")
-                (unpacked / "resources/ms-store").touch()
-                appx_output = self.work / "appx" / arch
-                appx_output.mkdir(parents=True)
-                run(["electron-windows-store", "--input-directory", unpacked, "--output-directory", appx_output,
-                     "--package-version", self.version.split("-")[0] + ".0", "--package-name", "SiYuan" + suffix,
-                     "--manifest", ROOT / "app/appx" / ("AppxManifest-arm64.xml" if arch == "arm64" else "AppxManifest.xml"),
-                     "--assets", ROOT / "app/appx/assets", "--make-pri", "true"], ROOT)
-                self.collect(appx_output.glob("*.appx"), "Windows Appx", started)
+        started = time.time()
+        env = dict(os.environ, GOOS="windows", GOARCH=arch, CGO_ENABLED="1")
+        if arch == "arm64":
+            env["CC"] = '"' + str(self.args.arm64_cc) + '"'
+        kernel = self.work / "kernels" / arch / "SiYuan-Kernel.exe"
+        kernel.parent.mkdir(parents=True, exist_ok=True)
+        run(["go", "build", "-tags", "fts5 sqlcipher", "-ldflags=-s -w", "-o", kernel, "."], ROOT / "kernel", env)
+        self.check_kernel(kernel, arch)
+        copy_verified(ROOT / "app/elevator" / f"elevator-{arch}.exe", kernel.parent / "elevator.exe", self.work)
+        generated_config = self.work / f"windows-{arch}.json"
+        run(["node", ROOT / "scripts/release-windows-config.cjs", ROOT / "app" / config,
+             kernel.parent, output, self.thumbprint, generated_config], ROOT / "app")
+        signing_env = dict(os.environ)
+        for key in ("CSC_LINK", "CSC_KEY_PASSWORD", "WIN_CSC_LINK", "WIN_CSC_KEY_PASSWORD"):
+            signing_env.pop(key, None)
+        run(["pnpm", "exec", "electron-builder", "--config", generated_config, "--win",
+             "--arm64" if arch == "arm64" else "--x64", "--publish=never"], ROOT / "app", signing_env)
+        suffix = "-arm64" if arch == "arm64" else ""
+        installer = output / f"siyuan-{self.version}-win{suffix}.exe"
+        verify_signature(installer, self.thumbprint)
+        self.collect([installer], "Windows", started)
+        if self.args.appx:
+            unpacked = output / ("win-arm64-unpacked" if arch == "arm64" else "win-unpacked")
+            (unpacked / "resources/ms-store").touch()
+            appx_output = self.work / "appx" / arch
+            appx_output.mkdir(parents=True)
+            run(["electron-windows-store", "--input-directory", unpacked, "--output-directory", appx_output,
+                 "--package-version", self.version.split("-")[0] + ".0", "--package-name", "SiYuan" + suffix,
+                 "--manifest", ROOT / "app/appx" / ("AppxManifest-arm64.xml" if arch == "arm64" else "AppxManifest.xml"),
+                 "--assets", ROOT / "app/appx/assets", "--make-pri", "true"], ROOT)
+            self.collect(appx_output.glob("*.appx"), "Windows Appx", started)
 
     def linux(self):
         started = time.time()
@@ -348,11 +554,9 @@ class Builder:
             header = source.with_suffix(".h")
             if not header.is_file() or header.stat().st_mtime < started - 2:
                 raise BuildError(f"鸿蒙内核头文件未更新：{header}")
-            # 各架构保存配套头文件，正式版原生模块使用 ARM64 的公共头文件。
-            headers = sorted(source.parent.glob("*.h"))
-            for path in headers:
-                copy_verified(path, self.args.harmony_dir / "entry/libs" / abi / path.name, self.args.harmony_dir)
-                if architecture == "arm64":
+            # 原生模块从公共包含目录读取头文件，使用 ARM64 构建生成的版本。
+            if architecture == "arm64":
+                for path in sorted(source.parent.glob("*.h")):
                     copy_verified(path, self.args.harmony_dir / "entry/src/main/cpp/include" / path.name,
                                   self.args.harmony_dir)
         for name in ("libkernel.h", "lan_sync_bridge.h"):
@@ -374,11 +578,12 @@ class Builder:
         self.collect([app], "鸿蒙", started)
 
     def finish(self):
-        args = argparse.Namespace(directory=self.args.output, version=self.version, baseline=None,
-                                  report=None, sevenzip=self.args.sevenzip)
-        if VERIFY.verify(args):
-            raise BuildError(f"安装包校验未通过，已收集的产物保留在 {self.args.output}")
-        print(f"完成：本次收集 {len(self.artifacts)} 个安装包，{self.args.output} 中的安装包已全部校验")
+        print(f"构建完成：本次收集 {len(self.artifacts)} 个安装包到 {self.args.output}；请单独执行安装包校验")
+        command = ["python", "-X", "utf8", "scripts/verify-release.py", "check", str(self.args.output),
+                   "--version", self.version]
+        if self.args.sevenzip:
+            command.extend(("--sevenzip", self.args.sevenzip))
+        print(subprocess.list2cmdline(command))
 
 
 def parser():
@@ -387,6 +592,8 @@ def parser():
     result.add_argument("--execute", action="store_true", help="实际执行；不传时只显示计划")
     result.add_argument("--appx", action="store_true", help="Windows 额外生成两个 Microsoft Store Appx 包")
     result.add_argument("--output", type=Path, help="安装包收集目录，默认桌面 siyuan；不覆盖已有产物")
+    result.add_argument("--records-dir", type=Path, default=ROOT.parent / "release-records",
+                        help="持久化发布记录根目录，默认主仓库同级 release-records；每次执行创建独立子目录")
     result.add_argument("--certificate-subject", default="Yunnan Liandi Technology Co., Ltd.", help="Windows 证书主题，可用指纹替代")
     result.add_argument("--certificate-sha1", help="Windows 签名证书的 40 位公开指纹，不是密码")
     result.add_argument("--arm64-cc", type=Path, default=Path("D:/Program Files/llvm-mingw-20240518-ucrt-x86_64/bin/aarch64-w64-mingw32-gcc.exe"))
@@ -396,7 +603,7 @@ def parser():
     result.add_argument("--android-dir", type=Path, default=ROOT.parent / "siyuan-android")
     result.add_argument("--harmony-dir", type=Path, default=ROOT.parent / "siyuan-harmony")
     result.add_argument("--deveco", type=Path, default=Path("D:/Program Files/Huawei/DevEco Studio"))
-    result.add_argument("--sevenzip", help="安装包校验使用的 7-Zip 可执行文件")
+    result.add_argument("--sevenzip", help="仅用于完成后提示的手动校验命令，不在构建时调用")
     return result
 
 
@@ -415,6 +622,7 @@ def main():
     for name in ("android_dir", "harmony_dir", "deveco", "arm64_cc"):
         setattr(args, name, getattr(args, name).resolve())
     print(f"版本：{version}\n平台：{', '.join(args.platforms)}\n收集目录：{args.output}")
+    print(f"发布记录根目录：{args.records_dir.resolve()}；实际执行时按版本和时间创建独立目录")
     descriptions = {
         "windows": "构建 AMD64/ARM64 内核 - YubiKey 签名 - 生成两个 NSIS 安装包 - 检查签名",
         "linux": f"WSL 用户 {args.wsl_user}、目录 {args.wsl_repo} - 检查源代码一致 - 双架构构建 TAR/AppImage/DEB/RPM",
@@ -422,32 +630,47 @@ def main():
         "harmony": "WSL 构建两种架构内核并分别复制 - 更新 app.zip - Hvigor release 构建 APP",
     }
     print("本地前端仅构建一次；Linux 前端在 WSL 中构建")
+    if {"linux", "harmony"} & set(args.platforms):
+        print("构建前自动同步 WSL 到 Windows 当前提交；提交不同时要求两端工作区干净，目标已推送且包含 WSL 当前提交")
     for platform in args.platforms:
         print(f"  {platform}: {descriptions[platform]}")
-    print("各平台产物生成后立即复制到收集目录，最后统一校验该目录中的安装包")
+    print("各平台产物生成后立即复制到收集目录，构建完成后请单独执行安装包校验")
     if not args.execute:
         print("当前仅显示计划，没有执行构建或修改文件；添加 --execute 开始")
         return 0
     if os.name != "nt":
         raise BuildError("此编排脚本需要在 Windows 上执行，Linux 和鸿蒙内核通过 WSL 构建")
-    with tempfile.TemporaryDirectory(prefix="siyuan-release-preflight-") as temporary:
-        probe = Builder(args, version, Path(temporary))
-        probe.preflight()
+    record = create_record(args, version)
+    with record.session():
+        print(f"版本：{version}；平台：{', '.join(args.platforms)}；收集目录：{args.output}")
+        execute_build(args, version, record)
+    return 0
+
+
+def execute_build(args, version, record):
+    with record.stage("preflight"):
+        with tempfile.TemporaryDirectory(prefix="siyuan-release-preflight-") as temporary:
+            probe = Builder(args, version, Path(temporary), record)
+            probe.preflight()
     work = Path(tempfile.mkdtemp(prefix=f"siyuan-release-{version}-{datetime.now():%Y%m%d}-"))
-    builder = Builder(args, version, work)
+    record.data["work_directory"] = str(work)
+    record.save()
+    builder = Builder(args, version, work, record)
     builder.thumbprint, builder.wsl_root = probe.thumbprint, probe.wsl_root
     print(f"本次构建目录：{work}；失败时保留产物供检查", flush=True)
     if set(args.platforms) & {"windows", "android", "harmony"}:
-        builder.build_ui()
+        with record.stage("frontend"):
+            builder.build_ui()
     assets = work / "mobile/app.zip"
     if set(args.platforms) & {"android", "harmony"}:
-        create_mobile_assets(assets, version)
+        with record.stage("assets"):
+            create_mobile_assets(assets, version)
     for platform in PLATFORMS:
         if platform in args.platforms:
             method = getattr(builder, platform)
-            method(assets) if platform in {"android", "harmony"} else method()
+            with record.stage(platform) if platform != "windows" else nullcontext():
+                method(assets) if platform in {"android", "harmony"} else method()
     builder.finish()
-    return 0
 
 
 if __name__ == "__main__":
@@ -456,3 +679,6 @@ if __name__ == "__main__":
     except (BuildError, VERIFY.VerificationError, OSError, ValueError, subprocess.SubprocessError) as error:
         print(f"[FAIL] {error}", file=sys.stderr)
         sys.exit(1)
+    except KeyboardInterrupt:
+        print("构建已中断，已开始的发布记录保留供检查", file=sys.stderr)
+        sys.exit(130)

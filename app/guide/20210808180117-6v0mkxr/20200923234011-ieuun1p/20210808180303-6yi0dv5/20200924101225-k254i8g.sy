@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20260923221935"
+		"updated": "20260928225427"
 	},
 	"Children": [
 		{
@@ -1405,7 +1405,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20260921215916"
+				"updated": "20260928225427"
 			},
 			"Children": [
 				{
@@ -2533,7 +2533,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-r1kfene",
-				"updated": "20260923221935"
+				"updated": "20260926151827"
 			},
 			"Children": [
 				{
@@ -2553,6 +2553,57 @@
 				{
 					"Type": "NodeText",
 					"Data": "A mind map block is a dedicated block type. You can convert an unordered, ordered, or task list into a mind map block and convert it back to a list. Conversion preserves item content, numbering, and task states. Existing mind maps stored as lists are upgraded when their documents are opened for editing."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-kkcg79g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-kkcg79g",
+				"updated": "20260926152549"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select the first node in a range, click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Summary"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the mind map toolbar, then select the last sibling node to add a bracket and summary text. The range must be contiguous and cannot overlap or contain another summary. These steps also work on mobile. You can also use the up and down arrow keys to select the last node, Enter to confirm the range, and Esc to cancel."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-2f033n1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-2f033n1",
+				"updated": "20260926151827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Double-click the summary text, or select the summary and use the edit button at the bottom, to edit it. Enter saves and Esc cancels. You can change its color or delete it using the bottom toolbar; Delete also removes the selected summary. These changes support undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-z49ph4y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-z49ph4y",
+				"updated": "20260926151827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Converting to a list hides the summary but preserves its data; converting back restores it. Nodes inserted inside the range are included automatically. Removing or moving members out shrinks the range; one remaining member keeps the summary, while removing all members removes it. Summary text is an annotation, not an independently searchable or referenceable block. SiYuan-format HTML and PDF previews display summaries."
 				}
 			]
 		},
@@ -2932,7 +2983,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-lubwy1k",
-				"updated": "20250330192603"
+				"updated": "20260928225427"
 			},
 			"Children": [
 				{
@@ -2963,6 +3014,182 @@
 				{
 					"Type": "NodeText",
 					"Data": ". It can be used to combine continuous content blocks in a document, and also to support horizontal typesetting."
+				}
+			]
+		},
+		{
+			"ID": "20260928225427-pmkcfru",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260928225427-pmkcfru",
+				"updated": "20260928225427"
+			},
+			"Children": [
+				{
+					"ID": "20260928225427-4wel37x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-4wel37x",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-yrq8l73",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-yrq8l73",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Type "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Horizontal super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Vertical super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to create two empty paragraphs arranged side by side or vertically, with the cursor in the first paragraph. Search for “columns” to find these options. On mobile, they are also available in the keyboard toolbar's insert panel"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260928225427-ldrjy5i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-ldrjy5i",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-6yzyax0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-6yzyax0",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "In the super block's block icon menu, select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Add a column to the beginning of the current super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Add a column to the end of the current super block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to add an empty paragraph at either end of a horizontal layout. For a vertical layout, the corresponding actions add a block. The new block does not copy the type or content of existing children"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260928225427-29pl5zd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-29pl5zd",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-9sn0h7t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-9sn0h7t",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "In the menu of a direct child of a vertical super block, select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Create local columns to the left"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Create local columns to the right"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to group that block and a new empty paragraph into a nested horizontal super block. Other blocks keep their layout. These actions do not change the scope of existing left/right column insertion shortcuts"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

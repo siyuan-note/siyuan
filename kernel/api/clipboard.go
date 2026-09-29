@@ -96,3 +96,14 @@ var cleanupRichText = contractHandler(apicontract.CleanupRichText, func(c *gin.C
 	model.CleanupRichClipboardBatch(request.Batch, request.Groups)
 	return apicontract.Success(apicontract.Null{})
 })
+
+var preparePasteAssets = contractHandler(apicontract.PreparePasteAssets, func(c *gin.Context, request apicontract.PreparePasteAssetsRequest) apicontract.Response[map[string]string] {
+	if err := holdEncryptedBoxRequest(c, request.Notebook); err != nil {
+		return apicontract.Failure[map[string]string](-1, err.Error())
+	}
+	assets, err := model.PrepareClipboardPasteAssets(request.Notebook, request.Assets)
+	if err != nil {
+		return apicontract.Failure[map[string]string](-1, err.Error())
+	}
+	return apicontract.Success(assets)
+})

@@ -1189,6 +1189,25 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                 }
             });
         }
+        if (selectedItemInfos.length === 1 && primaryRows[0].isDetached) {
+            menu.addItem({
+                id: "bindDocument",
+                label: window.siyuan.languages.bind,
+                icon: "iconLink",
+                click() {
+                    openDatabaseRowByData(protyle, {
+                        avID: blockElement.dataset.avId,
+                        databaseBlockID: blockElement.dataset.nodeId,
+                        notebookID: protyle.notebookId,
+                        itemID: selectedItemInfos[0].itemID,
+                        valueID: primaryRows[0].valueID,
+                        title: primaryRows[0].content.trim(),
+                        isDetached: true,
+                        bindPrimary: true,
+                    });
+                }
+            });
+        }
         menu.addItem({
             id: "addToDatabase",
             label: window.siyuan.languages.addToDatabase,

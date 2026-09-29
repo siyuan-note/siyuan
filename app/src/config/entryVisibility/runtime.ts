@@ -15,6 +15,7 @@ import {
     TOP_BAR_ROOT_PATH,
     STATUS_BAR_ROOT_PATH,
     WINDOW_TOP_BAR_ROOT_PATH,
+    SLASH_MENU_ROOT_PATH,
 } from "./catalog";
 import {
     mergeEntryOrderPreservingUnknown,
@@ -62,7 +63,8 @@ const getTemplateVisibility = (path: string, template: TEntryVisibilityTemplate)
 
 export const isEntryVisible = (path: string): boolean => {
     /// #if MOBILE
-    if (!path.startsWith(`${TOOLBAR_ENTRY_ROOT_PATH}.`)) {
+    if (!path.startsWith(`${TOOLBAR_ENTRY_ROOT_PATH}.`) &&
+        path !== SLASH_MENU_ROOT_PATH && !path.startsWith(`${SLASH_MENU_ROOT_PATH}.`)) {
         return true;
     }
     /// #endif

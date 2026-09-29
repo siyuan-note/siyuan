@@ -306,6 +306,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
+        // 组合输入期间保留浏览器的原生选区，避免读取选区时修复光标而打断输入法。
+        if (event.isComposing) {
+            event.stopPropagation();
+            return;
+        }
         if (hasClosestByAttribute(event.target, "data-type", "av-search")) {
             if (matchHotKey("⌘A", event)) {
                 event.preventDefault();
@@ -406,10 +411,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }, 100);
                 return false;
             }
-        }
-        if (event.isComposing) {
-            event.stopPropagation();
-            return;
         }
         // https://github.com/siyuan-note/siyuan/issues/2261
         if (!["⌘", "⇧", "⌥", "⌃"].includes(Constants.KEYCODELIST[event.keyCode])) {
@@ -1641,6 +1642,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const trackedRangeInsertion = prepareTrackedRangeInsertion(protyle, range);
             try {
                 if (softEnter(range, nodeElement, protyle, trackedRangeInsertion)) {
+                    if (protyle.options.typewriterMode) {
+                        scheduleCaretScroll(protyle, "down");
+                    }
                     event.stopPropagation();
                     event.preventDefault();
                     return;
@@ -1682,6 +1686,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const trackedRangeInsertion = prepareTrackedRangeInsertion(protyle, range);
             try {
                 await enter(nodeElement, range, protyle, trackedRangeInsertion);
+                if (protyle.options.typewriterMode) {
+                    scheduleCaretScroll(protyle, "down");
+                }
             } finally {
                 endTrackedRangeInsertion(trackedRangeInsertion);
             }

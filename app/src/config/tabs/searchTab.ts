@@ -8,6 +8,8 @@ const registerSearchQueryGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.searchBlockType,
         footer: `[1] ${window.siyuan.languages.containerBlockTip1}`,
         items: [
+            {kind: "switch", id: "search.mindmap", label: `${window.siyuan.languages.mindmap} <sup>[1]</sup>`, icon: "iconMindmap"},
+            {kind: "switch", id: "search.mindmapItem", label: `${window.siyuan.languages.mindmapItem} <sup>[1]</sup>`, icon: "iconListItem"},
             {kind: "switch", id: "search.customBlock", label: window.siyuan.languages.customBlock, icon: "iconPlugin"},
             {kind: "switch", id: "search.mathBlock", label: window.siyuan.languages.math, icon: "iconMath"},
             {kind: "switch", id: "search.table", label: window.siyuan.languages.tableBlock, icon: "iconTable"},

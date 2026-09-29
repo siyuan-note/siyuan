@@ -59,6 +59,13 @@ type UploadCloudSnapshotRequest struct {
 }
 type GetRepoSnapshotsRequest struct {
 	Page float64 `json:"page"`
+	RepoSnapshotTimeRange
+	// ID 可选，去除首尾空白后按 7 至 40 位十六进制快照 ID 前缀查询本地仓库，不区分大小写，忽略分页。
+	// 前缀匹配多个快照时全部返回，按创建时间降序排列。
+	// 省略或留空时保留分页列表；未找到返回空列表，格式错误及仓库读取失败返回错误。
+	ID string `json:"id" api:"optional"`
+	// IncludeFiles 默认为 false；为 true 时 ID 必须完整，返回该快照的文件元数据，不读取文件正文。
+	IncludeFiles bool `json:"includeFiles" api:"optional"`
 }
 type SearchRepoFileRequest struct {
 	Keyword string  `json:"keyword" api:"trim"`
@@ -73,7 +80,36 @@ type ExportRepoFileRequest struct {
 }
 type GetCloudRepoSnapshotsRequest struct {
 	Page float64 `json:"page"`
+	RepoSnapshotTimeRange
 }
+
+// RepoSnapshotTimeRange 在分页前按创建时间筛选，省略或为 0 表示该端无界。
+// 本地 ID 查询同样筛选时间，但仍忽略分页；云端会遍历索引页，错误时不返回部分结果。
+type RepoSnapshotTimeRange struct {
+	// StartTime 为包含在范围内的起始 Unix 毫秒时间戳，必须是非负整数。
+	StartTime int64 `json:"startTime" api:"optional"`
+	// EndTime 为不包含在范围内的结束 Unix 毫秒时间戳，必须是非负整数。
+	// 两端均非 0 时，EndTime 必须大于 StartTime。
+	EndTime int64 `json:"endTime" api:"optional"`
+}
+
+func decodeRepoSnapshotTimeRange(fields map[string]json.RawMessage) (ret RepoSnapshotTimeRange, err error) {
+	for key, target := range map[string]*int64{"startTime": &ret.StartTime, "endTime": &ret.EndTime} {
+		if raw, exists := fields[key]; exists {
+			if string(raw) == "null" {
+				return ret, fmt.Errorf("%s must be a non-negative integer", key)
+			}
+			if err = json.Unmarshal(raw, target); err != nil || *target < 0 {
+				return ret, fmt.Errorf("%s must be a non-negative integer", key)
+			}
+		}
+	}
+	if ret.EndTime != 0 && ret.StartTime >= ret.EndTime {
+		return ret, errors.New("endTime must be greater than startTime")
+	}
+	return ret, nil
+}
+
 type RemoveCloudRepoTagSnapshotRequest struct {
 	Tag string `json:"tag" api:"trim"`
 }
@@ -139,6 +175,9 @@ type RepoKeyData struct {
 }
 type RepoSnapshot struct {
 	RepoLog
+	// Tags 为该快照的全部本地标记，按名称排序；未标记时为空数组。
+	// Tag 保留标记快照视图中当前行的单个标记，供上传、移除等操作使用。
+	Tags             []string         `json:"tags"`
 	TypesCount       []*RepoTypeCount `json:"typesCount"`
 	RequiresDownload bool             `json:"requiresDownload"`
 }
@@ -161,6 +200,9 @@ type RepoDocHistory struct {
 	Title   string `json:"title"`
 	HSize   string `json:"hSize"`
 	Updated int64  `json:"updated"`
+	// Snapshots 包含引用此文件版本的全部本地标记快照，按快照时间倒序排列；同一快照的标记合并。
+	// 以仓库文件 ID 匹配，不只查询 IndexID；仅返回标记、备注等元数据，不读取文件正文。
+	Snapshots []*DocHistorySnapshot `json:"snapshots"`
 }
 type RepoTypeCount struct {
 	Type  string `json:"type"`
@@ -320,6 +362,21 @@ func init() {
 		if request.Page, err = legacyField[float64](fields, "page", "Number", true); err != nil {
 			return request, err
 		}
+		if request.RepoSnapshotTimeRange, err = decodeRepoSnapshotTimeRange(fields); err != nil {
+			return request, err
+		}
+		if request.ID, err = legacyField[string](fields, "id", "String", false); err != nil {
+			return request, err
+		}
+		request.ID = strings.TrimSpace(request.ID)
+		if raw, exists := fields["includeFiles"]; exists {
+			if string(raw) == "null" {
+				return request, errors.New("includeFiles must be a boolean")
+			}
+			if err = json.Unmarshal(raw, &request.IncludeFiles); err != nil {
+				return request, err
+			}
+		}
 		return request, nil
 	}
 	SearchRepoFile.decodeRequest = func(reader io.Reader) (request SearchRepoFileRequest, err error) {
@@ -364,6 +421,9 @@ func init() {
 			return request, err
 		}
 		if request.Page, err = legacyField[float64](fields, "page", "Number", true); err != nil {
+			return request, err
+		}
+		if request.RepoSnapshotTimeRange, err = decodeRepoSnapshotTimeRange(fields); err != nil {
 			return request, err
 		}
 		return request, nil

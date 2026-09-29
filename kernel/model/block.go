@@ -387,14 +387,15 @@ func hasSurvivingAttributeViewBlock(group *blockRefCheckGroup, boundAVIDs, avBlo
 }
 
 type BlockTreeInfo struct {
-	ID           string `json:"id"`
-	Type         string `json:"type"`
-	ParentID     string `json:"parentID"`
-	ParentType   string `json:"parentType"`
-	PreviousID   string `json:"previousID"`
-	PreviousType string `json:"previousType"`
-	NextID       string `json:"nextID"`
-	NextType     string `json:"nextType"`
+	HeadingChildren *bool  `json:"headingChildren,omitempty"`
+	ID              string `json:"id"`
+	Type            string `json:"type"`
+	ParentID        string `json:"parentID"`
+	ParentType      string `json:"parentType"`
+	PreviousID      string `json:"previousID"`
+	PreviousType    string `json:"previousType"`
+	NextID          string `json:"nextID"`
+	NextType        string `json:"nextType"`
 }
 
 func GetBlockTreeInfos(ids []string) (ret map[string]*BlockTreeInfo) {
@@ -404,18 +405,38 @@ func GetBlockTreeInfos(ids []string) (ret map[string]*BlockTreeInfo) {
 // GetBlockTreeInfosInBox 获取指定笔记本内的块树信息。空 box 仅查询普通全局库。
 func GetBlockTreeInfosInBox(ids []string, boxID string) (ret map[string]*BlockTreeInfo) {
 	ret = map[string]*BlockTreeInfo{}
+	// 同一批查询中的文档只加载和遍历一次，避免多个折叠标题重复读取整棵树。
+	nodesByRoot := map[string]map[string]*ast.Node{}
 	for _, id := range ids {
-		tree := loadTreeForBlockDOM(id, boxID)
-		if nil == tree {
-			continue
+		var nodes map[string]*ast.Node
+		if bt := treenode.GetBlockTreeInBox(id, boxID); nil != bt {
+			nodes = nodesByRoot[bt.RootID]
 		}
-		node := treenode.GetNodeInTree(tree, id)
+		if nil == nodes {
+			tree := loadTreeForBlockDOM(id, boxID)
+			if nil == tree {
+				continue
+			}
+			nodes = map[string]*ast.Node{}
+			ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+				if entering && "" != node.ID {
+					nodes[node.ID] = node
+				}
+				return ast.WalkContinue
+			})
+			nodesByRoot[tree.Root.ID] = nodes
+		}
+		node := nodes[id]
 		if nil == node {
 			ret[id] = &BlockTreeInfo{ID: id}
 			continue
 		}
 
 		bti := &BlockTreeInfo{ID: id, Type: node.Type.String()}
+		if ast.NodeHeading == node.Type {
+			hasChildren := treenode.HasHeadingChildren(node)
+			bti.HeadingChildren = &hasChildren
+		}
 		ret[id] = bti
 		parent := treenode.ParentBlock(node)
 		if nil != parent {

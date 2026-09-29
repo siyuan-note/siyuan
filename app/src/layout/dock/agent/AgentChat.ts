@@ -4964,6 +4964,7 @@ export class AgentChat extends Model {
             "dailynote": L.agentCatDailynote, "import": L.agentCatImport,
             "repo": L.agentCatRepo, "history": L.agentCatHistory,
             "sync": L.agentCatSync, "database": L.agentCatDatabase,
+            "bazaar": L.bazaar,
         };
         return m[name] || name || L.agentCatDefault;
     }

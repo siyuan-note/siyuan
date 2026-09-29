@@ -31,6 +31,8 @@ import {
 } from "./aiSkillUi";
 import {isAgentStreamingMarkdownEnabled, setAgentStreamingMarkdownEnabled} from "./agentStreamingMarkdown";
 import {openSkillManager} from "../../../ai/skills/manager";
+import {openAgentInstructions} from "./aiInstructions";
+import {genMcpOAuthHtml, mountMcpOAuth} from "./mcpOAuthUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -91,6 +93,16 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.apiMaxTokens,
         desc: window.siyuan.languages.apiMaxTokensTip,
         min: 0,
+    });
+    group.button({
+        id: "aiAgentInstructions",
+        title: window.siyuan.languages.agentInstructions,
+        desc: window.siyuan.languages.agentInstructionsTip,
+        label: window.siyuan.languages.edit,
+        icon: "iconEdit",
+        afterMount: root => {
+            root.querySelector("#aiAgentInstructions")?.addEventListener("click", openAgentInstructions);
+        },
     });
     group.switch("agentStreamingMarkdown", {
         title: window.siyuan.languages.agentStreamingMarkdown,
@@ -228,6 +240,13 @@ const registerAiSkillsGroup = (tab: SettingTabBuilder) => {
 
 const registerAiMcpGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("mcp", window.siyuan.languages.configGroupMcp);
+
+    group.slot({
+        key: "mcpOAuthServer",
+        keywords: [window.siyuan.languages.mcpOAuthServer, "OAuth", "ChatGPT"],
+        html: genMcpOAuthHtml,
+        afterMount: mountMcpOAuth,
+    });
 
     group.slot({
         key: "mcpServers",

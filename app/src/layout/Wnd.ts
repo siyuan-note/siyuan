@@ -39,17 +39,16 @@ import {Asset} from "../asset";
 import {newFile} from "../util/newFile";
 import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
-import {getFrontend, isWindow} from "../util/functions";
+import {getFrontend} from "../util/functions";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 import {Custom} from "./dock/Custom";
 import type {App} from "../index";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
-import {closeWindow} from "../window/closeWin";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {setPosition} from "../util/setPosition";
 import {clearOBG} from "./dock/util";
-import {recordBeforeResizeTop} from "../protyle/util/resize";
+import {recordBeforeResizeTop, restoreBeforeResizeTop} from "../protyle/util/resize";
 import {isPhablet, sanitizeClosedTabs, setStorageVal} from "../protyle/util/compatibility";
 import {setTitle} from "../util/processTitle";
 import {dragOverScroll} from "../boot/globalEvent/dragover";
@@ -862,7 +861,10 @@ export class Wnd {
         event.stopPropagation();
     }
 
-    private renderTabList(target: HTMLElement) {
+    public renderTabList(target = this.headersElement.parentElement.querySelector<HTMLElement>('[data-type="more"]'), focus = false) {
+        if (!target || this.headersElement.children.length === 0) {
+            return;
+        }
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
             window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TAB_LIST) {
             window.siyuan.menus.menu.remove();
@@ -921,6 +923,22 @@ export class Wnd {
             h: rect.height,
             isLeft: true
         });
+        if (focus) {
+            const menu = window.siyuan.menus.menu;
+            const activeElement = document.activeElement;
+            const currentElement = menu.element.querySelector<HTMLElement>(".b3-menu__item--selected") ||
+                menu.element.querySelector<HTMLElement>(".b3-menu__item");
+            currentElement?.classList.add("b3-menu__item--current");
+            currentElement?.focus({preventScroll: true});
+            currentElement?.scrollIntoView({block: "nearest"});
+            // 仅在焦点仍位于菜单内时恢复，避免页签切换后抢回原编辑器焦点。
+            menu.removeCB = () => {
+                if (activeElement instanceof HTMLElement && activeElement.isConnected &&
+                    menu.element.contains(document.activeElement)) {
+                    activeElement.focus({preventScroll: true});
+                }
+            };
+        }
     }
 
     private removeOverCounter(isSaveLayout = false) {
@@ -987,6 +1005,7 @@ export class Wnd {
                 item.model.beforeDestroy();
             }
             if (item.model instanceof Editor) {
+                saveBackScroll(item.model.editor.protyle);
                 saveScroll(item.model.editor.protyle);
                 // 更新文档关闭时间（批量关闭页签时由 closeTabByType 批量处理，这里不单独调用）
                 if (!isBatchClose) {
@@ -1061,12 +1080,6 @@ export class Wnd {
         if (window.siyuan.layout.centerLayout) {
             const wnd = getWndByLayout(window.siyuan.layout.centerLayout);
             if (!wnd) {
-                /// #if !BROWSER
-                if (isWindow()) {
-                    closeWindow(this.app);
-                    return;
-                }
-                /// #endif
                 const wnd = new Wnd(this.app);
                 window.siyuan.layout.centerLayout.addWnd(wnd);
                 wnd.addTab(newCenterEmptyTab(this.app), false, false);
@@ -1104,6 +1117,8 @@ export class Wnd {
     }
 
     public moveTab(tab: Tab, nextId?: string) {
+        const protyle = tab.model instanceof Editor ? tab.model.editor.protyle : undefined;
+        const scrollTop = protyle?.contentElement.scrollTop;
         let rangeData: {
             id: string,
             start: number,
@@ -1176,6 +1191,12 @@ export class Wnd {
         tab.parent = this;
         hideAllElements(["toolbar"]);
         setTabPosition();
+        if (protyle) {
+            // 在浏览器绘制前恢复阅读位置，保留锚点供尺寸动画结束后再次校准。
+            if (!restoreBeforeResizeTop(protyle, false)) {
+                protyle.contentElement.scrollTop = scrollTop;
+            }
+        }
     }
 
     public split(direction: Config.TUILayoutDirection, after = true) {

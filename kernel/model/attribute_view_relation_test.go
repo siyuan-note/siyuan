@@ -49,19 +49,50 @@ func TestRenderAttributeViewRelationCandidates(t *testing.T) {
 func TestRelationCandidateOrderingAndPaging(t *testing.T) {
 	attrView, alphaID, betaID := newRelationCandidateTestAttributeView()
 	table := renderAttributeViewRelationCandidates(attrView)
-	rows, total := filterSortPageRelationCandidates(table.Rows, "", 1, 1)
+	rows, total := filterSortPageRelationCandidates(table, attrView, "", 1, 1, nil)
 	if 2 != total || 1 != len(rows) || betaID != rows[0].ID {
 		t.Fatalf("the first page should contain the newest candidate: total=%d rows=%+v", total, rows)
 	}
 
-	rows, total = filterSortPageRelationCandidates(table.Rows, "", 2, 1)
+	rows, total = filterSortPageRelationCandidates(table, attrView, "", 2, 1, nil)
 	if 2 != total || 1 != len(rows) || alphaID != rows[0].ID {
 		t.Fatalf("the second page should contain the older candidate: total=%d rows=%+v", total, rows)
 	}
 
-	rows, total = filterSortPageRelationCandidates(table.Rows, "blue", 1, 16)
+	rows, total = filterSortPageRelationCandidates(table, attrView, "blue", 1, 16, nil)
 	if 1 != total || 1 != len(rows) || betaID != rows[0].ID {
 		t.Fatalf("search should inspect all fields: total=%d rows=%+v", total, rows)
+	}
+}
+
+func TestRelationCandidateColumnSort(t *testing.T) {
+	attrView, alphaID, betaID := newRelationCandidateTestAttributeView()
+	numberKey := attrView.KeyValues[2].Key
+	attrView.KeyValues[2].Values = []*av.Value{
+		{ID: ast.NewNodeID(), KeyID: numberKey.ID, BlockID: alphaID, Type: av.KeyTypeNumber, Number: &av.ValueNumber{Content: 10, IsNotEmpty: true}},
+		{ID: ast.NewNodeID(), KeyID: numberKey.ID, BlockID: betaID, Type: av.KeyTypeNumber, Number: &av.ValueNumber{Content: 2, IsNotEmpty: true}},
+	}
+	for _, test := range []struct {
+		column  string
+		order   av.SortOrder
+		keyword string
+		page    int
+		want    string
+		total   int
+	}{
+		{attrView.GetBlockKey().ID, av.SortOrderAsc, "", 1, alphaID, 2},
+		{attrView.GetBlockKey().ID, av.SortOrderDesc, "", 1, betaID, 2},
+		{attrView.GetBlockKey().ID, av.SortOrderAsc, "", 2, betaID, 2},
+		{attrView.KeyValues[1].Key.ID, av.SortOrderDesc, "red", 1, alphaID, 1},
+		{numberKey.ID, av.SortOrderAsc, "", 1, betaID, 2},
+		{numberKey.ID, av.SortOrderDesc, "", 1, alphaID, 2},
+	} {
+		table := renderAttributeViewRelationCandidates(attrView)
+		rows, total := filterSortPageRelationCandidates(table, attrView, test.keyword, test.page, 1,
+			&av.ViewSort{Column: test.column, Order: test.order})
+		if len(rows) != 1 || rows[0].ID != test.want || total != test.total {
+			t.Fatalf("sort %+v: rows=%+v total=%d", test, rows, total)
+		}
 	}
 }
 

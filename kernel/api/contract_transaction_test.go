@@ -96,6 +96,7 @@ func TestTransactionContractMapping(t *testing.T) {
 		t.Fatal(err)
 	}
 	fixtures := []*model.Transaction{{Timestamp: 123, DoOperations: []*model.Operation{
+		{Action: "move", ID: "source", NextID: "next", PreviousID: "previous", ParentID: "parent", BlockIDs: []string{"child"}},
 		{Action: "update", Data: "<div>content</div>", Context: map[string]any{"focusId": "block"}},
 		{Action: "updateAttrViewCell", Data: map[string]any{"text": nil}},
 		{Action: "updateAttrViewCells", CellUpdates: []*model.AttrViewCellUpdate{{KeyID: "key", RowID: "item", Data: map[string]any{"number": map[string]any{"content": 1.5}}}}},

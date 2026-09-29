@@ -17,6 +17,8 @@ import {isBrowser, isTouchDevice} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {removeCompressURL} from "../../../util/image";
 import {openDatabaseRowByData} from "./openDatabaseRow";
+import {openAVBindBlock} from "./bindBlock";
+import {preserveAVBindingRange} from "./binding";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {
     createEmptyAVValue,
@@ -132,6 +134,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         if (element.dataset.avAttributeRenderId !== renderID) {
             return;
         }
+        const restoreBindingRange = preserveAVBindingRange(protyle, element);
         let html = "";
         const tables = Array.isArray(response.data) ? response.data : [];
         tables.forEach((table) => {
@@ -343,6 +346,10 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 }
             });
             element.addEventListener("mousedown", (event) => {
+                if (hasClosestByAttribute(event.target as HTMLElement, "data-type", "av-bind-document")) {
+                    event.preventDefault();
+                    return;
+                }
                 if (!hasClosestByAttribute(event.target as HTMLElement, "data-type", "remove")) {
                     return;
                 }
@@ -408,6 +415,15 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                         boundBlockID: backlinkOpenElement.dataset.boundBlockId,
                         isDetached: backlinkOpenElement.dataset.detached === "true",
                     });
+                    event.stopPropagation();
+                    return;
+                }
+                const bindElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "av-bind-document");
+                if (bindElement) {
+                    const field = bindElement.closest<HTMLElement>("[data-row-id][data-col-id]");
+                    if (field) {
+                        openAVBindBlock(protyle, field);
+                    }
                     event.stopPropagation();
                     return;
                 }
@@ -521,9 +537,14 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             element.innerHTML = html;
         }
         renderAVRichTextElements(element);
+        restoreBindingRange(element);
         element.dataset.readonly = String(Boolean(protyle.disabled));
         element.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea").forEach(item => {
             item.readOnly = Boolean(protyle.disabled);
+        });
+        element.querySelectorAll<HTMLButtonElement>('[data-type="av-bind-document"]').forEach(item => {
+            item.disabled = Boolean(protyle.disabled || window.siyuan.isPublish ||
+                protyle.options.history?.created || protyle.options.history?.snapshot);
         });
         tables.forEach((table: IAVAttributeTableData) => {
             const blockElement = element.querySelector<HTMLElement>(`[data-attribute-id="${id}"][data-av-id="${table.avID}"]`);

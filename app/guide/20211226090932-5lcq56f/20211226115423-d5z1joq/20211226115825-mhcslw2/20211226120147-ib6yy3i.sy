@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20260923221935"
+		"updated": "20260928225427"
 	},
 	"Children": [
 		{
@@ -1434,7 +1434,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-esm6f20",
-				"updated": "20260921215916"
+				"updated": "20260928225427"
 			},
 			"Children": [
 				{
@@ -2548,7 +2548,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-cfx2ewc",
-				"updated": "20260923221935"
+				"updated": "20260926151827"
 			},
 			"Children": [
 				{
@@ -2568,6 +2568,57 @@
 				{
 					"Type": "NodeText",
 					"Data": "心智圖區塊是獨立的區塊類型。可以將無序列表、有序列表或任務列表轉換為心智圖區塊，也可以轉換回列表。轉換會保留列表項內容、編號和任務狀態。以列表形式儲存的舊心智圖會在開啟文件進行編輯時升級。"
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-6pycwgr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-6pycwgr",
+				"updated": "20260926152549"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取範圍的第一個節點，點選心智圖工具列中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "概要"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，再選擇末端同層節點，即可新增方括號與概要文字。範圍必須連續，不能與既有概要重疊或巢狀包含。行動端也可依相同步驟操作。選擇範圍時也可使用上下方向鍵選擇末端節點，Enter 確認範圍，Esc 取消。"
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-nenflr8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-nenflr8",
+				"updated": "20260926151827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按兩下概要文字，或選取概要後點選底部的編輯按鈕，即可修改文字；Enter 儲存，Esc 取消。可以透過底部工具列修改顏色或刪除概要，也可以按 Delete 刪除選取的概要。這些操作皆支援復原與重做。"
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-99amoq6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-99amoq6",
+				"updated": "20260926151827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "轉成列表後，概要隱藏但資料保留，轉回心智圖後恢復顯示。範圍內插入的節點自動納入概要，刪除成員或將成員移出範圍會縮小範圍；剩一個成員仍保留概要，全部刪除時一併刪除概要。概要文字屬於附加說明，不作為可獨立搜尋或引用的正文區塊。思源格式的 HTML 與 PDF 預覽會顯示概要。"
 				}
 			]
 		},
@@ -2932,7 +2983,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-hqosjsi",
-				"updated": "20260730184353"
+				"updated": "20260928225427"
 			},
 			"Children": [
 				{
@@ -2963,6 +3014,182 @@
 				{
 					"Type": "NodeText",
 					"Data": "。可用於組合文檔內連續的內容區塊，也用於支援橫向排版。"
+				}
+			]
+		},
+		{
+			"ID": "20260928225427-ml4x782",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260928225427-ml4x782",
+				"updated": "20260928225427"
+			},
+			"Children": [
+				{
+					"ID": "20260928225427-1mg1auw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-1mg1auw",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-a2itmpm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-a2itmpm",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "輸入 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "橫向超級區塊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "縱向超級區塊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，即可建立包含兩個空段落的左右或上下佈局，並在第一個段落開始輸入。可以搜尋「分欄」找到這兩個選項，行動端也可從鍵盤工具列的插入面板選擇"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260928225427-8e5t3i8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-8e5t3i8",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-0zdub0o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-0zdub0o",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在超級區塊的區塊標示選單中，選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "超級區塊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "在目前超級區塊開頭新增分欄"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "超級區塊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "在目前超級區塊末尾新增分欄"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，可在橫向佈局的兩端新增空段落；縱向佈局對應新增區塊。新區塊不會複製現有子區塊的類型或內容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260928225427-qqtimqi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-qqtimqi",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-9iuexxt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-9iuexxt",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在縱向超級區塊的直接子區塊選單中，選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "在左側建立局部分欄"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "在右側建立局部分欄"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，會將目前區塊和一個新空段落組合成內層橫向超級區塊，其他區塊保持原佈局。局部分欄不會改變既有左右插欄快捷鍵的作用範圍"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

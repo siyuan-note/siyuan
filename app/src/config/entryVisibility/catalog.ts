@@ -212,6 +212,18 @@ const gutterCopyChildren = (single = false) => [
 ];
 
 const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), true, [
+        node("removeList", lang("removeList")),
+        node("list", lang("list")),
+        node("orderedList", lang("ordered-list")),
+        node("check", lang("check")),
+        ...(!multi ? [node("listMindmap", lang("mindmap"))] : []),
+        node("includeSublists", lang("includeSublists"), true, [
+            node("recursiveRemoveList", lang("removeList")),
+            node("recursiveList", lang("list")),
+            node("recursiveOrderedList", lang("ordered-list")),
+            node("recursiveCheck", lang("check")),
+            node("recursiveParagraph", lang("paragraph")),
+        ]),
         node("paragraph", lang("paragraph")),
         node("quote", lang("quote")),
         node("callout", lang("callout")),
@@ -222,10 +234,6 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("calloutCaution", location(lang("callout"), literal("Caution"))),
         node("calloutCustom", location(lang("callout"), () => `${window.siyuan.languages.custom}...`)),
         ...(!multi ? [node("tabs", lang("tabs"))] : []),
-        node("list", lang("list")),
-        node("orderedList", lang("ordered-list")),
-        node("check", lang("check")),
-        ...(!multi ? [node("listMindmap", lang("mindmap"))] : []),
         // 列表及列表项复用段落和标题入口，保持单选、多选的配置标识和默认顺序一致。
         node("heading1", lang("heading1")),
         node("heading2", lang("heading2")),
@@ -238,12 +246,6 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("table", lang("tableBlock")),
         node("line", lang("line")),
         node("math", lang("math")),
-        node("includeSublists", lang("includeSublists"), true, [
-            node("recursiveParagraph", lang("paragraph")),
-            node("recursiveList", lang("list")),
-            node("recursiveOrderedList", lang("ordered-list")),
-            node("recursiveCheck", lang("check")),
-        ]),
     ]);
 
 const gutterHeadingTransform = () => node("tWithSubtitle", lang("tWithSubtitle"), true, [
@@ -396,6 +398,10 @@ const gutterSingle = () => [
         node("cancelSuperBlock", () => `${window.siyuan.languages.cancel} ${window.siyuan.languages.superBlock}`),
         node("turnIntoVLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.vLayout}`),
         node("turnIntoHLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.hLayout}`),
+        node("prependSuperBlockColumn", lang("prependSuperBlockColumn")),
+        node("prependSuperBlockChild", lang("prependSuperBlockChild")),
+        node("appendSuperBlockColumn", lang("appendSuperBlockColumn")),
+        node("appendSuperBlockChild", lang("appendSuperBlockChild")),
     ]),
     separator("separator_code"),
     node("code", lang("code"), true, [
@@ -466,6 +472,8 @@ const gutterSingle = () => [
     node("insertAfter", lang("insertAfter")),
     node("insertSuperBlockLeft", lang("insertSuperBlockLeft")),
     node("insertSuperBlockRight", lang("insertSuperBlockRight")),
+    node("createSuperBlockLeft", lang("createSuperBlockLeft")),
+    node("createSuperBlockRight", lang("createSuperBlockRight")),
     node("jumpTo", lang("jumpTo"), false, [
         node("jumpToParentPrev", lang("jumpToParentPrev"), false),
         node("jumpToParentNext", lang("jumpToParentNext"), false),
@@ -527,6 +535,8 @@ const slashMenuBuiltinChildren = [
     node("orderedList", lang("ordered-list")),
     node("check", lang("check")),
     node("quote", lang("quote")),
+    node("horizontalSuperBlock", lang("horizontalSuperBlock")),
+    node("verticalSuperBlock", lang("verticalSuperBlock")),
     node("tabs", lang("tabs")),
     node("mindmap", lang("mindmap")),
     node("calloutNote", location(lang("callout"), literal("Note"))),
@@ -582,6 +592,7 @@ const slashMenuBuiltinChildren = [
 
 const slashMenuRoot = {
     ...node("menu", lang("entrySlashMenu"), true, [...slashMenuBuiltinChildren], true),
+    defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
     displayChildrenDirectly: true,
 };
 

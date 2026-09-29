@@ -1,6 +1,8 @@
 
 export const getDefaultType = () => {
     return {
+        mindmap: window.siyuan.config.search.mindmap ?? true,
+        mindmapItem: window.siyuan.config.search.mindmapItem ?? false,
         audioBlock: window.siyuan.config.search.audioBlock,
         videoBlock: window.siyuan.config.search.videoBlock,
         iframeBlock: window.siyuan.config.search.iframeBlock,
@@ -27,6 +29,8 @@ export const getDefaultType = () => {
 
 export const normalizeSearchTypes = (types: Config.IUILayoutTabSearchConfig["types"]) => ({
     ...types,
+    mindmap: types?.mindmap ?? window.siyuan.config.search.mindmap ?? true,
+    mindmapItem: types?.mindmapItem ?? window.siyuan.config.search.mindmapItem ?? false,
     customBlock: types?.customBlock ?? window.siyuan.config.search.customBlock ?? true,
 });
 

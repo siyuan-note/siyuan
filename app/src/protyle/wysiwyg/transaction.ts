@@ -42,6 +42,7 @@ import {resize} from "../util/resize";
 import {scrollCenter} from "../../util/highlightById";
 import {consumeGutterFoldRestore} from "../ui/gutterVisibility";
 import {setFold} from "../util/blockFold";
+import {refreshHeadingFoldIndicators} from "../util/headingFoldIndicator";
 import {queueTransaction, queueTransactionBatch} from "../util/transactionQueue";
 import {
     cleanHeadingNumberHTML,
@@ -75,7 +76,8 @@ import {
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
 import {getHeadingConversionElements, isListHeadingContainer} from "./headingConversion";
-import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
+import {cleanTableCellRichHTML, getTableBlockHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
+import {cleanTableVirtualizationHTML, TABLE_VIRTUAL_ID} from "../util/tableVirtualizationDOM";
 import {cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource} from "../render/listMindmap/model";
 import {buildCancelListOperations} from "./cancelList";
 import {buildListConversionOperations} from "./listConversion";
@@ -92,7 +94,8 @@ const cleanBlockSelectionModeOperations = (operations?: IOperation[]) => {
     operations?.forEach(operation => {
         if (["appendInsert", "insert", "prependInsert", "update"].includes(operation.action) &&
             typeof operation.data === "string") {
-            operation.data = cleanListMindmapHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(operation.data)));
+            operation.data = cleanListMindmapHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(
+                cleanTableVirtualizationHTML(operation.data))));
         }
         if (operation.action === "unfoldHeading" && typeof operation.retData === "string") {
             operation.retData = cleanBlockSelectionModeHTML(operation.retData);
@@ -289,8 +292,7 @@ const promiseTransaction = (options: {
                     updatedEmbed = true;
                 };
 
-                const allTempElement = document.createElement("template");
-                allTempElement.innerHTML = cleanBlockSelectionModeHTML(getVisibleFoldHeadingHTML(operation.data));
+                let allTempElement: HTMLTemplateElement;
                 updateElements.forEach((item) => {
                     if ((currentEmbedElement && isInEmbedBlock(item, false) === currentEmbedElement) ||
                         (range && (item === range.startContainer || item.contains(range.startContainer)))) {
@@ -308,6 +310,11 @@ const promiseTransaction = (options: {
                         item.removeAttribute(Constants.ATTRIBUTE_EDITING);
                     } else {
                         // https://github.com/siyuan-note/siyuan/issues/14495
+                        // 仅在嵌入副本需要查找子块时解析完整快照，当前块的本地输入无需构建整块 DOM。
+                        if (!allTempElement) {
+                            allTempElement = document.createElement("template");
+                            allTempElement.innerHTML = cleanBlockSelectionModeHTML(getVisibleFoldHeadingHTML(operation.data));
+                        }
                         const newTempElement = allTempElement.content.querySelector(`[data-node-id="${item.getAttribute("data-id")}"]`);
                         if (newTempElement && !isInEmbedBlock(newTempElement)) {
                             updateHTML(item.querySelector("[data-node-id]"), newTempElement.outerHTML);
@@ -367,7 +374,14 @@ const promiseTransaction = (options: {
                         }
                     });
                     let hasFind = false;
-                    if (operation.previousID && updateElements.length > 0) {
+                    if (operation.nextID && updateElements.length > 0) {
+                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.nextID}"]`).forEach(item => {
+                            if (!isInEmbedBlock(item) && !item.contains(range.startContainer)) {
+                                item.before(...cloneMoveElements(primaryMoveElements));
+                                hasFind = true;
+                            }
+                        });
+                    } else if (operation.previousID && updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
                             if (!isInEmbedBlock(item) && !getNextBlockSibling(item)?.contains(range.startContainer)) {
                                 item.after(...cloneMoveElements(primaryMoveElements));
@@ -409,7 +423,7 @@ const promiseTransaction = (options: {
                     pendingEmbedElements.add(item);
                 });
                 // 移动块（含撤销移动）后刷新相关超级块的拖拽手柄，避免手柄残留/缺失
-                const moveEls = [operation.id, operation.parentID, operation.previousID]
+                const moveEls = [operation.id, operation.parentID, operation.previousID, operation.nextID]
                     .map(id => id ? protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) : null)
                     .filter(Boolean) as Element[];
                 refreshSbs(...moveEls);
@@ -652,6 +666,7 @@ const promiseTransaction = (options: {
                 }
             });
             queueHeadingNumberRefresh(protyle, responseTransaction.doOperations);
+            refreshHeadingFoldIndicators(protyle);
             void applyViewFoldStates(protyle);
             options.callback?.();
         },
@@ -1216,7 +1231,14 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     originSbs.push(sb);
                 }
             });
-            if (operation.previousID && updateElements.length > 0) {
+            if (operation.nextID && updateElements.length > 0) {
+                protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.nextID}"]`).forEach(item => {
+                    if (!isInEmbedBlock(item)) {
+                        item.before(...cloneMoveElements(primaryMoveElements));
+                        hasFind = true;
+                    }
+                });
+            } else if (operation.previousID && updateElements.length > 0) {
                 const previousElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`);
                 if (previousElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
                     // 反链面板删除超级块中的最后一个段落块后撤销重做
@@ -1299,7 +1321,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 }
             });
             // 移动块（含重做/同步）后刷新相关超级块的拖拽手柄
-            const moveEls = [operation.id, operation.parentID, operation.previousID]
+            const moveEls = [operation.id, operation.parentID, operation.previousID, operation.nextID]
                 .map(id => id ? protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) : null)
                 .filter(Boolean) as Element[];
             refreshSbs(...moveEls);
@@ -1457,7 +1479,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             "setAttrViewColRollupFilters", "sortAttrViewKey", "setAttrViewColDesc",
             "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewCoverFrom", "setAttrViewCoverFromAssetKeyID", "setAttrViewCardCoverPosition",
             "setAttrViewBlockView", "setAttrViewBlockVisibleViews", "setAttrViewContextFilter", "setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
-            "setAttrViewCalendar", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow", "hideAttrViewName", "setAttrViewShowIcon",
+            "setAttrViewConditionalColors", "setAttrViewCalendar", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow", "hideAttrViewName", "setAttrViewShowIcon",
             "setAttrViewWrapField", "setAttrViewGroup", "removeAttrViewGroup", "hideAttrViewGroup", "sortAttrViewGroup",
             "foldAttrViewGroup", "foldAttrViewGroups", "hideAttrViewAllGroups", "setAttrViewFitImage", "setAttrViewDisplayFieldName", "setAttrViewDisplayEmptyFields",
             "insertAttrViewBlock", "setAttrViewColDateFillSpecificTime", "setAttrViewFillColBackgroundColor", "setAttrViewUpdatedIncludeTime",
@@ -1502,6 +1524,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
         });
     });
     queueHeadingNumberRefresh(protyle, operations);
+    refreshHeadingFoldIndicators(protyle);
     if (shouldReloadForHeadingBatch(protyle.block.rootID, operations)) {
         reloadProtyle(protyle, false);
     }
@@ -2074,9 +2097,12 @@ const unfoldListHeadings = async (protyle: IProtyle, nodeElements: Element[]) =>
     return foldOperations.reverse();
 };
 
+export const removeListStructure = (protyle: IProtyle, nodeElements: Element[], recursively = false) =>
+    turnListBlocksInto({protyle, recursively}, nodeElements.filter(isListHeadingContainer));
+
 const turnListBlocksInto = async (options: {
     protyle: IProtyle,
-    type: TTurnInto,
+    type?: TTurnInto,
     level?: number,
     range?: Range,
     unfocus?: boolean,
@@ -2087,7 +2113,12 @@ const turnListBlocksInto = async (options: {
     const conversionElements = options.recursively ? selected.flatMap(element => [element,
         ...Array.from(element.querySelectorAll('[data-type="NodeList"]')).filter(list =>
             list.getAttribute("data-subtype") === element.getAttribute("data-subtype"))]).reverse() : selected;
-    const targets = getHeadingConversionElements(conversionElements);
+    // 取消列表只移除外层结构，任意类型的首块均可保留。
+    const targets = options.type ? getHeadingConversionElements(conversionElements) : conversionElements.flatMap(element => {
+        const items = element.getAttribute("data-type") === "NodeList" ?
+            Array.from(element.children).filter(item => item.getAttribute("data-type") === "NodeListItem") : [element];
+        return items.map(item => Array.from(item.children).find(child => child.hasAttribute("data-node-id"))).filter(Boolean);
+    });
     if (targets.length === 0) {
         return;
     }
@@ -2132,7 +2163,8 @@ const turnListBlocksInto = async (options: {
             previousID = response.data.previousID;
             parentID = response.data.parentID || parentID;
         }
-        const operations = buildListConversionOperations(list, {itemIDs, previousID, parentID, convert,
+        const operations = buildListConversionOperations(list, {itemIDs, previousID, parentID,
+            convert: options.type ? convert : undefined,
             newID: () => Lute.NewNodeID()});
         doOperations.push(...operations.doOperations);
         undoOperations.unshift(...operations.undoOperations);
@@ -2583,14 +2615,16 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         refreshSbResize(element);
     }
     const id = element.getAttribute("data-node-id");
-    let newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(element.outerHTML))));
+    const getHTML = () => element.getAttribute("data-type") === "NodeTable" && element.querySelector(`[${TABLE_VIRTUAL_ID}]`) ?
+        getTableBlockHTML(element) : element.outerHTML;
+    let newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(getHTML()))));
     const cleanOldHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(oldHTML))));
     if (newHTML === cleanOldHTML.replace("<wbr>", "") && !additionalOperations) {
         return;
     }
     if (element.getAttribute("data-type") === "NodeTable") {
         element.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-        newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(element.outerHTML))));
+        newHTML = cleanListMindmapHTML(cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(getHTML()))));
     }
     element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
     const doOperations: IOperation[] = [{

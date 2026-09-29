@@ -29,6 +29,7 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"removeFlashcards", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
 	{"setAttrViewName", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
 	{"setAttrViewNewItemTemplates", reflect.TypeFor[TransactionNewItemTemplates](), reflect.TypeFor[Null]()},
+	{"setAttrViewConditionalColors", reflect.TypeFor[[]*AVConditionalColorRule](), reflect.TypeFor[Null]()},
 	{"setAttrViewFilters", reflect.TypeFor[[]*AVViewFilter](), reflect.TypeFor[Null]()},
 	{"setAttrViewContextFilter", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
 	{"setAttrViewColRelationFilters", reflect.TypeFor[[]*AVViewFilter](), reflect.TypeFor[Null]()},

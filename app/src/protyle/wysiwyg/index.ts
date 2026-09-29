@@ -1,4 +1,5 @@
 import {recordReplacementUndo} from "./replacementInput";
+import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
 import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
@@ -8,6 +9,8 @@ import {renderLongTextRuns} from "../util/longTextWrap";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
+import {isCommittedTextInput} from "./compositionInput";
+import {isDirectMathClick} from "../util/mathClick";
 import {
     beforePaste,
     convertPastedListItemSubtype,
@@ -46,7 +49,7 @@ import {mergeTableCellContents} from "../util/tableCellRich";
 import {resolveDocumentBlockElement} from "../util/outlineBlock";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
-import {getDiagramBlock, handleDiagramPreviewClick, previewDiagram} from "../preview/diagram";
+import {getDiagramBlock, previewDiagram} from "../preview/diagram";
 import {
     contentMenu,
     enterBack,
@@ -101,6 +104,7 @@ import {blockRender} from "../render/blockRender";
 import {getAllModels} from "../../layout/getAll";
 import {pushBack, pushBackByClick} from "../../util/backForward";
 import {bindTouchNavigation} from "./touchNavigation";
+import {openTouchReference} from "./touchReference";
 import {openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
 /// #else
@@ -141,6 +145,7 @@ import {
     setTableCellStyle,
     TableControl,
 } from "../util/tableControl";
+import {TABLE_VIRTUAL_ID} from "../util/tableVirtualizationDOM";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
@@ -187,6 +192,7 @@ import {chartRender} from "../render/chartRender";
 import {reloadProtyle} from "../util/reload";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 import {setFold, toggleListFold} from "../util/blockFold";
+import {bindHeadingFoldIndicators} from "../util/headingFoldIndicator";
 import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
@@ -225,11 +231,13 @@ import {
     resolveBlockDragSelectStart
 } from "./blockDragSelect";
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
+import {restoreGutterBySelection} from "../gutter/restore";
 import {bindTouchBlockDragSelect} from "./touchBlockDragSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldFoldEmbeddedListByAlt, shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
 import {LargeListVirtualizer} from "./listVirtualization";
+import {LargeTableVirtualizer} from "./tableVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {syncRootAttributes} from "../util/syncRootAttributes";
@@ -396,10 +404,14 @@ export class WYSIWYG {
     private inputTimeout: number;
     private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
     private runningInputTasks = new Set<Promise<void>>();
+    private persistComposition?: () => void;
     public tableControl: TableControl;
     private largeListVirtualizer?: LargeListVirtualizer;
+    private largeTableVirtualizer?: LargeTableVirtualizer;
     private disposeSpellcheckFocus?: () => void;
     private disposeEmbedToolbarVisibility?: () => void;
+    private disposeHeadingFoldIndicators?: () => void;
+    private disposeBoundedBlockDragSelect?: () => void;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -430,6 +442,7 @@ export class WYSIWYG {
     }
 
     public async flushPendingInput() {
+        this.persistComposition?.();
         // 输入处理可能等待块引用查询，交接编辑器前也需等待已经开始执行的任务。
         while (this.pendingInputTimeouts.size || this.runningInputTasks.size) {
             const callbacks = Array.from(this.pendingInputTimeouts.values());
@@ -538,9 +551,15 @@ export class WYSIWYG {
         if (!isMobile()) {
             bindTouchBlockDragSelect(this.element, () => !protyle.toolbar.isMultiSelectMode());
         }
+        if (isAndroid() || isIOSDevice()) {
+            this.disposeBoundedBlockDragSelect = bindBoundedBlockDragSelect(protyle, this.element);
+        }
         /// #if !MOBILE
         bindTouchNavigation(this.element, (target, point) => {
             if (!protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive) {
+                if (openTouchReference(protyle, target, point)) {
+                    return true;
+                }
                 pushBackByClick(protyle, target, point);
             }
         });
@@ -548,6 +567,11 @@ export class WYSIWYG {
         if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
             return;
         }
+        this.disposeHeadingFoldIndicators = bindHeadingFoldIndicators(protyle, this.element, (ids, notebook, done) => {
+            fetchPost("/api/block/getBlockTreeInfos", {ids, notebook}, response => {
+                done(response.code === 0 ? response.data : null);
+            });
+        });
         if (!isMobile() && !protyle.options.backlinkData && !protyle.lite) {
             this.largeListVirtualizer = new LargeListVirtualizer(protyle.element, this.element, protyle.id);
         }
@@ -556,13 +580,28 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.persistComposition?.();
+        this.persistComposition = undefined;
+        this.disposeHeadingFoldIndicators?.();
         this.disposeEmbedToolbarVisibility?.();
         this.disposeSpellcheckFocus?.();
+        this.disposeBoundedBlockDragSelect?.();
         this.largeListVirtualizer?.destroy();
+        this.largeTableVirtualizer?.destroy();
     }
 
-    public prepareLargeListVirtualization(contentElement: Element, replace: boolean) {
+    public prepareBlockVirtualization(contentElement: Element, replace: boolean) {
         this.largeListVirtualizer?.prepare(contentElement, replace);
+        const protyle = this.protyle;
+        // 此时 initUI 已创建正文滚动容器，桌面和移动端共用表格窗口。
+        if (!this.largeTableVirtualizer && !protyle.options.backlinkData && !protyle.lite) {
+            this.largeTableVirtualizer = new LargeTableVirtualizer(protyle.element, this.element, protyle.contentElement,
+                () => !!protyle.highlight?.ranges?.length ||
+                    this.pendingInputTimeouts.size > 0 || this.runningInputTasks.size > 0 ||
+                    !!this.tableControl?.getSelectedCells().length && !this.tableControl.hasVirtualCellSelection() ||
+                    !!window.siyuan.menus?.menu?.element && !window.siyuan.menus.menu.element.classList.contains("fn__none") ||
+                    !!window.siyuan.dragElement || !!this.element.querySelector(".protyle-wysiwyg--select"), !!this.tableControl);
+        }
     }
 
     public renderCustom(ial: Record<string, string>) {
@@ -2151,6 +2190,8 @@ export class WYSIWYG {
                 }
             }
             let moveCellElement: HTMLElement;
+            let tableSelectionGrid: ReturnType<typeof buildTableGrid>;
+            let tableSelectionMerged = false;
             let hasLeftTableBlock = false;
             let avDragSelectMode: "items" | "blocks" | undefined;
             let avDragSelectFrame: number | undefined;
@@ -2289,7 +2330,9 @@ export class WYSIWYG {
                             tableBlockElement.firstElementChild.style.webkitUserModify = "read-only";
                             const tableElement = tableBlockElement.querySelector("table");
                             const tableRect = tableElement.getBoundingClientRect();
-                            const rowRects = Array.from(tableElement.rows).map(row => row.getBoundingClientRect());
+                            const rowRects = Array.from(tableElement.children)
+                                .filter(section => ["THEAD", "TBODY", "TFOOT"].includes(section.tagName))
+                                .map(section => section.getBoundingClientRect()).filter(rect => rect.height > 0);
                             const gridRect = {
                                 left: Math.min(...rowRects.map(rect => rect.left)) - tableRect.left,
                                 top: Math.min(...rowRects.map(rect => rect.top)) - tableRect.top,
@@ -2307,13 +2350,23 @@ export class WYSIWYG {
                             };
                             let selectionRects: ReturnType<typeof getCellRect>[] = [];
                             let logicalSelection = false;
-                            if (target.tagName === "TH" || target.tagName === "TD") {
-                                const grid = buildTableGrid(tableElement);
+                            if (tableElement.hasAttribute(TABLE_VIRTUAL_ID) && (target.tagName === "TH" || target.tagName === "TD")) {
+                                selectionRects = [getCellRect(target), getCellRect(moveTarget)];
+                                logicalSelection = true;
+                            } else if (target.tagName === "TH" || target.tagName === "TD") {
+                                if (!tableSelectionGrid) {
+                                    tableSelectionGrid = buildTableGrid(tableElement);
+                                    tableSelectionMerged = tableSelectionGrid.cellInfos.some(info =>
+                                        info.rowspan > 1 || info.colspan > 1);
+                                }
+                                const grid = tableSelectionGrid;
                                 const targetInfo = grid.cellInfos.find(item => item.cell === target);
                                 const moveTargetInfo = grid.cellInfos.find(item => item.cell === moveTarget);
                                 const selectedInfos = getTableCellsInRectangle(grid.cellInfos, targetInfo, moveTargetInfo);
                                 if (selectedInfos.length > 0) {
-                                    selectionRects = selectedInfos.map(item => getCellRect(item.cell));
+                                    // 无合并单元格时矩形由首尾确定，不逐个测量选中的单元格。
+                                    selectionRects = tableSelectionMerged ? selectedInfos.map(item => getCellRect(item.cell)) :
+                                        [getCellRect(target), getCellRect(moveTarget)];
                                     logicalSelection = true;
                                 }
                             }
@@ -2969,6 +3022,9 @@ export class WYSIWYG {
                 }
 
                 const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+                if (startsFromPadding && selectElement.length > 0) {
+                    requestAnimationFrame(() => restoreGutterBySelection(protyle, selectElement[0]));
+                }
                 if (avDragSelectMode === "items" && avDragSelectElement) {
                     setAVDragItemAnchor(avDragSelectElement);
                     countBlockWord([], protyle);
@@ -3973,6 +4029,8 @@ export class WYSIWYG {
 
         // 输入法测试点 https://github.com/siyuan-note/siyuan/issues/3027
         let isComposition = false; // for iPhone
+        let recoveredComposition = false;
+        let compositionSnapshot: {element: HTMLElement; html: string};
         // 组合输入已由 beforeinput 处理时，忽略其后到达的 compositionend，避免重复生成事务。
         let beforeInputCompositionHandled = false;
         // 原生软换行在 input 触发前已经修改 DOM，需预存选区供撤销恢复。
@@ -4010,6 +4068,9 @@ export class WYSIWYG {
             }
         });
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.isComposing) {
+                return;
+            }
             if ((event.key === "Backspace" || event.key === "Delete") && getSelection().rangeCount > 0) {
                 prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0));
             }
@@ -4084,6 +4145,26 @@ export class WYSIWYG {
             hasRetainedText?: (range: Range) => boolean;
         };
         let crossBlockComposition: ICrossBlockComposition;
+        this.persistComposition = () => {
+            if (!isComposition || crossBlockComposition || !compositionSnapshot?.html ||
+                !this.element.contains(compositionSnapshot.element)) {
+                return;
+            }
+            // 仅序列化副本，不重绘候选文本或移动原生光标；结束或取消组合时继续提交后续差异。
+            const element = compositionSnapshot.element;
+            const html = element.outerHTML;
+            updateTransaction(protyle, element.cloneNode(true) as HTMLElement, compositionSnapshot.html);
+            compositionSnapshot.html = html;
+            this.lastHTMLs[element.getAttribute("data-node-id")] = html;
+        };
+        this.element.addEventListener("focusout", () => {
+            // 等待同一轮原生结束事件，焦点仍在编辑器内部时不提前保存候选内容。
+            queueMicrotask(() => {
+                if (!this.element.contains(this.element.ownerDocument.activeElement)) {
+                    this.persistComposition?.();
+                }
+            });
+        });
         const isAfterInlineMath = (range: Range) => {
             let previousNode: Node;
             if (range.startContainer.nodeType === Node.TEXT_NODE) {
@@ -4102,7 +4183,10 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            this.persistComposition?.();
             isComposition = true;
+            recoveredComposition = false;
+            compositionSnapshot = undefined;
             crossBlockComposition = undefined;
             // 微软双拼由于 focusByRange 导致无法输入文字，因此不再 keydown 中记录了，但 keyup 会记录拼音字符，因此使用 isComposition 阻止 keyup 记录。
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
@@ -4137,6 +4221,15 @@ export class WYSIWYG {
             if ((selectionModeElement || !isMac()) && nodeElement && !crossBlockComposition) {
                 setInsertWbrHTML(nodeElement, range, protyle);
             }
+            if (nodeElement && !crossBlockComposition) {
+                const id = nodeElement.getAttribute("data-node-id");
+                const html = this.lastHTMLs[id] || nodeElement.outerHTML;
+                this.lastHTMLs[id] = html;
+                compositionSnapshot = {
+                    element: nodeElement,
+                    html,
+                };
+            }
             event.stopPropagation();
         });
 
@@ -4149,6 +4242,11 @@ export class WYSIWYG {
             if (getAVTemplateInteractiveElement(event.target)) {
                 return;
             }
+            // 已提交的文本会沿普通输入链路保存，迟到的结束事件不能再次提交或恢复旧光标。
+            if (recoveredComposition) {
+                return;
+            }
+            compositionSnapshot = undefined;
             if (crossBlockComposition) {
                 const currentComposition = crossBlockComposition;
                 beforeInputCompositionHandled = false;
@@ -4220,7 +4318,8 @@ export class WYSIWYG {
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
             recordReplacementUndo(event, this.element, this.lastHTMLs);
-            if ((event.inputType.startsWith("insert") || event.inputType.startsWith("delete")) &&
+            if (!event.isComposing && !isComposition &&
+                (event.inputType.startsWith("insert") || event.inputType.startsWith("delete")) &&
                 getSelection().rangeCount > 0) {
                 prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0));
             }
@@ -4373,6 +4472,13 @@ export class WYSIWYG {
                 window.siyuan.menus.menu.remove();
                 return;
             }
+            if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {
+                protyle.hint.enableExtend = true;
+            }
+            // 输入法可能暂时清空选区或把光标放到编辑器根节点，候选更新不能触发选区修复。
+            if (event.isComposing || (isComposition && !isCommittedTextInput(event))) {
+                return;
+            }
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
             if (!blockElement) {
@@ -4380,8 +4486,21 @@ export class WYSIWYG {
             }
             // 输入可能改变列宽，隐藏已有调整线，待鼠标重新命中列边界后定位。
             blockElement.closest(".table")?.querySelector(".table__resize")?.setAttribute("style", "display:none");
-            if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {
-                protyle.hint.enableExtend = true;
+            // 外接键盘的结束事件可能缺失，收到明确提交的文本后恢复输入处理。
+            // 跨块组合由其独立事务完成，不能在这里拆开提交。
+            if (isComposition && !crossBlockComposition && isCommittedTextInput(event)) {
+                isComposition = false;
+                recoveredComposition = true;
+                beforeInputCompositionHandled = false;
+                compositionRange = undefined;
+                if (compositionSnapshot?.html && this.element.contains(compositionSnapshot.element)) {
+                    if (compositionSnapshot.element === blockElement) {
+                        this.lastHTMLs[blockElement.getAttribute("data-node-id")] = compositionSnapshot.html;
+                    } else {
+                        updateTransaction(protyle, compositionSnapshot.element, compositionSnapshot.html);
+                    }
+                }
+                compositionSnapshot = undefined;
             }
             if (event.isComposing || isComposition ||
                 // https://github.com/siyuan-note/siyuan/issues/337 编辑器内容拖拽问题
@@ -4415,6 +4534,9 @@ export class WYSIWYG {
         this.element.addEventListener("keyup", (event) => {
             if (getAVTemplateInteractiveElement(event.target)) {
                 event.stopPropagation();
+                return;
+            }
+            if (event.isComposing || isComposition) {
                 return;
             }
             const range = getEditorRange(this.element).cloneRange();
@@ -4594,9 +4716,6 @@ export class WYSIWYG {
             if (protyle.toolbar.isMultiSelectMode()) {
                 event.preventDefault();
                 event.stopPropagation();
-                return;
-            }
-            if (handleDiagramPreviewClick(event)) {
                 return;
             }
             /// #if MOBILE
@@ -5084,7 +5203,8 @@ export class WYSIWYG {
 
             // 需放在属性后，否则数学公式无法点击属性；需放在 action 后，否则嵌入块的的 action 无法打开；需放在嵌入块后，否则嵌入块中的数学公式会被打开
             const mathElement = hasClosestByAttribute(event.target, "data-subtype", "math");
-            if (!event.shiftKey && !ctrlIsPressed && mathElement && !protyle.disabled) {
+            if (!event.shiftKey && !ctrlIsPressed && mathElement && !protyle.disabled &&
+                (!isInAndroid() || isDirectMathClick(mathElement, event))) {
                 protyle.toolbar.showRender(protyle, mathElement);
                 event.stopPropagation();
                 return;

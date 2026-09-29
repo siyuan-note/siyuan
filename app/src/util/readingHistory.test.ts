@@ -28,45 +28,73 @@ test("tab visibility changes preserve a scrolled viewport including zero", () =>
 });
 
 for (const changedRange of [false, true]) {
-    test(`tablet history restores reading position with ${changedRange ? "reloaded" : "retained"} blocks`, async () => {
-        let visible = true;
-        let switched = 0;
-        let reloaded = 0;
-        const protyle = {
-            element: {getBoundingClientRect: () => ({height: visible ? 700 : 0})},
-            contentElement: {scrollTop: 1133},
-            block: {rootID: "doc"},
-            wysiwyg: {element: {
-                firstElementChild: {getAttribute: () => changedRange ? "changed" : "first"},
-                lastElementChild: {getAttribute: () => "last"},
-            }},
-            model: {parent: {headElement: {}, parent: {switchTab: () => { switched++; visible = true; }}}},
-        };
-        const stack = {id: "old-caret", protyle};
-        const context: any = {
-            previousIsBack: false,
-            forwardStack: [],
-            window: {siyuan: {backStack: [stack]}},
-            isPhablet: () => true,
-            saveScroll: () => ({rootId: "doc", startId: "first", endId: "last", scrollTop: protyle.contentElement.scrollTop}),
-            document: {contains: () => true},
-            hideElements: () => {},
-            getDocByScroll: (options: any) => {
-                reloaded++;
-                assert.equal(options.focus, false);
-                assert.equal(options.scrollAttr.startId, "first");
-                protyle.contentElement.scrollTop = options.scrollAttr.scrollTop;
-                options.cb();
-            },
-        };
-        runInNewContext(compiled, context);
-        context.save(protyle);
-        visible = false;
-        protyle.contentElement.scrollTop = 0;
-        context.save(protyle);
-        assert.equal(await context.restore({}, stack), true);
-        assert.equal(protyle.contentElement.scrollTop, 1133);
-        assert.equal(switched, 1);
-        assert.equal(reloaded, changedRange ? 1 : 0);
-    });
+    for (const changedZoom of [false, true]) {
+        test(`tablet history restores reading position with changed range ${changedRange} and zoom ${changedZoom}`, async () => {
+            let visible = true;
+            let switched = 0;
+            let reloaded = 0;
+            const protyle = {
+                element: {getBoundingClientRect: () => ({height: visible ? 700 : 0})},
+                contentElement: {scrollTop: 1133},
+                block: {rootID: "doc", showAll: false, id: "doc"},
+                wysiwyg: {element: {
+                    firstElementChild: {getAttribute: () => changedRange ? "changed" : "first"},
+                    lastElementChild: {getAttribute: () => "last"},
+                }},
+                model: {parent: {headElement: {}, parent: {switchTab: () => { switched++; visible = true; }}}},
+            };
+            const stack = {id: "old-caret", protyle};
+            const context: any = {
+                previousIsBack: false,
+                forwardStack: [],
+                window: {siyuan: {backStack: [stack]}},
+                isPhablet: () => true,
+                saveScroll: () => ({rootId: "doc", startId: "first", endId: "last", scrollTop: protyle.contentElement.scrollTop}),
+                document: {contains: () => true},
+                hideElements: () => {},
+                getDocByScroll: (options: any) => {
+                    reloaded++;
+                    assert.equal(options.focus, false);
+                    assert.equal(options.scrollAttr.startId, "first");
+                    protyle.contentElement.scrollTop = options.scrollAttr.scrollTop;
+                    options.cb();
+                },
+            };
+            runInNewContext(compiled, context);
+            context.save(protyle);
+            visible = false;
+            protyle.block.showAll = changedZoom;
+            protyle.block.id = changedZoom ? "zoomed" : "doc";
+            protyle.contentElement.scrollTop = 0;
+            context.save(protyle);
+            assert.equal(await context.restore({}, stack), true);
+            assert.equal(protyle.contentElement.scrollTop, 1133);
+            assert.equal(switched, 1);
+            assert.equal(reloaded, changedRange || changedZoom ? 1 : 0);
+        });
+    }
 }
+
+test("saving a visible document at the top does not restore a stale cached scroll offset", async () => {
+    const protyle = {
+        element: {getBoundingClientRect: () => ({height: 700})},
+        contentElement: {scrollTop: 0},
+        block: {rootID: "doc"},
+        wysiwyg: {element: {
+            firstElementChild: {getAttribute: () => "first"},
+            lastElementChild: {getAttribute: () => "last"},
+        }},
+        model: {parent: {headElement: {}, parent: {switchTab: () => {}}}},
+    };
+    const stack = {id: "doc", protyle};
+    const context: any = {
+        previousIsBack: false, forwardStack: [], window: {siyuan: {backStack: [stack]}},
+        isPhablet: () => true, document: {contains: () => true}, hideElements: () => {},
+        saveScroll: () => ({rootId: "doc", startId: "first", endId: "last", scrollTop: 1133}),
+    };
+    runInNewContext(compiled, context);
+    context.save(protyle);
+    protyle.contentElement.scrollTop = 500;
+    await context.restore({}, stack);
+    assert.equal(protyle.contentElement.scrollTop, 0);
+});

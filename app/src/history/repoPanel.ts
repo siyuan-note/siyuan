@@ -4,15 +4,20 @@ import {escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {removeSelectedRepoTags, repoSelectionKey, RepoSource, RepoTagSelection} from "./repoBatch";
 import {canPurgeRepo} from "./repoPurge";
+import {repoDateRange, RepoTimeRange} from "./repoRange";
 
 interface RepoPanelState {
     selected: Map<string, RepoTagSelection>;
     managing: boolean;
     busy: boolean;
     tagged: boolean;
+    range: RepoTimeRange;
 }
 
 const states = new WeakMap<Element, RepoPanelState>();
+
+export const getRepoSnapshotRange = (pane: Element): RepoTimeRange =>
+    states.get(pane.closest(".history__snapshots"))?.range || {};
 
 export const getRepoSnapshotType = (pane: Element) => {
     const tagged = states.get(pane.closest(".history__snapshots"))?.tagged;
@@ -79,7 +84,7 @@ export const updateRepoSelection = (pane: Element) => {
 
 export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: number) => void) => {
     const lang = window.siyuan.languages;
-    const state: RepoPanelState = {selected: new Map(), managing: false, busy: false, tagged: false};
+    const state: RepoPanelState = {selected: new Map(), managing: false, busy: false, tagged: false, range: {}};
     states.set(root, state);
     root.classList.add("history__snapshots");
     root.classList.toggle("history__snapshots--narrow", isMobile());
@@ -92,6 +97,12 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     <button class="b3-button b3-button--outline fn__none" data-action="manage">${lang.repoBatchManage}</button>
     <button class="b3-button b3-button--outline" data-type="genRepo">${lang.createSnapshot}</button>
 </div>
+<form class="history__snapshot-toolbar" data-role="date-range">
+    <label>${lang.startDate} <input type="date" class="b3-text-field" data-range="start" min="1970-01-01" max="9999-12-31"></label>
+    <label>${lang.endDate} <input type="date" class="b3-text-field" data-range="end" min="1970-01-01" max="9999-12-31"></label>
+    <button type="submit" class="b3-button b3-button--outline">${lang.filter}</button>
+    <button type="button" class="b3-button b3-button--text" data-action="range-clear">${lang.clear}</button>
+</form>
 <div class="history__snapshot-columns"></div>
 <div class="history__snapshot-toolbar fn__none" data-role="batch">
     <span data-role="selection" aria-live="polite"></span><span class="fn__flex-1"></span>
@@ -134,6 +145,34 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     }
     const panes = () => Array.from(columns.querySelectorAll<HTMLElement>("[data-repo-source]"));
     const refresh = () => panes().forEach(pane => render(pane, 1));
+    const startDate = root.querySelector<HTMLInputElement>('[data-range="start"]');
+    const endDate = root.querySelector<HTMLInputElement>('[data-range="end"]');
+    const dateForm = root.querySelector<HTMLFormElement>('[data-role="date-range"]');
+    const updateDateLimits = () => {
+        startDate.max = endDate.value || "9999-12-31";
+        endDate.min = startDate.value || "1970-01-01";
+    };
+    startDate.addEventListener("change", updateDateLimits);
+    endDate.addEventListener("change", updateDateLimits);
+    const applyRange = () => {
+        state.range = repoDateRange(startDate.value, endDate.value);
+        state.selected.clear();
+        panes().forEach(pane => {
+            pane.querySelector<HTMLInputElement>(".b3-text-field").value = "";
+            const compare = pane.querySelector('[data-type="compare"]');
+            compare.removeAttribute("data-ids");
+            compare.setAttribute("disabled", "disabled");
+        });
+        updateRepoSelection(panes()[0]);
+        refresh();
+    };
+    dateForm.addEventListener("submit", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!state.busy && dateForm.reportValidity()) {
+            applyRange();
+        }
+    });
     const message = (text: string) => {
         const result = root.querySelector('[data-role="result"]');
         result.textContent = text;
@@ -141,6 +180,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     };
     const setBusy = (busy: boolean) => {
         state.busy = busy;
+        dateForm.querySelectorAll<HTMLInputElement | HTMLButtonElement>("input, button").forEach(control => control.disabled = busy);
         root.setAttribute("aria-busy", String(busy));
         root.querySelectorAll<HTMLButtonElement>("button[data-action], button[data-type=genRepo]").forEach(button => button.disabled = busy);
         updateRepoSelection(panes()[0]);
@@ -169,7 +209,12 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         }
         event.stopPropagation();
         const action = button.dataset.action;
-        if (action === "normal" || action === "tagged") {
+        if (action === "range-clear") {
+            startDate.value = "";
+            endDate.value = "";
+            updateDateLimits();
+            applyRange();
+        } else if (action === "normal" || action === "tagged") {
             state.tagged = action === "tagged";
             state.managing = false;
             state.selected.clear();

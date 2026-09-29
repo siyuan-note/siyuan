@@ -84,6 +84,19 @@ var SetFlashcardEditLater = define[SetFlashcardEditLaterRequest, FlashcardEditLa
 var QueryFlashcards = define[QueryFlashcardsRequest, QueryFlashcardsData](
 	"queryFlashcards", "/api/flashcard/queryCards", StructJSONBody, ResponseOptions{}, "POST")
 
+// MCP OAuth 协议入口返回标准 OAuth JSON 或授权页面，不使用内核结果信封。
+var MCPOAuthResource = define[EmptyRequest, BinaryContent]("mcpOAuthResource", "/.well-known/oauth-protected-resource/mcp", NoBody, mcpOAuthContentOptions(), "GET")
+var MCPOAuthResourceRoot = define[EmptyRequest, BinaryContent]("mcpOAuthResourceRoot", "/.well-known/oauth-protected-resource", NoBody, mcpOAuthContentOptions(), "GET")
+var MCPOAuthMetadata = define[EmptyRequest, BinaryContent]("mcpOAuthMetadata", "/.well-known/oauth-authorization-server", NoBody, mcpOAuthContentOptions(), "GET")
+var MCPOAuthToken = define[MCPOAuthTokenRequest, BinaryContent]("mcpOAuthToken", "/oauth/mcp/token", FormBody, mcpOAuthContentOptions(), "POST")
+var MCPOAuthRevoke = define[MCPOAuthTokenRequest, BinaryContent]("mcpOAuthRevoke", "/oauth/mcp/revoke", FormBody, mcpOAuthContentOptions(), "POST")
+var MCPOAuthAuthorize = define[EmptyRequest, BinaryContent]("mcpOAuthServerAuthorize", "/oauth/mcp/authorize", NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 302, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}), "GET")
+var MCPOAuthConsent = define[MCPOAuthConsentRequest, BinaryContent]("mcpOAuthConsent", "/oauth/mcp/consent", FormBody, HTTPContentOptions(HTTPContentVariant{Status: 302, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}), "POST")
+var MCPOAuthGet = define[EmptyRequest, MCPOAuthStatus]("mcpOAuthGet", "/api/mcp/getOAuth", NoBody, ResponseOptions{}, "POST")
+var MCPOAuthSet = define[MCPOAuthConfig, Null]("mcpOAuthSet", "/api/mcp/setOAuth", JSONBody, ResponseOptions{}, "POST")
+var MCPOAuthAddClient = define[MCPOAuthClientRequest, MCPOAuthClientSecret]("mcpOAuthAddClient", "/api/mcp/addOAuthClient", JSONBody, ResponseOptions{}, "POST")
+var MCPOAuthRemoveClient = define[MCPOAuthRemoveRequest, Null]("mcpOAuthRemoveClient", "/api/mcp/removeOAuthClient", JSONBody, ResponseOptions{}, "POST")
+
 var (
 	GetChildBlocks     = define[BlockQueryRequest, []*ChildBlock]("getChildBlocks", "/api/block/getChildBlocks", JSONBody, ResponseOptions{NonNullable: true}, "POST")
 	GetTailChildBlocks = define[TailChildBlocksRequest, []*ChildBlock]("getTailChildBlocks", "/api/block/getTailChildBlocks", JSONBody, ResponseOptions{NonNullable: true}, "POST")
@@ -504,6 +517,7 @@ var GetShorthands = define[ShorthandsRequest, *ShorthandsData]("getShorthands", 
 var ReadClipboardFilePaths = define[EmptyRequest, []ClipboardFile]("readFilePaths", "/api/clipboard/readFilePaths", NoBody, ResponseOptions{NonNullable: true}, "POST")
 var WriteClipboardFilePath = define[ClipboardPathRequest, Null]("writeFilePath", "/api/clipboard/writeFilePath", JSONBody, ResponseOptions{}, "POST")
 var PrepareRichText = define[PrepareRichTextRequest, *RichClipboardPrepared]("prepareRichText", "/api/clipboard/prepareRichText", JSONBody, ResponseOptions{}, "POST")
+var PreparePasteAssets = define[PreparePasteAssetsRequest, map[string]string]("preparePasteAssets", "/api/clipboard/preparePasteAssets", JSONBody, ResponseOptions{NonNullable: true}, "POST")
 var CleanupRichText = define[CleanupRichTextRequest, Null]("cleanupRichText", "/api/clipboard/cleanupRichText", JSONBody, ResponseOptions{}, "POST")
 
 var StartFreeTrial = define[EmptyRequest, Null]("startFreeTrial", "/api/account/startFreeTrial", NoBody, ResponseOptions{}, "POST")
@@ -596,6 +610,8 @@ var GetHistoryItems = define[HistoryItemsRequest, HistoryItemsData]("getHistoryI
 var GetNotebookHistory = define[EmptyRequest, NotebookHistoryData]("getNotebookHistory", "/api/history/getNotebookHistory", NoBody, ResponseOptions{}, "POST")
 
 var GetDocHistoryContent = define[DocHistoryContentRequest, DocHistoryContentData]("getDocHistoryContent", "/api/history/getDocHistoryContent", JSONBody, ResponseOptions{}, "POST")
+
+var GetDocHistorySnapshots = define[DocHistorySnapshotsRequest, DocHistorySnapshotsData]("getDocHistorySnapshots", "/api/history/getDocHistorySnapshots", JSONBody, ResponseOptions{}, "POST")
 
 var CreateDocHistory = define[CreateDocHistoryRequest, Null]("createDocHistory", "/api/history/createDocHistory", JSONBody, ResponseOptions{}, "POST")
 
@@ -963,6 +979,8 @@ var AIAgentTitle = define[AITitleRequest, string]("agentChatTitle", "/api/ai/age
 var AIListSessions = define[AISessionsRequest, AISessionList]("lsSessions", "/api/ai/agent/lsSessions", StructJSONBody, ResponseOptions{}, "POST")
 var AIRemoveSession = define[AISessionIDRequest, Null]("removeSession", "/api/ai/agent/removeSession", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409, 500}}, "POST")
 var AIListSkills = define[EmptyRequest, []AISkillInfo]("lsSkills", "/api/ai/agent/lsSkills", NoBody, ResponseOptions{}, "POST")
+var AIGetAgentInstructions = define[EmptyRequest, AIAgentInstructionsData]("getAgentInstructions", "/api/ai/agent/getInstructions", NoBody, ResponseOptions{}, "POST")
+var AISetAgentInstructions = define[AIAgentInstructionsSaveRequest, AIAgentInstructionsData]("setAgentInstructions", "/api/ai/agent/setInstructions", JSONBody, ResponseOptions{}, "POST")
 var AIListUserSkills = define[EmptyRequest, []AIUserSkillInfo]("lsUserSkills", "/api/ai/agent/lsUserSkills", NoBody, ResponseOptions{}, "POST")
 var AIGetSkill = define[AISkillNameRequest, AISkillData]("getSkill", "/api/ai/agent/getSkill", StructJSONBody, ResponseOptions{}, "POST")
 var AISaveSkill = define[AISkillSaveRequest, Null]("saveSkill", "/api/ai/agent/saveSkill", StructJSONBody, ResponseOptions{}, "POST")

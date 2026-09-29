@@ -160,6 +160,12 @@ export const initUI = (protyle: IProtyle) => {
             }
         }
         const lastElement = protyle.wysiwyg.element.lastElementChild;
+        const backlinkElement = protyle.wysiwyg.element.nextElementSibling;
+        if (backlinkElement?.classList.contains("sy__backlink--bottom") &&
+            backlinkElement.getClientRects().length > 0 &&
+            event.clientY >= backlinkElement.getBoundingClientRect().top) {
+            return;
+        }
         const lastRect = lastElement.getBoundingClientRect();
         const range = document.createRange();
         if (event.y > lastRect.bottom) {

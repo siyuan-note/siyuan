@@ -10,6 +10,34 @@ import {
     resolveEntryOrderWithBoundaryDefaults,
 } from "./order";
 
+test("super block creation merges into saved menu orders and preserves plugin slots", () => {
+    const groups: Array<[string, string[]]> = [
+        ["gutter.single.superBlock", ["prependSuperBlockColumn", "prependSuperBlockChild", "appendSuperBlockColumn", "appendSuperBlockChild"]],
+        ["gutter.single", ["createSuperBlockLeft", "createSuperBlockRight"]],
+        ["editor.slash.menu", ["horizontalSuperBlock", "verticalSuperBlock"]],
+    ];
+    groups.forEach(([path, added]) => {
+        const entries = getEntryCatalogChildren(path);
+        const defaults = entries.map(item => item.key);
+        const saved = defaults.filter(key => !added.includes(key)).reverse();
+        saved.splice(1, 0, "plugin:example:item");
+        const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+        assert.deepEqual(merged.filter(key => !added.includes(key)), saved);
+        added.forEach(key => {
+            assert.equal(merged.filter(item => item === key).length, 1);
+            assert.equal(entries.find(item => item.key === key).simple, true);
+        });
+        const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+        const resolved = resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators);
+        assert.equal(resolved.includes("plugin:example:item"), true);
+        assert.equal(separators.has(resolved[0]), false);
+        assert.equal(separators.has(resolved[resolved.length - 1]), false);
+        resolved.forEach((key, index) => {
+            assert.equal(separators.has(key) && separators.has(resolved[index + 1]), false);
+        });
+    });
+});
+
 test("document tree duplication merges into saved orders and retains plugin slots", () => {
     const entries = getEntryCatalogChildren("docTree.document.copy");
     const defaults = entries.map(item => item.key);
@@ -68,6 +96,33 @@ test("custom task status merges into saved list menus without moving existing en
     assert.deepEqual(merged.slice(merged.indexOf("taskStatusTodo"), merged.indexOf("orderedListStart")), added);
     assert.deepEqual(resolveEntryOrder(["customTaskStatus", "prependListItem", "appendListItem", "plugin:example:item"],
         merged, new Set(["separator_numbering"])), ["appendListItem", "plugin:example:item", "customTaskStatus", "prependListItem"]);
+});
+
+test("remove list merges into saved conversion menus and preserves plugin slots", () => {
+    for (const path of ["gutter.single.turnInto", "gutter.multi.turnInto"]) {
+        const entries = getEntryCatalogChildren(path);
+        const defaults = entries.map(item => item.key);
+        const saved = defaults.filter(key => key !== "removeList").reverse();
+        saved.splice(1, 0, "plugin:example:item");
+        const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+        assert.deepEqual(merged.filter(key => key !== "removeList"), saved);
+        assert.equal(merged[merged.indexOf("list") - 1], "removeList");
+        const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+        assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+        assert.deepEqual(resolveEntryOrder(["paragraph", "removeList"], merged, separators), ["paragraph", "removeList"]);
+    }
+});
+
+test("recursive remove list merges without changing saved actions or plugin slots", () => {
+    for (const root of ["gutter.single", "gutter.multi"]) {
+        const defaults = getEntryCatalogChildren(`${root}.turnInto.includeSublists`).map(item => item.key);
+        const saved = ["recursiveParagraph", "plugin:example:item", "recursiveList", "recursiveOrderedList", "recursiveCheck"];
+        const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+        assert.deepEqual(merged.filter(key => key !== "recursiveRemoveList"), saved);
+        assert.equal(merged[1], "plugin:example:item");
+        assert.equal(merged[merged.indexOf("recursiveList") - 1], "recursiveRemoveList");
+        assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, new Set()), merged);
+    }
 });
 
 test("list mind map view merges into conversion menus and preserves plugin slots", () => {
@@ -218,7 +273,7 @@ test("tab conversion merges into saved block menus without moving plugin slots",
     const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
     assert.deepEqual(merged.filter(key => key !== "tabs"), saved);
     assert.equal(merged[1], "plugin:example:item");
-    assert.equal(merged[merged.indexOf("tabs") + 1], "list");
+    assert.equal(merged[merged.indexOf("tabs") + 1], "heading1");
 });
 
 test("document tree profiles merge sibling creation while preserving custom order and plugin slots", () => {

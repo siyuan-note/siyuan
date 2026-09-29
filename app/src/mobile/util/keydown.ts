@@ -15,6 +15,10 @@ export const mobileKeydown = (app: App, event: KeyboardEvent) => {
         if (key === "openContextMenu") {
             return false;
         }
+        // 桌面页签菜单不拦截移动端的键盘输入。
+        if (key === "switchTab") {
+            return false;
+        }
         if (matchHotKey(window.siyuan.config.keymap.general[key], event)) {
             const protyle = getCurrentEditor()?.protyle;
             if (protyle) {

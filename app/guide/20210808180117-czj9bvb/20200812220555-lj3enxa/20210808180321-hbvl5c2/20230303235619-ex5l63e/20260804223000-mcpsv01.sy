@@ -6,7 +6,7 @@
 		"id": "20260804223000-mcpsv01",
 		"title": "MCP 服务",
 		"type": "doc",
-		"updated": "20260804230000"
+		"updated": "20260926135700"
 	},
 	"Children": [
 		{"ID": "20260804223001-mcpcn01", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223001-mcpcn01", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "概述"}]},
@@ -21,6 +21,11 @@
 		{"ID": "20260804223010-mcpcn10", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223010-mcpcn10", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "权限和安全"}]},
 		{"ID": "20260804223011-mcpcn11", "Type": "NodeParagraph", "Properties": {"id": "20260804223011-mcpcn11", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "MCP 端点仅允许通过鉴权的管理员访问。API token 代表工作空间的管理员权限，连接的客户端可以读取数据，也可能修改或删除数据、访问工作空间文件、执行 SQL 或触发同步等操作，因此只应连接可信客户端。"}]},
 		{"ID": "20260804223012-mcpcn12", "Type": "NodeParagraph", "Properties": {"id": "20260804223012-mcpcn12", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "只读模式会拒绝 MCP 的 POST 和 DELETE 请求，因而无法正常调用工具。不要直接将思源服务端口暴露到不可信网络；远程使用时应配置 HTTPS、反向代理或防火墙，并在 token 泄露后立即更换。"}]},
-		{"ID": "20260804223013-mcpcn13", "Type": "NodeParagraph", "Properties": {"id": "20260804223013-mcpcn13", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "若要直接通过 HTTP 接口操作思源，请参阅 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20201227194925-7ipoiv6", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "内核 API"}, {"Type": "NodeText", "Data": "；若要为思源 AI 智能体配置外部 MCP 服务，请参阅 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20260804171000-aiagt01", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "AI 智能体"}, {"Type": "NodeText", "Data": "。"}]}
+		{"ID": "20260804223013-mcpcn13", "Type": "NodeParagraph", "Properties": {"id": "20260804223013-mcpcn13", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "若要直接通过 HTTP 接口操作思源，请参阅 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20201227194925-7ipoiv6", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "内核 API"}, {"Type": "NodeText", "Data": "；若要为思源 AI 智能体配置外部 MCP 服务，请参阅 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20260804171000-aiagt01", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "AI 智能体"}, {"Type": "NodeText", "Data": "。"}]},
+		{"ID": "20260926135700-06e5wr2", "Type": "NodeHeading", "Properties": {"id": "20260926135700-06e5wr2", "updated": "20260926135700"}, "Children": [{"Type": "NodeText", "Data": "OAuth 连接"}], "HeadingLevel": 2},
+		{"ID": "20260926135700-oegwoa6", "Type": "NodeParagraph", "Properties": {"id": "20260926135700-oegwoa6", "updated": "20260926135700"}, "Children": [{"Type": "NodeText", "Data": "在 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "设置"}, {"Type": "NodeText", "Data": " - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "AI"}, {"Type": "NodeText", "Data": " - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "MCP"}, {"Type": "NodeText", "Data": " 中配置 MCP 服务端 OAuth。默认关闭，需要设置锁屏密码或 OIDC 登录。填写公开的 HTTPS 地址，例如 https://note.example.com，不包含路径。MCP 地址为 https://note.example.com/mcp；反向代理需要保留公开的 Host，同时转发 /.well-known/、/oauth/mcp/、/mcp 和登录页面。"}]},
+		{"ID": "20260926135700-4s5iwp4", "Type": "NodeParagraph", "Properties": {"id": "20260926135700-4s5iwp4", "updated": "20260926135700"}, "Children": [{"Type": "NodeText", "Data": "使用客户端名称和 MCP 客户端（例如 ChatGPT）显示的完整回调地址注册客户端。立即保存客户端 ID 和密钥，密钥仅显示一次。在客户端的 OAuth 连接设置中填写二者，连接 MCP 地址，登录思源并确认授权。不支持动态客户端注册。"}]},
+		{"ID": "20260926135700-wyl79ns", "Type": "NodeParagraph", "Properties": {"id": "20260926135700-wyl79ns", "updated": "20260926135700"}, "Children": [{"Type": "NodeText", "Data": "授权允许使用当前工作空间对外开放的全部 MCP 工具，包括读取、写入、删除和管理能力。OAuth 令牌仅能用于 /mcp。只读模式和加密笔记本锁定仍然生效，授权不会解锁笔记本。原有 API Token 连接方式继续可用。"}]},
+		{"ID": "20260926135700-tpszwn3", "Type": "NodeParagraph", "Properties": {"id": "20260926135700-tpszwn3", "updated": "20260926135700"}, "Children": [{"Type": "NodeText", "Data": "访问令牌有效期为一小时。申请 offline_access 的客户端会获得轮换的刷新令牌，其有效期最长为授权后的三十天。移除客户端会撤销其令牌；撤销全部授权会保留客户端注册。关闭 OAuth、修改公开地址或修改管理员认证配置都会撤销已有授权。配置与凭证摘要保存在本地 conf/mcp-oauth.json，请妥善保管此文件，不要在工作空间之间共享。"}]}
 	]
 }

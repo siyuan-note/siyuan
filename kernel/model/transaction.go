@@ -423,6 +423,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewCardSize(op)
 			case "setAttrViewCardWidth":
 				ret = tx.doSetAttrViewCardWidth(op)
+			case "setAttrViewConditionalColors":
+				ret = tx.doSetAttrViewConditionalColors(op)
 			case "setAttrViewCalendar":
 				ret = tx.doSetAttrViewCalendar(op)
 			case "setAttrViewCardLayout":
@@ -604,12 +606,17 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		logging.LogWarnf("%s [%s]", msg, id)
 		return &TxErr{code: TxErrCodePushMsg, msg: msg, id: id}
 	}
-	if targetPreviousID := operation.PreviousID; "" != targetPreviousID {
-		if targetBlockTree := treenode.GetBlockTree(targetPreviousID); nil != targetBlockTree &&
+	targetSiblingID := operation.NextID
+	moveBefore := "" != targetSiblingID
+	if !moveBefore {
+		targetSiblingID = operation.PreviousID
+	}
+	if "" != targetSiblingID {
+		if targetBlockTree := treenode.GetBlockTree(targetSiblingID); nil != targetBlockTree &&
 			treenode.TypeAbbr(ast.NodeDocument.String()) == targetBlockTree.Type {
-			msg := "document blocks cannot be used as previous siblings"
-			logging.LogWarnf("%s [%s]", msg, targetPreviousID)
-			return &TxErr{code: TxErrCodePushMsg, msg: msg, id: targetPreviousID}
+			msg := "document blocks cannot be used as sibling anchors"
+			logging.LogWarnf("%s [%s]", msg, targetSiblingID)
+			return &TxErr{code: TxErrCodePushMsg, msg: msg, id: targetSiblingID}
 		}
 	}
 
@@ -632,18 +639,17 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		treenode.SetSelfFolded(srcNode, false)
 	}
 
-	targetPreviousID := operation.PreviousID
 	targetParentID := operation.ParentID
-	if "" != targetPreviousID {
-		if id == targetPreviousID {
+	if "" != targetSiblingID {
+		if id == targetSiblingID {
 			return &TxErr{code: TxErrCodeSkipTx}
 		}
 
 		var targetTree *parse.Tree
-		targetTree, err = tx.loadTree(targetPreviousID)
+		targetTree, err = tx.loadTree(targetSiblingID)
 		if err != nil {
-			logging.LogErrorf("load tree [%s] failed: %s", targetPreviousID, err)
-			return &TxErr{code: TxErrCodeBlockNotFound, id: targetPreviousID}
+			logging.LogErrorf("load tree [%s] failed: %s", targetSiblingID, err)
+			return &TxErr{code: TxErrCodeBlockNotFound, id: targetSiblingID}
 		}
 		isSameTree := srcTree.ID == targetTree.ID
 		if isSameTree {
@@ -655,18 +661,18 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			return &TxErr{code: TxErrCodeSkipTx}
 		}
 
-		targetNode := treenode.GetNodeInTree(targetTree, targetPreviousID)
+		targetNode := treenode.GetNodeInTree(targetTree, targetSiblingID)
 		if nil == targetNode {
-			logging.LogErrorf("get node [%s] in tree [%s] failed", targetPreviousID, targetTree.Root.ID)
-			return &TxErr{code: TxErrCodeBlockNotFound, id: targetPreviousID}
+			logging.LogErrorf("get node [%s] in tree [%s] failed", targetSiblingID, targetTree.Root.ID)
+			return &TxErr{code: TxErrCodeBlockNotFound, id: targetSiblingID}
 		}
 		if ast.NodeDocument == targetNode.Type {
-			msg := "document blocks cannot be used as previous siblings"
-			logging.LogWarnf("%s [%s]", msg, targetPreviousID)
-			return &TxErr{code: TxErrCodePushMsg, msg: msg, id: targetPreviousID}
+			msg := "document blocks cannot be used as sibling anchors"
+			logging.LogWarnf("%s [%s]", msg, targetSiblingID)
+			return &TxErr{code: TxErrCodePushMsg, msg: msg, id: targetSiblingID}
 		}
 
-		if ast.NodeHeading == targetNode.Type && treenode.IsSelfFolded(targetNode) {
+		if !moveBefore && ast.NodeHeading == targetNode.Type && treenode.IsSelfFolded(targetNode) {
 			targetChildren := treenode.HeadingChildren(targetNode)
 
 			if l := len(targetChildren); 0 < l {
@@ -682,12 +688,12 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			return &TxErr{code: TxErrCodeSkipTx}
 		}
 
-		if nil == operation.BlockIDs && 0 < len(headingChildren) {
+		if !moveBefore && nil == operation.BlockIDs && 0 < len(headingChildren) {
 			// 折叠标题再编辑形成外层列表（前面加上 * ）时，前端给的 tx 序列会形成死循环，在这里解开
 			// Nested lists cause hang after collapsing headings https://github.com/siyuan-note/siyuan/issues/15943
 			lastChild := headingChildren[len(headingChildren)-1]
 			if ast.NodeList == lastChild.Type &&
-				nil != lastChild.FirstChild && nil != lastChild.FirstChild.FirstChild && lastChild.FirstChild.FirstChild.ID == targetPreviousID {
+				nil != lastChild.FirstChild && nil != lastChild.FirstChild.FirstChild && lastChild.FirstChild.FirstChild.ID == targetSiblingID {
 				headingChildren = headingChildren[:len(headingChildren)-1]
 			}
 		}
@@ -696,27 +702,23 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		}
 
 		tx.markListItemFoldCandidate(srcParent, srcTree)
-		for i := len(headingChildren) - 1; -1 < i; i-- {
-			c := headingChildren[i]
-			targetNode.InsertAfter(c)
+		if moveBefore {
+			// 先插入标题，再按原顺序插入下辖块，保持整个移动集合位于锚点之前。
+			targetNode.InsertBefore(srcNode)
+			for _, child := range headingChildren {
+				targetNode.InsertBefore(child)
+			}
+		} else {
+			for i := len(headingChildren) - 1; -1 < i; i-- {
+				targetNode.InsertAfter(headingChildren[i])
+			}
+			targetNode.InsertAfter(srcNode)
 		}
-		targetNode.InsertAfter(srcNode)
 		if nil != srcEmptyList {
 			srcEmptyList.Unlink()
 		}
 
-		treenode.RefreshUpdated(srcNode)
-		tx.nodes[srcNode.ID] = srcNode
-		tx.markStructureCheck(srcNode)
-		for _, child := range headingChildren {
-			tx.markStructureCheck(child)
-		}
-		treenode.RefreshUpdated(srcTree.Root)
-		tx.writeTree(srcTree)
-		if !isSameTree {
-			tx.writeTree(targetTree)
-			tx.recordCrossTreeMoveRefRefresh(srcTree, targetTree, srcNode, headingChildren)
-		}
+		tx.finishMove(srcTree, targetTree, srcNode, headingChildren)
 		return
 	}
 
@@ -733,7 +735,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	if isSameTree {
 		targetTree = srcTree
 	}
-	// 禁止跨加密边界移动块（同 doMove targetPreviousID 分支）
+	// 禁止跨加密边界移动块（同 doMove targetSiblingID 分支）
 	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
 		util.PushMsg(Conf.Language(391), 5000)
 		return &TxErr{code: TxErrCodeSkipTx}
@@ -798,6 +800,11 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		}
 	}
 
+	tx.finishMove(srcTree, targetTree, srcNode, headingChildren)
+	return
+}
+
+func (tx *Transaction) finishMove(srcTree, targetTree *parse.Tree, srcNode *ast.Node, headingChildren []*ast.Node) {
 	treenode.RefreshUpdated(srcNode)
 	tx.nodes[srcNode.ID] = srcNode
 	tx.markStructureCheck(srcNode)
@@ -806,11 +813,10 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	}
 	treenode.RefreshUpdated(srcTree.Root)
 	tx.writeTree(srcTree)
-	if !isSameTree {
+	if srcTree.ID != targetTree.ID {
 		tx.writeTree(targetTree)
 		tx.recordCrossTreeMoveRefRefresh(srcTree, targetTree, srcNode, headingChildren)
 	}
-	return
 }
 
 const moveGroupIDContextKey = "moveGroupID"
@@ -2621,6 +2627,7 @@ type Transaction struct {
 	attributeViewDeletionErr  error
 	structureCheckNodes       map[*ast.Node]struct{}
 	crossTreeMoveRefRefreshes []crossTreeMoveRefRefresh
+	mindmapSummarySiblings    map[string]map[string][]string
 
 	luteEngine *lute.Lute
 	m          *sync.Mutex
@@ -2673,6 +2680,7 @@ func (tx *Transaction) begin() (err error) {
 	tx.templateDocTreeRootSnapshot = nil
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
+	tx.mindmapSummarySiblings = nil
 	tx.mutatedRootIDs = nil
 	tx.changedRootIDs = nil
 	tx.boxIcons = map[string]string{}
@@ -2903,6 +2911,7 @@ func (tx *Transaction) commit() (err error) {
 // releaseCommittedResources 释放执行期间的文档树；操作中的撤销快照及广播所需的文档 ID 继续保留。
 func (tx *Transaction) releaseCommittedResources() {
 	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
+	tx.mindmapSummarySiblings = nil
 	tx.relatedAvIDs = nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
@@ -2919,6 +2928,7 @@ func (tx *Transaction) releaseCommittedResources() {
 }
 
 func (tx *Transaction) rollback() {
+	tx.mindmapSummarySiblings = nil
 	tx.finishAttributeViewMutation(true)
 	for _, tree := range tx.blockSwapOriginalTrees {
 		treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
@@ -3030,6 +3040,7 @@ func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.T
 		return
 	}
 	tx.trees[bt.RootID] = ret
+	tx.captureListMindmapSummarySiblings(ret)
 	return
 }
 
@@ -3062,6 +3073,7 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 		return
 	}
 	tx.trees[rootID] = ret
+	tx.captureListMindmapSummarySiblings(ret)
 	return
 }
 

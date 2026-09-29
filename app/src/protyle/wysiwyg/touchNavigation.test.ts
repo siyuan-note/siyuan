@@ -8,11 +8,12 @@ const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/touchNavigati
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const fixture = () => {
+const fixture = (handled = false) => {
     const exports: any = {};
     let time = 0;
     const targets: unknown[] = [];
     const points: unknown[] = [];
+    let prevented = 0;
     const listeners = new Map<string, (event: any) => void>();
     const element = {addEventListener: (type: string, listener: (event: any) => void) => listeners.set(type, listener)};
     runInNewContext(compiled, {
@@ -23,6 +24,7 @@ const fixture = () => {
     exports.bindTouchNavigation(element, (target: unknown, point: unknown) => {
         targets.push(target);
         points.push(point);
+        return handled;
     });
     const target = {closest: () => element};
     const send = (type: string, options: any = {}) => {
@@ -30,12 +32,13 @@ const fixture = () => {
         listeners.get(type)({
             target,
             defaultPrevented: false,
+            preventDefault: () => prevented++,
             touches: type === "touchend" ? [] : [touch],
             changedTouches: [touch],
             ...options,
         });
     };
-    return {send, targets, points, target, advance: () => time += 500};
+    return {send, targets, points, target, advance: () => time += 500, prevented: () => prevented};
 };
 
 test("native touch taps record each paragraph without requiring a click", () => {
@@ -45,7 +48,16 @@ test("native touch taps record each paragraph without requiring a click", () => 
     f.send("touchstart");
     f.send("touchend");
     assert.deepEqual(f.targets, [f.target, f.target]);
+    assert.equal(f.prevented(), 0);
     assert.equal(JSON.stringify(f.points), JSON.stringify([{x: 100, y: 100}, {x: 100, y: 100}]));
+});
+
+test("handled reference taps suppress the compatibility click", () => {
+    const f = fixture(true);
+    f.send("touchstart");
+    f.send("touchend");
+    assert.equal(f.targets.length, 1);
+    assert.equal(f.prevented(), 1);
 });
 
 test("scrolling away and back, cancellation and long presses do not record navigation", () => {

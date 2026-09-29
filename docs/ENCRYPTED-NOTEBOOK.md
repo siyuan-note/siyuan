@@ -80,6 +80,8 @@ Encrypted notebooks are maintained as a released feature.
 
 An encrypted notebook is an "island" — data is physically isolated, operations have dedicated entry points, it never participates in global features (global search/graph), it cannot be published, and documents/database files do not cross the boundary. In-notebook features (editing, block refs, backlinks, search, database, outline, history, etc.) work normally; when unlocked, AI/LLM can read content directly and use in-notebook search. Encrypted notebooks are also isolated from each other. Normal notebooks are completely unaffected.
 
+Pasting normal-notebook content into an unlocked encrypted notebook creates independent encrypted copies of its local attachments and rewrites the pasted references. Original attachments remain unchanged, and attachments already in the target notebook are reused. Batch failures abort the paste and remove newly created copies. This does not enable cross-notebook attachment sharing or copying from another encrypted notebook, and it does not change encryption formats. Opening an encrypted attachment's file location continues to use a temporary decrypted copy.
+
 ### Feature limitations
 
 An encrypted notebook is an island; some features are unsupported because of their cross-notebook nature or dependence on global aggregation. These are explicit feature boundaries.

@@ -2034,6 +2034,8 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		logging.LogErrorf("copy search conf failed: %s", err)
 	}
 	if nil != types {
+		s.Mindmap = new(types["mindmap"])
+		s.MindmapItem = new(types["mindmapItem"])
 		s.Document = types["document"]
 		s.Heading = types["heading"]
 		s.List = types["list"]
@@ -2102,6 +2104,8 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 	addSimple(s.Tabs, "tabs")
 	addSimple(s.TabItem, "tab")
 	addSimple(s.CustomBlockEnabled(), "custom")
+	addSimple(s.MindmapEnabled(), "mindmap")
+	addSimple(s.MindmapItemEnabled(), "mindmap_item")
 
 	var clauses []string
 

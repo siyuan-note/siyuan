@@ -81,8 +81,7 @@ import {
     uniqueDragIds
 } from "./dragDocument";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
-import {getAVData, getAVPreviousItemID, getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
-import {setAVItemAnchor} from "../render/av/rangeSelect";
+import {getAVData, getAVPreviousItemID, getAVSelectedItemPoints} from "../render/av/virtualScroll";
 import {getCaretRect} from "./caretRect";
 import {isBlockRefDropTargetDisabled} from "./blockRefDrop";
 import {appendCancelSuperBlockOperations} from "../../block/cancelSuperBlock";
@@ -132,8 +131,25 @@ const getTargetListItem = (targetElement: Element, isBottom: boolean) => {
 };
 
 type TDragSourcePosition = {
+    nextID?: string,
     previousID: string,
     parentID: string
+};
+
+const getDragSourceNextID = (element: Element, sources: Element[]) => {
+    let current = element;
+    while (current) {
+        let next = getNextBlockSibling(current);
+        // 折叠标题下辖块与其他源块都会移动，撤销锚点必须留在原容器中。
+        while (next && shouldUnfoldMovedHeading(current, next)) {
+            next = getNextBlockSibling(next);
+        }
+        if (!next || !sources.includes(next)) {
+            return next?.getAttribute("data-node-id") || "";
+        }
+        current = next;
+    }
+    return "";
 };
 
 type TDragSourceContainerSnapshot = {
@@ -222,6 +238,7 @@ const cancelDragSourceSB = async (nodeElement: Element, excludedChildIDs: Set<st
 const wrapInRowSB = async (protyle: IProtyle, elements: Element[]) => {
     const firstElement = elements[0];
     const sourcePosition: TDragSourcePosition = {
+        nextID: getDragSourceNextID(firstElement, elements),
         previousID: getPreviousBlockSibling(firstElement)?.getAttribute("data-node-id") || "",
         parentID: await getDragSourceParentID(protyle, firstElement)
     };
@@ -325,6 +342,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             const id = item.getAttribute("data-node-id");
             if (id && !sourcePositions.has(id)) {
                 sourcePositions.set(id, {
+                    nextID: getDragSourceNextID(item, sourceElements),
                     previousID: getPreviousBlockSibling(item)?.getAttribute("data-node-id") || "",
                     parentID: await getDragSourceParentID(protyle, item)
                 });
@@ -361,7 +379,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 action: "insert",
                 data: newListElement.outerHTML,
                 id: newListId,
-                previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(tempTargetElement)?.getAttribute("data-node-id")),
+                nextID: position === "beforebegin" ? tempTargetElement.getAttribute("data-node-id") : undefined,
+                previousID: position === "afterend" ? targetId : undefined,
                 parentID: position === "afterbegin" ? targetId : (getParentBlock(tempTargetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
             });
             undoOperations.push({
@@ -389,10 +408,11 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             });
         } else {
             // 用 DOM 移动前预捕获的源位置构造撤销操作，避免移动后 item 的父/兄弟已变导致撤销移到错误位置
-            const srcPos = sourcePositions.get(id) || {previousID: "", parentID};
+            const srcPos = sourcePositions.get(id) || {nextID: "", previousID: "", parentID};
             undoMoveOperation = {
                 action: "move",
                 id,
+                nextID: srcPos.nextID,
                 previousID: srcPos.previousID,
                 parentID: srcPos.parentID,
                 context: {moveGroupID},
@@ -439,7 +459,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     action: "insert",
                     id: copyNewId,
                     data: copyElement.outerHTML,
-                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(copyElement)?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
+                    nextID: position === "beforebegin" ? tempTargetElement.getAttribute("data-node-id") : undefined,
+                    previousID: position === "afterend" ? targetId : undefined,
                     parentID: position === "afterbegin" ? targetId : (getParentBlock(copyElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(copyElement);
@@ -511,7 +532,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 doOperations.push({
                     action: "move",
                     id,
-                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(item)?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
+                    nextID: position === "beforebegin" ? tempTargetElement.getAttribute("data-node-id") : undefined,
+                    previousID: position === "afterend" ? targetId : undefined,
                     parentID: position === "afterbegin" ? targetId : (getParentBlock(item)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                     context: {moveGroupID},
                 });
@@ -789,6 +811,9 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         wrapUndoOperations.splice(0, 0, ...targetWrap.undoOperations);
         targetElement = targetWrap.element;
         sourcePositions.forEach(position => {
+            if (position.nextID === targetID) {
+                position.nextID = targetElement.getAttribute("data-node-id");
+            }
             if (position.previousID === targetID) {
                 position.previousID = targetElement.getAttribute("data-node-id");
             }
@@ -961,6 +986,9 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         wrapUndoOperations.splice(0, 0, ...targetWrap.undoOperations);
         targetElement = targetWrap.element;
         sourcePositions.forEach(position => {
+            if (position.nextID === targetID) {
+                position.nextID = targetElement.getAttribute("data-node-id");
+            }
             if (position.previousID === targetID) {
                 position.previousID = targetElement.getAttribute("data-node-id");
             }
@@ -982,6 +1010,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     }
     const targetListStart = targetElement.getAttribute("data-type") === "NodeListItem" &&
         targetElement.getAttribute("data-subtype") === "o" ? getOrderedListStart(targetElement.parentElement) : undefined;
+    const previousBlockElement = getPreviousBlockSibling(targetElement);
     const moveToResult = await moveTo(protyle, sourceElements, sourceRowElement || targetElement, isSameEditor,
         sourceRowElement || intoEmptyTab ? "afterbegin" : (isBottom ? "afterend" : "beforebegin"), isCopy, sourcePositions);
     if (sourceRowElement && isCopy) {
@@ -998,7 +1027,6 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     }
     undoOperations.push(...wrapUndoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
-    const previousBlockElement = getPreviousBlockSibling(targetElement);
     const unfoldHeadingElements = new Set<Element>();
     if (!isColumnDrop && isBottom &&
         targetElement.getAttribute("data-type") === "NodeHeading" &&
@@ -1205,13 +1233,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (target.classList.contains("av__gallery-item")) {
                 const blockElement = hasClosestBlock(target);
                 if (blockElement) {
-                    if (!target.classList.contains("av__gallery-item--select")) {
-                        clearSelect(["galleryItem"], blockElement);
-                        target.classList.add("av__gallery-item--select");
-                        const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
-                        updateAVRowSelect(bodyElement, target.dataset.id, true);
-                        setAVItemAnchor(blockElement, target);
-                    }
+                    const isSelected = target.classList.contains("av__gallery-item--select");
+                    const groupID = (hasClosestByClassName(target, "av__body") as HTMLElement).dataset.groupId;
+                    const selectIds = isSelected ? getAVSelectedItemPoints(blockElement).map(item =>
+                        item.itemID + (item.groupID ? `@${item.groupID}` : "")) :
+                        [target.dataset.id + (groupID ? `@${groupID}` : "")];
                     const ghostElement = document.createElement("div");
                     ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
                     const isKanban = blockElement.getAttribute("data-av-type") === "kanban";
@@ -1220,7 +1246,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     let galleryElement: HTMLElement;
                     let cloneGalleryElement = document.createElement("div");
-                    const selectElements = blockElement.querySelectorAll(".av__gallery-item--select");
+                    const selectElements = isSelected ?
+                        Array.from(blockElement.querySelectorAll(".av__gallery-item--select")) : [target];
                     selectElements.forEach(item => {
                         if (!galleryElement || !galleryElement.contains(item)) {
                             galleryElement = item.parentElement;
@@ -1256,8 +1283,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         });
                     }
                     window.siyuan.dragElement = target;
-                    const selectIds = getAVSelectedItemPoints(blockElement).map(item =>
-                        item.itemID + (item.groupID ? `@${item.groupID}` : ""));
                     event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${selectIds}`,
                         ghostElement.outerHTML);
                 }

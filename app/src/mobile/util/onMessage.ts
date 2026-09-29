@@ -1,4 +1,5 @@
 import {openMobileFileById} from "../editor";
+import {closeNotebookHistoryDialogs} from "../../history/notebookDialogs";
 import {MOBILE_BARS_CONFIG_KEY} from "./mobileBarsConfig";
 import {showMobileBars} from "./mobileBars";
 import {
@@ -123,6 +124,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "closeBox":
             case "removeBox": {
+                closeNotebookHistoryDialogs(data.data.box);
                 removeMobileBacklinkContent({notebookId: data.data.box});
                 window.siyuan.mobile.tabs?.removeNotebook(data.data.box);
                 break;

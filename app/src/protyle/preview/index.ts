@@ -3,7 +3,7 @@ import {focusByRange} from "../util/selection";
 import {openLink} from "../../editor/openLink";
 import {showMessage} from "../../dialog/message";
 import {previewDocImage} from "./image";
-import {getDiagramBlock, handleDiagramPreviewClick, previewDiagram} from "./diagram";
+import {getDiagramBlock, previewDiagram} from "./diagram";
 import {needSubscribe} from "../../util/needSubscribe";
 import {Constants} from "../../constants";
 /// #if !BROWSER
@@ -29,6 +29,7 @@ import {hasTopClosestByAttribute} from "../util/hasClosest";
 import {addScriptSync} from "../util/addScript";
 import {prepareWechatCopy, prepareZhihuCopy} from "./platformCopy";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {destroyAutoDirection, setAutoDirection} from "../render/autoDirection";
 
 export class Preview {
     public element: HTMLElement;
@@ -127,10 +128,15 @@ export class Preview {
         document.addEventListener("copy", this.copyEventHandler);
         /// #endif
 
-        this.element.addEventListener("click", (event) => {
-            if (handleDiagramPreviewClick(event)) {
-                return;
+        this.element.addEventListener("dblclick", (event) => {
+            const diagramElement = getDiagramBlock((event.target as Element).closest('[data-subtype="plantuml"]') as HTMLElement);
+            if (diagramElement) {
+                previewDiagram(diagramElement);
+                event.stopPropagation();
+                event.preventDefault();
             }
+        });
+        this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
                 if (target.tagName === "A") {
@@ -151,7 +157,6 @@ export class Preview {
                 } else if (target.tagName === "IMG") {
                     const diagramElement = getDiagramBlock(target.closest('[data-subtype="plantuml"]') as HTMLElement);
                     if (diagramElement) {
-                        previewDiagram(diagramElement);
                         event.stopPropagation();
                         event.preventDefault();
                         return;
@@ -210,7 +215,7 @@ export class Preview {
                 window.siyuan.mobile.docks.outline?.setCurrentByPreview(nodeElement);
                 /// #endif
                 const diagramElement = getDiagramBlock(nodeElement);
-                if (diagramElement) {
+                if (diagramElement && diagramElement.getAttribute("data-subtype") !== "plantuml") {
                     previewDiagram(diagramElement);
                     event.stopPropagation();
                     event.preventDefault();
@@ -223,6 +228,7 @@ export class Preview {
     }
 
     public destroy() {
+        destroyAutoDirection(this.previewElement);
         destroyTabsRender(this.previewElement);
         window.clearTimeout(this.mdTimeoutId);
         /// #if !BROWSER
@@ -271,6 +277,7 @@ export class Preview {
                     ?.classList.add("protyle-preview__title");
                 /// #endif
                 processRender(protyle.preview.previewElement);
+                setAutoDirection(protyle.preview.previewElement, window.siyuan.config.editor.autoDirection);
                 tabsRender(protyle.preview.previewElement, {label: window.siyuan.languages.tabItem,
                     shown: item => processRender(item)});
                 highlightRender(protyle.preview.previewElement);

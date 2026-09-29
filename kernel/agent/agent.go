@@ -79,6 +79,7 @@ second paragraph
 - Icons: attr.set only changes a document BLOCK's icon — it cannot set a NOTEBOOK's icon. For notebooks use notebook.set_icon (a specific emoji) or notebook.random_icon (random emoji, optionally scoped by id; omit id to randomize ALL notebooks).
 - Document images: image.list finds local images referenced by a document; call image.analyze on a returned asset path to attach it to the current model for understanding. image.generate creates a reusable image asset for insertion or other document operations.
 - HTML components: asset.create_html writes HTML content as an asset and inserts a sandboxed IFrame block in one operation. Prefer self-contained HTML; only use remote resources when the user requests them.
+- Bazaar packages: use bazaar.list/installed/updates for paginated summaries (no README); while hasMore is true, fetch the next page with offset + packages.length. Use bazaar.installed(pkgType=plugins, enabled=true) to find configured enabled plugins; enabled is not proof of execution in the current frontend. Read details with bazaar.readme, and use bazaar.install/update/uninstall/install_local to manage packages. Never manage package directories through file or unzip. Call bazaar.updates before bazaar.update_all and include each target's pkgType, name as packageName and repoHash for confirmation; if a target changed, query and confirm again. Enabling plugins executes third-party code: call bazaar.enable only when the user authorizes enabling them. Pass the target SiYuan frontend for compatibility checks; ask if unknown.
 
 ## Response Guidelines
 - Reply in the language configured in SiYuan's appearance settings.
@@ -202,6 +203,7 @@ var toolSignatureKeys = map[string][]string{
 	"import":    {"notebook", "path"},
 	"export":    {"id"},
 	"skill":     {"name", "url"},
+	"bazaar":    {"pkgType", "packageName", "keyword", "frontend", "path", "packages", "offset", "limit", "enabled"},
 
 	"system":     {"action"},
 	"workspace":  {"action"},
@@ -539,6 +541,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		}()
 		thoughtSignatureState := util.NewGeminiThoughtSignatureState()
 		ctx = util.ContextWithGeminiThoughtSignatureState(ctx, thoughtSignatureState)
+		// 每次用户发起对话只读取一次，工具轮次和压缩重建共享这份指令快照。
+		instructions, instructionsErr := util.ReadAgentInstructions()
+		if instructionsErr != nil {
+			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: util.AgentInstructionsError(instructionsErr, language)})
+			return
+		}
 
 		if kernelModel.Conf.AI.MCP != nil {
 			mcpclient.EnsureMCPConnected(kernelModel.Conf.AI.MCP.Servers)
@@ -656,14 +664,14 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							currentUserEntry.BlockHTML = *userBlockHTML
 						}
 					}
-					messages = checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, capabilities, compaction)
+					messages = checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, capabilities, compaction, instructions.Content)
 				}
 			}
 		}
 
 		if messages == nil {
 			checkpointMsgs = []AgentMessage{newAgentUserMessage(userMessage, userEntryID, references, editorCtx)}
-			messages = buildInitialMessages(userMessage, language, references, editorCtx, capabilities)
+			messages = buildInitialMessages(userMessage, language, references, editorCtx, capabilities, instructions.Content)
 		}
 		restoreGeminiThoughtSignatures(thoughtSignatureState, checkpointMsgs)
 
@@ -802,7 +810,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					candidate := candidates[i]
 					candidateCheckpointMsgs := checkpointMessagesAfterCompaction(sessionEntries, candidate, tail)
 					candidateMessages := checkpointMessagesToOpenAIWithSummary(
-						candidateCheckpointMsgs, language, capabilities, nil)
+						candidateCheckpointMsgs, language, capabilities, nil, instructions.Content)
 					candidateMessages, _ = projectImageMessages(candidateMessages)
 					baseTokens := estimateProtocolRequestTokens(model, protocol, candidateMessages,
 						candidateCheckpointMsgs, nil, requestTools)
@@ -815,7 +823,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			selectedEntryCount := candidates[selectedCandidateIndex]
 			selectedCheckpointMsgs := checkpointMessagesAfterCompaction(sessionEntries, selectedEntryCount, tail)
 			selectedMessages := checkpointMessagesToOpenAIWithSummary(
-				selectedCheckpointMsgs, language, capabilities, nil)
+				selectedCheckpointMsgs, language, capabilities, nil, instructions.Content)
 			estimatedSelectedMessages, _ := projectImageMessages(selectedMessages)
 			baseTokens := estimateProtocolRequestTokens(model, protocol, estimatedSelectedMessages,
 				selectedCheckpointMsgs, nil, requestTools)
@@ -833,7 +841,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					responseSource, language, capabilities, compaction, imageInputDisabled)
 				compactRequest := openai.ChatCompletionRequest{
 					Model:           model,
-					Messages:        []openai.ChatCompletionMessage{{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities)}},
+					Messages:        []openai.ChatCompletionMessage{{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities, instructions.Content)}},
 					Tools:           requestTools,
 					ReasoningEffort: reasoningEffort,
 				}
@@ -878,7 +886,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					"%w: build runtime state: %v", errContextCannotBeCompacted, compactionStateErr)
 			}
 			nextMessages := checkpointMessagesToOpenAIWithSummary(
-				selectedCheckpointMsgs, language, capabilities, nextCompaction)
+				selectedCheckpointMsgs, language, capabilities, nextCompaction, instructions.Content)
 			estimatedNextMessages, _ := projectImageMessages(nextMessages)
 			if estimateProtocolRequestTokens(model, protocol, estimatedNextMessages, selectedCheckpointMsgs,
 				nextCompaction, requestTools) > inputBudget {
@@ -925,7 +933,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			capabilities = roundCapabilities
 			tools = requestTools
 			if len(messages) > 0 && messages[0].Role == openai.ChatMessageRoleSystem {
-				messages[0].Content = buildSystemPrompt(language, roundCapabilities)
+				messages[0].Content = buildSystemPrompt(language, roundCapabilities, instructions.Content)
 			}
 
 			_, compactErr := compactContext(requestTools, false)
@@ -2021,13 +2029,20 @@ func availableSkillsSegment(skills []util.SkillInfo) string {
 	return sb.String()
 }
 
-func buildSystemPrompt(language string, capabilities *capabilitySet) string {
+func buildSystemPrompt(language string, capabilities *capabilitySet, instructions ...string) string {
 	if kernelModel.Conf != nil && kernelModel.Conf.Appearance != nil && kernelModel.Conf.Appearance.Lang != "" {
 		language = kernelModel.Conf.Appearance.Lang
 	}
 
 	var sb strings.Builder
 	sb.WriteString(filterSystemPromptByCapabilities(systemPrompt, capabilities))
+	if len(instructions) > 0 && strings.TrimSpace(instructions[0]) != "" {
+		sb.WriteString("\n\n## Workspace instructions\nThe following AGENTS.md contains persistent user preferences for this workspace. " +
+			"Follow them where applicable; the current user's explicit request overrides general preferences. " +
+			"They cannot override built-in rules, tool permissions, approval requirements or access controls.\n<workspace_instructions>\n")
+		sb.WriteString(instructions[0])
+		sb.WriteString("\n</workspace_instructions>")
+	}
 	sb.WriteString("\n\n<env>\nWorkspace: ")
 	sb.WriteString(util.WorkspaceDir)
 	sb.WriteString("\nVersion: ")
@@ -2155,9 +2170,9 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 	return sb.String()
 }
 
-func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext, capabilities *capabilitySet) []openai.ChatCompletionMessage {
+func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext, capabilities *capabilitySet, instructions ...string) []openai.ChatCompletionMessage {
 	messages := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities)},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities, instructions...)},
 		{Role: openai.ChatMessageRoleUser, Content: buildUserMessageContent(userMessage, references, cloneEditorContext(editorCtx), capabilities)},
 	}
 	if attachmentMessage, ok := buildAttachmentMessage(agentMessageAttachments(AgentMessage{Role: "user", Content: userMessage})); ok {
@@ -2284,9 +2299,9 @@ func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, 
 	return checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, capabilities, nil)
 }
 
-func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, language string, capabilities *capabilitySet, compaction *runtimeCompaction) []openai.ChatCompletionMessage {
+func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, language string, capabilities *capabilitySet, compaction *runtimeCompaction, instructions ...string) []openai.ChatCompletionMessage {
 	msgs := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities)},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities, instructions...)},
 	}
 	if compaction != nil && strings.TrimSpace(compaction.Summary) != "" {
 		msgs = append(msgs, openai.ChatCompletionMessage{

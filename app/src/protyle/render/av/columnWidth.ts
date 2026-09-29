@@ -1,3 +1,5 @@
+import {hasAVRenderTemplateResult} from "./cellValue";
+
 const getEstimatedTextWidth = (value: string) => {
     return Array.from(value.trim().replace(/[\r\n]+/g, " ")).reduce((width, character) => {
         if (/[\u2E80-\u9FFF\uAC00-\uD7AF]/u.test(character)) {
@@ -26,17 +28,33 @@ export const getAVColumnTextMeasurer = (blockElement: HTMLElement) => {
 };
 
 export const getAVColumnFitWidth = (name: string, type: TAVCol, values: string[],
-                                    measureText = getEstimatedTextWidth) => {
+                                    measureText = getEstimatedTextWidth, extraWidths: number[] = []) => {
     const headerWidth = measureText(name) + 42;
     const contentPadding = ["select", "mSelect"].includes(type) ? 32 : 20;
-    const contentWidth = values.reduce((width, value) => Math.max(width, measureText(value) + contentPadding), 0);
+    const contentWidth = values.reduce((width, value, index) =>
+        Math.max(width, measureText(value) + contentPadding + (extraWidths[index] || 0)), 0);
     return `${Math.ceil(Math.min(480, Math.max(64, headerWidth, contentWidth)))}px`;
 };
 
-export const getAVRelationColumnWidth = (fitWidth: string, type: TAVCol, primary: boolean) => {
-    const width = parseFloat(fitWidth) || 64;
-    const minWidth = primary ? 120 : 64;
-    const maxWidth = ["relation", "rollup", "mAsset"].includes(type) ? 200 : 160;
+export const getAVColumnIconWidth = (blockElement: HTMLElement) => {
+    const icon = blockElement.querySelector<HTMLElement>(".av__cell .b3-menu__avemoji:not(.fn__none)");
+    if (icon) {
+        const style = getComputedStyle(icon);
+        const width = icon.getBoundingClientRect().width +
+            (parseFloat(style.marginLeft) || 0) + (parseFloat(style.marginRight) || 0);
+        if (width > 0) {
+            return width;
+        }
+    }
+    // 虚拟滚动可能尚未渲染带图标的行，为默认图标及其间距预留空间。
+    return 28;
+};
+
+export const getAVRelationColumnWidth = (fitWidth: string, type: TAVCol, primary: boolean, nameWidth = 0) => {
+    // 表头为字段图标、排序箭头和内边距预留空间。
+    const width = Math.max(parseFloat(fitWidth) || 64, nameWidth + 62);
+    const minWidth = primary ? 240 : 64;
+    const maxWidth = primary ? 400 : ["relation", "rollup", "mAsset"].includes(type) ? 200 : 160;
     return `${Math.min(maxWidth, Math.max(minWidth, width))}px`;
 };
 
@@ -63,11 +81,13 @@ export const getAVTableFitWidths = (
     getValueText: (value: IAVCellValue, column: IAVColumn, rowIndex: number) => string,
     measureText = getEstimatedTextWidth,
     columnIDs?: string[],
+    iconWidth = 28,
 ) => {
     const targetColumnIDs = columnIDs ? new Set(columnIDs) : undefined;
     const visibleColumns = view.columns.filter(column =>
         !column.hidden && (!targetColumnIDs || targetColumnIDs.has(column.id)));
     const values = new Map(visibleColumns.map(column => [column.id, [] as string[]]));
+    const extraWidths = new Map(visibleColumns.map(column => [column.id, [] as number[]]));
     const collect = (table: IAVTable) => {
         if (table.groups?.length > 0) {
             (table.groups as IAVTable[]).forEach(group => {
@@ -96,6 +116,10 @@ export const getAVTableFitWidths = (
                     (typeof columnIndex === "number" && columnIndex > -1 ? row.cells[columnIndex] : undefined);
                 if (cell) {
                     values.get(column.id)?.push(getValueText(cell.value, column, rowIndex));
+                    // 逐行计入实际显示的主键图标，未绑定项及模板渲染结果不占用图标空间。
+                    extraWidths.get(column.id)?.push(view.showIcon && column.type === "block" &&
+                        cell.value?.block && !cell.value.isDetached &&
+                        !hasAVRenderTemplateResult(cell.value, column.renderTemplate) ? iconWidth : 0);
                 }
             });
         });
@@ -103,6 +127,7 @@ export const getAVTableFitWidths = (
     collect(view);
     return Object.fromEntries(visibleColumns.map(column => [
         column.id,
-        getAVColumnFitWidth(column.name, column.type, values.get(column.id) || [], measureText),
+        getAVColumnFitWidth(column.name, column.type, values.get(column.id) || [], measureText,
+            extraWidths.get(column.id)),
     ]));
 };

@@ -1,4 +1,99 @@
 .history {
+  &__associations {
+    padding: 8px 16px;
+    flex-shrink: 0;
+
+    summary {
+      cursor: pointer;
+    }
+  }
+
+  &__association-list {
+    max-height: 30vh;
+    overflow: auto;
+  }
+
+  &__association {
+    padding: 8px 0;
+  }
+
+  &__association-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  &__association-link {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  &__association-memo {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  &__snapshot-detail,
+  &__snapshot-detail-content {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__snapshot-detail-status {
+    padding: 12px 16px;
+    overflow-wrap: anywhere;
+  }
+
+  &__snapshot-detail-meta {
+    padding: 12px 16px;
+    max-height: 25vh;
+    overflow: auto;
+    overflow-wrap: anywhere;
+    flex-shrink: 0;
+  }
+
+  &__snapshot-detail-panels {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+  }
+
+  &__snapshot-detail-files {
+    width: 35%;
+    min-width: 0;
+    overflow: auto;
+  }
+
+  &__snapshot-detail-preview {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+
+    > div {
+      flex: 1;
+      min-height: 0;
+    }
+  }
+
+  @media (max-width: 600px) {
+    &__snapshot-detail-panels {
+      flex-direction: column;
+    }
+
+    &__snapshot-detail-files {
+      width: auto;
+      max-height: 25vh;
+      flex-shrink: 0;
+    }
+  }
+
   &__snapshots {
     min-width: 0;
     min-height: 0;
@@ -246,6 +341,25 @@
     height: 100%;
     box-sizing: border-box;
     border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
+  }
+
+  &__repo-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  &__repo-pagination {
+    display: flex;
+    align-items: center;
+  }
+
+  &__repo-search {
+    flex: 1 1 200px;
+    min-width: 0;
+
+    .b3-text-field {
+      width: 100%;
+    }
   }
 
   &__date {

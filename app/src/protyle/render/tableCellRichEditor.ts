@@ -11,7 +11,7 @@ import {configureAVRichTextLute, getAVRichTextLute, getAVRichTextUnsupportedPast
 import {highlightRender} from "./highlightRender";
 import {mathRender} from "./mathRender";
 import {renderTableCellRichElements} from "./tableCellRich";
-import {cleanTableCellRichHTML, getTableCellInlineHTML, getTableCellRichBlockDOM, renderTableCellRich, serializeTableCellRich, setTableCellRich, TABLE_CELL_INLINE_ATTRIBUTE, updateTableCellEditingValue} from "../util/tableCellRich";
+import {getTableBlockHTML, getTableCellInlineHTML, getTableCellRichBlockDOM, renderTableCellRich, serializeTableCellRich, setTableCellRich, TABLE_CELL_INLINE_ATTRIBUTE, updateTableCellEditingValue} from "../util/tableCellRich";
 import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
 import {focusByOffset, focusByRange, getSelectionOffset, getUndoFocusContext} from "../util/selection";
 import {getAdjacentRichTableCell, isTableCellCaretAtBoundary} from "../util/tableCellRichNavigation";
@@ -23,10 +23,11 @@ import {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCe
 import {matchHotKey} from "../util/hotKey";
 import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
 import {getTableCellEditorLute} from "../util/tableCellRichLute";
-import {setTableCellRichContext} from "../util/tableCellRichContext";
+import {setTableCellRichContext, setTableCellRichEventTarget} from "../util/tableCellRichContext";
 import {updateOutlineCurrentBlock} from "../util/outlineBlock";
 import {canEnterCodeBlock} from "../wysiwyg/codeBlockEnter";
 import {bindLiteCodeActions} from "../lite/codeActions";
+import {getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM} from "../util/tableVirtualizationDOM";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 let openingEditor: object | undefined;
@@ -101,7 +102,7 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
     openingEditor = request;
     const tableID = table.dataset.nodeId;
     const tableParent = table.parentElement;
-    const rowIndex = (cell.parentElement as HTMLTableRowElement).rowIndex;
+    const rowIndex = getTableVirtualRowIndex(cell.parentElement as HTMLTableRowElement);
     const cellIndex = cell.cellIndex;
     // 记录预览中被点击的公式位置，在重建单元格后打开对应公式的编辑面板。
     const clickedMath = point?.target?.closest('[data-subtype="math"]');
@@ -165,6 +166,7 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
             ctrlKey: event.ctrlKey, metaKey: event.metaKey, altKey: event.altKey, shiftKey: event.shiftKey,
             bubbles: true, cancelable: true,
         });
+        setTableCellRichEventTarget(forwarded, host);
         if (!owner.element.dispatchEvent(forwarded)) {
             event.preventDefault();
         }
@@ -179,7 +181,8 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
         hintSlash(key, protyle, hintSource).filter(item => TABLE_CELL_SLASH_IDS.has(item.id)));
     const hint: IProtyleOptions["hint"] = {
         extend: [{key: "((", hint: hintRef}, {key: "【【", hint: hintRef}, {key: "（（", hint: hintRef},
-            {key: "[[", hint: hintRef}, {key: "#", hint: hintTag}, {key: "/", hint: safeSlash}, {key: "、", hint: safeSlash}],
+            {key: "[[", hint: hintRef}, {key: "#", hint: hintTag}, {key: "/", hint: safeSlash}, {key: "、", hint: safeSlash},
+            {key: ":"}],
     };
     let finished = false;
     let composing = false;
@@ -237,16 +240,19 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
                 contentChanged = false;
                 return;
             }
-            const oldHTML = cleanTableCellRichHTML(table.outerHTML);
+            if (getTableCellInlineHTML(serialized.blockDOM) === null) {
+                restoreTableVirtualizationDOM(table);
+            }
+            const oldHTML = getTableBlockHTML(table);
             const redoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection(), true) || undoSelection;
             const tableRange = document.createRange();
             tableRange.selectNodeContents(cell);
             tableRange.collapse(true);
             const context = getUndoFocusContext(owner.wysiwyg.element, tableRange, true);
-            const cellIndex = Array.from(table.querySelectorAll("th, td")).indexOf(cell).toString();
+            // 索引以完整表格为参照，读取屏外行计数即可记录撤销位置。
+            context.undoFocusTableCell = getTableVirtualCellIndex(cell).toString();
             const focusContext = (saved: typeof undoSelection) => saved ? {
                 ...context,
-                undoFocusTableCell: cellIndex,
                 undoFocusTableSelection: JSON.stringify(saved),
             } : context;
             source = serialized.markdown;
@@ -300,6 +306,7 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
         }
         // 先提交当前单元格，再由所属文档撤销，保证切换单元格后仍可连续回退。
         finish();
+        restoreTableVirtualizationDOM(table);
         const range = document.createRange();
         range.selectNodeContents(cell);
         range.collapse(true);
@@ -416,6 +423,7 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
             event.stopImmediatePropagation();
             // 先提交内嵌编辑内容，再以所属单元格执行表格快捷键。
             finish();
+            restoreTableVirtualizationDOM(table);
             const range = document.createRange();
             range.selectNodeContents(cell);
             range.collapse(true);
@@ -447,6 +455,7 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
                 isTableCellCaretAtBoundary(fragment.wysiwyg, range, event.key)) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
+                restoreTableVirtualizationDOM(table);
                 const nextCell = getAdjacentRichTableCell(cell, event.key);
                 if (nextCell) {
                     const goalX = getCaretGoalX(range);
@@ -470,6 +479,7 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 finish();
+                restoreTableVirtualizationDOM(table);
                 const tableRange = document.createRange();
                 tableRange.selectNodeContents(cell);
                 tableRange.collapse(true);

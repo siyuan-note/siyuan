@@ -7,9 +7,24 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260925174006"
+		"updated": "20260928175046"
 	},
 	"Children": [
+		{
+			"ID": "20260928091747-w9nonqj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260928091747-w9nonqj",
+				"updated": "20260928175046"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
 		{
 			"ID": "20260908092714-514td5y",
 			"Type": "NodeParagraph",
@@ -52,121 +67,12 @@
 			]
 		},
 		{
-			"ID": "20260925174006-mz00jbc",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260925174006-mz00jbc",
-				"updated": "20260925174006"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "可在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "快捷键"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "通用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "打开上下文菜单"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中修改或解绑快捷键，默认在 Windows/Linux 上为 Ctrl+/，在 macOS 上为 Cmd+/。它根据当前焦点打开编辑器内容、数据库行、搜索结果或导航项的上下文菜单。输入 / 仍用于触发斜杠菜单。"
-				}
-			]
-		},
-		{
-			"ID": "20260923233001-fcalbnf",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260923233001-fcalbnf",
-				"updated": "20260923233001"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在桌面端 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 窗口中，从搜索框按 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 可依次聚焦可见分类，再进入右侧设置控件。按 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 反向移动，按 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 或 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Space"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 打开当前聚焦的分类。"
-				}
-			]
-		},
-		{
 			"ID": "20240112150737-e41yt1y",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240112150737-e41yt1y",
-				"updated": "20260828134448"
+				"updated": "20260928091724"
 			},
 			"Children": [
 				{
@@ -3274,6 +3180,210 @@
 			]
 		},
 		{
+			"ID": "20260928091724-ihwrgdf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-ihwrgdf",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签切换菜单"
+				}
+			]
+		},
+		{
+			"ID": "20260928085827-161wwi2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260928085827-161wwi2",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快捷键"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "通用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "页签切换"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中设置打开页签切换菜单的快捷键，默认未绑定按键。菜单按页签栏顺序列出当前活动分屏的页签，可使用上下方向键选择、回车键切换、Esc 关闭。也可从命令面板执行此命令。"
+				}
+			]
+		},
+		{
+			"ID": "20260928091724-gk809a3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-gk809a3",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上下文菜单"
+				}
+			]
+		},
+		{
+			"ID": "20260925174006-mz00jbc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925174006-mz00jbc",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快捷键"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "通用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打开上下文菜单"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中修改或解绑快捷键，默认在 Windows/Linux 上为 Ctrl+/，在 macOS 上为 Cmd+/。它根据当前焦点打开编辑器内容、数据库行、搜索结果或导航项的上下文菜单。输入 / 仍用于触发斜杠菜单。"
+				}
+			]
+		},
+		{
+			"ID": "20260928091724-rru7l3t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-rru7l3t",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "设置窗口键盘操作"
+				}
+			]
+		},
+		{
+			"ID": "20260923233001-fcalbnf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260923233001-fcalbnf",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 窗口中，从搜索框按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可依次聚焦可见分类，再进入右侧设置控件。按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 反向移动，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 打开当前聚焦的分类。"
+				}
+			]
+		},
+		{
 			"ID": "20210826183308-g4ck02v",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -4112,7 +4222,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260925094732"
+				"updated": "20260928091724"
 			},
 			"Children": [
 				{
@@ -4127,7 +4237,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20260902224242"
+				"updated": "20260928091724"
 			},
 			"Children": [
 				{
@@ -9878,6 +9988,76 @@
 			]
 		},
 		{
+			"ID": "20260928091724-31ks0a6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-31ks0a6",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "斜杠菜单与工具栏配置"
+				}
+			]
+		},
+		{
+			"ID": "20260927164841-yjk81pw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927164841-yjk81pw",
+				"updated": "20260928175046"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在移动端打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "菜单和按钮的显隐与排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，编辑自定义方案并选择斜杠菜单分类。移动端与桌面端共用方案中的总开关、候选显隐和排序配置，默认值为桌面端开启、移动端关闭。开启总开关，确认保存并启用该方案后，输入 / 可搜索内容块，选择候选后在原光标处插入。"
+				}
+			]
+		},
+		{
+			"ID": "20260927164841-y6wu08m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927164841-y6wu08m",
+				"updated": "20260928175046"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编辑自定义方案时，可通过分类选择框切换工具栏与斜杠菜单。拖动项目左侧的六点手柄调整顺序，使用项目开关调整显隐；拖至列表边缘可滚动。排序前需清空搜索，修改后确认保存方案。内置方案只读，可复制后自定义，再启用保存的方案。方案保存在本设备，不跨设备同步。"
+				}
+			]
+		},
+		{
 			"ID": "20210102174148-tq925jm",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -11337,7 +11517,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-n64nfza",
-				"updated": "20260924173802"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12010,7 +12190,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-r3fq7uc",
-				"updated": "20260925172309"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12070,6 +12250,37 @@
 				{
 					"Type": "NodeText",
 					"Data": "，这也会移除已有标题格式。块 ID、数据库关联和字段值均会保留。首块既非段落也非标题的列表项会跳过。移动端使用同一块菜单。仅将光标放在段落或标题内时，快捷键只转换该块，不取消外围列表。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "如需仅移除列表结构并保留标题等内容块类型，请选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "块菜单"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "转换为"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消列表"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。可操作整个列表或选中的列表项，保留子列表、内容块 ID、数据库关联和字段值，移动端同样适用。"
 				}
 			]
 		},
@@ -12536,7 +12747,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20260925094732"
+				"updated": "20260926152753"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13126,6 +13337,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260926152753-tamny2o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926152753-tamny2o",
+				"updated": "20260926152753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选择概要范围时，使用上下方向键选择末端同级节点，Enter 确认，Esc 取消。编辑概要文字时，Enter 保存，Esc 取消。选中概要后，Delete 或 Backspace 删除概要。"
 				}
 			]
 		},

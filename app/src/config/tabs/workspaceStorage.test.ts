@@ -124,12 +124,32 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
     const chart = () => realEcharts.getInstanceByDom(root.querySelector("[data-storage-chart]"));
     check.equal(chart().getOption().series[0].data.length, 6, "assets must not become another pie slice");
     check.equal(chart().getOption().series[0].data.reduce((sum: number, item: {value: number}) => sum + item.value, 0), result().totalSize);
+    const checkHoverColors = async () => {
+        for (const color of ["oklch(70% 0.15 150)", "lab(60% -30 40)", "color(display-p3 0.2 0.7 0.4)", "#47a56b"]) {
+            document.documentElement.style.setProperty("--b3-font-color6", color);
+            await tick();
+            await captures("theme-color-ready");
+            const instance = chart();
+            instance.dispatchAction({type: "highlight", seriesIndex: 0, dataIndex: 0});
+            await captures("theme-color-hover");
+            const sector = instance.getModel().getSeriesByIndex(0).getData().getItemGraphicEl(0);
+            check.ok(sector.currentStates.includes("emphasis"));
+            check.equal(sector.style.fill, color, "hover must preserve browser-supported theme colors");
+            instance.dispatchAction({type: "downplay", seriesIndex: 0, dataIndex: 0});
+            await tick();
+            check.equal(sector.style.fill, color);
+        }
+        document.documentElement.style.removeProperty("--b3-font-color6");
+        await tick();
+    };
+    await checkHoverColors();
     await captures("desktop-light");
     await surface(true, 340, 24);
     window.siyuan.config.appearance.mode = 1;
     document.documentElement.setAttribute("data-theme-mode", "dark");
     await tick();
     check.ok(inits >= 2 && disposals >= 1, "theme changes must recreate the chart");
+    await checkHoverColors();
     const beforeStyleLoad = inits;
     const themeLink = document.createElement("link");
     themeLink.rel = "stylesheet";
@@ -278,7 +298,7 @@ const path = require("node:path");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show: false, width: 850, height: 1050, webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
+    const win = new BrowserWindow({show: false, width: 850, height: 1050, webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false, offscreen: true}});
     let styleKey;
     ipcMain.handle("storage-surface", async (_event, mobile, width) => {
         win.setContentSize(width, 1100);

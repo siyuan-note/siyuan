@@ -62,14 +62,14 @@ const cases = (source) => {
         disconnect() { disconnected = true; }
     }
     const navigation = new Function("ResizeObserver", "Constants", "isInEmbedBlock", "revealTabsForTarget",
-        "preventScroll", "focusBlock", "scrollCenter", "pushBack", "setTimeout",
+        "preventScroll", "focusBlock", "scrollCenter", "pushBack", "setTimeout", "isPhablet",
         source.visibility + source.navigation + "; return switchEditor;")(
         Observer, {CB_GET_FOCUS: "focus"}, () => false,
         target => { target.dataset.tabsHidden = "false"; }, () => {}, () => document.createRange(),
-        (_protyle, target) => { scrolls++; target.dataset.tabsHidden = "false"; }, () => {}, () => {});
+        (_protyle, target) => { scrolls++; target.dataset.tabsHidden = "false"; }, () => {}, () => {}, () => false);
     root.innerHTML = '<div class="tab-item" data-node-id="target" data-tabs-hidden="false">Target</div>';
     const target = root.firstElementChild;
-    const protyle = {wysiwyg: {element: root}, contentElement: root,
+    const protyle = {element: root, wysiwyg: {element: root}, contentElement: root,
         preview: {element: {classList: {contains: () => true}}}, toolbar: {}, block: {rootID: "doc"}};
     const editor = {editor: {protyle}, parent: {parent: {switchTab() {}, showHeading() {}}}};
     const start = () => {

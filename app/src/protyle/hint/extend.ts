@@ -1,5 +1,6 @@
 import {fetchPost} from "../../util/fetch";
 import {registerBuiltinSlashHint} from "./builtinSlash";
+import {getSuperBlockCommand} from "../../block/superBlock";
 import {insertHTML} from "../util/insertHTML";
 import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
 import {getIconByType} from "../../editor/getIcon";
@@ -35,7 +36,7 @@ import {
     refreshSlashMenuCatalog,
     SLASH_MENU_ROOT_PATH,
 } from "../../config/entryVisibility/catalog";
-import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
+import {getConfiguredEntryVisibility, getEntryOrder} from "../../config/entryVisibility/runtime";
 import {resolveSlashMenuItems, TSlashMenuItem} from "./slashMenu";
 import {
     getBuiltinInlineStylePropertyValue,
@@ -180,6 +181,16 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         id: "quote",
         value: "> " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.quote.custom, ">")}</div>`,
+    }, {
+        filter: [window.siyuan.languages.horizontalSuperBlock, window.siyuan.languages.superBlock, "horizontal super block", "columns", "layout", "横向超级块", "hengxiangchaojikuai", "hx", "超级块", "chaojikuai", "cjk", "分栏", "fenlan", "fl"],
+        id: "horizontalSuperBlock",
+        value: getSuperBlockCommand("col"),
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSuper"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.horizontalSuperBlock}</span></div>`,
+    }, {
+        filter: [window.siyuan.languages.verticalSuperBlock, window.siyuan.languages.superBlock, "vertical super block", "columns", "layout", "纵向超级块", "zongxiangchaojikuai", "zx", "超级块", "chaojikuai", "cjk", "分栏", "fenlan", "fl"],
+        id: "verticalSuperBlock",
+        value: getSuperBlockCommand("row"),
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSuper"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.verticalSuperBlock}</span></div>`,
     }, {
         filter: [window.siyuan.languages.tabs, "tabs", "页签", "yeqian", "yq"],
         id: "tabs",
@@ -441,7 +452,7 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
 };
 
 export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
-    const enabled = isEntryVisible(SLASH_MENU_ROOT_PATH);
+    const enabled = getConfiguredEntryVisibility(SLASH_MENU_ROOT_PATH);
     if (!enabled) {
         return [];
     }
@@ -489,7 +500,7 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
         canUpload: !!(protyle.options.upload.handler || (protyle.options.upload.url && protyle.upload)),
         key,
         order: getEntryOrder(SLASH_MENU_ROOT_PATH),
-        visible: (entryKey) => isEntryVisible(getSlashMenuEntryPath(entryKey)),
+        visible: (entryKey) => getConfiguredEntryVisibility(getSlashMenuEntryPath(entryKey)),
     });
 });
 
@@ -562,9 +573,10 @@ export const genHintItemHTML = (item: IBlock) => {
 };
 
 export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IHintData[] => {
-    const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
+    const nodeElement = hasClosestBlock((source === "av" ? protyle.toolbar.range :
+        getEditorRange(protyle.wysiwyg.element)).startContainer);
     const createTarget = protyle.hint.prepareCreateTarget(protyle, "ref");
-    protyle.hint.genLoading(protyle);
+    protyle.hint.genLoading(protyle, 0, source);
     let refParam: import("../../types/api").SearchRefBlockRequestInput;
     if (protyle.lite) {
         refParam = {k: key, id: "", rootID: "", beforeLen: 48, isDatabase: false, isSquareBrackets: true};
@@ -611,6 +623,12 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
                     value: `((newSubDoc "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
                     html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div>`,
+                });
+                createItemCount++;
+                dataList.push({
+                    value: `((newFileAtPath "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
+                    html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.data.k}</mark></span></div>`,
                 });
                 createItemCount++;
             }

@@ -6,7 +6,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Ref Content Block",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260927183214"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200924101312-jj4e0v3",
-				"updated": "20210512154431"
+				"updated": "20260927183214"
 			},
 			"Children": [
 				{
@@ -53,6 +53,47 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "Content Block/Reference"
+				}
+			]
+		},
+		{
+			"ID": "20260927091603-y3kej6k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927091603-y3kej6k",
+				"updated": "20260927183214"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After entering "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[["
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and a document title, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Choose location and create document"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the reference suggestions to select a notebook root or a parent document. Confirm to create the document there and insert its reference at the original position. This location applies only to this creation and does not change the default save path. Canceling creates no document. This is available on desktop and mobile. This action is also available when binding or rebinding a database entry. The entry is bound to the new document only after the document has been created successfully; canceling or a creation failure leaves the original binding unchanged."
 				}
 			]
 		},

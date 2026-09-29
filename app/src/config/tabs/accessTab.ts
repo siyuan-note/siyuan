@@ -152,7 +152,9 @@ const mountOIDCButton = (root: HTMLElement) => {
     </label>
     <div class="b3-label b3-label--inner" data-section="claimRules">
         <div class="config-name">${window.siyuan.languages.oidcClaimRules}</div>
+        <div class="b3-label__text">${window.siyuan.languages.oidcClaimRulesRequired}</div>
         <div class="b3-label__text">${window.siyuan.languages.oidcClaimRulesTip}</div>
+        <div class="b3-label__text" data-section="githubClaimRules">${window.siyuan.languages.oidcGitHubClaimRulesTip}</div>
         <div class="fn__hr"></div>
         <textarea spellcheck="false" data-field="claimRules" class="b3-text-field fn__block" rows="5" style="resize: vertical;">${escape(JSON.stringify(config.claimRules, null, 2))}</textarea>
     </div>
@@ -191,6 +193,8 @@ const mountOIDCButton = (root: HTMLElement) => {
             form.querySelector<HTMLElement>('[data-section="mobileCallbackWarning"]').classList.toggle("fn__none",
                 provider !== "google");
             form.querySelector<HTMLElement>('[data-section="claimRules"]').classList.toggle("fn__none", allowAll);
+            form.querySelector<HTMLElement>('[data-section="githubClaimRules"]').classList.toggle("fn__none",
+                provider !== "github");
             if (!validationPending) {
                 buttons[1].textContent = enabled ? window.siyuan.languages.oidcVerifyAndSave : window.siyuan.languages.confirm;
             }
@@ -351,7 +355,13 @@ const mountOIDCButton = (root: HTMLElement) => {
         buttons[1].addEventListener("click", () => {
             try {
                 const field = <T extends HTMLElement>(name: string) => form.querySelector<T>(`[data-field="${name}"]`);
-                const claimRules = JSON.parse(field<HTMLTextAreaElement>("claimRules").value) as Config.IOIDCClaimRule[];
+                const claimRulesInput = field<HTMLTextAreaElement>("claimRules");
+                const claimRules = JSON.parse(claimRulesInput.value.trim() || "[]") as Config.IOIDCClaimRule[];
+                if (!Array.isArray(claimRules)) {
+                    showMessage(window.siyuan.languages.oidcConfigInvalid, 6000, "error");
+                    claimRulesInput.focus();
+                    return;
+                }
                 const nextConfig: Config.IOIDC = {
                     enabled: field<HTMLInputElement>("enabled").checked,
                     provider: field<HTMLSelectElement>("provider").value as Config.IOIDC["provider"],
@@ -364,6 +374,11 @@ const mountOIDCButton = (root: HTMLElement) => {
                     claimRules,
                 };
                 if (nextConfig.enabled) {
+                    if (!nextConfig.allowAll && claimRules.length === 0) {
+                        showMessage(window.siyuan.languages.oidcClaimRulesRequired, 6000, "error");
+                        claimRulesInput.focus();
+                        return;
+                    }
                     if (validationPending) {
                         cancelValidation();
                     }

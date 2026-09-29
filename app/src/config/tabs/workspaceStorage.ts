@@ -95,6 +95,7 @@ export const mountWorkspaceStorage = (root: HTMLElement) => {
                     radius: ["65%", "90%"],
                     label: {show: false},
                     labelLine: {show: false},
+                    emphasis: {itemStyle: {color: "inherit"}},
                     emptyCircleStyle: {color: style.getPropertyValue("--b3-theme-surface")},
                     data: data.directories.map((entry, index) => ({
                         name: entry.name === "other" ? window.siyuan.languages.workspaceStorageOther : entry.name,

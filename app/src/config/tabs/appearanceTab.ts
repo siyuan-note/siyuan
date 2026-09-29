@@ -166,6 +166,11 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.rtlTip,
         save: (value) => editorConfigApi.patch("editor.rtl", value),
     });
+    group.switch("editor.autoDirection", {
+        title: window.siyuan.languages.autoDirection,
+        desc: window.siyuan.languages.autoDirectionTip,
+        save: (value) => editorConfigApi.patch("editor.autoDirection", value),
+    });
 };
 
 const genFontListItemHtml = (item: IFontItem, checked: boolean) => {
@@ -943,7 +948,9 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     /// #endif
     group.slot({
         key: "entryVisibility",
-        keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip],
+        keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip,
+            window.siyuan.languages.entryToolbar, window.siyuan.languages.entrySlashMenu,
+            ...(isMobile() ? [window.siyuan.languages.mobileToolbarEntryTip] : [])],
         html: genEntryVisibilityHtml,
         afterMount: mountEntryVisibility,
     });

@@ -9,9 +9,24 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260925174006"
+		"updated": "20260928175046"
 	},
 	"Children": [
+		{
+			"ID": "20260928091747-t67pljp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260928091747-t67pljp",
+				"updated": "20260928175046"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
 		{
 			"ID": "20260908134131-m3ys4ns",
 			"Type": "NodeParagraph",
@@ -50,118 +65,13 @@
 			]
 		},
 		{
-			"ID": "20260925174006-lw5d4uc",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260925174006-lw5d4uc",
-				"updated": "20260925174006"
-			},
-			"Children": [
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "ショートカット"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "一般"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "コンテキストメニューを開く"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " でショートカットを変更または解除できます。既定値は Windows/Linux では Ctrl+/、macOS では Cmd+/ です。現在のフォーカスに応じて、エディター内のコンテンツ、データベースの行、検索結果、ナビゲーション項目のコンテキストメニューを開きます。文字 / の入力によるスラッシュメニューの表示は変わりません。"
-				}
-			]
-		},
-		{
-			"ID": "20260923233001-0vynujv",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260923233001-0vynujv",
-				"updated": "20260923233001"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "デスクトップ版の "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " ウィンドウでは、検索欄から "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " を押すと、表示中のカテゴリに順番にフォーカスが移り、その後、右側の設定項目に移ります。"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " で逆方向に移動し、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " または "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Space"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " でフォーカス中のカテゴリを開きます。"
-				}
-			]
-		},
-		{
 			"ID": "20240530101000-9imgmgf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"ID": "20240530101000-0wo4ch4",
 				"id": "20240530101000-9imgmgf",
-				"updated": "20260828134448"
+				"updated": "20260928091724"
 			},
 			"Children": [
 				{
@@ -3267,6 +3177,206 @@
 			]
 		},
 		{
+			"ID": "20260928091724-u3gisds",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-u3gisds",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブ切り替えメニュー"
+				}
+			]
+		},
+		{
+			"ID": "20260928085827-0dy3tdl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260928085827-0dy3tdl",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ショートカット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一般"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "タブの切り替え"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でタブ切り替えメニューのショートカットを設定できます。既定では割り当てられていません。メニューには、アクティブな分割ペインのタブがタブバーと同じ順序で表示されます。上下の矢印キーで選択し、Enter で切り替え、Esc で閉じます。コマンドパネルからも実行できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260928091724-64moixh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-64moixh",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテキストメニュー"
+				}
+			]
+		},
+		{
+			"ID": "20260925174006-lw5d4uc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925174006-lw5d4uc",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ショートカット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一般"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "コンテキストメニューを開く"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でショートカットを変更または解除できます。既定値は Windows/Linux では Ctrl+/、macOS では Cmd+/ です。現在のフォーカスに応じて、エディター内のコンテンツ、データベースの行、検索結果、ナビゲーション項目のコンテキストメニューを開きます。文字 / の入力によるスラッシュメニューの表示は変わりません。"
+				}
+			]
+		},
+		{
+			"ID": "20260928091724-pbrjucc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-pbrjucc",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定画面のキーボード操作"
+				}
+			]
+		},
+		{
+			"ID": "20260923233001-0vynujv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260923233001-0vynujv",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ウィンドウでは、検索欄から "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、表示中のカテゴリに順番にフォーカスが移り、その後、右側の設定項目に移ります。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で逆方向に移動し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でフォーカス中のカテゴリを開きます。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-fibh6bk",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -4068,7 +4178,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20260925094732"
+				"updated": "20260928091724"
 			},
 			"Children": [
 				{
@@ -4094,7 +4204,7 @@
 			"Properties": {
 				"ID": "20240530101000-tkbdrth",
 				"id": "20240530101000-9wkmh8w",
-				"updated": "20260902224242"
+				"updated": "20260928091724"
 			},
 			"Children": [
 				{
@@ -9803,6 +9913,76 @@
 			]
 		},
 		{
+			"ID": "20260928091724-dfq9c2s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-dfq9c2s",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スラッシュメニューとツールバーの設定"
+				}
+			]
+		},
+		{
+			"ID": "20260927164841-exxixvw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927164841-exxixvw",
+				"updated": "20260928175046"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "モバイルでは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "メニューとボタンの表示と順序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、カスタムプロファイルを編集してスラッシュメニューの分類を選択します。モバイルとデスクトップは、有効・無効、候補の表示・非表示、順序を同じプロファイル設定で管理します。初期値はデスクトップでは有効、モバイルでは無効です。スイッチを有効にして確認・保存し、そのプロファイルを有効にすると、/ を入力してコンテンツブロックを検索でき、候補を選択すると元のカーソル位置に挿入されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260927164841-2wtv9yz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927164841-2wtv9yz",
+				"updated": "20260928175046"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カスタムプロファイルでは、分類の選択欄でツールバーとスラッシュメニューを切り替えます。項目の左側にある6つの点のハンドルをドラッグして順序を変更し、スイッチで表示・非表示を設定します。リストの端までドラッグするとスクロールします。並べ替える前に検索欄を空にし、変更後は確認してプロファイルを保存します。組み込みプロファイルは読み取り専用です。複製してカスタマイズし、保存したプロファイルを有効にしてください。プロファイルはこの端末に保存され、端末間では同期されません。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-zy0pmo3",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -11278,7 +11458,7 @@
 			"Properties": {
 				"ID": "20240530101000-xpeqztf",
 				"id": "20240530101000-emapwbq",
-				"updated": "20260924173802"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -11961,7 +12141,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-3l46zgy",
-				"updated": "20260925172309"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12021,6 +12201,37 @@
 				{
 					"Type": "NodeText",
 					"Data": " を選びます。この操作では既存の見出し書式も解除されます。ブロック ID、データベースとの関連付け、フィールド値は保持されます。最初のブロックが段落でも見出しでもない項目はスキップされます。モバイルでも同じブロックメニューを利用できます。段落や見出し内にカーソルを置くだけの場合、ショートカットはそのブロックだけを変換し、外側のリストは解除しません。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "見出しなどのブロックの種類を保ったままリスト構造だけを解除するには、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロックメニュー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "変換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "リストを解除"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選びます。リスト全体または選択したリスト項目が対象となり、子リスト、内容ブロックの ID、データベースとの関連付け、フィールド値は保持されます。モバイルでも利用できます。"
 				}
 			]
 		},
@@ -12496,7 +12707,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-icqlkb6",
-				"updated": "20260925094732"
+				"updated": "20260926152753"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12998,6 +13209,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260926152753-5vwcnw1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926152753-5vwcnw1",
+				"updated": "20260926152753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "要約範囲の選択中は上下の矢印キーで同じ親を持つ末端のノードを選び、Enter で確定、Esc でキャンセルします。要約テキストの編集中は Enter で保存、Esc でキャンセルします。選択中の要約は Delete または Backspace で削除できます。"
 				}
 			]
 		},

@@ -46,6 +46,8 @@ func (s *SearchSubtypeFilter) Selected() map[string]bool {
 }
 
 type SearchBlockRequest struct {
+	// types 缺省或为 null 时使用搜索设置；显式对象只包含值为 true 的类型。
+	// mindmap 和 mindmapItem 分别筛选思维导图和思维导图项，不受列表子类型筛选影响。
 	SearchAssetContentRequest
 	Paths    []string             `json:"paths" api:"optional,nullable"`
 	SubTypes *SearchSubtypeFilter `json:"subTypes" api:"optional"`

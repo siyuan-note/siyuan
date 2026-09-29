@@ -586,6 +586,12 @@ var setSearch = contractHandler(apicontract.SetSearch, func(c *gin.Context, requ
 	if s.CustomBlock == nil {
 		s.CustomBlock = new(model.Conf.Search.CustomBlockEnabled())
 	}
+	if s.Mindmap == nil {
+		s.Mindmap = new(model.Conf.Search.MindmapEnabled())
+	}
+	if s.MindmapItem == nil {
+		s.MindmapItem = new(model.Conf.Search.MindmapItemEnabled())
+	}
 
 	if 32 > s.Limit {
 		s.Limit = 32

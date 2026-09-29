@@ -164,6 +164,10 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 	filePath := filepath.Join(util.DataDir, box.ID, p)
 	ret = filesys.DocIAL(filePath)
 	if 1 > len(ret) {
+		// 目录枚举后文档可能已被删除，不将不存在的文件视为损坏。
+		if _, statErr := os.Stat(filePath); errors.Is(statErr, os.ErrNotExist) {
+			return nil
+		}
 		// 加密笔记本的 .sy 解密失败（DEK 未缓存或 box 未解锁）时不应视为损坏，
 		// 否则文件会被 moveCorruptedData 移走导致数据丢失。
 		// 使用解析后的文件路径反查实际 boxID（可能因 symlink 或路径穿越指向加密 box）
@@ -184,6 +188,10 @@ func (box *Box) moveCorruptedData(filePath string) {
 	base := filepath.Base(filePath)
 	to := filepath.Join(util.WorkspaceDir, "corrupted", time.Now().Format("2006-01-02-150405"), box.ID, base)
 	if copyErr := filelock.Copy(filePath, to); nil != copyErr {
+		// 属性读取与备份之间发生删除时，无需再备份源文件。
+		if _, statErr := os.Stat(filePath); errors.Is(copyErr, os.ErrNotExist) && errors.Is(statErr, os.ErrNotExist) {
+			return
+		}
 		logging.LogErrorf("copy corrupted data file [%s] failed: %s", filePath, copyErr)
 		return
 	}

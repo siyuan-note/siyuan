@@ -813,6 +813,10 @@
     left: -30px;
   }
 
+  div[fold="1"][data-type="NodeHeading"][data-heading-empty="true"]::before {
+    display: none;
+  }
+
   [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
     @include mixin.text-clamp(1);
     opacity: .38;

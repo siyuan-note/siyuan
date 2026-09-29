@@ -40,6 +40,16 @@
   line-height: 1.5;
   outline: none;
 
+  &--nested {
+    width: 260px;
+    --mindmap-view-height: 260px;
+    pointer-events: none;
+
+    > .mindmap-view__toolbar {
+      display: none;
+    }
+  }
+
   &__preview-block.protyle-wysiwyg--hl {
     position: relative;
   }
@@ -86,6 +96,16 @@
 
   &__spacer {
     flex: 1;
+  }
+
+  &--locked &__viewport {
+    touch-action: pan-y;
+  }
+
+  &--locked &__fold,
+  &--locked &__add-child,
+  &--locked &__add-bridge {
+    display: none;
   }
 
   &__level-control {
@@ -157,7 +177,7 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
-    cursor: grab;
+    cursor: default;
     touch-action: none;
     user-select: none;
 
@@ -213,7 +233,12 @@
     color: var(--b3-theme-on-background);
     font-size: 16px;
     line-height: 1.5;
-    cursor: grab;
+    cursor: default;
+
+    &:focus-visible {
+      outline: 1px solid var(--b3-theme-primary);
+      outline-offset: 2px;
+    }
 
     &:hover:not(.mindmap-view__node--dragging):not(.mindmap-view__node--editing):not(.mindmap-view__node--selected) {
       box-shadow: inset 0 0 0 2px var(--b3-list-hover);
@@ -618,6 +643,10 @@
     opacity: 0;
   }
 
+  &__viewport--dragging &__node {
+    cursor: grabbing;
+  }
+
   &__ghost {
     z-index: 5;
     opacity: .5;
@@ -647,6 +676,18 @@
     &--selected {
       outline: inset 0 0 0 2px solid var(--b3-theme-primary);
     }
+  }
+
+  &__node--summary {
+    max-width: 240px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  &__summary-editor {
+    position: absolute;
+    width: 240px;
+    z-index: 6;
   }
 
   &__route-handle {
@@ -801,6 +842,7 @@
     }
 
     &__node--selected,
+    &__summary--selected,
     &__relation--selected {
       outline: none;
     }

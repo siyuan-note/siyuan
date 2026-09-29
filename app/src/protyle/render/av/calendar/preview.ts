@@ -7,7 +7,11 @@ interface IPreviewRect {
 
 // 按实际尺寸避让目标日期列中的内容，换行条目和更多按钮也参与占位。
 export const getCalendarPreviewTop = (top: number, height: number, left: number, right: number,
-                                      obstacles: IPreviewRect[], gap: number) => {
+                                      obstacles: IPreviewRect[], gap: number, source?: IPreviewRect) => {
+    // 日期范围未变化时复用原条目位置，保留同一天内的显示顺序。
+    if (source) {
+        return source.top;
+    }
     const occupied = obstacles.filter(rect => rect.left < right && rect.right > left)
         .sort((a, b) => a.top - b.top);
     for (const rect of occupied) {
@@ -24,7 +28,7 @@ export const getCalendarPreviewTop = (top: number, height: number, left: number,
 export const createCalendarPreviewLayout = () => {
     const heights = new Map<HTMLElement, {value: string; priority: string}>();
     return {
-        place: (week: HTMLElement, layer: HTMLElement, card: HTMLElement) => {
+        place: (week: HTMLElement, layer: HTMLElement, card: HTMLElement, source?: HTMLElement) => {
             const layerRect = layer.getBoundingClientRect();
             const cardRect = card.getBoundingClientRect();
             const header = week.querySelector<HTMLElement>(".av__calendar-days").getBoundingClientRect();
@@ -32,7 +36,8 @@ export const createCalendarPreviewLayout = () => {
             const gap = parseFloat(getComputedStyle(grid).rowGap) || 0;
             const obstacles = Array.from(week.querySelectorAll<HTMLElement>("[data-calendar-item], [data-calendar-expand]"))
                 .map(element => element.getBoundingClientRect());
-            const top = getCalendarPreviewTop(header.bottom, cardRect.height, cardRect.left, cardRect.right, obstacles, gap);
+            const top = getCalendarPreviewTop(header.bottom, cardRect.height, cardRect.left, cardRect.right,
+                obstacles, gap, source?.getBoundingClientRect());
             card.style.top = `${top - layerRect.top}px`;
             const rect = week.getBoundingClientRect();
             const style = getComputedStyle(week);

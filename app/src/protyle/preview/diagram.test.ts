@@ -67,7 +67,6 @@ for (const carrier of ["object", "img", "empty"]) {
         const exports = {} as {
             previewDiagram: (element: unknown) => Promise<void>;
             getDiagramBlock: (element: unknown) => unknown;
-            handleDiagramPreviewClick: (event: unknown) => boolean;
         };
         runInNewContext(compiled, {
             exports,
@@ -83,16 +82,5 @@ for (const carrier of ["object", "img", "empty"]) {
         assert.equal(exports.getDiagramBlock(diagram), diagram);
         await exports.previewDiagram(diagram);
         assert.deepEqual(previews, carrier === "empty" ? [] : [[url]]);
-
-        let prevented = false;
-        let stopped = false;
-        assert.equal(exports.handleDiagramPreviewClick({
-            target: {closest: () => ({closest: () => diagram})},
-            preventDefault: () => { prevented = true; },
-            stopPropagation: () => { stopped = true; },
-        }), true);
-        assert.equal(prevented, true);
-        assert.equal(stopped, true);
-        assert.equal(exports.handleDiagramPreviewClick({target: {closest: (): Element => null}}), false);
     });
 }

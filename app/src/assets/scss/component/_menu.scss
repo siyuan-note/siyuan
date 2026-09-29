@@ -320,7 +320,7 @@
     color: var(--b3-theme-on-surface);
     font-size: 13px;
     line-height: 20px;
-    padding: 8px;
+    padding: 8px 16px;
   }
 
   &__group-items {
@@ -499,6 +499,11 @@
 
     &--close:hover {
       background-color: transparent;
+    }
+
+    &--warning:hover,
+    &--warning:focus-visible {
+      color: var(--b3-theme-error);
     }
 
     &--hint:hover {

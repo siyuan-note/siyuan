@@ -2,7 +2,7 @@ export const buildListConversionOperations = (source: Element, options: {
     itemIDs: Set<string>,
     parentID: string,
     previousID?: string,
-    convert: (html: string) => string,
+    convert?: (html: string) => string,
     newID: () => string,
 }) => {
     const list = source.cloneNode(true) as Element;
@@ -75,7 +75,7 @@ export const buildListConversionOperations = (source: Element, options: {
             previousID = childID;
             anchor.after(child);
             anchor = child;
-            if (index === 0) {
+            if (index === 0 && options.convert) {
                 const oldHTML = child.outerHTML;
                 const html = options.convert(oldHTML);
                 undoUpdates.push({action: "update", id: childID, data: oldHTML});

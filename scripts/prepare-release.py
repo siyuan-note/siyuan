@@ -91,6 +91,9 @@ def plan(args):
         return re.sub(r'(?<![\d.])' + re.escape(old) + r'(?!\d|\.\d)', args.version, text)
 
     edit(args.repo / "docs/RELEASE-VERIFICATION.zh-CN.md", document)
+    if args.index_dir.resolve() in {args.repo.resolve(), args.android_dir.resolve(), args.harmony_dir.resolve()}:
+        raise PreparationError("b3log-index 必须是独立仓库")
+    changes.extend(index_plan(args))
     return changes
 
 
@@ -243,13 +246,13 @@ def verify_index(repo, version):
 
 
 def publish_index(args):
-    changes = index_plan(args)
     branch = index_preflight(args)
     print(f"官网思源版本：{args.version}；仓库：{args.index_dir}")
-    print(f"将更新 version.pug，执行 pnpm install --frozen-lockfile 和 pnpm run build，提交并推送 origin/{branch}")
+    print(f"将执行 pnpm install --frozen-lockfile 和 pnpm run build，提交并推送 origin/{branch}")
     if not args.execute:
         return
-    apply(changes)
+    if field(read(args.index_dir / INDEX_VERSION_FILE), INDEX_VERSION, "官网思源版本")[1] != args.version:
+        raise PreparationError("官网版本与目标版本不一致，请先执行版本准备")
     build_index(args.index_dir)
     verify_index(args.index_dir, args.version)
     # 构建后再次检查，禁止顺带提交锁文件或其他目录的改动。
@@ -293,10 +296,7 @@ def main():
         changes = plan(args)
         repositories = publish_preflight(args, changes) if args.publish else []
         if args.publish:
-            if args.index_dir.resolve() in {args.repo.resolve(), args.android_dir.resolve(), args.harmony_dir.resolve()}:
-                raise PreparationError("b3log-index 必须是独立仓库")
             # 官网也在写入任何版本文件前预检，避免路径或版本错误造成部分发布。
-            index_plan(args)
             index_preflight(args)
         for path, original, updated in changes:
             print(f"更新：{path}")

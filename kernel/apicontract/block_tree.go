@@ -1,14 +1,17 @@
 package apicontract
 
 type BlockTreeInfo struct {
-	ID           string `json:"id"`
-	Type         string `json:"type"`
-	ParentID     string `json:"parentID"`
-	ParentType   string `json:"parentType"`
-	PreviousID   string `json:"previousID"`
-	PreviousType string `json:"previousType"`
-	NextID       string `json:"nextID"`
-	NextType     string `json:"nextType"`
+	// HeadingChildren 仅对标题返回，表示完整文档同一容器内是否存在下辖块；空段落也算下辖块。
+	// 此字段不受折叠状态、分页或当前视图影响；非标题省略，旧客户端可忽略。
+	HeadingChildren *bool  `json:"headingChildren,omitempty"`
+	ID              string `json:"id"`
+	Type            string `json:"type"`
+	ParentID        string `json:"parentID"`
+	ParentType      string `json:"parentType"`
+	PreviousID      string `json:"previousID"`
+	PreviousType    string `json:"previousType"`
+	NextID          string `json:"nextID"`
+	NextType        string `json:"nextType"`
 }
 
 type BlockPath struct {

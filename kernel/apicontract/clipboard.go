@@ -1,5 +1,15 @@
 package apicontract
 
+// PreparePasteAssetsRequest 为加密笔记本中的粘贴创建独立附件副本，不修改源文件。
+// assets 仅接受工作空间内的 assets/ 引用，可包含查询参数、片段和 PDF 标注 ID。
+// 同一目标笔记本的附件直接复用，其他加密笔记本的附件拒绝跨边界复制。
+// 目标必须已解锁；失败返回 code=-1、data=null，并清理本批次新建的附件。
+// 成功返回原始引用到目标引用的映射，保留非 box 查询参数和片段。
+type PreparePasteAssetsRequest struct {
+	Notebook string   `json:"notebook" api:"trim"`
+	Assets   []string `json:"assets"`
+}
+
 type ClipboardFile struct {
 	Name    string `json:"name"`
 	Size    int64  `json:"size"`

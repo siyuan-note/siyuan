@@ -7,9 +7,24 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260925174006"
+		"updated": "20260928175046"
 	},
 	"Children": [
+		{
+			"ID": "20260928091747-a3qlogr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260928091747-a3qlogr",
+				"updated": "20260928175046"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
 		{
 			"ID": "20260908092714-e1q4nu2",
 			"Type": "NodeParagraph",
@@ -52,121 +67,12 @@
 			]
 		},
 		{
-			"ID": "20260925174006-m7i1hw9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260925174006-m7i1hw9",
-				"updated": "20260925174006"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "可在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "快速鍵"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "通用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "開啟快顯功能表"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中修改或解除快捷鍵綁定，預設在 Windows/Linux 上為 Ctrl+/，在 macOS 上為 Cmd+/。它會依目前焦點開啟編輯器內容、資料庫列、搜尋結果或導覽項目的快顯功能表。輸入 / 仍用於觸發斜線選單。"
-				}
-			]
-		},
-		{
-			"ID": "20260923233001-dx1k6zh",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260923233001-dx1k6zh",
-				"updated": "20260923233001"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在桌面端 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 視窗中，從搜尋框按 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 可依序聚焦可見分類，再進入右側設定控制項。按 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 反向移動，按 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 或 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Space"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 開啟目前聚焦的分類。"
-				}
-			]
-		},
-		{
 			"ID": "20211226122652-0t4c1qf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-0t4c1qf",
-				"updated": "20260828134448"
+				"updated": "20260928091724"
 			},
 			"Children": [
 				{
@@ -3268,6 +3174,210 @@
 			]
 		},
 		{
+			"ID": "20260928091724-tm781zq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-tm781zq",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "頁籤切換選單"
+				}
+			]
+		},
+		{
+			"ID": "20260928085827-6l4hbie",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260928085827-6l4hbie",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快速鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "通用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "分頁切換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中設定開啟頁籤切換選單的快捷鍵，預設未綁定按鍵。選單按頁籤列順序列出目前作用中分割視窗的頁籤，可使用上下方向鍵選擇、Enter 鍵切換、Esc 關閉。也可從命令面板執行此命令。"
+				}
+			]
+		},
+		{
+			"ID": "20260928091724-hyo8s4v",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-hyo8s4v",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "快顯選單"
+				}
+			]
+		},
+		{
+			"ID": "20260925174006-m7i1hw9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260925174006-m7i1hw9",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快速鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "通用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "開啟快顯功能表"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中修改或解除快捷鍵綁定，預設在 Windows/Linux 上為 Ctrl+/，在 macOS 上為 Cmd+/。它會依目前焦點開啟編輯器內容、資料庫列、搜尋結果或導覽項目的快顯功能表。輸入 / 仍用於觸發斜線選單。"
+				}
+			]
+		},
+		{
+			"ID": "20260928091724-d67vnwi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-d67vnwi",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定視窗鍵盤操作"
+				}
+			]
+		},
+		{
+			"ID": "20260923233001-dx1k6zh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260923233001-dx1k6zh",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 視窗中，從搜尋框按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可依序聚焦可見分類，再進入右側設定控制項。按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 反向移動，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開啟目前聚焦的分類。"
+				}
+			]
+		},
+		{
 			"ID": "20211226122652-3q2xsbj",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -4106,7 +4216,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260925094732"
+				"updated": "20260928091724"
 			},
 			"Children": [
 				{
@@ -4121,7 +4231,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20260902224242"
+				"updated": "20260928091724"
 			},
 			"Children": [
 				{
@@ -9867,6 +9977,76 @@
 			]
 		},
 		{
+			"ID": "20260928091724-sj0935a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260928091724-sj0935a",
+				"updated": "20260928091724"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "斜線選單與工具列設定"
+				}
+			]
+		},
+		{
+			"ID": "20260927164841-m2ossua",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927164841-m2ossua",
+				"updated": "20260928175046"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在行動端開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "選單和按鈕的顯隱與排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，編輯自訂方案並選擇斜線選單分類。行動端與桌面端共用方案中的總開關、候選顯隱和排序設定，預設值為桌面端開啟、行動端關閉。開啟總開關，確認儲存並啟用該方案後，輸入 / 可搜尋內容區塊，選擇候選項目後在原游標處插入。"
+				}
+			]
+		},
+		{
+			"ID": "20260927164841-7yj0cwc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927164841-7yj0cwc",
+				"updated": "20260928175046"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編輯自訂方案時，可透過分類選擇框切換工具列與斜線選單。拖曳項目左側的六點把手調整順序，使用項目開關調整顯隱；拖至清單邊緣可捲動。排序前需清空搜尋，修改後確認儲存方案。內建方案唯讀，可複製後自訂，再啟用儲存的方案。方案儲存在本裝置，不跨裝置同步。"
+				}
+			]
+		},
+		{
 			"ID": "20211226122652-8191vgw",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -11349,7 +11529,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-wez4zj6",
-				"updated": "20260924173802"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12022,7 +12202,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-11vvysw",
-				"updated": "20260925172309"
+				"updated": "20260926131843"
 			},
 			"Children": [
 				{
@@ -12082,6 +12262,37 @@
 				{
 					"Type": "NodeText",
 					"Data": "，這也會移除既有標題格式。區塊 ID、資料庫關聯和欄位值均會保留。首個區塊既非段落也非標題的列表項會略過。行動端使用相同的區塊選單。僅將游標放在段落或標題內時，快捷鍵只轉換該區塊，不取消外圍列表。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "如需僅移除列表結構並保留標題等內容區塊類型，請選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區塊選單"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "轉換為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消列表"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。可操作整個列表或選取的列表項，保留子列表、內容區塊 ID、資料庫關聯和欄位值，行動端同樣適用。"
 				}
 			]
 		},
@@ -12542,7 +12753,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20260925094732"
+				"updated": "20260926152753"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13044,6 +13255,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260926152753-0k1m0f6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926152753-0k1m0f6",
+				"updated": "20260926152753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選擇概要範圍時，使用上下方向鍵選擇末端同層節點，Enter 確認，Esc 取消。編輯概要文字時，Enter 儲存，Esc 取消。選取概要後，Delete 或 Backspace 刪除概要。"
 				}
 			]
 		},

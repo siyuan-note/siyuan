@@ -7,7 +7,7 @@ import {openFileById} from "../editor/util";
 import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #endif
 import {fetchPost, fetchSyncPost} from "./fetch";
-import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
+import {getDisplayName, getOpenNotebookCount, isMoveTargetAllowed, movePathTo, pathPosix} from "./pathName";
 import {Constants} from "../constants";
 import {replaceFileName, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
@@ -248,7 +248,7 @@ function getNewFilePath(): Pick<NewDocRequest, "notebookId" | "currentPath" | "h
         hasFocusTarget = true;
     }
     if (!notebookId) {
-        const fileModel = getDockByType("file").data.file;
+        const fileModel = getDockByType("file")?.data.file;
         if (fileModel instanceof Files) {
             const currentElement = fileModel.element.querySelector(".b3-list-item--focus");
             if (currentElement) {
@@ -476,6 +476,68 @@ export const newFileByRefHint = (
                 createRefDocAsSubDoc(target, onCreated, presetId);
             }
         });
+    });
+};
+
+/** 选择本次块引新建位置，创建前后均校验原文档和选区 */
+export const newFileByRefHintAtPath = (
+    protyle: IProtyle,
+    name: string,
+    range: Range,
+    onCreated: (id: string, range: Range) => void,
+) => {
+    const context = createNewFileSelectionContext(protyle, range);
+    if (!context) {
+        return;
+    }
+    newFileAtPath({
+        notebookId: context.notebookId,
+        name,
+        isValid: () => !!isNewFileSelectionValid(protyle, context),
+        restoreFocus: () => focusByRange(context.range),
+        onCreated: (id) => onCreated(id, context.range),
+    });
+};
+
+/** 在选定位置新建文档，仅在调用方上下文仍有效时创建和回调 */
+export const newFileAtPath = (options: {
+    notebookId: string;
+    name: string;
+    isValid: () => boolean;
+    restoreFocus?: () => void;
+    onCreated: (id: string, title: string) => void;
+}) => {
+    const title = replaceFileName(options.name.trim());
+    if (!options.isValid() || (title && !validateName(title))) {
+        return;
+    }
+    let submitted = false;
+    movePathTo({
+        title: window.siyuan.languages.newFileAtPath,
+        flashcard: false,
+        sourceNotebookIds: [options.notebookId],
+        restoreFocus() {
+            if (options.isValid()) {
+                options.restoreFocus?.();
+            }
+        },
+        cb(paths, notebooks) {
+            if (submitted || !paths[0] || !notebooks[0] || !options.isValid() ||
+                !isMoveTargetAllowed([options.notebookId], notebooks[0])) {
+                return;
+            }
+            submitted = true;
+            createRefDocAsSubDoc({
+                kind: "subDoc",
+                targetNotebookId: notebooks[0],
+                parentPath: paths[0],
+                title,
+            }, (id) => {
+                if (options.isValid()) {
+                    options.onCreated(id, title);
+                }
+            });
+        },
     });
 };
 

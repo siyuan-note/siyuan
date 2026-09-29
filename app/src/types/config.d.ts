@@ -304,7 +304,7 @@ declare namespace Config {
             light: {color: string; opacity: number};
             dark: {color: string; opacity: number};
         };
-        /** 全局默认字体，按优先级从高到低排列 */
+        /** 全局默认字体，按优先级从高到低排列；动态图标也使用此列表和首选字重，字体由客户端解析 */
         globalFontFamilies: IEditor["fontFamilies"];
         /**
          * Close button behavior
@@ -761,6 +761,8 @@ declare namespace Config {
          * Whether to enable RTL (left-to-right chirography) mode
          */
         rtl: boolean;
+        /** 默认关闭；自动判定段落和标题的文本方向，手动方向优先，不改变列表和表格布局 */
+        autoDirection: boolean;
         /**
          * Whether to enable spell checking
          */
@@ -1438,6 +1440,7 @@ declare namespace Config {
         goToTab9?: IKey;
         goToTabNext?: IKey;
         goToTabPrev?: IKey;
+        switchTab?: IKey;
         goToEditTabNext?: IKey;
         goToEditTabPrev?: IKey;
         recentClosed?: IKey;
@@ -1606,6 +1609,10 @@ declare namespace Config {
         callout: boolean;
         tabs?: boolean;
         tabItem?: boolean;
+        /** 思维导图搜索；缺省时默认开启，更新设置时省略则保留当前值 */
+        mindmap?: boolean;
+        /** 思维导图项搜索；缺省时默认关闭，更新设置时省略则保留当前值 */
+        mindmapItem?: boolean;
         customBlock?: boolean;
         /**
          * Whether to distinguish between uppercase and lowercase letters when searching
@@ -2832,6 +2839,10 @@ declare namespace Config {
         callout: boolean;
         tabs?: boolean;
         tabItem?: boolean;
+        /** 思维导图搜索；旧配置继承全局设置，初始默认开启 */
+        mindmap?: boolean;
+        /** 思维导图项搜索；旧配置继承全局设置，初始默认关闭 */
+        mindmapItem?: boolean;
         customBlock?: boolean;
         /**
          * Search results contain code blocks

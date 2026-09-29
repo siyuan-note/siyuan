@@ -806,5 +806,257 @@
         "data": "<div data-subtype=\"h2\" data-node-id=\"20260925172757-j98deju\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260925172757\" custom-avs=\"database\"><div contenteditable=\"true\" spellcheck=\"false\"><wbr>inner</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>"
       }
     ]
+  },
+  {
+    "before": "<div data-subtype=\"u\" data-node-id=\"20260926132024-u5wg8nr\" data-node-index=\"1\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132024\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132024-tr11zm6\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132024\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132024-n4egegq\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132024\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\"><span data-type=\"strong\">one</span></div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div data-node-id=\"20260926132024-w2ue6uf\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132024\"><div contenteditable=\"true\" spellcheck=\"false\">tail</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"u\" data-node-id=\"20260926132024-2qkauxm\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132024\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132024-l1ld1lw\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132024\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-node-id=\"20260926132024-59hizrc\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132024\"><div contenteditable=\"true\" spellcheck=\"false\">nested</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132024-fnt9chy\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132024\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132024-zdt89uj\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132024\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">two</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132024-1dhl1yp\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132024\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132024-ptg9o2m\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132024\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">three</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
+    "after": "<div data-subtype=\"h2\" data-node-id=\"20260926132024-n4egegq\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132024\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\"><span data-type=\"strong\">one</span></div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div data-node-id=\"20260926132024-w2ue6uf\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132024\"><div contenteditable=\"true\" spellcheck=\"false\">tail</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"u\" data-node-id=\"20260926132024-2qkauxm\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132024\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132024-l1ld1lw\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132024\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-node-id=\"20260926132024-59hizrc\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132024\"><div contenteditable=\"true\" spellcheck=\"false\">nested</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"h2\" data-node-id=\"20260926132024-zdt89uj\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132024\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">two</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div data-subtype=\"h2\" data-node-id=\"20260926132024-ptg9o2m\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132024\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">three</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div>",
+    "targetIDs": [
+      "20260926132024-n4egegq",
+      "20260926132024-zdt89uj",
+      "20260926132024-ptg9o2m"
+    ],
+    "doOperations": [
+      {
+        "action": "move",
+        "id": "20260926132024-n4egegq",
+        "previousID": "20260926132024-u5wg8nr",
+        "parentID": "document"
+      },
+      {
+        "action": "move",
+        "id": "20260926132024-w2ue6uf",
+        "previousID": "20260926132024-n4egegq",
+        "parentID": "document"
+      },
+      {
+        "action": "move",
+        "id": "20260926132024-2qkauxm",
+        "previousID": "20260926132024-w2ue6uf",
+        "parentID": "document"
+      },
+      {
+        "action": "move",
+        "id": "20260926132024-zdt89uj",
+        "previousID": "20260926132024-2qkauxm",
+        "parentID": "document"
+      },
+      {
+        "action": "move",
+        "id": "20260926132024-ptg9o2m",
+        "previousID": "20260926132024-zdt89uj",
+        "parentID": "document"
+      },
+      {
+        "action": "delete",
+        "id": "20260926132024-u5wg8nr"
+      }
+    ],
+    "undoOperations": [
+      {
+        "action": "insert",
+        "id": "20260926132024-u5wg8nr",
+        "data": "<div data-subtype=\"u\" data-node-id=\"20260926132024-u5wg8nr\" data-node-index=\"1\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132024\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132024-tr11zm6\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132024\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132024-fnt9chy\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132024\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132024-1dhl1yp\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132024\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
+        "parentID": "document"
+      },
+      {
+        "action": "move",
+        "id": "20260926132024-n4egegq",
+        "parentID": "20260926132024-tr11zm6"
+      },
+      {
+        "action": "move",
+        "id": "20260926132024-w2ue6uf",
+        "parentID": "20260926132024-tr11zm6",
+        "previousID": "20260926132024-n4egegq"
+      },
+      {
+        "action": "move",
+        "id": "20260926132024-2qkauxm",
+        "parentID": "20260926132024-tr11zm6",
+        "previousID": "20260926132024-w2ue6uf"
+      },
+      {
+        "action": "move",
+        "id": "20260926132024-zdt89uj",
+        "parentID": "20260926132024-fnt9chy"
+      },
+      {
+        "action": "move",
+        "id": "20260926132024-ptg9o2m",
+        "parentID": "20260926132024-1dhl1yp"
+      }
+    ],
+    "removeList": true
+  },
+  {
+    "before": "<div data-subtype=\"o\" data-node-id=\"20260926132025-v01pa2b\" data-node-index=\"1\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"3.\" data-subtype=\"o\" data-node-id=\"20260926132025-39o50tu\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">3.</div><div data-subtype=\"h2\" data-node-id=\"20260926132025-oknwd65\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\"><span data-type=\"strong\">one</span></div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div data-node-id=\"20260926132025-g7ktczt\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">tail</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"u\" data-node-id=\"20260926132025-mo8ls71\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132025-o1fzdyu\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-node-id=\"20260926132025-643ui57\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">nested</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"4.\" data-subtype=\"o\" data-node-id=\"20260926132025-otk1rj4\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">4.</div><div data-subtype=\"h2\" data-node-id=\"20260926132025-gxsgfsc\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">two</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"5.\" data-subtype=\"o\" data-node-id=\"20260926132025-tkbm91z\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">5.</div><div data-subtype=\"h2\" data-node-id=\"20260926132025-5vxurax\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">three</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
+    "after": "<div data-subtype=\"o\" data-node-id=\"20260926132025-v01pa2b\" data-node-index=\"1\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"3.\" data-subtype=\"o\" data-node-id=\"20260926132025-39o50tu\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">3.</div><div data-subtype=\"h2\" data-node-id=\"20260926132025-oknwd65\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\"><span data-type=\"strong\">one</span></div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div data-node-id=\"20260926132025-g7ktczt\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">tail</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"u\" data-node-id=\"20260926132025-mo8ls71\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132025-o1fzdyu\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-node-id=\"20260926132025-643ui57\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">nested</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"h2\" data-node-id=\"20260926132025-gxsgfsc\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">two</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"list\" data-type=\"NodeList\" data-subtype=\"o\" data-node-id=\"20260926132025-pbbzmc7\"><div data-marker=\"5.\" data-subtype=\"o\" data-node-id=\"20260926132025-tkbm91z\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">5.</div><div data-subtype=\"h2\" data-node-id=\"20260926132025-5vxurax\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">three</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
+    "targetIDs": [
+      "20260926132025-oknwd65",
+      "20260926132025-gxsgfsc",
+      "20260926132025-5vxurax"
+    ],
+    "doOperations": [
+      {
+        "action": "move",
+        "id": "20260926132025-gxsgfsc",
+        "previousID": "20260926132025-v01pa2b",
+        "parentID": "document"
+      },
+      {
+        "action": "insert",
+        "id": "20260926132025-pbbzmc7",
+        "data": "<div class=\"list\" data-type=\"NodeList\" data-subtype=\"o\" data-node-id=\"20260926132025-pbbzmc7\"><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
+        "previousID": "20260926132025-gxsgfsc",
+        "parentID": "document"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-tkbm91z",
+        "parentID": "20260926132025-pbbzmc7"
+      },
+      {
+        "action": "delete",
+        "id": "20260926132025-otk1rj4"
+      },
+      {
+        "action": "update",
+        "id": "20260926132025-v01pa2b",
+        "data": "<div data-subtype=\"o\" data-node-id=\"20260926132025-v01pa2b\" data-node-index=\"1\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"3.\" data-subtype=\"o\" data-node-id=\"20260926132025-39o50tu\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">3.</div><div data-subtype=\"h2\" data-node-id=\"20260926132025-oknwd65\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\"><span data-type=\"strong\">one</span></div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div data-node-id=\"20260926132025-g7ktczt\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">tail</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"u\" data-node-id=\"20260926132025-mo8ls71\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132025-o1fzdyu\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-node-id=\"20260926132025-643ui57\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">nested</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>"
+      },
+      {
+        "action": "update",
+        "id": "20260926132025-pbbzmc7",
+        "data": "<div class=\"list\" data-type=\"NodeList\" data-subtype=\"o\" data-node-id=\"20260926132025-pbbzmc7\"><div data-marker=\"5.\" data-subtype=\"o\" data-node-id=\"20260926132025-tkbm91z\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">5.</div><div data-subtype=\"h2\" data-node-id=\"20260926132025-5vxurax\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">three</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>"
+      }
+    ],
+    "undoOperations": [
+      {
+        "action": "insert",
+        "id": "20260926132025-otk1rj4",
+        "data": "<div data-marker=\"4.\" data-subtype=\"o\" data-node-id=\"20260926132025-otk1rj4\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">4.</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
+        "parentID": "20260926132025-v01pa2b",
+        "previousID": "20260926132025-39o50tu"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-gxsgfsc",
+        "parentID": "20260926132025-otk1rj4"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-tkbm91z",
+        "parentID": "20260926132025-v01pa2b",
+        "previousID": "20260926132025-otk1rj4"
+      },
+      {
+        "action": "update",
+        "id": "20260926132025-v01pa2b",
+        "data": "<div data-subtype=\"o\" data-node-id=\"20260926132025-v01pa2b\" data-node-index=\"1\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"3.\" data-subtype=\"o\" data-node-id=\"20260926132025-39o50tu\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">3.</div><div data-subtype=\"h2\" data-node-id=\"20260926132025-oknwd65\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\"><span data-type=\"strong\">one</span></div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div data-node-id=\"20260926132025-g7ktczt\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">tail</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"u\" data-node-id=\"20260926132025-mo8ls71\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132025-o1fzdyu\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-node-id=\"20260926132025-643ui57\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">nested</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"4.\" data-subtype=\"o\" data-node-id=\"20260926132025-otk1rj4\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">4.</div><div data-subtype=\"h2\" data-node-id=\"20260926132025-gxsgfsc\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\"><wbr>two</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"5.\" data-subtype=\"o\" data-node-id=\"20260926132025-tkbm91z\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--order\" contenteditable=\"false\" draggable=\"true\">5.</div><div data-subtype=\"h2\" data-node-id=\"20260926132025-5vxurax\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">three</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>"
+      }
+    ],
+    "removeList": true
+  },
+  {
+    "before": "<div data-subtype=\"t\" data-node-id=\"20260926132025-665ipal\" data-node-index=\"1\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"t\" data-task=\"X\" data-node-id=\"20260926132025-kw648l8\" data-type=\"NodeListItem\" class=\"li protyle-task--done\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--task\" draggable=\"true\"><svg><use xlink:href=\"#iconCheck\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132025-0z2unev\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\"><span data-type=\"strong\">one</span></div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div data-node-id=\"20260926132025-rxi22pf\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">tail</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"u\" data-node-id=\"20260926132025-5m6iv10\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132025-xbfx88b\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-node-id=\"20260926132025-n4aorxi\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">nested</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"*\" data-subtype=\"t\" data-task=\"X\" data-node-id=\"20260926132025-loz0wq5\" data-type=\"NodeListItem\" class=\"li protyle-task--done\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--task\" draggable=\"true\"><svg><use xlink:href=\"#iconCheck\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132025-mx1cj1q\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">two</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"*\" data-subtype=\"t\" data-task=\"X\" data-node-id=\"20260926132025-91d275u\" data-type=\"NodeListItem\" class=\"li protyle-task--done\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--task\" draggable=\"true\"><svg><use xlink:href=\"#iconCheck\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132025-h84nqmb\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">three</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
+    "after": "<div data-subtype=\"h2\" data-node-id=\"20260926132025-0z2unev\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\"><span data-type=\"strong\">one</span></div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div data-node-id=\"20260926132025-rxi22pf\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">tail</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"u\" data-node-id=\"20260926132025-5m6iv10\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132025-xbfx88b\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-node-id=\"20260926132025-n4aorxi\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">nested</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"t\" data-node-id=\"20260926132025-665ipal\" data-node-index=\"1\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"t\" data-task=\"X\" data-node-id=\"20260926132025-loz0wq5\" data-type=\"NodeListItem\" class=\"li protyle-task--done\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--task\" draggable=\"true\"><svg><use xlink:href=\"#iconCheck\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132025-mx1cj1q\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">two</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"h2\" data-node-id=\"20260926132025-h84nqmb\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">three</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div>",
+    "targetIDs": [
+      "20260926132025-0z2unev",
+      "20260926132025-mx1cj1q",
+      "20260926132025-h84nqmb"
+    ],
+    "doOperations": [
+      {
+        "action": "move",
+        "id": "20260926132025-0z2unev",
+        "previousID": "20260926132025-665ipal",
+        "parentID": "document"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-rxi22pf",
+        "previousID": "20260926132025-0z2unev",
+        "parentID": "document"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-5m6iv10",
+        "previousID": "20260926132025-rxi22pf",
+        "parentID": "document"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-665ipal",
+        "previousID": "20260926132025-5m6iv10",
+        "parentID": "document"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-h84nqmb",
+        "previousID": "20260926132025-665ipal",
+        "parentID": "document"
+      },
+      {
+        "action": "delete",
+        "id": "20260926132025-kw648l8"
+      },
+      {
+        "action": "delete",
+        "id": "20260926132025-91d275u"
+      },
+      {
+        "action": "update",
+        "id": "20260926132025-665ipal",
+        "data": "<div data-subtype=\"t\" data-node-id=\"20260926132025-665ipal\" data-node-index=\"1\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"t\" data-task=\"X\" data-node-id=\"20260926132025-loz0wq5\" data-type=\"NodeListItem\" class=\"li protyle-task--done\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--task\" draggable=\"true\"><svg><use xlink:href=\"#iconCheck\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132025-mx1cj1q\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">two</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>"
+      }
+    ],
+    "undoOperations": [
+      {
+        "action": "move",
+        "id": "20260926132025-665ipal",
+        "parentID": "document"
+      },
+      {
+        "action": "insert",
+        "id": "20260926132025-kw648l8",
+        "data": "<div data-marker=\"*\" data-subtype=\"t\" data-task=\"X\" data-node-id=\"20260926132025-kw648l8\" data-type=\"NodeListItem\" class=\"li protyle-task--done\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--task\" draggable=\"true\"><svg><use xlink:href=\"#iconCheck\"></use></svg></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
+        "parentID": "20260926132025-665ipal"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-0z2unev",
+        "parentID": "20260926132025-kw648l8"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-rxi22pf",
+        "parentID": "20260926132025-kw648l8",
+        "previousID": "20260926132025-0z2unev"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-5m6iv10",
+        "parentID": "20260926132025-kw648l8",
+        "previousID": "20260926132025-rxi22pf"
+      },
+      {
+        "action": "insert",
+        "id": "20260926132025-91d275u",
+        "data": "<div data-marker=\"*\" data-subtype=\"t\" data-task=\"X\" data-node-id=\"20260926132025-91d275u\" data-type=\"NodeListItem\" class=\"li protyle-task--done\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--task\" draggable=\"true\"><svg><use xlink:href=\"#iconCheck\"></use></svg></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
+        "parentID": "20260926132025-665ipal",
+        "previousID": "20260926132025-loz0wq5"
+      },
+      {
+        "action": "move",
+        "id": "20260926132025-h84nqmb",
+        "parentID": "20260926132025-91d275u"
+      },
+      {
+        "action": "update",
+        "id": "20260926132025-665ipal",
+        "data": "<div data-subtype=\"t\" data-node-id=\"20260926132025-665ipal\" data-node-index=\"1\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"t\" data-task=\"X\" data-node-id=\"20260926132025-kw648l8\" data-type=\"NodeListItem\" class=\"li protyle-task--done\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--task\" draggable=\"true\"><svg><use xlink:href=\"#iconCheck\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132025-0z2unev\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\"><wbr><span data-type=\"strong\">one</span></div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div data-node-id=\"20260926132025-rxi22pf\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">tail</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-subtype=\"u\" data-node-id=\"20260926132025-5m6iv10\" data-type=\"NodeList\" class=\"list\" updated=\"20260926132025\"><div data-marker=\"*\" data-subtype=\"u\" data-node-id=\"20260926132025-xbfx88b\" data-type=\"NodeListItem\" class=\"li\" updated=\"20260926132025\"><div class=\"protyle-action\" draggable=\"true\"><svg><use xlink:href=\"#iconDot\"></use></svg></div><div data-node-id=\"20260926132025-n4aorxi\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20260926132025\"><div contenteditable=\"true\" spellcheck=\"false\">nested</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"*\" data-subtype=\"t\" data-task=\"X\" data-node-id=\"20260926132025-loz0wq5\" data-type=\"NodeListItem\" class=\"li protyle-task--done\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--task\" draggable=\"true\"><svg><use xlink:href=\"#iconCheck\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132025-mx1cj1q\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">two</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div data-marker=\"*\" data-subtype=\"t\" data-task=\"X\" data-node-id=\"20260926132025-91d275u\" data-type=\"NodeListItem\" class=\"li protyle-task--done\" updated=\"20260926132025\"><div class=\"protyle-action protyle-action--task\" draggable=\"true\"><svg><use xlink:href=\"#iconCheck\"></use></svg></div><div data-subtype=\"h2\" data-node-id=\"20260926132025-h84nqmb\" data-node-index=\"1\" data-type=\"NodeHeading\" class=\"h2\" updated=\"20260926132025\" custom-avs=\"database\" custom-av-database-field=\"retained\"><div contenteditable=\"true\" spellcheck=\"false\">three</div><div class=\"protyle-attr\" contenteditable=\"false\"><div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>"
+      }
+    ],
+    "removeList": true
   }
 ]

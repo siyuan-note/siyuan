@@ -211,7 +211,11 @@ var getAttributeViewRelationCandidates = contractHandler(apicontract.GetAttribut
 	if avID == "" {
 		avID = request.ID
 	}
-	name, blockIDs, colors, columns, selectedRows, rows, total, err := model.GetAttributeViewRelationCandidates(avID, request.KeyID, request.Keyword, avNonemptyStrings(request.SelectedBlockIDs), avPage(request.Page, 1), avPage(request.PageSize, -1))
+	var candidateSort *av.ViewSort
+	if request.Sort != nil {
+		candidateSort = &av.ViewSort{Column: request.Sort.Column, Order: av.SortOrder(request.Sort.Order)}
+	}
+	name, blockIDs, colors, columns, selectedRows, rows, total, err := model.GetAttributeViewRelationCandidates(avID, request.KeyID, request.Keyword, avNonemptyStrings(request.SelectedBlockIDs), avPage(request.Page, 1), avPage(request.PageSize, -1), candidateSort)
 	if err != nil {
 		return apicontract.Failure[apicontract.AVRelationCandidatesData](-1, err.Error())
 	}

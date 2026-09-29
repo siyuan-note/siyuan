@@ -28,7 +28,7 @@ import {openInlineStyleDialog} from "../../toolbar/inlineStyleDialog";
 import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
     moveListMindmapNode, readListMindmap, replaceListMindmapContent,
-    writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch,
+    writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch, normalizeListMindmapSummaryMetadata,
 } from "./model";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
 import {getListMindmapElements, registerListMindmapRoot, registerListMindmapView} from "./render";
@@ -38,9 +38,10 @@ import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
 import {getListMindmapFoldStates} from "./fold";
 import {isMobile} from "../../../util/functions";
+import {getListMindmapSiblingIDs, getListMindmapSummaryRange} from "./summary";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
-    restoreFocus: (listID: string, candidateIDs: string[]) => void, destroy: () => void}>();
+    restoreFocus: (listID: string, candidateIDs: string[]) => void, focusRevision: number, destroy: () => void}>();
 
 export const mountNewListMindmap = (owner: IProtyle, list: HTMLElement) => roots.get(owner)?.mountNew(list);
 
@@ -109,14 +110,24 @@ class ListMindmapController {
         this.host.className = "mindmap-view";
         syncListMindmapHeight(list, this.host);
         this.host.contentEditable = "false";
-        this.host.addEventListener("pointermove", event => {
-            if (event.pointerType !== "mouse" || event.buttons || !owner.options.render.gutter ||
+        const renderGutter = (event: PointerEvent) => {
+            if (!owner.options.render.gutter ||
                 !owner.gutter || this.host.classList.contains("fullscreen") ||
                 (event.target as Element).closest(".mindmap-view__editor, .protyle-toolbar, .protyle-util")) {
                 return;
             }
-            // 脑图内部的鼠标事件不冒泡到编辑器，块标仍定位到原列表块。
+            // 脑图内部的指针事件不冒泡到编辑器，块标仍定位到原列表块。
             owner.gutter.render(owner, list, this.host);
+        };
+        this.host.addEventListener("pointermove", event => {
+            if (event.pointerType === "mouse" && !event.buttons) {
+                renderGutter(event);
+            }
+        });
+        this.host.addEventListener("pointerup", event => {
+            if (event.pointerType !== "mouse" && event.isPrimary) {
+                renderGutter(event);
+            }
         });
         this.host.addEventListener("pointerdown", event => {
             const target = event.target as HTMLElement;
@@ -134,7 +145,7 @@ class ListMindmapController {
             }
         }, {capture: true});
         this.host.addEventListener("keydown", event => {
-            if (event.isComposing || (event.target instanceof Element &&
+            if (this.view?.isLocked() || event.isComposing || (event.target instanceof Element &&
                 event.target.closest("input, textarea, select, .mindmap-view__editor"))) {
                 return;
             }
@@ -152,6 +163,9 @@ class ListMindmapController {
             onOpenLink: (href, event) => openLink(owner.app, href, event, event.ctrlKey || event.metaKey),
             onInteractionStart: event => suspendBlockPopover(this.host, event),
             readOnly: !canEdit(owner, list),
+            onLockChange: locked => canEdit(owner, list) ? this.metadata(metadata => {
+                metadata.viewLocked = locked;
+            }) : Promise.resolve(true),
             onExpandLevelMenu: (anchor, select) => {
                 const menu = new Menu();
                 for (let level = 1; level <= 6; level++) {
@@ -323,6 +337,32 @@ class ListMindmapController {
             onRelationDelete: id => this.metadata(metadata => {
                 metadata.relations = metadata.relations.filter(item => item.id !== id);
             }),
+            onSummaryAdd: async (from, to) => {
+                const id = Lute.NewNodeID();
+                const saved = await this.change(() => {
+                    const model = readListMindmap(list);
+                    const nodeIds = getListMindmapSummaryRange(model, from, to);
+                    if (!nodeIds.length) {
+                        return false;
+                    }
+                    model.metadata.summaries ||= [];
+                    model.metadata.summaries.push({id, parentId: model.nodes.get(from).parentId,
+                        nodeIds, label: window.siyuan.languages.listMindmapSummary});
+                    writeListMindmapMetadata(list, model.metadata);
+                });
+                return saved ? id : undefined;
+            },
+            onSummaryChange: (id, patch, expected) => this.metadata(metadata => {
+                const summary = metadata.summaries?.find(item => item.id === id);
+                if (!summary || (expected !== undefined && JSON.stringify(summary) !== expected)) {
+                    showMessage(window.siyuan.languages.listMindmapStale);
+                    return false;
+                }
+                Object.assign(summary, patch);
+            }),
+            onSummaryDelete: id => this.metadata(metadata => {
+                metadata.summaries = metadata.summaries?.filter(item => item.id !== id) || [];
+            }),
         });
         list.dataset.mindmapViewRendered = "true";
         this.unregisterVisible = registerListMindmapView(list, this.view, this.host);
@@ -349,7 +389,7 @@ class ListMindmapController {
     }
 
     private metadata(change: (metadata: ListMindmapMetadata) => void | false) {
-        this.change(() => {
+        return this.change(() => {
             const metadata = readListMindmap(this.list).metadata;
             if (change(metadata) === false) {
                 return false;
@@ -407,7 +447,7 @@ class ListMindmapController {
         return this.taskChanges;
     }
 
-    private async change(change: () => unknown, editing = false) {
+    private async change(change: () => unknown, editing = false, focusID?: string) {
         if (this.disposed || !this.list.isConnected || !canEdit(this.owner, this.list)) {
             return false;
         }
@@ -419,10 +459,27 @@ class ListMindmapController {
         }
         const before = cleanListMindmapHTML(this.list.outerHTML);
         try {
+            const model = readListMindmap(this.list);
+            const selectedID = this.view.getSelectedId() || model.root.id;
+            const selected = model.nodes.get(selectedID);
+            const siblings = selected?.parentId ? model.nodes.get(selected.parentId)?.children || [] : [];
+            const index = siblings.findIndex(node => node.id === selectedID);
+            const previous = getListMindmapSiblingIDs(model);
             if (change() === false) {
                 return false;
             }
-            updateTransaction(this.owner, this.list, before);
+            normalizeListMindmapSummaryMetadata(this.list, previous);
+            if (cleanListMindmapHTML(this.list.outerHTML) !== before) {
+                const next = readListMindmap(this.list);
+                const nextID = [focusID, selectedID, siblings[index + 1]?.id, siblings[index - 1]?.id,
+                    selected?.parentId].find(id => next.nodes.has(id)) || next.root.id;
+                // 将操作前后的节点分别记录在事务中，重做时可定位到重新插入的节点。
+                updateTransaction(this.owner, this.list, before, {
+                    undoFocusId: selectedID, undoFocusStart: "0", undoFocusEnd: "0",
+                }, {doOperations: [], undoOperations: [], context: {
+                    undoFocusId: nextID, undoFocusStart: "0", undoFocusEnd: "0",
+                }});
+            }
             this.refresh();
             return true;
         } catch (error) {
@@ -448,7 +505,8 @@ class ListMindmapController {
             item.dataset.type = "NodeMindmapItem";
             item.classList.replace("li", "mindmap-item");
         }
-        if (!await this.change(() => addListMindmapNode(this.list, id, kind === "child" ? "child" : "after", item))) {
+        if (!await this.change(() => addListMindmapNode(this.list, id, kind === "child" ? "child" : "after", item),
+            false, item.dataset.nodeId)) {
             return;
         }
         this.view.focusNode(item.dataset.nodeId);
@@ -500,12 +558,16 @@ class ListMindmapController {
         if (!canEdit(this.owner, this.list) || (this.activeEditor && !await this.activeEditor.finish())) {
             return;
         }
+        const root = roots.get(this.owner);
+        const focusRevision = root?.focusRevision;
         if (redo) {
             await this.owner.undo.redo(this.owner);
         } else {
             await this.owner.undo.undo(this.owner);
         }
-        roots.get(this.owner)?.restoreFocus(this.list.dataset.nodeId, candidateIDs);
+        if (root?.focusRevision === focusRevision) {
+            root?.restoreFocus(this.list.dataset.nodeId, candidateIDs);
+        }
     }
 
     public focusNode(candidateIDs: string[]) {
@@ -649,7 +711,21 @@ export const initListMindmaps = (owner: IProtyle) => {
             });
         }
     };
-    const unregister = registerListMindmapRoot(root, schedule);
+    const restoreFocus = (listID: string, candidateIDs: string[]) => {
+        const list = getListMindmapElements(root).find(item => item.dataset.nodeId === listID);
+        if (!list) {
+            return;
+        }
+        roots.get(owner).focusRevision++;
+        pendingFocus = {listID, candidateIDs};
+        refresh();
+        const instance = instances.get(list);
+        if (instance) {
+            instance.focusNode(candidateIDs);
+            pendingFocus = undefined;
+        }
+    };
+    const unregister = registerListMindmapRoot(root, schedule, restoreFocus);
     const observer = new MutationObserver(records => {
         if (records.some(record => {
             const element = record.target instanceof Element ? record.target : record.target.parentElement;
@@ -665,19 +741,7 @@ export const initListMindmaps = (owner: IProtyle) => {
             newlyCreated.add(list);
             refresh();
         }
-    }, restoreFocus: (listID, candidateIDs) => {
-        const list = getListMindmapElements(root).find(item => item.dataset.nodeId === listID);
-        if (!list) {
-            return;
-        }
-        pendingFocus = {listID, candidateIDs};
-        refresh();
-        const instance = instances.get(list);
-        if (instance) {
-            instance.focusNode(candidateIDs);
-            pendingFocus = undefined;
-        }
-    }, destroy: () => {
+    }, restoreFocus, focusRevision: 0, destroy: () => {
         disposed = true;
         unregister();
         observer.disconnect();

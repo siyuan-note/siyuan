@@ -133,6 +133,8 @@ const createTouchHarness = (side: "left" | "right", options: {
         start: (x = 180, y = 200) => touch.handleTouchStart(event(x, y)),
         move: (x: number, y = 200, count = 1) => touch.handleTouchMove(event(x, y, count)),
         end: (x: number, y = 200) => { now += 100; touch.handleTouchEnd(event(x, y)); },
+        handledMove: (x: number) => touch.handleTouchMove({...event(x), defaultPrevented: true}),
+        handledEnd: (x: number) => touch.handleTouchEnd({...event(x), defaultPrevented: true}),
         cancel: () => touch.handleTouchCancel(),
     };
 };
@@ -140,6 +142,18 @@ const createTouchHarness = (side: "left" | "right", options: {
 for (const side of ["left", "right"] as const) {
     const nextX = side === "left" ? 240 : 120;
     const closeX = side === "left" ? 120 : 240;
+    test(`${side} sidebar does not reuse a gesture consumed by editor block selection`, () => {
+        const harness = createTouchHarness(side, {closed: true});
+        harness.start();
+        harness.handledMove(nextX);
+        harness.handledEnd(nextX);
+        assert.deepEqual(harness.actions, []);
+        harness.start();
+        harness.move(nextX);
+        harness.end(nextX);
+        assert.deepEqual(harness.actions, [`open:${side}`]);
+    });
+
     test(`${side} sidebar ignores the complete gesture inside a protected canvas and resumes outside it`, () => {
         const harness = createTouchHarness(side, {closed: true});
         harness.start();

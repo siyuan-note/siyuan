@@ -285,6 +285,38 @@
       },
       "additionalProperties": false
     },
+    "AIAgentInstructionsData": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "content",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "AIAgentInstructionsSaveRequestInput": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "content",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
     "AIAgentMessage": {
       "type": "object",
       "properties": {
@@ -6827,6 +6859,98 @@
       ],
       "additionalProperties": false
     },
+    "AVConditionalColorRule": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVValueSelect"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "filter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVViewFilter"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "matchOption": {
+          "type": "boolean"
+        },
+        "target": {
+          "type": "string",
+          "enum": [
+            "item",
+            "property"
+          ]
+        }
+      },
+      "required": [
+        "color",
+        "filter",
+        "id",
+        "matchOption",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "AVConditionalColorRuleInput": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVValueSelectInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "filter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVViewFilterInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "matchOption": {
+          "type": "boolean"
+        },
+        "target": {
+          "type": "string",
+          "enum": [
+            "item",
+            "property"
+          ]
+        }
+      },
+      "required": [
+        "color",
+        "filter",
+        "id",
+        "matchOption",
+        "target"
+      ],
+      "additionalProperties": false
+    },
     "AVContextFilterData": {
       "type": "object",
       "properties": {
@@ -7191,6 +7315,26 @@
                 }
               ]
             },
+            "conditionalColors": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/AVConditionalColorRule"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "coverFrom": {
               "type": "integer"
             },
@@ -7335,6 +7479,7 @@
             "fields",
             "cards",
             "cardCount",
+            "conditionalColors",
             "id",
             "icon",
             "name",
@@ -7449,6 +7594,9 @@
     "AVGalleryCard": {
       "type": "object",
       "properties": {
+        "conditionalColors": {
+          "$ref": "#/$defs/AVItemConditionalColors"
+        },
         "coverContent": {
           "type": "string"
         },
@@ -7796,6 +7944,28 @@
       ],
       "additionalProperties": false
     },
+    "AVItemConditionalColors": {
+      "type": "object",
+      "properties": {
+        "background": {
+          "$ref": "#/$defs/AVValueSelect"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVValueSelect"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "AVKanban": {
       "anyOf": [
         {
@@ -7827,6 +7997,26 @@
                     "anyOf": [
                       {
                         "$ref": "#/$defs/AVKanbanCard"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "conditionalColors": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/AVConditionalColorRule"
                       },
                       {
                         "type": "null"
@@ -7987,6 +8177,7 @@
             "fields",
             "cards",
             "cardCount",
+            "conditionalColors",
             "id",
             "icon",
             "name",
@@ -8105,6 +8296,9 @@
     "AVKanbanCard": {
       "type": "object",
       "properties": {
+        "conditionalColors": {
+          "$ref": "#/$defs/AVItemConditionalColors"
+        },
         "coverContent": {
           "type": "string"
         },
@@ -9557,6 +9751,22 @@
       ],
       "additionalProperties": false
     },
+    "AVRelationCandidateSortInput": {
+      "type": "object",
+      "properties": {
+        "column": {
+          "type": "string"
+        },
+        "order": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "column",
+        "order"
+      ],
+      "additionalProperties": false
+    },
     "AVRelationCandidatesData": {
       "type": "object",
       "properties": {
@@ -10545,6 +10755,26 @@
                 }
               ]
             },
+            "conditionalColors": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/AVConditionalColorRule"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "desc": {
               "type": "string"
             },
@@ -10668,6 +10898,7 @@
             "columns",
             "rows",
             "rowCount",
+            "conditionalColors",
             "id",
             "icon",
             "name",
@@ -11008,6 +11239,9 @@
               "type": "null"
             }
           ]
+        },
+        "conditionalColors": {
+          "$ref": "#/$defs/AVItemConditionalColors"
         },
         "id": {
           "type": "string"
@@ -12458,6 +12692,26 @@
         "calendar": {
           "$ref": "#/$defs/AVLayoutCalendar"
         },
+        "conditionalColors": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVConditionalColorRule"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "desc": {
           "type": "string"
         },
@@ -12582,6 +12836,7 @@
         }
       },
       "required": [
+        "conditionalColors",
         "desc",
         "groupCreated",
         "groupFolded",
@@ -18734,6 +18989,9 @@
     "BlockTreeInfo": {
       "type": "object",
       "properties": {
+        "headingChildren": {
+          "type": "boolean"
+        },
         "id": {
           "type": "string"
         },
@@ -20776,6 +21034,12 @@
         "mathBlock": {
           "type": "boolean"
         },
+        "mindmap": {
+          "type": "boolean"
+        },
+        "mindmapItem": {
+          "type": "boolean"
+        },
         "paragraph": {
           "type": "boolean"
         },
@@ -20956,6 +21220,26 @@
           ]
         },
         "mathBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mindmap": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mindmapItem": {
           "anyOf": [
             {
               "type": "boolean"
@@ -21312,6 +21596,132 @@
       },
       "required": [
         "historyPath"
+      ],
+      "additionalProperties": false
+    },
+    "DocHistorySnapshot": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "integer"
+        },
+        "fileID": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "memo": {
+          "type": "string"
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "created",
+        "fileID",
+        "id",
+        "memo",
+        "tags"
+      ],
+      "additionalProperties": false
+    },
+    "DocHistorySnapshotEntry": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string"
+        },
+        "historyPath": {
+          "type": "string"
+        },
+        "snapshots": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/DocHistorySnapshot"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "created",
+        "historyPath",
+        "snapshots"
+      ],
+      "additionalProperties": false
+    },
+    "DocHistorySnapshotsData": {
+      "type": "object",
+      "properties": {
+        "histories": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/DocHistorySnapshotEntry"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "histories"
+      ],
+      "additionalProperties": false
+    },
+    "DocHistorySnapshotsRequestInput": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "op": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "created",
+        "id"
       ],
       "additionalProperties": false
     },
@@ -26126,6 +26536,16 @@
               "type": "null"
             }
           ]
+        },
+        "sort": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationCandidateSortInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -26449,8 +26869,14 @@
     "GetCloudRepoSnapshotsRequestInput": {
       "type": "object",
       "properties": {
+        "endTime": {
+          "type": "integer"
+        },
         "page": {
           "type": "number"
+        },
+        "startTime": {
+          "type": "integer"
         }
       },
       "required": [
@@ -26704,8 +27130,20 @@
     "GetRepoSnapshotsRequestInput": {
       "type": "object",
       "properties": {
+        "endTime": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "includeFiles": {
+          "type": "boolean"
+        },
         "page": {
           "type": "number"
+        },
+        "startTime": {
+          "type": "integer"
         }
       },
       "required": [
@@ -29743,6 +30181,175 @@
         "data",
         "msg"
       ],
+      "additionalProperties": false
+    },
+    "MCPOAuthClient": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "redirectURI": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "redirectURI"
+      ],
+      "additionalProperties": false
+    },
+    "MCPOAuthClientRequestInput": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "redirectURI": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "redirectURI"
+      ],
+      "additionalProperties": false
+    },
+    "MCPOAuthClientSecret": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "redirectURI": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "redirectURI",
+        "secret"
+      ],
+      "additionalProperties": false
+    },
+    "MCPOAuthConfigInput": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "publicURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "publicURL"
+      ],
+      "additionalProperties": false
+    },
+    "MCPOAuthConsentRequestInput": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "type": "string"
+        },
+        "ticket": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MCPOAuthRemoveRequestInput": {
+      "type": "object",
+      "properties": {
+        "all": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MCPOAuthStatus": {
+      "type": "object",
+      "properties": {
+        "clients": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MCPOAuthClient"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "publicURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "clients",
+        "enabled",
+        "publicURL"
+      ],
+      "additionalProperties": false
+    },
+    "MCPOAuthTokenRequestInput": {
+      "type": "object",
+      "properties": {
+        "client_id": {
+          "type": "string"
+        },
+        "client_secret": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "code_verifier": {
+          "type": "string"
+        },
+        "grant_type": {
+          "type": "string"
+        },
+        "redirect_uri": {
+          "type": "string"
+        },
+        "refresh_token": {
+          "type": "string"
+        },
+        "resource": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "token_type_hint": {
+          "type": "string"
+        }
+      },
       "additionalProperties": false
     },
     "MarkdownHTMLRequestInput": {
@@ -33523,6 +34130,25 @@
       ],
       "additionalProperties": false
     },
+    "PreparePasteAssetsRequestInput": {
+      "type": "object",
+      "properties": {
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notebook": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "assets",
+        "notebook"
+      ],
+      "additionalProperties": false
+    },
     "PrepareRichTextRequestInput": {
       "type": "object",
       "properties": {
@@ -34944,6 +35570,26 @@
         "indexID": {
           "type": "string"
         },
+        "snapshots": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/DocHistorySnapshot"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "title": {
           "type": "string"
         },
@@ -34955,6 +35601,7 @@
         "fileID",
         "hSize",
         "indexID",
+        "snapshots",
         "title",
         "updated"
       ],
@@ -35259,6 +35906,19 @@
         "tag": {
           "type": "string"
         },
+        "tags": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "typesCount": {
           "anyOf": [
             {
@@ -35295,6 +35955,7 @@
         "systemName",
         "systemOS",
         "tag",
+        "tags",
         "typesCount"
       ],
       "additionalProperties": false
@@ -38184,6 +38845,16 @@
             }
           ]
         },
+        "autoDirection": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "backlinkBlockSort": {
           "anyOf": [
             {
@@ -40050,6 +40721,26 @@
             }
           ]
         },
+        "mindmap": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mindmapItem": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "name": {
           "anyOf": [
             {
@@ -41801,6 +42492,9 @@
             }
           ]
         },
+        "autoDirection": {
+          "type": "boolean"
+        },
         "backlinkBlockSort": {
           "type": "integer"
         },
@@ -42096,6 +42790,7 @@
         "allowHTMLBLockScript",
         "allowSVGScript",
         "assetOpen",
+        "autoDirection",
         "backlinkBlockSort",
         "backlinkContainChildren",
         "backlinkExpandCount",
@@ -44188,6 +44883,26 @@
         "memo": {
           "type": "boolean"
         },
+        "mindmap": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mindmapItem": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "name": {
           "type": "boolean"
         },
@@ -44252,6 +44967,8 @@
         "listItem",
         "mathBlock",
         "memo",
+        "mindmap",
+        "mindmapItem",
         "name",
         "paragraph",
         "superBlock",
@@ -53218,6 +53935,226 @@
               "anyOf": [
                 {
                   "$ref": "#/$defs/TransactionNewItemTemplatesInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string"
+            },
+            "groupID": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "ignoreDefaultFill": {
+              "type": "boolean"
+            },
+            "isDetached": {
+              "type": "boolean"
+            },
+            "isTwoWay": {
+              "type": "boolean"
+            },
+            "keyID": {
+              "type": "string"
+            },
+            "layout": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nextID": {
+              "type": "string"
+            },
+            "parentID": {
+              "type": "string"
+            },
+            "previousID": {
+              "type": "string"
+            },
+            "removeDest": {
+              "type": "boolean"
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "type": "string"
+            },
+            "rowID": {
+              "type": "string"
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ]
+            },
+            "viewID": {
+              "type": "string"
+            },
+            "viewIDs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "action",
+            "id",
+            "rootID",
+            "parentID",
+            "previousID",
+            "nextID",
+            "blockIDs",
+            "blockID",
+            "deckID",
+            "avID",
+            "srcIDs",
+            "srcs",
+            "isDetached",
+            "name",
+            "type",
+            "format",
+            "keyID",
+            "rowID",
+            "isTwoWay",
+            "backRelationKeyID",
+            "removeDest",
+            "layout",
+            "groupID",
+            "targetGroupID",
+            "viewID",
+            "ignoreDefaultFill",
+            "context",
+            "data",
+            "retData"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "setAttrViewConditionalColors"
+              ]
+            },
+            "avID": {
+              "type": "string"
+            },
+            "backRelationKeyID": {
+              "type": "string"
+            },
+            "blockID": {
+              "type": "string"
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TransactionCellUpdate"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "context": {
+              "$ref": "#/$defs/TransactionContext"
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/AVConditionalColorRuleInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
                 },
                 {
                   "type": "null"
@@ -77191,6 +78128,373 @@
               "anyOf": [
                 {
                   "$ref": "#/$defs/TransactionNewItemTemplatesInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "format": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "groupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ignoreDefaultFill": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isDetached": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isTwoWay": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "keyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "layout": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "nextID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "parentID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "previousID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "removeDest": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rowID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": {
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ],
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "setAttrViewConditionalColors"
+              ]
+            },
+            "avID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "backRelationKeyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionCellUpdateInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TransactionContext"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/AVConditionalColorRuleInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
                 },
                 {
                   "type": "null"
@@ -106128,6 +107432,7 @@
           "removeFlashcards",
           "setAttrViewName",
           "setAttrViewNewItemTemplates",
+          "setAttrViewConditionalColors",
           "setAttrViewFilters",
           "setAttrViewContextFilter",
           "setAttrViewColRelationFilters",
@@ -107686,6 +108991,258 @@
     },
     {
       "method": "GET",
+      "path": "/.well-known/oauth-authorization-server",
+      "handler": "mcpOAuthMetadata",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "application/json"
+        },
+        {
+          "status": 400,
+          "contentType": "application/json"
+        },
+        {
+          "status": 401,
+          "contentType": "application/json"
+        },
+        {
+          "status": 404,
+          "contentType": "application/json"
+        },
+        {
+          "status": 429,
+          "contentType": "application/json"
+        },
+        {
+          "status": 500,
+          "contentType": "application/json"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/.well-known/oauth-protected-resource",
+      "handler": "mcpOAuthResourceRoot",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "application/json"
+        },
+        {
+          "status": 400,
+          "contentType": "application/json"
+        },
+        {
+          "status": 401,
+          "contentType": "application/json"
+        },
+        {
+          "status": 404,
+          "contentType": "application/json"
+        },
+        {
+          "status": 429,
+          "contentType": "application/json"
+        },
+        {
+          "status": 500,
+          "contentType": "application/json"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/.well-known/oauth-protected-resource/mcp",
+      "handler": "mcpOAuthResource",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "application/json"
+        },
+        {
+          "status": 400,
+          "contentType": "application/json"
+        },
+        {
+          "status": 401,
+          "contentType": "application/json"
+        },
+        {
+          "status": 404,
+          "contentType": "application/json"
+        },
+        {
+          "status": 429,
+          "contentType": "application/json"
+        },
+        {
+          "status": 500,
+          "contentType": "application/json"
+        }
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/api/ai/mcp/oauth/callback/:flowID",
       "handler": "mcpOAuthCallback",
       "body": "none",
@@ -108856,6 +110413,78 @@
         "contentType": "text/event-stream",
         "upstreamStatuses": true
       }
+    },
+    {
+      "method": "GET",
+      "path": "/oauth/mcp/authorize",
+      "handler": "mcpOAuthServerAuthorize",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "text/html"
+        },
+        {
+          "status": 302,
+          "contentType": "text/html"
+        },
+        {
+          "status": 400,
+          "contentType": "text/html"
+        }
+      ]
     },
     {
       "method": "GET",
@@ -111626,6 +113255,81 @@
     },
     {
       "method": "POST",
+      "path": "/api/ai/agent/getInstructions",
+      "handler": "getAgentInstructions",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIAgentInstructionsData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/ai/agent/getSession",
       "handler": "getSession",
       "body": "structJSON",
@@ -112515,6 +114219,81 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/agent/setInstructions",
+      "handler": "setAgentInstructions",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AIAgentInstructionsSaveRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIAgentInstructionsData"
               },
               "msg": {
                 "type": "string"
@@ -128538,6 +130317,84 @@
     },
     {
       "method": "POST",
+      "path": "/api/clipboard/preparePasteAssets",
+      "handler": "preparePasteAssets",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/PreparePasteAssetsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/clipboard/prepareRichText",
       "handler": "prepareRichText",
       "body": "json",
@@ -136755,6 +138612,81 @@
     },
     {
       "method": "POST",
+      "path": "/api/history/getDocHistorySnapshots",
+      "handler": "getDocHistorySnapshots",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/DocHistorySnapshotsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/DocHistorySnapshotsData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/history/getHistoryItems",
       "handler": "getHistoryItems",
       "body": "json",
@@ -138932,6 +140864,306 @@
                   },
                   {
                     "$ref": "#/$defs/WPSPresentationData"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/addOAuthClient",
+      "handler": "mcpOAuthAddClient",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthClientRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/MCPOAuthClientSecret"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/getOAuth",
+      "handler": "mcpOAuthGet",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/MCPOAuthStatus"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/removeOAuthClient",
+      "handler": "mcpOAuthRemoveClient",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthRemoveRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/setOAuth",
+      "handler": "mcpOAuthSet",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthConfigInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
                   }
                 ]
               },
@@ -160580,6 +162812,242 @@
           }
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/oauth/mcp/consent",
+      "handler": "mcpOAuthConsent",
+      "body": "form",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthConsentRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 302,
+          "contentType": "text/html"
+        },
+        {
+          "status": 400,
+          "contentType": "text/html"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/oauth/mcp/revoke",
+      "handler": "mcpOAuthRevoke",
+      "body": "form",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthTokenRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "application/json"
+        },
+        {
+          "status": 400,
+          "contentType": "application/json"
+        },
+        {
+          "status": 401,
+          "contentType": "application/json"
+        },
+        {
+          "status": 404,
+          "contentType": "application/json"
+        },
+        {
+          "status": 429,
+          "contentType": "application/json"
+        },
+        {
+          "status": 500,
+          "contentType": "application/json"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/oauth/mcp/token",
+      "handler": "mcpOAuthToken",
+      "body": "form",
+      "request": {
+        "$ref": "#/$defs/MCPOAuthTokenRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "application/json"
+        },
+        {
+          "status": 400,
+          "contentType": "application/json"
+        },
+        {
+          "status": 401,
+          "contentType": "application/json"
+        },
+        {
+          "status": 404,
+          "contentType": "application/json"
+        },
+        {
+          "status": 429,
+          "contentType": "application/json"
+        },
+        {
+          "status": 500,
+          "contentType": "application/json"
+        }
+      ]
     },
     {
       "method": "POST",

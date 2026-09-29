@@ -45,7 +45,7 @@ func TestQuoteFTSPhrase(t *testing.T) {
 func TestBuildBackmentionQueryBindsValues(t *testing.T) {
 	matchExpression := `content:("stored'title") AND ("client'keyword")`
 	rootID := "root'id"
-	query, args := buildBackmentionQuery(matchExpression, rootID, 64)
+	query, args := buildBackmentionQuery(matchExpression, rootID, "", 64)
 
 	if strings.Contains(query, matchExpression) || strings.Contains(query, rootID) {
 		t.Fatalf("query contains an unbound value: %s", query)
@@ -54,6 +54,15 @@ func TestBuildBackmentionQueryBindsValues(t *testing.T) {
 		t.Fatalf("expected three placeholders, got query %q", query)
 	}
 	expectedArgs := []any{matchExpression, rootID, 64}
+	if !reflect.DeepEqual(args, expectedArgs) {
+		t.Fatalf("expected arguments %#v, got %#v", expectedArgs, args)
+	}
+	beforeID := "cursor'id"
+	query, args = buildBackmentionQuery(matchExpression, rootID, beforeID, 64)
+	if strings.Contains(query, beforeID) || !strings.Contains(query, "AND id < ?") {
+		t.Fatalf("cursor must be bound as an exclusive upper boundary: %s", query)
+	}
+	expectedArgs = []any{matchExpression, rootID, beforeID, 64}
 	if !reflect.DeepEqual(args, expectedArgs) {
 		t.Fatalf("expected arguments %#v, got %#v", expectedArgs, args)
 	}

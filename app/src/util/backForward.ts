@@ -46,12 +46,15 @@ export const saveBackScroll = (protyle?: IProtyle) => {
     }
     const position = saveScroll(stack.protyle, true) as IScrollAttr;
     if (position) {
+        // 可见编辑器的零滚动位置有效，不使用隐藏页签留下的滚动缓存。
+        position.scrollTop = stack.protyle.contentElement.scrollTop;
         readingPositions.set(stack, position);
     }
 };
 
 const focusStack = async (app: App, stack: IBackStack) => {
     hideElements(["gutter", "toolbar", "hint", "util", "dialog"], stack.protyle);
+    const readingPosition = isPhablet() ? readingPositions.get(stack) : undefined;
     let blockElement: HTMLElement;
     if (!document.contains(stack.protyle.element)) {
         const response = await fetchSyncPost("/api/block/checkBlockExist", {id: stack.protyle.block.rootID});
@@ -89,7 +92,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                 title: info.data.rootTitle,
                 docIcon: info.data.rootIcon,
                 callback(tab) {
-                    const scrollAttr = (saveScroll(stack.protyle, true) || {}) as IScrollAttr;
+                    const scrollAttr = {...(readingPosition || saveScroll(stack.protyle, true) || {})} as IScrollAttr;
                     scrollAttr.rootId = stack.protyle.block.rootID;
                     scrollAttr.focusId = stack.id;
                     scrollAttr.focusStart = stack.position.start;
@@ -103,11 +106,15 @@ const focusStack = async (app: App, stack: IBackStack) => {
                         blockId: stack.zoomId || stack.id || stack.protyle.block.rootID,
                         rootId: stack.protyle.block.rootID,
                         notebookId: stack.protyle.notebookId,
+                        scrollAttr,
                         action: stack.zoomId ? [Constants.CB_GET_SCROLL, Constants.CB_GET_ALL, Constants.CB_GET_UNUNDO] :
                             [Constants.CB_GET_SCROLL, Constants.CB_GET_UNUNDO],
                         afterInitProtyle(editor) {
                             const protyle = editor.protyle;
                             if (!document.contains(protyle.element) || !tab.headElement.classList.contains("item--focus")) {
+                                return;
+                            }
+                            if (readingPosition) {
                                 return;
                             }
                             if (info.data.rootID === stack.id) {
@@ -168,13 +175,12 @@ const focusStack = async (app: App, stack: IBackStack) => {
     }
 
     const currentZoomId = stack.protyle.block.showAll ? stack.protyle.block.id : undefined;
-    const readingPosition = readingPositions.get(stack);
-    if (isPhablet() && readingPosition && currentZoomId === stack.zoomId) {
+    if (readingPosition) {
         // 阅读位置独立于旧光标，显示页签后按离开时的加载范围和滚动值恢复。
         stack.protyle.model.parent.parent.switchTab(stack.protyle.model.parent.headElement);
         const first = stack.protyle.wysiwyg.element.firstElementChild?.getAttribute("data-node-id");
         const last = stack.protyle.wysiwyg.element.lastElementChild?.getAttribute("data-node-id");
-        if (first === readingPosition.startId && last === readingPosition.endId) {
+        if (currentZoomId === stack.zoomId && first === readingPosition.startId && last === readingPosition.endId) {
             stack.protyle.contentElement.scrollTop = readingPosition.scrollTop;
             return true;
         }
@@ -262,6 +268,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                 onGet({
                     data: getResponse,
                     protyle: stack.protyle,
+                    action: [Constants.CB_GET_UNUNDO],
                     afterCB() {
                         Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
                             if (!isInEmbedBlock(item)) {
@@ -432,20 +439,20 @@ export const pushBack = (protyle: IProtyle, range?: Range, blockElement?: Elemen
     if (editElement) {
         const position = getSelectionOffset(editElement, undefined, range);
         const id = blockElement.getAttribute("data-node-id") || protyle.block.rootID;
+        // 后退后先将当前记录归还后退栈，再去重，确保新导航能够替换前进分支。
+        if (previousIsBack && forwardStack.length > 0) {
+            window.siyuan.backStack.push(forwardStack.pop());
+        }
+        forwardStack = [];
+        previousIsBack = false;
+        document.querySelector("#barForward")?.classList.add("toolbar__item--disabled");
         const lastStack = window.siyuan.backStack[window.siyuan.backStack.length - 1];
-        if (lastStack && lastStack.id === id && (
+        if (lastStack && lastStack.protyle === protyle && lastStack.id === id && (
             (protyle.block.showAll && lastStack.zoomId === protyle.block.id) || (!lastStack.zoomId && !protyle.block.showAll)
         )) {
             lastStack.position = position;
             readingPositions.delete(lastStack);
         } else {
-            if (forwardStack.length > 0) {
-                if (previousIsBack) {
-                    window.siyuan.backStack.push(forwardStack.pop());
-                }
-                forwardStack = [];
-                document.querySelector("#barForward")?.classList.add("toolbar__item--disabled");
-            }
             window.siyuan.backStack.push({
                 position,
                 id,
@@ -455,7 +462,6 @@ export const pushBack = (protyle: IProtyle, range?: Range, blockElement?: Elemen
             if (window.siyuan.backStack.length > Constants.SIZE_UNDO) {
                 window.siyuan.backStack.shift();
             }
-            previousIsBack = false;
         }
         if (window.siyuan.backStack.length > 1) {
             document.querySelector("#barBack")?.classList.remove("toolbar__item--disabled");

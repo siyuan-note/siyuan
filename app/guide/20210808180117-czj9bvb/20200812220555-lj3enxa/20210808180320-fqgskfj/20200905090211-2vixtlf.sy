@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20260923221935"
+		"updated": "20260928225427"
 	},
 	"Children": [
 		{
@@ -1438,7 +1438,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090624-9qgquxh",
-				"updated": "20260921215916"
+				"updated": "20260928225427"
 			},
 			"Children": [
 				{
@@ -2612,7 +2612,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-j34ty5i",
-				"updated": "20260923221935"
+				"updated": "20260926151827"
 			},
 			"Children": [
 				{
@@ -2632,6 +2632,57 @@
 				{
 					"Type": "NodeText",
 					"Data": "思维导图块是独立的块类型。可以将无序列表、有序列表或任务列表转换为思维导图块，也可以转换回列表。转换会保留列表项内容、编号和任务状态。以列表形式保存的旧思维导图会在打开文档进行编辑时升级。"
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-8wl1iml",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-8wl1iml",
+				"updated": "20260926152549"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中范围的第一个节点，点击脑图工具栏中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "概要"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，再选择末端同级节点，即可添加方括号和概要文字。范围必须连续，不能与已有概要重叠或嵌套。移动端也可按相同步骤操作。选择范围时也可使用上下方向键选择末端节点，Enter 确认范围，Esc 取消。"
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-csjz6es",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-csjz6es",
+				"updated": "20260926151827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "双击概要文字，或选中概要后点击底部的编辑按钮，即可修改文字；Enter 保存，Esc 取消。可以通过底部工具栏修改颜色或删除概要，也可以按 Delete 删除选中的概要。这些操作均支持撤销和重做。"
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-bcv3d7b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-bcv3d7b",
+				"updated": "20260926151827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "转成列表后，概要隐藏但数据保留，转回脑图后恢复显示。范围内插入的节点自动纳入概要，删除成员或将成员移出范围会缩小范围；剩一个成员仍保留概要，全部删除时一并删除概要。概要文字属于附加说明，不作为可独立搜索或引用的正文块。思源格式的 HTML 和 PDF 预览会显示概要。"
 				}
 			]
 		},
@@ -3014,7 +3065,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-jtebaer",
-				"updated": "20260425180520"
+				"updated": "20260928225427"
 			},
 			"Children": [
 				{
@@ -3045,6 +3096,182 @@
 				{
 					"Type": "NodeText",
 					"Data": "。可用于组合文档内连续的内容块，也用于支持横向排版。"
+				}
+			]
+		},
+		{
+			"ID": "20260928225427-nm9hbe6",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260928225427-nm9hbe6",
+				"updated": "20260928225427"
+			},
+			"Children": [
+				{
+					"ID": "20260928225427-k1dee87",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-k1dee87",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-04zhlj8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-04zhlj8",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "输入 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "横向超级块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "纵向超级块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，即可创建包含两个空段落的左右或上下布局，并在第一个段落开始输入。可以搜索“分栏”找到这两个选项，移动端也可从键盘工具栏的插入面板选择"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260928225427-duan8en",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-duan8en",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-5hnfex1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-5hnfex1",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在超级块的块标菜单中，选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "超级块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "在当前超级块开头添加分栏"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "超级块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "在当前超级块末尾添加分栏"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，可在横向布局的两端添加空段落；纵向布局对应添加块。新块不会复制现有子块的类型或内容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260928225427-eu2cjgj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260928225427-eu2cjgj",
+						"updated": "20260928225427"
+					},
+					"Children": [
+						{
+							"ID": "20260928225427-f7s9zeg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260928225427-f7s9zeg",
+								"updated": "20260928225427"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在纵向超级块的直接子块菜单中，选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "在左侧创建局部分栏"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "在右侧创建局部分栏"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，会将当前块和一个新空段落组合成内层横向超级块，其他块保持原布局。局部分栏不改变已有左右插栏快捷键的作用范围"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

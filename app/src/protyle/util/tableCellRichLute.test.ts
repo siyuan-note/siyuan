@@ -13,12 +13,12 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const codeTabAttribute = "custom-sy-code-tab-spaces";
     const api = new Function("Constants", source + "\nreturn {getAgentLute, configureAVRichTextLute, getTableCellEditorLute, " +
         "canEnterCodeBlock, hasCodeBlockFence, getTableCellInlineHTML, serializeTableCellRich, " +
-        "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM};")({
+        "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM, restoreTableVirtualizationDOM};")({
         CUSTOM_SY_CODE_TAB_SPACES: codeTabAttribute,
     }) as
         typeof import("../render/setLute") & typeof import("../render/av/richTextValue") &
         typeof import("./tableCellRichLute") & typeof import("../wysiwyg/codeBlockEnter") &
-        typeof import("./tableCellRich") & typeof import("../render/av/richText");
+        typeof import("./tableCellRich") & typeof import("../render/av/richText") & typeof import("./tableVirtualizationDOM");
     const base = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const lute = api.getTableCellEditorLute(base);
@@ -182,7 +182,7 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
         typeof import("../wysiwyg/enter").enter;
     const fill = new Function(...Object.keys(dependencies), hintSource + "\nreturn Hint.prototype.fill;")(...Object.values(dependencies));
     const fragment = {wysiwyg, protyle, hintElement, getBlockHTML: () => wysiwyg.innerHTML};
-    const keyDependencies = {...dependencies, host, cell, fragment, owner: protyle, signal: new AbortController().signal,
+    const keyDependencies = {...dependencies, host, cell, table: cell.closest("table"), fragment, owner: protyle, signal: new AbortController().signal,
         captureBeforeChange: () => {}, composing: false, matchHotKey: () => false, finish: () => {},
         fixTable: () => { calls.navigated++; }};
     new Function(...Object.keys(keyDependencies), keydownSource)(...Object.values(keyDependencies));
@@ -527,7 +527,7 @@ test("table cells insert code through slash and Enter without losing soft breaks
         .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const read = (file: string) => readFileSync(path.join(__dirname, file), "utf8");
     const source = ["longTextWrap.ts", "inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts", "../../util/escape.ts",
-        "../render/setLute.ts", "../wysiwyg/codeBlockUtil.ts", "../render/av/richTextValue.ts", "../render/av/richText.ts",
+        "tableVirtualizationDOM.ts", "../render/setLute.ts", "../wysiwyg/codeBlockUtil.ts", "../render/av/richTextValue.ts", "../render/av/richText.ts",
         "../wysiwyg/taskListMarker.ts", "../wysiwyg/codeBlockEnter.ts", "tableCellRichLute.ts", "tableCellRichValue.ts",
         "tableCellRich.ts"].map(file => compile(read(file))).join("\n");
     const hint = createSourceFile("hint.ts", read("../hint/index.ts"), ScriptTarget.Latest, true);

@@ -2,6 +2,7 @@ import {getAVRichTextBlockDOM, getAVRichTextLute, sanitizeAVRichTextBlockDOM, se
 import {decodeTableCellRich, encodeTableCellRich, TABLE_CELL_RICH_ATTRIBUTE, TABLE_RICH_ATTRIBUTE} from "./tableCellRichValue";
 import {restoreInlineElementBoundaries} from "./inlineElementBoundary";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
+import {getTableVirtualizationHTML, TABLE_VIRTUAL_ID} from "./tableVirtualizationDOM";
 
 export const TABLE_CELL_INLINE_ATTRIBUTE = "data-sy-table-cell-inline";
 
@@ -240,6 +241,21 @@ export const cleanTableCellRichHTML = (html: string) => {
         `th[${TABLE_CELL_INLINE_ATTRIBUTE}], td[${TABLE_CELL_INLINE_ATTRIBUTE}]`)
         .forEach(cell => renderTableCellRich(cell));
     return template.innerHTML;
+};
+
+// 编辑器界面只在单元格副本中替换，完整表格快照由可见行与屏外缓存拼接。
+export const getTableBlockHTML = (table: Element) => {
+    if (!table.querySelector(`[${TABLE_VIRTUAL_ID}]`)) {
+        return cleanTableCellRichHTML(table.outerHTML);
+    }
+    const replacements = new Map<Element, string>();
+    table.querySelectorAll(`th[${TABLE_CELL_RICH_ATTRIBUTE}], td[${TABLE_CELL_RICH_ATTRIBUTE}], ` +
+        `th[${TABLE_CELL_INLINE_ATTRIBUTE}], td[${TABLE_CELL_INLINE_ATTRIBUTE}]`).forEach(cell => {
+        const clone = cell.cloneNode(false) as Element;
+        renderTableCellRich(clone);
+        replacements.set(cell, clone.outerHTML);
+    });
+    return getTableVirtualizationHTML(table, replacements);
 };
 
 export const retainTableCellRichMetadata = (html: string, changedHTML: string) => {

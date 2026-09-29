@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260929000700"
 	},
 	"Children": [
 		{
@@ -36,6 +36,53 @@
 				{
 					"Type": "NodeText",
 					"Data": "Global search supports query syntax for advanced search, including AND/OR/NOT logic, type filtering, and field filtering. It also offers advanced features such as direct database table queries, index exclusion, and search exclusion, covering everything from simple keywords to complex conditions. The following sub-documents introduce each of these features in detail."
+				}
+			]
+		},
+		{
+			"ID": "20260929000700-l9atr7g",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260929000700-l9atr7g",
+				"updated": "20260929000700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mind map search"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260929000700-fx8kb8s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929000700-fx8kb8s",
+				"updated": "20260929000700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", enable Mind map block to find a whole mind map by its node text in block reference and embed suggestions. In global search, select Mind map block in Search type. Mind map item block can be enabled separately to find individual branches. Mind map block is enabled by default; Mind map item block is disabled by default. Older search configurations inherit these options from the global search settings, while explicit choices are preserved."
 				}
 			]
 		},

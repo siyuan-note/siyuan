@@ -7,6 +7,7 @@ import {lineNumberRender} from "../render/highlightRender";
 import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {stickyRow} from "../render/av/row";
+import {restoreGutterBySelection} from "../gutter/restore";
 
 export const clearBeforeResizeTop = () => {
     /// #if !MOBILE
@@ -47,6 +48,20 @@ export const recordBeforeResizeTop = () => {
     /// #endif
 };
 
+export const restoreBeforeResizeTop = (protyle: IProtyle, clear = true) => {
+    const topElement = protyle.wysiwyg.element.querySelector("[data-resize-top]");
+    if (!topElement) {
+        return false;
+    }
+    // 只调整编辑器的滚动位置，避免滚动外层布局，并保留块内的小数偏移。
+    protyle.contentElement.scrollTop += topElement.getBoundingClientRect().top -
+        protyle.contentElement.getBoundingClientRect().top + parseFloat(topElement.getAttribute("data-resize-top"));
+    if (clear) {
+        topElement.removeAttribute("data-resize-top");
+    }
+    return true;
+};
+
 export const resize = (protyle: IProtyle) => {
     hideElements(["gutterOnly"], protyle);
     const abs = setPadding(protyle);
@@ -75,11 +90,8 @@ export const resize = (protyle: IProtyle) => {
                 lineNumberRender(item.parentElement);
             }
         });
-        const topElement = protyle.wysiwyg.element.querySelector("[data-resize-top]");
-        if (topElement) {
-            topElement.scrollIntoView();
-            protyle.contentElement.scrollTop += parseInt(topElement.getAttribute("data-resize-top"));
-            topElement.removeAttribute("data-resize-top");
-        }
+        restoreBeforeResizeTop(protyle);
+        // 等待恢复滚动位置触发的 scroll 事件清理块标后，再按最新选区渲染。
+        requestAnimationFrame(() => restoreGutterBySelection(protyle));
     }, Constants.TIMEOUT_TRANSITION + 100);   // 等待 setPadding 动画结束
 };

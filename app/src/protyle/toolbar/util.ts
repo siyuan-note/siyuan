@@ -1,4 +1,4 @@
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchSyncPost} from "../../util/fetch";
 import {markToolbarHotkey} from "./hotkey";
 import {Constants} from "../../constants";
 import {focusByRange, focusByWbr} from "../util/selection";
@@ -29,21 +29,25 @@ export const clearTemplatePreview = (element: Element) => {
 };
 
 export const previewTemplate = (pathString: string, element: Element, parentId: string, source?: string) => {
-    clearTemplatePreview(element);
     if (!pathString || !element.isConnected || element.closest(".fn__none")) {
+        clearTemplatePreview(element);
         return;
     }
     const request = {};
     templatePreviewRequests.set(element, request);
-    fetchPost("/api/template/render", {
+    fetchSyncPost("/api/template/render", {
         id: parentId,
         path: pathString,
         mode: "preview",
         preview: true,
         ...(source === undefined ? {} : {content: source})
-    }, (response) => {
+    }).then((response) => {
         // 切换模板或关闭预览后，忽略先前请求的返回结果。
-        if (templatePreviewRequests.get(element) !== request || !element.isConnected || response.code !== 0) {
+        if (templatePreviewRequests.get(element) !== request || !element.isConnected) {
+            return;
+        }
+        clearTemplatePreview(element);
+        if (response.code !== 0) {
             return;
         }
         const content = normalizeHTMLAssetIFrameBlockDOM(response.data.content.replace(/contenteditable="true"/g, ""));
@@ -53,6 +57,10 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
                 window.siyuan.languages.newSubDoc));
         }
         tabsRender(element.firstElementChild, {label: window.siyuan.languages.tabItem});
+    }).catch(() => {
+        if (templatePreviewRequests.get(element) === request) {
+            clearTemplatePreview(element);
+        }
     });
 };
 

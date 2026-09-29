@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20260820190627"
+		"updated": "20260926163337"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170025-0kg9iaq",
-				"updated": "20260804180000"
+				"updated": "20260926163337"
 			},
 			"Children": [
 				{
@@ -159,6 +159,113 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中配置支持图片输出的模型。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-jwclkdq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260926163337-jwclkdq",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自定义指令"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-mxj72qh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-mxj72qh",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "智能体"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自定义指令"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中编辑长期偏好，例如写作风格、引用习惯和笔记整理规则。桌面端和移动端共用同一份工作空间指令。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-kr7adcx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-kr7adcx",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "指令保存在工作空间的 data/ai/AGENTS.md 中，支持最多 32 KiB 的 UTF-8 文本。启用数据同步且未被同步忽略规则排除时，该文件随工作空间同步。也可以使用文本编辑器直接编辑文件；文件不存在或为空时不添加自定义指令。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-u4f51t8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-u4f51t8",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保存后下一轮对话生效，正在执行的工具调用和上下文压缩继续使用本轮开始时的指令快照。指令占用模型上下文。当前消息可以覆盖一般偏好，但不能通过指令绕过工具权限、审批或访问控制。首版不支持笔记本或文档级继承，也不自动加载同名笔记或附件。"
+				}
+			]
+		},
+		{
+			"ID": "20260926163337-g2pa359",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926163337-g2pa359",
+				"updated": "20260926163337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件读取失败、编码错误或内容超限时，会显示错误并停止本轮请求，原文件不会被覆盖或截断。如果保存时发现文件已被其它窗口或同步修改，请先复制未保存的内容，重新打开编辑器并合并修改后再保存。"
 				}
 			]
 		},

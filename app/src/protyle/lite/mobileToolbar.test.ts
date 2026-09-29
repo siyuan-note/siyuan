@@ -53,6 +53,8 @@ test("shared mobile toolbar follows fragment focus, retains panel ownership and 
     const composer = createEditor();
     const cell = createEditor();
     const changes: IProtyle[] = [];
+    let focusRefreshes = 0;
+    events.addEventListener("siyuan-mobile-toolbar-focus", () => focusRefreshes++);
     events.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => changes.push(event.detail));
     Object.defineProperty(globalThis, "window", {configurable: true, value: events});
     Object.defineProperty(globalThis, "document", {configurable: true, value: state});
@@ -71,6 +73,13 @@ test("shared mobile toolbar follows fragment focus, retains panel ownership and 
         composer.wysiwyg.element.dispatchEvent(new Event("focusin"));
         assert.equal(getMobileToolbarProtyle(), composer);
 
+        const firstActivation = changes.length;
+        composer.wysiwyg.element.dispatchEvent(new Event("pointerdown"));
+        assert.equal(changes.length, firstActivation);
+        composer.wysiwyg.element.dispatchEvent(new Event("focusin"));
+        assert.equal(changes.length, firstActivation);
+        assert.equal(focusRefreshes, 1);
+
         state.activeElement = {closest: () => null};
         assert.equal(getMobileToolbarProtyle(), composer);
 
@@ -83,7 +92,10 @@ test("shared mobile toolbar follows fragment focus, retains panel ownership and 
         assert.equal(getMobileToolbarProtyle(), undefined);
 
         state.activeElement = {closest: () => cell.wysiwyg.element};
+        assert.equal(getMobileToolbarProtyle(), cell);
+        const beforeRefocus = focusRefreshes;
         cell.wysiwyg.element.dispatchEvent(new Event("focusin"));
+        assert.equal(focusRefreshes, beforeRefocus + 1);
         cleanups.pop()();
         assert.equal(getMobileToolbarProtyle(), undefined);
         assert.equal(changes.at(-1), cell);

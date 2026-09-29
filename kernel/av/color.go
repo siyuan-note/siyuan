@@ -339,6 +339,11 @@ func (av *AttributeView) resolveDirectViewGroupColors(view *View, colors []*Attr
 	if nil == view {
 		return
 	}
+	for _, rule := range view.ConditionalColors {
+		if nil != rule && nil != rule.Color {
+			rule.Color.ResolvedColor = resolveColor(rule.Color.Color, colors)
+		}
+	}
 	if nil != view.GroupKey {
 		if key, err := av.GetKey(view.GroupKey.ID); nil == err &&
 			(KeyTypeSelect == key.Type || KeyTypeMSelect == key.Type) {
@@ -467,6 +472,14 @@ func visitViewColorHolders(view *View, visitOption func(*SelectOption), visitSel
 	visitKeyColorHolders(view.GroupKey, visitOption, visitSelection)
 	walkValueSelects(view.GroupVal, visitSelection)
 	visitFilterColorHolders(view.Filters, visitSelection)
+	for _, rule := range view.ConditionalColors {
+		if nil != rule {
+			if nil != rule.Color {
+				visitSelection(rule.Color)
+			}
+			visitFilterColorHolders([]*ViewFilter{rule.Filter}, visitSelection)
+		}
+	}
 	if nil != view.GroupCalc && nil != view.GroupCalc.FieldCalc {
 		walkValueSelects(view.GroupCalc.FieldCalc.Result, visitSelection)
 	}
@@ -669,6 +682,14 @@ func collectViewCustomColorIndexes(view *View, attrView *AttributeView, addColor
 	}
 	collectKeyCustomColorIndexes(view.GroupKey, addColor)
 	collectFilterCustomColorIndexes(view.Filters, attrView, addColor)
+	for _, rule := range view.ConditionalColors {
+		if nil != rule {
+			if nil != rule.Color {
+				addColor(rule.Color.Color)
+			}
+			collectFilterCustomColorIndexes([]*ViewFilter{rule.Filter}, attrView, addColor)
+		}
+	}
 	collectValueCustomColorIndexes(view.GroupVal, addColor)
 	for _, layout := range view.TableLayouts() {
 		if nil == layout {

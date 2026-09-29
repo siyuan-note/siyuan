@@ -1,3 +1,5 @@
+import {isCommittedTextInput} from "../wysiwyg/compositionInput";
+
 const LONG_TEXT_SELECTOR = 'span[data-inline-wrap="token"]';
 const TEXT_CONTAINER_SELECTOR = "[contenteditable], [data-table-cell-content]";
 const EXCLUDED_SELECTOR = 'pre, script, style, svg, textarea, [data-type="NodeCodeBlock"], ' +
@@ -272,6 +274,11 @@ export const renderLongTextRuns = (root: Element) => {
         editor.addEventListener("compositionend", () => {
             composingEditors.delete(editor);
         });
+        editor.addEventListener("input", (event: InputEvent) => {
+            if (isCommittedTextInput(event)) {
+                composingEditors.delete(editor);
+            }
+        }, true);
     }
     if (!composingEditors.has(editor) && !inputDepth.get(editor)) {
         normalizeLongTextRuns(root);

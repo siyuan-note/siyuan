@@ -58,7 +58,8 @@ const scrollAnimation = (timestamp: number) => {
     dragoverScroll.lastTime = timestamp;
 };
 
-export const dragOverScroll = (moveEvent: MouseEvent, contentRect: DOMRect, element: Element, direction: "x" | "y" = "y") => {
+export const dragOverScroll = (moveEvent: Pick<MouseEvent, "clientX" | "clientY">, contentRect: DOMRect,
+                               element: Element, direction: "x" | "y" = "y") => {
     const clientPosition = direction === "x" ? moveEvent.clientX : moveEvent.clientY;
     const start = direction === "x" ? contentRect.left : contentRect.top;
     const end = direction === "x" ? contentRect.right : contentRect.bottom;

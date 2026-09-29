@@ -17,20 +17,16 @@ SPEC = importlib.util.spec_from_file_location("build_release", ROOT / "scripts/b
 BUILD = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(BUILD)
 
-# 只列出发布构建写入的位置，不使用 git clean，也不清理开发前端或工具缓存。
+# 只清理构建输出，保留移动端内核、资源包及头文件，不使用 git clean。
 MAIN_OUTPUTS = (
     "app/build", "app/kernel-linux", "app/kernel-linux-arm64",
-    "kernel/harmony/libkernel.so", "kernel/harmony/libkernel.h",
 )
 ANDROID_OUTPUTS = (
     "build", "app/build", "app/build-release", "app/.cxx",
-    "app/libs/kernel.aar", "app/src/main/assets/app.zip",
 )
 HARMONY_OUTPUTS = (
     "build", "entry/build", "entry/.cxx",
-    "entry/src/main/resources/rawfile/app.zip",
-) + tuple(f"entry/libs/{abi}/{name}" for abi in ("arm64-v8a", "x86_64")
-          for name in ("libkernel.so", "libkernel.h", "lan_sync_bridge.h"))
+)
 
 
 class CleanupError(Exception):
@@ -138,6 +134,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--execute", action="store_true", help="实际删除；执行前停止构建并确认发布包已收齐")
     parser.add_argument("--output", type=Path, help="额外保留的自定义收集目录，与构建时 --output 一致")
+    parser.add_argument("--records-dir", type=Path, default=ROOT.parent / "release-records",
+                        help="保留发布记录目录，与构建时 --records-dir 一致")
     parser.add_argument("--android-dir", type=Path, default=ROOT.parent / "siyuan-android")
     parser.add_argument("--harmony-dir", type=Path, default=ROOT.parent / "siyuan-harmony")
     parser.add_argument("--wsl-distro", help="与构建时一致的 WSL 发行版")
@@ -145,7 +143,7 @@ def main():
     parser.add_argument("--wsl-repo", default="/home/d/88250/siyuan")
     parser.add_argument("--skip-wsl", action="store_true", help="只清理 Windows 本地工程及临时产物")
     args = parser.parse_args()
-    protected = [BUILD.VERIFY.desktop_folder().resolve()]
+    protected = [BUILD.VERIFY.desktop_folder().resolve(), args.records_dir.resolve()]
     if args.output:
         protected.append(args.output.resolve())
     for path in protected:

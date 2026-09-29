@@ -1,9 +1,13 @@
+import contextlib
+import argparse
 import importlib.util
+import io
 import os
 from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 SPEC = importlib.util.spec_from_file_location("clean_release", Path(__file__).with_name("clean-release.py"))
@@ -31,6 +35,31 @@ class CleanupTests(unittest.TestCase):
         CLEAN.clean([(self.root, self.build)], [self.output], execute=True)
         self.assertFalse(self.build.exists())
         self.assertEqual((self.output / "release.app").read_bytes(), b"signed package")
+
+    def test_main_preserves_default_release_records(self):
+        records = self.root / "release-records/3.8.4/run"
+        records.mkdir(parents=True)
+        (records / "build.log").write_text("build output", encoding="utf-8")
+        with patch.object(CLEAN, "ROOT", self.root / "repo"), \
+                patch.object(CLEAN.sys, "argv", ["clean-release.py", "--execute"]), \
+                patch.object(CLEAN.BUILD.VERIFY, "desktop_folder", return_value=self.output), \
+                patch.object(CLEAN, "collect_targets", return_value=[(self.root, self.build)]), \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(CLEAN.main(), 0)
+        self.assertEqual((records / "build.log").read_text(), "build output")
+        self.assertFalse(self.build.exists())
+
+    def test_custom_release_records_prevent_overlapping_cleanup(self):
+        records = self.build / "records"
+        records.mkdir()
+        (records / "progress.json").write_text("{}", encoding="utf-8")
+        with patch.object(CLEAN.sys, "argv", ["clean-release.py", "--execute", "--records-dir", str(records)]), \
+                patch.object(CLEAN.BUILD.VERIFY, "desktop_folder", return_value=self.output), \
+                patch.object(CLEAN, "collect_targets", return_value=[(self.root, self.build)]), \
+                contextlib.redirect_stdout(io.StringIO()), self.assertRaises(CLEAN.CleanupError):
+            CLEAN.main()
+        self.assertTrue((records / "progress.json").exists())
+        self.assertTrue((self.build / "release.app").exists())
 
     def test_protected_directory_and_ancestors_rejected_before_any_deletion(self):
         for path in (self.output, self.output.parent, self.output / "release.app"):
@@ -82,6 +111,41 @@ class CleanupTests(unittest.TestCase):
         CLEAN.clean(targets, [self.output], execute=True)
         self.assertTrue((self.build / "release.app").exists())
         self.assertFalse(untracked.exists())
+
+    def test_mobile_inputs_survive_cleanup_while_build_outputs_are_removed(self):
+        main = self.root / "main"
+        android = self.root / "android"
+        harmony = self.root / "harmony"
+        temporary = self.root / "temporary"
+        temporary.mkdir()
+        preserved = {
+            main: ["kernel/kernel.aar", "kernel/harmony/libkernel.so", "kernel/harmony/libkernel.h"],
+            android: ["app/libs/kernel.aar", "app/src/main/assets/app.zip"],
+            harmony: ["entry/src/main/resources/rawfile/app.zip", "entry/src/main/cpp/include/libkernel.h",
+                      "entry/src/main/cpp/include/lan_sync_bridge.h"] +
+                     [f"entry/libs/{abi}/{name}" for abi in ("arm64-v8a", "x86_64")
+                      for name in ("libkernel.so", "libkernel.h", "lan_sync_bridge.h")],
+        }
+        outputs = {main: ["app/build", "app/kernel-linux", "app/kernel-linux-arm64"],
+                   android: ["build", "app/build", "app/build-release", "app/.cxx"],
+                   harmony: ["build", "entry/build", "entry/.cxx"]}
+        for repo, marker in ((main, "kernel/go.mod"), (android, "build.gradle"), (harmony, "AppScope/app.json5")):
+            for relative in [marker] + preserved[repo] + [path + "/output.bin" for path in outputs[repo]]:
+                path = repo / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"preserved content")
+        args = argparse.Namespace(android_dir=android, harmony_dir=harmony, skip_wsl=True)
+        with patch.object(CLEAN, "ROOT", main), patch.object(CLEAN.tempfile, "gettempdir", return_value=str(temporary)), \
+                patch.object(CLEAN.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, stdout=b"")), \
+                contextlib.redirect_stdout(io.StringIO()):
+            targets = CLEAN.collect_targets(args)
+            CLEAN.clean(targets, [self.output], execute=True)
+        for repo, relatives in preserved.items():
+            for relative in relatives:
+                self.assertEqual((repo / relative).read_bytes(), b"preserved content")
+        for repo, relatives in outputs.items():
+            for relative in relatives:
+                self.assertFalse((repo / relative).exists())
 
 
 if __name__ == "__main__":

@@ -1,6 +1,24 @@
 type TableCellContext = {owner: IProtyle, cell: HTMLTableCellElement, finish: () => void};
 
 const contexts = new WeakMap<IProtyle, TableCellContext>();
+const forwardedEventTargets = new WeakMap<Event, HTMLElement>();
+
+export const setTableCellRichEventTarget = (event: Event, host: HTMLElement) => {
+    forwardedEventTargets.set(event, host);
+};
+
+const getInlineEditor = (node: EventTarget | null) => {
+    const element = node instanceof Element ? node : node instanceof Node ? node.parentElement : undefined;
+    return element?.closest<HTMLElement>(".table__cell-editor.table__cell--inline");
+};
+
+export const getTableCellRichEventTarget = (event: Event) =>
+    getInlineEditor(forwardedEventTargets.get(event) || event.target);
+
+export const getTableCellRichSelectionHost = (selection: Selection) => {
+    const host = getInlineEditor(selection?.anchorNode);
+    return selection?.rangeCount === 1 && host?.contains(selection.focusNode) ? host : undefined;
+};
 
 export const setTableCellRichContext = (protyle: IProtyle, context: TableCellContext) => {
     contexts.set(protyle, context);

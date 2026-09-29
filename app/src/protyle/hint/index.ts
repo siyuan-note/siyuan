@@ -1,6 +1,8 @@
 import {isTableLikeView} from "../render/av/viewType";
 import {Constants} from "../../constants";
 import {isBuiltinSlashHint} from "./builtinSlash";
+import {getSuperBlockCommandLayout} from "../../block/superBlock";
+import {genEmptySuperBlock} from "../../block/insertSuperBlock";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -22,7 +24,9 @@ import {
     getBlockRefAnchorText,
     getDocCreateTemplatePath,
     isConfiguredCreateTargetCurrentSubDoc,
+    newFileAtPath,
     newFileByRefHint,
+    newFileByRefHintAtPath,
     newFileBySelectRange,
     newFileInProtyle,
     newSubDocByRefHint
@@ -62,7 +66,8 @@ import {isNotCtrl, isOnlyMeta} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
-import {getAVBindingOperations} from "../render/av/binding";
+import {getAVBindingCell, getAVBindingOperations} from "../render/av/binding";
+import {isRangeInEditor} from "../../util/newFileSelection";
 import {genCellValueByElement} from "../render/av/cell";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
@@ -130,6 +135,7 @@ export class Hint {
     private emojiPanel?: EmojiPanelController;
     private emojiBrowseMode = false;
     private loadingAnimation?: Animation;
+    private bindingDismissController?: AbortController;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -185,6 +191,7 @@ export class Hint {
     }
 
     public destroy() {
+        this.bindingDismissController?.abort();
         this.cancelLoadingAnimation();
         this.destroyEmojiPanel();
     }
@@ -333,11 +340,6 @@ export class Hint {
             if (!this.enableSlash || !blockElement || isInEmbedBlock(blockElement)) {
                 return;
             }
-            if (!protyle.lite && isMobile() &&
-                (this.splitChar !== "/" || window.siyuan.storage[Constants.LOCAL_MOBILE_SLASH_MENU]?.enabled !== true)) {
-                this.element.classList.add("fn__none");
-                return;
-            }
             if (protyle.lite) {
                 protyle.options.hint.extend.find((item) => {
                     if (item.key === "/" && item.hint) {
@@ -458,7 +460,21 @@ export class Hint {
         this.loadingAnimation = undefined;
     }
 
-    public genLoading(protyle: IProtyle, delay = 0) {
+    public genLoading(protyle: IProtyle, delay = 0, source = this.source) {
+        this.source = source;
+        this.bindingDismissController?.abort();
+        if (source === "av" && getAVBindingCell(protyle.toolbar.range)?.dataset.rowId) {
+            // 独立条目面板没有编辑器的空白点击处理，使用捕获事件兼容鼠标和触摸。
+            const controller = new AbortController();
+            this.bindingDismissController = controller;
+            document.addEventListener("pointerdown", event => {
+                if (this.element.contains(event.target as Node)) {
+                    return;
+                }
+                this.element.classList.add("fn__none");
+                controller.abort();
+            }, {capture: true, signal: controller.signal});
+        }
         const delayPanel = this.loadingAnimation?.playState === "running" &&
             (this.loadingAnimation.effect as KeyframeEffect)?.target === this.element;
         this.cancelLoadingAnimation();
@@ -468,7 +484,7 @@ export class Hint {
             this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><img width="64px" src="/stage/loading-pure.svg"></div>';
             this.element.classList.remove("fn__none");
             if (this.source === "av") {
-                const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+                const cellElement = getAVBindingCell(protyle.toolbar.range);
                 if (cellElement) {
                     const cellRect = cellElement.getBoundingClientRect();
                     /// #if !MOBILE
@@ -587,7 +603,7 @@ export class Hint {
             this.element.classList.remove("hint--menu");
         }
         if (this.source === "av") {
-            const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+            const cellElement = getAVBindingCell(protyle.toolbar.range);
             if (cellElement) {
                 const cellRect = cellElement.getBoundingClientRect();
                 /// #if !MOBILE
@@ -631,6 +647,7 @@ export class Hint {
                     this.fill(decodeURIComponent(this.element.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, false, isNotCtrl(event));
                     event.preventDefault();
                 } else if (event.key === "Escape") {
+                    this.bindingDismissController?.abort();
                     this.element.classList.add("fn__none");
                     focusByRange(protyle.toolbar.range);
                 }
@@ -679,6 +696,9 @@ export class Hint {
                     const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
                     searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${hideConfiguredCreate && response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div></button>`;
+                    const pathRefText = `((newFileAtPath "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
+                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(pathRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.data.k}</mark></span></div></button>`;
                 }
                 response.data.blocks.forEach((item: IBlock, index: number) => {
                     let blockRefHTML;
@@ -771,6 +791,7 @@ ${genHintItemHTML(item)}
     }
 
     public fill(value: string, protyle: IProtyle, updateRange = true, refIsS = false) {
+        this.bindingDismissController?.abort();
         hideElements(["hint", "toolbar"], protyle);
         if (updateRange && this.source !== "av") {
             protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
@@ -804,20 +825,66 @@ ${genHintItemHTML(item)}
             return;
         }
         if (this.source === "av") {
-            let cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+            let cellElement = getAVBindingCell(protyle.toolbar.range);
             if (!cellElement) {
                 cellElement = nodeElement.querySelector(".av__cell--select") as HTMLElement;
             }
-            if (!cellElement) {
+            if (!cellElement?.isConnected || protyle.disabled || window.siyuan.isPublish ||
+                protyle.options.history?.created || protyle.options.history?.snapshot) {
                 return;
             }
-            const rowElement = hasClosestByClassName(cellElement, isTableLikeView(nodeElement.getAttribute("data-av-type")) ? "av__row" : "av__gallery-item");
+            const panelCell = cellElement.hasAttribute("data-row-id");
+            const rowElement = panelCell ? cellElement : hasClosestByClassName(cellElement,
+                isTableLikeView(nodeElement.getAttribute("data-av-type")) ? "av__row" : "av__gallery-item");
             if (!rowElement) {
                 return;
             }
-            const previousID = rowElement.dataset.id;
+            const previousID = panelCell ? rowElement.dataset.rowId : rowElement.dataset.id;
             const avID = nodeElement.getAttribute("data-av-id");
             const previousValue = genCellValueByElement("block", cellElement);
+            const updatePreview = (nextValue: IAVCellValue) => {
+                if (!panelCell) {
+                    updateAttrViewCellAnimation(cellElement, nextValue);
+                }
+            };
+            if (value.startsWith("((newFileAtPath ") && value.endsWith(`${Lute.Caret}'))`)) {
+                const fileNames = value.substring("((newFileAtPath \"".length, value.length - 4).split(`"${Constants.ZWSP}'`);
+                const name = fileNames.length === 1 ? fileNames[0] : fileNames[1];
+                const {notebookId, path, block: {rootID}} = protyle;
+                const blockID = nodeElement.dataset.nodeId;
+                const bindingCell = cellElement;
+                const savedValue = JSON.stringify(previousValue);
+                const savedRange = range.cloneRange();
+                // 选址期间条目可能被删除、换绑或重绘，始终校验原条目及其主键值。
+                const isValid = () => protyle.notebookId === notebookId && protyle.path === path &&
+                    protyle.block.rootID === rootID && nodeElement.isConnected && bindingCell.isConnected &&
+                    (panelCell || protyle.wysiwyg.element.contains(nodeElement)) && nodeElement.contains(rowElement) &&
+                    rowElement.contains(bindingCell) && nodeElement.dataset.nodeId === blockID &&
+                    nodeElement.getAttribute("data-av-id") === avID &&
+                    (panelCell ? rowElement.dataset.rowId : rowElement.dataset.id) === previousID &&
+                    JSON.stringify(genCellValueByElement("block", bindingCell)) === savedValue;
+                newFileAtPath({
+                    notebookId,
+                    name,
+                    isValid,
+                    restoreFocus() {
+                        if (isRangeInEditor(protyle.wysiwyg.element, savedRange)) {
+                            focusByRange(savedRange);
+                        }
+                    },
+                    onCreated(id, title) {
+                        const operations = getAVBindingOperations(avID, previousID, id, blockID,
+                            previousValue, {protyleID: protyle.id});
+                        transaction(protyle, operations.doOperations, operations.undoOperations);
+                        updatePreview({
+                            type: "block",
+                            isDetached: false,
+                            block: {content: title, id},
+                        });
+                    },
+                });
+                return;
+            }
             let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;
@@ -837,7 +904,7 @@ ${genHintItemHTML(item)}
                 } else {
                     newFileByRefHint(protyle, realFileName, bindNewDoc, newID);
                 }
-                updateAttrViewCellAnimation(cellElement, {
+                updatePreview({
                     type: "block",
                     isDetached: false,
                     block: {content: realFileName, id: newID}
@@ -847,7 +914,7 @@ ${genHintItemHTML(item)}
                 const operations = getAVBindingOperations(avID, previousID, sourceId, nodeElement.dataset.nodeId,
                     previousValue, {protyleID: protyle.id});
                 transaction(protyle, operations.doOperations, operations.undoOperations);
-                updateAttrViewCellAnimation(cellElement, {
+                updatePreview({
                     type: "block",
                     isDetached: false,
                     block: {
@@ -880,12 +947,14 @@ ${genHintItemHTML(item)}
             return;
         }
         // 新建文件
-        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
-            const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
+        const choosePath = value.startsWith("((newFileAtPath ");
+        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && (value.startsWith("((newFile ") || choosePath) && value.endsWith(`${Lute.Caret}'))`)) {
+            const prefix = choosePath ? "((newFileAtPath " : "((newFile ";
+            const fileNames = value.substring(prefix.length + 1, value.length - 4).split(`"${Constants.ZWSP}'`);
             const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
-            newFileByRefHint(protyle, realFileName, (id) => {
+            const insertRef = (id: string, insertRange: Range) => {
                 // https://github.com/siyuan-note/siyuan/issues/10133
-                protyle.toolbar.range = range;
+                protyle.toolbar.range = insertRange;
                 const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",
                     color: `${id}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${getBlockRefAnchorText(refIsS ? fileNames[0] : realFileName)}`
@@ -894,7 +963,12 @@ ${genHintItemHTML(item)}
                     protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
                 }
                 protyle.toolbar.range.collapse(false);
-            });
+            };
+            if (choosePath) {
+                newFileByRefHintAtPath(protyle, realFileName, range, insertRef);
+            } else {
+                newFileByRefHint(protyle, realFileName, (id) => insertRef(id, range));
+            }
             return;
         }
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar)) {
@@ -1076,6 +1150,7 @@ ${genHintItemHTML(item)}
                     this.fixImageCursor(range);
                 }
                 const isMindmap = value === `- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`;
+                const superBlockLayout = getSuperBlockCommandLayout(value);
                 let textContent = isMindmap ? `- ${Lute.Caret}` : value;
                 if (value === "```") {
                     textContent = value + (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(window.siyuan.storage[Constants.LOCAL_CODELANG]) ? "" : window.siyuan.storage[Constants.LOCAL_CODELANG]) + Lute.Caret + "\n```";
@@ -1109,9 +1184,13 @@ ${genHintItemHTML(item)}
                         clientY: rect.top
                     });
                     return;
-                } else if (editableElement.textContent === "" && nodeElement.getAttribute("data-type") === "NodeParagraph") {
+                } else if ((editableElement.textContent === "" ||
+                    superBlockLayout && editableElement.textContent.split(Constants.ZWSP).join("") === "") &&
+                    nodeElement.getAttribute("data-type") === "NodeParagraph") {
                     let newHTML = "";
-                    if (value === "<div>") {
+                    if (superBlockLayout) {
+                        newHTML = genEmptySuperBlock(superBlockLayout, nodeElement).outerHTML;
+                    } else if (value === "<div>") {
                         newHTML = `<div data-node-id="${id}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     } else {
                         editableElement.textContent = textContent;
@@ -1162,7 +1241,8 @@ ${genHintItemHTML(item)}
                         }]);
                     }
                 } else {
-                    let newHTML = isMindmap ? spinListMindmapDOM(protyle.lute, textContent) :
+                    let newHTML = superBlockLayout ? genEmptySuperBlock(superBlockLayout).outerHTML :
+                        isMindmap ? spinListMindmapDOM(protyle.lute, textContent) :
                         protyle.lute.SpinBlockDOM(textContent);
                     if (value === "<div>") {
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;

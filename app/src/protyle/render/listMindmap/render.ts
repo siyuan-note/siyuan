@@ -4,7 +4,8 @@ import {readListMindmap} from "./model";
 import {ListMindmapView} from "./view";
 import {revealTabsForTarget} from "../tabsRender";
 
-const editorRoots = new WeakMap<Element, () => void>();
+const editorRoots = new WeakMap<Element, {refresh: () => void,
+    restoreFocus: (listID: string, candidateIDs: string[]) => void}>();
 const previews = new WeakMap<HTMLElement, ListMindmapView>();
 const visibleViews = new WeakMap<HTMLElement, {view: ListMindmapView, host: HTMLElement}>();
 
@@ -66,9 +67,31 @@ export const resolveVisibleListMindmapBlock = (source: Element): {
     return null;
 };
 
-export const registerListMindmapRoot = (root: Element, refresh: () => void) => {
-    editorRoots.set(root, refresh);
+export const registerListMindmapRoot = (root: Element, refresh: () => void,
+                                       restoreFocus: (listID: string, candidateIDs: string[]) => void) => {
+    editorRoots.set(root, {refresh, restoreFocus});
     return () => editorRoots.delete(root);
+};
+
+// 撤销回放会替换源块，节点焦点交给编辑器在脑图重新挂载后恢复。
+export const restoreListMindmapFocus = (root: Element, source: Element) => {
+    const registered = editorRoots.get(root);
+    if (!registered || source.closest(".mindmap-view")) {
+        return false;
+    }
+    const list = getListMindmapElements(root).find(item => item.contains(source));
+    if (!list) {
+        return false;
+    }
+    const candidateIDs: string[] = [];
+    for (let element = source; element && list.contains(element); element = element.parentElement) {
+        const id = element.getAttribute("data-node-id");
+        if (id) {
+            candidateIDs.push(id);
+        }
+    }
+    registered.restoreFocus(list.dataset.nodeId, candidateIDs);
+    return true;
 };
 
 export const getListMindmapElements = (root: Element) => {
@@ -84,7 +107,7 @@ export const getListMindmapElements = (root: Element) => {
 // 导出页面和只读预览共用节点布局，源列表始终保留在文档中。
 export const listMindmapRender = (root: Element, cdn?: string) => {
     const editor = root.closest(".protyle-wysiwyg");
-    const refresh = editor && editorRoots.get(editor);
+    const refresh = editor && editorRoots.get(editor)?.refresh;
     if (refresh) {
         refresh();
         return;

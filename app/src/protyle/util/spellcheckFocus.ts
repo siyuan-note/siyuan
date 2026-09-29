@@ -1,3 +1,5 @@
+import {isCommittedTextInput} from "../wysiwyg/compositionInput";
+
 const restoredFocusHandlers = new WeakMap<HTMLElement, () => void>();
 
 export const recordRestoredSpellcheckFocus = (element: HTMLElement, previousActiveElement: Element | null) => {
@@ -66,6 +68,11 @@ export const bindSpellcheckFocus = (element: HTMLElement, isEnabled: () => boole
     const onCompositionEnd = () => {
         composing = false;
     };
+    const onInput = (event: InputEvent) => {
+        if (isCommittedTextInput(event)) {
+            composing = false;
+        }
+    };
     restoredFocusHandlers.set(element, () => {
         pending = isEnabled();
     });
@@ -74,6 +81,7 @@ export const bindSpellcheckFocus = (element: HTMLElement, isEnabled: () => boole
     element.addEventListener("focusout", clear);
     element.addEventListener("compositionstart", onCompositionStart, true);
     element.addEventListener("compositionend", onCompositionEnd, true);
+    element.addEventListener("input", onInput, true);
     view.addEventListener("mousedown", onWindowMouseDown);
     return () => {
         clear();
@@ -83,6 +91,7 @@ export const bindSpellcheckFocus = (element: HTMLElement, isEnabled: () => boole
         element.removeEventListener("focusout", clear);
         element.removeEventListener("compositionstart", onCompositionStart, true);
         element.removeEventListener("compositionend", onCompositionEnd, true);
+        element.removeEventListener("input", onInput, true);
         view.removeEventListener("mousedown", onWindowMouseDown);
     };
 };

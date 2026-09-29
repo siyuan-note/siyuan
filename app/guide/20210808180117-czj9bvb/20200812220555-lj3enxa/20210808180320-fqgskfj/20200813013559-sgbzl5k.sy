@@ -6,7 +6,7 @@
 		"id": "20200813013559-sgbzl5k",
 		"title": "引用内容块",
 		"type": "doc",
-		"updated": "20260820190627"
+		"updated": "20260927183214"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200817123136-in6y5m1",
-				"updated": "20210512154105"
+				"updated": "20260927183214"
 			},
 			"Children": [
 				{
@@ -53,6 +53,47 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "内容块/引用"
+				}
+			]
+		},
+		{
+			"ID": "20260927091603-ca0ts26",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927091603-ca0ts26",
+				"updated": "20260927183214"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "输入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[["
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和文档标题后，可在引用候选列表中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "选择位置新建文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，指定笔记本根目录或父文档。确认后将在该位置创建文档，并在原位置插入引用。所选位置仅对本次创建生效，不会修改默认保存路径；取消不会创建文档。桌面端和移动端均支持此操作。数据库条目绑定或重新绑定文档时也可使用此操作。文档创建成功后才会绑定到该条目；取消或创建失败不会改变原有绑定。"
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容區塊",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260927183214"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120337-x5qwass",
-				"updated": "20250311195846"
+				"updated": "20260927183214"
 			},
 			"Children": [
 				{
@@ -53,6 +53,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20260927091603-savpene",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260927091603-savpene",
+				"updated": "20260927183214"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "輸入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[["
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和文件標題後，可在區塊引用候選清單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "選擇位置新增文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，指定筆記本根目錄或父文件。確認後將在該位置建立文件，並在原位置插入區塊引用。所選位置僅對本次建立生效，不會修改預設儲存路徑；取消不會建立文件。桌面端和行動端均支援此操作。資料庫項目綁定或重新綁定文件時也可使用此操作。文件建立成功後才會綁定到該項目；取消或建立失敗不會改變原有綁定。"
 				}
 			]
 		},

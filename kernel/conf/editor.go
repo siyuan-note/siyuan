@@ -87,6 +87,7 @@ type Editor struct {
 	DynamicLoadBlocks               int            `json:"dynamicLoadBlocks"`               // 块动态数，下限 48
 	Justify                         bool           `json:"justify"`                         // 是否两端对齐
 	RTL                             bool           `json:"rtl"`                             // 是否从右到左显示
+	AutoDirection                   bool           `json:"autoDirection"`                   // 是否自动判定段落和标题的文本方向
 	Spellcheck                      bool           `json:"spellcheck"`                      // 是否启用拼写检查
 	SpellcheckLanguages             []string       `json:"spellcheckLanguages"`             // 拼写检查语言
 	HashTagSearch                   *bool          `json:"hashTagSearch"`                   // 输入 # 时是否进行标签搜索

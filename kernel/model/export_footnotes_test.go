@@ -26,6 +26,67 @@ func newFootnoteTestDoc(t *testing.T, boxID, text string) *parse.Tree {
 	return tree
 }
 
+func TestExportFootnotesAcrossNotebooks(t *testing.T) {
+	const sourceBox = "20260927000000-box0001"
+	const targetBox = "20260927000001-box0002"
+	setupExportRelatedTest(t, sourceBox, targetBox)
+	Conf.Editor = conf.NewEditor()
+	source := newFootnoteTestDoc(t, sourceBox, "source")
+	target := newFootnoteTestDoc(t, targetBox, "cross notebook content")
+	nested := newFootnoteTestDoc(t, sourceBox, "nested content")
+	source.Root.FirstChild.AppendChild(newFootnoteTestRef(target.Root.FirstChild.ID))
+	target.Root.FirstChild.AppendChild(newFootnoteTestRef(nested.Root.FirstChild.ID))
+	nested.Root.FirstChild.AppendChild(newFootnoteTestRef(target.Root.FirstChild.ID))
+	for _, tree := range []*parse.Tree{source, target, nested} {
+		writeExportRelatedTestTree(t, tree)
+	}
+	exported, err := exportTree(prepareExportTree(getExportBlockTree(source.ID)), true, true, false, true,
+		4, 0, 0, "#", "#", "", "", false, "", false, true, true, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defs := exported.Root.ChildrenByType(ast.NodeFootnotesDef)
+	if len(defs) != 2 {
+		t.Fatalf("expected two definitions for a cross-notebook cycle, got %d", len(defs))
+	}
+	for i, want := range []string{"cross notebook content", "nested content"} {
+		if !strings.Contains(defs[i].Text(), want) {
+			t.Fatalf("footnote %d lost content %q: %s", i, want, defs[i].Text())
+		}
+	}
+}
+
+func TestExportFootnotesRejectCrossCryptoBoundary(t *testing.T) {
+	const sourceBox = "20260927000002-box0003"
+	const targetBox = "20260927000003-box0004"
+	setupExportRelatedTest(t, sourceBox, targetBox)
+	Conf.Editor = conf.NewEditor()
+	source := newFootnoteTestDoc(t, sourceBox, "source")
+	target := newFootnoteTestDoc(t, targetBox, "private content")
+	nested := newFootnoteTestDoc(t, sourceBox, "unreachable content")
+	source.Root.FirstChild.AppendChild(newFootnoteTestRef(target.Root.FirstChild.ID))
+	target.Root.FirstChild.AppendChild(newFootnoteTestRef(nested.Root.FirstChild.ID))
+	for _, tree := range []*parse.Tree{source, target, nested} {
+		writeExportRelatedTestTree(t, tree)
+	}
+	markRuntimeEncryptedBox(targetBox)
+	t.Cleanup(func() { forgetRuntimeEncryptedBox(targetBox) })
+	var order []string
+	refs := map[string]*refAsFootnotes{}
+	depth := 0
+	collectFootnotesDefs0(source, source.Root, &order, refs, &depth)
+	if len(order) != 1 || order[0] != target.Root.FirstChild.ID {
+		t.Fatalf("collected references beyond the crypto boundary: %v", order)
+	}
+	defs, err := resolveFootnotesDefs(&order, refs, source, map[string]bool{}, "", "", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if defs != nil && defs.FirstChild != nil {
+		t.Fatal("export included content beyond the crypto boundary")
+	}
+}
+
 func TestExportFootnotesStayWithinBlockScope(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	Conf.Export, Conf.Editor = conf.NewExport(), conf.NewEditor()

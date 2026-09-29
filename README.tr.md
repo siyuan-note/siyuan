@@ -114,7 +114,7 @@ Bazı özellikler yalnızca ücretli üyeler için geçerlidir. Detaylar için [
 
 ## 🏗️ Mimari ve Ekosistem
 
-![SiYuan Arch](screenshots/SiYuan_Arch.png "SiYuan Arch")
+![SiYuan Arch](screenshots/SiYuan_Arch.svg "SiYuan Arch")
 
 | Proje                                                    | Açıklama              | Çatallama (Forks)                                                              | Yıldız (Stars)                                                                     |
 |----------------------------------------------------------|-----------------------|--------------------------------------------------------------------------------|------------------------------------------------------------------------------------|

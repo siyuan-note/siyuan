@@ -263,10 +263,10 @@ export const openAVFieldBinding = (options: {
         context.destroy();
         return;
     }
-    // 隐藏主键或虚拟滚动条目使用现有字段代理，候选关闭后及时清理。
+    // 候选关闭后仍可能继续选址新建，保留代理直到条目重绘或绑定目标改变。
     const hint = options.protyle.hint.element;
     const observer = new MutationObserver(() => {
-        if (!field.isConnected || hint.classList.contains("fn__none") ||
+        if (!field.isConnected ||
             options.protyle.toolbar.range?.startContainer !== field) {
             observer.disconnect();
             context.destroy();

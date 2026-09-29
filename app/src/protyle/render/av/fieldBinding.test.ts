@@ -5,13 +5,13 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ScriptTarget, transpileModule} from "typescript";
 
-test("hidden primary binding reuses the field proxy and releases it when dismissed or unavailable", () => {
+test("hidden primary binding survives path selection and releases removed or replaced targets", () => {
     const source = readFileSync(join(__dirname, "batchEdit.ts"), "utf8");
     const code = transpileModule(source.substring(source.indexOf("export const openAVFieldBinding"))
         .replace("export const", "const") + "\nopenAVFieldBinding;", {
         compilerOptions: {target: ScriptTarget.ES2020},
     }).outputText;
-    for (const reason of ["dismissed", "removed", "replaced", "readonly"]) {
+    for (const reason of ["path-selection", "removed", "replaced", "readonly"]) {
         let hidden = false;
         let destroyed = 0;
         let disconnected = 0;
@@ -39,8 +39,15 @@ test("hidden primary binding reuses the field proxy and releases it when dismiss
         } else {
             callback();
             assert.equal(destroyed, 0);
-            hidden = reason === "dismissed";
-            field.isConnected = reason !== "removed";
+            if (reason === "path-selection") {
+                hidden = true;
+                callback();
+                assert.equal(destroyed, 0);
+                field.isConnected = false;
+            }
+            if (reason === "removed") {
+                field.isConnected = false;
+            }
             if (reason === "replaced") {
                 protyle.toolbar.range.startContainer = {};
             }

@@ -44,7 +44,7 @@ class Surface {
     }
 }
 
-const fixture = () => {
+const fixture = (mountScroll = true) => {
     const exports: any = {};
     let time = 10000;
     const window = new Surface();
@@ -62,7 +62,8 @@ const fixture = () => {
         require: () => ({Constants: {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_MULTIPLE_SELECT: 1500}}),
         Date: {now: () => time},
     });
-    const dispose = exports.bindBlockDragSelectionGesture(element, scrollElement, {
+    let mountedScrollElement: Surface;
+    const dispose = exports.bindBlockDragSelectionGesture(element, () => mountedScrollElement, {
         canStart: () => enabled,
         getStartBlock: (target: object) => blocks.includes(target as typeof blocks[0]) ? target : undefined,
         getBlockAtPoint: (point: {clientY: number}) => blocks[Math.floor(point.clientY / 100)],
@@ -71,6 +72,9 @@ const fixture = () => {
         scroll: (point: unknown) => scrolls.push(point),
         finish: (source: string, cancelled: boolean) => finishes.push({source, cancelled}),
     });
+    if (mountScroll) {
+        mountedScrollElement = scrollElement;
+    }
     const mouseDown = (properties = {}) => element.send("mousedown", {target: blocks[0], ...properties});
     const touch = (type: string, y = 20, properties = {}) => {
         const point = {identifier: 1, clientX: 20, clientY: y};
@@ -83,8 +87,22 @@ const fixture = () => {
         advance: (milliseconds: number) => time += milliseconds,
         disable: () => enabled = false,
         enterMultiSelect: () => multiSelect = true,
+        mount: () => mountedScrollElement = scrollElement,
     };
 };
+
+test("scroll containers can be initialized after binding and disposal before a gesture is safe", () => {
+    const unused = fixture(false);
+    assert.doesNotThrow(unused.dispose);
+    assert.equal(unused.element.count(), 0);
+    const mounted = fixture(false);
+    mounted.mount();
+    mounted.touch("touchstart");
+    assert.equal(mounted.scrollElement.count(), 1);
+    mounted.touch("touchend");
+    assert.equal(mounted.scrollElement.count(), 0);
+    mounted.dispose();
+});
 
 test("mouse text selection stays native in one block and becomes a reversible whole-block range across blocks", () => {
     const f = fixture();

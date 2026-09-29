@@ -14,7 +14,7 @@ interface IBlockDragSelectionOptions {
 }
 
 // 文字选区保留在单个编辑宿主内，跨块拖动由应用维护整块选区。
-export const bindBlockDragSelectionGesture = (element: HTMLElement, scrollElement: HTMLElement,
+export const bindBlockDragSelectionGesture = (element: HTMLElement, getScrollElement: () => HTMLElement,
                                               options: IBlockDragSelectionOptions) => {
     const ownerDocument = element.ownerDocument;
     const ownerWindow = ownerDocument.defaultView;
@@ -25,6 +25,7 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, scrollElemen
     let suppressClickUntil = 0;
     let lastTouchTime = 0;
     let composing = false;
+    let scrollElement: HTMLElement;
 
     const finish = (cancelled: boolean) => {
         const previous = gesture;
@@ -37,7 +38,8 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, scrollElemen
         ownerDocument.removeEventListener("touchstart", additionalTouch, true);
         ownerDocument.removeEventListener("keydown", keyDown, true);
         ownerDocument.removeEventListener("dragstart", dragStart, true);
-        scrollElement.removeEventListener("scroll", scroll);
+        scrollElement?.removeEventListener("scroll", scroll);
+        scrollElement = undefined;
         ownerWindow.removeEventListener("blur", cancel);
         if (previous?.active) {
             suppressClickUntil = Date.now() + 500;
@@ -145,6 +147,8 @@ export const bindBlockDragSelectionGesture = (element: HTMLElement, scrollElemen
             return;
         }
         gesture = {source, block, point, time: Date.now(), touchID, active: false, lastPoint: point};
+        // 正文宿主先于滚动容器初始化，开始手势时再绑定实际容器。
+        scrollElement = getScrollElement();
         ownerDocument.addEventListener("keydown", keyDown, true);
         ownerDocument.addEventListener("dragstart", dragStart, true);
         ownerWindow.addEventListener("blur", cancel);

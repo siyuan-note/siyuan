@@ -23,7 +23,7 @@ export const bindBoundedBlockDragSelect = (protyle: IProtyle, element: HTMLEleme
             item => item.getAttribute("data-type") === "NodeListItem");
         return block ? (isInEmbedBlock(block) || block) as HTMLElement : undefined;
     };
-    return bindBlockDragSelectionGesture(element, protyle.contentElement, {
+    return bindBlockDragSelectionGesture(element, () => protyle.contentElement, {
         canStart: source => !!protyle.gutter && !protyle.disabled &&
             !window.siyuan.touchDragActive && !element.closest(".sy__backlink--bottom") &&
             !element.classList.contains("fn__pointer-none") &&

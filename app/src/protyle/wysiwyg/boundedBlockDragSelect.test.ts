@@ -42,12 +42,15 @@ const fixture = (mobile = false) => {
         gutter: {}, disabled: false,
         toolbar: {isMultiSelectMode: () => multiSelect, subElement: {},
             showMultiSelectMode: () => multiSelect = true},
-        contentElement: {getBoundingClientRect: () => ({left: 0, right: 100, top: 0, bottom: 100})},
     };
+    let getScrollElement: Parameters<typeof bindBlockDragSelectionGesture>[1];
     let options: Parameters<typeof bindBlockDragSelectionGesture>[2];
     const modules: Record<string, unknown> = {
-        "./blockDragSelectionGesture": {bindBlockDragSelectionGesture: (_element: unknown, _scroll: unknown,
-                                                                       value: typeof options) => options = value},
+        "./blockDragSelectionGesture": {bindBlockDragSelectionGesture: (_element: unknown, scroll: typeof getScrollElement,
+                                                                       value: typeof options) => {
+            getScrollElement = scroll;
+            options = value;
+        }},
         "./blockSelection": {
             BLOCK_SELECTION_CLASS: "protyle-wysiwyg--select",
             clearBlockSelectionMode: () => states.forEach(state => state.clear()),
@@ -71,6 +74,7 @@ const fixture = (mobile = false) => {
     // 构造 WYSIWYG 时实例尚未赋给 protyle，绑定阶段不能从 protyle 读取编辑器元素。
     exports.bindBoundedBlockDragSelect(protyle, element);
     protyle.wysiwyg = {element};
+    protyle.contentElement = {getBoundingClientRect: () => ({left: 0, right: 100, top: 0, bottom: 100})};
     const target = (excluded = false, editable = true, ownEditor = true) => ({
         closest: (selector: string) => {
             if (selector === ".protyle-wysiwyg") {
@@ -83,7 +87,7 @@ const fixture = (mobile = false) => {
         },
     } as unknown as HTMLElement);
     return {
-        options: options!, protyle, blocks: blocks as unknown as HTMLElement[], classes, states, target,
+        options: options!, getScrollElement: getScrollElement!, protyle, blocks: blocks as unknown as HTMLElement[], classes, states, target,
         setEditable: (value: string) => rootEditable = value,
         setBacklink: () => backlink = true,
         detach: () => blockOwned = false,
@@ -92,6 +96,13 @@ const fixture = (mobile = false) => {
         state: () => ({focused, modeElement, multiSelect, selectionCleared, toolbarCount, gutterRestored}),
     };
 };
+
+test("bounded selection resolves the scroll container after editor initialization on both platforms", () => {
+    for (const mobile of [false, true]) {
+        const f = fixture(mobile);
+        assert.equal(f.getScrollElement(), f.protyle.contentElement);
+    }
+});
 
 test("bounded mouse selection is enabled only for protected editor roots with block operations", () => {
     const f = fixture();

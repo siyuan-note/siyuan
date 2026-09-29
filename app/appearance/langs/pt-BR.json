@@ -1,4 +1,5 @@
 {
+	"embedHTMLFileBelow": "Incorporar arquivo HTML abaixo",
 	"horizontalSuperBlock": "Super bloco horizontal",
 	"verticalSuperBlock": "Super bloco vertical",
 	"prependSuperBlockColumn": "Adicionar uma coluna ao início do super bloco atual",

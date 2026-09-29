@@ -1,4 +1,5 @@
 {
+	"embedHTMLFileBelow": "아래에 HTML 파일 삽입",
 	"horizontalSuperBlock": "가로 슈퍼 블록",
 	"verticalSuperBlock": "세로 슈퍼 블록",
 	"prependSuperBlockColumn": "현재 슈퍼 블록 시작 부분에 열 추가",

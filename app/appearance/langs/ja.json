@@ -1,4 +1,5 @@
 {
+	"embedHTMLFileBelow": "下に HTML ファイルを埋め込む",
 	"horizontalSuperBlock": "横向きスーパーブロック",
 	"verticalSuperBlock": "縦向きスーパーブロック",
 	"prependSuperBlockColumn": "現在のスーパーブロックの先頭に列を追加",

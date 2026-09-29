@@ -1,4 +1,5 @@
 {
+	"embedHTMLFileBelow": "Встроить HTML-файл ниже",
 	"horizontalSuperBlock": "Горизонтальный супер блок",
 	"verticalSuperBlock": "Вертикальный супер блок",
 	"prependSuperBlockColumn": "Добавить столбец в начало текущего супер блока",

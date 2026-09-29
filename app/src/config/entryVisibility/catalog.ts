@@ -1032,6 +1032,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("cut", lang("cut")),
             node("remove", lang("remove")),
             node("rename", lang("rename")),
+            node("embedHTMLFileBelow", lang("embedHTMLFileBelow")),
             node("turnIntoRef", lang("ref")),
             node("turnIntoText", lang("text")),
             separator("separator_2"),

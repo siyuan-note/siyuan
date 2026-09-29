@@ -57,7 +57,8 @@ import {checkFold, genTagList, renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openMobileFileById} from "../mobile/editor";
-import {renderAssetsPreview} from "../asset/renderAssets";
+import {genAssetHTML, renderAssetsPreview} from "../asset/renderAssets";
+import {insertHTML} from "../protyle/util/insertHTML";
 import {upDownHint} from "../util/upDownHint";
 import {hintRenderAssets} from "../protyle/hint/extend";
 import {Menu} from "../plugin/Menu";
@@ -70,7 +71,7 @@ import {base64ToURL, showBase64ImageSizeLimit} from "../protyle/upload/base64";
 import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
 import {isEncryptedBox} from "../util/pathName";
-import {getHTMLAssetIFrameSrc} from "../asset/html";
+import {getHTMLAssetIFrameSrc, isLocalHTMLAssetPath} from "../asset/html";
 import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities";
 import {
     getDistributedTableColumnWidth,
@@ -1794,6 +1795,22 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                 icon: "iconEdit",
                 click() {
                     renameAsset(linkAddress);
+                }
+            }).element);
+        }
+        if (linkAddress && isLocalHTMLAssetPath(linkAddress)) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "embedHTMLFileBelow",
+                label: window.siyuan.languages.embedHTMLFileBelow,
+                icon: "iconHTML5",
+                click() {
+                    window.siyuan.menus.menu.remove();
+                    const range = document.createRange();
+                    range.selectNodeContents(linkElement);
+                    range.collapse(false);
+                    protyle.toolbar.range = range;
+                    insertHTML(genAssetHTML("", linkAddress, "", linkAddress, true),
+                        protyle, true, true, false, "after");
                 }
             }).element);
         }

@@ -1,4 +1,5 @@
 {
+	"embedHTMLFileBelow": "Вбудувати HTML-файл нижче",
 	"horizontalSuperBlock": "Горизонтальний суперблок",
 	"verticalSuperBlock": "Вертикальний суперблок",
 	"prependSuperBlockColumn": "Додати стовпець на початок поточного суперблока",

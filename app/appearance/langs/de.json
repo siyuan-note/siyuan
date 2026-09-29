@@ -1,4 +1,5 @@
 {
+	"embedHTMLFileBelow": "HTML-Datei darunter einbetten",
 	"horizontalSuperBlock": "Horizontaler Superblock",
 	"verticalSuperBlock": "Vertikaler Superblock",
 	"prependSuperBlockColumn": "Spalte am Anfang des aktuellen Superblocks hinzufügen",

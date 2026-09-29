@@ -1,4 +1,5 @@
 {
+	"embedHTMLFileBelow": "Incrustar archivo HTML debajo",
 	"horizontalSuperBlock": "Superbloque horizontal",
 	"verticalSuperBlock": "Superbloque vertical",
 	"prependSuperBlockColumn": "Añadir una columna al principio del superbloque actual",

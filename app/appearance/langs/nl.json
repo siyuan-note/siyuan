@@ -1,4 +1,5 @@
 {
+	"embedHTMLFileBelow": "HTML-bestand hieronder insluiten",
 	"horizontalSuperBlock": "Horizontaal superblok",
 	"verticalSuperBlock": "Verticaal superblok",
 	"prependSuperBlockColumn": "Kolom toevoegen aan het begin van het huidige superblok",

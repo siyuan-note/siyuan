@@ -192,6 +192,13 @@
       color: var(--b3-callout-note);
     }
 
+    > .callout-info > .callout-title {
+      mark,
+      span[data-type~="mark"] {
+        color: inherit;
+      }
+    }
+
     .callout-icon {
       font-variant-emoji: emoji;
 

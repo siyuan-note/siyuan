@@ -637,10 +637,42 @@ export const initListMindmaps = (owner: IProtyle) => {
     const root = owner.wysiwyg.element;
     const instances = new Map<HTMLElement, ListMindmapController>();
     const loading = new WeakSet<HTMLElement>();
+    const placeholders = new Map<HTMLElement, HTMLElement>();
+    const failed = new WeakSet<HTMLElement>();
     const newlyCreated = new WeakSet<HTMLElement>();
     let pendingFocus: {listID: string, candidateIDs: string[]};
     let frame = 0;
     let disposed = false;
+    const clearPlaceholder = (list: HTMLElement) => {
+        placeholders.get(list)?.remove();
+        placeholders.delete(list);
+        if (!instances.has(list)) {
+            list.removeAttribute("data-mindmap-view-rendered");
+        }
+    };
+    const prepare = () => {
+        const lists = new Set(getListMindmapElements(root));
+        placeholders.forEach((host, list) => {
+            if (!lists.has(list)) {
+                clearPlaceholder(list);
+            }
+        });
+        lists.forEach(list => {
+            if (instances.has(list) || failed.has(list) || placeholders.has(list)) {
+                return;
+            }
+            // 在浏览器绘制正文前占位，补齐源块期间沿用脑图的尺寸和公共加载动画。
+            const host = document.createElement("div");
+            host.className = "mindmap-view";
+            host.contentEditable = "false";
+            host.setAttribute("aria-busy", "true");
+            host.innerHTML = '<div class="fn__loading"><img width="64" src="/stage/loading-pure.svg" alt=""></div>';
+            syncListMindmapHeight(list, host);
+            placeholders.set(list, host);
+            list.appendChild(host);
+            list.dataset.mindmapViewRendered = "true";
+        });
+    };
     const refresh = () => {
         if (disposed) {
             return;
@@ -655,13 +687,14 @@ export const initListMindmaps = (owner: IProtyle) => {
                     instance.refresh();
                 } catch (error) {
                     console.error(error);
+                    failed.add(list);
                     instance.destroy();
                     instances.delete(list);
                 }
             }
         });
         lists.forEach(list => {
-            if (instances.has(list) || loading.has(list)) {
+            if (instances.has(list) || loading.has(list) || failed.has(list)) {
                 return;
             }
             const mount = () => {
@@ -672,12 +705,15 @@ export const initListMindmaps = (owner: IProtyle) => {
                 try {
                     const instance = new ListMindmapController(owner, list);
                     instances.set(list, instance);
+                    placeholders.delete(list);
                     if (pendingFocus?.listID === list.dataset.nodeId) {
                         instance.focusNode(pendingFocus.candidateIDs);
                         pendingFocus = undefined;
                     }
                 } catch (error) {
                     console.error(error);
+                    failed.add(list);
+                    clearPlaceholder(list);
                     list.querySelector(":scope > .mindmap-view")?.remove();
                     list.removeAttribute("data-mindmap-view-rendered");
                 }
@@ -690,8 +726,15 @@ export const initListMindmaps = (owner: IProtyle) => {
                         mount();
                     } else if (complete === "changed") {
                         retry = true;
+                    } else {
+                        failed.add(list);
+                        clearPlaceholder(list);
                     }
-                }).catch(error => console.error(error)).finally(() => {
+                }).catch(error => {
+                    console.error(error);
+                    failed.add(list);
+                    clearPlaceholder(list);
+                }).finally(() => {
                     loading.delete(list);
                     if (retry) {
                         schedule();
@@ -704,6 +747,9 @@ export const initListMindmaps = (owner: IProtyle) => {
         });
     };
     const schedule = () => {
+        if (!disposed) {
+            prepare();
+        }
         if (!frame && !disposed) {
             frame = requestAnimationFrame(() => {
                 frame = 0;
@@ -748,6 +794,7 @@ export const initListMindmaps = (owner: IProtyle) => {
         cancelAnimationFrame(frame);
         instances.forEach(instance => instance.destroy());
         instances.clear();
+        placeholders.forEach((host, list) => clearPlaceholder(list));
     }});
     schedule();
 };

@@ -6,6 +6,7 @@ import {getFieldsByData} from "./view";
 import {TAVBatchEditMode} from "./batchValue";
 import {cloneAVCellValueSnapshot} from "./cellValue";
 import {renderAVRichTextElements} from "./richText";
+import {openAVBindBlock} from "./bindBlock";
 
 const EDITABLE_FIELD_TYPES: TAVCol[] = [
     "block",
@@ -244,4 +245,33 @@ export const openAVFieldEditor = (options: {
         positionByMenu: true,
         requireExplicitChange: true,
     });
+};
+
+export const openAVFieldBinding = (options: {
+    protyle: IProtyle;
+    blockElement: HTMLElement;
+    field: IAVColumn;
+    anchorElement: HTMLElement;
+}) => {
+    const context = createBatchEditContext(options);
+    if (!context) {
+        return;
+    }
+    const field = context.cellElements[0];
+    const value = JSON.parse(decodeURIComponent(field.dataset.cellValue)) as IAVCellValue;
+    if (!openAVBindBlock(options.protyle, field, value.block?.content?.trim() || "")) {
+        context.destroy();
+        return;
+    }
+    // 隐藏主键或虚拟滚动条目使用现有字段代理，候选关闭后及时清理。
+    const hint = options.protyle.hint.element;
+    const observer = new MutationObserver(() => {
+        if (!field.isConnected || hint.classList.contains("fn__none") ||
+            options.protyle.toolbar.range?.startContainer !== field) {
+            observer.disconnect();
+            context.destroy();
+        }
+    });
+    observer.observe(hint, {attributes: true, attributeFilter: ["class"]});
+    observer.observe(options.blockElement, {childList: true});
 };

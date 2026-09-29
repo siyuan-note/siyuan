@@ -64,7 +64,7 @@ import {
     resetCardCoverPosition,
     startCardCoverPosition
 } from "./coverPosition";
-import {getEditableAVFields, openAVFieldEditor, updateAVFieldValue} from "./batchEdit";
+import {getEditableAVFields, openAVFieldBinding, openAVFieldEditor, updateAVFieldValue} from "./batchEdit";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValue";
 import {isMobile} from "../../../util/functions";
 import {getAVCurrentViewID} from "./viewVisibility";
@@ -1189,16 +1189,16 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                 label: window.siyuan.languages.bind,
                 icon: "iconLink",
                 click() {
-                    openDatabaseRowByData(protyle, {
-                        avID: blockElement.dataset.avId,
-                        databaseBlockID: blockElement.dataset.nodeId,
-                        notebookID: protyle.notebookId,
-                        itemID: selectedItemInfos[0].itemID,
-                        valueID: primaryRows[0].valueID,
-                        title: primaryRows[0].content.trim(),
-                        isDetached: true,
-                        bindPrimary: true,
-                    });
+                    menu.close();
+                    const cell = primaryRows[0].cellElement;
+                    if (cell?.isConnected && cell.getClientRects().length > 0) {
+                        updateDatabaseRow(protyle, cell);
+                    } else {
+                        const field = getEditableAVFields(blockElement).find(item => item.type === "block");
+                        if (field) {
+                            openAVFieldBinding({protyle, blockElement, field, anchorElement});
+                        }
+                    }
                 }
             });
         }

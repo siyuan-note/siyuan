@@ -44,6 +44,8 @@ const gNet = require("net");
 const childProcess = require("child_process");
 const remote = require("@electron/remote/main");
 const {probeRemoteKernelAuthentication} = require("./remoteKernelAuth");
+const {saveRemoteExport} = require("./remoteExport");
+const remoteExportSenders = new WeakSet();
 const {createConnectionManager, getRemoteSession} = require("./connectionManager");
 const {connectionArgs, readConnections, closeConnectionWindows} = require("./connectionStore");
 const {
@@ -3169,6 +3171,33 @@ app.whenReady().then(() => {
             return getKernelConnection(getWindowKernelTarget(event.sender.id));
         }
         const remoteSender = getWindowKernelTarget(event.sender.id)?.mode === "remote";
+        if (data.cmd === "saveRemoteExport") {
+            if (!remoteSender || !initializedWindowIds.has(event.sender.id) ||
+                event.senderFrame !== event.sender.mainFrame || remoteExportSenders.has(event.sender)) {
+                return {status: "error"};
+            }
+            const controller = new AbortController();
+            const abort = () => controller.abort();
+            remoteExportSenders.add(event.sender);
+            event.sender.once("destroyed", abort);
+            try {
+                return await saveRemoteExport({
+                    uri: data.uri,
+                    origin: getWindowKernelTarget(event.sender.id).origin,
+                    choosePath: (defaultPath) => dialog.showSaveDialog(BrowserWindow.fromWebContents(event.sender), {
+                        defaultPath, properties: ["showOverwriteConfirmation"],
+                    }),
+                    fetch: (url, options) => event.sender.session.fetch(url, options),
+                    signal: controller.signal,
+                });
+            } catch (error) {
+                writeLog("save remote export failed: " + error.message);
+                return {status: "error"};
+            } finally {
+                event.sender.removeListener("destroyed", abort);
+                remoteExportSenders.delete(event.sender);
+            }
+        }
         if (remoteSender && ["beginRichClipboard", "completeRichClipboard", "cancelRichClipboard", "clipboardRead", "clipboardReadFiles"]
             .includes(data.cmd)) {
             writeLog("ignored local file clipboard processing in remote kernel mode");

@@ -432,7 +432,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
                     openHistory(app);
                 }
             }).element);
-            if (!window.siyuan.config.readonly && getHostCapabilities().importExport) {
+            if (!window.siyuan.config.readonly && getHostCapabilities().documentImportExport) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "dataMigration",
                     label: window.siyuan.languages.dataMigration,

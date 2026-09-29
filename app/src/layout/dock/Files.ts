@@ -2195,7 +2195,7 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                     }
                 }).element);
             }
-            if (getHostCapabilities().importExport) {
+            if (getHostCapabilities().documentImportExport) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "importNotebook",
                     icon: "iconDownload",

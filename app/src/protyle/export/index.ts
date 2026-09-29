@@ -12,7 +12,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
 import {getScreenWidth, isInMobileApp, saveExportFile, setStorageVal} from "../util/compatibility";
-import {getFrontend} from "../../util/functions";
+import {getFrontend, isBrowser} from "../../util/functions";
 import {isEncryptedBox} from "../../util/pathName";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getLastExportPath, setLastExportPath} from "./path";
@@ -49,30 +49,28 @@ const getIconScript = (servePath: string) => {
 };
 
 export const saveExport = (option: IExportOptions) => {
-    if (!getHostCapabilities().importExport) {
+    if (!getHostCapabilities().documentImportExport) {
         return;
     }
-    /// #if BROWSER
-    if (["html", "htmlmd"].includes(option.type)) {
+    if ((isBrowser() || getHostCapabilities().remoteKernel) && ["html", "htmlmd"].includes(option.type)) {
         const startExport = () => {
-        const msgId = showMessage(window.siyuan.languages.exporting, -1);
-        // 浏览器环境：先调用 API 生成资源文件，再在前端生成完整的 HTML
-        const onExportHTML = async (exportResponse: APICallbackResponse<APIPOSTRoutes["/api/export/exportHTML"]["response"]>) => {
-            const html = await onExport(exportResponse, undefined, "", option);
-            fetchPost("/api/export/exportBrowserHTML", {
-                folder: exportResponse.data.folder,
-                html: html,
-                name: exportResponse.data.name
-            }, zipResponse => {
-                // 与导出 .sy.zip/markdown.zip/图片一致，统一走 saveExportFile，以便移动端原生 App 调用 JSAndroid.saveExportFile 等接口保存到本地
-                saveExportFile(zipResponse.data.zip, msgId);
-            });
-        };
-        if (option.type === "htmlmd") {
-            fetchPost("/api/export/exportMdHTML", {id: option.id, savePath: ""}, onExportHTML);
-        } else {
-            fetchPost("/api/export/exportHTML", {id: option.id, pdf: false, merge: true, savePath: ""}, onExportHTML);
-        }
+            const msgId = showMessage(window.siyuan.languages.exporting, -1);
+            // 浏览器和远程连接先生成资源与完整 HTML，再下载服务器打包的导出物。
+            const onExportHTML = async (exportResponse: APICallbackResponse<APIPOSTRoutes["/api/export/exportHTML"]["response"]>) => {
+                const html = await onExport(exportResponse, undefined, "", option);
+                fetchPost("/api/export/exportBrowserHTML", {
+                    folder: exportResponse.data.folder,
+                    html: html,
+                    name: exportResponse.data.name
+                }, zipResponse => {
+                    saveExportFile(zipResponse.data.zip, msgId);
+                });
+            };
+            if (option.type === "htmlmd") {
+                fetchPost("/api/export/exportMdHTML", {id: option.id, savePath: ""}, onExportHTML);
+            } else {
+                fetchPost("/api/export/exportHTML", {id: option.id, pdf: false, merge: true, savePath: ""}, onExportHTML);
+            }
         };
         fetchPost("/api/block/getBlockInfo", {id: option.id}, (response) => {
             if (response.code === 0 && isEncryptedBox(response.data.box)) {
@@ -83,7 +81,10 @@ export const saveExport = (option: IExportOptions) => {
         });
         return;
     }
-    /// #else
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
+    /// #if !BROWSER
     if (option.type === "pdf") {
         if (window.siyuan.config.appearance.mode === 1) {
             confirmDialog(window.siyuan.languages.pdfTip, window.siyuan.languages.pdfConfirm, () => {

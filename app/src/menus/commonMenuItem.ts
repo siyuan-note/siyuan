@@ -584,7 +584,7 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
 };
 
 export const exportMd = (id: string) => {
-    if (window.siyuan.isPublish || !getHostCapabilities().importExport) {
+    if (window.siyuan.isPublish || !getHostCapabilities().documentImportExport) {
         return;
     }
     return new MenuItem({
@@ -594,6 +594,7 @@ export const exportMd = (id: string) => {
         icon: "iconUpload",
         submenu: [{
             id: "exportTemplate",
+            ignore: !getHostCapabilities().importExport,
             label: window.siyuan.languages.template,
             iconClass: "ft__error",
             icon: "iconMarkdown",
@@ -727,6 +728,7 @@ ${databaseOptions}`,
             /// #if !BROWSER
             {
                 id: "exportPDF",
+                ignore: !getHostCapabilities().importExport,
                 label: "PDF",
                 icon: "iconPDF",
                 click: () => {
@@ -749,6 +751,7 @@ ${databaseOptions}`,
                 }
             }, {
                 id: "exportWord",
+                ignore: !getHostCapabilities().importExport,
                 label: "Word .docx",
                 icon: "iconDocx",
                 click: () => {
@@ -756,6 +759,7 @@ ${databaseOptions}`,
                 }
             }, {
                 id: "exportMore",
+                ignore: !getHostCapabilities().importExport,
                 label: window.siyuan.languages.more,
                 icon: "iconMore",
                 type: "submenu",
@@ -874,7 +878,7 @@ ${databaseOptions}`,
                 id: "exportPDF",
                 label: window.siyuan.languages.print,
                 icon: "iconPDF",
-                ignore: !isInMobileApp(),
+                ignore: !isInMobileApp() || !getHostCapabilities().importExport,
                 click: () => {
                     const msgId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];

@@ -115,7 +115,7 @@ export const mountHelp = () => {
 };
 
 export const importNotebook = (file: File) => {
-    if (!getHostCapabilities().importExport) {
+    if (!getHostCapabilities().documentImportExport) {
         return;
     }
     const formData = new ContractFormData({file});
@@ -131,7 +131,7 @@ export const newNotebook = () => {
         <div class="b3-list-item fn__pointer" data-type="import-obsidian" role="button" tabindex="0"><svg class="b3-list-item__graphic"><use xlink:href="#iconObsidian"></use></svg><span class="b3-list-item__text">Obsidian Vault</span></div>`;
     }
     /// #endif
-    const importHTML = getHostCapabilities().importExport ? `<div class="fn__hr"></div>
+    const importHTML = getHostCapabilities().documentImportExport ? `<div class="fn__hr"></div>
     <div class="b3-label__text fn__pointer fn__flex" style="align-items: center;gap: 4px" data-type="toggle-import" role="button" tabindex="0" aria-expanded="false"><svg class="b3-list-item__arrow" style="display: block;flex: none;height: 14px;width: 14px" data-type="import-arrow"><use xlink:href="#iconRight"></use></svg><span style="line-height: 20px">${window.siyuan.languages.importFromMoreApps}</span></div>
     <div class="b3-list--background fn__none" data-type="import-options" style="padding-top: 8px">
         <label class="b3-list-item fn__pointer" data-type="import-sy"><svg class="b3-list-item__graphic"><use xlink:href="#iconSiYuan"></use></svg><span class="b3-list-item__text">SiYuan .sy.zip</span><input class="b3-form__upload" type="file" accept="application/zip"></label>
@@ -171,7 +171,7 @@ export const newNotebook = () => {
         });
         dialog.destroy();
     });
-    if (!getHostCapabilities().importExport) {
+    if (!getHostCapabilities().documentImportExport) {
         return;
     }
     const createNotebookForImport = (fallbackName: string, callback: (notebookID: string) => void) => {
@@ -231,6 +231,9 @@ export const newNotebook = () => {
         });
     });
     /// #if !BROWSER
+    if (!getHostCapabilities().localFileSystem) {
+        return;
+    }
     const importMarkdown = async (isFile: boolean) => {
         const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
             cmd: "showOpenDialog",

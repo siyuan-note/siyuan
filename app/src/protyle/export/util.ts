@@ -14,7 +14,7 @@ import {highlightRender, lineNumberRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
 import {isInAndroid, isIPad, isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
 import {useShell} from "../../util/pathName";
-import {getHostCapabilities} from "../../util/hostCapabilities";
+import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {copyPNGByLink, writePNGBlob} from "../../menus/util";
 
 // WebKit/Chromium 会拒绝宽度或高度超过此限制的 canvas，导致生成空白图像。
@@ -37,7 +37,7 @@ export const afterExport = (exportPath: string, msgId: string) => {
 };
 
 export const exportImage = (id: string, copyOnly = false) => {
-    if (!getHostCapabilities().importExport) {
+    if (!getHostCapabilities().documentImportExport) {
         return;
     }
     const exportDialog = new Dialog({
@@ -120,7 +120,7 @@ export const exportImage = (id: string, copyOnly = false) => {
             if (objectElement) {
                 const res = await fetch(objectElement.getAttribute("data"));
                 const response = await res.text();
-                objectElement.insertAdjacentHTML("beforebegin", response as string);
+                objectElement.insertAdjacentHTML("beforebegin", sanitizeKernelHTML(response));
                 objectElement.remove();
             }
         }
@@ -282,7 +282,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         watermarkPreviewElement.innerHTML = "";
         if (watermarkElement.checked) {
             if (window.siyuan.config.export.imageWatermarkDesc) {
-                watermarkPreviewElement.innerHTML = window.siyuan.config.export.imageWatermarkDesc;
+                watermarkPreviewElement.innerHTML = sanitizeKernelHTML(window.siyuan.config.export.imageWatermarkDesc);
             } else if (window.siyuan.config.export.imageWatermarkStr) {
                 if (window.siyuan.config.export.imageWatermarkStr.startsWith("http")) {
                     watermarkPreviewElement.setAttribute("style", `background-image: url(${window.siyuan.config.export.imageWatermarkStr});background-repeat: repeat;position: absolute;top: 0;left: 0;width: 100%;height: 100%;border-radius: var(--b3-border-radius-b);`);
@@ -290,7 +290,7 @@ export const exportImage = (id: string, copyOnly = false) => {
                     await addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image");
                     const width = Math.max(exportDialog.element.querySelector(".export-img").clientWidth / 3, 150);
                     watermarkPreviewElement.setAttribute("style", `width: ${width}px;height: ${width}px;display: flex;justify-content: center;align-items: center;color: var(--b3-border-color);font-size: 14px;`);
-                    watermarkPreviewElement.innerHTML = `<div style="transform: rotate(-45deg)">${window.siyuan.config.export.imageWatermarkStr}</div>`;
+                    watermarkPreviewElement.innerHTML = sanitizeKernelHTML(`<div style="transform: rotate(-45deg)">${window.siyuan.config.export.imageWatermarkStr}</div>`);
                     const canvas = await window.htmlToImage.toCanvas(watermarkPreviewElement);
                     watermarkPreviewElement.innerHTML = "";
                     watermarkPreviewElement.setAttribute("style", `background-image: url(${canvas.toDataURL("image/png")});background-repeat: repeat;position: absolute;top: 0;left: 0;width: 100%;height: 100%;border-radius: var(--b3-border-radius-b);`);
@@ -304,9 +304,12 @@ export const exportImage = (id: string, copyOnly = false) => {
         if (revision !== previewRevision) {
             return;
         }
-        previewElement.innerHTML = response.data.content;
+        previewElement.innerHTML = sanitizeKernelHTML(response.data.content);
         previewElement.setAttribute("data-doc-type", response.data.type || "NodeDocument");
         Object.keys(response.data.attrs).forEach(key => {
+            if (getHostCapabilities().remoteKernel && !key.startsWith("custom-") && key !== "style") {
+                return;
+            }
             previewElement.setAttribute(key, response.data.attrs[key]);
         });
         await renderExportJSEmbeds(previewElement, {

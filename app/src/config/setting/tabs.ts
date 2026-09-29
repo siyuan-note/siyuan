@@ -88,7 +88,7 @@ const settingTabs = {
         id: "export",
         icon: "iconUpload",
         title: () => window.siyuan.languages.export,
-        hidden: () => !getHostCapabilities().importExport,
+        hidden: () => !getHostCapabilities().documentImportExport,
         defaultSave: exportConfigApi.patch,
     }, registerExportTab),
     search: setting.tab({

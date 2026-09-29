@@ -3544,7 +3544,7 @@ export class Gutter {
             id: "copyAsPNG",
             iconHTML: "",
             label: window.siyuan.languages.copyAsPNG,
-            ignore: !getHostCapabilities().importExport,
+            ignore: !getHostCapabilities().documentImportExport,
             click() {
                 exportImage(id, true);
             }

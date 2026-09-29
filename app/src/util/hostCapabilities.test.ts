@@ -11,6 +11,14 @@ describe("trusted remote extension capabilities", () => {
         trustRemoteExtensions: true,
     };
 
+    it("allows document transfers without granting local paths or full data migration", () => {
+        const capabilities = resolveHostCapabilities(true, undefined, connection.kernelOrigin);
+        assert.equal(capabilities.documentImportExport, true);
+        assert.equal(capabilities.importExport, false);
+        assert.equal(capabilities.localFileSystem, false);
+        assert.equal(capabilities.ownsKernel, false);
+    });
+
     it("only enables plugins and appearance for the matching host connection", () => {
         const restricted = resolveHostCapabilities(true, undefined, connection.kernelOrigin);
         assert.equal(restricted.plugins, false);

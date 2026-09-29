@@ -61,7 +61,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             id: "copyAsPNG",
             iconHTML: "",
             label: window.siyuan.languages.copyAsPNG,
-            ignore: !getHostCapabilities().importExport,
+            ignore: !getHostCapabilities().documentImportExport,
             click() {
                 exportImage(protyle.block.showAll ? protyle.block.id : protyle.block.rootID, true);
             }

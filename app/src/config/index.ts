@@ -110,7 +110,7 @@ export const openSetting = (app: App, tab?: TSettingTab) => {
     if (tab === "bazaar" && !isBazaarAvailable()) {
         return;
     }
-    if (tab === "export" && !getHostCapabilities().importExport) {
+    if (tab === "export" && !getHostCapabilities().documentImportExport) {
         return;
     }
     /// #if MOBILE

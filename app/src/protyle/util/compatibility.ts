@@ -63,7 +63,7 @@ export const isPhablet = () => {
 };
 
 export const saveExportFile = async (uri: string, msgId?: string): Promise<TSaveExportFileResult> => {
-    if (!getHostCapabilities().importExport) {
+    if (!getHostCapabilities().documentImportExport) {
         if (msgId) {
             hideMessage(msgId);
         }
@@ -73,6 +73,23 @@ export const saveExportFile = async (uri: string, msgId?: string): Promise<TSave
         return {status: "error"};
     }
     /// #if !BROWSER
+    if (getHostCapabilities().remoteKernel) {
+        let result: TSaveExportFileResult;
+        try {
+            result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "saveRemoteExport", uri});
+        } catch (error) {
+            result = {status: "error"};
+        }
+        if (msgId) {
+            hideMessage(msgId);
+        }
+        if (result.status === "success") {
+            showMessage(window.siyuan.languages.exported);
+        } else if (result.status === "error") {
+            showMessage(window.siyuan.languages.exportFileSaveFailed, 0, "error");
+        }
+        return result;
+    }
     let saveErrorMsgId: string | undefined;
     try {
         const resolved = new URL(uri, `${location.origin}/`);

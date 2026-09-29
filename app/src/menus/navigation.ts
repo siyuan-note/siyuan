@@ -183,7 +183,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                 }
             }).element);
         }
-        if (getHostCapabilities().importExport) {
+        if (getHostCapabilities().documentImportExport) {
             const ignoreExport = notebookIds.some((notebookId) => isEncryptedBox(notebookId));
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "separator_2",
@@ -363,12 +363,12 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
             icon: "iconRiffCard",
             submenu: riffCardMenu,
         }).element);
-        if (getHostCapabilities().importExport) {
+        if (getHostCapabilities().documentImportExport) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         }
     }
     openEditorTab(app, blockIDs);
-    if (getHostCapabilities().importExport) {
+    if (getHostCapabilities().documentImportExport) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "export",
             label: window.siyuan.languages.export,
@@ -645,7 +645,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             }
         }).element);
     }
-    if (getHostCapabilities().localFileSystem || getHostCapabilities().importExport) {
+    if (getHostCapabilities().localFileSystem || getHostCapabilities().documentImportExport) {
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
     }
     /// #if !BROWSER
@@ -662,7 +662,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     /// #endif
     genImportMenu(notebookId, "/");
 
-    if (getHostCapabilities().importExport) {
+    if (getHostCapabilities().documentImportExport) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "export",
             label: window.siyuan.languages.export,
@@ -1062,7 +1062,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
 };
 
 export const genImportMenu = (notebookId: string, pathString: string) => {
-    if (window.siyuan.config.readonly || !getHostCapabilities().importExport) {
+    if (window.siyuan.config.readonly || !getHostCapabilities().documentImportExport) {
         return;
     }
     const reloadDocTree = () => {
@@ -1082,6 +1082,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
     const importstdmd = (label: string, isDoc?: boolean) => {
         return {
             id: isDoc ? "importMarkdownDoc" : "importMarkdownFolder",
+            ignore: !getHostCapabilities().localFileSystem,
             icon: isDoc ? "iconMarkdown" : "iconFolder",
             label,
             click: async () => {

@@ -107,7 +107,7 @@ const renderOnboarding = (app: App) => {
 </button>
 <div class="onboarding__title">&#x1F389; ${window.siyuan.languages.onboardingWelcome}</div>
 <div class="onboarding__desc">${window.siyuan.languages.onboardingDescription}</div>
-${getHostCapabilities().importExport ? `<button class="b3-button b3-button--outline fn__block" data-type="import">
+${getHostCapabilities().documentImportExport ? `<button class="b3-button b3-button--outline fn__block" data-type="import">
     <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.importExistingData}
 </button>` : ""}
 <button class="b3-button b3-button--outline fn__block" data-type="sync">
@@ -126,7 +126,7 @@ ${getHostCapabilities().importExport ? `<button class="b3-button b3-button--outl
                 dismissOnboarding();
                 break;
             case "import":
-                if (getHostCapabilities().importExport) {
+                if (getHostCapabilities().documentImportExport) {
                     openDataMigration({
                         mode: "onboarding",
                         notebookID: window.siyuan.config.onboarding.notebookID,

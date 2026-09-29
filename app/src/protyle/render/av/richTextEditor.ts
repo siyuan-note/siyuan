@@ -106,11 +106,11 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     maskElement.dataset.avBlockId = options.nodeElement.dataset.nodeId;
     maskElement.style.zIndex = (++window.siyuan.zIndex).toString();
     maskElement.innerHTML = `<div class="av__richtext-editor" role="dialog">
-    <div class="av__richtext-host"></div>
     ${mobile ? `<div class="av__richtext-actions">
         <button type="button" class="b3-button b3-button--cancel" data-type="cancel">${escapeHtml(window.siyuan.languages.cancel)}</button>
         <button type="button" class="b3-button b3-button--text" data-type="save">${escapeHtml(window.siyuan.languages.save)}</button>
     </div>` : ""}
+    <div class="av__richtext-host"></div>
 </div>`;
     document.body.appendChild(maskElement);
     // 独立记录详情使用未挂载的编辑器上下文，浮层生命周期跟随实际可见的详情面板。

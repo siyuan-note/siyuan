@@ -100,6 +100,20 @@ const runCases = async (sources) => {
     for (const mode of ["document", "desktop-row", "mobile-row"]) {
         mobile = mode === "mobile-row";
         const state = createOwner(mode !== "document");
+        if (mobile) {
+            const toolbar = document.createElement("div");
+            toolbar.className = "keyboard";
+            toolbar.style.zIndex = "100";
+            document.body.append(toolbar);
+            const save = document.querySelector('[data-type="save"]');
+            const cancel = document.querySelector('[data-type="cancel"]');
+            for (const button of [save, cancel]) {
+                const rect = button.getBoundingClientRect();
+                assert.ok(rect.bottom <= toolbar.getBoundingClientRect().top, "actions must remain above the keyboard toolbar");
+                assert.ok(button.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)),
+                    "mobile actions must receive pointer events");
+            }
+        }
         for (const input of ["a", "b", "中文"]) {
             fragment.input.append(document.createTextNode(input));
             fragment.input.dispatchEvent(new InputEvent("input", {bubbles: true, data: input}));
@@ -183,6 +197,8 @@ const runElectron = async () => {
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
         await win.loadURL("data:text/html,<html><body></body></html>");
+        await win.webContents.insertCSS(require("sass").compile(path.join(__dirname, "../src/assets/scss/mobile.scss"),
+            {logger: {warn() {}}}).css);
         await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)})`);
         console.log("AV rich text editor lifecycle cases passed");
     } catch (error) {

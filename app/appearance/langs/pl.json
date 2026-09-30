@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Utrzymuj okno na wierzchu",
+	"unpinWindow": "Nie utrzymuj okna na wierzchu",
 	"settingsWindowMode": "Otwieraj ustawienia w",
 	"settingsWindowModeTip": "Obowiązuje przy następnym otwarciu ustawień; wtyczki decydują, jak otwierać własne ustawienia",
 	"settingsWindowInApp": "Oknie głównym",

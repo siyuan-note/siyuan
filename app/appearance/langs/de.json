@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Fenster im Vordergrund halten",
+	"unpinWindow": "Fenster nicht mehr im Vordergrund halten",
 	"settingsWindowMode": "Einstellungen öffnen in",
 	"settingsWindowModeTip": "Gilt beim nächsten Öffnen der Einstellungen; Plugins bestimmen selbst, wie ihre Einstellungen geöffnet werden",
 	"settingsWindowInApp": "Hauptfenster",

@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Pertahankan jendela di atas",
+	"unpinWindow": "Berhenti mempertahankan jendela di atas",
 	"settingsWindowMode": "Buka pengaturan di",
 	"settingsWindowModeTip": "Berlaku saat pengaturan dibuka berikutnya; plugin menentukan cara membuka pengaturannya sendiri",
 	"settingsWindowInApp": "Jendela utama",

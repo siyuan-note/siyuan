@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Mantener ventana encima",
+	"unpinWindow": "Dejar de mantener ventana encima",
 	"settingsWindowMode": "Abrir ajustes en",
 	"settingsWindowModeTip": "Se aplica la próxima vez que se abran los ajustes; cada complemento decide cómo abrir sus propios ajustes",
 	"settingsWindowInApp": "Ventana principal",

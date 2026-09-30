@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Mantieni la finestra in primo piano",
+	"unpinWindow": "Non mantenere più la finestra in primo piano",
 	"settingsWindowMode": "Apri le impostazioni in",
 	"settingsWindowModeTip": "Si applica alla prossima apertura delle impostazioni; i plugin decidono come aprire le proprie impostazioni",
 	"settingsWindowInApp": "Finestra principale",

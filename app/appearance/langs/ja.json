@@ -1,4 +1,6 @@
 {
+	"pinWindow": "ウィンドウを最前面に表示",
+	"unpinWindow": "ウィンドウの最前面表示を解除",
 	"settingsWindowMode": "設定を開く場所",
 	"settingsWindowModeTip": "次回設定を開くときに適用されます。プラグインの設定を開く方法は各プラグインが決定します",
 	"settingsWindowInApp": "メインウィンドウ内",

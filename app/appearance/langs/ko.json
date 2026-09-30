@@ -1,4 +1,6 @@
 {
+	"pinWindow": "창을 항상 위에 표시",
+	"unpinWindow": "창의 항상 위 표시 해제",
 	"settingsWindowMode": "설정을 열 위치",
 	"settingsWindowModeTip": "다음에 설정을 열 때 적용되며, 플러그인 설정을 여는 방식은 각 플러그인이 결정합니다",
 	"settingsWindowInApp": "기본 창 내부",

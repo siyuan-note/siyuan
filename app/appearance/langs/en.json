@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Keep window on top",
+	"unpinWindow": "Stop keeping window on top",
 	"settingsWindowMode": "Open settings in",
 	"settingsWindowModeTip": "Applies the next time settings are opened; plugins determine how their own settings open",
 	"settingsWindowInApp": "Main window",

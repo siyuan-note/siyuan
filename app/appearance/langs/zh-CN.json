@@ -1,4 +1,6 @@
 {
+	"pinWindow": "置顶窗口",
+	"unpinWindow": "取消置顶窗口",
 	"settingsWindowMode": "打开设置位置",
 	"settingsWindowModeTip": "下次打开设置时生效，插件设置的打开方式由插件决定",
 	"settingsWindowInApp": "主窗口内",

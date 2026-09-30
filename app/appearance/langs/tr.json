@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Pencereyi her zaman üstte tut",
+	"unpinWindow": "Pencereyi her zaman üstte tutmayı bırak",
 	"settingsWindowMode": "Ayarların açılacağı yer",
 	"settingsWindowModeTip": "Ayarlar bir sonraki açılışta uygulanır; eklentiler kendi ayarlarının nasıl açılacağını belirler",
 	"settingsWindowInApp": "Ana pencere",

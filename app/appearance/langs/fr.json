@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Garder la fenêtre au premier plan",
+	"unpinWindow": "Ne plus garder la fenêtre au premier plan",
 	"settingsWindowMode": "Ouvrir les paramètres dans",
 	"settingsWindowModeTip": "S’applique à la prochaine ouverture des paramètres ; les extensions décident comment ouvrir leurs propres paramètres",
 	"settingsWindowInApp": "La fenêtre principale",

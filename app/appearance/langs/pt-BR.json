@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Manter janela no topo",
+	"unpinWindow": "Deixar de manter janela no topo",
 	"settingsWindowMode": "Abrir configurações em",
 	"settingsWindowModeTip": "Aplica-se na próxima abertura das configurações; os plugins determinam como abrir suas próprias configurações",
 	"settingsWindowInApp": "Janela principal",

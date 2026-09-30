@@ -710,7 +710,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
         label: lang("entryWindowTopBar"),
         children: [
             node("windowWorkspace", lang("layout")),
-            node("pinWindow", lang("pin")),
+            node("pinWindow", lang("pinWindow")),
         ],
     },
     statusBarCatalogSection,

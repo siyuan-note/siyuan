@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Venster bovenaan houden",
+	"unpinWindow": "Venster niet meer bovenaan houden",
 	"settingsWindowMode": "Instellingen openen in",
 	"settingsWindowModeTip": "Geldt de volgende keer dat instellingen worden geopend; plugins bepalen hoe hun eigen instellingen openen",
 	"settingsWindowInApp": "Hoofdvenster",

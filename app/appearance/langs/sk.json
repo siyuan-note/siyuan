@@ -1,4 +1,6 @@
 {
+	"pinWindow": "Ponechať okno navrchu",
+	"unpinWindow": "Zrušiť ponechanie okna navrchu",
 	"settingsWindowMode": "Otvárať nastavenia v",
 	"settingsWindowModeTip": "Platí pri ďalšom otvorení nastavení; doplnky určujú spôsob otvorenia svojich vlastných nastavení",
 	"settingsWindowInApp": "Hlavnom okne",

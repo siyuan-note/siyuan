@@ -1,4 +1,6 @@
 {
+	"pinWindow": "השארת החלון תמיד מעל",
+	"unpinWindow": "ביטול השארת החלון תמיד מעל",
 	"settingsWindowMode": "פתיחת ההגדרות ב",
 	"settingsWindowModeTip": "יחול בפתיחה הבאה של ההגדרות; כל תוסף קובע כיצד ההגדרות שלו ייפתחו",
 	"settingsWindowInApp": "החלון הראשי",

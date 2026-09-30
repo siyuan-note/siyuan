@@ -21,6 +21,19 @@ test("新窗口顶栏目录与按钮一致，旧配置和内置方案默认显�
     assert.match(readFileSync("src/window/workspace.ts", "utf8"), /dataset.windowTopbarEntry = "windowWorkspace"/);
     assert.match(readFileSync("src/boot/onGetConfig.ts", "utf8"), /data-window-topbar-entry="pinWindow"/);
     assert.deepEqual(order.resolveEntryOrder(keys, ["pinWindow"], new Set()), ["windowWorkspace", "pinWindow"]);
+    const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {configurable: true, value: {
+        siyuan: {languages: {pin: "Pin", pinWindow: "Keep window on top"}},
+    }});
+    try {
+        assert.equal(nodes.find(node => node.key === "pinWindow").label(), "Keep window on top");
+    } finally {
+        if (originalWindow) {
+            Object.defineProperty(globalThis, "window", originalWindow);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
 });
 
 const compiled = transpileModule(readFileSync("src/config/entryVisibility/runtime.ts", "utf8")

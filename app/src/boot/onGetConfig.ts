@@ -349,7 +349,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
         });
         document.body.insertAdjacentHTML("beforeend", `<div class="toolbar__window">
 <div class="toolbar__window-drag"></div>
-<div class="toolbar__item ariaLabel" data-window-topbar-entry="pinWindow" aria-label="${window.siyuan.languages[isAlwaysOnTop ? "unpin" : "pin"]}" id="pinWindow">
+<div class="toolbar__item ariaLabel" data-window-topbar-entry="pinWindow" aria-label="${window.siyuan.languages[isAlwaysOnTop ? "unpinWindow" : "pinWindow"]}" id="pinWindow">
     <svg>
         <use xlink:href="#icon${isAlwaysOnTop ? "Unpin" : "Pin"}"></use>
     </svg>
@@ -357,13 +357,13 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
         const pinElement = document.getElementById("pinWindow");
         void import("../window/workspace").then(({initWindowWorkspace}) => initWindowWorkspace());
         pinElement.addEventListener("click", () => {
-            if (pinElement.getAttribute("aria-label") === window.siyuan.languages.pin) {
+            if (pinElement.getAttribute("aria-label") === window.siyuan.languages.pinWindow) {
                 pinElement.querySelector("use").setAttribute("xlink:href", "#iconUnpin");
-                pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+                pinElement.setAttribute("aria-label", window.siyuan.languages.unpinWindow);
                 ipcRenderer.send(Constants.SIYUAN_CMD, "setAlwaysOnTopTrue");
             } else {
                 pinElement.querySelector("use").setAttribute("xlink:href", "#iconPin");
-                pinElement.setAttribute("aria-label", window.siyuan.languages.pin);
+                pinElement.setAttribute("aria-label", window.siyuan.languages.pinWindow);
                 ipcRenderer.send(Constants.SIYUAN_CMD, "setAlwaysOnTopFalse");
             }
         });

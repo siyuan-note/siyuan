@@ -6,7 +6,7 @@
 		"id": "20200924100906-0u4zfq3",
 		"title": "Window and Tab",
 		"type": "doc",
-		"updated": "20260930220342"
+		"updated": "20260930224728"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-fdf0e30",
-				"updated": "20260925230000"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -785,7 +785,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260922155242-zq7j067",
-				"updated": "20260925230000"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -799,7 +799,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-he816jm",
-				"updated": "20260925230000"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -808,7 +808,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " Click the layout button again to close the naming dialog. The visibility and order of the layout and pin buttons can be configured in "
+					"Data": " Click the layout button again to close the naming dialog. The visibility and order of the layout and \"Keep window on top\" buttons can be configured in "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -853,7 +853,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-py20wzf",
-				"updated": "20260923114823"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -867,7 +867,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " beside the pin button, enter a name, and save. Changes to tabs, splits, document reading positions, and PDF pages are then saved automatically."
+					"Data": " beside the \"Keep window on top\" button, enter a name, and save. Changes to tabs, splits, document reading positions, and PDF pages are then saved automatically."
 				}
 			]
 		},
@@ -908,7 +908,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-ikklk4b",
-				"updated": "20260923114823"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -985,7 +985,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to save the current main window into that entry. New window layouts save automatically. Both types show the latest save time at the bottom of the submenu. You can also rename a new window layout using the layout icon beside the pin button. Rename dialogs are titled "
+					"Data": " to save the current main window into that entry. New window layouts save automatically. Both types show the latest save time at the bottom of the submenu. You can also rename a new window layout using the layout icon beside the \"Keep window on top\" button. Rename dialogs are titled "
 				},
 				{
 					"Type": "NodeTextMark",

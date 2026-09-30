@@ -1,4 +1,6 @@
 {
+	"pinWindow": "置頂視窗",
+	"unpinWindow": "取消置頂視窗",
 	"settingsWindowMode": "開啟設定位置",
 	"settingsWindowModeTip": "下次開啟設定時生效，外掛程式設定的開啟方式由外掛程式決定",
 	"settingsWindowInApp": "主視窗內",

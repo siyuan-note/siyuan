@@ -8,7 +8,7 @@ import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 import {compileString} from "sass";
 
-const browserCases = (source: string, css: string, columnSource: string) => {
+const browserCases = (source: string, css: string, columnSource: string, blockSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const config = {editor: {databaseAttrShow: true, databaseAttrHideEmpty: false, databaseAttrViewMode: 0, databaseAttrUseTabs: false}};
     Object.assign(window, {siyuan: {config, languages: {
@@ -100,6 +100,63 @@ const browserCases = (source: string, css: string, columnSource: string) => {
         check.equal(menuElement.querySelector('[data-type="attributePanelVisibility"]'), null);
         menuElement.remove();
     }
+    const tables = ["database-a", "database-b"].map(avID => ({
+        avID, avName: avID, blockIDs: ["document"],
+        keyValues: [
+            ["default", "", ""], ["always", "always", ""], ["empty", "hide-empty", ""],
+            ["hidden", "hide", "value"], ["filled", "hide-empty", "value"],
+        ].map(([id, visibility, content]) => ({
+            key: {id, name: id, type: "text", attributePanelVisibility: visibility},
+            values: [{type: "text", text: {content}, blockID: "item"}],
+        })),
+    }));
+    const renderAttributes = new Function("fetchPost", "createEmptyAVValue", "getColIconByType", "cellValueIsEmpty",
+        "genAVAttributeRowHTML", "preserveAVBindingRange", "renderAVRichTextElements", blockSource + "\nreturn renderAVAttribute;")(
+        (url: string, _data: unknown, callback: (response: {data: unknown}) => void) => {
+            callback({data: url === "/api/av/getAttributeViewKeys" ? tables : {total: 0}});
+        }, () => ({}), () => "iconText", (value: IAVCellValue) => !value.text.content,
+        (options: {keyID: string, attributePanelVisibility: string, empty: boolean}) =>
+            `<div class="av__row" data-col-id="${options.keyID}" data-panel-visibility="${options.attributePanelVisibility}" data-empty="${options.empty}"></div>`,
+        () => () => {}, () => {});
+    for (const className of ["custom-attr protyle-db-row__body", "custom-attr"]) {
+        const body = document.createElement("div");
+        body.className = className;
+        document.body.append(body);
+        const protyle = {disabled: false};
+        renderAttributes(body, "document", protyle);
+        const visible = (id: string, avID = "database-a") => getComputedStyle(body.querySelector(
+            `[data-av-id="${avID}"] .av__row[data-col-id="${id}"]`)).display !== "none";
+        check.equal(visible("default"), true, "existing dialog defaults remain visible");
+        check.equal(visible("always"), true);
+        check.equal(visible("empty"), false);
+        check.equal(visible("hidden"), false);
+        check.equal(visible("filled"), true);
+        const edit = () => body.querySelector<HTMLButtonElement>('[data-av-id="database-a"] [data-type="toggle-panel-visibility"]');
+        edit().querySelector("use").dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        check.equal(visible("hidden"), true);
+        check.equal(visible("empty"), true);
+        check.equal(visible("hidden", "database-b"), false, "revealing one database keeps the others hidden");
+        renderAttributes(body, "document", protyle);
+        check.equal(edit().getAttribute("aria-pressed"), "true");
+        check.equal(visible("hidden"), true, "refresh preserves temporary reveal state");
+        protyle.disabled = true;
+        renderAttributes(body, "document", protyle);
+        edit().click();
+        check.equal(visible("hidden"), false, "readonly panels can restore visibility rules");
+        edit().click();
+        check.equal(visible("hidden"), true, "readonly panels can reveal hidden fields");
+        const previousRules = tables[0].keyValues.map(item => item.key.attributePanelVisibility);
+        tables[0].keyValues.forEach(item => item.key.attributePanelVisibility = "");
+        renderAttributes(body, "document", protyle);
+        check.equal(edit().classList.contains("fn__none"), true, "databases without hidden rules need no reveal button");
+        check.equal(edit().getAttribute("aria-pressed"), "false");
+        tables[0].keyValues.forEach((item, index) => item.key.attributePanelVisibility = previousRules[index]);
+        body.remove();
+    }
+    const topBody = document.createElement("div");
+    topBody.className = "custom-attr protyle-db-attr__body";
+    renderAttributes(topBody, "document", {disabled: false});
+    check.equal(topBody.querySelector('[data-type="toggle-panel-visibility"]'), null, "top panels reuse their existing edit button");
     return "Attribute panel visibility cases passed";
 };
 
@@ -114,9 +171,12 @@ test("attribute panel field rules preserve global defaults and reveal hidden fie
     const columnSource = transpileModule(readFileSync(path.resolve(__dirname, "col.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const blockSource = transpileModule(readFileSync(path.resolve(__dirname, "blockAttr.ts"), "utf8")
+        .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-panel-visibility-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + ")";
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {

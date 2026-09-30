@@ -1,5 +1,10 @@
 .custom-attr {
 
+  & > [data-av-id]:not([data-panel-show-all="true"]) .av__row[data-panel-visibility="hide"],
+  & > [data-av-id]:not([data-panel-show-all="true"]) .av__row[data-panel-visibility="hide-empty"][data-empty="true"] {
+    display: none;
+  }
+
   &__avbacklinks {
     border-bottom: 1px solid var(--b3-border-color);
     padding: 4px 8px 8px 36px;
@@ -307,11 +312,6 @@
   }
 
   &--hide-empty &__body > [data-av-id] .av__row[data-empty="true"][data-panel-visibility=""]:not([data-primary="true"]) {
-    display: none;
-  }
-
-  &:not(.protyle-db-attr--show-all) &__body > [data-av-id] .av__row[data-panel-visibility="hide"],
-  &:not(.protyle-db-attr--show-all) &__body > [data-av-id] .av__row[data-panel-visibility="hide-empty"][data-empty="true"] {
     display: none;
   }
 

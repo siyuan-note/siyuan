@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260930175958"
+		"updated": "20260930212321"
 	},
 	"Children": [
 		{
@@ -59,12 +59,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930175958-sqtxjcl",
-				"updated": "20260930175958"
+				"updated": "20260930212321"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the database attribute panel at the top of a document, click a field name and set Attribute panel field visibility to Always show, Hide when empty, or Always hide. Default follows the global setting for hiding empty fields. This rule applies to that field in the database's attribute panels and does not change its visibility in database views. Use the panel's edit button to temporarily reveal hidden fields, edit their values, or change their visibility rules."
+					"Data": "In a database attribute panel at the top of a document, on a database entry page, or in a block attribute dialog, click a field name to set Attribute panel field visibility to Always show, Hide when empty, or Always hide. Default preserves the panel's existing display settings; the panel at the top of a document follows the global setting for hiding empty fields. Rules apply to attribute panels of that database and do not change field visibility in its views. Click the panel's edit button to temporarily reveal hidden fields and edit their values or visibility rules."
 				}
 			]
 		},

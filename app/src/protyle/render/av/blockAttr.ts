@@ -140,12 +140,15 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             // 条目 ID 仅用于读取行数据，编辑菜单和更新时间使用真实数据库载体块。
             const blockID = row ? row.databaseBlockID : id;
             const primaryValue = table.keyValues.find(item => item.key.type === "block")?.values?.[0] || table.keyValues[0]?.values?.[0];
+            const hasHiddenFields = table.keyValues.some(item => ["hide", "hide-empty"].includes(item.key.attributePanelVisibility));
+            const showAll = hasHiddenFields && element.querySelector<HTMLElement>(`[data-av-id="${table.avID}"]`)?.dataset.panelShowAll === "true";
             let innerHTML = `<div class="custom-attr__avheader">
     <div class="block__logo block__logo--icon popover__block" style="max-width:calc(100% - 40px)" data-id='${JSON.stringify(table.blockIDs)}'>
         <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg>
         <span class="fn__ellipsis">${table.avName || window.siyuan.languages.database}</span>
     </div>
     <div class="fn__flex-1"></div>
+    ${element.classList.contains("protyle-db-attr__body") ? "" : `<button type="button" data-type="toggle-panel-visibility" class="block__icon block__icon--show ariaLabel${hasHiddenFields ? "" : " fn__none"}" data-position="4west" aria-label="${window.siyuan.languages.edit}" aria-pressed="${showAll}"><svg><use xlink:href="#iconEdit"></use></svg></button>`}
     <span data-type="remove" data-row-id="${primaryValue?.blockID || ""}" class="block__icon block__icon--warning block__icon--show b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
 </div>`;
             table.keyValues?.forEach(item => {
@@ -173,7 +176,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             innerHTML += `<div class="fn__hr"></div>
 <button data-type="addColumn" class="b3-button b3-button--cancel"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.newCol}</button>
 <div class="fn__hr--b"></div><div class="fn__hr--b"></div>`;
-            const tableHTML = `<div data-av-id="${table.avID}" data-av-type="table" data-node-id="${blockID}" data-attribute-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
+            const tableHTML = `<div data-av-id="${table.avID}" data-panel-show-all="${showAll}" data-av-type="table" data-node-id="${blockID}" data-attribute-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
             html += tableHTML;
 
             if (element.innerHTML) {
@@ -181,6 +184,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 const blockElement = element.querySelector<HTMLElement>(`[data-attribute-id="${id}"][data-av-id="${table.avID}"]`);
                 if (blockElement) {
                     blockElement.dataset.nodeId = blockID;
+                    blockElement.dataset.panelShowAll = String(showAll);
                     blockElement.innerHTML = innerHTML;
                 } else {
                     element.insertAdjacentHTML("beforeend", tableHTML);
@@ -360,6 +364,16 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 event.preventDefault();
             });
             element.addEventListener("click", (event) => {
+                const visibilityElement = (event.target as HTMLElement).closest<HTMLElement>('[data-type="toggle-panel-visibility"]');
+                if (visibilityElement) {
+                    const databaseElement = visibilityElement.closest<HTMLElement>("[data-av-id]");
+                    const showAll = databaseElement.dataset.panelShowAll !== "true";
+                    databaseElement.dataset.panelShowAll = String(showAll);
+                    visibilityElement.setAttribute("aria-pressed", String(showAll));
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 if (handleTemplateInteraction(protyle, event) || handleRichTextInteraction(protyle, event)) {
                     return;
                 }

@@ -479,6 +479,9 @@ export class AVAttributePanel {
             this.showEmptyFields = false;
         }
         this.element.classList.toggle("protyle-db-attr--show-all", this.showEmptyFields);
+        this.bodyElement.querySelectorAll<HTMLElement>(":scope > [data-av-id]").forEach(item => {
+            item.dataset.panelShowAll = String(this.showEmptyFields);
+        });
         updateEmptyState(this.element, hideEmpty && !this.showEmptyFields);
         const editElement = this.element.querySelector<HTMLElement>('[data-type="toggle-empty"]');
         editElement?.classList.toggle("fn__none", (!hideEmpty && !hasHiddenFields) || this.collapsed);

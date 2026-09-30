@@ -1,5 +1,9 @@
 .b3-dialog {
   &--window {
+    & > .b3-dialog__container > .toolbar {
+      flex-shrink: 0;
+    }
+
     & > .b3-dialog__scrim,
     & > .b3-dialog__container > [class^="resize__"] {
       display: none;

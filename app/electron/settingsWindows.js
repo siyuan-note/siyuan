@@ -3,7 +3,7 @@ const {normalizeWindowGeometry, captureWindowGeometry} = require("./windowGeomet
 const settingsPath = "/stage/build/app/settings.html";
 
 // 只允许已登记的内核页面打开预先授权的设置页，不改变普通链接的打开规则。
-const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, log}) => {
+const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, log, icon, platform = process.platform}) => {
     const pending = new Map();
     const reservations = new Map();
     const windows = new Map();
@@ -59,7 +59,7 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
         }
         if (reserved) cancel(reserved);
         const url = new URL(settingsPath, target.origin);
-        url.searchParams.set("token", data.token);
+        url.searchParams.set("settingsWindowToken", data.token);
         if (target.mode === "remote") {
             url.searchParams.set("remote", "1");
         }
@@ -85,6 +85,7 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
             if (created.url !== approved.url) return;
             release(approved);
             windows.set(approved.key, win);
+            if (platform !== "darwin") win.setMenu(null);
             initialize(win, approved.target);
             const close = () => { if (!win.isDestroyed()) win.destroy(); };
             contents.once("destroyed", close);
@@ -116,7 +117,12 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
             action: "allow",
             overrideBrowserWindowOptions: {
                 title: approved.data.title || "SiYuan",
-                frame: true,
+                frame: platform === "darwin",
+                titleBarStyle: "hidden",
+                trafficLightPosition: {x: 8, y: 8},
+                autoHideMenuBar: true,
+                fullscreenable: true,
+                icon,
                 minWidth: 493,
                 minHeight: 376,
                 width: 1000,

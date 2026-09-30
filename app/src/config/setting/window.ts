@@ -6,7 +6,7 @@ import {Menus} from "../../menus";
 import {genUUID} from "../../util/genID";
 import {fetchSyncPost} from "../../util/fetch";
 import {addBaseURL, redirectToCheckAuth, setNoteBook} from "../../util/pathName";
-import {getLocalStorage, initNativeDialogOverride, initWindowOpenOverride} from "../../protyle/util/compatibility";
+import {getLocalStorage, initNativeDialogOverride, initWindowOpenOverride, isMac, isWindows} from "../../protyle/util/compatibility";
 import {addScriptSync} from "../../protyle/util/addScript";
 import {loadDesktopHostConnection, initDesktopHost} from "../../boot/onGetConfig";
 import {loadLanguages} from "../../boot/loadLanguages";
@@ -31,10 +31,11 @@ import type {Dialog} from "../../dialog";
 import type {ISettingsCommand} from "./nativeWindow";
 import {getSettingTabDefs} from "./tabs";
 import {onWindowsMsg} from "../../window/onWindowsMsg";
+import {applyWindowState} from "../../boot/windowControls";
 
 const initialize = async () => {
     addBaseURL();
-    const token = new URLSearchParams(location.search).get("token");
+    const token = new URLSearchParams(location.search).get("settingsWindowToken");
     if (!token || !window.opener || window.opener.location.origin !== location.origin) {
         window.close();
         return;
@@ -119,6 +120,19 @@ const initialize = async () => {
     await initDesktopHost();
     ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (_event, data: IWebSocketData) => onWindowsMsg(data));
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
+    document.body.classList.toggle("body--windows", isWindows());
+    document.body.classList.toggle("body--win32", !isMac());
+    ipcRenderer.on(Constants.SIYUAN_EVENT, (_event, command: string) => applyWindowState(command));
+    ipcRenderer.send(Constants.SIYUAN_EVENT);
+    const [fullscreen, maximized] = await Promise.all([
+        ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "isFullScreen"}),
+        ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "isMaximized"}),
+    ]);
+    applyWindowState(fullscreen ? "enter-full-screen" : "leave-full-screen");
+    applyWindowState(maximized ? "maximize" : "unmaximize");
+    const zoom = window.siyuan.storage[Constants.LOCAL_ZOOM];
+    const position = Constants.SIZE_ZOOM.find(item => item.zoom === zoom)?.position;
+    if (position) ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "setTrafficLightPosition", zoom, position});
     const user = await fetchSyncPost("/api/setting/getCloudUser", {cached: true});
     window.siyuan.user = user.data && "userId" in user.data ? user.data : null;
     const emoji = await fetchSyncPost("/api/system/getEmojiConf", {});

@@ -14,7 +14,8 @@ const loadRendererModule = (source, modules) => {
 
 const rendererModules = (sources) => {
     let sequence = 0;
-    window.siyuan = {dialogs: [], zIndex: 1, storage: {}, languages: {cancel: "Cancel", save: "Save", config: "Settings"},
+    window.siyuan = {dialogs: [], zIndex: 1, storage: {zoom: 1}, languages: {cancel: "Cancel", save: "Save", config: "Settings",
+        min: "Minimize", max: "Maximize", restore: "Restore", close: "Close"},
         menus: {menu: {element: document.createElement("div"), remove() {}}}, ws: {app: {plugins: [], appId: "test"}}};
     const genUUID = () => "test-" + (++sequence);
     const {Dialog} = loadRendererModule(sources.dialog, {
@@ -23,14 +24,22 @@ const rendererModules = (sources) => {
         "../constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
     });
     const context = {isSettingsWindow: () => document.body.classList.contains("body--settings")};
-    const fit = loadRendererModule(sources.fit, {});
-    return {Dialog, genUUID, context, fit};
+    const {ipcRenderer} = require("electron");
+    const controls = loadRendererModule(sources.controls, {
+        electron: {ipcRenderer}, "../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd", LOCAL_ZOOM: "zoom"}},
+        "../util/functions": {setToolbarLeftMac() {}},
+    });
+    document.body.classList.toggle("body--win32", process.platform !== "darwin");
+    const fit = loadRendererModule(sources.fit, {
+        "../../boot/windowControls": controls, "../../protyle/util/compatibility": {isMac: () => process.platform === "darwin"},
+    });
+    return {Dialog, genUUID, context, fit, controls};
 };
 
 const bootChild = async (sources) => {
     const {Dialog, genUUID, context, fit} = rendererModules(sources);
     const host = await new Promise(resolve => {
-        const token = new URLSearchParams(location.search).get("token");
+        const token = new URLSearchParams(location.search).get("settingsWindowToken");
         window.opener.dispatchEvent(new CustomEvent("siyuan-settings-host-" + token, {detail: resolve}));
     });
     if (host.plugin) {
@@ -89,6 +98,38 @@ const runCases = async (sources) => {
     assert.equal(created, 1);
     assert.notEqual(control.ownerDocument, document);
     assert.equal(setting.dialog.element.querySelector("input"), control);
+    assert.equal(setting.dialog.element.querySelector(".toolbar #drag").textContent, "Plugin");
+    if (process.platform !== "darwin") {
+        assert.ok(setting.dialog.element.querySelector("#minWindow"));
+        assert.ok(setting.dialog.element.querySelector("#maxWindow"));
+        assert.ok(setting.dialog.element.querySelector("#closeWindow"));
+        for (const id of ["minWindow", "maxWindow", "restoreWindow"]) {
+            setting.dialog.element.querySelector("#" + id).click();
+        }
+        await wait();
+        assert.deepEqual(await ipcRenderer.invoke("test-settings-commands"), ["minimize", "maximize", "restore"]);
+    }
+    await ipcRenderer.invoke("test-settings-size", 493, 376);
+    await wait();
+    const childDocument = control.ownerDocument;
+    for (const theme of ["daylight", "midnight"]) {
+        const link = childDocument.getElementById("fixtureTheme");
+        await new Promise(resolve => {
+            link.onload = resolve;
+            link.href = "/fixture/" + theme + ".css?v=" + Date.now();
+        });
+        for (const fontSize of [14, 32]) {
+            childDocument.documentElement.style.setProperty("--b3-font-size", fontSize + "px");
+            const toolbar = setting.dialog.element.querySelector(".toolbar");
+            assert.equal(childDocument.defaultView.getComputedStyle(toolbar).height, "32px");
+            assert.equal(childDocument.defaultView.getComputedStyle(toolbar.querySelector("#drag")).getPropertyValue("-webkit-app-region"), "drag");
+            if (process.platform !== "darwin") {
+                const close = toolbar.querySelector("#closeWindow").getBoundingClientRect();
+                assert.ok(close.right <= childDocument.defaultView.innerWidth);
+                assert.ok(close.height >= 30);
+            }
+        }
+    }
     setting.open("Plugin");
     await wait();
     assert.equal(created, 1);
@@ -101,7 +142,8 @@ const runCases = async (sources) => {
 
     setting.open("Plugin");
     await ipcRenderer.invoke("test-settings-wait");
-    setting.close();
+    if (process.platform === "darwin") setting.close();
+    else setting.dialog.element.querySelector("#closeWindow").click();
     await wait();
     assert.equal(confirmed, 1);
     assert.equal(destroyed, 2);
@@ -122,18 +164,37 @@ if (process.versions.electron && process.type === "browser") {
         let ready = 0;
         let waiting;
         const children = new Set();
+        const commands = [];
         const ts = require("typescript");
         const sources = {};
+        const styles = require("sass").compile(path.join(__dirname, "../src/assets/scss/base.scss"), {
+            logger: {warn() {}, debug() {}},
+        }).css;
+        const themes = Object.fromEntries(["daylight", "midnight"].map(name => [name,
+            fs.readFileSync(path.join(__dirname, "../appearance/themes", name, "theme.css"), "utf8")]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
-            native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts"})) {
+            native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts"})) {
             sources[key] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText;
         }
         const server = createServer((request, response) => {
+            const pathname = new URL(request.url, "http://localhost").pathname;
+            if (pathname.startsWith("/fixture/")) {
+                response.setHeader("Content-Type", "text/css; charset=utf-8");
+                response.end(pathname === "/fixture/base.css" ? styles : themes[path.basename(pathname, ".css")]);
+                return;
+            }
             response.setHeader("Content-Type", "text/html; charset=utf-8");
             const child = request.url.startsWith("/stage/build/app/settings.html");
-            response.end(`<html><body class="${child ? "body--settings" : ""}">${child ?
+            if (child && (new URL(request.url, "http://localhost").searchParams.has("token") ||
+                !request.headers.cookie?.includes("settings-auth=authenticated"))) {
+                response.writeHead(401);
+                response.end(JSON.stringify({code: -1, msg: "Auth failed [query token]"}));
+                return;
+            }
+            if (!child) response.setHeader("Set-Cookie", "settings-auth=authenticated; HttpOnly; SameSite=Strict; Path=/");
+            response.end(`<html><head><link rel="stylesheet" href="/fixture/base.css"><link id="fixtureTheme" rel="stylesheet" href="/fixture/daylight.css"></head><body class="${child ? "body--settings" : ""}">${child ?
                 `<script>const loadRendererModule = ${loadRendererModule.toString()}; const rendererModules = ${rendererModules.toString()}; (${bootChild.toString()})(${JSON.stringify(sources)});</script>` : ""}</body></html>`);
         });
         await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
@@ -143,6 +204,7 @@ if (process.versions.electron && process.type === "browser") {
                 children.add(win);
                 assert.equal(win.getParentWindow(), null);
                 assert.equal(win.isModal(), false);
+                if (process.platform !== "darwin") assert.equal(win.isMenuBarVisible(), false);
                 win.on("closed", () => children.delete(win));
             }, show() {}, log() {}});
         ipcMain.on("test-settings-ready", () => {
@@ -150,6 +212,14 @@ if (process.versions.electron && process.type === "browser") {
         });
         ipcMain.handle("test-settings-wait", () => ready ? (--ready, Promise.resolve()) : new Promise(resolve => { waiting = resolve; }));
         ipcMain.handle("test-settings-window-count", () => children.size);
+        ipcMain.on("siyuan-cmd", (event, command) => {
+            assert.ok([...children].some(child => child.webContents === event.sender));
+            commands.push(command);
+        });
+        ipcMain.handle("test-settings-commands", () => commands);
+        ipcMain.handle("test-settings-size", (_event, width, height) => {
+            for (const child of children) child.setSize(width, height);
+        });
         try {
             owner = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
             owner.webContents.setWindowOpenHandler(details => {

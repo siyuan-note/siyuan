@@ -136,6 +136,7 @@ createSettingsTaskBridge({
 const settingsWindowPolicy = createSettingsWindows({
     ipcMain,
     screen,
+    icon: path.join(appDir, "stage", "icon-large.png"),
     getTarget: id => getWindowKernelTarget(id),
     show: win => showWindow(win),
     log: message => writeLog(message),

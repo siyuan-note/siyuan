@@ -63,7 +63,7 @@ const browserCases = async (source: string, actionsSource: string) => {
     render(root);
     render(root);
     check.equal(root.querySelectorAll(".protyle-action__ocr").length, 1);
-    const action = root.querySelector<HTMLElement>(".protyle-action__ocr");
+    let action = root.querySelector<HTMLElement>(".protyle-action__ocr");
     action.click();
     await new Promise(resolve => setTimeout(resolve, 30));
     check.equal(copies, 1);
@@ -76,6 +76,16 @@ const browserCases = async (source: string, actionsSource: string) => {
     root.setAttribute("data-readonly", "true");
     action.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     check.equal(opens, 1);
+    const snapshot = root.innerHTML;
+    root.innerHTML = snapshot;
+    render(root);
+    action = root.querySelector<HTMLElement>(".protyle-action__ocr");
+    action.click();
+    await new Promise(resolve => setTimeout(resolve, 30));
+    check.equal(copies, 2, "restored image actions still copy OCR text");
+    root.querySelector("img").setAttribute("data-src", "https://example.com/image.png");
+    render(root);
+    check.equal(root.querySelector(".protyle-action__ocr"), null);
     return "Image OCR cases passed";
 };
 

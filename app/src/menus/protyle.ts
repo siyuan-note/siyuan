@@ -49,6 +49,7 @@ import * as dayjs from "dayjs";
 import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
 import {renderImageDisplay} from "../protyle/render/imageDisplay";
+import {renderImageActions} from "../protyle/render/imageActions";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "./util";
@@ -1610,6 +1611,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
 
             imgElement.setAttribute("alt", textElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
             renderImageDisplay(assetElement);
+            renderImageActions(assetElement);
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, nodeElement, html);
         };

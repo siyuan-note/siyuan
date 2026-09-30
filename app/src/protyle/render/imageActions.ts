@@ -2,15 +2,28 @@ import {Constants} from "../../constants";
 import {copyImageOCRText, openImageOCR} from "../../asset/imageOCR";
 import {isEncryptedBox} from "../../util/pathName";
 
+const boundImageActions = new WeakSet<HTMLElement>();
+
 export const renderImageActions = (root: Element) => {
     root.querySelectorAll<HTMLImageElement>(".img img").forEach(image => {
         const actions = image.parentElement.querySelector(".protyle-icons");
-        if (!actions || actions.querySelector(".protyle-action__ocr") || window.siyuan.isPublish ||
+        const existing = actions?.querySelector<HTMLElement>(".protyle-action__ocr");
+        if (!actions || window.siyuan.isPublish ||
             !image.closest(".protyle-wysiwyg") || !image.getAttribute("data-src")?.startsWith("assets/") ||
+            /[?&]box=/.test(image.getAttribute("data-src")) ||
             isEncryptedBox(image.closest("[data-notebook-id]")?.getAttribute("data-notebook-id"))) {
+            existing?.remove();
+            if (actions?.childElementCount === 1) {
+                actions.querySelector(".protyle-icon--last")?.classList.replace("protyle-icon--last", "protyle-icon--only");
+            }
             return;
         }
+        if (existing && boundImageActions.has(existing)) {
+            return;
+        }
+        existing?.remove();
         const action = document.createElement("span");
+        boundImageActions.add(action);
         action.className = "protyle-icon protyle-icon--first protyle-action__ocr ariaLabel";
         action.tabIndex = 0;
         action.setAttribute("role", "button");
@@ -23,7 +36,7 @@ export const renderImageActions = (root: Element) => {
             event.preventDefault();
             clearTimeout(timer);
             timer = window.setTimeout(() => {
-                if (image.isConnected) {
+                if (image.isConnected && action.isConnected) {
                     copyImageOCRText(image.getAttribute("data-src"));
                 }
             }, Constants.TIMEOUT_DBLCLICK);

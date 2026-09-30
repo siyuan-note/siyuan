@@ -23,7 +23,7 @@ const browserCases = async (source: string, actionsSource: string) => {
                 this.element = document.createElement("div");
                 this.element.innerHTML = options.content;
                 document.body.append(this.element);
-                dialog = this;
+                dialog = {element: this.element, destroy: () => this.element.remove()};
             }
             destroy() { this.element.remove(); }
         },

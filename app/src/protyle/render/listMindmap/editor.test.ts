@@ -7,8 +7,12 @@ import test from "node:test";
 import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sourceCode: string, css: string, cleanupSource: string) => {
+const browserCases = async (sourceCode: string, css: string, cleanupSource: string, tabsSource: string) => {
     const check = require("node:assert/strict");
+    const {tabsRender, destroyTabsRender} = new Function(tabsSource + "; return {tabsRender, destroyTabsRender};")();
+    const baseStyle = document.createElement("style");
+    baseStyle.textContent = css;
+    document.head.append(baseStyle);
     const noop = (): void => undefined;
     const settle = async () => {
         await new Promise<void>(resolve => setTimeout(resolve, 0));
@@ -49,6 +53,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         host.style.width = "120px";
         host.style.minWidth = "36px";
         const wysiwyg = document.createElement("div");
+        wysiwyg.className = "protyle-wysiwyg";
         const hintElement = document.createElement("div");
         const toolbarElement = document.createElement("div");
         const subElement = document.createElement("div");
@@ -56,6 +61,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         container.append(element, host, hintElement, toolbarElement, subElement);
         document.body.append(container);
         const state = {
+            focusedText: "",
             flushed: 0,
             destroyed: 0,
             finished: 0,
@@ -109,10 +115,15 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
                 observer.observe(wysiwyg, {subtree: true, childList: true, characterData: true});
                 return {
                     protyle, wysiwyg, hintElement,
-                    focus: noop,
+                    focus: () => {
+                        const target = Array.from(wysiwyg.querySelectorAll<HTMLElement>('[contenteditable="true"]'))
+                            .reverse().find(item => item.getBoundingClientRect().width > 0);
+                        state.focusedText = target?.textContent || "";
+                    },
                     getBlockHTML: () => wysiwyg.innerHTML,
                     getMarkdown: () => wysiwyg.textContent,
                     destroy: () => {
+                        destroyTabsRender(wysiwyg);
                         observer.disconnect();
                         state.destroyed++;
                     },
@@ -143,6 +154,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
                     event.altKey === binding.includes("⌥");
             },
             processRender: noop,
+            initEditorTabs: () => tabsRender(wysiwyg, {readonly: () => false}),
             setCustomBlockRootReady: noop,
             avRender: noop,
             blockRender: noop,
@@ -203,6 +215,15 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     // 直接键入只替换首个段落，保留其余内容块。
     const paragraph = (id: string, html: string) =>
         `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true">${html}</div></div>`;
+    for (const active of ["first", "second"]) {
+        const tabs = create(`<div class="tabs" data-type="NodeTabs" data-node-id="tabs" tabs-active-id="${active}">
+            ${["first", "second"].map(id => `<div class="tab-item" data-type="NodeTabItem" data-node-id="${id}">
+                <div class="tab-item-info"><div class="tab-item-title">${id}</div></div>
+                <div class="tab-item-content">${paragraph(id + "-body", id)}</div></div>`).join("")}</div>`);
+        check.equal(tabs.state.focusedText, active, "opening an editor focuses the active tab instead of the last tab");
+        check.equal(tabs.wysiwyg.querySelector(".tabs").getAttribute("tabs-active-id"), active);
+        await tabs.remove();
+    }
     let typed = create(paragraph("first", "Old <strong>rich</strong>") +
         paragraph("second", "Keep") + '<div data-type="NodeThematicBreak" data-node-id="special"></div>', "N");
     check.equal(typed.wysiwyg.querySelector('[data-node-id="first"] > [contenteditable="true"]').textContent, "N");
@@ -676,6 +697,11 @@ test("list mindmap editor flushes pending input and preserves text across finish
     const cleanupSource = transpileModule(modelSource.slice(modelSource.indexOf("const cleanListMindmapDOM ="),
         modelSource.indexOf("// 转换前将思维导图块还原为列表结构"))
         .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const tabsSource = ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsRender.ts"]
+        .map(file => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
+            .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
+            compilerOptions: {target: ScriptTarget.ES2021},
+        }).outputText).join("\n");
     const code = `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
@@ -687,7 +713,7 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         const result = await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(cleanupSource)})`)});
+        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(cleanupSource)}, ${JSON.stringify(tabsSource)})`)});
         console.log(result);
         win.destroy();
         app.exit(0);

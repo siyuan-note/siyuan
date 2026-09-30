@@ -13,6 +13,7 @@ import {getDefaultToolbar} from "../../toolbar/defaults";
 import {hideElements} from "../../ui/hideElements";
 import {matchHotKey} from "../../util/hotKey";
 import {processRender} from "../../util/processCode";
+import {initEditorTabs} from "../../wysiwyg/tabs";
 import {avRender} from "../av/render";
 import {blockRender} from "../blockRender";
 import {highlightRender} from "../highlightRender";
@@ -171,6 +172,8 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             protyle.block.parentID = node.id;
             protyle.path = owner.path;
             setCustomBlockRootReady(element, true);
+            // 聚焦前同步页签可见性，避免光标进入尚未隐藏的非活动页签。
+            initEditorTabs(protyle);
             processRender(element);
             highlightRender(element);
             blockRender(protyle, element, undefined, options.onResize);

@@ -307,8 +307,9 @@ export class ListMindmapView {
 
     private showButtonTooltip = (event: Event) => {
         const button = (event.target as Element).closest<HTMLButtonElement>("button[aria-label]");
-        if (!button || !this.options.host.contains(button) || button.classList.contains("mindmap-view__relation") ||
-            button.classList.contains("mindmap-view__summary")) {
+        if (!button || button.closest(".mindmap-view") !== this.options.host ||
+            !(this.toolbar.contains(button) || this.inspector.contains(button) ||
+                button.classList.contains("mindmap-view__add-child") || button.classList.contains("mindmap-view__fold"))) {
             this.tooltip.hidden = true;
             return;
         }

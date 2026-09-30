@@ -2791,6 +2791,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         }});
     tabController.view = tabView;
     check.equal(tabHost.querySelector(".tabs-tab-label").textContent, "页签项块");
+    const tabButton = tabHost.querySelector<HTMLElement>(".tabs-tab");
+    tabButton.dispatchEvent(new MouseEvent("pointerover", {bubbles: true}));
+    check.equal(tabHost.querySelector<HTMLElement>('[role="tooltip"]').hidden, true,
+        "tab buttons do not trigger the mindmap toolbar tooltip");
+    tabButton.dispatchEvent(new FocusEvent("focusin", {bubbles: true}));
+    check.equal(tabHost.querySelector<HTMLElement>('[role="tooltip"]').hidden, true);
     const fragmentHost = document.createElement("div");
     fragmentHost.className = "mindmap-view";
     const fragmentRoot = document.createElement("div");

@@ -20,6 +20,7 @@ import {
     isWin11
 } from "../protyle/util/compatibility";
 import {setCodeTheme} from "../protyle/render/util";
+import {refreshMermaidTheme} from "../protyle/render/mermaidRender";
 import {getBackend, getFrontend} from "./functions";
 import {getWorkspaceName} from "./processTitle";
 import {ensureSelectedCustomFonts, getExportCustomFontStyle} from "./customFont";
@@ -163,6 +164,7 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     }
     if (previousThemeMode && previousThemeMode !== themeMode) {
         refreshChartTheme(document.body);
+        refreshMermaidTheme(document.body);
     }
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
     const defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;

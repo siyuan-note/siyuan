@@ -50,10 +50,44 @@ for (const scenario of [
         assert.deepEqual([Number(attributes.get("width")), Number(attributes.get("height"))], scenario.expected);
         assert.equal(clone.style.width, `${scenario.expected[0]}px`);
         assert.equal(clone.style.height, `${scenario.expected[1]}px`);
+        assert.equal(clone.style.backgroundColor, "#fff");
         assert.equal(previewBlob.type, "image/svg+xml");
         cleanup();
         assert.deepEqual(revoked, ["blob:diagram"]);
     });
+}
+
+for (const subtype of ["mermaid", "echarts"]) {
+    for (const background of ["rgb(30, 30, 30)", "rgb(255, 255, 255)"]) {
+        test(`${subtype} preview uses the editor background ${background}`, async () => {
+            const editor = {parentElement: null};
+            const diagram = {parentElement: editor, getAttribute: () => subtype, querySelector: () => render};
+            const clone = {style: {}, querySelectorAll: () => [], setAttribute: () => {}};
+            const render = {
+                viewBox: {baseVal: {width: 300, height: 150}}, cloneNode: () => clone,
+                querySelectorAll: () => [], getBoundingClientRect: () => ({width: 300, height: 150}),
+            };
+            let rasterBackground: string;
+            const exports = {} as {previewDiagram: (element: unknown) => Promise<void>};
+            runInNewContext(compiled, {
+                exports, Blob,
+                require: () => ({Constants: {PROTYLE_CDN: ""}, addScript: async () => {}, previewImages: () => {}}),
+                window: {
+                    getComputedStyle: (element: unknown) => ({length: 0,
+                        backgroundColor: element === editor ? background : "rgba(0, 0, 0, 0)"}),
+                    htmlToImage: {toBlob: async (_element: unknown, options: {backgroundColor: string}) => {
+                        rasterBackground = options.backgroundColor;
+                        return new Blob(["png"]);
+                    }},
+                },
+                XMLSerializer: class { public serializeToString() { return "<svg/>"; } },
+                URL: {createObjectURL: () => "blob:diagram"},
+            });
+            await exports.previewDiagram(diagram);
+            assert.equal(subtype === "echarts" ? rasterBackground : (clone.style as {backgroundColor: string}).backgroundColor,
+                background);
+        });
+    }
 }
 
 for (const carrier of ["object", "img", "empty"]) {

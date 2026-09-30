@@ -55,6 +55,12 @@ const runCases = source => {
     state.menu.close();
     check.equal(api.getMobileSelectMenuElement(), undefined);
 
+    select.className = "b3-text-field";
+    select.click();
+    check.equal(api.getMobileSelectMenuElement(), state.menu.element);
+    state.menu.close();
+    select.className = "b3-select";
+
     host.className = "b3-menu";
     select.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
     check.equal(state.menu.independent, true);

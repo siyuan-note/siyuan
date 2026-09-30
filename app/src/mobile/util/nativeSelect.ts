@@ -6,7 +6,7 @@ let activeMenu: Menu | undefined;
 export const getMobileSelectMenuElement = () => activeMenu?.element;
 
 const getSelect = (target: EventTarget) => {
-    const select = target instanceof Element ? target.closest<HTMLSelectElement>("select.b3-select") : null;
+    const select = target instanceof Element ? target.closest<HTMLSelectElement>("select.b3-select, select.b3-text-field") : null;
     return select && !select.matches(":disabled") && !select.multiple && select.size <= 1 ? select : undefined;
 };
 

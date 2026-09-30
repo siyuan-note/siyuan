@@ -49,7 +49,7 @@ export const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/gemini.svg"},
     {id: "mistral", name: "Mistral AI", baseURL: "https://api.mistral.ai/v1", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/mistral.svg"},
     {
-        id: "xiaomi-mimo", name: "Xiaomi MiMo", baseURL: "https://api.xiaomimimo.com/v1", category: "official", responsesSupport: "supported",
+        id: "xiaomi-mimo", name: "Xiaomi MiMo", baseURL: "https://api.xiaomimimo.com/v1", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/xiaomi-mimo.png",
         protocolBaseURLs: {"anthropic-messages": "https://api.xiaomimimo.com/anthropic"},
     },
     {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/siliconflow.svg"},

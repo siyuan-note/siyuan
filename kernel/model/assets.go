@@ -918,12 +918,12 @@ type AssetSearchMatch struct {
 }
 
 func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
-	ret, _ = SearchAssetsByNamePage(keyword, exts, nil, 1, Conf.Search.Limit)
+	ret, _ = SearchAssetsByNamePage(keyword, exts, nil, 1, Conf.Search.Limit, false)
 	return
 }
 
-// SearchAssetsByNamePage 根据文件名、路径和扩展名筛选资源，并按稳定顺序返回指定页。
-func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMatch, page, pageSize int) (ret []*cache.Asset, err error) {
+// SearchAssetsByNamePage 筛选资源，可合并图片元数据命中，并按稳定顺序返回指定页。
+func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMatch, page, pageSize int, includeMetadata bool) (ret []*cache.Asset, err error) {
 	ret = []*cache.Asset{}
 	if page < 1 || pageSize < 1 || pageSize > Conf.Search.Limit {
 		return nil, errors.New("invalid asset search page")
@@ -957,6 +957,14 @@ func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMat
 	keywords = append(keywords, keyword)
 	if "" != keyword {
 		keywords = append(keywords, strings.Split(keyword, " ")...)
+	}
+	metadataHits := map[string]int{}
+	if includeMetadata && strings.TrimSpace(keyword) != "" {
+		markdowns, queryErr := sql.QueryImageSpanMarkdowns()
+		if queryErr != nil {
+			return nil, queryErr
+		}
+		metadataHits = imageAssetMetadataHits(markdowns, keywords)
 	}
 	pathHitCount := map[string]int{}
 	filterAsset := func(path string, asset *cache.Asset) bool {
@@ -1012,12 +1020,16 @@ func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMat
 		}
 
 		// 只返回有匹配的资源
-		if 1 > hitNameCount+hitPathCount {
+		metadataHitCount := metadataHits[asset.Path]
+		if includeMetadata && strings.TrimSpace(keyword) != "" {
+			metadataHitCount += assetMetadataTextHits(util.GetAssetText(asset.Path), keywords)
+		}
+		if 1 > hitNameCount+hitPathCount+metadataHitCount {
 			return false
 		}
 
 		// 记录命中次数用于排序
-		pathHitCount[asset.Path] = hitNameCount + hitPathCount
+		pathHitCount[asset.Path] = hitNameCount + hitPathCount + metadataHitCount
 		return true
 	}
 	matchedAssets := cache.FilterAssets(filterAsset)

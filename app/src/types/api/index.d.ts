@@ -1684,7 +1684,7 @@ export type SearchAssetContentRequestInput = { "method"?: number | null; "orderB
 
 export type SearchAssetMatchInput = { "field"?: "name" | "path"; "mode": "prefix" | "suffix" | "regex"; "value": string; };
 
-export type SearchAssetRequestInput = { "exts"?: Array<string> | null; "k": string; "match"?: SearchAssetMatchInput | null; "page"?: number | null; "pageSize"?: number | null; };
+export type SearchAssetRequestInput = { "exts"?: Array<string> | null; "includeMetadata"?: boolean; "k": string; "match"?: SearchAssetMatchInput | null; "page"?: number | null; "pageSize"?: number | null; };
 
 export type SearchAttributeViewRelationKeyRequestInput = { "avID": string; "keyword": string; };
 

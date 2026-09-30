@@ -36300,6 +36300,9 @@
             }
           ]
         },
+        "includeMetadata": {
+          "type": "boolean"
+        },
         "k": {
           "type": "string"
         },

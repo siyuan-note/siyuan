@@ -39,6 +39,9 @@ type SearchPathRequest struct {
 type SearchAssetRequest struct {
 	// K 保留原有文件名和路径的关键词搜索与排序语义。
 	K string `json:"k"`
+	// IncludeMetadata 为 true 时额外匹配普通笔记本中图片的标题、提示文本和已有 OCR 文本。
+	// 省略或 false 保留文件名和路径搜索；不查询加密笔记本，筛选、排序及分页仍在合并命中后执行。
+	IncludeMetadata bool `json:"includeMetadata" api:"optional"`
 	// Exts 可省略或留空以搜索全部类型，扩展名接受 png 和 .png 两种写法，匹配时不区分大小写。
 	Exts []string `json:"exts" api:"optional,nullable"`
 	// Match 在关键词和扩展名筛选后、分页前作用于原始文件名或 assets/ 相对路径。

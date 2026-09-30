@@ -49,6 +49,23 @@ type Span struct {
 	IAL      string
 }
 
+// QueryImageSpanMarkdowns 读取全局索引中的图片引用，保留同一段落内各图片的元数据归属。
+func QueryImageSpanMarkdowns() (ret []string, err error) {
+	rows, err := query("SELECT DISTINCT markdown FROM spans WHERE type = 'img'")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var markdown string
+		if err = rows.Scan(&markdown); err != nil {
+			return nil, err
+		}
+		ret = append(ret, markdown)
+	}
+	return ret, rows.Err()
+}
+
 func SelectSpansRawStmt(stmt string, limit int) (ret []*Span) {
 	return selectSpansRawStmt(stmt, limit, func(stmt string) (*sql.Rows, error) {
 		return query(stmt)

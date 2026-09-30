@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20260820133158"
+		"updated": "20260930085927"
 	},
 	"Children": [
 		{
@@ -344,6 +344,20 @@
 			]
 		},
 		{
+			"ID": "20260930085927-fd25q1l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930085927-fd25q1l",
+				"updated": "20260930085927"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When inserting an existing asset, keywords also match image titles, tooltip text, and existing OCR text. The same image may have different titles or tooltip text in different documents; any matching reference can locate the asset. Encrypted notebook assets are excluded from this global search."
+				}
+			]
+		},
+		{
 			"ID": "20210115224203-q8bj2gd",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -386,7 +400,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;img\u0026gt;"
+					"TextMarkTextContent": "&lt;img&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -395,7 +409,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+					"TextMarkTextContent": "&lt;iframe&gt;"
 				},
 				{
 					"Type": "NodeText",

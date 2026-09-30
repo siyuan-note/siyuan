@@ -152,7 +152,7 @@ var searchAsset = contractHandler(apicontract.SearchAssetByName, func(c *gin.Con
 	if request.Match != nil {
 		match = &model.AssetSearchMatch{Field: request.Match.Field, Mode: request.Match.Mode, Value: request.Match.Value}
 	}
-	assets, err := model.SearchAssetsByNamePage(request.K, request.Exts, match, page, pageSize)
+	assets, err := model.SearchAssetsByNamePage(request.K, request.Exts, match, page, pageSize, request.IncludeMetadata)
 	if err != nil {
 		return apicontract.Failure[[]*apicontract.SearchAsset](-1, err.Error())
 	}

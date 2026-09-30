@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20260820133158"
+		"updated": "20260930085927"
 	},
 	"Children": [
 		{
@@ -340,6 +340,20 @@
 			]
 		},
 		{
+			"ID": "20260930085927-6il5688",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930085927-6il5688",
+				"updated": "20260930085927"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入已有資源時，關鍵字也會比對圖片標題、提示文字及已有的 OCR 文字。同一圖片在不同文件中的標題或提示文字可以不同，任一引用符合即可找到該資源。此全域搜尋不包含加密筆記本的資源。"
+				}
+			]
+		},
+		{
 			"ID": "20211226123051-5250xg7",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -369,7 +383,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;img\u0026gt;"
+					"TextMarkTextContent": "&lt;img&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -378,7 +392,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+					"TextMarkTextContent": "&lt;iframe&gt;"
 				},
 				{
 					"Type": "NodeText",

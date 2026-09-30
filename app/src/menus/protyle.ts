@@ -91,7 +91,8 @@ import {
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
         k,
-        exts
+        exts,
+        includeMetadata: true
     }, (response) => {
         let searchHTML = "";
         response.data.forEach((item: { path: string, hName: string }, index: number) => {

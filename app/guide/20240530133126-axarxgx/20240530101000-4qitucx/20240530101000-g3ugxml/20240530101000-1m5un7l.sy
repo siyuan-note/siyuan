@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20260820133158"
+		"updated": "20260930085927"
 	},
 	"Children": [
 		{
@@ -351,6 +351,20 @@
 			]
 		},
 		{
+			"ID": "20260930085927-1t89t26",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930085927-1t89t26",
+				"updated": "20260930085927"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "既存のアセットを挿入するときは、画像のタイトル、ツールチップのテキスト、既存の OCR テキストでも検索できます。同じ画像にドキュメントごとに異なるタイトルや説明が付いている場合、いずれかの参照が一致すればアセットを検索できます。このグローバル検索には暗号化ノートブックのアセットは含まれません。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-m2u22gy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -391,7 +405,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;img\u0026gt;"
+					"TextMarkTextContent": "&lt;img&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -400,7 +414,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+					"TextMarkTextContent": "&lt;iframe&gt;"
 				},
 				{
 					"Type": "NodeText",

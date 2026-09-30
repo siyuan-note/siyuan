@@ -9,11 +9,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -183,6 +185,7 @@ func TestAPIContractSearchPathAndSubtypeCompatibility(t *testing.T) {
 // 搜索查询在契约测试的独立进程内访问临时数据库。
 func testSearchQueryContracts(t *testing.T, docID string) {
 	t.Helper()
+	testSearchAssetMetadataContract(t)
 	for _, entry := range []struct {
 		path, body string
 		handler    gin.HandlerFunc
@@ -212,6 +215,66 @@ func testSearchQueryContracts(t *testing.T, docID string) {
 		}
 		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 {
 			t.Fatalf("search query failed: %s: %s, %v", path, recorder.Body.String(), err)
+		}
+	}
+}
+
+// testSearchAssetMetadataContract 在独立数据库中验证图片元数据、文件筛选和分页。
+func testSearchAssetMetadataContract(t *testing.T) {
+	t.Helper()
+	assetsDir := filepath.Join(util.DataDir, "assets")
+	if err := os.MkdirAll(assetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"metadata-a.png", "metadata-b.webp", "metadata-c.png", "metadata-orphan.png"} {
+		if err := os.WriteFile(filepath.Join(assetsDir, name), []byte("image"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cache.LoadAssets()
+	lute := util.NewLute()
+	tree := parse.Parse("", []byte(`![metadata hint](assets/metadata-a.png "metadata caption") ![other hint](assets/metadata-b.webp "other caption")`), lute.ParseOptions)
+	tree.ID, tree.Box, tree.Path, tree.HPath = tree.Root.ID, "20260912000000-boxapi1", "/"+tree.Root.ID+".sy", "/Images"
+	sql.UpsertTreeQueue(tree)
+	sql.FlushQueue()
+	util.SetAssetText("assets/metadata-c.png", "metadata recognized text")
+	util.SetAssetText("assets/metadata-orphan.png", "metadata orphan text")
+	t.Cleanup(func() {
+		util.SetAssetText("assets/metadata-c.png", "")
+		util.SetAssetText("assets/metadata-orphan.png", "")
+	})
+	engine := gin.New()
+	engine.POST("/api/search/searchAsset", searchAsset)
+	for _, tc := range []struct {
+		body string
+		want []string
+	}{
+		{`{"k":"caption"}`, nil},
+		{`{"k":"caption","includeMetadata":false}`, nil},
+		{`{"k":"caption","includeMetadata":true}`, []string{"assets/metadata-a.png", "assets/metadata-b.webp"}},
+		{`{"k":"other","includeMetadata":true}`, []string{"assets/metadata-b.webp"}},
+		{`{"k":"recognized","includeMetadata":true}`, []string{"assets/metadata-c.png"}},
+		{`{"k":"orphan text","includeMetadata":true,"exts":["webp"]}`, nil},
+		{`{"k":"caption","includeMetadata":true,"exts":["png"],"match":{"mode":"suffix","value":"-a.png"}}`, []string{"assets/metadata-a.png"}},
+		{`{"k":"recognized","includeMetadata":true,"pageSize":1,"page":2}`, nil},
+		{`{"k":"%_'; --","includeMetadata":true}`, nil},
+	} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/search/searchAsset", strings.NewReader(tc.body)))
+		requireAPIContract(t, "POST", "/api/search/searchAsset", recorder)
+		var response struct {
+			Code int                        `json:"code"`
+			Data []*apicontract.SearchAsset `json:"data"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 {
+			t.Fatalf("metadata search failed: %s, %v", recorder.Body.String(), err)
+		}
+		var paths []string
+		for _, asset := range response.Data {
+			paths = append(paths, asset.Path)
+		}
+		if !reflect.DeepEqual(paths, tc.want) {
+			t.Fatalf("metadata search %s: got %v, want %v", tc.body, paths, tc.want)
 		}
 	}
 }

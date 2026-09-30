@@ -37,6 +37,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/ocr"
 )
 
 var (
@@ -50,16 +51,16 @@ var (
 	assetsTextsChanged = atomic.Bool{}
 )
 
-func CleanNotExistAssetsTexts() {
+func CleanNotExistAssetsTexts(exists func(string) bool) {
 	assetsTextsLock.Lock()
 	defer assetsTextsLock.Unlock()
 
 	assetsPath := GetDataAssetsAbsPath()
 	var toRemoves []string
 	for asset := range assetsTexts {
-		assetAbsPath := strings.TrimPrefix(asset, "assets")
+		assetAbsPath := strings.TrimPrefix(OCRAssetKey(asset), "assets")
 		assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
-		if !filelock.IsExist(assetAbsPath) {
+		if !filelock.IsExist(assetAbsPath) && !exists(asset) {
 			toRemoves = append(toRemoves, asset)
 		}
 	}
@@ -85,14 +86,16 @@ func LoadAssetsTexts() {
 		return
 	}
 
-	assetsTextsLock.Lock()
-	if err = gulu.JSON.UnmarshalJSON(data, &assetsTexts); err != nil {
+	loaded := map[string]string{}
+	if err = gulu.JSON.UnmarshalJSON(data, &loaded); err == nil && loaded == nil {
+		err = errors.New("OCR texts must be an object")
+	}
+	if err != nil {
 		logging.LogErrorf("unmarshal assets texts failed: %s", err)
-		if err = filelock.Remove(assetsTextsPath); err != nil {
-			logging.LogErrorf("removed corrupted assets texts failed: %s", err)
-		}
 		return
 	}
+	assetsTextsLock.Lock()
+	assetsTexts = loaded
 	assetsTextsLock.Unlock()
 	debug.FreeOSMemory()
 
@@ -114,7 +117,7 @@ func SaveAssetsTexts() {
 
 	assetsTextsLock.Lock()
 	// OCR 功能未开启且 ocr-texts.json 不存在时，如果 assetsTexts 为空则不创建文件
-	if !TesseractEnabled && !filelock.IsExist(assetsTextsPath) && 0 == len(assetsTexts) {
+	if !filelock.IsExist(assetsTextsPath) && 0 == len(assetsTexts) {
 		assetsTextsLock.Unlock()
 		assetsTextsChanged.Store(false)
 		return
@@ -140,6 +143,7 @@ func SaveAssetsTexts() {
 }
 
 func SetAssetText(asset, text string) {
+	asset = OCRAssetKey(asset)
 	assetsTextsLock.Lock()
 	oldText, ok := assetsTexts[asset]
 	assetsTexts[asset] = text
@@ -152,33 +156,20 @@ func SetAssetText(asset, text string) {
 func ExistsAssetText(asset string) (ret bool) {
 	assetsTextsLock.Lock()
 	_, ret = assetsTexts[asset]
-	assetsTextsLock.Unlock()
-	return
-}
-
-func OcrAsset(asset string) (ret []map[string]string, err error) {
-	if !TesseractEnabled {
-		err = errors.New(Langs[Lang][266])
-		return
+	if !ret {
+		_, ret = assetsTexts[OCRAssetKey(asset)]
 	}
-
-	assetsPath := GetDataAssetsAbsPath()
-	assetAbsPath := strings.TrimPrefix(asset, "assets")
-	assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
-	ret = Tesseract(assetAbsPath)
-	assetsTextsLock.Lock()
-	ocrText := GetOcrJsonText(ret)
-	assetsTexts[asset] = ocrText
 	assetsTextsLock.Unlock()
-	if "" != ocrText {
-		assetsTextsChanged.Store(true)
-	}
 	return
 }
 
 func GetAssetText(asset string) (ret string) {
 	assetsTextsLock.Lock()
-	ret = assetsTexts[asset]
+	var found bool
+	ret, found = assetsTexts[OCRAssetKey(asset)]
+	if !found {
+		ret = assetsTexts[asset]
+	}
 	assetsTextsLock.Unlock()
 	return
 }
@@ -186,8 +177,17 @@ func GetAssetText(asset string) (ret string) {
 func RemoveAssetText(asset string) {
 	assetsTextsLock.Lock()
 	delete(assetsTexts, asset)
+	delete(assetsTexts, OCRAssetKey(asset))
 	assetsTextsLock.Unlock()
 	assetsTextsChanged.Store(true)
+}
+
+// OCRAssetKey 使同一图片的查询参数和片段引用共享识别结果。
+func OCRAssetKey(asset string) string {
+	if index := strings.IndexAny(asset, "?#"); index >= 0 {
+		return asset[:index]
+	}
+	return asset
 }
 
 var tesseractExts = []string{
@@ -218,16 +218,23 @@ func IsTesseractExtractable(p string) bool {
 // tesseractOCRLock 用于 Tesseract OCR 加锁串行执行提升稳定性 https://github.com/siyuan-note/siyuan/issues/7265
 var tesseractOCRLock = sync.Mutex{}
 
-func Tesseract(imgAbsPath string) (ret []map[string]string) {
+type TesseractProvider struct{}
+
+func (TesseractProvider) Available() bool {
+	return ContainerStd == Container && TesseractEnabled
+}
+
+func (TesseractProvider) Recognize(parent context.Context, imgAbsPath string) (ret []map[string]string, err error) {
 	if ContainerStd != Container || !TesseractEnabled {
+		err = ocr.ErrUnavailable
 		return
 	}
 
-	defer logging.Recover()
 	tesseractOCRLock.Lock()
 	defer tesseractOCRLock.Unlock()
 
 	if !IsTesseractExtractable(imgAbsPath) {
+		err = errors.New("unsupported Tesseract image format")
 		return
 	}
 
@@ -237,28 +244,28 @@ func Tesseract(imgAbsPath string) (ret []map[string]string) {
 	}
 
 	if TesseractMaxSize < uint64(info.Size()) {
+		err = errors.New("image exceeds Tesseract size limit")
 		return
 	}
-
-	defer logging.Recover()
 
 	timeout := 7000
 	timeoutEnv := os.Getenv("SIYUAN_TESSERACT_TIMEOUT")
 	if "" != timeoutEnv {
-		if timeoutParsed, parseErr := strconv.Atoi(timeoutEnv); nil == parseErr {
+		if timeoutParsed, parseErr := strconv.Atoi(timeoutEnv); nil == parseErr && timeoutParsed > 0 {
 			timeout = timeoutParsed
 		} else {
 			logging.LogWarnf("parse tesseract timeout [%s] failed: %s", timeoutEnv, parseErr)
 		}
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Millisecond)
+	ctx, cancel := context.WithTimeout(parent, time.Duration(timeout)*time.Millisecond)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, TesseractBin, "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", strings.Join(TesseractLangs, "+"), "tsv")
 	gulu.CmdAttr(cmd)
-	output, err := cmd.CombinedOutput()
+	output, err := cmd.Output()
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 		logging.LogWarnf("tesseract [path=%s, size=%d] timeout [%dms]", imgAbsPath, info.Size(), timeout)
+		err = ctx.Err()
 		return
 	}
 
@@ -273,6 +280,9 @@ func Tesseract(imgAbsPath string) (ret []map[string]string) {
 	// 按行分割 TSV 数据
 	tsv = strings.ReplaceAll(tsv, "\r", "")
 	lines := strings.Split(tsv, "\n")
+	if len(lines) == 0 || !strings.HasPrefix(lines[0], "level\t") {
+		return nil, errors.New("invalid Tesseract TSV response")
+	}
 
 	// 解析 TSV 数据 跳过标题行，从第二行开始处理
 	for _, line := range lines[1:] {
@@ -317,12 +327,20 @@ func GetOcrJsonText(jsonData []map[string]string) (ret string) {
 var tesseractInited = atomic.Bool{}
 
 func WaitForTesseractInit() {
-	for {
-		if tesseractInited.Load() {
-			return
+	_ = WaitForTesseractInitContext(context.Background())
+}
+
+func WaitForTesseractInitContext(ctx context.Context) error {
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+	for !tesseractInited.Load() {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
 		}
-		time.Sleep(time.Second)
 	}
+	return ctx.Err()
 }
 
 func InitTesseract() {

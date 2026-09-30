@@ -161,11 +161,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y strace
+      - name: Prepare native OCR verification resources
+        run: python3 scripts/prepare-ocr.py --runtime linux-amd64 --build-worker
       - name: Test all kernel packages
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
         run: go test -tags "fts5 sqlcipher" ./... -count=1
         working-directory: kernel
+        env:
+          SIYUAN_OCR_TEST_ASSETS: ${{ github.workspace }}/app/stage/ocr/models
+          SIYUAN_OCR_TEST_LIBRARY: ${{ github.workspace }}/app/stage/ocr/runtime/linux-amd64/libonnxruntime.so
       - name: Test path fixtures with custom temporary directories
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
@@ -197,6 +202,8 @@ jobs:
         continue-on-error: true
         run: pnpm test
         working-directory: app
+      - name: Test OCR resource preparation
+        run: python -m unittest discover -s scripts -p "test_prepare_ocr.py"
 
   build:
     runs-on: ${{ matrix.config.os }}
@@ -662,7 +669,8 @@ jobs:
              ${{ github.workspace }}/siyuan-android/app/libs/kernel.aar
           cd ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
           node scripts/trimChangelogs.js
-          zip -r app.zip appearance guide stage $([ -d changelogs ] && echo changelogs)
+          python3 ../scripts/prepare-ocr.py
+          zip -r app.zip appearance guide stage $([ -d changelogs ] && echo changelogs) -x 'stage/ocr/runtime/*'
           zip -j app.zip ../LICENSE ../THIRD_PARTY_NOTICES.md
           mkdir -p ${{ github.workspace }}/siyuan-android/app/src/main/assets
           cp app.zip ${{ github.workspace }}/siyuan-android/app/src/main/assets/app.zip

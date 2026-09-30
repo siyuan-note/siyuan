@@ -82,7 +82,7 @@ type AssetTextData struct {
 	Text string `json:"text"`
 }
 
-// AssetOCRData 的列名来自识别工具的 TSV 表头，单元格均为文本。
+// AssetOCRData 的列名沿用 Tesseract TSV 表头，所有提供商的单元格均为文本。
 type AssetOCRData struct {
 	Text    string              `json:"text"`
 	OCRJSON []map[string]string `json:"ocrJSON"`

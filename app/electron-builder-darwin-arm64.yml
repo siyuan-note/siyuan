@@ -12,6 +12,7 @@ directories:
 files:
   - "electron"
 afterPack: "./scripts/afterPack.js"
+beforePack: "./scripts/beforePack.js"
 extraFiles:
   - from: "../LICENSE"
     to: "Resources/LICENSE"
@@ -45,6 +46,9 @@ extraResources:
     to: "changelogs"
   - from: "stage"
     to: "stage"
+    filter: ["**/*", "!ocr/runtime/**/*"]
+  - from: "stage/ocr/runtime/darwin-arm64"
+    to: "stage/ocr/runtime/darwin-arm64"
   - from: "guide"
     to: "guide"
     filter: "!**/{.DS_Store,.git,.gitignore,.idea}"

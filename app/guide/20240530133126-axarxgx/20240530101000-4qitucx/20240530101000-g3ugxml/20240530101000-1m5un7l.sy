@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20260930093600"
+		"updated": "20261001013550"
 	},
 	"Children": [
 		{
@@ -1005,7 +1005,7 @@
 			"Properties": {
 				"ID": "20240530101000-5bix8t1",
 				"id": "20240530101000-9evyuhr",
-				"updated": "20240530101000"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
@@ -1020,22 +1020,63 @@
 			"Properties": {
 				"ID": "20240530101000-fl1bsnw",
 				"id": "20240530101000-t4ud4y2",
-				"updated": "20240530101000"
+				"updated": "20261001000112"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で Tesseract または PaddleOCR を選択し、自動認識を設定します。認識はカーネルでオフライン実行され、画面を開く必要はありません。Tesseract はデスクトップに別途インストールしてください。"
+				}
+			]
+		},
+		{
+			"ID": "20261001000112-ooz689o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001000112-ooz689o",
+				"updated": "20261001000112"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "この機能はデスクトップ版のみサポートされており、事前に "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/tesseract-ocr/tesseract",
-					"TextMarkTextContent": "Tesseract OCR"
-				},
+					"Data": "PaddleOCR には PP-OCRv6 Tiny と Small が内蔵され、ダウンロードせずにオフラインで使用できます。Tiny はリソース消費が少なく、Small は認識精度が高いモデルです。ほかの互換 PP-OCRv6 モデルをインポートする場合は、検出と認識の ONNX ファイルと各 inference.yml を選択します。インポートしたモデルはワークスペースと同期され、プロバイダーと使用モデルの選択は端末ごとに保存されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261001000112-87qzkfr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001000112-87qzkfr",
+				"updated": "20261001000112"
+			},
+			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": " プログラムをインストールしておく必要があります。"
+					"Data": "手動認識と自動認識は選択したプロバイダーを使用します。切り替えても既存の結果は保持され、画像メニューから明示的に再認識できます。失敗した場合は前回の結果を保持し、プロバイダーを自動切り替えしません。テキストは画像の文字検索と結果の編集に引き続き使用されます。暗号化ノートブックは OCR の対象外です。"
 				}
 			]
 		},
@@ -1070,7 +1111,7 @@
 			"Properties": {
 				"ID": "20240530101000-mbaa8ar",
 				"id": "20240530101000-qmvr8rd",
-				"updated": "20240530101000"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
@@ -1083,7 +1124,7 @@
 					"Properties": {
 						"ID": "20240530101000-lw8ri1k",
 						"id": "20240530101000-vuyib46",
-						"updated": "20240530101000"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1092,7 +1133,7 @@
 							"Properties": {
 								"ID": "20240530101000-9ucri2d",
 								"id": "20240530101000-ciyew7k",
-								"updated": "20240530101000"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
@@ -1124,12 +1165,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ と表示されます。OCR を無効にしたい場合は、環境変数に "
+									"Data": "​ と表示されます。Tesseract を無効にしたい場合は、環境変数に "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "SIYUAN\\_TESSERACT\\_ENABLED=false"
+									"TextMarkTextContent": "SIYUAN_TESSERACT_ENABLED=false"
 								},
 								{
 									"Type": "NodeText",
@@ -1149,7 +1190,7 @@
 					"Properties": {
 						"ID": "20240530101000-xjhk4ih",
 						"id": "20240530101000-yp8d881",
-						"updated": "20240530101000"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1158,12 +1199,12 @@
 							"Properties": {
 								"ID": "20240530101000-04xwhm0",
 								"id": "20240530101000-juctxsf",
-								"updated": "20240530101000"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "SiYuan はインストールされたすべての言語パックを有効にするわけではありません。言語パックが多すぎると、OCR が遅くなったり、タイムアウトして空の結果が返されたり、システムリソースを過剰に消費する可能性があるためです。そのため、デフォルトでは、最大で "
+									"Data": "SiYuan はインストールされたすべての言語パックを有効にするわけではありません。言語パックが多すぎると、OCR が遅くなったり、タイムアウトしたり、システムリソースを過剰に消費する可能性があるためです。そのため、デフォルトでは、最大で "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1260,7 +1301,7 @@
 					"Properties": {
 						"ID": "20240530101000-prezj3g",
 						"id": "20240530101000-8vlvsns",
-						"updated": "20240530101000"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1269,12 +1310,12 @@
 							"Properties": {
 								"ID": "20240530101000-9as1nfh",
 								"id": "20240530101000-ack0scp",
-								"updated": "20240530101000"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "png と jpg 形式の画像のみがサポートされています。"
+									"Data": "両方のプロバイダーは PNG、JPEG、TIFF、BMP、GIF、WebP 画像をサポートし、Tesseract は PBM、PGM、PPM、PNM もサポートします"
 								}
 							]
 						}
@@ -1290,7 +1331,7 @@
 					"Properties": {
 						"ID": "20240530101000-w91nsfc",
 						"id": "20240530101000-5mse6p6",
-						"updated": "20240530101000"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1299,12 +1340,12 @@
 							"Properties": {
 								"ID": "20240530101000-oiv9z77",
 								"id": "20240530101000-vsrr7lg",
-								"updated": "20240530101000"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デフォルトでは 2MB 以下の画像のみが処理されます。変更する場合は環境変数 "
+									"Data": "Tesseract は、デフォルトでは 2MB 以下の画像のみが処理されます。変更する場合は環境変数 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1322,7 +1363,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ は上限を 4MB に変更します)。"
+									"Data": "​ は上限を 4MB に変更します)。PaddleOCR は 32 MiB 以下、2400 万画素以下の画像をサポートします"
 								}
 							]
 						}
@@ -1336,12 +1377,12 @@
 			"Properties": {
 				"ID": "20240530101000-bhe8w6i",
 				"id": "20240530101000-hvmv9gg",
-				"updated": "20240530101000"
+				"updated": "20261001000112"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "画像の OCR はバックグラウンドで自動的に行われます。現在、PNG と JPG 画像のみをサポートしています。抽出されたテキストは検索機能で使用され、テキストキーワードによって画像を見つけることができます。"
+					"Data": "自動 OCR を有効にすると、カーネルは OCR 結果のない画像を処理します。抽出したテキストは検索に使用され、文字のキーワードで画像を見つけられます。"
 				}
 			]
 		},
@@ -1352,7 +1393,7 @@
 			"Properties": {
 				"ID": "20240530101000-aefldsk",
 				"id": "20240530101000-cpod2qy",
-				"updated": "20240530101000"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
@@ -1472,12 +1513,12 @@
 			"Properties": {
 				"ID": "20240530101000-ys1z20f",
 				"id": "20240530101000-rq0etyj",
-				"updated": "20260720201253"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "調整後は手動でアセットコンテンツインデックスを再構築する必要があります。"
+					"Data": "画像の結果編集画面で保存すると検索インデックスが自動更新されます。SiYuan の外部で JSON ファイルを編集した場合は、アセットコンテンツインデックスを手動で再構築してください"
 				}
 			]
 		},

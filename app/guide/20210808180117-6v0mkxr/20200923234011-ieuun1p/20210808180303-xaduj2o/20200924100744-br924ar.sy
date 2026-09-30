@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20260930093600"
+		"updated": "20261001013550"
 	},
 	"Children": [
 		{
@@ -967,7 +967,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003636-epvk98g",
-				"updated": "20230117003636"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
@@ -981,21 +981,67 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117003636-0buf00n",
-				"updated": "20230820185510"
+				"updated": "20261001000112"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "This feature is only supported on the desktop, and the "
+					"Data": "In "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "em",
-					"TextMarkTextContent": "Tesseract OCR"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " program needs to be manually installed first. "
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " select Tesseract or PaddleOCR and enable automatic OCR. Recognition runs offline in the kernel without an open interface. Tesseract requires a separate desktop installation."
+				}
+			]
+		},
+		{
+			"ID": "20261001000112-e9wid3h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001000112-e9wid3h",
+				"updated": "20261001000112"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PaddleOCR includes PP-OCRv6 Tiny and Small models, available offline without downloading. Tiny uses fewer resources; Small offers higher accuracy. To import another compatible PP-OCRv6 model, select its detection and recognition ONNX files and the corresponding inference.yml files. Imported models sync with the workspace; the provider and selected model are saved per device."
+				}
+			]
+		},
+		{
+			"ID": "20261001000112-ogz08vw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001000112-ogz08vw",
+				"updated": "20261001000112"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The selected provider handles both automatic and manual recognition. Switching preserves existing results; use the image menu to rerun OCR explicitly. Failures preserve the previous result and do not switch providers. Text remains available for image text search and editing. Encrypted notebooks do not participate in OCR."
 				}
 			]
 		},
@@ -1028,7 +1074,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231731-bdh7lab",
-				"updated": "20231110112758"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
@@ -1040,7 +1086,7 @@
 					},
 					"Properties": {
 						"id": "20230202231732-n7z8jth",
-						"updated": "20231110112758"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1048,7 +1094,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231732-f3jkj7p",
-								"updated": "20231110112758"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
@@ -1080,12 +1126,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ in the kernel boot log; If you want to disable OCR, set the environment variable "
+									"Data": "​ in the kernel boot log; If you want to disable Tesseract, set the environment variable "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "SIYUAN\\_TESSERACT\\_ENABLED=false"
+									"TextMarkTextContent": "SIYUAN_TESSERACT_ENABLED=false"
 								},
 								{
 									"Type": "NodeText",
@@ -1104,7 +1150,7 @@
 					},
 					"Properties": {
 						"id": "20230202231800-z8hswmk",
-						"updated": "20230211103154"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1112,7 +1158,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231800-c3x45ky",
-								"updated": "20230211103154"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
@@ -1121,7 +1167,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " does not enable all installed language packs, because too many language packs will cause OCR to be slow or even timeout and return empty results, and take up too many system resources, so by default only "
+									"Data": " does not enable all installed language packs, because too many language packs will cause OCR to be slow or time out, and take up too many system resources, so by default only "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1216,7 +1262,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230211102830-9azqf9m"
+						"id": "20230211102830-9azqf9m",
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1224,12 +1271,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230211102830-sbchex4",
-								"updated": "20230211102832"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Only images in png and jpg formats are supported"
+									"Data": "Both providers support PNG, JPEG, TIFF, BMP, GIF, and WebP images; Tesseract also supports PBM, PGM, PPM, and PNM"
 								}
 							]
 						}
@@ -1244,7 +1291,7 @@
 					},
 					"Properties": {
 						"id": "20230211102834-fx3o5su",
-						"updated": "20230211102928"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1252,12 +1299,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230211102834-3jzjdrv",
-								"updated": "20230211102928"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "By default, only images below 2MB are processed. If you need to adjust, you can set the environment variable "
+									"Data": "For Tesseract, By default, only images below 2MB are processed. If you need to adjust, you can set the environment variable "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1275,7 +1322,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ adjust the upper limit to 4MB"
+									"Data": "​​ adjust the upper limit to 4MB; PaddleOCR supports images up to 32 MiB and 24 million pixels"
 								}
 							]
 						}
@@ -1288,12 +1335,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117003636-ouxlaen",
-				"updated": "20230117003636"
+				"updated": "20261001000112"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Image OCR extracts text automatically in the background, currently only supports PNG and JPG images. The extracted text is used in the search function, so that images can be located by text keywords."
+					"Data": "When automatic OCR is enabled, the kernel processes images that have no existing OCR result. Extracted text is used by search to locate images by their text."
 				}
 			]
 		},
@@ -1303,7 +1350,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202934-1h96or8",
-				"updated": "20230414202934"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
@@ -1416,12 +1463,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414203027-chylp3d",
-				"updated": "20260720201253"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After the adjustment, you need to manually rebuild the asset content index."
+					"Data": "Changes saved in the image result editor automatically update search indexes. After editing the JSON file outside SiYuan, rebuild the asset content index"
 				}
 			]
 		},

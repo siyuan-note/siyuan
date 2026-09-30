@@ -19,6 +19,7 @@ import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {removeLoading} from "../protyle/ui/initUI";
 import {switchSettingPanelSubTab} from "./setting/mount";
 import {getHostCapabilities} from "../util/hostCapabilities";
+import {mountOCRSettings, ocrSearchStrings} from "./ocr";
 /// #if MOBILE
 import {openMobileFileById} from "../mobile/editor";
 /// #else
@@ -31,6 +32,7 @@ export const collectAssetsTabSearchStrings = (): string[] => [
     window.siyuan.languages.unreferencedAssets,
     window.siyuan.languages.unreferencedAV,
     window.siyuan.languages.missingAssets,
+    ...ocrSearchStrings(),
 ];
 
 /** 资源 Tab 挂载（面板页，不走注册表渲染） */
@@ -52,6 +54,7 @@ export const mountAssetsTab = (root: HTMLElement, keywords?: string, app?: App) 
             {type: "remove", label: window.siyuan.languages.unreferencedAssets},
             {type: "removeAV", label: window.siyuan.languages.unreferencedAV},
             {type: "missing", label: window.siyuan.languages.missingAssets},
+            {type: "ocr", label: ocrSearchStrings().join(" ")},
         ]);
     }
 };
@@ -62,6 +65,8 @@ export const unmountAssetsTab = (root: Element) => {
         return;
     }
     assets.editor?.destroy();
+    assets.unmountOCR?.();
+    assets.unmountOCR = undefined;
     assets.editor = undefined;
     assets.element = undefined;
 };
@@ -69,6 +74,7 @@ export const unmountAssetsTab = (root: Element) => {
 const assets = {
     element: undefined as Element | undefined,
     editor: undefined as Protyle | undefined,
+    unmountOCR: undefined as (() => void) | undefined,
     genHTML: () => {
         const mobile = isMobile();
         return `<div class="fn__flex-column" style="height: 100%">
@@ -87,6 +93,9 @@ const assets = {
             <span class="fn__flex-1"></span>
             <span class="item__text">${window.siyuan.languages.missingAssets}</span>
             <span class="fn__flex-1"></span>
+        </div>
+        <div class="item item--full" data-type="ocr">
+            <span class="fn__flex-1"></span><span class="item__text">OCR</span><span class="fn__flex-1"></span>
         </div>
     </div>
     <div class="fn__flex-1">
@@ -127,6 +136,7 @@ const assets = {
             </ul>
             <div class="fn__hr"></div>
         </div>
+        <div class="fn__none config-assets config-ocr" data-type="ocr" data-init="true"></div>
     </div>
 </div>`;
     },
@@ -135,6 +145,7 @@ const assets = {
         if (!root) {
             return;
         }
+        assets.unmountOCR = mountOCRSettings(root.querySelector<HTMLElement>('.config-assets[data-type="ocr"]'));
         const assetsListElement = root.querySelector('.config-assets[data-type="remove"] .config-assets__list');
         const avListElement = root.querySelector('.config-assets[data-type="removeAV"] .config-assets__list');
         const mobile = isMobile();

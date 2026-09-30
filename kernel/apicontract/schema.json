@@ -28117,6 +28117,34 @@
       ],
       "additionalProperties": false
     },
+    "ImportOCRModelsRequestInput": {
+      "type": "object",
+      "properties": {
+        "detector": {
+          "type": "string",
+          "format": "binary"
+        },
+        "detectorConfig": {
+          "type": "string",
+          "format": "binary"
+        },
+        "recognizer": {
+          "type": "string",
+          "format": "binary"
+        },
+        "recognizerConfig": {
+          "type": "string",
+          "format": "binary"
+        }
+      },
+      "required": [
+        "detector",
+        "detectorConfig",
+        "recognizer",
+        "recognizerConfig"
+      ],
+      "additionalProperties": false
+    },
     "ImportRepoKeyRequestInput": {
       "type": "object",
       "properties": {
@@ -32826,6 +32854,82 @@
       },
       "required": [
         "msg"
+      ],
+      "additionalProperties": false
+    },
+    "OCRConfigData": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "$ref": "#/$defs/SettingOCR"
+        },
+        "models": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/OCRModel"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "providers": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/OCRProviderState"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "config",
+        "models",
+        "providers"
+      ],
+      "additionalProperties": false
+    },
+    "OCRModel": {
+      "type": "object",
+      "properties": {
+        "builtIn": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "builtIn",
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "OCRProviderState": {
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "available",
+        "id"
       ],
       "additionalProperties": false
     },
@@ -45568,6 +45672,46 @@
       },
       "additionalProperties": false
     },
+    "SettingOCR": {
+      "type": "object",
+      "properties": {
+        "auto": {
+          "type": "boolean"
+        },
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "auto",
+        "model",
+        "provider"
+      ],
+      "additionalProperties": false
+    },
+    "SettingOCRInput": {
+      "type": "object",
+      "properties": {
+        "auto": {
+          "type": "boolean"
+        },
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "auto",
+        "model",
+        "provider"
+      ],
+      "additionalProperties": false
+    },
     "SettingPetalDisabledData": {
       "type": "object",
       "properties": {
@@ -48360,6 +48504,16 @@
             }
           ]
         },
+        "ocr": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingOCR"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "oidc": {
           "anyOf": [
             {
@@ -48536,6 +48690,7 @@
         "logLevel",
         "mcpOAuth",
         "notebookCrypto",
+        "ocr",
         "oidc",
         "onboarding",
         "publish",
@@ -118993,6 +119148,81 @@
     },
     {
       "method": "POST",
+      "path": "/api/asset/getOCRConfig",
+      "handler": "getOCRConfig",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/OCRConfigData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/asset/getUnusedAssets",
       "handler": "getUnusedAssets",
       "body": "none",
@@ -119029,6 +119259,81 @@
                     "type": "null"
                   }
                 ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/importOCRModels",
+      "handler": "importOCRModels",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/ImportOCRModelsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/OCRModel"
               },
               "msg": {
                 "type": "string"
@@ -119785,6 +120090,81 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/setOCRConfig",
+      "handler": "setOCRConfig",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingOCRInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SettingOCR"
               },
               "msg": {
                 "type": "string"

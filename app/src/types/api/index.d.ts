@@ -1234,6 +1234,8 @@ export type ImportNotebookArchiveRequestInput = { "file": Blob; "key"?: Blob; "p
 
 export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
 
+export type ImportOCRModelsRequestInput = { "detector": Blob; "detectorConfig": Blob; "recognizer": Blob; "recognizerConfig": Blob; };
+
 export type ImportRepoKeyRequestInput = { "key": string; };
 
 export type ImportSYRequestInput = { "file"?: Blob; "notebook"?: string; "toPath"?: string; };
@@ -1449,6 +1451,12 @@ export type NotebookPasswordRequestInput = { "password": string; };
 export type NotificationData = { "id": string; };
 
 export type NotificationRequestInput = { "msg": string; "timeout"?: number | null; };
+
+export type OCRConfigData = { "config": SettingOCR; "models": Array<OCRModel> | null; "providers": Array<OCRProviderState> | null; };
+
+export type OCRModel = { "builtIn": boolean; "id": string; "name": string; };
+
+export type OCRProviderState = { "available": boolean; "id": string; };
 
 export type ObsidianAnalysisRequestInput = { "localPath": string; };
 
@@ -1970,6 +1978,10 @@ export type SettingNotifications = { "browserCompatibility": boolean; "docTreeMa
 
 export type SettingNotificationsInput = { "browserCompatibility"?: boolean | null; "docTreeMaxList"?: boolean | null; "formatPainterTip"?: boolean | null; "selectAllIncompleteTip"?: boolean | null; "selectAllTip"?: boolean | null; "tagMaxList"?: boolean | null; "workspaceNotSSD"?: boolean | null; };
 
+export type SettingOCR = { "auto": boolean; "model": string; "provider": string; };
+
+export type SettingOCRInput = { "auto": boolean; "model": string; "provider": string; };
+
 export type SettingPetalDisabledData = { "dataChangePlugins": Array<string> | null; "globalPetalChanged": boolean; "globalPetalDisabled": boolean; "globalPetalEnabled": boolean; "globalPetalRevision": number; "reloadPlugins": Array<string> | null; "uninstallPlugins": Array<string> | null; "unloadPlugins": Array<string> | null; };
 
 export type SettingPetalDisabledRequestInput = { "petalDisabled": boolean; };
@@ -2104,7 +2116,7 @@ export type SystemAPITokenRequestInput = { "token": string; };
 
 export type SystemAccessAuthCodeRequestInput = { "accessAuthCode": string; };
 
-export type SystemAppConf = { "accessAuthCode": string; "ai": SettingAI | null; "api": SystemAPI | null; "appearance": SettingAppearance | null; "bazaar": SettingBazaar | null; "cloudRegion": number; "cookieKey": string; "dataIndexState": number; "editor": SettingEditor | null; "export": SettingExport | null; "fileTree": SettingFileTree | null; "flashcard": SettingFlashcard | null; "graph": SystemGraph | null; "keymap": { [key: string]: JSONValue } | null; "lang": string; "langs": Array<SystemLang | null> | null; "logLevel": string; "mcpOAuth": string; "notebookCrypto": SystemNotebookCrypto | null; "oidc": SystemOIDC | null; "onboarding": SystemOnboarding | null; "publish": SettingPublish | null; "readonly": boolean; "repo": SystemRepo | null; "search": SettingSearch | null; "secrets": SettingSecrets | null; "serverAddrs": Array<string> | null; "showChangelog": boolean; "snippet": SettingSnpt | null; "stat": SystemStat | null; "sync": SystemSync | null; "system": SystemSystem | null; "tag": SystemTag | null; "uiLayout": { [key: string]: JSONValue } | null; "userData": string; "variables": SettingVariables | null; };
+export type SystemAppConf = { "accessAuthCode": string; "ai": SettingAI | null; "api": SystemAPI | null; "appearance": SettingAppearance | null; "bazaar": SettingBazaar | null; "cloudRegion": number; "cookieKey": string; "dataIndexState": number; "editor": SettingEditor | null; "export": SettingExport | null; "fileTree": SettingFileTree | null; "flashcard": SettingFlashcard | null; "graph": SystemGraph | null; "keymap": { [key: string]: JSONValue } | null; "lang": string; "langs": Array<SystemLang | null> | null; "logLevel": string; "mcpOAuth": string; "notebookCrypto": SystemNotebookCrypto | null; "ocr": SettingOCR | null; "oidc": SystemOIDC | null; "onboarding": SystemOnboarding | null; "publish": SettingPublish | null; "readonly": boolean; "repo": SystemRepo | null; "search": SettingSearch | null; "secrets": SettingSecrets | null; "serverAddrs": Array<string> | null; "showChangelog": boolean; "snippet": SettingSnpt | null; "stat": SystemStat | null; "sync": SystemSync | null; "system": SystemSystem | null; "tag": SystemTag | null; "uiLayout": { [key: string]: JSONValue } | null; "userData": string; "variables": SettingVariables | null; };
 
 export type SystemAppearanceData = { "appearance": SettingAppearance | null; };
 
@@ -2819,10 +2831,20 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/asset/getOCRConfig": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": OCRConfigData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/asset/getUnusedAssets": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/asset/importOCRModels": {
+        request: ImportOCRModelsRequestInput;
+        response: { "code": 0; "data": OCRModel; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
     };
     "/api/asset/insertCover": {
         request: InsertCoverRequestInput;
@@ -2872,6 +2894,11 @@ export interface APIPOSTRoutes {
     "/api/asset/setImageOCRText": {
         request: SetAssetOCRTextRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/setOCRConfig": {
+        request: SettingOCRInput;
+        response: { "code": 0; "data": SettingOCR; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/asset/statAsset": {

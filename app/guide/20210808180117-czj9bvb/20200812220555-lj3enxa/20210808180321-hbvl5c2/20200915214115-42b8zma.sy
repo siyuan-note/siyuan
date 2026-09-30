@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20260930093600"
+		"updated": "20261001013550"
 	},
 	"Children": [
 		{
@@ -979,7 +979,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117002036-vmc0mx4",
-				"updated": "20230117002509"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
@@ -993,21 +993,67 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117002059-ssmlejt",
-				"updated": "20230820185522"
+				"updated": "20261001000112"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "该特性仅在桌面端支持，并且需要先手动安装 "
+					"Data": "在 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "em",
-					"TextMarkTextContent": "Tesseract OCR"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 程序。"
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "资源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择 Tesseract 或 PaddleOCR，并设置是否自动识别。识别由内核离线执行，无需打开界面。使用 Tesseract 时，需在桌面端自行安装该程序。"
+				}
+			]
+		},
+		{
+			"ID": "20261001000112-4enj18s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001000112-4enj18s",
+				"updated": "20261001000112"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PaddleOCR 内置 PP-OCRv6 Tiny 和 Small 模型，无需下载即可离线使用。Tiny 占用资源更少，Small 识别精度更高。导入其他兼容的 PP-OCRv6 模型时，分别选择检测、识别 ONNX 文件及对应的 inference.yml。导入模型随工作空间同步，提供商和当前模型的选择按设备保存。"
+				}
+			]
+		},
+		{
+			"ID": "20261001000112-6l7ji97",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001000112-6l7ji97",
+				"updated": "20261001000112"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手动识别和自动识别均使用所选提供商。切换后保留已有结果，可通过图片菜单主动重新识别。识别失败时保留上次结果，也不会自动切换提供商。文本继续用于图片文字搜索和结果编辑。加密笔记本不参与 OCR。"
 				}
 			]
 		},
@@ -1040,7 +1086,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231309-pcjl7c2",
-				"updated": "20231110112936"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
@@ -1052,7 +1098,7 @@
 					},
 					"Properties": {
 						"id": "20230202231311-7qdk1za",
-						"updated": "20231110112936"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1060,7 +1106,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231311-n1pf7in",
-								"updated": "20231110112936"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
@@ -1092,7 +1138,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​；如果要禁用 OCR，请设置环境变量 "
+									"Data": "​；如果要禁用 Tesseract，请设置环境变量 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1116,7 +1162,7 @@
 					},
 					"Properties": {
 						"id": "20230202231321-q1b1tza",
-						"updated": "20230211103207"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1124,12 +1170,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231321-5ugmgf0",
-								"updated": "20230211103207"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "思源并不会启用所有已安装的语言包，因为语言包太多的话会导致 OCR 缓慢甚至超时返回空结果，并且占用过多的系统资源，所以默认最多只会启用 "
+									"Data": "思源并不会启用所有已安装的语言包，因为语言包太多的话会导致 OCR 缓慢甚至超时，并且占用过多的系统资源，所以默认最多只会启用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1225,7 +1271,7 @@
 					},
 					"Properties": {
 						"id": "20230211102440-0qik4dd",
-						"updated": "20230211102642"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1233,12 +1279,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230211102440-09cmf75",
-								"updated": "20230211102642"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "仅支持 png 和 jpg 格式的图片"
+									"Data": "两种提供商均支持 PNG、JPEG、TIFF、BMP、GIF 和 WebP 图片，Tesseract 还支持 PBM、PGM、PPM 和 PNM"
 								}
 							]
 						}
@@ -1253,7 +1299,7 @@
 					},
 					"Properties": {
 						"id": "20230211102601-ifl3ojm",
-						"updated": "20230211102744"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1261,12 +1307,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230211102601-npe6hvh",
-								"updated": "20230211102744"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "默认只对 2MB 以下的图片进行处理，如果需要调整，可以通过环境变量 "
+									"Data": "Tesseract 默认只对 2MB 以下的图片进行处理，如果需要调整，可以通过环境变量 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1284,7 +1330,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 将上限调整为 4MB"
+									"Data": "​ 将上限调整为 4MB；PaddleOCR 支持不超过 32 MiB、2400 万像素的图片"
 								}
 							]
 						}
@@ -1297,12 +1343,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117002511-ex9qrjy",
-				"updated": "20230117003207"
+				"updated": "20261001000112"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "图片 OCR 提取文本过程是自动在后台进行的，目前仅支持 PNG、JPG 图片。提取的文本会被用于搜索功能，这样就能通过文本关键字来定位图片。"
+					"Data": "启用自动 OCR 后，内核会处理尚无 OCR 结果的图片，提取的文本用于搜索，可通过文字关键词定位图片。"
 				}
 			]
 		},
@@ -1312,7 +1358,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202710-a51lo76",
-				"updated": "20230414202726"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
@@ -1425,12 +1471,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414202749-qbcnypq",
-				"updated": "20260720201253"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "调整完以后需要手动重建资源文件索引。"
+					"Data": "通过图片结果编辑窗口保存后会自动更新搜索索引；在思源外部修改 JSON 文件后，需手动重建资源文件索引"
 				}
 			]
 		},

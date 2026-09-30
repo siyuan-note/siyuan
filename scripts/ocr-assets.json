@@ -1,0 +1,90 @@
+{
+  "models": [
+    {
+      "path": "tiny/det/inference.onnx",
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_tiny_det_onnx/resolve/2ba1506c0380b8f0b03dd142459aac66d4421f6c/inference.onnx",
+      "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
+      "size": 1780590
+    },
+    {
+      "path": "tiny/det/inference.yml",
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_tiny_det_onnx/resolve/2ba1506c0380b8f0b03dd142459aac66d4421f6c/inference.yml",
+      "sha256": "3ac018be6f97499a08faa3bbdeb33640968d9307f6736d152902747a9f259593",
+      "size": 883
+    },
+    {
+      "path": "tiny/rec/inference.onnx",
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_tiny_rec_onnx/resolve/2612ab37152ae0a677521bae4e1e3d4fb4cf7c30/inference.onnx",
+      "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
+      "size": 4462639
+    },
+    {
+      "path": "tiny/rec/inference.yml",
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_tiny_rec_onnx/resolve/2612ab37152ae0a677521bae4e1e3d4fb4cf7c30/inference.yml",
+      "sha256": "66170210bad538e83fff3c4a3867e547d6bf20b50d64b20347c4b913f3034ea1",
+      "size": 55571
+    },
+    {
+      "path": "small/det/inference.onnx",
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_small_det_onnx/resolve/28fe5895c24fd108c19eb3e8479f4ab385fbfc62/inference.onnx",
+      "sha256": "d73e0058b7a8086bbd57f3d10b8bcd4ff95363f67e06e2762b5e814fe9c9410e",
+      "size": 9880512
+    },
+    {
+      "path": "small/det/inference.yml",
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_small_det_onnx/resolve/28fe5895c24fd108c19eb3e8479f4ab385fbfc62/inference.yml",
+      "sha256": "193f435274bf9f0b5f71a929bbfbcf148282df7e633b34e7c373e8f44741b516",
+      "size": 885
+    },
+    {
+      "path": "small/rec/inference.onnx",
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx/resolve/b8f84f0b80c529de40b4fbb3544b84fa7233a513/inference.onnx",
+      "sha256": "5435fd747c9e0efe15a96d0b378d5bd157e9492ed8fd80edf08f30d02fa24634",
+      "size": 21159378
+    },
+    {
+      "path": "small/rec/inference.yml",
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_small_rec_onnx/resolve/b8f84f0b80c529de40b4fbb3544b84fa7233a513/inference.yml",
+      "sha256": "ab078671bb49f06228eadccd34f1bb501e157f7a047095ffb943ba81512c77d1",
+      "size": 150579
+    }
+  ],
+  "runtime": {
+    "windows-amd64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.24.3/onnxruntime-win-x64-1.24.3.zip",
+      "sha256": "4fbfb85d0e9de9bb6fb8a9866a7cb477cbad404d889b236931bf3f5d547e5f48",
+      "library": "onnxruntime.dll",
+      "size": 74397435
+    },
+    "windows-arm64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.24.3/onnxruntime-win-arm64-1.24.3.zip",
+      "sha256": "0b9ee92bcd1f82f684b574cb413f27595e0d2f7b96ec6d02b30301f45ad313b0",
+      "library": "onnxruntime.dll",
+      "size": 75093351
+    },
+    "linux-amd64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.24.3/onnxruntime-linux-x64-1.24.3.tgz",
+      "sha256": "4c436a280d650f8bf32c921a2bf4de7c42cc32884c51c90e47de991708bbb5a4",
+      "library": "libonnxruntime.so",
+      "size": 8150413
+    },
+    "linux-arm64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.24.3/onnxruntime-linux-aarch64-1.24.3.tgz",
+      "sha256": "15100fb88b4c692cdd6bf2cca5f4a26a3806cebca8136de6681e2aba4b2ea033",
+      "library": "libonnxruntime.so",
+      "size": 7166580
+    },
+    "darwin-arm64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.24.3/onnxruntime-osx-arm64-1.24.3.tgz",
+      "sha256": "c255663d40755f84b1b86373bdb9870bb65f3a2c3d779b3d7ae31aaa00cebb4f",
+      "library": "libonnxruntime.dylib",
+      "size": 30381891
+    },
+    "darwin-amd64": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.23.2/onnxruntime-osx-x86_64-1.23.2.tgz",
+      "sha256": "d10359e16347b57d9959f7e80a225a5b4a66ed7d7e007274a15cae86836485a6",
+      "library": "libonnxruntime.dylib",
+      "size": 11676322
+    }
+  }
+}

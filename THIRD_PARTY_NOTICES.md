@@ -21,6 +21,8 @@ The component list is informational and does not replace the license terms. Copy
 | Component | Version | License | Source | Distribution |
 |---|---|---|---|---|
 | Electron | 42.7.1 | MIT | [upstream](https://github.com/electron/electron) | Desktop runtime; Electron also ships LICENSES.chromium.html for Chromium and its dependencies |
+| ONNX Runtime | 1.24.3 (Windows, Linux, Apple Silicon, Android, HarmonyOS), 1.23.2 (Intel macOS), 1.24.2 (iOS) | MIT | [upstream](https://github.com/microsoft/onnxruntime) | Native CPU OCR runtime; license and dependency notices in app/stage/ocr/ONNXRUNTIME-LICENSE and ONNXRUNTIME-THIRD-PARTY-NOTICES.txt; desktop libraries also include their corresponding notices |
+| PaddleOCR PP-OCRv6 Tiny and Small ONNX models | Pinned revisions in scripts/ocr-assets.json | Apache-2.0 | [official models](https://huggingface.co/collections/PaddlePaddle/pp-ocrv6) | app/stage/ocr/models/; license text in app/stage/ocr/PADDLEOCR-LICENSE |
 | DOMPurify | 3.3.3 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | app/stage/protyle/js/protyle-html.js |
 | html-to-image | 1.11.13 | MIT | [upstream](https://github.com/bubkoo/html-to-image) | app/stage/protyle/js/html-to-image.min.js |
 | modern-screenshot | 4.6.6 | MIT | [upstream](https://github.com/qq15725/modern-screenshot) | app/stage/protyle/js/modern-screenshot.min.js |

@@ -27,6 +27,8 @@ declare namespace Config {
         accessAuthCode: string;
         oidc: IOIDC;
         ai: IAI;
+        /** 当前设备的本地 OCR 提供商和模型选择；切换后保留已有识别文本 */
+        ocr: {provider: string; model: string; auto: boolean};
         api: IAPI;
         appearance: IAppearance;
         bazaar: IBazaar;

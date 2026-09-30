@@ -73,6 +73,7 @@ type AppConf struct {
 	Search         *conf.Search         `json:"search"`         // 搜索配置
 	Flashcard      *conf.Flashcard      `json:"flashcard"`      // 闪卡配置
 	AI             *conf.AI             `json:"ai"`             // 人工智能配置
+	OCR            *conf.OCR            `json:"ocr"`            // 本地图片文字识别
 	Secrets        *conf.Secrets        `json:"secrets"`        // 全局密钥库
 	Variables      *conf.Variables      `json:"variables"`      // 全局变量库
 	Bazaar         *conf.Bazaar         `json:"bazaar"`         // 集市配置
@@ -781,6 +782,9 @@ func InitConf() {
 		}()
 	}
 
+	if nil == Conf.OCR {
+		Conf.OCR = conf.NewOCR(util.IsMobileContainer())
+	}
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()
 	} else {
@@ -901,6 +905,7 @@ func InitConf() {
 
 	go util.InitPandoc(Conf.Export.PandocBin)
 	go util.InitTesseract()
+	InitOCR()
 }
 
 func normalizeFileTreeDefaultIcon(fileTree *conf.FileTree, confFileExists bool) *conf.FileTree {

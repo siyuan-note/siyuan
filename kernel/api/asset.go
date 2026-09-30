@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -32,7 +33,6 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -108,7 +108,7 @@ var getImageOCRText = contractHandler(apicontract.GetImageOCRText, func(c *gin.C
 	path := *request.Path
 
 	// 加密笔记本的资源不参与全局 OCR（OCR 文本存在全局 data/assets/ocr-texts.json）
-	if absPath, absErr := model.GetAssetAbsPathInBox(path, ""); absErr == nil && model.IsEncryptedAssetPath(absPath) {
+	if model.IsEncryptedOCRAsset(path) {
 		return apicontract.Success(apicontract.AssetTextData{Text: ""})
 
 	}
@@ -122,27 +122,22 @@ var setImageOCRText = contractHandler(apicontract.SetImageOCRText, func(c *gin.C
 	text := request.Text
 
 	// 加密笔记本的资源不参与全局 OCR
-	if absPath, absErr := model.GetAssetAbsPathInBox(path, ""); absErr == nil && model.IsEncryptedAssetPath(absPath) {
+	if model.IsEncryptedOCRAsset(path) {
 		return apicontract.Success(apicontract.Null{})
 	}
-	util.SetAssetText(path, text)
-
-	// 刷新 OCR 结果到数据库
-	util.NodeOCRQueueLock.Lock()
-	defer util.NodeOCRQueueLock.Unlock()
-	for _, id := range util.NodeOCRQueue {
-		sql.IndexNodeQueue(id)
-	}
-	util.NodeOCRQueue = nil
+	model.SetOCRAssetText(path, text)
 
 	return apicontract.Success(apicontract.Null{})
 })
 
 var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request apicontract.AssetPathRequest) apicontract.Response[apicontract.AssetOCRData] {
 
-	path := request.Path
+	path := strings.SplitN(request.Path, "#", 2)[0]
 
 	// 加密笔记本的资源不参与全局 OCR
+	if model.IsEncryptedOCRAsset(path) {
+		return apicontract.FailureWithTimeout[apicontract.AssetOCRData](-1, model.Conf.Language(380), 3000)
+	}
 	absPath, err := model.GetAssetAbsPathInBox(path, "")
 	if err != nil {
 		return apicontract.Failure[apicontract.AssetOCRData](-1, err.Error())
@@ -154,7 +149,9 @@ var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request api
 		return apicontract.Failure[apicontract.AssetOCRData](-1, err.Error())
 	}
 
-	ocrJSON, err := util.OcrAsset(path)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Minute)
+	defer cancel()
+	ocrJSON, err := model.OCRAsset(ctx, path)
 	if nil != err {
 		return apicontract.FailureWithTimeout[apicontract.AssetOCRData](-1, err.Error(), 7000)
 	}

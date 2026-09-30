@@ -325,6 +325,7 @@ def source_preflight(args, version):
 
 
 def create_mobile_assets(destination, version):
+    run([sys.executable, ROOT / "scripts/prepare-ocr.py"], ROOT)
     destination.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(destination, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
         for group in VERIFY.GROUPS:
@@ -339,6 +340,8 @@ def create_mobile_assets(destination, version):
                 relative = path.relative_to(ROOT / "app")
                 if path.is_symlink() or not path.is_file() or any(
                         part in {".git", ".idea", ".gitignore", ".DS_Store"} for part in relative.parts):
+                    continue
+                if relative.parts[:3] == ("stage", "ocr", "runtime"):
                     continue
                 archive.write(path, relative.as_posix())
         for filename in ("LICENSE", "THIRD_PARTY_NOTICES.md"):

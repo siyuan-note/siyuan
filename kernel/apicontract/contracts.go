@@ -845,7 +845,13 @@ var StatAsset = define[AssetPathRequest, AssetStatData]("statAsset", "/api/asset
 var FullReindexAssetContent = define[EmptyRequest, Null]("fullReindexAssetContent", "/api/asset/fullReindexAssetContent", NoBody, ResponseOptions{}, "POST")
 var GetImageOCRText = define[AssetOCRTextRequest, AssetTextData]("getImageOCRText", "/api/asset/getImageOCRText", JSONBody, ResponseOptions{}, "POST")
 var SetImageOCRText = define[SetAssetOCRTextRequest, Null]("setImageOCRText", "/api/asset/setImageOCRText", JSONBody, ResponseOptions{}, "POST")
+
+// AssetOCR 始终使用当前设备选择的提供商，内核可在无界面的环境中识别。
+// 不自动回退到另一提供商；取消、模型或推理错误不覆盖已有文本，加密笔记本不参与 OCR。
 var AssetOCR = define[AssetPathRequest, AssetOCRData]("ocr", "/api/asset/ocr", JSONBody, ResponseOptions{}, "POST")
+var GetOCRConfig = define[EmptyRequest, OCRConfigData]("getOCRConfig", "/api/asset/getOCRConfig", JSONBody, ResponseOptions{}, "POST")
+var SetOCRConfig = define[SettingOCR, SettingOCR]("setOCRConfig", "/api/asset/setOCRConfig", JSONBody, ResponseOptions{}, "POST")
+var ImportOCRModels = define[ImportOCRModelsRequest, OCRModel]("importOCRModels", "/api/asset/importOCRModels", MultipartBody, ResponseOptions{}, "POST")
 var RenameAsset = define[RenameAssetRequest, AssetRenameData]("renameAsset", "/api/asset/renameAsset", JSONBody, ResponseOptions{}, "POST")
 var FindAssetReferences = define[FindAssetReferencesRequest, AssetReferencesData]("findAssetReferences", "/api/asset/findAssetReferences", JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var RelinkAsset = define[RelinkAssetRequest, AssetReferencesData]("relinkAsset", "/api/asset/relinkAsset", JSONBody, ResponseOptions{DataOnError: true}, "POST")

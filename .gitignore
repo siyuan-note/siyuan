@@ -50,3 +50,6 @@ muslbin/
 
 # Workflows
 **/__pycache__
+# OCR 模型和运行时由固定版本、校验摘要的发布准备脚本生成
+/app/stage/ocr/models/
+/app/stage/ocr/runtime/

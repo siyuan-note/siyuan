@@ -7,6 +7,7 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
     const pending = new Map();
     const reservations = new Map();
     const windows = new Map();
+    const windowStates = new WeakMap();
     const release = approved => {
         clearTimeout(approved.timer);
         pending.delete(approved.owner.id + ":" + approved.frameName);
@@ -18,6 +19,17 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
         release(approved);
         if (!approved.owner.isDestroyed()) approved.owner.send("siyuan-settings-closed", approved.data.token);
     };
+    ipcMain.on("siyuan-settings-ready", event => {
+        if (event.senderFrame !== event.sender.mainFrame) return;
+        for (const win of windows.values()) {
+            if (!win.isDestroyed() && win.webContents === event.sender) {
+                const state = windowStates.get(win);
+                state.ready = true;
+                state.reveal();
+                return;
+            }
+        }
+    });
     ipcMain.on("siyuan-settings-close", (event, key) => {
         const target = getTarget(event.sender.id);
         if (!target || event.senderFrame !== event.sender.mainFrame || typeof key !== "string" ||
@@ -48,8 +60,10 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
         const key = `${target.origin}:${data.key === "builtin" ? "builtin" : event.sender.id + ":" + data.key}`;
         const existing = windows.get(key);
         if (existing && !existing.isDestroyed()) {
-            show(existing);
+            const state = windowStates.get(existing);
+            state.data.command = data.command;
             existing.webContents.send("siyuan-settings-command", data.command);
+            if (state.shown) show(existing);
             return {create: false};
         }
         const reserved = reservations.get(key);
@@ -85,6 +99,18 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
             if (created.url !== approved.url) return;
             release(approved);
             windows.set(approved.key, win);
+            const state = {painted: false, ready: false, shown: false, data: approved.data};
+            state.reveal = () => {
+                if (!state.ready || !state.painted || state.shown || win.isDestroyed()) return;
+                state.shown = true;
+                if (state.data.geometry?.maximized) win.maximize();
+                show(win);
+            };
+            windowStates.set(win, state);
+            win.once("ready-to-show", () => {
+                state.painted = true;
+                state.reveal();
+            });
             if (platform !== "darwin") win.setMenu(null);
             initialize(win, approved.target);
             const close = () => { if (!win.isDestroyed()) win.destroy(); };
@@ -105,7 +131,6 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
                 win.on(event, saveGeometry);
             }
             win.webContents.once("did-finish-load", () => {
-                if (approved.data.geometry?.maximized) win.maximize();
                 win.webContents.send("siyuan-settings-command", approved.data.command);
             });
             win.webContents.on("did-fail-load", (_event, code, description) => {
@@ -116,6 +141,7 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
         return {
             action: "allow",
             overrideBrowserWindowOptions: {
+                show: false,
                 title: approved.data.title || "SiYuan",
                 frame: platform === "darwin",
                 titleBarStyle: "hidden",

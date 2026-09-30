@@ -32,6 +32,7 @@ import type {ISettingsCommand} from "./nativeWindow";
 import {getSettingTabDefs} from "./tabs";
 import {onWindowsMsg} from "../../window/onWindowsMsg";
 import {applyWindowState} from "../../boot/windowControls";
+import {waitForSettingsWindowPaint} from "./windowPaint";
 
 const initialize = async () => {
     addBaseURL();
@@ -139,50 +140,56 @@ const initialize = async () => {
     if (Array.isArray(emoji.data)) {
         window.siyuan.emojis = emoji.data;
     }
-    await loadAssets(window.siyuan.config.appearance);
-    await setInlineStyle();
-    initAssets();
-    initMessage();
-    initNativeDialogOverride();
-    initWindowOpenOverride(host.app);
-    document.title = host.plugin?.name || window.siyuan.languages.config;
-    if (host.plugin) {
-        host.plugin.mount(options => {
-            const setting = new Setting(options);
-            options.items.forEach(item => setting.addItem(item));
-            setting.open(host.plugin.name);
-            return setting.dialog;
-        });
-    } else {
-        const tab = getSettingTabDefs().find(def => def.id === new URLSearchParams(location.search).get("tab"))?.id;
-        dialog = openSettingDialog(host.app, tab);
-        dialog.element.querySelectorAll(".config__side .b3-list-item").forEach(item => {
-            item.addEventListener("click", () => {
-                const url = new URL(location.href);
-                url.searchParams.set("tab", item.getAttribute("data-name"));
-                history.replaceState(null, "", url);
+    await waitForSettingsWindowPaint(async () => {
+        await loadAssets(window.siyuan.config.appearance);
+        await setInlineStyle();
+        initAssets();
+        initMessage();
+        initNativeDialogOverride();
+        initWindowOpenOverride(host.app);
+        document.title = host.plugin?.name || window.siyuan.languages.config;
+        if (host.plugin) {
+            host.plugin.mount(options => {
+                const setting = new Setting(options);
+                options.items.forEach(item => setting.addItem(item));
+                setting.open(host.plugin.name);
+                return setting.dialog;
             });
-        });
-    }
-    document.addEventListener("keydown", event => {
-        if (!window.siyuan.menus.menu.element.classList.contains("fn__none") && bindMenuKeydown(event)) return;
-        if (event.key === "Escape" && !event.isComposing && !event.repeat) {
-            window.siyuan.dialogs[window.siyuan.dialogs.length - 1]?.destroy();
-            event.preventDefault();
+        } else {
+            const tab = getSettingTabDefs().find(def => def.id === new URLSearchParams(location.search).get("tab"))?.id;
+            dialog = openSettingDialog(host.app, tab);
+            dialog.element.querySelectorAll(".config__side .b3-list-item").forEach(item => {
+                item.addEventListener("click", () => {
+                    const url = new URL(location.href);
+                    url.searchParams.set("tab", item.getAttribute("data-name"));
+                    history.replaceState(null, "", url);
+                });
+            });
         }
+        document.addEventListener("keydown", event => {
+            if (!window.siyuan.menus.menu.element.classList.contains("fn__none") && bindMenuKeydown(event)) return;
+            if (event.key === "Escape" && !event.isComposing && !event.repeat) {
+                window.siyuan.dialogs[window.siyuan.dialogs.length - 1]?.destroy();
+                event.preventDefault();
+            }
+        });
+        window.addEventListener("mousemove", windowMouseMove);
+        window.addEventListener("blur", hideTooltip);
+        window.addEventListener("resize", () => window.siyuan.menus.menu.resetPosition());
+        window.addEventListener("unload", () => {
+            ws.ws.onclose = null;
+            ws.ws.close();
+            host.plugin?.closed();
+        });
+        window.siyuan.isReady = true;
+        ws.flushMainMessages();
+        await applyCommand();
     });
-    window.addEventListener("mousemove", windowMouseMove);
-    window.addEventListener("blur", hideTooltip);
-    window.addEventListener("resize", () => window.siyuan.menus.menu.resetPosition());
-    window.addEventListener("unload", () => {
-        ws.ws.onclose = null;
-        ws.ws.close();
-        host.plugin?.closed();
-    });
-    window.siyuan.isReady = true;
-    ws.flushMainMessages();
-    await applyCommand();
+    ipcRenderer.send("siyuan-settings-ready");
 };
 
 installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, window.location.href);
-void initialize().catch(error => console.error("Could not initialize the settings window", error));
+void initialize().catch(error => {
+    console.error("Could not initialize the settings window", error);
+    window.close();
+});

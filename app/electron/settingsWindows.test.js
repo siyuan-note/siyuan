@@ -6,6 +6,7 @@ const {createSettingsWindows} = require("./settingsWindows");
 const setup = (platform = "win32") => {
     let prepare;
     let close;
+    let ready;
     const shown = [];
     const initialized = [];
     const target = {origin: "https://example.com", mode: "remote"};
@@ -15,13 +16,16 @@ const setup = (platform = "win32") => {
     });
     const policy = createSettingsWindows({
         platform,
-        ipcMain: {handle: (_name, callback) => { prepare = callback; }, on: (_name, callback) => { close = callback; }},
+        ipcMain: {handle: (_name, callback) => { prepare = callback; }, on: (name, callback) => {
+            if (name === "siyuan-settings-close") close = callback;
+            if (name === "siyuan-settings-ready") ready = callback;
+        }},
         screen: {}, getTarget: id => id === 1 ? target : undefined,
         initialize: (...args) => initialized.push(args), show: win => shown.push(win), log() {},
     });
     const event = {sender: owner, senderFrame: owner.mainFrame};
     const open = (data = {}) => prepare(event, {key: "builtin", token: "first-token", command: {tab: "editor"}, ...data});
-    return {policy, owner, event, open, close, shown, initialized};
+    return {policy, owner, event, open, close, ready, shown, initialized};
 };
 
 test("settings popup authorization requires the registered top-level page and exact URL and frame", () => {
@@ -36,6 +40,7 @@ test("settings popup authorization requires the registered top-level page and ex
     assert.equal(policy(owner, {url: prepared.url, frameName: "other-frame"}), undefined);
     const allowed = policy(owner, prepared);
     assert.equal(allowed.action, "allow");
+    assert.equal(allowed.overrideBrowserWindowOptions.show, false);
     assert.equal(allowed.overrideBrowserWindowOptions.frame, false);
     assert.equal(allowed.overrideBrowserWindowOptions.titleBarStyle, "hidden");
     assert.equal(allowed.overrideBrowserWindowOptions.autoHideMenuBar, true);
@@ -47,11 +52,11 @@ test("settings popup authorization requires the registered top-level page and ex
 });
 
 test("settings windows reuse their workspace instance and close with the owning renderer", () => {
-    const {policy, owner, open, shown, initialized} = setup();
+    const {policy, owner, open, ready, shown, initialized} = setup();
     const prepared = open();
     assert.equal(open({token: "second-token", command: {tab: "appearance"}}).create, false);
     policy(owner, prepared);
-    const contents = Object.assign(new EventEmitter(), {sent: [], send(...message) { this.sent.push(message); }});
+    const contents = Object.assign(new EventEmitter(), {mainFrame: {}, sent: [], send(...message) { this.sent.push(message); }});
     let destroyed = false;
     const win = Object.assign(new EventEmitter(), {
         webContents: contents, isDestroyed: () => destroyed,
@@ -64,13 +69,50 @@ test("settings windows reuse their workspace instance and close with the owning 
     contents.emit("did-finish-load");
     assert.deepEqual(contents.sent[0], ["siyuan-settings-command", {tab: "appearance"}]);
     assert.equal(open({token: "third-token", command: {tab: "search"}}).create, false);
-    assert.equal(shown[0], win);
+    assert.equal(shown.length, 0);
     assert.deepEqual(contents.sent[1], ["siyuan-settings-command", {tab: "search"}]);
+    win.emit("ready-to-show");
+    assert.equal(shown.length, 0);
+    ready({sender: contents, senderFrame: contents.mainFrame});
+    assert.equal(shown[0], win);
+    assert.equal(open({token: "visible-token"}).create, false);
+    assert.equal(shown.length, 2);
     owner.emit("destroyed");
     assert.equal(destroyed, true);
     assert.deepEqual(owner.sent.at(-1), ["siyuan-settings-closed", "first-token"]);
     assert.equal(open({token: "fourth-token"}).create, true);
 });
+
+for (const rendererFirst of [false, true]) {
+    test(`settings wait for the renderer and first paint before maximizing or showing (rendererFirst=${rendererFirst})`, () => {
+        const {policy, owner, open, ready, shown} = setup();
+        const prepared = open({geometry: {maximized: true}});
+        policy(owner, prepared);
+        let maximized = 0;
+        const contents = Object.assign(new EventEmitter(), {mainFrame: {}, sent: [],
+            send(...message) { this.sent.push(message); }});
+        const win = Object.assign(new EventEmitter(), {webContents: contents, isDestroyed: () => false,
+            setMenu() {}, maximize() { maximized++; }});
+        owner.emit("did-create-window", win, {url: prepared.url});
+        assert.equal(open({token: "loading-token", command: {tab: "appearance"}}).create, false);
+        ready({sender: owner, senderFrame: owner.mainFrame});
+        ready({sender: contents, senderFrame: {}});
+        contents.emit("did-finish-load");
+        assert.deepEqual(contents.sent.at(-1), ["siyuan-settings-command", {tab: "appearance"}]);
+        assert.equal(maximized, 0);
+        assert.equal(shown.length, 0);
+        const rendererReady = () => ready({sender: contents, senderFrame: contents.mainFrame});
+        const paintReady = () => win.emit("ready-to-show");
+        (rendererFirst ? rendererReady : paintReady)();
+        assert.equal(maximized, 0);
+        assert.equal(shown.length, 0);
+        (rendererFirst ? paintReady : rendererReady)();
+        assert.equal(maximized, 1);
+        assert.deepEqual(shown, [win]);
+        rendererReady();
+        assert.equal(shown.length, 1);
+    });
+}
 
 test("plugin windows are distinct from built-in settings and reject other origins", () => {
     const {open, owner} = setup();

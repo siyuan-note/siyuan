@@ -37,27 +37,50 @@ const rendererModules = (sources) => {
 };
 
 const bootChild = async (sources) => {
+    const {ipcRenderer} = require("electron");
+    const {waitForSettingsWindowPaint} = loadRendererModule(sources.paint, {});
     const {Dialog, genUUID, context, fit} = rendererModules(sources);
     const host = await new Promise(resolve => {
         const token = new URLSearchParams(location.search).get("settingsWindowToken");
         window.opener.dispatchEvent(new CustomEvent("siyuan-settings-host-" + token, {detail: resolve}));
     });
-    if (host.plugin) {
-        const {Setting} = loadRendererModule(sources.setting, {
-            "../util/functions": {isMobile: () => false, getFrontend: () => "desktop-window"},
-            "../dialog": {Dialog}, "../config/setting/nativeWindow": {},
-            "../config/setting/windowContext": context, "../config/setting/windowDialog": fit,
-            "../util/genID": {genUUID},
-        });
-        host.plugin.mount(options => {
-            const setting = new Setting(options);
-            options.items.forEach(item => setting.addItem(item));
-            setting.open(host.plugin.name);
-            return setting.dialog;
-        });
-        window.addEventListener("unload", () => host.plugin.closed());
-    }
-    require("electron").ipcRenderer.send("test-settings-ready");
+    await waitForSettingsWindowPaint(async () => {
+        const theme = document.createElement("link");
+        theme.id = "pendingTheme";
+        theme.rel = "stylesheet";
+        theme.href = "/fixture/pending.css";
+        document.head.append(theme);
+        const missing = document.createElement("link");
+        missing.rel = "stylesheet";
+        missing.href = "/fixture/missing.css";
+        document.head.append(missing);
+        const canceled = document.createElement("link");
+        canceled.rel = "stylesheet";
+        canceled.href = "/fixture/pending.css?canceled";
+        document.head.append(canceled);
+        await ipcRenderer.invoke("test-settings-initializing");
+        canceled.remove();
+        if (host.plugin) {
+            const {Setting} = loadRendererModule(sources.setting, {
+                "../util/functions": {isMobile: () => false, getFrontend: () => "desktop-window"},
+                "../dialog": {Dialog}, "../config/setting/nativeWindow": {},
+                "../config/setting/windowContext": context, "../config/setting/windowDialog": fit,
+                "../util/genID": {genUUID},
+            });
+            host.plugin.mount(options => {
+                const setting = new Setting(options);
+                options.items.forEach(item => setting.addItem(item));
+                setting.open(host.plugin.name);
+                return setting.dialog;
+            });
+            window.addEventListener("unload", () => host.plugin.closed());
+        } else {
+            document.body.append(document.createElement("div"));
+        }
+    });
+    if (!document.getElementById("pendingTheme").sheet) throw new Error("settings shown before theme loaded");
+    ipcRenderer.send("siyuan-settings-ready");
+    ipcRenderer.send("test-settings-ready");
 };
 
 const runCases = async (sources) => {
@@ -164,6 +187,7 @@ if (process.versions.electron && process.type === "browser") {
         let ready = 0;
         let waiting;
         const children = new Set();
+        const shown = new Set();
         const commands = [];
         const ts = require("typescript");
         const sources = {};
@@ -173,7 +197,8 @@ if (process.versions.electron && process.type === "browser") {
         const themes = Object.fromEntries(["daylight", "midnight"].map(name => [name,
             fs.readFileSync(path.join(__dirname, "../appearance/themes", name, "theme.css"), "utf8")]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
-            native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts"})) {
+            native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
+            paint: "config/setting/windowPaint.ts"})) {
             sources[key] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText;
@@ -182,6 +207,15 @@ if (process.versions.electron && process.type === "browser") {
             const pathname = new URL(request.url, "http://localhost").pathname;
             if (pathname.startsWith("/fixture/")) {
                 response.setHeader("Content-Type", "text/css; charset=utf-8");
+                if (pathname === "/fixture/missing.css") {
+                    response.writeHead(404);
+                    response.end();
+                    return;
+                }
+                if (pathname === "/fixture/pending.css") {
+                    setTimeout(() => response.end(themes.midnight), 200);
+                    return;
+                }
                 response.end(pathname === "/fixture/base.css" ? styles : themes[path.basename(pathname, ".css")]);
                 return;
             }
@@ -205,9 +239,18 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(win.getParentWindow(), null);
                 assert.equal(win.isModal(), false);
                 if (process.platform !== "darwin") assert.equal(win.isMenuBarVisible(), false);
-                win.on("closed", () => children.delete(win));
-            }, show() {}, log() {}});
-        ipcMain.on("test-settings-ready", () => {
+                assert.equal(win.isVisible(), false);
+                win.on("closed", () => { children.delete(win); shown.delete(win); });
+            }, show(win) { shown.add(win); }, log() {}});
+        ipcMain.handle("test-settings-initializing", event => {
+            const win = [...children].find(child => child.webContents === event.sender);
+            assert.ok(win);
+            assert.equal(shown.has(win), false);
+            assert.equal(win.isVisible(), false);
+        });
+        ipcMain.on("test-settings-ready", event => {
+            const win = [...children].find(child => child.webContents === event.sender);
+            assert.equal(shown.has(win), true);
             if (waiting) { waiting(); waiting = undefined; } else ready++;
         });
         ipcMain.handle("test-settings-wait", () => ready ? (--ready, Promise.resolve()) : new Promise(resolve => { waiting = resolve; }));
@@ -224,7 +267,7 @@ if (process.versions.electron && process.type === "browser") {
             owner = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
             owner.webContents.setWindowOpenHandler(details => {
                 const result = policy(owner.webContents, details);
-                return result ? {...result, overrideBrowserWindowOptions: {...result.overrideBrowserWindowOptions, show: false}} : {action: "deny"};
+                return result || {action: "deny"};
             });
             await owner.loadURL(origin + "/stage/build/app/");
             await owner.webContents.executeJavaScript(`const loadRendererModule = ${loadRendererModule.toString()}; const rendererModules = ${rendererModules.toString()}; (${runCases.toString()})(${JSON.stringify(sources)})`);

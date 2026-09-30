@@ -1,5 +1,11 @@
 .b3-dialog {
   &--window {
+    & > .b3-dialog__container {
+      transform: none;
+      opacity: 1;
+      transition: none;
+    }
+
     & > .b3-dialog__container > .toolbar {
       flex-shrink: 0;
     }

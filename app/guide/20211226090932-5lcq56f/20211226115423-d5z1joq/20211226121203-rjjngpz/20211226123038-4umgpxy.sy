@@ -1430,6 +1430,37 @@
 				{
 					"Type": "NodeText",
 					"Data": "按一下圖片上的 OCR 圖示可複製辨識文字，按兩下可開啟可拖曳的編輯視窗，對照旁邊的原圖修改文字。也可透過圖片選單複製 OCR 文字或開啟結果編輯視窗。按儲存確認修改，按取消放棄修改；按視窗外不會關閉編輯視窗。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 圖片有 OCR 文字且外觀方案允許顯示時，才會顯示 OCR 按鈕。簡潔方案預設隱藏此按鈕，自訂外觀方案中可透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "圖片"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR 文字"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 設定顯示或隱藏。也可繼續透過圖片選單複製和編輯 OCR 文字。"
 				}
 			]
 		}

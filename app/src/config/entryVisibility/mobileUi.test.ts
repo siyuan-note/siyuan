@@ -75,7 +75,10 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     let view = open();
     const selectSlash = () => {
         const select = view.querySelector<HTMLSelectElement>("[data-type='entry-section']");
-        check(select.options.length === 2, "Mobile must offer toolbar and slash categories");
+        select.value = "editor.image";
+        select.dispatchEvent(new Event("change", {bubbles: true}));
+        check(view.querySelector("[data-entry-path='editor.image.ocrText']"), "Mobile exposes image OCR visibility");
+        check(select.options.length === 3, "Mobile must offer toolbar, slash, and image categories");
         select.value = "editor.slash";
         select.dispatchEvent(new Event("change", {bubbles: true}));
     };

@@ -1445,6 +1445,37 @@
 				{
 					"Type": "NodeText",
 					"Data": "单击图片上的 OCR 图标可复制识别文本，双击可打开可拖动的编辑窗口，对照旁边的原图修改文本。也可通过图片菜单复制 OCR 文本或打开结果编辑窗口。点击保存确认修改，点击取消放弃修改；点击窗口外不会关闭编辑窗口。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 图片有 OCR 文本且外观方案允许显示时，才会显示 OCR 按钮。简洁方案默认隐藏此按钮，自定义外观方案中可通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "图片"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR 文本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 设置显示或隐藏。也可继续通过图片菜单复制和编辑 OCR 文本。"
 				}
 			]
 		}

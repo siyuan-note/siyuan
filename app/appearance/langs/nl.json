@@ -243,7 +243,7 @@
 	"backlinkHideReference": "Verwijzingsblokken in doorgegeven backlinks verbergen",
 	"backlinkHideReferenceTip": "Verberg blokken met uitsluitend blokverwijzingen in doorgegeven backlinks als andere inhoud zichtbaar blijft en toon ze weer tijdens het bewerken",
 	"uploadInsertTargetUnavailable": "Het oorspronkelijke uploaddoel is niet meer beschikbaar. Het resultaat is niet ingevoegd; geüploade bestanden blijven behouden.",
-	"mobileToolbarEntryTip": "Configureer de zichtbaarheid en volgorde van mobiele werkbalk- en slashmenu-items; profielen worden op dit apparaat opgeslagen en niet tussen apparaten gesynchroniseerd",
+	"mobileToolbarEntryTip": "Stel zichtbaarheid en volgorde in voor de mobiele werkbalk en het slashmenu, en zichtbaarheid voor de OCR-knop bij afbeeldingen; profielen worden op dit apparaat opgeslagen en niet tussen apparaten gesynchroniseerd",
 	"keymapAssigned": "Toegewezen",
 	"keymapCustomized": "Door mij aangepast",
 	"keymapUnassigned": "Niet toegewezen",

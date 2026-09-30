@@ -54,14 +54,31 @@ const browserCases = async (source: string, actionsSource: string) => {
     check.equal(dialog.element.isConnected, false);
     let opens = 0;
     let copies = 0;
-    const render = new Function("Constants", "copyImageOCRText", "openImageOCR", "isEncryptedBox", actionsSource +
-        "\nreturn renderImageActions;")({TIMEOUT_DBLCLICK: 20}, () => copies++, () => opens++, () => false);
+    let visible = true;
+    let text = "recognized";
+    let requests = 0;
+    let pending: () => void;
+    const render = new Function("Constants", "copyImageOCRText", "openImageOCR", "isEncryptedBox", "isEntryVisible", "fetchPost", actionsSource +
+        "\nreturn renderImageActions;")({TIMEOUT_DBLCLICK: 20}, () => copies++, () => opens++, () => false,
+        () => visible, (_url: string, _data: unknown, callback: (response: {data: {text: string}}) => void) => {
+            requests++;
+            return new Promise<void>(resolve => {
+                pending = () => { callback({data: {text}}); resolve(); };
+            });
+        });
     const root = document.createElement("div");
     root.className = "protyle-wysiwyg";
     root.innerHTML = '<span class="img"><span></span><span><span class="protyle-icons"><span class="protyle-icon--only"></span></span><img data-src="assets/image.png"></span></span>';
     document.body.append(root);
     render(root);
     render(root);
+    check.equal(requests, 0, "rendering does not query every image");
+    const hover = async () => {
+        root.querySelector("img").parentElement.dispatchEvent(new MouseEvent("mouseenter"));
+        pending();
+        await new Promise(resolve => setTimeout(resolve, 0));
+    };
+    await hover();
     check.equal(root.querySelectorAll(".protyle-action__ocr").length, 1);
     let action = root.querySelector<HTMLElement>(".protyle-action__ocr");
     action.click();
@@ -79,10 +96,27 @@ const browserCases = async (source: string, actionsSource: string) => {
     const snapshot = root.innerHTML;
     root.innerHTML = snapshot;
     render(root);
+    await hover();
     action = root.querySelector<HTMLElement>(".protyle-action__ocr");
     action.click();
     await new Promise(resolve => setTimeout(resolve, 30));
     check.equal(copies, 2, "restored image actions still copy OCR text");
+    text = " \n ";
+    await hover();
+    check.equal(root.querySelector(".protyle-action__ocr"), null, "empty OCR text hides the action");
+    text = "recognized again";
+    await hover();
+    check.ok(root.querySelector(".protyle-action__ocr"));
+    visible = false;
+    window.dispatchEvent(new CustomEvent("siyuan-entry-visibility"));
+    check.equal(root.querySelector(".protyle-action__ocr"), null, "profile changes hide existing actions");
+    visible = true;
+    render(root);
+    root.querySelector("img").parentElement.dispatchEvent(new MouseEvent("mouseenter"));
+    root.querySelector("img").setAttribute("data-src", "assets/changed.png");
+    pending();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    check.equal(root.querySelector(".protyle-action__ocr"), null, "stale responses cannot add actions");
     root.querySelector("img").setAttribute("data-src", "https://example.com/image.png");
     render(root);
     check.equal(root.querySelector(".protyle-action__ocr"), null);

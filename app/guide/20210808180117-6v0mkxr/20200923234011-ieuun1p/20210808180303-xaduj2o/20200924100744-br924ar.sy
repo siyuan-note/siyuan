@@ -1436,6 +1436,37 @@
 				{
 					"Type": "NodeText",
 					"Data": "The image OCR icon copies recognized text with one click; double-click it to open a draggable editor with the original image beside the text. You can also copy OCR text or open the result editor from the image menu. Click Save to keep edits or Cancel to discard them; clicking outside the editor does not close it."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " The button appears only when OCR text is available and the appearance profile allows it. It is hidden in the Simple profile; in a custom appearance profile, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Image"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR text"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to show or hide it. The image menu remains available for copying and editing OCR text."
 				}
 			]
 		}

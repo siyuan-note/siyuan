@@ -879,6 +879,12 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     toolbarCatalogSection,
     {
+        key: "editor.image",
+        label: location(lang("editor"), lang("image")),
+        sortable: false,
+        children: [node("ocrText", lang("ocrResult"), false, undefined, false)],
+    },
+    {
         key: "editor.slash",
         label: location(lang("editor"), lang("entrySlashMenu")),
         sortable: false,

@@ -243,7 +243,7 @@
 	"backlinkHideReference": "Sembunyikan blok referensi pada tautan balik yang diteruskan",
 	"backlinkHideReferenceTip": "Sembunyikan blok yang hanya berisi referensi blok pada tautan balik yang diteruskan jika konten lain tetap terlihat, dan tampilkan kembali saat mengedit",
 	"uploadInsertTargetUnavailable": "Tujuan unggahan awal tidak lagi tersedia. Hasil tidak disisipkan; berkas yang diunggah tetap disimpan.",
-	"mobileToolbarEntryTip": "Atur visibilitas dan urutan item bilah alat dan menu garis miring di ponsel; profil disimpan di perangkat ini dan tidak disinkronkan antarperangkat",
+	"mobileToolbarEntryTip": "Atur visibilitas dan urutan entri bilah alat seluler dan menu garis miring, serta visibilitas tombol OCR gambar; profil disimpan pada perangkat ini dan tidak disinkronkan antarperangkat",
 	"keymapAssigned": "Ditetapkan",
 	"keymapCustomized": "Disesuaikan oleh saya",
 	"keymapUnassigned": "Belum ditetapkan",

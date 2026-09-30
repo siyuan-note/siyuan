@@ -60,7 +60,7 @@ import {
 } from "./dockOrder";
 
 const getVisibleEntryCatalog = () => isMobile() ? entryCatalog.filter(item =>
-    item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash")
+    item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash" || item.key === "editor.image")
     .map(item => item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child =>
         child.type === "separator" || child.key.startsWith("mobile-") ||
         MOBILE_TOOLBAR_NAMES.includes(child.key) || child.key.startsWith("plugin:"))} : item) : entryCatalog.map(item =>

@@ -60,6 +60,9 @@ export const openImageOCR = (path: string) => {
         save.disabled = true;
         try {
             const response = await fetchSyncPost("/api/asset/setImageOCRText", {path, text: textarea.value});
+            if (response.code === 0) {
+                window.dispatchEvent(new CustomEvent("siyuan-image-ocr"));
+            }
             if (!closed && response.code === 0) {
                 close();
             }

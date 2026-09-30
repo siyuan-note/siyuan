@@ -39,6 +39,12 @@ import {
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
 test("image OCR actions retain their configurable paths and order", () => {
+    const imageAction = getEntryCatalogNode("editor.image.ocrText");
+    assert.equal(imageAction.type, "entry");
+    assert.equal(imageAction.simple, false);
+    assert.equal(imageAction.sortable, false);
+    assert.equal(getEntryParentPath("editor.image.ocrText"), "editor.image");
+    assert.deepEqual(getEntryCatalogChildren("editor.image").map(item => item.key), ["ocrText"]);
     assert.deepEqual(getEntryCatalogChildren("inline.image.ocr").map(item => item.key), [
         "ocrResult", "copyOCRText", "separator_reOCR", "reOCR",
     ]);

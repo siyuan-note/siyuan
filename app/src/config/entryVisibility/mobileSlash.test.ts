@@ -25,6 +25,11 @@ test("slash visibility shares profile settings and only platform defaults differ
         });
         for (const mobile of [false, true]) {
             runtimeWindow.siyuan.mobile = mobile ? {} : undefined;
+            for (const visible of [false, true]) {
+                custom.entries["editor.image.ocrText"] = visible;
+                assert.equal(api.isEntryVisible("editor.image.ocrText"), visible);
+            }
+            delete custom.entries["editor.image.ocrText"];
             assert.equal(catalog.getEntryCatalogDefaultVisibility(root), !mobile);
             assert.equal(catalog.getEntryCatalogCustomDefaultVisibility(root), !mobile);
             for (const active of ["simple", "full", "custom"]) {

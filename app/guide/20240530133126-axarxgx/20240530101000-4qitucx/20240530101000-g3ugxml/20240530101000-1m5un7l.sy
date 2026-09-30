@@ -1500,6 +1500,37 @@
 				{
 					"Type": "NodeText",
 					"Data": "画像の OCR アイコンをクリックすると認識テキストをコピーでき、ダブルクリックすると元画像とテキストを並べた移動可能な編集ウィンドウが開きます。画像メニューからも OCR テキストのコピーや結果の編集ができます。保存で変更を確定し、キャンセルで破棄します。ウィンドウの外側をクリックしても閉じません。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 画像の OCR ボタンは、OCR テキストがあり、外観プロファイルで表示が許可されている場合にのみ表示されます。シンプルプロファイルでは非表示です。カスタム外観プロファイルの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR テキスト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で表示を切り替えられます。画像メニューからも OCR テキストのコピーと編集ができます。"
 				}
 			]
 		}

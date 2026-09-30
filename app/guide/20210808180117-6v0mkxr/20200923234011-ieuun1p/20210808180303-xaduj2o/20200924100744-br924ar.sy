@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20260930085927"
+		"updated": "20260930090802"
 	},
 	"Children": [
 		{
@@ -1326,6 +1326,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "After the adjustment, you need to manually rebuild the asset content index."
+				}
+			]
+		},
+		{
+			"ID": "20260930090802-3zn8sf9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930090802-3zn8sf9",
+				"updated": "20260930090802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The image OCR icon copies recognized text with one click; double-click it to open a draggable editor with the original image beside the text. You can also copy OCR text or open the result editor from the image menu. Click Save to keep edits or Cancel to discard them; clicking outside the editor does not close it."
 				}
 			]
 		}

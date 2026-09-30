@@ -82,6 +82,7 @@ import {getParentDocumentID} from "../protyle/util/parentDocument";
 import {prepareInlineElementBoundaryMutation} from "../protyle/util/inlineElementBoundary";
 import {getZoomFocusScrollAttr, shouldFocusAfterZoom} from "../protyle/util/focusRestore";
 import {scrollCenter} from "../util/highlightById";
+import {copyImageOCRText, openImageOCR} from "../asset/imageOCR";
 import {
     getSemanticInlineVisibleText,
     normalizeSemanticInlineElement,
@@ -1367,18 +1368,17 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             label: "OCR",
             submenu: [{
                 id: "ocrResult",
-                iconHTML: "",
-                type: "readonly",
-                label: `<textarea spellcheck="false" data-type="ocr" style="margin: 4px 0" rows="1" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.ocrResult}"></textarea>`,
-                bind(element) {
-                    element.style.maxWidth = "none";
-                    fetchPost("/api/asset/getImageOCRText", {
-                        path: imgElement.getAttribute("src")
-                    }, (response) => {
-                        const textarea = element.querySelector("textarea");
-                        textarea.value = response.data.text;
-                        textarea.dataset.ocrText = response.data.text;
-                    });
+                icon: "iconEdit",
+                label: window.siyuan.languages.ocrResult,
+                click() {
+                    openImageOCR(imgElement.getAttribute("data-src"));
+                }
+            }, {
+                id: "copyOCRText",
+                icon: "iconCopy",
+                label: `${window.siyuan.languages.copy} OCR`,
+                click() {
+                    copyImageOCRText(imgElement.getAttribute("data-src"));
                 }
             }, {
                 id: "separator_reOCR",
@@ -1607,13 +1607,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }
             }
 
-            const ocrElement = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement;
-            if (ocrElement && ocrElement.dataset.ocrText !== ocrElement.value) {
-                fetchPost("/api/asset/setImageOCRText", {
-                    path: imgElement.getAttribute("src"),
-                    text: ocrElement.value
-                });
-            }
             imgElement.setAttribute("alt", textElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, nodeElement, html);

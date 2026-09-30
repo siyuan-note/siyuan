@@ -38,6 +38,14 @@ import {
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
+test("image OCR actions retain their configurable paths and order", () => {
+    assert.deepEqual(getEntryCatalogChildren("inline.image.ocr").map(item => item.key), [
+        "ocrResult", "copyOCRText", "separator_reOCR", "reOCR",
+    ]);
+    assert.equal(getEntryCatalogNode("inline.image.ocr.copyOCRText").simple, false);
+    assert.equal(getEntryParentPath("inline.image.ocr.copyOCRText"), "inline.image.ocr");
+});
+
 test("remove list leads single and multiple block conversion menus", () => {
     for (const path of ["gutter.single.turnInto", "gutter.multi.turnInto"]) {
         assert.deepEqual(getEntryCatalogChildren(path).slice(0, 2).map(item => item.key), ["removeList", "list"]);

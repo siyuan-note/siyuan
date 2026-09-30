@@ -1,0 +1,114 @@
+import * as assert from "node:assert/strict";
+import {execFile} from "node:child_process";
+import {mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {tmpdir} from "node:os";
+import * as path from "node:path";
+import {test} from "node:test";
+import {promisify} from "node:util";
+import {ScriptTarget, transpileModule} from "typescript";
+
+const browserCases = async (source: string, actionsSource: string) => {
+    const check: typeof assert = require("node:assert/strict");
+    const copied: string[] = [];
+    const saved: {path: string, text: string}[] = [];
+    let dialog: {element: HTMLElement, destroy: () => void};
+    let receive: (response: {data: {text: string}}) => void;
+    Object.assign(window, {siyuan: {languages: {copy: "Copy", save: "Save", cancel: "Cancel", ocrResult: "OCR",
+        copied: "Copied", doubleClick: "Double click"}}});
+    const dependencies = {
+        Dialog: class {
+            element: HTMLElement;
+            constructor(options: {content: string, disableClose: boolean}) {
+                check.equal(options.disableClose, true);
+                this.element = document.createElement("div");
+                this.element.innerHTML = options.content;
+                document.body.append(this.element);
+                dialog = this;
+            }
+            destroy() { this.element.remove(); }
+        },
+        fetchPost: (_url: string, _body: {path: string}, callback: typeof receive) => { receive = callback; },
+        fetchSyncPost: async (_url: string, body: {path: string, text: string}) => {
+            saved.push(body);
+            return {code: 0};
+        },
+        writeText: (text: string) => copied.push(text), showMessage: () => {},
+    };
+    const api = new Function(...Object.keys(dependencies), source + "\nreturn {openImageOCR, copyImageOCRText};")(...Object.values(dependencies));
+    api.openImageOCR("assets/first.png");
+    let textarea = dialog.element.querySelector("textarea");
+    check.equal(textarea.disabled, true);
+    receive({data: {text: "recognized"}});
+    textarea.value = "corrected";
+    (dialog.element.querySelector('[data-action="copy"]') as HTMLElement).click();
+    check.deepEqual(copied, ["corrected"]);
+    (dialog.element.querySelector('[data-action="cancel"]') as HTMLElement).click();
+    check.equal(saved.length, 0);
+    api.openImageOCR("assets/second.png");
+    textarea = dialog.element.querySelector("textarea");
+    receive({data: {text: "original"}});
+    textarea.value = "updated";
+    (dialog.element.querySelector('[data-action="save"]') as HTMLElement).click();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    check.deepEqual(saved, [{path: "assets/second.png", text: "updated"}]);
+    check.equal(dialog.element.isConnected, false);
+    let opens = 0;
+    let copies = 0;
+    const render = new Function("Constants", "copyImageOCRText", "openImageOCR", "isEncryptedBox", actionsSource +
+        "\nreturn renderImageActions;")({TIMEOUT_DBLCLICK: 20}, () => copies++, () => opens++, () => false);
+    const root = document.createElement("div");
+    root.className = "protyle-wysiwyg";
+    root.innerHTML = '<span class="img"><span></span><span><span class="protyle-icons"><span class="protyle-icon--only"></span></span><img data-src="assets/image.png"></span></span>';
+    document.body.append(root);
+    render(root);
+    render(root);
+    check.equal(root.querySelectorAll(".protyle-action__ocr").length, 1);
+    const action = root.querySelector<HTMLElement>(".protyle-action__ocr");
+    action.click();
+    await new Promise(resolve => setTimeout(resolve, 30));
+    check.equal(copies, 1);
+    action.click();
+    action.click();
+    action.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    await new Promise(resolve => setTimeout(resolve, 30));
+    check.equal(copies, 1);
+    check.equal(opens, 1);
+    root.setAttribute("data-readonly", "true");
+    action.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    check.equal(opens, 1);
+    return "Image OCR cases passed";
+};
+
+test("image OCR copying, explicit saving and double-click editing", {
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    timeout: 45000,
+}, async () => {
+    const compile = (file: string) => transpileModule(readFileSync(path.resolve(__dirname, file), "utf8")
+        .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-image-ocr-test-"));
+    const script = path.join(temporary, "run.cjs");
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" +
+        JSON.stringify(compile("imageOCR.ts")) + "," + JSON.stringify(compile("../protyle/render/imageActions.ts")) + ")";
+    writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
+app.whenReady().then(async () => {
+    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    try {
+        await win.loadURL("data:text/html,<html><body></body></html>");
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
+        app.exit(0);
+    } catch (error) { console.error(error); app.exit(1); }
+});`, "utf8");
+    const env = {...process.env};
+    delete env.ELECTRON_RUN_AS_NODE;
+    try {
+        const result = await promisify(execFile)(require("electron") as unknown as string, [script],
+            {env, windowsHide: true, timeout: 40000});
+        assert.match(result.stdout, /Image OCR cases passed/);
+    } finally {
+        if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) && path.basename(temporary).startsWith("siyuan-image-ocr-test-")) {
+            rmSync(temporary, {recursive: true, force: true});
+        }
+    }
+});

@@ -1400,3 +1400,32 @@ table + .protyle-action__table {
     pointer-events: none;
   }
 }
+.image-ocr {
+  display: flex;
+  gap: 16px;
+  min-height: 0;
+
+  &__preview {
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+
+    img {
+      max-width: 100%;
+    }
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+    resize: none;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+
+    &__text {
+      min-height: 160px;
+    }
+  }
+}

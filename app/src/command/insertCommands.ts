@@ -120,10 +120,8 @@ const executeInsert = (context: ICommandContextSnapshot, id: string) => {
         return;
     }
     protyle.toolbar.range = context.range.cloneRange();
-    protyle.hint.splitChar = "/";
-    protyle.hint.lastIndex = -1;
     focusByRange(protyle.toolbar.range);
-    protyle.hint.fill(item.value, protyle, false);
+    protyle.hint.fillCommand(item.value, protyle, false);
     if ((context.environment === "mobile" || context.environment === "browser-mobile") &&
         (id === "ref" || id === "blockEmbed")) {
         /// #if MOBILE

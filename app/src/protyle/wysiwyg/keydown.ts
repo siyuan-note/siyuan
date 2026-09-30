@@ -2284,9 +2284,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             type: "Blocks2Blockquote"
                         });
                     } else {
-                        protyle.hint.splitChar = "/";
-                        protyle.hint.lastIndex = -1;
-                        protyle.hint.fill(">" + Lute.Caret, protyle);
+                        protyle.hint.fillCommand(">" + Lute.Caret, protyle);
                     }
                 } else {
                     const targetSubtype: TListSubtype = isMatchCheck ? "t" : (isMatchList ? "u" : "o");
@@ -2351,9 +2349,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             });
                         }
                     } else {
-                        protyle.hint.splitChar = "/";
-                        protyle.hint.lastIndex = -1;
-                        protyle.hint.fill((isMatchCheck ? "- [ ] " : (isMatchList ? "- " : "1. ")) + Lute.Caret, protyle);
+                        protyle.hint.fillCommand((isMatchCheck ? "- [ ] " : (isMatchList ? "- " : "1. ")) + Lute.Caret, protyle);
                     }
                 }
             } else {
@@ -2387,9 +2383,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.table, event) &&
             !isInEmbedBlock(nodeElement)) {
-            protyle.hint.splitChar = "/";
-            protyle.hint.lastIndex = -1;
-            protyle.hint.fill(`| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, protyle);
+            protyle.hint.fillCommand(`| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, protyle);
             event.preventDefault();
             event.stopPropagation();
             return;

@@ -1573,7 +1573,7 @@ export const initKeyboardToolbar = () => {
                 }
                 hideKeyboardToolbarUtil();
             }
-            protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
+            protyle.hint.fillCommand(dataValue, protyle, false);   // 点击后 range 会改变
             event.preventDefault();
             event.stopPropagation();
             if (dataValue === "((" || dataValue === "{{") {
@@ -1693,7 +1693,7 @@ export const initKeyboardToolbar = () => {
         const insert = MOBILE_TOOLBAR_INSERTS.find(item => item.name === type);
         if (insert) {
             protyle.toolbar.range = range.cloneRange();
-            protyle.hint.fill(insert.value(Constants), protyle, false);
+            protyle.hint.fillCommand(insert.value(Constants), protyle, false);
             return;
         } else if (["a", "block-ref", "inline-math", "inline-memo"].includes(type)) {
             if (!hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {

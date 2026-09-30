@@ -791,6 +791,15 @@ ${genHintItemHTML(item)}
         this.emojiBrowseMode = false;
     }
 
+    // 直接插入命令使用正文选区，不沿用候选面板的来源和触发位置。
+    public fillCommand(value: string, protyle: IProtyle, updateRange = true) {
+        this.source = "hint";
+        this.splitChar = "/";
+        this.lastIndex = -1;
+        this.hashTagSearchElement = undefined;
+        this.fill(value, protyle, updateRange);
+    }
+
     public fill(value: string, protyle: IProtyle, updateRange = true, refIsS = false) {
         this.bindingDismissController?.abort();
         hideElements(["hint", "toolbar"], protyle);

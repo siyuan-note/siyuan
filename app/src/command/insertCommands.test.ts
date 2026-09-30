@@ -53,7 +53,12 @@ test("insert commands search and execute existing insertion actions at the saved
     const protyle = {
         lite: false, disabled: false, wysiwyg: {element: {contains: (node: unknown) => node === container}},
         options: {upload: {accept: "image/*"}}, toolbar: {range: undefined as unknown},
-        hint: {splitChar: "", lastIndex: 2, fill: (value: string) => fills.push(value),
+        hint: {fillCommand: (value: string, target: unknown, updateRange: boolean) => {
+            assert.equal(target, protyle);
+            assert.equal(updateRange, false);
+            assert.ok(protyle.toolbar.range);
+            fills.push(value);
+        },
             bindUploadEvent: (_protyle: unknown, host: unknown) => { uploadBound = host === uploadHost; }},
     };
     const context = {
@@ -74,8 +79,6 @@ test("insert commands search and execute existing insertion actions at the saved
     assert.equal(queryCommandPalette(registry, context, "", recent)[0].id, "core.mobile.insert.assets");
     assert.equal((await registry.execute("core.mobile.insert.template", context)).status, "executed");
     assert.deepEqual(fills, ["template-value"]);
-    assert.equal(protyle.hint.splitChar, "/");
-    assert.equal(protyle.hint.lastIndex, -1);
     assert.equal(focused.length, 1);
     assert.ok(protyle.toolbar.range);
     await registry.execute("core.mobile.insert.ref", context);

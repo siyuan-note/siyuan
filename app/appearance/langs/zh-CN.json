@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "属性面板字段可见性",
+	"alwaysShow": "始终显示",
+	"hideWhenEmpty": "空白时隐藏",
+	"alwaysHide": "始终隐藏",
 	"renameAssetTip": "重命名会更新所有引用该资源文件的链接",
 	"exportImageTooLarge": "导出图片过大，请减少内容或表格列数后重试",
 	"imageOCRActionTip": "单击复制/双击编辑 OCR 文本",

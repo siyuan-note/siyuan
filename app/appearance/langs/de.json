@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "Feldsichtbarkeit im Eigenschaftsbereich",
+	"alwaysShow": "Immer anzeigen",
+	"hideWhenEmpty": "Ausblenden, wenn leer",
+	"alwaysHide": "Immer ausblenden",
 	"renameAssetTip": "Beim Umbenennen werden alle Links aktualisiert, die auf diese Ressource verweisen",
 	"exportImageTooLarge": "Das exportierte Bild ist zu groß. Reduzieren Sie den Inhalt oder die Anzahl der Tabellenspalten und versuchen Sie es erneut.",
 	"imageOCRActionTip": "Klicken zum Kopieren/Doppelklicken zum Bearbeiten des OCR-Texts",

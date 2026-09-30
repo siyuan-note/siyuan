@@ -19,6 +19,7 @@ const refreshActions = new Set<TOperation>([
     "duplicateAttrViewKey",
     "setAttrViewColIcon",
     "setAttrViewColDesc",
+    "setAttrViewColAttributePanelVisibility",
     "setAttrViewName",
     "setAttrViewCustomColors",
     "updateAttrViewColTemplate",
@@ -247,7 +248,7 @@ export class AVAttributePanel {
     }
 
     public displayEmptyFields() {
-        if (!window.siyuan.config.editor.databaseAttrHideEmpty || this.showEmptyFields) {
+        if (this.showEmptyFields) {
             return;
         }
         this.showEmptyFields = true;
@@ -472,15 +473,18 @@ export class AVAttributePanel {
     private updateEmptyState() {
         this.element.dataset.readonly = String(Boolean(this.protyle.disabled));
         const hideEmpty = window.siyuan.config.editor.databaseAttrHideEmpty;
-        if (!hideEmpty) {
+        const hasHiddenFields = Boolean(this.bodyElement.querySelector(
+            '.av__row[data-panel-visibility="hide"], .av__row[data-panel-visibility="hide-empty"]'));
+        if (!hideEmpty && !hasHiddenFields) {
             this.showEmptyFields = false;
         }
+        this.element.classList.toggle("protyle-db-attr--show-all", this.showEmptyFields);
         updateEmptyState(this.element, hideEmpty && !this.showEmptyFields);
         const editElement = this.element.querySelector<HTMLElement>('[data-type="toggle-empty"]');
-        editElement?.classList.toggle("fn__none", !hideEmpty || this.collapsed);
-        editElement?.setAttribute("aria-label", window.siyuan.languages[
-            this.showEmptyFields ? "hideEmptyFields" : "displayEmptyFields"
-        ]);
+        editElement?.classList.toggle("fn__none", (!hideEmpty && !hasHiddenFields) || this.collapsed);
+        editElement?.setAttribute("aria-label", hasHiddenFields ? window.siyuan.languages.edit :
+            window.siyuan.languages[this.showEmptyFields ? "hideEmptyFields" : "displayEmptyFields"]);
+        editElement?.setAttribute("aria-pressed", String(this.showEmptyFields));
     }
 
     private hideByDisplayConfig() {

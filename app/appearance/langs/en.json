@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "Attribute panel field visibility",
+	"alwaysShow": "Always show",
+	"hideWhenEmpty": "Hide when empty",
+	"alwaysHide": "Always hide",
 	"renameAssetTip": "Renaming updates all links that reference this asset",
 	"exportImageTooLarge": "The exported image is too large. Reduce the content or table columns and try again.",
 	"imageOCRActionTip": "Click to copy/double-click to edit OCR text",

@@ -325,6 +325,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewColumnIcon(op)
 			case "setAttrViewColDesc":
 				ret = tx.doSetAttrViewColumnDesc(op)
+			case "setAttrViewColAttributePanelVisibility":
+				ret = tx.doSetAttrViewColAttributePanelVisibility(op)
 			case "insertAttrViewBlock":
 				ret = tx.doInsertAttrViewBlock(op)
 			case "removeAttrViewBlock":

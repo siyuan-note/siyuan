@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "속성 패널 필드 표시",
+	"alwaysShow": "항상 표시",
+	"hideWhenEmpty": "비어 있으면 숨기기",
+	"alwaysHide": "항상 숨기기",
 	"renameAssetTip": "이름을 변경하면 이 리소스를 참조하는 모든 링크가 업데이트됩니다",
 	"exportImageTooLarge": "내보낼 이미지가 너무 큽니다. 내용이나 표의 열 수를 줄인 후 다시 시도하세요.",
 	"imageOCRActionTip": "클릭하여 복사/두 번 클릭하여 OCR 텍스트 편집",

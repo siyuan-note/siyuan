@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "Visibilitas kolom di panel properti",
+	"alwaysShow": "Selalu tampilkan",
+	"hideWhenEmpty": "Sembunyikan saat kosong",
+	"alwaysHide": "Selalu sembunyikan",
 	"renameAssetTip": "Penggantian nama memperbarui semua tautan yang merujuk ke sumber daya ini",
 	"exportImageTooLarge": "Gambar yang diekspor terlalu besar. Kurangi konten atau jumlah kolom tabel, lalu coba lagi.",
 	"imageOCRActionTip": "Klik untuk menyalin/klik dua kali untuk mengedit teks OCR",

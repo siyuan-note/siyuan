@@ -244,13 +244,14 @@ export const genAVAttributeRowHTML = (options: {
     renderTemplate?: string,
     value: IAVCellValue,
     empty: boolean,
+    attributePanelVisibility?: IAVColumn["attributePanelVisibility"],
 }) => {
     const value = options.value;
     const storedValue = cloneAVCellValueSnapshot(value);
     const textInputType = ["url", "email", "phone", "block"].includes(value.type);
     const hasOwnPlaceholder = ["text", "number", "date", "url", "phone", "template", "email"].includes(value.type);
     const checkClass = value.type === "checkbox" ? (value.checkbox.checked ? " av__cell-check" : " av__cell-uncheck") : "";
-    return `<div class="block__icons av__row" data-id="${options.nodeID}" data-col-id="${options.keyID}" data-empty="${options.empty}"${options.type === "block" ? ' data-primary="true"' : ""}>
+    return `<div class="block__icons av__row" data-id="${options.nodeID}" data-col-id="${options.keyID}" data-empty="${options.empty}" data-panel-visibility="${escapeAttr(options.attributePanelVisibility || "")}"${options.type === "block" ? ' data-primary="true"' : ""}>
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
     <div class="block__logo block__logo--icon ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAriaLabel(options.name)}<div class='ft__on-surface'>${escapeAriaLabel(options.desc || "")}</div>">
         ${options.icon ? unicode2Emoji(options.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${options.typeIcon}"></use></svg>`}

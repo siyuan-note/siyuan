@@ -174,6 +174,10 @@ func assertAVContractJSONEqual(t *testing.T, want, got any) {
 }
 
 func TestAVContractTransportMapping(t *testing.T) {
+	for _, visibility := range []string{"", "always", "hide-empty", "hide"} {
+		key := &av.Key{ID: "key", Type: av.KeyTypeText, AttributePanelVisibility: visibility}
+		assertAVContractJSONEqual(t, key, toContractAVKey(key))
+	}
 	base := &av.BaseInstance{ID: "view", Filters: []*av.ViewFilter{}, Sorts: nil, PageSize: 50, Group: &av.ViewGroup{Field: "key"}}
 	value := &av.Value{ID: "value", Type: av.KeyTypeText, Text: &av.ValueText{Content: "content"}, Relation: &av.ValueRelation{BlockIDs: []string{}}}
 	for _, view := range []av.Viewable{

@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "Widoczność pola w panelu właściwości",
+	"alwaysShow": "Zawsze pokazuj",
+	"hideWhenEmpty": "Ukryj, gdy puste",
+	"alwaysHide": "Zawsze ukrywaj",
 	"renameAssetTip": "Zmiana nazwy aktualizuje wszystkie linki odwołujące się do tego zasobu",
 	"exportImageTooLarge": "Eksportowany obraz jest zbyt duży. Zmniejsz ilość treści lub liczbę kolumn tabeli i spróbuj ponownie.",
 	"imageOCRActionTip": "Kliknij, aby skopiować/kliknij dwukrotnie, aby edytować tekst OCR",

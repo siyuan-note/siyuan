@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "Veldzichtbaarheid in het eigenschappenpaneel",
+	"alwaysShow": "Altijd tonen",
+	"hideWhenEmpty": "Verbergen indien leeg",
+	"alwaysHide": "Altijd verbergen",
 	"renameAssetTip": "Hernoemen werkt alle links bij die naar deze bron verwijzen",
 	"exportImageTooLarge": "De geëxporteerde afbeelding is te groot. Verminder de inhoud of het aantal tabelkolommen en probeer het opnieuw.",
 	"imageOCRActionTip": "Klik om te kopiëren/dubbelklik om OCR-tekst te bewerken",

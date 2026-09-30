@@ -157,6 +157,13 @@ export const openMenuPanel = (options: {
         }
         let html;
         let fields = getFieldsByData(data);
+        if (isCustomAttr && options.colId) {
+            const field = fields.find(item => item.id === options.colId);
+            const row = options.blockElement.querySelector<HTMLElement>(`.av__row[data-col-id="${options.colId}"]`);
+            if (field && row) {
+                field.attributePanelVisibility = row.dataset.panelVisibility as IAVColumn["attributePanelVisibility"];
+            }
+        }
         if (options.type === "config") {
             html = getViewHTML(data);
         } else if (options.type === "properties") {

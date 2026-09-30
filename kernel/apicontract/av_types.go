@@ -211,21 +211,23 @@ type AVGroupRange struct {
 }
 
 type AVKey struct {
-	ID             string            `json:"id" api:"optional,nullable"`
-	Name           string            `json:"name" api:"optional,nullable"`
-	Type           string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
-	Icon           string            `json:"icon" api:"optional,nullable"`
-	Desc           string            `json:"desc" api:"optional,nullable"`
-	Options        []*AVSelectOption `json:"options,omitempty" api:"optional,nullable"`
-	NumberFormat   string            `json:"numberFormat" api:"optional,nullable"`
-	DateFormat     string            `json:"dateFormat,omitempty" api:"optional,nullable,enum=|full|month-day-year|day-month-year|year-month-day"`
-	Template       string            `json:"template" api:"optional,nullable"`
-	RenderTemplate string            `json:"renderTemplate,omitempty" api:"optional,nullable"`
-	Relation       *AVRelation       `json:"relation,omitempty" api:"optional,nullable"`
-	Rollup         *AVRollup         `json:"rollup,omitempty" api:"optional,nullable"`
-	Date           *AVDate           `json:"date,omitempty" api:"optional,nullable"`
-	Created        *AVCreated        `json:"created,omitempty" api:"optional,nullable"`
-	Updated        *AVUpdated        `json:"updated,omitempty" api:"optional,nullable"`
+	// 属性面板字段可见性：空值沿用全局设置，always 始终显示，hide-empty 空白时隐藏，hide 始终隐藏。
+	AttributePanelVisibility string            `json:"attributePanelVisibility,omitempty" api:"optional,nullable,enum=|always|hide-empty|hide"`
+	ID                       string            `json:"id" api:"optional,nullable"`
+	Name                     string            `json:"name" api:"optional,nullable"`
+	Type                     string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	Icon                     string            `json:"icon" api:"optional,nullable"`
+	Desc                     string            `json:"desc" api:"optional,nullable"`
+	Options                  []*AVSelectOption `json:"options,omitempty" api:"optional,nullable"`
+	NumberFormat             string            `json:"numberFormat" api:"optional,nullable"`
+	DateFormat               string            `json:"dateFormat,omitempty" api:"optional,nullable,enum=|full|month-day-year|day-month-year|year-month-day"`
+	Template                 string            `json:"template" api:"optional,nullable"`
+	RenderTemplate           string            `json:"renderTemplate,omitempty" api:"optional,nullable"`
+	Relation                 *AVRelation       `json:"relation,omitempty" api:"optional,nullable"`
+	Rollup                   *AVRollup         `json:"rollup,omitempty" api:"optional,nullable"`
+	Date                     *AVDate           `json:"date,omitempty" api:"optional,nullable"`
+	Created                  *AVCreated        `json:"created,omitempty" api:"optional,nullable"`
+	Updated                  *AVUpdated        `json:"updated,omitempty" api:"optional,nullable"`
 }
 
 type AVSelectOption struct {

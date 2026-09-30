@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "Özellik panelindeki alan görünürlüğü",
+	"alwaysShow": "Her zaman göster",
+	"hideWhenEmpty": "Boş olduğunda gizle",
+	"alwaysHide": "Her zaman gizle",
 	"renameAssetTip": "Yeniden adlandırma bu kaynağa başvuran tüm bağlantıları günceller",
 	"exportImageTooLarge": "Dışa aktarılacak resim çok büyük. İçeriği veya tablonun sütun sayısını azaltıp tekrar deneyin.",
 	"imageOCRActionTip": "Kopyalamak için tıklayın/OCR metnini düzenlemek için çift tıklayın",

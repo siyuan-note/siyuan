@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "Visibilité du champ dans le panneau des propriétés",
+	"alwaysShow": "Toujours afficher",
+	"hideWhenEmpty": "Masquer si vide",
+	"alwaysHide": "Toujours masquer",
 	"renameAssetTip": "Le renommage met à jour tous les liens qui référencent cette ressource",
 	"exportImageTooLarge": "L’image exportée est trop grande. Réduisez le contenu ou le nombre de colonnes du tableau, puis réessayez.",
 	"imageOCRActionTip": "Cliquer pour copier/double-cliquer pour modifier le texte OCR",

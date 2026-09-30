@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "נראות שדה בחלונית המאפיינים",
+	"alwaysShow": "הצג תמיד",
+	"hideWhenEmpty": "הסתר כשהשדה ריק",
+	"alwaysHide": "הסתר תמיד",
 	"renameAssetTip": "שינוי השם מעדכן את כל הקישורים שמפנים למשאב זה",
 	"exportImageTooLarge": "התמונה המיוצאת גדולה מדי. צמצמו את התוכן או את מספר העמודות בטבלה ונסו שוב.",
 	"imageOCRActionTip": "לחיצה להעתקה/לחיצה כפולה לעריכת טקסט OCR",

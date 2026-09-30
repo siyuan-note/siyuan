@@ -44,6 +44,8 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"setAttrViewColPin", reflect.TypeFor[bool](), reflect.TypeFor[Null]()},
 	{"setAttrViewColIcon", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
 	{"setAttrViewColDesc", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
+	// 仅修改属性面板可见性；data 支持空字符串、always、hide-empty、hide，不影响数据库视图的字段显隐。
+	{"setAttrViewColAttributePanelVisibility", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
 	{"insertAttrViewBlock", reflect.TypeFor[Null](), reflect.TypeFor[TransactionInsertedItems]()},
 	{"removeAttrViewBlock", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
 	{"addAttrViewCol", reflect.TypeFor[string](), reflect.TypeFor[Null]()},

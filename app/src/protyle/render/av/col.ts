@@ -247,6 +247,20 @@ export const getEditHTML = (options: {
     <svg class="b3-menu__action ariaLabel" data-position="4west" aria-label="${window.siyuan.languages.fieldVisibility}" data-type="fieldVisibility"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
     }
+    if (options.isCustomAttr) {
+        const visibility = colData.attributePanelVisibility || "";
+        html += `<label class="b3-menu__item">
+    <span class="b3-menu__label">${window.siyuan.languages.attributePanelVisibility}</span>
+    <select class="b3-select" data-type="attributePanelVisibility">
+        ${[
+            ["", window.siyuan.languages.default],
+            ["always", window.siyuan.languages.alwaysShow],
+            ["hide-empty", window.siyuan.languages.hideWhenEmpty],
+            ["hide", window.siyuan.languages.alwaysHide],
+        ].map(([value, label]) => `<option value="${value}"${visibility === value ? " selected" : ""}>${label}</option>`).join("")}
+    </select>
+</label>`;
+    }
     if (colData.type !== "block") {
         html += `<button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
@@ -297,6 +311,19 @@ export const bindEditEvent = (options: {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
+    options.menuElement.querySelector<HTMLSelectElement>('[data-type="attributePanelVisibility"]')?.addEventListener("change", event => {
+        const visibility = (event.target as HTMLSelectElement).value as IAVColumn["attributePanelVisibility"];
+        const previous = colData.attributePanelVisibility || "";
+        if (visibility === previous) {
+            return;
+        }
+        transaction(options.protyle, [{
+            action: "setAttrViewColAttributePanelVisibility", id: colId, avID, data: visibility,
+        }], [{
+            action: "setAttrViewColAttributePanelVisibility", id: colId, avID, data: previous,
+        }]);
+        colData.attributePanelVisibility = visibility;
+    });
     const nameElement = options.menuElement.querySelector('[data-type="name"]') as HTMLInputElement;
     nameElement.addEventListener("blur", () => {
         const newValue = nameElement.value;

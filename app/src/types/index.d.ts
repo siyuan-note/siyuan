@@ -1382,6 +1382,7 @@ interface IAVSort {
 }
 
 interface IAVColumn {
+    attributePanelVisibility?: "" | "always" | "hide-empty" | "hide",
     width?: string,
     align?: TAVAlign,
     icon?: string,

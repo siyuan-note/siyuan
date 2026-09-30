@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260930140000"
+		"updated": "20260930175958"
 	},
 	"Children": [
 		{
@@ -36,6 +36,35 @@
 				{
 					"Type": "NodeText",
 					"Data": "Databases consist of content blocks or non-content block data, and are presented in different views, such as table view, list view, calendar view, kanban view, and card view."
+				}
+			]
+		},
+		{
+			"ID": "20260930175958-jgqkczm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260930175958-jgqkczm",
+				"updated": "20260930175958"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Attribute panel field visibility"
+				}
+			]
+		},
+		{
+			"ID": "20260930175958-sqtxjcl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930175958-sqtxjcl",
+				"updated": "20260930175958"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the database attribute panel at the top of a document, click a field name and set Attribute panel field visibility to Always show, Hide when empty, or Always hide. Default follows the global setting for hiding empty fields. This rule applies to that field in the database's attribute panels and does not change its visibility in database views. Use the panel's edit button to temporarily reveal hidden fields, edit their values, or change their visibility rules."
 				}
 			]
 		},

@@ -177,11 +177,12 @@ const (
 
 // Key 描述了属性视图属性字段的基础结构。
 type Key struct {
-	ID   string  `json:"id"`   // 字段 ID
-	Name string  `json:"name"` // 字段名
-	Type KeyType `json:"type"` // 字段类型
-	Icon string  `json:"icon"` // 字段图标
-	Desc string  `json:"desc"` // 字段描述
+	ID                       string  `json:"id"`                                 // 字段 ID
+	Name                     string  `json:"name"`                               // 字段名
+	Type                     KeyType `json:"type"`                               // 字段类型
+	Icon                     string  `json:"icon"`                               // 字段图标
+	Desc                     string  `json:"desc"`                               // 字段描述
+	AttributePanelVisibility string  `json:"attributePanelVisibility,omitempty"` // 属性面板可见性，空值沿用全局设置
 
 	// 以下是某些列类型的特有属性
 

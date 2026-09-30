@@ -167,6 +167,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     renderTemplate: item.key.renderTemplate,
                     value,
                     empty: cellValueIsEmpty(value, true, item.key.renderTemplate),
+                    attributePanelVisibility: item.key.attributePanelVisibility,
                 });
             });
             innerHTML += `<div class="fn__hr"></div>

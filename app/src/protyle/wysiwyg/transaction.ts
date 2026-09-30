@@ -1477,7 +1477,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColPin", "addAttrViewView", "setAttrViewColIcon",
             "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "duplicateAttrViewRow", "sortAttrViewView",
             "updateAttrViewColRelation", "setAttrViewColRelationFilters", "setAttrViewPageSize", "updateAttrViewColRollup",
-            "setAttrViewColRollupFilters", "sortAttrViewKey", "setAttrViewColDesc",
+            "setAttrViewColRollupFilters", "sortAttrViewKey", "setAttrViewColDesc", "setAttrViewColAttributePanelVisibility",
             "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewCoverFrom", "setAttrViewCoverFromAssetKeyID", "setAttrViewCardCoverPosition",
             "setAttrViewBlockView", "setAttrViewBlockVisibleViews", "setAttrViewContextFilter", "setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
             "setAttrViewConditionalColors", "setAttrViewCalendar", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow", "hideAttrViewName", "setAttrViewShowIcon",

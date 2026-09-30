@@ -621,21 +621,22 @@ func toContractAVKey(value *av.Key) *apicontract.AVKey {
 		return nil
 	}
 	return &apicontract.AVKey{
-		ID:             value.ID,
-		Name:           value.Name,
-		Type:           string(value.Type),
-		Icon:           value.Icon,
-		Desc:           value.Desc,
-		Options:        avContractSlice(value.Options, func(value *av.SelectOption) *apicontract.AVSelectOption { return toContractAVSelectOption(value) }),
-		NumberFormat:   string(value.NumberFormat),
-		DateFormat:     string(value.DateFormat),
-		Template:       value.Template,
-		RenderTemplate: value.RenderTemplate,
-		Relation:       toContractAVRelation(value.Relation),
-		Rollup:         toContractAVRollup(value.Rollup),
-		Date:           toContractAVDate(value.Date),
-		Created:        toContractAVCreated(value.Created),
-		Updated:        toContractAVUpdated(value.Updated),
+		AttributePanelVisibility: value.AttributePanelVisibility,
+		ID:                       value.ID,
+		Name:                     value.Name,
+		Type:                     string(value.Type),
+		Icon:                     value.Icon,
+		Desc:                     value.Desc,
+		Options:                  avContractSlice(value.Options, func(value *av.SelectOption) *apicontract.AVSelectOption { return toContractAVSelectOption(value) }),
+		NumberFormat:             string(value.NumberFormat),
+		DateFormat:               string(value.DateFormat),
+		Template:                 value.Template,
+		RenderTemplate:           value.RenderTemplate,
+		Relation:                 toContractAVRelation(value.Relation),
+		Rollup:                   toContractAVRollup(value.Rollup),
+		Date:                     toContractAVDate(value.Date),
+		Created:                  toContractAVCreated(value.Created),
+		Updated:                  toContractAVUpdated(value.Updated),
 	}
 }
 func toContractAVSelectOption(value *av.SelectOption) *apicontract.AVSelectOption {

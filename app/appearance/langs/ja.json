@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "属性パネルのフィールド表示",
+	"alwaysShow": "常に表示",
+	"hideWhenEmpty": "空の場合は非表示",
+	"alwaysHide": "常に非表示",
 	"renameAssetTip": "名前を変更すると、このアセットを参照するすべてのリンクが更新されます",
 	"exportImageTooLarge": "エクスポートする画像が大きすぎます。内容または表の列数を減らして再試行してください。",
 	"imageOCRActionTip": "クリックでコピー/ダブルクリックで OCR テキストを編集",

@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "屬性面板欄位可見性",
+	"alwaysShow": "始終顯示",
+	"hideWhenEmpty": "空白時隱藏",
+	"alwaysHide": "始終隱藏",
 	"renameAssetTip": "重新命名會更新所有引用此資源檔案的連結",
 	"exportImageTooLarge": "匯出圖片過大，請減少內容或表格欄數後重試",
 	"imageOCRActionTip": "按一下複製/按兩下編輯 OCR 文字",

@@ -1,4 +1,8 @@
 {
+	"attributePanelVisibility": "Viditeľnosť poľa na paneli vlastností",
+	"alwaysShow": "Vždy zobraziť",
+	"hideWhenEmpty": "Skryť, ak je prázdne",
+	"alwaysHide": "Vždy skryť",
 	"renameAssetTip": "Premenovanie aktualizuje všetky odkazy na tento zdroj",
 	"exportImageTooLarge": "Exportovaný obrázok je príliš veľký. Zmenšite obsah alebo počet stĺpcov tabuľky a skúste to znova.",
 	"imageOCRActionTip": "Kliknutím skopírujete/dvojitým kliknutím upravíte text OCR",

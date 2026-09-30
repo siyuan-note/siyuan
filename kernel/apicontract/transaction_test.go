@@ -49,6 +49,7 @@ func TestTransactionFiniteActionSchemas(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fixture := range []struct{ action, data string }{
+		{"setAttrViewColAttributePanelVisibility", `"hide-empty"`},
 		{"update", `"<div>content</div>"`},
 		{"append", `"<div>content</div>"`},
 		{"move", `"<div>content</div>"`},

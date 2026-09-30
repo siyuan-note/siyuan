@@ -74,6 +74,11 @@ func TestAttributeViewBindingEncryptedReplay(t *testing.T) {
 	if err := av.SaveAttributeView(before); err != nil {
 		t.Fatal(err)
 	}
+	key := before.KeyValues[2].Key
+	if err := setAttrViewColAttributePanelVisibility(&Operation{AvID: before.ID, ID: key.ID, Data: "hide"}); err != nil {
+		t.Fatal(err)
+	}
+	key.AttributePanelVisibility = "hide"
 	plainPath := filepath.Join(util.DataDir, "storage", "av", before.ID+".json")
 	if err := os.Remove(plainPath); err != nil {
 		t.Fatal(err)
@@ -85,6 +90,15 @@ func TestAttributeViewBindingEncryptedReplay(t *testing.T) {
 		if err := PerformTxSync(&Transaction{DoOperations: operations, isReplay: true}); err != nil {
 			t.Fatal(err)
 		}
+	}
+	cache.ClearAVCache()
+	persisted, err := av.ParseAttributeView(before.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	persistedKey, err := persisted.GetKey(key.ID)
+	if err != nil || persistedKey.AttributePanelVisibility != "hide" {
+		t.Fatalf("encrypted replay lost field visibility: %+v, %v", persistedKey, err)
 	}
 	path := filepath.Join(util.DataDir, boxID, "storage", "av", before.ID+".json")
 	ciphertext, err := os.ReadFile(path)
@@ -108,6 +122,9 @@ func TestAttributeViewBindingEncryptedReplay(t *testing.T) {
 				}
 			}
 			cache.ClearAVCache()
+			if err = setAttrViewColAttributePanelVisibility(&Operation{AvID: before.ID, ID: key.ID, Data: "always"}); err == nil {
+				t.Fatal("field visibility accepted inaccessible encrypted data")
+			}
 			if err = PerformTxSync(&Transaction{DoOperations: cloneOperations(tx.UndoOperations), isReplay: true}); err == nil {
 				t.Fatal("binding replay accepted inaccessible encrypted data")
 			}

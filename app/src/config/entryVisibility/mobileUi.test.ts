@@ -217,6 +217,27 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     view = open();
     check(!view.querySelector("[data-type='entry-section']"), "Desktop retains its location column");
     check(view.querySelector(".config-entry-visibility__column--locations"), "Desktop locations remain reachable");
+    const resetAllSelector = ".config-entry-visibility__column--locations .config-entry-visibility__column-title " +
+        "[data-action='reset-all-entry-orders']";
+    const desktopReset = view.querySelector<HTMLElement>(resetAllSelector);
+    check(desktopReset?.querySelector("use").getAttribute("xlink:href") === "#iconRefresh",
+        "Desktop reset all uses the shared refresh icon in the location title");
+    check(desktopReset.getAttribute("aria-label") === languages.entryResetAllOrders,
+        "Desktop reset all retains its distinct accessible label");
+    check(!view.querySelector(".b3-dialog__action [data-action='reset-all-entry-orders']"),
+        "Desktop footer must not duplicate reset all");
+    desktopReset.click();
+    check(config().profiles[0].orders["editor.slash.menu"], "Desktop reset all remains a draft");
+    view.querySelector<HTMLElement>("[data-action='cancel']").click();
+    check(config().profiles[0].orders["editor.slash.menu"], "Cancelling desktop reset preserves orders");
+    view = open();
+    view.querySelector<HTMLElement>(resetAllSelector).click();
+    view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(Object.keys(config().profiles[0].orders).length === 0, "Confirming desktop reset clears all orders");
+    config().profiles[0].orders["editor.slash.menu"] = order;
+    view = open("full");
+    check(!view.querySelector("[data-action='reset-all-entry-orders']"), "Desktop built-in profiles do not offer resets");
+    view = open();
     view.querySelector<HTMLElement>("[data-entry-section='editor.slash']").click();
     const desktopBrowser = view.querySelector<HTMLElement>("[data-type='entry-browser']");
     const first = desktopBrowser.querySelector<HTMLElement>("[data-entry-key='heading1']");

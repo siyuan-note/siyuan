@@ -312,9 +312,9 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
     </div>
 </section>`;
 
-const renderOrderReset = (prefix: string) => `<button class="block__icon block__icon--show ariaLabel"
-    data-action="reset-entry-order" data-entry-parent="${escapeAttr(prefix)}" data-position="north"
-    aria-label="${escapeAttr(window.siyuan.languages.entryResetOrder)}">
+const renderOrderReset = (prefix?: string) => `<button class="block__icon block__icon--show ariaLabel"
+    data-action="${prefix ? "reset-entry-order" : "reset-all-entry-orders"}"${prefix ? ` data-entry-parent="${escapeAttr(prefix)}"` : ""} data-position="north"
+    aria-label="${escapeAttr(window.siyuan.languages[prefix ? "entryResetOrder" : "entryResetAllOrders"])}">
     <svg><use xlink:href="#iconRefresh"></use></svg>
 </button>`;
 
@@ -451,7 +451,10 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
         : catalog;
     const section = sections.find((item) => item.key === sectionKey) || sections[0] || catalog[0];
     const locationColumn = `<section class="config-entry-visibility__column config-entry-visibility__column--locations" data-entry-column>
-    <div class="config-entry-visibility__column-title">${window.siyuan.languages.position}</div>
+    <div class="config-entry-visibility__column-title">
+        <span class="fn__ellipsis fn__flex-1">${window.siyuan.languages.position}</span>
+        ${readOnly ? "" : renderOrderReset()}
+    </div>
     <div class="config-entry-visibility__column-list">
         ${sections.map((item) => renderEntryLocation(profile, item, item.key === section.key, readOnly)).join("")}
     </div>
@@ -598,7 +601,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     <div class="config-entry-visibility__browser" data-type="entry-browser"></div>
 </div>
 <div class="b3-dialog__action">
-    ${builtin ? "" : `<button class="b3-button b3-button--outline config-entry-visibility__reset-orders ariaLabel" data-action="reset-all-entry-orders" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.entryResetAllOrders)}"><span class="fn__ellipsis">${window.siyuan.languages.entryResetAllOrders}</span></button><span class="fn__space fn__flex-1"></span>`}
+    ${builtin || !isMobile() ? "" : `<button class="b3-button b3-button--outline config-entry-visibility__reset-orders ariaLabel" data-action="reset-all-entry-orders" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.entryResetAllOrders)}"><span class="fn__ellipsis">${window.siyuan.languages.entryResetAllOrders}</span></button><span class="fn__space fn__flex-1"></span>`}
     ${builtin ? `<button class="b3-button b3-button--text" data-action="cancel">${window.siyuan.languages.close}</button>` : `<button class="b3-button b3-button--cancel" data-action="cancel">${window.siyuan.languages.cancel}</button>
     <span class="fn__space"></span>
     <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>`}

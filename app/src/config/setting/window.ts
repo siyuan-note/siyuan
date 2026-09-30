@@ -1,6 +1,7 @@
 import "../../assets/scss/base.scss";
 import {ipcRenderer, webFrame} from "electron";
 import {Constants} from "../../constants";
+import {onAgentStreamingMarkdownStorageChanged} from "../tabs/ai/agentStreamingMarkdown";
 import {Model} from "../../layout/Model";
 import {Menus} from "../../menus";
 import {genUUID} from "../../util/genID";
@@ -91,10 +92,22 @@ const initialize = async () => {
             case "syncing": processSync(data); break;
             case "setCloudUser": applyCloudUserState(data.data.user, data.data.userName); break;
             case "setServerAddrs": updateServerAddresses(data.data); break;
-            case "setLocalStorageVal": window.siyuan.storage[data.data.key] = data.data.val; break;
-            case "setLocalStorageVals": Object.assign(window.siyuan.storage, data.data.keyVals); break;
-            case "removeLocalStorageVal": delete window.siyuan.storage[data.data.key]; break;
-            case "removeLocalStorageVals": data.data.keys.forEach((key: string) => delete window.siyuan.storage[key]); break;
+            case "setLocalStorageVal":
+                window.siyuan.storage[data.data.key] = data.data.val;
+                onAgentStreamingMarkdownStorageChanged(data.data.key);
+                break;
+            case "setLocalStorageVals":
+                Object.assign(window.siyuan.storage, data.data.keyVals);
+                Object.keys(data.data.keyVals).forEach(onAgentStreamingMarkdownStorageChanged);
+                break;
+            case "removeLocalStorageVal":
+                delete window.siyuan.storage[data.data.key];
+                onAgentStreamingMarkdownStorageChanged(data.data.key);
+                break;
+            case "removeLocalStorageVals":
+                data.data.keys.forEach((key: string) => delete window.siyuan.storage[key]);
+                data.data.keys.forEach(onAgentStreamingMarkdownStorageChanged);
+                break;
         }
     }});
     const response = await fetchSyncPost("/api/system/getConf", {});

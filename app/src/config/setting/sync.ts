@@ -5,6 +5,7 @@ import {appearanceConfigApi} from "../tabs/appearanceRuntime";
 import {aiConfigApi} from "../tabs/ai/aiRuntime";
 import {objEquals} from "../../util/functions";
 import {syncSettingTasks} from "./taskBlocker";
+import {processSync} from "../../dialog/processSystem";
 /// #if !MOBILE
 import {applyKeymap} from "../tabs/keymapRuntime";
 import {remountOpenSettingTab} from "./mount";
@@ -40,6 +41,18 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             if (includes("ai") && !objEquals(window.siyuan.config.ai, next.ai)) {
                 aiConfigApi.apply(next.ai);
             }
+            if (includes("sync") && !objEquals(window.siyuan.config.sync, next.sync)) {
+                window.siyuan.config.sync = next.sync;
+                processSync();
+            }
+            let accessChanged = false;
+            if (includes("system")) {
+                // 系统设置通知同时同步访问授权的顶层配置，值以内核返回的脱敏配置为准。
+                for (const key of ["api", "oidc", "accessAuthCode"] as const) {
+                    accessChanged ||= !objEquals(window.siyuan.config[key], next[key]);
+                    Object.assign(window.siyuan.config, {[key]: next[key]});
+                }
+            }
             /// #if !MOBILE
             if (includes("keymap") && !objEquals(window.siyuan.config.keymap, next.keymap)) {
                 applyKeymap(next.keymap);
@@ -49,7 +62,7 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
                 window.siyuan.config.keymap = next.keymap;
             }
             /// #endif
-            const simple = ["export", "fileTree", "search", "flashcard", "secrets", "variables", "sync", "repo", "system", "bazaar", "publish"] as const;
+            const simple = ["export", "fileTree", "search", "flashcard", "secrets", "variables", "repo", "system", "bazaar", "publish"] as const;
             for (const key of simple) {
                 if (includes(key)) {
                     Object.assign(window.siyuan.config, {[key]: next[key]});
@@ -57,10 +70,13 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             }
             /// #if !MOBILE
             const tabs: Record<string, TSettingTab> = {fileTree: "file", secrets: "secretsVariables", variables: "secretsVariables", system: "app", publish: "access"};
-            for (const namespace of namespaces.has("*") ? [...simple, "editor", "keymap", "appearance", "ai"] : namespaces) {
+            const remountTabs = new Set<TSettingTab>();
+            for (const namespace of namespaces.has("*") ? [...simple, "editor", "keymap", "appearance", "ai", "sync"] : namespaces) {
                 const tab = getSettingTabDefs().find(definition => definition.id === (tabs[namespace] || namespace));
-                if (tab) void remountOpenSettingTab(tab.id);
+                if (tab) remountTabs.add(tab.id);
             }
+            if (accessChanged) remountTabs.add("access");
+            remountTabs.forEach(tab => { void remountOpenSettingTab(tab); });
             /// #endif
         }
     })().catch(error => console.error("Could not refresh settings", error)).finally(() => {

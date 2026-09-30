@@ -2,6 +2,7 @@ import {onWindowWorkspaceStorageChanged} from "./workspace";
 import {closeNotebookHistoryDialogs} from "../history/notebookDialogs";
 import {Constants} from "../constants";
 import {refreshSettingConfig} from "../config/setting/sync";
+import {onAgentStreamingMarkdownStorageChanged} from "../config/tabs/ai/agentStreamingMarkdown";
 import {systemConfig} from "../config/systemConfig";
 import {Menus} from "../menus";
 import {Model} from "../layout/Model";
@@ -125,22 +126,26 @@ class App {
                             case "setLocalStorageVal":
                                 if (window.siyuan.storage) {
                                     window.siyuan.storage[data.data.key] = data.data.val;
+                                    onAgentStreamingMarkdownStorageChanged(data.data.key);
                                     onWindowWorkspaceStorageChanged(data.data.key);
                                 }
                                 break;
                             case "setLocalStorageVals":
                                 Object.keys(data.data.keyVals).forEach((k) => {
                                     window.siyuan.storage[k] = data.data.keyVals[k];
+                                    onAgentStreamingMarkdownStorageChanged(k);
                                     onWindowWorkspaceStorageChanged(k);
                                 });
                                 break;
                             case "removeLocalStorageVal":
                                 delete window.siyuan.storage[data.data.key];
+                                onAgentStreamingMarkdownStorageChanged(data.data.key);
                                 onWindowWorkspaceStorageChanged(data.data.key);
                                 break;
                             case "removeLocalStorageVals":
                                 data.data.keys.forEach((k: string) => {
                                     delete window.siyuan.storage[k];
+                                    onAgentStreamingMarkdownStorageChanged(k);
                                     onWindowWorkspaceStorageChanged(k);
                                 });
                                 break;

@@ -7,8 +7,14 @@ export const isAgentStreamingMarkdownEnabled = (): boolean => {
     return window.siyuan.storage[AGENT_STREAMING_MARKDOWN_KEY] === true;
 };
 
+export const onAgentStreamingMarkdownStorageChanged = (key: string): void => {
+    if (key === AGENT_STREAMING_MARKDOWN_KEY) {
+        window.dispatchEvent(new CustomEvent(AGENT_STREAMING_MARKDOWN_CHANGED_EVENT));
+    }
+};
+
 export const setAgentStreamingMarkdownEnabled = (enabled: boolean): void => {
     window.siyuan.storage[AGENT_STREAMING_MARKDOWN_KEY] = enabled;
     setStorageVal(AGENT_STREAMING_MARKDOWN_KEY, enabled);
-    window.dispatchEvent(new CustomEvent(AGENT_STREAMING_MARKDOWN_CHANGED_EVENT));
+    onAgentStreamingMarkdownStorageChanged(AGENT_STREAMING_MARKDOWN_KEY);
 };

@@ -121,6 +121,7 @@ const getPinIcon = (pinned: boolean) => pinned ? "iconUnpin" : "iconPin";
 
 export class MobileTabs {
     private state: MobileTabsState;
+    private hasStoredTabs: boolean;
     private navigationEpoch = 0;
     private abortController?: AbortController;
     private activationBackStack: string[] = [];
@@ -134,7 +135,8 @@ export class MobileTabs {
 
     constructor(private readonly app: App) {
         const stored = window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] as MobileTabsState | undefined;
-        const tabs = stored?.version === 1 && Array.isArray(stored.tabs) ?
+        this.hasStoredTabs = stored?.version === 1 && Array.isArray(stored.tabs);
+        const tabs = this.hasStoredTabs ?
             stored.tabs.map(normalizeTab).filter((item): item is MobileTab => !!item).map(sanitizeTab) : [];
         this.state = {
             version: 1,
@@ -147,7 +149,12 @@ export class MobileTabs {
         this.activationForwardStack = Array.isArray(stored?.activationForwardStack) ?
             stored.activationForwardStack.filter((tabID) => typeof tabID === "string" && tabIDs.has(tabID)).slice(-MAX_HISTORY) : [];
         this.trimTabs();
-        this.persist();
+        // 旧版文档记录完成恢复前不写入空页签，避免中途退出后失去迁移依据。
+        if (this.hasStoredTabs) {
+            this.persist();
+        } else {
+            this.updateNavigationButtons();
+        }
         this.updateCounter();
     }
 
@@ -190,6 +197,7 @@ export class MobileTabs {
     }
 
     private persist() {
+        this.hasStoredTabs = true;
         const persistedState: MobileTabsState = {
             version: 1,
             activeTabID: this.state.activeTabID,
@@ -459,11 +467,16 @@ export class MobileTabs {
         return this.open(id, {...options, newTab: true});
     }
 
+    canRestoreLegacyDocument() {
+        // 已保存的空状态同样有效，用户开始新的导航后也不再恢复旧文档。
+        return !this.hasStoredTabs && this.navigationEpoch === 0;
+    }
+
     async restore(): Promise<boolean> {
         const tab = this.activeTab;
         if (!tab) {
             setEmpty(this.app);
-            return false;
+            return !this.canRestoreLegacyDocument();
         }
         tab.activeAt = Date.now();
         if (!tab.current) {
@@ -780,6 +793,10 @@ export class MobileTabs {
 
     save() {
         this.snapshot();
+        // 尚未迁移成功的临时空状态不能在关闭页面时覆盖旧版恢复记录。
+        if (!this.hasStoredTabs && this.state.tabs.length === 0) {
+            return;
+        }
         this.persist();
     }
 

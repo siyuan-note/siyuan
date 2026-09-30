@@ -402,17 +402,31 @@ export const initFramework = async (app: App, isStart: boolean) => {
         if (isStart && window.siyuan.config.fileTree.tabStartupMode === 2) {
             return;
         }
-        if (await window.siyuan.mobile.tabs.restore()) {
+        const tabs = window.siyuan.mobile.tabs;
+        if (await tabs.restore()) {
+            return;
+        }
+        const canRestoreLegacy = () => window.siyuan.mobile.tabs === tabs && tabs.canRestoreLegacyDocument();
+        if (!canRestoreLegacy()) {
             return;
         }
         const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
         fetchPost("/api/block/checkBlockExist", {id: localDoc?.id}, existResponse => {
+            if (!canRestoreLegacy()) {
+                return;
+            }
             if (existResponse.data) {
                 openMobileFileById(app, localDoc.id, [Constants.CB_GET_SCROLL]);
             } else {
                 fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
+                    if (!canRestoreLegacy()) {
+                        return;
+                    }
                     if (response.data.length !== 0) {
                         checkFold(response.data[0].id, (zoomIn) => {
+                            if (!canRestoreLegacy()) {
+                                return;
+                            }
                             openMobileFileById(app, response.data[0].id, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         });
                     } else {

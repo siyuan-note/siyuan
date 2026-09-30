@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260930171029"
+		"updated": "20260930234403"
 	},
 	"Children": [
 		{
@@ -13259,6 +13259,29 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260930234403-5eh3gn8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930234403-5eh3gn8",
+				"updated": "20260930234403"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Paste an image with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+V / ⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " while editing a node, or after selecting a node to append it to the end of its visible content. Wait for an active upload to finish before leaving node editing."
 				}
 			]
 		},

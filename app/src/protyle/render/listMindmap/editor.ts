@@ -11,6 +11,7 @@ import {bindLiteCodeActions} from "../../lite/codeActions";
 import {setMobileToolbarUndo} from "../../lite/mobileToolbar";
 import {getDefaultToolbar} from "../../toolbar/defaults";
 import {hideElements} from "../../ui/hideElements";
+import {uploadFiles} from "../../upload";
 import {matchHotKey} from "../../util/hotKey";
 import {processRender} from "../../util/processCode";
 import {initEditorTabs} from "../../wysiwyg/tabs";
@@ -150,7 +151,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         initialBlockHTML,
         protyleOptions: {notebookId: owner.notebookId, toolbar, hint},
         runtimeCapabilities: {
-            upload: false, websocket: false, pluginExtensions: false,
+            upload: true, websocket: false, pluginExtensions: false,
             listItemFragment: true,
             getTransactionOwner: operations => {
                 const avIDs = new Set(Array.from(host.querySelectorAll<HTMLElement>(
@@ -303,6 +304,10 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         if (finished) {
             return true;
         }
+        if (fragment.protyle.upload?.isUploading) {
+            showMessage(window.siyuan.languages.uploading);
+            return false;
+        }
         if (composing) {
             finishAfterComposition = true;
             return false;
@@ -319,6 +324,10 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
                 return false;
             }
         } while (comparableContent(fragment.getBlockHTML()) !== lastHTML);
+        if (fragment.protyle.upload?.isUploading) {
+            showMessage(window.siyuan.languages.uploading);
+            return false;
+        }
         cleanup();
         return true;
     };
@@ -468,5 +477,12 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             selection.addRange(range);
         }
     }
-    return {finish, destroy};
+    return {finish, destroy, pasteImages: (files: File[]) => {
+        if (finished || closing || !options.canEdit()) {
+            return;
+        }
+        fragment.focus(true);
+        fragment.protyle.toolbar.range = undefined;
+        uploadFiles(fragment.protyle, files, undefined, undefined, undefined, {source: "paste"});
+    }};
 };

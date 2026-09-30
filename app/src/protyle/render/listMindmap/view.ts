@@ -39,6 +39,7 @@ export interface ListMindmapViewOptions {
     onFullscreen?: (enter: boolean, button: HTMLButtonElement) => void;
     onInteractionStart?: (event: PointerEvent) => () => void;
     onEdit?: (id: string, contentHost: HTMLElement, replaceFirstParagraph?: string) => void;
+    onPasteImages?: (id: string, files: File[]) => void;
     isAddSiblingShortcut?: (event: KeyboardEvent) => boolean;
     isAddChildShortcut?: (event: KeyboardEvent) => boolean;
     onRootTitleChange?: (title: string) => void;
@@ -246,6 +247,7 @@ export class ListMindmapView {
         this.listen(this.viewport, "wheel", this.wheel, {passive: false});
         this.listen(this.viewport, "dragstart", (event: Event) => event.preventDefault());
         this.listen(options.host, "keydown", this.keyDown);
+        this.listen(options.host, "paste", this.pasteImages);
         // 脑图内部先处理交互，再阻止外层文档将节点操作识别为列表块编辑。
         ["pointerdown", "pointerup", "pointermove", "pointercancel", "mousedown", "mouseup", "mousemove", "click",
             "dblclick", "contextmenu", "dragstart", "dragover", "drop", "beforeinput", "input", "compositionstart",
@@ -2516,6 +2518,27 @@ export class ListMindmapView {
         this.offsetY = insetTop + availableHeight / 2 - (top + bottom) * this.scale / 2;
         this.draw();
     }
+
+    private pasteImages = (event: ClipboardEvent) => {
+        if (event.defaultPrevented || this.readOnly || this.editingId || this.relationFrom || this.summaryFrom ||
+            !this.options.onPasteImages || !this.selectedId ||
+            (event.target as HTMLElement).isContentEditable ||
+            (event.target as HTMLElement).closest("input, textarea, select")) {
+            return;
+        }
+        const id = this.selectedId;
+        const node = this.model.nodes.get(id);
+        const files = Array.from(event.clipboardData?.files || []).filter(file => file.type.startsWith("image/"));
+        if (!node || node.virtual || files.length === 0) {
+            return;
+        }
+        event.preventDefault();
+        this.finishThen(() => {
+            if (!this.readOnly && this.selectedId === id && this.model.nodes.has(id)) {
+                this.options.onPasteImages(id, files);
+            }
+        });
+    };
 
     private keyDown = (event: KeyboardEvent) => {
         if (this.locked) {

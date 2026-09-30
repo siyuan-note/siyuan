@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260930171029"
+		"updated": "20260930234403"
 	},
 	"Children": [
 		{
@@ -13209,6 +13209,29 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260930234403-cyh3qk6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930234403-cyh3qk6",
+				"updated": "20260930234403"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ノードの編集中に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+V / ⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で画像を貼り付けられます。ノードを選択した状態で貼り付けると、現在表示されている本文の末尾に画像が追加されます。アップロード中は完了を待ってからノードの編集を終了してください。"
 				}
 			]
 		},

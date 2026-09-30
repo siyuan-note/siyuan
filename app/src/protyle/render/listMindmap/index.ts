@@ -123,7 +123,7 @@ class ListMindmapController {
     private readonly view: ListMindmapView;
     private model: ListMindmapModel;
     private snapshot = "";
-    private activeEditor?: {finish: () => Promise<boolean>, destroy: () => void};
+    private activeEditor?: ReturnType<typeof openListMindmapEditor>;
     private editRequest = 0;
     private disposed = false;
     private taskChanges: Promise<void> = Promise.resolve();
@@ -285,6 +285,7 @@ class ListMindmapController {
                 }
             },
             onEdit: (id, contentHost, replaceFirstParagraph) => this.edit(id, contentHost, replaceFirstParagraph),
+            onPasteImages: (id, files) => void this.edit(id, this.view.getContentHost(id), undefined, files),
             isAddSiblingShortcut: event => {
                 const key = window.siyuan.config.keymap.editor.list?.mindmapAddSibling;
                 return !!key && matchHotKey(key, event);
@@ -545,7 +546,7 @@ class ListMindmapController {
         }
     }
 
-    private async edit(id: string, host: HTMLElement, replaceFirstParagraph?: string) {
+    private async edit(id: string, host: HTMLElement, replaceFirstParagraph?: string, images?: File[]) {
         const request = ++this.editRequest;
         if (!canEdit(this.owner, this.list) || (this.activeEditor && !await this.activeEditor.finish()) ||
             request !== this.editRequest || this.disposed || !host?.isConnected) {
@@ -574,6 +575,8 @@ class ListMindmapController {
         if (!this.activeEditor) {
             this.view.setEditing(undefined);
             this.view.update(this.model);
+        } else if (images) {
+            this.activeEditor.pasteImages(images);
         }
     }
 

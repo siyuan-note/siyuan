@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20260928225427"
+		"updated": "20260930234403"
 	},
 	"Children": [
 		{
@@ -2553,6 +2553,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "A mind map block is a dedicated block type. You can convert an unordered, ordered, or task list into a mind map block and convert it back to a list. Conversion preserves item content, numbering, and task states. Existing mind maps stored as lists are upgraded when their documents are opened for editing."
+				}
+			]
+		},
+		{
+			"ID": "20260930234403-jmgkoqd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930234403-jmgkoqd",
+				"updated": "20260930234403"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "While editing a node, type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and choose “Insert image or file” to upload a local image. You can also paste clipboard images. Images are stored as document attachments. The virtual center title used for multiple top-level nodes remains plain text."
 				}
 			]
 		},

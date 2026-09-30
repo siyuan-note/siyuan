@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260930171029"
+		"updated": "20260930234403"
 	},
 	"Children": [
 		{
@@ -13255,6 +13255,29 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260930234403-rg4uej3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930234403-rg4uej3",
+				"updated": "20260930234403"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編輯節點時可按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+V / ⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 貼上圖片；僅選取節點時貼上，圖片會附加到目前可見正文的末尾。上傳進行中需等待完成後再結束節點編輯。"
 				}
 			]
 		},

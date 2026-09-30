@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20260928225427"
+		"updated": "20260930234403"
 	},
 	"Children": [
 		{
@@ -2568,6 +2568,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "心智圖區塊是獨立的區塊類型。可以將無序列表、有序列表或任務列表轉換為心智圖區塊，也可以轉換回列表。轉換會保留列表項內容、編號和任務狀態。以列表形式儲存的舊心智圖會在開啟文件進行編輯時升級。"
+				}
+			]
+		},
+		{
+			"ID": "20260930234403-vfgciw1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930234403-vfgciw1",
+				"updated": "20260930234403"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編輯節點時，輸入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 並選擇「插入圖片或檔案」，即可上傳本機圖片，也可以直接貼上剪貼簿圖片。圖片會儲存為文件附件。多個頂層節點形成的虛擬中心標題仍為純文字。"
 				}
 			]
 		},

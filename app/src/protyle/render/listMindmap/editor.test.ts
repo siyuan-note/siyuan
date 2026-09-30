@@ -72,15 +72,17 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             flush: async (): Promise<void> => undefined,
             saveBarrier: undefined as Promise<void> | undefined,
             finishNested: async (): Promise<boolean> => true,
+            uploads: [] as File[][],
         };
         const protyle = {
             block: {rootID: ""},
+            upload: {isUploading: false},
             undo: {clear: noop},
             wysiwyg: {lastHTMLs: {} as Record<string, string>, flushPendingInput: async () => {
                 state.flushed++;
                 await state.flush();
             }},
-            toolbar: {element: toolbarElement, subElement},
+            toolbar: {element: toolbarElement, subElement, range: undefined as Range | undefined},
         };
         const dependencies = {
             genEmptyElement: () => {
@@ -130,6 +132,14 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
                 };
             },
             bindLiteCodeActions: noop,
+            uploadFiles: (target: typeof protyle, files: File[], _element: unknown, _success: unknown,
+                          _complete: unknown, options: {source: string}) => {
+                check.equal(target, protyle);
+                check.equal(options.source, "paste");
+                check.equal(target.block.rootID, "document");
+                check.equal(target.toolbar.range, undefined);
+                state.uploads.push(files);
+            },
             setMobileToolbarUndo: noop,
             getDefaultToolbar: (): unknown[] => [],
             hideElements: noop,
@@ -215,6 +225,37 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     // 直接键入只替换首个段落，保留其余内容块。
     const paragraph = (id: string, html: string) =>
         `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true">${html}</div></div>`;
+    // 粘贴到选中节点时保留原正文，在当前可见正文末尾启动上传；上传结束前保留编辑器。
+    const imageEditor = create(paragraph("body", "Keep text"));
+    const images = [new File(["image"], "image.png", {type: "image/png"})];
+    imageEditor.editor.pasteImages(images);
+    check.equal(imageEditor.state.focusedText, "Keep text");
+    check.deepEqual(imageEditor.state.uploads, [images]);
+    check.equal(imageEditor.wysiwyg.textContent, "Keep text");
+    imageEditor.protyle.upload.isUploading = true;
+    check.equal(await imageEditor.editor.finish(), false);
+    check.equal(imageEditor.state.destroyed, 0);
+    const image = document.createElement("img");
+    image.src = "assets/image.png";
+    imageEditor.wysiwyg.querySelector('[contenteditable="true"]').append(image);
+    imageEditor.protyle.upload.isUploading = false;
+    check.equal(await imageEditor.editor.finish(), true);
+    check.equal(imageEditor.element.querySelector("img").getAttribute("src"), "assets/image.png");
+    imageEditor.editor.pasteImages(images);
+    check.equal(imageEditor.state.uploads.length, 1, "closed editors do not accept another upload");
+    await imageEditor.remove();
+    // 关闭等待内层编辑结束时启动上传，也不能提前销毁外层编辑器。
+    const uploadingEditor = create();
+    const nestedGate = gate();
+    uploadingEditor.state.finishNested = () => nestedGate.promise.then(() => true);
+    const finishBeforeUpload = uploadingEditor.editor.finish();
+    uploadingEditor.protyle.upload.isUploading = true;
+    nestedGate.release();
+    check.equal(await finishBeforeUpload, false);
+    check.equal(uploadingEditor.state.destroyed, 0);
+    uploadingEditor.protyle.upload.isUploading = false;
+    check.equal(await uploadingEditor.editor.finish(), true);
+    await uploadingEditor.remove();
     for (const active of ["first", "second"]) {
         const tabs = create(`<div class="tabs" data-type="NodeTabs" data-node-id="tabs" tabs-active-id="${active}">
             ${["first", "second"].map(id => `<div class="tab-item" data-type="NodeTabItem" data-node-id="${id}">

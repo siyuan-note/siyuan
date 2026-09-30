@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260930171029"
+		"updated": "20260930234403"
 	},
 	"Children": [
 		{
@@ -13337,6 +13337,29 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260930234403-6bw63i6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930234403-6bw63i6",
+				"updated": "20260930234403"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编辑节点时可按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+V / ⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 粘贴图片；仅选中节点时粘贴，图片追加到当前可见正文末尾。上传进行中需等待完成后再退出节点编辑。"
 				}
 			]
 		},

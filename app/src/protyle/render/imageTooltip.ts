@@ -12,7 +12,9 @@ export const getImageTooltip = (image: HTMLImageElement, size?: string) => {
     } catch (error) {
         // 非 URL 编码的文件名保留原文。
     }
-    const text = Array.from(new Set([name, image.title, image.alt].filter(Boolean)))
+    const nameWithoutExtension = extension ? name.substring(0, name.lastIndexOf(".")) : name;
+    const descriptions = [image.title, image.alt].filter(value => value && value !== nameWithoutExtension);
+    const text = Array.from(new Set([name, ...descriptions].filter(Boolean)))
         .map(value => escapeHtml(value)).join("<br>");
     const format = /^data:image\/([\w.+-]+)/.exec(source)?.[1].replace(/\+xml$/, "").toUpperCase() ||
         extension.substring(1).toUpperCase();

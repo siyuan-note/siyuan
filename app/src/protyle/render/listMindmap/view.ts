@@ -2419,6 +2419,13 @@ export class ListMindmapView {
                 event.clientX - bounds.left, event.clientY - bounds.top);
             return;
         }
+        if (!this.fullscreenMarker && !event.shiftKey && !event.deltaX && event.deltaY) {
+            const {left, top, right, bottom} = this.contentBounds();
+            if (left * this.scale + this.offsetX >= 0 && right * this.scale + this.offsetX <= this.viewport.clientWidth &&
+                top * this.scale + this.offsetY >= 0 && bottom * this.scale + this.offsetY <= this.viewport.clientHeight) {
+                return;
+            }
+        }
         const next = this.boundedPan(this.offsetX - (event.shiftKey ?
             (event.deltaX ? event.deltaX : event.deltaY) * unitX : event.deltaX * unitX),
             this.offsetY - (event.shiftKey ? 0 : event.deltaY * unitY));

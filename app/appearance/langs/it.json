@@ -1,5 +1,6 @@
 {
 	"renameAssetTip": "La rinomina aggiorna tutti i collegamenti che fanno riferimento a questa risorsa",
+	"exportImageTooLarge": "L’immagine esportata è troppo grande. Riduci il contenuto o il numero di colonne della tabella e riprova.",
 	"imageOCRActionTip": "Clic per copiare/doppio clic per modificare il testo OCR",
 	"displayImgAltTip": "Quando attivata questa opzione mostra il testo del suggerimento sotto il titolo dell’immagine; anche se disattivata, passando il mouse sull’immagine vengono mostrati il titolo e il testo del suggerimento",
 	"displayImgNameTip": "Quando attivata questa opzione mostra i nomi dei file sopra le immagini locali, senza percorso e ID generato e mantenendo l’estensione; fai clic su un nome per aprire la finestra di rinomina",

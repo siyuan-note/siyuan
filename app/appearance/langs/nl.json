@@ -1,5 +1,6 @@
 {
 	"renameAssetTip": "Hernoemen werkt alle links bij die naar deze bron verwijzen",
+	"exportImageTooLarge": "De geëxporteerde afbeelding is te groot. Verminder de inhoud of het aantal tabelkolommen en probeer het opnieuw.",
 	"imageOCRActionTip": "Klik om te kopiëren/dubbelklik om OCR-tekst te bewerken",
 	"displayImgAltTip": "Na inschakeling verschijnt tooltiptekst onder de afbeeldingstitel; ook als deze optie uitstaat, worden de titel en tooltiptekst getoond wanneer de muis boven de afbeelding staat",
 	"displayImgNameTip": "Na inschakeling verschijnen bestandsnamen boven lokale afbeeldingen, zonder het pad en de gegenereerde ID, maar met extensie; klik op een naam om het dialoogvenster voor hernoemen te openen",

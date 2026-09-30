@@ -1,5 +1,6 @@
 {
 	"renameAssetTip": "重命名会更新所有引用该资源文件的链接",
+	"exportImageTooLarge": "导出图片过大，请减少内容或表格列数后重试",
 	"imageOCRActionTip": "单击复制/双击编辑 OCR 文本",
 	"displayImgAltTip": "启用后在图片标题下方显示提示文本；关闭后鼠标悬浮图片时仍会显示标题和提示文本",
 	"displayImgNameTip": "启用后在本地图片上方显示文件名，隐藏资源路径和随机码并保留扩展名；单击文件名打开重命名弹窗",

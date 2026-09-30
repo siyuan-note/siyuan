@@ -1,5 +1,6 @@
 {
 	"renameAssetTip": "Renaming updates all links that reference this asset",
+	"exportImageTooLarge": "The exported image is too large. Reduce the content or table columns and try again.",
 	"imageOCRActionTip": "Click to copy/double-click to edit OCR text",
 	"displayImgAltTip": "When enabled tooltip text appears below the image title; when disabled, hovering over the image still shows its title and tooltip text",
 	"displayImgNameTip": "When enabled file names appear above local images, hiding the asset path and generated ID while keeping the extension; click a name to open the rename dialog",

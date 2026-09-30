@@ -1,5 +1,6 @@
 {
 	"renameAssetTip": "Premenovanie aktualizuje všetky odkazy na tento zdroj",
+	"exportImageTooLarge": "Exportovaný obrázok je príliš veľký. Zmenšite obsah alebo počet stĺpcov tabuľky a skúste to znova.",
 	"imageOCRActionTip": "Kliknutím skopírujete/dvojitým kliknutím upravíte text OCR",
 	"displayImgAltTip": "Po zapnutí sa text popisu zobrazí pod názvom obrázka; aj keď je táto možnosť vypnutá, názov a text popisu sa zobrazia pri umiestnení kurzora nad obrázok",
 	"displayImgNameTip": "Po zapnutí sa nad lokálnymi obrázkami zobrazia názvy súborov bez cesty a generovaného ID, so zachovanou príponou; kliknutím na názov otvoríte dialóg premenovania",

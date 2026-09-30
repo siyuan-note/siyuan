@@ -1,4 +1,5 @@
 .export-img {
+  box-sizing: border-box;
   position: relative;
   border: 1px solid var(--b3-border-color);
   border-radius: var(--b3-border-radius-b);
@@ -30,6 +31,19 @@
   .protyle-wysiwyg {
     position: relative;
     z-index: 1;
+    overflow-x: visible;
+
+    .table,
+    [data-node-id].table[custom-pinthead="true"] {
+      > div:first-child {
+        overflow: visible;
+        max-height: none;
+      }
+    }
+
+    .sb[data-sb-layout="col"] > [data-node-id] {
+      min-width: min-content;
+    }
 
     [data-node-id].li[fold="1"] > .protyle-action::after {
       background-color: transparent;

@@ -1,5 +1,6 @@
 {
 	"renameAssetTip": "Al renombrar se actualizan todos los enlaces que hacen referencia a este recurso",
+	"exportImageTooLarge": "La imagen exportada es demasiado grande. Reduce el contenido o el número de columnas de la tabla y vuelve a intentarlo.",
 	"imageOCRActionTip": "Clic para copiar/doble clic para editar el texto OCR",
 	"displayImgAltTip": "Al activar esta opción el texto de ayuda aparece debajo del título de la imagen; al desactivarla, pasar el cursor sobre la imagen sigue mostrando su título y el texto de ayuda",
 	"displayImgNameTip": "Al activar esta opción los nombres de archivo aparecen sobre las imágenes locales, sin la ruta ni el ID generado y conservando la extensión; hacer clic en un nombre abre el diálogo para renombrar",

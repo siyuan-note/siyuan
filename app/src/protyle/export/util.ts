@@ -16,11 +16,7 @@ import {isInAndroid, isIPad, isIPhone, isSafari, saveExportFile, setStorageVal} 
 import {useShell} from "../../util/pathName";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {copyPNGByLink, writePNGBlob} from "../../menus/util";
-
-// WebKit/Chromium 会拒绝宽度或高度超过此限制的 canvas，导致生成空白图像。
-// html-to-image 默认会进行限制，而 modern-screenshot 不会（maximumCanvasSize
-// 默认为 0，即无限制），因此处理长文档时需要显式传入该参数。
-const MAX_CANVAS_SIZE = 16384;
+import {getExportImageSize, isExportImageSizeSupported, updateExportImageLayout} from "./imageLayout";
 
 const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
@@ -78,6 +74,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         width: isMobile() ? "92vw" : "990px",
         height: "70vh",
         resizeCallback() {
+            updateExportImageLayout(exportDialog.element.querySelector(".export-img"));
             previewElement.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((item: HTMLElement) => {
                 if ((item.nextElementSibling as HTMLElement).style.wordBreak === "break-word") {
                     lineNumberRender(item.parentElement);
@@ -133,21 +130,38 @@ export const exportImage = (id: string, copyOnly = false) => {
         await new Promise((resolve) => {
             setTimeout(resolve, Constants.TIMEOUT_LOAD);
         });
+        await document.fonts.ready;
+        await Promise.all(Array.from(previewElement.querySelectorAll("img")).map(item => {
+            item.loading = "eager";
+            return item.decode().catch(() => {});
+        }));
+        updateExportImageLayout(exportDialog.element.querySelector(".export-img"));
+        const contentElement = exportDialog.element.querySelector<HTMLElement>(".b3-dialog__content");
+        const size = getExportImageSize(contentElement);
+        const pixelRatio = window.devicePixelRatio || 1;
+        if (!isExportImageSizeSupported(size, pixelRatio)) {
+            throw new Error(window.siyuan.languages.exportImageTooLarge);
+        }
+        // 截图克隆完整内容区，预览窗口保持原有宽度和滚动位置。
+        const style = {boxSizing: "border-box", overflow: "hidden"};
         if (isIPhone() || isIPad() || isSafari()) {
             // modern-screenshot 通过缓存默认样式提高 WebKit/WKWebView 环境下的导出性能。
             await addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.6.6`, "protyleModernScreenshot");
             return window.modernScreenshot.domToBlob(
-                exportDialog.element.querySelector(".b3-dialog__content") as HTMLElement, {
+                contentElement, {
+                    ...size,
+                    style,
                     type: "image/png",
-                    // 默认为 1，会导致高清屏上导出的图片比 html-to-image 模糊
-                    scale: window.devicePixelRatio || 1,
-                    maximumCanvasSize: MAX_CANVAS_SIZE,
+                    scale: pixelRatio,
                     fetch: {placeholderImage: IMAGE_PLACEHOLDER}
                 });
         }
         await addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image");
         return window.htmlToImage.toBlob(
-            exportDialog.element.querySelector(".b3-dialog__content") as HTMLElement, {
+            contentElement, {
+                ...size,
+                style,
+                pixelRatio,
                 imagePlaceholder: IMAGE_PLACEHOLDER,
                 onImageErrorHandler: (event: Event) => {
                     (event.target as HTMLImageElement).src = IMAGE_PLACEHOLDER;
@@ -161,19 +175,6 @@ export const exportImage = (id: string, copyOnly = false) => {
         outputting = true;
         setActionDisabled(true);
         const msgId = showMessage(window.siyuan.languages.exporting, 0);
-        const containerElement = exportDialog.element.querySelector(".b3-dialog__container") as HTMLElement;
-        const oldHeight = containerElement.style.height;
-        const oldMaxHeight = containerElement.style.maxHeight;
-        const oldWidth = containerElement.style.width;
-        // 导出时让内容完整展开，避免移动端对话框的最大高度限制截断长图。
-        containerElement.style.height = "";
-        containerElement.style.maxHeight = "none";
-        /// #if MOBILE
-        containerElement.style.width = "100vw";
-        /// #endif
-        const contentElement = exportDialog.element.querySelector(".b3-dialog__content") as HTMLElement;
-        const oldOverflow = contentElement.style.overflow;
-        contentElement.style.overflow = "hidden";
         if (!copyOnly) {
             setStorageVal(Constants.LOCAL_EXPORTIMG, window.siyuan.storage[Constants.LOCAL_EXPORTIMG]);
         }
@@ -213,10 +214,6 @@ export const exportImage = (id: string, copyOnly = false) => {
         } finally {
             outputting = false;
             if (document.body.contains(exportDialog.element)) {
-                containerElement.style.height = oldHeight;
-                containerElement.style.maxHeight = oldMaxHeight;
-                containerElement.style.width = oldWidth;
-                contentElement.style.overflow = oldOverflow;
                 setActionDisabled(false);
             }
         }
@@ -288,7 +285,9 @@ export const exportImage = (id: string, copyOnly = false) => {
                     watermarkPreviewElement.setAttribute("style", `background-image: url(${window.siyuan.config.export.imageWatermarkStr});background-repeat: repeat;position: absolute;top: 0;left: 0;width: 100%;height: 100%;border-radius: var(--b3-border-radius-b);`);
                 } else {
                     await addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image");
-                    const width = Math.max(exportDialog.element.querySelector(".export-img").clientWidth / 3, 150);
+                    const imageElement = exportDialog.element.querySelector(".export-img");
+                    const contentElement = exportDialog.element.querySelector(".b3-dialog__content");
+                    const width = Math.max(Math.min(imageElement.clientWidth, contentElement.clientWidth) / 3, 150);
                     watermarkPreviewElement.setAttribute("style", `width: ${width}px;height: ${width}px;display: flex;justify-content: center;align-items: center;color: var(--b3-border-color);font-size: 14px;`);
                     watermarkPreviewElement.innerHTML = sanitizeKernelHTML(`<div style="transform: rotate(-45deg)">${window.siyuan.config.export.imageWatermarkStr}</div>`);
                     const canvas = await window.htmlToImage.toCanvas(watermarkPreviewElement);
@@ -326,12 +325,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         });
         processRender(previewElement);
         highlightRender(previewElement);
-        previewElement.querySelectorAll("table").forEach((item: HTMLElement) => {
-            if (item.clientWidth > item.parentElement.clientWidth) {
-                item.setAttribute("style", `margin-bottom:${item.parentElement.clientWidth * item.clientHeight / item.clientWidth - item.parentElement.clientHeight + 1}px;transform: scale(${item.parentElement.clientWidth / item.clientWidth});transform-origin: top left;`);
-                item.parentElement.style.overflow = "hidden";
-            }
-        });
+        updateExportImageLayout(exportDialog.element.querySelector(".export-img"));
 
         await updateWatermark();
         if (revision !== previewRevision) {

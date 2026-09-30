@@ -1,5 +1,6 @@
 {
 	"renameAssetTip": "Zmiana nazwy aktualizuje wszystkie linki odwołujące się do tego zasobu",
+	"exportImageTooLarge": "Eksportowany obraz jest zbyt duży. Zmniejsz ilość treści lub liczbę kolumn tabeli i spróbuj ponownie.",
 	"imageOCRActionTip": "Kliknij, aby skopiować/kliknij dwukrotnie, aby edytować tekst OCR",
 	"displayImgAltTip": "Po włączeniu tekst podpowiedzi jest wyświetlany pod tytułem obrazu; po wyłączeniu tej opcji tytuł i tekst podpowiedzi nadal są widoczne po najechaniu kursorem na obraz",
 	"displayImgNameTip": "Po włączeniu nazwy plików są wyświetlane nad obrazami lokalnymi, bez ścieżki i wygenerowanego identyfikatora, z zachowaniem rozszerzenia; kliknij nazwę, aby otworzyć okno zmiany nazwy",

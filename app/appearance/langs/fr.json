@@ -1,5 +1,6 @@
 {
 	"renameAssetTip": "Le renommage met à jour tous les liens qui référencent cette ressource",
+	"exportImageTooLarge": "L’image exportée est trop grande. Réduisez le contenu ou le nombre de colonnes du tableau, puis réessayez.",
 	"imageOCRActionTip": "Cliquer pour copier/double-cliquer pour modifier le texte OCR",
 	"displayImgAltTip": "Une fois cette option activée le texte de l’infobulle apparaît sous le titre de l’image ; même si cette option est désactivée, le survol de l’image affiche son titre et le texte de l’infobulle",
 	"displayImgNameTip": "Une fois cette option activée les noms de fichiers apparaissent au-dessus des images locales, sans le chemin ni l’identifiant généré, en conservant l’extension ; cliquer sur un nom ouvre la boîte de dialogue de renommage",

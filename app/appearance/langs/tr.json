@@ -1,6 +1,8 @@
 {
 	"displayImgAltTip": "Etkinleştirildiğinde görsel başlığının altında ipucu metni gösterilir; bu seçenek kapalıyken de fare görselin üzerine getirildiğinde başlık ve ipucu metni gösterilir",
 	"displayImgNameTip": "Etkinleştirildiğinde yerel görsellerin üzerinde dosya adları, kaynak yolu ve oluşturulan kimlik olmadan, uzantı korunarak gösterilir; düzenlemek için ada tıkla, kaynağı yeniden adlandırmak ve tüm referansları güncellemek için Enter tuşuna bas",
+	"entryResetOrder": "Sıralamayı sıfırla",
+	"entryResetAllOrders": "Tüm sıralamaları sıfırla",
 	"displayImgAlt": "Görsel ipucu metnini göster",
 	"displayImgName": "Görsel dosya adlarını göster",
 	"s3EndpointBucketWarning": "Endpoint zaten kova adını içeriyor olabilir; bu durum bulut anlık görüntülerinin listelenmesini ve temizlenmesini aksatabilir. Yapılandırmayı kontrol edin; eşitlenmiş veriler varsa yapılandırmayı değiştirmeden önce yedekleyin ve depolama yolunu doğrulayın",

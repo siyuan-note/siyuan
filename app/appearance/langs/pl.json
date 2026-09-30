@@ -1,6 +1,8 @@
 {
 	"displayImgAltTip": "Po włączeniu tekst podpowiedzi jest wyświetlany pod tytułem obrazu; po wyłączeniu tej opcji tytuł i tekst podpowiedzi nadal są widoczne po najechaniu kursorem na obraz",
 	"displayImgNameTip": "Po włączeniu nazwy plików są wyświetlane nad obrazami lokalnymi, bez ścieżki i wygenerowanego identyfikatora, z zachowaniem rozszerzenia; kliknij nazwę, aby ją edytować, i naciśnij Enter, aby zmienić nazwę zasobu i zaktualizować wszystkie odwołania",
+	"entryResetOrder": "Resetuj kolejność",
+	"entryResetAllOrders": "Resetuj wszystkie kolejności",
 	"displayImgAlt": "Pokazuj tekst podpowiedzi obrazów",
 	"displayImgName": "Pokazuj nazwy plików obrazów",
 	"s3EndpointBucketWarning": "Endpoint może już zawierać nazwę zasobnika, co może zakłócać wyświetlanie i czyszczenie migawek w chmurze. Sprawdź konfigurację; jeśli istnieją już zsynchronizowane dane, wykonaj ich kopię zapasową i sprawdź ścieżkę przechowywania przed zmianą konfiguracji",

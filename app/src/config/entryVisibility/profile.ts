@@ -11,6 +11,14 @@ export const getBuiltinProfileEntryVisibility = (
     ? defaultVisible
     : (simpleDefaultVisible ?? defaultVisible) && simple;
 
+export const resetEntryProfileOrder = (profile: Pick<Config.IEntryVisibilityProfile, "orders">, parentPath?: string) => {
+    if (parentPath) {
+        delete profile.orders[parentPath];
+    } else {
+        profile.orders = {};
+    }
+};
+
 export type TEntryVisibilityImportProfile = {
     name?: unknown;
     base?: unknown;

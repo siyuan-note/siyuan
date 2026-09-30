@@ -1322,6 +1322,10 @@
   }
 
   &-entry-visibility {
+    &__reset-orders {
+      max-width: 100%;
+    }
+
     &__view--mobile {
       .config-entry-visibility__search {
         margin: 0 8px;

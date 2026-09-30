@@ -1,6 +1,8 @@
 {
 	"displayImgAltTip": "Quando attivata questa opzione mostra il testo del suggerimento sotto il titolo dell’immagine; anche se disattivata, passando il mouse sull’immagine vengono mostrati il titolo e il testo del suggerimento",
 	"displayImgNameTip": "Quando attivata questa opzione mostra il nome del file sopra le immagini locali, senza percorso e ID generato e mantenendo l’estensione; fai clic sul nome per modificarlo e premi Invio per rinominare la risorsa e aggiornare tutti i riferimenti",
+	"entryResetOrder": "Reimposta ordine",
+	"entryResetAllOrders": "Reimposta tutti gli ordini",
 	"displayImgAlt": "Mostra il testo dei suggerimenti delle immagini",
 	"displayImgName": "Mostra i nomi dei file immagine",
 	"s3EndpointBucketWarning": "Endpoint potrebbe già contenere il nome del bucket, causando problemi nell'elenco e nella pulizia delle istantanee nel cloud. Controlla la configurazione; se esistono già dati sincronizzati, esegui un backup e verifica il percorso di archiviazione prima di modificarla",

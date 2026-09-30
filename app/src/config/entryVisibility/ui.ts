@@ -38,6 +38,7 @@ import {
     getProfileEntryVisibility,
     isEntryVisibilityImportVersionSupported,
     normalizeEntryVisibilityImportProfile,
+    resetEntryProfileOrder,
     TEntryVisibilityImportProfile,
 } from "./profile";
 import {getHostCapabilities} from "../../util/hostCapabilities";
@@ -49,6 +50,7 @@ import {
     DOCK_ORDER_SCOPES,
     DOCK_ORDER_SCOPES_BY_SIDE,
     getDockEntryOrderSnapshot,
+    getDefaultDockEntryOrderSnapshot,
     getDockOrderScopeLabelKey,
     isDockOrderScope,
     mergeDockEntryOrderSnapshot,
@@ -303,11 +305,18 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
     data-entry-column data-entry-depth="${depth}">
     <div class="config-entry-visibility__column-title">
         <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
+        ${sortable ? renderOrderReset(prefix) : ""}
     </div>
     <div class="config-entry-visibility__column-list">
         ${renderEntryRows(profile, prefix, nodes, depth, selectedPaths, parentEnabled, readOnly, sortable, getItemPath)}
     </div>
 </section>`;
+
+const renderOrderReset = (prefix: string) => `<button class="block__icon block__icon--show ariaLabel"
+    data-action="reset-entry-order" data-entry-parent="${escapeAttr(prefix)}" data-position="north"
+    aria-label="${escapeAttr(window.siyuan.languages.entryResetOrder)}">
+    <svg><use xlink:href="#iconRefresh"></use></svg>
+</button>`;
 
 const getDirectDisplayRoot = (section: IEntryCatalogSection) => section.children.length === 1 &&
     section.children[0].displayChildrenDirectly
@@ -400,7 +409,10 @@ const renderDockColumns = (
                 ? nodes.filter((item) => visiblePaths.has(`${DOCK_SECTION_KEY}.${item.key}`))
                 : nodes;
             return `<section class="config-entry-visibility__dock-group" data-entry-drop-scope="${scope}">
-                <div class="config-entry-visibility__dock-group-title" title="${escapeAttr(scopeLabel)}">${escapeHtml(scopeLabel)}</div>
+                <div class="config-entry-visibility__dock-group-title">
+                    <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(scopeLabel)}">${escapeHtml(scopeLabel)}</span>
+                    ${!visiblePaths && !readOnly ? renderOrderReset(scope) : ""}
+                </div>
                 <div class="config-entry-visibility__dock-list" data-entry-drop-scope="${scope}">
                     ${renderEntryRows(
         profile,
@@ -531,8 +543,8 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     refreshTopBarCatalog(plugins);
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);
-    const dockOrderSnapshot = getDockEntryOrderSnapshot();
     const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;
+    const dockOrderSnapshot = builtin ? getDockEntryOrderSnapshot() : getDefaultDockEntryOrderSnapshot();
     let selectedTemplate: TEntryVisibilityTemplate | "current" = ENTRY_PROFILE_SIMPLE;
     const existing = profileID
         ? window.siyuan.config.appearance.entryVisibility.profiles.find((item) => item.id === profileID)
@@ -586,6 +598,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     <div class="config-entry-visibility__browser" data-type="entry-browser"></div>
 </div>
 <div class="b3-dialog__action">
+    ${builtin ? "" : `<button class="b3-button b3-button--outline config-entry-visibility__reset-orders ariaLabel" data-action="reset-all-entry-orders" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.entryResetAllOrders)}"><span class="fn__ellipsis">${window.siyuan.languages.entryResetAllOrders}</span></button><span class="fn__space fn__flex-1"></span>`}
     ${builtin ? `<button class="b3-button b3-button--text" data-action="cancel">${window.siyuan.languages.close}</button>` : `<button class="b3-button b3-button--cancel" data-action="cancel">${window.siyuan.languages.cancel}</button>
     <span class="fn__space"></span>
     <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>`}
@@ -881,7 +894,11 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         }
         const actionElement = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
         const action = actionElement?.dataset.action;
-        if (action === "back" || action === "cancel") {
+        if (!builtin && (action === "reset-entry-order" || action === "reset-all-entry-orders")) {
+            cancelDrag();
+            resetEntryProfileOrder(draft, action === "reset-entry-order" ? actionElement.dataset.entryParent : undefined);
+            renderBrowser();
+        } else if (action === "back" || action === "cancel") {
             closeEditor();
         } else if (action === "select-entry-section") {
             selectedSectionKey = actionElement.dataset.entrySection;

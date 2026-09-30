@@ -92,6 +92,11 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
             const action = view.querySelector<HTMLElement>(".b3-dialog__action").getBoundingClientRect();
             check(action.bottom <= innerHeight && bounds.bottom <= action.top,
                 "List and actions must remain inside the viewport");
+            for (const button of view.querySelectorAll<HTMLElement>(".b3-dialog__action button")) {
+                const rect = button.getBoundingClientRect();
+                check(rect.left >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
+                    "Reset and save controls must remain reachable on narrow screens");
+            }
             const header = view.querySelector<HTMLElement>(".config-entry-visibility__mobile-header");
             for (const selector of ["[data-profile-field='name']", "[data-entry-path='editor.slash.menu']"]) {
                 const control = view.querySelector<HTMLElement>(selector);
@@ -115,6 +120,11 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         }
         view = open("");
         selectSlash();
+        const reset = view.querySelector<HTMLElement>("[data-action='reset-all-entry-orders']");
+        reset.querySelector("span").textContent = "Alle Reihenfolgen zurücksetzen";
+        const resetBounds = reset.getBoundingClientRect();
+        check(resetBounds.left >= 0 && resetBounds.right <= innerWidth,
+            "Long translated reset labels must fit the narrow editor");
         return "Narrow new and existing profiles passed";
     }
     selectSlash();
@@ -196,6 +206,8 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     view = open("full");
     selectSlash();
     check(!view.querySelector(".config-entry-visibility__drag"), "Built-in profiles must remain read-only");
+    check(!view.querySelector("[data-action='reset-entry-order'], [data-action='reset-all-entry-orders']"),
+        "Built-in profiles must not offer resets");
     enabled = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
     enabled.click();
     check(!enabled.checked, "Built-in total switch follows mobile default and remains read-only");
@@ -217,6 +229,16 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     const desktopOrder = config().profiles[0].orders["editor.slash.menu"];
     check(desktopOrder.indexOf("heading1") < desktopOrder.indexOf("heading3"), "Desktop drag still updates order");
     check(catalog.getEntryCatalogChildren("editor.slash.menu").length > 20, "Exercise the actual slash catalog");
+    config().profiles[0].orders["dock.order.LeftTop"] = ["outline", "file"];
+    config().profiles[0].orders["dock.order.RightTop"] = ["graph"];
+    view = open();
+    view.querySelector<HTMLElement>("[data-entry-section='dock']").click();
+    check(view.querySelectorAll("[data-action='reset-entry-order']").length === 6,
+        "Dock groups must offer resets for the six actual order scopes");
+    view.querySelector<HTMLElement>("[data-action='reset-entry-order'][data-entry-parent='dock.order.LeftTop']").click();
+    view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(!("dock.order.LeftTop" in config().profiles[0].orders), "Dock reset must remove its scope record");
+    check(config().profiles[0].orders["dock.order.RightTop"], "Dock reset must preserve the other scopes");
     mobile = true;
     window.siyuan.mobile = {} as typeof window.siyuan.mobile;
     view = open();
@@ -234,6 +256,24 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     view.querySelector<HTMLElement>("[data-action='confirm']").click();
     const toolbarOrder = config().profiles[0].orders["editor.toolbar"];
     check(toolbarOrder.indexOf(secondKey) < toolbarOrder.indexOf(firstKey), "Toolbar touch sorting must persist");
+    view = open();
+    selectSlash();
+    const resetOrder = () => view.querySelector<HTMLElement>("[data-action='reset-entry-order']").click();
+    resetOrder();
+    check(config().profiles[0].orders["editor.slash.menu"], "Reset must remain a draft until confirmed");
+    view.querySelector<HTMLElement>("[data-action='cancel']").click();
+    check(config().profiles[0].orders["editor.slash.menu"], "Cancel must preserve saved order and plugin slots");
+    view = open();
+    selectSlash();
+    resetOrder();
+    view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(!("editor.slash.menu" in config().profiles[0].orders), "Single reset must delete the order record");
+    check(config().profiles[0].orders["editor.toolbar"], "Single reset must preserve other levels");
+    check(config().profiles[0].entries["editor.slash.menu"] === true, "Reset must preserve visibility");
+    view = open();
+    view.querySelector<HTMLElement>("[data-action='reset-all-entry-orders']").click();
+    view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(Object.keys(config().profiles[0].orders).length === 0, "Reset all must clear order records");
     view = open();
     selectSlash();
     return "Mobile entry settings passed";

@@ -106,10 +106,10 @@ test("remove list merges into saved conversion menus and preserves plugin slots"
         saved.splice(1, 0, "plugin:example:item");
         const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
         assert.deepEqual(merged.filter(key => key !== "removeList"), saved);
-        assert.equal(merged[merged.indexOf("list") - 1], "removeList");
+        assert.equal(merged[merged.indexOf("heading6") + 1], "removeList");
         const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
         assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
-        assert.deepEqual(resolveEntryOrder(["paragraph", "removeList"], merged, separators), ["paragraph", "removeList"]);
+        assert.deepEqual(resolveEntryOrder(["paragraph", "removeList"], merged, separators), ["removeList", "paragraph"]);
     }
 });
 
@@ -273,7 +273,7 @@ test("tab conversion merges into saved block menus without moving plugin slots",
     const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
     assert.deepEqual(merged.filter(key => key !== "tabs"), saved);
     assert.equal(merged[1], "plugin:example:item");
-    assert.equal(merged[merged.indexOf("tabs") + 1], "heading1");
+    assert.equal(merged[merged.indexOf("tabs") + 1], "superBlock");
 });
 
 test("document tree profiles merge sibling creation while preserving custom order and plugin slots", () => {

@@ -1,4 +1,5 @@
 {
+	"blockTypeParentChange": "การแปลงนี้จะเปลี่ยนโครงสร้างหรือเค้าโครงของบล็อกภายนอก",
 	"attributePanelVisibility": "การแสดงฟิลด์ในแผงคุณสมบัติ",
 	"alwaysShow": "แสดงเสมอ",
 	"hideWhenEmpty": "ซ่อนเมื่อว่าง",

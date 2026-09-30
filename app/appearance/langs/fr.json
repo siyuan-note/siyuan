@@ -1,4 +1,5 @@
 {
+	"blockTypeParentChange": "Cette conversion modifierait la structure ou la disposition du bloc extérieur",
 	"attributePanelVisibility": "Visibilité du champ dans le panneau des propriétés",
 	"alwaysShow": "Toujours afficher",
 	"hideWhenEmpty": "Masquer si vide",

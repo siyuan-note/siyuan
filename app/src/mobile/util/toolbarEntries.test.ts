@@ -5,6 +5,26 @@ import {getDefaultToolbar, getPluginToolbarEntryKey, markPluginToolbarEntries} f
 import {getEntryCatalogChildren} from "../../config/entryVisibility/catalog";
 import {resolveEntryOrder} from "../../config/entryVisibility/order";
 
+test("mobile block type availability and visibility do not change the existing block menu", () => {
+    const root = new ToolbarElement();
+    const type = new ToolbarElement("block-type");
+    const block = new ToolbarElement("block");
+    root.children = [type, block];
+    const apply = (available: boolean, visible = true) => applyMobileToolbarEntries(root as unknown as HTMLElement,
+        getDefaultToolbar(true), {order: ["block-type", "mobile-block"],
+            isVisible: key => key !== "block-type" || visible,
+            isAvailable: name => name !== "block-type" || available});
+    apply(false);
+    assert.equal(type.classList.contains("fn__none"), true);
+    assert.equal(block.classList.contains("fn__none"), false);
+    assert.equal(block.dataset.id, "mobile-block");
+    apply(true);
+    assert.equal(type.classList.contains("fn__none"), false);
+    apply(true, false);
+    assert.equal(type.classList.contains("fn__none"), true);
+    assert.equal(block.classList.contains("fn__none"), false);
+});
+
 class ToolbarElement {
     public children: ToolbarElement[] = [];
     public dataset: {type?: string; id?: string};

@@ -1,4 +1,5 @@
 {
+	"blockTypeParentChange": "Bu dönüştürme dış bloğun yapısını veya düzenini değiştirir",
 	"attributePanelVisibility": "Özellik panelindeki alan görünürlüğü",
 	"alwaysShow": "Her zaman göster",
 	"hideWhenEmpty": "Boş olduğunda gizle",

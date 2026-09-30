@@ -52,9 +52,10 @@ test("image OCR actions retain their configurable paths and order", () => {
     assert.equal(getEntryParentPath("inline.image.ocr.copyOCRText"), "inline.image.ocr");
 });
 
-test("remove list leads single and multiple block conversion menus", () => {
+test("remove list precedes list types in single and multiple block conversion menus", () => {
     for (const path of ["gutter.single.turnInto", "gutter.multi.turnInto"]) {
-        assert.deepEqual(getEntryCatalogChildren(path).slice(0, 2).map(item => item.key), ["removeList", "list"]);
+        const keys = getEntryCatalogChildren(path).map(item => item.key);
+        assert.equal(keys[keys.indexOf("list") - 1], "removeList");
         const entry = getEntryCatalogNode(`${path}.removeList`);
         assert.equal(entry.type, "entry");
         assert.equal(entry.simple, true);
@@ -362,6 +363,9 @@ test("plugin top bar entries use the legacy unpinned list as their default visib
 });
 
 test("toolbar catalog follows the default toolbar declaration", () => {
+    const blockType = getEntryCatalogNode("editor.toolbar.block-type");
+    assert.equal(blockType.simple, true);
+    assert.equal(blockType.key, "block-type");
     const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH).filter(item => !item.key.startsWith("mobile-"));
     assert.deepEqual(children.map((item) => item.key), DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key));
     assert.equal(children.filter((item) => item.type === "separator").length, 2);
@@ -693,15 +697,18 @@ test("callout presets stay aligned across block menu scopes", () => {
     });
 });
 
-test("heading conversions follow list conversions across block menu scopes", () => {
+test("paragraph and headings precede list conversions across block menu scopes", () => {
     const headingKeys = ["heading1", "heading2", "heading3", "heading4", "heading5", "heading6"];
     ["gutter.single.turnInto", "gutter.multi.turnInto"].forEach((path) => {
         const keys = getEntryCatalogChildren(path).map(item => item.key);
-        assert.equal(keys[0], "removeList");
+        assert.equal(keys[0], "paragraph");
         assert.equal(getEntryCatalogNode(`${path}.paragraph`)?.simple, true);
         const headingIndex = keys.indexOf("heading1");
-        assert.equal(headingIndex, keys.indexOf(path === "gutter.single.turnInto" ? "tabs" : "calloutCustom") + 1);
+        assert.equal(headingIndex, 1);
         assert.deepEqual(keys.slice(headingIndex, headingIndex + headingKeys.length), headingKeys);
+        assert.deepEqual(keys.filter(key => ["list", "orderedList", "check", "quote", "callout"].includes(key)),
+            ["list", "orderedList", "check", "quote", "callout"]);
+        assert.equal(keys[headingIndex + headingKeys.length], "removeList");
         headingKeys.forEach(key => {
             const entry = getEntryCatalogNode(`${path}.${key}`);
             assert.equal(entry?.type, "entry");
@@ -713,11 +720,11 @@ test("heading conversions follow list conversions across block menu scopes", () 
 test("tab conversion belongs to the single block conversion menu", () => {
     const keys = getEntryCatalogChildren("gutter.single.turnInto").map(item => item.key);
     assert.equal(keys[keys.indexOf("tabs") - 1], "calloutCustom");
-    assert.equal(keys[keys.indexOf("tabs") + 1], "heading1");
+    assert.equal(keys[keys.indexOf("tabs") + 1], "superBlock");
     assert.equal(getEntryCatalogNode("gutter.single.turnInto.tabs")?.simple, true);
     assert.equal(getEntryCatalogNode("gutter.single.turnInto.tabs")?.type, "entry");
     assert.equal(getEntryCatalogNode("gutter.multi.turnInto.tabs"), undefined);
-    assert.equal(keys[keys.indexOf("superBlock") - 1], "heading6");
+    assert.equal(keys[keys.indexOf("superBlock") - 1], "tabs");
     assert.equal(keys[keys.indexOf("superBlock") + 1], "code");
     assert.equal(getEntryCatalogNode("gutter.single.turnInto.superBlock")?.simple, true);
     assert.equal(getEntryCatalogNode("gutter.single.turnInto.superBlock")?.type, "entry");
@@ -1340,12 +1347,13 @@ test("simple profile follows the reviewed defaults", () => {
     hidden.forEach((path) => assert.equal(getEntryCatalogNode(path)?.simple, false, path));
 });
 
-test("list conversion prioritizes list actions and keeps recursive entry identities", () => {
+test("list conversion groups list actions and keeps recursive entry identities", () => {
     for (const root of ["gutter.single", "gutter.multi"]) {
         const keys = getEntryCatalogChildren(`${root}.turnInto`).map(item => item.key);
-        assert.deepEqual(keys.slice(0, root === "gutter.single" ? 7 : 6), [
+        const start = keys.indexOf("removeList");
+        assert.deepEqual(keys.slice(start, start + (root === "gutter.single" ? 6 : 5)), [
             "removeList", "list", "orderedList", "check",
-            ...(root === "gutter.single" ? ["listMindmap"] : []), "includeSublists", "paragraph",
+            ...(root === "gutter.single" ? ["listMindmap"] : []), "includeSublists",
         ]);
         const children = getEntryCatalogChildren(`${root}.turnInto.includeSublists`);
         assert.deepEqual(children.map(item => item.key), [

@@ -1,6 +1,8 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {getMobilePluginToolbarItems} from "./pluginToolbar";
+import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
 
 describe("getMobilePluginToolbarItems", () => {
     const builtinTypes = ["strong", "em", "inline-memo"];
@@ -31,5 +33,13 @@ describe("getMobilePluginToolbarItems", () => {
         const pluginItems = getMobilePluginToolbarItems(toolbar, builtinTypes);
         assert.deepEqual(pluginItems.map(item => item.name), ["plugin-b", "plugin-a"]);
         assert.equal(pluginItems[1].icon, "iconANew");
+    });
+
+    it("does not duplicate the built-in block type picker as a plugin", () => {
+        const source = readFileSync(resolve(process.cwd(), "src/mobile/util/keyboardToolbar.ts"), "utf8");
+        assert.match(source, /getMobilePluginToolbarItems\(protyle.options.toolbar, Constants.INLINE_TYPE.concat\("font-family", "font-size", "block-type"\)\)/);
+        assert.equal((source.match(/<button class="keyboard__action" data-type="block-type"/g) || []).length, 1);
+        assert.deepEqual(getMobilePluginToolbarItems([{name: "block-type"}, {name: "plugin-a"}],
+            builtinTypes.concat("block-type")), [{name: "plugin-a"}]);
     });
 });

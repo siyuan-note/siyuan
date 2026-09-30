@@ -1,4 +1,5 @@
 {
+	"blockTypeParentChange": "Diese Umwandlung würde die Struktur oder das Layout des äußeren Blocks ändern",
 	"attributePanelVisibility": "Feldsichtbarkeit im Eigenschaftsbereich",
 	"alwaysShow": "Immer anzeigen",
 	"hideWhenEmpty": "Ausblenden, wenn leer",

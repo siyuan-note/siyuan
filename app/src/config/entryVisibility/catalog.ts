@@ -1,4 +1,5 @@
 import {CODE_TAB_SPACE_VALUES} from "../../protyle/wysiwyg/codeBlockUtil";
+import {orderGutterTurnIntoItems} from "../../protyle/gutter/turnIntoMenu";
 import {
     DESKTOP_TOOLBAR_ENTRIES,
     getToolbarEntryId,
@@ -212,7 +213,7 @@ const gutterCopyChildren = (single = false) => [
     ] : []),
 ];
 
-const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), true, [
+const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), true, orderGutterTurnIntoItems([
         node("removeList", lang("removeList")),
         node("list", lang("list")),
         node("orderedList", lang("ordered-list")),
@@ -235,7 +236,6 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("calloutCaution", location(lang("callout"), literal("Caution"))),
         node("calloutCustom", location(lang("callout"), () => `${window.siyuan.languages.custom}...`)),
         ...(!multi ? [node("tabs", lang("tabs"))] : []),
-        // 列表及列表项复用段落和标题入口，保持单选、多选的配置标识和默认顺序一致。
         node("heading1", lang("heading1")),
         node("heading2", lang("heading2")),
         node("heading3", lang("heading3")),
@@ -247,7 +247,7 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("table", lang("tableBlock")),
         node("line", lang("line")),
         node("math", lang("math")),
-    ]);
+    ], item => item.key));
 
 const gutterHeadingTransform = () => node("tWithSubtitle", lang("tWithSubtitle"), true, [
     node("heading1", lang("heading1")),
@@ -501,7 +501,7 @@ const gutterSingle = () => [
 
 export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
 
-// 共享工具栏声明决定目录默认顺序，字体和字号位于外观之前。
+// 共享工具栏声明决定目录默认顺序，块类型位于首位，字体和字号位于外观之前。
 const toolbarBuiltinChildren = [
     ...MOBILE_TOOLBAR_ACTIONS.map(item => node(getMobileToolbarActionKey(item.name), lang(item.lang), true)),
     separator("mobile-separator"),

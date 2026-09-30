@@ -1,4 +1,5 @@
 {
+	"blockTypeParentChange": "この変換は外側のブロックの構造やレイアウトを変更するため実行できません",
 	"attributePanelVisibility": "属性パネルのフィールド表示",
 	"alwaysShow": "常に表示",
 	"hideWhenEmpty": "空の場合は非表示",

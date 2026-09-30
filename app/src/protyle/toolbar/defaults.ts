@@ -18,6 +18,10 @@ type TConfigurableToolbarItem = IMenuItem & {
 export const TOOLBAR_ENTRY_ROOT_PATH = "editor.toolbar";
 
 export const DESKTOP_TOOLBAR_ENTRIES: IToolbarEntry[] = [{
+    key: "block-type",
+    name: "block-type",
+    lang: "turnInto",
+}, {
     key: "block-ref",
     name: "block-ref",
     lang: "ref",

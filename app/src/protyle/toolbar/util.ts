@@ -195,6 +195,11 @@ export const removeInlineType = (inlineElement: HTMLElement, type: string, range
 
 export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
     const toolbarItem: IMenuItem [] = [{
+        name: "block-type",
+        lang: "turnInto",
+        icon: "iconParagraph",
+        tipPosition: "n",
+    }, {
         name: "block-ref",
         hotkey: window.siyuan.config.keymap.editor.insert.ref.custom,
         lang: "ref",

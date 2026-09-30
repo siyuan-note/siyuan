@@ -1,4 +1,5 @@
 import {Divider} from "./Divider";
+import {BlockType, updateBlockTypeButton} from "./BlockType";
 import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {renderMultiSelectToolbar, updateMultiSelectToolbar} from "../../mobile/util/multiSelectToolbar";
 import {selectAllLoadedBlocks} from "../wysiwyg/blockSelection";
@@ -141,7 +142,7 @@ const applyPluginToolbar = (toolbar: Array<string | IMenuItem>, protyle: IProtyl
         });
         result = filterPluginToolbar(result, protyle.lite);
         result.forEach((toolbarItem) => {
-            if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|", "font-family", "font-size").includes(toolbarItem.name)) {
+            if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|", "font-family", "font-size", "block-type").includes(toolbarItem.name)) {
                 return;
             }
             if (typeof toolbarItem.hotkey !== "string") {
@@ -296,6 +297,8 @@ export class Toolbar {
             return;
         }
         this.range = range;
+        updateBlockTypeButton(protyle, this.element.querySelector('[data-type="block-type"]'), range);
+        applyToolbarEntryVisibility(this.element);
         this.rangePosition = undefined;
         this.isMultipleClick = (position?.detail || 0) > 1;
         const nodeElement = hasClosestBlock(range.startContainer);
@@ -2530,6 +2533,9 @@ export class Toolbar {
     private genItem(protyle: IProtyle, menuItem: IMenuItem) {
         let menuItemObj;
         switch (menuItem.name) {
+            case "block-type":
+                menuItemObj = new BlockType(protyle, menuItem);
+                break;
             case "strong":
             case "em":
             case "s":

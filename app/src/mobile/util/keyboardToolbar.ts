@@ -90,6 +90,8 @@ import {insertEmptyBlock} from "../../block/util";
 import {getIconByType} from "../../editor/getIcon";
 import {MOBILE_TOOLBAR_ACTIONS, MOBILE_TOOLBAR_INSERTS} from "./toolbarActions";
 import {pauseMobileBarsScroll} from "./mobileBars";
+import {getBlockTypeSelection, openBlockTypeMenu, updateBlockTypeButton} from "../../protyle/toolbar/BlockType";
+import {TTextBlockSelection} from "../../protyle/toolbar/blockTypeCore";
 
 const getCurrentEditor = () => getMobileToolbarProtyle()?.getInstance() || getDocumentEditor();
 let toolbarProtyle: IProtyle;
@@ -101,6 +103,11 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
         isVisible: key => isEntryVisible(`${TOOLBAR_ENTRY_ROOT_PATH}.${key}`),
         isAvailable: name => {
             const protyle = getCurrentEditor()?.protyle;
+            if (name === "block-type") {
+                const selection = getSelection();
+                return !!protyle && selection?.rangeCount > 0 &&
+                    !!getBlockTypeSelection(protyle, selection.getRangeAt(0));
+            }
             if (name === "copy" || name === "cut") {
                 const selection = getSelection();
                 return !!protyle && !protyle.disabled && selection?.rangeCount > 0 && !selection.isCollapsed &&
@@ -162,7 +169,7 @@ export const updateMobilePluginToolbar = (protyle: IProtyle) => {
         return;
     }
     inlineToolbarElement.querySelectorAll('[data-plugin-toolbar="true"]').forEach(item => item.remove());
-    getMobilePluginToolbarItems(protyle.options.toolbar, Constants.INLINE_TYPE.concat("font-family", "font-size")).forEach(toolbarItem => {
+    getMobilePluginToolbarItems(protyle.options.toolbar, Constants.INLINE_TYPE.concat("font-family", "font-size", "block-type")).forEach(toolbarItem => {
         const itemElement = document.createElement("button");
         itemElement.className = "keyboard__action";
         itemElement.dataset.type = toolbarItem.name;
@@ -986,6 +993,7 @@ const renderKeyboardToolbar = () => {
         actions.classList.remove("fn__none");
         applyKeyboardToolbarEntries(actions, protyle.options.toolbar);
         protyle.toolbar.range = range;
+        updateBlockTypeButton(protyle, actions.querySelector('[data-type="block-type"]'), range);
 
         const blockButton = actions.querySelector<HTMLElement>('[data-type="block"]');
         const blockType = nodeElement.getAttribute("data-type");
@@ -1450,6 +1458,7 @@ export const initKeyboardToolbar = () => {
             ${[...MOBILE_TOOLBAR_ACTIONS, ...MOBILE_TOOLBAR_INSERTS].map(item =>
         `<button class="keyboard__action" data-type="${item.name}" aria-label="${window.siyuan.languages[item.lang]}"><svg><use xlink:href="#${item.icon}"></use></svg></button>`).join("")}
             <span class="keyboard__split" data-id="mobile-separator"></span>
+            <button class="keyboard__action" data-type="block-type" aria-haspopup="menu" aria-label="${window.siyuan.languages.turnInto}">${window.siyuan.languages.paragraph}</button>
             <button class="keyboard__action" data-type="block-ref" aria-label="${window.siyuan.languages.ref}"><svg><use xlink:href="#iconRef"></use></svg></button>
             <button class="keyboard__action" data-type="a" aria-label="${window.siyuan.languages.link}"><svg><use xlink:href="#iconLink"></use></svg></button>
             <span class="keyboard__split" data-id="separator_1"></span>
@@ -1487,8 +1496,20 @@ export const initKeyboardToolbar = () => {
     let startY = 0;
     let startX = 0;
     let moved = false;
-    const takeMenuKeyboard = bindMobileMenuKeyboard(toolbarElement, 'button[data-type="block"]',
+    const takeMenuKeyboard = bindMobileMenuKeyboard(toolbarElement, 'button[data-type="block"], button[data-type="block-type"]',
         () => getCurrentEditor()?.protyle);
+    let blockTypeSelection: {protyle: IProtyle, snapshot: TTextBlockSelection} | undefined;
+    toolbarElement.addEventListener("pointerdown", event => {
+        blockTypeSelection = undefined;
+        if (!(event.target as Element).closest('button[data-type="block-type"]')) {
+            return;
+        }
+        const protyle = getCurrentEditor()?.protyle;
+        const selection = getSelection();
+        if (protyle && selection?.rangeCount > 0) {
+            blockTypeSelection = {protyle, snapshot: getBlockTypeSelection(protyle, selection.getRangeAt(0))};
+        }
+    }, true);
     toolbarElement.addEventListener("touchstart", e => {
         startY = e.touches[0].clientY;
         startX = e.touches[0].clientX;
@@ -1502,7 +1523,7 @@ export const initKeyboardToolbar = () => {
     toolbarElement.addEventListener("mousedown", event => {
         const buttonElement = hasClosestByTag(event.target as HTMLElement, "BUTTON");
         const type = buttonElement && buttonElement.getAttribute("data-type");
-        if (type === "undo" || type === "redo" || type === "block") {
+        if (type === "undo" || type === "redo" || type === "block" || type === "block-type") {
             // 保持编辑器焦点，避免工具栏操作期间软键盘收起。
             event.preventDefault();
         }
@@ -1632,6 +1653,18 @@ export const initKeyboardToolbar = () => {
         event.stopPropagation();
         const selection = getSelection();
         const currentRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+        if (type === "block-type") {
+            const saved = blockTypeSelection;
+            blockTypeSelection = undefined;
+            if (protyle && (!saved || saved.protyle === protyle)) {
+                const snapshot = saved?.snapshot || (currentRange ? getBlockTypeSelection(protyle, currentRange) : undefined);
+                openBlockTypeMenu(protyle, buttonElement, snapshot, {
+                    onClose: () => restoreMenuKeyboard?.(),
+                    isCurrent: () => getCurrentEditor()?.protyle === protyle,
+                });
+            }
+            return;
+        }
         // 收起菜单不依赖实时选区，编辑器失焦后使用保存的选区恢复光标。
         const closeAddMenu = type === "add" && buttonElement.classList.contains("protyle-toolbar__item--current");
         if (type === "done" || closeAddMenu) {

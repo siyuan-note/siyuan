@@ -1,4 +1,5 @@
 {
+	"blockTypeParentChange": "इस रूपांतरण से बाहरी ब्लॉक की संरचना या लेआउट बदल जाएगा",
 	"attributePanelVisibility": "गुण पैनल में फ़ील्ड की दृश्यता",
 	"alwaysShow": "हमेशा दिखाएँ",
 	"hideWhenEmpty": "खाली होने पर छिपाएँ",

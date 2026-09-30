@@ -1,4 +1,5 @@
 {
+	"blockTypeParentChange": "이 변환은 바깥쪽 블록의 구조나 레이아웃을 변경합니다",
 	"attributePanelVisibility": "속성 패널 필드 표시",
 	"alwaysShow": "항상 표시",
 	"hideWhenEmpty": "비어 있으면 숨기기",

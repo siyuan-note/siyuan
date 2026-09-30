@@ -1,4 +1,5 @@
 {
+	"blockTypeParentChange": "此转换会改变外层块的结构或布局",
 	"attributePanelVisibility": "属性面板字段可见性",
 	"alwaysShow": "始终显示",
 	"hideWhenEmpty": "空白时隐藏",

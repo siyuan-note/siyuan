@@ -401,7 +401,8 @@ export const applyToolbarEntryVisibility = (toolbarElement: HTMLElement) => {
     const result = resolveToolbarItems(children, {
         getKey: resolveKey,
         isSeparator: (item) => item.classList.contains("protyle-toolbar__divider"),
-        isVisible: (key) => isEntryVisible(`${TOOLBAR_ENTRY_ROOT_PATH}.${key}`),
+        isVisible: (key) => isEntryVisible(`${TOOLBAR_ENTRY_ROOT_PATH}.${key}`) &&
+            children.some(item => resolveKey(item) === key && item.dataset.entryUnavailable !== "true"),
         order: getEntryOrder(TOOLBAR_ENTRY_ROOT_PATH),
     });
     result.ordered.forEach((item) => toolbarElement.append(item));

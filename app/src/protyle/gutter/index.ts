@@ -46,6 +46,7 @@ import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {toggleListMindmap} from "../render/listMindmap";
 import {getBlockHeightTarget, setBlockHeight} from "./height";
+import {orderGutterTurnIntoItems} from "./turnIntoMenu";
 import {
     getContenteditableElement,
     getEmbedGutterOperationContext,
@@ -1214,7 +1215,7 @@ export class Gutter {
                 icon: "iconTurnInto",
                 label: window.siyuan.languages.turnInto,
                 type: "submenu",
-                submenu: turnIntoSubmenu
+                submenu: orderGutterTurnIntoItems(turnIntoSubmenu, item => item.id)
             }).element);
             if (headingLevel) {
                 const ids = selectsElement.map((item) => item.getAttribute("data-node-id"));
@@ -1269,7 +1270,7 @@ export class Gutter {
                     icon: "iconTurnInto",
                     label: window.siyuan.languages.turnInto,
                     type: "submenu",
-                    submenu,
+                    submenu: orderGutterTurnIntoItems(submenu, item => item.id),
                 }).element);
             }
         }
@@ -1993,7 +1994,7 @@ export class Gutter {
                 icon: "iconTurnInto",
                 label: window.siyuan.languages.turnInto,
                 type: "submenu",
-                submenu: turnIntoSubmenu
+                submenu: orderGutterTurnIntoItems(turnIntoSubmenu, item => item.id)
             }).element);
         }
         if (!isEmbedMenu && !protyle.disabled && !nodeElement.classList.contains("hr") &&

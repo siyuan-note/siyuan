@@ -1,4 +1,5 @@
 {
+	"blockTypeParentChange": "Deze conversie zou de structuur of indeling van het buitenste blok wijzigen",
 	"attributePanelVisibility": "Veldzichtbaarheid in het eigenschappenpaneel",
 	"alwaysShow": "Altijd tonen",
 	"hideWhenEmpty": "Verbergen indien leeg",

@@ -31,6 +31,7 @@ type GetAttributeViewAddingBlockDefaultValuesRequest struct {
 	AddingBlockID string `json:"addingBlockID" api:"optional,nullable"`
 }
 
+// 无图标的普通块继承原条目图标，已有文档或已设置图标的普通块使用自身图标。
 type BatchReplaceAttributeViewBlocksRequest struct {
 	AvID       string              `json:"avID"`
 	IsDetached bool                `json:"isDetached"`
@@ -233,6 +234,7 @@ type CreateAttributeViewItemWithMarkdownRequest struct {
 	Session      string `json:"session" api:"optional,nullable"`
 }
 
+// 新建文档继承游离条目已设置的图标；条目未设置图标时沿用文档模板图标。
 type CreateAttributeViewItemDocsRequest struct {
 	AvID     string   `json:"avID"`
 	BlockID  string   `json:"blockID"`

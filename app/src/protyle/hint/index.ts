@@ -67,6 +67,7 @@ import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
 import {getAVBindingCell, getAVBindingOperations} from "../render/av/binding";
+import {bindCreatedAVDocument} from "../render/av/bindCreatedDocument";
 import {isRangeInEditor} from "../../util/newFileSelection";
 import {genCellValueByElement} from "../render/av/cell";
 import {setFold} from "../util/blockFold";
@@ -847,6 +848,21 @@ ${genHintItemHTML(item)}
                     updateAttrViewCellAnimation(cellElement, nextValue);
                 }
             };
+            const bindingBlockID = nodeElement.dataset.nodeId;
+            const savedPrimaryValue = JSON.stringify(previousValue);
+            const bindCreatedDoc = async (id: string, title: string) => {
+                const bound = await bindCreatedAVDocument(protyle, {
+                    avID, itemID: previousID, documentID: id, blockID: bindingBlockID, previousValue,
+                    isValid: () => cellElement.isConnected && nodeElement.isConnected &&
+                        nodeElement.dataset.nodeId === bindingBlockID &&
+                        (panelCell ? rowElement.dataset.rowId : rowElement.dataset.id) === previousID &&
+                        JSON.stringify(genCellValueByElement("block", cellElement)) === savedPrimaryValue,
+                });
+                if (bound) {
+                    updatePreview({type: "block", isDetached: false,
+                        block: {content: title, id, icon: previousValue.block?.icon}});
+                }
+            };
             if (value.startsWith("((newFileAtPath ") && value.endsWith(`${Lute.Caret}'))`)) {
                 const fileNames = value.substring("((newFileAtPath \"".length, value.length - 4).split(`"${Constants.ZWSP}'`);
                 const name = fileNames.length === 1 ? fileNames[0] : fileNames[1];
@@ -872,16 +888,7 @@ ${genHintItemHTML(item)}
                             focusByRange(savedRange);
                         }
                     },
-                    onCreated(id, title) {
-                        const operations = getAVBindingOperations(avID, previousID, id, blockID,
-                            previousValue, {protyleID: protyle.id});
-                        transaction(protyle, operations.doOperations, operations.undoOperations);
-                        updatePreview({
-                            type: "block",
-                            isDetached: false,
-                            block: {content: title, id},
-                        });
-                    },
+                    onCreated: bindCreatedDoc,
                 });
                 return;
             }
@@ -894,21 +901,12 @@ ${genHintItemHTML(item)}
                 const fileNames = value.substring(prefix.length, value.length - 4).split(`"${Constants.ZWSP}'`);
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
                 const newID = Lute.NewNodeID();
-                const bindNewDoc = () => {
-                    const operations = getAVBindingOperations(avID, previousID, newID, nodeElement.dataset.nodeId,
-                        previousValue, {protyleID: protyle.id});
-                    transaction(protyle, operations.doOperations, operations.undoOperations);
-                };
+                const bindNewDoc = () => bindCreatedDoc(newID, realFileName);
                 if (isNewSubDoc) {
                     newSubDocByRefHint(protyle, realFileName, bindNewDoc, newID);
                 } else {
                     newFileByRefHint(protyle, realFileName, bindNewDoc, newID);
                 }
-                updatePreview({
-                    type: "block",
-                    isDetached: false,
-                    block: {content: realFileName, id: newID}
-                });
             } else {
                 const sourceId = tempElement.getAttribute("data-id");
                 const operations = getAVBindingOperations(avID, previousID, sourceId, nodeElement.dataset.nodeId,

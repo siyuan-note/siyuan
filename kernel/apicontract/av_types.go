@@ -78,7 +78,8 @@ type AVValue struct {
 }
 
 type AVValueBlock struct {
-	ID         string `json:"id,omitempty" api:"optional,nullable"`
+	ID string `json:"id,omitempty" api:"optional,nullable"`
+	// 游离条目可独立设置图标；绑定条目与目标块共享图标，无图标的普通块在绑定时继承条目图标。
 	Icon       string `json:"icon,omitempty" api:"optional,nullable"`
 	Content    string `json:"content" api:"optional,nullable"`
 	RefSubtype string `json:"refSubtype,omitempty" api:"optional,nullable,enum=s|d"`
@@ -416,8 +417,9 @@ type AVViewData struct {
 }
 
 type AVNewItemTemplate struct {
-	ID                  string                          `json:"id" api:"optional,nullable"`
-	Name                string                          `json:"name" api:"optional,nullable"`
+	ID   string `json:"id" api:"optional,nullable"`
+	Name string `json:"name" api:"optional,nullable"`
+	// 游离条目和文档条目均支持预设图标；省略或为空时使用相应的默认图标。
 	Icon                string                          `json:"icon,omitempty" api:"optional,nullable"`
 	TargetType          string                          `json:"targetType" api:"optional,nullable,enum=detached|document"`
 	PrimaryKeyTemplate  string                          `json:"primaryKeyTemplate,omitempty" api:"optional,nullable"`

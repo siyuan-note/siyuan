@@ -123,7 +123,7 @@ func TestEmptyNewItemTemplatesUseVirtualDefault(t *testing.T) {
 	}
 }
 
-func TestDetachedNewItemTemplateDropsIcon(t *testing.T) {
+func TestDetachedNewItemTemplatePreservesIcon(t *testing.T) {
 	attrView := &AttributeView{Spec: CurrentSpec, ID: ast.NewNodeID()}
 	config := &NewItemTemplatesConfig{Templates: []*NewItemTemplate{{
 		ID: ast.NewNodeID(), Name: "Detached", Icon: "1f4c4", TargetType: NewItemTargetDetached, HideInFileTree: true,
@@ -131,8 +131,8 @@ func TestDetachedNewItemTemplateDropsIcon(t *testing.T) {
 	if err := attrView.SetNewItemTemplates(config); nil != err {
 		t.Fatalf("set detached new item template failed: %s", err)
 	}
-	if "" != attrView.NewItemTemplates[0].Icon {
-		t.Fatalf("detached template icon should be empty: %q", attrView.NewItemTemplates[0].Icon)
+	if "1f4c4" != attrView.NewItemTemplates[0].Icon {
+		t.Fatalf("detached template icon was not preserved: %q", attrView.NewItemTemplates[0].Icon)
 	}
 	if attrView.NewItemTemplates[0].HideInFileTree {
 		t.Fatal("detached template should not preserve the file tree visibility setting")

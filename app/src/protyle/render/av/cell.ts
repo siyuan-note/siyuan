@@ -68,6 +68,12 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
         protyle.options.history?.created || protyle.options.history?.snapshot) {
         return;
     }
+    const relationElement = target.closest<HTMLElement>(".av__cell--relation");
+    const relationValue = relationElement?.dataset.relationValue ?
+        JSON.parse(decodeURIComponent(relationElement.dataset.relationValue)) as IAVCellValue : undefined;
+    if (relationValue?.isDetached) {
+        return openAVRelationIcon(protyle, target, relationElement, relationValue);
+    }
     const cellElement = target.closest<HTMLElement>('.av__cell[data-dtype="block"], [data-type="block"][data-cell-value]');
     const value = cellElement ? genCellValueByElement("block", cellElement) : undefined;
     const blockID = value ? value.block?.id : target.nextElementSibling?.getAttribute("data-id");
@@ -111,6 +117,56 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
                 cell: {...currentCell, id: currentCell?.id || cellElement.dataset.id, value: oldValue},
                 column: {id: colID, type: "block"} as IAVColumn,
             }]);
+    }, target.querySelector("img"), {ownerElement: protyle.element});
+};
+
+const openAVRelationIcon = async (protyle: IProtyle, target: HTMLElement, relationElement: HTMLElement, value: IAVCellValue) => {
+    const sourceCell = relationElement.closest<HTMLElement>('.av__cell[data-dtype="relation"], [data-type="relation"][data-av-id]');
+    const sourceBlock = hasClosestBlock(target);
+    const keyID = sourceCell?.dataset.colId || sourceCell?.dataset.fieldId;
+    const rowID = relationElement.dataset.rowId;
+    if (!sourceBlock || !keyID || !rowID) {
+        return;
+    }
+    const sourceAVID = sourceBlock.dataset.avId;
+    const response = await fetchSyncPost("/api/av/getAttributeViewKeysByID", {avID: sourceAVID, keyIDs: [keyID]});
+    const avID = response.code === 0 ? response.data?.[0]?.relation?.avID : "";
+    if (!avID || !target.isConnected || protyle.disabled || window.siyuan.config.readonly || window.siyuan.isPublish ||
+        protyle.options.history?.created || protyle.options.history?.snapshot) {
+        return;
+    }
+    const rect = target.getBoundingClientRect();
+    openEmojiPanel("", "av", {
+        x: rect.left, y: rect.bottom, h: rect.height, w: rect.width,
+    }, async (unicode) => {
+        if (protyle.disabled || window.siyuan.config.readonly || window.siyuan.isPublish ||
+            protyle.options.history?.created || protyle.options.history?.snapshot) {
+            return;
+        }
+        // 关联字段修改目标数据库的主键值，读取当前条目，避免覆盖后续编辑或重新绑定。
+        const current = await fetchSyncPost("/api/av/getAttributeViewKeys", {
+            id: rowID, avID, itemID: rowID, valueID: value.id,
+        });
+        const table = current.code === 0 ? current.data?.find(item => item.avID === avID) : undefined;
+        const primary = table?.keyValues.find(item => item.key.type === "block");
+        const currentValue = primary?.values?.[0];
+        const blockID = table?.blockIDs?.[0];
+        if (!currentValue?.isDetached || !blockID || protyle.disabled || window.siyuan.config.readonly ||
+            window.siyuan.isPublish || protyle.options.history?.created || protyle.options.history?.snapshot) {
+            return;
+        }
+        const oldValue = cloneAVCellValueSnapshot(currentValue);
+        oldValue.block.icon = oldValue.block.icon || "";
+        const newValue = cloneAVCellValueSnapshot(oldValue);
+        newValue.block.icon = unicode;
+        const options = {valueID: oldValue.id, avID, blockID, keyID: primary.key.id, rowID: oldValue.blockID};
+        transaction(protyle, [createAVCellUpdateOperation({...options, data: newValue})],
+            [createAVCellUpdateOperation({...options, data: oldValue})]);
+        if (target.isConnected && relationElement.dataset.rowId === rowID) {
+            relationElement.dataset.relationValue = encodeURIComponent(JSON.stringify(newValue));
+            target.dataset.unicode = unicode;
+            target.innerHTML = getAVBlockIconHTML(newValue);
+        }
     }, target.querySelector("img"), {ownerElement: protyle.element});
 };
 

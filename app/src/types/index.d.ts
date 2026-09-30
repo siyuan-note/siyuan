@@ -1184,6 +1184,7 @@ interface IAVNewItemFieldValue {
 interface IAVNewItemTemplate {
     id: string;
     name: string;
+    /** 游离条目和文档条目均支持预设图标。 */
     icon?: string;
     targetType: TAVNewItemTarget;
     primaryKeyTemplate?: string;
@@ -1474,6 +1475,7 @@ interface IAVCellValue {
     block?: {
         content: string,
         id?: string,
+        /** 游离条目可独立设置图标；绑定条目与目标块共享图标，无图标的普通块在绑定时继承条目图标。 */
         icon?: string,
         refSubtype?: "s" | "d"
     }

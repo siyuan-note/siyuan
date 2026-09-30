@@ -10,7 +10,7 @@ import * as viewType from "./viewType";
 import * as escape from "../../../util/escape";
 
 // 执行实际渲染、取值和事务生成代码，隔离图标面板与编辑器外部依赖。
-const createHarness = (layout: TAVView = "table", detached = true, icon?: string) => {
+const createHarness = (layout: TAVView = "table", detached = true, icon?: string, relation = false) => {
     const value: IAVCellValue = {id: "value", keyID: "primary", blockID: "row", type: "block",
         isDetached: detached, block: {content: "Title", ...(detached ? {} : {id: "document"}), icon}};
     const cell = {id: "value", value} as IAVCell;
@@ -33,8 +33,11 @@ const createHarness = (layout: TAVView = "table", detached = true, icon?: string
             }
             return selector === ".b3-menu__avemoji" ? target : null;
         }};
-    const target = {dataset: {unicode: icon || ""}, innerHTML: "",
-        closest: () => cellElement, querySelector: (): HTMLElement => null,
+    const relationElement = {dataset: {rowId: "row", relationValue: encodeURIComponent(JSON.stringify(value))},
+        closest: () => ({dataset: layout === "gallery" ? {fieldId: "relation"} : {colId: "relation"}})};
+    const target = {dataset: {unicode: icon || ""}, innerHTML: "", isConnected: true,
+        closest: (selector: string) => selector === ".av__cell--relation" ? (relation ? relationElement : null) : cellElement,
+        querySelector: (): HTMLElement => null,
         getBoundingClientRect: () => ({left: 1, bottom: 2, height: 3, width: 4})};
     const protyle = {disabled: false, element: {}, options: {},
         wysiwyg: {element: {querySelectorAll: () => [block]}}} as unknown as IProtyle;
@@ -49,6 +52,12 @@ const createHarness = (layout: TAVView = "table", detached = true, icon?: string
         }},
         "../../util/hasClosest": {hasClosestBlock: () => block, hasClosestByClassName: () => false},
         "./virtualScroll": {getAVData: () => data, getAVPrimaryCell: () => cell},
+        "../../../util/fetch": {fetchSyncPost: async (path: string) => ({code: 0,
+            data: path.endsWith("getAttributeViewKeysByID") ? [{relation: {avID: "related"}}] : [{
+                avID: "related", blockIDs: ["related-database"],
+                keyValues: [{key: {id: "primary", type: "block"}, values: [cell.value]}],
+            }],
+        })},
         "./row": {getFieldIdByCellElement: () => "row"},
         "./col": {getColId: () => "primary"},
         "./selectionState": {updateAVSelectedCellValue: () => {}},
@@ -174,6 +183,25 @@ describe("database item icons", () => {
         await Promise.resolve();
         assert.equal((h.operations[0].doOperations[0].data as IAVCellValue).block.content, "Later title");
         assert.equal(h.operations[0].doOperations[0].rowID, "row");
+    });
+
+    it("edits the related entry with its carrier and reads its latest primary value for undo", async () => {
+        const h = createHarness("gallery", true, undefined, true);
+        await h.open();
+        assert.equal(h.panel.type, "av");
+        h.cell.value.block.content = "Later title";
+        h.cell.value.block.icon = "1f680";
+        await h.panel.callback("1f600");
+        const op = h.operations[0];
+        assert.equal(op.doOperations[0].avID, "related");
+        assert.equal(op.doOperations[0].blockID, "related-database");
+        assert.equal(op.doOperations[0].rowID, "row");
+        assert.equal((op.doOperations[0].data as IAVCellValue).block.content, "Later title");
+        assert.equal((op.undoOperations[0].data as IAVCellValue).block.icon, "1f680");
+        assert.equal(h.target.dataset.unicode, "1f600");
+        h.cell.value.isDetached = false;
+        await h.panel.callback("");
+        assert.equal(h.operations.length, 1);
     });
 
     it("does not write after rebinding, becoming read-only, or publishing", () => {

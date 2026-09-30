@@ -161,6 +161,12 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	applyAttributeViewContextFilterDefaultValue(attrView, itemID, filterContext, fieldValues)
 	boundBlockID := itemID
 	isDetached := av.NewItemTargetDocument != itemTemplate.TargetType
+	if isDetached && itemTemplate.Icon != "" {
+		fieldValues[attrView.GetBlockKeyValues().Key.ID] = &av.Value{
+			Type: av.KeyTypeBlock, IsDetached: true,
+			Block: &av.ValueBlock{Content: preview.PrimaryKey, Icon: itemTemplate.Icon},
+		}
+	}
 	var createdTree *parse.Tree
 	if !isDetached {
 		boundBlockID, createdTree, err = createAttributeViewItemDocumentWithMarkdown(preview, itemTemplate, document)
@@ -278,7 +284,12 @@ func CreateAttributeViewItemDocs(avID, blockID, saveMode string, itemIDs []strin
 		return cleanupErr
 	}
 	for _, item := range items {
-		item.docID, item.tree, err = createAttributeViewItemDocument(item.preview, itemTemplate)
+		// 条目已设置的图标优先用于新建文档，未设置时沿用文档模板。
+		documentTemplate := *itemTemplate
+		if icon, valid := util.FilterIconValue(item.original.Block.Icon); valid && icon != "" {
+			documentTemplate.Icon = icon
+		}
+		item.docID, item.tree, err = createAttributeViewItemDocument(item.preview, &documentTemplate)
 		if nil != err {
 			return nil, newItemCreationError(err, cleanupCreatedDocs())
 		}

@@ -27,11 +27,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// 换绑快照只保留主键值，条目 ID 和其他字段值始终保持不变。
+// 换绑快照保留主键值和继承到目标块的图标，条目 ID 和其他字段值始终保持不变。
 type attributeViewBindingSnapshot struct {
-	avID, blockID, boxID string
-	before, after        *av.Value
-	duplicateItemID      string
+	avID, blockID, boxID       string
+	before, after              *av.Value
+	duplicateItemID            string
+	iconBlockID, inheritedIcon string
 }
 
 func (tx *Transaction) replaceAttributeViewBinding(op *Operation) error {
@@ -57,7 +58,7 @@ func (tx *Transaction) replaceAttributeViewBinding(op *Operation) error {
 			value.IsDetached != expected.IsDetached || value.Block.ID != expected.Block.ID {
 			return fmt.Errorf("database entry binding [%s] changed", expected.BlockID)
 		}
-		if err = tx.applyAttributeViewBinding(current, value, desired, state); err != nil {
+		if err = tx.applyAttributeViewBinding(current, value, desired, state, op.attributeViewBindingUndo); err != nil {
 			return err
 		}
 		op.RetData = map[string]any{"targetItemID": value.BlockID, "duplicate": false}
@@ -115,7 +116,7 @@ func (tx *Transaction) replaceAttributeViewBinding(op *Operation) error {
 		state.duplicateItemID = existing.BlockID
 	}
 	if state.duplicateItemID == "" {
-		if err = tx.applyAttributeViewBinding(current, value, desired, state); err != nil {
+		if err = tx.applyAttributeViewBinding(current, value, desired, state, false); err != nil {
 			return err
 		}
 	} else if err = tx.rememberAttributeViewMutationTree(blockID); err != nil {
@@ -135,7 +136,7 @@ func (tx *Transaction) replaceAttributeViewBinding(op *Operation) error {
 }
 
 func (tx *Transaction) applyAttributeViewBinding(current *av.AttributeView, value, desired *av.Value,
-	state *attributeViewBindingSnapshot) error {
+	state *attributeViewBindingSnapshot, undo bool) error {
 	if !desired.IsDetached {
 		if existing := current.GetBlockValueByBoundID(desired.Block.ID); existing != nil && existing.BlockID != value.BlockID {
 			return fmt.Errorf("database block [%s] is already bound", desired.Block.ID)
@@ -190,9 +191,25 @@ func (tx *Transaction) applyAttributeViewBinding(current *av.AttributeView, valu
 			avIDs = append(avIDs, current.ID)
 		}
 		avs := strings.Join(avIDs, ",")
-		if err := setNodeAttrsWithTx(tx, nodes[id], trees[id], map[string]string{
+		attrs := map[string]string{
 			av.NodeAttrNameAvs: avs, av.NodeAttrViewNames: getAvNames(avs),
-		}); err != nil {
+		}
+		if !tx.isReplay && bound {
+			if icon := attributeViewInheritedBlockIcon(nodes[id], desired.Block.Icon); icon != "" {
+				state.iconBlockID, state.inheritedIcon = id, icon
+				attrs["icon"] = icon
+			}
+		} else if id == state.iconBlockID {
+			// 仅恢复本次继承的图标，保留绑定后单独修改过的块图标。
+			expected, desiredIcon := "", state.inheritedIcon
+			if undo {
+				expected, desiredIcon = desiredIcon, ""
+			}
+			if nodes[id].IALAttr("icon") == expected {
+				attrs["icon"] = desiredIcon
+			}
+		}
+		if err := setNodeAttrsWithTx(tx, nodes[id], trees[id], attrs); err != nil {
 			return err
 		}
 	}
@@ -211,4 +228,27 @@ func (tx *Transaction) applyAttributeViewBinding(current *av.AttributeView, valu
 	}
 	refreshRelatedSrcAvsInBlock(current.ID, state.blockID, tx)
 	return nil
+}
+
+// 无自定义图标的普通块继承条目图标，文档始终使用自身图标。
+func attributeViewInheritedBlockIcon(node *ast.Node, icon string) string {
+	if node == nil || node.Type == ast.NodeDocument || node.IALAttr("icon") != "" {
+		return ""
+	}
+	icon, _ = util.FilterIconValue(icon)
+	return icon
+}
+
+func inheritAttributeViewBlockIcon(tx *Transaction, node *ast.Node, tree *parse.Tree, icon string) error {
+	icon = attributeViewInheritedBlockIcon(node, icon)
+	if icon == "" {
+		return nil
+	}
+	if tx != nil {
+		if err := tx.rememberAttributeViewMutationTree(node.ID); err != nil {
+			return err
+		}
+		return setNodeAttrsWithTx(tx, node, tree, map[string]string{"icon": icon})
+	}
+	return setNodeAttrs(node, tree, map[string]string{"icon": icon})
 }

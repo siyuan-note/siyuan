@@ -7842,6 +7842,11 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 		}
 
 		if av.KeyTypeBlock == blockVal.Type {
+			if !isDetached {
+				if err = inheritAttributeViewBlockIcon(tx, node, tree, blockVal.Block.Icon); err != nil {
+					return
+				}
+			}
 			blockVal.IsDetached = isDetached
 			if !isDetached {
 				if "" != blockVal.Block.ID && blockVal.Block.ID != newNodeID {
@@ -8163,12 +8168,17 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		if updatedVal.Block == nil {
 			return nil, ErrBlockNotFound
 		}
-		_, tree, loadErr := getNodeByBlockID(tx, updatedVal.Block.ID)
+		node, tree, loadErr := getNodeByBlockID(tx, updatedVal.Block.ID)
 		if loadErr != nil {
 			return nil, loadErr
 		}
 		if err = validateAttributeViewBinding(avID, tree); err != nil {
 			return
+		}
+		if oldIsDetached || oldBoundBlockID != updatedVal.Block.ID {
+			if err = inheritAttributeViewBlockIcon(tx, node, tree, blockVal.Block.Icon); err != nil {
+				return
+			}
 		}
 	}
 	if av.KeyTypeText == updatedVal.Type && nil != updatedVal.Text {

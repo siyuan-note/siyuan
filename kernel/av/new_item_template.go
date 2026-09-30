@@ -74,7 +74,6 @@ func (av *AttributeView) SetNewItemTemplates(config *NewItemTemplatesConfig) err
 			return fmt.Errorf("invalid new item template target type [%s]", itemTemplate.TargetType)
 		}
 		if NewItemTargetDocument != itemTemplate.TargetType {
-			itemTemplate.Icon = ""
 			itemTemplate.HideInFileTree = false
 		}
 		itemTemplate.ContentTemplatePath = strings.TrimSpace(itemTemplate.ContentTemplatePath)

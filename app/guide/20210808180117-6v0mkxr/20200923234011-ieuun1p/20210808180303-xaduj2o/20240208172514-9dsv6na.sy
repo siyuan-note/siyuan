@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260929123717"
+		"updated": "20260930140000"
 	},
 	"Children": [
 		{
@@ -59,12 +59,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260929105001-d3q9qik",
-				"updated": "20260929105001"
+				"updated": "20260930140000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Unbound entries can have their own icons. Click the icon beside the primary-key value or in the entry details to change or remove it. Entries without a custom icon show a neutral default icon, and the view's icon visibility setting still applies."
+					"Data": "Unbound entries can have their own icons. Click the icon beside the primary-key value, in the entry details, or in a relation field to change or remove it. Item templates can preset icons for both unbound and document entries. Unbound entries without a custom icon show a short horizontal line, and the view's icon visibility setting still applies."
 				}
 			]
 		},
@@ -73,12 +73,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260929105001-pdids8d",
-				"updated": "20260929105001"
+				"updated": "20260930140000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Binding or rebinding an entry replaces its icon with the target block's icon. Bound entries continue to share their icons with the bound blocks; for a document block, this is the document icon. Unbinding preserves the last displayed icon, which can then be changed independently."
+					"Data": "When binding or rebinding to a regular block without a custom icon, the block inherits the entry's icon. If the block already has an icon, or is an existing document, its own icon is used. A document created during binding inherits the entry's custom icon; if none is set, the document template's icon is used. Bound entries share icons with their bound blocks. Unbinding preserves the last displayed icon, which can then be changed independently."
 				}
 			]
 		},

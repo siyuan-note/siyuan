@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "Bei Aktivierung erscheint der Tooltip-Text unter dem Bildtitel; auch bei deaktivierter Option werden Titel und Tooltip-Text beim Bewegen des Mauszeigers über das Bild angezeigt",
 	"displayImgNameTip": "Bei Aktivierung erscheinen Dateinamen über lokalen Bildern, ohne Ressourcenpfad und generierte ID, aber mit Dateiendung; zum Bearbeiten auf den Namen klicken und mit Enter umbenennen und alle Verweise aktualisieren",
 	"displayImgAlt": "Bildhinweistext anzeigen",
 	"displayImgName": "Bilddateinamen anzeigen",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Blockzitat-Karten",
 	"flashcardBlockquoteTip": "Wenn aktiviert, wird der erste untergeordnete Block eines Blockzitats als Frage und die übrigen untergeordneten Blöcke als Antworten erkannt",
 	"headingNumber": "Automatische Überschriftennummerierung",
-	"headingNumberTip": "Hierarchische Nummern automatisch vor Überschriften anzeigen",
+	"headingNumberTip": "Bei Aktivierung erscheinen hierarchische Nummern automatisch vor Überschriften",
 	"headingNumberFormat": "Format der Überschriftennummerierung",
 	"backlinkShowBottom": "Backlink-Bereich am Dokumentende anzeigen",
 	"databaseAttrHideEmpty": "Leere Felder im Datenbankbereich standardmäßig ausblenden",
@@ -2285,7 +2286,7 @@
 	"md8": "Nach der Aktivierung wird, wenn das Bild eine Webdatei (kein lokales Asset) ist, ein Eckzeichen angezeigt",
 	"md9": "Virtuelle Referenz-Stichwort-Einschlussliste",
 	"md12": "Ecke-Icon des Inhaltsblocks",
-	"md16": "In der oberen rechten Ecke anzeigen: Lesezeichen, Namen, Aliase, Notizen, den Namen der verbundenen Datenbank und die Referenzanzahl",
+	"md16": "Bei Aktivierung erscheinen Lesezeichen, Namen, Aliase, Notizen, der Name der verbundenen Datenbank und die Referenzanzahl in der oberen rechten Ecke",
 	"md27": "Codeblock-Zeilennummer",
 	"md28": "Nach der Aktivierung zeigt der Codeblock die Zeilennummer an (Bitte beachten Sie, dass die Aktivierung die Leistung des Editors beeinträchtigen kann)",
 	"md29": "Anzahl der Tabulatoren",

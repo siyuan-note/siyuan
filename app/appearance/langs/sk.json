@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "Po zapnutí sa text popisu zobrazí pod názvom obrázka; aj keď je táto možnosť vypnutá, názov a text popisu sa zobrazia pri umiestnení kurzora nad obrázok",
 	"displayImgNameTip": "Po zapnutí sa názvy súborov zobrazia nad lokálnymi obrázkami bez cesty a vygenerovaného ID, so zachovaním prípony; kliknutím na názov ho upravíte a stlačením Enter premenujete zdroj a aktualizujete všetky odkazy",
 	"displayImgAlt": "Zobraziť text popisu obrázkov",
 	"displayImgName": "Zobraziť názvy súborov obrázkov",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Kartičky z bloku citácie",
 	"flashcardBlockquoteTip": "Po zapnutí sa prvý podradený blok bloku citácie rozpozná ako otázka a ostatné podradené bloky ako odpovede",
 	"headingNumber": "Automatické číslovanie nadpisov",
-	"headingNumberTip": "Automaticky zobrazovať hierarchické čísla pred nadpismi",
+	"headingNumberTip": "Po zapnutí sa hierarchické čísla automaticky zobrazia pred nadpismi",
 	"headingNumberFormat": "Formát číslovania nadpisov",
 	"backlinkShowBottom": "Zobraziť panel spätných odkazov v spodnej časti dokumentu",
 	"databaseAttrHideEmpty": "Predvolene skryť prázdne polia v paneli databázy",
@@ -2285,7 +2286,7 @@
 	"md8": "Zobraziť značku, ak obrázok nie je lokálny",
 	"md9": "Zoznam pre virtuálne referencie",
 	"md12": "Rohová ikona bloku obsahu",
-	"md16": "Zobraziť záložky, názvy, aliasy a počty referencií v rohu",
+	"md16": "Po zapnutí sa v pravom hornom rohu zobrazia záložky, názvy, aliasy, poznámky, názov prepojenej databázy a počet odkazov",
 	"md27": "Číslovanie riadkov v kóde",
 	"md28": "Zobraziť čísla riadkov v blokoch kódu (môže znížiť výkon)",
 	"md29": "Veľkosť tabulátora (medzery)",

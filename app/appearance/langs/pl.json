@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "Po włączeniu tekst podpowiedzi jest wyświetlany pod tytułem obrazu; po wyłączeniu tej opcji tytuł i tekst podpowiedzi nadal są widoczne po najechaniu kursorem na obraz",
 	"displayImgNameTip": "Po włączeniu nazwy plików są wyświetlane nad obrazami lokalnymi, bez ścieżki i wygenerowanego identyfikatora, z zachowaniem rozszerzenia; kliknij nazwę, aby ją edytować, i naciśnij Enter, aby zmienić nazwę zasobu i zaktualizować wszystkie odwołania",
 	"displayImgAlt": "Pokazuj tekst podpowiedzi obrazów",
 	"displayImgName": "Pokazuj nazwy plików obrazów",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Fiszki z bloku cytatu",
 	"flashcardBlockquoteTip": "Po włączeniu pierwszy blok podrzędny bloku cytatu jest rozpoznawany jako pytanie, a pozostałe bloki podrzędne jako odpowiedzi",
 	"headingNumber": "Automatyczna numeracja nagłówków",
-	"headingNumberTip": "Automatycznie wyświetlaj numery hierarchiczne przed nagłówkami",
+	"headingNumberTip": "Po włączeniu numery hierarchiczne są automatycznie wyświetlane przed nagłówkami",
 	"headingNumberFormat": "Format numeracji nagłówków",
 	"backlinkShowBottom": "Pokaż panel odniesień zwrotnych na dole dokumentu",
 	"databaseAttrHideEmpty": "Domyślnie ukrywaj puste pola w panelu bazy danych",
@@ -2285,7 +2286,7 @@
 	"md8": "Po włączeniu, jeśli obraz jest plikiem internetowym (nie lokalnym plikiem zasobu), zostanie wyświetlony znacznik rogu",
 	"md9": "Lista słów kluczowych referencji wirtualnych",
 	"md12": "Ikona rogu bloku treści",
-	"md16": "Wyświetlaj w prawym górnym rogu zakładki, nazwy, aliasy, notatki, nazwę powiązanej bazy danych i liczbę odwołań",
+	"md16": "Po włączeniu w prawym górnym rogu są wyświetlane zakładki, nazwy, aliasy, notatki, nazwa powiązanej bazy danych i liczba odwołań",
 	"md27": "Numer linii bloku kodu",
 	"md28": "Po włączeniu, blok kodu wyświetli numer linii (Proszę pamiętać, że włączenie może obniżyć wydajność edytora)",
 	"md29": "Ilość spacji Tab",

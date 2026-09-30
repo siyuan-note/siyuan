@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "When enabled tooltip text appears below the image title; when disabled, hovering over the image still shows its title and tooltip text",
 	"displayImgNameTip": "When enabled file names appear above local images, hiding the asset path and generated ID while keeping the extension; click a name to edit it and press Enter to rename the asset and update all references",
 	"displayImgAlt": "Show image tooltip text",
 	"displayImgName": "Show image file names",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Blockquote Carding",
 	"flashcardBlockquoteTip": "When enabled, the first child block of a blockquote is recognized as a question, and the rest of the child blocks are recognized as answers",
 	"headingNumber": "Automatic heading numbering",
-	"headingNumberTip": "Automatically display hierarchical numbers before headings",
+	"headingNumberTip": "When enabled hierarchical numbers are automatically displayed before headings",
 	"headingNumberFormat": "Heading numbering format",
 	"backlinkShowBottom": "Show the backlinks panel at the bottom of the document",
 	"databaseAttrHideEmpty": "Hide empty fields in the database panel by default",
@@ -2285,7 +2286,7 @@
 	"md8": "When enabled, if the image is a web file (non-local asset file), it will display a corner mark",
 	"md9": "Virtual Reference keyword inclusion list",
 	"md12": "Content block corner icon",
-	"md16": "Display bookmarks, names, aliases, notes, the name of the bound database, and reference count in the top right corner",
+	"md16": "When enabled bookmarks, names, aliases, notes, the name of the bound database, and reference count appear in the top right corner",
 	"md27": "Code block line number",
 	"md28": "When enabled, the code block will display the line number (Please note that enabling may reduce editor performance)",
 	"md29": "Number of Tab Spaces",

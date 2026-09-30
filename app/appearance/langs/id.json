@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "Saat diaktifkan teks petunjuk muncul di bawah judul gambar; saat opsi ini dinonaktifkan, judul dan teks petunjuk tetap muncul ketika kursor diarahkan ke gambar",
 	"displayImgNameTip": "Saat diaktifkan nama berkas muncul di atas gambar lokal tanpa jalur aset dan ID yang dihasilkan, dengan ekstensi tetap disertakan; klik nama untuk mengeditnya, lalu tekan Enter untuk mengganti nama aset dan memperbarui semua referensi",
 	"displayImgAlt": "Tampilkan teks keterangan gambar",
 	"displayImgName": "Tampilkan nama berkas gambar",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Kartu blok kutipan",
 	"flashcardBlockquoteTip": "Jika diaktifkan, blok anak pertama dari blok kutipan dikenali sebagai pertanyaan dan blok anak lainnya dikenali sebagai jawaban",
 	"headingNumber": "Penomoran judul otomatis",
-	"headingNumberTip": "Tampilkan nomor hierarkis secara otomatis sebelum judul",
+	"headingNumberTip": "Saat diaktifkan nomor hierarkis ditampilkan secara otomatis sebelum judul",
 	"headingNumberFormat": "Format penomoran judul",
 	"backlinkShowBottom": "Tampilkan panel pranala balik di bagian bawah dokumen",
 	"databaseAttrHideEmpty": "Sembunyikan bidang kosong di panel basis data secara bawaan",
@@ -2285,7 +2286,7 @@
 	"md8": "Saat diaktifkan, jika gambar adalah file web (bukan file aset lokal), itu akan menampilkan tanda sudut",
 	"md9": "Daftar inklusi kata kunci Referensi Virtual",
 	"md12": "Ikon sudut blok konten",
-	"md16": "Tampilkan bookmark, nama, alias, catatan, nama database terikat, dan jumlah referensi di sudut kanan atas",
+	"md16": "Saat diaktifkan bookmark, nama, alias, catatan, nama database terikat, dan jumlah referensi ditampilkan di sudut kanan atas",
 	"md27": "Nomor baris blok kode",
 	"md28": "Saat diaktifkan, blok kode akan menampilkan nomor baris (Harap perhatikan bahwa mengaktifkan dapat mengurangi kinerja editor)",
 	"md29": "Jumlah Spasi Tab",

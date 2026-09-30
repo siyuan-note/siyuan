@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "Na inschakeling verschijnt tooltiptekst onder de afbeeldingstitel; ook als deze optie uitstaat, worden de titel en tooltiptekst getoond wanneer de muis boven de afbeelding staat",
 	"displayImgNameTip": "Na inschakeling verschijnen bestandsnamen boven lokale afbeeldingen, zonder het pad en de gegenereerde ID, maar met extensie; klik op een naam om deze te bewerken en druk op Enter om de bron te hernoemen en alle verwijzingen bij te werken",
 	"displayImgAlt": "Tooltiptekst van afbeeldingen tonen",
 	"displayImgName": "Bestandsnamen van afbeeldingen tonen",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Flashcards van citaatblokken",
 	"flashcardBlockquoteTip": "Indien ingeschakeld, wordt het eerste onderliggende blok van een citaatblok herkend als vraag en worden de overige onderliggende blokken herkend als antwoorden",
 	"headingNumber": "Automatische kopnummering",
-	"headingNumberTip": "Hiërarchische nummers automatisch voor koppen weergeven",
+	"headingNumberTip": "Na inschakeling verschijnen hiërarchische nummers automatisch voor koppen",
 	"headingNumberFormat": "Indeling voor kopnummering",
 	"backlinkShowBottom": "Paneel met terugverwijzingen onderaan het document weergeven",
 	"databaseAttrHideEmpty": "Lege velden in het databasepaneel standaard verbergen",
@@ -2285,7 +2286,7 @@
 	"md8": "Indien ingeschakeld toont een webafbeelding (geen lokaal assetbestand) een hoekmarkering",
 	"md9": "Opnamelijst trefwoorden voor virtuele verwijzing",
 	"md12": "Hoekpictogram inhoudsblok",
-	"md16": "Toon bladwijzers, namen, aliassen, notities, de naam van de gekoppelde database en het aantal verwijzingen rechtsboven",
+	"md16": "Na inschakeling verschijnen bladwijzers, namen, aliassen, notities, de naam van de gekoppelde database en het aantal verwijzingen rechtsboven",
 	"md27": "Codeblok regelnummer",
 	"md28": "Indien ingeschakeld toont het codeblok het regelnummer (let op: inschakelen kan de editorprestaties verminderen)",
 	"md29": "Tab-spaties",

@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "Quando attivata questa opzione mostra il testo del suggerimento sotto il titolo dell’immagine; anche se disattivata, passando il mouse sull’immagine vengono mostrati il titolo e il testo del suggerimento",
 	"displayImgNameTip": "Quando attivata questa opzione mostra il nome del file sopra le immagini locali, senza percorso e ID generato e mantenendo l’estensione; fai clic sul nome per modificarlo e premi Invio per rinominare la risorsa e aggiornare tutti i riferimenti",
 	"displayImgAlt": "Mostra il testo dei suggerimenti delle immagini",
 	"displayImgName": "Mostra i nomi dei file immagine",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Schede da blocchi citazione",
 	"flashcardBlockquoteTip": "Quando è abilitato, il primo blocco figlio di un blocco citazione viene riconosciuto come domanda e gli altri blocchi figli come risposte",
 	"headingNumber": "Numerazione automatica dei titoli",
-	"headingNumberTip": "Mostra automaticamente numeri gerarchici prima dei titoli",
+	"headingNumberTip": "Quando attivata questa opzione mostra automaticamente numeri gerarchici prima dei titoli",
 	"headingNumberFormat": "Formato di numerazione dei titoli",
 	"backlinkShowBottom": "Mostra il pannello dei backlink in fondo al documento",
 	"databaseAttrHideEmpty": "Nascondi per impostazione predefinita i campi vuoti nel pannello del database",
@@ -2285,7 +2286,7 @@
 	"md8": "Dopo l'abilitazione, se l'immagine è un file web (non un file di asset locale), verrà mostrato un marchio d'angolo",
 	"md9": "Lista di inclusione delle parole chiave di riferimento virtuale",
 	"md12": "Icona dell'angolo del blocco di contenuto",
-	"md16": "Visualizza in alto a destra segnalibri, nomi, alias, note, nome del database associato e conteggio dei riferimenti",
+	"md16": "Quando attivata questa opzione mostra in alto a destra segnalibri, nomi, alias, note, nome del database associato e conteggio dei riferimenti",
 	"md27": "Numerazione delle righe del blocco di codice",
 	"md28": "Dopo l'abilitazione, il blocco di codice mostrerà il numero di riga (Nota: l'abilitazione può ridurre le prestazioni dell'editor)",
 	"md29": "Numero di spazi del Tab",

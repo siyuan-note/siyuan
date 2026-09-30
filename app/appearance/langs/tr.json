@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "Etkinleştirildiğinde görsel başlığının altında ipucu metni gösterilir; bu seçenek kapalıyken de fare görselin üzerine getirildiğinde başlık ve ipucu metni gösterilir",
 	"displayImgNameTip": "Etkinleştirildiğinde yerel görsellerin üzerinde dosya adları, kaynak yolu ve oluşturulan kimlik olmadan, uzantı korunarak gösterilir; düzenlemek için ada tıkla, kaynağı yeniden adlandırmak ve tüm referansları güncellemek için Enter tuşuna bas",
 	"displayImgAlt": "Görsel ipucu metnini göster",
 	"displayImgName": "Görsel dosya adlarını göster",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Alıntı bloğu kartları",
 	"flashcardBlockquoteTip": "Etkinleştirildiğinde, alıntı bloğunun ilk alt bloğu soru, kalan alt blokları ise yanıt olarak tanınır",
 	"headingNumber": "Otomatik başlık numaralandırma",
-	"headingNumberTip": "Başlıkların önünde hiyerarşik numaraları otomatik olarak göster",
+	"headingNumberTip": "Etkinleştirildiğinde başlıkların önünde hiyerarşik numaralar otomatik olarak gösterilir",
 	"headingNumberFormat": "Başlık numaralandırma biçimi",
 	"backlinkShowBottom": "Belgenin altında geri bağlantılar panelini göster",
 	"databaseAttrHideEmpty": "Veritabanı panelindeki boş alanları varsayılan olarak gizle",
@@ -2285,7 +2286,7 @@
 	"md8": "Etkinleştirildiğinde görsel yerel değilse köşe işareti gösterilir",
 	"md9": "Sanal referans anahtar kelime dahil listesi",
 	"md12": "İçerik bloğu köşe simgesi",
-	"md16": "Yer imleri, adlar, takma adlar, notlar, bağlı veritabanı adı ve referans sayısını sağ üstte göster",
+	"md16": "Etkinleştirildiğinde yer imleri, adlar, takma adlar, notlar, bağlı veritabanı adı ve referans sayısı sağ üstte gösterilir",
 	"md27": "Kod bloğu satır numarası",
 	"md28": "Etkinleştirildiğinde kod bloğunda satır numarası gösterilir (etkinleştirme editör performansını azaltabilir)",
 	"md29": "Sekme boşluğu sayısı",

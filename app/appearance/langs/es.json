@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "Al activar esta opción el texto de ayuda aparece debajo del título de la imagen; al desactivarla, pasar el cursor sobre la imagen sigue mostrando su título y el texto de ayuda",
 	"displayImgNameTip": "Al activar esta opción los nombres de archivo aparecen sobre las imágenes locales, sin la ruta ni el ID generado y conservando la extensión; hacer clic en el nombre para editarlo y pulsar Intro para renombrar el recurso y actualizar todas las referencias",
 	"displayImgAlt": "Mostrar el texto de ayuda de las imágenes",
 	"displayImgName": "Mostrar nombres de archivos de imagen",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Tarjetas de bloques de cita",
 	"flashcardBlockquoteTip": "Cuando está habilitado, el primer bloque secundario de un bloque de cita se reconoce como pregunta y los demás bloques secundarios como respuestas",
 	"headingNumber": "Numeración automática de encabezados",
-	"headingNumberTip": "Mostrar automáticamente números jerárquicos antes de los encabezados",
+	"headingNumberTip": "Al activar esta opción aparecen automáticamente números jerárquicos antes de los encabezados",
 	"headingNumberFormat": "Formato de numeración de encabezados",
 	"backlinkShowBottom": "Mostrar el panel de enlaces entrantes al final del documento",
 	"databaseAttrHideEmpty": "Ocultar de forma predeterminada los campos vacíos del panel de base de datos",
@@ -2285,7 +2286,7 @@
 	"md8": "Después de habilitarlo, si la imagen es un archivo de red (archivo de recursos no locales), mostrará una marca de esquina",
 	"md9": "Lista de inclusión de palabras clave de referencia virtual",
 	"md12": "Icono de esquina del bloque de contenido",
-	"md16": "Mostrar en la esquina superior derecha los marcadores, nombres, alias, notas, el nombre de la base de datos vinculada y el recuento de referencias",
+	"md16": "Al activar esta opción aparecen en la esquina superior derecha los marcadores, nombres, alias, notas, el nombre de la base de datos vinculada y el recuento de referencias",
 	"md27": "Número de línea del bloque de código",
 	"md28": "Tras la habilitación, el bloque de código mostrará el número de línea (Tenga en cuenta que habilitarlo puede reducir el rendimiento del editor)",
 	"md29": "Número de espacios de Tab",

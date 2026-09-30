@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "Када је укључена ова опција приказује текст објашњења испод наслова слике; када је искључена, наслов и текст објашњења се и даље приказују при преласку показивача преко слике",
 	"displayImgNameTip": "Када је укључена ова опција приказује називе датотека изнад локалних слика, без путање и генерисаног ID-а, уз задржавање наставка; кликни на назив да га измениш и притисни Enter да преименујеш ресурс и ажурираш све референце",
 	"displayImgAlt": "Прикажи текст објашњења слика",
 	"displayImgName": "Прикажи називе датотека слика",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Kartice iz citata",
 	"flashcardBlockquoteTip": "Kada je omogućeno, prvi podblok citata se prepoznaje kao pitanje, a ostali podblokovi kao odgovori",
 	"headingNumber": "Automatsko numerisanje naslova",
-	"headingNumberTip": "Automatski prikazuje hijerarhijske brojeve ispred naslova",
+	"headingNumberTip": "Kada je uključeno automatski prikazuje hijerarhijske brojeve ispred naslova",
 	"headingNumberFormat": "Format numerisanja naslova",
 	"backlinkShowBottom": "Prikaži panel povratnih veza na dnu dokumenta",
 	"databaseAttrHideEmpty": "Podrazumevano sakrij prazna polja u panelu baze",
@@ -2285,7 +2286,7 @@
 	"md8": "Kada je omogućeno, ako je slika veb fajl (nije lokalni prilog), prikazuje se ugaona oznaka",
 	"md9": "Lista uključenih ključnih reči za virtuelnu referencu",
 	"md12": "Ugaona ikonica bloka",
-	"md16": "Prikazuje obeleživače, imena, aliase, beleške, naziv povezane baze podataka i broj referenci u gornjem desnom uglu",
+	"md16": "Kada je uključeno prikazuje obeleživače, imena, aliase, beleške, naziv povezane baze podataka i broj referenci u gornjem desnom uglu",
 	"md27": "Brojevi redova u bloku koda",
 	"md28": "Kada je omogućeno, blok koda prikazuje broj reda (napomena: ovo može smanjiti performanse uređivača)",
 	"md29": "Broj razmaka za Tab",

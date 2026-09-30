@@ -195,6 +195,7 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     });
     group.switch("editor.displayImgAlt", {
         title: window.siyuan.languages.displayImgAlt,
+        desc: window.siyuan.languages.displayImgAltTip,
     });
     group.switch("editor.displayNetImgMark", {
         title: window.siyuan.languages.md7,

@@ -1,4 +1,5 @@
 {
+	"displayImgAltTip": "Quando ativada esta opção mostra o texto da dica abaixo do título da imagem; mesmo quando desativada, passar o mouse sobre a imagem exibe seu título e o texto da dica",
 	"displayImgNameTip": "Quando ativada esta opção mostra o nome do arquivo acima das imagens locais, sem o caminho nem o ID gerado e mantendo a extensão; clique no nome para editá-lo e pressione Enter para renomear o recurso e atualizar todas as referências",
 	"displayImgAlt": "Mostrar o texto de dica das imagens",
 	"displayImgName": "Mostrar nomes dos arquivos de imagem",
@@ -715,7 +716,7 @@
 	"flashcardBlockquote": "Cartões de bloco de citação",
 	"flashcardBlockquoteTip": "Quando ativado, o primeiro bloco filho de um bloco de citação é reconhecido como pergunta e os demais blocos filhos como respostas",
 	"headingNumber": "Numeração automática de títulos",
-	"headingNumberTip": "Exibir automaticamente números hierárquicos antes dos títulos",
+	"headingNumberTip": "Quando ativada esta opção mostra automaticamente números hierárquicos antes dos títulos",
 	"headingNumberFormat": "Formato de numeração de títulos",
 	"backlinkShowBottom": "Mostrar o painel de backlinks na parte inferior do documento",
 	"databaseAttrHideEmpty": "Ocultar campos vazios no painel do banco de dados por padrão",
@@ -2285,7 +2286,7 @@
 	"md8": "Quando ativado, se a imagem for um arquivo da web (não um arquivo de ativo local), exibirá uma marca de canto",
 	"md9": "Lista de inclusão de palavras-chave de Referência Virtual",
 	"md12": "Ícone de canto do bloco de conteúdo",
-	"md16": "Exibir marcadores, nomes, apelidos, notas, o nome do banco de dados vinculado e contagem de referência no canto superior direito",
+	"md16": "Quando ativada esta opção mostra marcadores, nomes, apelidos, notas, o nome do banco de dados vinculado e a contagem de referências no canto superior direito",
 	"md27": "Número de linha do bloco de código",
 	"md28": "Quando ativado, o bloco de código exibirá o número da linha (Observe que ativar pode reduzir o desempenho do editor)",
 	"md29": "Número de espaços Tab",

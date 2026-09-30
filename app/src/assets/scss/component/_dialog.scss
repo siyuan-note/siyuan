@@ -20,6 +20,7 @@
 
     .toolbar--settings {
       position: relative;
+      border-bottom: 1px solid var(--b3-border-color);
 
       #drag {
         position: absolute;

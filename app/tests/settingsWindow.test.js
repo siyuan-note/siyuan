@@ -210,7 +210,8 @@ const runCases = async (sources) => {
                         if (!button.getClientRects().length) continue;
                         const rect = button.getBoundingClientRect();
                         assert.equal(rect.top, 0, id + " at screen top in " + state);
-                        assert.equal(rect.bottom, toolbar.getBoundingClientRect().bottom);
+                        assert.equal(rect.bottom, toolbar.getBoundingClientRect().bottom -
+                            parseFloat(childWindow.getComputedStyle(toolbar).borderBottomWidth));
                         assert.ok(button.contains(childDocument.elementFromPoint((rect.left + rect.right) / 2, 0)));
                     }
                     childDocument.body.classList.remove(state);

@@ -191,15 +191,11 @@ const registerAppGeneralGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("general", window.siyuan.languages.configGroupGeneral);
 
     /// #if !BROWSER && !MOBILE
-    group.select("settingsWindowMode", {
+    group.switch("settingsWindowMode", {
         title: window.siyuan.languages.settingsWindowMode,
         desc: window.siyuan.languages.settingsWindowModeTip,
-        options: [
-            {value: 0, label: window.siyuan.languages.settingsWindowInApp},
-            {value: 1, label: window.siyuan.languages.settingsWindowStandalone},
-        ],
-        readConfig: getSettingsWindowMode,
-        save: setSettingsWindowMode,
+        readConfig: () => getSettingsWindowMode() === 1,
+        save: (value) => setSettingsWindowMode(value ? 1 : 0),
     });
     /// #endif
     /// #if !BROWSER

@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "Geldt de volgende keer dat instellingen worden geopend; plugins bepalen hoe hun eigen instellingen openen",
 	"settingsPendingSaveError": "Niet-opgeslagen wijzigingen in de editor konden niet worden opgeslagen. Probeer het opnieuw.",
 	"blockTypeParentChange": "Deze conversie zou de structuur of indeling van het buitenste blok wijzigen",
-	"attributePanelVisibility": "Veldzichtbaarheid in het eigenschappenpaneel",
+	"attributePanelVisibility": "Veldzichtbaarheid in het databasepaneel",
 	"alwaysShow": "Altijd tonen",
 	"hideWhenEmpty": "Verbergen indien leeg",
 	"alwaysHide": "Altijd verbergen",

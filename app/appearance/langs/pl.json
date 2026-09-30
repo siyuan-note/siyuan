@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "Obowiązuje przy następnym otwarciu ustawień; wtyczki decydują, jak otwierać własne ustawienia",
 	"settingsPendingSaveError": "Nie udało się zapisać oczekujących zmian w edytorze. Spróbuj ponownie.",
 	"blockTypeParentChange": "Ta konwersja zmieniłaby strukturę lub układ bloku zewnętrznego",
-	"attributePanelVisibility": "Widoczność pola w panelu właściwości",
+	"attributePanelVisibility": "Widoczność pola w panelu bazy danych",
 	"alwaysShow": "Zawsze pokazuj",
 	"hideWhenEmpty": "Ukryj, gdy puste",
 	"alwaysHide": "Zawsze ukrywaj",

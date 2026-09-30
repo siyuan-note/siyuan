@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "Se aplica la próxima vez que se abran los ajustes; cada complemento decide cómo abrir sus propios ajustes",
 	"settingsPendingSaveError": "No se pudieron guardar los cambios pendientes del editor. Inténtalo de nuevo.",
 	"blockTypeParentChange": "Esta conversión cambiaría la estructura o el diseño del bloque exterior",
-	"attributePanelVisibility": "Visibilidad del campo en el panel de propiedades",
+	"attributePanelVisibility": "Visibilidad del campo en el panel de la base de datos",
 	"alwaysShow": "Mostrar siempre",
 	"hideWhenEmpty": "Ocultar cuando esté vacío",
 	"alwaysHide": "Ocultar siempre",

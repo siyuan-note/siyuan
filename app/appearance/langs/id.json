@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "Berlaku saat pengaturan dibuka berikutnya; plugin menentukan cara membuka pengaturannya sendiri",
 	"settingsPendingSaveError": "Perubahan editor yang tertunda tidak dapat disimpan. Silakan coba lagi.",
 	"blockTypeParentChange": "Konversi ini akan mengubah struktur atau tata letak blok luar",
-	"attributePanelVisibility": "Visibilitas kolom di panel properti",
+	"attributePanelVisibility": "Visibilitas kolom di panel basis data",
 	"alwaysShow": "Selalu tampilkan",
 	"hideWhenEmpty": "Sembunyikan saat kosong",
 	"alwaysHide": "Selalu sembunyikan",

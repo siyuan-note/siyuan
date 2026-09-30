@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "下次開啟設定介面時生效，外掛程式設定的開啟方式由外掛程式決定",
 	"settingsPendingSaveError": "無法儲存編輯器中尚未提交的變更，請重試。",
 	"blockTypeParentChange": "此轉換會改變外層區塊的結構或版面配置",
-	"attributePanelVisibility": "屬性面板欄位可見性",
+	"attributePanelVisibility": "資料庫面板欄位可見性",
 	"alwaysShow": "始終顯示",
 	"hideWhenEmpty": "空白時隱藏",
 	"alwaysHide": "始終隱藏",

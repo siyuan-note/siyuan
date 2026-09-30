@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "Applies the next time settings are opened; plugins determine how their own settings open",
 	"settingsPendingSaveError": "Could not save pending editor changes. Please try again.",
 	"blockTypeParentChange": "This conversion would change the outer block structure or layout",
-	"attributePanelVisibility": "Attribute panel field visibility",
+	"attributePanelVisibility": "Database panel field visibility",
 	"alwaysShow": "Always show",
 	"hideWhenEmpty": "Hide when empty",
 	"alwaysHide": "Always hide",

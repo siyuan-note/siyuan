@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "يسري عند فتح الإعدادات في المرة القادمة؛ يحدد كل ملحق طريقة فتح إعداداته",
 	"settingsPendingSaveError": "تعذّر حفظ التغييرات المعلّقة في المحرر. يرجى المحاولة مرة أخرى.",
 	"blockTypeParentChange": "سيؤدي هذا التحويل إلى تغيير بنية الكتلة الخارجية أو تخطيطها",
-	"attributePanelVisibility": "ظهور الحقل في لوحة الخصائص",
+	"attributePanelVisibility": "ظهور الحقل في لوحة قاعدة البيانات",
 	"alwaysShow": "إظهار دائمًا",
 	"hideWhenEmpty": "إخفاء عندما يكون فارغًا",
 	"alwaysHide": "إخفاء دائمًا",

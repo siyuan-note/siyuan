@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "Gilt beim nächsten Öffnen der Einstellungen; Plugins bestimmen selbst, wie ihre Einstellungen geöffnet werden",
 	"settingsPendingSaveError": "Ausstehende Änderungen im Editor konnten nicht gespeichert werden. Bitte erneut versuchen.",
 	"blockTypeParentChange": "Diese Umwandlung würde die Struktur oder das Layout des äußeren Blocks ändern",
-	"attributePanelVisibility": "Feldsichtbarkeit im Eigenschaftsbereich",
+	"attributePanelVisibility": "Feldsichtbarkeit im Datenbankbereich",
 	"alwaysShow": "Immer anzeigen",
 	"hideWhenEmpty": "Ausblenden, wenn leer",
 	"alwaysHide": "Immer ausblenden",

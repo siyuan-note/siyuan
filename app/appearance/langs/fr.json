@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "S’applique à la prochaine ouverture des paramètres ; les extensions décident comment ouvrir leurs propres paramètres",
 	"settingsPendingSaveError": "Impossible d'enregistrer les modifications en attente dans l'éditeur. Veuillez réessayer.",
 	"blockTypeParentChange": "Cette conversion modifierait la structure ou la disposition du bloc extérieur",
-	"attributePanelVisibility": "Visibilité du champ dans le panneau des propriétés",
+	"attributePanelVisibility": "Visibilité du champ dans le panneau de la base de données",
 	"alwaysShow": "Toujours afficher",
 	"hideWhenEmpty": "Masquer si vide",
 	"alwaysHide": "Toujours masquer",

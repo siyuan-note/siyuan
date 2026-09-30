@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "下次打开设置界面时生效，插件设置的打开方式由插件决定",
 	"settingsPendingSaveError": "无法保存编辑器中尚未提交的修改，请重试。",
 	"blockTypeParentChange": "此转换会改变外层块的结构或布局",
-	"attributePanelVisibility": "属性面板字段可见性",
+	"attributePanelVisibility": "数据库面板字段可见性",
 	"alwaysShow": "始终显示",
 	"hideWhenEmpty": "空白时隐藏",
 	"alwaysHide": "始终隐藏",

@@ -8,12 +8,12 @@ import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 import {compileString} from "sass";
 
-const browserCases = (source: string, css: string, columnSource: string, blockSource: string) => {
+const browserCases = (source: string, css: string, columnSource: string, blockSource: string, menuSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const config = {editor: {databaseAttrShow: true, databaseAttrHideEmpty: false, databaseAttrViewMode: 0, databaseAttrUseTabs: false}};
     Object.assign(window, {siyuan: {config, languages: {
         database: "Database", edit: "Edit", displayEmptyFields: "Show", hideEmptyFields: "Hide",
-        default: "Default", attributePanelVisibility: "Attribute panel visibility",
+        default: "Default", attributePanelVisibility: "Database panel field visibility",
         alwaysShow: "Always show", hideWhenEmpty: "Hide when empty", alwaysHide: "Always hide",
     }}});
     const Panel = new Function("cancelHeightAnimation", source + "\nreturn AVAttributePanel;")(() => {});
@@ -64,26 +64,52 @@ const browserCases = (source: string, css: string, columnSource: string, blockSo
     }
     const transactions: unknown[][] = [];
     const escape = (value: string) => value || "";
-    const columns = new Function("getFieldsByData", "escapeAttr", "escapeHtml", "escapeAriaLabel", "bindRollupData", "transaction",
+    let mobile = false;
+    let submenuShown = 0;
+    let mobileChoices: IMenu[] = [];
+    Object.assign(window.siyuan, {menus: {menu: {remove() {}, showSubMenu() { submenuShown++; }}}});
+    const Item = new Function("updateMenuItemGroupClasses", menuSource + "\nreturn MenuItem;")(() => {});
+    class MobileMenu {
+        public addItem(item: IMenu) { mobileChoices.push(item); }
+        public open() {}
+    }
+    const columns = new Function("getFieldsByData", "escapeAttr", "escapeHtml", "escapeAriaLabel", "bindRollupData", "transaction", "MenuItem", "Menu", "isMobile",
         columnSource + "\nreturn {getEditHTML, bindEditEvent};")(
         (data: IAV) => (data.view as IAVTable).columns, escape, escape, escape, () => {},
-        (_protyle: IProtyle, operations: IOperation[], undo: IOperation[]) => transactions.push([operations, undo]));
+        (_protyle: IProtyle, operations: IOperation[], undo: IOperation[]) => transactions.push([operations, undo]),
+        Item, MobileMenu, () => mobile);
     for (const visibility of [undefined, "always", "hide-empty", "hide"]) {
         const field = {id: "key", name: "Notes", type: "text", attributePanelVisibility: visibility};
         const data = {id: "database", viewType: "table", view: {columns: [field]}};
         const menuElement = document.createElement("div");
         const options = {data, colId: field.id, isCustomAttr: true, menuElement};
-        menuElement.innerHTML = columns.getEditHTML(options);
         document.body.append(menuElement);
-        columns.bindEditEvent(options);
-        const select = menuElement.querySelector<HTMLSelectElement>('[data-type="attributePanelVisibility"]');
-        check.deepEqual(Array.from(select.options, option => option.value), ["", "always", "hide-empty", "hide"]);
-        check.equal(select.value, visibility || "");
         let previous = visibility || "";
-        for (const next of ["hide", "always", ""]) {
+        for (const next of [previous, "hide", "hide-empty", "always", ""]) {
+            menuElement.innerHTML = columns.getEditHTML(options);
+            columns.bindEditEvent(options);
+            const parent = menuElement.querySelector<HTMLButtonElement>('[data-type="attributePanelVisibility"]');
+            const buttons = Array.from(parent.querySelectorAll<HTMLButtonElement>(".b3-menu__submenu .b3-menu__item"));
+            check.equal(parent.querySelector("select"), null);
+            check.equal(Array.from(parent.querySelectorAll("use")).some(use => use.getAttribute("xlink:href") === "#iconRight"), true);
+            check.deepEqual(buttons.map(button => button.querySelector(".b3-menu__label").textContent),
+                ["Default", "Always show", "Hide when empty", "Always hide"]);
+            const values = ["", "always", "hide-empty", "hide"];
+            check.equal(buttons.findIndex(button => !!button.querySelector(".b3-menu__checked")), values.indexOf(previous));
+            const shown = submenuShown;
+            parent.dispatchEvent(new MouseEvent("mouseenter"));
+            check.equal(submenuShown, shown + 1);
+            check.equal(parent.classList.contains("b3-menu__item--show"), true);
+            parent.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true}));
+            check.equal(document.activeElement, buttons[0]);
+            buttons[0].dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowLeft", bubbles: true}));
+            check.equal(parent.classList.contains("b3-menu__item--show"), false);
+            check.equal(document.activeElement, parent);
+            parent.dispatchEvent(new MouseEvent("mouseenter"));
+            menuElement.querySelector('[data-type="name"]').dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            check.equal(parent.classList.contains("b3-menu__item--show"), false, "hovering another item closes the submenu");
             const count = transactions.length;
-            select.value = next;
-            select.dispatchEvent(new Event("change", {bubbles: true}));
+            buttons[values.indexOf(next)].click();
             if (next === previous) {
                 check.equal(transactions.length, count);
             } else {
@@ -96,6 +122,20 @@ const browserCases = (source: string, css: string, columnSource: string, blockSo
                 previous = next;
             }
         }
+        mobile = true;
+        mobileChoices = [];
+        menuElement.innerHTML = columns.getEditHTML(options);
+        columns.bindEditEvent(options);
+        const mobileParent = menuElement.querySelector<HTMLButtonElement>('[data-type="attributePanelVisibility"]');
+        const shown = submenuShown;
+        mobileParent.dispatchEvent(new MouseEvent("mouseenter"));
+        check.equal(submenuShown, shown, "mobile opens choices by tap rather than hover");
+        mobileParent.click();
+        check.equal(mobileChoices.length, 4);
+        check.equal(mobileChoices[0].checked, true);
+        mobileChoices[2].click(mobileParent, new MouseEvent("click"));
+        check.equal(field.attributePanelVisibility, "hide-empty");
+        mobile = false;
         menuElement.innerHTML = columns.getEditHTML({...options, isCustomAttr: false});
         check.equal(menuElement.querySelector('[data-type="attributePanelVisibility"]'), null);
         menuElement.remove();
@@ -174,16 +214,20 @@ test("attribute panel field rules preserve global defaults and reveal hidden fie
     const blockSource = transpileModule(readFileSync(path.resolve(__dirname, "blockAttr.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const menuSource = transpileModule(readFileSync("src/menus/Menu.ts", "utf8")
+        .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-panel-visibility-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + ")";
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + "," + JSON.stringify(menuSource) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    win.webContents.on("console-message", event => console.error(event.message));
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify("try {" + code + "} catch (error) {console.error(error.stack); throw error;}")}));
         app.exit(0);
     } catch (error) { console.error(error); app.exit(1); }
 });`, "utf8");

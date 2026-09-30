@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "Si applica alla prossima apertura delle impostazioni; i plugin decidono come aprire le proprie impostazioni",
 	"settingsPendingSaveError": "Impossibile salvare le modifiche in sospeso nell'editor. Riprova.",
 	"blockTypeParentChange": "Questa conversione modificherebbe la struttura o la disposizione del blocco esterno",
-	"attributePanelVisibility": "Visibilità del campo nel pannello delle proprietà",
+	"attributePanelVisibility": "Visibilità del campo nel pannello del database",
 	"alwaysShow": "Mostra sempre",
 	"hideWhenEmpty": "Nascondi se vuoto",
 	"alwaysHide": "Nascondi sempre",

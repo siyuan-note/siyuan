@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "다음에 설정을 열 때 적용되며, 플러그인 설정을 여는 방식은 각 플러그인이 결정합니다",
 	"settingsPendingSaveError": "편집기의 저장 대기 중인 변경 사항을 저장할 수 없습니다. 다시 시도해 주세요.",
 	"blockTypeParentChange": "이 변환은 바깥쪽 블록의 구조나 레이아웃을 변경합니다",
-	"attributePanelVisibility": "속성 패널 필드 표시",
+	"attributePanelVisibility": "데이터베이스 패널 필드 표시",
 	"alwaysShow": "항상 표시",
 	"hideWhenEmpty": "비어 있으면 숨기기",
 	"alwaysHide": "항상 숨기기",

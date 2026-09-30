@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "Ayarlar bir sonraki açılışta uygulanır; eklentiler kendi ayarlarının nasıl açılacağını belirler",
 	"settingsPendingSaveError": "Düzenleyicide bekleyen değişiklikler kaydedilemedi. Lütfen tekrar deneyin.",
 	"blockTypeParentChange": "Bu dönüştürme dış bloğun yapısını veya düzenini değiştirir",
-	"attributePanelVisibility": "Özellik panelindeki alan görünürlüğü",
+	"attributePanelVisibility": "Veritabanı panelindeki alan görünürlüğü",
 	"alwaysShow": "Her zaman göster",
 	"hideWhenEmpty": "Boş olduğunda gizle",
 	"alwaysHide": "Her zaman gizle",

@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "Platí pri ďalšom otvorení nastavení; doplnky určujú spôsob otvorenia svojich vlastných nastavení",
 	"settingsPendingSaveError": "Nepodarilo sa uložiť čakajúce zmeny v editore. Skúste to znova.",
 	"blockTypeParentChange": "Táto konverzia by zmenila štruktúru alebo rozloženie vonkajšieho bloku",
-	"attributePanelVisibility": "Viditeľnosť poľa na paneli vlastností",
+	"attributePanelVisibility": "Viditeľnosť poľa na paneli databázy",
 	"alwaysShow": "Vždy zobraziť",
 	"hideWhenEmpty": "Skryť, ak je prázdne",
 	"alwaysHide": "Vždy skryť",

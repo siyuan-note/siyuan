@@ -16,7 +16,7 @@
 	"settingsWindowModeTip": "अगली बार सेटिंग खोलने पर लागू होगा; प्लगइन अपनी सेटिंग खोलने का तरीका स्वयं तय करते हैं",
 	"settingsPendingSaveError": "संपादक में लंबित बदलाव सहेजे नहीं जा सके। कृपया दोबारा प्रयास करें।",
 	"blockTypeParentChange": "इस रूपांतरण से बाहरी ब्लॉक की संरचना या लेआउट बदल जाएगा",
-	"attributePanelVisibility": "गुण पैनल में फ़ील्ड की दृश्यता",
+	"attributePanelVisibility": "डेटाबेस पैनल में फ़ील्ड की दृश्यता",
 	"alwaysShow": "हमेशा दिखाएँ",
 	"hideWhenEmpty": "खाली होने पर छिपाएँ",
 	"alwaysHide": "हमेशा छिपाएँ",

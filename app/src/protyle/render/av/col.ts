@@ -1,6 +1,7 @@
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
+import {MenuItem} from "../../../menus/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {getDefaultOperatorByType, getEditableFilters, hasFilterForColumn} from "./filter";
@@ -248,18 +249,7 @@ export const getEditHTML = (options: {
 </button>`;
     }
     if (options.isCustomAttr) {
-        const visibility = colData.attributePanelVisibility || "";
-        html += `<label class="b3-menu__item">
-    <span class="b3-menu__label">${window.siyuan.languages.attributePanelVisibility}</span>
-    <select class="b3-select" data-type="attributePanelVisibility">
-        ${[
-            ["", window.siyuan.languages.default],
-            ["always", window.siyuan.languages.alwaysShow],
-            ["hide-empty", window.siyuan.languages.hideWhenEmpty],
-            ["hide", window.siyuan.languages.alwaysHide],
-        ].map(([value, label]) => `<option value="${value}"${visibility === value ? " selected" : ""}>${label}</option>`).join("")}
-    </select>
-</label>`;
+        html += '<button class="b3-menu__item" data-type="attributePanelVisibility"></button>';
     }
     if (colData.type !== "block") {
         html += `<button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
@@ -311,19 +301,69 @@ export const bindEditEvent = (options: {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
-    options.menuElement.querySelector<HTMLSelectElement>('[data-type="attributePanelVisibility"]')?.addEventListener("change", event => {
-        const visibility = (event.target as HTMLSelectElement).value as IAVColumn["attributePanelVisibility"];
-        const previous = colData.attributePanelVisibility || "";
-        if (visibility === previous) {
-            return;
+    const visibilityElement = options.menuElement.querySelector('[data-type="attributePanelVisibility"]');
+    if (visibilityElement) {
+        const choices: Array<[IAVColumn["attributePanelVisibility"], string]> = [
+            ["", window.siyuan.languages.default], ["always", window.siyuan.languages.alwaysShow],
+            ["hide-empty", window.siyuan.languages.hideWhenEmpty], ["hide", window.siyuan.languages.alwaysHide],
+        ];
+        const items: IMenu[] = choices.map(([visibility, label]) => ({
+            label, iconHTML: "", checked: (colData.attributePanelVisibility || "") === visibility,
+            click: () => {
+                const previous = colData.attributePanelVisibility || "";
+                if (visibility !== previous) {
+                    transaction(options.protyle, [{
+                        action: "setAttrViewColAttributePanelVisibility", id: colId, avID, data: visibility,
+                    }], [{
+                        action: "setAttrViewColAttributePanelVisibility", id: colId, avID, data: previous,
+                    }]);
+                    colData.attributePanelVisibility = visibility;
+                }
+                options.menuElement.closest(".av__panel")?.remove();
+            },
+        }));
+        const item = new MenuItem({icon: "iconEye", label: window.siyuan.languages.attributePanelVisibility, submenu: items});
+        visibilityElement.replaceWith(item.element);
+        item.element.dataset.type = "attributePanelVisibility";
+        const submenu = item.element.querySelector<HTMLElement>(".b3-menu__submenu");
+        const showSubmenu = () => {
+            item.element.classList.add("b3-menu__item--show");
+            window.siyuan.menus.menu.showSubMenu(submenu);
+        };
+        if (!isMobile()) {
+            item.element.addEventListener("mouseenter", showSubmenu);
+            item.element.addEventListener("keydown", event => {
+                if (event.key === "ArrowRight") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    showSubmenu();
+                    submenu.querySelector<HTMLButtonElement>(".b3-menu__item").focus();
+                } else if (event.key === "ArrowLeft" || event.key === "Escape") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    item.element.classList.remove("b3-menu__item--show");
+                    item.element.focus();
+                }
+            });
+            options.menuElement.addEventListener("mouseover", event => {
+                if (!item.element.contains(event.target as Node)) {
+                    item.element.classList.remove("b3-menu__item--show");
+                }
+            });
         }
-        transaction(options.protyle, [{
-            action: "setAttrViewColAttributePanelVisibility", id: colId, avID, data: visibility,
-        }], [{
-            action: "setAttrViewColAttributePanelVisibility", id: colId, avID, data: previous,
-        }]);
-        colData.attributePanelVisibility = visibility;
-    });
+        item.element.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (isMobile()) {
+                const menu = new Menu(undefined, undefined, true);
+                items.forEach(choice => menu.addItem(choice));
+                const rect = item.element.getBoundingClientRect();
+                menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+            } else {
+                showSubmenu();
+            }
+        });
+    }
     const nameElement = options.menuElement.querySelector('[data-type="name"]') as HTMLInputElement;
     nameElement.addEventListener("blur", () => {
         const newValue = nameElement.value;

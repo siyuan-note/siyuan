@@ -1,5 +1,5 @@
 {
-	"displayImgAltTip": "启用后在图片标题下方显示提示文本；关闭后，鼠标悬浮图片时仍会显示标题和提示文本",
+	"displayImgAltTip": "启用后在图片标题下方显示提示文本；关闭后鼠标悬浮图片时仍会显示标题和提示文本",
 	"displayImgNameTip": "启用后在本地图片上方显示文件名，隐藏资源路径和随机码并保留扩展名；单击文件名可编辑，回车改名并更新所有引用",
 	"entryResetOrder": "重置排序",
 	"entryResetAllOrders": "重置全部排序",

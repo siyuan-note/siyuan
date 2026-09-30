@@ -5,6 +5,7 @@ import {isMobile} from "../util/functions";
 import {removeSelectedRepoTags, repoSelectionKey, RepoSource, RepoTagSelection} from "./repoBatch";
 import {canPurgeRepo} from "./repoPurge";
 import {repoDateRange, RepoTimeRange} from "./repoRange";
+import {MenuItem} from "../menus/Menu";
 
 interface RepoPanelState {
     selected: Map<string, RepoTagSelection>;
@@ -44,6 +45,7 @@ export const updateRepoSelection = (pane: Element) => {
     root.querySelectorAll<HTMLElement>("[data-repo-source]").forEach(column => {
         const source = column.dataset.repoSource as RepoSource;
         column.querySelector('[data-action="purge"]').classList.toggle("fn__none", !canPurgeRepo(source, window.siyuan.config.sync.provider));
+        column.querySelector('[data-action="source-more"]').classList.toggle("fn__none", !canPurgeRepo(source, window.siyuan.config.sync.provider));
         const comparison: {id: string}[] = JSON.parse(column.querySelector('[data-type="compare"]').getAttribute("data-ids") || "[]");
         column.querySelectorAll<HTMLLIElement>('li[data-type="repoitem"]').forEach(row => {
             row.classList.toggle("b3-list-item--focus", !state.managing && comparison.some(item => item.id === row.dataset.id));
@@ -87,6 +89,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     const state: RepoPanelState = {selected: new Map(), managing: false, busy: false, tagged: false, range: {}};
     states.set(root, state);
     root.classList.add("history__snapshots");
+    root.classList.toggle("history__snapshots--mobile", isMobile());
     root.classList.toggle("history__snapshots--narrow", isMobile());
     root.dataset.source = "local";
     const template = root.innerHTML;
@@ -94,6 +97,8 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     <button type="button" class="b3-button b3-button--text" data-action="normal" aria-pressed="true">${lang.dataSnapshot}</button>
     <button type="button" class="b3-button b3-button--text" data-action="tagged" aria-pressed="false">${lang.repoTaggedSnapshots}</button>
     <span class="fn__flex-1"></span>
+    <button type="button" class="b3-button b3-button--text history__snapshot-mobile-control" data-action="filters" aria-expanded="false">${lang.filter}</button>
+    <div class="history__snapshot-date-controls">
     <div class="history__snapshot-range">
         <input type="date" class="b3-text-field" data-range="start" aria-label="${lang.startDate}" min="1970-01-01" max="9999-12-31">
         <span aria-hidden="true">-</span>
@@ -101,6 +106,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     </div>
     <button type="submit" class="b3-button b3-button--outline">${lang.filter}</button>
     <button type="button" class="b3-button b3-button--text" data-action="range-clear">${lang.clear}</button>
+    </div>
     <button type="button" class="b3-button b3-button--outline fn__none" data-action="manage">${lang.repoBatchManage}</button>
 </form>
 <div class="history__snapshot-columns"></div>
@@ -122,6 +128,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         <button class="b3-button b3-button--text" data-action="cloud" aria-pressed="false">${lang.cloudSnapshot}</button>
     </div><span class="fn__flex-1"></span>
     <button class="b3-button b3-button--text${canPurgeRepo(source, window.siyuan.config.sync.provider) ? "" : " fn__none"}" data-action="purge">${source === "local" ? lang.dataRepoPurge : lang.cloudStoragePurge}</button>
+    <button class="block__icon block__icon--show history__snapshot-mobile-control" data-action="source-more" aria-label="${lang.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
 </div>
 <label class="history__snapshot-toolbar fn__none"><input type="checkbox" class="history__snapshot-check" data-repo-all> ${lang.selectAll}</label>${template}`;
         const createButton = pane.querySelector('[data-type="genRepo"]');
@@ -166,6 +173,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     endDate.addEventListener("change", updateDateLimits);
     const applyRange = () => {
         state.range = repoDateRange(startDate.value, endDate.value);
+        root.querySelector('[data-action="filters"]').setAttribute("aria-pressed", String(!!startDate.value || !!endDate.value));
         state.selected.clear();
         panes().forEach(pane => {
             pane.querySelector<HTMLInputElement>(".b3-text-field").value = "";
@@ -219,7 +227,26 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         }
         event.stopPropagation();
         const action = button.dataset.action;
-        if (action === "range-clear") {
+        if (action === "filters") {
+            const expanded = root.classList.toggle("history__snapshots--filters");
+            button.setAttribute("aria-expanded", String(expanded));
+        } else if (action === "source-more") {
+            const pane = button.closest<HTMLElement>("[data-repo-source]");
+            const purge = pane.querySelector<HTMLButtonElement>('[data-action="purge"]');
+            const menu = window.siyuan.menus.menu;
+            menu.remove();
+            menu.append(new MenuItem({
+                icon: "iconTrashcan",
+                label: purge.textContent,
+                disabled: !canPurgeRepo(pane.dataset.repoSource as RepoSource, window.siyuan.config.sync.provider),
+                click: () => {
+                    menu.remove();
+                    purge.click();
+                },
+            }).element);
+            const rect = button.getBoundingClientRect();
+            menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
+        } else if (action === "range-clear") {
             startDate.value = "";
             endDate.value = "";
             updateDateLimits();

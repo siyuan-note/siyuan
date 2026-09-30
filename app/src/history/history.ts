@@ -22,6 +22,7 @@ import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from
 import {openDocHistory} from "./doc";
 import {getRepoSnapshotRange, getRepoSnapshotType, initRepoPanel, updateRepoSelection} from "./repoPanel";
 import {repoSnapshotInRange} from "./repoRange";
+import {MenuItem} from "../menus/Menu";
 
 let historyEditor: Protyle;
 const repoPanelCleanup = new WeakMap<Element, () => void>();
@@ -265,6 +266,12 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     if (["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) && !window.siyuan.config.readonly) {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="editSnapshotMemo" aria-label="${window.siyuan.languages.editSnapshotMemo}"><svg><use xlink:href="#iconEdit"></use></svg></span>` + actionHTML;
     }
+    if (isMobile()) {
+        actionHTML = actionHTML.replace(/class="b3-list-item__action([^"]*)" data-type="([^"]+)"/g,
+            (match, classes, action) => ["rollback", "downloadRollback"].includes(action) ? match :
+                `class="b3-list-item__action history__snapshot-menu-action${classes}" data-type="${action}"`);
+        actionHTML = actionHTML.replaceAll('<span class="fn__flex-1"></span>', "");
+    }
     const memos = new Map<string, string>();
     snapshotMemos.set(element, memos);
     let repoHTML = "";
@@ -318,7 +325,7 @@ ${statHTML}`;
         repoHTML += `<li class="b3-list-item${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag || ""))}">
 <div class="fn__flex-1">
     ${infoHTML}
-    <div class="fn__flex" style="height: 26px" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag || ""))}">
+    <div class="fn__flex history__repo-actions" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag || ""))}">
         ${actionHTML}
         <span class="b3-list-item__action" data-type="more">
             <svg><use xlink:href="#iconMore"></use></svg>
@@ -833,9 +840,26 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (type === "more") {
-                target.parentElement.parentElement.querySelectorAll(".b3-list-item__meta").forEach(item => {
-                    item.classList.toggle("fn__none");
+                const row = target.closest<HTMLElement>('li[data-type="repoitem"]');
+                const menu = window.siyuan.menus.menu;
+                menu.remove();
+                row.querySelectorAll<HTMLElement>(".history__snapshot-menu-action").forEach(action => {
+                    menu.append(new MenuItem({
+                        icon: action.querySelector("use").getAttribute("xlink:href").substring(1),
+                        label: action.getAttribute("aria-label") || action.textContent.trim(),
+                        click: () => {
+                            menu.remove();
+                            action.click();
+                        },
+                    }).element);
                 });
+                menu.append(new MenuItem({
+                    icon: "iconInfo",
+                    label: window.siyuan.languages.info,
+                    click: () => row.querySelectorAll(".b3-list-item__meta").forEach(item => item.classList.toggle("fn__none")),
+                }).element);
+                const rect = target.getBoundingClientRect();
+                menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
                 event.stopPropagation();
                 event.preventDefault();
                 break;

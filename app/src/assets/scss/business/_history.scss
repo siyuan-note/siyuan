@@ -142,9 +142,36 @@
     &--search:not(&--narrow) [data-repo-source="cloud"] {
       display: none;
     }
+
+    &--mobile {
+      .history__snapshot-mobile-control {
+        display: inline-flex;
+      }
+
+      .history__snapshot-date-controls {
+        flex-basis: 100%;
+      }
+
+      &:not(.history__snapshots--filters) .history__snapshot-date-controls,
+      [data-action="purge"],
+      .history__snapshot-menu-action {
+        display: none;
+      }
+    }
   }
 
   &__snapshot {
+    &-mobile-control {
+      display: none;
+    }
+
+    &-date-controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
     &-loading {
       position: relative;
       height: 100%;
@@ -359,6 +386,10 @@
     height: 100%;
     box-sizing: border-box;
     border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
+
+    &.history__snapshot-pane {
+      border-radius: 0;
+    }
   }
 
   &__repo-actions {

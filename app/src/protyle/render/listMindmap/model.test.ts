@@ -2180,6 +2180,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const single = new api.ListMindmapView({...options, model: api.readListMindmap(singleList)});
     await settle();
     check.equal(single.scale, 1, "initial layout keeps a single node at its normal size");
+    const initialTransform = [single.scale, single.offsetX, single.offsetY];
     const panButton = host.querySelector<HTMLButtonElement>('[aria-label="cursorHand"]');
     const panViewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
     check.equal(getComputedStyle(panViewport).cursor, "default");
@@ -2203,8 +2204,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(panButton.getAttribute("aria-pressed"), "false");
     check.equal(getComputedStyle(panViewport).cursor, "default");
     check.ok(getComputedStyle(panNode).pointerEvents !== "none");
-    single.fit();
-    check.ok(single.scale > 1 && single.scale <= 2.5, "fit enlarges small maps within the zoom limit");
+    single.zoomAt(2.5);
+    check.equal(single.scale, 2.5, "manual zoom can still enlarge a small map");
+    host.querySelector<HTMLButtonElement>('[aria-label="listMindmapFit"]').click();
+    check.deepEqual([single.scale, single.offsetX, single.offsetY], initialTransform,
+        "fit restores the initial position and scale after panning and zooming");
     const fitViewport = host.querySelector<HTMLElement>(".mindmap-view__viewport").getBoundingClientRect();
     const fitNode = host.querySelector<HTMLElement>(".mindmap-view__node").getBoundingClientRect();
     check.ok(Math.abs((fitNode.left + fitNode.right) / 2 - (fitViewport.left + fitViewport.right) / 2) < 1,

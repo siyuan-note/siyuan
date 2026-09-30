@@ -993,7 +993,7 @@ export class ListMindmapView {
                 this.fitPrint();
             } else if (this.initialFit) {
                 this.initialFit = false;
-                this.fit(1);
+                this.fit();
             } else {
                 const bounded = this.boundedPan(this.offsetX, this.offsetY);
                 this.offsetX = bounded.x;
@@ -2498,7 +2498,7 @@ export class ListMindmapView {
         this.draw();
     }
 
-    public fit(maxScale = 2.5) {
+    public fit(maxScale = 1) {
         const width = this.viewport.clientWidth;
         const height = this.viewport.clientHeight;
         if (!this.positions.size || !width || !height) {

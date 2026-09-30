@@ -953,8 +953,8 @@ export const openEmojiPanel = (
                 <div class="color__square fn__pointer${dynamicCurrentObj.color === "#ea5d97" ? " color__square--current" : ""}" style="background-color:#ea5d97"></div>
                 <div class="color__square fn__pointer${dynamicCurrentObj.color === "#93627f" ? " color__square--current" : ""}" style="background-color:#93627f"></div>
                 <div class="color__square fn__pointer${dynamicCurrentObj.color === "#5f6368" ? " color__square--current" : ""}" style="background-color:#5f6368"></div>
-                <div class="fn__space--small"></div>
-                <input type="color" class="b3-text-field fn__flex-1 fn__flex-center" value="${dynamicCurrentObj.color}" aria-label="${window.siyuan.languages.colorFont}">
+                <div class="fn__space--small fn__flex-1"></div>
+                <input type="color" class="b3-text-field" value="${dynamicCurrentObj.color}" aria-label="${window.siyuan.languages.colorFont}">
             </div>
             <div class="fn__flex">
                 <span class="fn__space"></span>

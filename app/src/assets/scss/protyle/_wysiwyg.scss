@@ -915,6 +915,7 @@
     &[data-type="NodeMindmap"],
     &[data-type="NodeList"][custom-sy-list-mindmap="1"] {
       height: calc(1.625em + 12px);
+      max-height: calc(1.625em + 12px);
 
       > .mindmap-view {
         display: none;

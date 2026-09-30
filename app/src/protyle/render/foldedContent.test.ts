@@ -42,6 +42,29 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     };
     const mathRender = new Function(...Object.keys(dependencies), sources.math + "\nreturn mathRender;")(
         ...Object.values(dependencies));
+    const summaries = document.createElement("div");
+    summaries.innerHTML = '<div class="li" data-node-id="item" data-type="NodeListItem" fold="1">' +
+        '<div class="protyle-action"></div><div class="p" data-node-id="summary" data-type="NodeParagraph">' +
+        '<div contenteditable="true"><span data-subtype="math" data-content="x"></span></div></div>' +
+        '<div class="p" data-node-id="hidden" data-type="NodeParagraph">' +
+        '<div contenteditable="true"><span data-subtype="math" data-content="y"></span></div></div></div>';
+    root.appendChild(summaries);
+    const summary = summaries.querySelector<HTMLElement>('[data-node-id="summary"]');
+    const hidden = summaries.querySelector<HTMLElement>('[data-node-id="hidden"]');
+    check.notEqual(getComputedStyle(summary).display, "none");
+    check.equal(getComputedStyle(hidden).display, "none");
+    check.equal(api.isFoldedRenderContent(summary.firstElementChild.firstElementChild), false);
+    check.equal(api.isFoldedRenderContent(hidden.firstElementChild.firstElementChild), true);
+    mathRender(summaries);
+    check.equal(requests.length, 1, "visible folded summaries still initialize KaTeX");
+    outer.querySelector(".callout-title").appendChild(summaries);
+    check.equal(api.isFoldedRenderContent(summary.firstElementChild.firstElementChild), false,
+        "folded callout titles remain renderable");
+    outer.querySelector(".callout-content").appendChild(summaries);
+    check.equal(api.isFoldedRenderContent(summary.firstElementChild.firstElementChild), true,
+        "an outer hidden region still defers the inner visible summary");
+    summaries.remove();
+    requests.length = 0;
     mathRender(root);
     check.equal(requests.length, 0, "folded math must not initialize KaTeX");
     for (const language of ["abc", "echarts", "graphviz", "flowchart", "plantuml", "mermaid"]) {
@@ -128,6 +151,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
                 mindmap.dataset.type = "NodeMindmap";
                 mindmap.dataset.nodeId = "map";
                 mindmap.dataset.mindmapViewRendered = "true";
+                mindmap.style.height = "500px";
                 mindmap.innerHTML = '<div class="mindmap-item" data-node-id="item" data-type="NodeMindmapItem">Root title</div>' +
                     '<div class="mindmap-view" style="--mindmap-view-height:500px"></div>';
                 root.appendChild(mindmap);
@@ -137,6 +161,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
                 check.equal(getComputedStyle(mindmap.querySelector(".mindmap-view")).display, "none");
                 check.equal(getComputedStyle(mindmap.firstElementChild).display, "block");
                 mindmap.removeAttribute("fold");
+                check.equal(mindmap.style.height, "500px", "folding preserves the configured height");
                 check.equal(mindmap.getBoundingClientRect().height, expanded);
                 mindmap.remove();
             }

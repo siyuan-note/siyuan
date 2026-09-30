@@ -604,7 +604,7 @@ func validateValueTextRichTreeWithImages(tree *parse.Tree, images bool) (err err
 		if !entering {
 			return ast.WalkContinue
 		}
-		allowed := isAllowedValueTextRichNode(node)
+		allowed := isAllowedValueTextRichNode(node, images)
 		if images && ast.NodeKramdownBlockIAL == node.Type {
 			allowed = isAllowedValueTextRichBlockIAL(node, true)
 		}
@@ -666,7 +666,7 @@ func newValueTextRichLute() *lute.Lute {
 	return ret
 }
 
-func isAllowedValueTextRichNode(node *ast.Node) bool {
+func isAllowedValueTextRichNode(node *ast.Node, localLinks bool) bool {
 	if nil == node {
 		return false
 	}
@@ -705,7 +705,8 @@ func isAllowedValueTextRichNode(node *ast.Node) bool {
 		ast.NodeFileAnnotationRefText:
 		return true
 	case ast.NodeLinkDest:
-		return isAllowedValueTextRichLinkTarget(node.TokensStr())
+		return isAllowedValueTextRichLinkTarget(node.TokensStr()) ||
+			localLinks && !node.ParentIs(ast.NodeImage) && isAllowedTableCellRichLocalLinkTarget(node.TokensStr())
 	case ast.NodeCodeBlock, ast.NodeCodeBlockFenceInfoMarker:
 		return !isValueTextRichExecutableCodeFence(node.CodeBlockInfo)
 	case ast.NodeKramdownBlockIAL:
@@ -713,7 +714,7 @@ func isAllowedValueTextRichNode(node *ast.Node) bool {
 	case ast.NodeKramdownSpanIAL:
 		return isAllowedValueTextRichSpanIAL(node)
 	case ast.NodeTextMark:
-		return isAllowedValueTextMark(node)
+		return isAllowedValueTextMark(node, localLinks)
 	}
 	return false
 }
@@ -730,8 +731,8 @@ func isValueTextRichExecutableCodeFence(info []byte) bool {
 	return false
 }
 
-func isAllowedValueTextMark(node *ast.Node) bool {
-	if !isAllowedValueTextMarkType(node) || !isAllowedValueTextMarkReferenceData(node) {
+func isAllowedValueTextMark(node *ast.Node, localLinks bool) bool {
+	if !isAllowedValueTextMarkType(node) || !isAllowedValueTextMarkReferenceData(node, localLinks) {
 		return false
 	}
 	if 1 > len(node.KramdownIAL) {
@@ -756,7 +757,7 @@ func isAllowedValueTextMarkType(node *ast.Node) bool {
 	return true
 }
 
-func isAllowedValueTextMarkReferenceData(node *ast.Node) bool {
+func isAllowedValueTextMarkReferenceData(node *ast.Node, localLinks bool) bool {
 	if node.IsTextMarkType("block-ref") {
 		if !ast.IsNodeIDPattern(node.TextMarkBlockRefID) ||
 			("d" != node.TextMarkBlockRefSubtype && "s" != node.TextMarkBlockRefSubtype) ||
@@ -780,7 +781,8 @@ func isAllowedValueTextMarkReferenceData(node *ast.Node) bool {
 	}
 
 	if node.IsTextMarkType("a") {
-		if !isAllowedValueTextRichLinkTarget(node.TextMarkAHref) {
+		if !isAllowedValueTextRichLinkTarget(node.TextMarkAHref) &&
+			!(localLinks && isAllowedTableCellRichLocalLinkTarget(node.TextMarkAHref)) {
 			return false
 		}
 	} else if "" != node.TextMarkAHref || "" != node.TextMarkATitle {

@@ -1628,7 +1628,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     hideTooltip();
     hideElements(["util", "toolbar", "hint"], protyle);
     let html = nodeElement.outerHTML;
-    const linkAddress = linkElement.getAttribute("data-href");
+    const linkAddress = linkElement.getAttribute("data-href") || "";
     let inputElements: NodeListOf<HTMLTextAreaElement>;
     if (!protyle.disabled) {
         window.siyuan.menus.menu.append(new MenuItem({

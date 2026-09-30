@@ -40,7 +40,9 @@ func TestTableCellRichDocumentReaders(t *testing.T) {
 	source := "- **first**\n- second\n\n```go\na | b\nc\n```"
 	for _, source := range []string{source, source + "\n" +
 		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}`,
-		source + "\n" + `{: id="20260921000000-code001" custom-sy-code-tab-spaces="2"}`} {
+		source + "\n" + `{: id="20260921000000-code001" custom-sy-code-tab-spaces="2"}`,
+		`first <span data-type="a" data-href="D:\基线测试\文档.docx" data-title="title">anchor</span>` + "\n\n" +
+			`<span data-type="a" data-href="file:///D:\基线测试\文档.docx">file anchor</span>`} {
 		for name, read := range readers {
 			t.Run(name, func(t *testing.T) {
 				tree, err := read(legacy)
@@ -128,7 +130,8 @@ func TestTableCellRichHTMLAndMarkdownExports(t *testing.T) {
 	luteEngine := util.NewLute()
 	source := "- **first**\n- second\n\n```go\na | b\nc\n```\n" +
 		`{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false" custom-sy-code-tab-spaces="2"}` +
-		"\n\n![image](assets/original.png)"
+		"\n\n![image](assets/original.png)\n\n" +
+		`<span data-type="a" data-href="file:///D:/baseline/document.txt" data-title="Local title">local link</span>`
 	tree := parse.Parse("", []byte("| Header |\n| --- |\n| value |"), luteEngine.ParseOptions)
 	cell := tree.Root.FirstChild.LastChild.FirstChild
 	cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
@@ -141,7 +144,8 @@ func TestTableCellRichHTMLAndMarkdownExports(t *testing.T) {
 			t.Fatalf("standard Markdown contains internal rich source: %s", markdown)
 		}
 	}
-	if !strings.Contains(markdown, "first") || !strings.Contains(markdown, "original.png") {
+	if !strings.Contains(markdown, "first") || !strings.Contains(markdown, "original.png") ||
+		!strings.Contains(markdown, "file:///D:/baseline/document.txt") {
 		t.Fatal("Markdown projection lost content")
 	}
 	if err := treenode.MaterializeTableCellRichExport(tree.Root); nil != err {
@@ -170,6 +174,9 @@ func TestTableCellRichHTMLAndMarkdownExports(t *testing.T) {
 			for _, expected := range expectedHTML {
 				if !strings.Contains(html, expected) {
 					t.Fatalf("export missing %q: %s", expected, html)
+				}
+				if !strings.Contains(html, "file:///D:/baseline/document.txt") || !strings.Contains(html, "Local title") {
+					t.Fatalf("export lost the local link or its title: %s", html)
 				}
 			}
 			if strings.Contains(html, "original.png") || strings.Contains(html, "table-cell-rich") {

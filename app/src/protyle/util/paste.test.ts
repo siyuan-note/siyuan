@@ -162,8 +162,12 @@ describe("strip pasted IAL data attributes", () => {
 });
 
 describe("restricted cell selected text paste", () => {
+    if (typeof Lute === "undefined") {
+        require("../../../stage/protyle/js/lute/lute.min.js");
+    }
+    const lute = Lute.New();
     const runPaste = async (text: string, options: {selected?: string, code?: boolean, inlineCode?: boolean,
-        unsupported?: boolean} = {}) => {
+        unsupported?: boolean, tableCell?: boolean} = {}) => {
         const selected = options.selected ?? "Selected & text";
         const marks: Array<{type: string, value: ITextOption}> = [];
         const inserted: string[] = [];
@@ -189,6 +193,7 @@ describe("restricted cell selected text paste", () => {
                 isUploadInsertPositionAvailable: () => true,
             },
             "./selection": {getEditorRange: () => range},
+            "./tableCellRichContext": {getTableCellRichContext: () => options.tableCell ? {} : undefined},
             "./hasClosest": {hasClosestBlock: () => block},
             "./compatibility": {isInHarmony: () => false},
             "./officeMath": {extractOfficeMathHTML: () => ""},
@@ -198,7 +203,7 @@ describe("restricted cell selected text paste", () => {
             "./inlineElementMarker": {stripSemanticMarkersFromRangeText: () => selected},
             "../../editor/pdfAssetLink": {getPdfAnnotationReference: (): undefined => undefined},
             "../../util/functions": {isDynamicRef: (value: string) => /^\(\(\d{14}-\w{7} '.*'\)\)$/.test(value)},
-            "../toolbar/util": {resolveLinkDest: (value: string) => /^(https?:|file:|assets\/)/.test(value) ? value : ""},
+            "../toolbar/util": {resolveLinkDest: (value: string) => value.startsWith("assets/") ? value : lute.GetLinkDest(value)},
             "../render/av/richTextValue": {getAVRichTextSafeURL},
             "./normalizeText": {removeZWJ: (value: string) => value},
             "./insertHTML": {insertHTML: (value: string) => inserted.push(value)},
@@ -251,11 +256,21 @@ describe("restricted cell selected text paste", () => {
         ["https://example.com", {code: true}],
         ["https://example.com", {inlineCode: true}],
         ["file:///private/document", {}],
+        ["D:\\基线测试\\文档.docx", {tableCell: true}],
     ] as const) {
         it(`retains plain text fallback for ${text} ${JSON.stringify(options)}`, async () => {
             const result = await runPaste(text, options);
             assert.deepEqual(result.marks, []);
             assert.deepEqual(result.inserted, ["plain:" + text]);
+        });
+    }
+
+    for (const url of ["file:///D:\\基线测试\\文档.docx", "file:///tmp/document"]) {
+        it(`attaches ${url} to selected table cell text`, async () => {
+            const result = await runPaste(url, {tableCell: true});
+            assert.equal(result.marks[0].type, "a");
+            assert.equal(result.marks[0].value.color, url);
+            assert.deepEqual(result.inserted, []);
         });
     }
 

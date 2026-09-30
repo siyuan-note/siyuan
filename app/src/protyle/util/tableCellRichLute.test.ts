@@ -13,7 +13,8 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const codeTabAttribute = "custom-sy-code-tab-spaces";
     const api = new Function("Constants", source + "\nreturn {getAgentLute, configureAVRichTextLute, getTableCellEditorLute, " +
         "canEnterCodeBlock, hasCodeBlockFence, getTableCellInlineHTML, serializeTableCellRich, " +
-        "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM, restoreTableVirtualizationDOM};")({
+        "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM, restoreTableVirtualizationDOM, " +
+        "copyTableCellContent, renderTableCellRich};")({
         CUSTOM_SY_CODE_TAB_SPACES: codeTabAttribute,
     }) as
         typeof import("../render/setLute") & typeof import("../render/av/richTextValue") &
@@ -22,6 +23,45 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const base = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const lute = api.getTableCellEditorLute(base);
+    for (const target of [
+        "D:\\基线测试\\测试文档1.docx", "D:/基线测试/测试文档1.docx", "D:\\目录\\",
+        "file:///D:\\基线测试\\测试文档1.docx", "file:///D:/基线测试/测试文档1.docx",
+        "file:///tmp/test%20document.txt", "file://server/share/document.txt", "\\\\server\\share\\document.txt",
+        "https://example.com/document.txt", "assets/document.txt",
+    ]) {
+        const html = '<div data-type="NodeParagraph"><div contenteditable="true">' +
+            `<span data-type="a strong" data-href="${target}" data-title="title">anchor</span></div></div>`;
+        for (const multiBlock of [false, true]) {
+            let blockDOM = html + (multiBlock ? base.Md2BlockDOM("second paragraph") : "");
+            for (let pass = 0; pass < 3; pass++) {
+                const sanitized = api.sanitizeAVRichTextBlockDOM(Lute.Sanitize(blockDOM), true, true);
+                const value = api.serializeTableCellRich(sanitized);
+                const cell = document.createElement("td");
+                api.updateTableCellEditingValue(cell, value);
+                api.renderTableCellRich(cell);
+                const copied = document.createElement("td");
+                api.copyTableCellContent(copied, cell);
+                blockDOM = api.getTableCellRichBlockDOM(copied);
+                const holder = document.createElement("template");
+                holder.innerHTML = blockDOM;
+                const link = holder.content.querySelector('[data-type~="a"]');
+                check.equal(link?.getAttribute("data-href"), target, target);
+                check.equal(link?.textContent, "anchor", target);
+                check.ok(link?.getAttribute("data-type").split(" ").includes("strong"), target);
+                check.equal(link?.getAttribute("data-title"), "title", target);
+            }
+        }
+    }
+    for (const target of ["javascript:alert(1)", "data:text/html,payload", "file:///tmp/file%00.txt"]) {
+        const html = '<div data-type="NodeParagraph"><div contenteditable="true">' +
+            `<span data-type="a" data-href="${target}">anchor</span></div></div>`;
+        const holder = document.createElement("template");
+        holder.innerHTML = api.sanitizeAVRichTextBlockDOM(html, true, true);
+        check.equal(holder.content.querySelector('[data-type~="a"]')?.getAttribute("data-href"), null, target);
+    }
+    const localImage = '<div data-type="NodeParagraph"><div contenteditable="true">' +
+        '<span class="img"><img src="file:///tmp/image.png"></span></div></div>';
+    check.doesNotMatch(api.sanitizeAVRichTextBlockDOM(localImage, true, true), /<img/);
     const customHTML = '<span data-type="custom_symble_strong_CJK_rectangle_yin" ' +
         'style="--custom-symble-strong: rgb(0 166 240 / 1);">test</span>';
     const customBlockDOM = base.Md2BlockDOM(customHTML + "\n\nsecond");

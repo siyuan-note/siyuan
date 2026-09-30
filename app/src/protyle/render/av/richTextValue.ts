@@ -190,7 +190,7 @@ const isCleanAVRichTextAssetPath = (value: string) => {
     return cleanPath === path;
 };
 
-export const getAVRichTextSafeURL = (value?: string | null) => {
+export const getAVRichTextSafeURL = (value?: string | null, localLinks = false) => {
     const original = value || "";
     if (!original) {
         return "";
@@ -199,7 +199,7 @@ export const getAVRichTextSafeURL = (value?: string | null) => {
         return "";
     }
     const url = decodeAVRichTextHTMLEntities(original);
-    if (typeof url !== "string" || hasUnsafeAVRichTextURLCharacter(url)) {
+    if (typeof url !== "string" || Array.from(url).some(isAVRichTextControlOrFormatCharacter)) {
         return "";
     }
     let percentDecoded: string;
@@ -208,7 +208,27 @@ export const getAVRichTextSafeURL = (value?: string | null) => {
     } catch {
         return "";
     }
-    if (!hasValidAVRichTextUnicode(percentDecoded) || hasUnsafeAVRichTextURLCharacter(percentDecoded)) {
+    if (!hasValidAVRichTextUnicode(percentDecoded) ||
+        Array.from(percentDecoded).some(isAVRichTextControlOrFormatCharacter)) {
+        return "";
+    }
+    // 普通表格保留本地超链接，图片来源和数据库片段继续使用默认的地址规则。
+    if (localLinks) {
+        if (/^[a-z]:[\\/]/i.test(url) || /^\\\\[^\\/:?#@]+[\\/][^\\/]+/.test(url)) {
+            return url;
+        }
+        const normalized = url.replace(/\\/g, "/");
+        if (/^file:\/\/(?:[^/]+)?\//i.test(normalized) && !normalized.slice(7).split("/", 1)[0].includes(":")) {
+            try {
+                if (new URL(normalized).protocol === "file:") {
+                    return url;
+                }
+            } catch {
+                return "";
+            }
+        }
+    }
+    if (hasUnsafeAVRichTextURLCharacter(url) || hasUnsafeAVRichTextURLCharacter(percentDecoded)) {
         return "";
     }
     const scheme = url.match(/^([a-z][a-z0-9+.-]*):/i)?.[1].toLowerCase();

@@ -394,6 +394,27 @@ describe("attribute view text source compatibility", () => {
         }
     });
 
+    it("allows local link targets only with the table cell policy", () => {
+        for (const target of [
+            "D:\\基线测试\\测试文档1.docx", "D:/基线测试/测试文档1.docx", "D:\\目录\\",
+            "file:///D:\\基线测试\\测试文档1.docx", "file:///D:/基线测试/测试文档1.docx",
+            "file:///tmp/test%20document.txt", "file://server/share/document.txt",
+            "\\\\server\\share\\document.txt",
+        ]) {
+            assert.equal(getAVRichTextSafeURL(target, true), target);
+            assert.equal(getAVRichTextSafeURL(target), "");
+        }
+        for (const target of [
+            "javascript:alert(1)", "javascript&colon;alert(1)", "java%73cript:alert(1)",
+            "data:text/html,payload", "vbscript:payload", "file:relative.txt", "file://",
+            "file://user@server/share/document.txt", "file://server:123/share/document.txt",
+            "D:relative.txt", "D:\\file%0a.txt", "file:///tmp/file%00.txt",
+            "D:\\file\u200B.txt", "https:\\\\example.com\\document.txt", "\\\\server",
+        ]) {
+            assert.equal(getAVRichTextSafeURL(target, true), "", target);
+        }
+    });
+
     it("keeps only supported inline color declarations", () => {
         for (const id of ["error", "warning", "info", "success"]) {
             const style = `color: var(--b3-card-${id}-color); background-color: var(--b3-card-${id}-background);`;

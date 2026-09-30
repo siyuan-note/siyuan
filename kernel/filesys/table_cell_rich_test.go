@@ -49,9 +49,27 @@ func TestTableCellRichEncryptedLegacyReadAndAuthentication(t *testing.T) {
 		t.Fatal("reading a supported encrypted document must not enable rich text")
 	}
 	cell := tree.Root.FirstChild.LastChild.FirstChild
-	cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: "- first\n- second"}
+	source := "- first\n- second\n\n" +
+		`<span data-type="a" data-href="D:\基线测试\文档.docx" data-title="title">local link</span>`
+	cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
 	treenode.UpgradeSpec(tree)
 	luteEngine := util.NewLute()
+	data := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()
+	richCiphertext, err := encryptDataWithDEK(boxID, documentPath, data, dek)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(absPath, richCiphertext, 0600); err != nil {
+		t.Fatal(err)
+	}
+	cache.ClearTreeCache()
+	restored, err := LoadTree(boxID, documentPath, luteEngine)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if restored.Root.FirstChild.LastChild.FirstChild.TableCellRich.Content != source {
+		t.Fatal("authenticated table reads must preserve local links")
+	}
 	for _, invalid := range []ast.TableCellRich{
 		{Spec: 99, Format: "kramdown", Content: "preserve"},
 		{Spec: 1, Format: "kramdown", Content: "preserve\x00source"},

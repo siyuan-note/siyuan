@@ -1,4 +1,5 @@
 {
+	"displayImgNameTip": "Po włączeniu nazwy plików są wyświetlane nad obrazami lokalnymi, bez ścieżki i wygenerowanego identyfikatora, z zachowaniem rozszerzenia; kliknij nazwę, aby ją edytować, i naciśnij Enter, aby zmienić nazwę zasobu i zaktualizować wszystkie odwołania",
 	"displayImgAlt": "Pokazuj tekst podpowiedzi obrazów",
 	"displayImgName": "Pokazuj nazwy plików obrazów",
 	"s3EndpointBucketWarning": "Endpoint może już zawierać nazwę zasobnika, co może zakłócać wyświetlanie i czyszczenie migawek w chmurze. Sprawdź konfigurację; jeśli istnieją już zsynchronizowane dane, wykonaj ich kopię zapasową i sprawdź ścieżkę przechowywania przed zmianą konfiguracji",

@@ -1,4 +1,5 @@
 {
+	"displayImgNameTip": "Al activar esta opción los nombres de archivo aparecen sobre las imágenes locales, sin la ruta ni el ID generado y conservando la extensión; hacer clic en el nombre para editarlo y pulsar Intro para renombrar el recurso y actualizar todas las referencias",
 	"displayImgAlt": "Mostrar el texto de ayuda de las imágenes",
 	"displayImgName": "Mostrar nombres de archivos de imagen",
 	"s3EndpointBucketWarning": "Endpoint puede contener ya el nombre del bucket, lo que puede afectar al listado y la limpieza de instantáneas en la nube. Revise la configuración; si ya hay datos sincronizados, haga una copia de seguridad y compruebe su ruta de almacenamiento antes de cambiarla",

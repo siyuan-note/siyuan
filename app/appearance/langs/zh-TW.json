@@ -1,4 +1,5 @@
 {
+	"displayImgNameTip": "啟用後在本機圖片上方顯示檔名，隱藏資源路徑和隨機碼並保留副檔名；按一下檔名可編輯，按 Enter 重新命名並更新所有引用",
 	"displayImgAlt": "顯示圖片提示文字",
 	"displayImgName": "顯示圖片檔名",
 	"s3EndpointBucketWarning": "Endpoint 可能重複包含儲存桶名稱，導致雲端快照列舉與清理異常。請核對設定；若已有同步資料，請先備份並確認儲存路徑，再修改設定",

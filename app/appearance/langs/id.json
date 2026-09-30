@@ -1,4 +1,5 @@
 {
+	"displayImgNameTip": "Saat diaktifkan nama berkas muncul di atas gambar lokal tanpa jalur aset dan ID yang dihasilkan, dengan ekstensi tetap disertakan; klik nama untuk mengeditnya, lalu tekan Enter untuk mengganti nama aset dan memperbarui semua referensi",
 	"displayImgAlt": "Tampilkan teks keterangan gambar",
 	"displayImgName": "Tampilkan nama berkas gambar",
 	"s3EndpointBucketWarning": "Endpoint mungkin sudah memuat nama bucket, sehingga daftar dan pembersihan snapshot cloud dapat terganggu. Periksa konfigurasi; jika sudah ada data tersinkron, cadangkan dan pastikan jalur penyimpanannya sebelum mengubah konfigurasi",

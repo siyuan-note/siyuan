@@ -1,4 +1,5 @@
 {
+	"displayImgNameTip": "Po zapnutí sa názvy súborov zobrazia nad lokálnymi obrázkami bez cesty a vygenerovaného ID, so zachovaním prípony; kliknutím na názov ho upravíte a stlačením Enter premenujete zdroj a aktualizujete všetky odkazy",
 	"displayImgAlt": "Zobraziť text popisu obrázkov",
 	"displayImgName": "Zobraziť názvy súborov obrázkov",
 	"s3EndpointBucketWarning": "Endpoint už môže obsahovať názov bucketu, čo môže narušiť zobrazovanie a čistenie cloudových snímok. Skontrolujte nastavenia; ak už existujú synchronizované údaje, pred zmenou nastavení ich zálohujte a overte cestu uloženia",

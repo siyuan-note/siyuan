@@ -1,4 +1,5 @@
 {
+	"displayImgNameTip": "启用后在本地图片上方显示文件名，隐藏资源路径和随机码并保留扩展名；单击文件名可编辑，回车改名并更新所有引用",
 	"displayImgAlt": "显示图片提示文本",
 	"displayImgName": "显示图片文件名",
 	"s3EndpointBucketWarning": "Endpoint 可能重复包含桶名，导致云端快照列举和清理异常。请核对配置；已有同步数据时，请先备份并确认存储路径，再修改配置",

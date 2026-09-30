@@ -191,6 +191,7 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("blockFeatures", window.siyuan.languages.configGroupBlockFeatures);
     group.switch("editor.displayImgName", {
         title: window.siyuan.languages.displayImgName,
+        desc: window.siyuan.languages.displayImgNameTip,
     });
     group.switch("editor.displayImgAlt", {
         title: window.siyuan.languages.displayImgAlt,

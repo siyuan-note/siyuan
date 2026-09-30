@@ -1,4 +1,5 @@
 {
+	"displayImgNameTip": "Na inschakeling verschijnen bestandsnamen boven lokale afbeeldingen, zonder het pad en de gegenereerde ID, maar met extensie; klik op een naam om deze te bewerken en druk op Enter om de bron te hernoemen en alle verwijzingen bij te werken",
 	"displayImgAlt": "Tooltiptekst van afbeeldingen tonen",
 	"displayImgName": "Bestandsnamen van afbeeldingen tonen",
 	"s3EndpointBucketWarning": "Endpoint bevat mogelijk al de bucketnaam, wat het weergeven en opruimen van cloudsnapshots kan verstoren. Controleer de configuratie; maak een back-up van bestaande gesynchroniseerde gegevens en controleer hun opslagpad voordat u de configuratie wijzigt",

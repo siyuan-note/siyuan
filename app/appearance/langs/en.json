@@ -1,4 +1,5 @@
 {
+	"displayImgNameTip": "When enabled file names appear above local images, hiding the asset path and generated ID while keeping the extension; click a name to edit it and press Enter to rename the asset and update all references",
 	"displayImgAlt": "Show image tooltip text",
 	"displayImgName": "Show image file names",
 	"s3EndpointBucketWarning": "Endpoint may already contain the bucket name, which can disrupt cloud snapshot listing and cleanup. Check the configuration; if synced data already exists, back it up and verify its storage path before changing the configuration",

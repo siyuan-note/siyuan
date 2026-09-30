@@ -1,4 +1,5 @@
 {
+	"displayImgName": "Pokazuj nazwy plików obrazów",
 	"s3EndpointBucketWarning": "Endpoint może już zawierać nazwę zasobnika, co może zakłócać wyświetlanie i czyszczenie migawek w chmurze. Sprawdź konfigurację; jeśli istnieją już zsynchronizowane dane, wykonaj ich kopię zapasową i sprawdź ścieżkę przechowywania przed zmianą konfiguracji",
 	"embedHTMLFileBelow": "Osadź plik HTML poniżej",
 	"horizontalSuperBlock": "Poziomy super blok",

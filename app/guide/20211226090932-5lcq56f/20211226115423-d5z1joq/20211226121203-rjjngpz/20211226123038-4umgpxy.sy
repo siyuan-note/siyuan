@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20260930090802"
+		"updated": "20260930092043"
 	},
 	"Children": [
 		{
@@ -350,6 +350,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "插入已有資源時，關鍵字也會比對圖片標題、提示文字及已有的 OCR 文字。同一圖片在不同文件中的標題或提示文字可以不同，任一引用符合即可找到該資源。此全域搜尋不包含加密筆記本的資源。"
+				}
+			]
+		},
+		{
+			"ID": "20260930092043-i4ib04g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930092043-i4ib04g",
+				"updated": "20260930092043"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示圖片檔名"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後，本機圖片上方會顯示檔名，隱藏資源路徑和隨機碼，保留副檔名。按一下檔名可編輯，按 Enter 重新命名並更新所有引用；按 Escape 或離開輸入框取消。唯讀檢視和加密筆記本不支援行內重新命名。"
 				}
 			]
 		},

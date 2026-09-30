@@ -1,4 +1,5 @@
 {
+	"displayImgName": "Afficher les noms des fichiers image",
 	"s3EndpointBucketWarning": "Endpoint contient peut-être déjà le nom du bucket, ce qui peut perturber la liste et le nettoyage des instantanés cloud. Vérifiez la configuration ; si des données sont déjà synchronisées, sauvegardez-les et vérifiez leur chemin de stockage avant de modifier la configuration",
 	"embedHTMLFileBelow": "Intégrer le fichier HTML en dessous",
 	"horizontalSuperBlock": "Superblock horizontal",

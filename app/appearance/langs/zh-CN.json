@@ -1,4 +1,5 @@
 {
+	"displayImgName": "显示图片文件名",
 	"s3EndpointBucketWarning": "Endpoint 可能重复包含桶名，导致云端快照列举和清理异常。请核对配置；已有同步数据时，请先备份并确认存储路径，再修改配置",
 	"embedHTMLFileBelow": "在下方嵌入 HTML 文件",
 	"horizontalSuperBlock": "横向超级块",

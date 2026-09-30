@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20260930090802"
+		"updated": "20260930092043"
 	},
 	"Children": [
 		{
@@ -354,6 +354,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "插入已有资源时，关键词也会匹配图片标题、提示文本和已有 OCR 文本。同一图片在不同文档中的标题或提示文本可以不同，任一引用匹配即可找到该资源。此全局搜索不包含加密笔记本的资源。"
+				}
+			]
+		},
+		{
+			"ID": "20260930092043-qa1mz4p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930092043-qa1mz4p",
+				"updated": "20260930092043"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "开启 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "显示图片文件名"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后，本地图片上方会显示文件名，隐藏资源路径和随机码，保留扩展名。单击文件名可编辑，按回车改名并更新所有引用；按 Escape 或离开输入框取消。只读视图和加密笔记本不支持内联改名。"
 				}
 			]
 		},

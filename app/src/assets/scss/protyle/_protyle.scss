@@ -1429,3 +1429,22 @@ table + .protyle-action__table {
     }
   }
 }
+
+.img__name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow-wrap: anywhere;
+  white-space: break-spaces;
+
+  > span:not(.img__extension) {
+    flex: 1;
+    width: 0;
+  }
+
+  input {
+    min-width: 0;
+    width: 100%;
+  }
+}

@@ -93,6 +93,42 @@ func TestAPIContractSettingMindmapCompatibility(t *testing.T) {
 	})
 }
 
+func TestAPIContractSettingImageDisplayCompatibility(t *testing.T) {
+	compareSettingConfig(t, apicontract.SetEditor, conf.NewEditor, []string{
+		`{}`, `{"displayImgName":true}`, `{"displayImgName":false}`,
+		`{"displayImgName":null}`, `{"DisplayImgName":true}`, `{"displayImgName":"bad"}`,
+	})
+}
+
+func TestAPIContractSettingImageDisplayUpdates(t *testing.T) {
+	previousConf, previousReadOnly, previousMarkdown := model.Conf, util.ReadOnly, util.MarkdownSettings
+	model.Conf = model.NewAppConf()
+	model.Conf.Editor = conf.NewEditor()
+	util.ReadOnly = true
+	t.Cleanup(func() {
+		model.Conf, util.ReadOnly, util.MarkdownSettings = previousConf, previousReadOnly, previousMarkdown
+	})
+	for _, entry := range []struct {
+		body string
+		want bool
+	}{
+		{`{"displayImgName":true}`, true},
+		{`{}`, true},
+		{`{"displayImgName":false}`, false},
+		{`{"DisplayImgName":true}`, true},
+		{`{"displayImgName":null}`, false},
+	} {
+		code, message, data := settingContractRequest(t, "setEditor", setEditor, entry.body)
+		var response apicontract.SettingEditor
+		if err := json.Unmarshal(data, &response); err != nil {
+			t.Fatal(err)
+		}
+		if code != 0 || model.Conf.Editor.DisplayImgName != entry.want || response.DisplayImgName != entry.want {
+			t.Fatalf("image display update %s: code=%d message=%s data=%s", entry.body, code, message, data)
+		}
+	}
+}
+
 func TestAPIContractSettingParserCompatibility(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	for _, body := range []string{"", `{`, `[]`, `false`, `{"unknown":1e1000}`, `{"app":1e1000,"app":1}`, `{"fontSize":16}{"extra":true}`} {

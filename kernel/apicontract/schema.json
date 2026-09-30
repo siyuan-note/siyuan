@@ -38546,6 +38546,16 @@
             }
           ]
         },
+        "displayImgName": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "displayNetImgMark": {
           "anyOf": [
             {
@@ -42020,6 +42030,9 @@
         "displayBookmarkIcon": {
           "type": "boolean"
         },
+        "displayImgName": {
+          "type": "boolean"
+        },
         "displayNetImgMark": {
           "type": "boolean"
         },
@@ -42216,6 +42229,7 @@
         "databaseAttrUseTabs",
         "databaseAttrViewMode",
         "displayBookmarkIcon",
+        "displayImgName",
         "displayNetImgMark",
         "dragHTMLFileToIframe",
         "dynamicLoadBlocks",

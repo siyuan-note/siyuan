@@ -20,6 +20,16 @@ func (r settingConfig) ConfigJSON() []byte        { return append([]byte(nil), r
 func (r settingConfig) ConfigError() error        { return r.configError }
 func (r settingConfig) HasField(name string) bool { _, ok := r.fields[name]; return ok }
 
+// HasFieldFold 按配置结构的大小写兼容规则检查字段是否提交。
+func (r settingConfig) HasFieldFold(name string) bool {
+	for field := range r.fields {
+		if strings.EqualFold(field, name) {
+			return true
+		}
+	}
+	return false
+}
+
 func decodeSettingConfig(reader io.Reader, path string, removeApp bool) (r settingConfig, err error) {
 	var raw json.RawMessage
 	err = json.NewDecoder(reader).Decode(&raw)

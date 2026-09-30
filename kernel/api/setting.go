@@ -375,6 +375,9 @@ var setEditor = contractHandler(apicontract.SetEditor, func(c *gin.Context, requ
 	if !request.HasField("codeFontFamilies") {
 		editor.CodeFontFamilies = model.Conf.Editor.CodeFontFamilies
 	}
+	if !request.HasFieldFold("displayImgName") {
+		editor.DisplayImgName = model.Conf.Editor.DisplayImgName
+	}
 	editor.NormalizeFontFamilies()
 
 	if "" == editor.PlantUMLServePath {

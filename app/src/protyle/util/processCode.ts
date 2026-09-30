@@ -15,6 +15,7 @@ import {renderEmbedHeadings} from "../render/embedHeading";
 import {normalizeInlineElementBoundaries} from "./inlineElementBoundary";
 import {renderLongTextRuns} from "./longTextWrap";
 import {renderImageActions} from "../render/imageActions";
+import {renderImageDisplay} from "../render/imageDisplay";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
@@ -65,6 +66,7 @@ const RENDER_MAP: Record<string, (previewPanel: Element) => void> = {
 
 export const processRender = (previewPanel: Element) => {
     renderImageActions(previewPanel);
+    renderImageDisplay(previewPanel);
     normalizeInlineElementBoundaries(previewPanel);
     renderLongTextRuns(previewPanel);
     renderEmbedHeadings(previewPanel);

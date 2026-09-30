@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20260930090802"
+		"updated": "20260930092043"
 	},
 	"Children": [
 		{
@@ -361,6 +361,43 @@
 				{
 					"Type": "NodeText",
 					"Data": "既存のアセットを挿入するときは、画像のタイトル、ツールチップのテキスト、既存の OCR テキストでも検索できます。同じ画像にドキュメントごとに異なるタイトルや説明が付いている場合、いずれかの参照が一致すればアセットを検索できます。このグローバル検索には暗号化ノートブックのアセットは含まれません。"
+				}
+			]
+		},
+		{
+			"ID": "20260930092043-zd8vt2u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930092043-zd8vt2u",
+				"updated": "20260930092043"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディター"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像のファイル名を表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にすると、ローカル画像の上にパスと生成 ID を除いたファイル名が拡張子付きで表示されます。名前をクリックして編集し、Enter で名前を変更するとすべての参照が更新されます。Escape または入力欄から離れるとキャンセルされます。読み取り専用表示と暗号化ノートブックではインラインで名前を変更できません。"
 				}
 			]
 		},

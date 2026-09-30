@@ -1,4 +1,5 @@
 {
+	"displayImgName": "Show image file names",
 	"s3EndpointBucketWarning": "Endpoint may already contain the bucket name, which can disrupt cloud snapshot listing and cleanup. Check the configuration; if synced data already exists, back it up and verify its storage path before changing the configuration",
 	"embedHTMLFileBelow": "Embed HTML file below",
 	"horizontalSuperBlock": "Horizontal super block",

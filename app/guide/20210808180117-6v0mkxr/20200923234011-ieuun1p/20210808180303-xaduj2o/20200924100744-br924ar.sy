@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20260930090802"
+		"updated": "20260930092043"
 	},
 	"Children": [
 		{
@@ -354,6 +354,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "When inserting an existing asset, keywords also match image titles, tooltip text, and existing OCR text. The same image may have different titles or tooltip text in different documents; any matching reference can locate the asset. Encrypted notebook assets are excluded from this global search."
+				}
+			]
+		},
+		{
+			"ID": "20260930092043-7z9onxu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930092043-7z9onxu",
+				"updated": "20260930092043"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Show image file names"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to show file names above local images, without the asset path or generated ID and with the extension preserved. Click a name to edit it, then press Enter to rename the asset and update all references; Escape or leaving the field cancels. Read-only views and encrypted notebooks do not allow inline renaming."
 				}
 			]
 		},

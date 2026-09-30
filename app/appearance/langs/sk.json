@@ -1,4 +1,8 @@
 {
+	"settingsWindowMode": "Otvárať nastavenia v",
+	"settingsWindowModeTip": "Platí pri ďalšom otvorení nastavení; doplnky určujú spôsob otvorenia svojich vlastných nastavení",
+	"settingsWindowInApp": "Hlavnom okne",
+	"settingsWindowStandalone": "Novom okne",
 	"settingsPendingSaveError": "Nepodarilo sa uložiť čakajúce zmeny v editore. Skúste to znova.",
 	"blockTypeParentChange": "Táto konverzia by zmenila štruktúru alebo rozloženie vonkajšieho bloku",
 	"attributePanelVisibility": "Viditeľnosť poľa na paneli vlastností",

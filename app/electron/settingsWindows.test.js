@@ -151,3 +151,29 @@ test("macOS settings windows retain native traffic lights with the main window t
     assert.equal(allowed.overrideBrowserWindowOptions.titleBarStyle, "hidden");
     assert.deepEqual(allowed.overrideBrowserWindowOptions.trafficLightPosition, {x: 8, y: 8});
 });
+
+for (const platform of ["win32", "linux", "darwin"]) {
+    test(`settings DevTools shortcut works without a menu on ${platform}`, () => {
+        const {policy, owner, open} = setup(platform);
+        const prepared = open();
+        policy(owner, prepared);
+        let toggled = 0;
+        let prevented = 0;
+        const contents = Object.assign(new EventEmitter(), {toggleDevTools() { toggled++; }});
+        const win = Object.assign(new EventEmitter(), {webContents: contents, isDestroyed: () => false, setMenu() {}});
+        owner.emit("did-create-window", win, {url: prepared.url});
+        const input = {type: "keyDown", key: "I", isAutoRepeat: false, control: platform !== "darwin",
+            shift: platform !== "darwin", meta: platform === "darwin", alt: platform === "darwin"};
+        const press = data => contents.emit("before-input-event", {preventDefault() { prevented++; }}, {...input, ...data});
+        press({key: "j"});
+        press({type: "keyUp"});
+        press({isAutoRepeat: true});
+        press(platform === "darwin" ? {control: true} : {alt: true});
+        assert.equal(toggled, 0);
+        assert.equal(prevented, 0);
+        press({});
+        press({key: "i"});
+        assert.equal(toggled, 2);
+        assert.equal(prevented, 2);
+    });
+}

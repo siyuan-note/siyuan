@@ -93,6 +93,7 @@ const runCases = async (sources) => {
         "../../plugin/globalState": {subscribeGlobalPluginState: () => () => {}, applyPluginReload: async () => {}},
         "../../plugin/loader": {loadPlugin: async () => {}, unloadPlugin: async () => {}},
         "../../boot/globalEvent/globalShortcut": {sendGlobalShortcut() {}, sendUnregisterGlobalShortcut() {}},
+        "../../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd"}},
     });
     const {Setting} = loadRendererModule(sources.setting, {
         "../util/functions": {isMobile: () => false, getFrontend: () => "desktop"}, "../dialog": {Dialog},
@@ -146,6 +147,12 @@ const runCases = async (sources) => {
             const toolbar = setting.dialog.element.querySelector(".toolbar");
             assert.equal(childDocument.defaultView.getComputedStyle(toolbar).height, "32px");
             assert.equal(childDocument.defaultView.getComputedStyle(toolbar.querySelector("#drag")).getPropertyValue("-webkit-app-region"), "drag");
+            const title = toolbar.querySelector("#drag").getBoundingClientRect();
+            assert.ok(Math.abs((title.left + title.right) / 2 - childDocument.defaultView.innerWidth / 2) < 1);
+            const range = childDocument.createRange();
+            range.selectNodeContents(toolbar.querySelector("#drag"));
+            const caption = range.getBoundingClientRect();
+            assert.ok(Math.abs((caption.left + caption.right) / 2 - childDocument.defaultView.innerWidth / 2) < 1);
             if (process.platform !== "darwin") {
                 const close = toolbar.querySelector("#closeWindow").getBoundingClientRect();
                 assert.ok(close.right <= childDocument.defaultView.innerWidth);
@@ -172,6 +179,27 @@ const runCases = async (sources) => {
     assert.equal(destroyed, 2);
     await native.openNativeSettings(window.siyuan.ws.app, {tab: "appearance"});
     await ipcRenderer.invoke("test-settings-wait");
+    const builtinHost = await ipcRenderer.invoke("test-settings-token");
+    const host = await new Promise(resolve => {
+        window.dispatchEvent(new CustomEvent("siyuan-settings-host-" + builtinHost, {detail: resolve}));
+    });
+    const legacySetting = new Setting({});
+    window.siyuan.ws.app.plugins.push({name: "legacy", openSetting: () => legacySetting.open("Legacy plugin")});
+    await host.openPluginSetting("legacy");
+    assert.equal(legacySetting.dialog.element.ownerDocument, document);
+    await wait();
+    assert.equal((await ipcRenderer.invoke("test-settings-commands")).at(-1), "show-owner");
+    legacySetting.dialog.destroy();
+    await wait();
+    const modernSetting = new Setting({openInWindow: true});
+    window.siyuan.ws.app.plugins.push({name: "modern", openSetting: () => modernSetting.open("Modern plugin")});
+    const commandsBefore = (await ipcRenderer.invoke("test-settings-commands")).length;
+    await host.openPluginSetting("modern");
+    await ipcRenderer.invoke("test-settings-wait");
+    assert.notEqual(modernSetting.dialog.element.ownerDocument, document);
+    assert.equal((await ipcRenderer.invoke("test-settings-commands")).length, commandsBefore);
+    modernSetting.close();
+    await wait();
     await native.openNativeSettings(window.siyuan.ws.app, {tab: "editor"});
     assert.equal(await ipcRenderer.invoke("test-settings-window-count"), 1);
 };
@@ -256,10 +284,16 @@ if (process.versions.electron && process.type === "browser") {
         ipcMain.handle("test-settings-wait", () => ready ? (--ready, Promise.resolve()) : new Promise(resolve => { waiting = resolve; }));
         ipcMain.handle("test-settings-window-count", () => children.size);
         ipcMain.on("siyuan-cmd", (event, command) => {
+            if (event.sender === owner.webContents) {
+                assert.equal(command, "show");
+                commands.push("show-owner");
+                return;
+            }
             assert.ok([...children].some(child => child.webContents === event.sender));
             commands.push(command);
         });
         ipcMain.handle("test-settings-commands", () => commands);
+        ipcMain.handle("test-settings-token", () => new URL([...children][0].webContents.getURL()).searchParams.get("settingsWindowToken"));
         ipcMain.handle("test-settings-size", (_event, width, height) => {
             for (const child of children) child.setSize(width, height);
         });

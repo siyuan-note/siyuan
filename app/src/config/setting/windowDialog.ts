@@ -15,10 +15,11 @@ export const fitSettingsWindowDialog = (dialog: Dialog) => {
     container.style.top = "auto";
     container.setAttribute("aria-modal", "false");
     dialog.element.querySelectorAll(".resize__move").forEach(element => element.classList.remove("resize__move"));
+    dialog.element.querySelector(".config__tab-title")?.remove();
     /// #if !BROWSER
     const header = container.querySelector<HTMLElement>(".b3-dialog__header");
     const title = header.textContent || document.title;
-    header.className = "toolbar fn__flex";
+    header.className = "toolbar toolbar--settings fn__flex";
     const drag = document.createElement("div");
     drag.id = "drag";
     drag.className = "fn__flex-1";
@@ -32,5 +33,18 @@ export const fitSettingsWindowDialog = (dialog: Dialog) => {
         header.append(controls);
         initWindowControls(controls, () => dialog.destroy());
     }
+    const updateTitleInset = () => {
+        const style = getComputedStyle(header);
+        const controls = header.querySelector("#windowControls");
+        const inset = Math.max(parseFloat(style.paddingLeft), parseFloat(style.paddingRight),
+            controls?.getBoundingClientRect().width || 0);
+        header.style.setProperty("--settings-window-title-inset", inset + "px");
+    };
+    const observer = new ResizeObserver(updateTitleInset);
+    observer.observe(header);
+    const controls = header.querySelector("#windowControls");
+    if (controls) observer.observe(controls);
+    updateTitleInset();
+    window.addEventListener("unload", () => observer.disconnect(), {once: true});
     /// #endif
 };

@@ -11,7 +11,8 @@ type AccessibilitySetting = {enabled: boolean; override: boolean | null};
 type Invoke = (channel: string, data: {cmd: string; enabled?: boolean}) => Promise<AccessibilitySetting>;
 type Slot = {key: string; html: () => string; afterMount: (root: unknown) => Promise<void>};
 
-const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke, slotKey = "accessibilitySupport"): Slot | undefined => {
+const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke, slotKey = "accessibilitySupport",
+                              selects: string[] = []): Slot | undefined => {
     const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appTab.ts"), "utf8");
     const processed = parse(source, {BROWSER: browser, MOBILE: mobile}, false, true);
     const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
@@ -43,6 +44,8 @@ const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke
         get: (_, method) => (value: Slot) => {
             if (method === "slot") {
                 slots.push(value);
+            } else if (method === "select") {
+                selects.push(String(value));
             }
         },
     });
@@ -53,6 +56,14 @@ const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke
 test("workspace storage is available in desktop, browser and mobile without local workspace management", () => {
     for (const [browser, mobile] of [[false, false], [true, false], [true, true]]) {
         assert.ok(getAccessibilitySlot(browser, mobile, undefined, "workspaceStorage"));
+    }
+});
+
+test("settings window mode is configurable only in the Electron desktop client", () => {
+    for (const [browser, mobile] of [[false, false], [true, false], [true, true], [false, true]]) {
+        const selects: string[] = [];
+        getAccessibilitySlot(browser, mobile, undefined, "unused", selects);
+        assert.equal(selects.includes("settingsWindowMode"), !browser && !mobile);
     }
 });
 

@@ -6,7 +6,7 @@
 		"id": "20211226123216-tlxw66f",
 		"title": "視窗和分頁",
 		"type": "doc",
-		"updated": "20260930192450"
+		"updated": "20260930220342"
 	},
 	"Children": [
 		{
@@ -1255,12 +1255,57 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930192450-635bol5",
-				"updated": "20260930192450"
+				"updated": "20260930220342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "桌面用戶端的設定會在獨立視窗中開啟，可以移動、調整大小及最小化。保持設定視窗開啟時，仍可捲動、切換及編輯文件。再次開啟設定會聚焦已有視窗。設定變更會同步至目前工作空間的其他視窗；批次清理未引用附件、清理未引用資料庫及匯入設定期間會暫時阻擋操作。瀏覽器版使用設定對話框，行動版使用設定頁面。外掛程式決定其設定是否使用獨立視窗。"
+					"Data": "桌面用戶端預設在獨立視窗中開啟設定，可以移動、調整大小及最小化。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "應用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "開啟設定位置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇主視窗內或新視窗，下次開啟設定時生效。文件新視窗也支援使用已設定的設定快捷鍵開啟設定。保持設定視窗開啟時，仍可捲動、切換及編輯文件。再次開啟設定會聚焦已有視窗。設定變更會同步至目前工作空間的其他視窗；批次清理未引用附件、清理未引用資料庫及匯入設定期間會暫時阻擋操作。瀏覽器版使用設定對話框，行動版使用設定頁面。舊版外掛程式的設定會在其所屬視窗中開啟，並將該視窗切到前景；支援獨立視窗的外掛程式則在新視窗中開啟。在獨立設定視窗中，可按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（Windows/Linux）或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Option+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS）切換開發者工具。"
 				}
 			]
 		},

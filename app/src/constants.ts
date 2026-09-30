@@ -175,6 +175,7 @@ export abstract class Constants {
 
     // localstorage
     public static readonly LOCAL_ZOOM = "local-zoom";
+    public static readonly LOCAL_SETTINGS_WINDOW_MODE = "local-settings-window-mode";
     public static readonly LOCAL_SEARCHDATA = "local-searchdata";
     public static readonly LOCAL_SEARCHKEYS = "local-searchkeys";
     public static readonly LOCAL_SEARCHASSET = "local-searchasset";

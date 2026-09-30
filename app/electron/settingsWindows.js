@@ -112,6 +112,14 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
                 state.reveal();
             });
             if (platform !== "darwin") win.setMenu(null);
+            win.webContents.on("before-input-event", (event, input) => {
+                const modifiers = platform === "darwin" ? input.meta && input.alt && !input.control && !input.shift :
+                    input.control && input.shift && !input.meta && !input.alt;
+                if (input.type === "keyDown" && !input.isAutoRepeat && input.key.toLowerCase() === "i" && modifiers) {
+                    event.preventDefault();
+                    win.webContents.toggleDevTools();
+                }
+            });
             initialize(win, approved.target);
             const close = () => { if (!win.isDestroyed()) win.destroy(); };
             contents.once("destroyed", close);

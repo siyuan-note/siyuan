@@ -3,6 +3,9 @@ import {ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import type {SettingTabBuilder} from "../setting/builder";
+/// #if !BROWSER && !MOBILE
+import {getSettingsWindowMode, setSettingsWindowMode} from "../setting/windowMode";
+/// #endif
 import {runSettingsMaintenance} from "../setting/maintenance";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -187,6 +190,18 @@ const genImportUploadButtonHtml = (inputId: string, label: string): string =>
 const registerAppGeneralGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("general", window.siyuan.languages.configGroupGeneral);
 
+    /// #if !BROWSER && !MOBILE
+    group.select("settingsWindowMode", {
+        title: window.siyuan.languages.settingsWindowMode,
+        desc: window.siyuan.languages.settingsWindowModeTip,
+        options: [
+            {value: 0, label: window.siyuan.languages.settingsWindowInApp},
+            {value: 1, label: window.siyuan.languages.settingsWindowStandalone},
+        ],
+        readConfig: getSettingsWindowMode,
+        save: setSettingsWindowMode,
+    });
+    /// #endif
     /// #if !BROWSER
     if (!window.siyuan.config.system.isMicrosoftStore && window.siyuan.config.system.container === "std" && window.siyuan.config.system.os !== "linux") {
         group.select("system.autoLaunch2", {

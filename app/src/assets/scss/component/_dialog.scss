@@ -10,6 +10,23 @@
       flex-shrink: 0;
     }
 
+    .toolbar--settings {
+      position: relative;
+
+      #drag {
+        position: absolute;
+        inset: 0;
+        min-width: 0;
+        padding-inline: var(--settings-window-title-inset, var(--b3-toolbar-left-mac));
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      #windowControls {
+        margin-left: auto;
+      }
+    }
+
     & > .b3-dialog__scrim,
     & > .b3-dialog__container > [class^="resize__"] {
       display: none;

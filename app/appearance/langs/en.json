@@ -1,4 +1,8 @@
 {
+	"settingsWindowMode": "Open settings in",
+	"settingsWindowModeTip": "Applies the next time settings are opened; plugins determine how their own settings open",
+	"settingsWindowInApp": "Main window",
+	"settingsWindowStandalone": "New window",
 	"settingsPendingSaveError": "Could not save pending editor changes. Please try again.",
 	"blockTypeParentChange": "This conversion would change the outer block structure or layout",
 	"attributePanelVisibility": "Attribute panel field visibility",

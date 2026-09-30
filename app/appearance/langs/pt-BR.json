@@ -1,4 +1,8 @@
 {
+	"settingsWindowMode": "Abrir configurações em",
+	"settingsWindowModeTip": "Aplica-se na próxima abertura das configurações; os plugins determinam como abrir suas próprias configurações",
+	"settingsWindowInApp": "Janela principal",
+	"settingsWindowStandalone": "Nova janela",
 	"settingsPendingSaveError": "Não foi possível salvar as alterações pendentes no editor. Tente novamente.",
 	"blockTypeParentChange": "Esta conversão alteraria a estrutura ou o layout do bloco externo",
 	"attributePanelVisibility": "Visibilidade do campo no painel de propriedades",

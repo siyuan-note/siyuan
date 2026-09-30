@@ -30,6 +30,27 @@ const keyboardEvent = (key: string, control: boolean | string = false) => ({
     stopPropagation() { this.propagationStopped = true; },
 });
 
+test("configured settings shortcut opens settings from main and detached document windows", () => {
+    for (const detached of [false, true]) {
+        for (const targetTag of ["DIV", "INPUT"]) {
+            let opened = 0;
+            const bindings = new Proxy({}, {get: (_target, key) => key === "config" ? "custom-settings" : key});
+            const keydown = loadFunction("src/boot/globalEvent/keydown.ts", "windowKeyDown", {
+                filterHotkey: () => false, switchDialog: undefined, searchKeydown: () => false,
+                isWindow: () => detached, bindMenuKeydown: () => false, bindAVPanelKeydown: () => false,
+                document: {body: {}}, getKeymapBindings: (): string[] => [], isNotCtrl: () => false,
+                matchHotKey: (binding: unknown, event: {key: string}) => binding === event.key,
+                EDITOR_FONT_SIZE_COMMANDS: [], openSetting: () => { opened++; },
+                window: {siyuan: {config: {readonly: false, keymap: {general: bindings}}}},
+            });
+            const event = {...keyboardEvent("custom-settings"), target: {tagName: targetTag, closest: (): null => null}};
+            keydown({}, event);
+            assert.equal(opened, 1);
+            assert.equal(event.defaultPrevented, true);
+        }
+    }
+});
+
 test("readonly body and tab header preserve keyboard defaults and bubbling", async () => {
     const bind = loadFunction("src/protyle/wysiwyg/keydown.ts", "keydown", {
         bindVerticalNavigationReset: (): void => undefined,

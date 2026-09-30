@@ -24,6 +24,7 @@ import {getHostCapabilities} from "../util/hostCapabilities";
 import {unmountWorkspaceStorage} from "./tabs/workspaceStorage";
 /// #if !MOBILE
 import {openNativeSettings} from "./setting/nativeWindow";
+import {getSettingsWindowMode} from "./setting/windowMode";
 import {isSettingsWindow} from "./setting/windowContext";
 import {fitSettingsWindowDialog} from "./setting/windowDialog";
 /// #endif
@@ -136,7 +137,7 @@ export const openSetting = (app: App, tab?: TSettingTab) => {
     openMobileSetting(app, tab);
     /// #else
     /// #if !BROWSER
-    if (!isSettingsWindow()) {
+    if (!isSettingsWindow() && getSettingsWindowMode() === 1) {
         void openNativeSettings(app, {tab});
         return;
     }
@@ -197,7 +198,7 @@ export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemNa
     }
 
     /// #if !BROWSER && !MOBILE
-    if (!isSettingsWindow()) {
+    if (!isSettingsWindow() && getSettingsWindowMode() === 1) {
         await openNativeSettings(app, {tab: "bazaar", readme: {type: bazaarType, from, resource}});
         return;
     }

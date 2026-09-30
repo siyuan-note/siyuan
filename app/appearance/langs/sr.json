@@ -1,4 +1,8 @@
 {
+	"settingsWindowMode": "Место отварања подешавања",
+	"settingsWindowModeTip": "Примењује се при следећем отварању подешавања; додаци одређују како се отварају њихова подешавања",
+	"settingsWindowInApp": "Главни прозор",
+	"settingsWindowStandalone": "Нови прозор",
 	"settingsPendingSaveError": "Није могуће сачувати промене на чекању у уређивачу. Покушајте поново.",
 	"blockTypeParentChange": "Ова конверзија би променила структуру или распоред спољног блока",
 	"attributePanelVisibility": "Видљивост поља у панелу својстава",

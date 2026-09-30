@@ -1,4 +1,8 @@
 {
+	"settingsWindowMode": "Apri le impostazioni in",
+	"settingsWindowModeTip": "Si applica alla prossima apertura delle impostazioni; i plugin decidono come aprire le proprie impostazioni",
+	"settingsWindowInApp": "Finestra principale",
+	"settingsWindowStandalone": "Nuova finestra",
 	"settingsPendingSaveError": "Impossibile salvare le modifiche in sospeso nell'editor. Riprova.",
 	"blockTypeParentChange": "Questa conversione modificherebbe la struttura o la disposizione del blocco esterno",
 	"attributePanelVisibility": "Visibilità del campo nel pannello delle proprietà",

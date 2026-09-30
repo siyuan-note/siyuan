@@ -1,4 +1,8 @@
 {
+	"settingsWindowMode": "Einstellungen öffnen in",
+	"settingsWindowModeTip": "Gilt beim nächsten Öffnen der Einstellungen; Plugins bestimmen selbst, wie ihre Einstellungen geöffnet werden",
+	"settingsWindowInApp": "Hauptfenster",
+	"settingsWindowStandalone": "Neuem Fenster",
 	"settingsPendingSaveError": "Ausstehende Änderungen im Editor konnten nicht gespeichert werden. Bitte erneut versuchen.",
 	"blockTypeParentChange": "Diese Umwandlung würde die Struktur oder das Layout des äußeren Blocks ändern",
 	"attributePanelVisibility": "Feldsichtbarkeit im Eigenschaftsbereich",

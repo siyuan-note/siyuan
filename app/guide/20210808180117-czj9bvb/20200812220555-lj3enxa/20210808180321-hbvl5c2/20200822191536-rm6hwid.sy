@@ -6,7 +6,7 @@
 		"id": "20200822191536-rm6hwid",
 		"title": "窗口和页签",
 		"type": "doc",
-		"updated": "20260930192450"
+		"updated": "20260930220342"
 	},
 	"Children": [
 		{
@@ -1255,12 +1255,57 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930192450-lqv7jpo",
-				"updated": "20260930192450"
+				"updated": "20260930220342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "桌面客户端的设置在独立窗口中打开，可以移动、调整大小和最小化。保持设置窗口打开时，仍可滚动、切换和编辑文档。再次打开设置会聚焦已有窗口。配置修改会同步到当前工作空间的其他窗口；批量清理未引用附件、清理未引用数据库和导入配置期间会临时阻塞操作。浏览器端使用设置对话框，移动端使用设置页面。插件设置是否使用独立窗口由插件决定。"
+					"Data": "桌面客户端默认在独立窗口中打开设置，可以移动、调整大小和最小化。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "应用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打开设置位置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择主窗口内或新窗口，下次打开设置时生效。文档新窗口也支持使用已配置的设置快捷键打开设置。保持设置窗口打开时，仍可滚动、切换和编辑文档。再次打开设置会聚焦已有窗口。配置修改会同步到当前工作空间的其他窗口；批量清理未引用附件、清理未引用数据库和导入配置期间会临时阻塞操作。浏览器端使用设置对话框，移动端使用设置页面。旧插件设置在其所属窗口中打开，并将该窗口切到前台；适配独立窗口的插件则在新窗口中打开。在设置独立窗口中，可按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（Windows/Linux）或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Option+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS）切换开发者工具。"
 				}
 			]
 		},

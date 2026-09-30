@@ -1,4 +1,8 @@
 {
+	"settingsWindowMode": "打开设置位置",
+	"settingsWindowModeTip": "下次打开设置时生效，插件设置的打开方式由插件决定",
+	"settingsWindowInApp": "主窗口内",
+	"settingsWindowStandalone": "新窗口",
 	"settingsPendingSaveError": "无法保存编辑器中尚未提交的修改，请重试。",
 	"blockTypeParentChange": "此转换会改变外层块的结构或布局",
 	"attributePanelVisibility": "属性面板字段可见性",

@@ -1583,7 +1583,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return;
     }
-    if (!isTabWindow && !window.siyuan.config.readonly && matchHotKey(window.siyuan.config.keymap.general.config, event)) {
+    if (!window.siyuan.config.readonly && matchHotKey(window.siyuan.config.keymap.general.config, event)) {
         openSetting(app);
         event.preventDefault();
         return;

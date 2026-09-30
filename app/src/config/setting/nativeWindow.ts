@@ -8,6 +8,7 @@ import {exitSiYuan} from "../../dialog/processSystem";
 import {subscribeGlobalPluginState, applyPluginReload} from "../../plugin/globalState";
 import {loadPlugin, unloadPlugin} from "../../plugin/loader";
 import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/globalShortcut";
+import {Constants} from "../../constants";
 import type {App} from "../../index";
 import type {ISettingsWindowHost} from "./windowContext";
 import type {TSettingTab} from "./tabs";
@@ -20,6 +21,7 @@ export interface ISettingsCommand {
 const geometryKey = "settingsWindowGeometry";
 const hosts = new Map<string, {host: ISettingsWindowHost; listener: EventListener}>();
 let listening = false;
+let openSequence = 0;
 
 export const closeNativeSettings = (key: string) => {
     /// #if !BROWSER
@@ -30,6 +32,7 @@ export const closeNativeSettings = (key: string) => {
 export const openNativeSettings = async (app: App, command: ISettingsCommand = {},
                                          plugin?: ISettingsWindowHost["plugin"], key = "builtin") => {
     /// #if !BROWSER
+    openSequence++;
     if (!listening) {
         listening = true;
         window.addEventListener("unload", () => {
@@ -69,6 +72,14 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
         applyPluginReload: async data => { await applyPluginReload(app, data); },
         loadPlugin: async data => { await loadPlugin(app, data); },
         unloadPlugin: async name => { await unloadPlugin(app, name); },
+        openPluginSetting: async name => {
+            const item = app.plugins.find(item => item.name === name);
+            if (!item) return;
+            const sequence = openSequence;
+            await item.openSetting();
+            // 插件沿用原窗口对话框时显示其所属窗口，原生设置窗口自行接管焦点。
+            if (sequence === openSequence) ipcRenderer.send(Constants.SIYUAN_CMD, "show");
+        },
     };
     const listener = ((event: CustomEvent<(host: ISettingsWindowHost) => void>) => event.detail(host)) as EventListener;
     hosts.set(token, {host, listener});

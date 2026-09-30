@@ -262,6 +262,10 @@ const renderPDF = async (id: string) => {
         .b3-switch {
             margin-left: 14px;
         }
+
+        #action .b3-select:focus {
+            outline: none;
+        }
         
         #previewContainer {
           position: fixed;

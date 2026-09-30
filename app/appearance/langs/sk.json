@@ -1,7 +1,8 @@
 {
+	"renameAssetTip": "Premenovanie aktualizuje všetky odkazy na tento zdroj",
 	"imageOCRActionTip": "Kliknutím skopírujete/dvojitým kliknutím upravíte text OCR",
 	"displayImgAltTip": "Po zapnutí sa text popisu zobrazí pod názvom obrázka; aj keď je táto možnosť vypnutá, názov a text popisu sa zobrazia pri umiestnení kurzora nad obrázok",
-	"displayImgNameTip": "Po zapnutí sa názvy súborov zobrazia nad lokálnymi obrázkami bez cesty a vygenerovaného ID, so zachovaním prípony; kliknutím na názov ho upravíte a stlačením Enter premenujete zdroj a aktualizujete všetky odkazy",
+	"displayImgNameTip": "Po zapnutí sa nad lokálnymi obrázkami zobrazia názvy súborov bez cesty a generovaného ID, so zachovanou príponou; kliknutím na názov otvoríte dialóg premenovania",
 	"entryResetOrder": "Obnoviť poradie",
 	"entryResetAllOrders": "Obnoviť všetky poradia",
 	"displayImgAlt": "Zobraziť text popisu obrázkov",

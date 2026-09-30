@@ -1439,13 +1439,7 @@ table + .protyle-action__table {
   overflow-wrap: anywhere;
   white-space: break-spaces;
 
-  > span:not(.img__extension) {
-    flex: 1;
-    width: 0;
-  }
-
-  input {
-    min-width: 0;
+  > span {
     flex: 1;
     width: 0;
   }

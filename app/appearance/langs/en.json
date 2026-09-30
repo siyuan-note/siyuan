@@ -1,7 +1,8 @@
 {
+	"renameAssetTip": "Renaming updates all links that reference this asset",
 	"imageOCRActionTip": "Click to copy/double-click to edit OCR text",
 	"displayImgAltTip": "When enabled tooltip text appears below the image title; when disabled, hovering over the image still shows its title and tooltip text",
-	"displayImgNameTip": "When enabled file names appear above local images, hiding the asset path and generated ID while keeping the extension; click a name to edit it and press Enter to rename the asset and update all references",
+	"displayImgNameTip": "When enabled file names appear above local images, hiding the asset path and generated ID while keeping the extension; click a name to open the rename dialog",
 	"entryResetOrder": "Reset order",
 	"entryResetAllOrders": "Reset all orders",
 	"displayImgAlt": "Show image tooltip text",

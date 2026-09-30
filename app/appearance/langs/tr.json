@@ -1,7 +1,8 @@
 {
+	"renameAssetTip": "Yeniden adlandırma bu kaynağa başvuran tüm bağlantıları günceller",
 	"imageOCRActionTip": "Kopyalamak için tıklayın/OCR metnini düzenlemek için çift tıklayın",
 	"displayImgAltTip": "Etkinleştirildiğinde görsel başlığının altında ipucu metni gösterilir; bu seçenek kapalıyken de fare görselin üzerine getirildiğinde başlık ve ipucu metni gösterilir",
-	"displayImgNameTip": "Etkinleştirildiğinde yerel görsellerin üzerinde dosya adları, kaynak yolu ve oluşturulan kimlik olmadan, uzantı korunarak gösterilir; düzenlemek için ada tıkla, kaynağı yeniden adlandırmak ve tüm referansları güncellemek için Enter tuşuna bas",
+	"displayImgNameTip": "Etkinleştirildiğinde yerel görsellerin üzerinde dosya adları, kaynak yolu ve oluşturulan kimlik olmadan, uzantı korunarak gösterilir; yeniden adlandırma iletişim kutusunu açmak için ada tıklayın",
 	"entryResetOrder": "Sıralamayı sıfırla",
 	"entryResetAllOrders": "Tüm sıralamaları sıfırla",
 	"displayImgAlt": "Görsel ipucu metnini göster",

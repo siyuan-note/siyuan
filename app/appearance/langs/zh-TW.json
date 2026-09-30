@@ -1,7 +1,8 @@
 {
+	"renameAssetTip": "重新命名會更新所有引用此資源檔案的連結",
 	"imageOCRActionTip": "按一下複製/按兩下編輯 OCR 文字",
 	"displayImgAltTip": "啟用後在圖片標題下方顯示提示文字；關閉後滑鼠懸停圖片時仍會顯示標題和提示文字",
-	"displayImgNameTip": "啟用後在本機圖片上方顯示檔名，隱藏資源路徑和隨機碼並保留副檔名；按一下檔名可編輯，按 Enter 重新命名並更新所有引用",
+	"displayImgNameTip": "啟用後在本機圖片上方顯示檔名，隱藏資源路徑和隨機碼並保留副檔名；按一下檔名開啟重新命名對話框",
 	"entryResetOrder": "重設排序",
 	"entryResetAllOrders": "重設全部排序",
 	"displayImgAlt": "顯示圖片提示文字",

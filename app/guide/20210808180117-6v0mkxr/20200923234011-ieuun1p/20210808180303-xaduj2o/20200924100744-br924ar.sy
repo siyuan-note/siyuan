@@ -394,7 +394,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to show file names above local images, without the asset path or generated ID and with the extension preserved. Click a name to edit it, then press Enter to rename the asset and update all references; Escape or leaving the field cancels. Read-only views and encrypted notebooks do not allow inline renaming."
+					"Data": " to show file names above local images, without the asset path or generated ID and with the extension preserved. Click a name to open the rename dialog. Confirming the new name updates all links that reference the asset; canceling leaves the name unchanged. Read-only views and encrypted notebooks do not support renaming from the image name."
 				}
 			]
 		},

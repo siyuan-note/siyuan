@@ -1,7 +1,8 @@
 {
+	"renameAssetTip": "A renomeação atualiza todos os links que fazem referência a este recurso",
 	"imageOCRActionTip": "Clique para copiar/clique duas vezes para editar o texto OCR",
 	"displayImgAltTip": "Quando ativada esta opção mostra o texto da dica abaixo do título da imagem; mesmo quando desativada, passar o mouse sobre a imagem exibe seu título e o texto da dica",
-	"displayImgNameTip": "Quando ativada esta opção mostra o nome do arquivo acima das imagens locais, sem o caminho nem o ID gerado e mantendo a extensão; clique no nome para editá-lo e pressione Enter para renomear o recurso e atualizar todas as referências",
+	"displayImgNameTip": "Quando ativada esta opção mostra os nomes dos arquivos acima das imagens locais, sem o caminho nem o ID gerado e mantendo a extensão; clique em um nome para abrir a caixa de diálogo de renomeação",
 	"entryResetOrder": "Redefinir ordem",
 	"entryResetAllOrders": "Redefinir todas as ordens",
 	"displayImgAlt": "Mostrar o texto de dica das imagens",

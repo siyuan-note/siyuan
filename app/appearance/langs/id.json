@@ -1,7 +1,8 @@
 {
+	"renameAssetTip": "Penggantian nama memperbarui semua tautan yang merujuk ke sumber daya ini",
 	"imageOCRActionTip": "Klik untuk menyalin/klik dua kali untuk mengedit teks OCR",
 	"displayImgAltTip": "Saat diaktifkan teks petunjuk muncul di bawah judul gambar; saat opsi ini dinonaktifkan, judul dan teks petunjuk tetap muncul ketika kursor diarahkan ke gambar",
-	"displayImgNameTip": "Saat diaktifkan nama berkas muncul di atas gambar lokal tanpa jalur aset dan ID yang dihasilkan, dengan ekstensi tetap disertakan; klik nama untuk mengeditnya, lalu tekan Enter untuk mengganti nama aset dan memperbarui semua referensi",
+	"displayImgNameTip": "Saat diaktifkan nama file ditampilkan di atas gambar lokal, tanpa jalur dan ID yang dibuat serta tetap menyertakan ekstensi; klik nama untuk membuka dialog penggantian nama",
 	"entryResetOrder": "Atur ulang urutan",
 	"entryResetAllOrders": "Atur ulang semua urutan",
 	"displayImgAlt": "Tampilkan teks keterangan gambar",

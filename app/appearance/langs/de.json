@@ -1,7 +1,8 @@
 {
+	"renameAssetTip": "Beim Umbenennen werden alle Links aktualisiert, die auf diese Ressource verweisen",
 	"imageOCRActionTip": "Klicken zum Kopieren/Doppelklicken zum Bearbeiten des OCR-Texts",
 	"displayImgAltTip": "Bei Aktivierung erscheint der Tooltip-Text unter dem Bildtitel; auch bei deaktivierter Option werden Titel und Tooltip-Text beim Bewegen des Mauszeigers über das Bild angezeigt",
-	"displayImgNameTip": "Bei Aktivierung erscheinen Dateinamen über lokalen Bildern, ohne Ressourcenpfad und generierte ID, aber mit Dateiendung; zum Bearbeiten auf den Namen klicken und mit Enter umbenennen und alle Verweise aktualisieren",
+	"displayImgNameTip": "Bei Aktivierung erscheinen Dateinamen über lokalen Bildern, ohne Ressourcenpfad und generierte ID, aber mit Dateiendung; auf einen Namen klicken, um den Umbenennungsdialog zu öffnen",
 	"entryResetOrder": "Reihenfolge zurücksetzen",
 	"entryResetAllOrders": "Alle Reihenfolgen zurücksetzen",
 	"displayImgAlt": "Bildhinweistext anzeigen",

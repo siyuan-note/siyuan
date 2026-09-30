@@ -102,6 +102,7 @@ export const renameAsset = (assetPath: string) => {
     const dialog = openInputDialog({
         title: window.siyuan.languages.rename,
         value: oldName,
+        description: window.siyuan.languages.renameAssetTip,
         onConfirm: async (value, dialog) => {
             if (value === oldName || !value) {
                 dialog.destroy();

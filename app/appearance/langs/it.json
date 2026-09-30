@@ -1,7 +1,8 @@
 {
+	"renameAssetTip": "La rinomina aggiorna tutti i collegamenti che fanno riferimento a questa risorsa",
 	"imageOCRActionTip": "Clic per copiare/doppio clic per modificare il testo OCR",
 	"displayImgAltTip": "Quando attivata questa opzione mostra il testo del suggerimento sotto il titolo dell’immagine; anche se disattivata, passando il mouse sull’immagine vengono mostrati il titolo e il testo del suggerimento",
-	"displayImgNameTip": "Quando attivata questa opzione mostra il nome del file sopra le immagini locali, senza percorso e ID generato e mantenendo l’estensione; fai clic sul nome per modificarlo e premi Invio per rinominare la risorsa e aggiornare tutti i riferimenti",
+	"displayImgNameTip": "Quando attivata questa opzione mostra i nomi dei file sopra le immagini locali, senza percorso e ID generato e mantenendo l’estensione; fai clic su un nome per aprire la finestra di rinomina",
 	"entryResetOrder": "Reimposta ordine",
 	"entryResetAllOrders": "Reimposta tutti gli ordini",
 	"displayImgAlt": "Mostra il testo dei suggerimenti delle immagini",

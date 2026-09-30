@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "Ricevi richieste di creazione di schede all’indirizzo ${url}",
+	"ankiConnectLocalWithoutKey": "Consenti accesso locale senza chiave",
+	"ankiConnectLocalWithoutKeyTip": "Consenti ai client locali attendibili di usare questa interfaccia senza token API, anche con un codice di autorizzazione configurato",
+	"ankiConnectNotebookTip": "Salva i campi in un quaderno normale aperto; i mazzi diventano gruppi di ripasso",
 	"flashcardStudyLater": "Studia più tardi",
 	"flashcardStudyLaterTip": "Sposta alla fine di questa sessione senza cambiare la scadenza",
 	"flashcardStudyLaterUnavailable": "Al momento è pronta solo questa scheda. Puoi rispondere o saltarla",

@@ -88,7 +88,29 @@ const registerFlashcardReviewGroup = (tab: SettingTabBuilder) => {
     });
 };
 
+const registerAnkiConnectGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("ankiConnect", window.siyuan.languages.ankiConnect);
+    group.switch("flashcard.ankiConnectEnabled", {
+        title: window.siyuan.languages.ankiConnect,
+        desc: window.siyuan.languages.ankiConnectTip.replace("${url}", `${window.location.origin}/api/flashcard/ankiConnect`),
+    });
+    group.switch("flashcard.ankiConnectLocalWithoutKey", {
+        title: window.siyuan.languages.ankiConnectLocalWithoutKey,
+        desc: window.siyuan.languages.ankiConnectLocalWithoutKeyTip,
+    });
+    group.select("flashcard.ankiConnectNotebook", {
+        title: window.siyuan.languages.targetNotebook,
+        desc: window.siyuan.languages.ankiConnectNotebookTip,
+        options: [
+            {value: "", label: window.siyuan.languages.select},
+            ...(window.siyuan.notebooks || []).filter((notebook) => !notebook.closed && !notebook.encrypted)
+                .map((notebook) => ({value: notebook.id, label: notebook.name})),
+        ],
+    });
+};
+
 export const registerFlashcardTab = (tab: SettingTabBuilder) => {
     registerFlashcardCreationGroup(tab);
     registerFlashcardReviewGroup(tab);
+    registerAnkiConnectGroup(tab);
 };

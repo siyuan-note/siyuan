@@ -585,6 +585,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/setRepoIndexRetentionDays", model.CheckAuth, model.CheckAdminRole, setRepoIndexRetentionDays)
 	ginServer.Handle("POST", "/api/repo/setRetentionIndexesDaily", model.CheckAuth, model.CheckAdminRole, setRetentionIndexesDaily)
 
+	ginServer.Handle("POST", "/api/flashcard/ankiConnect", ankiConnect)
 	ginServer.Handle("POST", "/api/flashcard/getMigrationStatus", model.CheckAuth, model.CheckAdminRole, getFlashcardMigrationStatus)
 	ginServer.Handle("POST", "/api/flashcard/previewAnkiPackage", model.CheckAuth, model.CheckAdminRole, previewAnkiFlashcardPackage)
 	ginServer.Handle("POST", "/api/flashcard/importAnkiPackage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importAnkiFlashcardPackage)

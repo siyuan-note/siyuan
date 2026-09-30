@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "Odbieraj żądania tworzenia fiszek z innych aplikacji pod adresem ${url}",
+	"ankiConnectLocalWithoutKey": "Zezwalaj na dostęp lokalny bez klucza",
+	"ankiConnectLocalWithoutKeyTip": "Zezwalaj zaufanym lokalnym klientom na dostęp do tego interfejsu bez tokenu API, nawet przy ustawionym kodzie autoryzacji",
+	"ankiConnectNotebookTip": "Zapisuj pola w otwartym zwykłym notatniku; talie stają się zestawami powtórek",
 	"flashcardStudyLater": "Ucz się później",
 	"flashcardStudyLaterTip": "Przenieś na koniec tej sesji bez zmiany terminu powtórki",
 	"flashcardStudyLaterUnavailable": "Teraz dostępna jest tylko ta fiszka. Możesz odpowiedzieć lub ją pominąć",

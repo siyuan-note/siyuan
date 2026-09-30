@@ -516,6 +516,30 @@ export type AddAttributeViewBlocksRequestInput = { "avID": string; "blockID"?: s
 
 export type AddAttributeViewKeyRequestInput = { "avID": string; "blockID"?: string | null; "keyID": string; "keyIcon": string; "keyName": string; "keyType": string; "previousKeyID": string; };
 
+export type AnkiConnectAddDetail = { "canAdd": boolean; "error": string | null; };
+
+export type AnkiConnectDuplicateScopeOptionsInput = { "checkAllModels"?: boolean; "checkChildren"?: boolean; "deckName"?: string; };
+
+export type AnkiConnectFieldInfo = { "order": number; "value": string; };
+
+export type AnkiConnectMediaInput = { "data"?: string; "fields": Array<string>; "filename": string; "path"?: string; "skipHash"?: string; "url"?: string; };
+
+export type AnkiConnectNoteInfo = { "cards": Array<number> | null; "fields": Record<string, AnkiConnectFieldInfo> | null; "modelName": string; "noteId": number; "tags": Array<string> | null; };
+
+export type AnkiConnectNoteInput = { "audio"?: Array<AnkiConnectMediaInput>; "deckName"?: string; "fields"?: Record<string, string>; "id"?: number; "modelName"?: string; "options"?: AnkiConnectNoteOptionsInput | null; "picture"?: Array<AnkiConnectMediaInput>; "tags"?: Array<string>; "video"?: Array<AnkiConnectMediaInput>; };
+
+export type AnkiConnectNoteOptionsInput = { "allowDuplicate"?: boolean; "duplicateScope"?: string; "duplicateScopeOptions"?: AnkiConnectDuplicateScopeOptionsInput | null; };
+
+export type AnkiConnectParamsInput = { "actions"?: Array<AnkiConnectRequestInput> | Array<string> | null; "data"?: string; "deck"?: string; "filename"?: string; "modelName"?: string; "note"?: AnkiConnectNoteInput | null; "notes"?: Array<AnkiConnectNoteInput> | Array<number>; "path"?: string; "query"?: string; "scopes"?: Array<string>; "skipHash"?: string; "url"?: string; };
+
+export type AnkiConnectReflection = { "actions"?: Array<string> | null; "scopes": Array<string> | null; };
+
+export type AnkiConnectRequestInput = { "action": string; "key"?: string; "params"?: AnkiConnectParamsInput | null; "version"?: number | null; };
+
+export type AnkiConnectResponse = AnkiConnectResult | { "error": null; "result": AnkiConnectResult; } | { "error": string; "result": null; };
+
+export type AnkiConnectResult = null | number | string | Array<AnkiConnectResponse> | Array<string> | null | Array<boolean> | null | Array<number | null> | null | Array<AnkiConnectNoteInfo | (Record<string, never> & { "cards"?: never; "fields"?: never; "modelName"?: never; "noteId"?: never; "tags"?: never; })> | null | Array<AnkiConnectAddDetail> | null | Record<string, number> | null | AnkiConnectReflection;
+
 export type AppendAttributeViewDetachedBlocksWithValuesRequestInput = { "avID": string; "blocksValues": Array<Array<AVValueInput | null> | null>; };
 
 export type AppendBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
@@ -1808,7 +1832,7 @@ export type SetFiletreeRequestInput = { "allowCreateDeeper"?: boolean | null; "a
 
 export type SetFlashcardEditLaterRequestInput = { "cardID": string; "changedAt": number; "enabled": boolean; "expectedRevisionID"?: string; "note"?: string; "operationID": string; };
 
-export type SetFlashcardRequestInput = { "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "openMode"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
+export type SetFlashcardRequestInput = { "ankiConnectEnabled"?: boolean | null; "ankiConnectLocalWithoutKey"?: boolean | null; "ankiConnectNotebook"?: string | null; "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "openMode"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
 
 export type SetGraphConfRequestInput = { "conf": GraphConfigurationFieldsInput; "type": string; };
 
@@ -1950,7 +1974,7 @@ export type SettingExport = { "addTitle": boolean; "blockEmbedMode": number; "bl
 
 export type SettingFileTree = { "allowCreateDeeper": boolean; "alwaysSelectOpenedFile": boolean; "boxDocEnabled": boolean | null; "closeTabOnDoubleClick": boolean; "closeTabsOnStart": boolean; "createDocAtTop": boolean | null; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "docIconClickExpand": boolean; "largeFileWarningSize": number; "maxListCount": number; "maxOpenTabCount": number; "noSplitScreenWhenOpenTab": boolean; "openFilesUseCurrentTab": boolean; "parentDocClickExpand": boolean; "recentDocsMaxListCount": number; "refCreateSaveBox": string; "refCreateSavePath": string; "removeDocWithoutConfirm": boolean; "shorthandSaveBox": string; "shorthandSavePath": string; "sort": number; "tabStartupMode": number | null; "useSVGDefaultIcon": boolean | null; "useSingleLineSave": boolean; };
 
-export type SettingFlashcard = { "blockquote": boolean; "callout": boolean; "deck": boolean; "heading": boolean; "list": boolean; "mark": boolean; "maximumInterval": number; "newCardLimit": number; "openMode": number; "requestRetention": number; "reviewCardLimit": number; "reviewMode": number; "superBlock": boolean; "weights": string; };
+export type SettingFlashcard = { "ankiConnectEnabled": boolean; "ankiConnectLocalWithoutKey": boolean; "ankiConnectNotebook": string; "blockquote": boolean; "callout": boolean; "deck": boolean; "heading": boolean; "list": boolean; "mark": boolean; "maximumInterval": number; "newCardLimit": number; "openMode": number; "requestRetention": number; "reviewCardLimit": number; "reviewMode": number; "superBlock": boolean; "weights": string; };
 
 export type SettingIconRequestInput = { "icon": string; };
 
@@ -4174,6 +4198,12 @@ export interface APIPOSTRoutes {
         request: FileTreePathsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/flashcard/ankiConnect": {
+        request: AnkiConnectRequestInput;
+        response: AnkiConnectResponse | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        output: "directJSON";
     };
     "/api/flashcard/createQuickSources": {
         request: CreateQuickFlashcardSourcesRequestInput;

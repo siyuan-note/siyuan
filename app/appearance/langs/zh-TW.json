@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "接收第三方製卡請求，服務位址：${url}",
+	"ankiConnectLocalWithoutKey": "允許本機免密存取",
+	"ankiConnectLocalWithoutKeyTip": "允許可信本機用戶端不提供 API Token 存取此介面，即使已設定存取授權碼",
+	"ankiConnectNotebookTip": "將卡片欄位儲存到開啟的一般筆記本，牌組對應複習集",
 	"flashcardStudyLater": "稍後再學",
 	"flashcardStudyLaterTip": "移到本輪佇列末尾，不改變到期時間",
 	"flashcardStudyLaterUnavailable": "目前只剩這一張可學習的卡片，可以繼續作答或略過",

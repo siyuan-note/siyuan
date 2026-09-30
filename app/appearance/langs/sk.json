@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "Prijímať požiadavky na kartičky z iných aplikácií na ${url}",
+	"ankiConnectLocalWithoutKey": "Povoliť miestny prístup bez kľúča",
+	"ankiConnectLocalWithoutKeyTip": "Povoliť dôveryhodným miestnym klientom používať toto rozhranie bez tokenu API aj pri nastavenom autorizačnom kóde",
+	"ankiConnectNotebookTip": "Ukladať polia do otvoreného bežného zápisníka; balíčky sa stanú sadami opakovania",
 	"flashcardStudyLater": "Učiť sa neskôr",
 	"flashcardStudyLaterTip": "Presunúť na koniec tohto sedenia bez zmeny termínu opakovania",
 	"flashcardStudyLaterUnavailable": "Teraz je pripravená iba táto karta. Môžete odpovedať alebo ju preskočiť",

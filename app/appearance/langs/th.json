@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "รับคำขอสร้างบัตรจากแอปอื่นที่ ${url}",
+	"ankiConnectLocalWithoutKey": "อนุญาตการเข้าถึงในเครื่องโดยไม่ใช้คีย์",
+	"ankiConnectLocalWithoutKeyTip": "อนุญาตให้ไคลเอนต์ในเครื่องที่เชื่อถือได้ใช้ส่วนติดต่อ API นี้โดยไม่มีโทเคน แม้จะตั้งรหัสอนุญาตการเข้าถึงแล้ว",
+	"ankiConnectNotebookTip": "บันทึกฟิลด์บัตรในสมุดบันทึกทั่วไปที่เปิดอยู่ และแปลงสำรับเป็นชุดทบทวน",
 	"flashcardStudyLater": "เรียนภายหลัง",
 	"flashcardStudyLaterTip": "ย้ายไปท้ายรอบนี้โดยไม่เปลี่ยนกำหนดทบทวน",
 	"flashcardStudyLaterUnavailable": "ขณะนี้มีเพียงการ์ดใบนี้ที่พร้อมเรียน คุณสามารถตอบหรือข้ามได้",

@@ -1060,3 +1060,5 @@ var ClearHistory = define[TransactionClearHistoryRequest, Null]("clearHistory", 
 
 var BroadcastWebSocket = define[EmptyRequest, Null]("broadcast", "/ws/broadcast", NoBody, RawWebSocketOptions(), "GET")
 var BroadcastSubscribe = define[EmptyRequest, Null]("broadcastSubscribe", "/es/broadcast/subscribe", NoBody, RawSSEOptions(), "GET")
+
+var AnkiConnect = define[AnkiConnectRequest, AnkiConnectResponse]("ankiConnect", "/api/flashcard/ankiConnect", JSONBody, ResponseOptions{Output: DirectJSONOutput}, "POST")

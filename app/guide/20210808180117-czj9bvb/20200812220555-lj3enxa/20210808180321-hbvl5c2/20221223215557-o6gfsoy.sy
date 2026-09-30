@@ -7,7 +7,7 @@
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261001005456"
 	},
 	"Children": [
 		{
@@ -1041,6 +1041,104 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-fcfh81p",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261001005456-fcfh81p",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AnkiConnect"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261001005456-s48htv8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-s48htv8",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "闪卡"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AnkiConnect"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中启用接口，并选择打开的普通笔记本保存卡片字段。客户端创建的牌组对应复习集，不支持加密笔记本。"
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-jwv9ryd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-jwv9ryd",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Aictionary 等客户端中，将完整 API 地址设置为 http://127.0.0.1:6806/api/flashcard/ankiConnect，并按实际环境修改主机和端口。Basic 模型使用 Front 和 Back 字段，也支持 Basic (and reversed card)、Cloze 以及保留了模板的已导入 Anki 模型。"
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-95va0ml",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-95va0ml",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "请求需要通过 key、Authorization 请求头或地址中的 token 参数提供思源 API Token。允许本机免密访问是独立的可选开关，仅用于可信本机原生客户端，即使已设置访问授权码也可使用。浏览器跨域请求和远程客户端仍需认证。"
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-as5hx67",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-as5hx67",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "支持模型与牌组查询、创建牌组、重复检查、单条及批量制卡、笔记查询、字段更新和媒体保存。更新保留已有卡片身份和复习历史。HTML 转换为思源内容块，移除脚本和自定义样式。媒体支持 Base64 数据或 HTTP 地址，不支持本机文件路径、AnkiWeb 同步和 Anki 复习控制。笔记搜索支持文本、字段、deck、note、tag、nid 及布尔组合。"
 				}
 			]
 		}

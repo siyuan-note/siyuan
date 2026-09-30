@@ -7,7 +7,7 @@
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261001005456"
 	},
 	"Children": [
 		{
@@ -1037,6 +1037,104 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-gruu00a",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261001005456-gruu00a",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AnkiConnect"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261001005456-hzobcva",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-hzobcva",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable the interface in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Flashcards"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AnkiConnect"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and select an opened ordinary notebook for card fields. Decks created by clients become review sets. Encrypted notebooks are not supported."
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-dakkkkg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-dakkkkg",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In a client such as Aictionary, set the full API URL to http://127.0.0.1:6806/api/flashcard/ankiConnect, replacing the host and port as needed. Basic uses Front and Back; Basic (and reversed card), Cloze, and imported Anki models with retained templates are also available."
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-r3pmj4p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-r3pmj4p",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Requests require the SiYuan API Token in key, the Authorization header, or the token URL parameter. Allow local access without a key is an independent opt-in for trusted local native clients, even with an access authorization code configured. Browser cross-origin requests and remote clients still require authentication."
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-xfxhk7b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-xfxhk7b",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Supported operations include model and deck queries, deck creation, duplicate checks, individual and batch note creation, note queries, field updates, and media storage. Updates preserve existing card identities and review history. HTML is converted to SiYuan blocks with scripts and custom styles removed. Media accepts Base64 data or HTTP URLs; local file paths, AnkiWeb synchronization, and Anki review control are not supported. Note searches support text, fields, deck, note, tag, nid, and boolean combinations."
 				}
 			]
 		}

@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "استقبال طلبات إنشاء البطاقات من التطبيقات الأخرى على ${url}",
+	"ankiConnectLocalWithoutKey": "السماح بالوصول المحلي دون مفتاح",
+	"ankiConnectLocalWithoutKeyTip": "السماح للعملاء المحليين الموثوقين باستخدام هذه الواجهة دون رمز API حتى عند تعيين رمز تفويض الوصول",
+	"ankiConnectNotebookTip": "حفظ حقول البطاقات في دفتر عادي مفتوح وتحويل مجموعات البطاقات إلى مجموعات مراجعة",
 	"flashcardStudyLater": "الدراسة لاحقًا",
 	"flashcardStudyLaterTip": "نقل إلى نهاية الجلسة الحالية دون تغيير موعد المراجعة",
 	"flashcardStudyLaterUnavailable": "هذه البطاقة فقط جاهزة الآن. يمكنك الإجابة عنها أو تخطيها",

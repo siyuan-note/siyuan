@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "Receive third-party flashcard requests at ${url}",
+	"ankiConnectLocalWithoutKey": "Allow local access without a key",
+	"ankiConnectLocalWithoutKeyTip": "Allow trusted local clients to use this interface without an API Token, even when an access authorization code is set",
+	"ankiConnectNotebookTip": "Save card fields in an opened ordinary notebook; decks become review sets",
 	"flashcardStudyLater": "Study later",
 	"flashcardStudyLaterTip": "Move to the end of this session without changing the due time",
 	"flashcardStudyLaterUnavailable": "Only this card is ready now. You can answer it or skip it",

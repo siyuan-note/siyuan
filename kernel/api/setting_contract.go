@@ -300,6 +300,9 @@ func settingFlashcardPayload(value *conf.Flashcard) *apicontract.SettingFlashcar
 		return nil
 	}
 	result := &apicontract.SettingFlashcard{}
+	result.AnkiConnectEnabled = value.AnkiConnectEnabled
+	result.AnkiConnectLocalWithoutKey = value.AnkiConnectLocalWithoutKey
+	result.AnkiConnectNotebook = value.AnkiConnectNotebook
 	result.OpenMode = value.OpenMode
 	result.NewCardLimit = value.NewCardLimit
 	result.ReviewCardLimit = value.ReviewCardLimit

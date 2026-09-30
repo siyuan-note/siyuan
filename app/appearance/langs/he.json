@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "קבלת בקשות ליצירת כרטיסיות מיישומים אחרים בכתובת ${url}",
+	"ankiConnectLocalWithoutKey": "אפשר גישה מקומית ללא מפתח",
+	"ankiConnectLocalWithoutKeyTip": "אפשר ללקוחות מקומיים מהימנים להשתמש בממשק זה ללא אסימון API, גם כאשר מוגדר קוד הרשאת גישה",
+	"ankiConnectNotebookTip": "שמור את שדות הכרטיסיות במחברת רגילה פתוחה; החפיסות הופכות לערכות חזרה",
 	"flashcardStudyLater": "ללמוד מאוחר יותר",
 	"flashcardStudyLaterTip": "העברה לסוף ההפעלה הנוכחית בלי לשנות את מועד החזרה",
 	"flashcardStudyLaterUnavailable": "רק הכרטיס הזה זמין כרגע. אפשר לענות או לדלג עליו",

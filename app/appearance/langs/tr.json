@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "Diğer uygulamalardan gelen kart isteklerini ${url} adresinde al",
+	"ankiConnectLocalWithoutKey": "Anahtarsız yerel erişime izin ver",
+	"ankiConnectLocalWithoutKeyTip": "Erişim yetkilendirme kodu ayarlanmış olsa bile güvenilir yerel istemcilerin bu arayüzü API belirteci olmadan kullanmasına izin ver",
+	"ankiConnectNotebookTip": "Kart alanlarını açık normal bir not defterine kaydet; desteler tekrar kümelerine dönüşür",
 	"flashcardStudyLater": "Daha sonra çalış",
 	"flashcardStudyLaterTip": "Tekrar zamanını değiştirmeden bu oturumun sonuna taşı",
 	"flashcardStudyLaterUnavailable": "Şu anda yalnızca bu kart hazır. Yanıtlayabilir veya atlayabilirsiniz",

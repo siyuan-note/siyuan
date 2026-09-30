@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "Receber solicitações de cartões de outros aplicativos em ${url}",
+	"ankiConnectLocalWithoutKey": "Permitir acesso local sem chave",
+	"ankiConnectLocalWithoutKeyTip": "Permitir que clientes locais confiáveis usem esta interface sem token de API, mesmo com um código de autorização configurado",
+	"ankiConnectNotebookTip": "Salvar os campos em um caderno comum aberto; os baralhos se tornam conjuntos de revisão",
 	"flashcardStudyLater": "Estudar mais tarde",
 	"flashcardStudyLaterTip": "Mover para o final desta sessão sem alterar o prazo",
 	"flashcardStudyLaterUnavailable": "Apenas este cartão está disponível agora. Você pode responder ou pulá-lo",

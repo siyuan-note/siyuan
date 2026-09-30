@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "Terima permintaan kartu dari aplikasi lain di ${url}",
+	"ankiConnectLocalWithoutKey": "Izinkan akses lokal tanpa kunci",
+	"ankiConnectLocalWithoutKeyTip": "Izinkan klien lokal tepercaya menggunakan antarmuka ini tanpa token API, meskipun kode otorisasi akses telah diatur",
+	"ankiConnectNotebookTip": "Simpan bidang kartu di buku catatan biasa yang terbuka; dek menjadi kumpulan ulasan",
 	"flashcardStudyLater": "Pelajari nanti",
 	"flashcardStudyLaterTip": "Pindahkan ke akhir sesi ini tanpa mengubah waktu pengulangan",
 	"flashcardStudyLaterUnavailable": "Hanya kartu ini yang siap sekarang. Anda dapat menjawab atau melewatinya",

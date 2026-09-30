@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "外部アプリのカード作成要求を ${url} で受け付けます",
+	"ankiConnectLocalWithoutKey": "ローカルからのキーなしアクセスを許可",
+	"ankiConnectLocalWithoutKeyTip": "アクセス認証コードが設定されていても、信頼できるローカルクライアントにこの API へのトークンなしアクセスを許可します",
+	"ankiConnectNotebookTip": "カードのフィールドを開いている通常のノートブックに保存し、デッキを復習セットに対応させます",
 	"flashcardStudyLater": "後で学習",
 	"flashcardStudyLaterTip": "期日を変えずに、このセッションの最後へ移動",
 	"flashcardStudyLaterUnavailable": "今すぐ学習できるカードはこの1枚だけです。回答するかスキップできます",

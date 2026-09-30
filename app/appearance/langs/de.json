@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "Kartenanfragen externer Anwendungen unter ${url} empfangen",
+	"ankiConnectLocalWithoutKey": "Lokalen Zugriff ohne Schlüssel erlauben",
+	"ankiConnectLocalWithoutKeyTip": "Vertrauenswürdigen lokalen Clients den Zugriff auf diese Schnittstelle ohne API-Token erlauben, auch mit eingerichtetem Zugriffscode",
+	"ankiConnectNotebookTip": "Kartenfelder in einem geöffneten normalen Notizbuch speichern; Stapel werden zu Wiederholungssets",
 	"flashcardStudyLater": "Später lernen",
 	"flashcardStudyLaterTip": "Ans Ende dieser Sitzung verschieben, ohne die Fälligkeit zu ändern",
 	"flashcardStudyLaterUnavailable": "Momentan ist nur diese Karte bereit. Du kannst sie beantworten oder überspringen",

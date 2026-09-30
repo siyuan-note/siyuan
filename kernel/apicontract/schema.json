@@ -13714,6 +13714,535 @@
       ],
       "additionalProperties": false
     },
+    "AnkiConnectAddDetail": {
+      "type": "object",
+      "properties": {
+        "canAdd": {
+          "type": "boolean"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "canAdd",
+        "error"
+      ],
+      "additionalProperties": false
+    },
+    "AnkiConnectDuplicateScopeOptionsInput": {
+      "type": "object",
+      "properties": {
+        "checkAllModels": {
+          "type": "boolean"
+        },
+        "checkChildren": {
+          "type": "boolean"
+        },
+        "deckName": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AnkiConnectFieldInfo": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "type": "integer"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "order",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "AnkiConnectMediaInput": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "filename": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "skipHash": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "fields",
+        "filename"
+      ],
+      "additionalProperties": false
+    },
+    "AnkiConnectNoteInfo": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fields": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/AnkiConnectFieldInfo"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "modelName": {
+          "type": "string"
+        },
+        "noteId": {
+          "type": "integer"
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "cards",
+        "fields",
+        "modelName",
+        "noteId",
+        "tags"
+      ],
+      "additionalProperties": false
+    },
+    "AnkiConnectNoteInput": {
+      "type": "object",
+      "properties": {
+        "audio": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnkiConnectMediaInput"
+          }
+        },
+        "deckName": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "integer"
+        },
+        "modelName": {
+          "type": "string"
+        },
+        "options": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnkiConnectNoteOptionsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "picture": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnkiConnectMediaInput"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "video": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnkiConnectMediaInput"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "AnkiConnectNoteOptionsInput": {
+      "type": "object",
+      "properties": {
+        "allowDuplicate": {
+          "type": "boolean"
+        },
+        "duplicateScope": {
+          "type": "string"
+        },
+        "duplicateScopeOptions": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnkiConnectDuplicateScopeOptionsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "AnkiConnectParamsInput": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/AnkiConnectRequestInput"
+                  }
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "data": {
+          "type": "string"
+        },
+        "deck": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "modelName": {
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnkiConnectNoteInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AnkiConnectNoteInput"
+              }
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "query": {
+          "type": "string"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skipHash": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AnkiConnectReflection": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scopes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "scopes"
+      ],
+      "additionalProperties": false
+    },
+    "AnkiConnectRequestInput": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnkiConnectParamsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "AnkiConnectResponse": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AnkiConnectResult"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "type": "null"
+            },
+            "result": {
+              "$ref": "#/$defs/AnkiConnectResult"
+            }
+          },
+          "required": [
+            "result",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "type": "string"
+            },
+            "result": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "result",
+            "error"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "AnkiConnectResult": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnkiConnectResponse"
+          }
+        },
+        {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "boolean"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AnkiConnectNoteInfo"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AnkiConnectAddDetail"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "$ref": "#/$defs/AnkiConnectReflection"
+        }
+      ]
+    },
     "AppendAttributeViewDetachedBlocksWithValuesRequestInput": {
       "type": "object",
       "properties": {
@@ -40055,6 +40584,36 @@
     "SetFlashcardRequestInput": {
       "type": "object",
       "properties": {
+        "ankiConnectEnabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ankiConnectLocalWithoutKey": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ankiConnectNotebook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "blockquote": {
           "anyOf": [
             {
@@ -43475,6 +44034,15 @@
     "SettingFlashcard": {
       "type": "object",
       "properties": {
+        "ankiConnectEnabled": {
+          "type": "boolean"
+        },
+        "ankiConnectLocalWithoutKey": {
+          "type": "boolean"
+        },
+        "ankiConnectNotebook": {
+          "type": "string"
+        },
         "blockquote": {
           "type": "boolean"
         },
@@ -43519,6 +44087,9 @@
         }
       },
       "required": [
+        "ankiConnectEnabled",
+        "ankiConnectLocalWithoutKey",
+        "ankiConnectNotebook",
         "blockquote",
         "callout",
         "deck",
@@ -137361,6 +137932,62 @@
           }
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/api/flashcard/ankiConnect",
+      "handler": "ankiConnect",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AnkiConnectRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/AnkiConnectResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "directJSON"
     },
     {
       "method": "POST",

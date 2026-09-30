@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "Ontvang kaartverzoeken van andere toepassingen op ${url}",
+	"ankiConnectLocalWithoutKey": "Lokale toegang zonder sleutel toestaan",
+	"ankiConnectLocalWithoutKeyTip": "Vertrouwde lokale clients toegang tot deze interface zonder API-token toestaan, ook als een toegangscode is ingesteld",
+	"ankiConnectNotebookTip": "Sla kaartvelden op in een geopend gewoon notitieboek; stapels worden herhalingssets",
 	"flashcardStudyLater": "Later leren",
 	"flashcardStudyLaterTip": "Naar het einde van deze sessie verplaatsen zonder de herhaaldatum te wijzigen",
 	"flashcardStudyLaterUnavailable": "Alleen deze kaart is nu beschikbaar. Je kunt antwoorden of de kaart overslaan",

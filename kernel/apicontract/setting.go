@@ -159,20 +159,23 @@ type SettingVariable struct {
 }
 
 type SettingFlashcard struct {
-	OpenMode         int     `json:"openMode" api:"optional,nullable"`
-	NewCardLimit     int     `json:"newCardLimit" api:"optional,nullable"`
-	ReviewCardLimit  int     `json:"reviewCardLimit" api:"optional,nullable"`
-	Mark             bool    `json:"mark" api:"optional,nullable"`
-	List             bool    `json:"list" api:"optional,nullable"`
-	Blockquote       bool    `json:"blockquote" api:"optional,nullable"`
-	Callout          bool    `json:"callout" api:"optional,nullable"`
-	SuperBlock       bool    `json:"superBlock" api:"optional,nullable"`
-	Heading          bool    `json:"heading" api:"optional,nullable"`
-	Deck             bool    `json:"deck" api:"optional,nullable"`
-	ReviewMode       int     `json:"reviewMode" api:"optional,nullable"`
-	RequestRetention float64 `json:"requestRetention" api:"optional,nullable"`
-	MaximumInterval  int     `json:"maximumInterval" api:"optional,nullable"`
-	Weights          string  `json:"weights" api:"optional,nullable"`
+	AnkiConnectEnabled         bool    `json:"ankiConnectEnabled" api:"optional,nullable"`
+	AnkiConnectLocalWithoutKey bool    `json:"ankiConnectLocalWithoutKey" api:"optional,nullable"`
+	AnkiConnectNotebook        string  `json:"ankiConnectNotebook" api:"optional,nullable"`
+	OpenMode                   int     `json:"openMode" api:"optional,nullable"`
+	NewCardLimit               int     `json:"newCardLimit" api:"optional,nullable"`
+	ReviewCardLimit            int     `json:"reviewCardLimit" api:"optional,nullable"`
+	Mark                       bool    `json:"mark" api:"optional,nullable"`
+	List                       bool    `json:"list" api:"optional,nullable"`
+	Blockquote                 bool    `json:"blockquote" api:"optional,nullable"`
+	Callout                    bool    `json:"callout" api:"optional,nullable"`
+	SuperBlock                 bool    `json:"superBlock" api:"optional,nullable"`
+	Heading                    bool    `json:"heading" api:"optional,nullable"`
+	Deck                       bool    `json:"deck" api:"optional,nullable"`
+	ReviewMode                 int     `json:"reviewMode" api:"optional,nullable"`
+	RequestRetention           float64 `json:"requestRetention" api:"optional,nullable"`
+	MaximumInterval            int     `json:"maximumInterval" api:"optional,nullable"`
+	Weights                    string  `json:"weights" api:"optional,nullable"`
 }
 
 type SettingEditor struct {

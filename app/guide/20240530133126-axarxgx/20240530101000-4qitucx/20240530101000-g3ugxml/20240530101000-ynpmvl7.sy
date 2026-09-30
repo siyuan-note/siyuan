@@ -8,7 +8,7 @@
 		"id": "20240530101000-ynpmvl7",
 		"title": "フラッシュカード",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261001005456"
 	},
 	"Children": [
 		{
@@ -1032,6 +1032,100 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-xm8gmgw",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261001005456-xm8gmgw",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AnkiConnect"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261001005456-9t79fyg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-9t79fyg",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "フラッシュカード"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AnkiConnect"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で API を有効にし、カードのフィールドを保存する開いている通常のノートブックを選択します。クライアントが作成するデッキは復習セットに対応します。暗号化ノートブックには対応していません。"
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-mtc5ipa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-mtc5ipa",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Aictionary などのクライアントで API の完全な URL を http://127.0.0.1:6806/api/flashcard/ankiConnect に設定し、環境に応じてホストとポートを変更します。Basic は Front と Back フィールドを使用します。Basic (and reversed card)、Cloze、およびテンプレートを保持したインポート済み Anki モデルも利用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-2n5m8ib",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-2n5m8ib",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リクエストには key、Authorization ヘッダー、または URL の token パラメーターで思源の API トークンを指定します。「ローカルからのキーなしアクセスを許可」は、信頼できるローカルのネイティブクライアント専用の独立した任意設定で、アクセス認証コードが設定されていても利用できます。ブラウザーのクロスオリジンリクエストとリモートクライアントには認証が必要です。"
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-gqxnkxx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-gqxnkxx",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "モデルとデッキの照会、デッキの作成、重複確認、個別および一括ノート作成、ノート検索、フィールド更新、メディア保存に対応します。更新時には既存のカード ID と復習履歴を保持します。HTML は思源のブロックに変換され、スクリプトと独自のスタイルは削除されます。メディアは Base64 データまたは HTTP URL に対応し、ローカルファイルのパス、AnkiWeb 同期、Anki の復習操作には対応していません。ノート検索ではテキスト、フィールド、deck、note、tag、nid、および論理式を使用できます。"
 				}
 			]
 		}

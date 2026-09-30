@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "Recevoir les demandes de création de cartes à ${url}",
+	"ankiConnectLocalWithoutKey": "Autoriser l’accès local sans clé",
+	"ankiConnectLocalWithoutKeyTip": "Autoriser les clients locaux fiables à utiliser cette interface sans jeton API, même avec un code d’autorisation configuré",
+	"ankiConnectNotebookTip": "Enregistrer les champs dans un carnet ordinaire ouvert ; les paquets deviennent des ensembles de révision",
 	"flashcardStudyLater": "Étudier plus tard",
 	"flashcardStudyLaterTip": "Déplacer à la fin de cette session sans modifier l’échéance",
 	"flashcardStudyLaterUnavailable": "Seule cette carte est disponible maintenant. Vous pouvez y répondre ou la passer",

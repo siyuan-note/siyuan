@@ -1014,6 +1014,12 @@ declare namespace Config {
      * Flashcard related configuration
      */
     export interface IFlashCard {
+        /** 是否启用 AnkiConnect 制卡接口 */
+        ankiConnectEnabled: boolean;
+        /** 是否允许可信本机客户端免密访问兼容接口 */
+        ankiConnectLocalWithoutKey: boolean;
+        /** 第三方卡片正文的普通笔记本 ID */
+        ankiConnectNotebook: string;
         /** 默认打开方式，0：弹窗，1：页签，2：右侧分屏，3：新窗口 */
         openMode: number;
         /**

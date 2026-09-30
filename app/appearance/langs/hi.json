@@ -1,4 +1,9 @@
 {
+	"ankiConnect": "AnkiConnect",
+	"ankiConnectTip": "अन्य ऐप के कार्ड बनाने के अनुरोध ${url} पर प्राप्त करें",
+	"ankiConnectLocalWithoutKey": "बिना कुंजी के स्थानीय पहुँच की अनुमति दें",
+	"ankiConnectLocalWithoutKeyTip": "पहुँच प्राधिकरण कोड सेट होने पर भी विश्वसनीय स्थानीय क्लाइंट को API टोकन के बिना इस इंटरफ़ेस का उपयोग करने दें",
+	"ankiConnectNotebookTip": "कार्ड के फ़ील्ड खुले सामान्य नोटबुक में सहेजें; डेक पुनरावृत्ति समूह बनते हैं",
 	"flashcardStudyLater": "बाद में पढ़ें",
 	"flashcardStudyLaterTip": "दोहराने का समय बदले बिना इस सत्र के अंत में भेजें",
 	"flashcardStudyLaterUnavailable": "अभी केवल यही कार्ड तैयार है। आप उत्तर दे सकते हैं या इसे छोड़ सकते हैं",

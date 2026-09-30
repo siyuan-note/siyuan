@@ -26,6 +26,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -208,13 +209,22 @@ func prepareAnkiContentNote(note flashcardv2.AnkiContentNote) (preparedAnkiConte
 	return ret, nil
 }
 
+var ankiVideoMarkup = regexp.MustCompile(`(?is)<video\b[^>]*>.*?</video\s*>`)
+
 func safeAnkiHTMLToMarkdown(value string) (ret string, err error) {
 	policy := bluemonday.UGCPolicy()
-	policy.AllowElements("audio", "source")
-	policy.AllowAttrs("controls", "preload", "src").OnElements("audio")
+	policy.AllowElements("audio", "video", "source")
+	policy.AllowAttrs("controls", "preload", "src").OnElements("audio", "video")
 	policy.AllowAttrs("src", "type").OnElements("source")
 	policy.AllowRelativeURLs(true)
 	sanitized := policy.Sanitize(value)
+	// 视频以独立媒体块写入，其余正文使用统一的安全 HTML 转换。
+	var videos []string
+	sanitized = ankiVideoMarkup.ReplaceAllStringFunc(sanitized, func(markup string) string {
+		marker := "siyuanankivideo" + strings.ReplaceAll(ast.NewNodeID(), "-", "")
+		videos = append(videos, marker, "\n\n"+markup+"\n\n")
+		return "<p>" + marker + "</p>"
+	})
 	engine := util.NewLute()
 	engine.SetHTMLTag2TextMark(true)
 	defer func() {
@@ -225,6 +235,9 @@ func safeAnkiHTMLToMarkdown(value string) (ret string, err error) {
 	ret, err = engine.HTML2Markdown(sanitized)
 	if err != nil {
 		return "", err
+	}
+	if len(videos) > 0 {
+		ret = strings.NewReplacer(videos...).Replace(ret)
 	}
 	return strings.TrimSpace(ret), nil
 }

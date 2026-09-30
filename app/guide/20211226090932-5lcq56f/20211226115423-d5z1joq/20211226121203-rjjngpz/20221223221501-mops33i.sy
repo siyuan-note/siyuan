@@ -7,7 +7,7 @@
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261001005456"
 	},
 	"Children": [
 		{
@@ -1041,6 +1041,104 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-du49mbk",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261001005456-du49mbk",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AnkiConnect"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261001005456-7yzkdie",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-7yzkdie",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "閃卡"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AnkiConnect"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中啟用介面，並選擇開啟的一般筆記本儲存卡片欄位。用戶端建立的牌組對應複習集，不支援加密筆記本。"
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-dt4n5fb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-dt4n5fb",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Aictionary 等用戶端中，將完整 API 位址設為 http://127.0.0.1:6806/api/flashcard/ankiConnect，並依實際環境修改主機和連接埠。Basic 模型使用 Front 和 Back 欄位，也支援 Basic (and reversed card)、Cloze 及保留了範本的已匯入 Anki 模型。"
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-7sy7z8m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-7sy7z8m",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "請求需要透過 key、Authorization 請求標頭或位址中的 token 參數提供思源 API Token。允許本機免密存取是獨立的選用開關，僅供可信本機原生用戶端使用，即使已設定存取授權碼也可使用。瀏覽器跨網域請求和遠端用戶端仍需驗證。"
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-u32tsmp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-u32tsmp",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "支援模型與牌組查詢、建立牌組、重複檢查、單筆及批次製卡、筆記查詢、欄位更新和媒體儲存。更新保留既有卡片身分和複習歷史。HTML 轉換為思源內容區塊，移除指令碼和自訂樣式。媒體支援 Base64 資料或 HTTP 位址，不支援本機檔案路徑、AnkiWeb 同步和 Anki 複習控制。筆記搜尋支援文字、欄位、deck、note、tag、nid 及布林組合。"
 				}
 			]
 		}

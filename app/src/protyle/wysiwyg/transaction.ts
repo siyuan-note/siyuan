@@ -2494,7 +2494,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     }
     // 本地插入和正在编辑的块保留现有 DOM，立即补充图片文件名和提示文本。
     doOperations.forEach(operation => {
-        if ((operation.action === "insert" || operation.action === "update") && operation.data.includes("<img ")) {
+        if ((operation.action === "insert" || operation.action === "update") &&
+            typeof operation.data === "string" && operation.data.includes("<img ")) {
             protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(renderImageDisplay);
         }
     });

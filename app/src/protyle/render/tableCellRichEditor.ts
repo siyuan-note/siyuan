@@ -30,7 +30,7 @@ import {canEnterCodeBlock} from "../wysiwyg/codeBlockEnter";
 import {bindLiteCodeActions} from "../lite/codeActions";
 import {getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM} from "../util/tableVirtualizationDOM";
 
-let activeEditor: {cell: Element, finish: () => void} | undefined;
+let activeEditor: {cell: Element, finish: () => void, prepareSwitch: () => boolean} | undefined;
 let openingEditor: object | undefined;
 
 export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCellElement[], type: string,
@@ -88,19 +88,45 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
 export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCellElement,
                                              navigation?: {key: string, goalX: number}, point?: {x: number, y: number, target?: Element},
                                              restoredSelection?: ReturnType<typeof captureRichCellSelection>) => {
-    if (owner.disabled || !cell.isConnected || activeEditor?.cell === cell) {
+    if (owner.disabled || !cell.isConnected) {
         return;
     }
-    activeEditor?.finish();
-    if (activeEditor) {
+    if (activeEditor?.cell === cell) {
+        openingEditor = undefined;
         return;
     }
+    const previousEditor = activeEditor;
+    const preserveFocus = isMobile() && previousEditor?.cell.contains(document.activeElement) &&
+        previousEditor.cell.closest(".protyle-wysiwyg") === owner.wysiwyg.element;
+    let retainedEditor: typeof activeEditor;
+    if (preserveFocus && previousEditor.prepareSwitch()) {
+        retainedEditor = previousEditor;
+    } else {
+        activeEditor?.finish();
+        if (activeEditor) {
+            openingEditor = undefined;
+            return;
+        }
+    }
+    const request = {};
+    openingEditor = request;
+    try {
+        await mountTableCellRichEditor(request, retainedEditor, owner, cell, navigation, point, restoredSelection);
+    } finally {
+        if (retainedEditor && openingEditor === request) {
+            retainedEditor.finish();
+        }
+    }
+};
+
+const mountTableCellRichEditor = async (request: object, previousEditor: typeof activeEditor,
+                                      owner: IProtyle, cell: HTMLTableCellElement,
+                                      navigation?: {key: string, goalX: number}, point?: {x: number, y: number, target?: Element},
+                                      restoredSelection?: ReturnType<typeof captureRichCellSelection>) => {
     let table = cell.closest<HTMLElement>('[data-type="NodeTable"]');
     if (!table || cell.closest(".protyle-wysiwyg") !== owner.wysiwyg.element) {
         return;
     }
-    const request = {};
-    openingEditor = request;
     const tableID = table.dataset.nodeId;
     const tableParent = table.parentElement;
     const rowIndex = getTableVirtualRowIndex(cell.parentElement as HTMLTableRowElement);
@@ -121,7 +147,8 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
         table = Array.from(tableParent.children).find(element => element.getAttribute("data-node-id") === tableID) as HTMLElement;
         cell = table?.querySelector("table")?.rows[rowIndex]?.cells[cellIndex];
     }
-    if (!cell?.isConnected || cell.closest(".protyle-wysiwyg") !== owner.wysiwyg.element || activeEditor) {
+    if (!cell?.isConnected || cell.closest(".protyle-wysiwyg") !== owner.wysiwyg.element ||
+        (activeEditor && activeEditor !== previousEditor)) {
         return;
     }
     let initialBlockHTML: string;
@@ -301,9 +328,16 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
         }
         if (activeEditor?.cell === cell) {
             activeEditor = undefined;
+            openingEditor = undefined;
         }
     };
-    activeEditor = {cell, finish};
+    activeEditor = {cell, finish, prepareSwitch: () => {
+        if (composing) {
+            return false;
+        }
+        commit();
+        return true;
+    }};
     const undoCell = (redo: boolean) => {
         if (composing) {
             return;
@@ -384,8 +418,17 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
         if (belongsToEditor(event.target as Node)) {
             return;
         }
-        // 表格右侧空白由外层编辑器忽略，保持单元格编辑状态，避免销毁编辑器后留下失效光标。
         const target = event.target instanceof Element ? event.target : undefined;
+        const nextCell = target?.closest("td, th");
+        if (isMobile() && nextCell && nextCell !== cell && cell.contains(document.activeElement) &&
+            nextCell.closest(".protyle-wysiwyg") === owner.wysiwyg.element &&
+            !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey &&
+            !target.closest("a, [data-type~='block-ref'], [data-type~='a'], img, input, textarea, button, select")) {
+            // 点击其他单元格时保留输入焦点，由新编辑器接管后再清理当前编辑器。
+            event.preventDefault();
+            return;
+        }
+        // 表格右侧空白由外层编辑器忽略，保持单元格编辑状态，避免销毁编辑器后留下失效光标。
         if (target && owner.wysiwyg.element.contains(target) &&
             (!target.closest("[data-node-id]") || target.closest("[data-node-id]") === table)) {
             const tableRect = table.querySelector("table")?.getBoundingClientRect();

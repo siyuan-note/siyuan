@@ -129,6 +129,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
                 protyle: {block: {}, toolbar: {element: hidden, subElement: hidden}, undo: {clear: noop}},
                 getBlockHTML: () => wysiwyg.innerHTML, destroy: noop,
                 focus: () => {
+                    wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]').focus();
                     const range = document.createRange();
                     range.selectNodeContents(wysiwyg.querySelector('[contenteditable="true"]'));
                     range.collapse(true);
@@ -168,6 +169,48 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
 
     let tableImageOwner: IProtyle;
     let imageMenus = 0;
+    {
+        const {owner, queue, element, table} = fixture();
+        const first = table.querySelector("th");
+        const next = first.nextElementSibling as HTMLTableCellElement;
+        await open(owner, first);
+        const oldHost = first.querySelector(".table__cell-editor");
+        const focused = document.activeElement;
+        check.ok(oldHost.contains(focused));
+        focused.textContent = "Saved before switching";
+        focused.dispatchEvent(new Event("input", {bubbles: true}));
+        const flush = queue.flushPendingInput.bind(queue);
+        let focusLost = false;
+        queue.flushPendingInput = async () => {
+            focusLost ||= document.activeElement === document.body;
+            await flush();
+        };
+        const pointer = new PointerEvent("pointerdown", {bubbles: true, cancelable: true});
+        next.dispatchEvent(pointer);
+        check.equal(document.activeElement, focused, "pressing another cell retains the current input focus");
+        await open(owner, next);
+        check.equal(focusLost, false, "cell handoff never leaves the document without an editing focus");
+        check.ok(next.contains(document.activeElement));
+        check.equal(oldHost.isConnected, false);
+        check.match(api.getTableCellRichBlockDOM(first), /Saved before switching/);
+        changes.forEach(change => change.doOperations.forEach(operationHTML));
+        const third = next.nextElementSibling as HTMLTableCellElement;
+        const releases: Array<() => void> = [];
+        queue.flushPendingInput = async () => {
+            await new Promise<void>(resolve => { releases.push(resolve); });
+            focusLost ||= document.activeElement === document.body;
+        };
+        const obsolete = open(owner, first);
+        const latest = open(owner, third);
+        releases[0]();
+        await obsolete;
+        check.ok(next.contains(document.activeElement), "a cancelled switch retains focus while the latest switch waits");
+        releases[1]();
+        await latest;
+        check.equal(focusLost, false, "rapid switches keep focus until the latest cell is ready");
+        check.ok(third.contains(document.activeElement));
+        await finish(element);
+    }
     for (const rich of [false, true]) {
         const {owner, element, table} = fixture();
         const cell = table.querySelector("th");

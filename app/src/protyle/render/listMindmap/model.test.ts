@@ -676,7 +676,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const sourceList = source.firstElementChild;
         sourceList.setAttribute("custom-sy-list-mindmap", "1");
         sourceList.setAttribute("data-mindmap-view-rendered", "true");
-        const metadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: "Example"});
+        const metadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: ""});
         sourceList.setAttribute("custom-sy-list-mindmap-data", metadata);
         sourceList.classList.add("protyle-wysiwyg--select");
         sourceList.querySelector('[contenteditable="true"]').insertAdjacentHTML("afterbegin", "<wbr>");
@@ -702,7 +702,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     typedSource.innerHTML = lute.Md2BlockDOM("* Alpha\n  * Nested\n* Beta\n");
     const typedList = typedSource.firstElementChild as HTMLElement;
     const typedIDs = ids(typedList);
-    const typedMetadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: "Example"});
+    const typedMetadata = JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: ""});
     typedList.setAttribute("custom-sy-list-mindmap-data", typedMetadata);
     api.retagMindmapBranch(typedList, true);
     typedList.classList.add("protyle-wysiwyg--select");

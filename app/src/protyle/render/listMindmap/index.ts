@@ -29,7 +29,9 @@ import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
     moveListMindmapNode, readListMindmap, replaceListMindmapContent,
     writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch, normalizeListMindmapSummaryMetadata,
+    convertListMindmapToList, hasListMindmapRootTitle,
 } from "./model";
+import {prepareListMindmapConversion} from "./conversion";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
 import {getListMindmapElements, registerListMindmapRoot, registerListMindmapView} from "./render";
 import {syncListMindmapHeight} from "./height";
@@ -59,8 +61,28 @@ const canToggleView = (owner: IProtyle, list: HTMLElement) => !owner.disabled &&
 const canEdit = (owner: IProtyle, list: HTMLElement) => canToggleView(owner, list) &&
     !list.closest(".protyle-wysiwyg__embed");
 
-export const toggleListMindmap = (owner: IProtyle, list: HTMLElement) => {
+export const toggleListMindmap = async (owner: IProtyle, list: HTMLElement) => {
     if (!["NodeList", "NodeMindmap"].includes(list.dataset.type) || !canToggleView(owner, list)) {
+        return;
+    }
+    const exiting = list.dataset.type === "NodeMindmap" || list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1";
+    if (exiting && canEdit(owner, list) && hasListMindmapRootTitle(list)) {
+        const source = await prepareListMindmapConversion(owner, list);
+        if (!source || !canEdit(owner, list)) {
+            return;
+        }
+        const type = {o: "UL2OL", t: "UL2TL", u: "OL2UL"}[source.getAttribute("data-subtype")] || "OL2UL";
+        const html = convertListMindmapToList(source, type, owner.lute);
+        const template = list.ownerDocument.createElement("template");
+        template.innerHTML = html;
+        const converted = template.content.firstElementChild;
+        const before = cleanListMindmapHTML(source.outerHTML);
+        Array.from(list.attributes).forEach(attr => list.removeAttribute(attr.name));
+        Array.from(converted.attributes).forEach(attr => list.setAttribute(attr.name, attr.value));
+        list.replaceChildren(...Array.from(converted.childNodes));
+        hideElements(["gutter", "toolbar", "hint"], owner);
+        updateTransaction(owner, list, before);
+        roots.get(owner)?.refresh();
         return;
     }
     if (list.dataset.type === "NodeMindmap" || list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) == null) {

@@ -79,7 +79,11 @@ import {isEmptyParagraph} from "./emptyTextBlock";
 import {getHeadingConversionElements, isListHeadingContainer} from "./headingConversion";
 import {cleanTableCellRichHTML, getTableBlockHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
 import {cleanTableVirtualizationHTML, TABLE_VIRTUAL_ID} from "../util/tableVirtualizationDOM";
-import {cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource} from "../render/listMindmap/model";
+import {
+    cleanListMindmapHTML, convertListMindmapToList, hasListMindmapRootTitle,
+    isListMindmapListConversion, listMindmapConversionSource,
+} from "../render/listMindmap/model";
+import {prepareListMindmapConversion} from "../render/listMindmap/conversion";
 import {buildCancelListOperations} from "./cancelList";
 import {buildListConversionOperations} from "./listConversion";
 import {getProtyleTransactionOwner} from "../runtimeCapabilities";
@@ -2309,9 +2313,19 @@ export const turnsOneInto = async (options: {
     if (["CancelBlockquote", "CancelList", "CancelCallout"].includes(options.type)) {
         foldOperations = await unfoldListHeadings(options.protyle, [options.nodeElement]);
     }
-    let oldHTML = options.nodeElement.outerHTML;
+    const completeMindmap = isListMindmapListConversion(options.nodeElement, options.type) &&
+        hasListMindmapRootTitle(options.nodeElement);
+    const conversionSource = completeMindmap ?
+        await prepareListMindmapConversion(options.protyle, options.nodeElement) : options.nodeElement;
+    if (!conversionSource) {
+        return;
+    }
+    const mindmapSnapshot = completeMindmap ? cleanListMindmapHTML(options.nodeElement.outerHTML) : undefined;
+    const mindmapRootID = options.protyle.block.rootID;
+    const mindmapNotebookID = options.protyle.notebookId;
+    let oldHTML = conversionSource.outerHTML;
     if (options.undoElement) {
-        const oldElement = options.nodeElement.cloneNode(true) as HTMLElement;
+        const oldElement = conversionSource.cloneNode(true) as HTMLElement;
         const undoElement = oldElement.querySelector(`[data-node-id="${options.undoElement.id}"]`);
         if (undoElement) {
             undoElement.outerHTML = options.undoElement.html;
@@ -2330,11 +2344,20 @@ export const turnsOneInto = async (options: {
         }
         previousId = response.data.previousID;
     }
+    if (completeMindmap && (!options.nodeElement.isConnected || options.protyle.disabled ||
+        options.protyle.block.rootID !== mindmapRootID ||
+        options.protyle.notebookId !== mindmapNotebookID ||
+        options.protyle.options.action.includes(Constants.CB_GET_HISTORY) ||
+        options.nodeElement.closest(".protyle-wysiwyg__embed") ||
+        options.nodeElement.closest(".protyle-wysiwyg") !== options.protyle.wysiwyg.element ||
+        cleanListMindmapHTML(options.nodeElement.outerHTML) !== mindmapSnapshot)) {
+        return;
+    }
     const parentId = getEmbedChildOperationParentID(options.nodeElement) ||
         getParentBlock(options.nodeElement).getAttribute("data-node-id") || options.protyle.block.parentID;
     let newHTML: string;
     if (isTabsListConversion(options.type)) {
-        let source = options.nodeElement;
+        let source = conversionSource;
         if (!options.protyle.lite && source.querySelector('[fold="1"]')) {
             await waitForPendingTransactions(options.protyle);
             const snapshot = source.outerHTML;
@@ -2364,7 +2387,7 @@ export const turnsOneInto = async (options: {
         }
         newHTML = converted.outerHTML;
     } else {
-        const listHTML = convertListMindmapToList(options.nodeElement, options.type, options.protyle.lute);
+        const listHTML = convertListMindmapToList(conversionSource, options.type, options.protyle.lute);
         const sourceHTML = options.type === "CancelList" && options.nodeElement.getAttribute("data-type") === "NodeMindmap" ?
             listMindmapConversionSource(options.nodeElement).outerHTML : cleanListMindmapHTML(options.nodeElement.outerHTML);
         // @ts-ignore

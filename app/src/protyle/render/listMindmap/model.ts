@@ -343,22 +343,81 @@ export const listMindmapConversionSource = (element: Element): Element => {
     return source;
 };
 
+export const hasListMindmapRootTitle = (element: Element) =>
+    !!parseListMindmapMetadata(element.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA)).rootTitle?.trim();
+
+// 将有标题的虚拟根转为真实父项，已有块及其身份保持不变。
+export const materializeListMindmapRoot = (list: HTMLElement, lute: Lute): boolean => {
+    const model = readListMindmap(list);
+    const title = model.metadata.rootTitle;
+    if (!model.root.virtual || !title?.trim()) {
+        return false;
+    }
+    const marker = list.dataset.subtype === "o" ? "1." : list.dataset.subtype === "t" ? "* [ ]" : "*";
+    const template = list.ownerDocument.createElement("template");
+    template.innerHTML = lute.Md2BlockDOM(`${marker} x\n`);
+    const nested = template.content.firstElementChild as HTMLElement;
+    const item = directItems(nested)[0];
+    const titleElement = list.ownerDocument.createElement("span");
+    titleElement.setAttribute("data-type", "text");
+    titleElement.textContent = title;
+    item.querySelector<HTMLElement>('[data-type="NodeParagraph"] > [contenteditable]').replaceChildren(titleElement);
+    item.remove();
+    const children = directItems(list);
+    if (children.length) {
+        const attr = nested.querySelector(":scope > .protyle-attr");
+        children.forEach(child => nested.insertBefore(child, attr));
+        item.insertBefore(nested, item.querySelector(":scope > .protyle-attr"));
+    }
+    list.insertBefore(item, list.querySelector(":scope > .protyle-attr"));
+    const rootID = model.root.id;
+    const itemID = item.dataset.nodeId;
+    const metadata = model.metadata;
+    delete metadata.rootTitle;
+    if (Object.prototype.hasOwnProperty.call(metadata.nodes, rootID)) {
+        metadata.nodes[itemID] = metadata.nodes[rootID];
+        delete metadata.nodes[rootID];
+    }
+    metadata.relations.forEach(relation => {
+        if (relation.from === rootID) {
+            relation.from = itemID;
+        }
+        if (relation.to === rootID) {
+            relation.to = itemID;
+        }
+    });
+    metadata.summaries?.forEach(summary => {
+        if (summary.parentId === rootID) {
+            summary.parentId = itemID;
+        }
+    });
+    writeListMindmapMetadata(list, metadata);
+    return true;
+};
+
+export const isListMindmapListConversion = (element: Element, type: string) =>
+    (element.getAttribute("data-type") === "NodeMindmap" ||
+        element.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") &&
+    ["OL2UL", "UL2OL", "UL2TL", "OL2TL", "TL2UL", "TL2OL"].includes(type);
+
 // 转换列表类型时退出脑图显示，保留节点、连接元数据及原 DOM 供撤销使用。
 export const convertListMindmapToList = (element: Element, type: string, lute: Lute): string | undefined => {
-    if (element.getAttribute("data-type") !== "NodeMindmap" &&
-        element.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1" ||
-        !["OL2UL", "UL2OL", "UL2TL", "OL2TL", "TL2UL", "TL2OL"].includes(type)) {
+    if (!isListMindmapListConversion(element, type)) {
         return;
     }
     const source = listMindmapConversionSource(element);
     const from = {o: "OL", t: "TL", u: "UL"}[source.getAttribute("data-subtype")] || "UL";
     const to = type.split("2")[1];
-    if (from === to) {
-        // 同类型转换也规范化块 DOM，清除脑图遗留的块选中状态并保留正文光标。
-        return lute.SpinBlockDOM(source.outerHTML);
-    }
+    // 同类型转换也规范化块 DOM，清除脑图遗留的块选中状态并保留正文光标。
     // @ts-expect-error Lute 的类型声明未包含列表转换方法。
-    return lute[`${from}2${to}`](source.outerHTML);
+    const converted = from === to ? lute.SpinBlockDOM(source.outerHTML) : lute[`${from}2${to}`](source.outerHTML);
+    if (!hasListMindmapRootTitle(source)) {
+        return converted;
+    }
+    const template = source.ownerDocument.createElement("template");
+    template.innerHTML = converted;
+    const list = template.content.firstElementChild as HTMLElement;
+    return materializeListMindmapRoot(list, lute) ? lute.SpinBlockDOM(list.outerHTML) : converted;
 };
 
 // 按每层最大宽度对齐节点，并为每个分支保留完整的垂直空间，避免富文本节点相互遮挡。

@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "Click to copy/double-click to edit OCR text",
 	"displayImgAltTip": "When enabled tooltip text appears below the image title; when disabled, hovering over the image still shows its title and tooltip text",
 	"displayImgNameTip": "When enabled file names appear above local images, hiding the asset path and generated ID while keeping the extension; click a name to edit it and press Enter to rename the asset and update all references",
 	"entryResetOrder": "Reset order",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "When enabled, [[ or 【【 to search for block references only in doc names",
 	"pasteURLAutoConvert": "Auto-convert pasted URL to link",
 	"pasteURLAutoConvertTip": "When enabled, pasting a URL starting with http:// or https:// will automatically convert it to a clickable link",
-	"ocrResult": "OCR result text",
+	"ocrResult": "OCR text",
 	"reOCR": "Re OCR",
 	"continueReview1": "Continue Review",
 	"continueReview2": "There are still <code class='fn__code'>${count}</code> cards to review, continue?",

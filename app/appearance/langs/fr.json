@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "Cliquer pour copier/double-cliquer pour modifier le texte OCR",
 	"displayImgAltTip": "Une fois cette option activée le texte de l’infobulle apparaît sous le titre de l’image ; même si cette option est désactivée, le survol de l’image affiche son titre et le texte de l’infobulle",
 	"displayImgNameTip": "Une fois cette option activée les noms de fichiers apparaissent au-dessus des images locales, sans le chemin ni l’identifiant généré, en conservant l’extension ; cliquer sur le nom pour le modifier, puis appuyer sur Entrée pour renommer la ressource et mettre à jour toutes les références",
 	"entryResetOrder": "Réinitialiser l’ordre",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "Après l'activation, [[ ou 【【 pour rechercher des références de bloc uniquement dans les noms de documents",
 	"pasteURLAutoConvert": "Convertir automatiquement les URL collées en liens",
 	"pasteURLAutoConvertTip": "Lorsque cette option est activée, coller une URL commençant par http:// ou https:// la convertit automatiquement en lien cliquable",
-	"ocrResult": "Texte du résultat OCR",
+	"ocrResult": "Texte OCR",
 	"reOCR": "ReOCR",
 	"continueReview1": "Continuer la révision",
 	"continueReview2": "Il reste encore des fiches <code class='fn__code'>${count}</code> à examiner, continuer ?",

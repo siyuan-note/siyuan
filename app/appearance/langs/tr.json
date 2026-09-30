@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "Kopyalamak için tıklayın/OCR metnini düzenlemek için çift tıklayın",
 	"displayImgAltTip": "Etkinleştirildiğinde görsel başlığının altında ipucu metni gösterilir; bu seçenek kapalıyken de fare görselin üzerine getirildiğinde başlık ve ipucu metni gösterilir",
 	"displayImgNameTip": "Etkinleştirildiğinde yerel görsellerin üzerinde dosya adları, kaynak yolu ve oluşturulan kimlik olmadan, uzantı korunarak gösterilir; düzenlemek için ada tıkla, kaynağı yeniden adlandırmak ve tüm referansları güncellemek için Enter tuşuna bas",
 	"entryResetOrder": "Sıralamayı sıfırla",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "Etkinleştirildiğinde [[ veya 【【 yalnızca belge adlarında blok referanslarını arar",
 	"pasteURLAutoConvert": "Yapıştırılan URL'yi otomatik olarak bağlantıya dönüştür",
 	"pasteURLAutoConvertTip": "Etkinleştirildiğinde, http:// veya https:// ile başlayan bir URL yapıştırıldığında otomatik olarak tıklanabilir bir bağlantıya dönüştürülür",
-	"ocrResult": "OCR sonuç metni",
+	"ocrResult": "OCR metni",
 	"reOCR": "OCR’yi yeniden çalıştır",
 	"continueReview1": "Gözden geçirmeye devam et",
 	"continueReview2": "Hâlâ <code class='fn__code'>${count}</code> kart kaldı, devam edilsin mi?",

@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "Clic para copiar/doble clic para editar el texto OCR",
 	"displayImgAltTip": "Al activar esta opción el texto de ayuda aparece debajo del título de la imagen; al desactivarla, pasar el cursor sobre la imagen sigue mostrando su título y el texto de ayuda",
 	"displayImgNameTip": "Al activar esta opción los nombres de archivo aparecen sobre las imágenes locales, sin la ruta ni el ID generado y conservando la extensión; hacer clic en el nombre para editarlo y pulsar Intro para renombrar el recurso y actualizar todas las referencias",
 	"entryResetOrder": "Restablecer el orden",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "Después de habilitar, [[ o 【【 para buscar referencias de bloque solo en nombres de documentos",
 	"pasteURLAutoConvert": "Convertir automáticamente la URL pegada en enlace",
 	"pasteURLAutoConvertTip": "Cuando está habilitado, pegar una URL que comience con http:// o https:// la convertirá automáticamente en un enlace clicable",
-	"ocrResult": "Texto de resultado de OCR",
+	"ocrResult": "Texto OCR",
 	"reOCR": "Re-OCR",
 	"continueReview1": "Continuar revisión",
 	"continueReview2": "Todavía hay tarjetas <code class='fn__code'>${count}</code> para revisar, ¿continuar?",

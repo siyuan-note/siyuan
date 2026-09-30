@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "单击复制/双击编辑 OCR 文本",
 	"displayImgAltTip": "启用后在图片标题下方显示提示文本；关闭后鼠标悬浮图片时仍会显示标题和提示文本",
 	"displayImgNameTip": "启用后在本地图片上方显示文件名，隐藏资源路径和随机码并保留扩展名；单击文件名可编辑，回车改名并更新所有引用",
 	"entryResetOrder": "重置排序",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "启用后使用 [[ 或 【【 搜索块引用时将只在文档名中搜索",
 	"pasteURLAutoConvert": "粘贴网址时自动转为链接",
 	"pasteURLAutoConvertTip": "启用后粘贴 http:// 或 https:// 开头的网址时将自动转为可点击的链接",
-	"ocrResult": "OCR 结果文本",
+	"ocrResult": "OCR 文本",
 	"reOCR": "重新 OCR",
 	"continueReview1": "继续复习",
 	"continueReview2": "还有 <code class='fn__code'>${count}</code> 张卡片待复习，是否继续？",

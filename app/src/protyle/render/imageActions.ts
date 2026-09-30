@@ -27,7 +27,7 @@ export const renderImageActions = (root: Element) => {
         action.className = "protyle-icon protyle-icon--first protyle-action__ocr ariaLabel";
         action.tabIndex = 0;
         action.setAttribute("role", "button");
-        action.setAttribute("aria-label", `${window.siyuan.languages.copy} OCR / ${window.siyuan.languages.doubleClick} ${window.siyuan.languages.ocrResult}`);
+        action.setAttribute("aria-label", window.siyuan.languages.imageOCRActionTip);
         action.setAttribute("data-position", "north");
         action.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
         let timer: number;

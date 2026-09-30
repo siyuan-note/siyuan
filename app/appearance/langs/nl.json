@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "Klik om te kopiëren/dubbelklik om OCR-tekst te bewerken",
 	"displayImgAltTip": "Na inschakeling verschijnt tooltiptekst onder de afbeeldingstitel; ook als deze optie uitstaat, worden de titel en tooltiptekst getoond wanneer de muis boven de afbeelding staat",
 	"displayImgNameTip": "Na inschakeling verschijnen bestandsnamen boven lokale afbeeldingen, zonder het pad en de gegenereerde ID, maar met extensie; klik op een naam om deze te bewerken en druk op Enter om de bron te hernoemen en alle verwijzingen bij te werken",
 	"entryResetOrder": "Volgorde herstellen",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "Indien ingeschakeld doorzoekt [[ of 【【 bij het zoeken naar blokverwijzingen alleen documentnamen",
 	"pasteURLAutoConvert": "Geplakte URL automatisch omzetten naar link",
 	"pasteURLAutoConvertTip": "Indien ingeschakeld wordt een geplakte URL die begint met http:// of https:// automatisch omgezet naar een klikbare link",
-	"ocrResult": "OCR-resultaat",
+	"ocrResult": "OCR-tekst",
 	"reOCR": "Opnieuw OCR",
 	"continueReview1": "Doorgaan",
 	"continueReview2": "Nog <code class='fn__code'>${count}</code> kaarten te herhalen, doorgaan?",

@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "Klik untuk menyalin/klik dua kali untuk mengedit teks OCR",
 	"displayImgAltTip": "Saat diaktifkan teks petunjuk muncul di bawah judul gambar; saat opsi ini dinonaktifkan, judul dan teks petunjuk tetap muncul ketika kursor diarahkan ke gambar",
 	"displayImgNameTip": "Saat diaktifkan nama berkas muncul di atas gambar lokal tanpa jalur aset dan ID yang dihasilkan, dengan ekstensi tetap disertakan; klik nama untuk mengeditnya, lalu tekan Enter untuk mengganti nama aset dan memperbarui semua referensi",
 	"entryResetOrder": "Atur ulang urutan",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "Saat diaktifkan, [[ atau 【【 untuk mencari referensi blok hanya dalam nama dokumen",
 	"pasteURLAutoConvert": "Konversi otomatis URL yang ditempel menjadi tautan",
 	"pasteURLAutoConvertTip": "Saat diaktifkan, menempelkan URL yang dimulai dengan http:// atau https:// akan secara otomatis mengonversinya menjadi tautan yang dapat diklik",
-	"ocrResult": "Teks hasil OCR",
+	"ocrResult": "Teks OCR",
 	"reOCR": "OCR ulang",
 	"continueReview1": "Lanjutkan Ulasan",
 	"continueReview2": "Masih ada <code class='fn__code'>${count}</code> kartu untuk diulas, lanjutkan?",

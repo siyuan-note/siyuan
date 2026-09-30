@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "Кликните за копирање/двапут кликните за уређивање OCR текста",
 	"displayImgAltTip": "Када је укључена ова опција приказује текст објашњења испод наслова слике; када је искључена, наслов и текст објашњења се и даље приказују при преласку показивача преко слике",
 	"displayImgNameTip": "Када је укључена ова опција приказује називе датотека изнад локалних слика, без путање и генерисаног ID-а, уз задржавање наставка; кликни на назив да га измениш и притисни Enter да преименујеш ресурс и ажурираш све референце",
 	"entryResetOrder": "Ресетуј редослед",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "Kada je omogućeno, [[ ili 【【 za pretragu referenci bloka pretražuju samo nazive dokumenata",
 	"pasteURLAutoConvert": "Automatski pretvori nalepljeni URL u vezu",
 	"pasteURLAutoConvertTip": "Kada je omogućeno, lepljenje URL-a koji počinje sa http:// ili https:// automatski se pretvara u vezu na koju se može kliknuti",
-	"ocrResult": "Tekst OCR rezultata",
+	"ocrResult": "OCR текст",
 	"reOCR": "Ponovi OCR",
 	"continueReview1": "Nastavi ponavljanje",
 	"continueReview2": "Još uvek ima <code class='fn__code'>${count}</code> kartica za ponavljanje. Nastaviti?",

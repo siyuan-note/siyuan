@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "Clic per copiare/doppio clic per modificare il testo OCR",
 	"displayImgAltTip": "Quando attivata questa opzione mostra il testo del suggerimento sotto il titolo dell’immagine; anche se disattivata, passando il mouse sull’immagine vengono mostrati il titolo e il testo del suggerimento",
 	"displayImgNameTip": "Quando attivata questa opzione mostra il nome del file sopra le immagini locali, senza percorso e ID generato e mantenendo l’estensione; fai clic sul nome per modificarlo e premi Invio per rinominare la risorsa e aggiornare tutti i riferimenti",
 	"entryResetOrder": "Reimposta ordine",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "Dopo l'abilitazione, [[ o 【【 per cercare riferimenti di blocchi solo nei nomi dei documenti",
 	"pasteURLAutoConvert": "Converti automaticamente URL incollato in link",
 	"pasteURLAutoConvertTip": "Quando abilitato, incollando un URL che inizia con http:// o https:// verrà automaticamente convertito in un link cliccabile",
-	"ocrResult": "Risultato OCR",
+	"ocrResult": "Testo OCR",
 	"reOCR": "Ripeti OCR",
 	"continueReview1": "Continua la revisione",
 	"continueReview2": "Ci sono ancora <code class='fn__code'>${count}</code> carte da rivedere, continuare?",

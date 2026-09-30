@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "Klicken zum Kopieren/Doppelklicken zum Bearbeiten des OCR-Texts",
 	"displayImgAltTip": "Bei Aktivierung erscheint der Tooltip-Text unter dem Bildtitel; auch bei deaktivierter Option werden Titel und Tooltip-Text beim Bewegen des Mauszeigers über das Bild angezeigt",
 	"displayImgNameTip": "Bei Aktivierung erscheinen Dateinamen über lokalen Bildern, ohne Ressourcenpfad und generierte ID, aber mit Dateiendung; zum Bearbeiten auf den Namen klicken und mit Enter umbenennen und alle Verweise aktualisieren",
 	"entryResetOrder": "Reihenfolge zurücksetzen",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "Nach der Aktivierung wird [[ oder 【【 verwendet, um nach Blockreferenzen nur in Dokumentnamen zu suchen",
 	"pasteURLAutoConvert": "Eingefügte URLs automatisch in Links umwandeln",
 	"pasteURLAutoConvertTip": "Wenn aktiviert, werden URLs, die mit http:// oder https:// beginnen, beim Einfügen automatisch in klickbare Links umgewandelt",
-	"ocrResult": "OCR-Ergebnistext",
+	"ocrResult": "OCR-Text",
 	"reOCR": "Re OCR",
 	"continueReview1": "Überprüfung fortsetzen",
 	"continueReview2": "Es sind noch <code class='fn__code'>${count}</code> Karten zur Überprüfung vorhanden, fortfahren?",

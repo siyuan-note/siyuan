@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "Kliknutím skopírujete/dvojitým kliknutím upravíte text OCR",
 	"displayImgAltTip": "Po zapnutí sa text popisu zobrazí pod názvom obrázka; aj keď je táto možnosť vypnutá, názov a text popisu sa zobrazia pri umiestnení kurzora nad obrázok",
 	"displayImgNameTip": "Po zapnutí sa názvy súborov zobrazia nad lokálnymi obrázkami bez cesty a vygenerovaného ID, so zachovaním prípony; kliknutím na názov ho upravíte a stlačením Enter premenujete zdroj a aktualizujete všetky odkazy",
 	"entryResetOrder": "Obnoviť poradie",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "Ak je povolené, hľadanie cez [[ sa obmedzí len na názvy dokumentov",
 	"pasteURLAutoConvert": "Automaticky previesť vloženú URL na odkaz",
 	"pasteURLAutoConvertTip": "Ak je povolené, vloženie URL začínajúcej na http:// alebo https:// ju automaticky prevedie na klikateľný odkaz",
-	"ocrResult": "Text výsledku OCR",
+	"ocrResult": "Text OCR",
 	"reOCR": "Spustiť OCR znova",
 	"continueReview1": "Pokračovať v opakovaní",
 	"continueReview2": "Zostáva <code class='fn__code'>${count}</code> kariet na prehodnotenie, pokračovať?",

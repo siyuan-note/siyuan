@@ -1,4 +1,5 @@
 {
+	"imageOCRActionTip": "クリックでコピー/ダブルクリックで OCR テキストを編集",
 	"displayImgAltTip": "有効にすると画像のタイトルの下にツールチップのテキストを表示します。無効にしても、画像にマウスを合わせるとタイトルとツールチップのテキストが表示されます",
 	"displayImgNameTip": "有効にするとローカル画像の上に、アセットのパスと生成 ID を除いたファイル名を拡張子付きで表示します。名前をクリックして編集し、Enter で名前を変更すると、すべての参照が更新されます",
 	"entryResetOrder": "並び順をリセット",
@@ -1562,7 +1563,7 @@
 	"onlySearchForDocTip": "<code class='fn__code'>[[</code> を使用したブロック参照の検索でドキュメント名のみを検索します",
 	"pasteURLAutoConvert": "貼り付けたURLを自動でリンクに変換",
 	"pasteURLAutoConvertTip": "有効にすると、http:// または https:// で始まるURLを貼り付けた際に自動的にクリック可能なリンクに変換します",
-	"ocrResult": "OCR 結果のテキスト",
+	"ocrResult": "OCR テキスト",
 	"reOCR": "再 OCR",
 	"continueReview1": "復習を続ける",
 	"continueReview2": "<code class='fn__code'>${count}</code> 枚のカードの復習が残っています。続けますか？",

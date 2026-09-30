@@ -68,6 +68,15 @@ const browserCases = async (source: string, luteSource: string) => {
     check.equal(root.querySelector(".img__name"), null);
     check.equal(root.querySelector(".img__alt"), null);
     check.equal(lute.BlockDOM2StdMd(root.innerHTML), original);
+    config.editor.displayImgName = true;
+    root.removeAttribute("data-notebook-id");
+    render(root);
+    const snapshot = root.innerHTML;
+    root.innerHTML = snapshot;
+    render(root);
+    const restoredName = root.querySelector<HTMLElement>(".img__name");
+    restoredName.click();
+    check.ok(restoredName.querySelector("input"), "restored image names remain editable");
     return "Image display cases passed";
 };
 

@@ -1,6 +1,8 @@
 import {getAssetExtension, getAssetName, isEncryptedBox} from "../../util/pathName";
 import {renameAssetFile, validateName} from "../../editor/rename";
 
+const boundImageNames = new WeakSet<HTMLElement>();
+
 const setImageName = (element: HTMLElement, path: string) => {
     const text = document.createElement("span");
     text.textContent = getAssetName(path) + getAssetExtension(path);
@@ -38,6 +40,10 @@ export const renderImageDisplay = (root: Element) => {
             name.setAttribute("role", "button");
             name.setAttribute("aria-label", window.siyuan.languages.rename);
             container.insertBefore(name, image);
+        }
+        if (!boundImageNames.has(name)) {
+            boundImageNames.add(name);
+            setImageName(name, path);
             name.addEventListener("mousedown", event => event.stopPropagation());
             name.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.target === name && (event.key === "Enter" || event.key === " ") && !event.isComposing) {
@@ -55,7 +61,7 @@ export const renderImageDisplay = (root: Element) => {
                 const wysiwyg = image.closest(".protyle-wysiwyg");
                 const source = image.getAttribute("data-src");
                 if (!wysiwyg || wysiwyg.getAttribute("data-readonly") === "true" || window.siyuan.config.readonly ||
-                    window.siyuan.isPublish || source.includes("?box=") ||
+                    window.siyuan.isPublish || /[?&]box=/.test(source) ||
                     isEncryptedBox(image.closest("[data-notebook-id]")?.getAttribute("data-notebook-id"))) {
                     return;
                 }

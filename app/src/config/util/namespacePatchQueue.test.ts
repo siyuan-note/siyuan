@@ -4,6 +4,20 @@ import {createNamespacePatchQueue} from "./namespacePatchQueue";
 
 const nextTask = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
+test("field submission sends only changed paths in order, without submitting stale local configuration", async () => {
+    const submitted: Array<[string, unknown]> = [];
+    const patch = createNamespacePatchQueue({
+        namespace: "editor", getConfig: () => ({fontSize: 16, fullWidth: false}),
+        submit: async () => { throw new Error("full configuration must not be submitted"); },
+        submitPatch: async (path, value) => {
+            submitted.push([path, value]);
+            return {fontSize: 20, fullWidth: true};
+        },
+    });
+    await Promise.all([patch("editor.fontSize", 20), patch("fullWidth", true)]);
+    assert.deepEqual(submitted, [["fontSize", 20], ["fullWidth", true]]);
+});
+
 test("namespace patches are serialized against the latest server response", async () => {
     type TestConfig = {
         approval: {

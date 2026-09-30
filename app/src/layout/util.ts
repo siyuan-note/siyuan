@@ -23,6 +23,7 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
 import {isWindow} from "../util/functions";
+import {getSettingsWindowHost} from "../config/setting/windowContext";
 import {showMessage} from "../dialog/message";
 import {isEncryptedBox, parseUriInfo} from "../util/pathName";
 import {Custom} from "./dock/Custom";
@@ -232,6 +233,11 @@ export const exportLayout = async (options: {
     cb: () => void,
     errorExit: boolean
 }) => {
+    const host = getSettingsWindowHost();
+    if (host) {
+        await host.exportLayout(options);
+        return;
+    }
     const editors = getAllEditor();
     await withFetchTimeout(async (signal) => {
         for (let i = 0; i < editors.length; i++) {

@@ -6,8 +6,13 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
 import {fetchPost} from "./fetch";
 import {isBrowser} from "./functions";
+import {applySettingTask} from "../config/setting/taskBlocker";
 
 export const processMessage = (response: IWebSocketData) => {
+    if (response.cmd === "settingTask") {
+        applySettingTask(response.data);
+        return false;
+    }
     if ("msg" === response.cmd) {
         const id = showMessage(response.msg, response.data.closeTimeout, response.code === 0 ? "info" : "error", response.data.id);
         document.querySelector("#message #addMicrosoftDefenderExclusion")?.addEventListener("click", (event) => {

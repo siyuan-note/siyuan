@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "No se pudieron guardar los cambios pendientes del editor. Inténtalo de nuevo.",
 	"blockTypeParentChange": "Esta conversión cambiaría la estructura o el diseño del bloque exterior",
 	"attributePanelVisibility": "Visibilidad del campo en el panel de propiedades",
 	"alwaysShow": "Mostrar siempre",

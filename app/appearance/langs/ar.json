@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "تعذّر حفظ التغييرات المعلّقة في المحرر. يرجى المحاولة مرة أخرى.",
 	"blockTypeParentChange": "سيؤدي هذا التحويل إلى تغيير بنية الكتلة الخارجية أو تخطيطها",
 	"attributePanelVisibility": "ظهور الحقل في لوحة الخصائص",
 	"alwaysShow": "إظهار دائمًا",

@@ -877,6 +877,9 @@ var SetSecrets = define[SetSecretsRequest, *SettingSecrets]("setSecrets", "/api/
 var SetVariables = define[SetVariablesRequest, *SettingVariables]("setVariables", "/api/setting/setVariables", JSONBody, ResponseOptions{}, "POST")
 var SetFlashcard = define[SetFlashcardRequest, *SettingFlashcard]("setFlashcard", "/api/setting/setFlashcard", JSONBody, ResponseOptions{}, "POST")
 var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/setting/setEditor", JSONBody, ResponseOptions{}, "POST")
+
+// PatchSetting 保留省略字段，成功后客户端重新读取配置；通知不包含密码或密钥。
+var PatchSetting = define[PatchSettingRequest, Null]("patchSetting", "/api/setting/patch", JSONBody, ResponseOptions{}, "POST")
 var SetExport = define[SetExportRequest, *SettingExport]("setExport", "/api/setting/setExport", JSONBody, ResponseOptions{}, "POST")
 var SetFiletree = define[SetFiletreeRequest, *SettingFileTree]("setFiletree", "/api/setting/setFiletree", JSONBody, ResponseOptions{}, "POST")
 var SetSearch = define[SetSearchRequest, *SettingSearch]("setSearch", "/api/setting/setSearch", JSONBody, ResponseOptions{}, "POST")

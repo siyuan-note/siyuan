@@ -45,6 +45,20 @@ type SystemConfData struct {
 	Conf      *SystemAppConf `json:"conf"`
 	Start     bool           `json:"start"`
 	IsPublish bool           `json:"isPublish"`
+	// SettingTasks 为当前仍执行的设置维护任务，前端初始化和重连时恢复任务阻塞。
+	SettingTasks *SettingTaskState `json:"settingTasks,omitempty"`
+}
+
+type SettingTask struct {
+	ID       string `json:"id"`
+	Active   bool   `json:"active"`
+	Message  string `json:"message"`
+	Revision uint64 `json:"revision"`
+}
+
+type SettingTaskState struct {
+	Revision uint64        `json:"revision"`
+	Tasks    []SettingTask `json:"tasks"`
 }
 type SystemImportConfRequest struct {
 	File []*multipart.FileHeader `json:"file" api:"optional"`

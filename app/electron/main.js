@@ -77,6 +77,8 @@ const {
 const {dispatchWindowMessage} = require("./windowMessaging");
 const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorkspaces");
 const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = require("./windowGeometry");
+const {createSettingsWindows} = require("./settingsWindows");
+const {createSettingsTaskBridge} = require("./settingsTasks");
 const windowWorkspaces = new WindowWorkspaceRegistry();
 const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 const {
@@ -125,6 +127,26 @@ const notebookSystemLock = createNotebookSystemLock({
 });
 const windowKernelTargets = new Map();
 const initializedWindowIds = new Set();
+createSettingsTaskBridge({
+    ipcMain,
+    getTarget: id => getWindowKernelTarget(id),
+    getWindows: origin => BrowserWindow.getAllWindows().filter(win =>
+        initializedWindowIds.has(win.webContents.id) && windowKernelTargets.get(win.webContents.id)?.origin === origin),
+});
+const settingsWindowPolicy = createSettingsWindows({
+    ipcMain,
+    screen,
+    getTarget: id => getWindowKernelTarget(id),
+    show: win => showWindow(win),
+    log: message => writeLog(message),
+    initialize: (win, target) => {
+        remote.enable(win.webContents);
+        bindSpellcheckContextMenu(win.webContents);
+        rememberWindowKernelTarget(win, target);
+        win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
+        windowNavigate(win, "settings", target.origin, target.mode === "remote");
+    },
+});
 const pendingRemoteOpenURLs = [];
 const blockDragSessions = new Map();
 const blockDragWindowFocusOrder = new Map();
@@ -857,6 +879,7 @@ const windowNavigate = (currentWindow, windowType, kernelOrigin, remoteMode = fa
                 windowType === "app" && ["/stage/build/app/", "/check-auth"].includes(targetURL.pathname) ||
                 windowType === "app" && !remoteMode && targetURL.pathname === "/" ||
                 windowType === "window" && ["/stage/build/app/window.html", "/check-auth"].includes(targetURL.pathname) ||
+                windowType === "settings" && ["/stage/build/app/settings.html", "/check-auth"].includes(targetURL.pathname) ||
                 windowType === "export" && targetURL.pathname.startsWith("/export/temp/")
             )) {
                 return;
@@ -1488,7 +1511,7 @@ const installRemoteFrontendProtocol = (target) => {
         const isTargetOrigin = requestURL?.origin === target.origin;
         const requestPathname = requestURL?.pathname || "/";
         const localDocumentRequest = isTargetOrigin && (request.method === "GET" || request.method === "HEAD") &&
-            ["/check-auth", "/stage/build/app/", "/stage/build/app/window.html"].includes(requestURL.pathname);
+            ["/check-auth", "/stage/build/app/", "/stage/build/app/window.html", "/stage/build/app/settings.html"].includes(requestURL.pathname);
         const localResource = isTargetOrigin && (request.method === "GET" || request.method === "HEAD")
             ? getLocalRemoteResource(requestURL.pathname)
             : undefined;
@@ -1548,7 +1571,7 @@ const installRemoteFrontendProtocol = (target) => {
                 }
             }
             if (localDocumentRequest &&
-                ["/stage/build/app/", "/stage/build/app/window.html"].includes(requestURL.pathname)) {
+                ["/stage/build/app/", "/stage/build/app/window.html", "/stage/build/app/settings.html"].includes(requestURL.pathname)) {
                 try {
                     if (!await probeRemoteKernelAuthentication(net, remoteSession, requestURL.href)) {
                         const authURL = new URL("/check-auth", target.origin);
@@ -2258,7 +2281,7 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
             try {
                 const responseURL = new URL(details.url);
                 preserveRemoteDocumentCSP = responseURL.origin === kernelTarget.origin &&
-                    ["/check-auth", "/stage/build/app/", "/stage/build/app/window.html"].includes(responseURL.pathname);
+                    ["/check-auth", "/stage/build/app/", "/stage/build/app/window.html", "/stage/build/app/settings.html"].includes(responseURL.pathname);
             } catch (error) {
                 preserveRemoteDocumentCSP = false;
             }
@@ -4524,6 +4547,10 @@ app.on("activate", () => {
 
 app.on("web-contents-created", (webContentsCreatedEvent, contents) => {
     contents.setWindowOpenHandler((details) => {
+        const settings = settingsWindowPolicy(contents, details);
+        if (settings) {
+            return settings;
+        }
         const kernelTarget = getWindowKernelTarget(contents.id);
         if (kernelTarget?.mode === "remote") {
             openExternalURL(details.url, true);

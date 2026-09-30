@@ -170,6 +170,9 @@ func WithAfterWrite[Data any](response Response[Data], after func()) Response[Da
 
 func (r Response[Data]) AfterWrite() func() { return r.afterWrite }
 
+func (r Response[Data]) Code() int       { return r.code }
+func (r Response[Data]) Message() string { return r.msg }
+
 // WithHTTPStatus 只为声明过的业务错误保留额外 HTTP 状态。
 func (e Endpoint[Request, Data]) WithHTTPStatus(response Response[Data], status int) Response[Data] {
 	response.httpStatus = status

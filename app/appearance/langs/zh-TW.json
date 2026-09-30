@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "無法儲存編輯器中尚未提交的變更，請重試。",
 	"blockTypeParentChange": "此轉換會改變外層區塊的結構或版面配置",
 	"attributePanelVisibility": "屬性面板欄位可見性",
 	"alwaysShow": "始終顯示",

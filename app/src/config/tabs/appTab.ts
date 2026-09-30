@@ -3,6 +3,7 @@ import {ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import type {SettingTabBuilder} from "../setting/builder";
+import {runSettingsMaintenance} from "../setting/maintenance";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {ContractFormData} from "../../util/contractFormData";
@@ -453,7 +454,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
             root.querySelector("#importConf")?.addEventListener("change", (event: Event) => {
                 const target = event.target as HTMLInputElement;
                 const formData = new ContractFormData({file: [target.files[0]]});
-                fetchPost("/api/system/importConf", formData, (response) => {
+                void runSettingsMaintenance(() => fetchPost("/api/system/importConf", formData, (response) => {
                     if (response.code !== 0) {
                         showMessage(response.msg);
                         return;
@@ -467,7 +468,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
                         cb: exitSiYuan,
                     });
                     /// #endif
-                });
+                }));
             });
         },
     });

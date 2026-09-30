@@ -4,11 +4,18 @@ import {isWindow} from "../../util/functions";
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 import {getKeymapBindings} from "../../util/keymapBindings";
 import {syncAppMenuShortcuts} from "./commonHotkey";
+import {getSettingsWindowHost} from "../../config/setting/windowContext";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
 
 export const sendGlobalShortcut = (app: App) => {
+    const host = getSettingsWindowHost();
+    if (host) {
+        if (document.activeElement?.matches(".config-keymap__record, #searchByKey")) host.suspendShortcuts();
+        else host.restoreShortcuts();
+        return;
+    }
     /// #if !BROWSER
     if (document.activeElement?.matches(".config-keymap__record, #searchByKey")) {
         sendUnregisterGlobalShortcut(app);
@@ -48,6 +55,11 @@ export const sendGlobalShortcut = (app: App) => {
 };
 
 export const sendUnregisterGlobalShortcut = (app: App) => {
+    const host = getSettingsWindowHost();
+    if (host) {
+        host.suspendShortcuts();
+        return;
+    }
     /// #if !BROWSER
     if (app) {
         syncAppMenuShortcuts(true);

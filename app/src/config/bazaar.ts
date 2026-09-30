@@ -1,4 +1,4 @@
-import {normalizeBodyGradient} from "../util/bodyGradient";
+import {refreshSettingConfig} from "./setting/sync";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
@@ -14,6 +14,7 @@ import {escapeAttr, escapeHtml} from "../util/escape";
 import {formatCount} from "../util/number";
 import {loadPlugin, unloadPlugin} from "../plugin/loader";
 import {subscribeGlobalPluginState} from "../plugin/globalState";
+import {getSettingsWindowHost} from "./setting/windowContext";
 import {switchSettingPanelSubTab} from "./setting/mount";
 import {isThemeFrontendSupported} from "../util/themeCompatibility";
 import {
@@ -1384,7 +1385,7 @@ type="checkbox">
                 callback();
             };
             if (!enabled) {
-                unloadPlugin(app, item.name).then(finish);
+                (getSettingsWindowHost()?.unloadPlugin(item.name) || unloadPlugin(app, item.name)).then(finish);
                 return;
             }
             if (window.siyuan.config.bazaar.petalDisabled) {
@@ -1392,7 +1393,7 @@ type="checkbox">
                 finish();
                 return;
             }
-            loadPlugin(app, response.data).then(finish, (error) => {
+            (getSettingsWindowHost()?.loadPlugin(response.data) || loadPlugin(app, response.data)).then(finish, (error) => {
                 console.error(error);
                 finish();
             });
@@ -1454,14 +1455,24 @@ type="checkbox">
                 appearance.themeDark = "midnight";
             }
         }
-        fetchPost("/api/setting/setAppearance", appearance, response => {
+        const previous = window.siyuan.config.appearance;
+        const patch: {icon?: string; themeLight?: string; themeDark?: string; mode?: number; modeOS?: boolean} = {};
+        for (const key of ["icon", "themeLight", "themeDark", "mode", "modeOS"] as const) {
+            if (appearance[key] !== previous[key]) {
+                Object.assign(patch, {[key]: appearance[key]});
+            }
+        }
+        if (!Object.keys(patch).length) {
+            callback();
+            return;
+        }
+        fetchPost("/api/setting/patch", {appearance: patch}, response => {
             if (response.code !== 0) {
                 showMessage(response.msg);
                 callback();
                 return;
             }
-            window.siyuan.config.appearance = {...response.data, lang: appearance.lang, bodyGradient: normalizeBodyGradient(response.data.bodyGradient)};
-            callback();
+            void refreshSettingConfig("appearance").then(callback);
         });
     },
     _initBazaarPanel(bazaarType: TBazaarType, panel: HTMLElement) {

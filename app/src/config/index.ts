@@ -22,9 +22,14 @@ import type {App} from "../index";
 import {unmountAssetsTab} from "./assets";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {unmountWorkspaceStorage} from "./tabs/workspaceStorage";
+/// #if !MOBILE
+import {openNativeSettings} from "./setting/nativeWindow";
+import {isSettingsWindow} from "./setting/windowContext";
+import {fitSettingsWindowDialog} from "./setting/windowDialog";
+/// #endif
 
 /// #if !MOBILE
-const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
+export const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
     window.siyuan.dialogs.find((item) => item.element.querySelector(".config__tab-container"))?.destroy();
     let range: Range;
     if (getSelection().rangeCount > 0) {
@@ -77,10 +82,13 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
             if (range) {
                 focusByRange(range);
             }
+            if (isSettingsWindow()) {
+                window.close();
+            }
         },
     });
     settingDialogRef.element = dialog.element;
-    const disposeDrag = initSettingDrag(dialog.element);
+    const disposeDrag = isSettingsWindow() ? undefined : initSettingDrag(dialog.element);
     dialog.element.setAttribute("data-key", Constants.DIALOG_SETTING);
 
     const tabWrap = dialog.element.querySelector(".config__tab-wrap") as HTMLElement;
@@ -102,9 +110,20 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
         });
     });
     switchSettingTab(dialog.element, app, initialTab);
+    if (isSettingsWindow()) {
+        fitSettingsWindowDialog(dialog);
+    }
     return dialog;
 };
 /// #endif
+
+export const openPluginSetting = (app: App) => {
+    /// #if MOBILE
+    openMobileSetting(app);
+    /// #else
+    return openSettingDialog(app);
+    /// #endif
+};
 
 export const openSetting = (app: App, tab?: TSettingTab) => {
     if (tab === "bazaar" && !isBazaarAvailable()) {
@@ -116,6 +135,19 @@ export const openSetting = (app: App, tab?: TSettingTab) => {
     /// #if MOBILE
     openMobileSetting(app, tab);
     /// #else
+    /// #if !BROWSER
+    if (!isSettingsWindow()) {
+        void openNativeSettings(app, {tab});
+        return;
+    }
+    /// #endif
+    if (isSettingsWindow()) {
+        const dialog = window.siyuan.dialogs.find(item => item.element.getAttribute("data-key") === Constants.DIALOG_SETTING);
+        if (dialog) {
+            switchSettingTab(dialog.element, app, tab || "editor");
+            return dialog;
+        }
+    }
     return openSettingDialog(app, tab);
     /// #endif
 };
@@ -164,6 +196,12 @@ export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemNa
         return;
     }
 
+    /// #if !BROWSER && !MOBILE
+    if (!isSettingsWindow()) {
+        await openNativeSettings(app, {tab: "bazaar", readme: {type: bazaarType, from, resource}});
+        return;
+    }
+    /// #endif
     openSetting(app, "bazaar");
     await withMountedBazaar(({bazaar, renderReadme}) => {
         bazaar.switchBazaarTab(app, bazaarType, from);

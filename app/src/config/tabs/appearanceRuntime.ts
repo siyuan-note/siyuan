@@ -22,6 +22,7 @@ import {remountOpenSettingTab} from "../setting/mount";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 import {syncBodyGradient} from "./bodyGradient";
 import {refreshDynamicIcons} from "../../emoji/dynamicIcon";
+import {isSettingsWindow} from "../setting/windowContext";
 
 /** 主题模式下拉框初值：合并 mode / modeOS */
 export const appearanceThemeModeValue = (): number =>
@@ -30,11 +31,10 @@ export const appearanceThemeModeValue = (): number =>
 /** 主题模式选择：合并 mode / modeOS 后提交 */
 export const saveThemeMode = (value: number) => {
     const OSThemeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? 1 : 0;
-    fetchPost("/api/setting/setAppearance", {
-        ...window.siyuan.config.appearance,
+    fetchPost("/api/setting/patch", {appearance: {
         mode: (value === 2 ? OSThemeMode : value) as Config.IAppearance["mode"],
         modeOS: value === 2,
-    });
+    }});
 };
 
 /// #if MOBILE
@@ -55,6 +55,10 @@ interface IAppearanceRefresh {
 
 const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppearanceRefresh) => {
     if (data.lang !== window.siyuan.config.appearance.lang) {
+        if (isSettingsWindow()) {
+            window.location.reload();
+            return;
+        }
         markAppearanceReloadPending();
         /// #if MOBILE
         void reloadUI();
@@ -104,13 +108,15 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
 
     document.getElementById("status")?.classList.toggle("fn__none", data.hideStatusBar);
     /// #if !MOBILE
-    if (data.hideStatusBar !== prevAppearance.hideStatusBar) {
+    if (!isSettingsWindow() && data.hideStatusBar !== prevAppearance.hideStatusBar) {
         adjustDockPadding();
     }
-    if (data.hideToolbar !== prevAppearance.hideToolbar) {
+    if (!isSettingsWindow() && data.hideToolbar !== prevAppearance.hideToolbar) {
         syncHideToolbarLayout();
     }
-    updateBarModeIcon();
+    if (!isSettingsWindow()) {
+        updateBarModeIcon();
+    }
     /// #endif
 
     await loadAssets(data);

@@ -1,4 +1,5 @@
 import {openMobileFileById} from "../editor";
+import {refreshSettingConfig} from "../../config/setting/sync";
 import {closeNotebookHistoryDialogs} from "../../history/notebookDialogs";
 import {MOBILE_BARS_CONFIG_KEY} from "./mobileBarsConfig";
 import {showMobileBars} from "./mobileBars";
@@ -73,6 +74,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setAppearance":
                 appearanceConfigApi.apply(data.data);
+                break;
+            case "settingChanged":
+                void refreshSettingConfig(data.data.namespace);
                 break;
             case "refreshAppearance":
                 void refreshAppearance(data.data);

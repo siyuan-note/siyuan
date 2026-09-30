@@ -1,6 +1,7 @@
 import {onWindowWorkspaceStorageChanged} from "./workspace";
 import {closeNotebookHistoryDialogs} from "../history/notebookDialogs";
 import {Constants} from "../constants";
+import {refreshSettingConfig} from "../config/setting/sync";
 import {systemConfig} from "../config/systemConfig";
 import {Menus} from "../menus";
 import {Model} from "../layout/Model";
@@ -66,6 +67,9 @@ class App {
                                 break;
                             case "setAppearance":
                                 appearanceConfigApi.apply(data.data);
+                                break;
+                            case "settingChanged":
+                                void refreshSettingConfig(data.data.namespace);
                                 break;
                             case "refreshAppearance":
                                 void refreshAppearance(data.data);

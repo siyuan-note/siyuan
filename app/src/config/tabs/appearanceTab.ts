@@ -1,5 +1,3 @@
-import {normalizeAssetOpenConfig} from "../../editor/assetOpen";
-import {normalizeBodyGradient} from "../../util/bodyGradient";
 /// #if !BROWSER
 import * as path from "path";
 import {useShell} from "../../util/pathName";
@@ -336,22 +334,9 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
             refreshOpenMenu?.();
         };
         if (globalFont) {
-            const appearance = {
-                ...window.siyuan.config.appearance,
-                globalFontFamilies: configuredFonts,
-            };
-            fetchPost("/api/setting/setAppearance", appearance, response => {
-                appearanceConfigApi.apply({...response.data, lang: appearance.lang, bodyGradient: normalizeBodyGradient(response.data.bodyGradient)});
-                refreshFonts();
-            });
+            void appearanceConfigApi.patch("globalFontFamilies", configuredFonts, refreshFonts);
         } else {
-            fetchPost("/api/setting/setEditor", {
-                ...window.siyuan.config.editor,
-                [configKey]: configuredFonts,
-            }, response => {
-                editorConfigApi.apply({...response.data, assetOpen: normalizeAssetOpenConfig(response.data.assetOpen)});
-                refreshFonts();
-            });
+            void editorConfigApi.patch(configKey, configuredFonts, refreshFonts);
         }
     };
     bindSelectedFontList(selectedListElement, () => selectedFonts, persistFonts, (chip, index, event) => {
@@ -1166,10 +1151,7 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
                 if (objEquals(statusBar, window.siyuan.config.appearance.statusBar)) {
                     return;
                 }
-                fetchPost("/api/setting/setAppearance", {
-                    ...window.siyuan.config.appearance,
-                    statusBar
-                });
+                void appearanceConfigApi.patch("statusBar", statusBar);
             }
         });
     });
@@ -1227,10 +1209,7 @@ const mountAppearanceSetNotifications = (root: HTMLElement) => {
                 if (objEquals(notifications, window.siyuan.config.appearance.notifications)) {
                     return;
                 }
-                fetchPost("/api/setting/setAppearance", {
-                    ...window.siyuan.config.appearance,
-                    notifications
-                });
+                void appearanceConfigApi.patch("notifications", notifications);
             }
         });
     });

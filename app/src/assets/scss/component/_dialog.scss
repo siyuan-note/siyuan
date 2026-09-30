@@ -1,4 +1,10 @@
 .b3-dialog {
+  &--window {
+    & > .b3-dialog__scrim,
+    & > .b3-dialog__container > [class^="resize__"] {
+      display: none;
+    }
+  }
   position: fixed;
   top: 0;
   left: 0;

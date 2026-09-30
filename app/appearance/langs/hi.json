@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "संपादक में लंबित बदलाव सहेजे नहीं जा सके। कृपया दोबारा प्रयास करें।",
 	"blockTypeParentChange": "इस रूपांतरण से बाहरी ब्लॉक की संरचना या लेआउट बदल जाएगा",
 	"attributePanelVisibility": "गुण पैनल में फ़ील्ड की दृश्यता",
 	"alwaysShow": "हमेशा दिखाएँ",

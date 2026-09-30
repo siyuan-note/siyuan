@@ -104,6 +104,7 @@ const getLifecycleManager = (app: App) => {
         shouldReloadOnDataChange: (plugin) => plugin.onDataChanged === Plugin.prototype.onDataChanged,
         onDataChanged: (plugin, reason) => plugin.onDataChanged(reason),
         onunload: (plugin) => {
+            plugin.setting?.close();
             deactivateCustomBlockPlugin(plugin.name);
             beginPluginTeardown(plugin);
             return plugin.onunload();

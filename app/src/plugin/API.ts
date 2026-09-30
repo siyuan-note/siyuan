@@ -26,7 +26,7 @@ import {getAllModels, getAllTabs} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
 import {getAllEditor} from "../layout/getAll";
-import {openSetting} from "../config";
+import {openPluginSetting} from "../config";
 import {openAttr, openFileAttr} from "../menus/commonMenuItem";
 import {globalCommand} from "../boot/globalEvent/command/global";
 import {saveScroll} from "../protyle/scroll/saveScroll";
@@ -430,7 +430,7 @@ const createAPI = () => ({
     /// #endif
     getActiveEditor,
     platformUtils,
-    openSetting,
+    openSetting: openPluginSetting,
     openAttributePanel,
     saveLayout,
     globalCommand,

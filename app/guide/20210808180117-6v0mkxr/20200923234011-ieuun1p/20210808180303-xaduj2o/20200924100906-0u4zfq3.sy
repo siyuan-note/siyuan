@@ -6,7 +6,7 @@
 		"id": "20200924100906-0u4zfq3",
 		"title": "Window and Tab",
 		"type": "doc",
-		"updated": "20260925230000"
+		"updated": "20260930192450"
 	},
 	"Children": [
 		{
@@ -1224,6 +1224,39 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260930192450-5l394sc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260930192450-5l394sc",
+				"updated": "20260930192450"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Settings window"
+				}
+			]
+		},
+		{
+			"ID": "20260930192450-jc5b7ix",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930192450-jc5b7ix",
+				"updated": "20260930192450"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The desktop client opens settings in a separate window that can be moved, resized, and minimized. You can keep it open while scrolling, switching, and editing documents. Opening settings again focuses the existing window. Setting changes synchronize with other windows in the same workspace. Bulk cleanup of unreferenced assets or databases and settings import temporarily block interaction while they run. The browser uses a settings dialog, and mobile uses a settings page. Plugins decide whether their settings use a separate window."
 				}
 			]
 		},

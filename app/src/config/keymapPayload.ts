@@ -35,3 +35,12 @@ export const keymapPayload = (keymap: Config.IKeymap): {[key: string]: JSONValue
         plugin,
     };
 };
+
+// 快捷键名称可以包含点号，按原始分段构造更新对象。
+export const keymapRowPatch = (path: string[], value: JSONValue): {[key: string]: JSONValue} => {
+    let patch: {[key: string]: JSONValue} = {[path[path.length - 1]]: value};
+    for (let index = path.length - 2; index >= 0; index--) {
+        patch = {[path[index]]: patch};
+    }
+    return patch;
+};

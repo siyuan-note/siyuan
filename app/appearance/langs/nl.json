@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "Niet-opgeslagen wijzigingen in de editor konden niet worden opgeslagen. Probeer het opnieuw.",
 	"blockTypeParentChange": "Deze conversie zou de structuur of indeling van het buitenste blok wijzigen",
 	"attributePanelVisibility": "Veldzichtbaarheid in het eigenschappenpaneel",
 	"alwaysShow": "Altijd tonen",

@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "Nepodarilo sa uložiť čakajúce zmeny v editore. Skúste to znova.",
 	"blockTypeParentChange": "Táto konverzia by zmenila štruktúru alebo rozloženie vonkajšieho bloku",
 	"attributePanelVisibility": "Viditeľnosť poľa na paneli vlastností",
 	"alwaysShow": "Vždy zobraziť",

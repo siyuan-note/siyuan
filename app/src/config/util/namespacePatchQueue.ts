@@ -4,6 +4,7 @@ export const createNamespacePatchQueue = <TData>(options: {
     namespace: string;
     getConfig: () => TData;
     submit: (payload: TData) => Promise<TData | undefined>;
+    submitPatch?: (path: string, value: unknown) => Promise<TData | undefined>;
 }) => {
     const prefix = `${options.namespace}.`;
     let queue = Promise.resolve();
@@ -14,9 +15,9 @@ export const createNamespacePatchQueue = <TData>(options: {
             return Promise.resolve();
         }
         queue = queue.then(async () => {
-            const prev = options.getConfig() as unknown as Record<string, unknown>;
-            const payload = mergeRecordByDottedPath(prev, rel, value) as unknown as TData;
-            const data = await options.submit(payload);
+            const data = options.submitPatch ? await options.submitPatch(rel, value) : await options.submit(
+                mergeRecordByDottedPath(options.getConfig() as unknown as Record<string, unknown>, rel, value) as unknown as TData
+            );
             if (data !== undefined) {
                 onApplied?.(data);
             }

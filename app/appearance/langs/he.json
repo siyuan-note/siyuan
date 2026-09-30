@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "לא ניתן לשמור את השינויים הממתינים בעורך. יש לנסות שוב.",
 	"blockTypeParentChange": "המרה זו תשנה את המבנה או הפריסה של הבלוק החיצוני",
 	"attributePanelVisibility": "נראות שדה בחלונית המאפיינים",
 	"alwaysShow": "הצג תמיד",

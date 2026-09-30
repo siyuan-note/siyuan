@@ -208,13 +208,11 @@ const showSelectAllTip = () => {
     selectAllTipShown = true;
     document.querySelector(`#message [data-id="${messageId}"] button`)?.addEventListener("click", () => {
         hideMessage(messageId);
-        fetchPost("/api/setting/setAppearance", {
-            ...window.siyuan.config.appearance,
+        fetchPost("/api/setting/patch", {appearance: {
             notifications: {
-                ...window.siyuan.config.appearance.notifications,
                 selectAllTip: false,
             }
-        });
+        }});
     });
 };
 

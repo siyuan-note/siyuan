@@ -1,4 +1,5 @@
 import {Constants} from "./constants";
+import {refreshSettingConfig} from "./config/setting/sync";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
 import {systemConfig} from "./config/systemConfig";
 import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
@@ -93,6 +94,9 @@ export class App {
                             break;
                         case "setAppearance":
                             appearanceConfigApi.apply(data.data);
+                            break;
+                        case "settingChanged":
+                            void refreshSettingConfig(data.data.namespace);
                             break;
                         case "refreshAppearance":
                             void refreshAppearance(data.data);

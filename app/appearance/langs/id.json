@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "Perubahan editor yang tertunda tidak dapat disimpan. Silakan coba lagi.",
 	"blockTypeParentChange": "Konversi ini akan mengubah struktur atau tata letak blok luar",
 	"attributePanelVisibility": "Visibilitas kolom di panel properti",
 	"alwaysShow": "Selalu tampilkan",

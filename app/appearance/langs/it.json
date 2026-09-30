@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "Impossibile salvare le modifiche in sospeso nell'editor. Riprova.",
 	"blockTypeParentChange": "Questa conversione modificherebbe la struttura o la disposizione del blocco esterno",
 	"attributePanelVisibility": "Visibilità del campo nel pannello delle proprietà",
 	"alwaysShow": "Mostra sempre",

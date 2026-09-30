@@ -42,6 +42,17 @@ func notebookConfContract(value *conf.BoxConf) *apicontract.NotebookConf {
 // contractHandler 将请求绑定和响应类型与注册契约关联，业务入口继续使用现有中间件。
 func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, Data],
 	handler func(*gin.Context, Request) apicontract.Response[Data], beforeDecode ...func(*gin.Context) *apicontract.Response[Data]) gin.HandlerFunc {
+	if namespace := additionalSettingNamespace(endpoint.Definition().Path); namespace != "" {
+		handler = serializeSetting(namespace, handler)
+	}
+	if endpoint.Definition().Path == "/api/system/getConf" {
+		read := handler
+		handler = func(c *gin.Context, request Request) apicontract.Response[Data] {
+			settingMutationMu.Lock()
+			defer settingMutationMu.Unlock()
+			return read(c, request)
+		}
+	}
 	return func(c *gin.Context) {
 		writeResponse := func(response apicontract.Response[Data]) {
 			if after := response.AfterWrite(); after != nil {

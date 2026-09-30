@@ -1,4 +1,5 @@
 import {escapeAttr, escapeHtml} from "../util/escape";
+import {runSettingsMaintenance} from "./setting/maintenance";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isBrowser, isMobile} from "../util/functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -171,7 +172,7 @@ const assets = {
                 const type = target.getAttribute("data-type");
                 if (target.id === "removeAll") {
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAll}`, () => {
-                        fetchPost("/api/asset/removeUnusedAssets", {}, response => {
+                        void runSettingsMaintenance(() => fetchPost("/api/asset/removeUnusedAssets", {}, response => {
                             /// #if !MOBILE
                             getAllModels().asset.forEach(item => {
                                 if (response.data.paths.includes(item.path)) {
@@ -181,18 +182,18 @@ const assets = {
                             /// #endif
                             assetsListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                             clearAssetPreview();
-                        });
+                        }));
                     }, undefined, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (target.id === "removeAVAll") {
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAllAV}`, () => {
-                        fetchPost("/api/av/removeUnusedAttributeViews", {}, () => {
+                        void runSettingsMaintenance(() => fetchPost("/api/av/removeUnusedAttributeViews", {}, () => {
                             avListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                             avPreviewElement.innerHTML = "";
                             hideMobilePreview(avListElement, avPreviewElement);
-                        });
+                        }));
                     }, undefined, true);
                     event.preventDefault();
                     event.stopPropagation();

@@ -4,6 +4,9 @@ import {Constants} from "../../constants";
 import type {SettingSearchUnavailableItem, SettingTabMountContext} from "./builder";
 import {getSettingTab, type TSettingTab} from "./tabs";
 
+const deferredTabs = new Set<TSettingTab>();
+let watchingFocus = false;
+
 /** 首次挂载：渲染全部注册项并执行 afterMount */
 export const mountSettingTab = async (tabId: string, root: HTMLElement) => {
     const {html, items} = buildGroupedItemsView(tabId);
@@ -24,6 +27,20 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
     if (!root?.innerHTML) {
         return;
     }
+    if (root.contains(document.activeElement)) {
+        deferredTabs.add(tabId);
+        if (!watchingFocus) {
+            watchingFocus = true;
+            // 离开正在输入的面板后更新控件，避免替换用户尚未提交的输入。
+            document.addEventListener("focusout", () => setTimeout(() => {
+                const tabs = [...deferredTabs];
+                deferredTabs.clear();
+                tabs.forEach(tab => { void remountOpenSettingTab(tab); });
+            }, 0));
+        }
+        return;
+    }
+    deferredTabs.delete(tabId);
     const search: Partial<SettingTabMountContext> = {};
     const keywords = getSearchKeywordsLower(dialogElement);
     const tab = getSettingTab(tabId);
@@ -36,7 +53,7 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
     }
     // 重建和异步初始化配置项会改变内容高度，完成后恢复面板的滚动位置。
     const {scrollTop, scrollLeft} = root;
-    await tab.mount(root, search, undefined, true);
+    await tab.mount(root, search, window.siyuan.ws.app, true);
     root.scrollTop = scrollTop;
     root.scrollLeft = scrollLeft;
 };

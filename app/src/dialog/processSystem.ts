@@ -1,4 +1,5 @@
 import {Constants} from "../constants";
+import {getSettingsWindowHost} from "../config/setting/windowContext";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
@@ -208,6 +209,11 @@ const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean)
 };
 
 export const exitSiYuan = async (setCurrentWorkspace = true) => {
+    const host = getSettingsWindowHost();
+    if (host) {
+        await host.exit(setCurrentWorkspace);
+        return;
+    }
     hideAllElements(["util"]);
     /// #if !BROWSER
     try {

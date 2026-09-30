@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "エディターの未保存の変更を保存できませんでした。もう一度お試しください。",
 	"blockTypeParentChange": "この変換は外側のブロックの構造やレイアウトを変更するため実行できません",
 	"attributePanelVisibility": "属性パネルのフィールド表示",
 	"alwaysShow": "常に表示",

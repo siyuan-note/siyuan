@@ -581,6 +581,7 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 })
 
 var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Context, request apicontract.SystemImportConfRequest) (ret apicontract.Response[apicontract.Null]) {
+	defer beginSettingTask("importConf")()
 	ret = apicontract.Success(apicontract.Null{})
 
 	logging.LogInfof("importing conf...")
@@ -787,7 +788,8 @@ var getConf = contractHandler(apicontract.SystemGetConf, func(c *gin.Context, re
 	if err != nil {
 		return apicontract.Failure[apicontract.SystemConfData](-1, "get conf failed: "+err.Error())
 	}
-	ret = apicontract.Success(apicontract.SystemConfData{Conf: config, Start: !util.IsUILoaded.Load(), IsPublish: isPublish})
+	ret = apicontract.Success(apicontract.SystemConfData{Conf: config, Start: !util.IsUILoaded.Load(), IsPublish: isPublish,
+		SettingTasks: activeSettingTasks()})
 	return
 })
 

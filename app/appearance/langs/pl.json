@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "Nie udało się zapisać oczekujących zmian w edytorze. Spróbuj ponownie.",
 	"blockTypeParentChange": "Ta konwersja zmieniłaby strukturę lub układ bloku zewnętrznego",
 	"attributePanelVisibility": "Widoczność pola w panelu właściwości",
 	"alwaysShow": "Zawsze pokazuj",

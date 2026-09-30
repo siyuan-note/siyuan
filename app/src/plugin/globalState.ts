@@ -6,6 +6,7 @@ import {
     type IGlobalPluginStateSnapshot,
 } from "./globalStateCoordinator";
 import {type IPluginReloadData, reloadPlugin} from "./loader";
+import {getSettingsWindowHost} from "../config/setting/windowContext";
 
 type TGlobalPluginReloadData = IPluginReloadData & IGlobalPluginStatePayload;
 
@@ -34,6 +35,10 @@ const isGlobalPluginState = (data: IPluginReloadData): data is TGlobalPluginRelo
     typeof data.globalPetalChanged === "boolean";
 
 export const applyPluginReload = (app: App, data: IPluginReloadData = {}) => {
+    const host = getSettingsWindowHost();
+    if (host) {
+        return host.applyPluginReload(data);
+    }
     if (!isGlobalPluginState(data)) {
         return reloadPlugin(app, data);
     }
@@ -45,7 +50,7 @@ export const syncGlobalPluginConfig = (app: App, petalDisabled: boolean) => {
 };
 
 export const subscribeGlobalPluginState = (app: App, listener: (state: IGlobalPluginStateSnapshot) => void) =>
-    getCoordinator(app).subscribe(listener);
+    getSettingsWindowHost()?.subscribePlugins(listener) || getCoordinator(app).subscribe(listener);
 
 export const setGlobalPluginsDisabled = async (app: App, petalDisabled: boolean) => {
     const response = await fetchSyncPost("/api/setting/setBazaarPetalDisabled", {petalDisabled});

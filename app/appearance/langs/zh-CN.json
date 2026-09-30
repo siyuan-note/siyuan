@@ -1,4 +1,5 @@
 {
+	"settingsPendingSaveError": "无法保存编辑器中尚未提交的修改，请重试。",
 	"blockTypeParentChange": "此转换会改变外层块的结构或布局",
 	"attributePanelVisibility": "属性面板字段可见性",
 	"alwaysShow": "始终显示",

@@ -50,12 +50,22 @@ export class Model {
                 console.error("Failed to process queued WebSocket message:", error);
             }
         });
+        if (window.siyuan.isReady) {
+            const {refreshSettingConfig}: typeof import("../config/setting/sync") = require("../config/setting/sync");
+            void refreshSettingConfig();
+        }
     }
 
     public connect(options: IConnectOptions) {
         const websocketURL = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`;
         const ws = new WebSocket(`${websocketURL}?app=${Constants.SIYUAN_APPID}&id=${options.id}${options.type ? "&type=" + options.type : ""}`);
         ws.onopen = () => {
+            if (options.type === "main" && window.siyuan.isReady) {
+                const {resetSettingTaskRevision}: typeof import("../config/setting/taskBlocker") = require("../config/setting/taskBlocker");
+                resetSettingTaskRevision();
+                const {refreshSettingConfig}: typeof import("../config/setting/sync") = require("../config/setting/sync");
+                void refreshSettingConfig();
+            }
             if (options.callback) {
                 options.callback.call(this);
             }
@@ -96,11 +106,7 @@ export class Model {
             if (0 > ev.reason.indexOf("close websocket")) {
                 console.warn("WebSocket is closed. Reconnect will be attempted in 3 second.", ev);
                 setTimeout(() => {
-                    this.connect({
-                        id: options.id,
-                        type: options.type,
-                        msgCallback: options.msgCallback
-                    });
+                    this.connect(options);
                 }, 3000);
             }
         };

@@ -12,6 +12,7 @@ export interface ISettingsWindowHost {
     loadPlugin: (data: IPluginData) => Promise<void>;
     unloadPlugin: (name: string) => Promise<void>;
     openPluginSetting: (name: string) => Promise<void>;
+    hasPluginSetting: (name: string) => boolean;
     suspendShortcuts: () => void;
     restoreShortcuts: () => void;
     plugin?: {

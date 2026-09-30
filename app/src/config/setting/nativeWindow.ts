@@ -9,6 +9,7 @@ import {subscribeGlobalPluginState, applyPluginReload} from "../../plugin/global
 import {loadPlugin, unloadPlugin} from "../../plugin/loader";
 import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/globalShortcut";
 import {Constants} from "../../constants";
+import {hasPluginSetting} from "../../plugin";
 import type {App} from "../../index";
 import type {ISettingsWindowHost} from "./windowContext";
 import type {TSettingTab} from "./tabs";
@@ -72,9 +73,13 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
         applyPluginReload: async data => { await applyPluginReload(app, data); },
         loadPlugin: async data => { await loadPlugin(app, data); },
         unloadPlugin: async name => { await unloadPlugin(app, name); },
+        hasPluginSetting: name => {
+            const item = app.plugins.find(item => item.name === name);
+            return Boolean(item && hasPluginSetting(item));
+        },
         openPluginSetting: async name => {
             const item = app.plugins.find(item => item.name === name);
-            if (!item) return;
+            if (!item || !hasPluginSetting(item)) return;
             const sequence = openSequence;
             await item.openSetting();
             // 插件沿用原窗口对话框时显示其所属窗口，原生设置窗口自行接管焦点。

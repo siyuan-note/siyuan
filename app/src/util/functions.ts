@@ -30,7 +30,8 @@ export const getFrontend = () => {
     }
     /// #else
     if (window.navigator.userAgent.startsWith("SiYuan/")) {
-        if (isWindow()) {
+        // 设置窗口使用桌面主窗口的集市包兼容性，文档新窗口单独判断。
+        if (isWindow() && !document.body.classList.contains("body--settings")) {
             return "desktop-window";
         }
         return "desktop";

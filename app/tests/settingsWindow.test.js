@@ -33,17 +33,24 @@ const rendererModules = (sources) => {
     const fit = loadRendererModule(sources.fit, {
         "../../boot/windowControls": controls, "../../protyle/util/compatibility": {isMac: () => process.platform === "darwin"},
     });
-    return {Dialog, genUUID, context, fit, controls};
+    const frontend = loadRendererModule(sources.frontend, {
+        "./hostCapabilities": {getHostCapabilities: () => ({})}, "../editor/pdfAssetLink": {},
+    });
+    return {Dialog, genUUID, context, fit, controls, frontend};
 };
 
 const bootChild = async (sources) => {
     const {ipcRenderer} = require("electron");
     const {waitForSettingsWindowPaint} = loadRendererModule(sources.paint, {});
-    const {Dialog, genUUID, context, fit} = rendererModules(sources);
+    const {Dialog, genUUID, context, fit, frontend} = rendererModules(sources);
+    require("node:assert/strict").equal(frontend.getFrontend(), "desktop", navigator.userAgent);
     const host = await new Promise(resolve => {
         const token = new URLSearchParams(location.search).get("settingsWindowToken");
         window.opener.dispatchEvent(new CustomEvent("siyuan-settings-host-" + token, {detail: resolve}));
     });
+    class Plugin {openSetting() {}}
+    const pluginSettings = {};
+    new Function("Plugin", "exports", sources.pluginSettings)(Plugin, pluginSettings);
     await waitForSettingsWindowPaint(async () => {
         const theme = document.createElement("link");
         theme.id = "pendingTheme";
@@ -62,7 +69,7 @@ const bootChild = async (sources) => {
         canceled.remove();
         if (host.plugin) {
             const {Setting} = loadRendererModule(sources.setting, {
-                "../util/functions": {isMobile: () => false, getFrontend: () => "desktop-window"},
+                "../util/functions": {isMobile: () => false, getFrontend: frontend.getFrontend},
                 "../dialog": {Dialog}, "../config/setting/nativeWindow": {},
                 "../config/setting/windowContext": context, "../config/setting/windowDialog": fit,
                 "../util/genID": {genUUID},
@@ -75,6 +82,9 @@ const bootChild = async (sources) => {
             });
             window.addEventListener("unload", () => host.plugin.closed());
         } else {
+            const withoutSettings = host.app.plugins.find(plugin => plugin.name === "without-settings");
+            require("node:assert/strict").equal(pluginSettings.hasPluginSetting(withoutSettings), true);
+            require("node:assert/strict").equal(host.hasPluginSetting(withoutSettings.name), false);
             document.body.append(document.createElement("div"));
         }
     });
@@ -87,6 +97,9 @@ const runCases = async (sources) => {
     const assert = require("node:assert/strict");
     const {ipcRenderer} = require("electron");
     const {Dialog, genUUID, context, fit} = rendererModules(sources);
+    class Plugin {openSetting() {}}
+    const pluginSettings = {};
+    new Function("Plugin", "exports", sources.pluginSettings)(Plugin, pluginSettings);
     const native = loadRendererModule(sources.native, {
         electron: {ipcRenderer}, "../../util/genID": {genUUID}, "../../protyle/util/compatibility": {setStorageVal() {}},
         "../../layout/util": {exportLayout: async options => options.cb()}, "../../dialog/processSystem": {exitSiYuan: async () => {}},
@@ -94,6 +107,7 @@ const runCases = async (sources) => {
         "../../plugin/loader": {loadPlugin: async () => {}, unloadPlugin: async () => {}},
         "../../boot/globalEvent/globalShortcut": {sendGlobalShortcut() {}, sendUnregisterGlobalShortcut() {}},
         "../../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd"}},
+        "../../plugin": pluginSettings,
     });
     const {Setting} = loadRendererModule(sources.setting, {
         "../util/functions": {isMobile: () => false, getFrontend: () => "desktop"}, "../dialog": {Dialog},
@@ -136,6 +150,15 @@ const runCases = async (sources) => {
     await ipcRenderer.invoke("test-settings-size", 493, 376);
     await wait();
     const childDocument = control.ownerDocument;
+    if (process.platform === "win32") {
+        const points = ["#drag", "#minWindow", "#maxWindow", "#closeWindow"].map(selector => {
+            const rect = childDocument.querySelector(selector).getBoundingClientRect();
+            return {x: (rect.left + rect.right) / 2 / childDocument.defaultView.innerWidth,
+                y: (rect.top + rect.bottom) / 2 / childDocument.defaultView.innerHeight};
+        });
+        const hits = await ipcRenderer.invoke("test-settings-hit-test", points);
+        assert.deepEqual(hits, [2, 1, 1, 1]);
+    }
     for (const theme of ["daylight", "midnight"]) {
         const link = childDocument.getElementById("fixtureTheme");
         await new Promise(resolve => {
@@ -177,6 +200,8 @@ const runCases = async (sources) => {
     await wait();
     assert.equal(confirmed, 1);
     assert.equal(destroyed, 2);
+    const withoutSettings = Object.assign(new Plugin(), {name: "without-settings"});
+    window.siyuan.ws.app.plugins.push(withoutSettings);
     await native.openNativeSettings(window.siyuan.ws.app, {tab: "appearance"});
     await ipcRenderer.invoke("test-settings-wait");
     const builtinHost = await ipcRenderer.invoke("test-settings-token");
@@ -184,7 +209,17 @@ const runCases = async (sources) => {
         window.dispatchEvent(new CustomEvent("siyuan-settings-host-" + builtinHost, {detail: resolve}));
     });
     const legacySetting = new Setting({});
+    assert.equal(host.hasPluginSetting("without-settings"), false);
+    assert.equal(host.hasPluginSetting("missing"), false);
+    const emptyCommands = (await ipcRenderer.invoke("test-settings-commands")).length;
+    await host.openPluginSetting("without-settings");
+    await wait();
+    assert.equal((await ipcRenderer.invoke("test-settings-commands")).length, emptyCommands);
+    const configured = Object.assign(new Plugin(), {name: "configured", setting: new Setting({})});
+    window.siyuan.ws.app.plugins.push(configured);
+    assert.equal(host.hasPluginSetting("configured"), true);
     window.siyuan.ws.app.plugins.push({name: "legacy", openSetting: () => legacySetting.open("Legacy plugin")});
+    assert.equal(host.hasPluginSetting("legacy"), true);
     await host.openPluginSetting("legacy");
     assert.equal(legacySetting.dialog.element.ownerDocument, document);
     await wait();
@@ -209,6 +244,7 @@ if (process.versions.electron && process.type === "browser") {
     const {createServer} = require("node:http");
     const {createSettingsWindows} = require("../electron/settingsWindows");
     app.setPath("userData", process.argv[2]);
+    app.userAgentFallback = "SiYuan/fixture Electron";
     app.whenReady().then(async () => {
         let owner;
         let code = 0;
@@ -226,11 +262,22 @@ if (process.versions.electron && process.type === "browser") {
             fs.readFileSync(path.join(__dirname, "../appearance/themes", name, "theme.css"), "utf8")]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
-            paint: "config/setting/windowPaint.ts"})) {
-            sources[key] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), {
+            paint: "config/setting/windowPaint.ts", frontend: "util/functions.ts"})) {
+            let source = fs.readFileSync(path.join(__dirname, "../src", file), "utf8");
+            if (key === "frontend") {
+                source = require("ifdef-loader/preprocessor").parse(source, {MOBILE: false, BROWSER: false}, false, true);
+            }
+            sources[key] = ts.transpileModule(source, {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText;
         }
+        const pluginSource = ts.createSourceFile("plugin/index.ts", fs.readFileSync(path.join(__dirname, "../src/plugin/index.ts"), "utf8"),
+            ts.ScriptTarget.ES2021, true);
+        const pluginSetting = pluginSource.statements.find(statement => ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(item => item.name.getText(pluginSource) === "hasPluginSetting"));
+        sources.pluginSettings = ts.transpileModule(pluginSetting.getText(pluginSource), {
+            compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
+        }).outputText;
         const server = createServer((request, response) => {
             const pathname = new URL(request.url, "http://localhost").pathname;
             if (pathname.startsWith("/fixture/")) {
@@ -263,6 +310,12 @@ if (process.versions.electron && process.type === "browser") {
         const origin = "http://127.0.0.1:" + server.address().port;
         const policy = createSettingsWindows({ipcMain, screen, getTarget: id => owner?.webContents.id === id ? {origin, mode: "local"} : undefined,
             initialize: win => {
+                win.webContents.on("console-message", details => {
+                    if (details.level === "error" && details.message.startsWith("Uncaught")) {
+                        console.error(details.message);
+                        app.exit(1);
+                    }
+                });
                 children.add(win);
                 assert.equal(win.getParentWindow(), null);
                 assert.equal(win.isModal(), false);
@@ -297,6 +350,19 @@ if (process.versions.electron && process.type === "browser") {
         ipcMain.handle("test-settings-size", (_event, width, height) => {
             for (const child of children) child.setSize(width, height);
         });
+        if (process.platform === "win32") {
+            const {promisify} = require("node:util");
+            const {execFile} = require("node:child_process");
+            ipcMain.handle("test-settings-hit-test", async (_event, points) => {
+                const child = [...children][0];
+                const buffer = child.getNativeWindowHandle();
+                const handle = buffer.length === 8 ? buffer.readBigUInt64LE().toString() : String(buffer.readUInt32LE());
+                const {stdout} = await promisify(execFile)("powershell.exe", ["-NoProfile", "-NonInteractive",
+                    "-File", path.join(__dirname, "fixtures/windowHitTest.ps1"), handle, JSON.stringify(points)],
+                {windowsHide: true, timeout: 15000});
+                return JSON.parse(stdout);
+            });
+        }
         try {
             owner = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
             owner.webContents.setWindowOpenHandler(details => {

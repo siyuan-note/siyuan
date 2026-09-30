@@ -2,6 +2,7 @@ import {fetchSyncPost} from "../../util/fetch";
 import {systemConfig} from "../systemConfig";
 import {editorConfigApi} from "../tabs/editorRuntime";
 import {appearanceConfigApi} from "../tabs/appearanceRuntime";
+import {aiConfigApi} from "../tabs/ai/aiRuntime";
 import {objEquals} from "../../util/functions";
 import {syncSettingTasks} from "./taskBlocker";
 /// #if !MOBILE
@@ -36,6 +37,9 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             if (includes("appearance") && !objEquals(window.siyuan.config.appearance, next.appearance)) {
                 appearanceConfigApi.apply(next.appearance);
             }
+            if (includes("ai") && !objEquals(window.siyuan.config.ai, next.ai)) {
+                aiConfigApi.apply(next.ai);
+            }
             /// #if !MOBILE
             if (includes("keymap") && !objEquals(window.siyuan.config.keymap, next.keymap)) {
                 applyKeymap(next.keymap);
@@ -45,7 +49,7 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
                 window.siyuan.config.keymap = next.keymap;
             }
             /// #endif
-            const simple = ["ai", "export", "fileTree", "search", "flashcard", "secrets", "variables", "sync", "repo", "system", "bazaar", "publish"] as const;
+            const simple = ["export", "fileTree", "search", "flashcard", "secrets", "variables", "sync", "repo", "system", "bazaar", "publish"] as const;
             for (const key of simple) {
                 if (includes(key)) {
                     Object.assign(window.siyuan.config, {[key]: next[key]});
@@ -53,7 +57,7 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             }
             /// #if !MOBILE
             const tabs: Record<string, TSettingTab> = {fileTree: "file", secrets: "secretsVariables", variables: "secretsVariables", system: "app", publish: "access"};
-            for (const namespace of namespaces.has("*") ? [...simple, "editor", "keymap", "appearance"] : namespaces) {
+            for (const namespace of namespaces.has("*") ? [...simple, "editor", "keymap", "appearance", "ai"] : namespaces) {
                 const tab = getSettingTabDefs().find(definition => definition.id === (tabs[namespace] || namespace));
                 if (tab) void remountOpenSettingTab(tab.id);
             }

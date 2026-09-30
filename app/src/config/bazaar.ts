@@ -826,7 +826,9 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                     const showDisable = ["icons", "themes"].includes(bazaarType) && bazaarItem.current;
                     const plugin = bazaarType === "plugins" ?
                         app.plugins.find((item: Plugin) => item.name === bazaarItem.name) : undefined;
-                    const hasSetting = plugin ? hasPluginSetting(plugin) : false;
+                    const host = getSettingsWindowHost();
+                    const hasSetting = bazaarType === "plugins" &&
+                        (host ? host.hasPluginSetting(bazaarItem.name) : Boolean(plugin && hasPluginSetting(plugin)));
                     const showPublishSwitch = bazaarType === "plugins" && window.siyuan.config.publish.enable;
                     const publishEnabled = isBazaarPluginEnabledInPublish(bazaarItem);
                     const publishSwitchHTML = showPublishSwitch ? `<span class="config-bazaar__publish-controls"><label data-type="plugin-publish-enable-label" class="config-bazaar__publish-switch ariaLabel" data-position="north" aria-label="${escapeAttr(bazaarItem.disabledInPublish ? window.siyuan.languages.pluginDisabledInPublishTip : window.siyuan.languages.publishService)}">

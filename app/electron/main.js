@@ -3043,7 +3043,7 @@ app.whenReady().then(() => {
             trayMenuTemplate.splice(1, 0, {
                 label: mainWindow.isAlwaysOnTop() ? lang.cancelWindowTop : lang.setWindowTop, click: () => {
                     if (!mainWindow.isAlwaysOnTop()) {
-                        mainWindow.setAlwaysOnTop(true);
+                        mainWindow.setAlwaysOnTop(true, "pop-up-menu");
                     } else {
                         mainWindow.setAlwaysOnTop(false);
                     }
@@ -3694,7 +3694,8 @@ app.whenReady().then(() => {
                 if (!currentWindow) {
                     return;
                 }
-                currentWindow.setAlwaysOnTop(true);
+                // Windows 置顶窗口使用不受任务栏后置限制的级别。
+                currentWindow.setAlwaysOnTop(true, "win32" === process.platform ? "pop-up-menu" : "floating");
                 break;
             case "clearCache":
                 event.sender.session.clearCache();
@@ -3888,7 +3889,7 @@ app.whenReady().then(() => {
         } else {
             win.center();
         }
-        win.setAlwaysOnTop(data.alwaysOnTop);
+        win.setAlwaysOnTop(data.alwaysOnTop, "win32" === process.platform ? "pop-up-menu" : "floating");
         win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
         win.webContents.session.setSpellCheckerLanguages(["en-US"]);
         win.loadURL(windowURL.href);

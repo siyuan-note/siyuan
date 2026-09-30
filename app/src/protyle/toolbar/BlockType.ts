@@ -51,7 +51,7 @@ export const updateBlockTypeButton = (protyle: IProtyle, button: HTMLElement, ra
     } else {
         button.textContent = label;
     }
-    button.setAttribute("aria-label", `${window.siyuan.languages.turnInto} ${label}`);
+    button.setAttribute("aria-label", window.siyuan.languages.turnInto);
 };
 
 export const openBlockTypeMenu = (protyle: IProtyle, button: HTMLElement, snapshot: TTextBlockSelection,

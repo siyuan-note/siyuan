@@ -13,6 +13,8 @@ const runCases = async (sources, platform) => {
     let inputRequests = 0;
     let undoCalls = 0;
     const inserts = [];
+    const commands = [];
+    const nativeKeyboard = platform === "android" || platform === "harmony";
     const visible = new Set(["mobile-copy", "mobile-cut", "mobile-undo", "mobile-redo", "mobile-indent",
         "mobile-outdent", "mobile-block", "mobile-add", "mobile-heading1", "strong", "em", "mobile-separator"]);
     const order = ["strong", "mobile-undo", "mobile-separator", "mobile-heading1", "em", "mobile-indent", "mobile-outdent"];
@@ -24,8 +26,8 @@ const runCases = async (sources, platform) => {
         "mobile/editor": {getCurrentEditor: () => current && {protyle: current}},
         "protyle/lite/mobileToolbar": {getMobileToolbarProtyle: () => undefined, getMobileToolbarUndo: () => undefined,
             getMobileToolbarPaddingElement: protyle => protyle.element},
-        "protyle/util/compatibility": {isInAndroid: () => platform === "android", isInHarmony: () => false,
-            isInMobileApp: () => platform === "android",
+        "protyle/util/compatibility": {isInAndroid: () => platform === "android", isInHarmony: () => platform === "harmony",
+            isInMobileApp: () => platform !== "browser",
             isInEdge: () => false},
         "mobile/util/inlineMathSelection": {createInlineMathSelection: () => ({reset() {}, update() {}, prepareInput() {}})},
         "mobile/util/pluginToolbar": {getMobilePluginToolbarItems: () => []},
@@ -38,6 +40,14 @@ const runCases = async (sources, platform) => {
         "protyle/util/tableCellRichContext": {getTableCellRichContext: () => undefined},
         "editor/getIcon": {getIconByType: () => "iconParagraph"},
         "plugin/EventBusCore": {forEachPluginSubscriber() {}},
+        "protyle/util/selection": {
+            getSelectionPosition: () => ({top: 100, left: 0}),
+            focusByRange: range => {
+                editable.focus();
+                getSelection().removeAllRanges();
+                getSelection().addRange(range);
+            },
+        },
         "protyle/util/inlineElementMarker": {stripSemanticMarkersFromRangeText: range => range.toString()},
         "protyle/util/editorFocus": {getEditorFocusRange: (_root, range, fallback) => range || fallback,
             restoreEditorFocusRange: (_root, range) => {
@@ -57,7 +67,7 @@ const runCases = async (sources, platform) => {
         if (!cache[name]) {
             cache[name] = {};
             new Function("require", "exports", sources[name])(relative =>
-                load(path.posix.normalize(path.posix.join(path.posix.dirname(name), relative))), cache[name]);
+                load(relative.startsWith(".") ? path.posix.normalize(path.posix.join(path.posix.dirname(name), relative)) : relative), cache[name]);
         }
         return cache[name];
     };
@@ -67,25 +77,23 @@ const runCases = async (sources, platform) => {
     const toolbar = document.getElementById("keyboardToolbar");
     const preview = document.createElement("div");
     preview.className = "fn__none";
-    const selectionInput = load("mobile/util/selectionKeyboard");
-    const focus = HTMLElement.prototype.focus;
-    HTMLElement.prototype.focus = function (...args) {
-        const suppressed = selectionInput.suppressMobileSelectionFocus(this);
-        focus.apply(this, args);
-        if (!suppressed && this === editable) {
-            load("mobile/util/mobileAppUtil").callMobileAppShowKeyboard();
-        }
-    };
     window.siyuan = {zIndex: 1, languages: {}, mobile: {size: {}}, config: {readonly: false, editor: {fontSize: 16}},
-        menus: {menu: {remove() {}}}};
-    if (platform === "android") {
-        window.JSAndroid = {showKeyboard: () => keyboardShows++, hideKeyboard: () => keyboardHides++};
+        menus: {menu: {element: document.createElement("div"), remove() {}}}};
+    if (nativeKeyboard) {
+        window[platform === "android" ? "JSAndroid" : "JSHarmony"] = {
+            showKeyboard: () => keyboardShows++, hideKeyboard: () => keyboardHides++,
+        };
     }
     window.addEventListener("siyuan-mobile-keyboard-change", event => {
+        document.body.classList.toggle("mobile-keyboard--open", event.detail);
         if (event.detail) {
             inputRequests++;
         }
     });
+    document.execCommand = command => {
+        commands.push({command, text: getSelection().toString()});
+        return true;
+    };
     window.Lute = {Caret: "‸"};
     current = {element: document.getElementById("editor"), editable, contentElement: root.parentElement,
         wysiwyg: {element: root}, preview: {element: preview},
@@ -94,8 +102,11 @@ const runCases = async (sources, platform) => {
         gutter: {}, undo: {undo: () => undoCalls++}, hint: {fill: value => inserts.push(value)}};
     const keyboard = load("mobile/util/keyboardToolbar");
     keyboard.initKeyboardToolbar();
+    load("mobile/inputBindings");
     const settle = async () => {
         document.dispatchEvent(new Event("selectionchange"));
+        // 文档编辑器和原生键盘回调会刷新工具栏，此处复用同一入口。
+        keyboard.showKeyboardToolbar();
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     };
     const select = (end = 5) => {
@@ -106,34 +117,53 @@ const runCases = async (sources, platform) => {
         getSelection().addRange(range);
     };
     const touch = type => editable.dispatchEvent(new PointerEvent(type, {bubbles: true, pointerType: "touch"}));
+    // 键盘尚未打开时选字，不覆盖输入类型，也不要求先点击独立的编辑按钮。
     touch("pointerdown");
-    assert.equal(editable.getAttribute("inputmode"), "none");
+    assert.equal(editable.hasAttribute("inputmode"), false);
     editable.focus();
-    assert.equal(keyboardShows, 0);
+    assert.equal(keyboardShows > 0, nativeKeyboard);
     select();
     touch("pointerup");
+    editable.click();
     await settle();
-    assert.equal(selectionInput.isMobileSelectionMode(), true);
-    assert.equal(keyboardHides, platform === "android" ? 1 : 0);
+    assert.equal(keyboardHides, 0);
     assert.equal(toolbar.classList.contains("fn__none"), false);
-    assert.equal(toolbar.classList.contains("keyboard--selection"), true);
+    assert.equal(toolbar.classList.contains("keyboard--selection"), false);
+    assert.equal(toolbar.querySelector('[data-type="done"] use').getAttribute("xlink:href"), "#iconKeyboardHide");
     assert.equal(getSelection().toString(), "Alpha");
+    assert.equal(document.activeElement, editable);
+    assert.ok(inputRequests > 0);
+    assert.equal(toolbar.querySelector('[data-type="copy"]').classList.contains("fn__none"), false);
+    assert.equal(toolbar.querySelector('[data-type="cut"]').classList.contains("fn__none"), false);
     const contextMenu = new MouseEvent("contextmenu", {bubbles: true, cancelable: true});
     editable.dispatchEvent(contextMenu);
-    assert.equal(contextMenu.defaultPrevented, true);
+    assert.equal(contextMenu.defaultPrevented, false);
     assert.equal(getSelection().toString(), "Alpha");
-    editable.blur();
-    load("mobile/util/mobileAppUtil").callMobileAppShowKeyboard();
-    assert.equal(keyboardShows, 0);
-    assert.equal(selectionInput.isMobileSelectionMode(), true);
-    assert.equal(keyboard.hideKeyboardToolbarByApp(false), load("mobile/util/touchSelection").KeyboardHideResult.PreserveSelection);
+
+    // 正在输入时重新选字或拖动端点，选区变化不能关闭键盘。
+    assert.equal(document.body.classList.contains("mobile-keyboard--open"), true);
+    touch("pointerdown");
+    select(10);
+    touch("pointerup");
+    await settle();
+    assert.equal(getSelection().toString(), "Alpha beta");
+    assert.equal(keyboardHides, 0);
+    assert.equal(editable.hasAttribute("inputmode"), false);
+    select();
+    editable.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    await settle();
     assert.equal(getSelection().toString(), "Alpha");
+    assert.equal(keyboardHides, 0);
     const action = name => toolbar.querySelector(`[data-type="${name}"]`).dispatchEvent(
-        new Event(platform === "android" ? "touchend" : "click", {bubbles: true, cancelable: true}));
+        new Event(nativeKeyboard ? "touchend" : "click", {bubbles: true, cancelable: true}));
+    action("copy");
+    action("cut");
+    assert.deepEqual(commands, [{command: "copy", text: "Alpha"}, {command: "cut", text: "Alpha"}]);
     action("strong");
     await settle();
-    assert.equal(keyboardShows, 0);
-    assert.equal(editable.getAttribute("inputmode"), "none");
+    assert.equal(keyboardHides, 0);
+    assert.equal(editable.hasAttribute("inputmode"), false);
+    assert.equal(document.activeElement, editable);
     action("undo");
     assert.equal(undoCalls, 1);
     action("redo");
@@ -153,30 +183,44 @@ const runCases = async (sources, platform) => {
     await settle();
     assert.equal(toolbar.querySelector('[data-type="heading1"]').classList.contains("fn__none"), true);
     current.lite = undefined;
+    const showsBeforeClose = keyboardShows;
     action("done");
-    await settle();
-    assert.equal(selectionInput.isMobileSelectionMode(), false);
+    assert.equal(document.activeElement, document.body);
     assert.equal(editable.hasAttribute("inputmode"), false);
-    assert.ok(inputRequests > 0);
-    assert.equal(keyboardShows > 0, platform === "android");
-    assert.equal(toolbar.classList.contains("keyboard--selection"), false);
-    // 短按折叠光标恢复输入，保留已有的 inputmode 属性。
-    selectionInput.clearMobileSelectionInput();
+    assert.equal(keyboardHides, nativeKeyboard ? 1 : 0);
+    assert.equal(keyboardShows, showsBeforeClose);
+    assert.equal(toolbar.classList.contains("fn__none"), true);
+    // 短按继续输入时保留已有 inputmode，折叠选区不显示复制与剪切。
     editable.setAttribute("inputmode", "text");
     touch("pointerdown");
+    editable.focus();
     select(0);
     touch("pointerup");
     editable.click();
-    assert.equal(editable.getAttribute("inputmode"), "text");
-    assert.equal(selectionInput.isMobileSelectionMode(), false);
-    // 输入框与数据库字段弹层不会继承文档的选择模式。
-    touch("pointerdown");
-    select();
     await settle();
+    assert.equal(editable.getAttribute("inputmode"), "text");
+    assert.equal(toolbar.querySelector('[data-type="copy"]').classList.contains("fn__none"), true);
+    assert.equal(toolbar.querySelector('[data-type="cut"]').classList.contains("fn__none"), true);
+    // 输入框不会因残留文档选区恢复文档工具栏。
     const input = document.createElement("input");
     document.body.append(input);
+    select();
     input.focus();
-    assert.equal(selectionInput.isMobileSelectionMode(), false);
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    assert.equal(toolbar.classList.contains("fn__none"), true);
+    assert.equal(editable.getAttribute("inputmode"), "text");
+    assert.equal(document.activeElement, input);
+    // 只读编辑器不通过全局点击与焦点逻辑请求输入。
+    keyboard.hideKeyboardToolbar();
+    root.setAttribute("data-readonly", "true");
+    current.disabled = true;
+    const showsBeforeReadonly = keyboardShows;
+    touch("pointerdown");
+    editable.focus();
+    select();
+    touch("pointerup");
+    editable.click();
+    assert.equal(keyboardShows, showsBeforeReadonly);
     assert.equal(editable.getAttribute("inputmode"), "text");
 };
 
@@ -190,15 +234,33 @@ const runElectron = async () => {
     let exitCode = 0;
     try {
         const ts = require("typescript");
-        const modules = ["mobile/util/selectionKeyboard", "mobile/util/keyboardToolbar", "mobile/util/toolbarActions",
+        const modules = ["mobile/util/keyboardToolbar", "mobile/util/toolbarActions",
             "mobile/util/toolbarEntries", "mobile/util/mobileAppUtil", "mobile/util/mobileKeyboardChange",
             "mobile/util/touchSelection", "mobile/util/visibleViewport", "protyle/util/hasClosest",
             "protyle/toolbar/defaults", "protyle/toolbar/entryVisibility", "config/entryVisibility/order"];
         const sources = Object.fromEntries(modules.map(name => [name, ts.transpileModule(
             readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
             {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
+        // 直接使用移动端 App 的点击与 focus 绑定，避免测试替身漏掉输入抑制逻辑。
+        const appSource = ts.createSourceFile("mobile/index.ts",
+            readFileSync(path.join(__dirname, "../src/mobile/index.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+        const appClass = appSource.statements.find(node => ts.isClassDeclaration(node) && node.name.text === "App");
+        const statements = appClass.members.find(ts.isConstructorDeclaration).body.statements;
+        const clickBinding = statements.find(node => node.getText(appSource).startsWith('window.addEventListener("click",'));
+        const focusBinding = statements.find(node => ts.isBlock(node) && node.getText(appSource).includes("__siyuan_original_focus"));
+        assert.ok(clickBinding && focusBinding);
+        sources["mobile/inputBindings"] = ts.transpileModule(`
+            const {canInput, armKeyboardLock, callMobileAppShowKeyboard} = require("mobile/util/mobileAppUtil");
+            const {hideKeyboardToolbarUtilOnEditorClick} = require("mobile/util/keyboardToolbar");
+            const {hasClosestByClassName, hasClosestByAttribute, hasTopClosestByClassName} = require("protyle/util/hasClosest");
+            const {Constants} = require("constants");
+            const scrollInputIntoView = () => {};
+            const hideAllElements = () => {};
+            ${clickBinding.getText(appSource)}
+            ${focusBinding.getText(appSource)}
+        `, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         const css = require("sass").compile(path.join(__dirname, "../src/assets/scss/mobile.scss"), {logger: {warn() {}}}).css;
-        for (const platform of ["android", "browser"]) {
+        for (const platform of ["android", "harmony", "ios", "browser"]) {
             await win.loadURL("data:text/html,<html><body></body></html>");
             await win.webContents.insertCSS(css);
             await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(platform)})`);
@@ -216,7 +278,7 @@ const runElectron = async () => {
 if (process.versions.electron && process.type === "browser") {
     runElectron().catch(error => {console.error(error); require("electron").app.exit(1);});
 } else {
-    require("node:test").it("keeps touch selections editable without opening the keyboard and shares toolbar configuration", {
+    require("node:test").it("keeps touch selections in the input flow and shares toolbar configuration", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,
     }, async () => {

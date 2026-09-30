@@ -128,8 +128,6 @@ describe("mobile input detection", () => {
 describe("mobile app keyboard", () => {
     it("notifies listeners before requesting the Android keyboard", () => {
         const originalWindow = globalThis.window;
-        const originalDocument = globalThis.document;
-        Object.defineProperty(globalThis, "document", {configurable: true, value: {activeElement: undefined}});
         const calls: string[] = [];
         const testWindow = new EventTarget() as Window & typeof globalThis;
         Object.assign(testWindow, {
@@ -152,7 +150,6 @@ describe("mobile app keyboard", () => {
             callMobileAppShowKeyboard();
             assert.deepEqual(calls, ["change", "keyboard"]);
         } finally {
-            Object.defineProperty(globalThis, "document", {configurable: true, value: originalDocument});
             Object.defineProperty(globalThis, "window", {
                 configurable: true,
                 value: originalWindow,

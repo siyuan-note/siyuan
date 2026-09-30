@@ -90,7 +90,6 @@ import {insertEmptyBlock} from "../../block/util";
 import {getIconByType} from "../../editor/getIcon";
 import {MOBILE_TOOLBAR_ACTIONS, MOBILE_TOOLBAR_INSERTS} from "./toolbarActions";
 import {pauseMobileBarsScroll} from "./mobileBars";
-import {clearMobileSelectionInput, getMobileSelectionRange, initMobileSelectionInput, isMobileSelectionMode} from "./selectionKeyboard";
 
 const getCurrentEditor = () => getMobileToolbarProtyle()?.getInstance() || getDocumentEditor();
 let toolbarProtyle: IProtyle;
@@ -103,7 +102,10 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
         isAvailable: name => {
             const protyle = getCurrentEditor()?.protyle;
             if (name === "copy" || name === "cut") {
-                return !!getMobileSelectionRange();
+                const selection = getSelection();
+                return !!protyle && !protyle.disabled && selection?.rangeCount > 0 && !selection.isCollapsed &&
+                    protyle.wysiwyg.element.contains(selection.anchorNode) &&
+                    protyle.wysiwyg.element.contains(selection.focusNode);
             }
             if (name === "block") {
                 return !!protyle?.gutter || !!protyle && !!getTableCellRichContext(protyle);
@@ -396,43 +398,12 @@ const preventKeyboardToolbarRender = () => {
 };
 
 const updateKeyboardToolbarPosition = () => {
-    const toolbarElement = document.getElementById("keyboardToolbar");
-    const range = getMobileSelectionRange();
-    const floating = !!range && keyboardPanelTop === undefined;
-    if (toolbarElement.classList.contains("keyboard--selection") && !floating) {
-        toolbarElement.style.top = "";
-        toolbarElement.style.left = "";
-        toolbarElement.style.bottom = "";
-        toolbarElement.style.visibility = "";
-    }
-    toolbarElement.classList.toggle("keyboard--selection", floating);
-    if (floating) {
-        const viewport = getVisibleViewportBounds();
-        const content = hasClosestByClassName(range.startContainer, "protyle-content", true);
-        if (content) {
-            const contentRect = content.getBoundingClientRect();
-            viewport.top = Math.max(viewport.top, contentRect.top);
-            viewport.bottom = Math.min(viewport.bottom, contentRect.bottom);
-        }
-        const rect = Array.from(range.getClientRects()).find(item => item.bottom > viewport.top && item.top < viewport.bottom);
-        toolbarElement.style.visibility = rect ? "" : "hidden";
-        if (rect) {
-            const width = toolbarElement.getBoundingClientRect().width;
-            const height = toolbarElement.clientHeight || 48;
-            toolbarElement.style.top = `${Math.max(viewport.top + 8, Math.min(viewport.bottom - height - 8,
-                rect.top - height - 8 >= viewport.top ? rect.top - height - 8 : rect.bottom + 8))}px`;
-            toolbarElement.style.left = `${Math.max(8, Math.min(window.innerWidth - width - 8,
-                rect.left + (rect.width - width) / 2))}px`;
-        }
-        toolbarElement.style.bottom = "auto";
-        toolbarElement.style.transform = "";
-        return;
-    }
     updateKeyboardPanelHeight();
     scrollKeyboardSelectionIntoView();
     if (isInMobileApp() || !window.visualViewport) {
         return;
     }
+    const toolbarElement = document.getElementById("keyboardToolbar");
     const viewportBottom = window.visualViewport.offsetTop + window.visualViewport.height;
     const toolbarHeight = toolbarElement.getBoundingClientRect().height || 48;
     toolbarElement.style.transform = "";
@@ -896,7 +867,7 @@ const hideKeyboardToolbarUtil = (restoreKeyboard = false) => {
     if (keyboardPanelClosing) {
         return;
     }
-    if (restoreKeyboard && keyboardPanelTop !== undefined && !isMobileSelectionMode()) {
+    if (restoreKeyboard && keyboardPanelTop !== undefined) {
         keyboardPanelClosing = true;
         showUtil = true;
         resetKeyboardToolbarUtilButtons();
@@ -985,7 +956,7 @@ const renderKeyboardToolbar = () => {
     // 合并同一帧内的选区变化，在浏览器更新选区后及时显示工具栏。
     renderKeyboardToolbarFrame = window.requestAnimationFrame(() => {
         renderKeyboardToolbarFrame = undefined;
-        if (!canInput(document.activeElement) && !getMobileSelectionRange()) {
+        if (!canInput(document.activeElement)) {
             hideKeyboardToolbar();
             return;
         }
@@ -1090,7 +1061,7 @@ const showKeyboardToolbarElement = () => {
     }
     const selection = getSelection();
     // 空块恢复焦点时 Selection 可能暂时为空，但原生键盘已经显示，仍需隐藏普通底栏。
-    notifyMobileKeyboardChange(!isMobileSelectionMode());
+    notifyMobileKeyboardChange(true);
     const protyle = getCurrentEditor()?.protyle;
     if (!protyle || (selection.rangeCount > 0 && (
         hasClosestByClassName(selection.getRangeAt(0).startContainer, "protyle-wysiwyg", true) !== protyle.wysiwyg.element ||
@@ -1107,14 +1078,10 @@ const showKeyboardToolbarElement = () => {
         toolbarProtyle = protyle;
         updateMobilePluginToolbar(protyle);
     }
-    const selectionOnly = isMobileSelectionMode();
     const done = toolbarElement.querySelector('.keyboard__action[data-type="done"]');
-    done.setAttribute("aria-label", selectionOnly && keyboardPanelTop === undefined ? window.siyuan.languages.edit : window.siyuan.languages.close);
+    done.setAttribute("aria-label", window.siyuan.languages.close);
     done.querySelector("use").setAttribute("xlink:href",
-        keyboardPanelTop !== undefined ? "#iconCloseRound" : selectionOnly ? "#iconEdit" : "#iconKeyboardHide");
-    if (selectionOnly) {
-        getMobileToolbarPaddingElement(protyle).style.paddingBottom = "";
-    }
+        keyboardPanelTop !== undefined ? "#iconCloseRound" : "#iconKeyboardHide");
     if (!toolbarElement.classList.contains("fn__none")) {
         return;
     }
@@ -1124,9 +1091,6 @@ const showKeyboardToolbarElement = () => {
     toolbarElement.classList.remove("fn__none");
     toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
     updateKeyboardToolbarPosition();
-    if (selectionOnly) {
-        return;
-    }
     const modelElement = document.getElementById("model");
     if (modelElement.style.transform === "translateX(0px)") {
         modelElement.style.paddingBottom = "48px";
@@ -1155,7 +1119,7 @@ export const showKeyboardToolbar = () => {
 
 const scrollKeyboardSelectionIntoView = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
-    if (!toolbarElement || toolbarElement.classList.contains("fn__none") || showUtil || isMobileSelectionMode()) {
+    if (!toolbarElement || toolbarElement.classList.contains("fn__none") || showUtil) {
         return;
     }
     clearTimeout(scrollSelectionIntoViewTimeout);
@@ -1237,7 +1201,7 @@ export const hideKeyboardToolbar = () => {
     clearTimeout(scrollSelectionIntoViewTimeout);
     clearRenderGutterAfterScroll?.();
     // 键盘退场时保留已展开的移动端菜单，菜单由用户操作或编辑器切换关闭。
-    if (showUtil || keyboardPanelTop !== undefined || getMobileSelectionRange()) {
+    if (showUtil || keyboardPanelTop !== undefined) {
         return;
     }
     pendingKeyboardFocus = undefined;
@@ -1263,11 +1227,6 @@ export const hideKeyboardToolbar = () => {
 };
 
 export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
-    if (isMobileSelectionMode()) {
-        notifyMobileKeyboardChange(false);
-        renderKeyboardToolbar();
-        return KeyboardHideResult.PreserveSelection;
-    }
     inlineMathSelection.reset();
     if (preserveSelection && ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)) {
         // 输入法切换安全键盘时会临时隐藏，保留普通输入框焦点，避免中断密码输入。
@@ -1305,9 +1264,6 @@ export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
 };
 
 export const activeBlur = (force = false) => {
-    if (!force && isMobileSelectionMode()) {
-        return;
-    }
     const now = Date.now();
     if (!force && now < keyboardLockUntil) {
         console.warn(`activeBlur blocked by lock (remaining: ${keyboardLockUntil - now}ms)`);
@@ -1328,20 +1284,6 @@ export const activeBlur = (force = false) => {
 };
 
 export const initKeyboardToolbar = () => {
-    initMobileSelectionInput(() => {
-        const protyle = getCurrentEditor()?.protyle;
-        if (protyle) {
-            hideElements(["util"], protyle);
-        }
-        notifyMobileKeyboardChange(false);
-        window.JSAndroid?.hideKeyboard?.();
-        window.JSHarmony?.hideKeyboard?.();
-    }, renderKeyboardToolbar);
-    document.addEventListener("scroll", () => {
-        if (getMobileSelectionRange()) {
-            updateKeyboardToolbarPosition();
-        }
-    }, true);
     window.addEventListener("siyuan-mobile-toolbar-focus", renderKeyboardToolbar);
     window.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => {
         if (event.detail) {
@@ -1357,9 +1299,6 @@ export const initKeyboardToolbar = () => {
     });
     let composing = false;
     window.addEventListener("siyuan-mobile-keyboard-hiding", () => {
-        if (isMobileSelectionMode()) {
-            return;
-        }
         // 键盘退场前先隐藏工具栏，焦点和选区由原生端在动画结束后清理。
         preventKeyboardToolbarRender();
         hideKeyboardToolbar();
@@ -1563,7 +1502,7 @@ export const initKeyboardToolbar = () => {
     toolbarElement.addEventListener("mousedown", event => {
         const buttonElement = hasClosestByTag(event.target as HTMLElement, "BUTTON");
         const type = buttonElement && buttonElement.getAttribute("data-type");
-        if (isMobileSelectionMode() || type === "undo" || type === "redo" || type === "block") {
+        if (type === "undo" || type === "redo" || type === "block") {
             // 保持编辑器焦点，避免工具栏操作期间软键盘收起。
             event.preventDefault();
         }
@@ -1693,12 +1632,6 @@ export const initKeyboardToolbar = () => {
         event.stopPropagation();
         const selection = getSelection();
         const currentRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
-        if (type === "done" && isMobileSelectionMode() && keyboardPanelTop === undefined) {
-            const range = currentRange?.cloneRange() || protyle?.toolbar.range;
-            clearMobileSelectionInput();
-            restoreKeyboardToolbarRange(protyle, range);
-            return;
-        }
         // 收起菜单不依赖实时选区，编辑器失焦后使用保存的选区恢复光标。
         const closeAddMenu = type === "add" && buttonElement.classList.contains("protyle-toolbar__item--current");
         if (type === "done" || closeAddMenu) {

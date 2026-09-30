@@ -4,6 +4,12 @@
       transform: none;
       opacity: 1;
       transition: none;
+      border-radius: 0;
+    }
+
+    .config__tab-wrap,
+    .config__view {
+      border-radius: 0;
     }
 
     & > .b3-dialog__container > .toolbar {

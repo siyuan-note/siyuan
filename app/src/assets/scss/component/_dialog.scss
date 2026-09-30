@@ -5,8 +5,10 @@
       opacity: 1;
       transition: none;
       border-radius: 0;
+      border: 0;
     }
 
+    .config__panel,
     .config__tab-wrap,
     .config__view {
       border-radius: 0;
@@ -31,6 +33,12 @@
       #windowControls {
         margin-left: auto;
         -webkit-app-region: no-drag;
+
+        .toolbar__item {
+          align-self: stretch;
+          align-items: center;
+          height: auto;
+        }
       }
     }
 

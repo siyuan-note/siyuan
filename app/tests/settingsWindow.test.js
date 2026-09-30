@@ -127,11 +127,14 @@ const runCases = async (sources) => {
     let created = 0;
     const control = document.createElement("input");
     control.value = "original";
+    const panel = document.createElement("div");
+    panel.className = "config__panel";
+    panel.append(control);
     const setting = new Setting({openInWindow: true, confirmCallback: () => {
         assert.equal(control.value, "changed");
         confirmed++;
     }, destroyCallback: () => destroyed++});
-    setting.addItem({title: "Control", createActionElement: () => { created++; return control; }});
+    setting.addItem({title: "Control", createActionElement: () => { created++; return panel; }});
     setting.open("Plugin");
     await ipcRenderer.invoke("test-settings-wait");
     assert.equal(created, 1);
@@ -159,6 +162,24 @@ const runCases = async (sources) => {
         });
         const hits = await ipcRenderer.invoke("test-settings-hit-test", points);
         assert.deepEqual(hits, [2, 1, 1, 1]);
+        for (const state of ["maximized", "fullscreen"]) {
+            await ipcRenderer.invoke("test-settings-native-state", state);
+            await wait();
+            const topPoints = ["#drag", "#minWindow", "#maxWindow", "#closeWindow"].map(selector => {
+                const rect = childDocument.querySelector(selector).getBoundingClientRect();
+                return {x: (rect.left + rect.right) / 2 / childDocument.defaultView.innerWidth, y: 0};
+            });
+            assert.deepEqual(await ipcRenderer.invoke("test-settings-hit-test", topPoints),
+                [state === "fullscreen" ? 1 : 2, 1, 1, 1], state);
+            for (const selector of ["#minWindow", "#maxWindow", "#closeWindow"]) {
+                const button = childDocument.querySelector(selector);
+                const rect = button.getBoundingClientRect();
+                assert.ok(button.contains(childDocument.elementFromPoint((rect.left + rect.right) / 2, 0)), state + selector);
+            }
+        }
+        await ipcRenderer.invoke("test-settings-native-state", "normal");
+        await ipcRenderer.invoke("test-settings-size", 493, 376);
+        await wait();
     }
     for (const theme of ["daylight", "midnight"]) {
         const link = childDocument.getElementById("fixtureTheme");
@@ -169,6 +190,10 @@ const runCases = async (sources) => {
         for (const fontSize of [14, 32]) {
             childDocument.documentElement.style.setProperty("--b3-font-size", fontSize + "px");
             const toolbar = setting.dialog.element.querySelector(".toolbar");
+            const container = setting.dialog.element.querySelector(".b3-dialog__container");
+            const childWindow = childDocument.defaultView;
+            assert.equal(childWindow.getComputedStyle(container).borderTopWidth, "0px");
+            assert.equal(childWindow.getComputedStyle(panel).borderRadius, "0px");
             assert.equal(childDocument.defaultView.getComputedStyle(toolbar).height, "32px");
             assert.equal(childDocument.defaultView.getComputedStyle(toolbar.querySelector("#drag")).getPropertyValue("-webkit-app-region"), "drag");
             const title = toolbar.querySelector("#drag").getBoundingClientRect();
@@ -178,6 +203,18 @@ const runCases = async (sources) => {
             const caption = range.getBoundingClientRect();
             assert.ok(Math.abs((caption.left + caption.right) / 2 - childDocument.defaultView.innerWidth / 2) < 1);
             if (process.platform !== "darwin") {
+                for (const state of ["body--maximize", "body--fullscreen"]) {
+                    childDocument.body.classList.add(state);
+                    for (const id of ["minWindow", "maxWindow", "restoreWindow", "closeWindow"]) {
+                        const button = childDocument.getElementById(id);
+                        if (!button.getClientRects().length) continue;
+                        const rect = button.getBoundingClientRect();
+                        assert.equal(rect.top, 0, id + " at screen top in " + state);
+                        assert.equal(rect.bottom, toolbar.getBoundingClientRect().bottom);
+                        assert.ok(button.contains(childDocument.elementFromPoint((rect.left + rect.right) / 2, 0)));
+                    }
+                    childDocument.body.classList.remove(state);
+                }
                 const close = toolbar.querySelector("#closeWindow").getBoundingClientRect();
                 assert.ok(close.right <= childDocument.defaultView.innerWidth);
                 assert.ok(close.height >= 30);
@@ -259,7 +296,8 @@ if (process.versions.electron && process.type === "browser") {
             logger: {warn() {}, debug() {}},
         }).css;
         const themes = Object.fromEntries(["daylight", "midnight"].map(name => [name,
-            fs.readFileSync(path.join(__dirname, "../appearance/themes", name, "theme.css"), "utf8")]));
+            fs.readFileSync(path.join(__dirname, "../appearance/themes", name, "theme.css"), "utf8") +
+            "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
             paint: "config/setting/windowPaint.ts", frontend: "util/functions.ts"})) {
@@ -350,6 +388,23 @@ if (process.versions.electron && process.type === "browser") {
         ipcMain.handle("test-settings-token", () => new URL([...children][0].webContents.getURL()).searchParams.get("settingsWindowToken"));
         ipcMain.handle("test-settings-size", (_event, width, height) => {
             for (const child of children) child.setSize(width, height);
+        });
+        ipcMain.handle("test-settings-native-state", async (_event, state) => {
+            const child = [...children][0];
+            const transition = (event, action) => new Promise(resolve => {
+                child.once(event, resolve);
+                action();
+            });
+            if (child.isFullScreen()) {
+                await transition("leave-full-screen", () => child.setFullScreen(false));
+            }
+            if (state === "fullscreen") {
+                await transition("enter-full-screen", () => child.setFullScreen(true));
+            } else if (state === "maximized" && !child.isMaximized()) {
+                await transition("maximize", () => child.maximize());
+            } else if (state === "normal" && child.isMaximized()) {
+                await transition("unmaximize", () => child.unmaximize());
+            }
         });
         if (process.platform === "win32") {
             const {promisify} = require("node:util");

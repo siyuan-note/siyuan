@@ -1430,7 +1430,8 @@ table + .protyle-action__table {
   }
 }
 
-.img__name {
+.img__name,
+.img__alt {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1445,6 +1446,7 @@ table + .protyle-action__table {
 
   input {
     min-width: 0;
-    width: 100%;
+    flex: 1;
+    width: 0;
   }
 }

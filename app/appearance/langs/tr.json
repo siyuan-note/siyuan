@@ -1,4 +1,5 @@
 {
+	"displayImgAlt": "Görsel ipucu metnini göster",
 	"displayImgName": "Görsel dosya adlarını göster",
 	"s3EndpointBucketWarning": "Endpoint zaten kova adını içeriyor olabilir; bu durum bulut anlık görüntülerinin listelenmesini ve temizlenmesini aksatabilir. Yapılandırmayı kontrol edin; eşitlenmiş veriler varsa yapılandırmayı değiştirmeden önce yedekleyin ve depolama yolunu doğrulayın",
 	"embedHTMLFileBelow": "HTML dosyasını aşağıya göm",

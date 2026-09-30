@@ -11,7 +11,7 @@ const browserCases = async (source: string, luteSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     new Function(luteSource)();
     const lute = Lute.New();
-    const config = {editor: {displayImgName: true}, readonly: false};
+    const config = {editor: {displayImgName: true, displayImgAlt: true}, readonly: false};
     Object.assign(window, {siyuan: {config, languages: {rename: "Rename"}}});
     const renamed: {path: string, name: string}[] = [];
     const getExtension = (value: string) => require("node:path").posix.extname(value.split("?")[0]);
@@ -37,6 +37,9 @@ const browserCases = async (source: string, luteSource: string) => {
     check.equal(root.querySelectorAll(".img__name").length, 1);
     const name = root.querySelector<HTMLElement>(".img__name");
     check.equal(name.textContent, "example.png");
+    const alt = root.querySelector<HTMLElement>(".img__alt");
+    check.equal(alt.textContent, "description");
+    check.equal(alt.previousElementSibling.className, "protyle-action__title");
     check.equal(lute.BlockDOM2StdMd(root.innerHTML), original);
     name.click();
     let input = name.querySelector("input");
@@ -60,8 +63,10 @@ const browserCases = async (source: string, luteSource: string) => {
     name.click();
     check.equal(name.querySelector("input"), null);
     config.editor.displayImgName = false;
+    config.editor.displayImgAlt = false;
     render(root);
     check.equal(root.querySelector(".img__name"), null);
+    check.equal(root.querySelector(".img__alt"), null);
     check.equal(lute.BlockDOM2StdMd(root.innerHTML), original);
     return "Image display cases passed";
 };

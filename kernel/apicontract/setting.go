@@ -174,7 +174,7 @@ type SettingFlashcard struct {
 	Weights          string  `json:"weights" api:"optional,nullable"`
 }
 
-// SettingEditor 描述编辑器配置。displayImgName 默认关闭，更新设置时省略该字段保留当前值。
+// SettingEditor 描述编辑器配置。displayImgName 和 displayImgAlt 默认关闭，更新设置时省略这些字段保留当前值。
 type SettingEditor struct {
 	AllowSVGScript                  bool                 `json:"allowSVGScript" api:"optional,nullable"`
 	AllowHTMLBLockScript            bool                 `json:"allowHTMLBLockScript" api:"optional,nullable"`
@@ -193,6 +193,7 @@ type SettingEditor struct {
 	DisplayBookmarkIcon             bool                 `json:"displayBookmarkIcon" api:"optional,nullable"`
 	DisplayNetImgMark               bool                 `json:"displayNetImgMark" api:"optional,nullable"`
 	DisplayImgName                  bool                 `json:"displayImgName" api:"optional,nullable"`
+	DisplayImgAlt                   bool                 `json:"displayImgAlt" api:"optional,nullable"`
 	DatabaseAttrShow                *bool                `json:"databaseAttrShow" api:"optional,nullable"`
 	DatabaseAttrClickMode           int                  `json:"databaseAttrClickMode" api:"optional,nullable"`
 	DatabaseAttrViewMode            int                  `json:"databaseAttrViewMode" api:"optional,nullable"`

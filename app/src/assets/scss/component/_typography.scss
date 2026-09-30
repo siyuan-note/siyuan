@@ -692,7 +692,8 @@
       }
     }
 
-    .protyle-action__title {
+    .protyle-action__title,
+    .img__alt {
       display: flex;
       font-size: 85%;
       color: var(--b3-theme-on-surface);

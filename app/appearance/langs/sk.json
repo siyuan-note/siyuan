@@ -1,4 +1,5 @@
 {
+	"displayImgAlt": "Zobraziť text popisu obrázkov",
 	"displayImgName": "Zobraziť názvy súborov obrázkov",
 	"s3EndpointBucketWarning": "Endpoint už môže obsahovať názov bucketu, čo môže narušiť zobrazovanie a čistenie cloudových snímok. Skontrolujte nastavenia; ak už existujú synchronizované údaje, pred zmenou nastavení ich zálohujte a overte cestu uloženia",
 	"embedHTMLFileBelow": "Vložiť súbor HTML nižšie",

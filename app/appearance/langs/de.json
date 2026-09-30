@@ -1,4 +1,5 @@
 {
+	"displayImgAlt": "Bildhinweistext anzeigen",
 	"displayImgName": "Bilddateinamen anzeigen",
 	"s3EndpointBucketWarning": "Endpoint enthält möglicherweise bereits den Bucket-Namen, was das Auflisten und Bereinigen von Cloud-Snapshots beeinträchtigen kann. Prüfen Sie die Konfiguration; sichern Sie vorhandene synchronisierte Daten und prüfen Sie deren Speicherpfad, bevor Sie die Konfiguration ändern",
 	"embedHTMLFileBelow": "HTML-Datei darunter einbetten",

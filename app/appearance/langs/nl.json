@@ -1,4 +1,5 @@
 {
+	"displayImgAlt": "Tooltiptekst van afbeeldingen tonen",
 	"displayImgName": "Bestandsnamen van afbeeldingen tonen",
 	"s3EndpointBucketWarning": "Endpoint bevat mogelijk al de bucketnaam, wat het weergeven en opruimen van cloudsnapshots kan verstoren. Controleer de configuratie; maak een back-up van bestaande gesynchroniseerde gegevens en controleer hun opslagpad voordat u de configuratie wijzigt",
 	"embedHTMLFileBelow": "HTML-bestand hieronder insluiten",

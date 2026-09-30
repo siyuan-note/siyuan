@@ -619,6 +619,8 @@ declare namespace Config {
         displayNetImgMark: boolean;
         /** 全局显示图片文件名，默认关闭，不写入文档属性 */
         displayImgName: boolean;
+        /** 全局在图片标题下显示提示文本，默认关闭，不写入文档属性 */
+        displayImgAlt: boolean;
         /**
          * Whether to show database attributes at the top of the document
          */

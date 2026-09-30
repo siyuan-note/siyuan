@@ -1,4 +1,5 @@
 {
+	"displayImgAlt": "Mostrar el texto de ayuda de las imágenes",
 	"displayImgName": "Mostrar nombres de archivos de imagen",
 	"s3EndpointBucketWarning": "Endpoint puede contener ya el nombre del bucket, lo que puede afectar al listado y la limpieza de instantáneas en la nube. Revise la configuración; si ya hay datos sincronizados, haga una copia de seguridad y compruebe su ruta de almacenamiento antes de cambiarla",
 	"embedHTMLFileBelow": "Incrustar archivo HTML debajo",

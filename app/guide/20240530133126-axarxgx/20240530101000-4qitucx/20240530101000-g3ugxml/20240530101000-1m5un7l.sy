@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20260930092043"
+		"updated": "20260930092955"
 	},
 	"Children": [
 		{
@@ -398,6 +398,43 @@
 				{
 					"Type": "NodeText",
 					"Data": " を有効にすると、ローカル画像の上にパスと生成 ID を除いたファイル名が拡張子付きで表示されます。名前をクリックして編集し、Enter で名前を変更するとすべての参照が更新されます。Escape または入力欄から離れるとキャンセルされます。読み取り専用表示と暗号化ノートブックではインラインで名前を変更できません。"
+				}
+			]
+		},
+		{
+			"ID": "20260930092955-e9bzngv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930092955-e9bzngv",
+				"updated": "20260930092955"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディター"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像のツールチップテキストを表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にすると、画像の説明がタイトルの下に表示されます。この設定が無効でも、画像にマウスを合わせるとタイトルとツールチップテキストの両方が表示されます。説明には既存の代替テキストを使用し、アセットの挿入時に検索できます。"
 				}
 			]
 		},

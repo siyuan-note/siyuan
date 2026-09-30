@@ -97,6 +97,8 @@ func TestAPIContractSettingImageDisplayCompatibility(t *testing.T) {
 	compareSettingConfig(t, apicontract.SetEditor, conf.NewEditor, []string{
 		`{}`, `{"displayImgName":true}`, `{"displayImgName":false}`,
 		`{"displayImgName":null}`, `{"DisplayImgName":true}`, `{"displayImgName":"bad"}`,
+		`{"displayImgAlt":true}`, `{"displayImgAlt":false}`, `{"displayImgAlt":null}`,
+		`{"DisplayImgAlt":true}`, `{"displayImgAlt":"bad"}`,
 	})
 }
 
@@ -125,6 +127,22 @@ func TestAPIContractSettingImageDisplayUpdates(t *testing.T) {
 		}
 		if code != 0 || model.Conf.Editor.DisplayImgName != entry.want || response.DisplayImgName != entry.want {
 			t.Fatalf("image display update %s: code=%d message=%s data=%s", entry.body, code, message, data)
+		}
+	}
+	for _, entry := range []struct {
+		body string
+		want bool
+	}{
+		{`{"displayImgAlt":true}`, true}, {`{}`, true}, {`{"displayImgAlt":false}`, false},
+		{`{"DisplayImgAlt":true}`, true}, {`{"displayImgAlt":null}`, false},
+	} {
+		code, message, data := settingContractRequest(t, "setEditor", setEditor, entry.body)
+		var response apicontract.SettingEditor
+		if err := json.Unmarshal(data, &response); err != nil {
+			t.Fatal(err)
+		}
+		if code != 0 || model.Conf.Editor.DisplayImgAlt != entry.want || response.DisplayImgAlt != entry.want {
+			t.Fatalf("image tooltip text update %s: code=%d message=%s data=%s", entry.body, code, message, data)
 		}
 	}
 }

@@ -61,6 +61,7 @@ type Editor struct {
 	DisplayBookmarkIcon             bool           `json:"displayBookmarkIcon"`             // 是否显示内容块角标
 	DisplayNetImgMark               bool           `json:"displayNetImgMark"`               // 是否显示网络图片角标
 	DisplayImgName                  bool           `json:"displayImgName"`                  // 是否显示图片文件名
+	DisplayImgAlt                   bool           `json:"displayImgAlt"`                   // 是否显示图片提示文本
 	DatabaseAttrShow                *bool          `json:"databaseAttrShow"`                // 是否在文档顶部显示数据库属性
 	DatabaseAttrClickMode           int            `json:"databaseAttrClickMode"`           // 数据库角标点击模式，0：聚焦块并展开数据库面板，1：打开块属性面板
 	DatabaseAttrViewMode            int            `json:"databaseAttrViewMode"`            // 数据库属性默认展开状态，0：展开，1：折叠

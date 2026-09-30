@@ -14,6 +14,7 @@ import {
 import {isTouchDevice} from "../util/functions";
 import {escapeAriaLabel, escapeHtml, escapeLessThans} from "../util/escape";
 import {isListItemActionElement} from "../protyle/wysiwyg/listContext";
+import {getImageTooltip} from "../protyle/render/imageTooltip";
 /// #if !MOBILE
 import {getInstanceById} from "../layout/util";
 import {Editor} from "../editor";
@@ -103,7 +104,8 @@ export const initBlockPopover = (app: App) => {
             hideTooltip();
             return;
         }
-        const aElement = (isListItemAction && listItemActionElement) ||
+        const image = event.target instanceof HTMLImageElement && event.target.closest(".img") ? event.target : null;
+        const aElement = image || (isListItemAction && listItemActionElement) ||
             hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByClassName(event.target, "ariaLabel") ||
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
@@ -116,7 +118,7 @@ export const initBlockPopover = (app: App) => {
             let tooltipClass = "";
             let tooltipTarget = aElement as Element;
             let tooltipPositionOverride = isListItemAction ? "north" : undefined;
-            let tip = isListItemAction ? window.siyuan.languages.listItemActionTip :
+            let tip = image ? getImageTooltip(image) : isListItemAction ? window.siyuan.languages.listItemActionTip :
                 aElement.getAttribute("aria-label") || "";
             if (aElement.classList.contains("av__cell") && !aElement.classList.contains("ariaLabel")) {
                 if (aElement.classList.contains("av__cell--header")) {
@@ -184,7 +186,7 @@ export const initBlockPopover = (app: App) => {
                 tooltipClass = "memo"; // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
                 tooltipSpace = 0; // tooltip 和备注元素之间不能有空隙 https://github.com/siyuan-note/siyuan/issues/14796#issuecomment-3649757267
             }
-            if (!tip) {
+            if (!tip && !image) {
                 if (aElement.getAttribute("data-type")?.includes("a")) {
                     tooltipClass = "href"; // 为超链接添加 class https://github.com/siyuan-note/siyuan/issues/11440#issuecomment-2119080691
                     tooltipSpace = 0;
@@ -285,8 +287,12 @@ export const initBlockPopover = (app: App) => {
             if (tip && !aElement.classList.contains("b3-tooltips")) {
                 // https://github.com/siyuan-note/siyuan/issues/11294
                 try {
-                    showTooltip(decodeURIComponent(tip), tooltipTarget, tooltipClass, event, tooltipSpace,
-                        tooltipPositionOverride);
+                    if (image) {
+                        showTooltip(tip, tooltipTarget, tooltipClass, event, tooltipSpace, tooltipPositionOverride);
+                    } else {
+                        showTooltip(decodeURIComponent(tip), tooltipTarget, tooltipClass, event, tooltipSpace,
+                            tooltipPositionOverride);
+                    }
                 } catch (e) {
                     // https://ld246.com/article/1718235737991
                     showTooltip(tip, tooltipTarget, tooltipClass, event, tooltipSpace, tooltipPositionOverride);

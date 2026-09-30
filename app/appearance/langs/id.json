@@ -1,4 +1,5 @@
 {
+	"displayImgAlt": "Tampilkan teks keterangan gambar",
 	"displayImgName": "Tampilkan nama berkas gambar",
 	"s3EndpointBucketWarning": "Endpoint mungkin sudah memuat nama bucket, sehingga daftar dan pembersihan snapshot cloud dapat terganggu. Periksa konfigurasi; jika sudah ada data tersinkron, cadangkan dan pastikan jalur penyimpanannya sebelum mengubah konfigurasi",
 	"embedHTMLFileBelow": "Sematkan berkas HTML di bawah",

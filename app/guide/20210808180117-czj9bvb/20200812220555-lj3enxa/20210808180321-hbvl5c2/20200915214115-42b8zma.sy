@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20260930092043"
+		"updated": "20260930092955"
 	},
 	"Children": [
 		{
@@ -395,6 +395,47 @@
 				{
 					"Type": "NodeText",
 					"Data": " 后，本地图片上方会显示文件名，隐藏资源路径和随机码，保留扩展名。单击文件名可编辑，按回车改名并更新所有引用；按 Escape 或离开输入框取消。只读视图和加密笔记本不支持内联改名。"
+				}
+			]
+		},
+		{
+			"ID": "20260930092955-skpw6hv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930092955-skpw6hv",
+				"updated": "20260930092955"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "开启 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "显示图片提示文本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后，图片描述会显示在标题下方。即使关闭此选项，鼠标悬浮图片时也会同时显示标题和提示文本。描述仍使用图片原有的提示文本，插入资源时可以搜索。"
 				}
 			]
 		},

@@ -10,6 +10,20 @@ const setImageName = (element: HTMLElement, path: string) => {
 export const renderImageDisplay = (root: Element) => {
     root.querySelectorAll<HTMLImageElement>(".img img").forEach(image => {
         const container = image.parentElement;
+        let alt = container.querySelector<HTMLElement>(".img__alt");
+        if (window.siyuan.config.editor.displayImgAlt && image.alt) {
+            if (!alt) {
+                alt = document.createElement("span");
+                alt.className = "img__alt";
+                alt.contentEditable = "false";
+            }
+            const text = document.createElement("span");
+            text.textContent = image.alt;
+            alt.replaceChildren(text);
+            container.append(alt);
+        } else {
+            alt?.remove();
+        }
         let name = container.querySelector<HTMLElement>(".img__name");
         const path = image.getAttribute("data-src") || "";
         if (!window.siyuan.config.editor.displayImgName || !path.startsWith("assets/")) {

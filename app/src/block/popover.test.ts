@@ -10,6 +10,7 @@ import {ScriptTarget, transpileModule} from "typescript";
 const browserCases = async (source: string) => {
     const check = require("node:assert/strict");
     const requests: ((response: unknown) => void)[] = [];
+    let tooltip = "";
     class Panel {
         element = document.createElement("div");
         editors: {protyle: IProtyle}[] = [];
@@ -36,6 +37,7 @@ const browserCases = async (source: string) => {
         BlockPanel: Panel,
         fetchSyncPost: () => new Promise(resolve => requests.push(resolve)),
         hideTooltip: () => {},
+        showTooltip: (text: string) => { tooltip = text; },
         Constants: {TIMEOUT_INPUT: 5},
         isTouchDevice: () => false,
         isEncryptedBox: () => false,
@@ -133,6 +135,24 @@ const browserCases = async (source: string) => {
     check.equal(window.siyuan.blockPanels.length, 1);
     check.equal(window.siyuan.config.editor.floatWindowMode, 0);
     check.equal(window.siyuan.config.editor.floatWindowDelay, 20);
+
+    const imageRoot = document.createElement("span");
+    imageRoot.className = "img";
+    const image = document.createElement("img");
+    image.title = "Caption %3Cem%3E & details";
+    image.alt = "<literal> description";
+    imageRoot.append(image);
+    document.body.append(imageRoot);
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, "Caption %3Cem%3E &amp; details<br>&lt;literal> description");
+    check.equal(image.title, "Caption %3Cem%3E & details");
+    check.equal(image.alt, "<literal> description");
+    image.title = "";
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, "&lt;literal> description");
+    image.title = image.alt;
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, "&lt;literal> description");
     return "Popover interaction cases passed";
 };
 
@@ -140,7 +160,7 @@ test("mindmap interaction cancels pending popovers and preserves hover preferenc
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 20000,
 }, async () => {
-    const source = ["../protyle/util/hasClosest.ts", "popover.ts"].map(file => transpileModule(
+    const source = ["../protyle/util/hasClosest.ts", "../util/escape.ts", "../protyle/render/imageTooltip.ts", "popover.ts"].map(file => transpileModule(
         readFileSync(path.join(__dirname, file), "utf8").replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}},
     ).outputText).join("\n");

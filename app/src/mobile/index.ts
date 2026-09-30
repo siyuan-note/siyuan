@@ -68,6 +68,7 @@ import {initTouchDragBridge} from "../util/touchDragBridge";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {openByMobile} from "../editor/openLink";
 import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
+import {initMobileSelect} from "./util/nativeSelect";
 import {updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {showMobileBars} from "./util/mobileBars";
 import {initializeEnglishCommandTranslations} from "../command/english";
@@ -205,6 +206,7 @@ class App {
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);
+                    initMobileSelect();
                     document.title = window.siyuan.languages.siyuanNote;
                     bootSync();
                     appearanceConfigApi.apply(window.siyuan.config.appearance);

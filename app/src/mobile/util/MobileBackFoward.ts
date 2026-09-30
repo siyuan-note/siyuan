@@ -5,6 +5,7 @@ import {closePanel} from "./closePanel";
 import {backModel, destroyModel} from "../menu/model";
 import {destroyAVRichTextEditor} from "../../protyle/render/av/richTextEditor";
 import {isAbove} from "../../util/zIndex";
+import {getMobileSelectMenuElement} from "./nativeSelect";
 
 export const clearMobileBackForward = (notebookId?: string) => {
     if (notebookId) {
@@ -27,7 +28,12 @@ export const goBack = () => {
     const menuElement = document.getElementById("menu");
     const richTextElement = document.querySelector<HTMLElement>(".av__richtext-mask");
     const topDialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
-    if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
+    const selectMenuElement = getMobileSelectMenuElement();
+    if (selectMenuElement && (!topDialog ||
+        isAbove(selectMenuElement, topDialog.element.querySelector(".b3-dialog")))) {
+        selectMenuElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+        return;
+    } else if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;

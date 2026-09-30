@@ -30,6 +30,7 @@ test("mobile back saves the database text editor before leaving its owner", () =
                 saved++;
             }},
             "../../util/zIndex": {isAbove},
+            "./nativeSelect": {getMobileSelectMenuElement: (): undefined => undefined},
         };
         const api = {} as typeof import("./MobileBackFoward");
         runInNewContext(source, {
@@ -45,4 +46,31 @@ test("mobile back saves the database text editor before leaving its owner", () =
         assert.equal(closedMenu, overlay === "menu" ? 1 : 0);
         assert.equal(navigated, 0);
     }
+});
+
+test("mobile back closes a select menu before its containing menu or dialog", () => {
+    const source = transpileModule(readFileSync(join(__dirname, "MobileBackFoward.ts"), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+    }).outputText;
+    let closedSelect = 0;
+    let closedOwner = 0;
+    const selectMenu = {style: {zIndex: "3"}, dispatchEvent: () => closedSelect++};
+    const ownerMenu = {classList: {contains: (name: string) => name !== "fn__none"},
+        dispatchEvent: () => closedOwner++};
+    const api = {} as typeof import("./MobileBackFoward");
+    const modules: Record<string, unknown> = {
+        "../editor": {getCurrentEditor: (): undefined => undefined},
+        "../../util/zIndex": {isAbove},
+        "./nativeSelect": {getMobileSelectMenuElement: () => selectMenu},
+    };
+    runInNewContext(source, {
+        exports: api, require: (name: string) => modules[name] || {}, CustomEvent: class {},
+        document: {getElementById: () => ({style: {}}), querySelector: (): undefined => undefined},
+        window: {siyuan: {menus: {menu: {element: ownerMenu}}, dialogs: [{
+            element: {querySelector: () => ({style: {zIndex: "2"}})}, destroy: () => closedOwner++,
+        }]}},
+    });
+    api.goBack();
+    assert.equal(closedSelect, 1);
+    assert.equal(closedOwner, 0);
 });

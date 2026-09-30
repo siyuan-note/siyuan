@@ -43,6 +43,7 @@ const bootChild = async (sources) => {
     const {ipcRenderer} = require("electron");
     const {waitForSettingsWindowPaint} = loadRendererModule(sources.paint, {});
     const {Dialog, genUUID, context, fit, frontend} = rendererModules(sources);
+    require("node:assert/strict").equal(navigator.userAgent.startsWith("SiYuan/"), false);
     require("node:assert/strict").equal(frontend.getFrontend(), "desktop", navigator.userAgent);
     const host = await new Promise(resolve => {
         const token = new URLSearchParams(location.search).get("settingsWindowToken");
@@ -244,7 +245,6 @@ if (process.versions.electron && process.type === "browser") {
     const {createServer} = require("node:http");
     const {createSettingsWindows} = require("../electron/settingsWindows");
     app.setPath("userData", process.argv[2]);
-    app.userAgentFallback = "SiYuan/fixture Electron";
     app.whenReady().then(async () => {
         let owner;
         let code = 0;
@@ -310,6 +310,7 @@ if (process.versions.electron && process.type === "browser") {
         const origin = "http://127.0.0.1:" + server.address().port;
         const policy = createSettingsWindows({ipcMain, screen, getTarget: id => owner?.webContents.id === id ? {origin, mode: "local"} : undefined,
             initialize: win => {
+                win.webContents.userAgent = "SiYuan/fixture Electron " + win.webContents.userAgent;
                 win.webContents.on("console-message", details => {
                     if (details.level === "error" && details.message.startsWith("Uncaught")) {
                         console.error(details.message);
@@ -365,6 +366,7 @@ if (process.versions.electron && process.type === "browser") {
         }
         try {
             owner = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+            owner.webContents.userAgent = "SiYuan/fixture Electron " + owner.webContents.userAgent;
             owner.webContents.setWindowOpenHandler(details => {
                 const result = policy(owner.webContents, details);
                 return result || {action: "deny"};

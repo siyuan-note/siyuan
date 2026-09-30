@@ -29,9 +29,14 @@ export const getFrontend = () => {
         return "browser-mobile";
     }
     /// #else
+    /// #if !BROWSER
+    // 设置窗口首屏的浏览器标识可能尚未更新，使用桌面主窗口的集市包兼容性。
+    if (document.body.classList.contains("body--settings")) {
+        return "desktop";
+    }
+    /// #endif
     if (window.navigator.userAgent.startsWith("SiYuan/")) {
-        // 设置窗口使用桌面主窗口的集市包兼容性，文档新窗口单独判断。
-        if (isWindow() && !document.body.classList.contains("body--settings")) {
+        if (isWindow()) {
             return "desktop-window";
         }
         return "desktop";

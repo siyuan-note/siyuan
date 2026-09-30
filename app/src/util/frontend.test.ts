@@ -6,7 +6,8 @@ import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpi
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-const getFrontend = (mobile: boolean, native: boolean, toolbar: boolean, settings: boolean) => {
+const getFrontend = (mobile: boolean, native: boolean, toolbar: boolean, settings: boolean,
+                     userAgent = native ? "SiYuan/3.8.7 Electron" : "Mozilla/5.0") => {
     const source = createSourceFile("functions.ts", parse(readFileSync("src/util/functions.ts", "utf8"),
         {MOBILE: mobile, BROWSER: !native}, false, true), ScriptTarget.ES2021, true);
     const declarations = source.statements.filter(statement => isVariableStatement(statement) &&
@@ -15,7 +16,7 @@ const getFrontend = (mobile: boolean, native: boolean, toolbar: boolean, setting
     runInNewContext(transpileModule(declarations.map(item => item.getText(source)).join("\n"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText, {
-        exports, window: {navigator: {userAgent: native ? "SiYuan/3.8.7 Electron" : "Mozilla/5.0"}},
+        exports, window: {navigator: {userAgent}},
         document: {getElementById: () => toolbar ? {} : null, body: {classList: {contains: () => settings}}},
     });
     return exports.getFrontend();
@@ -23,6 +24,7 @@ const getFrontend = (mobile: boolean, native: boolean, toolbar: boolean, setting
 
 test("native settings use desktop package compatibility rather than document-window compatibility", () => {
     assert.equal(getFrontend(false, true, false, true), "desktop");
+    assert.equal(getFrontend(false, true, false, true, "Mozilla/5.0 Electron"), "desktop");
 });
 
 test("main windows, detached documents, browsers and mobile retain their frontend identities", () => {

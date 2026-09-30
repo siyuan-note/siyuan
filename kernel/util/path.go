@@ -551,19 +551,26 @@ func isSensitivePath(p string) bool {
 	// 家目录下的凭据复制进工作空间后外泄：Git push token、HTTP/API 凭据、Postgres 密码、
 	// K8s/Docker/容器仓库配置、GPG 私钥环、云厂商 CLI 凭据、包管理器 token 等。
 	homeDirs := []string{HomeDir}
+	// 自定义配置主目录不能使系统用户主目录中的凭据失去保护。
+	if homeDirOverridden && systemHomeDir != "" && systemHomeDir != HomeDir {
+		homeDirs = append(homeDirs, systemHomeDir)
+		if resolved, err := filepath.EvalSymlinks(systemHomeDir); err == nil && resolved != systemHomeDir {
+			homeDirs = append(homeDirs, resolved)
+		}
+	}
 	homeCheckPaths := []string{toCheckPathLower}
-	if HomeDir != "" && !gulu.File.IsSubPath(HomeDir, p) {
-		// 工作空间真实路径获得系统目录豁免后，仍需匹配家目录真实路径下的敏感位置。
+	if HomeDir != "" {
+		// 主目录自身也可能是别名，工作空间规范路径必须同时匹配其真实目录中的敏感位置。
 		if resolved, err := filepath.EvalSymlinks(HomeDir); err == nil && resolved != HomeDir {
 			homeDirs = append(homeDirs, resolved)
 		}
-		// 家目录已是真实路径而目标仍使用工作空间别名时，按工作空间根目录映射目标。
-		// 只映射根目录，保留对尚未创建的导出目标及工作空间内路径的检查。
-		if inWorkspace && workspaceDir == WorkspaceDir {
-			if resolved, err := filepath.EvalSymlinks(workspaceDir); err == nil && resolved != workspaceDir {
-				if rel, err := filepath.Rel(workspaceDir, p); err == nil {
-					homeCheckPaths = append(homeCheckPaths, strings.ToLower(filepath.Join(resolved, rel)))
-				}
+	}
+	// 工作空间别名可能位于自定义主目录中，但指向系统主目录中的敏感位置。
+	// 只映射工作空间根目录，保留对尚未创建的目标及工作空间内路径的检查。
+	if inWorkspace && workspaceDir == WorkspaceDir {
+		if resolved, err := filepath.EvalSymlinks(workspaceDir); err == nil && resolved != workspaceDir {
+			if rel, err := filepath.Rel(workspaceDir, p); err == nil {
+				homeCheckPaths = append(homeCheckPaths, strings.ToLower(filepath.Join(resolved, rel)))
 			}
 		}
 	}

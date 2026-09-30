@@ -489,12 +489,17 @@ func isICloudPath(workspaceAbsPath string) bool {
 	}
 
 	// macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
-	iCloudRoot := filepath.Join(HomeDir, "Library", "Mobile Documents")
-	if resolvedRoot, matched := matchICloudRoot(HomeDir, iCloudRoot, workspacePath); matched {
+	if resolvedRoot, matched := matchSystemICloudRoot(workspacePath); matched {
 		logging.LogWarnf("workspace [%s] is in iCloud path [%s]", workspaceAbsPath, resolvedRoot)
 		return true
 	}
 	return false
+}
+
+// matchSystemICloudRoot 使用系统用户主目录，避免配置目录覆盖改变真实 iCloud 的检测位置。
+func matchSystemICloudRoot(workspacePath string) (resolvedRoot string, matched bool) {
+	iCloudRoot := filepath.Join(systemHomeDir, "Library", "Mobile Documents")
+	return matchICloudRoot(systemHomeDir, iCloudRoot, workspacePath)
 }
 
 func longestExistingPath(path string) string {

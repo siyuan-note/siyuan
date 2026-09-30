@@ -119,6 +119,7 @@ func Boot() {
 	IncBootProgress(3, BootL10n(299, "Booting kernel..."))
 
 	// 由标准库 flag 解析 os.Args，再走统一的 BootWithFlags。
+	homeDirPath := flag.String("home-dir", "", "base directory for user configuration (defaults to the system user home)")
 	workspacePath := flag.String("workspace", "", "dir path of the workspace, default to ~/SiYuan/")
 	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
 	port := flag.String("port", "0", "port of the HTTP server")
@@ -131,6 +132,11 @@ func Boot() {
 	enablePprof := flag.Bool("enable-pprof", false, "enable unauthenticated /debug/pprof/ endpoints (dev only, never on a network-exposed instance)")
 	safeMode := flag.Bool("safe-mode", false, "boot in safe mode")
 	flag.Parse()
+
+	if err := SetHomeDir(*homeDirPath); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(logging.ExitCodeInitWorkspaceErr)
+	}
 
 	BootWithFlags(*workspacePath, *wdPath, *port, *readOnly, *accessAuthCode, *lang, *mode, *ssl, *attachUI, *safeMode, *enablePprof)
 }
@@ -247,8 +253,10 @@ func SetBooted() {
 }
 
 var (
-	HomeDir, _    = gulu.OS.Home()
-	WorkingDir, _ = os.Getwd()
+	systemHomeDir, _  = gulu.OS.Home()
+	HomeDir           = systemHomeDir
+	homeDirOverridden bool
+	WorkingDir, _     = os.Getwd()
 
 	WorkspaceDir       string        // 工作空间目录路径
 	WorkspaceName      string        // 工作空间名称
@@ -274,6 +282,35 @@ var (
 	UIProcessIDs = sync.Map{} // UI 进程 ID
 )
 
+// SetHomeDir 设置用户配置基路径，配置仍保存在其 .config/siyuan 子目录中。
+// 空参数保留默认目录；显式路径必须能创建配置目录，失败时不回退到系统用户主目录。
+func SetHomeDir(homeDir string) error {
+	if homeDir == "" {
+		return nil
+	}
+	absPath, err := filepath.Abs(homeDir)
+	if err != nil {
+		return fmt.Errorf("resolve --home-dir [%s] failed: %w", homeDir, err)
+	}
+	if err = os.MkdirAll(filepath.Join(absPath, ".config", "siyuan"), 0755); err != nil {
+		return fmt.Errorf("initialize --home-dir [%s] failed: %w", absPath, err)
+	}
+	HomeDir = absPath
+	homeDirOverridden = true
+	return nil
+}
+
+// defaultWorkspacePath 保留各平台默认布局，显式配置主目录时不再使用 Windows USERPROFILE。
+func defaultWorkspacePath(homeDir, goos, userProfile string, homeDirOverridden bool) string {
+	if goos == "windows" && !homeDirOverridden && userProfile != "" {
+		return filepath.Join(userProfile, "SiYuan")
+	}
+	if goos == "darwin" {
+		return filepath.Join(homeDir, "Library", "Application Support", "SiYuan")
+	}
+	return filepath.Join(homeDir, "SiYuan")
+}
+
 // MaxUIProcessCount UI 进程注册表条目数上限。
 const MaxUIProcessCount = 64
 
@@ -298,16 +335,7 @@ func initWorkspaceDir(workspaceArg string) {
 		}
 	}
 
-	defaultWorkspaceDir := filepath.Join(HomeDir, "SiYuan")
-	if gulu.OS.IsWindows() {
-		// 改进 Windows 端默认工作空间路径 https://github.com/siyuan-note/siyuan/issues/5622
-		if userProfile := os.Getenv("USERPROFILE"); "" != userProfile {
-			defaultWorkspaceDir = filepath.Join(userProfile, "SiYuan")
-		}
-	} else if gulu.OS.IsDarwin() {
-		// Change the initial workspace path to ~/Library/Application Support/SiYuan on macOS https://github.com/siyuan-note/siyuan/issues/17095
-		defaultWorkspaceDir = filepath.Join(HomeDir, "Library", "Application Support", "SiYuan")
-	}
+	defaultWorkspaceDir := defaultWorkspacePath(HomeDir, runtime.GOOS, os.Getenv("USERPROFILE"), homeDirOverridden)
 
 	var workspacePaths []string
 	if !gulu.File.IsExist(workspaceConf) {

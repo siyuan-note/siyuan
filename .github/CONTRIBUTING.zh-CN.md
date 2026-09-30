@@ -61,6 +61,10 @@ NPM 镜像：
 * Windows: `./SiYuan-Kernel.exe serve --mode=dev`
 * Linux/macOS: `./SiYuan-Kernel serve --mode=dev`
 
+可选的全局参数 `--home-dir <path>` 用于指定用户配置目录的基路径。工作空间列表、Cookie 密钥等文件仍保存在 `<path>/.config/siyuan/` 中。相对路径以进程当前目录为基准解析，缺失的配置目录会自动创建；路径无效或不可写时直接报错，不会回退到系统用户主目录。未指定该参数时保持现有行为。该参数也适用于 `workspace list` 等离线 CLI 命令。
+
+笔记数据目录由 `--workspace` 指定，应用资源目录由 `--wd` 指定，三者可以独立使用。例如，先创建空目录 `/work/siyuan-workspace`，再执行：`./SiYuan-Kernel serve --mode=dev --home-dir=/work/siyuan-home --workspace=/work/siyuan-workspace --wd=/work/siyuan/app`。启动服务时未显式指定工作空间且所选配置中没有已注册工作空间，默认工作空间沿用各平台的目录布局，位于所选主目录下：Windows/Linux 为 `SiYuan`，macOS 为 `Library/Application Support/SiYuan`。Windows 上显式指定 `--home-dir` 后，`USERPROFILE` 不再覆盖该选择。这些选项不改变移动端应用的沙箱路径。
+
 ### iOS
 
 * `cd kernel`

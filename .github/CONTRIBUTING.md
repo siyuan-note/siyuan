@@ -61,6 +61,10 @@ Note: In the development environment, the kernel process will not be automatical
 * Windows: `./SiYuan-Kernel.exe serve --mode=dev`
 * Linux/macOS: `./SiYuan-Kernel serve --mode=dev`
 
+The optional global `--home-dir <path>` flag sets the base directory for user configuration. Files such as the workspace registry and cookie key remain under `<path>/.config/siyuan/`. Relative paths are resolved against the current process directory, and missing configuration directories are created. Invalid or unwritable paths fail without falling back to the system user home. Omitting the flag preserves the existing behavior. The flag also applies to offline CLI commands such as `workspace list`.
+
+Use `--workspace` for notebook data and `--wd` for application resources independently. For example, after creating an empty `/work/siyuan-workspace` directory: `./SiYuan-Kernel serve --mode=dev --home-dir=/work/siyuan-home --workspace=/work/siyuan-workspace --wd=/work/siyuan/app`. When starting the server without an explicit workspace or a registered workspace in the selected profile, the default workspace remains under the selected home directory using the platform's existing layout (`SiYuan` on Windows/Linux, `Library/Application Support/SiYuan` on macOS). When `--home-dir` is set on Windows, `USERPROFILE` does not override it. These options do not change the mobile app's sandbox paths.
+
 ### iOS
 
 * `cd kernel`

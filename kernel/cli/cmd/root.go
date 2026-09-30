@@ -34,6 +34,7 @@ import (
 )
 
 var (
+	homeDirPath   string
 	workspacePath string
 	outputFormat  string
 	dryRun        bool
@@ -58,6 +59,9 @@ var rootCmd = &cobra.Command{
 		return nil
 	},
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if err := util.SetHomeDir(homeDirPath); err != nil {
+			return err
+		}
 		// workspace 子命令不需要工作空间校验
 		if cmd.Parent() != nil && cmd.Parent().Name() == "workspace" {
 			return nil
@@ -283,6 +287,7 @@ func init() {
 	rootCmd.Short = "SiYuan Kernel v" + util.Ver
 	rootCmd.Long = "SiYuan Kernel v" + util.Ver + ". Manage workspace data directly or start the HTTP server."
 
+	rootCmd.PersistentFlags().StringVar(&homeDirPath, "home-dir", "", "base directory for user configuration (defaults to the system user home)")
 	rootCmd.PersistentFlags().StringVarP(&workspacePath, "workspace", "w", "", "workspace path")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "format", "f", "table", "output format: table | json")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "dry run mode: validate and print what would happen without making changes")

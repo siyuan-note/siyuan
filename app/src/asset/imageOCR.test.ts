@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string, actionsSource: string) => {
+const browserCases = async (source: string, actionsSource: string, statusSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const copied: string[] = [];
     const saved: {path: string, text: string}[] = [];
@@ -15,6 +15,17 @@ const browserCases = async (source: string, actionsSource: string) => {
     let receive: (response: {data: {text: string}}) => void;
     Object.assign(window, {siyuan: {languages: {copy: "Copy", save: "Save", cancel: "Cancel", ocrResult: "OCR",
         copied: "Copied", doubleClick: "Double click"}}});
+    let text = "recognized";
+    let requests = 0;
+    let pending: () => void;
+    const invalidated: string[] = [];
+    const status: typeof import("./imageOCRStatus") = new Function("fetchSyncPost", statusSource +
+        "\nreturn {getImageOCRStatus, invalidateImageOCRStatus};")(() => {
+        requests++;
+        return new Promise(resolve => {
+            pending = () => resolve({code: 0, data: {text}});
+        });
+    });
     const dependencies = {
         Dialog: class {
             element: HTMLElement;
@@ -33,6 +44,7 @@ const browserCases = async (source: string, actionsSource: string) => {
             return {code: 0};
         },
         writeText: (text: string) => copied.push(text), showMessage: () => {},
+        invalidateImageOCRStatus: (path: string) => { invalidated.push(path); status.invalidateImageOCRStatus(path); },
     };
     const api = new Function(...Object.keys(dependencies), source + "\nreturn {openImageOCR, copyImageOCRText};")(...Object.values(dependencies));
     api.openImageOCR("assets/first.png");
@@ -51,21 +63,14 @@ const browserCases = async (source: string, actionsSource: string) => {
     (dialog.element.querySelector('[data-action="save"]') as HTMLElement).click();
     await new Promise(resolve => setTimeout(resolve, 0));
     check.deepEqual(saved, [{path: "assets/second.png", text: "updated"}]);
+    check.deepEqual(invalidated, ["assets/second.png"]);
     check.equal(dialog.element.isConnected, false);
     let opens = 0;
     let copies = 0;
     let visible = true;
-    let text = "recognized";
-    let requests = 0;
-    let pending: () => void;
-    const render = new Function("Constants", "copyImageOCRText", "openImageOCR", "isEncryptedBox", "isEntryVisible", "fetchPost", actionsSource +
+    const render = new Function("Constants", "copyImageOCRText", "openImageOCR", "isEncryptedBox", "isEntryVisible", "getImageOCRStatus", actionsSource +
         "\nreturn renderImageActions;")({TIMEOUT_DBLCLICK: 20}, () => copies++, () => opens++, () => false,
-        () => visible, (_url: string, _data: unknown, callback: (response: {data: {text: string}}) => void) => {
-            requests++;
-            return new Promise<void>(resolve => {
-                pending = () => { callback({data: {text}}); resolve(); };
-            });
-        });
+        () => visible, status.getImageOCRStatus);
     const root = document.createElement("div");
     root.className = "protyle-wysiwyg";
     root.innerHTML = '<span class="img"><span></span><span><span class="protyle-icons"><span class="protyle-icon--only"></span></span><img data-src="assets/image.png"></span></span>';
@@ -74,11 +79,18 @@ const browserCases = async (source: string, actionsSource: string) => {
     render(root);
     check.equal(requests, 0, "rendering does not query every image");
     const hover = async () => {
+        const count = requests;
         root.querySelector("img").parentElement.dispatchEvent(new MouseEvent("mouseenter"));
-        pending();
+        if (requests !== count) {
+            pending();
+        }
         await new Promise(resolve => setTimeout(resolve, 0));
     };
     await hover();
+    await hover();
+    root.querySelector("img").parentElement.dispatchEvent(new Event("focusin"));
+    root.querySelector("img").parentElement.dispatchEvent(new Event("pointerdown"));
+    check.equal(requests, 1, "hover, focus, and pointer interactions reuse the status");
     check.equal(root.querySelectorAll(".protyle-action__ocr").length, 1);
     let action = root.querySelector<HTMLElement>(".protyle-action__ocr");
     action.click();
@@ -97,14 +109,19 @@ const browserCases = async (source: string, actionsSource: string) => {
     root.innerHTML = snapshot;
     render(root);
     await hover();
+    check.equal(requests, 1, "restored content reuses the resource cache");
     action = root.querySelector<HTMLElement>(".protyle-action__ocr");
     action.click();
     await new Promise(resolve => setTimeout(resolve, 30));
     check.equal(copies, 2, "restored image actions still copy OCR text");
     text = " \n ";
+    status.invalidateImageOCRStatus("assets/image.png");
     await hover();
     check.equal(root.querySelector(".protyle-action__ocr"), null, "empty OCR text hides the action");
+    await hover();
+    check.equal(requests, 2, "empty text is cached too");
     text = "recognized again";
+    status.invalidateImageOCRStatus("assets/image.png");
     await hover();
     check.ok(root.querySelector(".protyle-action__ocr"));
     visible = false;
@@ -112,6 +129,7 @@ const browserCases = async (source: string, actionsSource: string) => {
     check.equal(root.querySelector(".protyle-action__ocr"), null, "profile changes hide existing actions");
     visible = true;
     render(root);
+    status.invalidateImageOCRStatus("assets/image.png");
     root.querySelector("img").parentElement.dispatchEvent(new MouseEvent("mouseenter"));
     root.querySelector("img").setAttribute("data-src", "assets/changed.png");
     pending();
@@ -133,7 +151,8 @@ test("image OCR copying, explicit saving and double-click editing", {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-image-ocr-test-"));
     const script = path.join(temporary, "run.cjs");
     const code = "const __name = value => value; (" + browserCases.toString() + ")(" +
-        JSON.stringify(compile("imageOCR.ts")) + "," + JSON.stringify(compile("../protyle/render/imageActions.ts")) + ")";
+        JSON.stringify(compile("imageOCR.ts")) + "," + JSON.stringify(compile("../protyle/render/imageActions.ts")) +
+        "," + JSON.stringify(compile("imageOCRStatus.ts")) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {

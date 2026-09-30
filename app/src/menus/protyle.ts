@@ -50,6 +50,7 @@ import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
 import {renderImageDisplay} from "../protyle/render/imageDisplay";
 import {renderImageActions} from "../protyle/render/imageActions";
+import {invalidateImageOCRStatus} from "../asset/imageOCRStatus";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "./util";
@@ -1390,8 +1391,11 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 iconHTML: "",
                 label: window.siyuan.languages.reOCR,
                 click() {
+                    const path = imgElement.getAttribute("data-src");
                     fetchPost("/api/asset/ocr", {
                         path: imgElement.getAttribute("src"),
+                    }, () => {
+                        invalidateImageOCRStatus(path);
                     });
                 }
             }],

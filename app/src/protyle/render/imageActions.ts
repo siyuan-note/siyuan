@@ -1,7 +1,7 @@
 import {Constants} from "../../constants";
 import {copyImageOCRText, openImageOCR} from "../../asset/imageOCR";
 import {isEncryptedBox} from "../../util/pathName";
-import {fetchPost} from "../../util/fetch";
+import {getImageOCRStatus} from "../../asset/imageOCRStatus";
 import {isEntryVisible} from "../../config/entryVisibility/runtime";
 
 const boundImageActions = new WeakSet<HTMLElement>();
@@ -52,20 +52,16 @@ const updateImageAction = (image: HTMLImageElement) => {
     const source = image.getAttribute("data-src");
     const controller = new AbortController();
     requests.set(image, controller);
-    fetchPost("/api/asset/getImageOCRText", {path: source}, response => {
+    getImageOCRStatus(source).then(hasText => {
         if (controller.signal.aborted || !image.isConnected || image.getAttribute("data-src") !== source) {
             return;
         }
-        if (canShowImageAction(image) && response.data.text.trim()) {
+        if (canShowImageAction(image) && hasText) {
             addImageAction(image);
         } else {
             removeImageAction(image);
         }
-    }, undefined, () => {
-        if (!controller.signal.aborted && image.getAttribute("data-src") === source) {
-            removeImageAction(image);
-        }
-    }, controller.signal).finally(() => {
+    }).finally(() => {
         if (requests.get(image) === controller) {
             requests.delete(image);
         }

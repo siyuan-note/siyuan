@@ -2,6 +2,7 @@ import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {writeText} from "../protyle/util/compatibility";
+import {invalidateImageOCRStatus} from "./imageOCRStatus";
 
 export const copyImageOCRText = (path: string) => {
     fetchPost("/api/asset/getImageOCRText", {path}, (response) => {
@@ -61,7 +62,7 @@ export const openImageOCR = (path: string) => {
         try {
             const response = await fetchSyncPost("/api/asset/setImageOCRText", {path, text: textarea.value});
             if (response.code === 0) {
-                window.dispatchEvent(new CustomEvent("siyuan-image-ocr"));
+                invalidateImageOCRStatus(path);
             }
             if (!closed && response.code === 0) {
                 close();

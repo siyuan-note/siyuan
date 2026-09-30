@@ -25,6 +25,7 @@ import {Constants} from "../../constants";
 import {blockRender} from "../render/blockRender";
 import {renderEmbedHeadings} from "../render/embedHeading";
 import {processRender} from "../util/processCode";
+import {renderImageDisplay} from "../render/imageDisplay";
 import {highlightRender} from "../render/highlightRender";
 import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
 import {zoomOut} from "../../menus/protyle";
@@ -2491,6 +2492,12 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         protyle.updated = true;
         protyle.undo.add(doOperations, undoOperations, protyle);
     }
+    // 本地插入和正在编辑的块保留现有 DOM，立即补充图片文件名和提示文本。
+    doOperations.forEach(operation => {
+        if ((operation.action === "insert" || operation.action === "update") && operation.data.includes("<img ")) {
+            protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(renderImageDisplay);
+        }
+    });
     if (protyle?.lite) {
         if (!options?.skipSync) {
             syncTrackedRanges(protyle, doOperations, options?.trackedRangeInsertion);

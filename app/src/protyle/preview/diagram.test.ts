@@ -60,12 +60,12 @@ for (const scenario of [
 for (const subtype of ["mermaid", "echarts"]) {
     for (const background of ["rgb(30, 30, 30)", "rgb(255, 255, 255)"]) {
         test(`${subtype} preview uses the editor background ${background}`, async () => {
-            const editor = {parentElement: null};
+            const editor = {parentElement: null as HTMLElement};
             const diagram = {parentElement: editor, getAttribute: () => subtype, querySelector: () => render};
-            const clone = {style: {}, querySelectorAll: () => [], setAttribute: () => {}};
+            const clone = {style: {}, querySelectorAll: (): Element[] => [], setAttribute: () => {}};
             const render = {
                 viewBox: {baseVal: {width: 300, height: 150}}, cloneNode: () => clone,
-                querySelectorAll: () => [], getBoundingClientRect: () => ({width: 300, height: 150}),
+                querySelectorAll: (): Element[] => [], getBoundingClientRect: () => ({width: 300, height: 150}),
             };
             let rasterBackground: string;
             const exports = {} as {previewDiagram: (element: unknown) => Promise<void>};

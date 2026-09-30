@@ -32,7 +32,6 @@ export class AgentSessionPanel {
             onRename: (id: string, title: string) => Promise<void>;
             getStatus?: (id: string) => AgentSessionRunStatus | undefined;
             getTitle?: (id: string) => string | undefined;
-            onClose?: () => void;
         },
         private mobile = false,
     ) {
@@ -92,8 +91,7 @@ export class AgentSessionPanel {
 
             let html = this.mobile ? '<div class="toolbar toolbar--border">' +
                 '<svg class="toolbar__icon" data-type="back"><use xlink:href="#iconLeft"></use></svg>' +
-                '<span class="toolbar__text">' + L.manageSessions + "</span>" +
-                '<svg class="toolbar__icon agent-session-popup__close" data-type="close"><use xlink:href="#iconCloseRound"></use></svg></div>' : "";
+                '<span class="toolbar__text">' + L.manageSessions + "</span></div>" : "";
             html += '<input spellcheck="false" class="b3-text-field agent-session-popup__search" placeholder="' + L.agentSessionSearch + '">';
             html += '<div class="b3-list b3-list--background fn__flex-1"></div>';
 
@@ -103,10 +101,6 @@ export class AgentSessionPanel {
             this.renderItems(itemsContainer, result.sessions, false);
             const searchInput = this.popup.querySelector(".agent-session-popup__search") as HTMLInputElement;
             this.popup.querySelector('[data-type="back"]')?.addEventListener("click", () => this.close());
-            this.popup.querySelector('[data-type="close"]')?.addEventListener("click", () => {
-                this.close();
-                this.callbacks.onClose?.();
-            });
             searchInput.addEventListener("input", (event: InputEvent) => {
                 event.stopPropagation();
                 if (event.isComposing) {

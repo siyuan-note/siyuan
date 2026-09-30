@@ -271,6 +271,12 @@ export const handleTouchEnd = (event: TouchEvent) => {
     }
 
     const targetSidebar = getTargetSidebar(target);
+    if (target.closest(".agent-session-popup--mobile")) {
+        if (!scrollBlock && isXScroll && firstDirection === "toRight" && !reversing) {
+            window.siyuan.mobile.agentChatController?.handleBack();
+        }
+        return;
+    }
     if (scrollBlock) {
         if (targetSidebar) {
             popSidebar(targetSidebar, false);
@@ -535,6 +541,9 @@ export const handleTouchMove = (event: TouchEvent) => {
             return;
         }
         if (hasClosestByAttribute(target, "id", "menu", true)) {
+            return;
+        }
+        if (target.closest(".agent-session-popup--mobile")) {
             return;
         }
         if (!getTargetSidebar(target) && !getMobileSidebarConfig().sidebarSwipe) {

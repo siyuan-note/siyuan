@@ -125,7 +125,6 @@ export class MobileTabs {
     private abortController?: AbortController;
     private activationBackStack: string[] = [];
     private activationForwardStack: string[] = [];
-    private overviewElement?: HTMLElement;
     private overviewLongPressTimer?: number;
     private overviewLongPressTabID?: string;
     private overviewLongPressTriggered = false;
@@ -880,11 +879,7 @@ export class MobileTabs {
     </div>
 </div>`,
             bindEvent: (element) => {
-                if (element !== this.overviewElement) {
-                    // 每次渲染都会替换内容，事件绑定在固定的容器上
-                    this.overviewElement = element;
-                    this.bindOverviewEvents(element);
-                }
+                this.bindOverviewEvents(element.firstElementChild as HTMLElement);
             },
             destroyCallback: () => {
                 this.cancelOverviewLongPress();

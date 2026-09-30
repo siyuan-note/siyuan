@@ -520,7 +520,6 @@ export class AgentChat extends Model {
                 },
                 getStatus: (id) => this.sessionRuns.resolveStatus(id),
                 getTitle: (id) => this.pendingSessionTitles.get(id),
-                onClose: this.host.mobile ? this.host.close : undefined,
             },
             !!this.host.mobile,
         );

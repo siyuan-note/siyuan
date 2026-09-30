@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20260930092955"
+		"updated": "20260930093600"
 	},
 	"Children": [
 		{
@@ -436,6 +436,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " to display the image description below its title. Hovering over an image shows both its title and tooltip text even when this option is off. The description remains the image's existing alternative text and can be searched when inserting assets."
+				}
+			]
+		},
+		{
+			"ID": "20260930093600-gqubib2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930093600-gqubib2",
+				"updated": "20260930093600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hover over an image to see its file name, format, loaded original dimensions, title, and tooltip text, even if it has no title. Local workspace images also show file size when available. File size is omitted for remote and encrypted notebook images."
 				}
 			]
 		},

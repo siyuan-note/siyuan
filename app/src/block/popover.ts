@@ -120,6 +120,23 @@ export const initBlockPopover = (app: App) => {
             let tooltipPositionOverride = isListItemAction ? "north" : undefined;
             let tip = image ? getImageTooltip(image) : isListItemAction ? window.siyuan.languages.listItemActionTip :
                 aElement.getAttribute("aria-label") || "";
+            const imagePath = image?.getAttribute("data-src") || image?.getAttribute("src") || "";
+            if (image && !window.siyuan.isPublish && isLocalPath(imagePath) && !/[?&]box=/.test(imagePath) &&
+                !isEncryptedBox(image.closest("[data-notebook-id]")?.getAttribute("data-notebook-id"))) {
+                tooltipAbortController = new AbortController();
+                const capturedController = tooltipAbortController;
+                fetchPost("/api/asset/statAsset", {path: imagePath}, (response) => {
+                    if (capturedController.signal.aborted || !image.isConnected) {
+                        return;
+                    }
+                    if (response.code === 0 && response.data) {
+                        showTooltip(getImageTooltip(image, response.data.hSize), image, undefined, event);
+                    }
+                    if (tooltipAbortController === capturedController) {
+                        tooltipAbortController = null;
+                    }
+                }, undefined, undefined, capturedController.signal);
+            }
             if (aElement.classList.contains("av__cell") && !aElement.classList.contains("ariaLabel")) {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");

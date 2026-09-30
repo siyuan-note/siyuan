@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20260930092955"
+		"updated": "20260930093600"
 	},
 	"Children": [
 		{
@@ -384,7 +384,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "エディター"
+					"TextMarkTextContent": "エディタ"
 				},
 				{
 					"Type": "NodeText",
@@ -421,7 +421,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "エディター"
+					"TextMarkTextContent": "エディタ"
 				},
 				{
 					"Type": "NodeText",
@@ -430,11 +430,25 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "画像のツールチップテキストを表示"
+					"TextMarkTextContent": "画像のツールチップのテキストを表示"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " を有効にすると、画像の説明がタイトルの下に表示されます。この設定が無効でも、画像にマウスを合わせるとタイトルとツールチップテキストの両方が表示されます。説明には既存の代替テキストを使用し、アセットの挿入時に検索できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260930093600-nnyntle",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930093600-nnyntle",
+				"updated": "20260930093600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "画像にマウスを合わせると、タイトルがなくてもファイル名、形式、読み込み済み画像の元のサイズ、タイトル、ツールチップテキストを確認できます。ローカルワークスペースの画像では、取得できる場合にファイルサイズも表示されます。ネットワーク画像と暗号化ノートブックの画像ではファイルサイズは表示されません。"
 				}
 			]
 		},

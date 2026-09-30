@@ -23,6 +23,7 @@ const browserCases = async (source: string, css: string) => {
         roots,
         Constants: {CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", ATTRIBUTE_EDITING: "data-editing"},
         getListMindmapElements: (root: Element) => Array.from(root.querySelectorAll('[data-type="NodeMindmap"]')),
+        isFoldedRenderContent: (element: Element) => !!element.closest('[fold="1"]'),
         syncListMindmapHeight: (list: HTMLElement, host: HTMLElement) => {
             host.style.setProperty("--mindmap-view-height", list.style.height);
         },
@@ -60,6 +61,32 @@ const browserCases = async (source: string, css: string) => {
         callbacks.forEach(callback => callback(0));
         await flush();
     };
+    for (const folded of ["parent", "self"]) {
+        const root = document.createElement("div");
+        root.className = "protyle-wysiwyg";
+        root.innerHTML = '<div data-type="NodeTabs" data-node-id="tabs"><div data-type="NodeMindmap" data-node-id="map">' +
+            '<div class="mindmap-item" data-node-id="item">Preserved source</div></div></div>';
+        const list = root.querySelector<HTMLElement>('[data-type="NodeMindmap"]');
+        const container = folded === "parent" ? root.firstElementChild : list;
+        container.setAttribute("fold", "1");
+        document.body.appendChild(root);
+        const owner = {wysiwyg: {element: root}};
+        const before = requests;
+        init(owner);
+        await frame();
+        check.equal(requests, before, "folded mindmaps do not load their full source");
+        check.equal(list.querySelector(".mindmap-view"), null);
+        check.equal(list.firstElementChild.textContent, "Preserved source");
+        container.removeAttribute("fold");
+        await flush();
+        await frame();
+        check.equal(requests, before + 1);
+        resolveLoad("complete");
+        await flush();
+        check.equal(list.querySelector(".mindmap-view").textContent, "Rendered");
+        roots.get(owner).destroy();
+        root.remove();
+    }
     for (const result of ["complete", "failed", "changed", "destroy"]) {
         const root = document.createElement("div");
         root.className = "protyle-wysiwyg";

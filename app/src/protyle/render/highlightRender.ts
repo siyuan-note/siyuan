@@ -3,9 +3,10 @@ import {Constants} from "../../constants";
 import {focusByOffset, getSelectionOffset} from "../util/selection";
 import {setCodeTheme} from "./util";
 import {escapeHtml} from "../../util/escape";
+import {isFoldedRenderContent} from "./foldedContent";
 
 export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, zoom = 1) => {
-    let codeElements: NodeListOf<Element>;
+    let codeElements: NodeListOf<Element> | Element[];
     let isPreview = false;
     if (element.classList.contains("code-block")) {
         // 编辑器内代码块编辑渲染
@@ -25,6 +26,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
             codeElements = element.querySelectorAll(".code-block .hljs");
         }
     }
+    codeElements = Array.from(codeElements).filter(item => !isFoldedRenderContent(item));
     if (codeElements.length === 0) {
         return;
     }

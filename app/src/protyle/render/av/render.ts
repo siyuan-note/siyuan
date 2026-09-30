@@ -1,4 +1,5 @@
 import {renderCalendar} from "./calendar/render";
+import {isFoldedRenderContent} from "../foldedContent";
 import {getCalendarRequestRange} from "./calendar/state";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
@@ -569,7 +570,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
     }
     for (let i = 0; i < avElements.length; i++) {
         const e = avElements[i] as HTMLElement;
-        if (e.closest(".mindmap-view__preview-block")) {
+        if (e.closest(".mindmap-view__preview-block") || isFoldedRenderContent(e)) {
             continue;
         }
         e.removeAttribute("data-rendering");

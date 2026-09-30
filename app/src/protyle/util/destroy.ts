@@ -1,5 +1,6 @@
 import {destroyTabsRender} from "../render/tabsRender";
 import {destroyListMindmaps} from "../render/listMindmap";
+import {destroyFoldedRender} from "./foldedRender";
 import {cancelLegacyMindmapMigration} from "../render/listMindmap/migrate";
 import {hideElements} from "../ui/hideElements";
 import {isSupportCSSHL} from "../render/searchMarkRender";
@@ -18,6 +19,7 @@ export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
+    destroyFoldedRender(protyle);
     destroyListMindmaps(protyle);
     cancelLegacyMindmapMigration(protyle);
     invalidateFocusFoldRequests(protyle);

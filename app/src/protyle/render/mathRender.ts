@@ -7,6 +7,7 @@ import {looseJsonParse} from "../../util/functions";
 import {genRenderFrame} from "./util";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getMathRenderSecurity} from "./mathRenderSecurity";
+import {isFoldedRenderContent} from "./foldedContent";
 
 const fitMathWidth = (mathElement: HTMLElement, blockElement: HTMLElement | false, isBlock: boolean) => {
     return new Promise<void>((resolve) => {
@@ -25,8 +26,9 @@ const fitMathWidth = (mathElement: HTMLElement, blockElement: HTMLElement | fals
 };
 
 export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWidth = false) => {
-    const mathElements = element.getAttribute("data-subtype") === "math" ?
-        [element] : Array.from(element.querySelectorAll('[data-subtype="math"]'));
+    const mathElements = (element.getAttribute("data-subtype") === "math" ?
+        [element] : Array.from(element.querySelectorAll('[data-subtype="math"]')))
+        .filter(item => !isFoldedRenderContent(item));
     if (mathElements.length === 0) {
         return;
     }

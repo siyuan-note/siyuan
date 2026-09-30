@@ -436,6 +436,7 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
         "\nreturn {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, focusByOffset, getSelectionOffset};")(
         ...Object.values(selectionDependencies)) as typeof import("./tableCellRichSelection") & typeof import("./selection");
     const renderDependencies = {
+        isFoldedRenderContent: () => false,
         ...selectionAPI, Constants: {PROTYLE_CDN: ""}, setCodeTheme: () => {}, addScript: () => Promise.resolve(),
     };
     const render = new Function(...Object.keys(renderDependencies), highlightSource + "\nreturn highlightRender;")(

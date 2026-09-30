@@ -10,6 +10,7 @@ import {updateTransaction} from "../wysiwyg/transaction";
 import {configureAVRichTextLute, getAVRichTextLute, getAVRichTextUnsupportedPasteBlocks, sanitizeAVRichTextBlockDOM} from "./av/richText";
 import {highlightRender} from "./highlightRender";
 import {mathRender} from "./mathRender";
+import {imgMenu} from "../../menus/protyle";
 import {renderTableCellRichElements} from "./tableCellRich";
 import {getTableBlockHTML, getTableCellInlineHTML, getTableCellRichBlockDOM, renderTableCellRich, serializeTableCellRich, setTableCellRich, TABLE_CELL_INLINE_ATTRIBUTE, updateTableCellEditingValue} from "../util/tableCellRich";
 import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
@@ -108,6 +109,9 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
     const clickedMath = point?.target?.closest('[data-subtype="math"]');
     const clickedMathIndex = clickedMath && cell.contains(clickedMath) ?
         Array.from(cell.querySelectorAll('[data-subtype="math"]')).indexOf(clickedMath) : -1;
+    const clickedImage = point?.target?.closest(".protyle-action")?.closest('.img[data-type="img"]');
+    const clickedImageIndex = clickedImage && cell.contains(clickedImage) ?
+        Array.from(cell.querySelectorAll('.img[data-type="img"]')).indexOf(clickedImage) : -1;
     // 外层输入先完成解析和事务，避免把即将挂载的单元格编辑界面当作正文。
     await owner.wysiwyg.flushPendingInput();
     if (openingEditor !== request || owner.disabled || !owner.element.isConnected) {
@@ -514,6 +518,14 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
     fragment.focus(true);
     // 进入单元格编辑即按所属表格块同步大纲高亮
     updateOutlineCurrentBlock(owner, cell);
+    // 图片操作使用重建后的节点和内部编辑器，菜单修改随单元格事务保存。
+    if (clickedImageIndex >= 0) {
+        const image = fragment.wysiwyg.querySelectorAll<HTMLElement>('.img[data-type="img"]')[clickedImageIndex];
+        if (image) {
+            imgMenu(fragment.protyle, getSelection().getRangeAt(0), image, {clientX: point.x + 4, clientY: point.y});
+            return;
+        }
+    }
     if (clickedMathIndex >= 0) {
         const mathElement = fragment.wysiwyg.querySelectorAll('[data-subtype="math"]')[clickedMathIndex];
         if (mathElement) {

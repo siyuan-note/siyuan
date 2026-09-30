@@ -40,6 +40,7 @@ import {getListMindmapFoldStates} from "./fold";
 import {isMobile} from "../../../util/functions";
 import {getListMindmapSiblingIDs, getListMindmapSummaryRange} from "./summary";
 import {isProtyleListItemFragment} from "../../runtimeCapabilities";
+import {isFoldedRenderContent} from "../foldedContent";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
     restoreFocus: (listID: string, candidateIDs: string[]) => void, focusRevision: number,
@@ -669,7 +670,7 @@ export const initListMindmaps = (owner: IProtyle) => {
             }
         });
         lists.forEach(list => {
-            if (instances.has(list) || failed.has(list) || placeholders.has(list)) {
+            if (instances.has(list) || failed.has(list) || placeholders.has(list) || isFoldedRenderContent(list, true)) {
                 return;
             }
             // 在浏览器绘制正文前占位，补齐源块期间沿用脑图的尺寸和公共加载动画。
@@ -693,7 +694,7 @@ export const initListMindmaps = (owner: IProtyle) => {
             if (!lists.has(list)) {
                 instance.destroy();
                 instances.delete(list);
-            } else {
+            } else if (!isFoldedRenderContent(list, true)) {
                 try {
                     instance.refresh();
                 } catch (error) {
@@ -705,11 +706,11 @@ export const initListMindmaps = (owner: IProtyle) => {
             }
         });
         lists.forEach(list => {
-            if (instances.has(list) || loading.has(list) || failed.has(list)) {
+            if (instances.has(list) || loading.has(list) || failed.has(list) || isFoldedRenderContent(list, true)) {
                 return;
             }
             const mount = () => {
-                if (disposed || !root.contains(list) ||
+                if (disposed || !root.contains(list) || isFoldedRenderContent(list, true) ||
                     list.dataset.type !== "NodeMindmap" && list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1") {
                     return;
                 }

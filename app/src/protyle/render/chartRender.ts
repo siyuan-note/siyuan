@@ -1,4 +1,5 @@
 import {addScript} from "../util/addScript";
+import {isFoldedRenderContent} from "./foldedContent";
 import {loadECharts} from "../util/echarts";
 import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../util/hasClosest";
@@ -58,6 +59,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     } else {
         echartsElements = element.querySelectorAll('[data-subtype="echarts"]:not([data-render="true"])');
     }
+    echartsElements = Array.from(echartsElements).filter(item => !isFoldedRenderContent(item));
     if (echartsElements.length === 0) {
         return;
     }

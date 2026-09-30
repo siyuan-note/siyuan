@@ -1,4 +1,5 @@
 import {addScript} from "../util/addScript";
+import {isFoldedRenderContent} from "./foldedContent";
 import {Constants} from "../../constants";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
@@ -17,6 +18,7 @@ export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
     } else {
         flowchartElements = element.querySelectorAll('[data-subtype="flowchart"]:not([data-render="true"])');
     }
+    flowchartElements = Array.from(flowchartElements).filter(item => !isFoldedRenderContent(item));
     if (flowchartElements.length === 0) {
         return;
     }

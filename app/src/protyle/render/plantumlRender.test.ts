@@ -33,6 +33,7 @@ for (const mode of ["editor", "readonly", "preview", "export", "remote"]) {
             require: () => ({
                 Constants: {PROTYLE_CDN: ""},
                 addScript: async () => {},
+                isFoldedRenderContent: () => false,
                 hasClosestByClassName: () => mode === "preview" ? false : {hasAttribute: () => mode !== "export"},
                 getHostCapabilities: () => ({remoteKernel: mode === "remote"}),
             }),

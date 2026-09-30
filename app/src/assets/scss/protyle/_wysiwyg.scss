@@ -485,7 +485,7 @@
           touch-action: none;
           opacity: 0;
           margin-right: 16px;
-          background-color: var(--b3-border-color);
+          background-color: var(--b3-theme-primary-light);
           // 透明覆盖层扩展点击热区，让 4px 的细手柄也能轻松点中
           position: relative;
           z-index: 5;
@@ -894,7 +894,35 @@
     }
 
     &.callout {
-      height: calc(1.625em * 2.14 + 8px);
+      display: block;
+      height: auto;
+
+      > .callout-content {
+        display: none;
+      }
+    }
+
+    &.tabs {
+      display: block;
+      height: calc(1.625em + 12px);
+
+      > .tab-item,
+      > .tabs-divider {
+        display: none;
+      }
+    }
+
+    &[data-type="NodeMindmap"],
+    &[data-type="NodeList"][custom-sy-list-mindmap="1"] {
+      height: calc(1.625em + 12px);
+
+      > .mindmap-view {
+        display: none;
+      }
+
+      > [data-node-id]:first-child {
+        display: block;
+      }
     }
 
     &[data-type="NodeBlockQueryEmbed"],
@@ -1033,6 +1061,10 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
 
 .protyle-wysiwyg:not([contenteditable]),
 .protyle-wysiwyg[data-readonly="true"] {
+  .sb__resize {
+    display: none;
+  }
+
   .img:hover .protyle-icons {
     display: none;
   }

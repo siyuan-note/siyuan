@@ -24,6 +24,7 @@ const cases = async (source: string) => {
     const requests: {url: string, data: Record<string, string>}[] = [];
     const chartRefreshes: Element[] = [];
     const dependencies = {
+        isFoldedRenderContent: () => false,
         fetchPost: (url: string, data: Record<string, string>) => requests.push({url, data}),
         fetchSyncPost: () => check.fail("Preview requested database data"),
         genRenderFrame: () => {},

@@ -4659,7 +4659,7 @@ export class WYSIWYG {
                 return;
             }
             // 双击超级块拖拽手柄，均分所有列宽
-            if (target.classList.contains("sb__resize")) {
+            if (!protyle.disabled && target.classList.contains("sb__resize")) {
                 const doOperations: IOperation[] = [];
                 const undoOperations: IOperation[] = [];
                 Array.from(target.parentElement.children).forEach((item: HTMLElement) => {

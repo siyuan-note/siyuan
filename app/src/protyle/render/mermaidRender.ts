@@ -1,4 +1,5 @@
 import {addScript} from "../util/addScript";
+import {isFoldedRenderContent} from "./foldedContent";
 import {Constants} from "../../constants";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
@@ -48,6 +49,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     } else {
         mermaidElements = Array.from(element.querySelectorAll('[data-subtype="mermaid"]:not([data-render="true"])'));
     }
+    mermaidElements = mermaidElements.filter(item => !isFoldedRenderContent(item));
     if (mermaidElements.length === 0) {
         return;
     }

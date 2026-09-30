@@ -43,7 +43,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         "getAgentLute, configureAVRichTextLute, getTableCellEditorLute, getAVRichTextLute, " +
         "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, " +
         "setTableCellRich, getTableCellInlineHTML, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, " +
-        "updateTableCellContentLayout, captureRichCellSelection, restoreRichCellSelection, setTableCellRichEventTarget, " +
+        "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
         "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM};")(...Object.values(dependencies)) as
         typeof import("../wysiwyg/input") & typeof import("../util/table") & typeof import("./setLute") &
         typeof import("./av/richText") & typeof import("./av/richTextValue") & typeof import("../util/tableCellRichLute") &
@@ -99,6 +99,14 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         getDefaultToolbar: (): string[] => [], updateOutlineCurrentBlock: noop,
         setMobileToolbarUndo: noop, setTableCellRichContext: noop, bindTableCellRichDrag: noop,
         bindLiteCodeActions: noop, highlightRender: noop,
+        imgMenu: (protyle: IProtyle, _range: Range, image: HTMLElement) => {
+            check.equal(image.closest(".protyle-wysiwyg"), image.closest(".table__cell-editor").querySelector(".protyle-wysiwyg"));
+            check.ok(protyle !== tableImageOwner, "the menu must use the cell editor's transaction context");
+            image.querySelector("img").setAttribute("src", "assets/changed.png");
+            image.querySelector("img").setAttribute("data-src", "assets/changed.png");
+            image.dispatchEvent(new Event("input", {bubbles: true}));
+            imageMenus++;
+        },
         matchHotKey: () => false,
         getUndoFocusContext: (_element: Element, range: Range) => {
             const table = (range.startContainer as Element).closest('[data-type="NodeTable"]');
@@ -157,6 +165,34 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
         await tick();
     };
+
+    let tableImageOwner: IProtyle;
+    let imageMenus = 0;
+    for (const rich of [false, true]) {
+        const {owner, element, table} = fixture();
+        const cell = table.querySelector("th");
+        if (rich) {
+            api.setTableCellRich(cell, "![first](assets/first.png)\n\n![second](assets/second.png)");
+            cell.querySelector(".table__cell-rich").innerHTML = api.getTableCellRichBlockDOM(cell);
+        } else {
+            cell.innerHTML = lute.Md2BlockDOM("![first](assets/first.png)");
+            cell.innerHTML = cell.querySelector('[contenteditable="true"]').innerHTML;
+        }
+        const images = cell.querySelectorAll<HTMLElement>('.img[data-type="img"]');
+        const image = images[images.length - 1];
+        const action = image.querySelector(".protyle-action");
+        check.ok(action);
+        tableImageOwner = owner;
+        const previous = imageMenus;
+        await open(owner, cell, undefined, {x: 10, y: 20, target: action});
+        check.equal(imageMenus, previous + 1, "one click opens the selected image menu");
+        check.equal(cell.querySelectorAll("img")[images.length - 1].getAttribute("src"), "assets/changed.png");
+        check.ok(changes.length > 0);
+        const saved = document.createElement("div");
+        saved.innerHTML = operationHTML(changes[changes.length - 1].doOperations[0]);
+        check.match(api.getTableCellRichBlockDOM(saved.querySelector("th")), /assets\/changed\.png/);
+        await finish(element);
+    }
 
     {
         const {owner, element, wysiwyg, table} = fixture();

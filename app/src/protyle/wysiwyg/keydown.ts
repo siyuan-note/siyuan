@@ -346,6 +346,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
         }
+        if (event.key === "Escape" && !protyle.toolbar.subElement.classList.contains("fn__none") &&
+            protyle.toolbar.subElement.dataset.subElementSource === SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE) {
+            protyle.toolbar.subElement.classList.add("fn__none");
+            closeSubElement(protyle.toolbar);
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
         hideElements(["util"], protyle);
         if (event.shiftKey && event.key.indexOf("Arrow") > -1) {
             // 防止连续选中的时候抖动 https://github.com/siyuan-note/insider/issues/657#issuecomment-851391217
@@ -1893,14 +1901,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // esc
         if (event.key === "Escape") {
-            if (!protyle.toolbar.subElement.classList.contains("fn__none") &&
-                protyle.toolbar.subElement.dataset.subElementSource === SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE) {
-                protyle.toolbar.subElement.classList.add("fn__none");
-                closeSubElement(protyle.toolbar);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
             if (formatPainter.deactivate()) {
                 event.stopPropagation();
                 event.preventDefault();

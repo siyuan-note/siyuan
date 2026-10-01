@@ -152,7 +152,7 @@ HTML initially shows all content and hides inactive items only after interactive
 | Item operations and task state | [`tabs.ts`](../app/src/protyle/wysiwyg/tabs.ts), [`taskListMarker.ts`](../app/src/protyle/wysiwyg/taskListMarker.ts) |
 | List conversion and deletion repair | [`tabsList.ts`](../app/src/protyle/wysiwyg/tabsList.ts), [`tabsRemoval.ts`](../app/src/protyle/wysiwyg/tabsRemoval.ts) |
 | Block menu and configuration catalog | [`gutter/index.ts`](../app/src/protyle/gutter/index.ts), [`catalog.ts`](../app/src/config/entryVisibility/catalog.ts) |
-| Kernel normalization and title traversal | [`treenode/tabs.go`](../kernel/treenode/tabs.go), [`model/tabs.go`](../kernel/model/tabs.go) |
+| Kernel normalization and title traversal | [`treenode/tabs.go`](../kernel/treenode/tabs.go) |
 | JSON format | [`SY-FORMAT.md`](SY-FORMAT.md) |
 
 ## Compatibility and recovery

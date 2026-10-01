@@ -9,11 +9,13 @@ import {compileString} from "sass";
 import {createSourceFile, isIfStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (renderSource: string, resizeSource: string, luteSource: string, css: string,
-                            bridgeSource: string, coreSource: string) => {
+                            bridgeSource: string, coreSource: string, insertSources: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     document.body.replaceChildren();
     new Function(luteSource)();
     const lute = Lute.New();
+    lute.SetSpin(true);
+    lute.SetProtyleWYSIWYG(true);
     const style = document.createElement("style");
     style.textContent = css + `
         :root { --b3-theme-on-surface-light: #888; --b3-theme-on-surface: #555;
@@ -31,6 +33,70 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     root.className = "protyle-wysiwyg";
     root.dataset.readonly = "false";
     document.body.appendChild(root);
+    const inserts: {operations: IOperation[], undo: IOperation[]}[] = [];
+    const modules: Record<string, unknown> = {
+        "src/constants": {Constants: {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing"}},
+        "src/util/hostCapabilities": {getHostCapabilities: () => ({remoteKernel: false})},
+        "src/protyle/util/selection": {
+            getEditorRange: () => window.getSelection().getRangeAt(0),
+            focusBlock() {},
+        },
+        "src/protyle/wysiwyg/transaction": {
+            transaction: (_protyle: IProtyle, operations: IOperation[], undo: IOperation[]) => inserts.push({operations, undo}),
+        },
+    };
+    const load = (id: string): unknown => {
+        if (modules[id]) {
+            return modules[id];
+        }
+        const source = insertSources[id];
+        const exports = {};
+        modules[id] = exports;
+        if (!source) {
+            return new Proxy(exports, {get: (_target, key) => check.fail(`Unexpected insertion dependency: ${id}.${String(key)}`)});
+        }
+        new Function("exports", "require", source)(exports, (specifier: string) => load(
+            require("node:path").posix.normalize(require("node:path").posix.join(id, "..", specifier))
+        ));
+        return exports;
+    };
+    const {insertHTML} = load("src/protyle/util/insertHTML") as typeof import("../util/insertHTML");
+    for (const type of ["NodeIFrame", "NodeWidget"]) {
+        for (const empty of [false, true]) {
+            for (const nested of [false, true]) {
+                root.innerHTML = lute.Md2BlockDOM("Insert here");
+                const paragraph = root.firstElementChild;
+                if (empty) {
+                    paragraph.firstElementChild.replaceChildren();
+                }
+                const range = document.createRange();
+                range.selectNodeContents(paragraph.firstElementChild);
+                range.collapse(false);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                const protyle = {lute, wysiwyg: {element: root}, toolbar: {range, getCurrentType: () => []},
+                    block: {parentID: "document"}} as IProtyle;
+                const frameHTML = `<iframe src="about:blank"${type === "NodeWidget" ? ' data-subtype="widget"' : ""}></iframe>`;
+                const frameDOM = lute.SpinBlockDOM(frameHTML);
+                const html = nested ? `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeBlockquote" class="bq">${frameDOM}<div class="protyle-attr" contenteditable="false"></div></div>` : frameDOM;
+                inserts.length = 0;
+                // 使用真实插入入口，保留桌面当前选区和移动端保存选区两种调用方式。
+                insertHTML(html, protyle, type === "NodeWidget", type === "NodeWidget");
+                const block = root.querySelector(`[data-type="${type}"]`);
+                check.ok(block, `${type} inserted ${nested ? "inside a container" : "as a top-level block"}: ${root.innerHTML}`);
+                check.equal(block.querySelectorAll(".protyle-block-resize").length, 3,
+                    `${type} has all handles immediately after insertion`);
+                check.equal(inserts.length, 1);
+                const operation = inserts[0].operations.find(item => item.action === "insert");
+                check.ok(operation);
+                check.ok(typeof operation.data === "string");
+                check.doesNotMatch(operation.data, /protyle-block-resize/, "derived handles stay out of insertion transactions");
+                check.equal(lute.BlockDOM2StdMd(root.querySelector(`[data-node-id="${operation.id}"]`).outerHTML),
+                    lute.BlockDOM2StdMd(operation.data),
+                    "insertion preserves source after handle initialization");
+            }
+        }
+    }
     const bridgeCore = {};
     new Function("exports", coreSource)(bridgeCore);
     const bridge = {} as {initTouchDragBridge: () => void};
@@ -192,6 +258,7 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
         const handle = document.createElement("div");
         handle.className = "mindmap-view__resize protyle-block-resize touch-resize-active";
         handle.dataset.resizeAxis = axis;
+        handle.tabIndex = axis === "both" ? -1 : 0;
         host.appendChild(handle);
     }
     const mindmap = document.createElement("div");
@@ -215,6 +282,51 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     host.classList.remove("fullscreen");
     block.querySelectorAll(".protyle-block-resize").forEach(handle => handle.classList.add("touch-resize-active"));
     return "IFrame, widget and mind map resize cases passed";
+};
+
+const visibilityCases = async (move: (x: number, y: number) => Promise<void>, tab: () => Promise<void>,
+                               evaluate: (code: string) => Promise<unknown>) => {
+    await move(1, 1);
+    await evaluate("document.querySelectorAll(\".touch-resize-active\").forEach(handle => handle.classList.remove(\"touch-resize-active\"));");
+    const touchOnly = await evaluate("matchMedia('(hover: none) and (pointer: coarse)').matches");
+    for (const selector of [".iframe", ".mindmap-view"]) {
+        const state = await evaluate(`(() => {
+            const block = document.querySelector(${JSON.stringify(selector)});
+            const target = block.querySelector("iframe, .mindmap-view__viewport");
+            target.tabIndex = 0;
+            target.focus();
+            require("node:assert/strict").equal(document.activeElement, target);
+            return {opacity: Array.from(block.querySelectorAll(".protyle-block-resize")).map(handle => getComputedStyle(handle).opacity),
+                x: target.getBoundingClientRect().left + 10, y: target.getBoundingClientRect().top + 10};
+        })()`) as {opacity: string[], x: number, y: number};
+        assert.deepEqual(state.opacity, Array(3).fill(touchOnly ? "1" : "0"), "content focus alone does not reveal mouse handles");
+        await move(state.x, state.y);
+        const opacity = await evaluate(`Array.from(document.querySelector(${JSON.stringify(selector)}).querySelectorAll(".protyle-block-resize")).map(handle => getComputedStyle(handle).opacity)`);
+        assert.deepEqual(opacity, ["1", "1", "1"], "hover reveals every handle");
+        await move(1, 1);
+        const hidden = await evaluate(`Array.from(document.querySelector(${JSON.stringify(selector)}).querySelectorAll(".protyle-block-resize")).map(handle => getComputedStyle(handle).opacity)`);
+        assert.deepEqual(hidden, Array(3).fill(touchOnly ? "1" : "0"), "leaving the block hides mouse handles");
+        await evaluate(`(() => {
+            const block = document.querySelector(${JSON.stringify(selector)});
+            const handles = ["width", "height", "both"].map(axis => block.querySelector('[data-resize-axis="' + axis + '"]'));
+            const rects = handles.map(handle => handle.getBoundingClientRect());
+            const decorations = handles.map(handle => getComputedStyle(handle, "::after"));
+            const right = rects[0].left + parseFloat(decorations[0].left) + parseFloat(decorations[0].width);
+            const bottom = rects[1].top + parseFloat(decorations[1].top) + parseFloat(decorations[1].height);
+            const check = require("node:assert/strict");
+            check.equal(rects[2].right - parseFloat(decorations[2].right), right, "corner aligns with the right handle");
+            check.equal(rects[2].bottom - parseFloat(decorations[2].bottom), bottom, "corner aligns with the bottom handle");
+        })()`);
+    }
+    if (!touchOnly) {
+        await tab();
+        const focused = await evaluate(`(() => {
+            const handle = document.activeElement;
+            return {axis: handle.getAttribute("data-resize-axis"), opacity: getComputedStyle(handle).opacity,
+                siblings: Array.from(handle.parentElement.querySelectorAll(".protyle-block-resize")).filter(item => item !== handle).map(item => getComputedStyle(item).opacity)};
+        })()`);
+        assert.deepEqual(focused, {axis: "width", opacity: "1", siblings: ["0", "0"]}, "keyboard focus reveals only its resize handle");
+    }
 };
 
 test("external resize handles preserve source, independent axes, historical dimensions and clipping", {
@@ -241,19 +353,37 @@ test("external resize handles preserve source, independent axes, historical dime
     const script = path.join(temporary, "run.cjs");
     const bridgeSources = ["src/util/touchDragBridge.ts", "src/util/touchDragBridgeCore.ts"].map(file =>
         transpileModule(readFileSync(file, "utf8"), {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText);
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" +
-        [renderSource, resizeSource, readFileSync("stage/protyle/js/lute/lute.min.js", "utf8"), css, ...bridgeSources]
+    const insertSources = Object.fromEntries([
+        "src/protyle/util/insertHTML", "src/protyle/render/iframeResize", "src/protyle/util/hasClosest",
+        "src/protyle/wysiwyg/getBlock", "src/protyle/util/inlineElementBoundary", "src/protyle/util/inlineElementMarker",
+        "src/protyle/util/longTextWrap", "src/protyle/util/codeBlockRenderState", "src/asset/html",
+    ].map(file => [file, transpileModule(readFileSync(file + ".ts", "utf8"),
+        {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText]));
+    const makeCode = (styles: string) => "const __name = value => value; (" + browserCases.toString() + ")(" +
+        [renderSource, resizeSource, readFileSync("stage/protyle/js/lute/lute.min.js", "utf8"), styles, ...bridgeSources, insertSources]
             .map(value => JSON.stringify(value)).join(",") + ")";
+    const code = makeCode(css);
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+const __name = value => value;
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, width: 900, height: 700,
         webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: !!process.env.SIYUAN_RESIZE_PREVIEW}});
     win.webContents.setBackgroundThrottling(false);
     try {
+        win.webContents.debugger.attach("1.3");
+        const checkVisibility = () => (${visibilityCases.toString()})(
+            (x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}),
+            async () => {
+                await win.webContents.debugger.sendCommand("Input.dispatchKeyEvent", {type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9});
+                await win.webContents.debugger.sendCommand("Input.dispatchKeyEvent", {type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9});
+            }, code => win.webContents.executeJavaScript(code));
+        const assert = require("node:assert/strict");
         await win.loadURL("data:text/html,<html><body></body></html>");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
+        await checkVisibility();
         if (process.env.SIYUAN_RESIZE_PREVIEW) {
+            await win.webContents.executeJavaScript('document.querySelectorAll(".protyle-block-resize").forEach(handle => handle.classList.add("touch-resize-active"));');
             await win.webContents.executeJavaScript("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
             require("fs").writeFileSync(process.env.SIYUAN_RESIZE_PREVIEW + "-light.png", (await win.webContents.capturePage()).toPNG());
         }
@@ -263,7 +393,6 @@ app.whenReady().then(async () => {
             require("fs").writeFileSync(process.env.SIYUAN_RESIZE_PREVIEW + "-dark.png", (await win.webContents.capturePage()).toPNG());
         }
         win.setSize(390, 700);
-        win.webContents.debugger.attach("1.3");
         await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true});
         await win.loadURL("data:text/html,<html><body></body></html>");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
@@ -274,6 +403,13 @@ app.whenReady().then(async () => {
             await win.webContents.executeJavaScript("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
             require("fs").writeFileSync(process.env.SIYUAN_RESIZE_PREVIEW + "-narrow.png", (await win.webContents.capturePage()).toPNG());
         }
+        await checkVisibility();
+        await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: false});
+        win.setSize(900, 700);
+        await win.loadURL("data:text/html,<html><body></body></html>");
+        // 激活触屏命中区域规则，模拟鼠标为主且同时带有触屏的设备。
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify(makeCode(css.replaceAll("@media (any-pointer: coarse)", "@media all")))}));
+        await checkVisibility();
         app.exit(0);
     } catch (error) { console.error(error); app.exit(1); }
 });`, "utf8");

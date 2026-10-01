@@ -1027,8 +1027,7 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
     display: inline-block;
   }
 
-  .iframe:hover .protyle-block-resize,
-  .iframe:focus-within .protyle-block-resize {
+  .iframe:hover .protyle-block-resize {
     opacity: 1;
   }
 

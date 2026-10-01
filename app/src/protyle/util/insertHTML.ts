@@ -65,6 +65,7 @@ import {getAVSelectedTableCells} from "../render/av/virtualScroll";
 import {resetCodeBlockRenderState} from "./codeBlockRenderState";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
+import {renderIFrameResize} from "../render/iframeResize";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -1448,6 +1449,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             } else {
                 blockElement.after(item);
             }
+            renderIFrameResize(item);
         }
         if (!lastElement && !hasParentHeading) {
             lastElement = item;

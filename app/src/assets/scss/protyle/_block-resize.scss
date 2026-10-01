@@ -62,8 +62,8 @@
     &::after {
       width: 16px;
       height: 16px;
-      right: 4px;
-      bottom: 4px;
+      right: 9px;
+      bottom: 9px;
       border-right: 3px solid currentColor;
       border-bottom: 3px solid currentColor;
       border-bottom-right-radius: 10px;
@@ -76,6 +76,7 @@
   }
 
   &:focus-visible {
+    opacity: 1;
     outline: 1px solid var(--b3-theme-primary);
     outline-offset: -2px;
   }
@@ -90,8 +91,6 @@
 @media (any-pointer: coarse) {
   // 外侧命中区域为触屏加宽，装饰尺寸保持不变。
   .protyle-block-resize {
-    opacity: 1;
-
     &[data-resize-axis="width"] {
       width: 20px;
       right: -20px;
@@ -111,10 +110,16 @@
       bottom: -24px;
 
       &::after {
-        right: 12px;
-        bottom: 12px;
+        right: 17px;
+        bottom: 17px;
       }
     }
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .protyle-block-resize {
+    opacity: 1;
   }
 }
 

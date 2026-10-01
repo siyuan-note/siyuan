@@ -100,7 +100,6 @@
   }
 
   &:hover &__resize,
-  &:focus-within &__resize,
   &__resize.touch-resize-active {
     opacity: 1;
   }

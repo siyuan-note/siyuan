@@ -40,7 +40,7 @@ var hashes = map[string]*hashInfo{
 
 // hashByName 按名称查找摘要算法，名称大小写不敏感。
 func hashByName(name string) (*hashInfo, error) {
-	canonical, err := canonicalName(name)
+	canonical, err := CanonicalAlgorithmName(name)
 	if err != nil {
 		return nil, err
 	}

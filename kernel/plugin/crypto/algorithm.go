@@ -48,8 +48,8 @@ var algorithmNames = func() map[string]string {
 	return ret
 }()
 
-// canonicalName 将算法名称规范化，未知名称返回 NotSupportedError。
-func canonicalName(name string) (string, error) {
+// CanonicalAlgorithmName 将算法名称规范化，未知名称返回 NotSupportedError。
+func CanonicalAlgorithmName(name string) (string, error) {
 	canonical, ok := algorithmNames[strings.ToLower(strings.TrimSpace(name))]
 	if !ok {
 		return "", notSupportedError("%s is not a supported algorithm", name)

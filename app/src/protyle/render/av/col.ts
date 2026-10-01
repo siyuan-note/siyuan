@@ -346,7 +346,8 @@ export const bindEditEvent = (options: {
                 }
             });
             options.menuElement.addEventListener("mouseover", event => {
-                if (!item.element.contains(event.target as Node)) {
+                const hoveredItem = (event.target as Element).closest(".b3-menu__item");
+                if (hoveredItem && !item.element.contains(hoveredItem)) {
                     item.element.classList.remove("b3-menu__item--show");
                 }
             });

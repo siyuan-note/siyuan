@@ -100,6 +100,12 @@ const browserCases = (source: string, css: string, columnSource: string, blockSo
             parent.dispatchEvent(new MouseEvent("mouseenter"));
             check.equal(submenuShown, shown + 1);
             check.equal(parent.classList.contains("b3-menu__item--show"), true);
+            menuElement.querySelector(".b3-menu__items").dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            check.equal(parent.classList.contains("b3-menu__item--show"), true, "crossing the menu padding keeps the submenu open");
+            parent.querySelector(".b3-menu__submenu").dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            check.equal(parent.classList.contains("b3-menu__item--show"), true, "entering the submenu background keeps it open");
+            buttons[0].dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            check.equal(parent.classList.contains("b3-menu__item--show"), true, "entering a submenu option keeps it open");
             parent.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true}));
             check.equal(document.activeElement, buttons[0]);
             buttons[0].dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowLeft", bubbles: true}));

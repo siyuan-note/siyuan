@@ -2668,6 +2668,43 @@
 			]
 		},
 		{
+			"ID": "20261001015635-x8m40zw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-x8m40zw",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將滑鼠移到心智圖外框上即可顯示尺寸控制點：拖曳右邊緣調整寬度，拖曳下邊緣調整高度，拖曳右下角同時調整寬高；觸控螢幕可直接拖曳控制點。此操作調整心智圖區塊在文件中的尺寸，不改變畫布縮放比例。放開後儲存一次可復原的修改；按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或取消觸控操作可恢復原尺寸。仍可透過區塊選單設定寬度和高度。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-ytql4qf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-ytql4qf",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "唯讀、鎖定視圖與全螢幕狀態下不顯示尺寸控制點。心智圖作為超級區塊的直接子區塊時，只顯示底部高度控制點；寬度透過超級區塊的分欄分隔線調整。"
+				}
+			]
+		},
+		{
 			"ID": "20260926151827-6pycwgr",
 			"Type": "NodeParagraph",
 			"Properties": {

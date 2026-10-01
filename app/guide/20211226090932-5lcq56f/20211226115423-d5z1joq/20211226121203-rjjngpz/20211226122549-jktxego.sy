@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260930234403"
+		"updated": "20261001015635"
 	},
 	"Children": [
 		{
@@ -4216,7 +4216,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260930171029"
+				"updated": "20261001015635"
 			},
 			"Children": [
 				{
@@ -12753,7 +12753,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-z0oyw36",
-				"updated": "20260926152753"
+				"updated": "20261001015635"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13292,6 +13292,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "選擇概要範圍時，使用上下方向鍵選擇末端同層節點，Enter 確認，Esc 取消。編輯概要文字時，Enter 儲存，Esc 取消。選取概要後，Delete 或 Backspace 刪除概要。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-nxedhhs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-nxedhhs",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "心智圖尺寸控制點取得鍵盤焦點後，使用方向鍵按 10 px 調整對應的寬度或高度；按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 再按方向鍵則每次調整 1 px。這些按鍵僅作用於目前取得焦點的尺寸控制點。拖曳過程中按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可取消尺寸調整。"
 				}
 			]
 		},

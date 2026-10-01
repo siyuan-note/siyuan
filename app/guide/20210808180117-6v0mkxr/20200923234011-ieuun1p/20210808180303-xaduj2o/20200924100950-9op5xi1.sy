@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260930234403"
+		"updated": "20261001015635"
 	},
 	"Children": [
 		{
@@ -4224,7 +4224,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260930171029"
+				"updated": "20261001015635"
 			},
 			"Children": [
 				{
@@ -12757,7 +12757,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20260926152753"
+				"updated": "20261001015635"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13296,6 +13296,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "While selecting a summary range, use the up and down arrow keys to select the last sibling node, Enter to confirm, and Esc to cancel. While editing summary text, Enter saves and Esc cancels. Delete or Backspace removes the selected summary."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-5eooc5g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-5eooc5g",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a mind map resize handle has keyboard focus, use the arrow keys to adjust its width or height by 10 px, or hold "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " with an arrow key for 1 px steps. These keys apply only to the focused resize handle. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " during a drag to cancel resizing."
 				}
 			]
 		},

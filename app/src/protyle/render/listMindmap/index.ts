@@ -35,6 +35,8 @@ import {prepareListMindmapConversion} from "./conversion";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
 import {getListMindmapElements, registerListMindmapRoot, registerListMindmapView} from "./render";
 import {syncListMindmapHeight} from "./height";
+import {bindListMindmapResize} from "./resize";
+import {setBlockHeight} from "../../gutter/height";
 import {ListMindmapView} from "./view";
 import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
@@ -128,6 +130,7 @@ class ListMindmapController {
     private disposed = false;
     private taskChanges: Promise<void> = Promise.resolve();
     private unregisterVisible?: () => void;
+    private resize: ReturnType<typeof bindListMindmapResize>;
 
     constructor(owner: IProtyle, list: HTMLElement) {
         this.owner = owner;
@@ -395,6 +398,21 @@ class ListMindmapController {
             }),
         });
         list.dataset.mindmapViewRendered = "true";
+        this.resize = bindListMindmapResize({
+            block: list, host: this.host,
+            labels: {width: window.siyuan.languages.width, height: window.siyuan.languages.height},
+            canResize: () => canEdit(owner, list) && !this.view.isLocked(),
+            prepare: () => this.finish(),
+            commit: size => this.change(() => {
+                if (size.width !== undefined && !list.parentElement?.classList.contains("sb")) {
+                    list.style.width = `${size.width}px`;
+                    list.style.flex = "none";
+                }
+                if (size.height !== undefined) {
+                    setBlockHeight(list, `${size.height}px`);
+                }
+            }),
+        });
         this.unregisterVisible = registerListMindmapView(list, this.view, this.host);
         this.snapshot = cleanListMindmapHTML(list.outerHTML);
         if (canEdit(owner, list)) {
@@ -614,6 +632,7 @@ class ListMindmapController {
     public refresh() {
         this.view.setReadOnly(!canEdit(this.owner, this.list));
         syncListMindmapHeight(this.list, this.host);
+        this.resize.refresh();
         const snapshot = cleanListMindmapHTML(this.list.outerHTML);
         if (snapshot === this.snapshot) {
             return;
@@ -631,6 +650,7 @@ class ListMindmapController {
         const restoreFocus = this.host.contains(document.activeElement) && this.list.isConnected &&
             this.list.dataset.type !== "NodeMindmap" && this.list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1";
         this.activeEditor?.destroy();
+        this.resize.destroy();
         this.unregisterVisible?.();
         this.view.destroy();
         this.host.remove();

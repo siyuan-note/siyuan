@@ -2653,6 +2653,43 @@
 			]
 		},
 		{
+			"ID": "20261001015635-3w0f58c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-3w0f58c",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hover over the outer frame to reveal the resize handles. Drag the right edge to change width, the bottom edge to change height, or the bottom-right corner to change both. On touch devices, drag the handles directly. This changes the block size in the document, not the canvas zoom. Releasing saves one undoable change; press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or cancel the touch gesture to restore the original size. The block menu’s width and height settings remain available."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-8tls0r0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-8tls0r0",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Resize handles are hidden in read-only, locked, and full-screen views. A mind map directly inside a super block has only the bottom height handle; use the super block’s column divider to change its width."
+				}
+			]
+		},
+		{
 			"ID": "20260926151827-kkcg79g",
 			"Type": "NodeParagraph",
 			"Properties": {

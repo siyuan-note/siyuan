@@ -9,6 +9,7 @@ import {fetchSyncPost} from "../../util/fetch";
 import {addBaseURL, redirectToCheckAuth, setNoteBook} from "../../util/pathName";
 import {getLocalStorage, initNativeDialogOverride, initWindowOpenOverride, isMac, isWindows} from "../../protyle/util/compatibility";
 import {addScriptSync} from "../../protyle/util/addScript";
+import {ensureLute} from "../../protyle/util/lute";
 import {loadDesktopHostConnection, initDesktopHost} from "../../boot/onGetConfig";
 import {loadLanguages} from "../../boot/loadLanguages";
 import {systemConfig} from "../systemConfig";
@@ -53,10 +54,13 @@ const initialize = async () => {
         const next = command;
         command = undefined;
         if (next.tab) {
-            switchSettingTab(dialog.element, host.app, next.tab);
+            const mounted = switchSettingTab(dialog.element, host.app, next.tab);
             const url = new URL(location.href);
             url.searchParams.set("tab", next.tab);
             history.replaceState(null, "", url);
+            if (next.tab === "assets") {
+                await mounted;
+            }
         }
         if (next.readme) {
             const {type, from, resource} = next.readme;
@@ -118,18 +122,24 @@ const initialize = async () => {
     window.siyuan.config = systemConfig(response.data.conf);
     window.siyuan.isPublish = response.data.isPublish;
     await loadDesktopHostConnection();
-    await Promise.all([
+    const [user, emoji] = await Promise.all([
+        fetchSyncPost("/api/setting/getCloudUser", {cached: true}),
+        fetchSyncPost("/api/system/getEmojiConf", {}),
         setNoteBook(),
         new Promise<void>(resolve => getLocalStorage(resolve)),
-        addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript"),
-    ]);
-    await addScriptSync(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
-    await new Promise<void>(resolve => {
-        void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, languages => {
+        addScriptSync(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript"),
+        loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, languages => {
             window.siyuan.languages = languages;
-            resolve();
-        });
-    });
+        }),
+        host.plugin ? ensureLute() : Promise.resolve(),
+    ]);
+    if (!window.siyuan.languages || !window.DOMPurify) {
+        throw new Error("Could not load settings window dependencies");
+    }
+    window.siyuan.user = user.data && "userId" in user.data ? user.data : null;
+    if (Array.isArray(emoji.data)) {
+        window.siyuan.emojis = emoji.data;
+    }
     window.siyuan.menus = new Menus(host.app);
     await initDesktopHost();
     ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (_event, data: IWebSocketData) => onWindowsMsg(data));
@@ -147,12 +157,6 @@ const initialize = async () => {
     const zoom = window.siyuan.storage[Constants.LOCAL_ZOOM];
     const position = Constants.SIZE_ZOOM.find(item => item.zoom === zoom)?.position;
     if (position) ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "setTrafficLightPosition", zoom, position});
-    const user = await fetchSyncPost("/api/setting/getCloudUser", {cached: true});
-    window.siyuan.user = user.data && "userId" in user.data ? user.data : null;
-    const emoji = await fetchSyncPost("/api/system/getEmojiConf", {});
-    if (Array.isArray(emoji.data)) {
-        window.siyuan.emojis = emoji.data;
-    }
     await waitForSettingsWindowPaint(async () => {
         await loadAssets(window.siyuan.config.appearance);
         await setInlineStyle();
@@ -170,6 +174,9 @@ const initialize = async () => {
             });
         } else {
             const tab = getSettingTabDefs().find(def => def.id === new URLSearchParams(location.search).get("tab"))?.id;
+            if (tab === "assets") {
+                await ensureLute();
+            }
             dialog = openSettingDialog(host.app, tab);
             dialog.element.querySelectorAll(".config__side .b3-list-item").forEach(item => {
                 item.addEventListener("click", () => {

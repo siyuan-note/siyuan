@@ -8,7 +8,7 @@ import * as themeCompatibility from "./themeCompatibility";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-const createAssets = () => {
+const createAssets = (ensureLute: () => Promise<void> = async () => {}) => {
     const source = readFileSync(resolve(process.cwd(), "src/util/assets.ts"), "utf8");
     const processed = parse(source, {MOBILE: false, BROWSER: true}, false, true);
     const code = transpileModule(processed, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
@@ -79,11 +79,26 @@ const createAssets = () => {
                     elements[id]?.setAttribute("src", url);
                 }};
             }
+            if (name === "../protyle/util/lute") {
+                return {ensureLute};
+            }
             return new Proxy({}, {get: () => (): undefined => undefined});
         },
     });
     return {assets: moduleExports, appearance, elements, errors, scriptURLs, removedElements};
 };
+
+test("third-party appearance scripts wait for Lute before execution", async () => {
+    let complete: () => void;
+    const pending = new Promise<void>(resolve => complete = resolve);
+    const {assets, appearance, scriptURLs} = createAssets(() => pending);
+    appearance.themeJS = true;
+    const loaded = assets.loadAssets(appearance);
+    assert.deepEqual(scriptURLs, []);
+    complete();
+    await loaded;
+    assert.ok(scriptURLs.some(url => url.startsWith("/appearance/themes/custom/theme.js")));
+});
 
 test("missing appearance packages use built-in resources without replacing the saved choices", async () => {
     const {assets, appearance, elements, scriptURLs, removedElements} = createAssets();

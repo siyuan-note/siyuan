@@ -377,6 +377,15 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 if (handleTemplateInteraction(protyle, event) || handleRichTextInteraction(protyle, event)) {
                     return;
                 }
+                const relationRefElement = (event.target as HTMLElement).closest<HTMLElement>(
+                    '.av__cell--relation [data-type~="block-ref"][data-id]');
+                if (relationRefElement?.dataset.id) {
+                    openLink(protyle.app, `siyuan://blocks/${relationRefElement.dataset.id}`, event,
+                        event.ctrlKey || event.metaKey);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 const urlElement = (event.target as HTMLElement).closest<HTMLAnchorElement>(
                     '[data-av-id][data-type="url"] > a.block__icon');
                 if (urlElement) {

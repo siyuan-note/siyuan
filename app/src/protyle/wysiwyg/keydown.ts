@@ -2,6 +2,7 @@ import type {BlockQueryRequestInput} from "../../types/api";
 import {isProtyleListItemFragment} from "../runtimeCapabilities";
 import {hideElements} from "../ui/hideElements";
 import {isTabTextBoundary} from "./tabsBoundary";
+import {getBlockInsertionContext} from "./blockInsertion";
 import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     focusBlock,
@@ -382,8 +383,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if ((nodeElement.classList.contains(BLOCK_SELECTION_CLASS) || blockSelectionModeElement) &&
             isNotCtrl(event) && !event.shiftKey && !event.altKey &&
-            !isInEmbedBlock(nodeElement)) {
-            if (event.key.toLowerCase() === "a") {
+            ["a", "b"].includes(event.key.toLowerCase())) {
+            const position = event.key.toLowerCase() === "a" ? "afterend" : "beforebegin";
+            const insertion = getBlockInsertionContext(editorElement, nodeElement, position, blockSelectionModeElement);
+            if (insertion.allowed) {
                 event.stopPropagation();
                 event.preventDefault();
                 protyle.wysiwyg.element.blur();
@@ -393,19 +396,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 // 阻止中文输入的残留
                 setTimeout(() => {
-                    insertEmptyBlock(protyle, "afterend", blockSelectionModeElement);
-                }, 100);
-                return false;
-            } else if (event.key.toLowerCase() === "b") {
-                event.stopPropagation();
-                event.preventDefault();
-                protyle.wysiwyg.element.blur();
-                if (blockSelectionModeElement) {
-                    clearBlockSelectionMode(protyle.wysiwyg.element, true);
-                    countBlockWord([], protyle);
-                }
-                setTimeout(() => {
-                    insertEmptyBlock(protyle, "beforebegin", blockSelectionModeElement);
+                    insertEmptyBlock(protyle, position, insertion.target);
                 }, 100);
                 return false;
             }
@@ -2418,21 +2409,25 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertBefore, event) &&
-            !isInEmbedBlock(nodeElement)) {
-            // https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2846594701
-            nodeElement.querySelector(".img--select")?.classList.remove("img--select");
-            insertEmptyBlock(protyle, "beforebegin");
-            event.preventDefault();
-            return true;
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertBefore, event)) {
+            const insertion = getBlockInsertionContext(editorElement, nodeElement, "beforebegin", blockSelectionModeElement);
+            if (insertion.allowed) {
+                // https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2846594701
+                nodeElement.querySelector(".img--select")?.classList.remove("img--select");
+                insertEmptyBlock(protyle, "beforebegin", insertion.target);
+                event.preventDefault();
+                return true;
+            }
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertAfter, event) &&
-            !isInEmbedBlock(nodeElement)) {
-            nodeElement.querySelector(".img--select")?.classList.remove("img--select");
-            insertEmptyBlock(protyle, "afterend");
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertAfter, event)) {
+            const insertion = getBlockInsertionContext(editorElement, nodeElement, "afterend", blockSelectionModeElement);
+            if (insertion.allowed) {
+                nodeElement.querySelector(".img--select")?.classList.remove("img--select");
+                insertEmptyBlock(protyle, "afterend", insertion.target);
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
+            }
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.insertSuperBlockLeft, event) &&
             !isInEmbedBlock(nodeElement)) {

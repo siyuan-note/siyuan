@@ -3,6 +3,7 @@ const {readFileSync, mkdtempSync, rmSync} = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const ts = require("typescript");
+const {parse} = require("ifdef-loader/preprocessor");
 
 const sourceFile = file => ts.createSourceFile(file, readFileSync(path.join(__dirname, "../src", file), "utf8"),
     ts.ScriptTarget.Latest, true);
@@ -29,6 +30,8 @@ const sources = () => {
         module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022,
     }}).outputText;
     const workspace = sourceFile("menus/workspace.ts");
+    const workspaceMenu = find(workspace, node => ts.isVariableDeclaration(node) &&
+        node.name.getText(workspace) === "workspaceMenu").initializer;
     const renderMenu = find(workspace, node => ts.isVariableDeclaration(node) &&
         node.name.getText(workspace) === "renderMenu").initializer;
     const popupIndex = renderMenu.body.statements.findIndex(node =>
@@ -38,13 +41,20 @@ const sources = () => {
     const declaration = name => find(menu, node => ts.isVariableDeclaration(node) &&
         node.name.getText(menu) === name).getText(menu);
     return {
+        editor: compile(parse(keyboard.text, {MOBILE: false, BROWSER: true}, false, true)),
+        hide: compile(sourceFile("protyle/ui/hideElements.ts").text),
+        lifecycle: compile(sourceFile("protyle/toolbar/subElementLifecycle.ts").text),
+        globalKeyboard: compile(parse(sourceFile("boot/globalEvent/keydown.ts").text,
+            {MOBILE: false, BROWSER: true}, false, true)),
+        keymap: compile(sourceFile("util/keymapBindings.ts").text),
+        hotkey: compile(sourceFile("protyle/util/hotKey.ts").text),
         escape: compile(`function editorEscape(protyle, event, range, isCrossBlock, nodeElement) {
             const blockSelectionModeElement = undefined;
             ${escape.getText(keyboard)}
         }` + sourceFile("protyle/toolbar/subElementLifecycle.ts").text.replaceAll("export ", "")),
         card: compile(`const openCardByData = ${openCard.getText(card)};`),
-        menu: compile(`function openWorkspaceMenu(openOnly) {
-            const rect = {left: 0, bottom: 0, height: 0};
+        menu: compile(`async function workspaceMenu(app, rect, openOnly = false) {
+            ${workspaceMenu.body.statements[0].getText(workspace)}
             ${renderMenu.body.statements.slice(popupIndex).map(node => node.getText(workspace)).join("\n")}
         }
         const ${declaration("getActionMenu")};
@@ -54,10 +64,12 @@ const sources = () => {
 
 const cases = async compiled => {
     const check = require("node:assert/strict");
-    const Constants = {DIALOG_OPENCARD: "card"};
+    const Constants = {DIALOG_OPENCARD: "card", KEYCODELIST: {27: "Esc"}};
     const menu = document.createElement("div");
     menu.className = "fn__none";
-    window.siyuan = {dialogs: [], menus: {menu: {element: menu}}, languages: {}};
+    const keys = new Proxy({}, {get: () => ({})});
+    window.siyuan = {dialogs: [], menus: {menu: {element: menu}}, languages: {},
+        config: {keymap: {general: keys, editor: {general: keys, insert: keys, heading: keys, list: keys, table: keys}}}};
     let blockSelections = 0;
     const hideElements = (panels, protyle) => {
         for (const name of ["toolbar", "hint", "util"]) {
@@ -75,13 +87,38 @@ const cases = async compiled => {
         (node, name) => (node.nodeType === 1 ? node : node.parentElement).closest(`.${name}`),
         (root, block) => {block.classList.add("selected-block"); root.focus(); blockSelections++;},
         () => blockSelections++, () => {}, () => {}, "selected-block");
+    const load = (text, imports) => {
+        const exports = {};
+        new Function("require", "exports", text)(name =>
+            new Proxy(imports[name] || {}, {get: (target, key) => target[key] || (() => false)}), exports);
+        return exports;
+    };
+    const lifecycle = load(compiled.lifecycle, {});
+    const selectionMode = {clearBlockSelectionMode: root => {
+        root.querySelectorAll(".selected-block").forEach(item => item.classList.remove("selected-block"));
+    }};
+    const actualHide = load(compiled.hide, {"../toolbar/subElementLifecycle": lifecycle,
+        "../wysiwyg/blockSelection": selectionMode});
+    const fullEditor = load(compiled.editor, {"../ui/hideElements": actualHide,
+        "../toolbar/subElementLifecycle": lifecycle,
+        "../util/hasClosest": {hasClosestBlock: node => (node.nodeType === 1 ? node : node.parentElement).closest("[data-node-id]"),
+            hasClosestByAttribute: () => false},
+        "../util/selection": {getEditorRange: () => getSelection().getRangeAt(0)},
+        "../../constants": {Constants},
+        "./blockSelection": {getBlockSelectionModeElement: () => undefined},
+        "../toolbar/FormatPainter": {formatPainter: {deactivate: () => false}},
+    });
     const setup = () => {
         document.body.innerHTML = '<div class="protyle-wysiwyg" tabindex="0"><div data-node-id="first"><div contenteditable="true">First text</div></div><div data-node-id="last"><div contenteditable="true">Last text</div></div></div>';
         const root = document.body.firstElementChild;
         const element = document.createElement("div");
         const subElement = document.createElement("div");
         const hint = document.createElement("div");
-        return {wysiwyg: {element: root}, toolbar: {element, subElement}, hint: {element: hint}};
+        const selectElement = document.createElement("div");
+        selectElement.classList.add("fn__none");
+        return {element: root, selectElement, wysiwyg: {element: root},
+            toolbar: {element, subElement, isMultiSelectMode: () => false},
+            hint: {element: hint, deactivateEmojiPanel() {}}};
     };
     // 行内外观先独立关闭，跨块文本选区和工具栏保持不变。
     for (const crossBlock of [false, true]) {
@@ -98,10 +135,16 @@ const cases = async compiled => {
         protyle.toolbar.subElement.dataset.subElementSource = "selection-toolbar";
         protyle.toolbar.subElementCloseCB = () => cleaned++;
         protyle.hint.element.classList.add("fn__none");
-        root.addEventListener("keydown", event => editorEscape(protyle, event, range, crossBlock, first));
+        const pending = [];
+        const addEventListener = root.addEventListener.bind(root);
+        root.addEventListener = (name, listener, options) => addEventListener(name,
+            event => pending.push(listener(event)), options);
+        fullEditor.keydown(protyle, root);
+        root.addEventListener = addEventListener;
         const before = blockSelections;
-        const event = new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true});
+        const event = new KeyboardEvent("keydown", {key: "Escape", code: "Escape", bubbles: true, cancelable: true});
         first.firstElementChild.dispatchEvent(event);
+        await Promise.all(pending);
         check.equal(event.defaultPrevented, true);
         check.equal(protyle.toolbar.subElement.classList.contains("fn__none"), true);
         check.equal(protyle.toolbar.element.classList.contains("fn__none"), false);
@@ -155,19 +198,39 @@ const cases = async compiled => {
         check.equal(first.classList.contains("selected-block"), false);
     }
     // 快捷键将焦点移到可操作菜单项，方向键不再被编辑器截获。
+    const menuConstants = {MENU_BAR_WORKSPACE: "workspace", KEYCODELIST: {38: "↑", 40: "↓", 220: "\\"}};
     const menuBindings = new Function("window", "Constants", compiled.menu +
-        "\nreturn {openWorkspaceMenu, bindMenuKeydown};")(window, {KEYCODELIST: {38: "↑", 40: "↓"}});
+        "\nreturn {workspaceMenu, bindMenuKeydown};")(window, menuConstants);
+    const keymap = load(compiled.keymap, {});
+    const hotkey = load(compiled.hotkey, {"../../util/keymapBindings": keymap, "../../constants": {Constants: menuConstants},
+        "./compatibility": {isNotCtrl: event => !event.ctrlKey && !event.metaKey, isMac: () => false,
+            isOnlyMeta: event => event.ctrlKey && !event.metaKey}});
+    const globalKeyboard = load(compiled.globalKeyboard, {"../../menus/Menu": menuBindings,
+        "../../menus/workspace": menuBindings, "../../protyle/util/hotKey": hotkey,
+        "../../constants": {Constants: menuConstants},
+        "../../util/keymapBindings": {getKeymapBindings: () => []},
+        "../../layout/getAll": {getAllEditor: () => [], getAllDocks: () => []},
+    });
     for (const openOnly of [true, false]) {
         const protyle = setup();
         const editor = protyle.wysiwyg.element.firstElementChild.firstElementChild;
         editor.focus();
         const menuElement = document.createElement("div");
+        const bar = document.createElement("button");
+        bar.id = "barWorkspace";
+        document.body.append(bar);
         menuElement.className = "b3-menu fn__none";
         menuElement.innerHTML = '<div></div><div class="b3-menu__items"><button class="b3-menu__item" style="display: none">Hidden</button><button class="b3-menu__item b3-menu__item--readonly">Readonly</button><button class="b3-menu__item" disabled>Disabled</button><button class="b3-menu__item" id="firstAction">First</button><button class="b3-menu__item" id="nextAction">Next</button></div>';
         document.body.append(menuElement);
-        const menu = {element: menuElement, popup: () => menuElement.classList.remove("fn__none"),
+        let opens = 0;
+        const menu = {element: menuElement, popup: () => {
+            opens++;
+            menuElement.setAttribute("data-name", "workspace");
+            menuElement.classList.remove("fn__none");
+        },
             remove() {this.removeCB?.(); this.removeCB = undefined; menuElement.classList.add("fn__none");}};
         window.siyuan.menus.menu = menu;
+        window.siyuan.config.keymap.general = {...window.siyuan.config.keymap.general, mainMenu: {custom: "⌥\\"}};
         let editorArrows = 0;
         editor.addEventListener("keydown", event => {
             if (event.key.startsWith("Arrow")) {
@@ -176,7 +239,9 @@ const cases = async compiled => {
             }
         });
         const listener = event => {
-            if (menuBindings.bindMenuKeydown(event)) {
+            if (event.altKey) {
+                globalKeyboard.windowKeyDown({}, event);
+            } else if (menuBindings.bindMenuKeydown(event)) {
                 event.preventDefault();
             } else if (event.key === "Escape") {
                 menu.remove();
@@ -185,20 +250,31 @@ const cases = async compiled => {
         };
         document.body.addEventListener("keydown", listener);
         try {
-            menuBindings.openWorkspaceMenu(openOnly);
+            if (openOnly) {
+                const event = new KeyboardEvent("keydown", {key: "\\", code: "Backslash", keyCode: 220,
+                    altKey: true, bubbles: true, cancelable: true});
+                editor.dispatchEvent(event);
+                check.equal(event.defaultPrevented, true);
+            } else {
+                await menuBindings.workspaceMenu({}, {}, false);
+            }
             check.equal(document.activeElement, openOnly ? menuElement.querySelector("#firstAction") : editor);
             document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {
                 key: "ArrowDown", keyCode: 40, bubbles: true, cancelable: true,
             }));
             check.equal(editorArrows, openOnly ? 0 : 1);
             if (openOnly) {
+                document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "\\", code: "Backslash", keyCode: 220,
+                    altKey: true, repeat: true, bubbles: true, cancelable: true}));
+                check.equal(opens, 1);
+                check.equal(menuElement.classList.contains("fn__none"), false);
                 check.equal(menuElement.querySelector(".b3-menu__item--current").id, "nextAction");
                 document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {
                     key: "Escape", bubbles: true, cancelable: true,
                 }));
                 check.equal(menuElement.classList.contains("fn__none"), true);
                 check.equal(document.activeElement, editor);
-                menuBindings.openWorkspaceMenu(true);
+                await menuBindings.workspaceMenu({}, {}, true);
                 const newFocus = document.createElement("button");
                 document.body.append(newFocus);
                 newFocus.focus();

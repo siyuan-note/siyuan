@@ -20,6 +20,7 @@ export class AgentSessionPanel {
     private isLoadingMore = false;
     private searchTimer: number | null = null;
     private searchKeyword = "";
+    private removeCloseListeners: (() => void) | undefined;
 
     constructor(
         private triggerBtn: HTMLElement,
@@ -52,11 +53,26 @@ export class AgentSessionPanel {
         this.render();
     }
 
-    close() {
+    close(immediate = false) {
+        this.removeCloseListeners?.();
+        this.removeCloseListeners = undefined;
         this.closeAllSubmenus();
-        this.popup?.remove();
-        document.querySelectorAll(".agent-session-popup").forEach(function (el) {
-            el.remove();
+        document.querySelectorAll<HTMLElement>(".agent-session-popup").forEach(el => {
+            const transform = getComputedStyle(el).transform;
+            el.getAnimations().forEach(animation => animation.cancel());
+            if (this.mobile && !immediate && el === this.popup) {
+                const animation = el.animate([
+                    {transform},
+                    {transform: "translateX(100%)"},
+                ], {
+                    duration: 150,
+                    easing: "cubic-bezier(0, 0, .2, 1)",
+                    fill: "forwards",
+                });
+                animation.finished.then(() => el.remove(), () => {});
+            } else {
+                el.remove();
+            }
         });
         this.popup = null;
         this.searchKeyword = "";
@@ -70,12 +86,12 @@ export class AgentSessionPanel {
     }
 
     destroy() {
-        this.close();
+        this.close(true);
     }
 
     private async render() {
         this.isRendering = true;
-        this.close();
+        this.close(true);
         try {
             const result = await SessionStore.list({page: 1, pageSize: 30});
             this.items = result.sessions;
@@ -133,6 +149,13 @@ export class AgentSessionPanel {
             // 桌面端浮层使用视口坐标定位，挂到顶层可避免受浮动 Dock 的变换坐标系和裁剪影响。
             if (this.mobile) {
                 this.host.appendChild(this.popup);
+                this.popup.animate([
+                    {transform: "translateX(100%)"},
+                    {transform: "translateX(0)"},
+                ], {
+                    duration: 150,
+                    easing: "cubic-bezier(0, 0, .2, 1)",
+                });
             } else {
                 document.body.appendChild(this.popup);
             }
@@ -154,12 +177,15 @@ export class AgentSessionPanel {
             }
             const closeOut = () => {
                 this.close();
+            };
+            const closeTimer = setTimeout(() => {
+                document.addEventListener("click", closeOut);
+            }, 10);
+            this.removeCloseListeners = () => {
+                clearTimeout(closeTimer);
                 document.removeEventListener("click", closeOut);
                 window.removeEventListener("resize", onResize);
             };
-            setTimeout(() => {
-                document.addEventListener("click", closeOut);
-            }, 10);
             if (!this.mobile) {
                 searchInput.focus();
             }

@@ -6,10 +6,11 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
 import {compileString} from "sass";
-import {createSourceFile, isIfStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isClassDeclaration, isIfStatement, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (renderSource: string, resizeSource: string, luteSource: string, css: string,
-                            bridgeSource: string, coreSource: string, insertSources: Record<string, string>) => {
+                            bridgeSource: string, coreSource: string, insertSources: Record<string, string>,
+                            hintSource: string, menuSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     document.body.replaceChildren();
     new Function(luteSource)();
@@ -97,6 +98,114 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
             }
         }
     }
+    const constants = {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing", BLOCK_HINT_KEYS: ["(("], INLINE_TYPE: [] as string[]};
+    const selection = window.getSelection();
+    const menuElement = document.createElement("div");
+    document.body.appendChild(menuElement);
+    const menuEvents: string[] = [];
+    const menu = {
+        element: menuElement,
+        popup() { menuEvents.push("popup"); },
+        showSubMenu() { menuEvents.push("submenu"); },
+        fullscreen() { menuEvents.push("fullscreen"); },
+    };
+    const iframeMenu = new Function("getHostCapabilities", "getHTMLAssetIFrameSrc", "updateTransaction", menuSource + "\nreturn iframeMenu;")(
+        () => ({remoteKernel: false}),
+        (load("src/asset/html") as typeof import("../../asset/html")).getHTMLAssetIFrameSrc, () => {});
+    for (const mobile of [false, true]) {
+        for (const empty of [false, true]) {
+            for (const inList of [false, true]) {
+                const text = mobile ? (empty ? "" : "Prefix ") : (empty ? "/" : "Prefix /");
+                root.innerHTML = lute.Md2BlockDOM(inList ? "- Placeholder" : "Placeholder");
+                const paragraph = root.querySelector<HTMLElement>('[data-type="NodeParagraph"]');
+                paragraph.firstElementChild.textContent = text;
+                const originalHTML = paragraph.outerHTML;
+                const originalID = paragraph.dataset.nodeId;
+                const range = document.createRange();
+                const textNode = paragraph.firstElementChild.firstChild;
+                range.setStart(textNode || paragraph.firstElementChild, text.length);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                const undoContext = {undoFocusId: originalID, undoFocusStart: String(text.length), undoFocusEnd: String(text.length)};
+                const dependencies = {
+                    ...(load("src/protyle/util/hasClosest") as typeof import("../util/hasClosest")),
+                    ...(load("src/protyle/wysiwyg/getBlock") as typeof import("../wysiwyg/getBlock")),
+                    ...(load("src/protyle/hint/blockHintRange") as typeof import("../hint/blockHintRange")),
+                    Constants: constants, renderIFrameResize: render,
+                    isMobile: () => mobile, isProtyleListItemFragment: () => false,
+                    getSuperBlockCommandLayout: (): undefined => undefined,
+                    hideElements() {},
+                    getEditorRange: () => selection.getRangeAt(0),
+                    getUndoFocusContext: () => undoContext,
+                    focusByRange: (target: Range) => { selection.removeAllRanges(); selection.addRange(target); },
+                    updateTransaction: (_owner: IProtyle, node: HTMLElement, before: string, context: Record<string, string>) => {
+                        inserts.push({operations: [{action: "update", id: node.dataset.nodeId, data: node.outerHTML}],
+                            undo: [{action: "update", id: originalID, data: before, context}]});
+                    },
+                    transaction: (_owner: IProtyle, operations: IOperation[], undo: IOperation[]) => inserts.push({operations, undo}),
+                };
+                const hint = new Function(...Object.keys(dependencies), hintSource + "\nreturn new Hint();")(...Object.values(dependencies)) as {
+                    fill: (value: string, protyle: IProtyle) => void,
+                    fillCommand: (value: string, protyle: IProtyle, updateRange: boolean) => void,
+                };
+                Object.assign(hint, {source: "hint", splitChar: "/", lastIndex: text.length - 1, fixImageCursor() {}});
+                Object.assign(window, {siyuan: {menus: {menu}, languages: {link: "URL"}}});
+                const protyle = {
+                    lute, wysiwyg: {element: root}, toolbar: {range},
+                    gutter: {renderMenu: (_owner: IProtyle, block: HTMLElement) => {
+                        menuElement.innerHTML = '<div class="b3-menu__items"><div data-id="assetIFrame"><div class="b3-menu__submenu"><div class="b3-menu__items"></div></div></div></div>';
+                        const item = iframeMenu(protyle, block)[0] as IMenu;
+                        const element = document.createElement("div");
+                        element.innerHTML = item.label;
+                        item.bind(element);
+                        menuElement.querySelector(".b3-menu__submenu > .b3-menu__items").appendChild(element);
+                    }},
+                } as IProtyle;
+                inserts.length = 0;
+                menuEvents.length = 0;
+                const value = '<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals allow-popups allow-storage-access-by-user-activation" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>';
+                // 桌面候选菜单调用 fill，移动端工具栏调用 fillCommand 并使用保存的选区。
+                if (mobile) {
+                    hint.fillCommand(value, protyle, false);
+                } else {
+                    hint.fill(value, protyle);
+                }
+                const block = root.querySelector<HTMLElement>('[data-type="NodeIFrame"]');
+                check.ok(block);
+                check.equal(block.querySelectorAll(".protyle-block-resize").length, 3,
+                    `slash insertion initializes handles: mobile=${mobile}, empty=${empty}, list=${inList}`);
+                check.deepEqual(menuEvents, mobile ? ["fullscreen"] : ["popup", "submenu"]);
+                const textarea = menuElement.querySelector("textarea");
+                check.equal(document.activeElement, textarea, "the URL field retains focus");
+                textarea.value = "about:blank#inserted";
+                textarea.dispatchEvent(new Event("change", {bubbles: true}));
+                check.equal(block.querySelector("iframe").getAttribute("src"), textarea.value);
+                check.equal(block.querySelectorAll(".protyle-block-resize").length, 3, "editing the URL preserves every handle");
+                check.equal(inserts.length, 1, "initialization does not add a transaction");
+                const restore = inserts[0].undo.find(operation => operation.id === originalID && operation.action === "update");
+                check.equal(restore.data, originalHTML);
+                check.equal(restore.context, undoContext);
+                const inserted = inserts[0].operations.find(operation => operation.id === block.dataset.nodeId);
+                check.ok(typeof inserted.data === "string");
+                check.doesNotMatch(inserted.data, /protyle-block-resize/, "the insertion transaction contains only source markup");
+                check.equal(block.dataset.nodeId === originalID, empty, "replacement preserves the original block ID");
+                if (!empty) {
+                    check.equal(paragraph.firstElementChild.textContent, "Prefix ");
+                }
+                const handle = block.querySelector<HTMLElement>('[data-resize-axis="width"]');
+                const width = block.querySelector("iframe").clientWidth;
+                updates.length = 0;
+                start({disabled: false}, handle, block, {clientX: 400}, document, 2000, 2000, 300, () => {},
+                    (_owner: unknown, node: HTMLElement, before: string) => updates.push({before, after: node.outerHTML}), () => {});
+                document.onmousemove(new MouseEvent("mousemove", {clientX: 420, clientY: 300}));
+                document.onmouseup(new MouseEvent("mouseup"));
+                check.equal(block.style.width, `${width + 20}px`, "a newly inserted block resizes without a refresh");
+                check.equal(updates.length, 1);
+            }
+        }
+    }
+    menuElement.remove();
     const bridgeCore = {};
     new Function("exports", coreSource)(bridgeCore);
     const bridge = {} as {initTouchDragBridge: () => void};
@@ -331,7 +440,7 @@ const visibilityCases = async (move: (x: number, y: number) => Promise<void>, ta
 
 test("external resize handles preserve source, independent axes, historical dimensions and clipping", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 45000,
+    timeout: 90000,
 }, async () => {
     const source = createSourceFile("index.ts", readFileSync("src/protyle/wysiwyg/index.ts", "utf8"), ScriptTarget.ES2021, true);
     let resize = "";
@@ -357,10 +466,24 @@ test("external resize handles preserve source, independent axes, historical dime
         "src/protyle/util/insertHTML", "src/protyle/render/iframeResize", "src/protyle/util/hasClosest",
         "src/protyle/wysiwyg/getBlock", "src/protyle/util/inlineElementBoundary", "src/protyle/util/inlineElementMarker",
         "src/protyle/util/longTextWrap", "src/protyle/util/codeBlockRenderState", "src/asset/html",
+        "src/protyle/hint/blockHintRange",
     ].map(file => [file, transpileModule(readFileSync(file + ".ts", "utf8"),
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText]));
+    const hintFile = createSourceFile("hint.ts", readFileSync("src/protyle/hint/index.ts", "utf8"), ScriptTarget.ES2021, true);
+    const hintDeclaration = hintFile.statements.find(node => isClassDeclaration(node) && node.name.text === "Hint");
+    assert.ok(hintDeclaration && isClassDeclaration(hintDeclaration));
+    const hintMethods = hintDeclaration.members.filter(member => ["fill", "fillCommand"].includes(member.name?.getText(hintFile)))
+        .map(member => member.getText(hintFile)).join("\n");
+    const hintSource = transpileModule(`class Hint { ${hintMethods} }`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const menuFile = createSourceFile("menu.ts", readFileSync("src/menus/protyle.ts", "utf8"), ScriptTarget.ES2021, true);
+    const menuDeclaration = menuFile.statements.find(node => isVariableStatement(node) &&
+        node.declarationList.declarations.some(declaration => declaration.name.getText(menuFile) === "iframeMenu"));
+    assert.ok(menuDeclaration);
+    const menuSource = transpileModule(menuDeclaration.getText(menuFile).replace(/^export /, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const makeCode = (styles: string) => "const __name = value => value; (" + browserCases.toString() + ")(" +
-        [renderSource, resizeSource, readFileSync("stage/protyle/js/lute/lute.min.js", "utf8"), styles, ...bridgeSources, insertSources]
+        [renderSource, resizeSource, readFileSync("stage/protyle/js/lute/lute.min.js", "utf8"), styles, ...bridgeSources,
+            insertSources, hintSource, menuSource]
             .map(value => JSON.stringify(value)).join(",") + ")";
     const code = makeCode(css);
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -417,7 +540,7 @@ app.whenReady().then(async () => {
     delete env.ELECTRON_RUN_AS_NODE;
     try {
         const result = await promisify(execFile)(require("electron") as unknown as string, [script],
-            {env, windowsHide: true, timeout: 40000});
+            {env, windowsHide: true, timeout: 85000});
         assert.match(result.stdout, /resize cases passed/);
     } finally {
         if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) && path.basename(temporary).startsWith("siyuan-block-resize-test-")) {

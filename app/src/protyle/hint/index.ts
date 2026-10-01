@@ -37,6 +37,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
+import {renderIFrameResize} from "../render/iframeResize";
 import {spinListMindmapDOM} from "../render/listMindmap/create";
 import {mountNewListMindmap} from "../render/listMindmap";
 import {assetMenu, imgMenu} from "../../menus/protyle";
@@ -1338,6 +1339,7 @@ ${genHintItemHTML(item)}
                 } else if (value.startsWith("```")) {
                     highlightRender(nodeElement);
                 } else if (value.startsWith("<iframe") || value.startsWith("<video") || value.startsWith("<audio")) {
+                    renderIFrameResize(nodeElement);
                     protyle.gutter.renderMenu(protyle, nodeElement);
                     const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetVideo"], [data-id="assetAudio"], [data-id="assetIFrame"]');
                     if (isMobile()) {

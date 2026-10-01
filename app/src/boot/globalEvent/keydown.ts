@@ -241,7 +241,7 @@ const documentKeydown = (app: App, event: KeyboardEvent, protyle: IProtyle, rang
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition, event) &&
         !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-            openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title?.editElement.textContent || window.siyuan.languages.untitled);
+            openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title?.editElement.textContent || window.siyuan.languages.untitled, true);
         });
         event.preventDefault();
         return true;
@@ -716,11 +716,11 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         if (isFile) {
             const id = liElements[0].getAttribute("data-node-id");
             fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
-                openCardByData(app, response.data, "doc", id, getDisplayName(liElements[0].getAttribute("data-name"), false, true));
+                openCardByData(app, response.data, "doc", id, getDisplayName(liElements[0].getAttribute("data-name"), false, true), true);
             });
         } else {
             fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
-                openCardByData(app, response.data, "notebook", notebookId, getNotebookName(notebookId));
+                openCardByData(app, response.data, "notebook", notebookId, getNotebookName(notebookId), true);
             });
         }
         event.preventDefault();
@@ -1523,7 +1523,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
     if (matchHotKey(window.siyuan.config.keymap.general.commandPanel, event)) {
         event.preventDefault();
-        commandPanel(app);
+        commandPanel(app, {openOnly: true});
         return;
     }
     const editorFontSizeCommand = EDITOR_FONT_SIZE_COMMANDS.find((item) =>
@@ -1544,7 +1544,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.dataHistory, event)) {
-        openHistory(app);
+        openHistory(app, "doc", true);
         event.preventDefault();
         return;
     }

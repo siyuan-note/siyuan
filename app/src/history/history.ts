@@ -512,13 +512,15 @@ const renderRmNotebook = (element: HTMLElement) => {
     });
 };
 
-export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") => {
+export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc", openOnly = false) => {
     if (window.siyuan.config.readonly) {
         return;
     }
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#historyContainer")) {
-            item.destroy();
+            if (!openOnly) {
+                item.destroy();
+            }
             return true;
         }
     });

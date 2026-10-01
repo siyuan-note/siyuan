@@ -83,9 +83,12 @@ export class Font extends ToolbarItem {
 
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
         super(protyle, menuItem);
-        this.element.addEventListener("click", () => {
+        this.element.addEventListener("click", (event) => {
             if (protyle.toolbar.subElement.dataset.subElementSource === SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE &&
                 !protyle.toolbar.subElement.classList.contains("fn__none")) {
+                if (event instanceof CustomEvent && event.detail?.openOnly) {
+                    return;
+                }
                 protyle.toolbar.subElement.classList.add("fn__none");
                 closeSubElement(protyle.toolbar);
                 focusByRange(protyle.toolbar.range);

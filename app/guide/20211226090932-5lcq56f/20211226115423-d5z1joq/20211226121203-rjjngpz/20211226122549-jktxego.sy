@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261001015635"
+		"updated": "20261002010621"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-a3qlogr",
-				"updated": "20260928175046"
+				"updated": "20261002010621"
 			},
 			"Children": [
 				{
@@ -63,6 +63,29 @@
 				{
 					"Type": "NodeText",
 					"Data": " 組合的單一字元設為快捷鍵。"
+				}
+			]
+		},
+		{
+			"ID": "20261002010621-im1xicd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002010621-im1xicd",
+				"updated": "20261002010621"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "命令面板、最近開啟的文件、資料歷史、閃卡複習、行內外觀、主選單和頁籤列表的快捷鍵只負責開啟面板，再次按下會保持開啟。按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 關閉；編輯器中已有浮層時，先關閉浮層。"
 				}
 			]
 		},

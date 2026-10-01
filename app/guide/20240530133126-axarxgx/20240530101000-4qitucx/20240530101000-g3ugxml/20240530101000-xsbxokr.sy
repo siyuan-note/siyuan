@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20261001015635"
+		"updated": "20261002010621"
 	},
 	"Children": [
 		{
@@ -18,7 +18,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-t67pljp",
-				"updated": "20260928175046"
+				"updated": "20261002010621"
 			},
 			"Children": [
 				{
@@ -61,6 +61,29 @@
 				{
 					"Type": "NodeText",
 					"Data": " と組み合わせた単一文字をショートカットに設定することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20261002010621-mogxh00",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002010621-mogxh00",
+				"updated": "20261002010621"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コマンドパレット、最近開いたドキュメント、データ履歴、フラッシュカードの復習、インラインの外観、メインメニュー、タブ一覧のショートカットは、パネルを開きます。もう一度押してもパネルは開いたままです。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと閉じます。エディターのポップアップが表示されている場合は、先にそのポップアップを閉じます。"
 				}
 			]
 		},

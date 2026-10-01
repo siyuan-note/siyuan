@@ -801,19 +801,22 @@ const emitEvent = (card: ICard, type: string) => {
     });
 };
 
-export const openCard = (app: App) => {
+export const openCard = (app: App, openOnly = false) => {
     if (window.siyuan.config.readonly) {
         return;
     }
     fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
-        openCardByData(app, cardsResponse.data, "all");
+        openCardByData(app, cardsResponse.data, "all", undefined, undefined, openOnly);
     });
 };
 
-export const openCardByData = async (app: App, cardsData: ICardData, cardType: TCardType, id?: string, title?: string) => {
+export const openCardByData = async (app: App, cardsData: ICardData, cardType: TCardType, id?: string, title?: string,
+                                     openOnly = false) => {
     const exit = window.siyuan.dialogs.find(item => {
         if (item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD) {
-            item.destroy();
+            if (!openOnly) {
+                item.destroy();
+            }
             return true;
         }
     });
@@ -865,6 +868,22 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     dialog.editors = {
         card: editor
     };
+    dialog.element.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.key !== "Escape" || event.isComposing || event.repeat) {
+            return;
+        }
+        const protyle = editor.protyle;
+        // 编辑器浮层优先处理 Esc，正文获得焦点时仍可关闭复习弹窗。
+        if (!window.siyuan.menus.menu.element.classList.contains("fn__none") ||
+            !protyle.toolbar.element.classList.contains("fn__none") ||
+            !protyle.toolbar.subElement.classList.contains("fn__none") ||
+            !protyle.hint.element.classList.contains("fn__none")) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        dialog.destroy();
+    }, true);
     /// #if !MOBILE
     const focusElement = dialog.element.querySelector(".block__icons button.block__icon") as HTMLElement;
     focusElement.focus();

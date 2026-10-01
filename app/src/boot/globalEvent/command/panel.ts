@@ -61,16 +61,21 @@ export const commandPanel = (app: App, options: {
     protyle?: IProtyle;
     range?: Range;
     restoreKeyboard?: () => void;
+    openOnly?: boolean;
 } = {}) => {
     const menu = window.siyuan.menus.menu;
     if (isMobile() && menu.element.getAttribute("data-name") === Constants.DIALOG_COMMANDPANEL) {
-        menu.closeSheet();
+        if (!options.openOnly) {
+            menu.closeSheet();
+        }
         return;
     }
     const openCommandPanelDialog = window.siyuan.dialogs.find(item =>
         item.element.getAttribute("data-key") === Constants.DIALOG_COMMANDPANEL);
     if (openCommandPanelDialog) {
-        openCommandPanelDialog.destroy();
+        if (!options.openOnly) {
+            openCommandPanelDialog.destroy();
+        }
         return;
     }
     const context = captureCommandContext({app, source: "commandPanel", protyle: options.protyle, range: options.range});
@@ -175,8 +180,7 @@ export const commandPanel = (app: App, options: {
         if (event.isComposing) {
             return;
         }
-        if (!event.repeat && matchHotKey(window.siyuan.config.keymap.general.commandPanel, event)) {
-            close();
+        if (matchHotKey(window.siyuan.config.keymap.general.commandPanel, event)) {
             event.preventDefault();
             return;
         }

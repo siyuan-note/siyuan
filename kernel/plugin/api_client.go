@@ -17,6 +17,7 @@
 package plugin
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -83,8 +84,8 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							} else {
 								body := b.Export()
 								if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
-									src := arrayBuffer.Bytes()
-									bodyBytes = new(src)
+									// ArrayBuffer.Bytes() 指向 JS 引擎内存，异步发送前需复制，避免脚本后续修改与发送并发读写。
+									bodyBytes = new(bytes.Clone(arrayBuffer.Bytes()))
 								}
 							}
 						}

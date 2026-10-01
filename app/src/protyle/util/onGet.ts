@@ -56,6 +56,7 @@ export const onGet = (options: {
     updateReadonly?: boolean,
     scrollPosition?: ScrollLogicalPosition,
     afterCB?: () => void,
+    afterAVRender?: () => void | Promise<void>,
     dataDocType?: string,
     isValid?: () => boolean,
     focusAfterZoom?: boolean,
@@ -156,6 +157,7 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            afterAVRender: options.afterAVRender,
             isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
@@ -176,6 +178,7 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            afterAVRender: options.afterAVRender,
             isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
@@ -209,6 +212,7 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            afterAVRender: options.afterAVRender,
             isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
@@ -242,6 +246,7 @@ const setHTML = (options: {
     scrollPosition?: ScrollLogicalPosition,
     refreshHeadingNumbers?: boolean,
     afterCB?: () => void,
+    afterAVRender?: () => void | Promise<void>,
     focusAfterZoom?: boolean,
     suppressFocus?: boolean,
     isValid?: () => boolean,
@@ -382,7 +387,14 @@ const setHTML = (options: {
     }
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
-    avRender(protyle.wysiwyg.element, protyle);
+    const avRendering = avRender(protyle.wysiwyg.element, protyle);
+    if (options.afterAVRender) {
+        void avRendering.then(() => {
+            if (!options.isValid || options.isValid()) {
+                return options.afterAVRender();
+            }
+        }).catch(error => console.error(error));
+    }
     blockRender(protyle, protyle.wysiwyg.element);
     renderHeadingNumbers(protyle);
     if (options.refreshHeadingNumbers) {

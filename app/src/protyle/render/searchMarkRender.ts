@@ -7,11 +7,15 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
                                      rootElement?: HTMLElement,
                                      currentElement?: Element,
                                      excludeSelector?: string,
+                                     isValid?: () => boolean,
                                  }) => {
     if (!isSupportCSSHL() || ((!keys || keys.length === 0) && !hlId)) {
         return;
     }
     setTimeout(() => {
+        if (options?.isValid && !options.isValid()) {
+            return;
+        }
         restoreTableVirtualizationDOM(protyle.wysiwyg.element);
         protyle.highlight.markHL.clear();
         protyle.highlight.mark.clear();
@@ -103,16 +107,10 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
 
         // 没有匹配到关键字，但是有高亮块时，需将其添加进去
         if (!isSetHL && hlBlockElement) {
-            const startIndex = text.indexOf(hlBlockElement.textContent);
-            if (startIndex > -1) {
-                const range = new Range();
-                let currentNodeIndex = 0;
-                while (textNodes.length && textNodesSize[currentNodeIndex] <= startIndex) {
-                    currentNodeIndex++;
-                }
-                range.setStart(textNodes[currentNodeIndex], 0);
-                rangeIndexes.push({range, startIndex, isCurrent: true});
-            }
+            const range = new Range();
+            range.selectNodeContents(hlBlockElement);
+            range.collapse(true);
+            rangeIndexes.push({range, startIndex: text.indexOf(hlBlockElement.textContent), isCurrent: true});
         }
 
         rangeIndexes.sort((b, a) => {

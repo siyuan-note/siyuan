@@ -208,7 +208,12 @@ export const setAVLocateRequest = (blockElement: HTMLElement, request: IAVLocate
 };
 
 const getAVLocateRequest = (blockElement: HTMLElement) => {
-    return locateRequests.get(blockElement);
+    const request = locateRequests.get(blockElement);
+    if (request?.isValid && !request.isValid()) {
+        locateRequests.delete(blockElement);
+        return;
+    }
+    return request;
 };
 
 const clearAVLocateRequest = (blockElement: HTMLElement, request: IAVLocateRequest) => {

@@ -11,6 +11,7 @@ export interface IAVLocateRequest {
     previousViewID?: string;
     messageShown?: boolean;
     located?: boolean;
+    isValid?: () => boolean;
 }
 
 export const locateRequests = new WeakMap<HTMLElement, IAVLocateRequest>();

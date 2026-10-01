@@ -10,12 +10,14 @@ const {ModuleKind, transpileModule} = require("typescript");
 const runCases = source => {
     const check = require("node:assert/strict");
     const state = {};
+    const dismissals = [];
     class Menu {
         constructor(_id, onClose, independent) {
             this.items = [];
             this.element = document.createElement("div");
             this.independent = independent;
             this.onClose = onClose;
+            this.element.addEventListener("click", event => dismissals.push([this, event.detail]));
             state.menu = this;
         }
         addItem(item) { this.items.push(item); }
@@ -47,11 +49,13 @@ const runCases = source => {
     check.deepEqual(state.menu.items.map(item => item.label), ["First", "Second", "Group", "Disabled"]);
     check.equal(state.menu.items[0].current, true);
     check.equal(state.menu.items[3].disabled, true);
-    state.menu.items[0].click();
+    check.equal(state.menu.items[0].click(), true);
     check.equal(changes.length, 0);
-    state.menu.items[1].click();
+    check.equal(dismissals.at(-1)[1], "back");
+    check.equal(state.menu.items[1].click(), true);
     check.equal(select.selectedIndex, 1);
     check.deepEqual(changes, [["input", 1], ["change", 1]]);
+    check.equal(dismissals.at(-1)[1], "back");
     state.menu.close();
     check.equal(api.getMobileSelectMenuElement(), undefined);
 
@@ -79,6 +83,17 @@ const runCases = source => {
     state.menu.items[0].click();
     check.equal(changes.length, 2);
     state.menu.close();
+
+    document.body.appendChild(host);
+    select.addEventListener("change", () => select.click(), {once: true});
+    select.click();
+    const replacedMenu = state.menu;
+    const count = dismissals.length;
+    check.equal(replacedMenu.items[0].click(), true);
+    check.notEqual(state.menu, replacedMenu);
+    check.equal(dismissals.length, count);
+    state.menu.close();
+    host.remove();
     return "Mobile native select cases passed";
 };
 

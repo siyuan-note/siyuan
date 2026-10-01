@@ -28,12 +28,19 @@ const openSelect = (select: HTMLSelectElement) => {
             disabled: option.disabled || groupDisabled,
             click: () => {
                 if (!select.isConnected || !select.contains(option) || select.matches(":disabled") ||
-                    option.disabled || groupDisabled || option.selected) {
-                    return;
+                    option.disabled || groupDisabled) {
+                    return true;
                 }
-                select.selectedIndex = option.index;
-                select.dispatchEvent(new Event("input", {bubbles: true}));
-                select.dispatchEvent(new Event("change", {bubbles: true}));
+                if (!option.selected) {
+                    select.selectedIndex = option.index;
+                    select.dispatchEvent(new Event("input", {bubbles: true}));
+                    select.dispatchEvent(new Event("change", {bubbles: true}));
+                }
+                if (activeMenu === menu) {
+                    // 复用移动端返回事件，等待菜单收起过渡完成后再清理。
+                    menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+                }
+                return true;
             },
         });
     };

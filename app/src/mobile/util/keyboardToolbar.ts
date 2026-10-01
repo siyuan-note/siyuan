@@ -81,7 +81,7 @@ import {isMobile} from "../../util/functions";
 import {createFontSizePicker} from "../../protyle/toolbar/fontControls";
 import {applyMobileToolbarEntries} from "./toolbarEntries";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
-import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
 import {restoreGutterBySelection} from "../../protyle/gutter/restore";
 import {mountLiteSlashMenu} from "./liteSlashMenu";
@@ -98,21 +98,28 @@ let toolbarProtyle: IProtyle;
 let unmountLiteSlashMenu: (() => void) | undefined;
 
 const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string | IMenuItem>) => {
+    const protyle = getCurrentEditor()?.protyle;
+    const selection = getSelection();
+    const range = selection?.rangeCount > 0 && protyle?.wysiwyg.element.contains(selection.anchorNode) &&
+        protyle.wysiwyg.element.contains(selection.focusNode) ? selection.getRangeAt(0) : undefined;
+    const nodeElement = (range && hasClosestBlock(range.startContainer)) || undefined;
+    const inCode = nodeElement?.classList.contains("code-block");
+    const hasText = !!range && !!stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
     applyMobileToolbarEntries(element, toolbar, {
         order: getEntryOrder(TOOLBAR_ENTRY_ROOT_PATH),
         isVisible: key => isEntryVisible(`${TOOLBAR_ENTRY_ROOT_PATH}.${key}`),
         isAvailable: name => {
-            const protyle = getCurrentEditor()?.protyle;
             if (name === "block-type") {
-                const selection = getSelection();
-                return !!protyle && selection?.rangeCount > 0 &&
-                    !!getBlockTypeSelection(protyle, selection.getRangeAt(0));
+                return !!range && !!getBlockTypeSelection(protyle, range);
             }
             if (name === "copy" || name === "cut") {
-                const selection = getSelection();
-                return !!protyle && !protyle.disabled && selection?.rangeCount > 0 && !selection.isCollapsed &&
-                    protyle.wysiwyg.element.contains(selection.anchorNode) &&
-                    protyle.wysiwyg.element.contains(selection.focusNode);
+                return !!range && !protyle.disabled && !range.collapsed;
+            }
+            if (name === "outdent" || name === "indent") {
+                return !!nodeElement?.parentElement.classList.contains("li") || !!inCode && hasText;
+            }
+            if (name !== "block-type" && MOBILE_TOOLBAR_NAMES.includes(name)) {
+                return !inCode && hasText;
             }
             if (name === "block") {
                 return !!protyle?.gutter || !!protyle && !!getTableCellRichContext(protyle);

@@ -136,7 +136,8 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     });
     const defaultTemplate = data.newItemTemplates?.find(item => item.id === data.defaultTemplateID);
     const defaultTemplateID = defaultTemplate && (defaultTemplate.targetType !== "detached" ||
-        defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
+        defaultTemplate.icon || defaultTemplate.primaryKeyTemplate ||
+        Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
     const editingState = getAVHeaderEditingState(editable, includeEditingControls);
     return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-current-view-id="${escapeAttr(data.viewID)}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}" data-view-pages="${escapeAttr(serializeAVViewPageSizes(data.views))}">
         <div class="fn__flex av__views${isMobile() ? " av__views--mobile" : ""}${showSearch ? " av__views--show av__views--search" : ""}">

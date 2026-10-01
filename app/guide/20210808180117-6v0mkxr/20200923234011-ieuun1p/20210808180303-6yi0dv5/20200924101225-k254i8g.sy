@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261001051950"
+		"updated": "20261002002136"
 	},
 	"Children": [
 		{
@@ -1405,7 +1405,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20261001051950"
+				"updated": "20261002002136"
 			},
 			"Children": [
 				{
@@ -2533,7 +2533,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-r1kfene",
-				"updated": "20261001051950"
+				"updated": "20261002002136"
 			},
 			"Children": [
 				{
@@ -2694,12 +2694,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001015635-3w0f58c",
-				"updated": "20261001015635"
+				"updated": "20261002002136"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Hover over the outer frame to reveal the resize handles. Drag the right edge to change width, the bottom edge to change height, or the bottom-right corner to change both. On touch devices, drag the handles directly. This changes the block size in the document, not the canvas zoom. Releasing saves one undoable change; press "
+					"Data": "Hover over the outer frame to reveal the small handles outside the border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly. This changes the block size in the document, not the canvas zoom. Releasing saves one undoable change; press "
 				},
 				{
 					"Type": "NodeTextMark",

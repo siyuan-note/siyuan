@@ -30,7 +30,8 @@
   height: var(--mindmap-view-height, 460px);
   min-height: min(260px, var(--mindmap-view-height, 260px));
   box-sizing: border-box;
-  overflow: hidden;
+  // 画布由内部视口裁剪，外侧尺寸把手保持可见。
+  overflow: visible;
   border: 1px solid var(--b3-border-color);
   border-radius: var(--b3-border-radius);
   background: var(--b3-theme-background);
@@ -96,41 +97,6 @@
 
   &__spacer {
     flex: 1;
-  }
-
-  &__resize {
-    z-index: 5;
-    opacity: 0;
-
-    &.resize__r {
-      right: 0;
-      top: 42px;
-      bottom: 16px;
-    }
-
-    &.resize__d {
-      bottom: 0;
-      right: 16px;
-    }
-
-    &.resize__rd {
-      right: 0;
-      bottom: 0;
-    }
-
-    &::before {
-      content: "";
-      position: absolute;
-      inset: 2px;
-      border-radius: var(--b3-border-radius);
-      background-color: var(--b3-theme-surface-lighter);
-      pointer-events: none;
-    }
-
-    &:focus-visible {
-      outline: 1px solid var(--b3-theme-primary);
-      outline-offset: -2px;
-    }
   }
 
   &:hover &__resize,
@@ -222,6 +188,7 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    border-radius: inherit;
     cursor: default;
     touch-action: none;
     user-select: none;
@@ -876,29 +843,6 @@
     height: 28px;
   }
 
-  // 脑图把手位于边框内，不沿用外层弹窗向外扩展的触摸定位。
-  .mindmap-view > .mindmap-view__resize {
-    opacity: 1;
-
-    &.resize__r {
-      width: 14px;
-      right: 0;
-      bottom: 24px;
-    }
-
-    &.resize__d {
-      height: 14px;
-      bottom: 0;
-      right: 24px;
-    }
-
-    &.resize__rd {
-      width: 24px;
-      height: 24px;
-      right: 0;
-      bottom: 0;
-    }
-  }
 }
 
 @media print {

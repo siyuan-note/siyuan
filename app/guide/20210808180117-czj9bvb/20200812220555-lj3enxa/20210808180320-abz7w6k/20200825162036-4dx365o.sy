@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260929221400"
+		"updated": "20261002002136"
 	},
 	"Children": [
 		{
@@ -4056,7 +4056,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604183551-ob6f6wk",
-				"updated": "20210608004838"
+				"updated": "20261002002136"
 			},
 			"Children": [
 				{
@@ -4073,6 +4073,20 @@
 				"id": "20220908200902-6rqv2wt",
 				"updated": "20220908200902"
 			}
+		},
+		{
+			"ID": "20261002002136-ke75879",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002002136-ke75879",
+				"updated": "20261002002136"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将鼠标移到块上即可显示边框外的小尺寸手柄：拖动右侧中间的手柄调整宽度，拖动底部中间的手柄调整高度，拖动右下角的圆角手柄同时调整宽高。触屏可直接拖动手柄，单独调整宽度或高度时会保留另一项尺寸。"
+				}
+			]
 		},
 		{
 			"ID": "20210608113637-i04ffr2",

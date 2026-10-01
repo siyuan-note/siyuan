@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260929221400"
+		"updated": "20261002002136"
 	},
 	"Children": [
 		{
@@ -4229,7 +4229,7 @@
 			"Properties": {
 				"ID": "20240530101000-5be67rn",
 				"id": "20240530101000-7nhcll9",
-				"updated": "20240530101000"
+				"updated": "20261002002136"
 			},
 			"Children": [
 				{
@@ -4247,6 +4247,20 @@
 				"id": "20240530101000-vdi4815",
 				"updated": "20240530101000"
 			}
+		},
+		{
+			"ID": "20261002002136-ika0ql3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002002136-ika0ql3",
+				"updated": "20261002002136"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロックにマウスカーソルを合わせると、枠の外側に小さなサイズ変更ハンドルが表示されます。右側中央のハンドルをドラッグすると幅、下側中央のハンドルは高さ、右下の丸い角のハンドルは両方を変更できます。タッチ操作ではハンドルを直接ドラッグします。幅または高さだけを変更する場合、もう一方のサイズは維持されます。"
+				}
+			]
 		},
 		{
 			"ID": "20240530101000-8t5ocsw",

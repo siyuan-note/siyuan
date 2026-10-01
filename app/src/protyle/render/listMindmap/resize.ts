@@ -178,7 +178,7 @@ export const bindListMindmapResize = (options: ResizeOptions) => {
     const stopTouch = (event: Event) => event.stopPropagation();
     for (const axis of ["width", "height", "both"] as const) {
         const handle = documentSelf.createElement("div");
-        handle.className = `resize__${axis === "width" ? "r" : axis === "height" ? "d" : "rd"} mindmap-view__resize`;
+        handle.className = "protyle-block-resize mindmap-view__resize";
         handle.dataset.resizeAxis = axis;
         handle.setAttribute("data-prevent-swipe", "true");
         if (axis !== "both") {

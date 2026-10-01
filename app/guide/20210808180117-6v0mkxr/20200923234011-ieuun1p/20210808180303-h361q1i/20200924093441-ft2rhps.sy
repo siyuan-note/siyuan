@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260929221400"
+		"updated": "20261002002136"
 	},
 	"Children": [
 		{
@@ -4061,7 +4061,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604230350-ql890l0",
-				"updated": "20210608004924"
+				"updated": "20261002002136"
 			},
 			"Children": [
 				{
@@ -4078,6 +4078,20 @@
 				"id": "20220909095329-0tocxte",
 				"updated": "20220909095329"
 			}
+		},
+		{
+			"ID": "20261002002136-2v39dr6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002002136-2v39dr6",
+				"updated": "20261002002136"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hover over the block to reveal the small handles outside its border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly; changing one dimension preserves the other."
+				}
+			]
 		},
 		{
 			"ID": "20210608121322-k9l5wuv",

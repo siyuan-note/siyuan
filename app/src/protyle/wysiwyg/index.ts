@@ -1960,6 +1960,9 @@ export class WYSIWYG {
                 if (!nodeElement) {
                     return;
                 }
+                const html = nodeElement.outerHTML;
+                const isIFrame = ["NodeIFrame", "NodeWidget"].includes(nodeElement.dataset.type);
+                const resizeAxis = isIFrame ? target.dataset.resizeAxis || "both" : "both";
                 let isCenter = true;
                 if ("NodeVideo" === nodeElement.dataset.type) {
                     nodeElement.classList.add("iframe--drag");
@@ -1975,38 +1978,45 @@ export class WYSIWYG {
                     target.parentElement.parentElement.classList.add("img--drag");
                 }
 
-                const html = nodeElement.outerHTML;
                 const x = event.clientX;
-                const dragElement = target.previousElementSibling as HTMLElement;
+                const dragElement = isIFrame ? nodeElement.querySelector<HTMLElement>(":scope > .iframe-content > iframe") :
+                    target.previousElementSibling as HTMLElement;
+                if (!dragElement) {
+                    nodeElement.classList.remove("iframe--drag");
+                    return;
+                }
                 const dragWidth = dragElement.clientWidth;
                 const dragHeight = dragElement.clientHeight;
+                if (target.classList.contains("protyle-block-resize")) {
+                    target.classList.add("touch-resize-active");
+                }
 
                 const imgElement = dragElement.parentElement.parentElement;
                 if (dragElement.tagName === "IMG") {
                     img3115(imgElement);
                 }
-                // 3.4.1 以前历史数据兼容
-                if (dragElement.tagName === "IFRAME") {
-                    dragElement.style.height = "";
-                    dragElement.style.width = "";
-                }
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     if (dragElement.tagName === "IMG") {
                         dragElement.style.height = "";
                     }
-                    if (moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {
+                    if (resizeAxis !== "height" && moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {
                         const multiple = ((dragElement.tagName === "IMG" && !imgElement.style.minWidth && nodeElement.style.textAlign !== "center") || !isCenter) ? 1 : 2;
                         if (dragElement.tagName === "IMG") {
                             dragElement.parentElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
                         } else if (dragElement.tagName === "IFRAME") {
+                            // 只清理当前轴的历史尺寸，另一轴继续沿用原数据。
+                            dragElement.style.width = "";
+                            dragElement.removeAttribute("width");
                             nodeElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
                         } else {
                             dragElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
                         }
                     }
-                    if (dragElement.tagName !== "IMG") {
+                    if (resizeAxis !== "width" && dragElement.tagName !== "IMG") {
                         if (moveEvent.clientY > y - dragHeight + 8 && moveEvent.clientY < mostBottom) {
                             if (dragElement.tagName === "IFRAME") {
+                                dragElement.style.height = "";
+                                dragElement.removeAttribute("height");
                                 nodeElement.style.height = (dragHeight + (moveEvent.clientY - y)) + "px";
                             } else {
                                 dragElement.style.height = (dragHeight + (moveEvent.clientY - y)) + "px";
@@ -2021,12 +2031,13 @@ export class WYSIWYG {
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
+                    nodeElement.classList.remove("iframe--drag");
+                    target.classList.remove("touch-resize-active");
+                    target.parentElement.parentElement.classList.remove("img--drag");
                     if (target.classList.contains("protyle-action__drag") && nodeElement) {
                         focusBlock(nodeElement);
                         updateTransaction(protyle, nodeElement, html);
                     }
-                    nodeElement.classList.remove("iframe--drag");
-                    target.parentElement.parentElement.classList.remove("img--drag");
                 };
                 return;
             }

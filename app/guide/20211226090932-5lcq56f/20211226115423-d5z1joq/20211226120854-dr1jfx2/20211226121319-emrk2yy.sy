@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260929221400"
+		"updated": "20261002002136"
 	},
 	"Children": [
 		{
@@ -4055,7 +4055,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-zl8npgo",
-				"updated": "20211226122008"
+				"updated": "20261002002136"
 			},
 			"Children": [
 				{
@@ -4072,6 +4072,20 @@
 				"id": "20220909095422-c32trma",
 				"updated": "20220909095422"
 			}
+		},
+		{
+			"ID": "20261002002136-cjh38oq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002002136-cjh38oq",
+				"updated": "20261002002136"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將滑鼠移到區塊上即可顯示邊框外的小尺寸控制點：拖曳右側中間的控制點調整寬度，拖曳底部中間的控制點調整高度，拖曳右下角的圓角控制點同時調整寬高。觸控螢幕可直接拖曳控制點，單獨調整寬度或高度時會保留另一項尺寸。"
+				}
+			]
 		},
 		{
 			"ID": "20211226122008-je7yc30",

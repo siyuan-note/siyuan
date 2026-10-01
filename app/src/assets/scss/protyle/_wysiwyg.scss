@@ -729,7 +729,7 @@
         }
       }
 
-      .protyle-action__drag {
+      &:not([data-type="NodeIFrame"]):not([data-type="NodeWidget"]) .protyle-action__drag {
         height: 32px;
         width: 4px;
         background-color: var(--b3-theme-surface);
@@ -973,6 +973,10 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
   cursor: text;
 }
 
+.protyle-wysiwyg[data-readonly="true"] .iframe .protyle-block-resize {
+  display: none;
+}
+
 .protyle-format-painter__cursor {
   position: fixed;
   z-index: 9;
@@ -1021,6 +1025,11 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
   .img:hover .protyle-action__drag,
   .iframe:hover .protyle-action__drag {
     display: inline-block;
+  }
+
+  .iframe:hover .protyle-block-resize,
+  .iframe:focus-within .protyle-block-resize {
+    opacity: 1;
   }
 
   .code-block .protyle-action {

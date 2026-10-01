@@ -1,5 +1,5 @@
 import {genUUID} from "../util/genID";
-import {isAbove} from "../util/zIndex";
+import {getZIndex, isAbove} from "../util/zIndex";
 import {moveResize} from "./moveResize";
 import {isMobile} from "../util/functions";
 import {isNotCtrl} from "../protyle/util/compatibility";
@@ -138,11 +138,12 @@ left:${left || "auto"};top:${top || "auto"}">
         this.destroying = true;
         document.removeEventListener("keydown", this.trapFocus, true);
         this.element.classList.remove("b3-dialog--open");
+        const menu = window.siyuan.menus.menu;
+        const menuZIndex = isAbove(menu.element, this.element.querySelector(".b3-dialog")) ? getZIndex(menu.element) : undefined;
         setTimeout(() => {
-            // av 修改列头emoji后点击关闭emoji图标
-            if (isAbove(window.siyuan.menus.menu.element, this.element.querySelector(".b3-dialog"))) {
-                // https://github.com/siyuan-note/siyuan/issues/6783
-                window.siyuan.menus.menu.remove();
+            // 仅清理关闭开始时位于对话框上方的同一次菜单，保留之后打开的内容。
+            if (menuZIndex !== undefined && window.siyuan.menus.menu === menu && getZIndex(menu.element) === menuZIndex) {
+                menu.remove();
             }
             const activeElement = document.activeElement;
             const restoreFocus = activeElement === document.body || this.element.contains(activeElement);

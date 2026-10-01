@@ -2601,8 +2601,8 @@ export class ListMindmapView {
         this.draw();
         const {left, top, right, bottom} = this.contentBounds();
         const insetTop = 16;
-        // 菜单打开前后保持相同的底部留白，避免选中节点时画布跳动。
-        const insetBottom = 42;
+        // 底部为菜单、外侧间距和横向滚动条留出空间，避免选中节点时画布跳动。
+        const insetBottom = 66;
         const availableWidth = Math.max(1, width - 48);
         const availableHeight = Math.max(1, height - insetTop - insetBottom);
         this.scale = Math.min(maxScale, Math.max(.15, Math.min(availableWidth / Math.max(1, right - left),

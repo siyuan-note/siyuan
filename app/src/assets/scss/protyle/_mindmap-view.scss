@@ -753,7 +753,7 @@
 
   &__route-status {
     position: absolute;
-    bottom: 40px;
+    bottom: 72px;
     left: 50%;
     z-index: 6;
     transform: translateX(-50%);
@@ -767,12 +767,12 @@
   }
 
   &__inspector {
-    @include protyle-toolbar-surface;
+    @include protyle-toolbar-surface($shadow: 0 0 0 1px var(--b3-border-color));
     position: absolute;
     left: 50%;
     right: auto;
     transform: translateX(-50%);
-    bottom: 0;
+    bottom: 8px;
     z-index: 6;
     width: max-content;
     min-width: 0;

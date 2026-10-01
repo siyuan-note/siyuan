@@ -1267,12 +1267,19 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     select(beta);
     check.equal(inspector.hidden, false);
     check.equal(inspector.classList.contains("mindmap-view__inspector--node"), true);
-    check.equal(getComputedStyle(inspector).bottom, "0px");
+    check.equal(getComputedStyle(inspector).bottom, "8px");
     check.equal(host.querySelector(".mindmap-view__status"), null);
     const nodeMenuBounds = inspector.getBoundingClientRect();
     const panelBounds = host.getBoundingClientRect();
     check.ok(Math.abs(nodeMenuBounds.left + nodeMenuBounds.width / 2 - panelBounds.left - panelBounds.width / 2) < 2);
     check.ok(nodeMenuBounds.width < panelBounds.width / 2);
+    check.ok(panelBounds.bottom - nodeMenuBounds.bottom >= 8);
+    for (const borderColor of ["#d4d4d4", "#484848"]) {
+        host.style.setProperty("--b3-border-color", borderColor);
+        check.equal(getComputedStyle(inspector).boxShadow,
+            getComputedStyle(host).borderTopColor + " 0px 0px 0px 1px");
+    }
+    host.style.removeProperty("--b3-border-color");
     check.equal(inspector.querySelectorAll('input[type="number"]').length, 0);
     check.equal(inspector.querySelectorAll('input[type="checkbox"]').length, 0);
     check.equal(inspector.querySelector('input[type="color"]'), null);
@@ -1516,10 +1523,25 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(relationElement.classList.contains("mindmap-view__relation--hover"), false);
     check.equal(inspector.hidden, false);
     check.equal(inspector.classList.contains("mindmap-view__inspector--line"), true);
-    check.equal(getComputedStyle(inspector).bottom, "0px");
+    check.equal(getComputedStyle(inspector).bottom, "8px");
     const lineMenuBounds = inspector.getBoundingClientRect();
     check.ok(Math.abs(lineMenuBounds.left + lineMenuBounds.width / 2 - panelBounds.left - panelBounds.width / 2) < 2);
     check.ok(lineMenuBounds.width < panelBounds.width / 2);
+    const routeStatus = host.querySelector<HTMLElement>(".mindmap-view__route-status");
+    const statusHidden = routeStatus.hidden;
+    routeStatus.hidden = false;
+    check.ok(routeStatus.getBoundingClientRect().bottom < lineMenuBounds.top);
+    routeStatus.hidden = statusHidden;
+    hostParent.style.width = "320px";
+    const narrowInspectorBounds = inspector.getBoundingClientRect();
+    const narrowPanelBounds = host.getBoundingClientRect();
+    check.ok(narrowInspectorBounds.left > narrowPanelBounds.left);
+    check.ok(narrowInspectorBounds.right < narrowPanelBounds.right);
+    check.ok(inspector.scrollWidth > inspector.clientWidth);
+    inspector.scrollLeft = inspector.scrollWidth;
+    check.ok(inspector.scrollLeft > 0);
+    inspector.scrollLeft = 0;
+    hostParent.style.width = "760px";
     check.equal(inspector.querySelector(".mindmap-view__section"), null);
     const arrowSelector = () => inspector.querySelector<HTMLSelectElement>('[aria-label="listMindmapArrowDirection"]');
     check.ok(arrowSelector().classList.contains("b3-select"));
@@ -2028,6 +2050,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(host.getBoundingClientRect().left, 0);
     check.equal(host.getBoundingClientRect().width, window.innerWidth);
     check.equal(getComputedStyle(host).zIndex, "8");
+    select(beta);
+    check.equal(inspector.hidden, false);
+    check.ok(host.getBoundingClientRect().bottom - inspector.getBoundingClientRect().bottom >= 8);
     check.deepEqual(fullscreenChanges, [true]);
     view.setReadOnly(true);
     check.ok(host.querySelector('[aria-label="exitFullscreen"]'));

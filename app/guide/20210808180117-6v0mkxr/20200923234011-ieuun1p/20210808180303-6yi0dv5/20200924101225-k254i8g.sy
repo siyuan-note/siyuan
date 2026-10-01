@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261001015635"
+		"updated": "20261001051950"
 	},
 	"Children": [
 		{
@@ -1405,7 +1405,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20261001015635"
+				"updated": "20261001051950"
 			},
 			"Children": [
 				{
@@ -2533,7 +2533,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-r1kfene",
-				"updated": "20261001015635"
+				"updated": "20261001051950"
 			},
 			"Children": [
 				{
@@ -2643,12 +2643,49 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001015635-yca6fy3",
-				"updated": "20261001015635"
+				"updated": "20261001051950"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On a selected relation, the hollow circle marks the start and the filled circle marks the end, regardless of arrow direction. Drag a circle to change the connected node. Attachment positions on each node remain automatic."
+					"Data": "On a selected relation, the hollow circle marks the start and the filled circle marks the end, regardless of arrow direction. Drag either circle along any of its node’s four edges to position the connection point, or onto another valid node to reconnect. Mouse and touch dragging are supported. Releasing saves one undoable change. Dropping on blank space, an invalid target, the opposite endpoint’s node, or an existing same-direction connection cancels the change. A position that cannot avoid nodes or controls is also rejected. Connection points remain automatic until adjusted; adjusted positions follow the node as its text size or layout changes."
+				}
+			]
+		},
+		{
+			"ID": "20261001051950-ow14bv7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001051950-ow14bv7",
+				"updated": "20261001051950"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the bottom relation settings, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Restore automatic connection points"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reset both connection points while keeping the manually adjusted intermediate path. Double-clicking a path-segment handle resets only the intermediate path and preserves the connection points. Labels, styles, and arrow direction are unchanged."
+				}
+			]
+		},
+		{
+			"ID": "20261001051950-ue75z7f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001051950-ue75z7f",
+				"updated": "20261001051950"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If a layout change blocks the saved manual path, the line temporarily uses an automatic path while retaining the specified connection points. If those connection points are also unavailable, it temporarily uses automatic connection points. A notice identifies which setting cannot be used. Saved settings are retained and restored when the layout permits. Read-only views and exports use the same drawing rules without adjustment handles; read-only views also show fallback notices."
 				}
 			]
 		},

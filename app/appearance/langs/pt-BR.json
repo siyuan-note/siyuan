@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "Restaurar pontos de conexão automáticos",
+	"listMindmapAnchorFallback": "Os pontos de conexão definidos não estão disponíveis neste layout; pontos de conexão automáticos são exibidos temporariamente",
+	"listMindmapAnchorInvalid": "Este ponto de conexão não permite desviar de nós ou controles; escolha outra posição",
 	"listMindmapArrowDirection": "Direção da seta",
 	"listMindmapArrowForward": "Seta para frente",
 	"listMindmapArrowReverse": "Seta invertida",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "Visualização de calendário do banco de dados",
 	"calendarClearDate": "Limpar data",
 	"runtimeInfo": "Informações de execução",
-	"listMindmapRouteStart": "Arraste para alterar o nó inicial",
-	"listMindmapRouteEnd": "Arraste para alterar o nó de destino",
+	"listMindmapRouteStart": "Arraste para mover o ponto de conexão inicial ou conectar a outro nó",
+	"listMindmapRouteEnd": "Arraste para mover o ponto de conexão final ou conectar a outro nó",
 	"listMindmapRouteHandle": "Arraste para ajustar o trajeto; clique duas vezes na alça para restaurar o cálculo automático",
 	"listMindmapRouteFallback": "O trajeto ajustado não está disponível neste leiaute; exibindo o trajeto automático",
 	"decisionModel": "Modelo de decisão",

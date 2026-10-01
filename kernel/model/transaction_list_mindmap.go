@@ -89,9 +89,27 @@ func validListMindmapMetadata(data map[string]any) bool {
 		if route, exists := relation["route"]; exists && !validListMindmapRoute(route) {
 			return false
 		}
+		for _, key := range []string{"fromAnchor", "toAnchor"} {
+			if value, exists := relation[key]; exists && !validListMindmapRelationAnchor(value) {
+				return false
+			}
+		}
 		seen[relation["id"].(string)] = true
 	}
 	return true
+}
+
+func validListMindmapRelationAnchor(value any) bool {
+	anchor, ok := value.(map[string]any)
+	if !ok {
+		return false
+	}
+	side, ok := anchor["side"].(string)
+	if !ok || !slices.Contains([]string{"left", "right", "top", "bottom"}, side) {
+		return false
+	}
+	ratio, ok := anchor["ratio"].(float64)
+	return ok && !math.IsNaN(ratio) && !math.IsInf(ratio, 0) && ratio >= 0 && ratio <= 1
 }
 
 func validListMindmapRoute(value any) bool {

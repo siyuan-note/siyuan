@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "Restore automatic connection points",
+	"listMindmapAnchorFallback": "The specified connection points are unavailable in this layout; temporarily showing automatic connection points",
+	"listMindmapAnchorInvalid": "This connection point cannot avoid nodes or controls; choose another position",
 	"listMindmapArrowDirection": "Arrow direction",
 	"listMindmapArrowForward": "Forward arrow",
 	"listMindmapArrowReverse": "Reverse arrow",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "Database calendar view",
 	"calendarClearDate": "Clear date",
 	"runtimeInfo": "Runtime information",
-	"listMindmapRouteStart": "Drag to change the start node",
-	"listMindmapRouteEnd": "Drag to change the end node",
+	"listMindmapRouteStart": "Drag to move the start connection point or reconnect to another node",
+	"listMindmapRouteEnd": "Drag to move the end connection point or reconnect to another node",
 	"listMindmapRouteHandle": "Drag to adjust the path; double-click the handle to reset",
 	"listMindmapRouteFallback": "The adjusted path is unavailable in this layout; showing the automatic path",
 	"decisionModel": "Decision model",

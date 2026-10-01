@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "स्वचालित कनेक्शन बिंदु बहाल करें",
+	"listMindmapAnchorFallback": "इस लेआउट में चुने गए कनेक्शन बिंदुओं का उपयोग नहीं हो सकता; अस्थायी रूप से स्वचालित कनेक्शन बिंदु दिखाए जा रहे हैं",
+	"listMindmapAnchorInvalid": "इस कनेक्शन बिंदु से नोड या नियंत्रणों से बचना संभव नहीं है; कोई दूसरी स्थिति चुनें",
 	"listMindmapArrowDirection": "तीर की दिशा",
 	"listMindmapArrowForward": "आगे की ओर तीर",
 	"listMindmapArrowReverse": "उलटी दिशा में तीर",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "डेटाबेस कैलेंडर दृश्य",
 	"calendarClearDate": "तारीख साफ़ करें",
 	"runtimeInfo": "रनटाइम की जानकारी",
-	"listMindmapRouteStart": "आरंभिक नोड बदलने के लिए खींचें",
-	"listMindmapRouteEnd": "लक्ष्य नोड बदलने के लिए खींचें",
+	"listMindmapRouteStart": "शुरुआती कनेक्शन बिंदु को खिसकाने या किसी दूसरे नोड से जोड़ने के लिए खींचें",
+	"listMindmapRouteEnd": "अंतिम कनेक्शन बिंदु को खिसकाने या किसी दूसरे नोड से जोड़ने के लिए खींचें",
 	"listMindmapRouteHandle": "पथ समायोजित करने के लिए खींचें; स्वचालित गणना बहाल करने के लिए ड्रैग हैंडल पर दो बार क्लिक करें",
 	"listMindmapRouteFallback": "इस लेआउट में समायोजित पथ उपलब्ध नहीं है; स्वचालित पथ दिखाया जा रहा है",
 	"decisionModel": "निर्णय मॉडल",

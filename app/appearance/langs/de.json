@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "Automatische Verbindungspunkte wiederherstellen",
+	"listMindmapAnchorFallback": "Die festgelegten Verbindungspunkte sind in diesem Layout nicht verfügbar; vorübergehend werden automatische Verbindungspunkte angezeigt",
+	"listMindmapAnchorInvalid": "An diesem Verbindungspunkt können Knoten oder Bedienelemente nicht umgangen werden; wählen Sie eine andere Position",
 	"listMindmapArrowDirection": "Pfeilrichtung",
 	"listMindmapArrowForward": "Vorwärtspfeil",
 	"listMindmapArrowReverse": "Rückwärtspfeil",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "Datenbank-Kalenderansicht",
 	"calendarClearDate": "Datum löschen",
 	"runtimeInfo": "Laufzeitinformationen",
-	"listMindmapRouteStart": "Ziehen, um den Startknoten zu ändern",
-	"listMindmapRouteEnd": "Ziehen, um den Zielknoten zu ändern",
+	"listMindmapRouteStart": "Ziehen, um den Startverbindungspunkt zu verschieben oder einen anderen Knoten zu verbinden",
+	"listMindmapRouteEnd": "Ziehen, um den Endverbindungspunkt zu verschieben oder einen anderen Knoten zu verbinden",
 	"listMindmapRouteHandle": "Ziehen, um den Verlauf anzupassen; Doppelklick auf den Ziehpunkt stellt die automatische Berechnung wieder her",
 	"listMindmapRouteFallback": "Der angepasste Verlauf ist in diesem Layout nicht verfügbar; der automatische Verlauf wird angezeigt",
 	"decisionModel": "Entscheidungsmodell",

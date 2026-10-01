@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "Automatische verbindingspunten herstellen",
+	"listMindmapAnchorFallback": "De opgegeven verbindingspunten zijn niet beschikbaar in deze indeling; er worden tijdelijk automatische verbindingspunten weergegeven",
+	"listMindmapAnchorInvalid": "Dit verbindingspunt kan knooppunten of bedieningselementen niet ontwijken; kies een andere positie",
 	"listMindmapArrowDirection": "Pijlrichting",
 	"listMindmapArrowForward": "Pijl vooruit",
 	"listMindmapArrowReverse": "Omgekeerde pijl",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "Kalenderweergave van database",
 	"calendarClearDate": "Datum wissen",
 	"runtimeInfo": "Runtime-informatie",
-	"listMindmapRouteStart": "Sleep om het beginknooppunt te wijzigen",
-	"listMindmapRouteEnd": "Sleep om het doelknooppunt te wijzigen",
+	"listMindmapRouteStart": "Sleep om het beginverbindingspunt te verplaatsen of verbinding te maken met een ander knooppunt",
+	"listMindmapRouteEnd": "Sleep om het eindverbindingspunt te verplaatsen of verbinding te maken met een ander knooppunt",
 	"listMindmapRouteHandle": "Sleep om het pad aan te passen; dubbelklik op de sleepgreep om de automatische berekening te herstellen",
 	"listMindmapRouteFallback": "Het aangepaste pad is niet beschikbaar in deze indeling; het automatische pad wordt getoond",
 	"decisionModel": "Beslismodel",

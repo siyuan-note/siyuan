@@ -101,4 +101,27 @@ test("manual route save and reset use one transaction and reject stale relation 
         target.onRelationChange("r", {arrowDirection});
         assert.equal(transactions.length, count, "choosing the current direction is a no-op");
     }
+    data = JSON.parse(saved);
+    const anchor = {side: "top", ratio: .27};
+    const beforeAnchor = JSON.stringify(data);
+    target.onRelationChange("r", {fromAnchor: anchor}, JSON.stringify(data.relations[0]));
+    const anchored = transactions[transactions.length - 1];
+    assert.equal(anchored.before, beforeAnchor);
+    assert.deepEqual(JSON.parse(anchored.after).relations[0], {...JSON.parse(beforeAnchor).relations[0], fromAnchor: anchor});
+    data = JSON.parse(anchored.before);
+    assert.equal(JSON.stringify(data), beforeAnchor, "undo restores automatic attachment");
+    data = JSON.parse(anchored.after);
+    target.onRelationChange("r", {fromAnchor: undefined, toAnchor: undefined}, JSON.stringify(data.relations[0]));
+    assert.equal(transactions[transactions.length - 1].after, beforeAnchor, "anchor reset preserves the manual path");
+    data = JSON.parse(anchored.after);
+    const anchorSnapshot = JSON.stringify(data.relations[0]);
+    const count = transactions.length;
+    data.relations[0].label = "New remote label";
+    target.onRelationChange("r", {fromAnchor: {side: "left", ratio: .4}}, anchorSnapshot);
+    assert.equal(transactions.length, count, "stale anchor drags cannot replace remote updates");
+    assert.equal(messages.pop(), "stale");
+    data = JSON.parse(anchored.after);
+    target.onRelationChange("r", {from: "c", route: undefined, fromAnchor: undefined}, JSON.stringify(data.relations[0]));
+    assert.deepEqual(JSON.parse(transactions[transactions.length - 1].after).relations[0],
+        {id: "r", from: "c", to: "b", label: "Keep", color: "red"});
 });

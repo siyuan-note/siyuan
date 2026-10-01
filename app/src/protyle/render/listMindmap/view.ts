@@ -8,7 +8,8 @@ import {
     readListMindmap,
 } from "./model";
 import {routeMindmapRelation, routeManualMindmapRelation, adjustMindmapRoute,
-    MindmapRoutePoint, MindmapManualRoute} from "./routing";
+    MindmapRoutePoint, MindmapManualRoute, MindmapRelationAnchor,
+    projectMindmapRelationAnchor, getMindmapRelationAnchorPoint} from "./routing";
 import {mathRender} from "../mathRender";
 import {getAVRichTextSafeURL} from "../av/richTextValue";
 import {Constants} from "../../../constants";
@@ -90,6 +91,8 @@ interface PointerState {
         endpoint?: "from" | "to";
         targetId?: string;
         route?: MindmapManualRoute;
+        anchor?: MindmapRelationAnchor;
+        routeFallback?: boolean;
     };
 }
 
@@ -137,6 +140,7 @@ export class ListMindmapView {
     private finishRelationEdit?: (save: boolean) => void;
     private linePaths: {id: string, relation: boolean, summary?: boolean, path: Path2D, arrows?: MindmapRoutePoint[]}[] = [];
     private relationRoutes = new Map<string, MindmapRoutePoint[]>();
+    private anchorFallbackRoutes = new Set<string>();
     private readonly routeHandles = new Map<string, HTMLButtonElement>();
     private readonly routeStatus = createElement("div", "mindmap-view__route-status");
     private readonly fallbackRoutes = new Set<string>();
@@ -928,6 +932,7 @@ export class ListMindmapView {
             this.summaryPositions = layoutListMindmapSummaries(this.model, this.positions, summarySizes);
             this.relationRoutes.clear();
             this.fallbackRoutes.clear();
+            this.anchorFallbackRoutes.clear();
             this.edges = result.edges;
             this.bounds = result;
             let top = 0;
@@ -1276,18 +1281,37 @@ export class ListMindmapView {
         return {path, start, next, end, previous, arrowSizeLimit, labelPoint};
     }
 
-    private calculateRelationRoute(relation: ListMindmapRelation | undefined, from: ListMindmapPosition, to: ListMindmapPosition) {
-        if (relation) {
-            this.fallbackRoutes.delete(relation.id);
-            if (relation.route) {
-                const points = routeManualMindmapRelation(from, to, this.routingObstacles(), relation.route);
-                if (points.length >= 2) {
-                    return points;
-                }
-                this.fallbackRoutes.add(relation.id);
+    private resolveRelationRoute(relation: ListMindmapRelation | undefined, from: ListMindmapPosition,
+                                 to: ListMindmapPosition, allowAnchorFallback = true) {
+        const obstacles = this.routingObstacles();
+        if (relation?.route) {
+            const points = routeManualMindmapRelation(from, to, obstacles, relation.route, relation);
+            if (points.length >= 2) {
+                return {points, routeFallback: false, anchorFallback: false};
             }
         }
-        return routeMindmapRelation(from, to, this.routingObstacles());
+        const points = routeMindmapRelation(from, to, obstacles, undefined, relation);
+        const routeFallback = !!relation?.route;
+        if (points.length >= 2 || !allowAnchorFallback || (!relation?.fromAnchor && !relation?.toAnchor)) {
+            return {points, routeFallback, anchorFallback: false};
+        }
+        // 布局变化时保留原约束，临时自动选取接入点；再次可用后恢复保存的位置。
+        return {points: routeMindmapRelation(from, to, obstacles), routeFallback, anchorFallback: true};
+    }
+
+    private calculateRelationRoute(relation: ListMindmapRelation | undefined, from: ListMindmapPosition, to: ListMindmapPosition) {
+        const result = this.resolveRelationRoute(relation, from, to);
+        if (relation) {
+            this.fallbackRoutes.delete(relation.id);
+            this.anchorFallbackRoutes.delete(relation.id);
+            if (result.routeFallback) {
+                this.fallbackRoutes.add(relation.id);
+            }
+            if (result.anchorFallback) {
+                this.anchorFallbackRoutes.add(relation.id);
+            }
+        }
+        return result.points;
     }
 
     private renderRouteControls() {
@@ -1333,11 +1357,15 @@ export class ListMindmapView {
                 this.routeHandles.delete(key);
             }
         });
-        const invalid = this.pointer?.relation && !this.pointer.relation.valid;
+        const invalid = drag && !drag.valid;
+        const anchorFallback = !drag && this.anchorFallbackRoutes.size > 0;
+        const routeFallback = drag ? drag.valid && drag.routeFallback :
+            this.readOnly ? this.fallbackRoutes.size > 0 : this.fallbackRoutes.has(id);
         this.viewport.classList.toggle("mindmap-view__viewport--route-invalid", !!invalid);
-        this.routeStatus.hidden = this.readOnly || !!this.options.printLayout || !!this.printTransform ||
-            (!invalid && !this.fallbackRoutes.has(id));
-        this.routeStatus.textContent = this.label(invalid ? "invalid" : "listMindmapRouteFallback");
+        this.routeStatus.hidden = !!this.options.printLayout || !!this.printTransform ||
+            (!invalid && !anchorFallback && !routeFallback);
+        this.routeStatus.textContent = this.label(invalid ? drag.anchor ? "listMindmapAnchorInvalid" : "invalid" :
+            anchorFallback ? "listMindmapAnchorFallback" : "listMindmapRouteFallback");
     }
 
     private getRouteHandle(id: string, part: number | "from" | "to") {
@@ -1419,26 +1447,35 @@ export class ListMindmapView {
         const from = this.positions.get(relation.from);
         const to = this.positions.get(relation.to);
         drag.valid = false;
+        if (!from || !to) {
+            this.draw();
+            return;
+        }
         if (drag.endpoint) {
             const target = this.positions.get(drag.targetId);
             const point = target || {id: "", ...drag.handle, width: 0, height: 0};
             const nextFrom = drag.endpoint === "from" ? point : from;
             const nextTo = drag.endpoint === "to" ? point : to;
-            const points = target?.id === relation[drag.endpoint] ? drag.points :
-                routeMindmapRelation(nextFrom, nextTo, this.routingObstacles());
-            drag.valid = !!target && this.canReconnectRelation(relation, drag.endpoint, target.id) && points.length >= 2;
+            const anchorKey = drag.endpoint === "from" ? "fromAnchor" : "toAnchor";
+            const sameNode = target?.id === relation[drag.endpoint];
+            const preview = {...relation, [drag.endpoint]: target?.id || relation[drag.endpoint],
+                [anchorKey]: sameNode ? drag.anchor : undefined, route: sameNode ? relation.route : undefined};
+            const {points, routeFallback} = this.resolveRelationRoute(preview, nextFrom, nextTo, false);
+            drag.valid = !!target && (!sameNode || !!drag.anchor) &&
+                this.canReconnectRelation(relation, drag.endpoint, target.id) && points.length >= 2;
+            drag.routeFallback = routeFallback;
             if (points.length >= 2) {
                 this.relationRoutes.set(drag.id, points);
             }
             this.nodeElements.forEach((element, id) => element.classList.toggle("mindmap-view__node--relation",
-                drag.valid && id === drag.targetId));
+                id === drag.targetId && (sameNode || drag.valid)));
             this.draw();
             return;
         }
         const route = from && to && adjustMindmapRoute(drag.points, drag.segment, drag.offset, from, to,
             this.fallbackRoutes.has(drag.id) ? undefined : relation.route);
         if (route) {
-            const points = routeManualMindmapRelation(from, to, this.routingObstacles(), route);
+            const points = routeManualMindmapRelation(from, to, this.routingObstacles(), route, relation);
             if (points.length >= 2) {
                 drag.route = route;
                 drag.valid = true;
@@ -1465,6 +1502,19 @@ export class ListMindmapView {
             const relation = this.model.metadata.relations.find(item => item.id === id);
             if (!this.readOnly && relation?.route) {
                 this.options.onRelationChange?.(id, {route: undefined}, JSON.stringify(relation));
+            }
+        });
+    }
+
+    private resetRelationAnchors(id: string) {
+        if (this.readOnly) {
+            return;
+        }
+        this.cancelPointer();
+        this.finishThen(() => {
+            const relation = this.model.metadata.relations.find(item => item.id === id);
+            if (!this.readOnly && (relation?.fromAnchor || relation?.toAnchor)) {
+                this.options.onRelationChange?.(id, {fromAnchor: undefined, toAnchor: undefined}, JSON.stringify(relation));
             }
         });
     }
@@ -2005,6 +2055,20 @@ export class ListMindmapView {
                 drag.targetId = [...this.positions.values()].find(node => drag.handle.x >= node.x &&
                     drag.handle.x <= node.x + node.width && drag.handle.y >= node.y &&
                     drag.handle.y <= node.y + node.height)?.id;
+                const relation = this.model.metadata.relations.find(item => item.id === drag.id);
+                const original = this.positions.get(relation?.[drag.endpoint]);
+                const tolerance = (event.pointerType === "touch" ? 16 : 8) / this.scale;
+                // 真实节点命中优先于原节点的近边吸附，避免缩小时抢占换接目标。
+                if (original && (!drag.targetId || drag.targetId === original.id) &&
+                    drag.handle.x >= original.x - tolerance && drag.handle.x <= original.x + original.width + tolerance &&
+                    drag.handle.y >= original.y - tolerance && drag.handle.y <= original.y + original.height + tolerance) {
+                    drag.targetId = original.id;
+                    const anchor = relation[drag.endpoint === "from" ? "fromAnchor" : "toAnchor"];
+                    drag.anchor = {...anchor, ...projectMindmapRelationAnchor(original, drag.handle, drag.anchor || anchor)};
+                    drag.handle = getMindmapRelationAnchorPoint(original, drag.anchor, 3);
+                } else {
+                    drag.anchor = undefined;
+                }
             } else {
                 drag.offset = (drag.points[drag.segment].y === drag.points[drag.segment + 1].y ? dy : dx) / this.scale;
             }
@@ -2110,8 +2174,19 @@ export class ListMindmapView {
             this.cancelPointer();
             const relation = this.model.metadata.relations.find(item => item.id === drag.id);
             if (moved && drag.endpoint && drag.valid && relation && !this.readOnly &&
-                relation[drag.endpoint] !== drag.targetId && this.canReconnectRelation(relation, drag.endpoint, drag.targetId)) {
-                this.options.onRelationChange?.(drag.id, {[drag.endpoint]: drag.targetId, route: undefined}, drag.original);
+                this.canReconnectRelation(relation, drag.endpoint, drag.targetId)) {
+                const anchorKey = drag.endpoint === "from" ? "fromAnchor" : "toAnchor";
+                if (relation[drag.endpoint] === drag.targetId) {
+                    if (drag.anchor && JSON.stringify(relation[anchorKey]) !== JSON.stringify(drag.anchor)) {
+                        this.options.onRelationChange?.(drag.id, {[anchorKey]: drag.anchor}, drag.original);
+                    }
+                } else {
+                    const patch: Partial<ListMindmapRelation> = {[drag.endpoint]: drag.targetId, route: undefined};
+                    if (relation[anchorKey]) {
+                        patch[anchorKey] = undefined;
+                    }
+                    this.options.onRelationChange?.(drag.id, patch, drag.original);
+                }
             } else if (moved && !drag.endpoint && Math.abs(drag.offset) > .01 && drag.valid && drag.route && !this.readOnly) {
                 this.options.onRelationChange?.(drag.id, {route: drag.route}, drag.original);
             }
@@ -2806,6 +2881,9 @@ export class ListMindmapView {
             }
             this.inspector.append(squareButton("edit", "iconEdit", () => this.editRelationLabel()),
                 squareButton("delete", "iconTrashcan", () => this.options.onRelationDelete?.(relation.id)));
+            if (relation.fromAnchor || relation.toAnchor) {
+                this.inspector.append(squareButton("listMindmapAnchorReset", "iconRefresh", () => this.resetRelationAnchors(relation.id)));
+            }
             return;
         }
         if (this.selectedEdge) {

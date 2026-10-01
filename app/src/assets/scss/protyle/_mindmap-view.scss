@@ -871,6 +871,11 @@
 }
 
 @media (any-pointer: coarse) {
+  .mindmap-view__route-endpoint {
+    width: 28px;
+    height: 28px;
+  }
+
   // 脑图把手位于边框内，不沿用外层弹窗向外扩展的触摸定位。
   .mindmap-view > .mindmap-view__resize {
     opacity: 1;

@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "Przywróć automatyczne punkty połączenia",
+	"listMindmapAnchorFallback": "Wybrane punkty połączenia są niedostępne w tym układzie; tymczasowo wyświetlane są automatyczne punkty połączenia",
+	"listMindmapAnchorInvalid": "Ten punkt połączenia nie pozwala ominąć węzłów lub elementów sterujących; wybierz inną pozycję",
 	"listMindmapArrowDirection": "Kierunek strzałki",
 	"listMindmapArrowForward": "Strzałka do przodu",
 	"listMindmapArrowReverse": "Strzałka odwrotna",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "Widok kalendarza bazy danych",
 	"calendarClearDate": "Wyczyść datę",
 	"runtimeInfo": "Informacje o środowisku uruchomieniowym",
-	"listMindmapRouteStart": "Przeciągnij, aby zmienić węzeł początkowy",
-	"listMindmapRouteEnd": "Przeciągnij, aby zmienić węzeł docelowy",
+	"listMindmapRouteStart": "Przeciągnij, aby przesunąć początkowy punkt połączenia lub połączyć z innym węzłem",
+	"listMindmapRouteEnd": "Przeciągnij, aby przesunąć końcowy punkt połączenia lub połączyć z innym węzłem",
 	"listMindmapRouteHandle": "Przeciągnij, aby dostosować przebieg; kliknij dwukrotnie uchwyt, aby przywrócić automatyczne wyznaczanie",
 	"listMindmapRouteFallback": "Dostosowany przebieg jest niedostępny w tym układzie; wyświetlany jest przebieg automatyczny",
 	"decisionModel": "Model decyzyjny",

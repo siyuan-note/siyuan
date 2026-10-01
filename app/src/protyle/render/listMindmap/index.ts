@@ -363,8 +363,10 @@ class ListMindmapController {
                     }
                 }
                 Object.assign(relation, patch);
-                if ("route" in patch && patch.route === undefined) {
-                    delete relation.route;
+                for (const key of ["route", "fromAnchor", "toAnchor"] as const) {
+                    if (key in patch && patch[key] === undefined) {
+                        delete relation[key];
+                    }
                 }
             }),
             onRelationDelete: id => this.metadata(metadata => {

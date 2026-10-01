@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "استعادة نقاط الاتصال التلقائية",
+	"listMindmapAnchorFallback": "لا يمكن استخدام نقاط الاتصال المحددة في التخطيط الحالي؛ تُعرض نقاط اتصال تلقائية مؤقتًا",
+	"listMindmapAnchorInvalid": "لا يمكن لنقطة الاتصال هذه تجنب العقد أو عناصر التحكم؛ اختر موضعًا آخر",
 	"listMindmapArrowDirection": "اتجاه السهم",
 	"listMindmapArrowForward": "سهم أمامي",
 	"listMindmapArrowReverse": "سهم عكسي",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "عرض التقويم لقاعدة البيانات",
 	"calendarClearDate": "مسح التاريخ",
 	"runtimeInfo": "معلومات التشغيل",
-	"listMindmapRouteStart": "اسحب لتغيير عقدة البداية",
-	"listMindmapRouteEnd": "اسحب لتغيير عقدة النهاية",
+	"listMindmapRouteStart": "اسحب لتحريك نقطة اتصال البداية أو إعادة الاتصال بعقدة أخرى",
+	"listMindmapRouteEnd": "اسحب لتحريك نقطة اتصال النهاية أو إعادة الاتصال بعقدة أخرى",
 	"listMindmapRouteHandle": "اسحب لضبط المسار؛ انقر نقرًا مزدوجًا على مقبض السحب لاستعادة الحساب التلقائي",
 	"listMindmapRouteFallback": "المسار المعدّل غير متاح في هذا التخطيط؛ يتم عرض المسار التلقائي",
 	"decisionModel": "نموذج اتخاذ القرار",

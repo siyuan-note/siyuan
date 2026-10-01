@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "שחזור נקודות חיבור אוטומטיות",
+	"listMindmapAnchorFallback": "לא ניתן להשתמש בנקודות החיבור שהוגדרו בפריסה הנוכחית; נקודות חיבור אוטומטיות מוצגות באופן זמני",
+	"listMindmapAnchorInvalid": "נקודת החיבור הזו אינה מאפשרת לעקוף צמתים או פקדים; יש לבחור מיקום אחר",
 	"listMindmapArrowDirection": "כיוון החץ",
 	"listMindmapArrowForward": "חץ קדימה",
 	"listMindmapArrowReverse": "חץ הפוך",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "תצוגת לוח שנה של מסד הנתונים",
 	"calendarClearDate": "ניקוי תאריך",
 	"runtimeInfo": "מידע על סביבת הריצה",
-	"listMindmapRouteStart": "גררו כדי לשנות את צומת ההתחלה",
-	"listMindmapRouteEnd": "גררו כדי לשנות את צומת הסיום",
+	"listMindmapRouteStart": "יש לגרור כדי להזיז את נקודת החיבור ההתחלתית או להתחבר לצומת אחר",
+	"listMindmapRouteEnd": "יש לגרור כדי להזיז את נקודת החיבור הסופית או להתחבר לצומת אחר",
 	"listMindmapRouteHandle": "גררו כדי להתאים את הנתיב; לחצו פעמיים על ידית הגרירה כדי לשחזר חישוב אוטומטי",
 	"listMindmapRouteFallback": "הנתיב המותאם אינו זמין בפריסה זו; מוצג הנתיב האוטומטי",
 	"decisionModel": "מודל החלטות",

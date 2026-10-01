@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "คืนค่าจุดเชื่อมต่ออัตโนมัติ",
+	"listMindmapAnchorFallback": "ไม่สามารถใช้จุดเชื่อมต่อที่ระบุในเค้าโครงปัจจุบันได้ จึงแสดงจุดเชื่อมต่ออัตโนมัติชั่วคราว",
+	"listMindmapAnchorInvalid": "จุดเชื่อมต่อนี้ไม่สามารถหลีกเลี่ยงโหนดหรือส่วนควบคุมได้ โปรดเลือกตำแหน่งอื่น",
 	"listMindmapArrowDirection": "ทิศทางลูกศร",
 	"listMindmapArrowForward": "ลูกศรไปข้างหน้า",
 	"listMindmapArrowReverse": "ลูกศรย้อนกลับ",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "มุมมองปฏิทินฐานข้อมูล",
 	"calendarClearDate": "ล้างวันที่",
 	"runtimeInfo": "ข้อมูลสภาพแวดล้อมการทำงาน",
-	"listMindmapRouteStart": "ลากเพื่อเปลี่ยนโหนดเริ่มต้น",
-	"listMindmapRouteEnd": "ลากเพื่อเปลี่ยนโหนดปลายทาง",
+	"listMindmapRouteStart": "ลากเพื่อย้ายจุดเชื่อมต่อเริ่มต้นหรือเชื่อมต่อกับโหนดอื่น",
+	"listMindmapRouteEnd": "ลากเพื่อย้ายจุดเชื่อมต่อปลายทางหรือเชื่อมต่อกับโหนดอื่น",
 	"listMindmapRouteHandle": "ลากเพื่อปรับเส้นทาง ดับเบิลคลิกที่จุดควบคุมเพื่อกลับไปคำนวณอัตโนมัติ",
 	"listMindmapRouteFallback": "ไม่สามารถใช้เส้นทางที่ปรับไว้ในเค้าโครงนี้ได้ จึงแสดงเส้นทางอัตโนมัติชั่วคราว",
 	"decisionModel": "โมเดลการตัดสินใจ",

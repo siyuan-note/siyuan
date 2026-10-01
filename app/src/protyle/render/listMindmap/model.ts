@@ -1,6 +1,6 @@
 import {Constants} from "../../../constants";
 import {getOrderedListMarkerUpdates} from "../../wysiwyg/listContext";
-import type {MindmapManualRoute} from "./routing";
+import type {MindmapManualRoute, MindmapRelationAnchor} from "./routing";
 import {getListMindmapSiblingIDs, normalizeListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary} from "./summary";
 
@@ -28,6 +28,8 @@ export interface ListMindmapRelation {
     dash?: boolean;
     arrowDirection?: "forward" | "reverse" | "both" | "none";
     route?: MindmapManualRoute;
+    fromAnchor?: MindmapRelationAnchor;
+    toAnchor?: MindmapRelationAnchor;
 }
 
 export interface ListMindmapMetadata {
@@ -125,6 +127,16 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
             ("arrowDirection" in relation && (typeof relation.arrowDirection !== "string" ||
                 !["forward", "reverse", "both", "none"].includes(relation.arrowDirection)))) {
             throw invalidMetadata();
+        }
+        for (const key of ["fromAnchor", "toAnchor"]) {
+            if (key in relation) {
+                const anchor = relation[key];
+                if (!isRecord(anchor) || typeof anchor.side !== "string" ||
+                    !["left", "right", "top", "bottom"].includes(anchor.side) ||
+                    typeof anchor.ratio !== "number" || !Number.isFinite(anchor.ratio) || anchor.ratio < 0 || anchor.ratio > 1) {
+                    throw invalidMetadata();
+                }
+            }
         }
         if ("route" in relation) {
             const route = relation.route;

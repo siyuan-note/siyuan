@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "接続位置を自動に戻す",
+	"listMindmapAnchorFallback": "現在のレイアウトでは指定した接続位置を使用できないため、一時的に自動の接続位置を表示しています",
+	"listMindmapAnchorInvalid": "この接続位置ではノードや操作ボタンを避けられません。位置を調整してください",
 	"listMindmapArrowDirection": "矢印の方向",
 	"listMindmapArrowForward": "順方向の矢印",
 	"listMindmapArrowReverse": "逆方向の矢印",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "データベースのカレンダービュー",
 	"calendarClearDate": "日付をクリア",
 	"runtimeInfo": "実行環境情報",
-	"listMindmapRouteStart": "ドラッグして始点ノードを変更",
-	"listMindmapRouteEnd": "ドラッグして終点ノードを変更",
+	"listMindmapRouteStart": "ドラッグして始点の接続位置を調整するか、別のノードに接続",
+	"listMindmapRouteEnd": "ドラッグして終点の接続位置を調整するか、別のノードに接続",
 	"listMindmapRouteHandle": "ドラッグして経路を調整、ハンドルをダブルクリックして自動計算に戻す",
 	"listMindmapRouteFallback": "現在のレイアウトでは手動の経路を使用できないため、自動の経路を表示しています",
 	"decisionModel": "判定モデル",

@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "Otomatik bağlantı noktalarını geri yükle",
+	"listMindmapAnchorFallback": "Belirtilen bağlantı noktaları bu düzende kullanılamıyor; geçici olarak otomatik bağlantı noktaları gösteriliyor",
+	"listMindmapAnchorInvalid": "Bu bağlantı noktasından düğümlerin veya denetimlerin etrafından geçilemiyor; başka bir konum seçin",
 	"listMindmapArrowDirection": "Ok yönü",
 	"listMindmapArrowForward": "İleri ok",
 	"listMindmapArrowReverse": "Ters ok",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "Veritabanı takvim görünümü",
 	"calendarClearDate": "Tarihi temizle",
 	"runtimeInfo": "Çalışma zamanı bilgileri",
-	"listMindmapRouteStart": "Başlangıç düğümünü değiştirmek için sürükleyin",
-	"listMindmapRouteEnd": "Hedef düğümü değiştirmek için sürükleyin",
+	"listMindmapRouteStart": "Başlangıç bağlantı noktasını taşımak veya başka bir düğüme bağlanmak için sürükleyin",
+	"listMindmapRouteEnd": "Bitiş bağlantı noktasını taşımak veya başka bir düğüme bağlanmak için sürükleyin",
 	"listMindmapRouteHandle": "Yolu ayarlamak için sürükleyin; otomatik hesaplamayı geri yüklemek için sürükleme tutamacına çift tıklayın",
 	"listMindmapRouteFallback": "Ayarlanan yol bu düzende kullanılamıyor; otomatik yol gösteriliyor",
 	"decisionModel": "Karar modeli",

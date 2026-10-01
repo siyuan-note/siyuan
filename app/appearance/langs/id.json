@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "Pulihkan titik koneksi otomatis",
+	"listMindmapAnchorFallback": "Titik koneksi yang ditentukan tidak tersedia dalam tata letak ini; titik koneksi otomatis ditampilkan sementara",
+	"listMindmapAnchorInvalid": "Titik koneksi ini tidak dapat menghindari simpul atau kontrol; pilih posisi lain",
 	"listMindmapArrowDirection": "Arah panah",
 	"listMindmapArrowForward": "Panah maju",
 	"listMindmapArrowReverse": "Panah terbalik",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "Tampilan kalender basis data",
 	"calendarClearDate": "Hapus tanggal",
 	"runtimeInfo": "Informasi runtime",
-	"listMindmapRouteStart": "Seret untuk mengganti simpul awal",
-	"listMindmapRouteEnd": "Seret untuk mengganti simpul tujuan",
+	"listMindmapRouteStart": "Seret untuk memindahkan titik koneksi awal atau menghubungkan ke simpul lain",
+	"listMindmapRouteEnd": "Seret untuk memindahkan titik koneksi akhir atau menghubungkan ke simpul lain",
 	"listMindmapRouteHandle": "Seret untuk menyesuaikan jalur; klik dua kali pada pegangan seret untuk mengembalikan perhitungan otomatis",
 	"listMindmapRouteFallback": "Jalur yang disesuaikan tidak tersedia dalam tata letak ini; jalur otomatis ditampilkan",
 	"decisionModel": "Model keputusan",

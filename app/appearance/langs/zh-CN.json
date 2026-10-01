@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "恢复自动接入",
+	"listMindmapAnchorFallback": "当前布局无法使用指定连接点，暂时显示自动连接点",
+	"listMindmapAnchorInvalid": "当前连接点无法避开节点或控件，请调整位置",
 	"listMindmapArrowDirection": "箭头方向",
 	"listMindmapArrowForward": "正向箭头",
 	"listMindmapArrowReverse": "反向箭头",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "数据库 日历视图",
 	"calendarClearDate": "清空日期",
 	"runtimeInfo": "运行信息",
-	"listMindmapRouteStart": "拖动更换起始节点",
-	"listMindmapRouteEnd": "拖动更换目标节点",
+	"listMindmapRouteStart": "拖动调整起点连接位置或更换连接节点",
+	"listMindmapRouteEnd": "拖动调整终点连接位置或更换连接节点",
 	"listMindmapRouteHandle": "拖动调整路径，双击拖拽手柄恢复自动计算",
 	"listMindmapRouteFallback": "当前布局无法使用手动路径，暂时显示自动路径",
 	"decisionModel": "决策模型",

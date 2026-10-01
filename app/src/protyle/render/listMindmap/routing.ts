@@ -1,5 +1,13 @@
 export interface MindmapRoutePoint {x: number; y: number;}
 export interface MindmapRouteBox extends MindmapRoutePoint {width: number; height: number; controlY?: number;}
+export interface MindmapRelationAnchor {
+    side: "left" | "right" | "top" | "bottom";
+    ratio: number;
+}
+export interface MindmapRelationAnchors {
+    fromAnchor?: MindmapRelationAnchor;
+    toAnchor?: MindmapRelationAnchor;
+}
 export interface MindmapManualRoute {
     version: 1;
     points: (MindmapRoutePoint & {t: number})[];
@@ -7,17 +15,83 @@ export interface MindmapManualRoute {
 
 const bendCost = 24;
 
+export const getMindmapRelationAnchorPoint = (node: MindmapRouteBox, anchor: MindmapRelationAnchor,
+                                            gap = 0): MindmapRoutePoint => {
+    if (anchor.side === "left" || anchor.side === "right") {
+        return {x: node.x + (anchor.side === "left" ? -gap : node.width + gap),
+            y: node.y + node.height * anchor.ratio};
+    }
+    return {x: node.x + node.width * anchor.ratio,
+        y: node.y + (anchor.side === "top" ? -gap : node.height + gap)};
+};
+
+// 将指针投影到矩形边缘；角点等距时沿用原边，避免拖动时来回跳动。
+export const projectMindmapRelationAnchor = (node: MindmapRouteBox, point: MindmapRoutePoint,
+                                            previous?: MindmapRelationAnchor): MindmapRelationAnchor => {
+    const clamp = (value: number) => Math.max(0, Math.min(1, value));
+    const candidates: MindmapRelationAnchor[] = ["left", "right", "top", "bottom"].map(side => ({
+        side: side as MindmapRelationAnchor["side"],
+        ratio: side === "left" || side === "right" ? clamp((point.y - node.y) / (node.height || 1)) :
+            clamp((point.x - node.x) / (node.width || 1)),
+    }));
+    let best = candidates.find(candidate => candidate.side === previous?.side) || candidates[0];
+    const distance = (anchor: MindmapRelationAnchor) => {
+        const projected = getMindmapRelationAnchorPoint(node, anchor);
+        return Math.hypot(point.x - projected.x, point.y - projected.y);
+    };
+    for (const candidate of candidates) {
+        if (distance(candidate) < distance(best) - 1e-9) {
+            best = candidate;
+        }
+    }
+    return best;
+};
+
+const relationObstacles = (nodes: MindmapRouteBox[], clearance: number) => nodes.flatMap(node => [
+    {left: node.x - clearance, right: node.x + node.width + clearance,
+        top: node.y - clearance, bottom: node.y + node.height + clearance},
+    {left: node.x + node.width - 19, right: node.x + node.width + 61,
+        top: (node.controlY ?? node.y + node.height) - 15, bottom: (node.controlY ?? node.y + node.height) + 15},
+]);
+
+const segmentIntersectsBox = (a: MindmapRoutePoint, b: MindmapRoutePoint,
+                              box: ReturnType<typeof relationObstacles>[number]) => a.x === b.x ?
+    a.x > box.left && a.x < box.right && Math.max(a.y, b.y) > box.top && Math.min(a.y, b.y) < box.bottom :
+    a.y > box.top && a.y < box.bottom && Math.max(a.x, b.x) > box.left && Math.min(a.x, b.x) < box.right;
+
+const satisfiesRelationAnchors = (points: MindmapRoutePoint[], from: MindmapRouteBox, to: MindmapRouteBox,
+                                  anchors: MindmapRelationAnchors) => {
+    if (points.length < 2) {
+        return false;
+    }
+    return [{node: from, anchor: anchors.fromAnchor, point: points[0], next: points[1]},
+        {node: to, anchor: anchors.toAnchor, point: points[points.length - 1], next: points[points.length - 2]}]
+        .every(({node, anchor, point, next}) => {
+            if (!anchor) {
+                return true;
+            }
+            const expected = getMindmapRelationAnchorPoint(node, anchor, 3);
+            return point.x === expected.x && point.y === expected.y &&
+                (anchor.side === "left" ? next.x < point.x && next.y === point.y :
+                    anchor.side === "right" ? next.x > point.x && next.y === point.y :
+                        anchor.side === "top" ? next.y < point.y && next.x === point.x :
+                            next.y > point.y && next.x === point.x);
+        });
+};
+
 export const routeMindmapRelation = (from: MindmapRouteBox, to: MindmapRouteBox,
-                                    nodes: MindmapRouteBox[], clearance = 12): MindmapRoutePoint[] => {
+                                    nodes: MindmapRouteBox[], clearance = 12,
+                                    anchors: MindmapRelationAnchors = {}): MindmapRoutePoint[] => {
     // 双向连接使用同一条几何路径，避免端口同分时因搜索方向不同而出现错位。
     const order = from.x - to.x || from.y - to.y || from.width - to.width || from.height - to.height;
     if (to.width > 0 && to.height > 0 && order > 0) {
-        return routeMindmapRelation(to, from, nodes, clearance).reverse();
+        return routeMindmapRelation(to, from, nodes, clearance,
+            {fromAnchor: anchors.toAnchor, toAnchor: anchors.fromAnchor}).reverse();
     }
     let best: MindmapRoutePoint[] = [];
     let bestCost = Infinity;
     for (const gap of [...new Set([clearance, Math.min(clearance, 6)])]) {
-        const route = findRelationRoute(from, to, nodes, gap);
+        const route = findRelationRoute(from, to, nodes, gap, anchors);
         if (route.length < 2) {
             continue;
         }
@@ -34,7 +108,11 @@ export const routeMindmapRelation = (from: MindmapRouteBox, to: MindmapRouteBox,
         }
     }
     // 搜索保留避障空间，绘制端点靠近节点，避免短连接只剩两个挤在一起的箭头。
-    const attach = (point: MindmapRoutePoint, node: MindmapRouteBox) => {
+    const attach = (point: MindmapRoutePoint, node: MindmapRouteBox, anchor?: MindmapRelationAnchor) => {
+        if (anchor) {
+            Object.assign(point, getMindmapRelationAnchorPoint(node, anchor, 3));
+            return;
+        }
         if (!node.width || !node.height) {
             return;
         }
@@ -49,22 +127,26 @@ export const routeMindmapRelation = (from: MindmapRouteBox, to: MindmapRouteBox,
         }
     };
     if (best.length >= 2) {
-        attach(best[0], from);
-        attach(best[best.length - 1], to);
+        attach(best[0], from, anchors.fromAnchor);
+        attach(best[best.length - 1], to, anchors.toAnchor);
+    }
+    if ((anchors.fromAnchor || anchors.toAnchor) && !satisfiesRelationAnchors(best, from, to, anchors)) {
+        return [];
     }
     return best;
 };
 
 // 在障碍边界构成的正交可视网格上搜索，方向纳入状态以惩罚多余转弯。
 const findRelationRoute = (from: MindmapRouteBox, to: MindmapRouteBox,
-                           nodes: MindmapRouteBox[], clearance: number): MindmapRoutePoint[] => {
-    const boxes = nodes.flatMap(node => [
-        {left: node.x - clearance, right: node.x + node.width + clearance,
-            top: node.y - clearance, bottom: node.y + node.height + clearance},
-        {left: node.x + node.width - 19, right: node.x + node.width + 61,
-            top: (node.controlY ?? node.y + node.height) - 15, bottom: (node.controlY ?? node.y + node.height) + 15},
-    ]);
-    const ports = (node: MindmapRouteBox, other: MindmapRouteBox) => {
+                           nodes: MindmapRouteBox[], clearance: number,
+                           anchors: MindmapRelationAnchors): MindmapRoutePoint[] => {
+    const boxes = relationObstacles(nodes, clearance);
+    const attachmentObstacles = anchors.fromAnchor || anchors.toAnchor ? relationObstacles(nodes, 0) : [];
+    const ports = (node: MindmapRouteBox, other: MindmapRouteBox, anchor?: MindmapRelationAnchor) => {
+        if (anchor) {
+            return [{...getMindmapRelationAnchorPoint(node, anchor, clearance),
+                direction: ["left", "right", "top", "bottom"].indexOf(anchor.side)}];
+        }
         if (!node.width && !node.height) {
             return [0, 1, 2, 3].map(direction => ({x: node.x, y: node.y, direction}));
         }
@@ -83,11 +165,33 @@ const findRelationRoute = (from: MindmapRouteBox, to: MindmapRouteBox,
                 {x: node.x + node.width + clearance, y, direction: 1}]),
         ];
     };
-    const starts = ports(from, to);
-    const goals = to.width === 0 && to.height === 0 ?
-        [0, 1, 2, 3].map(direction => ({x: to.x, y: to.y, direction})) : ports(to, from);
-    const xs = [...new Set([...boxes.flatMap(box => [box.left, box.right]), ...starts.map(p => p.x), ...goals.map(p => p.x)])].sort((a, b) => a - b);
-    const ys = [...new Set([...boxes.flatMap(box => [box.top, box.bottom]), ...starts.map(p => p.y), ...goals.map(p => p.y)])].sort((a, b) => a - b);
+    // 网格之外的引出段也必须避障，包含绘制端点与节点边缘之间的短间隙。
+    const clearAttachment = (port: MindmapRoutePoint & {direction: number}, node: MindmapRouteBox) => {
+        if ((!anchors.fromAnchor && !anchors.toAnchor) || (!node.width && !node.height)) {
+            return true;
+        }
+        const border = {...port};
+        if (port.direction < 2) {
+            border.x = node.x + (port.direction === 0 ? 0 : node.width);
+        } else {
+            border.y = node.y + (port.direction === 2 ? 0 : node.height);
+        }
+        return !attachmentObstacles.some(box => segmentIntersectsBox(border, port, box));
+    };
+    const starts = ports(from, to, anchors.fromAnchor).filter(port => clearAttachment(port, from));
+    const goals = ports(to, from, anchors.toAnchor).filter(port => clearAttachment(port, to));
+    if (!starts.length || !goals.length) {
+        return [];
+    }
+    // 固定边可能朝向整个图的外侧，额外网格线为最外层端口保留垂直引出空间。
+    const escapes = anchors.fromAnchor || anchors.toAnchor ? [...starts, ...goals].map(port => ({
+        x: port.x + (port.direction === 0 ? -clearance : port.direction === 1 ? clearance : 0),
+        y: port.y + (port.direction === 2 ? -clearance : port.direction === 3 ? clearance : 0),
+    })) : [];
+    const xs = [...new Set([...boxes.flatMap(box => [box.left, box.right]), ...starts.map(p => p.x),
+        ...goals.map(p => p.x), ...escapes.map(p => p.x)])].sort((a, b) => a - b);
+    const ys = [...new Set([...boxes.flatMap(box => [box.top, box.bottom]), ...starts.map(p => p.y),
+        ...goals.map(p => p.y), ...escapes.map(p => p.y)])].sort((a, b) => a - b);
     const point = (index: number) => ({x: xs[index % xs.length], y: ys[Math.floor(index / xs.length)]});
     const indexOf = (p: MindmapRoutePoint) => ys.indexOf(p.y) * xs.length + xs.indexOf(p.x);
     const columns = new Map<number, typeof boxes>();
@@ -224,7 +328,8 @@ const decodeMindmapRoute = (route: MindmapManualRoute, from: MindmapRouteBox, to
     });
 
 export const routeManualMindmapRelation = (from: MindmapRouteBox, to: MindmapRouteBox,
-                                          nodes: MindmapRouteBox[], route: MindmapManualRoute): MindmapRoutePoint[] => {
+                                          nodes: MindmapRouteBox[], route: MindmapManualRoute,
+                                          anchors: MindmapRelationAnchors = {}): MindmapRoutePoint[] => {
     const controls = decodeMindmapRoute(route, from, to);
     const stops = [from, ...controls, to];
     const result: MindmapRoutePoint[] = [];
@@ -234,7 +339,9 @@ export const routeManualMindmapRelation = (from: MindmapRouteBox, to: MindmapRou
         if (!a.width && !b.width && a.x === b.x && a.y === b.y) {
             continue;
         }
-        const segment = routeMindmapRelation(a, b, nodes);
+        const segment = routeMindmapRelation(a, b, nodes, 12,
+            {fromAnchor: i === 1 ? anchors.fromAnchor : undefined,
+                toAnchor: i === stops.length - 1 ? anchors.toAnchor : undefined});
         if (segment.length < 2) {
             return [];
         }
@@ -257,7 +364,7 @@ export const routeManualMindmapRelation = (from: MindmapRouteBox, to: MindmapRou
             simplified.push(point);
         }
     }
-    return simplified;
+    return (anchors.fromAnchor || anchors.toAnchor) && !satisfiesRelationAnchors(simplified, from, to, anchors) ? [] : simplified;
 };
 
 export const moveMindmapRouteSegment = (points: MindmapRoutePoint[], index: number, offset: number): MindmapRoutePoint[] => {

@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "Obnoviť automatické body pripojenia",
+	"listMindmapAnchorFallback": "Určené body pripojenia nie sú v tomto rozložení dostupné; dočasne sa zobrazujú automatické body pripojenia",
+	"listMindmapAnchorInvalid": "Tento bod pripojenia neumožňuje obísť uzly alebo ovládacie prvky; vyberte inú polohu",
 	"listMindmapArrowDirection": "Smer šípky",
 	"listMindmapArrowForward": "Šípka vpred",
 	"listMindmapArrowReverse": "Opačná šípka",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "Kalendárové zobrazenie databázy",
 	"calendarClearDate": "Vymazať dátum",
 	"runtimeInfo": "Informácie o prostredí behu",
-	"listMindmapRouteStart": "Potiahnutím zmeníte počiatočný uzol",
-	"listMindmapRouteEnd": "Potiahnutím zmeníte cieľový uzol",
+	"listMindmapRouteStart": "Potiahnutím presuniete začiatočný bod pripojenia alebo pripojíte iný uzol",
+	"listMindmapRouteEnd": "Potiahnutím presuniete koncový bod pripojenia alebo pripojíte iný uzol",
 	"listMindmapRouteHandle": "Potiahnutím upravíte trasu; dvojitým kliknutím na úchyt obnovíte automatický výpočet",
 	"listMindmapRouteFallback": "Upravená trasa nie je v tomto rozložení dostupná; zobrazuje sa automatická trasa",
 	"decisionModel": "Rozhodovací model",

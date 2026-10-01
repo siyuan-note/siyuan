@@ -1,4 +1,7 @@
 {
+	"listMindmapAnchorReset": "Ripristina i punti di connessione automatici",
+	"listMindmapAnchorFallback": "I punti di connessione specificati non sono disponibili in questa disposizione; vengono mostrati temporaneamente punti di connessione automatici",
+	"listMindmapAnchorInvalid": "Questo punto di connessione non consente di evitare nodi o controlli; scegli un’altra posizione",
 	"listMindmapArrowDirection": "Direzione della freccia",
 	"listMindmapArrowForward": "Freccia in avanti",
 	"listMindmapArrowReverse": "Freccia inversa",
@@ -138,8 +141,8 @@
 	"databaseCalendarView": "Vista calendario del database",
 	"calendarClearDate": "Cancella data",
 	"runtimeInfo": "Informazioni di esecuzione",
-	"listMindmapRouteStart": "Trascina per cambiare il nodo iniziale",
-	"listMindmapRouteEnd": "Trascina per cambiare il nodo di destinazione",
+	"listMindmapRouteStart": "Trascina per spostare il punto di connessione iniziale o collegare un altro nodo",
+	"listMindmapRouteEnd": "Trascina per spostare il punto di connessione finale o collegare un altro nodo",
 	"listMindmapRouteHandle": "Trascina per regolare il percorso; fai doppio clic sulla maniglia per ripristinare il calcolo automatico",
 	"listMindmapRouteFallback": "Il percorso modificato non è disponibile in questa disposizione; viene mostrato il percorso automatico",
 	"decisionModel": "Modello decisionale",

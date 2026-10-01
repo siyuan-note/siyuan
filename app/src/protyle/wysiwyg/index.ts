@@ -3876,7 +3876,7 @@ export class WYSIWYG {
             }
             if (!isNotEditBlock(nodeElement) && !nodeElement.classList.contains("protyle-wysiwyg--select") &&
                 !hasClosestByClassName(target, "protyle-action") && // https://github.com/siyuan-note/siyuan/issues/8983
-                (isMobile() || event.detail.target || (beforeContextmenuRange && nodeElement.contains(beforeContextmenuRange.startContainer)))
+                (isMobile() || event.detail.target || (beforeContextmenuRange && beforeContextmenuRange.intersectsNode(nodeElement)))
             ) {
                 if ((!isMobile() || protyle.toolbar?.element.classList.contains("fn__none")) && !nodeElement.classList.contains("av")) {
                     const spellcheckContext = await requestSpellcheckContext(x, y);
@@ -3887,7 +3887,7 @@ export class WYSIWYG {
                         protyle.wysiwyg.flushPendingInput();
                         setInsertWbrHTML(nodeElement, protyle.toolbar.range, protyle);
                     }
-                    contentMenu(protyle, nodeElement);
+                    contentMenu(protyle, hasClosestBlock(protyle.toolbar.range.startContainer) || nodeElement);
                     addSpellcheckMenuItems(spellcheckContext);
                     /// #if !MOBILE
                     window.siyuan.menus.menu.popup({x, y: y + 13, h: 26});

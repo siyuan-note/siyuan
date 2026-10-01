@@ -11,6 +11,7 @@ const runCases = async (sources, platform) => {
     let keyboardShows = 0;
     let keyboardHides = 0;
     let inputRequests = 0;
+    const focusRequests = [];
     let undoCalls = 0;
     const inserts = [];
     const commands = [];
@@ -83,6 +84,7 @@ const runCases = async (sources, platform) => {
     if (nativeKeyboard) {
         window[platform === "android" ? "JSAndroid" : "JSHarmony"] = {
             showKeyboard: () => keyboardShows++, hideKeyboard: () => keyboardHides++,
+            setWebViewFocusable: focusable => focusRequests.push(focusable),
         };
     }
     window.addEventListener("siyuan-mobile-keyboard-change", event => {
@@ -119,6 +121,9 @@ const runCases = async (sources, platform) => {
     };
     const touch = type => editable.dispatchEvent(new PointerEvent(type, {bubbles: true, pointerType: "touch"}));
     // 键盘尚未打开时选字，不覆盖输入类型，也不要求先点击独立的编辑按钮。
+    editable.dispatchEvent(new Event("touchstart", {bubbles: true}));
+    assert.deepEqual(focusRequests, platform === "android" ? [true] : []);
+    assert.equal(getSelection().isCollapsed, true);
     touch("pointerdown");
     assert.equal(editable.hasAttribute("inputmode"), false);
     editable.focus();
@@ -256,6 +261,11 @@ const runCases = async (sources, platform) => {
     root.setAttribute("data-readonly", "true");
     current.disabled = true;
     const showsBeforeReadonly = keyboardShows;
+    const focusRequestsBeforeReadonly = focusRequests.length;
+    editable.dispatchEvent(new Event("touchstart", {bubbles: true}));
+    assert.equal(focusRequests.length, focusRequestsBeforeReadonly);
+    document.body.dispatchEvent(new Event("touchstart", {bubbles: true}));
+    assert.equal(focusRequests.length, focusRequestsBeforeReadonly);
     touch("pointerdown");
     editable.focus();
     select();
@@ -287,9 +297,10 @@ const runElectron = async () => {
             readFileSync(path.join(__dirname, "../src/mobile/index.ts"), "utf8"), ts.ScriptTarget.Latest, true);
         const appClass = appSource.statements.find(node => ts.isClassDeclaration(node) && node.name.text === "App");
         const statements = appClass.members.find(ts.isConstructorDeclaration).body.statements;
+        const touchBinding = statements.find(node => node.getText(appSource).startsWith('document.addEventListener("touchstart",'));
         const clickBinding = statements.find(node => node.getText(appSource).startsWith('window.addEventListener("click",'));
         const focusBinding = statements.find(node => ts.isBlock(node) && node.getText(appSource).includes("__siyuan_original_focus"));
-        assert.ok(clickBinding && focusBinding);
+        assert.ok(touchBinding && clickBinding && focusBinding);
         sources["mobile/inputBindings"] = ts.transpileModule(`
             const {canInput, armKeyboardLock, callMobileAppShowKeyboard} = require("mobile/util/mobileAppUtil");
             const {hideKeyboardToolbarUtilOnEditorClick} = require("mobile/util/keyboardToolbar");
@@ -297,6 +308,7 @@ const runElectron = async () => {
             const {Constants} = require("constants");
             const scrollInputIntoView = () => {};
             const hideAllElements = () => {};
+            ${touchBinding.getText(appSource)}
             ${clickBinding.getText(appSource)}
             ${focusBinding.getText(appSource)}
         `, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;

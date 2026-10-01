@@ -242,6 +242,8 @@ class CompilerTests(unittest.TestCase):
 
     def test_explicit_compiler_supports_paths_with_spaces(self):
         with patch.dict(os.environ, {"SIYUAN_OCR_CC_AMD64": "'/opt/cross tools/gcc'"}, clear=True), \
+                patch.object(prepare.platform, "machine", return_value="AMD64"), \
+                patch.object(prepare.platform, "system", return_value="Windows"), \
                 patch.object(prepare.shutil, "which", return_value="/opt/cross tools/gcc"), \
                 patch.object(prepare.subprocess, "check_output", side_effect=["x86_64-linux-gnu", "#define __GLIBC__ 2\n"]) as probe:
             self.assertEqual(prepare.linux_worker_environment("linux-amd64")["CC"], "'/opt/cross tools/gcc'")

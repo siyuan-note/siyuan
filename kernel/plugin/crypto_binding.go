@@ -33,6 +33,7 @@ type cryptoHost struct {
 	isView       goja.Callable // ArrayBuffer.isView
 	jsonParse    goja.Callable // JSON.parse
 	jsonValue    goja.Value    // JSON，作为 parse 的 this
+	uint8Array   *goja.Object  // Uint8Array 构造函数
 	keyPrototype *goja.Object  // CryptoKey.prototype
 }
 
@@ -89,8 +90,22 @@ func newCryptoHost(p *KernelPlugin, rt *goja.Runtime) (host *cryptoHost, err err
 	host.jsonValue = jsonValue
 	host.jsonParse = jsonParse
 
+	uint8Array := rt.GlobalObject().Get("Uint8Array")
+	if uint8Array == nil {
+		return nil, fmt.Errorf("globalThis.Uint8Array is not available")
+	}
+	host.uint8Array = uint8Array.ToObject(rt)
+	if host.uint8Array == nil {
+		return nil, fmt.Errorf("globalThis.Uint8Array is not an object")
+	}
+
 	host.keyPrototype = lo.Must(newCryptoKeyPrototype(rt))
 	return host, nil
+}
+
+// newUint8Array 用捕获的构造函数把字节切片包装为 Uint8Array。
+func (h *cryptoHost) newUint8Array(rt *goja.Runtime, data []byte) (*goja.Object, error) {
+	return rt.New(h.uint8Array, rt.ToValue(rt.NewArrayBuffer(data)))
 }
 
 // newCryptoKeyPrototype 构造 CryptoKey.prototype，其上的访问器从宿主对象读取属性。
@@ -161,6 +176,26 @@ func (h *cryptoHost) newCryptoKeyObject(rt *goja.Runtime, key *crypto.Key) (*goj
 			return nil, err
 		}
 		if err := algorithm.Set("hash", hash); err != nil {
+			return nil, err
+		}
+	}
+	if key.Algorithm.ModulusLength != nil {
+		if err := algorithm.Set("modulusLength", rt.ToValue(*key.Algorithm.ModulusLength)); err != nil {
+			return nil, err
+		}
+	}
+	if key.Algorithm.PublicExponent != nil {
+		// 规范要求 publicExponent 是 Uint8Array，这里由 ArrayBuffer 构造视图。
+		exponent, err := h.newUint8Array(rt, key.Algorithm.PublicExponent)
+		if err != nil {
+			return nil, err
+		}
+		if err = algorithm.Set("publicExponent", exponent); err != nil {
+			return nil, err
+		}
+	}
+	if key.Algorithm.NamedCurve != "" {
+		if err := algorithm.Set("namedCurve", rt.ToValue(key.Algorithm.NamedCurve)); err != nil {
 			return nil, err
 		}
 	}

@@ -43,6 +43,8 @@ func encrypt(alg Algorithm, key *Key, data []byte) ([]byte, error) {
 		return encryptAESCBC(alg, key, data)
 	case AlgAESCTR:
 		return cryptAESCTR(alg, key, data)
+	case AlgRSAOAEP:
+		return encryptRSAOAEP(alg, key, data)
 	default:
 		return nil, notSupportedError("%s does not support encryption", alg.Name)
 	}
@@ -57,6 +59,8 @@ func decrypt(alg Algorithm, key *Key, data []byte) ([]byte, error) {
 		return decryptAESCBC(alg, key, data)
 	case AlgAESCTR:
 		return cryptAESCTR(alg, key, data)
+	case AlgRSAOAEP:
+		return decryptRSAOAEP(alg, key, data)
 	default:
 		return nil, notSupportedError("%s does not support decryption", alg.Name)
 	}
@@ -71,6 +75,12 @@ func Sign(alg Algorithm, key *Key, data []byte) ([]byte, error) {
 	switch alg.Name {
 	case AlgHMAC:
 		return hmacSum(key, data)
+	case AlgRSASSAPKCS1, AlgRSAPSS:
+		return signRSA(alg, key, data)
+	case AlgECDSA:
+		return signECDSA(alg, key, data)
+	case AlgEd25519:
+		return signEd25519(key, data)
 	default:
 		return nil, notSupportedError("%s does not support signing", alg.Name)
 	}
@@ -85,6 +95,12 @@ func Verify(alg Algorithm, key *Key, signature []byte, data []byte) (bool, error
 	switch alg.Name {
 	case AlgHMAC:
 		return verifyHMAC(key, signature, data)
+	case AlgRSASSAPKCS1, AlgRSAPSS:
+		return verifyRSA(alg, key, signature, data)
+	case AlgECDSA:
+		return verifyECDSA(alg, key, signature, data)
+	case AlgEd25519:
+		return verifyEd25519(key, signature, data)
 	default:
 		return false, notSupportedError("%s does not support verification", alg.Name)
 	}
@@ -93,7 +109,7 @@ func Verify(alg Algorithm, key *Key, signature []byte, data []byte) (bool, error
 // GenerateKey 生成密钥或密钥对。
 func GenerateKey(alg Algorithm, extractable bool, usages []KeyUsage) (*KeyPair, error) {
 	switch alg.Name {
-	case AlgAESCBC, AlgAESCTR, AlgAESGCM:
+	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW:
 		if err := checkUsages(alg.Name, KeyTypeSecret, usages); err != nil {
 			return nil, err
 		}
@@ -111,18 +127,69 @@ func GenerateKey(alg Algorithm, extractable bool, usages []KeyUsage) (*KeyPair, 
 			return nil, err
 		}
 		return &KeyPair{Secret: key}, nil
+
+	case AlgRSASSAPKCS1, AlgRSAPSS, AlgRSAOAEP:
+		if err := checkKeyPairUsages(alg.Name, usages); err != nil {
+			return nil, err
+		}
+		return generateRSAKeyPair(alg, extractable, usages)
+	case AlgECDSA, AlgECDH:
+		if err := checkKeyPairUsages(alg.Name, usages); err != nil {
+			return nil, err
+		}
+		return generateECKeyPair(alg, extractable, usages)
+	case AlgEd25519:
+		if err := checkKeyPairUsages(alg.Name, usages); err != nil {
+			return nil, err
+		}
+		return generateEd25519KeyPair(alg, extractable, usages)
+	case AlgX25519:
+		if err := checkKeyPairUsages(alg.Name, usages); err != nil {
+			return nil, err
+		}
+		return generateX25519KeyPair(alg, extractable, usages)
+
 	default:
 		return nil, notSupportedError("%s does not support key generation", alg.Name)
 	}
 }
 
+// checkKeyPairUsages 校验生成密钥对时的用法：用法会被拆分给公私钥，
+// 因此只要求每一项都被算法接受，并且至少产生一个私钥用法。
+func checkKeyPairUsages(algName string, usages []KeyUsage) error {
+	byKeyType, ok := usageTable[algName]
+	if !ok {
+		return notSupportedError("%s does not support key generation", algName)
+	}
+
+	for _, usage := range usages {
+		if !containsUsage(byKeyType[KeyTypePrivate], usage) && !containsUsage(byKeyType[KeyTypePublic], usage) {
+			return syntaxError("%s keys cannot be used for %s", algName, usage)
+		}
+	}
+
+	private, _ := splitAsymmetricUsages(algName, usages)
+	if len(private) == 0 {
+		return syntaxError("%s requires at least one private key usage", algName)
+	}
+	return nil
+}
+
 // ImportKey 从外部格式导入密钥。
 func ImportKey(format KeyFormat, data KeyData, alg Algorithm, extractable bool, usages []KeyUsage) (*Key, error) {
+	if err := checkFormat(alg.Name, format); err != nil {
+		return nil, err
+	}
+
 	switch format {
 	case FormatRaw:
 		return importRawKey(alg, data.Raw, extractable, usages)
 	case FormatJWK:
 		return importJWK(alg, data.JSON, extractable, usages)
+	case FormatSPKI:
+		return importSPKI(alg, data.Raw, extractable, usages)
+	case FormatPKCS8:
+		return importPKCS8(alg, data.Raw, extractable, usages)
 	default:
 		return nil, notSupportedError("%s keys cannot be imported from the %s format", alg.Name, format)
 	}
@@ -131,7 +198,7 @@ func ImportKey(format KeyFormat, data KeyData, alg Algorithm, extractable bool, 
 // importRawKey 从原始字节导入对称密钥与 KDF 基础密钥。
 func importRawKey(alg Algorithm, data []byte, extractable bool, usages []KeyUsage) (*Key, error) {
 	switch alg.Name {
-	case AlgAESCBC, AlgAESCTR, AlgAESGCM:
+	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW:
 		if err := checkUsages(alg.Name, KeyTypeSecret, usages); err != nil {
 			return nil, err
 		}
@@ -146,6 +213,12 @@ func importRawKey(alg Algorithm, data []byte, extractable bool, usages []KeyUsag
 			return nil, err
 		}
 		return importKDFKey(alg, data, extractable, usages)
+	case AlgEd25519:
+		return importEd25519Raw(alg, data, extractable, usages)
+	case AlgX25519:
+		return importX25519Raw(alg, data, extractable, usages)
+	case AlgECDSA, AlgECDH:
+		return importECRaw(alg, data, extractable, usages)
 	default:
 		return nil, notSupportedError("%s keys cannot be imported from the raw format", alg.Name)
 	}
@@ -164,12 +237,22 @@ func ExportKey(format KeyFormat, key *Key) (*KeyData, error) {
 
 // exportKey 按格式导出密钥，不校验 extractable，便于 wrapKey 复用。
 func exportKey(format KeyFormat, key *Key) (*KeyData, error) {
+	if err := checkFormat(key.Algorithm.Name, format); err != nil {
+		return nil, err
+	}
+
 	switch format {
 	case FormatRaw:
 		switch key.Algorithm.Name {
-		case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgHMAC:
+		case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgHMAC:
 			// 复制密钥材料，避免调用方修改导出结果时影响密钥本身。
 			return &KeyData{Raw: bytes.Clone(key.secret)}, nil
+		case AlgECDSA, AlgECDH, AlgEd25519, AlgX25519:
+			data, err := exportPublicRaw(key)
+			if err != nil {
+				return nil, err
+			}
+			return &KeyData{Raw: data}, nil
 		default:
 			return nil, notSupportedError("%s keys cannot be exported in the raw format", key.Algorithm.Name)
 		}
@@ -179,6 +262,18 @@ func exportKey(format KeyFormat, key *Key) (*KeyData, error) {
 			return nil, err
 		}
 		return &KeyData{JSON: data}, nil
+	case FormatSPKI:
+		data, err := exportSPKI(key)
+		if err != nil {
+			return nil, err
+		}
+		return &KeyData{Raw: data}, nil
+	case FormatPKCS8:
+		data, err := exportPKCS8(key)
+		if err != nil {
+			return nil, err
+		}
+		return &KeyData{Raw: data}, nil
 	default:
 		return nil, notSupportedError("%s keys cannot be exported in the %s format", key.Algorithm.Name, format)
 	}
@@ -199,6 +294,8 @@ func deriveBits(alg Algorithm, key *Key, length *int) ([]byte, error) {
 		return deriveBitsHKDF(alg, key, length)
 	case AlgPBKDF2:
 		return deriveBitsPBKDF2(alg, key, length)
+	case AlgECDH, AlgX25519:
+		return deriveBitsECDH(alg, key, length)
 	default:
 		return nil, notSupportedError("%s does not support bit derivation", alg.Name)
 	}
@@ -225,7 +322,7 @@ func DeriveKey(alg Algorithm, key *Key, derived Algorithm, extractable bool, usa
 // derivedKeyLength 返回派生目标算法所需的密钥位长。
 func derivedKeyLength(derived Algorithm) (*int, error) {
 	switch derived.Name {
-	case AlgAESCBC, AlgAESCTR, AlgAESGCM:
+	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW:
 		if derived.Length == nil {
 			return nil, typeError("%s requires the length member", derived.Name)
 		}
@@ -273,6 +370,9 @@ func WrapKey(format KeyFormat, key *Key, wrappingKey *Key, alg Algorithm) ([]byt
 	if format == FormatJWK {
 		plaintext = data.JSON
 	}
+	if alg.Name == AlgAESKW {
+		return wrapAESKW(wrappingKey, plaintext)
+	}
 	return encrypt(alg, wrappingKey, plaintext)
 }
 
@@ -283,7 +383,13 @@ func UnwrapKey(format KeyFormat, wrapped []byte, unwrappingKey *Key, alg Algorit
 		return nil, err
 	}
 
-	plaintext, err := decrypt(alg, unwrappingKey, wrapped)
+	var plaintext []byte
+	var err error
+	if alg.Name == AlgAESKW {
+		plaintext, err = unwrapAESKW(unwrappingKey, wrapped)
+	} else {
+		plaintext, err = decrypt(alg, unwrappingKey, wrapped)
+	}
 	if err != nil {
 		return nil, err
 	}

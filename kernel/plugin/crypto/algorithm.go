@@ -28,18 +28,28 @@ const (
 	AlgAESCBC = "AES-CBC"
 	AlgAESCTR = "AES-CTR"
 	AlgAESGCM = "AES-GCM"
+	AlgAESKW  = "AES-KW"
 	AlgHMAC   = "HMAC"
 
 	AlgHKDF   = "HKDF"
 	AlgPBKDF2 = "PBKDF2"
+
+	AlgRSASSAPKCS1 = "RSASSA-PKCS1-v1_5"
+	AlgRSAPSS      = "RSA-PSS"
+	AlgRSAOAEP     = "RSA-OAEP"
+	AlgECDSA       = "ECDSA"
+	AlgECDH        = "ECDH"
+	AlgEd25519     = "Ed25519"
+	AlgX25519      = "X25519"
 )
 
 // algorithmNames 以小写名称映射到规范化名称，用于大小写不敏感的算法查找。
 var algorithmNames = func() map[string]string {
 	names := []string{
 		AlgSHA1, AlgSHA256, AlgSHA384, AlgSHA512,
-		AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgHMAC,
+		AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgHMAC,
 		AlgHKDF, AlgPBKDF2,
+		AlgRSASSAPKCS1, AlgRSAPSS, AlgRSAOAEP, AlgECDSA, AlgECDH, AlgEd25519, AlgX25519,
 	}
 	ret := make(map[string]string, len(names))
 	for _, name := range names {
@@ -70,9 +80,18 @@ type Algorithm struct {
 	Salt []byte // HKDF/PBKDF2 的盐
 	Info []byte // HKDF 的上下文信息
 
+	Label []byte // RSA-OAEP 的标签
+
 	Length     *int // AES/HMAC 的密钥位长，AES-CTR 中为计数器位长
 	TagLength  *int // AES-GCM 的认证标签位长
 	Iterations *int // PBKDF2 的迭代次数
+	SaltLength *int // RSA-PSS 的盐字节数
+
+	ModulusLength  *int   // RSA 密钥的模数位长
+	PublicExponent []byte // RSA 密钥的公开指数，大端字节序
+	NamedCurve     string // ECDSA/ECDH 的曲线名称
+
+	Public *Key // ECDH 派生时的对方公钥
 }
 
 // usageTable 描述每个算法允许的用法，按密钥类型区分。
@@ -82,8 +101,60 @@ var usageTable = map[string]map[KeyType][]KeyUsage{
 	AlgAESGCM: {KeyTypeSecret: {UsageEncrypt, UsageDecrypt, UsageWrapKey, UsageUnwrapKey}},
 	AlgHMAC:   {KeyTypeSecret: {UsageSign, UsageVerify}},
 
+	AlgAESKW:  {KeyTypeSecret: {UsageWrapKey, UsageUnwrapKey}},
 	AlgHKDF:   {KeyTypeSecret: {UsageDeriveBits, UsageDeriveKey}},
 	AlgPBKDF2: {KeyTypeSecret: {UsageDeriveBits, UsageDeriveKey}},
+
+	AlgRSASSAPKCS1: {KeyTypePrivate: {UsageSign}, KeyTypePublic: {UsageVerify}},
+	AlgRSAPSS:      {KeyTypePrivate: {UsageSign}, KeyTypePublic: {UsageVerify}},
+	AlgECDSA:       {KeyTypePrivate: {UsageSign}, KeyTypePublic: {UsageVerify}},
+	AlgEd25519:     {KeyTypePrivate: {UsageSign}, KeyTypePublic: {UsageVerify}},
+
+	AlgRSAOAEP: {
+		KeyTypePrivate: {UsageDecrypt, UsageUnwrapKey},
+		KeyTypePublic:  {UsageEncrypt, UsageWrapKey},
+	},
+
+	// 公钥不参与派生，usages 必须为空数组。
+	AlgECDH:   {KeyTypePrivate: {UsageDeriveBits, UsageDeriveKey}, KeyTypePublic: nil},
+	AlgX25519: {KeyTypePrivate: {UsageDeriveBits, UsageDeriveKey}, KeyTypePublic: nil},
+}
+
+// formatTable 描述每个算法支持的密钥格式。
+var formatTable = map[string][]KeyFormat{
+	AlgAESCBC: {FormatRaw, FormatJWK},
+	AlgAESCTR: {FormatRaw, FormatJWK},
+	AlgAESGCM: {FormatRaw, FormatJWK},
+	AlgAESKW:  {FormatRaw, FormatJWK},
+	AlgHMAC:   {FormatRaw, FormatJWK},
+	AlgHKDF:   {FormatRaw},
+	AlgPBKDF2: {FormatRaw},
+
+	AlgRSASSAPKCS1: {FormatSPKI, FormatPKCS8, FormatJWK},
+	AlgRSAPSS:      {FormatSPKI, FormatPKCS8, FormatJWK},
+	AlgRSAOAEP:     {FormatSPKI, FormatPKCS8, FormatJWK},
+
+	// raw 格式仅适用于这些算法的公钥。
+	AlgECDSA:   {FormatRaw, FormatSPKI, FormatPKCS8, FormatJWK},
+	AlgECDH:    {FormatRaw, FormatSPKI, FormatPKCS8, FormatJWK},
+	AlgEd25519: {FormatRaw, FormatSPKI, FormatPKCS8, FormatJWK},
+	AlgX25519:  {FormatRaw, FormatSPKI, FormatPKCS8, FormatJWK},
+}
+
+// checkFormat 校验算法是否支持该密钥格式，不支持时返回 NotSupportedError。
+// 该检查先于密钥数据解析，避免无效数据掩盖格式不受支持的事实。
+func checkFormat(algName string, format KeyFormat) error {
+	formats, ok := formatTable[algName]
+	if !ok {
+		return notSupportedError("%s keys cannot be imported or exported", algName)
+	}
+
+	for _, cur := range formats {
+		if cur == format {
+			return nil
+		}
+	}
+	return notSupportedError("%s keys do not support the %s format", algName, format)
 }
 
 // checkUsages 校验用法列表是否被算法与密钥类型允许，并要求对称密钥与私钥至少声明一种用法。

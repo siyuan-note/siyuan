@@ -55,6 +55,13 @@ func (h *cryptoHost) normalizeAlgorithm(rt *goja.Runtime, value goja.Value) (alg
 		}
 	}
 
+	// ECDH 与 X25519 的 public 成员是对方的 CryptoKey。
+	if publicValue := object.Get("public"); isJsValueNotNull(publicValue) {
+		if alg.Public, err = cryptoKeyOf(rt, publicValue, "algorithm.public"); err != nil {
+			return
+		}
+	}
+
 	for _, member := range []struct {
 		name   string
 		target *[]byte
@@ -64,12 +71,22 @@ func (h *cryptoHost) normalizeAlgorithm(rt *goja.Runtime, value goja.Value) (alg
 		{"additionalData", &alg.AAD},
 		{"salt", &alg.Salt},
 		{"info", &alg.Info},
+		{"label", &alg.Label},
+		{"publicExponent", &alg.PublicExponent},
 	} {
 		if memberValue := object.Get(member.name); isJsValueNotNull(memberValue) {
 			if *member.target, err = h.cryptoBytesOf(rt, memberValue, "algorithm."+member.name); err != nil {
 				return
 			}
 		}
+	}
+
+	if curveValue := object.Get("namedCurve"); isJsValueNotNull(curveValue) {
+		if !goja.IsString(curveValue) {
+			err = crypto.NewError(crypto.ErrNameType, "algorithm.namedCurve must be a string")
+			return
+		}
+		alg.NamedCurve = curveValue.String()
 	}
 
 	for _, member := range []struct {
@@ -79,6 +96,8 @@ func (h *cryptoHost) normalizeAlgorithm(rt *goja.Runtime, value goja.Value) (alg
 		{"length", &alg.Length},
 		{"tagLength", &alg.TagLength},
 		{"iterations", &alg.Iterations},
+		{"saltLength", &alg.SaltLength},
+		{"modulusLength", &alg.ModulusLength},
 	} {
 		if memberValue := object.Get(member.name); isJsValueNotNull(memberValue) {
 			var number int

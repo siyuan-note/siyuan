@@ -63,6 +63,10 @@ type KeyAlgorithm struct {
 	Name   string // 规范化后的算法名称
 	Hash   string // 摘要算法名称，绑定层展开为 {name} 对象
 	Length *int   // AES/HMAC 的密钥位长
+
+	ModulusLength  *int   // RSA 密钥的模数位长
+	PublicExponent []byte // RSA 密钥的公开指数，绑定层转换为 Uint8Array
+	NamedCurve     string // ECDSA/ECDH 的曲线名称
 }
 
 // Key 是 CryptoKey 的算法层表示，密钥材料只保存在该结构中。
@@ -72,7 +76,9 @@ type Key struct {
 	Usages      []KeyUsage
 	Algorithm   KeyAlgorithm
 
-	secret []byte // 对称密钥与 KDF 的原始密钥材料
+	secret  []byte // 对称密钥与 KDF 的原始密钥材料
+	private any    // *rsa.PrivateKey、*ecdsa.PrivateKey、*ecdh.PrivateKey、ed25519.PrivateKey
+	public  any    // *rsa.PublicKey、*ecdsa.PublicKey、*ecdh.PublicKey、ed25519.PublicKey
 }
 
 // HasUsage 判断密钥是否声明了某种用法。
@@ -80,9 +86,11 @@ func (k *Key) HasUsage(usage KeyUsage) bool {
 	return containsUsage(k.Usages, usage)
 }
 
-// KeyPair 是 generateKey 的结果：对称算法只填充 Secret。
+// KeyPair 是 generateKey 的结果：对称算法只填充 Secret，非对称算法填充公私钥。
 type KeyPair struct {
-	Secret *Key
+	Secret     *Key
+	PublicKey  *Key
+	PrivateKey *Key
 }
 
 // KeyData 是 importKey/exportKey 交换的密钥数据：raw/spki/pkcs8 使用 Raw，jwk 使用 JSON。
@@ -107,6 +115,17 @@ func cloneUsages(usages []KeyUsage) []KeyUsage {
 	}
 	ret := make([]KeyUsage, len(usages))
 	copy(ret, usages)
+	return ret
+}
+
+// filterUsages 返回 usages 中被 allowed 允许的部分，用于生成密钥对时区分公私钥用法。
+func filterUsages(usages []KeyUsage, allowed ...KeyUsage) []KeyUsage {
+	ret := make([]KeyUsage, 0, len(usages))
+	for _, usage := range usages {
+		if containsUsage(allowed, usage) {
+			ret = append(ret, usage)
+		}
+	}
 	return ret
 }
 

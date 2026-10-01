@@ -246,12 +246,33 @@ func optionalLengthOf(value goja.Value) (*int, error) {
 	return &length, nil
 }
 
-// newKeyPairValue 将密钥对转换为 JS 值，对称算法直接返回 CryptoKey。
+// newKeyPairValue 将密钥对转换为 JS 值：对称算法返回 CryptoKey，
+// 非对称算法返回含 publicKey 与 privateKey 的 CryptoKeyPair。
 func (h *cryptoHost) newKeyPairValue(rt *goja.Runtime, pair *crypto.KeyPair) (goja.Value, error) {
 	if pair.Secret != nil {
 		return h.newCryptoKeyObject(rt, pair.Secret)
 	}
-	return nil, crypto.NewError(crypto.ErrNameOperation, "generateKey produced no key")
+	if pair.PublicKey == nil || pair.PrivateKey == nil {
+		return nil, crypto.NewError(crypto.ErrNameOperation, "generateKey produced no key")
+	}
+
+	publicKey, err := h.newCryptoKeyObject(rt, pair.PublicKey)
+	if err != nil {
+		return nil, err
+	}
+	privateKey, err := h.newCryptoKeyObject(rt, pair.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	keyPair := rt.NewObject()
+	if err = keyPair.Set("publicKey", publicKey); err != nil {
+		return nil, err
+	}
+	if err = keyPair.Set("privateKey", privateKey); err != nil {
+		return nil, err
+	}
+	return keyPair, nil
 }
 
 // newKeyDataValue 将导出的密钥数据转换为 JS 值：raw 等格式返回 ArrayBuffer，jwk 返回普通对象。

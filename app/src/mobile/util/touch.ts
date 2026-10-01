@@ -361,7 +361,8 @@ export const handleTouchStart = (event: TouchEvent) => {
         return;
     }
     // 自行处理触摸的内容独占整轮手势，松手和取消时也不操作外层侧栏。
-    preventSwipe = !!hasClosestByAttribute(target, "data-prevent-swipe", null, true);
+    preventSwipe = !!target.closest(".av__widthdrag") ||
+        !!hasClosestByAttribute(target, "data-prevent-swipe", null, true);
     if (preventSwipe) {
         return;
     }

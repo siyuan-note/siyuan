@@ -16,7 +16,7 @@ import {avRender, genTabHeaderHTML, updateSearch} from "../render";
 import {replaceAVContainer} from "../container";
 import {renderAVRichTextElements} from "../richText";
 import {avContextmenu} from "../action";
-import {bindAvSearch} from "../search";
+import {bindAvSearch, captureAvSearchSelection, deferAvSearchRender} from "../search";
 import {getAVData, getAVSelectedItemIDs, setAVData} from "../virtualScroll";
 import {addCalendarDays, calendarDay, calendarDayDistance, getCalendarDate, getCalendarInterval, getISOWeekForCalendarRow, ICalendarEvent, ICalendarSegment,
     isCalendarDateEditable, moveCalendarDate, packCalendarWeek, resizeCalendarDate} from "./date";
@@ -349,6 +349,14 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
 };
 
 export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyle, data: IAV, cb?: (data: IAV) => void) => {
+    const search = blockElement.querySelector<HTMLElement>('[data-type="av-search"]');
+    if (deferAvSearchRender(search, () => {
+        // 组合输入结束后重新读取当前视图和查询，并沿用渲染请求的过期检查。
+        blockElement.removeAttribute("data-render");
+        void avRender(blockElement, protyle, cb);
+    })) {
+        return;
+    }
     const view = data.view as IAVTable;
     const state = getCalendarState(blockElement, data.viewID);
     const rowLimit = view.calendar.rowLimit || 3;
@@ -374,9 +382,9 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         return;
     }
     const editable = canEditCalendar(protyle);
-    const search = blockElement.querySelector<HTMLElement>('[data-type="av-search"]');
     const query = search?.textContent || "";
     const isSearching = search === document.activeElement;
+    const selection = captureAvSearchSelection(search);
     const hasUndated = !!dateColumn && state.undatedCount?.dateKeyID === dateColumn.id && state.undatedCount.query === query.trim() &&
         state.undatedCount.total > 0;
     const events: ICalendarEvent[] = [];
@@ -593,7 +601,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     if (!dateColumn && editable) {
         bindCalendarSettings({protyle, blockElement, data, menuElement: root});
     }
-    bindAvSearch({blockElement, query, isSearching, onChange: () => updateSearch(blockElement, protyle)});
+    bindAvSearch({blockElement, query, isSearching, selection, onChange: () => updateSearch(blockElement, protyle)});
     renderAVRichTextElements(blockElement);
     finishAVLocate(blockElement, protyle, data);
     cb?.(data);

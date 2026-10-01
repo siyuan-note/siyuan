@@ -1699,6 +1699,9 @@ func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string,
 		}
 	}
 	pageCount = (matchedBlockCount + pageSize - 1) / pageSize
+	if 2 != method {
+		compactAttributeViewSearchResults(blocks)
+	}
 
 	switch groupBy {
 	case 0: // 不分组

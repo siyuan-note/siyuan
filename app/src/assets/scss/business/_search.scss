@@ -2,6 +2,11 @@
 @use "../component/form";
 
 .search {
+  &__av-content {
+    -webkit-line-clamp: 7;
+    overflow-wrap: anywhere;
+  }
+
   &__layout {
     display: flex;
     flex: 1;

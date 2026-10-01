@@ -8,6 +8,81 @@ import * as dates from "./date";
 import {cellValueIsEmpty, createEmptyAVValue} from "../cellValue";
 import {getConditionalBackground} from "../conditionalColor";
 
+const search = {bindAvSearch() {}, captureAvSearchSelection() {}, deferAvSearchRender: () => false};
+
+test("calendar refreshes the current view after composition and captures the latest selection before replacing the header", async () => {
+    const range = {start: new Date(2026, 8, 1).getTime(), end: new Date(2026, 8, 8).getTime(), timeZone: "UTC"};
+    const input = {textContent: "before after"};
+    const selection = {anchor: 9, focus: 2};
+    const root = {querySelectorAll: (): unknown[] => [], querySelector: () => ({addEventListener() {}}),
+        addEventListener() {}};
+    let composing = true;
+    let captured = false;
+    let replaced = false;
+    let completed = false;
+    let refreshed = 0;
+    let viewID = "calendar";
+    let deferred: () => void;
+    let bound: Parameters<typeof import("../search").bindAvSearch>[0];
+    const block = {dataset: {}, removeAttribute() {}, querySelector: (selector: string) =>
+        selector === ".av__calendar" ? root : input};
+    const modules: Record<string, unknown> = {
+        "./date": dates,
+        "./state": {getCalendarState: () => ({anchor: range.start, mode: "month", rowLimit: 3}), getCalendarRequestRange: () => range},
+        "../render": {
+            genTabHeaderHTML: (data: IAV) => { assert.equal(data.viewID, viewID); return ""; },
+            avRender(element: HTMLElement, protyle: IProtyle, callback: (data: IAV) => void) {
+                refreshed++;
+                return api.renderCalendar(element, protyle, {viewID,
+                    view: {calendar: {}, columns: [], rows: [], calendarRange: range}} as unknown as IAV, callback);
+            },
+        },
+        "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
+        "../../../../constants": {Constants: {ZWSP: ""}},
+        "../container": {replaceAVContainer() { assert.equal(captured, true); replaced = true; }},
+        "../virtualScroll": {getAVSelectedItemIDs: (): string[] => [], setAVData() {}},
+        "../richText": {renderAVRichTextElements() {}},
+        "../locate": {finishAVLocate() {}},
+        "../search": {
+            deferAvSearchRender(element: unknown, render: () => void) {
+                assert.equal(element, input);
+                deferred = render;
+                return composing;
+            },
+            captureAvSearchSelection(element: unknown) {
+                assert.equal(replaced, false);
+                assert.equal(element, input);
+                captured = true;
+                return selection;
+            },
+            bindAvSearch(options: typeof bound) { bound = options; },
+        },
+    };
+    const api = {} as typeof import("./render");
+    runInNewContext(transpileModule(readFileSync(join(__dirname, "render.ts"), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+    }).outputText, {
+        exports: api, require: (name: string) => modules[name] || {},
+        window: {siyuan: {config: {lang: "en"}, languages: {}}}, document: {activeElement: input},
+    });
+    await api.renderCalendar(block as unknown as HTMLElement, {disabled: true, options: {}} as IProtyle,
+        {viewID: "calendar", view: {calendar: {}, columns: [], rows: [], calendarRange: range}} as unknown as IAV,
+        () => { completed = true; });
+    assert.equal(replaced, false);
+    assert.equal(captured, false);
+    assert.equal(completed, false);
+    composing = false;
+    viewID = "another-calendar";
+    input.textContent = "before latest after";
+    deferred();
+    assert.equal(refreshed, 1);
+    assert.equal(replaced, true);
+    assert.equal(completed, true);
+    assert.equal(bound.query, input.textContent);
+    assert.equal(bound.isSearching, true);
+    assert.equal(bound.selection, selection);
+});
+
 test("calendar omits empty fields while preserving zero, unchecked boxes and rendered values", async () => {
     const start = new Date(2026, 8, 1).getTime();
     const range = {start, end: dates.addCalendarDays(start, 7), timeZone: "UTC"};
@@ -32,6 +107,7 @@ test("calendar omits empty fields while preserving zero, unchecked boxes and ren
         "../conditionalColor": {getConditionalBackground},
         "../cell": {renderCell: () => "<span></span>"},
         "../render": {genTabHeaderHTML: () => ""},
+        "../search": search,
         "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
         "../../../../constants": {Constants: {}},
         "../virtualScroll": {getAVSelectedItemIDs: (): string[] => []},
@@ -70,6 +146,7 @@ test("calendar without a date field renders its setup instead of reading an abse
         "./state": {getCalendarState: () => state, getCalendarRequestRange: () => range},
         "./settings": {getCalendarSettingsHTML: () => "date-field-settings"},
         "../render": {genTabHeaderHTML: () => "view-switcher"},
+        "../search": search,
         "../col": {getColNameByType: (type: string) => type},
         "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
         "../../../../constants": {Constants: {ZWSP: ""}},
@@ -127,7 +204,7 @@ test("calendar refresh keeps selected event segments and blank clicks dismiss th
         "../../../../constants": {Constants: {ZWSP: ""}},
         "../container": {replaceAVContainer() {}},
         "../virtualScroll": {getAVSelectedItemIDs: () => ["selected", "deleted"], setAVData() {}},
-        "../search": {bindAvSearch() {}},
+        "../search": search,
         "../richText": {renderAVRichTextElements() {}},
         "../locate": {finishAVLocate() {}},
     };
@@ -204,7 +281,7 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
             "../../../../constants": {Constants: {ZWSP: ""}},
             "../container": {replaceAVContainer: (_block: unknown, value: string) => { html = value; }},
             "../virtualScroll": {getAVSelectedItemIDs: (): string[] => [], setAVData() {}},
-            "../search": {bindAvSearch() {}},
+            "../search": search,
             "../richText": {renderAVRichTextElements() {}},
             "../locate": {finishAVLocate() {}},
         };
@@ -310,7 +387,7 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
             "../../../../constants": {Constants: {ZWSP: ""}},
             "../container": {replaceAVContainer: (_block: unknown, value: string) => { html = value; }},
             "../virtualScroll": {getAVData: () => data, getAVSelectedItemIDs: (): string[] => [], setAVData() {}},
-            "../search": {bindAvSearch() {}},
+            "../search": search,
             "../richText": {renderAVRichTextElements() {}},
             "../locate": {finishAVLocate() {}},
             "../render/av/calendar/render": calendar,

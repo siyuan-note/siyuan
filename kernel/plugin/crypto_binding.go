@@ -104,8 +104,9 @@ func newCryptoHost(p *KernelPlugin, rt *goja.Runtime) (host *cryptoHost, err err
 }
 
 // newUint8Array 用捕获的构造函数把字节切片包装为 Uint8Array。
+// ArrayBuffer 直接引用传入的切片，因此复制一份，避免脚本改写内核保留的数据。
 func (h *cryptoHost) newUint8Array(rt *goja.Runtime, data []byte) (*goja.Object, error) {
-	return rt.New(h.uint8Array, rt.ToValue(rt.NewArrayBuffer(data)))
+	return rt.New(h.uint8Array, rt.ToValue(rt.NewArrayBuffer(bytes.Clone(data))))
 }
 
 // newCryptoKeyPrototype 构造 CryptoKey.prototype，其上的访问器从宿主对象读取属性。

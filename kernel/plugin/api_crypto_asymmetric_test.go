@@ -73,6 +73,27 @@ func TestCryptoGenerateKeyPairShape(t *testing.T) {
 	}
 }
 
+func TestCryptoPublicExponentIsNotAliased(t *testing.T) {
+	rt := newCryptoTestRuntime(t)
+
+	// publicExponent 由内核保留并被公私钥共享，脚本修改它不应影响后续读取。
+	got := rt.await(`(async () => {
+		const pair = await siyuan.crypto.subtle.generateKey(
+			{name: "RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256"},
+			true, ["encrypt", "decrypt"]);
+
+		pair.publicKey.algorithm.publicExponent.fill(0);
+		report([
+			[...pair.publicKey.algorithm.publicExponent].join("."),
+			[...pair.privateKey.algorithm.publicExponent].join("."),
+		].join(","));
+	})()`)
+	// 第一个值是被改写的那份副本，第二个必须仍是原值。
+	if got != "0.0.0,1.0.1" {
+		t.Fatalf("publicExponent = %s, want 0.0.0,1.0.1", got)
+	}
+}
+
 func TestCryptoAsymmetricSignVerify(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 

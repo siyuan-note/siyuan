@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -47,6 +48,7 @@ var (
 	TesseractLangs   []string
 
 	assetsTexts        = map[string]string{}
+	assetsTextAliases  = map[string][]string{}
 	assetsTextsLock    = sync.Mutex{}
 	assetsTextsChanged = atomic.Bool{}
 )
@@ -94,8 +96,15 @@ func LoadAssetsTexts() {
 		logging.LogErrorf("unmarshal assets texts failed: %s", err)
 		return
 	}
+	aliases := map[string][]string{}
+	for reference := range loaded {
+		if key := OCRAssetKey(reference); key != reference {
+			aliases[key] = append(aliases[key], reference)
+		}
+	}
 	assetsTextsLock.Lock()
 	assetsTexts = loaded
+	assetsTextAliases = aliases
 	assetsTextsLock.Unlock()
 	debug.FreeOSMemory()
 
@@ -175,16 +184,30 @@ func GetAssetText(asset string) (ret string) {
 }
 
 func RemoveAssetText(asset string) {
+	key := OCRAssetKey(asset)
 	assetsTextsLock.Lock()
 	delete(assetsTexts, asset)
-	delete(assetsTexts, OCRAssetKey(asset))
+	delete(assetsTexts, key)
+	// 同时移除旧版本保存的完整查询参数别名，避免删除规范键后重新读到旧结果。
+	for _, reference := range assetsTextAliases[key] {
+		delete(assetsTexts, reference)
+	}
+	delete(assetsTextAliases, key)
 	assetsTextsLock.Unlock()
 	assetsTextsChanged.Store(true)
 }
 
-// OCRAssetKey 使同一图片的查询参数和片段引用共享识别结果。
+// OCRAssetKey 保留本地资源的笔记本身份，只合并显示参数和片段；外部地址保留完整查询参数。
 func OCRAssetKey(asset string) string {
-	if index := strings.IndexAny(asset, "?#"); index >= 0 {
+	asset = strings.SplitN(asset, "#", 2)[0]
+	if index := strings.IndexByte(asset, '?'); index >= 0 && strings.HasPrefix(asset, "assets/") {
+		query, err := url.ParseQuery(asset[index+1:])
+		if err != nil {
+			return asset
+		}
+		if boxID := strings.TrimSpace(query.Get("box")); boxID != "" {
+			return asset[:index] + "?box=" + url.QueryEscape(boxID)
+		}
 		return asset[:index]
 	}
 	return asset

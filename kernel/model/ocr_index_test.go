@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,11 +28,13 @@ type ocrFixtureProvider struct {
 	rows   []map[string]string
 	err    error
 	called bool
+	path   string
 }
 
 func (*ocrFixtureProvider) Available() bool { return true }
-func (p *ocrFixtureProvider) Recognize(context.Context, string) ([]map[string]string, error) {
+func (p *ocrFixtureProvider) Recognize(_ context.Context, path string) ([]map[string]string, error) {
 	p.called = true
+	p.path = path
 	return p.rows, p.err
 }
 
@@ -194,5 +197,111 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 	after, err := os.ReadFile(filepath.Join(util.DataDir, encryptedBox, "assets", "encrypted.png"))
 	if err != nil || !bytes.Equal(after, ciphertext) {
 		t.Fatal("encrypted OCR changed source ciphertext")
+	}
+	testOCRNotebookIsolation(t, provider, fixture.box.ID)
+}
+
+func testOCRNotebookIsolation(t *testing.T, provider *ocrFixtureProvider, firstBox string) {
+	t.Helper()
+	const secondBox = "20261001020300-abcdefg"
+	box := &Box{ID: secondBox}
+	if err := box.SaveConf(conf.NewBoxConf()); err != nil {
+		t.Fatal(err)
+	}
+	const path = "assets/ocr-notebook-isolation.png"
+	first, second := path+"?box="+firstBox, path+"?box="+secondBox
+	for _, boxID := range []string{"", firstBox, secondBox} {
+		filename := filepath.Join(util.DataDir, boxID, filepath.FromSlash(path))
+		if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filename, []byte("fixture "+boxID), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	util.SetAssetText(path, "globalocrkeyword")
+	for _, reference := range []string{path, first, second} {
+		defer util.RemoveAssetText(reference)
+	}
+	documents := []struct {
+		box, reference, want string
+	}{
+		{firstBox, path, "globalocrkeyword"},
+		{firstBox, path + "?width=100&box=" + firstBox + "#preview", "firstocrkeyword"},
+		{secondBox, second, "secondocrkeyword"},
+		{secondBox, first + "&width=200", "firstocrkeyword"},
+	}
+	for i, document := range documents {
+		rootID := fmt.Sprintf("2026100102010%d-abcdefg", i)
+		paragraphID := fmt.Sprintf("2026100102020%d-abcdefg", i)
+		tree := treenode.NewTree(document.box, "/"+rootID+".sy", "/Scoped OCR", "Scoped OCR")
+		paragraph := treenode.NewParagraph(paragraphID)
+		parsed := parse.Parse("ocr", []byte("![fixture]("+document.reference+")"), util.NewLute().ParseOptions)
+		image := parsed.Root.FirstChild.FirstChild
+		image.Unlink()
+		paragraph.AppendChild(image)
+		tree.Root.AppendChild(paragraph)
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
+		sql.IndexTreeQueue(tree)
+	}
+	sql.FlushQueue()
+	Conf.OCR.Provider = "paddleocr"
+	for _, test := range []struct{ reference, box, text string }{
+		{"  " + first + "&width=100#preview", firstBox, "firstocrkeyword"},
+		{second, secondBox, "secondocrkeyword"},
+	} {
+		provider.rows = []map[string]string{{"text": test.text, "conf": "99"}}
+		if _, err := OCRAsset(context.Background(), test.reference); err != nil {
+			t.Fatal(err)
+		}
+		if provider.path != filepath.Join(util.DataDir, test.box, filepath.FromSlash(path)) {
+			t.Fatalf("OCR recognized the wrong notebook asset: %s", provider.path)
+		}
+	}
+	sql.FlushQueue()
+	check := func() {
+		t.Helper()
+		for i, document := range documents {
+			paragraphID := fmt.Sprintf("2026100102020%d-abcdefg", i)
+			block := sql.GetBlock(paragraphID)
+			if block == nil || !strings.Contains(block.Content, document.want) {
+				t.Fatalf("scoped OCR was not indexed for %s: %+v", document.reference, block)
+			}
+			for _, unwanted := range []string{"globalocrkeyword", "firstocrkeyword", "secondocrkeyword", "changedocrkeyword"} {
+				if unwanted != document.want && strings.Contains(block.Content, unwanted) {
+					t.Fatalf("OCR leaked between notebook resources: %+v", block)
+				}
+			}
+		}
+	}
+	check()
+	SetOCRAssetText(first+"#edited", "changedocrkeyword")
+	documents[1].want, documents[3].want = "changedocrkeyword", "changedocrkeyword"
+	sql.FlushQueue()
+	check()
+	for keyword, count := range map[string]int{"firstocrkeyword": 0, "changedocrkeyword": 2, "secondocrkeyword": 1} {
+		matches, err := sql.QueryNoLimitArgs("SELECT id FROM blocks_fts WHERE blocks_fts MATCH ?", keyword)
+		if err != nil || len(matches) != count {
+			t.Fatalf("unexpected scoped OCR full-text results for %s: %v, %v", keyword, matches, err)
+		}
+	}
+	provider.err = errors.New("scoped recognition failed")
+	if _, err := OCRAsset(context.Background(), first); err == nil {
+		t.Fatal("failed notebook recognition returned success")
+	}
+	provider.err = nil
+	util.SaveAssetsTexts()
+	for _, reference := range []string{path, first, second} {
+		util.RemoveAssetText(reference)
+	}
+	util.LoadAssetsTexts()
+	secondText := util.GetOcrJsonText([]map[string]string{{"text": "secondocrkeyword", "conf": "99"}})
+	for reference, want := range map[string]string{path: "globalocrkeyword", first: "changedocrkeyword", second: secondText} {
+		if got := util.GetAssetText(reference); got != want {
+			t.Fatalf("scoped OCR result did not survive reload for %s: %q", reference, got)
+		}
 	}
 }

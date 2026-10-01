@@ -43,6 +43,27 @@ BUNDLED_COMPONENTS = [
         "Desktop runtime; Electron also ships LICENSES.chromium.html for Chromium and its dependencies",
     ),
     (
+        "ONNX Runtime",
+        "1.24.3 (Windows, Linux, Apple Silicon, Android, HarmonyOS), 1.23.2 (Intel macOS), 1.24.2 (iOS)",
+        "MIT",
+        "https://github.com/microsoft/onnxruntime",
+        "Native CPU OCR runtime; license and dependency notices in app/stage/ocr/ONNXRUNTIME-LICENSE and ONNXRUNTIME-THIRD-PARTY-NOTICES.txt; desktop libraries also include their corresponding notices",
+    ),
+    (
+        "Microsoft Visual C++ Runtime",
+        "14.x from the release builder's licensed Visual Studio redist",
+        "Microsoft Visual Studio Software License Terms",
+        "https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution#visual-c-runtime-files",
+        "Windows OCR runtime directories include unmodified app-local CRT DLLs, MICROSOFT-VC-RUNTIME-NOTICE.txt, and vc-runtime-files.json with the exact file digests",
+    ),
+    (
+        "PaddleOCR PP-OCRv6 Tiny and Small ONNX models",
+        "Pinned revisions in scripts/ocr-assets.json",
+        "Apache-2.0",
+        "https://huggingface.co/collections/PaddlePaddle/pp-ocrv6",
+        "app/stage/ocr/models/; license text in app/stage/ocr/PADDLEOCR-LICENSE",
+    ),
+    (
         "DOMPurify",
         "3.3.3",
         "Apache-2.0 OR MPL-2.0",

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -134,9 +135,12 @@ func OCRAsset(ctx context.Context, path string) ([]map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	canonical, _, err := assetPathAndBox(path, "")
+	canonical, boxID, err := assetPathAndBox(path, "")
 	if err != nil {
 		return nil, err
+	}
+	if boxID != "" {
+		canonical += "?box=" + url.QueryEscape(boxID)
 	}
 	SetOCRAssetText(canonical, util.GetOcrJsonText(rows))
 	return rows, nil

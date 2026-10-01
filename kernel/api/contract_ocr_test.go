@@ -65,6 +65,61 @@ func TestAPIContractOCREncryptedAssetAliases(t *testing.T) {
 	}
 }
 
+func TestAPIContractOCRNotebookIsolation(t *testing.T) {
+	assets := setupAssetContractWorkspace(t)
+	const name = "ocr-notebook-contract.png"
+	const path = "assets/" + name
+	const firstBox = "20261001021001-abcdefg"
+	const secondBox = "20261001021002-abcdefg"
+	boxConfig, err := json.Marshal(conf.NewBoxConf())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, boxID := range []string{firstBox, secondBox} {
+		for name, content := range map[string][]byte{".siyuan/conf.json": boxConfig, path: []byte(boxID)} {
+			filename := filepath.Join(util.DataDir, boxID, filepath.FromSlash(name))
+			if err = os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err = os.WriteFile(filename, content, 0644); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	if err = os.WriteFile(filepath.Join(assets, name), []byte("global image"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	engine.POST("/api/asset/setImageOCRText", setImageOCRText)
+	engine.POST("/api/asset/getImageOCRText", getImageOCRText)
+	results := map[string]string{path: "global OCR", path + "?box=" + firstBox: "first notebook OCR", path + "?box=" + secondBox: "second notebook OCR"}
+	for reference, text := range results {
+		reference := reference
+		t.Cleanup(func() { util.RemoveAssetText(reference) })
+		body, _ := json.Marshal(map[string]string{"path": reference + "#preview", "text": text})
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/setImageOCRText", bytes.NewReader(body)))
+		requireAPIContract(t, "POST", "/api/asset/setImageOCRText", recorder)
+		var response struct{ Code int }
+		if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 {
+			t.Fatalf("set OCR: %s, %v", recorder.Body.String(), err)
+		}
+	}
+	for reference, want := range results {
+		body, _ := json.Marshal(map[string]string{"path": reference + "#different-preview"})
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/getImageOCRText", bytes.NewReader(body)))
+		requireAPIContract(t, "POST", "/api/asset/getImageOCRText", recorder)
+		var response struct {
+			Code int
+			Data apicontract.AssetTextData
+		}
+		if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || response.Data.Text != want {
+			t.Fatalf("get OCR for %s: %s, %v", reference, recorder.Body.String(), err)
+		}
+	}
+}
+
 func TestAPIContractOCRPermissions(t *testing.T) {
 	setupAssetContractWorkspace(t)
 	previousReadOnly := util.ReadOnly

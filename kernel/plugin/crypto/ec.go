@@ -208,7 +208,7 @@ func importECRaw(alg Algorithm, data []byte, extractable bool, usages []KeyUsage
 	if err != nil {
 		return nil, dataError("invalid %s public key: %s", curve.Name, err)
 	}
-	return newECDSAKey(alg, publicKey, KeyTypePublic, extractable, usages)
+	return newECDSAKey(alg, publicKey, extractable, usages)
 }
 
 // deriveBitsECDH 以 ECDH 或 X25519 计算共享密钥，并按 length 截断。

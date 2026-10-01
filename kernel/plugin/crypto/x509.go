@@ -30,7 +30,7 @@ func importSPKI(alg Algorithm, data []byte, extractable bool, usages []KeyUsage)
 	if err != nil {
 		return nil, dataError("invalid SubjectPublicKeyInfo: %s", err)
 	}
-	return keyFromMaterial(alg, parsed, KeyTypePublic, extractable, usages)
+	return keyFromMaterial(alg, parsed, extractable, usages)
 }
 
 // importPKCS8 从 PrivateKeyInfo 导入私钥。
@@ -39,7 +39,7 @@ func importPKCS8(alg Algorithm, data []byte, extractable bool, usages []KeyUsage
 	if err != nil {
 		return nil, dataError("invalid PrivateKeyInfo: %s", err)
 	}
-	return keyFromMaterial(alg, parsed, KeyTypePrivate, extractable, usages)
+	return keyFromMaterial(alg, parsed, extractable, usages)
 }
 
 // exportSPKI 将公钥导出为 SubjectPublicKeyInfo。
@@ -69,8 +69,8 @@ func exportPKCS8(key *Key) ([]byte, error) {
 }
 
 // keyFromMaterial 校验解析出的密钥材料是否与请求的算法匹配，并构造 Key。
-func keyFromMaterial(alg Algorithm, material any, keyType KeyType,
-	extractable bool, usages []KeyUsage) (*Key, error) {
+// 公钥与私钥由材料本身区分，调用方无需指定密钥类型。
+func keyFromMaterial(alg Algorithm, material any, extractable bool, usages []KeyUsage) (*Key, error) {
 	switch alg.Name {
 	case AlgRSASSAPKCS1, AlgRSAPSS, AlgRSAOAEP:
 		h, err := hashOf(alg)
@@ -81,13 +81,13 @@ func keyFromMaterial(alg Algorithm, material any, keyType KeyType,
 
 	case AlgECDSA:
 		// EcKeyImportParams 只有 namedCurve，摘要算法在 sign/verify 时由 EcdsaParams 指定。
-		return newECDSAKey(alg, material, keyType, extractable, usages)
+		return newECDSAKey(alg, material, extractable, usages)
 
 	case AlgECDH, AlgX25519:
-		return newECDHKey(alg, material, keyType, extractable, usages)
+		return newECDHKey(alg, material, extractable, usages)
 
 	case AlgEd25519:
-		return newEd25519Key(alg, material, keyType, extractable, usages)
+		return newEd25519Key(alg, material, extractable, usages)
 
 	default:
 		return nil, notSupportedError("%s keys cannot be imported from this format", alg.Name)
@@ -95,47 +95,46 @@ func keyFromMaterial(alg Algorithm, material any, keyType KeyType,
 }
 
 // newECDSAKey 由解析得到的材料构造 ECDSA 密钥，并校验曲线是否与参数一致。
-func newECDSAKey(alg Algorithm, material any, keyType KeyType,
-	extractable bool, usages []KeyUsage) (*Key, error) {
+// 密钥类型由材料决定，避免与调用方的预期不一致时把私钥标记为公钥。
+func newECDSAKey(alg Algorithm, material any, extractable bool, usages []KeyUsage) (*Key, error) {
 	expected, err := curveByName(alg.NamedCurve)
 	if err != nil {
 		return nil, err
+	}
+
+	key := &Key{
+		Extractable: extractable,
+		Usages:      cloneUsages(usages),
+		Algorithm:   KeyAlgorithm{Name: alg.Name, NamedCurve: expected.Name},
 	}
 
 	var curve elliptic.Curve
 	switch typed := material.(type) {
 	case *ecdsa.PrivateKey:
 		curve = typed.Curve
+		key.Type = KeyTypePrivate
+		key.private = typed
 	case *ecdsa.PublicKey:
 		curve = typed.Curve
+		key.Type = KeyTypePublic
+		key.public = typed
 	default:
 		return nil, dataError("ECDSA keys require EC key data")
 	}
 	if curve != expected.Curve {
 		return nil, dataError("the key data uses a curve other than %s", expected.Name)
 	}
-	if err = checkUsages(alg.Name, keyType, usages); err != nil {
-		return nil, err
-	}
 
-	key := &Key{
-		Type:        keyType,
-		Extractable: extractable,
-		Usages:      cloneUsages(usages),
-		Algorithm:   KeyAlgorithm{Name: alg.Name, NamedCurve: expected.Name},
-	}
-	if privateKey, ok := material.(*ecdsa.PrivateKey); ok {
-		key.private = privateKey
-	} else {
-		key.public = material
+	if err = checkUsages(alg.Name, key.Type, usages); err != nil {
+		return nil, err
 	}
 	return key, nil
 }
 
 // newECDHKey 由解析得到的材料构造 ECDH 或 X25519 密钥。
 // x509 将 EC 密钥解析为 ecdsa 类型，需转换为 ecdh 类型后使用。
-func newECDHKey(alg Algorithm, material any, keyType KeyType,
-	extractable bool, usages []KeyUsage) (*Key, error) {
+// 密钥类型由材料决定，避免与调用方的预期不一致时把私钥标记为公钥。
+func newECDHKey(alg Algorithm, material any, extractable bool, usages []KeyUsage) (*Key, error) {
 	keyAlg := KeyAlgorithm{Name: alg.Name}
 	if alg.Name == AlgECDH {
 		curve, err := curveByName(alg.NamedCurve)
@@ -145,18 +144,20 @@ func newECDHKey(alg Algorithm, material any, keyType KeyType,
 		keyAlg.NamedCurve = curve.Name
 	}
 
-	key := &Key{Type: keyType, Extractable: extractable, Usages: cloneUsages(usages), Algorithm: keyAlg}
+	key := &Key{Extractable: extractable, Usages: cloneUsages(usages), Algorithm: keyAlg}
 
 	switch typed := material.(type) {
 	case *ecdh.PrivateKey:
 		if err := checkECDHCurve(alg, typed.Curve()); err != nil {
 			return nil, err
 		}
+		key.Type = KeyTypePrivate
 		key.private = typed
 	case *ecdh.PublicKey:
 		if err := checkECDHCurve(alg, typed.Curve()); err != nil {
 			return nil, err
 		}
+		key.Type = KeyTypePublic
 		key.public = typed
 	case *ecdsa.PrivateKey:
 		converted, err := typed.ECDH()
@@ -166,6 +167,7 @@ func newECDHKey(alg Algorithm, material any, keyType KeyType,
 		if err = checkECDHCurve(alg, converted.Curve()); err != nil {
 			return nil, err
 		}
+		key.Type = KeyTypePrivate
 		key.private = converted
 	case *ecdsa.PublicKey:
 		converted, err := typed.ECDH()
@@ -175,12 +177,13 @@ func newECDHKey(alg Algorithm, material any, keyType KeyType,
 		if err = checkECDHCurve(alg, converted.Curve()); err != nil {
 			return nil, err
 		}
+		key.Type = KeyTypePublic
 		key.public = converted
 	default:
 		return nil, dataError("%s keys require EC or X25519 key data", alg.Name)
 	}
 
-	if err := checkUsages(alg.Name, keyType, usages); err != nil {
+	if err := checkUsages(alg.Name, key.Type, usages); err != nil {
 		return nil, err
 	}
 	return key, nil
@@ -205,26 +208,26 @@ func checkECDHCurve(alg Algorithm, curve ecdh.Curve) error {
 	return nil
 }
 
-// newEd25519Key 由解析得到的材料构造 Ed25519 密钥。
-func newEd25519Key(alg Algorithm, material any, keyType KeyType,
-	extractable bool, usages []KeyUsage) (*Key, error) {
-	if err := checkUsages(alg.Name, keyType, usages); err != nil {
-		return nil, err
-	}
-
+// newEd25519Key 由解析得到的材料构造 Ed25519 密钥，密钥类型由材料决定。
+func newEd25519Key(alg Algorithm, material any, extractable bool, usages []KeyUsage) (*Key, error) {
 	key := &Key{
-		Type:        keyType,
 		Extractable: extractable,
 		Usages:      cloneUsages(usages),
 		Algorithm:   KeyAlgorithm{Name: alg.Name},
 	}
 	switch typed := material.(type) {
 	case ed25519.PrivateKey:
+		key.Type = KeyTypePrivate
 		key.private = typed
 	case ed25519.PublicKey:
+		key.Type = KeyTypePublic
 		key.public = typed
 	default:
 		return nil, dataError("Ed25519 keys require Ed25519 key data")
+	}
+
+	if err := checkUsages(alg.Name, key.Type, usages); err != nil {
+		return nil, err
 	}
 	return key, nil
 }

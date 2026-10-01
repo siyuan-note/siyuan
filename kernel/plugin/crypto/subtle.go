@@ -342,8 +342,6 @@ func derivedKeyLength(derived Algorithm) (*int, error) {
 			return nil, err
 		}
 		return intPtr(h.New().BlockSize() * 8), nil
-	case AlgHKDF, AlgPBKDF2:
-		return nil, notSupportedError("%s keys cannot be derived", derived.Name)
 	default:
 		return nil, notSupportedError("%s keys cannot be derived", derived.Name)
 	}

@@ -191,17 +191,13 @@ func importJWKOKP(jwk *jsonWebKey, alg Algorithm, extractable bool, usages []Key
 
 // importJWKAsymmetric 借助 go-jose 解析 RSA 与 EC 的 JWK 密钥材料。
 func importJWKAsymmetric(jwk *jsonWebKey, alg Algorithm, extractable bool, usages []KeyUsage) (*Key, error) {
-	// go-jose 会校验坐标长度、点是否在曲线上，并对 RSA 私钥执行 Validate。
+	// go-jose 会校验坐标长度、点是否在曲线上，并对 RSA 私钥执行 Validate，
+	// 并按是否含 d 成员返回私钥或公钥类型的材料。
 	var parsed jose.JSONWebKey
 	if err := parsed.UnmarshalJSON(jwk.raw); err != nil {
 		return nil, dataError("invalid JSON Web Key: %s", err)
 	}
-
-	keyType := KeyTypePublic
-	if jwk.D != "" {
-		keyType = KeyTypePrivate
-	}
-	return keyFromMaterial(alg, parsed.Key, keyType, extractable, usages)
+	return keyFromMaterial(alg, parsed.Key, extractable, usages)
 }
 
 // exportJWK 将密钥导出为 JWK。

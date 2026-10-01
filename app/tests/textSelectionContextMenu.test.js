@@ -23,6 +23,8 @@ const sources = () => {
     const range = selection.statements.find(node => ts.isVariableStatement(node) &&
         node.declarationList.declarations.some(item => item.name.getText(selection) === "getEditorRange"));
     assert.ok(range);
+    const wordSelection = readFileSync(path.join(__dirname, "../src/mobile/util/wordSelection.ts"), "utf8")
+        .replace("export const ", "const ");
     const preprocess = (source, mobile) => {
         const active = [true];
         return source.split("\n").filter(line => {
@@ -42,7 +44,7 @@ const sources = () => {
     };
     return [false, true].map(mobile => ts.transpileModule(preprocess(
         `const bind = function(protyle) {let beforeContextmenuRange; ${bindings.join(";\n")};};\n` +
-        range.getText(selection).replace("export ", ""), mobile), {
+        range.getText(selection).replace("export ", "") + "\n" + wordSelection, mobile), {
         compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS},
     }).outputText);
 };
@@ -121,6 +123,25 @@ const cases = async compiled => {
         check.equal(menus.length, 1);
         check.equal(menus[0].block, blocks[1]);
         check.equal(selection.isCollapsed, true);
+
+        // 长按菜单扩展 Android 的中文单字选区，并保留思源菜单与后续复制读取的选区。
+        texts[1].textContent = "我的天空大地呀为什么";
+        dependencies.window.JSAndroid = {getWordSelection(text, start, end) {
+            check.deepEqual({text, start, end}, {text: "我的天空大地呀为什么", start: 8, end: 9});
+            return "[7,10]";
+        }};
+        selection.setBaseAndExtent(texts[1], 8, texts[1], 9);
+        menus.length = 0;
+        callbacks.pointerdown();
+        let prevented = false;
+        await callbacks.contextmenu({shiftKey: false, target: blocks[1].firstElementChild, detail: {},
+            clientX: 20, clientY: 20, stopPropagation() {}, preventDefault() { prevented = true; }});
+        check.equal(prevented, true);
+        check.equal(menus.length, 1);
+        check.equal(menus[0].text, "为什么");
+        check.equal(menus[0].copy(), "为什么");
+        check.equal(selection.toString(), "为什么");
+        delete dependencies.window.JSAndroid;
     }
     return "Text selection context menu cases passed";
 };

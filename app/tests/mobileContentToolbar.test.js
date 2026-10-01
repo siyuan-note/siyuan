@@ -104,6 +104,82 @@ const runCases = async () => {
         assert.equal(state.toolbar.subElement.classList.contains("fn__none"), true);
     }
 
+    // Android 分词跨普通格式扩展选区，思源菜单使用扩展后的文字执行复制和剪切。
+    const selectChinese = state => {
+        const range = document.createRange();
+        range.selectNodeContents(state.editable.querySelector("b"));
+        range.setStart(state.editable.querySelector("b").firstChild, 0);
+        range.setEnd(state.editable.querySelector("b").firstChild, 1);
+        window.focusContentRange(range);
+    };
+    const nativeCalls = [];
+    window.JSAndroid = {getWordSelection(text, start, end) {
+        nativeCalls.push({text, start, end});
+        const offset = text.indexOf("为什么");
+        return JSON.stringify([offset, offset + 3]);
+    }};
+    for (const table of [false, true]) {
+        for (const action of ["copy", "cut"]) {
+            const state = createEditor(false, table);
+            state.editable.innerHTML = "😀呀，为什么".replace("什么", "<b>什</b>么");
+            selectChinese(state);
+            state.editable.querySelector("b").dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+            assert.equal(getSelection().toString(), "为什么");
+            assert.equal(state.toolbar.range.toString(), "为什么");
+            assert.deepEqual(nativeCalls.at(-1), {text: "😀呀，为什么", start: 5, end: 6});
+            assert.equal(state.toolbar.subElement.classList.contains("fn__none"), false);
+            await click(state, action);
+            assert.deepEqual(commands.at(-1), {command: action, text: "为什么"});
+        }
+    }
+
+    // 特殊元素与隐藏标记切断分词上下文，已选词语、英文和代码块不重新分词。
+    for (const boundary of ['<span data-type="code">为</span>', "为\u200b", '<a href="#">为</a>']) {
+        const state = createEditor(false);
+        state.editable.innerHTML = boundary + "<b>什</b>么";
+        selectChinese(state);
+        window.JSAndroid.getWordSelection = (text, start, end) => {
+            assert.deepEqual({text, start, end}, {text: "什么", start: 0, end: 1});
+            return "[0,2]";
+        };
+        assert.equal(window.expandAndroidWordSelection(state.block).toString(), "什么");
+    }
+    window.JSAndroid.getWordSelection = () => { throw new Error("Unexpected native call"); };
+    const english = createEditor(false);
+    assert.equal(window.expandAndroidWordSelection(english.block), undefined);
+    assert.equal(getSelection().toString(), "lph");
+    const special = createEditor(false);
+    special.editable.innerHTML = "为<b>什</b>么";
+    selectChinese(special);
+    special.block.setAttribute("data-type", "NodeCodeBlock");
+    assert.equal(window.expandAndroidWordSelection(special.block), undefined);
+    special.block.setAttribute("data-type", "NodeParagraph");
+    special.editable.querySelector("b").setAttribute("data-type", "block-ref");
+    assert.equal(window.expandAndroidWordSelection(special.block), undefined);
+    special.editable.querySelector("b").removeAttribute("data-type");
+    const wordRange = getSelection().getRangeAt(0);
+    wordRange.setStart(special.editable.firstChild, 0);
+    wordRange.setEnd(special.editable.lastChild, 1);
+    assert.equal(window.expandAndroidWordSelection(special.block), undefined);
+    assert.equal(getSelection().toString(), "为什么");
+
+    // 旧客户端、原生失败与无效偏移保留原选区，避免错误选中相邻内容。
+    const fallback = createEditor(false);
+    fallback.editable.innerHTML = "为<b>什</b>么";
+    selectChinese(fallback);
+    for (const reply of ["", "null", "{}", "[0]", "[-1,3]", "[0,4]", "[2,3]", "[0,1]", "[0,2.5]", "[1,2]"]) {
+        window.JSAndroid.getWordSelection = () => reply;
+        assert.equal(window.expandAndroidWordSelection(fallback.block), undefined);
+        assert.equal(getSelection().toString(), "什");
+    }
+    window.JSAndroid.getWordSelection = () => { throw new Error("Unavailable"); };
+    assert.equal(window.expandAndroidWordSelection(fallback.block), undefined);
+    delete window.JSAndroid;
+    fallback.editable.querySelector("b").dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    assert.equal(fallback.toolbar.range.toString(), "什");
+    await click(fallback, "copy");
+    assert.deepEqual(commands.at(-1), {command: "copy", text: "什"});
+
     // 有块菜单时继续支持再次全选，并通过现有多选菜单操作已选块。
     const documentEditor = createEditor(true);
     await click(documentEditor, "select");
@@ -161,6 +237,8 @@ const runElectron = async () => {
             read("protyle/wysiwyg/blockSelection"),
             read("protyle/toolbar/subElementLifecycle"),
             read("mobile/util/multiSelectToolbar"),
+            read("mobile/util/wordSelection"),
+            "window.expandAndroidWordSelection = expandAndroidWordSelection;",
             extract("protyle/wysiwyg/getBlock", ["getContenteditableElement"]),
             extract("protyle/ui/hideElements", ["hideElements"]),
             extract("protyle/util/selection", ["selectIsEditor", "selectAll", "getSelectionOffset", "focusByRange", "getEditorRange"]),

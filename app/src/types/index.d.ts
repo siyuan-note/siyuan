@@ -237,6 +237,7 @@ interface Window {
         getScreenWidthPx(): number
         exit(): void
         setWebViewFocusable(enable: boolean): void
+        getWordSelection?(text: string, start: number, end: number): string
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
         cancelNotification(id: number): void
         logInputEvent?(details: string): void

@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "ทิศทางลูกศร",
+	"listMindmapArrowForward": "ลูกศรไปข้างหน้า",
+	"listMindmapArrowReverse": "ลูกศรย้อนกลับ",
+	"listMindmapArrowBoth": "ลูกศรทั้งสองด้าน",
+	"listMindmapArrowNone": "ไม่มีลูกศร",
 	"ocrProvider": "ผู้ให้บริการ OCR",
 	"ocrProviderTip": "รู้จำแบบออฟไลน์ในเคอร์เนลของเครื่อง ต้องติดตั้ง Tesseract แยกต่างหาก และจะไม่สลับโดยอัตโนมัติเมื่อใช้งานไม่ได้",
 	"ocrAuto": "OCR อัตโนมัติ",

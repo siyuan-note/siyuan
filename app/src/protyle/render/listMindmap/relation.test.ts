@@ -84,4 +84,21 @@ test("manual route save and reset use one transaction and reject stale relation 
     data.relations.push({...data.relations[0], id: "existing", from: "c"});
     target.onRelationChange("r", {from: "c"}, JSON.stringify(data.relations[0]));
     assert.equal(transactions.length, 3, "duplicate connections are checked against the current source data");
+    for (const arrowDirection of ["forward", "reverse", "both", "none"]) {
+        data = JSON.parse(saved);
+        const before = JSON.stringify(data);
+        target.onRelationChange("r", {arrowDirection});
+        const transaction = transactions[transactions.length - 1];
+        assert.equal(transaction.before, before, "undo retains the original relation and missing default field");
+        assert.deepEqual(JSON.parse(transaction.after).relations[0], {
+            ...JSON.parse(before).relations[0], arrowDirection,
+        }, "direction changes preserve endpoints, manual route, text and styling");
+        data = JSON.parse(transaction.before);
+        assert.equal(JSON.stringify(data), before);
+        data = JSON.parse(transaction.after);
+        assert.equal(JSON.stringify(data), transaction.after, "redo restores the selected arrow mode");
+        const count = transactions.length;
+        target.onRelationChange("r", {arrowDirection});
+        assert.equal(transactions.length, count, "choosing the current direction is a no-op");
+    }
 });

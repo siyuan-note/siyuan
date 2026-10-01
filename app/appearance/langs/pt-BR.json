@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Direção da seta",
+	"listMindmapArrowForward": "Seta para frente",
+	"listMindmapArrowReverse": "Seta invertida",
+	"listMindmapArrowBoth": "Setas nas duas extremidades",
+	"listMindmapArrowNone": "Sem setas",
 	"ocrProvider": "Provedor de OCR",
 	"ocrProviderTip": "Reconhecimento offline no núcleo local; instale o Tesseract separadamente; não há troca automática se estiver indisponível",
 	"ocrAuto": "OCR automático",

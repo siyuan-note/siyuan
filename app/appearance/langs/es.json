@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Dirección de la flecha",
+	"listMindmapArrowForward": "Flecha hacia delante",
+	"listMindmapArrowReverse": "Flecha inversa",
+	"listMindmapArrowBoth": "Flechas en ambos extremos",
+	"listMindmapArrowNone": "Sin flechas",
 	"ocrProvider": "Proveedor de OCR",
 	"ocrProviderTip": "Reconocimiento sin conexión en el núcleo local; instale Tesseract por separado; no se cambia automáticamente si no está disponible",
 	"ocrAuto": "OCR automático",

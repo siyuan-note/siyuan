@@ -67,6 +67,22 @@ test("manual relation routes are optional, versioned and validated without dropp
     }
 });
 
+test("relation arrow directions are optional and validated without dropping metadata", () => {
+    const relation = {id: "r", from: "a", to: "b", label: "Keep", color: "red", extension: "keep",
+        route: {version: 1, points: [{x: 10, y: 20, t: .5}]}};
+    const metadata = {version: 1, nodes: {}, relations: [relation]};
+    const original = JSON.stringify(metadata);
+    assert.equal(JSON.stringify(parseListMindmapMetadata(original)), original);
+    for (const arrowDirection of ["forward", "reverse", "both", "none"]) {
+        const value = JSON.stringify({...metadata, relations: [{...relation, arrowDirection}]});
+        assert.equal(JSON.stringify(parseListMindmapMetadata(value)), value);
+    }
+    for (const arrowDirection of [null, "", "backward", 0, false, {}, []]) {
+        const value = JSON.stringify({...metadata, relations: [{...relation, arrowDirection}]});
+        assert.throws(() => parseListMindmapMetadata(value), /Invalid list mindmap metadata/);
+    }
+});
+
 test("summary metadata is optional and rejects damaged groups while retaining extension fields", () => {
     const old = '{"version":1,"rootTitle":"Root","nodes":{},"relations":[]}';
     assert.equal(JSON.stringify(parseListMindmapMetadata(old)), old);
@@ -754,7 +770,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const copiedRoute = {version: 1, points: [{x: -35, y: 20, t: .5}], extension: "keep"};
     list.setAttribute("custom-sy-list-mindmap-data", JSON.stringify({version: 1, extension: "keep",
         nodes: {a: {bold: true}, b: {italic: true}, deleted: {bold: true}},
-        relations: [{id: "relation", from: "a", to: "b", label: "keep", route: copiedRoute},
+        relations: [{id: "relation", from: "a", to: "b", label: "keep", route: copiedRoute, arrowDirection: "both"},
             {id: "orphan", from: "a", to: "deleted", label: "remove"}]}));
     const copiedItems = list.querySelectorAll('[data-type="NodeListItem"]');
     copiedItems[0].setAttribute("data-node-id", "new-a");
@@ -768,7 +784,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     api.remapListMindmapIDs(list, new Map([["a", "new-a"], ["b", "new-b"]]));
     const remapped = JSON.parse(list.getAttribute("custom-sy-list-mindmap-data"));
     check.deepEqual(remapped.nodes, {"new-a": {bold: true}, "new-b": {italic: true}});
-    check.deepEqual(remapped.relations, [{id: "relation", from: "new-a", to: "new-b", label: "keep", route: copiedRoute}]);
+    check.deepEqual(remapped.relations, [{id: "relation", from: "new-a", to: "new-b", label: "keep",
+        route: copiedRoute, arrowDirection: "both"}]);
     check.equal(remapped.extension, "keep");
     check.equal(list.querySelector(".mindmap-view"), null);
     check.equal(list.hasAttribute("data-mindmap-view-rendered"), false);
@@ -1504,6 +1521,28 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(Math.abs(lineMenuBounds.left + lineMenuBounds.width / 2 - panelBounds.left - panelBounds.width / 2) < 2);
     check.ok(lineMenuBounds.width < panelBounds.width / 2);
     check.equal(inspector.querySelector(".mindmap-view__section"), null);
+    const arrowSelector = () => inspector.querySelector<HTMLSelectElement>('[aria-label="listMindmapArrowDirection"]');
+    check.ok(arrowSelector().classList.contains("b3-select"));
+    check.equal(arrowSelector().value, "forward", "old relations show the default arrow direction");
+    check.equal(arrowSelector().options.length, 4);
+    for (const arrowDirection of ["forward", "reverse", "both", "none"]) {
+        const selector = arrowSelector();
+        selector.focus();
+        const keyboard = new KeyboardEvent("keydown", {key: "ArrowDown", bubbles: true, cancelable: true});
+        selector.dispatchEvent(keyboard);
+        check.equal(keyboard.defaultPrevented, false, "direction keys belong to the shared select control");
+        selector.value = arrowDirection;
+        selector.dispatchEvent(new Event("change", {bubbles: true}));
+        check.deepEqual(relationChanges.pop(), ["relation-test", {arrowDirection}]);
+        model.metadata.relations[0].arrowDirection = arrowDirection;
+        view.update(model);
+        await settle();
+        check.equal(arrowSelector().value, arrowDirection);
+        check.equal(document.activeElement, arrowSelector(), "changing direction preserves keyboard focus");
+    }
+    delete model.metadata.relations[0].arrowDirection;
+    view.update(model);
+    await settle();
     host.querySelector(".mindmap-view__relation").dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     const relationLabel = host.querySelector<HTMLInputElement>(".mindmap-view__relation-editor");
     check.equal(document.activeElement, relationLabel);
@@ -1601,7 +1640,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         view.scale = scale;
         view.draw();
         for (const id of ["forward", "reverse"]) {
-            const end = view.linePaths.find((line: any) => line.id === id).end;
+            const end = view.linePaths.find((line: any) => line.id === id).arrows[0];
             const bounds = viewport.getBoundingClientRect();
             const x = bounds.left + view.offsetX + end.x * scale;
             const y = bounds.top + view.offsetY + end.y * scale;
@@ -1777,7 +1816,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.selectedRelation = "drag-route";
     view.updateSelection();
     await settle();
-    const resetEnd = view.linePaths.find((line: any) => line.id === "drag-route").end;
+    const resetEnd = view.linePaths.find((line: any) => line.id === "drag-route").arrows[0];
     const resetBounds = viewport.getBoundingClientRect();
     viewport.dispatchEvent(new MouseEvent("dblclick", {clientX: resetBounds.left + view.offsetX + resetEnd.x * view.scale,
         clientY: resetBounds.top + view.offsetY + resetEnd.y * view.scale, bubbles: true}));
@@ -3358,6 +3397,7 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         compile(path.join(__dirname, "create.ts")) + compile(path.join(__dirname, "render.ts"));
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_block.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_button.scss")).css +
+        require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_select.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/business/_color.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/component/_tooltips.scss")).css +
         require("sass").compile(path.resolve(__dirname, "../../../assets/scss/protyle/_mindmap-view.scss")).css;

@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20260930234403"
+		"updated": "20261001015635"
 	},
 	"Children": [
 		{
@@ -1405,7 +1405,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20260928225427"
+				"updated": "20261001015635"
 			},
 			"Children": [
 				{
@@ -2533,7 +2533,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-r1kfene",
-				"updated": "20260926151827"
+				"updated": "20261001015635"
 			},
 			"Children": [
 				{
@@ -2576,6 +2576,79 @@
 				{
 					"Type": "NodeText",
 					"Data": " and choose “Insert image or file” to upload a local image. You can also paste clipboard images. Images are stored as document attachments. The virtual center title used for multiple top-level nodes remains plain text."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-my9v7og",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-my9v7og",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select a relation line and use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Arrow direction"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the bottom settings to choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Forward arrow"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (start to end, the default), "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reverse arrow"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (end to start), "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Arrows at both ends"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "No arrows"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Changing direction preserves the connected nodes, label, and manual path, supports undo and redo, and does not affect parent-child lines."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-yca6fy3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-yca6fy3",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On a selected relation, the hollow circle marks the start and the filled circle marks the end, regardless of arrow direction. Drag a circle to change the connected node. Attachment positions on each node remain automatic."
 				}
 			]
 		},

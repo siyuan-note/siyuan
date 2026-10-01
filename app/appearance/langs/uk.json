@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Напрямок стрілки",
+	"listMindmapArrowForward": "Пряма стрілка",
+	"listMindmapArrowReverse": "Зворотна стрілка",
+	"listMindmapArrowBoth": "Стрілки на обох кінцях",
+	"listMindmapArrowNone": "Без стрілок",
 	"ocrProvider": "Провайдер OCR",
 	"ocrProviderTip": "Розпізнавання офлайн у локальному ядрі; встановіть Tesseract окремо; автоматичного перемикання за недоступності немає",
 	"ocrAuto": "Автоматичний OCR",

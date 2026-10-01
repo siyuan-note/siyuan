@@ -135,7 +135,7 @@ export class ListMindmapView {
     private selectedEdge?: string;
     private hoveredLine?: string;
     private finishRelationEdit?: (save: boolean) => void;
-    private linePaths: {id: string, relation: boolean, summary?: boolean, path: Path2D, end?: MindmapRoutePoint}[] = [];
+    private linePaths: {id: string, relation: boolean, summary?: boolean, path: Path2D, arrows?: MindmapRoutePoint[]}[] = [];
     private relationRoutes = new Map<string, MindmapRoutePoint[]>();
     private readonly routeHandles = new Map<string, HTMLButtonElement>();
     private readonly routeStatus = createElement("div", "mindmap-view__route-status");
@@ -1227,6 +1227,8 @@ export class ListMindmapView {
         }
         const end = points[points.length - 1];
         const previous = points[points.length - 2];
+        const start = points[0];
+        const next = points[1];
         // 按整条路径限制箭头大小，短尾段不会把长关系线的箭头压小。
         const arrowSizeLimit = points.slice(1).reduce((length, point, i) =>
             length + Math.hypot(point.x - points[i].x, point.y - points[i].y), 0) / 3;
@@ -1247,7 +1249,7 @@ export class ListMindmapView {
         const drawingEnd = drawingPoints[drawingPoints.length - 1];
         path.lineTo(drawingEnd.x, drawingEnd.y);
         if (!label) {
-            return {path, end, previous, arrowSizeLimit, labelPoint: undefined as MindmapRoutePoint | undefined};
+            return {path, start, next, end, previous, arrowSizeLimit, labelPoint: undefined as MindmapRoutePoint | undefined};
         }
         const width = label.offsetWidth;
         const height = label.offsetHeight;
@@ -1271,7 +1273,7 @@ export class ListMindmapView {
         // 调整关系线时隐藏文字，保留测量尺寸，避免遮挡手柄或改变节点布局。
         label.style.visibility = !labelPoint || (id === this.selectedRelation && !this.readOnly &&
             !this.printTransform && !this.options.printLayout) ? "hidden" : "";
-        return {path, end, previous, arrowSizeLimit, labelPoint};
+        return {path, start, next, end, previous, arrowSizeLimit, labelPoint};
     }
 
     private calculateRelationRoute(relation: ListMindmapRelation | undefined, from: ListMindmapPosition, to: ListMindmapPosition) {
@@ -1567,8 +1569,16 @@ export class ListMindmapView {
                 element.hidden = true;
                 return;
             }
-            const {path, end, previous, arrowSizeLimit, labelPoint} = route;
-            this.linePaths.push({id: relation.id, relation: true, path, end});
+            const {path, start, next, end, previous, arrowSizeLimit, labelPoint} = route;
+            const direction = relation.arrowDirection || "forward";
+            const arrows = [];
+            if (direction === "forward" || direction === "both") {
+                arrows.push({tip: end, previous});
+            }
+            if (direction === "reverse" || direction === "both") {
+                arrows.push({tip: start, previous: next});
+            }
+            this.linePaths.push({id: relation.id, relation: true, path, arrows: arrows.map(arrow => arrow.tip)});
             context.beginPath();
             const selected = relation.id === this.selectedRelation;
             const hovered = this.hoveredLine === `relation:${relation.id}`;
@@ -1581,20 +1591,22 @@ export class ListMindmapView {
             context.setLineDash(relation.dash === false ? [] : [5, 4]);
             context.stroke(path);
             context.setLineDash([]);
-            context.beginPath();
-            const direction = Math.atan2(end.y - previous.y, end.x - previous.x);
             // 短线上的双向箭头预留间隙，避免合并成菱形。
             const arrowSize = Math.min(Math.max(7 / this.scale, baseWidth * 2), arrowSizeLimit);
             // 箭头随线条状态加宽，保持长度不变以保留双向箭头之间的间隙。
             const halfWidth = arrowSize / 2 + emphasis / 2;
-            const baseX = end.x - arrowSize * Math.cos(Math.PI / 6) * Math.cos(direction);
-            const baseY = end.y - arrowSize * Math.cos(Math.PI / 6) * Math.sin(direction);
             context.fillStyle = context.strokeStyle;
-            context.moveTo(baseX - halfWidth * Math.sin(direction), baseY + halfWidth * Math.cos(direction));
-            context.lineTo(end.x, end.y);
-            context.lineTo(baseX + halfWidth * Math.sin(direction), baseY - halfWidth * Math.cos(direction));
-            context.closePath();
-            context.fill();
+            arrows.forEach(({tip, previous}) => {
+                const angle = Math.atan2(tip.y - previous.y, tip.x - previous.x);
+                const baseX = tip.x - arrowSize * Math.cos(Math.PI / 6) * Math.cos(angle);
+                const baseY = tip.y - arrowSize * Math.cos(Math.PI / 6) * Math.sin(angle);
+                context.beginPath();
+                context.moveTo(baseX - halfWidth * Math.sin(angle), baseY + halfWidth * Math.cos(angle));
+                context.lineTo(tip.x, tip.y);
+                context.lineTo(baseX + halfWidth * Math.sin(angle), baseY - halfWidth * Math.cos(angle));
+                context.closePath();
+                context.fill();
+            });
             if (labelPoint) {
                 element.style.left = `${labelPoint.x}px`;
                 element.style.top = `${labelPoint.y}px`;
@@ -2146,14 +2158,13 @@ export class ListMindmapView {
         let arrow: typeof lines[number];
         let distance = 12 / this.scale;
         lines.forEach(item => {
-            if (!item.end) {
-                return;
-            }
-            const current = Math.hypot(item.end.x - x, item.end.y - y);
-            if (current < distance) {
-                distance = current;
-                arrow = item;
-            }
+            item.arrows?.forEach(tip => {
+                const current = Math.hypot(tip.x - x, tip.y - y);
+                if (current < distance || (arrow && current === distance && item.id === this.selectedRelation)) {
+                    distance = current;
+                    arrow = item;
+                }
+            });
         });
         const hits = lines.filter(item => context.isPointInStroke(item.path, x, y));
         // 沿线移动或双击时保持已选关系，避免重新选中覆盖在上方的反向连接。
@@ -2730,6 +2741,7 @@ export class ListMindmapView {
         if (this.inspector.hidden || this.readOnly) {
             return;
         }
+        const focusArrowDirection = this.inspector.querySelector("select") === document.activeElement;
         this.inspector.replaceChildren();
         const lineSelected = !!this.selectedRelation || !!this.selectedEdge || !!this.selectedSummary;
         this.inspector.classList.toggle("mindmap-view__inspector--node", !lineSelected);
@@ -2777,6 +2789,21 @@ export class ListMindmapView {
             }
             const change = (patch: Partial<ListMindmapRelation>) => this.options.onRelationChange?.(relation.id, patch);
             color(relation.color, value => change({color: value}));
+            const direction = createElement("select", "b3-select");
+            direction.setAttribute("aria-label", this.label("listMindmapArrowDirection"));
+            for (const [value, key] of [["forward", "listMindmapArrowForward"], ["reverse", "listMindmapArrowReverse"],
+                ["both", "listMindmapArrowBoth"], ["none", "listMindmapArrowNone"]]) {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = this.label(key);
+                direction.append(option);
+            }
+            direction.value = relation.arrowDirection || "forward";
+            direction.addEventListener("change", () => change({arrowDirection: direction.value as ListMindmapRelation["arrowDirection"]}));
+            this.inspector.append(direction);
+            if (focusArrowDirection) {
+                direction.focus({preventScroll: true});
+            }
             this.inspector.append(squareButton("edit", "iconEdit", () => this.editRelationLabel()),
                 squareButton("delete", "iconTrashcan", () => this.options.onRelationDelete?.(relation.id)));
             return;

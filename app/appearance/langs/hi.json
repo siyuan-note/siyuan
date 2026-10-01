@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "तीर की दिशा",
+	"listMindmapArrowForward": "आगे की ओर तीर",
+	"listMindmapArrowReverse": "उलटी दिशा में तीर",
+	"listMindmapArrowBoth": "दोनों सिरों पर तीर",
+	"listMindmapArrowNone": "कोई तीर नहीं",
 	"ocrProvider": "OCR प्रदाता",
 	"ocrProviderTip": "स्थानीय कर्नेल में ऑफ़लाइन पहचान; Tesseract अलग से स्थापित करें; अनुपलब्ध होने पर प्रदाता अपने आप नहीं बदलेगा",
 	"ocrAuto": "स्वचालित OCR",

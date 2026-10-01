@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20260930234403"
+		"updated": "20261001015635"
 	},
 	"Children": [
 		{
@@ -1434,7 +1434,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-esm6f20",
-				"updated": "20260928225427"
+				"updated": "20261001015635"
 			},
 			"Children": [
 				{
@@ -2548,7 +2548,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-cfx2ewc",
-				"updated": "20260926151827"
+				"updated": "20261001015635"
 			},
 			"Children": [
 				{
@@ -2591,6 +2591,79 @@
 				{
 					"Type": "NodeText",
 					"Data": " 並選擇「插入圖片或檔案」，即可上傳本機圖片，也可以直接貼上剪貼簿圖片。圖片會儲存為文件附件。多個頂層節點形成的虛擬中心標題仍為純文字。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-0kuzxlx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-0kuzxlx",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取關係線後，使用底部設定中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "箭頭方向"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "正向箭頭"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（從起點指向終點，預設）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "反向箭頭"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（從終點指向起點）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雙向箭頭"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "無箭頭"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。切換方向會保留連接節點、關係文字與手動路徑，支援復原與重做，不影響父子節點之間的連線。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-wjlw51s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-wjlw51s",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取關係線後，空心圓表示連接起點，實心圓表示連接終點，與箭頭方向無關。拖曳圓形控制點可以變更對應的連接節點；節點上的具體連接位置仍由系統自動選擇。"
 				}
 			]
 		},

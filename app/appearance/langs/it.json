@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Direzione della freccia",
+	"listMindmapArrowForward": "Freccia in avanti",
+	"listMindmapArrowReverse": "Freccia inversa",
+	"listMindmapArrowBoth": "Frecce a entrambe le estremità",
+	"listMindmapArrowNone": "Nessuna freccia",
 	"ocrProvider": "Fornitore OCR",
 	"ocrProviderTip": "Riconoscimento offline nel kernel locale; installare Tesseract separatamente; nessun cambio automatico se non disponibile",
 	"ocrAuto": "OCR automatico",

@@ -89,6 +89,30 @@ func TestPruneListMindmapPreservesInvalidRoutes(t *testing.T) {
 	}
 }
 
+func TestPruneListMindmapArrowDirections(t *testing.T) {
+	for _, direction := range []string{"forward", "reverse", "both", "none"} {
+		_, list, _ := mindmapTestTree()
+		original := `{"version":1,"nodes":{"deleted":{}},"relations":[{"id":"r","from":"` + list.ID +
+			`","to":"child","label":"Keep","arrowDirection":"` + direction +
+			`","route":{"version":1,"points":[{"x":10,"y":20,"t":0.5}]},"extension":9007199254740993}]}`
+		list.SetIALAttr(listMindmapMetadataAttr, original)
+		next, changed := pruneListMindmapMetadata(list)
+		if !changed || strings.Contains(next, "deleted") || !strings.Contains(next, `"arrowDirection":"`+direction+`"`) ||
+			!strings.Contains(next, `"label":"Keep"`) || !strings.Contains(next, `"points":[{"x":10,"y":20,"t":0.5}]`) ||
+			!strings.Contains(next, "9007199254740993") {
+			t.Fatalf("arrow metadata was lost during pruning: %s", next)
+		}
+	}
+	for _, direction := range []string{`null`, `""`, `"backward"`, `0`, `false`, `{}`, `[]`} {
+		_, list, _ := mindmapTestTree()
+		original := `{"version":1,"nodes":{"deleted":{}},"relations":[{"id":"r","from":"a","to":"b","label":"","arrowDirection":` + direction + `}]}`
+		list.SetIALAttr(listMindmapMetadataAttr, original)
+		if next, changed := pruneListMindmapMetadata(list); changed || next != original {
+			t.Fatalf("invalid arrow direction was changed: %s", next)
+		}
+	}
+}
+
 func TestPruneListMindmapExcludesListsInsideContentBlocks(t *testing.T) {
 	_, list, child := mindmapTestTree()
 	quote := &ast.Node{Type: ast.NodeBlockquote, ID: "quote"}

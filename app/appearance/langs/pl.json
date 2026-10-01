@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Kierunek strzałki",
+	"listMindmapArrowForward": "Strzałka do przodu",
+	"listMindmapArrowReverse": "Strzałka odwrotna",
+	"listMindmapArrowBoth": "Strzałki na obu końcach",
+	"listMindmapArrowNone": "Bez strzałek",
 	"ocrProvider": "Dostawca OCR",
 	"ocrProviderTip": "Rozpoznawanie offline w lokalnym jądrze; zainstaluj Tesseract oddzielnie; brak automatycznej zmiany w razie niedostępności",
 	"ocrAuto": "Automatyczny OCR",

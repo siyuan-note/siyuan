@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Смер стрелице",
+	"listMindmapArrowForward": "Стрелица унапред",
+	"listMindmapArrowReverse": "Обрнута стрелица",
+	"listMindmapArrowBoth": "Стрелице на оба краја",
+	"listMindmapArrowNone": "Без стрелица",
 	"ocrProvider": "OCR добављач",
 	"ocrProviderTip": "Препознавање ван мреже у локалном језгру; Tesseract инсталирајте засебно; нема аутоматске промене ако није доступан",
 	"ocrAuto": "Аутоматски OCR",

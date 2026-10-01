@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Arah panah",
+	"listMindmapArrowForward": "Panah maju",
+	"listMindmapArrowReverse": "Panah terbalik",
+	"listMindmapArrowBoth": "Panah di kedua ujung",
+	"listMindmapArrowNone": "Tanpa panah",
 	"ocrProvider": "Penyedia OCR",
 	"ocrProviderTip": "Pengenalan luring di kernel lokal; pasang Tesseract secara terpisah; tidak berpindah otomatis saat tidak tersedia",
 	"ocrAuto": "OCR otomatis",

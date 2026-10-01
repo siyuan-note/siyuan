@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "矢印の方向",
+	"listMindmapArrowForward": "順方向の矢印",
+	"listMindmapArrowReverse": "逆方向の矢印",
+	"listMindmapArrowBoth": "両端に矢印",
+	"listMindmapArrowNone": "矢印なし",
 	"ocrProvider": "OCR プロバイダー",
 	"ocrProviderTip": "ローカルカーネルでオフライン認識します。Tesseract は別途インストールが必要です。利用できない場合も自動切り替えは行いません",
 	"ocrAuto": "自動 OCR",

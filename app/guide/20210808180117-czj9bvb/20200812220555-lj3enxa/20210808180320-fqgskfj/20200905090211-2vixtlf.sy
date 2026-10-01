@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20260930234403"
+		"updated": "20261001015635"
 	},
 	"Children": [
 		{
@@ -1438,7 +1438,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090624-9qgquxh",
-				"updated": "20260928225427"
+				"updated": "20261001015635"
 			},
 			"Children": [
 				{
@@ -2612,7 +2612,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-j34ty5i",
-				"updated": "20260926151827"
+				"updated": "20261001015635"
 			},
 			"Children": [
 				{
@@ -2655,6 +2655,79 @@
 				{
 					"Type": "NodeText",
 					"Data": " 并选择“插入图片或文件”，即可上传本地图片，也可以直接粘贴剪贴板图片。图片作为文档附件保存。多个顶层节点形成的虚拟中心标题仍为纯文本。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-pbhnzjy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-pbhnzjy",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中关系线后，使用底部设置中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "箭头方向"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "正向箭头"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（从起点指向终点，默认）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "反向箭头"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（从终点指向起点）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "双向箭头"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "无箭头"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。切换方向保留连接节点、关系文字和手动路径，支持撤销和重做，不影响父子节点之间的连线。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-ls0c0dv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-ls0c0dv",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中关系线后，空心圆表示连接起点，实心圆表示连接终点，与箭头方向无关。拖动圆形手柄可以更换对应的连接节点；节点上的具体连接位置仍由系统自动选择。"
 				}
 			]
 		},

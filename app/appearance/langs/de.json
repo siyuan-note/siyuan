@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Pfeilrichtung",
+	"listMindmapArrowForward": "Vorwärtspfeil",
+	"listMindmapArrowReverse": "Rückwärtspfeil",
+	"listMindmapArrowBoth": "Pfeile an beiden Enden",
+	"listMindmapArrowNone": "Keine Pfeile",
 	"ocrProvider": "OCR-Anbieter",
 	"ocrProviderTip": "Offline-Erkennung im lokalen Kernel; Tesseract separat installieren; kein automatischer Wechsel bei Nichtverfügbarkeit",
 	"ocrAuto": "Automatische OCR",

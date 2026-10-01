@@ -80,6 +80,12 @@ func validListMindmapMetadata(data map[string]any) bool {
 		if _, ok := relation["label"].(string); !ok || seen[relation["id"].(string)] {
 			return false
 		}
+		if value, exists := relation["arrowDirection"]; exists {
+			direction, ok := value.(string)
+			if !ok || !slices.Contains([]string{"forward", "reverse", "both", "none"}, direction) {
+				return false
+			}
+		}
 		if route, exists := relation["route"]; exists && !validListMindmapRoute(route) {
 			return false
 		}

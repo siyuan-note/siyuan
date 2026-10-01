@@ -795,7 +795,8 @@
       flex-shrink: 0;
     }
 
-    > button {
+    > button,
+    > select {
       flex-shrink: 0;
     }
   }

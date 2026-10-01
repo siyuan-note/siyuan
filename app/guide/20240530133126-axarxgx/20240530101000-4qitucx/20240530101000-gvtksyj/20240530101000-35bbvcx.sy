@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20260930234403"
+		"updated": "20261001015635"
 	},
 	"Children": [
 		{
@@ -1491,7 +1491,7 @@
 			"Properties": {
 				"ID": "20240530101000-rjjxxn8",
 				"id": "20240530101000-p035stn",
-				"updated": "20260928225427"
+				"updated": "20261001015635"
 			},
 			"Children": [
 				{
@@ -2699,7 +2699,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260921215916-odykie5",
-				"updated": "20260926151827"
+				"updated": "20261001015635"
 			},
 			"Children": [
 				{
@@ -2742,6 +2742,79 @@
 				{
 					"Type": "NodeText",
 					"Data": " を入力して「画像やファイルを挿入」を選択すると、ローカル画像をアップロードできます。クリップボードの画像を貼り付けることもできます。画像は文書の添付ファイルとして保存されます。複数の最上位ノードに対して表示される仮想中心のタイトルはプレーンテキストのままです。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-vr2ykf2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-vr2ykf2",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "関連線を選択し、下部の設定にある "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "矢印の方向"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "順方向の矢印"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（始点から終点、既定）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "逆方向の矢印"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（終点から始点）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "両端に矢印"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "矢印なし"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択できます。方向を変更しても接続先のノード、ラベル、手動の経路は保持され、元に戻す・やり直しに対応しています。親子ノード間の線には影響しません。"
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-wnnepvh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-wnnepvh",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "関連線を選択すると、矢印の方向にかかわらず、白抜きの円は接続の始点、塗りつぶした円は終点を示します。円形のハンドルをドラッグすると、接続先のノードを変更できます。各ノード上の具体的な接続位置は自動的に選択されます。"
 				}
 			]
 		},

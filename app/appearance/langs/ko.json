@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "화살표 방향",
+	"listMindmapArrowForward": "정방향 화살표",
+	"listMindmapArrowReverse": "역방향 화살표",
+	"listMindmapArrowBoth": "양쪽 끝 화살표",
+	"listMindmapArrowNone": "화살표 없음",
 	"ocrProvider": "OCR 제공자",
 	"ocrProviderTip": "로컬 커널에서 오프라인으로 인식합니다. Tesseract는 별도로 설치해야 하며, 사용할 수 없어도 자동으로 전환하지 않습니다",
 	"ocrAuto": "자동 OCR",

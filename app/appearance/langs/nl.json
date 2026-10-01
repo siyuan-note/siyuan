@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Pijlrichting",
+	"listMindmapArrowForward": "Pijl vooruit",
+	"listMindmapArrowReverse": "Omgekeerde pijl",
+	"listMindmapArrowBoth": "Pijlen aan beide uiteinden",
+	"listMindmapArrowNone": "Geen pijlen",
 	"ocrProvider": "OCR-provider",
 	"ocrProviderTip": "Offline herkennen in de lokale kernel; installeer Tesseract afzonderlijk; geen automatische wissel bij onbeschikbaarheid",
 	"ocrAuto": "Automatische OCR",

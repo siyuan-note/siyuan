@@ -26,6 +26,7 @@ export interface ListMindmapRelation {
     color?: string;
     width?: number;
     dash?: boolean;
+    arrowDirection?: "forward" | "reverse" | "both" | "none";
     route?: MindmapManualRoute;
 }
 
@@ -120,7 +121,9 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
             ("color" in relation && typeof relation.color !== "string") ||
             ("width" in relation && (typeof relation.width !== "number" ||
                 !Number.isFinite(relation.width) || relation.width < 0)) ||
-            ("dash" in relation && typeof relation.dash !== "boolean")) {
+            ("dash" in relation && typeof relation.dash !== "boolean") ||
+            ("arrowDirection" in relation && (typeof relation.arrowDirection !== "string" ||
+                !["forward", "reverse", "both", "none"].includes(relation.arrowDirection)))) {
             throw invalidMetadata();
         }
         if ("route" in relation) {

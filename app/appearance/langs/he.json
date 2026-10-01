@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "כיוון החץ",
+	"listMindmapArrowForward": "חץ קדימה",
+	"listMindmapArrowReverse": "חץ הפוך",
+	"listMindmapArrowBoth": "חצים בשני הקצוות",
+	"listMindmapArrowNone": "ללא חצים",
 	"ocrProvider": "ספק OCR",
 	"ocrProviderTip": "זיהוי לא מקוון בליבה המקומית; יש להתקין את Tesseract בנפרד; אין מעבר אוטומטי כשהספק אינו זמין",
 	"ocrAuto": "OCR אוטומטי",

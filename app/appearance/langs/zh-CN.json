@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "箭头方向",
+	"listMindmapArrowForward": "正向箭头",
+	"listMindmapArrowReverse": "反向箭头",
+	"listMindmapArrowBoth": "双向箭头",
+	"listMindmapArrowNone": "无箭头",
 	"ocrProvider": "OCR 提供商",
 	"ocrProviderTip": "由本机内核离线识别；Tesseract 需自行安装；不可用时不会自动切换",
 	"ocrAuto": "自动 OCR",

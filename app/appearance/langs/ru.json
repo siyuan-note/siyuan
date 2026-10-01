@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Направление стрелки",
+	"listMindmapArrowForward": "Прямая стрелка",
+	"listMindmapArrowReverse": "Обратная стрелка",
+	"listMindmapArrowBoth": "Стрелки на обоих концах",
+	"listMindmapArrowNone": "Без стрелок",
 	"ocrProvider": "Провайдер OCR",
 	"ocrProviderTip": "Распознавание офлайн в локальном ядре; установите Tesseract отдельно; автоматического переключения при недоступности нет",
 	"ocrAuto": "Автоматический OCR",

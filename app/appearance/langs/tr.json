@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "Ok yönü",
+	"listMindmapArrowForward": "İleri ok",
+	"listMindmapArrowReverse": "Ters ok",
+	"listMindmapArrowBoth": "Her iki uçta ok",
+	"listMindmapArrowNone": "Ok yok",
 	"ocrProvider": "OCR sağlayıcısı",
 	"ocrProviderTip": "Yerel çekirdekte çevrimdışı tanıma; Tesseract ayrı kurulmalıdır; kullanılamadığında otomatik geçiş yapılmaz",
 	"ocrAuto": "Otomatik OCR",

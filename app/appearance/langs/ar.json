@@ -1,4 +1,9 @@
 {
+	"listMindmapArrowDirection": "اتجاه السهم",
+	"listMindmapArrowForward": "سهم أمامي",
+	"listMindmapArrowReverse": "سهم عكسي",
+	"listMindmapArrowBoth": "أسهم عند الطرفين",
+	"listMindmapArrowNone": "بلا أسهم",
 	"ocrProvider": "موفّر OCR",
 	"ocrProviderTip": "التعرّف دون اتصال في النواة المحلية؛ ثبّت Tesseract بشكل منفصل؛ لا يتم التبديل تلقائيًا عند عدم التوفر",
 	"ocrAuto": "OCR تلقائي",

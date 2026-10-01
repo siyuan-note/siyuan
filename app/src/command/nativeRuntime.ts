@@ -17,7 +17,9 @@ import {openSearch} from "../search/spread";
 
 export const executeLegacyNativeCommand = async (command: string, context: ICommandContextSnapshot) => {
     const app = context.app as App;
-    if (globalCommand(command, app, context.range)) {
+    const openOnly = ["shortcut", "editorShortcut", "fileTreeShortcut", "dockShortcut", "globalShortcut", "keymap"]
+        .includes(context.source);
+    if (globalCommand(command, app, context.range, openOnly)) {
         return;
     }
 

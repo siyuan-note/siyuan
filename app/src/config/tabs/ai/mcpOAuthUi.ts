@@ -1,3 +1,4 @@
+import {escapeHTMLStr} from "../../../util/escape";
 import {fetchSyncPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
 
@@ -9,7 +10,7 @@ export const mountMcpOAuth = (root: HTMLElement) => {
         return;
     }
     const lang = window.siyuan.languages;
-    const escape = Lute.EscapeHTMLStr;
+    const escape = escapeHTMLStr;
     const input = (field: string, label: string, value = "", readonly = false) =>
         `<label class="fn__block">${escape(label)}<input class="b3-text-field fn__block" data-field="${field}" value="${escape(value)}" ${readonly ? "readonly" : ""} spellcheck="false"></label><div class="fn__hr"></div>`;
 

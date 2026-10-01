@@ -2121,7 +2121,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     findToolbar = true;
                     if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(menuItem.name)) {
-                        protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent("click"));
+                        protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(
+                            new CustomEvent("click", {detail: {openOnly: menuItem.name === "text"}}));
                     } else if (Constants.INLINE_TYPE.includes(menuItem.name)) {
                         protyle.toolbar.setInlineMark(protyle, menuItem.name, "range");
                     } else if (menuItem.click) {

@@ -1,3 +1,4 @@
+import {escapeHTMLStr} from "../../util/escape";
 import type {SettingTabBuilder} from "../setting/builder";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {ContractFormData} from "../../util/contractFormData";
@@ -101,7 +102,7 @@ const mountOIDCButton = (root: HTMLElement) => {
     }
     root.querySelector("#oidcConfig")?.addEventListener("click", () => {
         const config = window.siyuan.config.oidc;
-        const escape = (value: string) => Lute.EscapeHTMLStr(value);
+        const escape = (value: string) => escapeHTMLStr(value);
         let destroyOIDCDialog: () => void = () => undefined;
         const dialog = new Dialog({
             title: window.siyuan.languages.oidcLogin,

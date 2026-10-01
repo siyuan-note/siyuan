@@ -1,4 +1,5 @@
 import {recordReplacementUndo} from "./replacementInput";
+import {expandAndroidWordSelection} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
 import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
@@ -3876,7 +3877,7 @@ export class WYSIWYG {
             }
             if (!isNotEditBlock(nodeElement) && !nodeElement.classList.contains("protyle-wysiwyg--select") &&
                 !hasClosestByClassName(target, "protyle-action") && // https://github.com/siyuan-note/siyuan/issues/8983
-                (isMobile() || event.detail.target || (beforeContextmenuRange && nodeElement.contains(beforeContextmenuRange.startContainer)))
+                (isMobile() || event.detail.target || (beforeContextmenuRange && beforeContextmenuRange.intersectsNode(nodeElement)))
             ) {
                 if ((!isMobile() || protyle.toolbar?.element.classList.contains("fn__none")) && !nodeElement.classList.contains("av")) {
                     const spellcheckContext = await requestSpellcheckContext(x, y);
@@ -3887,7 +3888,11 @@ export class WYSIWYG {
                         protyle.wysiwyg.flushPendingInput();
                         setInsertWbrHTML(nodeElement, protyle.toolbar.range, protyle);
                     }
-                    contentMenu(protyle, nodeElement);
+                    const wordRange = expandAndroidWordSelection(nodeElement);
+                    if (wordRange) {
+                        protyle.toolbar.range = wordRange;
+                    }
+                    contentMenu(protyle, hasClosestBlock(protyle.toolbar.range.startContainer) || nodeElement);
                     addSpellcheckMenuItems(spellcheckContext);
                     /// #if !MOBILE
                     window.siyuan.menus.menu.popup({x, y: y + 13, h: 26});
@@ -4717,7 +4722,7 @@ export class WYSIWYG {
                 target.closest("[contenteditable]")?.getAttribute("contenteditable") !== "false" &&
                 selection?.rangeCount && !selection.isCollapsed && selection.toString() &&
                 nodeElement.contains(selection.anchorNode) && nodeElement.contains(selection.focusNode)) {
-                protyle.toolbar.range = selection.getRangeAt(0);
+                protyle.toolbar.range = expandAndroidWordSelection(nodeElement) || selection.getRangeAt(0);
                 contentMenu(protyle, nodeElement);
             }
             /// #endif

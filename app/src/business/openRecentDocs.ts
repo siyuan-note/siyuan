@@ -77,14 +77,16 @@ const renderRecentDocsContent = async (data: {
 </div>`;
 };
 
-export const openRecentDocs = () => {
+export const openRecentDocs = (openOnly = false) => {
     const openRecentDocsDialog = window.siyuan.dialogs.find(item => {
         if (item.element.getAttribute("data-key") === Constants.DIALOG_RECENTDOCS) {
             return true;
         }
     });
     if (openRecentDocsDialog) {
-        hideElements(["dialog"]);
+        if (!openOnly) {
+            hideElements(["dialog"]);
+        }
         return;
     }
     const sortBy = window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type as TRecentDocsSort;

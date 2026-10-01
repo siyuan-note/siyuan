@@ -14,6 +14,7 @@ import {writeText} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {Protyle} from "../protyle";
+import {ensureLute} from "../protyle/util/lute";
 import type {App} from "../index";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {removeLoading} from "../protyle/ui/initUI";
@@ -35,19 +36,38 @@ export const collectAssetsTabSearchStrings = (): string[] => [
     ...ocrSearchStrings(),
 ];
 
+const pendingAssetsMounts = new WeakMap<Element, object>();
+
 /** 资源 Tab 挂载（面板页，不走注册表渲染） */
-export const mountAssetsTab = (root: HTMLElement, keywords?: string, app?: App) => {
+export const mountAssetsTab = async (root: HTMLElement, keywords?: string, app?: App) => {
     if (assets.element && assets.element !== root) {
         unmountAssetsTab(assets.element);
     }
+    assets.element = root;
+    if (!root.innerHTML && app && typeof Lute === "undefined") {
+        const pending = {};
+        pendingAssetsMounts.set(root, pending);
+        try {
+            await ensureLute();
+        } catch (error) {
+            if (pendingAssetsMounts.get(root) === pending && root.isConnected) {
+                pendingAssetsMounts.delete(root);
+                console.error("Could not initialize assets settings", error);
+                showMessage(window.siyuan.languages._kernel["258"], 6000, "error");
+            }
+            return;
+        }
+        // 等待引擎期间关闭面板或再次挂载时，只保留最新的挂载请求。
+        if (pendingAssetsMounts.get(root) !== pending || assets.element !== root || !root.isConnected) {
+            return;
+        }
+        pendingAssetsMounts.delete(root);
+    }
     if (root.innerHTML === "") {
-        assets.element = root;
         root.innerHTML = assets.genHTML();
         if (app) {
             assets.bindEvent(app);
         }
-    } else {
-        assets.element = root;
     }
     if (keywords) {
         switchSettingPanelSubTab(root, keywords, [
@@ -61,6 +81,7 @@ export const mountAssetsTab = (root: HTMLElement, keywords?: string, app?: App) 
 
 /** 释放资源 Tab 内嵌编辑器及根节点引用 */
 export const unmountAssetsTab = (root: Element) => {
+    pendingAssetsMounts.delete(root);
     if (assets.element !== root) {
         return;
     }

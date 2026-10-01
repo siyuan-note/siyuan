@@ -1,6 +1,7 @@
 import {Constants} from "../constants";
 import {getBodyGradientImage} from "./bodyGradient";
 import {addScript} from "../protyle/util/addScript";
+import {ensureLute} from "../protyle/util/lute";
 import {addStyle} from "../protyle/util/addStyle";
 import {getAllEditor, getAllModels} from "../layout/getAll";
 import {invalidateHeadingNumberMeasurements} from "../protyle/util/headingNumberCore";
@@ -247,6 +248,11 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     const themeScriptAddress = `/appearance/themes/${themeName}/theme.js?v=${appearancePackageVersion("themes", themeName, data.themeVer)}`;
     const themeScriptURL = new URL(themeScriptAddress, window.location.href).href;
     const themeScriptElements = getThemeScriptElements();
+    const iconName = data.icon === "litheness" || data.icons?.some(icon => icon.name === data.icon) ? data.icon : "litheness";
+    if ((data.themeJS && themeSupported) || iconName !== "litheness") {
+        // 第三方主题和图标脚本可以调用编辑器引擎，执行前确保 Lute 已就绪。
+        await ensureLute();
+    }
     if (!data.themeJS || !themeSupported) {
         removeThemeScriptElements();
     } else if (!themeScriptElements.some((item) => item.src === themeScriptURL)) {
@@ -255,7 +261,6 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     }
 
     // load icons
-    const iconName = data.icon === "litheness" || data.icons?.some(icon => icon.name === data.icon) ? data.icon : "litheness";
     const isBuiltInIcon = iconName === "litheness";
     const iconScriptElement = document.getElementById("iconScript");
     const iconDefaultScriptElement = document.getElementById("iconDefaultScript");

@@ -4,7 +4,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { runInNewContext } = require("node:vm");
 const ts = require("typescript");
-function fixture(delay) {
+function fixture(delay, mobile = false) {
     const log = [];
     let now = 0;
     let counter = 0;
@@ -74,6 +74,7 @@ function fixture(delay) {
         addEventListener() { }, removeEventListener() { }, getElementById() { return null; } };
     document.activeElement = document.body;
     const menu = { element: new Element(), visible: false,
+        closeSheet() { log.push({at: now, action: "sheet closed"}); },
         remove() {
             if (this.visible)
                 log.push({ at: now, action: "resources removed" });
@@ -109,12 +110,12 @@ function fixture(delay) {
     const command = { id: "core.insert.assets", label: () => "Assets" };
     const context = {};
     const { commandPanel } = load("boot/globalEvent/command/panel.ts", {
-        "../../../dialog": { Dialog }, "../../../util/functions": { isMobile: () => false },
+        "../../../dialog": { Dialog }, "../../../util/functions": { isMobile: () => mobile },
         "../../../constants": { Constants }, "../../../util/upDownHint": { upDownHint() { } },
         "../../../util/keymapBindings": {},
         "../../../protyle/util/compatibility": { updateHotkeyTip: x => x, setStorageVal() { } },
         "../../../protyle/util/hasClosest": { hasClosestByClassName: x => x },
-        "../../../protyle/util/hotKey": { matchHotKey: () => false },
+        "../../../protyle/util/hotKey": { matchHotKey: (_keymap, event) => event.key === "Palette" },
         "../../../command/context": { captureCommandContext: () => context },
         "../../../command/insertCommands": { ensureInsertCommands() { } },
         "../../../command/executor": { ensureCommandSystem: () => ({}), executeCommandById: () => {
@@ -125,8 +126,43 @@ function fixture(delay) {
         "../../../command/english": { initializeEnglishCommandTranslations: () => Promise.resolve() },
         "../../../command/paletteCore": { ...lifecycle, queryCommandPalette: () => [command] },
     });
-    return { commandPanel, menu, window, advance, log, Dialog, timeout: Constants.TIMEOUT_DBLCLICK };
+    return { commandPanel, menu, window, advance, log, Dialog, Constants, timeout: Constants.TIMEOUT_DBLCLICK };
 }
+
+test("palette shortcuts retain the existing query and Escape still cancels", () => {
+    const f = fixture(0);
+    f.commandPanel({}, {openOnly: true});
+    const dialog = f.window.siyuan.dialogs[0];
+    const input = dialog.element.querySelector(".b3-text-field");
+    input.value = "query";
+    f.commandPanel({}, {openOnly: true});
+    assert.equal(f.window.siyuan.dialogs[0], dialog);
+    let prevented = 0;
+    for (const repeat of [false, true]) {
+        input.listeners.keydown({key: "Palette", repeat, stopPropagation() {}, preventDefault() {prevented++;}});
+        assert.equal(f.window.siyuan.dialogs[0], dialog);
+        assert.equal(input.value, "query");
+    }
+    assert.equal(prevented, 2);
+    input.listeners.keydown({key: "Escape", stopPropagation() {}, preventDefault() {}});
+    f.advance(300);
+    assert.equal(f.window.siyuan.dialogs.length, 0);
+    assert.equal(f.log.some(item => item.action === "assets command executed"), false);
+});
+
+test("palette mouse entry still toggles and mobile shortcut keeps its sheet open", () => {
+    const desktop = fixture(0);
+    desktop.commandPanel({});
+    desktop.commandPanel({});
+    desktop.advance(300);
+    assert.equal(desktop.window.siyuan.dialogs.length, 0);
+    const mobile = fixture(0, true);
+    mobile.menu.element.setAttribute("data-name", mobile.Constants.DIALOG_COMMANDPANEL);
+    mobile.commandPanel({}, {openOnly: true});
+    assert.equal(mobile.log.some(item => item.action === "sheet closed"), false);
+    mobile.commandPanel({});
+    assert.equal(mobile.log.filter(item => item.action === "sheet closed").length, 1);
+});
 for (const action of ["Enter", "click"]) {
     for (const responseDelay of [0, 10, 189, 190, 250]) {
         test(`palette ${action} preserves resources opened after ${responseDelay}ms`, () => {

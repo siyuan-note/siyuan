@@ -11,12 +11,14 @@ const runCases = async (sources, platform) => {
     let keyboardShows = 0;
     let keyboardHides = 0;
     let inputRequests = 0;
+    const focusRequests = [];
     let undoCalls = 0;
     const inserts = [];
     const commands = [];
     const nativeKeyboard = platform === "android" || platform === "harmony";
     const visible = new Set(["mobile-copy", "mobile-cut", "mobile-undo", "mobile-redo", "mobile-indent",
-        "mobile-outdent", "mobile-block", "mobile-add", "mobile-heading1", "strong", "em", "mobile-separator"]);
+        "mobile-outdent", "mobile-block", "mobile-add", "mobile-heading1", "strong", "em", "a", "block-ref", "text",
+        "mobile-separator"]);
     const order = ["strong", "mobile-undo", "mobile-separator", "mobile-heading1", "em", "mobile-indent", "mobile-outdent"];
     const constants = {INLINE_TYPE: ["a", "block-ref", "strong", "em", "u", "s", "code"], ZWSP: "\u200b",
         TIMEOUT_TRANSITION: 20, TIMEOUT_COUNT: 50};
@@ -82,6 +84,7 @@ const runCases = async (sources, platform) => {
     if (nativeKeyboard) {
         window[platform === "android" ? "JSAndroid" : "JSHarmony"] = {
             showKeyboard: () => keyboardShows++, hideKeyboard: () => keyboardHides++,
+            setWebViewFocusable: focusable => focusRequests.push(focusable),
         };
     }
     window.addEventListener("siyuan-mobile-keyboard-change", event => {
@@ -118,6 +121,9 @@ const runCases = async (sources, platform) => {
     };
     const touch = type => editable.dispatchEvent(new PointerEvent(type, {bubbles: true, pointerType: "touch"}));
     // 键盘尚未打开时选字，不覆盖输入类型，也不要求先点击独立的编辑按钮。
+    editable.dispatchEvent(new Event("touchstart", {bubbles: true}));
+    assert.deepEqual(focusRequests, platform === "android" ? [true] : []);
+    assert.equal(getSelection().isCollapsed, true);
     touch("pointerdown");
     assert.equal(editable.hasAttribute("inputmode"), false);
     editable.focus();
@@ -135,6 +141,12 @@ const runCases = async (sources, platform) => {
     assert.ok(inputRequests > 0);
     assert.equal(toolbar.querySelector('[data-type="copy"]').classList.contains("fn__none"), false);
     assert.equal(toolbar.querySelector('[data-type="cut"]').classList.contains("fn__none"), false);
+    const hidden = name => toolbar.querySelector(`[data-type="${name}"]`).classList.contains("fn__none");
+    assert.equal(hidden("indent"), true);
+    assert.equal(hidden("outdent"), true);
+    for (const name of ["strong", "em", "a", "block-ref", "text"]) {
+        assert.equal(hidden(name), false);
+    }
     const contextMenu = new MouseEvent("contextmenu", {bubbles: true, cancelable: true});
     editable.dispatchEvent(contextMenu);
     assert.equal(contextMenu.defaultPrevented, false);
@@ -183,6 +195,37 @@ const runCases = async (sources, platform) => {
     await settle();
     assert.equal(toolbar.querySelector('[data-type="heading1"]').classList.contains("fn__none"), true);
     current.lite = undefined;
+    // 代码块选中内容时可缩进，列表首项保留禁用状态，外观配置仍可隐藏按钮。
+    const block = editable.parentElement;
+    block.classList.add("code-block");
+    select();
+    await settle();
+    assert.equal(hidden("indent"), false);
+    assert.equal(hidden("outdent"), false);
+    assert.equal(toolbar.querySelector('[data-type="indent"]').hasAttribute("disabled"), false);
+    assert.equal(hidden("strong"), true);
+    select(0);
+    await settle();
+    assert.equal(hidden("indent"), true);
+    block.classList.remove("code-block");
+    const listItem = document.createElement("div");
+    listItem.className = "li";
+    root.append(listItem);
+    listItem.append(block);
+    editable.focus();
+    select(0);
+    await settle();
+    assert.equal(hidden("indent"), false);
+    assert.equal(hidden("outdent"), false);
+    assert.equal(toolbar.querySelector('[data-type="indent"]').hasAttribute("disabled"), true);
+    visible.delete("mobile-outdent");
+    await settle();
+    assert.equal(hidden("outdent"), true);
+    root.append(block);
+    listItem.remove();
+    editable.focus();
+    select(0);
+    await settle();
     const showsBeforeClose = keyboardShows;
     action("done");
     assert.equal(document.activeElement, document.body);
@@ -201,12 +244,15 @@ const runCases = async (sources, platform) => {
     assert.equal(editable.getAttribute("inputmode"), "text");
     assert.equal(toolbar.querySelector('[data-type="copy"]').classList.contains("fn__none"), true);
     assert.equal(toolbar.querySelector('[data-type="cut"]').classList.contains("fn__none"), true);
+    for (const name of ["indent", "outdent", "strong", "em", "a", "block-ref", "text"]) {
+        assert.equal(hidden(name), true);
+    }
     // 输入框不会因残留文档选区恢复文档工具栏。
     const input = document.createElement("input");
     document.body.append(input);
     select();
     input.focus();
-    await new Promise(resolve => requestAnimationFrame(resolve));
+    await settle();
     assert.equal(toolbar.classList.contains("fn__none"), true);
     assert.equal(editable.getAttribute("inputmode"), "text");
     assert.equal(document.activeElement, input);
@@ -215,6 +261,11 @@ const runCases = async (sources, platform) => {
     root.setAttribute("data-readonly", "true");
     current.disabled = true;
     const showsBeforeReadonly = keyboardShows;
+    const focusRequestsBeforeReadonly = focusRequests.length;
+    editable.dispatchEvent(new Event("touchstart", {bubbles: true}));
+    assert.equal(focusRequests.length, focusRequestsBeforeReadonly);
+    document.body.dispatchEvent(new Event("touchstart", {bubbles: true}));
+    assert.equal(focusRequests.length, focusRequestsBeforeReadonly);
     touch("pointerdown");
     editable.focus();
     select();
@@ -246,9 +297,10 @@ const runElectron = async () => {
             readFileSync(path.join(__dirname, "../src/mobile/index.ts"), "utf8"), ts.ScriptTarget.Latest, true);
         const appClass = appSource.statements.find(node => ts.isClassDeclaration(node) && node.name.text === "App");
         const statements = appClass.members.find(ts.isConstructorDeclaration).body.statements;
+        const touchBinding = statements.find(node => node.getText(appSource).startsWith('document.addEventListener("touchstart",'));
         const clickBinding = statements.find(node => node.getText(appSource).startsWith('window.addEventListener("click",'));
         const focusBinding = statements.find(node => ts.isBlock(node) && node.getText(appSource).includes("__siyuan_original_focus"));
-        assert.ok(clickBinding && focusBinding);
+        assert.ok(touchBinding && clickBinding && focusBinding);
         sources["mobile/inputBindings"] = ts.transpileModule(`
             const {canInput, armKeyboardLock, callMobileAppShowKeyboard} = require("mobile/util/mobileAppUtil");
             const {hideKeyboardToolbarUtilOnEditorClick} = require("mobile/util/keyboardToolbar");
@@ -256,6 +308,7 @@ const runElectron = async () => {
             const {Constants} = require("constants");
             const scrollInputIntoView = () => {};
             const hideAllElements = () => {};
+            ${touchBinding.getText(appSource)}
             ${clickBinding.getText(appSource)}
             ${focusBinding.getText(appSource)}
         `, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
@@ -280,14 +333,14 @@ if (process.versions.electron && process.type === "browser") {
 } else {
     require("node:test").it("keeps touch selections in the input flow and shares toolbar configuration", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-        timeout: 45000,
+        timeout: 125000,
     }, async () => {
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-mobile-editing-"));
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
+                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 120000});
             assert.match(stdout, /Mobile editing toolbar cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));

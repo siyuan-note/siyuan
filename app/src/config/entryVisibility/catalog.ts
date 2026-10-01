@@ -502,6 +502,7 @@ const gutterSingle = () => [
 export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
 
 // 共享工具栏声明决定目录默认顺序，块类型位于首位，字体和字号位于外观之前。
+// 移动端操作按钮默认以插入和块菜单开头，显隐和排序继续使用已有配置标识。
 const toolbarBuiltinChildren = [
     ...MOBILE_TOOLBAR_ACTIONS.map(item => node(getMobileToolbarActionKey(item.name), lang(item.lang), true)),
     separator("mobile-separator"),

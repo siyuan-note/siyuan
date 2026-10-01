@@ -135,10 +135,12 @@ const getZoomSubMenu = () => {
     return submenu;
 };
 
-export const workspaceMenu = async (app: App, rect: DOMRect) => {
+export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BAR_WORKSPACE) {
-        window.siyuan.menus.menu.remove();
+        if (!openOnly) {
+            window.siyuan.menus.menu.remove();
+        }
         return;
     }
     let remoteConnections: string[] = [];

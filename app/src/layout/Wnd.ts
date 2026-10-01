@@ -867,7 +867,9 @@ export class Wnd {
         }
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
             window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TAB_LIST) {
-            window.siyuan.menus.menu.remove();
+            if (!focus) {
+                window.siyuan.menus.menu.remove();
+            }
             return;
         }
         window.siyuan.menus.menu.remove();

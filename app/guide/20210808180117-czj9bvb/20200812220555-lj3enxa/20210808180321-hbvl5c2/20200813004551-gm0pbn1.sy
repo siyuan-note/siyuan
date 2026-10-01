@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261001015635"
+		"updated": "20261002010621"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-w9nonqj",
-				"updated": "20260928175046"
+				"updated": "20261002010621"
 			},
 			"Children": [
 				{
@@ -63,6 +63,29 @@
 				{
 					"Type": "NodeText",
 					"Data": " 组合的单个字符设置为快捷键。"
+				}
+			]
+		},
+		{
+			"ID": "20261002010621-3c1s74q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002010621-3c1s74q",
+				"updated": "20261002010621"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "命令面板、最近打开的文档、数据历史、闪卡复习、行内外观、主菜单和页签列表的快捷键只负责打开面板，再次按下会保持打开。按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 关闭；编辑器中已有浮层时，先关闭浮层。"
 				}
 			]
 		},

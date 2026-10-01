@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261001015635"
+		"updated": "20261002010621"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-wub2unw",
-				"updated": "20260928175046"
+				"updated": "20261002010621"
 			},
 			"Children": [
 				{
@@ -63,6 +63,29 @@
 				{
 					"Type": "NodeText",
 					"Data": " cannot be set as a shortcut."
+				}
+			]
+		},
+		{
+			"ID": "20261002010621-zd9bn2e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002010621-zd9bn2e",
+				"updated": "20261002010621"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The shortcuts for the command palette, recent documents, data history, flashcard review, inline appearance, main menu, and tab list open their panels. Pressing the shortcut again keeps the panel open. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to close it; if an editor popup is visible, Esc closes that popup first."
 				}
 			]
 		},

@@ -1,6 +1,17 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {escapeSearchHighlight, stripSearchMark} from "./escape";
+import {escapeHTMLStr, escapeSearchHighlight, stripSearchMark} from "./escape";
+
+describe("escape HTML strings", () => {
+    it("matches the bundled Lute engine for text and double-quoted attributes", () => {
+        require("../../stage/protyle/js/lute/lute.min.js");
+        for (const value of ["", "plain text", "&<>\"'", "&amp; &#39; &quot;", "</textarea><img src=\"x\">",
+            "中文、日本語、😀\n\t'quoted'"]) {
+            assert.equal(escapeHTMLStr(value), Lute.EscapeHTMLStr(value));
+        }
+        assert.equal(escapeHTMLStr("&<>\"'"), "&amp;&lt;&gt;&quot;'");
+    });
+});
 
 describe("strip search mark", () => {
     it("removes search highlights without decoding escaped block names", () => {

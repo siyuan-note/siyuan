@@ -121,6 +121,13 @@ class App {
             ws: mainWs
         };
         // 不能使用 touchstart，否则会被 event.stopImmediatePropagation() 阻塞
+        document.addEventListener("touchstart", (event: TouchEvent) => {
+            if (window.JSAndroid?.setWebViewFocusable && canInput(event.target as Element)) {
+                // 在原生选区建立前启用焦点，保留首次双击的选择手柄。
+                armKeyboardLock();
+                window.JSAndroid.setWebViewFocusable(true);
+            }
+        }, true);
         window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             const menu = window.siyuan.menus?.menu;
             if (menu && !menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {

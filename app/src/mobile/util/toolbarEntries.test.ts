@@ -5,6 +5,18 @@ import {getDefaultToolbar, getPluginToolbarEntryKey, markPluginToolbarEntries} f
 import {getEntryCatalogChildren} from "../../config/entryVisibility/catalog";
 import {resolveEntryOrder} from "../../config/entryVisibility/order";
 
+test("mobile default actions start with add and block without replacing saved order", () => {
+    const catalog = getEntryCatalogChildren("editor.toolbar");
+    const defaults = catalog.map(item => item.key);
+    assert.deepEqual(defaults.slice(0, 6), [
+        "mobile-add", "mobile-block", "mobile-outdent", "mobile-indent", "mobile-copy", "mobile-cut",
+    ]);
+    const saved = ["mobile-copy", "mobile-indent", "mobile-block", "mobile-add", "mobile-outdent"];
+    const order = resolveEntryOrder(defaults, saved,
+        new Set(catalog.filter(item => item.type === "separator").map(item => item.key)));
+    assert.deepEqual(order.filter(key => saved.includes(key)), saved);
+});
+
 test("mobile block type availability and visibility do not change the existing block menu", () => {
     const root = new ToolbarElement();
     const type = new ToolbarElement("block-type");

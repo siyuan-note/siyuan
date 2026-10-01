@@ -200,6 +200,9 @@ func TestAPIContractSystemRawResponses(t *testing.T) {
 }
 
 func TestAPIContractSystemUploadErrors(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	t.Cleanup(func() { model.Conf = previousConf })
 	for _, test := range []struct {
 		route   string
 		handler gin.HandlerFunc

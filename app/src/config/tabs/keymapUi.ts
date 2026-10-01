@@ -19,6 +19,7 @@ import {genKeymapRowHtml, getRowBindings, renderRowBindings} from "./keymapRow";
 import {escapeHtml} from "../../util/escape";
 import {Menu} from "../../plugin/Menu";
 import {refreshSettingConfig} from "../setting/sync";
+import type {App} from "../../index";
 
 const keymapToolbarSearchStrings = (): string[] => [
     window.siyuan.languages.keymapTip,
@@ -84,7 +85,17 @@ const bindKeymapToolbar = (root: HTMLElement) => {
 };
 
 /** 快捷键 Tab 挂载（面板页，不走注册表渲染） */
-export const mountKeymapTab = async (root: HTMLElement, keywords?: string) => {
+export const mountKeymapTab = async (root: HTMLElement, keywords?: string, _app?: App, rebuild = false) => {
+    if (rebuild && root.innerHTML !== "") {
+        root.querySelectorAll<HTMLElement>(".config-keymap__row").forEach(row => {
+            const keys = getKeymapBindings(getKeymapItem(window.siyuan.config.keymap, row.dataset.key.split(Constants.ZWSP)));
+            if (JSON.stringify(keys) !== row.dataset.keys) {
+                renderRowBindings(row, keys);
+            }
+        });
+        refreshKeymapBindings(root);
+        return;
+    }
     if (root.innerHTML === "") {
         root.innerHTML = genKeymapTabHtml();
         bindKeymapToolbar(root);

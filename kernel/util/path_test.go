@@ -170,6 +170,32 @@ func TestIsSensitivePathWorkspaceFilesNotBlocked(t *testing.T) {
 	}
 }
 
+func TestIsSensitivePathWorkspaceAssetSymlink(t *testing.T) {
+	originalHome, originalWorkspace := HomeDir, WorkspaceDir
+	HomeDir, WorkspaceDir = t.TempDir(), t.TempDir()
+	t.Cleanup(func() { HomeDir, WorkspaceDir = originalHome, originalWorkspace })
+	target := filepath.Join(HomeDir, ".config", "example")
+	if err := os.MkdirAll(target, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(target, "existing.txt"), []byte("fixture"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	assets := filepath.Join(WorkspaceDir, "data", "assets")
+	if err := os.MkdirAll(assets, 0755); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(assets, "linked")
+	if err := os.Symlink(target, link); err != nil {
+		t.Skipf("create asset symlink: %v", err)
+	}
+	for _, relative := range []string{"existing.txt", filepath.Join("missing", "example.txt")} {
+		if path := filepath.Join(link, relative); IsSensitivePath(path) {
+			t.Errorf("workspace asset symlink should remain allowed: %s", path)
+		}
+	}
+}
+
 // TestIsSensitivePathSymlinkWorkspace 验证工作空间父目录为符号链接时的真实路径判定。
 func TestIsSensitivePathSymlinkWorkspace(t *testing.T) {
 	realHome, err := filepath.EvalSymlinks(t.TempDir())

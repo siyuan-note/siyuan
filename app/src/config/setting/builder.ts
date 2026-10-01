@@ -40,7 +40,7 @@ interface ItemsSettingTabOptions<TId extends string = string> extends SettingTab
 
 interface PanelSettingTabOptions<TId extends string = string> extends SettingTabShell<TId> {
     searchStrings: () => string[];
-    mount: (root: HTMLElement, keywords?: string, app?: App) => void | Promise<void>;
+    mount: (root: HTMLElement, keywords?: string, app?: App, rebuild?: boolean) => void | Promise<void>;
 }
 
 type ControlSpecBase = {
@@ -512,10 +512,9 @@ export class SettingBuilder {
         let tabSearchIndex: readonly string[] | undefined;
         return {
             ...shell,
-            // panel 型 Tab 不支持 rebuild（无注册项可清），忽略该参数以对齐 SettingTab.mount 签名
-            mount: async (root, {keywords} = {}, app, _rebuild) => {
-                void _rebuild;
-                await mount(root, keywords, app);
+            // 面板自行处理配置刷新，保留搜索、展开等交互状态。
+            mount: async (root, {keywords} = {}, app, rebuild) => {
+                await mount(root, keywords, app, rebuild);
             },
             scanSearch: (keywords) => {
                 if (tabSearchTitle === undefined) {

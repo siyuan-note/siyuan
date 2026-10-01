@@ -20,7 +20,7 @@ class TestElement {
         return this.selected;
     }
 
-    querySelector() {
+    querySelector(): null {
         return null;
     }
 }

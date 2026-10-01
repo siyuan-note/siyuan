@@ -279,9 +279,14 @@ func TestIsSensitivePathHomeDirOverrideHomeAlias(t *testing.T) {
 	systemHomeDir = t.TempDir()
 	homeDirOverridden = true
 	WorkspaceDir = filepath.Join(HomeDir, "workspace")
+	if err := os.WriteFile(filepath.Join(realWorkspace, "existing.txt"), []byte("fixture"), 0600); err != nil {
+		t.Fatal(err)
+	}
 	for _, root := range []string{WorkspaceDir, filepath.Join(realHome, "workspace"), realWorkspace} {
-		if path := filepath.Join(root, "example.txt"); !IsSensitivePath(path) {
-			t.Errorf("configured home credential alias is no longer protected: %s", path)
+		for _, relative := range []string{"existing.txt", "example.txt", filepath.Join("missing", "example.txt")} {
+			if path := filepath.Join(root, relative); !IsSensitivePath(path) {
+				t.Errorf("configured home credential alias is no longer protected: %s", path)
+			}
 		}
 	}
 }

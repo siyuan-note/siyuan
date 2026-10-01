@@ -446,7 +446,7 @@ func IsPartitionRootPath(path string) bool {
 // globalCopyFiles 等接受工作空间外绝对路径的接口的攻击面。工作空间内的路径不解析符号链接，
 // 一是因为工作空间内文件（如 assets 中指向外部目录的符号链接）可能合法地指向工作空间外，
 // 对其解析后执行系统目录前缀检查会误伤；二是避免在高 QPS 的伺服热路径上引入额外的 stat 开销。
-// 解析失败（如路径不存在）时回退到仅检查原始路径。
+// 目标尚未创建时解析最长已存在的父目录，避免别名下的新文件绕过敏感目录检查。
 func IsSensitivePath(p string) bool {
 	if p == "" {
 		return false
@@ -458,8 +458,8 @@ func IsSensitivePath(p string) bool {
 	if gulu.File.IsSubPath(WorkspaceDir, p) {
 		return false
 	}
-	resolved, err := filepath.EvalSymlinks(p)
-	if err == nil && resolved != p {
+	resolved := ResolveLongestExistingParent(p)
+	if resolved != p {
 		if isSensitivePath(resolved) {
 			return true
 		}

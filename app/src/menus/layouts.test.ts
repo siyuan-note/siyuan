@@ -40,6 +40,7 @@ const fixture = (geometryAvailable = true) => {
         getAllLayout: () => ({current: true}),
         suspendLayoutSaving: () => util.suspendLayoutSaving(),
         isWindow: () => false,
+        getSettingsWindowHost: (): undefined => undefined,
         getAllEditor: (): unknown[] => [],
         withFetchTimeout: async (callback: () => Promise<void>) => callback(),
         captureWindowGeometry: async () => geometryAvailable ? geometry : undefined,

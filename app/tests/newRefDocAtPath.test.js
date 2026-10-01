@@ -218,6 +218,7 @@ const databaseFixture = (view = "table", isDetached = true) => {
     const operations = [];
     const animations = [];
     Object.assign(f.deps, load("protyle/render/av/binding", f.deps, f.window, f.Lute),
+        load("protyle/render/av/bindCreatedDocument", f.deps, f.window, f.Lute),
         load("protyle/render/av/viewType", f.deps, f.window, f.Lute), {
         hasClosestByClassName: (node, name) => {
             if (name === "av__cell") {
@@ -238,7 +239,7 @@ const databaseFixture = (view = "table", isDetached = true) => {
     });
 };
 
-test("database creation binds only after success and preserves item identity and undo", () => {
+test("database creation binds only after success and preserves item identity and undo", async () => {
     for (const view of ["table", "list", "gallery", "kanban"]) {
         for (const isDetached of [false, true]) {
             const f = databaseFixture(view, isDetached);
@@ -248,6 +249,7 @@ test("database creation binds only after success and preserves item identity and
             assert.equal(f.animations.length, 0);
             assert.equal(f.requests[0].data.path, "/chosen-parent/20260927120000-newdoc1.sy");
             f.requests[0].cb({code: 0});
+            await Promise.resolve();
             assert.equal(f.operations.length, 1);
             const {doOperations, undoOperations} = f.operations[0];
             assert.equal(doOperations[0].previousID, "original-item");
@@ -274,7 +276,7 @@ test("canceling database location selection leaves the original binding and disp
     assert.equal(f.focused.length, 1);
 });
 
-test("database context changes before confirmation or after creation starts cannot replace another binding", () => {
+test("database context changes before confirmation or after creation starts cannot replace another binding", async () => {
     const changes = [
         f => { f.cell.isConnected = false; },
         f => { f.block.isConnected = false; },
@@ -296,6 +298,7 @@ test("database context changes before confirmation or after creation starts cann
             change(f);
             if (afterCreate) {
                 f.requests[0].cb({code: 0});
+                await Promise.resolve();
             } else {
                 f.picker.cb(["/"], ["other"]);
                 assert.equal(f.requests.length, 0);

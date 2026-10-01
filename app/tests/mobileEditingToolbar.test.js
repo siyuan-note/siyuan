@@ -99,7 +99,7 @@ const runCases = async (sources, platform) => {
         wysiwyg: {element: root}, preview: {element: preview},
         options: {toolbar: load("protyle/toolbar/defaults").getDefaultToolbar(true)},
         toolbar: {isMultiSelectMode: () => false, getCurrentToolbarType: () => [], setInlineMark: () => editable.focus()},
-        gutter: {}, undo: {undo: () => undoCalls++}, hint: {fill: value => inserts.push(value)}};
+        gutter: {}, undo: {undo: () => undoCalls++}, hint: {fillCommand: value => inserts.push(value)}};
     const keyboard = load("mobile/util/keyboardToolbar");
     keyboard.initKeyboardToolbar();
     load("mobile/inputBindings");

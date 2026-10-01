@@ -130,6 +130,31 @@ describe("database item icons", () => {
         }
     });
 
+    it("keeps primary content separate from row actions without changing references or template values", () => {
+        for (const detached of [false, true]) {
+            const h = createHarness("table", detached, "1f600");
+            for (const template of [false, true]) {
+                if (template) {
+                    h.cell.value.renderedContent = "<strong>Display title</strong>";
+                }
+                for (const showIcon of [false, true]) {
+                    const html = h.api.renderCell(h.cell.value, 0, showIcon);
+                    assert.match(html, /^<span class="av__cellprimary"><span class="b3-menu__avemoji/);
+                    assert.match(html, /<\/span><span class="av__row-actions">/);
+                    assert.equal((html.match(/data-type="av-row-open"/g) || []).length, 1);
+                    assert.equal((html.match(/data-type="av-row-update"/g) || []).length, 1);
+                    if (template) {
+                        const value = html.match(/data-cell-value="([^"]+)"/)[1];
+                        assert.equal(JSON.parse(decodeURIComponent(value)).block.content, "Title");
+                        assert.match(html, /<strong>Display title<\/strong>/);
+                    } else if (!detached) {
+                        assert.match(html, /data-type="block-ref" data-id="document"/);
+                    }
+                }
+            }
+        }
+    });
+
     it("reads an explicit empty icon for undo and preserves icons when renaming or unbinding", async () => {
         const h = createHarness("list", true, "1f600");
         assert.equal(h.api.genCellValueByElement("block", h.cellElement as unknown as HTMLElement).block.icon, "1f600");

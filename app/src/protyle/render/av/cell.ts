@@ -635,7 +635,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const cssStyle = getComputedStyle(cellElements[0]);
     const storedCellValue = getStoredCellValueByElement(cellElements[0]);
     const hasRenderedTemplate = cellElements[0].matches(".av__celltext--template") ||
-        Boolean(cellElements[0].querySelector(":scope > .av__celltext--template"));
+        Boolean(cellElements[0].querySelector(":scope > .av__celltext--template, :scope > .av__cellprimary > .av__celltext--template"));
     if (type === "text" && !hasRenderedTemplate) {
         const stableCells = getStableTextCells(cellElements, blockElement);
         if (stableCells.length > 0) {
@@ -1366,7 +1366,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         const storedValue = cloneAVCellValueSnapshot(cellValue);
         text = `<span class="av__celltext av__celltext--template" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(storedValue)))}">${getAVTemplateHTML(cellValue.renderedContent || "")}</span>`;
         if (cellValue.type === "block") {
-            text = renderAVBlockIcon(cellValue, showIcon) + text;
+            text = `<span class="av__cellprimary">${renderAVBlockIcon(cellValue, showIcon)}${text}</span>`;
             const bindLabel = cellValue?.isDetached ? window.siyuan.languages.bind : window.siyuan.languages.rebind;
             const updateIcon = cellValue?.isDetached ? "iconRef" : "iconRefresh";
             text += `<span class="av__row-actions"><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-row-open"><svg><use xlink:href="#iconOpen"></use></svg></button><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${bindLabel}" data-type="av-row-update"><svg><use xlink:href="#${updateIcon}"></use></svg></button></span>`;
@@ -1392,6 +1392,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         } else {
             text = `${renderAVBlockIcon(cellValue, showIcon)}<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(cellValue.block.content)}</span>`;
         }
+        text = `<span class="av__cellprimary">${text}</span>`;
         const bindLabel = cellValue?.isDetached ? window.siyuan.languages.bind : window.siyuan.languages.rebind;
         const updateIcon = cellValue?.isDetached ? "iconRef" : "iconRefresh";
         text += `<span class="av__row-actions"><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-row-open"><svg><use xlink:href="#iconOpen"></use></svg></button><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${bindLabel}" data-type="av-row-update"><svg><use xlink:href="#${updateIcon}"></use></svg></button></span>`;

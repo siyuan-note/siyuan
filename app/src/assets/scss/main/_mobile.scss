@@ -1985,20 +1985,24 @@ body.mobile-topbar--merged {
 }
 
 .av__cell[data-dtype="block"]:not(.av__cell--header) {
-  padding-right: 77px;
+  // 按钮留白放在内容内层，避免外层内边距撑大窄列，导致表头与正文错位。
+  & > .av__cellprimary {
+    display: block;
+    padding-right: 69px;
+  }
 
   & > .av__row-actions {
     opacity: 1;
     pointer-events: auto;
   }
 
-  &[data-align="center"] {
-    padding-left: 77px;
+  &[data-align="center"] > .av__cellprimary {
+    padding-left: 69px;
   }
 
-  &[data-align="right"] {
-    padding-left: 77px;
-    padding-right: 8px;
+  &[data-align="right"] > .av__cellprimary {
+    padding-left: 69px;
+    padding-right: 0;
   }
 }
 

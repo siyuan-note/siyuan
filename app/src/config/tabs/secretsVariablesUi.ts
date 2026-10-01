@@ -1,4 +1,4 @@
-import {escapeHTMLStr} from "../../util/escape";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {bindPasswordIconaToggle} from "../render/fragments";
 import {Dialog} from "../../dialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
@@ -228,8 +228,8 @@ const renderNamedItemList = (options: RenderNamedItemListOptions) => {
         return;
     }
     const html = items.map((item) => {
-        return `<div class="b3-list-item b3-list-item--narrow${hideActionClass}" ${dataAttr}="${escapeHTMLStr(item.name)}">
-    <span class="b3-list-item__text">${escapeHTMLStr(item.name)}</span>
+        return `<div class="b3-list-item b3-list-item--narrow${hideActionClass}" ${dataAttr}="${escapeHtmlTextAndAttr(item.name)}">
+    <span class="b3-list-item__text">${escapeHtmlTextAndAttr(item.name)}</span>
     <span data-type="${deleteType}" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
         <svg><use xlink:href="#iconTrashcan"></use></svg>
     </span>
@@ -273,12 +273,12 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
 
     const valueInputHtml = isSecret
         ? `<div class="b3-form__icona fn__block">
-    <input id="itemValue" type="password" class="b3-text-field b3-form__icona-input" spellcheck="false" value="${escapeHTMLStr(initial.value)}">
+    <input id="itemValue" type="password" class="b3-text-field b3-form__icona-input" spellcheck="false" value="${escapeHtmlTextAndAttr(initial.value)}">
     <svg class="b3-form__icona-icon" data-action="togglePassword" style="user-select: none;">
         <use xlink:href="#iconEye"></use>
     </svg>
 </div>`
-        : `<input class="b3-text-field fn__block" id="itemValue" type="text" spellcheck="false" value="${escapeHTMLStr(initial.value)}"/>`;
+        : `<input class="b3-text-field fn__block" id="itemValue" type="text" spellcheck="false" value="${escapeHtmlTextAndAttr(initial.value)}"/>`;
 
     const initialHosts: string[] = isSecret ? (initial.allowedHosts ?? []) : [];
     const hostsInputHtml = isSecret
@@ -286,7 +286,7 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
     <div class="config-name">${window.siyuan.languages.secretAllowedHosts}</div>
     <div class="b3-label__text">${window.siyuan.languages.secretAllowedHostsTip}</div>
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__block" id="itemAllowedHosts" type="text" spellcheck="false" value="${escapeHTMLStr(initialHosts.join(", "))}"/>
+    <input class="b3-text-field fn__block" id="itemAllowedHosts" type="text" spellcheck="false" value="${escapeHtmlTextAndAttr(initialHosts.join(", "))}"/>
 </div>`
         : "";
 
@@ -298,7 +298,7 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
         <div class="config-name">${isSecret ? window.siyuan.languages.secretName : window.siyuan.languages.variableName}</div>
         <div class="b3-label__text">${isSecret ? window.siyuan.languages.secretNameTip : window.siyuan.languages.variableNameTip}</div>
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" id="itemName" type="text" spellcheck="false" value="${escapeHTMLStr(initial.name)}"/>
+        <input class="b3-text-field fn__block" id="itemName" type="text" spellcheck="false" value="${escapeHtmlTextAndAttr(initial.name)}"/>
     </div>
     ${hostsInputHtml}
     <div class="b3-label b3-label--inner">
@@ -356,7 +356,7 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
 const showDeleteConfirm = (title: string, onConfirm: () => void) => {
     confirmDialog(
         window.siyuan.languages.deleteOpConfirm,
-        window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHTMLStr(title)),
+        window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
         onConfirm,
         undefined,
         true,

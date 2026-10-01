@@ -4,7 +4,7 @@ import {showMessage} from "../../../dialog/message";
 import {Constants} from "../../../constants";
 import {isMobile} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
-import {escapeHTMLStr, escapeHtml} from "../../../util/escape";
+import {escapeHtmlTextAndAttr, escapeHtml} from "../../../util/escape";
 import {aiConfigApi} from "./aiRuntime";
 import {openByMobile} from "../../../editor/openLink";
 import {canOpenExternalURL} from "../../../util/hostCapabilities";
@@ -361,7 +361,7 @@ export const getModelPickerKeywords = (group: ModelPickerGroup): string[] => {
 const showDeleteConfirm = (title: string, onConfirm: () => void) => {
     confirmDialog(
         window.siyuan.languages.deleteOpConfirm,
-        window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHTMLStr(title)),
+        window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
         onConfirm,
         undefined,
         true,
@@ -423,7 +423,7 @@ const mountAddMcpServerButton = (root: HTMLElement, block: HTMLElement) => {
     groupTitle.insertAdjacentHTML("beforeend", `<span class="fn__flex-1"></span>
 <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-type="addAiMcpServer">
     <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
-    <span>${escapeHTMLStr(window.siyuan.languages.addAiMcpServer)}</span>
+    <span>${escapeHtmlTextAndAttr(window.siyuan.languages.addAiMcpServer)}</span>
 </button>`);
     (groupTitle.lastElementChild as HTMLButtonElement).addEventListener("click", (event) => {
         openMcpServerDialog(root, null);
@@ -643,14 +643,14 @@ const renderMcpServerList = (root: HTMLElement) => {
         return;
     }
     const serversHtml = servers.map((server) => {
-        return `<div class="b3-list-item b3-list-item--narrow${hideActionClass}" data-type="aiMcpServer" data-mcp-server-id="${escapeHTMLStr(server.id)}" data-mcp-server-name="${escapeHTMLStr(server.name)}">
-    <span class="mcp-status-dot b3-tooltips b3-tooltips__n" data-mcp-status-id="${escapeHTMLStr(server.id)}" aria-label="${server.enabled ? window.siyuan.languages.mcpStatusConnecting : window.siyuan.languages.mcpStatusDisabled}" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;margin-right:4px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:${server.enabled ? "#d97706" : "var(--b3-theme-on-surface-light)"};"></span></span>
-    <span class="b3-list-item__text">${escapeHTMLStr(server.name)}</span>
-    <span class="ft__on-surface fn__flex-center" data-mcp-tools-count="${escapeHTMLStr(server.id)}" style="font-size:12px;margin-right:8px;"></span>
-    <span data-type="authorizeAiMcpServer" data-mcp-authorize-id="${escapeHTMLStr(server.id)}" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.mcpAuthorize}">
+        return `<div class="b3-list-item b3-list-item--narrow${hideActionClass}" data-type="aiMcpServer" data-mcp-server-id="${escapeHtmlTextAndAttr(server.id)}" data-mcp-server-name="${escapeHtmlTextAndAttr(server.name)}">
+    <span class="mcp-status-dot b3-tooltips b3-tooltips__n" data-mcp-status-id="${escapeHtmlTextAndAttr(server.id)}" aria-label="${server.enabled ? window.siyuan.languages.mcpStatusConnecting : window.siyuan.languages.mcpStatusDisabled}" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;margin-right:4px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:${server.enabled ? "#d97706" : "var(--b3-theme-on-surface-light)"};"></span></span>
+    <span class="b3-list-item__text">${escapeHtmlTextAndAttr(server.name)}</span>
+    <span class="ft__on-surface fn__flex-center" data-mcp-tools-count="${escapeHtmlTextAndAttr(server.id)}" style="font-size:12px;margin-right:8px;"></span>
+    <span data-type="authorizeAiMcpServer" data-mcp-authorize-id="${escapeHtmlTextAndAttr(server.id)}" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.mcpAuthorize}">
         <svg><use xlink:href="#iconKey"></use></svg>
     </span>
-    <span data-type="disconnectAiMcpOAuth" data-mcp-disconnect-oauth-id="${escapeHTMLStr(server.id)}" class="fn__none b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.mcpDisconnectAuthorization}">
+    <span data-type="disconnectAiMcpOAuth" data-mcp-disconnect-oauth-id="${escapeHtmlTextAndAttr(server.id)}" class="fn__none b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.mcpDisconnectAuthorization}">
         <svg><use xlink:href="#iconLinkOff"></use></svg>
     </span>
     <span data-type="deleteAiMcpServer" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
@@ -703,11 +703,11 @@ const renderEnvironmentVariableOptions = (availableNames: string[], selectedName
                 ? `<span class="b3-list-item__meta">${window.siyuan.languages.aiMcpEnvSensitive}</span>`
                 : "")
             : `<span class="b3-list-item__meta">${window.siyuan.languages.aiMcpEnvUnavailable}</span>`;
-        return `<label class="b3-list-item b3-list-item--narrow" data-mcp-env-option="${escapeHTMLStr(name)}">
-    <span class="b3-list-item__text">${escapeHTMLStr(name)}</span>
+        return `<label class="b3-list-item b3-list-item--narrow" data-mcp-env-option="${escapeHtmlTextAndAttr(name)}">
+    <span class="b3-list-item__text">${escapeHtmlTextAndAttr(name)}</span>
     ${status}
     <span class="fn__space--small"></span>
-    <input class="b3-switch" type="checkbox" aria-label="${escapeHTMLStr(name)}" data-mcp-inherit-env="${escapeHTMLStr(name)}"${selected.has(key) ? " checked" : ""}>
+    <input class="b3-switch" type="checkbox" aria-label="${escapeHtmlTextAndAttr(name)}" data-mcp-inherit-env="${escapeHtmlTextAndAttr(name)}"${selected.has(key) ? " checked" : ""}>
 </label>`;
     }).join("");
 };
@@ -731,9 +731,9 @@ const parseStringRecord = (value: string, invalidMessage: string): Record<string
 
 const renderMcpEnvironmentRow = (name = "", value = "") => `<div data-mcp-env-row>
     <div class="fn__flex">
-        <input class="b3-text-field fn__flex-1" data-mcp-env-name type="text" spellcheck="false" placeholder="NAME" value="${escapeHTMLStr(name)}">
+        <input class="b3-text-field fn__flex-1" data-mcp-env-name type="text" spellcheck="false" placeholder="NAME" value="${escapeHtmlTextAndAttr(name)}">
         <span class="fn__space"></span>
-        <input class="b3-text-field fn__flex-1" data-mcp-env-value type="text" spellcheck="false" placeholder="{{secrets.NAME}}" value="${escapeHTMLStr(value)}">
+        <input class="b3-text-field fn__flex-1" data-mcp-env-value type="text" spellcheck="false" placeholder="{{secrets.NAME}}" value="${escapeHtmlTextAndAttr(value)}">
         <span class="fn__space--small"></span>
         <button class="block__icon block__icon--show block__icon--warning" data-type="deleteMcpEnvironmentVariable" type="button" aria-label="${window.siyuan.languages.delete}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
@@ -807,7 +807,7 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         <div class="config-name">${window.siyuan.languages.aiMcpServerName}</div>
         <div class="b3-label__text">${window.siyuan.languages.aiMcpServerNameTip}</div>
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" id="aiMcpServerName" type="text" spellcheck="false" value="${escapeHTMLStr(initialServer.name)}"/>
+        <input class="b3-text-field fn__block" id="aiMcpServerName" type="text" spellcheck="false" value="${escapeHtmlTextAndAttr(initialServer.name)}"/>
     </div>
     <div class="b3-label b3-label--inner">
         <div class="config-name">${window.siyuan.languages.connectionType}</div>
@@ -821,13 +821,13 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         <div class="config-name">${window.siyuan.languages.command}</div>
         <div class="b3-label__text">${window.siyuan.languages.aiMcpCommandTip}</div>
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" id="aiMcpServerCommand" type="text" spellcheck="false" value="${escapeHTMLStr(initialServer.command)}"/>
+        <input class="b3-text-field fn__block" id="aiMcpServerCommand" type="text" spellcheck="false" value="${escapeHtmlTextAndAttr(initialServer.command)}"/>
     </div>
     <div class="b3-label b3-label--inner${mcpTypeHidden("stdio")}" data-mcp-type="stdio">
         <div class="config-name">${window.siyuan.languages.args}</div>
         <div class="b3-label__text">${window.siyuan.languages.aiMcpArgsTip}</div>
         <div class="fn__hr"></div>
-        <textarea spellcheck="false" class="b3-text-field fn__block" id="aiMcpServerArgs" rows="4" style="resize: vertical;">${escapeHTMLStr(argsText)}</textarea>
+        <textarea spellcheck="false" class="b3-text-field fn__block" id="aiMcpServerArgs" rows="4" style="resize: vertical;">${escapeHtmlTextAndAttr(argsText)}</textarea>
     </div>
     <div class="b3-label b3-label--inner${mcpTypeHidden("stdio")}" data-mcp-type="stdio">
         <div class="config-name">${window.siyuan.languages.aiMcpInheritEnv}</div>
@@ -855,13 +855,13 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         <div class="config-name">URL</div>
         <div class="b3-label__text">${window.siyuan.languages.aiMcpUrlTip}</div>
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" id="aiMcpServerUrl" type="text" spellcheck="false" value="${escapeHTMLStr(initialServer.url)}"/>
+        <input class="b3-text-field fn__block" id="aiMcpServerUrl" type="text" spellcheck="false" value="${escapeHtmlTextAndAttr(initialServer.url)}"/>
     </div>
     <div class="b3-label b3-label--inner${mcpTypeHidden("http")}" data-mcp-type="http">
         <div class="config-name">${window.siyuan.languages.aiMcpHttpHeaders}</div>
         <div class="b3-label__text">${window.siyuan.languages.fillJsonObject}</div>
         <div class="fn__hr"></div>
-        <textarea spellcheck="false" class="b3-text-field fn__block" id="aiMcpServerHeaders" rows="3" style="resize: vertical;" placeholder='{"Authorization":"Bearer ..."}'>${escapeHTMLStr(headersText)}</textarea>
+        <textarea spellcheck="false" class="b3-text-field fn__block" id="aiMcpServerHeaders" rows="3" style="resize: vertical;" placeholder='{"Authorization":"Bearer ..."}'>${escapeHtmlTextAndAttr(headersText)}</textarea>
     </div>
     <div class="b3-label b3-label--inner fn__flex${mcpTypeHidden("http")}" data-mcp-type="http">
         <div class="fn__flex-1">

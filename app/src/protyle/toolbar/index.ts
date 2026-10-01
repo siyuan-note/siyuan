@@ -70,7 +70,7 @@ import {mathRender} from "../render/mathRender";
 import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
 import {paste, pasteAsPlainText, pasteEscaped} from "../util/paste";
-import {escapeAttr, escapeHtml} from "../../util/escape";
+import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
 import {resizeSide} from "../../history/resizeSide";
 import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardToolbar";
 import {FormatPainter} from "./FormatPainter";
@@ -1758,7 +1758,7 @@ export class Toolbar {
                     }
                 });
             } else {
-                renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+                renderElement.setAttribute("data-content", escapeHtmlTextAndAttr(textElement.value));
                 renderElement.removeAttribute("data-render");
             }
             if (!types.includes("NodeBlockQueryEmbed") || !types.includes("NodeHTMLBlock") || !isInlineMemo) {
@@ -1849,7 +1849,7 @@ export class Toolbar {
             } else if (types.includes("inline-math") && !noChange) {
                 // 行内数学公式不允许换行 https://github.com/siyuan-note/siyuan/issues/2187
                 if (textElement.value) {
-                    renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+                    renderElement.setAttribute("data-content", escapeHtmlTextAndAttr(textElement.value));
                     renderElement.removeAttribute("data-render");
                     processRender(renderElement);
                 } else {
@@ -1858,7 +1858,7 @@ export class Toolbar {
                     renderElement.outerHTML = "<wbr>";
                 }
             } else if (!noChange) {
-                renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+                renderElement.setAttribute("data-content", escapeHtmlTextAndAttr(textElement.value));
                 renderElement.removeAttribute("data-render");
                 if (types.includes("NodeBlockQueryEmbed")) {
                     blockRender(protyle, renderElement);

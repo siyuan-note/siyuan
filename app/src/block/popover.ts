@@ -12,7 +12,7 @@ import {
     shouldMeasureAVCellContentOverflow,
 } from "../protyle/render/av/cellOverflow";
 import {isTouchDevice} from "../util/functions";
-import {escapeAriaLabel, escapeHtml, escapeLessThans} from "../util/escape";
+import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../util/escape";
 import {isListItemActionElement} from "../protyle/wysiwyg/listContext";
 import {getImageTooltip} from "../protyle/render/imageTooltip";
 /// #if !MOBILE
@@ -151,7 +151,7 @@ export const initBlockPopover = (app: App) => {
                 } else {
                     if (aElement.firstElementChild?.getAttribute("data-type") === "url") {
                         if (aElement.firstElementChild.textContent.indexOf("...") > -1) {
-                            tip = Lute.EscapeHTMLStr(aElement.firstElementChild.getAttribute("data-href"));
+                            tip = escapeHtmlTextAndAttr(aElement.firstElementChild.getAttribute("data-href"));
                             tooltipClass = "href";
                         }
                     }
@@ -162,7 +162,7 @@ export const initBlockPopover = (app: App) => {
                         !hasClosestByClassName(event.target, "block__icon")) {
                         aElement.style.overflow = "auto";
                         if (hasAVCellContentOverflow(aElement, richTextElement)) {
-                            tip = Lute.EscapeHTMLStr(getCellText(aElement));
+                            tip = escapeHtmlTextAndAttr(getCellText(aElement));
                         }
                         aElement.style.overflow = "";
                     }
@@ -189,7 +189,7 @@ export const initBlockPopover = (app: App) => {
                 const textElement = cellElement?.querySelector(".b3-menu__label, .av__celltext") as HTMLElement;
                 if (cellElement && (cellElement.clientWidth + 0.5 < cellElement.scrollWidth ||
                         (textElement && textElement.clientWidth + 0.5 < textElement.scrollWidth))) {
-                    tip = Lute.EscapeHTMLStr(cellElement.querySelector(".b3-menu__label")?.textContent ||
+                    tip = escapeHtmlTextAndAttr(cellElement.querySelector(".b3-menu__label")?.textContent ||
                         getCellText(cellElement));
                     tooltipTarget = cellElement;
                     tooltipPositionOverride = "north";

@@ -1,5 +1,5 @@
 import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
-import {escapeHtml} from "../../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
 import {getTreeItemTailHTML} from "../../util/treeItemTail";
 import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
@@ -1710,7 +1710,7 @@ export class MobileFiles extends Model {
     <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__nw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">
         <svg><use xlink:href="#iconAdd"></use></svg>
     </span>`;
-        return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" data-count="${item.subFileCount}" ${FILE_TREE_CHILDREN_SORT_MODE}="${item.childrenSortMode ?? ""}" data-type="navigation-file"
+        return `<li data-node-id="${item.id}" data-name="${escapeHtmlTextAndAttr(item.name)}" data-count="${item.subFileCount}" ${FILE_TREE_CHILDREN_SORT_MODE}="${item.childrenSortMode ?? ""}" data-type="navigation-file"
 class="b3-list-item" data-path="${item.path}" style="--file-toggle-width:${paddingLeft + 20}px"${getFileTreeDefaultIconAttr(item.icon, defaultIcon)}>
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>

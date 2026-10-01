@@ -22,7 +22,7 @@ import {Dialog} from "../../dialog";
 import {openInputDialog} from "../../dialog/inputDialog";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {pathPosix} from "../../util/pathName";
-import {escapeHTMLStr, escapeAttr, escapeHtml} from "../../util/escape";
+import {escapeHtmlTextAndAttr, escapeAttr, escapeHtml} from "../../util/escape";
 /// #endif
 /// #if !BROWSER
 import {afterExport} from "../../protyle/export/util";
@@ -365,9 +365,9 @@ const genNetworkProxyHtml = (): string => {
             <option value="http" ${proxy.scheme === "http" ? "selected" : ""}>HTTP</option>
         </select>
         <span class="fn__space"></span>
-        <input spellcheck="false" id="networkProxyHost" placeholder="user:pass@IP" class="b3-text-field fn__flex-1" value="${escapeHTMLStr(proxy.host)}"/>
+        <input spellcheck="false" id="networkProxyHost" placeholder="user:pass@IP" class="b3-text-field fn__flex-1" value="${escapeHtmlTextAndAttr(proxy.host)}"/>
         <span class="fn__space"></span>
-        <input id="networkProxyPort" placeholder="Port" class="b3-text-field fn__flex-1" value="${escapeHTMLStr(proxy.port)}" type="number"/>
+        <input id="networkProxyPort" placeholder="Port" class="b3-text-field fn__flex-1" value="${escapeHtmlTextAndAttr(proxy.port)}" type="number"/>
         <span class="fn__space"></span>
         <button id="networkProxyConfirm" class="b3-button fn__size200 b3-button--outline">${window.siyuan.languages.confirm}</button>
     </div>

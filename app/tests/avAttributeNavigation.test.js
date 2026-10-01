@@ -13,14 +13,13 @@ const runCases = (sources) => {
     let tables;
     const escape = value => String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;")
         .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    window.Lute = {EscapeHTMLStr: escape};
     window.DOMPurify = {sanitize: value => value};
     window.siyuan = {config: {editor: {}}, languages: {database: "Database", empty: "Empty", untitled: "Untitled"}};
     const dependencies = {
         "../../../util/fetch": {fetchPost: (url, _data, callback) => callback({
             data: url.endsWith("getAttributeViewKeys") ? tables : {total: 0},
         })},
-        "../../../util/escape": {escapeAttr: escape, escapeHtml: escape, escapeAriaLabel: escape},
+        "../../../util/escape": {escapeAttr: escape, escapeHtml: escape, escapeAriaLabel: escape, escapeHtmlTextAndAttr: escape},
         "../../../emoji/fileTreeIcon": {getFileTreeIconHTML: () => "<svg></svg>"},
         "../../../util/hostCapabilities": {getHostCapabilities: () => ({remoteKernel: true})},
         "../../../util/functions": {isTouchDevice: () => mobile},

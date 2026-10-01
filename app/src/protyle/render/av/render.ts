@@ -14,7 +14,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {getRowHTML, stickyRow, updateAVSelectionStatus, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
-import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {isInMobileApp} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
 import {renderGallery} from "./gallery/render";
@@ -196,7 +196,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             <div class="fn__space"></div>
             ${editingState.newItemHTML}
         </div>
-        <div contenteditable="${editingState.contenteditable}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${Lute.EscapeHTMLStr(data.name || "")}" data-tip="${window.siyuan.languages._kernel[267]}">${Lute.EscapeHTMLStr(data.name || "")}</div>
+        <div contenteditable="${editingState.contenteditable}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${escapeHtmlTextAndAttr(data.name || "")}" data-tip="${window.siyuan.languages._kernel[267]}">${escapeHtmlTextAndAttr(data.name || "")}</div>
     </div>`;
 };
 
@@ -341,7 +341,7 @@ const renderGroupTable = (options: ITableOptions) => {
             const virtualData = plan.virtualData[group.id];
             const renderBody = !group.groupFolded || virtualData?.locate;
             avBodyHTML += `${getGroupTitleHTML(group, group.rowCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}"${virtualData?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${renderBody ? getTableHTMLs(group, options.blockElement, virtualData, true) : ""}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${renderBody ? getTableHTMLs(group, options.blockElement, virtualData, true) : ""}</div>`;
         }
     });
     if (options.renderAll) {

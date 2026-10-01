@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import * as dayjs from "dayjs";
 import {restoreInlineElementBoundaryHTML} from "../util/inlineElementBoundary";
@@ -1041,7 +1042,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             let avHTML = "";
             Object.keys(data.new).forEach(key => {
                 attrsResult[key] = data.new[key];
-                const escapeHTML = Lute.EscapeHTMLStr(data.new[key]);
+                const escapeHTML = escapeHtmlTextAndAttr(data.new[key]);
                 if (key === "bookmark") {
                     bookmarkHTML = `<div class="protyle-attr--bookmark">${escapeHTML}</div>`;
                 } else if (key === "name") {

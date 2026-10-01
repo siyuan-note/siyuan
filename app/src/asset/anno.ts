@@ -9,7 +9,7 @@ import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {escapeAttr, escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {filesize} from "filesize";
 import md5 from "blueimp-md5";
 import {getRectImageName, hideRectResizeHandles, moveRectBounds, resizeRectBounds} from "./rectAnnotationResize";
@@ -725,7 +725,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         }
     });
     // eslint-disable-next-line no-control-regex
-    const content = Lute.EscapeHTMLStr(rangeContents.textContent.replace(/[\x00]|\n/g, ""));
+    const content = escapeHtmlTextAndAttr(rangeContents.textContent.replace(/[\x00]|\n/g, ""));
     const startPage = pdf.pdfViewer.getPageView(startIndex);
     const startPageRect = startPage.canvas.getClientRects()[0];
     const startViewport = startPage.viewport;

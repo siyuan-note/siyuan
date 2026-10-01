@@ -3,7 +3,7 @@ import {Menu} from "../../../plugin/Menu";
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint, upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
-import {escapeAttr, escapeHtml, escapeLessThans} from "../../../util/escape";
+import {escapeAttr, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
 import {genCellValueByElement, getCellValueText, renderCell, updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
@@ -449,7 +449,7 @@ style="grid-template-columns:${gridTemplate}">
             const isDetached = primaryValue.isDetached;
             const useRenderedContent = hasAVRenderTemplateResult(primaryValue, column.renderTemplate);
             const content = useRenderedContent ? getAVTemplateHTML(primaryValue.renderedContent || "") :
-                Lute.EscapeHTMLStr(primaryValue.block?.content || window.siyuan.languages.untitled);
+                escapeHtmlTextAndAttr(primaryValue.block?.content || window.siyuan.languages.untitled);
             html += `<span data-relation-column="${escapeAttr(column.id)}" class="av__relation-table-cell av__relation-table-primary" data-row-id="${escapeAttr(row.id)}"
 data-value-id="${escapeAttr(primaryCell.id || "")}"
 style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}${primaryCell.color ? `color:${primaryCell.color};` : ""}">
@@ -489,7 +489,7 @@ const genRelationFooterHTML = (menuElement: HTMLElement, keyword: string, hasCan
 data-id="${escapeAttr(refElement?.getAttribute("data-id") || "")}">${escapeHtml(refElement?.textContent || "")}</span>`;
         return `<button class="b3-menu__item av__relation-table-footer" data-type="setRelationCell" data-relation-type="create">
     <span class="b3-menu__label fn__ellipsis">${window.siyuan.languages.newRowInRelation.replace("${x}", databaseName).
-            replace("${y}", Lute.EscapeHTMLStr(keyword))}</span>
+            replace("${y}", escapeHtmlTextAndAttr(keyword))}</span>
 </button>`;
     }
     if (!hasCandidates && !hasMore) {
@@ -999,7 +999,7 @@ const genCreatedRelationRowHTML = (menuElement: HTMLElement, rowID: string, cont
     let cellsHTML = `<span data-relation-column="${escapeAttr(columns?.[0]?.dataset.relationColumn || "")}" class="av__relation-table-cell av__relation-table-primary" data-row-id="${rowID}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <span class="av__relation-row-icon">${getAVBlockIconHTML({isDetached: true})}</span>
-    <span class="b3-menu__label fn__ellipsis" data-id="">${Lute.EscapeHTMLStr(content)}</span>
+    <span class="b3-menu__label fn__ellipsis" data-id="">${escapeHtmlTextAndAttr(content)}</span>
 </span>`;
     for (let i = 1; i < (columns?.length || 1); i++) {
         cellsHTML += `<span data-relation-column="${escapeAttr(columns[i].dataset.relationColumn)}" class="av__relation-table-cell${columns[i].classList.contains("fn__none") ? " fn__none" : ""}"></span>`;

@@ -7,7 +7,6 @@ const runCases = sources => {
     const assert = require("node:assert/strict");
     const escape = text => String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;")
         .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    window.Lute = {EscapeHTMLStr: escape};
     window.siyuan = {languages: {untitled: "Untitled"}, config: {editor: {allowHTMLBLockScript: false}}};
     const sanitized = [];
     window.DOMPurify = {sanitize: content => {
@@ -28,7 +27,7 @@ const runCases = sources => {
         "./col": {getColIconByType: () => "iconText"},
         "../../../emoji": {unicode2Emoji: () => ""},
         "../../util/compatibility": {setStorageVal: () => {}},
-        "../../../util/escape": {escapeAttr: escape, escapeHtml: escape},
+        "../../../util/escape": {escapeAttr: escape, escapeHtml: escape, escapeHtmlTextAndAttr: escape},
         "../../../emoji/fileTreeIcon": {getFileTreeIconHTML: () => ""},
         "../../../util/hostCapabilities": {getHostCapabilities: () => ({remoteKernel: true})},
     };

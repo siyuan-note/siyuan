@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {isEmptyParagraph} from "./emptyTextBlock";
@@ -15,7 +16,7 @@ export const turnParagraphIntoCode = (protyle: IProtyle, nodeElement: HTMLElemen
     }
     const html = nodeElement.outerHTML;
     editElement.innerHTML = "```" + window.siyuan.storage[Constants.LOCAL_CODELANG] + "\n" +
-        Lute.EscapeHTMLStr(editElement.textContent) + "<wbr>\n```";
+        escapeHtmlTextAndAttr(editElement.textContent) + "<wbr>\n```";
     nodeElement.insertAdjacentHTML("afterend", protyle.lute.SpinBlockDOM(nodeElement.outerHTML));
     const newNodeElement = nodeElement.nextElementSibling;
     nodeElement.remove();

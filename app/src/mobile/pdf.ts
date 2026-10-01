@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../util/escape";
 import {Constants} from "../constants";
 import {getPdfViewerHTML} from "../asset/pdf/viewerTemplate";
 import {showMessage} from "../dialog/message";
@@ -142,7 +143,7 @@ export const openMobilePDF = (path: string, pdfParams?: number | string) => {
     let modelElement: HTMLElement | undefined;
     let isDestroyed = false;
     const abortController = new AbortController();
-    const title = Lute.EscapeHTMLStr(getDisplayName(getAssetPathWithoutQuery(path)));
+    const title = escapeHtmlTextAndAttr(getDisplayName(getAssetPathWithoutQuery(path)));
 
     openModel({
         title,

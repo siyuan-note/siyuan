@@ -16,7 +16,7 @@ import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
 import {getAssetExtension, getAssetName} from "../../../util/pathName";
 import {mergeAddOption} from "./select";
-import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 import {formatDateDisplay, formatDateValue, parseDateValue} from "./dateFormat";
 import {getFieldIdByCellElement} from "./row";
@@ -171,7 +171,7 @@ const openAVRelationIcon = async (protyle: IProtyle, target: HTMLElement, relati
 };
 
 const renderCellURL = (urlContent: string) => {
-    return `<span class="av__celltext av__celltext--url" data-type="url" data-href="${escapeAttr(urlContent)}">${Lute.EscapeHTMLStr(urlContent)}</span>`;
+    return `<span class="av__celltext av__celltext--url" data-type="url" data-href="${escapeAttr(urlContent)}">${escapeHtmlTextAndAttr(urlContent)}</span>`;
 };
 
 const getStoredCellValueByElement = (cellElement: HTMLElement) => {
@@ -1379,18 +1379,18 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
             const storedValue = cloneAVCellValueSnapshot(cellValue);
             text = `<div class="av__celltext av__celltext--rich b3-typography" data-protyle-lite-render="safe" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(storedValue)))}">${getAVRichTextPreviewHTML(source.content)}</div>`;
         } else {
-            text = `<span class="av__celltext">${cellValue ? Lute.EscapeHTMLStr(cellValue.text.content || "") : ""}</span>`;
+            text = `<span class="av__celltext">${cellValue ? escapeHtmlTextAndAttr(cellValue.text.content || "") : ""}</span>`;
         }
     } else if (["email", "phone"].includes(cellValue.type)) {
-        text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${cellValue ? Lute.EscapeHTMLStr(cellValue[cellValue.type as "email"].content || "") : ""}</span>`;
+        text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${cellValue ? escapeHtmlTextAndAttr(cellValue[cellValue.type as "email"].content || "") : ""}</span>`;
     } else if ("url" === cellValue.type) {
         text = renderCellURL(cellValue?.url?.content || "");
     } else if (cellValue.type === "block") {
         // 不可使用换行 https://github.com/siyuan-note/siyuan/issues/11365
         if (cellValue?.isDetached) {
-            text = `${renderAVBlockIcon(cellValue, showIcon)}<span class="av__celltext">${Lute.EscapeHTMLStr(cellValue.block.content || "")}</span>`;
+            text = `${renderAVBlockIcon(cellValue, showIcon)}<span class="av__celltext">${escapeHtmlTextAndAttr(cellValue.block.content || "")}</span>`;
         } else {
-            text = `${renderAVBlockIcon(cellValue, showIcon)}<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(cellValue.block.content)}</span>`;
+            text = `${renderAVBlockIcon(cellValue, showIcon)}<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref">${escapeHtmlTextAndAttr(cellValue.block.content)}</span>`;
         }
         text = `<span class="av__cellprimary">${text}</span>`;
         const bindLabel = cellValue?.isDetached ? window.siyuan.languages.bind : window.siyuan.languages.rebind;
@@ -1518,11 +1518,11 @@ export const getAVSelectedCellData = (blockElement: HTMLElement) => {
 const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {
     let text = "";
     if (["text"].includes(cellValue.type)) {
-        text = cellValue ? Lute.EscapeHTMLStr(cellValue[cellValue.type as "text"].content || "") : "";
+        text = cellValue ? escapeHtmlTextAndAttr(cellValue[cellValue.type as "text"].content || "") : "";
     } else if (["email", "phone"].includes(cellValue.type)) {
         const emailContent = cellValue ? cellValue[cellValue.type as "email"].content : "";
         if (emailContent) {
-            text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${Lute.EscapeHTMLStr(emailContent)}</span>`;
+            text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${escapeHtmlTextAndAttr(emailContent)}</span>`;
         }
     } else if ("url" === cellValue.type) {
         const urlContent = cellValue?.url?.content || "";
@@ -1531,9 +1531,9 @@ const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {
         }
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
-            text = `${renderAVBlockIcon(cellValue, showIcon)}<span class="av__celltext">${Lute.EscapeHTMLStr(cellValue.block?.content || window.siyuan.languages.untitled)}</span>`;
+            text = `${renderAVBlockIcon(cellValue, showIcon)}<span class="av__celltext">${escapeHtmlTextAndAttr(cellValue.block?.content || window.siyuan.languages.untitled)}</span>`;
         } else {
-            text = `${renderAVBlockIcon(cellValue, showIcon)}<span data-type="block-ref" data-id="${cellValue.block?.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(cellValue.block?.content || window.siyuan.languages.untitled)}</span>`;
+            text = `${renderAVBlockIcon(cellValue, showIcon)}<span data-type="block-ref" data-id="${cellValue.block?.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref">${escapeHtmlTextAndAttr(cellValue.block?.content || window.siyuan.languages.untitled)}</span>`;
         }
     } else if (cellValue.type === "number") {
         text = cellValue?.number.formattedContent || cellValue?.number.content.toString() || "";

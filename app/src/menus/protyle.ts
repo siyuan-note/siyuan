@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../util/escape";
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {
     hasClosestBlock,
@@ -262,7 +263,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
             anchorElement.value = refElement.textContent;
             const inputEvent = () => {
                 if (anchorElement.value) {
-                    refElement.innerHTML = Lute.EscapeHTMLStr(anchorElement.value);
+                    refElement.innerHTML = escapeHtmlTextAndAttr(anchorElement.value);
                 } else {
                     refElement.innerHTML = "*";
                 }
@@ -396,7 +397,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 inputElement.addEventListener("input", () => {
                     if (inputElement.value) {
                         // 不能使用 textContent，否则 < 会变为 &lt;
-                        element.innerHTML = Lute.EscapeHTMLStr(inputElement.value).trim() || refBlockId;
+                        element.innerHTML = escapeHtmlTextAndAttr(inputElement.value).trim() || refBlockId;
                     } else {
                         fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
                             element.innerHTML = sanitizeKernelHTML(response.data);
@@ -1684,16 +1685,16 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                     if (anchor.length > Constants.SIZE_LINK_TEXT_MAX) {
                         anchor = anchor.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
                     }
-                    linkElement.innerHTML = Lute.EscapeHTMLStr(anchor);
+                    linkElement.innerHTML = escapeHtmlTextAndAttr(anchor);
                 }
                 inputElements[1].value = anchor;
                 inputElements[1].addEventListener("compositionend", () => {
-                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "").trim() || "*");
+                    linkElement.innerHTML = escapeHtmlTextAndAttr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "").trim() || "*");
                 });
                 inputElements[1].addEventListener("input", (event: KeyboardEvent) => {
                     if (!event.isComposing) {
                         // https://github.com/siyuan-note/siyuan/issues/4511
-                        linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "").trim()) || "*";
+                        linkElement.innerHTML = escapeHtmlTextAndAttr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "").trim()) || "*";
                     }
                 });
                 inputElements[1].addEventListener("keydown", (event) => {
@@ -1898,12 +1899,12 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
     }
     window.siyuan.menus.menu.removeCB = () => {
         if (inputElements[2].value) {
-            linkElement.setAttribute("data-title", Lute.EscapeHTMLStr(inputElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
+            linkElement.setAttribute("data-title", escapeHtmlTextAndAttr(inputElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
         } else {
             linkElement.removeAttribute("data-title");
         }
         if (linkElement.getAttribute("data-type").indexOf("a") > -1) {
-            linkElement.setAttribute("data-href", Lute.EscapeHTMLStr(inputElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
+            linkElement.setAttribute("data-href", escapeHtmlTextAndAttr(inputElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
         } else {
             linkElement.removeAttribute("data-href");
         }

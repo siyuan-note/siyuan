@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {openInputDialog} from "../../dialog/inputDialog";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {
@@ -787,13 +788,13 @@ export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
             const title = value.trim();
             const location = (dialog.element.querySelector("select") as HTMLSelectElement).value;
             if (title) {
-                const html = `<caption contenteditable="false" ${location === "bottom" ? 'style="caption-side: bottom;"' : ""}>${Lute.EscapeHTMLStr(title)}</caption>`;
+                const html = `<caption contenteditable="false" ${location === "bottom" ? 'style="caption-side: bottom;"' : ""}>${escapeHtmlTextAndAttr(title)}</caption>`;
                 if (captionElement) {
                     captionElement.outerHTML = html;
                 } else {
                     nodeElement.querySelector("table").insertAdjacentHTML("afterbegin", html);
                 }
-                nodeElement.setAttribute("caption", Lute.EscapeHTMLStr(html));
+                nodeElement.setAttribute("caption", escapeHtmlTextAndAttr(html));
             } else {
                 if (captionElement) {
                     captionElement.remove();

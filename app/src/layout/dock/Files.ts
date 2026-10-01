@@ -1,4 +1,4 @@
-import {escapeAriaLabel, escapeHtml, escapeLessThans} from "../../util/escape";
+import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../util/escape";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {getInstanceById, setPanelFocus} from "../util";
@@ -2147,7 +2147,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
             iconExpands && item.subFileCount === 0 && !editingPublishAccess ? " file-tree__item--icon-open" : ""}${
             window.siyuan.config.fileTree.parentDocClickExpand && item.subFileCount > 0 ? " file-tree__item--title-expand" : ""}`;
         const defaultIcon = item.subFileCount === 0 ? "file" : "folder";
-        return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" ${FILE_TREE_CHILDREN_SORT_MODE}="${item.childrenSortMode ?? ""}"
+        return `<li data-node-id="${item.id}" data-name="${escapeHtmlTextAndAttr(item.name)}" draggable="true" data-count="${item.subFileCount}" ${FILE_TREE_CHILDREN_SORT_MODE}="${item.childrenSortMode ?? ""}"
 data-type="navigation-file" 
 style="--file-toggle-width:${paddingLeft + 18}px;--file-action-offset:${paddingLeft + 20}px"
 class="b3-list-item b3-list-item--hide-action${actionClasses}" data-path="${item.path}"${getFileTreeDefaultIconAttr(item.icon, defaultIcon)}>

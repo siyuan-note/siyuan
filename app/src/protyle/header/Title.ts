@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 import type {BlockQueryRequestInput} from "../../types/api";
 import {
     focusByOffset,
@@ -409,21 +410,21 @@ export class Title {
         }
         let nodeAttrHTML = "";
         if (response.data.ial.bookmark) {
-            nodeAttrHTML += `<div class="protyle-attr--bookmark">${Lute.EscapeHTMLStr(response.data.ial.bookmark)}</div>`;
+            nodeAttrHTML += `<div class="protyle-attr--bookmark">${escapeHtmlTextAndAttr(response.data.ial.bookmark)}</div>`;
         }
         if (response.data.ial.name) {
-            nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${Lute.EscapeHTMLStr(response.data.ial.name)}</div>`;
+            nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${escapeHtmlTextAndAttr(response.data.ial.name)}</div>`;
         }
         if (response.data.ial.alias) {
-            nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${Lute.EscapeHTMLStr(response.data.ial.alias)}</div>`;
+            nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${escapeHtmlTextAndAttr(response.data.ial.alias)}</div>`;
         }
         if (response.data.ial.memo) {
-            nodeAttrHTML += `<div class="protyle-attr--memo ariaLabel" aria-label="${Lute.EscapeHTMLStr(response.data.ial.memo)}" data-position="north"><svg><use xlink:href="#iconM"></use></svg></div>`;
+            nodeAttrHTML += `<div class="protyle-attr--memo ariaLabel" aria-label="${escapeHtmlTextAndAttr(response.data.ial.memo)}" data-position="north"><svg><use xlink:href="#iconM"></use></svg></div>`;
         }
         if (response.data.ial["custom-avs"]) {
             let avTitle = "";
             response.data.attrViews.forEach((item: { id: string, name: string }) => {
-                avTitle += `<span data-av-id="${item.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${Lute.EscapeHTMLStr(item.name)}</span>&nbsp;`;
+                avTitle += `<span data-av-id="${item.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${escapeHtmlTextAndAttr(item.name)}</span>&nbsp;`;
             });
             if (avTitle) {
                 avTitle = avTitle.substring(0, avTitle.length - 6);

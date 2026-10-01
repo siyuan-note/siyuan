@@ -1,7 +1,7 @@
 import * as path from "path";
 import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
-import {escapeAriaLabel, escapeHtml} from "./escape";
+import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "./escape";
 import {isMobile} from "./functions";
 import {focusByRange} from "../protyle/util/selection";
 import {Constants} from "../constants";
@@ -160,7 +160,7 @@ export const getDocDisplayName = (name: string, titleEmpty?: boolean, escape?: b
     }
     const displayName = getDisplayName(name, true, true);
     if (escape) {
-        return Lute.EscapeHTMLStr(displayName);
+        return escapeHtmlTextAndAttr(displayName);
     }
     return displayName;
 };

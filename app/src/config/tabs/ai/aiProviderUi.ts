@@ -1,4 +1,4 @@
-import {escapeHTMLStr} from "../../../util/escape";
+import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import type {AIModelTestData} from "../../../types/api";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../../render/fragments";
 import {confirmDialog} from "../../../dialog/confirmDialog";
@@ -33,7 +33,7 @@ export interface IGroupedModelPicker {
 
 const PROVIDER_CATEGORIES = ["official", "aggregator", "local", "custom"] as const;
 
-const escapeHTML = (value: string) => escapeHTMLStr(value ?? "");
+const escapeHTML = (value: string) => escapeHtmlTextAndAttr(value ?? "");
 
 const cloneProvider = (provider: Config.IProvider): Config.IProvider =>
     JSON.parse(JSON.stringify(provider)) as Config.IProvider;

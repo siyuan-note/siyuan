@@ -78,7 +78,6 @@ const createHarness = (layout: TAVView = "table", detached = true, icon?: string
             window: {siyuan}, document: {querySelectorAll: (): HTMLElement[] => [], createElement: () => ({
                 matches: () => false, querySelector: (): HTMLElement => null, querySelectorAll: (): HTMLElement[] => [], textContent: "",
             })},
-            Lute: {EscapeHTMLStr: escape.escapeHtml},
         });
         mocks[`./${name}`] = module.exports;
         return module.exports;

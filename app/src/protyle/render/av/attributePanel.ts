@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import {renderAVAttribute} from "./blockAttr";
 import {
     cancelHeightAnimation,
@@ -307,7 +308,7 @@ export class AVAttributePanel {
             }
             tabsElement.innerHTML = databaseElements.map(item => {
                 const title = item.querySelector(".custom-attr__avheader .block__logo span")?.textContent || window.siyuan.languages.database;
-                return `<button type="button" draggable="${!this.protyle.disabled}" class="item${item.dataset.avId === this.activeAvID ? " item--focus" : ""}" data-type="av-tab" data-id="${item.dataset.avId}"><span class="item__text">${Lute.EscapeHTMLStr(title)}</span></button>`;
+                return `<button type="button" draggable="${!this.protyle.disabled}" class="item${item.dataset.avId === this.activeAvID ? " item--focus" : ""}" data-type="av-tab" data-id="${item.dataset.avId}"><span class="item__text">${escapeHtmlTextAndAttr(title)}</span></button>`;
             }).join("");
             this.bindTabDrag(tabsElement);
         } else {

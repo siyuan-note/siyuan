@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../../../../util/escape";
 import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
 import {hasClosestBlock, hasClosestByClassName} from "../../../util/hasClosest";
@@ -96,7 +97,7 @@ const renderGroupGallery = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
             avBodyHTML += `${getGroupTitleHTML(group, group.cardCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}"${options.resetData.virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${options.resetData.virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
         }
     });
     if (options.renderAll) {

@@ -1,4 +1,4 @@
-import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {unicode2Emoji} from "../../../emoji";
 import {renderAVBlockIcon} from "./blockIcon";
 import {getCompressURL} from "../../../util/image";
@@ -29,7 +29,7 @@ export const genAVRelationHTML = (item: IAVCellValue, rowID: string, showIcon = 
     }
     const useTemplate = hasAVRenderTemplateResult(item);
     const content = useTemplate ? getAVTemplateHTML(item.renderedContent || "") :
-        Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled);
+        escapeHtmlTextAndAttr(item.block.content || window.siyuan.languages.untitled);
     const templateClass = useTemplate ? " av__celltext--template" : "";
     const storedValue = escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(item))));
     const attributes = `data-row-id="${escapeAttr(rowID)}" data-relation-value="${storedValue}" class="av__cell--relation"`;

@@ -8,7 +8,7 @@ import {Constants} from "../../../../constants";
 import {avRender, genTabHeaderHTML} from "../render";
 import {replaceAVContainer} from "../container";
 import {afterRenderGallery, renderGallery} from "../gallery/render";
-import {escapeAttr, escapeHtml} from "../../../../util/escape";
+import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../../util/escape";
 import {getRowHTML} from "../row";
 import {getAVSelectedItemPoints, getBodyVirtualData} from "../virtualScroll";
 import {
@@ -235,7 +235,7 @@ export const renderKanban = async (options: {
             }
             bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}" data-group-id="${group.id}" data-previous-group-id="${view.groups[groupIndex - 1]?.id || ""}" data-group-config="${groupConfig}"${selectBg}>
     ${getKanbanTitleHTML(group, group.cardCount, groupDraggable)}
-    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}"${virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body">${getKanbanHTML(group, options.blockElement, virtualData[group.id])}</div>
+    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body">${getKanbanHTML(group, options.blockElement, virtualData[group.id])}</div>
 </div>`;
         }
     });

@@ -1392,6 +1392,7 @@ body.mobile-topbar--merged {
     border: 0;
     color: var(--b3-theme-on-surface);
 
+    &[data-type="block-type"],
     &[data-type="font-family"],
     &[data-type="font-size"] {
       padding: 0 8px;

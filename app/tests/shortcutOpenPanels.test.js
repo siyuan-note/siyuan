@@ -111,37 +111,52 @@ test("native shortcut sources open panels without toggling while menu commands r
     }
 });
 
-test("Escape from flashcard content closes its dialog after editor overlays are dismissed", () => {
-    const source = sourceFile("card/openCard.ts");
-    const binding = find(source, node => ts.isCallExpression(node) &&
-        node.expression.getText(source) === "dialog.element.addEventListener" && node.arguments[0]?.text === "keydown");
-    let handler;
-    let destroyed = 0;
-    const elements = [hiddenElement(), hiddenElement(), hiddenElement(), hiddenElement()];
-    const dialog = {element: {addEventListener: (name, fn, capture) => {
-        assert.equal(name, "keydown");
-        assert.equal(capture, true);
-        handler = fn;
-    }}, destroy: () => destroyed++};
-    evaluate(binding.getText(source), {dialog, window: {siyuan: {menus: {menu: {element: elements[0]}}}},
-        editor: {protyle: {toolbar: {element: elements[1], subElement: elements[2]}, hint: {element: elements[3]}}}});
-    for (const overlay of elements) {
-        overlay.classList.contains = () => false;
-        const event = new Event("keydown", {cancelable: true});
-        event.key = "Escape";
-        handler(event);
-        assert.equal(destroyed, 0);
-        assert.equal(event.defaultPrevented, false);
-        overlay.classList.contains = () => true;
+test("Ctrl+E and Alt+0 keep their dialogs open through the actual global keydown branches", async () => {
+    const keymap = evaluate(sourceFile("util/keymapBindings.ts").text, {});
+    const Constants = {DIALOG_RECENTDOCS: "recent", DIALOG_OPENCARD: "card", KEYCODELIST: {69: "E", 48: "0"}};
+    const {matchHotKey} = evaluate(sourceFile("protyle/util/hotKey.ts").text, {
+        require: name => name.endsWith("keymapBindings") ? keymap : name.endsWith("constants") ? {Constants} : {
+            isMac: () => false, isNotCtrl: event => !event.ctrlKey && !event.metaKey,
+            isOnlyMeta: event => event.ctrlKey && !event.metaKey,
+        },
+    });
+    const source = sourceFile("boot/globalEvent/keydown.ts");
+    for (const [command, key, eventFlags] of [
+        ["recentDocs", "⌘E", {key: "e", keyCode: 69, ctrlKey: true}],
+        ["riffCard", "⌥0", {key: "0", keyCode: 48, altKey: true}],
+    ]) {
+        const branch = find(source, node => ts.isIfStatement(node) &&
+            node.expression.getText(source).includes(`keymap.general.${command}, event`));
+        let closes = 0;
+        let blurs = 0;
+        const pending = [];
+        const window = {siyuan: {config: {keymap: {general: {[command]: {custom: key}}}},
+            dialogs: [{element: {getAttribute: () => command === "recentDocs" ? "recent" : "card"},
+                destroy: () => closes++}]}};
+        const recentSource = sourceFile("business/openRecentDocs.ts");
+        const recent = prefix(recentSource, arrow(recentSource, "openRecentDocs"), "const sortBy", {
+            window, Constants, hideElements: () => closes++,
+        });
+        const cardSource = sourceFile("card/openCard.ts");
+        const card = prefix(cardSource, arrow(cardSource, "openCardByData"), "let lastRange", {window, Constants});
+        const openCard = evaluate(`exports.openCard = ${arrow(cardSource, "openCard").getText(cardSource)};`, {
+            window, fetchPost: (_url, _data, callback) => callback({data: {}}),
+            openCardByData: (...args) => pending.push(card(...args)),
+        }).openCard;
+        const handler = evaluate(`exports.subject = function(event) {${branch.getText(source)}};`, {
+            app: {}, window, Constants, isTabWindow: false, matchHotKey,
+            document: {activeElement: {blur: () => blurs++}}, openCard,
+            openRecentDocs: (...args) => pending.push(recent(...args)),
+        }).subject;
+        for (const repeat of [false, true]) {
+            const event = {ctrlKey: false, metaKey: false, altKey: false, shiftKey: false,
+                repeat, ...eventFlags, preventDefault() {this.defaultPrevented = true;}};
+            handler(event);
+            await Promise.all(pending);
+            assert.equal(event.defaultPrevented, true);
+            assert.equal(closes, 0);
+            assert.equal(blurs, 0);
+            assert.equal(window.siyuan.dialogs.length, 1);
+        }
     }
-    for (const flags of [{isComposing: true}, {repeat: true}, {key: "Enter"}]) {
-        handler({key: "Escape", ...flags});
-        assert.equal(destroyed, 0);
-    }
-    const event = new Event("keydown", {cancelable: true});
-    event.key = "Escape";
-    handler(event);
-    assert.equal(destroyed, 1);
-    assert.equal(event.defaultPrevented, true);
-    assert.equal(event.cancelBubble, true);
 });

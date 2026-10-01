@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20261002010621"
+		"updated": "20261002013053"
 	},
 	"Children": [
 		{
@@ -18,7 +18,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-t67pljp",
-				"updated": "20261002010621"
+				"updated": "20261002013053"
 			},
 			"Children": [
 				{
@@ -69,7 +69,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002010621-mogxh00",
-				"updated": "20261002010621"
+				"updated": "20261002013053"
 			},
 			"Children": [
 				{
@@ -83,7 +83,34 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を押すと閉じます。エディターのポップアップが表示されている場合は、先にそのポップアップを閉じます。"
+					"Data": " を押すと閉じます。エディターのポップアップが表示されている場合は、先にそのポップアップを閉じます。フラッシュカードの本文では、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すとブロックを選択します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を長押しすると復習ボタンにフォーカスが移り、もう一度 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すとダイアログが閉じます。"
 				}
 			]
 		},

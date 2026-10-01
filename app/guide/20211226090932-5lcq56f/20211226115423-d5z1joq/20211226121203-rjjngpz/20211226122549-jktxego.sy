@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261002010621"
+		"updated": "20261002013053"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-a3qlogr",
-				"updated": "20261002010621"
+				"updated": "20261002013053"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002010621-im1xicd",
-				"updated": "20261002010621"
+				"updated": "20261002013053"
 			},
 			"Children": [
 				{
@@ -85,7 +85,34 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 關閉；編輯器中已有浮層時，先關閉浮層。"
+					"Data": " 關閉；編輯器中已有浮層時，先關閉浮層。在閃卡正文中，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選取區塊，長按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 將焦點移回複習按鈕，再按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 關閉彈窗。"
 				}
 			]
 		},

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261002010621"
+		"updated": "20261002013053"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-wub2unw",
-				"updated": "20261002010621"
+				"updated": "20261002013053"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002010621-zd9bn2e",
-				"updated": "20261002010621"
+				"updated": "20261002013053"
 			},
 			"Children": [
 				{
@@ -85,7 +85,34 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to close it; if an editor popup is visible, Esc closes that popup first."
+					"Data": " to close it; if an editor popup is visible, Esc closes that popup first. In flashcard content, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " selects blocks. Hold "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to focus the review buttons, then press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to close the dialog."
 				}
 			]
 		},

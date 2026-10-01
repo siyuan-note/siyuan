@@ -1466,7 +1466,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     if (matchHotKey(window.siyuan.config.keymap.general.recentDocs, event)) {
-        openRecentDocs();
+        openRecentDocs(true);
         event.preventDefault();
         return;
     }
@@ -1603,8 +1603,9 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.riffCard, event)) {
-        openCard(app);
-        if (document.activeElement) {
+        openCard(app, true);
+        if (document.activeElement && !window.siyuan.dialogs.some(item =>
+            item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD)) {
             (document.activeElement as HTMLElement).blur();
         }
         event.preventDefault();

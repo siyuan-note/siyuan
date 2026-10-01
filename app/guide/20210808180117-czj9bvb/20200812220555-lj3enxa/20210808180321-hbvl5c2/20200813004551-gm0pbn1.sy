@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261002010621"
+		"updated": "20261002013053"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-w9nonqj",
-				"updated": "20261002010621"
+				"updated": "20261002013053"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002010621-3c1s74q",
-				"updated": "20261002010621"
+				"updated": "20261002013053"
 			},
 			"Children": [
 				{
@@ -85,7 +85,34 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 关闭；编辑器中已有浮层时，先关闭浮层。"
+					"Data": " 关闭；编辑器中已有浮层时，先关闭浮层。在闪卡正文中，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 选中块，长按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 将焦点移回复习按钮，再按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 关闭弹窗。"
 				}
 			]
 		},

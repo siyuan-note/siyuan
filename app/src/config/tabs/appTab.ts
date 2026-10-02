@@ -521,21 +521,6 @@ const mountExportData = (root: HTMLElement) => {
 const registerAppMaintenanceGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("maintenance", window.siyuan.languages.configGroupMaintenance);
 
-    group.button({
-        id: "resetSettings",
-        title: window.siyuan.languages.resetSettings,
-        desc: window.siyuan.languages.resetSettingsTip,
-        label: window.siyuan.languages.reset,
-        icon: "iconUndo",
-        afterMount: root => {
-            const button = root.querySelector<HTMLButtonElement>("#resetSettings");
-            if (button) {
-                button.disabled = window.siyuan.config.readonly || window.siyuan.isPublish;
-                button.addEventListener("click", confirmResetSettings);
-            }
-        },
-    });
-
     group.slot({
         key: "workspaceStorage",
         keywords: [window.siyuan.languages.workspaceStorage, window.siyuan.languages.workspaceStorageTip,
@@ -589,6 +574,20 @@ const registerAppMaintenanceGroup = (tab: SettingTabBuilder) => {
             root.querySelector("#clearTempFiles")?.addEventListener("click", () => {
                 fetchPost("/api/system/clearTempFiles", {});
             });
+        },
+    });
+    group.button({
+        id: "resetSettings",
+        title: window.siyuan.languages.resetSettings,
+        desc: window.siyuan.languages.resetSettingsTip,
+        label: window.siyuan.languages.reset,
+        icon: "iconUndo",
+        afterMount: root => {
+            const button = root.querySelector<HTMLButtonElement>("#resetSettings");
+            if (button) {
+                button.disabled = window.siyuan.config.readonly || window.siyuan.isPublish;
+                button.addEventListener("click", confirmResetSettings);
+            }
         },
     });
     if (getHostCapabilities().importExport) {

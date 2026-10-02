@@ -1805,6 +1805,7 @@ export class Gutter {
                     {menuId: "check", icon: "iconCheck", label: "check", type: "UL2TL"},
                 ].forEach(target => turnIntoSubmenu.push(this.turnsOneInto({
                     ...target, id, protyle, nodeElement, label: window.siyuan.languages[target.label],
+                    accelerator: window.siyuan.config.keymap.editor.insert[target.label].custom,
                 })));
             } else if (listSubtype === "o") {
                 turnIntoSubmenu.push(this.turnsOneInto({

@@ -1,4 +1,5 @@
 {
+	"automationIncomplete": "规则已停用，请完善配置：${1}",
 	"databaseAutomations": "自动化",
 	"automationTip": "所有视图共享规则。原修改与自动操作一起撤销，失败时全部回滚。自动操作不会触发其他规则",
 	"automationTrigger": "触发条件",

@@ -1,4 +1,5 @@
 {
+	"automationIncomplete": "Regel gepauzeerd; voltooi de configuratie: ${1}",
 	"databaseAutomations": "Automatiseringen",
 	"automationTip": "Regels gelden voor alle weergaven. Oorspronkelijke bewerkingen en automatische acties worden samen ongedaan gemaakt en bij fouten teruggedraaid. Automatische acties activeren geen andere regels",
 	"automationTrigger": "Trigger",

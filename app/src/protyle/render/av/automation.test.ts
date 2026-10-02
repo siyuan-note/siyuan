@@ -25,12 +25,12 @@ test("automation settings reject readonly, publishing and historical editors bef
     }
 });
 
-test("automation settings reuse the menu and return after saving with an independent undo configuration", async () => {
+test("automation settings autosave changes with independent undo snapshots and keep the menu open", async () => {
     const listeners = new Map<string, (event: unknown) => void>();
-    const transactions: Array<{perform: IOperation[], undo: IOperation[], complete: () => void}> = [];
+    const transactions: Array<{perform: IOperation[], undo: IOperation[]}> = [];
     const conditionList = {innerHTML: "", querySelectorAll: (): HTMLElement[] => []};
     const conditionHost = {innerHTML: "", querySelector: (selector: string) => selector === "[data-conditions]" ? conditionList : {addEventListener() {}}};
-    const actionsHost = {innerHTML: "", querySelectorAll: (): HTMLElement[] => []};
+    const actionsHost = {innerHTML: "", classList: {toggle() {}}, querySelectorAll: (): HTMLElement[] => []};
     const body = {
         isConnected: true, innerHTML: "", querySelectorAll: (): HTMLElement[] => [],
         querySelector: (selector: string) => selector === "[data-source-conditions]" ? conditionHost : actionsHost,
@@ -54,15 +54,16 @@ test("automation settings reuse the menu and return after saving with an indepen
     const rule = {id: "rule", name: "Copy relation", enabled: true, trigger: "changed", actions: [{
         type: "edit", target: "filtered", avID: "target", fields: {relation: {mode: "static", value: {type: "relation", relation: {blockIDs: [] as string[]}}}},
     }]};
+    const otherRule = {...rule, id: "other", actions: [{...rule.actions[0], avID: "unloaded"}]};
     const database = {id: "source", keyValues: [
         {key: {id: "wrong", name: "Wrong target", type: "relation", relation: {avID: "elsewhere"}}},
         {key: {id: "compatible", name: "Same target", type: "relation", relation: {avID: "linked"}}},
-    ], automations: {spec: 1, rules: [rule]}};
+    ], automations: {spec: 1, rules: [rule, otherRule]}};
     const destination = {id: "target", keyValues: [{key: {id: "relation", name: "Relation", type: "relation", relation: {avID: "linked"}}}]};
     const methods = {} as typeof import("./automation");
     runInNewContext(compiled, {
         exports: methods,
-        window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations"},
+        window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations", fields: "Fields", automationIncomplete: "Incomplete: ${1}"},
             menus: {menu: {remove() { menuVisible = false; }}}}},
         require: (name: string) => ({
             "../../../plugin/Menu": {Menu: class {
@@ -71,8 +72,8 @@ test("automation settings reuse the menu and return after saving with an indepen
             }},
             "../../../util/escape": {escapeAttr: String, escapeHtml: String},
             "../../../util/fetch": {fetchSyncPost: async (_path: string, request: {id: string}) => ({code: 0, data: {av: request.id === "source" ? database : destination}})},
-            "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[], options: {callback: () => void}) => {
-                transactions.push({perform, undo, complete: options.callback});
+            "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) => {
+                transactions.push({perform, undo});
             }},
         })[name] || {},
     });
@@ -83,6 +84,7 @@ test("automation settings reuse the menu and return after saving with an indepen
     assert.ok(classes.has("b3-menu--fullscreen"));
     assert.ok(classes.has("b3-menu--sheet"));
     assert.match(menu.innerHTML, /data-type="go-config"/);
+    assert.doesNotMatch(menu.innerHTML, /data-save|data-cancel/);
     assert.ok(resized >= 2);
     const addField = {dataset: {action: "add-field"}, closest: () => ({dataset: {index: "0"}}),
         getBoundingClientRect: () => ({left: 0, bottom: 0, height: 20})};
@@ -96,7 +98,6 @@ test("automation settings reuse the menu and return after saving with an indepen
     const target = {value: "source", matches: (selector: string) => selector === "[data-mode]",
         closest: (selector: string) => selector === "[data-index]" ? {dataset: {index: "0"}} : {dataset: {fieldId: "relation"}}};
     listeners.get("change")({target});
-    listeners.get("[data-save]:click")({currentTarget: {blur() {}}});
     const performed = JSON.parse(JSON.stringify(transactions[0].perform[0]));
     const undone = JSON.parse(JSON.stringify(transactions[0].undo[0]));
     assert.equal(performed.action, "setAttrViewAutomations");
@@ -104,24 +105,41 @@ test("automation settings reuse the menu and return after saving with an indepen
     assert.equal(performed.data.rules[0].actions[0].fields.relation.keyID, "compatible");
     assert.equal(undone.data.rules[0].actions[0].fields.relation.mode, "static");
     assert.equal(database.automations.rules[0].actions[0].fields.relation.mode, "static");
+    assert.deepEqual(performed.data.rules[1], otherRule);
     assert.equal(returned, 0);
-    transactions[0].complete();
-    assert.equal(returned, 1);
+    listeners.get("change")({target: {checked: false, matches: (selector: string) => selector === "[data-enabled]", closest: (): HTMLElement => null}});
+    assert.equal(transactions.length, 2);
+    assert.deepEqual(transactions[1].undo[0].data, transactions[0].perform[0].data);
+    assert.equal(JSON.parse(JSON.stringify(transactions[0].perform[0].data)).rules[0].enabled, true);
+    assert.equal(JSON.parse(JSON.stringify(transactions[1].perform[0].data)).rules[0].enabled, false);
+    listeners.get("change")({target: {checked: true, matches: (selector: string) => selector === "[data-enabled]", closest: (): HTMLElement => null}});
+    assert.equal(transactions.length, 3);
+    assert.equal(JSON.parse(JSON.stringify(transactions[2].perform[0].data)).rules[0].enabled, true);
+    listeners.get("click")({target: {closest: () => ({dataset: {action: "add-action"}, closest: (): HTMLElement => null})}});
+    assert.equal(transactions.length, 4);
+    assert.equal(JSON.parse(JSON.stringify(transactions[3].perform[0].data)).rules[0].enabled, false);
+    assert.equal(JSON.parse(JSON.stringify(transactions[3].perform[0].data)).rules[0].actions.length, 2);
+    assert.deepEqual(JSON.parse(JSON.stringify(transactions[3].perform[0].data)).rules[1], otherRule);
     panel.isConnected = false;
     menuVisible = true;
     captureClick();
     assert.equal(menuVisible, true);
-    transactions[0].complete();
-    assert.equal(returned, 1);
+    assert.equal(returned, 0);
 });
 
-test("empty automation settings open a new draft and only persist it on save", async () => {
+test("empty automation settings persist an incomplete rule disabled on editing and reject enabling it", async () => {
     const listeners = new Map<string, (event: unknown) => void>();
     const transactions: Array<{perform: IOperation[], undo: IOperation[]}> = [];
+    const status = {textContent: "", classList: {toggle() {}}};
+    const select = {selectedOptions: [{textContent: ""}]};
+    const enabled = {checked: false};
     const list = {innerHTML: "", querySelectorAll: (): HTMLElement[] => []};
     const conditions = {innerHTML: "", querySelector: (selector: string) => selector === "[data-conditions]" ? list : {addEventListener() {}}};
-    const body = {isConnected: true, innerHTML: "", addEventListener() {}, querySelectorAll: (): HTMLElement[] => [],
-        querySelector: (selector: string) => selector === "[data-source-conditions]" ? conditions : list};
+    const body = {isConnected: true, innerHTML: "",
+        addEventListener: (type: string, listener: (event: unknown) => void) => listeners.set(type, listener),
+        querySelectorAll: (): HTMLElement[] => [],
+        querySelector: (selector: string) => ({"[data-source-conditions]": conditions, "[data-status]": status,
+            "[data-rule]": select, "[data-enabled]": enabled})[selector] || list};
     const panel = {isConnected: true, addEventListener() {}, querySelector: (selector: string) => selector === "[data-body]" ? body : {
         addEventListener: (_type: string, listener: (event: unknown) => void) => listeners.set(selector, listener),
     }};
@@ -133,7 +151,7 @@ test("empty automation settings open a new draft and only persist it on save", a
     runInNewContext(compiled, {
         exports: methods,
         Lute: {NewNodeID: () => "draft-rule"},
-        window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations"}}},
+        window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations", fields: "Fields", automationIncomplete: "Incomplete: ${1}"}}},
         require: (name: string) => ({
             "../../../util/escape": {escapeAttr: String, escapeHtml: String},
             "../../../util/fetch": {fetchSyncPost: async () => ({code: 0, data: {av: database}})},
@@ -150,22 +168,34 @@ test("empty automation settings open a new draft and only persist it on save", a
     assert.match(list.innerHTML, /data-action="add-field"/);
     assert.equal(transactions.length, 0);
     assert.equal(database.automations.rules.length, 0);
-    listeners.get("[data-save]")({currentTarget: {blur() {}}});
+    const nameInput = {value: "Draft", matches: (selector: string) => selector === "[data-name]", closest: (): HTMLElement => null};
+    listeners.get("input")({target: nameInput});
+    assert.equal(transactions.length, 0);
+    listeners.get("blur")({target: nameInput});
     assert.equal(transactions.length, 1);
     const saved = JSON.parse(JSON.stringify(transactions[0].perform[0]));
     const undo = JSON.parse(JSON.stringify(transactions[0].undo[0]));
     assert.equal(saved.data.rules[0].id, "draft-rule");
+    assert.equal(saved.data.rules[0].name, "Draft");
+    assert.equal(saved.data.rules[0].enabled, false);
     assert.equal(undo.data.rules.length, 0);
     assert.equal(database.automations.rules.length, 0);
+    assert.equal(status.textContent, "Incomplete: Fields");
+    listeners.get("change")({target: {checked: true, matches: (selector: string) => selector === "[data-enabled]", closest: (): HTMLElement => null}});
+    assert.equal(transactions.length, 1);
+    assert.equal(enabled.checked, false);
+    listeners.get("click")({target: {closest: () => ({dataset: {action: "remove-rule"}, closest: (): HTMLElement => null})}});
+    assert.equal(transactions.length, 2);
+    assert.equal(JSON.parse(JSON.stringify(transactions[1].perform[0].data)).rules.length, 0);
+    assert.deepEqual(transactions[1].undo[0].data, transactions[0].perform[0].data);
 });
 
 test("leaving automation settings while loading does not replace the next page or submit a transaction", async () => {
     let complete: (response: unknown) => void;
     let returned = 0;
-    const listeners = new Map<string, () => void>();
     const panel = {isConnected: true, addEventListener() {}, querySelector: (selector: string) => {
-        assert.ok(["[data-body]", "[data-cancel]"].includes(selector));
-        return {addEventListener: (_type: string, listener: () => void) => listeners.set(selector, listener)};
+        assert.equal(selector, "[data-body]");
+        return {};
     }};
     const menu = {innerHTML: "", classList: {add() {}, remove() {}}, addEventListener() {}, querySelector: (selector: string) =>
         selector === ".av__automation" ? panel : {click() { returned++; panel.isConnected = false; menu.innerHTML = "settings"; }}};
@@ -180,7 +210,10 @@ test("leaving automation settings while loading does not replace the next page o
     });
     const pending = methods.openAutomationMenu({protyle: {options: {}} as IProtyle, blockElement: {} as HTMLElement,
         avID: "database", menuElement: menu as unknown as HTMLElement, onResize() {}});
-    listeners.get("[data-cancel]")();
+    const back = menu.querySelector('[data-type="go-config"]');
+    if ("click" in back) {
+        back.click();
+    }
     complete({code: 0, data: {av: {id: "database"}}});
     await pending;
     assert.equal(returned, 1);

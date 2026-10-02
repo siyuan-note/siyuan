@@ -3752,7 +3752,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to add and save rules. Rules are shared by the entire database and can respond to item edits in any view or mirror"
+					"Data": " to add a rule. Changes are saved automatically; text is saved when the field loses focus or Enter is pressed. New rules are disabled by default. Incomplete rules are automatically disabled and show what is missing; enable them manually after completing the configuration. Rules are shared by the entire database and can be triggered by item changes in any view or mirror"
 				}
 			]
 		},

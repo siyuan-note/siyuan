@@ -1,5 +1,4 @@
 import type {AVAttributeViewData, AVAutomationActionInput, AVAutomationRuleInput, AVAutomationValueInput} from "../../../types/api";
-import {showMessage} from "../../../dialog/message";
 import {Menu} from "../../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchSyncPost} from "../../../util/fetch";
@@ -61,7 +60,6 @@ export const openAutomationMenu = async (options: {
 <button class="b3-menu__separator"></button>
 <div class="av__automation">
     <div class="av__automation-body" data-body></div>
-    <div class="av__automation-footer fn__flex"><div class="fn__flex-1"></div><button class="b3-button b3-button--cancel" data-cancel>${lang.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text" data-save disabled>${lang.save}</button></div>
 </div></div>`;
     const panel = menuElement.querySelector<HTMLElement>(".av__automation");
     const body = panel.querySelector<HTMLElement>("[data-body]");
@@ -81,7 +79,6 @@ export const openAutomationMenu = async (options: {
     };
     panel.addEventListener("click", event => event.stopPropagation());
     panel.addEventListener("change", event => event.stopPropagation());
-    panel.querySelector("[data-cancel]").addEventListener("click", goBack);
     onResize();
     const response = await fetchSyncPost("/api/av/getAttributeView", {id: avID});
     // 返回上级或关闭菜单后，不再填充已经移除的设置页。
@@ -97,9 +94,9 @@ export const openAutomationMenu = async (options: {
         goBack();
         return;
     }
-    const previous = clone(database.automations || {spec: 1 as const, rules: []});
+    let previous: {spec: 1, rules: AutomationRule[]} = clone(database.automations || {spec: 1, rules: []});
     const createRule = (): AutomationRule => ({
-        id: Lute.NewNodeID(), name: lang.databaseAutomations, enabled: true, trigger: "changed",
+        id: Lute.NewNodeID(), name: lang.databaseAutomations, enabled: false, trigger: "changed",
         actions: [{type: "edit", target: "current", fields: {}}],
     });
     const rules: AutomationRule[] = clone(previous.rules || []);
@@ -120,6 +117,80 @@ export const openAutomationMenu = async (options: {
     };
     const targetID = (action: AutomationAction) => action.target === "current" ? avID : action.target === "related" ?
         fieldsOf(database).find(field => field.id === action.relationKeyID)?.relation?.avID : action.avID;
+    const filtersAvailable = (source: AVAttributeViewData, filters: IAVFilter[] = []): boolean => filters.every(filter =>
+        filter.filters ? filtersAvailable(source, filter.filters) : fieldsOf(source).some(field => field.id === filter.column));
+    const incomplete = (rule: AutomationRule): string => {
+        if (rule === rules[index] && Array.from(body.querySelectorAll<HTMLInputElement>("input")).some(input => !input.checkValidity())) {
+            return lang.invalid;
+        }
+        if (!rule.name.trim()) {
+            return lang.name;
+        }
+        if (rule.keyID && !fieldsOf(database).some(field => field.id === rule.keyID)) {
+            return lang.automationTrigger;
+        }
+        if (!filtersAvailable(database, rule.conditions)) {
+            return lang.filter;
+        }
+        if (!rule.actions.length || rule.actions.length > 20) {
+            return lang.automationAction;
+        }
+        for (const action of rule.actions) {
+            const target = databases.get(targetID(action));
+            if (!target) {
+                return action.target === "related" ? lang.relation : lang.database;
+            }
+            if (!filtersAvailable(target, action.filters)) {
+                return lang.filter;
+            }
+            if (!Object.keys(action.fields).length) {
+                return lang.fields;
+            }
+            for (const [keyID, value] of Object.entries(action.fields)) {
+                const field = fieldsOf(target).find(field => field.id === keyID);
+                if (!field || value.mode === "source" && !compatibleFields(database, field).some(source => source.id === value.keyID) ||
+                    value.mode === "static" && value.value?.type !== field.type ||
+                    value.mode === "currentTime" && field.type !== "date" ||
+                    value.mode === "triggerItem" && (field.type !== "relation" || field.relation?.avID !== avID)) {
+                    return field?.name || lang.fields;
+                }
+            }
+        }
+        return "";
+    };
+    const updateStatus = () => {
+        const rule = rules[index];
+        const issue = rule && incomplete(rule);
+        const status = body.querySelector<HTMLElement>("[data-status]");
+        if (status) {
+            status.textContent = issue ? lang.automationIncomplete.replace("${1}", issue) : "";
+            status.classList.toggle("fn__none", !issue);
+        }
+        const enabled = body.querySelector<HTMLInputElement>("[data-enabled]");
+        if (enabled && rule) {
+            enabled.checked = rule.enabled;
+        }
+    };
+    const save = (rule = rules[index]) => {
+        // 不完整规则保留配置并停用，补全后由用户显式启用，避免编辑中途开始执行。
+        if (rule) {
+            if (incomplete(rule)) {
+                rule.enabled = false;
+            }
+            if (!rule.name.trim()) {
+                rule.name = lang.databaseAutomations;
+            }
+        }
+        updateStatus();
+        onResize();
+        const next = {spec: 1 as const, rules: clone(rules)};
+        if (JSON.stringify(next) === JSON.stringify(previous)) {
+            return;
+        }
+        const operation = {action: "setAttrViewAutomations" as const, avID, blockID: blockElement.dataset.nodeId};
+        transaction(protyle, [{...operation, data: next}], [{...operation, data: clone(previous)}]);
+        previous = clone(next);
+    };
     const chooseField = (target: HTMLElement, fields: IAVColumn[], callback: (field: IAVColumn) => void) => {
         const menu = new Menu();
         fields.forEach(field => menu.addItem({label: escapeHtml(field.name), click: () => callback(field)}));
@@ -174,15 +245,26 @@ export const openAutomationMenu = async (options: {
             `<button type="button" class="b3-button b3-button--cancel" data-role="field-value" data-value-type="${field.type}" data-selected="${escapeAttr(JSON.stringify(selected))}">${getSelectedOptionsHTML(field, selected) || lang.select}</button>` :
             getValueInputHTML(field, {mode: "static", value: value.value});
         const input = host.querySelector<HTMLElement>('[data-role="field-value"]');
-        const update = () => { value.value = genFieldValue(field, input, value.value); };
-        input.addEventListener("input", update);
-        input.addEventListener("change", update);
+        const update = () => {
+            if (input instanceof HTMLInputElement && !input.checkValidity()) {
+                input.reportValidity();
+                return;
+            }
+            value.value = genFieldValue(field, input, value.value);
+        };
+        const commit = () => {
+            update();
+            save();
+        };
+        input.addEventListener("change", commit);
+        input.addEventListener("blur", commit);
         if (field.type === "checkbox") {
             input.addEventListener("click", () => {
                 const checked = input.getAttribute("aria-pressed") !== "true";
                 input.setAttribute("aria-pressed", String(checked));
                 input.querySelector("use").setAttribute("xlink:href", checked ? "#iconCheck" : "#iconUncheck");
                 update();
+                save();
             });
         } else if (field.type === "relation") {
             getRelationOptions(field, choices => renderRelationFieldValue(input, choices));
@@ -205,13 +287,17 @@ export const openAutomationMenu = async (options: {
         body.innerHTML = `<div class="ft__on-surface ft__smaller">${lang.automationTip}</div>
 <div class="av__automation-row">${rule ? `<select class="b3-select fn__flex-1" data-rule aria-label="${lang.databaseAutomations}">${rules.map((item, i) => optionHTML(String(i), item.name, String(index))).join("")}</select>` : ""}${iconButton("add-rule", "iconAdd", lang.new)}${rule ? iconButton("remove-rule", "iconTrashcan", lang.delete, true) : ""}</div>
 ${rule ? `<div class="av__automation-row"><input class="b3-text-field fn__flex-1" data-name aria-label="${lang.name}" value="${escapeAttr(rule.name)}"><label class="fn__flex fn__flex-center"><input type="checkbox" class="b3-switch" data-enabled${rule.enabled ? " checked" : ""}><span class="fn__space"></span>${lang.enable}</label></div>
+<div class="ft__error ft__smaller fn__none" role="status" data-status></div>
 <div class="ft__b">${lang.automationTrigger}</div><div class="av__automation-row"><select class="b3-select" data-trigger>${optionHTML("added", lang.automationAdded, rule.trigger)}${optionHTML("changed", lang.automationChanged, rule.trigger)}</select>${rule.trigger === "changed" ? `<select class="b3-select fn__flex-1" data-trigger-field aria-label="${lang.fields}">${optionHTML("", lang.all, rule.keyID || "")}${fieldsOf(database).map(field => optionHTML(field.id, field.name, rule.keyID)).join("")}</select>` : ""}</div>
 <div data-source-conditions></div><div class="ft__b">${lang.automationAction}</div><div data-actions></div><button type="button" class="b3-button b3-button--cancel" data-action="add-action"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAction}</button>` : ""}`;
         if (!rule) {
             onResize();
             return;
         }
-        mountFilters(body.querySelector("[data-source-conditions]"), database, rule.conditions || [], filters => rule.conditions = filters);
+        mountFilters(body.querySelector("[data-source-conditions]"), database, rule.conditions || [], filters => {
+            rule.conditions = filters;
+            save();
+        });
         const actionsHost = body.querySelector<HTMLElement>("[data-actions]");
         actionsHost.innerHTML = rule.actions.map((action, i) => {
             const target = databases.get(targetID(action));
@@ -229,7 +315,10 @@ ${target ? `<div data-target-filters></div><div data-fields></div><button type="
                 return;
             }
             if (action.type === "edit" && action.target !== "current") {
-                mountFilters(element.querySelector("[data-target-filters]"), target, action.filters || [], filters => action.filters = filters);
+                mountFilters(element.querySelector("[data-target-filters]"), target, action.filters || [], filters => {
+                    action.filters = filters;
+                    save();
+                });
             }
             const fieldsHost = element.querySelector<HTMLElement>("[data-fields]");
             Object.entries(action.fields).forEach(([keyID, value]) => {
@@ -252,6 +341,7 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
                 }
             });
         });
+        updateStatus();
         onResize();
     };
     body.addEventListener("input", event => {
@@ -260,19 +350,38 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
             body.querySelector<HTMLSelectElement>("[data-rule]").selectedOptions[0].textContent = rules[index].name;
         }
     });
+    body.addEventListener("blur", event => {
+        const target = event.target as HTMLInputElement;
+        if (target.matches("[data-name]")) {
+            rules[index].name = target.value.trim() || lang.databaseAutomations;
+            target.value = rules[index].name;
+            body.querySelector<HTMLSelectElement>("[data-rule]").selectedOptions[0].textContent = target.value;
+            save();
+        }
+    }, true);
     body.addEventListener("change", event => {
         const target = event.target as HTMLInputElement;
         const rule = rules[index];
         const action = rule?.actions[Number(target.closest<HTMLElement>("[data-index]")?.dataset.index)];
         if (target.matches("[data-rule]")) {
             index = Number(target.value);
+            void render();
+            return;
+        } else if (target.matches("[data-name]")) {
+            rule.name = target.value.trim() || lang.databaseAutomations;
+            target.value = rule.name;
+            body.querySelector<HTMLSelectElement>("[data-rule]").selectedOptions[0].textContent = rule.name;
+            save();
+            return;
         } else if (target.matches("[data-enabled]")) {
             rule.enabled = target.checked;
+            save();
             return;
         } else if (target.matches("[data-trigger]")) {
             rule.trigger = target.value === "added" ? "added" : "changed";
         } else if (target.matches("[data-trigger-field]")) {
             rule.keyID = target.value;
+            save();
             return;
         } else if (target.matches("[data-action-type]")) {
             action.type = target.value === "add" ? "add" : "edit";
@@ -296,13 +405,20 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
             }
         } else if (target.matches("[data-source-field]")) {
             action.fields[target.closest<HTMLElement>("[data-field-id]").dataset.fieldId].keyID = target.value;
+            save();
             return;
         } else {
             return;
         }
+        save();
         void render();
     });
     body.addEventListener("keydown", event => {
+        if (event.key === "Enter" && !event.isComposing && (event.target as HTMLElement).matches("input")) {
+            event.preventDefault();
+            (event.target as HTMLInputElement).blur();
+            return;
+        }
         const target = (event.target as Element).closest<SVGElement>(".b3-menu__action[data-action]");
         if (target && (event.key === "Enter" || event.key === " ")) {
             event.preventDefault();
@@ -326,7 +442,9 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
             case "remove-rule":
                 rules.splice(index, 1);
                 index = Math.min(index, rules.length - 1);
-                break;
+                save(null);
+                void render();
+                return;
             case "add-action":
                 rule.actions.push({type: "edit", target: "current", fields: {}});
                 break;
@@ -339,6 +457,7 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
             case "add-field":
                 chooseField(target, fieldsOf(databases.get(targetID(action))).filter(field => !action.fields[field.id]), field => {
                     action.fields[field.id] = {mode: "static", value: genEmptyFilterValue(field).value};
+                    save();
                     void render();
                 });
                 return;
@@ -347,31 +466,15 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
                     action.avID = element.dataset.avId;
                     action.fields = {};
                     action.filters = [];
+                    save();
                     void render();
                 }});
                 return;
             default:
                 return;
         }
+        save();
         void render();
-    });
-    panel.querySelector<HTMLButtonElement>("[data-save]").disabled = false;
-    panel.querySelector<HTMLButtonElement>("[data-save]").addEventListener("click", event => {
-        if (rules.some(rule => !rule.name.trim())) {
-            showMessage(lang.nameEmpty);
-            return;
-        }
-        const invalid = Array.from(body.querySelectorAll<HTMLInputElement>("input")).find(input => !input.checkValidity());
-        if (invalid) {
-            invalid.reportValidity();
-            return;
-        }
-        const button = event.currentTarget as HTMLButtonElement;
-        const operation = {action: "setAttrViewAutomations" as const, avID, blockID: blockElement.dataset.nodeId};
-        transaction(protyle, [{...operation, data: {spec: 1, rules: clone(rules)}}], [{...operation, data: previous}], {
-            callback: goBack,
-        });
-        button.blur();
     });
     await render();
 };

@@ -3044,10 +3044,6 @@ img.av__cellassetimg {
     min-height: 0;
   }
 
-  &-footer {
-    padding: 0 16px 16px;
-  }
-
   &-row {
     display: flex;
     align-items: center;
@@ -3068,6 +3064,10 @@ img.av__cellassetimg {
     gap: 8px;
     margin-bottom: 16px;
     min-width: 0;
+  }
+
+  &-action:last-child {
+    margin-bottom: 0;
   }
 
   &-filter,

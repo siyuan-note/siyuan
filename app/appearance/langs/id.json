@@ -1,4 +1,5 @@
 {
+	"automationIncomplete": "Aturan dijeda; lengkapi konfigurasi: ${1}",
 	"databaseAutomations": "Otomatisasi",
 	"automationTip": "Aturan berlaku untuk semua tampilan. Perubahan sumber dan tindakan otomatis dibatalkan bersama serta dipulihkan jika gagal. Tindakan otomatis tidak memicu aturan lain",
 	"automationTrigger": "Pemicu",

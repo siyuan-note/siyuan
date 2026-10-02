@@ -1,4 +1,5 @@
 {
+	"automationIncomplete": "Regel pausiert; Konfiguration vervollständigen: ${1}",
 	"databaseAutomations": "Automatisierungen",
 	"automationTip": "Regeln gelten für alle Ansichten. Ausgangsänderungen und automatische Aktionen werden gemeinsam rückgängig gemacht und bei Fehlern zurückgesetzt. Automatische Aktionen lösen keine weiteren Regeln aus",
 	"automationTrigger": "Auslöser",

@@ -1,4 +1,5 @@
 {
+	"automationIncomplete": "Regola in pausa; completa la configurazione: ${1}",
 	"databaseAutomations": "Automazioni",
 	"automationTip": "Le regole si applicano a tutte le viste. Le modifiche originali e le azioni automatiche vengono annullate insieme e ripristinate in caso di errore. Le azioni automatiche non attivano altre regole",
 	"automationTrigger": "Evento di attivazione",

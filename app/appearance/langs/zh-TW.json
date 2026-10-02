@@ -1,4 +1,5 @@
 {
+	"automationIncomplete": "規則已停用，請完善設定：${1}",
 	"databaseAutomations": "自動化",
 	"automationTip": "所有檢視共用規則。原始修改與自動操作一併復原，失敗時全部回復。自動操作不會觸發其他規則",
 	"automationTrigger": "觸發條件",

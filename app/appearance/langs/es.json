@@ -1,4 +1,5 @@
 {
+	"automationIncomplete": "Regla pausada; completa la configuración: ${1}",
 	"databaseAutomations": "Automatizaciones",
 	"automationTip": "Las reglas se aplican a todas las vistas. Los cambios originales y las acciones automáticas se deshacen juntos y se revierten si hay un error. Las acciones automáticas no activan otras reglas",
 	"automationTrigger": "Disparador",

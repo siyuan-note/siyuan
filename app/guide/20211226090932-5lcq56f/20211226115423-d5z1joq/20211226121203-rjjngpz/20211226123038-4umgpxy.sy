@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261001013550"
+		"updated": "20261002231520"
 	},
 	"Children": [
 		{
@@ -965,7 +965,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003901-ze4mbzz",
-				"updated": "20261001013550"
+				"updated": "20261002231520"
 			},
 			"Children": [
 				{
@@ -1020,12 +1020,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001000112-w0zyvyj",
-				"updated": "20261001000112"
+				"updated": "20261002231520"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "PaddleOCR 內建 PP-OCRv6 Tiny 和 Small 模型，無需下載即可離線使用。Tiny 占用資源較少，Small 辨識精確度較高。匯入其他相容的 PP-OCRv6 模型時，分別選取偵測、辨識 ONNX 檔案及對應的 inference.yml。匯入模型隨工作空間同步，提供者和目前模型的選擇依裝置儲存。"
+					"Data": "PaddleOCR 內建 PP-OCRv6 Tiny 和 Small 模型，無需下載即可離線使用。Tiny 占用資源較少，Small 辨識精確度較高。匯入其他相容的 PP-OCRv6 模型時，分別選取偵測、辨識 ONNX 檔案及對應的 inference.yml。匯入模型隨工作空間同步，提供者和目前模型的選擇依裝置儲存。新使用者預設使用 PaddleOCR，桌面端使用 Small，行動端使用 Tiny，自動 OCR 預設關閉。既有使用者保留原 OCR 設定；從尚無 OCR 提供者設定的版本升級時，繼續使用 Tesseract。"
 				}
 			]
 		},

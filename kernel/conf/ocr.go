@@ -12,5 +12,5 @@ func NewOCR(mobile bool) *OCR {
 	if mobile {
 		model = "tiny"
 	}
-	return &OCR{Provider: "tesseract", Model: model, Auto: true}
+	return &OCR{Provider: "paddleocr", Model: model, Auto: false}
 }

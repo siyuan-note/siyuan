@@ -26,6 +26,19 @@ var ocrRegistry = ocr.NewRegistry()
 var ocrInit sync.Once
 var nativePaddle = &ocr.PaddleProvider{Config: currentPaddleConfig}
 
+// 新设备使用内置 PaddleOCR 并关闭自动识别，已有设备缺少 OCR 配置时保留 Tesseract 自动识别。
+func normalizeOCRConfig(value *conf.OCR, confFileExists, mobile bool) *conf.OCR {
+	if value != nil {
+		return value
+	}
+	value = conf.NewOCR(mobile)
+	if confFileExists {
+		value.Provider = string(ocr.Tesseract)
+		value.Auto = true
+	}
+	return value
+}
+
 func InitOCR() {
 	ocrInit.Do(func() {
 		if err := ocrRegistry.Register(ocr.Tesseract, util.TesseractProvider{}); err != nil {

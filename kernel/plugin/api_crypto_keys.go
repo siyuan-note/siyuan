@@ -222,7 +222,9 @@ func (h *cryptoHost) keyDataOf(rt *goja.Runtime, format crypto.KeyFormat, value 
 
 		json, marshalErr := object.MarshalJSON()
 		if marshalErr != nil {
-			err = crypto.NewError(crypto.ErrNameData, "keyData is not a valid JsonWebKey: %s", marshalErr)
+			// 序列化失败时返回的是 JS 异常，例如 getter 抛出的异常或循环引用导致的 TypeError，
+			// 原样传出，以原值拒绝 Promise。
+			err = marshalErr
 			return
 		}
 		data.JSON = json

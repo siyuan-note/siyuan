@@ -752,6 +752,72 @@ func TestCryptoAcceptsEmptyBufferSource(t *testing.T) {
 	}
 }
 
+func TestCryptoArgumentExceptionsRejectThePromise(t *testing.T) {
+	rt := newCryptoTestRuntime(t)
+
+	// 读取参数时脚本抛出的异常不能同步抛出，而要以原值拒绝 Promise，
+	// 这样调用方的 .catch(...) 才能处理。
+	got := rt.await(`(async () => {
+		const subtle = siyuan.crypto.subtle;
+		const thrown = new Error("boom");
+		const fail = () => { throw thrown; };
+		const data = new Uint8Array(1);
+		const usages = ["encrypt"];
+		Object.defineProperty(usages, 0, {get: fail});
+
+		const results = [];
+		for (const [label, call] of [
+			["name getter", () => subtle.digest({get name() { return fail(); }}, data)],
+			["hash getter", () => subtle.importKey("raw", data, {name: "HMAC", get hash() { return fail(); }}, true, ["sign"])],
+			["valueOf", () => subtle.generateKey({name: "AES-GCM", length: {valueOf: fail}}, true, ["encrypt"])],
+			["usages element", () => subtle.generateKey({name: "AES-GCM", length: 128}, true, usages)],
+			["jwk getter", () => subtle.importKey("jwk", {get kty() { return fail(); }}, "AES-GCM", true, ["encrypt"])],
+		]) {
+			let promise;
+			try {
+				promise = call();
+			} catch (e) {
+				results.push(label + "=threw synchronously");
+				continue;
+			}
+			await promise.then(
+				() => results.push(label + "=resolved"),
+				(e) => results.push(label + "=" + (e === thrown ? "rejected with the thrown value" : "rejected with " + e)));
+		}
+		report(results.join("\n"));
+	})()`)
+	want := strings.Join([]string{
+		"name getter=rejected with the thrown value",
+		"hash getter=rejected with the thrown value",
+		"valueOf=rejected with the thrown value",
+		"usages element=rejected with the thrown value",
+		"jwk getter=rejected with the thrown value",
+	}, "\n")
+	if got != want {
+		t.Fatalf("argument exceptions =\n%s\nwant\n%s", got, want)
+	}
+}
+
+func TestCryptoArgumentInterruptPropagates(t *testing.T) {
+	rt := newCryptoTestRuntime(t)
+
+	// 插件停止时会中断运行时，参数读取期间发生的中断必须照常终止脚本，不能被当作脚本异常处理。
+	var runErr error
+	if _, err := rt.plugin.worker.RunSync(func(r *goja.Runtime) (any, error) {
+		if err := r.Set("interruptNow", func() { r.Interrupt("stop") }); err != nil {
+			return nil, err
+		}
+		_, runErr = r.RunString(`siyuan.crypto.subtle.digest({get name() { interruptNow(); for (;;) {} }}, new Uint8Array(1))`)
+		r.ClearInterrupt()
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := runErr.(*goja.InterruptedError); !ok {
+		t.Fatalf("error = %v (%T), want *goja.InterruptedError", runErr, runErr)
+	}
+}
+
 func TestCryptoSurfaceIsFrozen(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 

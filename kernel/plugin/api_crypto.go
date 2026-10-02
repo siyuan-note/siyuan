@@ -221,7 +221,14 @@ func (h *cryptoHost) run(rt *goja.Runtime, name string,
 		}
 	}
 
-	compute, err := prepare()
+	// 读取参数时可能调用脚本定义的 getter、valueOf 或迭代器。按 WebIDL 的约定，返回 Promise 的方法
+	// 要把其中抛出的异常转为以原值拒绝，而不是同步抛出。Try 只捕获可捕获的 JS 异常，
+	// 中断与栈溢出等不可捕获的异常仍会向上传播。
+	var compute func() (any, error)
+	var err error
+	if exception := rt.Try(func() { compute, err = prepare() }); exception != nil {
+		err = exception
+	}
 	if err != nil {
 		rejectWith(rt, err)
 		return rt.ToValue(promise)
@@ -283,9 +290,13 @@ func (h *cryptoHost) toJsValue(rt *goja.Runtime, result any) (goja.Value, error)
 	}
 }
 
-// toJsError 将错误转换为 JS 错误对象：参数类型错误用 TypeError，
+// toJsError 将错误转换为 JS 错误对象：脚本抛出的异常保持原值，参数类型错误用 TypeError，
 // 其余沿用 GoError 并把 name 设为 Web Crypto 规范的错误名称。
 func (h *cryptoHost) toJsError(rt *goja.Runtime, err error) goja.Value {
+	if exception, ok := err.(*goja.Exception); ok {
+		return exception.Value()
+	}
+
 	cryptoErr, ok := err.(*crypto.Error)
 	if !ok {
 		return rt.NewGoError(err)

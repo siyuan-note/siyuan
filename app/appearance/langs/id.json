@@ -3050,6 +3050,8 @@
 		"406": "Pengarsipan gagal. Data asli tetap disimpan; periksa ruang kosong, izin, dan unduhan sumber daya",
 		"407": "Arsipkan semua data pemulihan buku catatan terenkripsi sebelum menonaktifkan enkripsi",
 		"408": "Resolusi DNS gagal. Periksa pengaturan jaringan, DNS, atau proksi",
-		"409": "Koneksi jaringan terputus atau tidak dapat dibuat. Periksa pengaturan jaringan, proksi, atau firewall"
+		"409": "Koneksi jaringan terputus atau tidak dapat dibuat. Periksa pengaturan jaringan, proksi, atau firewall",
+		"410": "Konversi dibatalkan: seluruh daftar terikat ke baris basis data, tetapi konversi menghasilkan beberapa blok tanpa satu tujuan pengikatan. Lepaskan ikatan daftar atau ikat setiap item terlebih dahulu",
+		"411": "Konversi dibatalkan: item daftar dan blok pertamanya terikat ke baris berbeda dalam basis data yang sama. Lepaskan salah satu ikatan terlebih dahulu"
 	}
 }

@@ -12,6 +12,7 @@ const transactionActions: Record<IOperation["action"], true> = {
     "delete": true,
     "move": true,
     "swapBlockRef": true,
+    "convertList": true,
     "moveOutlineHeading": true,
     "append": true,
     "appendInsert": true,

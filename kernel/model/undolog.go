@@ -351,6 +351,13 @@ func (l *UndoLog) ClearAttributeView(avID string) {
 				if operation.AvID == avID {
 					return true
 				}
+				if conversion := operation.listConversion; conversion != nil {
+					for _, binding := range conversion.bindings {
+						if binding.avID == avID {
+							return true
+						}
+					}
+				}
 				if snapshot := operation.attributeViewFields; snapshot != nil && snapshot.changes[avID] != nil {
 					return true
 				}

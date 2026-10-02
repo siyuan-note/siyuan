@@ -12,6 +12,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -145,6 +146,7 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 		return copy, nil
 	}
 	restoredItems := map[string][]string{}
+	restoredBindings := false
 	for _, id := range sortedAttributeViewFieldKeys(bound) {
 		historical, err := readBoundAttributeViewHistory(boundAttributeViewHistoryPath(historyDir, boxID, id), boxID, id)
 		if os.IsNotExist(err) {
@@ -166,8 +168,15 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 			if _, exists := bound[id][primary.Block.ID]; !exists || current.GetBlockValueByBoundID(primary.Block.ID) != nil {
 				continue
 			}
-			if current.GetBlockValue(primary.BlockID) != nil {
-				return fmt.Errorf("database entry [%s] has a different binding", primary.BlockID)
+			if existing := current.GetBlockValue(primary.BlockID); existing != nil {
+				if !canRestoreListConversionBinding(tree, primary, existing) {
+					return fmt.Errorf("database entry [%s] has a different binding", primary.BlockID)
+				}
+				block := primary.Clone().Block
+				block.Created, block.Updated = existing.Block.Created, existing.Block.Updated
+				existing.Block = block
+				restoredBindings = true
+				continue
 			}
 			itemIDs = append(itemIDs, primary.BlockID)
 		}
@@ -248,11 +257,41 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 			}
 		}
 	}
-	if len(restoredItems) == 0 {
+	if len(restoredItems) == 0 && !restoredBindings {
 		return nil
 	}
 	for _, view := range after {
 		regenAttrViewGroups(view)
 	}
 	return tx.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{boxID: boxID}, before, after)
+}
+
+// 仅将同一条目从历史列表的首块还原到外壳，不覆盖无关换绑或后续字段编辑。
+func canRestoreListConversionBinding(tree *parse.Tree, historical, current *av.Value) bool {
+	if current.IsDetached || current.Block == nil || historical.ID != current.ID || historical.KeyID != current.KeyID {
+		return false
+	}
+	source := treenode.GetNodeInTree(tree, historical.Block.ID)
+	if source == nil {
+		return false
+	}
+	if source.Type == ast.NodeList {
+		items := listConversionItems(source)
+		if len(items) != 1 {
+			return false
+		}
+		source = items[0]
+	}
+	if source.Type != ast.NodeListItem {
+		return false
+	}
+	first := firstListConversionBlock(source)
+	if first == nil || first.ID != current.Block.ID {
+		return false
+	}
+	currentTree, err := LoadTreeByBlockID(first.ID)
+	if err != nil || currentTree.ID != tree.ID || currentTree.Box != tree.Box {
+		return false
+	}
+	return treenode.GetNodeInTree(currentTree, historical.Block.ID) == nil
 }

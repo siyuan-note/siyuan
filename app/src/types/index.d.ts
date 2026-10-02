@@ -697,6 +697,12 @@ interface ISiyuan {
     isPublish?: boolean;
 }
 
+/**
+ * convertList 必须通过 /api/transactions 作为单笔、单操作事务提交，blockIDs 为选中的列表、列表项或文本块。
+ * data.type 为 heading、paragraph 或 remove；heading 的 level 为 1 至 6，其他类型忽略 level。
+ * data.recursively 仅展开同类型子列表；列表项绑定迁移到首块并保留行身份和字段，歧义绑定整批拒绝。
+ * 成功后 retData 返回 rootIDs、removedIDs 和 focusID；撤销状态由内核管理，无需提交 undoOperations。
+ */
 type IOperation = Exclude<import("./api").TransactionOperationRequest, {action: import("./api").UnknownTransactionAction}>;
 
 interface IAVFilterOperation {

@@ -97,6 +97,8 @@ func TestTransactionContractMapping(t *testing.T) {
 	}
 	fixtures := []*model.Transaction{{Timestamp: 123, DoOperations: []*model.Operation{
 		{Action: "move", ID: "source", NextID: "next", PreviousID: "previous", ParentID: "parent", BlockIDs: []string{"child"}},
+		{Action: "convertList", ID: "document", BlockIDs: []string{"list"}, Data: apicontract.TransactionListConversion{Type: "heading", Level: 5},
+			RetData: apicontract.TransactionListConversionResult{RootIDs: []string{"document"}, RemovedIDs: []string{"list"}, FocusID: "paragraph"}},
 		{Action: "update", Data: "<div>content</div>", Context: map[string]any{"focusId": "block"}},
 		{Action: "updateAttrViewCell", Data: map[string]any{"text": nil}},
 		{Action: "updateAttrViewCells", CellUpdates: []*model.AttrViewCellUpdate{{KeyID: "key", RowID: "item", Data: map[string]any{"number": map[string]any{"content": 1.5}}}}},
@@ -198,6 +200,7 @@ func TestTransactionContractEncryptedContextAdmission(t *testing.T) {
 	for _, operation := range []*model.Operation{
 		{Action: "plugin-custom", Context: map[string]any{"boxID": boxID}},
 		{Action: "update", ID: boxID},
+		{Action: "convertList", BlockIDs: []string{boxID}},
 		{Action: "insertAttrViewBlock", Srcs: []map[string]any{{"id": boxID}}},
 	} {
 		if err := holdTransactionEncryptedBoxRequests(context, []*model.Transaction{{DoOperations: []*model.Operation{operation}}}); err == nil {

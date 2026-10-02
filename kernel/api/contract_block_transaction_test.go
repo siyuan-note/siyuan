@@ -140,6 +140,7 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 	engine.POST("/api/block/getHeadingFoldTransaction", getHeadingFoldTransaction)
 	testAPIContractRemainingBlockQueries(t, engine, box.ID, docID, heading.ID)
 	testAPIContractMindmapMigration(t, engine, box.ID, docID)
+	testAPIContractListConversion(t, engine, docID)
 	for _, entry := range []struct {
 		path, id, scope string
 		code            int

@@ -3050,6 +3050,8 @@
 		"406": "The archive operation failed. Original data has been preserved; check available space, permissions, and resource downloads",
 		"407": "Archive all encrypted notebook recovery dependencies before disabling encryption",
 		"408": "DNS resolution failed, please check your network, DNS, or proxy settings",
-		"409": "The network connection was interrupted or could not be established, please check your network, proxy, or firewall settings"
+		"409": "The network connection was interrupted or could not be established, please check your network, proxy, or firewall settings",
+		"410": "Conversion canceled: the whole list is bound to a database row, but conversion produces multiple blocks with no unique binding target. Unbind the whole list or bind individual list items first",
+		"411": "Conversion canceled: the list item and its first block are bound to different rows in the same database. Unbind one of them first"
 	}
 }

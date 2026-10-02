@@ -3050,6 +3050,8 @@
 		"406": "Échec de l’archivage. Les données originales sont conservées ; vérifiez l’espace disponible, les autorisations et les téléchargements de ressources",
 		"407": "Archivez toutes les données de récupération des carnets chiffrés avant de désactiver le chiffrement",
 		"408": "La résolution DNS a échoué. Vérifiez les paramètres du réseau, du DNS ou du proxy",
-		"409": "La connexion réseau a été interrompue ou n’a pas pu être établie. Vérifiez les paramètres du réseau, du proxy ou du pare-feu"
+		"409": "La connexion réseau a été interrompue ou n’a pas pu être établie. Vérifiez les paramètres du réseau, du proxy ou du pare-feu",
+		"410": "Conversion annulée : la liste entière est liée à une ligne de base de données, mais la conversion produit plusieurs blocs sans cible unique. Déliez la liste ou liez ses éléments individuellement au préalable",
+		"411": "Conversion annulée : l’élément de liste et son premier bloc sont liés à des lignes différentes de la même base de données. Supprimez d’abord l’un des liens"
 	}
 }

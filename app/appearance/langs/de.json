@@ -3050,6 +3050,8 @@
 		"406": "Archivierung fehlgeschlagen. Die Originaldaten bleiben erhalten; freien Speicherplatz, Berechtigungen und Ressourcendownloads prüfen",
 		"407": "Vor dem Deaktivieren der Verschlüsselung alle Wiederherstellungsdaten verschlüsselter Notizbücher archivieren",
 		"408": "DNS-Auflösung fehlgeschlagen. Bitte prüfen Sie Ihre Netzwerk-, DNS- oder Proxy-Einstellungen",
-		"409": "Die Netzwerkverbindung wurde unterbrochen oder konnte nicht hergestellt werden. Bitte prüfen Sie Ihre Netzwerk-, Proxy- oder Firewall-Einstellungen"
+		"409": "Die Netzwerkverbindung wurde unterbrochen oder konnte nicht hergestellt werden. Bitte prüfen Sie Ihre Netzwerk-, Proxy- oder Firewall-Einstellungen",
+		"410": "Konvertierung abgebrochen: Die gesamte Liste ist an eine Datenbankzeile gebunden, die Konvertierung erzeugt jedoch mehrere Blöcke ohne eindeutiges Bindungsziel. Lösen Sie zuerst die Bindung der Liste oder binden Sie einzelne Listeneinträge",
+		"411": "Konvertierung abgebrochen: Der Listeneintrag und sein erster Block sind an verschiedene Zeilen derselben Datenbank gebunden. Lösen Sie zuerst eine der Bindungen"
 	}
 }

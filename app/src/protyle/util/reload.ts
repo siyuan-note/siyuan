@@ -14,7 +14,7 @@ import {updateBacklinkReferenceVisibility} from "../wysiwyg/backlinkReference";
 import {shouldReloadProtyle} from "./reloadState";
 import {setAutoDirection, setTitleAutoDirection} from "../render/autoDirection";
 
-export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
+export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean, callback?: () => void) => {
     if (!shouldReloadProtyle(protyle)) {
         return;
     }
@@ -103,6 +103,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
                 }
                 protyle.databaseAttributePanel?.refresh();
                 protyle.model?.refreshBottomBacklinkPanel();
+                callback?.();
             }
         });
     }

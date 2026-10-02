@@ -3050,6 +3050,8 @@
 		"406": "Error al archivar. Se han conservado los datos originales; compruebe el espacio libre, los permisos y las descargas de recursos",
 		"407": "Archive todos los datos de recuperación de cuadernos cifrados antes de desactivar el cifrado",
 		"408": "La resolución DNS ha fallado. Compruebe la configuración de red, DNS o proxy",
-		"409": "La conexión de red se ha interrumpido o no se ha podido establecer. Compruebe la configuración de red, proxy o cortafuegos"
+		"409": "La conexión de red se ha interrumpido o no se ha podido establecer. Compruebe la configuración de red, proxy o cortafuegos",
+		"410": "Conversión cancelada: toda la lista está vinculada a una fila de la base de datos, pero la conversión genera varios bloques sin un destino único. Desvincule la lista o vincule sus elementos individualmente primero",
+		"411": "Conversión cancelada: el elemento de la lista y su primer bloque están vinculados a filas distintas de la misma base de datos. Desvincule uno de ellos primero"
 	}
 }

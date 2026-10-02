@@ -36,3 +36,15 @@ test("editor transaction selection preserves the original extension response", (
     assert.deepEqual(response.doOperations[1].data, {extension: [1, null, true]});
     assert.equal(selected.undoOperations, null);
 });
+
+test("authoritative list conversion invalidates heading numbers and the outline", () => {
+    const response: Transaction = JSON.parse(`{"doOperations":[{
+        "action":"convertList","id":"document","blockIDs":["list"],
+        "data":{"type":"heading","level":5,"recursively":false},
+        "retData":{"rootIDs":["document"],"removedIDs":["list"],"focusID":"paragraph"}
+    }]}`);
+    const operations = getEditorTransaction(response).doOperations;
+    assert.equal(operations.length, 1);
+    assert.equal(operationsMayChangeOutline(operations), true);
+    assert.equal(operationsMayChangeHeadingNumbers(operations), true);
+});

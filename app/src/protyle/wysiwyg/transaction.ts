@@ -77,7 +77,7 @@ import {
     restoreBlockSelectionModeState
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
-import {getHeadingConversionElements, isListHeadingContainer} from "./headingConversion";
+import {isListHeadingContainer} from "./headingConversion";
 import {cleanTableCellRichHTML, getTableBlockHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
 import {cleanTableVirtualizationHTML, TABLE_VIRTUAL_ID} from "../util/tableVirtualizationDOM";
 import {
@@ -86,7 +86,8 @@ import {
 } from "../render/listMindmap/model";
 import {prepareListMindmapConversion} from "../render/listMindmap/conversion";
 import {buildCancelListOperations} from "./cancelList";
-import {buildListConversionOperations} from "./listConversion";
+import {markMirror, refreshUndoButtons} from "../undo/globalUndo";
+import type {TransactionListConversionResult} from "../../types/api";
 import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
@@ -865,6 +866,10 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     const deferUndoFocus = !!undoFocusContext?.undoFocusEmbedId;
     const pendingUndoEmbedElements = new Set<Element>();
     operations.forEach(operation => {
+        if (operation.action === "convertList") {
+            refreshListConversion(protyle, operation.retData, isUndo);
+            return;
+        }
         if (operation.action === "swapBlockRef") {
             if (operation.retData?.includes(protyle.block.rootID)) {
                 reloadProtyle(protyle, false);
@@ -2106,6 +2111,33 @@ const unfoldListHeadings = async (protyle: IProtyle, nodeElements: Element[]) =>
 export const removeListStructure = (protyle: IProtyle, nodeElements: Element[], recursively = false) =>
     turnListBlocksInto({protyle, recursively}, nodeElements.filter(isListHeadingContainer));
 
+const refreshListConversion = (protyle: IProtyle, result: TransactionListConversionResult, focus = false) => {
+    if (!result?.rootIDs?.length) {
+        return;
+    }
+    if (result.rootIDs.includes(protyle.block.rootID)) {
+        if (result.removedIDs.includes(protyle.block.id)) {
+            protyle.block.id = result.focusID || protyle.block.rootID;
+        }
+        if (result.removedIDs.includes(protyle.block.parentID)) {
+            protyle.block.parentID = protyle.block.rootID;
+        }
+        reloadProtyle(protyle, false, undefined, () => {
+            if (focus && result.focusID) {
+                const element = protyle.wysiwyg.element.querySelector(`[data-node-id="${result.focusID}"]`);
+                if (element) {
+                    focusBlock(element);
+                }
+            }
+        });
+    } else {
+        protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach(item => {
+            item.removeAttribute("data-render");
+            blockRender(protyle, item);
+        });
+    }
+};
+
 const turnListBlocksInto = async (options: {
     protyle: IProtyle,
     type?: TTurnInto,
@@ -2116,95 +2148,36 @@ const turnListBlocksInto = async (options: {
 }, elements: Element[]) => {
     const protyle = options.protyle;
     const selected = elements.filter(element => !elements.some(parent => parent !== element && parent.contains(element)));
-    const conversionElements = options.recursively ? selected.flatMap(element => [element,
-        ...Array.from(element.querySelectorAll('[data-type="NodeList"]')).filter(list =>
-            list.getAttribute("data-subtype") === element.getAttribute("data-subtype"))]).reverse() : selected;
-    // 取消列表只移除外层结构，任意类型的首块均可保留。
-    const targets = options.type ? getHeadingConversionElements(conversionElements) : conversionElements.flatMap(element => {
-        const items = element.getAttribute("data-type") === "NodeList" ?
-            Array.from(element.children).filter(item => item.getAttribute("data-type") === "NodeListItem") : [element];
-        return items.map(item => Array.from(item.children).find(child => child.hasAttribute("data-node-id"))).filter(Boolean);
-    });
-    if (targets.length === 0) {
+    if (!selected.length) {
         return;
     }
-    const lists = new Map<Element, Set<string>>();
-    conversionElements.filter(isListHeadingContainer).forEach(element => {
-        const list = element.getAttribute("data-type") === "NodeList" ? element : element.parentElement;
-        const itemIDs = lists.get(list) || new Set<string>();
-        const items = element === list ? Array.from(list.children) : [element];
-        items.forEach(item => {
-            const first = Array.from(item.children).find(child => child.hasAttribute("data-node-id"));
-            if (targets.includes(first)) {
-                itemIDs.add(item.getAttribute("data-node-id"));
-            }
+    // 等待已有编辑落盘，再由内核检查完整列表；拒绝时保留页面和折叠状态。
+    return queueTransaction(protyle, async () => {
+        const response = await fetchSyncPost("/api/transactions", {
+            reqId: Date.now(), session: protyle.id, app: Constants.SIYUAN_APPID,
+            transactions: [{doOperations: [{
+                action: "convertList", id: protyle.block.rootID,
+                blockIDs: selected.map(element => element.getAttribute("data-node-id")),
+                data: {
+                    type: options.type === "Blocks2Hs" ? "heading" : options.type ? "paragraph" : "remove",
+                    level: options.level || 0,
+                    recursively: options.recursively || false,
+                },
+            }]}],
         });
-        if (itemIDs.size > 0) {
-            lists.set(list, itemIDs);
+        if (response.code !== 0 || !response.data?.length) {
+            return;
         }
+        const operation = getEditorTransaction(response.data[0]).doOperations.find(item => item.action === "convertList");
+        if (operation?.action !== "convertList" || !operation.retData?.rootIDs?.length) {
+            return;
+        }
+        operation.retData.rootIDs.forEach(rootID => markMirror(rootID, {canUndo: true, canRedo: false}));
+        protyle.updated = true;
+        hideElements(["select", "gutter"], protyle);
+        refreshListConversion(protyle, operation.retData, !options.unfocus);
+        refreshUndoButtons(protyle);
     });
-    if (!options.unfocus && !targets[0].querySelector("wbr")) {
-        getContenteditableElement(targets[0])?.insertAdjacentHTML("afterbegin", "<wbr>");
-    }
-    const foldOperations = await unfoldListHeadings(protyle, Array.from(lists.keys()));
-    protyle.observerLoad?.disconnect();
-    hideElements(["select"], protyle);
-    const doOperations: IOperation[] = [];
-    const undoOperations: IOperation[] = [];
-    const convert = (html: string): string => {
-        // @ts-ignore Lute 声明尚未包含块类型转换方法。
-        return protyle.lute[options.type](html, options.level);
-    };
-    for (const [list, itemIDs] of lists) {
-        let previousID = getPreviousBlockSibling(list)?.getAttribute("data-node-id");
-        let parentID = getEmbedChildOperationParentID(list) || getParentBlock(list)?.getAttribute("data-node-id") ||
-            protyle.block.parentID || protyle.block.rootID;
-        if (!previousID && protyle.block.showAll) {
-            const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
-                id: list.getAttribute("data-node-id"), notebook: protyle.notebookId,
-            });
-            if (response.code !== 0) {
-                throw new Error(response.msg);
-            }
-            previousID = response.data.previousID;
-            parentID = response.data.parentID || parentID;
-        }
-        const operations = buildListConversionOperations(list, {itemIDs, previousID, parentID,
-            convert: options.type ? convert : undefined,
-            newID: () => Lute.NewNodeID()});
-        doOperations.push(...operations.doOperations);
-        undoOperations.unshift(...operations.undoOperations);
-        disposeCustomBlocksInElement(list);
-        list.insertAdjacentHTML("afterend", operations.html);
-        list.remove();
-    }
-    selected.filter(element => ["NodeHeading", "NodeParagraph"].includes(element.getAttribute("data-type"))).forEach(element => {
-        const id = element.getAttribute("data-node-id");
-        let html = convert(element.outerHTML);
-        let foldData;
-        if (element.getAttribute("data-type") === "NodeHeading" && element.getAttribute("fold") === "1" &&
-            (options.type === "Blocks2Ps" || element.getAttribute("data-subtype") !== `h${options.level}`)) {
-            foldData = setFold(protyle, element as HTMLElement, undefined, undefined, true);
-            html = html.replace(' fold="1"', "");
-            doOperations.push(...(foldData?.doOperations || []));
-        }
-        doOperations.push({action: "update", id, data: html});
-        undoOperations.push({action: "update", id, data: element.outerHTML});
-        undoOperations.push(...(foldData?.undoOperations || []));
-        disposeCustomBlocksInElement(element);
-        element.outerHTML = html;
-    });
-    transaction(protyle, doOperations.concat(foldOperations), undoOperations.concat(foldOperations.map(operation => ({...operation}))));
-    if (!hasViewFoldContext(protyle)) {
-        onTransaction(protyle, foldOperations, false, true);
-    }
-    blockRender(protyle, protyle.wysiwyg.element);
-    processRender(protyle.wysiwyg.element);
-    highlightRender(protyle.wysiwyg.element);
-    avRender(protyle.wysiwyg.element, protyle);
-    if (!options.unfocus) {
-        focusByWbr(protyle.wysiwyg.element, options.range || getEditorRange(protyle.wysiwyg.element));
-    }
 };
 
 export const turnListsRecursively = async (options: {

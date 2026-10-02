@@ -3050,6 +3050,8 @@
 		"406": "Archivácia zlyhala. Pôvodné údaje zostali zachované; skontrolujte voľné miesto, oprávnenia a sťahovanie zdrojov",
 		"407": "Pred vypnutím šifrovania archivujte všetky údaje na obnovu šifrovaných poznámkových blokov",
 		"408": "Preklad názvu DNS zlyhal. Skontrolujte nastavenia siete, DNS alebo proxy",
-		"409": "Sieťové pripojenie bolo prerušené alebo sa ho nepodarilo nadviazať. Skontrolujte nastavenia siete, proxy alebo brány firewall"
+		"409": "Sieťové pripojenie bolo prerušené alebo sa ho nepodarilo nadviazať. Skontrolujte nastavenia siete, proxy alebo brány firewall",
+		"410": "Konverzia zrušená: celý zoznam je naviazaný na riadok databázy, ale konverzia vytvorí viac blokov bez jednoznačného cieľa väzby. Najprv zrušte väzbu zoznamu alebo naviažte jednotlivé položky",
+		"411": "Konverzia zrušená: položka zoznamu a jej prvý blok sú naviazané na rôzne riadky tej istej databázy. Najprv zrušte jednu z väzieb"
 	}
 }

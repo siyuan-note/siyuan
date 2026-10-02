@@ -47,6 +47,23 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 	}
 	timestamp := int64(request.ReqID)
 	var err error
+	convertList := false
+	for _, transaction := range transactions {
+		if transaction == nil {
+			continue
+		}
+		for _, operation := range transaction.DoOperations {
+			if operation != nil && operation.Action == "convertList" {
+				convertList = true
+			}
+		}
+	}
+	if convertList {
+		if len(transactions) != 1 || len(transactions[0].DoOperations) != 1 {
+			return apicontract.Failure[[]*apicontract.Transaction](-1, "list conversion requires a separate transaction")
+		}
+		model.FlushTxQueue()
+	}
 
 	if err = model.ValidateFlashcardTransactions(transactions); err != nil {
 		return apicontract.Failure[[]*apicontract.Transaction](-1, err.Error())
@@ -69,7 +86,7 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 		transaction.MarkFromAPI() // 标记来自 HTTP 入口，供全局撤销日志捕获判别
 	}
 
-	if templateDocTreeAttached {
+	if templateDocTreeAttached || convertList {
 		if err = model.PerformTxSync(transactions[0]); nil != err {
 			return apicontract.Failure[[]*apicontract.Transaction](-1, util.EscapeHTML(err.Error()))
 		}
@@ -375,7 +392,7 @@ func pushUndoTransactions(app, session string, transactions []*model.Transaction
 
 func holdBlockSwapReplayRequests(c *gin.Context, tx *model.Transaction, rootIDs []string) error {
 	for _, operation := range tx.DoOperations {
-		if operation != nil && operation.Action == "swapBlockRef" {
+		if operation != nil && (operation.Action == "swapBlockRef" || operation.Action == "convertList") {
 			return holdEncryptedBlockRequests(c, "", rootIDs, false)
 		}
 	}

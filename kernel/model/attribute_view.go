@@ -4099,7 +4099,13 @@ func genAttrViewGroupsWithItems(view *av.View, attrView *av.AttributeView, sourc
 		}
 	}
 
-	for groupValue, groupItems := range groupItemsMap {
+	groupValues := make([]string, 0, len(groupItemsMap))
+	for value := range groupItemsMap {
+		groupValues = append(groupValues, value)
+	}
+	sort.Strings(groupValues)
+	for _, groupValue := range groupValues {
+		groupItems := groupItemsMap[groupValue]
 		var v *av.View
 		switch view.LayoutType {
 		case av.LayoutTypeList:
@@ -4161,11 +4167,14 @@ func genAttrViewGroupsWithItems(view *av.View, attrView *av.AttributeView, sourc
 
 // GroupState 用于临时记录每个分组视图的状态，以便后面重新生成分组后可以恢复这些状态。
 type GroupState struct {
-	ID      string
-	Folded  bool
-	Hidden  int
-	Sort    int
-	ItemIDs []string
+	ID         string
+	LayoutID   string
+	LayoutType av.LayoutType
+	Position   int
+	Folded     bool
+	Hidden     int
+	Sort       int
+	ItemIDs    []string
 }
 
 func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) {
@@ -4174,18 +4183,21 @@ func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) 
 		return
 	}
 
-	for _, groupView := range view.Groups {
+	for position, groupView := range view.Groups {
 		if av.LayoutTypeKanban == groupView.LayoutType {
 			// 看板视图的分组不能折叠
 			groupView.GroupFolded = false
 		}
 
 		groupStates[groupView.GetGroupValue()] = &GroupState{
-			ID:      groupView.ID,
-			Folded:  groupView.GroupFolded,
-			Hidden:  groupView.GroupHidden,
-			Sort:    groupView.GroupSort,
-			ItemIDs: groupView.GroupItemIDs,
+			ID:         groupView.ID,
+			LayoutID:   attrViewGroupLayoutID(groupView),
+			LayoutType: groupView.LayoutType,
+			Position:   position,
+			Folded:     groupView.GroupFolded,
+			Hidden:     groupView.GroupHidden,
+			Sort:       groupView.GroupSort,
+			ItemIDs:    groupView.GroupItemIDs,
 		}
 	}
 	return
@@ -4198,6 +4210,18 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 			groupView.GroupFolded = state.Folded
 			groupView.GroupHidden = state.Hidden
 			groupView.GroupSort = state.Sort
+			if groupView.LayoutType == state.LayoutType && state.LayoutID != "" {
+				switch groupView.LayoutType {
+				case av.LayoutTypeTable:
+					groupView.Table.ID = state.LayoutID
+				case av.LayoutTypeList:
+					groupView.List.ID = state.LayoutID
+				case av.LayoutTypeGallery:
+					groupView.Gallery.ID = state.LayoutID
+				case av.LayoutTypeKanban:
+					groupView.Kanban.ID = state.LayoutID
+				}
+			}
 
 			itemIDsSort := map[string]int{}
 			for i, itemID := range state.ItemIDs {
@@ -4210,6 +4234,14 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 		}
 	}
 
+	// 分组重建保留序列化顺序，避免未编辑的布局被记录为字段变更。
+	sort.SliceStable(view.Groups, func(i, j int) bool {
+		left, right := groupStates[view.Groups[i].GetGroupValue()], groupStates[view.Groups[j].GetGroupValue()]
+		if left != nil && right != nil {
+			return left.Position < right.Position
+		}
+		return left != nil && right == nil
+	})
 	defaultGroup := view.GetGroupByGroupValue(groupValueDefault)
 	if nil != defaultGroup {
 		if -1 == defaultGroup.GroupSort {
@@ -4229,6 +4261,28 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 		view.Groups = append(view.Groups, defaultGroup)
 		defaultGroup.GroupSort = len(view.Groups) - 1
 	}
+}
+
+func attrViewGroupLayoutID(view *av.View) string {
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		if view.Table != nil {
+			return view.Table.ID
+		}
+	case av.LayoutTypeList:
+		if view.List != nil {
+			return view.List.ID
+		}
+	case av.LayoutTypeGallery:
+		if view.Gallery != nil {
+			return view.Gallery.ID
+		}
+	case av.LayoutTypeKanban:
+		if view.Kanban != nil {
+			return view.Kanban.ID
+		}
+	}
+	return ""
 }
 
 func GetCurrentAttributeViewImages(c *gin.Context, avID, blockID, viewID, query string) (ret []string, err error) {

@@ -523,59 +523,56 @@ func pushLatestRefDynamicText(key string, sequence uint64, rootID, blockID, defB
 
 func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 	var parents []*ast.Node
-	for _, updatedDefNode := range updatedDefNodes {
-		for parent := updatedDefNode.Parent; nil != parent && ast.NodeDocument != parent.Type; parent = parent.Parent {
+	for _, node := range updatedDefNodes {
+		for parent := node.Parent; parent != nil && parent.Type != ast.NodeDocument; parent = parent.Parent {
 			parents = append(parents, parent)
 		}
 	}
 	for _, parent := range parents {
 		updatedDefNodes[parent.ID] = parent
 	}
-
-	for _, updatedDefNode := range updatedDefNodes {
-		avs := updatedDefNode.IALAttr(av.NodeAttrNameAvs)
-		if "" == avs {
+	// 按数据库汇总主键刷新，同批块更新只解析和保存每个数据库一次。
+	byView := map[string]map[string]*ast.Node{}
+	for _, node := range updatedDefNodes {
+		for id := range strings.SplitSeq(node.IALAttr(av.NodeAttrNameAvs), ",") {
+			if id == "" {
+				continue
+			}
+			if byView[id] == nil {
+				byView[id] = map[string]*ast.Node{}
+			}
+			byView[id][node.ID] = node
+		}
+	}
+	for _, id := range sortedAttributeViewFieldKeys(byView) {
+		view, err := av.ParseAttributeView(id)
+		if err != nil {
 			continue
 		}
-
-		avIDs := strings.SplitSeq(avs, ",")
-		for avID := range avIDs {
-			attrView, parseErr := av.ParseAttributeView(avID)
-			if nil != parseErr {
+		primary := view.GetBlockKeyValues()
+		if primary == nil {
+			continue
+		}
+		changed := false
+		for _, value := range primary.Values {
+			node := byView[id][value.Block.ID]
+			if node == nil {
 				continue
 			}
-
-			changedAv := false
-			blockValues := attrView.GetBlockKeyValues()
-			if nil == blockValues {
+			icon, content := getNodeAvBlockText(node, id)
+			content = util.UnescapeHTML(content)
+			subtype := getNodeAvBlockRefSubtype(node, id)
+			if icon != value.Block.Icon || content != value.Block.Content || subtype != value.Block.RefSubtype {
+				value.Block.Icon, value.Block.Content, value.Block.RefSubtype = icon, content, subtype
+				changed = true
+			}
+		}
+		if changed {
+			if err = av.SaveAttributeView(view); err != nil {
 				continue
 			}
-
-			for _, blockValue := range blockValues.Values {
-				if blockValue.Block.ID == updatedDefNode.ID {
-					newIcon, newContent := getNodeAvBlockText(updatedDefNode, avID)
-					newRefSubtype := getNodeAvBlockRefSubtype(updatedDefNode, avID)
-					if newIcon != blockValue.Block.Icon {
-						blockValue.Block.Icon = newIcon
-						changedAv = true
-					}
-					if newContent != blockValue.Block.Content {
-						blockValue.Block.Content = util.UnescapeHTML(newContent)
-						changedAv = true
-					}
-					if newRefSubtype != blockValue.Block.RefSubtype {
-						blockValue.Block.RefSubtype = newRefSubtype
-						changedAv = true
-					}
-					break
-				}
-			}
-			if changedAv {
-				av.SaveAttributeView(attrView)
-				ReloadAttrView(avID)
-
-				refreshRelatedSrcAvs(avID, nil)
-			}
+			ReloadAttrView(id)
+			refreshRelatedSrcAvs(id, nil)
 		}
 	}
 }

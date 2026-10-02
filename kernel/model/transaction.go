@@ -75,6 +75,12 @@ func PerformTxSync(tx *Transaction) (err error) {
 		isFlushing.Store(false)
 		flushLock.Unlock()
 	}()
+	if !tx.isReplay && len(tx.DoOperations) == 1 && tx.DoOperations[0].Action == "convertList" {
+		// 完整列表转换读取前先执行已排队编辑，确保各客户端的提交顺序一致。
+		for _, queued := range takeQueuedTransactions() {
+			flushTx(queued)
+		}
+	}
 	return performTxSyncLocked(tx)
 }
 
@@ -273,6 +279,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doMove(op)
 			case "swapBlockRef":
 				ret = tx.doSwapBlockRef(op)
+			case "convertList":
+				ret = tx.doConvertList(op)
 			case "moveOutlineHeading":
 				ret = tx.doMoveOutlineHeading(op)
 			case "append":
@@ -2445,6 +2453,8 @@ type Operation struct {
 	templateDocTreeRootID    string
 	blockSwapState           *blockSwapState
 	blockSwapUndo            bool
+	listConversion           *listConversionState
+	listConversionUndo       bool
 	attributeViewItems       *attributeViewItemsSnapshot
 	attributeViewFields      *attributeViewFieldsSnapshot
 	attributeViewFieldUndo   bool

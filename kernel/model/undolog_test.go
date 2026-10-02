@@ -30,6 +30,7 @@ func TestUndoLogClearAttributeView(t *testing.T) {
 		{Action: "updateAttrViewCell", AvID: avID},
 		{Action: "addAttrViewCol", AvID: "related-database", attributeViewFields: snapshot},
 		{Action: "insertAttrViewBlock", AvID: "related-database", attributeViewItems: &attributeViewItemsSnapshot{relatedChanges: snapshot}},
+		{Action: "convertList", listConversion: &listConversionState{bindings: []*listConversionBinding{{avID: avID}}}},
 	} {
 		t.Run(operation.Action, func(t *testing.T) {
 			log := newUndoLog(64)

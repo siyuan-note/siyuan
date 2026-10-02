@@ -3050,6 +3050,8 @@
 		"406": "Archivering mislukt. De oorspronkelijke gegevens zijn bewaard; controleer vrije ruimte, machtigingen en het downloaden van bronnen",
 		"407": "Archiveer alle herstelgegevens van versleutelde notitieboeken voordat u versleuteling uitschakelt",
 		"408": "DNS-resolutie mislukt. Controleer uw netwerk-, DNS- of proxyinstellingen",
-		"409": "De netwerkverbinding is onderbroken of kon niet tot stand worden gebracht. Controleer uw netwerk-, proxy- of firewallinstellingen"
+		"409": "De netwerkverbinding is onderbroken of kon niet tot stand worden gebracht. Controleer uw netwerk-, proxy- of firewallinstellingen",
+		"410": "Conversie geannuleerd: de hele lijst is gekoppeld aan een databaserij, maar de conversie levert meerdere blokken op zonder uniek koppelingsdoel. Ontkoppel eerst de lijst of koppel afzonderlijke lijstitems",
+		"411": "Conversie geannuleerd: het lijstitem en het eerste blok zijn gekoppeld aan verschillende rijen in dezelfde database. Verwijder eerst een van de koppelingen"
 	}
 }

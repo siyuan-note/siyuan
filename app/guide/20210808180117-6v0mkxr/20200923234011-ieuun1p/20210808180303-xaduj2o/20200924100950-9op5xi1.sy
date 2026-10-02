@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261002201736"
+		"updated": "20261002202250"
 	},
 	"Children": [
 		{
@@ -4293,7 +4293,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20260928091724"
+				"updated": "20261002202032"
 			},
 			"Children": [
 				{
@@ -4313,7 +4313,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20260902224242"
+				"updated": "20261002202032"
 			},
 			"Children": [
 				{
@@ -4862,7 +4862,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "A text selection spanning multiple blocks copies the corresponding block embed list, just like selecting those blocks"
+								}
+							]
 						}
 					]
 				},
@@ -10113,7 +10119,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-d0mxz1p",
-				"updated": "20261002201736"
+				"updated": "20261002202250"
 			},
 			"Children": [
 				{
@@ -10137,7 +10143,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-v6ksqnu",
-				"updated": "20261002201736"
+				"updated": "20261002202250"
 			},
 			"Children": [
 				{
@@ -11515,6 +11521,65 @@
 								{
 									"Type": "NodeText",
 									"Data": "; the configured shortcut also converts a selected mind map block to this list type"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mind map block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Unassigned"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Insert a mind map, or convert the selected list or the list containing the caret; configure in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
 								}
 							]
 						}

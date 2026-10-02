@@ -1351,6 +1351,8 @@ declare namespace Config {
         link?: IKey;
         mark?: IKey;
         memo?: IKey;
+        /** 插入思维导图或将当前列表转换为思维导图，默认未绑定。 */
+        mindmap?: IKey;
         ref?: IKey;
         strike?: IKey;
         sub?: IKey;

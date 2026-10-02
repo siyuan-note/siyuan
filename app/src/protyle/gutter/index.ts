@@ -1876,6 +1876,7 @@ export class Gutter {
                     id: "listMindmap",
                     icon: "iconMindmap",
                     label: window.siyuan.languages.mindmap,
+                    accelerator: window.siyuan.config.keymap.editor.insert.mindmap?.custom,
                     click() {
                         hideElements(["select"], protyle);
                         void toggleListMindmap(protyle, nodeElement as HTMLElement);

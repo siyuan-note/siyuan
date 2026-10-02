@@ -136,6 +136,7 @@ const runCases = async (sources) => {
     assert.deepEqual(registry.getMobileSecondaryEditors(), [editor]);
     panel.markIndexDirty({backlinkChanged: true, backlinkFull: true});
     panel.refreshAfterIndex();
+    await new Promise(resolve => setTimeout(resolve, 1100));
     const inFlight = requests.shift();
     editor.protyle.wysiwyg.element.focus();
     assert.equal(registry.getActiveMobileSecondaryEditor(), editor);

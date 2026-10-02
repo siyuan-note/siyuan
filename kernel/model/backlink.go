@@ -634,11 +634,7 @@ func GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword string, sortMode, 
 		if nil != NormalizeBacklinkSourceFilter(sourceFilter) {
 			linkRefsCount = len(filteredLinkRefs)
 		}
-		tmpBacklinks := toFlatTree(filteredLinkRefs, 0, "backlink", nil)
-		for _, l := range tmpBacklinks {
-			l.Blocks = nil
-			backlinks = append(backlinks, l)
-		}
+		backlinks = backlinkListPaths(filteredLinkRefs, boxID)
 	} else {
 		linkRefsCount = 0
 	}
@@ -667,11 +663,7 @@ func GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword string, sortMode, 
 
 	if includeMentions {
 		mentionRefs, _ := buildTreeBackmentionInBox(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12, boxID)
-		tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink", nil)
-		for _, l := range tmpBackmentions {
-			l.Blocks = nil
-			backmentions = append(backmentions, l)
-		}
+		backmentions = backlinkListPaths(mentionRefs, boxID)
 	}
 
 	sort.Slice(backmentions, func(i, j int) bool {
@@ -718,6 +710,34 @@ func GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword string, sortMode, 
 		name := boxNames[l.Box]
 		l.HPath = name + l.HPath
 	}
+	return
+}
+
+// 反链和提及列表只需要文档元数据及命中数量，按笔记本读取索引，避免为每组加载和渲染整篇文档。
+func backlinkListPaths(blocks []*Block, boxID string) (ret []*Path) {
+	ret = []*Path{}
+	counts := map[string]int{}
+	var rootIDs []string
+	for _, block := range blocks {
+		if counts[block.RootID] == 0 {
+			rootIDs = append(rootIDs, block.RootID)
+		}
+		counts[block.RootID]++
+	}
+	for start := 0; start < len(rootIDs); start += 512 {
+		for _, root := range sql.GetBlocksInBox(rootIDs[start:min(start+512, len(rootIDs))], boxID) {
+			if root == nil {
+				continue
+			}
+			block := fromSQLBlock(root, "", 0)
+			ret = append(ret, &Path{
+				ID: block.ID, Box: block.Box, Name: path.Base(block.HPath), HPath: block.HPath,
+				NodeType: block.Type, Type: "backlink", SubType: block.SubType,
+				Count: counts[block.ID], Updated: block.IAL["updated"], Created: block.ID[:14],
+			})
+		}
+	}
+	sort.Slice(ret, func(i, j int) bool { return ret[i].ID > ret[j].ID })
 	return
 }
 

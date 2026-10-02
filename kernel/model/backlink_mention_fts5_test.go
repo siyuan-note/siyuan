@@ -118,6 +118,17 @@ func TestBacklinkMentionFilteredPagination(t *testing.T) {
 				sql.UpdateRefsTreeQueue(tree)
 			}
 			sql.FlushQueue()
+			groupedBlocks := []*Block{{RootID: fixture.targetID}, {RootID: fixture.sourceID}, {RootID: fixture.targetID}}
+			wantPaths := toFlatTree(groupedBlocks, 0, "backlink", nil)
+			for _, item := range wantPaths {
+				item.Blocks = nil
+			}
+			if got := backlinkListPaths(groupedBlocks, boxID); !reflect.DeepEqual(got, wantPaths) {
+				t.Fatalf("indexed document groups changed list metadata: got %+v, want %+v", got, wantPaths)
+			}
+			if got := backlinkListPaths(nil, boxID); got == nil || len(got) != 0 {
+				t.Fatalf("empty groups must remain an empty array: %+v", got)
+			}
 			query, args := buildBackmentionQuery(columnFilter()+`:("needle" OR "broad")`, fixture.sourceID, "", 64)
 			if candidates := sql.SelectBlocksRawStmtArgsInBox(query, args, 64, boxID); len(candidates) != len(ids) {
 				var candidateIDs []string

@@ -138,12 +138,20 @@ html[data-frontend="browser-desktop"] {
     }
   }
 
-  &__title-icon {
+  &__title-content {
     display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    gap: 4px;
+    vertical-align: top;
+    pointer-events: none;
+  }
+
+  &__title-icon {
+    display: flex;
+    flex-shrink: 0;
     width: 16px;
     height: 16px;
-    margin-right: 4px;
-    vertical-align: middle;
     align-items: center;
     justify-content: center;
     pointer-events: none;

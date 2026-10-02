@@ -1,4 +1,7 @@
 {
+	"previewAsset": "Vista previa del archivo",
+	"assetPreviewFailed": "No se puede mostrar la vista previa de este archivo",
+	"assetPreviewTruncated": "Solo se muestra el inicio del archivo",
 	"listMindmapAnchorReset": "Restaurar puntos de conexión automáticos",
 	"listMindmapAnchorFallback": "Los puntos de conexión especificados no están disponibles en esta disposición; se muestran temporalmente puntos de conexión automáticos",
 	"listMindmapAnchorInvalid": "Este punto de conexión no permite evitar nodos o controles; elige otra posición",

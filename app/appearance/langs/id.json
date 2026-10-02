@@ -1,4 +1,7 @@
 {
+	"previewAsset": "Pratinjau berkas",
+	"assetPreviewFailed": "Tidak dapat menampilkan pratinjau berkas ini",
+	"assetPreviewTruncated": "Hanya bagian awal berkas yang ditampilkan",
 	"listMindmapAnchorReset": "Pulihkan titik koneksi otomatis",
 	"listMindmapAnchorFallback": "Titik koneksi yang ditentukan tidak tersedia dalam tata letak ini; titik koneksi otomatis ditampilkan sementara",
 	"listMindmapAnchorInvalid": "Titik koneksi ini tidak dapat menghindari simpul atau kontrol; pilih posisi lain",

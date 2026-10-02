@@ -1,4 +1,7 @@
 {
+	"previewAsset": "Dateivorschau",
+	"assetPreviewFailed": "Diese Datei kann nicht in der Vorschau angezeigt werden",
+	"assetPreviewTruncated": "Es wird nur der Anfang der Datei angezeigt",
 	"listMindmapAnchorReset": "Automatische Verbindungspunkte wiederherstellen",
 	"listMindmapAnchorFallback": "Die festgelegten Verbindungspunkte sind in diesem Layout nicht verfügbar; vorübergehend werden automatische Verbindungspunkte angezeigt",
 	"listMindmapAnchorInvalid": "An diesem Verbindungspunkt können Knoten oder Bedienelemente nicht umgangen werden; wählen Sie eine andere Position",

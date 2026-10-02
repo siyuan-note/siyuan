@@ -1,4 +1,7 @@
 {
+	"previewAsset": "معاينة الملف",
+	"assetPreviewFailed": "تعذرت معاينة هذا الملف",
+	"assetPreviewTruncated": "يتم عرض الجزء الأول من الملف فقط",
 	"listMindmapAnchorReset": "استعادة نقاط الاتصال التلقائية",
 	"listMindmapAnchorFallback": "لا يمكن استخدام نقاط الاتصال المحددة في التخطيط الحالي؛ تُعرض نقاط اتصال تلقائية مؤقتًا",
 	"listMindmapAnchorInvalid": "لا يمكن لنقطة الاتصال هذه تجنب العقد أو عناصر التحكم؛ اختر موضعًا آخر",

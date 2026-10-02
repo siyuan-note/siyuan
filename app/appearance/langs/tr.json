@@ -1,4 +1,7 @@
 {
+	"previewAsset": "Dosyayı önizle",
+	"assetPreviewFailed": "Bu dosya önizlenemiyor",
+	"assetPreviewTruncated": "Dosyanın yalnızca başlangıcı gösteriliyor",
 	"listMindmapAnchorReset": "Otomatik bağlantı noktalarını geri yükle",
 	"listMindmapAnchorFallback": "Belirtilen bağlantı noktaları bu düzende kullanılamıyor; geçici olarak otomatik bağlantı noktaları gösteriliyor",
 	"listMindmapAnchorInvalid": "Bu bağlantı noktasından düğümlerin veya denetimlerin etrafından geçilemiyor; başka bir konum seçin",

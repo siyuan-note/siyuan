@@ -9,7 +9,7 @@ import {getAllModels} from "../layout/getAll";
 import * as path from "path";
 /// #endif
 import {openBy} from "../editor/util";
-import {renderAssetsPreview} from "../asset/renderAssets";
+import {AssetPreview} from "./assetPreview";
 import {writeText} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
@@ -86,6 +86,8 @@ export const unmountAssetsTab = (root: Element) => {
         return;
     }
     assets.editor?.destroy();
+    assets.disposePreview?.();
+    assets.disposePreview = undefined;
     assets.unmountOCR?.();
     assets.unmountOCR = undefined;
     assets.editor = undefined;
@@ -96,6 +98,7 @@ const assets = {
     element: undefined as Element | undefined,
     editor: undefined as Protyle | undefined,
     unmountOCR: undefined as (() => void) | undefined,
+    disposePreview: undefined as (() => void) | undefined,
     genHTML: () => {
         const mobile = isMobile();
         return `<div class="fn__flex-column" style="height: 100%">
@@ -172,6 +175,7 @@ const assets = {
         const mobile = isMobile();
         const assetsPreviewElement = assetsListElement.nextElementSibling as HTMLElement;
         const avPreviewElement = avListElement.nextElementSibling as HTMLElement;
+        const preview = new AssetPreview(assetsPreviewElement);
         const hideMobilePreview = (listElement: Element, previewElement: HTMLElement) => {
             if (!mobile) {
                 return;
@@ -181,8 +185,18 @@ const assets = {
             previewElement.removeAttribute("data-item");
         };
         const clearAssetPreview = () => {
-            assetsPreviewElement.innerHTML = "";
+            preview.clear();
             hideMobilePreview(assetsListElement, assetsPreviewElement);
+        };
+        const visibilityObserver = new MutationObserver(() => {
+            if (root.classList.contains("fn__none")) {
+                clearAssetPreview();
+            }
+        });
+        visibilityObserver.observe(root, {attributes: true, attributeFilter: ["class"]});
+        assets.disposePreview = () => {
+            visibilityObserver.disconnect();
+            clearAssetPreview();
         };
         const editor = new Protyle(app, avListElement.nextElementSibling as HTMLElement, {
             blockId: "",
@@ -231,8 +245,8 @@ const assets = {
                     event.stopPropagation();
                     break;
                 } else if (target.classList.contains("item") && !target.classList.contains("item--focus")) {
+                    clearAssetPreview();
                     if (mobile) {
-                        clearAssetPreview();
                         hideMobilePreview(avListElement, avPreviewElement);
                     }
                     root.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
@@ -268,9 +282,8 @@ const assets = {
                     clearAssetPreview();
                     if (!selected) {
                         target.classList.add("b3-list-item--focus");
-                        assetsPreviewElement.setAttribute("data-item", target.dataset.item || "");
-                        assetsPreviewElement.innerHTML = renderAssetsPreview(target.dataset.path || "", target.dataset.item);
                         assetsPreviewElement.classList.remove("fn__none");
+                        preview.show(target.dataset.path || "", target.dataset.item);
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -408,8 +421,7 @@ const assets = {
                 const liElement = hasClosestByClassName(event.target as Element, "b3-list-item");
                 if (liElement && liElement.getAttribute("data-item") !== assetsPreviewElement.getAttribute("data-item")) {
                     const item = liElement.getAttribute("data-item");
-                    assetsPreviewElement.setAttribute("data-item", item);
-                    assetsPreviewElement.innerHTML = renderAssetsPreview(liElement.getAttribute("data-path"), item);
+                    preview.show(liElement.getAttribute("data-path"), item, 250);
                 }
             });
         }

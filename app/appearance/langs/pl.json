@@ -1,4 +1,7 @@
 {
+	"previewAsset": "Podgląd pliku",
+	"assetPreviewFailed": "Nie można wyświetlić podglądu tego pliku",
+	"assetPreviewTruncated": "Wyświetlany jest tylko początek pliku",
 	"listMindmapAnchorReset": "Przywróć automatyczne punkty połączenia",
 	"listMindmapAnchorFallback": "Wybrane punkty połączenia są niedostępne w tym układzie; tymczasowo wyświetlane są automatyczne punkty połączenia",
 	"listMindmapAnchorInvalid": "Ten punkt połączenia nie pozwala ominąć węzłów lub elementów sterujących; wybierz inną pozycję",

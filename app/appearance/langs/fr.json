@@ -1,4 +1,7 @@
 {
+	"previewAsset": "Aperçu du fichier",
+	"assetPreviewFailed": "Impossible de prévisualiser ce fichier",
+	"assetPreviewTruncated": "Seul le début du fichier est affiché",
 	"listMindmapAnchorReset": "Rétablir les points de connexion automatiques",
 	"listMindmapAnchorFallback": "Les points de connexion définis ne sont pas disponibles dans cette disposition ; des points de connexion automatiques sont affichés temporairement",
 	"listMindmapAnchorInvalid": "Ce point de connexion ne permet pas de contourner les nœuds ou les commandes ; choisissez une autre position",

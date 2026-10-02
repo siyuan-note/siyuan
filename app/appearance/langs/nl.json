@@ -1,4 +1,7 @@
 {
+	"previewAsset": "Bestand bekijken",
+	"assetPreviewFailed": "Dit bestand kan niet worden weergegeven",
+	"assetPreviewTruncated": "Alleen het begin van het bestand wordt weergegeven",
 	"listMindmapAnchorReset": "Automatische verbindingspunten herstellen",
 	"listMindmapAnchorFallback": "De opgegeven verbindingspunten zijn niet beschikbaar in deze indeling; er worden tijdelijk automatische verbindingspunten weergegeven",
 	"listMindmapAnchorInvalid": "Dit verbindingspunt kan knooppunten of bedieningselementen niet ontwijken; kies een andere positie",

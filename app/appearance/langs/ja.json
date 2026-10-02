@@ -1,4 +1,7 @@
 {
+	"previewAsset": "ファイルをプレビュー",
+	"assetPreviewFailed": "このファイルをプレビューできません",
+	"assetPreviewTruncated": "ファイルの先頭部分のみ表示しています",
 	"listMindmapAnchorReset": "接続位置を自動に戻す",
 	"listMindmapAnchorFallback": "現在のレイアウトでは指定した接続位置を使用できないため、一時的に自動の接続位置を表示しています",
 	"listMindmapAnchorInvalid": "この接続位置ではノードや操作ボタンを避けられません。位置を調整してください",

@@ -1,4 +1,7 @@
 {
+	"previewAsset": "Náhľad súboru",
+	"assetPreviewFailed": "Náhľad tohto súboru nie je možné zobraziť",
+	"assetPreviewTruncated": "Zobrazuje sa iba začiatok súboru",
 	"listMindmapAnchorReset": "Obnoviť automatické body pripojenia",
 	"listMindmapAnchorFallback": "Určené body pripojenia nie sú v tomto rozložení dostupné; dočasne sa zobrazujú automatické body pripojenia",
 	"listMindmapAnchorInvalid": "Tento bod pripojenia neumožňuje obísť uzly alebo ovládacie prvky; vyberte inú polohu",

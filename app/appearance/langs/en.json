@@ -1,4 +1,7 @@
 {
+	"previewAsset": "Preview file",
+	"assetPreviewFailed": "Unable to preview this file",
+	"assetPreviewTruncated": "Only the beginning of the file is shown",
 	"listMindmapAnchorReset": "Restore automatic connection points",
 	"listMindmapAnchorFallback": "The specified connection points are unavailable in this layout; temporarily showing automatic connection points",
 	"listMindmapAnchorInvalid": "This connection point cannot avoid nodes or controls; choose another position",

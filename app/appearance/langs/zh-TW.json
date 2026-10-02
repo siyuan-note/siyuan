@@ -1,4 +1,7 @@
 {
+	"previewAsset": "預覽檔案",
+	"assetPreviewFailed": "無法預覽此檔案",
+	"assetPreviewTruncated": "僅顯示檔案開頭的部分內容",
 	"listMindmapAnchorReset": "恢復自動接入",
 	"listMindmapAnchorFallback": "目前配置無法使用指定連接點，暫時顯示自動連接點",
 	"listMindmapAnchorInvalid": "目前連接點無法避開節點或控制項，請調整位置",

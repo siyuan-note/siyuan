@@ -19,6 +19,7 @@ import { LinkTarget } from "./pdf_link_service.js";
 import { PDFViewerApplication } from "./app.js";
 import {Constants} from "../../constants";
 import {destroyAnno, initAnno} from "../anno";
+import {registerPdfInstance} from "../annoRuntime";
 import {AnnotationEditorType} from "./pdfjs";
 
 /* eslint-disable-next-line no-unused-vars */
@@ -235,7 +236,7 @@ function getViewerConfiguration(element) {
 }
 
 // NOTE
-function webViewerLoad(file, element, pdfPage, annoId) {
+function webViewerLoad(file, element, pdfPage, annoId, previewOnly = false) {
   // SiYuan 通过 AppOptions.set 显式配置 viewer,禁用从 localStorage 读取的 Preferences,
   AppOptions.set("disablePreferences", true);
   AppOptions.set("workerSrc", `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.compat.mjs?v=4.8.69`);
@@ -271,7 +272,13 @@ function webViewerLoad(file, element, pdfPage, annoId) {
     }
   }
   const runPromise = pdf.run(config);
-  initAnno(element, pdf);
+  if (previewOnly) {
+    // 未引用资源仅用于预览，不读取或写入批注文件。
+    registerPdfInstance(element, pdf);
+    config.toolbar.rectAnno.classList.add("fn__none");
+  } else {
+    initAnno(element, pdf);
+  }
   const destroy = pdf.destroy.bind(pdf);
   let isDestroyed = false;
   pdf.destroy = async () => {

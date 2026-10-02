@@ -1,4 +1,7 @@
 {
+	"previewAsset": "파일 미리보기",
+	"assetPreviewFailed": "이 파일을 미리 볼 수 없습니다",
+	"assetPreviewTruncated": "파일의 앞부분만 표시됩니다",
 	"listMindmapAnchorReset": "자동 연결 지점 복원",
 	"listMindmapAnchorFallback": "현재 레이아웃에서는 지정한 연결 지점을 사용할 수 없어 임시로 자동 연결 지점을 표시합니다",
 	"listMindmapAnchorInvalid": "이 연결 지점에서는 노드나 컨트롤을 피할 수 없습니다. 다른 위치를 선택하세요",

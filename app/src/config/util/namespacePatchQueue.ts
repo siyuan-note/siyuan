@@ -1,4 +1,5 @@
 import {mergeRecordByDottedPath} from "./dotPath";
+import {trackSettingSave} from "../setting/pending";
 
 export const createNamespacePatchQueue = <TData>(options: {
     namespace: string;
@@ -24,6 +25,6 @@ export const createNamespacePatchQueue = <TData>(options: {
         }).catch((error) => {
             console.warn("config patch failed", error);
         });
-        return queue;
+        return trackSettingSave(queue);
     };
 };

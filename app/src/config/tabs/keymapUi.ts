@@ -19,6 +19,7 @@ import {genKeymapRowHtml, getRowBindings, renderRowBindings} from "./keymapRow";
 import {escapeHtml} from "../../util/escape";
 import {Menu} from "../../plugin/Menu";
 import {refreshSettingConfig} from "../setting/sync";
+import {trackSettingSave} from "../setting/pending";
 import type {App} from "../../index";
 
 const keymapToolbarSearchStrings = (): string[] => [
@@ -65,7 +66,7 @@ const bindKeymapToolbar = (root: HTMLElement) => {
     });
     root.querySelector("#keymapResetBtn")?.addEventListener("click", () => {
         confirmDialog("⚠️ " + window.siyuan.languages.reset, window.siyuan.languages.confirmReset, () => {
-            keymapSaveQueue = keymapSaveQueue.then(async () => {
+            keymapSaveQueue = trackSettingSave(keymapSaveQueue.then(async () => {
                 try {
                     const data = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
                     const response = await fetchSyncPost("/api/setting/setKeymap", {data: keymapPayload(data)});
@@ -79,7 +80,7 @@ const bindKeymapToolbar = (root: HTMLElement) => {
                     console.error("Could not reset shortcuts:", error);
                     showMessage(window.siyuan.languages.keymapSaveFailed);
                 }
-            });
+            }));
         });
     });
 };
@@ -739,7 +740,7 @@ const saveKeymapRow = (root: HTMLElement, row: HTMLElement, keys: string[], chan
     change?.(data);
     applyKeymap(data);
     const revision = ++keymapRevision;
-    keymapSaveQueue = keymapSaveQueue.then(async () => {
+    keymapSaveQueue = trackSettingSave(keymapSaveQueue.then(async () => {
         try {
             const response = await fetchSyncPost("/api/setting/patch", {
                 keymap: keymapRowPatch(row.dataset.key.split(Constants.ZWSP), {
@@ -763,5 +764,5 @@ const saveKeymapRow = (root: HTMLElement, row: HTMLElement, keys: string[], chan
             refreshKeymapBindings(root);
             showMessage(window.siyuan.languages.keymapSaveFailed);
         }
-    });
+    }));
 };

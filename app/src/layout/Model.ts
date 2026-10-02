@@ -61,6 +61,8 @@ export class Model {
         const ws = new WebSocket(`${websocketURL}?app=${Constants.SIYUAN_APPID}&id=${options.id}${options.type ? "&type=" + options.type : ""}`);
         ws.onopen = () => {
             if (options.type === "main" && window.siyuan.isReady) {
+                const {reloadSettingsResetOnReconnect}: typeof import("../config/setting/reset") = require("../config/setting/reset");
+                if (reloadSettingsResetOnReconnect()) return;
                 const {resetSettingTaskRevision}: typeof import("../config/setting/taskBlocker") = require("../config/setting/taskBlocker");
                 resetSettingTaskRevision();
                 const {refreshSettingConfig}: typeof import("../config/setting/sync") = require("../config/setting/sync");

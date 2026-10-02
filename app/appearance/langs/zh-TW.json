@@ -1,4 +1,9 @@
 {
+	"resetSettings": "重設設定",
+	"resetSettingsTip": "還原目前工作空間的一般偏好設定",
+	"resetSettingsConfirm": "確定重設一般設定與目前視窗配置嗎？筆記、憑證、連線設定、外掛、程式碼片段、已儲存的配置、歷史保留天數與應用程式全域設定都會保留。",
+	"resetSettingsExit": "連線至此工作空間的用戶端將重新載入，桌面應用程式隨後結束，請重新啟動。",
+	"resetSettingsReload": "連線至此工作空間的所有用戶端將重新載入。",
 	"previewAsset": "預覽檔案",
 	"assetPreviewFailed": "無法預覽此檔案",
 	"assetPreviewTruncated": "僅顯示檔案開頭的部分內容",

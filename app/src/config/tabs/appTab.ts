@@ -7,6 +7,7 @@ import type {SettingTabBuilder} from "../setting/builder";
 import {getSettingsWindowMode, setSettingsWindowMode} from "../setting/windowMode";
 /// #endif
 import {runSettingsMaintenance} from "../setting/maintenance";
+import {confirmResetSettings} from "../setting/reset";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {ContractFormData} from "../../util/contractFormData";
@@ -519,6 +520,21 @@ const mountExportData = (root: HTMLElement) => {
 
 const registerAppMaintenanceGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("maintenance", window.siyuan.languages.configGroupMaintenance);
+
+    group.button({
+        id: "resetSettings",
+        title: window.siyuan.languages.resetSettings,
+        desc: window.siyuan.languages.resetSettingsTip,
+        label: window.siyuan.languages.reset,
+        icon: "iconUndo",
+        afterMount: root => {
+            const button = root.querySelector<HTMLButtonElement>("#resetSettings");
+            if (button) {
+                button.disabled = window.siyuan.config.readonly || window.siyuan.isPublish;
+                button.addEventListener("click", confirmResetSettings);
+            }
+        },
+    });
 
     group.slot({
         key: "workspaceStorage",

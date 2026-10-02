@@ -1,4 +1,9 @@
 {
+	"resetSettings": "Ripristina impostazioni",
+	"resetSettingsTip": "Ripristina le preferenze generali dello spazio di lavoro corrente",
+	"resetSettingsConfirm": "Ripristinare le impostazioni generali e la disposizione attuale? Note, credenziali, connessioni, plugin, frammenti di codice, disposizioni salvate, durata della cronologia e impostazioni globali dell’applicazione verranno conservati.",
+	"resetSettingsExit": "I client connessi verranno ricaricati, poi l’applicazione desktop verrà chiusa. Riavviala per continuare.",
+	"resetSettingsReload": "Tutti i client connessi a questo spazio di lavoro verranno ricaricati.",
 	"previewAsset": "Anteprima del file",
 	"assetPreviewFailed": "Impossibile visualizzare l'anteprima di questo file",
 	"assetPreviewTruncated": "Viene mostrata solo la parte iniziale del file",

@@ -1,4 +1,9 @@
 {
+	"resetSettings": "Przywróć ustawienia",
+	"resetSettingsTip": "Przywróć zwykłe preferencje w bieżącej przestrzeni roboczej",
+	"resetSettingsConfirm": "Przywrócić zwykłe ustawienia i bieżący układ? Notatki, dane uwierzytelniania, połączenia, wtyczki, fragmenty kodu, zapisane układy, okres przechowywania historii i ustawienia globalne aplikacji zostaną zachowane.",
+	"resetSettingsExit": "Połączone klienty zostaną ponownie załadowane, a aplikacja komputerowa zamknięta. Uruchom ją ponownie, aby kontynuować.",
+	"resetSettingsReload": "Wszystkie klienty połączone z tą przestrzenią roboczą zostaną ponownie załadowane.",
 	"previewAsset": "Podgląd pliku",
 	"assetPreviewFailed": "Nie można wyświetlić podglądu tego pliku",
 	"assetPreviewTruncated": "Wyświetlany jest tylko początek pliku",

@@ -1,4 +1,9 @@
 {
+	"resetSettings": "Obnoviť nastavenia",
+	"resetSettingsTip": "Obnoviť bežné predvoľby aktuálneho pracovného priestoru",
+	"resetSettingsConfirm": "Obnoviť bežné nastavenia a aktuálne rozloženie? Poznámky, prihlasovacie údaje, pripojenia, doplnky, úryvky kódu, uložené rozloženia, doba uchovávania histórie a globálne nastavenia aplikácie zostanú zachované.",
+	"resetSettingsExit": "Pripojení klienti sa znovu načítajú a počítačová aplikácia sa ukončí. Pokračujte jej opätovným spustením.",
+	"resetSettingsReload": "Všetci klienti pripojení k tomuto pracovnému priestoru sa znovu načítajú.",
 	"previewAsset": "Náhľad súboru",
 	"assetPreviewFailed": "Náhľad tohto súboru nie je možné zobraziť",
 	"assetPreviewTruncated": "Zobrazuje sa iba začiatok súboru",

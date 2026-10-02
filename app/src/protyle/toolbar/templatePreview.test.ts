@@ -5,6 +5,7 @@ import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {withFetchTimeout} from "../../util/fetchTimeout";
+import {trackSettingRequest} from "../../config/setting/pending";
 
 const loadPreview = () => {
     const requests: Array<{resolve: (response: Response) => void, reject: (error: Error) => void}> = [];
@@ -31,6 +32,7 @@ const loadPreview = () => {
     const fetchModule = loadModule("../../util/fetch.ts", {
         "./processMessage": messagesModule,
         "./fetchTimeout": {withFetchTimeout},
+        "../config/setting/pending": {trackSettingRequest},
     });
     const previewModule = loadModule("util.ts", {
         "../../util/fetch": fetchModule,

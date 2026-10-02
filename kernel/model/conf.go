@@ -239,6 +239,10 @@ func (conf *AppConf) SetUser(user *conf.User) {
 
 func InitConf() {
 	initLang()
+	if err := recoverSettingsReset(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover settings reset failed: %s", err)
+		return
+	}
 
 	Conf = NewAppConf()
 	// 先回滚未提交的目录移动，即使配置文件丢失也必须在挂载和同步之前恢复。
@@ -1188,15 +1192,28 @@ func (conf *AppConf) Save() {
 	conf.m.Lock()
 	defer conf.m.Unlock()
 
-	plainData, err := gulu.JSON.MarshalJSON(conf)
+	newData, err := conf.marshalForSave()
 	if err != nil {
 		logging.LogErrorf("marshal conf failed: %s", err)
 		return
 	}
+	confPath := filepath.Join(util.ConfDir, "conf.json")
+	oldData, err := filelock.ReadFile(confPath)
+	if err == nil && bytes.Equal(newData, oldData) {
+		return
+	}
+	conf.save0(newData)
+}
+
+// marshalForSave 生成持久化副本，调用方持有配置锁，凭据仅在副本中加密。
+func (conf *AppConf) marshalForSave() ([]byte, error) {
+	plainData, err := gulu.JSON.MarshalJSON(conf)
+	if err != nil {
+		return nil, err
+	}
 	snapshot := NewAppConf()
 	if err = gulu.JSON.UnmarshalJSON(plainData, snapshot); err != nil {
-		logging.LogErrorf("copy conf failed: %s", err)
-		return
+		return nil, err
 	}
 	if snapshot.AI != nil {
 		snapshot.AI.EncryptAPIKeys()
@@ -1214,23 +1231,7 @@ func (conf *AppConf) Save() {
 		snapshot.System.UpdateChannel = ""
 	}
 
-	newData, err := gulu.JSON.MarshalIndentJSON(snapshot, "", "  ")
-	if err != nil {
-		logging.LogErrorf("marshal conf snapshot failed: %s", err)
-		return
-	}
-	confPath := filepath.Join(util.ConfDir, "conf.json")
-	oldData, err := filelock.ReadFile(confPath)
-	if err != nil {
-		conf.save0(newData)
-		return
-	}
-
-	if bytes.Equal(newData, oldData) {
-		return
-	}
-
-	conf.save0(newData)
+	return gulu.JSON.MarshalIndentJSON(snapshot, "", "  ")
 }
 
 func (conf *AppConf) save0(data []byte) {

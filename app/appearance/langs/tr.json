@@ -1,4 +1,9 @@
 {
+	"resetSettings": "Ayarları sıfırla",
+	"resetSettingsTip": "Geçerli çalışma alanının genel tercihlerini varsayılana döndür",
+	"resetSettingsConfirm": "Genel ayarlar ve geçerli düzen sıfırlansın mı? Notlar, kimlik bilgileri, bağlantılar, eklentiler, kod parçacıkları, kaydedilen düzenler, geçmiş saklama süresi ve uygulama genelindeki ayarlar korunacaktır.",
+	"resetSettingsExit": "Bağlı istemciler yeniden yüklenecek ve masaüstü uygulaması kapanacaktır. Devam etmek için yeniden başlatın.",
+	"resetSettingsReload": "Bu çalışma alanına bağlı tüm istemciler yeniden yüklenecektir.",
 	"previewAsset": "Dosyayı önizle",
 	"assetPreviewFailed": "Bu dosya önizlenemiyor",
 	"assetPreviewTruncated": "Dosyanın yalnızca başlangıcı gösteriliyor",

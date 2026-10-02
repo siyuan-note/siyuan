@@ -26,18 +26,23 @@ import (
 )
 
 // MarkdownSettings 运行时 Markdown 配置。
-var MarkdownSettings = &Markdown{
-	InlineAsterisk:               true,
-	InlineUnderscore:             true,
-	InlineSup:                    true,
-	InlineSub:                    true,
-	InlineTag:                    true,
-	InlineMath:                   true,
-	InlineStrikethrough:          true,
-	InlineFullWidthStrikethrough: false,
-	BlockFullWidthTaskList:       new(true),
-	InlineMark:                   true,
-	CodeBlockMiddleDot:           new(true),
+var MarkdownSettings = NewMarkdown()
+
+// NewMarkdown 返回独立的默认语法配置，不引用运行时设置。
+func NewMarkdown() *Markdown {
+	return &Markdown{
+		InlineAsterisk:               true,
+		InlineUnderscore:             true,
+		InlineSup:                    true,
+		InlineSub:                    true,
+		InlineTag:                    true,
+		InlineMath:                   true,
+		InlineStrikethrough:          true,
+		InlineFullWidthStrikethrough: false,
+		BlockFullWidthTaskList:       new(true),
+		InlineMark:                   true,
+		CodeBlockMiddleDot:           new(true),
+	}
 }
 
 type Markdown struct {

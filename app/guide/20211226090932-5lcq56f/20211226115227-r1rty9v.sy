@@ -7,9 +7,116 @@
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261002224424"
 	},
 	"Children": [
+		{
+			"ID": "20261002224424-tfgg0bu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261002224424-tfgg0bu",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何重設設定？"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-pu34oda",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-pu34oda",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "應用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "維護"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重設設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可還原目前工作空間的一般偏好設定、內建快捷鍵、選單和行動端工具列設定，以及目前視窗配置。"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-ky6f3e3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-ky6f3e3",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "筆記、資源、歷史、快照、閃卡學習進度及目前歷史保留天數都會保留。帳號、驗證、同步與加密金鑰、AI/MCP 連線、密鑰、變數、語言及網路設定也會保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-82n3i54",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-82n3i54",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "已安裝的主題和圖示不會刪除，但會切換為預設外觀。外掛、程式碼片段及其啟用狀態、外掛快捷鍵和已儲存的視窗配置都會保留。更新通道、無障礙、Linux 輸入法和開機自啟等應用程式全域設定維持不變。"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-ti364ue",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-ti364ue",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重設前，連線至此工作空間的所有用戶端必須完成儲存；儲存失敗時會取消重設。隨後用戶端會重新載入。透過本機桌面應用程式發起時，桌面應用程式會在重新載入後結束，請重新啟動；行動端和瀏覽器端僅重新載入。"
+				}
+			]
+		},
 		{
 			"ID": "20211226115356-hp36u1f",
 			"Type": "NodeHeading",

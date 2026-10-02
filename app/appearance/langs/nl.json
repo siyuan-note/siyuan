@@ -1,4 +1,9 @@
 {
+	"resetSettings": "Instellingen herstellen",
+	"resetSettingsTip": "Algemene voorkeuren in de huidige werkruimte herstellen",
+	"resetSettingsConfirm": "Algemene instellingen en de huidige indeling herstellen? Notities, inloggegevens, verbindingen, plug-ins, codefragmenten, opgeslagen indelingen, de bewaartermijn van de geschiedenis en algemene appinstellingen blijven behouden.",
+	"resetSettingsExit": "Verbonden clients worden opnieuw geladen, waarna de desktopapp afsluit. Start deze opnieuw om verder te gaan.",
+	"resetSettingsReload": "Alle clients die met deze werkruimte verbonden zijn, worden opnieuw geladen.",
 	"previewAsset": "Bestand bekijken",
 	"assetPreviewFailed": "Dit bestand kan niet worden weergegeven",
 	"assetPreviewTruncated": "Alleen het begin van het bestand wordt weergegeven",

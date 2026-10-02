@@ -5,6 +5,7 @@ import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {withFetchTimeout} from "./fetchTimeout";
+import {flushSettingSaves, settingSaveFailures, trackSettingRequest} from "../config/setting/pending";
 
 const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() => {}),
                        processResponse: (response: IWebSocketData) => boolean = () => true) => {
@@ -25,6 +26,7 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
                 case "electron": return {ipcRenderer: {send: (...args: unknown[]) => sends.push(args)}};
                 case "./processMessage": return {processMessage: processResponse};
                 case "./kernelFault": return {kernelError: () => assert.fail("unexpected kernel error")};
+                case "../config/setting/pending": return {trackSettingRequest};
                 case "./fetchTimeout": return {
                     withFetchTimeout: (request: (signal?: AbortSignal) => Promise<unknown>, signal: AbortSignal, timeout: number) => {
                         timeouts.push(timeout);
@@ -119,5 +121,19 @@ it("falls back to desktop quit when exit or closing layout requests stall", asyn
         await fetchPost(url, {errorExit: true}, () => assert.fail("unexpected success"));
         assert.deepEqual(timeouts, [30000]);
         assert.deepEqual(sends, [["quit", "6806"]]);
+    }
+});
+
+it("reports consumed settings errors to reset without changing fetch callbacks", async () => {
+    for (const response of ["business", "network"]) {
+        const before = settingSaveFailures();
+        const {fetchPost} = loadFetchPost(async () => {
+            if (response === "network") throw new Error("offline");
+            return new Response(JSON.stringify({code: -1, msg: "failed", data: null}), {
+                headers: {"Content-Type": "application/json"},
+            });
+        }, () => false);
+        await fetchPost("/api/setting/patch", {});
+        await assert.rejects(flushSettingSaves(before));
     }
 });

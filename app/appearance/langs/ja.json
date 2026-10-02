@@ -1,4 +1,9 @@
 {
+	"resetSettings": "設定をリセット",
+	"resetSettingsTip": "現在のワークスペースの一般設定を初期値に戻す",
+	"resetSettingsConfirm": "一般設定と現在のウィンドウ配置をリセットしますか？ノート、認証情報、接続設定、プラグイン、コードスニペット、保存済みの配置、履歴の保存日数、アプリ全体の設定は保持されます。",
+	"resetSettingsExit": "接続中のクライアントを再読み込みした後、デスクトップアプリを終了します。再度起動してください。",
+	"resetSettingsReload": "このワークスペースに接続しているすべてのクライアントを再読み込みします。",
 	"previewAsset": "ファイルをプレビュー",
 	"assetPreviewFailed": "このファイルをプレビューできません",
 	"assetPreviewTruncated": "ファイルの先頭部分のみ表示しています",

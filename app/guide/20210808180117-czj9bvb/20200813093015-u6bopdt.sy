@@ -7,9 +7,116 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261002224424"
 	},
 	"Children": [
+		{
+			"ID": "20261002224424-luj4eko",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261002224424-luj4eko",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何重置设置？"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-je9rmm7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-je9rmm7",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "应用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "维护"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重置设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可恢复当前工作空间的普通偏好设置、内置快捷键、菜单和移动端工具栏设置，以及当前窗口布局。"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-65x3gs3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-65x3gs3",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "笔记、资源、历史、快照、闪卡学习进度及当前历史保留天数都会保留。账号、认证、同步和加密密钥、AI/MCP 连接、密钥、变量、语言及网络配置也会保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-4h4rx7c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-4h4rx7c",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "已安装的主题和图标不会删除，但会切换为默认外观。插件、代码片段及其启用状态、插件快捷键和已保存布局都会保留。更新通道、无障碍、Linux 输入法和开机自启等应用全局设置保持不变。"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-dosrx3o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-dosrx3o",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重置前，连接此工作空间的所有客户端必须完成保存；保存失败时会取消重置。随后客户端会重新加载。通过本地桌面应用发起时，桌面应用会在重载后退出，请重新启动；移动端和浏览器端仅重新加载。"
+				}
+			]
+		},
 		{
 			"ID": "20210428213311-2hv9zwx",
 			"Type": "NodeHeading",

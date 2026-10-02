@@ -1,4 +1,9 @@
 {
+	"resetSettings": "설정 초기화",
+	"resetSettingsTip": "현재 작업 공간의 일반 환경설정을 기본값으로 복원",
+	"resetSettingsConfirm": "일반 설정과 현재 창 배치를 초기화할까요? 노트, 인증 정보, 연결 설정, 플러그인, 코드 스니펫, 저장된 배치, 기록 보관 기간 및 앱 전역 설정은 유지됩니다.",
+	"resetSettingsExit": "연결된 클라이언트가 새로고침된 후 데스크톱 앱이 종료됩니다. 계속하려면 다시 실행하세요.",
+	"resetSettingsReload": "이 작업 공간에 연결된 모든 클라이언트가 새로고침됩니다.",
 	"previewAsset": "파일 미리보기",
 	"assetPreviewFailed": "이 파일을 미리 볼 수 없습니다",
 	"assetPreviewTruncated": "파일의 앞부분만 표시됩니다",

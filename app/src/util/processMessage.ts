@@ -9,6 +9,18 @@ import {isBrowser} from "./functions";
 import {applySettingTask} from "../config/setting/taskBlocker";
 
 export const processMessage = (response: IWebSocketData) => {
+    if (response.cmd === "prepareSettingsReset") {
+        void import("../config/setting/reset").then(reset => reset.prepareSettingsReset(response.data));
+        return false;
+    }
+    if (response.cmd === "cancelSettingsReset") {
+        void import("../config/setting/reset").then(reset => reset.cancelSettingsReset(response.data));
+        return false;
+    }
+    if (response.cmd === "settingsReset") {
+        void import("../config/setting/reset").then(reset => reset.completeSettingsReset(response.data));
+        return false;
+    }
     if (response.cmd === "settingTask") {
         applySettingTask(response.data);
         return false;

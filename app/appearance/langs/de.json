@@ -1,4 +1,9 @@
 {
+	"resetSettings": "Einstellungen zurücksetzen",
+	"resetSettingsTip": "Allgemeine Einstellungen im aktuellen Arbeitsbereich wiederherstellen",
+	"resetSettingsConfirm": "Allgemeine Einstellungen und die aktuelle Fensteranordnung zurücksetzen? Notizen, Zugangsdaten, Verbindungen, Plugins, Code-Snippets, gespeicherte Anordnungen, die Aufbewahrungsdauer des Verlaufs und anwendungsweite Einstellungen bleiben erhalten.",
+	"resetSettingsExit": "Verbundene Clients werden neu geladen, danach wird die Desktop-App beendet. Starten Sie sie erneut.",
+	"resetSettingsReload": "Alle mit diesem Arbeitsbereich verbundenen Clients werden neu geladen.",
 	"previewAsset": "Dateivorschau",
 	"assetPreviewFailed": "Diese Datei kann nicht in der Vorschau angezeigt werden",
 	"assetPreviewTruncated": "Es wird nur der Anfang der Datei angezeigt",

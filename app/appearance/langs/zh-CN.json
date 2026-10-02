@@ -1,4 +1,9 @@
 {
+	"resetSettings": "重置设置",
+	"resetSettingsTip": "恢复当前工作空间的普通偏好设置",
+	"resetSettingsConfirm": "确定重置普通设置和当前窗口布局吗？笔记、凭据、连接配置、插件、代码片段、已保存的布局、历史保留天数和应用全局设置将会保留。",
+	"resetSettingsExit": "连接此工作空间的客户端将重新加载，桌面应用随后退出，请重新启动。",
+	"resetSettingsReload": "连接此工作空间的所有客户端将重新加载。",
 	"previewAsset": "预览文件",
 	"assetPreviewFailed": "无法预览此文件",
 	"assetPreviewTruncated": "仅显示文件开头的部分内容",

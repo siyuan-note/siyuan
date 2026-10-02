@@ -1,4 +1,9 @@
 {
+	"resetSettings": "Atur ulang pengaturan",
+	"resetSettingsTip": "Pulihkan preferensi umum di ruang kerja saat ini",
+	"resetSettingsConfirm": "Atur ulang pengaturan umum dan tata letak saat ini? Catatan, kredensial, koneksi, plugin, cuplikan kode, tata letak tersimpan, masa penyimpanan riwayat, dan pengaturan global aplikasi akan dipertahankan.",
+	"resetSettingsExit": "Klien yang terhubung akan dimuat ulang, lalu aplikasi desktop akan ditutup. Jalankan kembali untuk melanjutkan.",
+	"resetSettingsReload": "Semua klien yang terhubung ke ruang kerja ini akan dimuat ulang.",
 	"previewAsset": "Pratinjau berkas",
 	"assetPreviewFailed": "Tidak dapat menampilkan pratinjau berkas ini",
 	"assetPreviewTruncated": "Hanya bagian awal berkas yang ditampilkan",

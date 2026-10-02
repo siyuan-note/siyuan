@@ -792,6 +792,8 @@ export type CloudSyncDirsData = { "checkedSyncDir": string; "hSize": string; "sy
 
 export type CommitNotebookArchiveRequestInput = { "id": string; "saved": boolean; };
 
+export type ConfirmSettingsResetRequestInput = { "saved": boolean; "token": string; };
+
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
 export type ContinueImportSYRequestInput = { "notebook": string; "token": string; };
@@ -1639,6 +1641,8 @@ export type ResetGraphData = { "conf": GlobalGraphConf; };
 export type ResetLocalGraphData = { "conf": LocalGraphConf; };
 
 export type ResetRiffCardsRequestInput = { "blockIDs"?: Array<string> | null; "deckID": string; "id": string; "type": string; };
+
+export type ResetSettingsRequestInput = { "exit"?: boolean; };
 
 export type ReviewRiffCardRequestInput = { "cardID": string; "deckID": string; "rating": number; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
 
@@ -5009,6 +5013,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/setting/confirmSettingsReset": {
+        request: ConfirmSettingsResetRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/setting/getBootAppearances": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SettingBootAppearancesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5049,6 +5058,11 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/setting/resetSettings": {
+        request: ResetSettingsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/setting/setAI": {
         request: SetAIRequestInput;

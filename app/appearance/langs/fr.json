@@ -1,4 +1,9 @@
 {
+	"resetSettings": "Réinitialiser les paramètres",
+	"resetSettingsTip": "Rétablir les préférences générales de cet espace de travail",
+	"resetSettingsConfirm": "Réinitialiser les paramètres généraux et la disposition actuelle ? Les notes, identifiants, connexions, extensions, extraits de code, dispositions enregistrées, durée de conservation de l’historique et paramètres globaux de l’application seront conservés.",
+	"resetSettingsExit": "Les clients connectés seront rechargés, puis l’application de bureau se fermera. Relancez-la pour continuer.",
+	"resetSettingsReload": "Tous les clients connectés à cet espace de travail seront rechargés.",
 	"previewAsset": "Aperçu du fichier",
 	"assetPreviewFailed": "Impossible de prévisualiser ce fichier",
 	"assetPreviewTruncated": "Seul le début du fichier est affiché",

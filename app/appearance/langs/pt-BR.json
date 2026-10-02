@@ -1,4 +1,9 @@
 {
+	"resetSettings": "Redefinir configurações",
+	"resetSettingsTip": "Restaurar as preferências gerais do espaço de trabalho atual",
+	"resetSettingsConfirm": "Redefinir as configurações gerais e o layout atual? Notas, credenciais, conexões, plugins, trechos de código, layouts salvos, prazo de retenção do histórico e configurações globais do aplicativo serão preservados.",
+	"resetSettingsExit": "Os clientes conectados serão recarregados e o aplicativo de desktop será encerrado. Inicie-o novamente para continuar.",
+	"resetSettingsReload": "Todos os clientes conectados a este espaço de trabalho serão recarregados.",
 	"previewAsset": "Pré-visualizar arquivo",
 	"assetPreviewFailed": "Não foi possível pré-visualizar este arquivo",
 	"assetPreviewTruncated": "Apenas o início do arquivo é exibido",

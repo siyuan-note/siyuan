@@ -6,6 +6,7 @@ import {processMessage} from "./processMessage";
 import {kernelError} from "./kernelFault";
 import {withFetchTimeout} from "./fetchTimeout";
 import type {FetchGet, FetchPost, FetchSyncPost} from "../types/api";
+import {trackSettingRequest} from "../config/setting/pending";
 
 export const fetchPost = ((
     url: string,
@@ -45,7 +46,7 @@ export const fetchPost = ((
         init.signal = signal;
     }
     let isGetFile202 = false;
-    return withFetchTimeout((requestSignal) => fetch(url, {...init, signal: requestSignal}).then((response) => {
+    return trackSettingRequest(url, withFetchTimeout((requestSignal) => fetch(url, {...init, signal: requestSignal}).then((response) => {
         switch (response.status) {
             case 403:
             case 404:
@@ -75,7 +76,7 @@ export const fetchPost = ((
                     return response.text();
                 }
         }
-    }), signal, timeout).then((response: IWebSocketData) => {
+    }), signal, timeout)).then((response: IWebSocketData) => {
         if (failCallback && url === "/api/file/getFile" && isGetFile202) {
             failCallback(response);
             return;
@@ -141,12 +142,13 @@ export const fetchSyncPost = (async (url: string, data?: any, headers?: Record<s
             init.body = JSON.stringify(data);
         }
     }
-    const res = await fetch(url, init);
-    const res2 = await res.json() as IWebSocketData;
-    if (process) {
-        processMessage(res2);
-    }
-    return res2;
+    return trackSettingRequest(url, fetch(url, init).then(async res => {
+        const res2 = await res.json() as IWebSocketData;
+        if (process) {
+            processMessage(res2);
+        }
+        return res2;
+    }));
 }) as FetchSyncPost<IWebSocketData>;
 
 export const fetchGet = ((url: string, cb: (response: IWebSocketData | IObject | string) => void) => {

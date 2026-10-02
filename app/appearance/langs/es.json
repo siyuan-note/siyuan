@@ -1,4 +1,9 @@
 {
+	"resetSettings": "Restablecer ajustes",
+	"resetSettingsTip": "Restaurar las preferencias generales del espacio de trabajo actual",
+	"resetSettingsConfirm": "¿Restablecer los ajustes generales y la disposición actual? Se conservarán las notas, credenciales, conexiones, complementos, fragmentos de código, disposiciones guardadas, plazo de conservación del historial y ajustes globales de la aplicación.",
+	"resetSettingsExit": "Los clientes conectados se recargarán y la aplicación de escritorio se cerrará. Vuelva a iniciarla para continuar.",
+	"resetSettingsReload": "Se recargarán todos los clientes conectados a este espacio de trabajo.",
 	"previewAsset": "Vista previa del archivo",
 	"assetPreviewFailed": "No se puede mostrar la vista previa de este archivo",
 	"assetPreviewTruncated": "Solo se muestra el inicio del archivo",

@@ -15,6 +15,7 @@ import {searchMarkRender} from "../searchMarkRender";
 import {registerDatabaseRowRefresh} from "./databaseRowRefresh";
 import {focusDatabasePrimary} from "./primaryFocus";
 import {preserveAVBindingRange} from "./binding";
+import {inheritDatabaseRowReadonly} from "./rowReadonly";
 
 export interface IDatabaseRowOpenData {
     avID: string;
@@ -120,6 +121,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
         notebookId: data.notebookID,
         after(editor) {
             const contextProtyle = editor.protyle;
+            inheritDatabaseRowReadonly(contextProtyle, protyle);
             rowElement.dataset.protyleId = contextProtyle.id;
             unregisterRefresh = registerDatabaseRowRefresh(contextProtyle.id, {
                 getAVID: () => data.avID,
@@ -131,11 +133,12 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
     });
 };
 /// #else
-const showDatabaseRowPreview = (model: Editor, data: IDatabaseRowOpenData) => {
+const showDatabaseRowPreview = (model: Editor, data: IDatabaseRowOpenData, source: Partial<IProtyle>) => {
     if (!model?.editor?.protyle) {
         return;
     }
     const editorProtyle = model.editor.protyle;
+    inheritDatabaseRowReadonly(editorProtyle, source);
     editorProtyle.element.dataset.databaseRowId = data.boundBlockID || "";
     editorProtyle.databaseAttributePanel?.expand(data.avID);
     editorProtyle.contentElement.scrollTop = 0;
@@ -145,20 +148,20 @@ const showDatabaseRowPreview = (model: Editor, data: IDatabaseRowOpenData) => {
     });
 };
 
-const focusDatabaseRowPreview = (model: Editor, data: IDatabaseRowOpenData) => {
+const focusDatabaseRowPreview = (model: Editor, data: IDatabaseRowOpenData, source: Partial<IProtyle>) => {
     const editorProtyle = model?.editor?.protyle;
     if (!editorProtyle || !data.boundBlockID) {
         return;
     }
     if (editorProtyle.block.showAll && editorProtyle.block.id === data.boundBlockID) {
-        showDatabaseRowPreview(model, data);
+        showDatabaseRowPreview(model, data, source);
         return;
     }
     zoomOut({
         protyle: editorProtyle,
         id: data.boundBlockID,
         reload: true,
-        callback: () => showDatabaseRowPreview(model, data),
+        callback: () => showDatabaseRowPreview(model, data, source),
     });
 };
 
@@ -201,6 +204,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
     window.siyuan.menus.menu.remove();
     openMobileFileById(protyle.app, data.boundBlockID, [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
         undefined, undefined, (editorProtyle) => {
+            inheritDatabaseRowReadonly(editorProtyle, protyle);
             editorProtyle.element.dataset.databaseRowId = data.boundBlockID;
             editorProtyle.databaseAttributePanel?.expand(data.avID);
             editorProtyle.contentElement.scrollTop = 0;
@@ -242,6 +246,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
             afterOpen(model) {
                 if (model instanceof Custom) {
                     Object.assign(model.data, data, {blockID: data.databaseBlockID, notebookId: data.notebookID});
+                    model.element.dispatchEvent(new CustomEvent("database-row-readonly", {detail: protyle}));
                     model.update();
                 }
             },
@@ -259,7 +264,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
             position: options.position,
             zoomIn: true,
             afterOpen(model: Editor) {
-                focusDatabaseRowPreview(model, data);
+                focusDatabaseRowPreview(model, data, protyle);
             },
         });
         return Boolean(opened);
@@ -283,7 +288,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
         openedTab.parent.switchTab(openedTab.headElement);
         openedTab.parent.showHeading();
         if (openedModel instanceof Editor) {
-            focusDatabaseRowPreview(openedModel as Editor, data);
+            focusDatabaseRowPreview(openedModel as Editor, data, protyle);
         }
         return true;
     }
@@ -296,7 +301,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
         keepAVPanel: options?.keepAVPanel,
         zoomIn: true,
         afterOpen(model: Editor) {
-            showDatabaseRowPreview(model, data);
+            showDatabaseRowPreview(model, data, protyle);
         },
     });
     return Boolean(opened);

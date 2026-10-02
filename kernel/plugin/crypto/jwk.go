@@ -44,10 +44,10 @@ const (
 // jsonWebKey 是 JWK 的通用视图：非对称密钥材料交由 go-jose 处理，
 // 此处负责 Web Crypto 关心的元数据（kty、alg、ext、key_ops）与对称、OKP 密钥材料。
 type jsonWebKey struct {
-	Kty string `json:"kty,omitempty"`
-	Crv string `json:"crv,omitempty"`
-	Alg string `json:"alg,omitempty"`
-	Use string `json:"use,omitempty"`
+	Kty string  `json:"kty,omitempty"`
+	Crv string  `json:"crv,omitempty"`
+	Alg string  `json:"alg,omitempty"`
+	Use *string `json:"use,omitempty"` // nil 表示成员缺失，空串同样参与校验
 
 	// 导入时 nil 表示成员缺失，空切片表示空数组；导出时始终输出该成员。
 	KeyOps []string `json:"key_ops"`
@@ -70,7 +70,7 @@ func importJWK(alg Algorithm, data []byte, extractable bool, usages []KeyUsage) 
 	if jwk.Kty == "" {
 		return nil, dataError("JSON Web Key is missing the kty member")
 	}
-	if err := checkJWKMetadata(&jwk, extractable, usages); err != nil {
+	if err := checkJWKMetadata(&jwk, alg.Name, extractable, usages); err != nil {
 		return nil, err
 	}
 
@@ -326,7 +326,7 @@ func exportJWKAsymmetric(key *Key, jwk *jsonWebKey) ([]byte, error) {
 }
 
 // checkJWKMetadata 校验 JWK 的 ext、key_ops 与 use 成员是否与导入参数相符。
-func checkJWKMetadata(jwk *jsonWebKey, extractable bool, usages []KeyUsage) error {
+func checkJWKMetadata(jwk *jsonWebKey, algName string, extractable bool, usages []KeyUsage) error {
 	if jwk.Ext != nil && !*jwk.Ext && extractable {
 		return dataError("JSON Web Key is marked as non-extractable")
 	}
@@ -347,30 +347,21 @@ func checkJWKMetadata(jwk *jsonWebKey, extractable bool, usages []KeyUsage) erro
 		}
 	}
 
-	if jwk.Use != "" {
-		if expected := jwkUse(usages); expected != "" && jwk.Use != expected {
-			return dataError("JSON Web Key use %q does not match the requested key usages", jwk.Use)
+	// 规范按算法确定 use 的取值，并且只在请求了用法时校验。
+	if jwk.Use != nil && len(usages) > 0 {
+		if expected := jwkUse(algName); expected != "" && *jwk.Use != expected {
+			return dataError("JSON Web Key use %q does not match %s, which requires %q", *jwk.Use, algName, expected)
 		}
 	}
 	return nil
 }
 
-// jwkUse 返回用法列表对应的 use 取值，混合用法返回空串表示不做校验。
-func jwkUse(usages []KeyUsage) string {
-	var sig, enc bool
-	for _, usage := range usages {
-		switch usage {
-		case UsageSign, UsageVerify:
-			sig = true
-		case UsageEncrypt, UsageDecrypt, UsageWrapKey, UsageUnwrapKey:
-			enc = true
-		}
-	}
-
-	switch {
-	case sig && !enc:
+// jwkUse 返回算法要求的 JWK use 取值：签名算法为 sig，加密、包装与密钥协商算法为 enc。
+func jwkUse(algName string) string {
+	switch algName {
+	case AlgHMAC, AlgRSASSAPKCS1, AlgRSAPSS, AlgECDSA, AlgEd25519:
 		return "sig"
-	case enc && !sig:
+	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgAESECB, AlgRSAOAEP, AlgECDH, AlgX25519:
 		return "enc"
 	default:
 		return ""

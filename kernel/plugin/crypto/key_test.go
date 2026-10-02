@@ -314,6 +314,101 @@ func TestJWKImportValidation(t *testing.T) {
 	}
 }
 
+func TestJWKUseFollowsAlgorithm(t *testing.T) {
+	rsa := func(name string) Algorithm {
+		return Algorithm{Name: name, Hash: AlgSHA256, ModulusLength: intPtr(2048), PublicExponent: []byte{1, 0, 1}}
+	}
+
+	// use 的取值由算法决定，与请求的用法无关。
+	cases := []struct {
+		alg      Algorithm
+		generate []KeyUsage
+		usages   []KeyUsage
+		want     string
+	}{
+		{Algorithm{Name: AlgAESGCM, Length: intPtr(128)}, []KeyUsage{UsageEncrypt}, []KeyUsage{UsageEncrypt}, "enc"},
+		{Algorithm{Name: AlgAESKW, Length: intPtr(128)}, []KeyUsage{UsageWrapKey}, []KeyUsage{UsageWrapKey}, "enc"},
+		{Algorithm{Name: AlgAESECB, Length: intPtr(128)}, []KeyUsage{UsageEncrypt}, []KeyUsage{UsageEncrypt}, "enc"},
+		{Algorithm{Name: AlgHMAC, Hash: AlgSHA256}, []KeyUsage{UsageSign}, []KeyUsage{UsageSign}, "sig"},
+		{rsa(AlgRSASSAPKCS1), []KeyUsage{UsageSign, UsageVerify}, []KeyUsage{UsageSign}, "sig"},
+		{rsa(AlgRSAOAEP), []KeyUsage{UsageEncrypt, UsageDecrypt}, []KeyUsage{UsageDecrypt}, "enc"},
+		{Algorithm{Name: AlgECDSA, NamedCurve: CurveP256}, []KeyUsage{UsageSign, UsageVerify}, []KeyUsage{UsageSign}, "sig"},
+		{Algorithm{Name: AlgECDH, NamedCurve: CurveP256}, []KeyUsage{UsageDeriveBits}, []KeyUsage{UsageDeriveBits}, "enc"},
+		{Algorithm{Name: AlgEd25519}, []KeyUsage{UsageSign, UsageVerify}, []KeyUsage{UsageSign}, "sig"},
+		{Algorithm{Name: AlgX25519}, []KeyUsage{UsageDeriveBits}, []KeyUsage{UsageDeriveBits}, "enc"},
+	}
+
+	for _, c := range cases {
+		pair, err := GenerateKey(c.alg, true, c.generate)
+		if err != nil {
+			t.Fatalf("%s: %v", c.alg.Name, err)
+		}
+		key := pair.Secret
+		if key == nil {
+			key = pair.PrivateKey
+		}
+		data, err := ExportKey(FormatJWK, key)
+		if err != nil {
+			t.Fatalf("%s: %v", c.alg.Name, err)
+		}
+		var jwk map[string]any
+		if err = json.Unmarshal(data.JSON, &jwk); err != nil {
+			t.Fatal(err)
+		}
+		// 去掉 key_ops，只观察 use 的校验。
+		delete(jwk, "key_ops")
+
+		wrong := "sig"
+		if c.want == "sig" {
+			wrong = "enc"
+		}
+		// 空串同样是存在的成员，必须参与校验。
+		for _, entry := range []struct {
+			use  string
+			want string
+		}{{c.want, ""}, {wrong, ErrNameData}, {"", ErrNameData}} {
+			jwk["use"] = entry.use
+			encoded, marshalErr := json.Marshal(jwk)
+			if marshalErr != nil {
+				t.Fatal(marshalErr)
+			}
+			_, err = ImportKey(FormatJWK, KeyData{JSON: encoded}, c.alg, true, c.usages)
+			if entry.want == "" {
+				if err != nil {
+					t.Errorf("%s use %q: %v", c.alg.Name, entry.use, err)
+				}
+				continue
+			}
+			if name := errorName(t, err); name != entry.want {
+				t.Errorf("%s use %q: error name = %q, want %q", c.alg.Name, entry.use, name, entry.want)
+			}
+		}
+	}
+
+	// 未请求任何用法时不校验 use，没有用法的 ECDH 公钥带 sig 仍可导入。
+	pair, err := GenerateKey(Algorithm{Name: AlgECDH, NamedCurve: CurveP256}, true, []KeyUsage{UsageDeriveBits})
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := ExportKey(FormatJWK, pair.PublicKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var jwk map[string]any
+	if err = json.Unmarshal(data.JSON, &jwk); err != nil {
+		t.Fatal(err)
+	}
+	jwk["use"] = "sig"
+	encoded, err := json.Marshal(jwk)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = ImportKey(FormatJWK, KeyData{JSON: encoded}, Algorithm{Name: AlgECDH, NamedCurve: CurveP256},
+		true, []KeyUsage{}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestWrapKeyRoundTrip(t *testing.T) {
 	wrappingKey := newSecretKey(AlgAESGCM, "", bytes.Repeat([]byte{1}, 32), UsageWrapKey, UsageUnwrapKey)
 	target := newSecretKey(AlgAESCBC, "", bytes.Repeat([]byte{2}, 16), UsageEncrypt, UsageDecrypt)

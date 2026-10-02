@@ -451,6 +451,33 @@ func TestCryptoJWKKeyOpsPresence(t *testing.T) {
 	}
 }
 
+func TestCryptoJWKUseOfKeyAgreement(t *testing.T) {
+	rt := newCryptoTestRuntime(t)
+
+	// ECDH 与 X25519 的私钥用于派生，use 必须是 enc，sig 报 DataError。
+	got := rt.await(`(async () => {
+		const subtle = siyuan.crypto.subtle;
+		const results = [];
+		for (const alg of [{name: "ECDH", namedCurve: "P-256"}, {name: "X25519"}]) {
+			const pair = await subtle.generateKey(alg, true, ["deriveBits"]);
+			const {key_ops, ...jwk} = await subtle.exportKey("jwk", pair.privateKey);
+			for (const use of ["sig", "enc"]) {
+				try {
+					await subtle.importKey("jwk", {...jwk, use}, alg, true, ["deriveBits"]);
+					results.push(alg.name + " " + use + "=resolved");
+				} catch (e) {
+					results.push(alg.name + " " + use + "=" + e.name);
+				}
+			}
+		}
+		report(results.join(","));
+	})()`)
+	want := "ECDH sig=DataError,ECDH enc=resolved,X25519 sig=DataError,X25519 enc=resolved"
+	if got != want {
+		t.Fatalf("use = %s, want %s", got, want)
+	}
+}
+
 func TestCryptoDeriveKeyAndBits(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 

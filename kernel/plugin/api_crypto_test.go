@@ -267,6 +267,35 @@ func TestCryptoAESGCMRoundTrip(t *testing.T) {
 	}
 }
 
+func TestCryptoImportIgnoresAESParameterLength(t *testing.T) {
+	rt := newCryptoTestRuntime(t)
+
+	// 同一个 AES-CTR 参数对象可以同时用于导入与加解密，其中的 length 是计数器位长，
+	// 不影响导入：密钥位长取自密钥数据。
+	got := rt.await(`(async () => {
+		const subtle = siyuan.crypto.subtle;
+		const params = {name: "AES-CTR", counter: new Uint8Array(16), length: 64};
+		const raw = siyuan.crypto.getRandomValues(new Uint8Array(16));
+
+		try {
+			const key = await subtle.importKey("raw", raw, params, true, ["encrypt", "decrypt"]);
+			const plaintext = new TextEncoderLike("reused parameters");
+			const ciphertext = await subtle.encrypt(params, key, plaintext);
+			const decrypted = await subtle.decrypt(params, key, ciphertext);
+			const same = [...new Uint8Array(decrypted)].join(",") === [...plaintext].join(",");
+
+			// 其他 AES 模式同样忽略导入参数中的 length。
+			const gcm = await subtle.importKey("raw", raw, {name: "AES-GCM", length: 256}, true, ["encrypt"]);
+			report([key.algorithm.length, same, gcm.algorithm.length].join(","));
+		} catch (e) {
+			report(e.name + ": " + e.message);
+		}
+	})()`)
+	if got != "128,true,128" {
+		t.Fatalf("AES import = %s, want 128,true,128", got)
+	}
+}
+
 func TestCryptoKeyObjectShape(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 

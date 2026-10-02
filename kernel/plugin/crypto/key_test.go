@@ -132,10 +132,19 @@ func TestImportExportRawAES(t *testing.T) {
 		t.Fatalf("error = %v, want DataError", err)
 	}
 
-	// length 与实际密钥材料不一致。
-	mismatch := Algorithm{Name: AlgAESGCM, Length: intPtr(128)}
-	if _, err = ImportKey(FormatRaw, KeyData{Raw: secret}, mismatch, true, []KeyUsage{UsageEncrypt}); errorName(t, err) != ErrNameData {
-		t.Fatalf("error = %v, want DataError", err)
+	// 规范的 AES 导入参数只有 name，参数中的 length 不参与导入，位长取自密钥数据。
+	for _, other := range []Algorithm{
+		{Name: AlgAESGCM, Length: intPtr(128)},
+		{Name: AlgAESCTR, Counter: make([]byte, 16), Length: intPtr(64)},
+	} {
+		imported, importErr := ImportKey(FormatRaw, KeyData{Raw: secret}, other, true, []KeyUsage{UsageEncrypt})
+		if importErr != nil {
+			t.Fatalf("%s with length %d: %v", other.Name, *other.Length, importErr)
+		}
+		if *imported.Algorithm.Length != 256 {
+			t.Fatalf("%s with length %d: key length = %d, want 256",
+				other.Name, *other.Length, *imported.Algorithm.Length)
+		}
 	}
 }
 

@@ -59,14 +59,12 @@ func generateAESKey(alg Algorithm, extractable bool, usages []KeyUsage) (*Key, e
 	}, nil
 }
 
-// importAESKey 从原始字节导入 AES 密钥。
+// importAESKey 从原始字节导入 AES 密钥。规范的 AES 导入参数只有 name，
+// 密钥位长完全由密钥数据决定，参数中的 length（例如复用加密参数时 AES-CTR 的计数器位长）不参与导入。
 func importAESKey(alg Algorithm, secret []byte, extractable bool, usages []KeyUsage) (*Key, error) {
 	length := len(secret) * 8
 	if !containsInt(aesKeyLengths, length) {
 		return nil, dataError("%s key data must be 16, 24 or 32 bytes, got %d", alg.Name, len(secret))
-	}
-	if alg.Length != nil && *alg.Length != length {
-		return nil, dataError("%s key data is %d bits, but length is %d", alg.Name, length, *alg.Length)
 	}
 
 	return &Key{

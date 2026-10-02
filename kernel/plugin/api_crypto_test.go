@@ -601,6 +601,66 @@ func TestCryptoRespectsTypedArrayViews(t *testing.T) {
 	}
 }
 
+func TestCryptoAcceptsEmptyBufferSource(t *testing.T) {
+	rt := newCryptoTestRuntime(t)
+
+	// 长度为 0 的 BufferSource 是合法取值，必须与成员缺失区分开：
+	// RFC 5869 允许 HKDF 的 salt 与 info 为空，浏览器同样接受。
+	got := rt.await(`(async () => {
+		const subtle = siyuan.crypto.subtle;
+		const base = await subtle.importKey("raw", new TextEncoderLike("password"),
+			{name: "HKDF"}, false, ["deriveBits"]);
+
+		const results = [];
+		for (const [label, params] of [
+			["empty info", {name: "HKDF", hash: "SHA-256", salt: new Uint8Array(8), info: new Uint8Array(0)}],
+			["empty salt", {name: "HKDF", hash: "SHA-256", salt: new Uint8Array(0), info: new Uint8Array(4)}],
+			["both empty", {name: "HKDF", hash: "SHA-256", salt: new Uint8Array(0), info: new Uint8Array(0)}],
+			["empty ArrayBuffer", {name: "HKDF", hash: "SHA-256", salt: new ArrayBuffer(0), info: new ArrayBuffer(0)}],
+		]) {
+			try {
+				const bits = await subtle.deriveBits(params, base, 128);
+				results.push(label + "=" + bits.byteLength);
+			} catch (e) {
+				results.push(label + "=" + e.name);
+			}
+		}
+
+		// 成员缺失仍然是 TypeError，空值不等于缺失。
+		try {
+			await subtle.deriveBits({name: "HKDF", hash: "SHA-256", salt: new Uint8Array(8)}, base, 128);
+			results.push("absent info=resolved");
+		} catch (e) {
+			results.push("absent info=" + e.name);
+		}
+		report(results.join(","));
+	})()`)
+	want := "empty info=16,empty salt=16,both empty=16,empty ArrayBuffer=16,absent info=TypeError"
+	if got != want {
+		t.Fatalf("empty BufferSource = %s, want %s", got, want)
+	}
+
+	// 空明文与空的附加认证数据同样可用。
+	got = rt.await(`(async () => {
+		const subtle = siyuan.crypto.subtle;
+		const key = await subtle.generateKey({name: "AES-GCM", length: 128}, true, ["encrypt", "decrypt"]);
+		const iv = siyuan.crypto.getRandomValues(new Uint8Array(12));
+
+		const ciphertext = await subtle.encrypt(
+			{name: "AES-GCM", iv, additionalData: new Uint8Array(0)}, key, new Uint8Array(0));
+		const plaintext = await subtle.decrypt({name: "AES-GCM", iv}, key, ciphertext);
+
+		const digest = await subtle.digest("SHA-256", new Uint8Array(0));
+		const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+		report([ciphertext.byteLength, plaintext.byteLength, hex].join(","));
+	})()`)
+	// 空明文的密文只有 16 字节认证标签；空输入的 SHA-256 是已知值。
+	want = "16,0,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+	if got != want {
+		t.Fatalf("empty input = %s, want %s", got, want)
+	}
+}
+
 func TestCryptoSurfaceIsFrozen(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 

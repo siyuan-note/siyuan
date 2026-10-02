@@ -252,6 +252,11 @@ func (h *cryptoHost) cryptoBytesOf(rt *goja.Runtime, value goja.Value, name stri
 	if exportErr := rt.ExportTo(value, &data); exportErr != nil {
 		return nil, crypto.NewError(crypto.ErrNameType, "%s could not be read as bytes: %s", name, exportErr)
 	}
+	if data == nil {
+		// 长度为 0 的 TypedArray 会导出为 nil 切片，而算法层用 nil 表示成员缺失，
+		// 因此统一返回非 nil 的空切片，保证空的 BufferSource 与缺失成员可以区分。
+		return []byte{}, nil
+	}
 	return bytes.Clone(data), nil
 }
 

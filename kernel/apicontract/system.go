@@ -31,6 +31,9 @@ type SystemCheckUpdateRequest struct {
 type SystemZipData struct {
 	Zip string `json:"zip"`
 }
+
+// SystemExportConfData 返回设置导出文件名和压缩包路径。导出副本清空 AI 密钥（含决策模型）和 OIDC 客户端密钥，
+// 不修改当前工作空间配置；导出的设置文件不包含笔记本加密密钥及恢复材料。
 type SystemExportConfData struct {
 	Name string `json:"name"`
 	Zip  string `json:"zip"`

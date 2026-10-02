@@ -524,6 +524,9 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 	clonedConf.CookieKey = ""
 	clonedConf.MCPOAuth = ""
 	clonedConf.CloudRegion = 0
+	if nil != clonedConf.OIDC {
+		clonedConf.OIDC.ClientSecret = ""
+	}
 	if nil != clonedConf.AI {
 		for _, provider := range clonedConf.AI.Providers {
 			if nil != provider {
@@ -536,6 +539,9 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 		}
 		if nil != clonedConf.AI.Rerank {
 			clonedConf.AI.Rerank.APIKey = ""
+		}
+		if nil != clonedConf.AI.Decision {
+			clonedConf.AI.Decision.APIKey = ""
 		}
 		clonedConf.AI.MCP = nil
 	}

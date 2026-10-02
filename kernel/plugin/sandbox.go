@@ -50,7 +50,11 @@ const (
 )
 
 var (
-	httpClient *req.Client = req.C().SetTimeout(time.Minute)
+	// 请求时限由 siyuan.client.fetch 按请求设置；req.C() 默认 2 分钟的整体超时会截断更长的时限，因此关闭。
+	httpClient *req.Client = req.C().SetTimeout(0)
+
+	// fetchDefaultTimeout 是 siyuan.client.fetch 未指定 timeout 时的请求时限。
+	fetchDefaultTimeout = time.Minute
 )
 
 type Promise struct {

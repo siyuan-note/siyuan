@@ -49,7 +49,8 @@ type jsonWebKey struct {
 	Alg string `json:"alg,omitempty"`
 	Use string `json:"use,omitempty"`
 
-	KeyOps []string `json:"key_ops,omitempty"`
+	// 导入时 nil 表示成员缺失，空切片表示空数组；导出时始终输出该成员。
+	KeyOps []string `json:"key_ops"`
 	Ext    *bool    `json:"ext,omitempty"`
 
 	K string `json:"k,omitempty"` // 对称密钥材料
@@ -232,7 +233,8 @@ func checkECPrivateKey(privateKey *ecdsa.PrivateKey) (*ecdsa.PrivateKey, error) 
 
 // exportJWK 将密钥导出为 JWK。
 func exportJWK(key *Key) ([]byte, error) {
-	jwk := jsonWebKey{Ext: &key.Extractable, Alg: jwkAlgorithm(key)}
+	// 规范要求把 key_ops 设为密钥的用法，没有用法的密钥也要输出空数组。
+	jwk := jsonWebKey{Ext: &key.Extractable, Alg: jwkAlgorithm(key), KeyOps: make([]string, 0, len(key.Usages))}
 	for _, usage := range key.Usages {
 		jwk.KeyOps = append(jwk.KeyOps, string(usage))
 	}
@@ -317,9 +319,7 @@ func exportJWKAsymmetric(key *Key, jwk *jsonWebKey) ([]byte, error) {
 	if jwk.Alg != "" {
 		merged["alg"] = jwk.Alg
 	}
-	if len(jwk.KeyOps) > 0 {
-		merged["key_ops"] = jwk.KeyOps
-	}
+	merged["key_ops"] = jwk.KeyOps
 	merged["ext"] = key.Extractable
 
 	return json.Marshal(merged)
@@ -331,9 +331,13 @@ func checkJWKMetadata(jwk *jsonWebKey, extractable bool, usages []KeyUsage) erro
 		return dataError("JSON Web Key is marked as non-extractable")
 	}
 
-	if len(jwk.KeyOps) > 0 {
+	// key_ops 只要存在就参与校验，空数组不允许任何用法；RFC 7517 不允许其中出现重复值。
+	if jwk.KeyOps != nil {
 		allowed := make([]KeyUsage, 0, len(jwk.KeyOps))
 		for _, op := range jwk.KeyOps {
+			if containsUsage(allowed, KeyUsage(op)) {
+				return dataError("JSON Web Key key_ops contains the duplicate value %q", op)
+			}
 			allowed = append(allowed, KeyUsage(op))
 		}
 		for _, usage := range usages {

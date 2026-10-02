@@ -416,6 +416,41 @@ func TestCryptoImportExportKey(t *testing.T) {
 	}
 }
 
+func TestCryptoJWKKeyOpsPresence(t *testing.T) {
+	rt := newCryptoTestRuntime(t)
+
+	// key_ops 缺失时不限制用法；为空数组或含重复值时报 DataError。
+	got := rt.await(`(async () => {
+		const subtle = siyuan.crypto.subtle;
+		const key = await subtle.generateKey({name: "AES-GCM", length: 128}, true, ["encrypt"]);
+		const {key_ops, ...withoutKeyOps} = await subtle.exportKey("jwk", key);
+
+		const results = [];
+		for (const [label, jwk] of [
+			["absent", withoutKeyOps],
+			["empty", {...withoutKeyOps, key_ops: []}],
+			["duplicate", {...withoutKeyOps, key_ops: ["encrypt", "encrypt"]}],
+		]) {
+			try {
+				await subtle.importKey("jwk", jwk, "AES-GCM", true, ["encrypt"]);
+				results.push(label + "=resolved");
+			} catch (e) {
+				results.push(label + "=" + e.name);
+			}
+		}
+
+		// 没有用法的公钥导出空数组。
+		const pair = await subtle.generateKey({name: "ECDH", namedCurve: "P-256"}, true, ["deriveBits"]);
+		const publicJwk = await subtle.exportKey("jwk", pair.publicKey);
+		results.push("export=" + JSON.stringify(publicJwk.key_ops));
+		report(results.join(","));
+	})()`)
+	want := "absent=resolved,empty=DataError,duplicate=DataError,export=[]"
+	if got != want {
+		t.Fatalf("key_ops = %s, want %s", got, want)
+	}
+}
+
 func TestCryptoDeriveKeyAndBits(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 

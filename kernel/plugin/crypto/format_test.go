@@ -415,6 +415,35 @@ func TestECJWKRejectsInvalidPrivateKey(t *testing.T) {
 	}
 }
 
+func TestJWKExportsEmptyKeyOps(t *testing.T) {
+	// ECDH 与 X25519 的公钥没有用法，导出的 key_ops 必须是空数组而不是缺失。
+	// 两者分别走 go-jose 编码与本地编码两条路径。
+	for _, alg := range []Algorithm{{Name: AlgECDH, NamedCurve: CurveP256}, {Name: AlgX25519}} {
+		pair, err := GenerateKey(alg, true, []KeyUsage{UsageDeriveBits})
+		if err != nil {
+			t.Fatalf("%s: %v", alg.Name, err)
+		}
+		data, err := ExportKey(FormatJWK, pair.PublicKey)
+		if err != nil {
+			t.Fatalf("%s: %v", alg.Name, err)
+		}
+
+		var jwk map[string]any
+		if err = json.Unmarshal(data.JSON, &jwk); err != nil {
+			t.Fatal(err)
+		}
+		keyOps, ok := jwk["key_ops"].([]any)
+		if !ok || len(keyOps) != 0 {
+			t.Fatalf("%s: key_ops = %#v, want an empty array", alg.Name, jwk["key_ops"])
+		}
+
+		// 导出结果可以原样导入。
+		if _, err = ImportKey(FormatJWK, KeyData{JSON: data.JSON}, alg, true, []KeyUsage{}); err != nil {
+			t.Fatalf("%s: %v", alg.Name, err)
+		}
+	}
+}
+
 func TestOKPJWKRejectsWrongCurve(t *testing.T) {
 	ed, err := GenerateKey(Algorithm{Name: AlgEd25519}, true, []KeyUsage{UsageSign})
 	if err != nil {

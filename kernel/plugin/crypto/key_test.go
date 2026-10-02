@@ -288,6 +288,8 @@ func TestJWKImportValidation(t *testing.T) {
 		{"invalid base64url", `{"kty":"oct","k":"not base64!"}`, ErrNameData},
 		{"non-extractable", `{"kty":"oct","k":"` + secret + `","ext":false}`, ErrNameData},
 		{"key_ops mismatch", `{"kty":"oct","k":"` + secret + `","key_ops":["decrypt"]}`, ErrNameData},
+		{"empty key_ops", `{"kty":"oct","k":"` + secret + `","key_ops":[]}`, ErrNameData},
+		{"duplicate key_ops", `{"kty":"oct","k":"` + secret + `","key_ops":["encrypt","encrypt"]}`, ErrNameData},
 		{"use mismatch", `{"kty":"oct","k":"` + secret + `","use":"sig"}`, ErrNameData},
 		{"alg mismatch", `{"kty":"oct","k":"` + secret + `","alg":"A256GCM"}`, ErrNameData},
 	}
@@ -302,6 +304,12 @@ func TestJWKImportValidation(t *testing.T) {
 	// 正确的 JWK 可以导入，alg 与 ext 相符。
 	valid := `{"kty":"oct","k":"` + secret + `","alg":"A128GCM","ext":true,"key_ops":["encrypt","decrypt"]}`
 	if _, err := ImportKey(FormatJWK, KeyData{JSON: []byte(valid)}, alg, true, usages); err != nil {
+		t.Fatal(err)
+	}
+
+	// 缺少 key_ops 时不限制用法。
+	withoutKeyOps := `{"kty":"oct","k":"` + secret + `"}`
+	if _, err := ImportKey(FormatJWK, KeyData{JSON: []byte(withoutKeyOps)}, alg, true, usages); err != nil {
 		t.Fatal(err)
 	}
 }

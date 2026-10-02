@@ -6,7 +6,7 @@
 		"id": "20200813125307-pxsjela",
 		"title": "导入和导出",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261002211013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201229120428-dgzkno8",
-				"updated": "20260803171606"
+				"updated": "20261002211013"
 			},
 			"Children": [
 				{
@@ -30,7 +30,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511184321-um53ppo",
-				"updated": "20260803163440"
+				"updated": "20261002211013"
 			},
 			"Children": [
 				{
@@ -50,6 +50,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "思源支持导入 Markdown 文件。所以如果你需要导入其他笔记软件的数据，请先将数据转换为 Markdown 文件。"
+				}
+			]
+		},
+		{
+			"ID": "20261002211013-ujtdqw0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002211013-ujtdqw0",
+				"updated": "20261002211013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "导入 Markdown 时，[^note]: 形式的脚注定义会转换为独立的有序列表项，正文中的 [^note] 会转换为上标块引用。点击引用可打开定义，通过定义的反向链接可返回引用它的正文块。脚注中的多个段落会保留在同一列表项内。没有对应定义的脚注不生成块引用，代码示例和转义的脚注语法保留为字面文本。"
 				}
 			]
 		},

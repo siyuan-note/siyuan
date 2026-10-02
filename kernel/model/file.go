@@ -1363,7 +1363,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		// 改进链滴剪藏 https://github.com/siyuan-note/siyuan/issues/13117
 		enableLuteInlineSyntax(luteEngine)
 	}
-	dom := luteEngine.Md2BlockDOM(md, false)
+	dom := markdownWithFootnotes2BlockDOM(luteEngine, md)
 	titleEmpty := false
 	if nil != arg {
 		if titleEmptyArg, ok := arg["titleEmpty"]; ok {

@@ -584,10 +584,13 @@ var StartObsidianVaultImport = define[ObsidianImportRequest, *ObsidianVaultTask]
 
 var CancelObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("cancelObsidianVaultTask", "/api/import/cancelObsidianVaultTask", JSONBody, ResponseOptions{DataOnError: true}, "POST")
 
+// ImportStdMd 将标准脚注定义导入为独立列表项，正文脚注转换为指向列表项的上标静态块引用。
+// 多次引用共享同一目标；未定义的脚注不生成块引用，代码中的脚注文本保持原样，反链复用块引用索引。
 var ImportStdMd = define[ImportMarkdownRequest, Null]("importStdMd", "/api/import/importStdMd", JSONBody, ResponseOptions{}, "POST")
 
 var ImportData = define[ImportDataRequest, Null]("importData", "/api/import/importData", MultipartBody, ResponseOptions{}, "POST")
 
+// ImportZipMd 对压缩包中的 Markdown 使用与 ImportStdMd 相同的脚注转换规则。
 var ImportZipMd = define[ImportZipMarkdownRequest, Null]("importZipMd", "/api/import/importZipMd", MultipartBody, ResponseOptions{}, "POST")
 
 var ImportSY = define[ImportSYRequest, Null]("importSY", "/api/import/importSY", MultipartBody, ResponseOptions{}, "POST")
@@ -791,6 +794,9 @@ var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDo
 var DuplicateDocTree = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDocTree", "/api/filetree/duplicateDocTree", JSONBody, ResponseOptions{}, "POST")
 var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", JSONBody, ResponseOptions{}, "POST")
 var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// CreateDocWithMd 保留编辑器 Markdown 语法选项，并按 ImportStdMd 的规则自动转换标准脚注。
+// 请求字段、文档 ID 响应和笔记本权限规则不变；转义的脚注语法可用于保留字面文本。
 var CreateDocWithMd = define[FileTreeCreateMarkdownRequest, string]("createDocWithMd", "/api/filetree/createDocWithMd", JSONBody, ResponseOptions{}, "POST")
 var GetDocCreateSavePath = define[FileTreeNotebookRequest, FileTreeCreateSavePathData]("getDocCreateSavePath", "/api/filetree/getDocCreateSavePath", JSONBody, ResponseOptions{}, "POST")
 var GetRefCreateSavePath = define[FileTreeNotebookRequest, FileTreeSavePathData]("getRefCreateSavePath", "/api/filetree/getRefCreateSavePath", JSONBody, ResponseOptions{}, "POST")

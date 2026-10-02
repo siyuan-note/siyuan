@@ -1985,11 +1985,13 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 
 func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdated string) {
 	luteEngine := util.NewStdLute()
+	luteEngine.SetFootnotes(true)
 	luteEngine.SetYamlFrontMatter(true) // 解析 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/10878
 	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
 	if nil == ret {
 		return
 	}
+	convertMarkdownFootnotes(ret)
 	parse.NormalizeInlineHTMLTextStyles(ret)
 	normalizeImportedHTMLTextStyles(ret)
 	yfmRootID, yfmTitle, yfmUpdated = normalizeTree(ret)
@@ -2315,11 +2317,13 @@ func htmlBlock2Inline(tree *parse.Tree) {
 }
 
 func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {
+	blockIDs := map[string]string{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || "" == n.ID {
 			return ast.WalkContinue
 		}
 
+		oldID := n.ID
 		n.ID = ast.NewNodeID()
 		if ast.NodeDocument == n.Type && "" != rootID {
 			n.ID = rootID
@@ -2334,6 +2338,16 @@ func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {
 			}
 		} else {
 			n.SetIALAttr("updated", util.TimeFromID(n.ID))
+		}
+		blockIDs[oldID] = n.ID
+		return ast.WalkContinue
+	})
+	// 导入时为块分配新 ID，同时更新文档内脚注等块引用的目标。
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && treenode.IsBlockRef(n) {
+			if id := blockIDs[n.TextMarkBlockRefID]; id != "" {
+				n.TextMarkBlockRefID = id
+			}
 		}
 		return ast.WalkContinue
 	})

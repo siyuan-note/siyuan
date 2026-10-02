@@ -14,6 +14,7 @@ import {
 } from "./config";
 import {beginSearchPathRequest} from "./path";
 import {isDisabledFeature} from "../protyle/util/compatibility";
+import {createKeyboardSearchTrace} from "../util/keyboardDiagnostic";
 
 let openSearchVersion = 0;
 
@@ -25,6 +26,9 @@ export const openSearch = async (options: {
     notebookIds?: string[],
     searchPath?: string
 }) => {
+    const trace = createKeyboardSearchTrace(options.hotkey === Constants.DIALOG_SEARCH ? "search" :
+        options.hotkey === Constants.DIALOG_GLOBALSEARCH ? "globalSearch" : "");
+    trace("search-enter");
     if (window.siyuan.isPublish && options.hotkey === Constants.DIALOG_REPLACE) {
         return;
     }
@@ -43,11 +47,17 @@ export const openSearch = async (options: {
         hPath = getNotebookName(options.notebookId);
         idPath.push(options.notebookId);
         if (options.searchPath && options.searchPath !== "/") {
+            trace("path-start");
             const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
                 notebook: options.notebookId,
                 path: options.searchPath.endsWith(".sy") ? options.searchPath : options.searchPath + ".sy"
+            }).catch(error => {
+                trace("path-error", "exception");
+                throw error;
             });
+            trace("path-result", typeof response.data === "string" ? "string" : "invalid-data", response.code);
             if (version !== openSearchVersion || (isCurrentPathRequest && !isCurrentPathRequest())) {
+                trace("path-stale");
                 return;
             }
             if (response.code !== 0 || typeof response.data !== "string") {
@@ -118,10 +128,16 @@ export const openSearch = async (options: {
             } else if (options.hotkey === Constants.DIALOG_SEARCH) {
                 const toPath = item.editors.edit.protyle.path;
                 const toNotebook = item.editors.edit.protyle.notebookId;
+                trace("path-start");
+                let received = false;
                 fetchPost("/api/filetree/getHPathsByPaths", {paths: [toPath]}, (response) => {
+                    received = true;
+                    trace("path-result", Array.isArray(response.data) && typeof response.data[0] === "string" ?
+                        "string-array" : "invalid-data", response.code);
                     if (version !== openSearchVersion || !item.element.isConnected ||
                         item.element.getAttribute("data-key") !== Constants.DIALOG_SEARCH ||
                         (isCurrentPathRequest && !isCurrentPathRequest())) {
+                        trace("path-stale");
                         return;
                     }
                     if (!Array.isArray(response.data) || typeof response.data[0] !== "string") {
@@ -139,12 +155,17 @@ export const openSearch = async (options: {
                         storageConfig: replaceSearchConfigPath(
                             currentData, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]),
                     });
+                }).finally(() => {
+                    if (!received) {
+                        trace("path-error", "exception");
+                    }
                 });
             }
             return true;
         }
     });
     if (exitDialog) {
+        trace("dialog-reused");
         return;
     }
     let range: Range;
@@ -179,4 +200,5 @@ export const openSearch = async (options: {
         dialog.destroy({focus: "false"});
     });
     dialog.data = config;
+    trace("dialog-created");
 };

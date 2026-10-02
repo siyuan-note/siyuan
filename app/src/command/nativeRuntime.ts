@@ -9,6 +9,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {globalCommand} from "../boot/globalEvent/command/global";
 import {onlyProtyleCommand} from "../boot/globalEvent/command/protyle";
 import type {ICommandContextSnapshot} from "./types";
+import {createKeyboardSearchTrace} from "../util/keyboardDiagnostic";
 /// #if MOBILE
 import {popSearch} from "../mobile/menu/search";
 /// #else
@@ -119,10 +120,17 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
         case "search":
             if (!isFileFocus) {
                 /// #if MOBILE
+                const trace = createKeyboardSearchTrace("search");
+                trace("search-enter");
+                trace("path-start");
                 const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
                     notebook: protyle.notebookId,
                     path: protyle.path.endsWith(".sy") ? protyle.path : protyle.path + ".sy",
+                }).catch(error => {
+                    trace("path-error", "exception");
+                    throw error;
                 });
+                trace("path-result", typeof response.data === "string" ? "string" : "invalid-data", response.code);
                 if (response.code !== 0 || typeof response.data !== "string") {
                     return;
                 }
@@ -132,6 +140,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                     hPath: pathPosix().join(getNotebookName(protyle.notebookId), response.data),
                     idPath: [pathPosix().join(protyle.notebookId, protyle.path)],
                 });
+                trace("dialog-created", "mobile");
                 /// #else
                 openSearch({
                     app,

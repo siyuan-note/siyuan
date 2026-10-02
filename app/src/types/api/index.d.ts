@@ -2158,6 +2158,14 @@ export type SystemImportConfRequestInput = { "file"?: Array<Blob>; };
 
 export type SystemImportFileRequestInput = { "file"?: Blob; };
 
+export type SystemKeyboardLogEntryInput = { "command"?: string; "detail"?: string; "environment"?: SystemKeyboardLogEnvironmentInput | null; "event"?: number; "keyboard"?: SystemKeyboardLogEventInput | null; "responseCode"?: number | null; "seq": number; "stage": string; "time": number; };
+
+export type SystemKeyboardLogEnvironmentInput = { "frontend": string; "globalSearch": Array<string>; "platform": string; "search": Array<string>; "userAgent": string; "version": string; };
+
+export type SystemKeyboardLogEventInput = { "alt": boolean; "cancelBubble": boolean; "code": string; "composing": boolean; "ctrl": boolean; "defaultPrevented": boolean; "key": string; "keyCode": number; "matchGlobalSearch": boolean; "matchSearch": boolean; "meta": boolean; "repeat": boolean; "shift": boolean; "target": string; "trusted": boolean; };
+
+export type SystemKeyboardLogRequestInput = { "entries": Array<SystemKeyboardLogEntryInput>; "session": string; };
+
 export type SystemLANSync = { "enabled": boolean; "maxConcurrentReqs": number; };
 
 export type SystemLang = { "label": string; "name": string; };
@@ -5416,6 +5424,11 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/system/appendKeyboardLog": {
+        request: SystemKeyboardLogRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/system/bootProgress": {
         request: EmptyRequestInput;

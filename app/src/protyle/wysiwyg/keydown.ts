@@ -1,4 +1,5 @@
 import type {BlockQueryRequestInput} from "../../types/api";
+import {logKeyboardDiagnostic} from "../../util/keyboardDiagnostic";
 import {isProtyleListItemFragment} from "../runtimeCapabilities";
 import {toggleListMindmap} from "../render/listMindmap";
 import {hideElements} from "../ui/hideElements";
@@ -300,15 +301,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     bindVerticalNavigationReset(editorElement);
     editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html" || event.target.localName === "input") {
+            logKeyboardDiagnostic("editor-stop", event, "input-target");
             event.stopPropagation();
             return;
         }
         if (getAVTemplateInteractiveElement(event.target)) {
+            logKeyboardDiagnostic("editor-stop", event, "av-interactive");
             event.stopPropagation();
             return;
         }
         // 组合输入期间保留浏览器的原生选区，避免读取选区时修复光标而打断输入法。
         if (event.isComposing) {
+            logKeyboardDiagnostic("editor-stop", event, "composing");
             event.stopPropagation();
             return;
         }

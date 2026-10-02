@@ -100,6 +100,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/dismissOnboarding", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, dismissOnboarding)
 	ginServer.Handle("POST", "/api/system/checkUpdate", model.CheckAuth, model.CheckAdminRole, checkUpdate)
 	ginServer.Handle("POST", "/api/system/exportLog", model.CheckAuth, model.CheckAdminRole, exportLog)
+	ginServer.Handle("POST", "/api/system/appendKeyboardLog", model.CheckAuth, model.CheckAdminRole, appendKeyboardLog)
 	ginServer.Handle("POST", "/api/system/getChangelog", model.CheckAuth, getChangelog)
 	ginServer.Handle("POST", "/api/system/getNetwork", model.CheckAuth, model.CheckAdminRole, getNetwork)
 	ginServer.Handle("POST", "/api/system/exportConf", model.CheckAuth, model.CheckAdminRole, exportConf)

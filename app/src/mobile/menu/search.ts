@@ -4,6 +4,7 @@ import {getAttr} from "../../search/attrs";
 import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {Constants} from "../../constants";
+import {createKeyboardSearchTrace} from "../../util/keyboardDiagnostic";
 import {fetchPost} from "../../util/fetch";
 import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
@@ -767,6 +768,8 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
 };
 
 export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConfig) => {
+    const trace = createKeyboardSearchTrace(searchConfig ? "search" : "globalSearch");
+    trace("search-enter");
     const config: Config.IUILayoutTabSearchConfig = JSON.parse(JSON.stringify(window.siyuan.storage[Constants.LOCAL_SEARCHDATA]));
     const currentEditor = getCurrentEditor();
     if (currentEditor && isEncryptedBox(currentEditor.protyle.notebookId)) {
@@ -917,6 +920,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
             updateSearchResult(config, element);
         }
     });
+    trace("dialog-created", "mobile");
 };
 
 const goAsset = () => {

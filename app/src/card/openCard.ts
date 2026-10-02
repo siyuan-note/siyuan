@@ -837,14 +837,16 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         width: isMobile() ? "100vw" : "80vw",
         height: isMobile() ? "100dvh" : "70vh",
         destroyCallback() {
-            if (editor) {
-                editor.destroy();
-                if (window.siyuan.mobile) {
+            try {
+                editor?.destroy();
+            } finally {
+                // 仅释放当前复习窗口的编辑器，保留销毁期间打开的其他编辑器。
+                if (editor && window.siyuan.mobile?.popEditor === editor) {
                     window.siyuan.mobile.popEditor = null;
                 }
-            }
-            if (lastRange) {
-                focusByRange(lastRange);
+                if (lastRange) {
+                    focusByRange(lastRange);
+                }
             }
         },
         resizeCallback(type: string) {

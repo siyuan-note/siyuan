@@ -107,6 +107,48 @@ const runCases = async (source) => {
     assert.equal(window.getSelection().anchorOffset, 3);
     assert.equal(window.siyuan.dialogs.length, 0);
 
+    const errors = [];
+    document.body.append(trigger);
+    const onError = event => {
+        errors.push(event.error);
+        event.preventDefault();
+    };
+    window.addEventListener("error", onError);
+    const drag = document.createElement("div");
+    drag.id = "drag";
+    document.body.append(drag);
+    try {
+        for (const replacement of [false, true]) {
+            trigger.focus();
+            drag.classList.add("fn__hidden");
+            const error = new Error("Dialog cleanup failed");
+            let next;
+            let calls = 0;
+            dialog = open({destroyCallback: () => {
+                calls++;
+                if (replacement) {
+                    next = open();
+                }
+                throw error;
+            }});
+            dialog.destroy();
+            dialog.destroy();
+            await tick();
+            assert.equal(errors.pop(), error);
+            assert.equal(calls, 1);
+            assert.equal(dialog.element.isConnected, false);
+            assert.equal(window.siyuan.dialogs.includes(dialog), false);
+            assert.equal(drag.classList.contains("fn__hidden"), false);
+            assert.equal(document.activeElement, replacement ? next.element.querySelector("input") : trigger);
+            assert.equal(window.siyuan.dialogs.length, replacement ? 1 : 0);
+            next?.destroy();
+            await tick();
+        }
+    } finally {
+        window.removeEventListener("error", onError);
+        drag.remove();
+    }
+
     dialog = new Dialog({content: '<button id="first">First</button><input disabled><button hidden>Hidden</button><button id="last">Last</button>'});
     const container = dialog.element.querySelector(".b3-dialog__container");
     assert.equal(document.activeElement, container);
@@ -139,6 +181,102 @@ const runCases = async (source) => {
     await tick();
 };
 
+const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
+    const assert = require("node:assert/strict");
+    const tick = () => new Promise(resolve => setTimeout(resolve, 20));
+    let id = 0;
+    const constants = {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_OPENCARD: "card", LOCAL_DIALOGPOSITION: "positions"};
+    window.siyuan = {
+        dialogs: [], zIndex: 1, config: {}, storage: {positions: {}},
+        mobile: mobile ? {popEditor: null} : undefined,
+        menus: {menu: {element: document.createElement("div"), remove() {}}},
+    };
+    const modules = {
+        "../util/genID": {genUUID: () => String(++id)},
+        "../util/zIndex": {isAbove: () => false},
+        "./moveResize": {moveResize() {}},
+        "../util/functions": {isMobile: () => mobile},
+        "../constants": {Constants: constants},
+        "../protyle/util/selection": {focusByRange: range => {
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+        }},
+        "./util": {updateCardHV() {}},
+    };
+    const load = source => {
+        const exports = {};
+        new Function("require", "exports", source)(name => modules[name] || {}, exports);
+        return exports;
+    };
+    modules["../dialog"] = load(dialogSource);
+    const cards = load(cardSource);
+    const app = {plugins: []};
+    const data = {cards: []};
+    const errors = [];
+    const error = new Error("Flashcard editor cleanup failed");
+    let destroyError = error;
+    let destroyCount = 0;
+    let replacement;
+    cards.genCardHTML = () => '<div class="block__icons"><button class="block__icon">Review</button></div>';
+    cards.bindCardEvent = async ({element}) => {
+        element.setAttribute("data-key", constants.DIALOG_OPENCARD);
+        const editor = {resize() {}, destroy() {
+            destroyCount++;
+            if (replacement) {
+                window.siyuan.mobile.popEditor = replacement;
+            }
+            if (destroyError) {
+                throw destroyError;
+            }
+        }};
+        if (mobile) {
+            window.siyuan.mobile.popEditor = editor;
+        }
+        return editor;
+    };
+    const onError = event => {
+        errors.push(event.error);
+        event.preventDefault();
+    };
+    window.addEventListener("error", onError);
+    try {
+        await cards.openCardByData(app, data, "all");
+        const first = window.siyuan.dialogs[0];
+        first.destroy();
+        first.destroy();
+        await tick();
+        assert.equal(errors.pop(), error);
+        assert.equal(destroyCount, 1);
+        assert.equal(first.element.isConnected, false);
+        assert.equal(window.siyuan.dialogs.length, 0);
+        if (mobile) {
+            assert.equal(window.siyuan.mobile.popEditor, null);
+        }
+
+        destroyError = undefined;
+        await cards.openCardByData(app, data, "all");
+        const second = window.siyuan.dialogs[0];
+        assert.notEqual(second, first);
+        assert.equal(second.element.isConnected, true);
+        await cards.openCardByData(app, data, "all", undefined, undefined, true);
+        assert.equal(window.siyuan.dialogs[0], second);
+        assert.equal(destroyCount, 1);
+        if (mobile) {
+            replacement = {};
+        }
+        await cards.openCardByData(app, data, "all");
+        await tick();
+        assert.equal(destroyCount, 2);
+        assert.equal(window.siyuan.dialogs.length, 0);
+        if (mobile) {
+            assert.equal(window.siyuan.mobile.popEditor, replacement);
+        }
+        assert.equal(errors.length, 0);
+    } finally {
+        window.removeEventListener("error", onError);
+    }
+};
+
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow, ipcMain} = require("electron");
     app.setPath("userData", process.argv[2]);
@@ -161,6 +299,15 @@ if (process.versions.electron && process.type === "browser") {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
             }).outputText;
             await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(source)})`);
+            const {parse} = require("ifdef-loader/preprocessor");
+            const cardSource = fs.readFileSync(path.join(__dirname, "../src/card/openCard.ts"), "utf8");
+            for (const mobile of [false, true]) {
+                const compiled = ts.transpileModule(parse(cardSource, {MOBILE: mobile, BROWSER: true}, false, true), {
+                    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+                }).outputText;
+                await win.webContents.executeJavaScript(
+                    `(${runFlashcardCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(compiled)}, ${mobile})`);
+            }
         } catch (error) {
             console.error(error);
             code = 1;
@@ -173,7 +320,7 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("dialog focus restoration respects callbacks, nested dialogs and unavailable targets", async () => {
+    test("dialogs restore focus and flashcards reopen after cleanup failures on desktop and mobile", async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-dialog-focus-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

@@ -148,31 +148,33 @@ left:${left || "auto"};top:${top || "auto"}">
             const activeElement = document.activeElement;
             const restoreFocus = activeElement === document.body || this.element.contains(activeElement);
             this.element.remove();
-            if (this.destroyCallback) {
-                this.destroyCallback(options);
-            }
-            window.siyuan.dialogs.find((item, index) => {
-                if (item.id === this.id) {
-                    window.siyuan.dialogs.splice(index, 1);
-                    return true;
+            try {
+                this.destroyCallback?.(options);
+            } finally {
+                // 关闭回调失败时也注销对话框，避免残留状态阻止再次打开。
+                window.siyuan.dialogs.find((item, index) => {
+                    if (item.id === this.id) {
+                        window.siyuan.dialogs.splice(index, 1);
+                        return true;
+                    }
+                });
+                // 调用方和上层对话框已接管焦点时，不覆盖其焦点；失效或隐藏的触发元素不再恢复。
+                const target = this.previousFocus;
+                const topDialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
+                if (restoreFocus && document.activeElement === document.body && target?.isConnected &&
+                    target.getClientRects().length && getComputedStyle(target).visibility === "visible" &&
+                    !target.closest("[inert]") && (!topDialog || topDialog.element.contains(target))) {
+                    target.focus({preventScroll: true});
+                    if (document.activeElement === target && this.previousRange?.startContainer.isConnected &&
+                        this.previousRange.endContainer.isConnected && target.contains(this.previousRange.commonAncestorContainer)) {
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(this.previousRange);
+                    }
                 }
-            });
-            // 调用方和上层对话框已接管焦点时，不覆盖其焦点；失效或隐藏的触发元素不再恢复。
-            const target = this.previousFocus;
-            const topDialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
-            if (restoreFocus && document.activeElement === document.body && target?.isConnected &&
-                target.getClientRects().length && getComputedStyle(target).visibility === "visible" &&
-                !target.closest("[inert]") && (!topDialog || topDialog.element.contains(target))) {
-                target.focus({preventScroll: true});
-                if (document.activeElement === target && this.previousRange?.startContainer.isConnected &&
-                    this.previousRange.endContainer.isConnected && target.contains(this.previousRange.commonAncestorContainer)) {
-                    const selection = window.getSelection();
-                    selection.removeAllRanges();
-                    selection.addRange(this.previousRange);
-                }
+                // https://github.com/siyuan-note/siyuan/issues/10475
+                document.getElementById("drag")?.classList.remove("fn__hidden");
             }
-            // https://github.com/siyuan-note/siyuan/issues/10475
-            document.getElementById("drag")?.classList.remove("fn__hidden");
         }, Constants.TIMEOUT_DBLCLICK);
     }
 

@@ -111,7 +111,7 @@ func signECDSA(alg Algorithm, key *Key, data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	h, err := hashOf(alg)
+	h, err := strongHashOf(alg)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func verifyECDSA(alg Algorithm, key *Key, signature []byte, data []byte) (bool, 
 	if err != nil {
 		return false, err
 	}
-	h, err := hashOf(alg)
+	h, err := strongHashOf(alg)
 	if err != nil {
 		return false, err
 	}

@@ -189,7 +189,7 @@ func TestUnpadPKCS7RejectsInvalidPadding(t *testing.T) {
 	for _, last := range []byte{0, 17, 0xff} {
 		data := bytes.Repeat([]byte{0}, aes.BlockSize)
 		data[len(data)-1] = last
-		if _, err := unpadPKCS7(data, aes.BlockSize); errorName(t, err) != ErrNameOperation {
+		if _, err := unpadPKCS7(AlgAESCBC, data, aes.BlockSize); errorName(t, err) != ErrNameOperation {
 			t.Fatalf("last byte %d: error = %v, want OperationError", last, err)
 		}
 	}
@@ -199,7 +199,7 @@ func TestUnpadPKCS7RejectsInvalidPadding(t *testing.T) {
 	data[len(data)-1] = 3
 	data[len(data)-2] = 3
 	data[len(data)-3] = 2
-	if _, err := unpadPKCS7(data, aes.BlockSize); errorName(t, err) != ErrNameOperation {
+	if _, err := unpadPKCS7(AlgAESCBC, data, aes.BlockSize); errorName(t, err) != ErrNameOperation {
 		t.Fatalf("error = %v, want OperationError", err)
 	}
 }

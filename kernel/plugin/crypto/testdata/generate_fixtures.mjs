@@ -1,6 +1,6 @@
 // 用 Node 的 WebCrypto 生成跨实现互通夹具，供 interop_test.go 使用。
 // 重新生成：node generate_fixtures.mjs > interop.json
-import { webcrypto } from "node:crypto";
+import crypto, { webcrypto } from "node:crypto";
 
 const b64 = (buf) => Buffer.from(buf).toString("base64");
 const encode = (text) => new TextEncoder().encode(text);
@@ -170,6 +170,47 @@ for (const [label, generate, namedCurve] of [
         bobSpki: b64(await webcrypto.subtle.exportKey("spki", bob.publicKey)),
         length: 256,
         bits: b64(await webcrypto.subtle.deriveBits({ name: generate.name, public: bob.publicKey }, alice.privateKey, 256)),
+    });
+}
+
+// MD5 与 AES-ECB 是内核的非规范扩展，Node 的 WebCrypto 不支持它们，
+// 因此这两类夹具改用 Node 的传统 crypto 接口，其底层同样是 OpenSSL。
+for (const [label, input] of [
+    ["MD5 of the message", message],
+    ["MD5 of an empty input", ""],
+]) {
+    fixtures.cases.push({
+        kind: "md5",
+        label,
+        input: b64(encode(input)),
+        digest: b64(crypto.createHash("md5").update(input, "utf8").digest()),
+    });
+}
+
+for (const [label, keyBytes] of [
+    ["HMAC-MD5 256-bit key", hmacKeyBytes],
+    ["HMAC-MD5 short key", new Uint8Array(8).fill(0x0b)],
+]) {
+    const mac = crypto.createHmac("md5", Buffer.from(keyBytes));
+    mac.update(message, "utf8");
+    fixtures.cases.push({
+        kind: "hmac-md5",
+        label,
+        keyBytes: b64(keyBytes),
+        signature: b64(mac.digest()),
+    });
+}
+
+// AES-ECB 使用 PKCS#7 填充，与内核一致，因此密文可以逐字节比较。
+for (const [label, bits] of [["AES-ECB 128", 128], ["AES-ECB 256", 256]]) {
+    const keyBytes = aesKeyBytes.slice(0, bits / 8);
+    const cipher = crypto.createCipheriv(`aes-${bits}-ecb`, Buffer.from(keyBytes), null);
+    const ciphertext = Buffer.concat([cipher.update(message, "utf8"), cipher.final()]);
+    fixtures.cases.push({
+        kind: "aes-ecb",
+        label,
+        keyBytes: b64(keyBytes),
+        ciphertext: b64(ciphertext),
     });
 }
 

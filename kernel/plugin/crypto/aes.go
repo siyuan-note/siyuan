@@ -162,7 +162,7 @@ func decryptAESCBC(alg Algorithm, key *Key, ciphertext []byte) ([]byte, error) {
 
 	plaintext := make([]byte, len(ciphertext))
 	cipher.NewCBCDecrypter(block, alg.IV).CryptBlocks(plaintext, ciphertext)
-	return unpadPKCS7(plaintext, block.BlockSize())
+	return unpadPKCS7(AlgAESCBC, plaintext, block.BlockSize())
 }
 
 func aesCBCBlock(alg Algorithm, key *Key) (cipher.Block, error) {
@@ -170,6 +170,39 @@ func aesCBCBlock(alg Algorithm, key *Key) (cipher.Block, error) {
 		return nil, operationError("AES-CBC requires a %d-byte iv, got %d", aes.BlockSize, len(alg.IV))
 	}
 	return aesBlock(key)
+}
+
+// encryptAESECB 以 AES-ECB 加密，使用 PKCS#7 填充。该模式不属于 Web Crypto 规范，
+// 标准库也刻意没有提供对应的 BlockMode，因此逐分组调用分组密码。
+func encryptAESECB(key *Key, plaintext []byte) ([]byte, error) {
+	block, err := aesBlock(key)
+	if err != nil {
+		return nil, err
+	}
+
+	padded := padPKCS7(plaintext, block.BlockSize())
+	ciphertext := make([]byte, len(padded))
+	for offset := 0; offset < len(padded); offset += block.BlockSize() {
+		block.Encrypt(ciphertext[offset:offset+block.BlockSize()], padded[offset:offset+block.BlockSize()])
+	}
+	return ciphertext, nil
+}
+
+// decryptAESECB 以 AES-ECB 解密并去除 PKCS#7 填充。
+func decryptAESECB(key *Key, ciphertext []byte) ([]byte, error) {
+	block, err := aesBlock(key)
+	if err != nil {
+		return nil, err
+	}
+	if len(ciphertext) == 0 || len(ciphertext)%block.BlockSize() != 0 {
+		return nil, operationError("AES-ECB ciphertext length must be a non-zero multiple of %d", block.BlockSize())
+	}
+
+	plaintext := make([]byte, len(ciphertext))
+	for offset := 0; offset < len(ciphertext); offset += block.BlockSize() {
+		block.Decrypt(plaintext[offset:offset+block.BlockSize()], ciphertext[offset:offset+block.BlockSize()])
+	}
+	return unpadPKCS7(AlgAESECB, plaintext, block.BlockSize())
 }
 
 // cryptAESCTR 以 AES-CTR 加解密。规范要求计数器只在低 length 位内回绕，
@@ -257,7 +290,7 @@ func padPKCS7(data []byte, blockSize int) []byte {
 }
 
 // unpadPKCS7 校验并去除 PKCS#7 填充，使用常数时间比较避免填充预言。
-func unpadPKCS7(data []byte, blockSize int) ([]byte, error) {
+func unpadPKCS7(algName string, data []byte, blockSize int) ([]byte, error) {
 	padding := int(data[len(data)-1])
 	valid := subtle.ConstantTimeLessOrEq(1, padding) & subtle.ConstantTimeLessOrEq(padding, blockSize)
 
@@ -269,7 +302,7 @@ func unpadPKCS7(data []byte, blockSize int) ([]byte, error) {
 	}
 
 	if valid != 1 {
-		return nil, operationError("AES-CBC padding is invalid")
+		return nil, operationError("%s padding is invalid", algName)
 	}
 	return data[:len(data)-padding], nil
 }

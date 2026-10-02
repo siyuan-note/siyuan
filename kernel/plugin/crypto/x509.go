@@ -73,7 +73,7 @@ func exportPKCS8(key *Key) ([]byte, error) {
 func keyFromMaterial(alg Algorithm, material any, extractable bool, usages []KeyUsage) (*Key, error) {
 	switch alg.Name {
 	case AlgRSASSAPKCS1, AlgRSAPSS, AlgRSAOAEP:
-		h, err := hashOf(alg)
+		h, err := strongHashOf(alg)
 		if err != nil {
 			return nil, err
 		}

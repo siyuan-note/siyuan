@@ -45,6 +45,8 @@ type interopCase struct {
 	PrivateJWK json.RawMessage `json:"privateJwk"`
 	JWK        json.RawMessage `json:"jwk"`
 
+	Input             string `json:"input"`
+	Digest            string `json:"digest"`
 	Signature         string `json:"signature"`
 	Ciphertext        string `json:"ciphertext"`
 	LabeledCiphertext string `json:"labeledCiphertext"`
@@ -139,6 +141,12 @@ func TestInteropWithNodeWebCrypto(t *testing.T) {
 				runInteropKDFCase(t, c)
 			case "ecdh":
 				runInteropECDHCase(t, c)
+			case "md5":
+				runInteropMD5Case(t, c)
+			case "hmac-md5":
+				runInteropHMACMD5Case(t, c, message)
+			case "aes-ecb":
+				runInteropAESECBCase(t, c, message)
 			default:
 				t.Fatalf("unknown fixture kind %q", c.Kind)
 			}
@@ -146,7 +154,8 @@ func TestInteropWithNodeWebCrypto(t *testing.T) {
 	}
 
 	// 确保夹具覆盖了所有预期的算法族，避免夹具被意外裁剪后测试仍然通过。
-	for _, kind := range []string{"sign", "rsa-oaep", "aes", "aes-kw", "hmac", "hkdf", "pbkdf2", "ecdh"} {
+	for _, kind := range []string{"sign", "rsa-oaep", "aes", "aes-kw", "hmac", "hkdf", "pbkdf2", "ecdh",
+		"md5", "hmac-md5", "aes-ecb"} {
 		if !covered[kind] {
 			t.Errorf("interop fixtures do not cover %q", kind)
 		}
@@ -420,5 +429,70 @@ func runInteropECDHCase(t *testing.T, c interopCase) {
 	}
 	if !bytes.Equal(bits, decodeB64(t, c.Bits)) {
 		t.Fatalf("shared secret differs from Node's output\n got %x\nwant %x", bits, decodeB64(t, c.Bits))
+	}
+}
+
+// runInteropMD5Case 比较 MD5 摘要。MD5 是非规范扩展，夹具来自 Node 的传统 crypto 接口。
+func runInteropMD5Case(t *testing.T, c interopCase) {
+	digest, err := Digest(Algorithm{Name: AlgMD5}, decodeB64(t, c.Input))
+	if err != nil {
+		t.Fatalf("digest: %v", err)
+	}
+	if !bytes.Equal(digest, decodeB64(t, c.Digest)) {
+		t.Fatalf("digest differs from Node's output\n got %x\nwant %x", digest, decodeB64(t, c.Digest))
+	}
+}
+
+// runInteropHMACMD5Case 比较 HMAC-MD5 的签名。
+func runInteropHMACMD5Case(t *testing.T, c interopCase, message []byte) {
+	key, err := ImportKey(FormatRaw, KeyData{Raw: decodeB64(t, c.KeyBytes)},
+		Algorithm{Name: AlgHMAC, Hash: AlgMD5}, true, []KeyUsage{UsageSign, UsageVerify})
+	if err != nil {
+		t.Fatalf("import raw: %v", err)
+	}
+
+	signature, err := Sign(Algorithm{Name: AlgHMAC}, key, message)
+	if err != nil {
+		t.Fatalf("sign: %v", err)
+	}
+	if !bytes.Equal(signature, decodeB64(t, c.Signature)) {
+		t.Fatalf("signature differs from Node's output\n got %x\nwant %x", signature, decodeB64(t, c.Signature))
+	}
+
+	// Node 生成的签名必须通过内核校验。
+	ok, err := Verify(Algorithm{Name: AlgHMAC}, key, decodeB64(t, c.Signature), message)
+	if err != nil {
+		t.Fatalf("verify: %v", err)
+	}
+	if !ok {
+		t.Fatal("the kernel rejected a signature produced by Node")
+	}
+}
+
+// runInteropAESECBCase 比较 AES-ECB 的密文。两端都使用 PKCS#7 填充，因此结果应逐字节相同。
+func runInteropAESECBCase(t *testing.T, c interopCase, message []byte) {
+	key, err := ImportKey(FormatRaw, KeyData{Raw: decodeB64(t, c.KeyBytes)},
+		Algorithm{Name: AlgAESECB}, true, []KeyUsage{UsageEncrypt, UsageDecrypt})
+	if err != nil {
+		t.Fatalf("import raw: %v", err)
+	}
+	alg := Algorithm{Name: AlgAESECB}
+
+	ciphertext, err := Encrypt(alg, key, message)
+	if err != nil {
+		t.Fatalf("encrypt: %v", err)
+	}
+	if !bytes.Equal(ciphertext, decodeB64(t, c.Ciphertext)) {
+		t.Fatalf("ciphertext differs from Node's output\n got %x\nwant %x",
+			ciphertext, decodeB64(t, c.Ciphertext))
+	}
+
+	// 内核必须能解密 Node 生成的密文。
+	plaintext, err := Decrypt(alg, key, decodeB64(t, c.Ciphertext))
+	if err != nil {
+		t.Fatalf("decrypt: %v", err)
+	}
+	if !bytes.Equal(plaintext, message) {
+		t.Fatalf("decrypted %q, want %q", plaintext, message)
 	}
 }

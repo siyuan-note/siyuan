@@ -43,6 +43,8 @@ func encrypt(alg Algorithm, key *Key, data []byte) ([]byte, error) {
 		return encryptAESCBC(alg, key, data)
 	case AlgAESCTR:
 		return cryptAESCTR(alg, key, data)
+	case AlgAESECB:
+		return encryptAESECB(key, data)
 	case AlgRSAOAEP:
 		return encryptRSAOAEP(alg, key, data)
 	default:
@@ -59,6 +61,8 @@ func decrypt(alg Algorithm, key *Key, data []byte) ([]byte, error) {
 		return decryptAESCBC(alg, key, data)
 	case AlgAESCTR:
 		return cryptAESCTR(alg, key, data)
+	case AlgAESECB:
+		return decryptAESECB(key, data)
 	case AlgRSAOAEP:
 		return decryptRSAOAEP(alg, key, data)
 	default:
@@ -109,7 +113,7 @@ func Verify(alg Algorithm, key *Key, signature []byte, data []byte) (bool, error
 // GenerateKey 生成密钥或密钥对。
 func GenerateKey(alg Algorithm, extractable bool, usages []KeyUsage) (*KeyPair, error) {
 	switch alg.Name {
-	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW:
+	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgAESECB:
 		if err := checkUsages(alg.Name, KeyTypeSecret, usages); err != nil {
 			return nil, err
 		}
@@ -198,7 +202,7 @@ func ImportKey(format KeyFormat, data KeyData, alg Algorithm, extractable bool, 
 // importRawKey 从原始字节导入对称密钥与 KDF 基础密钥。
 func importRawKey(alg Algorithm, data []byte, extractable bool, usages []KeyUsage) (*Key, error) {
 	switch alg.Name {
-	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW:
+	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgAESECB:
 		if err := checkUsages(alg.Name, KeyTypeSecret, usages); err != nil {
 			return nil, err
 		}
@@ -244,7 +248,7 @@ func exportKey(format KeyFormat, key *Key) (*KeyData, error) {
 	switch format {
 	case FormatRaw:
 		switch key.Algorithm.Name {
-		case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgHMAC:
+		case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgAESECB, AlgHMAC:
 			// 复制密钥材料，避免调用方修改导出结果时影响密钥本身。
 			return &KeyData{Raw: bytes.Clone(key.secret)}, nil
 		case AlgECDSA, AlgECDH, AlgEd25519, AlgX25519:
@@ -322,7 +326,7 @@ func DeriveKey(alg Algorithm, key *Key, derived Algorithm, extractable bool, usa
 // derivedKeyLength 返回派生目标算法所需的密钥位长。
 func derivedKeyLength(derived Algorithm) (*int, error) {
 	switch derived.Name {
-	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW:
+	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgAESECB:
 		if derived.Length == nil {
 			return nil, typeError("%s requires the length member", derived.Name)
 		}

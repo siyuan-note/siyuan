@@ -91,7 +91,7 @@ func importJWK(alg Algorithm, data []byte, extractable bool, usages []KeyUsage) 
 // importJWKMaterial 按算法解析 JWK 的密钥材料。
 func importJWKMaterial(jwk *jsonWebKey, alg Algorithm, extractable bool, usages []KeyUsage) (*Key, error) {
 	switch alg.Name {
-	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW:
+	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgAESECB:
 		secret, err := decodeJWKOct(jwk, alg.Name)
 		if err != nil {
 			return nil, err
@@ -208,7 +208,7 @@ func exportJWK(key *Key) ([]byte, error) {
 	}
 
 	switch key.Algorithm.Name {
-	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgHMAC:
+	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgAESECB, AlgHMAC:
 		jwk.Kty = jwkKeyTypeOct
 		jwk.K = base64.RawURLEncoding.EncodeToString(key.secret)
 		return json.Marshal(jwk)
@@ -451,6 +451,10 @@ func jwkAlgorithm(key *Key) string {
 		}
 	case AlgECDH, AlgX25519, AlgEd25519:
 		// 规范未为这些算法定义 alg 取值。
+		return ""
+	case AlgAESECB:
+		// AES-ECB 不是 Web Crypto 算法，JWA 注册表也没有对应的 alg 取值，
+		// 因此不输出该成员，避免伪造出看似已注册的名称。
 		return ""
 	case AlgHMAC:
 		return jwkHashSuffix("HS", key.Algorithm.Hash)

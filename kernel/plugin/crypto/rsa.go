@@ -32,7 +32,7 @@ const (
 
 // generateRSAKeyPair 生成 RSA 密钥对。
 func generateRSAKeyPair(alg Algorithm, extractable bool, usages []KeyUsage) (*KeyPair, error) {
-	h, err := hashOf(alg)
+	h, err := strongHashOf(alg)
 	if err != nil {
 		return nil, err
 	}

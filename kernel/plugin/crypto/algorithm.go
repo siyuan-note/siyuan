@@ -43,6 +43,18 @@ const (
 	AlgX25519      = "X25519"
 )
 
+// 以下算法不属于 Web Crypto 规范，是内核为兼容遗留系统提供的扩展，浏览器不支持它们。
+// 两者都已不再安全，仅应用于对接无法变更的既有数据与第三方接口，不要用于新设计。
+const (
+	// AlgMD5 的碰撞攻击已经实用化，因此只允许用于摘要计算与 HMAC、HKDF、PBKDF2 的
+	// 伪随机函数，签名类算法会拒绝它，详见 strongHashOf。
+	AlgMD5 = "MD5"
+
+	// AlgAESECB 对相同的明文分组产生相同的密文分组，会泄漏明文结构，且不提供认证。
+	// 因此只支持 encrypt 与 decrypt，不支持 wrapKey 与 unwrapKey。
+	AlgAESECB = "AES-ECB"
+)
+
 // algorithmNames 以小写名称映射到规范化名称，用于大小写不敏感的算法查找。
 var algorithmNames = func() map[string]string {
 	names := []string{
@@ -50,6 +62,7 @@ var algorithmNames = func() map[string]string {
 		AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW, AlgHMAC,
 		AlgHKDF, AlgPBKDF2,
 		AlgRSASSAPKCS1, AlgRSAPSS, AlgRSAOAEP, AlgECDSA, AlgECDH, AlgEd25519, AlgX25519,
+		AlgMD5, AlgAESECB,
 	}
 	ret := make(map[string]string, len(names))
 	for _, name := range names {
@@ -105,6 +118,10 @@ var usageTable = map[string]map[KeyType][]KeyUsage{
 	AlgHKDF:   {KeyTypeSecret: {UsageDeriveBits, UsageDeriveKey}},
 	AlgPBKDF2: {KeyTypeSecret: {UsageDeriveBits, UsageDeriveKey}},
 
+	// AES-ECB 是非规范扩展，不支持包装密钥：该模式确定、无认证且不使用 iv，
+	// 用它包装密钥会暴露被包装密钥的分组结构。
+	AlgAESECB: {KeyTypeSecret: {UsageEncrypt, UsageDecrypt}},
+
 	AlgRSASSAPKCS1: {KeyTypePrivate: {UsageSign}, KeyTypePublic: {UsageVerify}},
 	AlgRSAPSS:      {KeyTypePrivate: {UsageSign}, KeyTypePublic: {UsageVerify}},
 	AlgECDSA:       {KeyTypePrivate: {UsageSign}, KeyTypePublic: {UsageVerify}},
@@ -126,6 +143,7 @@ var formatTable = map[string][]KeyFormat{
 	AlgAESCTR: {FormatRaw, FormatJWK},
 	AlgAESGCM: {FormatRaw, FormatJWK},
 	AlgAESKW:  {FormatRaw, FormatJWK},
+	AlgAESECB: {FormatRaw, FormatJWK},
 	AlgHMAC:   {FormatRaw, FormatJWK},
 	AlgHKDF:   {FormatRaw},
 	AlgPBKDF2: {FormatRaw},

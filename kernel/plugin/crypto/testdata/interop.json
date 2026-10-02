@@ -443,6 +443,42 @@
 			"bobSpki": "MCowBQYDK2VuAyEA8Smlct4n4K9q9EGRt3OwuCzmqbPoBmYB4Z97DYAyZmA=",
 			"length": 256,
 			"bits": "V7zfiIOi7UUpceYy5nuvSjr907pAPZa0yUIQuhdn4GE="
+		},
+		{
+			"kind": "md5",
+			"label": "MD5 of the message",
+			"input": "c2l5dWFuIGtlcm5lbCBwbHVnaW4gaW50ZXJvcA==",
+			"digest": "nUxsBQLYQUQ5x/Fqc14ZeQ=="
+		},
+		{
+			"kind": "md5",
+			"label": "MD5 of an empty input",
+			"input": "",
+			"digest": "1B2M2Y8AsgTpgAmY7PhCfg=="
+		},
+		{
+			"kind": "hmac-md5",
+			"label": "HMAC-MD5 256-bit key",
+			"keyBytes": "AwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwM=",
+			"signature": "riplOx65inzVk6VXnkaULw=="
+		},
+		{
+			"kind": "hmac-md5",
+			"label": "HMAC-MD5 short key",
+			"keyBytes": "CwsLCwsLCws=",
+			"signature": "unx9JFYlCrFICld0LuEdmg=="
+		},
+		{
+			"kind": "aes-ecb",
+			"label": "AES-ECB 128",
+			"keyBytes": "BwcHBwcHBwcHBwcHBwcHBw==",
+			"ciphertext": "Ot2KYTptxmFOeRQitQxpw4x5IQUaZsjsk0V3GNyFxro="
+		},
+		{
+			"kind": "aes-ecb",
+			"label": "AES-ECB 256",
+			"keyBytes": "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=",
+			"ciphertext": "BuXzvbRE7itpff96p8EIo1iZzEzAawAj2P2NKZy6VWQ="
 		}
 	]
 }

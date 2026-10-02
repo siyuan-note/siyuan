@@ -18,6 +18,7 @@ package crypto
 
 import (
 	stdcrypto "crypto"
+	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -26,9 +27,10 @@ import (
 
 // hashInfo 描述一个受支持的摘要算法。
 type hashInfo struct {
-	Name string           // 规范化后的算法名称
-	New  func() hash.Hash // 哈希构造函数
-	ID   stdcrypto.Hash   // 标准库的哈希标识，用于 RSA 签名等场景
+	Name   string           // 规范化后的算法名称
+	New    func() hash.Hash // 哈希构造函数
+	ID     stdcrypto.Hash   // 标准库的哈希标识，用于 RSA 签名等场景
+	Legacy bool             // 是否为 Web Crypto 规范之外的遗留算法
 }
 
 var hashes = map[string]*hashInfo{
@@ -36,6 +38,8 @@ var hashes = map[string]*hashInfo{
 	AlgSHA256: {Name: AlgSHA256, New: sha256.New, ID: stdcrypto.SHA256},
 	AlgSHA384: {Name: AlgSHA384, New: sha512.New384, ID: stdcrypto.SHA384},
 	AlgSHA512: {Name: AlgSHA512, New: sha512.New, ID: stdcrypto.SHA512},
+
+	AlgMD5: {Name: AlgMD5, New: md5.New, ID: stdcrypto.MD5, Legacy: true},
 }
 
 // hashByName 按名称查找摘要算法，名称大小写不敏感。
@@ -52,12 +56,29 @@ func hashByName(name string) (*hashInfo, error) {
 	return h, nil
 }
 
-// hashOf 返回算法参数中 hash 成员指定的摘要算法。
+// hashOf 返回算法参数中 hash 成员指定的摘要算法，允许遗留算法。
+// HMAC、HKDF 与 PBKDF2 把摘要算法当作伪随机函数使用，依赖的是原像抗性而非抗碰撞性，
+// 因此接受 MD5，以便对接只支持它的既有系统。
 func hashOf(alg Algorithm) (*hashInfo, error) {
 	if alg.Hash == "" {
 		return nil, typeError("%s requires the hash member", alg.Name)
 	}
 	return hashByName(alg.Hash)
+}
+
+// strongHashOf 与 hashOf 相同，但拒绝 Web Crypto 规范之外的遗留摘要算法。
+// 非对称算法的安全性建立在抗碰撞性之上：MD5 的选择前缀碰撞攻击成本已经很低，
+// 用它签名意味着签名可被伪造，因此签名与 RSA-OAEP 只接受规范定义的摘要算法。
+func strongHashOf(alg Algorithm) (*hashInfo, error) {
+	h, err := hashOf(alg)
+	if err != nil {
+		return nil, err
+	}
+	if h.Legacy {
+		return nil, notSupportedError("%s cannot be used with %s because it is not collision resistant",
+			h.Name, alg.Name)
+	}
+	return h, nil
 }
 
 // Digest 计算数据的摘要。

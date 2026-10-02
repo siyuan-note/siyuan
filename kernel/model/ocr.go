@@ -77,6 +77,9 @@ func (config *AppConf) GetOCR() conf.OCR {
 }
 
 func (config *AppConf) SetOCR(value conf.OCR) error {
+	if err := (ocr.Thresholds(value.Thresholds)).Validate(); err != nil {
+		return err
+	}
 	if value.Provider != string(ocr.Tesseract) && value.Provider != string(ocr.PaddleOCR) {
 		return errors.New("unknown OCR provider")
 	}
@@ -117,7 +120,7 @@ func currentPaddleConfig() ocr.PaddleConfig {
 	} else if runtime.GOOS == "darwin" {
 		filename = "libonnxruntime.dylib"
 	}
-	result := ocr.PaddleConfig{Directory: ocrModelDirectory(value.Model), Library: filepath.Join(directory, filename)}
+	result := ocr.PaddleConfig{Directory: ocrModelDirectory(value.Model), Library: filepath.Join(directory, filename), Thresholds: ocr.Thresholds(value.Thresholds)}
 	if runtime.GOOS == "linux" {
 		result.Worker = filepath.Join(directory, "siyuan-ocr")
 	}

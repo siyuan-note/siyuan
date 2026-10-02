@@ -1,4 +1,9 @@
 {
+	"ocrDetectionThreshold": "Algılama eşiği",
+	"ocrBoxThreshold": "Metin kutusu güven eşiği",
+	"ocrRecognitionThreshold": "Tanıma güven eşiği",
+	"ocrThresholdsTip": "Modelin algılama parametrelerini ve 0.5 tanıma eşiğini kullanmak için boş bırakın; yüksek eşikler yanlış tanımaları azaltır ancak metni atlayabilir; yalnızca sonraki tanımaları etkiler",
+	"ocrThresholdRange": "Algılama ve kutu eşikleri 0’dan büyük ve 1’den küçük olmalıdır; tanıma eşiği 0 ile 1 arasında olmalıdır",
 	"automationIncomplete": "Kural duraklatıldı; yapılandırmayı tamamlayın: ${1}",
 	"databaseAutomations": "Otomasyonlar",
 	"automationTip": "Kurallar tüm görünümlerde geçerlidir. Kaynak düzenlemeleri ve otomatik işlemler birlikte geri alınır; hata durumunda tümü geri döndürülür. Otomatik işlemler başka kuralları tetiklemez",

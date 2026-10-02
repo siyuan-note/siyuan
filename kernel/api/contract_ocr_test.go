@@ -336,6 +336,76 @@ func TestAPIContractOCRSettings(t *testing.T) {
 	}
 }
 
+func TestAPIContractOCRThresholdPersistence(t *testing.T) {
+	setupAssetContractWorkspace(t)
+	previousConfDir := util.ConfDir
+	util.ConfDir = t.TempDir()
+	t.Cleanup(func() { util.ConfDir = previousConfDir })
+	engine := gin.New()
+	engine.POST("/api/asset/setOCRConfig", setOCRConfig)
+	path := "assets/threshold-preserved.png"
+	util.SetAssetText(path, "existing result")
+	t.Cleanup(func() { util.RemoveAssetText(path) })
+	for _, test := range []struct {
+		fields  string
+		success bool
+		custom  bool
+	}{
+		{`,"thresholds":{"detection":0.4,"box":0.7,"recognition":0.9}`, true, true},
+		{"", true, true},
+		{`,"thresholds":null`, true, true},
+		{`,"thresholds":{"detection":0,"box":0.7,"recognition":0.9}`, false, true},
+		{`,"thresholds":{"detection":0.4,"box":1,"recognition":0.9}`, false, true},
+		{`,"thresholds":{"detection":0.4,"box":0.7,"recognition":1.1}`, false, true},
+		{`,"thresholds":{"detection":null,"box":null,"recognition":null}`, true, false},
+	} {
+		body := `{"provider":"tesseract","model":"tiny","auto":false` + test.fields + `}`
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/setOCRConfig", strings.NewReader(body)))
+		requireAPIContract(t, "POST", "/api/asset/setOCRConfig", recorder)
+		var response struct {
+			Code int
+			Data *apicontract.SettingOCR
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+			t.Fatal(err)
+		}
+		if (response.Code == 0) != test.success {
+			t.Fatalf("%s: %s", body, recorder.Body.String())
+		}
+		got := model.Conf.GetOCR().Thresholds
+		if test.custom {
+			if got.Detection == nil || *got.Detection != 0.4 || got.Box == nil || *got.Box != 0.7 || got.Recognition == nil || *got.Recognition != 0.9 {
+				t.Fatalf("saved thresholds lost: %+v", got)
+			}
+		} else if got != (conf.OCRThresholds{}) {
+			t.Fatalf("reset did not restore defaults: %+v", got)
+		}
+		persisted, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var saved struct{ OCR conf.OCR }
+		if err = json.Unmarshal(persisted, &saved); err != nil {
+			t.Fatal(err)
+		}
+		want, _ := json.Marshal(got)
+		actual, _ := json.Marshal(saved.OCR.Thresholds)
+		if !bytes.Equal(want, actual) {
+			t.Fatalf("persisted thresholds %s != %s", actual, want)
+		}
+		if test.success {
+			actual, _ = json.Marshal(response.Data.Thresholds)
+			if !bytes.Equal(want, actual) {
+				t.Fatalf("response lost thresholds: %s", actual)
+			}
+		}
+		if util.GetAssetText(path) != "existing result" {
+			t.Fatal("threshold update rewrote existing OCR")
+		}
+	}
+}
+
 func connectOCRNotifications(t *testing.T, engine *gin.Engine) *websocket.Conn {
 	t.Helper()
 	push := melody.New()

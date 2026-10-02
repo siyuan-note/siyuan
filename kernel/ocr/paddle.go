@@ -30,9 +30,10 @@ import (
 
 // PaddleConfig 指定一组检测和识别模型，Linux 使用原生辅助进程以兼容静态内核。
 type PaddleConfig struct {
-	Library   string `json:"library"`
-	Worker    string `json:"worker"`
-	Directory string `json:"directory"`
+	Library    string     `json:"library"`
+	Worker     string     `json:"worker"`
+	Directory  string     `json:"directory"`
+	Thresholds Thresholds `json:"thresholds"`
 }
 
 type modelConfig struct {
@@ -136,7 +137,11 @@ func ValidateModels(directory string) error {
 }
 
 func (p *PaddleProvider) load(cfg PaddleConfig) error {
-	if cfg == p.loaded && p.detector != nil && p.recognizer != nil {
+	if err := cfg.Thresholds.Validate(); err != nil {
+		return err
+	}
+	// 后处理阈值每次识别时读取，调整阈值不重建原生会话。
+	if cfg.Library == p.loaded.Library && cfg.Directory == p.loaded.Directory && cfg.Worker == p.loaded.Worker && p.detector != nil && p.recognizer != nil {
 		return nil
 	}
 	p.close()
@@ -272,7 +277,7 @@ func (p *PaddleProvider) Recognize(ctx context.Context, path string) ([]map[stri
 	if err != nil {
 		return nil, err
 	}
-	boxes, err := detectBoxes(detected, w, h, p.detection)
+	boxes, err := detectBoxes(detected, w, h, cfg.Thresholds.detectionConfig(p.detection))
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +297,7 @@ func (p *PaddleProvider) Recognize(ctx context.Context, path string) ([]map[stri
 		if decodeErr != nil {
 			return nil, decodeErr
 		}
-		if strings.TrimSpace(text) == "" || confidence < 0.5 {
+		if !cfg.Thresholds.accepts(text, confidence) {
 			continue
 		}
 		left, top, right, bottom := box.bounds()

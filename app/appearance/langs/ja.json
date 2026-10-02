@@ -1,4 +1,9 @@
 {
+	"ocrDetectionThreshold": "検出しきい値",
+	"ocrBoxThreshold": "テキスト領域の信頼度しきい値",
+	"ocrRecognitionThreshold": "認識の信頼度しきい値",
+	"ocrThresholdsTip": "空欄の場合はモデルの検出パラメーターと認識しきい値 0.5 を使用します。値を上げると誤認識を減らせますが、文字を見落とす場合があります。次回以降の認識にのみ適用されます",
+	"ocrThresholdRange": "検出とテキスト領域のしきい値は 0 より大きく 1 未満、認識しきい値は 0 以上 1 以下にしてください",
 	"automationIncomplete": "ルールは停止中です。設定を完了してください：${1}",
 	"databaseAutomations": "自動化",
 	"automationTip": "ルールはすべてのビューで共有されます。元の編集と自動操作はまとめて取り消され、失敗時はすべて元に戻ります。自動操作は他のルールを起動しません",

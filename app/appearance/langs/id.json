@@ -1,4 +1,9 @@
 {
+	"ocrDetectionThreshold": "Ambang deteksi",
+	"ocrBoxThreshold": "Ambang keyakinan kotak teks",
+	"ocrRecognitionThreshold": "Ambang keyakinan pengenalan",
+	"ocrThresholdsTip": "Kosongkan untuk memakai parameter deteksi model dan ambang pengenalan 0.5; ambang lebih tinggi mengurangi kesalahan tetapi dapat melewatkan teks; hanya berlaku untuk pengenalan berikutnya",
+	"ocrThresholdRange": "Ambang deteksi dan kotak harus lebih besar dari 0 dan lebih kecil dari 1; ambang pengenalan harus antara 0 dan 1",
 	"automationIncomplete": "Aturan dijeda; lengkapi konfigurasi: ${1}",
 	"databaseAutomations": "Otomatisasi",
 	"automationTip": "Aturan berlaku untuk semua tampilan. Perubahan sumber dan tindakan otomatis dibatalkan bersama serta dipulihkan jika gagal. Tindakan otomatis tidak memicu aturan lain",

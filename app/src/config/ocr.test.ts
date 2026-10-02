@@ -3,12 +3,13 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import type {OCRThresholds, SettingOCR} from "../types/api";
 
 const createOCRPanel = async () => {
     const compiled = transpileModule(readFileSync("src/config/ocr.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
-    const config = {ocr: {provider: "paddleocr", model: "small", auto: false}};
+    const config: {ocr: SettingOCR} = {ocr: {provider: "paddleocr", model: "small", auto: false}};
     let serverConfig = {...config.ocr};
     let models = [{id: "small", name: "Small", builtIn: true}];
     let reads = 0;
@@ -19,10 +20,11 @@ const createOCRPanel = async () => {
     const controls = Object.fromEntries([
         "ocrProvider", "ocrModel", "ocrAuto", "ocrImportModels", "ocrImport",
         "detector", "detectorConfig", "recognizer", "recognizerConfig",
+        "ocrAdvanced",
     ].map(id => [id, {
         id, value: id === "ocrProvider" ? "paddleocr" : "small", checked: false, disabled: false, innerHTML: "",
         files: [{name: `${id}.onnx`}],
-        tagName: id === "ocrImport" ? "BUTTON" : "INPUT",
+        tagName: id === "ocrImport" || id === "ocrAdvanced" ? "BUTTON" : "INPUT",
         closest: () => ({classList: {toggle() {}}}),
     }]));
     const listeners = new Map<string, (event: unknown) => Promise<void>>();
@@ -40,14 +42,20 @@ const createOCRPanel = async () => {
     }> = [];
     const errors: string[] = [];
     const notifications = new Map<string, () => void>();
+    let advanced: {initial: OCRThresholds; save: (value: OCRThresholds) => Promise<boolean>; destroy: () => void};
+    let dialogCloses = 0;
     const exports = {} as {mountOCRSettings: (element: unknown) => () => void};
-    runInNewContext(compiled, {exports, AbortController, window: {siyuan: {config, languages: {}},
+    runInNewContext(compiled, {exports, AbortController, window: {siyuan: {config, languages: {ocrThresholdRange: "invalid threshold"}},
         addEventListener: (name: string, callback: () => void, options: {signal: AbortSignal}) => {
             notifications.set(name, callback);
             options.signal.addEventListener("abort", () => notifications.delete(name));
         },
     }, require: () => ({
         OCR_CHANGED_EVENT: "ocr-test",
+        openOCRThresholds: (initial: OCRThresholds, save: (value: OCRThresholds) => Promise<boolean>, onClose: () => void) => {
+            advanced = {initial, save, destroy: () => { dialogCloses++; onClose(); }};
+            return advanced;
+        },
         objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
         fetchSyncPost: (url: string, value: typeof config.ocr) => {
             if (url === "/api/asset/getOCRConfig") {
@@ -69,6 +77,8 @@ const createOCRPanel = async () => {
     await new Promise(setImmediate);
     return {
         controls, config, requests, errors, close, renders: () => renders,
+        openAdvanced: () => listeners.get("click")({target: {closest: () => controls.ocrAdvanced}, stopPropagation() {}}),
+        advanced: () => advanced, dialogCloses: () => dialogCloses,
         reads: () => reads, snapshot, readRequests,
         notify: () => notifications.get("ocr-test")?.(),
         deferRead: () => { deferredRead = true; },
@@ -127,6 +137,31 @@ for (const networkFailure of [false, true]) {
         panel.close();
     });
 }
+
+test("advanced OCR settings receive the latest thresholds and use the panel save queue", async () => {
+    const panel = await createOCRPanel();
+    panel.updateServer({provider: "paddleocr", model: "small", auto: false,
+        thresholds: {detection: 0.4, box: 0.7, recognition: 0.8}});
+    panel.notify();
+    await new Promise(setImmediate);
+    const renders = panel.renders();
+    await panel.openAdvanced();
+    assert.equal(panel.advanced().initial.box, 0.7);
+    const saving = panel.advanced().save({detection: 0.5, box: 0.8, recognition: 0.9});
+    await new Promise(setImmediate);
+    panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
+    assert.equal(await saving, true);
+    assert.equal(panel.config.ocr.thresholds.recognition, 0.9);
+    const toggle = panel.changeAuto(true);
+    await new Promise(setImmediate);
+    assert.equal(panel.requests[1].config.thresholds, undefined);
+    panel.requests[1].resolve({code: 0, data: {...panel.requests[1].config, thresholds: panel.config.ocr.thresholds}});
+    await toggle;
+    assert.equal(panel.config.ocr.thresholds.recognition, 0.9);
+    assert.equal(panel.renders(), renders);
+    panel.close();
+    assert.equal(panel.dialogCloses(), 1);
+});
 
 test("closing the OCR panel cancels queued saves and ignores a late response", async () => {
     const panel = await createOCRPanel();

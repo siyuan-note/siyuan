@@ -1,4 +1,9 @@
 {
+	"ocrDetectionThreshold": "Soglia di rilevamento",
+	"ocrBoxThreshold": "Soglia di confidenza dei riquadri di testo",
+	"ocrRecognitionThreshold": "Soglia di confidenza del riconoscimento",
+	"ocrThresholdsTip": "Lasciare vuoto per usare i parametri di rilevamento del modello e una soglia di riconoscimento di 0.5; valori più alti riducono i falsi positivi ma possono omettere testo; si applica solo ai riconoscimenti successivi",
+	"ocrThresholdRange": "Le soglie di rilevamento e dei riquadri devono essere maggiori di 0 e minori di 1; quella di riconoscimento deve essere compresa tra 0 e 1",
 	"automationIncomplete": "Regola in pausa; completa la configurazione: ${1}",
 	"databaseAutomations": "Automazioni",
 	"automationTip": "Le regole si applicano a tutte le viste. Le modifiche originali e le azioni automatiche vengono annullate insieme e ripristinate in caso di errore. Le azioni automatiche non attivano altre regole",

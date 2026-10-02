@@ -8,6 +8,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -72,7 +73,8 @@ func TestNativePaddleOCR(t *testing.T) {
 	}
 	for _, size := range []string{"tiny", "small"} {
 		t.Run(size, func(t *testing.T) {
-			provider := &PaddleProvider{Config: func() PaddleConfig { return PaddleConfig{Library: library, Directory: filepath.Join(assets, size)} }}
+			config := PaddleConfig{Library: library, Directory: filepath.Join(assets, size)}
+			provider := &PaddleProvider{Config: func() PaddleConfig { return config }}
 			defer provider.Close()
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
@@ -90,6 +92,21 @@ func TestNativePaddleOCR(t *testing.T) {
 			}
 			if expected != "" && !strings.Contains(text.String(), expected) {
 				t.Fatalf("missing expected text %q in %q", expected, text.String())
+			}
+			detector, recognizer := provider.detector, provider.recognizer
+			zero := 0.0
+			config.Thresholds.Recognition = &zero
+			unfiltered, err := provider.Recognize(ctx, fixture)
+			if err != nil || len(unfiltered) < len(rows) {
+				t.Fatalf("lowering recognition threshold lost text: %v", err)
+			}
+			if provider.detector != detector || provider.recognizer != recognizer {
+				t.Fatal("changing thresholds recreated native sessions")
+			}
+			config.Thresholds = Thresholds{}
+			restored, err := provider.Recognize(ctx, fixture)
+			if err != nil || !reflect.DeepEqual(rows, restored) {
+				t.Fatalf("reset did not restore original recognition: %v", err)
 			}
 		})
 	}

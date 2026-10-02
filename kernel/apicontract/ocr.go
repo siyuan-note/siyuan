@@ -4,10 +4,21 @@ import "mime/multipart"
 
 // SettingOCR 的选择仅保存在当前设备；切换提供商或模型不删除、重跑已有识别结果。
 // auto 仅控制内核后台识别，手动识别继续使用 /api/asset/ocr 的既有输入和输出。
+// thresholds 省略或为 null 时保留设备已保存的阈值；传入对象时整体替换。
+// 修改阈值只影响后续识别，不修改模型文件或已有结果，Tesseract 不使用这些参数。
 type SettingOCR struct {
-	Provider string `json:"provider"`
-	Model    string `json:"model"`
-	Auto     bool   `json:"auto"`
+	Provider   string         `json:"provider"`
+	Model      string         `json:"model"`
+	Auto       bool           `json:"auto"`
+	Thresholds *OCRThresholds `json:"thresholds,omitempty" api:"optional"`
+}
+
+// OCRThresholds 的 detection、box 必须为 (0, 1) 内的有限数，recognition 为 [0, 1] 内的有限数。
+// 对象内三个字段均须提供；字段为 null 时恢复默认：检测沿用当前模型 YAML，识别为 0.5。
+type OCRThresholds struct {
+	Detection   *float64 `json:"detection"`
+	Box         *float64 `json:"box"`
+	Recognition *float64 `json:"recognition"`
 }
 
 type OCRProviderState struct {

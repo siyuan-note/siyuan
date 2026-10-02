@@ -1,4 +1,9 @@
 {
+	"ocrDetectionThreshold": "Prah detekcie",
+	"ocrBoxThreshold": "Prah spoľahlivosti textových oblastí",
+	"ocrRecognitionThreshold": "Prah spoľahlivosti rozpoznávania",
+	"ocrThresholdsTip": "Ponechajte prázdne pre parametre detekcie modelu a prah rozpoznávania 0.5; vyššie prahy znižujú falošné rozpoznania, ale môžu vynechať text; platí iba pre ďalšie rozpoznávania",
+	"ocrThresholdRange": "Prahy detekcie a oblastí musia byť väčšie ako 0 a menšie ako 1; prah rozpoznávania musí byť od 0 do 1",
 	"automationIncomplete": "Pravidlo pozastavené; dokončite konfiguráciu: ${1}",
 	"databaseAutomations": "Automatizácie",
 	"automationTip": "Pravidlá platia pre všetky zobrazenia. Pôvodné úpravy a automatické akcie sa vracajú späť spoločne a pri zlyhaní sa obnoví pôvodný stav. Automatické akcie nespúšťajú ďalšie pravidlá",

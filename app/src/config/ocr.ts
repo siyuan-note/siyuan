@@ -1,4 +1,4 @@
-import type {OCRConfigData, SettingOCR} from "../types/api";
+import type {OCRConfigData, OCRThresholds, SettingOCR} from "../types/api";
 import {fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import {escapeAttr, escapeHtml} from "../util/escape";
@@ -7,6 +7,7 @@ import {genButtonRowHtml} from "./render/render";
 import {showMessage} from "../dialog/message";
 import {OCR_CHANGED_EVENT} from "./ocrRuntime";
 import {objEquals} from "../util/functions";
+import {openOCRThresholds} from "./ocrThresholds";
 
 export const ocrSearchStrings = (): string[] => [
     "OCR", "Tesseract", "PaddleOCR", "Tiny", "Small",
@@ -14,6 +15,9 @@ export const ocrSearchStrings = (): string[] => [
     window.siyuan.languages.ocrModel,
     window.siyuan.languages.ocrAuto,
     window.siyuan.languages.ocrImportModels,
+    window.siyuan.languages.ocrDetectionThreshold,
+    window.siyuan.languages.ocrBoxThreshold,
+    window.siyuan.languages.ocrRecognitionThreshold,
 ];
 
 export const mountOCRSettings = (root: HTMLElement): (() => void) => {
@@ -22,7 +26,8 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     let data: OCRConfigData;
     let busy = false;
     let pendingSaves = 0;
-    let saveQueue = Promise.resolve();
+    let saveQueue = Promise.resolve(false);
+    let thresholdDialog: ReturnType<typeof openOCRThresholds>;
     let refreshPending = false;
     let refreshTask: Promise<void>;
     let writeRevision = 0;
@@ -38,9 +43,10 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     ];
     const updateControls = () => {
         const isPaddleOCR = root.querySelector<HTMLSelectElement>("#ocrProvider").value === "paddleocr";
-        ["ocrModel", "ocrImportModels", "ocrImport"].forEach(id => {
+        ["ocrModel", "ocrImportModels", "ocrImport", "ocrAdvanced"].forEach(id => {
             root.querySelector(`#${id}`).closest(".config-item").classList.toggle("fn__none", !isPaddleOCR);
         });
+        if (!isPaddleOCR) thresholdDialog?.destroy();
         root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
             element.disabled = busy || (element.tagName === "BUTTON" && pendingSaves > 0);
         });
@@ -66,6 +72,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         root.innerHTML = genSwitchRow("ocrAuto", languages.ocrAuto, languages.ocrAutoTip, data.config.auto) +
             selectRow("ocrProvider", languages.ocrProvider, languages.ocrProviderTip, providerOptions()) +
             selectRow("ocrModel", languages.ocrModel, languages.ocrModelTip, modelOptions()) +
+            genButtonRowHtml("ocrAdvanced", languages.configGroupAdvanced, undefined, languages.config, "iconSettings") +
             `<div id="ocrImportModels" class="b3-label config-item">${genConfigItemMainHtml(languages.ocrImportModels, languages.ocrImportModelsTip)}
 ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span class="b3-label__text">${file.title}</span><div class="fn__hr--small"></div><input id="${file.id}" class="b3-text-field fn__block" type="file" accept="${file.suffix.split(",").map(suffix => `.${suffix}`).join(",")}"></label>`).join("")}</div>` +
             genButtonRowHtml("ocrImport", "", undefined, languages.import, "iconDownload");
@@ -112,34 +119,31 @@ ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span cl
     };
     root.innerHTML = "<div class=\"fn__loading\"><img src=\"/stage/loading-pure.svg\"></div>";
     window.addEventListener(OCR_CHANGED_EVENT, () => { void load().catch(handleError); }, {signal: controller.signal});
-    root.addEventListener("change", async event => {
-        event.stopPropagation();
-        const target = event.target as HTMLInputElement | HTMLSelectElement;
-        if (busy || !data) {
-            return;
-        }
-        if (files.some(file => file.id === target.id)) {
-            updateControls();
-            return;
+    const saveConfig = async (thresholds?: OCRThresholds): Promise<boolean> => {
+        if (closed || busy || !data) {
+            return false;
         }
         const config: SettingOCR = {
             provider: root.querySelector<HTMLSelectElement>("#ocrProvider").value,
             model: root.querySelector<HTMLSelectElement>("#ocrModel").value,
             auto: root.querySelector<HTMLInputElement>("#ocrAuto").checked,
+            thresholds,
         };
         writeRevision++;
         pendingSaves++;
         updateControls();
         // 串行保存每次选择，保留控件焦点和文件选择，最后一次完成后再校正界面状态。
         const save = async () => {
+            let saved = false;
             try {
                 if (closed) {
-                    return;
+                    return false;
                 }
                 const response = await fetchSyncPost("/api/asset/setOCRConfig", config, undefined, true, controller.signal);
                 if (response.code === 0 && !closed) {
                     data.config = response.data;
                     window.siyuan.config.ocr = response.data;
+                    saved = true;
                 }
             } catch (error) {
                 handleError(error);
@@ -153,14 +157,29 @@ ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span cl
                     if (refreshPending) void load().catch(handleError);
                 }
             }
+            return saved;
         };
         saveQueue = saveQueue.then(save, save);
-        await saveQueue;
+        return saveQueue;
+    };
+    root.addEventListener("change", async event => {
+        event.stopPropagation();
+        const target = event.target as HTMLInputElement | HTMLSelectElement;
+        if (files.some(file => file.id === target.id)) {
+            updateControls();
+            return;
+        }
+        await saveConfig();
     }, {signal: controller.signal});
     root.addEventListener("click", async event => {
         event.stopPropagation();
         const button = (event.target as HTMLElement).closest("button");
         if (!button || busy || pendingSaves > 0 || !data) {
+            return;
+        }
+        if (button.id === "ocrAdvanced") {
+            thresholdDialog?.destroy();
+            thresholdDialog = openOCRThresholds(data.config.thresholds, saveConfig, () => { thresholdDialog = undefined; });
             return;
         }
         if (button.id === "ocrImport") {
@@ -198,6 +217,7 @@ ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span cl
     });
     return () => {
         closed = true;
+        thresholdDialog?.destroy();
         controller.abort();
     };
 };

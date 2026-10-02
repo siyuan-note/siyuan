@@ -22,8 +22,13 @@ var getOCRConfig = contractHandler(apicontract.GetOCRConfig, func(c *gin.Context
 	for _, id := range []string{"tesseract", "paddleocr"} {
 		providers = append(providers, apicontract.OCRProviderState{ID: id, Available: model.OCRProviderAvailable(id)})
 	}
-	return apicontract.Success(apicontract.OCRConfigData{Config: apicontract.SettingOCR(value), Providers: providers, Models: models})
+	return apicontract.Success(apicontract.OCRConfigData{Config: ocrConfigPayload(value), Providers: providers, Models: models})
 })
+
+func ocrConfigPayload(value conf.OCR) apicontract.SettingOCR {
+	thresholds := apicontract.OCRThresholds(value.Thresholds)
+	return apicontract.SettingOCR{Provider: value.Provider, Model: value.Model, Auto: value.Auto, Thresholds: &thresholds}
+}
 
 func ocrModelPayload(id string) apicontract.OCRModel {
 	name := id
@@ -38,10 +43,15 @@ func ocrModelPayload(id string) apicontract.OCRModel {
 }
 
 var setOCRConfig = contractHandler(apicontract.SetOCRConfig, serializeSetting("ocr", func(c *gin.Context, request apicontract.SettingOCR) apicontract.Response[apicontract.SettingOCR] {
-	if err := model.Conf.SetOCR(conf.OCR(request)); err != nil {
+	value := model.Conf.GetOCR()
+	value.Provider, value.Model, value.Auto = request.Provider, request.Model, request.Auto
+	if request.Thresholds != nil {
+		value.Thresholds = conf.OCRThresholds(*request.Thresholds)
+	}
+	if err := model.Conf.SetOCR(value); err != nil {
 		return apicontract.Failure[apicontract.SettingOCR](-1, err.Error())
 	}
-	return apicontract.Success(request)
+	return apicontract.Success(ocrConfigPayload(value))
 }))
 
 var importOCRModels = contractHandler(apicontract.ImportOCRModels, func(c *gin.Context, request apicontract.ImportOCRModelsRequest) apicontract.Response[apicontract.OCRModel] {

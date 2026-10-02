@@ -1476,6 +1476,10 @@ export type OCRModel = { "builtIn": boolean; "id": string; "name": string; };
 
 export type OCRProviderState = { "available": boolean; "id": string; };
 
+export type OCRThresholds = { "box": number | null; "detection": number | null; "recognition": number | null; };
+
+export type OCRThresholdsInput = { "box": number | null; "detection": number | null; "recognition": number | null; };
+
 export type ObsidianAnalysisRequestInput = { "localPath": string; };
 
 export type ObsidianImportRequestInput = { "notebookName": string; "taskID": string; };
@@ -1998,9 +2002,9 @@ export type SettingNotifications = { "browserCompatibility": boolean; "docTreeMa
 
 export type SettingNotificationsInput = { "browserCompatibility"?: boolean | null; "docTreeMaxList"?: boolean | null; "formatPainterTip"?: boolean | null; "selectAllIncompleteTip"?: boolean | null; "selectAllTip"?: boolean | null; "tagMaxList"?: boolean | null; "workspaceNotSSD"?: boolean | null; };
 
-export type SettingOCR = { "auto": boolean; "model": string; "provider": string; };
+export type SettingOCR = { "auto": boolean; "model": string; "provider": string; "thresholds"?: OCRThresholds; };
 
-export type SettingOCRInput = { "auto": boolean; "model": string; "provider": string; };
+export type SettingOCRInput = { "auto": boolean; "model": string; "provider": string; "thresholds"?: OCRThresholdsInput | null; };
 
 export type SettingPetalDisabledData = { "dataChangePlugins": Array<string> | null; "globalPetalChanged": boolean; "globalPetalDisabled": boolean; "globalPetalEnabled": boolean; "globalPetalRevision": number; "reloadPlugins": Array<string> | null; "uninstallPlugins": Array<string> | null; "unloadPlugins": Array<string> | null; };
 

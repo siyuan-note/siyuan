@@ -33318,6 +33318,88 @@
       ],
       "additionalProperties": false
     },
+    "OCRThresholds": {
+      "type": "object",
+      "properties": {
+        "box": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "detection": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recognition": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "box",
+        "detection",
+        "recognition"
+      ],
+      "additionalProperties": false
+    },
+    "OCRThresholdsInput": {
+      "type": "object",
+      "properties": {
+        "box": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "detection": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recognition": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "box",
+        "detection",
+        "recognition"
+      ],
+      "additionalProperties": false
+    },
     "ObsidianAnalysisRequestInput": {
       "type": "object",
       "properties": {
@@ -46077,6 +46159,9 @@
         },
         "provider": {
           "type": "string"
+        },
+        "thresholds": {
+          "$ref": "#/$defs/OCRThresholds"
         }
       },
       "required": [
@@ -46097,6 +46182,16 @@
         },
         "provider": {
           "type": "string"
+        },
+        "thresholds": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OCRThresholdsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

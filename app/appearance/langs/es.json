@@ -1,4 +1,9 @@
 {
+	"ocrDetectionThreshold": "Umbral de detección",
+	"ocrBoxThreshold": "Umbral de confianza de los cuadros de texto",
+	"ocrRecognitionThreshold": "Umbral de confianza de reconocimiento",
+	"ocrThresholdsTip": "Dejar vacío para usar los parámetros de detección del modelo y un umbral de reconocimiento de 0.5; los valores altos reducen falsos positivos, pero pueden omitir texto; solo afecta a futuros reconocimientos",
+	"ocrThresholdRange": "Los umbrales de detección y de cuadros deben ser mayores que 0 y menores que 1; el de reconocimiento debe estar entre 0 y 1",
 	"automationIncomplete": "Regla pausada; completa la configuración: ${1}",
 	"databaseAutomations": "Automatizaciones",
 	"automationTip": "Las reglas se aplican a todas las vistas. Los cambios originales y las acciones automáticas se deshacen juntos y se revierten si hay un error. Las acciones automáticas no activan otras reglas",

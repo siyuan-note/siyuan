@@ -1,4 +1,9 @@
 {
+	"ocrDetectionThreshold": "검출 임계값",
+	"ocrBoxThreshold": "텍스트 영역 신뢰도 임계값",
+	"ocrRecognitionThreshold": "인식 신뢰도 임계값",
+	"ocrThresholdsTip": "비워 두면 모델의 검출 매개변수와 인식 임계값 0.5를 사용합니다. 값을 높이면 오인식이 줄지만 일부 텍스트를 놓칠 수 있습니다. 이후 인식에만 적용됩니다",
+	"ocrThresholdRange": "검출 및 영역 임계값은 0보다 크고 1보다 작아야 하며, 인식 임계값은 0 이상 1 이하여야 합니다",
 	"automationIncomplete": "규칙이 일시 중지되었습니다. 설정을 완료하세요: ${1}",
 	"databaseAutomations": "자동화",
 	"automationTip": "규칙은 모든 보기에서 공유됩니다. 원본 편집과 자동 작업은 함께 실행 취소되며, 실패하면 모두 복원됩니다. 자동 작업은 다른 규칙을 실행하지 않습니다",

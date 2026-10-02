@@ -28,6 +28,96 @@ const setup = (platform = "win32") => {
     return {policy, owner, event, open, close, ready, shown, initialized};
 };
 
+const setupGeometry = (key = "builtin") => {
+    const {policy, owner, open} = setup();
+    const prepared = open({key});
+    policy(owner, prepared);
+    const geometry = {x: 10, y: 20, width: 1000, height: 760, maximized: false, fullscreen: false};
+    let destroyed = false;
+    const win = Object.assign(new EventEmitter(), {
+        webContents: new EventEmitter(), isDestroyed: () => destroyed, setMenu() {},
+        getNormalBounds: () => {
+            assert.equal(destroyed, false);
+            const {x, y, width, height} = geometry;
+            return {x, y, width, height};
+        },
+        isMaximized: () => geometry.maximized, isFullScreen: () => geometry.fullscreen,
+        destroy() { destroyed = true; this.emit("closed"); },
+    });
+    owner.emit("did-create-window", win, {url: prepared.url});
+    const saved = () => owner.sent.filter(message => message[0] === "siyuan-settings-geometry");
+    return {owner, win, geometry, saved};
+};
+
+test("settings geometry coalesces continuous changes and skips unchanged states", t => {
+    const {win, geometry, saved} = setupGeometry();
+    t.mock.timers.enable({apis: ["setTimeout"]});
+    for (let i = 0; i < 20; i++) {
+        geometry.x++;
+        geometry.width++;
+        win.emit("move");
+        win.emit("resize");
+        t.mock.timers.tick(100);
+        assert.equal(saved().length, 0);
+    }
+    t.mock.timers.tick(200);
+    assert.deepEqual(saved(), [["siyuan-settings-geometry", {version: 1, ...geometry}]]);
+    win.emit("move");
+    win.emit("resize");
+    t.mock.timers.tick(300);
+    win.emit("close");
+    assert.equal(saved().length, 1);
+});
+
+test("settings geometry preserves maximize and restore changes with identical normal bounds", t => {
+    const {win, geometry, saved} = setupGeometry();
+    t.mock.timers.enable({apis: ["setTimeout"]});
+    for (const maximized of [false, true, false]) {
+        geometry.maximized = maximized;
+        win.emit(maximized ? "maximize" : "unmaximize");
+        win.emit("resize");
+        t.mock.timers.tick(300);
+    }
+    assert.deepEqual(saved().map(message => message[1].maximized), [false, true, false]);
+});
+
+test("closing settings immediately flushes the latest geometry and cancels deferred saves", t => {
+    const {win, geometry, saved} = setupGeometry();
+    t.mock.timers.enable({apis: ["setTimeout"]});
+    win.emit("move");
+    t.mock.timers.tick(100);
+    geometry.x = 200;
+    geometry.fullscreen = true;
+    win.emit("close");
+    assert.deepEqual(saved(), [["siyuan-settings-geometry", {version: 1, ...geometry}]]);
+    win.destroy();
+    t.mock.timers.tick(1000);
+    assert.equal(saved().length, 1);
+});
+
+test("destroying settings or their owner cancels pending geometry saves", t => {
+    const fixtures = [setupGeometry(), setupGeometry()];
+    t.mock.timers.enable({apis: ["setTimeout"]});
+    fixtures.forEach(({win}) => win.emit("resize"));
+    fixtures[0].win.destroy();
+    fixtures[1].owner.isDestroyed = () => true;
+    fixtures[1].owner.emit("destroyed");
+    t.mock.timers.tick(1000);
+    fixtures.forEach(({saved}) => assert.equal(saved().length, 0));
+});
+
+test("plugin settings do not save built-in settings geometry", t => {
+    const {win, saved} = setupGeometry("plugin-example");
+    t.mock.timers.enable({apis: ["setTimeout"]});
+    win.emit("move");
+    win.emit("resize");
+    win.emit("maximize");
+    t.mock.timers.tick(300);
+    win.emit("close");
+    win.destroy();
+    assert.equal(saved().length, 0);
+});
+
 test("settings popup authorization requires the registered top-level page and exact URL and frame", () => {
     const {policy, owner, event, open} = setup();
     const prepared = open();

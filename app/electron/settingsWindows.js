@@ -130,13 +130,26 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
                     contents.send("siyuan-settings-closed", approved.data.token);
                 }
             });
-            const saveGeometry = () => {
-                if (!win.isDestroyed() && !contents.isDestroyed() && approved.data.key === "builtin") {
-                    contents.send("siyuan-settings-geometry", captureWindowGeometry(win));
+            if (approved.data.key === "builtin") {
+                let geometryTimer;
+                let lastGeometry;
+                const saveGeometry = () => {
+                    clearTimeout(geometryTimer);
+                    if (win.isDestroyed() || contents.isDestroyed()) return;
+                    const geometry = captureWindowGeometry(win);
+                    if (lastGeometry && Object.keys(geometry).every(key => geometry[key] === lastGeometry[key])) return;
+                    contents.send("siyuan-settings-geometry", geometry);
+                    lastGeometry = geometry;
+                };
+                // 合并连续的窗口变化，关闭时立即保存最终状态。
+                for (const event of ["resize", "move", "maximize", "unmaximize"]) {
+                    win.on(event, () => {
+                        clearTimeout(geometryTimer);
+                        geometryTimer = setTimeout(saveGeometry, 300);
+                    });
                 }
-            };
-            for (const event of ["resize", "move", "maximize", "unmaximize", "close"]) {
-                win.on(event, saveGeometry);
+                win.on("close", saveGeometry);
+                win.once("closed", () => clearTimeout(geometryTimer));
             }
             win.webContents.once("did-finish-load", () => {
                 win.webContents.send("siyuan-settings-command", approved.data.command);

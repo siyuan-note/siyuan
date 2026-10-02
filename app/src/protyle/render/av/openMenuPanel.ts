@@ -245,17 +245,6 @@ export const openMenuPanel = (options: {
             setAVCellPanelTarget(avPanelElement, options.blockElement);
         }
         applyAVColorPalette(avPanelElement as HTMLElement, getAVCustomColors());
-        if (options.destroyCallback) {
-            const renderedPanelElement = avPanelElement;
-            const parentElement = renderedPanelElement.parentElement;
-            const observer = new MutationObserver(() => {
-                if (!renderedPanelElement.isConnected) {
-                    observer.disconnect();
-                    options.destroyCallback();
-                }
-            });
-            observer.observe(parentElement, {childList: true});
-        }
         let closeCB: () => void;
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
         if (isMobile()) {
@@ -276,6 +265,36 @@ export const openMenuPanel = (options: {
             }
         };
         let tabRect = options.blockElement.querySelector(`.av__views, .av__row[data-col-id="${options.colId}"] > .block__logo`)?.getBoundingClientRect();
+        const resizeMenu = ignoreRows && !isMobile() ? () => {
+            if (!menuElement.isConnected) {
+                return;
+            }
+            tabRect = options.blockElement.querySelector(".av__views")?.getBoundingClientRect();
+            if (!tabRect) {
+                return;
+            }
+            // 窗口尺寸变化后重新计算锚点，避免沿用旧的粘滞位置
+            delete menuElement.dataset.positionTop;
+            delete menuElement.dataset.positionBottom;
+            delete menuElement.dataset.positionX;
+            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
+        } : undefined;
+        if (resizeMenu) {
+            window.addEventListener("resize", resizeMenu);
+        }
+        if (options.destroyCallback || resizeMenu) {
+            const renderedPanelElement = avPanelElement;
+            const observer = new MutationObserver(() => {
+                if (!renderedPanelElement.isConnected) {
+                    observer.disconnect();
+                    if (resizeMenu) {
+                        window.removeEventListener("resize", resizeMenu);
+                    }
+                    options.destroyCallback?.();
+                }
+            });
+            observer.observe(renderedPanelElement.parentElement, {childList: true});
+        }
         if (["select", "date", "asset", "relation", "rollup"].includes(options.type)) {
             let lastElement = options.cellElements[options.cellElements.length - 1];
             if (!options.blockElement.contains(lastElement)) {

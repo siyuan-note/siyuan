@@ -188,6 +188,13 @@ test("empty automation settings persist an incomplete rule disabled on editing a
     assert.equal(transactions.length, 2);
     assert.equal(JSON.parse(JSON.stringify(transactions[1].perform[0].data)).rules.length, 0);
     assert.deepEqual(transactions[1].undo[0].data, transactions[0].perform[0].data);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.match(body.innerHTML, /data-name/);
+    assert.match(body.innerHTML, /data-trigger/);
+    assert.match(list.innerHTML, /data-action="add-field"/);
+    assert.equal(transactions.length, 2);
+    listeners.get("click")({target: {closest: () => ({dataset: {action: "remove-rule"}, closest: (): HTMLElement => null})}});
+    assert.equal(transactions.length, 2);
 });
 
 test("leaving automation settings while loading does not replace the next page or submit a transaction", async () => {

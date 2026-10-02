@@ -140,7 +140,7 @@ export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFiel
     }
     const hiddenClass = column.type === "date" && fieldValue?.mode === "currentTime" ? " fn__none" : "";
     const max = column.type === "date" ? ` max="${column.date?.fillSpecificTime ? "9999-12-31 23:59" : "9999-12-31"}"` : "";
-    return `<input class="b3-text-field b3-text-field--text fn__flex-1${hiddenClass}" data-role="field-value" type="${inputType}"${max} value="${escapeAttr(getFieldText(value))}">`;
+    return `<input class="b3-text-field b3-text-field--text fn__flex-1${hiddenClass}" data-role="field-value" type="${inputType}"${column.type === "number" ? ' step="any"' : ""}${max} value="${escapeAttr(getFieldText(value))}">`;
 };
 
 export const openFieldSelectMenu = (target: HTMLElement, column: IAVColumn) => {

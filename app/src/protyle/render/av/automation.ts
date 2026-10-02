@@ -443,6 +443,10 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
                 rules.splice(index, 1);
                 index = Math.min(index, rules.length - 1);
                 save(null);
+                if (!rules.length) {
+                    rules.push(createRule());
+                    index = 0;
+                }
                 void render();
                 return;
             case "add-action":

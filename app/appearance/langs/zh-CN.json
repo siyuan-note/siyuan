@@ -1,5 +1,5 @@
 {
-	"databaseAutomations": "数据库自动化",
+	"databaseAutomations": "自动化",
 	"automationTip": "所有视图共享规则。原修改与自动操作一起撤销，失败时全部回滚。自动操作不会触发其他规则",
 	"automationTrigger": "触发条件",
 	"automationAdded": "新增条目时",

@@ -1,5 +1,5 @@
 {
-	"databaseAutomations": "Automatyzacje bazy danych",
+	"databaseAutomations": "Automatyzacje",
 	"automationTip": "Reguły obowiązują we wszystkich widokach. Pierwotne zmiany i automatyczne działania są cofane razem, a po błędzie przywracany jest stan początkowy. Automatyczne działania nie uruchamiają innych reguł",
 	"automationTrigger": "Wyzwalacz",
 	"automationAdded": "Dodano element",

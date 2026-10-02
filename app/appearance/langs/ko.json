@@ -1,5 +1,5 @@
 {
-	"databaseAutomations": "데이터베이스 자동화",
+	"databaseAutomations": "자동화",
 	"automationTip": "규칙은 모든 보기에서 공유됩니다. 원본 편집과 자동 작업은 함께 실행 취소되며, 실패하면 모두 복원됩니다. 자동 작업은 다른 규칙을 실행하지 않습니다",
 	"automationTrigger": "실행 조건",
 	"automationAdded": "항목 추가 시",

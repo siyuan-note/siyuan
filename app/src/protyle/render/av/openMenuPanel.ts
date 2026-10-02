@@ -1,5 +1,5 @@
 import {openConditionalColorsMenu} from "./conditionalColorMenu";
-import {openAutomationDialog} from "./automation";
+import {openAutomationMenu} from "./automation";
 import {isTableLikeView} from "./viewType";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
@@ -877,17 +877,28 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "automations") {
-                    avPanelElement.remove();
                     window.siyuan.menus.menu.remove();
-                    void openAutomationDialog(options.protyle, options.blockElement as HTMLElement, data.id);
+                    void openAutomationMenu({
+                        protyle: options.protyle,
+                        blockElement: options.blockElement as HTMLElement,
+                        avID: data.id,
+                        menuElement,
+                        onResize: () => {
+                            if (!isMobile()) {
+                                delete menuElement.dataset.positionX;
+                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
+                            }
+                        },
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "go-config") {
-                    if (menuElement.classList.contains("av__conditional-panel")) {
+                    if (menuElement.classList.contains("av__conditional-panel") ||
+                        menuElement.classList.contains("av__automation-panel")) {
                         delete menuElement.dataset.positionX;
                     }
-                    menuElement.classList.remove("av__conditional-panel");
+                    menuElement.classList.remove("av__conditional-panel", "av__automation-panel");
                     if (options.filterOperation) {
                         avPanelElement.remove();
                         openMenuPanel({
@@ -2273,7 +2284,7 @@ ${hideHTML}`;
     }
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
+    <span class="block__icon block__icon--menu-back" data-type="go-config">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.fields}</span>

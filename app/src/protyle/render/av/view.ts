@@ -306,8 +306,9 @@ export const getViewHTML = (data: IAV) => {
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item" data-type="automations">
-    <svg class="b3-menu__icon"><use xlink:href="#iconRefresh"></use></svg>
+    <svg class="b3-menu__icon"><use xlink:href="#iconZap"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.databaseAutomations}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item" data-type="goSorts">
     <svg class="b3-menu__icon"><use xlink:href="#iconSort"></use></svg>

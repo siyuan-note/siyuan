@@ -1,5 +1,5 @@
 {
-	"databaseAutomations": "Veritabanı otomasyonları",
+	"databaseAutomations": "Otomasyonlar",
 	"automationTip": "Kurallar tüm görünümlerde geçerlidir. Kaynak düzenlemeleri ve otomatik işlemler birlikte geri alınır; hata durumunda tümü geri döndürülür. Otomatik işlemler başka kuralları tetiklemez",
 	"automationTrigger": "Tetikleyici",
 	"automationAdded": "Öğe eklendiğinde",

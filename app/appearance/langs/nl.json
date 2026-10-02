@@ -1,5 +1,5 @@
 {
-	"databaseAutomations": "Databaseautomatiseringen",
+	"databaseAutomations": "Automatiseringen",
 	"automationTip": "Regels gelden voor alle weergaven. Oorspronkelijke bewerkingen en automatische acties worden samen ongedaan gemaakt en bij fouten teruggedraaid. Automatische acties activeren geen andere regels",
 	"automationTrigger": "Trigger",
 	"automationAdded": "Item toegevoegd",

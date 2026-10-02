@@ -92,7 +92,7 @@ export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup, viewT
     });
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="${(!group || !group.field) ? "go-config" : "goGroups"}">
+    <span class="block__icon block__icon--menu-back" data-type="${(!group || !group.field) ? "go-config" : "goGroups"}">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.groupMethod}</span>
@@ -137,7 +137,7 @@ export const getLanguageByIndex = (index: number, type: "sort" | "date") => {
 export const getGroupsNumberHTML = (group: IAVGroup) => {
     return `<div class="b3-menu__items">
     <button class="b3-menu__item" data-type="nobg">
-        <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goGroups">
+        <span class="block__icon block__icon--menu-back" data-type="goGroups">
             <svg><use xlink:href="#iconLeft"></use></svg>
         </span>
         <span class="b3-menu__label ft__center">${window.siyuan.languages.numberFormatNone}</span>
@@ -272,7 +272,7 @@ ${groupHTML}
     }
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
+    <span class="block__icon block__icon--menu-back" data-type="go-config">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.group}</span>

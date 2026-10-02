@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261002224707"
+		"updated": "20261003000448"
 	},
 	"Children": [
 		{
@@ -3715,12 +3715,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261002224707"
+				"updated": "20261003000448"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Database automations"
+					"Data": "Automations"
 				}
 			]
 		},
@@ -3729,7 +3729,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-5by05dc",
-				"updated": "20261002224707"
+				"updated": "20261003000448"
 			},
 			"Children": [
 				{
@@ -3748,7 +3748,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Database automations"
+					"TextMarkTextContent": "Automations"
 				},
 				{
 					"Type": "NodeText",

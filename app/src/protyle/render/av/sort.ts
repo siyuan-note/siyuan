@@ -163,7 +163,7 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
     });
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
+    <span class="block__icon block__icon--menu-back" data-type="go-config">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.sort}</span>

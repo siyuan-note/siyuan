@@ -1,5 +1,5 @@
 {
-	"databaseAutomations": "データベースの自動化",
+	"databaseAutomations": "自動化",
 	"automationTip": "ルールはすべてのビューで共有されます。元の編集と自動操作はまとめて取り消され、失敗時はすべて元に戻ります。自動操作は他のルールを起動しません",
 	"automationTrigger": "トリガー",
 	"automationAdded": "項目の追加時",

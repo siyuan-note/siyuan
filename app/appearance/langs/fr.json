@@ -1,5 +1,5 @@
 {
-	"databaseAutomations": "Automatisations de base de données",
+	"databaseAutomations": "Automatisations",
 	"automationTip": "Les règles s’appliquent à toutes les vues. Les modifications initiales et les actions automatiques sont annulées ensemble et restaurées en cas d’échec. Les actions automatiques ne déclenchent pas d’autres règles",
 	"automationTrigger": "Déclencheur",
 	"automationAdded": "Élément ajouté",

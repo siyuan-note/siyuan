@@ -1,5 +1,5 @@
 {
-	"databaseAutomations": "Automações de banco de dados",
+	"databaseAutomations": "Automações",
 	"automationTip": "As regras se aplicam a todas as visualizações. As edições originais e as ações automáticas são desfeitas juntas e revertidas em caso de falha. As ações automáticas não acionam outras regras",
 	"automationTrigger": "Gatilho",
 	"automationAdded": "Item adicionado",

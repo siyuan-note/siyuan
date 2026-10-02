@@ -28,7 +28,7 @@ export const openConditionalColorsMenu = async (options: {
     menuElement.classList.add("av__conditional-panel");
     menuElement.innerHTML = `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" data-type="go-config"><svg><use xlink:href="#iconLeft"></use></svg></span>
+    <span class="block__icon block__icon--menu-back" data-type="go-config"><svg><use xlink:href="#iconLeft"></use></svg></span>
     <span class="b3-menu__label ft__center">${lang.conditionalColors}</span>
 </button>
 <button class="b3-menu__separator"></button>

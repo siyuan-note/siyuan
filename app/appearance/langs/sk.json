@@ -1,5 +1,5 @@
 {
-	"databaseAutomations": "Automatizácie databázy",
+	"databaseAutomations": "Automatizácie",
 	"automationTip": "Pravidlá platia pre všetky zobrazenia. Pôvodné úpravy a automatické akcie sa vracajú späť spoločne a pri zlyhaní sa obnoví pôvodný stav. Automatické akcie nespúšťajú ďalšie pravidlá",
 	"automationTrigger": "Spúšťač",
 	"automationAdded": "Pridanie položky",

@@ -1,5 +1,5 @@
 {
-	"databaseAutomations": "Database automations",
+	"databaseAutomations": "Automations",
 	"automationTip": "Rules apply to all views. Source edits and automatic actions are undone together and rolled back on failure. Automatic actions do not trigger other rules",
 	"automationTrigger": "Trigger",
 	"automationAdded": "Item added",

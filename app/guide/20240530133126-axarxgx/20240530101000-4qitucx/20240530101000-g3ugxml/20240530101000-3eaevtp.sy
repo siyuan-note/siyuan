@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20261002224707"
+		"updated": "20261003000448"
 	},
 	"Children": [
 		{
@@ -3725,12 +3725,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-2ctdjhm",
-				"updated": "20261002224707"
+				"updated": "20261003000448"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "データベースの自動化"
+					"Data": "自動化"
 				}
 			]
 		},
@@ -3739,7 +3739,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-ffzbedy",
-				"updated": "20261002224707"
+				"updated": "20261003000448"
 			},
 			"Children": [
 				{
@@ -3758,7 +3758,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "データベースの自動化"
+					"TextMarkTextContent": "自動化"
 				},
 				{
 					"Type": "NodeText",

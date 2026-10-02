@@ -117,7 +117,7 @@ export const getEditHTML = (options: {
         }
     });
     let html = `<button class="b3-menu__item" data-type="nobg" data-col-id="${options.colId}">
-    <span class="block__icon${options.isCustomAttr ? " fn__none" : ""}" style="padding: 8px;margin-left: -4px;" data-type="go-properties">
+    <span class="block__icon block__icon--menu-back${options.isCustomAttr ? " fn__none" : ""}" data-type="go-properties">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.edit}</span>
@@ -266,7 +266,7 @@ export const getEditHTML = (options: {
 </div>
 <div class="b3-menu__items fn__none">
     <button class="b3-menu__item" data-type="nobg" data-col-id="${colData.id}">
-        <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goEditCol">
+        <span class="block__icon block__icon--menu-back" data-type="goEditCol">
             <svg><use xlink:href="#iconLeft"></use></svg>
         </span>
         <span class="b3-menu__label ft__center">${window.siyuan.languages.edit}</span>

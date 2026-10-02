@@ -2048,6 +2048,12 @@
         max-width: calc(100vw - 32px);
       }
 
+      &.av__automation-panel:not(.b3-menu--fullscreen) {
+        width: 520px;
+        min-width: min(340px, calc(100vw - 32px));
+        max-width: calc(100vw - 32px);
+      }
+
       &__items {
         max-height: calc(100vh - 60px);
       }
@@ -2082,10 +2088,13 @@
 
       .block__icon:not([data-conditional-drag]) {
         line-height: 20px;
-        padding: 0 4px;
         font-size: 12px;
         align-self: center;
         opacity: 1;
+
+        &:not(.block__icon--menu-back) {
+          padding: 0 4px;
+        }
       }
 
       &__label {
@@ -2256,10 +2265,13 @@
 
     .block__icon:not([data-conditional-drag]) {
       line-height: 20px;
-      padding: 0 4px;
       font-size: 12px;
       align-self: center;
       opacity: 1;
+
+      &:not(.block__icon--menu-back) {
+        padding: 0 4px;
+      }
     }
   }
 
@@ -2937,30 +2949,6 @@ img.av__cellassetimg {
     min-width: 0;
   }
 
-  .av__filter-rowinner,
-  .av__filter-date-config {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-  }
-
-  .av__filter-date-controls {
-    display: contents;
-  }
-
-  .av__filter-date-config {
-    order: 1;
-    flex-basis: 100%;
-  }
-
-  .av__filter-value {
-    order: 2;
-    flex-basis: 100%;
-    min-width: 0;
-  }
-
   .av__conditional-controls {
     grid-column: 1 / -1;
     display: flex;
@@ -2975,16 +2963,6 @@ img.av__cellassetimg {
       max-width: 100%;
       white-space: normal;
     }
-  }
-
-  .av__field-wrapper {
-    width: 128px;
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .b3-select {
-    max-width: 100%;
   }
 
   .av__conditional-swatch {
@@ -3012,10 +2990,46 @@ img.av__cellassetimg {
     }
   }
 }
+.av__panel .av__conditional-colors,
+.av__panel .av__automation-filter {
+  .av__filter-rowinner,
+  .av__filter-date-config {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .av__filter-date-controls {
+    display: contents;
+  }
+
+  .av__filter-date-config {
+    order: 1;
+    flex-basis: 100%;
+  }
+
+  .av__filter-value {
+    order: 2;
+    flex-basis: 100%;
+    min-width: 0;
+  }
+
+  .av__field-wrapper {
+    width: 128px;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .b3-select {
+    max-width: 100%;
+  }
+}
+
 .av__automation {
   display: flex;
   flex-direction: column;
-  height: 100%;
   min-height: 0;
 
   &-filter {
@@ -3027,9 +3041,11 @@ img.av__cellassetimg {
     flex-direction: column;
     gap: 12px;
     padding: 16px;
-    overflow: auto;
-    flex: 1;
     min-height: 0;
+  }
+
+  &-footer {
+    padding: 0 16px 16px;
   }
 
   &-row {
@@ -3038,6 +3054,11 @@ img.av__cellassetimg {
     flex-wrap: wrap;
     gap: 8px;
     min-width: 0;
+
+    > .b3-menu__action {
+      flex-shrink: 0;
+      margin-left: 0;
+    }
   }
 
   &-action,

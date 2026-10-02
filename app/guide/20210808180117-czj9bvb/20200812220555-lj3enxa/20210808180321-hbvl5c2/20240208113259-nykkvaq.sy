@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261002224707"
+		"updated": "20261003000448"
 	},
 	"Children": [
 		{
@@ -3715,12 +3715,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-l8jclpi",
-				"updated": "20261002224707"
+				"updated": "20261003000448"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "数据库自动化"
+					"Data": "自动化"
 				}
 			]
 		},
@@ -3729,7 +3729,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-5gkk78g",
-				"updated": "20261002224707"
+				"updated": "20261003000448"
 			},
 			"Children": [
 				{
@@ -3748,7 +3748,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "数据库自动化"
+					"TextMarkTextContent": "自动化"
 				},
 				{
 					"Type": "NodeText",

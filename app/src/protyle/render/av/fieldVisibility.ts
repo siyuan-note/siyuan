@@ -88,7 +88,7 @@ const getFieldVisibilityItemsHTML = (views: IAVFieldView[], backColId: string) =
     ${view.hidden ? "" : '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>'}
 </button>`;
     };
-    const titleIconHTML = `<span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="editCol" data-id="${backColId}">
+    const titleIconHTML = `<span class="block__icon block__icon--menu-back" data-type="editCol" data-id="${backColId}">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>`;
     let html = `<button class="b3-menu__item av__field-visibility-title" data-type="nobg">

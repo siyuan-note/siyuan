@@ -18,6 +18,7 @@ import {getUnRefList} from "../../search/unRef";
 import {toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "../../search/toggleHistory";
 import {Protyle} from "../../protyle";
 import {getKeysByLiElement} from "../../search/menu";
+import {getSearchAVMatches} from "../../search/avPreview";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
@@ -275,6 +276,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 config,
                 value: searchInputElement.value,
                 edit,
+                matches: getSearchAVMatches(currentList),
             });
         } else {
             getArticle({
@@ -312,6 +314,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 config,
                 value: searchInputElement.value,
                 edit,
+                matches: getSearchAVMatches(currentList),
             });
         } else if (searchType === "unRef") {
             getArticle({

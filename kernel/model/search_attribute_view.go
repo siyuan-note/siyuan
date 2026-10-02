@@ -1,8 +1,10 @@
 package model
 
 import (
+	"encoding/json"
 	"html"
 	"strings"
+	"unicode/utf16"
 	"unicode/utf8"
 
 	"github.com/88250/lute/ast"
@@ -120,7 +122,7 @@ func compactAttributeViewSearchContent(attrView *av.AttributeView, fallback stri
 		}
 		line := `<span class="fn__code">` + key + `</span>`
 		if nil != part.value {
-			line += " " + attributeViewSearchPartHTML(part)
+			line += " " + attributeViewSearchPartMatchHTML(part)
 			if av.KeyTypeBlock != part.key.Type {
 				if rowTitle := rowTitles[part.value.BlockID]; "" != rowTitle {
 					line = util.EscapeHTML(attributeViewSearchSummary(rowTitle, 48)) + " · " + line
@@ -221,15 +223,7 @@ func attributeViewSearchPartHTML(part *attributeViewSearchPart) string {
 	if 0 == len(part.ranges) {
 		return util.EscapeHTML(attributeViewSearchSummary(part.text, 80))
 	}
-	start, end := part.ranges[0].start, part.ranges[0].end
-	for i := 0; i < 32 && start > 0; i++ {
-		_, size := utf8.DecodeLastRuneInString(part.text[:start])
-		start -= size
-	}
-	for i := 0; i < 64 && end < len(part.text); i++ {
-		_, size := utf8.DecodeRuneInString(part.text[end:])
-		end += size
-	}
+	start, end := attributeViewSearchPartWindow(part)
 	var result strings.Builder
 	if start > 0 {
 		result.WriteString("...")
@@ -238,9 +232,6 @@ func attributeViewSearchPartHTML(part *attributeViewSearchPart) string {
 	for _, match := range part.ranges {
 		if match.start >= end {
 			break
-		}
-		if match.end > end {
-			end = match.end
 		}
 		result.WriteString(util.EscapeHTML(part.text[cursor:match.start]))
 		result.WriteString("<mark>" + util.EscapeHTML(part.text[match.start:match.end]) + "</mark>")
@@ -251,4 +242,55 @@ func attributeViewSearchPartHTML(part *attributeViewSearchPart) string {
 		result.WriteString("...")
 	}
 	return result.String()
+}
+
+func attributeViewSearchPartWindow(part *attributeViewSearchPart) (start, end int) {
+	start, end = part.ranges[0].start, part.ranges[0].end
+	for i := 0; i < 32 && start > 0; i++ {
+		_, size := utf8.DecodeLastRuneInString(part.text[:start])
+		start -= size
+	}
+	for i := 0; i < 64 && end < len(part.text); i++ {
+		_, size := utf8.DecodeRuneInString(part.text[end:])
+		end += size
+	}
+	for _, match := range part.ranges {
+		if match.start >= end {
+			break
+		}
+		if match.end > end {
+			end = match.end
+		}
+	}
+	return
+}
+
+// attributeViewSearchPartMatchHTML 保留实际命中的条目、字段和片段内位置，避免预览重新匹配时扩大命中范围。
+func attributeViewSearchPartMatchHTML(part *attributeViewSearchPart) string {
+	content := attributeViewSearchPartHTML(part)
+	if nil == part.key || nil == part.value || "" == part.key.ID || "" == part.value.BlockID || 0 == len(part.ranges) {
+		return content
+	}
+	start, end := attributeViewSearchPartWindow(part)
+	match := struct {
+		ItemID         string   `json:"itemID"`
+		KeyID          string   `json:"keyID"`
+		Text           string   `json:"text"`
+		Ranges         [][2]int `json:"ranges"`
+		TruncatedStart bool     `json:"truncatedStart"`
+		TruncatedEnd   bool     `json:"truncatedEnd"`
+	}{ItemID: part.value.BlockID, KeyID: part.key.ID, Text: part.text[start:end],
+		TruncatedStart: start > 0, TruncatedEnd: end < len(part.text)}
+	for _, span := range part.ranges {
+		if span.start >= end {
+			break
+		}
+		match.Ranges = append(match.Ranges, [2]int{len(utf16.Encode([]rune(part.text[start:span.start]))),
+			len(utf16.Encode([]rune(part.text[start:span.end])))})
+	}
+	data, err := json.Marshal(match)
+	if nil != err {
+		return content
+	}
+	return `<span data-av-search-match="` + util.EscapeHTML(string(data)) + `">` + content + `</span>`
 }

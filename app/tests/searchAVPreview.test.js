@@ -5,7 +5,8 @@ const os = require("node:os");
 
 const sources = () => {
     const ts = require("typescript");
-    return Object.fromEntries(["search/util", "search/avPreview", "protyle/util/onGet", "protyle/render/searchMarkRender"]
+    return Object.fromEntries(["search/util", "search/avPreview", "boot/globalEvent/searchKeydown",
+        "protyle/util/onGet", "protyle/render/searchMarkRender"]
         .map(name => [name, ts.transpileModule(readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
         }).outputText]));
@@ -26,6 +27,8 @@ const runCases = async modules => {
     let shape = "av__row";
     let status = "visible";
     let absentField = false;
+    let fieldHTML;
+    let unrelatedRow = "";
     const stubs = {
         constants: {Constants: constants},
         "util/fetch": {
@@ -67,10 +70,10 @@ const runCases = async modules => {
                 assert.equal(request.persistView, false);
                 assert.equal(request.viewID, undefined);
                 return new Promise(resolve => targetRenders.push(() => {
-                    block.innerHTML = '<div class="av__views"><div data-type="av-search">needle toolbar</div></div>' +
+                    block.innerHTML = '<div class="av__views"><div data-type="av-search">needle toolbar</div></div>' + unrelatedRow +
                         (status === "visible" ? `<div class="${shape}" data-id="last-page-row">
                             <div data-dtype="block">Row title</div>
-                            <div data-col-id="${absentField ? "hidden-other" : "notes"}" data-field-id="${absentField ? "hidden-other" : "notes"}">${absentField ? "no match" : keyword}</div></div>` : "");
+                            <div data-col-id="${absentField ? "hidden-other" : "notes"}" data-field-id="${absentField ? "hidden-other" : "notes"}">${absentField ? "no match" : fieldHTML ?? keyword}</div></div>` : "");
                     cb({target: {status}});
                     resolve();
                 }));
@@ -94,7 +97,17 @@ const runCases = async modules => {
         return cache[name];
     };
     const {getArticle, renderNextSearchMark} = load("search/util");
+    const preview = load("search/avPreview");
     const highlighter = load("protyle/render/searchMarkRender");
+    let highlightCompletion;
+    const renderMarks = highlighter.searchMarkRender;
+    highlighter.searchMarkRender = (...args) => {
+        const callback = args[3];
+        highlightCompletion = new Promise(resolve => {
+            args[3] = () => { callback?.(); resolve(); };
+        });
+        return renderMarks(...args);
+    };
     const host = document.createElement("div");
     host.style.cssText = "height:200px;overflow:auto";
     const editor = document.createElement("div");
@@ -107,7 +120,7 @@ const runCases = async modules => {
         highlight: {mark: new Highlight(), markHL: new Highlight(), ranges: [],
             styleElement: Object.assign(document.createElement("style"), {textContent: ""})}};
     protyle.highlight.styleElement.dataset.uuid = "test-search-preview";
-    const search = () => getArticle({id: "database", edit: {protyle}, config: {method: 0}, value: keyword});
+    const search = (options = {}) => getArticle({id: "database", edit: {protyle}, config: {method: 0}, value: keyword, ...options});
     for (shape of ["av__row", "av__gallery-item", "av__calendar-item"]) {
         search();
         assert.equal(initialRenders.length, 1);
@@ -169,6 +182,109 @@ const runCases = async modules => {
     valid = false;
     await tick();
     assert.equal(completed, false, "a queued keyword scan cannot overwrite a newer preview");
+
+    keyword = "cat";
+    absentField = false;
+    unrelatedRow = '<div class="av__row" data-id="wrong-row"><div data-col-id="notes">concatenate</div></div>';
+    for (shape of ["av__row", "av__gallery-item", "av__calendar-item"]) {
+        for (const value of ["cat", "concatenate cat", "🙂 concatenate cat"]) {
+            const start = value.lastIndexOf("cat");
+            const match = {itemID: "last-page-row", keyID: "notes", text: value, ranges: [[start, start + 3]],
+                truncatedStart: false, truncatedEnd: false};
+            const summary = document.createElement("span");
+            summary.dataset.avSearchMatch = JSON.stringify(match);
+            summary.innerHTML = "<mark>cat</mark>";
+            const matches = preview.getSearchAVMatchesFromHTML(summary.outerHTML);
+            assert.deepEqual(matches, [match], "result HTML preserves actual hit information");
+            fieldHTML = value.slice(0, start) + "<b>ca</b>t";
+            const before = targets.length;
+            search({config: {method: 3}, matches});
+            initialRenders.shift()();
+            await tick();
+            assert.equal(targets.length, before, "regex preview must not re-search extracted keywords");
+            targetRenders.shift()();
+            await tick();
+            await highlightCompletion;
+            assert.equal(protyle.highlight.ranges.length, 1);
+            const range = protyle.highlight.ranges[0];
+            assert.equal(range.toString(), "cat", `${shape}: ${value}`);
+            assert.ok(range.startContainer.parentElement.closest('[data-id="last-page-row"]'),
+                "a preceding concatenate row cannot steal the actual regex hit");
+            assert.equal(range.startContainer.parentElement.tagName, "B",
+                "same-field substring matches and UTF-16 offsets cannot expand the actual hit");
+        }
+    }
+
+    for (const value of ["concatenate", "cat cat"]) {
+        fieldHTML = value;
+        search({config: {method: 3}, matches: [{itemID: "last-page-row", keyID: "notes", text: "cat", ranges: [[0, 3]],
+            truncatedStart: false, truncatedEnd: false}]});
+        initialRenders.shift()();
+        await tick();
+        targetRenders.shift()();
+        await tick();
+        await highlightCompletion;
+        assert.equal(protyle.highlight.ranges.length, 1);
+        assert.equal(protyle.highlight.ranges[0].toString(), "",
+            "changed or ambiguous field text keeps a field anchor without guessing a substring");
+        assert.equal(scrollAnchor.dataset.colId, "notes");
+    }
+
+    const beforeRegexFallback = targets.length;
+    search({config: {method: 3}, matches: []});
+    initialRenders.shift()();
+    await tick();
+    await highlightCompletion;
+    assert.equal(targets.length, beforeRegexFallback);
+    assert.equal(targetRenders.length, 0, "missing actual hits cannot trigger a guessed row render");
+    assert.equal(protyle.highlight.ranges[0].toString(), "");
+    assert.equal(scrollAnchor.dataset.nodeId, "database");
+
+    const panel = document.createElement("div");
+    panel.innerHTML = '<div class="b3-dialog__body"><span id="selection-anchor">Search</span><input id="searchInput">' +
+        '<div id="searchAssets" class="fn__none"></div><div id="searchUnRefPanel" class="fn__none"></div>' +
+        '<div id="searchList"><div class="b3-list-item b3-list-item--focus" data-node-id="database"></div>' +
+        '<div class="b3-list-item" data-node-id="database"></div></div></div>';
+    document.body.appendChild(panel);
+    const summary = document.createElement("span");
+    summary.dataset.avSearchMatch = JSON.stringify({itemID: "last-page-row", keyID: "notes", text: "concatenate cat",
+        ranges: [[12, 15]], truncatedStart: false, truncatedEnd: false});
+    summary.innerHTML = "<mark>cat</mark>";
+    panel.querySelectorAll(".b3-list-item").forEach(item => item.appendChild(summary.cloneNode(true)));
+    window.siyuan.dialogs = [{element: panel, data: {method: 3}, editors: {edit: {protyle}}}];
+    window.siyuan.config.keymap = {general: {}, editor: {general: {}}};
+    window.siyuan.storage = {};
+    window.siyuan.menus = {menu: {element: panel.querySelector(".fn__none")}};
+    panel.querySelector("#searchInput").value = "\\bcat\\b";
+    const selection = document.createRange();
+    selection.selectNodeContents(panel.querySelector("#selection-anchor"));
+    getSelection().removeAllRanges();
+    getSelection().addRange(selection);
+    shape = "av__row";
+    fieldHTML = "concatenate <b>ca</b>t";
+    const {searchKeydown} = load("boot/globalEvent/searchKeydown");
+    for (const key of ["ArrowDown", "ArrowUp"]) {
+        assert.equal(searchKeydown({}, {key, target: panel.querySelector("#searchInput")}), true);
+        initialRenders.shift()();
+        await tick();
+        targetRenders.shift()();
+        await tick();
+        await highlightCompletion;
+        assert.equal(targets.length, beforeRegexFallback, "keyboard navigation preserves actual regex hits");
+        assert.equal(protyle.highlight.ranges.length, 1);
+        assert.equal(protyle.highlight.ranges[0].toString(), "cat");
+        assert.equal(protyle.highlight.ranges[0].startContainer.parentElement.tagName, "B");
+    }
+    getSelection().removeAllRanges();
+    panel.remove();
+
+    assert.deepEqual(preview.getSearchAVMatchesFromHTML('<span data-av-search-match="invalid"></span>'), []);
+    const invalid = document.createElement("span");
+    invalid.dataset.avSearchMatch = JSON.stringify({itemID: 'bad"id', keyID: "notes", text: "cat", ranges: [[0, 4]],
+        truncatedStart: false, truncatedEnd: false});
+    const invalidSummary = document.createDocumentFragment();
+    invalidSummary.appendChild(invalid);
+    assert.deepEqual(preview.getSearchAVMatches(invalidSummary), []);
     host.remove();
     return "Database search preview cases passed";
 };
@@ -177,7 +293,8 @@ if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow} = require("electron");
     app.setPath("userData", process.argv[2]);
     app.whenReady().then(async () => {
-        const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+        const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false,
+            backgroundThrottling: false}});
         try {
             await win.loadURL("about:blank");
             console.log(await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources())})`));

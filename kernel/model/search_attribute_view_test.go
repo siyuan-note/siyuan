@@ -1,7 +1,10 @@
 package model
 
 import (
+	"encoding/json"
+	"html"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 	"unicode/utf8"
@@ -9,6 +12,70 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAttributeViewSearchRegexPreviewMetadata(t *testing.T) {
+	attrView := attributeViewSearchTestFixture()
+	attrView.KeyValues[1].Key.ID = "status"
+	attrView.KeyValues[1].Values[0].Text.Content = "concatenate"
+	attrView.KeyValues[1].Values[2].Text.Content = "cat"
+	source := "Contacts All people Title Project Apollo Project Borealis Status concatenate cat"
+	marked := regexp.MustCompile(`\bcat\b`).ReplaceAllString(source, "<mark>$0</mark>")
+	got := compactAttributeViewSearchContent(attrView, marked)
+	metadata := regexp.MustCompile(`data-av-search-match="([^"]*)"`).FindAllStringSubmatch(got, -1)
+	if len(metadata) != 1 {
+		t.Fatalf("expected only the actual value match, got %q", got)
+	}
+	var match struct {
+		ItemID, KeyID, Text string
+		Ranges              [][2]int
+		TruncatedStart      bool
+		TruncatedEnd        bool
+	}
+	if err := json.Unmarshal([]byte(html.UnescapeString(metadata[0][1])), &match); err != nil {
+		t.Fatal(err)
+	}
+	if match.ItemID != "row-b" || match.KeyID != "status" || match.Text != "cat" ||
+		!reflect.DeepEqual(match.Ranges, [][2]int{{0, 3}}) || match.TruncatedStart || match.TruncatedEnd {
+		t.Fatalf("preview metadata lost regex boundaries: %#v", match)
+	}
+}
+
+func TestAttributeViewSearchPreviewMetadataOffsets(t *testing.T) {
+	for _, test := range []struct {
+		name, text string
+		start, end int
+		truncated  bool
+	}{
+		{name: "word boundary after substring", text: "concatenate cat", start: 12, end: 15},
+		{name: "UTF-16 and escaped content", text: "🙂 & <cat> concatenate cat", start: 23, end: 26},
+		{name: "bounded context", text: strings.Repeat("🙂", 40) + "cat" + strings.Repeat("&", 80), start: 64, end: 67, truncated: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			start := strings.LastIndex(test.text, "cat")
+			part := &attributeViewSearchPart{text: test.text, key: &av.Key{ID: "notes"}, value: &av.Value{BlockID: "row"},
+				ranges: []attributeViewSearchRange{{start, start + 3}}}
+			got := attributeViewSearchPartMatchHTML(part)
+			metadata := regexp.MustCompile(`data-av-search-match="([^"]*)"`).FindStringSubmatch(got)
+			if len(metadata) != 2 {
+				t.Fatalf("missing preview metadata: %q", got)
+			}
+			var match struct {
+				Text           string
+				Ranges         [][2]int
+				TruncatedStart bool
+				TruncatedEnd   bool
+			}
+			if err := json.Unmarshal([]byte(html.UnescapeString(metadata[1])), &match); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(match.Ranges, [][2]int{{test.start, test.end}}) ||
+				match.TruncatedStart != test.truncated || match.TruncatedEnd != test.truncated ||
+				(!test.truncated && match.Text != test.text) || (test.truncated && utf8.RuneCountInString(match.Text) != 99) {
+				t.Fatalf("incorrect preview context or offsets: %#v", match)
+			}
+		})
+	}
+}
 
 func TestAttributeViewSearchParseMarks(t *testing.T) {
 	tests := []struct {

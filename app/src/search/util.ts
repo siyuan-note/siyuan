@@ -67,7 +67,7 @@ import {
     syncSearchConfigHPath,
 } from "./config";
 import {beginSearchPathRequest, invalidateSearchPathRequests, refreshCurrentSearchPath} from "./path";
-import {beginSearchPreviewRequest, locateSearchAVPreview} from "./avPreview";
+import {beginSearchPreviewRequest, getSearchAVMatches, getSearchAVMatchesFromHTML, IAVSearchMatch, locateSearchAVPreview} from "./avPreview";
 
 const persistSearchConfig = (config: Config.IUILayoutTabSearchConfig) => {
     window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = resolvePersistedSearchConfig(
@@ -914,6 +914,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                         id: target.getAttribute("data-node-id"),
                                         config: searchType === "doc" ? config : null,
                                         value: searchType === "doc" ? searchInputElement.value : null,
+                                        matches: getSearchAVMatches(target),
                                     });
                                     if (shouldRestoreFocus(searchInputElement)) {
                                         searchInputElement.focus();
@@ -1276,6 +1277,7 @@ export const getArticle = (options: {
     config?: Config.IUILayoutTabSearchConfig,
     edit: Protyle
     value?: string,
+    matches?: IAVSearchMatch[],
 }) => {
     const isCurrent = beginSearchPreviewRequest(options.edit.protyle);
     checkFold(options.id, (zoomIn) => {
@@ -1338,6 +1340,7 @@ export const getArticle = (options: {
                                 id: options.id,
                                 method: options.config?.method ?? 0,
                                 keywords: getResponse.data.keywords,
+                                matches: options.matches,
                                 isCurrent,
                             });
                         } catch (error) {
@@ -1390,6 +1393,7 @@ export const getArticle = (options: {
                             }, {
                                 rootElement: preview?.rootElement,
                                 currentElement: preview?.currentElement,
+                                ranges: preview?.ranges,
                                 excludeSelector: ".av__views [data-type=\"av-search\"], .av__selection-toolbar, .av__calendar-toolbar, .av__row--footer",
                                 isValid: isCurrent,
                             });
@@ -1689,6 +1693,7 @@ ${countHTML}
             id: currentData.id,
             config,
             value: (element.querySelector("#searchInput") as HTMLInputElement).value,
+            matches: getSearchAVMatchesFromHTML(currentData.content),
         });
     } else {
         edit.protyle.element.classList.add("fn__none");

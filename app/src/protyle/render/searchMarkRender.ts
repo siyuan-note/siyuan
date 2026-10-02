@@ -8,6 +8,7 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
                                      currentElement?: Element,
                                      excludeSelector?: string,
                                      isValid?: () => boolean,
+                                     ranges?: Range[],
                                  }) => {
     if (!isSupportCSSHL() || ((!keys || keys.length === 0) && !hlId)) {
         return;
@@ -59,7 +60,19 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
 
         const text = rootElement.textContent;
         const rangeIndexes: { range: Range, startIndex: number, isCurrent: boolean }[] = [];
-        if (keys && keys.length > 0) {
+        if (options?.ranges) {
+            options.ranges.forEach(range => {
+                if (!rootElement.contains(range.commonAncestorContainer)) {
+                    return;
+                }
+                const prefix = document.createRange();
+                prefix.selectNodeContents(rootElement);
+                prefix.setEnd(range.startContainer, range.startOffset);
+                const isCurrent = !isSetHL && !!hlBlockElement?.contains(range.startContainer);
+                isSetHL = isSetHL || isCurrent;
+                rangeIndexes.push({range, startIndex: prefix.toString().length, isCurrent});
+            });
+        } else if (keys && keys.length > 0) {
             keys.forEach(key => {
                 if (!key) {
                     return;

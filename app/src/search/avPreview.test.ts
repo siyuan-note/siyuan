@@ -98,6 +98,16 @@ test("database preview rejects stale fetches and detached blocks before locating
     }
 });
 
+test("regex preview without actual matches keeps the database anchor instead of guessing a row", async () => {
+    const state = setup();
+    const result = await state.api.locateSearchAVPreview({...state.options, method: 3, keywords: ["cat"]});
+    assert.equal(result.rootElement, state.block);
+    assert.equal(result.currentElement, state.block);
+    assert.equal(result.ranges.length, 0);
+    assert.equal(state.fetches.length, 0);
+    assert.equal(state.requests.length, 0);
+});
+
 test("database preview rejects a render completed after another search", async () => {
     const state = setup();
     const pending = state.api.locateSearchAVPreview(state.options);

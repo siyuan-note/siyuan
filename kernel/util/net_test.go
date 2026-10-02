@@ -81,7 +81,7 @@ func TestIsCrossSiteFetchSite(t *testing.T) {
 	}
 }
 
-// TestIsSessionOriginAllowedRequest 验证会话认证请求校验：浏览器标记的跨站请求直接拒绝，
+// TestIsSessionOriginAllowedRequest 验证会话认证请求校验：仅允许跨站应用入口导航，
 // 其余请求回退到 Origin 校验
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
 func TestIsSessionOriginAllowedRequest(t *testing.T) {
@@ -103,7 +103,7 @@ func TestIsSessionOriginAllowedRequest(t *testing.T) {
 		{name: "same-site asset navigation denied", site: "same-site", host: "note.example.com", path: "/assets/file.png", mode: "navigate", dest: "document", want: false},
 		{name: "same-site app fetch denied", site: "same-site", host: "note.example.com", path: "/stage/build/desktop/", mode: "cors", dest: "empty", want: false},
 		{name: "same-site app navigation with Origin denied", site: "same-site", origin: "https://home.example.com", host: "note.example.com", path: "/stage/build/desktop/", mode: "navigate", dest: "document", want: false},
-		{name: "cross-site app navigation denied", site: "cross-site", host: "note.example.com", path: "/stage/build/desktop/", mode: "navigate", dest: "document", want: false},
+		{name: "cross-site app navigation", site: "cross-site", host: "note.example.com", path: "/stage/build/desktop/", mode: "navigate", dest: "document", want: true},
 		{name: "same-origin without Origin", site: "same-origin", origin: "", host: "127.0.0.1:6806", want: true},
 		{name: "none without Origin", site: "none", origin: "", host: "127.0.0.1:6806", want: true},
 		{name: "absent fetch site with local origin", site: "", origin: "http://127.0.0.1:6806", host: "127.0.0.1:6806", want: true},
@@ -126,6 +126,35 @@ func TestIsSessionOriginAllowedRequest(t *testing.T) {
 				t.Fatalf("IsSessionOriginAllowedRequest(site=%q, origin=%q, host=%q) = %v, want %v", test.site, test.origin, test.host, got, test.want)
 			}
 		})
+	}
+}
+
+func TestIsSessionOriginAllowedPWANavigation(t *testing.T) {
+	for _, path := range []string{"/", "/stage/build/app/", "/stage/build/desktop/", "/stage/build/mobile/",
+		"/stage/build/app/index.html", "/stage/build/desktop/index.html", "/stage/build/mobile/index.html"} {
+		request := httptest.NewRequest(http.MethodGet, "https://notes.example"+path+"?r=start", nil)
+		request.Header.Set("Sec-Fetch-Site", "cross-site")
+		request.Header.Set("Sec-Fetch-Mode", "navigate")
+		request.Header.Set("Sec-Fetch-Dest", "document")
+		if !IsSessionOriginAllowedRequest(request) {
+			t.Errorf("PWA entry rejected: %s", path)
+		}
+		for _, change := range []func(*http.Request){
+			func(r *http.Request) { r.Method = http.MethodPost },
+			func(r *http.Request) { r.Header.Set("Origin", "https://external.example") },
+			func(r *http.Request) { r.Header.Set("Sec-Fetch-Mode", "cors") },
+			func(r *http.Request) { r.Header.Set("Sec-Fetch-Dest", "iframe") },
+			func(r *http.Request) { r.Header.Set("Sec-Fetch-Site", "unknown") },
+			func(r *http.Request) { r.URL.Path = "/api/network/proxy" },
+			func(r *http.Request) { r.URL.Path = "/assets/image.png" },
+			func(r *http.Request) { r.URL.Path = path + "extra" },
+		} {
+			blocked := request.Clone(request.Context())
+			change(blocked)
+			if IsSessionOriginAllowedRequest(blocked) {
+				t.Errorf("unexpected navigation exception: %s %s %v", blocked.Method, blocked.URL, blocked.Header)
+			}
+		}
 	}
 }
 

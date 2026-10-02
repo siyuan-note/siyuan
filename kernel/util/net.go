@@ -147,13 +147,14 @@ func IsCrossSiteFetchSite(site string) bool {
 	return "" != site && "same-origin" != site && "none" != site
 }
 
-// IsSessionOriginAllowedRequest 校验会话认证请求：同站子域的应用页面导航可放行，
+// IsSessionOriginAllowedRequest 校验会话认证请求：应用入口的顶层 GET 页面导航可放行，
 // 其他跨源请求拒绝，其余请求继续校验 Origin。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
 func IsSessionOriginAllowedRequest(r *http.Request) bool {
 	if IsCrossSiteFetchSite(r.Header.Get("Sec-Fetch-Site")) {
-		// 已登录用户可从同站子域进入应用页面；跨站导航和同站 API 请求仍须拒绝。
-		return r.Header.Get("Sec-Fetch-Site") == "same-site" &&
+		// 已登录用户可从子域、外部链接或 PWA 图标进入应用；API、资源和嵌入页面请求仍须拒绝。
+		site := r.Header.Get("Sec-Fetch-Site")
+		return (site == "same-site" || site == "cross-site") &&
 			r.Method == http.MethodGet && r.Header.Get("Origin") == "" &&
 			r.Header.Get("Sec-Fetch-Mode") == "navigate" &&
 			r.Header.Get("Sec-Fetch-Dest") == "document" && isAppEntryPath(r.URL.Path)

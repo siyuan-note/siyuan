@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"html"
 	"strings"
 	"testing"
 
@@ -10,6 +11,64 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestMarkdownFootnotesPreserveLabelPunctuation(t *testing.T) {
+	for _, label := range []string{"a_b", "a*b", "a&b", "a<b", "a=b", "a~b", "a^b", "a$b", "a#b", "a!b", "a(b)", "a`b", "a&amp;b"} {
+		for _, api := range []bool{false, true} {
+			t.Run(fmt.Sprintf("label=%s/api=%v", label, api), func(t *testing.T) {
+				markdown := "*Before[^" + label + "] after*.\n\n[^" + label + "]: body\n"
+				engine := util.NewLute()
+				tree, _, _, _ := parseStdMd([]byte(markdown), true)
+				if api {
+					tree = engine.BlockDOM2Tree(markdownWithFootnotes2BlockDOM(engine, markdown))
+				}
+				refs := markdownFootnoteRefs(t, tree)
+				if len(refs) != 1 || !refs[0].IsTextMarkType("em") {
+					t.Fatalf("lost reference or surrounding emphasis: %+v", refs)
+				}
+				if got, want := html.UnescapeString(tree.Root.FirstChild.Text()), "Before["+label+"] after."; got != want {
+					t.Fatalf("label altered paragraph: got %q, want %q", got, want)
+				}
+			})
+		}
+	}
+}
+
+func TestMarkdownFootnotesStartingWithList(t *testing.T) {
+	const markdown = "Text[^note].\n\n[^note]: - First\n    - Second\n"
+	for _, api := range []bool{false, true} {
+		t.Run(fmt.Sprintf("api=%v", api), func(t *testing.T) {
+			engine := util.NewLute()
+			tree, _, _, _ := parseStdMd([]byte(markdown), true)
+			if api {
+				tree = engine.BlockDOM2Tree(markdownWithFootnotes2BlockDOM(engine, markdown))
+			} else {
+				reassignIDUpdated(tree, ast.NewNodeID(), "")
+			}
+			refs := markdownFootnoteRefs(t, tree)
+			if len(refs) != 1 {
+				t.Fatalf("expected one reference, got %d", len(refs))
+			}
+			item := treenode.GetNodeInTree(tree, refs[0].TextMarkBlockRefID)
+			paragraph := item.FirstChild
+			if paragraph == nil || paragraph.Type != ast.NodeParagraph || paragraph.ID == "" || paragraph.Text() != "" {
+				t.Fatalf("missing editable summary paragraph: %+v", paragraph)
+			}
+			if list := item.ChildByType(ast.NodeList); list == nil || list.Text() != "FirstSecond" {
+				t.Fatalf("lost nested list content: %+v", list)
+			}
+			dom := engine.Tree2BlockDOM(tree, engine.RenderOptions, engine.ParseOptions)
+			reopened := engine.BlockDOM2Tree(engine.SpinBlockDOM(dom))
+			reopenedRefs := markdownFootnoteRefs(t, reopened)
+			if len(reopenedRefs) != 1 || reopenedRefs[0].TextMarkBlockRefID != item.ID {
+				t.Fatal("editing changed the footnote target")
+			}
+			if got := treenode.GetNodeInTree(reopened, item.ID).FirstChild.ID; got != paragraph.ID {
+				t.Fatalf("editing replaced the summary paragraph: %s != %s", got, paragraph.ID)
+			}
+		})
+	}
+}
 
 func TestMarkdownFootnotes(t *testing.T) {
 	for _, separator := range []string{"\n", "\n\n", "\r\n", "\r\n\r\n"} {
@@ -21,7 +80,7 @@ func TestMarkdownFootnotes(t *testing.T) {
 					engine := util.NewLute()
 					tree = engine.BlockDOM2Tree(markdownWithFootnotes2BlockDOM(engine, markdown))
 				} else {
-					tree, _, _, _ = parseStdMd([]byte(markdown))
+					tree, _, _, _ = parseStdMd([]byte(markdown), true)
 					reassignIDUpdated(tree, ast.NewNodeID(), "20260901000000")
 				}
 				refs := markdownFootnoteRefs(t, tree)
@@ -66,7 +125,7 @@ func TestMarkdownFootnotesPreserveLiteralAndUnreferencedContent(t *testing.T) {
 	markdown := "Text[^note].\n\nUnknown[^missing].\n\n`[^note]` and \\[^note].\n\n```md\n[^code]: code definition\n```\n\n[^note]: First\n[^NOTE]: Duplicate\n[^unused]: Unreferenced\n[^empty]:\n"
 	for _, api := range []bool{false, true} {
 		engine := util.NewLute()
-		tree, _, _, _ := parseStdMd([]byte(markdown))
+		tree, _, _, _ := parseStdMd([]byte(markdown), true)
 		if api {
 			tree = engine.BlockDOM2Tree(markdownWithFootnotes2BlockDOM(engine, markdown))
 		}
@@ -99,7 +158,7 @@ func TestMarkdownFootnotesLargeDocument(t *testing.T) {
 	for i := 1; i <= 1459; i++ {
 		fmt.Fprintf(&source, "[^%d]: Definition %d\n", i, i)
 	}
-	tree, _, _, _ := parseStdMd([]byte(source.String()))
+	tree, _, _, _ := parseStdMd([]byte(source.String()), true)
 	refs := markdownFootnoteRefs(t, tree)
 	if len(refs) != 1459 {
 		t.Fatalf("lost references: %d", len(refs))

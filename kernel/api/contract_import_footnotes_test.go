@@ -69,7 +69,7 @@ func TestAPIContractMarkdownFootnotes(t *testing.T) {
 	defer sql.CloseDatabase()
 	treenode.InitBlockTree(true)
 	defer treenode.CloseDatabase()
-	const markdown = "First[^note].\n\nSecond[^note].\n\n[^note]: Confidential footnote\n\n    Second paragraph\n"
+	const markdown = "First[^note_key].\n\nSecond[^note_key].\n\nThird[^list_note].\n\nFourth[^list_note].\n\n[^note_key]: Confidential footnote\n\n    Second paragraph\n\n[^list_note]: - Nested first\n    - Nested second\n"
 	source := filepath.Join(testutil.PublicDataDir(t), "footnotes.md")
 	if err := os.WriteFile(source, []byte(markdown), 0600); err != nil {
 		t.Fatal(err)
@@ -146,8 +146,17 @@ func TestAPIContractMarkdownFootnotes(t *testing.T) {
 				if entering && treenode.IsBlockRef(n) {
 					count++
 					def := treenode.GetNodeInTree(tree, n.TextMarkBlockRefID)
-					if def == nil || def.Type != ast.NodeListItem || !n.IsTextMarkType("sup") || def.Text() != "Confidential footnoteSecond paragraph" {
+					if def == nil || def.Type != ast.NodeListItem || !n.IsTextMarkType("sup") {
 						t.Errorf("lost footnote target or content in %s", hpath)
+						return ast.WalkContinue
+					}
+					if n.TextMarkTextContent == "[list_note]" {
+						if def.FirstChild == nil || def.FirstChild.Type != ast.NodeParagraph || def.FirstChild.ID == "" ||
+							def.FirstChild.Text() != "" || def.Text() != "Nested firstNested second" {
+							t.Errorf("lost nested footnote structure in %s", hpath)
+						}
+					} else if def.Text() != "Confidential footnoteSecond paragraph" {
+						t.Errorf("lost multi-paragraph footnote in %s", hpath)
 					}
 					if refs := sql.QueryRefsByDefIDInBox(n.TextMarkBlockRefID, false, boxID); len(refs) != 2 {
 						t.Errorf("expected two backlinks in %s, got %d", hpath, len(refs))
@@ -155,8 +164,11 @@ func TestAPIContractMarkdownFootnotes(t *testing.T) {
 				}
 				return ast.WalkContinue
 			})
-			if count != 2 {
-				t.Fatalf("expected two references in %s, got %d", hpath, count)
+			if count != 4 {
+				t.Fatalf("expected four references in %s, got %d", hpath, count)
+			}
+			if text := tree.Root.FirstChild.Text(); text != "First[note_key]." {
+				t.Fatalf("footnote label altered paragraph in %s: %q", hpath, text)
 			}
 			data, err := os.ReadFile(filepath.Join(util.DataDir, boxID, block.Path))
 			if err != nil || util.IsCiphertext(data) != encrypted {

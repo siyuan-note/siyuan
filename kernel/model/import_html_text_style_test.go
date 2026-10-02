@@ -30,7 +30,7 @@ func TestImportHTMLTextStyles(t *testing.T) {
 		`<div style="font-family:Arial;font-size:24px"><small>small <strong>bold</strong></small></div>`,
 	} {
 		t.Run(input, func(t *testing.T) {
-			tree, _, _, _ := parseStdMd([]byte(input))
+			tree, _, _, _ := parseStdMd([]byte(input), true)
 			styled := 0
 			bold := false
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

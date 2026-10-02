@@ -59,8 +59,8 @@ func convertMarkdownFootnotes(tree *parse.Tree) {
 		def.Type = ast.NodeListItem
 		def.Tokens = nil
 		def.FootnotesRefs = nil
-		if def.FirstChild == nil {
-			def.AppendChild(&ast.Node{Type: ast.NodeParagraph})
+		if def.FirstChild == nil || def.FirstChild.Type == ast.NodeList {
+			def.PrependChild(&ast.Node{Type: ast.NodeParagraph})
 		}
 	}
 }

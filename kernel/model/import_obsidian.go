@@ -870,7 +870,7 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 				doc.BlockIDs[blockID] = ast.NewNodeID()
 			}
 		}
-		tree, _, _, _ := parseStdMd(data)
+		tree, _, _, _ := parseStdMd(data, false)
 		if tree == nil {
 			return newObsidianUserError(347, doc.Source.RelPath,
 				fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath))
@@ -913,7 +913,7 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 				}
 			}
 		}
-		tree, _, _, _ := parseStdMd(data)
+		tree, _, _, _ := parseStdMd(data, false)
 		if tree == nil {
 			return newObsidianUserError(347, doc.Source.RelPath,
 				fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath))

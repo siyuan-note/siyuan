@@ -1650,7 +1650,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				return io.EOF
 			}
 
-			tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data)
+			tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data, true)
 			if nil == tree {
 				logging.LogErrorf("parse tree [%s] failed", currentPath)
 				return nil
@@ -1798,7 +1798,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		if err != nil {
 			return err
 		}
-		tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data)
+		tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data, true)
 		if nil == tree {
 			msg := fmt.Sprintf("parse tree [%s] failed", localPath)
 			logging.LogError(msg)
@@ -1983,15 +1983,17 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 	return
 }
 
-func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdated string) {
+func parseStdMd(markdown []byte, footnotes bool) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdated string) {
 	luteEngine := util.NewStdLute()
-	luteEngine.SetFootnotes(true)
+	luteEngine.SetFootnotes(footnotes)
 	luteEngine.SetYamlFrontMatter(true) // 解析 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/10878
 	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
 	if nil == ret {
 		return
 	}
-	convertMarkdownFootnotes(ret)
+	if footnotes {
+		convertMarkdownFootnotes(ret)
+	}
 	parse.NormalizeInlineHTMLTextStyles(ret)
 	normalizeImportedHTMLTextStyles(ret)
 	yfmRootID, yfmTitle, yfmUpdated = normalizeTree(ret)

@@ -5,6 +5,7 @@ import type {IGlobalPluginStateSnapshot} from "../../plugin/globalStateCoordinat
 
 export interface ISettingsWindowHost {
     app: App;
+    title: string;
     exportLayout: (options: {cb: () => void; errorExit: boolean}) => Promise<void>;
     exit: (setCurrentWorkspace?: boolean) => Promise<void>;
     subscribePlugins: (listener: (state: IGlobalPluginStateSnapshot) => void) => () => void;

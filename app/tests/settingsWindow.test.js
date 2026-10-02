@@ -14,7 +14,8 @@ const loadRendererModule = (source, modules) => {
 
 const rendererModules = (sources) => {
     let sequence = 0;
-    window.siyuan = {dialogs: [], zIndex: 1, storage: {zoom: 1}, languages: {cancel: "Cancel", save: "Save", config: "Settings",
+    window.siyuan = {dialogs: [], zIndex: 1, storage: {zoom: 1}, config: {system: {workspaceDir: "D:/workspaces/Workspace A & <B>/"}},
+        languages: {cancel: "Cancel", save: "Save", config: "Settings", workspace: "Workspace",
         min: "Minimize", max: "Maximize", restore: "Restore", close: "Close"},
         menus: {menu: {element: document.createElement("div"), remove() {}}}, ws: {app: {plugins: [], appId: "test"}}};
     const genUUID = () => "test-" + (++sequence);
@@ -36,13 +37,16 @@ const rendererModules = (sources) => {
     const frontend = loadRendererModule(sources.frontend, {
         "./hostCapabilities": {getHostCapabilities: () => ({})}, "../editor/pdfAssetLink": {},
     });
-    return {Dialog, genUUID, context, fit, controls, frontend};
+    const titles = loadRendererModule(sources.titles, {
+        "./escape": {}, "../constants": {Constants: {}}, "./pathName": {pathPosix: () => require("node:path").posix},
+    });
+    return {Dialog, genUUID, context, fit, controls, frontend, titles};
 };
 
 const bootChild = async (sources) => {
     const {ipcRenderer} = require("electron");
     const {waitForSettingsWindowPaint} = loadRendererModule(sources.paint, {});
-    const {Dialog, genUUID, context, fit, frontend} = rendererModules(sources);
+    const {Dialog, genUUID, context, fit, frontend, titles} = rendererModules(sources);
     require("node:assert/strict").equal(navigator.userAgent.startsWith("SiYuan/"), false);
     require("node:assert/strict").equal(frontend.getFrontend(), "desktop", navigator.userAgent);
     const host = await new Promise(resolve => {
@@ -68,6 +72,8 @@ const bootChild = async (sources) => {
         document.head.append(canceled);
         await ipcRenderer.invoke("test-settings-initializing");
         canceled.remove();
+        window.siyuan.config.system.workspaceDir = "";
+        document.title = host.title;
         if (host.plugin) {
             const {Setting} = loadRendererModule(sources.setting, {
                 "../util/functions": {isMobile: () => false, getFrontend: frontend.getFrontend},
@@ -86,7 +92,11 @@ const bootChild = async (sources) => {
             const withoutSettings = host.app.plugins.find(plugin => plugin.name === "without-settings");
             require("node:assert/strict").equal(pluginSettings.hasPluginSetting(withoutSettings), true);
             require("node:assert/strict").equal(host.hasPluginSetting(withoutSettings.name), false);
-            document.body.append(document.createElement("div"));
+            require("node:assert/strict").equal(titles.getWorkspaceName(), "Workspace");
+            require("node:assert/strict").equal(document.title, "Settings - Workspace A & <B>");
+            const dialog = new Dialog({content: "<div></div>"});
+            fit.fitSettingsWindowDialog(dialog);
+            require("node:assert/strict").equal(dialog.element.querySelector("#drag").textContent, document.title);
         }
     });
     if (!document.getElementById("pendingTheme").sheet) throw new Error("settings shown before theme loaded");
@@ -97,7 +107,7 @@ const bootChild = async (sources) => {
 const runCases = async (sources) => {
     const assert = require("node:assert/strict");
     const {ipcRenderer} = require("electron");
-    const {Dialog, genUUID, context, fit} = rendererModules(sources);
+    const {Dialog, genUUID, context, fit, titles} = rendererModules(sources);
     class Plugin {openSetting() {}}
     const pluginSettings = {};
     new Function("Plugin", "exports", sources.pluginSettings)(Plugin, pluginSettings);
@@ -109,6 +119,7 @@ const runCases = async (sources) => {
         "../../boot/globalEvent/globalShortcut": {sendGlobalShortcut() {}, sendUnregisterGlobalShortcut() {}},
         "../../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd"}},
         "../../plugin": pluginSettings,
+        "../../util/processTitle": titles,
     });
     const {Setting} = loadRendererModule(sources.setting, {
         "../util/functions": {isMobile: () => false, getFrontend: () => "desktop"}, "../dialog": {Dialog},
@@ -247,6 +258,7 @@ const runCases = async (sources) => {
     const host = await new Promise(resolve => {
         window.dispatchEvent(new CustomEvent("siyuan-settings-host-" + builtinHost, {detail: resolve}));
     });
+    assert.equal(host.title, "Settings - Workspace A & <B>");
     const legacySetting = new Setting({});
     assert.equal(host.hasPluginSetting("without-settings"), false);
     assert.equal(host.hasPluginSetting("missing"), false);
@@ -301,7 +313,7 @@ if (process.versions.electron && process.type === "browser") {
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
-            paint: "config/setting/windowPaint.ts", frontend: "util/functions.ts"})) {
+            paint: "config/setting/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts"})) {
             let source = fs.readFileSync(path.join(__dirname, "../src", file), "utf8");
             if (key === "frontend") {
                 source = require("ifdef-loader/preprocessor").parse(source, {MOBILE: false, BROWSER: false}, false, true);

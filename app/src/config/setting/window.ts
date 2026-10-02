@@ -35,7 +35,6 @@ import {getSettingTabDefs} from "./tabs";
 import {onWindowsMsg} from "../../window/onWindowsMsg";
 import {applyWindowState} from "../../boot/windowControls";
 import {waitForSettingsWindowPaint} from "./windowPaint";
-import {getWorkspaceName} from "../../util/processTitle";
 
 const initialize = async () => {
     addBaseURL();
@@ -165,7 +164,7 @@ const initialize = async () => {
         initMessage();
         initNativeDialogOverride();
         initWindowOpenOverride(host.app);
-        document.title = host.plugin?.name || `${window.siyuan.languages.config} - ${getWorkspaceName()}`;
+        document.title = host.title;
         if (host.plugin) {
             host.plugin.mount(options => {
                 const setting = new Setting(options);

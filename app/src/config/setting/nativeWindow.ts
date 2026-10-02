@@ -10,6 +10,7 @@ import {loadPlugin, unloadPlugin} from "../../plugin/loader";
 import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/globalShortcut";
 import {Constants} from "../../constants";
 import {hasPluginSetting} from "../../plugin";
+import {getWorkspaceName} from "../../util/processTitle";
 import type {App} from "../../index";
 import type {ISettingsWindowHost} from "./windowContext";
 import type {TSettingTab} from "./tabs";
@@ -54,8 +55,9 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
         });
     }
     const token = genUUID();
+    const title = plugin?.name || `${window.siyuan.languages.config} - ${getWorkspaceName()}`;
     const prepared = await ipcRenderer.invoke("siyuan-settings-prepare", {
-        token, key, command, title: plugin?.name || window.siyuan.languages.config,
+        token, key, command, title,
         geometry: key === "builtin" ? window.siyuan.storage[geometryKey] : undefined,
     });
     if (!prepared.create) {
@@ -66,7 +68,7 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
         return;
     }
     const host: ISettingsWindowHost = {
-        app, exportLayout, exit: exitSiYuan, plugin,
+        app, title, exportLayout, exit: exitSiYuan, plugin,
         suspendShortcuts: () => sendUnregisterGlobalShortcut(app),
         restoreShortcuts: () => sendGlobalShortcut(app),
         subscribePlugins: listener => subscribeGlobalPluginState(app, listener),

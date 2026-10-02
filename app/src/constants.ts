@@ -655,6 +655,7 @@ export abstract class Constants {
                 check: {default: "⌘L", custom: "⌘L"},
                 "ordered-list": {default: "", custom: ""},
                 list: {default: "", custom: ""},
+                mindmap: {default: "", custom: ""},
                 table: {default: "⌘O", custom: "⌘O"},
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},
                 quote: {default: "", custom: ""},

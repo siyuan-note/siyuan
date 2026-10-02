@@ -1,5 +1,6 @@
 import type {BlockQueryRequestInput} from "../../types/api";
 import {isProtyleListItemFragment} from "../runtimeCapabilities";
+import {toggleListMindmap} from "../render/listMindmap";
 import {hideElements} from "../ui/hideElements";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {getBlockInsertionContext} from "./blockInsertion";
@@ -2203,6 +2204,33 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 await listIndent(protyle, [nodeElement.parentElement], range);
                 return true;
             }
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.insert.mindmap, event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (isProtyleListItemFragment(protyle) || isInEmbedBlock(nodeElement)) {
+                return;
+            }
+            const selected = Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>(".protyle-wysiwyg--select"));
+            if (selected.length > 1) {
+                return;
+            }
+            const target = selected[0] || nodeElement;
+            const list = getAppendListContext(target, protyle.wysiwyg.element)?.listElement;
+            if (target.dataset.type === "NodeMindmap" || list?.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") {
+                return;
+            }
+            if (list) {
+                hideElements(["select"], protyle);
+                await toggleListMindmap(protyle, list);
+            } else {
+                if (selected.length === 1) {
+                    focusBlock(target);
+                    hideElements(["select"], protyle);
+                }
+                protyle.hint.fillCommand(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, protyle);
+            }
+            return;
         }
         const isMatchList = matchHotKey(window.siyuan.config.keymap.editor.insert.list, event);
         const isMatchCheck = matchHotKey(window.siyuan.config.keymap.editor.insert.check, event);

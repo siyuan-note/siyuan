@@ -72,6 +72,7 @@ test("insert commands search and execute existing insertion actions at the saved
     assert.ok(registry.list({...context, environment: "browser-mobile"}).some(command => command.id === "core.mobile.insert.template"));
     assert.deepEqual(Array.from(registry.get("core.mobile.insert.heading1")?.keymapPath || []), ["editor", "heading", "heading1"]);
     assert.deepEqual(Array.from(registry.get("core.mobile.insert.orderedList")?.keymapPath || []), ["editor", "insert", "ordered-list"]);
+    assert.deepEqual(Array.from(registry.get("core.mobile.insert.mindmap")?.keymapPath || []), ["editor", "insert", "mindmap"]);
     assert.deepEqual(Array.from(registry.get("core.mobile.insert.ref")?.keymapPath || []), ["editor", "insert", "ref"]);
     assert.equal(registry.get("core.mobile.insert.template")?.keymapPath, undefined);
     assert.equal(queryCommandPalette(registry, context, "模板")[0].id, "core.mobile.insert.template");

@@ -6,9 +6,11 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -96,5 +98,59 @@ func TestAPIContractSettingsResetAuthorization(t *testing.T) {
 				requireAPIContract(t, http.MethodPost, path, recorder)
 			}
 		}
+	}
+}
+
+func TestAPIContractSettingsResetSerializesGraphWrites(t *testing.T) {
+	previousConf, previousReadOnly := model.Conf, util.ReadOnly
+	model.Conf, util.ReadOnly = model.NewAppConf(), true
+	t.Cleanup(func() { model.Conf, util.ReadOnly = previousConf, previousReadOnly })
+	gin.SetMode(gin.TestMode)
+	for _, entry := range []struct {
+		path    string
+		handler gin.HandlerFunc
+		body    string
+		changed bool
+	}{
+		{"/api/graph/setGraphConf", setGraphConf, `{"type":"global","conf":{"minRefs":20}}`, true},
+		{"/api/graph/setGraphConf", setGraphConf, `{"type":"local","conf":{"dailyNote":false}}`, true},
+		{"/api/graph/resetGraph", resetGraph, `{}`, true},
+		{"/api/graph/resetLocalGraph", resetLocalGraph, `{}`, true},
+		{"/api/graph/getGraph", getGraph, `{"conf":{"d3":false}}`, false},
+		{"/api/graph/getLocalGraph", getLocalGraph, `{"id":"missing","conf":{"d3":false}}`, false},
+	} {
+		t.Run(entry.path+entry.body, func(t *testing.T) {
+			model.Conf.Graph = conf.NewGraph()
+			model.Conf.Graph.Global.MinRefs = 7
+			model.Conf.Graph.Local.DailyNote = true
+			before := string(graphJSON(t, model.Conf.Graph))
+			recorder := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(recorder)
+			c.Set(model.RoleContextKey, model.RoleAdministrator)
+			c.Request = httptest.NewRequest(http.MethodPost, entry.path, strings.NewReader(entry.body))
+			started, finished := make(chan struct{}), make(chan struct{})
+			settingMutationMu.Lock()
+			go func() {
+				close(started)
+				entry.handler(c)
+				close(finished)
+			}()
+			<-started
+			select {
+			case <-finished:
+				t.Error("graph write bypassed the settings reset lock")
+			case <-time.After(50 * time.Millisecond):
+			}
+			settingMutationMu.Unlock()
+			select {
+			case <-finished:
+			case <-time.After(5 * time.Second):
+				t.Fatal("graph write did not resume after settings reset unlocked")
+			}
+			requireAPIContract(t, http.MethodPost, entry.path, recorder)
+			if changed := before != string(graphJSON(t, model.Conf.Graph)); changed != entry.changed {
+				t.Fatal("graph write or validation changed after unlocking")
+			}
+		})
 	}
 }

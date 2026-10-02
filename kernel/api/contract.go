@@ -45,7 +45,7 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 	if namespace := additionalSettingNamespace(endpoint.Definition().Path); namespace != "" {
 		handler = serializeSetting(namespace, handler)
 	}
-	if endpoint.Definition().Path == "/api/system/getConf" || settingsResetStoragePath(endpoint.Definition().Path) {
+	if endpoint.Definition().Path == "/api/system/getConf" || settingsResetWritePath(endpoint.Definition().Path) {
 		read := handler
 		handler = func(c *gin.Context, request Request) apicontract.Response[Data] {
 			settingMutationMu.Lock()
@@ -132,12 +132,13 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 	}
 }
 
-// settingsResetStoragePath 让重置事务与布局及本地偏好写入互斥，不改变这些接口的通知语义。
-func settingsResetStoragePath(path string) bool {
+// settingsResetWritePath 让重置事务与布局、本地偏好及关系图配置写入互斥，不改变这些接口的通知语义。
+func settingsResetWritePath(path string) bool {
 	switch path {
 	case "/api/system/setUILayout", "/api/storage/setLocalStorage", "/api/storage/setLocalStorageVal",
 		"/api/storage/setLocalStorageVals", "/api/storage/removeLocalStorageVal", "/api/storage/removeLocalStorageVals",
-		"/api/setting/setBootAppearance":
+		"/api/setting/setBootAppearance", "/api/graph/setGraphConf", "/api/graph/resetGraph", "/api/graph/resetLocalGraph",
+		"/api/graph/getGraph", "/api/graph/getLocalGraph":
 		return true
 	}
 	return false

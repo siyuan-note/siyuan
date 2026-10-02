@@ -1,6 +1,6 @@
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {fetchSyncPost} from "../../util/fetch";
-import {getAllEditor} from "../../layout/getAll";
+import {getAllEditor, getAllModels} from "../../layout/getAll";
 import {setNativeSettingTask} from "./taskBlocker";
 import {flushSettingSaves, settingSaveFailures} from "./pending";
 import {getHostCapabilities} from "../../util/hostCapabilities";
@@ -42,7 +42,12 @@ export const prepareSettingsReset = async (data: {id: string; token: string}) =>
             resume();
             return;
         }
-        preparation.resume = resume;
+        const resumeGraphs: Array<() => void> = [];
+        preparation.resume = () => {
+            resume();
+            resumeGraphs.forEach(resumeGraph => resumeGraph());
+        };
+        getAllModels().graph.forEach(graph => resumeGraphs.push(graph.suspendSettingsSaving()));
         /// #endif
         await flushSettingSaves(previousFailures);
         if (preparation?.id !== data.id) return;

@@ -17,14 +17,17 @@
 package plugin
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/dop251/goja"
 	"github.com/lxzan/gws"
@@ -54,6 +57,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		headers := map[string]string{}
 		var bodyString *string
 		var bodyBytes *[]byte
+		timeout := fetchDefaultTimeout
 
 		if goja.IsString(call.Argument(0)) {
 			path = call.Argument(0).String()
@@ -83,10 +87,16 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							} else {
 								body := b.Export()
 								if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
-									src := arrayBuffer.Bytes()
-									bodyBytes = new(src)
+									// ArrayBuffer.Bytes() 指向 JS 引擎内存，异步发送前需复制，避免脚本后续修改与发送并发读写。
+									bodyBytes = new(bytes.Clone(arrayBuffer.Bytes()))
 								}
 							}
+						}
+					}
+
+					if argErr == nil {
+						if t := initObj.Get("timeout"); isJsValueNotNull(t) {
+							timeout, argErr = fetchTimeoutOf(t)
 						}
 					}
 				}
@@ -116,8 +126,18 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					}
 				}()
 
+				// 以插件上下文为父上下文，使插件停止时取消未完成的请求。
+				var ctx context.Context
+				var cancel context.CancelFunc
+				if timeout > 0 {
+					ctx, cancel = context.WithTimeout(p.context, timeout)
+				} else {
+					ctx, cancel = context.WithCancel(p.context)
+				}
+				defer cancel()
+
 				targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
-				r := httpClient.R()
+				r := httpClient.R().SetContext(ctx)
 				for k, v := range headers {
 					r.SetHeader(k, v)
 				}
@@ -129,9 +149,13 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					r.SetBody(*bodyBytes)
 				}
 
+				// req 在 Send 内读完响应体，因此读取响应体时超时也会在这里返回。
 				resp, sendErr := r.Send(method, targetURL)
 				if sendErr != nil {
 					err = sendErr
+					if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+						err = fmt.Errorf("request timed out after %s: %w", timeout, sendErr)
+					}
 					return
 				}
 
@@ -778,5 +802,27 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 	lo.Must0(ObjectFreeze(rt, client))
 
 	lo.Must0(siyuan.Set("client", client))
+	return
+}
+
+// fetchTimeoutOf 将 siyuan.client.fetch 的 init.timeout（毫秒）转换为请求时限，返回 0 表示不限时。
+func fetchTimeoutOf(value goja.Value) (timeout time.Duration, err error) {
+	// 只接受数值类型：不转换字符串，也不调用对象的 valueOf 等脚本代码。
+	milliseconds := math.NaN()
+	if goja.IsNumber(value) {
+		milliseconds = value.ToFloat()
+	}
+	if math.IsNaN(milliseconds) || math.IsInf(milliseconds, 0) || milliseconds < 0 {
+		err = fmt.Errorf("timeout must be a non-negative finite number")
+		return
+	}
+
+	// 不足 1 纳秒的正数向上取整，避免变成表示不限时的 0；超出 time.Duration 范围时取最大值。
+	nanoseconds := math.Ceil(milliseconds * float64(time.Millisecond))
+	if nanoseconds >= math.MaxInt64 {
+		timeout = math.MaxInt64
+		return
+	}
+	timeout = time.Duration(nanoseconds)
 	return
 }

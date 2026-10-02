@@ -90,6 +90,7 @@ import {copyImageOCRText, openImageOCR} from "../asset/imageOCR";
 import {
     getSemanticInlineVisibleText,
     normalizeSemanticInlineElement,
+    removeSemanticInlineExternalBoundaries,
     stripSemanticMarkersFromRangeText,
 } from "../protyle/util/inlineElementMarker";
 
@@ -1939,6 +1940,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     window.siyuan.menus.menu.removeCB = () => {
         tagElement.textContent = Constants.WORD_JOINER + (inputElement.value || "");
         if (!inputElement.value) {
+            removeSemanticInlineExternalBoundaries(tagElement);
             tagElement.insertAdjacentHTML("afterend", "<wbr>");
             tagElement.remove();
             focusByWbr(nodeElement, protyle.toolbar.range);
@@ -2078,6 +2080,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         icon: "iconTrashcan",
         label: window.siyuan.languages.remove,
         click() {
+            removeSemanticInlineExternalBoundaries(tagElement);
             tagElement.insertAdjacentHTML("afterend", "<wbr>");
             tagElement.remove();
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));

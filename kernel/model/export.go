@@ -481,7 +481,7 @@ func Export2Liandi(id string) (err error) {
 			".md", 3, 1, 1,
 			"#", "#",
 			"", "",
-			false, false, nil, true, false, nil, nil)
+			false, false, nil, nil, false, nil, nil)
 		result := gulu.Ret.NewResult()
 		request := httpclient.NewCloudRequest30s()
 		request = request.
@@ -1045,7 +1045,7 @@ func ExportPreview(id string, fillCSSVar bool, avPublishFilter AVExportPublishFi
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			"#", "#", // 这里固定使用 # 包裹标签，否则无法正确解析标签 https://github.com/siyuan-note/siyuan/issues/13857
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true, avPublishFilter, accessChecker...)
+			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, nil, avPublishFilter, accessChecker...)
 		if nil != exportTreeErr {
 			return exportTreeErr
 		}
@@ -1234,7 +1234,7 @@ func exportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptio
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true, nil)
+			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, nil, nil)
 		if nil != exportTreeErr {
 			return exportTreeErr
 		}
@@ -1415,7 +1415,7 @@ func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			addTitle, customTitle, Conf.Export.InlineMemo, true, true, nil)
+			addTitle, customTitle, Conf.Export.InlineMemo, true, nil, nil)
 		if nil != exportTreeErr {
 			return exportTreeErr
 		}
@@ -2140,7 +2140,7 @@ func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjust
 			".md", Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, fillCSSVar, nil, avPublishFilter, accessChecker...)
+			Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, nil, fillCSSVar, nil, avPublishFilter, accessChecker...)
 		return nil
 	}); exportErr != nil {
 		logging.LogErrorf("export std markdown [%s] failed: %s", id, exportErr)
@@ -3063,7 +3063,7 @@ func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar
 			".md", refMode, embedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			addTitle, Conf.Export.InlineMemo, nil, true, fillCSSVar, nil, nil)
+			addTitle, Conf.Export.InlineMemo, nil, nil, fillCSSVar, nil, nil)
 		docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 		if addYfm {
 			exportedMd = yfm(docIAL) + exportedMd
@@ -3076,7 +3076,7 @@ func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar
 	return
 }
 
-func exportMarkdownContent(rootID, ext string, exportRefMode int, defBlockIDs []string, singleFile bool,
+func exportMarkdownContent(rootID, ext string, exportRefMode int, defBlockIDs []string, references *markdownExportReferences,
 	boxPaths map[string]string) (tree *parse.Tree, exportedMd string, isEmpty bool) {
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {
@@ -3103,7 +3103,7 @@ func exportMarkdownContent(rootID, ext string, exportRefMode int, defBlockIDs []
 		ext, exportRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, singleFile, false, boxPaths, nil)
+		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, references, false, boxPaths, nil)
 	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 	if Conf.Export.MarkdownYFM {
 		// 导出 Markdown 时在文档头添加 YFM 开关 https://github.com/siyuan-note/siyuan/issues/7727
@@ -3115,13 +3115,13 @@ func exportMarkdownContent(rootID, ext string, exportRefMode int, defBlockIDs []
 func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string, assetsDestSpace2Underscore, adjustHeadingLv, imgTag bool,
 	ext string, blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string, blockRefTextLeft, blockRefTextRight string,
-	addTitle, inlineMemo bool, defBlockIDs []string, singleFile, fillCSSVar bool, boxPaths map[string]string,
+	addTitle, inlineMemo bool, defBlockIDs []string, references *markdownExportReferences, fillCSSVar bool, boxPaths map[string]string,
 	avPublishFilter AVExportPublishFilter, accessChecker ...EmbedBlockAccessChecker) (ret string) {
 	tree, exportTreeErr := exportTree(tree, false, false, false, false,
 		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
-		addTitle, "", inlineMemo, 0 < len(defBlockIDs), singleFile, avPublishFilter, accessChecker...)
+		addTitle, "", inlineMemo, 0 < len(defBlockIDs), references, avPublishFilter, accessChecker...)
 	if nil != exportTreeErr {
 		logging.LogErrorf("prepare Markdown export failed: %s", exportTreeErr)
 		return ""
@@ -3184,7 +3184,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 		}
 
 		if 4 == blockRefMode { // 脚注+锚点哈希
-			if n.IsBlock() && gulu.Str.Contains(n.ID, defBlockIDs) {
+			if n.IsBlock() && (gulu.Str.Contains(n.ID, defBlockIDs) || references != nil && references.anchorIDs[n.ID]) {
 				// 如果是定义块，则在开头处添加锚点
 				anchorSpan := treenode.NewSpanAnchor(n.ID)
 				if ast.NodeDocument != n.Type {
@@ -3209,10 +3209,10 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 			if treenode.IsBlockRef(n) {
 				// 如果是引用元素，则将其转换为超链接，指向 xxx.md#block-id
 				defID, linkText := getExportBlockRefLinkText(n, blockRefTextLeft, blockRefTextRight, tree.Box)
-				if gulu.Str.Contains(defID, defBlockIDs) {
+				if references.contains(defID, tree.Box) || references == nil && gulu.Str.Contains(defID, defBlockIDs) {
 					var href string
 					bt := getExportBlockTreeInBox(defID, tree.Box)
-					if len(boxPaths) > 0 {
+					if len(boxPaths) > 0 || references != nil && !IsEncryptedBox(tree.Box) {
 						bt = getExportBlockTree(defID)
 					}
 					if nil != bt {
@@ -3277,7 +3277,7 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string,
 	blockRefTextLeft, blockRefTextRight string,
-	addTitle bool, customTitle string, inlineMemo, addDocAnchorSpan, singleFile bool,
+	addTitle bool, customTitle string, inlineMemo, addDocAnchorSpan bool, references *markdownExportReferences,
 	avPublishFilter AVExportPublishFilter, accessChecker ...EmbedBlockAccessChecker) (ret *parse.Tree, err error) {
 	luteEngine := NewLute()
 	ret = tree
@@ -3300,9 +3300,9 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 	// 收集引用转脚注+锚点哈希（可能跨文档递归）
 	var refFootnoteOrder []string // 按顺序存储 defID
 	refFootnotesByID := make(map[string]*refAsFootnotes)
-	if 4 == blockRefMode && singleFile {
+	if 4 == blockRefMode {
 		depth = 0
-		collectFootnotesDefs0(ret, ret.Root, &refFootnoteOrder, refFootnotesByID, &depth)
+		collectFootnotesDefs0(ret, ret.Root, &refFootnoteOrder, refFootnotesByID, &depth, references)
 	}
 
 	currentTreeNodeIDs := map[string]bool{}
@@ -4162,7 +4162,7 @@ func blockLink2Ref(currentTree *parse.Tree) {
 	})
 }
 
-func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int) {
+func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences) {
 	*depth++
 	if 4096 < *depth {
 		return
@@ -4177,20 +4177,27 @@ func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *
 		logging.LogErrorf("not found node [%s] in tree [%s]", id, t.Root.ID)
 		return
 	}
-	collectFootnotesDefs0(currentTree, node, refFootnoteOrder, refFootnotesByID, depth)
+	collectFootnotesDefs0(currentTree, node, refFootnoteOrder, refFootnotesByID, depth, references)
 	if ast.NodeHeading == node.Type {
 		children := treenode.HeadingChildren(node)
 		for _, c := range children {
-			collectFootnotesDefs0(currentTree, c, refFootnoteOrder, refFootnotesByID, depth)
+			collectFootnotesDefs0(currentTree, c, refFootnoteOrder, refFootnotesByID, depth, references)
 		}
 	}
 }
 
-func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int) {
+func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences) {
+	if references.contains(defID, currentTree.Box) {
+		references.anchorIDs[defID] = true
+		return
+	}
 	if nil != refFootnotesByID[defID] {
 		return
 	}
 	if isNodeInTree(defID, currentTree) {
+		if references != nil {
+			references.anchorIDs[defID] = true
+		}
 		// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
 		return
 	}
@@ -4202,10 +4209,10 @@ func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string,
 		refNum:        strconv.Itoa(len(*refFootnoteOrder)),
 		refAnchorText: anchorText,
 	}
-	collectFootnotesDefs(currentTree, defID, refFootnoteOrder, refFootnotesByID, depth)
+	collectFootnotesDefs(currentTree, defID, refFootnoteOrder, refFootnotesByID, depth, references)
 }
 
-func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int) {
+func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -4213,7 +4220,7 @@ func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteO
 
 		if treenode.IsBlockRef(n) {
 			defID, refText, _ := treenode.GetBlockRef(n)
-			addRefFootnoteAndRecurse(currentTree, defID, refText, refFootnoteOrder, refFootnotesByID, depth)
+			addRefFootnoteAndRecurse(currentTree, defID, refText, refFootnoteOrder, refFootnotesByID, depth, references)
 			return ast.WalkSkipChildren
 		} else if treenode.IsBlockLink(n) {
 			defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
@@ -4225,7 +4232,7 @@ func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteO
 					anchorText = sql.GetRefText(defID)
 				}
 			}
-			addRefFootnoteAndRecurse(currentTree, defID, anchorText, refFootnoteOrder, refFootnotesByID, depth)
+			addRefFootnoteAndRecurse(currentTree, defID, anchorText, refFootnoteOrder, refFootnotesByID, depth, references)
 			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue
@@ -4347,7 +4354,7 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths, defBlockIDs 
 func exportPandocConvertZip0(boxID, baseFolderName string, docPaths, defBlockIDs []string, pandocFrom, pandocTo, ext string,
 	boxPaths map[string]string) (zipPath string) {
 	defer util.ClearPushProgress(100)
-	if err := prepareExportAssets(boxID, docPaths); err != nil {
+	if err := prepareExportAssets(boxID, docPaths, true); err != nil {
 		util.PushErrMsg(err.Error(), 7000)
 		return
 	}
@@ -4390,6 +4397,16 @@ func exportPandocConvertZip0(boxID, baseFolderName string, docPaths, defBlockIDs
 	}
 
 	exportRefMode := Conf.Export.BlockRefMode
+	var references *markdownExportReferences
+	if exportRefMode == 4 {
+		var err error
+		references, err = prepareMarkdownExportReferences(docPaths, defBlockIDs)
+		if err != nil {
+			logging.LogErrorf("prepare Markdown export references failed: %s", err)
+			util.PushErrMsg(err.Error(), 7000)
+			return ""
+		}
+	}
 	wrotePathHash := map[string]string{}
 	assetsPathMap, err := allAssetAbsPaths()
 	if nil != err {
@@ -4402,7 +4419,7 @@ func exportPandocConvertZip0(boxID, baseFolderName string, docPaths, defBlockIDs
 	luteEngine.SetExportNormalizeTaskListMarker(true)
 	for i, p := range docPaths {
 		rootID := util.GetTreeID(p)
-		tree, md, isEmpty := exportMarkdownContent(rootID, ext, exportRefMode, defBlockIDs, false, boxPaths)
+		tree, md, isEmpty := exportMarkdownContent(rootID, ext, exportRefMode, defBlockIDs, references, boxPaths)
 		if nil == tree {
 			continue
 		}

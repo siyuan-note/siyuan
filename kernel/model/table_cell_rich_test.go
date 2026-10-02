@@ -298,7 +298,7 @@ func TestTableCellRichFootnoteExport(t *testing.T) {
 		TextMarkBlockRefID: table.ID, TextMarkBlockRefSubtype: "s", TextMarkTextContent: "Rich target"})
 	writeAssetDownloadDocumentTest(t, referring)
 	exported, err := exportTree(prepareExportTree(getExportBlockTree(referring.ID)), true, true, false, true,
-		4, 0, 0, "#", "#", "", "", false, "", false, true, true, nil)
+		4, 0, 0, "#", "#", "", "", false, "", false, true, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -41,7 +41,7 @@ func TestExportFootnotesAcrossNotebooks(t *testing.T) {
 		writeExportRelatedTestTree(t, tree)
 	}
 	exported, err := exportTree(prepareExportTree(getExportBlockTree(source.ID)), true, true, false, true,
-		4, 0, 0, "#", "#", "", "", false, "", false, true, true, nil)
+		4, 0, 0, "#", "#", "", "", false, "", false, true, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func TestExportFootnotesRejectCrossCryptoBoundary(t *testing.T) {
 	var order []string
 	refs := map[string]*refAsFootnotes{}
 	depth := 0
-	collectFootnotesDefs0(source, source.Root, &order, refs, &depth)
+	collectFootnotesDefs0(source, source.Root, &order, refs, &depth, nil)
 	if len(order) != 1 || order[0] != target.Root.FirstChild.ID {
 		t.Fatalf("collected references beyond the crypto boundary: %v", order)
 	}
@@ -113,7 +113,7 @@ func TestExportFootnotesStayWithinBlockScope(t *testing.T) {
 		t.Run(scenario.name, func(t *testing.T) {
 			tree := prepareExportTree(getExportBlockTree(scenario.id))
 			exported, err := exportTree(tree, true, true, false, true,
-				4, 0, 0, "#", "#", "", "", false, "", false, true, true, nil)
+				4, 0, 0, "#", "#", "", "", false, "", false, true, nil, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -231,7 +231,7 @@ func TestExportFootnotesHeadingAndContainerScopes(t *testing.T) {
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
 			tree, err := exportTree(prepareExportTree(getExportBlockTree(scenario.id)), true, true, false, true,
-				4, 0, 0, "#", "#", "", "", false, "", false, true, true, nil)
+				4, 0, 0, "#", "#", "", "", false, "", false, true, nil, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -265,7 +265,7 @@ func TestExportFootnotesUseMaterializedTableContent(t *testing.T) {
 		writeAssetDownloadDocumentTest(t, tree)
 	}
 	exported, err := exportTree(prepareExportTree(getExportBlockTree(table.ID)), true, true, false, true,
-		4, 0, 0, "#", "#", "", "", false, "", false, true, true, nil)
+		4, 0, 0, "#", "#", "", "", false, "", false, true, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

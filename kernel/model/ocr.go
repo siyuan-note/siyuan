@@ -26,6 +26,23 @@ var ocrRegistry = ocr.NewRegistry()
 var ocrInit sync.Once
 var nativePaddle = &ocr.PaddleProvider{Config: currentPaddleConfig}
 
+func notifyOCRModelsChanged() {
+	util.BroadcastByType("main", "ocrChanged", 0, "", nil)
+}
+
+// 同步路径相对于 data 目录，仅模型目录变化需要刷新 OCR 选项。
+func ocrModelFilesChanged(changes ...[]string) bool {
+	for _, paths := range changes {
+		for _, value := range paths {
+			value = strings.TrimPrefix(strings.ReplaceAll(value, "\\", "/"), "/")
+			if value == "ocr/models" || strings.HasPrefix(value, "ocr/models/") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // 新设备使用内置 PaddleOCR 并关闭自动识别，已有设备缺少 OCR 配置时保留 Tesseract 自动识别。
 func normalizeOCRConfig(value *conf.OCR, confFileExists, mobile bool) *conf.OCR {
 	if value != nil {

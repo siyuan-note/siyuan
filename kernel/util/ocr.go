@@ -367,6 +367,7 @@ func WaitForTesseractInitContext(ctx context.Context) error {
 }
 
 func InitTesseract() {
+	defer BroadcastByType("main", "ocrChanged", 0, "", nil)
 	ver := getTesseractVer()
 	if "" == ver {
 		tesseractInited.Store(true)

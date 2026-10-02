@@ -49,3 +49,26 @@ func TestNormalizeOCRConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestOCRModelFilesChanged(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		upserts []string
+		removes []string
+		want    bool
+	}{
+		{name: "no files"},
+		{name: "ordinary assets", upserts: []string{"assets/image.png", "box/document.sy"}},
+		{name: "similar directory", upserts: []string{"ocr/models-backup/config.yml", "box/ocr/models/test.yml"}},
+		{name: "new model", upserts: []string{"ocr/models/hash/det/inference.onnx"}, want: true},
+		{name: "removed model", removes: []string{"/ocr/models/hash/rec/inference.yml"}, want: true},
+		{name: "removed model directory", removes: []string{"ocr/models"}, want: true},
+		{name: "Windows separators", upserts: []string{`ocr\models\hash\det\inference.onnx`}, want: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := ocrModelFilesChanged(test.upserts, test.removes); got != test.want {
+				t.Fatalf("model changes: got %t, want %t", got, test.want)
+			}
+		})
+	}
+}

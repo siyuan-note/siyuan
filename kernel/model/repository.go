@@ -2776,6 +2776,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	if removedEncryptedBox {
 		sql.FlushQueue()
 	}
+	if !exit && ocrModelFilesChanged(upserts, removes) {
+		notifyOCRModelsChanged()
+	}
 
 	// 需要确认恢复记录时，索引更新必须在当前调用内完成
 	if needFullReindex(upsertTrees) && (len(immediateIndex) == 0 || !immediateIndex[0]) {

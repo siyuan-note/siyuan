@@ -26,6 +26,42 @@ test("settings notifications update runtime configuration and refresh the regist
 });
 
 for (const mobile of [false, true]) {
+    test(`OCR notifications preserve the settings page and unrelated runtime configuration (mobile=${mobile})`, async () => {
+        const {parse} = require("ifdef-loader/preprocessor");
+        const compiled = transpileModule(parse(readFileSync("src/config/setting/sync.ts", "utf8"),
+            {MOBILE: mobile, BROWSER: mobile}, false, true), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText;
+        const editor = {fontSize: 16};
+        const appearance = {theme: "dark"};
+        const config = {ocr: {provider: "paddleocr", model: "small", auto: false}, editor, appearance, keymap: {}};
+        let next = {...config.ocr, auto: true};
+        let notifications = 0;
+        const remounted: string[] = [];
+        const exports = {} as {refreshSettingConfig: (namespace?: string) => Promise<void>};
+        runInNewContext(compiled, {exports, window: {siyuan: {config}}, console, require: () => ({
+            fetchSyncPost: async () => ({code: 0, data: {conf: {...config, ocr: next,
+                editor: {fontSize: 18}, appearance: {theme: "light"}}}}),
+            systemConfig: (value: unknown) => value,
+            objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
+            editorConfigApi: {apply: () => assert.fail("OCR must not apply editor settings")},
+            appearanceConfigApi: {apply: () => assert.fail("OCR must not apply appearance settings")},
+            syncSettingTasks() {}, getSettingTabDefs: () => [{id: "assets"}, {id: "appearance"}, {id: "editor"}],
+            notifyOCRChanged: () => { notifications++; },
+            remountOpenSettingTab: async (tab: string) => { remounted.push(tab); },
+        })});
+        await exports.refreshSettingConfig("ocr");
+        assert.equal(config.ocr, next);
+        assert.equal(config.editor, editor);
+        assert.equal(config.appearance, appearance);
+        assert.deepEqual(remounted, []);
+        next = {...next, auto: false};
+        await exports.refreshSettingConfig("ocr");
+        assert.equal(config.ocr.auto, false);
+        assert.deepEqual(remounted, []);
+        assert.equal(notifications, 2);
+    });
+
     test(`AI settings received from another window notify the agent model picker (mobile=${mobile})`, async () => {
         const {parse} = require("ifdef-loader/preprocessor");
         const compile = (file: string) => transpileModule(parse(readFileSync(file, "utf8"),

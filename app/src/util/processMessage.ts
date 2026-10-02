@@ -7,8 +7,13 @@ import {Constants} from "../constants";
 import {fetchPost} from "./fetch";
 import {isBrowser} from "./functions";
 import {applySettingTask} from "../config/setting/taskBlocker";
+import {notifyOCRChanged} from "../config/ocrRuntime";
 
 export const processMessage = (response: IWebSocketData) => {
+    if (response.cmd === "ocrChanged") {
+        notifyOCRChanged();
+        return false;
+    }
     if (response.cmd === "prepareSettingsReset") {
         void import("../config/setting/reset").then(reset => reset.prepareSettingsReset(response.data));
         return false;

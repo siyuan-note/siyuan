@@ -10,7 +10,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var getOCRConfig = contractHandler(apicontract.GetOCRConfig, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.OCRConfigData] {
@@ -38,13 +37,12 @@ func ocrModelPayload(id string) apicontract.OCRModel {
 	return apicontract.OCRModel{ID: id, Name: name, BuiltIn: id == "tiny" || id == "small"}
 }
 
-var setOCRConfig = contractHandler(apicontract.SetOCRConfig, func(c *gin.Context, request apicontract.SettingOCR) apicontract.Response[apicontract.SettingOCR] {
+var setOCRConfig = contractHandler(apicontract.SetOCRConfig, serializeSetting("ocr", func(c *gin.Context, request apicontract.SettingOCR) apicontract.Response[apicontract.SettingOCR] {
 	if err := model.Conf.SetOCR(conf.OCR(request)); err != nil {
 		return apicontract.Failure[apicontract.SettingOCR](-1, err.Error())
 	}
-	util.BroadcastByType("main", "setConf", 0, "", model.Conf)
 	return apicontract.Success(request)
-})
+}))
 
 var importOCRModels = contractHandler(apicontract.ImportOCRModels, func(c *gin.Context, request apicontract.ImportOCRModelsRequest) apicontract.Response[apicontract.OCRModel] {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Minute)

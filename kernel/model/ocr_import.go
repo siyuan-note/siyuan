@@ -102,5 +102,6 @@ func ImportOCRModels(ctx context.Context, files []*multipart.FileHeader) (string
 		return "", err
 	}
 	IncSyncIfNeeded(destination)
+	notifyOCRModelsChanged()
 	return id, nil
 }

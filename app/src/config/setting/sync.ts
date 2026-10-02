@@ -6,6 +6,7 @@ import {aiConfigApi} from "../tabs/ai/aiRuntime";
 import {objEquals} from "../../util/functions";
 import {syncSettingTasks} from "./taskBlocker";
 import {processSync} from "../../dialog/processSystem";
+import {notifyOCRChanged} from "../ocrRuntime";
 /// #if !MOBILE
 import {applyKeymap} from "../tabs/keymapRuntime";
 import {remountOpenSettingTab} from "./mount";
@@ -62,11 +63,14 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
                 window.siyuan.config.keymap = next.keymap;
             }
             /// #endif
-            const simple = ["export", "fileTree", "search", "flashcard", "secrets", "variables", "repo", "system", "bazaar", "publish"] as const;
+            const simple = ["export", "fileTree", "search", "flashcard", "secrets", "variables", "repo", "system", "bazaar", "publish", "ocr"] as const;
             for (const key of simple) {
                 if (includes(key)) {
                     Object.assign(window.siyuan.config, {[key]: next[key]});
                 }
+            }
+            if (includes("ocr") && next.ocr) {
+                notifyOCRChanged();
             }
             /// #if !MOBILE
             const tabs: Record<string, TSettingTab> = {fileTree: "file", secrets: "secretsVariables", variables: "secretsVariables", system: "app", publish: "access"};

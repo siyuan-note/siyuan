@@ -13,8 +13,11 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
+	"github.com/olahol/melody"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -168,6 +171,7 @@ func TestAPIContractOCRNativeImportAndHeadlessRecognition(t *testing.T) {
 	engine := gin.New()
 	engine.POST("/api/asset/importOCRModels", importOCRModels)
 	engine.POST("/api/asset/ocr", ocr)
+	connection := connectOCRNotifications(t, engine)
 	upload := func(invalid bool) apicontract.OCRModel {
 		t.Helper()
 		var body bytes.Buffer
@@ -215,6 +219,13 @@ func TestAPIContractOCRNativeImportAndHeadlessRecognition(t *testing.T) {
 		return response.Data
 	}
 	imported := upload(false)
+	if err := connection.SetReadDeadline(time.Now().Add(5 * time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	var notification struct{ Cmd string }
+	if err := connection.ReadJSON(&notification); err != nil || notification.Cmd != "ocrChanged" {
+		t.Fatalf("model import notification: %+v, %v", notification, err)
+	}
 	if len(imported.ID) != 64 || imported.BuiltIn {
 		t.Fatalf("invalid model result: %+v", imported)
 	}
@@ -272,7 +283,7 @@ func TestAPIContractOCRSettings(t *testing.T) {
 	if err := json.Unmarshal(get.Body.Bytes(), &result); err != nil {
 		t.Fatal(err)
 	}
-	if result.Data.Config.Provider != "tesseract" || !result.Data.Config.Auto || len(result.Data.Models) != 2 || len(result.Data.Providers) != 2 {
+	if result.Data.Config.Provider != "paddleocr" || result.Data.Config.Auto || len(result.Data.Models) != 2 || len(result.Data.Providers) != 2 {
 		t.Fatalf("unexpected defaults: %+v", result.Data)
 	}
 	path := "assets/preserved.png"
@@ -288,6 +299,7 @@ func TestAPIContractOCRSettings(t *testing.T) {
 		{`{"provider":"tesseract","model":"tiny","auto":"false"}`, false},
 		{`{"provider":"tesseract","model":"tiny"}`, false},
 	} {
+		previousRevision := settingRevision
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/setOCRConfig", strings.NewReader(test.body)))
 		requireAPIContract(t, "POST", "/api/asset/setOCRConfig", recorder)
@@ -297,6 +309,13 @@ func TestAPIContractOCRSettings(t *testing.T) {
 		}
 		if (response.Code == 0) != test.success {
 			t.Fatalf("body=%s response=%s", test.body, recorder.Body.String())
+		}
+		expectedRevision := previousRevision
+		if test.success {
+			expectedRevision++
+		}
+		if settingRevision != expectedRevision {
+			t.Fatalf("OCR setting revision: got %d, want %d", settingRevision, expectedRevision)
 		}
 		if util.GetAssetText(path) != "existing text" {
 			t.Fatal("configuration update changed existing OCR text")
@@ -314,6 +333,66 @@ func TestAPIContractOCRSettings(t *testing.T) {
 	}
 	if saved.OCR.Auto || saved.OCR.Model != "tiny" {
 		t.Fatalf("settings were not persisted: %+v", saved.OCR)
+	}
+}
+
+func connectOCRNotifications(t *testing.T, engine *gin.Engine) *websocket.Conn {
+	t.Helper()
+	push := melody.New()
+	connected := make(chan *melody.Session, 1)
+	push.HandleConnect(func(session *melody.Session) {
+		util.AddPushChan(session)
+		connected <- session
+	})
+	push.HandleDisconnect(util.RemovePushChan)
+	engine.GET("/ws", func(c *gin.Context) { _ = push.HandleRequest(c.Writer, c.Request) })
+	server := httptest.NewServer(engine)
+	t.Cleanup(func() { push.Close(); server.Close() })
+	endpoint := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws?app=" + t.Name() + "&id=ocr-settings&type=main"
+	connection, response, err := websocket.DefaultDialer.Dial(endpoint, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	t.Cleanup(func() { connection.Close() })
+	select {
+	case session := <-connected:
+		t.Cleanup(func() { util.RemovePushChan(session) })
+	case <-time.After(5 * time.Second):
+		t.Fatal("OCR settings WebSocket did not connect")
+	}
+	return connection
+}
+
+func TestAPIContractOCRSettingsNotifications(t *testing.T) {
+	setupAssetContractWorkspace(t)
+	previousConfDir := util.ConfDir
+	util.ConfDir = t.TempDir()
+	t.Cleanup(func() { util.ConfDir = previousConfDir })
+	engine := gin.New()
+	engine.POST("/api/asset/setOCRConfig", setOCRConfig)
+	connection := connectOCRNotifications(t, engine)
+	for _, auto := range []bool{true, false} {
+		body, err := json.Marshal(apicontract.SettingOCR{Provider: "tesseract", Model: "tiny", Auto: auto})
+		if err != nil {
+			t.Fatal(err)
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/setOCRConfig", bytes.NewReader(body)))
+		requireAPIContract(t, "POST", "/api/asset/setOCRConfig", recorder)
+		if err = connection.SetReadDeadline(time.Now().Add(5 * time.Second)); err != nil {
+			t.Fatal(err)
+		}
+		var event struct {
+			Cmd  string
+			Data map[string]json.RawMessage
+		}
+		if err = connection.ReadJSON(&event); err != nil {
+			t.Fatal(err)
+		}
+		if event.Cmd != "settingChanged" || string(event.Data["namespace"]) != `"ocr"` || len(event.Data) != 2 {
+			t.Fatalf("OCR update must only notify its configuration namespace: %+v", event)
+		}
 	}
 }
 

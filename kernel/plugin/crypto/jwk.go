@@ -91,7 +91,7 @@ func importJWK(alg Algorithm, data []byte, extractable bool, usages []KeyUsage) 
 // importJWKMaterial 按算法解析 JWK 的密钥材料。
 func importJWKMaterial(jwk *jsonWebKey, alg Algorithm, extractable bool, usages []KeyUsage) (*Key, error) {
 	switch alg.Name {
-	case AlgAESCBC, AlgAESCTR, AlgAESGCM:
+	case AlgAESCBC, AlgAESCTR, AlgAESGCM, AlgAESKW:
 		secret, err := decodeJWKOct(jwk, alg.Name)
 		if err != nil {
 			return nil, err

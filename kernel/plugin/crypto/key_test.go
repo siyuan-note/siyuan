@@ -216,9 +216,17 @@ func TestExportKeyRequiresExtractable(t *testing.T) {
 
 func TestJWKRoundTrip(t *testing.T) {
 	// AES 密钥的 alg 取值与密钥位长相关。
-	aesCases := map[string]string{AlgAESGCM: "A256GCM", AlgAESCBC: "A256CBC", AlgAESCTR: "A256CTR"}
+	aesCases := map[string]string{
+		AlgAESGCM: "A256GCM", AlgAESCBC: "A256CBC", AlgAESCTR: "A256CTR", AlgAESKW: "A256KW",
+	}
 	for algName, wantAlg := range aesCases {
-		key := newSecretKey(algName, "", bytes.Repeat([]byte{3}, 32), UsageEncrypt, UsageDecrypt)
+		// AES-KW 只接受包装用法。
+		usages := []KeyUsage{UsageEncrypt, UsageDecrypt}
+		if algName == AlgAESKW {
+			usages = []KeyUsage{UsageWrapKey, UsageUnwrapKey}
+		}
+
+		key := newSecretKey(algName, "", bytes.Repeat([]byte{3}, 32), usages...)
 		data, err := ExportKey(FormatJWK, key)
 		if err != nil {
 			t.Fatalf("%s: %v", algName, err)
@@ -239,7 +247,7 @@ func TestJWKRoundTrip(t *testing.T) {
 		}
 
 		imported, err := ImportKey(FormatJWK, KeyData{JSON: data.JSON},
-			Algorithm{Name: algName}, true, []KeyUsage{UsageEncrypt, UsageDecrypt})
+			Algorithm{Name: algName}, true, usages)
 		if err != nil {
 			t.Fatalf("%s: %v", algName, err)
 		}

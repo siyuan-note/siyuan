@@ -16,13 +16,14 @@ import {exportLayout} from "../../layout/util";
 import {exitSiYuan} from "../../dialog/processSystem";
 import {showMessage} from "../../dialog/message";
 import {isMac, saveExportFile} from "../../protyle/util/compatibility";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 /// #if MOBILE
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Dialog} from "../../dialog";
 import {openInputDialog} from "../../dialog/inputDialog";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {pathPosix} from "../../util/pathName";
-import {escapeHtmlTextAndAttr, escapeAttr, escapeHtml} from "../../util/escape";
+import {escapeAttr, escapeHtml} from "../../util/escape";
 /// #endif
 /// #if !BROWSER
 import {afterExport} from "../../protyle/export/util";

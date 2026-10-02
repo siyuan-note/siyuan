@@ -4,6 +4,7 @@ import {resolve} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
@@ -23,7 +24,7 @@ const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke
         console: {warn: (): void => undefined},
         window: {siyuan: {
             languages: new Proxy({}, {get: (_, key) => String(key)}),
-            config: {system: {isMicrosoftStore: true}},
+            config: {system: {isMicrosoftStore: true, networkProxy: {host: 'user:"<&@host', port: "7890", scheme: "http"}}},
         }},
         require: (name: string) => {
             if (name === "electron") {
@@ -35,6 +36,9 @@ const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke
             }
             if (name === "../../util/hostCapabilities") {
                 return {getHostCapabilities: () => ({importExport: false, workspaces: false})};
+            }
+            if (name === "../../util/escape") {
+                return {escapeHtmlTextAndAttr};
             }
             return new Proxy({}, {get: () => () => ""});
         },
@@ -64,6 +68,15 @@ test("settings window mode is configurable only in the Electron desktop client",
         const switches: string[] = [];
         getAccessibilitySlot(browser, mobile, undefined, "unused", switches);
         assert.equal(switches.includes("settingsWindowMode"), !browser && !mobile);
+    }
+});
+
+test("network proxy renders escaped values in every build target", () => {
+    for (const [browser, mobile] of [[false, false], [true, false], [true, true], [false, true]]) {
+        const slot = getAccessibilitySlot(browser, mobile, undefined, "networkProxy");
+        assert.ok(slot);
+        assert.ok(slot.html().includes('value="user:&quot;&lt;&amp;@host"'));
+        assert.ok(slot.html().includes('value="7890"'));
     }
 });
 

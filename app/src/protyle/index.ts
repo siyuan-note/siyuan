@@ -59,8 +59,8 @@ import {
     refreshSearchPathAfterRename,
 } from "../search/path";
 import {syncSearchConfigHPath} from "../search/config";
-import {sanitizeKernelHTML} from "../util/hostCapabilities";
 /// #endif
+import {sanitizeKernelHTML} from "../util/hostCapabilities";
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
 import {setFoldById, zoomOut} from "../menus/protyle";

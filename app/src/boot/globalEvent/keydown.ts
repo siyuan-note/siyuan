@@ -1459,6 +1459,9 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             }
         });
         if (openRecentDocsDialog) {
+            if ((event.target as HTMLElement).closest("select")) {
+                return;
+            }
             event.preventDefault();
             dialogArrow(app, openRecentDocsDialog.element, event);
             return;

@@ -9,6 +9,42 @@ export const resolveCodeTabSpaces = (attributeValue: string | null, globalValue:
 
 export const getCodeTabSpace = (spaces: number) => spaces === 0 ? "\t" : "".padStart(spaces, " ");
 
+export const detectCodeTabSpaces = (text: string): number | null => {
+    const spaceIndents: number[] = [];
+    let hasTabs = false;
+    let lineCount = 0;
+    for (const line of text.split("\n")) {
+        if (!line.trim()) {
+            continue;
+        }
+        lineCount++;
+        const indent = line.match(/^[ \t]+/)?.[0];
+        if (!indent) {
+            continue;
+        }
+        if (indent.includes("\t")) {
+            if (indent.includes(" ") || spaceIndents.length > 0) {
+                return null;
+            }
+            hasTabs = true;
+        } else {
+            if (hasTabs) {
+                return null;
+            }
+            spaceIndents.push(indent.length);
+        }
+    }
+    if (lineCount < 2) {
+        return null;
+    }
+    if (hasTabs) {
+        return 0;
+    }
+    // 仅采用受支持的最小空格缩进，且其他缩进必须是它的整数倍。
+    const spaces = spaceIndents.reduce((minimum, value) => Math.min(minimum, value), Infinity);
+    return CODE_TAB_SPACE_VALUES.includes(spaces) && spaceIndents.every(value => value % spaces === 0) ? spaces : null;
+};
+
 export const getCodeBlockLineRange = (text: string, start: number, end: number) => {
     const rangeStart = Math.min(Math.max(start, 0), text.length);
     const rangeEnd = Math.min(Math.max(end, rangeStart), text.length);

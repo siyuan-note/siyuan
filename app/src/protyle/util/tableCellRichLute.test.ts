@@ -473,7 +473,7 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     check.equal(updates, editableUpdates, "closing the editor invalidates menu callbacks");
     const selectionDependencies = {getContenteditableElement, isNotEditBlock: () => false, revealTabsForTarget: () => {}};
     const selectionAPI = new Function(...Object.keys(selectionDependencies), selectionSource +
-        "\nreturn {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, focusByOffset, getSelectionOffset};")(
+        "\nreturn {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, focusByOffset, getSelectionOffset, setLastNodeRange};")(
         ...Object.values(selectionDependencies)) as typeof import("./tableCellRichSelection") & typeof import("./selection");
     const renderDependencies = {
         isFoldedRenderContent: () => false,
@@ -489,6 +489,61 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
             return {value: span.outerHTML};
         },
     }});
+    const indentDependencies = {...copyDependencies, ...selectionAPI};
+    const indentActions = new Function(...Object.keys(indentDependencies), copySource + "\nreturn {tabCodeBlock};")(
+        ...Object.values(indentDependencies)) as typeof import("../wysiwyg/codeBlock");
+    const indentationCases: Array<{text: string, global: number, override?: string, detected?: string, unit: string}> = [
+        {text: "if ready:\n  work()\n    nested()\n", global: 0, detected: "2", unit: "  "},
+        {text: "if ready:\n    work()\n", global: 2, detected: "4", unit: "    "},
+        {text: "if ready:\n\twork()\n", global: 4, detected: "0", unit: "\t"},
+        {text: "if ready:\n  work()\n", global: 4, override: "0", unit: "\t"},
+        {text: "if ready:\n  work()\n", global: 0, override: "4", unit: "    "},
+        {text: "if ready:\n  work()\n\tnested()\n", global: 4, unit: "    "},
+        {text: "  work()\n", global: 0, unit: "\t"},
+    ];
+    for (const item of indentationCases) {
+        window.siyuan.config.editor.codeTabSpaces = item.global;
+        wysiwyg.innerHTML = base.Md2BlockDOM("```text\n" + item.text + "```");
+        const code = wysiwyg.firstElementChild as HTMLElement;
+        const editable = getContenteditableElement(code);
+        if (item.override !== undefined) {
+            code.setAttribute(codeTabAttribute, item.override);
+        }
+        const originalHTML = code.outerHTML;
+        check.equal(editable.textContent, item.text, "loading pasted code preserves its whitespace");
+        const range = selectionAPI.focusByOffset(editable, 0, item.text.length - 1, false);
+        check.ok(range);
+        indentActions.tabCodeBlock(protyle as unknown as IProtyle, code, range);
+        const indented = item.text.slice(0, -1).split("\n").map(line => item.unit + line).join("\n") + "\n";
+        check.equal(editable.textContent, indented);
+        check.equal(code.getAttribute(codeTabAttribute), item.override ?? item.detected ?? null);
+        check.equal(calls.transaction.oldHTML, originalHTML, "undo restores both the text and the inherited setting");
+        api.updateTableCellEditingValue(settingCell, api.serializeTableCellRich(code.outerHTML));
+        const reopened = document.createElement("div");
+        reopened.innerHTML = api.getTableCellRichBlockDOM(settingCell);
+        check.equal(reopened.firstElementChild.getAttribute(codeTabAttribute), item.override ?? item.detected ?? null);
+        check.equal(getContenteditableElement(reopened).textContent, indented);
+        indentActions.tabCodeBlock(protyle as unknown as IProtyle, code, range, true);
+        check.equal(editable.textContent, item.text, "outdent uses the saved width and reverses the preceding indent");
+    }
+    window.siyuan.config.editor.codeTabSpaces = 0;
+    wysiwyg.innerHTML = base.Md2BlockDOM("```text\nif ready:\n  work()\n```");
+    const outdentCode = wysiwyg.firstElementChild as HTMLElement;
+    const outdentEditable = getContenteditableElement(outdentCode);
+    const unchangedHTML = outdentCode.outerHTML;
+    const unchangedRange = selectionAPI.focusByOffset(outdentEditable, 0, 0, false);
+    check.ok(unchangedRange);
+    indentActions.tabCodeBlock(protyle as unknown as IProtyle, outdentCode, unchangedRange, true);
+    check.equal(outdentCode.outerHTML, unchangedHTML, "a no-op does not persist an inferred setting");
+    const outdentRange = selectionAPI.focusByOffset(outdentEditable, 12, 12, false);
+    check.ok(outdentRange);
+    indentActions.tabCodeBlock(protyle as unknown as IProtyle, outdentCode, outdentRange, true);
+    check.equal(outdentEditable.textContent, "if ready:\nwork()\n");
+    check.equal(outdentCode.getAttribute(codeTabAttribute), "2");
+    check.equal(calls.transaction.oldHTML, unchangedHTML);
+    indentActions.tabCodeBlock(protyle as unknown as IProtyle, outdentCode, outdentRange);
+    check.equal(outdentEditable.textContent, "if ready:\n  work()\n", "indent retains the detected width after the last indent was removed");
+    window.siyuan.config.editor.codeTabSpaces = 4;
     const body = "4441231234444\n\n\n123555555\n22\n\n123\n";
     wysiwyg.innerHTML = base.Md2BlockDOM("sdf\n\n```java\n" + body + "```");
     const codeEdit = wysiwyg.querySelector<HTMLElement>('.hljs [contenteditable="true"]');

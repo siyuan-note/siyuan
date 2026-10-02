@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261002224733"
+		"updated": "20261002230606"
 	},
 	"Children": [
 		{
@@ -4272,7 +4272,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20261002224733"
+				"updated": "20261002230606"
 			},
 			"Children": [
 				{
@@ -14343,7 +14343,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250423104310-6605t5b",
-				"updated": "20261002224733"
+				"updated": "20261002230606"
 			},
 			"Children": [
 				{
@@ -14566,6 +14566,29 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261002230606-2186dda",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002230606-2186dda",
+				"updated": "20261002230606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "代码块尚未单独设置 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab 空格数"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 时，执行缩进或反缩进会从至少两行非空代码中识别一致的缩进，并保存为该代码块的设置。支持识别制表符，或以 2、4、6、8 个空格为最小宽度且其他缩进为其整数倍的空格缩进。混合缩进或依据不足时沿用全局设置。显式块级设置优先。识别不会重新格式化已有代码。"
 				}
 			]
 		},

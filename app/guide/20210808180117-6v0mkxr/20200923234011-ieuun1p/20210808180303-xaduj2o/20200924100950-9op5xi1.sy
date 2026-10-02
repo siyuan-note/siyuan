@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261002224733"
+		"updated": "20261002230606"
 	},
 	"Children": [
 		{
@@ -4274,7 +4274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261002224733"
+				"updated": "20261002230606"
 			},
 			"Children": [
 				{
@@ -14261,7 +14261,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250423105026-c1t0rqo",
-				"updated": "20261002224733"
+				"updated": "20261002230606"
 			},
 			"Children": [
 				{
@@ -14484,6 +14484,29 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261002230606-fd59093",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002230606-fd59093",
+				"updated": "20261002230606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a code block has no individual "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Number of Tab Spaces"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " setting, indenting or outdenting detects consistent indentation from at least two nonblank lines and saves it for that block. Tabs or the smallest space indent of 2, 4, 6, or 8 spaces are recognized; other space indents must be multiples of that width. Mixed indentation or insufficient evidence falls back to the global setting. An explicit block setting takes precedence. Detection does not reformat existing code."
 				}
 			]
 		},

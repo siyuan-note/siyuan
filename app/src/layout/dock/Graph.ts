@@ -31,6 +31,7 @@ export class Graph extends Model {
     private element: HTMLElement;
     private saveTimeout: number;
     private searchTimeout: number;
+    private settingsSavingSuspended = false;
     private pendingGraphConf: IGraphCommon & {dailyNote: boolean, minRefs?: number};
     public blockId: string; // "local" / "pin" 必填
     public rootId: string; // "local" 必填
@@ -445,6 +446,7 @@ export class Graph extends Model {
     }
 
     public searchGraph(options: IGraphSearchOptions = {}) {
+        if (this.settingsSavingSuspended) return;
         const refresh = options.refresh || false;
         const resetLayout = options.resetLayout ?? refresh;
         const id = options.id;
@@ -457,9 +459,7 @@ export class Graph extends Model {
             this.searchTimeout = 0;
         }
         if (this.saveTimeout) {
-            window.clearTimeout(this.saveTimeout);
-            this.saveTimeout = 0;
-            this.persistGraphConf();
+            this.flushPendingSettings();
         }
         const requestVersion = ++this.requestVersion;
         element.classList.add("fn__rotate");
@@ -533,11 +533,7 @@ export class Graph extends Model {
         if (this.searchTimeout) {
             window.clearTimeout(this.searchTimeout);
         }
-        if (this.saveTimeout) {
-            window.clearTimeout(this.saveTimeout);
-            this.saveTimeout = 0;
-        }
-        this.persistGraphConf();
+        this.flushPendingSettings();
         this.graphEngine?.destroy();
         this.graphEngine = undefined;
         this.renderedGraphData = undefined;
@@ -601,12 +597,30 @@ export class Graph extends Model {
         }
         this.pendingGraphConf = conf;
         this.saveTimeout = window.setTimeout(() => {
-            this.saveTimeout = 0;
-            this.persistGraphConf();
+            this.flushPendingSettings();
         }, 300);
     }
 
-    private persistGraphConf() {
+    // 重置期间暂停会保存配置的查询，取消重置后恢复面板刷新。
+    public suspendSettingsSaving() {
+        if (this.searchTimeout) {
+            window.clearTimeout(this.searchTimeout);
+            this.searchTimeout = 0;
+            this.pendingGraphConf = this.getGraphConf();
+        }
+        this.flushPendingSettings();
+        this.settingsSavingSuspended = true;
+        return () => {
+            this.settingsSavingSuspended = false;
+            this.searchGraph();
+        };
+    }
+
+    private flushPendingSettings() {
+        if (this.saveTimeout) {
+            window.clearTimeout(this.saveTimeout);
+            this.saveTimeout = 0;
+        }
         if (!this.pendingGraphConf) {
             return;
         }

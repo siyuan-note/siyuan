@@ -2,14 +2,18 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -232,5 +236,102 @@ func TestSettingsResetRejectsCorruptionAndReadonly(t *testing.T) {
 	after, err := os.ReadFile(settingsResetPaths()[1])
 	if err != nil || !bytes.Equal(after, []byte("invalid json")) {
 		t.Fatal("corrupt recovery must not overwrite existing files")
+	}
+}
+
+func TestSettingsResetRollbackFailureStopsWrites(t *testing.T) {
+	const rootEnv = "SIYUAN_TEST_SETTINGS_RESET_ROOT"
+	const modeEnv = "SIYUAN_TEST_SETTINGS_RESET_MODE"
+	if root := os.Getenv(rootEnv); root != "" {
+		util.ConfDir, util.DataDir = filepath.Join(root, "conf"), filepath.Join(root, "data")
+		Conf = NewAppConf()
+		paths := settingsResetPaths()
+		if os.Getenv(modeEnv) == "pending" {
+			journal := settingsResetJournal{Version: 1}
+			for _, path := range paths {
+				data, err := os.ReadFile(path)
+				if err != nil {
+					t.Fatal(err)
+				}
+				journal.Files = append(journal.Files, settingsResetFile{Exists: true, Data: data})
+			}
+			data, err := json.Marshal(journal)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = os.WriteFile(settingsResetJournalPath(), data, 0600); err != nil {
+				t.Fatal(err)
+			}
+		}
+		blockRollback := func() {
+			if err := os.Remove(paths[1]); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Mkdir(paths[1], 0755); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if os.Getenv(modeEnv) == "pending" {
+			blockRollback()
+			_ = ResetSettings()
+		} else {
+			_ = writeSettingsReset([][]byte{[]byte(`{}`), []byte(`{}`), []byte(`{}`)}, func(path string, data []byte) error {
+				if path == paths[1] {
+					blockRollback()
+					return errors.New("simulated disk failure")
+				}
+				return filelock.WriteFile(path, data)
+			})
+		}
+		t.Fatal("failed recovery allowed further writes")
+	}
+	for _, mode := range []string{"rollback", "pending"} {
+		t.Run(mode, func(t *testing.T) {
+			settingsResetTestEnvironment(t)
+			paths := settingsResetPaths()
+			original, err := os.ReadFile(paths[0])
+			if err != nil {
+				t.Fatal(err)
+			}
+			originals := [][]byte{original, []byte(`{"plugin":"retained"}`), []byte(`{}`)}
+			for i, path := range paths {
+				if err = filelock.WriteFile(path, originals[i]); err != nil {
+					t.Fatal(err)
+				}
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestSettingsResetRollbackFailureStopsWrites$")
+			cmd.Env = append(os.Environ(), rootEnv+"="+filepath.Dir(util.ConfDir), modeEnv+"="+mode)
+			output, err := cmd.CombinedOutput()
+			var exitErr *exec.ExitError
+			if !errors.As(err, &exitErr) || exitErr.ExitCode() != logging.ExitCodeFileSysErr {
+				t.Fatalf("expected fatal file-system exit, got %v\n%s", err, output)
+			}
+			if _, err = os.Stat(settingsResetJournalPath()); err != nil {
+				t.Fatalf("recovery journal was not preserved: %v", err)
+			}
+			if err = os.Remove(paths[1]); err != nil {
+				t.Fatal(err)
+			}
+			if err = recoverSettingsReset(); err != nil {
+				t.Fatal(err)
+			}
+			for i, path := range paths {
+				data, readErr := os.ReadFile(path)
+				if readErr != nil || !bytes.Equal(data, originals[i]) {
+					t.Fatalf("original configuration was not recovered: %s, %v", path, readErr)
+				}
+			}
+			Conf.Api.Token = "token-after-successful-recovery"
+			Conf.Save()
+			if err = recoverSettingsReset(); err != nil {
+				t.Fatal(err)
+			}
+			data, err := os.ReadFile(paths[0])
+			if err != nil || !bytes.Contains(data, []byte(Conf.Api.Token)) {
+				t.Fatal("recovery reverted a later configuration save")
+			}
+		})
 	}
 }

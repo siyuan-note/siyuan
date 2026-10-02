@@ -42,3 +42,18 @@ test("reset does not wait for its own acknowledgement or unrelated fetches", asy
     }
     await flushSettingSaves();
 });
+
+test("reset waits for graph writes and rejects failed graph saves", async () => {
+    for (const name of ["setGraphConf", "resetGraph", "resetLocalGraph", "getGraph", "getLocalGraph"]) {
+        let release: (result: {code: number}) => void;
+        const before = settingSaveFailures();
+        trackSettingRequest("/api/graph/" + name, new Promise(resolve => { release = resolve; }));
+        let flushed = false;
+        const flush = flushSettingSaves(before).then(() => { flushed = true; });
+        await Promise.resolve();
+        await Promise.resolve();
+        assert.equal(flushed, false);
+        release({code: -1});
+        await assert.rejects(flush);
+    }
+});

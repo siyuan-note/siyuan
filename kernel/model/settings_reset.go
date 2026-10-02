@@ -81,6 +81,7 @@ func ResetSettings() error {
 	defer localStorageLock.Unlock()
 	defer bootAppearanceConfLock.Unlock()
 	if err := recoverSettingsReset(); err != nil {
+		util.ReportFileSysFatalError(err)
 		return err
 	}
 	next := defaultWorkspaceSettings(Conf)
@@ -194,13 +195,21 @@ func writeSettingsReset(next [][]byte, write func(string, []byte) error) error {
 			err = write(path, next[i])
 		}
 		if err != nil {
-			return errors.Join(err, recoverSettingsReset())
+			return rollbackSettingsReset(err)
 		}
 	}
 	if err = os.Remove(settingsResetJournalPath()); err != nil {
-		return errors.Join(err, recoverSettingsReset())
+		return rollbackSettingsReset(err)
 	}
 	return nil
+}
+
+// 回滚失败时停止内核，保留恢复日志，避免后续保存被下次启动的回滚覆盖。
+func rollbackSettingsReset(cause error) error {
+	if err := recoverSettingsReset(); err != nil {
+		util.ReportFileSysFatalError(errors.Join(cause, err))
+	}
+	return cause
 }
 
 // recoverSettingsReset 在读取主配置之前回滚未提交操作，未知日志保持原样并阻止继续启动。

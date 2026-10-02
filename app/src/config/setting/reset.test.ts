@@ -16,6 +16,10 @@ const loadReset = (browser: boolean, mobile: boolean, failed = false) => {
             calls.push("save editor");
             if (failed) throw new Error("offline");
         }}],
+        getAllModels: () => ({graph: [{suspendSettingsSaving: () => {
+            calls.push("save graph");
+            return () => calls.push("resume graph");
+        }}]}),
         setNativeSettingTask: (_id: string, active: boolean) => calls.push(active ? "block" : "unblock"),
         suspendLayoutSaving: async () => { calls.push("suspend layout"); return () => calls.push("resume layout"); },
         settingSaveFailures: () => 0,
@@ -38,7 +42,7 @@ for (const [browser, mobile] of [[false, false], [true, false], [true, true]]) {
     test(`reset saves before reloading and only the local desktop exits (${browser}, ${mobile})`, async () => {
         const {api, calls} = loadReset(browser, mobile);
         await api.prepareSettingsReset({id: "reset", token: "one-use"});
-        assert.deepEqual(calls, ["block", "blur", "save editor", ...mobile ? [] : ["suspend layout"], "save settings", "ack true"]);
+        assert.deepEqual(calls, ["block", "blur", "save editor", ...mobile ? [] : ["suspend layout", "save graph"], "save settings", "ack true"]);
         api.completeSettingsReset({id: "reset", exit: true});
         api.exitAfterSettingsReset();
         assert.deepEqual(calls.slice(-(!browser ? 2 : 1)), !browser ? ["reload", "exit"] : ["reload"]);
@@ -60,7 +64,7 @@ test("cancellation resumes layout saving and prepared reconnect reloads without 
     api.cancelSettingsReset("unrelated");
     assert.equal(calls.includes("resume layout"), false);
     api.cancelSettingsReset("first");
-    assert.deepEqual(calls.slice(-2), ["resume layout", "unblock"]);
+    assert.deepEqual(calls.slice(-3), ["resume layout", "resume graph", "unblock"]);
     await api.prepareSettingsReset({id: "second", token: "b"});
     assert.equal(api.reloadSettingsResetOnReconnect(), true);
     assert.equal(calls.at(-1), "reload");

@@ -17,7 +17,7 @@ export const trackSettingSave = <T>(promise: Promise<T>): Promise<T> => {
 };
 
 export const trackSettingRequest = <T>(url: string, promise: Promise<T>): Promise<T> =>
-    /^\/api\/(setting\/(set|patch)|storage\/(set|remove)LocalStorage|system\/set)/.test(url)
+    /^\/api\/(setting\/(set|patch)|storage\/(set|remove)LocalStorage|system\/set|graph\/(setGraphConf|resetGraph|resetLocalGraph|getGraph|getLocalGraph)$)/.test(url)
         ? trackSettingSave(promise) : promise;
 
 export const flushSettingSaves = async (previousFailures = failures) => {

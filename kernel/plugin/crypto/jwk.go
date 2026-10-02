@@ -197,7 +197,37 @@ func importJWKAsymmetric(jwk *jsonWebKey, alg Algorithm, extractable bool, usage
 	if err := parsed.UnmarshalJSON(jwk.raw); err != nil {
 		return nil, dataError("invalid JSON Web Key: %s", err)
 	}
-	return keyFromMaterial(alg, parsed.Key, extractable, usages)
+
+	material := parsed.Key
+	if privateKey, ok := material.(*ecdsa.PrivateKey); ok {
+		checked, err := checkECPrivateKey(privateKey)
+		if err != nil {
+			return nil, err
+		}
+		material = checked
+	}
+	return keyFromMaterial(alg, material, extractable, usages)
+}
+
+// checkECPrivateKey 校验 EC 私钥的 d 位于 [1, n-1] 内，且其对应的公钥正是 x 与 y 给出的点，
+// 返回由 d 重新推导的私钥。go-jose 只校验各成员的长度以及该点是否在曲线上，
+// 而 d 与 x、y 不对应的私钥签出的签名无法用该公钥验证。
+func checkECPrivateKey(privateKey *ecdsa.PrivateKey) (*ecdsa.PrivateKey, error) {
+	size := (privateKey.Curve.Params().N.BitLen() + 7) / 8
+	d := privateKey.D.Bytes()
+	if len(d) > size {
+		return nil, dataError("the EC private key is out of range")
+	}
+
+	// ParseRawPrivateKey 要求定长输入，并拒绝 0 与不小于曲线阶的值。
+	derived, err := ecdsa.ParseRawPrivateKey(privateKey.Curve, append(make([]byte, size-len(d)), d...))
+	if err != nil {
+		return nil, dataError("invalid EC private key: %s", err)
+	}
+	if !derived.PublicKey.Equal(&privateKey.PublicKey) {
+		return nil, dataError("the EC private key does not match the public key")
+	}
+	return derived, nil
 }
 
 // exportJWK 将密钥导出为 JWK。

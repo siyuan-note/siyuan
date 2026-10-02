@@ -18,6 +18,7 @@ package crypto
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"testing"
 )
@@ -343,6 +344,73 @@ func TestOKPJWKRejectsInconsistentKeyPair(t *testing.T) {
 		}
 		if _, err = ImportKey(FormatJWK, KeyData{JSON: mixed}, alg, true, usages); errorName(t, err) != ErrNameData {
 			t.Fatalf("%s: error = %v, want DataError", algName, err)
+		}
+	}
+}
+
+func TestECJWKRejectsInvalidPrivateKey(t *testing.T) {
+	// P-256 的阶 n，d 必须小于它。
+	order := "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"
+
+	for _, c := range []struct {
+		alg         Algorithm
+		usages      []KeyUsage
+		importUsage KeyUsage
+	}{
+		{Algorithm{Name: AlgECDSA, NamedCurve: CurveP256}, []KeyUsage{UsageSign, UsageVerify}, UsageSign},
+		{Algorithm{Name: AlgECDH, NamedCurve: CurveP256}, []KeyUsage{UsageDeriveBits}, UsageDeriveBits},
+	} {
+		first, err := GenerateKey(c.alg, true, c.usages)
+		if err != nil {
+			t.Fatalf("%s: %v", c.alg.Name, err)
+		}
+		second, err := GenerateKey(c.alg, true, c.usages)
+		if err != nil {
+			t.Fatalf("%s: %v", c.alg.Name, err)
+		}
+
+		firstData, err := ExportKey(FormatJWK, first.PrivateKey)
+		if err != nil {
+			t.Fatalf("%s: %v", c.alg.Name, err)
+		}
+		secondData, err := ExportKey(FormatJWK, second.PrivateKey)
+		if err != nil {
+			t.Fatalf("%s: %v", c.alg.Name, err)
+		}
+		var firstJWK, secondJWK map[string]any
+		if err = json.Unmarshal(firstData.JSON, &firstJWK); err != nil {
+			t.Fatal(err)
+		}
+		if err = json.Unmarshal(secondData.JSON, &secondJWK); err != nil {
+			t.Fatal(err)
+		}
+
+		// d 来自另一把密钥、为 0 或等于曲线阶时都必须拒绝，x 与 y 保持不变。
+		for label, d := range map[string]any{
+			"d from another key": secondJWK["d"],
+			"d = 0":              base64.RawURLEncoding.EncodeToString(make([]byte, 32)),
+			"d = n":              base64.RawURLEncoding.EncodeToString(mustHex(t, order)),
+		} {
+			invalid := map[string]any{}
+			for member, value := range firstJWK {
+				invalid[member] = value
+			}
+			invalid["d"] = d
+
+			data, marshalErr := json.Marshal(invalid)
+			if marshalErr != nil {
+				t.Fatal(marshalErr)
+			}
+			_, err = ImportKey(FormatJWK, KeyData{JSON: data}, c.alg, true, []KeyUsage{c.importUsage})
+			if name := errorName(t, err); name != ErrNameData {
+				t.Errorf("%s %s: error name = %q, want %q", c.alg.Name, label, name, ErrNameData)
+			}
+		}
+
+		// 原样导入的私钥仍然可用。
+		if _, err = ImportKey(FormatJWK, KeyData{JSON: firstData.JSON}, c.alg, true,
+			[]KeyUsage{c.importUsage}); err != nil {
+			t.Fatalf("%s: %v", c.alg.Name, err)
 		}
 	}
 }

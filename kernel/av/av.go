@@ -49,6 +49,7 @@ type AttributeView struct {
 	Views             []*View            `json:"views"`                       // 视图
 	NewItemTemplates  []*NewItemTemplate `json:"newItemTemplates,omitempty"`  // 新增条目模板
 	DefaultTemplateID string             `json:"defaultTemplateID,omitempty"` // 默认新增条目模板 ID
+	Automations       *AutomationConfig  `json:"automations,omitempty"`
 	// CustomColorRenderContext 保存只读渲染期间的关联数据库调色板上下文。
 	CustomColorRenderContext *CustomColorRenderContext `json:"-"`
 	// 卡片封面位置，条目 ID -> 封面来源 -> 位置
@@ -940,6 +941,9 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 	if nil == err {
 		err = CheckSpec(ret)
 	}
+	if err == nil && ret.Automations != nil && ret.Automations.Spec != 1 {
+		err = fmt.Errorf("unsupported database automation specification [%d]", ret.Automations.Spec)
+	}
 	if nil == err {
 		err = ret.ValidateListLayouts()
 	}
@@ -1321,6 +1325,7 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 		}
 	}
 
+	ret.remapAutomationKeys(av.ID, keyIDMap)
 	oldKeyIDs = gulu.Str.RemoveDuplicatedElem(oldKeyIDs)
 	sorts := map[string]int{}
 	for i, k := range ret.KeyIDs {

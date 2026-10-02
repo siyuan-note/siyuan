@@ -197,6 +197,13 @@ func TestAVContractTransportMapping(t *testing.T) {
 	}
 	assertAVContractJSONEqual(t, &av.ViewTableColumn{BaseField: &av.BaseField{ID: "key", Calc: &av.FieldCalc{}}, Calc: nil}, toContractAVViewTableColumn(&av.ViewTableColumn{BaseField: &av.BaseField{ID: "key", Calc: &av.FieldCalc{}}, Calc: nil}))
 	fixture := setupAttributeViewContextFilterAPITest(t)
+	fixture.attrView.Automations = &av.AutomationConfig{Spec: 1, Rules: []*av.AutomationRule{{
+		ID: ast.NewNodeID(), Name: "Automation", Enabled: true, Trigger: "changed", KeyID: fixture.textKeyID,
+		Conditions: []*av.ViewFilter{{Column: fixture.textKeyID, Operator: av.FilterOperatorIsNotEmpty, Value: &av.Value{Type: av.KeyTypeText}}},
+		Actions: []*av.AutomationAction{{Type: "edit", Target: "current", Fields: map[string]*av.AutomationValue{
+			fixture.textKeyID: {Mode: "source", KeyID: fixture.attrView.GetBlockKeyValues().Key.ID},
+		}}},
+	}}}
 	assertAVContractJSONEqual(t, model.NewAttributeViewData(fixture.attrView), toContractAVAttributeViewData(model.NewAttributeViewData(fixture.attrView)))
 }
 

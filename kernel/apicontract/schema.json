@@ -6051,6 +6051,9 @@
     "AVAttributeViewData": {
       "type": "object",
       "properties": {
+        "automations": {
+          "$ref": "#/$defs/AVAutomationConfig"
+        },
         "cardCoverPositions": {
           "type": "object",
           "additionalProperties": {
@@ -6378,6 +6381,372 @@
         "notebookID",
         "title",
         "valueID"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationAction": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "fields": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVAutomationValue"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVViewFilter"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "relationKeyID": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string",
+          "enum": [
+            "current",
+            "related",
+            "filtered"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "add",
+            "edit"
+          ]
+        }
+      },
+      "required": [
+        "fields",
+        "target",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationActionInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVAutomationValueInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVViewFilterInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "relationKeyID": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string",
+          "enum": [
+            "current",
+            "related",
+            "filtered"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "add",
+            "edit"
+          ]
+        }
+      },
+      "required": [
+        "fields",
+        "target",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationConfig": {
+      "type": "object",
+      "properties": {
+        "rules": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVAutomationRule"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spec": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "rules",
+        "spec"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationConfigInput": {
+      "type": "object",
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVAutomationRuleInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "spec": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "rules",
+        "spec"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationRule": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVAutomationAction"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVViewFilter"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "keyID": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "trigger": {
+          "type": "string",
+          "enum": [
+            "added",
+            "changed"
+          ]
+        }
+      },
+      "required": [
+        "actions",
+        "enabled",
+        "id",
+        "name",
+        "trigger"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationRuleInput": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVAutomationActionInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVViewFilterInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "keyID": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "trigger": {
+          "type": "string",
+          "enum": [
+            "added",
+            "changed"
+          ]
+        }
+      },
+      "required": [
+        "actions",
+        "enabled",
+        "id",
+        "name",
+        "trigger"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationValue": {
+      "type": "object",
+      "properties": {
+        "keyID": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "static",
+            "source",
+            "currentTime",
+            "triggerItem"
+          ]
+        },
+        "value": {
+          "$ref": "#/$defs/AVValue"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationValueInput": {
+      "type": "object",
+      "properties": {
+        "keyID": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "static",
+            "source",
+            "currentTime",
+            "triggerItem"
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVValueInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode"
       ],
       "additionalProperties": false
     },
@@ -56501,6 +56870,216 @@
             "action": {
               "type": "string",
               "enum": [
+                "setAttrViewAutomations"
+              ]
+            },
+            "avID": {
+              "type": "string"
+            },
+            "backRelationKeyID": {
+              "type": "string"
+            },
+            "blockID": {
+              "type": "string"
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TransactionCellUpdate"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "context": {
+              "$ref": "#/$defs/TransactionContext"
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVAutomationConfigInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string"
+            },
+            "groupID": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "ignoreDefaultFill": {
+              "type": "boolean"
+            },
+            "isDetached": {
+              "type": "boolean"
+            },
+            "isTwoWay": {
+              "type": "boolean"
+            },
+            "keyID": {
+              "type": "string"
+            },
+            "layout": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nextID": {
+              "type": "string"
+            },
+            "parentID": {
+              "type": "string"
+            },
+            "previousID": {
+              "type": "string"
+            },
+            "removeDest": {
+              "type": "boolean"
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "type": "string"
+            },
+            "rowID": {
+              "type": "string"
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ]
+            },
+            "viewID": {
+              "type": "string"
+            },
+            "viewIDs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "action",
+            "id",
+            "rootID",
+            "parentID",
+            "previousID",
+            "nextID",
+            "blockIDs",
+            "blockID",
+            "deckID",
+            "avID",
+            "srcIDs",
+            "srcs",
+            "isDetached",
+            "name",
+            "type",
+            "format",
+            "keyID",
+            "rowID",
+            "isTwoWay",
+            "backRelationKeyID",
+            "removeDest",
+            "layout",
+            "groupID",
+            "targetGroupID",
+            "viewID",
+            "ignoreDefaultFill",
+            "context",
+            "data",
+            "retData"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
                 "setAttrViewConditionalColors"
               ]
             },
@@ -81103,6 +81682,363 @@
               "anyOf": [
                 {
                   "$ref": "#/$defs/TransactionNewItemTemplatesInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "format": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "groupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ignoreDefaultFill": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isDetached": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isTwoWay": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "keyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "layout": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "nextID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "parentID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "previousID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "removeDest": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rowID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": {
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ],
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "setAttrViewAutomations"
+              ]
+            },
+            "avID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "backRelationKeyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionCellUpdateInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TransactionContext"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVAutomationConfigInput"
                 },
                 {
                   "type": "null"
@@ -110765,6 +111701,7 @@
           "removeFlashcards",
           "setAttrViewName",
           "setAttrViewNewItemTemplates",
+          "setAttrViewAutomations",
           "setAttrViewConditionalColors",
           "setAttrViewFilters",
           "setAttrViewContextFilter",

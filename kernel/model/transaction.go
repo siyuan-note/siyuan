@@ -254,6 +254,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		}
 	}()
 
+	if err = tx.prepareAttributeViewAutomations(); err != nil {
+		tx.rollback()
+		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+	}
 	isLargeInsert := tx.processLargeInsert()
 	isLargeDelete := tx.processLargeDelete()
 	if !isLargeInsert {
@@ -305,6 +309,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewName(op)
 			case "setAttrViewNewItemTemplates":
 				ret = tx.doSetAttrViewNewItemTemplates(op)
+			case "setAttrViewAutomations":
+				ret = tx.doSetAttrViewAutomations(op)
 			case "setAttrViewFilters":
 				ret = tx.doSetAttrViewFilters(op)
 			case "setAttrViewContextFilter":
@@ -492,6 +498,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		}
 	}
 
+	if err = tx.runAttributeViewAutomations(); err != nil {
+		tx.rollback()
+		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+	}
 	if ret = tx.normalizeListItemFolds(); nil != ret {
 		tx.rollback()
 		return
@@ -2458,6 +2468,7 @@ type Operation struct {
 	attributeViewItems       *attributeViewItemsSnapshot
 	attributeViewFields      *attributeViewFieldsSnapshot
 	attributeViewFieldUndo   bool
+	attributeViewAutomation  bool
 	attributeViewBinding     *attributeViewBindingSnapshot
 	attributeViewBindingUndo bool
 
@@ -2626,6 +2637,7 @@ type Transaction struct {
 	writeTransactionTree         func(*parse.Tree) error
 	blockSwapOriginalTrees       []*parse.Tree
 	attributeViewRollback        *attributeViewRollback
+	attributeViewAutomations     *attributeViewAutomationState
 	invalidatedAvHistory         map[string]bool
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
@@ -2879,8 +2891,13 @@ func (tx *Transaction) commit() (err error) {
 			continue
 		}
 
+		if err = tx.rememberAutomationView(destAv, ""); err != nil {
+			return err
+		}
 		regenAttrViewGroups(destAv)
-		av.SaveAttributeView(destAv)
+		if saveErr := av.SaveAttributeView(destAv); saveErr != nil && tx.attributeViewAutomations != nil {
+			return saveErr
+		}
 		ReloadAttrView(avID)
 	}
 	for _, tree := range tx.removedCreatedDocs {
@@ -2937,6 +2954,7 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.crossTreeMoveRefRefreshes = nil
 	tx.removeCreatedDoc, tx.writeTransactionTree = nil, nil
 	tx.luteEngine = nil
+	tx.attributeViewAutomations = nil
 }
 
 func (tx *Transaction) rollback() {
@@ -3051,6 +3069,9 @@ func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.T
 	if err != nil {
 		return
 	}
+	if err = tx.rememberAutomationTree(ret); err != nil {
+		return nil, err
+	}
 	tx.trees[bt.RootID] = ret
 	tx.captureListMindmapSummarySiblings(ret)
 	return
@@ -3083,6 +3104,9 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 	ret, err = filesys.LoadTree(box, p, tx.luteEngine)
 	if err != nil {
 		return
+	}
+	if err = tx.rememberAutomationTree(ret); err != nil {
+		return nil, err
 	}
 	tx.trees[rootID] = ret
 	tx.captureListMindmapSummarySiblings(ret)

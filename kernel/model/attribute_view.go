@@ -2953,6 +2953,7 @@ type AttributeViewData struct {
 	Views              []*av.View                                  `json:"views"`
 	NewItemTemplates   []*av.NewItemTemplate                       `json:"newItemTemplates,omitempty"`
 	DefaultTemplateID  string                                      `json:"defaultTemplateID,omitempty"`
+	Automations        *av.AutomationConfig                        `json:"automations,omitempty"`
 	CardCoverPositions map[string]map[string]*av.CardCoverPosition `json:"cardCoverPositions,omitempty"`
 }
 
@@ -2964,6 +2965,7 @@ func NewAttributeViewData(attrView *av.AttributeView) (ret *AttributeViewData) {
 		Spec: attrView.Spec, ID: attrView.ID, Name: attrView.Name, KeyValues: attrView.KeyValues, KeyIDs: attrView.KeyIDs,
 		Views: attrView.Views, NewItemTemplates: attrView.NewItemTemplates, DefaultTemplateID: attrView.DefaultTemplateID,
 		CardCoverPositions: attrView.CardCoverPositions, CustomColors: attrView.Palette(),
+		Automations: attrView.Automations,
 	}
 	if view, _ := attrView.GetFirstView(); nil != view {
 		ret.ViewID = view.ID
@@ -6053,7 +6055,8 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 		}
 		return
 	}
-	result, err := addAttributeViewBlocks(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill)
+	result, err := addAttributeViewBlocks(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID,
+		operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill, operation.attributeViewAutomation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
@@ -6062,7 +6065,7 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 }
 
 func AddAttributeViewBlock(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool) (err error) {
-	_, err = addAttributeViewBlocks(tx, srcs, avID, dbBlockID, viewID, groupID, previousItemID, ignoreDefaultFill)
+	_, err = addAttributeViewBlocks(tx, srcs, avID, dbBlockID, viewID, groupID, previousItemID, ignoreDefaultFill, false)
 	return
 }
 
@@ -6071,7 +6074,8 @@ type insertAttrViewBlockResult struct {
 	ExistingItemIDs []string `json:"existingItemIDs"`
 }
 
-func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool) (result *insertAttrViewBlockResult, err error) {
+func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string,
+	ignoreDefaultFill, databaseScope bool) (result *insertAttrViewBlockResult, err error) {
 	result = &insertAttrViewBlockResult{}
 	if 0 == len(srcs) {
 		return
@@ -6079,6 +6083,9 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
 	attrView, err := avParseView(avID, dbBlockID)
 	if err != nil {
+		return
+	}
+	if err = tx.rememberAutomationView(attrView, dbBlockID); err != nil {
 		return
 	}
 
@@ -6143,7 +6150,7 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock0(attrView, now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, tree, tx, result); nil != avErr {
+		if avErr := addAttributeViewBlock0(attrView, now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, databaseScope, tree, tx, result); nil != avErr {
 			err = avErr
 			return
 		}
@@ -6158,7 +6165,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 	if err != nil {
 		return
 	}
-	if err = addAttributeViewBlock0(attrView, now, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent, src, isDetached, ignoreDefaultFill, tree, tx, result); nil != err {
+	if err = addAttributeViewBlock0(attrView, now, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent, src, isDetached, ignoreDefaultFill, false, tree, tx, result); nil != err {
 		return
 	}
 	regenAttrViewGroups(attrView)
@@ -6166,7 +6173,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 	return
 }
 
-func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult) (err error) {
+func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill, databaseScope bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		if err = validateAttributeViewBinding(avID, tree); err != nil {
@@ -6237,7 +6244,11 @@ func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlock
 
 	blockValues.Values = append(blockValues.Values, blockValue)
 
-	view, err := getAttrViewViewByBlockID(attrView, dbBlockID)
+	viewBlockID := dbBlockID
+	if databaseScope {
+		viewBlockID = ""
+	}
+	view, err := getAttrViewViewByBlockID(attrView, viewBlockID)
 	if nil != err {
 		logging.LogErrorf("get view by block ID [%s] failed: %s", dbBlockID, err)
 		return
@@ -6257,9 +6268,12 @@ func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlock
 	}
 
 	useGroupDefault := "" != groupID
-	filterContext, contextErr := resolveAttributeViewFilterContext(attrView, view, dbBlockID)
-	if nil != contextErr {
-		return contextErr
+	var filterContext *av.FilterContext
+	if !databaseScope {
+		filterContext, err = resolveAttributeViewFilterContext(attrView, view, dbBlockID)
+		if err != nil {
+			return err
+		}
 	}
 	if nil != filterContext && 1 > len(filterContext.CurrentDocumentItemIDs) {
 		return av.ErrAttributeViewContextNotBound
@@ -8137,6 +8151,9 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	if 0 < len(blockIDs) {
 		blockID = blockIDs[0]
 	}
+	if err = tx.rememberAutomationView(attrView, blockID); err != nil {
+		return
+	}
 	var keyValues *av.KeyValues
 	var blockVal *av.Value
 	if nil == context {
@@ -8504,7 +8521,7 @@ func updateTwoWayRelationDestAttrViewInBlock(attrView *av.AttributeView, relKey 
 	}
 
 	now := util.CurrentTimeMillis()
-	if 1 == relationChangeMode {
+	if 0 != relationChangeMode {
 		addBlockIDs := val.Relation.BlockIDs
 		for _, bID := range oldRelationBlockIDs {
 			addBlockIDs = gulu.Str.RemoveElem(addBlockIDs, bID)
@@ -8527,7 +8544,8 @@ func updateTwoWayRelationDestAttrViewInBlock(attrView *av.AttributeView, relKey 
 				break
 			}
 		}
-	} else if 2 == relationChangeMode {
+	}
+	if 0 != relationChangeMode {
 		removeBlockIDs := oldRelationBlockIDs
 		for _, bID := range val.Relation.BlockIDs {
 			removeBlockIDs = gulu.Str.RemoveElem(removeBlockIDs, bID)

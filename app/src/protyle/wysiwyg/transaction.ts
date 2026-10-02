@@ -1483,7 +1483,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
         if (["addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
             "updateAttrViewColOption", "updateAttrViewCell", "updateAttrViewCells", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
             "setAttrViewColWrap", "setAttrViewColWidth", "setAttrViewColsWidth", "setAttrViewColAlign", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
-            "setAttrViewSorts", "setAttrViewNewItemTemplates", "setAttrViewCustomColors", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "setAttrViewColDateFormat", "removeAttrViewBlock",
+            "setAttrViewSorts", "setAttrViewNewItemTemplates", "setAttrViewAutomations", "setAttrViewCustomColors", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "setAttrViewColDateFormat", "removeAttrViewBlock",
             "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColPin", "addAttrViewView", "setAttrViewColIcon",
             "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "duplicateAttrViewRow", "sortAttrViewView",
             "updateAttrViewColRelation", "setAttrViewColRelationFilters", "setAttrViewPageSize", "updateAttrViewColRollup",

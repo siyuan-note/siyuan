@@ -3012,3 +3012,58 @@ img.av__cellassetimg {
     }
   }
 }
+.av__automation {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+
+  &-filter {
+    @include av-filter-editor;
+  }
+
+  &-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    overflow: auto;
+    flex: 1;
+    min-height: 0;
+  }
+
+  &-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  &-action,
+  &-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    min-width: 0;
+  }
+
+  &-filter,
+  &-value {
+    flex: 1;
+    min-width: 160px;
+    max-width: 100%;
+  }
+
+  &-value {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .b3-select,
+  .b3-text-field {
+    min-width: 0;
+    max-width: 100%;
+  }
+}

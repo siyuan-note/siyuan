@@ -1,4 +1,5 @@
 import {openConditionalColorsMenu} from "./conditionalColorMenu";
+import {openAutomationDialog} from "./automation";
 import {isTableLikeView} from "./viewType";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
@@ -872,6 +873,13 @@ export const openMenuPanel = (options: {
                     if (!options.keepMenuOpen || !isProgrammaticClose) {
                         window.siyuan.menus.menu.remove();
                     }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "automations") {
+                    avPanelElement.remove();
+                    window.siyuan.menus.menu.remove();
+                    void openAutomationDialog(options.protyle, options.blockElement as HTMLElement, data.id);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

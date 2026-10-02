@@ -433,6 +433,7 @@ func (av *AttributeView) visitPersistedColorHolders(visitOption func(*SelectOpti
 			}
 		}
 	}
+	av.visitAutomationValues(func(value *Value) { walkValueSelects(value, visitSelection) })
 }
 
 func visitKeyColorHolders(key *Key, visitOption func(*SelectOption), visitSelection func(*ValueSelect)) {
@@ -624,6 +625,7 @@ func (av *AttributeView) usedCustomColorIndexSet() map[int]struct{} {
 			}
 		}
 	}
+	av.visitAutomationValues(func(value *Value) { collectValueCustomColorIndexes(value, addColor) })
 	return ret
 }
 

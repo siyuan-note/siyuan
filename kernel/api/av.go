@@ -259,7 +259,9 @@ var addAttributeViewBlocks = contractHandler(apicontract.AddAttributeViewBlocks,
 		}
 		srcs = append(srcs, src)
 	}
-	if err := model.AddAttributeViewBlock(nil, srcs, request.AvID, request.BlockID, request.ViewID, request.GroupID, request.PreviousID, request.IgnoreDefaultFill); err != nil {
+	if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "insertAttrViewBlock", Srcs: srcs,
+		AvID: request.AvID, BlockID: request.BlockID, ViewID: request.ViewID, GroupID: request.GroupID,
+		PreviousID: request.PreviousID, IgnoreDefaultFill: request.IgnoreDefaultFill}}); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	model.ReloadAttrView(request.AvID)
@@ -562,27 +564,34 @@ var setAttributeViewBlockAttr = contractHandler(apicontract.SetAttributeViewBloc
 		logging.LogWarn(msg)
 		return apicontract.Failure[apicontract.AVValueData](-1, msg)
 	}
-	value, err := model.UpdateAttributeViewCell(nil, request.AvID, request.KeyID, itemID, request.Value)
+	if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "updateAttrViewCell", AvID: request.AvID,
+		KeyID: request.KeyID, RowID: itemID, Data: request.Value}}); err != nil {
+		return apicontract.Failure[apicontract.AVValueData](-1, err.Error())
+	}
+	view, err := av.ParseAttributeView(request.AvID)
 	if err != nil {
 		return apicontract.Failure[apicontract.AVValueData](-1, err.Error())
 	}
+	value := view.GetValue(request.KeyID, itemID)
 	model.ReloadAttrView(request.AvID)
 	return apicontract.Success(apicontract.AVValueData{Value: toContractAVValue(value)})
 })
 
 var batchSetAttributeViewBlockAttrs = contractHandler(apicontract.BatchSetAttributeViewBlockAttrs, func(c *gin.Context, request apicontract.BatchSetAttributeViewBlockAttrsRequest) apicontract.Response[apicontract.Null] {
-	values := make([]any, len(request.Values))
+	operations := make([]*model.Operation, len(request.Values))
 	for i, value := range request.Values {
-		fields := map[string]any{"keyID": value.KeyID, "value": value.Value}
+		itemID := ""
 		if value.ItemID != nil {
-			fields["itemID"] = *value.ItemID
+			itemID = *value.ItemID
+		} else if value.RowID != nil {
+			msg := fmt.Sprintf("[%s] parameter [%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details", c.Request.RequestURI, "rowID")
+			logging.LogWarn(msg)
+			return apicontract.Failure[apicontract.Null](-1, msg)
 		}
-		if value.RowID != nil {
-			fields["rowID"] = *value.RowID
-		}
-		values[i] = fields
+		operations[i] = &model.Operation{Action: "updateAttrViewCell", AvID: request.AvID, KeyID: value.KeyID,
+			RowID: itemID, Data: value.Value}
 	}
-	if err := model.BatchUpdateAttributeViewCells(nil, request.AvID, values); err != nil {
+	if err := model.PerformAttributeViewOperations(operations); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	model.ReloadAttrView(request.AvID)

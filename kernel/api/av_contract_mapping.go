@@ -1006,6 +1006,7 @@ func toContractAVAttributeViewData(value *model.AttributeViewData) *apicontract.
 			return toContractAVNewItemTemplate(value)
 		}),
 		DefaultTemplateID: value.DefaultTemplateID,
+		Automations:       toContractAVAutomationConfig(value.Automations),
 		CardCoverPositions: avContractMap(value.CardCoverPositions, func(value map[string]*av.CardCoverPosition) map[string]*apicontract.AVCardCoverPosition {
 			return avContractMap(value, func(value *av.CardCoverPosition) *apicontract.AVCardCoverPosition {
 				return toContractAVCardCoverPosition(value)

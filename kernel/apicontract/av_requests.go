@@ -124,6 +124,7 @@ type AppendAttributeViewDetachedBlocksWithValuesRequest struct {
 	BlocksValues [][]*AVValue `json:"blocksValues"`
 }
 
+// AddAttributeViewBlocksRequest 新增的条目会在同一事务中触发数据库自动化；失败时恢复本次写入。
 type AddAttributeViewBlocksRequest struct {
 	AvID              string          `json:"avID"`
 	BlockID           string          `json:"blockID" api:"optional,nullable"`
@@ -334,6 +335,7 @@ type GetAttributeViewBacklinksRequest struct {
 	ValueID string `json:"valueID" api:"optional,nullable,ignoretype"`
 }
 
+// SetAttributeViewBlockAttrRequest 字段实际改变时触发数据库自动化，返回联动完成后的字段值。
 type SetAttributeViewBlockAttrRequest struct {
 	AvID   string       `json:"avID"`
 	KeyID  string       `json:"keyID"`
@@ -342,6 +344,7 @@ type SetAttributeViewBlockAttrRequest struct {
 	Value  AVValuePatch `json:"value"`
 }
 
+// BatchSetAttributeViewBlockAttrsRequest 整批更新完成后求值自动化，同一条目每条规则最多触发一次。
 type BatchSetAttributeViewBlockAttrsRequest struct {
 	AvID   string         `json:"avID"`
 	Values []AVCellUpdate `json:"values"`

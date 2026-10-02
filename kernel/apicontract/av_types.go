@@ -464,6 +464,7 @@ type AVAttributeViewData struct {
 	Views              []*AVView                                  `json:"views" api:"optional,nullable"`
 	NewItemTemplates   []*AVNewItemTemplate                       `json:"newItemTemplates,omitempty" api:"optional,nullable"`
 	DefaultTemplateID  string                                     `json:"defaultTemplateID,omitempty" api:"optional,nullable"`
+	Automations        *AVAutomationConfig                        `json:"automations,omitempty" api:"optional"`
 	CardCoverPositions map[string]map[string]*AVCardCoverPosition `json:"cardCoverPositions,omitempty" api:"optional,nullable"`
 }
 

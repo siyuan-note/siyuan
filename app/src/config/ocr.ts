@@ -30,11 +30,15 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         {id: "recognizerConfig", title: `${languages.ocrRecognizer} - YAML`, suffix: "yml,yaml"},
     ];
     const updateControls = () => {
+        const isPaddleOCR = root.querySelector<HTMLSelectElement>("#ocrProvider").value === "paddleocr";
+        ["ocrModel", "ocrImportModels", "ocrImport"].forEach(id => {
+            root.querySelector(`#${id}`).closest(".config-item").classList.toggle("fn__none", !isPaddleOCR);
+        });
         root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
             element.disabled = busy;
         });
-        root.querySelector<HTMLSelectElement>("#ocrModel").disabled = busy || data.config.provider !== "paddleocr";
-        root.querySelector<HTMLButtonElement>("#ocrImport").disabled = busy || files.some(file => !root.querySelector<HTMLInputElement>(`#${file.id}`).files?.length);
+        root.querySelector<HTMLSelectElement>("#ocrModel").disabled = busy || !isPaddleOCR;
+        root.querySelector<HTMLButtonElement>("#ocrImport").disabled = busy || !isPaddleOCR || files.some(file => !root.querySelector<HTMLInputElement>(`#${file.id}`).files?.length);
     };
     const render = () => {
         root.innerHTML = selectRow("ocrProvider", languages.ocrProvider, languages.ocrProviderTip,
@@ -42,7 +46,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
             selectRow("ocrModel", languages.ocrModel, languages.ocrModelTip,
                 data.models.map(model => `<option value="${escapeAttr(model.id)}" ${model.id === data.config.model ? "selected" : ""}>${escapeHtml(model.name)}${model.builtIn ? ` (${escapeHtml(languages.builtIn)})` : ""}</option>`).join("")) +
             genSwitchRow("ocrAuto", languages.ocrAuto, languages.ocrAutoTip, data.config.auto) +
-            `<div class="b3-label config-item">${genConfigItemMainHtml(languages.ocrImportModels, languages.ocrImportModelsTip)}
+            `<div id="ocrImportModels" class="b3-label config-item">${genConfigItemMainHtml(languages.ocrImportModels, languages.ocrImportModelsTip)}
 ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span class="b3-label__text">${file.title}</span><div class="fn__hr--small"></div><input id="${file.id}" class="b3-text-field fn__block" type="file" accept="${file.suffix.split(",").map(suffix => `.${suffix}`).join(",")}"></label>`).join("")}</div>` +
             genButtonRowHtml("ocrImport", "", undefined, languages.import, "iconDownload") +
             genButtonRowHtml("ocrRefresh", "", undefined, languages.refresh, "iconRefresh");

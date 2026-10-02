@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261002201736"
+		"updated": "20261002202032"
 	},
 	"Children": [
 		{
@@ -4287,7 +4287,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20260928091724"
+				"updated": "20261002202032"
 			},
 			"Children": [
 				{
@@ -4311,7 +4311,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20260902224242"
+				"updated": "20261002202032"
 			},
 			"Children": [
 				{
@@ -4856,7 +4856,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "跨块选中文字时，复制对应的嵌入块列表，与选中这些块后复制一致"
+								}
+							]
 						}
 					]
 				},

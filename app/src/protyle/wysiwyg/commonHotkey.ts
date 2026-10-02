@@ -2,7 +2,7 @@ import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {matchHotKey} from "../util/hotKey";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isMac, writeText} from "../util/compatibility";
-import {focusBlock, getSelectionOffset, setFirstNodeRange, setLastNodeRange,} from "../util/selection";
+import {focusBlock, getBlockElementsByRange, getEditorRange, getSelectionOffset, setFirstNodeRange, setLastNodeRange,} from "../util/selection";
 import {getContenteditableElement, getNextBlock} from "./getBlock";
 import {hideElements} from "../ui/hideElements";
 import {countBlockWord} from "../../layout/status";
@@ -106,6 +106,12 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed, event)) {
         if (nodeElement) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                const range = getEditorRange(protyle.wysiwyg.element);
+                if (!range.collapsed && protyle.wysiwyg.element.contains(range.commonAncestorContainer)) {
+                    selectElements.push(...getBlockElementsByRange(range));
+                }
+            }
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }

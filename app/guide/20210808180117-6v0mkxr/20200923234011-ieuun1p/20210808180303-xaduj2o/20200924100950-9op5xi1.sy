@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261002201736"
+		"updated": "20261002202032"
 	},
 	"Children": [
 		{
@@ -4293,7 +4293,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20260928091724"
+				"updated": "20261002202032"
 			},
 			"Children": [
 				{
@@ -4313,7 +4313,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20260902224242"
+				"updated": "20261002202032"
 			},
 			"Children": [
 				{
@@ -4862,7 +4862,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "A text selection spanning multiple blocks copies the corresponding block embed list, just like selecting those blocks"
+								}
+							]
 						}
 					]
 				},

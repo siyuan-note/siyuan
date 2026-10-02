@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261002201736"
+		"updated": "20261002202032"
 	},
 	"Children": [
 		{
@@ -4281,7 +4281,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20260928091724"
+				"updated": "20261002202032"
 			},
 			"Children": [
 				{
@@ -4301,7 +4301,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20260902224242"
+				"updated": "20261002202032"
 			},
 			"Children": [
 				{
@@ -4850,7 +4850,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "跨區塊選取文字時，複製對應的嵌入區塊列表，與選取這些區塊後複製一致"
+								}
+							]
 						}
 					]
 				},

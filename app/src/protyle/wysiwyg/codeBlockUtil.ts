@@ -27,11 +27,10 @@ export const updateCodeBlockLines = (text: string, tabSpace: string, outdent = f
     if (line.startsWith("\t")) {
         return line.substring(1);
     }
-    if (tabSpace === "\t") {
-        return line;
-    }
+    // 制表符模式按代码块默认显示宽度处理行首空格。
+    const spaceLimit = tabSpace === "\t" ? 4 : tabSpace.length;
     let spaceCount = 0;
-    while (spaceCount < tabSpace.length && line[spaceCount] === " ") {
+    while (spaceCount < spaceLimit && line[spaceCount] === " ") {
         spaceCount++;
     }
     return line.substring(spaceCount);

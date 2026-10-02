@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261002202250"
+		"updated": "20261002224733"
 	},
 	"Children": [
 		{
@@ -4266,7 +4266,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20261001015635"
+				"updated": "20261002224733"
 			},
 			"Children": [
 				{
@@ -14261,12 +14261,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250423105322-jc65ji5",
-				"updated": "20260811122156"
+				"updated": "20261002224733"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "代碼區塊 "
+					"Data": "程式碼區塊 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -14334,7 +14334,7 @@
 			"Properties": {
 				"colgroup": "min-width: 60px;|min-width: 60px;",
 				"id": "20250423105322-ou0dbnf",
-				"updated": "20260811122156"
+				"updated": "20261002224733"
 			},
 			"Children": [
 				{
@@ -14417,6 +14417,69 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在游標處插入縮排，或增加選取行的縮排"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "減少目前行或選取行的縮排：刪除一個行首定位字元，或最多依 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab 空格數"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 設定刪除行首空格；設定為 0 時最多刪除 4 個空格"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift+Tab"
 								}
 							]
 						}

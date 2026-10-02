@@ -33,7 +33,14 @@ test("code block line indentation handles spaces, tabs, partial indentation and 
     assert.equal(updateCodeBlockLines("one\n\ntwo", "\t"), "\tone\n\t\n\ttwo");
     assert.equal(updateCodeBlockLines("    one\n  two\n\tthree\nfour", "    ", true),
         "one\ntwo\nthree\nfour");
-    assert.equal(updateCodeBlockLines("  one\n\ttwo", "\t", true), "  one\ntwo");
+    assert.equal(updateCodeBlockLines("  one\n\ttwo", "\t", true), "one\ntwo");
+});
+
+test("tab mode outdents pasted spaces by up to four columns without changing code whitespace", () => {
+    const text = "    if ready:\n        run()\n  partial\n\t\tnested\n  \t mixed\n  \n\nvalue    tail\t";
+    assert.equal(updateCodeBlockLines(text, "\t", true),
+        "if ready:\n    run()\npartial\n\tnested\n\t mixed\n\n\nvalue    tail\t");
+    assert.equal(updateCodeBlockLines(updateCodeBlockLines(text, "\t"), "\t", true), text);
 });
 
 const outdentAtCaret = (text: string, caret: number, tabSpace = "    ") => {
@@ -42,10 +49,12 @@ const outdentAtCaret = (text: string, caret: number, tabSpace = "    ") => {
 };
 
 test("collapsed code block outdent removes leading indentation from any caret position", () => {
-    for (const [caret, expected] of [[0, 0], [2, 0], [4, 0], [6, 2], [9, 5]]) {
-        assert.deepEqual(outdentAtCaret("    value", caret), {text: "value", caret: expected});
+    for (const tabSpace of ["    ", "\t"]) {
+        for (const [caret, expected] of [[0, 0], [2, 0], [4, 0], [6, 2], [9, 5]]) {
+            assert.deepEqual(outdentAtCaret("    value", caret, tabSpace), {text: "value", caret: expected});
+        }
+        assert.deepEqual(outdentAtCaret("      value", 5, tabSpace), {text: "  value", caret: 1});
     }
-    assert.deepEqual(outdentAtCaret("      value", 5), {text: "  value", caret: 1});
     assert.deepEqual(outdentAtCaret("  value", 7), {text: "value", caret: 5});
     assert.deepEqual(outdentAtCaret("    value", 9, "  "), {text: "  value", caret: 7});
 });
@@ -53,7 +62,7 @@ test("collapsed code block outdent removes leading indentation from any caret po
 test("collapsed code block outdent uses the configured unit and preserves other whitespace", () => {
     assert.deepEqual(outdentAtCaret("\tvalue", 6), {text: "value", caret: 5});
     assert.deepEqual(outdentAtCaret("\t\tvalue", 7, "\t"), {text: "\tvalue", caret: 6});
-    assert.deepEqual(outdentAtCaret("  value", 7, "\t"), {text: "  value", caret: 7});
+    assert.deepEqual(outdentAtCaret("  value", 7, "\t"), {text: "value", caret: 5});
     assert.deepEqual(outdentAtCaret("  \tvalue", 8), {text: "\tvalue", caret: 6});
     assert.deepEqual(outdentAtCaret("value    ", 9), {text: "value    ", caret: 9});
     assert.deepEqual(outdentAtCaret("    value  tail\t", 16), {text: "value  tail\t", caret: 12});

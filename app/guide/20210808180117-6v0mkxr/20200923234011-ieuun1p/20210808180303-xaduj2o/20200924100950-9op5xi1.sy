@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261002013053"
+		"updated": "20261002201736"
 	},
 	"Children": [
 		{
@@ -10113,7 +10113,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-d0mxz1p",
-				"updated": "20260811122156"
+				"updated": "20261002201736"
 			},
 			"Children": [
 				{
@@ -10137,7 +10137,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-v6ksqnu",
-				"updated": "20260811122156"
+				"updated": "20261002201736"
 			},
 			"Children": [
 				{
@@ -11386,6 +11386,10 @@
 								{
 									"Type": "NodeText",
 									"Data": "See below for related shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; the configured shortcut also converts a selected mind map block to this list type"
 								}
 							]
 						}
@@ -11431,6 +11435,10 @@
 								{
 									"Type": "NodeText",
 									"Data": "See below for related shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; the configured shortcut also converts a selected mind map block to this list type"
 								}
 							]
 						}
@@ -11503,6 +11511,10 @@
 								{
 									"Type": "NodeText",
 									"Data": "See below for related shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; the configured shortcut also converts a selected mind map block to this list type"
 								}
 							]
 						}

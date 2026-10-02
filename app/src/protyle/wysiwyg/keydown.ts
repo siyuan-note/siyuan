@@ -2289,7 +2289,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const targetSubtype: TListSubtype = isMatchCheck ? "t" : (isMatchList ? "u" : "o");
                     const listContext = hasBlockSelection ? undefined :
                         getListContext(selectsElement[0], protyle.wysiwyg.element);
-                    if (listContext) {
+                    if (type === "NodeMindmap" || type === "NodeList" &&
+                        selectsElement[0].getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") {
+                        turnsOneInto({
+                            protyle,
+                            nodeElement: selectsElement[0],
+                            id: selectsElement[0].dataset.nodeId,
+                            type: isMatchCheck ? "UL2TL" : (isMatchList ? "OL2UL" : "UL2OL"),
+                        });
+                    } else if (listContext) {
                         const isListItemFocused = Boolean(protyle.block.showAll &&
                             protyle.block.id === listContext.listItemElement.dataset.nodeId);
                         const action = getListShortcutAction(listContext, targetSubtype,

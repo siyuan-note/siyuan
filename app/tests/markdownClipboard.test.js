@@ -11,6 +11,8 @@ const sources = () => {
     return {
         clipboard: compile("protyle/util/markdownClipboard.ts"),
         paste: compile("protyle/util/paste.ts"),
+        localAssets: compile("protyle/upload/htmlLocalAssets.ts"),
+        uploadResult: compile("protyle/upload/uploadResult.ts"),
         fixture: JSON.parse(readFileSync(path.join(__dirname, "fixtures/doubao-clipboard.json"), "utf8")),
     };
 };
@@ -90,9 +92,13 @@ const runCases = async source => {
     };
 
     // 执行共享入口，覆盖桌面剪贴板事件、移动端读取结果以及保留来源格式选项。
-    const paste = async (mobile, preserveSourceFormat = false, restricted = false) => {
+    const paste = async (mobile, preserveSourceFormat = false, restricted = false, localAssetStatus, switched = false) => {
         let inserted;
         let htmlConversions = 0;
+        let convertedSource;
+        const pasteHTML = localAssetStatus ? '<p>Before<img src="file:///tmp/missing.png"></p>' +
+            '<table><tr><td>Table cell</td></tr></table><p><img src="file:///tmp/good.png"></p><p>After</p>' : html;
+        const pasteText = localAssetStatus ? "" : text;
         let checkedBlockDOM;
         const validated = new Error("validated restricted content");
         const block = document.createElement("div");
@@ -106,7 +112,7 @@ const runCases = async source => {
             "../runtimeCapabilities": {
                 getProtyleBlockDOMSanitizer: () => restricted ? value => value : undefined,
                 isProtyleRichHTMLPasteEnabled: () => restricted,
-                isProtyleUploadDisabled: () => true,
+                isProtyleUploadDisabled: () => !localAssetStatus,
                 areProtylePluginExtensionsEnabled: () => false,
                 getProtyleUnsupportedPasteBlocks: () => value => {
                     checkedBlockDOM = value;
@@ -116,6 +122,7 @@ const runCases = async source => {
             "../upload/insertPosition": {
                 createUploadInsertPosition: () => ({range}), captureUploadDocument: () => ({}),
                 isUploadInsertPositionAvailable: () => true, getAvailableUploadInsertRange: () => range,
+                isUploadDocumentAvailable: () => !switched,
             },
             "./selection": {getEditorRange: () => range},
             "./hasClosest": {hasClosestBlock: () => block},
@@ -127,12 +134,28 @@ const runCases = async source => {
             "./pasteSource": {extractCrossBlockPasteContext: value => ({html: value})},
             "./processCode": {processPasteCode: () => false, processRender: noop},
             "./inlineElementMarker": {stripSemanticMarkersFromRangeText: () => ""},
-            "../upload/htmlLocalAssets": {resolveHTMLAssetURLs: noop, getHTMLAssetSourceURL: () => undefined,
-                collectHTMLLocalAssets: () => [], removeHTMLLocalAssetPaths: noop},
-            "../upload/htmlEmbeddedAssets": {hasHTMLEmbeddedAssets: () => false, collectHTMLEmbeddedAssets: () => []},
-            "../../util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: false})},
+            "../upload/htmlLocalAssets": load(source.localAssets),
+            "../upload/uploadResult": load(source.uploadResult),
+            "../upload/htmlEmbeddedAssets": {hasHTMLEmbeddedAssets: () => false, collectHTMLEmbeddedAssets: () => [],
+                validateHTMLEmbeddedAssetSizes: noop},
+            "../../util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: !mobile && Boolean(localAssetStatus)})},
+            "../../dialog/message": {showMessage: noop},
+            "../upload": {uploadLocalFiles: (files, _protyle, _upload, options, success, complete) => {
+                check.equal(files.length, 2);
+                check.equal(options.fromHTMLPaste, true);
+                const result = {status: localAssetStatus, succFiles: localAssetStatus === "partial" ?
+                    [{index: 1, name: "good.png", path: "assets/good.png"}] : []};
+                if (localAssetStatus === "partial") {
+                    success({}, result);
+                }
+                complete(false, result);
+            }},
             "../../util/fetch": {fetchSyncPost: async (_url, request) => {
+                if (request.preflight) {
+                    return {code: 0, data: {converted: true, useHTML: true, normalizedHTML: request.dom}};
+                }
                 htmlConversions++;
+                convertedSource = request.dom;
                 return {code: 0, data: lute.HTML2BlockDOM(request.dom)};
             }},
             "./insertHTML": {insertHTML: value => { inserted = value; }},
@@ -143,12 +166,12 @@ const runCases = async source => {
             "../../util/highlightById": {scrollCenter: noop},
             "electron": {ipcRenderer: {invoke: async () => ""}},
         };
-        window.siyuan = {config: {editor: {pasteURLAutoConvert: false}}};
+        window.siyuan = {config: {editor: {pasteURLAutoConvert: false}}, languages: {uploadError: "upload failed"}};
         const protyle = {lute, hint: {}, options: {upload: {max: 1024 * 1024}},
             wysiwyg: {element: block}, toolbar: {getCurrentType: () => []}};
-        const event = mobile ? {textHTML: html, textPlain: text, siyuanHTML: "", target: block, preserveSourceFormat} : {
+        const event = mobile ? {textHTML: pasteHTML, textPlain: pasteText, siyuanHTML: "", target: block, preserveSourceFormat} : {
             target: block, stopPropagation: noop, preventDefault: noop, preserveSourceFormat,
-            clipboardData: {files: [], types: [], getData: type => ({"text/html": html, "text/plain": text}[type] || "")},
+            clipboardData: {files: [], types: [], getData: type => ({"text/html": pasteHTML, "text/plain": pasteText}[type] || "")},
         };
         try {
             await load(source.paste, mocks).paste(protyle, event);
@@ -158,7 +181,7 @@ const runCases = async source => {
                 throw error;
             }
         }
-        return {inserted, htmlConversions, checkedBlockDOM};
+        return {inserted, htmlConversions, checkedBlockDOM, convertedSource};
     };
     for (const mobile of [false, true]) {
         const result = await paste(mobile);
@@ -171,6 +194,28 @@ const runCases = async source => {
         const restrictedPreserved = await paste(mobile, true, true);
         check.doesNotMatch(restrictedPreserved.checkedBlockDOM, /data-type="inline-math"/);
     }
+    for (const status of ["partial", "failed", "canceled"]) {
+        const result = await paste(false, true, false, status);
+        if (status === "canceled") {
+            check.equal(result.inserted, undefined);
+            check.equal(result.htmlConversions, 0);
+            continue;
+        }
+        check.match(result.inserted, /Before/);
+        check.match(result.inserted, /After/);
+        check.match(result.inserted, /Table cell/);
+        check.match(result.inserted, /data-type="NodeTable"/);
+        check.doesNotMatch(result.convertedSource, /file:\/\//);
+        if (status === "partial") {
+            check.match(result.convertedSource, /src="assets\/good.png"/);
+        }
+    }
+    const mobileLocal = await paste(true, true, false, "failed");
+    check.match(mobileLocal.inserted, /Table cell/);
+    check.doesNotMatch(mobileLocal.convertedSource, /file:\/\//);
+    const switched = await paste(false, true, false, "partial", true);
+    check.equal(switched.inserted, undefined);
+    check.equal(switched.htmlConversions, 0);
     return "Markdown clipboard cases passed";
 };
 

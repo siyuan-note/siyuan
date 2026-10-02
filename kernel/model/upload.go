@@ -199,7 +199,8 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 			assetAbsPath = util.FileURLToLocalPath(assetAbsPath)
 		}
 		baseName := filepath.Base(assetAbsPath)
-		if validateHTMLPath && (util.IsSensitivePath(assetAbsPath) || EncryptedRawPathBoxID(assetAbsPath) != "") {
+		if validateHTMLPath && (util.IsSensitiveHTMLAssetPath(assetAbsPath) || EncryptedRawPathBoxID(assetAbsPath) != "") {
+			logging.LogWarnf("HTML paste local asset path is not allowed [%s]", assetAbsPath)
 			recordAssetUploadFailure(&failedFiles, index, baseName, errors.New("local asset path is not allowed"))
 			continue
 		}

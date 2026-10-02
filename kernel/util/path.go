@@ -451,7 +451,7 @@ func IsSensitivePath(p string) bool {
 	if p == "" {
 		return false
 	}
-	if isSensitivePath(p) {
+	if isSensitivePath(p, false) {
 		return true
 	}
 	// 仅对工作空间外的路径解析符号链接，防止用符号链接绕过黑名单指向敏感目标。
@@ -460,7 +460,27 @@ func IsSensitivePath(p string) bool {
 	}
 	resolved := ResolveLongestExistingParent(p)
 	if resolved != p {
-		if isSensitivePath(resolved) {
+		if isSensitivePath(resolved, false) {
+			return true
+		}
+	}
+	return false
+}
+
+// IsSensitiveHTMLAssetPath 允许剪贴板引用用户文档及系统临时文件，仍检查凭据、工作空间私有目录和符号链接目标。
+func IsSensitiveHTMLAssetPath(p string) bool {
+	if p == "" {
+		return false
+	}
+	return isSensitivePath(p, true) || isSensitivePath(ResolveLongestExistingParent(p), true)
+}
+
+func isHTMLAssetUserPath(p string) bool {
+	for _, root := range []string{os.TempDir(), HomeDir, systemHomeDir} {
+		if root == "" {
+			continue
+		}
+		if gulu.File.IsSubPath(root, p) || gulu.File.IsSubPath(ResolveLongestExistingParent(root), p) {
 			return true
 		}
 	}
@@ -468,7 +488,7 @@ func IsSensitivePath(p string) bool {
 }
 
 // isSensitivePath 执行敏感性黑名单匹配，必要时解析工作空间路径，但不解析目标路径。
-func isSensitivePath(p string) bool {
+func isSensitivePath(p string, htmlAsset bool) bool {
 	toCheckPathLower := filepath.Clean(strings.ToLower(p))
 	toCheckNameLower := filepath.Base(toCheckPathLower)
 	workspaceDir := WorkspaceDir
@@ -482,9 +502,9 @@ func isSensitivePath(p string) bool {
 		}
 	}
 
-	// 系统目录前缀检查仅对工作空间外的路径执行，工作空间内仍需检查配置、临时文件和凭据。
-	// iOS 沙箱及 Linux /var/home 下的合法工作空间可能位于 /var，需按工作空间边界判断。
-	if !inWorkspace {
+	// 工作空间和剪贴板引用的用户目录可位于系统目录中，但仍需检查配置、私有临时文件和凭据。
+	// iOS 沙箱、macOS 临时目录及 Linux /var/home 均按各自目录边界判断。
+	if !inWorkspace && !(htmlAsset && isHTMLAssetUserPath(p)) {
 		// 敏感目录前缀（UNIX 风格）
 		prefixes := []string{
 			"/.",

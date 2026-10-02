@@ -10,6 +10,7 @@ import {
     captureUploadDocument,
     createUploadInsertPosition,
     getAvailableUploadInsertRange,
+    isUploadDocumentAvailable,
     isUploadInsertPositionAvailable,
 } from "../upload/insertPosition";
 import {processPasteCode, processRender} from "./processCode";
@@ -44,7 +45,7 @@ import {
     type IHTMLEmbeddedAsset,
     validateHTMLEmbeddedAssetSizes,
 } from "../upload/htmlEmbeddedAssets";
-import {getCompleteAssetUploadPathsByInput} from "../upload/uploadResult";
+import {getAssetUploadPathsByInput, getCompleteAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
@@ -1439,24 +1440,31 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 preparedHTML = true;
             }
             if (localAssets.length > 0) {
-                let localAssetPaths: string[] | undefined;
+                let localAssetResult: Omit<IAssetUploadResult, "requestId" | "input"> | undefined;
                 await new Promise<void>(resolve => {
                     uploadLocalFiles(localAssets.map(item => ({path: item.path, size: null})), protyle, true, {
                         ...assetUploadOptions,
                         requiredFileCount: localAssets.length,
                         fromHTMLPaste: true,
                     }, (_response, result) => {
-                        localAssetPaths = getCompleteAssetUploadPathsByInput(localAssets.length, result);
-                    }, () => resolve());
+                        localAssetResult = result;
+                    }, (_succeeded, result) => {
+                        localAssetResult = result || localAssetResult;
+                        resolve();
+                    });
                 });
-                if (!localAssetPaths) {
+                if (!localAssetResult || localAssetResult.status === "canceled" ||
+                    !isUploadDocumentAvailable(protyle, assetUploadOptions.document)) {
                     return;
                 }
                 range = restorePasteInsertRange();
                 if (!range) {
                     return;
                 }
-                applyHTMLLocalAssetPaths(localAssets, localAssetPaths);
+                applyHTMLLocalAssetPaths(localAssets, getAssetUploadPathsByInput(localAssets.length, localAssetResult));
+                if (localAssetResult.status !== "success") {
+                    showMessage(window.siyuan.languages.uploadError);
+                }
             }
             let embeddedAssets: IHTMLEmbeddedAsset[];
             try {

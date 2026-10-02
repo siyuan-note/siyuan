@@ -254,10 +254,10 @@ func TestIsSensitivePathWorkspacePrefixBoundary(t *testing.T) {
 	t.Cleanup(func() { WorkspaceDir = originalWorkspace })
 	for _, parent := range parents {
 		WorkspaceDir = filepath.Join(parent, "siyuan-test-workspace")
-		if isSensitivePath(filepath.Join(WorkspaceDir, "data", "public.txt")) {
+		if isSensitivePath(filepath.Join(WorkspaceDir, "data", "public.txt"), false) {
 			t.Fatalf("workspace data should be allowed: %s", WorkspaceDir)
 		}
-		if !isSensitivePath(filepath.Join(WorkspaceDir+"-outside", "public.txt")) {
+		if !isSensitivePath(filepath.Join(WorkspaceDir+"-outside", "public.txt"), false) {
 			t.Fatalf("workspace prefix sibling should remain sensitive: %s", WorkspaceDir)
 		}
 	}

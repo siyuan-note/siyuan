@@ -50,6 +50,9 @@ type AssetPathsCloudUploadRequest struct {
 	IgnorePushMsg bool     `json:"ignorePushMsg" api:"optional,nullable"`
 }
 
+// InsertLocalAssetsRequest 在 fromHTMLPaste 为 true 时上传剪贴板引用的本地资源。
+// 允许系统临时目录及用户文档中的普通文件，仍拒绝凭据、工作空间私有路径及加密笔记本原始文件。
+// 单个文件失败通过 failedFiles 返回，其他文件的成功结果保留在 succFiles 中。
 type InsertLocalAssetsRequest struct {
 	AssetPaths    []string `json:"assetPaths"`
 	IsUpload      *bool    `json:"isUpload" api:"optional"`

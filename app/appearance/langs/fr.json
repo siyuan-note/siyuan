@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "Afficher les notes de version de la v${version}",
+	"bazaarReleaseNotesLatest": "Dernière",
+	"bazaarReleaseNotesEmpty": "Cette version n'a pas de notes de version",
+	"bazaarReleaseNotesUnavailable": "Les notes de version sont indisponibles",
 	"ocrModelDefault": "Valeur par défaut du modèle",
 	"ocrDetectionThreshold": "Seuil de détection",
 	"ocrBoxThreshold": "Seuil de confiance des zones de texte",

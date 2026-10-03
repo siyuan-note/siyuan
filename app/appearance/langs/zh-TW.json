@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "檢視 v${version} 的發行說明",
+	"bazaarReleaseNotesLatest": "最新",
+	"bazaarReleaseNotesEmpty": "這個版本沒有寫發行說明",
+	"bazaarReleaseNotesUnavailable": "讀不到發行說明",
 	"ocrModelDefault": "模型預設",
 	"ocrDetectionThreshold": "偵測閾值",
 	"ocrBoxThreshold": "文字框信賴度閾值",

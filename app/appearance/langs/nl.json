@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "Release-opmerkingen voor v${version} bekijken",
+	"bazaarReleaseNotesLatest": "Nieuwste",
+	"bazaarReleaseNotesEmpty": "Deze versie heeft geen release-opmerkingen",
+	"bazaarReleaseNotesUnavailable": "Release-opmerkingen zijn niet beschikbaar",
 	"ocrModelDefault": "Modelstandaard",
 	"ocrDetectionThreshold": "Detectiedrempel",
 	"ocrBoxThreshold": "Betrouwbaarheidsdrempel voor tekstvakken",

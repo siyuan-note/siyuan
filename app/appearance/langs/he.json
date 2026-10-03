@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "הצג את הערות הגרסה של v${version}",
+	"bazaarReleaseNotesLatest": "האחרונה",
+	"bazaarReleaseNotesEmpty": "לגרסה הזו אין הערות גרסה",
+	"bazaarReleaseNotesUnavailable": "הערות הגרסה אינן זמינות",
 	"ocrModelDefault": "ברירת המחדל של המודל",
 	"ocrDetectionThreshold": "סף זיהוי אזורים",
 	"ocrBoxThreshold": "סף ביטחון לתיבות טקסט",

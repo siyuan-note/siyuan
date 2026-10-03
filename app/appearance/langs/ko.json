@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "v${version} 릴리스 노트 보기",
+	"bazaarReleaseNotesLatest": "최신",
+	"bazaarReleaseNotesEmpty": "이 버전에는 릴리스 노트가 없습니다",
+	"bazaarReleaseNotesUnavailable": "릴리스 노트를 불러올 수 없습니다",
 	"ocrModelDefault": "모델 기본값",
 	"ocrDetectionThreshold": "검출 임계값",
 	"ocrBoxThreshold": "텍스트 영역 신뢰도 임계값",

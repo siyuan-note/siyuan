@@ -16897,6 +16897,55 @@
       ],
       "additionalProperties": false
     },
+    "BazaarRelease": {
+      "type": "object",
+      "properties": {
+        "html": {
+          "type": "string"
+        },
+        "publishedAt": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "html",
+        "publishedAt",
+        "tag"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarReleasesData": {
+      "type": "object",
+      "properties": {
+        "releases": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarRelease"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "releases"
+      ],
+      "additionalProperties": false
+    },
     "BazaarStatusBar": {
       "type": "object",
       "properties": {
@@ -26651,6 +26700,18 @@
       "required": [
         "packageNames",
         "packageType"
+      ],
+      "additionalProperties": false
+    },
+    "GetBazaarPackageReleasesRequestInput": {
+      "type": "object",
+      "properties": {
+        "repoURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "repoURL"
       ],
       "additionalProperties": false
     },
@@ -127132,6 +127193,82 @@
               },
               "data": {
                 "$ref": "#/$defs/BazaarRatingsData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarPackageReleases",
+      "handler": "getBazaarPackageReleases",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarPackageReleasesRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarReleasesData"
               },
               "msg": {
                 "type": "string"

@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "Pokaż informacje o wydaniu v${version}",
+	"bazaarReleaseNotesLatest": "Najnowsze",
+	"bazaarReleaseNotesEmpty": "Ta wersja nie ma informacji o wydaniu",
+	"bazaarReleaseNotesUnavailable": "Informacje o wydaniu są niedostępne",
 	"ocrModelDefault": "Domyślna wartość modelu",
 	"ocrDetectionThreshold": "Próg wykrywania",
 	"ocrBoxThreshold": "Próg pewności obszarów tekstu",

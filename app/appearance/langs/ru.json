@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "Показать примечания к выпуску v${version}",
+	"bazaarReleaseNotesLatest": "Последняя",
+	"bazaarReleaseNotesEmpty": "У этой версии нет примечаний к выпуску",
+	"bazaarReleaseNotesUnavailable": "Примечания к выпуску недоступны",
 	"ocrModelDefault": "По умолчанию для модели",
 	"ocrDetectionThreshold": "Порог обнаружения",
 	"ocrBoxThreshold": "Порог уверенности текстовых областей",

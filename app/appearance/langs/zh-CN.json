@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "查看 v${version} 的发行说明",
+	"bazaarReleaseNotesLatest": "最新",
+	"bazaarReleaseNotesEmpty": "这个版本没有写发行说明",
+	"bazaarReleaseNotesUnavailable": "读不到发行说明",
 	"ocrModelDefault": "模型默认",
 	"ocrDetectionThreshold": "检测阈值",
 	"ocrBoxThreshold": "文本框置信度阈值",

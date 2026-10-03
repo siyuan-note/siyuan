@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "Ver as notas da versão da v${version}",
+	"bazaarReleaseNotesLatest": "Mais recente",
+	"bazaarReleaseNotesEmpty": "Esta versão não possui notas da versão",
+	"bazaarReleaseNotesUnavailable": "As notas da versão não estão disponíveis",
 	"ocrModelDefault": "Padrão do modelo",
 	"ocrDetectionThreshold": "Limiar de detecção",
 	"ocrBoxThreshold": "Limiar de confiança das caixas de texto",

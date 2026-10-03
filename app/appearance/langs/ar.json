@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "عرض ملاحظات الإصدار v${version}",
+	"bazaarReleaseNotesLatest": "الأحدث",
+	"bazaarReleaseNotesEmpty": "لا تحتوي هذه النسخة على ملاحظات الإصدار",
+	"bazaarReleaseNotesUnavailable": "ملاحظات الإصدار غير متاحة",
 	"ocrModelDefault": "القيمة الافتراضية للنموذج",
 	"ocrDetectionThreshold": "عتبة الكشف",
 	"ocrBoxThreshold": "عتبة الثقة لمربعات النص",

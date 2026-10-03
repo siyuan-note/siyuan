@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "v${version} sürüm notlarını görüntüle",
+	"bazaarReleaseNotesLatest": "En son",
+	"bazaarReleaseNotesEmpty": "Bu sürümde sürüm notu yok",
+	"bazaarReleaseNotesUnavailable": "Sürüm notları kullanılamıyor",
 	"ocrModelDefault": "Model varsayılanı",
 	"ocrDetectionThreshold": "Algılama eşiği",
 	"ocrBoxThreshold": "Metin kutusu güven eşiği",

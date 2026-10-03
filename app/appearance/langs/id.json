@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "Lihat catatan rilis untuk v${version}",
+	"bazaarReleaseNotesLatest": "Terbaru",
+	"bazaarReleaseNotesEmpty": "Versi ini tidak memiliki catatan rilis",
+	"bazaarReleaseNotesUnavailable": "Catatan rilis tidak tersedia",
 	"ocrModelDefault": "Bawaan model",
 	"ocrDetectionThreshold": "Ambang deteksi",
 	"ocrBoxThreshold": "Ambang keyakinan kotak teks",

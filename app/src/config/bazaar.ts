@@ -1033,7 +1033,7 @@ type="checkbox">
 </section>`;
         const marketSection = available ? `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarMarketInfo}</div>
-    ${bazaar._genReadmeMetaRow(window.siyuan.languages.version, `v${available.version}`)}
+    ${bazaar._genReadmeMetaRow(window.siyuan.languages.version, `<button type="button" class="item__version-link ariaLabel" data-type="release-notes" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.bazaarReleaseNotesTip.replace("${version}", available.version))}">v${escapeHtml(available.version)}</button>`, true)}
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.releaseDate, available.hUpdated)}
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.pkgSize, available.hSize)}
     ${available.keywords?.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.keywords, bazaar._genReadmeKeywords(available.keywords), true) : ""}

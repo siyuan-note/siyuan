@@ -1,0 +1,361 @@
+name: Desktop build
+
+on:
+  workflow_call:
+    inputs:
+      config:
+        required: true
+        type: string
+      packageManager:
+        required: true
+        type: string
+      testing_ref:
+        default: ""
+        type: string
+
+jobs:
+  build:
+    runs-on: ${{ fromJSON(inputs.config).os }}
+    name: ${{ fromJSON(inputs.config).name }}
+    env:
+      SIYUAN_E2E_SHARDS: ${{ fromJSON(inputs.config).e2e_shards }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+
+      - name: Set up MSYS2 UCRT64
+        uses: msys2/setup-msys2@v2
+        if: "contains( fromJSON(inputs.config).goos, 'windows')"
+        with:
+          msystem: UCRT64
+          install: p7zip mingw-w64-ucrt-x86_64-lua
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
+          cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
+          cache: true
+      - run: go version
+
+      - name: Set up goversioninfo
+        run: go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo && go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+        if: "contains( fromJSON(inputs.config).goos, 'windows')"
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
+        env:
+          GO111MODULE: on
+          CGO_ENABLED: 1
+          GOOS: ${{ fromJSON(inputs.config).goos }}
+          GOPATH: ${{ github.workspace }}/go
+          GOARCH: ${{ fromJSON(inputs.config).goarch }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install Node pnpm
+        run: npm install -g ${{ inputs.packageManager }}
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Get pnpm store path
+        id: pnpm-store
+        shell: bash
+        run: |
+          STORE_PATH=$(pnpm store path --silent)
+          echo "path=$STORE_PATH" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('go/src/github.com/{0}/app/pnpm-lock.yaml', github.repository)) }}
+          restore-keys: pnpm-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Install Node Dependencies
+        run: pnpm install --no-frozen-lockfile
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Install Electron Binary
+        run: node node_modules/electron/install.js
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Building UI
+        run: pnpm run build
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Clean Build and Kernel Directories
+        run: |
+          rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build"
+          rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel"*
+        shell: bash
+
+      - name: Generate Icon Resource and Properties/Version Info For Windows
+        run: ${{ github.workspace }}\go\${{ fromJSON(inputs.config).gobin }}\goversioninfo -platform-specific=true -icon="resource\icon.ico" -manifest="resource\goversioninfo.exe.manifest"
+        if: "contains( fromJSON(inputs.config).goos, 'windows')"
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
+
+      - name: Building Kernel
+        run: go build -tags "fts5 sqlcipher" -o "${{ fromJSON(inputs.config).kernel_path }}" -ldflags "${{ fromJSON(inputs.config).build_args_prefix }} github.com/${{ github.repository }}/kernel/util.${{ fromJSON(inputs.config).build_args_suffix }}"
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
+        env:
+          GO111MODULE: on
+          CGO_ENABLED: 1
+          GOOS: ${{ fromJSON(inputs.config).goos }}
+          GOPATH: ${{ github.workspace }}/go
+          GOARCH: ${{ fromJSON(inputs.config).goarch }}
+
+      - name: Snapshot raw ARM editor runtime
+        id: editor-runtime
+        if: fromJSON(inputs.config).goos == 'darwin' && fromJSON(inputs.config).goarch == 'arm64'
+        continue-on-error: true
+        shell: bash
+        env:
+          TESTING_REF: ${{ inputs.testing_ref }}
+        run: |
+          [[ "$TESTING_REF" =~ ^[0-9a-f]{40}$ ]]
+          test "$(uname -m)" = arm64
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -x app/kernel-darwin-arm64/SiYuan-Kernel
+          test -s app/stage/build/desktop/index.html
+          test -d app/node_modules
+          mkdir -p "$RUNNER_TEMP/editor-runtime"
+          # 在打包脚本修改资源之前封存完整 app，tar 保留依赖链接和内核可执行权限。
+          tar -czf "$RUNNER_TEMP/editor-runtime/runtime.tar.gz" app
+          node -e 'require("node:fs").writeFileSync(process.argv[1], JSON.stringify({productSHA: process.env.GITHUB_SHA, testingSHA: process.env.TESTING_REF}, null, 2) + "\n")' \
+            "$RUNNER_TEMP/editor-runtime/revisions.json"
+          (cd "$RUNNER_TEMP/editor-runtime" && shasum -a 256 runtime.tar.gz revisions.json > SHA256SUMS)
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+
+      - name: Upload raw ARM editor runtime
+        if: steps.editor-runtime.outcome == 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: editor-runtime-macos-arm64
+          path: ${{ runner.temp }}/editor-runtime/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 2
+
+      - name: Checkout siyuan-testing
+        if: fromJSON(inputs.config).e2e_shards != ''
+        continue-on-error: true
+        uses: actions/checkout@v6
+        with:
+          repository: siyuan-note/siyuan-testing
+          ref: main
+          path: ${{ github.workspace }}/siyuan-testing
+
+      - name: Install End-to-End Test Dependencies
+        if: fromJSON(inputs.config).e2e_shards != ''
+        continue-on-error: true
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ github.workspace }}/siyuan-testing
+
+      - name: Validate End-to-End Test Shards
+        if: fromJSON(inputs.config).e2e_shards != ''
+        shell: bash
+        run: |
+          pnpm run typecheck
+          # 每个 E2E job 只配置自己的 shard，校验脚本需要全量 shard 列表
+          # 才能验证三个 shard 的并集覆盖全部测试且无重复
+          unset SIYUAN_E2E_SHARDS
+          pnpm run test:shards
+        working-directory: ${{ github.workspace }}/siyuan-testing
+
+      - name: Start Kernel for End-to-End Tests
+        if: fromJSON(inputs.config).e2e_shards != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          APP_DIR="${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app"
+          KERNEL_PATH="${{ fromJSON(inputs.config).kernel_path }}"
+          for shard_config in ${SIYUAN_E2E_SHARDS}; do
+            shard="${shard_config%:*}"
+            port="${shard_config#*:}"
+            workspace="${USERPROFILE:-${HOME}}/SiYuan-Testing"
+            mkdir -p "${workspace}"
+            "${KERNEL_PATH}" --workspace="${workspace}" serve --wd="${APP_DIR}" --port="${port}" \
+              > "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel-console.log" 2>&1 &
+            echo "$!" > "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel.pid"
+          done
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
+
+      - name: Wait for End-to-End Test Kernels
+        if: fromJSON(inputs.config).e2e_shards != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          wait_for_kernel() {
+            local pid="$1"
+            local port="$2"
+            local log_path="$3"
+            local boot_progress_path="${RUNNER_TEMP}/siyuan-e2e-${port}-boot-progress.json"
+            for attempt in {1..60}; do
+              if curl --fail --silent --output "${boot_progress_path}" --request POST \
+                "http://127.0.0.1:${port}/api/system/bootProgress" && \
+                node -e 'try { const data = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); process.exit(data.data?.progress >= 100 ? 0 : 1); } catch { process.exit(1); }' \
+                  "${boot_progress_path}"; then
+                rm -f "${boot_progress_path}"
+                return
+              fi
+              if ! kill -0 "${pid}" 2>/dev/null; then
+                cat "${log_path}"
+                return 1
+              fi
+              sleep 1
+            done
+            cat "${log_path}"
+            if [ -f "${boot_progress_path}" ]; then
+              cat "${boot_progress_path}"
+            fi
+            return 1
+          }
+          for shard_config in ${SIYUAN_E2E_SHARDS}; do
+            shard="${shard_config%:*}"
+            port="${shard_config#*:}"
+            pid="$(cat "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel.pid")"
+            wait_for_kernel "${pid}" "${port}" \
+              "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel-console.log"
+          done
+
+      - name: Run End-to-End Tests
+        if: fromJSON(inputs.config).e2e_shards != ''
+        continue-on-error: true
+        timeout-minutes: 50
+        shell: bash
+        run: |
+          TEST_PIDS=()
+          TEST_SHARDS=()
+          for shard_config in ${SIYUAN_E2E_SHARDS}; do
+            shard="${shard_config%:*}"
+            port="${shard_config#*:}"
+            (
+              # UI 测试共享同一内核及全局界面状态，必须串行运行
+              # 编辑器分组用例较多，保留 45 分钟总时限；其他分组保持 25 分钟
+              # 外层步骤保留 5 分钟余量，单项用例仍使用测试配置中的超时
+              test_timeout=1500000
+              if [ "${shard}" = "editor" ]; then
+                test_timeout=2700000
+              fi
+              SIYUAN_BASE_URL="http://127.0.0.1:${port}" \
+              SIYUAN_E2E_SHARD="${shard}" \
+              SIYUAN_TEST_RESULTS_DIR="test-results-${shard}" \
+              PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-${shard}" \
+              pnpm exec playwright test --config=config/playwright.focused.config.ts \
+                --global-timeout="${test_timeout}" --workers=1 \
+                --reporter=line,html --output="test-results-${shard}"
+            ) &
+            TEST_PID=$!
+            TEST_PIDS+=("${TEST_PID}")
+            TEST_SHARDS+=("${shard}")
+          done
+          TEST_STATUS=0
+          set +e
+          for index in "${!TEST_PIDS[@]}"; do
+            wait "${TEST_PIDS[${index}]}"
+            shard_status=$?
+            if [ "${shard_status}" -ne 0 ]; then
+              echo "::error title=End-to-End shard failed::${TEST_SHARDS[${index}]} exited with ${shard_status}"
+              TEST_STATUS=1
+            fi
+          done
+          set -e
+          exit "${TEST_STATUS}"
+        working-directory: ${{ github.workspace }}/siyuan-testing
+
+      - name: Stop End-to-End Test Kernels
+        if: always() && fromJSON(inputs.config).e2e_shards != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          stop_kernel() {
+            local pid="$1"
+            if [ -z "${pid}" ] || ! kill -0 "${pid}" 2>/dev/null; then
+              return
+            fi
+            kill -TERM "${pid}"
+            for attempt in {1..30}; do
+              if ! kill -0 "${pid}" 2>/dev/null; then
+                return
+              fi
+              sleep 1
+            done
+            kill -KILL "${pid}"
+          }
+          for shard_config in ${SIYUAN_E2E_SHARDS}; do
+            shard="${shard_config%:*}"
+            pid_path="${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel.pid"
+            if [ -f "${pid_path}" ]; then
+              stop_kernel "$(cat "${pid_path}")"
+            fi
+          done
+
+      - name: Collect End-to-End Test Logs
+        if: always() && fromJSON(inputs.config).e2e_shards != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          log_dir="${{ github.workspace }}/siyuan-testing/kernel-logs"
+          mkdir -p "${log_dir}"
+          cp "${RUNNER_TEMP}"/siyuan-e2e-*-kernel-console.log "${log_dir}/" 2>/dev/null || true
+          workspace="${USERPROFILE:-${HOME}}/SiYuan-Testing"
+          if [ -f "${workspace}/temp/siyuan.log" ]; then
+            cp "${workspace}/temp/siyuan.log" "${log_dir}/siyuan.log"
+          fi
+
+      - name: Upload End-to-End Test Results
+        if: always() && fromJSON(inputs.config).e2e_shards != ''
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: siyuan-e2e-${{ fromJSON(inputs.config).suffix }}
+          path: |
+            ${{ github.workspace }}/siyuan-testing/playwright-report-*
+            ${{ github.workspace }}/siyuan-testing/test-results-*
+            ${{ github.workspace }}/siyuan-testing/kernel-logs
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Install RPM build tools
+        if: fromJSON(inputs.config).goos == 'linux'
+        run: sudo apt-get install -y rpm
+
+      - name: Building Electron App
+        run: pnpm run ${{ fromJSON(inputs.config).electron_args }}
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Verify RPM Package Contents
+        if: fromJSON(inputs.config).goos == 'linux'
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+        run: |
+          for package in build/*.rpm; do
+            test -f "$package"
+            build_id_entries="$(rpm -qpl "$package" | awk '/^\/usr\/lib\/\.build-id(\/|$)/')"
+            if [ -n "$build_id_entries" ]; then
+              echo "Unexpected build-id entries in $package:"
+              echo "$build_id_entries"
+              exit 1
+            fi
+          done
+
+      - name: Upload Build Artifacts (Non-Linux)
+        if: fromJSON(inputs.config).goos != 'linux'
+        uses: actions/upload-artifact@v7
+        with:
+          name: siyuan-${{ fromJSON(inputs.config).suffix }}
+          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-${{ fromJSON(inputs.config).suffix }}
+
+      - name: Upload Build Artifacts (Linux)
+        if: fromJSON(inputs.config).goos == 'linux'
+        uses: actions/upload-artifact@v7
+        with:
+          name: siyuan-linux
+          path: |
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.AppImage
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.tar.gz
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.deb
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.rpm

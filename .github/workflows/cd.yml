@@ -19,11 +19,22 @@ jobs:
       release_title: ${{ steps.release_info.outputs.release_title }}
       version: ${{ steps.version.outputs.value }}
       android_ref: ${{ steps.android_version.outputs.ref }}
+      testing_ref: ${{ steps.testing_ref.outputs.sha }}
       packageManager: ${{ steps.packageManager.outputs.value }}
       release_body: ${{ steps.release_info.outputs.release_body }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
+      - name: Resolve editor testing revision
+        id: testing_ref
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SHA=$(gh api repos/siyuan-note/siyuan-testing/commits/main --jq .sha)
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -122,6 +133,9 @@ jobs:
         run: python -m unittest discover -s scripts -p "test_check_lang_keys.py"
       - name: Check language keys and kernel placeholders
         run: python scripts/check-lang-keys.py
+      - name: Test editor workflow safeguards
+        continue-on-error: true
+        run: python -m unittest discover -s scripts -p "test_editor_e2e_workflow.py"
 
   contracts:
     name: API contracts and kernel tests
@@ -204,13 +218,13 @@ jobs:
         working-directory: app
       - name: Test OCR build and resource scripts
         run: python -m unittest discover -s scripts -p "test_*ocr*.py"
+      - name: Test editor group selection
+        continue-on-error: true
+        run: node --test scripts/test-prepare-editor-e2e-groups.mjs
 
   build:
-    runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.name }}
     needs: [prepare, languages, contracts, frontend-tests]
-    env:
-      SIYUAN_E2E_SHARDS: ${{ matrix.config.e2e_shards }}
     strategy:
       matrix:
         config:
@@ -234,16 +248,6 @@ jobs:
             goarch: "amd64"
             suffix: "mac.dmg"
             e2e_shards: "main:6806"
-          - os: macos-latest
-            name: macos build mac-arm64.dmg
-            kernel_path: "../app/kernel-darwin-arm64/SiYuan-Kernel"
-            build_args_prefix: "-s -w -X"
-            build_args_suffix: "Mode=prod"
-            electron_args: "dist-darwin-arm64"
-            goos: "darwin"
-            goarch: "arm64"
-            suffix: "mac-arm64.dmg"
-            e2e_shards: "editor:6807"
           - os: windows-latest
             name: windows build win.exe
             kernel_path: "../app/kernel/SiYuan-Kernel.exe"
@@ -256,313 +260,201 @@ jobs:
             suffix: "win.exe"
             e2e_shards: "attribute-view:6808"
 
+    uses: ./.github/workflows/desktop-build.yml
+    with:
+      config: ${{ toJSON(matrix.config) }}
+      packageManager: ${{ needs.prepare.outputs.packageManager }}
+
+  build_macos_arm64:
+    name: macos build mac-arm64.dmg
+    # ARM 独立完成构建和打包后启动 editor，避免等待其他桌面平台的整个矩阵。
+    needs: [prepare, languages, contracts, frontend-tests]
+    uses: ./.github/workflows/desktop-build.yml
+    with:
+      config: >-
+        {"os":"macos-latest","name":"macos build mac-arm64.dmg","kernel_path":"../app/kernel-darwin-arm64/SiYuan-Kernel","build_args_prefix":"-s -w -X","build_args_suffix":"Mode=prod","electron_args":"dist-darwin-arm64","goos":"darwin","goarch":"arm64","suffix":"mac-arm64.dmg","e2e_shards":""}
+      packageManager: ${{ needs.prepare.outputs.packageManager }}
+      testing_ref: ${{ needs.prepare.outputs.testing_ref }}
+
+  editor_e2e:
+    name: macos ARM editor group ${{ matrix.group }}
+    # 两组使用独立 runner 和工作空间，测试结果不回写发布产物。
+    needs: [prepare, build_macos_arm64]
+    runs-on: macos-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [1, 2]
+    env:
+      SIYUAN_E2E_SHARD: editor
+      SIYUAN_BASE_URL: http://127.0.0.1:6807
+      SIYUAN_TEST_RESULTS_DIR: test-results-editor-${{ matrix.group }}
+      PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-editor-${{ matrix.group }}
+      PLAYWRIGHT_JSON_OUTPUT_FILE: editor-results-${{ matrix.group }}.json
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout test orchestration
+        uses: actions/checkout@v6
         with:
-          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+          path: source
 
-      - name: Set up MSYS2 UCRT64
-        uses: msys2/setup-msys2@v2
-        if: "contains( matrix.config.goos, 'windows')"
-        with:
-          msystem: UCRT64
-          install: p7zip mingw-w64-ucrt-x86_64-lua
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
-          cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
-          cache: true
-      - run: go version
-
-      - name: Set up goversioninfo
-        run: go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo && go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-        if: "contains( matrix.config.goos, 'windows')"
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
+      - name: Verify pinned revisions
+        id: revisions
+        shell: bash
         env:
-          GO111MODULE: on
-          CGO_ENABLED: 1
-          GOOS: ${{ matrix.config.goos }}
-          GOPATH: ${{ github.workspace }}/go
-          GOARCH: ${{ matrix.config.goarch }}
+          TESTING_REF: ${{ needs.prepare.outputs.testing_ref }}
+        run: |
+          [[ "$TESTING_REF" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git -C source rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(uname -m)" = arm64
+
+      - name: Checkout pinned siyuan-testing
+        uses: actions/checkout@v6
+        with:
+          repository: siyuan-note/siyuan-testing
+          ref: ${{ needs.prepare.outputs.testing_ref }}
+          path: siyuan-testing
 
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
           node-version: 24
 
-      - name: Install Node pnpm
-        run: npm install -g ${{ needs.prepare.outputs.packageManager }}
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
-
-      - name: Get pnpm store path
-        id: pnpm-store
-        shell: bash
+      - name: Install test dependencies
+        id: dependencies
         run: |
-          STORE_PATH=$(pnpm store path --silent)
-          echo "path=$STORE_PATH" >> "$GITHUB_OUTPUT"
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+          npm install --global ${{ needs.prepare.outputs.packageManager }}
+          pnpm install --frozen-lockfile
+        working-directory: siyuan-testing
 
-      - name: Cache pnpm store
-        uses: actions/cache@v5
+      - name: Download raw ARM editor runtime
+        id: download
+        uses: actions/download-artifact@v8
         with:
-          path: ${{ steps.pnpm-store.outputs.path }}
-          key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('go/src/github.com/{0}/app/pnpm-lock.yaml', github.repository)) }}
-          restore-keys: pnpm-${{ runner.os }}-${{ runner.arch }}-
+          name: editor-runtime-macos-arm64
+          path: editor-runtime
 
-      - name: Install Node Dependencies
-        run: pnpm install --no-frozen-lockfile
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
-
-      - name: Install Electron Binary
-        run: node node_modules/electron/install.js
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
-
-      - name: Building UI
-        run: pnpm run build
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
-
-      - name: Clean Build and Kernel Directories
-        run: |
-          rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build"
-          rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel"*
+      - name: Verify and restore editor runtime
+        id: restore
         shell: bash
-
-      - name: Generate Icon Resource and Properties/Version Info For Windows
-        run: ${{ github.workspace }}\go\${{ matrix.config.gobin }}\goversioninfo -platform-specific=true -icon="resource\icon.ico" -manifest="resource\goversioninfo.exe.manifest"
-        if: "contains( matrix.config.goos, 'windows')"
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
-
-      - name: Building Kernel
-        run: go build -tags "fts5 sqlcipher" -o "${{ matrix.config.kernel_path }}" -ldflags "${{ matrix.config.build_args_prefix }} github.com/${{ github.repository }}/kernel/util.${{ matrix.config.build_args_suffix }}"
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
         env:
-          GO111MODULE: on
-          CGO_ENABLED: 1
-          GOOS: ${{ matrix.config.goos }}
-          GOPATH: ${{ github.workspace }}/go
-          GOARCH: ${{ matrix.config.goarch }}
+          TESTING_REF: ${{ needs.prepare.outputs.testing_ref }}
+        run: |
+          (cd editor-runtime && shasum -a 256 --check SHA256SUMS)
+          node -e 'const r = require("./editor-runtime/revisions.json"); if (r.productSHA !== process.env.GITHUB_SHA || r.testingSHA !== process.env.TESTING_REF) throw new Error("Runtime revision mismatch");'
+          test "$(git -C siyuan-testing rev-parse HEAD)" = "$TESTING_REF"
+          mkdir runtime
+          tar -xzf editor-runtime/runtime.tar.gz -C runtime
+          test -x runtime/app/kernel-darwin-arm64/SiYuan-Kernel
+          test -s runtime/app/stage/build/desktop/index.html
+          test -d runtime/app/node_modules
 
-      - name: Checkout siyuan-testing
-        if: matrix.config.e2e_shards != ''
-        continue-on-error: true
-        uses: actions/checkout@v6
-        with:
-          repository: siyuan-note/siyuan-testing
-          ref: main
-          path: ${{ github.workspace }}/siyuan-testing
-
-      - name: Install End-to-End Test Dependencies
-        if: matrix.config.e2e_shards != ''
-        continue-on-error: true
-        run: pnpm install --frozen-lockfile
-        working-directory: ${{ github.workspace }}/siyuan-testing
-
-      - name: Validate End-to-End Test Shards
-        if: matrix.config.e2e_shards != ''
+      - name: Validate editor groups and test coverage
+        id: coverage
         shell: bash
         run: |
           pnpm run typecheck
-          # 每个 E2E job 只配置自己的 shard，校验脚本需要全量 shard 列表
-          # 才能验证三个 shard 的并集覆盖全部测试且无重复
+          # 先检查现有三大分组，再校验 editor 两组的实际用例并集。
           unset SIYUAN_E2E_SHARDS
           pnpm run test:shards
-        working-directory: ${{ github.workspace }}/siyuan-testing
+          node ../source/scripts/prepare-editor-e2e-groups.mjs "$PWD"
+        working-directory: siyuan-testing
 
-      - name: Start Kernel for End-to-End Tests
-        if: matrix.config.e2e_shards != ''
-        continue-on-error: true
+      - name: Start and wait for editor kernel
+        id: kernel
         shell: bash
         run: |
-          APP_DIR="${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app"
-          KERNEL_PATH="${{ matrix.config.kernel_path }}"
-          for shard_config in ${SIYUAN_E2E_SHARDS}; do
-            shard="${shard_config%:*}"
-            port="${shard_config#*:}"
-            workspace="${USERPROFILE:-${HOME}}/SiYuan-Testing"
-            mkdir -p "${workspace}"
-            "${KERNEL_PATH}" --workspace="${workspace}" serve --wd="${APP_DIR}" --port="${port}" \
-              > "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel-console.log" 2>&1 &
-            echo "$!" > "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel.pid"
-          done
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
-
-      - name: Wait for End-to-End Test Kernels
-        if: matrix.config.e2e_shards != ''
-        continue-on-error: true
-        shell: bash
-        run: |
-          wait_for_kernel() {
-            local pid="$1"
-            local port="$2"
-            local log_path="$3"
-            local boot_progress_path="${RUNNER_TEMP}/siyuan-e2e-${port}-boot-progress.json"
-            for attempt in {1..60}; do
-              if curl --fail --silent --output "${boot_progress_path}" --request POST \
-                "http://127.0.0.1:${port}/api/system/bootProgress" && \
-                node -e 'try { const data = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); process.exit(data.data?.progress >= 100 ? 0 : 1); } catch { process.exit(1); }' \
-                  "${boot_progress_path}"; then
-                rm -f "${boot_progress_path}"
-                return
-              fi
-              if ! kill -0 "${pid}" 2>/dev/null; then
-                cat "${log_path}"
-                return 1
-              fi
-              sleep 1
-            done
-            cat "${log_path}"
-            if [ -f "${boot_progress_path}" ]; then
-              cat "${boot_progress_path}"
+          mkdir -p "$HOME/SiYuan-Testing"
+          "$GITHUB_WORKSPACE/runtime/app/kernel-darwin-arm64/SiYuan-Kernel" \
+            --workspace="$HOME/SiYuan-Testing" serve --wd="$GITHUB_WORKSPACE/runtime/app" --port=6807 \
+            > "$RUNNER_TEMP/editor-kernel-console.log" 2>&1 &
+          pid=$!
+          echo "$pid" > "$RUNNER_TEMP/editor-kernel.pid"
+          for attempt in {1..60}; do
+            if curl --fail --silent --output "$RUNNER_TEMP/editor-boot.json" --request POST \
+              http://127.0.0.1:6807/api/system/bootProgress && \
+              node -e 'try { const d = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); process.exit(d.data?.progress >= 100 ? 0 : 1); } catch { process.exit(1); }' "$RUNNER_TEMP/editor-boot.json"; then
+              exit 0
             fi
-            return 1
-          }
-          for shard_config in ${SIYUAN_E2E_SHARDS}; do
-            shard="${shard_config%:*}"
-            port="${shard_config#*:}"
-            pid="$(cat "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel.pid")"
-            wait_for_kernel "${pid}" "${port}" \
-              "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel-console.log"
-          done
-
-      - name: Run End-to-End Tests
-        if: matrix.config.e2e_shards != ''
-        continue-on-error: true
-        timeout-minutes: 50
-        shell: bash
-        run: |
-          TEST_PIDS=()
-          TEST_SHARDS=()
-          for shard_config in ${SIYUAN_E2E_SHARDS}; do
-            shard="${shard_config%:*}"
-            port="${shard_config#*:}"
-            (
-              # UI 测试共享同一内核及全局界面状态，必须串行运行
-              # 编辑器分组用例较多，保留 45 分钟总时限；其他分组保持 25 分钟
-              # 外层步骤保留 5 分钟余量，单项用例仍使用测试配置中的超时
-              test_timeout=1500000
-              if [ "${shard}" = "editor" ]; then
-                test_timeout=2700000
-              fi
-              SIYUAN_BASE_URL="http://127.0.0.1:${port}" \
-              SIYUAN_E2E_SHARD="${shard}" \
-              SIYUAN_TEST_RESULTS_DIR="test-results-${shard}" \
-              PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-${shard}" \
-              pnpm exec playwright test --config=config/playwright.focused.config.ts \
-                --global-timeout="${test_timeout}" --workers=1 \
-                --reporter=line,html --output="test-results-${shard}"
-            ) &
-            TEST_PID=$!
-            TEST_PIDS+=("${TEST_PID}")
-            TEST_SHARDS+=("${shard}")
-          done
-          TEST_STATUS=0
-          set +e
-          for index in "${!TEST_PIDS[@]}"; do
-            wait "${TEST_PIDS[${index}]}"
-            shard_status=$?
-            if [ "${shard_status}" -ne 0 ]; then
-              echo "::error title=End-to-End shard failed::${TEST_SHARDS[${index}]} exited with ${shard_status}"
-              TEST_STATUS=1
-            fi
-          done
-          set -e
-          exit "${TEST_STATUS}"
-        working-directory: ${{ github.workspace }}/siyuan-testing
-
-      - name: Stop End-to-End Test Kernels
-        if: always() && matrix.config.e2e_shards != ''
-        continue-on-error: true
-        shell: bash
-        run: |
-          stop_kernel() {
-            local pid="$1"
-            if [ -z "${pid}" ] || ! kill -0 "${pid}" 2>/dev/null; then
-              return
-            fi
-            kill -TERM "${pid}"
-            for attempt in {1..30}; do
-              if ! kill -0 "${pid}" 2>/dev/null; then
-                return
-              fi
-              sleep 1
-            done
-            kill -KILL "${pid}"
-          }
-          for shard_config in ${SIYUAN_E2E_SHARDS}; do
-            shard="${shard_config%:*}"
-            pid_path="${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel.pid"
-            if [ -f "${pid_path}" ]; then
-              stop_kernel "$(cat "${pid_path}")"
-            fi
-          done
-
-      - name: Collect End-to-End Test Logs
-        if: always() && matrix.config.e2e_shards != ''
-        continue-on-error: true
-        shell: bash
-        run: |
-          log_dir="${{ github.workspace }}/siyuan-testing/kernel-logs"
-          mkdir -p "${log_dir}"
-          cp "${RUNNER_TEMP}"/siyuan-e2e-*-kernel-console.log "${log_dir}/" 2>/dev/null || true
-          workspace="${USERPROFILE:-${HOME}}/SiYuan-Testing"
-          if [ -f "${workspace}/temp/siyuan.log" ]; then
-            cp "${workspace}/temp/siyuan.log" "${log_dir}/siyuan.log"
-          fi
-
-      - name: Upload End-to-End Test Results
-        if: always() && matrix.config.e2e_shards != ''
-        continue-on-error: true
-        uses: actions/upload-artifact@v7
-        with:
-          name: siyuan-e2e-${{ matrix.config.suffix }}
-          path: |
-            ${{ github.workspace }}/siyuan-testing/playwright-report-*
-            ${{ github.workspace }}/siyuan-testing/test-results-*
-            ${{ github.workspace }}/siyuan-testing/kernel-logs
-          if-no-files-found: ignore
-          retention-days: 14
-
-      - name: Install RPM build tools
-        if: matrix.config.goos == 'linux'
-        run: sudo apt-get install -y rpm
-
-      - name: Building Electron App
-        run: pnpm run ${{ matrix.config.electron_args }}
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
-
-      - name: Verify RPM Package Contents
-        if: matrix.config.goos == 'linux'
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
-        run: |
-          for package in build/*.rpm; do
-            test -f "$package"
-            build_id_entries="$(rpm -qpl "$package" | awk '/^\/usr\/lib\/\.build-id(\/|$)/')"
-            if [ -n "$build_id_entries" ]; then
-              echo "Unexpected build-id entries in $package:"
-              echo "$build_id_entries"
+            if ! kill -0 "$pid" 2>/dev/null; then
+              cat "$RUNNER_TEMP/editor-kernel-console.log"
               exit 1
             fi
+            sleep 1
           done
+          cat "$RUNNER_TEMP/editor-kernel-console.log"
+          cat "$RUNNER_TEMP/editor-boot.json" 2>/dev/null || true
+          exit 1
 
-      - name: Upload Build Artifacts (Non-Linux)
-        if: matrix.config.goos != 'linux'
+      - name: Run editor group
+        id: tests
+        timeout-minutes: 50
+        run: >-
+          pnpm exec playwright test --config=config/playwright.editor-group-${{ matrix.group }}.config.ts
+          --global-timeout=2700000 --workers=1 --reporter=line,html,json
+          --output=test-results-editor-${{ matrix.group }}
+        working-directory: siyuan-testing
+
+      - name: Stop editor kernel
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          if [ ! -f "$RUNNER_TEMP/editor-kernel.pid" ]; then exit 0; fi
+          pid=$(cat "$RUNNER_TEMP/editor-kernel.pid")
+          if ! kill -0 "$pid" 2>/dev/null; then exit 0; fi
+          kill -TERM "$pid"
+          for attempt in {1..30}; do
+            if ! kill -0 "$pid" 2>/dev/null; then exit 0; fi
+            sleep 1
+          done
+          kill -KILL "$pid"
+
+      - name: Record editor outcome and collect logs
+        if: always()
+        shell: bash
+        env:
+          GROUP: ${{ matrix.group }}
+          TESTING_REF: ${{ needs.prepare.outputs.testing_ref }}
+          TEST_OUTCOME: ${{ steps.tests.outcome }}
+          DOWNLOAD_OUTCOME: ${{ steps.download.outcome }}
+          RESTORE_OUTCOME: ${{ steps.restore.outcome }}
+          COVERAGE_OUTCOME: ${{ steps.coverage.outcome }}
+          KERNEL_OUTCOME: ${{ steps.kernel.outcome }}
+        run: |
+          mkdir -p siyuan-testing/kernel-logs
+          cp "$RUNNER_TEMP"/editor-kernel-console.log "$RUNNER_TEMP"/editor-boot.json siyuan-testing/kernel-logs/ 2>/dev/null || true
+          cp "$HOME/SiYuan-Testing/temp/siyuan.log" siyuan-testing/kernel-logs/ 2>/dev/null || true
+          cp editor-runtime/revisions.json siyuan-testing/kernel-logs/ 2>/dev/null || true
+          if [ "$TEST_OUTCOME" = skipped ] || [ -z "$TEST_OUTCOME" ]; then
+            status="NOT RUN (test prerequisites did not complete)"
+            echo "::error title=Editor tests not run::Group $GROUP: download=$DOWNLOAD_OUTCOME restore=$RESTORE_OUTCOME coverage=$COVERAGE_OUTCOME kernel=$KERNEL_OUTCOME"
+          else
+            status="$TEST_OUTCOME (Playwright step outcome)"
+          fi
+          {
+            echo "Editor group $GROUP: $status"
+            echo "Product SHA: $GITHUB_SHA"
+            echo "Testing SHA: $TESTING_REF"
+            echo "Download: $DOWNLOAD_OUTCOME; restore: $RESTORE_OUTCOME; coverage: $COVERAGE_OUTCOME; kernel: $KERNEL_OUTCOME"
+          } | tee siyuan-testing/kernel-logs/outcome.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload editor reports and logs
+        if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
-          name: siyuan-${{ matrix.config.suffix }}
-          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-${{ matrix.config.suffix }}
-
-      - name: Upload Build Artifacts (Linux)
-        if: matrix.config.goos == 'linux'
-        uses: actions/upload-artifact@v7
-        with:
-          name: siyuan-linux
+          name: siyuan-e2e-editor-${{ matrix.group }}
           path: |
-            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.AppImage
-            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.tar.gz
-            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.deb
-            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.rpm
+            siyuan-testing/playwright-report-editor-*
+            siyuan-testing/test-results-editor-*
+            siyuan-testing/editor-results-*.json
+            siyuan-testing/editor-e2e-groups.json
+            siyuan-testing/kernel-logs
+          if-no-files-found: warn
+          retention-days: 14
 
   build_android:
     runs-on: ubuntu-24.04
@@ -734,10 +626,17 @@ jobs:
   create_release:
     name: Create Release
     runs-on: ubuntu-24.04
-    needs: [prepare, build, build_android]
+    needs: [prepare, build, build_macos_arm64, build_android, editor_e2e]
+    # 等待两组测试结束；测试失败不阻塞发布，但构建失败或取消仍会阻止发布。
+    if: >-
+      ${{ always() && !cancelled() && needs.prepare.result == 'success' &&
+          needs.build.result == 'success' && needs.build_macos_arm64.result == 'success' &&
+          needs.build_android.result == 'success' && needs.editor_e2e.result != 'cancelled' }}
     steps:
-      - name: Download all artifacts
+      - name: Download release artifacts
         uses: actions/download-artifact@v8
+        with:
+          pattern: siyuan-*
 
       - name: Prepare Release Assets
         shell: bash

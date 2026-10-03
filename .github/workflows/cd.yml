@@ -296,12 +296,20 @@ jobs:
         run: npm install -g ${{ needs.prepare.outputs.packageManager }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
+      - name: Get pnpm store path
+        id: pnpm-store
+        shell: bash
+        run: |
+          STORE_PATH=$(pnpm store path --silent)
+          echo "path=$STORE_PATH" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
       - name: Cache pnpm store
         uses: actions/cache@v5
         with:
-          path: ~/.pnpm-store
-          key: pnpm-${{ runner.os }}-${{ hashFiles('app/pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('go/src/github.com/{0}/app/pnpm-lock.yaml', github.repository)) }}
+          restore-keys: pnpm-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install Node Dependencies
         run: pnpm install --no-frozen-lockfile
@@ -584,12 +592,20 @@ jobs:
         run: npm install -g ${{ needs.prepare.outputs.packageManager }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
+      - name: Get pnpm store path
+        id: pnpm-store
+        shell: bash
+        run: |
+          STORE_PATH=$(pnpm store path --silent)
+          echo "path=$STORE_PATH" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
       - name: Cache pnpm store
         uses: actions/cache@v5
         with:
-          path: ~/.pnpm-store
-          key: pnpm-${{ runner.os }}-${{ hashFiles('app/pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('go/src/github.com/{0}/app/pnpm-lock.yaml', github.repository)) }}
+          restore-keys: pnpm-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install Node Dependencies
         run: pnpm install --no-frozen-lockfile

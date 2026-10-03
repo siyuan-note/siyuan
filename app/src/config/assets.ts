@@ -187,6 +187,7 @@ const assets = {
         };
         const clearAssetPreview = () => {
             preview.clear();
+            assetsListElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             hideMobilePreview(assetsListElement, assetsPreviewElement);
         };
         const visibilityObserver = new MutationObserver(() => {
@@ -278,13 +279,15 @@ const assets = {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (mobile && target.getAttribute("data-tab-type") === "unrefAssets") {
+                } else if (target.getAttribute("data-tab-type") === "unrefAssets") {
                     const selected = target.classList.contains("b3-list-item--focus");
-                    clearAssetPreview();
+                    assetsListElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                     if (!selected) {
                         target.classList.add("b3-list-item--focus");
                         assetsPreviewElement.classList.remove("fn__none");
                         preview.show(target.dataset.path || "", target.dataset.item);
+                    } else if (mobile) {
+                        clearAssetPreview();
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -419,6 +422,9 @@ const assets = {
 
         if (!mobile) {
             assetsListElement.addEventListener("mouseover", (event) => {
+                if (assetsListElement.querySelector(".b3-list-item--focus")) {
+                    return;
+                }
                 const liElement = hasClosestByClassName(event.target as Element, "b3-list-item");
                 if (liElement && liElement.getAttribute("data-item") !== assetsPreviewElement.getAttribute("data-item")) {
                     const item = liElement.getAttribute("data-item");

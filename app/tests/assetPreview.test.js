@@ -15,6 +15,9 @@ const sources = () => {
         previewPath: compile("asset/previewPath.ts"),
         escape: compile("util/escape.ts"),
         viewer: compile("asset/pdf/viewer.js"),
+        annotations: compile("asset/anno.ts"),
+        annotationRuntime: compile("asset/annoRuntime.ts"),
+        textLayer: compile("asset/pdf/text_layer_builder.js"),
         viewerTemplate: compile("asset/pdf/viewerTemplate.ts"),
         pdfTheme: compile("asset/pdfViewer.ts"),
         mobilePDF: compile("mobile/pdf.ts"),
@@ -247,7 +250,8 @@ const runCases = async source => {
             "../protyle/util/onGet": {disabledProtyle: () => {}},
             "../protyle/ui/initUI": {removeLoading: () => {}},
             "../util/fetch": {fetchPost: (url, _data, callback) => {
-                if (url.endsWith("getUnusedAssets")) callback({data: [{item: "assets/note.txt", path: "assets/note.txt"}]});
+                if (url.endsWith("getUnusedAssets")) callback({data: ["note.txt", "other.txt", "audio.mp3", "book.pdf"].map(name =>
+                    ({item: "assets/" + name, path: "assets/" + name}))});
             }},
         });
         const root = document.createElement("div");
@@ -261,6 +265,42 @@ const runCases = async source => {
         item.dispatchEvent(new MouseEvent(isMobile ? "click" : "mouseover", {bubbles: true}));
         await new Promise(resolve => setTimeout(resolve, 300));
         check.match(panel.textContent, /Settings preview/);
+        if (!isMobile) {
+            const items = root.querySelectorAll('[data-tab-type="unrefAssets"]');
+            const current = panel.firstElementChild;
+            item.click();
+            check.equal(item.classList.contains("b3-list-item--focus"), true);
+            items[1].dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            await settle();
+            check.equal(panel.firstElementChild, current);
+            items[1].click();
+            await settle();
+            check.equal(panel.dataset.item, "assets/other.txt");
+            check.equal(item.classList.contains("b3-list-item--focus"), false);
+            check.equal(items[1].classList.contains("b3-list-item--focus"), true);
+            items[1].click();
+            check.equal(items[1].classList.contains("b3-list-item--focus"), false);
+            item.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            await new Promise(resolve => setTimeout(resolve, 300));
+            check.equal(panel.dataset.item, "assets/note.txt");
+            items[2].click();
+            const audio = panel.querySelector("audio");
+            check.ok(audio);
+            item.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            items[2].click();
+            check.equal(panel.querySelector("audio"), audio);
+            items[3].click();
+            const button = panel.querySelector("button");
+            item.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            check.equal(panel.querySelector("button"), button);
+            button.click();
+            await settle();
+            const pdf = panel.firstElementChild;
+            item.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            check.equal(panel.firstElementChild, pdf);
+            item.click();
+            await settle();
+        }
         for (const themeCSS of source.themes) {
             theme.textContent = themeCSS;
             panel.style.fontSize = "32px";
@@ -291,6 +331,7 @@ const runCases = async source => {
         await settle();
         check.equal(panel.textContent, "");
         check.equal(panel.hasAttribute("data-item"), false);
+        check.equal(root.querySelector('.config-assets[data-type="remove"] .b3-list-item--focus'), null);
         assetsAPI.unmountAssetsTab(root);
         root.remove();
     }
@@ -320,12 +361,50 @@ const runCases = async source => {
         undefined, undefined, true);
     check.equal(annotations, 0);
     check.equal(registrations, 1);
+    check.equal(readonly.appConfig.previewOnly, true);
     check.equal(viewerElement.querySelector("button").classList.contains("fn__none"), true);
     await readonly.destroy();
     await readonly.destroy();
     check.equal(cleanup, 1);
-    await viewerAPI.webViewerLoad("assets/normal.pdf", viewerElement).destroy();
+    const normal = viewerAPI.webViewerLoad("assets/normal.pdf", viewerElement);
+    check.equal(normal.appConfig.previewOnly, false);
+    await normal.destroy();
     check.equal(annotations, 1);
+    const runtime = load(source.annotationRuntime);
+    const annotationRequests = [];
+    const anno = load(source.annotations, {
+        "./annoRuntime": runtime,
+        "../layout/getAll": {getAllModels: () => ({asset: []})},
+        "../util/fetch": {fetchPost: (...args) => annotationRequests.push(args)},
+    });
+    const {TextLayerBuilder} = load(source.textLayer, {
+        "../anno": anno,
+        "./pdfjs": {TextLayer: class {
+            textDivs = [];
+            textContentItemsStr = [];
+            render() { return Promise.resolve(); }
+            update() {}
+            cancel() {}
+        }},
+    });
+    for (const name of ["normal", "\u4e2d\u6587", "with space", "literal%20name", "hash#name"]) {
+        const element = document.createElement("div");
+        const page = document.createElement("div");
+        page.dataset.pageNumber = "1";
+        element.append(page);
+        document.body.append(element);
+        const instance = {appConfig: {previewOnly: true,
+            file: new URL("assets/" + encodeURIComponent(name) + ".pdf?dataPath=box%2Fassets%2Ffile.pdf", "http://localhost").href}};
+        runtime.registerPdfInstance(element, instance);
+        const layer = new TextLayerBuilder({pdfPage: {streamTextContent() {}}, onAppend: div => page.append(div)});
+        await layer.render({});
+        await layer.render({});
+        check.equal(anno.getPdfInstance(layer.div), instance);
+        check.equal(annotationRequests.length, 0);
+        layer.cancel();
+        runtime.destroyAnno(element);
+        element.remove();
+    }
     preview.clear();
     return "Asset preview cases passed";
 };

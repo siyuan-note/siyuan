@@ -892,7 +892,8 @@ export const getPdfInstance = (element: HTMLElement) => {
 
 export const getHighlight = (element: HTMLElement) => {
     const pdfInstance: any = getPdfInstance(element);
-    if (!pdfInstance) {
+    // 未引用资源预览仍注册实例以支持键盘操作，但不访问批注文件。
+    if (!pdfInstance || pdfInstance.appConfig.previewOnly) {
         return;
     }
     element.parentElement.querySelector(":scope > .pdf__rects")?.remove();

@@ -2598,6 +2598,9 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             showLocalBootWindow();
         }
         const currentKernelPort = kernelPort;
+        const currentBootWindow = bootWindow;
+        let kernelExited = false;
+        const bootCanceled = () => kernelExited || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
         const cmds = ["serve", "--port", currentKernelPort, "--wd", appDir, "--attach-ui"];
         if (isDevEnv && workspaces.length === 0) {
             cmds.push("--mode", "dev");
@@ -2625,6 +2628,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             kernelProcesses.set(kernelPortKey, kernelProcess);
             writeLog("booted kernel process [pid=" + kernelProcess.pid + ", port=" + currentKernelPort + "]");
             kernelProcess.on("close", (code, signal) => {
+                kernelExited = true;
                 if (kernelProcesses.get(kernelPortKey) === kernelProcess) {
                     kernelProcesses.delete(kernelPortKey);
                 }
@@ -2660,7 +2664,9 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                     }
 
                     exitApp(currentKernelPort, errorWindowId);
-                    bootWindow.destroy();
+                    if (!currentBootWindow.isDestroyed()) {
+                        currentBootWindow.destroy();
+                    }
                     resolve(false);
                 }
             });
@@ -2687,6 +2693,10 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             }
         }
 
+        if (bootCanceled()) {
+            resolve(false);
+            return;
+        }
         if (0 === apiData.code) {
             writeLog("got kernel version [" + apiData.data + "]");
             if (!isDevEnv && apiData.data !== appVer) {
@@ -2696,11 +2706,21 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                 resolve(false);
             } else {
                 let progressing = false;
+                let progressFailures = 0;
+                const retryableProgressErrors = new Set([
+                    "net::ERR_CERT_DATABASE_CHANGED",
+                    "net::ERR_CERT_VERIFIER_CHANGED",
+                    "net::ERR_NETWORK_CHANGED",
+                ]);
                 const bootShowStart = Date.now();
                 // 启动超时兜底，防止内核异常时永久卡在 boot 轮询。数据同步、首次全量索引重建、
                 // 数据库版本变更触发的全表重建都发生在 SetBooted() 之前，会计入此循环，故给足余量
                 const bootTimeout = 300000;
                 while (!progressing) {
+                    if (bootCanceled()) {
+                        resolve(false);
+                        return;
+                    }
                     if (Date.now() - bootShowStart > bootTimeout) {
                         writeLog("boot progress timeout after " + bootTimeout + "ms, exiting boot");
                         showErrorWindow("启动超时", "Boot timeout",
@@ -2716,16 +2736,31 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                     try {
                         const progressResult = await net.fetch(getServer(currentKernelPort) + "/api/system/bootProgress");
                         const progressData = await progressResult.json();
+                        if (bootCanceled()) {
+                            resolve(false);
+                            return;
+                        }
+                        progressFailures = 0;
                         if (progressData.data.progress >= 100) {
                             // 内核完成后等待动画快进收尾（200ms）再进入主窗口
                             await sleep(200);
-                            resolve(currentKernelPort);
+                            resolve(bootCanceled() ? false : currentKernelPort);
                             progressing = true;
                         } else {
                             await sleep(100);
                         }
                     } catch (e) {
                         writeLog("get boot progress failed: " + e.message);
+                        if (bootCanceled()) {
+                            resolve(false);
+                            return;
+                        }
+                        // 只读启动查询在证书或网络配置变化后有限重试，不延长总启动期限。
+                        if (retryableProgressErrors.has(e.message) && ++progressFailures < 15) {
+                            writeLog("retrying boot progress [attempt=" + progressFailures + "/14]");
+                            await sleep(500);
+                            continue;
+                        }
                         requestKernelExit(currentKernelPort);
                         bootWindow.destroy();
                         resolve(false);

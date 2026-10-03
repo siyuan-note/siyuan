@@ -541,6 +541,8 @@ func ExportSystemLog() (zipPath string) {
 	if err := writeSystemGoroutineLog(exportFolder); err != nil {
 		logging.LogErrorf("export goroutine log failed: %s", err)
 	}
+	copyOptionalSystemLog(filepath.Join(util.TempDir, util.OperationStallLogName),
+		filepath.Join(exportFolder, util.OperationStallLogName), 0)
 
 	appLog := filepath.Join(util.HomeDir, ".config", "siyuan", "app.log")
 	if gulu.File.IsExist(appLog) {

@@ -58,6 +58,8 @@ func IsMoveOutlineHeading(transactions *[]*Transaction) bool {
 }
 
 func FlushTxQueue() {
+	diagnostic := util.WatchOperation("flush editing transactions", "wait for transaction queue")
+	defer diagnostic.Finish()
 	time.Sleep(time.Duration(50) * time.Millisecond)
 	for 0 < txQueueSize() || isFlushing.Load() {
 		time.Sleep(10 * time.Millisecond)
@@ -225,6 +227,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	if 1 > len(tx.DoOperations) {
 		return
 	}
+	diagnostic := util.WatchOperation("editing transaction", "begin transaction")
+	defer diagnostic.Finish()
 
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/cpu_profile_tx")
@@ -254,15 +258,18 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		}
 	}()
 
+	diagnostic.Stage("prepare database automations")
 	if err = tx.prepareAttributeViewAutomations(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
 	}
+	diagnostic.Stage("process bulk operations")
 	isLargeInsert := tx.processLargeInsert()
 	isLargeDelete := tx.processLargeDelete()
 	if !isLargeInsert {
 		for operationIndex := 0; operationIndex < len(tx.DoOperations); operationIndex++ {
 			op := tx.DoOperations[operationIndex]
+			diagnostic.Stage("execute " + op.Action)
 			if isLargeDelete && "delete" == op.Action {
 				continue
 			}
@@ -498,6 +505,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		}
 	}
 
+	diagnostic.Stage("finalize database bindings and block structure")
 	if err = tx.runAttributeViewAutomations(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
@@ -516,6 +524,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	}
 	tx.UndoOperations = append(tx.UndoOperations, tx.attributeViewDeletionUndo...)
 
+	diagnostic.Stage("commit transaction")
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
 		if 1 == tx.state.Load() {

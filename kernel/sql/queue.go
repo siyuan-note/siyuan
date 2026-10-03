@@ -216,9 +216,12 @@ func clearQueue() {
 var flushingTx = atomic.Bool{}
 
 func FlushQueue() {
+	diagnostic := util.WatchOperation("flush database index", "wait for index lock")
+	defer diagnostic.Finish()
 	initDatabaseLock.Lock()
 	defer initDatabaseLock.Unlock()
 
+	diagnostic.Stage("take queued operations")
 	ops, indexSnapshot := getOperations()
 	total := len(ops)
 	if 1 > total && !flushingTx.Load() {
@@ -290,6 +293,7 @@ func FlushQueue() {
 			}
 		}
 
+		diagnostic.Stage("begin " + op.action)
 		tx, err := beginTxForBox(op.boxID())
 		if err != nil {
 			logging.LogWarnf("skip queue operation [%s] for box [%s]: %s", op.action, op.boxID(), err)
@@ -309,6 +313,7 @@ func FlushQueue() {
 		groupOpsCurrent[op.action]++
 		context["current"] = groupOpsCurrent[op.action]
 		context["total"] = groupOpsTotal[op.action]
+		diagnostic.Stage("execute " + op.action)
 		if err = execOp(op, tx, context); err != nil {
 			tx.Rollback()
 			closeTxPreparedStmts(tx)
@@ -321,6 +326,7 @@ func FlushQueue() {
 			continue
 		}
 
+		diagnostic.Stage("commit " + op.action)
 		if err = commitTx(tx); err != nil {
 			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("commit tx failed: %s", err)
@@ -362,11 +368,13 @@ func FlushQueue() {
 	}
 
 	// Push database index commit event https://github.com/siyuan-note/siyuan/issues/8814
+	diagnostic.Stage("notify index completion")
 	util.BroadcastByType("main", "databaseIndexCommit", 0, "", backlinkChange.data())
 
 	eventbus.Publish(eventbus.EvtSQLIndexFlushed)
 
 	// 刷新期间追加的操作仍在内存队列中，磁盘队列仅用于进程重启恢复，不能在这里重复执行。
+	diagnostic.Stage("persist index queue completion")
 	clearIndexQueue(indexSnapshot)
 }
 

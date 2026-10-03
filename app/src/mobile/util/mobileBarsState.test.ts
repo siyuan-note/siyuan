@@ -78,11 +78,11 @@ describe("mobile bars state", () => {
         assert.equal(getVisibility(state).topbarVisible, true);
     });
 
-    it("hides the top bars on entering input and reveals them when scrolling back", () => {
+    it("preserves visible top bars on entering input and still follows scrolling", () => {
         let state = createMobileBarsState(100);
         state = update(state, {type: "set-editing", active: true});
         assert.deepEqual(getVisibility(state), {
-            topbarVisible: false,
+            topbarVisible: true,
             bottomBarVisible: false,
             editingBarVisible: true,
             scrollPaused: false,
@@ -99,6 +99,17 @@ describe("mobile bars state", () => {
 
         state = update(state, {type: "set-editing", active: false, scrollTop: 180});
         assert.equal(getVisibility(state).bottomBarVisible, true);
+    });
+
+    it("preserves a partial reading offset when the keyboard opens and closes", () => {
+        let state = createMobileBarsState(100);
+        state = update(state, {type: "scroll", scrollTop: 112});
+        state = update(state, {type: "set-editing", active: true, scrollTop: 140});
+        assert.equal(state.readingBarsOffset, 12);
+        assert.equal(state.scrollTop, 140);
+        state = update(state, {type: "set-editing", active: false, scrollTop: 160});
+        assert.equal(state.readingBarsOffset, 12);
+        assert.equal(state.scrollTop, 160);
     });
 
     it("preserves hidden bars across keyboard changes and ignores cursor scrolling", () => {

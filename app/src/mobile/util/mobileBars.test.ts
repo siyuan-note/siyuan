@@ -126,9 +126,19 @@ describe("mobile bars", () => {
                 assert.equal(topbarElement.attributes.has("inert"), false);
                 assert.equal(topbarElement.attributes.get("aria-hidden"), "false");
                 assert.equal(classes.has("mobile-chrome--hidden"), false);
+                assert.equal(breadcrumbElement.attributes.has("inert"), false);
+                assert.equal(breadcrumbElement.attributes.get("aria-hidden"), "false");
+            };
+            const scrollTo = (top: number) => {
+                scrollElement.scrollTop = top;
+                scrollElement.onScroll();
+                frame(0);
             };
             if (keyboardAlreadyOpen) {
                 changeKeyboard(true);
+                assertTitleVisible();
+                finishScroll();
+                scrollTo(48);
                 assert.equal(topbarElement.attributes.has("inert"), true);
             }
             mockDocument.activeElement = {id: "toolbarName"};
@@ -148,7 +158,14 @@ describe("mobile bars", () => {
             assertTitleVisible();
             assert.equal(bottomBarElement.attributes.has("inert"), false);
             changeKeyboard(true);
+            assertTitleVisible();
+            assert.equal(bottomBarElement.attributes.has("inert"), true);
+            finishScroll();
+            scrollTo(148);
             assert.equal(topbarElement.attributes.has("inert"), true);
+            assert.equal(breadcrumbElement.attributes.has("inert"), true);
+            scrollTo(100);
+            assertTitleVisible();
         });
     }
 

@@ -85,3 +85,55 @@ test("a failed assets dependency reports an error and permits another mount", as
     await retried;
     assert.equal(assets.mounted(), 1);
 });
+
+test("initial and repeated unused asset queries identify their own desktop or mobile frontend", () => {
+    for (const mobile of [false, true]) {
+        const code = transpileModule(readFileSync("src/config/assets.ts", "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText;
+        const requests: {url: string; headers: Record<string, string>}[] = [];
+        let click: (event: any) => void;
+        const classList = {contains: (value: string) => value === "item", add: () => {}, remove: () => {}};
+        const preview = {classList, removeAttribute: () => {}};
+        const list = {nextElementSibling: preview, addEventListener: () => {}, querySelector: (): null => null};
+        const panel = {classList, getAttribute: () => "remove"};
+        const root = {
+            classList,
+            querySelector: (selector: string) => selector.includes("config-assets__list") ? list : {classList},
+            querySelectorAll: () => [panel],
+            addEventListener: (_name: string, callback: typeof click) => { click = callback; },
+        };
+        const context = {
+            exports: {} as {assets: {element: typeof root; bindEvent: (app: any) => void}},
+            MutationObserver: class {observe() {} disconnect() {}},
+            require: (name: string) => {
+                if (name === "../util/fetch") return {
+                    fetchPost: (url: string, _data: any, _callback: any, headers: Record<string, string>) => {
+                        requests.push({url, headers});
+                    },
+                };
+                if (name === "../util/fetchAppId") return {SIYUAN_APP_ID_HEADER: "X-SiYuan-App-ID"};
+                if (name === "../constants") return {Constants: {SIYUAN_APPID: "this-window"}};
+                if (name === "../util/functions") return {isMobile: () => mobile};
+                if (name === "./ocr") return {mountOCRSettings: () => {}};
+                if (name === "./assetPreview") return {AssetPreview: class {clear() {}}};
+                if (name === "../protyle") return {Protyle: class {protyle = {};}};
+                if (name === "../protyle/util/onGet") return {disabledProtyle: () => {}};
+                if (name === "../protyle/ui/initUI") return {removeLoading: () => {}};
+                return {};
+            },
+        };
+        runInNewContext(code + "\nexports.assets = assets;", context);
+        context.exports.assets.element = root;
+        context.exports.assets.bindEvent({appId: "settings-host-window"});
+        click({
+            target: {classList, getAttribute: () => "remove", isEqualNode: () => false},
+            preventDefault: () => {}, stopPropagation: () => {},
+        });
+        assert.equal(requests.length, 2);
+        requests.forEach(request => {
+            assert.equal(request.url, "/api/asset/getUnusedAssets");
+            assert.equal(request.headers["X-SiYuan-App-ID"], "this-window");
+        });
+    }
+});

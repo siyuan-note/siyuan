@@ -871,6 +871,7 @@ var RemoveUnusedAsset = define[AssetPathRequest, AssetPathData]("removeUnusedAss
 var RemoveUnusedAssets = define[EmptyRequest, AssetPathsData]("removeUnusedAssets", "/api/asset/removeUnusedAssets", NoBody, ResponseOptions{}, "POST")
 
 // 扫描失败返回标准错误，不将失败表示为成功的空列表。
+// 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
 var GetUnusedAssets = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAssets", "/api/asset/getUnusedAssets", NoBody, ResponseOptions{}, "POST")
 var GetMissingAssets = define[EmptyRequest, []*AssetUnusedItem]("getMissingAssets", "/api/asset/getMissingAssets", NoBody, ResponseOptions{}, "POST")
 

@@ -4,6 +4,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {isBrowser, isMobile} from "../util/functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
+import {SIYUAN_APP_ID_HEADER} from "../util/fetchAppId";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 import * as path from "path";
@@ -257,7 +258,7 @@ const assets = {
                             if (type === "remove") {
                                 fetchPost("/api/asset/getUnusedAssets", {}, response => {
                                     assets._renderList(response.data, assetsListElement, "unrefAssets");
-                                });
+                                }, {[SIYUAN_APP_ID_HEADER]: Constants.SIYUAN_APPID});
                             } else if (!item.getAttribute("data-init")) {
                                 if (type === "removeAV") {
                                     fetchPost("/api/av/getUnusedAttributeViews", {}, response => {
@@ -427,7 +428,7 @@ const assets = {
         }
         fetchPost("/api/asset/getUnusedAssets", {}, response => {
             assets._renderList(response.data, assetsListElement, "unrefAssets");
-        });
+        }, {[SIYUAN_APP_ID_HEADER]: Constants.SIYUAN_APPID});
     },
     _renderList: (data: {
         item: string,

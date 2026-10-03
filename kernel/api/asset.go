@@ -359,7 +359,8 @@ var getUnusedAssets = contractHandler(apicontract.GetUnusedAssets, func(c *gin.C
 	const maxUnusedAssets = 512
 	if total > maxUnusedAssets {
 		unusedAssets = unusedAssets[:maxUnusedAssets]
-		util.PushMsg(fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAssets), 5000)
+		// 提示仅发送给发起查询的前端；未提供应用标识的调用保留广播行为。
+		util.PushMsgWithApp(c.GetHeader("X-SiYuan-App-ID"), fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAssets), 5000)
 	}
 
 	return apicontract.Success(assetUnusedItems(unusedAssets))

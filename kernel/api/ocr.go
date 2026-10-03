@@ -44,12 +44,10 @@ func ocrModelPayload(id string) apicontract.OCRModel {
 	name := id
 	if id == "tiny" {
 		name = "PP-OCRv6 Tiny"
-	} else if id == "small" {
-		name = "PP-OCRv6 Small"
 	} else {
 		name = "PP-OCRv6 " + strings.ToUpper(id[:8])
 	}
-	return apicontract.OCRModel{ID: id, Name: name, BuiltIn: id == "tiny" || id == "small"}
+	return apicontract.OCRModel{ID: id, Name: name, BuiltIn: id == "tiny"}
 }
 
 var setOCRConfig = contractHandler(apicontract.SetOCRConfig, serializeSetting("ocr", func(c *gin.Context, request apicontract.SettingOCR) apicontract.Response[apicontract.SettingOCR] {
@@ -61,7 +59,7 @@ var setOCRConfig = contractHandler(apicontract.SetOCRConfig, serializeSetting("o
 	if err := model.Conf.SetOCR(value); err != nil {
 		return apicontract.Failure[apicontract.SettingOCR](-1, err.Error())
 	}
-	return apicontract.Success(ocrConfigPayload(value))
+	return apicontract.Success(ocrConfigPayload(model.Conf.GetOCR()))
 }))
 
 var importOCRModels = contractHandler(apicontract.ImportOCRModels, func(c *gin.Context, request apicontract.ImportOCRModelsRequest) apicontract.Response[apicontract.OCRModel] {

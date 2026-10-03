@@ -41,7 +41,7 @@
 	"ocrAuto": "자동 OCR",
 	"ocrAutoTip": "OCR 결과가 없는 일반 노트북 이미지만 처리합니다",
 	"ocrModel": "OCR 모델",
-	"ocrModelTip": "Tiny와 Small이 내장되어 있습니다. 변경해도 기존 결과는 유지되며 이미지 메뉴에서 다시 인식할 수 있습니다",
+	"ocrModelTip": "Tiny만 내장되어 있습니다. 모델을 전환해도 기존 결과는 유지되며 이미지 메뉴에서 OCR을 다시 실행할 수 있습니다",
 	"ocrImportModels": "OCR 모델 가져오기",
 	"ocrImportModelsTip": "호환되는 PP-OCRv6 감지 및 인식 ONNX 파일과 각각의 inference.yml을 선택하세요. 가져온 파일은 작업 공간과 동기화됩니다",
 	"ocrDetector": "감지 모델",

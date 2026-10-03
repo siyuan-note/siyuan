@@ -41,7 +41,7 @@
 	"ocrAuto": "OCR automático",
 	"ocrAutoTip": "Processar imagens de cadernos comuns que ainda não possuem resultado de OCR",
 	"ocrModel": "Modelo de OCR",
-	"ocrModelTip": "Tiny e Small são integrados; a troca preserva os resultados existentes; repita o OCR pelo menu da imagem",
+	"ocrModelTip": "Apenas Tiny está integrado; trocar de modelo preserva os resultados existentes; execute o OCR novamente pelo menu da imagem",
 	"ocrImportModels": "Importar modelos de OCR",
 	"ocrImportModelsTip": "Selecione arquivos ONNX compatíveis de detecção e reconhecimento PP-OCRv6 e seus arquivos inference.yml; os arquivos importados são sincronizados com o espaço de trabalho",
 	"ocrDetector": "Modelo de detecção",

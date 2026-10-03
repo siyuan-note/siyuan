@@ -41,7 +41,7 @@
 	"ocrAuto": "Automatische OCR",
 	"ocrAutoTip": "Bilder normaler Notizbücher ohne vorhandenes OCR-Ergebnis verarbeiten",
 	"ocrModel": "OCR-Modell",
-	"ocrModelTip": "Tiny und Small sind integriert; ein Wechsel behält Ergebnisse bei; OCR im Bildmenü erneut ausführen",
+	"ocrModelTip": "Nur Tiny ist integriert; beim Wechsel bleiben vorhandene Ergebnisse erhalten; OCR lässt sich über das Bildmenü erneut ausführen",
 	"ocrImportModels": "OCR-Modelle importieren",
 	"ocrImportModelsTip": "Kompatible PP-OCRv6-ONNX-Dateien für Erkennung und Texterfassung sowie deren inference.yml auswählen; importierte Dateien werden mit dem Arbeitsbereich synchronisiert",
 	"ocrDetector": "Erkennungsmodell",

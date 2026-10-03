@@ -9,9 +9,9 @@ const createOCRPanel = async () => {
     const compiled = transpileModule(readFileSync("src/config/ocr.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
-    const config: {ocr: SettingOCR} = {ocr: {provider: "paddleocr", model: "small", auto: false}};
+    const config: {ocr: SettingOCR} = {ocr: {provider: "paddleocr", model: "tiny", auto: false}};
     let serverConfig = {...config.ocr};
-    let models = [{id: "small", name: "Small", builtIn: true}];
+    let models = [{id: "tiny", name: "Tiny", builtIn: true}];
     let reads = 0;
     let deferredRead = false;
     const readRequests: Array<(response: unknown) => void> = [];
@@ -22,7 +22,7 @@ const createOCRPanel = async () => {
         "detector", "detectorConfig", "recognizer", "recognizerConfig",
         "ocrAdvanced",
     ].map(id => [id, {
-        id, value: id === "ocrProvider" ? "paddleocr" : "small", checked: false, disabled: false, innerHTML: "",
+        id, value: id === "ocrProvider" ? "paddleocr" : "tiny", checked: false, disabled: false, innerHTML: "",
         files: [{name: `${id}.onnx`}],
         tagName: id === "ocrImport" || id === "ocrAdvanced" ? "BUTTON" : "INPUT",
         closest: () => ({classList: {toggle() {}}}),
@@ -140,7 +140,7 @@ for (const networkFailure of [false, true]) {
 
 test("advanced OCR settings receive the latest thresholds and use the panel save queue", async () => {
     const panel = await createOCRPanel();
-    panel.updateServer({provider: "paddleocr", model: "small", auto: false,
+    panel.updateServer({provider: "paddleocr", model: "tiny", auto: false,
         thresholds: {detection: 0.4, box: 0.7, recognition: 0.8}});
     panel.notify();
     await new Promise(setImmediate);
@@ -206,7 +206,7 @@ test("a notification read received during a save cannot overwrite the pending sw
     panel.readRequests[0](stale);
     await new Promise(setImmediate);
     assert.equal(panel.controls.ocrAuto.checked, true);
-    panel.updateServer({provider: "paddleocr", model: "small", auto: true});
+    panel.updateServer({provider: "paddleocr", model: "tiny", auto: true});
     panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
     await pending;
     await new Promise(setImmediate);
@@ -222,7 +222,7 @@ test("OCR notifications coalesce and discard a superseded response", async () =>
     panel.deferRead();
     panel.notify();
     await new Promise(setImmediate);
-    panel.updateServer({provider: "paddleocr", model: "small", auto: true});
+    panel.updateServer({provider: "paddleocr", model: "tiny", auto: true});
     panel.notify();
     panel.notify();
     panel.readRequests[0](stale);
@@ -240,7 +240,7 @@ test("a read started before a save cannot overwrite the completed save", async (
     await new Promise(setImmediate);
     const pending = panel.changeAuto(true);
     await new Promise(setImmediate);
-    panel.updateServer({provider: "paddleocr", model: "small", auto: true});
+    panel.updateServer({provider: "paddleocr", model: "tiny", auto: true});
     panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
     await pending;
     panel.readRequests[0](stale);
@@ -257,7 +257,7 @@ test("closing the panel ignores a late notification response", async () => {
     panel.deferRead();
     panel.notify();
     await new Promise(setImmediate);
-    panel.updateServer({provider: "paddleocr", model: "small", auto: true});
+    panel.updateServer({provider: "paddleocr", model: "tiny", auto: true});
     panel.close();
     panel.readRequests[0](panel.snapshot());
     await new Promise(setImmediate);

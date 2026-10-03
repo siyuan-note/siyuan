@@ -41,7 +41,7 @@
 	"ocrAuto": "自動 OCR",
 	"ocrAutoTip": "OCR 結果がまだない通常のノートブックの画像を処理します",
 	"ocrModel": "OCR モデル",
-	"ocrModelTip": "Tiny と Small は内蔵されています。切り替えても既存の結果は保持され、画像メニューから再認識できます",
+	"ocrModelTip": "Tiny のみ内蔵されています。切り替えても既存の結果は保持され、画像メニューから再認識できます",
 	"ocrImportModels": "OCR モデルをインポート",
 	"ocrImportModelsTip": "対応する PP-OCRv6 の検出・認識 ONNX ファイルとそれぞれの inference.yml を選択します。インポートしたファイルはワークスペースと同期されます",
 	"ocrDetector": "検出モデル",

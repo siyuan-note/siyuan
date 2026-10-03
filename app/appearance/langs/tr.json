@@ -41,7 +41,7 @@
 	"ocrAuto": "Otomatik OCR",
 	"ocrAutoTip": "Henüz OCR sonucu olmayan normal defter görüntülerini işle",
 	"ocrModel": "OCR modeli",
-	"ocrModelTip": "Tiny ve Small yerleşiktir; değiştirmek mevcut sonuçları korur; görüntü menüsünden OCR işlemini tekrarlayın",
+	"ocrModelTip": "Yalnızca Tiny yerleşiktir; model değişikliği mevcut sonuçları korur; görsel menüsünden OCR işlemini yeniden çalıştırın",
 	"ocrImportModels": "OCR modellerini içe aktar",
 	"ocrImportModelsTip": "Uyumlu PP-OCRv6 algılama ve tanıma ONNX dosyalarını ve inference.yml dosyalarını seçin; içe aktarılan dosyalar çalışma alanıyla eşitlenir",
 	"ocrDetector": "Algılama modeli",

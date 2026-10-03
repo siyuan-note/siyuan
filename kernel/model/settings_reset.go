@@ -41,7 +41,7 @@ func defaultWorkspaceSettings(current *AppConf) *AppConf {
 	next.Search = conf.NewSearch()
 	next.Graph = conf.NewGraph()
 	next.Flashcard = conf.NewFlashcard()
-	next.OCR = conf.NewOCR(util.IsMobileContainer())
+	next.OCR = conf.NewOCR()
 	next.Appearance = conf.NewAppearance()
 	next.Appearance.Lang = current.Lang
 	if current.Appearance != nil {

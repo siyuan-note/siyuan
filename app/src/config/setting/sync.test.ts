@@ -146,7 +146,7 @@ for (const mobile of [false, true]) {
         }).outputText;
         const editor = {fontSize: 16};
         const appearance = {theme: "dark"};
-        const config = {ocr: {provider: "paddleocr", model: "small", auto: false}, editor, appearance, keymap: {}};
+        const config = {ocr: {provider: "paddleocr", model: "tiny", auto: false}, editor, appearance, keymap: {}};
         let next = {...config.ocr, auto: true};
         let notifications = 0;
         const remounted: string[] = [];

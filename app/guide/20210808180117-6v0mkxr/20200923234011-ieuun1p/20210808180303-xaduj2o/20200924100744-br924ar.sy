@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261003224949"
+		"updated": "20261003234011"
 	},
 	"Children": [
 		{
@@ -967,7 +967,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003636-epvk98g",
-				"updated": "20261002231520"
+				"updated": "20261003234011"
 			},
 			"Children": [
 				{
@@ -1022,12 +1022,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001000112-e9wid3h",
-				"updated": "20261002231520"
+				"updated": "20261003234011"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "PaddleOCR includes PP-OCRv6 Tiny and Small models, available offline without downloading. Tiny uses fewer resources; Small offers higher accuracy. To import another compatible PP-OCRv6 model, select its detection and recognition ONNX files and the corresponding inference.yml files. Imported models sync with the workspace; the provider and selected model are saved per device. New users default to PaddleOCR with Small on desktop and Tiny on mobile; automatic OCR is disabled by default. Existing users retain their OCR configuration; upgrading from a version without OCR provider settings keeps Tesseract."
+					"Data": "PaddleOCR bundles only PP-OCRv6 Tiny, available offline without downloading and selected by default on desktop and mobile. Other compatible PP-OCRv6 models, such as Small and Medium, can be imported by selecting their detection and recognition ONNX files and corresponding inference.yml files. Imported models sync with the workspace; the provider and selected model are saved per device. New users default to PaddleOCR with automatic OCR disabled. Existing provider, automatic OCR, and threshold settings are preserved. The former built-in Small selection migrates to Tiny; imported models are unaffected. Upgrading from a version without OCR provider settings keeps Tesseract."
 				}
 			]
 		},

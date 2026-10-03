@@ -41,7 +41,7 @@
 	"ocrAuto": "自動 OCR",
 	"ocrAutoTip": "僅處理尚無 OCR 結果的一般筆記本圖片",
 	"ocrModel": "OCR 模型",
-	"ocrModelTip": "已內建 Tiny 和 Small；切換後保留現有結果，可在圖片選單中重新辨識",
+	"ocrModelTip": "僅內建 Tiny；切換後保留現有結果，可在圖片選單中重新辨識",
 	"ocrImportModels": "匯入 OCR 模型",
 	"ocrImportModelsTip": "選取配套的 PP-OCRv6 偵測、辨識 ONNX 檔案及各自的 inference.yml；匯入檔案隨工作空間同步",
 	"ocrDetector": "偵測模型",

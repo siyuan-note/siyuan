@@ -6,6 +6,7 @@ import "mime/multipart"
 // auto 仅控制内核后台识别，手动识别继续使用 /api/asset/ocr 的既有输入和输出。
 // thresholds 省略或为 null 时保留设备已保存的阈值；传入对象时整体替换。
 // 修改阈值只影响后续识别，不修改模型文件或已有结果，Tesseract 不使用这些参数。
+// 仅内置 tiny；旧内置模型标识 small 会归一化为 tiny，自行导入的模型仍使用内容摘要标识。
 type SettingOCR struct {
 	Provider   string         `json:"provider"`
 	Model      string         `json:"model"`
@@ -40,7 +41,7 @@ type OCRConfigData struct {
 
 // ImportOCRModelsRequest 导入配套的 PP-OCRv6 ONNX 模型和 YAML 配置。
 // 两个模型各不超过 256 MiB，两个配置各不超过 1 MiB；成功后文件存放于 data/ocr/models/<内容摘要>/。
-// 导入不自动切换当前模型，失败不覆盖已有模型。内置 Tiny、Small 不写入工作空间。
+// 导入不自动切换当前模型，失败不覆盖已有模型。内置 Tiny 不写入工作空间。
 type ImportOCRModelsRequest struct {
 	Detector         *multipart.FileHeader `json:"detector"`
 	DetectorConfig   *multipart.FileHeader `json:"detectorConfig"`

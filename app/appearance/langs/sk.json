@@ -41,7 +41,7 @@
 	"ocrAuto": "Automatické OCR",
 	"ocrAutoTip": "Spracovať obrázky bežných zápisníkov, ktoré ešte nemajú výsledok OCR",
 	"ocrModel": "Model OCR",
-	"ocrModelTip": "Tiny a Small sú vstavané; zmena zachová existujúce výsledky; OCR zopakujte z ponuky obrázka",
+	"ocrModelTip": "Zabudovaný je iba Tiny; zmena modelu zachová existujúce výsledky; OCR možno znova spustiť z ponuky obrázka",
 	"ocrImportModels": "Importovať modely OCR",
 	"ocrImportModelsTip": "Vyberte kompatibilné súbory ONNX detekcie a rozpoznávania PP-OCRv6 a ich súbory inference.yml; importované súbory sa synchronizujú s pracovným priestorom",
 	"ocrDetector": "Detekčný model",

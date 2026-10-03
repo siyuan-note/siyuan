@@ -68,6 +68,45 @@ class ResourceTests(unittest.TestCase):
     def entry(self, file):
         return {"url": file.as_uri(), "sha256": hashlib.sha256(file.read_bytes()).hexdigest(), "size": file.stat().st_size}
 
+    def test_preparation_keeps_only_tiny_bundled_and_removes_stale_small(self):
+        stage = self.root / "stage"
+        obsolete = stage / "models/small/det/inference.onnx"
+        obsolete.parent.mkdir(parents=True)
+        obsolete.write_bytes(b"old bundled model")
+        runtime = stage / "runtime/library"
+        runtime.parent.mkdir()
+        runtime.write_bytes(b"runtime")
+        downloaded = []
+
+        def download(entry, destination):
+            downloaded.append(entry["path"])
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(b"tiny model")
+
+        with patch.object(prepare, "STAGE", stage), patch.object(prepare, "download", side_effect=download), \
+                patch.object(sys, "argv", ["prepare-ocr.py"]):
+            prepare.main()
+        self.assertEqual(set(downloaded), {"tiny/det/inference.onnx", "tiny/det/inference.yml",
+                                           "tiny/rec/inference.onnx", "tiny/rec/inference.yml"})
+        self.assertEqual({path.name for path in (stage / "models").iterdir()}, {"tiny"})
+        self.assertEqual(runtime.read_bytes(), b"runtime")
+
+    def test_obsolete_model_cleanup_rejects_paths_outside_stage(self):
+        stage = self.root / "stage"
+        obsolete = stage / "models/small"
+        obsolete.mkdir(parents=True)
+        outside = self.root / "outside"
+        outside.mkdir()
+        original_resolve = Path.resolve
+        def resolve(path, *args, **kwargs):
+            return outside if path == obsolete else original_resolve(path, *args, **kwargs)
+        with patch.object(prepare, "STAGE", stage), patch.object(Path, "resolve", resolve), \
+                patch.object(prepare.shutil, "rmtree") as remove:
+            with self.assertRaisesRegex(ValueError, "escapes"):
+                prepare.remove_obsolete_models()
+            remove.assert_not_called()
+        self.assertTrue(outside.exists())
+
     def test_checksum_failure_preserves_previous_resource(self):
         source = self.root / "source"
         source.write_bytes(b"invalid replacement")

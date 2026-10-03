@@ -41,7 +41,7 @@
 	"ocrAuto": "Automatic OCR",
 	"ocrAutoTip": "Process ordinary notebook images that have no OCR result yet",
 	"ocrModel": "OCR model",
-	"ocrModelTip": "Tiny and Small are built in; switching preserves existing results; rerun OCR from the image menu",
+	"ocrModelTip": "Only Tiny is built in; switching preserves existing results; rerun OCR from the image menu",
 	"ocrImportModels": "Import OCR models",
 	"ocrImportModelsTip": "Select compatible PP-OCRv6 detection and recognition ONNX files and their inference.yml files; imported files sync with the workspace",
 	"ocrDetector": "Detection model",

@@ -419,7 +419,8 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 	case "delete":
 		err = batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
 		if nil == err {
-			tx.Exec("DELETE FROM block_embeddings WHERE box = ? AND path LIKE ?", op.removeTreeBox, op.removeTreePath+"%")
+			condition, args := documentPathPrefixCondition("path", op.removeTreeBox, op.removeTreePath)
+			tx.Exec("DELETE FROM block_embeddings WHERE "+condition, args...)
 		}
 	case "delete_id":
 		err = deleteByRootID(tx, op.removeTreeID, context)

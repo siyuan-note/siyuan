@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261003225941"
+		"updated": "20261003234156"
 	},
 	"Children": [
 		{
@@ -3456,7 +3456,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-ar71gu2",
-				"updated": "20260905124213"
+				"updated": "20261003234156"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -3491,6 +3491,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "タブ右側のメニューで、タブの追加、複製、削除、並べ替え、および上部／左側の配置を選べます。選択中のタブと配置はドキュメントとともに保存・同期されます。読み取り専用画面での切り替えは一時的です。タブ配置を解除すると、すべてのタイトルと本文が順番に残ります。"
+				}
+			]
+		},
+		{
+			"ID": "20261003234156-3qtc9d0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003234156-3qtc9d0",
+				"updated": "20261003234156"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブ項目のメニューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ズームイン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、その項目とタイトルだけが表示され、バックリンクの対象もその項目に限定されます。子ブロックを含めるかどうかは既存の設定に従います。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "フォーカス解除"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶとタブグループ全体に戻ります。フォーカス中の項目内にある入れ子のタブは通常どおり切り替えられます。"
 				}
 			]
 		},

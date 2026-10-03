@@ -16,6 +16,10 @@ import {copySubMenu, openAttr} from "../../menus/commonMenuItem";
 import {isTaskListMarker, nextTaskListMarker} from "./taskListMarker";
 import {hideElements} from "../ui/hideElements";
 import {getTaskStatusItems} from "./taskStatusDialog";
+import {canFocusTabItem, getFocusedTabItem, prepareFocusedTabItem} from "./tabsFocus";
+import {zoomOut} from "../../menus/protyle";
+
+const boundFocusedTitles = new WeakSet<HTMLElement>();
 
 export const toggleTabsTasks = (protyle: IProtyle, tabs: HTMLElement) => {
     const items = getTabItems(tabs);
@@ -159,6 +163,9 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
     const lang = window.siyuan.languages;
     const menu = new Menu();
     menu.addItem({icon: "iconCopy", label: lang.copy, submenu: copySubMenu([item.dataset.nodeId], false)});
+    if (canFocusTabItem(protyle, item)) {
+        menu.addItem({icon: "iconEnter", label: lang.enter, click: () => zoomOut({protyle, id: item.dataset.nodeId})});
+    }
     if (canEdit(protyle, tabs)) {
         if (getTabTask(item) !== null) {
             menu.addSeparator({id: "separator_taskStatusBefore"});
@@ -167,6 +174,8 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
             menu.addSeparator({id: "separator_taskStatus"});
         }
         menu.addItem({icon: "iconEdit", label: lang.rename, click: () => renameTab(protyle, item)});
+    }
+    if (canEdit(protyle, tabs) && tabs.classList.contains("tabs")) {
         menu.addItem({icon: "iconCopy", label: lang.duplicateCopy, click: () => {
             const copy = item.cloneNode(true) as HTMLElement;
             const ids = new Map<string, string>();
@@ -199,7 +208,20 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
 export const initEditorTabs = (protyle: IProtyle) => {
     const root = protyle.wysiwyg.element;
     const measured = new WeakSet<Element>();
+    if (!boundFocusedTitles.has(root)) {
+        boundFocusedTitles.add(root);
+        root.addEventListener("contextmenu", event => {
+            const item = getFocusedTabItem(protyle);
+            const info = (event.target as Element).closest(".tab-item-info");
+            if (item?.parentElement === root && info?.parentElement === item) {
+                event.preventDefault();
+                event.stopPropagation();
+                openTabsMenu(protyle, item, item, info as HTMLElement);
+            }
+        });
+    }
     tabsRender(root, {
+        prepare: () => prepareFocusedTabItem(protyle),
         readonly: tabs => !canEdit(protyle, tabs || root),
         label: window.siyuan.languages.tabItem,
         addLabel: window.siyuan.languages.newTabItem,

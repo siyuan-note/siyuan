@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261003225941"
+		"updated": "20261003234156"
 	},
 	"Children": [
 		{
@@ -3324,7 +3324,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-top2oxl",
-				"updated": "20260905124213"
+				"updated": "20261003234156"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -3359,6 +3359,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "Use the menu beside the tabs to add, duplicate, delete or reorder tabs and choose a top or left layout. The active tab and layout are saved and synced with the document. Switching in a read-only view is temporary. Removing the tab layout preserves every title and its content in order."
+				}
+			]
+		},
+		{
+			"ID": "20261003234156-ki04gzc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003234156-ki04gzc",
+				"updated": "20261003234156"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use a tab item's menu to choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Zoom in"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Only that item and its title are displayed, and backlinks follow that item. Whether backlinks include its child blocks follows the existing setting. Choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Exit focus"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to restore the full tab group. Nested tab groups inside the focused item can still be switched normally."
 				}
 			]
 		},

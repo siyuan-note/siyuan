@@ -250,7 +250,8 @@ export const initUI = (protyle: IProtyle) => {
         }
         const tabsHeader = hasClosestByClassName(event.target, "tabs-header");
         const nodeElement = tabsHeader ? hasClosestBlock(tabsHeader.parentElement) : hasClosestBlock(event.target);
-        if (!tabsHeader && nodeElement && nodeElement.getAttribute("data-type") === "NodeTabItem") {
+        if (!tabsHeader && nodeElement && nodeElement.getAttribute("data-type") === "NodeTabItem" &&
+            nodeElement.parentElement.classList.contains("tabs")) {
             hideElements(["gutter"], protyle);
             return;
         }

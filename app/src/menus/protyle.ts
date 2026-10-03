@@ -1124,7 +1124,14 @@ export const zoomOut = (options: {
             action,
             scrollAttr: getZoomFocusScrollAttr(options.id, options.focusId, options.focusPosition),
             scrollPosition: options.focusId ? "start" : undefined,
-            afterCB: options.callback,
+            afterCB: () => {
+                /// #if MOBILE
+                if (window.siyuan.mobile?.editor?.protyle === options.protyle) {
+                    window.siyuan.mobile.docks.backlink?.update();
+                }
+                /// #endif
+                options.callback?.();
+            },
             dataDocType: options.dataDocType,
             focusAfterZoom,
             suppressFocus,

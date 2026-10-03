@@ -4,6 +4,7 @@ import {escapeHtml} from "../../util/escape";
 import {clearTabsAttributes, renderTabsAttributes} from "./tabsAttributes";
 
 export interface ITabsRenderOptions {
+    prepare?: () => void;
     readonly?: (tabs?: Element) => boolean;
     taskReadonly?: (tabs?: Element) => boolean;
     label?: string;
@@ -176,6 +177,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             }
             controller.observer.disconnect();
             controller.resize.disconnect();
+            controller.options.prepare?.();
             const focusedAttributes = document.activeElement?.closest<HTMLElement>(".tabs-attributes");
             const focusedAttributesID = focusedAttributes && element.contains(focusedAttributes) ?
                 focusedAttributes.dataset.blockId : undefined;

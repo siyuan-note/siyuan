@@ -7,6 +7,7 @@ import {objEquals} from "../../util/functions";
 import {syncSettingTasks} from "./taskBlocker";
 import {processSync} from "../../dialog/processSystem";
 import {notifyOCRChanged} from "../ocrRuntime";
+import {refreshMountedBazaar} from "../bazaarTab";
 /// #if !MOBILE
 import {applyKeymap} from "../tabs/keymapRuntime";
 import {remountOpenSettingTab} from "./mount";
@@ -71,6 +72,9 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             }
             if (includes("ocr") && next.ocr) {
                 notifyOCRChanged();
+            }
+            if (includes("bazaar")) {
+                void refreshMountedBazaar();
             }
             /// #if !MOBILE
             const tabs: Record<string, TSettingTab> = {fileTree: "file", secrets: "secretsVariables", variables: "secretsVariables", system: "app", publish: "access"};

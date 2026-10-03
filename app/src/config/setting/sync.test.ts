@@ -26,6 +26,30 @@ test("settings notifications update runtime configuration and refresh the regist
 });
 
 for (const mobile of [false, true]) {
+    test(`marketplace configuration and reconnection refresh mounted packages (mobile=${mobile})`, async () => {
+        const {parse} = require("ifdef-loader/preprocessor");
+        const compiled = transpileModule(parse(readFileSync("src/config/setting/sync.ts", "utf8"),
+            {MOBILE: mobile, BROWSER: mobile}, false, true), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText;
+        const config = {bazaar: {trust: true}, editor: {}, appearance: {}, keymap: {}};
+        let refreshed = 0;
+        const exports = {} as {refreshSettingConfig: (namespace?: string) => Promise<void>};
+        runInNewContext(compiled, {exports, window: {siyuan: {config}}, console, require: () => ({
+            fetchSyncPost: async () => ({code: 0, data: {conf: config}}),
+            systemConfig: (value: unknown) => value,
+            objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
+            syncSettingTasks() {}, getSettingTabDefs: (): {id: string}[] => [],
+            refreshMountedBazaar: () => { refreshed++; },
+        })});
+        await exports.refreshSettingConfig("editor");
+        assert.equal(refreshed, 0);
+        await exports.refreshSettingConfig("bazaar");
+        assert.equal(refreshed, 1);
+        await exports.refreshSettingConfig();
+        assert.equal(refreshed, 2);
+    });
+
     test(`OCR notifications preserve the settings page and unrelated runtime configuration (mobile=${mobile})`, async () => {
         const {parse} = require("ifdef-loader/preprocessor");
         const compiled = transpileModule(parse(readFileSync("src/config/setting/sync.ts", "utf8"),
@@ -110,7 +134,7 @@ for (const mobile of [false, true]) {
             fetchSyncPost: async () => ({code: 0, data: {conf: JSON.parse(JSON.stringify({...config, ai: next}))}}),
             systemConfig: (value: unknown) => value,
             objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
-            ...aiExports, syncSettingTasks() {}, remountOpenSettingTab: async () => {}, getSettingTabDefs: () => [{id: "ai"}],
+            ...aiExports, syncSettingTasks() {}, refreshMountedBazaar() {}, remountOpenSettingTab: async () => {}, getSettingTabDefs: () => [{id: "ai"}],
         };
         const exports = {} as {refreshSettingConfig: (namespace?: string) => Promise<void>};
         runInNewContext(compile("src/config/setting/sync.ts"), {exports, require: () => dependencies, window: windowContext, console});
@@ -148,7 +172,7 @@ for (const mobile of [false, true]) {
             fetchSyncPost: async () => failed ? {code: -1} : {code: 0, data: {conf: JSON.parse(JSON.stringify(next))}},
             systemConfig: (value: unknown) => value,
             objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
-            syncSettingTasks() {}, processSync() {}, getSettingTabDefs: () => [{id: "app"}, {id: "access"}],
+            syncSettingTasks() {}, refreshMountedBazaar() {}, processSync() {}, getSettingTabDefs: () => [{id: "app"}, {id: "access"}],
             remountOpenSettingTab: async (tab: string) => { remounted.push(tab); },
         })});
         await exports.refreshSettingConfig("system");

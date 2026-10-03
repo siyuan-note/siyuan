@@ -1,6 +1,7 @@
 import {Constants} from "../../constants";
 import {isEncryptedBox} from "../../util/pathName";
 import {preparePasteAssets} from "./pasteAssets";
+import {normalizePictureImages} from "./pictureImages";
 import {escapeHtml, escapeMarkdownPlainText} from "../../util/escape";
 import {getTableCellPlainText} from "./tableCellRich";
 import {getTableCellRichContext} from "./tableCellRichContext";
@@ -766,6 +767,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         siyuanHTML = siyuanHTML || clipboard.textSiyuan;
         textHTML = clipboard.textHtml;
     }
+    if (blockDOMSanitizer && !siyuanHTML && /<picture[\s>]/i.test(textHTML)) {
+        const template = document.createElement("template");
+        template.innerHTML = textHTML;
+        normalizePictureImages(template.content, getHTMLAssetSourceURL(textHTML));
+        textHTML = template.innerHTML;
+    }
     if (blockDOMSanitizer && !siyuanHTML && !isProtyleUploadDisabled(protyle)) {
         // 受限片段中的图片走附件上传，避免被后续纯文本降级丢弃。
         const isImage = (name: string) => Constants.SIYUAN_ASSETS_IMAGE.includes(
@@ -895,7 +902,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // process word
         const doc = new DOMParser().parseFromString(textHTML, "text/html");
         // 在移除文档头之前解析来源，避免将网页根路径当成本地绝对路径。
-        resolveHTMLAssetURLs(doc, getHTMLAssetSourceURL(textHTML, doc.querySelector("base[href]")?.getAttribute("href")));
+        const sourceURL = getHTMLAssetSourceURL(textHTML, doc.querySelector("base[href]")?.getAttribute("href"));
+        normalizePictureImages(doc, sourceURL);
+        resolveHTMLAssetURLs(doc, sourceURL);
         if (doc.body && doc.body.innerHTML) {
             textHTML = doc.body.innerHTML;
         }
@@ -1326,6 +1335,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (isHTML) {
             const tempElement = document.createElement("div");
             tempElement.innerHTML = textHTML;
+            normalizePictureImages(tempElement);
             if (!getHostCapabilities().localFileSystem) {
                 removeHTMLLocalAssetPaths(collectHTMLLocalAssets(tempElement));
             }

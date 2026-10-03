@@ -166,7 +166,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
-        "getListMindmapSiblingIDs, normalizeListMindmapSummaryMetadata, getListMindmapSummaryRange, " +
+        "getListMindmapSiblingIDs, normalizeListMindmapSummaryMetadata, getListMindmapSummaryRange, getListMindmapSiblingFoldStates, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
         "tabsRender, destroyTabsRender, getTabTask, getListMindmapTabItem, convertTabsList, ListMindmapView, registerListMindmapView, resolveVisibleListMindmapBlock, getListMindmapElements, registerListMindmapRoot, restoreListMindmapFocus};")(
         async (element: Element) => {
@@ -2194,6 +2194,94 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     await settle();
     check.equal(nodeElement(alpha).hidden, false, "level selection expands a previously folded virtual center");
     levelView.destroy();
+
+    // Alt 点击只切换同一父节点下的分支，普通点击和只读视图沿用各自的折叠行为。
+    const siblingHolder = document.createElement("div");
+    siblingHolder.innerHTML = lute.Md2BlockDOM("* First\n  * A\n    * A child\n      * A grandchild\n  * B\n    * B child\n  * Leaf\n* Second\n  * C\n    * C child\n");
+    const siblingList = siblingHolder.firstElementChild as HTMLElement;
+    const siblingHost = document.createElement("div");
+    siblingHost.className = "mindmap-view";
+    hostParent.append(siblingHost);
+    let siblingModel = api.readListMindmap(siblingList);
+    const [a, b, leaf] = siblingModel.root.children[0].children;
+    const c = siblingModel.root.children[1].children[0];
+    const deep = a.children[0];
+    deep.element.setAttribute("fold", "1");
+    siblingModel = api.readListMindmap(siblingList);
+    const siblingSource = siblingList.outerHTML;
+    let siblingFinishAllowed: boolean | Promise<boolean> = true;
+    let siblingSaveAllowed = true;
+    let siblingSaves = 0;
+    const siblingView = new api.ListMindmapView({host: siblingHost, model: siblingModel, readOnly: true,
+        finishEdit: () => siblingFinishAllowed,
+        onFoldSiblings: async (id: string) => {
+            if (!siblingSaveAllowed) {
+                return false;
+            }
+            api.getListMindmapSiblingFoldStates(siblingModel, id).forEach((collapsed: boolean, siblingID: string) => {
+                siblingModel.nodes.get(siblingID).element?.setAttribute("fold", collapsed ? "1" : "0");
+            });
+            siblingSaves++;
+            siblingModel = api.readListMindmap(siblingList);
+            siblingView.update(siblingModel);
+            return true;
+        },
+    });
+    const siblingElement = (id: string) => siblingHost.querySelector<HTMLElement>(`[data-mindmap-id="${id}"]`);
+    const clickSiblingFold = async (id: string, altKey = true) => {
+        siblingElement(id).querySelector(".mindmap-view__fold").dispatchEvent(new MouseEvent("click", {
+            bubbles: true, altKey,
+        }));
+        await settle();
+    };
+    await settle();
+    await clickSiblingFold(a.id, false);
+    check.equal(siblingElement(deep.id).hidden, true, "ordinary clicks only fold the clicked node");
+    check.equal(siblingElement(b.children[0].id).hidden, false);
+    await clickSiblingFold(b.id);
+    check.equal(siblingElement(b.children[0].id).hidden, true, "mixed sibling states fold together");
+    check.equal(siblingElement(c.children[0].id).hidden, false, "branches under other parents are untouched");
+    check.equal(siblingElement(leaf.id).hidden, false);
+    await clickSiblingFold(a.id);
+    check.equal(siblingElement(deep.id).hidden, false);
+    check.equal(siblingElement(deep.children[0].id).hidden, true, "deeper folding states survive sibling expansion");
+    check.equal(siblingElement(b.children[0].id).hidden, false);
+    check.equal(siblingList.outerHTML, siblingSource, "read-only sibling folding never writes source attributes");
+    check.equal(siblingSaves, 0);
+    siblingModel.metadata.viewLocked = true;
+    siblingView.update(siblingModel);
+    await clickSiblingFold(a.id);
+    check.equal(siblingElement(deep.id).hidden, false, "locked views ignore Alt folding");
+    siblingModel.metadata.viewLocked = false;
+    siblingView.update(siblingModel);
+    siblingView.setReadOnly(false);
+    siblingSaveAllowed = false;
+    await clickSiblingFold(a.id);
+    check.equal(siblingElement(deep.id).hidden, false, "failed saves do not change sibling visibility");
+    check.equal(siblingList.outerHTML, siblingSource);
+    siblingSaveAllowed = true;
+    siblingFinishAllowed = false;
+    await clickSiblingFold(a.id);
+    check.equal(siblingSaves, 0, "failed editor completion blocks sibling folding");
+    siblingFinishAllowed = Promise.resolve(true);
+    siblingView.selectNode(deep.id);
+    await clickSiblingFold(b.id);
+    check.equal(siblingSaves, 1);
+    check.equal(siblingView.selectedId, a.id, "hidden selections move to the visible ancestor");
+    check.equal(siblingElement(deep.id).hidden, true);
+    check.equal(siblingElement(b.children[0].id).hidden, true);
+    check.equal(siblingModel.nodes.get(c.id).collapsed, false);
+    await clickSiblingFold(a.id);
+    check.equal(siblingSaves, 2);
+    check.equal(siblingElement(deep.id).hidden, false);
+    check.equal(siblingElement(deep.children[0].id).hidden, true);
+    siblingView.setReadOnly(true);
+    await clickSiblingFold(siblingModel.root.id);
+    check.equal(siblingElement(a.id).hidden, true, "a virtual center folds locally even without a parent");
+    await clickSiblingFold(siblingModel.root.id);
+    check.equal(siblingElement(a.id).hidden, false);
+    siblingView.destroy();
+    siblingHost.remove();
     list.outerHTML = persistedBeforeFold;
     list = holder.querySelector<HTMLElement>('[data-type="NodeList"]');
     model = api.readListMindmap(list);

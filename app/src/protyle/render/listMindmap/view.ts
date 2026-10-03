@@ -15,7 +15,7 @@ import {getAVRichTextSafeURL} from "../av/richTextValue";
 import {Constants} from "../../../constants";
 import {findMindmapDrop} from "./drop";
 import {destroyTabsRender, tabsRender} from "../tabsRender";
-import {getListMindmapFoldStates} from "./fold";
+import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
 import type {ListMindmapFoldTarget} from "./fold";
 import {clampMindmapPanOffset} from "./pan";
 import {getListMindmapSummaryRange, layoutListMindmapSummaries} from "./summary";
@@ -49,6 +49,7 @@ export interface ListMindmapViewOptions {
     onAdd?: (id: string, kind: "child" | "sibling") => void;
     onDelete?: (id: string) => boolean | void | Promise<boolean | void>;
     onFold?: (id: string) => void;
+    onFoldSiblings?: (id: string) => Promise<boolean>;
     onFoldLevel?: (level: ListMindmapFoldTarget) => Promise<boolean>;
     onExpandLevelMenu?: (anchor: HTMLElement, select: (level: ListMindmapFoldTarget) => void) => void;
     onTaskToggle?: (id: string, cycle?: boolean) => void;
@@ -296,7 +297,7 @@ export class ListMindmapView {
         this.disposers.push(() => target.removeEventListener(event, handler, options));
     }
 
-    private makeButton(key: string, icon: string, action: () => void, className = "") {
+    private makeButton(key: string, icon: string, action: (event: MouseEvent) => void, className = "") {
         const button = createElement("button", "block__icon block__icon--show " + className);
         button.type = "button";
         button.setAttribute("aria-label", this.label(key));
@@ -306,7 +307,7 @@ export class ListMindmapView {
         }
         button.addEventListener("click", (event) => {
             event.stopPropagation();
-            this.finishThen(action);
+            this.finishThen(() => action(event));
         });
         return button;
     }
@@ -602,7 +603,13 @@ export class ListMindmapView {
                 addBridge.hidden = !!this.readOnly;
                 addBridge.setAttribute("aria-hidden", "true");
                 element.append(addBridge);
-                const fold = this.makeButton("collapse", "iconLeft", () => this.toggleFold(id), "mindmap-view__fold");
+                const fold = this.makeButton("collapse", "iconLeft", event => {
+                    if (event.altKey) {
+                        void this.toggleSiblingFold(id).catch(error => console.error(error));
+                    } else {
+                        this.toggleFold(id);
+                    }
+                }, "mindmap-view__fold");
                 fold.append(createElement("span", "mindmap-view__fold-count"));
                 element.append(fold);
                 const addChild = this.makeButton("listMindmapChild", "iconAdd", () => {
@@ -1799,6 +1806,25 @@ export class ListMindmapView {
         }
     }
 
+    private async toggleSiblingFold(id: string) {
+        if (this.locked) {
+            return;
+        }
+        const states = getListMindmapSiblingFoldStates(this.model, id, this.folded);
+        if (!states.size) {
+            return;
+        }
+        const selectedId = this.selectedId;
+        this.finishRelationEdit?.(true);
+        this.cancelPointer();
+        if (!this.readOnly && !await this.options.onFoldSiblings?.(id)) {
+            return;
+        }
+        if (!this.destroyed) {
+            this.updateFoldStates(states, selectedId);
+        }
+    }
+
     private async expandToLevel(level: ListMindmapFoldTarget, selectedId = this.selectedId) {
         if (this.locked) {
             return;
@@ -1811,7 +1837,11 @@ export class ListMindmapView {
         if (this.destroyed) {
             return;
         }
-        getListMindmapFoldStates(this.model.root, level).forEach((collapsed, id) => {
+        this.updateFoldStates(getListMindmapFoldStates(this.model.root, level), selectedId);
+    }
+
+    private updateFoldStates(states: Map<string, boolean>, selectedId: string) {
+        states.forEach((collapsed, id) => {
             if (this.readOnly || this.model.nodes.get(id)?.virtual) {
                 this.folded.set(id, collapsed);
             } else {

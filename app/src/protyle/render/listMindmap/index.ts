@@ -40,7 +40,7 @@ import {setBlockHeight} from "../../gutter/height";
 import {ListMindmapView} from "./view";
 import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
-import {getListMindmapFoldStates} from "./fold";
+import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
 import {isMobile} from "../../../util/functions";
 import {getListMindmapSiblingIDs, getListMindmapSummaryRange} from "./summary";
 import {isProtyleListItemFragment} from "../../runtimeCapabilities";
@@ -347,6 +347,15 @@ class ListMindmapController {
                 if (node?.element && !node.virtual) {
                     node.element.setAttribute("fold", node.collapsed ? "0" : "1");
                 }
+            }),
+            onFoldSiblings: id => this.change(() => {
+                const model = readListMindmap(list);
+                getListMindmapSiblingFoldStates(model, id).forEach((collapsed, siblingID) => {
+                    const node = model.nodes.get(siblingID);
+                    if (node.element && node.collapsed !== collapsed) {
+                        node.element.setAttribute("fold", collapsed ? "1" : "0");
+                    }
+                });
             }),
             onUndo: () => this.undo(false),
             onRedo: () => this.undo(true),

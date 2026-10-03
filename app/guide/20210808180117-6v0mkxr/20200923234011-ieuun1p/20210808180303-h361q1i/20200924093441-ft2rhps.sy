@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261002002136"
+		"updated": "20261003225941"
 	},
 	"Children": [
 		{
@@ -1911,7 +1911,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20260928143000"
+				"updated": "20261003225941"
 			},
 			"Children": [
 				{
@@ -1931,6 +1931,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "Use Lock view in the mind map toolbar to prevent editing, zooming and panning. Swiping or using the mouse wheel over the map then scrolls the document. Use Unlock view to resume interaction. The lock state is saved with the block."
+				}
+			]
+		},
+		{
+			"ID": "20261003225941-mxlfdrn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003225941-mxlfdrn",
+				"updated": "20261003225941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hold "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS) and click a node's fold button to fold or expand sibling branches under the same parent. If any sibling branch is expanded, all are folded; otherwise, all are expanded. Deeper folding states are preserved. A normal click only toggles the current node."
 				}
 			]
 		},

@@ -9,7 +9,7 @@ const runCases = async (sources) => {
     const dataByElement = new WeakMap();
     let mobile = false;
     let fragment;
-    window.siyuan = {zIndex: 0, languages: {empty: "Empty", cancel: "Cancel", save: "Save"}};
+    window.siyuan = {zIndex: 0, languages: {empty: "Empty", confirm: "Confirm"}};
     const hiddenElement = () => {
         const element = document.createElement("div");
         element.className = "fn__none";
@@ -105,14 +105,13 @@ const runCases = async (sources) => {
             toolbar.className = "keyboard";
             toolbar.style.zIndex = "100";
             document.body.append(toolbar);
-            const save = document.querySelector('[data-type="save"]');
-            const cancel = document.querySelector('[data-type="cancel"]');
-            for (const button of [save, cancel]) {
-                const rect = button.getBoundingClientRect();
-                assert.ok(rect.bottom <= toolbar.getBoundingClientRect().top, "actions must remain above the keyboard toolbar");
-                assert.ok(button.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)),
-                    "mobile actions must receive pointer events");
-            }
+            const confirm = document.querySelector('[data-type="confirm"]');
+            assert.equal(document.querySelectorAll(".av__richtext-actions button").length, 1);
+            assert.equal(confirm.textContent, window.siyuan.languages.confirm);
+            const rect = confirm.getBoundingClientRect();
+            assert.ok(rect.bottom <= toolbar.getBoundingClientRect().top, "actions must remain above the keyboard toolbar");
+            assert.ok(confirm.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)),
+                "mobile actions must receive pointer events");
         }
         for (const input of ["a", "b", "中文"]) {
             fragment.input.append(document.createTextNode(input));
@@ -125,7 +124,7 @@ const runCases = async (sources) => {
         assert.equal(hasAVEditorSession(state.owner), true, `${mode}: track the visible owner`);
         fragment.pendingInput = "待提交";
         if (mobile) {
-            document.querySelector('[data-type="save"]').click();
+            document.querySelector('[data-type="confirm"]').click();
         } else {
             document.querySelector(".av__richtext-mask").dispatchEvent(new MouseEvent("mousedown", {bubbles: true}));
         }
@@ -141,12 +140,11 @@ const runCases = async (sources) => {
         assert.equal(document.querySelector(".av__richtext-mask"), null);
 
         if (mobile) {
-            const cancelled = createOwner(true);
-            fragment.input.append(document.createTextNode("discarded"));
-            document.querySelector('[data-type="cancel"]').click();
+            const unchanged = createOwner(true);
+            document.querySelector('[data-type="confirm"]').click();
             await settle();
-            assert.equal(cancelled.saves.length, 0);
-            assert.equal(cancelled.closed(), 1);
+            assert.equal(unchanged.saves.length, 0);
+            assert.equal(unchanged.closed(), 1);
             assert.equal(document.querySelector(".av__richtext-mask"), null);
 
             const returned = createOwner(true);

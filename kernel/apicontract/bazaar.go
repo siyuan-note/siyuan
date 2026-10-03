@@ -60,6 +60,9 @@ type GetBazaarPackageREADMERequest struct {
 	RepoHash    string `json:"repoHash" api:"trim"`
 	PackageType string `json:"packageType" api:"trim"`
 }
+type GetBazaarPackageReleasesRequest struct {
+	RepoURL string `json:"repoURL" api:"trim"`
+}
 type GetBazaarPluginRequest struct {
 	Frontend string `json:"frontend" api:"trim"`
 	Keyword  string `json:"keyword" api:"optional,nullable"`
@@ -180,6 +183,14 @@ type BazaarPackageSizeData struct {
 }
 type BazaarREADMEData struct {
 	HTML string `json:"html"`
+}
+type BazaarRelease struct {
+	Tag         string `json:"tag"`
+	PublishedAt string `json:"publishedAt"`
+	HTML        string `json:"html"`
+}
+type BazaarReleasesData struct {
+	Releases []*BazaarRelease `json:"releases"`
 }
 type BazaarRatingsData struct {
 	Ratings              map[string]*BazaarPackageRating `json:"ratings"`

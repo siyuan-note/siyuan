@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "Zobraziť poznámky k vydaniu pre v${version}",
+	"bazaarReleaseNotesLatest": "Najnovšie",
+	"bazaarReleaseNotesEmpty": "Táto verzia nemá poznámky k vydaniu",
+	"bazaarReleaseNotesUnavailable": "Poznámky k vydaniu nie sú k dispozícii",
 	"ocrModelDefault": "Predvolená hodnota modelu",
 	"ocrDetectionThreshold": "Prah detekcie",
 	"ocrBoxThreshold": "Prah spoľahlivosti textových oblastí",

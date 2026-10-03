@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "View release notes for v${version}",
+	"bazaarReleaseNotesLatest": "Latest",
+	"bazaarReleaseNotesEmpty": "This version has no release notes",
+	"bazaarReleaseNotesUnavailable": "Release notes are unavailable",
 	"ocrModelDefault": "Model default",
 	"ocrDetectionThreshold": "Detection threshold",
 	"ocrBoxThreshold": "Text box confidence threshold",

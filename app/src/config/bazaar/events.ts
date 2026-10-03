@@ -23,6 +23,7 @@ import {
     isBazaarPackageType,
 } from "./packageConfig";
 import {openRatingDialog, refreshVisibleRatingUI, syncRatingUser} from "./rating";
+import {openReleaseNotesDialog} from "./releaseNotes";
 import {getSettingsWindowHost} from "../setting/windowContext";
 
 type TBazaarController = typeof import("../bazaar").bazaar;
@@ -93,6 +94,14 @@ const ACTION_HANDLERS = {
             return CONTINUE;
         }
         openRatingDialog(controller, pkgType, packageName);
+        return HANDLED;
+    }) satisfies TBazaarActionHandler,
+    "release-notes": ((context) => {
+        const {availableItem} = context;
+        if (!availableItem?.repoURL || !availableItem.version) {
+            return CONTINUE;
+        }
+        openReleaseNotesDialog(availableItem.repoURL, availableItem.version);
         return HANDLED;
     }) satisfies TBazaarActionHandler,
     "copy-funding": ((context, target) => {

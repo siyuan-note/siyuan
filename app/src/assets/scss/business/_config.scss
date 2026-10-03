@@ -143,6 +143,38 @@
   }
 }
 
+.bazaar-release-notes {
+  // containerClassName 落在 .b3-dialog__container 自己身上，所以这里写的是它本身的属性，不是后代选择器。
+  // 头部固定、正文滚动；内容不超过视口时高度仍然自适应。
+  max-height: 85vh;
+
+  &__head {
+    align-items: center;
+    border-bottom: 1px solid var(--b3-theme-surface-lighter);
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    padding: 12px 24px;
+  }
+
+  &__label {
+    color: var(--b3-theme-on-surface);
+    flex: 0 0 auto;
+  }
+
+  &__select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 16px 24px;
+  }
+}
+
 .config {
   &__tab-wrap {
     overflow: hidden;
@@ -1072,6 +1104,18 @@
       .item {
         &__body {
           display: contents;
+        }
+
+        &__version-link {
+          background-color: transparent;
+          border: 0;
+          color: var(--b3-theme-primary);
+          cursor: pointer;
+          font-family: inherit;
+          font-size: inherit;
+          line-height: inherit;
+          padding: 0;
+          text-decoration: underline;
         }
 
         &__side {

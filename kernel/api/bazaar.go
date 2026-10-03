@@ -233,6 +233,15 @@ var getBazaarPackageREADME = contractHandler(apicontract.GetBazaarPackageREADME,
 	return apicontract.Success(data)
 })
 
+var getBazaarPackageReleases = contractHandler(apicontract.GetBazaarPackageReleases, func(c *gin.Context, request apicontract.GetBazaarPackageReleasesRequest) apicontract.Response[apicontract.BazaarReleasesData] {
+	if _, ok := bazaar.GithubOwnerRepo(request.RepoURL); !ok {
+		return apicontract.Failure[apicontract.BazaarReleasesData](1, "Invalid repository URL")
+	}
+	data := apicontract.BazaarReleasesData{Releases: bazaarReleases(model.GetBazaarPackageReleases(c.Request.Context(), request.RepoURL))}
+
+	return apicontract.Success(data)
+})
+
 var getBazaarPlugin = contractHandler(apicontract.GetBazaarPlugin, func(c *gin.Context, request apicontract.GetBazaarPluginRequest) apicontract.Response[apicontract.BazaarPackagesData] {
 	data := apicontract.BazaarPackagesData{Packages: bazaarPackages(model.GetBazaarPackages("plugins", request.Frontend, request.Keyword))}
 
@@ -445,6 +454,16 @@ func bazaarRatings(values map[string]*bazaar.PackageRating) map[string]*apicontr
 	ret := make(map[string]*apicontract.BazaarPackageRating, len(values))
 	for key, value := range values {
 		ret[key] = bazaarRating(value)
+	}
+	return ret
+}
+func bazaarReleases(values []*bazaar.BazaarRelease) []*apicontract.BazaarRelease {
+	if values == nil {
+		return nil
+	}
+	ret := make([]*apicontract.BazaarRelease, len(values))
+	for i, value := range values {
+		ret[i] = &apicontract.BazaarRelease{Tag: value.Tag, PublishedAt: value.PublishedAt, HTML: value.HTML}
 	}
 	return ret
 }

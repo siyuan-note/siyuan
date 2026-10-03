@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "v${version} のリリースノートを表示",
+	"bazaarReleaseNotesLatest": "最新",
+	"bazaarReleaseNotesEmpty": "このバージョンのリリースノートはありません",
+	"bazaarReleaseNotesUnavailable": "リリースノートを読み込めません",
 	"ocrModelDefault": "モデルの既定値",
 	"ocrDetectionThreshold": "検出しきい値",
 	"ocrBoxThreshold": "テキスト領域の信頼度しきい値",

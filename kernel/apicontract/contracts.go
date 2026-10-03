@@ -684,6 +684,10 @@ var GetBazaarPackageUserRatings = define[GetBazaarPackageUserRatingsRequest, Baz
 var GetBazaarPackageRating = define[GetBazaarPackageRatingRequest, BazaarRatingResult]("getBazaarPackageRating", "/api/bazaar/getBazaarPackageRating", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
 var SetBazaarPackageRating = define[SetBazaarPackageRatingRequest, BazaarRatingResult]("setBazaarPackageRating", "/api/bazaar/setBazaarPackageRating", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
 var GetBazaarPackageREADME = define[GetBazaarPackageREADMERequest, BazaarREADMEData]("getBazaarPackageREADME", "/api/bazaar/getBazaarPackageREADME", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// 仅接受 https://github.com/<owner>/<repo> 形式的仓库地址，其他形式返回 code 1。
+// 一次最多返回 100 个发行版，发行说明已渲染为 HTML，结果在内存中缓存 30 分钟。
+var GetBazaarPackageReleases = define[GetBazaarPackageReleasesRequest, BazaarReleasesData]("getBazaarPackageReleases", "/api/bazaar/getBazaarPackageReleases", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarPlugin = define[GetBazaarPluginRequest, BazaarPackagesData]("getBazaarPlugin", "/api/bazaar/getBazaarPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledPlugin = define[GetInstalledPluginRequest, BazaarPackagesData]("getInstalledPlugin", "/api/bazaar/getInstalledPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 

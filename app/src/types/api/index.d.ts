@@ -688,6 +688,10 @@ export type BazaarRatingResult = (BazaarRatingData & { "errorCode"?: never; }) |
 
 export type BazaarRatingsData = { "eligiblePackageNames": Array<string> | null; "ratings": Record<string, BazaarPackageRating | null> | null; };
 
+export type BazaarRelease = { "html": string; "publishedAt": string; "tag": string; };
+
+export type BazaarReleasesData = { "releases": Array<BazaarRelease | null> | null; };
+
 export type BazaarStatusBar = { "msgDataSyncDisabled": boolean; "msgTaskAssetDatabaseIndexCommitDisabled": boolean; "msgTaskDatabaseIndexCommitDisabled": boolean; "msgTaskHistoryDatabaseIndexCommitDisabled": boolean; "msgTaskHistoryGenerateFileDisabled": boolean; "version": number; };
 
 export type BazaarUpdatedData = { "icons": Array<BazaarPackageDetail | null> | null; "plugins": Array<BazaarPackageDetail | null> | null; "templates": Array<BazaarPackageDetail | null> | null; "themes": Array<BazaarPackageDetail | null> | null; "widgets": Array<BazaarPackageDetail | null> | null; };
@@ -1131,6 +1135,8 @@ export type GetBazaarPackageREADMERequestInput = { "packageType": string; "repoH
 export type GetBazaarPackageRatingRequestInput = { "packageName": string; "packageType": string; };
 
 export type GetBazaarPackageRatingsRequestInput = { "packageNames": Array<string>; "packageType": string; };
+
+export type GetBazaarPackageReleasesRequestInput = { "repoURL": string; };
 
 export type GetBazaarPackageRequestInput = { "frontend"?: string | null; "packageName": string; "packageType": string; };
 
@@ -3262,6 +3268,11 @@ export interface APIPOSTRoutes {
     "/api/bazaar/getBazaarPackageRatings": {
         request: GetBazaarPackageRatingsRequestInput;
         response: { "code": 0; "data": BazaarRatingsData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackageReleases": {
+        request: GetBazaarPackageReleasesRequestInput;
+        response: { "code": 0; "data": BazaarReleasesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/bazaar/getBazaarPackageUserRatings": {

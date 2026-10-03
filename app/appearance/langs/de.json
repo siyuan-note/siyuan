@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "Versionshinweise für v${version} anzeigen",
+	"bazaarReleaseNotesLatest": "Neueste",
+	"bazaarReleaseNotesEmpty": "Für diese Version gibt es keine Versionshinweise",
+	"bazaarReleaseNotesUnavailable": "Versionshinweise sind nicht verfügbar",
 	"ocrModelDefault": "Modellstandard",
 	"ocrDetectionThreshold": "Erkennungsschwelle für Textbereiche",
 	"ocrBoxThreshold": "Konfidenzschwelle für Textrahmen",

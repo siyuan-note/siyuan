@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "v${version} के रिलीज़ नोट्स देखें",
+	"bazaarReleaseNotesLatest": "नवीनतम",
+	"bazaarReleaseNotesEmpty": "इस संस्करण के लिए कोई रिलीज़ नोट्स नहीं हैं",
+	"bazaarReleaseNotesUnavailable": "रिलीज़ नोट्स उपलब्ध नहीं हैं",
 	"ocrModelDefault": "मॉडल का डिफ़ॉल्ट",
 	"ocrDetectionThreshold": "पहचान क्षेत्र की सीमा",
 	"ocrBoxThreshold": "टेक्स्ट बॉक्स विश्वास सीमा",

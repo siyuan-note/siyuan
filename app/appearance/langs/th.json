@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "ดูบันทึกประจำรุ่นของ v${version}",
+	"bazaarReleaseNotesLatest": "ล่าสุด",
+	"bazaarReleaseNotesEmpty": "เวอร์ชันนี้ไม่มีบันทึกประจำรุ่น",
+	"bazaarReleaseNotesUnavailable": "บันทึกประจำรุ่นไม่พร้อมใช้งาน",
 	"ocrModelDefault": "ค่าเริ่มต้นของโมเดล",
 	"ocrDetectionThreshold": "เกณฑ์การตรวจจับ",
 	"ocrBoxThreshold": "เกณฑ์ความเชื่อมั่นของกรอบข้อความ",

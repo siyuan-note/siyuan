@@ -1733,6 +1733,39 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 	})
 }
 
+func TestBazaarPackageReleasesContractInput(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		body    string
+		repoURL string
+		ok      bool
+	}{
+		{name: "valid repository", body: `{"repoURL":"https://github.com/owner/repo"}`, repoURL: "https://github.com/owner/repo", ok: true},
+		{name: "trims repository", body: `{"repoURL":" https://github.com/owner/repo "}`, repoURL: "https://github.com/owner/repo", ok: true},
+		{name: "missing field", body: `{}`},
+		{name: "null field", body: `{"repoURL":null}`},
+		{name: "blank field", body: `{"repoURL":"  "}`},
+		{name: "wrong type", body: `{"repoURL":1}`},
+		{name: "not an object", body: `[]`},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			request, err := apicontract.GetBazaarPackageReleases.Decode(bytes.NewReader([]byte(test.body)))
+			if !test.ok {
+				if err == nil {
+					t.Fatalf("expected %s to be rejected", test.body)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("expected %s to decode, got %v", test.body, err)
+			}
+			if request.RepoURL != test.repoURL {
+				t.Fatalf("expected repoURL %q, got %q", test.repoURL, request.RepoURL)
+			}
+		})
+	}
+}
+
 func TestBazaarContractTransportCompatibility(t *testing.T) {
 	icon := ""
 	enabled := false
@@ -1744,7 +1777,8 @@ func TestBazaarContractTransportCompatibility(t *testing.T) {
 	appearance.BodyGradient = &conf.BodyGradient{Mode: "custom", Light: conf.BodyGradientColor{Color: "#000000", Opacity: 50}}
 	appearance.EntryVisibility.Profiles = []*conf.EntryVisibilityProfile{nil, {ID: "custom", Orders: map[string][]string{"menu": {"item"}}}}
 	appearance.GlobalFontFamilies = []*conf.EditorFont{nil, {Family: "serif", Weight: 500}}
-	cases := [][2]interface{}{{pkg, bazaarPackage(pkg)}, {&bazaar.Package{}, bazaarPackage(&bazaar.Package{})}, {appearance, bazaarAppearance(appearance)}, {(*conf.Appearance)(nil), bazaarAppearance(nil)}, {[]*bazaar.Package{nil, pkg}, bazaarPackages([]*bazaar.Package{nil, pkg})}, {([]*bazaar.Package)(nil), bazaarPackages(nil)}, {[]*bazaar.Package{}, bazaarPackages([]*bazaar.Package{})}}
+	release := &bazaar.BazaarRelease{Tag: "v1.0.0", PublishedAt: "2026-01-01T00:00:00Z", HTML: "<p>notes</p>"}
+	cases := [][2]interface{}{{pkg, bazaarPackage(pkg)}, {&bazaar.Package{}, bazaarPackage(&bazaar.Package{})}, {appearance, bazaarAppearance(appearance)}, {(*conf.Appearance)(nil), bazaarAppearance(nil)}, {[]*bazaar.Package{nil, pkg}, bazaarPackages([]*bazaar.Package{nil, pkg})}, {([]*bazaar.Package)(nil), bazaarPackages(nil)}, {[]*bazaar.Package{}, bazaarPackages([]*bazaar.Package{})}, {[]*bazaar.BazaarRelease{release}, bazaarReleases([]*bazaar.BazaarRelease{release})}, {([]*bazaar.BazaarRelease)(nil), bazaarReleases(nil)}, {[]*bazaar.BazaarRelease{}, bazaarReleases([]*bazaar.BazaarRelease{})}}
 	for _, pair := range cases {
 		left, _ := json.Marshal(pair[0])
 		right, _ := json.Marshal(pair[1])
@@ -1770,6 +1804,7 @@ func TestBazaarContractHTTPFailures(t *testing.T) {
 		{"installBazaarTheme", `{"repoURL":"url","repoHash":"hash","packageName":"name","mode":null}`, installBazaarTheme, -1, "Fields [mode] and [modeOS] must be provided together"},
 		{"installBazaarTheme", `{"repoURL":"url","repoHash":"hash","packageName":"name","mode":null,"modeOS":false}`, installBazaarTheme, -1, "Field [mode] is required"},
 		{"installBazaarTheme", `{"repoURL":"url","repoHash":"hash","packageName":"name","mode":2,"modeOS":false}`, installBazaarTheme, -1, "Field [mode] must be 0 or 1"},
+		{"getBazaarPackageReleases", `{"repoURL":"https://gitee.com/owner/repo"}`, getBazaarPackageReleases, 1, "Invalid repository URL"},
 	} {
 		t.Run(test.name+test.body, func(t *testing.T) {
 			engine := gin.New()

@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "Переглянути примітки до випуску v${version}",
+	"bazaarReleaseNotesLatest": "Остання",
+	"bazaarReleaseNotesEmpty": "Ця версія не має приміток до випуску",
+	"bazaarReleaseNotesUnavailable": "Примітки до випуску недоступні",
 	"ocrModelDefault": "Типове значення моделі",
 	"ocrDetectionThreshold": "Поріг виявлення",
 	"ocrBoxThreshold": "Поріг впевненості текстових областей",

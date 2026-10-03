@@ -529,6 +529,12 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 	return
 }
 
+// GetBazaarPackageReleases 获取集市包在 GitHub 上的发行版列表（发行说明已渲染为 HTML）。
+func GetBazaarPackageReleases(ctx context.Context, repoURL string) (ret []*bazaar.BazaarRelease) {
+	ret = bazaar.GetBazaarPackageReleases(ctx, repoURL)
+	return
+}
+
 // installBazaarPackage 下载并安装集市包
 func installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName string) (meta installMeta, err error) {
 	installPath, jsonFileName, err := getPackageInstallPath(pkgType, packageName)

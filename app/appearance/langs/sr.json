@@ -1,4 +1,8 @@
 {
+	"bazaarReleaseNotesTip": "Prikaži napomene o izdanju za v${version}",
+	"bazaarReleaseNotesLatest": "Najnovije",
+	"bazaarReleaseNotesEmpty": "Ova verzija nema napomene o izdanju",
+	"bazaarReleaseNotesUnavailable": "Napomene o izdanju nisu dostupne",
 	"ocrModelDefault": "Подразумевана вредност модела",
 	"ocrDetectionThreshold": "Праг детекције",
 	"ocrBoxThreshold": "Праг поузданости текстуалних области",

@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ScriptTarget, transpileModule} from "typescript";
 import {getListConversionType, shouldIgnoreListShortcut} from "./listContext";
+import {getBlockOperationElements} from "./blockSelection";
 
 const source = readFileSync("src/protyle/wysiwyg/keydown.ts", "utf8");
 const start = source.indexOf("        const isMatchList =");
@@ -13,7 +14,8 @@ const compiled = transpileModule(`(async () => {${source.slice(start, end)}})()`
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText;
 
-const runShortcut = async (type: string, subtype: string, key: string, legacy = false, embedded = false) => {
+const runShortcut = async (type: string, subtype: string, key: string, legacy = false, embedded = false,
+                           selectionMode = false) => {
     const selected = {
         dataset: {type, subtype, nodeId: "selected"},
         getAttribute: (name: string) => name === "custom-sy-list-mindmap" && legacy ? "1" : null,
@@ -26,10 +28,14 @@ const runShortcut = async (type: string, subtype: string, key: string, legacy = 
         Constants: {CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap"},
         matchHotKey: (binding: string) => binding === key,
         event: {preventDefault: () => prevented = true, stopPropagation() {}},
-        protyle: {wysiwyg: {element: {querySelectorAll: () => [selected]}},
+        protyle: {wysiwyg: {element: {querySelectorAll: () => selectionMode ? [] : [selected]}},
             hint: {fillCommand: (value: string) => insertions.push(value)}},
         nodeElement: {dataset: {type: "NodeParagraph", nodeId: "following-paragraph"}},
         range: {}, isCrossBlock: false, selectText: "",
+        blockSelectionModeElement: selectionMode ? selected : undefined,
+        getBlockOperationElements,
+        getListContext: (): undefined => undefined,
+        turnsIntoOneTransaction: (options: {type: string}) => calls.push(options),
         isProtyleListItemFragment: () => false,
         isInEmbedBlock: () => embedded,
         shouldIgnoreListShortcut, getListConversionType,
@@ -61,4 +67,17 @@ test("ordinary list cancellation and embedded mindmap protection remain intact",
     const embedded = await runShortcut("NodeMindmap", "u", "list", false, true);
     assert.deepEqual(embedded.calls, []);
     assert.deepEqual(embedded.insertions, []);
+});
+
+test("list shortcuts use the active block in keyboard selection mode", async () => {
+    for (const legacy of [false, true]) {
+        for (const [key, type] of [["list", "OL2UL"], ["ordered-list", "UL2OL"], ["check", "UL2TL"]]) {
+            const result = await runShortcut(legacy ? "NodeList" : "NodeMindmap", "u", key, legacy, false, true);
+            assert.equal(result.calls.length, 1);
+            assert.equal(result.calls[0].type, type);
+            assert.equal(result.calls[0].nodeElement, result.selected);
+            assert.deepEqual(result.insertions, []);
+            assert.equal(result.prevented, true);
+        }
+    }
 });

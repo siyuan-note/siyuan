@@ -1094,8 +1094,7 @@ type="checkbox">
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.pkgSize, available.hSize)}
     ${available.keywords?.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.keywords, bazaar._genReadmeKeywords(available.keywords), true) : ""}
 </section>` : "";
-        const resourceStats = available ? `<div class="fn__hr"></div>
-<div class="fn__flex">
+        const resourceStats = available ? `<span class="fn__space"></span>
     <svg class="svg ft__on-surface"><use xlink:href="#iconStar"></use></svg>
     <span class="fn__space--small"></span>
     <a href="${escapeAttr(resourceData.repoURL)}/stargazers" target="_blank" title="Stars">${formatCount(resourceData.stars)}</a>
@@ -1106,8 +1105,7 @@ type="checkbox">
     <span class="fn__space"></span>
     <svg class="svg ft__on-surface"><use xlink:href="#iconDownload"></use></svg>
     <span class="fn__space--small"></span>
-    ${formatCount(resourceData.downloads)}
-</div>` : "";
+    ${formatCount(resourceData.downloads)}` : "";
         const fundingItems = getBazaarFundingItems(resourceData.funding);
         if (fundingItems.length === 0 && resourceData.preferredFunding) {
             fundingItems.push({url: resourceData.preferredFunding});
@@ -1146,8 +1144,8 @@ type="checkbox">
                 <div class="item__meta-title">${window.siyuan.languages.bazaarResources}</div>
                 <div class="fn__flex">
                     <a href="${escapeAttr(resourceData.repoURL)}/issues" target="_blank" title="Feedback via GitHub Issues" data-type="feedback">${window.siyuan.languages.feedback}</a>
+                    ${resourceStats}
                 </div>
-                ${resourceStats}
             </section>
         </div>
         <div class="fn__hr--b"></div>

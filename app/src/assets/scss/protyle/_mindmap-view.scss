@@ -229,14 +229,17 @@
     gap: 8px;
 
     > span {
-      flex: 1 1 120px;
+      flex: 1 1 auto;
       min-width: 0;
       overflow-wrap: anywhere;
     }
+  }
 
-    > button {
-      flex-shrink: 0;
-    }
+  &__summary-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px;
+    margin-left: auto;
   }
 
   &__viewport--pan {

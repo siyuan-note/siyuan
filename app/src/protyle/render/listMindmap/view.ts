@@ -229,7 +229,9 @@ export class ListMindmapView {
             this.cancelSummarySelection();
             this.updateSelection();
         });
-        this.summaryControls.append(this.summaryCount, this.summaryConfirm, cancelSummary);
+        const summaryActions = createElement("div", "mindmap-view__summary-actions");
+        summaryActions.append(cancelSummary, this.summaryConfirm);
+        this.summaryControls.append(this.summaryCount, summaryActions);
         options.host.append(this.summaryControls);
         this.summaryBox.hidden = true;
         this.viewport.append(this.summaryBox);
@@ -2861,6 +2863,9 @@ export class ListMindmapView {
             event.keyCode === 229;
         if (target.closest("input, textarea, select, audio, video, iframe") ||
             this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
+            return;
+        }
+        if (this.summaryControls.contains(target) && target.closest("button") && event.key !== "Escape") {
             return;
         }
         if (this.pointer?.relation && event.key !== "Escape") {

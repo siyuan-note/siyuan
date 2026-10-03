@@ -3529,8 +3529,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     document.body.append(batchHost);
     const batchHistory: {before: string, after: string}[] = [];
     let batchID = 0;
+    const batchLabels: Record<string, string> = {
+        listMindmapSummaryBatch: "创建 ${count} 个概要", confirm: "确定", cancel: "取消",
+    };
     const batchView = new api.ListMindmapView({host: batchHost, model: api.readListMindmap(batchList), onExit: () => {},
-        labels: new Proxy({}, {get: (_target, key) => String(key)}),
+        labels: new Proxy(batchLabels, {get: (target, key) => target[String(key)] || String(key)}),
         onSummaryBatchAdd: async (ranges: any[], expected: string) => {
             const model = api.readListMindmap(batchList);
             check.equal(api.getListMindmapSummarySnapshot(model), expected);
@@ -3561,11 +3564,29 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(batchView.summaryRanges.length, 2);
     check.equal(batchHistory.length, 0, "dragging only previews the groups");
     check.equal(batchHost.querySelector<HTMLElement>(".mindmap-view__summary-controls").hidden, false);
+    const controls = batchHost.querySelector<HTMLElement>(".mindmap-view__summary-controls");
+    const actions = [...controls.querySelectorAll("button")];
+    const checkButtonRow = () => {
+        check.equal(actions[0].getBoundingClientRect().top, actions[1].getBoundingClientRect().top,
+            "cancel and confirm stay on one row");
+    };
+    checkButtonRow();
+    const countBounds = controls.querySelector("span").getBoundingClientRect();
+    const actionBounds = actions[0].getBoundingClientRect();
+    check.ok(Math.abs(countBounds.top + countBounds.height / 2 - actionBounds.top - actionBounds.height / 2) < 1,
+        "compact localized labels do not force actions onto a separate row");
+    check.equal(actions[0].textContent, batchLabels.cancel);
+    check.equal(actions[1].textContent, batchLabels.confirm);
+    actions[0].focus();
+    const cancelKey = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
+    actions[0].dispatchEvent(cancelKey);
+    check.equal(cancelKey.defaultPrevented, false, "focused cancel keeps native keyboard activation");
+    check.equal(batchHistory.length, 0, "Enter on cancel never confirms the batch");
     batchHost.style.width = "280px";
     batchHost.style.fontSize = "32px";
     await settle();
-    const controls = batchHost.querySelector<HTMLElement>(".mindmap-view__summary-controls");
     const controlsBounds = controls.getBoundingClientRect();
+    checkButtonRow();
     check.ok(controlsBounds.width <= batchHost.offsetWidth - 16);
     controls.querySelectorAll("button").forEach(button => {
         const rect = button.getBoundingClientRect();

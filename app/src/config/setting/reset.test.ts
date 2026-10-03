@@ -5,7 +5,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 const {parse} = require("ifdef-loader/preprocessor");
 
-const loadReset = (browser: boolean, mobile: boolean, failed = false) => {
+const loadReset = (browser: boolean, mobile: boolean, failed = false, settingsWindow = false) => {
     const calls: string[] = [];
     const source = parse(readFileSync("src/config/setting/reset.ts", "utf8"), {BROWSER: browser, MOBILE: mobile}, false, true);
     const code = transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText;
@@ -26,7 +26,11 @@ const loadReset = (browser: boolean, mobile: boolean, failed = false) => {
         flushSettingSaves: async () => { calls.push("save settings"); },
         fetchSyncPost: async (_path: string, data: {saved: boolean}) => { calls.push("ack " + data.saved); return {code: 0}; },
         getHostCapabilities: () => ({ownsKernel: !browser}),
-        isWindow: () => false, isSettingsWindow: () => false,
+        isWindow: () => false, isSettingsWindow: () => settingsWindow,
+        closeSettingsWindow: () => {
+            if (settingsWindow) calls.push("close settings");
+            return settingsWindow;
+        },
         exitSiYuan: async () => { calls.push("exit"); },
     };
     class Element { blur() { calls.push("blur"); } }
@@ -68,4 +72,17 @@ test("cancellation resumes layout saving and prepared reconnect reloads without 
     await api.prepareSettingsReset({id: "second", token: "b"});
     assert.equal(api.reloadSettingsResetOnReconnect(), true);
     assert.equal(calls.at(-1), "reload");
+});
+
+test("settings reset completion and prepared reconnect close the child without reload or exit", async () => {
+    for (const reconnect of [false, true]) {
+        const {api, calls} = loadReset(false, false, false, true);
+        await api.prepareSettingsReset({id: "settings", token: "settings-token"});
+        if (reconnect) assert.equal(api.reloadSettingsResetOnReconnect(), true);
+        else api.completeSettingsReset({id: "settings", exit: true});
+        api.exitAfterSettingsReset();
+        assert.equal(calls.at(-1), "close settings");
+        assert.equal(calls.includes("reload"), false);
+        assert.equal(calls.includes("exit"), false);
+    }
 });

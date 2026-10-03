@@ -18,7 +18,7 @@ const rendererModules = (sources) => {
         languages: {cancel: "Cancel", save: "Save", config: "Settings", workspace: "Workspace",
         min: "Minimize", max: "Maximize", restore: "Restore", close: "Close"},
         menus: {menu: {element: document.createElement("div"), remove() {}}}, ws: {app: {plugins: [], appId: "test"}}};
-    const genUUID = () => "test-" + (++sequence);
+    const genUUID = () => "test-" + Date.now() + "-" + (++sequence);
     const {Dialog} = loadRendererModule(sources.dialog, {
         "../util/genID": {genUUID}, "../util/zIndex": {isAbove: () => false}, "./moveResize": {moveResize() {}},
         "../util/functions": {isMobile: () => false}, "../protyle/util/compatibility": {isNotCtrl: () => true},
@@ -120,6 +120,8 @@ const runCases = async (sources) => {
         "../../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd"}},
         "../../plugin": pluginSettings,
         "../../util/processTitle": titles,
+        "../entryVisibility/dockOrder": {getDockEntryOrderSnapshot: () => ({})},
+        "./taskBlocker": {hasNativeSettingTasks: () => false},
     });
     const {Setting} = loadRendererModule(sources.setting, {
         "../util/functions": {isMobile: () => false, getFrontend: () => "desktop"}, "../dialog": {Dialog},
@@ -440,7 +442,23 @@ if (process.versions.electron && process.type === "browser") {
                 return result || {action: "deny"};
             });
             await owner.loadURL(origin + "/stage/build/app/");
-            await owner.webContents.executeJavaScript(`const loadRendererModule = ${loadRendererModule.toString()}; const rendererModules = ${rendererModules.toString()}; (${runCases.toString()})(${JSON.stringify(sources)})`);
+            const runRendererCases = () => owner.webContents.executeJavaScript(`const loadRendererModule = ${loadRendererModule.toString()}; const rendererModules = ${rendererModules.toString()}; (${runCases.toString()})(${JSON.stringify(sources)})`);
+            await runRendererCases();
+            const previousTokens = new Set([...children].map(child => new URL(child.webContents.getURL()).searchParams.get("settingsWindowToken")));
+            assert.ok(previousTokens.size > 0);
+            const reloaded = new Promise(resolve => owner.webContents.once("did-finish-load", resolve));
+            const closedForReload = [...children].map(child => new Promise(resolve => child.once("closed", resolve)));
+            owner.reload();
+            await Promise.all([reloaded, ...closedForReload]);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            assert.equal(children.size, 0, "owner reload closes settings without restoring them");
+            commands.length = 0;
+            ready = 0;
+            await runRendererCases();
+            assert.ok(children.size > 0, "settings can be manually reopened after owner reload");
+            for (const child of children) {
+                assert.equal(previousTokens.has(new URL(child.webContents.getURL()).searchParams.get("settingsWindowToken")), false);
+            }
             const closed = [...children].map(child => new Promise(resolve => child.once("closed", resolve)));
             owner.destroy();
             await Promise.all(closed);

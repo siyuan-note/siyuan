@@ -2,11 +2,12 @@ import {Constants} from "../../constants";
 import {addScriptSync} from "./addScript";
 
 // 创建编辑器或执行依赖 Lute 的扩展脚本前，等待引擎加载完成。
-export const ensureLute = async () => {
+export const ensureLute = async (options: {reloadOnFailure?: boolean} = {}) => {
     if (typeof Lute !== "undefined") {
         return;
     }
-    await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
+    await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`,
+        "protyleLuteScript", options);
     if (typeof Lute === "undefined") {
         throw new Error("Could not load Lute");
     }

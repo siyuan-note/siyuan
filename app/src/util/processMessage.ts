@@ -1,5 +1,6 @@
 /// #if !MOBILE
-import {exportLayout} from "../layout/util";
+import {reloadUI} from "../layout/util";
+import {closeSettingsWindow} from "../config/setting/windowContext";
 /// #endif
 import {hideMessage, showMessage} from "../dialog/message";
 import {setStorageVal} from "../protyle/util/compatibility";
@@ -56,30 +57,23 @@ export const processMessage = (response: IWebSocketData) => {
         return false;
     }
     if ("reloadui" === response.cmd) {
+        /// #if !MOBILE
+        if (closeSettingsWindow()) return false;
+        /// #endif
         if (response.data?.resetScroll) {
             window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
             setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION], () => {
                 /// #if MOBILE
                 window.location.reload();
                 /// #else
-                exportLayout({
-                    cb() {
-                        window.location.reload();
-                    },
-                    errorExit: false,
-                });
+                void reloadUI();
                 /// #endif
             });
         } else {
             /// #if MOBILE
             window.location.reload();
             /// #else
-            exportLayout({
-                cb() {
-                    window.location.reload();
-                },
-                errorExit: false,
-            });
+            void reloadUI();
             /// #endif
         }
         return false;

@@ -8,16 +8,59 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
     const reservations = new Map();
     const windows = new Map();
     const windowStates = new WeakMap();
+    const owners = new WeakMap();
     const release = approved => {
         clearTimeout(approved.timer);
-        pending.delete(approved.owner.id + ":" + approved.frameName);
+        const key = approved.owner.id + ":" + approved.frameName;
+        if (pending.get(key) === approved) pending.delete(key);
         if (reservations.get(approved.key) === approved) reservations.delete(approved.key);
-        approved.owner.removeListener("destroyed", approved.cancel);
-        if (approved.created) approved.owner.removeListener("did-create-window", approved.created);
     };
-    const cancel = approved => {
+    const finish = (approved, ownerInvalidated = false) => {
+        if (!approved.active) return;
+        approved.active = false;
         release(approved);
-        if (!approved.owner.isDestroyed()) approved.owner.send("siyuan-settings-closed", approved.data.token);
+        owners.get(approved.owner).records.delete(approved);
+        if (windows.get(approved.key) === approved.win) windows.delete(approved.key);
+        if (!approved.owner.isDestroyed()) {
+            try {
+                approved.owner.send("siyuan-settings-closed", approved.data.token, ownerInvalidated);
+            } catch (error) {
+                log("settings owner failed to receive close notification: " + error);
+            }
+        }
+    };
+    const cancel = (approved, ownerInvalidated = false) => {
+        finish(approved, ownerInvalidated);
+        if (approved.win && !approved.win.isDestroyed()) approved.win.destroy();
+    };
+    const watchOwner = owner => {
+        let state = owners.get(owner);
+        if (state) return state;
+        state = {records: new Set()};
+        owners.set(owner, state);
+        const invalidate = () => {
+            for (const approved of [...state.records]) cancel(approved, true);
+        };
+        owner.on("did-start-navigation", details => {
+            if (details.isMainFrame && !details.isSameDocument) invalidate();
+        });
+        owner.on("render-process-gone", invalidate);
+        owner.once("destroyed", invalidate);
+        owner.on("did-create-window", (win, details) => {
+            const approved = [...state.records].find(item => item.url === details.url && item.created);
+            if (approved) {
+                approved.created(win);
+                return;
+            }
+            // 授权失效后才创建的子窗口不能继续使用旧文档的宿主。
+            try {
+                const url = new URL(details.url);
+                if (url.pathname === settingsPath && url.searchParams.has("settingsWindowToken")) win.destroy();
+            } catch {
+                return;
+            }
+        });
+        return state;
     };
     ipcMain.on("siyuan-settings-ready", event => {
         if (event.senderFrame !== event.sender.mainFrame) return;
@@ -30,15 +73,26 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
             }
         }
     });
-    ipcMain.on("siyuan-settings-close", (event, key) => {
+    ipcMain.on("siyuan-settings-close-self", event => {
+        if (event.senderFrame !== event.sender.mainFrame) return;
+        for (const win of windows.values()) {
+            if (!win.isDestroyed() && win.webContents === event.sender) {
+                cancel(windowStates.get(win).approved);
+                return;
+            }
+        }
+    });
+    ipcMain.on("siyuan-settings-close", (event, data) => {
         const target = getTarget(event.sender.id);
-        if (!target || event.senderFrame !== event.sender.mainFrame || typeof key !== "string" ||
-            !/^plugin-[a-zA-Z0-9-]+$/.test(key)) return;
-        const registryKey = `${target.origin}:${event.sender.id}:${key}`;
+        if (!target || event.senderFrame !== event.sender.mainFrame || !data ||
+            !/^(builtin|plugin-[a-zA-Z0-9-]+)$/.test(data.key) ||
+            !/^[a-zA-Z0-9-]{1,100}$/.test(data.token)) return;
+        const registryKey = `${target.origin}:${data.key === "builtin" ? "builtin" : event.sender.id + ":" + data.key}`;
         const reserved = reservations.get(registryKey);
-        if (reserved) cancel(reserved);
+        if (reserved && reserved.owner === event.sender && reserved.data.token === data.token) cancel(reserved);
         const win = windows.get(registryKey);
-        if (win && !win.isDestroyed()) win.close();
+        const approved = win && windowStates.get(win).approved;
+        if (approved?.owner === event.sender && approved.data.token === data.token) cancel(approved);
     });
     ipcMain.handle("siyuan-settings-prepare", (event, data) => {
         const target = getTarget(event.sender.id);
@@ -78,14 +132,14 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
             url.searchParams.set("remote", "1");
         }
         const frameName = "siyuan-settings-" + data.token;
-        const approved = {key, target, owner: event.sender, url: url.href, frameName, data, expires: Date.now() + 60000};
-        approved.cancel = () => cancel(approved);
-        approved.timer = setTimeout(approved.cancel, 60000);
+        const approved = {key, target, owner: event.sender, url: url.href, frameName, data,
+            active: true, expires: Date.now() + 60000};
+        watchOwner(event.sender).records.add(approved);
+        approved.timer = setTimeout(() => cancel(approved), 60000);
         approved.timer.unref();
-        event.sender.once("destroyed", approved.cancel);
         pending.set(event.sender.id + ":" + frameName, approved);
         reservations.set(key, approved);
-        return {create: true, url: approved.url, frameName};
+        return {create: true, token: data.token, url: approved.url, frameName};
     });
     return (contents, details) => {
         const pendingKey = contents.id + ":" + details.frameName;
@@ -95,13 +149,14 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
             return undefined;
         }
         pending.delete(pendingKey);
-        approved.created = (win, created) => {
-            if (created.url !== approved.url) return;
+        approved.created = win => {
+            approved.created = undefined;
+            approved.win = win;
             release(approved);
             windows.set(approved.key, win);
-            const state = {painted: false, ready: false, shown: false, data: approved.data};
+            const state = {painted: false, ready: false, shown: false, data: approved.data, approved};
             state.reveal = () => {
-                if (!state.ready || !state.painted || state.shown || win.isDestroyed()) return;
+                if (!approved.active || !state.ready || !state.painted || state.shown || win.isDestroyed()) return;
                 state.shown = true;
                 if (state.data.geometry?.maximized) win.maximize();
                 show(win);
@@ -120,22 +175,13 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
                     win.webContents.toggleDevTools();
                 }
             });
-            initialize(win, approved.target);
-            const close = () => { if (!win.isDestroyed()) win.destroy(); };
-            contents.once("destroyed", close);
-            win.on("closed", () => {
-                windows.delete(approved.key);
-                contents.removeListener("destroyed", close);
-                if (!contents.isDestroyed()) {
-                    contents.send("siyuan-settings-closed", approved.data.token);
-                }
-            });
+            win.once("closed", () => finish(approved));
             if (approved.data.key === "builtin") {
                 let geometryTimer;
                 let lastGeometry;
                 const saveGeometry = () => {
                     clearTimeout(geometryTimer);
-                    if (win.isDestroyed() || contents.isDestroyed()) return;
+                    if (!approved.active || win.isDestroyed() || contents.isDestroyed()) return;
                     const geometry = captureWindowGeometry(win);
                     if (lastGeometry && Object.keys(geometry).every(key => geometry[key] === lastGeometry[key])) return;
                     contents.send("siyuan-settings-geometry", geometry);
@@ -152,13 +198,20 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
                 win.once("closed", () => clearTimeout(geometryTimer));
             }
             win.webContents.once("did-finish-load", () => {
-                win.webContents.send("siyuan-settings-command", approved.data.command);
+                if (approved.active) win.webContents.send("siyuan-settings-command", approved.data.command);
             });
-            win.webContents.on("did-fail-load", (_event, code, description) => {
+            win.webContents.on("did-fail-load", (_event, code, description, _url, isMainFrame) => {
                 if (code !== -3) log("settings window failed to load: " + description);
+                if (code !== -3 && isMainFrame) cancel(approved);
             });
+            win.webContents.once("render-process-gone", () => cancel(approved));
+            try {
+                initialize(win, approved.target);
+            } catch (error) {
+                cancel(approved);
+                log("settings window failed to initialize: " + error);
+            }
         };
-        contents.on("did-create-window", approved.created);
         return {
             action: "allow",
             overrideBrowserWindowOptions: {

@@ -2,10 +2,19 @@ import type {App} from "../../index";
 import type {Dialog} from "../../dialog";
 import type {IPluginReloadData} from "../../plugin/loader";
 import type {IGlobalPluginStateSnapshot} from "../../plugin/globalStateCoordinator";
+import type {TDockOrderSnapshot} from "../entryVisibility/dockOrder";
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
 
 export interface ISettingsWindowHost {
     app: App;
     title: string;
+    isActive: () => boolean;
+    dispose: () => void;
+    reload: () => Promise<void>;
+    resetLayout: () => Promise<void>;
+    getDockOrderSnapshot: () => TDockOrderSnapshot;
     exportLayout: (options: {cb: () => void; errorExit: boolean}) => Promise<void>;
     exit: (setCurrentWorkspace?: boolean) => Promise<void>;
     subscribePlugins: (listener: (state: IGlobalPluginStateSnapshot) => void) => () => void;
@@ -29,3 +38,14 @@ let host: ISettingsWindowHost;
 export const setSettingsWindowHost = (value: ISettingsWindowHost) => { host = value; };
 export const getSettingsWindowHost = () => host;
 export const isSettingsWindow = () => typeof document !== "undefined" && document.body.classList.contains("body--settings");
+
+// 重载和重置结束设置会话，不触发关闭时的旧窗口偏好保存。
+export const closeSettingsWindow = () => {
+    /// #if !BROWSER
+    if (isSettingsWindow()) {
+        ipcRenderer.send("siyuan-settings-close-self");
+        return true;
+    }
+    /// #endif
+    return false;
+};

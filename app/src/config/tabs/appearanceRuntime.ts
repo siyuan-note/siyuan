@@ -2,7 +2,7 @@
 import {saveScroll} from "../../protyle/scroll/saveScroll";
 /// #else
 import {adjustDockPadding} from "../../layout/dock/util";
-import {exportLayout} from "../../layout/util";
+import {reloadUI as reloadDesktopUI} from "../../layout/util";
 import {syncHideToolbarLayout, updateBarModeIcon} from "../../layout/topBar";
 /// #endif
 import {fetchPost} from "../../util/fetch";
@@ -22,7 +22,7 @@ import {remountOpenSettingTab} from "../setting/mount";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 import {syncBodyGradient} from "./bodyGradient";
 import {refreshDynamicIcons} from "../../emoji/dynamicIcon";
-import {isSettingsWindow} from "../setting/windowContext";
+import {closeSettingsWindow, isSettingsWindow} from "../setting/windowContext";
 
 /** 主题模式下拉框初值：合并 mode / modeOS */
 export const appearanceThemeModeValue = (): number =>
@@ -56,19 +56,14 @@ interface IAppearanceRefresh {
 const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppearanceRefresh) => {
     if (data.lang !== window.siyuan.config.appearance.lang) {
         if (isSettingsWindow()) {
-            window.location.reload();
+            closeSettingsWindow();
             return;
         }
         markAppearanceReloadPending();
         /// #if MOBILE
         void reloadUI();
         /// #else
-        void exportLayout({
-            cb() {
-                window.location.reload();
-            },
-            errorExit: false,
-        });
+        void reloadDesktopUI();
         /// #endif
         return;
     }
@@ -90,16 +85,12 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
     }
     const unloadChangedTheme = themeChanged && prevAppearance.themeJS && isCurrentThemeSupported(prevAppearance, getFrontend());
     if ((unloadChangedTheme || shouldUnloadThemeScript(prevAppearance, data, getFrontend())) && !await unloadThemeScript()) {
+        if (closeSettingsWindow()) return;
         markAppearanceReloadPending();
         /// #if MOBILE
         void reloadUI();
         /// #else
-        void exportLayout({
-            errorExit: false,
-            cb() {
-                window.location.reload();
-            },
-        });
+        void reloadDesktopUI();
         /// #endif
         return;
     }

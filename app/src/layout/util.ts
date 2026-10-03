@@ -16,7 +16,7 @@ import {Search} from "../search";
 import {Dock} from "./dock";
 import {focusByRange} from "../protyle/util/selection";
 import {hideElements} from "../protyle/ui/hideElements";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
 import {saveScroll} from "../protyle/scroll/saveScroll";
@@ -46,6 +46,7 @@ import {applyDockEntryVisibility} from "../config/entryVisibility/runtime";
 import {MIN_HORIZONTAL_PANE_SIZE, MIN_VERTICAL_PANE_SIZE, panePercentages, resizePanePercentages} from "./resizePane";
 import {requestResponsiveDockLayout} from "./dock/responsive";
 import {stickyRow} from "../protyle/render/av/row";
+import {flushSettingSaves, settingSaveFailures} from "../config/setting/pending";
 
 const isBuiltInCustomModel = (type: string) => {
     return type === "siyuan-card" || type === "siyuan-database-row";
@@ -150,17 +151,71 @@ const dockToJSON = (dock: Dock) => {
     };
 };
 
-export const resetLayout = () => {
-    if (window.siyuan.config.readonly) {
-        window.location.reload();
-    } else {
-        fetchPost("/api/system/setUILayout", {layout: {}}, () => {
-            window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
-            setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
-            window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION] = {};
-            setStorageVal(Constants.LOCAL_DIALOGPOSITION, window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION]);
+let reloadingUI = false;
+
+// 重载由持有布局的窗口执行，子窗口不能将自己的重载回调传给宿主。
+export const reloadUI = async () => {
+    const host = getSettingsWindowHost();
+    if (reloadingUI) return;
+    reloadingUI = true;
+    let reloaded = false;
+    try {
+        const failures = settingSaveFailures();
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+        await flushSettingSaves(failures);
+        if (host) {
+            await host.reload();
+            return;
+        }
+        await exportLayout({errorExit: false, cb: () => {
+            reloaded = true;
             window.location.reload();
-        });
+        }});
+    } catch (error) {
+        console.error("Could not reload the interface", error);
+        showMessage(window.siyuan.languages.settingsPendingSaveError, 6000, "error");
+    } finally {
+        if (!reloaded) reloadingUI = false;
+    }
+};
+
+export const resetLayout = async () => {
+    const host = getSettingsWindowHost();
+    if (reloadingUI) return;
+    if (!host && window.siyuan.config.readonly) {
+        window.location.reload();
+        return;
+    }
+    reloadingUI = true;
+    let resume: () => void;
+    try {
+        const failures = settingSaveFailures();
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+        await flushSettingSaves(failures);
+        if (host) {
+            try {
+                await host.resetLayout();
+            } finally {
+                reloadingUI = false;
+            }
+            return;
+        }
+        resume = await suspendLayoutSaving();
+        const response = await fetchSyncPost("/api/system/setUILayout", {layout: {}});
+        if (response.code !== 0) throw new Error(response.msg);
+        window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
+        window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION] = {};
+        await Promise.all([
+            setStorageVal(Constants.LOCAL_FILEPOSITION, {}),
+            setStorageVal(Constants.LOCAL_DIALOGPOSITION, {}),
+        ]);
+        await flushSettingSaves(failures);
+        window.location.reload();
+    } catch (error) {
+        resume?.();
+        reloadingUI = false;
+        console.error("Could not reset the layout", error);
+        showMessage(window.siyuan.languages.settingsPendingSaveError, 6000, "error");
     }
 };
 
@@ -287,8 +342,8 @@ export const exportLayout = async (options: {
             layout: layoutJSON,
             errorExit: options.errorExit    // 后台不接受该参数，用于请求发生错误时退出程序
         };
-        fetchPost("/api/system/setUILayout", request, () => {
-            options.cb();
+        await fetchPost("/api/system/setUILayout", request, (response) => {
+            if (response.code === 0) options.cb();
         });
     }
 };

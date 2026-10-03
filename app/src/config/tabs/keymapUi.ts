@@ -4,7 +4,7 @@ import {matchHotKey} from "../../protyle/util/hotKey";
 import {Constants} from "../../constants";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {fetchSyncPost} from "../../util/fetch";
-import {exportLayout} from "../../layout/util";
+import {reloadUI} from "../../layout/util";
 import {applyKeymap} from "./keymapRuntime";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/globalShortcut";
@@ -57,12 +57,7 @@ const genKeymapTabHtml = () => genKeymapToolbarHtml() + genConfigGroup(genKeymap
 
 const bindKeymapToolbar = (root: HTMLElement) => {
     root.querySelector("#keymapRefreshBtn")?.addEventListener("click", () => {
-        void exportLayout({
-            cb() {
-                window.location.reload();
-            },
-            errorExit: false,
-        });
+        void reloadUI();
     });
     root.querySelector("#keymapResetBtn")?.addEventListener("click", () => {
         confirmDialog("⚠️ " + window.siyuan.languages.reset, window.siyuan.languages.confirmReset, () => {
@@ -75,7 +70,7 @@ const bindKeymapToolbar = (root: HTMLElement) => {
                     }
                     savedKeymap = data;
                     applyKeymap(data);
-                    void exportLayout({cb: () => window.location.reload(), errorExit: false});
+                    void reloadUI();
                 } catch (error) {
                     console.error("Could not reset shortcuts:", error);
                     showMessage(window.siyuan.languages.keymapSaveFailed);

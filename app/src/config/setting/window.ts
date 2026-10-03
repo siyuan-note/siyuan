@@ -1,12 +1,11 @@
 import "../../assets/scss/base.scss";
-import {ipcRenderer, webFrame} from "electron";
+import {ipcRenderer} from "electron";
 import {Constants} from "../../constants";
-import {onAgentStreamingMarkdownStorageChanged} from "../tabs/ai/agentStreamingMarkdown";
 import {Model} from "../../layout/Model";
 import {Menus} from "../../menus";
 import {genUUID} from "../../util/genID";
 import {fetchSyncPost} from "../../util/fetch";
-import {addBaseURL, redirectToCheckAuth, setNoteBook} from "../../util/pathName";
+import {addBaseURL, redirectToCheckAuth} from "../../util/pathName";
 import {getLocalStorage, initNativeDialogOverride, initWindowOpenOverride, isMac, isWindows} from "../../protyle/util/compatibility";
 import {addScriptSync} from "../../protyle/util/addScript";
 import {ensureLute} from "../../protyle/util/lute";
@@ -16,7 +15,7 @@ import {systemConfig} from "../systemConfig";
 import {loadAssets, setInlineStyle, initAssets, reloadInlineStyles, refreshThemeStyle} from "../../util/assets";
 import {initMessage} from "../../dialog/message";
 import {progressLoading, processSync, downloadProgress} from "../../dialog/processSystem";
-import {setSettingsWindowHost, type ISettingsWindowHost} from "./windowContext";
+import {setSettingsWindowHost} from "./windowContext";
 import {refreshSettingConfig} from "./sync";
 import {openSettingDialog} from "../index";
 import {switchSettingTab} from "../search/dialog";
@@ -35,22 +34,58 @@ import {getSettingTabDefs} from "./tabs";
 import {onWindowsMsg} from "../../window/onWindowsMsg";
 import {applyWindowState} from "../../boot/windowControls";
 import {waitForSettingsWindowPaint} from "./windowPaint";
+import {createSettingsWindowRuntime, resolveSettingsWindowHost, startSettingsWindow} from "./windowRuntime";
+
+let disposeSettingsWindow = () => {};
 
 const initialize = async () => {
     addBaseURL();
-    const token = new URLSearchParams(location.search).get("settingsWindowToken");
-    if (!token || !window.opener || window.opener.location.origin !== location.origin) {
+    const host = resolveSettingsWindowHost();
+    if (!host) {
         window.close();
         return;
     }
-    const host = await new Promise<ISettingsWindowHost>(resolve => {
-        window.opener.dispatchEvent(new CustomEvent("siyuan-settings-host-" + token, {detail: resolve}));
-    });
     setSettingsWindowHost(host);
+    let disposed = false;
+    const ws = new Model({app: host.app});
+    const listeners: {channel: string; listener: Parameters<typeof ipcRenderer.on>[1]}[] = [];
+    disposeSettingsWindow = () => {
+        if (disposed) return;
+        disposed = true;
+        if (window.siyuan) window.siyuan.isReady = false;
+        ws.destroy();
+        listeners.forEach(({channel, listener}) => ipcRenderer.removeListener(channel, listener));
+        setSettingsWindowHost(undefined);
+        try {
+            host.dispose();
+        } catch (error) {
+            console.warn("Could not release the settings window owner", error);
+        }
+    };
+    window.addEventListener("unload", disposeSettingsWindow, {once: true});
+    const isActive = () => {
+        if (disposed) return false;
+        try {
+            if (host.isActive()) return true;
+        } catch (error) {
+            console.warn("Could not reach the settings window owner", error);
+        }
+        disposeSettingsWindow();
+        window.close();
+        return false;
+    };
+    const listen = (channel: string, callback: Parameters<typeof ipcRenderer.on>[1]) => {
+        const listener: Parameters<typeof ipcRenderer.on>[1] = (event, ...args) => {
+            if (isActive()) callback(event, ...args);
+        };
+        listeners.push({channel, listener});
+        ipcRenderer.on(channel, listener);
+    };
+    const runtime = createSettingsWindowRuntime(isActive);
     let dialog: Dialog;
     let command: ISettingsCommand;
     const applyCommand = async () => {
-        if (!dialog || !command || host.plugin) return;
+        if (!isActive() || !dialog || !command || host.plugin) return;
         const next = command;
         command = undefined;
         if (next.tab) {
@@ -60,31 +95,39 @@ const initialize = async () => {
             history.replaceState(null, "", url);
             if (next.tab === "assets") {
                 await mounted;
+                if (!isActive()) return;
             }
         }
         if (next.readme) {
             const {type, from, resource} = next.readme;
             await withMountedBazaar(({bazaar, renderReadme}) => {
+                if (!isActive()) return;
                 bazaar.switchBazaarTab(host.app, type, from);
                 renderReadme(type, from, resource);
             });
         }
     };
-    ipcRenderer.on("siyuan-settings-command", (_event, next: ISettingsCommand) => {
+    listen("siyuan-settings-command", (_event, next: ISettingsCommand) => {
         command = next;
-        void applyCommand();
+        void applyCommand().catch(error => console.error("Could not apply settings window command", error));
     });
-    const ws = new Model({app: host.app});
     window.siyuan = {
         zIndex: 10, isReady: false, notebooks: [], reqIds: {}, backStack: [], layout: {}, dialogs: [],
         blockPanels: [], closedTabs: [], ctrlIsPressed: false, altIsPressed: false, ws,
     };
-    ws.connect({id: genUUID(), type: "main", msgCallback: data => {
-        if (!data) return;
+    ws.connect({id: genUUID(), type: "main", callback: () => {
+        if (isActive() && window.siyuan.isReady) {
+            void runtime.reconnect().catch(error => console.error("Could not reconnect settings runtime", error));
+        }
+    }, msgCallback: data => {
+        if (!isActive() || !data || runtime.handleMessage(data)) return;
         switch (data.cmd) {
             case "logoutAuth": redirectToCheckAuth(); break;
             case "settingChanged": void refreshSettingConfig(data.data.namespace); break;
-            case "setConf": void refreshSettingConfig(); break;
+            case "setConf":
+                void refreshSettingConfig();
+                void runtime.refreshSnippets(true);
+                break;
             case "setAppearance": appearanceConfigApi.apply(data.data); break;
             case "refreshAppearance": void refreshAppearance(data.data); break;
             case "reloadInlineStyles": void reloadInlineStyles(); break;
@@ -96,43 +139,31 @@ const initialize = async () => {
             case "syncing": processSync(data); break;
             case "setCloudUser": applyCloudUserState(data.data.user, data.data.userName); break;
             case "setServerAddrs": updateServerAddresses(data.data); break;
-            case "setLocalStorageVal":
-                window.siyuan.storage[data.data.key] = data.data.val;
-                onAgentStreamingMarkdownStorageChanged(data.data.key);
-                break;
-            case "setLocalStorageVals":
-                Object.assign(window.siyuan.storage, data.data.keyVals);
-                Object.keys(data.data.keyVals).forEach(onAgentStreamingMarkdownStorageChanged);
-                break;
-            case "removeLocalStorageVal":
-                delete window.siyuan.storage[data.data.key];
-                onAgentStreamingMarkdownStorageChanged(data.data.key);
-                break;
-            case "removeLocalStorageVals":
-                data.data.keys.forEach((key: string) => delete window.siyuan.storage[key]);
-                data.data.keys.forEach(onAgentStreamingMarkdownStorageChanged);
-                break;
         }
     }});
     const response = await fetchSyncPost("/api/system/getConf", {});
+    if (!isActive()) return;
     if (response.code !== 0) {
+        disposeSettingsWindow();
         window.close();
         return;
     }
     window.siyuan.config = systemConfig(response.data.conf);
     window.siyuan.isPublish = response.data.isPublish;
     await loadDesktopHostConnection();
+    if (!isActive()) return;
     const [user, emoji] = await Promise.all([
         fetchSyncPost("/api/setting/getCloudUser", {cached: true}),
         fetchSyncPost("/api/system/getEmojiConf", {}),
-        setNoteBook(),
+        runtime.refreshNotebooks(),
         new Promise<void>(resolve => getLocalStorage(resolve)),
         addScriptSync(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript"),
         loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, languages => {
-            window.siyuan.languages = languages;
+            if (isActive()) window.siyuan.languages = languages;
         }),
-        host.plugin ? ensureLute() : Promise.resolve(),
+        host.plugin ? ensureLute({reloadOnFailure: false}) : Promise.resolve(),
     ]);
+    if (!isActive()) return;
     if (!window.siyuan.languages || !window.DOMPurify) {
         throw new Error("Could not load settings window dependencies");
     }
@@ -142,25 +173,27 @@ const initialize = async () => {
     }
     window.siyuan.menus = new Menus(host.app);
     await initDesktopHost();
-    ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (_event, data: IWebSocketData) => onWindowsMsg(data));
-    webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
+    if (!isActive()) return;
+    listen(Constants.SIYUAN_SEND_WINDOWS, (_event, data: IWebSocketData) => onWindowsMsg(data));
+    runtime.applyZoom();
     document.body.classList.toggle("body--windows", isWindows());
     document.body.classList.toggle("body--win32", !isMac());
-    ipcRenderer.on(Constants.SIYUAN_EVENT, (_event, command: string) => applyWindowState(command));
+    listen(Constants.SIYUAN_EVENT, (_event, command: string) => applyWindowState(command));
     ipcRenderer.send(Constants.SIYUAN_EVENT);
     const [fullscreen, maximized] = await Promise.all([
         ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "isFullScreen"}),
         ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "isMaximized"}),
     ]);
+    if (!isActive()) return;
     applyWindowState(fullscreen ? "enter-full-screen" : "leave-full-screen");
     applyWindowState(maximized ? "maximize" : "unmaximize");
-    const zoom = window.siyuan.storage[Constants.LOCAL_ZOOM];
-    const position = Constants.SIZE_ZOOM.find(item => item.zoom === zoom)?.position;
-    if (position) ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "setTrafficLightPosition", zoom, position});
     await waitForSettingsWindowPaint(async () => {
         await loadAssets(window.siyuan.config.appearance);
+        if (!isActive()) return;
         await setInlineStyle();
+        if (!isActive()) return;
         initAssets();
+        runtime.applyZoom();
         initMessage();
         initNativeDialogOverride();
         initWindowOpenOverride(host.app);
@@ -175,7 +208,8 @@ const initialize = async () => {
         } else {
             const tab = getSettingTabDefs().find(def => def.id === new URLSearchParams(location.search).get("tab"))?.id;
             if (tab === "assets") {
-                await ensureLute();
+                await ensureLute({reloadOnFailure: false});
+                if (!isActive()) return;
             }
             dialog = openSettingDialog(host.app, tab);
             dialog.element.querySelectorAll(".config__side .b3-list-item").forEach(item => {
@@ -195,21 +229,22 @@ const initialize = async () => {
         });
         window.addEventListener("mousemove", windowMouseMove);
         window.addEventListener("blur", hideTooltip);
-        window.addEventListener("resize", () => window.siyuan.menus.menu.resetPosition());
-        window.addEventListener("unload", () => {
-            ws.ws.onclose = null;
-            ws.ws.close();
-            host.plugin?.closed();
+        window.addEventListener("focus", () => {
+            void runtime.refreshNotebooks().catch(error => console.error("Could not refresh settings notebooks", error));
         });
+        window.addEventListener("resize", () => window.siyuan.menus.menu.resetPosition());
+        await runtime.refreshSnippets();
+        if (!isActive()) return;
         window.siyuan.isReady = true;
         ws.flushMainMessages();
         await applyCommand();
     });
-    ipcRenderer.send("siyuan-settings-ready");
+    if (isActive()) ipcRenderer.send("siyuan-settings-ready");
 };
 
 installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, window.location.href);
-void initialize().catch(error => {
+void startSettingsWindow(initialize, error => {
     console.error("Could not initialize the settings window", error);
+    disposeSettingsWindow();
     window.close();
 });

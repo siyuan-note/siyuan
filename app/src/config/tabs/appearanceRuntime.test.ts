@@ -111,7 +111,10 @@ for (const mobile of [true, false]) {
                         }});
                     }
                     if (name === "../../layout/util") {
-                        return {exportLayout: (options: {cb: () => void}) => options.cb()};
+                        return {reloadUI: () => calls.push("reload")};
+                    }
+                    if (name === "../setting/windowContext") {
+                        return {isSettingsWindow: () => false, closeSettingsWindow: () => false};
                     }
                     return new Proxy({}, {get: (_, key) => () => calls.push(String(key))});
                 },

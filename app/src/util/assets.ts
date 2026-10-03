@@ -7,7 +7,8 @@ import {getAllEditor, getAllModels} from "../layout/getAll";
 import {invalidateHeadingNumberMeasurements} from "../protyle/util/headingNumberCore";
 import {renderHeadingNumbers} from "../protyle/util/headingNumber";
 /// #if !MOBILE
-import {exportLayout} from "../layout/util";
+import {reloadUI} from "../layout/util";
+import {closeSettingsWindow} from "../config/setting/windowContext";
 /// #endif
 import {fetchPost} from "./fetch";
 import {
@@ -324,12 +325,7 @@ export const initAssets = (keepLoading = false) => {
                     !await unloadThemeScript()) {
                     markAppearanceReloadPending();
                     /// #if !MOBILE
-                    exportLayout({
-                        cb() {
-                            window.location.reload();
-                        },
-                        errorExit: false,
-                    });
+                    if (!closeSettingsWindow()) void reloadUI();
                     /// #else
                     window.location.reload();
                     /// #endif

@@ -10,7 +10,7 @@ import {suspendLayoutSaving} from "../../layout/util";
 /// #endif
 /// #if !BROWSER
 import {isWindow} from "../../util/functions";
-import {isSettingsWindow} from "./windowContext";
+import {closeSettingsWindow, isSettingsWindow} from "./windowContext";
 import {exitSiYuan} from "../../dialog/processSystem";
 /// #endif
 
@@ -76,6 +76,9 @@ export const reloadSettingsResetOnReconnect = () => {
         cancelSettingsReset(preparation.id);
         return false;
     }
+    /// #if !BROWSER
+    if (closeSettingsWindow()) return true;
+    /// #endif
     window.location.reload();
     return true;
 };
@@ -83,6 +86,7 @@ export const reloadSettingsResetOnReconnect = () => {
 export const completeSettingsReset = (data: {id: string; exit: boolean}) => {
     if (preparation) window.clearTimeout(preparation.timer);
     /// #if !BROWSER
+    if (closeSettingsWindow()) return;
     if (data.exit && getHostCapabilities().ownsKernel && !isWindow() && !isSettingsWindow()) {
         sessionStorage.setItem(EXIT_AFTER_RESET, "true");
     }

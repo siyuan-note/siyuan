@@ -6,19 +6,41 @@ import {Constants} from "../../constants";
 import {refreshHeadingNumberMeasurements} from "../../util/assets";
 import {getExtensionScriptNonce, getHostCapabilities} from "../../util/hostCapabilities";
 
-export const renderSnippet = (timeout = 0) => {
-    if (!getHostCapabilities().customAppearance) {
+export const renderSnippet = (timeout = 0, isActive = () => true, beforeJS?: () => Promise<void>) => {
+    if (!isActive() || !getHostCapabilities().customAppearance) {
         return Promise.resolve();
     }
     const abortController = timeout > 0 ? new AbortController() : undefined;
     const timeoutId = abortController ? window.setTimeout(() => {
         abortController.abort();
     }, timeout) : 0;
+    let scriptsReady = Promise.resolve();
     return fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
+        if (!isActive() || !getHostCapabilities().customAppearance) return;
         let cssChanged = false;
+        const scripts: ISnippet[] = [];
+        const appendScript = (item: ISnippet) => {
+            if (!isActive() || !getHostCapabilities().customAppearance || !window.siyuan.config.snippet.enabledJS) return;
+            const script = document.createElement("script");
+            script.type = "text/javascript";
+            const nonce = getExtensionScriptNonce();
+            if (nonce) script.nonce = nonce;
+            script.text = item.content;
+            script.id = `snippetJS${item.id}`;
+            document.head.appendChild(script);
+        };
+        const snippetIds = new Set(response.data.snippets.map((item: ISnippet) =>
+            `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`));
+        document.querySelectorAll('style[id^="snippetCSS"], script[id^="snippetJS"]').forEach(element => {
+            if (!snippetIds.has(element.id)) {
+                cssChanged ||= element.tagName === "STYLE";
+                element.remove();
+            }
+        });
         response.data.snippets.forEach((item: ISnippet) => {
+            if (!isActive()) return;
             const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
-            let exitElement = document.getElementById(id) as HTMLScriptElement | HTMLStyleElement;
+            const exitElement = document.getElementById(id) as HTMLScriptElement | HTMLStyleElement;
             if ((!window.siyuan.config.snippet.enabledCSS && item.type === "css") ||
                 (!window.siyuan.config.snippet.enabledJS && item.type === "js")) {
                 if (exitElement) {
@@ -48,21 +70,22 @@ export const renderSnippet = (timeout = 0) => {
                 document.head.appendChild(styleEl);
                 cssChanged = true;
             } else if (item.type === "js") {
-                exitElement = document.createElement("script");
-                exitElement.type = "text/javascript";
-                const nonce = getExtensionScriptNonce();
-                if (nonce) {
-                    exitElement.nonce = nonce;
-                }
-                exitElement.text = item.content;
-                exitElement.id = id;
-                document.head.appendChild(exitElement);
+                if (beforeJS) scripts.push(item);
+                else appendScript(item);
             }
         });
         if (cssChanged) {
             refreshHeadingNumberMeasurements();
         }
-    }, undefined, undefined, abortController?.signal).finally(() => {
+        if (scripts.length) {
+            // CSS 先独立生效，脚本依赖失败不阻塞样式更新或禁用。
+            scriptsReady = Promise.resolve().then(async () => {
+                if (!isActive() || !getHostCapabilities().customAppearance || !window.siyuan.config.snippet.enabledJS) return;
+                await beforeJS();
+                scripts.forEach(appendScript);
+            }).catch(error => console.error("Could not initialize snippet scripts", error));
+        }
+    }, undefined, undefined, abortController?.signal).then(() => scriptsReady).finally(() => {
         window.clearTimeout(timeoutId);
     });
 };

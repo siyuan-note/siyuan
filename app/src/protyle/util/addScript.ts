@@ -1,13 +1,18 @@
-const pendingScripts = new Map<string, Promise<boolean>>();
+const pendingScripts = new Map<string, {promise: Promise<boolean>; reloadOnFailure: boolean}>();
 
-export const addScriptSync = async (path: string, id: string) => {
+export const addScriptSync = async (path: string, id: string, options: {reloadOnFailure?: boolean} = {}) => {
     if (pendingScripts.has(id)) {
-        return pendingScripts.get(id);
+        const pending = pendingScripts.get(id);
+        if (options.reloadOnFailure === false) {
+            pending.reloadOnFailure = false;
+        }
+        return pending.promise;
     }
     if (document.getElementById(id)) {
         return false;
     }
-    const pending = new Promise<boolean>((resolve) => {
+    const pending = {promise: undefined as Promise<boolean>, reloadOnFailure: options.reloadOnFailure !== false};
+    pending.promise = new Promise<boolean>((resolve) => {
         const scriptElement = document.createElement("script");
         scriptElement.type = "text/javascript";
         scriptElement.src = path;
@@ -16,6 +21,11 @@ export const addScriptSync = async (path: string, id: string) => {
         scriptElement.onload = () => {
             pendingScripts.delete(id);
             if (id === "protyleLuteScript" && typeof Lute === "undefined") {
+                if (!pending.reloadOnFailure) {
+                    scriptElement.remove();
+                    resolve(false);
+                    return;
+                }
                 // 鸿蒙系统上首次加载可能没有初始化 Lute，重新载入页面恢复编辑器。
                 window.location.reload();
             }
@@ -29,7 +39,7 @@ export const addScriptSync = async (path: string, id: string) => {
         document.head.appendChild(scriptElement);
     });
     pendingScripts.set(id, pending);
-    return pending;
+    return pending.promise;
 };
 
 export const addScript = (path: string, id: string) => {

@@ -10,11 +10,14 @@ const compile = source => ts.transpileModule(source, {
 }).outputText;
 const storageCommands = ["setLocalStorageVal", "setLocalStorageVals", "removeLocalStorageVal", "removeLocalStorageVals"];
 
-for (const file of ["src/index.ts", "src/window/index.ts", "src/mobile/util/onMessage.ts", "src/config/setting/window.ts"]) {
+for (const file of ["src/index.ts", "src/window/index.ts", "src/mobile/util/onMessage.ts", "src/config/setting/windowRuntime.ts"]) {
     test(`storage pushes notify the active streaming renderer without losing platform hooks (${file})`, () => {
         const source = sourceFile(file);
         const clauses = [];
+        let storageChanged = "";
         const visit = node => {
+            if (ts.isVariableStatement(node) && node.declarationList.declarations.some(item =>
+                item.name.getText(source) === "onStorageChanged")) storageChanged = node.getText(source);
             if (ts.isCaseClause(node) && ts.isStringLiteral(node.expression) && storageCommands.includes(node.expression.text)) {
                 clauses.push(node.getText(source));
             }
@@ -48,7 +51,8 @@ for (const file of ["src/index.ts", "src/window/index.ts", "src/mobile/util/onMe
         });
         const platformCalls = [];
         const receiver = {};
-        runInNewContext(compile(`export const receive = data => {switch(data.cmd){${clauses.join("\n")}}};`), {
+        runInNewContext(compile(`let zoomRevision = 0; const applyZoom = () => {}; ${storageChanged}
+export const receive = data => {switch(data.cmd){${clauses.join("\n")}}};`), {
             exports: receiver, window, ...preference,
             onWindowWorkspaceStorageChanged: key => platformCalls.push(key),
             MOBILE_BARS_CONFIG_KEY: "mobile-bars", Constants: {LOCAL_MOBILE_BOTTOM_BAR: "mobile-bottom", LOCAL_MOBILE_SIDE_PANEL: "mobile-side"},

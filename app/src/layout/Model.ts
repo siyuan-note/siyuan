@@ -14,6 +14,8 @@ interface IConnectOptions {
 export class Model {
     public ws: WebSocket;
     public reqId: number;
+    private socketDisposed = false;
+    private reconnectTimer: ReturnType<typeof setTimeout>;
     private mainMessageQueue: {
         data: string,
         callback: (data: IWebSocketData) => void
@@ -42,24 +44,29 @@ export class Model {
     }
 
     public flushMainMessages() {
+        if (this.socketDisposed) return;
         const messages = this.mainMessageQueue.splice(0);
         messages.forEach((message) => {
+            if (this.socketDisposed) return;
             try {
                 this.processWebSocketMessage(message.data, message.callback);
             } catch (error) {
                 console.error("Failed to process queued WebSocket message:", error);
             }
         });
-        if (window.siyuan.isReady) {
+        if (!this.socketDisposed && window.siyuan.isReady) {
             const {refreshSettingConfig}: typeof import("../config/setting/sync") = require("../config/setting/sync");
             void refreshSettingConfig();
         }
     }
 
     public connect(options: IConnectOptions) {
+        if (this.socketDisposed) return;
+        clearTimeout(this.reconnectTimer);
         const websocketURL = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`;
         const ws = new WebSocket(`${websocketURL}?app=${Constants.SIYUAN_APPID}&id=${options.id}${options.type ? "&type=" + options.type : ""}`);
         ws.onopen = () => {
+            if (this.socketDisposed || this.ws !== ws) return;
             if (options.type === "main" && window.siyuan.isReady) {
                 const {reloadSettingsResetOnReconnect}: typeof import("../config/setting/reset") = require("../config/setting/reset");
                 if (reloadSettingsResetOnReconnect()) return;
@@ -85,7 +92,7 @@ export class Model {
             }
         };
         ws.onmessage = (event) => {
-            if (!options.msgCallback) {
+            if (this.socketDisposed || this.ws !== ws || !options.msgCallback) {
                 return;
             }
             if (options.type === "main" && !window.siyuan.isReady) {
@@ -101,18 +108,20 @@ export class Model {
             }
         };
         ws.onclose = (ev) => {
+            if (this.socketDisposed || this.ws !== ws) return;
             if (0 <= ev.reason.indexOf("unauthenticated")) {
                 return;
             }
 
             if (0 > ev.reason.indexOf("close websocket")) {
                 console.warn("WebSocket is closed. Reconnect will be attempted in 3 second.", ev);
-                setTimeout(() => {
+                this.reconnectTimer = setTimeout(() => {
                     this.connect(options);
                 }, 3000);
             }
         };
         ws.onerror = (err: Event & { target: { url: string, readyState: number } }) => {
+            if (this.socketDisposed || this.ws !== ws) return;
             if (err.target.url.endsWith("&type=main") && err.target.readyState === 3) {
                 const {kernelError}: typeof import("../util/kernelFault") = require("../util/kernelFault");
                 kernelError();
@@ -126,7 +135,7 @@ export class Model {
     }
 
     public send(cmd: string, param: Record<string, unknown>, process = false) {
-        if (!this.ws ||
+        if (this.socketDisposed || !this.ws ||
             this.ws.readyState === WebSocket.CLOSING ||
             this.ws.readyState === WebSocket.CLOSED) { // Inbox 无 WebSocket，关闭中的连接不能继续发送
             return;
@@ -147,6 +156,16 @@ export class Model {
     }
 
     public destroy() {
-        // 子类按需释放模型持有的资源。
+        if (this.socketDisposed) return;
+        this.socketDisposed = true;
+        clearTimeout(this.reconnectTimer);
+        this.mainMessageQueue.length = 0;
+        if (this.ws) {
+            this.ws.onopen = null;
+            this.ws.onmessage = null;
+            this.ws.onclose = null;
+            this.ws.onerror = null;
+            this.ws.close();
+        }
     }
 }

@@ -12,7 +12,7 @@ import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {ContractFormData} from "../../util/contractFormData";
 /// #if !MOBILE
-import {exportLayout} from "../../layout/util";
+import {exportLayout, reloadUI} from "../../layout/util";
 /// #endif
 import {exitSiYuan} from "../../dialog/processSystem";
 import {showMessage} from "../../dialog/message";
@@ -400,12 +400,7 @@ const mountNetworkProxy = (root: HTMLElement) => {
                 proxyMode: scheme === "system" ? "system" : scheme === "" ? "direct" : "fixed_servers",
                 proxyURL: scheme === "system" ? "://" : `${scheme}://${host}:${port}`,
             }).then(() => {
-                exportLayout({
-                    errorExit: false,
-                    cb() {
-                        window.location.reload();
-                    },
-                });
+                void reloadUI();
             });
             /// #endif
         });

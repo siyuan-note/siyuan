@@ -27,16 +27,18 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
     if (!root?.innerHTML) {
         return;
     }
-    if (root.contains(document.activeElement)) {
+    if (root.contains(document.activeElement) || root.querySelector(".config-entry-visibility__view")) {
         deferredTabs.add(tabId);
         if (!watchingFocus) {
             watchingFocus = true;
-            // 离开正在输入的面板后更新控件，避免替换用户尚未提交的输入。
-            document.addEventListener("focusout", () => setTimeout(() => {
+            // 离开输入控件或关闭入口方案编辑器后再刷新，保留尚未提交的输入与草稿。
+            const refreshDeferredTabs = () => setTimeout(() => {
                 const tabs = [...deferredTabs];
                 deferredTabs.clear();
                 tabs.forEach(tab => { void remountOpenSettingTab(tab); });
-            }, 0));
+            }, 0);
+            document.addEventListener("focusout", refreshDeferredTabs);
+            document.addEventListener("siyuan-entry-profile-closed", refreshDeferredTabs);
         }
         return;
     }

@@ -46,6 +46,9 @@ import {isMobile} from "../../util/functions";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {bindTouchOrder} from "./touchOrder";
 import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+/// #if !MOBILE
+import {getSettingsWindowHost, isSettingsWindow} from "../setting/windowContext";
+/// #endif
 import {
     DOCK_ORDER_SCOPES,
     DOCK_ORDER_SCOPES_BY_SIDE,
@@ -156,13 +159,20 @@ const getEntryViews = (root: HTMLElement) => Array.from(getEntryViewHost(root).c
 const removeEntryView = (root: HTMLElement, view?: HTMLElement) => {
     const views = view ? [view] : getEntryViews(root);
     views.forEach((item) => {
+        const remove = () => {
+            if (!item.parentElement) {
+                return;
+            }
+            item.remove();
+            root.dispatchEvent(new CustomEvent("siyuan-entry-profile-closed", {bubbles: true}));
+        };
         item.classList.remove("config__view--show");
         item.addEventListener("transitionend", (event) => {
             if (event.propertyName === "opacity") {
-                item.remove();
+                remove();
             }
         });
-        window.setTimeout(() => item.remove(), 300);
+        window.setTimeout(remove, 300);
     });
 };
 
@@ -541,13 +551,40 @@ const getEntrySearchFilter = (query: string) => {
     return {results, visiblePaths, visibleSectionKeys};
 };
 
+const getProfileDockOrderSnapshot = (builtin: boolean) => {
+    let snapshot: TDockOrderSnapshot;
+    /// #if !MOBILE
+    if (isSettingsWindow()) {
+        try {
+            const ownerSnapshot = getSettingsWindowHost()?.getDockOrderSnapshot();
+            const seen = new Set<string>();
+            if (ownerSnapshot && DOCK_ORDER_SCOPES.every(scope => Array.isArray(ownerSnapshot[scope]) &&
+                ownerSnapshot[scope].every(key => {
+                    if (typeof key !== "string" || !key || seen.has(key)) {
+                        return false;
+                    }
+                    seen.add(key);
+                    return true;
+                }))) {
+                snapshot = Object.fromEntries(DOCK_ORDER_SCOPES.map(scope => [scope, [...ownerSnapshot[scope]]])) as
+                    TDockOrderSnapshot;
+            }
+        } catch (error) {
+            console.warn("Could not read settings owner dock order", error);
+        }
+    }
+    /// #endif
+    snapshot ||= getDockEntryOrderSnapshot();
+    return builtin ? snapshot : getDefaultDockEntryOrderSnapshot(snapshot);
+};
+
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     const plugins = window.siyuan.ws?.app?.plugins || [];
     refreshTopBarCatalog(plugins);
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);
     const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;
-    const dockOrderSnapshot = builtin ? getDockEntryOrderSnapshot() : getDefaultDockEntryOrderSnapshot();
+    const dockOrderSnapshot = getProfileDockOrderSnapshot(builtin);
     let selectedTemplate: TEntryVisibilityTemplate | "current" = ENTRY_PROFILE_SIMPLE;
     const existing = profileID
         ? window.siyuan.config.appearance.entryVisibility.profiles.find((item) => item.id === profileID)

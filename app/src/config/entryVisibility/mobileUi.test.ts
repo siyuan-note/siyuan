@@ -14,6 +14,9 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         }
     };
     let mobile = true;
+    let settingsWindow = false;
+    const ownerSnapshot: Record<string, string[]> = {};
+    let ownerReads = 0;
     const cache: Record<string, Record<string, any>> = {};
     const noop = () => {};
     window.siyuan = {languages, mobile: {}, storage: {}, config: {editor: {codeTabSpaces: 4}, appearance: {
@@ -41,6 +44,8 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
                 "dialog/confirmDialog": {confirmDialog: (_title: string, _text: string, callback: () => void) => callback()},
                 "dialog/message": {showMessage: noop},
                 "protyle/util/compatibility": {isInMobileApp: () => true},
+                "config/setting/windowContext": {isSettingsWindow: () => settingsWindow,
+                    getSettingsWindowHost: () => ({getDockOrderSnapshot: () => { ownerReads++; return ownerSnapshot; }})},
             };
             check(id in mocks, `Missing module ${id}`);
             return mocks[id];
@@ -263,6 +268,32 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     view.querySelector<HTMLElement>("[data-action='confirm']").click();
     check(!("dock.order.LeftTop" in config().profiles[0].orders), "Dock reset must remove its scope record");
     check(config().profiles[0].orders["dock.order.RightTop"], "Dock reset must preserve the other scopes");
+    settingsWindow = true;
+    Object.assign(ownerSnapshot, load("config/entryVisibility/dockOrder").createDockEntryOrderSnapshot({
+        RightBottom: ["outline", "plugin:unavailable:dock", "file"], BottomLeft: ["graph"],
+    }));
+    config().profiles[0].orders["dock.order.RightBottom"] = ["outline", "plugin:unavailable:dock", "file"];
+    const savedOrders = JSON.stringify(config().profiles[0].orders);
+    view = open();
+    view.querySelector<HTMLElement>("[data-entry-section='dock']").click();
+    const ownerRows = () => view.querySelectorAll("[data-entry-row][data-entry-parent='dock.order.RightBottom']");
+    check(ownerRows().length === 2, "Detached settings must use the owner's live dock placement");
+    check(ownerRows()[0].getAttribute("data-entry-key") === "outline", "Saved dock order must take precedence");
+    const reads = ownerReads;
+    ownerSnapshot["dock.order.RightBottom"] = ["outline", "plugin:unavailable:dock"];
+    ownerSnapshot["dock.order.LeftBottom"] = ["file"];
+    const ownerSearch = view.querySelector<HTMLInputElement>("[data-type='entry-search']");
+    ownerSearch.dispatchEvent(new Event("input", {bubbles: true}));
+    check(ownerReads === reads && ownerRows().length === 2, "Rerendering a draft must retain its opening snapshot");
+    check(JSON.stringify(config().profiles[0].orders) === savedOrders, "Editing must not rewrite saved orders");
+    view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(JSON.stringify(config().profiles[0].orders) === savedOrders, "Saving visibility must preserve unknown order slots");
+    view = open("full");
+    view.querySelector<HTMLElement>("[data-entry-section='dock']").click();
+    check(ownerReads === reads + 1, "A reopened editor must read the owner's current dock snapshot");
+    check(view.querySelector("[data-entry-key='file'][data-entry-parent='dock.order.LeftBottom']"),
+        "Built-in profiles must display the updated owner placement");
+    settingsWindow = false;
     mobile = true;
     window.siyuan.mobile = {} as typeof window.siyuan.mobile;
     view = open();

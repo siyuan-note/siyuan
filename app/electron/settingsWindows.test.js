@@ -6,6 +6,7 @@ const {createSettingsWindows} = require("./settingsWindows");
 const setup = (platform = "win32") => {
     let prepare;
     let close;
+    let closeSelf;
     let ready;
     const shown = [];
     const initialized = [];
@@ -18,14 +19,15 @@ const setup = (platform = "win32") => {
         platform,
         ipcMain: {handle: (_name, callback) => { prepare = callback; }, on: (name, callback) => {
             if (name === "siyuan-settings-close") close = callback;
+            if (name === "siyuan-settings-close-self") closeSelf = callback;
             if (name === "siyuan-settings-ready") ready = callback;
         }},
-        screen: {}, getTarget: id => id === 1 ? target : undefined,
+        screen: {}, getTarget: id => [1, 2].includes(id) ? target : undefined,
         initialize: (...args) => initialized.push(args), show: win => shown.push(win), log() {},
     });
     const event = {sender: owner, senderFrame: owner.mainFrame};
     const open = (data = {}) => prepare(event, {key: "builtin", token: "first-token", command: {tab: "editor"}, ...data});
-    return {policy, owner, event, open, close, ready, shown, initialized};
+    return {policy, owner, event, open, close, closeSelf, ready, shown, initialized, prepare, target};
 };
 
 const setupGeometry = (key = "builtin") => {
@@ -169,7 +171,7 @@ test("settings windows reuse their workspace instance and close with the owning 
     assert.equal(shown.length, 2);
     owner.emit("destroyed");
     assert.equal(destroyed, true);
-    assert.deepEqual(owner.sent.at(-1), ["siyuan-settings-closed", "first-token"]);
+    assert.deepEqual(owner.sent.at(-1), ["siyuan-settings-closed", "first-token", true]);
     assert.equal(open({token: "fourth-token"}).create, true);
 });
 
@@ -228,9 +230,9 @@ test("simultaneous popups initialize their own windows and canceled reservations
     const builtinWindow = create(builtin);
     assert.deepEqual(initialized.map(args => args[0]), [pluginWindow, builtinWindow]);
     const canceled = open({token: "canceled-token", key: "plugin-other"});
-    close(event, "plugin-other");
+    close(event, {key: "plugin-other", token: "canceled-token"});
     assert.equal(policy(owner, canceled), undefined);
-    assert.deepEqual(owner.sent.at(-1), ["siyuan-settings-closed", "canceled-token"]);
+    assert.deepEqual(owner.sent.at(-1), ["siyuan-settings-closed", "canceled-token", false]);
     assert.equal(open({token: "reopened-token", key: "plugin-other"}).create, true);
 });
 
@@ -265,5 +267,130 @@ for (const platform of ["win32", "linux", "darwin"]) {
         press({key: "i"});
         assert.equal(toggled, 2);
         assert.equal(prevented, 2);
+    });
+}
+
+const createWindow = (owner, prepared) => {
+    let destroyed = false;
+    const webContents = Object.assign(new EventEmitter(), {mainFrame: {}, send() {}});
+    const win = Object.assign(new EventEmitter(), {
+        webContents, setMenu() {}, isDestroyed: () => destroyed,
+        destroy() { destroyed = true; this.emit("closed"); },
+    });
+    owner.emit("did-create-window", win, {url: prepared.url});
+    return win;
+};
+
+for (const invalidation of ["navigation", "render-process-gone", "destroyed"]) {
+    test(`owner ${invalidation} invalidates windows, reservations and authorized late children`, () => {
+        const {owner, open, policy, initialized} = setup();
+        const builtin = open();
+        policy(owner, builtin);
+        const win = createWindow(owner, builtin);
+        const pending = open({key: "plugin-pending", token: "pending-token"});
+        const late = open({key: "plugin-late", token: "late-token"});
+        policy(owner, late);
+        if (invalidation === "navigation") owner.emit("did-start-navigation", {isSameDocument: false, isMainFrame: true});
+        else owner.emit(invalidation);
+        assert.equal(win.isDestroyed(), true);
+        assert.equal(policy(owner, pending), undefined);
+        assert.equal(createWindow(owner, late).isDestroyed(), true);
+        assert.equal(initialized.length, 1);
+        assert.deepEqual(owner.sent.filter(item => item[0] === "siyuan-settings-closed").map(item => item.slice(1)),
+            [["first-token", true], ["pending-token", true], ["late-token", true]]);
+        assert.equal(open({token: "manually-reopened"}).create, true);
+    });
+}
+
+test("same-document and subframe navigations preserve the settings owner", () => {
+    const {owner, open, policy} = setup();
+    const prepared = open();
+    policy(owner, prepared);
+    const win = createWindow(owner, prepared);
+    owner.emit("did-start-navigation", {isSameDocument: true, isMainFrame: true});
+    owner.emit("did-start-navigation", {isSameDocument: false, isMainFrame: false});
+    assert.equal(win.isDestroyed(), false);
+    assert.equal(open({token: "reuse-token"}).create, false);
+});
+
+test("workspace reuse keeps the original creator as owner until it is invalidated", () => {
+    const {owner, open, policy, prepare, target} = setup();
+    const secondOwner = Object.assign(new EventEmitter(), {id: 2, mainFrame: {}, getURL: () => target.origin + "/stage/build/app/",
+        isDestroyed: () => false, send() {}});
+    const event = {sender: secondOwner, senderFrame: secondOwner.mainFrame};
+    const prepared = open();
+    policy(owner, prepared);
+    const win = createWindow(owner, prepared);
+    assert.equal(prepare(event, {key: "builtin", token: "second-owner", command: {tab: "appearance"}}).create, false);
+    secondOwner.emit("did-start-navigation", {isSameDocument: false, isMainFrame: true});
+    assert.equal(win.isDestroyed(), false);
+    owner.emit("did-start-navigation", {isSameDocument: false, isMainFrame: true});
+    assert.equal(win.isDestroyed(), true);
+    const reopened = prepare(event, {key: "builtin", token: "new-owner"});
+    assert.equal(reopened.create, true);
+    policy(secondOwner, reopened);
+    const replacement = createWindow(secondOwner, reopened);
+    owner.emit("render-process-gone");
+    assert.equal(replacement.isDestroyed(), false);
+    secondOwner.emit("render-process-gone");
+    assert.equal(replacement.isDestroyed(), true);
+});
+
+test("stale token cancellation cannot close a reopened plugin session", () => {
+    const {owner, event, open, close, policy} = setup();
+    const old = open({key: "plugin-example", token: "old-token"});
+    policy(owner, old);
+    close(event, {key: "plugin-example", token: "old-token"});
+    const replacement = open({key: "plugin-example", token: "new-token"});
+    close(event, {key: "plugin-example", token: "old-token"});
+    assert.equal(policy(owner, replacement).action, "allow");
+    const win = createWindow(owner, replacement);
+    assert.equal(createWindow(owner, old).isDestroyed(), true);
+    close(event, {key: "plugin-example", token: "old-token"});
+    assert.equal(win.isDestroyed(), false);
+    close(event, {key: "plugin-example", token: "new-token"});
+    assert.equal(win.isDestroyed(), true);
+});
+
+test("only the creating owner and matching token may cancel built-in settings", () => {
+    const {owner, event, open, close, policy} = setup();
+    const prepared = open();
+    policy(owner, prepared);
+    const win = createWindow(owner, prepared);
+    const other = Object.assign(new EventEmitter(), {id: 2, mainFrame: {}});
+    close({sender: other, senderFrame: other.mainFrame}, {key: "builtin", token: "first-token"});
+    assert.equal(win.isDestroyed(), false);
+    close(event, {key: "builtin", token: "wrong-token"});
+    assert.equal(win.isDestroyed(), false);
+    close(event, {key: "builtin", token: "first-token"});
+    assert.equal(win.isDestroyed(), true);
+});
+
+test("forced child close validates the sender and skips geometry persistence", () => {
+    const {owner, event, open, closeSelf, policy} = setup();
+    const prepared = open();
+    policy(owner, prepared);
+    const win = createWindow(owner, prepared);
+    closeSelf(event);
+    closeSelf({sender: win.webContents, senderFrame: {}});
+    assert.equal(win.isDestroyed(), false);
+    closeSelf({sender: win.webContents, senderFrame: win.webContents.mainFrame});
+    assert.equal(win.isDestroyed(), true);
+    assert.equal(owner.sent.some(item => item[0] === "siyuan-settings-geometry"), false);
+});
+
+for (const failure of ["did-fail-load", "render-process-gone"]) {
+    test(`child ${failure} releases its owner session and singleton reservation`, () => {
+        const {owner, open, policy} = setup();
+        const prepared = open();
+        policy(owner, prepared);
+        const win = createWindow(owner, prepared);
+        if (failure === "did-fail-load") {
+            win.webContents.emit(failure, {}, -105, "failed", prepared.url, false);
+            assert.equal(win.isDestroyed(), false);
+            win.webContents.emit(failure, {}, -105, "failed", prepared.url, true);
+        } else win.webContents.emit(failure);
+        assert.equal(win.isDestroyed(), true);
+        assert.equal(open({token: "retry-token"}).create, true);
     });
 }

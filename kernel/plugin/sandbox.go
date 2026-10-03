@@ -30,6 +30,7 @@ import (
 	"github.com/imroc/req/v3"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/plugin/encoding"
 )
 
 type WebSocketState int64
@@ -95,6 +96,7 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	url.Enable(rt)
 	buffer.Enable(rt)
 	console.Enable(rt)
+	encoding.Enable(rt)
 	return
 }
 

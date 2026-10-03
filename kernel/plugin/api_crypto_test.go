@@ -66,7 +66,7 @@ func newCryptoTestRuntime(t *testing.T) *cryptoTestRuntime {
 		}); err != nil {
 			return nil, err
 		}
-		// 沙箱没有 TextEncoder，测试脚本用它把 ASCII 字符串转为 Uint8Array。
+		// 这里只注入 siyuan.crypto，没有启用 TextEncoder，测试脚本用它把 ASCII 字符串转为 Uint8Array。
 		if _, err := rt.RunString(`function TextEncoderLike(text) {
 			const bytes = new Uint8Array(text.length);
 			for (let i = 0; i < text.length; i++) {

@@ -35,7 +35,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {copyPlainText, isPhablet, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
+import {copyPlainText, isDisabledFeature, isPhablet, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
 import {paste, pasteAndKeepSourceFormat, pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
@@ -87,6 +87,7 @@ import {prepareInlineElementBoundaryMutation} from "../protyle/util/inlineElemen
 import {getZoomFocusScrollAttr, shouldFocusAfterZoom} from "../protyle/util/focusRestore";
 import {scrollCenter} from "../util/highlightById";
 import {copyImageOCRText, openImageOCR} from "../asset/imageOCR";
+import {reImageAIOCR} from "../asset/imageAIOCR";
 import {
     getSemanticInlineVisibleText,
     normalizeSemanticInlineElement,
@@ -1399,6 +1400,14 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     }, () => {
                         invalidateImageOCRStatus(path);
                     });
+                }
+            }, {
+                id: "reAIOCR",
+                icon: "iconSparkles",
+                label: window.siyuan.languages.reAIOCR,
+                ignore: isDisabledFeature("ai"),
+                click() {
+                    void reImageAIOCR(imgElement.getAttribute("data-src"));
                 }
             }],
         }).element);

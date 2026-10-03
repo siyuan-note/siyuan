@@ -12,6 +12,16 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
+var aiOCR = contractHandler(apicontract.AIOCR, func(c *gin.Context, request apicontract.AssetPathRequest) apicontract.Response[apicontract.AssetTextData] {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Minute)
+	defer cancel()
+	text, err := model.AIOCRAsset(ctx, request.Path)
+	if err != nil {
+		return apicontract.FailureWithTimeout[apicontract.AssetTextData](-1, err.Error(), 7000)
+	}
+	return apicontract.Success(apicontract.AssetTextData{Text: text})
+})
+
 var getOCRConfig = contractHandler(apicontract.GetOCRConfig, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.OCRConfigData] {
 	value := model.Conf.GetOCR()
 	models := []apicontract.OCRModel{}

@@ -869,6 +869,15 @@ var SetImageOCRText = define[SetAssetOCRTextRequest, Null]("setImageOCRText", "/
 // AssetOCR 始终使用当前设备选择的提供商，内核可在无界面的环境中识别。
 // 不自动回退到另一提供商；取消、模型或推理错误不覆盖已有文本，加密笔记本不参与 OCR。
 var AssetOCR = define[AssetPathRequest, AssetOCRData]("ocr", "/api/asset/ocr", JSONBody, ResponseOptions{}, "POST")
+
+// AIOCR 仅手动调用已启用的智能体模型识别本地 assets/ 图片，不使用会话、工具或后台自动识别。
+// path 保留 box 查询参数以隔离笔记本资源；拒绝加密资源和外部图片地址。
+// 支持现有 AI 生成协议，受 AI 功能开关、管理员权限和只读模式限制。
+// 请求上限为两分钟，提供商配置的更短超时仍生效；模型不支持图片时返回错误，不降级为纯文本请求。
+// 成功将完整文本（含换行和空白，图片无文字时可为空）保存到现有 OCR 存储并更新索引。
+// 失败、取消、拒绝或截断时保留已有文本；不返回虚构的坐标和置信度。
+var AIOCR = define[AssetPathRequest, AssetTextData]("aiOCR", "/api/ai/ocr", JSONBody, ResponseOptions{}, "POST")
+
 var GetOCRConfig = define[EmptyRequest, OCRConfigData]("getOCRConfig", "/api/asset/getOCRConfig", JSONBody, ResponseOptions{}, "POST")
 var SetOCRConfig = define[SettingOCR, SettingOCR]("setOCRConfig", "/api/asset/setOCRConfig", JSONBody, ResponseOptions{}, "POST")
 var ImportOCRModels = define[ImportOCRModelsRequest, OCRModel]("importOCRModels", "/api/asset/importOCRModels", MultipartBody, ResponseOptions{}, "POST")

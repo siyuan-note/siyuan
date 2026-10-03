@@ -112,6 +112,7 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 		t.Fatalf("obsolete OCR remained in full-text search: %v, %v", matches, err)
 	}
 	provider.err = errors.New("inference failed")
+	testAIOCRAssetIndex(t, path, paragraph.ID)
 	if _, err := OCRAsset(context.Background(), path); err == nil {
 		t.Fatal("failed provider returned success")
 	}
@@ -183,6 +184,9 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 				provider.called = false
 				if _, err := OCRAsset(context.Background(), path); err == nil || provider.called {
 					t.Fatalf("encrypted OCR reached %s (unlocked=%v): %v", selected, unlocked, err)
+				}
+				if _, err := AIOCRAsset(context.Background(), path); err == nil || err.Error() != Conf.Language(380) {
+					t.Fatalf("AI OCR did not reject encrypted asset (unlocked=%v): %v", unlocked, err)
 				}
 				SetOCRAssetText(path, "private text")
 				if util.ExistsAssetText(path) {

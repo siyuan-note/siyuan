@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import test from "node:test";
 import {getEntryCatalogChildren} from "./catalog";
 import {
+    isValidEntryOrder,
     mergeEntryOrder,
     mergeEntryOrderPreservingUnknown,
     moveEntryOrder,
@@ -9,6 +10,17 @@ import {
     resolveEntryOrder,
     resolveEntryOrderWithBoundaryDefaults,
 } from "./order";
+
+test("AI OCR merges into saved image menus while retaining plugin slots and valid separators", () => {
+    const entries = getEntryCatalogChildren("inline.image.ocr");
+    const defaults = entries.map(item => item.key);
+    const saved = ["copyOCRText", "plugin:example:item", "ocrResult", "separator_reOCR", "reOCR"];
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved, undefined, separators);
+    assert.deepEqual(merged, [...saved, "reAIOCR"]);
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+    assert.equal(isValidEntryOrder(merged, separators), true);
+});
 
 test("super block creation merges into saved menu orders and preserves plugin slots", () => {
     const groups: Array<[string, string[]]> = [

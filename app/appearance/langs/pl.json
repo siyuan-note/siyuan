@@ -1,4 +1,5 @@
 {
+	"reAIOCR": "Ponów OCR przy użyciu AI",
 	"pdfAnnotationDeleteRefConfirm": "Ta adnotacja PDF jest przywoływana przez ${x} bloków. Jej usunięcie unieważni te odwołania. Kontynuować?",
 	"ocrModelDefault": "Domyślna wartość modelu",
 	"ocrDetectionThreshold": "Próg wykrywania",
@@ -3080,6 +3081,8 @@
 		"408": "Rozwiązywanie nazw DNS nie powiodło się. Sprawdź ustawienia sieci, DNS lub serwera proxy",
 		"409": "Połączenie sieciowe zostało przerwane lub nie można go nawiązać. Sprawdź ustawienia sieci, serwera proxy lub zapory",
 		"410": "Konwersja anulowana: cała lista jest powiązana z wierszem bazy danych, ale konwersja tworzy wiele bloków bez jednoznacznego celu powiązania. Najpierw odłącz listę lub powiąż jej poszczególne elementy",
-		"411": "Konwersja anulowana: element listy i jego pierwszy blok są powiązane z różnymi wierszami tej samej bazy danych. Najpierw usuń jedno z powiązań"
+		"411": "Konwersja anulowana: element listy i jego pierwszy blok są powiązane z różnymi wierszami tej samej bazy danych. Najpierw usuń jedno z powiązań",
+		"412": "Najpierw skonfiguruj model agenta",
+		"413": "OCR z AI nie zwrócił pełnej transkrypcji; zachowano dotychczasowy wynik"
 	}
 }

@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20261003073646"
+		"updated": "20261003224949"
 	},
 	"Children": [
 		{
@@ -1407,7 +1407,7 @@
 			"Properties": {
 				"ID": "20240530101000-aefldsk",
 				"id": "20240530101000-cpod2qy",
-				"updated": "20261001013550"
+				"updated": "20261003224949"
 			},
 			"Children": [
 				{
@@ -1586,6 +1586,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " で表示を切り替えられます。画像メニューからも OCR テキストのコピーと編集ができます。"
+				}
+			]
+		},
+		{
+			"ID": "20261003224949-qenn1ez",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003224949-qenn1ez",
+				"updated": "20261003224949"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "画像メニューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI で OCR を再実行"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択すると、ローカル画像を設定済みのエージェントモデルに送信して文字を認識します。画像入力に対応したモデルが必要です。AI OCR は手動でのみ実行され、既存の OCR テキスト、編集、コピー、検索インデックスを利用します。認識に失敗した場合は元の結果を保持します。暗号化ノートブックの画像には対応していません。"
 				}
 			]
 		}

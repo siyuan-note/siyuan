@@ -1,4 +1,5 @@
 {
+	"reAIOCR": "Ripeti OCR con IA",
 	"pdfAnnotationDeleteRefConfirm": "Questa annotazione PDF è referenziata da ${x} blocchi. Eliminandola, questi riferimenti diventeranno non validi. Continuare?",
 	"ocrModelDefault": "Predefinito del modello",
 	"ocrDetectionThreshold": "Soglia di rilevamento",
@@ -3080,6 +3081,8 @@
 		"408": "Risoluzione DNS non riuscita. Controlla le impostazioni di rete, DNS o proxy",
 		"409": "La connessione di rete è stata interrotta o non è stato possibile stabilirla. Controlla le impostazioni di rete, proxy o firewall",
 		"410": "Conversione annullata: l’intero elenco è associato a una riga del database, ma la conversione genera più blocchi senza una destinazione univoca. Rimuovi prima l’associazione dell’elenco o associa le singole voci",
-		"411": "Conversione annullata: la voce dell’elenco e il suo primo blocco sono associati a righe diverse dello stesso database. Rimuovi prima una delle associazioni"
+		"411": "Conversione annullata: la voce dell’elenco e il suo primo blocco sono associati a righe diverse dello stesso database. Rimuovi prima una delle associazioni",
+		"412": "Configura prima il modello dell’agente",
+		"413": "L’OCR con IA non ha restituito una trascrizione completa; il risultato precedente è stato conservato"
 	}
 }

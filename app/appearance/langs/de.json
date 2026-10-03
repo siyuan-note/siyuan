@@ -1,4 +1,5 @@
 {
+	"reAIOCR": "OCR mit KI erneut ausführen",
 	"pdfAnnotationDeleteRefConfirm": "Diese PDF-Anmerkung wird von ${x} Blöcken referenziert. Durch das Löschen werden diese Referenzen ungültig. Fortfahren?",
 	"ocrModelDefault": "Modellstandard",
 	"ocrDetectionThreshold": "Erkennungsschwelle für Textbereiche",
@@ -3080,6 +3081,8 @@
 		"408": "DNS-Auflösung fehlgeschlagen. Bitte prüfen Sie Ihre Netzwerk-, DNS- oder Proxy-Einstellungen",
 		"409": "Die Netzwerkverbindung wurde unterbrochen oder konnte nicht hergestellt werden. Bitte prüfen Sie Ihre Netzwerk-, Proxy- oder Firewall-Einstellungen",
 		"410": "Konvertierung abgebrochen: Die gesamte Liste ist an eine Datenbankzeile gebunden, die Konvertierung erzeugt jedoch mehrere Blöcke ohne eindeutiges Bindungsziel. Lösen Sie zuerst die Bindung der Liste oder binden Sie einzelne Listeneinträge",
-		"411": "Konvertierung abgebrochen: Der Listeneintrag und sein erster Block sind an verschiedene Zeilen derselben Datenbank gebunden. Lösen Sie zuerst eine der Bindungen"
+		"411": "Konvertierung abgebrochen: Der Listeneintrag und sein erster Block sind an verschiedene Zeilen derselben Datenbank gebunden. Lösen Sie zuerst eine der Bindungen",
+		"412": "Bitte konfigurieren Sie zuerst das Agentenmodell",
+		"413": "Die KI-OCR hat keinen vollständigen Text zurückgegeben; das bisherige Ergebnis wurde beibehalten"
 	}
 }

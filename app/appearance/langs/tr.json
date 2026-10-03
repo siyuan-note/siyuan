@@ -1,4 +1,5 @@
 {
+	"reAIOCR": "OCR’yi yapay zekâ ile yeniden çalıştır",
 	"pdfAnnotationDeleteRefConfirm": "Bu PDF açıklamasına ${x} bloktan başvuruluyor. Silindiğinde bu başvurular geçersiz olacaktır. Devam edilsin mi?",
 	"ocrModelDefault": "Model varsayılanı",
 	"ocrDetectionThreshold": "Algılama eşiği",
@@ -3080,6 +3081,8 @@
 		"408": "DNS çözümlemesi başarısız oldu. Ağ, DNS veya vekil sunucu ayarlarınızı kontrol edin",
 		"409": "Ağ bağlantısı kesildi veya kurulamadı. Ağ, vekil sunucu veya güvenlik duvarı ayarlarınızı kontrol edin",
 		"410": "Dönüştürme iptal edildi: tüm liste bir veritabanı satırına bağlı, ancak dönüştürme birden fazla blok oluşturuyor ve tek bir bağlama hedefi belirlenemiyor. Önce listenin bağını kaldırın veya liste öğelerini ayrı ayrı bağlayın",
-		"411": "Dönüştürme iptal edildi: liste öğesi ve ilk bloğu aynı veritabanındaki farklı satırlara bağlı. Önce bağlantılardan birini kaldırın"
+		"411": "Dönüştürme iptal edildi: liste öğesi ve ilk bloğu aynı veritabanındaki farklı satırlara bağlı. Önce bağlantılardan birini kaldırın",
+		"412": "Lütfen önce ajan modelini yapılandırın",
+		"413": "Yapay zekâ OCR tam bir metin döndürmedi; mevcut sonuç korundu"
 	}
 }

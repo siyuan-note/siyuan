@@ -963,6 +963,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("copyOCRText", () => `${window.siyuan.languages.copy} OCR`, false),
                 separator("separator_reOCR"),
                 node("reOCR", lang("reOCR"), false),
+                node("reAIOCR", lang("reAIOCR"), false),
             ]),
             node("alignCenter", lang("alignCenter")),
             node("alignLeft", lang("alignLeft")),

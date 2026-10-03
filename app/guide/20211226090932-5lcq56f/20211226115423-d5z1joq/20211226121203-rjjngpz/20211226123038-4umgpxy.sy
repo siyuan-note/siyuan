@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261003073646"
+		"updated": "20261003224949"
 	},
 	"Children": [
 		{
@@ -1358,7 +1358,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414203058-foirrwk",
-				"updated": "20261001013550"
+				"updated": "20261003224949"
 			},
 			"Children": [
 				{
@@ -1522,6 +1522,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " 設定顯示或隱藏。也可繼續透過圖片選單複製和編輯 OCR 文字。"
+				}
+			]
+		},
+		{
+			"ID": "20261003224949-qe1gsny",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003224949-qe1gsny",
+				"updated": "20261003224949"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在圖片選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用 AI 重新 OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，將本機圖片傳送給已設定的智能體模型進行文字辨識，模型須支援圖片輸入。AI OCR 僅手動執行，結果沿用現有 OCR 文字、編輯、複製與搜尋索引；辨識失敗時保留原結果。加密筆記本圖片不支援此功能。"
 				}
 			]
 		}

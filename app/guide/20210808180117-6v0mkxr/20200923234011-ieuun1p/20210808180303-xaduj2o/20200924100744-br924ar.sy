@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261003073646"
+		"updated": "20261003224949"
 	},
 	"Children": [
 		{
@@ -1364,7 +1364,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202934-1h96or8",
-				"updated": "20261001013550"
+				"updated": "20261003224949"
 			},
 			"Children": [
 				{
@@ -1528,6 +1528,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " to show or hide it. The image menu remains available for copying and editing OCR text."
+				}
+			]
+		},
+		{
+			"ID": "20261003224949-gtf3qng",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003224949-gtf3qng",
+				"updated": "20261003224949"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the image menu, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Redo OCR with AI"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", which sends the local image to the configured agent model for text recognition. The model must support image input. AI OCR runs only when requested and shares the existing OCR text, editing, copying, and search index. Failed recognition preserves the previous result. Encrypted notebook images are not supported."
 				}
 			]
 		}

@@ -46,10 +46,17 @@ test("image OCR actions retain their configurable paths and order", () => {
     assert.equal(getEntryParentPath("editor.image.ocrText"), "editor.image");
     assert.deepEqual(getEntryCatalogChildren("editor.image").map(item => item.key), ["ocrText"]);
     assert.deepEqual(getEntryCatalogChildren("inline.image.ocr").map(item => item.key), [
-        "ocrResult", "copyOCRText", "separator_reOCR", "reOCR",
+        "ocrResult", "copyOCRText", "separator_reOCR", "reOCR", "reAIOCR",
     ]);
     assert.equal(getEntryCatalogNode("inline.image.ocr.copyOCRText").simple, false);
     assert.equal(getEntryParentPath("inline.image.ocr.copyOCRText"), "inline.image.ocr");
+    assert.equal(getEntryCatalogNode("inline.image.ocr.reAIOCR").simple, false);
+    assert.equal(getEntryParentPath("inline.image.ocr.reAIOCR"), "inline.image.ocr");
+    const source = readFileSync(resolve(process.cwd(), "src/menus/protyle.ts"), "utf8");
+    const start = source.indexOf('id: "ocr",', source.indexOf("export const imgMenu"));
+    const menu = source.slice(start, source.indexOf('id: "alignCenter",', start));
+    assert.deepEqual(Array.from(menu.matchAll(/id: "([^"]+)"/g), match => match[1]).slice(1),
+        getEntryCatalogChildren("inline.image.ocr").map(item => item.key));
 });
 
 test("remove list precedes list types in single and multiple block conversion menus", () => {

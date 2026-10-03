@@ -135,6 +135,7 @@ func TestAPIContractOCRPermissions(t *testing.T) {
 		{"/api/asset/getOCRConfig", false, getOCRConfig},
 		{"/api/asset/setOCRConfig", true, setOCRConfig},
 		{"/api/asset/importOCRModels", true, importOCRModels},
+		{"/api/ai/ocr", true, aiOCR},
 	} {
 		for _, role := range []model.Role{model.RoleReader, model.RoleEditor, model.RoleAdministrator} {
 			for _, readonly := range []bool{false, true} {

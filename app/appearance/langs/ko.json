@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "이 PDF 주석은 ${x}개의 블록에서 참조됩니다. 삭제하면 이 참조가 무효화됩니다. 계속하시겠습니까?",
 	"ocrModelDefault": "모델 기본값",
 	"ocrDetectionThreshold": "검출 임계값",
 	"ocrBoxThreshold": "텍스트 영역 신뢰도 임계값",

@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "此 PDF 標註被 ${x} 個區塊引用，刪除後這些引用將失效。是否繼續？",
 	"ocrModelDefault": "模型預設",
 	"ocrDetectionThreshold": "偵測閾值",
 	"ocrBoxThreshold": "文字框信賴度閾值",

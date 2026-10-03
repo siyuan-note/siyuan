@@ -4283,7 +4283,7 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 		return fmt.Errorf("resolve file annotation asset [%s]: %w", assetLink, err)
 	}
 	sya := absPath + ".sya"
-	// 以实际资源所属笔记本认证标注密文，读取失败时保留源文件并中止导出。
+	// 以实际资源所属笔记本认证标注密文，读取已有标注失败时保留源文件并中止导出。
 	assetBoxID := ExtractBoxIDFromAssetsPath(absPath)
 	var dek []byte
 	if IsEncryptedBox(assetBoxID) {
@@ -4297,6 +4297,11 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	}
 	syaData, readErr := os.ReadFile(sya)
 	if readErr != nil {
+		if os.IsNotExist(readErr) {
+			// 删除最后一个标注会移除标注文件，导出时仍保留引用文字。
+			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(n.TextMarkTextContent)})
+			return nil
+		}
 		return fmt.Errorf("read file annotation [%s]: %w", sya, readErr)
 	}
 	if nil != dek {
@@ -4315,12 +4320,20 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); err != nil {
 		return fmt.Errorf("parse file annotation [%s]: %w", sya, err)
 	}
+	if nil == syaJSON {
+		return fmt.Errorf("invalid file annotation data in [%s]", sya)
+	}
 	annotationData, found := syaJSON[annotationID]
+	if !found {
+		// 标注已删除时保留引用文字，不生成无法定位页码的链接。
+		n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(n.TextMarkTextContent)})
+		return nil
+	}
 	pageIndex := annotationData.Page
 	if 0 < len(annotationData.Pages) {
 		pageIndex = annotationData.Pages[0].Index
 	}
-	if !found || nil == pageIndex || *pageIndex < 0 {
+	if nil == pageIndex || *pageIndex < 0 {
 		return fmt.Errorf("missing or invalid annotation [%s] in [%s]", annotationID, sya)
 	}
 	pageStr := strconv.Itoa(*pageIndex + 1)

@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "Bu PDF açıklamasına ${x} bloktan başvuruluyor. Silindiğinde bu başvurular geçersiz olacaktır. Devam edilsin mi?",
 	"ocrModelDefault": "Model varsayılanı",
 	"ocrDetectionThreshold": "Algılama eşiği",
 	"ocrBoxThreshold": "Metin kutusu güven eşiği",

@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "This PDF annotation is referenced by ${x} blocks. Deleting it will invalidate these references. Continue?",
 	"ocrModelDefault": "Model default",
 	"ocrDetectionThreshold": "Detection threshold",
 	"ocrBoxThreshold": "Text box confidence threshold",

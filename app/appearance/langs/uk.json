@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "На цю анотацію PDF посилаються ${x} блоків. Після її видалення ці посилання стануть недійсними. Продовжити?",
 	"ocrModelDefault": "Типове значення моделі",
 	"ocrDetectionThreshold": "Поріг виявлення",
 	"ocrBoxThreshold": "Поріг впевненості текстових областей",

@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "この PDF 注釈は ${x} 個のブロックから参照されています。削除すると、これらの参照が無効になります。続行しますか？",
 	"ocrModelDefault": "モデルの既定値",
 	"ocrDetectionThreshold": "検出しきい値",
 	"ocrBoxThreshold": "テキスト領域の信頼度しきい値",

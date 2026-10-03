@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "${x} בלוקים מפנים להערת PDF זו. מחיקתה תהפוך את ההפניות האלה ללא תקפות. להמשיך?",
 	"ocrModelDefault": "ברירת המחדל של המודל",
 	"ocrDetectionThreshold": "סף זיהוי אזורים",
 	"ocrBoxThreshold": "סף ביטחון לתיבות טקסט",

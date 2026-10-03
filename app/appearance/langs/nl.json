@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "${x} blokken verwijzen naar deze PDF-annotatie. Als u deze verwijdert, worden deze verwijzingen ongeldig. Doorgaan?",
 	"ocrModelDefault": "Modelstandaard",
 	"ocrDetectionThreshold": "Detectiedrempel",
 	"ocrBoxThreshold": "Betrouwbaarheidsdrempel voor tekstvakken",

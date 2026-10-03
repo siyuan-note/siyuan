@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "${x} ब्लॉक इस PDF टिप्पणी का संदर्भ देते हैं। इसे हटाने से ये संदर्भ अमान्य हो जाएंगे। जारी रखें?",
 	"ocrModelDefault": "मॉडल का डिफ़ॉल्ट",
 	"ocrDetectionThreshold": "पहचान क्षेत्र की सीमा",
 	"ocrBoxThreshold": "टेक्स्ट बॉक्स विश्वास सीमा",

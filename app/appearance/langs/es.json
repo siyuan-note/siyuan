@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "${x} bloques hacen referencia a esta anotación PDF. Al eliminarla, estas referencias dejarán de ser válidas. ¿Continuar?",
 	"ocrModelDefault": "Predeterminado del modelo",
 	"ocrDetectionThreshold": "Umbral de detección",
 	"ocrBoxThreshold": "Umbral de confianza de los cuadros de texto",

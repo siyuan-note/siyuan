@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "Diese PDF-Anmerkung wird von ${x} Blöcken referenziert. Durch das Löschen werden diese Referenzen ungültig. Fortfahren?",
 	"ocrModelDefault": "Modellstandard",
 	"ocrDetectionThreshold": "Erkennungsschwelle für Textbereiche",
 	"ocrBoxThreshold": "Konfidenzschwelle für Textrahmen",

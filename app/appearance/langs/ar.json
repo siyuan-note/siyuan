@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "يشير ${x} من الكتل إلى تعليق PDF هذا. سيؤدي حذفه إلى إبطال هذه المراجع. هل تريد المتابعة؟",
 	"ocrModelDefault": "القيمة الافتراضية للنموذج",
 	"ocrDetectionThreshold": "عتبة الكشف",
 	"ocrBoxThreshold": "عتبة الثقة لمربعات النص",

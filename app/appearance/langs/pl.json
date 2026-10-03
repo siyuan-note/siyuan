@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "Ta adnotacja PDF jest przywoływana przez ${x} bloków. Jej usunięcie unieważni te odwołania. Kontynuować?",
 	"ocrModelDefault": "Domyślna wartość modelu",
 	"ocrDetectionThreshold": "Próg wykrywania",
 	"ocrBoxThreshold": "Próg pewności obszarów tekstu",

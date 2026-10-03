@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "На ову PDF белешку упућује ${x} блокова. Брисањем ће ове референце постати неважеће. Наставити?",
 	"ocrModelDefault": "Подразумевана вредност модела",
 	"ocrDetectionThreshold": "Праг детекције",
 	"ocrBoxThreshold": "Праг поузданости текстуалних области",

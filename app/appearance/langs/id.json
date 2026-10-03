@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "Anotasi PDF ini dirujuk oleh ${x} blok. Menghapusnya akan membuat rujukan tersebut tidak valid. Lanjutkan?",
 	"ocrModelDefault": "Bawaan model",
 	"ocrDetectionThreshold": "Ambang deteksi",
 	"ocrBoxThreshold": "Ambang keyakinan kotak teks",

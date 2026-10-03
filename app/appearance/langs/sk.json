@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationDeleteRefConfirm": "Na túto anotáciu PDF odkazuje ${x} blokov. Jej odstránením sa tieto odkazy stanú neplatnými. Pokračovať?",
 	"ocrModelDefault": "Predvolená hodnota modelu",
 	"ocrDetectionThreshold": "Prah detekcie",
 	"ocrBoxThreshold": "Prah spoľahlivosti textových oblastí",

@@ -464,6 +464,7 @@ export class ListMindmapView {
             }).catch(error => console.error(error)).finally(() => button.disabled = false);
         });
         this.buttons.get("lock").setAttribute("aria-pressed", String(this.locked));
+        this.buttons.get("lock").setAttribute("data-subtype", this.locked ? "lock" : "unlock");
         if (this.locked) {
             add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
             return;

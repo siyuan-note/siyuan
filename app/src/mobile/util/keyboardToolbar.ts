@@ -83,6 +83,7 @@ import {applyMobileToolbarEntries} from "./toolbarEntries";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
 import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
+import {isMobileLandscape} from "./orientation";
 import {restoreGutterBySelection} from "../../protyle/gutter/restore";
 import {mountLiteSlashMenu} from "./liteSlashMenu";
 import {getTableCellRichContext} from "../../protyle/util/tableCellRichContext";
@@ -435,7 +436,7 @@ const updateKeyboardPanelHeight = () => {
     if (keyboardPanelTop === undefined) {
         return;
     }
-    if (keyboardPanelLandscape !== window.matchMedia("(orientation: landscape)").matches) {
+    if (keyboardPanelLandscape !== isMobileLandscape()) {
         keyboardPanelClosing = false;
         hideKeyboardToolbarUtil();
         return;
@@ -1412,7 +1413,7 @@ export const initKeyboardToolbar = () => {
         }
         renderKeyboardToolbar();
     }, false);
-    window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+    window.siyuan.mobile.size.isLandscape = isMobileLandscape();
     if (window.siyuan.mobile.size.isLandscape) {
         window.siyuan.mobile.size.landscape = {
             height1: window.innerHeight,
@@ -1428,7 +1429,7 @@ export const initKeyboardToolbar = () => {
         window.addEventListener("resize", () => {
             updateKeyboardToolbarPosition();
             // 获取键盘高度
-            window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+            window.siyuan.mobile.size.isLandscape = isMobileLandscape();
             if (window.siyuan.mobile.size.isLandscape) {
                 if (!window.siyuan.mobile.size.landscape) {
                     window.siyuan.mobile.size.landscape = {

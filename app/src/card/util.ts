@@ -1,6 +1,8 @@
+import {isMobileLandscape} from "../mobile/util/orientation";
+
 export const updateCardHV = () => {
     /// #if MOBILE
-    if (window.matchMedia("(orientation:portrait)").matches) {
+    if (!isMobileLandscape()) {
         document.querySelectorAll(".card__action .card__icon").forEach(item => {
             item.classList.remove("fn__none");
         });

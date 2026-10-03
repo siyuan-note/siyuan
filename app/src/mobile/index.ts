@@ -69,6 +69,7 @@ import {openByMobile} from "../editor/openLink";
 import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 import {initMobileSelect} from "./util/nativeSelect";
 import {updateMobileTopBarLayout} from "./util/mobileTopBar";
+import {bindMobileOrientationChange} from "./util/orientation";
 import {showMobileBars} from "./util/mobileBars";
 import {initializeEnglishCommandTranslations} from "../command/english";
 import {loadLanguages} from "../boot/loadLanguages";
@@ -189,7 +190,7 @@ class App {
             window.siyuan.mobile.tabs?.save();
         }, false);
         // 判断手机横竖屏状态
-        window.matchMedia("(orientation:portrait)").addEventListener("change", () => {
+        bindMobileOrientationChange(() => {
             updateCardHV();
             updateMobileTopBarLayout();
             showMobileBars();

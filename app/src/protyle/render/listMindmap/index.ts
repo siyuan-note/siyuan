@@ -29,7 +29,7 @@ import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
     moveListMindmapNode, readListMindmap, replaceListMindmapContent,
     writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch, normalizeListMindmapSummaryMetadata,
-    convertListMindmapToList, hasListMindmapRootTitle,
+    convertListMindmapToList, hasListMindmapRootTitle, clearListMindmapHeight,
 } from "./model";
 import {prepareListMindmapConversion} from "./conversion";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
@@ -111,10 +111,21 @@ export const toggleListMindmap = async (owner: IProtyle, list: HTMLElement) => {
         }
     }
     hideElements(["gutter", "toolbar", "hint"], owner);
+    const previousStyle = list.getAttribute("style") || "";
+    if (!next) {
+        clearListMindmapHeight(list);
+    }
+    const nextStyle = list.getAttribute("style") || "";
+    const doAttrs: Record<string, string> = {[Constants.CUSTOM_SY_LIST_MINDMAP]: next};
+    const undoAttrs: Record<string, string> = {[Constants.CUSTOM_SY_LIST_MINDMAP]: previous};
+    if (nextStyle !== previousStyle) {
+        doAttrs.style = nextStyle;
+        undoAttrs.style = previousStyle;
+    }
     list.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP, next);
     transaction(owner, [{action: "setAttrs", id: list.dataset.nodeId,
-        data: JSON.stringify({[Constants.CUSTOM_SY_LIST_MINDMAP]: next})}], [{action: "setAttrs", id: list.dataset.nodeId,
-        data: JSON.stringify({[Constants.CUSTOM_SY_LIST_MINDMAP]: previous})}]);
+        data: JSON.stringify(doAttrs)}], [{action: "setAttrs", id: list.dataset.nodeId,
+        data: JSON.stringify(undoAttrs)}]);
     roots.get(owner)?.refresh();
 };
 

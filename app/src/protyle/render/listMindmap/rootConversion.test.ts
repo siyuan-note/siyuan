@@ -24,6 +24,15 @@ class ElementFixture {
         return {contains: (name: string) => classes().includes(name), replace: (from: string, to: string) =>
             this.setAttribute("class", classes().map(name => name === from ? to : name).join(" "))};
     }
+    get style() {
+        const readStyle = () => this.getAttribute("style") || "";
+        return {
+            get height() { return readStyle().match(/(?:^|;)\s*height\s*:\s*([^;]+)/)?.[1] || ""; },
+            get cssText() { return readStyle(); },
+            removeProperty: (name: string) => this.setAttribute("style", readStyle()
+                .split(";").filter(value => value.split(":")[0].trim() !== name).filter(Boolean).join(";")),
+        };
+    }
     getAttribute(name: string): string | null { return this.attributes.find((attr: any) => attr.name === name)?.value ?? null; }
     hasAttribute(name: string) { return this.getAttribute(name) !== null; }
     setAttribute(name: string, value: string) {
@@ -140,6 +149,61 @@ const getUpdateOperations = (element: ElementFixture, before: string) => {
     return operations;
 };
 
+test("mindmap list conversions release canvas height while preserving all items, styles and undo data", () => {
+    const markdown = "* Root\n  * Effects\n" + Array.from({length: 20}, (_, index) => `    * Item ${index}\n`).join("");
+    for (const legacy of [false, true]) {
+        for (const title of ["", "Canvas title"]) {
+            for (const conversion of ["OL2UL", "UL2OL", "UL2TL"]) {
+                const original = parse(lute.Md2BlockDOM(markdown));
+                if (legacy) { original.setAttribute("custom-sy-list-mindmap", "1"); }
+                else { api.retagMindmapBranch(original, true); }
+                original.setAttribute("style", "height:750px;color:red;width:80%");
+                original.setAttribute(dataAttr, JSON.stringify({version: 1, nodes: {}, relations: [], rootTitle: title}));
+                const before = original.outerHTML;
+                const originalIDs = ids(original);
+                const result = parse(api.convertListMindmapToList(original, conversion, lute));
+                assert.equal(result.style.height, "");
+                assert.match(result.getAttribute("style"), /color:\s*red/);
+                assert.match(result.getAttribute("style"), /width:\s*80%/);
+                assert.equal(result.querySelectorAll('[data-type="NodeListItem"]').length, 22);
+                assert.deepEqual(ids(result), originalIDs);
+                assert.ok(result.textContent.includes("Item 18") && result.textContent.includes("Item 19"));
+                assert.equal(original.outerHTML, before, "conversion leaves the full undo source untouched");
+                const operations = getUpdateOperations(result, before);
+                assert.ok((operations.undoOperations[0].data as string).includes("height:750px"));
+                assert.ok(!(operations.doOperations[0].data as string).includes("height:750px"));
+            }
+        }
+    }
+});
+
+test("direct mindmap retagging clears only canvas height and removes an empty style attribute", () => {
+    for (const style of ["height:750px", "height:750px;color:red"]) {
+        const original = parse(lute.Md2BlockDOM("* Root\n  * Nested\n"));
+        api.retagMindmapBranch(original, true);
+        original.setAttribute("style", style);
+        original.querySelector('[data-type="NodeParagraph"]').setAttribute("style", "height:42px");
+        original.querySelector('[data-type="NodeMindmap"]').setAttribute("style", "height:84px");
+        const originalIDs = ids(original);
+        api.retagMindmapBranch(original, false);
+        assert.equal(original.style.height, "");
+        assert.equal(original.getAttribute("style"), style.includes("color") ? "color:red" : null);
+        assert.equal(original.querySelector('[data-type="NodeParagraph"]').style.height, "42px");
+        assert.equal(original.querySelector('[data-type="NodeList"]').style.height, "84px");
+        assert.deepEqual(ids(original), originalIDs);
+    }
+});
+
+test("entering a mindmap preserves height and leaving without a height preserves the exact style", () => {
+    const original = parse(lute.Md2BlockDOM("* Root\n"));
+    original.setAttribute("style", "height:750px;color:red");
+    api.retagMindmapBranch(original, true);
+    assert.equal(original.getAttribute("style"), "height:750px;color:red");
+    original.setAttribute("style", "color: red; width: 80%;");
+    api.retagMindmapBranch(original, false);
+    assert.equal(original.getAttribute("style"), "color: red; width: 80%;");
+});
+
 test("titled virtual roots preserve content, identities and associations across every list type", () => {
     for (const legacy of [false, true]) {
         for (const marker of ["*", "3.", "* [X]"]) {
@@ -153,6 +217,7 @@ test("titled virtual roots preserve content, identities and associations across 
                 children[0].setAttribute("custom-keep", "value");
                 children[0].setAttribute("fold", "1");
                 original.setAttribute("custom-container", "keep");
+                original.setAttribute("style", "height:750px;color:red");
                 const rootID = original.dataset.nodeId;
                 const metadata = {version: 1, rootTitle: "<Root> & **literal**", extension: "keep",
                     nodes: {[rootID]: {bold: true, extension: "keep"}, [children[0].dataset.nodeId]: {italic: true}},
@@ -165,6 +230,8 @@ test("titled virtual roots preserve content, identities and associations across 
                 const model = api.readListMindmap(result);
                 assert.equal(original.outerHTML, before, "undo source is unchanged");
                 assert.equal(result.dataset.type, "NodeList");
+                assert.equal(result.style.height, "");
+                assert.match(result.getAttribute("style"), /color:\s*red/);
                 assert.equal(result.dataset.nodeId, rootID);
                 assert.equal(result.getAttribute("custom-container"), "keep");
                 assert.equal(model.root.virtual, false);
@@ -192,10 +259,12 @@ test("titled virtual roots preserve content, identities and associations across 
                 assert.equal(operations.doOperations[0].id, rootID);
                 assert.equal(operations.undoOperations[0].id, rootID);
                 const undo = parse(operations.undoOperations[0].data as string);
+                assert.equal(undo.style.height, "750px");
                 assert.deepEqual(ids(undo), oldIDs);
                 assert.equal(undo.getAttribute(dataAttr), JSON.stringify(metadata));
                 assert.equal(undo.dataset.type, original.dataset.type);
                 const redo = parse(operations.doOperations[0].data as string);
+                assert.equal(redo.style.height, "");
                 assert.deepEqual(ids(redo), ids(result));
                 assert.equal(redo.getAttribute(dataAttr), result.getAttribute(dataAttr));
                 const savedIDs = ids(result);

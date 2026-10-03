@@ -182,7 +182,22 @@ export const writeListMindmapMetadata = (list: HTMLElement, metadata: ListMindma
     list.setAttribute(Constants.CUSTOM_SY_LIST_MINDMAP_DATA, value);
 };
 
+// 退出脑图时移除画布高度，让列表按正文撑开，同时保留其他块样式。
+export const clearListMindmapHeight = (element: Element) => {
+    const style = (element as HTMLElement).style;
+    if (!style.height) {
+        return;
+    }
+    style.removeProperty("height");
+    if (!style.cssText) {
+        element.removeAttribute("style");
+    }
+};
+
 export const retagMindmapBranch = (root: Element, toMindmap: boolean) => {
+    if (!toMindmap) {
+        clearListMindmapHeight(root);
+    }
     const sourceBranch = toMindmap ? "NodeList" : "NodeMindmap";
     const sourceItem = toMindmap ? "NodeListItem" : "NodeMindmapItem";
     const pending = [root];
@@ -354,6 +369,7 @@ export const listMindmapConversionSource = (element: Element): Element => {
     if (source.getAttribute("data-type") === "NodeMindmap") {
         retagMindmapBranch(source, false);
     }
+    clearListMindmapHeight(source);
     source.removeAttribute(Constants.CUSTOM_SY_LIST_MINDMAP);
     return source;
 };

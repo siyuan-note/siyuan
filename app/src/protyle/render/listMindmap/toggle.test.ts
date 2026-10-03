@@ -45,6 +45,14 @@ const setup = (embedded = true) => {
         roots: new WeakMap(), hideElements: () => {}, readListMindmap: () => {},
         hasListMindmapRootTitle: () => false,
         cleanListMindmapHTML: (html: string) => html,
+        clearListMindmapHeight: () => {
+            const style = attrs.get("style");
+            if (style) {
+                const remaining = style.split(";").filter(value => !value.trim().startsWith("height:")).filter(Boolean).join(";");
+                if (remaining) { attrs.set("style", remaining); }
+                else { attrs.delete("style"); }
+            }
+        },
         retagMindmapBranch: (_element: Element, toMindmap: boolean) => {
             list.dataset.type = toMindmap ? "NodeMindmap" : "NodeList";
         },
@@ -104,6 +112,23 @@ test("read-only, history and lightweight editors cannot persist embedded view ch
         }
         api.toggleListMindmap(owner, list);
         assert.equal(operations.length, 0);
+    }
+});
+
+test("legacy mindmap exit includes height cleanup and exact style restoration in its attribute transaction", async () => {
+    for (const style of ["height:750px", "height:750px;color:red"]) {
+        const {owner, list, attrs, attribute, operations, api} = setup();
+        attrs.set("style", style);
+        await api.toggleListMindmap(owner, list);
+        const expected = style.includes("color") ? "color:red" : "";
+        assert.deepEqual(JSON.parse(operations[0].doOperations[0].data), {[attribute]: "", style: expected});
+        assert.deepEqual(JSON.parse(operations[0].undoOperations[0].data), {[attribute]: "1", style});
+        assert.equal(attrs.get("style") || "", expected);
+        for (const [name, value] of Object.entries(JSON.parse(operations[0].undoOperations[0].data))) {
+            attrs.set(name, value as string);
+        }
+        await api.toggleListMindmap(owner, list);
+        assert.deepEqual(JSON.parse(operations[1].doOperations[0].data), {[attribute]: "", style: expected});
     }
 });
 

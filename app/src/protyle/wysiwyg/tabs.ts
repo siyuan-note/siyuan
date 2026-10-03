@@ -211,6 +211,9 @@ export const initEditorTabs = (protyle: IProtyle) => {
     if (!boundFocusedTitles.has(root)) {
         boundFocusedTitles.add(root);
         root.addEventListener("contextmenu", event => {
+            if (event.shiftKey || protyle.toolbar?.isMultiSelectMode()) {
+                return;
+            }
             const item = getFocusedTabItem(protyle);
             const info = (event.target as Element).closest(".tab-item-info");
             if (item?.parentElement === root && info?.parentElement === item) {
@@ -218,7 +221,7 @@ export const initEditorTabs = (protyle: IProtyle) => {
                 event.stopPropagation();
                 openTabsMenu(protyle, item, item, info as HTMLElement);
             }
-        });
+        }, true);
     }
     tabsRender(root, {
         prepare: () => prepareFocusedTabItem(protyle),

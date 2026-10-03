@@ -90,6 +90,7 @@ import {markMirror, refreshUndoButtons} from "../undo/globalUndo";
 import type {TransactionListConversionResult} from "../../types/api";
 import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
+import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
     invalidateTrackedRangesByOperations,
@@ -1000,6 +1001,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     tempElement.innerHTML = operation.data;
                     const newTempElement = tempElement.content.querySelector(`[data-node-id="${newUpdateId}"]`);
                     if (newTempElement) {
+                        // 局部回放脱离容器前，保留页签项继承的任务状态。
+                        preserveTabTask(newTempElement, newTempElement);
                         updateElements.push(newUpdateElement);
                         operation.data = newTempElement.outerHTML;
                         operation.id = newUpdateId;

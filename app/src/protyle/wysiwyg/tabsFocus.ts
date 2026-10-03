@@ -38,11 +38,11 @@ export const prepareFocusedTabItem = (protyle: IProtyle) => {
             item.setAttribute("tabs-task", task);
         }
         root.replaceChildren(item);
-        item.removeAttribute("data-tabs-hidden");
-        const info = item.querySelector<HTMLElement>(":scope > .tab-item-info");
-        info?.classList.remove("tabs-title-editor");
-        info?.removeAttribute("style");
     }
+    item.removeAttribute("data-tabs-hidden");
+    const info = item.querySelector<HTMLElement>(":scope > .tab-item-info");
+    info?.classList.remove("tabs-title-editor");
+    info?.removeAttribute("style");
     const content = getTabContent(item);
     ["id", "role", "aria-labelledby", "tabindex"].forEach(name => content?.removeAttribute(name));
     getTabTitle(item)?.setAttribute("contenteditable", String(!protyle.disabled));

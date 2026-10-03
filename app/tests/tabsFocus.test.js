@@ -23,6 +23,9 @@ const sources = () => {
         compile("protyle/render/tabsRender.ts"),
         compile("protyle/wysiwyg/tabsFocus.ts"),
         compile("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]),
+        compile("protyle/util/tabsCopy.ts", ["preserveTabTask"]),
+        compile("protyle/wysiwyg/transactionUpdate.ts"),
+        compile("protyle/wysiwyg/transaction.ts", ["onTransaction"]),
         compile("protyle/wysiwyg/tabs.ts", ["boundFocusedTitles", "canEdit", "changeTabs", "renameTab", "openTabsMenu", "initEditorTabs"]),
         compile("protyle/util/selection.ts", ["selectAll"]),
     ].join("\n");
@@ -52,15 +55,22 @@ const cases = async (source) => {
     }
     const api = new Function("Constants", "Menu", "copySubMenu", "transaction", "zoomOut", "hideElements",
         "focusBlock", "focusByRange", "queueTransaction", "fetchPost", "openAttr", "processRender", "avRender",
-        "getSelectAllBlockAction", "countBlockWord", "getTaskStatusItems",
-        source + "; return {initEditorTabs, openTabsMenu, changeTabs, selectAll, destroyTabsRender};")(
+        "getSelectAllBlockAction", "countBlockWord", "getTaskStatusItems", "replayDeps",
+        "const {invalidateTrackedRangesByOperations, invalidateViewFoldRequests, handleViewFoldSourceOperation, " +
+        "updateBlock, syncTrackedRanges, applyViewFoldStates, queueHeadingNumberRefresh, refreshHeadingFoldIndicators} = replayDeps;" +
+        source + "; return {initEditorTabs, openTabsMenu, changeTabs, selectAll, destroyTabsRender, onTransaction};")(
         {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing"}, Menu, () => [],
         (_protyle, forward, undo) => { transactions.push({forward, undo}); },
         options => { navigations.push(options.id); }, () => {}, () => {}, range => {
             window.getSelection().removeAllRanges();
             window.getSelection().addRange(range);
         }, (_protyle, task) => task(), () => {}, () => {}, () => {}, () => {},
-        () => "expand", ids => { selectedIDs = ids; }, () => []);
+        () => "expand", ids => { selectedIDs = ids; }, () => [], {
+            invalidateTrackedRangesByOperations: () => {}, invalidateViewFoldRequests: () => {},
+            handleViewFoldSourceOperation: () => false, syncTrackedRanges: () => {},
+            applyViewFoldStates: () => {}, queueHeadingNumberRefresh: () => {}, refreshHeadingFoldIndicators: () => {},
+            updateBlock: (items, _protyle, operation) => items.forEach(item => { item.outerHTML = operation.data; }),
+        });
 
     for (const readonly of [false, true]) {
         for (const position of ["top", "left"]) {
@@ -69,6 +79,8 @@ const cases = async (source) => {
             const element = document.createElement("div");
             const root = document.createElement("div");
             root.className = "protyle-wysiwyg";
+            let genericContextMenus = 0;
+            root.addEventListener("contextmenu", () => genericContextMenus++);
             element.append(root);
             document.body.append(element);
             root.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab A\n\nBody A\n@tab B\n\nBody B\n:::\n");
@@ -78,11 +90,12 @@ const cases = async (source) => {
             a.querySelector(".tab-item-content").insertAdjacentHTML("beforeend", lute.Md2BlockDOM(
                 "::: tabs\n@tab Inner A\n\nInner body A\n@tab Inner B\n\nInner body B\n:::\n"));
             const protyle = {element, wysiwyg: {element: root}, disabled: readonly, options: {action: []},
-                toolbar: {}, block: {id: "doc", rootID: "doc", showAll: false}};
+                toolbar: {isMultiSelectMode: () => false}, block: {id: "doc", rootID: "doc", showAll: false}};
             tabs.setAttribute("tabs-position", position);
             tabs.setAttribute("tabs-active-id", b.dataset.nodeId);
             const fullGroup = tabs.outerHTML;
             api.initEditorTabs(protyle);
+            const replayGroup = tabs.outerHTML;
             api.openTabsMenu(protyle, tabs, a, tabs);
             menu.find(item => item.label === "Zoom in").click();
             check.deepEqual(navigations, [a.dataset.nodeId]);
@@ -116,7 +129,19 @@ const cases = async (source) => {
             check.deepEqual(selectedIDs, [a.dataset.nodeId]);
             a.classList.remove("protyle-wysiwyg--select");
             a.querySelector(".tab-item-title").dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
+            check.equal(genericContextMenus, 0);
             check.equal(menu.some(item => item.label === "Delete"), false);
+            const focusedMenu = menu;
+            a.querySelector(".tab-item-title").dispatchEvent(
+                new MouseEvent("contextmenu", {bubbles: true, cancelable: true, shiftKey: true}));
+            check.equal(genericContextMenus, 1);
+            check.equal(menu, focusedMenu);
+            protyle.toolbar.isMultiSelectMode = () => true;
+            a.querySelector(".tab-item-title").dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
+            check.equal(genericContextMenus, 2);
+            check.equal(menu, focusedMenu);
+            protyle.toolbar.isMultiSelectMode = () => false;
+            genericContextMenus = 0;
             if (!readonly) {
                 menu.find(item => item.label === "Rename").click();
                 api.changeTabs(protyle, [a], () => { a.querySelector(".tab-item-title").textContent = "Edited A"; });
@@ -131,6 +156,38 @@ const cases = async (source) => {
             check.equal(innerButtons.length, 2);
             innerButtons[1].click();
             check.equal(innerButtons[1].getAttribute("aria-selected"), "true");
+
+            // 其他窗口和撤销回放按聚焦 ID 提取页签项，可能带回组内的隐藏标记和标题定位样式。
+            const replay = document.createElement("template");
+            replay.innerHTML = replayGroup;
+            const replayItem = replay.content.querySelector(`[data-node-id="${a.dataset.nodeId}"]`);
+            const replayInfo = replayItem.querySelector(".tab-item-info");
+            replayInfo.classList.add("tabs-title-editor");
+            replayInfo.style.left = "100px";
+            root.firstElementChild.replaceWith(replayItem);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            check.equal(root.firstElementChild, replayItem);
+            check.equal(replayItem.hasAttribute("data-tabs-hidden"), false);
+            check.notEqual(getComputedStyle(replayItem).display, "none");
+            check.equal(replayInfo.classList.contains("tabs-title-editor"), false);
+            check.equal(replayInfo.hasAttribute("style"), false);
+            replayItem.querySelector(".tab-item-content > [data-node-id]").dispatchEvent(
+                new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
+            check.equal(genericContextMenus, 1);
+
+            for (const isUndo of [false, true]) {
+                const update = document.createElement("template");
+                update.innerHTML = replayGroup;
+                update.content.firstElementChild.setAttribute("tabs-task", "true");
+                const operation = {action: "update", id: tabs.dataset.nodeId, data: update.innerHTML};
+                api.onTransaction(protyle, [operation], isUndo);
+                await new Promise(resolve => setTimeout(resolve, 0));
+                check.equal(operation.id, a.dataset.nodeId);
+                check.equal(root.firstElementChild.getAttribute("tabs-task"), " ");
+                check.equal(root.firstElementChild.hasAttribute("data-tabs-hidden"), false);
+                check.notEqual(getComputedStyle(root.firstElementChild).display, "none");
+                check.doesNotMatch(root.innerHTML, /Body B/);
+            }
 
             // 重新加载容器时继续提取目标项，并保留从容器继承的任务状态。
             root.innerHTML = fullGroup;

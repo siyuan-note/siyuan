@@ -98,6 +98,21 @@ export const restoreInlineElementBoundaries = (root: ParentNode) => {
     elements.forEach(restoreInlineElementBoundary);
 };
 
+const getInlineBoundaryAtPoint = (container: Node, offset: number) => {
+    let previous = container.nodeType === Node.TEXT_NODE ? container : container.childNodes[offset - 1];
+    while (previous?.nodeName === "WBR") {
+        previous = previous.previousSibling;
+    }
+    if (!previous || getInlineElementBoundaryOffset(previous) < 0) {
+        return;
+    }
+    let next = previous.nextSibling;
+    while (next?.nodeName === "WBR") {
+        next = next.nextSibling;
+    }
+    return next as HTMLElement;
+};
+
 export const prepareInlineElementBoundaryMutation = (range: Range) => {
     const ancestor = range.commonAncestorContainer;
     const root = ancestor.nodeType === Node.ELEMENT_NODE ? ancestor as HTMLElement : ancestor.parentElement;
@@ -109,7 +124,10 @@ export const prepareInlineElementBoundaryMutation = (range: Range) => {
     if (inline) {
         elements.unshift(inline);
     }
-    const selected = elements.filter(element => range.intersectsNode(element));
+    // 光标位于元素外部占位符时，输入或分段也会改变该占位符与元素的相邻关系。
+    const boundaries = [getInlineBoundaryAtPoint(range.startContainer, range.startOffset),
+        getInlineBoundaryAtPoint(range.endContainer, range.endOffset)];
+    const selected = elements.filter(element => boundaries.includes(element) || range.intersectsNode(element));
     if (selected.length === 0) {
         return;
     }

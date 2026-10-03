@@ -118,6 +118,9 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
             if (name === "outdent" || name === "indent") {
                 return !!nodeElement?.parentElement.classList.contains("li") || !!inCode && hasText;
             }
+            if (name === "block-ref") {
+                return !!range && !inCode;
+            }
             if (name !== "block-type" && MOBILE_TOOLBAR_NAMES.includes(name)) {
                 return !inCode && hasText;
             }
@@ -963,6 +966,23 @@ export const bindMobileMenuKeyboard = (element: HTMLElement, selector: string, g
     };
 };
 
+const keepBlockHintKeyboard = (protyle: IProtyle) => {
+    // 引用和嵌入候选没有输入框，关闭插入菜单后保留软键盘用于继续筛选。
+    hideKeyboardToolbarUtil();
+    callMobileAppShowKeyboard();
+    if (isInHarmony() || isInAndroid()) {
+        const range = protyle.toolbar.range;
+        setTimeout(() => {
+            if (getCurrentEditor()?.protyle === protyle && protyle.toolbar.range === range &&
+                range.startContainer.isConnected && range.endContainer.isConnected &&
+                protyle.wysiwyg.element.contains(range.startContainer) &&
+                protyle.wysiwyg.element.contains(range.endContainer)) {
+                focusByRange(range);
+            }
+        }, Constants.TIMEOUT_TRANSITION);
+    }
+};
+
 const renderKeyboardToolbar = () => {
     if (renderKeyboardToolbarFrame !== undefined) {
         return;
@@ -1605,13 +1625,7 @@ export const initKeyboardToolbar = () => {
             event.preventDefault();
             event.stopPropagation();
             if (dataValue === "((" || dataValue === "{{") {
-                // (( / {{ 的候选列表无输入框，需保持键盘不收起，否则无法继续输入筛选 https://github.com/siyuan-note/siyuan/issues/17877
-                // 关闭插入菜单，保留光标和软键盘用于输入查询条件
-                hideKeyboardToolbarUtil();
-                callMobileAppShowKeyboard();
-                if (isInHarmony() || isInAndroid()) {
-                    setTimeout(() => focusByRange(protyle.toolbar.range), Constants.TIMEOUT_TRANSITION);
-                }
+                keepBlockHintKeyboard(protyle);
             } else if (slashBtnElement.getAttribute("data-focus") === "true" ||
                 liteSlashBtnElement && slashBtnElement.getAttribute("data-focus") !== "false") {
                 const selection = getSelection();
@@ -1738,6 +1752,12 @@ export const initKeyboardToolbar = () => {
         } else if (["a", "block-ref", "inline-math", "inline-memo"].includes(type)) {
             if (!hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
                 hideElements(["util"], protyle);
+                if (type === "block-ref" && range.collapsed) {
+                    protyle.toolbar.range = range.cloneRange();
+                    protyle.hint.fillCommand("((", protyle, false);
+                    keepBlockHintKeyboard(protyle);
+                    return;
+                }
                 protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("click"));
             }
             return;

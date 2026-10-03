@@ -244,9 +244,21 @@ const runCases = async (sources, platform) => {
     assert.equal(editable.getAttribute("inputmode"), "text");
     assert.equal(toolbar.querySelector('[data-type="copy"]').classList.contains("fn__none"), true);
     assert.equal(toolbar.querySelector('[data-type="cut"]').classList.contains("fn__none"), true);
-    for (const name of ["indent", "outdent", "strong", "em", "a", "block-ref", "text"]) {
+    for (const name of ["indent", "outdent", "strong", "em", "a", "text"]) {
         assert.equal(hidden(name), true);
     }
+    assert.equal(hidden("block-ref"), false);
+    action("block-ref");
+    assert.equal(inserts.at(-1), "((");
+    assert.equal(current.toolbar.range.collapsed, true);
+    assert.equal(document.activeElement, editable);
+    await new Promise(resolve => setTimeout(resolve, constants.TIMEOUT_TRANSITION + 10));
+    visible.delete("block-ref");
+    await settle();
+    assert.equal(hidden("block-ref"), true);
+    visible.add("block-ref");
+    await settle();
+    assert.equal(hidden("block-ref"), false);
     // 输入框不会因残留文档选区恢复文档工具栏。
     const input = document.createElement("input");
     document.body.append(input);

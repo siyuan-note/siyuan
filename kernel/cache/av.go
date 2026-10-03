@@ -62,11 +62,17 @@ func GetAVDataInBox(avID, boxID string) (raw []byte, ok bool) {
 }
 
 func GetAVDataWithVersionInBox(avID, boxID string) (raw []byte, version uint64, ok bool) {
-	v, _ := avCache.Get(avCacheKey(avID, boxID))
+	avSearchDataCacheLock.RLock()
+	defer avSearchDataCacheLock.RUnlock()
+	key := avCacheKey(avID, boxID)
+	v, _ := avCache.Get(key)
 	if nil == v {
 		return
 	}
 	entry := v.(*avCacheEntry)
+	if entry.version != avDataVersions[key] {
+		return
+	}
 	return entry.raw, entry.version, true
 }
 

@@ -16,7 +16,12 @@
 
 package cache
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+
+	"github.com/dgraph-io/ristretto"
+)
 
 func TestAVSearchDataInvalidation(t *testing.T) {
 	const avID = "20260728120000-search"
@@ -79,5 +84,64 @@ func TestAVCacheGeneration(t *testing.T) {
 	ClearAVCache()
 	if current := GetAVCacheGeneration(); current != generation+1 {
 		t.Fatalf("unexpected AV cache generation: %d", current)
+	}
+}
+
+func TestAVCacheRejectsStaleAsyncAdmission(t *testing.T) {
+	original := avCache
+	entered, release := make(chan struct{}), make(chan struct{})
+	controlled, err := ristretto.NewCache(&ristretto.Config{
+		NumCounters: 100, MaxCost: 1 << 20, BufferItems: 64,
+		Cost: func(value interface{}) int64 {
+			close(entered)
+			<-release
+			return 1
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	avCache = controlled
+	t.Cleanup(func() {
+		ClearAVCache()
+		controlled.Close()
+		avCache = original
+	})
+	// 暂停准入线程，让同一数据库的两次写入都在首次缓存建立前入队。
+	SetAVDataInBox("blocker", "box", []byte{})
+	<-entered
+	SetAVDataInBox("database", "box", []byte("old"))
+	latestVersion := SetAVDataWithVersionInBox("database", "box", []byte("latest"))
+	close(release)
+	controlled.Wait()
+	if raw, version, ok := GetAVDataWithVersionInBox("database", "box"); ok && (!bytes.Equal(raw, []byte("latest")) || version != latestVersion) {
+		t.Fatalf("returned stale database after a newer write: %q", raw)
+	}
+	// 未命中后重新读取源文件，可以恢复当前版本的缓存。
+	latestVersion = SetAVDataWithVersionInBox("database", "box", []byte("latest"))
+	controlled.Wait()
+	if raw, version, ok := GetAVDataWithVersionInBox("database", "box"); !ok || !bytes.Equal(raw, []byte("latest")) || version != latestVersion {
+		t.Fatalf("latest database was not cached: %q, %v", raw, ok)
+	}
+}
+
+func TestAVCacheRemovalKeepsNotebookIsolation(t *testing.T) {
+	t.Cleanup(ClearAVCache)
+	for _, box := range []string{"", "plain", "encrypted"} {
+		SetAVDataInBox("database", box, []byte(box+" content"))
+	}
+	avCache.Wait()
+	RemoveAVDataInBox("database", "encrypted")
+	if _, ok := GetAVDataInBox("database", "encrypted"); ok {
+		t.Fatal("removed notebook cache remained readable")
+	}
+	if raw, ok := GetAVDataInBox("database", "plain"); !ok || string(raw) != "plain content" {
+		t.Fatal("removing another notebook changed the plain cache")
+	}
+	RemoveAVData("database")
+	for _, box := range []string{"", "plain", "encrypted"} {
+		if _, ok := GetAVDataInBox("database", box); ok {
+			t.Fatalf("database cache remained readable in notebook %q", box)
+		}
 	}
 }

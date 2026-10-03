@@ -135,6 +135,53 @@ const runCases = async (sources) => {
     legacy.dialog.destroy();
     await wait();
 
+    const toggles = {first: false, second: false};
+    const saves = [];
+    const {genSwitchRow} = loadRendererModule(sources.fragments, {});
+    const markup = () => genSwitchRow("first", "First setting", "Description", toggles.first) +
+        genSwitchRow("second", "Second setting", "Description", toggles.second);
+    const clickDialog = new Dialog({content: '<div class="config__tab-wrap"><div class="config__tab-container" data-name="editor">' +
+        markup() + "</div></div>"});
+    clickDialog.element.setAttribute("data-key", "settings");
+    let remounted = 0;
+    const mounting = loadRendererModule(sources.mount, {
+        "../render/render": {}, "../search/normalize": {getSearchKeywordsLower: () => ""},
+        "../../constants": {Constants: {DIALOG_SETTING: "settings"}},
+        "./tabs": {getSettingTab: () => ({mount: async root => { remounted++; root.innerHTML = markup(); }})},
+    });
+    const saving = loadRendererModule(sources.save, {
+        "./mount": mounting,
+        "./item": {getSettingItem: id => ({readValue: input => input.checked, save: value => {
+            toggles[id] = value;
+            saves.push(id);
+            void mounting.remountOpenSettingTab("editor");
+        }})},
+    });
+    window.siyuan.config.readonly = false;
+    saving.bindSettingSaveDelegation(clickDialog.element.querySelector(".config__tab-wrap"));
+    const clickLabel = async id => {
+        const rect = clickDialog.element.querySelector("#" + id).closest("label").getBoundingClientRect();
+        await ipcRenderer.invoke("test-settings-pointer", "mouseDown", Math.round(rect.left + 10), Math.round(rect.top + rect.height / 2));
+        // 离屏窗口不派发失焦事件，补发与按下标签时相同的事件，保留原生鼠标点击流程。
+        document.dispatchEvent(new FocusEvent("focusout"));
+        await wait();
+        await ipcRenderer.invoke("test-settings-pointer", "mouseUp", Math.round(rect.left + 10), Math.round(rect.top + rect.height / 2));
+        await wait();
+    };
+    await clickLabel("first");
+    assert.deepEqual(saves, ["first"]);
+    const secondInput = clickDialog.element.querySelector("#second");
+    await clickLabel("second");
+    assert.deepEqual(saves, ["first", "second"], "each settings label responds to its first physical click");
+    assert.equal(clickDialog.element.querySelector("#second"), secondInput, "deferred refresh preserves the pressed label");
+    assert.equal(secondInput.checked, true);
+    document.activeElement.blur();
+    document.dispatchEvent(new FocusEvent("focusout"));
+    await wait();
+    assert.equal(remounted, 1, "refresh resumes after leaving the input");
+    clickDialog.destroy();
+    await wait();
+
     let confirmed = 0;
     let destroyed = 0;
     let created = 0;
@@ -315,7 +362,8 @@ if (process.versions.electron && process.type === "browser") {
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
-            paint: "config/setting/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts"})) {
+            paint: "config/setting/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",
+            mount: "config/setting/mount.ts", save: "config/setting/save.ts", fragments: "config/render/fragments.ts"})) {
             let source = fs.readFileSync(path.join(__dirname, "../src", file), "utf8");
             if (key === "frontend") {
                 source = require("ifdef-loader/preprocessor").parse(source, {MOBILE: false, BROWSER: false}, false, true);
@@ -400,6 +448,9 @@ if (process.versions.electron && process.type === "browser") {
             commands.push(command);
         });
         ipcMain.handle("test-settings-commands", () => commands);
+        ipcMain.handle("test-settings-pointer", (event, type, x, y) => {
+            event.sender.sendInputEvent({type, x, y, button: "left", clickCount: 1});
+        });
         ipcMain.handle("test-settings-token", () => new URL([...children][0].webContents.getURL()).searchParams.get("settingsWindowToken"));
         ipcMain.handle("test-settings-size", (_event, width, height) => {
             for (const child of children) child.setSize(width, height);

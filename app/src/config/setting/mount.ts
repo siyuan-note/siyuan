@@ -6,6 +6,30 @@ import {getSettingTab, type TSettingTab} from "./tabs";
 
 const deferredTabs = new Set<TSettingTab>();
 let watchingFocus = false;
+let watchingPointer = false;
+let pressedTarget: EventTarget;
+
+const refreshDeferredTabs = () => {
+    if (!deferredTabs.size) return;
+    setTimeout(() => {
+        const tabs = [...deferredTabs];
+        deferredTabs.clear();
+        tabs.forEach(tab => { void remountOpenSettingTab(tab); });
+    }, 0);
+};
+
+// 从按下到点击完成期间保留控件，避免失焦刷新移除本次点击的目标。
+export const watchSettingTabInteractions = () => {
+    if (watchingPointer) return;
+    watchingPointer = true;
+    document.addEventListener("pointerdown", event => { pressedTarget = event.target; }, true);
+    const endPointer = () => {
+        pressedTarget = undefined;
+        refreshDeferredTabs();
+    };
+    document.addEventListener("pointerup", endPointer, true);
+    document.addEventListener("pointercancel", endPointer, true);
+};
 
 /** 首次挂载：渲染全部注册项并执行 afterMount */
 export const mountSettingTab = async (tabId: string, root: HTMLElement) => {
@@ -27,16 +51,12 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
     if (!root?.innerHTML) {
         return;
     }
-    if (root.contains(document.activeElement) || root.querySelector(".config-entry-visibility__view")) {
+    if (root.contains(document.activeElement) || pressedTarget && root.contains(pressedTarget as Node) ||
+        root.querySelector(".config-entry-visibility__view")) {
         deferredTabs.add(tabId);
         if (!watchingFocus) {
             watchingFocus = true;
             // 离开输入控件或关闭入口方案编辑器后再刷新，保留尚未提交的输入与草稿。
-            const refreshDeferredTabs = () => setTimeout(() => {
-                const tabs = [...deferredTabs];
-                deferredTabs.clear();
-                tabs.forEach(tab => { void remountOpenSettingTab(tab); });
-            }, 0);
             document.addEventListener("focusout", refreshDeferredTabs);
             document.addEventListener("siyuan-entry-profile-closed", refreshDeferredTabs);
         }

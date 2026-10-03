@@ -13,6 +13,7 @@ import {hasPluginSetting} from "../../plugin";
 import {getWorkspaceName} from "../../util/processTitle";
 import {getDockEntryOrderSnapshot} from "../entryVisibility/dockOrder";
 import {hasNativeSettingTasks} from "./taskBlocker";
+import {openBazaarPath} from "../bazaar/openPath";
 import type {App} from "../../index";
 import type {ISettingsWindowHost} from "./windowContext";
 import type {TSettingTab} from "./tabs";
@@ -105,6 +106,7 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
         reload: () => { assertActive(); return reloadUI(); },
         resetLayout: () => { assertActive(); return resetLayout(); },
         getDockOrderSnapshot: () => { assertActive(); return getDockEntryOrderSnapshot(); },
+        openBazaarPath: (type, name, storage) => { assertActive(); openBazaarPath(type, name, storage); },
         exit: setCurrentWorkspace => { assertActive(); return exitSiYuan(setCurrentWorkspace); },
         plugin: plugin && {
             name: plugin.name,

@@ -52,7 +52,7 @@ var getUnusedAttributeViews = contractHandler(apicontract.GetUnusedAttributeView
 	total := len(values)
 	if total > 512 {
 		values = values[:512]
-		util.PushMsg(fmt.Sprintf(model.Conf.Language(279), total, 512), 5000)
+		util.PushMsgWithApp(resolveRequestAppID(c, ""), fmt.Sprintf(model.Conf.Language(279), total, 512), 5000)
 	}
 	return apicontract.Success(assetUnusedItems(values))
 })

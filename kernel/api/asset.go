@@ -360,7 +360,7 @@ var getUnusedAssets = contractHandler(apicontract.GetUnusedAssets, func(c *gin.C
 	if total > maxUnusedAssets {
 		unusedAssets = unusedAssets[:maxUnusedAssets]
 		// 提示仅发送给发起查询的前端；未提供应用标识的调用保留广播行为。
-		util.PushMsgWithApp(c.GetHeader("X-SiYuan-App-ID"), fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAssets), 5000)
+		util.PushMsgWithApp(resolveRequestAppID(c, ""), fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAssets), 5000)
 	}
 
 	return apicontract.Success(assetUnusedItems(unusedAssets))
@@ -400,12 +400,13 @@ var uploadCloud = contractHandler(apicontract.AssetUploadCloud, func(c *gin.Cont
 	ignorePushMsg := request.IgnorePushMsg
 	id := request.ID
 
-	count, err := model.UploadAssets2Cloud(id, ignorePushMsg)
+	app := resolveRequestAppID(c, "")
+	count, err := model.UploadAssets2CloudWithApp(id, ignorePushMsg, app)
 	if err != nil {
 		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 3000)
 	}
 
-	util.PushMsg(fmt.Sprintf(model.Conf.Language(41), count), 3000)
+	util.PushMsgWithApp(app, fmt.Sprintf(model.Conf.Language(41), count), 3000)
 
 	return apicontract.Success(apicontract.Null{})
 })
@@ -415,13 +416,14 @@ var uploadCloudByAssetsPaths = contractHandler(apicontract.AssetUploadCloudByAss
 	assets := append([]string(nil), request.Paths...)
 	ignorePushMsg := request.IgnorePushMsg
 
-	count, err := model.UploadAssets2CloudByAssetsPaths(assets, ignorePushMsg)
+	app := resolveRequestAppID(c, "")
+	count, err := model.UploadAssets2CloudByAssetsPathsWithApp(assets, ignorePushMsg, app)
 	if err != nil {
 		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 3000)
 	}
 
 	if !ignorePushMsg {
-		util.PushMsg(fmt.Sprintf(model.Conf.Language(41), count), 3000)
+		util.PushMsgWithApp(app, fmt.Sprintf(model.Conf.Language(41), count), 3000)
 	}
 
 	return apicontract.Success(apicontract.Null{})

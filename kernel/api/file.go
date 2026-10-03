@@ -42,16 +42,7 @@ import (
 // errMsgSeeKernelLog 接在 API 错误提示末尾，引导用户查看内核日志以获取完整信息（避免在 Msg 暴露工作空间绝对路径）。
 const (
 	errMsgSeeKernelLog = ". For details, see the SiYuan kernel log."
-	siyuanAppIDHeader  = "X-SiYuan-App-ID"
 )
-
-// resolveFileAPIAppID 优先使用宿主统一注入的应用标识，同时兼容旧请求体中的 app。
-func resolveFileAPIAppID(c *gin.Context, bodyApp string) string {
-	if headerApp := c.GetHeader(siyuanAppIDHeader); headerApp != "" {
-		return headerApp
-	}
-	return bodyApp
-}
 
 // rejectEncryptedBoxPath 检查 absPath 是否落在加密笔记本目录下（含 symlink 绕过），是则返回 true。
 // 原始文件 API（getFile/putFile/copyFile/renameFile/removeFile）是绕过加密层的逃生口，
@@ -703,7 +694,7 @@ var renameFile = contractHandler(apicontract.RenameFile, func(c *gin.Context, re
 var removeFile = contractHandler(apicontract.RemoveFile, func(c *gin.Context, request apicontract.RemoveFileRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
 	app, filePath := request.App, request.Path
-	app = resolveFileAPIAppID(c, app)
+	app = resolveRequestAppID(c, app)
 
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
@@ -761,7 +752,7 @@ var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request 
 
 	isDirStr := request.IsDir
 	isDir, _ := strconv.ParseBool(isDirStr)
-	app := resolveFileAPIAppID(c, request.App)
+	app := resolveRequestAppID(c, request.App)
 
 	var err error
 	filePath := request.Path

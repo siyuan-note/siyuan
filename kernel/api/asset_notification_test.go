@@ -21,6 +21,19 @@ import (
 )
 
 func TestAPIContractUnusedAssetNotificationScope(t *testing.T) {
+	testAPIContractUnusedNotificationScope(t, false)
+}
+
+func TestAPIContractUnusedAttributeViewNotificationScope(t *testing.T) {
+	testAPIContractUnusedNotificationScope(t, true)
+}
+
+func testAPIContractUnusedNotificationScope(t *testing.T, attributeViews bool) {
+	t.Helper()
+	endpoint, handler := "/api/asset/getUnusedAssets", getUnusedAssets
+	if attributeViews {
+		endpoint, handler = "/api/av/getUnusedAttributeViews", getUnusedAttributeViews
+	}
 	for _, test := range []struct {
 		name  string
 		count int
@@ -37,8 +50,19 @@ func TestAPIContractUnusedAssetNotificationScope(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			assets := setupAssetContractWorkspace(t)
 			model.Conf.FileTree = conf.NewFileTree()
+			if attributeViews {
+				assets = filepath.Join(util.DataDir, "storage", "av")
+				if err := os.MkdirAll(assets, 0755); err != nil {
+					t.Fatal(err)
+				}
+			}
 			for i := 0; i < test.count; i++ {
-				if err := os.WriteFile(filepath.Join(assets, fmt.Sprintf("unused-%04d.txt", i)), []byte("unused"), 0644); err != nil {
+				name, content := fmt.Sprintf("unused-%04d.txt", i), []byte("unused")
+				if attributeViews {
+					name = fmt.Sprintf("20261003000000-%07d.json", i)
+					content = []byte(`{"name":"unused","keyValues":[]}`)
+				}
+				if err := os.WriteFile(filepath.Join(assets, name), content, 0644); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -53,7 +77,7 @@ func TestAPIContractUnusedAssetNotificationScope(t *testing.T) {
 			})
 			push.HandleDisconnect(util.RemovePushChan)
 			engine := gin.New()
-			engine.POST("/api/asset/getUnusedAssets", getUnusedAssets)
+			engine.POST(endpoint, handler)
 			engine.GET("/ws", func(c *gin.Context) { _ = push.HandleRequest(c.Writer, c.Request) })
 			server := httptest.NewServer(engine)
 			t.Cleanup(func() { _ = push.Close(); server.Close() })
@@ -79,13 +103,13 @@ func TestAPIContractUnusedAssetNotificationScope(t *testing.T) {
 				}
 				connections = append(connections, connection)
 			}
-			request := httptest.NewRequest("POST", "/api/asset/getUnusedAssets", strings.NewReader(`{}`))
+			request := httptest.NewRequest("POST", endpoint, strings.NewReader(`{}`))
 			if test.app != "" {
 				request.Header.Set("X-SiYuan-App-ID", appPrefix+test.app)
 			}
 			recorder := httptest.NewRecorder()
 			engine.ServeHTTP(recorder, request)
-			requireAPIContract(t, "POST", "/api/asset/getUnusedAssets", recorder)
+			requireAPIContract(t, "POST", endpoint, recorder)
 			var response struct {
 				Code int
 				Data []apicontract.AssetUnusedItem

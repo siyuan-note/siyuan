@@ -242,7 +242,7 @@ const initialize = async () => {
     if (isActive()) ipcRenderer.send("siyuan-settings-ready");
 };
 
-installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, window.location.href);
+installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, document.baseURI, location.origin);
 void startSettingsWindow(initialize, error => {
     console.error("Could not initialize the settings window", error);
     disposeSettingsWindow();

@@ -564,10 +564,12 @@ var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "
 
 var RefreshBacklink = define[RefreshBacklinkRequest, Null]("refreshBacklink", "/api/ref/refreshBacklink", JSONBody, ResponseOptions{}, "POST")
 
+// 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
 var GetBackmentionDoc = define[BackmentionDocumentRequest, BacklinkContextData]("getBackmentionDoc", "/api/ref/getBackmentionDoc", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 var GetBacklinkDoc = define[BacklinkDocumentRequest, BacklinkContextData]("getBacklinkDoc", "/api/ref/getBacklinkDoc", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
+// 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
 var GetBacklink2 = define[BacklinkListRequest, BacklinkListData]("getBacklink2", "/api/ref/getBacklink2", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
 var GetGlobalBacklinks = define[GlobalBacklinkListRequest, GlobalBacklinkListData]("getGlobalBacklinks", "/api/ref/getGlobalBacklinks", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetGlobalBacklinkContexts = define[GlobalBacklinkContextRequest, GlobalBacklinkContextData]("getGlobalBacklinkContexts", "/api/ref/getGlobalBacklinkContexts", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
@@ -672,6 +674,8 @@ var PluginRPCWebSocketByName = define[EmptyRequest, PluginRPCFailure]("pluginJso
 var InstallLocalBazaarPackage = define[InstallLocalBazaarPackageRequest, BazaarLocalInstallResult]("installLocalBazaarPackage", "/api/bazaar/installLocalBazaarPackage", MultipartBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
 var BatchUpdatePackage = define[BatchUpdatePackageRequest, Null]("batchUpdatePackage", "/api/bazaar/batchUpdatePackage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetUpdatedPackage = define[GetUpdatedPackageRequest, BazaarUpdatedData]("getUpdatedPackage", "/api/bazaar/getUpdatedPackage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
 var UpdateBazaarPackage = define[UpdateBazaarPackageRequest, BazaarPackagesData]("updateBazaarPackage", "/api/bazaar/updateBazaarPackage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledPackageSize = define[GetInstalledPackageSizeRequest, BazaarPackageSizeData]("getInstalledPackageSize", "/api/bazaar/getInstalledPackageSize", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarPackage = define[GetBazaarPackageRequest, BazaarPackageDetail]("getBazaarPackage", "/api/bazaar/getBazaarPackage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
@@ -682,22 +686,32 @@ var SetBazaarPackageRating = define[SetBazaarPackageRatingRequest, BazaarRatingR
 var GetBazaarPackageREADME = define[GetBazaarPackageREADMERequest, BazaarREADMEData]("getBazaarPackageREADME", "/api/bazaar/getBazaarPackageREADME", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarPlugin = define[GetBazaarPluginRequest, BazaarPackagesData]("getBazaarPlugin", "/api/bazaar/getBazaarPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledPlugin = define[GetInstalledPluginRequest, BazaarPackagesData]("getInstalledPlugin", "/api/bazaar/getInstalledPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
 var InstallBazaarPlugin = define[InstallBazaarPluginRequest, BazaarPackagesData]("installBazaarPlugin", "/api/bazaar/installBazaarPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarPlugin = define[UninstallBazaarPluginRequest, BazaarPackagesData]("uninstallBazaarPlugin", "/api/bazaar/uninstallBazaarPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarWidget = define[GetBazaarWidgetRequest, BazaarPackagesData]("getBazaarWidget", "/api/bazaar/getBazaarWidget", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledWidget = define[GetInstalledWidgetRequest, BazaarPackagesData]("getInstalledWidget", "/api/bazaar/getInstalledWidget", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
 var InstallBazaarWidget = define[InstallBazaarWidgetRequest, BazaarPackagesData]("installBazaarWidget", "/api/bazaar/installBazaarWidget", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarWidget = define[UninstallBazaarWidgetRequest, BazaarPackagesData]("uninstallBazaarWidget", "/api/bazaar/uninstallBazaarWidget", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarIcon = define[GetBazaarIconRequest, BazaarPackagesData]("getBazaarIcon", "/api/bazaar/getBazaarIcon", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledIcon = define[GetInstalledIconRequest, BazaarPackagesData]("getInstalledIcon", "/api/bazaar/getInstalledIcon", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
 var InstallBazaarIcon = define[InstallBazaarIconRequest, BazaarAppearancePackagesData]("installBazaarIcon", "/api/bazaar/installBazaarIcon", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarIcon = define[UninstallBazaarIconRequest, BazaarAppearancePackagesData]("uninstallBazaarIcon", "/api/bazaar/uninstallBazaarIcon", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarTemplate = define[GetBazaarTemplateRequest, BazaarPackagesData]("getBazaarTemplate", "/api/bazaar/getBazaarTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledTemplate = define[GetInstalledTemplateRequest, BazaarPackagesData]("getInstalledTemplate", "/api/bazaar/getInstalledTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
 var InstallBazaarTemplate = define[InstallBazaarTemplateRequest, BazaarPackagesData]("installBazaarTemplate", "/api/bazaar/installBazaarTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarTemplate = define[UninstallBazaarTemplateRequest, BazaarPackagesData]("uninstallBazaarTemplate", "/api/bazaar/uninstallBazaarTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarTheme = define[GetBazaarThemeRequest, BazaarPackagesData]("getBazaarTheme", "/api/bazaar/getBazaarTheme", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledTheme = define[GetInstalledThemeRequest, BazaarPackagesData]("getInstalledTheme", "/api/bazaar/getInstalledTheme", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
 var InstallBazaarTheme = define[InstallBazaarThemeRequest, BazaarAppearancePackagesData]("installBazaarTheme", "/api/bazaar/installBazaarTheme", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var UninstallBazaarTheme = define[UninstallBazaarThemeRequest, BazaarAppearancePackagesData]("uninstallBazaarTheme", "/api/bazaar/uninstallBazaarTheme", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
@@ -877,7 +891,11 @@ var GetMissingAssets = define[EmptyRequest, []*AssetUnusedItem]("getMissingAsset
 
 // ResolveAssetPath 返回普通资源路径；已解锁的加密资源返回保留原始名称的受管临时明文副本路径。
 var ResolveAssetPath = define[AssetPathRequest, string]("resolveAssetPath", "/api/asset/resolveAssetPath", JSONBody, ResponseOptions{}, "POST")
+
+// 上传提示生命周期使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，状态栏仍全局更新。
 var AssetUploadCloud = define[AssetCloudUploadRequest, Null]("uploadCloud", "/api/asset/uploadCloud", JSONBody, ResponseOptions{}, "POST")
+
+// 上传提示生命周期使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，保留 ignorePushMsg 语义。
 var AssetUploadCloudByAssetsPaths = define[AssetPathsCloudUploadRequest, Null]("uploadCloudByAssetsPaths", "/api/asset/uploadCloudByAssetsPaths", JSONBody, ResponseOptions{}, "POST")
 var InsertLocalAssets = define[InsertLocalAssetsRequest, AssetUploadData]("insertLocalAssets", "/api/asset/insertLocalAssets", JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var InsertCover = define[InsertCoverRequest, AssetInsertCoverData]("insertCover", "/api/asset/insertCover", JSONBody, ResponseOptions{}, "POST")
@@ -915,6 +933,8 @@ var SetEmoji = define[SettingEmojiRequest, Null]("setEmoji", "/api/setting/setEm
 
 var RemoveUnusedAttributeView = define[RemoveUnusedAttributeViewRequest, AVIDData]("removeUnusedAttributeView", "/api/av/removeUnusedAttributeView", JSONBody, ResponseOptions{}, "POST")
 var RemoveUnusedAttributeViews = define[EmptyRequest, AVPathsData]("removeUnusedAttributeViews", "/api/av/removeUnusedAttributeViews", NoBody, ResponseOptions{}, "POST")
+
+// 截断提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
 var GetUnusedAttributeViews = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAttributeViews", "/api/av/getUnusedAttributeViews", NoBody, ResponseOptions{}, "POST")
 var GetAttributeViewItemIDsByBoundIDs = define[GetAttributeViewItemIDsByBoundIDsRequest, map[string]string]("getAttributeViewItemIDsByBoundIDs", "/api/av/getAttributeViewItemIDsByBoundIDs", JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewBoundBlockIDsByItemIDs = define[GetAttributeViewBoundBlockIDsByItemIDsRequest, map[string]string]("getAttributeViewBoundBlockIDsByItemIDs", "/api/av/getAttributeViewBoundBlockIDsByItemIDs", JSONBody, ResponseOptions{}, "POST")

@@ -15,7 +15,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestResolveFileAPIAppID(t *testing.T) {
+func TestResolveRequestAppID(t *testing.T) {
 	tests := []struct {
 		name     string
 		header   string
@@ -34,7 +34,7 @@ func TestResolveFileAPIAppID(t *testing.T) {
 			if test.header != "" {
 				context.Request.Header.Set(siyuanAppIDHeader, test.header)
 			}
-			if actual := resolveFileAPIAppID(context, test.body); actual != test.expected {
+			if actual := resolveRequestAppID(context, test.body); actual != test.expected {
 				t.Fatalf("expected app [%s], got [%s]", test.expected, actual)
 			}
 		})

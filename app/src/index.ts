@@ -372,7 +372,7 @@ export class App {
     }
 }
 
-installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, window.location.href);
+installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, document.baseURI, location.origin);
 const siyuanApp = new App();
 
 window.openFileByURL = (openURL) => {

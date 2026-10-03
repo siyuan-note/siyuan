@@ -1438,6 +1438,11 @@ func getAssetAbsPath(relativePath string, includeEncrypted bool) (absPath string
 }
 
 func UploadAssets2Cloud(id string, ignorePushMsg bool) (count int, err error) {
+	return UploadAssets2CloudWithApp(id, ignorePushMsg, "")
+}
+
+// UploadAssets2CloudWithApp 将块资源上传提示限定到发起实例；空标识保留广播。
+func UploadAssets2CloudWithApp(id string, ignorePushMsg bool, app string) (count int, err error) {
 	if !IsSubscriber() {
 		return
 	}
@@ -1464,7 +1469,7 @@ func UploadAssets2Cloud(id string, ignorePushMsg bool) (count int, err error) {
 		assets = append(assets, getQueryEmbedNodesAssetsLinkDests(n)...)
 	}
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
-	count, err = uploadAssets2Cloud(assets, bizTypeUploadAssets, ignorePushMsg)
+	count, err = uploadAssets2CloudWithApp(assets, bizTypeUploadAssets, ignorePushMsg, app)
 	if err != nil {
 		return
 	}
@@ -1472,11 +1477,16 @@ func UploadAssets2Cloud(id string, ignorePushMsg bool) (count int, err error) {
 }
 
 func UploadAssets2CloudByAssetsPaths(assetPaths []string, ignorePushMsg bool) (count int, err error) {
+	return UploadAssets2CloudByAssetsPathsWithApp(assetPaths, ignorePushMsg, "")
+}
+
+// UploadAssets2CloudByAssetsPathsWithApp 在同一实例显示、更新和清除本次上传的提示。
+func UploadAssets2CloudByAssetsPathsWithApp(assetPaths []string, ignorePushMsg bool, app string) (count int, err error) {
 	if !IsSubscriber() {
 		return
 	}
 
-	count, err = uploadAssets2Cloud(assetPaths, bizTypeUploadAssets, ignorePushMsg)
+	count, err = uploadAssets2CloudWithApp(assetPaths, bizTypeUploadAssets, ignorePushMsg, app)
 	return
 }
 
@@ -1487,6 +1497,10 @@ const (
 
 // uploadAssets2Cloud 将资源文件上传到云端图床。
 func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool) (count int, err error) {
+	return uploadAssets2CloudWithApp(assetPaths, bizType, ignorePushMsg, "")
+}
+
+func uploadAssets2CloudWithApp(assetPaths []string, bizType string, ignorePushMsg bool, app string) (count int, err error) {
 	var uploadAbsAssets []string
 	for _, assetPath := range assetPaths {
 		var absPath string
@@ -1512,10 +1526,11 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 
 	var msgId string
 	if !ignorePushMsg {
-		msgId = util.PushMsg(fmt.Sprintf(Conf.Language(27), len(uploadAbsAssets)), 3000)
+		msgId = util.PushMsgWithApp(app, fmt.Sprintf(Conf.Language(27), len(uploadAbsAssets)), 3000)
+		defer util.PushClearMsgWithApp(app, msgId)
 	}
 	if loadErr := LoadUploadToken(); nil != loadErr {
-		util.PushMsg(loadErr.Error(), 5000)
+		util.PushMsgWithApp(app, loadErr.Error(), 5000)
 		return
 	}
 
@@ -1551,7 +1566,7 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 			logging.LogWarnf("file [%s] larger than limit size [%s], ignore uploading it", absAsset, humanize.IBytes(limitSize))
 			if 3 > pushErrMsgCount {
 				msg := fmt.Sprintf(Conf.Language(247), filepath.Base(absAsset), humanize.IBytes(limitSize))
-				util.PushErrMsg(msg, 30000)
+				util.PushErrMsgWithApp(app, msg, 30000)
 			}
 			pushErrMsgCount++
 			continue
@@ -1560,7 +1575,7 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 		if !ignorePushMsg {
 			msg := fmt.Sprintf(Conf.Language(27), html.EscapeString(absAsset))
 			util.PushStatusBar(msg)
-			util.PushUpdateMsg(msgId, msg, 3000)
+			util.PushUpdateMsgWithApp(app, msgId, msg, 3000)
 		}
 
 		requestResult := gulu.Ret.NewResult()
@@ -1593,10 +1608,6 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 		completedUploadAssets = append(completedUploadAssets, relAsset)
 		logging.LogInfof("uploaded asset [%s]", relAsset)
 		count++
-	}
-
-	if !ignorePushMsg {
-		util.PushClearMsg(msgId)
 	}
 
 	if 0 < len(completedUploadAssets) {

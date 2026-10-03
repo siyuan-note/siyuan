@@ -1,3 +1,4 @@
+import {fetchWithAppId} from "../../util/fetchWithAppId";
 import {Constants} from "../../constants";
 import {looseJsonParse} from "../../util/functions";
 import {getHostCapabilities} from "../../util/hostCapabilities";
@@ -463,7 +464,7 @@ export const prepareRichClipboardHTML = (html: string) => {
 };
 
 const postRichClipboard = async (url: string, data: Record<string, unknown>) => {
-    const response = await fetch(url, {
+    const response = await fetchWithAppId(url, {
         method: "POST",
         body: JSON.stringify(data),
     });

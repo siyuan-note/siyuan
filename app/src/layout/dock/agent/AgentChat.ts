@@ -1,3 +1,4 @@
+import {fetchWithAppId} from "../../../util/fetchWithAppId";
 import {Model} from "../../Model";
 import type {App} from "../../../index";
 import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult, IToolEffects} from "./agentSSE";
@@ -3825,7 +3826,7 @@ export class AgentChat extends Model {
         const requestSessionID = this.sessionId;
         const userEntry = this.entries.find((e): e is { type: "user"; content: string } => e.type === "user");
         const userMsg = userEntry?.content?.slice(0, 500) || "";
-        fetch("/api/ai/agent/title", {
+        fetchWithAppId("/api/ai/agent/title", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
@@ -4152,7 +4153,7 @@ export class AgentChat extends Model {
             body.always = true;
         }
         try {
-            const resp = await fetch("/api/ai/agent/confirm", {
+            const resp = await fetchWithAppId("/api/ai/agent/confirm", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(body),
@@ -4219,7 +4220,7 @@ export class AgentChat extends Model {
                                               structuredContentSet: boolean, isError: boolean) {
         for (let attempt = 0; attempt < 3; attempt++) {
             try {
-                const resp = await fetch("/api/ai/agent/browserCapabilityResult", {
+                const resp = await fetchWithAppId("/api/ai/agent/browserCapabilityResult", {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({callID, result, structuredContent, structuredContentSet, isError}),
@@ -4358,7 +4359,7 @@ export class AgentChat extends Model {
     private async postQuestionAnswer(questionID: string, answers: string[],
                                      sessionID: string, questionEntryID: string): Promise<boolean> {
         try {
-            const resp = await fetch("/api/ai/agent/question", {
+            const resp = await fetchWithAppId("/api/ai/agent/question", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({questionID: questionID, answers: answers}),

@@ -1,3 +1,4 @@
+import {isSameOriginAPIRequest, SIYUAN_APP_ID_HEADER} from "../../util/fetchAppId";
 import {insertHTML} from "../util/insertHTML";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
@@ -479,6 +480,9 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
             }
             const xhr = new XMLHttpRequest();
             xhr.open("POST", protyle.options.upload.url);
+            if (isSameOriginAPIRequest(protyle.options.upload.url, document.baseURI, location.origin)) {
+                xhr.setRequestHeader(SIYUAN_APP_ID_HEADER, Constants.SIYUAN_APPID);
+            }
             if (protyle.options.upload.token) {
                 xhr.setRequestHeader("X-Upload-Token", protyle.options.upload.token);
             }

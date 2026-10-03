@@ -284,29 +284,41 @@ func PushTxErr(msg string, code int, data any) {
 }
 
 func PushUpdateMsg(msgId string, msg string, timeout int) {
-	BroadcastByType("main", "msg", 0, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
+	PushUpdateMsgWithApp("", msgId, msg, timeout)
+}
+
+// PushUpdateMsgWithApp 在指定实例更新提示；未指定实例时广播，实例离线时丢弃。
+func PushUpdateMsgWithApp(app, msgId, msg string, timeout int) {
+	pushNotificationWithApp(app, "msg", 0, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
 }
 
 func PushMsg(msg string, timeout int) (msgId string) {
-	msgId = gulu.Rand.String(7)
-	BroadcastByType("main", "msg", 0, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
-	return
+	return PushMsgWithApp("", msg, timeout)
 }
 
 func PushMsgWithApp(app, msg string, timeout int) (msgId string) {
 	msgId = gulu.Rand.String(7)
-	if "" == app {
-		BroadcastByType("main", "msg", 0, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
-		return
-	}
-	BroadcastByTypeAndApp("main", app, "msg", 0, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
+	PushUpdateMsgWithApp(app, msgId, msg, timeout)
 	return
 }
 
 func PushErrMsg(msg string, timeout int) (msgId string) {
+	return PushErrMsgWithApp("", msg, timeout)
+}
+
+// PushErrMsgWithApp 在指定实例显示错误；未指定实例时广播，实例离线时丢弃。
+func PushErrMsgWithApp(app, msg string, timeout int) (msgId string) {
 	msgId = gulu.Rand.String(7)
-	BroadcastByType("main", "msg", -1, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
+	pushNotificationWithApp(app, "msg", -1, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
 	return
+}
+
+func pushNotificationWithApp(app, cmd string, code int, msg string, data any) {
+	if "" == app {
+		BroadcastByType("main", cmd, code, msg, data)
+		return
+	}
+	BroadcastByTypeAndApp("main", app, cmd, code, msg, data)
 }
 
 func PushStatusBar(msg string) {
@@ -386,6 +398,14 @@ func PushProgress(code, current, total int, msg string) {
 // PushClearMsg 会清空指定消息。
 func PushClearMsg(msgId string) {
 	BroadcastByType("main", "cmsg", 0, "", map[string]any{"id": msgId})
+}
+
+// PushClearMsgWithApp 清除指定实例的单条提示；空消息 ID 不执行清除，避免影响其他任务。
+func PushClearMsgWithApp(app, msgId string) {
+	if "" == msgId {
+		return
+	}
+	pushNotificationWithApp(app, "cmsg", 0, "", map[string]any{"id": msgId})
 }
 
 // PushClearProgress 取消进度遮罩。

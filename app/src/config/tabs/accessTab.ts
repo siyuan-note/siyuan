@@ -1,3 +1,4 @@
+import {fetchWithAppId} from "../../util/fetchWithAppId";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import type {SettingTabBuilder} from "../setting/builder";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -541,7 +542,7 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
                         if (input.files && input.files[0]) {
                             const formData = new FormData();
                             formData.append("file", input.files[0]);
-                            fetch("/api/system/importTLSCABundle", {
+                            fetchWithAppId("/api/system/importTLSCABundle", {
                                 method: "POST",
                                 body: formData,
                             }).then(res => res.json()).then((response) => {

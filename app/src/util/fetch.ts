@@ -1,3 +1,4 @@
+import {fetchWithAppId} from "./fetchWithAppId";
 import {Constants} from "../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -46,7 +47,7 @@ export const fetchPost = ((
         init.signal = signal;
     }
     let isGetFile202 = false;
-    return trackSettingRequest(url, withFetchTimeout((requestSignal) => fetch(url, {...init, signal: requestSignal}).then((response) => {
+    return trackSettingRequest(url, withFetchTimeout((requestSignal) => fetchWithAppId(url, {...init, signal: requestSignal}).then((response) => {
         switch (response.status) {
             case 403:
             case 404:
@@ -142,7 +143,7 @@ export const fetchSyncPost = (async (url: string, data?: any, headers?: Record<s
             init.body = JSON.stringify(data);
         }
     }
-    return trackSettingRequest(url, fetch(url, init).then(async res => {
+    return trackSettingRequest(url, fetchWithAppId(url, init).then(async res => {
         const res2 = await res.json() as IWebSocketData;
         if (process) {
             processMessage(res2);
@@ -152,7 +153,7 @@ export const fetchSyncPost = (async (url: string, data?: any, headers?: Record<s
 }) as FetchSyncPost<IWebSocketData>;
 
 export const fetchGet = ((url: string, cb: (response: IWebSocketData | IObject | string) => void) => {
-    fetch(url, {cache: "no-store"}).then((response) => {
+    fetchWithAppId(url, {cache: "no-store"}).then((response) => {
         if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
             return response.json();
         } else {

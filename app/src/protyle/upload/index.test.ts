@@ -6,12 +6,14 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import * as insertPosition from "./insertPosition";
 import * as uploadResult from "./uploadResult";
+import * as fetchAppId from "../../util/fetchAppId";
 
 // 执行完整上传模块，替换网络、界面和插件等待，以控制文档切换发生的时刻。
 const createHarness = (failLocalUpload = false) => {
     const results: Array<{status: string}> = [];
     const completions: Array<Omit<IAssetUploadResult, "requestId" | "input"> | undefined> = [];
     const requests: Array<{id: string; respond(): void}> = [];
+    const headers = new Headers();
     let resolvePlugin: (prepared: unknown) => void;
     let onComplete = () => {};
     let confirm: (() => void) | undefined;
@@ -42,6 +44,7 @@ const createHarness = (failLocalUpload = false) => {
         upload = {};
         onreadystatechange: () => void;
         open() {}
+        setRequestHeader(name: string, value: string) { headers.set(name, value); }
         send(form: FormDataStub) {
             requests.push({id: form.values.get("id") as string, respond: () => {
                 this.readyState = 4;
@@ -51,10 +54,11 @@ const createHarness = (failLocalUpload = false) => {
     }
     const mocks: Record<string, unknown> = {
         "./insertPosition": insertPosition,
+        "../../util/fetchAppId": fetchAppId,
         "./uploadResult": uploadResult,
         "../runtimeCapabilities": {isProtyleUploadDisabled: () => false},
         "../../util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: true})},
-        "../../constants": {Constants: {SIZE_UPLOAD_TIP_SIZE: 1024}},
+        "../../constants": {Constants: {SIZE_UPLOAD_TIP_SIZE: 1024, SIYUAN_APPID: "upload-window"}},
         "../../util/escape": {escapeHtml: (value: string) => value},
         "../../dialog/message": {showMessage: () => "message", hideMessage: () => {}},
         "../../dialog/confirmDialog": {confirmDialog: (_title: string, _msg: string, yes: () => void) => {
@@ -85,7 +89,8 @@ const createHarness = (failLocalUpload = false) => {
     runInNewContext(compiled, {
         module, exports: module.exports, require: (name: string) => mocks[name] || {}, Promise,
         FormData: FormDataStub, XMLHttpRequest: XHRStub, DataTransferItem: class {},
-        document: {body: {contains: () => protyle.element.isConnected}},
+        location: {origin: "https://siyuan.test"},
+        document: {baseURI: "https://siyuan.test/stage/build/app/", body: {contains: () => protyle.element.isConnected}},
         window: {siyuan: {languages: {uploading: "uploading"}}}, console,
     });
     const api = module.exports as typeof import("./index");
@@ -101,7 +106,7 @@ const createHarness = (failLocalUpload = false) => {
                 true, options, () => { consumed++; }, (_succeeded, result) => completions.push(result));
         }
     };
-    return {protyle, requests, results, completions, start, resume: () => resolvePlugin(undefined),
+    return {protyle, requests, results, completions, start, headers, resume: () => resolvePlugin(undefined),
         delayConfirmation: () => { delayConfirmation = true; }, confirm: () => confirm(),
         consumed: () => consumed, onComplete: (callback: () => void) => { onComplete = callback; }};
 };
@@ -194,5 +199,19 @@ describe("upload document binding", () => {
                 assert.equal(harness.consumed(), switchAt === "never" ? 1 : 0);
             });
         }
+    }
+});
+
+
+it("limits upload app headers to same-origin API URLs", async () => {
+    for (const url of ["/api/asset/upload", "../../../api/asset/upload", "/upload", "https://external.test/api/upload"]) {
+        const harness = createHarness();
+        harness.protyle.options.upload.url = url;
+        harness.start("files");
+        harness.resume();
+        await settle();
+        assert.equal(harness.requests.length, 1);
+        assert.equal(harness.headers.get(fetchAppId.SIYUAN_APP_ID_HEADER),
+            url.includes("/api/asset/upload") ? "upload-window" : null);
     }
 });

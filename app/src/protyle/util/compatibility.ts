@@ -1,3 +1,4 @@
+import {fetchWithAppId} from "../../util/fetchWithAppId";
 import {focusByRange} from "./selection";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
@@ -119,7 +120,7 @@ export const saveExportFile = async (uri: string, msgId?: string): Promise<TSave
                 }
                 return {status: "canceled"};
             }
-            const copyResponse = await (await fetch("/api/export/copyExportFile", {
+            const copyResponse = await (await fetchWithAppId("/api/export/copyExportFile", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({

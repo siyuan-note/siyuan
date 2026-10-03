@@ -40,7 +40,7 @@ test("fit restores a small map to its initial scale and centered position", () =
     assert.deepEqual(transform(target), initial);
     assert.equal(target.scale, 1);
     assert.equal(target.offsetX, 290);
-    assert.equal(target.offsetY, 142);
+    assert.equal(target.offsetY, 130);
     target.fit();
     assert.deepEqual(transform(target), initial, "repeated fitting is stable");
 });
@@ -48,15 +48,15 @@ test("fit restores a small map to its initial scale and centered position", () =
 test("fit still shrinks large maps and adapts to the current viewport", () => {
     const target = setup(2020, 1010);
     target.fit();
-    assert.equal(target.scale, .362);
+    assert.equal(target.scale, .338);
     assert.equal((20 + 2020) / 2 * target.scale + target.offsetX, 400);
-    assert.equal((10 + 1010) / 2 * target.scale + target.offsetY, 197);
+    assert.equal((10 + 1010) / 2 * target.scale + target.offsetY, 185);
     target.viewport.clientWidth = 360;
     target.viewport.clientHeight = 300;
     target.fit();
     assert.equal(target.scale, .156);
     assert.equal((20 + 2020) / 2 * target.scale + target.offsetX, 180);
-    assert.equal((10 + 1010) / 2 * target.scale + target.offsetY, 137);
+    assert.equal((10 + 1010) / 2 * target.scale + target.offsetY, 125);
 });
 
 test("fit keeps the existing minimum zoom and ignores an unavailable canvas", () => {

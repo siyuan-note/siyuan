@@ -64,6 +64,7 @@ const rendererSource = () => {
         const getAVTemplateInteractiveElement = () => false;
         const getBlockSelectionModeElement = () => undefined;
         const revealTabsForTarget = () => {};
+        const logKeyboardDiagnostic = () => {};
         const getAtomicVerticalNavigationOwner = () => undefined;
         const getSemanticMarkerPrefixLengthForNode = () => 0;
         const normalizeInlineElementBoundaries = () => {};

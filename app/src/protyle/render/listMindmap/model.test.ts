@@ -3394,7 +3394,8 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     const findShortcut = (node: import("typescript").Node) => {
         if ((typescript.isVariableStatement(node) && node.declarationList.declarations.some(item =>
             ["isMatchList", "isMatchOList", "isMatchCheck", "isMatchQuote"].includes(item.name.getText(keydownSource)))) ||
-            (typescript.isIfStatement(node) && node.expression.getText(keydownSource).includes("isProtyleListItemFragment("))) {
+            (typescript.isIfStatement(node) && ["isProtyleListItemFragment(", "isMatchList", "isMatchOList", "isMatchCheck"]
+                .every(name => node.expression.getText(keydownSource).includes(name)))) {
             shortcutStatements.push(node);
         }
         typescript.forEachChild(node, findShortcut);

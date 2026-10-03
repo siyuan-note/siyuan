@@ -226,6 +226,7 @@ const runElectron = async () => {
             extract("blockAttr", ["renderAVAttribute", "renderAttributeViewBacklinks"]),
             extract("openMenuPanel", ["openMenuPanel"]), extract("cell", ["updateCellsValue"]),
             extract("primaryFocus", ["focusDatabasePrimary"]),
+            extract("rowReadonly", ["inheritDatabaseRowReadonly"]),
             extract("../../../editor/databaseRow", ["newDatabaseRowModel"]),
             extract("openDatabaseRow", ["closeMobileDatabaseRow", "openMobileDatabaseRow"])].map(source =>
             ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText);

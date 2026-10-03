@@ -96,10 +96,20 @@ describe("tab switcher keyboard entry", () => {
         assert.equal(f.document.activeElement, f.original);
     });
 
-    it("toggles an open menu without reopening it", () => {
+    it("keeps a shortcut-opened menu visible without reopening it", () => {
         const f = fixture();
         f.wnd.renderTabList(undefined, true);
+        const selected = f.items[1].element;
         f.wnd.renderTabList(undefined, true);
+        assert.equal(f.popupCount(), 1);
+        assert.equal(f.menu.element.classList.contains("fn__none"), false);
+        assert.equal(f.document.activeElement, selected);
+    });
+
+    it("closes an open menu when its mouse anchor is toggled", () => {
+        const f = fixture();
+        f.wnd.renderTabList(undefined, true);
+        f.wnd.renderTabList(f.anchor);
         assert.equal(f.popupCount(), 1);
         assert.equal(f.menu.element.classList.contains("fn__none"), true);
         assert.equal(f.document.activeElement, f.original);

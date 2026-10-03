@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "创建 ${count} 个概要",
+	"listMindmapSummaryConflict": "概要范围交叉，请调整选择",
 	"reAIOCR": "使用 AI 重新 OCR",
 	"pdfAnnotationDeleteRefConfirm": "此 PDF 标注被 ${x} 个块引用，删除后这些引用将失效。是否继续？",
 	"ocrModelDefault": "模型默认",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "指令内容不能超过 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md 已发生变化。请先复制你的修改，重新打开编辑器并合并后再保存",
 	"listMindmapSummary": "概要",
-	"listMindmapSummarySelect": "选择概要范围的末端同级节点，范围不能与已有概要重叠",
+	"listMindmapSummarySelect": "选择末端同级节点，或在画布空白处框选分组；点击空白处后可逐个点选节点",
 	"mcpOAuthServer": "MCP 服务端 OAuth",
 	"mcpOAuthTip": "需要锁屏密码或 OIDC 登录，以及公开的 HTTPS 地址；关闭或修改地址会撤销全部授权",
 	"mcpOAuthPublicURL": "公开 HTTPS 地址",

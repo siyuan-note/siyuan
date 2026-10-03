@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "Buat ${count} ringkasan",
+	"listMindmapSummaryConflict": "Rentang ringkasan saling bersilangan; sesuaikan pilihan",
 	"reAIOCR": "Ulangi OCR dengan AI",
 	"pdfAnnotationDeleteRefConfirm": "Anotasi PDF ini dirujuk oleh ${x} blok. Menghapusnya akan membuat rujukan tersebut tidak valid. Lanjutkan?",
 	"ocrModelDefault": "Bawaan model",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Instruksi tidak boleh melebihi 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md telah berubah. Salin perubahan Anda, buka kembali editor, lalu gabungkan sebelum menyimpan",
 	"listMindmapSummary": "Ringkasan",
-	"listMindmapSummarySelect": "Pilih simpul terakhir dengan induk yang sama dalam rentang ringkasan; ringkasan tidak boleh tumpang tindih",
+	"listMindmapSummarySelect": "Pilih simpul saudara terakhir atau seret pada kanvas kosong untuk memilih grup; ketuk kanvas kosong untuk memilih simpul satu per satu",
 	"mcpOAuthServer": "OAuth server MCP",
 	"mcpOAuthTip": "Memerlukan kata sandi layar kunci atau login OIDC dan origin HTTPS publik; menonaktifkan atau mengubah origin mencabut semua otorisasi",
 	"mcpOAuthPublicURL": "Origin HTTPS publik",

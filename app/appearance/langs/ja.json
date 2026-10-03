@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "${count} 個の要約を作成",
+	"listMindmapSummaryConflict": "要約範囲が交差しています。選択を調整してください",
 	"reAIOCR": "AI で OCR を再実行",
 	"pdfAnnotationDeleteRefConfirm": "この PDF 注釈は ${x} 個のブロックから参照されています。削除すると、これらの参照が無効になります。続行しますか？",
 	"ocrModelDefault": "モデルの既定値",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "指示は 32 KiB 以下にしてください",
 	"agentInstructionsConflict": "AGENTS.md が変更されました。編集内容をコピーし、エディターを開き直して変更を統合してから保存してください",
 	"listMindmapSummary": "要約",
-	"listMindmapSummarySelect": "要約範囲の末端にある同じ親のノードを選択してください。要約範囲は重複できません",
+	"listMindmapSummarySelect": "末端の兄弟ノードを選ぶか、キャンバスの空白部分をドラッグしてグループを選択します。空白部分をタップするとノードを個別に選択できます",
 	"mcpOAuthServer": "MCP サーバー OAuth",
 	"mcpOAuthTip": "画面ロックのパスワードまたは OIDC ログインと公開 HTTPS オリジンが必要です。無効化またはオリジンの変更で全認可が取り消されます",
 	"mcpOAuthPublicURL": "公開 HTTPS オリジン",

@@ -95,11 +95,27 @@ func TestMigrateLegacyMindmapsEncrypted(t *testing.T) {
 	}
 	oldDocID := ast.NewNodeID()
 	oldTree := treenode.NewTree(boxID, "/"+oldDocID+".sy", "/Old list", "Old list")
-	_, oldSource := engine.Md2BlockDOMTree("- Secret root\n  - Secret child\n", false)
+	_, oldSource := engine.Md2BlockDOMTree("- Secret root\n  - Secret child\n  - Second child\n", false)
 	oldList := firstContentBlock(oldSource.Root)
 	oldList.Unlink()
 	oldList.SetIALAttr(listMindmapViewAttr, "1")
-	oldList.SetIALAttr(listMindmapMetadataAttr, `{"version":1,"nodes":{},"relations":[]}`)
+	legacySummary, err := os.ReadFile("testdata/list_mindmap_summary_v1.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var legacyItems []string
+	ast.Walk(oldList, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.Type == ast.NodeListItem {
+			legacyItems = append(legacyItems, node.ID)
+		}
+		return ast.WalkContinue
+	})
+	if len(legacyItems) != 3 {
+		t.Fatalf("unexpected legacy fixture tree: %v", legacyItems)
+	}
+	legacyMetadata := strings.NewReplacer(`"root"`, `"`+legacyItems[0]+`"`,
+		`"a"`, `"`+legacyItems[1]+`"`, `"b"`, `"`+legacyItems[2]+`"`).Replace(strings.TrimSpace(string(legacySummary)))
+	oldList.SetIALAttr(listMindmapMetadataAttr, legacyMetadata)
 	oldTree.Root.AppendChild(oldList)
 	if _, err = filesys.WriteTree(oldTree); err != nil {
 		t.Fatal(err)
@@ -140,7 +156,8 @@ func TestMigrateLegacyMindmapsEncrypted(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, _, oldContent, _, err := GetDocHistoryContent(oldRelative, "", false)
-	if err != nil || !strings.Contains(oldContent, `data-type="NodeList"`) || !strings.Contains(oldContent, "Secret root") {
+	if err != nil || !strings.Contains(oldContent, `data-type="NodeList"`) || !strings.Contains(oldContent, "Secret root") ||
+		!strings.Contains(oldContent, "Legacy summary") {
 		t.Fatalf("encrypted old list history cannot recover the source: %v", err)
 	}
 	corrupt, _ := os.ReadFile(path)

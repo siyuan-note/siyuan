@@ -45,14 +45,15 @@ test("selected mind map nodes accept clipboard images after finishing the previo
 });
 
 test("mind map image paste respects edit state, selection and read-only boundaries", () => {
-    for (const mode of ["readonly", "editing", "relation", "summary", "virtual", "missing", "unselected",
+    for (const mode of ["readonly", "editing", "relation", "summary", "batch", "virtual", "missing", "unselected",
         "input", "editable", "handled", "text", "export"]) {
         const current = create();
         switch (mode) {
             case "readonly": current.target.readOnly = true; break;
             case "editing": current.target.editingId = "node"; break;
             case "relation": current.target.relationFrom = "node"; break;
-            case "summary": current.target.summaryFrom = "node"; break;
+            case "summary": current.target.summaryFrom = "node"; current.target.summarySelecting = true; break;
+            case "batch": current.target.summarySelecting = true; break;
             case "virtual": current.target.model.nodes.get("node").virtual = true; break;
             case "missing": current.target.model.nodes.clear(); break;
             case "unselected": current.target.selectedId = undefined; break;

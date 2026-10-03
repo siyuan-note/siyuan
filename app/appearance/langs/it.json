@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "Crea ${count} riepiloghi",
+	"listMindmapSummaryConflict": "Gli intervalli dei riepiloghi si incrociano; modifica la selezione",
 	"reAIOCR": "Ripeti OCR con IA",
 	"pdfAnnotationDeleteRefConfirm": "Questa annotazione PDF è referenziata da ${x} blocchi. Eliminandola, questi riferimenti diventeranno non validi. Continuare?",
 	"ocrModelDefault": "Predefinito del modello",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Le istruzioni non devono superare 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md è cambiato. Copia le tue modifiche, riapri l’editor e uniscile prima di salvare",
 	"listMindmapSummary": "Riepilogo",
-	"listMindmapSummarySelect": "Seleziona l'ultimo nodo con lo stesso genitore nell'intervallo; i riepiloghi non possono sovrapporsi",
+	"listMindmapSummarySelect": "Seleziona l'ultimo nodo fratello o trascina sullo spazio vuoto per selezionare gruppi; tocca lo spazio vuoto per selezionare i nodi singolarmente",
 	"mcpOAuthServer": "OAuth del server MCP",
 	"mcpOAuthTip": "Richiede una password di blocco o un accesso OIDC e un’origine HTTPS pubblica; disattivare o modificare l’origine revoca tutte le autorizzazioni",
 	"mcpOAuthPublicURL": "Origine HTTPS pubblica",

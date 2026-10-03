@@ -209,6 +209,36 @@
     pointer-events: none;
   }
 
+  &__viewport--summary {
+    cursor: crosshair;
+  }
+
+  &__selection-box {
+    position: absolute;
+    pointer-events: none;
+    border: 1px solid var(--b3-theme-primary);
+    background: var(--b3-theme-primary-lightest);
+    box-sizing: border-box;
+    z-index: 5;
+  }
+
+  &__summary-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    > span {
+      flex: 1 1 120px;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    > button {
+      flex-shrink: 0;
+    }
+  }
+
   &__viewport--pan {
     cursor: grab;
 
@@ -856,6 +886,7 @@
     &__tooltip,
     &__route-handle,
     &__route-status,
+    &__selection-box,
     &__add-bridge,
     &__fold,
     &__add-child {

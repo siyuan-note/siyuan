@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "Créer ${count} résumés",
+	"listMindmapSummaryConflict": "Les plages de résumé se croisent ; ajustez la sélection",
 	"reAIOCR": "Relancer l’OCR avec l’IA",
 	"pdfAnnotationDeleteRefConfirm": "Cette annotation PDF est référencée par ${x} blocs. Sa suppression rendra ces références invalides. Continuer ?",
 	"ocrModelDefault": "Valeur par défaut du modèle",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Les instructions ne doivent pas dépasser 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md a changé. Copiez vos modifications, rouvrez l’éditeur et fusionnez-les avant d’enregistrer",
 	"listMindmapSummary": "Résumé",
-	"listMindmapSummarySelect": "Sélectionnez le dernier nœud de même parent dans la plage ; les résumés ne peuvent pas se chevaucher",
+	"listMindmapSummarySelect": "Sélectionnez le dernier nœud frère ou tracez une sélection dans une zone vide ; touchez une zone vide pour sélectionner les nœuds individuellement",
 	"mcpOAuthServer": "OAuth du serveur MCP",
 	"mcpOAuthTip": "Nécessite un mot de passe de verrouillage ou une connexion OIDC et une origine HTTPS publique ; désactiver ou modifier cette origine révoque toutes les autorisations",
 	"mcpOAuthPublicURL": "Origine HTTPS publique",

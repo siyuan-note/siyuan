@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "${count} Zusammenfassungen erstellen",
+	"listMindmapSummaryConflict": "Zusammenfassungsbereiche überschneiden sich; Auswahl anpassen",
 	"reAIOCR": "OCR mit KI erneut ausführen",
 	"pdfAnnotationDeleteRefConfirm": "Diese PDF-Anmerkung wird von ${x} Blöcken referenziert. Durch das Löschen werden diese Referenzen ungültig. Fortfahren?",
 	"ocrModelDefault": "Modellstandard",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Anweisungen dürfen höchstens 32 KiB groß sein",
 	"agentInstructionsConflict": "AGENTS.md wurde geändert. Kopieren Sie Ihre Änderungen, öffnen Sie den Editor erneut und führen Sie die Änderungen vor dem Speichern zusammen",
 	"listMindmapSummary": "Zusammenfassung",
-	"listMindmapSummarySelect": "Wähle den letzten gleichgeordneten Knoten des Bereichs; Zusammenfassungen dürfen sich nicht überschneiden",
+	"listMindmapSummarySelect": "Letzten Geschwisterknoten auswählen oder auf der leeren Zeichenfläche Gruppen aufziehen; zum einzelnen Auswählen von Knoten auf die leere Fläche tippen",
 	"mcpOAuthServer": "OAuth für MCP-Server",
 	"mcpOAuthTip": "Erfordert ein Sperrbildschirmpasswort oder eine OIDC-Anmeldung und einen öffentlichen HTTPS-Ursprung; Deaktivieren oder Ändern des Ursprungs widerruft alle Autorisierungen",
 	"mcpOAuthPublicURL": "Öffentlicher HTTPS-Ursprung",

@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "${count} özet oluştur",
+	"listMindmapSummaryConflict": "Özet aralıkları kesişiyor; seçimi düzenleyin",
 	"reAIOCR": "OCR’yi yapay zekâ ile yeniden çalıştır",
 	"pdfAnnotationDeleteRefConfirm": "Bu PDF açıklamasına ${x} bloktan başvuruluyor. Silindiğinde bu başvurular geçersiz olacaktır. Devam edilsin mi?",
 	"ocrModelDefault": "Model varsayılanı",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Talimatlar 32 KiB boyutunu aşmamalıdır",
 	"agentInstructionsConflict": "AGENTS.md değişti. Düzenlemelerinizi kopyalayın, düzenleyiciyi yeniden açın ve kaydetmeden önce değişiklikleri birleştirin",
 	"listMindmapSummary": "Özet",
-	"listMindmapSummarySelect": "Özet aralığında aynı üst düğüme bağlı son düğümü seçin; özetler çakışamaz",
+	"listMindmapSummarySelect": "Aynı üst öğeye bağlı son düğümü seçin veya boş tuvalde sürükleyerek grupları seçin; düğümleri tek tek seçmek için boş tuvale dokunun",
 	"mcpOAuthServer": "MCP sunucusu OAuth",
 	"mcpOAuthTip": "Ekran kilidi parolası veya OIDC oturumu ve herkese açık bir HTTPS kaynağı gerektirir; kapatmak veya kaynağı değiştirmek tüm yetkileri iptal eder",
 	"mcpOAuthPublicURL": "Herkese açık HTTPS kaynağı",

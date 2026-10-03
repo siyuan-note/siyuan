@@ -2745,7 +2745,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the mind map toolbar, then select the last sibling node to add a bracket and summary text. The range must be contiguous and cannot overlap or contain another summary. These steps also work on mobile. You can also use the up and down arrow keys to select the last node, Enter to confirm the range, and Esc to cancel."
+					"Data": " in the mind map toolbar, then select the last sibling node to add a bracket and summary text. The range must be contiguous. Single-node summaries and nested ranges are supported; ranges may contain each other but must not cross. The bracket encloses the visible subtree and any inner summaries. To create several summaries, activate Summary and drag a selection on blank canvas. You can also tap blank canvas, then tap nodes individually. The preview groups consecutive selected siblings by parent; selected ancestors take precedence over their descendants. Existing identical summaries are skipped, and crossing ranges prevent creation. Use the confirm button or Enter to create all previewed groups in one undoable operation; Esc cancels. Document updates cancel a pending selection. These steps also work on mobile. You can also use the up and down arrow keys to select the last node, Enter to confirm the range, and Esc to cancel."
 				}
 			]
 		},
@@ -2773,7 +2773,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Converting to a list hides the summary but preserves its data; converting back restores it. Nodes inserted inside the range are included automatically. Removing or moving members out shrinks the range; one remaining member keeps the summary, while removing all members removes it. Summary text is an annotation, not an independently searchable or referenceable block. SiYuan-format HTML and PDF previews display summaries."
+					"Data": "Converting to a list hides the summary but preserves its data; converting back restores it. Nodes inserted inside the range are included automatically. Removing or moving members out shrinks the range; one remaining member keeps the summary, while removing all members removes it. Summary text is an annotation, not an independently searchable or referenceable block. SiYuan-format HTML and PDF previews display summaries. Deleting an inner summary preserves the nodes and the outer summary. Nested configurations require a newer client; older clients preserve the configuration and display the source list instead of the mind map."
 				}
 			]
 		},

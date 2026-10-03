@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "Utwórz ${count} podsumowań",
+	"listMindmapSummaryConflict": "Zakresy podsumowań krzyżują się; zmień zaznaczenie",
 	"reAIOCR": "Ponów OCR przy użyciu AI",
 	"pdfAnnotationDeleteRefConfirm": "Ta adnotacja PDF jest przywoływana przez ${x} bloków. Jej usunięcie unieważni te odwołania. Kontynuować?",
 	"ocrModelDefault": "Domyślna wartość modelu",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Instrukcje nie mogą przekraczać 32 KiB",
 	"agentInstructionsConflict": "Plik AGENTS.md został zmieniony. Skopiuj swoje zmiany, otwórz edytor ponownie i scal je przed zapisaniem",
 	"listMindmapSummary": "Podsumowanie",
-	"listMindmapSummarySelect": "Wybierz ostatni węzeł o tym samym rodzicu w zakresie; podsumowania nie mogą się nakładać",
+	"listMindmapSummarySelect": "Wybierz ostatni węzeł z tym samym rodzicem lub przeciągnij po pustym obszarze, aby zaznaczyć grupy; dotknij pustego obszaru, aby wybierać węzły pojedynczo",
 	"mcpOAuthServer": "OAuth serwera MCP",
 	"mcpOAuthTip": "Wymaga hasła blokady lub logowania OIDC oraz publicznego adresu HTTPS; wyłączenie lub zmiana adresu cofa wszystkie autoryzacje",
 	"mcpOAuthPublicURL": "Publiczny adres HTTPS",

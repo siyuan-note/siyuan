@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "إنشاء ${count} من الملخصات",
+	"listMindmapSummaryConflict": "نطاقات الملخصات متقاطعة؛ يرجى تعديل التحديد",
 	"reAIOCR": "إعادة OCR باستخدام AI",
 	"pdfAnnotationDeleteRefConfirm": "يشير ${x} من الكتل إلى تعليق PDF هذا. سيؤدي حذفه إلى إبطال هذه المراجع. هل تريد المتابعة؟",
 	"ocrModelDefault": "القيمة الافتراضية للنموذج",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "يجب ألا يتجاوز حجم التعليمات 32 KiB",
 	"agentInstructionsConflict": "تم تغيير AGENTS.md. انسخ تعديلاتك، وأعد فتح المحرر، ثم ادمج التغييرات قبل الحفظ",
 	"listMindmapSummary": "ملخص",
-	"listMindmapSummarySelect": "حدد آخر عقدة شقيقة في نطاق الملخص؛ لا يمكن أن تتداخل الملخصات",
+	"listMindmapSummarySelect": "حدد آخر عقدة لها الأب نفسه، أو اسحب في مساحة فارغة لتحديد مجموعات؛ اضغط على مساحة فارغة لتحديد العقد منفردة",
 	"mcpOAuthServer": "OAuth لخادم MCP",
 	"mcpOAuthTip": "يتطلب كلمة مرور قفل الشاشة أو تسجيل دخول OIDC وأصل HTTPS عامًا؛ يؤدي التعطيل أو تغيير الأصل إلى إلغاء جميع التفويضات",
 	"mcpOAuthPublicURL": "أصل HTTPS العام",

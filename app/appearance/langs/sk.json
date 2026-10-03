@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "Vytvoriť ${count} súhrnov",
+	"listMindmapSummaryConflict": "Rozsahy súhrnov sa krížia; upravte výber",
 	"reAIOCR": "Zopakovať OCR pomocou AI",
 	"pdfAnnotationDeleteRefConfirm": "Na túto anotáciu PDF odkazuje ${x} blokov. Jej odstránením sa tieto odkazy stanú neplatnými. Pokračovať?",
 	"ocrModelDefault": "Predvolená hodnota modelu",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Pokyny nesmú presiahnuť 32 KiB",
 	"agentInstructionsConflict": "Súbor AGENTS.md sa zmenil. Skopírujte svoje zmeny, znova otvorte editor a pred uložením ich zlúčte",
 	"listMindmapSummary": "Súhrn",
-	"listMindmapSummarySelect": "Vyberte posledný uzol s rovnakým rodičom v rozsahu; súhrny sa nesmú prekrývať",
+	"listMindmapSummarySelect": "Vyberte posledný uzol s rovnakým rodičom alebo potiahnite na prázdnom plátne a vyberte skupiny; ťuknite na prázdne plátno a vyberajte uzly jednotlivo",
 	"mcpOAuthServer": "OAuth servera MCP",
 	"mcpOAuthTip": "Vyžaduje heslo uzamknutia alebo prihlásenie OIDC a verejný pôvod HTTPS; vypnutie alebo zmena pôvodu odvolá všetky autorizácie",
 	"mcpOAuthPublicURL": "Verejný pôvod HTTPS",

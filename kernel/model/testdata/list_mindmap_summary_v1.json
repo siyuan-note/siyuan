@@ -1,0 +1,1 @@
+{"version":1,"rootTitle":"Legacy summary fixture","nodes":{"a":{"textColor":"red","extension":"keep"}},"relations":[{"id":"relation","from":"a","to":"b","label":"Legacy relation"}],"summaries":[{"id":"summary","parentId":"root","nodeIds":["a","b"],"label":"Legacy summary","color":"blue","extension":"keep"}],"extension":"keep"}

@@ -1,7 +1,7 @@
 import {Constants} from "../../../constants";
 import {getOrderedListMarkerUpdates} from "../../wysiwyg/listContext";
 import type {MindmapManualRoute, MindmapRelationAnchor} from "./routing";
-import {getListMindmapSiblingIDs, normalizeListMindmapSummaries} from "./summary";
+import {getListMindmapSiblingIDs, isListMindmapSummaryCrossing, normalizeListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary} from "./summary";
 
 export interface ListMindmapNodeStyle {
@@ -33,7 +33,7 @@ export interface ListMindmapRelation {
 }
 
 export interface ListMindmapMetadata {
-    version: 1;
+    version: 1 | 2;
     rootTitle?: string;
     viewLocked?: boolean;
     nodes: Record<string, ListMindmapNodeStyle>;
@@ -94,7 +94,8 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
     } catch {
         throw invalidMetadata();
     }
-    if (!isRecord(data) || data.version !== 1 || !isRecord(data.nodes) || !Array.isArray(data.relations)) {
+    if (!isRecord(data) || (data.version !== 1 && data.version !== 2) ||
+        !isRecord(data.nodes) || !Array.isArray(data.relations)) {
         throw invalidMetadata();
     }
     const stringKeys = ["textColor", "backgroundColor", "borderColor", "lineColor"];
@@ -164,12 +165,20 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
                 throw invalidMetadata();
             }
             summaryIds.add(summary.id);
+            const localMembers = new Set<string>();
             for (const id of summary.nodeIds) {
-                if (typeof id !== "string" || !id || id === summary.parentId || members.has(id)) {
+                if (typeof id !== "string" || !id || id === summary.parentId || localMembers.has(id) ||
+                    data.version === 1 && members.has(id)) {
                     throw invalidMetadata();
                 }
                 members.add(id);
+                localMembers.add(id);
             }
+        }
+        const summaries = data.summaries;
+        if (data.version === 2 && summaries.some((a, index) => summaries.slice(index + 1).some(b =>
+            a.parentId === b.parentId && isListMindmapSummaryCrossing(a.nodeIds, b.nodeIds)))) {
+            throw invalidMetadata();
         }
     }
     return data as unknown as ListMindmapMetadata;
@@ -486,9 +495,11 @@ export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
         }
     }
     const heights = new Map<string, number>();
+    const summaries = [...(options.summaries || [])].sort((a, b) =>
+        a.nodeIds.length - b.nodeIds.length || a.height - b.height);
     [...ordered].reverse().forEach(({node}) => {
         const children = node.collapsed ? [] : node.children;
-        (options.summaries || []).forEach(summary => {
+        summaries.forEach(summary => {
             const start = children.findIndex(child => child.id === summary.nodeIds[0]);
             if (start < 0 || !summary.nodeIds.every((id, index) => children[start + index]?.id === id)) {
                 return;
@@ -506,6 +517,8 @@ export const layoutListMindmap = (root: ListMindmapLayoutNode, options: {
             (index ? gapBefore(child.id) : 0), 0);
         heights.set(node.id, Math.max(node.height, childHeight));
     });
+    (options.summaries || []).filter(summary => summary.nodeIds.length === 1 && summary.nodeIds[0] === root.id)
+        .forEach(summary => heights.set(root.id, Math.max(heights.get(root.id), summary.height + 16)));
     const tops = new Map([[root.id, padding]]);
     const nodes = new Map<string, ListMindmapPosition>();
     const edges: {from: string, to: string}[] = [];
@@ -672,7 +685,8 @@ export const normalizeListMindmapSummaryMetadata = (list: HTMLElement, previous:
     if (!model.metadata.summaries) {
         return;
     }
-    const summaries = normalizeListMindmapSummaries(model.metadata.summaries, getListMindmapSiblingIDs(model), previous, moved);
+    const summaries = normalizeListMindmapSummaries(model.metadata.summaries, getListMindmapSiblingIDs(model),
+        previous, moved, model.metadata.version);
     if (JSON.stringify(summaries) !== JSON.stringify(model.metadata.summaries)) {
         model.metadata.summaries = summaries;
         writeListMindmapMetadata(list, model.metadata);

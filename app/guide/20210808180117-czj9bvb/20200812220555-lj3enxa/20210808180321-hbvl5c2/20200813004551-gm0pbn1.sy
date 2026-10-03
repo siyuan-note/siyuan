@@ -13540,7 +13540,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "选择概要范围时，使用上下方向键选择末端同级节点，Enter 确认，Esc 取消。编辑概要文字时，Enter 保存，Esc 取消。选中概要后，Delete 或 Backspace 删除概要。"
+					"Data": "批量概要预览中，Enter 一次创建所有分组概要，Esc 取消，创建后可一次撤销。选择概要范围时，使用上下方向键选择末端同级节点，Enter 确认，Esc 取消。编辑概要文字时，Enter 保存，Esc 取消。选中概要后，Delete 或 Backspace 删除概要。"
 				}
 			]
 		},

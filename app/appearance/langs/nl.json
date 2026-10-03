@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "${count} samenvattingen maken",
+	"listMindmapSummaryConflict": "Samenvattingsbereiken kruisen elkaar; pas de selectie aan",
 	"reAIOCR": "OCR opnieuw uitvoeren met AI",
 	"pdfAnnotationDeleteRefConfirm": "${x} blokken verwijzen naar deze PDF-annotatie. Als u deze verwijdert, worden deze verwijzingen ongeldig. Doorgaan?",
 	"ocrModelDefault": "Modelstandaard",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Instructies mogen maximaal 32 KiB groot zijn",
 	"agentInstructionsConflict": "AGENTS.md is gewijzigd. Kopieer je wijzigingen, open de editor opnieuw en voeg ze samen voordat je opslaat",
 	"listMindmapSummary": "Samenvatting",
-	"listMindmapSummarySelect": "Selecteer de laatste knoop met dezelfde ouder in het bereik; samenvattingen mogen niet overlappen",
+	"listMindmapSummarySelect": "Selecteer de laatste knoop met dezelfde ouder of sleep op het lege canvas om groepen te selecteren; tik op het lege canvas om knopen afzonderlijk te selecteren",
 	"mcpOAuthServer": "OAuth voor MCP-server",
 	"mcpOAuthTip": "Vereist een vergrendelwachtwoord of OIDC-aanmelding en een openbare HTTPS-oorsprong; uitschakelen of wijzigen van de oorsprong trekt alle machtigingen in",
 	"mcpOAuthPublicURL": "Openbare HTTPS-oorsprong",

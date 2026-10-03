@@ -18,8 +18,9 @@ import {destroyTabsRender, tabsRender} from "../tabsRender";
 import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
 import type {ListMindmapFoldTarget} from "./fold";
 import {clampMindmapPanOffset} from "./pan";
-import {getListMindmapSummaryRange, layoutListMindmapSummaries} from "./summary";
-import type {ListMindmapSummary, ListMindmapSummaryPosition} from "./summary";
+import {getListMindmapSummaryParentID, getListMindmapSummaryRange, getListMindmapSummarySelection, getListMindmapSummarySnapshot,
+    layoutListMindmapSummaries} from "./summary";
+import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -65,6 +66,7 @@ export interface ListMindmapViewOptions {
     onRelationChange?: (id: string, patch: Partial<ListMindmapRelation>, expected?: string) => void;
     onRelationDelete?: (id: string) => void;
     onSummaryAdd?: (from: string, to: string) => Promise<string | undefined>;
+    onSummaryBatchAdd?: (ranges: ListMindmapSummaryRange[], expected: string) => Promise<string[] | undefined>;
     onSummaryChange?: (id: string, patch: Pick<Partial<ListMindmapSummary>, "label" | "color">, expected?: string) => void;
     onSummaryDelete?: (id: string) => void;
     onExit: () => void;
@@ -79,6 +81,7 @@ interface PointerState {
     x: number;
     y: number;
     moved: boolean;
+    summary?: boolean;
     targetId?: string;
     placement?: "before" | "child" | "after";
     relation?: {
@@ -123,6 +126,14 @@ export class ListMindmapView {
     private readonly summaryStatus = createElement("div", "mindmap-view__route-status");
     private selectedSummary?: string;
     private summaryFrom?: string;
+    private summarySelecting = false;
+    private summarySnapshot?: string;
+    private summarySelected = new Set<string>();
+    private summaryRanges: ListMindmapSummaryRange[] = [];
+    private readonly summaryControls = createElement("div", "mindmap-view__inspector mindmap-view__summary-controls");
+    private readonly summaryCount = createElement("span", "");
+    private readonly summaryConfirm = createElement("button", "b3-button b3-button--text");
+    private readonly summaryBox = createElement("div", "mindmap-view__selection-box");
     private finishSummaryEdit?: (save: boolean) => void;
     private editingSummary?: string;
     private readonly buttons = new Map<string, HTMLButtonElement>();
@@ -206,6 +217,22 @@ export class ListMindmapView {
         this.summaryStatus.setAttribute("role", "status");
         this.summaryStatus.textContent = this.label("listMindmapSummarySelect");
         options.host.append(this.summaryStatus);
+        this.summaryControls.hidden = true;
+        this.summaryCount.setAttribute("role", "status");
+        this.summaryConfirm.type = "button";
+        this.summaryConfirm.textContent = this.label("confirm");
+        this.summaryConfirm.addEventListener("click", () => void this.confirmSummarySelection());
+        const cancelSummary = createElement("button", "b3-button b3-button--cancel");
+        cancelSummary.type = "button";
+        cancelSummary.textContent = this.label("cancel");
+        cancelSummary.addEventListener("click", () => {
+            this.cancelSummarySelection();
+            this.updateSelection();
+        });
+        this.summaryControls.append(this.summaryCount, this.summaryConfirm, cancelSummary);
+        options.host.append(this.summaryControls);
+        this.summaryBox.hidden = true;
+        this.viewport.append(this.summaryBox);
         this.createToolbar();
         this.listen(document, "pointerdown", this.dismissControls, {capture: true});
         this.listen(options.host, "pointerover", this.showButtonTooltip);
@@ -346,7 +373,7 @@ export class ListMindmapView {
     private clearSelection() {
         this.inspector.hidden = true;
         if (!this.selectedId && !this.selectedRelation && !this.selectedEdge && !this.relationFrom &&
-            !this.selectedSummary && !this.summaryFrom) {
+            !this.selectedSummary && !this.summarySelecting) {
             return;
         }
         this.selectedId = undefined;
@@ -354,13 +381,16 @@ export class ListMindmapView {
         this.selectedEdge = undefined;
         this.relationFrom = undefined;
         this.selectedSummary = undefined;
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.updateSelection();
     }
 
     private dismissControls = (event: PointerEvent) => {
         const target = event.target as Node;
         this.tooltip.hidden = true;
+        if (this.summarySelecting && (this.viewport.contains(target) || this.summaryControls.contains(target))) {
+            return;
+        }
         if (target instanceof Element && target.closest(".mindmap-view__relation-editor, .mindmap-view__route-handle, .mindmap-view__summary-editor")) {
             return;
         }
@@ -420,7 +450,7 @@ export class ListMindmapView {
     private refreshControls() {
         const value = !!this.readOnly;
         this.finishSummaryEdit?.(false);
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.cancelPointer();
         this.relationFrom = undefined;
         this.inspector.hidden = true;
@@ -471,14 +501,24 @@ export class ListMindmapView {
         }
         if (!this.readOnly) {
             add("summary", "listMindmapSummary", "iconGroups", () => {
-                this.setPanning(false);
-                this.inspector.hidden = true;
-                this.relationFrom = undefined;
-                this.summaryFrom = this.summaryFrom ? undefined : this.selectedId;
-                this.updateSelection();
+                this.finishThen(() => {
+                    const selecting = !this.summarySelecting;
+                    this.cancelPointer();
+                    this.cancelSummarySelection();
+                    this.setPanning(false);
+                    this.inspector.hidden = true;
+                    this.relationFrom = undefined;
+                    this.summarySelecting = selecting;
+                    if (selecting) {
+                        this.summarySnapshot = getListMindmapSummarySnapshot(this.model);
+                        this.summaryFrom = getListMindmapSummaryRange(this.model, this.selectedId, this.selectedId).length ?
+                            this.selectedId : undefined;
+                    }
+                    this.updateSelection();
+                });
             });
             add("relation", "connect", "iconRoute", () => {
-                this.summaryFrom = undefined;
+                this.cancelSummarySelection();
                 this.setPanning(false);
                 this.inspector.hidden = true;
                 this.relationFrom = this.relationFrom ? undefined : this.selectedId;
@@ -543,7 +583,7 @@ export class ListMindmapView {
 
     private setPanning(value: boolean) {
         if (value) {
-            this.summaryFrom = undefined;
+            this.cancelSummarySelection();
         }
         this.panning = value;
         this.viewport.classList.toggle("mindmap-view__viewport--pan", value);
@@ -553,7 +593,7 @@ export class ListMindmapView {
     }
 
     public update(model: ListMindmapModel) {
-        if (this.pointer?.relation) {
+        if (this.pointer?.relation || this.pointer?.summary) {
             this.cancelPointer();
         }
         if (this.destroyed) {
@@ -564,7 +604,7 @@ export class ListMindmapView {
             this.persistedLocked = !!model.metadata.viewLocked;
             this.setLocked(this.persistedLocked);
         }
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         if (this.levelSelect) {
             const placeholder = new Option(this.label("expandLevel"), "");
             placeholder.disabled = true;
@@ -1064,7 +1104,7 @@ export class ListMindmapView {
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
         this.relationFrom = undefined;
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.inspector.hidden = !!this.readOnly;
         this.updateSelection();
         this.renderInspector();
@@ -1075,7 +1115,7 @@ export class ListMindmapView {
         if (!from || !getListMindmapSummaryRange(this.model, from, id).length) {
             return;
         }
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.updateSelection();
         void this.options.onSummaryAdd?.(from, id).then(summaryId => {
             if (summaryId && !this.destroyed) {
@@ -1087,6 +1127,55 @@ export class ListMindmapView {
                 });
             }
         }).catch(error => console.error(error));
+    }
+
+    private cancelSummarySelection() {
+        this.summarySelecting = false;
+        this.summaryFrom = undefined;
+        this.summarySnapshot = undefined;
+        this.summarySelected.clear();
+        this.summaryRanges = [];
+        this.summaryControls.hidden = true;
+        this.summaryBox.hidden = true;
+    }
+
+    private previewSummarySelection() {
+        const {ranges, conflict} = getListMindmapSummarySelection(this.model, this.summarySelected);
+        this.summaryRanges = ranges;
+        this.summaryConfirm.disabled = conflict || !ranges.length || !this.options.onSummaryBatchAdd;
+        this.summaryCount.textContent = conflict ? this.label("listMindmapSummaryConflict") :
+            this.label("listMindmapSummaryBatch").replace("${count}", String(ranges.length));
+        this.summaryControls.hidden = false;
+        this.updateSelection();
+    }
+
+    private async confirmSummarySelection() {
+        if (!this.summarySelecting || this.summaryConfirm.disabled || this.readOnly) {
+            return;
+        }
+        const ranges = this.summaryRanges;
+        const expected = this.summarySnapshot;
+        this.summaryConfirm.disabled = true;
+        let ids: string[];
+        try {
+            ids = await this.options.onSummaryBatchAdd?.(ranges, expected);
+        } catch (error) {
+            console.error(error);
+        }
+        if (this.destroyed) {
+            return;
+        }
+        this.cancelSummarySelection();
+        if (ids?.length === 1) {
+            this.selectSummary(ids[0]);
+            requestAnimationFrame(() => {
+                if (!this.destroyed && this.selectedSummary === ids[0]) {
+                    this.editSummaryLabel(ids[0]);
+                }
+            });
+        } else {
+            this.updateSelection();
+        }
     }
 
     private editSummaryLabel(id: string) {
@@ -1196,7 +1285,7 @@ export class ListMindmapView {
                     this.finishThen(() => {
                         this.selectedRelation = relation.id;
                         this.selectedSummary = undefined;
-                        this.summaryFrom = undefined;
+                        this.cancelSummarySelection();
                         this.selectedEdge = undefined;
                         this.relationFrom = undefined;
                         this.selectedId = undefined;
@@ -1673,6 +1762,31 @@ export class ListMindmapView {
         this.drawRelationPreview(context, resolveColor(relationStyles[0].color, primary), relationStyles[0].width || 1.5);
         this.drawSummaries(context, (color, selected, hovered) =>
             resolveLineStyle(summaryStyles, color, undefined, defaultLine, selected, hovered));
+        if (this.summarySelecting && !this.printTransform && !this.options.printLayout && this.summaryRanges.length) {
+            const previews = this.summaryRanges.map((range, index) => ({...range, id: `preview:${index}`, label: ""}));
+            const sizes = new Map([...this.summaryPositions].map(([id, position]) =>
+                [id, {width: position.width, height: position.height}]));
+            previews.forEach(preview => sizes.set(preview.id, {width: 0, height: 0}));
+            const model = {...this.model, metadata: {...this.model.metadata,
+                summaries: [...(this.model.metadata.summaries || []), ...previews]}};
+            const positions = layoutListMindmapSummaries(model, this.positions, sizes);
+            context.save();
+            context.strokeStyle = primary;
+            context.lineWidth = 1.5 / this.scale;
+            context.setLineDash([4 / this.scale, 4 / this.scale]);
+            previews.forEach(preview => {
+                const position = positions.get(preview.id);
+                if (position) {
+                    context.beginPath();
+                    context.moveTo(position.x - 10, position.top);
+                    context.lineTo(position.x, position.top);
+                    context.lineTo(position.x, position.bottom);
+                    context.lineTo(position.x - 10, position.bottom);
+                    context.stroke();
+                }
+            });
+            context.restore();
+        }
         this.renderRouteControls();
     }
 
@@ -1751,7 +1865,7 @@ export class ListMindmapView {
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
         this.updateSelection();
-        if (!this.readOnly && !this.relationFrom && !this.summaryFrom) {
+        if (!this.readOnly && !this.relationFrom && !this.summarySelecting) {
             this.inspector.hidden = false;
         }
         if (changed || !this.inspector.hidden) {
@@ -1764,17 +1878,18 @@ export class ListMindmapView {
             this.relationPreview = undefined;
         }
         this.nodeElements.forEach((element, id) => {
-            element.classList.toggle("mindmap-view__node--selected", this.selectedId === id);
+            const selected = this.selectedId === id || this.summarySelected.has(id);
+            element.classList.toggle("mindmap-view__node--selected", selected);
             element.classList.toggle("mindmap-view__node--relation", this.relationFrom === id ||
                 this.relationPreview?.targetId === id || !!this.summaryFrom &&
                 getListMindmapSummaryRange(this.model, this.summaryFrom, id).length > 0);
-            element.setAttribute("aria-selected", String(this.selectedId === id));
+            element.setAttribute("aria-selected", String(selected));
         });
         this.relationElements.forEach((element, id) => element.classList.toggle("mindmap-view__relation--selected", this.selectedRelation === id));
         const node = this.model.nodes.get(this.selectedId);
         const disabled: Record<string, boolean> = {
             relation: !node || node.virtual,
-            summary: !this.summaryFrom && (!node || !getListMindmapSummaryRange(this.model, node.id, node.id).length),
+            summary: false,
             style: !node && !this.selectedRelation && !this.selectedEdge,
         };
         Object.keys(disabled).forEach((key) => {
@@ -1784,9 +1899,10 @@ export class ListMindmapView {
             }
         });
         this.buttons.get("relation")?.classList.toggle("block__icon--active", !!this.relationFrom);
-        this.buttons.get("summary")?.classList.toggle("block__icon--active", !!this.summaryFrom);
-        this.buttons.get("summary")?.setAttribute("aria-pressed", String(!!this.summaryFrom));
-        this.summaryStatus.hidden = !this.summaryFrom;
+        this.buttons.get("summary")?.classList.toggle("block__icon--active", this.summarySelecting);
+        this.buttons.get("summary")?.setAttribute("aria-pressed", String(this.summarySelecting));
+        this.summaryStatus.hidden = !this.summarySelecting || !this.summaryControls.hidden;
+        this.viewport.classList.toggle("mindmap-view__viewport--summary", this.summarySelecting);
         this.draw();
     }
 
@@ -1859,7 +1975,7 @@ export class ListMindmapView {
         }
         this.selectedId = selected.id;
         this.selectedSummary = undefined;
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
         this.relationFrom = undefined;
@@ -1974,10 +2090,39 @@ export class ListMindmapView {
     }
 
     private beginPointer(event: PointerEvent, id?: string) {
-        if (this.summaryFrom && id && !this.readOnly && event.button === 0 && !this.panning) {
+        if (this.summarySelecting && !this.readOnly && event.button === 0 && !this.panning) {
             event.preventDefault();
             this.suppressLinkClick = true;
-            this.finishSummaryRange(id);
+            if (id) {
+                if (this.summaryFrom) {
+                    this.finishSummaryRange(id);
+                } else if (!this.model.nodes.get(id)?.virtual && getListMindmapSummaryParentID(this.model, id)) {
+                    if (this.summarySelected.has(id)) {
+                        this.summarySelected.delete(id);
+                    } else {
+                        this.summarySelected.add(id);
+                    }
+                    this.selectedId = undefined;
+                    this.previewSummarySelection();
+                }
+                this.cancelPointer();
+                return;
+            }
+            this.summaryFrom = undefined;
+            this.selectedId = undefined;
+            this.summarySelected.clear();
+            this.summaryRanges = [];
+            this.summaryControls.hidden = true;
+            this.options.host.focus({preventScroll: true});
+            this.pointer = {pointerId: event.pointerId, startX: event.clientX, startY: event.clientY,
+                x: this.offsetX, y: this.offsetY, moved: false, summary: true};
+            try {
+                this.pointerCapture = this.viewport;
+                this.viewport.setPointerCapture(event.pointerId);
+            } catch {
+                this.cancelPointer();
+            }
+            this.updateSelection();
             return;
         }
         if (this.panning || event.button === 2) {
@@ -2077,6 +2222,31 @@ export class ListMindmapView {
         }
         event.preventDefault();
         pointer.moved = true;
+        if (pointer.summary) {
+            const viewport = this.viewport.getBoundingClientRect();
+            const left = Math.min(pointer.startX, event.clientX);
+            const right = Math.max(pointer.startX, event.clientX);
+            const top = Math.min(pointer.startY, event.clientY);
+            const bottom = Math.max(pointer.startY, event.clientY);
+            this.summaryBox.hidden = false;
+            this.summaryBox.style.left = `${left - viewport.left}px`;
+            this.summaryBox.style.top = `${top - viewport.top}px`;
+            this.summaryBox.style.width = `${right - left}px`;
+            this.summaryBox.style.height = `${bottom - top}px`;
+            this.summarySelected.clear();
+            this.positions.forEach((position, id) => {
+                const node = this.model.nodes.get(id);
+                const x = viewport.left + this.offsetX + (position.x + position.width / 2) * this.scale;
+                const y = viewport.top + this.offsetY + (position.y - (id === this.model.root.id ? 1 : 3) +
+                    position.height / 2) * this.scale;
+                if (!node.virtual && getListMindmapSummaryParentID(this.model, id) &&
+                    x >= left && x <= right && y >= top && y <= bottom) {
+                    this.summarySelected.add(id);
+                }
+            });
+            this.previewSummarySelection();
+            return;
+        }
         if (pointer.relation) {
             const drag = pointer.relation;
             if (drag.endpoint) {
@@ -2197,6 +2367,13 @@ export class ListMindmapView {
             return;
         }
         const {id, targetId, placement, moved} = pointer;
+        if (pointer.summary) {
+            this.suppressLinkClick = true;
+            pointer.summary = false;
+            this.cancelPointer();
+            this.previewSummarySelection();
+            return;
+        }
         if (pointer.relation) {
             if (moved) {
                 this.previewRouteDrag();
@@ -2289,7 +2466,7 @@ export class ListMindmapView {
             return;
         }
         this.selectedSummary = undefined;
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.selectedId = undefined;
         this.relationFrom = undefined;
         this.selectedRelation = line.relation ? line.id : undefined;
@@ -2314,6 +2491,13 @@ export class ListMindmapView {
         this.clearDrop();
         const pointer = this.pointer;
         this.pointer = undefined;
+        this.summaryBox.hidden = true;
+        if (pointer?.summary) {
+            this.summarySelected.clear();
+            this.summaryRanges = [];
+            this.summaryControls.hidden = true;
+            this.updateSelection();
+        }
         if (pointer && this.pointerCapture?.hasPointerCapture(pointer.pointerId)) {
             this.pointerCapture.releasePointerCapture(pointer.pointerId);
         }
@@ -2344,7 +2528,7 @@ export class ListMindmapView {
             return;
         }
         clearTimeout(this.linkTimer);
-        if (this.panning || this.suppressLinkClick || this.relationFrom || this.summaryFrom || event.detail > 1) {
+        if (this.panning || this.suppressLinkClick || this.relationFrom || this.summarySelecting || event.detail > 1) {
             event.preventDefault();
             return;
         }
@@ -2367,7 +2551,7 @@ export class ListMindmapView {
 
     private doubleClick = (event: MouseEvent) => {
         clearTimeout(this.linkTimer);
-        if (this.readOnly || this.relationFrom || this.summaryFrom || this.panning || this.pinching) {
+        if (this.readOnly || this.relationFrom || this.summarySelecting || this.panning || this.pinching) {
             return;
         }
         const target = event.target as HTMLElement;
@@ -2644,7 +2828,7 @@ export class ListMindmapView {
     }
 
     private pasteImages = (event: ClipboardEvent) => {
-        if (event.defaultPrevented || this.readOnly || this.editingId || this.relationFrom || this.summaryFrom ||
+        if (event.defaultPrevented || this.readOnly || this.editingId || this.relationFrom || this.summarySelecting ||
             !this.options.onPasteImages || !this.selectedId ||
             (event.target as HTMLElement).isContentEditable ||
             (event.target as HTMLElement).closest("input, textarea, select")) {
@@ -2682,13 +2866,17 @@ export class ListMindmapView {
         if (this.pointer?.relation && event.key !== "Escape") {
             return;
         }
-        if (this.summaryFrom && event.key !== "Escape") {
+        if (this.summarySelecting && event.key !== "Escape") {
             if (startingComposition || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
                 return;
             }
             if (event.key === "Enter") {
-                this.finishSummaryRange(this.selectedId);
-            } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                if (this.summaryFrom) {
+                    this.finishSummaryRange(this.selectedId);
+                } else {
+                    void this.confirmSummarySelection();
+                }
+            } else if (this.summaryFrom && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
                 const parent = this.model.nodes.get(this.model.nodes.get(this.summaryFrom)?.parentId);
                 const index = parent?.children.findIndex(node => node.id === this.selectedId) ?? -1;
                 const next = parent?.children[index + (event.key === "ArrowUp" ? -1 : 1)];
@@ -2823,6 +3011,7 @@ export class ListMindmapView {
             });
         } else if (!startingComposition && event.key === "Escape") {
             const draggingRoute = !!this.pointer?.relation;
+            const selectingSummary = this.summarySelecting;
             this.cancelPointer();
             if (draggingRoute) {
                 event.preventDefault();
@@ -2830,9 +3019,9 @@ export class ListMindmapView {
                 return;
             }
             this.relationFrom = undefined;
-            this.summaryFrom = undefined;
+            this.cancelSummarySelection();
             this.inspector.hidden = true;
-            if (this.fullscreenMarker) {
+            if (this.fullscreenMarker && !selectingSummary) {
                 this.exitFullscreen();
             }
             this.updateSelection();

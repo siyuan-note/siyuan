@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "Crear ${count} resúmenes",
+	"listMindmapSummaryConflict": "Los rangos de resumen se cruzan; ajusta la selección",
 	"reAIOCR": "Repetir OCR con IA",
 	"pdfAnnotationDeleteRefConfirm": "${x} bloques hacen referencia a esta anotación PDF. Al eliminarla, estas referencias dejarán de ser válidas. ¿Continuar?",
 	"ocrModelDefault": "Predeterminado del modelo",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Las instrucciones no deben superar los 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md ha cambiado. Copia tus cambios, vuelve a abrir el editor y combínalos antes de guardar",
 	"listMindmapSummary": "Resumen",
-	"listMindmapSummarySelect": "Selecciona el último nodo del mismo nivel del rango; los resúmenes no pueden superponerse",
+	"listMindmapSummarySelect": "Selecciona el último nodo hermano o arrastra en el lienzo vacío para seleccionar grupos; toca el lienzo vacío para seleccionar nodos individualmente",
 	"mcpOAuthServer": "OAuth del servidor MCP",
 	"mcpOAuthTip": "Requiere una contraseña de bloqueo o inicio de sesión OIDC y un origen HTTPS público; desactivarlo o cambiar el origen revoca todas las autorizaciones",
 	"mcpOAuthPublicURL": "Origen HTTPS público",

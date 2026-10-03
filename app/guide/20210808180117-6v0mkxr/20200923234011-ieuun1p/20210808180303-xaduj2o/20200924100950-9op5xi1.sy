@@ -13458,7 +13458,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "While selecting a summary range, use the up and down arrow keys to select the last sibling node, Enter to confirm, and Esc to cancel. While editing summary text, Enter saves and Esc cancels. Delete or Backspace removes the selected summary."
+					"Data": "In the summary batch preview, Enter creates all groups in one undoable operation and Esc cancels. While selecting a summary range, use the up and down arrow keys to select the last sibling node, Enter to confirm, and Esc to cancel. While editing summary text, Enter saves and Esc cancels. Delete or Backspace removes the selected summary."
 				}
 			]
 		},

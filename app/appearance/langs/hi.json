@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "${count} सारांश बनाएँ",
+	"listMindmapSummaryConflict": "सारांश के दायरे एक-दूसरे को काटते हैं; चयन बदलें",
 	"reAIOCR": "AI से दोबारा OCR करें",
 	"pdfAnnotationDeleteRefConfirm": "${x} ब्लॉक इस PDF टिप्पणी का संदर्भ देते हैं। इसे हटाने से ये संदर्भ अमान्य हो जाएंगे। जारी रखें?",
 	"ocrModelDefault": "मॉडल का डिफ़ॉल्ट",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "निर्देश 32 KiB से अधिक नहीं होने चाहिए",
 	"agentInstructionsConflict": "AGENTS.md बदल गया है। अपने बदलाव कॉपी करें, संपादक फिर से खोलें और सहेजने से पहले बदलावों को मिलाएँ",
 	"listMindmapSummary": "सारांश",
-	"listMindmapSummarySelect": "सारांश के दायरे में समान मूल नोड वाला अंतिम नोड चुनें; सारांशों के दायरे आपस में नहीं मिलने चाहिए",
+	"listMindmapSummarySelect": "एक ही मूल नोड का अंतिम नोड चुनें या खाली कैनवास पर खींचकर समूह चुनें; नोड अलग-अलग चुनने के लिए खाली कैनवास पर टैप करें",
 	"mcpOAuthServer": "MCP सर्वर OAuth",
 	"mcpOAuthTip": "लॉक स्क्रीन पासवर्ड या OIDC लॉगिन और सार्वजनिक HTTPS ओरिजिन आवश्यक है; बंद करने या ओरिजिन बदलने से सभी प्राधिकरण रद्द हो जाते हैं",
 	"mcpOAuthPublicURL": "सार्वजनिक HTTPS ओरिजिन",

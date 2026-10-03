@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "Create ${count} summaries",
+	"listMindmapSummaryConflict": "Summary ranges cross; adjust the selection",
 	"reAIOCR": "Redo OCR with AI",
 	"pdfAnnotationDeleteRefConfirm": "This PDF annotation is referenced by ${x} blocks. Deleting it will invalidate these references. Continue?",
 	"ocrModelDefault": "Model default",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Instructions must be at most 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md has changed. Copy your edits, reopen the editor, and merge them before saving",
 	"listMindmapSummary": "Summary",
-	"listMindmapSummarySelect": "Select the last sibling node in the summary range; summaries cannot overlap",
+	"listMindmapSummarySelect": "Select the last sibling node, or drag on blank canvas to select groups; tap blank canvas to select nodes individually",
 	"mcpOAuthServer": "MCP server OAuth",
 	"mcpOAuthTip": "Requires a lock screen password or OIDC login and a public HTTPS origin; disabling or changing the origin revokes all authorizations",
 	"mcpOAuthPublicURL": "Public HTTPS origin",

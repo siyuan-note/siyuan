@@ -13458,7 +13458,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "選擇概要範圍時，使用上下方向鍵選擇末端同層節點，Enter 確認，Esc 取消。編輯概要文字時，Enter 儲存，Esc 取消。選取概要後，Delete 或 Backspace 刪除概要。"
+					"Data": "批次概要預覽中，Enter 一次建立所有分組概要，Esc 取消，建立後可一次復原。選擇概要範圍時，使用上下方向鍵選擇末端同層節點，Enter 確認，Esc 取消。編輯概要文字時，Enter 儲存，Esc 取消。選取概要後，Delete 或 Backspace 刪除概要。"
 				}
 			]
 		},

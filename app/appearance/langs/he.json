@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "יצירת ${count} סיכומים",
+	"listMindmapSummaryConflict": "טווחי הסיכומים מצטלבים; יש לשנות את הבחירה",
 	"reAIOCR": "ביצוע OCR מחדש עם AI",
 	"pdfAnnotationDeleteRefConfirm": "${x} בלוקים מפנים להערת PDF זו. מחיקתה תהפוך את ההפניות האלה ללא תקפות. להמשיך?",
 	"ocrModelDefault": "ברירת המחדל של המודל",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "גודל ההוראות לא יכול לעלות על 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md השתנה. יש להעתיק את העריכות, לפתוח מחדש את העורך ולמזג את השינויים לפני השמירה",
 	"listMindmapSummary": "סיכום",
-	"listMindmapSummarySelect": "יש לבחור את הצומת האח האחרון בטווח הסיכום; סיכומים אינם יכולים לחפוף",
+	"listMindmapSummarySelect": "בחרו את הצומת האחרון בעל אותו הורה, או גררו באזור ריק לבחירת קבוצות; הקישו באזור ריק לבחירת צמתים בנפרד",
 	"mcpOAuthServer": "OAuth של שרת MCP",
 	"mcpOAuthTip": "נדרשים סיסמת נעילת מסך או כניסת OIDC ומקור HTTPS ציבורי; השבתה או שינוי המקור מבטלים את כל ההרשאות",
 	"mcpOAuthPublicURL": "מקור HTTPS ציבורי",

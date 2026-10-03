@@ -1,4 +1,6 @@
 {
+	"listMindmapSummaryBatch": "Направи сажетке: ${count}",
+	"listMindmapSummaryConflict": "Опсези сажетака се укрштају; прилагодите избор",
 	"reAIOCR": "Понови OCR помоћу AI",
 	"pdfAnnotationDeleteRefConfirm": "На ову PDF белешку упућује ${x} блокова. Брисањем ће ове референце постати неважеће. Наставити?",
 	"ocrModelDefault": "Подразумевана вредност модела",
@@ -101,7 +103,7 @@
 	"agentInstructionsTooLarge": "Упутства не смеју бити већа од 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md је промењен. Копирајте своје измене, поново отворите уређивач и обједините их пре чувања",
 	"listMindmapSummary": "Сажетак",
-	"listMindmapSummarySelect": "Изаберите последњи чвор са истим родитељем у опсегу; сажеци се не смеју преклапати",
+	"listMindmapSummarySelect": "Изаберите последњи чвор са истим родитељем или превуците по празном платну да изаберете групе; додирните празно платно за појединачни избор чворова",
 	"mcpOAuthServer": "OAuth MCP сервера",
 	"mcpOAuthTip": "Захтева лозинку за закључавање или OIDC пријаву и јавну HTTPS адресу; искључивање или промена адресе опозива сва овлашћења",
 	"mcpOAuthPublicURL": "Јавна HTTPS адреса",

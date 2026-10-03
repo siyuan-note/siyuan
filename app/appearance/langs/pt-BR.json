@@ -1,8 +1,9 @@
 {
+	"ocrModelDefault": "Padrão do modelo",
 	"ocrDetectionThreshold": "Limiar de detecção",
 	"ocrBoxThreshold": "Limiar de confiança das caixas de texto",
 	"ocrRecognitionThreshold": "Limiar de confiança do reconhecimento",
-	"ocrThresholdsTip": "Deixe vazio para usar os parâmetros de detecção do modelo e o limiar de reconhecimento de 0.5; valores maiores reduzem falsos positivos, mas podem omitir texto; aplica-se apenas a novos reconhecimentos",
+	"ocrThresholdsTip": "Deixe vazio para usar os valores padrão. Limiares maiores reduzem falsos positivos, mas podem omitir texto. Aplica-se apenas a novos reconhecimentos",
 	"ocrThresholdRange": "Os limiares de detecção e das caixas devem ser maiores que 0 e menores que 1; o de reconhecimento deve estar entre 0 e 1",
 	"automationIncomplete": "Regra pausada; complete a configuração: ${1}",
 	"databaseAutomations": "Automações",

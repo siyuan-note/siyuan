@@ -1,8 +1,9 @@
 {
+	"ocrModelDefault": "Model default",
 	"ocrDetectionThreshold": "Detection threshold",
 	"ocrBoxThreshold": "Text box confidence threshold",
 	"ocrRecognitionThreshold": "Recognition confidence threshold",
-	"ocrThresholdsTip": "Leave blank to use model detection parameters and a recognition threshold of 0.5; higher thresholds reduce false positives but may miss text; applies to future recognition only",
+	"ocrThresholdsTip": "Leave blank to use defaults. Higher thresholds reduce false positives but may miss text. Applies to future recognition only",
 	"ocrThresholdRange": "Detection and box thresholds must be greater than 0 and less than 1; recognition must be between 0 and 1",
 	"automationIncomplete": "Rule paused; complete the configuration: ${1}",
 	"databaseAutomations": "Automations",

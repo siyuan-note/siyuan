@@ -1,8 +1,9 @@
 {
+	"ocrModelDefault": "Domyślna wartość modelu",
 	"ocrDetectionThreshold": "Próg wykrywania",
 	"ocrBoxThreshold": "Próg pewności obszarów tekstu",
 	"ocrRecognitionThreshold": "Próg pewności rozpoznawania",
-	"ocrThresholdsTip": "Pozostaw puste, aby użyć parametrów wykrywania modelu i progu rozpoznawania 0.5; wyższe progi zmniejszają liczbę błędnych rozpoznań, ale mogą pomijać tekst; dotyczy tylko kolejnych rozpoznań",
+	"ocrThresholdsTip": "Pozostaw puste, aby użyć wartości domyślnych. Wyższe progi zmniejszają liczbę błędnych wykryć, ale mogą pomijać tekst. Dotyczy tylko kolejnych rozpoznań",
 	"ocrThresholdRange": "Progi wykrywania i obszarów muszą być większe od 0 i mniejsze od 1; próg rozpoznawania musi mieścić się od 0 do 1",
 	"automationIncomplete": "Reguła wstrzymana; uzupełnij konfigurację: ${1}",
 	"databaseAutomations": "Automatyzacje",

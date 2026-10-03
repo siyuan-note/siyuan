@@ -1,8 +1,9 @@
 {
+	"ocrModelDefault": "模型默认",
 	"ocrDetectionThreshold": "检测阈值",
 	"ocrBoxThreshold": "文本框置信度阈值",
 	"ocrRecognitionThreshold": "识别置信度阈值",
-	"ocrThresholdsTip": "留空使用模型检测参数和 0.5 的识别阈值；提高阈值可减少误识别，但可能漏字；仅影响后续识别",
+	"ocrThresholdsTip": "留空使用默认值。调高阈值可减少误检，也可能漏字。仅对后续识别生效",
 	"ocrThresholdRange": "检测和文本框阈值须大于 0 且小于 1，识别阈值须在 0 到 1 之间",
 	"automationIncomplete": "规则已停用，请完善配置：${1}",
 	"databaseAutomations": "自动化",

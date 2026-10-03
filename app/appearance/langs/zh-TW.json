@@ -1,8 +1,9 @@
 {
+	"ocrModelDefault": "模型預設",
 	"ocrDetectionThreshold": "偵測閾值",
 	"ocrBoxThreshold": "文字框信賴度閾值",
 	"ocrRecognitionThreshold": "辨識信賴度閾值",
-	"ocrThresholdsTip": "留空使用模型偵測參數和 0.5 的辨識閾值；提高閾值可減少誤辨識，但可能漏字；僅影響後續辨識",
+	"ocrThresholdsTip": "留空使用預設值。調高閾值可減少誤判，也可能漏字。僅對後續辨識生效",
 	"ocrThresholdRange": "偵測和文字框閾值須大於 0 且小於 1，辨識閾值須介於 0 到 1",
 	"automationIncomplete": "規則已停用，請完善設定：${1}",
 	"databaseAutomations": "自動化",

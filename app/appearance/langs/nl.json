@@ -1,8 +1,9 @@
 {
+	"ocrModelDefault": "Modelstandaard",
 	"ocrDetectionThreshold": "Detectiedrempel",
 	"ocrBoxThreshold": "Betrouwbaarheidsdrempel voor tekstvakken",
 	"ocrRecognitionThreshold": "Betrouwbaarheidsdrempel voor herkenning",
-	"ocrThresholdsTip": "Laat leeg voor de detectieparameters van het model en een herkenningsdrempel van 0.5; hogere waarden verminderen foutieve herkenning maar kunnen tekst missen; geldt alleen voor volgende herkenningen",
+	"ocrThresholdsTip": "Laat leeg voor standaardwaarden. Hogere drempels verminderen foutieve detecties, maar kunnen tekst missen. Geldt alleen voor volgende herkenningen",
 	"ocrThresholdRange": "Detectie- en tekstvakdrempels moeten groter dan 0 en kleiner dan 1 zijn; de herkenningsdrempel moet tussen 0 en 1 liggen",
 	"automationIncomplete": "Regel gepauzeerd; voltooi de configuratie: ${1}",
 	"databaseAutomations": "Automatiseringen",

@@ -1,8 +1,9 @@
 {
+	"ocrModelDefault": "Valeur par défaut du modèle",
 	"ocrDetectionThreshold": "Seuil de détection",
 	"ocrBoxThreshold": "Seuil de confiance des zones de texte",
 	"ocrRecognitionThreshold": "Seuil de confiance de reconnaissance",
-	"ocrThresholdsTip": "Laisser vide pour utiliser les paramètres de détection du modèle et un seuil de reconnaissance de 0.5 ; des seuils plus élevés réduisent les faux positifs mais peuvent omettre du texte ; uniquement pour les prochaines reconnaissances",
+	"ocrThresholdsTip": "Laisser vide pour utiliser les valeurs par défaut. Des seuils plus élevés réduisent les faux positifs, mais peuvent omettre du texte. S'applique uniquement aux prochaines reconnaissances",
 	"ocrThresholdRange": "Les seuils de détection et des zones doivent être strictement compris entre 0 et 1 ; celui de reconnaissance doit être compris entre 0 et 1 inclus",
 	"automationIncomplete": "Règle suspendue ; complétez la configuration : ${1}",
 	"databaseAutomations": "Automatisations",

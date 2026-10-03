@@ -31,7 +31,8 @@ const createDialog = (mobile = false, initial: OCRThresholds = {detection: 0.4, 
     const exports = {} as {openOCRThresholds: (value: OCRThresholds, save: (value: OCRThresholds) => Promise<boolean>, close: () => void) => Dialog};
     runInNewContext(compiled, {exports, window: {siyuan: {languages: {
         ocrDetectionThreshold: "Detection", ocrBoxThreshold: "Box", ocrRecognitionThreshold: "Recognition",
-        ocrThresholdRange: "invalid threshold", default: "Default", configGroupAdvanced: "Advanced",
+        ocrThresholdRange: "invalid threshold", ocrModelDefault: "Model default", configGroupAdvanced: "Advanced",
+        ocrThresholdsTip: "Leave blank to use defaults",
     }}}, require: () => ({Dialog, isMobile: () => mobile, escapeAttr: (value: string) => value})});
     const dialog = exports.openOCRThresholds(initial, value => new Promise(resolve => requests.push({value, resolve})), () => { closed++; });
     const click = (action: string) => listeners.get("click")({target: {closest: () => ({dataset: {action}})}});
@@ -44,6 +45,10 @@ for (const mobile of [false, true]) {
         assert.equal(panel.options.width, mobile ? "92vw" : "520px");
         assert.doesNotMatch(panel.options.content, /<details|<summary/);
         assert.match(panel.options.content, /b3-dialog__content/);
+        assert.match(panel.options.content, /Leave blank to use defaults/);
+        assert.match(panel.options.content, /id="ocr-detection"[^>]*placeholder="Model default"/);
+        assert.match(panel.options.content, /id="ocr-box"[^>]*placeholder="Model default"/);
+        assert.match(panel.options.content, /id="ocr-recognition"[^>]*placeholder="0.5"/);
         panel.inputs.detection.value = "0.6";
         assert.equal(panel.requests.length, 0);
         const saving = panel.click("save");

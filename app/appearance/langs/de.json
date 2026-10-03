@@ -1,8 +1,9 @@
 {
+	"ocrModelDefault": "Modellstandard",
 	"ocrDetectionThreshold": "Erkennungsschwelle für Textbereiche",
 	"ocrBoxThreshold": "Konfidenzschwelle für Textrahmen",
 	"ocrRecognitionThreshold": "Konfidenzschwelle für Texterkennung",
-	"ocrThresholdsTip": "Leer lassen für die Erkennungsparameter des Modells und eine Texterkennungsschwelle von 0.5; höhere Werte reduzieren Fehlerkennungen, können aber Text übersehen; gilt nur für künftige Erkennungen",
+	"ocrThresholdsTip": "Leer lassen für Standardwerte. Höhere Schwellen reduzieren Fehlerkennungen, können aber Text übersehen. Gilt nur für künftige Erkennungen",
 	"ocrThresholdRange": "Bereichs- und Rahmenschwellen müssen größer als 0 und kleiner als 1 sein; die Texterkennungsschwelle muss zwischen 0 und 1 liegen",
 	"automationIncomplete": "Regel pausiert; Konfiguration vervollständigen: ${1}",
 	"databaseAutomations": "Automatisierungen",

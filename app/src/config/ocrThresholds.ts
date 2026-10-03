@@ -10,9 +10,9 @@ export const openOCRThresholds = (
 ): Dialog => {
     const languages = window.siyuan.languages;
     const fields = [
-        {key: "detection", title: languages.ocrDetectionThreshold},
-        {key: "box", title: languages.ocrBoxThreshold},
-        {key: "recognition", title: languages.ocrRecognitionThreshold},
+        {key: "detection", title: languages.ocrDetectionThreshold, placeholder: languages.ocrModelDefault},
+        {key: "box", title: languages.ocrBoxThreshold, placeholder: languages.ocrModelDefault},
+        {key: "recognition", title: languages.ocrRecognitionThreshold, placeholder: "0.5"},
     ] as const;
     let closed = false;
     let saving = false;
@@ -21,9 +21,9 @@ export const openOCRThresholds = (
         width: isMobile() ? "92vw" : "520px",
         content: `<div class="b3-dialog__content">
 <div class="b3-label__text">${languages.ocrThresholdsTip}</div><div class="fn__hr--b"></div>
-${fields.map(({key, title}) => `<div class="b3-label b3-label--inner">
+${fields.map(({key, title, placeholder}) => `<div class="b3-label b3-label--inner">
 <label class="config-name fn__block" for="ocr-${key}">${title}</label><div class="fn__hr"></div>
-<input id="ocr-${key}" class="b3-text-field fn__block" type="number" min="0" max="1" step="any" value="${initial?.[key] ?? ""}" placeholder="${escapeAttr(languages.default)}"></div>`).join("")}
+<input id="ocr-${key}" class="b3-text-field fn__block" type="number" min="0" max="1" step="any" value="${initial?.[key] ?? ""}" placeholder="${escapeAttr(placeholder)}"></div>`).join("")}
 </div><div class="b3-dialog__action">
 <button class="b3-button b3-button--outline" data-action="reset">${languages.reset}</button><div class="fn__flex-1"></div>
 <button class="b3-button b3-button--cancel" data-action="cancel">${languages.cancel}</button><div class="fn__space"></div>

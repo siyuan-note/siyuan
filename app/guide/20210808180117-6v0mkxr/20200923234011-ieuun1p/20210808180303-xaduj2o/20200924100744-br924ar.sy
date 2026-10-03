@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261003234011"
+		"updated": "20261004005806"
 	},
 	"Children": [
 		{
@@ -967,7 +967,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003636-epvk98g",
-				"updated": "20261003234011"
+				"updated": "20261004005806"
 			},
 			"Children": [
 				{
@@ -1364,7 +1364,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202934-1h96or8",
-				"updated": "20261003224949"
+				"updated": "20261004005806"
 			},
 			"Children": [
 				{
@@ -1536,7 +1536,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003224949-gtf3qng",
-				"updated": "20261003224949"
+				"updated": "20261004005806"
 			},
 			"Children": [
 				{
@@ -1559,7 +1559,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", which sends the local image to the configured agent model for text recognition. The model must support image input. AI OCR runs only when requested and shares the existing OCR text, editing, copying, and search index. Failed recognition preserves the previous result. Encrypted notebook images are not supported."
+					"Data": ", which sends the local image to the configured agent model for text recognition. The model must support image input. AI OCR runs only when requested and shares the existing OCR text, editing, copying, and search index. Failed recognition preserves the previous result. Encrypted notebook images are not supported. PNG, JPEG, GIF, and WebP are supported directly; BMP and TIFF are converted to PNG, and HEIC/HEIF to JPEG without reducing resolution. The original and converted images must each be within 20 MiB, and the converted image within 40 million pixels. Recognition actions are hidden for network images, and the OCR menu is hidden for encrypted notebook images. Unsupported formats such as AVIF, SVG, and ICO do not show the AI OCR action."
 				}
 			]
 		}

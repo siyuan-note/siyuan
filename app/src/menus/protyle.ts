@@ -88,6 +88,7 @@ import {getZoomFocusScrollAttr, shouldFocusAfterZoom} from "../protyle/util/focu
 import {scrollCenter} from "../util/highlightById";
 import {copyImageOCRText, openImageOCR} from "../asset/imageOCR";
 import {reImageAIOCR} from "../asset/imageAIOCR";
+import {getImageOCRAvailability} from "../asset/imageOCRAvailability";
 import {
     getSemanticInlineVisibleText,
     normalizeSemanticInlineElement,
@@ -1366,6 +1367,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         const imagePath = imgElement.getAttribute("data-src");
+        const ocrAvailability = getImageOCRAvailability(imagePath, protyle.notebookId);
         if (imagePath.startsWith("assets/")) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "rename",
@@ -1379,6 +1381,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.append(new MenuItem({
             id: "ocr",
             label: "OCR",
+            ignore: !ocrAvailability.text,
             submenu: [{
                 id: "ocrResult",
                 icon: "iconEdit",
@@ -1395,15 +1398,17 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }
             }, {
                 id: "separator_reOCR",
-                type: "separator"
+                type: "separator",
+                ignore: !ocrAvailability.local,
             }, {
                 id: "reOCR",
                 iconHTML: "",
                 label: window.siyuan.languages.reOCR,
+                ignore: !ocrAvailability.local,
                 click() {
                     const path = imgElement.getAttribute("data-src");
                     fetchPost("/api/asset/ocr", {
-                        path: imgElement.getAttribute("src"),
+                        path,
                     }, () => {
                         invalidateImageOCRStatus(path);
                     });
@@ -1412,7 +1417,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 id: "reAIOCR",
                 icon: "iconSparkles",
                 label: window.siyuan.languages.reAIOCR,
-                ignore: isDisabledFeature("ai"),
+                ignore: isDisabledFeature("ai") || !ocrAvailability.ai,
                 click() {
                     void reImageAIOCR(imgElement.getAttribute("data-src"));
                 }

@@ -127,7 +127,7 @@ func TestConvertStillImages(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			preview, err := convert(context.Background(), source, ModePreview)
+			preview, err := Convert(context.Background(), source, ModePreview)
 			if err != nil {
 				t.Fatal(err)
 			}

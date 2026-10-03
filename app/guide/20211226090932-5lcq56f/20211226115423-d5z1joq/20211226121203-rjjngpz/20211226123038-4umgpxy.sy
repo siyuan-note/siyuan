@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261003234011"
+		"updated": "20261004005806"
 	},
 	"Children": [
 		{
@@ -965,7 +965,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003901-ze4mbzz",
-				"updated": "20261003234011"
+				"updated": "20261004005806"
 			},
 			"Children": [
 				{
@@ -1358,7 +1358,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414203058-foirrwk",
-				"updated": "20261003224949"
+				"updated": "20261004005806"
 			},
 			"Children": [
 				{
@@ -1530,7 +1530,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003224949-qe1gsny",
-				"updated": "20261003224949"
+				"updated": "20261004005806"
 			},
 			"Children": [
 				{
@@ -1553,7 +1553,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，將本機圖片傳送給已設定的智能體模型進行文字辨識，模型須支援圖片輸入。AI OCR 僅手動執行，結果沿用現有 OCR 文字、編輯、複製與搜尋索引；辨識失敗時保留原結果。加密筆記本圖片不支援此功能。"
+					"Data": "，將本機圖片傳送給已設定的智能體模型進行文字辨識，模型須支援圖片輸入。AI OCR 僅手動執行，結果沿用現有 OCR 文字、編輯、複製與搜尋索引；辨識失敗時保留原結果。加密筆記本圖片不支援此功能。支援 PNG、JPEG、GIF 和 WebP；BMP、TIFF 轉為 PNG，HEIC/HEIF 轉為 JPEG，保留原圖解析度。原始圖片和轉換後的圖片均不得超過 20 MiB，轉換後的圖片不得超過四千萬像素。網路圖片隱藏辨識入口，加密筆記本圖片隱藏 OCR 選單；AVIF、SVG、ICO 等不支援的格式隱藏 AI OCR 入口。"
 				}
 			]
 		}

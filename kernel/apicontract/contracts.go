@@ -872,6 +872,8 @@ var AssetOCR = define[AssetPathRequest, AssetOCRData]("ocr", "/api/asset/ocr", J
 
 // AIOCR 仅手动调用已启用的智能体模型识别本地 assets/ 图片，不使用会话、工具或后台自动识别。
 // path 保留 box 查询参数以隔离笔记本资源；拒绝加密资源和外部图片地址。
+// 支持 PNG、JPEG、GIF、WebP，并将 BMP、TIFF 转为 PNG、HEIC/HEIF 转为 JPEG；其他格式返回错误。
+// 保留原图分辨率，原始文件和发送图片均限制为 20 MiB、发送图片限制为四千万像素；HEIF 遵循预览解码限制。
 // 支持现有 AI 生成协议，受 AI 功能开关、管理员权限和只读模式限制。
 // 请求上限为两分钟，提供商配置的更短超时仍生效；模型不支持图片时返回错误，不降级为纯文本请求。
 // 成功将完整文本（含换行和空白，图片无文字时可为空）保存到现有 OCR 存储并更新索引。

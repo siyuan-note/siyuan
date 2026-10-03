@@ -1,17 +1,25 @@
 package model
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"image"
+	"image/png"
 	"io"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/disintegration/imaging"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	_ "golang.org/x/image/bmp"
+	_ "golang.org/x/image/tiff"
 )
 
 // AIOCRAsset 使用智能体模型单次识别本地图片，完整响应通过校验后才保存和更新索引。
@@ -55,7 +63,7 @@ func AIOCRAsset(ctx context.Context, path string) (string, error) {
 		return "", err
 	}
 	// 保留原图分辨率，避免长截图中的小字在缩放后丢失；仍限制文件体积和总像素。
-	image, err := util.PrepareModelImage(data, documentImageMaxBytes, documentImageMaxPixels, 0)
+	image, err := prepareAIOCRImage(ctx, data)
 	if err != nil {
 		return "", err
 	}
@@ -99,4 +107,43 @@ func AIOCRAsset(ctx context.Context, path string) (string, error) {
 	text := strings.ReplaceAll(response.Choices[0].Message.Content, "\r\n", "\n")
 	SetOCRAssetText(path, text)
 	return text, nil
+}
+
+// prepareAIOCRImage 仅转换模型不接受但内核可解码的位图，保留分辨率并校验发送体积。
+func prepareAIOCRImage(ctx context.Context, data []byte) (util.PreparedImage, error) {
+	if err := ctx.Err(); err != nil {
+		return util.PreparedImage{}, err
+	}
+	if len(data) > documentImageMaxBytes {
+		return util.PreparedImage{}, fmt.Errorf("image exceeds size limit: %d bytes", documentImageMaxBytes)
+	}
+	switch mimeType := mimetype.Detect(data).String(); mimeType {
+	case "image/bmp", "image/tiff":
+		config, _, err := image.DecodeConfig(bytes.NewReader(data))
+		if err != nil {
+			return util.PreparedImage{}, err
+		}
+		if config.Width < 1 || config.Height < 1 || config.Width > documentImageMaxPixels/config.Height {
+			return util.PreparedImage{}, fmt.Errorf("image exceeds pixel limit: %d", documentImageMaxPixels)
+		}
+		decoded, err := imaging.Decode(bytes.NewReader(data), imaging.AutoOrientation(true))
+		if err != nil {
+			return util.PreparedImage{}, err
+		}
+		var output bytes.Buffer
+		if err = png.Encode(&output, decoded); err != nil {
+			return util.PreparedImage{}, err
+		}
+		data = output.Bytes()
+	case "image/heic", "image/heif", "image/heic-sequence", "image/heif-sequence":
+		var err error
+		data, err = heif.Convert(ctx, data, heif.ModePreview)
+		if err != nil {
+			return util.PreparedImage{}, err
+		}
+	}
+	if err := ctx.Err(); err != nil {
+		return util.PreparedImage{}, err
+	}
+	return util.PrepareModelImage(data, documentImageMaxBytes, documentImageMaxPixels, 0)
 }

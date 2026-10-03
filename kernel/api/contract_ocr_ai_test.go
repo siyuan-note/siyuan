@@ -20,8 +20,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/image/bmp"
+	"golang.org/x/image/tiff"
 )
 
 const aiOCRSuccess = `{"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"first  column\r\nsecond line"}}]}`
@@ -281,5 +284,120 @@ func TestAPIContractAIOCREmptyTextAndOriginalResolution(t *testing.T) {
 	}
 	if !bytes.Contains(received, []byte(base64.StdEncoding.EncodeToString(imageData.Bytes()))) {
 		t.Fatal("long image was downscaled before OCR")
+	}
+}
+
+func TestAPIContractAIOCRConvertedFormats(t *testing.T) {
+	for _, extension := range []string{"bmp", "tif", "tiff", "heic", "heif"} {
+		t.Run(extension, func(t *testing.T) {
+			var received []byte
+			engine := setupAIOCRContract(t, func(w http.ResponseWriter, r *http.Request) {
+				received, _ = io.ReadAll(r.Body)
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = io.WriteString(w, aiOCRSuccess)
+			})
+			var source bytes.Buffer
+			img := image.NewRGBA(image.Rect(0, 0, 4096, 16))
+			img.Set(2, 3, color.RGBA{R: 255, A: 255})
+			width, height, mimeType := 4096, 16, "image/png"
+			var err error
+			switch extension {
+			case "bmp":
+				err = bmp.Encode(&source, img)
+			case "tif", "tiff":
+				err = tiff.Encode(&source, img, nil)
+			default:
+				var data []byte
+				data, err = os.ReadFile("../heif/testdata/basic.heic")
+				if err == nil {
+					source.Write(data)
+					width, height, err = heif.ImageSize(data)
+				}
+				mimeType = "image/jpeg"
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			path := "assets/converted." + extension
+			filename := filepath.Join(util.DataDir, filepath.FromSlash(path))
+			if err = os.WriteFile(filename, source.Bytes(), 0600); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() { util.RemoveAssetText(path) })
+			response := requestAIOCR(t, engine, path+"#preview")
+			if response.Code != 0 || response.Data.Text != "first  column\nsecond line" || util.GetAssetText(path) != response.Data.Text {
+				t.Fatalf("converted OCR failed: %+v", response)
+			}
+			var request struct {
+				Messages []struct {
+					Content json.RawMessage `json:"content"`
+				} `json:"messages"`
+			}
+			if err = json.Unmarshal(received, &request); err != nil || len(request.Messages) != 2 {
+				t.Fatalf("invalid model request: %s", received)
+			}
+			var parts []struct {
+				ImageURL struct {
+					URL string `json:"url"`
+				} `json:"image_url"`
+			}
+			if err = json.Unmarshal(request.Messages[1].Content, &parts); err != nil || len(parts) != 1 {
+				t.Fatalf("invalid image parts: %s", received)
+			}
+			prefix := "data:" + mimeType + ";base64,"
+			if !strings.HasPrefix(parts[0].ImageURL.URL, prefix) {
+				t.Fatalf("unexpected converted MIME: %s", parts[0].ImageURL.URL[:min(80, len(parts[0].ImageURL.URL))])
+			}
+			data, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(parts[0].ImageURL.URL, prefix))
+			if err != nil {
+				t.Fatal(err)
+			}
+			config, _, err := image.DecodeConfig(bytes.NewReader(data))
+			if err != nil || config.Width != width || config.Height != height {
+				t.Fatalf("conversion changed resolution: %+v, %v", config, err)
+			}
+			if extension == "bmp" || extension == "tif" || extension == "tiff" {
+				decoded, err := png.Decode(bytes.NewReader(data))
+				if err != nil || color.NRGBAModel.Convert(decoded.At(2, 3)) != (color.NRGBA{R: 255, A: 255}) {
+					t.Fatal("bitmap conversion lost source pixels")
+				}
+			}
+			unchanged, err := os.ReadFile(filename)
+			if err != nil || !bytes.Equal(unchanged, source.Bytes()) {
+				t.Fatal("conversion changed source asset")
+			}
+		})
+	}
+}
+
+func TestAPIContractAIOCRInvalidConversions(t *testing.T) {
+	calls := 0
+	engine := setupAIOCRContract(t, func(http.ResponseWriter, *http.Request) { calls++ })
+	var oversized bytes.Buffer
+	if err := tiff.Encode(&oversized, image.NewGray(image.Rect(0, 0, 8000, 5001)), &tiff.Options{Compression: tiff.Deflate}); err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name string
+		data []byte
+	}{
+		{"broken.bmp", []byte{'B', 'M', 0, 0}},
+		{"broken.tiff", []byte{'I', 'I', 42, 0, 8, 0, 0, 0}},
+		{"broken.heic", append([]byte{0, 0, 0, 24}, []byte("ftypheic\x00\x00\x00\x00heicmif1")...)},
+		{"image.svg", []byte(`<svg xmlns="http://www.w3.org/2000/svg"/>`)},
+		{"oversized.tiff", oversized.Bytes()},
+		{"oversized.bmp", bytes.Repeat([]byte{'B'}, 20*1024*1024+1)},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			path := "assets/" + test.name
+			if err := os.WriteFile(filepath.Join(util.DataDir, filepath.FromSlash(path)), test.data, 0600); err != nil {
+				t.Fatal(err)
+			}
+			util.SetAssetText(path, "previous text")
+			t.Cleanup(func() { util.RemoveAssetText(path) })
+			if response := requestAIOCR(t, engine, path); response.Code == 0 || calls != 0 || util.GetAssetText(path) != "previous text" {
+				t.Fatalf("invalid conversion reached model or changed OCR: %+v, calls=%d", response, calls)
+			}
+		})
 	}
 }

@@ -192,6 +192,19 @@ func TestCryptoRandomUUID(t *testing.T) {
 	}
 }
 
+func TestCryptoIsInstalledAsGlobal(t *testing.T) {
+	rt := newCryptoTestRuntime(t)
+
+	// globalThis.crypto 与 siyuan.crypto 是同一个对象，按标准全局名访问的代码可直接使用。
+	got := rt.run(`(() => {
+		const random = crypto.getRandomValues(new Uint8Array(4));
+		return [globalThis.crypto === siyuan.crypto, random.length, typeof crypto.subtle.digest].join(",");
+	})()`)
+	if got.String() != "true,4,function" {
+		t.Fatalf("globalThis.crypto = %s, want true,4,function", got.String())
+	}
+}
+
 func TestCryptoDigest(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 

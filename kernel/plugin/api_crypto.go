@@ -30,7 +30,8 @@ import (
 // randomValuesMaxLength 是 getRandomValues 单次可填充的最大字节数，与浏览器一致。
 const randomValuesMaxLength = 65536
 
-// injectCrypto 注入 siyuan.crypto，实现 Web Crypto API 的 Crypto 接口。
+// injectCrypto 注入 siyuan.crypto，实现 Web Crypto API 的 Crypto 接口，并以同一对象提供 globalThis.crypto，
+// 供按标准全局名访问 Web Crypto 的代码使用。
 // 密钥材料只保存在内核侧，插件通过 CryptoKey 句柄引用；运算在事件循环之外执行，
 // 结果回到事件循环后再转换为 JS 值。
 func injectCrypto(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
@@ -68,6 +69,7 @@ func injectCrypto(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 	lo.Must0(ObjectFreeze(rt, cryptoObj))
 	lo.Must0(siyuan.Set("crypto", cryptoObj))
+	lo.Must0(rt.GlobalObject().Set("crypto", cryptoObj))
 	return
 }
 

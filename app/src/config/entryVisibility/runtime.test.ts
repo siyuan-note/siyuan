@@ -72,3 +72,53 @@ test("dock visibility menus follow profile scope order instead of the catalog or
     resetEntryProfileOrder(config.profiles[0], "dock.order.LeftTop");
     assert.deepEqual(Array.from(exports.getEntryOrder("dock")), ["file", "outline"]);
 });
+
+test("entry profile saves in settings windows send requests and flush pending changes", () => {
+    const initial: Config.IEntryVisibility = {version: 6, active: "full", profiles: []};
+    const events: string[] = [];
+    const requests: Array<{url: string; config: Config.IEntryVisibility;
+        respond: (response: {code: number; data: Config.IEntryVisibility}) => void}> = [];
+    const window = {
+        siyuan: {layout: {}, config: {appearance: {entryVisibility: initial}}},
+        dispatchEvent: (event: {type: string}) => events.push(event.type),
+    };
+    const context = {
+        window,
+        document: {querySelectorAll: (): HTMLElement[] => [], querySelector: (): Element => null,
+            getElementById: (): HTMLElement => null},
+        CustomEvent: class {constructor(public type: string) {}},
+    };
+    const bar = {} as typeof import("../../layout/dock/barVisibility");
+    const compile = (path: string) => transpileModule(readFileSync(resolve(process.cwd(), "src", path), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    runInNewContext(compile("layout/dock/barVisibility.ts"), {...context, exports: bar});
+    const exports = {} as typeof import("./runtime");
+    runInNewContext(compile("config/entryVisibility/runtime.ts"), {...context, exports, require: () => ({
+        syncDockBarVisibility: bar.syncDockBarVisibility,
+        refreshDockCatalog: () => {},
+        getDockEntryOrderSnapshot: () => Object.fromEntries(DOCK_ORDER_SCOPES.map(scope => [scope, []])),
+        mergeDockEntryOrderSnapshot,
+        applyDockEntryOrderSnapshot: () => {},
+        fetchPost: (url: string, config: Config.IEntryVisibility,
+                    respond: (response: {code: number; data: Config.IEntryVisibility}) => void) => {
+            requests.push({url, config, respond});
+        },
+    })});
+    const simple = {...initial, active: "simple"};
+    const full = {...initial};
+    exports.saveEntryVisibility(simple);
+    assert.equal(window.siyuan.config.appearance.entryVisibility, simple);
+    assert.equal(requests.length, 1);
+    assert.equal(requests[0].url, "/api/setting/setEntryVisibility");
+    assert.equal(requests[0].config, simple);
+    assert.deepEqual(events, ["siyuan-entry-visibility"]);
+    exports.saveEntryVisibility(full);
+    assert.equal(requests.length, 1);
+    requests[0].respond({code: 0, data: simple});
+    assert.equal(requests.length, 2);
+    assert.equal(requests[1].config, full);
+    assert.equal(window.siyuan.config.appearance.entryVisibility, full);
+    requests[1].respond({code: 0, data: full});
+    assert.deepEqual(events, ["siyuan-entry-visibility", "siyuan-entry-visibility", "siyuan-entry-visibility"]);
+});

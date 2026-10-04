@@ -104,6 +104,7 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	console.Enable(rt)
 	encoding.Enable(rt)
 	EnableAbortAPI(rt)
+	EnableFormDataAPI(rt)
 	return
 }
 

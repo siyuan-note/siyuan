@@ -57,6 +57,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		headers := map[string]string{}
 		var bodyString *string
 		var bodyBytes *[]byte
+		var bodyContentType string // 请求体自带的媒体类型（如 FormData 的 multipart boundary），调用方未显式设置 Content-Type 时使用
 		timeout := fetchDefaultTimeout
 		var signal *abortSignalState
 
@@ -85,6 +86,11 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						if b := initObj.Get("body"); isJsValueNotNull(b) {
 							if goja.IsString(b) {
 								bodyString = new(b.String())
+							} else if formData, ok := formDataStateOf(b); ok {
+								// 在调用时完成编码，之后对 FormData 的修改不影响本次请求（与 fetch 规范一致）。
+								body, contentType := formData.encodeMultipart()
+								bodyBytes = &body
+								bodyContentType = contentType
 							} else {
 								body := b.Export()
 								if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
@@ -175,6 +181,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				r := httpClient.R().SetContext(ctx)
 				for k, v := range headers {
 					r.SetHeader(k, v)
+				}
+				if bodyContentType != "" && r.Headers.Get("Content-Type") == "" {
+					r.SetHeader("Content-Type", bodyContentType)
 				}
 				r.SetHeader(model.XAuthTokenKey, p.token)
 

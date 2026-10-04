@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -74,8 +75,9 @@ func runClientFetchScript(t *testing.T, p *KernelPlugin, script string) <-chan s
 
 	settled := make(chan string, 1)
 	_, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
-		// 与生产环境一致先启用 AbortController/AbortSignal 等全局，供脚本中的 init.signal 使用。
+		// 与生产环境一致先启用 AbortController、FormData 等全局，供脚本中的 init.signal、init.body 使用。
 		EnableAbortAPI(rt)
+		EnableFormDataAPI(rt)
 
 		siyuan := rt.NewObject()
 		if injectErr := injectClient(p, rt, siyuan); injectErr != nil {
@@ -178,6 +180,141 @@ func TestClientFetchCopiesArrayBufferBody(t *testing.T) {
 		t.Fatal("timed out waiting for fetch request")
 	}
 
+	if reason := waitClientFetchSettled(t, settled); reason != "" {
+		t.Fatalf("fetch rejected: %s", reason)
+	}
+}
+
+// multipartRequest 是内核替身收到的 multipart 请求：Content-Type 头与按 Go 的 mime/multipart 解析出的表单。
+type multipartRequest struct {
+	contentTypes []string
+	values       string              // 按字段名排序的 fmt 格式输出
+	files        map[string][]string // 同名文件按请求中的顺序排列
+	err          error
+}
+
+// receiveMultipart 返回解析 multipart 请求并把结果发到 requests 的处理函数；文件以 "文件名|类型|内容" 记录。
+func receiveMultipart(requests chan<- multipartRequest) http.HandlerFunc {
+	return func(_ http.ResponseWriter, r *http.Request) {
+		received := multipartRequest{contentTypes: r.Header.Values("Content-Type")}
+		if received.err = r.ParseMultipartForm(1 << 20); received.err == nil {
+			received.values = fmt.Sprint(r.MultipartForm.Value)
+			received.files = map[string][]string{}
+			for name, headers := range r.MultipartForm.File {
+				for _, header := range headers {
+					file, err := header.Open()
+					if err != nil {
+						received.err = err
+						break
+					}
+					content, err := io.ReadAll(file)
+					file.Close()
+					if err != nil {
+						received.err = err
+						break
+					}
+					received.files[name] = append(received.files[name],
+						header.Filename+"|"+header.Header.Get("Content-Type")+"|"+string(content))
+				}
+			}
+		}
+		requests <- received
+	}
+}
+
+// waitMultipartRequest 等待内核替身收到请求。
+func waitMultipartRequest(t *testing.T, requests <-chan multipartRequest) multipartRequest {
+	t.Helper()
+
+	select {
+	case received := <-requests:
+		return received
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for fetch request")
+		return multipartRequest{}
+	}
+}
+
+func TestClientFetchSendsFormDataAsMultipart(t *testing.T) {
+	requests := make(chan multipartRequest, 1)
+	p := startClientFetchTest(t, receiveMultipart(requests))
+
+	settled := runClientFetchScript(t, p, `
+		const body = new FormData();
+		body.append("assetsDirPath", "/assets/");
+		body.append("file[]", new File(["hello"], "hello.txt", {type: "text/plain"}));
+		body.append("file[]", new Blob([new Uint8Array([0, 255])]), "raw.bin");
+		siyuan.client.fetch("/api/asset/upload", {method: "POST", body})
+			.then(() => settle(""), (e) => settle(String(e)));
+	`)
+
+	received := waitMultipartRequest(t, requests)
+	if received.err != nil {
+		t.Fatalf("parse multipart request: %v (Content-Type %q)", received.err, received.contentTypes)
+	}
+	if len(received.contentTypes) != 1 || !strings.HasPrefix(received.contentTypes[0], "multipart/form-data; boundary=") {
+		t.Fatalf("Content-Type = %q, want a single multipart/form-data type with the generated boundary",
+			received.contentTypes)
+	}
+	if want := "map[assetsDirPath:[/assets/]]"; received.values != want {
+		t.Fatalf("form values = %s, want %s", received.values, want)
+	}
+	want := []string{"hello.txt|text/plain|hello", "raw.bin|application/octet-stream|\x00\xff"}
+	if got := received.files["file[]"]; !slices.Equal(got, want) {
+		t.Fatalf("form files = %q, want %q", got, want)
+	}
+	if reason := waitClientFetchSettled(t, settled); reason != "" {
+		t.Fatalf("fetch rejected: %s", reason)
+	}
+}
+
+func TestClientFetchKeepsExplicitContentTypeForFormData(t *testing.T) {
+	contentTypes := make(chan []string, 1)
+	p := startClientFetchTest(t, func(_ http.ResponseWriter, r *http.Request) {
+		contentTypes <- r.Header.Values("Content-Type")
+	})
+
+	settled := runClientFetchScript(t, p, `
+		const body = new FormData();
+		body.append("a", "1");
+		const headers = {"content-type": "multipart/form-data; boundary=caller"};
+		siyuan.client.fetch("/", {method: "POST", body, headers}).then(() => settle(""), (e) => settle(String(e)));
+	`)
+
+	select {
+	case got := <-contentTypes:
+		if len(got) != 1 || got[0] != "multipart/form-data; boundary=caller" {
+			t.Fatalf("Content-Type = %q, want only the caller's value", got)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for fetch request")
+	}
+	if reason := waitClientFetchSettled(t, settled); reason != "" {
+		t.Fatalf("fetch rejected: %s", reason)
+	}
+}
+
+func TestClientFetchEncodesFormDataAtCallTime(t *testing.T) {
+	requests := make(chan multipartRequest, 1)
+	p := startClientFetchTest(t, receiveMultipart(requests))
+
+	// fetch 之后的修改与 fetch 位于同一段同步脚本中，请求任务只能在脚本结束后执行，
+	// 因此推迟到请求任务里才编码的实现必然发送修改后的内容。
+	settled := runClientFetchScript(t, p, `
+		const body = new FormData();
+		body.append("a", "1");
+		siyuan.client.fetch("/", {method: "POST", body}).then(() => settle(""), (e) => settle(String(e)));
+		body.set("a", "changed");
+		body.append("late", "x");
+	`)
+
+	received := waitMultipartRequest(t, requests)
+	if received.err != nil {
+		t.Fatalf("parse multipart request: %v", received.err)
+	}
+	if want := "map[a:[1]]"; received.values != want {
+		t.Fatalf("form values = %s, want the entries at call time %s", received.values, want)
+	}
 	if reason := waitClientFetchSettled(t, settled); reason != "" {
 		t.Fatalf("fetch rejected: %s", reason)
 	}

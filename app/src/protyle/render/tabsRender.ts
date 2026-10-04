@@ -10,6 +10,8 @@ export interface ITabsRenderOptions {
     label?: string;
     addLabel?: string;
     select?: (tabs: HTMLElement, id: string) => void;
+    restore?: (tabs: HTMLElement) => string;
+    remember?: (tabs: HTMLElement, id: string) => void;
     activate?: (item: HTMLElement) => void;
     rename?: (item: HTMLElement) => void;
     add?: (tabs: HTMLElement) => void;
@@ -166,6 +168,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             }
             state.active = id;
             state.pending = undefined;
+            if (persist) {
+                controller.options.remember?.(tabs, id);
+            }
             if (persist && !controller.options.readonly?.(tabs)) {
                 controller.options.select?.(tabs, id);
             }
@@ -192,7 +197,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                 const source = resolveTabID(ids, tabs.getAttribute("tabs-active-id"));
                 let state = states.get(tabs);
                 if (!state || state.owner !== controller) {
-                    state = {owner: controller, active: source, source, instance: `siyuan-tabs-${++instanceID}`};
+                    const restored = controller.options.restore?.(tabs);
+                    state = {owner: controller, active: ids.includes(restored) ? restored : source,
+                        source, instance: `siyuan-tabs-${++instanceID}`};
                     states.set(tabs, state);
                 }
                 const current = items.find(item => itemID(item) === state.active);

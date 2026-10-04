@@ -8,6 +8,7 @@ import {resolveVisibleListMindmapBlock} from "../render/listMindmap/render";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {revealTabsForTarget} from "../render/tabsRender";
+import {getTabReadingID} from "../wysiwyg/tabsReading";
 import {bgFade, scrollCenter} from "../../util/highlightById";
 /// #if !MOBILE
 import {pushBack} from "../../util/backForward";
@@ -687,7 +688,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     const hasScrollTop = scrollAttr && typeof scrollAttr.scrollTop === "number";
     const savedFocusElement = focusElement;
     if (hasScrollTop && scrollAttr.focusId && !action.includes(Constants.CB_GET_HL)) {
-        focusElement = getSavedTabFocusTarget(focusElement);
+        focusElement = getSavedTabFocusTarget(focusElement, tabs => getTabReadingID(protyle, tabs as HTMLElement));
     }
     if (action.includes(Constants.CB_GET_HL)) {
         preventScroll(protyle); // 搜索页签滚动会导致再次请求

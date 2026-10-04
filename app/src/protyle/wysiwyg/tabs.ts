@@ -18,6 +18,7 @@ import {hideElements} from "../ui/hideElements";
 import {getTaskStatusItems} from "./taskStatusDialog";
 import {canFocusTabItem, getFocusedTabItem, prepareFocusedTabItem} from "./tabsFocus";
 import {zoomOut} from "../../menus/protyle";
+import {getTabReadingID, saveTabReadingID} from "./tabsReading";
 
 const boundFocusedTitles = new WeakSet<HTMLElement>();
 
@@ -226,6 +227,8 @@ export const initEditorTabs = (protyle: IProtyle) => {
     tabsRender(root, {
         prepare: () => prepareFocusedTabItem(protyle),
         readonly: tabs => !canEdit(protyle, tabs || root),
+        restore: tabs => getTabReadingID(protyle, tabs),
+        remember: (tabs, id) => saveTabReadingID(protyle, tabs, id),
         label: window.siyuan.languages.tabItem,
         addLabel: window.siyuan.languages.newTabItem,
         taskLabel: window.siyuan.languages.task,

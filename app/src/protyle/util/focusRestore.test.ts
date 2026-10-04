@@ -48,6 +48,17 @@ describe("saved focus respects persisted tab selection", () => {
         inner.append(new FocusElement("tab-item", {"data-node-id": "inner-active"}));
         assert.equal(getSavedTabFocusTarget(first.asElement()), outer.asElement());
     });
+    it("prioritizes the readonly reading position over stale focus and falls back after deletion", () => {
+        const tabs = new FocusElement("tabs", {"tabs-active-id": "first"});
+        const first = tabs.append(new FocusElement("tab-item", {"data-node-id": "first"}));
+        const second = tabs.append(new FocusElement("tab-item", {"data-node-id": "second"}));
+        const oldFocus = first.append(new FocusElement());
+        const readingFocus = second.append(new FocusElement());
+        assert.equal(getSavedTabFocusTarget(oldFocus.asElement(), () => "second"), tabs.asElement());
+        assert.equal(getSavedTabFocusTarget(readingFocus.asElement(), () => "second"), readingFocus.asElement());
+        assert.equal(getSavedTabFocusTarget(oldFocus.asElement(), () => "deleted"), oldFocus.asElement());
+        assert.equal(getSavedTabFocusTarget(oldFocus.asElement(), () => undefined), oldFocus.asElement());
+    });
     it("leaves ordinary focus and a missing target unchanged", () => {
         const paragraph = new FocusElement();
         assert.equal(getSavedTabFocusTarget(paragraph.asElement()), paragraph.asElement());

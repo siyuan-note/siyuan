@@ -3035,7 +3035,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Tabs group related content. Click a title to switch tabs, drag to reorder, or double-click to rename. Tabs can appear at the top or on the left; the selected tab is saved and synced."
+					"Data": "Tabs group related content. Click a title to switch tabs, drag to reorder, or double-click to rename. Tabs can appear at the top or on the left; the selected tab is saved and synced in edit mode. Locked documents remember the reading position locally without changing the default tab."
 				}
 			]
 		},

@@ -18,8 +18,14 @@ package plugin
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dop251/goja"
@@ -85,7 +91,7 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
 		}
 	}()
 
-	registry := require.NewRegistry()
+	registry := require.NewRegistry(require.WithLoader(pluginSourceLoader(p)))
 
 	registry.Enable(rt)
 	registry.RegisterNativeModule(
@@ -98,6 +104,47 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	console.Enable(rt)
 	encoding.Enable(rt)
 	return
+}
+
+// pluginSourceLoader 返回 require 的源码加载器，只读取插件目录（kernel.js 所在目录）内的普通文件。
+// require 以调用方脚本名为基准解析相对路径，kernel.js 的脚本名是 p.file，因此 p.file 所在目录对应插件目录；
+// 绝对路径、越出插件目录的路径以及向上查找到的 node_modules 都视为模块文件不存在，解析器会继续尝试其他候选路径。
+// 文件经插件目录句柄打开，指向插件目录之外的符号链接无法读取。
+func pluginSourceLoader(p *KernelPlugin) require.SourceLoader {
+	prefix := filepath.Dir(p.file) + string(filepath.Separator)
+	return func(name string) ([]byte, error) {
+		rel, ok := strings.CutPrefix(name, prefix)
+		if !ok || !filepath.IsLocal(rel) {
+			return nil, require.ModuleFileDoesNotExistError
+		}
+
+		root, err := os.OpenRoot(p.pluginDir)
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				return nil, require.ModuleFileDoesNotExistError
+			}
+			return nil, err
+		}
+		defer root.Close()
+
+		file, err := root.Open(rel)
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				return nil, require.ModuleFileDoesNotExistError
+			}
+			return nil, err
+		}
+		defer file.Close()
+
+		info, err := file.Stat()
+		if err != nil {
+			return nil, err
+		}
+		if !info.Mode().IsRegular() {
+			return nil, require.ModuleFileDoesNotExistError
+		}
+		return io.ReadAll(file)
+	}
 }
 
 // EnableSiyuanModule injects all siyuan.* APIs into the plugin's goja global context.

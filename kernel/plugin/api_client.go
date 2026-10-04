@@ -58,6 +58,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		var bodyString *string
 		var bodyBytes *[]byte
 		timeout := fetchDefaultTimeout
+		var signal *abortSignalState
 
 		if goja.IsString(call.Argument(0)) {
 			path = call.Argument(0).String()
@@ -99,6 +100,12 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							timeout, argErr = fetchTimeoutOf(t)
 						}
 					}
+
+					if argErr == nil {
+						if s := initObj.Get("signal"); isJsValueNotNull(s) {
+							signal, argErr = abortSignalOf(rt, s, "signal")
+						}
+					}
 				}
 			}
 		}
@@ -109,32 +116,60 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				return
 			}
 
+			// 请求发出前 signal 已经中止：不发送请求，直接以 reason reject。
+			if signal != nil && signal.aborted {
+				if rejectErr := reject(signal.reason); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.fetch reject: %v", p.Name, rejectErr)
+				}
+				return
+			}
+
+			// 以插件上下文为父上下文，使插件停止时取消未完成的请求；signal 中止时额外取消。
+			var ctx context.Context
+			var cancel context.CancelFunc
+			if timeout > 0 {
+				ctx, cancel = context.WithTimeout(p.context, timeout)
+			} else {
+				ctx, cancel = context.WithCancel(p.context)
+			}
+
+			// abortHookFired 记录取消是否来自 signal 中止，与超时、插件停止等其他取消来源区开；
+			// 依赖 Store/Load 建立的 happens-before 关系，该标记为 true 之后再读取 signal.reason 是安全的
+			// （triggerAbort 在调用 goHooks 前已写入 reason，且其后不再修改）。
+			var abortHookFired atomic.Bool
+			if signal != nil {
+				signal.addAbortHook(func() {
+					abortHookFired.Store(true)
+					cancel()
+				})
+			}
+
 			go func() {
+				defer cancel()
+
 				var err error
+				var rejectReason goja.Value // 中止时改用它而不是 err（包装成 Error）进行 reject，reason 可以是任意值
+
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.client.fetch: %v", r)
+						rejectReason = nil
 					}
 
-					if err != nil {
-						p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-							if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-								logging.LogErrorf("[plugin:%s] siyuan.client.fetch reject: %v", p.Name, rejectErr)
-							}
-							return
-						}, nil)
+					if err == nil && rejectReason == nil {
+						return
 					}
+					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						reason := rejectReason
+						if reason == nil {
+							reason = rt.NewGoError(err)
+						}
+						if rejectErr := reject(reason); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.fetch reject: %v", p.Name, rejectErr)
+						}
+						return
+					}, nil)
 				}()
-
-				// 以插件上下文为父上下文，使插件停止时取消未完成的请求。
-				var ctx context.Context
-				var cancel context.CancelFunc
-				if timeout > 0 {
-					ctx, cancel = context.WithTimeout(p.context, timeout)
-				} else {
-					ctx, cancel = context.WithCancel(p.context)
-				}
-				defer cancel()
 
 				targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
 				r := httpClient.R().SetContext(ctx)
@@ -152,6 +187,10 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				// req 在 Send 内读完响应体，因此读取响应体时超时也会在这里返回。
 				resp, sendErr := r.Send(method, targetURL)
 				if sendErr != nil {
+					if abortHookFired.Load() {
+						rejectReason = signal.reason
+						return
+					}
 					err = sendErr
 					if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 						err = fmt.Errorf("request timed out after %s: %w", timeout, sendErr)

@@ -74,6 +74,9 @@ func runClientFetchScript(t *testing.T, p *KernelPlugin, script string) <-chan s
 
 	settled := make(chan string, 1)
 	_, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
+		// 与生产环境一致先启用 AbortController/AbortSignal 等全局，供脚本中的 init.signal 使用。
+		EnableAbortAPI(rt)
+
 		siyuan := rt.NewObject()
 		if injectErr := injectClient(p, rt, siyuan); injectErr != nil {
 			return nil, injectErr
@@ -227,6 +230,106 @@ func TestClientFetchTimeoutCoversResponseBody(t *testing.T) {
 	reason := waitClientFetchSettled(t, runClientFetchScript(t, p, fetchAndSettle("/stalled", "{timeout: 100}")))
 	if !strings.Contains(reason, "timed out after 100ms") {
 		t.Fatalf("fetch settled with %q, want the timeout while reading the response body", reason)
+	}
+}
+
+func TestClientFetchRejectsImmediatelyWhenSignalAlreadyAborted(t *testing.T) {
+	p := startClientFetchTest(t, func(http.ResponseWriter, *http.Request) {
+		t.Error("fetch sent a request although its signal was already aborted")
+	})
+
+	reason := waitClientFetchSettled(t, runClientFetchScript(t, p, `
+		const controller = new AbortController();
+		controller.abort("already gone");
+		siyuan.client.fetch("/", {signal: controller.signal}).then(() => settle(""), (e) => settle(String(e)));
+	`))
+	if reason != "already gone" {
+		t.Fatalf("fetch settled with %q, want the signal's reason", reason)
+	}
+}
+
+func TestClientFetchRejectsWithSignalReasonWhenAbortedMidFlight(t *testing.T) {
+	started := make(chan struct{})
+	cancelled := make(chan struct{})
+	p := startClientFetchTest(t, func(_ http.ResponseWriter, r *http.Request) {
+		close(started)
+		<-r.Context().Done()
+		close(cancelled)
+	})
+
+	settled := runClientFetchScript(t, p, `
+		const controller = new AbortController();
+		siyuan.client.fetch("/pending", {signal: controller.signal, timeout: 0})
+			.then(() => settle(""), (e) => settle(String(e)));
+		globalThis.__controller = controller;
+	`)
+	select {
+	case <-started:
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for fetch request")
+	}
+
+	if _, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
+		controller := rt.GlobalObject().Get("__controller")
+		fn, _ := goja.AssertFunction(controller.ToObject(rt).Get("abort"))
+		_, callErr := fn(controller, rt.ToValue("mid-flight abort"))
+		return nil, callErr
+	}); err != nil {
+		t.Fatalf("controller.abort(): %v", err)
+	}
+
+	select {
+	case <-cancelled:
+	case <-time.After(5 * time.Second):
+		t.Fatal("pending request was not cancelled by the signal")
+	}
+	if reason := waitClientFetchSettled(t, settled); reason != "mid-flight abort" {
+		t.Fatalf("fetch settled with %q, want the signal's reason", reason)
+	}
+}
+
+func TestClientFetchSignalAbortDoesNotMaskUnrelatedCancellation(t *testing.T) {
+	// 插件停止（父上下文取消）与 signal 中止是不同的取消来源，前者仍应保留原有的 "context canceled" 行为。
+	started := make(chan struct{})
+	cancelled := make(chan struct{})
+	p := startClientFetchTest(t, func(_ http.ResponseWriter, r *http.Request) {
+		close(started)
+		<-r.Context().Done()
+		close(cancelled)
+	})
+
+	settled := runClientFetchScript(t, p, `
+		const controller = new AbortController();
+		siyuan.client.fetch("/pending", {signal: controller.signal, timeout: 0})
+			.then(() => settle(""), (e) => settle(String(e)));
+	`)
+	select {
+	case <-started:
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for fetch request")
+	}
+
+	p.cancel()
+	select {
+	case <-cancelled:
+	case <-time.After(5 * time.Second):
+		t.Fatal("pending request was not cancelled with the plugin context")
+	}
+	if reason := waitClientFetchSettled(t, settled); !strings.Contains(reason, "context canceled") {
+		t.Fatalf("fetch settled with %q, want cancellation unrelated to the signal", reason)
+	}
+}
+
+func TestClientFetchRejectsNonAbortSignalInit(t *testing.T) {
+	p := startClientFetchTest(t, func(http.ResponseWriter, *http.Request) {
+		t.Error("fetch sent a request with an invalid signal")
+	})
+
+	for _, signal := range []string{"{}", `"not a signal"`, "123"} {
+		reason := waitClientFetchSettled(t, runClientFetchScript(t, p, fetchAndSettle("/", "{signal: "+signal+"}")))
+		if !strings.Contains(reason, "signal must be an AbortSignal") {
+			t.Errorf("signal %s: fetch settled with %q", signal, reason)
+		}
 	}
 }
 

@@ -35,6 +35,7 @@ import (
 	"github.com/dop251/goja_nodejs/eventloop"
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -75,9 +76,11 @@ func runClientFetchScript(t *testing.T, p *KernelPlugin, script string) <-chan s
 
 	settled := make(chan string, 1)
 	_, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
-		// 与生产环境一致先启用 AbortController、FormData 等全局，供脚本中的 init.signal、init.body 使用。
+		// 与生产环境一致先启用 AbortController、FormData、Streams 等全局，供脚本中的 init.signal、init.body、
+		// response.body 使用。
 		EnableAbortAPI(rt)
 		p.formDataHost = EnableFormDataAPI(rt)
+		p.streamsHost = streams.Enable(rt)
 
 		siyuan := rt.NewObject()
 		if injectErr := injectClient(p, rt, siyuan); injectErr != nil {
@@ -326,14 +329,94 @@ func TestClientFetchResponseBytesAndBlob(t *testing.T) {
 		w.Write([]byte{0x89, 'P', 'N', 'G'})
 	})
 
+	// response.blob() 整体读完响应体并认领它；blob 本身不是一次性的，可以反复调用其方法；
+	// 响应体被认领后，response 上的另一个数据方法（这里用 bytes()）必须按 bodyUsed 语义拒绝。
 	got := waitClientFetchSettled(t, runClientFetchScript(t, p, `
 		siyuan.client.fetch("/image").then(async (response) => {
 			const blob = await response.blob();
-			settle(JSON.stringify([Array.from(await response.bytes()), blob.type, Array.from(await blob.bytes())]));
+			const bytesFromBlob = Array.from(await blob.bytes());
+			const bytesFromBlobAgain = Array.from(new Uint8Array(await blob.arrayBuffer()));
+			let secondCallRejected = false;
+			try { await response.bytes(); } catch (e) { secondCallRejected = e instanceof TypeError; }
+			settle(JSON.stringify([blob.type, bytesFromBlob, bytesFromBlobAgain, secondCallRejected]));
 		}).catch((e) => settle(String(e)));
 	`))
-	if want := `[[137,80,78,71],"image/png",[137,80,78,71]]`; got != want {
+	if want := `["image/png",[137,80,78,71],[137,80,78,71],true]`; got != want {
 		t.Fatalf("response bytes() and blob() = %s, want %s", got, want)
+	}
+}
+
+// TestClientFetchResponseBodyStreamsChunks 验证 response.body 是真正边到边读的流：第一块数据到达时
+// fetch() 已经 resolve，第二块数据要等服务端继续写入才会出现，不是构造响应对象时就已经整体读完。
+func TestClientFetchResponseBodyStreamsChunks(t *testing.T) {
+	secondChunk := make(chan struct{})
+	p := startClientFetchTest(t, func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "first-")
+		w.(http.Flusher).Flush()
+		select {
+		case <-secondChunk:
+		case <-r.Context().Done():
+			return
+		}
+		io.WriteString(w, "second")
+	})
+
+	// 必须在运行主脚本之前就把这个 Go 回调挂到 globalThis 上：主脚本是异步的（先等 fetch 的 Promise resolve
+	// 再读 body），调用它时才去设置回调会有时间窗口竞争，脚本可能在回调还没挂上去之前就先调用到它。
+	// p.worker 的事件循环只有一个 goja.Runtime，这里设置的全局在后续 runClientFetchScript 里仍然可见。
+	if _, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
+		return nil, rt.Set("__unblockSecondChunk", func(goja.FunctionCall) goja.Value {
+			close(secondChunk)
+			return goja.Undefined()
+		})
+	}); err != nil {
+		t.Fatalf("expose __unblockSecondChunk: %v", err)
+	}
+
+	settled := runClientFetchScript(t, p, `
+		siyuan.client.fetch("/chunks").then(async (response) => {
+			const reader = response.body.getReader();
+			const first = await reader.read();
+			const firstBytes = Array.from(first.value);
+			__unblockSecondChunk();
+			const second = await reader.read();
+			const third = await reader.read();
+			settle(JSON.stringify([firstBytes, Array.from(second.value), third.done]));
+		}, (e) => settle("fetch-rejected:" + String(e))).catch((e) => settle("script-threw:" + String(e)));
+	`)
+
+	reason := waitClientFetchSettled(t, settled)
+	if want := `[[102,105,114,115,116,45],[115,101,99,111,110,100],true]`; reason != want {
+		t.Fatalf("response.body chunks = %s, want %s", reason, want)
+	}
+}
+
+// TestClientFetchResponseBodyCancelReleasesConnection 验证取消 response.body 的 reader 会关闭底层连接，
+// 不需要把响应体读完。
+func TestClientFetchResponseBodyCancelReleasesConnection(t *testing.T) {
+	serverSawCancellation := make(chan struct{})
+	p := startClientFetchTest(t, func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "first-")
+		w.(http.Flusher).Flush()
+		<-r.Context().Done() // reader.cancel() 关闭连接后，服务端的请求 context 会被取消
+		close(serverSawCancellation)
+	})
+
+	settled := runClientFetchScript(t, p, `
+		siyuan.client.fetch("/cancel-me").then(async (response) => {
+			const reader = response.body.getReader();
+			await reader.read();
+			await reader.cancel("not interested");
+			settle("cancelled");
+		}, (e) => settle("fetch-rejected:" + String(e)));
+	`)
+	if reason := waitClientFetchSettled(t, settled); reason != "cancelled" {
+		t.Fatalf("fetch settled with %q, want \"cancelled\"", reason)
+	}
+	select {
+	case <-serverSawCancellation:
+	case <-time.After(5 * time.Second):
+		t.Fatal("server did not observe the connection closing after reader.cancel()")
 	}
 }
 
@@ -374,16 +457,29 @@ func TestClientFetchTimeoutOverridesDefault(t *testing.T) {
 	}
 }
 
-func TestClientFetchTimeoutCoversResponseBody(t *testing.T) {
+// timeout 现在只约束到收到响应头为止：响应头已经到达后，即便响应体一直不来，fetch() 本身也必须 resolve，
+// 之后读取响应体不再受这个已经停掉的计时器约束，与浏览器 fetch 的 timeout/AbortSignal 分离语义一致。
+func TestClientFetchTimeoutCoversOnlyHeadersNotResponseBody(t *testing.T) {
 	p := startClientFetchTest(t, func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "partial")
 		w.(http.Flusher).Flush()
 		<-r.Context().Done()
 	})
 
-	reason := waitClientFetchSettled(t, runClientFetchScript(t, p, fetchAndSettle("/stalled", "{timeout: 100}")))
-	if !strings.Contains(reason, "timed out after 100ms") {
-		t.Fatalf("fetch settled with %q, want the timeout while reading the response body", reason)
+	settled := runClientFetchScript(t, p, `
+		siyuan.client.fetch("/stalled", {timeout: 50}).then((response) => {
+			const textPromise = response.text();
+			const stillPending = new Promise((resolve) => setTimeout(() => resolve("still-pending"), 150));
+			Promise.race([textPromise, stillPending]).then(
+				(result) => settle("resolved:" + response.status + ":" + result),
+				(e) => settle("text-rejected:" + String(e)),
+			);
+		}, (e) => settle("fetch-rejected:" + String(e)));
+	`)
+	reason := waitClientFetchSettled(t, settled)
+	if want := "resolved:200:still-pending"; reason != want {
+		t.Fatalf("fetch settled with %q, want %q (fetch() resolves at headers, and reading the body is not bounded "+
+			"by the already-expired timeout)", reason, want)
 	}
 }
 

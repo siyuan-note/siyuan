@@ -172,6 +172,9 @@ func filterByContext(collection Collection, attrView *AttributeView,
 			},
 		},
 	}
+	if KeyTypeRollup == keyValues.Key.Type {
+		filter.Value = &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{Contents: []*Value{filter.Value}}}
+	}
 	valuesByItemID := make(map[string]*Value, len(keyValues.Values))
 	for _, value := range keyValues.Values {
 		if nil == value {
@@ -184,6 +187,9 @@ func filterByContext(collection Collection, attrView *AttributeView,
 	var items []Item
 	for _, item := range collection.GetItems() {
 		value := valuesByItemID[item.GetID()]
+		if nil == value && KeyTypeRollup == keyValues.Key.Type {
+			value = &Value{KeyID: context.KeyID, BlockID: item.GetID(), Type: KeyTypeRollup, Rollup: &ValueRollup{}}
+		}
 		if nil != value && value.Filter(filter, attrView, item.GetID(), rollupFurtherCollections, cachedAttrViews) {
 			items = append(items, item)
 		}
@@ -337,8 +343,13 @@ func evalMissingLeaf(filter *ViewFilter) bool {
 	case FilterOperatorIsNotEmpty:
 		return false
 	case FilterOperatorContainsAnyItem, FilterOperatorDoesNotContainAnyItem:
-		if !isExactRelationFilter(filter) || nil == filter.Value.Relation ||
-			1 > len(filter.Value.Relation.BlockIDs) {
+		comparison := filter
+		if nil != filter.Value && KeyTypeRollup == filter.Value.Type && nil != filter.Value.Rollup &&
+			0 < len(filter.Value.Rollup.Contents) {
+			comparison = &ViewFilter{Operator: filter.Operator, Value: filter.Value.Rollup.Contents[0]}
+		}
+		if !isExactRelationFilter(comparison) || nil == comparison.Value.Relation ||
+			1 > len(comparison.Value.Relation.BlockIDs) {
 			return true
 		}
 		return FilterOperatorDoesNotContainAnyItem == filter.Operator
@@ -663,25 +674,24 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 	// 单独处理汇总
 	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type && nil != filter.Value.Rollup {
 		key, _ := attrView.GetKey(value.KeyID)
-		if nil == key {
+		if nil == key || nil == key.Rollup {
 			return false
 		}
 
 		relKey, _ := attrView.GetKey(key.Rollup.RelationKeyID)
-		if nil == relKey {
+		if !isConfiguredRelationKey(relKey) {
 			return false
 		}
 
 		relVal := attrView.GetValue(relKey.ID, itemID)
-		if nil == relVal || nil == relVal.Relation {
-			return false
-		}
 
 		destAv := cachedAttrViews[relKey.Relation.AvID]
 		if nil == destAv {
 			destAv, _ = ParseAttributeView(relKey.Relation.AvID)
 			if nil != destAv {
-				cachedAttrViews[relKey.Relation.AvID] = destAv
+				if nil != cachedAttrViews {
+					cachedAttrViews[relKey.Relation.AvID] = destAv
+				}
 			}
 		}
 		if nil == destAv {
@@ -693,8 +703,27 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		if nil == destKey {
 			return false
 		}
+		var comparison *ViewFilter
+		if 0 < len(filter.Value.Rollup.Contents) {
+			candidate := &ViewFilter{Operator: filter.Operator, Value: filter.Value.Rollup.Contents[0]}
+			if isExactRelationFilter(candidate) {
+				if !isRollupValueList(key) || !isConfiguredRelationKey(destKey) {
+					return false
+				}
+				comparison = candidate
+			}
+		}
+		if nil == relVal || nil == relVal.Relation {
+			return nil != comparison && filterRelationRollupItems(nil, comparison)
+		}
 
 		rollupContext := rollupFurtherCollections[key.ID]
+		if nil != comparison {
+			// 精确筛选按条目 ID 匹配，不能让显示值按名称去重后丢失同名条目。
+			contents := &ValueRollup{}
+			contents.BuildContents(destAv, destKey, relVal, nil, rollupContext)
+			return filterRelationRollupItems(contents.Contents, comparison)
+		}
 		value.Rollup.BuildContents(destAv, destKey, relVal, key.Rollup.Calc, rollupContext)
 		relationContentCount := len(relVal.Relation.Contents)
 		if nil != rollupContext && nil != rollupContext.EligibleItemIDs {

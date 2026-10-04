@@ -5494,9 +5494,6 @@ func setAttributeViewContextFilter(tx *Transaction, blockID, avID,
 		ret = &av.AttributeViewContextFilter{Spec: av.AttributeViewContextFilterSpec, KeyID: keyID}
 		// undo/redo 重放需要能恢复字段删除或改型后留下的旧配置；普通事务和公开 API 仍严格校验。
 		if nil == tx || !tx.isReplay {
-			if err = ret.Validate(attrView); nil != err {
-				return nil, err
-			}
 			if _, err = resolveAttributeViewContextFilterTarget(attrView, ret, tree.Box); nil != err {
 				return nil, fmt.Errorf("validate attribute view context filter target: %w", err)
 			}
@@ -5543,13 +5540,6 @@ func resolveAttributeViewFilterContext(attrView *av.AttributeView, view *av.View
 	context := &av.FilterContext{KeyID: contextFilter.KeyID}
 	// 字段删除、改型或关联目标失效时保留块级配置，并以空上下文安全渲染。
 	// 这样撤销字段变更后配置可自动恢复，用户也可在界面中显式禁用。
-	if err = contextFilter.Validate(attrView); nil != err {
-		return context, nil
-	}
-	key, err := attrView.GetKey(contextFilter.KeyID)
-	if nil != err || nil == key || nil == key.Relation {
-		return context, nil
-	}
 	_, tree, err := getAttributeViewInstanceNode(attrView, blockID)
 	if nil != err {
 		return nil, err
@@ -5567,26 +5557,46 @@ func resolveAttributeViewFilterContext(attrView *av.AttributeView, view *av.View
 
 func resolveAttributeViewContextFilterTarget(attrView *av.AttributeView, contextFilter *av.AttributeViewContextFilter,
 	carrierBoxID string) (ret *av.AttributeView, err error) {
-	if err = contextFilter.Validate(attrView); nil != err {
-		return nil, err
+	if nil == contextFilter || av.AttributeViewContextFilterSpec != contextFilter.Spec {
+		return nil, av.ErrInvalidAttributeViewContextFilter
 	}
-	key, _ := attrView.GetKey(contextFilter.KeyID)
-	if key.Relation.AvID == attrView.ID {
-		return attrView, nil
-	}
-	targetBoxID := ""
-	if IsEncryptedBox(carrierBoxID) {
-		targetBoxID = carrierBoxID
-	}
-	av.SetAVBoxID(key.Relation.AvID, targetBoxID)
-	ret, err = av.ParseAttributeViewInBox(key.Relation.AvID, targetBoxID)
+	load := attributeViewContextFilterLoader(attrView, carrierBoxID)
+	key, err := attrView.ResolveRelationKey(contextFilter.KeyID, load)
 	if nil != err {
 		return nil, err
 	}
-	if nil == ret {
-		return nil, av.ErrAttributeViewNotFound
+	return load(key.Relation.AvID)
+}
+
+// GetAttributeViewContextFilterFields 在承载数据库块的笔记本范围内解析上下文筛选候选。
+func GetAttributeViewContextFilterFields(attrView *av.AttributeView, blockID string) []*av.AttributeViewContextFilterField {
+	boxID, _, err := resolveAttributeViewCarrierBoxID(blockID)
+	if nil != err {
+		return []*av.AttributeViewContextFilterField{}
 	}
-	return
+	return attrView.ContextFilterFields(attributeViewContextFilterLoader(attrView, boxID))
+}
+
+func attributeViewContextFilterLoader(attrView *av.AttributeView,
+	carrierBoxID string) func(string) (*av.AttributeView, error) {
+	return func(avID string) (*av.AttributeView, error) {
+		if nil != attrView && avID == attrView.ID {
+			return attrView, nil
+		}
+		targetBoxID := ""
+		if IsEncryptedBox(carrierBoxID) {
+			targetBoxID = carrierBoxID
+		}
+		av.SetAVBoxID(avID, targetBoxID)
+		ret, err := av.ParseAttributeViewInBox(avID, targetBoxID)
+		if nil != err {
+			return nil, err
+		}
+		if nil == ret {
+			return nil, av.ErrAttributeViewNotFound
+		}
+		return ret, nil
+	}
 }
 
 func getAttributeViewCarrierBlockTree(blockID string) *treenode.BlockTree {

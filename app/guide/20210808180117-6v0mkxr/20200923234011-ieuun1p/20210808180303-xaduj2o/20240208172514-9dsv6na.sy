@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260927123058"
+		"updated": "20261004032313"
 	},
 	"Children": [
 		{
@@ -1554,7 +1554,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-5zjv62o",
-				"updated": "20260904121106"
+				"updated": "20261004032313"
 			},
 			"Children": [
 				{
@@ -1583,7 +1583,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171129-438l9c3",
-				"updated": "20260904121106"
+				"updated": "20261004032313"
 			},
 			"Children": [
 				{
@@ -1868,7 +1868,7 @@
 					},
 					"Properties": {
 						"id": "20260904022100-t3p2t45",
-						"updated": "20260904121106"
+						"updated": "20261004032313"
 					},
 					"Children": [
 						{
@@ -1876,7 +1876,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260904022100-h1drat7",
-								"updated": "20260904121106"
+								"updated": "20261004032313"
 							},
 							"Children": [
 								{
@@ -1895,7 +1895,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " from the database block toolbar and select a configured Relation field. The panel lists all configured Relation fields in the database, but only one can be enabled at a time. Select another field to switch to it; select the checked field again to turn off the context filter. Once enabled, the fixed condition “Contains any item - Current document” applies to every view in this database block. Each view’s ordinary filters remain independent and are combined with the context filter using AND. When you add an item from this database block, the current document is automatically added to the selected Relation field. For filtering and adding items to work, the current document must already be bound to an item in the selected Relation field’s target database; otherwise, no matching items are shown and you cannot add items from this database block"
+									"Data": " from the database block toolbar and select a configured Relation field, or a Rollup targeting a Relation field with Show original values or Show unique values. The panel lists all eligible fields in the database, but only one can be enabled at a time. Select another field to switch to it; select the checked field again to turn off the context filter. Once enabled, the fixed condition “Contains any item - Current document” applies to every view in this database block. Each view’s ordinary filters remain independent and are combined with the context filter using AND. The current document must already be bound to an item in the final related database; otherwise, no matching items are shown and you cannot add items from this database block. With a direct Relation field, new items automatically relate to the current document. With a Rollup, new items do not fill the computed value or change relations in the intermediate database, and may be hidden by the filter. Eligible Rollups also support Contains any item and Does not contain any item in ordinary filters: search and select items from the final related database to match the entire rolled-up item set. Items with identical names are distinguished by item ID. Existing keyword filters and their Any, All, and None quantifiers keep their existing behavior"
 								}
 							]
 						}

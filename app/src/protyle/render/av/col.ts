@@ -407,7 +407,9 @@ export const bindEditEvent = (options: {
             inputElement.setAttribute("placeholder", `${options.data.name} ${nameElement.value}`);
         }
     });
-    nameElement.select();
+    if (!isMobile()) {
+        nameElement.select();
+    }
     nameElement.value = colData.name;
     const descElement = options.menuElement.querySelector('.b3-text-field[data-type="desc"]') as HTMLTextAreaElement;
     nameElement.nextElementSibling.addEventListener("click", () => {

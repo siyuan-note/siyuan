@@ -12,6 +12,7 @@ import {clearSelect} from "../../util/clear";
 import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "./viewVisibility";
 import {isNotEditBlock} from "../../wysiwyg/getBlock";
 import {countFilterLeaves} from "./filterTree";
+import {isMobile} from "../../../util/functions";
 
 export const setAVBlockVisibleViewIDs = (
     protyle: IProtyle,
@@ -215,7 +216,9 @@ export const bindViewEvent = (options: {
             options.menuElement.parentElement.remove();
         }
     });
-    inputElement.select();
+    if (!isMobile()) {
+        inputElement.select();
+    }
     inputElement.value = inputElement.dataset.value;
     const descElement = options.menuElement.querySelector('.b3-text-field[data-type="desc"]') as HTMLTextAreaElement;
     inputElement.nextElementSibling.addEventListener("click", () => {
@@ -338,7 +341,9 @@ export const getViewHTML = (data: IAV) => {
 
 export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Element, blockElement: Element }) => {
     const inputElement = options.menuElement.querySelector(".b3-text-field") as HTMLInputElement;
-    inputElement.focus();
+    if (!isMobile()) {
+        inputElement.focus();
+    }
     inputElement.addEventListener("keydown", (event) => {
         event.stopPropagation();
         if (event.isComposing) {

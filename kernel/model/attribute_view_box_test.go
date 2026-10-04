@@ -100,6 +100,27 @@ func TestAttributeViewCarrierUsesExactCryptoBoundary(t *testing.T) {
 		0 != len(context.CurrentDocumentItemIDs) {
 		t.Fatalf("cross-boundary context target should fail closed with no matched items: %#v, %v", context, contextErr)
 	}
+
+	rollupKey := &av.Key{ID: "foreign-rollup", Type: av.KeyTypeRollup,
+		Rollup: &av.Rollup{RelationKeyID: relationKey.ID, KeyID: "foreign-staff"}}
+	fixture.attrView.KeyValues = append(fixture.attrView.KeyValues, &av.KeyValues{Key: rollupKey})
+	rollupContext := &av.AttributeViewContextFilter{Spec: av.AttributeViewContextFilterSpec, KeyID: rollupKey.ID}
+	if _, err = resolveAttributeViewContextFilterTarget(fixture.attrView, rollupContext, fixture.tree.Box); nil == err {
+		t.Fatal("rollup must not load an intermediate database across the carrier crypto boundary")
+	}
+	for _, field := range GetAttributeViewContextFilterFields(fixture.attrView, carrierBlockID) {
+		if field.ID == rollupKey.ID {
+			t.Fatal("rollup metadata must not expose an inaccessible intermediate database")
+		}
+	}
+
+	localRelation := &av.Key{ID: "local-relation", Type: av.KeyTypeRelation,
+		Relation: &av.Relation{AvID: fixture.attrView.ID}}
+	fixture.attrView.KeyValues = append(fixture.attrView.KeyValues, &av.KeyValues{Key: localRelation})
+	rollupKey.Rollup.RelationKeyID, rollupKey.Rollup.KeyID = localRelation.ID, relationKey.ID
+	if _, err = resolveAttributeViewContextFilterTarget(fixture.attrView, rollupContext, fixture.tree.Box); nil == err {
+		t.Fatal("rollup must not load the final relation database across the carrier crypto boundary")
+	}
 }
 
 func TestTwoWayRelationWriteUsesCarrierCryptoBoundary(t *testing.T) {

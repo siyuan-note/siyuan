@@ -1156,6 +1156,7 @@ interface IAV {
 
 interface IAVContextFilter {
     spec: 1;
+    /** 直接关联或目标为关联且显示原值/唯一值的汇总字段；汇总仅用于筛选，不回填新增条目 */
     keyID: string;
 }
 
@@ -1163,6 +1164,7 @@ interface IAVContextFilterField {
     id: string;
     name: string;
     icon: string;
+    /** 最终关联目标数据库的 ID；汇总字段返回关联目标，而非中间数据库 */
     targetAvID: string;
 }
 

@@ -447,6 +447,13 @@ const getOperatorSelectByType = (type: TAVCol, currentOperator: string, isRollup
 const rollupTargetColumns = new WeakMap<IAVColumn, IAVColumn>();
 const relationFilterLabelCache = new Map<string, string>();
 
+const isRelationRollupColumn = (column: IAVColumn, target = rollupTargetColumns.get(column)) =>
+    column?.type === "rollup" && target?.type === "relation" && !!target.relation?.avID &&
+    (!column.rollup?.calc?.operator || column.rollup.calc.operator === "Unique values");
+
+const wrapFilterCellValue = (filter: IAVFilter, value: IAVCellValue): IAVCellValue =>
+    filter.value?.type === "rollup" ? {type: "rollup", rollup: {contents: [value]}} as IAVCellValue : value;
+
 const getRelationFilterCacheKey = (avID: string, blockID: string) => `${avID}\n${blockID}`;
 
 const parseRelationFilterBlockIDs = (value: string | string[]): string[] => {
@@ -474,6 +481,7 @@ export const prepareFilterColumns = async (data: IAV) => {
     const fields = getFieldsByData(data);
     const avRequests = new Map<string, Promise<IAVColumn[]>>();
     const tasks = fields.filter((column) => column.type === "rollup" && column.rollup?.relationKeyID && column.rollup?.keyID).map(async (column) => {
+        rollupTargetColumns.delete(column);
         const relationColumn = fields.find((item) => item.id === column.rollup.relationKeyID);
         const targetAVID = relationColumn?.relation?.avID;
         if (!targetAVID) {
@@ -492,6 +500,7 @@ export const prepareFilterColumns = async (data: IAV) => {
             rollupTargetColumns.set(column, targetColumn);
         }
     });
+    await Promise.all(tasks);
     const relationSelections = new Map<string, Set<string>>();
     const collectRelationSelections = (filters: IAVFilter[]) => {
         filters.forEach((filter) => {
@@ -503,7 +512,8 @@ export const prepareFilterColumns = async (data: IAV) => {
                 return;
             }
             const column = fields.find((item) => item.id === filter.column);
-            const targetAVID = column?.type === "relation" ? column.relation?.avID : "";
+            const targetAVID = column?.type === "relation" ? column.relation?.avID :
+                isRelationRollupColumn(column) ? rollupTargetColumns.get(column).relation.avID : "";
             if (!targetAVID) {
                 return;
             }
@@ -512,7 +522,7 @@ export const prepareFilterColumns = async (data: IAV) => {
                 blockIDs = new Set<string>();
                 relationSelections.set(targetAVID, blockIDs);
             }
-            filter.value?.relation?.blockIDs?.forEach((blockID) => blockIDs.add(blockID));
+            getFilterCellValue(filter)?.relation?.blockIDs?.forEach((blockID) => blockIDs.add(blockID));
         });
     };
     collectRelationSelections(getRootFilters(data));
@@ -530,7 +540,7 @@ export const prepareFilterColumns = async (data: IAV) => {
             // 候选显示名加载失败不应阻止筛选面板打开，控件会保留行 ID 并允许重新搜索。
         }
     });
-    await Promise.all([...tasks, ...relationTasks]);
+    await Promise.all(relationTasks);
 };
 
 // resolveFilterValueType 解析 filter 实际的值类型。
@@ -584,7 +594,7 @@ export const genEmptyFilterValue = (column: IAVColumn, valueSource: "stored" | "
     const emptyRollup = {type: "rollup", rollup: {contents: []}} as IAVCellValue;
     const {type} = resolveFilterValueType({value: emptyRollup} as IAVFilter, column);
     return {
-        operator: getDefaultOperatorByType(type, true),
+        operator: getDefaultOperatorByType(type, !isRelationRollupColumn(column)),
         value: {
             type: "rollup",
             rollup: {contents: [genEmptyCellValue(type)]},
@@ -601,10 +611,11 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     const valueHidden = isEmptyOp ? " fn__none" : "";
 
     // 操作符 select
-    const operatorSelect = `<select class="b3-select" data-type="operation" data-path="${path}">${getOperatorSelectByType(valueType, operator, isRollup)}</select>`;
+    const relationRollup = isRelationRollupColumn(colData);
+    const operatorSelect = `<select class="b3-select" data-type="operation" data-path="${path}">${getOperatorSelectByType(valueType, operator, isRollup && !relationRollup)}</select>`;
 
     // 量化器 select（rollup/mAsset 才有）
-    const quantifierSelect = (isRollup || valueType === "mAsset")
+    const quantifierSelect = ((isRollup && !(relationRollup && isExactRelationOperator(operator))) || valueType === "mAsset")
         ? `<select class="b3-select" data-type="quantifier" data-path="${path}">
 <option ${(!filter.quantifier || filter.quantifier === "Any") ? "selected" : ""} value="Any">${window.siyuan.languages.filterQuantifierAny}</option>
 <option ${filter.quantifier === "All" ? "selected" : ""} value="All">${window.siyuan.languages.filterQuantifierAll}</option>
@@ -644,7 +655,7 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
         const {trigger, dropdown} = genInlineSelectHTML(filter, valueColumn, path, valueType, allowMultiple);
         valueHTML = trigger;
         extraHTML = dropdown; // 下拉面板放 valueContainer 外，fixed 定位不影响行宽
-    } else if (valueType === "relation" && !isRollup && isExactRelationOperator(operator)) {
+    } else if (valueType === "relation" && (!isRollup || relationRollup) && isExactRelationOperator(operator)) {
         const {trigger, dropdown} = genInlineRelationHTML(filter, valueColumn, path);
         valueHTML = trigger;
         extraHTML = dropdown;
@@ -885,9 +896,7 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
     }
 
     // rollup 包装
-    if (filter.value?.type === "rollup") {
-        newValue = {type: "rollup", rollup: {contents: [newValue]}} as IAVCellValue;
-    }
+    newValue = wrapFilterCellValue(filter, newValue);
 
     return {newValue, relativeDate, relativeDate2};
 };
@@ -1039,10 +1048,10 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         }
         const newFilter: IAVFilter = {
             ...filter,
-            value: {
+            value: wrapFilterCellValue(filter, {
                 type: "relation",
                 relation: {blockIDs: selectedBlockIDs, contents: []},
-            },
+            } as IAVCellValue),
         };
         commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, false, filterOperation);
         renderRelationFilterSelection(path, dropdown, selectedBlockIDs);
@@ -1142,7 +1151,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             const structureChange = (["date", "created", "updated"].includes(valueType) &&
                 ((newOp === "Is between") !== (oldOp === "Is between"))) ||
                 ((newOp === "Is empty" || newOp === "Is not empty") !== (oldOp === "Is empty" || oldOp === "Is not empty")) ||
-                (valueType === "relation" && !isRollup &&
+                (valueType === "relation" && (!isRollup || isRelationRollupColumn(colData)) &&
                     (isExactRelationOperator(newOp) !== isExactRelationOperator(oldOp)));
             saveRow(row, path, structureChange);
         } else if (type === "quantifier" || type === "dateEndpoint" || type?.startsWith("dataDirection") || type === "dateType") {

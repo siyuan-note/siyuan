@@ -27,7 +27,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
-// cryptoTestRuntime 启动一个注入了 siyuan.crypto 的事件循环，
+// cryptoTestRuntime 启动一个注入了 crypto 的事件循环，
 // 并提供在循环上执行脚本、等待异步结果的辅助方法。
 type cryptoTestRuntime struct {
 	t      *testing.T
@@ -52,11 +52,7 @@ func newCryptoTestRuntime(t *testing.T) *cryptoTestRuntime {
 	ret := &cryptoTestRuntime{t: t, plugin: p, loop: loop, done: make(chan string, 8)}
 
 	if _, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
-		siyuan := rt.NewObject()
-		if err := injectCrypto(p, rt, siyuan); err != nil {
-			return nil, err
-		}
-		if err := rt.Set("siyuan", siyuan); err != nil {
+		if err := injectCrypto(p, rt); err != nil {
 			return nil, err
 		}
 		// report 供脚本回传结果，done 供等待异步完成。
@@ -66,7 +62,7 @@ func newCryptoTestRuntime(t *testing.T) *cryptoTestRuntime {
 		}); err != nil {
 			return nil, err
 		}
-		// 这里只注入 siyuan.crypto，没有启用 TextEncoder，测试脚本用它把 ASCII 字符串转为 Uint8Array。
+		// 这里只注入 crypto，没有启用 TextEncoder，测试脚本用它把 ASCII 字符串转为 Uint8Array。
 		if _, err := rt.RunString(`function TextEncoderLike(text) {
 			const bytes = new Uint8Array(text.length);
 			for (let i = 0; i < text.length; i++) {
@@ -78,7 +74,7 @@ func newCryptoTestRuntime(t *testing.T) *cryptoTestRuntime {
 		}
 		return nil, nil
 	}); err != nil {
-		t.Fatalf("inject siyuan.crypto: %v", err)
+		t.Fatalf("inject crypto: %v", err)
 	}
 	return ret
 }
@@ -137,7 +133,7 @@ func TestCryptoGetRandomValues(t *testing.T) {
 	// 返回值必须是传入的同一个数组，且已被填充。
 	got := rt.run(`(() => {
 		const array = new Uint8Array(32);
-		const returned = siyuan.crypto.getRandomValues(array);
+		const returned = crypto.getRandomValues(array);
 		const filled = array.some((v) => v !== 0);
 		return [returned === array, filled].join(",");
 	})()`)
@@ -150,7 +146,7 @@ func TestCryptoGetRandomValues(t *testing.T) {
 		const types = [Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array,
 			Int32Array, Uint32Array, BigInt64Array, BigUint64Array];
 		return types.every((T) => {
-			siyuan.crypto.getRandomValues(new T(4));
+			crypto.getRandomValues(new T(4));
 			return true;
 		});
 	})()`)
@@ -163,29 +159,29 @@ func TestCryptoGetRandomValues(t *testing.T) {
 		"new Float32Array(4)", "new Float64Array(4)",
 		"new DataView(new ArrayBuffer(4))", "new ArrayBuffer(4)", "[1,2,3]", "null",
 	} {
-		message := rt.runError("siyuan.crypto.getRandomValues(" + expr + ")")
+		message := rt.runError("crypto.getRandomValues(" + expr + ")")
 		if !strings.Contains(message, "TypeMismatchError") {
 			t.Errorf("getRandomValues(%s) threw %q, want TypeMismatchError", expr, message)
 		}
 	}
 
 	// 超过 65536 字节应报 QuotaExceededError。
-	message := rt.runError("siyuan.crypto.getRandomValues(new Uint8Array(65537))")
+	message := rt.runError("crypto.getRandomValues(new Uint8Array(65537))")
 	if !strings.Contains(message, "QuotaExceededError") {
 		t.Fatalf("threw %q, want QuotaExceededError", message)
 	}
 
 	// 边界值 65536 字节应当接受。
-	rt.run("siyuan.crypto.getRandomValues(new Uint8Array(65536))")
+	rt.run("crypto.getRandomValues(new Uint8Array(65536))")
 }
 
 func TestCryptoRandomUUID(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 
 	got := rt.run(`(() => {
-		const uuid = siyuan.crypto.randomUUID();
+		const uuid = crypto.randomUUID();
 		const pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-		return [uuid.length, pattern.test(uuid), uuid !== siyuan.crypto.randomUUID()].join(",");
+		return [uuid.length, pattern.test(uuid), uuid !== crypto.randomUUID()].join(",");
 	})()`)
 	if got.String() != "36,true,true" {
 		t.Fatalf("randomUUID = %s, want 36,true,true", got.String())
@@ -195,13 +191,13 @@ func TestCryptoRandomUUID(t *testing.T) {
 func TestCryptoIsInstalledAsGlobal(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 
-	// globalThis.crypto 与 siyuan.crypto 是同一个对象，按标准全局名访问的代码可直接使用。
+	// crypto 以标准全局名安装在 globalThis 上，按标准全局名访问的代码可直接使用。
 	got := rt.run(`(() => {
 		const random = crypto.getRandomValues(new Uint8Array(4));
-		return [globalThis.crypto === siyuan.crypto, random.length, typeof crypto.subtle.digest].join(",");
+		return [typeof globalThis.crypto, random.length, typeof crypto.subtle.digest].join(",");
 	})()`)
-	if got.String() != "true,4,function" {
-		t.Fatalf("globalThis.crypto = %s, want true,4,function", got.String())
+	if got.String() != "object,4,function" {
+		t.Fatalf("globalThis.crypto = %s, want object,4,function", got.String())
 	}
 }
 
@@ -211,7 +207,7 @@ func TestCryptoDigest(t *testing.T) {
 	// 摘要结果以 ArrayBuffer 返回，内容与已知向量一致。
 	got := rt.await(`(async () => {
 		const data = new Uint8Array([0x61, 0x62, 0x63]);
-		const digest = await siyuan.crypto.subtle.digest("SHA-256", data);
+		const digest = await crypto.subtle.digest("SHA-256", data);
 		const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 		report([digest instanceof ArrayBuffer, hex].join(","));
 	})()`)
@@ -223,8 +219,8 @@ func TestCryptoDigest(t *testing.T) {
 	// 算法名称大小写不敏感，且接受 {name} 形式。
 	got = rt.await(`(async () => {
 		const data = new Uint8Array(0);
-		const a = await siyuan.crypto.subtle.digest("sha-1", data);
-		const b = await siyuan.crypto.subtle.digest({name: "SHA-1"}, data);
+		const a = await crypto.subtle.digest("sha-1", data);
+		const b = await crypto.subtle.digest({name: "SHA-1"}, data);
 		report([a.byteLength, b.byteLength].join(","));
 	})()`)
 	if got != "20,20" {
@@ -234,7 +230,7 @@ func TestCryptoDigest(t *testing.T) {
 	// 未知算法应 reject 且错误名为 NotSupportedError。
 	got = rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.digest("SHA-3", new Uint8Array(1));
+			await crypto.subtle.digest("SHA-3", new Uint8Array(1));
 			report("resolved");
 		} catch (e) {
 			report(e.name);
@@ -247,7 +243,7 @@ func TestCryptoDigest(t *testing.T) {
 	// 参数类型错误应 reject 为 TypeError。
 	got = rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.digest("SHA-256", "not a buffer");
+			await crypto.subtle.digest("SHA-256", "not a buffer");
 			report("resolved");
 		} catch (e) {
 			report(e.constructor.name + ":" + e.name);
@@ -262,9 +258,9 @@ func TestCryptoAESGCMRoundTrip(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const key = await subtle.generateKey({name: "AES-GCM", length: 256}, true, ["encrypt", "decrypt"]);
-		const iv = siyuan.crypto.getRandomValues(new Uint8Array(12));
+		const iv = crypto.getRandomValues(new Uint8Array(12));
 		const plaintext = new TextEncoderLike("hello siyuan");
 
 		const ciphertext = await subtle.encrypt({name: "AES-GCM", iv}, key, plaintext);
@@ -286,9 +282,9 @@ func TestCryptoImportIgnoresAESParameterLength(t *testing.T) {
 	// 同一个 AES-CTR 参数对象可以同时用于导入与加解密，其中的 length 是计数器位长，
 	// 不影响导入：密钥位长取自密钥数据。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const params = {name: "AES-CTR", counter: new Uint8Array(16), length: 64};
-		const raw = siyuan.crypto.getRandomValues(new Uint8Array(16));
+		const raw = crypto.getRandomValues(new Uint8Array(16));
 
 		try {
 			const key = await subtle.importKey("raw", raw, params, true, ["encrypt", "decrypt"]);
@@ -314,7 +310,7 @@ func TestCryptoKeyObjectShape(t *testing.T) {
 
 	// CryptoKey 不暴露自有属性，密钥材料不可从 JS 读取。
 	got := rt.await(`(async () => {
-		const key = await siyuan.crypto.subtle.generateKey({name: "AES-GCM", length: 128}, true, ["encrypt"]);
+		const key = await crypto.subtle.generateKey({name: "AES-GCM", length: 128}, true, ["encrypt"]);
 		report([
 			Object.keys(key).length,
 			JSON.stringify(key),
@@ -333,7 +329,7 @@ func TestCryptoKeyObjectShape(t *testing.T) {
 	// 属性是只读访问器，赋值在严格模式下抛错。
 	got = rt.await(`(async () => {
 		"use strict";
-		const key = await siyuan.crypto.subtle.generateKey({name: "AES-GCM", length: 128}, true, ["encrypt"]);
+		const key = await crypto.subtle.generateKey({name: "AES-GCM", length: 128}, true, ["encrypt"]);
 		try {
 			key.extractable = false;
 			report("assigned");
@@ -349,7 +345,7 @@ func TestCryptoKeyObjectShape(t *testing.T) {
 	got = rt.await(`(async () => {
 		const fake = {type: "secret", extractable: true, algorithm: {name: "AES-GCM"}, usages: ["encrypt"]};
 		try {
-			await siyuan.crypto.subtle.encrypt({name: "AES-GCM", iv: new Uint8Array(12)}, fake, new Uint8Array(1));
+			await crypto.subtle.encrypt({name: "AES-GCM", iv: new Uint8Array(12)}, fake, new Uint8Array(1));
 			report("resolved");
 		} catch (e) {
 			report(e.constructor.name);
@@ -364,7 +360,7 @@ func TestCryptoHMACSignVerify(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const raw = new Uint8Array([0x4a, 0x65, 0x66, 0x65]); // "Jefe"
 		const key = await subtle.importKey("raw", raw, {name: "HMAC", hash: "SHA-256"}, true, ["sign", "verify"]);
 		const data = new TextEncoderLike("what do ya want for nothing?");
@@ -390,8 +386,8 @@ func TestCryptoImportExportKey(t *testing.T) {
 
 	// raw 往返保持密钥材料不变。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
-		const raw = siyuan.crypto.getRandomValues(new Uint8Array(32));
+		const subtle = crypto.subtle;
+		const raw = crypto.getRandomValues(new Uint8Array(32));
 		const key = await subtle.importKey("raw", raw, "AES-CBC", true, ["encrypt", "decrypt"]);
 		const exported = await subtle.exportKey("raw", key);
 		const same = [...new Uint8Array(exported)].join(",") === [...raw].join(",");
@@ -403,7 +399,7 @@ func TestCryptoImportExportKey(t *testing.T) {
 
 	// jwk 导出为普通对象，可直接再次导入。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const key = await subtle.generateKey({name: "AES-GCM", length: 256}, true, ["encrypt", "decrypt"]);
 		const jwk = await subtle.exportKey("jwk", key);
 		const reimported = await subtle.importKey("jwk", jwk, "AES-GCM", true, ["encrypt", "decrypt"]);
@@ -418,7 +414,7 @@ func TestCryptoImportExportKey(t *testing.T) {
 
 	// 不可导出的密钥不能导出。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const key = await subtle.generateKey({name: "AES-GCM", length: 128}, false, ["encrypt"]);
 		try {
 			await subtle.exportKey("raw", key);
@@ -434,7 +430,7 @@ func TestCryptoImportExportKey(t *testing.T) {
 	// 未实现的格式应报 NotSupportedError，而不是参数错误。
 	got = rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.importKey("spki", new Uint8Array(8), "AES-GCM", true, ["encrypt"]);
+			await crypto.subtle.importKey("spki", new Uint8Array(8), "AES-GCM", true, ["encrypt"]);
 			report("resolved");
 		} catch (e) {
 			report(e.name);
@@ -447,7 +443,7 @@ func TestCryptoImportExportKey(t *testing.T) {
 	// 非法格式名属于参数错误。
 	got = rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.importKey("pem", new Uint8Array(8), "AES-GCM", true, ["encrypt"]);
+			await crypto.subtle.importKey("pem", new Uint8Array(8), "AES-GCM", true, ["encrypt"]);
 			report("resolved");
 		} catch (e) {
 			report(e.constructor.name);
@@ -463,7 +459,7 @@ func TestCryptoJWKKeyOpsPresence(t *testing.T) {
 
 	// key_ops 缺失时不限制用法；为空数组或含重复值时报 DataError。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const key = await subtle.generateKey({name: "AES-GCM", length: 128}, true, ["encrypt"]);
 		const {key_ops, ...withoutKeyOps} = await subtle.exportKey("jwk", key);
 
@@ -498,7 +494,7 @@ func TestCryptoJWKUseOfKeyAgreement(t *testing.T) {
 
 	// ECDH 与 X25519 的私钥用于派生，use 必须是 enc，sig 报 DataError。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const results = [];
 		for (const alg of [{name: "ECDH", namedCurve: "P-256"}, {name: "X25519"}]) {
 			const pair = await subtle.generateKey(alg, true, ["deriveBits"]);
@@ -525,7 +521,7 @@ func TestCryptoDeriveKeyAndBits(t *testing.T) {
 
 	// PBKDF2 派生比特串，相同参数结果一致。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const password = new TextEncoderLike("password");
 		const base = await subtle.importKey("raw", password, "PBKDF2", false, ["deriveBits", "deriveKey"]);
 		const params = {name: "PBKDF2", hash: "SHA-1", salt: new TextEncoderLike("salt"), iterations: 2};
@@ -543,7 +539,7 @@ func TestCryptoDeriveKeyAndBits(t *testing.T) {
 
 	// HKDF 需要 salt 与 info 成员。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const base = await subtle.importKey("raw", new Uint8Array(16), "HKDF", false, ["deriveBits"]);
 		try {
 			await subtle.deriveBits({name: "HKDF", hash: "SHA-256"}, base, 128);
@@ -559,7 +555,7 @@ func TestCryptoDeriveKeyAndBits(t *testing.T) {
 	// KDF 密钥要求 extractable 为 false。
 	got = rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.importKey("raw", new Uint8Array(16), "HKDF", true, ["deriveBits"]);
+			await crypto.subtle.importKey("raw", new Uint8Array(16), "HKDF", true, ["deriveBits"]);
 			report("resolved");
 		} catch (e) {
 			report(e.name);
@@ -574,10 +570,10 @@ func TestCryptoWrapUnwrapKey(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const wrapping = await subtle.generateKey({name: "AES-GCM", length: 256}, true, ["wrapKey", "unwrapKey"]);
 		const target = await subtle.generateKey({name: "AES-CBC", length: 128}, true, ["encrypt", "decrypt"]);
-		const iv = siyuan.crypto.getRandomValues(new Uint8Array(12));
+		const iv = crypto.getRandomValues(new Uint8Array(12));
 
 		const wrapped = await subtle.wrapKey("raw", target, wrapping, {name: "AES-GCM", iv});
 		const unwrapped = await subtle.unwrapKey("raw", wrapped, wrapping, {name: "AES-GCM", iv},
@@ -599,7 +595,7 @@ func TestCryptoUsageEnforcement(t *testing.T) {
 
 	// 未声明的用法应报 InvalidAccessError。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const key = await subtle.generateKey({name: "AES-GCM", length: 128}, true, ["decrypt"]);
 		try {
 			await subtle.encrypt({name: "AES-GCM", iv: new Uint8Array(12)}, key, new Uint8Array(1));
@@ -615,7 +611,7 @@ func TestCryptoUsageEnforcement(t *testing.T) {
 	// 算法不允许的用法应报 SyntaxError。
 	got = rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.generateKey({name: "AES-GCM", length: 128}, true, ["sign"]);
+			await crypto.subtle.generateKey({name: "AES-GCM", length: 128}, true, ["sign"]);
 			report("resolved");
 		} catch (e) {
 			report(e.name);
@@ -628,7 +624,7 @@ func TestCryptoUsageEnforcement(t *testing.T) {
 	// 非法用法字符串属于参数错误。
 	got = rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.generateKey({name: "AES-GCM", length: 128}, true, ["Encrypt"]);
+			await crypto.subtle.generateKey({name: "AES-GCM", length: 128}, true, ["Encrypt"]);
 			report("resolved");
 		} catch (e) {
 			report(e.constructor.name);
@@ -645,7 +641,7 @@ func TestCryptoInputIsCopiedBeforeComputation(t *testing.T) {
 	// 调用后立即修改输入缓冲区，结果必须对应调用时的内容。
 	got := rt.await(`(async () => {
 		const data = new Uint8Array([0x61, 0x62, 0x63]);
-		const promise = siyuan.crypto.subtle.digest("SHA-256", data);
+		const promise = crypto.subtle.digest("SHA-256", data);
 		data.fill(0);
 
 		const digest = await promise;
@@ -665,7 +661,7 @@ func TestCryptoRespectsTypedArrayViews(t *testing.T) {
 	got := rt.run(`(() => {
 		const buffer = new ArrayBuffer(16);
 		const view = new Uint8Array(buffer, 4, 8);
-		siyuan.crypto.getRandomValues(view);
+		crypto.getRandomValues(view);
 
 		const all = new Uint8Array(buffer);
 		const before = all.slice(0, 4).every((v) => v === 0);
@@ -679,7 +675,7 @@ func TestCryptoRespectsTypedArrayViews(t *testing.T) {
 
 	// 摘要只覆盖视图范围，结果与同内容的独立数组一致。
 	result := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const buffer = new Uint8Array([0, 0, 0x61, 0x62, 0x63, 0, 0]).buffer;
 		const view = new Uint8Array(buffer, 2, 3);
 
@@ -696,7 +692,7 @@ func TestCryptoRespectsTypedArrayViews(t *testing.T) {
 	// DataView 也是合法的 BufferSource。
 	result = rt.await(`(async () => {
 		const buffer = new Uint8Array([0x61, 0x62, 0x63]).buffer;
-		const digest = await siyuan.crypto.subtle.digest("SHA-256", new DataView(buffer));
+		const digest = await crypto.subtle.digest("SHA-256", new DataView(buffer));
 		const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 		report(hex);
 	})()`)
@@ -711,7 +707,7 @@ func TestCryptoAcceptsEmptyBufferSource(t *testing.T) {
 	// 长度为 0 的 BufferSource 是合法取值，必须与成员缺失区分开：
 	// RFC 5869 允许 HKDF 的 salt 与 info 为空，浏览器同样接受。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const base = await subtle.importKey("raw", new TextEncoderLike("password"),
 			{name: "HKDF"}, false, ["deriveBits"]);
 
@@ -746,9 +742,9 @@ func TestCryptoAcceptsEmptyBufferSource(t *testing.T) {
 
 	// 空明文与空的附加认证数据同样可用。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const key = await subtle.generateKey({name: "AES-GCM", length: 128}, true, ["encrypt", "decrypt"]);
-		const iv = siyuan.crypto.getRandomValues(new Uint8Array(12));
+		const iv = crypto.getRandomValues(new Uint8Array(12));
 
 		const ciphertext = await subtle.encrypt(
 			{name: "AES-GCM", iv, additionalData: new Uint8Array(0)}, key, new Uint8Array(0));
@@ -771,7 +767,7 @@ func TestCryptoArgumentExceptionsRejectThePromise(t *testing.T) {
 	// 读取参数时脚本抛出的异常不能同步抛出，而要以原值拒绝 Promise，
 	// 这样调用方的 .catch(...) 才能处理。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const thrown = new Error("boom");
 		const fail = () => { throw thrown; };
 		const data = new Uint8Array(1);
@@ -820,7 +816,7 @@ func TestCryptoArgumentInterruptPropagates(t *testing.T) {
 		if err := r.Set("interruptNow", func() { r.Interrupt("stop") }); err != nil {
 			return nil, err
 		}
-		_, runErr = r.RunString(`siyuan.crypto.subtle.digest({get name() { interruptNow(); for (;;) {} }}, new Uint8Array(1))`)
+		_, runErr = r.RunString(`crypto.subtle.digest({get name() { interruptNow(); for (;;) {} }}, new Uint8Array(1))`)
 		r.ClearInterrupt()
 		return nil, nil
 	}); err != nil {
@@ -835,13 +831,13 @@ func TestCryptoSurfaceIsFrozen(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 
 	got := rt.run(`(() => {
-		const results = [Object.isFrozen(siyuan.crypto), Object.isFrozen(siyuan.crypto.subtle)];
+		const results = [Object.isFrozen(crypto), Object.isFrozen(crypto.subtle)];
 		try {
-			siyuan.crypto.subtle.digest = () => {};
+			crypto.subtle.digest = () => {};
 		} catch (e) {
 			results.push("throws");
 		}
-		results.push(typeof siyuan.crypto.subtle.digest === "function");
+		results.push(typeof crypto.subtle.digest === "function");
 		return results.join(",");
 	})()`)
 	if got.String() != "true,true,true" {

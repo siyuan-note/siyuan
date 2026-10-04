@@ -156,7 +156,7 @@ func (s *SignalState) AddAbortHook(hook func()) {
 }
 
 // newSignalError 构造一个 name 为给定值的 Error，供未显式提供 reason 时使用。
-// 沙箱没有 DOMException，约定与 siyuan.crypto 一致：用普通 Error 并覆盖 name 属性，
+// 沙箱没有 DOMException，约定与 globalThis.crypto 一致：用普通 Error 并覆盖 name 属性，
 // 调用方应按 error.name 分支而不是 instanceof 判断。
 func newSignalError(rt *goja.Runtime, name, message string) goja.Value {
 	err := rt.NewGoError(fmt.Errorf("%s", message))

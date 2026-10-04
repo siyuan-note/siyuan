@@ -30,11 +30,10 @@ import (
 // randomValuesMaxLength 是 getRandomValues 单次可填充的最大字节数，与浏览器一致。
 const randomValuesMaxLength = 65536
 
-// injectCrypto 注入 siyuan.crypto，实现 Web Crypto API 的 Crypto 接口，并以同一对象提供 globalThis.crypto，
-// 供按标准全局名访问 Web Crypto 的代码使用。
+// injectCrypto 实现 Web Crypto API 的 Crypto 接口，以标准全局名 globalThis.crypto 提供。
 // 密钥材料只保存在内核侧，插件通过 CryptoKey 句柄引用；运算在事件循环之外执行，
 // 结果回到事件循环后再转换为 JS 值。
-func injectCrypto(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
+func injectCrypto(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("injectCrypto: %v", r)
@@ -45,7 +44,7 @@ func injectCrypto(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 	cryptoObj := rt.NewObject()
 
-	// siyuan.crypto.getRandomValues(typedArray) -> typedArray
+	// crypto.getRandomValues(typedArray) -> typedArray
 	lo.Must0(cryptoObj.Set("getRandomValues", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		value := call.Argument(0)
 		data, err := randomValuesTarget(rt, value)
@@ -59,7 +58,7 @@ func injectCrypto(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		return value
 	})))
 
-	// siyuan.crypto.randomUUID() -> string
+	// crypto.randomUUID() -> string
 	lo.Must0(cryptoObj.Set("randomUUID", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		return rt.ToValue(uuid.NewString())
 	})))
@@ -68,7 +67,6 @@ func injectCrypto(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 	lo.Must0(cryptoObj.Set("subtle", subtle))
 
 	lo.Must0(ObjectFreeze(rt, cryptoObj))
-	lo.Must0(siyuan.Set("crypto", cryptoObj))
 	lo.Must0(rt.GlobalObject().Set("crypto", cryptoObj))
 	return
 }
@@ -98,7 +96,7 @@ func randomValuesTarget(rt *goja.Runtime, value goja.Value) ([]byte, error) {
 	return data, nil
 }
 
-// newSubtleObject 构造 siyuan.crypto.subtle。
+// newSubtleObject 构造 crypto.subtle。
 func (h *cryptoHost) newSubtleObject(rt *goja.Runtime) (*goja.Object, error) {
 	subtle := rt.NewObject()
 
@@ -219,7 +217,7 @@ func (h *cryptoHost) run(rt *goja.Runtime, name string,
 
 	rejectWith := func(rt *goja.Runtime, err error) {
 		if rejectErr := reject(h.toJsError(rt, err)); rejectErr != nil {
-			logging.LogErrorf("[plugin:%s] siyuan.crypto.subtle.%s reject: %v", p.Name, name, rejectErr)
+			logging.LogErrorf("[plugin:%s] crypto.subtle.%s reject: %v", p.Name, name, rejectErr)
 		}
 	}
 
@@ -242,7 +240,7 @@ func (h *cryptoHost) run(rt *goja.Runtime, name string,
 		defer func() {
 			if r := recover(); r != nil {
 				computeErr = crypto.NewError(crypto.ErrNameOperation,
-					"panic during siyuan.crypto.subtle.%s: %v", name, r)
+					"panic during crypto.subtle.%s: %v", name, r)
 			}
 
 			runErr := p.worker.Run(func(rt *goja.Runtime) (any, error) {
@@ -257,12 +255,12 @@ func (h *cryptoHost) run(rt *goja.Runtime, name string,
 					return nil, nil
 				}
 				if resolveErr := resolve(value); resolveErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.crypto.subtle.%s resolve: %v", p.Name, name, resolveErr)
+					logging.LogErrorf("[plugin:%s] crypto.subtle.%s resolve: %v", p.Name, name, resolveErr)
 				}
 				return nil, nil
 			}, nil)
 			if runErr != nil {
-				logging.LogErrorf("[plugin:%s] siyuan.crypto.subtle.%s worker run: %v", p.Name, name, runErr)
+				logging.LogErrorf("[plugin:%s] crypto.subtle.%s worker run: %v", p.Name, name, runErr)
 			}
 		}()
 

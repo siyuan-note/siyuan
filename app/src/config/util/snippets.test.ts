@@ -128,3 +128,34 @@ test("JS waits for its dependency and respects disposal while the dependency is 
     await render;
     assert.equal(f.executed.length, 0);
 });
+
+test("styles-only initialization applies CSS without loading Lute or executing enabled JS", async () => {
+    const f = fixture();
+    let dependencies = 0;
+    const beforeJS = async () => { dependencies++; };
+    const snippets = [{id: "style", type: "css", enabled: true, content: "body {color: red;}"},
+        {id: "script", type: "js", enabled: true, content: "run();"}];
+    const styles = f.exports.renderSnippet(0, () => true, beforeJS, false);
+    f.requests.at(-1).complete(snippets);
+    await styles;
+    assert.equal(f.elements.get("snippetCSSstyle").textContent, snippets[0].content);
+    assert.equal(dependencies, 0);
+    assert.equal(f.executed.length, 0);
+    const scripts = f.exports.renderSnippet(0, () => true, beforeJS);
+    f.requests.at(-1).complete(snippets);
+    await scripts;
+    assert.equal(dependencies, 1);
+    assert.deepEqual(f.executed, [snippets[1].content]);
+    assert.equal(f.measurements(), 1);
+});
+
+test("disabled JS snippets never load their dependency", async () => {
+    const f = fixture();
+    f.config.snippet.enabledJS = false;
+    let dependencies = 0;
+    const rendered = f.exports.renderSnippet(0, () => true, async () => { dependencies++; });
+    f.requests.at(-1).complete([{id: "script", type: "js", enabled: true, content: "run();"}]);
+    await rendered;
+    assert.equal(dependencies, 0);
+    assert.equal(f.executed.length, 0);
+});

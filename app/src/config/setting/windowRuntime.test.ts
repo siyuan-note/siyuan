@@ -14,13 +14,14 @@ const deferred = () => {
 };
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
-const fixture = () => {
+const fixture = (deferSnippetScripts = false) => {
     let active = true;
     let notebooks: () => Promise<unknown> = async () => {};
     let fetch: (url: string) => Promise<unknown> = async url => url.endsWith("getConf") ?
         {code: 0, data: {conf: {snippet: {enabledCSS: true, enabledJS: true}}}} : {code: 0, data: {zoom: 1.25}};
     const calls: {type: string; value?: unknown}[] = [];
     const guards: (() => boolean)[] = [];
+    const scriptModes: boolean[] = [];
     const storage: Record<string, unknown> = {zoom: 1};
     const config = {snippet: {enabledCSS: true, enabledJS: false}, appearance: {hideToolbar: true}};
     const window = {siyuan: {storage, config, notebooks: [{id: "a", name: "Renamed", closed: false}],
@@ -35,8 +36,9 @@ const fixture = () => {
         isMac: () => true,
         setNoteBook: async (callback: () => void) => { calls.push({type: "notebooks"}); await notebooks(); callback(); },
         fetchSyncPost: (url: string) => { calls.push({type: "fetch", value: url}); return fetch(url); },
-        renderSnippet: async (_timeout: number, guard: () => boolean, beforeJS: () => Promise<void>) => {
-            if (config.snippet.enabledJS) await beforeJS();
+        renderSnippet: async (_timeout: number, guard: () => boolean, beforeJS: () => Promise<void>, includeJS: boolean) => {
+            scriptModes.push(includeJS);
+            if (includeJS && config.snippet.enabledJS) await beforeJS();
             calls.push({type: "snippet", value: config.snippet}); guards.push(guard);
         },
         getHostCapabilities: () => ({customAppearance: true}),
@@ -54,12 +56,35 @@ const fixture = () => {
         document: {getElementById: (id: string) => elements.get(id), createElement: () => ({}),
             querySelectorAll: () => elements.has("history") ? [elements.get("history")] : []},
         require: () => dependencies});
-    const runtime = exports.createSettingsWindowRuntime(() => active);
-    return {runtime, exports, calls, guards, config, storage, window, location, elements,
+    const runtime = exports.createSettingsWindowRuntime(() => active, deferSnippetScripts);
+    return {runtime, exports, calls, guards, scriptModes, config, storage, window, location, elements,
         setActive: (value: boolean) => { active = value; },
         setNotebooks: (value: typeof notebooks) => { notebooks = value; },
         setFetch: (value: typeof fetch) => { fetch = value; }};
 };
+
+test("startup snippet refreshes and configuration messages defer Lute until the window is shown", async () => {
+    const f = fixture(true);
+    f.config.snippet.enabledJS = true;
+    await f.runtime.refreshSnippets();
+    f.runtime.handleMessage({cmd: "setSnippet", data: {enabledCSS: true, enabledJS: true}} as IWebSocketData);
+    await tick();
+    await f.runtime.reconnect();
+    assert.deepEqual(f.scriptModes, [false, false, false]);
+    assert.equal(f.calls.some(call => call.type === "lute"), false);
+    await f.runtime.enableSnippetScripts();
+    assert.deepEqual(f.scriptModes, [false, false, false, true]);
+    assert.equal(f.calls.filter(call => call.type === "lute").length, 1);
+    await f.runtime.enableSnippetScripts();
+    assert.equal(f.scriptModes.length, 4);
+});
+
+test("deferred snippet scripts stay disabled when the owner has been disposed", async () => {
+    const f = fixture(true);
+    f.setActive(false);
+    await f.runtime.enableSnippetScripts();
+    assert.equal(f.scriptModes.length, 0);
+});
 
 test("settings host handshake fails closed for missing, stale, asynchronous and cross-origin owners", () => {
     const f = fixture();

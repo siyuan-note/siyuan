@@ -95,6 +95,7 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
         if (approved?.owner === event.sender && approved.data.token === data.token) cancel(approved);
     });
     ipcMain.handle("siyuan-settings-prepare", (event, data) => {
+        const requestedAt = Date.now();
         const target = getTarget(event.sender.id);
         if (!target || event.senderFrame !== event.sender.mainFrame || !data ||
             !/^[a-zA-Z0-9-]{1,100}$/.test(data.token) ||
@@ -132,7 +133,7 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
             url.searchParams.set("remote", "1");
         }
         const frameName = "siyuan-settings-" + data.token;
-        const approved = {key, target, owner: event.sender, url: url.href, frameName, data,
+        const approved = {key, target, owner: event.sender, url: url.href, frameName, data, requestedAt,
             active: true, expires: Date.now() + 60000};
         watchOwner(event.sender).records.add(approved);
         approved.timer = setTimeout(() => cancel(approved), 60000);
@@ -160,6 +161,9 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
                 state.shown = true;
                 if (state.data.geometry?.maximized) win.maximize();
                 show(win);
+                win.webContents.setBackgroundThrottling(true);
+                win.webContents.send("siyuan-settings-shown");
+                log("settings window revealed [" + (Date.now() - approved.requestedAt) + "ms since open request]");
             };
             windowStates.set(win, state);
             win.once("ready-to-show", () => {
@@ -235,6 +239,8 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, initialize, show, lo
                     nodeIntegrationInWorker: false,
                     webviewTag: approved.target.mode !== "remote",
                     webSecurity: approved.target.mode === "remote",
+                    // 首次显示前保持帧和定时器正常调度，显示后恢复后台节流。
+                    backgroundThrottling: false,
                 },
             },
         };

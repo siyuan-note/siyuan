@@ -138,6 +138,7 @@ test("settings popup authorization requires the registered top-level page and ex
     assert.equal(allowed.overrideBrowserWindowOptions.autoHideMenuBar, true);
     assert.equal(allowed.overrideBrowserWindowOptions.parent, undefined);
     assert.equal(allowed.overrideBrowserWindowOptions.webPreferences.webSecurity, true);
+    assert.equal(allowed.overrideBrowserWindowOptions.webPreferences.backgroundThrottling, false);
     assert.equal(policy(owner, prepared), undefined);
     event.senderFrame = {};
     assert.equal(open({token: "second-token"}).create, false);
@@ -148,7 +149,8 @@ test("settings windows reuse their workspace instance and close with the owning 
     const prepared = open();
     assert.equal(open({token: "second-token", command: {tab: "appearance"}}).create, false);
     policy(owner, prepared);
-    const contents = Object.assign(new EventEmitter(), {mainFrame: {}, sent: [], send(...message) { this.sent.push(message); }});
+    const contents = Object.assign(new EventEmitter(), {mainFrame: {}, sent: [], setBackgroundThrottling() {},
+        send(...message) { this.sent.push(message); }});
     let destroyed = false;
     const win = Object.assign(new EventEmitter(), {
         webContents: contents, isDestroyed: () => destroyed,
@@ -181,8 +183,12 @@ for (const rendererFirst of [false, true]) {
         const prepared = open({geometry: {maximized: true}});
         policy(owner, prepared);
         let maximized = 0;
+        const throttling = [];
         const contents = Object.assign(new EventEmitter(), {mainFrame: {}, sent: [],
-            send(...message) { this.sent.push(message); }});
+            send(...message) {
+                if (message[0] === "siyuan-settings-shown") assert.deepEqual(shown, [win]);
+                this.sent.push(message);
+            }, setBackgroundThrottling: value => throttling.push(value)});
         const win = Object.assign(new EventEmitter(), {webContents: contents, isDestroyed: () => false,
             setMenu() {}, maximize() { maximized++; }});
         owner.emit("did-create-window", win, {url: prepared.url});
@@ -193,6 +199,7 @@ for (const rendererFirst of [false, true]) {
         assert.deepEqual(contents.sent.at(-1), ["siyuan-settings-command", {tab: "appearance"}]);
         assert.equal(maximized, 0);
         assert.equal(shown.length, 0);
+        assert.deepEqual(throttling, []);
         const rendererReady = () => ready({sender: contents, senderFrame: contents.mainFrame});
         const paintReady = () => win.emit("ready-to-show");
         (rendererFirst ? rendererReady : paintReady)();
@@ -201,8 +208,11 @@ for (const rendererFirst of [false, true]) {
         (rendererFirst ? paintReady : rendererReady)();
         assert.equal(maximized, 1);
         assert.deepEqual(shown, [win]);
+        assert.deepEqual(throttling, [true]);
+        assert.deepEqual(contents.sent.at(-1), ["siyuan-settings-shown"]);
         rendererReady();
         assert.equal(shown.length, 1);
+        assert.equal(contents.sent.filter(message => message[0] === "siyuan-settings-shown").length, 1);
     });
 }
 

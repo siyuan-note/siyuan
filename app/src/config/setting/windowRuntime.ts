@@ -85,13 +85,14 @@ export const patchSettingsNotebookOptions = () => {
     });
 };
 
-export const createSettingsWindowRuntime = (isActive: () => boolean) => {
+export const createSettingsWindowRuntime = (isActive: () => boolean, deferSnippetScripts = false) => {
     let notebooksPending = false;
     let notebooksLoading: Promise<void>;
     let snippetRevision = 0;
     let snippetsPending = false;
     let snippetConfigPending = false;
     let snippetsLoading: Promise<void>;
+    let snippetScriptsEnabled = !deferSnippetScripts;
     let zoomRevision = 0;
 
     const applyZoom = () => {
@@ -149,13 +150,20 @@ export const createSettingsWindowRuntime = (isActive: () => boolean) => {
                 }
                 if (!isActive()) return;
                 await renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD, () => isActive() && revision === snippetRevision,
-                    () => ensureLute({reloadOnFailure: false}));
+                    () => ensureLute({reloadOnFailure: false}), snippetScriptsEnabled);
             }
         })().catch(error => console.error("Could not refresh settings snippets", error)).finally(() => {
             snippetsLoading = undefined;
             if (snippetsPending && isActive()) return refreshSnippets();
         });
         return snippetsLoading;
+    };
+
+    // 原生窗口首次显示后启用脚本，启动期间的刷新只应用 CSS。
+    const enableSnippetScripts = () => {
+        if (snippetScriptsEnabled || !isActive()) return Promise.resolve();
+        snippetScriptsEnabled = true;
+        return refreshSnippets();
     };
 
     const refreshZoom = async () => {
@@ -214,5 +222,5 @@ export const createSettingsWindowRuntime = (isActive: () => boolean) => {
         if (!isActive()) return;
         await Promise.all([refreshNotebooks(), refreshSnippets(true), refreshZoom()]);
     };
-    return {applyZoom, refreshNotebooks, refreshSnippets, handleMessage, reconnect};
+    return {applyZoom, refreshNotebooks, refreshSnippets, enableSnippetScripts, handleMessage, reconnect};
 };

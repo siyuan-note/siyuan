@@ -6,7 +6,7 @@ import {Constants} from "../../constants";
 import {refreshHeadingNumberMeasurements} from "../../util/assets";
 import {getExtensionScriptNonce, getHostCapabilities} from "../../util/hostCapabilities";
 
-export const renderSnippet = (timeout = 0, isActive = () => true, beforeJS?: () => Promise<void>) => {
+export const renderSnippet = (timeout = 0, isActive = () => true, beforeJS?: () => Promise<void>, includeJS = true) => {
     if (!isActive() || !getHostCapabilities().customAppearance) {
         return Promise.resolve();
     }
@@ -39,6 +39,7 @@ export const renderSnippet = (timeout = 0, isActive = () => true, beforeJS?: () 
         });
         response.data.snippets.forEach((item: ISnippet) => {
             if (!isActive()) return;
+            if (item.type === "js" && !includeJS) return;
             const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
             const exitElement = document.getElementById(id) as HTMLScriptElement | HTMLStyleElement;
             if ((!window.siyuan.config.snippet.enabledCSS && item.type === "css") ||

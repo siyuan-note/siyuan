@@ -1,3 +1,5 @@
+const FRAME_WAIT_LIMIT = 250;
+
 // 等主题样式和设置内容绘制完成，再通知主进程显示原生窗口。
 export const waitForSettingsWindowPaint = async (render: () => Promise<void>) => {
     const initialStyles = new Set(document.head.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'));
@@ -27,7 +29,17 @@ export const waitForSettingsWindowPaint = async (render: () => Promise<void>) =>
         await render();
         collectStyles();
         await Promise.all(pending);
-        await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        await new Promise<void>(resolve => {
+            let frame = 0;
+            const finish = () => {
+                window.clearTimeout(timer);
+                cancelAnimationFrame(frame);
+                resolve();
+            };
+            // 帧回调未及时执行时允许继续显示，原生窗口仍需满足 ready-to-show。
+            const timer = window.setTimeout(finish, FRAME_WAIT_LIMIT);
+            frame = requestAnimationFrame(() => { frame = requestAnimationFrame(finish); });
+        });
     } finally {
         observer.disconnect();
         styles.forEach(complete => complete());

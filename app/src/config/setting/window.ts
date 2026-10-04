@@ -83,7 +83,10 @@ const initialize = async () => {
         listeners.push({channel, listener});
         ipcRenderer.on(channel, listener);
     };
-    const runtime = createSettingsWindowRuntime(isActive);
+    const runtime = createSettingsWindowRuntime(isActive, true);
+    listen("siyuan-settings-shown", () => {
+        void runtime.enableSnippetScripts();
+    });
     let dialog: Dialog;
     let command: ISettingsCommand;
     const applyCommand = async () => {

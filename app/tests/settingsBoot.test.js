@@ -4,7 +4,7 @@ const {test} = require("node:test");
 const {runInNewContext} = require("node:vm");
 const {ModuleKind, ScriptTarget, transpileModule} = require("typescript");
 
-const createBoot = (plugin = false, failed = "") => {
+const createBoot = (plugin = false, failed = "", waitForStyles = false) => {
     const source = readFileSync("src/config/setting/window.ts", "utf8");
     const code = transpileModule(source.slice(0, source.indexOf("void startSettingsWindow(")) + "\nexport {initialize};", {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -13,6 +13,7 @@ const createBoot = (plugin = false, failed = "") => {
     const calls = [];
     let luteLoaded = false;
     let command;
+    let shown;
     const wait = name => {
         calls.push(name);
         return new Promise(resolve => pending.set(name, resolve));
@@ -40,6 +41,7 @@ const createBoot = (plugin = false, failed = "") => {
     const modules = {
         "electron": {ipcRenderer: {on: (name, callback) => {
             if (name === "siyuan-settings-command") command = callback;
+            if (name === "siyuan-settings-shown") shown = callback;
         }, removeListener() {}, send: name => calls.push(name), invoke: async () => false}, webFrame: {setZoomFactor() {}}},
         "../../constants": {Constants: constants},
         "../../layout/Model": {Model: class {
@@ -94,9 +96,14 @@ const createBoot = (plugin = false, failed = "") => {
         "./tabs": {getSettingTabDefs: () => []},
         "../search/dialog": {switchSettingTab: () => wait("assets")},
         "./windowPaint": {waitForSettingsWindowPaint: async render => render()},
-        "./windowRuntime": {resolveSettingsWindowHost: () => host, createSettingsWindowRuntime: () => ({
-            refreshNotebooks: () => wait("notebooks"), refreshSnippets: async () => {}, applyZoom() {}, handleMessage() {},
-        })},
+        "./windowRuntime": {resolveSettingsWindowHost: () => host, createSettingsWindowRuntime: (_active, deferScripts) => {
+            assert.equal(deferScripts, true);
+            return {
+                refreshNotebooks: () => wait("notebooks"),
+                refreshSnippets: async () => { if (waitForStyles) await wait("snippet-styles"); },
+                enableSnippetScripts: async () => calls.push("snippet-scripts"), applyZoom() {}, handleMessage() {},
+            };
+        }},
         "../../plugin/Setting": {Setting: class {addItem() {} open() { calls.push("render"); }}},
     };
     const context = {exports: {}, window, document: {body: {classList: {toggle() {}}},
@@ -108,9 +115,34 @@ const createBoot = (plugin = false, failed = "") => {
     window.location = context.location;
     runInNewContext(code, context);
     return {initialize: context.exports.initialize, calls, pending, command: next => command({}, next),
+        shown: () => shown({}),
         unload: () => events.get("unload")(), deactivate: () => { active = false; },
         window, menu, events, eventOptions, documentEvents};
 };
+
+test("settings wait for snippet styles and start scripts only after the native window is shown", async () => {
+    const boot = createBoot(false, "", true);
+    const initialized = boot.initialize();
+    await new Promise(resolve => setImmediate(resolve));
+    for (const complete of boot.pending.values()) complete();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(boot.calls.includes("snippet-styles"), true);
+    assert.equal(boot.calls.includes("siyuan-settings-ready"), false);
+    assert.equal(boot.calls.includes("snippet-scripts"), false);
+    boot.pending.get("snippet-styles")();
+    await initialized;
+    assert.equal(boot.calls.includes("siyuan-settings-ready"), true);
+    assert.equal(boot.calls.includes("snippet-scripts"), false);
+    boot.shown();
+    assert.equal(boot.calls.includes("snippet-scripts"), true);
+});
+
+test("a late native show notification cannot start scripts after disposal", async () => {
+    const boot = await bootReady();
+    boot.unload();
+    boot.shown();
+    assert.equal(boot.calls.includes("snippet-scripts"), false);
+});
 
 const bootReady = async () => {
     const boot = createBoot();

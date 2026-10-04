@@ -26,7 +26,9 @@ let popoverGeneration = 0;
 let cancelPopoverTimers: () => void;
 const popoverInteractions = new Set<HTMLElement>();
 
-const isPopoverSuspended = () => window.siyuan.dragElement || document.onmousemove || popoverInteractions.size > 0;
+const isPopoverInteractionActive = () => window.siyuan.dragElement || document.onmousemove || popoverInteractions.size > 0;
+const isPopoverSuspended = () => isPopoverInteractionActive() ||
+    (window.siyuan.menus && !window.siyuan.menus.menu.element.classList.contains("fn__none"));
 
 export const suspendBlockPopover = (root: HTMLElement, event: PointerEvent) => {
     popoverInteractions.add(root);
@@ -58,6 +60,11 @@ export const initBlockPopover = (app: App) => {
         clearTimeout(penTimeout);
         clearTimeout(penTimeoutHide);
     };
+    // 右键菜单处理器可能停止冒泡，提前取消悬停任务并使未完成的引用查询失效。
+    document.addEventListener("contextmenu", () => {
+        popoverGeneration++;
+        cancelPopoverTimers();
+    }, {capture: true});
     let lastPointerMoveLogTime = 0;
     const logAndroidInputEvent = (event: MouseEvent | PointerEvent) => {
         if (!window.JSAndroid?.logInputEvent) {
@@ -89,7 +96,7 @@ export const initBlockPopover = (app: App) => {
         logAndroidInputEvent(event);
         if (!window.siyuan.config || !window.siyuan.menus ||
             // 拖拽时禁止
-            isPopoverSuspended()) {
+            isPopoverInteractionActive()) {
             hideTooltip();
             return;
         }
@@ -323,6 +330,10 @@ export const initBlockPopover = (app: App) => {
             if (!tipElement || tipElement.clientHeight >= tipElement.scrollHeight) {
                 hideTooltip();
             }
+        }
+        if (isPopoverSuspended()) {
+            cancelPopoverTimers();
+            return;
         }
         if (window.siyuan.config.editor.floatWindowMode === 1 || window.siyuan.shiftIsPressed) {
             clearTimeout(timeoutHide);

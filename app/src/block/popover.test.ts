@@ -60,6 +60,7 @@ const browserCases = async (source: string) => {
         menus: {menu: {element: document.createElement("div")}},
         blockPanels: [],
     } as unknown as typeof window.siyuan;
+    window.siyuan.menus.menu.element.classList.add("fn__none");
     window.JSAndroid = {} as typeof window.JSAndroid;
     const root = document.createElement("div");
     root.className = "mindmap-view";
@@ -144,6 +145,101 @@ const browserCases = async (source: string) => {
     check.equal(window.siyuan.blockPanels.length, 1);
     check.equal(window.siyuan.config.editor.floatWindowMode, 0);
     check.equal(window.siyuan.config.editor.floatWindowDelay, 20);
+    window.siyuan.blockPanels[0].destroy();
+
+    // 右键处理器即使停止冒泡，也应取消此前排队的浮窗。
+    const menu = window.siyuan.menus.menu.element;
+    menu.classList.add("b3-menu");
+    document.body.append(menu);
+    const targets = [ref, document.createElement("span"), document.createElement("span")];
+    targets[1].className = "b3-list-item__icon ariaLabel popover__block";
+    targets[2].className = "protyle-breadcrumb__icon popover__block";
+    targets.slice(1).forEach(target => {
+        target.dataset.id = "test";
+        document.body.append(target);
+    });
+    targets.forEach(target => target.addEventListener("contextmenu", event => {
+        menu.classList.remove("fn__none");
+        event.stopPropagation();
+    }));
+    const rightClick = (target = ref) => target.dispatchEvent(new MouseEvent("contextmenu", {
+        bubbles: true, button: 2,
+    }));
+    const closeMenu = () => menu.classList.add("fn__none");
+    const menuAction = document.createElement("span");
+    menuAction.className = "ariaLabel";
+    menuAction.setAttribute("aria-label", "Context action");
+    menu.append(menuAction);
+    rightClick();
+    menuAction.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, "Context action", "menu action tooltips remain available");
+    closeMenu();
+    for (const target of targets) {
+        target.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+        rightClick(target);
+        await settle();
+        check.equal(window.siyuan.blockPanels.length, 0, "pending hover cannot cover a context menu");
+        target.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+        await settle();
+        check.equal(window.siyuan.blockPanels.length, 0, "new hover is suspended while the menu is visible");
+        closeMenu();
+        await settle();
+        check.equal(window.siyuan.blockPanels.length, 0, "closing the menu cannot replay a hover");
+        target.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+        await settle();
+        check.equal(window.siyuan.blockPanels.length, 1, "fresh hover resumes after the menu closes");
+        window.siyuan.blockPanels[0].destroy();
+    }
+
+    hover();
+    rightClick();
+    closeMenu();
+    await settle();
+    check.equal(window.siyuan.blockPanels.length, 0, "quickly closing the menu cannot revive a pending timer");
+
+    // 菜单关闭后才返回的引用查询仍属于右键前的悬停任务。
+    window.siyuan.shiftIsPressed = true;
+    hover();
+    check.equal(requests.length, 1);
+    rightClick();
+    closeMenu();
+    window.siyuan.shiftIsPressed = false;
+    requests.shift()({code: 0, data: {refDefs: [{refID: "test"}]}});
+    await settle();
+    check.equal(window.siyuan.blockPanels.length, 0, "late reference queries cannot reopen a closed menu's hover");
+
+    ref.dataset.type = "virtual-block-ref";
+    delete ref.dataset.id;
+    hover();
+    await settle();
+    check.equal(requests.length, 1);
+    rightClick();
+    closeMenu();
+    requests.shift()({code: 0, data: {refDefs: [{refID: "virtual"}]}});
+    await settle();
+    check.equal(window.siyuan.blockPanels.length, 0, "late virtual reference queries are cancelled by right click");
+    ref.dataset.type = "block-ref";
+    ref.dataset.id = "test";
+
+    rightClick();
+    hover();
+    penHover();
+    await api.showPopover({});
+    await settle();
+    check.equal(window.siyuan.blockPanels.length, 0, "mouse, pen and direct opening respect the visible menu");
+    closeMenu();
+    penHover();
+    await settle();
+    check.equal(window.siyuan.blockPanels.length, 1, "pen hover resumes after the menu closes");
+    const menuPinned = window.siyuan.blockPanels[0];
+    menuPinned.element.dataset.pin = "true";
+    rightClick();
+    closeMenu();
+    await settle();
+    check.equal(window.siyuan.blockPanels[0], menuPinned, "right click preserves pinned panels");
+    check.equal(window.siyuan.config.editor.floatWindowMode, 0);
+    check.equal(window.siyuan.config.editor.floatWindowDelay, 20);
+    menuPinned.destroy();
 
     const imageRoot = document.createElement("span");
     imageRoot.className = "img";
@@ -195,7 +291,7 @@ const browserCases = async (source: string) => {
     return "Popover interaction cases passed";
 };
 
-test("mindmap interaction cancels pending popovers and preserves hover preferences and pinned panels", {
+test("mindmap interactions and context menus cancel popovers and preserve hover preferences and pinned panels", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 20000,
 }, async () => {

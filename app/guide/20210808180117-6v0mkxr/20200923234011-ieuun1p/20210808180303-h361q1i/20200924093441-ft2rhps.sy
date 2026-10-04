@@ -3358,7 +3358,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use the menu beside the tabs to add, duplicate, delete or reorder tabs and choose a top or left layout. The active tab and layout are saved and synced with the document. In a locked document, the last tab viewed is saved in the local workspace without changing the document default. Published pages, globally read-only workspaces and encrypted notebooks keep this position only for the current session. Removing the tab layout preserves every title and its content in order."
+					"Data": "Use the menu beside the tabs to add, duplicate, delete or reorder tabs and choose a top or left layout. The active tab and layout are saved and synced with the document. In a locked document, the last tab viewed is saved in the local workspace without changing the document default. Published pages, read-only kernels and encrypted notebooks keep this position only for the current session. Removing the tab layout preserves every title and its content in order."
 				}
 			]
 		},

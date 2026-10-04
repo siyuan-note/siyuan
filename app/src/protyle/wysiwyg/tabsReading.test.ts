@@ -28,7 +28,7 @@ assert.ok(restoreSource);
 
 const fixture = (storage: Record<string, any> = {}) => {
     const writes: Record<string, string>[] = [];
-    const siyuan = {storage, config: {readonly: false}, isPublish: false};
+    const siyuan = {storage, config: {readonly: false, editor: {readOnly: false}}, isPublish: false};
     const api = {} as typeof import("./tabsReading");
     const root = {};
     const protyle = {disabled: true, lite: false, notebookId: "ordinary", options: {action: [] as string[]},
@@ -82,7 +82,17 @@ test("editing uses document defaults and clears an old readonly selection", () =
     assert.equal(f.read(), undefined);
 });
 
-test("publish, global readonly and encrypted notebooks retain only session selections", () => {
+test("global editor locking persists the reading position without unlocking the document", () => {
+    const f = fixture();
+    f.siyuan.config.editor.readOnly = true;
+    f.save("b");
+    assert.equal(f.read(), "b");
+    assert.equal(f.writes.length, 1);
+    assert.equal(f.protyle.disabled, true);
+    assert.equal(fixture({[storageKey]: f.writes[0]}).read(), "b");
+});
+
+test("publish, readonly kernels and encrypted notebooks retain only session selections", () => {
     for (const mode of ["publish", "readonly", "encrypted"]) {
         const f = fixture({[storageKey]: {other: "unchanged"}});
         f.siyuan.isPublish = mode === "publish";

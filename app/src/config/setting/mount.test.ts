@@ -114,3 +114,46 @@ test("settings refresh preserves an unfocused profile draft and resumes after th
     await Promise.resolve();
     assert.equal(mounted, 1);
 });
+
+test("deferred refresh preserves a pressed label until its click completes or is canceled", async () => {
+    const code = transpileModule(readFileSync("src/config/setting/mount.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    const input = {};
+    const label = {};
+    let mounted = 0;
+    const listeners = new Map<string, (event?: {target: object}) => void>();
+    const timers: Array<() => void> = [];
+    const root = {innerHTML: "settings", scrollTop: 12, scrollLeft: 0,
+        contains: (element: unknown) => element === input || element === label,
+        querySelector: (): Element | null => null};
+    const document = {activeElement: input,
+        addEventListener: (name: string, callback: (event?: {target: object}) => void) => listeners.set(name, callback)};
+    const exports = {} as {remountOpenSettingTab: (tab: string) => Promise<void>; watchSettingTabInteractions: () => void};
+    runInNewContext(code, {exports, document, setTimeout: (callback: () => void) => timers.push(callback),
+        require: () => ({Constants: {DIALOG_SETTING: "settings"}, getSearchKeywordsLower: () => "",
+            getSettingTab: () => ({mount: async () => { mounted++; }})}),
+        window: {siyuan: {ws: {app: {}}, dialogs: [{element: {getAttribute: () => "settings", querySelector: () => root}}]}}});
+    exports.watchSettingTabInteractions();
+    await exports.remountOpenSettingTab("editor");
+    listeners.get("pointerdown")({target: label});
+    document.activeElement = {};
+    listeners.get("focusout")();
+    timers.splice(0).forEach(callback => callback());
+    await Promise.resolve();
+    assert.equal(mounted, 0);
+    listeners.get("pointerup")();
+    assert.equal(mounted, 0);
+    document.activeElement = input;
+    timers.splice(0).forEach(callback => callback());
+    await Promise.resolve();
+    assert.equal(mounted, 0);
+    listeners.get("pointerdown")({target: label});
+    document.activeElement = {};
+    listeners.get("focusout")();
+    timers.splice(0).forEach(callback => callback());
+    listeners.get("pointercancel")();
+    timers.splice(0).forEach(callback => callback());
+    await Promise.resolve();
+    assert.equal(mounted, 1);
+});

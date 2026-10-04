@@ -4,6 +4,94 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, isMethodDeclaration, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {getAgentDefaultModelID, getUsableAgentModels} from "../../layout/dock/agent/agentModel";
+import {createNamespacePatchQueue} from "../util/namespacePatchQueue";
+import {mergeRecordByDottedPath} from "../util/dotPath";
+
+for (const mobile of [false, true]) {
+    test(`namespace patch and its push read confirmed configuration once (mobile=${mobile})`, async () => {
+        const {parse} = require("ifdef-loader/preprocessor");
+        const compile = (file: string) => transpileModule(parse(readFileSync(file, "utf8"),
+            {MOBILE: mobile, BROWSER: mobile}, false, true), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText;
+        const requests: string[] = [];
+        const config = {editor: {fontSize: 16}};
+        let fontSize = 16;
+        const refresh = {} as {refreshSettingConfig: (namespace: string) => Promise<void>};
+        const fetchSyncPost = async (url: string, data: {editor: {fontSize: number}}) => {
+            requests.push(url);
+            if (url.endsWith("patch")) {
+                fontSize = data.editor.fontSize;
+                void refresh.refreshSettingConfig("editor");
+                await Promise.resolve();
+                return {code: 0};
+            }
+            return {code: 0, data: {conf: {editor: {fontSize}}}};
+        };
+        runInNewContext(compile("src/config/setting/sync.ts"), {exports: refresh, window: {siyuan: {config}}, console,
+            require: () => ({fetchSyncPost, systemConfig: (value: unknown) => value,
+                objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
+                editorConfigApi: {apply: (value: typeof config.editor) => { config.editor = value; }},
+                syncSettingTasks() {}, getSettingTabDefs: () => [{id: "editor"}], remountOpenSettingTab: async () => {},
+            })});
+        const api = {} as {createConfigNamespaceApi: (options: {
+            namespace: string; getConfig: () => typeof config.editor;
+        }) => {patch: (path: string, value: number, applied: (value: typeof config.editor) => void) => Promise<void>}};
+        runInNewContext(compile("src/config/util/namespaceApi.ts"), {exports: api, require: () => ({
+            ...refresh, fetchSyncPost, createNamespacePatchQueue, mergeRecordByDottedPath,
+        })});
+        let confirmed: typeof config.editor;
+        await api.createConfigNamespaceApi({namespace: "editor", getConfig: () => config.editor})
+            .patch("fontSize", 18, value => { confirmed = value; });
+        assert.deepEqual(requests, ["/api/setting/patch", "/api/system/getConf"]);
+        assert.equal(confirmed.fontSize, 18);
+        fontSize = 20;
+        await refresh.refreshSettingConfig("editor");
+        assert.equal(config.editor.fontSize, 20);
+        assert.equal(requests.length, 3);
+    });
+
+    for (const result of ["success", "failure", "throw"]) {
+        test(`settings saves merge their notification with response refresh and release failures (mobile=${mobile}, ${result})`, async () => {
+            const {parse} = require("ifdef-loader/preprocessor");
+            const compiled = transpileModule(parse(readFileSync("src/config/setting/sync.ts", "utf8"),
+                {MOBILE: mobile, BROWSER: mobile}, false, true), {
+                compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+            }).outputText;
+            let requests = 0;
+            let finishSave: () => void;
+            const config = {editor: {fontSize: 16}};
+            const exports = {} as {
+                refreshSettingConfig: (namespace: string) => Promise<void>;
+                refreshSettingConfigAfter: (namespace: string, save: () => Promise<boolean>) => Promise<boolean>;
+            };
+            runInNewContext(compiled, {exports, window: {siyuan: {config}}, console, require: () => ({
+                fetchSyncPost: async () => { requests++; return {code: 0, data: {conf: {editor: {fontSize: 18}}}}; },
+                systemConfig: (value: unknown) => value,
+                objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
+                editorConfigApi: {apply: (value: typeof config.editor) => { config.editor = value; }},
+                syncSettingTasks() {}, getSettingTabDefs: () => [{id: "editor"}], remountOpenSettingTab: async () => {},
+            })});
+            const saving = exports.refreshSettingConfigAfter("editor", async () => {
+                await new Promise<void>(resolve => { finishSave = resolve; });
+                if (result === "throw") throw new Error("save failed");
+                return result === "success";
+            });
+            const rejected = result === "throw" ? assert.rejects(saving, /save failed/) : undefined;
+            const notified = exports.refreshSettingConfig("editor");
+            await Promise.resolve();
+            assert.equal(requests, 0);
+            finishSave();
+            if (rejected) await rejected;
+            else assert.equal(await saving, result === "success");
+            await notified;
+            assert.equal(requests, 1);
+            assert.equal(config.editor.fontSize, 18);
+            await exports.refreshSettingConfig("editor");
+            assert.equal(requests, 2, "later notifications still refresh configuration");
+        });
+    }
+}
 
 test("settings notifications update runtime configuration and refresh the registered tab", async () => {
     const compiled = transpileModule(readFileSync("src/config/setting/sync.ts", "utf8"), {
@@ -26,6 +114,30 @@ test("settings notifications update runtime configuration and refresh the regist
 });
 
 for (const mobile of [false, true]) {
+    test(`marketplace configuration and reconnection refresh mounted packages (mobile=${mobile})`, async () => {
+        const {parse} = require("ifdef-loader/preprocessor");
+        const compiled = transpileModule(parse(readFileSync("src/config/setting/sync.ts", "utf8"),
+            {MOBILE: mobile, BROWSER: mobile}, false, true), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText;
+        const config = {bazaar: {trust: true}, editor: {}, appearance: {}, keymap: {}};
+        let refreshed = 0;
+        const exports = {} as {refreshSettingConfig: (namespace?: string) => Promise<void>};
+        runInNewContext(compiled, {exports, window: {siyuan: {config}}, console, require: () => ({
+            fetchSyncPost: async () => ({code: 0, data: {conf: config}}),
+            systemConfig: (value: unknown) => value,
+            objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
+            syncSettingTasks() {}, getSettingTabDefs: (): {id: string}[] => [],
+            refreshMountedBazaar: () => { refreshed++; },
+        })});
+        await exports.refreshSettingConfig("editor");
+        assert.equal(refreshed, 0);
+        await exports.refreshSettingConfig("bazaar");
+        assert.equal(refreshed, 1);
+        await exports.refreshSettingConfig();
+        assert.equal(refreshed, 2);
+    });
+
     test(`OCR notifications preserve the settings page and unrelated runtime configuration (mobile=${mobile})`, async () => {
         const {parse} = require("ifdef-loader/preprocessor");
         const compiled = transpileModule(parse(readFileSync("src/config/setting/sync.ts", "utf8"),
@@ -34,7 +146,7 @@ for (const mobile of [false, true]) {
         }).outputText;
         const editor = {fontSize: 16};
         const appearance = {theme: "dark"};
-        const config = {ocr: {provider: "paddleocr", model: "small", auto: false}, editor, appearance, keymap: {}};
+        const config = {ocr: {provider: "paddleocr", model: "tiny", auto: false}, editor, appearance, keymap: {}};
         let next = {...config.ocr, auto: true};
         let notifications = 0;
         const remounted: string[] = [];
@@ -110,7 +222,7 @@ for (const mobile of [false, true]) {
             fetchSyncPost: async () => ({code: 0, data: {conf: JSON.parse(JSON.stringify({...config, ai: next}))}}),
             systemConfig: (value: unknown) => value,
             objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
-            ...aiExports, syncSettingTasks() {}, remountOpenSettingTab: async () => {}, getSettingTabDefs: () => [{id: "ai"}],
+            ...aiExports, syncSettingTasks() {}, refreshMountedBazaar() {}, remountOpenSettingTab: async () => {}, getSettingTabDefs: () => [{id: "ai"}],
         };
         const exports = {} as {refreshSettingConfig: (namespace?: string) => Promise<void>};
         runInNewContext(compile("src/config/setting/sync.ts"), {exports, require: () => dependencies, window: windowContext, console});
@@ -148,7 +260,7 @@ for (const mobile of [false, true]) {
             fetchSyncPost: async () => failed ? {code: -1} : {code: 0, data: {conf: JSON.parse(JSON.stringify(next))}},
             systemConfig: (value: unknown) => value,
             objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
-            syncSettingTasks() {}, processSync() {}, getSettingTabDefs: () => [{id: "app"}, {id: "access"}],
+            syncSettingTasks() {}, refreshMountedBazaar() {}, processSync() {}, getSettingTabDefs: () => [{id: "app"}, {id: "access"}],
             remountOpenSettingTab: async (tab: string) => { remounted.push(tab); },
         })});
         await exports.refreshSettingConfig("system");

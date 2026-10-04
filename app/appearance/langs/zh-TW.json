@@ -3,6 +3,10 @@
 	"bazaarReleaseNotesLatest": "最新",
 	"bazaarReleaseNotesEmpty": "這個版本沒有寫發行說明",
 	"bazaarReleaseNotesUnavailable": "讀不到發行說明",
+	"listMindmapSummaryBatch": "建立 ${count} 個概要",
+	"listMindmapSummaryConflict": "概要範圍交叉，請調整選取範圍",
+	"reAIOCR": "使用 AI 重新 OCR",
+	"pdfAnnotationDeleteRefConfirm": "此 PDF 標註被 ${x} 個區塊引用，刪除後這些引用將失效。是否繼續？",
 	"ocrModelDefault": "模型預設",
 	"ocrDetectionThreshold": "偵測閾值",
 	"ocrBoxThreshold": "文字框信賴度閾值",
@@ -43,7 +47,7 @@
 	"ocrAuto": "自動 OCR",
 	"ocrAutoTip": "僅處理尚無 OCR 結果的一般筆記本圖片",
 	"ocrModel": "OCR 模型",
-	"ocrModelTip": "已內建 Tiny 和 Small；切換後保留現有結果，可在圖片選單中重新辨識",
+	"ocrModelTip": "僅內建 Tiny；切換後保留現有結果，可在圖片選單中重新辨識",
 	"ocrImportModels": "匯入 OCR 模型",
 	"ocrImportModelsTip": "選取配套的 PP-OCRv6 偵測、辨識 ONNX 檔案及各自的 inference.yml；匯入檔案隨工作空間同步",
 	"ocrDetector": "偵測模型",
@@ -103,7 +107,7 @@
 	"agentInstructionsTooLarge": "指令內容不能超過 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md 已變更。請先複製你的修改，重新開啟編輯器並合併後再儲存",
 	"listMindmapSummary": "概要",
-	"listMindmapSummarySelect": "選擇概要範圍的末端同層節點，範圍不能與既有概要重疊",
+	"listMindmapSummarySelect": "選擇末端同層節點，或在畫布空白處框選分組；點選空白處後可逐一選取節點",
 	"mcpOAuthServer": "MCP 伺服器 OAuth",
 	"mcpOAuthTip": "需要鎖定畫面密碼或 OIDC 登入，以及公開的 HTTPS 網址；停用或修改網址會撤銷全部授權",
 	"mcpOAuthPublicURL": "公開 HTTPS 網址",
@@ -3083,6 +3087,8 @@
 		"408": "DNS 解析失敗，請檢查網路、DNS 或代理設定",
 		"409": "網路連線中斷或無法建立，請檢查網路、代理或防火牆設定",
 		"410": "轉換已取消：整個清單綁定了資料庫資料列，但轉換後會產生多個區塊，無法確定綁定應移轉到哪個區塊。請先解除整個清單的綁定，或改為綁定個別清單項目",
-		"411": "轉換已取消：清單項目和首個區塊綁定了同一資料庫中的不同資料列，無法自動合併。請先解除其中一個綁定"
+		"411": "轉換已取消：清單項目和首個區塊綁定了同一資料庫中的不同資料列，無法自動合併。請先解除其中一個綁定",
+		"412": "請先設定智能體模型",
+		"413": "AI OCR 未傳回完整的辨識文字，已保留原結果"
 	}
 }

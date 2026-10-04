@@ -436,17 +436,8 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 processed = true;
                 break;
             } else if (type === "remove") {
-                const urlPath = pdf.appConfig.file.replace(location.origin, "").substr(1);
-                const config = getConfig(pdf);
                 const id = rectElement.getAttribute("data-node-id");
-                delete config[id];
-                getRectElementsByNodeId(element, id).forEach(item => {
-                    item.remove();
-                });
-                fetchPost("/api/asset/setFileAnnotation", {
-                    path: urlPath + ".sya",
-                    data: JSON.stringify(config),
-                });
+                removeAnno(pdf, element, id);
                 hideToolbar(element);
                 event.preventDefault();
                 event.stopPropagation();
@@ -892,7 +883,8 @@ export const getPdfInstance = (element: HTMLElement) => {
 
 export const getHighlight = (element: HTMLElement) => {
     const pdfInstance: any = getPdfInstance(element);
-    if (!pdfInstance) {
+    // 未引用资源预览仍注册实例以支持键盘操作，但不访问批注文件。
+    if (!pdfInstance || pdfInstance.appConfig.previewOnly) {
         return;
     }
     element.parentElement.querySelector(":scope > .pdf__rects")?.remove();
@@ -1151,6 +1143,45 @@ async function getRectImgData(pdfObj: any, pageNumber: number, position: number[
     });
     return {blob, rotation: totalRotation, displayWidth};
 }
+
+const removeAnno = (pdf: any, element: HTMLElement, id: string) => {
+    const file = pdf.appConfig.file;
+    const urlPath = file.replace(location.origin, "").substr(1);
+    const isCurrent = () => element.isConnected && getRegisteredPdfInstance(element) === pdf && pdf.appConfig.file === file;
+    const remove = () => {
+        if (!isCurrent()) {
+            return;
+        }
+        const config = getConfig(pdf);
+        if (!config?.[id]) {
+            return;
+        }
+        delete config[id];
+        getRectElementsByNodeId(element, id).forEach(item => {
+            item.remove();
+        });
+        fetchPost("/api/asset/setFileAnnotation", {
+            path: urlPath + ".sya",
+            data: JSON.stringify(config),
+        });
+    };
+    fetchPost("/api/block/getRefIDsByFileAnnotationID", {
+        id,
+        notebook: new URL(file, location.origin).searchParams.get("box") || "",
+    }, (response) => {
+        if (response.code !== 0 || !isCurrent()) {
+            return;
+        }
+        const count = response.data.refDefs.length;
+        if (count > 0) {
+            confirmDialog(window.siyuan.languages.deleteOpConfirm,
+                window.siyuan.languages.pdfAnnotationDeleteRefConfirm.replace("${x}", count.toString()), remove,
+                undefined, true);
+        } else {
+            remove();
+        }
+    });
+};
 
 const setConfig = (pdf: any, id: string, data: IPdfAnno) => {
     const config = getConfig(pdf);

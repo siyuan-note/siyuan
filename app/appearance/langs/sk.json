@@ -3,6 +3,10 @@
 	"bazaarReleaseNotesLatest": "Najnovšie",
 	"bazaarReleaseNotesEmpty": "Táto verzia nemá poznámky k vydaniu",
 	"bazaarReleaseNotesUnavailable": "Poznámky k vydaniu nie sú k dispozícii",
+	"listMindmapSummaryBatch": "Vytvoriť ${count} súhrnov",
+	"listMindmapSummaryConflict": "Rozsahy súhrnov sa krížia; upravte výber",
+	"reAIOCR": "Zopakovať OCR pomocou AI",
+	"pdfAnnotationDeleteRefConfirm": "Na túto anotáciu PDF odkazuje ${x} blokov. Jej odstránením sa tieto odkazy stanú neplatnými. Pokračovať?",
 	"ocrModelDefault": "Predvolená hodnota modelu",
 	"ocrDetectionThreshold": "Prah detekcie",
 	"ocrBoxThreshold": "Prah spoľahlivosti textových oblastí",
@@ -43,7 +47,7 @@
 	"ocrAuto": "Automatické OCR",
 	"ocrAutoTip": "Spracovať obrázky bežných zápisníkov, ktoré ešte nemajú výsledok OCR",
 	"ocrModel": "Model OCR",
-	"ocrModelTip": "Tiny a Small sú vstavané; zmena zachová existujúce výsledky; OCR zopakujte z ponuky obrázka",
+	"ocrModelTip": "Zabudovaný je iba Tiny; zmena modelu zachová existujúce výsledky; OCR možno znova spustiť z ponuky obrázka",
 	"ocrImportModels": "Importovať modely OCR",
 	"ocrImportModelsTip": "Vyberte kompatibilné súbory ONNX detekcie a rozpoznávania PP-OCRv6 a ich súbory inference.yml; importované súbory sa synchronizujú s pracovným priestorom",
 	"ocrDetector": "Detekčný model",
@@ -103,7 +107,7 @@
 	"agentInstructionsTooLarge": "Pokyny nesmú presiahnuť 32 KiB",
 	"agentInstructionsConflict": "Súbor AGENTS.md sa zmenil. Skopírujte svoje zmeny, znova otvorte editor a pred uložením ich zlúčte",
 	"listMindmapSummary": "Súhrn",
-	"listMindmapSummarySelect": "Vyberte posledný uzol s rovnakým rodičom v rozsahu; súhrny sa nesmú prekrývať",
+	"listMindmapSummarySelect": "Vyberte posledný uzol s rovnakým rodičom alebo potiahnite na prázdnom plátne a vyberte skupiny; ťuknite na prázdne plátno a vyberajte uzly jednotlivo",
 	"mcpOAuthServer": "OAuth servera MCP",
 	"mcpOAuthTip": "Vyžaduje heslo uzamknutia alebo prihlásenie OIDC a verejný pôvod HTTPS; vypnutie alebo zmena pôvodu odvolá všetky autorizácie",
 	"mcpOAuthPublicURL": "Verejný pôvod HTTPS",
@@ -3083,6 +3087,8 @@
 		"408": "Preklad názvu DNS zlyhal. Skontrolujte nastavenia siete, DNS alebo proxy",
 		"409": "Sieťové pripojenie bolo prerušené alebo sa ho nepodarilo nadviazať. Skontrolujte nastavenia siete, proxy alebo brány firewall",
 		"410": "Konverzia zrušená: celý zoznam je naviazaný na riadok databázy, ale konverzia vytvorí viac blokov bez jednoznačného cieľa väzby. Najprv zrušte väzbu zoznamu alebo naviažte jednotlivé položky",
-		"411": "Konverzia zrušená: položka zoznamu a jej prvý blok sú naviazané na rôzne riadky tej istej databázy. Najprv zrušte jednu z väzieb"
+		"411": "Konverzia zrušená: položka zoznamu a jej prvý blok sú naviazané na rôzne riadky tej istej databázy. Najprv zrušte jednu z väzieb",
+		"412": "Najprv nakonfigurujte model agenta",
+		"413": "AI OCR nevrátil úplný prepis; pôvodný výsledok bol zachovaný"
 	}
 }

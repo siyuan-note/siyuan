@@ -44,11 +44,15 @@ func ocrModelFilesChanged(changes ...[]string) bool {
 }
 
 // 新设备使用内置 PaddleOCR 并关闭自动识别，已有设备缺少 OCR 配置时保留 Tesseract 自动识别。
-func normalizeOCRConfig(value *conf.OCR, confFileExists, mobile bool) *conf.OCR {
+func normalizeOCRConfig(value *conf.OCR, confFileExists bool) *conf.OCR {
 	if value != nil {
+		// 内置模型统一为 Tiny，自行导入的模型仍保留内容摘要标识。
+		if value.Model == "small" {
+			value.Model = "tiny"
+		}
 		return value
 	}
-	value = conf.NewOCR(mobile)
+	value = conf.NewOCR()
 	if confFileExists {
 		value.Provider = string(ocr.Tesseract)
 		value.Auto = true
@@ -71,19 +75,23 @@ func (config *AppConf) GetOCR() conf.OCR {
 	config.m.RLock()
 	defer config.m.RUnlock()
 	if config.OCR == nil {
-		return *conf.NewOCR(util.IsMobileContainer())
+		return *conf.NewOCR()
 	}
 	return *config.OCR
 }
 
 func (config *AppConf) SetOCR(value conf.OCR) error {
+	// 兼容旧客户端提交的内置 Small 标识，响应和持久化配置均使用 Tiny。
+	if value.Model == "small" {
+		value.Model = "tiny"
+	}
 	if err := (ocr.Thresholds(value.Thresholds)).Validate(); err != nil {
 		return err
 	}
 	if value.Provider != string(ocr.Tesseract) && value.Provider != string(ocr.PaddleOCR) {
 		return errors.New("unknown OCR provider")
 	}
-	if value.Model != "tiny" && value.Model != "small" {
+	if value.Model != "tiny" {
 		if len(value.Model) != 64 || strings.Trim(value.Model, "0123456789abcdef") != "" {
 			return errors.New("invalid OCR model ID")
 		}
@@ -105,7 +113,7 @@ func (config *AppConf) SetOCR(value conf.OCR) error {
 }
 
 func ocrModelDirectory(id string) string {
-	if id == "tiny" || id == "small" {
+	if id == "tiny" {
 		return filepath.Join(util.WorkingDir, "stage", "ocr", "models", id)
 	}
 	return filepath.Join(util.DataDir, "ocr", "models", id)
@@ -285,7 +293,7 @@ func autoOCRAssets() {
 }
 
 func OCRModels() []string {
-	result := []string{"tiny", "small"}
+	result := []string{"tiny"}
 	entries, _ := os.ReadDir(filepath.Join(util.DataDir, "ocr", "models"))
 	for _, entry := range entries {
 		id := entry.Name()

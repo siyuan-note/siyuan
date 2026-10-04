@@ -159,6 +159,7 @@ import {
     clearBlockSelectionMode,
     clearBlockSelection,
     getBlockSelectionModeElement,
+    getBlockOperationElements,
     getBlockSelectionStatusIDs,
     isContinuousBlockSelection,
     runBlockSelectionDelete,
@@ -2273,7 +2274,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 return;
             }
-            const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            const selectsElement = getBlockOperationElements(protyle.wysiwyg.element, blockSelectionModeElement);
             const hasBlockSelection = selectsElement.length > 0;
             if (!hasBlockSelection) {
                 selectsElement.push(nodeElement);

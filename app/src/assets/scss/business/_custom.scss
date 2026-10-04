@@ -173,7 +173,13 @@
     padding-left: 4px;
     font-weight: normal;
 
-    span {
+    & > span.block__logoicon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    & > span:not(.block__logoicon) {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;

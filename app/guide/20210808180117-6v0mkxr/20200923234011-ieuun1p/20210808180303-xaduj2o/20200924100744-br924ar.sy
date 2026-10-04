@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261003073646"
+		"updated": "20261004005806"
 	},
 	"Children": [
 		{
@@ -967,7 +967,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003636-epvk98g",
-				"updated": "20261002231520"
+				"updated": "20261004005806"
 			},
 			"Children": [
 				{
@@ -1022,12 +1022,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001000112-e9wid3h",
-				"updated": "20261002231520"
+				"updated": "20261003234011"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "PaddleOCR includes PP-OCRv6 Tiny and Small models, available offline without downloading. Tiny uses fewer resources; Small offers higher accuracy. To import another compatible PP-OCRv6 model, select its detection and recognition ONNX files and the corresponding inference.yml files. Imported models sync with the workspace; the provider and selected model are saved per device. New users default to PaddleOCR with Small on desktop and Tiny on mobile; automatic OCR is disabled by default. Existing users retain their OCR configuration; upgrading from a version without OCR provider settings keeps Tesseract."
+					"Data": "PaddleOCR bundles only PP-OCRv6 Tiny, available offline without downloading and selected by default on desktop and mobile. Other compatible PP-OCRv6 models, such as Small and Medium, can be imported by selecting their detection and recognition ONNX files and corresponding inference.yml files. Imported models sync with the workspace; the provider and selected model are saved per device. New users default to PaddleOCR with automatic OCR disabled. Existing provider, automatic OCR, and threshold settings are preserved. The former built-in Small selection migrates to Tiny; imported models are unaffected. Upgrading from a version without OCR provider settings keeps Tesseract."
 				}
 			]
 		},
@@ -1364,7 +1364,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202934-1h96or8",
-				"updated": "20261001013550"
+				"updated": "20261004005806"
 			},
 			"Children": [
 				{
@@ -1528,6 +1528,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " to show or hide it. The image menu remains available for copying and editing OCR text."
+				}
+			]
+		},
+		{
+			"ID": "20261003224949-gtf3qng",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003224949-gtf3qng",
+				"updated": "20261004005806"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the image menu, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Redo OCR with AI"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", which sends the local image to the configured agent model for text recognition. The model must support image input. AI OCR runs only when requested and shares the existing OCR text, editing, copying, and search index. Failed recognition preserves the previous result. Encrypted notebook images are not supported. PNG, JPEG, GIF, and WebP are supported directly; BMP and TIFF are converted to PNG, and HEIC/HEIF to JPEG without reducing resolution. The original and converted images must each be within 20 MiB, and the converted image within 40 million pixels. Recognition actions are hidden for network images, and the OCR menu is hidden for encrypted notebook images. Unsupported formats such as AVIF, SVG, and ICO do not show the AI OCR action."
 				}
 			]
 		}

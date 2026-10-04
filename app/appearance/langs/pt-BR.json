@@ -3,6 +3,10 @@
 	"bazaarReleaseNotesLatest": "Mais recente",
 	"bazaarReleaseNotesEmpty": "Esta versão não possui notas da versão",
 	"bazaarReleaseNotesUnavailable": "As notas da versão não estão disponíveis",
+	"listMindmapSummaryBatch": "Criar ${count} resumos",
+	"listMindmapSummaryConflict": "Os intervalos dos resumos se cruzam; ajuste a seleção",
+	"reAIOCR": "Refazer OCR com IA",
+	"pdfAnnotationDeleteRefConfirm": "Esta anotação PDF é referenciada por ${x} blocos. Ao excluí-la, essas referências ficarão inválidas. Continuar?",
 	"ocrModelDefault": "Padrão do modelo",
 	"ocrDetectionThreshold": "Limiar de detecção",
 	"ocrBoxThreshold": "Limiar de confiança das caixas de texto",
@@ -43,7 +47,7 @@
 	"ocrAuto": "OCR automático",
 	"ocrAutoTip": "Processar imagens de cadernos comuns que ainda não possuem resultado de OCR",
 	"ocrModel": "Modelo de OCR",
-	"ocrModelTip": "Tiny e Small são integrados; a troca preserva os resultados existentes; repita o OCR pelo menu da imagem",
+	"ocrModelTip": "Apenas Tiny está integrado; trocar de modelo preserva os resultados existentes; execute o OCR novamente pelo menu da imagem",
 	"ocrImportModels": "Importar modelos de OCR",
 	"ocrImportModelsTip": "Selecione arquivos ONNX compatíveis de detecção e reconhecimento PP-OCRv6 e seus arquivos inference.yml; os arquivos importados são sincronizados com o espaço de trabalho",
 	"ocrDetector": "Modelo de detecção",
@@ -103,7 +107,7 @@
 	"agentInstructionsTooLarge": "As instruções não podem exceder 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md foi alterado. Copie suas alterações, reabra o editor e combine-as antes de salvar",
 	"listMindmapSummary": "Resumo",
-	"listMindmapSummarySelect": "Selecione o último nó com o mesmo pai no intervalo; os resumos não podem se sobrepor",
+	"listMindmapSummarySelect": "Selecione o último nó irmão ou arraste na área vazia para selecionar grupos; toque na área vazia para selecionar nós individualmente",
 	"mcpOAuthServer": "OAuth do servidor MCP",
 	"mcpOAuthTip": "Exige uma senha de bloqueio ou login OIDC e uma origem HTTPS pública; desativar ou alterar a origem revoga todas as autorizações",
 	"mcpOAuthPublicURL": "Origem HTTPS pública",
@@ -3083,6 +3087,8 @@
 		"408": "Falha na resolução de DNS. Verifique as configurações de rede, DNS ou proxy",
 		"409": "A conexão de rede foi interrompida ou não pôde ser estabelecida. Verifique as configurações de rede, proxy ou firewall",
 		"410": "Conversão cancelada: a lista inteira está vinculada a uma linha do banco de dados, mas a conversão gera vários blocos sem um destino único. Desvincule a lista ou vincule seus itens individualmente primeiro",
-		"411": "Conversão cancelada: o item da lista e seu primeiro bloco estão vinculados a linhas diferentes do mesmo banco de dados. Desvincule um deles primeiro"
+		"411": "Conversão cancelada: o item da lista e seu primeiro bloco estão vinculados a linhas diferentes do mesmo banco de dados. Desvincule um deles primeiro",
+		"412": "Configure primeiro o modelo do agente",
+		"413": "O OCR com IA não retornou uma transcrição completa; o resultado anterior foi preservado"
 	}
 }

@@ -3,6 +3,10 @@
 	"bazaarReleaseNotesLatest": "Più recente",
 	"bazaarReleaseNotesEmpty": "Questa versione non ha note di rilascio",
 	"bazaarReleaseNotesUnavailable": "Le note di rilascio non sono disponibili",
+	"listMindmapSummaryBatch": "Crea ${count} riepiloghi",
+	"listMindmapSummaryConflict": "Gli intervalli dei riepiloghi si incrociano; modifica la selezione",
+	"reAIOCR": "Ripeti OCR con IA",
+	"pdfAnnotationDeleteRefConfirm": "Questa annotazione PDF è referenziata da ${x} blocchi. Eliminandola, questi riferimenti diventeranno non validi. Continuare?",
 	"ocrModelDefault": "Predefinito del modello",
 	"ocrDetectionThreshold": "Soglia di rilevamento",
 	"ocrBoxThreshold": "Soglia di confidenza dei riquadri di testo",
@@ -43,7 +47,7 @@
 	"ocrAuto": "OCR automatico",
 	"ocrAutoTip": "Elabora le immagini dei quaderni normali che non hanno ancora risultati OCR",
 	"ocrModel": "Modello OCR",
-	"ocrModelTip": "Tiny e Small sono integrati; il cambio conserva i risultati esistenti; ripetere l’OCR dal menu dell’immagine",
+	"ocrModelTip": "Solo Tiny è integrato; il cambio di modello conserva i risultati esistenti; esegui nuovamente OCR dal menu dell’immagine",
 	"ocrImportModels": "Importa modelli OCR",
 	"ocrImportModelsTip": "Selezionare i file ONNX compatibili di rilevamento e riconoscimento PP-OCRv6 e i relativi inference.yml; i file importati vengono sincronizzati con lo spazio di lavoro",
 	"ocrDetector": "Modello di rilevamento",
@@ -103,7 +107,7 @@
 	"agentInstructionsTooLarge": "Le istruzioni non devono superare 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md è cambiato. Copia le tue modifiche, riapri l’editor e uniscile prima di salvare",
 	"listMindmapSummary": "Riepilogo",
-	"listMindmapSummarySelect": "Seleziona l'ultimo nodo con lo stesso genitore nell'intervallo; i riepiloghi non possono sovrapporsi",
+	"listMindmapSummarySelect": "Seleziona l'ultimo nodo fratello o trascina sullo spazio vuoto per selezionare gruppi; tocca lo spazio vuoto per selezionare i nodi singolarmente",
 	"mcpOAuthServer": "OAuth del server MCP",
 	"mcpOAuthTip": "Richiede una password di blocco o un accesso OIDC e un’origine HTTPS pubblica; disattivare o modificare l’origine revoca tutte le autorizzazioni",
 	"mcpOAuthPublicURL": "Origine HTTPS pubblica",
@@ -3083,6 +3087,8 @@
 		"408": "Risoluzione DNS non riuscita. Controlla le impostazioni di rete, DNS o proxy",
 		"409": "La connessione di rete è stata interrotta o non è stato possibile stabilirla. Controlla le impostazioni di rete, proxy o firewall",
 		"410": "Conversione annullata: l’intero elenco è associato a una riga del database, ma la conversione genera più blocchi senza una destinazione univoca. Rimuovi prima l’associazione dell’elenco o associa le singole voci",
-		"411": "Conversione annullata: la voce dell’elenco e il suo primo blocco sono associati a righe diverse dello stesso database. Rimuovi prima una delle associazioni"
+		"411": "Conversione annullata: la voce dell’elenco e il suo primo blocco sono associati a righe diverse dello stesso database. Rimuovi prima una delle associazioni",
+		"412": "Configura prima il modello dell’agente",
+		"413": "L’OCR con IA non ha restituito una trascrizione completa; il risultato precedente è stato conservato"
 	}
 }

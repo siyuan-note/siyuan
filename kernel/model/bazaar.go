@@ -634,6 +634,12 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 		}
 		refreshAppearancePackages(nil, names)
 	}
+	pushBazaarChanged(pkgType)
+}
+
+// 集市包落盘并完成运行时处理后，通知所有前端更新本地安装状态。
+var pushBazaarChanged = func(pkgType string) {
+	util.BroadcastByType("main", "bazaarChanged", 0, "", []string{pkgType})
 }
 
 // InstallBazaarPackage 安装集市包，themeOptions 仅在 pkgType 为 "themes" 时生效
@@ -775,6 +781,7 @@ func UninstallPackage(pkgType, packageName string) error {
 	case "icons":
 		refreshAppearancePackages(nil, []string{packageName})
 	}
+	pushBazaarChanged(pkgType)
 
 	return nil
 }

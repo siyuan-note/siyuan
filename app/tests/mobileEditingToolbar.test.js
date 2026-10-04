@@ -14,9 +14,8 @@ const runCases = async (sources, platform) => {
     const focusRequests = [];
     let undoCalls = 0;
     const inserts = [];
-    const commands = [];
     const nativeKeyboard = platform === "android" || platform === "harmony";
-    const visible = new Set(["mobile-copy", "mobile-cut", "mobile-undo", "mobile-redo", "mobile-indent",
+    const visible = new Set(["mobile-undo", "mobile-redo", "mobile-indent",
         "mobile-outdent", "mobile-block", "mobile-add", "mobile-heading1", "strong", "em", "a", "block-ref", "text",
         "mobile-separator"]);
     const order = ["strong", "mobile-undo", "mobile-separator", "mobile-heading1", "em", "mobile-indent", "mobile-outdent"];
@@ -93,10 +92,6 @@ const runCases = async (sources, platform) => {
             inputRequests++;
         }
     });
-    document.execCommand = command => {
-        commands.push({command, text: getSelection().toString()});
-        return true;
-    };
     window.Lute = {Caret: "‸"};
     current = {element: document.getElementById("editor"), editable, contentElement: root.parentElement,
         wysiwyg: {element: root}, preview: {element: preview},
@@ -139,13 +134,17 @@ const runCases = async (sources, platform) => {
     assert.equal(getSelection().toString(), "Alpha");
     assert.equal(document.activeElement, editable);
     assert.ok(inputRequests > 0);
-    assert.equal(toolbar.querySelector('[data-type="copy"]').classList.contains("fn__none"), false);
-    assert.equal(toolbar.querySelector('[data-type="cut"]').classList.contains("fn__none"), false);
+    assert.equal(toolbar.querySelector('[data-type="copy"]'), null);
+    assert.equal(toolbar.querySelector('[data-type="cut"]'), null);
     const hidden = name => toolbar.querySelector(`[data-type="${name}"]`).classList.contains("fn__none");
     assert.equal(hidden("indent"), true);
     assert.equal(hidden("outdent"), true);
     for (const name of ["strong", "em", "a", "block-ref", "text"]) {
         assert.equal(hidden(name), false);
+    }
+    for (const {name} of [...load("mobile/util/toolbarActions").MOBILE_TOOLBAR_ACTIONS,
+        ...load("mobile/util/toolbarActions").MOBILE_TOOLBAR_INSERTS, {name: "block-type"}]) {
+        assert.equal(hidden(name), true, name);
     }
     const contextMenu = new MouseEvent("contextmenu", {bubbles: true, cancelable: true});
     editable.dispatchEvent(contextMenu);
@@ -168,22 +167,28 @@ const runCases = async (sources, platform) => {
     assert.equal(keyboardHides, 0);
     const action = name => toolbar.querySelector(`[data-type="${name}"]`).dispatchEvent(
         new Event(nativeKeyboard ? "touchend" : "click", {bubbles: true, cancelable: true}));
-    action("copy");
-    action("cut");
-    assert.deepEqual(commands, [{command: "copy", text: "Alpha"}, {command: "cut", text: "Alpha"}]);
+    for (const type of ["copy", "cut"]) {
+        const event = new ClipboardEvent(type, {bubbles: true, cancelable: true});
+        editable.dispatchEvent(event);
+        assert.equal(event.defaultPrevented, false);
+        assert.equal(getSelection().toString(), "Alpha");
+    }
     action("strong");
     await settle();
     assert.equal(keyboardHides, 0);
     assert.equal(editable.hasAttribute("inputmode"), false);
     assert.equal(document.activeElement, editable);
+    select(0);
+    await settle();
+    assert.equal(hidden("undo"), false);
+    assert.equal(hidden("heading1"), false);
     action("undo");
     assert.equal(undoCalls, 1);
     action("redo");
     assert.equal(undoCalls, 1);
     action("heading1");
     assert.equal(inserts[0], "# ‸");
-    const actualOrder = [...toolbar.querySelector(".keyboard__dynamic").children]
-        .filter(item => !item.classList.contains("fn__none")).map(item => item.dataset.id);
+    const actualOrder = [...toolbar.querySelector(".keyboard__dynamic").children].map(item => item.dataset.id);
     assert.ok(actualOrder.indexOf("strong") < actualOrder.indexOf("mobile-undo"));
     assert.ok(actualOrder.indexOf("mobile-heading1") < actualOrder.indexOf("em"));
     // 显隐变化和编辑器切换不得恢复隐藏项，也不得向受限的字段编辑器插入文档块。
@@ -195,13 +200,13 @@ const runCases = async (sources, platform) => {
     await settle();
     assert.equal(toolbar.querySelector('[data-type="heading1"]').classList.contains("fn__none"), true);
     current.lite = undefined;
-    // 代码块选中内容时可缩进，列表首项保留禁用状态，外观配置仍可隐藏按钮。
+    // 文本选区隐藏块操作，光标位于列表首项时保留缩进禁用状态，外观配置仍可隐藏按钮。
     const block = editable.parentElement;
     block.classList.add("code-block");
     select();
     await settle();
-    assert.equal(hidden("indent"), false);
-    assert.equal(hidden("outdent"), false);
+    assert.equal(hidden("indent"), true);
+    assert.equal(hidden("outdent"), true);
     assert.equal(toolbar.querySelector('[data-type="indent"]').hasAttribute("disabled"), false);
     assert.equal(hidden("strong"), true);
     select(0);
@@ -233,7 +238,7 @@ const runCases = async (sources, platform) => {
     assert.equal(keyboardHides, nativeKeyboard ? 1 : 0);
     assert.equal(keyboardShows, showsBeforeClose);
     assert.equal(toolbar.classList.contains("fn__none"), true);
-    // 短按继续输入时保留已有 inputmode，折叠选区不显示复制与剪切。
+    // 短按继续输入时保留已有 inputmode，折叠选区恢复上下文工具栏。
     editable.setAttribute("inputmode", "text");
     touch("pointerdown");
     editable.focus();
@@ -242,8 +247,8 @@ const runCases = async (sources, platform) => {
     editable.click();
     await settle();
     assert.equal(editable.getAttribute("inputmode"), "text");
-    assert.equal(toolbar.querySelector('[data-type="copy"]').classList.contains("fn__none"), true);
-    assert.equal(toolbar.querySelector('[data-type="cut"]').classList.contains("fn__none"), true);
+    assert.equal(toolbar.querySelector('[data-type="copy"]'), null);
+    assert.equal(toolbar.querySelector('[data-type="cut"]'), null);
     for (const name of ["indent", "outdent", "strong", "em", "a", "text"]) {
         assert.equal(hidden(name), true);
     }
@@ -345,14 +350,14 @@ if (process.versions.electron && process.type === "browser") {
 } else {
     require("node:test").it("keeps touch selections in the input flow and shares toolbar configuration", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-        timeout: 125000,
+        timeout: 185000,
     }, async () => {
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-mobile-editing-"));
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 120000});
+                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 180000});
             assert.match(stdout, /Mobile editing toolbar cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));

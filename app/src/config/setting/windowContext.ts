@@ -15,6 +15,7 @@ export interface ISettingsWindowHost {
     reload: () => Promise<void>;
     resetLayout: () => Promise<void>;
     getDockOrderSnapshot: () => TDockOrderSnapshot;
+    openBazaarPath: (type: TBazaarType, name: string, storage?: boolean) => void;
     exportLayout: (options: {cb: () => void; errorExit: boolean}) => Promise<void>;
     exit: (setCurrentWorkspace?: boolean) => Promise<void>;
     subscribePlugins: (listener: (state: IGlobalPluginStateSnapshot) => void) => () => void;

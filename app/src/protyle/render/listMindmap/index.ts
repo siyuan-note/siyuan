@@ -40,9 +40,10 @@ import {setBlockHeight} from "../../gutter/height";
 import {ListMindmapView} from "./view";
 import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
-import {getListMindmapFoldStates} from "./fold";
+import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
 import {isMobile} from "../../../util/functions";
-import {getListMindmapSiblingIDs, getListMindmapSummaryRange} from "./summary";
+import {addListMindmapSummaryRanges, getListMindmapSiblingIDs, getListMindmapSummaryParentID, getListMindmapSummaryRange,
+    getListMindmapSummarySnapshot} from "./summary";
 import {isProtyleListItemFragment} from "../../runtimeCapabilities";
 import {isFoldedRenderContent} from "../foldedContent";
 
@@ -348,6 +349,15 @@ class ListMindmapController {
                     node.element.setAttribute("fold", node.collapsed ? "0" : "1");
                 }
             }),
+            onFoldSiblings: id => this.change(() => {
+                const model = readListMindmap(list);
+                getListMindmapSiblingFoldStates(model, id).forEach((collapsed, siblingID) => {
+                    const node = model.nodes.get(siblingID);
+                    if (node.element && node.collapsed !== collapsed) {
+                        node.element.setAttribute("fold", collapsed ? "1" : "0");
+                    }
+                });
+            }),
             onUndo: () => this.undo(false),
             onRedo: () => this.undo(true),
             onNodeStyle: (id, patch) => this.metadata(metadata => {
@@ -384,19 +394,38 @@ class ListMindmapController {
                 metadata.relations = metadata.relations.filter(item => item.id !== id);
             }),
             onSummaryAdd: async (from, to) => {
-                const id = Lute.NewNodeID();
+                let ids: string[];
                 const saved = await this.change(() => {
                     const model = readListMindmap(list);
                     const nodeIds = getListMindmapSummaryRange(model, from, to);
                     if (!nodeIds.length) {
                         return false;
                     }
-                    model.metadata.summaries ||= [];
-                    model.metadata.summaries.push({id, parentId: model.nodes.get(from).parentId,
-                        nodeIds, label: window.siyuan.languages.listMindmapSummary});
+                    ids = addListMindmapSummaryRanges(model, [{parentId: getListMindmapSummaryParentID(model, from), nodeIds}],
+                        () => Lute.NewNodeID(), window.siyuan.languages.listMindmapSummary);
+                    if (!ids) {
+                        return false;
+                    }
                     writeListMindmapMetadata(list, model.metadata);
                 });
-                return saved ? id : undefined;
+                return saved ? ids?.[0] : undefined;
+            },
+            onSummaryBatchAdd: async (ranges, expected) => {
+                let ids: string[];
+                const saved = await this.change(() => {
+                    const model = readListMindmap(list);
+                    if (getListMindmapSummarySnapshot(model) !== expected) {
+                        showMessage(window.siyuan.languages.listMindmapStale);
+                        return false;
+                    }
+                    ids = addListMindmapSummaryRanges(model, ranges, () => Lute.NewNodeID(),
+                        window.siyuan.languages.listMindmapSummary);
+                    if (!ids) {
+                        return false;
+                    }
+                    writeListMindmapMetadata(list, model.metadata);
+                });
+                return saved ? ids : undefined;
             },
             onSummaryChange: (id, patch, expected) => this.metadata(metadata => {
                 const summary = metadata.summaries?.find(item => item.id === id);

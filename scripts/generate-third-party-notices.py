@@ -57,7 +57,7 @@ BUNDLED_COMPONENTS = [
         "Windows OCR runtime directories include unmodified app-local CRT DLLs, MICROSOFT-VC-RUNTIME-NOTICE.txt, and vc-runtime-files.json with the exact file digests",
     ),
     (
-        "PaddleOCR PP-OCRv6 Tiny and Small ONNX models",
+        "PaddleOCR PP-OCRv6 Tiny ONNX models",
         "Pinned revisions in scripts/ocr-assets.json",
         "Apache-2.0",
         "https://huggingface.co/collections/PaddlePaddle/pp-ocrv6",

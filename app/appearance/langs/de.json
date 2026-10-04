@@ -3,6 +3,10 @@
 	"bazaarReleaseNotesLatest": "Neueste",
 	"bazaarReleaseNotesEmpty": "Für diese Version gibt es keine Versionshinweise",
 	"bazaarReleaseNotesUnavailable": "Versionshinweise sind nicht verfügbar",
+	"listMindmapSummaryBatch": "${count} Zusammenfassungen erstellen",
+	"listMindmapSummaryConflict": "Zusammenfassungsbereiche überschneiden sich; Auswahl anpassen",
+	"reAIOCR": "OCR mit KI erneut ausführen",
+	"pdfAnnotationDeleteRefConfirm": "Diese PDF-Anmerkung wird von ${x} Blöcken referenziert. Durch das Löschen werden diese Referenzen ungültig. Fortfahren?",
 	"ocrModelDefault": "Modellstandard",
 	"ocrDetectionThreshold": "Erkennungsschwelle für Textbereiche",
 	"ocrBoxThreshold": "Konfidenzschwelle für Textrahmen",
@@ -43,7 +47,7 @@
 	"ocrAuto": "Automatische OCR",
 	"ocrAutoTip": "Bilder normaler Notizbücher ohne vorhandenes OCR-Ergebnis verarbeiten",
 	"ocrModel": "OCR-Modell",
-	"ocrModelTip": "Tiny und Small sind integriert; ein Wechsel behält Ergebnisse bei; OCR im Bildmenü erneut ausführen",
+	"ocrModelTip": "Nur Tiny ist integriert; beim Wechsel bleiben vorhandene Ergebnisse erhalten; OCR lässt sich über das Bildmenü erneut ausführen",
 	"ocrImportModels": "OCR-Modelle importieren",
 	"ocrImportModelsTip": "Kompatible PP-OCRv6-ONNX-Dateien für Erkennung und Texterfassung sowie deren inference.yml auswählen; importierte Dateien werden mit dem Arbeitsbereich synchronisiert",
 	"ocrDetector": "Erkennungsmodell",
@@ -103,7 +107,7 @@
 	"agentInstructionsTooLarge": "Anweisungen dürfen höchstens 32 KiB groß sein",
 	"agentInstructionsConflict": "AGENTS.md wurde geändert. Kopieren Sie Ihre Änderungen, öffnen Sie den Editor erneut und führen Sie die Änderungen vor dem Speichern zusammen",
 	"listMindmapSummary": "Zusammenfassung",
-	"listMindmapSummarySelect": "Wähle den letzten gleichgeordneten Knoten des Bereichs; Zusammenfassungen dürfen sich nicht überschneiden",
+	"listMindmapSummarySelect": "Letzten Geschwisterknoten auswählen oder auf der leeren Zeichenfläche Gruppen aufziehen; zum einzelnen Auswählen von Knoten auf die leere Fläche tippen",
 	"mcpOAuthServer": "OAuth für MCP-Server",
 	"mcpOAuthTip": "Erfordert ein Sperrbildschirmpasswort oder eine OIDC-Anmeldung und einen öffentlichen HTTPS-Ursprung; Deaktivieren oder Ändern des Ursprungs widerruft alle Autorisierungen",
 	"mcpOAuthPublicURL": "Öffentlicher HTTPS-Ursprung",
@@ -3083,6 +3087,8 @@
 		"408": "DNS-Auflösung fehlgeschlagen. Bitte prüfen Sie Ihre Netzwerk-, DNS- oder Proxy-Einstellungen",
 		"409": "Die Netzwerkverbindung wurde unterbrochen oder konnte nicht hergestellt werden. Bitte prüfen Sie Ihre Netzwerk-, Proxy- oder Firewall-Einstellungen",
 		"410": "Konvertierung abgebrochen: Die gesamte Liste ist an eine Datenbankzeile gebunden, die Konvertierung erzeugt jedoch mehrere Blöcke ohne eindeutiges Bindungsziel. Lösen Sie zuerst die Bindung der Liste oder binden Sie einzelne Listeneinträge",
-		"411": "Konvertierung abgebrochen: Der Listeneintrag und sein erster Block sind an verschiedene Zeilen derselben Datenbank gebunden. Lösen Sie zuerst eine der Bindungen"
+		"411": "Konvertierung abgebrochen: Der Listeneintrag und sein erster Block sind an verschiedene Zeilen derselben Datenbank gebunden. Lösen Sie zuerst eine der Bindungen",
+		"412": "Bitte konfigurieren Sie zuerst das Agentenmodell",
+		"413": "Die KI-OCR hat keinen vollständigen Text zurückgegeben; das bisherige Ergebnis wurde beibehalten"
 	}
 }

@@ -71,7 +71,7 @@ func TestNativePaddleOCR(t *testing.T) {
 		}
 		expected = "SiYuan OCR 123"
 	}
-	for _, size := range []string{"tiny", "small"} {
+	for _, size := range []string{"tiny"} {
 		t.Run(size, func(t *testing.T) {
 			config := PaddleConfig{Library: library, Directory: filepath.Join(assets, size)}
 			provider := &PaddleProvider{Config: func() PaddleConfig { return config }}

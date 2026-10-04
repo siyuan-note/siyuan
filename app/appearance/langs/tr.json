@@ -3,6 +3,10 @@
 	"bazaarReleaseNotesLatest": "En son",
 	"bazaarReleaseNotesEmpty": "Bu sürümde sürüm notu yok",
 	"bazaarReleaseNotesUnavailable": "Sürüm notları kullanılamıyor",
+	"listMindmapSummaryBatch": "${count} özet oluştur",
+	"listMindmapSummaryConflict": "Özet aralıkları kesişiyor; seçimi düzenleyin",
+	"reAIOCR": "OCR’yi yapay zekâ ile yeniden çalıştır",
+	"pdfAnnotationDeleteRefConfirm": "Bu PDF açıklamasına ${x} bloktan başvuruluyor. Silindiğinde bu başvurular geçersiz olacaktır. Devam edilsin mi?",
 	"ocrModelDefault": "Model varsayılanı",
 	"ocrDetectionThreshold": "Algılama eşiği",
 	"ocrBoxThreshold": "Metin kutusu güven eşiği",
@@ -43,7 +47,7 @@
 	"ocrAuto": "Otomatik OCR",
 	"ocrAutoTip": "Henüz OCR sonucu olmayan normal defter görüntülerini işle",
 	"ocrModel": "OCR modeli",
-	"ocrModelTip": "Tiny ve Small yerleşiktir; değiştirmek mevcut sonuçları korur; görüntü menüsünden OCR işlemini tekrarlayın",
+	"ocrModelTip": "Yalnızca Tiny yerleşiktir; model değişikliği mevcut sonuçları korur; görsel menüsünden OCR işlemini yeniden çalıştırın",
 	"ocrImportModels": "OCR modellerini içe aktar",
 	"ocrImportModelsTip": "Uyumlu PP-OCRv6 algılama ve tanıma ONNX dosyalarını ve inference.yml dosyalarını seçin; içe aktarılan dosyalar çalışma alanıyla eşitlenir",
 	"ocrDetector": "Algılama modeli",
@@ -103,7 +107,7 @@
 	"agentInstructionsTooLarge": "Talimatlar 32 KiB boyutunu aşmamalıdır",
 	"agentInstructionsConflict": "AGENTS.md değişti. Düzenlemelerinizi kopyalayın, düzenleyiciyi yeniden açın ve kaydetmeden önce değişiklikleri birleştirin",
 	"listMindmapSummary": "Özet",
-	"listMindmapSummarySelect": "Özet aralığında aynı üst düğüme bağlı son düğümü seçin; özetler çakışamaz",
+	"listMindmapSummarySelect": "Aynı üst öğeye bağlı son düğümü seçin veya boş tuvalde sürükleyerek grupları seçin; düğümleri tek tek seçmek için boş tuvale dokunun",
 	"mcpOAuthServer": "MCP sunucusu OAuth",
 	"mcpOAuthTip": "Ekran kilidi parolası veya OIDC oturumu ve herkese açık bir HTTPS kaynağı gerektirir; kapatmak veya kaynağı değiştirmek tüm yetkileri iptal eder",
 	"mcpOAuthPublicURL": "Herkese açık HTTPS kaynağı",
@@ -3083,6 +3087,8 @@
 		"408": "DNS çözümlemesi başarısız oldu. Ağ, DNS veya vekil sunucu ayarlarınızı kontrol edin",
 		"409": "Ağ bağlantısı kesildi veya kurulamadı. Ağ, vekil sunucu veya güvenlik duvarı ayarlarınızı kontrol edin",
 		"410": "Dönüştürme iptal edildi: tüm liste bir veritabanı satırına bağlı, ancak dönüştürme birden fazla blok oluşturuyor ve tek bir bağlama hedefi belirlenemiyor. Önce listenin bağını kaldırın veya liste öğelerini ayrı ayrı bağlayın",
-		"411": "Dönüştürme iptal edildi: liste öğesi ve ilk bloğu aynı veritabanındaki farklı satırlara bağlı. Önce bağlantılardan birini kaldırın"
+		"411": "Dönüştürme iptal edildi: liste öğesi ve ilk bloğu aynı veritabanındaki farklı satırlara bağlı. Önce bağlantılardan birini kaldırın",
+		"412": "Lütfen önce ajan modelini yapılandırın",
+		"413": "Yapay zekâ OCR tam bir metin döndürmedi; mevcut sonuç korundu"
 	}
 }

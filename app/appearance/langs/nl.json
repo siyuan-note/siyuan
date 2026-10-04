@@ -3,6 +3,10 @@
 	"bazaarReleaseNotesLatest": "Nieuwste",
 	"bazaarReleaseNotesEmpty": "Deze versie heeft geen release-opmerkingen",
 	"bazaarReleaseNotesUnavailable": "Release-opmerkingen zijn niet beschikbaar",
+	"listMindmapSummaryBatch": "${count} samenvattingen maken",
+	"listMindmapSummaryConflict": "Samenvattingsbereiken kruisen elkaar; pas de selectie aan",
+	"reAIOCR": "OCR opnieuw uitvoeren met AI",
+	"pdfAnnotationDeleteRefConfirm": "${x} blokken verwijzen naar deze PDF-annotatie. Als u deze verwijdert, worden deze verwijzingen ongeldig. Doorgaan?",
 	"ocrModelDefault": "Modelstandaard",
 	"ocrDetectionThreshold": "Detectiedrempel",
 	"ocrBoxThreshold": "Betrouwbaarheidsdrempel voor tekstvakken",
@@ -43,7 +47,7 @@
 	"ocrAuto": "Automatische OCR",
 	"ocrAutoTip": "Afbeeldingen in gewone notitieboeken zonder bestaand OCR-resultaat verwerken",
 	"ocrModel": "OCR-model",
-	"ocrModelTip": "Tiny en Small zijn ingebouwd; wisselen behoudt bestaande resultaten; voer OCR opnieuw uit via het afbeeldingsmenu",
+	"ocrModelTip": "Alleen Tiny is ingebouwd; wisselen behoudt bestaande resultaten; voer OCR opnieuw uit via het afbeeldingsmenu",
 	"ocrImportModels": "OCR-modellen importeren",
 	"ocrImportModelsTip": "Selecteer compatibele PP-OCRv6-ONNX-bestanden voor detectie en herkenning en hun inference.yml-bestanden; geïmporteerde bestanden synchroniseren met de werkruimte",
 	"ocrDetector": "Detectiemodel",
@@ -103,7 +107,7 @@
 	"agentInstructionsTooLarge": "Instructies mogen maximaal 32 KiB groot zijn",
 	"agentInstructionsConflict": "AGENTS.md is gewijzigd. Kopieer je wijzigingen, open de editor opnieuw en voeg ze samen voordat je opslaat",
 	"listMindmapSummary": "Samenvatting",
-	"listMindmapSummarySelect": "Selecteer de laatste knoop met dezelfde ouder in het bereik; samenvattingen mogen niet overlappen",
+	"listMindmapSummarySelect": "Selecteer de laatste knoop met dezelfde ouder of sleep op het lege canvas om groepen te selecteren; tik op het lege canvas om knopen afzonderlijk te selecteren",
 	"mcpOAuthServer": "OAuth voor MCP-server",
 	"mcpOAuthTip": "Vereist een vergrendelwachtwoord of OIDC-aanmelding en een openbare HTTPS-oorsprong; uitschakelen of wijzigen van de oorsprong trekt alle machtigingen in",
 	"mcpOAuthPublicURL": "Openbare HTTPS-oorsprong",
@@ -3083,6 +3087,8 @@
 		"408": "DNS-resolutie mislukt. Controleer uw netwerk-, DNS- of proxyinstellingen",
 		"409": "De netwerkverbinding is onderbroken of kon niet tot stand worden gebracht. Controleer uw netwerk-, proxy- of firewallinstellingen",
 		"410": "Conversie geannuleerd: de hele lijst is gekoppeld aan een databaserij, maar de conversie levert meerdere blokken op zonder uniek koppelingsdoel. Ontkoppel eerst de lijst of koppel afzonderlijke lijstitems",
-		"411": "Conversie geannuleerd: het lijstitem en het eerste blok zijn gekoppeld aan verschillende rijen in dezelfde database. Verwijder eerst een van de koppelingen"
+		"411": "Conversie geannuleerd: het lijstitem en het eerste blok zijn gekoppeld aan verschillende rijen in dezelfde database. Verwijder eerst een van de koppelingen",
+		"412": "Configureer eerst het agentmodel",
+		"413": "AI-OCR heeft geen volledige transcriptie teruggegeven; het bestaande resultaat is behouden"
 	}
 }

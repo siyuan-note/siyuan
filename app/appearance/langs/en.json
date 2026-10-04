@@ -3,6 +3,10 @@
 	"bazaarReleaseNotesLatest": "Latest",
 	"bazaarReleaseNotesEmpty": "This version has no release notes",
 	"bazaarReleaseNotesUnavailable": "Release notes are unavailable",
+	"listMindmapSummaryBatch": "Create ${count} summaries",
+	"listMindmapSummaryConflict": "Summary ranges cross; adjust the selection",
+	"reAIOCR": "Redo OCR with AI",
+	"pdfAnnotationDeleteRefConfirm": "This PDF annotation is referenced by ${x} blocks. Deleting it will invalidate these references. Continue?",
 	"ocrModelDefault": "Model default",
 	"ocrDetectionThreshold": "Detection threshold",
 	"ocrBoxThreshold": "Text box confidence threshold",
@@ -43,7 +47,7 @@
 	"ocrAuto": "Automatic OCR",
 	"ocrAutoTip": "Process ordinary notebook images that have no OCR result yet",
 	"ocrModel": "OCR model",
-	"ocrModelTip": "Tiny and Small are built in; switching preserves existing results; rerun OCR from the image menu",
+	"ocrModelTip": "Only Tiny is built in; switching preserves existing results; rerun OCR from the image menu",
 	"ocrImportModels": "Import OCR models",
 	"ocrImportModelsTip": "Select compatible PP-OCRv6 detection and recognition ONNX files and their inference.yml files; imported files sync with the workspace",
 	"ocrDetector": "Detection model",
@@ -103,7 +107,7 @@
 	"agentInstructionsTooLarge": "Instructions must be at most 32 KiB",
 	"agentInstructionsConflict": "AGENTS.md has changed. Copy your edits, reopen the editor, and merge them before saving",
 	"listMindmapSummary": "Summary",
-	"listMindmapSummarySelect": "Select the last sibling node in the summary range; summaries cannot overlap",
+	"listMindmapSummarySelect": "Select the last sibling node, or drag on blank canvas to select groups; tap blank canvas to select nodes individually",
 	"mcpOAuthServer": "MCP server OAuth",
 	"mcpOAuthTip": "Requires a lock screen password or OIDC login and a public HTTPS origin; disabling or changing the origin revokes all authorizations",
 	"mcpOAuthPublicURL": "Public HTTPS origin",
@@ -3083,6 +3087,8 @@
 		"408": "DNS resolution failed, please check your network, DNS, or proxy settings",
 		"409": "The network connection was interrupted or could not be established, please check your network, proxy, or firewall settings",
 		"410": "Conversion canceled: the whole list is bound to a database row, but conversion produces multiple blocks with no unique binding target. Unbind the whole list or bind individual list items first",
-		"411": "Conversion canceled: the list item and its first block are bound to different rows in the same database. Unbind one of them first"
+		"411": "Conversion canceled: the list item and its first block are bound to different rows in the same database. Unbind one of them first",
+		"412": "Please configure the agent model first",
+		"413": "AI OCR did not return a complete transcription; the existing result was preserved"
 	}
 }

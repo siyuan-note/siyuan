@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261002230606"
+		"updated": "20261003225941"
 	},
 	"Children": [
 		{
@@ -12878,7 +12878,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20261001015635"
+				"updated": "20261003225941"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12893,7 +12893,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-fr0uxw6",
-				"updated": "20260925094732",
+				"updated": "20261003225941",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13468,6 +13468,42 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击节点折叠按钮，折叠或展开同一父节点下的兄弟分支"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt+点击"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥点击"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -13504,7 +13540,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "选择概要范围时，使用上下方向键选择末端同级节点，Enter 确认，Esc 取消。编辑概要文字时，Enter 保存，Esc 取消。选中概要后，Delete 或 Backspace 删除概要。"
+					"Data": "批量概要预览中，Enter 一次创建所有分组概要，Esc 取消，创建后可一次撤销。选择概要范围时，使用上下方向键选择末端同级节点，Enter 确认，Esc 取消。编辑概要文字时，Enter 保存，Esc 取消。选中概要后，Delete 或 Backspace 删除概要。"
 				}
 			]
 		},

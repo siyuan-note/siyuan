@@ -248,6 +248,7 @@ function webViewerLoad(file, element, pdfPage, annoId, previewOnly = false) {
   pdf.annoId = annoId
   const config = getViewerConfiguration(element);
   config.file = file;
+  config.previewOnly = previewOnly;
   if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("GENERIC")) {
     // Give custom implementations of the default viewer a simpler way to
     // set various `AppOptions`, by dispatching an event once all viewer

@@ -43,6 +43,7 @@ const createBoot = (plugin = false, failed = "") => {
             destroy() { calls.push("disconnect"); }
         }},
         "../../menus": {Menus: class {}},
+        "../../dialog/tooltip": {initTooltips: () => calls.push("tooltips"), hideTooltip() {}},
         "../../util/genID": {genUUID: () => "id"},
         "../../util/fetch": {fetchSyncPost: async (url, data) => {
             if (url === "/api/system/getConf") return {code: 0, data: {conf: {appearance: {lang: "en"}}}};
@@ -108,6 +109,8 @@ for (const plugin of [false, true]) {
         boot.pending.get("user")();
         await initialized;
         assert.ok(boot.calls.indexOf("render") < boot.calls.indexOf("siyuan-settings-ready"));
+        assert.ok(boot.calls.indexOf("render") < boot.calls.indexOf("tooltips"));
+        assert.ok(boot.calls.indexOf("tooltips") < boot.calls.indexOf("siyuan-settings-ready"));
     });
 }
 

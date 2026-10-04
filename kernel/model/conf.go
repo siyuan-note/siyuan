@@ -786,7 +786,7 @@ func InitConf() {
 		}()
 	}
 
-	Conf.OCR = normalizeOCRConfig(Conf.OCR, confFileExists, util.IsMobileContainer())
+	Conf.OCR = normalizeOCRConfig(Conf.OCR, confFileExists)
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()
 	} else {

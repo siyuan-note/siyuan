@@ -295,6 +295,7 @@ func TestGetPackageUninstallPathUsesInvalidPackageDirectory(t *testing.T) {
 
 func TestInstallLocalBazaarPackageReplacesEmptyDirectoryTree(t *testing.T) {
 	setupSyncMutationTest(t)
+	changes := captureBazaarChanges(t)
 	oldDataDir, oldTempDir := util.DataDir, util.TempDir
 	root := t.TempDir()
 	util.DataDir = filepath.Join(root, "data")
@@ -341,6 +342,21 @@ func TestInstallLocalBazaarPackageReplacesEmptyDirectoryTree(t *testing.T) {
 	}
 	if _, err = os.Stat(filepath.Join(installPath, "plugin.json")); err != nil {
 		t.Fatalf("installed package manifest is missing: %s", err)
+	}
+	if len(*changes) != 1 || (*changes)[0] != "plugins" {
+		t.Fatalf("local installation notification = %v", *changes)
+	}
+	if _, err = InstallLocalBazaarPackage(archivePath, "", false); err == nil {
+		t.Fatal("expected existing package error")
+	}
+	if len(*changes) != 1 {
+		t.Fatal("rejected installation must not notify")
+	}
+	if _, err = InstallLocalBazaarPackage(archivePath, "", true); err != nil {
+		t.Fatal(err)
+	}
+	if len(*changes) != 2 {
+		t.Fatal("local overwrite must notify even when the plugin is disabled")
 	}
 }
 

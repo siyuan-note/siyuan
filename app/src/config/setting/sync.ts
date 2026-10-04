@@ -7,6 +7,7 @@ import {objEquals} from "../../util/functions";
 import {syncSettingTasks} from "./taskBlocker";
 import {processSync} from "../../dialog/processSystem";
 import {notifyOCRChanged} from "../ocrRuntime";
+import {refreshMountedBazaar} from "../bazaarTab";
 /// #if !MOBILE
 import {applyKeymap} from "../tabs/keymapRuntime";
 import {remountOpenSettingTab} from "./mount";
@@ -15,6 +16,24 @@ import {getSettingTabDefs, type TSettingTab} from "./tabs";
 
 let pending = new Set<string>();
 let refreshing: Promise<void>;
+let saving = 0;
+let saved: Promise<void>;
+let finishSaving: () => void;
+
+// 等待配置写入完成，将保存回调与同次写入的广播合并为一次配置读取。
+export const refreshSettingConfigAfter = async (namespace: string, save: () => Promise<boolean>) => {
+    if (saving++ === 0) {
+        saved = new Promise(resolve => { finishSaving = resolve; });
+    }
+    let changed: boolean;
+    try {
+        changed = await save();
+    } finally {
+        if (--saving === 0) finishSaving();
+    }
+    if (changed) await refreshSettingConfig(namespace);
+    return changed;
+};
 
 // 合并通知并串行读取，重连也使用同一流程，避免旧响应覆盖更新后的配置。
 export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
@@ -24,6 +43,7 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
     }
     refreshing = (async () => {
         while (pending.size) {
+            while (saving) await saved;
             const namespaces = pending;
             pending = new Set();
             const response = await fetchSyncPost("/api/system/getConf", {});
@@ -71,6 +91,9 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             }
             if (includes("ocr") && next.ocr) {
                 notifyOCRChanged();
+            }
+            if (includes("bazaar")) {
+                void refreshMountedBazaar();
             }
             /// #if !MOBILE
             const tabs: Record<string, TSettingTab> = {fileTree: "file", secrets: "secretsVariables", variables: "secretsVariables", system: "app", publish: "access"};

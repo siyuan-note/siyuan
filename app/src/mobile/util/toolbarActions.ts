@@ -5,8 +5,6 @@ export const MOBILE_TOOLBAR_ACTIONS = [
     {name: "block", lang: "contentBlock", icon: "iconParagraph"},
     {name: "outdent", lang: "outdent", icon: "iconOutdent"},
     {name: "indent", lang: "indent", icon: "iconIndent"},
-    {name: "copy", lang: "copy", icon: "iconCopy"},
-    {name: "cut", lang: "cut", icon: "iconCut"},
     {name: "softLine", lang: "wrap", icon: "iconSoftWrap"},
     {name: "undo", lang: "undo", icon: "iconUndo"},
     {name: "redo", lang: "redo", icon: "iconRedo"},

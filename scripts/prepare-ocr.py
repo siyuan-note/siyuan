@@ -297,6 +297,17 @@ def prepare_runtime(target, build_worker, prerequisites=None):
         subprocess.run(["go", "build", "-trimpath", "-ldflags=-s -w", "-o", str(directory / "siyuan-ocr"), "./ocr/cmd/ocr-worker"], cwd=ROOT / "kernel", env=prerequisites, check=True)
 
 
+def remove_obsolete_models():
+    # 清理构建目录中已取消内置的模型，避免增量打包继续携带 Small。
+    models = STAGE / "models"
+    obsolete = models / "small"
+    if not obsolete.exists() and not obsolete.is_symlink():
+        return
+    if models.resolve().parent != STAGE.resolve() or obsolete.is_symlink() or obsolete.resolve().parent != models.resolve():
+        raise ValueError("Obsolete OCR model directory escapes the packaging directory")
+    shutil.rmtree(obsolete)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runtime", choices=["none", *MANIFEST.get("runtime", {})], default="none")
@@ -313,6 +324,7 @@ def main():
         futures = [pool.submit(download, entry, STAGE / "models" / entry["path"]) for entry in MANIFEST["models"]]
         for future in futures:
             future.result()
+    remove_obsolete_models()
     if args.runtime != "none":
         prepare_runtime(args.runtime, args.build_worker, prerequisites)
     print(f"OCR resources ready: {args.runtime}")

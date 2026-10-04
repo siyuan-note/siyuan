@@ -28,6 +28,7 @@ func TestAPIContractAIDisabled(t *testing.T) {
 	engine := gin.New()
 	for path, handler := range map[string]gin.HandlerFunc{
 		"/api/ai/chatGPT":            chatGPT,
+		"/api/ai/ocr":                aiOCR,
 		"/api/ai/editor/chat":        aiEditorChat,
 		"/api/ai/agent/chat":         agentChat,
 		"/api/ai/testModel":          testModel,

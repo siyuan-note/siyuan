@@ -15,10 +15,6 @@ type OCRThresholds struct {
 	Recognition *float64 `json:"recognition"`
 }
 
-func NewOCR(mobile bool) *OCR {
-	model := "small"
-	if mobile {
-		model = "tiny"
-	}
-	return &OCR{Provider: "paddleocr", Model: model, Auto: false}
+func NewOCR() *OCR {
+	return &OCR{Provider: "paddleocr", Model: "tiny", Auto: false}
 }

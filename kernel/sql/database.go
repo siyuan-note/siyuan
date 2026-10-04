@@ -125,6 +125,9 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureRefsDefIndexes(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create refs definition indexes failed: %s", err)
 			}
+			if err := ensureDocumentPathIndexes(db, true); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document path indexes failed: %s", err)
+			}
 			if err := cleanupInvalidRefs(db); err != nil {
 				logging.LogErrorf("cleanup invalid refs failed: %s", err)
 			}
@@ -282,6 +285,9 @@ func initDBTables() {
 	_, err = db.Exec("CREATE INDEX idx_block_embeddings_root_id ON block_embeddings(root_id)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_block_embeddings_root_id] failed: %s", err)
+	}
+	if err = ensureDocumentPathIndexes(db, true); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document path indexes failed: %s", err)
 	}
 }
 
@@ -1338,32 +1344,34 @@ func batchDeleteByRootIDs(tx *sql.Tx, rootIDs []string, context map[string]any) 
 
 func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	// external content 模式下 FTS 行需按 rowid 删除，必须先删 FTS 再删 blocks。
-	stmt := "DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE box = ? AND path LIKE ?)"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	condition, args := documentPathPrefixCondition("path", boxID, pathPrefix)
+	stmt := "DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE " + condition + ")"
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM blocks WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	stmt = "DELETE FROM blocks WHERE " + condition
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM spans WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	stmt = "DELETE FROM spans WHERE " + condition
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM assets WHERE box = ? AND docpath LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	assetCondition, assetArgs := documentPathPrefixCondition("docpath", boxID, pathPrefix)
+	stmt = "DELETE FROM assets WHERE " + assetCondition
+	if err = execStmtTx(tx, stmt, assetArgs...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM refs WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	stmt = "DELETE FROM refs WHERE " + condition
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM file_annotation_refs WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	stmt = "DELETE FROM file_annotation_refs WHERE " + condition
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM attributes WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	stmt = "DELETE FROM attributes WHERE " + condition
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
 	ClearCache()
@@ -2078,6 +2086,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		return
 	}
 	if err = ensureRefsDefIndexes(boxDB); err != nil {
+		return
+	}
+	if err = ensureDocumentPathIndexes(boxDB, false); err != nil {
 		return
 	}
 	if err = cleanupInvalidRefs(boxDB); err != nil {

@@ -40,7 +40,12 @@ export class Model {
     private processWebSocketMessage(data: string, callback: (data: IWebSocketData) => void) {
         // 消息处理依赖面板子类，调用时加载以避免基类初始化期间形成循环依赖。
         const {processMessage}: typeof import("../util/processMessage") = require("../util/processMessage");
-        callback.call(this, processMessage(JSON.parse(data)));
+        const message = processMessage(JSON.parse(data));
+        if (message && message.cmd === "bazaarChanged") {
+            const {refreshMountedBazaar}: typeof import("../config/bazaarTab") = require("../config/bazaarTab");
+            void refreshMountedBazaar(message.data);
+        }
+        callback.call(this, message);
     }
 
     public flushMainMessages() {

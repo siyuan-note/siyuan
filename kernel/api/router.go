@@ -669,6 +669,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/removeUnusedAttributeView", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeUnusedAttributeView)
 
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, model.CheckAdminRole, chatGPT)
+	ginServer.Handle("POST", "/api/ai/ocr", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, aiOCR)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, model.CheckAdminRole, chatGPTWithAction)
 	ginServer.Handle("POST", "/api/ai/editor/chat", model.CheckAuth, model.CheckAdminRole, aiEditorChat)
 	ginServer.Handle("POST", "/api/ai/editor/lsActions", model.CheckAuth, model.CheckAdminRole, lsAIEditorActions)

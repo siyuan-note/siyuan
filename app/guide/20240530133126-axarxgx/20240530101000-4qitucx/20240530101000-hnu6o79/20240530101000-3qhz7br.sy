@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261002002136"
+		"updated": "20261003234156"
 	},
 	"Children": [
 		{
@@ -2044,7 +2044,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20260928143000"
+				"updated": "20261003225941"
 			},
 			"Children": [
 				{
@@ -2064,6 +2064,34 @@
 				{
 					"Type": "NodeText",
 					"Data": "マインドマップのツールバーで「表示をロック」を押すと、編集、拡大・縮小、移動が無効になります。マップ上でのスワイプやマウスホイール操作は文書をスクロールします。「表示のロックを解除」で操作を再開できます。ロック状態はブロックとともに保存されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261003225941-37evcb1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003225941-37evcb1",
+				"updated": "20261003225941"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）を押しながらノードの折りたたみボタンをクリックすると、同じ親ノード配下の兄弟ブランチをまとめて折りたたむ、または展開できます。展開されている兄弟ブランチがあればすべて折りたたみ、すべて折りたたまれていれば展開します。さらに深い階層の折りたたみ状態は保持されます。通常のクリックは現在のノードのみを切り替えます。"
 				}
 			]
 		},
@@ -3428,7 +3456,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-ar71gu2",
-				"updated": "20260905124213"
+				"updated": "20261003234156"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -3463,6 +3491,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "タブ右側のメニューで、タブの追加、複製、削除、並べ替え、および上部／左側の配置を選べます。選択中のタブと配置はドキュメントとともに保存・同期されます。読み取り専用画面での切り替えは一時的です。タブ配置を解除すると、すべてのタイトルと本文が順番に残ります。"
+				}
+			]
+		},
+		{
+			"ID": "20261003234156-3qtc9d0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003234156-3qtc9d0",
+				"updated": "20261003234156"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブ項目のメニューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ズームイン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、その項目とタイトルだけが表示され、バックリンクの対象もその項目に限定されます。子ブロックを含めるかどうかは既存の設定に従います。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "フォーカス解除"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶとタブグループ全体に戻ります。フォーカス中の項目内にある入れ子のタブは通常どおり切り替えられます。"
 				}
 			]
 		},

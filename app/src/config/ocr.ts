@@ -10,7 +10,7 @@ import {objEquals} from "../util/functions";
 import {openOCRThresholds} from "./ocrThresholds";
 
 export const ocrSearchStrings = (): string[] => [
-    "OCR", "Tesseract", "PaddleOCR", "Tiny", "Small",
+    "OCR", "Tesseract", "PaddleOCR", "Tiny",
     window.siyuan.languages.ocrProvider,
     window.siyuan.languages.ocrModel,
     window.siyuan.languages.ocrAuto,

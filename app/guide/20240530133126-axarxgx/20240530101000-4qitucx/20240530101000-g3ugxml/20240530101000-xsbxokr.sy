@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20261002230607"
+		"updated": "20261003225941"
 	},
 	"Children": [
 		{
@@ -12838,7 +12838,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-icqlkb6",
-				"updated": "20261001015635"
+				"updated": "20261003225941"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12853,7 +12853,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-01k7syf",
-				"updated": "20260925094732",
+				"updated": "20261003225941",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13340,6 +13340,42 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ノードの折りたたみボタンで同じ親ノード配下の兄弟ブランチを折りたたみ／展開"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt+クリック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥クリック"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -13376,7 +13412,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "要約範囲の選択中は上下の矢印キーで同じ親を持つ末端のノードを選び、Enter で確定、Esc でキャンセルします。要約テキストの編集中は Enter で保存、Esc でキャンセルします。選択中の要約は Delete または Backspace で削除できます。"
+					"Data": "要約の一括作成プレビューでは Enter で全グループを作成し、Esc でキャンセルします。作成は一度の取り消しで元に戻せます。要約範囲の選択中は上下の矢印キーで同じ親を持つ末端のノードを選び、Enter で確定、Esc でキャンセルします。要約テキストの編集中は Enter で保存、Esc でキャンセルします。選択中の要約は Delete または Backspace で削除できます。"
 				}
 			]
 		},

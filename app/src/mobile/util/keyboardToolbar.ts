@@ -89,7 +89,7 @@ import {mountLiteSlashMenu} from "./liteSlashMenu";
 import {getTableCellRichContext} from "../../protyle/util/tableCellRichContext";
 import {insertEmptyBlock} from "../../block/util";
 import {getIconByType} from "../../editor/getIcon";
-import {MOBILE_TOOLBAR_ACTIONS, MOBILE_TOOLBAR_INSERTS} from "./toolbarActions";
+import {MOBILE_TOOLBAR_ACTION_NAMES, MOBILE_TOOLBAR_ACTIONS, MOBILE_TOOLBAR_INSERTS} from "./toolbarActions";
 import {pauseMobileBarsScroll} from "./mobileBars";
 import {getBlockTypeSelection, openBlockTypeMenu, updateBlockTypeButton} from "../../protyle/toolbar/BlockType";
 import {TTextBlockSelection} from "../../protyle/toolbar/blockTypeCore";
@@ -110,11 +110,11 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
         order: getEntryOrder(TOOLBAR_ENTRY_ROOT_PATH),
         isVisible: key => isEntryVisible(`${TOOLBAR_ENTRY_ROOT_PATH}.${key}`),
         isAvailable: name => {
+            if (hasText && (name === "block-type" || MOBILE_TOOLBAR_ACTION_NAMES.includes(name))) {
+                return false;
+            }
             if (name === "block-type") {
                 return !!range && !!getBlockTypeSelection(protyle, range);
-            }
-            if (name === "copy" || name === "cut") {
-                return !!range && !protyle.disabled && !range.collapsed;
             }
             if (name === "outdent" || name === "indent") {
                 return !!nodeElement?.parentElement.classList.contains("li") || !!inCode && hasText;
@@ -1713,12 +1713,7 @@ export const initKeyboardToolbar = () => {
         if (window.siyuan.config.readonly || !protyle || protyle.disabled) {
             return;
         }
-        if (type === "copy" || type === "cut") {
-            focusByRange(range);
-            document.execCommand(type);
-            renderKeyboardToolbar();
-            return;
-        } else if (type === "undo") {
+        if (type === "undo") {
             const undoContext = getMobileToolbarUndo(protyle);
             if (undoContext) {
                 undoContext.run(false);

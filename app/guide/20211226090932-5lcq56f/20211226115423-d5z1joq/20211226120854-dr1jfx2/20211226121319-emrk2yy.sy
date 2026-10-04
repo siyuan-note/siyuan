@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261002002136"
+		"updated": "20261003234156"
 	},
 	"Children": [
 		{
@@ -1912,7 +1912,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20260928143000"
+				"updated": "20261003225941"
 			},
 			"Children": [
 				{
@@ -1932,6 +1932,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "點擊思維導圖工具列中的「鎖定視圖」後，禁止編輯、縮放和平移，在導圖上滑動或滾動滑鼠滾輪將捲動文件。點擊「解鎖視圖」可恢復操作。鎖定狀態隨區塊儲存。"
+				}
+			]
+		},
+		{
+			"ID": "20261003225941-6yr63oi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003225941-6yr63oi",
+				"updated": "20261003225941"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS 上為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）並點擊節點的摺疊按鈕，可統一摺疊或展開同一父節點下的兄弟分支。只要還有兄弟分支展開，就統一摺疊；全部摺疊時，則統一展開。更深層節點的摺疊狀態保持不變。一般點擊只切換目前節點。"
 				}
 			]
 		},
@@ -3293,7 +3325,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-9j816g5",
-				"updated": "20260905124213"
+				"updated": "20261003234156"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -3328,6 +3360,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "使用頁籤右側的選單新增、複製、刪除或排序頁籤，切換頂部或左側版面配置。選取的頁籤與版面配置會隨文件儲存、同步；唯讀頁面的切換僅於本次檢視生效。取消頁籤版面配置會依序保留所有標題與內文。"
+				}
+			]
+		},
+		{
+			"ID": "20261003234156-6krnh0y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003234156-6krnh0y",
+				"updated": "20261003234156"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在頁籤項選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "聚焦"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，只顯示該項及其標題，反向鏈接也限定於該項；是否包含子區塊沿用現有設定。選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "退出聚焦"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後恢復完整頁籤群組，聚焦項內部的巢狀頁籤仍可正常切換。"
 				}
 			]
 		},

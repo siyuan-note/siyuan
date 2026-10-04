@@ -24,7 +24,7 @@ import {appearanceConfigApi, refreshAppearance} from "../tabs/appearanceRuntime"
 import {Setting} from "../../plugin/Setting";
 import {bindMenuKeydown} from "../../menus/Menu";
 import {windowMouseMove} from "../../boot/globalEvent/mousemove";
-import {hideTooltip} from "../../dialog/tooltip";
+import {hideTooltip, initTooltips} from "../../dialog/tooltip";
 import {applyCloudUserState} from "../tabs/accountUi";
 import {updateServerAddresses} from "../tabs/accessRuntime";
 import {installPluginStorageFetchAppId} from "../../util/fetchAppId";
@@ -227,6 +227,7 @@ const initialize = async () => {
                 event.preventDefault();
             }
         });
+        initTooltips();
         window.addEventListener("mousemove", windowMouseMove);
         window.addEventListener("blur", hideTooltip);
         window.addEventListener("focus", () => {

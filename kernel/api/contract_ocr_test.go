@@ -135,6 +135,7 @@ func TestAPIContractOCRPermissions(t *testing.T) {
 		{"/api/asset/getOCRConfig", false, getOCRConfig},
 		{"/api/asset/setOCRConfig", true, setOCRConfig},
 		{"/api/asset/importOCRModels", true, importOCRModels},
+		{"/api/ai/ocr", true, aiOCR},
 	} {
 		for _, role := range []model.Role{model.RoleReader, model.RoleEditor, model.RoleAdministrator} {
 			for _, readonly := range []bool{false, true} {
@@ -283,7 +284,7 @@ func TestAPIContractOCRSettings(t *testing.T) {
 	if err := json.Unmarshal(get.Body.Bytes(), &result); err != nil {
 		t.Fatal(err)
 	}
-	if result.Data.Config.Provider != "paddleocr" || result.Data.Config.Auto || len(result.Data.Models) != 2 || len(result.Data.Providers) != 2 {
+	if result.Data.Config.Provider != "paddleocr" || result.Data.Config.Model != "tiny" || result.Data.Config.Auto || len(result.Data.Models) != 1 || result.Data.Models[0].ID != "tiny" || !result.Data.Models[0].BuiltIn || len(result.Data.Providers) != 2 {
 		t.Fatalf("unexpected defaults: %+v", result.Data)
 	}
 	path := "assets/preserved.png"
@@ -294,6 +295,7 @@ func TestAPIContractOCRSettings(t *testing.T) {
 		success bool
 	}{
 		{`{"provider":"tesseract","model":"tiny","auto":false}`, true},
+		{`{"provider":"tesseract","model":"small","auto":false}`, true},
 		{`{"provider":"unknown","model":"tiny","auto":true}`, false},
 		{`{"provider":"paddleocr","model":"../../outside","auto":true}`, false},
 		{`{"provider":"tesseract","model":"tiny","auto":"false"}`, false},
@@ -303,12 +305,18 @@ func TestAPIContractOCRSettings(t *testing.T) {
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/setOCRConfig", strings.NewReader(test.body)))
 		requireAPIContract(t, "POST", "/api/asset/setOCRConfig", recorder)
-		var response struct{ Code int }
+		var response struct {
+			Code int
+			Data *apicontract.SettingOCR
+		}
 		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
 			t.Fatal(err)
 		}
 		if (response.Code == 0) != test.success {
 			t.Fatalf("body=%s response=%s", test.body, recorder.Body.String())
+		}
+		if test.success && (response.Data == nil || response.Data.Model != "tiny" || model.Conf.GetOCR().Model != "tiny") {
+			t.Fatalf("legacy model was not normalized in response and configuration: %s", recorder.Body.String())
 		}
 		expectedRevision := previousRevision
 		if test.success {
@@ -472,7 +480,7 @@ func TestAPIContractOCRFailurePreservesText(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(assets, "failure.png"), []byte("invalid image"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	model.Conf.OCR = &conf.OCR{Provider: "paddleocr", Model: "small"}
+	model.Conf.OCR = &conf.OCR{Provider: "paddleocr", Model: "tiny"}
 	util.SetAssetText(path, "previous result")
 	t.Cleanup(func() { util.RemoveAssetText(path) })
 	engine := gin.New()

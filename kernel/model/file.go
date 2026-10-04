@@ -2078,10 +2078,13 @@ func RemoveDocs(paths []string) error {
 }
 
 func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	diagnostic := util.WatchOperation("remove document", "load document")
+	defer diagnostic.Finish()
 	ret, err = filesys.LoadTree(box.ID, p, luteEngine)
 	if err != nil || nil == ret {
 		return nil, ErrBlockNotFound
 	}
+	diagnostic.Stage("prepare local assets")
 	if !IsEncryptedBox(box.ID) {
 		assetParent := filepath.Dir(filepath.Join(util.DataDir, box.ID, p))
 		if err = EnsureAssetPrefixLocal(assetParent); err != nil {
@@ -2089,6 +2092,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		}
 	}
 
+	diagnostic.Stage("backup document history")
 	historyDir, err := getHistoryDir(HistoryOpDelete)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
@@ -2103,12 +2107,14 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	}
 
 	// 加密笔记本的 assets 不提升到全局
+	diagnostic.Stage("copy document assets")
 	if !IsEncryptedBox(box.ID) {
 		if err = copyDocAssetsToDataAssets(box.ID, p); err != nil {
 			return nil, err
 		}
 	}
 
+	diagnostic.Stage("collect child documents")
 	removeIDs := treenode.RootChildIDs(ret.ID)
 	dir := path.Dir(p)
 	childrenDir := path.Join(dir, ret.ID)
@@ -2121,6 +2127,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	}
 	existChildren := box.Exist(childrenDir)
 	if existChildren {
+		diagnostic.Stage("backup child document history")
 		absChildrenDir := filepath.Join(util.DataDir, ret.Box, childrenDir)
 		historyPath = filepath.Join(historyDir, ret.Box, childrenDir)
 		if err = filelock.Copy(absChildrenDir, historyPath); err != nil {
@@ -2128,6 +2135,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 			return
 		}
 	}
+	diagnostic.Stage("backup database bindings")
 	allRemoveRootIDs := []string{ret.ID}
 	allRemoveRootIDs = append(allRemoveRootIDs, removeIDs...)
 	allRemoveRootIDs = gulu.Str.RemoveDuplicatedElem(allRemoveRootIDs)
@@ -2146,12 +2154,15 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		}
 		removeTrees = append(removeTrees, removeTree)
 	}
+	diagnostic.Stage("index document history")
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	diagnostic.Stage("remove database bindings")
 	for _, removeTree := range removeTrees {
 		removedRootPaths[removeTree.ID] = removeTree.Path
 		syncDelete2AvBlock(removeTree.Root, removeTree, true, nil)
 	}
 
+	diagnostic.Stage("remove document files")
 	if existChildren {
 		if err = box.Remove(childrenDir); err != nil {
 			logging.LogErrorf("remove children dir [%s%s] failed: %s", box.ID, childrenDir, err)
@@ -2168,8 +2179,10 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	for rootID := range removedRootPaths {
 		removedPins[rootID] = true
 	}
+	diagnostic.Stage("update pinned documents")
 	maintainPinnedDocs(removedPins, "", "")
 
+	diagnostic.Stage("update document order")
 	box.removeSort(removeIDs)
 	if "/" != dir {
 		others, err := os.ReadDir(filepath.Join(util.DataDir, box.ID, dir))
@@ -2178,6 +2191,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		}
 	}
 
+	diagnostic.Stage("invalidate document caches")
 	for rootID, treePath := range removedRootPaths {
 		cache.RemoveTreeData(rootID)
 		cache.RemoveDocIAL(treePath)
@@ -2185,9 +2199,12 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	for _, blockTree := range removedBlockTrees {
 		cache.RemoveBlockIAL(blockTree.ID)
 	}
+	diagnostic.Stage("remove block tree index")
 	treenode.RemoveBlockTreesByPathPrefix(box.ID, childrenDir)
+	diagnostic.Stage("queue database index deletion")
 	sql.RemoveTreePathQueue(ret.Box, childrenDir)
 
+	diagnostic.Stage("notify document deletion")
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
 		"ids": removeIDs,

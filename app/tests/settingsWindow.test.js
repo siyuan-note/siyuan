@@ -14,7 +14,8 @@ const loadRendererModule = (source, modules) => {
 
 const rendererModules = (sources) => {
     let sequence = 0;
-    window.siyuan = {dialogs: [], zIndex: 1, storage: {zoom: 1}, config: {system: {workspaceDir: "D:/workspaces/Workspace A & <B>/"}},
+    window.siyuan = {dialogs: [], zIndex: 1, storage: {zoom: 1}, config: {system: {
+        workspaceDir: "D:/workspaces/Workspace A & <B>/", dataDir: "D:/workspaces/Workspace A & <B>/data"}},
         languages: {cancel: "Cancel", save: "Save", config: "Settings", workspace: "Workspace",
         min: "Minimize", max: "Maximize", restore: "Restore", close: "Close"},
         menus: {menu: {element: document.createElement("div"), remove() {}}}, ws: {app: {plugins: [], appId: "test"}}};
@@ -73,6 +74,19 @@ const bootChild = async (sources) => {
         await ipcRenderer.invoke("test-settings-initializing");
         canceled.remove();
         window.siyuan.config.system.workspaceDir = "";
+        window.siyuan.config.system.dataDir = "";
+        const {openBazaarPath} = loadRendererModule(sources.bazaarPath, {
+            path: require("node:path"), "../../util/pathName": {useShell() { throw new Error("child opened a relative path"); }},
+            "../setting/windowContext": {getSettingsWindowHost: () => host},
+        });
+        const callsBefore = window.opener.settingsPaths.length;
+        openBazaarPath("plugins", "example");
+        openBazaarPath("plugins", "example", true);
+        const expected = require("node:path");
+        require("node:assert/strict").deepEqual(Array.from(window.opener.settingsPaths.slice(callsBefore), item => Array.from(item)), [
+            ["openPath", expected.join("D:/workspaces/Workspace A & <B>/data", "plugins", "example")],
+            ["openPath", expected.join("D:/workspaces/Workspace A & <B>/data", "storage", "petal", "example")],
+        ]);
         document.title = host.title;
         if (host.plugin) {
             const {Setting} = loadRendererModule(sources.setting, {
@@ -99,6 +113,53 @@ const bootChild = async (sources) => {
             require("node:assert/strict").equal(dialog.element.querySelector("#drag").textContent, document.title);
         }
     });
+    const check = require("node:assert/strict");
+    await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "/stage/protyle/js/protyle-html.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.append(script);
+    });
+    check.equal(typeof window.Lute, "undefined");
+    const pluginEvents = [];
+    const {initTooltips} = loadRendererModule(sources.tooltip, {
+        "../util/functions": {isMobile: () => false},
+        "../plugin/EventBusCore": {emitToPlugins: name => pluginEvents.push(name),
+            forEachPluginSubscriber: (name, callback) => callback({emit: () => pluginEvents.push(name)})},
+    });
+    const tooltip = document.createElement("div");
+    tooltip.id = "tooltip";
+    tooltip.className = "tooltip fn__none";
+    const button = document.createElement("button");
+    button.className = "ariaLabel";
+    button.innerHTML = "<svg><use></use></svg>";
+    button.setAttribute("aria-label", encodeURIComponent('<b>Directory</b><img src="x" onerror="alert(1)">'));
+    button.setAttribute("data-delay", "0");
+    button.setAttribute("data-position", "north");
+    document.body.append(tooltip, button);
+    initTooltips();
+    const hover = element => element.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    hover(button.querySelector("use"));
+    check.equal(tooltip.classList.contains("fn__none"), false);
+    check.equal(tooltip.innerHTML, '<b>Directory</b><img src="x">');
+    check.equal(tooltip.style.animationDelay, "0ms");
+    check.equal(tooltip.style.pointerEvents, "none");
+    check.ok(parseFloat(tooltip.style.left) >= 0);
+    check.ok(parseFloat(tooltip.style.top) >= 0);
+    button.setAttribute("aria-label", "100% complete");
+    hover(button);
+    check.equal(tooltip.textContent, "100% complete");
+    button.classList.add("b3-tooltips");
+    hover(button);
+    check.equal(tooltip.classList.contains("fn__none"), true);
+    button.classList.remove("b3-tooltips");
+    hover(button);
+    hover(document.body);
+    check.equal(tooltip.classList.contains("fn__none"), true);
+    check.ok(pluginEvents.includes("before-show-tooltip"));
+    check.ok(pluginEvents.includes("before-hide-tooltip"));
+    button.remove();
     if (!document.getElementById("pendingTheme").sheet) throw new Error("settings shown before theme loaded");
     ipcRenderer.send("siyuan-settings-ready");
     ipcRenderer.send("test-settings-ready");
@@ -108,6 +169,11 @@ const runCases = async (sources) => {
     const assert = require("node:assert/strict");
     const {ipcRenderer} = require("electron");
     const {Dialog, genUUID, context, fit, titles} = rendererModules(sources);
+    window.settingsPaths = [];
+    const bazaarPath = loadRendererModule(sources.bazaarPath, {
+        path: require("node:path"), "../../util/pathName": {useShell: (...args) => window.settingsPaths.push(args)},
+        "../setting/windowContext": {getSettingsWindowHost: () => undefined},
+    });
     class Plugin {openSetting() {}}
     const pluginSettings = {};
     new Function("Plugin", "exports", sources.pluginSettings)(Plugin, pluginSettings);
@@ -122,6 +188,7 @@ const runCases = async (sources) => {
         "../../util/processTitle": titles,
         "../entryVisibility/dockOrder": {getDockEntryOrderSnapshot: () => ({})},
         "./taskBlocker": {hasNativeSettingTasks: () => false},
+        "../bazaar/openPath": bazaarPath,
     });
     const {Setting} = loadRendererModule(sources.setting, {
         "../util/functions": {isMobile: () => false, getFrontend: () => "desktop"}, "../dialog": {Dialog},
@@ -133,6 +200,53 @@ const runCases = async (sources) => {
     legacy.open("Legacy");
     assert.equal(legacy.dialog.element.ownerDocument, document);
     legacy.dialog.destroy();
+    await wait();
+
+    const toggles = {first: false, second: false};
+    const saves = [];
+    const {genSwitchRow} = loadRendererModule(sources.fragments, {});
+    const markup = () => genSwitchRow("first", "First setting", "Description", toggles.first) +
+        genSwitchRow("second", "Second setting", "Description", toggles.second);
+    const clickDialog = new Dialog({content: '<div class="config__tab-wrap"><div class="config__tab-container" data-name="editor">' +
+        markup() + "</div></div>"});
+    clickDialog.element.setAttribute("data-key", "settings");
+    let remounted = 0;
+    const mounting = loadRendererModule(sources.mount, {
+        "../render/render": {}, "../search/normalize": {getSearchKeywordsLower: () => ""},
+        "../../constants": {Constants: {DIALOG_SETTING: "settings"}},
+        "./tabs": {getSettingTab: () => ({mount: async root => { remounted++; root.innerHTML = markup(); }})},
+    });
+    const saving = loadRendererModule(sources.save, {
+        "./mount": mounting,
+        "./item": {getSettingItem: id => ({readValue: input => input.checked, save: value => {
+            toggles[id] = value;
+            saves.push(id);
+            void mounting.remountOpenSettingTab("editor");
+        }})},
+    });
+    window.siyuan.config.readonly = false;
+    saving.bindSettingSaveDelegation(clickDialog.element.querySelector(".config__tab-wrap"));
+    const clickLabel = async id => {
+        const rect = clickDialog.element.querySelector("#" + id).closest("label").getBoundingClientRect();
+        await ipcRenderer.invoke("test-settings-pointer", "mouseDown", Math.round(rect.left + 10), Math.round(rect.top + rect.height / 2));
+        // 离屏窗口不派发失焦事件，补发与按下标签时相同的事件，保留原生鼠标点击流程。
+        document.dispatchEvent(new FocusEvent("focusout"));
+        await wait();
+        await ipcRenderer.invoke("test-settings-pointer", "mouseUp", Math.round(rect.left + 10), Math.round(rect.top + rect.height / 2));
+        await wait();
+    };
+    await clickLabel("first");
+    assert.deepEqual(saves, ["first"]);
+    const secondInput = clickDialog.element.querySelector("#second");
+    await clickLabel("second");
+    assert.deepEqual(saves, ["first", "second"], "each settings label responds to its first physical click");
+    assert.equal(clickDialog.element.querySelector("#second"), secondInput, "deferred refresh preserves the pressed label");
+    assert.equal(secondInput.checked, true);
+    document.activeElement.blur();
+    document.dispatchEvent(new FocusEvent("focusout"));
+    await wait();
+    assert.equal(remounted, 1, "refresh resumes after leaving the input");
+    clickDialog.destroy();
     await wait();
 
     let confirmed = 0;
@@ -315,7 +429,9 @@ if (process.versions.electron && process.type === "browser") {
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
-            paint: "config/setting/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts"})) {
+            paint: "config/setting/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",
+            mount: "config/setting/mount.ts", save: "config/setting/save.ts", fragments: "config/render/fragments.ts",
+            bazaarPath: "config/bazaar/openPath.ts", tooltip: "dialog/tooltip.ts"})) {
             let source = fs.readFileSync(path.join(__dirname, "../src", file), "utf8");
             if (key === "frontend") {
                 source = require("ifdef-loader/preprocessor").parse(source, {MOBILE: false, BROWSER: false}, false, true);
@@ -333,6 +449,11 @@ if (process.versions.electron && process.type === "browser") {
         }).outputText;
         const server = createServer((request, response) => {
             const pathname = new URL(request.url, "http://localhost").pathname;
+            if (pathname === "/stage/protyle/js/protyle-html.js") {
+                response.setHeader("Content-Type", "text/javascript; charset=utf-8");
+                response.end(fs.readFileSync(path.join(__dirname, "../stage/protyle/js/protyle-html.js")));
+                return;
+            }
             if (pathname.startsWith("/fixture/")) {
                 response.setHeader("Content-Type", "text/css; charset=utf-8");
                 if (pathname === "/fixture/missing.css") {
@@ -400,6 +521,9 @@ if (process.versions.electron && process.type === "browser") {
             commands.push(command);
         });
         ipcMain.handle("test-settings-commands", () => commands);
+        ipcMain.handle("test-settings-pointer", (event, type, x, y) => {
+            event.sender.sendInputEvent({type, x, y, button: "left", clickCount: 1});
+        });
         ipcMain.handle("test-settings-token", () => new URL([...children][0].webContents.getURL()).searchParams.get("settingsWindowToken"));
         ipcMain.handle("test-settings-size", (_event, width, height) => {
             for (const child of children) child.setSize(width, height);

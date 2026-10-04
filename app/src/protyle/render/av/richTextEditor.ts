@@ -107,8 +107,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     maskElement.style.zIndex = (++window.siyuan.zIndex).toString();
     maskElement.innerHTML = `<div class="av__richtext-editor" role="dialog">
     ${mobile ? `<div class="av__richtext-actions">
-        <button type="button" class="b3-button b3-button--cancel" data-type="cancel">${escapeHtml(window.siyuan.languages.cancel)}</button>
-        <button type="button" class="b3-button b3-button--text" data-type="save">${escapeHtml(window.siyuan.languages.save)}</button>
+        <button type="button" class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button>
     </div>` : ""}
     <div class="av__richtext-host"></div>
 </div>`;
@@ -240,8 +239,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             void finish(true);
         }
     });
-    panelElement.querySelector('[data-type="cancel"]')?.addEventListener("click", () => void finish(false));
-    panelElement.querySelector('[data-type="save"]')?.addEventListener("click", () => void finish(true));
+    panelElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () => void finish(true));
     panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key === "Escape" && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&

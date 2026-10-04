@@ -111,7 +111,6 @@ export const reduceMobileBarsState = (
         return {
             ...resetScrollTracking(state, action.scrollTop),
             editing: action.active,
-            readingBarsOffset: action.active && !state.editing ? scrollOptions.maxOffset : state.readingBarsOffset,
         };
     }
 

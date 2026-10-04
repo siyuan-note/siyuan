@@ -176,7 +176,7 @@ func TestPruneListMindmapExcludesListsInsideContentBlocks(t *testing.T) {
 
 func TestPruneListMindmapPreservesInvalidMetadata(t *testing.T) {
 	for _, value := range []string{
-		`broken`, `null`, `{"version":2,"nodes":{"deleted":{}},"relations":[]}`,
+		`broken`, `null`, `{"version":3,"nodes":{"deleted":{}},"relations":[]}`,
 		`{"version":1,"nodes":{"deleted":{"bold":"true"}},"relations":[]}`,
 		`{"version":1,"nodes":{},"relations":[{"id":"r","from":"a","to":"b"}]}`,
 		`{"version":1,"nodes":{},"relations":[{"id":"r","from":"a","to":"b","label":""},{"id":"r","from":"b","to":"a","label":""}]}`,

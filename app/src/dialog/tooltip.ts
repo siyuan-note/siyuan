@@ -1,6 +1,30 @@
 import {isMobile} from "../util/functions";
 import {emitToPlugins, forEachPluginSubscriber} from "../plugin/EventBusCore";
 
+// 无编辑器的窗口复用提示框渲染，不注册块预览事件。
+export const initTooltips = () => {
+    document.addEventListener("mouseover", (event: MouseEvent) => {
+        const target = (event.target as Element).closest(".ariaLabel");
+        if (target && !target.classList.contains("b3-tooltips")) {
+            let message = target.getAttribute("aria-label") || "";
+            try {
+                message = decodeURIComponent(message);
+            } catch (error) {
+                // 保留包含不完整 URI 转义的提示文本。
+            }
+            if (message) {
+                showTooltip(message, target, undefined, event);
+                return;
+            }
+        }
+        const tooltip = document.getElementById("tooltip");
+        if (!tooltip.contains(event.target as Node) || tooltip.clientHeight >= tooltip.scrollHeight) {
+            hideTooltip();
+        }
+    });
+    document.addEventListener("mouseleave", hideTooltip);
+};
+
 export const showTooltip = (
     message: string,
     target: Element,

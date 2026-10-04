@@ -60,6 +60,7 @@ type OpenOptions = {
     tabID?: string;
     recentPreviousRootID?: string;
     recordActivation?: boolean;
+    keepPanels?: boolean;
 };
 
 type MobileTabOpenResult = "success" | "cancelled" | "invalid" | "failed";
@@ -459,7 +460,7 @@ export class MobileTabs {
                 options.afterOpen?.(protyle);
             }, options.forceReload, () => epoch === this.navigationEpoch, undefined, loadScroll, false, (invalid) => {
                 finish(abortController.signal.aborted ? "cancelled" : (invalid ? "invalid" : "failed"));
-            });
+            }, options.keepPanels);
         });
     }
 
@@ -472,7 +473,7 @@ export class MobileTabs {
         return !this.hasStoredTabs && this.navigationEpoch === 0;
     }
 
-    async restore(): Promise<boolean> {
+    async restore(keepPanels = false): Promise<boolean> {
         const tab = this.activeTab;
         if (!tab) {
             setEmpty(this.app);
@@ -492,13 +493,14 @@ export class MobileTabs {
             replace: true,
             scroll: tab.current.scroll,
             tabID: tab.id,
+            keepPanels,
         });
         if (result === "invalid") {
             this.state.tabs = this.state.tabs.filter((item) => item.id !== tab.id);
             this.state.activeTabID = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0]?.id;
             this.persist();
             this.updateCounter();
-            return this.restore();
+            return this.restore(keepPanels);
         }
         if (result === "failed") {
             setEmpty(this.app);
@@ -782,7 +784,7 @@ export class MobileTabs {
             this.cancelNavigation();
             this.state.activeTabID = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0]?.id;
             if (this.state.activeTabID) {
-                void this.restore();
+                void this.restore(true);
             } else {
                 setEmpty(this.app);
             }

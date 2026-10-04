@@ -3,6 +3,10 @@
 	"bazaarReleaseNotesLatest": "最新",
 	"bazaarReleaseNotesEmpty": "このバージョンのリリースノートはありません",
 	"bazaarReleaseNotesUnavailable": "リリースノートを読み込めません",
+	"listMindmapSummaryBatch": "${count} 個の要約を作成",
+	"listMindmapSummaryConflict": "要約範囲が交差しています。選択を調整してください",
+	"reAIOCR": "AI で OCR を再実行",
+	"pdfAnnotationDeleteRefConfirm": "この PDF 注釈は ${x} 個のブロックから参照されています。削除すると、これらの参照が無効になります。続行しますか？",
 	"ocrModelDefault": "モデルの既定値",
 	"ocrDetectionThreshold": "検出しきい値",
 	"ocrBoxThreshold": "テキスト領域の信頼度しきい値",
@@ -43,7 +47,7 @@
 	"ocrAuto": "自動 OCR",
 	"ocrAutoTip": "OCR 結果がまだない通常のノートブックの画像を処理します",
 	"ocrModel": "OCR モデル",
-	"ocrModelTip": "Tiny と Small は内蔵されています。切り替えても既存の結果は保持され、画像メニューから再認識できます",
+	"ocrModelTip": "Tiny のみ内蔵されています。切り替えても既存の結果は保持され、画像メニューから再認識できます",
 	"ocrImportModels": "OCR モデルをインポート",
 	"ocrImportModelsTip": "対応する PP-OCRv6 の検出・認識 ONNX ファイルとそれぞれの inference.yml を選択します。インポートしたファイルはワークスペースと同期されます",
 	"ocrDetector": "検出モデル",
@@ -103,7 +107,7 @@
 	"agentInstructionsTooLarge": "指示は 32 KiB 以下にしてください",
 	"agentInstructionsConflict": "AGENTS.md が変更されました。編集内容をコピーし、エディターを開き直して変更を統合してから保存してください",
 	"listMindmapSummary": "要約",
-	"listMindmapSummarySelect": "要約範囲の末端にある同じ親のノードを選択してください。要約範囲は重複できません",
+	"listMindmapSummarySelect": "末端の兄弟ノードを選ぶか、キャンバスの空白部分をドラッグしてグループを選択します。空白部分をタップするとノードを個別に選択できます",
 	"mcpOAuthServer": "MCP サーバー OAuth",
 	"mcpOAuthTip": "画面ロックのパスワードまたは OIDC ログインと公開 HTTPS オリジンが必要です。無効化またはオリジンの変更で全認可が取り消されます",
 	"mcpOAuthPublicURL": "公開 HTTPS オリジン",
@@ -3083,6 +3087,8 @@
 		"408": "DNS 名前解決に失敗しました。ネットワーク、DNS、またはプロキシの設定を確認してください",
 		"409": "ネットワーク接続が切断されたか、確立できませんでした。ネットワーク、プロキシ、またはファイアウォールの設定を確認してください",
 		"410": "変換を中止しました：リスト全体がデータベースの行に紐付いていますが、変換後に複数のブロックが生成されるため、移行先を特定できません。リスト全体の紐付けを解除するか、個別のリスト項目を紐付けてください",
-		"411": "変換を中止しました：リスト項目とその先頭ブロックが同じデータベースの異なる行に紐付いています。先にどちらかの紐付けを解除してください"
+		"411": "変換を中止しました：リスト項目とその先頭ブロックが同じデータベースの異なる行に紐付いています。先にどちらかの紐付けを解除してください",
+		"412": "先にエージェントのモデルを設定してください",
+		"413": "AI OCR から完全な認識テキストが返されなかったため、既存の結果を保持しました"
 	}
 }

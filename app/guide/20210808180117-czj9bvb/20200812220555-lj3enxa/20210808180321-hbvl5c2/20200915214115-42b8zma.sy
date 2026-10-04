@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20261003073646"
+		"updated": "20261004005806"
 	},
 	"Children": [
 		{
@@ -979,7 +979,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117002036-vmc0mx4",
-				"updated": "20261002231520"
+				"updated": "20261004005806"
 			},
 			"Children": [
 				{
@@ -1034,12 +1034,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001000112-4enj18s",
-				"updated": "20261002231520"
+				"updated": "20261003234011"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "PaddleOCR 内置 PP-OCRv6 Tiny 和 Small 模型，无需下载即可离线使用。Tiny 占用资源更少，Small 识别精度更高。导入其他兼容的 PP-OCRv6 模型时，分别选择检测、识别 ONNX 文件及对应的 inference.yml。导入模型随工作空间同步，提供商和当前模型的选择按设备保存。新用户默认使用 PaddleOCR，桌面端使用 Small，移动端使用 Tiny，自动 OCR 默认关闭。已有用户保留原 OCR 配置；从尚无 OCR 提供商设置的版本升级时，继续使用 Tesseract。"
+					"Data": "PaddleOCR 仅内置 PP-OCRv6 Tiny 模型，无需下载即可离线使用，桌面端和移动端均默认选择 Tiny。Small、Medium 等其他兼容的 PP-OCRv6 模型可自行导入：分别选择检测、识别 ONNX 文件及对应的 inference.yml。导入模型随工作空间同步，提供商和当前模型的选择按设备保存。新用户默认使用 PaddleOCR，自动 OCR 默认关闭。已有用户保留原提供商、自动 OCR 和阈值配置；旧的内置 Small 选择迁移为 Tiny，自行导入的模型不受影响。从尚无 OCR 提供商设置的版本升级时，继续使用 Tesseract。"
 				}
 			]
 		},
@@ -1372,7 +1372,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202710-a51lo76",
-				"updated": "20261001013550"
+				"updated": "20261004005806"
 			},
 			"Children": [
 				{
@@ -1536,6 +1536,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " 设置显示或隐藏。也可继续通过图片菜单复制和编辑 OCR 文本。"
+				}
+			]
+		},
+		{
+			"ID": "20261003224949-weus2iw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003224949-weus2iw",
+				"updated": "20261004005806"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在图片菜单中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用 AI 重新 OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，将本地图片发送给已配置的智能体模型进行文字识别，模型须支持图片输入。AI OCR 仅手动执行，结果复用现有 OCR 文本、编辑、复制和搜索索引；识别失败时保留原结果。加密笔记本图片不支持此功能。支持 PNG、JPEG、GIF 和 WebP；BMP、TIFF 转为 PNG，HEIC/HEIF 转为 JPEG，保留原图分辨率。原始图片和转换后的图片均不得超过 20 MiB，转换后的图片不得超过四千万像素。网络图片隐藏识别入口，加密笔记本图片隐藏 OCR 菜单；AVIF、SVG、ICO 等不支持的格式隐藏 AI OCR 入口。"
 				}
 			]
 		}

@@ -46,7 +46,15 @@ if (process.versions.electron && process.type === "browser") {
         const server = http.createServer((request, response) => {
             const pathname = new URL(request.url, "http://localhost").pathname;
             requests.set(pathname, (requests.get(pathname) || 0) + 1);
-            if (pathname.startsWith("/stage/protyle/")) {
+            if (pathname === "/stage/build/app/settings.html") {
+                const template = fs.readFileSync(path.join(__dirname, "../src/assets/template/app/settings.tpl"), "utf8");
+                response.setHeader("Content-Type", "text/html; charset=utf-8");
+                response.end(template.replace("</head>", '<script defer src="/settings-bootstrap.js"></script></head>'));
+            } else if (pathname === "/settings-bootstrap.js") {
+                const bridge = fs.readFileSync(path.join(__dirname, "../src/asset/pdf/pdfjs.js"), "utf8");
+                response.setHeader("Content-Type", "text/javascript; charset=utf-8");
+                response.end(`window.settingsPDFSnapshot = (() => { const module = {}; ${bridge}\nreturn module.exports; })();`);
+            } else if (pathname.startsWith("/stage/protyle/")) {
                 response.setHeader("Content-Type", "text/javascript; charset=utf-8");
                 const content = fs.readFileSync(path.join(__dirname, "..", pathname));
                 setTimeout(() => response.end(content), 30);
@@ -72,6 +80,10 @@ if (process.versions.electron && process.type === "browser") {
             await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify({loader: compile("addScript.ts"), lute: compile("lute.ts")})})`);
             assert.equal(requests.get("/stage/protyle/js/lute/lute.min.js"), 1);
             assert.equal(requests.get("/stage/protyle/js/protyle-html.js"), 1);
+            await win.loadURL("http://127.0.0.1:" + server.address().port + "/stage/build/app/settings.html");
+            assert.equal(await win.webContents.executeJavaScript("typeof window.settingsPDFSnapshot?.AnnotationEditorType.DISABLE"),
+                "number");
+            assert.equal(await win.webContents.executeJavaScript("window.settingsPDFSnapshot === window.pdfjsLib"), true);
         } catch (error) {
             console.error(error);
             exitCode = 1;
@@ -85,7 +97,7 @@ if (process.versions.electron && process.type === "browser") {
         app.exit(1);
     });
 } else {
-    require("node:test").test("external scripts initialize the sanitizer and Lute in Electron and retry failed loads", {
+    require("node:test").test("external scripts initialize the sanitizer, Lute and settings PDF.js in Electron", {
         timeout: 45000,
     }, async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-script-loading-"));

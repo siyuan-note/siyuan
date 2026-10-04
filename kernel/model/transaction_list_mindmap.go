@@ -14,7 +14,7 @@ const listMindmapMetadataAttr = "custom-sy-list-mindmap-data"
 
 // 只校验当前版本的已知字段，未知字段随配置保留，损坏和较新版本的配置不参与清理。
 func validListMindmapMetadata(data map[string]any) bool {
-	if data["version"] != float64(1) {
+	if data["version"] != float64(1) && data["version"] != float64(2) {
 		return false
 	}
 	nodes, ok := data["nodes"].(map[string]any)
@@ -30,7 +30,7 @@ func validListMindmapMetadata(data map[string]any) bool {
 			return false
 		}
 	}
-	if summaries, exists := data["summaries"]; exists && !validListMindmapSummaries(summaries) {
+	if summaries, exists := data["summaries"]; exists && !validListMindmapSummaries(summaries, data["version"] == float64(2)) {
 		return false
 	}
 	validFields := func(value map[string]any, strings, numbers, booleans []string) bool {
@@ -169,7 +169,8 @@ func pruneListMindmapMetadata(list *ast.Node, contexts ...*listMindmapSummaryCon
 		if len(contexts) > 0 {
 			context = contexts[0]
 		}
-		raw["summaries"], changed = normalizeListMindmapSummaries(summaries, listMindmapSiblingIDs(list), context)
+		raw["summaries"], changed = normalizeListMindmapSummaries(summaries, listMindmapSiblingIDs(list), context,
+			data["version"] == float64(2))
 	}
 	nodes := data["nodes"].(map[string]any)
 	for id := range nodes {

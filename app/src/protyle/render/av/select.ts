@@ -781,7 +781,7 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
     return `<div class="b3-menu__items" style="display: flex;flex-direction: column;flex: 1;">
 <div class="b3-chips" style="max-width: 50vw">
     ${selectedHTML}
-    <input spellcheck="false">
+    <input spellcheck="false" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)} / ${escapeAttr(window.siyuan.languages.addAttr)}" aria-label="${escapeAttr(window.siyuan.languages.searchPlaceholder)} / ${escapeAttr(window.siyuan.languages.addAttr)}">
 </div>
 <div class="av__select-list" style="flex: 1;overflow: auto;">${filterSelectHTML("", colData.options, selected)}</div>
 </div>`;

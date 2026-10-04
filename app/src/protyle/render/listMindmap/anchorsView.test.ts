@@ -41,6 +41,7 @@ const setup = (overrides: Partial<ListMindmapRelation> = {}) => {
         routingObstacles: () => [...positions.values()], draw: () => {}, refreshLayout: () => {},
         clearDrop: () => {}, setHoveredLine: () => {}, finishThen: (action: () => void) => action(),
         routeHandles: new Map(), routeStatus: {}, label: (key: string) => key,
+        summaryBox: {hidden: true},
         getRouteHandle: () => ({style: {}}),
     });
     view.relationRoutes.set("r", view.calculateRelationRoute(relation, positions.get("a"), positions.get("b")));

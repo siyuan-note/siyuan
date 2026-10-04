@@ -1272,6 +1272,7 @@ body.mobile-topbar--merged {
     &__list {
       overflow: auto;
       flex: 1;
+      position: relative;
     }
 
     &__preview {

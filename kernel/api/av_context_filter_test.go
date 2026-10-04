@@ -18,15 +18,11 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"os/exec"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
@@ -35,7 +31,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -86,64 +81,6 @@ func TestSetAttrViewContextFilterHandler(t *testing.T) {
 				t.Fatalf("invalid setter request was accepted: %s", response.Body.String())
 			}
 		})
-	}
-}
-
-func TestAPIContractAVRelationRollupContextFilter(t *testing.T) {
-	if os.Getenv("SIYUAN_TEST_API_RELATION_ROLLUP") != "1" {
-		// 写入数据库块需要进程级索引队列，使用独立进程初始化，避免污染其他 API 测试。
-		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-		defer cancel()
-		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestAPIContractAVRelationRollupContextFilter$", "-test.v")
-		command.Env = append(os.Environ(), "SIYUAN_TEST_API_RELATION_ROLLUP=1")
-		if output, err := command.CombinedOutput(); nil != err {
-			t.Fatalf("relation rollup API subprocess failed: %v\n%s", err, output)
-		}
-		return
-	}
-	root := t.TempDir()
-	util.DataDir, util.TempDir, util.ConfDir = root, root, root
-	util.QueueDir = filepath.Join(root, "queue")
-	util.DBPath, util.HistoryDBPath = filepath.Join(root, "siyuan.db"), filepath.Join(root, "history.db")
-	util.AssetContentDBPath, util.BlockTreeDBPath = filepath.Join(root, "asset_content.db"), filepath.Join(root, "blocktree.db")
-	sql.InitDatabase(true)
-	sql.InitHistoryDatabase(true)
-	sql.InitAssetContentDatabase(true)
-	t.Cleanup(sql.CloseDatabase)
-	fixture := setupAttributeViewContextFilterAPITest(t)
-	util.TimeLangs["en"] = map[string]any{}
-	for _, key := range []string{"albl", "blbl", "now", "1s", "xs", "1m", "xm", "1h", "xh", "1d", "xd", "1w", "xw", "1M", "xM", "1y", "2y", "xy", "max"} {
-		util.TimeLangs["en"][key] = "time"
-	}
-	rollup := &av.Key{ID: "rollup-employees", Name: "Employees", Type: av.KeyTypeRollup,
-		Rollup: &av.Rollup{RelationKeyID: fixture.relationKeyID, KeyID: fixture.relationKeyID}}
-	fixture.attrView.KeyValues = append(fixture.attrView.KeyValues, &av.KeyValues{Key: rollup})
-	if err := av.SaveAttributeView(fixture.attrView); nil != err {
-		t.Fatal(err)
-	}
-	response := callAttributeViewContextFilterAPI(t, "/api/av/setAttrViewContextFilter", map[string]any{
-		"avID": fixture.attrView.ID, "blockID": fixture.databaseID, "keyID": rollup.ID,
-	}, setAttrViewContextFilter)
-	var result struct {
-		Code int `json:"code"`
-		Data struct {
-			ContextFilter *av.AttributeViewContextFilter `json:"contextFilter"`
-		} `json:"data"`
-	}
-	decodeAttributeViewContextFilterAPIResponse(t, response, &result)
-	if result.Code != 0 || nil == result.Data.ContextFilter || result.Data.ContextFilter.KeyID != rollup.ID {
-		t.Fatalf("valid relation rollup rejected: %s", response.Body.String())
-	}
-	rollup.Rollup.Calc = &av.RollupCalc{Operator: av.CalcOperatorCountAll}
-	if err := av.SaveAttributeView(fixture.attrView); nil != err {
-		t.Fatal(err)
-	}
-	response = callAttributeViewContextFilterAPI(t, "/api/av/setAttrViewContextFilter", map[string]any{
-		"avID": fixture.attrView.ID, "blockID": fixture.databaseID, "keyID": rollup.ID,
-	}, setAttrViewContextFilter)
-	decodeAttributeViewContextFilterAPIResponse(t, response, &result)
-	if result.Code != -1 {
-		t.Fatalf("numeric rollup accepted as a relation: %s", response.Body.String())
 	}
 }
 

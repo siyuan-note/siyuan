@@ -95,7 +95,9 @@ func (filter *AttributeViewContextFilter) Validate(attrView *AttributeView) erro
 	if nil == filter || AttributeViewContextFilterSpec != filter.Spec || nil == attrView {
 		return ErrInvalidAttributeViewContextFilter
 	}
-	if _, err := attrView.ResolveRelationKey(filter.KeyID, nil); nil != err {
+	key, err := attrView.GetKey(filter.KeyID)
+	if nil != err || nil == key || KeyTypeRelation != key.Type || nil == key.Relation ||
+		"" == strings.TrimSpace(key.Relation.AvID) {
 		return ErrInvalidAttributeViewContextFilter
 	}
 	return nil
@@ -114,35 +116,21 @@ func (filter *AttributeViewContextFilter) Marshal() (string, error) {
 }
 
 // ContextFilterFields 返回整个数据库中可用于上下文筛选的关联字段，不受当前视图布局限制。
-func (av *AttributeView) ContextFilterFields(loaders ...func(string) (*AttributeView, error)) (ret []*AttributeViewContextFilterField) {
+func (av *AttributeView) ContextFilterFields() (ret []*AttributeViewContextFilterField) {
 	ret = []*AttributeViewContextFilterField{}
 	if nil == av {
 		return
-	}
-	load := ParseAttributeView
-	if 0 < len(loaders) && nil != loaders[0] {
-		load = loaders[0]
-	}
-	cache := map[string]*AttributeView{}
-	loadCached := func(id string) (*AttributeView, error) {
-		if target, ok := cache[id]; ok {
-			return target, nil
-		}
-		target, err := load(id)
-		cache[id] = target
-		return target, err
 	}
 	for _, keyValues := range av.KeyValues {
 		if nil == keyValues || nil == keyValues.Key {
 			continue
 		}
 		key := keyValues.Key
-		relation, err := av.ResolveRelationKey(key.ID, loadCached)
-		if nil != err {
+		if KeyTypeRelation != key.Type || nil == key.Relation || "" == strings.TrimSpace(key.Relation.AvID) {
 			continue
 		}
 		ret = append(ret, &AttributeViewContextFilterField{
-			ID: key.ID, Name: key.Name, Icon: key.Icon, TargetAvID: relation.Relation.AvID,
+			ID: key.ID, Name: key.Name, Icon: key.Icon, TargetAvID: key.Relation.AvID,
 		})
 	}
 	return

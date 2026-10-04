@@ -53,9 +53,7 @@ type SetAttrViewFiltersRequest struct {
 type SetAttrViewContextFilterRequest struct {
 	AvID    string `json:"avID"`
 	BlockID string `json:"blockID"`
-	// KeyID 允许直接关联或目标为关联且显示原值/唯一值的汇总字段；省略或为空时关闭筛选。
-	// 汇总按最终目标条目 ID 匹配，不为新增条目回填计算值或修改中间关联。
-	KeyID string `json:"keyID" api:"optional,nullable,ignoretype"`
+	KeyID   string `json:"keyID" api:"optional,nullable,ignoretype"`
 }
 
 type SetAttrViewSortsRequest struct {

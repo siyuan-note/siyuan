@@ -54,7 +54,7 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 	if err != nil {
 		return apicontract.Failure[apicontract.AVRenderResult](-1, err.Error())
 	}
-	data := apicontract.AVRenderData{AVArchiveRenderData: avArchiveRenderData(attrView, view), ContextFilter: toContractAVAttributeViewContextFilter(contextFilter), ContextFilterFields: avContractSlice(model.GetAttributeViewContextFilterFields(attrView, blockID), toContractAVAttributeViewContextFilterField), Target: toContractAVAttributeViewRenderTarget(target)}
+	data := apicontract.AVRenderData{AVArchiveRenderData: avArchiveRenderData(attrView, view), ContextFilter: toContractAVAttributeViewContextFilter(contextFilter), ContextFilterFields: avContractSlice(attrView.ContextFilterFields(), toContractAVAttributeViewContextFilterField), Target: toContractAVAttributeViewRenderTarget(target)}
 	if filter != nil {
 		view = filter(view)
 		if calendar, ok := view.(*av.Calendar); ok {

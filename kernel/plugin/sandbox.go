@@ -38,6 +38,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/plugin/encoding"
+	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 )
 
 type WebSocketState int64
@@ -106,6 +107,7 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	encoding.Enable(rt)
 	EnableAbortAPI(rt)
 	p.formDataHost = EnableFormDataAPI(rt)
+	p.streamsHost = streams.Enable(rt)
 	return
 }
 

@@ -34,16 +34,20 @@ const browserCases = async (layoutSource: string, exportSource: string, mobile: 
     class ExportDialog {
         element: HTMLElement;
         resize: () => void;
-        constructor(options: {content: string, width: string, height: string, resizeCallback: () => void}) {
+        private onDestroy: () => void;
+        constructor(options: {content: string, width: string, height: string, resizeCallback: () => void,
+            destroyCallback: () => void}) {
             this.element = document.createElement("div");
             this.element.classList.add("b3-dialog--open");
             this.element.innerHTML = `<div class="b3-dialog"><div class="b3-dialog__container" style="width:${options.width};height:${options.height}">
 <div class="b3-dialog__body">${options.content}</div></div></div>`;
             document.body.append(this.element);
             this.resize = options.resizeCallback;
+            this.onDestroy = options.destroyCallback;
             dialog = {element: this.element, resize: options.resizeCallback};
         }
         destroy() {
+            this.onDestroy?.();
             this.element.remove();
         }
     }
@@ -167,6 +171,10 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         check.equal(getComputedStyle(wide.querySelector("table")).transform, "none");
         check.ok(wide.querySelector("table").getBoundingClientRect().right <= imageElement.getBoundingClientRect().right,
             "Image must cover the whole table");
+        wide.querySelector<HTMLElement>("table").style.width = "2200px";
+        await new Promise(resolve => setTimeout(resolve, 100));
+        check.ok(wide.querySelector("table").getBoundingClientRect().right <= imageElement.getBoundingClientRect().right,
+            "Preview border must follow table width changes without resizing the dialog");
         wide.scrollLeft = wide.scrollWidth - wide.clientWidth;
         const oldScroll = wide.scrollLeft;
         await capture();
@@ -175,6 +183,20 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         imageElement.querySelector(".protyle-wysiwyg").innerHTML = table(1, false);
         dialog.resize();
         check.equal(imageElement.style.minWidth, "");
+
+        const database = await open(`<div class="table"><div><table>
+<caption>Database &amp; title</caption><colgroup><col style="width: 120px"><col style="width: 240px"></colgroup>
+<thead><tr><th style="white-space: nowrap">Long database property name</th><th style="white-space: nowrap">Second property</th></tr></thead>
+<tbody><tr><td>first line<br>second line</td><td><span class="marker" style="display:block;width:20px;height:20px;background:red"></span></td></tr></tbody>
+</table></div></div>`);
+        check.equal(database.querySelector("caption").textContent, "Database & title");
+        const header = database.querySelector<HTMLElement>("th");
+        const range = document.createRange();
+        range.selectNodeContents(header);
+        check.equal(range.getClientRects().length, 1, "Database headers must stay on one line");
+        check.ok(database.querySelector("td").getBoundingClientRect().height > header.getBoundingClientRect().height,
+            "Database cells must retain explicit line breaks");
+        await capture();
 
         const nested = await open(`<div class="sb" data-node-id="columns" data-sb-layout="col">${table(2)}${table(2)}</div>`);
         const nestedTables = nested.querySelectorAll("table");

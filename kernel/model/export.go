@@ -3634,6 +3634,24 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 
 		aligns := getAttrViewTableAligns(table, avHiddenCol)
 		mdTable := &ast.Node{Type: ast.NodeTable, TableAligns: aligns}
+		if wysiwyg {
+			if !view.HideAttrViewName && "" != strings.TrimSpace(attrView.Name) {
+				caption := "<caption>" + html.EscapeHTMLStr(attrView.Name) + "</caption>"
+				mdTable.SetIALAttr("caption", html.EscapeHTMLStr(caption))
+			}
+			var colStyles []string
+			for _, col := range table.Columns {
+				if avHiddenCol && col.Hidden {
+					continue
+				}
+				style := ""
+				if width := av.FilterWidthValue(col.Width); "" != width {
+					style = "width: " + width + ";"
+				}
+				colStyles = append(colStyles, style)
+			}
+			mdTable.SetIALAttr("colgroup", strings.Join(colStyles, "|"))
+		}
 		mdTableHead := &ast.Node{Type: ast.NodeTableHead}
 		mdTable.AppendChild(mdTableHead)
 		mdTableHeadRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
@@ -3646,6 +3664,9 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 			}
 
 			cell := &ast.Node{Type: ast.NodeTableCell, TableCellAlign: aligns[alignIndex]}
+			if wysiwyg {
+				cell.SetIALAttr("style", "white-space: nowrap;")
+			}
 			alignIndex++
 			name := col.Name
 			if !wysiwyg {

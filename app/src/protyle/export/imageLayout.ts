@@ -2,6 +2,27 @@ const MAX_IMAGE_SIZE = 16384;
 // 限制位图面积，避免单个 RGBA 画布占用超过 256 MiB。
 const MAX_IMAGE_PIXELS = 64 * 1024 * 1024;
 
+export const observeExportImageLayout = (imageElement: HTMLElement) => {
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+            frame = 0;
+            if (imageElement.isConnected) {
+                updateExportImageLayout(imageElement);
+            }
+        });
+    });
+    observer.observe(imageElement.parentElement);
+    observer.observe(imageElement.querySelector(".protyle-wysiwyg"));
+    imageElement.querySelectorAll("table").forEach(element => observer.observe(element));
+    updateExportImageLayout(imageElement);
+    return () => {
+        observer.disconnect();
+        cancelAnimationFrame(frame);
+    };
+};
+
 export const updateExportImageLayout = (imageElement: HTMLElement) => {
     const scrollElement = imageElement.parentElement;
     const scrollLeft = scrollElement.scrollLeft;

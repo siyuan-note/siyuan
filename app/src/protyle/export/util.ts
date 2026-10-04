@@ -16,7 +16,7 @@ import {isInAndroid, isIPad, isIPhone, isSafari, saveExportFile, setStorageVal} 
 import {useShell} from "../../util/pathName";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {copyPNGByLink, writePNGBlob} from "../../menus/util";
-import {getExportImageSize, isExportImageSizeSupported, updateExportImageLayout} from "./imageLayout";
+import {getExportImageSize, isExportImageSizeSupported, observeExportImageLayout, updateExportImageLayout} from "./imageLayout";
 
 const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
@@ -36,8 +36,12 @@ export const exportImage = (id: string, copyOnly = false) => {
     if (!getHostCapabilities().documentImportExport) {
         return;
     }
+    let stopObservingLayout: () => void;
     const exportDialog = new Dialog({
         disableAnimation: true,
+        destroyCallback() {
+            stopObservingLayout?.();
+        },
         title: copyOnly ? window.siyuan.languages.copyAsPNG : window.siyuan.languages.exportAsImage,
         content: `<div class="b3-dialog__content" style="${isMobile() ? "padding:8px;" : ""};background-color: var(--b3-theme-background)">
     <div style="${isMobile() ? "margin: 8px 0" : "padding: 48px;margin: 8px 0"}" class="export-img">
@@ -325,7 +329,8 @@ export const exportImage = (id: string, copyOnly = false) => {
         });
         processRender(previewElement);
         highlightRender(previewElement);
-        updateExportImageLayout(exportDialog.element.querySelector(".export-img"));
+        stopObservingLayout?.();
+        stopObservingLayout = observeExportImageLayout(exportDialog.element.querySelector(".export-img"));
 
         await updateWatermark();
         if (revision !== previewRevision) {

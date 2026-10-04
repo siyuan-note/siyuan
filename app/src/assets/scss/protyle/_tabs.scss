@@ -334,6 +334,10 @@
 }
 
 .protyle-wysiwyg {
+  > .tab-item > .tab-item-info {
+    border-bottom: 1px solid var(--b3-border-color);
+  }
+
   .tabs-attributes {
     display: none;
     align-items: center;

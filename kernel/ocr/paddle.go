@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/disintegration/imaging"
+	"github.com/siyuan-note/logging"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff"
 	_ "golang.org/x/image/webp"
@@ -56,26 +57,44 @@ type PaddleProvider struct {
 	detector, recognizer *session
 	detection            modelConfig
 	characters           []string
+	availabilityMu       sync.Mutex
+	availabilityError    string
 }
 
 func (p *PaddleProvider) Available() bool {
 	cfg := p.Config()
 	if cfg.Worker != "" {
 		if _, err := os.Stat(cfg.Worker); err != nil {
-			return false
+			return p.reportAvailability(err)
 		}
 		if _, err := os.Stat(cfg.Library); err != nil {
-			return false
+			return p.reportAvailability(err)
 		}
 	} else if err := initRuntime(cfg.Library); err != nil {
-		return false
+		return p.reportAvailability(fmt.Errorf("load ONNX Runtime library [%s]: %w", cfg.Library, err))
 	}
 	for _, path := range []string{"det/inference.onnx", "det/inference.yml", "rec/inference.onnx", "rec/inference.yml"} {
 		if _, err := os.Stat(filepath.Join(cfg.Directory, path)); err != nil {
-			return false
+			return p.reportAvailability(err)
 		}
 	}
-	return true
+	return p.reportAvailability(nil)
+}
+
+// reportAvailability 记录不可用原因，连续相同错误仅记录一次，恢复可用后允许重新记录。
+func (p *PaddleProvider) reportAvailability(err error) bool {
+	p.availabilityMu.Lock()
+	defer p.availabilityMu.Unlock()
+	if err == nil {
+		p.availabilityError = ""
+		return true
+	}
+	message := err.Error()
+	if message != p.availabilityError {
+		logging.LogWarnf("PaddleOCR is unavailable: %s", message)
+		p.availabilityError = message
+	}
+	return false
 }
 
 func readModelConfig(directory, kind string) (modelConfig, error) {

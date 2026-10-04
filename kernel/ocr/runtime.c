@@ -2,6 +2,7 @@
 
 #include "runtime.h"
 #include "onnxruntime_c_api.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #if defined(_WIN32)
@@ -46,8 +47,13 @@ char *sy_ocr_init(const char *library) {
     if (!path || !size) { free(path); return sy_message("Invalid ONNX Runtime library path"); }
     MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, library, -1, path, size);
     HMODULE handle = LoadLibraryExW(path, NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+    DWORD error = handle ? ERROR_SUCCESS : GetLastError();
     free(path);
-    if (!handle) return sy_message("Cannot load ONNX Runtime library");
+    if (!handle) {
+        char message[128];
+        snprintf(message, sizeof(message), "Cannot load ONNX Runtime library (win32 error %lu)", (unsigned long)error);
+        return sy_message(message);
+    }
     get_api = (void *)GetProcAddress(handle, "OrtGetApiBase");
 #else
     void *handle = dlopen(library, RTLD_NOW | RTLD_LOCAL);

@@ -165,6 +165,51 @@ func TestBootHomeDirProcess(t *testing.T) {
 	Boot()
 	defer UnlockWorkspace()
 	fmt.Printf("HOME_DIR=%s\nWORKSPACE=%s\nWD=%s\n", HomeDir, WorkspaceDir, WorkingDir)
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("CWD=%s\n", cwd)
+}
+
+func TestBootWorkingDir(t *testing.T) {
+	base := t.TempDir()
+	launcher := filepath.Join(base, "launcher")
+	resources := filepath.Join(base, "资源 with spaces")
+	for _, dir := range []string{launcher, resources} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, test := range []struct {
+		name, wd, want string
+	}{
+		{"default", "", launcher},
+		{"current directory", ".", launcher},
+		{"relative", filepath.Join("..", filepath.Base(resources)), resources},
+		{"absolute", resources, resources},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			root := t.TempDir()
+			workspace := filepath.Join(root, "workspace")
+			if err := os.MkdirAll(workspace, 0755); err != nil {
+				t.Fatal(err)
+			}
+			command := exec.Command(os.Args[0], "-test.run=^TestBootHomeDirProcess$", "--",
+				"--home-dir="+filepath.Join(root, "home"), "--workspace="+workspace, "--wd="+test.wd)
+			command.Dir = launcher
+			command.Env = append(os.Environ(), "SIYUAN_TEST_BOOT_HOME="+filepath.Join(root, "system-home"))
+			output, err := command.CombinedOutput()
+			if err != nil {
+				t.Fatalf("Boot() failed: %v\n%s", err, output)
+			}
+			for _, expected := range []string{"WD=" + test.want + "\n", "CWD=" + launcher + "\n"} {
+				if !strings.Contains(string(output), expected) {
+					t.Fatalf("missing %q in Boot() output:\n%s", expected, output)
+				}
+			}
+		})
+	}
 }
 
 func TestIsSensitivePathWithHomeDirOverride(t *testing.T) {

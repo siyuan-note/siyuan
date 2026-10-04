@@ -13,11 +13,65 @@ import (
 	"testing"
 	"time"
 
+	"github.com/siyuan-note/logging"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/font/opentype"
 	"golang.org/x/image/math/fixed"
 )
+
+func TestPaddleAvailabilityLogsFailuresAndRecovery(t *testing.T) {
+	root := t.TempDir()
+	logPath := filepath.Join(root, "ocr.log")
+	originalLogPath := logging.LogPath
+	logging.SetLogPath(logPath)
+	t.Cleanup(func() { logging.SetLogPath(originalLogPath) })
+	cfg := PaddleConfig{Worker: filepath.Join(root, "worker"), Library: filepath.Join(root, "runtime"), Directory: root}
+	for _, path := range []string{cfg.Worker, "det/inference.onnx", "det/inference.yml", "rec/inference.onnx", "rec/inference.yml"} {
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(root, path)
+		}
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte("fixture"), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	provider := &PaddleProvider{Config: func() PaddleConfig { return cfg }}
+	assertUnavailable := func(wantLogs int, path string) {
+		t.Helper()
+		for range 2 {
+			if provider.Available() {
+				t.Fatal("provider with missing resources must be unavailable")
+			}
+		}
+		data, err := os.ReadFile(logPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Count(string(data), "PaddleOCR is unavailable:") != wantLogs || !strings.Contains(string(data), path) {
+			t.Fatalf("expected %d warnings including %q, got:\n%s", wantLogs, path, data)
+		}
+	}
+	assertUnavailable(1, cfg.Library)
+	if err := os.WriteFile(cfg.Library, []byte("fixture"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if !provider.Available() {
+		t.Fatal("provider with all resources must recover")
+	}
+	if err := os.Remove(cfg.Library); err != nil {
+		t.Fatal(err)
+	}
+	assertUnavailable(2, cfg.Library)
+	cfg.Library = cfg.Worker
+	model := filepath.Join(root, "rec", "inference.yml")
+	if err := os.Remove(model); err != nil {
+		t.Fatal(err)
+	}
+	assertUnavailable(3, model)
+}
 
 func TestCTCBlankAndRepeatedCharacters(t *testing.T) {
 	data := []float32{0, .9, 0, 0, .8, 0, .9, 0, 0, 0, .7, 0, 0, 0, .8}

@@ -97,7 +97,12 @@ func InitWorkspace(workspacePath, wdPath string) {
 	initHttpClient()
 
 	if "" != wdPath {
-		WorkingDir = wdPath
+		absPath, err := filepath.Abs(wdPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "resolve --wd [%s] failed: %s\n", wdPath, err)
+			os.Exit(logging.ExitCodeInitWorkspaceErr)
+		}
+		WorkingDir = absPath
 	}
 
 	Container = ContainerStd

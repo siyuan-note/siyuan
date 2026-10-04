@@ -7,7 +7,7 @@
 		"id": "20240113102857-c63dmo5",
 		"title": "移动端 App",
 		"type": "doc",
-		"updated": "20260921210136"
+		"updated": "20261004052629"
 	},
 	"Children": [
 		{
@@ -823,7 +823,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174109-kf9rdvq",
-				"updated": "20260803163243"
+				"updated": "20261004052629"
 			},
 			"Children": [
 				{
@@ -852,7 +852,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174109-bccohoq",
-				"updated": "20260613174109"
+				"updated": "20261004052629"
 			},
 			"Children": [
 				{
@@ -935,6 +935,79 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261004052629-tczd7hi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261004052629-tczd7hi",
+				"updated": "20261004052629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新导入的闪念速记遵循 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中的 Markdown 语法开关。启用的行级语法、中点代码围栏（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "···"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）和全角任务快捷语法（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【X】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）会在导入时直接转换，无需再次编辑触发转换。"
+				}
+			]
+		},
+		{
+			"ID": "20261004052629-5dh5rgu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261004052629-5dh5rgu",
+				"updated": "20261004052629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每条速记单独解析，未闭合的代码块不会影响下一条速记。已导入的文档不会重新解析。"
 				}
 			]
 		},

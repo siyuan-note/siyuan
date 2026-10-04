@@ -187,10 +187,9 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 				}
 				buff := bytes.Buffer{}
 				for _, s := range shorthands {
-					buff.WriteString(s.content)
-					buff.WriteString("\n\n")
+					buff.WriteString(shorthandDOM(s.content, s.created))
 				}
-				dom := shorthandDOM(buff.String(), earliest)
+				dom := buff.String()
 				docID := util.NodeIDByTime(earliest)
 				var retID string
 				retID, err = createShorthandDocByDOM(boxID, hPath, dom, docID)
@@ -215,14 +214,11 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 				luteEngine := util.NewStdLute()
 				var nodes []*ast.Node
 				for _, s := range shorthands {
-					inputTree := parse.Parse("", []byte(s.content), luteEngine.ParseOptions)
+					inputTree := parseShorthandMarkdown(s.content, s.created, luteEngine)
 					if nil == inputTree {
 						continue
 					}
-					// 将速记行内语法转换为文本标记，确保追加到文档后可直接建立索引。
-					parse.NestedInlines2FlattedSpansHybrid(inputTree, false)
 					for c := inputTree.Root.FirstChild; nil != c; c = c.Next {
-						resetBlockIDsByTime(c, s.created)
 						nodes = append(nodes, c)
 					}
 				}
@@ -277,11 +273,10 @@ func resetBlockIDsByTime(node *ast.Node, created time.Time) {
 func shorthandDOM(md string, created time.Time) string {
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
-	_, tree := luteEngine.Md2BlockDOMTree(md, false)
+	tree := parseShorthandMarkdown(md, created, luteEngine)
 	if nil == tree {
 		return ""
 	}
-	resetBlockIDsByTime(tree.Root, created)
 	return luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 }
 

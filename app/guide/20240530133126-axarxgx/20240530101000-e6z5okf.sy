@@ -8,7 +8,7 @@
 		"id": "20240530101000-e6z5okf",
 		"title": "モバイルアプリ",
 		"type": "doc",
-		"updated": "20260921210136"
+		"updated": "20261004052629"
 	},
 	"Children": [
 		{
@@ -528,7 +528,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174259-xwu9036",
-				"updated": "20260803163243"
+				"updated": "20261004052629"
 			},
 			"Children": [
 				{
@@ -557,7 +557,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174259-djgqfrn",
-				"updated": "20260613174259"
+				"updated": "20261004052629"
 			},
 			"Children": [
 				{
@@ -640,6 +640,79 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261004052629-8qyrd3c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261004052629-8qyrd3c",
+				"updated": "20261004052629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新しいショートハンドを取り込む際は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の Markdown 構文の有効・無効の設定が適用されます。有効なインライン構文、中点のコードフェンス（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "···"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）、全角のタスク簡易構文（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【X】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）は取り込み時に変換され、再編集は不要です。"
+				}
+			]
+		},
+		{
+			"ID": "20261004052629-mfqen9u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261004052629-mfqen9u",
+				"updated": "20261004052629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各ショートハンドは個別に解析されるため、閉じられていないコードブロックが次のショートハンドに影響することはありません。取り込み済みのドキュメントは再解析されません。"
 				}
 			]
 		},

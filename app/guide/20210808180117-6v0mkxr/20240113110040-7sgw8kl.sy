@@ -7,7 +7,7 @@
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
 		"type": "doc",
-		"updated": "20260921210136"
+		"updated": "20261004052629"
 	},
 	"Children": [
 		{
@@ -820,7 +820,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174243-53h143k",
-				"updated": "20260803171606"
+				"updated": "20261004052629"
 			},
 			"Children": [
 				{
@@ -849,7 +849,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174243-r1hbexb",
-				"updated": "20260613174243"
+				"updated": "20261004052629"
 			},
 			"Children": [
 				{
@@ -932,6 +932,79 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261004052629-w95ysdy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261004052629-w95ysdy",
+				"updated": "20261004052629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "New shorthands use the Markdown syntax switches in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " when imported. Enabled inline syntax, middle-dot code fences ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "···"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "), and full-width task shortcuts ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【X】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ") are converted immediately, without editing the imported text again."
+				}
+			]
+		},
+		{
+			"ID": "20261004052629-inj9eiy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261004052629-inj9eiy",
+				"updated": "20261004052629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Each shorthand is parsed separately, so an unclosed code block cannot affect the next one. Previously imported documents are not re-parsed."
 				}
 			]
 		},

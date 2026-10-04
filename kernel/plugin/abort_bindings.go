@@ -43,8 +43,8 @@ var abortControllerStateType = reflect.TypeOf((*abortControllerState)(nil))
 // url、buffer、console、encoding 一致，失败时 panic。
 //
 // 与规范的已知差异（与本沙箱其它构造函数一致）：实例不是 AbortController/AbortSignal 的真正
-// ECMAScript 类，不用 new 直接调用构造函数也不会抛错；AbortSignal 本应完全不可直接构造
-// （含 new 调用），这里仍沿用“不用 new 不抛错”的沙箱惯例，而不是单独为它实现更贴近规范的拒绝。
+// ECMAScript 类，不用 new 直接调用 AbortController 也不会抛错（goja 的原生构造函数无法区分两种调用）；
+// AbortSignal 与规范一致，无论是否使用 new 都抛出 TypeError: Illegal constructor。
 // addEventListener 的 options 只支持 {once}，capture/passive/signal 会被静默忽略。
 func EnableAbortAPI(rt *goja.Runtime) {
 	if err := registerAbortAPI(rt); err != nil {

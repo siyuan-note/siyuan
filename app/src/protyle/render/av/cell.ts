@@ -60,6 +60,7 @@ import {openAVRichTextEditor} from "./richTextEditor";
 import {getAVData, getAVPrimaryCell} from "./virtualScroll";
 import {AV_CELL_EDITOR_CLOSE_EVENT} from "./cellEditor";
 import {getAVBlockIconHTML, renderAVBlockIcon} from "./blockIcon";
+import {bindAVCellInputPosition} from "./cellInputPosition";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -631,7 +632,6 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
-    let height = cellRect.height;
     const cssStyle = getComputedStyle(cellElements[0]);
     const storedCellValue = getStoredCellValueByElement(cellElements[0]);
     const hasRenderedTemplate = cellElements[0].matches(".av__celltext--template") ||
@@ -657,19 +657,11 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             return;
         }
     }
-    const inputTop = options?.positionByMenu ? cellRect.bottom : cellRect.top;
-    let style = `font-family:${cssStyle.fontFamily};font-size:${cssStyle.fontSize};line-height:${cssStyle.lineHeight};padding:${cssStyle.padding};position:absolute;top: ${inputTop}px;`;
-    if (contentElement && !options?.positionByMenu) {
-        const contentRect = contentElement.getBoundingClientRect();
-        if (cellRect.bottom > contentRect.bottom) {
-            height = contentRect.bottom - cellRect.top;
-        }
-        const width = Math.min(Math.max(cellRect.width, 25), contentRect.width);
-        style = `style='height: ${height}px;width:${width}px;left: ${(cellRect.left < contentRect.left || cellRect.left + width > contentRect.right) ? contentRect.left : cellRect.left}px;${style}'`;
-    } else {
-        const width = options?.positionByMenu ? Math.max(cellRect.width, 200) : Math.max(cellRect.width, 25);
-        style = `style='height: ${height}px;width:${width}px;left: ${cellRect.left}px;${style}'`;
+    let style = `font-family:${cssStyle.fontFamily};font-size:${cssStyle.fontSize};line-height:${cssStyle.lineHeight};padding:${cssStyle.padding};position:absolute;`;
+    if (options?.positionByMenu) {
+        style += `height:${cellRect.height}px;width:${Math.max(cellRect.width, 200)}px;left:${cellRect.left}px;top:${cellRect.bottom}px;`;
     }
+    style = `style='${style}'`;
 
     if (["text", "email", "phone", "block", "template"].includes(type)) {
         html = `<textarea ${style} spellcheck="false" class="b3-text-field"></textarea>`;
@@ -780,6 +772,24 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (inputElement) {
         if (options?.positionByMenu) {
             setPosition(inputElement, cellRect.left, cellRect.bottom, cellRect.height);
+        } else {
+            const anchorRow = cellElements[0].closest<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id]");
+            const groupID = cellElements[0].closest<HTMLElement>(".av__body[data-group-id]")?.dataset.groupId;
+            const fieldAttr = isTableLikeView(viewType) ? "data-col-id" : "data-field-id";
+            const fieldID = cellElements[0].getAttribute(fieldAttr);
+            const anchorSelector = anchorRow && fieldID ?
+                `${groupID ? `.av__body[data-group-id="${escapeAttr(groupID)}"] ` : ""}` +
+                `.${anchorRow.classList.contains("av__row") ? "av__row" : "av__gallery-item"}[data-id="${anchorRow.dataset.id}"] .av__cell[${fieldAttr}="${fieldID}"]` : "";
+            bindAVCellInputPosition(inputElement, () => {
+                if (!cellElements[0].isConnected && anchorSelector && blockElement.isConnected) {
+                    // 行重绘后按原分组、行和字段重新绑定，输入内容继续保留在同一个编辑框中。
+                    const anchor = blockElement.querySelector<HTMLElement>(anchorSelector);
+                    if (anchor) {
+                        cellElements[0] = anchor;
+                    }
+                }
+                return cellElements[0];
+            }, contentElement || undefined);
         }
         if (["text", "email", "phone", "block", "template"].includes(type)) {
             const storedContent = type === "template" ? undefined :

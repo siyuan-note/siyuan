@@ -139,7 +139,7 @@ test("package refresh stops when the page is replaced while awaiting an older re
 
 test("installed refresh preserves search and scroll, and an old request cannot clear a new loading flag", async () => {
     const requests = [];
-    const bazaar = loadMethods(["_genMyHTML"], {
+    const bazaar = loadMethods(["_genMyHTML", "_shouldKeepDownloadedOrder"], {
         getFrontend: () => "desktop",
         fetchPost: (_url, data, callback) => {
             const pending = deferred();
@@ -162,7 +162,8 @@ test("installed refresh preserves search and scroll, and an old request cannot c
     };
     Object.assign(bazaar, {
         element: {querySelector: selector => selector === "#configBazaarDownloaded" ? content : null},
-        _data: {}, _captureMount: () => generation, _isMountCurrent: value => value === generation,
+        _data: {downloaded: [], downloadedType: "widgets"},
+        _captureMount: () => generation, _isMountCurrent: value => value === generation,
         _updateDownloadedToolbar() {}, _updateDownloadedSortSelect() {}, _getDownloadedSortValue: () => "2",
         _applyDownloadedDeprecations() {}, _preserveDownloadedOrder: data => data, _loadDownloadedDeprecations() {},
     });

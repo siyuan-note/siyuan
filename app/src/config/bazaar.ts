@@ -857,7 +857,8 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             const packageItems = response.data.packages as IBazaarItem[];
             bazaar._applyDownloadedDeprecations(bazaarType, packageItems);
             const currentSortValue = bazaar._getDownloadedSortValue(bazaarType);
-            const packages = preserveOrder && initialSortValue === currentSortValue ?
+            const packages = preserveOrder && initialSortValue === currentSortValue &&
+                bazaar._shouldKeepDownloadedOrder(bazaarType, packageItems) ?
                 bazaar._preserveDownloadedOrder(packageItems) :
                 bazaar._sortDownloadedPackages(packageItems, currentSortValue);
             let html = "";
@@ -1268,6 +1269,15 @@ type="checkbox">
         if (!isUpdate) {
             titleElement?.querySelector('[data-type="install-all"].b3-button')?.classList.add("fn__none");
         }
+    },
+    // 仅在包类型和名称集合均未变化时沿用「已下载」列表的顺序。
+    _shouldKeepDownloadedOrder(bazaarType: TBazaarType, packages: IBazaarItem[]) {
+        if (bazaar._data.downloadedType !== bazaarType ||
+            packages.length !== bazaar._data.downloaded.length) {
+            return false;
+        }
+        const names = new Set(bazaar._data.downloaded.map((item) => item.name));
+        return packages.every((item) => names.has(item.name));
     },
     _preserveDownloadedOrder(packages: IBazaarItem[]) {
         const positions = new Map(bazaar._data.downloaded.map((item, index) => [item.name, index]));

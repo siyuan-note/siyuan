@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "GitHub 仓库星标数",
+	"bazaarFeedbackTip": "通过 GitHub Issues 反馈",
 	"performOCR": "进行 OCR",
 	"performAIOCR": "使用 AI 进行 OCR",
 	"listMindmapSummaryBatch": "创建 ${count} 个概要",

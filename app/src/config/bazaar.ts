@@ -1095,18 +1095,14 @@ type="checkbox">
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.pkgSize, available.hSize)}
     ${available.keywords?.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.keywords, bazaar._genReadmeKeywords(available.keywords), true) : ""}
 </section>` : "";
-        const resourceStats = available ? `<span class="fn__space"></span>
-    <svg class="svg ft__on-surface"><use xlink:href="#iconStar"></use></svg>
-    <span class="fn__space--small"></span>
-    <a href="${escapeAttr(resourceData.repoURL)}/stargazers" target="_blank" title="Stars">${formatCount(resourceData.stars)}</a>
-    <span class="fn__space"></span>
-    <svg class="svg ft__on-surface"><use xlink:href="#iconGitHubI"></use></svg>
-    <span class="fn__space--small"></span>
-    <a href="${escapeAttr(resourceData.repoURL)}/issues" target="_blank" title="Open issues">${formatCount(resourceData.openIssues)}</a>
-    <span class="fn__space"></span>
-    <svg class="svg ft__on-surface"><use xlink:href="#iconDownload"></use></svg>
-    <span class="fn__space--small"></span>
-    ${formatCount(resourceData.downloads)}` : "";
+        const resourceStats = available ? `<span class="item__resource fn__flex" title="${escapeAttr(window.siyuan.languages.download)}">
+    <svg class="svg ft__on-surface" aria-hidden="true"><use xlink:href="#iconDownload"></use></svg>
+    <span>${formatCount(resourceData.downloads)}</span>
+</span>
+<span class="item__resource fn__flex" title="${escapeAttr(window.siyuan.languages.bazaarStars)}">
+    <svg class="svg ft__on-surface" aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
+    <span>${formatCount(resourceData.stars)}</span>
+</span>` : "";
         const fundingItems = getBazaarFundingItems(resourceData.funding);
         if (fundingItems.length === 0 && resourceData.preferredFunding) {
             fundingItems.push({url: resourceData.preferredFunding});
@@ -1143,9 +1139,12 @@ type="checkbox">
             <div data-type="rating-detail-slot">${genReadmeRatingHTML(bazaar, bazaarType, displayData, ratingLoaded)}</div>
             <section class="item__meta-section item__resources">
                 <div class="item__meta-title">${window.siyuan.languages.bazaarResources}</div>
-                <div class="fn__flex">
-                    <a href="${escapeAttr(resourceData.repoURL)}/issues" target="_blank" title="Feedback via GitHub Issues" data-type="feedback">${window.siyuan.languages.feedback}</a>
+                <div class="item__resource-list fn__flex fn__flex-wrap">
                     ${resourceStats}
+                    <span class="item__resource fn__flex">
+                        <svg class="svg ft__on-surface" aria-hidden="true"><use xlink:href="#iconGitHubI"></use></svg>
+                        <a href="${escapeAttr(resourceData.repoURL)}/issues" target="_blank" title="${escapeAttr(window.siyuan.languages.bazaarFeedbackTip)}" data-type="feedback">${window.siyuan.languages.feedback}${available ? ` (${formatCount(resourceData.openIssues)})` : ""}</a>
+                    </span>
                 </div>
             </section>
         </div>

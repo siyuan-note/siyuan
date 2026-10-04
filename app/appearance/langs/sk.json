@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "Počet hviezdičiek repozitára GitHub",
+	"bazaarFeedbackTip": "Odoslať spätnú väzbu cez GitHub Issues",
 	"performOCR": "Spustiť OCR",
 	"performAIOCR": "Spustiť OCR pomocou AI",
 	"listMindmapSummaryBatch": "Vytvoriť ${count} súhrnov",

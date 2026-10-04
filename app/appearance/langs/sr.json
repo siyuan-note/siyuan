@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "Број звездица GitHub репозиторијума",
+	"bazaarFeedbackTip": "Пошаљите повратне информације преко GitHub Issues",
 	"performOCR": "Izvrši OCR",
 	"performAIOCR": "Izvrši OCR pomoću veštačke inteligencije",
 	"listMindmapSummaryBatch": "Направи сажетке: ${count}",

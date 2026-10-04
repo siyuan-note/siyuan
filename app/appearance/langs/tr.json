@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "GitHub deposunun yıldız sayısı",
+	"bazaarFeedbackTip": "GitHub Issues üzerinden geri bildirim gönderin",
 	"performOCR": "OCR çalıştır",
 	"performAIOCR": "Yapay zekâ ile OCR çalıştır",
 	"listMindmapSummaryBatch": "${count} özet oluştur",

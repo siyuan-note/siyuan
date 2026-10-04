@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "מספר הכוכבים של מאגר GitHub",
+	"bazaarFeedbackTip": "שליחת משוב באמצעות GitHub Issues",
 	"performOCR": "בצע OCR",
 	"performAIOCR": "בצע OCR באמצעות בינה מלאכותית",
 	"listMindmapSummaryBatch": "יצירת ${count} סיכומים",

@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "GitHub リポジトリのスター数",
+	"bazaarFeedbackTip": "GitHub Issues からフィードバックを送信",
 	"performOCR": "OCR を実行",
 	"performAIOCR": "AI で OCR を実行",
 	"listMindmapSummaryBatch": "${count} 個の要約を作成",

@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "Liczba gwiazdek repozytorium GitHub",
+	"bazaarFeedbackTip": "Prześlij opinię przez GitHub Issues",
 	"performOCR": "Wykonaj OCR",
 	"performAIOCR": "Wykonaj OCR z AI",
 	"listMindmapSummaryBatch": "Utwórz ${count} podsumowań",

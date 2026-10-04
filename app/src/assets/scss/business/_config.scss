@@ -1219,6 +1219,14 @@
           }
         }
 
+        &__resource {
+          gap: 4px;
+
+          &-list {
+            gap: 8px 16px;
+          }
+        }
+
         &__preview {
           width: 100%;
           height: 50%;

@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "GitHub 저장소의 스타 수",
+	"bazaarFeedbackTip": "GitHub Issues를 통해 피드백 보내기",
 	"performOCR": "OCR 실행",
 	"performAIOCR": "AI로 OCR 실행",
 	"listMindmapSummaryBatch": "요약 ${count}개 만들기",

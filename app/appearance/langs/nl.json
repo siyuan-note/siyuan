@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "Aantal sterren van de GitHub-repository",
+	"bazaarFeedbackTip": "Feedback versturen via GitHub Issues",
 	"performOCR": "OCR uitvoeren",
 	"performAIOCR": "OCR met AI uitvoeren",
 	"listMindmapSummaryBatch": "${count} samenvattingen maken",

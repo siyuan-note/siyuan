@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "Кількість зірок репозиторію GitHub",
+	"bazaarFeedbackTip": "Надіслати відгук через GitHub Issues",
 	"performOCR": "Виконати OCR",
 	"performAIOCR": "Виконати OCR за допомогою ШІ",
 	"listMindmapSummaryBatch": "Створити підсумки: ${count}",

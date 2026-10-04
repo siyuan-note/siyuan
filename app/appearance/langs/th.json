@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "จำนวนดาวของที่เก็บ GitHub",
+	"bazaarFeedbackTip": "ส่งข้อเสนอแนะผ่าน GitHub Issues",
 	"performOCR": "ดำเนินการ OCR",
 	"performAIOCR": "ดำเนินการ OCR ด้วย AI",
 	"listMindmapSummaryBatch": "สร้างสรุป ${count} รายการ",

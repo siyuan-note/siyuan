@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "GitHub 儲存庫星標數",
+	"bazaarFeedbackTip": "透過 GitHub Issues 回饋",
 	"performOCR": "進行 OCR",
 	"performAIOCR": "使用 AI 進行 OCR",
 	"listMindmapSummaryBatch": "建立 ${count} 個概要",

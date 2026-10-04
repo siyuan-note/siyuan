@@ -1,4 +1,6 @@
 {
+	"bazaarStars": "Jumlah bintang repositori GitHub",
+	"bazaarFeedbackTip": "Kirim masukan melalui GitHub Issues",
 	"performOCR": "Jalankan OCR",
 	"performAIOCR": "Jalankan OCR dengan AI",
 	"listMindmapSummaryBatch": "Buat ${count} ringkasan",

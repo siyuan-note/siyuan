@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package plugin
+package formdata
 
 import (
 	"fmt"
@@ -44,7 +44,7 @@ func newFormDataTestRuntime(t *testing.T) *formDataTestRuntime {
 	r := &formDataTestRuntime{t: t, loop: loop}
 	r.withRuntime(func(rt *goja.Runtime) {
 		url.Enable(rt)
-		EnableFormDataAPI(rt)
+		Enable(rt)
 	})
 	return r
 }

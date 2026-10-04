@@ -391,8 +391,8 @@ func (p *KernelPlugin) writeStreamResponse(c *gin.Context, response *ResponseStr
 // ArrayBuffer 视图（如 Uint8Array）或字符串（按 UTF-8 编码），与 siyuan.client.fetch 的 response.body
 // 的 chunk 形态保持一致；返回的切片是独立拷贝，不与引擎内存共享。
 func streamChunkBytes(p *KernelPlugin, rt *goja.Runtime, chunk goja.Value) ([]byte, error) {
-	if object, ok := chunk.(*goja.Object); ok && p.formDataHost.isBufferSource(chunk) {
-		return bytes.Clone(p.formDataHost.bufferSourceBytes(rt, object)), nil
+	if object, ok := chunk.(*goja.Object); ok && p.formDataHost.IsBufferSource(chunk) {
+		return bytes.Clone(p.formDataHost.BufferSourceBytes(rt, object)), nil
 	}
 	if goja.IsString(chunk) {
 		return []byte(chunk.String()), nil

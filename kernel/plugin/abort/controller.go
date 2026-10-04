@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package plugin
+package abort
 
 import (
 	"fmt"
@@ -24,62 +24,62 @@ import (
 	"github.com/samber/lo"
 )
 
-// abortControllerState 是 AbortController 的宿主对象实现：自身不暴露任何属性，signal/abort 由共享原型上的访问器与方法提供。
-type abortControllerState struct {
-	signal *abortSignalState
+// controllerState 是 AbortController 的宿主对象实现：自身不暴露任何属性，signal/abort 由共享原型上的访问器与方法提供。
+type controllerState struct {
+	signal *SignalState
 }
 
-func (c *abortControllerState) Get(string) goja.Value       { return nil }
-func (c *abortControllerState) Set(string, goja.Value) bool { return false }
-func (c *abortControllerState) Has(string) bool             { return false }
-func (c *abortControllerState) Delete(string) bool          { return false }
-func (c *abortControllerState) Keys() []string              { return nil }
+func (c *controllerState) Get(string) goja.Value       { return nil }
+func (c *controllerState) Set(string, goja.Value) bool { return false }
+func (c *controllerState) Has(string) bool             { return false }
+func (c *controllerState) Delete(string) bool          { return false }
+func (c *controllerState) Keys() []string              { return nil }
 
-// abortControllerStateType 用于在 Object.Export() 前用 Object.ExportType() 做判定，原因见 abortSignalStateType
+// controllerStateType 用于在 Object.Export() 前用 Object.ExportType() 做判定，原因见 signalStateType
 // 的注释：AbortController.prototype 本身作为 receiver 时，直接 Export() 会因 signal 访问器无限递归。
-var abortControllerStateType = reflect.TypeOf((*abortControllerState)(nil))
+var controllerStateType = reflect.TypeOf((*controllerState)(nil))
 
-// EnableAbortAPI 把 AbortController 与 AbortSignal 挂到 runtime 的 globalThis，调用方式与
+// Enable 把 AbortController 与 AbortSignal 挂到 runtime 的 globalThis，调用方式与
 // url、buffer、console、encoding 一致，失败时 panic。
 //
 // 与规范的已知差异（与本沙箱其它构造函数一致）：实例不是 AbortController/AbortSignal 的真正
 // ECMAScript 类，不用 new 直接调用 AbortController 也不会抛错（goja 的原生构造函数无法区分两种调用）；
 // AbortSignal 与规范一致，无论是否使用 new 都抛出 TypeError: Illegal constructor。
 // addEventListener 的 options 只支持 {once}，capture/passive/signal 会被静默忽略。
-func EnableAbortAPI(rt *goja.Runtime) {
-	if err := registerAbortAPI(rt); err != nil {
+func Enable(rt *goja.Runtime) {
+	if err := register(rt); err != nil {
 		panic(err)
 	}
 }
 
-// registerAbortAPI 构造并挂载 AbortController 与 AbortSignal。
-func registerAbortAPI(rt *goja.Runtime) (err error) {
+// register 构造并挂载 AbortController 与 AbortSignal。
+func register(rt *goja.Runtime) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("registerAbortAPI: %v", r)
+			err = fmt.Errorf("abort.Enable: %v", r)
 		}
 	}()
 
-	signalPrototype := lo.Must(newAbortSignalPrototype(rt))
-	signalCtor := lo.Must(newAbortSignalConstructor(rt, signalPrototype))
+	signalPrototype := lo.Must(newSignalPrototype(rt))
+	signalCtor := lo.Must(newSignalConstructor(rt, signalPrototype))
 	lo.Must0(rt.Set("AbortSignal", signalCtor))
 
-	controllerPrototype := lo.Must(newAbortControllerPrototype(rt, signalCtor))
-	controllerCtor := newAbortControllerConstructor(rt, controllerPrototype, signalCtor)
+	controllerPrototype := lo.Must(newControllerPrototype(rt, signalCtor))
+	controllerCtor := newControllerConstructor(rt, controllerPrototype, signalCtor)
 	lo.Must0(rt.Set("AbortController", controllerCtor))
 	return
 }
 
-// newAbortSignalObject 创建一个包装给定状态的 AbortSignal 对象，并绑定到共享原型。
-func newAbortSignalObject(rt *goja.Runtime, prototype *goja.Object, state *abortSignalState) *goja.Object {
+// newSignalObject 创建一个包装给定状态的 AbortSignal 对象，并绑定到共享原型。
+func newSignalObject(rt *goja.Runtime, prototype *goja.Object, state *SignalState) *goja.Object {
 	object := rt.NewDynamicObject(state)
 	lo.Must0(object.SetPrototype(prototype))
 	state.self = object
 	return object
 }
 
-// newAbortSignalConstructor 构造 AbortSignal 全局构造函数及其静态方法 abort/timeout/any。
-func newAbortSignalConstructor(rt *goja.Runtime, prototype *goja.Object) (*goja.Object, error) {
+// newSignalConstructor 构造 AbortSignal 全局构造函数及其静态方法 abort/timeout/any。
+func newSignalConstructor(rt *goja.Runtime, prototype *goja.Object) (*goja.Object, error) {
 	ctor := rt.ToValue(func(call goja.ConstructorCall) *goja.Object {
 		panic(rt.NewTypeError("Illegal constructor"))
 	}).(*goja.Object)
@@ -93,8 +93,8 @@ func newAbortSignalConstructor(rt *goja.Runtime, prototype *goja.Object) (*goja.
 
 	// AbortSignal.abort(reason?) -> 返回一个已经中止的新信号。
 	if err := ctor.Set("abort", rt.ToValue(func(call goja.FunctionCall) goja.Value {
-		state := &abortSignalState{}
-		object := newAbortSignalObject(rt, prototype, state)
+		state := &SignalState{}
+		object := newSignalObject(rt, prototype, state)
 		reason := call.Argument(0)
 		if goja.IsUndefined(reason) {
 			reason = nil // 让 triggerAbort 套用默认的 AbortError
@@ -112,15 +112,15 @@ func newAbortSignalConstructor(rt *goja.Runtime, prototype *goja.Object) (*goja.
 			milliseconds = 0
 		}
 
-		state := &abortSignalState{}
-		object := newAbortSignalObject(rt, prototype, state)
+		state := &SignalState{}
+		object := newSignalObject(rt, prototype, state)
 
 		setTimeout, ok := goja.AssertFunction(rt.GlobalObject().Get("setTimeout"))
 		if !ok {
 			panic(rt.NewTypeError("globalThis.setTimeout is not available"))
 		}
 		if _, err := setTimeout(goja.Undefined(), rt.ToValue(func(goja.FunctionCall) goja.Value {
-			state.triggerAbort(rt, newAbortSignalError(rt, "TimeoutError", "signal timed out"))
+			state.triggerAbort(rt, newSignalError(rt, "TimeoutError", "signal timed out"))
 			return goja.Undefined()
 		}), rt.ToValue(milliseconds)); err != nil {
 			panic(err)
@@ -132,10 +132,10 @@ func newAbortSignalConstructor(rt *goja.Runtime, prototype *goja.Object) (*goja.
 
 	// AbortSignal.any(signals) -> 任一源信号中止时跟随中止的新信号；源信号已中止则立即中止。
 	if err := ctor.Set("any", rt.ToValue(func(call goja.FunctionCall) goja.Value {
-		sources := abortSignalArrayOf(rt, call.Argument(0))
+		sources := signalArrayOf(rt, call.Argument(0))
 
-		state := &abortSignalState{}
-		object := newAbortSignalObject(rt, prototype, state)
+		state := &SignalState{}
+		object := newSignalObject(rt, prototype, state)
 
 		for _, source := range sources {
 			if source.aborted {
@@ -156,17 +156,17 @@ func newAbortSignalConstructor(rt *goja.Runtime, prototype *goja.Object) (*goja.
 	return ctor, nil
 }
 
-// abortSignalArrayOf 读取 AbortSignal.any() 的 signals 参数：接受数组，数组之外的可迭代对象未支持。
-func abortSignalArrayOf(rt *goja.Runtime, value goja.Value) []*abortSignalState {
+// signalArrayOf 读取 AbortSignal.any() 的 signals 参数：接受数组，数组之外的可迭代对象未支持。
+func signalArrayOf(rt *goja.Runtime, value goja.Value) []*SignalState {
 	if !isJsArray(rt, value) {
 		panic(rt.NewTypeError("signals must be an array of AbortSignal"))
 	}
 	object := value.ToObject(rt)
 	length := int64(object.Get("length").ToInteger())
 
-	states := make([]*abortSignalState, 0, length)
+	states := make([]*SignalState, 0, length)
 	for i := int64(0); i < length; i++ {
-		state, err := abortSignalOf(rt, object.Get(fmt.Sprint(i)), fmt.Sprintf("signals[%d]", i))
+		state, err := SignalOf(rt, object.Get(fmt.Sprint(i)), fmt.Sprintf("signals[%d]", i))
 		if err != nil {
 			panic(rt.NewTypeError(err.Error()))
 		}
@@ -175,30 +175,30 @@ func abortSignalArrayOf(rt *goja.Runtime, value goja.Value) []*abortSignalState 
 	return states
 }
 
-// newAbortSignalPrototype 构造 AbortSignal.prototype：aborted/reason/onabort 访问器，
+// newSignalPrototype 构造 AbortSignal.prototype：aborted/reason/onabort 访问器，
 // throwIfAborted、addEventListener、removeEventListener、dispatchEvent 方法。
-func newAbortSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
+func newSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
 	prototype := rt.NewObject()
 
-	self := func(call goja.FunctionCall, method string) *abortSignalState {
-		state, err := abortSignalOf(rt, call.This, "this")
+	self := func(call goja.FunctionCall, method string) *SignalState {
+		state, err := SignalOf(rt, call.This, "this")
 		if err != nil {
 			panic(rt.NewTypeError("AbortSignal.prototype.%s called on an incompatible receiver", method))
 		}
 		return state
 	}
 
-	accessor := func(name string, get func(*abortSignalState) goja.Value) error {
+	accessor := func(name string, get func(*SignalState) goja.Value) error {
 		getter := rt.ToValue(func(call goja.FunctionCall) goja.Value {
 			return get(self(call, name))
 		})
 		return prototype.DefineAccessorProperty(name, getter, nil, goja.FLAG_TRUE, goja.FLAG_TRUE)
 	}
 
-	if err := accessor("aborted", func(s *abortSignalState) goja.Value { return rt.ToValue(s.aborted) }); err != nil {
+	if err := accessor("aborted", func(s *SignalState) goja.Value { return rt.ToValue(s.aborted) }); err != nil {
 		return nil, err
 	}
-	if err := accessor("reason", func(s *abortSignalState) goja.Value {
+	if err := accessor("reason", func(s *SignalState) goja.Value {
 		if s.reason == nil {
 			return goja.Undefined()
 		}
@@ -260,7 +260,7 @@ func newAbortSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
 				return goja.Undefined()
 			}
 		}
-		s.listeners = append(s.listeners, abortListener{callback: callback, once: once})
+		s.listeners = append(s.listeners, signalListener{callback: callback, once: once})
 		return goja.Undefined()
 	})); err != nil {
 		return nil, err
@@ -273,7 +273,7 @@ func newAbortSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
 		}
 		callback := call.Argument(1)
 
-		remaining := make([]abortListener, 0, len(s.listeners))
+		remaining := make([]signalListener, 0, len(s.listeners))
 		for _, existing := range s.listeners {
 			if !existing.callback.SameAs(callback) {
 				remaining = append(remaining, existing)
@@ -308,16 +308,16 @@ func newAbortSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
 	return prototype, nil
 }
 
-// newAbortControllerConstructor 构造 AbortController 全局构造函数。
-func newAbortControllerConstructor(rt *goja.Runtime, prototype *goja.Object, signalCtor *goja.Object) *goja.Object {
+// newControllerConstructor 构造 AbortController 全局构造函数。
+func newControllerConstructor(rt *goja.Runtime, prototype *goja.Object, signalCtor *goja.Object) *goja.Object {
 	signalPrototype := signalCtor.Get("prototype").ToObject(rt)
 
 	ctor := rt.ToValue(func(call goja.ConstructorCall) *goja.Object {
-		signalState := &abortSignalState{}
-		newAbortSignalObject(rt, signalPrototype, signalState)
+		signalState := &SignalState{}
+		newSignalObject(rt, signalPrototype, signalState)
 
-		controllerState := &abortControllerState{signal: signalState}
-		object := rt.NewDynamicObject(controllerState)
+		state := &controllerState{signal: signalState}
+		object := rt.NewDynamicObject(state)
 		lo.Must0(object.SetPrototype(call.This.Prototype()))
 		return object
 	}).(*goja.Object)
@@ -327,14 +327,14 @@ func newAbortControllerConstructor(rt *goja.Runtime, prototype *goja.Object, sig
 	return ctor
 }
 
-// newAbortControllerPrototype 构造 AbortController.prototype：signal 访问器与 abort 方法。
-func newAbortControllerPrototype(rt *goja.Runtime, signalCtor *goja.Object) (*goja.Object, error) {
+// newControllerPrototype 构造 AbortController.prototype：signal 访问器与 abort 方法。
+func newControllerPrototype(rt *goja.Runtime, signalCtor *goja.Object) (*goja.Object, error) {
 	prototype := rt.NewObject()
 
-	self := func(call goja.FunctionCall, method string) *abortControllerState {
+	self := func(call goja.FunctionCall, method string) *controllerState {
 		if call.This != nil {
-			if object := call.This.ToObject(rt); object != nil && object.ExportType() == abortControllerStateType {
-				if state, ok := object.Export().(*abortControllerState); ok {
+			if object := call.This.ToObject(rt); object != nil && object.ExportType() == controllerStateType {
+				if state, ok := object.Export().(*controllerState); ok {
 					return state
 				}
 			}

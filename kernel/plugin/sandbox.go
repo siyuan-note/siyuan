@@ -37,7 +37,9 @@ import (
 	"github.com/imroc/req/v3"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/plugin/abort"
 	"github.com/siyuan-note/siyuan/kernel/plugin/encoding"
+	"github.com/siyuan-note/siyuan/kernel/plugin/formdata"
 	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 )
 
@@ -105,8 +107,8 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	buffer.Enable(rt)
 	console.Enable(rt)
 	encoding.Enable(rt)
-	EnableAbortAPI(rt)
-	p.formDataHost = EnableFormDataAPI(rt)
+	abort.Enable(rt)
+	p.formDataHost = formdata.Enable(rt)
 	p.streamsHost = streams.Enable(rt)
 	return
 }
@@ -224,7 +226,6 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 
 	// 使用注册时捕获的 Blob 原型与 Uint8Array 构造函数，插件脚本改写同名全局不影响返回的对象。
 	host := p.formDataHost
-	blobType := normalizeBlobType(contentType)
 
 	lo.Must0(object.Set("text", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
@@ -340,7 +341,7 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			result, err = rt.New(host.uint8Array, rt.ToValue(rt.NewArrayBuffer(data)))
+			result, err = host.NewUint8Array(rt, data)
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
@@ -366,7 +367,7 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			result = newBlobObject(rt, host.blobPrototype, &blobState{data: cloneBytes(data), typ: blobType})
+			result = host.NewBlob(rt, data, contentType)
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {

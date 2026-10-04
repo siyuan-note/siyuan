@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package plugin
+package formdata
 
 import (
 	"bytes"
@@ -228,9 +228,9 @@ func encodeFormDataGlobal(t *testing.T, rt *formDataTestRuntime, name string) (b
 	var contentType string
 	found := false
 	rt.withRuntime(func(rt *goja.Runtime) {
-		var state *formDataState
-		if state, found = formDataStateOf(rt.Get(name)); found {
-			body, contentType = state.encodeMultipart()
+		var state *State
+		if state, found = StateOf(rt.Get(name)); found {
+			body, contentType = state.EncodeMultipart()
 		}
 	})
 	if !found {

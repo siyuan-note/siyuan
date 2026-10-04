@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package plugin
+package formdata
 
 import (
 	"math"
@@ -207,4 +207,14 @@ func iteratorPrototypeOf(rt *goja.Runtime) *goja.Object {
 	}
 	iterator := lo.Must(values(array)).ToObject(rt)
 	return iterator.Prototype().Prototype()
+}
+
+// isJsValueNotUndefined 与 isJsValueNotNull 和 kernel/plugin/sandbox.go 的同名函数同构：本包不依赖 plugin 包，避免
+// 循环依赖，因此复制一份。
+func isJsValueNotUndefined(jsValue goja.Value) bool {
+	return jsValue != nil && !goja.IsUndefined(jsValue)
+}
+
+func isJsValueNotNull(jsValue goja.Value) bool {
+	return isJsValueNotUndefined(jsValue) && !goja.IsNull(jsValue)
 }

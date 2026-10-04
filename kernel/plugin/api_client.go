@@ -36,6 +36,8 @@ import (
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin/abort"
+	"github.com/siyuan-note/siyuan/kernel/plugin/formdata"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -60,7 +62,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		var bodyBytes *[]byte
 		var bodyContentType string     // 请求体自带的媒体类型（如 FormData 的 multipart boundary），调用方未显式设置 Content-Type 时使用
 		timeout := fetchDefaultTimeout // 只约束到收到响应头为止，不覆盖读取响应体的过程，与浏览器 fetch 的 timeout/signal 分离语义一致
-		var signal *abortSignalState
+		var signal *abort.SignalState
 
 		if goja.IsString(call.Argument(0)) {
 			path = call.Argument(0).String()
@@ -87,9 +89,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						if b := initObj.Get("body"); isJsValueNotNull(b) {
 							if goja.IsString(b) {
 								bodyString = new(b.String())
-							} else if formData, ok := formDataStateOf(b); ok {
+							} else if formData, ok := formdata.StateOf(b); ok {
 								// 在调用时完成编码，之后对 FormData 的修改不影响本次请求（与 fetch 规范一致）。
-								body, contentType := formData.encodeMultipart()
+								body, contentType := formData.EncodeMultipart()
 								bodyBytes = &body
 								bodyContentType = contentType
 							} else {
@@ -110,7 +112,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 					if argErr == nil {
 						if s := initObj.Get("signal"); isJsValueNotNull(s) {
-							signal, argErr = abortSignalOf(rt, s, "signal")
+							signal, argErr = abort.SignalOf(rt, s, "signal")
 						}
 					}
 				}
@@ -124,8 +126,8 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			}
 
 			// 请求发出前 signal 已经中止：不发送请求，直接以 reason reject。
-			if signal != nil && signal.aborted {
-				if rejectErr := reject(signal.reason); rejectErr != nil {
+			if signal != nil && signal.Aborted() {
+				if rejectErr := reject(signal.Reason()); rejectErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.client.fetch reject: %v", p.Name, rejectErr)
 				}
 				return
@@ -146,11 +148,11 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			}
 
 			// abortHookFired 记录取消是否来自 signal 中止，与超时、插件停止等其他取消来源区开；
-			// 依赖 Store/Load 建立的 happens-before 关系，该标记为 true 之后再读取 signal.reason 是安全的
+			// 依赖 Store/Load 建立的 happens-before 关系，该标记为 true 之后再读取 signal.Reason() 是安全的
 			// （triggerAbort 在调用 goHooks 前已写入 reason，且其后不再修改）。
 			var abortHookFired atomic.Bool
 			if signal != nil {
-				signal.addAbortHook(func() {
+				signal.AddAbortHook(func() {
 					abortHookFired.Store(true)
 					cancel()
 				})
@@ -207,7 +209,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 				if sendErr != nil {
 					if abortHookFired.Load() {
-						rejectReason = signal.reason
+						rejectReason = signal.Reason()
 						return
 					}
 					err = sendErr
@@ -1047,7 +1049,7 @@ func newFetchResponseBodyStream(p *KernelPlugin, rt *goja.Runtime, body *fetchRe
 // uint8ArrayOf 把 data 包装为 Uint8Array：data 已经是不会再被其它调用方共享或改写的独立切片，直接作为
 // ArrayBuffer 的底层存储，不需要再复制一次。
 func uint8ArrayOf(p *KernelPlugin, rt *goja.Runtime, data []byte) goja.Value {
-	value, err := rt.New(p.formDataHost.uint8Array, rt.ToValue(rt.NewArrayBuffer(data)))
+	value, err := p.formDataHost.NewUint8Array(rt, data)
 	if err != nil {
 		panic(err)
 	}

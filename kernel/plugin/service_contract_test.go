@@ -19,6 +19,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin/formdata"
 	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -52,7 +53,7 @@ func newServiceTestPlugin(t *testing.T, script string) (*KernelPlugin, context.C
 	var runErr error
 	loop.Run(func(rt *goja.Runtime) {
 		rt.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
-		p.formDataHost = EnableFormDataAPI(rt)
+		p.formDataHost = formdata.Enable(rt)
 		p.streamsHost = streams.Enable(rt)
 		_, runErr = rt.RunString(script)
 	})

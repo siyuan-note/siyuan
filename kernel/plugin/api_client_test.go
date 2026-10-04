@@ -35,6 +35,8 @@ import (
 	"github.com/dop251/goja_nodejs/eventloop"
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin/abort"
+	"github.com/siyuan-note/siyuan/kernel/plugin/formdata"
 	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -78,8 +80,8 @@ func runClientFetchScript(t *testing.T, p *KernelPlugin, script string) <-chan s
 	_, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
 		// 与生产环境一致先启用 AbortController、FormData、Streams 等全局，供脚本中的 init.signal、init.body、
 		// response.body 使用。
-		EnableAbortAPI(rt)
-		p.formDataHost = EnableFormDataAPI(rt)
+		abort.Enable(rt)
+		p.formDataHost = formdata.Enable(rt)
 		p.streamsHost = streams.Enable(rt)
 
 		siyuan := rt.NewObject()

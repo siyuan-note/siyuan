@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package plugin
+package formdata
 
 import (
 	"math"
@@ -30,7 +30,8 @@ import (
 )
 
 var (
-	// blobStateType 用于在 Object.Export() 前先以 Object.ExportType() 做品牌判定，原因见 abortSignalStateType 的注释。
+	// blobStateType 用于在 Object.Export() 前先以 Object.ExportType() 做品牌判定，原因见 kernel/plugin/abort 中
+	// signalStateType 的注释。
 	blobStateType = reflect.TypeOf((*blobState)(nil))
 	// arrayBufferExportType 是 ArrayBuffer 对象的导出类型，用于在不调用 Export() 的前提下识别 ArrayBuffer。
 	arrayBufferExportType = reflect.TypeOf(goja.ArrayBuffer{})
@@ -61,7 +62,7 @@ type blobState struct {
 	lastModified int64 // 自 Unix 纪元起的毫秒数
 }
 
-// blobStateOf 取出 Blob（含 File）的宿主状态，只接受由本文件创建的对象。
+// blobStateOf 取出 Blob（含 File）的宿主状态，只接受由本包创建的对象。
 func blobStateOf(value goja.Value) (*blobState, bool) {
 	object, ok := value.(*goja.Object)
 	if !ok || object.ExportType() != blobStateType {
@@ -92,11 +93,11 @@ type blobPropertyBag struct {
 }
 
 // blobPartsOf 按 WebIDL 把值转换为 sequence<BlobPart>，各项依次按 Blob、ArrayBuffer、ArrayBuffer 视图、USVString 识别。
-func (h *formDataHost) blobPartsOf(rt *goja.Runtime, value goja.Value, context string) (parts []blobPart) {
+func (h *Host) blobPartsOf(rt *goja.Runtime, value goja.Value, context string) (parts []blobPart) {
 	iterateSequence(rt, value, context, func(element goja.Value) {
 		if state, ok := blobStateOf(element); ok {
 			parts = append(parts, blobPart{blob: state})
-		} else if h.isBufferSource(element) {
+		} else if h.IsBufferSource(element) {
 			parts = append(parts, blobPart{buffer: element.(*goja.Object)})
 		} else {
 			parts = append(parts, blobPart{text: usvStringOf(rt, element)})
@@ -105,8 +106,8 @@ func (h *formDataHost) blobPartsOf(rt *goja.Runtime, value goja.Value, context s
 	return
 }
 
-// isBufferSource 判断值是不是 ArrayBuffer 或 ArrayBuffer 视图（TypedArray、DataView），不会触发对象上的访问器。
-func (h *formDataHost) isBufferSource(value goja.Value) bool {
+// IsBufferSource 判断值是不是 ArrayBuffer 或 ArrayBuffer 视图（TypedArray、DataView），不会触发对象上的访问器。
+func (h *Host) IsBufferSource(value goja.Value) bool {
 	object, ok := value.(*goja.Object)
 	if !ok {
 		return false
@@ -118,10 +119,10 @@ func (h *formDataHost) isBufferSource(value goja.Value) bool {
 	return err == nil && isView.ToBoolean()
 }
 
-// bufferSourceBytes 返回 BufferSource 当前的字节（与引擎共享内存，调用方须自行复制），ArrayBuffer 已分离时返回空。
+// BufferSourceBytes 返回 BufferSource 当前的字节（与引擎共享内存，调用方须自行复制），ArrayBuffer 已分离时返回空。
 // 视图先经注册时捕获的内建 buffer 访问器取出其 ArrayBuffer，确认未分离后再导出：goja 导出已分离缓冲区上的视图
 // 会触发 Go 运行时 panic，而不是抛出 JS 异常。
-func (h *formDataHost) bufferSourceBytes(rt *goja.Runtime, object *goja.Object) []byte {
+func (h *Host) BufferSourceBytes(rt *goja.Runtime, object *goja.Object) []byte {
 	if object.ExportType() == arrayBufferExportType {
 		return object.Export().(goja.ArrayBuffer).Bytes()
 	}
@@ -146,14 +147,14 @@ func (h *formDataHost) bufferSourceBytes(rt *goja.Runtime, object *goja.Object) 
 
 // processBlobParts 按 File API 规范拼接各部分的字节：BufferSource 在此时才复制其当前内容（已分离的为空），
 // 字符串按 UTF-8 编码，native 为 true 时先把字符串中的换行统一为平台换行符。
-func (h *formDataHost) processBlobParts(rt *goja.Runtime, parts []blobPart, native bool) []byte {
+func (h *Host) processBlobParts(rt *goja.Runtime, parts []blobPart, native bool) []byte {
 	data := []byte{}
 	for _, part := range parts {
 		switch {
 		case part.blob != nil:
 			data = append(data, part.blob.data...)
 		case part.buffer != nil:
-			data = append(data, h.bufferSourceBytes(rt, part.buffer)...)
+			data = append(data, h.BufferSourceBytes(rt, part.buffer)...)
 		default:
 			text := part.text
 			if native {
@@ -217,7 +218,7 @@ func cloneBytes(data []byte) []byte {
 }
 
 // newBlobConstructor 构造 Blob 全局构造函数：new Blob(blobParts?, options?)。
-func (h *formDataHost) newBlobConstructor(rt *goja.Runtime) *goja.Object {
+func (h *Host) newBlobConstructor(rt *goja.Runtime) *goja.Object {
 	return newInterfaceConstructor(rt, "Blob", 0, h.blobPrototype, func(call goja.ConstructorCall) *goja.Object {
 		var parts []blobPart
 		if blobParts := call.Argument(0); !goja.IsUndefined(blobParts) {
@@ -230,7 +231,7 @@ func (h *formDataHost) newBlobConstructor(rt *goja.Runtime) *goja.Object {
 }
 
 // newFileConstructor 构造继承自 Blob 的 File 全局构造函数：new File(fileBits, fileName, options?)。
-func (h *formDataHost) newFileConstructor(rt *goja.Runtime, blobConstructor *goja.Object) *goja.Object {
+func (h *Host) newFileConstructor(rt *goja.Runtime, blobConstructor *goja.Object) *goja.Object {
 	constructor := newInterfaceConstructor(rt, "File", 2, h.filePrototype, func(call goja.ConstructorCall) *goja.Object {
 		if len(call.Arguments) < 2 {
 			panic(rt.NewTypeError("File constructor: At least 2 arguments required, but only %d passed",
@@ -261,7 +262,7 @@ func (h *formDataHost) newFileConstructor(rt *goja.Runtime, blobConstructor *goj
 
 // newBlobPrototype 构造 Blob.prototype：size、type 访问器与 slice、text、arrayBuffer、bytes 方法。
 // 沙箱没有 ReadableStream，因此不提供 stream()。
-func (h *formDataHost) newBlobPrototype(rt *goja.Runtime) *goja.Object {
+func (h *Host) newBlobPrototype(rt *goja.Runtime) *goja.Object {
 	prototype := rt.NewObject()
 
 	self := func(call goja.FunctionCall, member string) *blobState {
@@ -341,7 +342,7 @@ func (h *formDataHost) newBlobPrototype(rt *goja.Runtime) *goja.Object {
 }
 
 // newFilePrototype 构造继承自 Blob.prototype 的 File.prototype：name 与 lastModified 访问器。
-func (h *formDataHost) newFilePrototype(rt *goja.Runtime) *goja.Object {
+func (h *Host) newFilePrototype(rt *goja.Runtime) *goja.Object {
 	prototype := rt.NewObject()
 	lo.Must0(prototype.SetPrototype(h.blobPrototype))
 

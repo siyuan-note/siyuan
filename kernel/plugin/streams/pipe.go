@@ -47,7 +47,7 @@ func pipeOptionsOf(rt *goja.Runtime, value goja.Value) pipeOptions {
 }
 
 // pipeSignalAborted/pipeSignalAddAbortListener 用鸭子类型读取 signal 参数：只要求有 aborted 属性与
-// addEventListener 方法，不要求是本包或 kernel/plugin 的 AbortSignal 实例，这样宿主注入的任意实现都能用。
+// addEventListener 方法，不要求是本包或 kernel/plugin/abort 的 AbortSignal 实例，这样宿主注入的任意实现都能用。
 func pipeSignalAborted(signal goja.Value) bool {
 	object, ok := signal.(*goja.Object)
 	if !ok {

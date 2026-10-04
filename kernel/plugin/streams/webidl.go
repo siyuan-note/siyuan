@@ -23,8 +23,8 @@ import (
 )
 
 // expandoProperties 保存脚本在宿主对象上自行添加的属性，使流对象能像浏览器中的平台对象一样挂载自定义属性、
-// 被子类用类字段扩展；内建成员都由原型上的访问器与方法提供，不经过这里。与 kernel/plugin/webidl.go 的同名
-// 类型同构：本包不依赖 plugin 包，避免循环依赖，因此复制一份这些通用、不含业务逻辑的 WebIDL 辅助。
+// 被子类用类字段扩展；内建成员都由原型上的访问器与方法提供，不经过这里。与 kernel/plugin/formdata/webidl.go
+// 的同名类型同构：本包不依赖 formdata 包，因此复制一份这些通用、不含业务逻辑的 WebIDL 辅助。
 type expandoProperties struct {
 	keys   []string
 	values map[string]goja.Value
@@ -98,7 +98,7 @@ func newInterfaceConstructor(rt *goja.Runtime, name string, length int, prototyp
 }
 
 // illegalConstructor 构造一个按 WebIDL 规范不可直接实例化的接口的构造函数：用 new 调用会抛出 TypeError，与
-// kernel/plugin 的 AbortSignal 构造函数一致（goja 以 ConstructorCall 签名注册的函数本就只能通过 new 调用）。
+// kernel/plugin/abort 的 AbortSignal 构造函数一致（goja 以 ConstructorCall 签名注册的函数本就只能通过 new 调用）。
 func illegalConstructor(rt *goja.Runtime, name string, prototype *goja.Object) *goja.Object {
 	return newInterfaceConstructor(rt, name, 0, prototype, func(goja.ConstructorCall) *goja.Object {
 		panic(rt.NewTypeError("Illegal constructor"))

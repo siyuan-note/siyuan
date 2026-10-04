@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package plugin
+package abort
 
 import (
 	"testing"
@@ -41,7 +41,7 @@ func newAbortTestRuntime(t *testing.T) *abortTestRuntime {
 	loop.RunOnLoop(func(rt *goja.Runtime) {
 		defer close(done)
 		rt.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
-		EnableAbortAPI(rt)
+		Enable(rt)
 	})
 	<-done
 

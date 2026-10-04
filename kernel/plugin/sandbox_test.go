@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/eventloop"
@@ -219,9 +220,70 @@ func TestEnableExtendModulesInstallsTextEncoderAndDecoder(t *testing.T) {
 	}
 }
 
+// dataObjectTestRuntime 是在事件循环上执行脚本的辅助对象，与 kernel/plugin/formdata 测试中的 formDataTestRuntime
+// 同构：其他包的测试文件对本包不可见，因此复制一份。
+type dataObjectTestRuntime struct {
+	t    *testing.T
+	loop *eventloop.EventLoop
+}
+
+// withRuntime 在事件循环上同步执行 fn。fn 运行在事件循环的 goroutine 上，不能调用 t.Fatal。
+func (r *dataObjectTestRuntime) withRuntime(fn func(rt *goja.Runtime)) {
+	r.t.Helper()
+
+	done := make(chan struct{})
+	r.loop.RunOnLoop(func(rt *goja.Runtime) {
+		defer close(done)
+		fn(rt)
+	})
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		r.t.Fatal("timed out waiting for the event loop")
+	}
+}
+
+// await 执行一段返回 Promise 的脚本，等待其完成后返回结果的字符串形式；被拒绝时以 "rejected:" 开头。
+func (r *dataObjectTestRuntime) await(script string) string {
+	r.t.Helper()
+
+	result := make(chan string, 1)
+	var err error
+	r.withRuntime(func(rt *goja.Runtime) {
+		var value goja.Value
+		if value, err = rt.RunString(script); err != nil {
+			return
+		}
+		promise := value.ToObject(rt)
+		then, ok := goja.AssertFunction(promise.Get("then"))
+		if !ok {
+			err = fmt.Errorf("script did not return a promise")
+			return
+		}
+		_, err = then(promise, rt.ToValue(func(call goja.FunctionCall) goja.Value {
+			result <- call.Argument(0).String()
+			return goja.Undefined()
+		}), rt.ToValue(func(call goja.FunctionCall) goja.Value {
+			result <- "rejected:" + call.Argument(0).String()
+			return goja.Undefined()
+		}))
+	})
+	if err != nil {
+		r.t.Fatalf("script failed: %v\n%s", err, script)
+	}
+
+	select {
+	case got := <-result:
+		return got
+	case <-time.After(5 * time.Second):
+		r.t.Fatalf("timed out waiting for:\n%s", script)
+		return ""
+	}
+}
+
 // newDataObjectTestPlugin 按 InitRuntime 的方式启用扩展模块，返回事件循环已启动的测试插件，以及在其 runtime 中执行
 // 脚本的辅助对象。
-func newDataObjectTestPlugin(t *testing.T) (*KernelPlugin, *formDataTestRuntime) {
+func newDataObjectTestPlugin(t *testing.T) (*KernelPlugin, *dataObjectTestRuntime) {
 	t.Helper()
 
 	loop := eventloop.NewEventLoop(eventloop.EnableConsole(true))
@@ -230,7 +292,7 @@ func newDataObjectTestPlugin(t *testing.T) (*KernelPlugin, *formDataTestRuntime)
 
 	p := &KernelPlugin{Petal: &model.Petal{Name: "test-data-object"}}
 	p.worker.Start(loop)
-	r := &formDataTestRuntime{t: t, loop: loop}
+	r := &dataObjectTestRuntime{t: t, loop: loop}
 	var err error
 	r.withRuntime(func(rt *goja.Runtime) {
 		rt.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
@@ -243,7 +305,7 @@ func newDataObjectTestPlugin(t *testing.T) (*KernelPlugin, *formDataTestRuntime)
 }
 
 // setDataObjects 为 contentTypes 的每个键创建内容为 data 副本的数据对象，挂到同名全局变量。
-func setDataObjects(t *testing.T, p *KernelPlugin, r *formDataTestRuntime, data []byte, contentTypes map[string]string) {
+func setDataObjects(t *testing.T, p *KernelPlugin, r *dataObjectTestRuntime, data []byte, contentTypes map[string]string) {
 	t.Helper()
 
 	var err error

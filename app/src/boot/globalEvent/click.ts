@@ -10,17 +10,7 @@ import {cancelDrag} from "./dragover";
 import {nbsp2space, removeZWJ} from "../../protyle/util/normalizeText";
 import {getDockByType} from "../../layout/tabUtil";
 import {SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "../../protyle/toolbar/subElementLifecycle";
-
-export const globalClickHideMenu = (element: HTMLElement) => {
-    if (!window.siyuan.menus.menu.element.contains(element) && !hasClosestByAttribute(element, "data-menu", "true")) {
-        if (getSelection().rangeCount > 0 && window.siyuan.menus.menu.element.contains(getSelection().getRangeAt(0).startContainer) &&
-            window.siyuan.menus.menu.element.contains(document.activeElement)) {
-            // https://ld246.com/article/1654567749834/comment/1654589171218#comments
-        } else {
-            window.siyuan.menus.menu.remove();
-        }
-    }
-};
+import {globalClickHideMenu} from "../../menus/menuClick";
 
 export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     cancelDrag();

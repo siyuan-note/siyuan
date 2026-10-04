@@ -19,6 +19,12 @@ const createBoot = (plugin = false, failed = "") => {
     };
     let active = true;
     const events = new Map();
+    const eventOptions = new Map();
+    const documentEvents = new Map();
+    const menu = {hidden: true, handledKey: false,
+        element: {style: {zIndex: "12"}, classList: {contains: () => menu.hidden}},
+        remove: isKey => { calls.push(isKey ? "close-menu-key" : "close-menu"); menu.hidden = true; },
+    };
     const host = {app: {}, isActive: () => active, dispose: () => { active = false; calls.push("dispose"); },
         plugin: plugin ? {name: "Plugin", mount: create => {
         assert.equal(luteLoaded, true);
@@ -26,7 +32,7 @@ const createBoot = (plugin = false, failed = "") => {
     }} : undefined};
     const window = {
         opener: {location: {origin: "http://localhost"}, dispatchEvent: event => event.detail(host)},
-        addEventListener: (name, callback) => events.set(name, callback),
+        addEventListener: (name, callback, options) => { events.set(name, callback); eventOptions.set(name, options); },
         close: () => calls.push("close"),
         DOMPurify: undefined,
     };
@@ -42,7 +48,10 @@ const createBoot = (plugin = false, failed = "") => {
             flushMainMessages() {}
             destroy() { calls.push("disconnect"); }
         }},
-        "../../menus": {Menus: class {}},
+        "../../menus": {Menus: class {menu = menu;}},
+        "../../menus/Menu": {bindMenuKeydown: () => { calls.push("menu-keydown"); return menu.handledKey; }},
+        "../../menus/menuClick": {globalClickHideMenu: target => calls.push(target)},
+        "../../util/zIndex": {isAbove: (element, reference) => Number(element.style.zIndex) > Number(reference.style.zIndex)},
         "../../dialog/tooltip": {initTooltips: () => calls.push("tooltips"), hideTooltip() {}},
         "../../util/genID": {genUUID: () => "id"},
         "../../util/fetch": {fetchSyncPost: async (url, data) => {
@@ -76,7 +85,11 @@ const createBoot = (plugin = false, failed = "") => {
         "../index": {openSettingDialog: () => {
             assert.equal(window.siyuan.user.userId, "user");
             calls.push("render");
-            return {element: {querySelectorAll: () => []}};
+            const dialog = {element: {querySelectorAll: () => [], querySelector: () => ({style: {zIndex: "11"}})},
+                destroy: () => calls.push("close-settings"),
+            };
+            window.siyuan.dialogs.push(dialog);
+            return dialog;
         }},
         "./tabs": {getSettingTabDefs: () => []},
         "../search/dialog": {switchSettingTab: () => wait("assets")},
@@ -86,7 +99,8 @@ const createBoot = (plugin = false, failed = "") => {
         })},
         "../../plugin/Setting": {Setting: class {addItem() {} open() { calls.push("render"); }}},
     };
-    const context = {exports: {}, window, document: {body: {classList: {toggle() {}}}, addEventListener() {}},
+    const context = {exports: {}, window, document: {body: {classList: {toggle() {}}},
+        addEventListener: (name, callback) => documentEvents.set(name, callback)},
         location: {search: "?settingsWindowToken=test", origin: "http://localhost", href: "http://localhost/settings"},
         URL, URLSearchParams, history: {replaceState() {}},
         CustomEvent: class {constructor(_name, options) { this.detail = options.detail; }},
@@ -94,8 +108,76 @@ const createBoot = (plugin = false, failed = "") => {
     window.location = context.location;
     runInNewContext(code, context);
     return {initialize: context.exports.initialize, calls, pending, command: next => command({}, next),
-        unload: () => events.get("unload")(), deactivate: () => { active = false; }};
+        unload: () => events.get("unload")(), deactivate: () => { active = false; },
+        window, menu, events, eventOptions, documentEvents};
 };
+
+const bootReady = async () => {
+    const boot = createBoot();
+    const initialized = boot.initialize();
+    await new Promise(resolve => setImmediate(resolve));
+    for (const complete of boot.pending.values()) complete();
+    await initialized;
+    boot.calls.length = 0;
+    return boot;
+};
+
+const keydown = (boot, options = {}) => {
+    const event = {key: "Escape", isComposing: false, repeat: false, ...options,
+        preventDefault: () => boot.calls.push("prevent-default")};
+    boot.documentEvents.get("keydown")(event);
+};
+
+test("settings bind lightweight outside-click handling even while a font menu is pending", async () => {
+    const boot = await bootReady();
+    const target = {};
+    boot.events.get("click")({target});
+    assert.deepEqual(boot.calls, [target]);
+    const options = boot.eventOptions.get("click");
+    assert.equal(typeof options === "boolean" ? options : Boolean(options?.capture), false);
+});
+
+test("Escape closes the topmost menu before the settings window", async () => {
+    const boot = await bootReady();
+    boot.menu.hidden = false;
+    keydown(boot);
+    assert.deepEqual(boot.calls, ["menu-keydown", "close-menu-key", "prevent-default"]);
+    boot.calls.length = 0;
+    keydown(boot);
+    assert.deepEqual(boot.calls, ["close-settings", "prevent-default"]);
+});
+
+test("menu keyboard navigation suppresses the default action", async () => {
+    const boot = await bootReady();
+    boot.menu.hidden = false;
+    boot.menu.handledKey = true;
+    keydown(boot, {key: "ArrowDown"});
+    assert.deepEqual(boot.calls, ["menu-keydown", "prevent-default"]);
+});
+
+test("an upper confirmation dialog keeps keyboard priority over the menu", async () => {
+    const boot = await bootReady();
+    boot.menu.hidden = false;
+    boot.menu.handledKey = true;
+    boot.window.siyuan.dialogs.push({element: {querySelector: () => ({style: {zIndex: "13"}})},
+        destroy: () => boot.calls.push("close-confirm")});
+    keydown(boot, {key: "ArrowDown"});
+    assert.deepEqual(boot.calls, []);
+    keydown(boot);
+    assert.deepEqual(boot.calls, ["close-confirm", "prevent-default"]);
+    assert.equal(boot.menu.hidden, false);
+});
+
+for (const options of [{isComposing: true}, {repeat: true}]) {
+    test(`settings do not dismiss menus or dialogs on guarded Escape ${JSON.stringify(options)}`, async () => {
+        const boot = await bootReady();
+        for (const hidden of [true, false]) {
+            boot.menu.hidden = hidden;
+            keydown(boot, options);
+        }
+        assert.deepEqual(boot.calls, ["menu-keydown"]);
+    });
+}
 
 for (const plugin of [false, true]) {
     test(`settings start independent requests together and wait before showing (plugin=${plugin})`, async () => {

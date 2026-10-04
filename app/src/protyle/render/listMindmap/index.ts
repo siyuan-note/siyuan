@@ -12,7 +12,7 @@ import {Menu} from "../../../plugin/Menu";
 import {completeTabsListSource} from "../../wysiwyg/tabsList";
 import {waitForPendingTransactions} from "../../util/transactionQueue";
 import {hideAllElements, hideElements} from "../../ui/hideElements";
-import {globalClickHideMenu} from "../../../boot/globalEvent/click";
+import {globalClickHideMenu} from "../../../menus/menuClick";
 import {countBlockWord} from "../../../layout/status";
 import {openLink} from "../../../editor/openLink";
 import {suspendBlockPopover} from "../../../block/popover";

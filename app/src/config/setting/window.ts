@@ -23,6 +23,8 @@ import {withMountedBazaar} from "../bazaarTab";
 import {appearanceConfigApi, refreshAppearance} from "../tabs/appearanceRuntime";
 import {Setting} from "../../plugin/Setting";
 import {bindMenuKeydown} from "../../menus/Menu";
+import {globalClickHideMenu} from "../../menus/menuClick";
+import {isAbove} from "../../util/zIndex";
 import {windowMouseMove} from "../../boot/globalEvent/mousemove";
 import {hideTooltip, initTooltips} from "../../dialog/tooltip";
 import {applyCloudUserState} from "../tabs/accountUi";
@@ -221,12 +223,24 @@ const initialize = async () => {
             });
         }
         document.addEventListener("keydown", event => {
-            if (!window.siyuan.menus.menu.element.classList.contains("fn__none") && bindMenuKeydown(event)) return;
+            const menu = window.siyuan.menus.menu;
+            const dialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
+            const menuIsAbove = !menu.element.classList.contains("fn__none") &&
+                (!dialog || isAbove(menu.element, dialog.element.querySelector(".b3-dialog")));
+            if (menuIsAbove && bindMenuKeydown(event)) {
+                event.preventDefault();
+                return;
+            }
             if (event.key === "Escape" && !event.isComposing && !event.repeat) {
-                window.siyuan.dialogs[window.siyuan.dialogs.length - 1]?.destroy();
+                if (menuIsAbove) {
+                    menu.remove(true);
+                } else {
+                    dialog?.destroy();
+                }
                 event.preventDefault();
             }
         });
+        window.addEventListener("click", event => globalClickHideMenu(event.target as HTMLElement));
         initTooltips();
         window.addEventListener("mousemove", windowMouseMove);
         window.addEventListener("blur", hideTooltip);

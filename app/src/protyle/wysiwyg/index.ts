@@ -185,7 +185,7 @@ import {editAssetItem} from "../render/av/asset";
 import {hasViewFoldContext, sanitizeViewFoldHTML} from "../util/viewFold";
 import {img3115} from "../../boot/compatibleVersion";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
-import {globalClickHideMenu} from "../../boot/globalEvent/click";
+import {globalClickHideMenu} from "../../menus/menuClick";
 import {hideTooltip} from "../../dialog/tooltip";
 import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clear";

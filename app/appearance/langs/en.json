@@ -1,4 +1,6 @@
 {
+	"performOCR": "Run OCR",
+	"performAIOCR": "Run OCR with AI",
 	"listMindmapSummaryBatch": "Create ${count} summaries",
 	"listMindmapSummaryConflict": "Summary ranges cross; adjust the selection",
 	"reAIOCR": "Redo OCR with AI",

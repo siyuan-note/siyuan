@@ -1,4 +1,6 @@
 {
+	"performOCR": "Spustiť OCR",
+	"performAIOCR": "Spustiť OCR pomocou AI",
 	"listMindmapSummaryBatch": "Vytvoriť ${count} súhrnov",
 	"listMindmapSummaryConflict": "Rozsahy súhrnov sa krížia; upravte výber",
 	"reAIOCR": "Zopakovať OCR pomocou AI",

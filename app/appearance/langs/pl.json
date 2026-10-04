@@ -1,4 +1,6 @@
 {
+	"performOCR": "Wykonaj OCR",
+	"performAIOCR": "Wykonaj OCR z AI",
 	"listMindmapSummaryBatch": "Utwórz ${count} podsumowań",
 	"listMindmapSummaryConflict": "Zakresy podsumowań krzyżują się; zmień zaznaczenie",
 	"reAIOCR": "Ponów OCR przy użyciu AI",

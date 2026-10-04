@@ -1,4 +1,6 @@
 {
+	"performOCR": "Jalankan OCR",
+	"performAIOCR": "Jalankan OCR dengan AI",
 	"listMindmapSummaryBatch": "Buat ${count} ringkasan",
 	"listMindmapSummaryConflict": "Rentang ringkasan saling bersilangan; sesuaikan pilihan",
 	"reAIOCR": "Ulangi OCR dengan AI",

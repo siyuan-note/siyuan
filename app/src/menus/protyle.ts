@@ -51,7 +51,7 @@ import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
 import {renderImageDisplay} from "../protyle/render/imageDisplay";
 import {renderImageActions} from "../protyle/render/imageActions";
-import {invalidateImageOCRStatus} from "../asset/imageOCRStatus";
+import {getImageOCRStatus, invalidateImageOCRStatus} from "../asset/imageOCRStatus";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "./util";
@@ -1382,6 +1382,21 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             id: "ocr",
             label: "OCR",
             ignore: !ocrAvailability.text,
+            bind(element) {
+                getImageOCRStatus(imagePath).then(hasText => {
+                    if (!element.isConnected || hasText === undefined) {
+                        return;
+                    }
+                    const localLabel = element.querySelector('[data-id="reOCR"] .b3-menu__label');
+                    if (localLabel) {
+                        localLabel.textContent = hasText ? window.siyuan.languages.reOCR : window.siyuan.languages.performOCR;
+                    }
+                    const aiLabel = element.querySelector('[data-id="reAIOCR"] .b3-menu__label');
+                    if (aiLabel) {
+                        aiLabel.textContent = hasText ? window.siyuan.languages.reAIOCR : window.siyuan.languages.performAIOCR;
+                    }
+                });
+            },
             submenu: [{
                 id: "ocrResult",
                 icon: "iconEdit",
@@ -1403,7 +1418,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             }, {
                 id: "reOCR",
                 iconHTML: "",
-                label: window.siyuan.languages.reOCR,
+                label: window.siyuan.languages.performOCR,
                 ignore: !ocrAvailability.local,
                 click() {
                     const path = imgElement.getAttribute("data-src");
@@ -1416,7 +1431,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             }, {
                 id: "reAIOCR",
                 icon: "iconSparkles",
-                label: window.siyuan.languages.reAIOCR,
+                label: window.siyuan.languages.performAIOCR,
                 ignore: isDisabledFeature("ai") || !ocrAvailability.ai,
                 click() {
                     void reImageAIOCR(imgElement.getAttribute("data-src"));

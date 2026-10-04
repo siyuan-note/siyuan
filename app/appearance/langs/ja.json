@@ -1,4 +1,6 @@
 {
+	"performOCR": "OCR を実行",
+	"performAIOCR": "AI で OCR を実行",
 	"listMindmapSummaryBatch": "${count} 個の要約を作成",
 	"listMindmapSummaryConflict": "要約範囲が交差しています。選択を調整してください",
 	"reAIOCR": "AI で OCR を再実行",

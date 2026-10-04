@@ -1,4 +1,6 @@
 {
+	"performOCR": "‫إجراء OCR‬",
+	"performAIOCR": "‫إجراء OCR بالذكاء الاصطناعي‬",
 	"listMindmapSummaryBatch": "إنشاء ${count} من الملخصات",
 	"listMindmapSummaryConflict": "نطاقات الملخصات متقاطعة؛ يرجى تعديل التحديد",
 	"reAIOCR": "إعادة OCR باستخدام AI",

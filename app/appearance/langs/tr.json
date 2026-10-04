@@ -1,4 +1,6 @@
 {
+	"performOCR": "OCR çalıştır",
+	"performAIOCR": "Yapay zekâ ile OCR çalıştır",
 	"listMindmapSummaryBatch": "${count} özet oluştur",
 	"listMindmapSummaryConflict": "Özet aralıkları kesişiyor; seçimi düzenleyin",
 	"reAIOCR": "OCR’yi yapay zekâ ile yeniden çalıştır",

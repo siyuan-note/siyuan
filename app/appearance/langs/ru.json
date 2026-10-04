@@ -1,4 +1,6 @@
 {
+	"performOCR": "Выполнить OCR",
+	"performAIOCR": "Выполнить OCR с помощью ИИ",
 	"listMindmapSummaryBatch": "Создать сводки: ${count}",
 	"listMindmapSummaryConflict": "Диапазоны сводок пересекаются; измените выделение",
 	"reAIOCR": "Повторить OCR с ИИ",

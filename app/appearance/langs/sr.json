@@ -1,4 +1,6 @@
 {
+	"performOCR": "Izvrši OCR",
+	"performAIOCR": "Izvrši OCR pomoću veštačke inteligencije",
 	"listMindmapSummaryBatch": "Направи сажетке: ${count}",
 	"listMindmapSummaryConflict": "Опсези сажетака се укрштају; прилагодите избор",
 	"reAIOCR": "Понови OCR помоћу AI",

@@ -1,4 +1,6 @@
 {
+	"performOCR": "進行 OCR",
+	"performAIOCR": "使用 AI 進行 OCR",
 	"listMindmapSummaryBatch": "建立 ${count} 個概要",
 	"listMindmapSummaryConflict": "概要範圍交叉，請調整選取範圍",
 	"reAIOCR": "使用 AI 重新 OCR",

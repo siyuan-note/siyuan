@@ -1,4 +1,6 @@
 {
+	"performOCR": "ดำเนินการ OCR",
+	"performAIOCR": "ดำเนินการ OCR ด้วย AI",
 	"listMindmapSummaryBatch": "สร้างสรุป ${count} รายการ",
 	"listMindmapSummaryConflict": "ช่วงสรุปไขว้กัน โปรดปรับการเลือก",
 	"reAIOCR": "ทำ OCR ใหม่ด้วย AI",

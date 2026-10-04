@@ -1,4 +1,6 @@
 {
+	"performOCR": "OCR करें",
+	"performAIOCR": "AI से OCR करें",
 	"listMindmapSummaryBatch": "${count} सारांश बनाएँ",
 	"listMindmapSummaryConflict": "सारांश के दायरे एक-दूसरे को काटते हैं; चयन बदलें",
 	"reAIOCR": "AI से दोबारा OCR करें",

@@ -1,4 +1,6 @@
 {
+	"performOCR": "OCR uitvoeren",
+	"performAIOCR": "OCR met AI uitvoeren",
 	"listMindmapSummaryBatch": "${count} samenvattingen maken",
 	"listMindmapSummaryConflict": "Samenvattingsbereiken kruisen elkaar; pas de selectie aan",
 	"reAIOCR": "OCR opnieuw uitvoeren met AI",

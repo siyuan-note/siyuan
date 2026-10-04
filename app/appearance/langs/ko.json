@@ -1,4 +1,6 @@
 {
+	"performOCR": "OCR 실행",
+	"performAIOCR": "AI로 OCR 실행",
 	"listMindmapSummaryBatch": "요약 ${count}개 만들기",
 	"listMindmapSummaryConflict": "요약 범위가 교차합니다. 선택을 조정하세요",
 	"reAIOCR": "AI로 OCR 다시 실행",

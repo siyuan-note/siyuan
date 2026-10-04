@@ -1,4 +1,6 @@
 {
+	"performOCR": "Exécuter l’OCR",
+	"performAIOCR": "Exécuter l’OCR avec l’IA",
 	"listMindmapSummaryBatch": "Créer ${count} résumés",
 	"listMindmapSummaryConflict": "Les plages de résumé se croisent ; ajustez la sélection",
 	"reAIOCR": "Relancer l’OCR avec l’IA",

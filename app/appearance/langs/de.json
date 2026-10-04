@@ -1,4 +1,6 @@
 {
+	"performOCR": "OCR ausführen",
+	"performAIOCR": "OCR mit KI ausführen",
 	"listMindmapSummaryBatch": "${count} Zusammenfassungen erstellen",
 	"listMindmapSummaryConflict": "Zusammenfassungsbereiche überschneiden sich; Auswahl anpassen",
 	"reAIOCR": "OCR mit KI erneut ausführen",

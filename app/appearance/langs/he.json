@@ -1,4 +1,6 @@
 {
+	"performOCR": "בצע OCR",
+	"performAIOCR": "בצע OCR באמצעות בינה מלאכותית",
 	"listMindmapSummaryBatch": "יצירת ${count} סיכומים",
 	"listMindmapSummaryConflict": "טווחי הסיכומים מצטלבים; יש לשנות את הבחירה",
 	"reAIOCR": "ביצוע OCR מחדש עם AI",

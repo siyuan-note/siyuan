@@ -1,4 +1,6 @@
 {
+	"performOCR": "Виконати OCR",
+	"performAIOCR": "Виконати OCR за допомогою ШІ",
 	"listMindmapSummaryBatch": "Створити підсумки: ${count}",
 	"listMindmapSummaryConflict": "Діапазони підсумків перетинаються; змініть виділення",
 	"reAIOCR": "Повторити OCR за допомогою ШІ",

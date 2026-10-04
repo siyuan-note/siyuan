@@ -147,6 +147,17 @@ const restoreGutterRange = (protyle: IProtyle) => {
     if (window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BLOCK_MULTI) {
         return;
     }
+    const mindmap = protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select > .mindmap-view")?.parentElement;
+    if (mindmap) {
+        // 整块操作使用正文编辑器焦点，避免画布拦截快捷键或恢复节点内的编辑选区。
+        protyle.wysiwyg.element.focus({preventScroll: true});
+        const range = document.createRange();
+        range.setStart(mindmap, 0);
+        range.collapse(true);
+        protyle.toolbar.range = range;
+        focusByRange(range);
+        return;
+    }
     const range = protyle.toolbar.range;
     const container = range?.startContainer;
     const target = container?.nodeType === Node.ELEMENT_NODE ? container as Element : container?.parentElement;

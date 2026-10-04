@@ -22,12 +22,12 @@ const browserCases = async (source: string) => {
         },
     }}}, menus: {menu: {element: hidden(), remove: noop}}} as any;
     const dependencies = {
-        Constants: {KEYCODELIST: {27: "Escape", 38: "↑", 74: "J", 76: "L"},
+        Constants: {KEYCODELIST: {27: "Escape", 38: "↑", 74: "J", 76: "L"}, MENU_BLOCK_MULTI: "multi",
             CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap"},
         bindVerticalNavigationReset: noop, logKeyboardDiagnostic: noop, getAVTemplateInteractiveElement: noop,
         prepareVerticalNavigation: noop, avKeydown: noop, fixTable: noop, commonHotkey: noop,
         countBlockWord: noop, clearAtomicFocus: noop,
-        setInsertWbrHTML: noop, getAtomicVerticalNavigationOwner: noop,
+        setInsertWbrHTML: noop, getAtomicVerticalNavigationOwner: noop, revealTabsForTarget: noop,
         formatPainter: {deactivate: () => false},
         isMac: () => false,
         isProtyleListItemFragment: () => false,
@@ -41,9 +41,10 @@ const browserCases = async (source: string) => {
         turnsOneInto: (options: any) => calls.push(options),
         turnsIntoOneTransaction: (options: any) => calls.push({nodeElement: options.selectsElement[0], type: options.type}),
     };
-    const keydown = new Function(...Object.keys(dependencies), source + "; return keydown;")(...Object.values(dependencies));
+    const {keydown, restoreGutterRange, getEditorRange} = new Function(...Object.keys(dependencies),
+        source + "; return {keydown, restoreGutterRange, getEditorRange};")(...Object.values(dependencies));
     const protyle = {wysiwyg: {element: root}, selectElement: hidden(), contentElement: root,
-        toolbar: {element: hidden(), subElement: hidden()}, hint: {element: hidden()},
+        toolbar: {element: hidden(), subElement: hidden(), range: undefined as Range}, hint: {element: hidden()},
         options: {render: {}, toolbar: [] as IMenuItem[]}, block: {}, scroll: {}};
     keydown(protyle, root);
     let failure: unknown;
@@ -53,7 +54,7 @@ const browserCases = async (source: string) => {
     });
     const press = async (key: string, keyCode: number, ctrlKey = false, shiftKey = false) => {
         const event = new KeyboardEvent("keydown", {key, keyCode, ctrlKey, shiftKey, bubbles: true, cancelable: true});
-        root.dispatchEvent(event);
+        document.activeElement.dispatchEvent(event);
         await new Promise(resolve => setTimeout(resolve, 0));
         if (failure) {
             throw failure;
@@ -81,11 +82,30 @@ const browserCases = async (source: string) => {
         check.equal(calls.length, 1);
         check.equal(calls[0].nodeElement, mindmap);
         check.equal(calls[0].type, conversion);
+
+        // 点击画布后通过块标选中整块，菜单恢复选区时必须把快捷键交回正文编辑器。
+        root.innerHTML = '<div data-type="NodeMindmap" data-node-id="map" class="mindmap" data-subtype="u">' +
+            '<div class="mindmap-view" contenteditable="false" tabindex="0">Map</div></div>';
+        const selectedMap = root.firstElementChild;
+        const canvas = selectedMap.firstElementChild as HTMLElement;
+        canvas.addEventListener("keydown", event => event.stopPropagation());
+        canvas.focus();
+        getSelection().setBaseAndExtent(canvas.firstChild, 0, canvas.firstChild, 0);
+        selectedMap.classList.add("protyle-wysiwyg--select");
+        protyle.toolbar.range = getEditorRange(selectedMap);
+        restoreGutterRange(protyle);
+        calls.length = 0;
+        const clickEvent = await press(conversion === "UL2TL" ? "l" : "j", conversion === "UL2TL" ? 76 : 74,
+            true, conversion === "UL2OL");
+        check.ok(clickEvent.defaultPrevented);
+        check.equal(calls.length, 1);
+        check.equal(calls[0].nodeElement, selectedMap);
+        check.equal(calls[0].type, conversion);
     }
     return "Keyboard block selection cases passed";
 };
 
-test("Escape and ArrowUp select the mindmap for all three list shortcuts", {
+test("keyboard and gutter selection route all three mindmap list shortcuts to the editor", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -110,7 +130,8 @@ test("Escape and ArrowUp select the mindmap for all three list shortcuts", {
             clearBlockSelectionMode, getBlockOperationElements, getBlockSelectionStatusIDs} = (() => {${extract("blockSelection")}
             return {BLOCK_SELECTION_CLASS, getBlockSelectionModeElement, setBlockSelectionModeElement,
                 clearBlockSelectionMode, getBlockOperationElements, getBlockSelectionStatusIDs};})();`, extract("listContext"),
-        extract("../util/selection", ["getEditorRange", "focusBlock"]),
+        extract("../util/selection", ["getEditorRange", "focusBlock", "focusByRange"]),
+        extract("../gutter/index", ["restoreGutterRange"]),
         extract("verticalNavigation", ["focusAtomicRegion", "focusVerticalBlockSelection"]), extract("keydown"),
     ].join("\n"), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-list-shortcut-test-"));

@@ -217,3 +217,26 @@ func TestEnableExtendModulesInstallsTextEncoderAndDecoder(t *testing.T) {
 		t.Fatalf("TextEncoder/TextDecoder = %s, want %s", got, want)
 	}
 }
+
+// newDataObjectTestPlugin 按 InitRuntime 的方式启用扩展模块，返回事件循环已启动的测试插件，以及在其 runtime 中执行
+// 脚本的辅助对象。
+func newDataObjectTestPlugin(t *testing.T) (*KernelPlugin, *formDataTestRuntime) {
+	t.Helper()
+
+	loop := eventloop.NewEventLoop(eventloop.EnableConsole(true))
+	loop.Start()
+	t.Cleanup(func() { loop.Stop() })
+
+	p := &KernelPlugin{Petal: &model.Petal{Name: "test-data-object"}}
+	p.worker.Start(loop)
+	r := &formDataTestRuntime{t: t, loop: loop}
+	var err error
+	r.withRuntime(func(rt *goja.Runtime) {
+		rt.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
+		err = EnableExtendModules(p, rt)
+	})
+	if err != nil {
+		t.Fatalf("EnableExtendModules: %v", err)
+	}
+	return p, r
+}

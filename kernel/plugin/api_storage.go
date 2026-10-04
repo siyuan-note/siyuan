@@ -179,9 +179,10 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 							return nil, err
 						}
 
+						// 错误存入局部变量而不是外层的 err：外层 goroutine 返回时会读取 err，在事件循环上写入它会构成数据竞争。
 						content := rt.NewObject()
-						if err = ObjectSetDataMethods(p, rt, content, result); err != nil {
-							return nil, err
+						if setErr := ObjectSetDataMethods(p, rt, content, result); setErr != nil {
+							return nil, setErr
 						}
 
 						return content, nil

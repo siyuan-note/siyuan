@@ -91,8 +91,9 @@ const clearInvisibleEditorSelection = () => {
         !editor.protyle.wysiwyg.element.contains(range.endContainer)) {
         return false;
     }
-    selection.removeAllRanges();
-    activeBlur();
+    // 空白选区折叠为光标，保持编辑焦点和键盘，避免长按或滚动中断输入。
+    selection.collapseToStart();
+    window.siyuan.mobile.touchRange = selection.getRangeAt(0).cloneRange();
     return true;
 };
 

@@ -6458,6 +6458,8 @@ func getNewValueByNearItem(nearItem av.Item, key *av.Key, addingBlockID string) 
 
 func getNearItem(attrView *av.AttributeView, view, groupView *av.View, previousItemID string,
 	filterContexts ...*av.FilterContext) (ret av.Item) {
+	// 邻近条目查找会过滤和排序缓存，完成后清除临时结果，确保默认值写入后按完整数据重新生成分组。
+	defer clear(attrView.RenderedViewables)
 	cachedAttrViews := map[string]*av.AttributeView{}
 	rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
 	viewable := sql.RenderGroupView(attrView, view, groupView, "")

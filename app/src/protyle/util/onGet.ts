@@ -403,7 +403,8 @@ const setHTML = (options: {
     if (options.isSyncing) {
         disabledForeverProtyle(protyle);
     } else {
-        if (protyle.breadcrumb) {
+        // 移动端横屏的空白区域承载顶部栏控件，同步提示仅在桌面端清理。
+        if (protyle.breadcrumb && !isMobile()) {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
         if (protyle.element.hasAttribute("disabled-forever")) {

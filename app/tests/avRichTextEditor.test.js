@@ -9,17 +9,35 @@ const runCases = async (sources) => {
     const dataByElement = new WeakMap();
     let mobile = false;
     let fragment;
-    window.siyuan = {zIndex: 0, languages: {empty: "Empty", confirm: "Confirm"}};
+    let request;
+    let candidates;
+    window.siyuan = {zIndex: 0, languages: {empty: "Empty", confirm: "Confirm",
+        newFile: "New document", newSubDoc: "New subdocument", newFileAtPath: "Choose location"}};
     const hiddenElement = () => {
         const element = document.createElement("div");
         element.className = "fn__none";
         return element;
     };
+    const hintDependencies = {
+        hasClosestBlock: node => node.parentElement?.closest("[data-node-id]"),
+        getEditorRange: () => ({startContainer: fragment.input.firstChild}),
+        isEncryptedBox: id => id === "encrypted-box",
+        fetchPost: (url, params, callback) => {
+            assert.equal(url, "/api/search/searchRefBlock");
+            request = params;
+            callback({data: {newDoc: true, k: "New document", blocks: []}});
+        },
+        Lute: {UnEscapeHTMLStr: value => value, Caret: "caret"},
+        replaceFileName: value => value,
+        Constants: {ZWSP: "\u200b"},
+    };
+    const hintRef = new Function(...Object.keys(hintDependencies), "exports", sources.hintRef + "\nreturn exports.hintRef;")(
+        ...Object.values(hintDependencies), {});
     const dependencies = {
         "../../../util/escape": {escapeHtml: value => value},
         "../../../util/functions": {isMobile: () => mobile},
         "../../../mobile/util/mobileAppUtil": {callMobileAppShowKeyboard: () => {}},
-        "../../hint/extend": {hintRef: () => [], hintSlash: () => []},
+        "../../hint/extend": {hintRef, hintSlash: () => []},
         "../../hint/builtinSlash": {registerBuiltinSlashHint: value => value},
         "../../toolbar/defaults": {getDefaultToolbar: () => []},
         "../highlightRender": {highlightRender: () => {}},
@@ -47,6 +65,16 @@ const runCases = async (sources) => {
                     pendingInput: "",
                     hintElement: hiddenElement(),
                     protyle: {
+                        lite: true,
+                        block: {},
+                        notebookId: options.protyleOptions.notebookId,
+                        options: options.protyleOptions,
+                        hint: {
+                            element: hiddenElement(),
+                            prepareCreateTarget: () => ({promise: Promise.resolve(false), isCurrent: () => true}),
+                            genLoading() {},
+                            genHTML: items => { candidates = items; },
+                        },
                         wysiwyg: {flushPendingInput: async () => {
                             fragment.flushed = true;
                             if (fragment.pendingInput) {
@@ -77,12 +105,13 @@ const runCases = async (sources) => {
     };
     const editor = load("./richTextEditor");
     const {hasAVEditorSession} = load("./editorSession");
-    const createOwner = standalone => {
+    const createOwner = (standalone, notebookId = "box") => {
         const owner = document.createElement("div");
         owner.className = standalone ? `protyle-db-row${mobile ? " protyle-db-row--mobile" : ""}` : "protyle";
         owner.innerHTML = '<div data-type="NodeAttributeView"><div class="av__row" data-id="row"><div data-col-id="text"></div></div></div>';
         document.body.replaceChildren(owner);
         const nodeElement = owner.firstElementChild;
+        nodeElement.dataset.nodeId = "carrier-block";
         const anchorElement = nodeElement.querySelector("[data-col-id]");
         const value = {id: "value", keyID: "text", blockID: "row", type: "text", text: {content: "Initial"}};
         const column = {id: "text", type: "text"};
@@ -92,11 +121,39 @@ const runCases = async (sources) => {
         dataByElement.set(nodeElement, data);
         const saves = [];
         let closed = 0;
-        const protyle = {element: standalone ? document.createElement("div") : owner};
+        const protyle = {element: standalone ? document.createElement("div") : owner,
+            notebookId, path: "/document.sy", block: {rootID: "document"}};
         editor.openAVRichTextEditor({protyle, nodeElement, anchorElement, value, stableCells,
             onSave: (...args) => saves.push(args), onDestroy: () => closed++});
         return {owner, protyle, nodeElement, anchorElement, value, stableCells, saves, data, closed: () => closed};
     };
+    // 文本字段块引复用真实文档上下文，不把临时段落或数据库条目当作搜索来源。
+    for (const isMobile of [false, true]) {
+        mobile = isMobile;
+        for (const standalone of [false, true]) {
+            for (const notebookId of ["box", "encrypted-box"]) {
+                const state = createOwner(standalone, notebookId);
+                for (const splitChar of ["((", "（（", "[[", "【【"]) {
+                    fragment.protyle.hint.splitChar = splitChar;
+                    const hint = fragment.protyle.options.hint.extend.find(item => item.key === splitChar);
+                    hint.hint("New document", fragment.protyle, "hint");
+                    await settle();
+                    assert.equal(request.id, "carrier-block");
+                    assert.equal(request.rootID, "document");
+                    assert.equal(request.isDatabase, false);
+                    assert.equal(request.isSquareBrackets, ["[[", "【【"].includes(splitChar));
+                    assert.equal(request.notebook, notebookId === "encrypted-box" ? notebookId : undefined);
+                    assert.equal(fragment.protyle.path, state.protyle.path);
+                    assert.equal(candidates.length, 3);
+                    assert.ok(candidates[0].value.startsWith("((newFile "));
+                    assert.ok(candidates[1].value.startsWith("((newSubDoc "));
+                    assert.ok(candidates[2].value.startsWith("((newFileAtPath "));
+                }
+                editor.destroyAVRichTextEditor();
+                await settle();
+            }
+        }
+    }
     for (const mode of ["document", "desktop-row", "mobile-row"]) {
         mobile = mode === "mobile-row";
         const state = createOwner(mode !== "document");
@@ -194,6 +251,11 @@ const runElectron = async () => {
         const sources = Object.fromEntries(["richTextEditor", "editorSession", "selectionState"].map(name => ["./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
+        const hintSource = ts.createSourceFile("extend.ts", readFileSync(path.join(__dirname,
+            "../src/protyle/hint/extend.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+        sources.hintRef = ts.transpileModule(hintSource.statements.filter(ts.isVariableStatement).find(statement =>
+            statement.declarationList.declarations.some(declaration => declaration.name.getText(hintSource) === "hintRef"))
+            .getText(hintSource), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.insertCSS(require("sass").compile(path.join(__dirname, "../src/assets/scss/mobile.scss"),
             {logger: {warn() {}}}).css);

@@ -154,6 +154,10 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             protyle.undo.clear();
         },
     });
+    // 临时块不在块树中，块引搜索和新建文档使用所属文档及真实载体块的上下文。
+    fragment.protyle.block.rootID = options.protyle.block.rootID;
+    fragment.protyle.block.parentID = options.nodeElement.dataset.nodeId;
+    fragment.protyle.path = options.protyle.path;
     setPanelPosition(panelElement, options.anchorElement);
     const initialMarkdown = serializeAVRichTextBlockDOM(fragment.getBlockHTML()).markdown;
 

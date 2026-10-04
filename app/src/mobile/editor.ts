@@ -69,7 +69,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                                    afterOpen?: (protyle: IProtyle) => void, forceReload = false,
                                    isValid: () => boolean = () => true, signal?: AbortSignal,
                                    scrollAttr?: IScrollAttr, updateRecent = true,
-                                   onFailure?: (invalid?: boolean) => void) => {
+                                   onFailure?: (invalid?: boolean) => void, keepPanels = false) => {
     let completed = false;
     let titleHidden = false;
     const complete = (protyle: IProtyle) => {
@@ -145,7 +145,9 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 protyle.block.id = protyle.block.rootID;
                 protyle.wysiwyg.element.setAttribute("data-doc-type", "NodeDocument");
             }
-            closePanel();
+            if (!keepPanels) {
+                closePanel();
+            }
             // 更新文档浏览时间
             const rootID = protyle.block.rootID;
             if (updateRecent) {
@@ -316,7 +318,9 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 return;
             }
         }
-        closePanel();
+        if (!keepPanels) {
+            closePanel();
+        }
     }, undefined, undefined, signal).then(() => {
         if (!blockInfoHandled) {
             fail();

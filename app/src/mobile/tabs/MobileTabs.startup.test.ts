@@ -39,6 +39,7 @@ const setup = (storage: Record<string, any> = {}, options: {
     const writes: Array<{key: string, value: any}> = [];
     const opened: string[] = [];
     const loads: string[] = [];
+    const keptPanels: boolean[] = [];
     const folds: Array<(zoomIn: boolean) => void> = [];
     let empty = 0;
     let sequence = 0;
@@ -51,7 +52,7 @@ const setup = (storage: Record<string, any> = {}, options: {
     }
     const fetchPost = (url: string, data: any, callback?: (response: any) => void) => {
         if (url === "/api/block/getBlockInfo") {
-            callback({code: options.failOpen ? 1 : 0, data: {rootID: data.id, box: "box"}});
+            callback({code: options.failOpen ? 1 : 0, data: {rootID: data.id, box: data.notebook || "box"}});
         } else {
             requests.push({url, data, callback});
         }
@@ -73,9 +74,12 @@ const setup = (storage: Record<string, any> = {}, options: {
             ({code: 0, data: Object.fromEntries(data.ids.map(id => [id, !options.missing?.includes(id)]))})},
         "../util/setEmpty": {setEmpty}, "../util/closePanel": {closeModel: () => {}},
         "../editor": {updateRecentDocSwitchTime: () => {}, loadMobileFileById: (_app: unknown, id: string,
-            action: string[], _position: unknown, _box: string, callback: (protyle: unknown) => void) => {
+            action: string[], _position: unknown, _box: string, callback: (protyle: unknown) => void,
+            _forceReload: boolean, _isValid: unknown, _signal: unknown, _scroll: unknown, _updateRecent: boolean,
+            _onFailure: unknown, keepPanels = false) => {
             loads.push(id);
-            const protyle = {block: {rootID: id, id, action, showAll: true}, notebookId: "box", path: `/${id}.sy`};
+            keptPanels.push(keepPanels);
+            const protyle = {block: {rootID: id, id, action, showAll: true}, notebookId: _box, path: `/${id}.sy`};
             window.siyuan.mobile.editor = {protyle};
             callback(protyle);
         }},
@@ -110,7 +114,7 @@ const setup = (storage: Record<string, any> = {}, options: {
         request.callback = undefined;
         callback(response);
     };
-    return {window, requests, writes, opened, loads, folds, api, respond, buttons,
+    return {window, requests, writes, opened, loads, keptPanels, folds, api, respond, buttons,
         start: (isStart = true) => startup({}, isStart), get tabs(): any { return window.siyuan.mobile.tabs; },
         get empty() { return empty; }};
 };
@@ -138,6 +142,41 @@ test("closing every tab or the final tab persists empty state without clearing u
         assert.equal(restarted.requests.length, 0);
         assert.deepEqual(restarted.opened, []);
     }
+});
+
+test("removing the active document restores another tab without closing panels", async () => {
+    for (const removeNotebook of [false, true]) {
+        const state = setup({mobileTabs: saved([tab("a", entry("a", "removed")), tab("b")])});
+        await state.start();
+        await flush();
+        assert.equal(state.keptPanels.at(-1), false);
+        if (removeNotebook) {
+            state.tabs.removeNotebook("removed");
+        } else {
+            state.tabs.removeRoots(["a"]);
+        }
+        await flush();
+        assert.equal(state.loads.at(-1), "b");
+        assert.equal(state.keptPanels.at(-1), true);
+        assert.equal(state.tabs.state.activeTabID, "b");
+        await state.tabs.open("c");
+        assert.equal(state.keptPanels.at(-1), false);
+    }
+});
+
+test("removing an inactive or final document does not open another document", async () => {
+    const state = setup({mobileTabs: saved([tab("a"), tab("b")])});
+    await state.start();
+    await flush();
+    const loaded = state.loads.length;
+    state.tabs.removeRoots(["b"]);
+    await flush();
+    assert.equal(state.loads.length, loaded);
+    state.tabs.removeRoots(["a"]);
+    await flush();
+    assert.equal(state.loads.length, loaded);
+    assert.equal(state.tabs.state.tabs.length, 0);
+    assert.ok(state.empty > 0);
 });
 
 test("saved blank, sanitized encrypted, malformed and deleted tabs never resurrect an unrelated old document", async () => {

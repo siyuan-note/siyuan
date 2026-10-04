@@ -103,6 +103,7 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	buffer.Enable(rt)
 	console.Enable(rt)
 	encoding.Enable(rt)
+	EnableAbortAPI(rt)
 	return
 }
 

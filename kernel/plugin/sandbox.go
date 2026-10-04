@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -104,7 +105,7 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	console.Enable(rt)
 	encoding.Enable(rt)
 	EnableAbortAPI(rt)
-	EnableFormDataAPI(rt)
+	p.formDataHost = EnableFormDataAPI(rt)
 	return
 }
 
@@ -208,14 +209,20 @@ func ObjectSeal(rt *goja.Runtime, obj *goja.Object) error {
 	return err
 }
 
-// ObjectSetDataMethods attaches text(), json(), buffer() and arrayBuffer() methods to a JS object,
-// each returning a Promise that resolves with the corresponding representation of data.
-func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object, data []byte) (err error) {
+// ObjectSetDataMethods 给 JS 对象添加 text()、json()、buffer()、arrayBuffer()、bytes() 与 blob() 方法，各方法返回以
+// data 的相应形式完成的 Promise。buffer()、arrayBuffer() 与 bytes() 的结果直接引用 data，不做复制；blob()
+// 返回 data 的副本，脚本修改其他方法的结果不会改变 Blob 的内容，Blob 的 type 是按 Blob 构造函数的 type 选项
+// 规范化后的 contentType（不按 MIME 类型解析）。
+func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object, data []byte, contentType string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("ObjectSetDataMethods: %v", r)
 		}
 	}()
+
+	// 使用注册时捕获的 Blob 原型与 Uint8Array 构造函数，插件脚本改写同名全局不影响返回的对象。
+	host := p.formDataHost
+	blobType := normalizeBlobType(contentType)
 
 	lo.Must0(object.Set("text", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
@@ -327,13 +334,65 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 
 		return rt.ToValue(promise)
 	})))
+	lo.Must0(object.Set("bytes", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+		promise, resolve, reject := rt.NewPromise()
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			result, err = rt.New(host.uint8Array, rt.ToValue(rt.NewArrayBuffer(data)))
+			return
+		}, func(rt *goja.Runtime, result any, err error) {
+			if lo.IsNil(err) {
+				if resolveErr := resolve(rt.ToValue(result)); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] data.bytes() resolve: %v", p.Name, resolveErr)
+				}
+			} else {
+				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] data.bytes() reject: %v", p.Name, rejectErr)
+				}
+			}
+		})
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] bytes worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] data.bytes() reject: %v", p.Name, rejectErr)
+			}
+		}
+
+		return rt.ToValue(promise)
+	})))
+	lo.Must0(object.Set("blob", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+		promise, resolve, reject := rt.NewPromise()
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			result = newBlobObject(rt, host.blobPrototype, &blobState{data: cloneBytes(data), typ: blobType})
+			return
+		}, func(rt *goja.Runtime, result any, err error) {
+			if lo.IsNil(err) {
+				if resolveErr := resolve(rt.ToValue(result)); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] data.blob() resolve: %v", p.Name, resolveErr)
+				}
+			} else {
+				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] data.blob() reject: %v", p.Name, rejectErr)
+				}
+			}
+		})
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] blob worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] data.blob() reject: %v", p.Name, rejectErr)
+			}
+		}
+
+		return rt.ToValue(promise)
+	})))
 	return
 }
 
-// NewDataObject creates a new JS object with text(), json(), buffer() and arrayBuffer() methods for the given data.
-func NewDataObject(p *KernelPlugin, rt *goja.Runtime, data []byte) (*goja.Object, error) {
+// NewDataObject 创建带有 ObjectSetDataMethods 所述数据方法的 JS 对象，contentType 为 blob() 返回的 Blob 的媒体类型。
+func NewDataObject(p *KernelPlugin, rt *goja.Runtime, data []byte, contentType string) (*goja.Object, error) {
 	obj := rt.NewObject()
-	if err := ObjectSetDataMethods(p, rt, obj, data); err != nil {
+	if err := ObjectSetDataMethods(p, rt, obj, data, contentType); err != nil {
 		return nil, err
 	}
 	return obj, nil
@@ -600,7 +659,8 @@ func getRequestHandler(rt *goja.Runtime, scope AccessScope, requestType RequestT
 func requestGoToJs(p *KernelPlugin, rt *goja.Runtime, request *Request) (jsRequest goja.Value, err error) {
 	// convert body raw data to js object
 	if data, ok := request.Request.Body.Data.(*[]byte); ok && data != nil {
-		request.Request.Body.Data, err = NewDataObject(p, rt, *data)
+		contentType := http.Header(request.Request.Headers).Get("Content-Type")
+		request.Request.Body.Data, err = NewDataObject(p, rt, *data, contentType)
 		if err != nil {
 			return
 		}
@@ -611,7 +671,8 @@ func requestGoToJs(p *KernelPlugin, rt *goja.Runtime, request *Request) (jsReque
 		for _, fileList := range request.Request.Body.Form.File {
 			for _, file := range fileList {
 				if data, ok := file.Data.(*[]byte); ok && data != nil {
-					file.Data, err = NewDataObject(p, rt, *data)
+					contentType := http.Header(file.Headers).Get("Content-Type")
+					file.Data, err = NewDataObject(p, rt, *data, contentType)
 					if err != nil {
 						return
 					}

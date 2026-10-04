@@ -103,6 +103,8 @@ type KernelPlugin struct {
 	worker  Worker               // Worker for serializing plugin js-call-go (e.g. logger) and go-call-js (e.g. RPC calls) tasks on a single goroutine
 	runtime *eventloop.EventLoop // goja event loop runtime for this plugin
 
+	formDataHost *formDataHost // 当前 runtime 中 Blob、File 与 FormData 的宿主状态，由 EnableExtendModules 设置
+
 	watcherMu   sync.Mutex
 	watcher     *fsnotify.Watcher // watcher for kernel plugin storage file changes
 	watcherDone chan struct{}

@@ -77,7 +77,7 @@ func runClientFetchScript(t *testing.T, p *KernelPlugin, script string) <-chan s
 	_, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
 		// 与生产环境一致先启用 AbortController、FormData 等全局，供脚本中的 init.signal、init.body 使用。
 		EnableAbortAPI(rt)
-		EnableFormDataAPI(rt)
+		p.formDataHost = EnableFormDataAPI(rt)
 
 		siyuan := rt.NewObject()
 		if injectErr := injectClient(p, rt, siyuan); injectErr != nil {
@@ -317,6 +317,23 @@ func TestClientFetchEncodesFormDataAtCallTime(t *testing.T) {
 	}
 	if reason := waitClientFetchSettled(t, settled); reason != "" {
 		t.Fatalf("fetch rejected: %s", reason)
+	}
+}
+
+func TestClientFetchResponseBytesAndBlob(t *testing.T) {
+	p := startClientFetchTest(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "Image/PNG")
+		w.Write([]byte{0x89, 'P', 'N', 'G'})
+	})
+
+	got := waitClientFetchSettled(t, runClientFetchScript(t, p, `
+		siyuan.client.fetch("/image").then(async (response) => {
+			const blob = await response.blob();
+			settle(JSON.stringify([Array.from(await response.bytes()), blob.type, Array.from(await blob.bytes())]));
+		}).catch((e) => settle(String(e)));
+	`))
+	if want := `[[137,80,78,71],"image/png",[137,80,78,71]]`; got != want {
+		t.Fatalf("response bytes() and blob() = %s, want %s", got, want)
 	}
 }
 

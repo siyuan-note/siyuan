@@ -226,7 +226,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					lo.Must0(response.Set("status", rt.ToValue(resp.StatusCode)))
 					lo.Must0(response.Set("statusText", rt.ToValue(resp.Status)))
 					lo.Must0(response.Set("headers", rt.ToValue(responseHeader)))
-					lo.Must0(ObjectSetDataMethods(p, rt, response, body))
+					lo.Must0(ObjectSetDataMethods(p, rt, response, body, resp.Header.Get("Content-Type")))
 					result = response
 					return
 				}, func(rt *goja.Runtime, result any, err error) {

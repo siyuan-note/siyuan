@@ -17,6 +17,7 @@
 package plugin
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -239,4 +240,121 @@ func newDataObjectTestPlugin(t *testing.T) (*KernelPlugin, *formDataTestRuntime)
 		t.Fatalf("EnableExtendModules: %v", err)
 	}
 	return p, r
+}
+
+// setDataObjects 为 contentTypes 的每个键创建内容为 data 副本的数据对象，挂到同名全局变量。
+func setDataObjects(t *testing.T, p *KernelPlugin, r *formDataTestRuntime, data []byte, contentTypes map[string]string) {
+	t.Helper()
+
+	var err error
+	r.withRuntime(func(rt *goja.Runtime) {
+		for name, contentType := range contentTypes {
+			var object *goja.Object
+			if object, err = NewDataObject(p, rt, bytes.Clone(data), contentType); err != nil {
+				return
+			}
+			if err = rt.Set(name, object); err != nil {
+				return
+			}
+		}
+	})
+	if err != nil {
+		t.Fatalf("create data objects: %v", err)
+	}
+}
+
+func TestDataObjectBytesAndBlob(t *testing.T) {
+	p, r := newDataObjectTestPlugin(t)
+	setDataObjects(t, p, r, []byte("hi\x00\xff"), map[string]string{
+		"typed":   "Text/Plain; Charset=UTF-8",
+		"untyped": "",
+		"invalid": "text/plain; name=\u00e9",
+	})
+
+	got := r.await(`(async () => {
+		const bytes = await typed.bytes();
+		const blob = await typed.blob();
+		const bytesBefore = Array.from(bytes);
+		// arrayBuffer() 与 bytes() 的结果和数据对象共享内存，改写其中一个会反映到另一个，但不影响此前由 blob() 复制出的 Blob。
+		new Uint8Array(await typed.arrayBuffer()).fill(0);
+		return JSON.stringify([
+			Object.getPrototypeOf(bytes) === Uint8Array.prototype, bytesBefore, Array.from(bytes),
+			Object.getPrototypeOf(blob) === Blob.prototype, blob.type, blob.size, Array.from(await blob.bytes()),
+			(await untyped.blob()).type, (await invalid.blob()).type,
+		]);
+	})()`)
+	want := `[true,[104,105,0,255],[0,0,0,0],true,"text/plain; charset=utf-8",4,[104,105,0,255],"",""]`
+	if got != want {
+		t.Fatalf("bytes() and blob() = %s, want %s", got, want)
+	}
+}
+
+func TestDataObjectIgnoresReplacedGlobals(t *testing.T) {
+	p, r := newDataObjectTestPlugin(t)
+	setDataObjects(t, p, r, []byte("x"), map[string]string{"data": ""})
+
+	got := r.await(`(async () => {
+		const OriginalBlob = Blob;
+		const OriginalUint8Array = Uint8Array;
+		globalThis.Blob = class {};
+		globalThis.Uint8Array = class {};
+		return JSON.stringify([
+			(await data.blob()) instanceof OriginalBlob,
+			(await data.bytes()) instanceof OriginalUint8Array,
+		]);
+	})()`)
+	if want := `[true,true]`; got != want {
+		t.Fatalf("results after replacing globals = %s, want %s", got, want)
+	}
+}
+
+func TestRequestDataObjectsUseContentTypes(t *testing.T) {
+	p, r := newDataObjectTestPlugin(t)
+	body := []byte(`{"a":1}`)
+	typedFile := []byte("hello")
+	untypedFile := []byte("x")
+	requests := map[string]*Request{
+		"bodyRequest": {Request: RequestContent{
+			Headers: map[string][]string{"Content-Type": {"Application/JSON; Charset=UTF-8"}},
+			Body:    RequestBody{Data: &body},
+		}},
+		"formRequest": {Request: RequestContent{
+			Headers: map[string][]string{"Content-Type": {"multipart/form-data; boundary=x"}},
+			Body: RequestBody{Form: &RequestForm{File: map[string][]*RequestFile{"file": {
+				{Headers: map[string][]string{"Content-Type": {"Text/Plain"}}, Data: &typedFile},
+				{Headers: map[string][]string{}, Data: &untypedFile},
+			}}}},
+		}},
+	}
+
+	var err error
+	r.withRuntime(func(rt *goja.Runtime) {
+		for name, request := range requests {
+			var value goja.Value
+			if value, err = requestGoToJs(p, rt, request); err != nil {
+				return
+			}
+			if err = rt.Set(name, value); err != nil {
+				return
+			}
+		}
+	})
+	if err != nil {
+		t.Fatalf("convert requests: %v", err)
+	}
+
+	// 请求体使用请求的 Content-Type；表单文件使用各自分段的 Content-Type，分段没有 Content-Type 时为空串。
+	got := r.await(`(async () => {
+		const files = formRequest.request.body.form.files.file;
+		const blobs = [
+			await bodyRequest.request.body.data.blob(),
+			await files[0].data.blob(),
+			await files[1].data.blob(),
+		];
+		return JSON.stringify(await Promise.all(blobs.map(async (blob) => [blob.type, await blob.text()])));
+	})()`)
+	want := `[["application/json; charset=utf-8","{\"a\":1}"],["text/plain","hello"],["","x"]]`
+	if got != want {
+		t.Fatalf("request blobs = %s, want %s", got, want)
+	}
 }

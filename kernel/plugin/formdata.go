@@ -53,29 +53,32 @@ type formDataHost struct {
 }
 
 // EnableFormDataAPI 把 Blob、File 与 FormData 挂到 runtime 的 globalThis，调用方式与 url、buffer、console、encoding
-// 一致，失败时 panic。FormData 的文件条目依赖 Blob 与 File，三者共享同一组原型，因此一起注册。
+// 一致，失败时 panic。FormData 的文件条目依赖 Blob 与 File，三者共享同一组原型，因此一起注册。返回的宿主状态供内核
+// 在该 runtime 中创建 Blob 与 Uint8Array，见 ObjectSetDataMethods。
 //
 // 与规范的已知差异：不用 new 直接调用构造函数不会抛错（goja 的原生构造函数无法区分两种调用）；沙箱没有
 // ReadableStream，Blob 不提供 stream()；沙箱没有 HTMLFormElement，FormData 构造函数的 form 参数只能省略或为
 // undefined；实例可以添加自定义属性，但不能被冻结，也不能带自有的 Symbol 属性。
-func EnableFormDataAPI(rt *goja.Runtime) {
-	if err := registerFormDataAPI(rt); err != nil {
+func EnableFormDataAPI(rt *goja.Runtime) *formDataHost {
+	h, err := registerFormDataAPI(rt)
+	if err != nil {
 		panic(err)
 	}
+	return h
 }
 
-// registerFormDataAPI 捕获所需的内建对象，构造并挂载 Blob、File 与 FormData。
-func registerFormDataAPI(rt *goja.Runtime) (err error) {
+// registerFormDataAPI 捕获所需的内建对象，构造并挂载 Blob、File 与 FormData，返回宿主状态。
+func registerFormDataAPI(rt *goja.Runtime) (h *formDataHost, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("registerFormDataAPI: %v", r)
+			h, err = nil, fmt.Errorf("registerFormDataAPI: %v", r)
 		}
 	}()
 
-	h := &formDataHost{}
+	h = &formDataHost{}
 	isView, ok := goja.AssertFunction(rt.Get("ArrayBuffer").ToObject(rt).Get("isView"))
 	if !ok {
-		return fmt.Errorf("globalThis.ArrayBuffer.isView is not a function")
+		return nil, fmt.Errorf("globalThis.ArrayBuffer.isView is not a function")
 	}
 	h.isView = isView
 	h.uint8Array = rt.Get("Uint8Array").ToObject(rt)

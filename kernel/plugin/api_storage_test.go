@@ -42,11 +42,13 @@ func TestStorageGetResolvesFileContents(t *testing.T) {
 		t.Fatalf("inject storage: %v", err)
 	}
 
+	// 存储文件没有媒体类型：即使扩展名对应某种类型，blob() 的 type 也为空串。
 	got := r.await(`(async () => {
 		const data = await siyuan.storage.get("icon.png");
-		return JSON.stringify([await data.text(), Array.from(new Uint8Array(await data.arrayBuffer()))]);
+		const blob = await data.blob();
+		return JSON.stringify([await data.text(), Array.from(await data.bytes()), blob.type, await blob.text()]);
 	})()`)
-	if want := `["png",[112,110,103]]`; got != want {
+	if want := `["png",[112,110,103],"","png"]`; got != want {
 		t.Fatalf("storage data = %s, want %s", got, want)
 	}
 }

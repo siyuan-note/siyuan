@@ -23,7 +23,7 @@ func TestPluginServiceProtocolVariants(t *testing.T) {
 			t.Fatalf("incomplete mode declaration: %+v", variant)
 		}
 	}
-	if len(seen) != 19 {
+	if len(seen) != 20 {
 		t.Fatal("service modes missing")
 	}
 	for _, tt := range []struct {
@@ -51,6 +51,8 @@ func TestPluginServiceProtocolVariants(t *testing.T) {
 		{PluginServiceSecureJSON, 200, "while(1);[1]", true},
 		{PluginServiceSecureJSON, 200, "while(1);invalid", false},
 		{PluginServiceRaw, 999, "\x00\xff", true},
+		{PluginServiceStream, 200, "\x00\xff", true},
+		{PluginServiceStream, 204, "unexpected", false},
 		{PluginServiceProxy, 404, "upstream error", true},
 		{PluginServiceEmpty, 200, "", true},
 		{PluginServiceEmpty, 200, "unexpected", false},

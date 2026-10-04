@@ -30882,6 +30882,16 @@
             }
           ]
         },
+        "RawSignatureAlgorithm": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "RawSubject": {
           "anyOf": [
             {
@@ -31063,6 +31073,7 @@
         "PublicKeyAlgorithm",
         "Raw",
         "RawIssuer",
+        "RawSignatureAlgorithm",
         "RawSubject",
         "RawSubjectPublicKeyInfo",
         "RawTBSCertificate",
@@ -31100,6 +31111,26 @@
         },
         "HelloRetryRequest": {
           "type": "boolean"
+        },
+        "LocalCertificate": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "NegotiatedProtocol": {
           "type": "string"
@@ -31211,6 +31242,7 @@
         "ECHAccepted",
         "HandshakeComplete",
         "HelloRetryRequest",
+        "LocalCertificate",
         "NegotiatedProtocol",
         "NegotiatedProtocolIsMutual",
         "OCSPResponse",
@@ -112771,6 +112803,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -113255,6 +113296,15 @@
           },
           {
             "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "stream",
             "statusPolicy": "plugin",
             "mediaTypes": [
               "dynamic"
@@ -115037,6 +115087,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -115878,6 +115937,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -116370,6 +116438,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -116854,6 +116931,15 @@
           },
           {
             "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "stream",
             "statusPolicy": "plugin",
             "mediaTypes": [
               "dynamic"
@@ -167975,6 +168061,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -168467,6 +168562,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -168951,6 +169055,15 @@
           },
           {
             "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "stream",
             "statusPolicy": "plugin",
             "mediaTypes": [
               "dynamic"

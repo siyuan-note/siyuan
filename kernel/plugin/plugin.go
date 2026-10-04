@@ -39,6 +39,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/smallnest/chanx"
 )
@@ -104,6 +105,7 @@ type KernelPlugin struct {
 	runtime *eventloop.EventLoop // goja event loop runtime for this plugin
 
 	formDataHost *formDataHost // 当前 runtime 中 Blob、File 与 FormData 的宿主状态，由 EnableExtendModules 设置
+	streamsHost  *streams.Host // 当前 runtime 中 ReadableStream/WritableStream/TransformStream 的宿主状态，由 EnableExtendModules 设置
 
 	watcherMu   sync.Mutex
 	watcher     *fsnotify.Watcher // watcher for kernel plugin storage file changes
@@ -961,8 +963,11 @@ func (p *KernelPlugin) handleHttpRequest(c *gin.Context, request *Request, scope
 				return
 			}
 
-			// convert response.body?.raw?.data from (string | Buffer | ArrayBuffer) to []byte
+			// convert response.body?.raw?.data from (string | Buffer | ArrayBuffer) to []byte, and pull out
+			// response.body?.stream?.stream (a ReadableStream instance) before the JSON round trip below:
+			// 两者都不能走 JSON 编解码，前者要转换成 []byte，后者是活的流对象，序列化不出有意义的结果。
 			var raw *[]byte
+			var stream *goja.Object
 			if bodyValue := responseObj.Get("body"); isJsValueNotNull(bodyValue) {
 				// response.body
 				if bodyObj := bodyValue.ToObject(rt); bodyObj != nil {
@@ -975,6 +980,18 @@ func (p *KernelPlugin) handleHttpRequest(c *gin.Context, request *Request, scope
 								if convertErr == nil {
 									raw = &dataBytes
 									rawObj.Set("data", goja.Null())
+								}
+							}
+						}
+					}
+					if streamValue := bodyObj.Get("stream"); isJsValueNotNull(streamValue) {
+						// response.body.stream
+						if streamObj := streamValue.ToObject(rt); streamObj != nil {
+							if innerValue := streamObj.Get("stream"); isJsValueNotNull(innerValue) {
+								// response.body.stream.stream
+								if innerObj := innerValue.ToObject(rt); innerObj != nil && p.streamsHost.IsReadableStream(innerObj) {
+									stream = innerObj
+									streamObj.Set("stream", goja.Null())
 								}
 							}
 						}
@@ -1003,6 +1020,9 @@ func (p *KernelPlugin) handleHttpRequest(c *gin.Context, request *Request, scope
 
 			if raw != nil && response.Body != nil && response.Body.Raw != nil {
 				response.Body.Raw.Data = *raw
+			}
+			if stream != nil && response.Body != nil && response.Body.Stream != nil {
+				response.Body.Stream.Stream = stream
 			}
 
 			done <- &handleResult{Value: &response}

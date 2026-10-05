@@ -52,6 +52,7 @@ let preventSwipe = false;
 let longPressTimer: number;
 let longPressBlockElement: HTMLElement;
 let longPressTouchRange: Range;
+let blankTouchFocus: {editorElement: HTMLElement, editableElement: HTMLElement, range: Range};
 
 const sideMaskElement = document.querySelector(".side-mask") as HTMLElement;
 
@@ -139,6 +140,26 @@ export const handleTouchUp = () => {
     }
     longPressBlockElement = undefined;
     longPressTouchRange = undefined;
+    blankTouchFocus = undefined;
+};
+
+export const handleTouchContextMenu = (event: MouseEvent) => {
+    const saved = blankTouchFocus;
+    if (!saved || event.target !== saved.editorElement ||
+        getCurrentEditor()?.protyle.wysiwyg.element !== saved.editorElement ||
+        !saved.editableElement.isConnected || !saved.range.startContainer.isConnected ||
+        !saved.range.endContainer.isConnected ||
+        (document.activeElement !== document.body && document.activeElement !== saved.editableElement)) {
+        return;
+    }
+    blankTouchFocus = undefined;
+    // WebView 长按非编辑区域时会先失焦，在原生菜单阶段恢复本轮按下前的编辑位置。
+    event.preventDefault();
+    saved.editableElement.focus({preventScroll: true});
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(saved.range);
+    window.siyuan.mobile.touchRange = saved.range.cloneRange();
 };
 
 export const handleTouchSelectionChange = () => {
@@ -317,6 +338,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
 };
 
 const resetTouchGesture = () => {
+    blankTouchFocus = undefined;
     isFirstMove = true;
     clientX = null;
     clientY = null;
@@ -380,6 +402,17 @@ export const handleTouchStart = (event: TouchEvent) => {
         return;
     }
     const editor = getCurrentEditor();
+    const activeElement = document.activeElement as HTMLElement;
+    const selection = window.getSelection();
+    if (event.touches.length === 1 && editor && !editor.protyle.disabled &&
+        target === editor.protyle.wysiwyg.element && activeElement?.isContentEditable &&
+        target.contains(activeElement) && selection?.rangeCount > 0 &&
+        document.getElementById("keyboardToolbar")?.classList.contains("fn__none") === false) {
+        const range = selection.getRangeAt(0);
+        if (target.contains(range.startContainer) && target.contains(range.endContainer)) {
+            blankTouchFocus = {editorElement: target, editableElement: activeElement, range: range.cloneRange()};
+        }
+    }
     if (getSelection().rangeCount > 0 && hasClosestBlock(event.target as Element) &&
         editor && !editor.protyle.disabled && event.touches[0].clientY > window.innerHeight / 2 &&
         document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {

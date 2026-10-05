@@ -1,4 +1,5 @@
 {
+	"viewRefContent": "Visualizza il contenuto a cui si fa riferimento",
 	"bazaarStars": "Numero di stelle del repository GitHub",
 	"bazaarFeedbackTip": "Invia feedback tramite GitHub Issues",
 	"performOCR": "Esegui OCR",

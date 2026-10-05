@@ -1,4 +1,5 @@
 {
+	"viewRefContent": "Prikaži sadržaj na koji se upućuje",
 	"bazaarStars": "Број звездица GitHub репозиторијума",
 	"bazaarFeedbackTip": "Пошаљите повратне информације преко GitHub Issues",
 	"performOCR": "Izvrši OCR",

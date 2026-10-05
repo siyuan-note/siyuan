@@ -79,7 +79,7 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
             opened.push(id);
             if (openSucceeded) {afterOpen({notebookId: "notebook"});} else {onFailure();}
         }},
-        "mobile/util/backlinkPanels": {closeMobileBacklinkSheets: async () => {}},
+        "mobile/util/MobileEditorDialog": {closeMobileEditorSheets: async () => {}},
         "constants": {Constants: {LOCAL_DOCINFO: "docInfo"}},
         "protyle/util/compatibility": {setStorageVal() {}},
         "util/pathName": {isEncryptedBox: () => false},

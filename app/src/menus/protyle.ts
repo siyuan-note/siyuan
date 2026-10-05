@@ -61,6 +61,9 @@ import {checkFold, genTagList, renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openMobileFileById} from "../mobile/editor";
+/// #if MOBILE
+import {openMobileReference} from "../mobile/util/openReference";
+/// #endif
 import {genAssetHTML, renderAssetsPreview} from "../asset/renderAssets";
 import {insertHTML} from "../protyle/util/insertHTML";
 import {upDownHint} from "../util/upDownHint";
@@ -682,6 +685,16 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             writeText(protyle.lute.BlockDOM2StdMd(element.outerHTML).trim());
         }
     }).element);
+    /// #if MOBILE
+    window.siyuan.menus.menu.append(new MenuItem({
+        id: "viewRefContent",
+        label: window.siyuan.languages.viewRefContent,
+        icon: "iconPreview",
+        click: () => {
+            void openMobileReference(protyle, refBlockId);
+        }
+    }).element);
+    /// #endif
     if (!protyle.disabled) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "cut",

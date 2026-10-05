@@ -38,8 +38,10 @@ export class Title {
     public element: HTMLElement;
     public editElement: HTMLElement;
     private timeout: number;
+    private pendingRename?: () => void;
+    private composing = false;
 
-    constructor(protyle: IProtyle) {
+    constructor(private protyle: IProtyle) {
         this.element = document.createElement("div");
         this.element.className = "protyle-title";
         if (window.siyuan.config.editor.displayBookmarkIcon) {
@@ -80,6 +82,7 @@ export class Title {
             });
             this.editElement.addEventListener("input", (event: InputEvent) => {
                 if (event.isComposing) {
+                    this.composing = true;
                     return;
                 }
                 if (this.editElement.textContent === "") {
@@ -90,6 +93,7 @@ export class Title {
                 this.rename(protyle);
             });
             this.editElement.addEventListener("compositionend", () => {
+                this.composing = false;
                 this.rename(protyle);
             });
             this.editElement.addEventListener("drop", (event: DragEvent) => {
@@ -343,6 +347,7 @@ export class Title {
 
     private rename(protyle: IProtyle) {
         clearTimeout(this.timeout);
+        this.pendingRename = undefined;
         if (!validateName(this.editElement.textContent, this.editElement)) {
             // 字数过长会导致滚动
             const offset = getSelectionOffset(this.editElement);
@@ -351,7 +356,9 @@ export class Title {
             return false;
         }
         hideTooltip();
-        this.timeout = window.setTimeout(() => {
+        this.pendingRename = () => {
+            this.pendingRename = undefined;
+            this.timeout = undefined;
             const fileName = replaceFileName(this.editElement.textContent);
             fetchPost("/api/filetree/renameDoc", {
                 notebook: protyle.notebookId,
@@ -363,7 +370,24 @@ export class Title {
                 this.setTitle(fileName);
                 focusByOffset(this.editElement, offset.start, offset.end);
             }
-        }, Constants.TIMEOUT_INPUT);
+        };
+        this.timeout = window.setTimeout(this.pendingRename, Constants.TIMEOUT_INPUT);
+    }
+
+    public flushPendingInput() {
+        if (this.composing) {
+            this.rename(this.protyle);
+        }
+        const rename = this.pendingRename;
+        this.cancelPendingInput();
+        rename?.();
+    }
+
+    public cancelPendingInput() {
+        clearTimeout(this.timeout);
+        this.timeout = undefined;
+        this.pendingRename = undefined;
+        this.composing = false;
     }
 
     public setTitle(title: string, empty = false) {

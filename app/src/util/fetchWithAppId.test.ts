@@ -5,6 +5,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {SIYUAN_APP_ID_HEADER, withAPIAppId} from "./fetchAppId";
 import {ContractFormData} from "./contractFormData";
+import {trackEditorSaveRequest} from "../protyle/util/editorSave";
 
 const load = (path: string, globals: Record<string, unknown>, dependencies: Record<string, unknown>) => {
     const exports = {};
@@ -61,6 +62,7 @@ test("shared fetch helpers attach the caller and preserve payloads", async () =>
             "./kernelFault": {kernelError: () => assert.fail("Unexpected kernel error")},
             "./fetchTimeout": {withFetchTimeout: (run: (signal: AbortSignal) => unknown, signal: AbortSignal) => run(signal)},
             "../config/setting/pending": {trackSettingRequest: (_url: string, promise: Promise<unknown>) => promise},
+            "../protyle/util/editorSave": {trackEditorSaveRequest},
         }) as typeof import("./fetch");
         const signal = new AbortController().signal;
         const headers = Object.freeze({Authorization: "Token test"});

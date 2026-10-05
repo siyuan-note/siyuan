@@ -32,6 +32,7 @@ import {handleMobileKernelExit} from "./kernelExit";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {applyEntryVisibility} from "../../config/entryVisibility/runtime";
 import {removeMobileBacklinkContent} from "./backlinkPanels";
+import {removeMobileReferenceSheet} from "./openReference";
 import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 
 let statusTimeout: number;
@@ -131,6 +132,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "removeBox": {
                 closeNotebookHistoryDialogs(data.data.box);
                 removeMobileBacklinkContent({notebookId: data.data.box});
+                removeMobileReferenceSheet({notebookId: data.data.box});
                 window.siyuan.mobile.tabs?.removeNotebook(data.data.box);
                 break;
             }
@@ -139,6 +141,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "removeDoc":
                 removeMobileBacklinkContent({rootIDs: data.data.ids});
+                removeMobileReferenceSheet({rootIDs: data.data.ids});
                 window.siyuan.mobile.tabs?.removeRoots(data.data.ids);
                 if (window.siyuan.config.onboarding?.newUser && !window.siyuan.config.onboarding.dismissed &&
                     data.data.ids.includes(window.siyuan.config.onboarding.documentID)) {

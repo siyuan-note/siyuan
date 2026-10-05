@@ -1,4 +1,5 @@
 {
+	"viewRefContent": "Просмотреть содержимое по ссылке",
 	"bazaarStars": "Количество звёзд репозитория GitHub",
 	"bazaarFeedbackTip": "Отправить отзыв через GitHub Issues",
 	"performOCR": "Выполнить OCR",

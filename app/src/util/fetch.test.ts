@@ -6,6 +6,7 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {withFetchTimeout} from "./fetchTimeout";
 import {flushSettingSaves, settingSaveFailures, trackSettingRequest} from "../config/setting/pending";
+import {trackEditorSaveRequest} from "../protyle/util/editorSave";
 
 const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() => {}),
                        processResponse: (response: IWebSocketData) => boolean = () => true) => {
@@ -28,6 +29,7 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
                 case "./processMessage": return {processMessage: processResponse};
                 case "./kernelFault": return {kernelError: () => assert.fail("unexpected kernel error")};
                 case "../config/setting/pending": return {trackSettingRequest};
+                case "../protyle/util/editorSave": return {trackEditorSaveRequest};
                 case "./fetchTimeout": return {
                     withFetchTimeout: (request: (signal?: AbortSignal) => Promise<unknown>, signal: AbortSignal, timeout: number) => {
                         timeouts.push(timeout);

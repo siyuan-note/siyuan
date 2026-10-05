@@ -1,4 +1,5 @@
 {
+	"viewRefContent": "参照先の内容を表示",
 	"bazaarStars": "GitHub リポジトリのスター数",
 	"bazaarFeedbackTip": "GitHub Issues からフィードバックを送信",
 	"performOCR": "OCR を実行",

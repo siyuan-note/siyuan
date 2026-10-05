@@ -6,6 +6,7 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {withFetchTimeout} from "../../util/fetchTimeout";
 import {trackSettingRequest} from "../../config/setting/pending";
+import {trackEditorSaveRequest} from "../util/editorSave";
 
 const loadPreview = () => {
     const requests: Array<{resolve: (response: Response) => void, reject: (error: Error) => void}> = [];
@@ -34,6 +35,7 @@ const loadPreview = () => {
         "./processMessage": messagesModule,
         "./fetchTimeout": {withFetchTimeout},
         "../config/setting/pending": {trackSettingRequest},
+        "../protyle/util/editorSave": {trackEditorSaveRequest},
     });
     const previewModule = loadModule("util.ts", {
         "../../util/fetch": fetchModule,

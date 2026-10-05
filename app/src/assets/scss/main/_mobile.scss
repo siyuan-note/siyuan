@@ -1821,6 +1821,26 @@ body.mobile-topbar--merged {
   }
 }
 
+.mobile-reference-dialog {
+  .mobile-reference-sheet {
+    // 按键盘上方的可见视口保留原文区域，不随键盘自动扩展到全屏。
+    max-height: 60%;
+  }
+
+  .b3-dialog__body {
+    box-sizing: border-box;
+  }
+
+  .mobile-reference-editor {
+    min-height: 0;
+  }
+
+  &--compact .b3-dialog__header {
+    // 窄小视口中将空间留给正文，标题仍为对话框提供无障碍名称。
+    display: none;
+  }
+}
+
 .mobile-backlinks-dialog {
   .mobile-backlinks-content {
     flex: 0 1 auto;

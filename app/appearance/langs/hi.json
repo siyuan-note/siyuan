@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "कोई पाठ चयनित नहीं",
+	"mobileToolbarTextSelection": "पाठ चयनित",
 	"ocrAIModel": "AI मॉडल",
 	"ocrAIModelTip": "छवि इनपुट का समर्थन करने वाला मॉडल चुनें; मैन्युअल और स्वचालित पहचान छवियाँ प्रदाता को भेजती है और शुल्क लग सकता है",
 	"viewRefContent": "संदर्भित सामग्री देखें",

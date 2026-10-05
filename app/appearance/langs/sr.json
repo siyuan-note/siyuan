@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "Без изабраног текста",
+	"mobileToolbarTextSelection": "Изабрани текст",
 	"ocrAIModel": "AI модел",
 	"ocrAIModelTip": "Изаберите модел који подржава слике; ручно и аутоматско препознавање шаље слике добављачу и може изазвати трошкове",
 	"viewRefContent": "Prikaži sadržaj na koji se upućuje",

@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "Nessun testo selezionato",
+	"mobileToolbarTextSelection": "Testo selezionato",
 	"ocrAIModel": "Modello IA",
 	"ocrAIModelTip": "Seleziona un modello che supporti le immagini; il riconoscimento manuale e automatico invia le immagini al suo fornitore e può comportare costi",
 	"viewRefContent": "Visualizza il contenuto a cui si fa riferimento",

@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "Tidak ada teks dipilih",
+	"mobileToolbarTextSelection": "Teks dipilih",
 	"ocrAIModel": "Model AI",
 	"ocrAIModelTip": "Pilih model yang mendukung masukan gambar; pengenalan manual dan otomatis mengirim gambar ke penyedia dan dapat dikenai biaya",
 	"viewRefContent": "Lihat konten yang dirujuk",

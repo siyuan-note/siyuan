@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "未选中文本",
+	"mobileToolbarTextSelection": "选中文本",
 	"ocrAIModel": "AI 模型",
 	"ocrAIModelTip": "选择支持图片输入的模型；手动和自动识别都会将图片发送给该提供商，可能产生费用",
 	"viewRefContent": "查看引用内容",

@@ -36,6 +36,7 @@ import {
 } from "./order";
 import {
     getProfileEntryVisibility,
+    getSavedEntryOrder,
     isEntryVisibilityImportVersionSupported,
     normalizeEntryVisibilityImportProfile,
     resetEntryProfileOrder,
@@ -45,7 +46,8 @@ import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isMobile} from "../../util/functions";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {bindTouchOrder} from "./touchOrder";
-import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
 /// #if !MOBILE
 import {getSettingsWindowHost, isSettingsWindow} from "../setting/windowContext";
 /// #endif
@@ -64,9 +66,8 @@ import {
 
 const getVisibleEntryCatalog = () => isMobile() ? entryCatalog.filter(item =>
     item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash" || item.key === "editor.image")
-    .map(item => item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child =>
-        child.type === "separator" || child.key.startsWith("mobile-") ||
-        MOBILE_TOOLBAR_NAMES.includes(child.key) || child.key.startsWith("plugin:"))} : item) : entryCatalog.map(item =>
+    .map(item => item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, sortable: false,
+        children: item.children.filter(child => MOBILE_TOOLBAR_CONTEXT_KEYS.includes(child.key))} : item) : entryCatalog.map(item =>
     item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child => !child.key.startsWith("mobile-"))} :
     item.key === TOP_BAR_ROOT_PATH && !isInMobileApp() ?
         {...item, children: item.children.filter(child => child.key !== "barExit")} : item);
@@ -241,7 +242,7 @@ const resolveProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, paren
     if (parentPath === STATUS_BAR_ROOT_PATH) {
         return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile.orders?.[parentPath], "spacer", separatorKeys);
     }
-    return resolveEntryOrder(defaultOrder, profile.orders?.[parentPath], separatorKeys);
+    return resolveEntryOrder(defaultOrder, getSavedEntryOrder(profile, parentPath, defaultOrder), separatorKeys);
 };
 
 const getProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
@@ -827,8 +828,8 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             return;
         }
         draft.orders ||= {};
-        const savedOrder = draft.orders[dragging.parentPath];
         const context = getEntryOrderContext(dragging.parentPath, dockOrderSnapshot);
+        const savedOrder = getSavedEntryOrder(draft, dragging.parentPath, dragging.defaultOrder);
         const separatorKeys = new Set([
             ...context.separatorKeys,
             ...(savedOrder || []).filter((key) =>

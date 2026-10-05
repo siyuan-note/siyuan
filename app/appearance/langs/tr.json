@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "Metin seçilmedi",
+	"mobileToolbarTextSelection": "Metin seçildi",
 	"ocrAIModel": "Yapay zekâ modeli",
 	"ocrAIModelTip": "Görüntü girişini destekleyen bir model seçin; elle ve otomatik tanıma, görüntüleri sağlayıcıya gönderir ve ücret doğurabilir",
 	"viewRefContent": "Referans verilen içeriği görüntüle",

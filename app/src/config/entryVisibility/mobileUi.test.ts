@@ -297,11 +297,14 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     mobile = true;
     window.siyuan.mobile = {} as typeof window.siyuan.mobile;
     view = open();
+    check(view.querySelectorAll("[data-entry-row]").length === 2, "Mobile toolbar exposes two context groups");
+    view.querySelector<HTMLElement>("[data-entry-path-row='editor.toolbar.mobile-input']").click();
     const toolbarBrowser = view.querySelector<HTMLElement>("[data-type='entry-browser']");
     toolbarBrowser.setPointerCapture = () => { captured = true; };
     toolbarBrowser.hasPointerCapture = () => captured;
     toolbarBrowser.releasePointerCapture = () => { captured = false; };
-    const toolbarRows = Array.from(toolbarBrowser.querySelectorAll<HTMLElement>("[data-entry-row]"));
+    const toolbarRows = Array.from(toolbarBrowser.querySelectorAll<HTMLElement>(
+        "[data-entry-row][data-entry-parent='editor.toolbar.mobile-input']"));
     const firstKey = toolbarRows[0].dataset.entryKey;
     const secondKey = toolbarRows[1].dataset.entryKey;
     const toolbarHandle = toolbarRows[0].querySelector(".config-entry-visibility__drag");
@@ -309,7 +312,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     send(toolbarBrowser, "pointermove", point(toolbarRows[1]));
     send(toolbarBrowser, "pointerup", point(toolbarRows[1]));
     view.querySelector<HTMLElement>("[data-action='confirm']").click();
-    const toolbarOrder = config().profiles[0].orders["editor.toolbar"];
+    const toolbarOrder = config().profiles[0].orders["editor.toolbar.mobile-input"];
     check(toolbarOrder.indexOf(secondKey) < toolbarOrder.indexOf(firstKey), "Toolbar touch sorting must persist");
     view = open();
     selectSlash();
@@ -323,7 +326,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     resetOrder();
     view.querySelector<HTMLElement>("[data-action='confirm']").click();
     check(!("editor.slash.menu" in config().profiles[0].orders), "Single reset must delete the order record");
-    check(config().profiles[0].orders["editor.toolbar"], "Single reset must preserve other levels");
+    check(config().profiles[0].orders["editor.toolbar.mobile-input"], "Single reset must preserve other levels");
     check(config().profiles[0].entries["editor.slash.menu"] === true, "Reset must preserve visibility");
     view = open();
     view.querySelector<HTMLElement>("[data-action='reset-all-entry-orders']").click();
@@ -339,7 +342,8 @@ test("mobile entry settings preserve preferences and support touch sorting witho
     timeout: 45000,
 }, async () => {
     const modules = ["config/entryVisibility/ui", "config/entryVisibility/catalog", "config/entryVisibility/order",
-        "config/entryVisibility/profile", "config/entryVisibility/dockOrder", "config/entryVisibility/touchOrder",
+        "config/entryVisibility/profile", "config/entryVisibility/mobileToolbarContext",
+        "config/entryVisibility/dockOrder", "config/entryVisibility/touchOrder",
         "protyle/toolbar/defaults", "mobile/util/toolbarActions", "protyle/wysiwyg/codeBlockUtil", "protyle/gutter/turnIntoMenu",
         "plugin/dockKey", "plugin/topBarKey", "util/escape"];
     const sources = Object.fromEntries(modules.map(id => [id, transpileModule(

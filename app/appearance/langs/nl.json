@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "Geen tekst geselecteerd",
+	"mobileToolbarTextSelection": "Tekst geselecteerd",
 	"ocrAIModel": "AI-model",
 	"ocrAIModelTip": "Kies een model dat afbeeldingen ondersteunt; handmatige en automatische herkenning sturen afbeeldingen naar de aanbieder en kunnen kosten veroorzaken",
 	"viewRefContent": "Inhoud waarnaar wordt verwezen bekijken",

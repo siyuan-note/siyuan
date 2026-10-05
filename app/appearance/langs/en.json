@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "No text selected",
+	"mobileToolbarTextSelection": "Text selected",
 	"ocrAIModel": "AI model",
 	"ocrAIModelTip": "Select a model that supports image input; manual and automatic recognition send images to its provider and may incur charges",
 	"viewRefContent": "View referenced content",

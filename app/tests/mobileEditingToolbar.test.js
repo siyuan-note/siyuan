@@ -19,6 +19,7 @@ const runCases = async (sources, platform) => {
         "mobile-outdent", "mobile-block", "mobile-add", "mobile-heading1", "strong", "em", "a", "block-ref", "text",
         "mobile-separator"]);
     const order = ["strong", "mobile-undo", "mobile-separator", "mobile-heading1", "em", "mobile-indent", "mobile-outdent"];
+    const contextEntries = new Map([["editor.toolbar.mobile-input.block-ref", false]]);
     const constants = {INLINE_TYPE: ["a", "block-ref", "strong", "em", "u", "s", "code"], ZWSP: "\u200b",
         TIMEOUT_TRANSITION: 20, TIMEOUT_COUNT: 50};
     class LocalUndo {}
@@ -35,7 +36,17 @@ const runCases = async (sources, platform) => {
         "protyle/undo": {LocalUndo},
         "protyle/undo/globalUndo": {getUndoRootID: () => "doc", hasUndoStateMirror: () => true,
             getMirror: () => ({canUndo: true, canRedo: false})},
-        "config/entryVisibility/runtime": {getEntryOrder: () => order, isEntryVisible: key => visible.has(key.slice("editor.toolbar.".length))},
+        "config/entryVisibility/runtime": {getEntryOrder: path => {
+            if (!path.endsWith(".mobile-input")) {
+                return order;
+            }
+            const {MOBILE_TOOLBAR_ACTIONS, MOBILE_TOOLBAR_INSERTS, getMobileToolbarActionKey} =
+                load("mobile/util/toolbarActions");
+            return [...MOBILE_TOOLBAR_ACTIONS.map(item => getMobileToolbarActionKey(item.name)),
+                "mobile-separator", "block-type", "block-ref",
+                ...MOBILE_TOOLBAR_INSERTS.map(item => getMobileToolbarActionKey(item.name))];
+        }, isEntryVisible: key =>
+            (contextEntries.get(key) ?? true) && visible.has(key.split(".").at(-1))},
         "util/functions": {isMobile: () => true},
         "mobile/util/menuKeyboard": {captureMenuKeyboard: () => () => {}},
         "protyle/util/tableCellRichContext": {getTableCellRichContext: () => undefined},
@@ -178,6 +189,9 @@ const runCases = async (sources, platform) => {
     assert.equal(keyboardHides, 0);
     assert.equal(editable.hasAttribute("inputmode"), false);
     assert.equal(document.activeElement, editable);
+    const actualOrder = [...toolbar.querySelector(".keyboard__dynamic").children].map(item => item.dataset.id);
+    assert.ok(actualOrder.indexOf("strong") < actualOrder.indexOf("mobile-undo"));
+    assert.ok(actualOrder.indexOf("mobile-heading1") < actualOrder.indexOf("em"));
     select(0);
     await settle();
     assert.equal(hidden("undo"), false);
@@ -188,9 +202,6 @@ const runCases = async (sources, platform) => {
     assert.equal(undoCalls, 1);
     action("heading1");
     assert.equal(inserts[0], "# ‸");
-    const actualOrder = [...toolbar.querySelector(".keyboard__dynamic").children].map(item => item.dataset.id);
-    assert.ok(actualOrder.indexOf("strong") < actualOrder.indexOf("mobile-undo"));
-    assert.ok(actualOrder.indexOf("mobile-heading1") < actualOrder.indexOf("em"));
     // 显隐变化和编辑器切换不得恢复隐藏项，也不得向受限的字段编辑器插入文档块。
     visible.delete("mobile-undo");
     window.dispatchEvent(new Event("siyuan-entry-visibility"));
@@ -239,6 +250,7 @@ const runCases = async (sources, platform) => {
     assert.equal(keyboardShows, showsBeforeClose);
     assert.equal(toolbar.classList.contains("fn__none"), true);
     // 短按继续输入时保留已有 inputmode，折叠选区恢复上下文工具栏。
+    visible.delete("mobile-heading1");
     editable.setAttribute("inputmode", "text");
     touch("pointerdown");
     editable.focus();
@@ -252,6 +264,10 @@ const runCases = async (sources, platform) => {
     for (const name of ["indent", "outdent", "strong", "em", "a", "text"]) {
         assert.equal(hidden(name), true);
     }
+    assert.equal(hidden("block-ref"), true);
+    assert.equal(toolbar.querySelector('[data-id="mobile-separator"]').classList.contains("fn__none"), true);
+    contextEntries.set("editor.toolbar.mobile-input.block-ref", true);
+    await settle();
     assert.equal(hidden("block-ref"), false);
     action("block-ref");
     assert.equal(inserts.at(-1), "((");
@@ -305,7 +321,8 @@ const runElectron = async () => {
         const modules = ["mobile/util/keyboardToolbar", "mobile/util/toolbarActions",
             "mobile/util/toolbarEntries", "mobile/util/mobileAppUtil", "mobile/util/mobileKeyboardChange",
             "mobile/util/touchSelection", "mobile/util/visibleViewport", "protyle/util/hasClosest",
-            "protyle/toolbar/defaults", "protyle/toolbar/entryVisibility", "config/entryVisibility/order"];
+            "protyle/toolbar/defaults", "protyle/toolbar/entryVisibility", "config/entryVisibility/order",
+            "config/entryVisibility/mobileToolbarContext"];
         const sources = Object.fromEntries(modules.map(name => [name, ts.transpileModule(
             readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
             {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));

@@ -4,6 +4,7 @@ import {
     DESKTOP_TOOLBAR_ENTRIES,
     getToolbarEntryId,
     getToolbarEntryLabel,
+    MOBILE_TOOLBAR_NAMES,
     TOOLBAR_ENTRY_ROOT_PATH,
 } from "../../protyle/toolbar/defaults";
 import {mergeEntryOrderPreservingUnknown} from "./order";
@@ -14,6 +15,7 @@ import {
     getPluginTopBarEntryKey,
     isPluginTopBarEntryKey,
 } from "../../plugin/topBarKey";
+import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
 
 export {getPluginDockEntryKey} from "../../plugin/dockKey";
 export {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "../../plugin/topBarKey";
@@ -522,6 +524,17 @@ const toolbarBuiltinChildren = [
 ];
 const toolbarBuiltinNodeMap = new Map(toolbarBuiltinChildren.map((item) => [item.key, item]));
 
+const mobileToolbarContexts = (children: IEntryCatalogNode[]) => MOBILE_TOOLBAR_CONTEXT_KEYS.map((key) => {
+    const selection = key === "mobile-selection";
+    const entries = children.filter(item => item.type === "separator" || item.key.startsWith("plugin:") ||
+        (selection ? MOBILE_TOOLBAR_NAMES.includes(item.key) && item.key !== "block-type" :
+            item.key.startsWith("mobile-") || ["block-type", "block-ref"].includes(item.key)))
+        .map(item => !selection && item.key === "block-ref" ? {...item,
+            defaultVisible: () => false, customDefaultVisible: false} : item);
+    return node(key, lang(selection ? "mobileToolbarTextSelection" : "mobileToolbarNoSelection"), true,
+        normalizeToolbarCatalogSeparators(entries), true, {fixed: true});
+});
+
 const slashMenuBuiltinChildren = [
     node("template", lang("template")),
     node("widget", lang("widget")),
@@ -607,7 +620,7 @@ const slashMenuRoot = {
 const toolbarCatalogSection: IEntryCatalogSection = {
     key: TOOLBAR_ENTRY_ROOT_PATH,
     label: location(lang("editor"), lang("entryToolbar")),
-    children: toolbarBuiltinChildren,
+    children: [...toolbarBuiltinChildren, ...mobileToolbarContexts(toolbarBuiltinChildren)],
 };
 
 export const TOP_BAR_ROOT_PATH = "topBar";
@@ -1278,7 +1291,7 @@ export const refreshDockCatalog = (plugins: IDockCatalogPlugin[]) => {
     rebuildCatalogIndexes();
 };
 
-const normalizeToolbarCatalogSeparators = (nodes: IEntryCatalogNode[]) => {
+function normalizeToolbarCatalogSeparators(nodes: IEntryCatalogNode[]) {
     const result: IEntryCatalogNode[] = [];
     nodes.forEach((item) => {
         if (item.type === "separator" && (result.length === 0 || result[result.length - 1].type === "separator")) {
@@ -1290,7 +1303,7 @@ const normalizeToolbarCatalogSeparators = (nodes: IEntryCatalogNode[]) => {
         result.pop();
     }
     return result;
-};
+}
 
 const toolbarCatalogNodeSignature = (item: IEntryCatalogNode, pluginLabels: Map<string, string>) => [
     item.key,
@@ -1329,7 +1342,7 @@ export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
     if (signature === toolbarCatalogSignature) {
         return;
     }
-    toolbarCatalogSection.children = children;
+    toolbarCatalogSection.children = [...children, ...mobileToolbarContexts(children)];
     toolbarCatalogSignature = signature;
     rebuildCatalogIndexes();
 };

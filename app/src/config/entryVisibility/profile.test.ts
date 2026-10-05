@@ -2,14 +2,82 @@ import * as assert from "node:assert/strict";
 import test from "node:test";
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
-import {getEntryCatalogCustomDefaultVisibility, getEntryCatalogDefaultVisibility, getEntryCatalogNode} from "./catalog";
+import {
+    getEntryCatalogChildren,
+    getEntryCatalogCustomDefaultVisibility,
+    getEntryCatalogDefaultVisibility,
+    getEntryCatalogNode,
+} from "./catalog";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {
     getBuiltinProfileEntryVisibility,
     getProfileEntryVisibility,
+    getSavedEntryOrder,
     isEntryVisibilityImportVersionSupported,
     normalizeEntryVisibilityImportProfile,
+    resetEntryProfileOrder,
 } from "./profile";
+import {getMobileToolbarContextPath} from "./mobileToolbarContext";
+import {mergeEntryOrderPreservingUnknown, resolveEntryOrder} from "./order";
+
+test("mobile toolbar contexts expose relevant entries and hide caret references by default", () => {
+    const input = getMobileToolbarContextPath(false);
+    const selection = getMobileToolbarContextPath(true);
+    const inputKeys = getEntryCatalogChildren(input).map(item => item.key);
+    const selectionKeys = getEntryCatalogChildren(selection).map(item => item.key);
+    assert.ok(inputKeys.includes("mobile-add") && inputKeys.includes("mobile-indent") && inputKeys.includes("block-ref"));
+    assert.equal(inputKeys.includes("strong"), false);
+    assert.ok(selectionKeys.includes("strong") && selectionKeys.includes("block-ref"));
+    assert.equal(selectionKeys.some(key => key.startsWith("mobile-")), false);
+    assert.equal(selectionKeys.includes("block-type"), false);
+    for (const template of ["full", "simple"] as const) {
+        for (const [path, expected] of [[`${input}.block-ref`, false], [`${selection}.block-ref`, true]] as const) {
+            const node = getEntryCatalogNode(path);
+            assert.equal(getBuiltinProfileEntryVisibility(template, node.simple,
+                getEntryCatalogDefaultVisibility(path)), expected);
+        }
+    }
+});
+
+test("mobile context visibility inherits legacy choices and permits independent overrides", () => {
+    const input = getMobileToolbarContextPath(false);
+    const selection = getMobileToolbarContextPath(true);
+    const profile: {entries: Record<string, boolean>} = {entries: {"editor.toolbar.block-ref": false}};
+    assert.equal(getProfileEntryVisibility(profile, `${input}.block-ref`,
+        getEntryCatalogCustomDefaultVisibility(`${input}.block-ref`)), false);
+    assert.equal(getProfileEntryVisibility(profile, `${selection}.block-ref`, true), false);
+    profile.entries[`${selection}.block-ref`] = true;
+    assert.equal(getProfileEntryVisibility(profile, `${selection}.block-ref`, false), true);
+    assert.equal(getProfileEntryVisibility(profile, `${input}.block-ref`,
+        getEntryCatalogCustomDefaultVisibility(`${input}.block-ref`)), false);
+    assert.equal(getProfileEntryVisibility(profile, "editor.toolbar.block-ref", true), false);
+    assert.equal(getProfileEntryVisibility({entries: {}}, `${input}.block-ref`,
+        getEntryCatalogCustomDefaultVisibility(`${input}.block-ref`)), false);
+    assert.equal(getProfileEntryVisibility({entries: {"editor.toolbar.block-ref": true}}, `${input}.block-ref`,
+        getEntryCatalogCustomDefaultVisibility(`${input}.block-ref`)), false);
+});
+
+test("mobile context orders retain legacy plugin slots and reset independently", () => {
+    const input = getMobileToolbarContextPath(false);
+    const selection = getMobileToolbarContextPath(true);
+    const legacy = ["strong", "plugin:disabled:item", "block-ref", "mobile-add", "mobile-block"];
+    const profile: Pick<Config.IEntryVisibilityProfile, "orders" | "entries" | "name"> = {
+        orders: {"editor.toolbar": legacy}, entries: {}, name: "Custom",
+    };
+    const defaults = ["mobile-add", "mobile-block", "block-ref"];
+    const inherited = getSavedEntryOrder(profile, input, defaults);
+    assert.deepEqual(inherited, ["plugin:disabled:item", "block-ref", "mobile-add", "mobile-block"]);
+    profile.orders[input] = mergeEntryOrderPreservingUnknown(defaults, inherited,
+        ["mobile-block", "mobile-add", "block-ref"]);
+    assert.ok(profile.orders[input].includes("plugin:disabled:item"));
+    assert.deepEqual(getSavedEntryOrder(profile, selection, ["block-ref", "strong"]),
+        ["strong", "plugin:disabled:item", "block-ref"]);
+    assert.deepEqual(profile.orders["editor.toolbar"], legacy);
+    resetEntryProfileOrder(profile, input);
+    assert.deepEqual(resolveEntryOrder(defaults, getSavedEntryOrder(profile, input, defaults), new Set()), defaults);
+    assert.deepEqual(profile.orders["editor.toolbar"], legacy);
+    assert.deepEqual(normalizeEntryVisibilityImportProfile(profile, 6, {}), profile);
+});
 
 test("chart height migration retains shared visibility and plugin order", () => {
     for (const existing of [undefined, true, false]) {

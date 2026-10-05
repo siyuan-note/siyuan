@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "دون تحديد نص",
+	"mobileToolbarTextSelection": "نص محدد",
 	"ocrAIModel": "نموذج الذكاء الاصطناعي",
 	"ocrAIModelTip": "اختر نموذجًا يدعم إدخال الصور؛ يرسل التعرف اليدوي والتلقائي الصور إلى مزود النموذج وقد تترتب رسوم",
 	"viewRefContent": "عرض المحتوى المشار إليه",

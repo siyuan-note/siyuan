@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "ללא טקסט נבחר",
+	"mobileToolbarTextSelection": "טקסט נבחר",
 	"ocrAIModel": "מודל בינה מלאכותית",
 	"ocrAIModelTip": "יש לבחור מודל התומך בקלט תמונות; זיהוי ידני ואוטומטי שולח תמונות לספק ועלול להיות כרוך בתשלום",
 	"viewRefContent": "הצג את התוכן שאליו מפנים",

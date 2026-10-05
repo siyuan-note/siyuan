@@ -7,6 +7,7 @@ import {ModuleKind, transpileModule} from "typescript";
 import {entryCatalog, TOP_BAR_ROOT_PATH} from "./catalog";
 import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import * as dockOrder from "./dockOrder";
+import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
 
 test("entry settings show exit only on native tablets without changing the persisted catalog", () => {
     const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/ui.ts"), "utf8");
@@ -19,7 +20,7 @@ test("entry settings show exit only on native tablets without changing the persi
     runInNewContext(compiled, {
         exports,
         require: () => ({
-            entryCatalog, TOP_BAR_ROOT_PATH, MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH,
+            entryCatalog, TOP_BAR_ROOT_PATH, MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH, MOBILE_TOOLBAR_CONTEXT_KEYS,
             isMobile: () => mobile,
             isInMobileApp: () => nativeTablet,
             DOCK_ORDER_SCOPES_BY_SIDE: {},
@@ -37,10 +38,9 @@ test("entry settings show exit only on native tablets without changing the persi
     const catalog = exports.catalog();
     assert.deepEqual(Array.from(catalog, item => item.key), [TOOLBAR_ENTRY_ROOT_PATH, "editor.image", "editor.slash"]);
     assert.equal(catalog.find(item => item.key === "editor.slash"), entryCatalog.find(item => item.key === "editor.slash"));
-    assert.ok(catalog[0].children.every(item => item.type === "separator" ||
-        item.key.startsWith("mobile-") || MOBILE_TOOLBAR_NAMES.includes(item.key)));
+    assert.deepEqual(Array.from(catalog[0].children, item => item.key), MOBILE_TOOLBAR_CONTEXT_KEYS);
     for (const name of ["undo", "indent", "heading1", "table", "template"]) {
-        assert.ok(catalog[0].children.some(item => item.key === `mobile-${name}`));
+        assert.ok(catalog[0].children[0].children.some(item => item.key === `mobile-${name}`));
     }
 });
 

@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "未選取文字",
+	"mobileToolbarTextSelection": "已選取文字",
 	"ocrAIModel": "AI 模型",
 	"ocrAIModelTip": "選擇支援圖片輸入的模型；手動和自動辨識都會將圖片傳送給該提供商，可能產生費用",
 	"viewRefContent": "查看引用內容",

@@ -23,7 +23,7 @@ import {
     resolveEntryOrderWithBoundaryDefaults,
 } from "./order";
 import {getDocTreeEntryScope} from "./docTreeScope";
-import {getBuiltinProfileEntryVisibility, getProfileEntryVisibility} from "./profile";
+import {getBuiltinProfileEntryVisibility, getProfileEntryVisibility, getSavedEntryOrder} from "./profile";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {resolveToolbarItems} from "../../protyle/toolbar/entryVisibility";
 import {syncDockBarVisibility} from "../../layout/dock/barVisibility";
@@ -118,7 +118,7 @@ export const getEntryOrder = (parentPath: string, profile = getActiveEntryProfil
     if (parentPath === STATUS_BAR_ROOT_PATH) {
         return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile?.orders?.[parentPath], "spacer", separatorKeys);
     }
-    return resolveEntryOrder(defaultOrder, profile?.orders?.[parentPath], separatorKeys);
+    return resolveEntryOrder(defaultOrder, getSavedEntryOrder(profile, parentPath, defaultOrder), separatorKeys);
 };
 
 export const createEntryOrderSnapshot = (current = false) => {
@@ -180,7 +180,7 @@ export const setEntryOrderValue = (parentPath: string, order: string[]) => {
     const separatorKeys = new Set(nodes?.filter((item) => item.type === "separator").map((item) => item.key));
     profile.orders[parentPath] = mergeEntryOrderPreservingUnknown(
         defaultOrder,
-        profile.orders[parentPath],
+        getSavedEntryOrder(profile, parentPath, defaultOrder),
         order,
         separatorKeys,
     );

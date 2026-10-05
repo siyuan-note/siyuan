@@ -81,7 +81,7 @@ import {isMobile} from "../../util/functions";
 import {createFontSizePicker} from "../../protyle/toolbar/fontControls";
 import {applyMobileToolbarEntries} from "./toolbarEntries";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
-import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {MOBILE_TOOLBAR_NAMES} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
 import {isMobileLandscape} from "./orientation";
 import {restoreGutterBySelection} from "../../protyle/gutter/restore";
@@ -93,6 +93,7 @@ import {MOBILE_TOOLBAR_ACTION_NAMES, MOBILE_TOOLBAR_ACTIONS, MOBILE_TOOLBAR_INSE
 import {pauseMobileBarsScroll} from "./mobileBars";
 import {getBlockTypeSelection, openBlockTypeMenu, updateBlockTypeButton} from "../../protyle/toolbar/BlockType";
 import {TTextBlockSelection} from "../../protyle/toolbar/blockTypeCore";
+import {getMobileToolbarContextPath} from "../../config/entryVisibility/mobileToolbarContext";
 
 const getCurrentEditor = () => getMobileToolbarProtyle()?.getInstance() || getDocumentEditor();
 let toolbarProtyle: IProtyle;
@@ -106,9 +107,10 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
     const nodeElement = (range && hasClosestBlock(range.startContainer)) || undefined;
     const inCode = nodeElement?.classList.contains("code-block");
     const hasText = !!range && !!stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
+    const contextPath = getMobileToolbarContextPath(hasText);
     applyMobileToolbarEntries(element, toolbar, {
-        order: getEntryOrder(TOOLBAR_ENTRY_ROOT_PATH),
-        isVisible: key => isEntryVisible(`${TOOLBAR_ENTRY_ROOT_PATH}.${key}`),
+        order: getEntryOrder(contextPath),
+        isVisible: key => isEntryVisible(`${contextPath}.${key}`),
         isAvailable: name => {
             if (hasText && (name === "block-type" || MOBILE_TOOLBAR_ACTION_NAMES.includes(name))) {
                 return false;

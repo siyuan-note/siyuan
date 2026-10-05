@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "Žiadny vybratý text",
+	"mobileToolbarTextSelection": "Vybratý text",
 	"ocrAIModel": "Model AI",
 	"ocrAIModelTip": "Vyberte model podporujúci obrázky; ručné aj automatické rozpoznávanie odosiela obrázky poskytovateľovi a môže byť spoplatnené",
 	"viewRefContent": "Zobraziť odkazovaný obsah",

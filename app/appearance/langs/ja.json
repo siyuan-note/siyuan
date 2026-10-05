@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "テキスト未選択",
+	"mobileToolbarTextSelection": "テキスト選択中",
 	"ocrAIModel": "AI モデル",
 	"ocrAIModelTip": "画像入力に対応するモデルを選択します。手動認識と自動認識では画像をプロバイダーに送信し、料金が発生する場合があります",
 	"viewRefContent": "参照先の内容を表示",

@@ -1,4 +1,6 @@
 {
+	"mobileToolbarNoSelection": "Brak zaznaczonego tekstu",
+	"mobileToolbarTextSelection": "Zaznaczony tekst",
 	"ocrAIModel": "Model AI",
 	"ocrAIModelTip": "Wybierz model obsługujący obrazy; rozpoznawanie ręczne i automatyczne wysyła obrazy do dostawcy i może wiązać się z opłatami",
 	"viewRefContent": "Wyświetl treść, do której prowadzi odnośnik",

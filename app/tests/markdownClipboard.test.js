@@ -11,6 +11,7 @@ const sources = () => {
     return {
         clipboard: compile("protyle/util/markdownClipboard.ts"),
         paste: compile("protyle/util/paste.ts"),
+        pictureImages: compile("protyle/util/pictureImages.ts"),
         localAssets: compile("protyle/upload/htmlLocalAssets.ts"),
         uploadResult: compile("protyle/upload/uploadResult.ts"),
         fixture: JSON.parse(readFileSync(path.join(__dirname, "fixtures/doubao-clipboard.json"), "utf8")),
@@ -109,6 +110,7 @@ const runCases = async source => {
         const mocks = {
             "../../constants": {Constants: {ZWSP: "\u200b"}},
             "./markdownClipboard": clipboard,
+            "./pictureImages": load(source.pictureImages),
             "../runtimeCapabilities": {
                 getProtyleBlockDOMSanitizer: () => restricted ? value => value : undefined,
                 isProtyleRichHTMLPasteEnabled: () => restricted,

@@ -40,6 +40,7 @@ test("mobile reference remains available at a caret without exposing other selec
                     stripSemanticMarkersFromRangeText: () => hasText ? "selected" : "",
                     Constants: {ZWSP: "\u200b"}, getEntryOrder: (): string[] => [], isEntryVisible: () => false,
                     TOOLBAR_ENTRY_ROOT_PATH: "editor.toolbar", MOBILE_TOOLBAR_NAMES: ["block-ref", "strong"],
+                    MOBILE_TOOLBAR_ACTION_NAMES: [],
                     applyMobileToolbarEntries: (_element: unknown, _toolbar: unknown, options: {
                         isAvailable: (name: string) => boolean, isVisible: (key: string) => boolean,
                     }) => {

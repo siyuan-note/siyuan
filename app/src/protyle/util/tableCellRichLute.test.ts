@@ -14,12 +14,13 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const api = new Function("Constants", source + "\nreturn {getAgentLute, configureAVRichTextLute, getTableCellEditorLute, " +
         "canEnterCodeBlock, hasCodeBlockFence, getTableCellInlineHTML, serializeTableCellRich, " +
         "updateTableCellEditingValue, getTableCellRichBlockDOM, sanitizeAVRichTextBlockDOM, restoreTableVirtualizationDOM, " +
-        "copyTableCellContent, renderTableCellRich};")({
+        "copyTableCellContent, renderTableCellRich, prepareInlineElementBoundaryMutation};")({
         CUSTOM_SY_CODE_TAB_SPACES: codeTabAttribute,
     }) as
         typeof import("../render/setLute") & typeof import("../render/av/richTextValue") &
         typeof import("./tableCellRichLute") & typeof import("../wysiwyg/codeBlockEnter") &
-        typeof import("./tableCellRich") & typeof import("../render/av/richText") & typeof import("./tableVirtualizationDOM");
+        typeof import("./tableCellRich") & typeof import("../render/av/richText") & typeof import("./tableVirtualizationDOM") &
+        typeof import("./inlineElementBoundary");
     const base = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const lute = api.getTableCellEditorLute(base);

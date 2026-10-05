@@ -22,6 +22,7 @@ const sources = () => {
         compile("protyle/render/tabsVisibility.ts", ["isHiddenTabContent"]),
         compile("protyle/render/tabsRender.ts"),
         compile("protyle/wysiwyg/tabsFocus.ts"),
+        compile("protyle/wysiwyg/tabsReading.ts"),
         compile("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]),
         compile("protyle/util/tabsCopy.ts", ["preserveTabTask"]),
         compile("protyle/wysiwyg/transactionUpdate.ts"),

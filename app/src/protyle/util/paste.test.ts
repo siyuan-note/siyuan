@@ -5,6 +5,7 @@ import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {getAVRichTextSafeURL} from "../render/av/richTextValue";
+import {normalizePictureImages} from "./pictureImages";
 
 // 执行粘贴入口，替换剪贴板和上传接口，检查图片不会在受限片段中被丢弃。
 const source = ts.transpileModule(readFileSync(join(process.cwd(), "src/protyle/util/paste.ts"), "utf8"), {
@@ -21,6 +22,7 @@ const createHarness = (disabled = false, richPaste = false) => {
     let checkedBlockDOM = "";
     const restrictedFallback = new Error("restricted fallback");
     const mocks: Record<string, unknown> = {
+        "./pictureImages": {normalizePictureImages},
         "../../constants": {Constants: {SIYUAN_ASSETS_IMAGE: [".png", ".jpg"]}},
         "../runtimeCapabilities": {
             getProtyleBlockDOMSanitizer: () => (html: string) => html,
@@ -193,6 +195,7 @@ describe("restricted cell selected text paste", () => {
                 isUploadInsertPositionAvailable: () => true,
             },
             "./selection": {getEditorRange: () => range},
+            "./pictureImages": {normalizePictureImages},
             "./tableCellRichContext": {getTableCellRichContext: () => options.tableCell ? {} : undefined},
             "./hasClosest": {hasClosestBlock: () => block},
             "./compatibility": {isInHarmony: () => false},
@@ -212,7 +215,9 @@ describe("restricted cell selected text paste", () => {
         };
         const module = {exports: {}};
         runInNewContext(source, {module, exports: module.exports, require: (id: string) => mocks[id] || {},
-            DOMParser: class {parseFromString() {return {querySelector: (): null => null, body: {innerHTML: ""}};}},
+            DOMParser: class {parseFromString() {
+                return {querySelector: (): null => null, querySelectorAll: (): Element[] => [], body: {innerHTML: ""}};
+            }},
             Lute: {Sanitize: (value: string) => value},
             window: {siyuan: {languages: {cellPasteUnsupported: "Unsupported: ${x}"}}},
         });

@@ -108,15 +108,20 @@ const browserCases = async (layoutSource: string, exportSource: string, mobile: 
     };
     const exported: {exportImage: (id: string, copyOnly?: boolean) => void} = new Function("exports", "require",
         `${exportSource}; return exports;`)({}, (name: string) => dependencies[name] || {});
-    const waitForActions = async () => {
-        for (let i = 0; i < 500; i++) {
+    const waitForActions = async (phase: string, timeout = 5000) => {
+        const started = Date.now();
+        while (Date.now() - started < timeout) {
             if (!document.body.contains(dialog.element) ||
                 !(dialog.element.querySelector('[data-type="copy"]') as HTMLButtonElement).disabled) {
                 return;
             }
             await new Promise(resolve => setTimeout(resolve, 10));
         }
-        check.fail("Export actions did not become available");
+        check.fail("Export actions did not become available: " + JSON.stringify({
+            phase, elapsedMs: Date.now() - started, engine, mobile,
+            visibility: document.visibilityState, messages, captured: !!captured,
+            table: dialog.element.querySelector("table")?.getBoundingClientRect().toJSON(),
+        }));
     };
     const table = (columns: number, wide = true) => `<div class="table" data-node-id="table"><div><table><tbody><tr>${
         Array.from({length: columns}, (_, index) => `<td${wide ? ' style="min-width:400px"' : ""}>column ${index}
@@ -128,7 +133,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         captured = undefined;
         messages.length = 0;
         exported.exportImage("root", copyOnly);
-        await waitForActions();
+        await waitForActions(copyOnly ? "automatic copy" : "preview", copyOnly ? 15000 : 5000);
         return dialog.element.querySelector<HTMLElement>(".b3-dialog__content");
     };
     const verifyCaptured = async () => {
@@ -153,7 +158,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
     };
     const capture = async (type = "copy") => {
         (dialog.element.querySelector(`[data-type="${type}"]`) as HTMLButtonElement).click();
-        await waitForActions();
+        await waitForActions(type, 15000);
         await verifyCaptured();
     };
     for (const renderer of ["html", "modern"]) {
@@ -172,9 +177,17 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         check.ok(wide.querySelector("table").getBoundingClientRect().right <= imageElement.getBoundingClientRect().right,
             "Image must cover the whole table");
         wide.querySelector<HTMLElement>("table").style.width = "2200px";
-        await new Promise(resolve => setTimeout(resolve, 100));
+        const deadline = Date.now() + 5000;
+        while (wide.querySelector("table").getBoundingClientRect().right > imageElement.getBoundingClientRect().right &&
+            Date.now() < deadline) {
+            await new Promise(resolve => setTimeout(resolve, 25));
+        }
         check.ok(wide.querySelector("table").getBoundingClientRect().right <= imageElement.getBoundingClientRect().right,
-            "Preview border must follow table width changes without resizing the dialog");
+            "Preview border must follow table width changes without resizing the dialog: " + JSON.stringify({
+                renderer, mobile, visibility: document.visibilityState, minWidth: imageElement.style.minWidth,
+                table: wide.querySelector("table").getBoundingClientRect().toJSON(),
+                image: imageElement.getBoundingClientRect().toJSON(),
+            }));
         wide.scrollLeft = wide.scrollWidth - wide.clientWidth;
         const oldScroll = wide.scrollLeft;
         await capture();
@@ -218,7 +231,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         large.querySelector<HTMLElement>("table").style.width = "20000px";
         dialog.resize();
         (dialog.element.querySelector('[data-type="copy"]') as HTMLButtonElement).click();
-        await waitForActions();
+        await waitForActions("oversized image");
         check.equal(captured, undefined);
         check.ok(messages.includes("Image too large"), "Oversized image must show a size error");
         check.equal(large.style.overflow, "");
@@ -250,7 +263,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
 
 test("wide PNG exports preserve text and all columns in both screenshot engines and viewport sizes", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 60000,
+    timeout: 95000,
 }, async () => {
     const sass = require("sass");
     const css = sass.compileString('@use "component/dialog"; @use "protyle/wysiwyg"; ' +
@@ -280,7 +293,7 @@ app.whenReady().then(async () => {
         for (const mobile of [false, true]) {
             phase = "load viewport " + mobile;
             win = new BrowserWindow({show:false,width:mobile ? 390 : 1000,height:850,
-                webPreferences:{nodeIntegration:true,contextIsolation:false}});
+                webPreferences:{nodeIntegration:true,contextIsolation:false,backgroundThrottling:false}});
             await win.loadURL("data:text/html,<html><head></head><body></body></html>");
             await win.webContents.executeJavaScript(${JSON.stringify(`const style = document.createElement("style");
 style.textContent = ${JSON.stringify(css)}; document.head.append(style);
@@ -304,10 +317,10 @@ ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(so
     delete env.ELECTRON_RUN_AS_NODE;
     try {
         const result = await promisify(execFile)(require("electron") as unknown as string, [script], {
-            env, timeout: 55000, windowsHide: true,
+            env, timeout: 90000, windowsHide: true,
         });
-        assert.match(result.stdout, /Image exports passed \(mobile=false\)/);
-        assert.match(result.stdout, /Image exports passed \(mobile=true\)/);
+        assert.match(result.stdout, /Image exports passed \(mobile=false\)/, result.stderr);
+        assert.match(result.stdout, /Image exports passed \(mobile=true\)/, result.stderr);
     } finally {
         rmSync(temporary, {recursive: true, force: true});
     }

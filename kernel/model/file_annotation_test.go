@@ -163,7 +163,7 @@ func TestFileAnnotationExportRejectsInvalidData(t *testing.T) {
 	util.WorkspaceDir = t.TempDir()
 	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	t.Cleanup(func() { util.WorkspaceDir, util.DataDir = oldWorkspace, oldDataDir })
-	for _, data := range []string{"invalid", "{}", `{"` + testFileAnnotationID + `":{"pages":[]}}`,
+	for _, data := range []string{"invalid", `{"` + testFileAnnotationID + `":{}}`, `{"` + testFileAnnotationID + `":{"pages":[]}}`,
 		`{"` + testFileAnnotationID + `":{"pages":[{"index":-1}]}}`} {
 		writeFileAnnotationTestAsset(t, filepath.Join(util.DataDir, "assets/a.pdf"), []byte(data))
 		node := newFileAnnotationTestNode("assets/a.pdf/" + testFileAnnotationID)

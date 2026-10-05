@@ -6,6 +6,12 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 ## 1. Non-negotiable constraints
 
+### Verify the code baseline before repository tasks
+
+- Before each new repository task, follow the branch rules in section 2, fetch the relevant remote refs, and verify the task's code baseline before analysis or other work. Respect explicitly requested commits, tags, or pull requests
+- Create new task branches from the freshly fetched remote target branch. Automatically fast-forward an existing branch only when its working tree is clean and it is merely behind. If synchronization is blocked, preserve existing work and report the limitation; do not discard changes, automatically stash or rebase, or create merge commits
+- Reuse the verified baseline for follow-ups in the same task; recheck after a substantial pause, a repository or branch change, or when newer commits could affect the task. Unrelated conversation needs no fetch
+
 ### Requirement evaluation
 
 Before implementing a requirement, evaluate its premise and approach with effort proportional to its complexity and risk

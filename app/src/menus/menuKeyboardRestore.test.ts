@@ -50,6 +50,7 @@ const setup = () => {
         fullscreenCloseTimeout: undefined,
         isMobile: () => true,
         applyMenuConfig: () => {},
+        setPopoverMenuOpen: () => {},
         updateMenuItemGroupClasses: () => {},
         activeBlur: (force: boolean) => events.push(force ? "hide-forced" : "hide"),
         waitForSheetViewport,

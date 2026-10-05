@@ -15,6 +15,12 @@ import {isTouchDevice} from "../util/functions";
 import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../util/escape";
 import {isListItemActionElement} from "../protyle/wysiwyg/listContext";
 import {getImageTooltip} from "../protyle/render/imageTooltip";
+import {
+    cancelPendingPopover,
+    getPopoverGeneration,
+    isPopoverMenuBlocked,
+    setPopoverCancellationHandler,
+} from "./popoverLifecycle";
 /// #if !MOBILE
 import {getInstanceById} from "../layout/util";
 import {Editor} from "../editor";
@@ -23,7 +29,6 @@ import {Tab} from "../layout/Tab";
 
 let popoverTargetElement: HTMLElement;
 let popoverGeneration = 0;
-let cancelPopoverTimers: () => void;
 const popoverInteractions = new Set<HTMLElement>();
 
 const isPopoverSuspended = () => window.siyuan.dragElement || document.onmousemove || popoverInteractions.size > 0;
@@ -31,7 +36,7 @@ const isPopoverSuspended = () => window.siyuan.dragElement || document.onmousemo
 export const suspendBlockPopover = (root: HTMLElement, event: PointerEvent) => {
     popoverInteractions.add(root);
     popoverGeneration++;
-    cancelPopoverTimers?.();
+    cancelPendingPopover(false);
     tooltipAbortController?.abort();
     tooltipAbortController = null;
     hideTooltip();
@@ -52,12 +57,59 @@ export const initBlockPopover = (app: App) => {
     let timeoutHide: number;
     let penTimeout: number;
     let penTimeoutHide: number;
-    cancelPopoverTimers = () => {
+    const cancelPopoverTimers = () => {
         clearTimeout(timeout);
         clearTimeout(timeoutHide);
         clearTimeout(penTimeout);
         clearTimeout(penTimeoutHide);
     };
+    let waitForMove = false;
+    let pointerX: number;
+    let pointerY: number;
+    setPopoverCancellationHandler(requireMove => {
+        cancelPopoverTimers();
+        if (requireMove) {
+            waitForMove = true;
+        }
+    });
+    const cancelOnPress = (event: MouseEvent) => {
+        if (event.type !== "contextmenu") {
+            pointerX = event.clientX;
+            pointerY = event.clientY;
+        }
+        cancelPendingPopover();
+    };
+    document.addEventListener("pointerdown", cancelOnPress, {capture: true, passive: true});
+    document.addEventListener("mousedown", cancelOnPress, {capture: true, passive: true});
+    document.addEventListener("contextmenu", cancelOnPress, {capture: true, passive: true});
+    document.addEventListener("pointermove", (event: PointerEvent & {target: HTMLElement}) => {
+        const moved = pointerX !== event.clientX || pointerY !== event.clientY;
+        pointerX = event.clientX;
+        pointerY = event.clientY;
+        if (!waitForMove || !moved || event.buttons !== 0 || event.pointerType === "touch" ||
+            !window.siyuan.config || !window.siyuan.menus || isPopoverSuspended() ||
+            isPopoverMenuBlocked(event.target)) {
+            return;
+        }
+        waitForMove = false;
+        const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
+            hasClosestByClassName(event.target, "av__cell");
+        if (event.pointerType === "pen" && window.JSAndroid) {
+            if (window.siyuan.config.editor.floatWindowMode === 0 && !window.siyuan.shiftIsPressed) {
+                penTimeout = window.setTimeout(() => {
+                    if (getTarget(event, aElement)) {
+                        showPopover(app, false, true);
+                    }
+                }, window.siyuan.config.editor.floatWindowDelay);
+            }
+        } else if (window.siyuan.config.editor.floatWindowMode === 0 && !window.siyuan.shiftIsPressed) {
+            timeout = window.setTimeout(() => {
+                if (getTarget(event, aElement) && !isTouchDevice()) {
+                    showPopover(app, false, true);
+                }
+            }, window.siyuan.config.editor.floatWindowDelay);
+        }
+    }, {capture: true, passive: true});
     let lastPointerMoveLogTime = 0;
     const logAndroidInputEvent = (event: MouseEvent | PointerEvent) => {
         if (!window.JSAndroid?.logInputEvent) {
@@ -87,6 +139,10 @@ export const initBlockPopover = (app: App) => {
     // 编辑器内容块引用/backlinks/tag/bookmark/套娃中使用
     document.addEventListener("mouseover", (event: MouseEvent & { target: HTMLElement, path: HTMLElement[] }) => {
         logAndroidInputEvent(event);
+        if (!waitForMove) {
+            pointerX = event.clientX;
+            pointerY = event.clientY;
+        }
         if (!window.siyuan.config || !window.siyuan.menus ||
             // 拖拽时禁止
             isPopoverSuspended()) {
@@ -357,12 +413,15 @@ export const initBlockPopover = (app: App) => {
                 clearTimeout(timeout);
             }
         }, Constants.TIMEOUT_INPUT);
+        if (waitForMove || event.buttons !== 0 || isPopoverMenuBlocked(event.target)) {
+            return;
+        }
         timeout = window.setTimeout(() => {
             if (!getTarget(event, aElement) || isTouchDevice()) {
                 return;
             }
             clearTimeout(timeoutHide);
-            showPopover(app);
+            showPopover(app, false, true);
         }, window.siyuan.config.editor.floatWindowDelay);
     });
     if (window.JSAndroid) {
@@ -380,6 +439,7 @@ export const initBlockPopover = (app: App) => {
             if (event.buttons !== 0 ||
                 !window.siyuan.config || !window.siyuan.menus ||
                 isPopoverSuspended() ||
+                waitForMove || isPopoverMenuBlocked(event.target) ||
                 window.siyuan.config.editor.floatWindowMode !== 0 || window.siyuan.shiftIsPressed) {
                 return;
             }
@@ -403,7 +463,7 @@ export const initBlockPopover = (app: App) => {
                 }
                 clearTimeout(penTimeoutHide);
                 clearTimeout(timeoutHide);
-                showPopover(app);
+                showPopover(app, false, true);
             }, window.siyuan.config.editor.floatWindowDelay);
         }, {capture: true, passive: true});
         document.addEventListener("pointermove", (event: PointerEvent) => {
@@ -417,6 +477,7 @@ export const initBlockPopover = (app: App) => {
         const cancelPenHover = (event: PointerEvent) => {
             logAndroidInputEvent(event);
             if (event.pointerType === "pen") {
+                cancelPendingPopover(false);
                 clearTimeout(penTimeout);
                 clearTimeout(penTimeoutHide);
             }
@@ -619,13 +680,15 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
     return true;
 };
 
-export const showPopover = async (app: App, showRef = false) => {
+export const showPopover = async (app: App, showRef = false, automatic = false) => {
     if (isPopoverSuspended() || !popoverTargetElement ||
+        (automatic && isPopoverMenuBlocked(popoverTargetElement)) ||
         (window.siyuan.menus.menu.data && window.siyuan.menus.menu.data === popoverTargetElement)) {
         return;
     }
     const targetElement = popoverTargetElement;
-    const generation = popoverGeneration;
+    const generation = getPopoverGeneration();
+    const interactionGeneration = popoverGeneration;
     let refDefs: IRefDefs[] = [];
     let originalRefBlockIDs: Record<string, string>;
     const notebookId = getPopoverNotebookId();
@@ -715,7 +778,9 @@ export const showPopover = async (app: App, showRef = false) => {
     }
 
     // 交互开始后，即使请求在松手后才返回，也不能重新打开交互前的浮窗。
-    if (generation !== popoverGeneration || targetElement !== popoverTargetElement ||
+    if (interactionGeneration !== popoverGeneration || (automatic && generation !== getPopoverGeneration()) ||
+        targetElement !== popoverTargetElement ||
+        (automatic && isPopoverMenuBlocked(targetElement)) ||
         !targetElement.isConnected || isPopoverSuspended() || refDefs.length === 0) {
         return;
     }
@@ -737,6 +802,8 @@ export const showPopover = async (app: App, showRef = false) => {
             isBacklink: showRef || popoverTargetElement.classList.contains("protyle-attr--refcount") || popoverTargetElement.classList.contains("counter"),
             refDefs,
             originalRefBlockIDs,
+            canShow: automatic ? () => generation === getPopoverGeneration() && targetElement.isConnected &&
+                !isPopoverSuspended() && !isPopoverMenuBlocked(targetElement) : undefined,
         }));
     }
     // 不能清除，否则ctrl 后 shift 就 无效 popoverTargetElement = undefined;

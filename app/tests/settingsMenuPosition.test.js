@@ -28,6 +28,7 @@ for (const [width, height] of [[1000, 760], [493, 376]]) {
                 "../config/entryVisibility/runtime": {applyMenuEntryVisibility() {}},
                 "./menuGroup": {updateMenuItemGroupClasses() {}},
                 "../plugin/EventBusCore": {forEachPluginSubscriber() {}},
+                "../block/popoverLifecycle": {setPopoverMenuOpen() {}},
             });
             const classes = new Set(["fn__none"]);
             const items = {innerHTML: "<input><div>Fonts</div>", style: {},

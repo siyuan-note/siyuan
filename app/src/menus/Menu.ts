@@ -13,6 +13,7 @@ import {escapeAttr} from "../util/escape";
 import {setMenuInputCurrent} from "./menuKeyboard";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {activeBlur} from "../mobile/util/keyboardToolbar";
+import {setPopoverMenuOpen} from "../block/popoverLifecycle";
 /// #if !MOBILE
 import {applyMenuEntryVisibility} from "../config/entryVisibility/runtime";
 /// #endif
@@ -544,6 +545,7 @@ export class Menu {
         this.element.lastElementChild.classList.remove("b3-menu__items--menu");
         this.element.lastElementChild.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全
         this.element.classList.add("fn__none");
+        setPopoverMenuOpen(this.element, false);
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet", "b3-menu--fit");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
@@ -581,6 +583,7 @@ export class Menu {
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
+        setPopoverMenuOpen(this.element, true);
         this.emitCommonMenu("common-menu-open", {
             name: this.element.getAttribute("data-name"),
             from: this.element.getAttribute("data-from"),
@@ -673,6 +676,7 @@ export class Menu {
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
+        setPopoverMenuOpen(this.element, true);
         this.stopTrackingTargetPosition();
         this.position = undefined;
         this.emitCommonMenu("common-menu-open", {

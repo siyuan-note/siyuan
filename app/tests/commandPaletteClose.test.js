@@ -105,6 +105,7 @@ function fixture(delay, mobile = false) {
         "../util/genID": { genUUID: () => "palette" }, "../util/zIndex": zIndex,
         "./moveResize": { moveResize() { } }, "../util/functions": { isMobile: () => false },
         "../constants": { Constants },
+        "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
     });
     const lifecycle = load("command/paletteCore.ts");
     const command = { id: "core.insert.assets", label: () => "Assets" };

@@ -15,6 +15,7 @@ const runCases = async (source) => {
         "../util/functions": {isMobile: () => false},
         "../protyle/util/compatibility": {isNotCtrl: () => true},
         "../constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
+        "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
     };
     const exports = {};
     new Function("require", "exports", source)(name => {
@@ -197,6 +198,7 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
         "./moveResize": {moveResize() {}},
         "../util/functions": {isMobile: () => mobile},
         "../constants": {Constants: constants},
+        "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "../protyle/util/selection": {focusByRange: range => {
             window.getSelection().removeAllRanges();
             window.getSelection().addRange(range);

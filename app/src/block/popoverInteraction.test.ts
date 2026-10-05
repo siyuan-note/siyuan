@@ -31,6 +31,9 @@ class TestElement {
         if (selector.startsWith(".") && this.classes.has(selector.substring(1))) {
             return this;
         }
+        if (selector === '[data-dialog-closing="true"]' && this.dataset.dialogClosing === "true") {
+            return this;
+        }
         return this.parentElement?.closest(selector) || null;
     }
     querySelector(selector: string): TestElement {
@@ -108,6 +111,7 @@ const createHarness = (android = false) => {
         typeof import("./popoverLifecycle");
     const api = loadModule("src/block/popover.ts", globals, {
         "./popoverLifecycle": lifecycle,
+        "./panelOwnership": loadModule("src/block/panelOwnership.ts", globals, {}),
         "./Panel": {BlockPanel: class {
             element = element({"data-pin": "false"});
             editors: unknown[] = [];
@@ -196,9 +200,9 @@ test("crossing a child before pointermove still resumes after a click", async ()
 });
 
 test("document icons, block references and both SiYuan link forms share cancellation and recovery", async () => {
-    for (const kind of ["reference", "tree", "breadcrumb", "database", "search", "bookmark", "gutter", "hint", "link", "url"]) {
+    for (const kind of ["reference", "tree", "breadcrumb", "database", "search", "recent", "bookmark", "gutter", "hint", "link", "url"]) {
         const h = createHarness();
-        if (["tree", "breadcrumb", "search", "bookmark", "gutter", "hint"].includes(kind)) {
+        if (["tree", "breadcrumb", "search", "recent", "bookmark", "gutter", "hint"].includes(kind)) {
             h.ref.attributes = {"data-id": kind};
             h.ref.classes.add("popover__block");
         } else if (kind === "link") {
@@ -222,6 +226,47 @@ test("document icons, block references and both SiYuan link forms share cancella
         await h.advance();
         assert.equal(h.panels.length, 1, kind);
     }
+});
+
+test("recent-document hover cannot start or finish after its dialog closes or its icon is replaced", async () => {
+    for (const state of ["closing", "detached"]) {
+        for (const phase of ["timer", "panel"]) {
+            const h = createHarness();
+            const dialog = h.element();
+            const icon = h.element({"data-id": "recent-document"}, ["popover__block"], dialog);
+            h.fire("mouseover", icon);
+            if (phase === "panel") {
+                await h.advance();
+                assert.equal(h.panels.length, 1);
+                assert.equal(h.panels[0].refDefs[0].refID, "recent-document");
+                assert.equal(h.panels[0].canShow(), true);
+            }
+            if (state === "closing") {
+                dialog.dataset.dialogClosing = "true";
+            } else {
+                icon.isConnected = false;
+            }
+            await h.advance();
+            if (phase === "timer") {
+                assert.equal(h.panels.length, 0);
+            } else {
+                assert.equal(h.panels[0].canShow(), false);
+            }
+        }
+    }
+});
+
+test("closing dialog anchors reject late explicit backlink queries without changing modifier semantics", async () => {
+    const h = createHarness();
+    const dialog = h.element();
+    const icon = h.element({"data-id": "recent-document"}, ["popover__block"], dialog);
+    h.siyuan.shiftIsPressed = true;
+    h.fire("mouseover", icon);
+    assert.equal(h.requests.length, 1);
+    dialog.dataset.dialogClosing = "true";
+    h.requests[0].resolve({code: 0, data: {refDefs: [{refID: "backlink"}]}});
+    await h.advance();
+    assert.equal(h.panels.length, 0);
 });
 
 test("contextmenu capture and menu lifecycle cancel timers without pointer events", async () => {
@@ -417,7 +462,7 @@ test("hover preferences, excluded targets and mindmap suspension remain effectiv
     }
 });
 
-test("the real Panel first-load callback discards canceled hover and leaves explicit or opened panels alone", () => {
+test("the real Panel first-load callback rejects canceled hover and unavailable anchors without closing menus", () => {
     const globals = {
         window: {siyuan: {zIndex: 5, languages: {}, config: {keymap: {
             general: {closeTab: {custom: ""}}, editor: {general: {openInNewTab: {custom: ""}}},
@@ -426,12 +471,13 @@ test("the real Panel first-load callback discards canceled hover and leaves expl
         ResizeObserver: class { observe() {} }, IntersectionObserver: class { observe() {} },
     };
     const module = loadModule("src/block/Panel.ts", globals, {
+        "./panelOwnership": loadModule("src/block/panelOwnership.ts", globals, {}),
         "../protyle/util/compatibility": {updateHotkeyAfterTip: () => ""},
         "../layout/getTopBarHeight": {getTopBarHeight: () => 0},
         "./panelPosition": {positionBlockPanel() {}},
     }) as unknown as {BlockPanel: {prototype: {render: () => void}}};
     for (const automatic of [false, true]) {
-        for (const cancelled of [false, true]) {
+        for (const state of ["available", "cancelled", "closing", "detached"]) {
             const element = new TestElement();
             const editorElement = new TestElement();
             const content = new TestElement();
@@ -453,12 +499,19 @@ test("the real Panel first-load callback discards canceled hover and leaves expl
                 },
             };
             module.BlockPanel.prototype.render.call(panel);
-            valid = !cancelled;
+            valid = state !== "cancelled";
+            if (state === "closing") {
+                panel.targetElement.dataset.dialogClosing = "true";
+            } else if (state === "detached") {
+                panel.targetElement.isConnected = false;
+            }
             after();
-            assert.equal(destroyed, automatic && cancelled);
-            assert.equal(element.classes.has("block__popover--open"), !(automatic && cancelled));
+            const unavailable = (automatic && state === "cancelled") || ["closing", "detached"].includes(state);
+            assert.equal(destroyed, unavailable);
+            assert.equal(element.classes.has("block__popover--open"), !unavailable);
             if (!destroyed) {
                 valid = false;
+                panel.targetElement.isConnected = false;
                 after();
                 assert.equal(destroyed, false, "already displayed panels are not canceled later");
             }

@@ -27,6 +27,7 @@ import {
 } from "./panelRemoval";
 import {getBlockPanelLoadPlan} from "./panelLoad";
 import {positionBlockPanel} from "./panelPosition";
+import {isBlockPanelTargetAvailable, registerBlockPanelOwner} from "./panelOwnership";
 
 const BLOCK_PANEL_EDITOR_MIN_HEIGHT = 155;
 
@@ -73,6 +74,7 @@ export class BlockPanel {
 
         this.element = document.createElement("div");
         this.element.classList.add("block__popover");
+        registerBlockPanelOwner(this.element, this.targetElement);
 
         const parentElement = hasClosestByClassName(this.targetElement, "block__popover", true);
         let level = 1;
@@ -595,7 +597,9 @@ export class BlockPanel {
                     if (!document.contains(this.element)) {
                         return;
                     }
-                    if (this.canShow && !this.canShow()) {
+                    if ((this.canShow && !this.canShow()) ||
+                        (!this.element.classList.contains("block__popover--open") && this.targetElement &&
+                            !isBlockPanelTargetAvailable(this.targetElement))) {
                         // 尚未展示的浮窗不能关闭其他浮窗上的菜单。
                         this.destroy(false);
                         return;

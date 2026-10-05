@@ -7,9 +7,11 @@ import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {getAllDocks} from "../layout/getAll";
 import {getDockHotkey} from "../layout/dock/hotkey";
 import {Dialog} from "../dialog";
-import {focusByRange} from "../protyle/util/selection";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
+import {destroyDialogBlockPanels} from "../block/panelOwnership";
+
+const recentDocsRenderVersions = new WeakMap<Element, number>();
 
 const renderRecentDocsContent = async (data: {
     rootID: string,
@@ -19,10 +21,14 @@ const renderRecentDocsContent = async (data: {
     closedAt?: number,
     openAt?: number,
 }[], element: Element, key?: string) => {
+    const version = (recentDocsRenderVersions.get(element) || 0) + 1;
+    recentDocsRenderVersions.set(element, version);
     let tabHtml = "";
     let index = 0;
+    let firstRootID: string;
     data.forEach((item) => {
         if (!key || (item.title || "").toLowerCase().includes(key.toLowerCase())) {
+            firstRootID = firstRootID || item.rootID;
             tabHtml += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
     ${getFileTreeIconHTML(item.icon, "file", "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${escapeHtml(item.title || "")}</span>
@@ -33,7 +39,7 @@ const renderRecentDocsContent = async (data: {
     let switchPath = "";
     if (tabHtml) {
         const pathResponse = await fetchSyncPost("/api/filetree/getFullHPathByID", {
-            id: data[0].rootID // 过滤后的第一个文档 ID
+            id: firstRootID
         });
         if (pathResponse.code === 0 && typeof pathResponse.data === "string") {
             switchPath = escapeHtml(pathResponse.data);
@@ -69,12 +75,21 @@ const renderRecentDocsContent = async (data: {
         dockHtml = '<ul class="b3-list b3-list--background" style="overflow: auto;width: 200px;">' + dockHtml + "</ul>";
     }
 
+    if (!element.isConnected || element.hasAttribute("data-dialog-closing") ||
+        recentDocsRenderVersions.get(element) !== version) {
+        return;
+    }
+    destroyDialogBlockPanels(element as HTMLElement);
     const pathElement = element.querySelector(".switch-doc__path");
     pathElement.innerHTML = switchPath;
     pathElement.previousElementSibling.innerHTML = `<div class="fn__flex fn__flex-1" style="overflow: auto;">
     ${dockHtml}
     <ul style="${isWindow() ? "border-left: 0;" : ""}min-width: 360px;" class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
 </div>`;
+    element.querySelectorAll<HTMLElement>("li[data-node-id] > .b3-list-item__graphic").forEach(icon => {
+        icon.classList.add("popover__block");
+        icon.dataset.id = icon.parentElement.dataset.nodeId;
+    });
 };
 
 export const openRecentDocs = (openOnly = false) => {
@@ -91,10 +106,6 @@ export const openRecentDocs = (openOnly = false) => {
     }
     const sortBy = window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type as TRecentDocsSort;
     fetchPost("/api/storage/getRecentDocs", {sortBy}, (response) => {
-        let range: Range;
-        if (getSelection().rangeCount > 0) {
-            range = getSelection().getRangeAt(0);
-        }
         const dialog = new Dialog({
             positionId: Constants.DIALOG_RECENTDOCS,
             title: `<div class="fn__flex">
@@ -117,11 +128,6 @@ export const openRecentDocs = (openOnly = false) => {
     <div class="switch-doc__path"></div>
 </div>`,
             height: "80vh",
-            destroyCallback: () => {
-                if (range && range.getBoundingClientRect().height !== 0) {
-                    focusByRange(range);
-                }
-            }
         });
         const sortSelect = dialog.element.querySelector("#recentDocsSort") as HTMLSelectElement;
         sortSelect.value = sortBy;
@@ -149,9 +155,15 @@ export const openRecentDocs = (openOnly = false) => {
         });
 
         // 添加排序下拉框事件监听
+        let sortRequestId = 0;
         sortSelect.addEventListener("change", () => {
+            const requestId = ++sortRequestId;
             // 重新调用 API 获取排序后的数据
             fetchPost("/api/storage/getRecentDocs", {sortBy: sortSelect.value}, (newResponse) => {
+                if (requestId !== sortRequestId || !dialog.element.isConnected ||
+                    dialog.element.hasAttribute("data-dialog-closing")) {
+                    return;
+                }
                 response = newResponse;
                 renderRecentDocsContent(newResponse.data, dialog.element, searchElement.value);
             });

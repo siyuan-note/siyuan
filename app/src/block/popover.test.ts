@@ -199,7 +199,7 @@ test("mindmap interaction cancels pending popovers and preserves hover preferenc
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 20000,
 }, async () => {
-    const source = ["../protyle/util/hasClosest.ts", "../util/escape.ts", "../protyle/render/imageTooltip.ts", "popoverLifecycle.ts", "popover.ts"].map(file => transpileModule(
+    const source = ["../protyle/util/hasClosest.ts", "../util/escape.ts", "../protyle/render/imageTooltip.ts", "panelOwnership.ts", "popoverLifecycle.ts", "popover.ts"].map(file => transpileModule(
         readFileSync(path.join(__dirname, file), "utf8").replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}},
     ).outputText).join("\n");

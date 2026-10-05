@@ -21,6 +21,7 @@ import {
     isPopoverMenuBlocked,
     setPopoverCancellationHandler,
 } from "./popoverLifecycle";
+import {isBlockPanelTargetAvailable} from "./panelOwnership";
 /// #if !MOBILE
 import {getInstanceById} from "../layout/util";
 import {Editor} from "../editor";
@@ -664,7 +665,7 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
             }
         }
     }
-    if (!popoverTargetElement || window.siyuan.altIsPressed ||
+    if (!popoverTargetElement || !isBlockPanelTargetAvailable(popoverTargetElement) || window.siyuan.altIsPressed ||
         (window.siyuan.isPublish && popoverTargetElement.dataset.popoverUrl === "/api/av/getMirrorDatabaseBlocks") ||
         (window.siyuan.config.editor.floatWindowMode === 0 && window.siyuan.ctrlIsPressed) ||
         (popoverTargetElement && popoverTargetElement.getAttribute("prevent-popover") === "true")) {
@@ -781,7 +782,7 @@ export const showPopover = async (app: App, showRef = false, automatic = false) 
     if (interactionGeneration !== popoverGeneration || (automatic && generation !== getPopoverGeneration()) ||
         targetElement !== popoverTargetElement ||
         (automatic && isPopoverMenuBlocked(targetElement)) ||
-        !targetElement.isConnected || isPopoverSuspended() || refDefs.length === 0) {
+        !isBlockPanelTargetAvailable(targetElement) || isPopoverSuspended() || refDefs.length === 0) {
         return;
     }
 
@@ -802,7 +803,7 @@ export const showPopover = async (app: App, showRef = false, automatic = false) 
             isBacklink: showRef || popoverTargetElement.classList.contains("protyle-attr--refcount") || popoverTargetElement.classList.contains("counter"),
             refDefs,
             originalRefBlockIDs,
-            canShow: automatic ? () => generation === getPopoverGeneration() && targetElement.isConnected &&
+            canShow: automatic ? () => generation === getPopoverGeneration() && isBlockPanelTargetAvailable(targetElement) &&
                 !isPopoverSuspended() && !isPopoverMenuBlocked(targetElement) : undefined,
         }));
     }

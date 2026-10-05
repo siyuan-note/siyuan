@@ -1465,7 +1465,8 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
                 return true;
             }
         });
-        if (openRecentDocsDialog) {
+        if (openRecentDocsDialog && openRecentDocsDialog.element.contains(event.target as Node) &&
+            !openRecentDocsDialog.element.hasAttribute("data-dialog-closing")) {
             if ((event.target as HTMLElement).closest("select")) {
                 return;
             }

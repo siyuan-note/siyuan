@@ -5,6 +5,7 @@ import {isMobile} from "../util/functions";
 import {isNotCtrl} from "../protyle/util/compatibility";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
+import {destroyDialogBlockPanels, getDialogBlockPanel} from "../block/panelOwnership";
 
 export class Dialog {
     private destroyCallback: (options?: IObject) => void;
@@ -24,8 +25,16 @@ export class Dialog {
         }
         // 对话框上方的菜单也需要约束 Tab，避免从菜单末尾进入背景。
         const menu = window.siyuan.menus.menu.element;
+        const dialog = this.element.querySelector(".b3-dialog") as HTMLElement;
+        const popover = getDialogBlockPanel(this.element, document.activeElement);
+        const activePopover = popover && isAbove(popover, dialog) ? popover : undefined;
+        // 浮窗正文中的 Tab 由编辑器处理，保留列表、表格和代码块的缩进操作。
+        if (activePopover && (document.activeElement as HTMLElement).isContentEditable &&
+            document.activeElement.closest(".protyle-wysiwyg")) {
+            return;
+        }
         const container = menu.contains(document.activeElement) && isAbove(menu, this.element.querySelector(".b3-dialog")) ?
-            menu : this.element.querySelector(".b3-dialog__container") as HTMLElement;
+            menu : activePopover || this.element.querySelector(".b3-dialog__container") as HTMLElement;
         const elements = Array.from(container.querySelectorAll<HTMLElement>(
             "a[href], button, input, select, textarea, [tabindex], [contenteditable]"
         )).filter(element => (element.tabIndex >= 0 || (element.isContentEditable && !element.hasAttribute("tabindex"))) &&
@@ -35,6 +44,7 @@ export class Dialog {
         elements.sort((a, b) => (a.tabIndex > 0 ? a.tabIndex : Infinity) - (b.tabIndex > 0 ? b.tabIndex : Infinity));
         const active = document.activeElement;
         if (!elements.length || !container.contains(active) || active === container ||
+            (activePopover && container === activePopover && !elements.includes(active as HTMLElement)) ||
             (event.shiftKey ? active === elements[0] : active === elements[elements.length - 1])) {
             event.preventDefault();
             event.stopPropagation();
@@ -136,6 +146,7 @@ left:${left || "auto"};top:${top || "auto"}">
             return;
         }
         this.destroying = true;
+        this.element.dataset.dialogClosing = "true";
         document.removeEventListener("keydown", this.trapFocus, true);
         this.element.classList.remove("b3-dialog--open");
         const menu = window.siyuan.menus.menu;
@@ -161,9 +172,11 @@ left:${left || "auto"};top:${top || "auto"}">
                 // 调用方和上层对话框已接管焦点时，不覆盖其焦点；失效或隐藏的触发元素不再恢复。
                 const target = this.previousFocus;
                 const topDialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
+                const targetPopover = topDialog && getDialogBlockPanel(topDialog.element, target);
                 if (restoreFocus && document.activeElement === document.body && target?.isConnected &&
                     target.getClientRects().length && getComputedStyle(target).visibility === "visible" &&
-                    !target.closest("[inert]") && (!topDialog || topDialog.element.contains(target))) {
+                    !target.closest("[inert]") && (!topDialog || topDialog.element.contains(target) ||
+                        (targetPopover && isAbove(targetPopover, topDialog.element.querySelector(".b3-dialog"))))) {
                     target.focus({preventScroll: true});
                     if (document.activeElement === target && this.previousRange?.startContainer.isConnected &&
                         this.previousRange.endContainer.isConnected && target.contains(this.previousRange.commonAncestorContainer)) {
@@ -176,6 +189,7 @@ left:${left || "auto"};top:${top || "auto"}">
                 document.getElementById("drag")?.classList.remove("fn__hidden");
             }
         }, Constants.TIMEOUT_DBLCLICK);
+        destroyDialogBlockPanels(this.element);
     }
 
     public bindInput(inputElement: HTMLInputElement | HTMLTextAreaElement, enterEvent?: () => void, bindEnter = true) {

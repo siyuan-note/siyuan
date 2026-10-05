@@ -1,4 +1,6 @@
 {
+	"ocrAIModel": "AI model",
+	"ocrAIModelTip": "Select a model that supports image input; manual and automatic recognition send images to its provider and may incur charges",
 	"viewRefContent": "View referenced content",
 	"bazaarStars": "GitHub repository star count",
 	"bazaarFeedbackTip": "Send feedback via GitHub Issues",
@@ -44,9 +46,9 @@
 	"listMindmapArrowBoth": "Arrows at both ends",
 	"listMindmapArrowNone": "No arrows",
 	"ocrProvider": "OCR provider",
-	"ocrProviderTip": "Recognize offline in the local kernel; install Tesseract separately; unavailable providers do not fall back automatically",
+	"ocrProviderTip": "Use a local OCR provider or a configured AI model; install Tesseract separately; unavailable providers do not fall back automatically",
 	"ocrAuto": "Automatic OCR",
-	"ocrAutoTip": "Process ordinary notebook images that have no OCR result yet",
+	"ocrAutoTip": "Process unencrypted notebook images without OCR results; AI sends images to its provider in the background",
 	"ocrModel": "OCR model",
 	"ocrModelTip": "Only Tiny is built in; switching preserves existing results; rerun OCR from the image menu",
 	"ocrImportModels": "Import OCR models",

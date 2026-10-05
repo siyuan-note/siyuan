@@ -34,3 +34,15 @@ func TestOCRThresholdContract(t *testing.T) {
 		}
 	}
 }
+
+func TestOCRAIModelCompatibility(t *testing.T) {
+	for _, field := range []string{"", `,"aiModelId":null`, `,"aiModelId":"vision"`} {
+		request, err := SetOCRConfig.Decode(strings.NewReader(`{"provider":"ai","model":"tiny","auto":false` + field + `}`))
+		if err != nil || field == `,"aiModelId":"vision"` && (request.AIModelID == nil || *request.AIModelID != "vision") {
+			t.Fatalf("valid independent model selection: %+v, %v", request, err)
+		}
+	}
+	if _, err := SetOCRConfig.Decode(strings.NewReader(`{"provider":"ai","model":"tiny","auto":false,"aiModelId":1}`)); err == nil {
+		t.Fatal("accepted numeric model ID")
+	}
+}

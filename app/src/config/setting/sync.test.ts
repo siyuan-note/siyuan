@@ -158,7 +158,7 @@ for (const mobile of [false, true]) {
             objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
             editorConfigApi: {apply: () => assert.fail("OCR must not apply editor settings")},
             appearanceConfigApi: {apply: () => assert.fail("OCR must not apply appearance settings")},
-            syncSettingTasks() {}, getSettingTabDefs: () => [{id: "assets"}, {id: "appearance"}, {id: "editor"}],
+            syncSettingTasks() {}, getSettingTabDefs: () => [{id: "assets"}, {id: "ocr"}, {id: "appearance"}, {id: "editor"}],
             notifyOCRChanged: () => { notifications++; },
             remountOpenSettingTab: async (tab: string) => { remounted.push(tab); },
         })});

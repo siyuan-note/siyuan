@@ -1381,6 +1381,8 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         const imagePath = imgElement.getAttribute("data-src");
         const ocrAvailability = getImageOCRAvailability(imagePath, protyle.notebookId);
+        const canOCR = ocrAvailability.local && (window.siyuan.config.ocr?.provider !== "ai" || ocrAvailability.ai && !isDisabledFeature("ai"));
+        const canAIOCR = ocrAvailability.ai && !isDisabledFeature("ai");
         if (imagePath.startsWith("assets/")) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "rename",
@@ -1427,12 +1429,12 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             }, {
                 id: "separator_reOCR",
                 type: "separator",
-                ignore: !ocrAvailability.local,
+                ignore: !canOCR && !canAIOCR,
             }, {
                 id: "reOCR",
                 iconHTML: "",
                 label: window.siyuan.languages.performOCR,
-                ignore: !ocrAvailability.local,
+                ignore: !canOCR,
                 click() {
                     const path = imgElement.getAttribute("data-src");
                     fetchPost("/api/asset/ocr", {
@@ -1445,7 +1447,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 id: "reAIOCR",
                 icon: "iconSparkles",
                 label: window.siyuan.languages.performAIOCR,
-                ignore: isDisabledFeature("ai") || !ocrAvailability.ai,
+                ignore: !canAIOCR,
                 click() {
                     void reImageAIOCR(imgElement.getAttribute("data-src"));
                 }

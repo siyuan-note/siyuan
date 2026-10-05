@@ -16,14 +16,19 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff"
 )
 
-// AIOCRAsset 使用智能体模型单次识别本地图片，完整响应通过校验后才保存和更新索引。
+// AIOCRAsset 使用所选 OCR AI 模型单次识别，未配置独立模型时兼容智能体模型。
 func AIOCRAsset(ctx context.Context, path string) (string, error) {
+	return aiOCRAsset(ctx, path, Conf.GetOCR(), false)
+}
+
+func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool) (string, error) {
 	if util.IsDisabledFeature("ai") {
 		return "", errors.New(Conf.Language(380))
 	}
@@ -34,7 +39,7 @@ func AIOCRAsset(ctx context.Context, path string) (string, error) {
 	if Conf.AI == nil {
 		return "", errors.New("AI configuration is unavailable")
 	}
-	provider, model := Conf.AI.GetAgentModel()
+	provider, model := getOCRAIModel(value)
 	if provider == nil || model == nil {
 		return "", errors.New(Conf.Language(412))
 	}
@@ -67,7 +72,10 @@ func AIOCRAsset(ctx context.Context, path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	maxTokens := Conf.AI.Agent.MaxCompletionTokens
+	maxTokens := 8192
+	if value.AIModelID == "" && Conf.AI.Agent != nil {
+		maxTokens = Conf.AI.Agent.MaxCompletionTokens
+	}
 	if maxTokens == 0 {
 		maxTokens = 8192
 	}
@@ -105,8 +113,69 @@ func AIOCRAsset(ctx context.Context, path string) (string, error) {
 		return "", errors.New(Conf.Language(413))
 	}
 	text := strings.ReplaceAll(response.Choices[0].Message.Content, "\r\n", "\n")
+	if automatic && !canSaveAutomaticOCR(value, path) {
+		return "", context.Canceled
+	}
 	SetOCRAssetText(path, text)
 	return text, nil
+}
+
+func getOCRAIModel(value conf.OCR) (*conf.Provider, *conf.Model) {
+	if util.IsDisabledFeature("ai") || Conf.AI == nil {
+		return nil, nil
+	}
+	if value.AIModelID == "" {
+		if value.Provider == "ai" {
+			return nil, nil
+		}
+		return Conf.AI.GetAgentModel()
+	}
+	provider, model := Conf.AI.GetModel(value.AIModelID)
+	if model == nil || model.ID != value.AIModelID || model.Name == "" {
+		return nil, nil
+	}
+	return provider, model
+}
+
+type OCRAIModel struct {
+	ID, Name, Provider string
+}
+
+// OCRAIModels 返回可选模型的显示信息；保留配置中的顺序，不泄露连接凭据。
+func OCRAIModels() (result []OCRAIModel) {
+	if util.IsDisabledFeature("ai") || Conf.AI == nil {
+		return
+	}
+	for _, provider := range Conf.AI.Providers {
+		if provider == nil || !provider.Enabled {
+			continue
+		}
+		providerName := provider.DisplayName
+		if providerName == "" {
+			providerName = provider.ID
+		}
+		for _, model := range provider.Models {
+			if model == nil || !model.Enabled || model.Name == "" {
+				continue
+			}
+			name := model.DisplayName
+			if name == "" {
+				name = model.Name
+			}
+			result = append(result, OCRAIModel{ID: model.ID, Name: name, Provider: providerName})
+		}
+	}
+	return
+}
+
+func isAIOCRPath(path string) bool {
+	path = strings.ToLower(strings.SplitN(strings.SplitN(path, "#", 2)[0], "?", 2)[0])
+	for _, extension := range []string{".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tif", ".tiff", ".heic", ".heif"} {
+		if strings.HasSuffix(path, extension) {
+			return true
+		}
+	}
+	return false
 }
 
 // prepareAIOCRImage 仅转换模型不接受但内核可解码的位图，保留分辨率并校验发送体积。

@@ -1,4 +1,6 @@
 {
+	"ocrAIModel": "AI 模型",
+	"ocrAIModelTip": "选择支持图片输入的模型；手动和自动识别都会将图片发送给该提供商，可能产生费用",
 	"viewRefContent": "查看引用内容",
 	"bazaarStars": "GitHub 仓库星标数",
 	"bazaarFeedbackTip": "通过 GitHub Issues 反馈",
@@ -44,9 +46,9 @@
 	"listMindmapArrowBoth": "双向箭头",
 	"listMindmapArrowNone": "无箭头",
 	"ocrProvider": "OCR 提供商",
-	"ocrProviderTip": "由本机内核离线识别；Tesseract 需自行安装；不可用时不会自动切换",
+	"ocrProviderTip": "使用本地 OCR 提供商或已配置的 AI 模型；Tesseract 需自行安装；不可用时不会自动切换",
 	"ocrAuto": "自动 OCR",
-	"ocrAutoTip": "仅处理尚无 OCR 结果的普通笔记本图片",
+	"ocrAutoTip": "仅处理尚无 OCR 结果的普通笔记本图片；AI 会在后台将图片发送给所选提供商",
 	"ocrModel": "OCR 模型",
 	"ocrModelTip": "仅内置 Tiny；切换后保留现有结果，可在图片菜单中重新识别",
 	"ocrImportModels": "导入 OCR 模型",

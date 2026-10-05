@@ -20,6 +20,7 @@ import {clearSyncTabElement} from "./tabs/syncRuntime";
 import type {TSettingTab} from "./setting/tabs";
 import type {App} from "../index";
 import {unmountAssetsTab} from "./assets";
+import {unmountOCRTab} from "./ocr";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {unmountWorkspaceStorage} from "./tabs/workspaceStorage";
 /// #if !MOBILE
@@ -74,6 +75,8 @@ export const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") 
             if (assetsRoot) {
                 unmountAssetsTab(assetsRoot);
             }
+            const ocrRoot = settingDialogRef.element?.querySelector<HTMLElement>('.config__tab-container[data-name="ocr"]');
+            if (ocrRoot) unmountOCRTab(ocrRoot);
             clearSyncTabElement();
             clearAccessTabElement();
             const appRoot = settingDialogRef.element?.querySelector<HTMLElement>('.config__tab-container[data-name="app"]');

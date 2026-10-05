@@ -867,10 +867,12 @@ var GetImageOCRText = define[AssetOCRTextRequest, AssetTextData]("getImageOCRTex
 var SetImageOCRText = define[SetAssetOCRTextRequest, Null]("setImageOCRText", "/api/asset/setImageOCRText", JSONBody, ResponseOptions{}, "POST")
 
 // AssetOCR 始终使用当前设备选择的提供商，内核可在无界面的环境中识别。
+// ai 使用设备保存的 aiModelId，返回原样文本和空 ocrJSON，不虚构坐标；本地提供商保持 TSV 数据。
 // 不自动回退到另一提供商；取消、模型或推理错误不覆盖已有文本，加密笔记本不参与 OCR。
 var AssetOCR = define[AssetPathRequest, AssetOCRData]("ocr", "/api/asset/ocr", JSONBody, ResponseOptions{}, "POST")
 
-// AIOCR 仅手动调用已启用的智能体模型识别本地 assets/ 图片，不使用会话、工具或后台自动识别。
+// AIOCR 手动调用设备选择的 OCR AI 模型识别本地 assets/ 图片，不使用会话、工具。
+// 未保存独立模型且本地提供商仍被选中时兼容智能体模型；显式模型失效时返回错误，不回退。
 // path 保留 box 查询参数以隔离笔记本资源；拒绝加密资源和外部图片地址。
 // 支持 PNG、JPEG、GIF、WebP，并将 BMP、TIFF 转为 PNG、HEIC/HEIF 转为 JPEG；其他格式返回错误。
 // 保留原图分辨率，原始文件和发送图片均限制为 20 MiB、发送图片限制为四千万像素；HEIF 遵循预览解码限制。

@@ -27,10 +27,12 @@ test("reset waits for queued settings that have not started their requests", asy
 });
 
 test("reset detects API failures even when normal settings UI consumes the error", async () => {
-    for (const result of [Promise.resolve({code: -1}), Promise.reject(new Error("offline"))]) {
-        const before = settingSaveFailures();
-        await trackSettingRequest("/api/setting/patch", result).catch(() => {});
-        await assert.rejects(flushSettingSaves(before));
+    for (const path of ["/api/setting/patch", "/api/asset/setOCRConfig"]) {
+        for (const result of [Promise.resolve({code: -1}), Promise.reject(new Error("offline"))]) {
+            const before = settingSaveFailures();
+            await trackSettingRequest(path, result).catch(() => {});
+            await assert.rejects(flushSettingSaves(before));
+        }
     }
     await trackSettingSave(Promise.resolve());
     await flushSettingSaves();

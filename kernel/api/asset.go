@@ -151,12 +151,12 @@ var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request api
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Minute)
 	defer cancel()
-	ocrJSON, err := model.OCRAsset(ctx, path)
+	text, ocrJSON, err := model.OCRAsset(ctx, path)
 	if nil != err {
 		return apicontract.FailureWithTimeout[apicontract.AssetOCRData](-1, err.Error(), 7000)
 	}
 
-	return apicontract.Success(apicontract.AssetOCRData{Text: util.GetOcrJsonText(ocrJSON), OCRJSON: ocrJSON})
+	return apicontract.Success(apicontract.AssetOCRData{Text: text, OCRJSON: ocrJSON})
 })
 
 var renameAsset = contractHandler(apicontract.RenameAsset, func(c *gin.Context, request apicontract.RenameAssetRequest) apicontract.Response[apicontract.AssetRenameData] {

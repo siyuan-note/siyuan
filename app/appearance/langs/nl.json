@@ -1,4 +1,6 @@
 {
+	"ocrAIModel": "AI-model",
+	"ocrAIModelTip": "Kies een model dat afbeeldingen ondersteunt; handmatige en automatische herkenning sturen afbeeldingen naar de aanbieder en kunnen kosten veroorzaken",
 	"viewRefContent": "Inhoud waarnaar wordt verwezen bekijken",
 	"bazaarStars": "Aantal sterren van de GitHub-repository",
 	"bazaarFeedbackTip": "Feedback versturen via GitHub Issues",
@@ -44,9 +46,9 @@
 	"listMindmapArrowBoth": "Pijlen aan beide uiteinden",
 	"listMindmapArrowNone": "Geen pijlen",
 	"ocrProvider": "OCR-provider",
-	"ocrProviderTip": "Offline herkennen in de lokale kernel; installeer Tesseract afzonderlijk; geen automatische wissel bij onbeschikbaarheid",
+	"ocrProviderTip": "Gebruik een lokale OCR-aanbieder of een ingesteld AI-model; installeer Tesseract apart; bij onbeschikbaarheid wordt niet automatisch overgeschakeld",
 	"ocrAuto": "Automatische OCR",
-	"ocrAutoTip": "Afbeeldingen in gewone notitieboeken zonder bestaand OCR-resultaat verwerken",
+	"ocrAutoTip": "Verwerk afbeeldingen uit niet-versleutelde notitieboeken zonder OCR-resultaat; AI stuurt afbeeldingen op de achtergrond naar de gekozen aanbieder",
 	"ocrModel": "OCR-model",
 	"ocrModelTip": "Alleen Tiny is ingebouwd; wisselen behoudt bestaande resultaten; voer OCR opnieuw uit via het afbeeldingsmenu",
 	"ocrImportModels": "OCR-modellen importeren",

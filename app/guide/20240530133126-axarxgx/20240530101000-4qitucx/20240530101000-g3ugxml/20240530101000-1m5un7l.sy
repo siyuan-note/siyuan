@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20261004005806"
+		"updated": "20261005192508"
 	},
 	"Children": [
 		{
@@ -1005,7 +1005,7 @@
 			"Properties": {
 				"ID": "20240530101000-5bix8t1",
 				"id": "20240530101000-9evyuhr",
-				"updated": "20261004005806"
+				"updated": "20261005192508"
 			},
 			"Children": [
 				{
@@ -1020,7 +1020,7 @@
 			"Properties": {
 				"ID": "20240530101000-fl1bsnw",
 				"id": "20240530101000-t4ud4y2",
-				"updated": "20261001000112"
+				"updated": "20261005192208"
 			},
 			"Children": [
 				{
@@ -1035,20 +1035,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "アセット"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
 					"TextMarkTextContent": "OCR"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で Tesseract または PaddleOCR を選択し、自動認識を設定します。認識はカーネルでオフライン実行され、画面を開く必要はありません。Tesseract はデスクトップに別途インストールしてください。"
+					"Data": " で Tesseract、PaddleOCR、AI のいずれかを選択し、自動認識を設定します。ローカルプロバイダーはカーネルでオフライン実行され、画面を開く必要はありません。Tesseract はデスクトップに別途インストールしてください。"
 				}
 			]
 		},
@@ -1407,7 +1398,7 @@
 			"Properties": {
 				"ID": "20240530101000-aefldsk",
 				"id": "20240530101000-cpod2qy",
-				"updated": "20261004005806"
+				"updated": "20261005192508"
 			},
 			"Children": [
 				{
@@ -1594,7 +1585,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003224949-qenn1ez",
-				"updated": "20261004005806"
+				"updated": "20261005192508"
 			},
 			"Children": [
 				{
@@ -1613,11 +1604,29 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "AI で OCR を再実行"
+					"TextMarkTextContent": "AI で OCR を実行"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を選択すると、ローカル画像を設定済みのエージェントモデルに送信して文字を認識します。画像入力に対応したモデルが必要です。AI OCR は手動でのみ実行され、既存の OCR テキスト、編集、コピー、検索インデックスを利用します。認識に失敗した場合は元の結果を保持します。暗号化ノートブックの画像には対応していません。PNG、JPEG、GIF、WebP に対応しています。BMP と TIFF は PNG に、HEIC/HEIF は JPEG に変換し、元の解像度を保持します。元画像と変換後の画像はそれぞれ 20 MiB 以下、変換後の画像は 4,000 万画素以下である必要があります。ネットワーク画像では認識項目を、暗号化ノートブックの画像では OCR メニューを非表示にします。AVIF、SVG、ICO などの未対応形式では AI OCR 項目を表示しません。"
+					"Data": " を選択すると、ローカル画像を独立して選択した OCR AI モデルに送信して文字を認識します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で AI とモデルを選択してください。AI 機能が有効で、有効なプロバイダーとモデルがある場合に AI が表示されます。モデルは画像入力に対応している必要がありますが、この能力は自動検証されません。手動認識と自動認識はこのモデルを使用します。ローカルプロバイダーから AI に切り替えると自動認識は無効になります。明示的に有効にすると、未認識の非暗号化ノートブック画像をバックグラウンドでプロバイダーに送信し、料金が発生する場合があります。選択したモデルを無効化または削除しても、別のモデルやプロバイダーに自動切り替えしません。ローカルプロバイダーを選択し、独立した AI モデルを設定していない場合、個別の手動 AI 項目は互換性のためエージェントモデルを使用します。結果は既存の OCR テキスト、編集、コピー、検索インデックスを利用し、失敗時は元の結果を保持します。暗号化ノートブックの画像には対応していません。PNG、JPEG、GIF、WebP に対応しています。BMP と TIFF は PNG に、HEIC/HEIF は JPEG に変換し、元の解像度を保持します。元画像と変換後の画像はそれぞれ 20 MiB 以下、変換後の画像は 4,000 万画素以下である必要があります。ネットワーク画像では認識項目を、暗号化ノートブックの画像では OCR メニューを非表示にします。AVIF、SVG、ICO などの未対応形式では AI OCR 項目を表示しません。"
 				}
 			]
 		}

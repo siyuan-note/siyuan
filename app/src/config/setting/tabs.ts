@@ -9,6 +9,7 @@ import {appearanceConfigApi} from "../tabs/appearanceRuntime";
 import {mountSyncTabExtras, patchSyncConfig} from "../tabs/syncRuntime";
 import {mountAccessTab} from "../tabs/accessRuntime";
 import {collectAssetsTabSearchStrings, mountAssetsTab} from "../assets";
+import {mountOCRTab, registerOCRTab} from "../ocr";
 import {collectBazaarTabSearchStrings, mountBazaarTab} from "../bazaarTab";
 /// #if !MOBILE
 import {collectKeymapTabSearchStrings, mountKeymapTab} from "../tabs/keymapUi";
@@ -85,6 +86,12 @@ const createSettingTabs = () => {
             searchStrings: collectAssetsTabSearchStrings,
             mount: mountAssetsTab,
         }),
+        ocr: setting.tab({
+            id: "ocr",
+            icon: "iconImage",
+            title: () => "OCR",
+            afterMount: mountOCRTab,
+        }, registerOCRTab),
         export: setting.tab({
             id: "export",
             icon: "iconUpload",

@@ -1,4 +1,6 @@
 {
+	"ocrAIModel": "Yapay zekâ modeli",
+	"ocrAIModelTip": "Görüntü girişini destekleyen bir model seçin; elle ve otomatik tanıma, görüntüleri sağlayıcıya gönderir ve ücret doğurabilir",
 	"viewRefContent": "Referans verilen içeriği görüntüle",
 	"bazaarStars": "GitHub deposunun yıldız sayısı",
 	"bazaarFeedbackTip": "GitHub Issues üzerinden geri bildirim gönderin",
@@ -44,9 +46,9 @@
 	"listMindmapArrowBoth": "Her iki uçta ok",
 	"listMindmapArrowNone": "Ok yok",
 	"ocrProvider": "OCR sağlayıcısı",
-	"ocrProviderTip": "Yerel çekirdekte çevrimdışı tanıma; Tesseract ayrı kurulmalıdır; kullanılamadığında otomatik geçiş yapılmaz",
+	"ocrProviderTip": "Yerel bir OCR sağlayıcısı veya yapılandırılmış yapay zekâ modeli kullanın; Tesseract ayrı kurulmalıdır; kullanılamadığında otomatik geçiş yapılmaz",
 	"ocrAuto": "Otomatik OCR",
-	"ocrAutoTip": "Henüz OCR sonucu olmayan normal defter görüntülerini işle",
+	"ocrAutoTip": "OCR sonucu olmayan şifrelenmemiş defter görüntülerini işler; yapay zekâ görüntüleri seçilen sağlayıcıya arka planda gönderir",
 	"ocrModel": "OCR modeli",
 	"ocrModelTip": "Yalnızca Tiny yerleşiktir; model değişikliği mevcut sonuçları korur; görsel menüsünden OCR işlemini yeniden çalıştırın",
 	"ocrImportModels": "OCR modellerini içe aktar",

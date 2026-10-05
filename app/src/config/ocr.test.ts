@@ -5,6 +5,36 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {OCRThresholds, SettingOCR} from "../types/api";
 
+test("OCR settings register separate searchable rows in shared desktop and mobile groups", () => {
+    const compiled = transpileModule(readFileSync("src/config/ocr.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    const languages = new Proxy({}, {get: (_target, key) => String(key)});
+    const exports = {} as {registerOCRTab: (tab: unknown) => void};
+    runInNewContext(compiled, {exports, window: {siyuan: {languages}}, require: () => ({
+        genConfigItemMainHtml: (title: string, desc: string) => `${title} ${desc}`,
+        genSwitchRow: (id: string) => `<label><input id="${id}"></label>`,
+        genButtonRowHtml: (id: string) => `<label><button id="${id}"></button></label>`,
+    })});
+    let group = "";
+    const rows: Array<{group: string; key: string; keywords: string[]; html: () => string}> = [];
+    const tab = {
+        group: (id: string) => { group = id; return tab; },
+        slot: (spec: Omit<typeof rows[number], "group">) => { rows.push({...spec, group}); return tab; },
+    };
+    exports.registerOCRTab(tab);
+    assert.deepEqual(rows.filter(row => row.group === "general").map(row => row.key),
+        ["ocrAuto", "ocrProvider", "ocrModel", "ocrAIModel"]);
+    const aiRow = rows.find(row => row.key === "ocrAIModel");
+    assert.ok(aiRow.keywords.includes("ocrAIModelTip"));
+    assert.match(aiRow.html(), /class="b3-select/);
+    assert.deepEqual(rows.filter(row => row.group === "models").map(row => row.key), ["ocrImportModels", "ocrImport"]);
+    const tabs = readFileSync("src/config/setting/tabs.ts", "utf8");
+    assert.match(tabs, /ocr: setting\.tab\([\s\S]*?afterMount: mountOCRTab,[\s\S]*?registerOCRTab/);
+    assert.doesNotMatch(readFileSync("src/config/assets.ts", "utf8"), /data-type="ocr"/);
+    assert.match(readFileSync("src/mobile/menu/settingPanel.ts", "utf8"), /tabId === "ocr"[\s\S]*?unmountOCRTab\(root\)/);
+});
+
 const createOCRPanel = async () => {
     const compiled = transpileModule(readFileSync("src/config/ocr.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -12,17 +42,19 @@ const createOCRPanel = async () => {
     const config: {ocr: SettingOCR} = {ocr: {provider: "paddleocr", model: "tiny", auto: false}};
     let serverConfig = {...config.ocr};
     let models = [{id: "tiny", name: "Tiny", builtIn: true}];
+    let aiModels: Array<{id: string; name: string; provider: string}> = [];
     let reads = 0;
     let deferredRead = false;
     const readRequests: Array<(response: unknown) => void> = [];
     const snapshot = () => ({code: 0, data: {config: {...serverConfig},
-        providers: [{id: "paddleocr", available: true}], models}});
+        providers: [{id: "paddleocr", available: true}, ...(aiModels.length || serverConfig.provider === "ai" ?
+            [{id: "ai", available: aiModels.some(model => model.id === serverConfig.aiModelId)}] : [])], models, aiModels}});
     const controls = Object.fromEntries([
-        "ocrProvider", "ocrModel", "ocrAuto", "ocrImportModels", "ocrImport",
+        "ocrProvider", "ocrModel", "ocrAIModel", "ocrAuto", "ocrImportModels", "ocrImport",
         "detector", "detectorConfig", "recognizer", "recognizerConfig",
         "ocrAdvanced",
     ].map(id => [id, {
-        id, value: id === "ocrProvider" ? "paddleocr" : "tiny", checked: false, disabled: false, innerHTML: "",
+        id, value: id === "ocrProvider" ? "paddleocr" : id === "ocrAIModel" ? "" : "tiny", checked: false, disabled: false, innerHTML: "",
         files: [{name: `${id}.onnx`}],
         tagName: id === "ocrImport" || id === "ocrAdvanced" ? "BUTTON" : "INPUT",
         closest: () => ({classList: {toggle() {}}}),
@@ -52,6 +84,8 @@ const createOCRPanel = async () => {
         },
     }, require: () => ({
         OCR_CHANGED_EVENT: "ocr-test",
+        AI_CONFIG_CHANGED_EVENT: "ai-test",
+        trackSettingSave: (task: Promise<boolean>) => task,
         openOCRThresholds: (initial: OCRThresholds, save: (value: OCRThresholds) => Promise<boolean>, onClose: () => void) => {
             advanced = {initial, save, destroy: () => { dialogCloses++; onClose(); }};
             return advanced;
@@ -81,6 +115,12 @@ const createOCRPanel = async () => {
         advanced: () => advanced, dialogCloses: () => dialogCloses,
         reads: () => reads, snapshot, readRequests,
         notify: () => notifications.get("ocr-test")?.(),
+        notifyAI: () => notifications.get("ai-test")?.(),
+        setAIModels: (value: typeof aiModels) => { aiModels = value; },
+        changeProvider: (value: string) => {
+            controls.ocrProvider.value = value;
+            return listeners.get("change")({target: controls.ocrProvider, stopPropagation() {}});
+        },
         deferRead: () => { deferredRead = true; },
         updateServer: (next: typeof config.ocr) => { serverConfig = next; },
         addModel: (id: string) => { models = [...models, {id, name: "Imported", builtIn: false}]; },
@@ -90,6 +130,65 @@ const createOCRPanel = async () => {
         },
     };
 };
+
+test("selecting AI uses a separate model and requires opting into automatic recognition", async () => {
+    const panel = await createOCRPanel();
+    assert.doesNotMatch(panel.controls.ocrProvider.innerHTML, /value="ai"/);
+    panel.updateServer({provider: "paddleocr", model: "tiny", auto: true});
+    panel.setAIModels([{id: "vision", name: "Image model", provider: "Provider"}]);
+    panel.notifyAI();
+    await new Promise(setImmediate);
+    assert.match(panel.controls.ocrProvider.innerHTML, /value="ai"/);
+    const saving = panel.changeProvider("ai");
+    await new Promise(setImmediate);
+    assert.equal(panel.requests[0].config.aiModelId, "vision");
+    assert.equal(panel.requests[0].config.auto, false);
+    assert.equal(panel.controls.ocrModel.disabled, true);
+    assert.equal(panel.controls.ocrAIModel.disabled, false);
+    panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
+    await saving;
+    const automatic = panel.changeAuto(true);
+    await new Promise(setImmediate);
+    assert.equal(panel.requests[1].config.aiModelId, "vision");
+    assert.equal(panel.requests[1].config.auto, true);
+    panel.requests[1].resolve({code: 0, data: panel.requests[1].config});
+    await automatic;
+    panel.close();
+});
+
+test("disabled or deleted AI models stay selected without falling back after AI notifications", async () => {
+    const panel = await createOCRPanel();
+    panel.updateServer({provider: "ai", model: "tiny", aiModelId: "deleted", auto: false});
+    panel.setAIModels([{id: "other", name: "Other", provider: "Provider"}]);
+    panel.notifyAI();
+    await new Promise(setImmediate);
+    assert.equal(panel.controls.ocrAIModel.value, "deleted");
+    assert.match(panel.controls.ocrAIModel.innerHTML, /value="deleted" disabled/);
+    panel.setAIModels([]);
+    panel.notifyAI();
+    await new Promise(setImmediate);
+    assert.equal(panel.controls.ocrProvider.value, "ai");
+    assert.equal(panel.controls.ocrAIModel.value, "deleted");
+    assert.equal(panel.requests.length, 0);
+    panel.close();
+});
+
+test("switching to AI preserves an unavailable imported local model independently", async () => {
+    const panel = await createOCRPanel();
+    const localModel = "a".repeat(64);
+    panel.updateServer({provider: "paddleocr", model: localModel, auto: false});
+    panel.setAIModels([{id: "vision", name: "Image model", provider: "Provider"}]);
+    panel.notify();
+    await new Promise(setImmediate);
+    assert.match(panel.controls.ocrModel.innerHTML, new RegExp(`value="${localModel}" disabled`));
+    const saving = panel.changeProvider("ai");
+    await new Promise(setImmediate);
+    assert.equal(panel.requests[0].config.model, localModel);
+    assert.equal(panel.requests[0].config.aiModelId, "vision");
+    panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
+    await saving;
+    panel.close();
+});
 
 test("OCR switches save in order without replacing the panel or disabling ordinary controls", async () => {
     const panel = await createOCRPanel();

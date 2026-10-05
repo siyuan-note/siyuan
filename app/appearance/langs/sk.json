@@ -1,4 +1,6 @@
 {
+	"ocrAIModel": "Model AI",
+	"ocrAIModelTip": "Vyberte model podporujúci obrázky; ručné aj automatické rozpoznávanie odosiela obrázky poskytovateľovi a môže byť spoplatnené",
 	"viewRefContent": "Zobraziť odkazovaný obsah",
 	"bazaarStars": "Počet hviezdičiek repozitára GitHub",
 	"bazaarFeedbackTip": "Odoslať spätnú väzbu cez GitHub Issues",
@@ -44,9 +46,9 @@
 	"listMindmapArrowBoth": "Šípky na oboch koncoch",
 	"listMindmapArrowNone": "Bez šípok",
 	"ocrProvider": "Poskytovateľ OCR",
-	"ocrProviderTip": "Rozpoznávanie offline v lokálnom jadre; Tesseract nainštalujte samostatne; pri nedostupnosti sa poskytovateľ automaticky nemení",
+	"ocrProviderTip": "Použite lokálneho poskytovateľa OCR alebo nastavený model AI; Tesseract nainštalujte samostatne; pri nedostupnosti sa poskytovateľ automaticky nemení",
 	"ocrAuto": "Automatické OCR",
-	"ocrAutoTip": "Spracovať obrázky bežných zápisníkov, ktoré ešte nemajú výsledok OCR",
+	"ocrAutoTip": "Spracovať obrázky z nešifrovaných zápisníkov bez výsledkov OCR; AI odosiela obrázky vybranému poskytovateľovi na pozadí",
 	"ocrModel": "Model OCR",
 	"ocrModelTip": "Zabudovaný je iba Tiny; zmena modelu zachová existujúce výsledky; OCR možno znova spustiť z ponuky obrázka",
 	"ocrImportModels": "Importovať modely OCR",

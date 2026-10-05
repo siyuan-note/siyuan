@@ -32,12 +32,19 @@ var getOCRConfig = contractHandler(apicontract.GetOCRConfig, func(c *gin.Context
 	for _, id := range []string{"tesseract", "paddleocr"} {
 		providers = append(providers, apicontract.OCRProviderState{ID: id, Available: model.OCRProviderAvailable(id)})
 	}
-	return apicontract.Success(apicontract.OCRConfigData{Config: ocrConfigPayload(value), Providers: providers, Models: models})
+	aiModels := []apicontract.OCRAIModel{}
+	for _, model := range model.OCRAIModels() {
+		aiModels = append(aiModels, apicontract.OCRAIModel{ID: model.ID, Name: model.Name, Provider: model.Provider})
+	}
+	if len(aiModels) > 0 || value.Provider == "ai" {
+		providers = append(providers, apicontract.OCRProviderState{ID: "ai", Available: model.OCRProviderAvailable("ai")})
+	}
+	return apicontract.Success(apicontract.OCRConfigData{Config: ocrConfigPayload(value), Providers: providers, Models: models, AIModels: aiModels})
 })
 
 func ocrConfigPayload(value conf.OCR) apicontract.SettingOCR {
 	thresholds := apicontract.OCRThresholds(value.Thresholds)
-	return apicontract.SettingOCR{Provider: value.Provider, Model: value.Model, Auto: value.Auto, Thresholds: &thresholds}
+	return apicontract.SettingOCR{Provider: value.Provider, Model: value.Model, Auto: value.Auto, Thresholds: &thresholds, AIModelID: &value.AIModelID}
 }
 
 func ocrModelPayload(id string) apicontract.OCRModel {
@@ -53,6 +60,9 @@ func ocrModelPayload(id string) apicontract.OCRModel {
 var setOCRConfig = contractHandler(apicontract.SetOCRConfig, serializeSetting("ocr", func(c *gin.Context, request apicontract.SettingOCR) apicontract.Response[apicontract.SettingOCR] {
 	value := model.Conf.GetOCR()
 	value.Provider, value.Model, value.Auto = request.Provider, request.Model, request.Auto
+	if request.AIModelID != nil {
+		value.AIModelID = *request.AIModelID
+	}
 	if request.Thresholds != nil {
 		value.Thresholds = conf.OCRThresholds(*request.Thresholds)
 	}

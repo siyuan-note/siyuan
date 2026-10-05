@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261004005806"
+		"updated": "20261005192508"
 	},
 	"Children": [
 		{
@@ -965,7 +965,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003901-ze4mbzz",
-				"updated": "20261004005806"
+				"updated": "20261005192508"
 			},
 			"Children": [
 				{
@@ -979,7 +979,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117003901-5pfzttc",
-				"updated": "20261001000112"
+				"updated": "20261005192208"
 			},
 			"Children": [
 				{
@@ -998,20 +998,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "資源"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
 					"TextMarkTextContent": "OCR"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中選擇 Tesseract 或 PaddleOCR，並設定是否自動辨識。辨識由核心離線執行，無需開啟介面。使用 Tesseract 時，需在桌面端自行安裝該程式。"
+					"Data": " 中選擇 Tesseract、PaddleOCR 或 AI，並設定是否自動辨識。本機提供商由核心離線執行，無須開啟介面。使用 Tesseract 時，須在桌面端自行安裝該程式。"
 				}
 			]
 		},
@@ -1358,7 +1349,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414203058-foirrwk",
-				"updated": "20261004005806"
+				"updated": "20261005192508"
 			},
 			"Children": [
 				{
@@ -1530,7 +1521,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003224949-qe1gsny",
-				"updated": "20261004005806"
+				"updated": "20261005192508"
 			},
 			"Children": [
 				{
@@ -1549,11 +1540,29 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "使用 AI 重新 OCR"
+					"TextMarkTextContent": "使用 AI 進行 OCR"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，將本機圖片傳送給已設定的智能體模型進行文字辨識，模型須支援圖片輸入。AI OCR 僅手動執行，結果沿用現有 OCR 文字、編輯、複製與搜尋索引；辨識失敗時保留原結果。加密筆記本圖片不支援此功能。支援 PNG、JPEG、GIF 和 WebP；BMP、TIFF 轉為 PNG，HEIC/HEIF 轉為 JPEG，保留原圖解析度。原始圖片和轉換後的圖片均不得超過 20 MiB，轉換後的圖片不得超過四千萬像素。網路圖片隱藏辨識入口，加密筆記本圖片隱藏 OCR 選單；AVIF、SVG、ICO 等不支援的格式隱藏 AI OCR 入口。"
+					"Data": "，將本機圖片傳送給獨立選擇的 OCR AI 模型進行文字辨識。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇 AI 和模型；啟用 AI 功能且有已啟用的提供商和模型時，才顯示 AI 選項。模型須支援圖片輸入，系統不會自動驗證此能力。手動與自動 OCR 均使用該模型。從本機提供商切換到 AI 時關閉自動辨識；明確開啟後，背景會將尚未辨識的非加密筆記本圖片傳送給提供商，可能產生費用。所選模型被停用或刪除後，不會自動換模型或提供商。使用本機提供商且未設定獨立 AI 模型時，單獨的 AI 手動入口相容沿用智能體模型。結果沿用現有 OCR 文字、編輯、複製與搜尋索引，失敗時保留原結果。加密筆記本圖片不支援此功能。支援 PNG、JPEG、GIF 和 WebP；BMP、TIFF 轉為 PNG，HEIC/HEIF 轉為 JPEG，保留原圖解析度。原始圖片和轉換後的圖片均不得超過 20 MiB，轉換後的圖片不得超過四千萬像素。網路圖片隱藏辨識入口，加密筆記本圖片隱藏 OCR 選單；AVIF、SVG、ICO 等不支援的格式隱藏 AI OCR 入口。"
 				}
 			]
 		}

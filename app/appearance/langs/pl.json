@@ -1,4 +1,6 @@
 {
+	"ocrAIModel": "Model AI",
+	"ocrAIModelTip": "Wybierz model obsługujący obrazy; rozpoznawanie ręczne i automatyczne wysyła obrazy do dostawcy i może wiązać się z opłatami",
 	"viewRefContent": "Wyświetl treść, do której prowadzi odnośnik",
 	"bazaarStars": "Liczba gwiazdek repozytorium GitHub",
 	"bazaarFeedbackTip": "Prześlij opinię przez GitHub Issues",
@@ -44,9 +46,9 @@
 	"listMindmapArrowBoth": "Strzałki na obu końcach",
 	"listMindmapArrowNone": "Bez strzałek",
 	"ocrProvider": "Dostawca OCR",
-	"ocrProviderTip": "Rozpoznawanie offline w lokalnym jądrze; zainstaluj Tesseract oddzielnie; brak automatycznej zmiany w razie niedostępności",
+	"ocrProviderTip": "Użyj lokalnego dostawcy OCR lub skonfigurowanego modelu AI; zainstaluj Tesseract osobno; brak automatycznego przełączania w razie niedostępności",
 	"ocrAuto": "Automatyczny OCR",
-	"ocrAutoTip": "Przetwarzaj obrazy w zwykłych notatnikach, które nie mają jeszcze wyniku OCR",
+	"ocrAutoTip": "Przetwarzaj obrazy z nieszyfrowanych notatników bez wyników OCR; AI wysyła obrazy do wybranego dostawcy w tle",
 	"ocrModel": "Model OCR",
 	"ocrModelTip": "Tylko Tiny jest wbudowany; zmiana modelu zachowuje istniejące wyniki; uruchom OCR ponownie z menu obrazu",
 	"ocrImportModels": "Importuj modele OCR",

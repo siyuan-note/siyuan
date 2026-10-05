@@ -1,4 +1,6 @@
 {
+	"ocrAIModel": "Modelo de IA",
+	"ocrAIModelTip": "Selecione um modelo que aceite imagens; o reconhecimento manual e automático envia imagens ao provedor e pode gerar cobranças",
 	"viewRefContent": "Ver conteúdo referenciado",
 	"bazaarStars": "Número de estrelas do repositório do GitHub",
 	"bazaarFeedbackTip": "Enviar comentários pelo GitHub Issues",
@@ -44,9 +46,9 @@
 	"listMindmapArrowBoth": "Setas nas duas extremidades",
 	"listMindmapArrowNone": "Sem setas",
 	"ocrProvider": "Provedor de OCR",
-	"ocrProviderTip": "Reconhecimento offline no núcleo local; instale o Tesseract separadamente; não há troca automática se estiver indisponível",
+	"ocrProviderTip": "Use um provedor OCR local ou um modelo de IA configurado; instale o Tesseract separadamente; não há troca automática quando indisponível",
 	"ocrAuto": "OCR automático",
-	"ocrAutoTip": "Processar imagens de cadernos comuns que ainda não possuem resultado de OCR",
+	"ocrAutoTip": "Processa imagens de cadernos não criptografados sem resultados OCR; a IA envia imagens ao provedor selecionado em segundo plano",
 	"ocrModel": "Modelo de OCR",
 	"ocrModelTip": "Apenas Tiny está integrado; trocar de modelo preserva os resultados existentes; execute o OCR novamente pelo menu da imagem",
 	"ocrImportModels": "Importar modelos de OCR",

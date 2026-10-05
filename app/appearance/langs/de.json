@@ -1,4 +1,6 @@
 {
+	"ocrAIModel": "KI-Modell",
+	"ocrAIModelTip": "Ein Modell mit Bildeingabe wählen; manuelle und automatische Erkennung senden Bilder an dessen Anbieter und können Kosten verursachen",
 	"viewRefContent": "Referenzierten Inhalt anzeigen",
 	"bazaarStars": "Anzahl der Sterne des GitHub-Repositorys",
 	"bazaarFeedbackTip": "Feedback über GitHub Issues geben",
@@ -44,9 +46,9 @@
 	"listMindmapArrowBoth": "Pfeile an beiden Enden",
 	"listMindmapArrowNone": "Keine Pfeile",
 	"ocrProvider": "OCR-Anbieter",
-	"ocrProviderTip": "Offline-Erkennung im lokalen Kernel; Tesseract separat installieren; kein automatischer Wechsel bei Nichtverfügbarkeit",
+	"ocrProviderTip": "Einen lokalen OCR-Anbieter oder ein konfiguriertes KI-Modell verwenden; Tesseract separat installieren; bei Nichtverfügbarkeit erfolgt kein automatischer Wechsel",
 	"ocrAuto": "Automatische OCR",
-	"ocrAutoTip": "Bilder normaler Notizbücher ohne vorhandenes OCR-Ergebnis verarbeiten",
+	"ocrAutoTip": "Bilder aus unverschlüsselten Notizbüchern ohne OCR-Ergebnis verarbeiten; KI sendet Bilder im Hintergrund an den gewählten Anbieter",
 	"ocrModel": "OCR-Modell",
 	"ocrModelTip": "Nur Tiny ist integriert; beim Wechsel bleiben vorhandene Ergebnisse erhalten; OCR lässt sich über das Bildmenü erneut ausführen",
 	"ocrImportModels": "OCR-Modelle importieren",

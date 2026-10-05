@@ -1,4 +1,6 @@
 {
+	"ocrAIModel": "Model AI",
+	"ocrAIModelTip": "Pilih model yang mendukung masukan gambar; pengenalan manual dan otomatis mengirim gambar ke penyedia dan dapat dikenai biaya",
 	"viewRefContent": "Lihat konten yang dirujuk",
 	"bazaarStars": "Jumlah bintang repositori GitHub",
 	"bazaarFeedbackTip": "Kirim masukan melalui GitHub Issues",
@@ -44,9 +46,9 @@
 	"listMindmapArrowBoth": "Panah di kedua ujung",
 	"listMindmapArrowNone": "Tanpa panah",
 	"ocrProvider": "Penyedia OCR",
-	"ocrProviderTip": "Pengenalan luring di kernel lokal; pasang Tesseract secara terpisah; tidak berpindah otomatis saat tidak tersedia",
+	"ocrProviderTip": "Gunakan penyedia OCR lokal atau model AI yang dikonfigurasi; instal Tesseract secara terpisah; tidak beralih otomatis saat tidak tersedia",
 	"ocrAuto": "OCR otomatis",
-	"ocrAutoTip": "Proses gambar buku catatan biasa yang belum memiliki hasil OCR",
+	"ocrAutoTip": "Memproses gambar buku catatan tidak terenkripsi tanpa hasil OCR; AI mengirim gambar ke penyedia yang dipilih di latar belakang",
 	"ocrModel": "Model OCR",
 	"ocrModelTip": "Hanya Tiny yang disertakan; pergantian model mempertahankan hasil yang ada; jalankan ulang OCR dari menu gambar",
 	"ocrImportModels": "Impor model OCR",

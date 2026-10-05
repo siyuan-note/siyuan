@@ -33242,9 +33242,42 @@
       ],
       "additionalProperties": false
     },
+    "OCRAIModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "provider"
+      ],
+      "additionalProperties": false
+    },
     "OCRConfigData": {
       "type": "object",
       "properties": {
+        "aiModels": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/OCRAIModel"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "config": {
           "$ref": "#/$defs/SettingOCR"
         },
@@ -33276,6 +33309,7 @@
         }
       },
       "required": [
+        "aiModels",
         "config",
         "models",
         "providers"
@@ -46151,6 +46185,9 @@
     "SettingOCR": {
       "type": "object",
       "properties": {
+        "aiModelId": {
+          "type": "string"
+        },
         "auto": {
           "type": "boolean"
         },
@@ -46174,6 +46211,16 @@
     "SettingOCRInput": {
       "type": "object",
       "properties": {
+        "aiModelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "auto": {
           "type": "boolean"
         },

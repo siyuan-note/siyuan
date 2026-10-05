@@ -41,10 +41,12 @@ test("shared image menus hide unavailable recognition and its separator while re
     const idPosition = menuSource.indexOf('id: "ocr",', menuSource.indexOf("export const imgMenu"));
     const start = menuSource.lastIndexOf("new MenuItem(", idPosition) + "new MenuItem(".length;
     const end = menuSource.indexOf("}).element);", start) + 1;
-    const getMenu = new Function("window", "ocrAvailability", "isDisabledFeature",
+    const getMenu = new Function("window", "ocrAvailability", "canOCR", "canAIOCR",
         `return (${menuSource.slice(start, end)});`);
-    const visibleItems = (path: string, notebookId: string, disabled = false) => {
-        const menu = getMenu({siyuan: {languages: {}}}, availability(path, notebookId), () => disabled);
+    const visibleItems = (path: string, notebookId: string, disabled = false, provider = "paddleocr") => {
+        const status = availability(path, notebookId);
+        const menu = getMenu({siyuan: {languages: {}}}, status,
+            status.local && (provider !== "ai" || status.ai && !disabled), status.ai && !disabled);
         return menu.ignore ? [] : menu.submenu.filter((item: {ignore?: boolean}) => !item.ignore)
             .map((item: {id: string}) => item.id);
     };
@@ -54,4 +56,6 @@ test("shared image menus hide unavailable recognition and its separator while re
     assert.deepEqual(visibleItems("assets/image.svg", "ordinary"), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR"]);
     assert.deepEqual(visibleItems("assets/image.heic", "ordinary"), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR", "reAIOCR"]);
     assert.deepEqual(visibleItems("assets/image.png", "ordinary", true), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR"]);
+    assert.deepEqual(visibleItems("assets/image.svg", "ordinary", false, "ai"), ["ocrResult", "copyOCRText"]);
+    assert.deepEqual(visibleItems("assets/image.png", "ordinary", true, "ai"), ["ocrResult", "copyOCRText"]);
 });

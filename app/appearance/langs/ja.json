@@ -1,4 +1,6 @@
 {
+	"ocrAIModel": "AI モデル",
+	"ocrAIModelTip": "画像入力に対応するモデルを選択します。手動認識と自動認識では画像をプロバイダーに送信し、料金が発生する場合があります",
 	"viewRefContent": "参照先の内容を表示",
 	"bazaarStars": "GitHub リポジトリのスター数",
 	"bazaarFeedbackTip": "GitHub Issues からフィードバックを送信",
@@ -44,9 +46,9 @@
 	"listMindmapArrowBoth": "両端に矢印",
 	"listMindmapArrowNone": "矢印なし",
 	"ocrProvider": "OCR プロバイダー",
-	"ocrProviderTip": "ローカルカーネルでオフライン認識します。Tesseract は別途インストールが必要です。利用できない場合も自動切り替えは行いません",
+	"ocrProviderTip": "ローカル OCR プロバイダーまたは設定済みの AI モデルを使用します。Tesseract は別途インストールが必要です。利用できない場合、自動では切り替えません",
 	"ocrAuto": "自動 OCR",
-	"ocrAutoTip": "OCR 結果がまだない通常のノートブックの画像を処理します",
+	"ocrAutoTip": "OCR 結果がない暗号化されていないノートブックの画像のみを処理します。AI は選択したプロバイダーに画像をバックグラウンドで送信します",
 	"ocrModel": "OCR モデル",
 	"ocrModelTip": "Tiny のみ内蔵されています。切り替えても既存の結果は保持され、画像メニューから再認識できます",
 	"ocrImportModels": "OCR モデルをインポート",

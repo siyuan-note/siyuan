@@ -4,6 +4,7 @@ package conf
 type OCR struct {
 	Provider   string        `json:"provider"`
 	Model      string        `json:"model"`
+	AIModelID  string        `json:"aiModelId"`
 	Auto       bool          `json:"auto"`
 	Thresholds OCRThresholds `json:"thresholds"`
 }

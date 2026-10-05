@@ -7,10 +7,14 @@ import "mime/multipart"
 // thresholds 省略或为 null 时保留设备已保存的阈值；传入对象时整体替换。
 // 修改阈值只影响后续识别，不修改模型文件或已有结果，Tesseract 不使用这些参数。
 // 仅内置 tiny；旧内置模型标识 small 会归一化为 tiny，自行导入的模型仍使用内容摘要标识。
+// provider 可为 tesseract、paddleocr 或 ai；aiModelId 是已配置 AI 模型的 ID，与本地 model 独立保存。
+// aiModelId 省略或为 null 时保留已有选择；失效的已保存 ID 保留并显示不可用，不回退到其他模型。
+// 首次切换到 ai 时 auto 强制关闭；之后可显式开启，手动和自动识别均使用所选 AI 模型。
 type SettingOCR struct {
 	Provider   string         `json:"provider"`
 	Model      string         `json:"model"`
 	Auto       bool           `json:"auto"`
+	AIModelID  *string        `json:"aiModelId,omitempty" api:"optional"`
 	Thresholds *OCRThresholds `json:"thresholds,omitempty" api:"optional"`
 }
 
@@ -37,6 +41,14 @@ type OCRConfigData struct {
 	Config    SettingOCR         `json:"config"`
 	Providers []OCRProviderState `json:"providers"`
 	Models    []OCRModel         `json:"models"`
+	AIModels  []OCRAIModel       `json:"aiModels"`
+}
+
+// OCRAIModel 仅列出启用的提供商及模型；不推断模型的图片输入能力，不包含提供商凭据。
+type OCRAIModel struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Provider string `json:"provider"`
 }
 
 // ImportOCRModelsRequest 导入配套的 PP-OCRv6 ONNX 模型和 YAML 配置。

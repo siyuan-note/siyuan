@@ -8,17 +8,68 @@ import {showMessage} from "../dialog/message";
 import {OCR_CHANGED_EVENT} from "./ocrRuntime";
 import {objEquals} from "../util/functions";
 import {openOCRThresholds} from "./ocrThresholds";
+import {AI_CONFIG_CHANGED_EVENT} from "./tabs/ai/aiRuntime";
+import type {SettingTabBuilder} from "./setting/builder";
+import {trackSettingSave} from "./setting/pending";
 
-export const ocrSearchStrings = (): string[] => [
-    "OCR", "Tesseract", "PaddleOCR", "Tiny",
-    window.siyuan.languages.ocrProvider,
-    window.siyuan.languages.ocrModel,
-    window.siyuan.languages.ocrAuto,
-    window.siyuan.languages.ocrImportModels,
-    window.siyuan.languages.ocrDetectionThreshold,
-    window.siyuan.languages.ocrBoxThreshold,
-    window.siyuan.languages.ocrRecognitionThreshold,
+const mounts = new WeakMap<HTMLElement, () => void>();
+
+export const unmountOCRTab = (root: HTMLElement) => {
+    mounts.get(root)?.();
+    mounts.delete(root);
+};
+
+export const mountOCRTab = (root: HTMLElement) => {
+    unmountOCRTab(root);
+    mounts.set(root, mountOCRSettings(root));
+};
+
+const selectRow = (id: string, title: string, desc: string) =>
+    `<label class="fn__flex b3-label config-item">${genConfigItemMainHtml(title, desc)}
+<span class="fn__space"></span><select id="${id}" class="b3-select fn__flex-center fn__size200" disabled></select></label>`;
+
+const getModelFiles = () => [
+    {id: "detector", title: window.siyuan.languages.ocrDetector, suffix: "onnx"},
+    {id: "detectorConfig", title: `${window.siyuan.languages.ocrDetector} - YAML`, suffix: "yml,yaml"},
+    {id: "recognizer", title: window.siyuan.languages.ocrRecognizer, suffix: "onnx"},
+    {id: "recognizerConfig", title: `${window.siyuan.languages.ocrRecognizer} - YAML`, suffix: "yml,yaml"},
 ];
+
+export const registerOCRTab = (tab: SettingTabBuilder) => {
+    const languages = window.siyuan.languages;
+    tab.group("general", "OCR").slot({
+        key: "ocrAuto",
+        keywords: [languages.ocrAuto, languages.ocrAutoTip],
+        html: () => genSwitchRow("ocrAuto", languages.ocrAuto, languages.ocrAutoTip, false),
+    }).slot({
+        key: "ocrProvider",
+        keywords: ["Tesseract", "PaddleOCR", "AI", languages.ocrProvider, languages.ocrProviderTip],
+        html: () => selectRow("ocrProvider", languages.ocrProvider, languages.ocrProviderTip),
+    }).slot({
+        key: "ocrModel",
+        keywords: ["PaddleOCR", "Tiny", languages.ocrModel, languages.ocrModelTip],
+        html: () => selectRow("ocrModel", languages.ocrModel, languages.ocrModelTip),
+    }).slot({
+        key: "ocrAIModel",
+        keywords: ["AI", languages.ocrAIModel, languages.ocrAIModelTip],
+        html: () => selectRow("ocrAIModel", languages.ocrAIModel, languages.ocrAIModelTip),
+    });
+    tab.group("advanced", languages.configGroupAdvanced).slot({
+        key: "ocrAdvanced",
+        keywords: [languages.ocrDetectionThreshold, languages.ocrBoxThreshold, languages.ocrRecognitionThreshold],
+        html: () => genButtonRowHtml("ocrAdvanced", languages.configGroupAdvanced, undefined, languages.config, "iconSettings"),
+    });
+    tab.group("models", languages.ocrImportModels).slot({
+        key: "ocrImportModels",
+        keywords: ["ONNX", "YAML", "Tiny", languages.ocrImportModels, languages.ocrDetector, languages.ocrRecognizer],
+        html: () => `<div id="ocrImportModels" class="b3-label config-item">${genConfigItemMainHtml(languages.ocrImportModels, languages.ocrImportModelsTip)}
+${getModelFiles().map(file => `<div class="fn__hr"></div><label class="fn__block"><span class="b3-label__text">${file.title}</span><div class="fn__hr--small"></div><input id="${file.id}" class="b3-text-field fn__block" type="file" accept="${file.suffix.split(",").map(suffix => `.${suffix}`).join(",")}"></label>`).join("")}</div>`,
+    }).slot({
+        key: "ocrImport",
+        keywords: ["ONNX", "YAML", languages.ocrImportModels, languages.import],
+        html: () => genButtonRowHtml("ocrImport", "", undefined, languages.import, "iconDownload"),
+    });
+};
 
 export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     const controller = new AbortController();
@@ -32,51 +83,74 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     let refreshTask: Promise<void>;
     let writeRevision = 0;
     const languages = window.siyuan.languages;
-    const selectRow = (id: string, title: string, desc: string, options: string) =>
-        `<label class="fn__flex b3-label config-item">${genConfigItemMainHtml(title, desc)}
-<span class="fn__space"></span><select id="${id}" class="b3-select fn__flex-center fn__size200">${options}</select></label>`;
-    const files = [
-        {id: "detector", title: languages.ocrDetector, suffix: "onnx"},
-        {id: "detectorConfig", title: `${languages.ocrDetector} - YAML`, suffix: "yml,yaml"},
-        {id: "recognizer", title: languages.ocrRecognizer, suffix: "onnx"},
-        {id: "recognizerConfig", title: `${languages.ocrRecognizer} - YAML`, suffix: "yml,yaml"},
-    ];
+    const files = getModelFiles();
     const updateControls = () => {
         const isPaddleOCR = root.querySelector<HTMLSelectElement>("#ocrProvider").value === "paddleocr";
+        const isAI = root.querySelector<HTMLSelectElement>("#ocrProvider").value === "ai";
         ["ocrModel", "ocrImportModels", "ocrImport", "ocrAdvanced"].forEach(id => {
             root.querySelector(`#${id}`).closest(".config-item").classList.toggle("fn__none", !isPaddleOCR);
+        });
+        root.querySelector("#ocrAIModel").closest(".config-item").classList.toggle("fn__none", !isAI);
+        ["advanced", "models"].forEach(group => {
+            root.querySelector(`[data-config-group-id="${group}"]`)?.classList.toggle("fn__none", !isPaddleOCR);
         });
         if (!isPaddleOCR) thresholdDialog?.destroy();
         root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
             element.disabled = busy || (element.tagName === "BUTTON" && pendingSaves > 0);
         });
         root.querySelector<HTMLSelectElement>("#ocrModel").disabled = busy || !isPaddleOCR;
+        root.querySelector<HTMLSelectElement>("#ocrAIModel").disabled = busy || !isAI;
         root.querySelector<HTMLButtonElement>("#ocrImport").disabled = busy || pendingSaves > 0 || !isPaddleOCR || files.some(file => !root.querySelector<HTMLInputElement>(`#${file.id}`).files?.length);
     };
     const providerOptions = () => {
         const providers = [...data.providers].sort((left, right) => Number(right.id === "paddleocr") - Number(left.id === "paddleocr"));
-        return providers.map(provider => `<option value="${escapeAttr(provider.id)}" ${data.config.provider === provider.id ? "selected" : ""}>${provider.id === "paddleocr" ? "PaddleOCR" : "Tesseract"}${provider.available ? "" : ` (${escapeHtml(languages.ocrUnavailable)})`}</option>`).join("");
+        return providers.map(provider => `<option value="${escapeAttr(provider.id)}" ${data.config.provider === provider.id ? "selected" : ""}>${provider.id === "paddleocr" ? "PaddleOCR" : provider.id === "ai" ? "AI" : "Tesseract"}${provider.available ? "" : ` (${escapeHtml(languages.ocrUnavailable)})`}</option>`).join("");
     };
-    const modelOptions = () => data.models.map(model => `<option value="${escapeAttr(model.id)}" ${model.id === data.config.model ? "selected" : ""}>${escapeHtml(model.name)}${model.builtIn ? ` (${escapeHtml(languages.builtIn)})` : ""}</option>`).join("");
+    const modelOptions = () => {
+        let html = data.models.map(model => `<option value="${escapeAttr(model.id)}" ${model.id === data.config.model ? "selected" : ""}>${escapeHtml(model.name)}${model.builtIn ? ` (${escapeHtml(languages.builtIn)})` : ""}</option>`).join("");
+        if (!data.models.some(model => model.id === data.config.model)) {
+            html += `<option value="${escapeAttr(data.config.model)}" disabled>${escapeHtml(languages.ocrUnavailable)}</option>`;
+        }
+        return html;
+    };
+    const aiModelOptions = () => {
+        const models = data.aiModels || [];
+        const selected = data.config.aiModelId || "";
+        let html = `<option value="">${escapeHtml(languages.noModelConfigured)}</option>`;
+        if (selected && !models.some(model => model.id === selected)) {
+            html += `<option value="${escapeAttr(selected)}" disabled>${escapeHtml(languages.ocrUnavailable)}</option>`;
+        }
+        const groups = new Map<string, typeof models>();
+        models.forEach(model => {
+            const group = groups.get(model.provider) || [];
+            group.push(model);
+            groups.set(model.provider, group);
+        });
+        groups.forEach((models, provider) => {
+            html += `<optgroup label="${escapeAttr(provider)}">${models.map(model =>
+                `<option value="${escapeAttr(model.id)}">${escapeHtml(model.name)}</option>`).join("")}</optgroup>`;
+        });
+        return html;
+    };
     const updateForm = (previous: OCRConfigData) => {
         const provider = root.querySelector<HTMLSelectElement>("#ocrProvider");
         const model = root.querySelector<HTMLSelectElement>("#ocrModel");
         if (!objEquals(previous.providers, data.providers)) provider.innerHTML = providerOptions();
-        if (!objEquals(previous.models, data.models)) model.innerHTML = modelOptions();
+        if (!objEquals(previous.models, data.models) || previous.config.model !== data.config.model) model.innerHTML = modelOptions();
+        if (!objEquals(previous.aiModels, data.aiModels) || previous.config.aiModelId !== data.config.aiModelId) {
+            root.querySelector<HTMLSelectElement>("#ocrAIModel").innerHTML = aiModelOptions();
+        }
         provider.value = data.config.provider;
         model.value = data.config.model;
+        root.querySelector<HTMLSelectElement>("#ocrAIModel").value = data.config.aiModelId || "";
         root.querySelector<HTMLInputElement>("#ocrAuto").checked = data.config.auto;
         updateControls();
     };
     const render = () => {
-        root.innerHTML = genSwitchRow("ocrAuto", languages.ocrAuto, languages.ocrAutoTip, data.config.auto) +
-            selectRow("ocrProvider", languages.ocrProvider, languages.ocrProviderTip, providerOptions()) +
-            selectRow("ocrModel", languages.ocrModel, languages.ocrModelTip, modelOptions()) +
-            genButtonRowHtml("ocrAdvanced", languages.configGroupAdvanced, undefined, languages.config, "iconSettings") +
-            `<div id="ocrImportModels" class="b3-label config-item">${genConfigItemMainHtml(languages.ocrImportModels, languages.ocrImportModelsTip)}
-${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span class="b3-label__text">${file.title}</span><div class="fn__hr--small"></div><input id="${file.id}" class="b3-text-field fn__block" type="file" accept="${file.suffix.split(",").map(suffix => `.${suffix}`).join(",")}"></label>`).join("")}</div>` +
-            genButtonRowHtml("ocrImport", "", undefined, languages.import, "iconDownload");
-        updateControls();
+        root.querySelector<HTMLSelectElement>("#ocrProvider").innerHTML = providerOptions();
+        root.querySelector<HTMLSelectElement>("#ocrModel").innerHTML = modelOptions();
+        root.querySelector<HTMLSelectElement>("#ocrAIModel").innerHTML = aiModelOptions();
+        updateForm(data);
     };
     const load = (): Promise<void> => {
         refreshPending = true;
@@ -95,7 +169,7 @@ ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span cl
                     continue;
                 }
                 if (response.code !== 0) {
-                    if (!data) root.innerHTML = `<div class="b3-label">${escapeHtml(response.msg)}</div>`;
+                    if (!data) showMessage(response.msg);
                     return;
                 }
                 const previous = data;
@@ -117,8 +191,11 @@ ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span cl
             showMessage(error.message);
         }
     };
-    root.innerHTML = "<div class=\"fn__loading\"><img src=\"/stage/loading-pure.svg\"></div>";
+    root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
+        element.disabled = true;
+    });
     window.addEventListener(OCR_CHANGED_EVENT, () => { void load().catch(handleError); }, {signal: controller.signal});
+    window.addEventListener(AI_CONFIG_CHANGED_EVENT, () => { void load().catch(handleError); }, {signal: controller.signal});
     const saveConfig = async (thresholds?: OCRThresholds): Promise<boolean> => {
         if (closed || busy || !data) {
             return false;
@@ -127,6 +204,7 @@ ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span cl
             provider: root.querySelector<HTMLSelectElement>("#ocrProvider").value,
             model: root.querySelector<HTMLSelectElement>("#ocrModel").value,
             auto: root.querySelector<HTMLInputElement>("#ocrAuto").checked,
+            aiModelId: root.querySelector<HTMLSelectElement>("#ocrAIModel").value,
             thresholds,
         };
         writeRevision++;
@@ -153,6 +231,7 @@ ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span cl
                     root.querySelector<HTMLSelectElement>("#ocrProvider").value = data.config.provider;
                     root.querySelector<HTMLSelectElement>("#ocrModel").value = data.config.model;
                     root.querySelector<HTMLInputElement>("#ocrAuto").checked = data.config.auto;
+                    root.querySelector<HTMLSelectElement>("#ocrAIModel").value = data.config.aiModelId || "";
                     updateControls();
                     if (refreshPending) void load().catch(handleError);
                 }
@@ -160,7 +239,7 @@ ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span cl
             return saved;
         };
         saveQueue = saveQueue.then(save, save);
-        return saveQueue;
+        return trackSettingSave(saveQueue);
     };
     root.addEventListener("change", async event => {
         event.stopPropagation();
@@ -169,6 +248,14 @@ ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span cl
             updateControls();
             return;
         }
+        if (!data) return;
+        if (target.id === "ocrProvider" && target.value === "ai" && data.config.provider !== "ai") {
+            root.querySelector<HTMLInputElement>("#ocrAuto").checked = false;
+            if (!data.config.aiModelId && data.aiModels?.length) {
+                root.querySelector<HTMLSelectElement>("#ocrAIModel").value = data.aiModels[0].id;
+            }
+        }
+        updateControls();
         await saveConfig();
     }, {signal: controller.signal});
     root.addEventListener("click", async event => {
@@ -211,9 +298,6 @@ ${files.map(file => `<div class="fn__hr"></div><label class="fn__block"><span cl
     }, {signal: controller.signal});
     void load().catch(error => {
         handleError(error);
-        if (!closed && !data) {
-            root.innerHTML = `<div class="b3-label">${escapeHtml(error.message)}</div>`;
-        }
     });
     return () => {
         closed = true;

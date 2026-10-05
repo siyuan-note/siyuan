@@ -88,7 +88,7 @@ func (config *AppConf) SetOCR(value conf.OCR) error {
 	if err := (ocr.Thresholds(value.Thresholds)).Validate(); err != nil {
 		return err
 	}
-	if value.Provider != string(ocr.Tesseract) && value.Provider != string(ocr.PaddleOCR) {
+	if value.Provider != string(ocr.Tesseract) && value.Provider != string(ocr.PaddleOCR) && value.Provider != "ai" {
 		return errors.New("unknown OCR provider")
 	}
 	if value.Model != "tiny" {
@@ -102,6 +102,17 @@ func (config *AppConf) SetOCR(value conf.OCR) error {
 		}
 	}
 	config.m.Lock()
+	previous := config.OCR
+	if value.Provider == "ai" && (previous == nil || previous.AIModelID == "" || previous.AIModelID != value.AIModelID) {
+		provider, model := getOCRAIModel(value)
+		if provider == nil || model == nil {
+			config.m.Unlock()
+			return errors.New(Conf.Language(412))
+		}
+	}
+	if value.Provider == "ai" && (previous == nil || previous.Provider != "ai") {
+		value.Auto = false
+	}
 	changed := config.OCR == nil || config.OCR.Provider != value.Provider || config.OCR.Model != value.Model
 	config.OCR = &value
 	config.m.Unlock()
@@ -150,41 +161,52 @@ func IsEncryptedOCRAsset(path string) bool {
 }
 
 // OCRAsset 与自动任务共用内核识别和存储流程，失败时保留已有结果。
-func OCRAsset(ctx context.Context, path string) ([]map[string]string, error) {
+func OCRAsset(ctx context.Context, path string) (string, []map[string]string, error) {
+	return ocrAsset(ctx, path, Conf.GetOCR(), false)
+}
+
+func ocrAsset(ctx context.Context, path string, value conf.OCR, automatic bool) (string, []map[string]string, error) {
+	if value.Provider == "ai" {
+		text, err := aiOCRAsset(ctx, path, value, automatic)
+		return text, []map[string]string{}, err
+	}
 	InitOCR()
 	path = strings.SplitN(path, "#", 2)[0]
 	if IsEncryptedOCRAsset(path) {
-		return nil, errors.New(Conf.Language(380))
+		return "", nil, errors.New(Conf.Language(380))
 	}
 	absPath, err := GetAssetAbsPathInBox(path, "")
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	if IsEncryptedAssetPath(absPath) {
-		return nil, errors.New(Conf.Language(380))
+		return "", nil, errors.New(Conf.Language(380))
 	}
 	if err = EnsureAssetLocal(absPath); err != nil {
-		return nil, err
+		return "", nil, err
 	}
-	value := Conf.GetOCR()
 	if value.Provider == string(ocr.Tesseract) {
 		if err = util.WaitForTesseractInitContext(ctx); err != nil {
-			return nil, err
+			return "", nil, err
 		}
 	}
 	rows, err := ocrRegistry.Recognize(ctx, ocr.ProviderID(value.Provider), absPath)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	canonical, boxID, err := assetPathAndBox(path, "")
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	if boxID != "" {
 		canonical += "?box=" + url.QueryEscape(boxID)
 	}
-	SetOCRAssetText(canonical, util.GetOcrJsonText(rows))
-	return rows, nil
+	if automatic && !canSaveAutomaticOCR(value, canonical) {
+		return "", nil, context.Canceled
+	}
+	text := util.GetOcrJsonText(rows)
+	SetOCRAssetText(canonical, text)
+	return text, rows, nil
 }
 
 func SetOCRAssetText(path, text string) {
@@ -235,32 +257,41 @@ func OCRAssetsJob() {
 	if value.Provider == string(ocr.Tesseract) {
 		util.WaitForTesseractInit()
 	}
-	if !ocrRegistry.Available(ocr.ProviderID(value.Provider)) {
+	if !OCRProviderAvailable(value.Provider) {
 		return
 	}
-	task.AppendTaskWithTimeout(task.OCRImage, 30*time.Second, autoOCRAssets)
+	task.AppendTaskWithTimeout(task.OCRImage, automaticOCRTimeout(value), autoOCRAssets)
 }
 
 var ocrRetry sync.Map
 
 func autoOCRAssets() {
 	defer logging.Recover()
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
 	value := Conf.GetOCR()
-	if !value.Auto {
+	if !value.Auto || !OCRProviderAvailable(value.Provider) {
 		return
 	}
-	assets := cache.FilterAssets(func(path string, asset *cache.Asset) bool { return util.IsTesseractExtractable(asset.Path) })
+	ctx, cancel := context.WithTimeout(context.Background(), automaticOCRTimeout(value))
+	defer cancel()
+	assets := cache.FilterAssets(func(path string, asset *cache.Asset) bool {
+		if value.Provider == "ai" {
+			return isAIOCRPath(asset.Path)
+		}
+		return util.IsTesseractExtractable(asset.Path)
+	})
+	limit := 7
+	if value.Provider == "ai" {
+		limit = 1
+	}
 	processed := 0
 	for _, asset := range assets {
-		if ctx.Err() != nil || processed >= 7 {
+		if ctx.Err() != nil || processed >= limit || !automaticOCRMatches(value) {
 			break
 		}
 		if util.ExistsAssetText(asset.Path) {
 			continue
 		}
-		key := fmt.Sprintf("%s:%s:%s", value.Provider, value.Model, asset.Path)
+		key := fmt.Sprintf("%s:%s:%s:%s", value.Provider, value.Model, value.AIModelID, asset.Path)
 		if retry, exists := ocrRetry.Load(key); exists && time.Now().Before(retry.(time.Time)) {
 			continue
 		}
@@ -269,7 +300,7 @@ func autoOCRAssets() {
 			continue
 		}
 		processed++
-		if _, err = OCRAsset(ctx, asset.Path); err != nil {
+		if _, _, err = ocrAsset(ctx, asset.Path, value, true); err != nil {
 			ocrRetry.Store(key, time.Now().Add(10*time.Minute))
 			logging.LogWarnf("automatic OCR failed: %s", err)
 		} else {
@@ -305,8 +336,33 @@ func OCRModels() []string {
 }
 
 func OCRProviderAvailable(id string) bool {
+	if id == "ai" {
+		value := Conf.GetOCR()
+		if value.Provider != "ai" {
+			return len(OCRAIModels()) > 0
+		}
+		provider, model := getOCRAIModel(value)
+		return provider != nil && model != nil
+	}
 	InitOCR()
 	return ocrRegistry.Available(ocr.ProviderID(id))
+}
+
+func automaticOCRTimeout(value conf.OCR) time.Duration {
+	if value.Provider == "ai" {
+		return 2 * time.Minute
+	}
+	return 30 * time.Second
+}
+
+func automaticOCRMatches(value conf.OCR) bool {
+	current := Conf.GetOCR()
+	return current.Auto && current.Provider == value.Provider && current.Model == value.Model && current.AIModelID == value.AIModelID
+}
+
+// 自动识别仅提交仍为空的结果，关闭自动识别、切换配置或手动编辑后丢弃在途响应。
+func canSaveAutomaticOCR(value conf.OCR, path string) bool {
+	return automaticOCRMatches(value) && OCRProviderAvailable(value.Provider) && !util.ExistsAssetText(path)
 }
 
 func FlushAssetsTextsJob() { util.SaveAssetsTexts() }

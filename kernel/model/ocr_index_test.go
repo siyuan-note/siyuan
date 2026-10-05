@@ -89,7 +89,7 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 		t.Fatal(err)
 	}
 	ocrInit.Do(func() {})
-	if _, err := OCRAsset(context.Background(), path+"#fragment"); err != nil {
+	if _, _, err := OCRAsset(context.Background(), path+"#fragment"); err != nil {
 		t.Fatal(err)
 	}
 	sql.FlushQueue()
@@ -113,7 +113,7 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 	}
 	provider.err = errors.New("inference failed")
 	testAIOCRAssetIndex(t, path, paragraph.ID)
-	if _, err := OCRAsset(context.Background(), path); err == nil {
+	if _, _, err := OCRAsset(context.Background(), path); err == nil {
 		t.Fatal("failed provider returned success")
 	}
 	if util.GetAssetText(path) != "editedocrkeyword" {
@@ -182,7 +182,7 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 			Conf.OCR.Provider = selected
 			for _, path := range []string{"assets/encrypted.png?box=" + encryptedBox, "assets/encrypted.png?box=" + encryptedBox + "#fragment", "assets/missing.png?box=" + encryptedBox + "#fragment"} {
 				provider.called = false
-				if _, err := OCRAsset(context.Background(), path); err == nil || provider.called {
+				if _, _, err := OCRAsset(context.Background(), path); err == nil || provider.called {
 					t.Fatalf("encrypted OCR reached %s (unlocked=%v): %v", selected, unlocked, err)
 				}
 				if _, err := AIOCRAsset(context.Background(), path); err == nil || err.Error() != Conf.Language(380) {
@@ -258,7 +258,7 @@ func testOCRNotebookIsolation(t *testing.T, provider *ocrFixtureProvider, firstB
 		{second, secondBox, "secondocrkeyword"},
 	} {
 		provider.rows = []map[string]string{{"text": test.text, "conf": "99"}}
-		if _, err := OCRAsset(context.Background(), test.reference); err != nil {
+		if _, _, err := OCRAsset(context.Background(), test.reference); err != nil {
 			t.Fatal(err)
 		}
 		if provider.path != filepath.Join(util.DataDir, test.box, filepath.FromSlash(path)) {
@@ -293,7 +293,7 @@ func testOCRNotebookIsolation(t *testing.T, provider *ocrFixtureProvider, firstB
 		}
 	}
 	provider.err = errors.New("scoped recognition failed")
-	if _, err := OCRAsset(context.Background(), first); err == nil {
+	if _, _, err := OCRAsset(context.Background(), first); err == nil {
 		t.Fatal("failed notebook recognition returned success")
 	}
 	provider.err = nil

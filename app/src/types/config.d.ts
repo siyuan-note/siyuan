@@ -27,7 +27,11 @@ declare namespace Config {
         accessAuthCode: string;
         oidc: IOIDC;
         ai: IAI;
-        /** 当前设备的 OCR 设置；阈值只影响后续 PaddleOCR 识别，空值使用模型检测参数和 0.5 的识别阈值 */
+        /**
+         * 当前设备的 OCR 设置；阈值只影响后续 PaddleOCR 识别，空值使用模型检测参数和 0.5 的识别阈值。
+         * provider 为 ai 时，手动和自动识别均使用独立的 aiModelId；失效时不回退到其他模型或提供商。
+         * 首次从本地提供商切换到 AI 时关闭自动识别，之后可以显式开启。
+         */
         ocr: import("./api").SettingOCR;
         api: IAPI;
         appearance: IAppearance;

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -114,9 +115,18 @@ func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protoco
 		return &OpenAICompletionStream{chat: stream}, nil
 	}
 
-	stream, err := client.CreateResponseStream(ctx, responseRequestFromChat(ctx, request, responseInput))
-	if err != nil {
-		return nil, err
+	responseRequest := responseRequestFromChat(ctx, request, responseInput)
+	var stream *openai.ResponseStream
+	for {
+		var err error
+		stream, err = client.CreateResponseStream(ctx, responseRequest)
+		if omitUnsupportedResponseSamplingParameter(&responseRequest, err) {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		break
 	}
 	return &OpenAICompletionStream{
 		responses:         stream,
@@ -132,14 +142,46 @@ func CreateOpenAICompletion(ctx context.Context, client *AIClient, protocol stri
 	if !IsOpenAIResponsesProtocol(protocol) {
 		return client.CreateChatCompletion(ctx, request)
 	}
-	response, err := client.CreateResponse(ctx, responseRequestFromChat(ctx, request, responseInput))
-	if err != nil {
-		return openai.ChatCompletionResponse{}, err
+	responseRequest := responseRequestFromChat(ctx, request, responseInput)
+	var response openai.CreateResponseResponse
+	for {
+		var err error
+		response, err = client.CreateResponse(ctx, responseRequest)
+		if omitUnsupportedResponseSamplingParameter(&responseRequest, err) {
+			continue
+		}
+		if err != nil {
+			return openai.ChatCompletionResponse{}, err
+		}
+		break
 	}
-	if err = responseResultError(response); err != nil {
+	if err := responseResultError(response); err != nil {
 		return openai.ChatCompletionResponse{}, err
 	}
 	return responseToChatCompletion(response), nil
+}
+
+// 仅对请求建立前明确拒绝的可选采样参数降级，保留推理强度及其他请求语义。
+// 每个字段最多移除一次；其他错误和已建立的响应流不重试。
+func omitUnsupportedResponseSamplingParameter(request *openai.CreateResponseRequest, err error) bool {
+	var apiErr *openai.APIError
+	if !errors.As(err, &apiErr) || apiErr.HTTPStatusCode != http.StatusBadRequest ||
+		apiErr.Code != "unsupported_parameter" || apiErr.Param == nil {
+		return false
+	}
+	switch *apiErr.Param {
+	case "temperature":
+		if request.Temperature != nil {
+			request.Temperature = nil
+			return true
+		}
+	case "top_p":
+		if request.TopP != nil {
+			request.TopP = nil
+			return true
+		}
+	}
+	return false
 }
 
 func CompactOpenAIResponse(ctx context.Context, client *AIClient, request openai.ChatCompletionRequest,

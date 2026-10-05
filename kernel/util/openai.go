@@ -289,6 +289,10 @@ func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int, headers 
 		MaxCompletionTokens: 1,
 		Temperature:         1,
 	}
+	if IsOpenAIResponsesProtocol(protocol) {
+		// Responses 的输出预算至少为 16，包含可能使用的推理 token。
+		request.MaxCompletionTokens = 16
+	}
 	if IsOpenAIResponsesProtocol(protocol) || IsAnthropicMessagesProtocol(protocol) {
 		request.Stream = true
 		var stream *OpenAICompletionStream

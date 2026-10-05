@@ -344,6 +344,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 撤销使用所属文档的历史栈，不依赖重新聚焦后浏览器是否已恢复块内选区。
                 event.preventDefault();
                 event.stopPropagation();
+                window.siyuan.menus.menu.remove();
                 if (undo) {
                     protyle.undo.undo(protyle);
                 } else {
@@ -487,7 +488,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             !event.altKey && !event.shiftKey && isNotCtrl(event)) {
             event.preventDefault();
             return;
-        } else if (event.key !== "Escape") {
+        } else if (!["Escape", "Control", "Shift", "Alt", "Meta"].includes(event.key)) {
             window.siyuan.menus.menu.remove();
         }
 

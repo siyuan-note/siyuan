@@ -4602,7 +4602,8 @@ export class WYSIWYG {
                 return;
             }
 
-            if ((event.shiftKey || isOnlyMeta(event)) && !event.isComposing && range.toString() !== "") {
+            if ((event.shiftKey || isOnlyMeta(event)) && !event.isComposing && range.toString() !== "" &&
+                window.siyuan.menus.menu.element.classList.contains("fn__none")) {
                 // 工具栏
                 protyle.toolbar.render(protyle, range);
                 countSelectWord(range, protyle);

@@ -8,8 +8,8 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 ### Verify the code baseline before repository tasks
 
-- Before each new repository task, follow the branch rules in section 2, fetch the relevant remote refs, and verify the task's code baseline before analysis or other work. Respect explicitly requested commits, tags, or pull requests
-- Create new task branches from the freshly fetched remote target branch. Automatically fast-forward an existing branch only when its working tree is clean and it is merely behind. If synchronization is blocked, preserve existing work and report the limitation; do not discard changes, automatically stash or rebase, or create merge commits
+- Before each new repository task, select the baseline source branch using the repository-specific branch policy in section 2's Git rules, fetch the relevant remote refs, and verify the task's code baseline before analysis or other work. Respect explicitly requested commits, tags, or pull requests
+- Create new task branches from the verified task baseline. The baseline source branch and the task branch used for work or an authorized push may differ. Automatically fast-forward an existing branch only when its working tree is clean and it is merely behind. If synchronization is blocked, preserve existing work and report the limitation; do not discard changes, automatically stash or rebase, or create merge commits
 - Reuse the verified baseline for follow-ups in the same task; recheck after a substantial pause, a repository or branch change, or when newer commits could affect the task. Unrelated conversation needs no fetch
 
 ### Requirement evaluation
@@ -81,8 +81,8 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
    - Represent in-app UI navigation paths as segmented `kbd` text marks: use one `NodeTextMark` with `TextMarkType: "kbd"` per navigation level, and place a plain `NodeText` containing ` - ` between adjacent levels
    - In every language, separate a `kbd` path from adjacent prose with exactly one ASCII space on each side, except at block boundaries, after full-width punctuation, or before any punctuation. Half-width punctuation before the path still requires a space; keep internal ` - ` separators unchanged
 5. **Git:**
-   - Branch policy is repository-specific: in `siyuan-note/siyuan`, work on `dev` or a task branch based on `dev`; **NEVER** commit on or push to `master`. If `dev` is unavailable, stop and report the missing branch instead of falling back to `master`
-   - In other repositories, follow their own branch rules; otherwise prefer `dev` when it exists locally or on the remote, and use the repository's actual default branch when `dev` does not exist. Do not extend SiYuan's `master` prohibition to other repositories or assume their default branch is named `master` or `main`
+   - Branch policy is repository-specific: in `siyuan-note/siyuan`, use `dev` as the baseline source branch and work on `dev` or a task branch based on `dev`; **NEVER** commit on or push to `master`. If `dev` is unavailable, stop and report the missing branch instead of falling back to `master`
+   - In other repositories, follow their own branch rules for baseline selection and work; otherwise prefer `dev` when it exists locally or on the remote, and use the repository's actual default branch when `dev` does not exist. Do not extend SiYuan's `master` prohibition to other repositories or assume their default branch is named `master` or `main`
    - If the intended branch cannot be determined confidently from the user's instructions, the repository's rules, and local or remote branch information, ask the user which branch to use and wait for their answer before editing, committing, or pushing; do not guess or silently choose a fallback
    - Before editing, verify the repository and current branch. Before every explicitly authorized commit or push, verify the current branch again and, for a push, the destination remote and branch; never rely only on the upstream configuration. If SiYuan is checked out on `master`, switch to `dev` or a task branch based on `dev` before making changes; preserve existing work and do not reset or discard it to switch branches
    - When explicitly asked to commit, follow the style of recent commits (gitmoji prefix + subject, in English)

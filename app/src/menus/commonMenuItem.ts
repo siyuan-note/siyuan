@@ -185,6 +185,11 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
 };
 
 export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmark", protyle?: IProtyle) => {
+    /// #if MOBILE
+    // 属性抽屉先结束编辑焦点，等待软键盘收起后展开。
+    (document.activeElement as HTMLElement)?.blur();
+    activeBlur(true);
+    /// #endif
     let customHTML = "";
     let notifyHTML = "";
     let hasAV = false;
@@ -445,13 +450,15 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         }
     });
     dialog.element.querySelectorAll(".b3-text-field[data-name]").forEach((item: HTMLInputElement) => {
-        if (focusName !== "av" && focusName !== "custom" && focusName === item.getAttribute("data-name")) {
+        if (!isMobile() && focusName !== "av" && focusName !== "custom" && focusName === item.getAttribute("data-name")) {
             item.focus();
         }
         bindAttrInput(item, attrs.id);
     });
     if (focusName === "alias") {
-        aliasInput.focus();
+        if (!isMobile()) {
+            aliasInput.focus();
+        }
     } else if (focusName === "av") {
         dialog.element.dispatchEvent(new CustomEvent("click", {detail: "NodeAttributeView"}));
         (document.activeElement as HTMLElement)?.blur();

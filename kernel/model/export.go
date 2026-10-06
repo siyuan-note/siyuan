@@ -3138,6 +3138,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
+	luteEngine.RenderOptions.OmitTableCellIAL = true
 	luteEngine.SetExportNormalizeTaskListMarker(true)
 	if "" != cloudAssetsBase {
 		luteEngine.RenderOptions.LinkBase = cloudAssetsBase

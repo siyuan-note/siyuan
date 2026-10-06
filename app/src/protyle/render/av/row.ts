@@ -647,9 +647,9 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
             ? viewsElement.nextElementSibling as HTMLElement
             : viewsElement;
         const viewsRect = placeholderElement.getBoundingClientRect();
-        // 吸顶栏按当前可用宽度换行，并同步占位高度，保持表头位置与文档布局一致。
+        // 吸顶栏保留可用宽度的小数精度，并同步换行后的占位高度，保持表头位置与文档布局一致。
         if (placeholderElement !== viewsElement) {
-            const width = Math.round(viewsRect.width) + "px";
+            const width = viewsRect.width + "px";
             if (viewsElement.style.width !== width) {
                 viewsElement.style.width = width;
             }
@@ -666,7 +666,7 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
             height,
             left: Math.round(viewsRect.left),
             top,
-            width: Math.round(viewsRect.width),
+            width: viewsRect.width,
             shouldFix,
         };
         if (shouldFix) {

@@ -264,7 +264,11 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
 	}
 	diagnostic.Stage("process bulk operations")
-	isLargeInsert := tx.processLargeInsert()
+	isLargeInsert, ret := tx.processLargeInsert()
+	if ret != nil {
+		tx.rollback()
+		return ret
+	}
 	isLargeDelete := tx.processLargeDelete()
 	if !isLargeInsert {
 		for operationIndex := 0; operationIndex < len(tx.DoOperations); operationIndex++ {
@@ -570,10 +574,10 @@ func (tx *Transaction) processLargeDelete() bool {
 	return true
 }
 
-func (tx *Transaction) processLargeInsert() bool {
+func (tx *Transaction) processLargeInsert() (bool, *TxErr) {
 	opSize := len(tx.DoOperations)
 	if 32 > opSize {
-		return false
+		return false, nil
 	}
 
 	var insertOps []*Operation
@@ -581,10 +585,10 @@ func (tx *Transaction) processLargeInsert() bool {
 	for i, op := range tx.DoOperations {
 		if "insert" != op.Action {
 			if "delete" != op.Action {
-				return false
+				return false, nil
 			}
 			if 0 != i && i != opSize-1 {
-				return false
+				return false, nil
 			}
 
 			if "delete" == op.Action {
@@ -601,19 +605,25 @@ func (tx *Transaction) processLargeInsert() bool {
 	}
 
 	if 1 > len(insertOps) {
-		return false
+		return false, nil
 	}
 
 	if nil != firstDeleteOp {
-		tx.doDelete(firstDeleteOp)
+		if txErr := tx.doDelete(firstDeleteOp); txErr != nil {
+			return true, txErr
+		}
 		tx.flushDeletedAttributeViewBlocks()
 	}
-	tx.doLargeInsert(insertOps)
+	if txErr := tx.doLargeInsert(insertOps); txErr != nil {
+		return true, txErr
+	}
 	if nil != lastDeleteOp {
-		tx.doDelete(lastDeleteOp)
+		if txErr := tx.doDelete(lastDeleteOp); txErr != nil {
+			return true, txErr
+		}
 		tx.flushDeletedAttributeViewBlocks()
 	}
-	return true
+	return true, nil
 }
 
 func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
@@ -1598,7 +1608,7 @@ func removeAttributeViewBoundItems(attrView *av.AttributeView, deletedBlockIDs m
 	return
 }
 
-func (tx *Transaction) doLargeInsert(operations []*Operation) {
+func (tx *Transaction) doLargeInsert(operations []*Operation) *TxErr {
 	tree, _ := tx.loadTree(operations[0].ID)
 	if nil == tree {
 		tree, _ = tx.loadTree(operations[0].PreviousID)
@@ -1612,16 +1622,17 @@ func (tx *Transaction) doLargeInsert(operations []*Operation) {
 
 	if nil == tree {
 		logging.LogErrorf("load tree [%s] failed", operations[0].ID)
-		return
+		return &TxErr{code: TxErrCodeReloadUI, msg: "insertion target block not found"}
 	}
 
 	for _, operation := range operations {
 		if txErr := tx.doInsert0(operation, tree); nil != txErr {
-			return
+			return txErr
 		}
 	}
 
 	tx.writeTree(tree)
+	return nil
 }
 
 func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
@@ -1669,6 +1680,24 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 }
 
 func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *TxErr) {
+	var node *ast.Node
+	nextID, previousID := operation.NextID, operation.PreviousID
+	anchorID, anchorName := nextID, "nextID"
+	if anchorID == "" {
+		anchorID, anchorName = previousID, "previousID"
+	}
+	// 按插入优先级检查实际生效的同级锚点，文档根没有父节点，不能在其前后插入块。
+	if anchorID != "" {
+		node = treenode.GetNodeInTree(tree, anchorID)
+		if node == nil {
+			logging.LogErrorf("get node [%s] in tree [%s] failed", anchorID, tree.Root.ID)
+			return &TxErr{code: TxErrCodeBlockNotFound, id: anchorID, msg: "insertion target block not found"}
+		}
+		if node.Parent == nil {
+			return &TxErr{code: TxErrCodeReloadUI, msg: fmt.Sprintf("`%s` cannot be the ID of a document", anchorName)}
+		}
+	}
+
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
 	subTree.Box, subTree.Path = tree.Box, tree.Path
@@ -1706,16 +1735,7 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
 	}
 
-	var node *ast.Node
-	nextID := operation.NextID
-	previousID := operation.PreviousID
 	if "" != nextID {
-		node = treenode.GetNodeInTree(tree, nextID)
-		if nil == node {
-			logging.LogErrorf("get node [%s] in tree [%s] failed", nextID, tree.Root.ID)
-			return &TxErr{code: TxErrCodeBlockNotFound, id: nextID}
-		}
-
 		if ast.NodeList == insertedNode.Type && nil != node.Parent && ast.NodeList == node.Parent.Type {
 			insertedNode = insertedNode.FirstChild
 		}
@@ -1724,12 +1744,6 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 			node.InsertBefore(remain)
 		}
 	} else if "" != previousID {
-		node = treenode.GetNodeInTree(tree, previousID)
-		if nil == node {
-			logging.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
-			return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
-		}
-
 		if ast.NodeHeading == node.Type && treenode.IsSelfFolded(node) {
 			children := treenode.HeadingChildren(node)
 			if l := len(children); 0 < l {

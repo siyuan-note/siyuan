@@ -673,17 +673,6 @@ var insertBlock = contractHandler(apicontract.InsertBlock, func(c *gin.Context, 
 			return contractFailure[[]*apicontract.BlockTransaction](ret)
 		}
 	}
-	// 校验 previousID 和 nextID 不能是文档；parentID 允许为文档，表示插入到文档末尾。
-	for _, id := range []string{previousID, nextID} {
-		if id == "" {
-			continue
-		}
-		if err := treenode.CheckSiblingAnchor(id); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return contractFailure[[]*apicontract.BlockTransaction](ret)
-		}
-	}
 	if "markdown" == dataType {
 		luteEngine := util.NewLute()
 		var err error

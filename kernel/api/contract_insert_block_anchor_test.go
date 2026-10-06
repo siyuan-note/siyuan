@@ -9,113 +9,124 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
-	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// TestInsertBlockRejectsDocumentSiblingAnchor 覆盖 insertBlock 以文档 ID 作为同级锚点的场景。
-// 文档 ID 格式合法，但不是合法的同级锚点：事务层会越过文档根插入，随后读取 insertedNode.Parent 时空指针 panic。
-// 因此 previousID / nextID 指向文档时必须返回可读的参数错误，而不是让内核崩溃。
-// 注意 parentID 指向文档表示插入到文档末尾，属于合法用法，不能用同一个校验拦掉。
-func TestInsertBlockRejectsDocumentSiblingAnchor(t *testing.T) {
-	originalPath := util.BlockTreeDBPath
-	util.BlockTreeDBPath = filepath.Join(t.TempDir(), "blocktree.db")
-	treenode.InitBlockTree(true)
-	t.Cleanup(func() {
-		treenode.CloseDatabase()
-		util.BlockTreeDBPath = originalPath
-		if originalPath != "" {
-			treenode.InitBlockTree(false)
-		}
-	})
-	gin.SetMode(gin.TestMode)
+// testAPIContractInsertBlockAnchors 复用隔离进程中的真实文档，验证参数错误、定位优先级和落盘位置。
+func testAPIContractInsertBlockAnchors(t *testing.T, boxID, docID, paragraphID string) {
 	engine := gin.New()
-	engine.Use(model.Recover)
-	engine.POST("/insert", insertBlock)
-
-	docID := ast.NewNodeID()
-	treenode.UpsertBlockTree(treenode.NewTree("20260908000000-boxid01", "/"+docID+".sy", "/Test", "Test"))
-	post := func(body string) (int, string) {
+	const path = "/api/block/insertBlock"
+	engine.POST(path, insertBlock)
+	post := func(t *testing.T, request map[string]any) (response struct {
+		Code int                             `json:"code"`
+		Msg  string                          `json:"msg"`
+		Data []*apicontract.BlockTransaction `json:"data"`
+	}) {
 		t.Helper()
+		body, err := json.Marshal(request)
+		if err != nil {
+			t.Fatal(err)
+		}
 		recorder := httptest.NewRecorder()
-		request := httptest.NewRequest(http.MethodPost, "/insert", strings.NewReader(body))
-		request.Header.Set("Content-Type", "application/json")
-		engine.ServeHTTP(recorder, request)
-		var response struct {
-			Code int    `json:"code"`
-			Msg  string `json:"msg"`
-		}
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", path, bytes.NewReader(body)))
+		requireAPIContract(t, "POST", path, recorder)
 		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
-			t.Fatalf("response is not JSON: %s, %v", recorder.Body.String(), err)
+			t.Fatal(err)
 		}
-		return response.Code, response.Msg
+		return
 	}
-
-	// 文档 ID 必须被识别为非法同级锚点，并给出可读原因。
-	code, msg := post(`{"previousID":"` + docID + `","data":"test","dataType":"markdown"}`)
-	if code != -1 {
-		t.Fatalf("previousID set to a document must be rejected, got code=%d msg=%q", code, msg)
-	}
-	if !strings.Contains(msg, "can not be the ID of a document") {
-		t.Fatalf("previousID set to a document must explain the document anchor, got %q", msg)
-	}
-	// 不存在的块同样必须被拒绝，且原因与「文档」区分开。
-	code, msg = post(`{"previousID":"20260908000000-missing","data":"test","dataType":"markdown"}`)
-	if code != -1 {
-		t.Fatalf("unknown previousID must be rejected, got code=%d msg=%q", code, msg)
-	}
-	if !strings.Contains(msg, "not found") {
-		t.Fatalf("unknown previousID must report a missing block, got %q", msg)
-	}
-
-	// parentID 指向文档是合法用法，校验不得误伤。
-	_, msg = post(`{"parentID":"` + docID + `","data":"test","dataType":"markdown"}`)
-	if strings.Contains(msg, "can not be the ID of a document") {
-		t.Fatalf("parentID set to a document must stay allowed, got %q", msg)
-	}
-}
-
-// TestCheckSiblingAnchor 直接覆盖同级锚点校验：文档被拒绝，其余块类型放行。
-func TestCheckSiblingAnchor(t *testing.T) {
-	originalPath := util.BlockTreeDBPath
-	util.BlockTreeDBPath = filepath.Join(t.TempDir(), "blocktree.db")
-	treenode.InitBlockTree(true)
-	t.Cleanup(func() {
-		treenode.CloseDatabase()
-		util.BlockTreeDBPath = originalPath
-		if originalPath != "" {
-			treenode.InitBlockTree(false)
+	readDocument := func(t *testing.T) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(util.DataDir, boxID, docID+".sy"))
+		if err != nil {
+			t.Fatal(err)
 		}
-	})
-
-	docID := ast.NewNodeID()
-	treenode.UpsertBlockTree(treenode.NewTree("20260908000000-boxid01", "/"+docID+".sy", "/Test", "Test"))
-	if err := treenode.CheckSiblingAnchor(docID); err == nil {
-		t.Fatal("a document must not be accepted as a sibling anchor")
-	} else if !strings.Contains(err.Error(), "can not be the ID of a document") {
-		t.Fatalf("document anchor error must be explicit, got %q", err.Error())
+		return data
 	}
-	if err := treenode.CheckSiblingAnchor("20260908000000-missing"); err == nil {
-		t.Fatal("a missing block must not be accepted as a sibling anchor")
-	} else if !strings.Contains(err.Error(), "not found") {
-		t.Fatalf("missing block error must be explicit, got %q", err.Error())
-	}
-	// 非文档块放行，校验不能过宽。
-	paragraphID := ast.NewNodeID()
-	paragraph := treenode.NewTree("20260908000000-boxid02", "/"+paragraphID+".sy", "/Test", "Test")
-	paragraph.Root.Type = ast.NodeParagraph
-	treenode.UpsertBlockTree(paragraph)
-	if err := treenode.CheckSiblingAnchor(paragraphID); err != nil {
-		t.Fatalf("a non-document block must stay allowed, got %q", err.Error())
+	const missingID = "20260908000000-missing"
+	for _, dataType := range []string{"markdown", "dom"} {
+		data := "anchor contract test"
+		if dataType == "dom" {
+			data = util.NewLute().Md2BlockDOM(data, false)
+		}
+		for _, field := range []string{"previousID", "nextID"} {
+			for _, anchor := range []struct{ name, id, message string }{
+				{"document", docID, "`" + field + "` cannot be the ID of a document"},
+				{"missing", missingID, "not found"},
+			} {
+				t.Run("insert-anchor/"+dataType+"/"+field+"/"+anchor.name, func(t *testing.T) {
+					before := readDocument(t)
+					response := post(t, map[string]any{
+						"data": data, "dataType": dataType, "parentID": docID, field: anchor.id,
+					})
+					if response.Code != -1 || response.Data != nil ||
+						!strings.Contains(response.Msg, anchor.message) || strings.Contains(response.Msg, "panic") {
+						t.Fatalf("expected explicit anchor error, got %+v", response)
+					}
+					if !bytes.Equal(before, readDocument(t)) {
+						t.Fatal("rejected insert changed the document")
+					}
+				})
+			}
+		}
+		for _, test := range []struct {
+			name, previousID, nextID, position string
+		}{
+			{"previous-block", paragraphID, "", "after"},
+			{"next-block", "", paragraphID, "before"},
+			{"document-parent", "", "", "first"},
+			{"next-priority-document-previous", docID, paragraphID, "before"},
+			{"next-priority-missing-previous", missingID, paragraphID, "before"},
+		} {
+			t.Run("insert-anchor/"+dataType+"/"+test.name, func(t *testing.T) {
+				response := post(t, map[string]any{
+					"data": data, "dataType": dataType, "parentID": docID,
+					"previousID": test.previousID, "nextID": test.nextID,
+				})
+				if response.Code != 0 || len(response.Data) != 1 || len(response.Data[0].DoOperations) != 1 {
+					t.Fatalf("expected successful insert, got %+v", response)
+				}
+				operation := response.Data[0].DoOperations[0]
+				cache.RemoveTreeData(docID)
+				tree, err := model.LoadTreeByBlockID(docID)
+				if err != nil {
+					t.Fatal(err)
+				}
+				node := treenode.GetNodeInTree(tree, operation.ID)
+				if node == nil || node.Parent != tree.Root || operation.ParentID != docID {
+					t.Fatalf("inserted block is not persisted under the document: %+v", operation)
+				}
+				switch test.position {
+				case "after":
+					if node.Previous == nil || node.Previous.ID != paragraphID {
+						t.Fatal("block was not inserted after previousID")
+					}
+				case "before":
+					if node.Next == nil || node.Next.ID != paragraphID {
+						t.Fatal("block was not inserted before nextID")
+					}
+				case "first":
+					if tree.Root.FirstChild != node {
+						t.Fatal("document parent must insert at the beginning")
+					}
+				}
+				if _, err := model.PerformBlockOperation(&model.Operation{Action: "delete", ID: operation.ID}); err != nil {
+					t.Fatal(err)
+				}
+			})
+		}
 	}
 }

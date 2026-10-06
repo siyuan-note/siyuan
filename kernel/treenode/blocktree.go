@@ -530,21 +530,6 @@ func CheckContainerParent(parentID string) error {
 	return fmt.Errorf("block [%s] type %q is a leaf block and cannot have children; use previousID to place the block as its sibling instead", parentID, bt.Type)
 }
 
-// CheckSiblingAnchor 校验 previousID / nextID 指向的块是否可作为同级锚点。
-// 文档 ID 格式合法，但文档是整棵树的根，没有父级上下文；把它当作同级锚点会让节点挂到根之下，
-// 事务层随后读取 insertedNode.Parent 时空指针 panic，因此必须在此拒绝。
-// 返回 nil 表示合法；返回 error 时调用方应拒绝本次操作。
-func CheckSiblingAnchor(id string) error {
-	bt := GetBlockTree(id)
-	if nil == bt {
-		return fmt.Errorf("block not found: %s", id)
-	}
-	if "d" == bt.Type {
-		return fmt.Errorf("`previousID` and `nextID` can not be the ID of a document")
-	}
-	return nil
-}
-
 // CheckListItemNesting 校验 parentID 和 childID 是否形成“列表项直含列表项”的非法嵌套。
 // 嵌套列表的正确结构是 ListItem > List > ListItem，列表项不能直接作为另一个列表项的子块。
 // 仅在 move 场景调用（源和目标类型均已知）。

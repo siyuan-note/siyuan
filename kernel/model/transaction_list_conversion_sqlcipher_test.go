@@ -67,6 +67,7 @@ func TestListConversionEncryptedReplayAndHistory(t *testing.T) {
 	if err = os.Remove(plainPath); err != nil {
 		t.Fatal(err)
 	}
+	testEncryptedInsertBlockAnchors(t, boxID, tree.ID, list.ID)
 	tx := listConversionTestTx(tree.ID, []string{list.ID}, "heading", false)
 	if err = PerformTxSync(tx); err != nil {
 		t.Fatal(err)
@@ -110,5 +111,52 @@ func TestListConversionEncryptedReplayAndHistory(t *testing.T) {
 	}
 	if data, _ := os.ReadFile(docPath); !bytes.Equal(data, before) {
 		t.Fatal("failed authentication changed document")
+	}
+}
+
+// testEncryptedInsertBlockAnchors 验证文档锚点拒绝时保留源密文，合法定位保持加密落盘。
+func testEncryptedInsertBlockAnchors(t *testing.T, boxID, docID, anchorID string) {
+	t.Helper()
+	path := filepath.Join(util.DataDir, boxID, docID+".sy")
+	before, err := os.ReadFile(path)
+	if err != nil || !util.IsCiphertext(before) {
+		t.Fatalf("expected encrypted source document: %v", err)
+	}
+	dom := util.NewLute().Md2BlockDOM("encrypted anchor test", false)
+	for _, field := range []string{"previousID", "nextID"} {
+		operation := &Operation{Action: "insert", Data: dom}
+		if field == "previousID" {
+			operation.PreviousID = docID
+		} else {
+			operation.NextID = docID
+		}
+		_, err := PerformBlockOperation(operation)
+		if err == nil || err.Error() != "`"+field+"` cannot be the ID of a document" {
+			t.Fatalf("expected encrypted document anchor rejection, got %v", err)
+		}
+		after, err := os.ReadFile(path)
+		if err != nil || !bytes.Equal(before, after) {
+			t.Fatalf("rejected insert changed source ciphertext: %v", err)
+		}
+	}
+	operation := &Operation{Action: "insert", NextID: anchorID, PreviousID: docID, ParentID: docID, Data: dom}
+	if _, err := PerformBlockOperation(operation); err != nil {
+		t.Fatalf("valid nextID must ignore the document previousID: %v", err)
+	}
+	cache.RemoveTreeDataInBox(docID, boxID)
+	tree, err := LoadTreeByBlockID(docID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	node := treenode.GetNodeInTree(tree, operation.ID)
+	if node == nil || node.Next == nil || node.Next.ID != anchorID {
+		t.Fatal("encrypted insertion did not preserve nextID precedence")
+	}
+	after, err := os.ReadFile(path)
+	if err != nil || !util.IsCiphertext(after) {
+		t.Fatalf("successful insert did not preserve ciphertext storage: %v", err)
+	}
+	if _, err := PerformBlockOperation(&Operation{Action: "delete", ID: operation.ID}); err != nil {
+		t.Fatal(err)
 	}
 }
